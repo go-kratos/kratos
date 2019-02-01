@@ -37,9 +37,22 @@ type Instance struct {
 	Status   int64
 }
 
+// InstancesInfo instance info.
+type InstancesInfo struct {
+	Instances map[string][]*Instance `json:"zone_instances"`
+	LastTs    int64                  `json:"latest_timestamp"`
+	Scheduler []*Scheduler           `json:"scheduler"`
+}
+
+// Scheduler  scheduler info in multi cluster.
+type Scheduler struct {
+	Src string           `json:"src"`
+	Dst map[string]int64 `json:"dst"`
+}
+
 // Resolver resolve naming service
 type Resolver interface {
-	Fetch(context.Context) (map[string][]*Instance, bool)
+	Fetch(context.Context) (*InstancesInfo, bool)
 	//Unwatch(id string)
 	Watch() <-chan struct{}
 	Close() error
