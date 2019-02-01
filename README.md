@@ -11,7 +11,7 @@ Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，
 - [ ] config @志辉
 - [ ] bm @佳辉
 - [ ] warden @龙虾
-- [ ] naming discovery @堂辉
+- [x] naming discovery @堂辉
 - [ ] cache&database @小旭
 - [ ] kratos tool @普余
 

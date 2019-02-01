@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	xtime "go-common/library/time"
+	xtime "github.com/bilibili/Kratos/pkg/time"
 )
 
 // Config broker config.

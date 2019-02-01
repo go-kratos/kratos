@@ -196,7 +196,7 @@ func (d *Discovery) selfproc(resolver naming.Resolver, event <-chan struct{}) {
 	}
 }
 
-func (d *Discovery) newSelf(instances naming.InstancesInfo) {
+func (d *Discovery) newSelf(instances *naming.InstancesInfo) {
 	ins, ok := instances.Instances[d.conf.Zone]
 	if !ok {
 		return
@@ -284,12 +284,12 @@ func (r *Resolver) Watch() <-chan struct{} {
 }
 
 // Fetch fetch resolver instance.
-func (r *Resolver) Fetch(c context.Context) (ins naming.InstancesInfo, ok bool) {
+func (r *Resolver) Fetch(c context.Context) (ins *naming.InstancesInfo, ok bool) {
 	r.d.mutex.RLock()
 	app, ok := r.d.apps[r.id]
 	r.d.mutex.RUnlock()
 	if ok {
-		ins, ok = app.zoneIns.Load().(naming.InstancesInfo)
+		ins, ok = app.zoneIns.Load().(*naming.InstancesInfo)
 		return
 	}
 	return
