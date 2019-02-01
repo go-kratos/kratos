@@ -1,0 +1,77 @@
+syntax = "proto3";
+package dapper.trace;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+option go_package = "protogen";
+
+message Tag {
+  enum Kind {
+    STRING = 0;
+    INT = 1;
+    BOOL = 2;
+    FLOAT = 3;
+  }
+  string key = 1;
+  Kind kind = 2;
+  bytes value = 3;
+}
+
+message Field {
+  string key = 1;
+  bytes value = 2;
+}
+
+message Log {
+  // Deprecated: Kind no long use
+  enum Kind {
+    STRING = 0;
+    INT = 1;
+    BOOL = 2;
+    FLOAT = 3;
+  }
+  string key = 1;
+  // Deprecated: Kind no long use
+  Kind kind = 2;
+  // Deprecated: Value no long use
+  bytes value = 3;
+  int64 timestamp = 4;
+  repeated Field fields = 5;
+}
+
+// SpanRef describes causal relationship of the current span to another span (e.g. 'child-of')
+message SpanRef {
+  enum RefType {
+    CHILD_OF = 0;
+    FOLLOWS_FROM = 1;
+  }
+  RefType ref_type = 1;
+  uint64 trace_id = 2;
+  uint64 span_id = 3;
+}
+
+// Span represents a named unit of work performed by a service.
+message Span {
+  int32 version = 99;
+  string service_name = 1;
+  string operation_name = 2;
+  // Deprecated: caller no long required
+  string caller = 3;
+  uint64 trace_id = 4;
+  uint64 span_id = 5;
+  uint64 parent_id = 6;
+  // Deprecated: level no long required
+  int32  level = 7;
+  // Deprecated: use start_time instead instead of start_at
+  int64 start_at = 8;
+  // Deprecated: use duration instead instead of finish_at
+  int64 finish_at = 9;
+  float sampling_probability = 10;
+  string env = 19;
+  google.protobuf.Timestamp start_time = 20;
+  google.protobuf.Duration duration = 21;
+  repeated SpanRef references = 22;
+  repeated Tag tags = 11;
+  repeated Log logs = 12;
+}
