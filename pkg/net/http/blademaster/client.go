@@ -3,9 +3,7 @@ package blademaster
 import (
 	"bytes"
 	"context"
-	"crypto/md5"
 	"crypto/tls"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -20,7 +18,6 @@ import (
 	"time"
 
 	"github.com/bilibili/Kratos/pkg/conf/env"
-	"github.com/bilibili/Kratos/pkg/log"
 	"github.com/bilibili/Kratos/pkg/net/metadata"
 	"github.com/bilibili/Kratos/pkg/net/netutil/breaker"
 	"github.com/bilibili/Kratos/pkg/stat"
@@ -33,13 +30,11 @@ import (
 const (
 	_minRead = 16 * 1024 // 16kb
 
-	_appKey    = "appkey"
-	_appSecret = "appsecret"
-	_ts        = "ts"
+	_ts = "ts"
 )
 
 var (
-	_noKickUserAgent = "haoguanwei@bilibili.com "
+	_noKickUserAgent = "blademaster"
 	clientStats      = stat.HTTPClient
 )
 
@@ -158,22 +153,13 @@ func (client *Client) SetConfig(c *ClientConfig) {
 // NewRequest new http request with method, uri, ip, values and headers.
 // TODO(zhoujiahui): param realIP should be removed later.
 func (client *Client) NewRequest(method, uri, realIP string, params url.Values) (req *xhttp.Request, err error) {
-	enc, err := client.sign(params)
-	if err != nil {
-		err = pkgerr.Wrapf(err, "uri:%s,params:%v", uri, params)
-		return
-	}
-	ru := uri
-	if enc != "" {
-		ru = uri + "?" + enc
-	}
 	if method == xhttp.MethodGet {
-		req, err = xhttp.NewRequest(xhttp.MethodGet, ru, nil)
+		req, err = xhttp.NewRequest(xhttp.MethodGet, uri+params.Encode(), nil)
 	} else {
-		req, err = xhttp.NewRequest(xhttp.MethodPost, uri, strings.NewReader(enc))
+		req, err = xhttp.NewRequest(xhttp.MethodPost, uri, strings.NewReader(params.Encode()))
 	}
 	if err != nil {
-		err = pkgerr.Wrapf(err, "method:%s,uri:%s", method, ru)
+		err = pkgerr.Wrapf(err, "method:%s,uri:%s", method, uri)
 		return
 	}
 	const (
@@ -353,39 +339,6 @@ func (client *Client) onBreaker(breaker breaker.Breaker, err *error) {
 	} else {
 		breaker.MarkSuccess()
 	}
-}
-
-// sign calc appkey and appsecret sign.
-func (client *Client) sign(params url.Values) (query string, err error) {
-	client.mutex.RLock()
-	key := client.conf.Key
-	secret := client.conf.Secret
-	client.mutex.RUnlock()
-	if params == nil {
-		params = url.Values{}
-	}
-	params.Set(_appKey, key)
-	if params.Get(_appSecret) != "" {
-		log.Warn("utils http get must not have parameter appSecret")
-	}
-	if params.Get(_ts) == "" {
-		params.Set(_ts, strconv.FormatInt(time.Now().Unix(), 10))
-	}
-	tmp := params.Encode()
-	if strings.IndexByte(tmp, '+') > -1 {
-		tmp = strings.Replace(tmp, "+", "%20", -1)
-	}
-	var b bytes.Buffer
-	b.WriteString(tmp)
-	b.WriteString(secret)
-	mh := md5.Sum(b.Bytes())
-	// query
-	var qb bytes.Buffer
-	qb.WriteString(tmp)
-	qb.WriteString("&sign=")
-	qb.WriteString(hex.EncodeToString(mh[:]))
-	query = qb.String()
-	return
 }
 
 // realUrl return url with http://host/params.
