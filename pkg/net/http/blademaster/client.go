@@ -29,8 +29,6 @@ import (
 
 const (
 	_minRead = 16 * 1024 // 16kb
-
-	_ts = "ts"
 )
 
 var (

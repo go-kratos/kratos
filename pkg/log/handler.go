@@ -2,12 +2,44 @@ package log
 
 import (
 	"context"
+	"time"
 
 	pkgerr "github.com/pkg/errors"
 )
 
 const (
+	_timeFormat = "2006-01-02T15:04:05.999999"
+
+	// log level defined in level.go.
+	_levelValue = "level_value"
+	//  log level name: INFO, WARN...
+	_level = "level"
+	// log time.
+	_time = "time"
+	// log file.
+	_source = "source"
+	// common log filed.
 	_log = "log"
+	// app name.
+	_appID = "app_id"
+	// container ID.
+	_instanceID = "instance_id"
+	// uniq ID from trace.
+	_tid = "traceid"
+	// request time.
+	_ts = "ts"
+	// requester.
+	_caller = "caller"
+	// container environment: prod, pre, uat, fat.
+	_deplyEnv = "env"
+	// container area.
+	_zone = "zone"
+	// mirror flag
+	_mirror = "mirror"
+	// color.
+	_color = "color"
+	// cluster.
+	_cluster = "cluster"
 )
 
 // Handler is used to handle log events, outputting them to
@@ -28,19 +60,43 @@ type Handler interface {
 	Close() error
 }
 
-// Handlers .
-type Handlers []Handler
+func newHandlers(filters []string, handlers ...Handler) *Handlers {
+	set := make(map[string]struct{})
+	for _, k := range filters {
+		set[k] = struct{}{}
+	}
+	return &Handlers{filters: set, handlers: handlers}
+}
+
+// Handlers a bundle for hander with filter function.
+type Handlers struct {
+	filters  map[string]struct{}
+	handlers []Handler
+}
 
 // Log handlers logging.
 func (hs Handlers) Log(c context.Context, lv Level, d ...D) {
-	for _, h := range hs {
+	var fn string
+	for i := range d {
+		if _, ok := hs.filters[d[i].Key]; ok {
+			d[i].Value = "***"
+		}
+		if d[i].Key == _source {
+			fn = d[i].Value.(string)
+		}
+	}
+	if fn == "" {
+		fn = funcName(4)
+	}
+	d = append(d, KV(_source, fn), KV(_time, time.Now()), KV(_levelValue, int(lv)), KV(_level, lv.String()))
+	for _, h := range hs.handlers {
 		h.Log(c, lv, d...)
 	}
 }
 
 // Close close resource.
 func (hs Handlers) Close() (err error) {
-	for _, h := range hs {
+	for _, h := range hs.handlers {
 		if e := h.Close(); e != nil {
 			err = pkgerr.WithStack(e)
 		}
@@ -50,7 +106,7 @@ func (hs Handlers) Close() (err error) {
 
 // SetFormat .
 func (hs Handlers) SetFormat(format string) {
-	for _, h := range hs {
+	for _, h := range hs.handlers {
 		h.SetFormat(format)
 	}
 }
