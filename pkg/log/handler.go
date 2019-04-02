@@ -76,19 +76,20 @@ type Handlers struct {
 
 // Log handlers logging.
 func (hs Handlers) Log(c context.Context, lv Level, d ...D) {
-	var fn string
+	var hasSource bool
 	for i := range d {
 		if _, ok := hs.filters[d[i].Key]; ok {
 			d[i].Value = "***"
 		}
 		if d[i].Key == _source {
-			fn = d[i].Value.(string)
+			hasSource = true
 		}
 	}
-	if fn == "" {
-		fn = funcName(4)
+	if !hasSource {
+		fn := funcName(3)
+		d = append(d, KVString(_source, fn))
 	}
-	d = append(d, KV(_source, fn), KV(_time, time.Now()), KV(_levelValue, int(lv)), KV(_level, lv.String()))
+	d = append(d, KV(_time, time.Now()), KVInt64(_levelValue, int64(lv)), KVString(_level, lv.String()))
 	for _, h := range hs.handlers {
 		h.Log(c, lv, d...)
 	}

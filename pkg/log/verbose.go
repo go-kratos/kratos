@@ -85,7 +85,7 @@ func V(v int32) Verbose {
 // Info logs a message at the info log level.
 func (v Verbose) Info(format string, args ...interface{}) {
 	if v {
-		h.Log(context.Background(), _infoLevel, KV(_log, fmt.Sprintf(format, args...)))
+		h.Log(context.Background(), _infoLevel, KVString(_log, fmt.Sprintf(format, args...)))
 	}
 }
 

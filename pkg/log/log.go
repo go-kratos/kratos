@@ -7,7 +7,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/bilibili/Kratos/pkg/conf/env"
 )
@@ -115,83 +114,6 @@ func Init(conf *Config) {
 	c = conf
 }
 
-// D represents a map of entry level data used for structured logging.
-// type D map[string]interface{}
-type D struct {
-	Key   string
-	Value interface{}
-}
-
-// AddTo exports a field through the ObjectEncoder interface. It's primarily
-// useful to library authors, and shouldn't be necessary in most applications.
-func (d D) AddTo(enc core.ObjectEncoder) {
-	var err error
-	switch val := d.Value.(type) {
-	case bool:
-		enc.AddBool(d.Key, val)
-	case complex128:
-		enc.AddComplex128(d.Key, val)
-	case complex64:
-		enc.AddComplex64(d.Key, val)
-	case float64:
-		enc.AddFloat64(d.Key, val)
-	case float32:
-		enc.AddFloat32(d.Key, val)
-	case int:
-		enc.AddInt(d.Key, val)
-	case int64:
-		enc.AddInt64(d.Key, val)
-	case int32:
-		enc.AddInt32(d.Key, val)
-	case int16:
-		enc.AddInt16(d.Key, val)
-	case int8:
-		enc.AddInt8(d.Key, val)
-	case string:
-		enc.AddString(d.Key, val)
-	case uint:
-		enc.AddUint(d.Key, val)
-	case uint64:
-		enc.AddUint64(d.Key, val)
-	case uint32:
-		enc.AddUint32(d.Key, val)
-	case uint16:
-		enc.AddUint16(d.Key, val)
-	case uint8:
-		enc.AddUint8(d.Key, val)
-	case []byte:
-		enc.AddByteString(d.Key, val)
-	case uintptr:
-		enc.AddUintptr(d.Key, val)
-	case time.Time:
-		enc.AddTime(d.Key, val)
-	case xtime.Time:
-		enc.AddTime(d.Key, val.Time())
-	case time.Duration:
-		enc.AddDuration(d.Key, val)
-	case xtime.Duration:
-		enc.AddDuration(d.Key, time.Duration(val))
-	case error:
-		enc.AddString(d.Key, val.Error())
-	case fmt.Stringer:
-		enc.AddString(d.Key, val.String())
-	default:
-		err = enc.AddReflected(d.Key, val)
-	}
-
-	if err != nil {
-		enc.AddString(fmt.Sprintf("%sError", d.Key), err.Error())
-	}
-}
-
-// KV return a log kv for logging field.
-func KV(key string, value interface{}) D {
-	return D{
-		Key:   key,
-		Value: value,
-	}
-}
-
 type logFilter []string
 
 func (f *logFilter) String() string {
@@ -209,32 +131,32 @@ func (f *logFilter) Set(value string) error {
 
 // Info logs a message at the info log level.
 func Info(format string, args ...interface{}) {
-	h.Log(context.Background(), _infoLevel, KV(_log, fmt.Sprintf(format, args...)))
+	h.Log(context.Background(), _infoLevel, KVString(_log, fmt.Sprintf(format, args...)))
 }
 
 // Warn logs a message at the warning log level.
 func Warn(format string, args ...interface{}) {
-	h.Log(context.Background(), _warnLevel, KV(_log, fmt.Sprintf(format, args...)))
+	h.Log(context.Background(), _warnLevel, KVString(_log, fmt.Sprintf(format, args...)))
 }
 
 // Error logs a message at the error log level.
 func Error(format string, args ...interface{}) {
-	h.Log(context.Background(), _errorLevel, KV(_log, fmt.Sprintf(format, args...)))
+	h.Log(context.Background(), _errorLevel, KVString(_log, fmt.Sprintf(format, args...)))
 }
 
 // Infoc logs a message at the info log level.
 func Infoc(ctx context.Context, format string, args ...interface{}) {
-	h.Log(ctx, _infoLevel, KV(_log, fmt.Sprintf(format, args...)))
+	h.Log(ctx, _infoLevel, KVString(_log, fmt.Sprintf(format, args...)))
 }
 
 // Errorc logs a message at the error log level.
 func Errorc(ctx context.Context, format string, args ...interface{}) {
-	h.Log(ctx, _errorLevel, KV(_log, fmt.Sprintf(format, args...)))
+	h.Log(ctx, _errorLevel, KVString(_log, fmt.Sprintf(format, args...)))
 }
 
 // Warnc logs a message at the warning log level.
 func Warnc(ctx context.Context, format string, args ...interface{}) {
-	h.Log(ctx, _warnLevel, KV(_log, fmt.Sprintf(format, args...)))
+	h.Log(ctx, _warnLevel, KVString(_log, fmt.Sprintf(format, args...)))
 }
 
 // Infov logs a message at the info log level.

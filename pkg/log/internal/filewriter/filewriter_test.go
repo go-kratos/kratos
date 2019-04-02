@@ -24,7 +24,7 @@ func touch(dir, name string) {
 
 func TestMain(m *testing.M) {
 	ret := m.Run()
-	// os.RemoveAll(logdir)
+	os.RemoveAll(logdir)
 	os.Exit(ret)
 }
 

@@ -5,14 +5,11 @@ import (
 	"fmt"
 	"runtime"
 	"strconv"
-	"sync"
 
 	"github.com/bilibili/Kratos/pkg/conf/env"
 	"github.com/bilibili/Kratos/pkg/net/metadata"
 	"github.com/bilibili/Kratos/pkg/net/trace"
 )
-
-var fm sync.Map
 
 func addExtraField(ctx context.Context, fields map[string]interface{}) {
 	if t, ok := trace.FromContext(ctx); ok {
@@ -42,13 +39,8 @@ func addExtraField(ctx context.Context, fields map[string]interface{}) {
 
 // funcName get func name.
 func funcName(skip int) (name string) {
-	if pc, _, lineNo, ok := runtime.Caller(skip); ok {
-		if v, ok := fm.Load(pc); ok {
-			name = v.(string)
-		} else {
-			name = runtime.FuncForPC(pc).Name() + ":" + strconv.FormatInt(int64(lineNo), 10)
-			fm.Store(pc, name)
-		}
+	if _, file, lineNo, ok := runtime.Caller(skip); ok {
+		return file + ":" + strconv.Itoa(lineNo)
 	}
-	return
+	return "unknown:0"
 }
