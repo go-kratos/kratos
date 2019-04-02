@@ -53,7 +53,6 @@ type Scheduler struct {
 // Resolver resolve naming service
 type Resolver interface {
 	Fetch(context.Context) (*InstancesInfo, bool)
-	//Unwatch(id string)
 	Watch() <-chan struct{}
 	Close() error
 }

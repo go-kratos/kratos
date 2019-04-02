@@ -21,7 +21,7 @@ import (
 	bm "github.com/bilibili/Kratos/pkg/net/http/blademaster"
 	"github.com/bilibili/Kratos/pkg/net/netutil"
 	"github.com/bilibili/Kratos/pkg/net/netutil/breaker"
-	"github.com/bilibili/Kratos/pkg/str"
+	xstr "github.com/bilibili/Kratos/pkg/str"
 	xtime "github.com/bilibili/Kratos/pkg/time"
 )
 
@@ -53,13 +53,10 @@ var (
 
 // Config discovery configures.
 type Config struct {
-	Nodes  []string
-	Key    string
-	Secret string
-	Region string
-	Zone   string
-	Env    string
-	Host   string
+	Nodes []string
+	Zone  string
+	Env   string
+	Host  string
 }
 
 // Discovery is discovery client.
@@ -88,10 +85,7 @@ type appInfo struct {
 
 func fixConfig(c *Config) {
 	if len(c.Nodes) == 0 {
-		c.Nodes = []string{"api.bilibili.co"}
-	}
-	if env.Region != "" {
-		c.Region = env.Region
+		c.Nodes = []string{"NOTE: please config a default HOST"}
 	}
 	if env.Zone != "" {
 		c.Zone = env.Zone
@@ -136,11 +130,7 @@ func Build(id string) naming.Resolver {
 // New new a discovery client.
 func New(c *Config) (d *Discovery) {
 	if c == nil {
-		c = &Config{
-			Nodes:  []string{"discovery.bilibili.co", "api.bilibili.co"},
-			Key:    "discovery",
-			Secret: "discovery",
-		}
+		c = &Config{}
 	}
 	fixConfig(c)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -154,10 +144,6 @@ func New(c *Config) (d *Discovery) {
 	}
 	// httpClient
 	cfg := &bm.ClientConfig{
-		App: &bm.App{
-			Key:    c.Key,
-			Secret: c.Secret,
-		},
 		Dial:    xtime.Duration(3 * time.Second),
 		Timeout: xtime.Duration(40 * time.Second),
 		Breaker: &breaker.Config{
@@ -676,7 +662,6 @@ func (d *Discovery) broadcast(apps map[string]naming.InstancesInfo) {
 
 func (d *Discovery) newParams(conf *Config) url.Values {
 	params := url.Values{}
-	params.Set("region", conf.Region)
 	params.Set("zone", conf.Zone)
 	params.Set("env", conf.Env)
 	params.Set("hostname", conf.Host)

@@ -43,15 +43,8 @@ func init() {
 	}
 }
 
-// App bilibili intranet authorization.
-type App struct {
-	Key    string
-	Secret string
-}
-
 // ClientConfig is http client conf.
 type ClientConfig struct {
-	*App
 	Dial      xtime.Duration
 	Timeout   xtime.Duration
 	KeepAlive xtime.Duration
@@ -95,10 +88,6 @@ func NewClient(c *ClientConfig) *Client {
 	client.urlConf = make(map[string]*ClientConfig)
 	client.hostConf = make(map[string]*ClientConfig)
 	client.breaker = breaker.NewGroup(c.Breaker)
-	// check appkey
-	if c.Key == "" || c.Secret == "" {
-		panic("http client must config appkey and appsecret")
-	}
 	if c.Timeout <= 0 {
 		panic("must config http timeout!!!")
 	}
@@ -120,10 +109,6 @@ func (client *Client) SetTransport(t xhttp.RoundTripper) {
 // SetConfig set client config.
 func (client *Client) SetConfig(c *ClientConfig) {
 	client.mutex.Lock()
-	if c.App != nil {
-		client.conf.App.Key = c.App.Key
-		client.conf.App.Secret = c.App.Secret
-	}
 	if c.Timeout > 0 {
 		client.conf.Timeout = c.Timeout
 	}
