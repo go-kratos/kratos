@@ -4,11 +4,42 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptrace"
+	"strconv"
 
+	"github.com/bilibili/Kratos/pkg/net/metadata"
 	"github.com/bilibili/Kratos/pkg/net/trace"
 )
 
 const _defaultComponentName = "net/http"
+
+// Trace is trace middleware
+func Trace() HandlerFunc {
+	return func(c *Context) {
+		// handle http request
+		// get derived trace from http request header
+		t, err := trace.Extract(trace.HTTPFormat, c.Request.Header)
+		if err != nil {
+			var opts []trace.Option
+			if ok, _ := strconv.ParseBool(trace.KratosTraceDebug); ok {
+				opts = append(opts, trace.EnableDebug())
+			}
+			t = trace.New(c.Request.URL.Path, opts...)
+		}
+		t.SetTitle(c.Request.URL.Path)
+		t.SetTag(trace.String(trace.TagComponent, _defaultComponentName))
+		t.SetTag(trace.String(trace.TagHTTPMethod, c.Request.Method))
+		t.SetTag(trace.String(trace.TagHTTPURL, c.Request.URL.String()))
+		t.SetTag(trace.String(trace.TagSpanKind, "server"))
+		// business tag
+		t.SetTag(trace.String("caller", metadata.String(c.Context, metadata.Caller)))
+		// export trace id to user.
+		// TODO(zhoujiahui): trace package should be updated
+		// c.Writer.Header().Set(trace.KratosTraceID, t.TraceID())
+		c.Context = trace.NewContext(c.Context, t)
+		c.Next()
+		t.Finish(&c.Error)
+	}
+}
 
 type closeTracker struct {
 	io.ReadCloser
