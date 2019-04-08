@@ -45,7 +45,7 @@ func NewClient(config *Config, options ...gohbase.Option) *Client {
 	rawcli := NewRawClient(config, options...)
 	rawcli.AddHook(NewSlowLogHook(250 * time.Millisecond))
 	rawcli.AddHook(MetricsHook(nil))
-	rawcli.AddHook(TraceHook("database/hbase.v2", strings.Join(config.Zookeeper.Addrs, ",")))
+	rawcli.AddHook(TraceHook("database/hbase", strings.Join(config.Zookeeper.Addrs, ",")))
 	return rawcli
 }
 
