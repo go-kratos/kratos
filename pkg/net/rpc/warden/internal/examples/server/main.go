@@ -70,7 +70,7 @@ func runServer(addr string) *warden.Server {
 
 func main() {
 	log.Init(&log.Config{Stdout: true})
-	server := runServer("0.0.0.0:8080")
+	server := runServer("0.0.0.0:8081")
 	signalHandler(server)
 }
 

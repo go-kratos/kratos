@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/bilibili/Kratos/pkg/ecode"
+	"github.com/bilibili/Kratos/pkg/log"
 	"github.com/bilibili/Kratos/pkg/net/rpc/warden"
 	pb "github.com/bilibili/Kratos/pkg/net/rpc/warden/internal/proto/testproto"
 
@@ -16,8 +17,9 @@ import (
 
 // usage: ./client -grpc.target=test.service=127.0.0.1:8080
 func main() {
+	log.Init(&log.Config{Stdout: true})
 	flag.Parse()
-	conn, err := warden.NewConn("discovery://d/test.service?t=t&cluster=asdasd")
+	conn, err := warden.NewConn("127.0.0.1:8081")
 	if err != nil {
 		panic(err)
 	}
