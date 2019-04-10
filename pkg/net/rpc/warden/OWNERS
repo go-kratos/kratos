@@ -1,0 +1,10 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- caoguoliang
+- maojian
+labels:
+- library
+reviewers:
+- caoguoliang
+- maojian
