@@ -26,6 +26,10 @@ type span struct {
 	childs        int
 }
 
+func (s *span) TraceID() string {
+	return s.context.String()
+}
+
 func (s *span) Fork(serviceName, operationName string) Trace {
 	if s.childs > _maxChilds {
 		// if child span more than max childs set return noopspan

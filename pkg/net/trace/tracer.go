@@ -55,6 +55,8 @@ func Close() error {
 
 // Trace trace common interface.
 type Trace interface {
+	// return current trace id.
+	TraceID() string
 	// Fork fork a trace with client trace.
 	Fork(serviceName, operationName string) Trace
 
