@@ -4,7 +4,7 @@ import (
 	"context"
 	"flag"
 
-	"github.com/bilibili/Kratos/pkg/log"
+	"github.com/bilibili/kratos/pkg/log"
 )
 
 var (

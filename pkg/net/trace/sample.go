@@ -10,7 +10,7 @@ const (
 	slotLength = 2048
 )
 
-var ignoreds = []string{"/metrics", "/monitor/ping"}
+var ignoreds = []string{"/metrics", "/ping"} // NOTE: add YOUR URL PATH that want ignore
 
 func init() {
 	rand.Seed(time.Now().UnixNano())

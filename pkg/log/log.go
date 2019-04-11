@@ -8,13 +8,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bilibili/Kratos/pkg/conf/env"
+	"github.com/bilibili/kratos/pkg/conf/env"
 )
 
 // Config log config.
 type Config struct {
-	Family string
-	Host   string
+	AppID string
+	Host  string
 
 	// stdout
 	Stdout bool
@@ -94,8 +94,8 @@ func Init(conf *Config) {
 			Filter: _filter,
 		}
 	}
-	if len(env.AppID) != 0 {
-		conf.Family = env.AppID // for caster
+	if conf.AppID == "" && len(env.AppID) != 0 {
+		conf.AppID = env.AppID
 	}
 	conf.Host = env.Hostname
 	if len(conf.Host) == 0 {

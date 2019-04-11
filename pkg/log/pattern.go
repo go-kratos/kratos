@@ -80,7 +80,6 @@ func (p *pattern) Render(w io.Writer, d map[string]interface{}) error {
 	for _, f := range p.funcs {
 		buf.WriteString(f(d))
 	}
-
 	_, err := buf.WriteTo(w)
 	return err
 }

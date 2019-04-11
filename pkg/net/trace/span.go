@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	protogen "github.com/bilibili/Kratos/pkg/net/trace/proto"
+	protogen "github.com/bilibili/kratos/pkg/net/trace/proto"
 )
 
 const (
@@ -24,6 +24,10 @@ type span struct {
 	tags          []Tag
 	logs          []*protogen.Log
 	childs        int
+}
+
+func (s *span) TraceID() string {
+	return s.context.String()
 }
 
 func (s *span) Fork(serviceName, operationName string) Trace {

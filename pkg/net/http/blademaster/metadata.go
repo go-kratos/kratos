@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bilibili/Kratos/pkg/conf/env"
-	"github.com/bilibili/Kratos/pkg/log"
+	"github.com/bilibili/kratos/pkg/conf/env"
+	"github.com/bilibili/kratos/pkg/log"
 
 	"github.com/pkg/errors"
 )
@@ -17,13 +17,14 @@ const (
 	_httpHeaderUser         = "x1-bmspy-user"
 	_httpHeaderColor        = "x1-bmspy-color"
 	_httpHeaderTimeout      = "x1-bmspy-timeout"
+	_httpHeaderMirror       = "x1-bmspy-mirror"
 	_httpHeaderRemoteIP     = "x-backend-bm-real-ip"
 	_httpHeaderRemoteIPPort = "x-backend-bm-real-ipport"
 )
 
-// mirror return true if x1-bilispy-mirror in http header and its value is 1 or true.
+// mirror return true if x-bmspy-mirror in http header and its value is 1 or true.
 func mirror(req *http.Request) bool {
-	mirrorStr := req.Header.Get("x1-bilispy-mirror")
+	mirrorStr := req.Header.Get(_httpHeaderMirror)
 	if mirrorStr == "" {
 		return false
 	}
@@ -79,7 +80,7 @@ func timeout(req *http.Request) time.Duration {
 }
 
 // remoteIP implements a best effort algorithm to return the real client IP, it parses
-// X-BACKEND-BILI-REAL-IP or X-Real-IP or X-Forwarded-For in order to work properly with reverse-proxies such us: nginx or haproxy.
+// x-backend-bm-real-ip or X-Real-IP or X-Forwarded-For in order to work properly with reverse-proxies such us: nginx or haproxy.
 // Use X-Forwarded-For before X-Real-Ip as nginx uses X-Real-Ip with the proxy's IP.
 func remoteIP(req *http.Request) (remote string) {
 	if remote = req.Header.Get(_httpHeaderRemoteIP); remote != "" && remote != "null" {

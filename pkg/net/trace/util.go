@@ -6,9 +6,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/bilibili/Kratos/pkg/conf/env"
-	"github.com/bilibili/Kratos/pkg/net/ip"
-	"github.com/bilibili/Kratos/pkg/net/metadata"
+	"github.com/bilibili/kratos/pkg/conf/env"
+	"github.com/bilibili/kratos/pkg/net/ip"
 
 	"github.com/pkg/errors"
 )
@@ -45,14 +44,10 @@ type stackTracer interface {
 
 type ctxKey string
 
-var _ctxkey ctxKey = "Kratos/pkg/net/trace.trace"
+var _ctxkey ctxKey = "kratos/pkg/net/trace.trace"
 
 // FromContext returns the trace bound to the context, if any.
 func FromContext(ctx context.Context) (t Trace, ok bool) {
-	if v := metadata.Value(ctx, metadata.Trace); v != nil {
-		t, ok = v.(Trace)
-		return
-	}
 	t, ok = ctx.Value(_ctxkey).(Trace)
 	return
 }
@@ -60,9 +55,5 @@ func FromContext(ctx context.Context) (t Trace, ok bool) {
 // NewContext new a trace context.
 // NOTE: This method is not thread safe.
 func NewContext(ctx context.Context, t Trace) context.Context {
-	if md, ok := metadata.FromContext(ctx); ok {
-		md[metadata.Trace] = t
-		return ctx
-	}
 	return context.WithValue(ctx, _ctxkey, t)
 }

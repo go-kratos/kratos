@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/bilibili/Kratos/pkg/log/internal/filewriter"
+	"github.com/bilibili/kratos/pkg/log/internal/filewriter"
 )
 
 // level idx
@@ -57,10 +57,7 @@ func NewFile(dir string, bufferSize, rotateSize int64, maxLogFile int) *FileHand
 
 // Log loggint to file .
 func (h *FileHandler) Log(ctx context.Context, lv Level, args ...D) {
-	d := make(map[string]interface{}, 10+len(args))
-	for _, arg := range args {
-		d[arg.Key] = arg.Value
-	}
+	d := toMap(args...)
 	// add extra fields
 	addExtraField(ctx, d)
 	d[_time] = time.Now().Format(_timeFormat)
