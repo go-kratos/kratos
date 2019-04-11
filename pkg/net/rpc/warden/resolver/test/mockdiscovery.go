@@ -2,8 +2,8 @@ package resolver
 
 import (
 	"context"
-	"github.com/bilibili/Kratos/pkg/conf/env"
-	"github.com/bilibili/Kratos/pkg/naming"
+	"github.com/bilibili/kratos/pkg/conf/env"
+	"github.com/bilibili/kratos/pkg/naming"
 )
 
 type mockDiscoveryBuilder struct {

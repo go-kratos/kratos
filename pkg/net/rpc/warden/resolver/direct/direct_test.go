@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bilibili/Kratos/pkg/net/netutil/breaker"
-	"github.com/bilibili/Kratos/pkg/net/rpc/warden"
-	pb "github.com/bilibili/Kratos/pkg/net/rpc/warden/internal/proto/testproto"
-	"github.com/bilibili/Kratos/pkg/net/rpc/warden/resolver"
-	xtime "github.com/bilibili/Kratos/pkg/time"
+	"github.com/bilibili/kratos/pkg/net/netutil/breaker"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden"
+	pb "github.com/bilibili/kratos/pkg/net/rpc/warden/internal/proto/testproto"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver"
+	xtime "github.com/bilibili/kratos/pkg/time"
 )
 
 type testServer struct {

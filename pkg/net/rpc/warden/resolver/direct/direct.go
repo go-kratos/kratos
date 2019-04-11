@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bilibili/Kratos/pkg/conf/env"
-	"github.com/bilibili/Kratos/pkg/naming"
-	"github.com/bilibili/Kratos/pkg/net/rpc/warden/resolver"
+	"github.com/bilibili/kratos/pkg/conf/env"
+	"github.com/bilibili/kratos/pkg/naming"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver"
 )
 
 const (

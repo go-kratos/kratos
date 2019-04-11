@@ -11,10 +11,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bilibili/Kratos/pkg/conf/env"
-	"github.com/bilibili/Kratos/pkg/log"
-	"github.com/bilibili/Kratos/pkg/naming"
-	wmeta "github.com/bilibili/Kratos/pkg/net/rpc/warden/internal/metadata"
+	"github.com/bilibili/kratos/pkg/conf/env"
+	"github.com/bilibili/kratos/pkg/log"
+	"github.com/bilibili/kratos/pkg/naming"
+	wmeta "github.com/bilibili/kratos/pkg/net/rpc/warden/internal/metadata"
 
 	"github.com/dgryski/go-farm"
 	"github.com/pkg/errors"
