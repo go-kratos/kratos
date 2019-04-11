@@ -30,7 +30,7 @@ func addExtraField(ctx context.Context, fields map[string]interface{}) {
 	}
 	fields[_deplyEnv] = env.DeployEnv
 	fields[_zone] = env.Zone
-	fields[_appID] = c.Family
+	fields[_appID] = c.AppID
 	fields[_instanceID] = c.Host
 	if metadata.Bool(ctx, metadata.Mirror) {
 		fields[_mirror] = true
