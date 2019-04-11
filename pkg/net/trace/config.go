@@ -8,9 +8,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/bilibili/Kratos/pkg/conf/dsn"
-	"github.com/bilibili/Kratos/pkg/conf/env"
-	xtime "github.com/bilibili/Kratos/pkg/time"
+	"github.com/bilibili/kratos/pkg/conf/dsn"
+	"github.com/bilibili/kratos/pkg/conf/env"
+	xtime "github.com/bilibili/kratos/pkg/time"
 )
 
 var _traceDSN = "unixgram:///var/run/dapper-collect/dapper-collect.sock"

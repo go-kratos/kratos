@@ -6,9 +6,9 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/bilibili/Kratos/pkg/conf/env"
-	"github.com/bilibili/Kratos/pkg/net/metadata"
-	"github.com/bilibili/Kratos/pkg/net/trace"
+	"github.com/bilibili/kratos/pkg/conf/env"
+	"github.com/bilibili/kratos/pkg/net/metadata"
+	"github.com/bilibili/kratos/pkg/net/trace"
 )
 
 func addExtraField(ctx context.Context, fields map[string]interface{}) {

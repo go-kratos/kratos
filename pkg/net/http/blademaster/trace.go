@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/http/httptrace"
 
-	"github.com/bilibili/Kratos/pkg/net/trace"
+	"github.com/bilibili/kratos/pkg/net/trace"
 )
 
 const _defaultComponentName = "net/http"

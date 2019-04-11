@@ -75,8 +75,8 @@ import (
 	"{{.Name}}/internal/server/grpc"
 	"{{.Name}}/internal/server/http"
 	"{{.Name}}/internal/service"
-	"github.com/bilibili/Kratos/pkg/conf/paladin"
-	"github.com/bilibili/Kratos/pkg/log"
+	"github.com/bilibili/kratos/pkg/conf/paladin"
+	"github.com/bilibili/kratos/pkg/log"
 )
 
 func main() {
@@ -126,12 +126,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/bilibili/Kratos/pkg/cache/memcache"
-	"github.com/bilibili/Kratos/pkg/cache/redis"
-	"github.com/bilibili/Kratos/pkg/conf/paladin"
-	"github.com/bilibili/Kratos/pkg/database/sql"
-	"github.com/bilibili/Kratos/pkg/log"
-	xtime "github.com/bilibili/Kratos/pkg/time"
+	"github.com/bilibili/kratos/pkg/cache/memcache"
+	"github.com/bilibili/kratos/pkg/cache/redis"
+	"github.com/bilibili/kratos/pkg/conf/paladin"
+	"github.com/bilibili/kratos/pkg/database/sql"
+	"github.com/bilibili/kratos/pkg/log"
+	xtime "github.com/bilibili/kratos/pkg/time"
 )
 
 // Dao dao.
@@ -233,7 +233,7 @@ import (
 	"context"
 
 	"{{.Name}}/internal/dao"
-	"github.com/bilibili/Kratos/pkg/conf/paladin"
+	"github.com/bilibili/kratos/pkg/conf/paladin"
 )
 
 // Service service.
@@ -274,7 +274,7 @@ import (
 
 	pb "{{.Name}}/api"
 	"{{.Name}}/internal/dao"
-	"github.com/bilibili/Kratos/pkg/conf/paladin"
+	"github.com/bilibili/kratos/pkg/conf/paladin"
 
 	"github.com/golang/protobuf/ptypes/empty"
 )
@@ -321,10 +321,10 @@ import (
 	"net/http"
 
 	"{{.Name}}/internal/service"
-	"github.com/bilibili/Kratos/pkg/conf/paladin"
-	"github.com/bilibili/Kratos/pkg/log"
-	bm "github.com/bilibili/Kratos/pkg/net/http/blademaster"
-	"github.com/bilibili/Kratos/pkg/net/http/blademaster/middleware/verify"
+	"github.com/bilibili/kratos/pkg/conf/paladin"
+	"github.com/bilibili/kratos/pkg/log"
+	bm "github.com/bilibili/kratos/pkg/net/http/blademaster"
+	"github.com/bilibili/kratos/pkg/net/http/blademaster/middleware/verify"
 )
 
 var (
@@ -425,8 +425,8 @@ message HelloReq {
 import (
 	pb "{{.Name}}/api"
 	"{{.Name}}/internal/service"
-	"github.com/bilibili/Kratos/pkg/conf/paladin"
-	"github.com/bilibili/Kratos/pkg/net/rpc/warden"
+	"github.com/bilibili/kratos/pkg/conf/paladin"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden"
 )
 
 // New new a grpc server.

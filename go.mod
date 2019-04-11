@@ -1,4 +1,4 @@
-module github.com/bilibili/Kratos
+module github.com/bilibili/kratos
 
 require (
 	github.com/BurntSushi/toml v0.3.1
@@ -19,3 +19,5 @@ require (
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.26.0
 )
+
+go 1.12

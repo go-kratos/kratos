@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bilibili/Kratos/pkg/conf/env"
-	"github.com/bilibili/Kratos/pkg/log"
+	"github.com/bilibili/kratos/pkg/conf/env"
+	"github.com/bilibili/kratos/pkg/log"
 
 	"github.com/pkg/errors"
 )

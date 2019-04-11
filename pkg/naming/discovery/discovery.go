@@ -14,15 +14,15 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bilibili/Kratos/pkg/conf/env"
-	"github.com/bilibili/Kratos/pkg/ecode"
-	"github.com/bilibili/Kratos/pkg/log"
-	"github.com/bilibili/Kratos/pkg/naming"
-	bm "github.com/bilibili/Kratos/pkg/net/http/blademaster"
-	"github.com/bilibili/Kratos/pkg/net/netutil"
-	"github.com/bilibili/Kratos/pkg/net/netutil/breaker"
-	xstr "github.com/bilibili/Kratos/pkg/str"
-	xtime "github.com/bilibili/Kratos/pkg/time"
+	"github.com/bilibili/kratos/pkg/conf/env"
+	"github.com/bilibili/kratos/pkg/ecode"
+	"github.com/bilibili/kratos/pkg/log"
+	"github.com/bilibili/kratos/pkg/naming"
+	bm "github.com/bilibili/kratos/pkg/net/http/blademaster"
+	"github.com/bilibili/kratos/pkg/net/netutil"
+	"github.com/bilibili/kratos/pkg/net/netutil/breaker"
+	xstr "github.com/bilibili/kratos/pkg/str"
+	xtime "github.com/bilibili/kratos/pkg/time"
 )
 
 const (

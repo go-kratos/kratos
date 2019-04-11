@@ -6,9 +6,9 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/bilibili/Kratos/pkg/conf/env"
-	"github.com/bilibili/Kratos/pkg/net/ip"
-	"github.com/bilibili/Kratos/pkg/net/metadata"
+	"github.com/bilibili/kratos/pkg/conf/env"
+	"github.com/bilibili/kratos/pkg/net/ip"
+	"github.com/bilibili/kratos/pkg/net/metadata"
 
 	"github.com/pkg/errors"
 )
@@ -45,7 +45,7 @@ type stackTracer interface {
 
 type ctxKey string
 
-var _ctxkey ctxKey = "Kratos/pkg/net/trace.trace"
+var _ctxkey ctxKey = "kratos/pkg/net/trace.trace"
 
 // FromContext returns the trace bound to the context, if any.
 func FromContext(ctx context.Context) (t Trace, ok bool) {
