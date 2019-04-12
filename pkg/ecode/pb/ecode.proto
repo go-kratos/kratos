@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/any.proto";
+
+option go_package = "go-common/library/ecode/pb";
+
+message Error {
+    int32 err_code = 1;
+    string err_message = 2;
+    google.protobuf.Any err_detail = 3;
+}

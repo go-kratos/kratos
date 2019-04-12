@@ -1,2 +1,4 @@
 go.sum
+BUILD
+.DS_Store
 tool/kratos/kratos

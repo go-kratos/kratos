@@ -37,3 +37,30 @@ const (
 	// Device 客户端信息
 	Device = "device"
 )
+
+var outgoingKey = map[string]struct{}{
+	Color:      struct{}{},
+	RemoteIP:   struct{}{},
+	RemotePort: struct{}{},
+	Mirror:     struct{}{},
+}
+
+var incomingKey = map[string]struct{}{
+	Caller: struct{}{},
+}
+
+// IsOutgoingKey represent this key should propagate by rpc.
+func IsOutgoingKey(key string) bool {
+	_, ok := outgoingKey[key]
+	return ok
+}
+
+// IsIncomingKey represent this key should extract from rpc metadata.
+func IsIncomingKey(key string) (ok bool) {
+	_, ok = outgoingKey[key]
+	if ok {
+		return
+	}
+	_, ok = incomingKey[key]
+	return
+}
