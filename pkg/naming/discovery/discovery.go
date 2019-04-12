@@ -59,6 +59,12 @@ type Config struct {
 	Host  string
 }
 
+type appData struct {
+	ZoneInstances map[string][]*naming.Instance `json:"zone_instances"`
+	LastTs        int64                         `json:"latest_timestamp"`
+	Err           string                        `json:"err"`
+}
+
 // Discovery is discovery client.
 type Discovery struct {
 	once       sync.Once
@@ -175,15 +181,15 @@ func (d *Discovery) selfproc(resolver naming.Resolver, event <-chan struct{}) {
 		if !ok {
 			return
 		}
-		instances, ok := resolver.Fetch(context.Background())
+		zones, ok := resolver.Fetch(context.Background())
 		if ok {
-			d.newSelf(instances)
+			d.newSelf(zones)
 		}
 	}
 }
 
-func (d *Discovery) newSelf(instances *naming.InstancesInfo) {
-	ins, ok := instances.Instances[d.conf.Zone]
+func (d *Discovery) newSelf(zones map[string][]*naming.Instance) {
+	ins, ok := zones[d.conf.Zone]
 	if !ok {
 		return
 	}
@@ -270,12 +276,12 @@ func (r *Resolver) Watch() <-chan struct{} {
 }
 
 // Fetch fetch resolver instance.
-func (r *Resolver) Fetch(c context.Context) (ins *naming.InstancesInfo, ok bool) {
+func (r *Resolver) Fetch(c context.Context) (ins map[string][]*naming.Instance, ok bool) {
 	r.d.mutex.RLock()
 	app, ok := r.d.apps[r.id]
 	r.d.mutex.RUnlock()
 	if ok {
-		ins, ok = app.zoneIns.Load().(*naming.InstancesInfo)
+		ins, ok = app.zoneIns.Load().(map[string][]*naming.Instance)
 		return
 	}
 	return
@@ -527,7 +533,6 @@ func (d *Discovery) serverproc() {
 			return
 		default:
 		}
-
 		apps, err := d.polls(ctx, d.pickNode())
 		if err != nil {
 			d.switchNode()
@@ -572,7 +577,7 @@ func (d *Discovery) nodes() (nodes []string) {
 	return
 }
 
-func (d *Discovery) polls(ctx context.Context, host string) (apps map[string]naming.InstancesInfo, err error) {
+func (d *Discovery) polls(ctx context.Context, host string) (apps map[string]appData, err error) {
 	var (
 		lastTs  []int64
 		appid   []string
@@ -597,8 +602,9 @@ func (d *Discovery) polls(ctx context.Context, host string) (apps map[string]nam
 	}
 	uri := fmt.Sprintf(_pollURL, host)
 	res := new(struct {
-		Code int                             `json:"code"`
-		Data map[string]naming.InstancesInfo `json:"data"`
+		Code    int                `json:"code"`
+		Message string             `json:"message"`
+		Data    map[string]appData `json:"data"`
 	})
 	params := url.Values{}
 	params.Set("env", conf.Env)
@@ -611,8 +617,17 @@ func (d *Discovery) polls(ctx context.Context, host string) (apps map[string]nam
 	}
 	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
 		if !ec.Equal(ecode.NotModified) {
-			log.Error("discovery: client.Get(%s) get error code(%d)", uri+"?"+params.Encode(), res.Code)
+			log.Error("discovery: client.Get(%s) get error code(%d) message(%s)", uri+"?"+params.Encode(), res.Code, res.Message)
 			err = ec
+			if ec.Equal(ecode.NothingFound) {
+				for appID, value := range res.Data {
+					if value.Err != "" {
+						errInfo := fmt.Sprintf("discovery: app(%s) on ENV(%s) %s!\n", appID, conf.Env, value.Err)
+						log.Error(errInfo)
+						fmt.Fprintf(os.Stderr, errInfo)
+					}
+				}
+			}
 		}
 		return
 	}
@@ -630,12 +645,12 @@ func (d *Discovery) polls(ctx context.Context, host string) (apps map[string]nam
 	return
 }
 
-func (d *Discovery) broadcast(apps map[string]naming.InstancesInfo) {
+func (d *Discovery) broadcast(apps map[string]appData) {
 	for id, v := range apps {
 		var count int
-		for zone, ins := range v.Instances {
+		for zone, ins := range v.ZoneInstances {
 			if len(ins) == 0 {
-				delete(v.Instances, zone)
+				delete(v.ZoneInstances, zone)
 			}
 			count += len(ins)
 		}
@@ -647,7 +662,7 @@ func (d *Discovery) broadcast(apps map[string]naming.InstancesInfo) {
 		d.mutex.RUnlock()
 		if ok {
 			app.lastTs = v.LastTs
-			app.zoneIns.Store(v)
+			app.zoneIns.Store(v.ZoneInstances)
 			d.mutex.RLock()
 			for rs := range app.resolver {
 				select {

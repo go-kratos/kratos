@@ -128,10 +128,10 @@ func (r *Resolver) updateproc() {
 				return
 			}
 		}
-		if insInfo, ok := r.nr.Fetch(context.Background()); ok {
-			instances, ok := insInfo.Instances[r.zone]
+		if insMap, ok := r.nr.Fetch(context.Background()); ok {
+			instances, ok := insMap[r.zone]
 			if !ok {
-				for _, value := range insInfo.Instances {
+				for _, value := range insMap {
 					instances = append(instances, value...)
 				}
 			}

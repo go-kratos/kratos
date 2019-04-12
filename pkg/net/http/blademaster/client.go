@@ -137,7 +137,7 @@ func (client *Client) SetConfig(c *ClientConfig) {
 // TODO(zhoujiahui): param realIP should be removed later.
 func (client *Client) NewRequest(method, uri, realIP string, params url.Values) (req *xhttp.Request, err error) {
 	if method == xhttp.MethodGet {
-		req, err = xhttp.NewRequest(xhttp.MethodGet, uri+params.Encode(), nil)
+		req, err = xhttp.NewRequest(xhttp.MethodGet, fmt.Sprintf("%s?%s", uri, params.Encode()), nil)
 	} else {
 		req, err = xhttp.NewRequest(xhttp.MethodPost, uri, strings.NewReader(params.Encode()))
 	}

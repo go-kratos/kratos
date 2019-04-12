@@ -6,19 +6,17 @@ import (
 
 // metadata common key
 const (
-	MetaColor   = "color"
-	MetaWeight  = "weight"
-	MetaCluster = "cluster"
 	MetaZone    = "zone"
+	MetaCluster = "cluster"
+	MetaWeight  = "weight"
+	MetaColor   = "color"
 )
 
 // Instance represents a server the client connects to.
 type Instance struct {
-	// Region bj/sh/gz
-	Region string `json:"region"`
 	// Zone is IDC.
 	Zone string `json:"zone"`
-	// Env prod/pre、uat/fat1
+	// Env prod/pre/uat/fat1
 	Env string `json:"env"`
 	// AppID is mapping servicetree appid.
 	AppID string `json:"appid"`
@@ -34,25 +32,13 @@ type Instance struct {
 	// Metadata is the information associated with Addr, which may be used
 	// to make load balancing decision.
 	Metadata map[string]string `json:"metadata"`
-	Status   int64
-}
-
-// InstancesInfo instance info.
-type InstancesInfo struct {
-	Instances map[string][]*Instance `json:"zone_instances"`
-	LastTs    int64                  `json:"latest_timestamp"`
-	Scheduler []*Scheduler           `json:"scheduler"`
-}
-
-// Scheduler  scheduler info in multi cluster.
-type Scheduler struct {
-	Src string           `json:"src"`
-	Dst map[string]int64 `json:"dst"`
+	// Status status
+	Status int64
 }
 
 // Resolver resolve naming service
 type Resolver interface {
-	Fetch(context.Context) (*InstancesInfo, bool)
+	Fetch(context.Context) (map[string][]*Instance, bool)
 	Watch() <-chan struct{}
 	Close() error
 }

@@ -8,12 +8,12 @@ import (
 
 	"github.com/bilibili/kratos/pkg/ecode"
 	"github.com/bilibili/kratos/pkg/log"
-	"github.com/bilibili/kratos/pkg/stat/summary"
+	"github.com/bilibili/kratos/pkg/stat/metric"
 )
 
 // sreBreaker is a sre CircuitBreaker pattern.
 type sreBreaker struct {
-	stat summary.Summary
+	stat metric.RollingCounter
 
 	k       float64
 	request int64
@@ -23,8 +23,13 @@ type sreBreaker struct {
 }
 
 func newSRE(c *Config) Breaker {
+	counterOpts := metric.RollingCounterOpts{
+		Size:           c.Bucket,
+		BucketDuration: time.Duration(int64(c.Window) / int64(c.Bucket)),
+	}
+	stat := metric.NewRollingCounter(counterOpts)
 	return &sreBreaker{
-		stat: summary.New(time.Duration(c.Window), c.Bucket),
+		stat: stat,
 		r:    rand.New(rand.NewSource(time.Now().UnixNano())),
 
 		request: c.Request,
@@ -33,8 +38,22 @@ func newSRE(c *Config) Breaker {
 	}
 }
 
+func (b *sreBreaker) summary() (success int64, total int64) {
+	b.stat.Reduce(func(iterator metric.Iterator) float64 {
+		for iterator.Next() {
+			bucket := iterator.Bucket()
+			total += bucket.Count
+			for _, p := range bucket.Points {
+				success += int64(p)
+			}
+		}
+		return 0
+	})
+	return
+}
+
 func (b *sreBreaker) Allow() error {
-	success, total := b.stat.Value()
+	success, total := b.summary()
 	k := b.k * float64(success)
 	if log.V(5) {
 		log.Info("breaker: request: %d, succee: %d, fail: %d", total, success, total-success)

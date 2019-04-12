@@ -218,14 +218,6 @@ func (d *Dao) pingRedis(ctx context.Context) (err error) {
 
 ## 项目简介
 1.
-
-## 编译环境
-
-
-## 依赖包
-
-
-## 编译执行
 `
 	_tplService = `package service
 
