@@ -120,6 +120,7 @@ func main() {
 
 # Reviewer
 `
+
 	_tplDao = `package dao
 
 import (
@@ -312,11 +313,12 @@ func (s *Service) Close() {
 import (
 	"net/http"
 
+	"{{.Name}}/internal/model"
 	"{{.Name}}/internal/service"
+
 	"github.com/bilibili/kratos/pkg/conf/paladin"
 	"github.com/bilibili/kratos/pkg/log"
 	bm "github.com/bilibili/kratos/pkg/net/http/blademaster"
-	"github.com/bilibili/kratos/pkg/net/http/blademaster/middleware/verify"
 )
 
 var (
@@ -337,19 +339,18 @@ func New(s *service.Service) (engine *bm.Engine) {
 	}
 	svc = s
 	engine = bm.DefaultServer(hc.Server)
-	initRouter(engine, verify.New(nil))
+	initRouter(engine)
 	if err := engine.Start(); err != nil {
 		panic(err)
 	}
 	return
 }
 
-func initRouter(e *bm.Engine, v *verify.Verify) {
+func initRouter(e *bm.Engine) {
 	e.Ping(ping)
-	e.Register(register)
 	g := e.Group("/{{.Name}}")
 	{
-		g.GET("/start", v.Verify, howToStart)
+		g.GET("/start", howToStart)
 	}
 }
 
@@ -360,14 +361,14 @@ func ping(ctx *bm.Context) {
 	}
 }
 
-func register(c *bm.Context) {
-	c.JSON(map[string]interface{}{}, nil)
-}
-
 // example for http request handler.
 func howToStart(c *bm.Context) {
-	c.String(0, "Golang 大法好 !!!")
+	k := &model.Kratos{
+		Hello: "Golang 大法好 !!!",
+	}
+	c.JSON(k, nil)
 }
+
 `
 	_tplAPIProto = `// 定义项目 API 的 proto 文件 可以同时描述 gRPC 和 HTTP API
 // protobuf 文件参考:
@@ -411,7 +412,11 @@ message HelloReq {
 //go:generate TODO:待完善工具protoc.sh
 `
 	_tplModel = `package model
-`
+
+// Kratos hello kratos.
+type Kratos struct {
+	Hello string
+}`
 	_tplGRPCServer = `package grpc
 
 import (
