@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -114,7 +115,7 @@ func runTool(name, dir, cmd string, args []string) (err error) {
 	}
 	if err = toolCmd.Run(); err != nil {
 		if e, ok := err.(*exec.ExitError); !ok || !e.Exited() {
-			fmt.Fprintf(os.Stderr, "install %s: %v\n", name, err)
+			fmt.Fprintf(os.Stderr, "运行 %s 出错: %v\n", name, err)
 		}
 	}
 	return
@@ -147,7 +148,7 @@ func (t Tool) install() {
 	}
 	cmds := strings.Split(t.Install, " ")
 	if len(cmds) > 0 {
-		if err := runTool(t.Name, t.toolPath(), cmds[0], cmds[1:]); err == nil {
+		if err := runTool(t.Name, path.Dir(t.toolPath()), cmds[0], cmds[1:]); err == nil {
 			color.Green("%s: 安装成功!", t.Name)
 		}
 	}

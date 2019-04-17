@@ -29,6 +29,8 @@ go build
 
 打开浏览器访问：[http://localhost:8000/kratos-demo/start](http://localhost:8000/kratos-demo/start)，你会看到输出了`Golang 大法好 ！！！`
 
+[快速开始](doc/wiki-cn/quickstart.md)
+
 # Document
 
 [简体中文](doc/wiki-cn/summary.md)

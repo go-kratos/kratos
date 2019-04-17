@@ -62,3 +62,8 @@ func howToStart(c *bm.Context) // handler方法默认传入bm的Context对象
 # 扩展阅读
 
 [bm模块说明](blademaster-mod.md) [bm中间件](blademaster-mid.md)  [bm基于pb生成](blademaster-pb.md)
+
+
+-------------
+
+[文档目录树](summary.md)
