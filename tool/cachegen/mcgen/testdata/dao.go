@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"go-common/library/cache/memcache"
-
+	"github.com/bilibili/Kratos/pkg/cache/memcache"
 	"github.com/bilibili/Kratos/pkg/container/pool"
 	xtime "github.com/bilibili/Kratos/pkg/time"
 )

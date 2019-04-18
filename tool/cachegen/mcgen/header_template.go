@@ -19,10 +19,10 @@ import (
 	{{if .UseStrConv}}"strconv"{{end}}
 	{{if .EnableBatch }}"sync"{{end}}
 NEWLINE
-	"go-common/library/stat/prom"
-	{{if .UseMemcached }}"go-common/library/cache/memcache"{{end}}
-	{{if .EnableBatch }}"go-common/library/sync/errgroup"{{end}}
-	"go-common/library/log"
+	"github.com/bilibili/Kratos/pkg/stat/prom"
+	{{if .UseMemcached }}"github.com/bilibili/Kratos/pkg/cache/memcache"{{end}}
+	{{if .EnableBatch }}"github.com/bilibili/Kratos/pkg/sync/errgroup"{{end}}
+	"github.com/bilibili/Kratos/pkg/log"
 	{{.ImportPackage}}
 )
 

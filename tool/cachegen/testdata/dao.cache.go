@@ -21,8 +21,8 @@ import (
 	"context"
 	"sync"
 
-	"go-common/library/stat/prom"
-	"go-common/library/sync/errgroup"
+	"github.com/bilibili/Kratos/pkg/errgroup"
+	"github.com/bilibili/Kratos/pkg/stat/prom"
 )
 
 var _ _cache

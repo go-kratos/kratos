@@ -46,9 +46,9 @@ import (
 	"context"
 	"fmt"
 
-	"go-common/library/cache/memcache"
-	"go-common/library/log"
-	"go-common/library/stat/prom"
+	"github.com/bilibili/Kratos/pkg/cache/memcache"
+	"github.com/bilibili/Kratos/pkg/log"
+	"github.com/bilibili/Kratos/pkg/stat/prom"
 )
 
 var _ _mc

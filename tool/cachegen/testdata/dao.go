@@ -3,7 +3,7 @@ package testdata
 import (
 	"context"
 
-	"go-common/library/sync/pipeline/fanout"
+	"github.com/bilibili/Kratos/pkg/sync/pipeline/fanout"
 )
 
 // Article test struct
