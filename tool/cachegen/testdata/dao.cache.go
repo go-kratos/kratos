@@ -21,8 +21,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/bilibili/Kratos/pkg/errgroup"
 	"github.com/bilibili/Kratos/pkg/stat/prom"
+	"github.com/bilibili/Kratos/pkg/sync/errgroup"
 )
 
 var _ _cache
@@ -57,12 +57,12 @@ func (d *Dao) Articles(c context.Context, keys []int64) (res map[int64]*Article,
 	missData := make(map[int64]*Article, missLen)
 	prom.CacheMiss.Add("Articles", int64(missLen))
 	var mutex sync.Mutex
-	group, ctx := errgroup.WithContext(c)
+	group := errgroup.WithCancel(c)
 	if missLen > 20 {
 		group.GOMAXPROCS(20)
 	}
 	var run = func(ms []int64) {
-		group.Go(func() (err error) {
+		group.Go(func(ctx context.Context) (err error) {
 			data, err := d.RawArticles(ctx, ms)
 			mutex.Lock()
 			for k, v := range data {

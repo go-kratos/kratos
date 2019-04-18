@@ -57,16 +57,15 @@ func (d *Dao) NAME(c context.Context, {{.IDName}} []KEY{{.ExtraArgsType}}) (res 
 			prom.CacheMiss.Add("NAME", int64(missLen))
 			var mutex sync.Mutex
 			{{if .BatchErrBreak}}
-				group, ctx := errgroup.WithContext(c)
+				group := errgroup.WithCancel(c)
 			{{else}}
-				group := &errgroup.Group{}
-				ctx := c
+				group := errgroup.WithContext(c)
 			{{end}}
 			if missLen > MAXGROUP {
 			group.GOMAXPROCS(MAXGROUP)
 			}
 			var run = func(ms []KEY) {
-				group.Go(func() (err error) {
+				group.Go(func(ctx context.Context) (err error) {
 					data, err := RAWFUNC(ctx, ms {{.ExtraRawArgs}})
 					mutex.Lock()
 					for k, v := range data {
