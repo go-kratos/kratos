@@ -3,7 +3,7 @@ package pb
 import (
 	"strconv"
 
-	"github.com/bilibili/kratos/pkg/ecode"
+	"kratos/pkg/ecode"
 
 	any "github.com/golang/protobuf/ptypes/any"
 )

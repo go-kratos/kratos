@@ -1,0 +1,2 @@
+A api directory use for test.
+To present a project because any directory contains /api sub-directory is considered as a project.
