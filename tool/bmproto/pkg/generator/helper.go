@@ -2,7 +2,7 @@ package generator
 
 import (
 	"kratos/tool/bmproto/pkg/tag"
-	"kratos/tool/bmproto/protoc-gen-liverpc/gen/typemap"
+	"kratos/tool/bmproto/pkg/typemap"
 	"reflect"
 	"strings"
 
@@ -137,8 +137,4 @@ func GetFieldRequired(
 		}
 	}
 	return required
-}
-
-func MakeIndentStr(i int) string {
-	return strings.Repeat(" ", i)
 }

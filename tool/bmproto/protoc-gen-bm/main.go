@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"kratos/tool/bmproto/pkg/generator"
 	bmgen "kratos/tool/bmproto/protoc-gen-bm/generator"
-	"kratos/tool/bmproto/protoc-gen-liverpc/gen"
+	"kratos/tool/bmproto/pkg/gen"
 	"os"
 )
 

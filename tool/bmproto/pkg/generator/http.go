@@ -5,7 +5,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	"kratos/tool/bmproto/pkg/tag"
-	"kratos/tool/bmproto/protoc-gen-liverpc/gen/typemap"
+	"kratos/tool/bmproto/pkg/typemap"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"net/http"
 	"strings"

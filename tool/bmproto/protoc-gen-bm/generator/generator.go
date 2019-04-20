@@ -10,8 +10,8 @@ import (
 	"sort"
 	"strings"
 
-	"kratos/tool/bmproto/protoc-gen-liverpc/gen/stringutils"
-	"kratos/tool/bmproto/protoc-gen-liverpc/gen/typemap"
+	"kratos/tool/bmproto/pkg/stringutils"
+	"kratos/tool/bmproto/pkg/typemap"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"

@@ -16,7 +16,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
-	"kratos/tool/bmproto/protoc-gen-liverpc/gen"
+	"kratos/tool/bmproto/pkg/gen"
 )
 
 type tpl struct {
