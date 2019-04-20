@@ -15,16 +15,12 @@
 * [其他代码生成](#其他代码生成)
     * [生成service模板](#生成service模板)
 * [其他特性](#其他特性)
-    * [添加http框架的Middleware](#添加http框架的middleware)
     * [自定义Url或者指定http方法为post](#自定义url或者指定http方法为post)
     * [只想要grpc的代码(不要markdown, bm.go)](#只想要grpc的代码不要markdown-bmgo)
     * [form tag和json tag](#form-tag和json-tag)
     * [添加接口请求参数的约束条件](#添加接口请求参数的约束条件)
-    * [同步api到bapi.bilibili.co](#同步api到bapibilibilico)
     * [支持json做为输入](#支持json做为输入)
 * [建立配置文件](#建立配置文件)
-* [直播部门老的用法](#直播部门老的用法)
-    * [兼容直播服务列表（按照discovery id）](#兼容直播服务列表按照discovery-id)
 
 <!-- vim-markdown-toc -->
 
@@ -78,11 +74,6 @@ GET  /department.app.Greeter/SayHello?param1=p1
 ```shell
 go install kratos/tool/bmproto/...
 ```
-
-或者使用kratos tool 安装
-
-`kratos tool install bmgen`
-
 
 ## 用法
 
@@ -165,25 +156,7 @@ project-
 ### 生成service模板
 `bmgen -t` 生成service模板代码在 internal/service/serviceName.go
 
-### 生成swagger
-`bmgen --swagger` or `bmgen -s` 生成 .swagger.json
-
-### 生成mock
-`bmgen --mock` or `bmgen -m` 调用mockgen 生成 .mock.go
-
-### 生成warden client(grpc)
-`bmgen --wardenclient` or `bmgen -w` warden_client.go
-
 ## 其他特性
-
-### 添加http框架的Middleware
-
-在RegisterXXBMServer之前加入代码
-
-
-```
-engine.Inject(pb.PathGreeterSayHello, middleware1, middleware2) // engine 类型是 *go-common/library/net/http/blademaster.Engine
-```
 
 ### 自定义Url或者指定http方法为post
 
@@ -256,62 +229,5 @@ curl 127.0.0.1:8000/department.app.Greeter/SayHello -H "Content-Type: applicatio
 
 ```toml
 explicit_http = false
-swagger = true
-mock = true
 tpl = true
 ```
-
-
-## 直播部门老的用法
-**对于以下"兼容直播服务列表中的服务"有效**
-
-
-- URL：/xlive/项目名/v*/service开头小写/method
-- 注册路由：使用RegisterXXXService而不是 RegisterXXBMServer
-- middleware：不支持RegisterXXXMiddleware 而是 使用注解
-
-
-```go
-api/api.proto
-service Greeter {
-    // `method:"POST"` // 表示请求方法为POST
-    // `midware:"user"`
-    rpc SayHello(A) returns (B);
-}
-
-// server/http/http.go
-import bm "go-common/library/net/http/blademaster"
-....
-userAuthMiddleware := xxxxx
-pb.RegisterXXService(e, svc, map[string]bm.HandlerFunc{"user":userAuthMiddleware})
-```
-
-
-- 注解，在方法或者字段上方的注视添加和 go的tag格式一样的注解，实现一定的功能
-
-  注解列表：
-
-  | key          | 位置                  | 说明                                                         |
-  | ------------ | --------------------- | ------------------------------------------------------------ |
-  | midware      | rpc method上方        | 不建议使用，请在代码中使用bm.Inject(path, mid1, mid2, ...) midware:"auth,verify" 中间件，auth 是验证登录态，verify是校验签名， |
-  | method       | rpc method上方        | method:"POST" 指定http请求方法                               |
-  | mock         | 响应message的字段上方 | mock:"mockdata" mock数据，生成文档的时候有用                 |
-  | internal     | 不建议继续使用        | 不建议继续使用                                               |
-  | dynamic      | 不建议继续使用        | 不建议继续使用                                               |
-  | dynamic_resp | 不建议继续使用        | 不建议继续使用                                               |
-
-
-
-### 兼容直播服务列表（按照discovery id）
--  "live.webucenter"
--  "live.webroom"
--  "live.appucenter"
--  "live.appblink"
--  "live.approom"
--  "live.appinterface"
--  "live.liveadmin"
--  "live.resource"
--  "live.livedemo"
--  "live.lotteryinterface"
-
-
