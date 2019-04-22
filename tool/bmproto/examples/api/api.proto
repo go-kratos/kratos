@@ -1,0 +1,33 @@
+syntax = "proto3";
+package department.app;
+
+option go_package = "api";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+
+service Greeter{
+    // api 标题
+    // api 说明
+    rpc SayHello(HelloRequest) returns (HelloResponse); // 对应 /department.app.Greeter/SayHello
+    rpc SayHelloCustomUrl(HelloRequest) returns (HelloResponse) {
+        option (google.api.http) = {
+            get:"/say_hello12345" // 对应 GET /say_hello
+        };
+    };
+    rpc SayHelloPost(HelloRequest) returns (HelloResponse) {
+        option (google.api.http) = {
+            post:"" // 对应 POST /department.app.Greeter/SayHelloPost 不填就走默认
+        };
+    };
+}
+
+message HelloRequest {
+    // 请求参数说明
+    string param1 = 1 [(gogoproto.moretags) = 'form:"param1"'];
+}
+
+message HelloResponse {
+    // 返回字段说明
+    string ret_string = 1 [(gogoproto.jsontag) = 'ret_string'];
+}
