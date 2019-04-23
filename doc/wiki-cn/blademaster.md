@@ -32,6 +32,9 @@ blademaster 处理请求的模式非常简单，大部分的逻辑都被封装�
 但是 Handler 中可以也中断整个处理流程，直接输出 Response。这种模式常被用于校验登陆的中间件中；一旦发现请求不合法，直接响应拒绝。  
 请求处理的流程中也可以使用 Render 来辅助渲染 Response，比如对于不同的请求需要响应不同的数据格式（JSON、XML），此时可以使用不同的 Render 来简化逻辑。  
 
+# 扩展阅读
+
+[bm快速开始](blademaster-quickstart.md) [bm模块说明](blademaster-mod.md) [bm中间件](blademaster-mid.md)  [bm基于pb生成](blademaster-pb.md)
 
 -------------
 
