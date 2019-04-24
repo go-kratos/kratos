@@ -1,10 +1,10 @@
 package http
 
 import (
-	"kratos/tool/bmproto/examples/api"
-	"kratos/tool/bmproto/examples/internal/service"
-	bm "go-common/library/net/http/blademaster"
-	"go-common/library/time"
+	"github.com/bilibili/kratos/tool/bmproto/examples/api"
+	"github.com/bilibili/kratos/tool/bmproto/examples/internal/service"
+	bm "github.com/bilibili/kratos/pkg/net/http/blademaster"
+	"github.com/bilibili/kratos/pkg/time"
 
 	xtime "time"
 )

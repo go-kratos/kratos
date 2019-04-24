@@ -2,16 +2,16 @@ package generator
 
 import (
 	"fmt"
-	"kratos/tool/bmproto/pkg/generator"
-	"kratos/tool/bmproto/pkg/naming"
-	"kratos/tool/bmproto/pkg/tag"
-	"kratos/tool/bmproto/pkg/utils"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/generator"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/naming"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/tag"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/utils"
 	"reflect"
 	"sort"
 	"strings"
 
-	"kratos/tool/bmproto/pkg/stringutils"
-	"kratos/tool/bmproto/pkg/typemap"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/stringutils"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/typemap"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
@@ -123,8 +123,8 @@ func (t *bm) generateImports(file *descriptor.FileDescriptorProto) {
 	//t.P(`	`,t.pkgs["context"], ` "context"`)
 	t.P(`	"context"`)
 	t.P()
-	t.P(`	bm "go-common/library/net/http/blademaster"`)
-	t.P(`	"go-common/library/net/http/blademaster/binding"`)
+	t.P(`	bm "github.com/bilibili/kratos/tool/bmproto/pkg/net/http/blademaster"`)
+	t.P(`	"github.com/bilibili/kratos/tool/bmproto/pkg/net/http/blademaster/binding"`)
 
 	t.P(`)`)
 	// It's legal to import a message and use it as an input or output for a

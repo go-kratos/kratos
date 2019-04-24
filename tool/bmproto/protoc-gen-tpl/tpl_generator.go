@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"kratos/tool/bmproto/pkg/generator"
-	"kratos/tool/bmproto/pkg/naming"
-	"kratos/tool/bmproto/pkg/project"
-	"kratos/tool/bmproto/pkg/tag"
-	"kratos/tool/bmproto/pkg/utils"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/generator"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/naming"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/project"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/tag"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/utils"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -16,7 +16,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
-	"kratos/tool/bmproto/pkg/gen"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/gen"
 )
 
 type tpl struct {

@@ -19,7 +19,7 @@ func TestNewProjInfo(t *testing.T) {
 		if proj.PathRefToProj != ".." {
 			t.Fatalf("pathRefToProj fail, expect .., got %s", proj.PathRefToProj)
 		}
-		if proj.ImportPath != "kratos/tool/bmproto/pkg" {
+		if proj.ImportPath != "github.com/bilibili/kratos/tool/bmproto/pkg" {
 			t.Fatalf("pathRefToProj fail, expect kratos/tool/bmproto/pkg, got %s", proj.ImportPath)
 		}
 		if proj.HasInternalPkg != false {

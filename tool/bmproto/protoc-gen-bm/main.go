@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"kratos/tool/bmproto/pkg/generator"
-	bmgen "kratos/tool/bmproto/protoc-gen-bm/generator"
-	"kratos/tool/bmproto/pkg/gen"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/generator"
+	bmgen "github.com/bilibili/kratos/tool/bmproto/protoc-gen-bm/generator"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/gen"
 	"os"
 )
 

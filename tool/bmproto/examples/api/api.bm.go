@@ -13,8 +13,8 @@ package api
 import (
 	"context"
 
-	bm "go-common/library/net/http/blademaster"
-	"go-common/library/net/http/blademaster/binding"
+	bm "github.com/bilibili/kratos/pkg/net/http/blademaster"
+	"github.com/bilibili/kratos/pkg/net/http/blademaster/binding"
 )
 
 // to suppressed 'imported but not used warning'

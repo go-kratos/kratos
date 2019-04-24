@@ -1,7 +1,7 @@
 package service
 
 import (
-	pb "kratos/tool/bmproto/examples/api"
+	pb "github.com/bilibili/kratos/tool/bmproto/examples/api"
 	"context"
 )
 

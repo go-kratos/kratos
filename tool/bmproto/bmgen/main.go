@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"kratos/tool/bmproto/pkg/project"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/project"
 
 	"github.com/BurntSushi/toml"
 	"github.com/pkg/errors"
@@ -316,7 +316,7 @@ func actionUpdate(ctx *cli.Context) (err error) {
 	if !fileExist(goCommonPath) {
 		return cli.NewExitError("go-common not exist : "+goCommonPath, 1)
 	}
-	cmd := fmt.Sprintf(`go install "kratos/tool/bmproto/..."`)
+	cmd := fmt.Sprintf(`go install "github.com/bilibili/kratos/tool/bmproto/..."`)
 	if err = runCmd(cmd); err != nil {
 		err = cli.NewExitError(err.Error(), 1)
 		return

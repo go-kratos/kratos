@@ -7,7 +7,7 @@ func TestGetGoImportPathForPb(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err is not nil %v", err)
 	} else {
-		if p != "kratos/tool/bmproto/pkg/naming" {
+		if p != "github.com/bilibili/kratos/tool/bmproto/pkg/naming" {
 			t.Fatalf("path is not correct" + p)
 		}
 	}

@@ -4,7 +4,7 @@ import (
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	"github.com/pkg/errors"
 	"github.com/siddontang/go/ioutil2"
-	"kratos/tool/bmproto/pkg/stringutils"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/stringutils"
 	"os"
 	"path/filepath"
 	"strings"

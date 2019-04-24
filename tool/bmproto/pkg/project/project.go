@@ -3,7 +3,7 @@ package project
 import (
 	"github.com/pkg/errors"
 	"github.com/siddontang/go/ioutil2"
-	"kratos/tool/bmproto/pkg/utils"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/utils"
 	"os"
 	"path/filepath"
 	"strings"

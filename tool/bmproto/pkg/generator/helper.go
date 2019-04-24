@@ -1,12 +1,12 @@
 package generator
 
 import (
-	"kratos/tool/bmproto/pkg/tag"
-	"kratos/tool/bmproto/pkg/typemap"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/tag"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/typemap"
 	"reflect"
 	"strings"
 
-	"kratos/tool/bmproto/pkg/extensions/gogoproto"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/extensions/gogoproto"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
