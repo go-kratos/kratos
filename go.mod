@@ -16,7 +16,6 @@ require (
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gogo/protobuf v1.2.0
 	github.com/golang/protobuf v1.2.0
-	github.com/kr/pty v1.1.4
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/montanaflynn/stats v0.5.0
 	github.com/pkg/errors v0.8.1
