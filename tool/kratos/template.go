@@ -417,6 +417,10 @@ message HelloReq {
 type Kratos struct {
 	Hello string
 }`
+	_tplGoMod = `module {{.Name}}
+
+require github.com/bilibili/kratos v0.0.0-20190424150529-72123ada7dc1
+`
 	_tplGRPCServer = `package grpc
 
 import (

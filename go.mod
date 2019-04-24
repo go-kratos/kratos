@@ -30,6 +30,7 @@ require (
 	github.com/urfave/cli v1.20.0
 	golang.org/x/net v0.0.0-20190311183353-d8887717615a
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
+	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
 	google.golang.org/grpc v1.18.0
 	gopkg.in/AlecAivazis/survey.v1 v1.8.2
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect

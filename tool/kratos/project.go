@@ -38,6 +38,7 @@ const (
 	_tplTypeModel
 	_tplTypeGRPCServer
 	_tplTypeAPIGenerate
+	_tplTypeGomod
 )
 
 var (
@@ -49,6 +50,7 @@ var (
 		_tplTypeContributors: "/CONTRIBUTORS.md",
 		_tplTypeReadme:       "/README.md",
 		// init project
+		_tplTypeGomod:      "/go.mod",
 		_tplTypeMain:       "/cmd/main.go",
 		_tplTypeDao:        "/internal/dao/dao.go",
 		_tplTypeHTTPServer: "/internal/server/http/http.go",
@@ -78,6 +80,7 @@ var (
 		_tplTypeAppToml:      _tplAppToml,
 		_tplTypeHTTPToml:     _tplHTTPToml,
 		_tplTypeModel:        _tplModel,
+		_tplTypeGomod:        _tplGoMod,
 	}
 )
 
