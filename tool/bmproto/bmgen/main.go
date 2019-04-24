@@ -38,7 +38,6 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "bmgen"
 	app.Usage = "根据proto文件生成bm框架或者grpc代码: \n" +
-		"文档： https://info.bilibili.co/pages/viewpage.action?pageId=13346884\n" +
 		"用法1，在项目的任何一个位置运行bmgen，会自动找到proto文件（项目包含cmd和api目录）\n"
 	app.Version = "1.0.0"
 	app.Commands = []cli.Command{
@@ -262,7 +261,7 @@ func generateForFile(f string, goPath string) (err error) {
 			// ends with .pb
 
 			errorf("\n======！！！！WARNING！！！！========\n" +
-				".pb文件生成代码的功能已经不再维护，请尽快迁移到.proto, 详情：\nhttp://info.bilibili.co/pages/viewpage.action?pageId=11864735#proto文件格式-.pb迁移到.proto\n" +
+				".pb文件生成代码的功能已经不再维护，请尽快迁移到.proto\n" +
 				"======！！！！WARNING！！！！========")
 			e := runCmd("which protoc-gen-gogofasterg")
 			if e != nil {
