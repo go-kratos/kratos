@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"kratos/tool/bmproto/pkg/project"
 	"io/ioutil"
 	"log"
 	"os"
@@ -12,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"kratos/tool/bmproto/pkg/project"
 
 	"github.com/BurntSushi/toml"
 	"github.com/pkg/errors"
