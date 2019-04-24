@@ -1,4 +1,4 @@
-# go-common/sync/pipeline/fanout
+# pkg/sync/pipeline/fanout
 
 以前的library/cache包改为pipeline/fanout
 

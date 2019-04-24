@@ -6,10 +6,10 @@ import (
 	"runtime"
 	"sync"
 
-	"go-common/library/log"
-	"go-common/library/net/metadata"
-	"go-common/library/net/trace"
-	"go-common/library/stat/prom"
+	"github.com/bilibili/kratos/pkg/log"
+	"github.com/bilibili/kratos/pkg/net/metadata"
+	"github.com/bilibili/kratos/pkg/net/trace"
+	"github.com/bilibili/kratos/pkg/stat/prom"
 )
 
 var (
