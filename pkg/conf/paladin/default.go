@@ -24,6 +24,7 @@ func Init() (err error) {
 		DefaultClient, err = NewFile(confPath)
 	} else {
 		// TODO: config service
+		panic("Please specify a file or dir name by -conf flag.")
 		return
 	}
 	if err != nil {
