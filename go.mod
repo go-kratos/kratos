@@ -29,7 +29,7 @@ require (
 	github.com/urfave/cli v1.20.0
 	golang.org/x/net v0.0.0-20190311183353-d8887717615a
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
-	google.golang.org/grpc v1.18.0
+	google.golang.org/grpc v1.20.1
 	gopkg.in/AlecAivazis/survey.v1 v1.8.2
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.26.0
@@ -48,5 +48,5 @@ replace (
 	golang.org/x/tools => github.com/golang/tools v0.0.0-20190328211700-ab21143f2384
 	google.golang.org/appengine => github.com/golang/appengine v1.1.0
 	google.golang.org/genproto => github.com/google/go-genproto v0.0.0-20180817151627-c66870c02cf8
-	google.golang.org/grpc => github.com/grpc/grpc-go v1.18.0
+	google.golang.org/grpc => github.com/grpc/grpc-go v1.20.1
 )
