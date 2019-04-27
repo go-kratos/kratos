@@ -17,7 +17,7 @@ Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，
 
     基于[gin](https://github.com/gin-gonic/gin)二次开发，具有快速、灵活的特点，可以方便的开发中间件处理通用或特殊逻辑，基础库默认实现了log&trace等。
     
-- [gRPC框架: Warden](doc/wiki-cn/warden.md)
+- [gRPC框架: Warden(wd)](doc/wiki-cn/warden.md)
 
     基于官方gRPC封装，默认使用[discovery](https://github.com/bilibili/discovery)进行服务注册发现，及wrr和p2c(默认)负载均衡。
     
