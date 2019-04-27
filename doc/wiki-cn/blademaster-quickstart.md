@@ -1,6 +1,6 @@
 # 准备工作
 
-推荐使用[kratos tool](kratos-tool.md)快速生成项目，如我们生成一个叫`kratos-demo`的项目。
+推荐使用[kratos工具](kratos-tool.md)快速生成项目，如我们生成一个叫`kratos-demo`的项目。
 
 生成目录结构如下：
 ```

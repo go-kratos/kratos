@@ -1,23 +1,29 @@
 # 准备工作
 
-推荐使用[kratos tool](kratos-tool.md)快速生成项目，如我们生成一个叫`kratos-demo`的项目。
-
-[快速开始](quickstart.md)
+推荐使用[kratos工具](kratos-tool.md)快速生成带`--grpc`的项目，如我们生成一个叫`kratos-demo`的项目。
 
 # pb文件
 
 创建项目成功后，进入`api`目录下可以看到`api.proto`和`api.pb.go`和`generate.go`文件，其中：
+
 * `api.proto`是gRPC server的描述文件
 * `api.pb.go`是基于`api.proto`生成的代码文件
-* `generate.go`是用于`kratos tool`执行`go generate`进行代码生成的临时文件
+* `generate.go`是用于`kratos tool kprotoc`执行`go generate`进行代码生成的临时文件
 
 接下来可以将以上三个文件全部删除或者保留`generate.go`，之后编写自己的proto文件，确认proto无误后，进行代码生成：
+
 * 可直接执行`kratos tool kprotoc`，该命令会调用protoc工具生成`.pb.go`文件
 * 如`generate.go`没删除，也可以执行`go generate`命令，将调用`kratos tool kprotoc`工具进行代码生成
 
+[kprotoc说明请看](kratos-tool.md)
+
+### 如没看kprotoc文档，请看下面这段话
+
+`kratos tool kprotoc`用于快速生成`pb.go`文件，但目前不支持windows，Linux也需要先自己安装`protoc`工具，具体请看[protoc说明](protoc.md)。
+
 # 注册server
 
-进入`internal/server/grpc`目录，打开`server.go`文件，可以看到以下代码，只需要替换以下注释内容就可以启动一个gRPC服务。
+进入`internal/server/grpc`目录打开`server.go`文件，可以看到以下代码，只需要替换以下注释内容就可以启动一个gRPC服务。
 
 ```go
 package grpc
@@ -68,7 +74,7 @@ func (s *Service) SayHello(ctx context.Context, req *pb.HelloReq) (reply *empty.
 * 第一个返回值必须是proto内定义的`message`对应生成的结构体，第二个参数必须是`error`
 * 在http框架bm中，如果共用proto文件生成bm代码，那么也可以直接使用该service方法
 
-建议service严格按照此格式声明方法，使其能够在bm和warden内共用
+建议service严格按照此格式声明方法使其能够在bm和warden内共用。
 
 # client调用
 

@@ -24,4 +24,4 @@
 * [cache](cache.md)
   * [memcache](cache-mc.md)
   * [redis](cache-redis.md)
-* [kratos tool](kratos-tool.md)
+* [kratos工具](kratos-tool.md)
