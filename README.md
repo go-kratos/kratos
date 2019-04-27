@@ -1,6 +1,10 @@
 # Kratos
 
+[![GoDoc Widget]][GoDoc]
+
 <img src="https://github.com/bilibili/kratos/raw/master/doc/img/kratos-log.jpg" width="200">
+
+----
 
 Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，包含大量微服务相关框架及工具。
 
