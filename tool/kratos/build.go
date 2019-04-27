@@ -40,8 +40,8 @@ func buildDir(base string, cmd string, n int) string {
 			return path.Join(base, cmd)
 		}
 	}
-	if n--; n <= 0 {
+	if n <= 1 {
 		return base
 	}
-	return buildDir(filepath.Dir(base), cmd, n)
+	return buildDir(filepath.Dir(base), cmd, n-1)
 }
