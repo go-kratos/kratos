@@ -117,6 +117,7 @@ func create() (err error) {
 		}
 		if runtime.GOOS != "darwin" {
 			fmt.Println("您的操作系统不是macos，kprotoc工具无法正常运行，请参看kratos tool文档！")
+			fmt.Println("地址：", toolDoc)
 		}
 	}
 	return
