@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
+	"runtime"
 	"strings"
 	"text/template"
 )
@@ -84,22 +84,6 @@ var (
 	}
 )
 
-func validate() (ok bool) {
-	if p.Name == "" {
-		fmt.Println("[-n] Invalid project name.")
-		return
-	}
-	if p.Path == "" {
-		if p.Here {
-			pwd, _ := os.Getwd()
-			p.Path = path.Join(pwd, p.Name)
-		} else {
-			p.Path = path.Join(goPath(), "src", p.Name)
-		}
-	}
-	return true
-}
-
 func create() (err error) {
 	if p.WithGRPC {
 		files[_tplTypeGRPCServer] = "/internal/server/grpc/server.go"
@@ -130,6 +114,9 @@ func create() (err error) {
 	if p.WithGRPC {
 		if err = genpb(); err != nil {
 			return
+		}
+		if runtime.GOOS != "darwin" {
+			fmt.Println("您的操作系统不是macos，kprotoc工具无法正常运行，请参看kratos tool文档！")
 		}
 	}
 	return

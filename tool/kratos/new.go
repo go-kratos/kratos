@@ -11,7 +11,7 @@ import (
 
 func runNew(ctx *cli.Context) error {
 	if len(ctx.Args()) == 0 {
-		return errors.New("Required project name")
+		return errors.New("required project name")
 	}
 	p.Name = ctx.Args()[0]
 	if p.Path != "" {

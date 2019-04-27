@@ -10,21 +10,9 @@ import (
 func main() {
 	app := cli.NewApp()
 	app.Name = "kratos"
-	app.Usage = "kratos tool"
+	app.Usage = "kratos工具集"
 	app.Version = Version
 	app.Commands = []cli.Command{
-		{
-			Name:    "build",
-			Aliases: []string{"b"},
-			Usage:   "kratos build",
-			Action:  buildAction,
-		},
-		{
-			Name:    "run",
-			Aliases: []string{"r"},
-			Usage:   "kratos run",
-			Action:  runAction,
-		},
 		{
 			Name:    "new",
 			Aliases: []string{"n"},
@@ -50,6 +38,19 @@ func main() {
 			},
 			Action: runNew,
 		},
+		{
+			Name:    "build",
+			Aliases: []string{"b"},
+			Usage:   "kratos build",
+			Action:  buildAction,
+		},
+		{
+			Name:    "run",
+			Aliases: []string{"r"},
+			Usage:   "kratos run",
+			Action:  runAction,
+		},
+
 		{
 			Name:    "tool",
 			Aliases: []string{"t"},
