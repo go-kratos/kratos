@@ -28,12 +28,13 @@ Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，
 
 我们致力于提供完整的微服务研发体验，整合相关框架及工具后，微服务治理相关部分可对整体业务开发周期无感，从而更加聚焦于业务交付。对每位开发者而言，整套Kratos框架也是不错的学习仓库，可以了解和参考到[bilibili](https://www.bilibili.com)在微服务方面的技术积累和经验。
 
-***名字来源于:《[战神](https://baike.baidu.com/item/%E6%88%98%E7%A5%9E/5896427)》游戏以希腊神话为背景，讲述由凡人成为战神的奎托斯（Kratos）成为战神并展开弑神屠杀的冒险历程。***
+*名字来源于:《[战神](https://baike.baidu.com/item/%E6%88%98%E7%A5%9E/5896427)》游戏以希腊神话为背景，讲述由凡人成为战神的奎托斯（Kratos）成为战神并展开弑神屠杀的冒险历程。*
 
 ## Quick start
 
 ```shell
 go get -u github.com/bilibili/kratos/tool/kratos
+cd $GOPATH/src
 kratos new kratos-demo
 ```
 
@@ -47,7 +48,7 @@ go build
 
 打开浏览器访问：[http://localhost:8000/kratos-demo/start](http://localhost:8000/kratos-demo/start)，你会看到输出了`Golang 大法好 ！！！`
 
-[快速开始](doc/wiki-cn/quickstart.md)
+[快速开始](doc/wiki-cn/quickstart.md)  [kratos工具](doc/wiki-cn/kratos-tool.md)
 
 ## Documentation
 
