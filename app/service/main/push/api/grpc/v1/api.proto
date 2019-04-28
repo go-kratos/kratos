@@ -1,0 +1,125 @@
+syntax = "proto3";
+
+package push.service.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Push {
+    rpc AddReport (AddReportRequest) returns (AddReportReply) {}
+    rpc DelReport (DelReportRequest) returns (DelReportReply) {}
+    rpc DelInvalidReports (DelInvalidReportsRequest) returns (DelInvalidReportsReply) {}
+    rpc AddReportCache (AddReportCacheRequest) returns (AddReportCacheReply) {}
+    rpc AddUserReportCache (AddUserReportCacheRequest) returns (AddUserReportCacheReply) {}
+    rpc AddTokenCache (AddTokenCacheRequest) returns (AddTokenCacheReply) {}
+    rpc AddTokensCache (AddTokensCacheRequest) returns (AddTokensCacheReply) {}
+    rpc AddCallback (AddCallbackRequest) returns (AddCallbackReply) {}
+    rpc AddMidProgress (AddMidProgressRequest) returns (AddMidProgressReply) {}
+    rpc Setting (SettingRequest) returns (SettingReply) {}
+    rpc SetSetting (SetSettingRequest) returns (SetSettingReply) {}
+}
+
+message ModelReport {
+    int64 id = 1 [(gogoproto.customname) = "ID"];
+    int32 app_id = 2 [(gogoproto.customname) = "APPID"];
+    int32 platform_id = 3 [(gogoproto.customname) = "PlatformID"];
+    int64 mid = 4;
+    string buvid = 5;
+    string device_token = 6;
+    int32 build = 7;
+    int32 time_zone = 8;
+    int32 notify_switch = 9;
+    string device_brand = 10;
+    string device_model = 11;
+    string os_version = 12 [(gogoproto.customname) = "OSVersion"];
+    string extra = 13;
+}
+
+message AddReportRequest {
+    ModelReport report = 1;
+}
+
+message AddReportReply {}
+
+message DelReportRequest {
+    int32 app_id = 1 [(gogoproto.customname) = "APPID"];
+    int64 mid = 2;
+    string device_token = 3;
+}
+
+message DelReportReply {}
+
+message DelInvalidReportsRequest {
+    int32 type = 1;
+}
+
+message DelInvalidReportsReply {}
+
+message AddReportCacheRequest {
+    ModelReport report = 1;
+}
+
+message AddReportCacheReply {}
+
+message AddUserReportCacheRequest {
+    int64 mid = 1;
+    repeated ModelReport reports = 2;
+}
+
+message AddUserReportCacheReply {}
+
+message AddTokenCacheRequest {
+    ModelReport report = 1;
+}
+
+message AddTokenCacheReply {}
+
+message AddTokensCacheRequest {
+    repeated ModelReport reports = 2;
+}
+
+message AddTokensCacheReply {}
+
+message AddCallbackRequest {
+    string task = 1;
+    int64 app = 2 [(gogoproto.customname) = "APP"];
+    int32 platform = 3;
+    int64 mid = 4;
+    int32 pid = 5;
+    string token = 6;
+    string buvid = 7;
+    int32 click = 8;
+    CallbackExtra extra = 9;
+}
+
+message AddCallbackReply {}
+
+message CallbackExtra {
+    int32 status = 1 [(gogoproto.moretags) = 'json:"st'];
+    int32 channel = 2 [(gogoproto.moretags) = 'json:"chan"'];
+}
+
+message AddMidProgressRequest {
+    string task = 1;
+    int64 mid_total = 2;
+    int64 mid_valid = 3;
+}
+
+message AddMidProgressReply {}
+
+message SettingRequest {
+    int64 mid = 1;
+}
+
+message SettingReply {
+    map<int32, int32> settings = 1;
+}
+
+message SetSettingRequest {
+    int64 mid = 1;
+    int32 type = 2;
+    int32 value = 3;
+}
+
+message SetSettingReply {}

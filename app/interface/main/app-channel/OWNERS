@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liweijia
+- luoxiaofan
+- peiyifei
+- sunyu
+labels:
+- interface
+- interface/main/app-channel
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- luoxiaofan
+- peiyifei
+- sunyu

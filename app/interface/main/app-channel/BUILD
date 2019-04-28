@@ -1,0 +1,38 @@
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//app/interface/main/app-channel/cmd:all-srcs",
+        "//app/interface/main/app-channel/conf:all-srcs",
+        "//app/interface/main/app-channel/dao/account:all-srcs",
+        "//app/interface/main/app-channel/dao/activity:all-srcs",
+        "//app/interface/main/app-channel/dao/archive:all-srcs",
+        "//app/interface/main/app-channel/dao/article:all-srcs",
+        "//app/interface/main/app-channel/dao/audio:all-srcs",
+        "//app/interface/main/app-channel/dao/audit:all-srcs",
+        "//app/interface/main/app-channel/dao/bangumi:all-srcs",
+        "//app/interface/main/app-channel/dao/card:all-srcs",
+        "//app/interface/main/app-channel/dao/converge:all-srcs",
+        "//app/interface/main/app-channel/dao/game:all-srcs",
+        "//app/interface/main/app-channel/dao/live:all-srcs",
+        "//app/interface/main/app-channel/dao/location:all-srcs",
+        "//app/interface/main/app-channel/dao/region:all-srcs",
+        "//app/interface/main/app-channel/dao/relation:all-srcs",
+        "//app/interface/main/app-channel/dao/shopping:all-srcs",
+        "//app/interface/main/app-channel/dao/special:all-srcs",
+        "//app/interface/main/app-channel/dao/tab:all-srcs",
+        "//app/interface/main/app-channel/dao/tag:all-srcs",
+        "//app/interface/main/app-channel/http:all-srcs",
+        "//app/interface/main/app-channel/model:all-srcs",
+        "//app/interface/main/app-channel/service/channel:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

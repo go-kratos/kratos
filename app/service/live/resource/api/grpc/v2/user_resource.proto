@@ -1,0 +1,184 @@
+syntax = "proto3";
+package live.resource.v2;
+option go_package = "v2";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// 请求创建资源
+message AddReq {
+    //资源类型
+    int32 res_type = 1 [(gogoproto.moretags) = 'form:"res_type" validate:"required"'];
+    //名称
+    string title = 2 [(gogoproto.moretags) = 'form:"title" validate:"required"'];
+    //URL
+    string url = 3 [(gogoproto.moretags) = 'form:"url" validate:"required"'];
+    //权重
+    int32 weight = 4 [(gogoproto.moretags) = 'form:"weight" validate:"required"'];
+    //创建人
+    string creator = 5 [(gogoproto.moretags) = 'form:"creator" validate:"required"'];
+}
+
+// 返回创建结果
+message AddResp {
+    //ID
+    int32 id = 1 [(gogoproto.jsontag) = "id"];
+    //资源类型
+    int32 res_type = 2 [(gogoproto.jsontag) = "res_type"];
+    //资源ID
+    int32 custom_id = 3 [(gogoproto.jsontag) = "custom_id"];
+    //名称
+    string title = 4 [(gogoproto.jsontag) = "title"];
+    //URL
+    string url = 5 [(gogoproto.jsontag) = "url"];
+    //权重
+    int32 weight = 6 [(gogoproto.jsontag) = "weight"];
+    //创建人
+    string creator = 7 [(gogoproto.jsontag) = "creator"];
+    //"状态1.上线中2.下线"
+    int32 status = 8 [(gogoproto.jsontag) = "status"];
+    //创建时刻
+    string ctime = 9 [(gogoproto.jsontag) = "ctime"];
+    //修改时刻
+    string mtime = 10 [(gogoproto.jsontag) = "mtime"];
+}
+
+// 请求编辑资源
+message EditReq {
+    //资源类型
+    int32 res_type = 1 [(gogoproto.moretags) = 'form:"res_type" validate:"required"'];
+    //资源ID
+    int32 custom_id = 2 [(gogoproto.moretags) = 'form:"custom_id" validate:"required"'];
+    //名称
+    string title = 3 [(gogoproto.moretags) = 'form:"title"'];
+    //URL
+    string url = 4 [(gogoproto.moretags) = 'form:"url"'];
+    //权重
+    int32 weight = 5 [(gogoproto.moretags) = 'form:"weight"'];
+}
+
+// 返回编辑结果
+message EditResp {
+    //ID
+    int32 id = 1 [(gogoproto.jsontag) = "id"];
+    //资源类型
+    int32 res_type = 2 [(gogoproto.jsontag) = "res_type"];
+    //资源ID
+    int32 custom_id = 3 [(gogoproto.jsontag) = "custom_id"];
+    //名称
+    string title = 4 [(gogoproto.jsontag) = "title"];
+    //URL
+    string url = 5 [(gogoproto.jsontag) = "url"];
+    //权重
+    int32 weight = 6 [(gogoproto.jsontag) = "weight"];
+    //创建人
+    string creator = 7 [(gogoproto.jsontag) = "creator"];
+    //"状态1.上线中2.下线"
+    int32 status = 8 [(gogoproto.jsontag) = "status"];
+    //创建时刻
+    string ctime = 9 [(gogoproto.jsontag) = "ctime"];
+    //修改时刻
+    string mtime = 10 [(gogoproto.jsontag) = "mtime"];
+}
+
+// 请求单个资源
+message QueryReq {
+    //资源类型
+    int32 res_type = 1 [(gogoproto.moretags) = 'form:"res_type" validate:"required"'];
+    //资源ID
+    int32 custom_id = 2 [(gogoproto.moretags) = 'form:"custom_id" validate:"required"'];
+}
+
+// 返回单个资源
+message QueryResp {
+    //ID
+    int32 id = 1 [(gogoproto.jsontag) = "id"];
+    //资源类型
+    int32 res_type = 2 [(gogoproto.jsontag) = "res_type"];
+    //资源ID
+    int32 custom_id = 3 [(gogoproto.jsontag) = "custom_id"];
+    //名称
+    string title = 4 [(gogoproto.jsontag) = "title"];
+    //URL
+    string url = 5 [(gogoproto.jsontag) = "url"];
+    //权重
+    int32 weight = 6 [(gogoproto.jsontag) = "weight"];
+    //创建人
+    string creator = 7 [(gogoproto.jsontag) = "creator"];
+    //"状态1.上线中2.下线"
+    int32 status = 8 [(gogoproto.jsontag) = "status"];
+    //创建时刻
+    string ctime = 9 [(gogoproto.jsontag) = "ctime"];
+    //修改时刻
+    string mtime = 10 [(gogoproto.jsontag) = "mtime"];
+}
+
+// 请求资源列表
+message ListReq {
+    //资源类型
+    int32 res_type = 1 [(gogoproto.moretags) = 'form:"res_type" validate:"required"'];
+    //页码
+    int32 page = 2 [(gogoproto.moretags) = 'form:"page"'];
+    //每页数据量
+    int32 page_size = 3 [(gogoproto.moretags) = 'form:"page_size"'];
+}
+
+// 返回资源列表
+message ListResp {
+    int32 currentPage = 1 [(gogoproto.jsontag) = "currentPage"];
+    int32 totalCount = 2 [(gogoproto.jsontag) = "totalCount"];
+    repeated List list = 3 [(gogoproto.jsontag) = "list"];
+    message List  {
+        //ID
+        int32 id = 1 [(gogoproto.jsontag) = "id"];
+        //资源类型
+        int32 res_type = 2 [(gogoproto.jsontag) = "res_type"];
+        //资源ID
+        int32 custom_id = 3 [(gogoproto.jsontag) = "custom_id"];
+        //名称
+        string title = 4 [(gogoproto.jsontag) = "title"];
+        //URL
+        string url = 5 [(gogoproto.jsontag) = "url"];
+        //权重
+        int32 weight = 6 [(gogoproto.jsontag) = "weight"];
+        //创建人
+        string creator = 7 [(gogoproto.jsontag) = "creator"];
+        //"状态1.上线中2.下线"
+        int32 status = 8 [(gogoproto.jsontag) = "status"];
+        //创建时刻
+        string ctime = 9 [(gogoproto.jsontag) = "ctime"];
+        //修改时刻
+        string mtime = 10 [(gogoproto.jsontag) = "mtime"];
+    }
+}
+
+// 请求变更资源状态
+message SetStatusReq {
+    //资源类型
+    int32 res_type = 1 [(gogoproto.moretags) = 'form:"res_type" validate:"required"'];
+    //页码
+    int32 custom_id = 2 [(gogoproto.moretags) = 'form:"custom_id" validate:"required"'];
+    //每页数据量
+    int32 status = 3 [(gogoproto.moretags) = 'form:"status" validate:"required"'];
+}
+
+// 返回变更结果
+message SetStatusResp {
+}
+
+service UserResource {
+    //Add 添加资源接口
+    rpc Add(AddReq) returns (AddResp);
+
+    //Edit 编辑现有资源
+    rpc Edit(EditReq) returns (EditResp);
+
+    //Query 请求单个资源
+    rpc Query(QueryReq) returns (QueryResp);
+
+    //List 获取资源列表
+    rpc List(ListReq) returns (ListResp);
+
+    //SetStatus 更改资源状态
+    rpc SetStatus(SetStatusReq) returns (SetStatusResp);
+}
+

@@ -1,0 +1,12 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- gaopeng
+labels:
+- admin
+- admin/main/growup
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- gaopeng

@@ -1,0 +1,44 @@
+load(
+    "@io_bazel_rules_go//proto:def.bzl",
+    "go_proto_library",
+)
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [],
+    embed = [":app_identity_go_proto"],
+    importmap = "go-common/vendor/google.golang.org/appengine/internal/app_identity",
+    importpath = "google.golang.org/appengine/internal/app_identity",
+    tags = ["automanaged"],
+    visibility = ["//vendor/google.golang.org/appengine:__subpackages__"],
+    deps = ["@com_github_golang_protobuf//proto:go_default_library"],
+)
+
+proto_library(
+    name = "app_identity_proto",
+    srcs = ["app_identity_service.proto"],
+    tags = ["automanaged"],
+)
+
+go_proto_library(
+    name = "app_identity_go_proto",
+    compilers = ["@io_bazel_rules_go//proto:go_grpc"],
+    importpath = "go-common/vendor/google.golang.org/appengine/internal/app_identity",
+    proto = ":app_identity_proto",
+    tags = ["automanaged"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

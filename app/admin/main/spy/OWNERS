@@ -1,0 +1,15 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- baihai
+- zhaogangtao
+labels:
+- admin
+- admin/main/spy
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- baihai
+- linmiao
+- zhaogangtao

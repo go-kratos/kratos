@@ -1,0 +1,27 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["rg_mock.go"],
+    importpath = "google.golang.org/grpc/examples/route_guide/mock_routeguide",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:go_default_library",
+        "//examples/route_guide/routeguide:go_default_library",
+        "//metadata:go_default_library",
+        "@com_github_golang_mock//gomock:go_default_library",
+        "@org_golang_x_net//context:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["rg_mock_test.go"],
+    embed = [":go_default_library"],
+    deps = [
+        "//examples/route_guide/routeguide:go_default_library",
+        "@com_github_golang_mock//gomock:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
+        "@org_golang_x_net//context:go_default_library",
+    ],
+)

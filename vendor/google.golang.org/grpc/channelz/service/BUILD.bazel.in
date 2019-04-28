@@ -1,0 +1,30 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["service.go"],
+    importpath = "google.golang.org/grpc/channelz/service",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:go_default_library",
+        "//channelz/grpc_channelz_v1:go_default_library",
+        "//connectivity:go_default_library",
+        "//internal/channelz:go_default_library",
+        "@com_github_golang_protobuf//ptypes:go_default_library",
+        "@io_bazel_rules_go//proto/wkt:wrappers_go_proto",
+        "@org_golang_x_net//context:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["service_test.go"],
+    embed = [":go_default_library"],
+    deps = [
+        "//channelz/grpc_channelz_v1:go_default_library",
+        "//connectivity:go_default_library",
+        "//internal/channelz:go_default_library",
+        "@com_github_golang_protobuf//ptypes:go_default_library",
+        "@org_golang_x_net//context:go_default_library",
+    ],
+)

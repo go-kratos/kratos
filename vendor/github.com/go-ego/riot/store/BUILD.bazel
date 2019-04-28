@@ -1,0 +1,33 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "badger_store.go",
+        "bolt_store.go",
+        "ldb_store.go",
+        "store.go",
+    ],
+    importmap = "go-common/vendor/github.com/go-ego/riot/store",
+    importpath = "github.com/go-ego/riot/store",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/coreos/bbolt:go_default_library",
+        "//vendor/github.com/dgraph-io/badger:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

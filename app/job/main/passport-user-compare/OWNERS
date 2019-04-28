@@ -1,0 +1,18 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chenjunxi
+- wanghuan01
+- wutao
+- zhaoyiquan
+- zhoujiahui
+labels:
+- job
+- job/main/passport-user-compare
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- chenjunxi
+- wutao
+- zhaoyiquan

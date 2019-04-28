@@ -1,0 +1,149 @@
+syntax = "proto3";
+package live.xgift.v1;
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Gift{
+    rpc room_gift_list(RoomGiftListReq) returns (RoomGiftListResp);
+    rpc gift_config(GiftConfigReq) returns (GiftConfigResp);
+    rpc discount_gift_list(DiscountGiftListReq) returns (DiscountGiftListResp);
+    rpc daily_bag(DailyBagReq) returns (DailyBagResp);
+}
+
+message RoomGiftListReq{
+    int64 room_id = 1;
+    int64 area_v2_parent_id = 2;
+    int64 area_v2_id = 3;
+    string platform = 4;
+    int64 build = 5;
+    string mobi_app = 6;
+}
+
+message RoomGiftListResp{
+    repeated List list = 1 [(gogoproto.jsontag)="list"];
+
+    message List{
+        int64 id = 1 [(gogoproto.jsontag)="id"];
+        int64 position = 2 [(gogoproto.jsontag)="position"];
+        int64 plan_id = 3 [(gogoproto.jsontag)="plan_id"];
+    }
+    repeated List silver_list = 2 [(gogoproto.jsontag)="silver_list"];
+
+    int64 show_count_map = 3 [(gogoproto.jsontag)="show_count_map"];
+
+    repeated OldList old_list = 4 [(gogoproto.jsontag)="old_list"];
+
+    message OldList{
+        int64 id = 1 [(gogoproto.jsontag)="id"];
+        string name = 2 [(gogoproto.jsontag)="name"];
+        int64 price = 3 [(gogoproto.jsontag)="price"];
+        int64 type = 4 [(gogoproto.jsontag)="type"];
+        map<string, string> coin_type=5 [(gogoproto.jsontag)="coin_type"];
+        string img = 6 [(gogoproto.jsontag)="img"];
+        string gift_url = 7 [(gogoproto.jsontag)="gift_url"];
+        string count_set = 8 [(gogoproto.jsontag)="count_set"];
+        int64 combo_num = 9 [(gogoproto.jsontag)="combo_num"];
+        int64 super_num = 10 [(gogoproto.jsontag)="super_num"];
+        map<int64, string> count_map = 11 [(gogoproto.jsontag)="count_map"];
+    }
+}
+
+message GiftConfigReq{
+    string platform = 1;
+    int64 build = 2;
+}
+
+message GiftConfigResp{
+    repeated Config data = 1 [(gogoproto.jsontag)="data"];
+    message Config{
+        int64 id = 1 [(gogoproto.jsontag)="id"];
+        string name = 2 [(gogoproto.jsontag)="name"];
+        int64 price = 3 [(gogoproto.jsontag)="price"];
+        int64 type = 4 [(gogoproto.jsontag)="type"];
+        string coin_type = 5 [(gogoproto.jsontag)="coin_type"];
+        int64 bag_gift = 6 [(gogoproto.jsontag)="bag_gift"];
+        int64 effect = 7 [(gogoproto.jsontag)="effect"];
+        string corner_mark = 8 [(gogoproto.jsontag)="corner_mark"];
+        int64 broadcast = 9 [(gogoproto.jsontag)="broadcast"];
+        int64 draw = 10 [(gogoproto.jsontag)="draw"];
+        int64 stay_time = 11 [(gogoproto.jsontag)="stay_time"];
+        int64 animation_frame_num = 12 [(gogoproto.jsontag)="animation_frame_num"];
+        string desc = 13 [(gogoproto.jsontag)="desc"];
+        string rule = 14 [(gogoproto.jsontag)="rule"];
+        string rights = 15 [(gogoproto.jsontag)="rights"];
+        int64 privilege_required = 16 [(gogoproto.jsontag)="privilege_required"];
+        repeated CountMap count_map = 17 [(gogoproto.jsontag)="count_map"];
+        string img_basic = 18 [(gogoproto.jsontag)="img_basic"];
+        string img_dynamic = 19 [(gogoproto.jsontag)="img_dynamic"];
+        string frame_animation = 20 [(gogoproto.jsontag)="frame_animation"];
+        string gif = 21 [(gogoproto.jsontag)="gif"];
+        string webp = 22 [(gogoproto.jsontag)="webp"];
+        string full_sc_web = 23 [(gogoproto.jsontag)="full_sc_web"];
+        string full_sc_horizontal = 24 [(gogoproto.jsontag)="full_sc_horizontal"];
+        string full_sc_vertical = 25 [(gogoproto.jsontag)="full_sc_vertical"];
+        string full_sc_horizontal_svga = 26 [(gogoproto.jsontag)="full_sc_horizontal_svga"];
+        string full_sc_vertical_svga = 27 [(gogoproto.jsontag)="full_sc_vertical_svga"];
+        string bullet_head = 28 [(gogoproto.jsontag)="bullet_head"];
+        string bullet_tail = 29 [(gogoproto.jsontag)="bullet_tail"];
+        int64 limit_interval = 30 [(gogoproto.jsontag)="limit_interval"];
+    }
+    message CountMap{
+        int64 num = 1 [(gogoproto.jsontag)="num"];
+        string text = 2 [(gogoproto.jsontag)="text"];
+    }
+}
+
+message DiscountGiftListReq{
+    int64 uid=1;
+    int64 roomid=2;
+    int64 area_v2_parent_id=3;
+    int64 area_v2_id=4;
+    string platform=5;
+    int64 ruid=6;
+}
+
+message DiscountGiftListResp{
+    repeated GiftInfo discount_list = 1;
+    message GiftInfo{
+        int64 gift_id=1 [(gogoproto.jsontag)="gift_id"];
+        int64 price=2 [(gogoproto.jsontag)="price"];
+        int64 discount_price=3 [(gogoproto.jsontag)="discount_price"];
+        string corner_mark=4 [(gogoproto.jsontag)="corner_mark"];
+        int64 corner_position=5 [(gogoproto.jsontag)="corner_position"];
+        string corner_color=6 [(gogoproto.jsontag)="corner_color"];
+    }
+}
+
+message DailyBagReq{
+    int64 uid = 1;
+}
+
+message DailyBagResp{
+    int64 bag_status=1 [(gogoproto.jsontag)="bag_status"];
+    int64 bag_expire_status=2 [(gogoproto.jsontag)="bag_expire_status"];
+    BagToast bag_toast = 3 [(gogoproto.jsontag)="bag_toast"];
+    message BagToast{
+        int64 toast_status=1 [(gogoproto.jsontag)="toast_status"];
+        string toast_message=2 [(gogoproto.jsontag)="toast_message"];
+    }
+    repeated BagList bag_list = 4 [(gogoproto.jsontag)="bag_list"];
+    message BagList{
+        int64 type=1 [(gogoproto.jsontag)="type"];
+        string bag_name=2 [(gogoproto.jsontag)="bag_name"];
+        Source source = 3 [(gogoproto.jsontag)="source"];
+        message Source{
+            int64 medal_id = 1 [(gogoproto.jsontag)="medal_id"];
+            string medal_name = 2 [(gogoproto.jsontag)="medal_name"];
+            int64 level = 3 [(gogoproto.jsontag)="level"];
+            int64 user_level = 4 [(gogoproto.jsontag)="user_level"];
+        }
+        repeated GiftList gift_list = 4 [(gogoproto.jsontag)="gift_list"];
+        message GiftList{
+            string gift_id=1 [(gogoproto.jsontag)="gift_id"];
+            int64 gift_num=2 [(gogoproto.jsontag)="gift_num"];
+            int64 expire_at=3 [(gogoproto.jsontag)="expire_at"];
+        }
+    }
+}

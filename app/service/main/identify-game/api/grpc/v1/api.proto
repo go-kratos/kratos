@@ -1,0 +1,43 @@
+syntax = "proto3";
+package main.service.identify.game.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// DelCacheReq request param for rpc DelCache
+message DelCacheReq {
+    string token = 1;
+}
+
+// DelCacheReply del cache reply
+message DelCacheReply {
+}
+
+//
+service IdentifyGame {
+    // CookieInfo identify info by cookie.
+    rpc DelCache (DelCacheReq) returns (DelCacheReply);
+    rpc GetCookieByToken(CreateCookieReq) returns (CreateCookieReply);
+}
+
+message CreateCookieReq {
+    string Token = 1 [(gogoproto.jsontag) = "token",(gogoproto.moretags) = "form:\"access_key\" validate:\"required\""];
+    string From = 2 [(gogoproto.jsontag) = "from",(gogoproto.moretags) = "form:\"from\""];
+}
+
+message CreateCookieReply {
+    CookieInfo BiliCookies = 1 [(gogoproto.jsontag) = "cookie_info"];
+    repeated string SSO = 2 [(gogoproto.jsontag) = "sso"];
+}
+
+message CookieInfo{
+    repeated Cookie Cookies = 1 [(gogoproto.jsontag) = "cookies"];
+    repeated string Domains = 2 [(gogoproto.jsontag) = "domains"];
+}
+
+message Cookie{
+    string Name = 1 [(gogoproto.jsontag) = "name"];
+    string Value = 2 [(gogoproto.jsontag) = "value"];
+    int64 HttpOnly = 3 [(gogoproto.jsontag) = "http_only"];
+    int64 Expires = 4 [(gogoproto.jsontag) = "expires"];
+}

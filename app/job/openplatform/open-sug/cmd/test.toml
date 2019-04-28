@@ -1,0 +1,177 @@
+env = "uat"
+sourcePath = "/Users/caocao/Code/go/src/go-common/app/job/openplatform/open-sug/source/"
+
+
+
+[redis]
+	name = "open-sug-job"
+	proto = "tcp"
+	addr = "172.16.33.203:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[mallMySQL]
+    addr = "172.22.34.101:3310"
+    dsn = "mall:FIb1lia9lK4UufUScJjrxvbkrEZtZD4l@tcp(172.22.34.101:3310)/open_mall?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "1000ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.mallDB.breaker]
+        window = "3s"
+        sleep = "1000ms"
+        bucket = 10
+        ratio = 0.5
+        request = 500
+
+[mallUgcMySQL]
+    addr = "172.22.34.101:3310"
+    dsn = "mallugc:FIb1lia9lK4UufUScJjrxvbkrEZtZD4l@tcp(172.22.34.101:3310)/open_mallugc?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "1000ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.ugcDB.breaker]
+        window = "3s"
+        sleep = "1000ms"
+        bucket = 10
+        ratio = 0.5
+        request = 500
+
+[ticketMySQL]
+     addr = "172.22.34.101:3310"
+        dsn = "ticket:i9HXWAvzWiqPxMxlfsQ8DRqYydjf3pYa@tcp(172.22.34.101:3310)/open_ticket?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 5
+    idle = 2
+    queryTimeout = "1000ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.ticketDB.breaker]
+        window = "3s"
+        sleep = "1000ms"
+        bucket = 10
+        ratio = 0.5
+        request = 500
+
+[pgcSub]
+    key = "39143bf7b888273e"
+    secret = "0766c43df93a9204d81c46caf2231ee1"
+    group = "Pgc-OpenTicket-S"
+    topic = "Pgc-T"
+    action = "sub"
+    offset = "old"
+    buffer = 1024
+    name = "open-sug-job/ticket"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[berserker]
+    appkey = "7a374e9a8fd3938ac682cc6cb07855e8"
+    secret = "ad994843be00732bd6e65f9f95887bac"
+    url = "http://berserker.bilibili.co/avenger/api/53/query"
+
+
+[elasticSearch]
+    addr = ["http://172.16.38.126:9201"]
+    check = "10s"
+    timeout = "1s"
+    [elasticSearch.season]
+            index = "sug_job_season"
+            type = "sug_job_season"
+            mapping = """
+            {
+                "settings": {
+                    "number_of_shards": 1,
+                    "number_of_replicas": 0,
+                    "analysis": {
+                        "analyzer": {
+                            "fulltext_analyzer": {
+                                "type": "custom",
+                                "tokenizer": "whitespace",
+                                "filter": [
+                                    "lowercase",
+                                    "type_as_payload"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "mappings": {
+                    "sug_job_season": {
+                        "_source": {
+                            "enabled": true
+                        },
+                        "properties": {
+                            "id": {
+                                "type": "long",
+                                "store": true
+                            },
+                            "title": {
+                                "type": "text",
+                                "term_vector": "with_positions_offsets_payloads",
+                                "store": true,
+                                "analyzer": "fulltext_analyzer"
+                            },
+                            "alias": {
+                                "type": "text",
+                                "term_vector": "with_positions_offsets_payloads",
+                                "store": true,
+                                "analyzer": "fulltext_analyzer"
+                            },
+                            "alias_search": {
+                                "type": "text",
+                                "term_vector": "with_positions_offsets_payloads",
+                                "store": true,
+                                "analyzer": "fulltext_analyzer"
+                            },
+                            "actors": {
+                                "type": "text",
+                                "term_vector": "with_positions_offsets_payloads",
+                                "store": true,
+                                "analyzer": "fulltext_analyzer"
+                            }
+                        }
+                    }
+                }
+            }
+            """
+
+
+
+
+[httpClient]
+    key = "654af11b5df0c9d3"
+    secret = "a7512b8b243b82f4bdb72cf2824b3f8e"
+    dial = "500ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[bfs]
+    timeout = "2s"
+    maxFileSize = 5242880
+    key = "c387398b08495933"
+    secret = "18295608cd3b8a5lbbe2b07a509705"
+    addr = "http://bfs.bilibili.co/bfs/openplatform/"
+    bucket = "openplatform"
+
+

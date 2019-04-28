@@ -1,0 +1,157 @@
+# This is a TOML document. Boom
+
+version = "1.0.0"
+
+[log]
+stdout = true
+dir = "/data/log/vip-admin"
+
+[memcache]
+    name = "vip"
+    proto = "tcp"
+    addr = "172.18.33.60:11234"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+
+[payConf]
+    baseURL = "http://pay.bilibili.co"
+	customerID = 10004
+	token ="0ff3d296ee0d7a28b4db1d761d2db907"
+	orderNotifyURL ="http://vip.bilibili.co/pay/payOrderNotify"
+	signNotifyURL ="http://vip.bilibili.co/pay/paySignNotify"
+	planID = 108217
+	productID ="vip_buy"
+	version ="1.0"
+	refundURL = "http://api.bilibili.co/x/internal/vip/notify/refund"
+
+[property]
+    MsgURI = "http://message.bilibili.com"
+    PayURI = "http://pay.bilibili.co"
+    annualVipBcoinDay = 10
+    annualVipBcoinCouponMoney = 5
+    annualVipBcoinCouponActivityId = 142
+    welfareBgHost = "http://uat-i%v.hdslb.com"
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://uat-dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 5
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+
+
+[VipRPC]
+    pullInterval = "10s"
+    [VipRPC.client]
+    token = "123456789"
+    proto = "tcp"
+    timeout = "1s"
+    timer = 1000
+    [VipRPC.client.breaker]
+    window  ="10s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [[backup]]
+    proto = "tcp"
+    addr = "127.0.0.1:6009"
+    timeout = "1s"
+    timer = 1000
+    [VipRPC.zookeeper]
+    root = "/microservice/vip/"
+    addrs = ["172.18.33.50:2199","172.18.33.51:2199","172.18.33.52:2199"]
+    timeout = "30s"
+
+[bm]
+    addr = "0.0.0.0:7531"
+    maxListen = 1000
+    timeout = "1000ms"
+
+[httpClient]
+key    = "ad4bb9b8f5d9d4a7"
+secret = "6912080d78d58be7cb94f57d50d438f6"
+dial      = "2s"
+timeout   = "2s"
+keepAlive = "60s"
+timer     = 128
+    [httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+ 
+[mysql]
+addr = "172.16.33.205"
+dsn = "zhaozhihao:MN9havOfnzY3kd6L78IVucRxgywe0p2P@tcp(172.16.33.205:3308)/bilibili_vip?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 2
+IdleTimeout ="4h"
+queryTimeout = "2s"
+execTimeout = "2s"
+tranTimeout = "2s"
+[mysql.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+
+[orm]
+[orm.vip]
+	dsn = "zhaozhihao:MN9havOfnzY3kd6L78IVucRxgywe0p2P@tcp(172.16.33.205:3308)/bilibili_vip?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 5
+	idle = 5
+	idleTimeout = "4h"
+
+[bfs]
+key="b2f31180234e497c"
+secret="e96a241fb05f449502420d9271b2ed"
+host   = "http://uat-bfs.bilibili.co"
+timeout = 1000
+maxFileSize = 5242880

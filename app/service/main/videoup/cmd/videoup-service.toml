@@ -1,0 +1,341 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/videoup-service.pid"
+dir = "./"
+perf = "127.0.0.1:6327"
+checkFile = "/data/www/videoup-service.html"
+family = "videoup-service"
+tick = "5m"
+chanSize = 1
+dmVerifyKey = "53e2fa226f5ad348"
+asyncThreshold = 3
+splitThreshold = 6
+splitGroupCount = 2
+failThreshold = 3
+editTimeout = "10s"
+
+[monitor]
+env = "pro"
+tels = "15871451480,18733334444"
+count = 10
+
+[app]
+key = "b8f239ca38a53308"
+secret = "5460ef72fe13c10dfb53442b9111427e"
+
+[host]
+mission = "http://172.16.33.104"
+account = "http://account.bilibili.co"
+monitor = "http://ops-mng.bilibili.co"
+apiCo = "http://uat-api.bilibili.co"
+msg = "http://message.bilibili.co"
+
+[xlog]
+dir = "/data/log/videoup-service/"
+    [xlog.elk]
+    project = "videoup-service"
+    addr = "172.18.20.17:8520"
+    chanSize = 10240
+
+
+[statsd]
+project = "videoup-service"
+addr = "172.18.20.15:8200"
+chanSize = 10240
+
+[httpClient]
+    [httpClient.read]
+   key = "b8f239ca38a53308"
+   secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "500ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.read.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.write]
+   key = "b8f239ca38a53308"
+   secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "500ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.write.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[bm]
+    addr = "0.0.0.0:6328"
+    maxListen = 1000
+    timeout = "1s"
+
+[antispamConf]
+    on=true
+    second=1
+    n=2
+    hour=1
+    m=10
+   [antispamConf.redis]
+    name = "video-service/track"
+    proto = "tcp"
+    addr = "172.16.33.205:6381"
+    idle = 10
+    active = 10
+    dialTimeout = "500ms"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    expire = "24m"
+
+[db]
+    [db.archive]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_archive?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "5s"
+    execTimeout = "5s"
+    tranTimeout = "10s"
+    [db.archive.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.archiveRead]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_archive?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idleTimeout ="4h"
+    queryTimeout = "5s"
+    execTimeout = "5s"
+    tranTimeout = "10s"
+    [db.archiveRead.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.archiveSlave]
+     addr = "172.18.16.67:3403"
+     dsn = "test:test@tcp(172.18.16.67:3403)/bilibili_archive?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+     active = 5
+     idle = 5
+     idleTimeout = "4h"
+     queryTimeout = "150ms"
+     execTimeout = "100ms"
+     tranTimeout = "200ms"
+    [db.archiveSlave.breaker]
+     window = "3s"
+     sleep = "100ms"
+     bucket = 10
+     ratio = 0.5
+     request = 100
+    [db.dede]
+    name = "172.16.33.205:3307"
+    dsn = "dede_test:dede_test@tcp(172.16.33.205:3307)/bilibili?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "5s"
+    execTimeout = "5s"
+    tranTimeout = "10s"
+    [db.dede.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.manager]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_manager?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "5s"
+    execTimeout = "5s"
+    tranTimeout = "10s"
+    [db.manager.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.oversea]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_oversea?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "5s"
+    execTimeout = "5s"
+    tranTimeout = "10s"
+    [db.oversea.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[videoupPub]
+key = "0PtMsLLxWyyvoTgAyLCD"
+secret = "0PtMsLLxWyyvoTgAyLCE"
+group = "Videoup-Videoup2Bvc-P"
+topic = "Videoup2Bvc"
+action = "pub"
+offset = "old"
+buffer = 128
+name = "videoup-service/databus"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+active = 1
+idle = 1
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[videoupPGCPub]
+key = "0PtMsLLxWyyvoTgAyLCD"
+secret = "0PtMsLLxWyyvoTgAyLCE"
+group = "Videoup-PGCVideoup2Bvc-P"
+topic = "PGCVideoup2Bvc"
+action = "pub"
+offset = "old"
+buffer = 128
+name = "videoup-service/databus"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+active = 1
+idle = 1
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[redis]
+    [redis.track]
+    name = "video-service/track"
+    proto = "tcp"
+    addr = "172.18.33.61:6807"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "10s"
+
+[keepArc]
+aids = [16201808]
+mid = 7784978
+
+[pubAgent]
+pgcSubmit = "http://172.18.33.137:9510"
+pgcDRMSubmit = "http://172.18.33.137:9510"
+ugcSubmit = "http://172.18.33.137:9510"
+Proxy = "http://172.18.33.137:11080"
+
+
+[memcache]
+    [memcache.archive]
+    name = "creative/archive"
+    proto = "tcp"
+    addr = "172.16.33.54:11213"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    tplExpire = "60s"
+
+[property]
+        [[property.msg]]
+            to = "staff"
+            msgid = 1
+            code = "1_19_1"
+            title = "多人合作投稿申请"
+            content = 'up主%s邀请您作为%s参与稿件《%s》（av%d）的多人合作，在网页端创作中心查看吧#{点击查看}{"https://member.bilibili.com/v2#/upload-manager/article/cooperation"}'
+        [[property.msg]]
+                    to = "up"
+                    msgid = 2
+                    code = "1_19_2"
+                    title = "参与者同意参与多人合作投稿"
+                    content = '参与者%s已接受您的邀请作为%s参与稿件《%s》（av%d）的多人合作，在网页端创作中心查看吧#{点击查看}{"https://member.bilibili.com/v2#/upload-manager/article"}'
+        [[property.msg]]
+                    to = "up"
+                    msgid = 3
+                    code = "1_19_3"
+                    title = "参与者拒绝参与多人合作投稿"
+                    content = '参与者%s已拒绝您的邀请作为%s参与稿件《%s》（av%d）的多人合作，在网页端创作中心查看吧#{点击查看}{"https://member.bilibili.com/v2#/upload-manager/article"}'
+        [[property.msg]]
+                    to = "staff"
+                    msgid = 4
+                    code = "1_19_4"
+                    title = "多人合作投稿参与类型变更申请"
+                    content = 'up主%s申请您参与稿件《%s》（av%d）的参与类型由%s变更为%s，在网页端创作中心查看吧#{点击查看}{"https://member.bilibili.com/v2#/upload-manager/article/cooperation"}'
+        [[property.msg]]
+                    to = "up"
+                    msgid = 5
+                    code = "1_19_5"
+                    title = "参与者同意多人合作投稿参与类型变更"
+                    content = '参与者%s已同意您申请其参与稿件《%s》（av%d）的参与类型由%s变更为%s，在网页端创作中心查看吧#{点击查看}{"https://member.bilibili.com/v2#/upload-manager/article"}'
+        [[property.msg]]
+                    to = "up"
+                    msgid = 6
+                    code = "1_19_6"
+                    title = "参与者拒绝多人合作投稿参与类型变更"
+                    content = '参与者%s已拒绝您申请其参与稿件《%s》（av%d）的参与类型由%s变更为%s，在网页端创作中心查看吧#{点击查看}{"https://member.bilibili.com/v2#/upload-manager/article"}'
+        [[property.msg]]
+                    to = "up"
+                    msgid = 7
+                    code = "1_19_7"
+                    title = "终止多人合作投稿申请"
+                    content = '合作者%s申请终止其作为稿件《%s》（av%d）的%s的多人合作，在网页端创作中心查看吧#{点击查看}{"https://member.bilibili.com/v2#/upload-manager/article"}'
+        [[property.msg]]
+                    to = "staff"
+                    msgid = 8
+                    code = "1_19_8"
+                    title = "同意终止多人合作投稿"
+                    content = 'up主%s已终止参与者%s作为稿件《%s》（av%d）的%s的多人合作，在网页端创作中心查看吧#{点击查看}{"https://member.bilibili.com/v2#/upload-manager/article/cooperation"}'
+        [[property.msg]]
+                    to = "staff"
+                    msgid = 9
+                    code = "1_19_9"
+                    title = "终止多人合作投稿申请"
+                    content = 'up主%s申请终止您作为稿件《%s》（av%d）的%s的多人合作，在网页端创作中心查看吧#{点击查看}{"https://member.bilibili.com/v2#/upload-manager/article/cooperation"}'
+        [[property.msg]]
+                    to = "up"
+                    msgid = 10
+                    code = "1_19_10"
+                    title = "同意终止多人合作投稿"
+                    content = 'up主%s已终止参与者%s作为稿件《%s》（av%d）的%s的多人合作，在网页端创作中心查看吧#{点击查看}{"https://member.bilibili.com/v2#/upload-manager/article"}'
+        [[property.msg]]
+                    to = "up"
+                    msgid = 11
+                    code = "1_19_11"
+                    title = "拒绝终止多人合作投稿"
+                    content = 'up主%s未能终止参与者%s作为稿件《%s》（av%d）的%s的多人合作，在网页端创作中心查看吧#{点击查看}{"https://member.bilibili.com/v2#/upload-manager/article"}'
+        [[property.msg]]
+                    to = "up"
+                    msgid = 12
+                    code = "1_19_12"
+                    title = "管理员解除合作关系"
+                    content = '管理员解除了您与参与者%s在稿件《%s》（av%d）中合作关系，在网页端创作中心查看吧#{点击查看}{"https://member.bilibili.com/v2#/upload-manager/article"}'
+        [[property.msg]]
+                    to = "staff"
+                    msgid = 13
+                    code = "1_19_12"
+                    title = "管理员解除合作关系"
+                    content = '管理员解除了您与UP主%s在稿件《%s》（av%d）中合作关系，在网页端创作中心查看吧#{点击查看}{"https://member.bilibili.com/v2#/upload-manager/article"}'

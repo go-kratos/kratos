@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package model;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// Info account info.
+message Info {
+  int64 Mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  string UserID = 2 [ (gogoproto.jsontag) = "userid" ];
+  string Uname = 3 [ (gogoproto.jsontag) = "uname" ];
+  string Face = 4 [ (gogoproto.jsontag) = "face" ];
+  bool HasEmail = 5 [ (gogoproto.jsontag) = "has_email" ];
+  bool HasTel = 6 [ (gogoproto.jsontag) = "has_tel" ];
+}
+
+// Perm token.
+message Perm {
+  int64 Mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  int32 AppID = 2 [ (gogoproto.jsontag) = "appid" ];
+  int32 AppSubID = 3 [ (gogoproto.jsontag) = "app_subid" ];
+  string AccessToken = 4 [ (gogoproto.jsontag) = "access_token" ];
+  string RefreshToken = 5 [ (gogoproto.jsontag) = "refresh_token" ];
+  int64 CreateAt = 6 [ (gogoproto.jsontag) = "create_at" ];
+  int64 Expires = 7 [ (gogoproto.jsontag) = "expires" ];
+}

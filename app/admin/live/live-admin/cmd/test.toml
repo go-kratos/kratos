@@ -1,0 +1,22 @@
+[log]
+    stdout = true
+[liverpc]
+    [liverpc.av]
+        Addr = "127.0.0.1:20218"
+
+[redis]
+	name = "live-admin"
+	proto = "tcp"
+	addr = "172.18.33.171:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[Bucket.slive]
+    key = "0dahgnv96o7byxsq"
+    secret = "x5efzuih903pdytakrol1cvng86jq2"
+    private = true

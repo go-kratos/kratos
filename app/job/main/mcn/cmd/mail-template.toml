@@ -1,0 +1,38 @@
+[MailTemplateConf]
+    SignTmplTitle = """[{{Now.Format "2006-01-02"}}] MCN-签约到期提醒"""
+    SignTmplContent = """
+    <html>
+    <body>
+    <table border="1">
+    <tr>
+    	<td>昵称(uid)</td>
+    	<td>到期提示信息</td>
+    </tr>
+    {{range .}}
+        <tr>
+            <td>{{.McnName}}（{{.McnMid}}）</td>
+            <td>{{.EndDate.Time.Format "2006-01-02"}} 签约即将到期，请尽快去<a href="http://up-profit.bilibili.co/allowance/#/mcn/mcnList">【up主CRM-MCN签约管理】查看</a></td>
+        </tr>
+    {{end}}
+    </table>
+    </body>
+    </html>
+    """
+    PayTmplTitle = """[{{Now.Format "2006-01-02"}}] MCN-付款到期提醒"""
+    PayTmplContent = """
+    <html>
+    <body>
+    <table border=1>
+    <tr>
+    	<td>昵称(uid)</td>
+    	<td>到期提示信息</td>
+    </tr>
+    {{range .}}
+        <tr>
+            <td>{{.McnName}}（{{.McnMid}}）</td>
+            <td>{{.DueDate.Time.Format "2006-01-02"}} 付款即将到期，应付款{{printf "%.2f" .GetPayValue}}元，请及时付款并尽快去<a href="http://up-profit.bilibili.co/allowance/#/mcn/mcnList">【up主CRM-MCN签约管理】处理</a></td>
+        </tr>
+    {{end}}
+    </table>
+    </body>
+    </html>"""

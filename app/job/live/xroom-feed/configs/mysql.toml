@@ -1,0 +1,10 @@
+[liveApp]
+	Addr = "172.16.38.117:3312"
+	DSN = "live:oWni@ElNs0P0C(dphdj*F1y4@tcp(172.16.38.117:3312)/live-app?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8mb4,utf8"
+	ReadDSN = ["live:oWni@ElNs0P0C(dphdj*F1y4@tcp(172.16.38.117:3312)/live-app?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8mb4,utf8"]
+	Active = 20
+	Idle = 10
+	IdleTimeout ="4h"
+	QueryTimeout = "200ms"
+	ExecTimeout = "300ms"
+	TranTimeout = "400ms"

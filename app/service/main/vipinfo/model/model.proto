@@ -1,0 +1,29 @@
+syntax = "proto3";
+package account.service.vipinfo;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "model";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message VipUserInfo {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 Mid = 2 [(gogoproto.jsontag) = "mid"];
+    int32 VipType = 3 [(gogoproto.jsontag) = "vip_type"];
+    int32 VipPayType = 4 [(gogoproto.jsontag) = "vip_pay_type"];
+    int32 PayChannelID = 5 [(gogoproto.jsontag) = "pay_channel_id"];
+    int32 VipStatus = 6 [(gogoproto.jsontag) = "vip_status"];
+    int64 VipStartTime = 7 [(gogoproto.jsontag) = "vip_start_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 VipRecentTime = 8 [(gogoproto.jsontag) = "vip_recent_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 VipOverdueTime = 9 [(gogoproto.jsontag) = "vip_overdue_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 AnnualVipOverdueTime = 10 [(gogoproto.jsontag) = "annual_vip_overdue_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Ctime = 11 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Mtime = 12 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 IosOverdueTime = 13 [(gogoproto.jsontag) = "ios_overdue_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Ver = 14 [(gogoproto.jsontag) = "ver"];
+}

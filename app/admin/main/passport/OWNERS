@@ -1,0 +1,15 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- gezhangyuan
+- wanghuan01
+- zhoujiahui
+labels:
+- admin
+- admin/main/passport
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- gezhangyuan
+- wanghuan01

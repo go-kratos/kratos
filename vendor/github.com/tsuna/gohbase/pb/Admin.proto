@@ -1,0 +1,310 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// This file contains protocol buffers that are used for Admin service.
+package pb;
+
+option java_package = "org.apache.hadoop.hbase.protobuf.generated";
+option java_outer_classname = "AdminProtos";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+//import "Client.proto";
+import "HBase.proto";
+import "WAL.proto";
+
+message GetRegionInfoRequest {
+  required RegionSpecifier region = 1;
+  optional bool compaction_state = 2;
+}
+
+message GetRegionInfoResponse {
+  required RegionInfo region_info = 1;
+  optional CompactionState compaction_state = 2;
+  optional bool isRecovering = 3;
+
+  enum CompactionState {
+    NONE = 0;
+    MINOR = 1;
+    MAJOR = 2;
+    MAJOR_AND_MINOR = 3;
+  }
+}
+
+/**
+ * Get a list of store files for a set of column families in a particular region.
+ * If no column family is specified, get the store files for all column families.
+ */
+message GetStoreFileRequest {
+  required RegionSpecifier region = 1;
+  repeated bytes family = 2;
+}
+
+message GetStoreFileResponse {
+  repeated string store_file = 1;
+}
+
+message GetOnlineRegionRequest {
+}
+
+message GetOnlineRegionResponse {
+  repeated RegionInfo region_info = 1;
+}
+
+message OpenRegionRequest {
+  repeated RegionOpenInfo open_info = 1;
+  // the intended server for this RPC.
+  optional uint64 serverStartCode = 2;
+  // wall clock time from master
+  optional uint64 master_system_time = 5;
+
+  message RegionOpenInfo {
+    required RegionInfo region = 1;
+    optional uint32 version_of_offline_node = 2;
+    repeated ServerName favored_nodes = 3;
+    // open region for distributedLogReplay
+    optional bool openForDistributedLogReplay = 4;
+  }
+}
+
+message OpenRegionResponse {
+  repeated RegionOpeningState opening_state = 1;
+
+  enum RegionOpeningState {
+    OPENED = 0;
+    ALREADY_OPENED = 1;
+    FAILED_OPENING = 2;
+  }
+}
+
+message WarmupRegionRequest {
+
+    required RegionInfo regionInfo = 1;
+}
+
+message WarmupRegionResponse {
+}
+
+/**
+ * Closes the specified region and will use or not use ZK during the close
+ * according to the specified flag.
+ */
+message CloseRegionRequest {
+  required RegionSpecifier region = 1;
+  optional uint32 version_of_closing_node = 2;
+  optional bool transition_in_ZK = 3 [default = true];
+  optional ServerName destination_server = 4;
+  // the intended server for this RPC.
+  optional uint64 serverStartCode = 5;
+}
+
+message CloseRegionResponse {
+  required bool closed = 1;
+}
+
+/**
+ * Flushes the MemStore of the specified region.
+ * <p>
+ * This method is synchronous.
+ */
+message FlushRegionRequest {
+  required RegionSpecifier region = 1;
+  optional uint64 if_older_than_ts = 2;
+  optional bool write_flush_wal_marker = 3; // whether to write a marker to WAL even if not flushed
+}
+
+message FlushRegionResponse {
+  required uint64 last_flush_time = 1;
+  optional bool flushed = 2;
+  optional bool wrote_flush_wal_marker = 3;
+}
+
+/**
+ * Splits the specified region.
+ * <p>
+ * This method currently flushes the region and then forces a compaction which
+ * will then trigger a split.  The flush is done synchronously but the
+ * compaction is asynchronous.
+ */
+message SplitRegionRequest {
+  required RegionSpecifier region = 1;
+  optional bytes split_point = 2;
+}
+
+message SplitRegionResponse {
+}
+
+/**
+ * Compacts the specified region.  Performs a major compaction if specified.
+ * <p>
+ * This method is asynchronous.
+ */
+message CompactRegionRequest {
+  required RegionSpecifier region = 1;
+  optional bool major = 2;
+  optional bytes family = 3;
+}
+
+message CompactRegionResponse {
+}
+
+message UpdateFavoredNodesRequest {
+  repeated RegionUpdateInfo update_info = 1;
+
+  message RegionUpdateInfo {
+    required RegionInfo region = 1;
+    repeated ServerName favored_nodes = 2;
+  }
+}
+
+message UpdateFavoredNodesResponse {
+  optional uint32 response = 1;
+}
+
+/**
+ * Merges the specified regions.
+ * <p>
+ * This method currently closes the regions and then merges them
+ */
+message MergeRegionsRequest {
+  required RegionSpecifier region_a = 1;
+  required RegionSpecifier region_b = 2;
+  optional bool forcible = 3 [default = false];
+  // wall clock time from master
+  optional uint64 master_system_time = 4;
+}
+
+message MergeRegionsResponse {
+}
+
+// Protocol buffer version of WAL for replication
+message WALEntry {
+  required WALKey key = 1;
+  // Following may be null if the KVs/Cells are carried along the side in a cellblock (See
+  // RPC for more on cellblocks). If Cells/KVs are in a cellblock, this next field is null
+  // and associated_cell_count has count of Cells associated w/ this WALEntry
+  repeated bytes key_value_bytes = 2;
+  // If Cell data is carried alongside in a cellblock, this is count of Cells in the cellblock.
+  optional int32 associated_cell_count = 3;
+}
+
+/**
+ * Replicates the given entries. The guarantee is that the given entries
+ * will be durable on the slave cluster if this method returns without
+ * any exception.  hbase.replication has to be set to true for this to work.
+ */
+message ReplicateWALEntryRequest {
+  repeated WALEntry entry = 1;
+  optional string replicationClusterId = 2;
+  optional string sourceBaseNamespaceDirPath = 3;
+  optional string sourceHFileArchiveDirPath = 4;
+}
+
+message ReplicateWALEntryResponse {
+}
+
+message RollWALWriterRequest {
+}
+
+/*
+ * Roll request responses no longer include regions to flush
+ * this list will always be empty when talking to a 1.0 server
+ */
+message RollWALWriterResponse {
+  // A list of encoded name of regions to flush
+  repeated bytes region_to_flush = 1;
+}
+
+message StopServerRequest {
+  required string reason = 1;
+}
+
+message StopServerResponse {
+}
+
+message GetServerInfoRequest {
+}
+
+message ServerInfo {
+  required ServerName server_name = 1;
+  optional uint32 webui_port = 2;
+}
+
+message GetServerInfoResponse {
+  required ServerInfo server_info = 1;
+}
+
+message UpdateConfigurationRequest {
+}
+
+message UpdateConfigurationResponse {
+}
+
+service AdminService {
+  rpc GetRegionInfo(GetRegionInfoRequest)
+    returns(GetRegionInfoResponse);
+
+  rpc GetStoreFile(GetStoreFileRequest)
+    returns(GetStoreFileResponse);
+
+  rpc GetOnlineRegion(GetOnlineRegionRequest)
+    returns(GetOnlineRegionResponse);
+
+  rpc OpenRegion(OpenRegionRequest)
+    returns(OpenRegionResponse);
+
+  rpc WarmupRegion(WarmupRegionRequest)
+    returns(WarmupRegionResponse);
+
+  rpc CloseRegion(CloseRegionRequest)
+    returns(CloseRegionResponse);
+
+  rpc FlushRegion(FlushRegionRequest)
+    returns(FlushRegionResponse);
+
+  rpc SplitRegion(SplitRegionRequest)
+    returns(SplitRegionResponse);
+
+  rpc CompactRegion(CompactRegionRequest)
+    returns(CompactRegionResponse);
+
+  rpc MergeRegions(MergeRegionsRequest)
+    returns(MergeRegionsResponse);
+
+  rpc ReplicateWALEntry(ReplicateWALEntryRequest)
+    returns(ReplicateWALEntryResponse);
+
+  rpc Replay(ReplicateWALEntryRequest)
+    returns(ReplicateWALEntryResponse);
+
+  rpc RollWALWriter(RollWALWriterRequest)
+    returns(RollWALWriterResponse);
+
+  rpc GetServerInfo(GetServerInfoRequest)
+    returns(GetServerInfoResponse);
+
+  rpc StopServer(StopServerRequest)
+    returns(StopServerResponse);
+
+  rpc UpdateFavoredNodes(UpdateFavoredNodesRequest)
+    returns(UpdateFavoredNodesResponse);
+
+  rpc UpdateConfiguration(UpdateConfigurationRequest)
+    returns(UpdateConfigurationResponse);
+}

@@ -1,0 +1,170 @@
+syntax = "proto3";
+
+package account.point;
+
+
+option go_package = "v1";
+
+message AddPointReply { 
+    int32 status = 1;
+}
+
+message AddPointReq { 
+    ModelArgPoint pc = 2;
+}
+
+message AllConfigReply { 
+    map<string, int64> data_0 = 1;
+}
+
+message AllConfigReq { 
+}
+
+message CloseReply { 
+}
+
+message CloseReq { 
+}
+
+message ConfigReply { 
+    int64 point = 1;
+}
+
+message ConfigReq { 
+    int32 change_type = 2;
+    int64 mid = 3;
+    double bp = 4;
+}
+
+message ConsumePointReply { 
+    int32 status = 1;
+}
+
+message ConsumePointReq { 
+    ModelArgPointConsume pc = 2;
+}
+
+message ModelArgPoint { 
+    int64 mid = 1;
+    int64 change_type = 2;
+    int64 point = 3;
+    string remark = 4;
+    string operator = 5;
+}
+
+message ModelArgPointAdd { 
+    int64 mid = 1;
+    int32 change_type = 2;
+    string relation_id = 3;
+    double bcoin = 4;
+    string remark = 5;
+    string order_id = 6;
+}
+
+message ModelArgPointConsume { 
+    int64 mid = 1;
+    int64 change_type = 2;
+    string relation_id = 3;
+    int64 point = 4;
+    string remark = 5;
+}
+
+message ModelOldPointHistory { 
+    int64 id = 1;
+    int64 mid = 2;
+    int64 point = 3;
+    string order_id = 4;
+    int32 change_type = 5;
+    int64 change_time = 6;
+    string relation_id = 7;
+    int64 point_balance = 8;
+    string remark = 9;
+    string operator = 10;
+}
+
+message ModelPointHistory { 
+    int64 id = 1;
+    int64 mid = 2;
+    int64 point = 3;
+    string order_id = 4;
+    int32 change_type = 5;
+    int64 change_time = 6;
+    string relation_id = 7;
+    int64 point_balance = 8;
+    string remark = 9;
+    string operator = 10;
+}
+
+message ModelPointInfo { 
+    int64 mid = 1;
+    int64 point_balance = 2;
+    int64 ver = 3;
+}
+
+message OldPointHistoryReply { 
+    repeated ModelOldPointHistory phs = 1;
+    int32 total = 2;
+}
+
+message OldPointHistoryReq { 
+    int64 mid = 2;
+    int32 pn = 3;
+    int32 ps = 4;
+}
+
+message PingReply { 
+}
+
+message PingReq { 
+}
+
+message PointAddByBpReply { 
+    int64 p = 1;
+}
+
+message PointAddByBpReq { 
+    ModelArgPointAdd pa = 2;
+}
+
+message PointHistoryReply { 
+    repeated ModelPointHistory phs = 1;
+    int32 total = 2;
+    int32 ncursor = 3;
+}
+
+message PointHistoryReq { 
+    int64 mid = 2;
+    int32 cursor = 3;
+    int32 ps = 4;
+}
+
+message PointInfoReply { 
+    ModelPointInfo pi = 1;
+}
+
+message PointInfoReq { 
+    int64 mid = 2;
+}
+
+service Point { 
+    // Config get point config. 
+    rpc Config(ConfigReq) returns(ConfigReply); 
+    // AllConfig all point config 
+    rpc AllConfig(AllConfigReq) returns(AllConfigReply); 
+    // Ping Service 
+    rpc Ping(PingReq) returns(PingReply); 
+    // Close Service 
+    rpc Close(CloseReq) returns(CloseReply); 
+    // PointInfo . 
+    rpc PointInfo(PointInfoReq) returns(PointInfoReply); 
+    // PointHistory . 
+    rpc PointHistory(PointHistoryReq) returns(PointHistoryReply); 
+    // OldPointHistory old point history . 
+    rpc OldPointHistory(OldPointHistoryReq) returns(OldPointHistoryReply); 
+    // PointAddByBp by bp. 
+    rpc PointAddByBp(PointAddByBpReq) returns(PointAddByBpReply); 
+    // ConsumePoint . 
+    rpc ConsumePoint(ConsumePointReq) returns(ConsumePointReply); 
+    // AddPoint . 
+    rpc AddPoint(AddPointReq) returns(AddPointReply); 
+}

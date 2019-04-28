@@ -1,0 +1,147 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/appstatic-admin.pid"
+dir = "./"
+unameTicker = "10s"
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    csrfOn = false
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 10
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    [identify.host]
+    auth = "http://passport.bilibili.co"
+    secret = "http://open.bilibili.co"
+    [identify.HTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [identify.HTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.HTTPClient.URL]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://uat-dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 10
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+
+[BM]
+    	addr = "0.0.0.0:6683"
+    	maxListen = 10
+        timeout = "1s"
+
+[orm]
+	dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_show?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 5
+	idle = 5
+	idleTimeout = "4h"
+
+[cfg]
+    historyVer = 10
+    freDiff = "10s"
+    folder = "/tmp/test"
+    storage = "bfs"
+    filetypes = []
+
+[xlog]
+    dir = "/data/log/appstatic-admin"
+    family = "appstatic-admin"
+
+[nas]
+key    = "53e2fa226f5ad348"
+secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+host   = "http://macross.bilibili.co/api/v1/macross/manager/upload"
+timeout = 1000
+oldURL = "dl-hdslb-com"
+newURL = "http://dl.hdslb.com"
+
+[bfs]
+key    = "fed7d6b5948c614f"
+secret = "280e9140721cff3879cd13f59fc28a"
+host   = "http://uat-bfs.bilibili.co"
+timeout = 1000
+
+[httpClient]
+    key    = "b525299741c108ef"
+    secret = "ef1d0b536d4bcef04dd7c75014c51f"
+    dial      = "500ms"
+    timeout   = "2s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.breaker]
+        window  = "10s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[redis]
+    name = "tv-job"
+    proto = "tcp"
+    addr = "127.0.0.1:6379"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"

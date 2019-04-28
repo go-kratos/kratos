@@ -1,0 +1,84 @@
+[rule]
+    tickRegion = "5s"
+    tickTag = "20s"
+    numArcs = 5
+    numIndexArcs = 10
+    minRegionCount = 15
+
+[host]
+    liveURI = "http://api.live.bilibili.co"
+    apiURI = "http://api.bilibili.co"
+    bigDataURI = "http://data.bilibili.co"
+
+
+[log]
+    family = "dynamic-service"
+    dir = "/data/log/dynamic-service/"
+
+
+[app]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+
+[httpClient]
+    [httpClient.read]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.write]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+
+[HTTPServer]
+    addr = "0.0.0.0:6231"
+    timeout = "1s"
+
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    [identify.app]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    [identify.host]
+    auth = "http://passport.bilibili.com"
+    secret = "http://open.bilibili.com"
+   [identify.httpClient]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "30ms"
+    timeout = "150ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  ="10s"
+    sleep   ="100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+
+[archiveRPC]
+    timeout = "1s"
+
+[memcache]
+    name = "dynamic-service"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"

@@ -1,0 +1,31 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["serverreflection.go"],
+    importpath = "google.golang.org/grpc/reflection",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:go_default_library",
+        "//codes:go_default_library",
+        "//reflection/grpc_reflection_v1alpha:go_default_library",
+        "//status:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
+        "@io_bazel_rules_go//proto/wkt:descriptor_go_proto",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["serverreflection_test.go"],
+    embed = [":go_default_library"],
+    deps = [
+        "//:go_default_library",
+        "//reflection/grpc_reflection_v1alpha:go_default_library",
+        "//reflection/grpc_testing:go_default_library",
+        "//reflection/grpc_testingv3:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
+        "@io_bazel_rules_go//proto/wkt:descriptor_go_proto",
+        "@org_golang_x_net//context:go_default_library",
+    ],
+)

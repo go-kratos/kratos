@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chenshangqiang
+- maojian
+- zhoujixiang
+labels:
+- main
+- service
+- service/main/msm
+options:
+  no_parent_owners: true
+reviewers:
+- chenshangqiang
+- haoguanwei
+- maojian
+- zhoujixiang

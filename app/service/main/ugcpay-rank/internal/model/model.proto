@@ -1,0 +1,64 @@
+syntax = "proto3";
+package main.account.ugcpay.service.model;
+option go_package = "model";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_getters_all) = false;
+
+message RankElecPrepUPProto {
+    int64 CountUPTotalElec = 1;
+    int64 Count = 2;
+    int64 UPMID = 3;
+    int64 Size = 4 [(gogoproto.casttype) = "int"];
+    repeated RankElecPrepElementProto List = 5;
+}
+
+message RankElecPrepAVProto {
+    RankElecPrepUPProto RankElecPrepUPProto = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    int64 AVID = 2;
+}
+
+message RankElecPrepElementProto {
+    int64 MID = 1;
+    int64 Rank = 2 [(gogoproto.casttype) = "int"];
+    uint32 TrendType = 3 [(gogoproto.casttype) = "uint8"];
+    int64 Amount = 4;
+    ElecMessageProto Message = 5;
+}
+
+
+message RankElecUPProto {
+    int64 CountUPTotalElec = 1 ;
+    int64 Count = 2 ;
+    int64 UPMID = 3 ;
+    int64 Size = 4 [(gogoproto.casttype) = "int"];
+    repeated RankElecElementProto List = 5;
+}
+
+message RankElecAVProto {
+    int64 CountUPTotalElec = 1 ;
+    int64 Count = 2 ;
+    int64 AVID = 3 ;
+    int64 UPMID = 4 ;
+    int64 Size = 5 [(gogoproto.casttype) = "int"];
+    repeated RankElecElementProto List = 6;
+}
+
+message RankElecElementProto {
+    RankElecPrepElementProto RankElecPrepElementProto = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    VIPInfoProto VIP = 2;
+    string Nickname = 3;
+    string Avatar = 4;
+}
+
+message ElecMessageProto {
+    string Message = 1;
+    bool Hidden = 2;
+}
+
+message VIPInfoProto {
+    int32 Type = 1;
+    int32 Status = 2;
+    int64 DueDate = 3;
+}

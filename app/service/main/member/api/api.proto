@@ -1,0 +1,589 @@
+syntax = "proto3";
+package account.service.member.v1;
+option go_package = "api";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message MidReq {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 真实ip
+  string realIP = 3 [ (gogoproto.jsontag) = "realIP" ];
+}
+
+message MemberMidReq {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 远端ip
+  string remoteIP = 2 [ (gogoproto.jsontag) = "remoteIP" ];
+}
+
+message MemberMidsReq {
+  // mid 列表
+  repeated int64 mids = 1 [ (gogoproto.jsontag) = "mids" ];
+  // 远端ip
+  string remoteIP = 2 [ (gogoproto.jsontag) = "remoteIP" ];
+}
+
+message MidByRealnameCardsReq {
+  // 身份证号
+  repeated string card_code = 1
+      [ (gogoproto.moretags) = "form:\"card_code\" validate:\"required\"" ];
+  // 国家
+  int32 country = 2 [
+    (gogoproto.jsontag) = "country",
+    (gogoproto.casttype) = "int16",
+    (gogoproto.moretags) = "form:\"country\""
+  ];
+  // 证件类型
+  int32 card_type = 3 [
+    (gogoproto.jsontag) = "card_type",
+    (gogoproto.casttype) = "int8",
+    (gogoproto.moretags) = "form:\"card_type\""
+  ];
+}
+
+// 空的message，对应真实service只返回error，没有具体返回值
+message EmptyStruct {}
+
+message LevelInfoReply {
+  // 当前的等级信息
+  int32 cur = 1 [ (gogoproto.jsontag) = "current_level" ];
+  // 当前等级的经验阀值
+  int32 min = 2 [ (gogoproto.jsontag) = "current_min" ];
+  // 当前的经验值
+  int32 now_exp = 3 [ (gogoproto.jsontag) = "current_exp" ];
+  // 下个等级的经验阀值
+  int32 next_exp = 4 [ (gogoproto.jsontag) = "next_exp" ];
+}
+
+message UserLogReply {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // ip
+  string ip = 2 [ (gogoproto.jsontag) = "ip" ];
+  // 时间戳
+  int64 ts = 3 [ (gogoproto.jsontag) = "ts" ];
+  // logId
+  string log_id = 4 [ (gogoproto.jsontag) = "log_id" ];
+  // 具体内容
+  map<string, string> content = 5 [ (gogoproto.jsontag) = "content" ];
+}
+
+message UserLogsReply {
+  // UserLog的集合
+  repeated UserLogReply user_logs = 1 [ (gogoproto.jsontag) = "user_logs" ];
+}
+
+message AddExpReq {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 增量
+  double count = 2 [ (gogoproto.jsontag) = "count" ];
+  // 修改原因
+  string reason = 3 [ (gogoproto.jsontag) = "reason" ];
+  // 操作类型
+  string operate = 4 [ (gogoproto.jsontag) = "operate" ];
+  // ip
+  string ip = 5 [ (gogoproto.jsontag) = "ip" ];
+}
+
+message ExpStatReply {
+  // 是否获取过登陆奖励
+  bool login = 1 [ (gogoproto.jsontag) = "login" ];
+  // 是否获取过看视频的奖励
+  bool watch = 2 [ (gogoproto.jsontag) = "watch_av" ];
+  // 是否获得投币奖励
+  int64 coin = 3 [ (gogoproto.jsontag) = "coins_av" ];
+  // 是否获得分享过视频的奖励
+  bool share = 4 [ (gogoproto.jsontag) = "share_av" ];
+}
+
+// member
+message BaseInfoReply {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 名称
+  string name = 2 [ (gogoproto.jsontag) = "name" ];
+  // 性别
+  int64 sex = 3 [ (gogoproto.jsontag) = "sex" ];
+  // 头像
+  string face = 4 [ (gogoproto.jsontag) = "face" ];
+  // 签名
+  string sign = 5 [ (gogoproto.jsontag) = "sign" ];
+  // 排名
+  int64 rank = 6 [ (gogoproto.jsontag) = "rank" ];
+  // 生日
+  int64 birthday = 7 [
+    (gogoproto.jsontag) = "birthday",
+    (gogoproto.casttype) = "go-common/library/time.Time"
+  ];
+}
+
+message OfficialInfoReply {
+  // 角色类别
+  int32 role = 1
+      [ (gogoproto.jsontag) = "role", (gogoproto.casttype) = "int8" ];
+  // 标题
+  string title = 2 [ (gogoproto.jsontag) = "title" ];
+  // 描述
+  string desc = 3 [ (gogoproto.jsontag) = "desc" ];
+}
+
+message BaseInfosReply {
+  // member基本信息集合
+  map<int64, BaseInfoReply> base_infos = 1;
+}
+
+message MemberInfoReply {
+  // 基本信息
+  BaseInfoReply base_info = 1;
+  // 等级信息
+  LevelInfoReply level_info = 2;
+  // 官方认证信息
+  OfficialInfoReply official_info = 3;
+}
+
+message MemberInfosReply { map<int64, MemberInfoReply> member_infos = 1; }
+
+message NickUpdatedReply {
+  // 昵称是否修改过
+  bool nick_updated = 1 [ (gogoproto.jsontag) = "nick_updated" ];
+}
+
+message OfficialDocReq {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 名称
+  string name = 2 [ (gogoproto.jsontag) = "name" ];
+  // 审核状态
+  int32 state = 3
+      [ (gogoproto.jsontag) = "state", (gogoproto.casttype) = "int8" ];
+  // 角色
+  int32 role = 4
+      [ (gogoproto.jsontag) = "role", (gogoproto.casttype) = "int8" ];
+  // 标题
+  string title = 5 [ (gogoproto.jsontag) = "title" ];
+  // 描述
+  string desc = 6 [ (gogoproto.jsontag) = "desc" ];
+  // 拒绝原因
+  string reject_reason = 7 [ (gogoproto.jsontag) = "reject_reason" ];
+  // 真实名字
+  int32 realname = 8
+      [ (gogoproto.jsontag) = "realname", (gogoproto.casttype) = "int8" ];
+  // 操作人
+  string operator = 9 [ (gogoproto.jsontag) = "operator" ];
+  // 电话
+  string telephone = 10 [ (gogoproto.jsontag) = "telephone" ];
+  // 邮箱
+  string email = 11 [ (gogoproto.jsontag) = "email" ];
+  // 地址
+  string address = 12 [ (gogoproto.jsontag) = "address" ];
+  // 公司
+  string company = 13 [ (gogoproto.jsontag) = "company" ];
+  // 统一信用代码
+  string credit_code = 14 [ (gogoproto.jsontag) = "credit_code" ];
+  // 组织机构
+  string organization = 15 [ (gogoproto.jsontag) = "organization" ];
+  // 组织机构类型
+  string organization_type = 16 [ (gogoproto.jsontag) = "organization_type" ];
+  // 营业执照
+  string business_license = 17 [ (gogoproto.jsontag) = "business_license" ];
+  // 企业规模
+  string business_scale = 18 [ (gogoproto.jsontag) = "business_scale" ];
+  // 企业等级
+  string business_level = 19 [ (gogoproto.jsontag) = "business_level" ];
+  // 企业授权函
+  string business_auth = 20 [ (gogoproto.jsontag) = "business_auth" ];
+  // 其他补充资料
+  string supplement = 21 [ (gogoproto.jsontag) = "supplement" ];
+  // 专业资质
+  string professional = 22 [ (gogoproto.jsontag) = "professional" ];
+  // 身份证明
+  string identification = 23 [ (gogoproto.jsontag) = "identification" ];
+  // 提交来源
+  string submit_source = 24 [ (gogoproto.jsontag) = "submit_source" ];
+}
+
+message UpdateSexReq {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 性别
+  int64 sex = 2 [ (gogoproto.jsontag) = "sex" ];
+  // 远端ip
+  string remote_IP = 3 [ (gogoproto.jsontag) = "remoteIP" ];
+}
+
+message UpdateUnameReq {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 名称
+  string name = 2 [ (gogoproto.jsontag) = "name" ];
+  // 远端ip
+  string remote_IP = 3 [ (gogoproto.jsontag) = "remoteIP" ];
+}
+
+message UpdateFaceReq {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 头像
+  string face = 2 [ (gogoproto.jsontag) = "face" ];
+  // 远端ip
+  string remote_IP = 3 [ (gogoproto.jsontag) = "remoteIP" ];
+}
+
+message UpdateRankReq {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 排行
+  int64 rank = 2 [ (gogoproto.jsontag) = "rank" ];
+  // 远端ip
+  string remote_IP = 3 [ (gogoproto.jsontag) = "remoteIP" ];
+}
+
+message UpdateBirthdayReq {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 生日
+  int64 birthday = 2 [
+    (gogoproto.jsontag) = "birthday",
+    (gogoproto.casttype) = "go-common/library/time.Time"
+  ];
+  // 远端ip
+  string remote_IP = 3 [ (gogoproto.jsontag) = "remoteIP" ];
+}
+
+message UpdateSignReq {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 签名
+  string sign = 2 [ (gogoproto.jsontag) = "sign" ];
+  // 远端ip
+  string remote_IP = 3 [ (gogoproto.jsontag) = "remoteIP" ];
+}
+
+message OfficialDocInfoReply {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 名称
+  string name = 2 [ (gogoproto.jsontag) = "name" ];
+  // 审核状态
+  int32 state = 3 [ (gogoproto.jsontag) = "state" ];
+  // 角色类型
+  int32 role = 4
+      [ (gogoproto.jsontag) = "role", (gogoproto.casttype) = "int8" ];
+  // 认证称号
+  string title = 5 [ (gogoproto.jsontag) = "title" ];
+  // 认证后缀
+  string desc = 6 [ (gogoproto.jsontag) = "desc" ];
+  // 被拒绝原因
+  string reject_reason = 7 [ (gogoproto.jsontag) = "reject_reason" ];
+  // 真实姓名
+  int32 realname = 8
+      [ (gogoproto.jsontag) = "realname", (gogoproto.casttype) = "int8" ];
+  // 经营人
+  string operator = 9 [ (gogoproto.jsontag) = "operator" ];
+  // 电话好吗
+  string telephone = 10 [ (gogoproto.jsontag) = "telephone" ];
+  // 邮箱
+  string email = 11 [ (gogoproto.jsontag) = "email" ];
+  // 地址
+  string address = 12 [ (gogoproto.jsontag) = "address" ];
+  // 公司
+  string company = 13 [ (gogoproto.jsontag) = "company" ];
+  // 社会信用代码
+  string credit_code = 14 [ (gogoproto.jsontag) = "credit_code" ];
+  // 政府或组织机构名称
+  string organization = 15 [ (gogoproto.jsontag) = "organization" ];
+  // 组织或机构类型
+  string organization_type = 16 [ (gogoproto.jsontag) = "organization_type" ];
+  // 营业执照
+  string business_license = 17 [ (gogoproto.jsontag) = "business_license" ];
+  // 企业规模
+  string business_scale = 18 [ (gogoproto.jsontag) = "business_scale" ];
+  // 企业等级
+  string business_level = 19 [ (gogoproto.jsontag) = "business_level" ];
+  // 企业授权函
+  string business_auth = 20 [ (gogoproto.jsontag) = "business_auth" ];
+  // 其他补充资料
+  string supplement = 21 [ (gogoproto.jsontag) = "supplement" ];
+  // 专业资质
+  string professional = 22 [ (gogoproto.jsontag) = "professional" ];
+  // 身份证明
+  string identification = 23 [ (gogoproto.jsontag) = "identification" ];
+}
+
+// moral
+message MoralReply {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 节操值
+  int64 moral = 2 [ (gogoproto.jsontag) = "moral" ];
+  // 增量
+  int64 added = 3 [ (gogoproto.jsontag) = "added" ];
+  // 减量
+  int64 deducted = 4 [ (gogoproto.jsontag) = "deducted" ];
+  // 上一次节操低于70时的恢复时间
+  int64 last_recover_date = 5 [
+    (gogoproto.jsontag) = "last_recover_date",
+    (gogoproto.casttype) = "go-common/library/time.Time"
+  ];
+}
+
+message UpdateMoralReq {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 增量
+  int64 delta = 2 [ (gogoproto.jsontag) = "delta" ];
+  // 类型
+  int64 origin = 3 [ (gogoproto.jsontag) = "origin" ];
+  // 操作原因
+  string reason = 4 [ (gogoproto.jsontag) = "reason" ];
+  // 操纵原因类型
+  int64 reason_type = 5 [ (gogoproto.jsontag) = "reason_type" ];
+  // 操作人
+  string operator = 6 [ (gogoproto.jsontag) = "operator" ];
+  // 备注
+  string remark = 7 [ (gogoproto.jsontag) = "remark" ];
+  // 状态
+  int64 status = 8 [ (gogoproto.jsontag) = "status" ];
+  // 是否通知
+  bool is_notify = 9 [ (gogoproto.jsontag) = "is_notify" ];
+  // ip地址
+  string ip = 10 [ (gogoproto.jsontag) = "ip" ];
+}
+
+message UpdateMoralsReq {
+  // mid 列表
+  repeated int64 mids = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 增量
+  int64 delta = 2 [ (gogoproto.jsontag) = "delta" ];
+  // 类型
+  int64 origin = 3 [ (gogoproto.jsontag) = "origin" ];
+  // 操作原因
+  string reason = 4 [ (gogoproto.jsontag) = "reason" ];
+  // 操纵原因类型
+  int64 reason_type = 5 [ (gogoproto.jsontag) = "reason_type" ];
+  // 操作人
+  string operator = 6 [ (gogoproto.jsontag) = "operator" ];
+  // 备注
+  string remark = 7 [ (gogoproto.jsontag) = "remark" ];
+  // 状态
+  int64 status = 8 [ (gogoproto.jsontag) = "status" ];
+  // 是否通知
+  bool is_notify = 9 [ (gogoproto.jsontag) = "is_notify" ];
+  // ip
+  string ip = 10 [ (gogoproto.jsontag) = "ip" ];
+}
+
+message UpdateMoralsReply {
+  // 批量更新后节操值
+  map<int64, int64> after_morals = 1 [ (gogoproto.jsontag) = "after_morals" ];
+}
+
+// property_review
+message AddUserMonitorReq {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 操作人
+  string operator = 2 [ (gogoproto.jsontag) = "operator" ];
+  // 备注
+  string remark = 3 [ (gogoproto.jsontag) = "remark" ];
+}
+
+// AddPropertyReview (暂时不开放调用)
+// message AddPropertyReviewReq {
+//     // mid
+//     int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+//     // 属性新的值
+//     string new = 2 [(gogoproto.jsontag) = "new"];
+//     // 状态
+//     int32 state = 3 [(gogoproto.jsontag) = "state",(gogoproto.casttype) =
+//     "int8"];
+//     // 属性
+//     int32 property = 4 [(gogoproto.jsontag) = "property",(gogoproto.casttype)
+//     = "int8"];
+//     // 额外的一些信息
+//     map<string, string> extra = 5 [(gogoproto.jsontag) = "extra"];
+// }
+
+message IsInMonitorReply {
+  // member是否处在受监控列表中
+  bool is_in_monitor = 1 [ (gogoproto.jsontag) = "is_in_monitor" ];
+}
+
+// realname
+message RealnameStatusReply {
+  // 实名认证状态
+  int32 realname_status = 1 [
+    (gogoproto.jsontag) = "realname_status",
+    (gogoproto.casttype) = "int8"
+  ];
+}
+
+message RealnameApplyInfoReply {
+  // 认证流程状态
+  int32 status = 1
+      [ (gogoproto.jsontag) = "status", (gogoproto.casttype) = "int8" ];
+  // 备注
+  string remark = 2 [ (gogoproto.jsontag) = "remark" ];
+}
+
+message ArgRealnameApplyReq {
+  // mid
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  // 验证码
+  int64 capture_code = 2 [ (gogoproto.jsontag) = "capture_code" ];
+  // 真实的名字
+  string realname = 3 [ (gogoproto.jsontag) = "realname" ];
+  // 证件类型
+  int32 card_type = 4
+      [ (gogoproto.jsontag) = "card_type", (gogoproto.casttype) = "int8" ];
+  // 证件码
+  string card_code = 5 [ (gogoproto.jsontag) = "card_code" ];
+  // 国家
+  int32 country = 6
+      [ (gogoproto.jsontag) = "country", (gogoproto.casttype) = "int16" ];
+  // 手持照的路径
+  string handIMG_token = 7;
+  // 证件照的前面
+  string frontIMG_token = 8;
+  // 证件照的后面
+  string backIMG_token = 9;
+}
+
+message RealnameDetailReply {
+  // 实名姓名
+  string realname = 1 [ (gogoproto.jsontag) = "realname" ];
+  // 证件码
+  string card = 2 [ (gogoproto.jsontag) = "card" ];
+  // 证件类型
+  int32 card_type = 3
+      [ (gogoproto.jsontag) = "card_type", (gogoproto.casttype) = "int8" ];
+  // 实名状态
+  int32 status = 4
+      [ (gogoproto.jsontag) = "status", (gogoproto.casttype) = "int8" ];
+  // 性别
+  string gender = 5 [ (gogoproto.jsontag) = "gender" ];
+  // 手持照IMG User
+  string hand_img = 6 [ (gogoproto.jsontag) = "hand_img" ];
+}
+
+message RealnameStrippedInfoReply {
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  int32 status = 2
+      [ (gogoproto.jsontag) = "status", (gogoproto.casttype) = "int8" ];
+  int32 channel = 3
+      [ (gogoproto.jsontag) = "channel", (gogoproto.casttype) = "int8" ];
+  int32 country = 4
+      [ (gogoproto.jsontag) = "country", (gogoproto.casttype) = "int16" ];
+  int32 card_type = 5
+      [ (gogoproto.jsontag) = "card_type", (gogoproto.casttype) = "int8" ];
+  int32 adult_type = 6
+      [ (gogoproto.jsontag) = "adult_type", (gogoproto.casttype) = "int8" ];
+}
+
+message MidByRealnameCardReply {
+  map<string, int64> code_to_mid = 5 [ (gogoproto.jsontag) = "code_to_mid" ];
+}
+
+message BlockInfoReply {
+  int64 MID = 1 [ (gogoproto.jsontag) = "mid" ];
+  int32 BlockStatus = 2 [ (gogoproto.jsontag) = "status" ];
+  int64 StartTime = 3 [ (gogoproto.jsontag) = "start_time" ];
+  int64 EndTime = 4 [ (gogoproto.jsontag) = "end_time" ];
+}
+
+message BlockDetailReply {
+  int64 MID = 1 [ (gogoproto.jsontag) = "mid" ];
+  int64 BlockCount = 2 [ (gogoproto.jsontag) = "block_count" ];
+}
+
+message BlockBatchDetailReply {
+    map<int64, BlockDetailReply> BlockDetails = 1 [ (gogoproto.jsontag) = "block_details" ];
+}
+
+message BlockBatchInfoReply {
+  repeated BlockInfoReply BlockInfos = 1
+      [ (gogoproto.jsontag) = "block_infos" ];
+}
+
+service Member {
+  // 得到member的基本信息
+  rpc Base(MemberMidReq) returns (BaseInfoReply);
+  // 批量得到一批member的基本信息
+  rpc Bases(MemberMidsReq) returns (BaseInfosReply);
+  // 得到member的全量信息
+  rpc Member(MemberMidReq) returns (MemberInfoReply);
+  // 批量得到一批member的全量信息
+  rpc Members(MemberMidsReq) returns (MemberInfosReply);
+  // 查看member是否更新过昵称
+  rpc NickUpdated(MemberMidReq) returns (NickUpdatedReply);
+  // 标记member已经更新过昵称
+  rpc SetNickUpdated(MemberMidReq) returns (EmptyStruct);
+  // 设置官方文档资料
+  rpc SetOfficialDoc(OfficialDocReq) returns (EmptyStruct);
+  // 设置member的性别
+  rpc SetSex(UpdateSexReq) returns (EmptyStruct);
+  // 设置member的名字
+  rpc SetName(UpdateUnameReq) returns (EmptyStruct);
+  // 设置member的头像
+  rpc SetFace(UpdateFaceReq) returns (EmptyStruct);
+  // 设置member的头像
+  rpc SetRank(UpdateRankReq) returns (EmptyStruct);
+  // 设置member的生日
+  rpc SetBirthday(UpdateBirthdayReq) returns (EmptyStruct);
+  // 设置member的签名
+  rpc SetSign(UpdateSignReq) returns (EmptyStruct);
+  // 得到member的官方信息
+  rpc OfficialDoc(MidReq) returns (OfficialDocInfoReply);
+
+  // 得到member的节操值
+  rpc Moral(MemberMidReq) returns (MoralReply);
+  // 得到member的节操日志
+  rpc MoralLog(MemberMidReq) returns (UserLogsReply);
+  // 给member添加节操值
+  rpc AddMoral(UpdateMoralReq) returns (EmptyStruct);
+  // 给一批member批量添加节操值
+  rpc BatchAddMoral(UpdateMoralsReq) returns (UpdateMoralsReply);
+
+  // 得到member的经验值
+  rpc Exp(MidReq) returns (LevelInfoReply);
+  // 得到member的等级
+  rpc Level(MidReq) returns (LevelInfoReply);
+  // 更新member的经验值
+  rpc UpdateExp(AddExpReq) returns (EmptyStruct);
+  // 得到membe的经验日志
+  rpc ExpLog(MidReq) returns (UserLogsReply);
+  // 得到member的经验统计
+  rpc ExpStat(MidReq) returns (ExpStatReply);
+
+  // 得到member的实名认证状态
+  rpc RealnameStatus(MemberMidReq) returns (RealnameStatusReply);
+  // 得到member 实名认证流程的状态
+  rpc RealnameApplyStatus(MemberMidReq) returns (RealnameApplyInfoReply);
+  // 手机号实名认证发送验证码
+  rpc RealnameTelCapture(MemberMidReq) returns (EmptyStruct);
+  // 进行实名认证
+  rpc RealnameApply(ArgRealnameApplyReq) returns (EmptyStruct);
+  // 实名详情
+  rpc RealnameDetail(MemberMidReq) returns (RealnameDetailReply);
+  // 所有非敏感实名认证信息
+  rpc RealnameStrippedInfo(MemberMidReq) returns (RealnameStrippedInfoReply);
+  // 通过身份证号查询 mid
+  rpc MidByRealnameCard(MidByRealnameCardsReq) returns (MidByRealnameCardReply);
+  // 添加用户为受监控
+  rpc AddUserMonitor(AddUserMonitorReq) returns (EmptyStruct);
+  // 查看member是否在监控状态
+  rpc IsInMonitor(MidReq) returns (IsInMonitorReply);
+  // 添加属性审核 (暂时不开放调用)
+  // rpc AddPropertyReview(AddPropertyReviewReq) returns (EmptyStruct);
+
+  // block
+  // 获取用户封禁信息数据
+  rpc BlockInfo(MemberMidReq) returns (BlockInfoReply);
+  // 批量获取用户封禁信息数据
+  rpc BlockBatchInfo(MemberMidsReq) returns (BlockBatchInfoReply);
+  //批量获取用户封禁详细数据
+  rpc BlockBatchDetail(MemberMidsReq) returns (BlockBatchDetailReply);
+}

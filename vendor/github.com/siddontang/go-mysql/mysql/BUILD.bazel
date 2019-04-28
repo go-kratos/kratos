@@ -1,0 +1,44 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "const.go",
+        "errcode.go",
+        "errname.go",
+        "error.go",
+        "field.go",
+        "gtid.go",
+        "mariadb_gtid.go",
+        "mysql_gtid.go",
+        "parse_binary.go",
+        "position.go",
+        "result.go",
+        "resultset.go",
+        "resultset_helper.go",
+        "state.go",
+        "util.go",
+    ],
+    importmap = "go-common/vendor/github.com/siddontang/go-mysql/mysql",
+    importpath = "github.com/siddontang/go-mysql/mysql",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/juju/errors:go_default_library",
+        "//vendor/github.com/satori/go.uuid:go_default_library",
+        "//vendor/github.com/siddontang/go/hack:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

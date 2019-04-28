@@ -1,0 +1,29 @@
+// 定义项目 API 的 proto 文件 可以同时描述 gRPC 和 HTTP API
+// protobuf 文件参考:
+//  - https://developers.google.com/protocol-buffers/
+//  - http://info.bilibili.co/display/documentation/gRPC+Proto
+// protobuf 生成 HTTP 工具:
+//  - http://git.bilibili.co/platform/go-common/tree/master/app/tool/protoc-gen-bm
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/protobuf/empty.proto";
+
+// package 命名使用 {discovery_id}.{version} 的方式, version 形如 v1, v2, v1beta ..
+// NOTE: 不知道的 discovery_id 请询问大佬, 新项目找大佬申请 discovery_id，先到先得抢注
+// e.g. account.service.v1
+package demo.service.v1;
+
+// NOTE: 最后请删除这些无用的注释 (゜-゜)つロ 
+
+option go_package = "api";
+// do not generate getXXX() method 
+option (gogoproto.goproto_getters_all) = false;
+
+service Demo {
+	rpc SayHello (HelloReq) returns (.google.protobuf.Empty);
+}
+
+message HelloReq {
+	string name = 1 [(gogoproto.moretags)='form:"name" validate:"required"'];
+}

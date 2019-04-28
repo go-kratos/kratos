@@ -1,0 +1,4 @@
+[global]
+    name = "qing"
+    version = "1.0.0"
+    default = "test"

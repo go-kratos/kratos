@@ -1,0 +1,20 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- hejianbing
+- liangguangsheng
+- lintanghui
+- wangyuzhe
+- zhaogangtao
+labels:
+- job
+- job/main/credit-timer
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- hejianbing
+- liangguangsheng
+- lintanghui
+- wangyuzhe
+- zhaogangtao

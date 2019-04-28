@@ -1,0 +1,13 @@
+syntax = "proto3";
+package cache;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message responseCache {
+    int32 Status = 1;
+    map<string, headerValue> Header = 2;
+    bytes Data = 3;
+}
+
+message headerValue {
+    repeated string Value = 1;
+}

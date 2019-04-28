@@ -1,0 +1,26 @@
+syntax="proto2";
+option cc_generic_services = true;
+
+package bili.search.rpc.tagbox;
+
+message SourceTypeConst {
+    optional string SOURCE_ARTICLE = 1 [default = "article"]; // 文章
+}
+
+message TagboxRequest {
+    required int32 id = 1;
+    required string source_type = 2;
+    required string content = 3;
+    required int32 trackid = 4;
+    optional string remarks = 5;
+}
+
+message TagboxResponse {
+    required int32 exec_code = 1;
+    required int32 id = 2;
+    repeated string keywords = 3;
+}
+
+service TagboxService {
+    rpc segment(TagboxRequest) returns (TagboxResponse);
+}

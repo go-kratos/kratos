@@ -1,0 +1,126 @@
+# This is a TOML document. Boom.
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/tag-job.pid"
+dir = "./"
+perf = "0.0.0.0:6014"
+checkFile = "/data/www/tag-job.html"
+
+[tag]
+tick = "5m"
+maxArcsLimit=1000
+arcTagSharding = 100
+
+[log]
+dir = "/data/log/tag-job/"
+
+[mysql]
+    addr = "172.16.33.54"
+    dsn = "test:test@tcp(172.16.33.54:3306)/bilibili_tag?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 1
+    idle = 1
+    IdleTimeout = "1s"
+    QueryTimeout = "1s"
+    ExecTimeout = "1s"
+    TranTimeout = "1s"
+    [mysql.breaker]
+        window  ="1s"
+        sleep   ="100ms"
+        bucket  = 10
+        ratio   = 0.1
+        request = 100
+
+[redis]
+    [redis.rank.redis]
+        name = "tag"
+        proto = "tcp"
+        addr = "172.16.33.54:6382"
+        idle = 10
+        active = 10
+        dialTimeout = "500ms"
+        readTimeout = "1s"
+        writeTimeout = "1s"
+        idleTimeout = "80s"
+    [redis.rank.expire]
+            tagNewArc = "72h"
+
+[databus]
+	[databus.archive]
+        key = "0QEO9F8JuuIxZzNDvklH"
+        secret = "0QEO9F8JuuIxZzNDvklI"
+        group = "ArchiveNotify-Tag-S"
+        topic = "ArchiveNotify-T"
+        action = "sub"
+        name = "tag-job/archivesub"
+        proto = "tcp"
+        addr = "172.16.33.158:6205"
+        idle = 1
+        active = 1
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+    [databus.tag]
+        key = "0QEO9F8JuuIxZzNDvklH"
+        secret = "0QEO9F8JuuIxZzNDvklI"
+        group = "TagBinlog-TagJob-S"
+        topic = "TagBinlog-T"
+        action = "sub"
+        name = "tag-job/tagsub"
+        proto = "tcp"
+        addr = "172.16.33.158:6205"
+        idle = 1
+        active = 1
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+
+[tracer]
+proto = "udp"
+addr = "172.16.0.148:5640"
+tag = "platform/tag-job"
+
+
+[Platform]
+    [Platform.mysql]
+        addr = "172.16.0.148"
+        dsn = "test:test@tcp(172.16.0.148:3306)/platform_tag?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 1
+        idle = 1
+        IdleTimeout = "1s"
+        QueryTimeout = "1s"
+        ExecTimeout = "1s"
+        TranTimeout = "1s"
+        [Platform.mysql.breaker]
+        window  ="1s"
+        sleep   ="100ms"
+        bucket  = 10
+        ratio   = 0.1
+        request = 100
+    [Platform.redis]
+        name = "tag-service"
+        proto = "tcp"
+        addr = "172.16.33.54:6382"
+        active = 10
+        idle = 5
+        dialTimeout = "1s"
+        readTimeout = "1s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+        expire = "8h"
+        subExpire = "8h"
+        actionExpire = "1h"
+        operateExpire = "24h"
+    [Platform.memcache]
+        name = "tag-service"
+        proto = "tcp"
+        addr = "172.16.33.54:11214"
+        idle = 5
+        active = 10
+        dialTimeout = "1s"
+        readTimeout = "1s"
+        writeTimeout = "1s"
+        idleTimeout = "80s"
+        tagExpire = "24h"
+        ResExpire = "24h"

@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package relation.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service BaseInfo {
+    
+    /** uid获取关注列表和粉丝数
+     * 
+     */   
+    rpc getFollowType (BaseInfoGetFollowTypeReq) returns (BaseInfoGetFollowTypeResp);
+    
+    /** uid获取最近30天送礼数据
+     * 
+     */   
+    rpc getGiftInfo (BaseInfoGetGiftInfoReq) returns (BaseInfoGetGiftInfoResp);
+}
+
+
+
+message BaseInfoGetFollowTypeReq {
+    
+}
+
+message BaseInfoGetFollowTypeResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    map<int64, UidInfo> data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message UidInfo {
+        // 用户uid
+        int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+        // 关注类型
+        int64 attribute = 2 [(gogoproto.jsontag) = "attribute"];
+        // 是否特别关注
+        int64 special = 3 [(gogoproto.jsontag) = "special"];
+    }
+}
+
+
+
+message BaseInfoGetGiftInfoReq {
+    
+}
+
+message BaseInfoGetGiftInfoResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    map<int64, UidInfo> data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message UidInfo {
+        // 用户uid
+        int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+        // 金瓜子数
+        int64 gold = 2 [(gogoproto.jsontag) = "gold"];
+    }
+}

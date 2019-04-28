@@ -1,0 +1,13 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- gaopeng
+- gaopeng,shaozhenyu,limengqing
+labels:
+- admin
+- admin/main/up-rating
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- gaopeng,shaozhenyu,limengqing

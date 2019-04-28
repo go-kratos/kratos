@@ -1,0 +1,204 @@
+syntax = "proto3";
+package live.xuser.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "app/service/live/xuser/api/grpc/xuser.proto";
+
+message GuardBuyReq {
+    string order_id = 1 [(gogoproto.moretags) = "validate:\"required\""];
+    int64 uid = 2 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 ruid = 3 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int32 guard_level = 4 [(gogoproto.moretags) = "validate:\"gt=0,required\"", (gogoproto.casttype) = "int"];
+    int32 num = 5 [(gogoproto.moretags) = "validate:\"gt=0,required\"", (gogoproto.casttype) = "int"];
+    Platform platform = 6 [(gogoproto.moretags) = "validate:\"required\""];
+    string source = 7 [(gogoproto.moretags) = "validate:\"required\""];
+}
+
+message GuardBuyReply {
+    int32 status = 1 [(gogoproto.jsontag) = "status", (gogoproto.casttype) = "int"];
+}
+
+// GetByUidTargetIdReq 1:1请求
+message ClearUIDCacheReq {
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"gt=0,required"'];
+    string magic_key = 2 [(gogoproto.moretags) = 'form:"magic_key" validate:"alpha,required"'];
+}
+
+message ClearUIDCacheResp {
+}
+
+
+// GetByUidTargetIdReq 1:1请求
+message GetByUidTargetIdReq {
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"gt=0,required"'];
+    int64 target_id = 2 [(gogoproto.moretags) = 'form:"target_id" validate:"required"'];
+    int64 sort_type = 3 [(gogoproto.moretags) = 'form:"sort_type" validate:"gte=0"'];
+}
+
+
+
+
+message GetByUidTargetIdResp {
+    map<int64, DaHangHaiInfo> data = 1 [(gogoproto.jsontag) = "data"];
+}
+
+
+message AllDaHangHaiInfo {
+    map<int64,DaHangHaiInfo>   guardInfo = 1 [(gogoproto.moretags) = 'validate:"required"'];
+}
+
+
+message FilterDaHangHaiInfo {
+    map<int64,DaHangHaiInfo>    guardInfo = 1 [(gogoproto.moretags) = 'validate:"required"'];
+}
+
+
+message DaHangHaiInfo {
+    // 主键
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+    // uid
+    int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+    // target_id
+    int64 target_id = 3 [(gogoproto.jsontag) = "target_id"];
+    // 守护类型 1为总督，2为提督，3为舰长
+    int64 privilege_type = 4 [(gogoproto.jsontag) = "privilege_type"];
+    // start_time
+    string start_time = 5 [(gogoproto.jsontag) = "start_time"];
+    // expired_time
+    string expired_time = 6 [(gogoproto.jsontag) = "expired_time"];
+    // ctime
+    string ctime = 7 [(gogoproto.jsontag) = "ctime"];
+    // utime
+    string utime = 8 [(gogoproto.jsontag) = "utime"];
+}
+
+message DaHangHaiInfoList {
+    repeated DaHangHaiInfo list = 1  [(gogoproto.jsontag) = "list"];
+}
+
+message GetByUidTargetIdsReq {
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"gt=0,required"'];
+    repeated  TargetIds targetIDs = 2 [(gogoproto.moretags) = 'form:"targetIDs" validate:"required"'];
+
+}
+
+message GetByUidTargetIdsResp {
+    map<int64, DaHangHaiInfo> data = 1 [(gogoproto.jsontag) = "data"];
+}
+
+
+message TargetIds {
+    int64 target_id = 1 [(gogoproto.moretags) = 'form:"target_id" validate:"gt=0,required"'];
+    int64 sort_type = 2 [(gogoproto.moretags) = 'form:"sort_type" validate:"gt=0"'];
+
+}
+
+
+// GetByTargetIdsBatchReq 根据uids批量获取所有守护关系
+message GetByTargetIdsReq {
+    repeated  TargetIds targetIDs = 1 [(gogoproto.moretags) = 'form:"targetIDs" validate:"required"'];
+
+}
+
+// TODO 实现
+message GetByTargetIdsResp {
+
+}
+
+// GetAllShouHuReq 目标全部守护数据
+message GetByUidReq {
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"gt=0,required"'];
+
+}
+
+
+message GetByUidResp {
+    map<int64, DaHangHaiInfo> data = 1 [(gogoproto.jsontag) = "data"];
+}
+
+// GetAllShouHuBatchReq 目标全部守护数据(批量)
+message GetByUidBatchReq {
+    repeated int64 uids = 1 [(gogoproto.moretags) = 'form:"uids" validate:"required"'];
+
+}
+
+message GetByUidBatchResp {
+    map<int64, DaHangHaiInfoList> data = 1 [(gogoproto.jsontag) = "data"];
+}
+
+message GetAnchorRecentTopGuardReq{
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"gt=0,required"'];
+}
+
+message GetAnchorRecentTopGuardResp{
+    // 主键
+    int64 cnt = 1 [(gogoproto.jsontag) = "cnt"];
+    repeated GetAnchorRecentTopGuardList list = 2  [(gogoproto.jsontag) = "list"];
+}
+
+message GetAnchorRecentTopGuardList{
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    int64 end_time = 2 [(gogoproto.jsontag) = "end_time"];
+    int64 is_open = 3 [(gogoproto.jsontag) = "is_open"];
+
+}
+
+message GetTopListGuardReq{
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"gt=0,required"'];
+    int64 page = 2 [(gogoproto.moretags) = 'form:"page" validate:"gte=1"'];
+    int64 page_size = 3 [(gogoproto.moretags) = 'form:"page_size" validate:"gte=1"'];
+}
+
+message GetTopListGuardResp{
+    // 守护总数量
+    int64 num = 1 [(gogoproto.jsontag) = "num"];
+    int64 page = 2 [(gogoproto.jsontag) = "page"];
+    int64 now = 3 [(gogoproto.jsontag) = "now"];
+    repeated TopListGuard list = 4[(gogoproto.jsontag) = "list"];
+    repeated TopListGuard top3 = 5[(gogoproto.jsontag) = "top3"];
+}
+
+message TopListGuard{
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    int64 ruid = 2 [(gogoproto.jsontag) = "ruid"];
+    int64 rank = 4 [(gogoproto.jsontag) = "rank"];
+    int64 guard_level = 3 [(gogoproto.jsontag) = "guard_level"];
+}
+
+
+message GetTopListGuardNumReq{
+     int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"gt=0,required"'];
+}
+
+message GetTopListGuardNumResp{
+    int64 total_count = 1 [(gogoproto.jsontag) = "total_count"];
+}
+
+
+
+service Guard {
+    // Buy 购买大航海
+    rpc Buy(GuardBuyReq) returns (GuardBuyReply);
+    // GetByUIDTargetID 获取我与目标用户守护关系,不支持批量(P0级)
+    rpc GetByUIDTargetID (GetByUidTargetIdReq) returns (GetByUidTargetIdResp);
+    // GetByTargetIdsBatch 获取我与目标用户守护关系,支持批量(P2级,必要时刻降级)
+    rpc GetByTargetIdsBatch (GetByTargetIdsReq) returns (GetByTargetIdsResp);
+
+    // GetByUIDTargetIds 根据uids批量获取所有守护关系,粉丝勋章使用
+    rpc GetByUIDTargetIds (GetByUidTargetIdsReq) returns (GetByUidTargetIdsResp);
+
+    // GetByUID 获取我所有的守护,不支持批量(P0级)
+    rpc GetByUIDForGift (GetByUidReq) returns (GetByUidResp);
+    // GetByUIDBatch 根据uids获取所有的守护,支持批量(P2级)
+    rpc GetByUIDBatch (GetByUidBatchReq) returns (GetByUidBatchResp);
+    // GetAnchorRecentTopGuard 获取最近的提督弹窗提醒
+    rpc GetAnchorRecentTopGuard (GetAnchorRecentTopGuardReq) returns (GetAnchorRecentTopGuardResp);
+    // GetTopListGuard 获取某个up主的守护排行榜
+    rpc GetTopListGuard (GetTopListGuardReq) returns (GetTopListGuardResp);
+    // GetTopListGuardNum 获取某个up主所有的守护数量,和GetTopListGuard接口的区别是此接口用于房间页首屏,逻辑比较简单,因此拆分开来
+    rpc GetTopListGuardNum (GetTopListGuardNumReq) returns (GetTopListGuardNumResp);
+
+    // ClearUIDCache 清除cache
+    rpc ClearUIDCache (ClearUIDCacheReq) returns (ClearUIDCacheResp);
+}

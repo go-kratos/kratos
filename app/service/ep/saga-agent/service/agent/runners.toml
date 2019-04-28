@@ -1,0 +1,10 @@
+ID=123
+[[runner]]
+url="http://gitlab.bilibili.co/"
+token="pxZPKWk1JQHLHNzYyj5p"
+name="mac-test-1"
+
+[[runner]]
+url="http://gitlab.bilibili.co/"
+token="crkm4z2ZQjfgQRi_puup"
+name="mac-test-2"

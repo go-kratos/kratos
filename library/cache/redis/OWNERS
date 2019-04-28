@@ -1,0 +1,11 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- maojian
+- zhapuyu
+labels:
+- library
+- library/cache/redis
+reviewers:
+- maojian
+- zhapuyu

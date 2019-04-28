@@ -1,0 +1,18 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- lintanghui
+- wanghuan01
+- wangyuzhe
+- zhaogangtao
+- zhoujiahui
+labels:
+- interface
+- interface/main/credit
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- lintanghui
+- wangyuzhe
+- zhaogangtao

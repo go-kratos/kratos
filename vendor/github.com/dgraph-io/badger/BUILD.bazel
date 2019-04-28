@@ -1,0 +1,59 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "backup.go",
+        "compaction.go",
+        "db.go",
+        "dir_unix.go",
+        "doc.go",
+        "errors.go",
+        "iterator.go",
+        "level_handler.go",
+        "levels.go",
+        "managed_db.go",
+        "manifest.go",
+        "options.go",
+        "structs.go",
+        "transaction.go",
+        "util.go",
+        "value.go",
+    ],
+    importmap = "go-common/vendor/github.com/dgraph-io/badger",
+    importpath = "github.com/dgraph-io/badger",
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/dgraph-io/badger/options:go_default_library",
+        "//vendor/github.com/dgraph-io/badger/protos:go_default_library",
+        "//vendor/github.com/dgraph-io/badger/skl:go_default_library",
+        "//vendor/github.com/dgraph-io/badger/table:go_default_library",
+        "//vendor/github.com/dgraph-io/badger/y:go_default_library",
+        "//vendor/github.com/dgryski/go-farm:go_default_library",
+        "//vendor/github.com/pkg/errors:go_default_library",
+        "//vendor/golang.org/x/sys/unix:go_default_library",
+        "@org_golang_x_net//trace:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//vendor/github.com/dgraph-io/badger/options:all-srcs",
+        "//vendor/github.com/dgraph-io/badger/protos:all-srcs",
+        "//vendor/github.com/dgraph-io/badger/skl:all-srcs",
+        "//vendor/github.com/dgraph-io/badger/table:all-srcs",
+        "//vendor/github.com/dgraph-io/badger/y:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

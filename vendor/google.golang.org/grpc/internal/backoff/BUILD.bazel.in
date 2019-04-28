@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["backoff.go"],
+    importpath = "google.golang.org/grpc/internal/backoff",
+    visibility = ["//:__subpackages__"],
+    deps = ["//internal/grpcrand:go_default_library"],
+)

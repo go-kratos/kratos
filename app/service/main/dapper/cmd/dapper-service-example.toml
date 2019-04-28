@@ -1,0 +1,27 @@
+[dapper]
+retention_day = 7
+api_listen = "127.0.0.1:6193"
+
+[log]
+stdout = true
+v = 10
+
+[hbase]
+    addrs = "172.22.33.146"
+
+[influx_db]
+    database = "dapper_uat"
+    addr = "http://172.22.33.146:8086"
+# origin tcp collect
+[collect]
+    network = "tcp"
+    addr = "127.0.0.1:6190"
+[kafka_collect]
+    topic = "lancer_main_dapper_collector"
+    addrs = ["172.18.33.163:9092", "172.18.33.164:9092", "172.18.33.165:9092"]
+
+[batch_writer]
+    # 64 MB buffer
+    raw_buf_size = 67108864
+    raw_chan_size = 4096
+    raw_workers = 5

@@ -1,0 +1,71 @@
+//存放api使用的模型
+syntax = "proto3";
+package ticket.service.sales.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+service Ticket {
+    // 查询电子票详情 - 支持根据订单号查询、场次 + uid 查询、票 id 查询
+    rpc TicketView(TicketViewRequest) returns (TicketViewResponse);
+    // 查询赠票信息
+    rpc TicketSend(TicketSendRequest) returns (TicketSendResponse);
+}
+
+message TicketViewRequest {
+    int64 order_id = 1 [(gogoproto.customname) = "OrderID"];
+    int64 uid = 2 [(gogoproto.customname) = "UID"];
+    int64 screen_id = 3 [(gogoproto.customname) = "ScreenID"];
+    repeated int64 id = 4 [(gogoproto.customname) = "ID"];
+}
+
+message TicketViewResponse {
+    repeated TicketItem tickets = 1;
+}
+
+message TicketItem {
+    int64 id = 1 [(gogoproto.customname) = "ID"];
+    int64 uid = 2 [(gogoproto.customname) = "UID"];
+    int64 oid = 3 [(gogoproto.customname) = "OID"];
+    int64 sid = 4 [(gogoproto.customname) = "SID"];
+    int64 price = 5;
+    int64 src = 6 [(gogoproto.casttype) = "int16"];
+    int64 type = 7 [(gogoproto.casttype) = "int16"];
+    int64 status = 8 [(gogoproto.casttype) = "int16"];
+    string qr = 9;
+    int64 ref_id = 10 [(gogoproto.customname) = "RefID"];
+    int64 sku_id = 11 [(gogoproto.customname) = "SkuID"];
+    int64 seat_id = 12 [(gogoproto.customname) = "SeatID"];
+    string seat = 13;
+    int64 refund_apply_time = 14 [(gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 etime = 15 [(gogoproto.customname) = "ETime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 ctime = 16 [(gogoproto.customname) = "CTime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 17 [(gogoproto.customname) = "MTime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message TicketSendRequest {
+    repeated int64 send_tid = 1 [(gogoproto.customname) = "SendTID"];
+    repeated int64 recv_tid = 2 [(gogoproto.customname) = "RecvTID"];
+}
+
+message TicketSendResponse {
+    repeated TicketSendItem ticket_sends = 1;
+}
+
+message TicketSendItem {
+    int64 id = 1 [(gogoproto.customname) = "ID"];
+    int64 sid = 2 [(gogoproto.customname) = "SID"];
+    int64 send_tid = 3 [(gogoproto.customname) = "SendTID"];
+    int64 recv_tid = 4 [(gogoproto.customname) = "RecvTID"];
+    int64 send_uid = 5 [(gogoproto.customname) = "SendUID"];
+    int64 recv_uid = 6 [(gogoproto.customname) = "RecvUID"];
+    string recv_tel = 7 [(gogoproto.customname) = "RecvTel"];
+    int32 status = 8 [(gogoproto.casttype) = "int16"];
+    int64 ctime = 9 [(gogoproto.customname) = "CTime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 10 [(gogoproto.customname) = "MTime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 oid = 11 [(gogoproto.customname) = "OID"];
+}

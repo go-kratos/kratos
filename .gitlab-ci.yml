@@ -1,0 +1,66 @@
+variables:
+  CI_SERVER_URL: http://git.bilibili.co
+#  CI_DEBUG_TRACE: "true"
+
+stages:
+  - COMPILE
+  - LINT
+  - TEST
+
+compile part:
+  stage: COMPILE
+  script:
+    - bash .rider/make_update.sh
+    - bazel info
+    - pwd
+    - bash .rider/bazel_build.sh "part"
+  only:
+    - branches
+  retry: 1
+
+compile(merge master):
+  stage: COMPILE
+  script:
+    - git pull origin master
+    - bash .rider/make_update.sh
+    - bazel info
+    - pwd
+    - bash .rider/bazel_build.sh
+  only:
+    - branches
+  retry: 1
+
+gometalinter:
+  stage: LINT
+  allow_failure: true
+  script:
+    - echo "gometalinter"
+    - pwd
+    - bash .rider/lint.sh
+  only:
+    - branches
+
+saga check:
+  stage: LINT
+  allow_failure: false
+  script:
+    - echo "saga check"
+    - pwd
+    - bash .rider/sagacheck.sh
+  except:
+    - master
+
+
+unit test:
+  stage: TEST
+#  allow_failure: true
+  script:
+    - echo "go unit test run"
+    - pwd
+    - bash .rider/unit_test.sh
+  only:
+    - branches
+  tags:
+    - uat-unittest
+
+

@@ -1,0 +1,43 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "collections.go",
+        "doc.go",
+        "equality.go",
+        "filter.go",
+        "messages.go",
+        "panic.go",
+        "quantity.go",
+        "serializer.go",
+        "strings.go",
+        "time.go",
+        "type.go",
+    ],
+    importmap = "go-common/vendor/github.com/smartystreets/assertions",
+    importpath = "github.com/smartystreets/assertions",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/smartystreets/assertions/internal/go-render/render:go_default_library",
+        "//vendor/github.com/smartystreets/assertions/internal/oglematchers:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//vendor/github.com/smartystreets/assertions/internal/go-render/render:all-srcs",
+        "//vendor/github.com/smartystreets/assertions/internal/oglematchers:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

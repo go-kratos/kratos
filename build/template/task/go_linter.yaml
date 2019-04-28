@@ -1,0 +1,18 @@
+presubmits:
+  platform/go-common:
+  - name: __go_linter_job_name__
+    always_run: true 
+    namespace: default
+    optional: true
+    spec:
+      containers:
+      - image: go_lint
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - ./build/verify-lint.sh
+        - ./<<bazel_dir_param>>/...

@@ -1,0 +1,68 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "host.go",
+        "host_darwin.go",
+        "host_darwin_386.go",
+        "host_darwin_amd64.go",
+        "host_fallback.go",
+        "host_freebsd.go",
+        "host_freebsd_386.go",
+        "host_freebsd_amd64.go",
+        "host_freebsd_arm.go",
+        "host_linux.go",
+        "host_linux_386.go",
+        "host_linux_amd64.go",
+        "host_linux_arm.go",
+        "host_linux_arm64.go",
+        "host_linux_mips.go",
+        "host_linux_mips64.go",
+        "host_linux_mips64le.go",
+        "host_linux_mipsle.go",
+        "host_linux_ppc64le.go",
+        "host_linux_s390x.go",
+        "host_openbsd.go",
+        "host_openbsd_amd64.go",
+        "host_solaris.go",
+        "host_windows.go",
+    ],
+    importmap = "go-common/vendor/github.com/shirou/gopsutil/host",
+    importpath = "github.com/shirou/gopsutil/host",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/shirou/gopsutil/internal/common:go_default_library",
+    ] + select({
+        "@io_bazel_rules_go//go/platform:darwin": [
+            "//vendor/github.com/shirou/gopsutil/process:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:freebsd": [
+            "//vendor/github.com/shirou/gopsutil/process:go_default_library",
+            "//vendor/golang.org/x/sys/unix:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:openbsd": [
+            "//vendor/github.com/shirou/gopsutil/process:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:windows": [
+            "//vendor/github.com/StackExchange/wmi:go_default_library",
+            "//vendor/github.com/shirou/gopsutil/process:go_default_library",
+            "//vendor/golang.org/x/sys/windows:go_default_library",
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

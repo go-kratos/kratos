@@ -1,0 +1,142 @@
+# This is a TOML document. Boom.
+version = "0.0.1"
+user = "nobody"
+pid = "/tmp/ticket-item.pid"
+dir = "./"
+family = "ticket-item"
+perf="0.0.0.0:3014"
+
+[log]
+dir = "/tmp/golog/ticket-item/"
+
+[db]
+    [db.master]
+    name = "172.16.33.203:3306"
+    dsn = "root:123456@tcp(172.16.33.203:3306)/tickets?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    # name = "172.22.34.101:3310"
+    # dsn = "ticket:i9HXWAvzWiqPxMxlfsQ8DRqYydjf3pYa@tcp(172.22.34.101:3310)/open_ticket?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    idleTimeout = "4h"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [db.master.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+
+[redis]
+	[redis.master]
+    name = "ticket-service"
+    proto = "tcp"
+    addr = "127.0.0.1:6379"
+    #addr = "172.16.33.203:6379"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "10s"
+
+[rpcServer]
+    addr = ':9301'
+    timeout = "3s"
+[bm]
+	[bm.inner]
+	addr = "0.0.0.0:8801"
+    timeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+
+	[bm.local]
+	addr = "0.0.0.0:8802"
+    timeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+
+[httpClient]
+  [httpClient.read]
+  key = "7c7ac0db1aa05587"
+  secret = "9a6d62d93290c5f771ad381e9ca23f26"
+  dial = "1s"
+  timeout = "4s"
+  keepAlive = "60s"
+  timer = 1000
+  [httpClient.read.breaker]
+      window  = "3s"
+      sleep   = "100ms"
+      bucket  = 10
+      ratio   = 0.5
+      request = 100
+  [httpClient.write]
+  key = "7c7ac0db1aa05587"
+  secret = "9a6d62d93290c5f771ad381e9ca23f26"
+  dial = "1s"
+  timeout = "3s"
+  keepAlive = "60s"
+  timer = 1000
+  [httpClient.write.breaker]
+      window  = "3s"
+      sleep   = "100ms"
+      bucket  = 10
+      ratio   = 0.5
+      request = 100
+
+[app]
+key = "7d9f6f6fe2a898e8"
+secret = "test"
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    csrfOn = false
+    [identify.app]
+    key = "7d9f6f6fe2a898e8"
+    secret = "test"
+    [identify.host]
+    auth = "http://uat-passport.bilibili.co"
+    secret = "http://uat-open.bilibili.co"
+    [identify.httpClient]
+    key = "7d9f6f6fe2a898e8"
+    secret = "test"
+    dial = "30ms"
+    timeout = "100ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://uat-passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://uat-passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://uat-open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+
+[orm]
+    dsn = "root:123456@tcp(172.16.33.203:3306)/tickets?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    #dsn = "ticket:i9HXWAvzWiqPxMxlfsQ8DRqYydjf3pYa@tcp(172.22.34.101:3310)/open_ticket?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    idleTimeout = "4h"
+
+[ut]
+    distPrefix  = "http://localhost:8801/x/internal/ticket/sales"
+
+[url]
+    elasticHost = "http://uat-manager.bilibili.co"
+    defaultHead = "https://static.hdslb.com/images/member/noface.gif"
+
+[baseCenter]
+    appId = "nBF6jpB7"
+    appToken = "XZUGqmAf1rRmu7l0dhogFIPPvveHOgSy2WtQ957JPeE="
+    url = "http://172.16.33.203/api/basecenter/"
+
+[tag]
+tags = "10001=漫展,10002=同人展,10003=漫展嘉年华,10004=游戏展,10005=见面会,10006=茶会,10007=展示会,10008=演唱会,10009=音乐会,10010=话剧,10011=比赛,10012=舞蹈,10013=画展,10014=乐园,10015=cosplay展,10016=only展,10017=古风展"

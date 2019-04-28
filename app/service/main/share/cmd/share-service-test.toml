@@ -1,0 +1,121 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/share-service.pid"
+dir = "./"
+perf = "127.0.0.1:6080"
+family = "share-service"
+RedisExpire = 108000
+
+tick = "5m"
+worker = 8
+
+AllowType = [1,2,3]
+
+Target   = 2233
+Sources  = [111,222,333,444,555,666]
+
+
+[xlog]
+dir = "/data/log/share-service/"
+
+[statsd]
+project = "share-service"
+addr = "172.18.20.15:8200"
+chanSize = 10240
+
+[tracer]
+proto = "udp"
+addr = "172.16.33.46:5140"
+tag = "platform/share-service"
+
+[app]
+key = "53e2fa226f5ad348"
+secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+
+[bm]
+    addr = "0.0.0.0:6081"
+    timeout = "1s"
+
+[db]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_share?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 1
+    idleTimeout ="4h"
+    queryTimeout = "10s"
+    execTimeout = "10s"
+    tranTimeout = "10s"
+    [db.arc.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[ecode]
+domain = "172.16.33.248:6401"
+all = "1h"
+diff = "5m"
+[ecode.clientconfig]
+    key = "test"
+    secret = "e6c4c252dc7e3d8a90805eecd7c73396"
+    dial      = "2000ms"
+    timeout   = "2s"
+    keepAlive = "10s"
+    timer     = 128
+    [ecode.clientconfig.breaker]
+        window  ="3s"
+        sleep   ="100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+[ecode.app]
+    key = "test"
+    secret = "e6c4c252dc7e3d8a90805eecd7c73396"
+
+[redis]
+    name = "share-service/redis"
+    proto = "tcp"
+    addr = "172.18.33.61:6889"
+    idle = 50
+    active = 100
+    dialTimeout = "10s"
+    readTimeout = "10s"
+    writeTimeout = "10s"
+    idleTimeout = "80s"
+    expire = "8h"
+
+[databus]
+    key = "8e27ab7e39270b59"
+    secret = "477df6a068d7332a163f95abbad2079c"
+    group = "ShareMid-MainAppSvr-P"
+    topic = "ShareMid-T"
+    action = "pub"
+    name = "share-service/pub"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[archiveDatabus]
+    key = "8e27ab7e39270b59"
+    secret = "477df6a068d7332a163f95abbad2079c"
+    group = "StatShare-MainAppSvr-P"
+    topic = "StatShare-T"
+    action = "pub"
+    name = "archive-service/StatShare"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 10
+    active = 50
+    dialTimeout = "2s"
+    readTimeout = "2s"
+    writeTimeout = "2s"
+    idleTimeout = "80s"
+

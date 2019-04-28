@@ -1,0 +1,145 @@
+# This is a TOML document. Boom.
+
+version = "3.0.0"
+user = "nobody"
+pid = "/tmp/account-service.pid"
+dir = "./"
+perf = "127.0.0.1:6070"
+
+[host]
+    passportURI = "http://uat-passport.bilibili.co"
+    vipURI = "http://uat-vip.bilibili.co"
+
+[wardenServer]
+    addr = "0.0.0.0:6077"
+    timeout = "1s"
+
+[liveZK]
+    addrs = ["172.18.33.131:2181", "172.18.33.168:2181", "172.18.33.169:2181"]
+    timeout = "1s"
+
+[log]
+dir = "/data/log/account-service/"
+    [log.agent]
+    taskID = "000069"
+    proto = "unixgram"
+    addr = "/var/run/lancer/collector.sock"
+    chan = 10240
+
+[tracer]
+family = "account-service"
+proto = "unixgram"
+addr = "/var/run/dapper-collect/dapper-collect.sock"
+
+[bm]
+    [bm.inner]
+    addr = "0.0.0.0:6071"
+    timeout = "1s"
+    [bm.local]
+    addr = "0.0.0.0:6072"
+    timeout = "1s"
+
+[rpcServer2]
+discoverOff = false
+token = "123456"
+[[rpcServer2.servers]]
+proto = "tcp"
+addr = "0.0.0.0:6079"
+weight = 10
+group = "test"
+[rpcServer2.zookeeper]
+root = "/microservice/account-service-2/"
+addrs = ["172.18.33.172:2181"]
+timeout = "1s"
+
+[httpClient]
+    [httpClient.read]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.read.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.read.url]
+    "http://api.bilibili.co/x/internal/v3/account/privacy" = {key = "7c7ac0db1aa05587", secret = "9a6d62d93290c5f771ad381e9ca23f26"}
+    [httpClient.write]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.write.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.privacy]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.privacy.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[identify]
+    [identify.host]
+    auth = "http://passport.bilibili.com"
+    secret = "http://open.bilibili.com"
+    [identify.httpClient]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "30ms"
+    timeout = "100ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[memcache]
+accountExpire = "3s"
+    [memcache.account]
+    name = "account-service/account"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[relationRPC]
+    timeout = "1s"
+
+[memberRPC]
+    timeout = "1s"
+
+[coinRPC]
+    timeout = "1s"
+
+[suitRPC]
+    timeout = "1s"
+
+[appkeyFilter]
+    whiteKeys = ["all"]

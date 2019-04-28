@@ -1,0 +1,19 @@
+[log]
+    stdout = true
+
+[bm]
+    addr = "127.0.0.1:6193"
+    timeout = "10s"
+
+[hbase]
+    addrs = "nvm-test-dapper-influxdb-01"
+
+[influx_db]
+    database = "dapper_uat"
+    addr = "http://172.22.33.146:8086"
+
+[ops_log]
+    api = "http://uat-ops-log.bilibili.co/elasticsearch/_msearch"
+
+[collectors]
+    nodes = ["172.16.38.143:6193"]

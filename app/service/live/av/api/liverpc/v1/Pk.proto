@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+package av.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Pk {
+    
+    /** 根据id获取PK基础信息
+     * 
+     */   
+    rpc getInfoById (PkGetInfoByIdReq) returns (PkGetInfoByIdResp);
+    
+    /** 根据id获取PK基础信息
+     * 
+     */   
+    rpc getPkStatus (PkGetPkStatusReq) returns (PkGetPkStatusResp);
+    
+    /** 批量获取pkIds
+     * 
+     */   
+    rpc getPkIdsByRoomIds (PkGetPkIdsByRoomIdsReq) returns (PkGetPkIdsByRoomIdsResp);
+}
+
+
+
+message PkGetInfoByIdReq {
+    // 会返回主播数据
+    int64 is_anchor = 1 [(gogoproto.jsontag) = "is_anchor"];
+    // 直播场次id
+    int64 pk_id = 2 [(gogoproto.jsontag) = "pk_id"];
+    // 房间id   房间id （pk_id与room_id必传一个）
+    int64 room_id = 3 [(gogoproto.jsontag) = "room_id"];
+    // 来源：pc：表示PC端；pc_link：表示PC直播姬；ios：表示ios端；ios_link：表示ios_link端；android：安卓端；android_link：安卓link端；ipad：ipad；android_pad:安卓pad端；live_mng：表示live后台;vc_mng：表示vc后台;"
+    string platform = 4 [(gogoproto.jsontag) = "platform"];
+}
+
+message PkGetInfoByIdResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 本场直播pk_id
+        int64 pk_id = 1 [(gogoproto.jsontag) = "pk_id"];
+        // 发起方房间id
+        int64 init_id = 2 [(gogoproto.jsontag) = "init_id"];
+        // 匹配方房间id
+        int64 match_id = 3 [(gogoproto.jsontag) = "match_id"];
+        // pk预备发起时间
+        int64 pre_time = 4 [(gogoproto.jsontag) = "pre_time"];
+        // pk状态 0 匹配成功;1.pk准备中; 2.pk进行中; 3.惩罚中; 10.连麦正常结束; 11.pk中断,连麦结束, 12 连麦异常,连麦结束
+        int64 status = 5 [(gogoproto.jsontag) = "status"];
+        // pk话题
+        string pk_topic = 6 [(gogoproto.jsontag) = "pk_topic"];
+        // 惩罚话题
+        string punish_topic = 7 [(gogoproto.jsontag) = "punish_topic"];
+    }
+}
+
+
+
+message PkGetPkStatusReq {
+    // 会返回主播数据
+    int64 is_anchor = 1 [(gogoproto.jsontag) = "is_anchor"];
+    // 直播场次id
+    int64 pk_id = 2 [(gogoproto.jsontag) = "pk_id"];
+    // 房间id   房间id （pk_id与room_id必传一个）
+    int64 room_id = 3 [(gogoproto.jsontag) = "room_id"];
+    // 邀请id
+    int64 invite_id = 4 [(gogoproto.jsontag) = "invite_id"];
+    // 来源：pc：表示PC端；pc_link：表示PC直播姬；ios：表示ios端；ios_link：表示ios_link端；android：安卓端；android_link：安卓link端；ipad：ipad；android_pad:安卓pad端；live_mng：表示live后台;vc_mng：表示vc后台;"
+    string platform = 5 [(gogoproto.jsontag) = "platform"];
+}
+
+message PkGetPkStatusResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 当前时间
+        int64 timestamp = 1 [(gogoproto.jsontag) = "timestamp"];
+        // 本场直播pk_id
+        int64 pk_id = 2 [(gogoproto.jsontag) = "pk_id"];
+        // pk状态 100 匹配成功;200.pk准备中; 300.pk进行中; 400惩罚中; 1000.连麦正常结束; 1100.pk中断,连麦结束, 1200，逃跑 1300 连麦异常,连麦结束
+        int64 pk_status = 3 [(gogoproto.jsontag) = "pk_status"];
+        // 邀请id
+        int64 invite_id = 4 [(gogoproto.jsontag) = "invite_id"];
+        // 100 排队中 200 邀请中 1000 同意邀请 1100 拒绝邀请 1200 取消邀请,1300 邀请异常（主播信息）
+        int64 invite_status = 5 [(gogoproto.jsontag) = "invite_status"];
+    }
+}
+
+
+
+message PkGetPkIdsByRoomIdsReq {
+    // 房间ids
+    repeated int64 room_ids = 1 [(gogoproto.jsontag) = "room_ids"];
+    // 来源：pc：表示PC端；pc_link：表示PC直播姬；ios：表示ios端；ios_link：表示ios_link端；android：安卓端；android_link：安卓link端；ipad：ipad；android_pad:安卓pad端；live_mng：表示live后台;vc_mng：表示vc后台;"
+    string platform = 2 [(gogoproto.jsontag) = "platform"];
+}
+
+message PkGetPkIdsByRoomIdsResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    map<string, int64> data = 3 [(gogoproto.jsontag) = "data"];
+}

@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package room.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service RoomPendant {
+    
+    /** 根据roomids批量获取角标
+     * 
+     */   
+    rpc getPendantByIds (RoomPendantGetPendantByIdsReq) returns (RoomPendantGetPendantByIdsResp);
+}
+
+
+
+message RoomPendantGetPendantByIdsReq {
+    // 
+    repeated int64 ids = 1 [(gogoproto.jsontag) = "ids"];
+    // 类型 "frame"房间页边框 , "badge"房间页角标 "index_badge"首页角标 "mobile_frame"移动端房间页边框 , "mobile_badge"移动端房间页角标 "mobile_index_badge"移动端首页角标
+    string type = 2 [(gogoproto.jsontag) = "type"];
+    // 位置0无1左上2右上3右下4左下 【5.29显示更新】：服务端还是吐右上，5.29客户端显示在左上,对应的背景图片
+    int64 position = 3 [(gogoproto.jsontag) = "position"];
+}
+
+message RoomPendantGetPendantByIdsResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    PendantInfo data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Result {
+        // 
+        string type = 1 [(gogoproto.jsontag) = "type"];
+        // 
+        int64 expire_time = 2 [(gogoproto.jsontag) = "expire_time"];
+        // 
+        string name = 3 [(gogoproto.jsontag) = "name"];
+        // 
+        string value = 4 [(gogoproto.jsontag) = "value"];
+        // 
+        string bg_color = 5 [(gogoproto.jsontag) = "bg_color"];
+        // 
+        string bg_pic = 6 [(gogoproto.jsontag) = "bg_pic"];
+    }
+       
+    message PendantInfo {
+        // 
+        map<int64, Result> result = 1 [(gogoproto.jsontag) = "result"];
+    }
+}

@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package userext.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Tag {
+    
+    /** 查询预约状态
+     * 
+     */   
+    rpc test (TagTestReq) returns (TagTestResp);
+}
+
+
+
+message TagTestReq {
+    // 活动 id
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+}
+
+message TagTestResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg　
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 活动 ID
+        int64 aid = 1 [(gogoproto.jsontag) = "aid"];
+        // 1.已经预约 2.没有预约
+        int64 action = 2 [(gogoproto.jsontag) = "action"];
+    }
+}

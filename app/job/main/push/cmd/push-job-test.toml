@@ -1,0 +1,124 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/push-job.pid"
+dir = "./"
+family = "push-job"
+
+[log]
+    dir = "/data/log/push-job/"
+
+[HTTPServer]
+    addr = "0.0.0.0:7021"
+    maxListen = 1000
+    timeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+
+[HTTPClient]
+    dial      = "50ms"
+    timeout   = "1s"
+    keepAlive = "60s"
+    key = "f265dcfa28272742"
+    secret = "437facc22dc8698b5544669bcc12348d"
+    [HTTPClient.breaker]
+        window  ="10s"
+        sleep   ="10ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[dpClient]
+    key = "17d515f7fa6324a19cfc6546d17ddca7"
+    secret = "eee2d709e54600ce147a4f522dc3c86e"
+    dial = "2s"
+    timeout = "30s"
+    keepAlive = "60s"
+    [dpClient.breaker]
+        window = "10s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request =  100
+
+[memcache]
+    name = "push"
+    proto = "tcp"
+    addr = "172.18.33.60:11228"
+    idle = 1000
+    active = 1000
+    dialTimeout = "10s"
+    readTimeout = "10s"
+    writeTimeout = "10s"
+    idleTimeout = "30s"
+
+[reportSub]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret="0QEO9F8JuuIxZzNDvklI"
+    group= "PushReport-Push-S"
+    topic= "PushReport-T"
+    action="sub"
+    name = "push-job/report-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[callbackSub]
+    key = "9765cdac5894f2ba"
+    secret="1448f5f2cd6029f6af6c5d438cd31edd"
+    group= "PushCallback-MainWebSvr-S"
+    topic= "PushCallback-T"
+    action="sub"
+    name = "push-callback-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[mysql]
+    addr = "172.16.33.205"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_push?timeout=1m&readTimeout=1m&writeTimeout=1m&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 10
+    idle = 5
+    queryTimeout = "1m"
+    execTimeout = "1m"
+    tranTimeout = "1m"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[wechat]
+    token = "GYQeuDWBbAsCNeGz"
+    secret = "ZKpmgINTkianyMbMixyxcPQjMCSHCDrk"
+    username = "wangjian"
+
+[job]
+    reportTicker = "5s"
+    delInvalidReportInterval = "10000h"
+    loadTaskInteval = "10ms"
+    pullResultIntervalHour = 8
+    delCallbackInterval = 15 # 单位:天
+    delTaskInterval = 30 # 单位:天
+    syncReportCacheWeek = 3 # report cache 同步时间，每周三
+    syncReportCacheHour = 2 # 两点
+    reportShard = 5
+    callbackShard = 5
+    pretreatmentTaskShard = 3
+    taskGoroutines = 5
+    limitPerTask = 100000
+    pushPartSize = 1000
+    pushPartChanSize = 10
+    mountDir = "/data/storage/"
+    pretreatTask = true
+    dpPollingTime = "30m"

@@ -1,0 +1,12 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- kuangxibin
+labels:
+- interface
+- interface/live/push-live
+- live
+options:
+  no_parent_owners: true
+reviewers:
+- kuangxibin

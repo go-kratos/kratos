@@ -1,0 +1,288 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+
+vipURI = "http://vip.bilibili.co"
+[app]
+key    = "ad4bb9b8f5d9d4a7"
+secret = "6912080d78d58be7cb94f57d50d438f6"
+
+[bm]
+    addr = "0.0.0.0:6822"
+	maxListen = 10
+	timeout = "1s"
+
+[payConf]
+	CustomerID = "10004"
+	Token ="0ff3d296ee0d7a28b4db1d761d2db907"
+	OrderNotifyURL ="http://vip.bilibili.co/pay/payOrderNotify"
+	SignNotifyURL ="http://vip.bilibili.co/pay/paySignNotify"
+	PlanID = 108217
+	ProductID ="vip_buy"
+	Version ="1.0"
+
+[URLConf]
+    payCoUrl = "http://pay.bilibili.co"
+    payUrl = "http://pay.bilibili.com"
+    MsgUrl = "http://message.bilibili.co"
+    mallUrl = "http://uat-mall.bilibili.co"
+    accountUrl = "http://account.bilibili.com"
+    apiCoUrl = "http://api.bilibili.co"
+    oldVipCoURL = "http://vip.bilibili.co"
+
+[property]
+    UpdateUserInfoCron = "0 0 0 * * ?"
+    willExpireMsgCron = "0 0 0 * * ?"
+    hadExpiredMsgCron = "0 0 0 * * ?"
+    AutoRenewCron = "0 0 0 * * ?"
+    SendMessageCron = "0 0 12 * * ?"
+    SalaryVideoCouponCron = "0 0 2 1 * ?"
+    PushDataCron = "0 0 3 * * ?"
+    SalaryVideoCouponnIterval = "5ms"
+    Retry = 3
+    SalaryDay = 10
+    annualVipSalaryCount = 4
+    normalVipSalaryCount = 2
+    frozenExpire = "15m"
+    frozenDate = "30m"
+    frozenLimit= 5
+    frozenCron = "0 1 0 * * ?"
+    sendBcoinCron = "0 0 0/1 10,11 * *"
+    handlerThread = 5
+    ReadThread = 3
+    PayMapping = {3 = "wechart"}
+    ActivityID = 142
+    AnnualVipBcoinCouponMoney = 5
+    AnnualVipBcoinDay = 10
+    batchSize = 200
+    salaryCouponMaps = {1 = {1 = 2, 2 = 4},2 = {1 = 8, 2 = 20}}
+    salaryCouponTypes = [1,2]
+    SalaryCouponBatchNoMaps = {1 = "view_%d_%s",2 = "cartoon_%d_%s"}
+    salaryCouponMsgTitleMaps = {1 = "观影劵到账通知",2 = "漫画阅读劵到账通知"}
+    salaryCouponMsgContentMaps = {1 = '大会员专享观影券已到账，#{点击查看>>}{"https://big.bilibili.com/mobile/userticket"}',2 = '大会员漫画阅读券已到账 #{点击查看>>}{"http://comic.bilibili.com/coupon.html"}'}
+    salaryCouponMsgSupplyContentMaps = {1 = '升级年度大会员赠送观影券%d张已到账，#{点击查看>>}{"https://big.bilibili.com/mobile/userticket"}',2 = '升级年度大会员赠送漫画阅读券%d张已到账，#{点击查看>>}{"http://comic.bilibili.com/coupon.html"}'}
+    salaryCouponURL = "http://api.bilibili.co/x/internal/coupon/grant"
+    msgOpen = true
+    activeStartTime = "2018-06-10 00:00:00"
+    sendMedalEndTime = "2018-07-08 00:00:00"
+    sendVipbuyEndTime = "2018-07-02 00:00:00"
+    summerActiveStartTime = "2018-06-09 00:00:00"
+    summerActiveEndTime = "2018-09-01 00:00:00"
+    sendCodeStartTime = "2018-08-20 00:00:00"
+    SendCodeEndTime = "2018-08-20 16:10:00"
+    couponIDs =["669748557aba188d","ab9b24dfcc107c6b","fe42eca7ed959a36","00244f64f658d1be"]
+    MedalID  = 1
+    codeExchangeMap = {1=[2,4],3=[3,8],12=[10,20]}
+    codeExchangeTimeMap = {1=1,3=1,12=4}
+    codeExchangePicMap = {1="http://i0.hdslb.com/bfs/activity-plat/static/20180615/d781502035dedd08821dacc88ea19b81/v573vo4y37.png",3="http://i0.hdslb.com/bfs/activity-plat/static/20180615/d781502035dedd08821dacc88ea19b81/89j8xm0019.png",12="http://i0.hdslb.com/bfs/activity-plat/static/20180615/d781502035dedd08821dacc88ea19b81/89j8xm0019.png"}
+    vipbuyExchangeNameMap={"669748557aba188d"="会员购满349减40优惠券","ab9b24dfcc107c6b"="会员购满269减30优惠券","fe42eca7ed959a36"="会员购满169减20优惠券","00244f64f658d1be"="会员购满69减8优惠券"}
+    grayScope = 500
+    pushToken = "fi6xf5xmldudexsh5tgukerohn3mgrl3"
+    businessId = 1
+    splitPush = 2
+    UpdateDB = true
+    NotGrantLimit = 100
+    EleEompensateCron = "*/5 * * * * ?"
+
+[RPC]
+  [RPC.VipRPC]
+    pullInterval = "10s"
+    [VipRPC.client]
+    token = "123456789"
+    proto = "tcp"
+    timeout = "1s"
+    timer = 1000
+    [VipRPC.client.breaker]
+    window  ="10s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [VipRPC.zookeeper]
+    root = "/microservice/vip/"
+    addrs = ["172.18.33.50:2199","172.18.33.51:2199","172.18.33.52:2199"]
+    timeout = "30s"
+
+[databusutil]
+    size = 100
+    chan = 1024
+    num = 4
+
+[httpClient]
+key    = "ad4bb9b8f5d9d4a7"
+secret = "6912080d78d58be7cb94f57d50d438f6"
+dial      = "2s"
+timeout   = "2s"
+keepAlive = "60s"
+timer     = 128
+    [httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+
+[newMysql]
+addr = "172.16.33.205"
+dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_vip?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 2
+IdleTimeout ="4h"
+queryTimeout = "2000ms"
+execTimeout = "2000ms"
+tranTimeout = "2000ms"
+[newMysql.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+
+[oldMysql]
+addr = "172.16.33.205"
+dsn = "vip:lqfGWO9n3XihPokr@tcp(172.16.33.205:3306)/vip?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 2
+IdleTimeout ="4h"
+queryTimeout = "2000ms"
+execTimeout = "2000ms"
+tranTimeout = "2000ms"
+[oldMysql.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+
+[databus]
+[databus.accLogin]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "Passport-MainAccount-S"
+    topic = "Passport-T"
+    action = "sub"
+    offset = "old"
+    buffer = 1024
+    name = "vip-job"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+[databus.oldVipBinLog]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "VipBinlog-MainAccount-S"
+    topic = "VipBinlog-T"
+    action = "sub"
+    offset = "old"
+    buffer = 1024
+    name = "vip-job"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+[databus.newVipBinLog]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "BiliVIPBinlog-MainAccount-S"
+    topic = "BiliVIPBinlog-T"
+    action = "sub"
+    offset = "old"
+    buffer = 1024
+    name = "vip-job"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+ [databus.salaryCoupon]
+        key = "4ba46ba31f9a44ef"
+        secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+        group = "VipBinlog-MainAccount-S" 
+        topic = "VipBinlog-T"
+        action = "sub"
+        offset = "old"
+        buffer = 1024
+        name = "vip-job"
+        proto = "tcp"
+        addr = "172.16.33.158:6205"
+        idle = 1
+        active = 1
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+[databus.accountNotify]
+        key = "4ba46ba31f9a44ef"
+        secret = "eab6221e1948b24a7376f6d0535f668a"
+        group = "AccountNotify-MainAccount-P"
+        topic = "AccountNotify-T"
+        action = "pub"
+        offset = "old"
+        buffer = 1024
+        name = "vip-job"
+        proto = "tcp"
+        addr = "172.16.33.158:6205"
+        idle = 1
+        active = 1
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+ [databus.couponNotify]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "BiliVIPBinlog-MainAccount-Coupon-S"
+    topic = "BiliVIPBinlog-T"
+    action = "sub"
+    offset = "old"
+    buffer = 1024
+    name = "vip-job"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[memcache]
+    name = "vip"
+    proto = "tcp"
+    addr = "172.18.33.60:11234"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+
+[redis]
+    name = "vip"
+    proto = "tcp"
+    addr = "172.18.33.61:6879"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+
+[RPCClient2]    
+    [RPCClient2.coupon]
+        timeout = "1s"

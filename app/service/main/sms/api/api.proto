@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+package sms.service.v1;
+
+import "app/service/main/sms/model/model.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+service Sms {
+    // Send send sms
+    rpc Send(SendReq) returns(SendReply);
+    // SendBatch send sms batch
+    rpc SendBatch(SendBatchReq) returns(SendBatchReply);
+}
+
+message AddTemplateReply {}
+
+message AddTemplateReq { 
+    int32 stype = 1 [(gogoproto.moretags) = 'form:"type" validate:"required,min=1"'];
+    string tcode = 2 [(gogoproto.moretags) = 'form:"code" validate:"required"'];
+    string template = 3 [(gogoproto.moretags) = 'form:"content" validate:"required"'];
+    string submitter = 5 [(gogoproto.moretags) = 'form:"submitter"'];
+}
+
+message TemplateListReply {
+    repeated model.ModelTemplate list = 1;
+    int32 total = 2;
+}
+
+message TemplateListReq {
+    int32 pn = 1 [(gogoproto.moretags) = 'form:"pn" default:"1"'];
+    int32 ps = 2 [(gogoproto.moretags) = 'form:"ps" default:"10"'];
+    string st = 3 [(gogoproto.moretags) = 'form:"st"'];
+    string sw = 4 [(gogoproto.moretags) = 'form:"sw"'];
+}
+
+message UpdateTemplateReply {}
+
+message UpdateTemplateReq {
+    int64 id = 1 [(gogoproto.customname) = "ID", (gogoproto.moretags) = 'form:"id" validate:"required,min=1"'];
+    int32 stype = 2 [(gogoproto.moretags) = 'form:"type" validate:"required,min=1"'];
+    int32 status = 3 [(gogoproto.moretags) = 'form:"status"'];
+    string tcode = 4 [(gogoproto.moretags) = 'form:"code" validate:"required"'];
+    string template = 5 [(gogoproto.moretags) = 'form:"content" validate:"required"'];
+    string submitter = 6 [(gogoproto.moretags) = 'form:"submitter"'];
+}
+
+message SendReply {}
+
+message SendReq { 
+    int64 mid = 1 [(gogoproto.moretags) = 'form:"mid"'];
+    string mobile = 2 [(gogoproto.moretags) = 'form:"mobile"'];
+    string country = 3 [(gogoproto.moretags) = 'form:"country"'];
+    string tcode = 4 [(gogoproto.moretags) = 'form:"tcode"'];
+    string tparam = 5 [(gogoproto.moretags) = 'form:"tparam"'];
+}
+
+message SendBatchReply {}
+
+message SendBatchReq {
+    repeated int64 mids = 1 [(gogoproto.moretags) = 'form:"mids,split"'];
+    repeated string mobiles = 2 [(gogoproto.moretags) = 'form:"mobiles,split"'];
+    string tcode = 3 [(gogoproto.moretags) = 'form:"tcode"'];
+    string tparam = 4 [(gogoproto.moretags) = 'form:"tparam"'];
+}
+
+message AddTaskReq {
+    int32 type = 1 [(gogoproto.moretags) = 'form:"type" validate:"required,min=1"'];
+    int32 business_id = 2 [(gogoproto.customname) = "BusinessID", (gogoproto.moretags) = 'form:"business_id"'];
+    string template_code = 3 [(gogoproto.moretags) = 'form:"template_code" validate:"required"'];
+    string desc = 4 [(gogoproto.moretags) = 'form:"desc"'];
+    string file_name = 5 [(gogoproto.moretags) = 'form:"file_name" validate:"required"'];
+    string file_path = 6 [(gogoproto.moretags) = 'form:"file_path" validate:"required"'];
+    int64 send_time = 7 [(gogoproto.moretags) = 'form:"send_time" validate:"required,min=1"'];
+}
+
+message AddTaskReply {}
+
+message UpdateTaskReq {
+    int64 id = 1 [(gogoproto.customname) = "ID", (gogoproto.moretags) = 'form:"id"'];
+    int32 type = 2 [(gogoproto.moretags) = 'form:"type" validate:"required,min=1"'];
+    int32 business_id = 3 [(gogoproto.customname) = "BusinessID", (gogoproto.moretags) = 'form:"business_id"'];
+    string template_code = 4 [(gogoproto.moretags) = 'form:"template_code" validate:"required"'];
+    string desc = 5 [(gogoproto.moretags) = 'form:"desc"'];
+    string file_name = 6 [(gogoproto.moretags) = 'form:"file_name" validate:"required"'];
+    string file_path = 7 [(gogoproto.moretags) = 'form:"file_path" validate:"required"'];
+    int64 send_time = 8 [(gogoproto.moretags) = 'form:"send_time" validate:"required,min=1"'];
+}
+
+message UpdateTaskReply {}
+
+message DeleteTaskReq {
+    int64 id = 1 [(gogoproto.customname) = "ID", (gogoproto.moretags) = 'form:"id"'];
+}
+
+message DeleteTaskReply {}
+
+message TaskInfoReq {
+    int64 id = 1 [(gogoproto.customname) = "ID", (gogoproto.moretags) = 'form:"id"'];
+}
+
+message TaskInfoReply {
+    model.ModelTask info = 1;
+}
+
+message TaskListReq {
+    int32 pn = 1 [(gogoproto.moretags) = 'form:"pn" default:"1"'];
+    int32 ps = 2 [(gogoproto.moretags) = 'form:"ps" default:"20"'];
+}
+
+message TaskListReply {
+    repeated model.ModelTask list = 1;
+    int32 total = 2;
+}

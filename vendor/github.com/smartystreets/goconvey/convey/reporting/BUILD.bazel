@@ -1,0 +1,37 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "console.go",
+        "doc.go",
+        "dot.go",
+        "gotest.go",
+        "init.go",
+        "json.go",
+        "printer.go",
+        "problems.go",
+        "reporter.go",
+        "reports.go",
+        "statistics.go",
+        "story.go",
+    ],
+    importmap = "go-common/vendor/github.com/smartystreets/goconvey/convey/reporting",
+    importpath = "github.com/smartystreets/goconvey/convey/reporting",
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/github.com/smartystreets/goconvey/convey/gotest:go_default_library"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

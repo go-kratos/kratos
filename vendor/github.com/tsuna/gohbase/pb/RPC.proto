@@ -1,0 +1,137 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package pb;
+
+import "Tracing.proto"; 
+import "HBase.proto";
+
+option java_package = "org.apache.hadoop.hbase.protobuf.generated";
+option java_outer_classname = "RPCProtos";
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+// See https://issues.apache.org/jira/browse/HBASE-7898 for high-level
+// description of RPC specification.
+//
+// On connection setup, the client sends six bytes of preamble -- a four
+// byte magic, a byte of version, and a byte of authentication type.
+//
+// We then send a "ConnectionHeader" protobuf of user information and the
+// 'protocol' or 'service' that is to be run over this connection as well as
+// info such as codecs and compression to use when we send cell blocks(see below).
+// This connection header protobuf is prefaced by an int that holds the length
+// of this connection header (this is NOT a varint).  The pb connection header
+// is sent with Message#writeTo.  The server throws an exception if it doesn't
+// like what it was sent noting what it is objecting too.  Otherwise, the server
+// says nothing and is open for business.
+//
+// Hereafter the client makes requests and the server returns responses.
+//
+// Requests look like this:
+//
+// <An int with the total length of the request>
+// <RequestHeader Message written out using Message#writeDelimitedTo>
+// <Optionally a Request Parameter Message written out using Message#writeDelimitedTo>
+// <Optionally a Cell block>
+//
+// ...where the Request Parameter Message is whatever the method name stipulated
+// in the RequestHeader expects; e.g. if the method is a scan, then the pb
+// Request Message is a GetRequest, or a ScanRequest.  A block of Cells
+// optionally follows.  The presence of a Request param Message and/or a
+// block of Cells will be noted in the RequestHeader.
+//
+// Response is the mirror of the request:
+//
+// <An int with the total length of the response>
+// <ResponseHeader Message written out using Message#writeDelimitedTo>
+// <Optionally a Response Result Message written out using Message#writeDelimitedTo>
+// <Optionally a Cell block>
+//
+// ...where the Response Message is the response type that goes with the
+// method specified when making the request and the follow on Cell blocks may
+// or may not be there -- read the response header to find out if one following.
+// If an exception, it will be included inside the Response Header.
+//
+// Any time we write a pb, we do it with Message#writeDelimitedTo EXCEPT when
+// the connection header is sent; this is prefaced by an int with its length
+// and the pb connection header is then written with Message#writeTo.
+//
+
+// User Information proto.  Included in ConnectionHeader on connection setup
+message UserInformation {
+  required string effective_user = 1;
+  optional string real_user = 2;
+}
+
+// This is sent on connection setup after the connection preamble is sent.
+message ConnectionHeader {
+  optional UserInformation user_info = 1;
+  optional string service_name = 2;
+  // Cell block codec we will use sending over optional cell blocks.  Server throws exception
+  // if cannot deal.  Null means no codec'ing going on so we are pb all the time (SLOW!!!)
+  optional string cell_block_codec_class = 3;
+  // Compressor we will use if cell block is compressed.  Server will throw exception if not supported.
+  // Class must implement hadoop's CompressionCodec Interface.  Can't compress if no codec.
+  optional string cell_block_compressor_class = 4;
+  optional VersionInfo version_info = 5;
+}
+
+// Optional Cell block Message.  Included in client RequestHeader
+message CellBlockMeta {
+  // Length of the following cell block.  Could calculate it but convenient having it too hand.
+  optional uint32 length = 1;
+}
+
+// At the RPC layer, this message is used to carry
+// the server side exception to the RPC client.
+message ExceptionResponse {
+  // Class name of the exception thrown from the server
+  optional string exception_class_name = 1;
+  // Exception stack trace from the server side
+  optional string stack_trace = 2;
+  // Optional hostname.  Filled in for some exceptions such as region moved
+  // where exception gives clue on where the region may have moved.
+  optional string hostname = 3;
+  optional int32 port = 4;
+  // Set if we are NOT to retry on receipt of this exception
+  optional bool do_not_retry = 5;
+}
+
+// Header sent making a request.
+message RequestHeader {
+  // Monotonically increasing call_id to keep track of RPC requests and their response
+  optional uint32 call_id = 1;
+  optional RPCTInfo trace_info = 2;
+  optional string method_name = 3;
+  // If true, then a pb Message param follows.
+  optional bool request_param = 4;
+  // If present, then an encoded data block follows.
+  optional CellBlockMeta cell_block_meta = 5;
+  // 0 is NORMAL priority.  200 is HIGH.  If no priority, treat it as NORMAL.
+  // See HConstants.
+  optional uint32 priority = 6;
+  optional uint32 timeout = 7;
+}
+
+message ResponseHeader {
+  optional uint32 call_id = 1;
+  // If present, then request threw an exception and no response message (else we presume one)
+  optional ExceptionResponse exception = 2;
+  // If present, then an encoded data block follows.
+  optional CellBlockMeta cell_block_meta = 3;
+}

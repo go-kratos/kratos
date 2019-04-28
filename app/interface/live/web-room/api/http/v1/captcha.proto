@@ -1,0 +1,46 @@
+syntax = "proto3";
+package live.webroom.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+
+// captcha 相关服务
+service Captcha {
+    // 创建验证码 `midware:"auth"`
+    rpc create (CreateCaptchaReq) returns (CreateCaptchaResp);
+
+    // 校验接口 `midware:"auth" method:"POST"`
+    rpc verify (VerifyReq) returns (VerifyResp);
+}
+
+message CreateCaptchaReq {
+    int64 type = 1 [(gogoproto.moretags) = 'form:"type"'];
+    string client_type = 2 [(gogoproto.moretags) = 'form:"client_type"'];
+    int64 height = 3 [(gogoproto.moretags) = 'form:"height"'];
+    int64 width = 4 [(gogoproto.moretags) = 'form:"width"'];
+}
+
+message CreateCaptchaResp{
+    int64 type = 1 [(gogoproto.jsontag) = "type"];
+    GeeTest geetest = 2 [(gogoproto.jsontag) = "geetest"];
+    Image image = 3 [(gogoproto.jsontag) = "image"];
+}
+
+message GeeTest{
+    string gt = 1 [(gogoproto.jsontag) = "gt"];
+    string challenge = 2 [(gogoproto.jsontag) = "challenge"];
+}
+message Image{
+    string tips = 1 [(gogoproto.jsontag) = "tips"];
+    string token = 2 [(gogoproto.jsontag) = "token"];
+    string content = 3 [(gogoproto.jsontag) = "content"];
+}
+message VerifyReq{
+    string anti = 1 [(gogoproto.moretags) = 'form:"anti"'];
+}
+
+message VerifyResp{
+    int64 type = 1 [(gogoproto.jsontag) = "type"];
+    string token = 2 [(gogoproto.jsontag) = "token"];
+}

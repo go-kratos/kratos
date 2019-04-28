@@ -1,0 +1,20 @@
+syntax = "proto3";
+package model;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message Exp {
+    int64 Uid = 1 [(gogoproto.jsontag) = "uid"];
+    int64 Uexp = 2 [(gogoproto.jsontag) = "uexp"];
+    int64 Rexp = 3 [(gogoproto.jsontag) = "rexp"];
+}
+
+message Level {
+    int64 Uid = 1 [(gogoproto.jsontag) = "uid"];
+    int64 Uexp = 2 [(gogoproto.jsontag) = "uexp"];
+    int64 Rexp = 3 [(gogoproto.jsontag) = "rexp"];
+    int32 Ulevel = 4 [(gogoproto.jsontag) = "ulevel"];
+    int32 Rlevel = 5 [(gogoproto.jsontag) = "rlevel"];
+    int32 Color = 6 [(gogoproto.jsontag) = "color"];
+    int64 Unext = 7 [(gogoproto.jsontag) = "unext"];
+    int64 Rnext = 8 [(gogoproto.jsontag) = "rnext"];
+}

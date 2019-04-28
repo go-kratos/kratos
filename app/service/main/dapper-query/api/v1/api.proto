@@ -1,0 +1,348 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+package dapper.query.v1;
+
+option go_package = "v1";
+
+message ListServiceNameReq {}
+
+message ListServiceNameReply {
+  repeated string service_names = 1;
+}
+
+message ListOperationNameReq {
+  string service_name = 1 [(gogoproto.moretags) = "form:\"service_name\" validate:\"required\""];
+}
+
+message ListOperationNameReply {
+  repeated string operation_names = 1;
+}
+
+message ListSpanReq {
+  string service_name = 1 [(gogoproto.moretags) = "form:\"service_name\" validate:\"required\""];
+  string operation_name = 2 [(gogoproto.moretags) = "form:\"operation_name\" validate:\"required\""];
+  int64 start = 3 [(gogoproto.moretags) = "form:\"start\""];
+  int64 end = 4 [(gogoproto.moretags) = "form:\"end\""];
+  // 目前支持的 order 
+  // time:desc time:asc 按时间排序
+  // duration:desc duration:asc 按耗时排序
+  string order = 5 [(gogoproto.moretags) = "form:\"order\""];
+  // 只显示 error 的 span
+  bool only_error = 6 [(gogoproto.moretags) = "form:\"only_error\""];
+  int32 offset = 7 [(gogoproto.moretags) = "form:\"offset\""];
+  int32 limit = 8 [(gogoproto.moretags) = "form:\"limit\""];
+}
+
+message SpanListItem {
+  string trace_id = 1;
+  string span_id = 2;
+  string parent_id = 3;
+  string service_name = 4;
+  string operation_name = 5;
+  string start_time = 6; // span 开始时间
+  string duration = 7; // span 耗时
+  map<string, TagValue> tags = 12;
+  // Deprecated: use tags
+  bool is_error = 8; // 是否发生错误
+  string container_ip = 9;
+  string region_zone = 10;
+  string mark = 11;
+}
+
+message TraceReq {
+  string trace_id = 1 [(gogoproto.moretags) = "form:\"trace_id\" validate:\"required\""];
+  string span_id = 2 [(gogoproto.moretags) = "form:\"span_id\""];
+}
+
+message RawTraceReq {
+  string trace_id = 1 [(gogoproto.moretags) = "form:\"trace_id\" validate:\"required\""];
+};
+
+message RawTraceReply {
+  repeated Span items = 1;
+}
+
+message TagValue {
+  oneof value {
+    string string_value = 2;
+    int64 int64_value = 3;
+    bool bool_value = 4;
+    float float_value = 5;
+  }
+}
+
+message Field {
+  string key = 1;
+  string value = 2;
+}
+
+message Log {
+  int64 timestamp = 1;
+  repeated Field fields = 2;
+}
+
+message Span {
+  string service_name = 1;
+  string operation_name = 2;
+  string trace_id = 3;
+  string span_id = 4;
+  string parent_id = 5;
+  int64 start_time = 6;
+  int64 duration = 7;
+  map<string, TagValue> tags = 8;
+  repeated Log logs = 9;
+  int32 level = 10;
+  repeated Span childs = 11;
+}
+
+message TraceReply {
+  int32 service_count = 1;
+  int32 span_count = 2;
+  int32 max_level = 3;
+  Span root = 4;
+}
+
+
+message ListSpanReply {
+  repeated SpanListItem items = 2;
+}
+
+message OperationNameRankReq {
+  string service_name = 1 [(gogoproto.moretags) = "form:\"service_name\" validate:\"required\""];
+  int64 start = 2 [(gogoproto.moretags) = "form:\"start\""];
+  int64 end = 3 [(gogoproto.moretags) = "form:\"end\""];
+  // 排序类型 max_duration 最大耗时, min_duration 最小耗时, avg_duration 平均耗时, errors 错误数
+  string rank_type = 4 [(gogoproto.moretags) = "form:\"rank_type\""];
+}
+
+message RankItem {
+  string service_name = 1;
+  string operation_name = 2;
+  // 当 rank type 是 max_duration, min_duration, avg_duration 时 value 是纳秒
+  // 当 rank type 是 errors 是 value 是错误数
+  double value = 3;
+}
+
+message OperationNameRankReply {
+  string rank_type = 1;
+  repeated RankItem items = 2;
+}
+
+message DependsRankReq {
+  string service_name = 1 [(gogoproto.moretags) = "form:\"service_name\" validate:\"required\""];
+  int64 start = 3 [(gogoproto.moretags) = "form:\"start\""];
+  int64 end = 4 [(gogoproto.moretags) = "form:\"end\""];
+  // 排序类型 max_duration 最大耗时, min_duration 最小耗时, avg_duration 平均耗时, errors 错误数
+  string rank_type = 5 [(gogoproto.moretags) = "form:\"rank_type\""];
+}
+
+message DependsRankReply {
+  string rank_type = 1;
+  repeated RankItem items = 2;
+}
+
+message SpanSeriesReq {
+  string service_name = 1 [(gogoproto.moretags) = "form:\"service_name\" validate:\"required\""];
+  string operation_name = 2 [(gogoproto.moretags) = "form:\"operation_name\" validate:\"required\""];
+  int64 start = 3 [(gogoproto.moretags) = "form:\"start\""];
+  int64 end = 4 [(gogoproto.moretags) = "form:\"end\""];
+  // 可选的 fields 有 max_duration, min_duration, avg_duration, errors
+  // 其中除 errors 返回的是一段时间内的总数 其他返回的都是平均数
+  // fields 是个数组可以通过 fields=max_duration,min_duration,avg_duration 逗号分隔
+  string fields = 6 [(gogoproto.moretags) = "form:\"fields\""];
+}
+
+message SeriesItem {
+  // 名称一般是请求的 field+{count|mean}
+  string field = 1;
+  repeated int64 values = 2 [(gogoproto.customtype) = "*int64"];
+}
+
+message SpanSeriesReply {
+  // 返回点的间隔
+  int64 interval = 5;
+  repeated string times = 1;
+  repeated SeriesItem items = 2;
+}
+
+message CltStatusReq {}
+
+message Client {
+  string addr = 1;
+  int64 err_count = 2;
+  int64 rate = 3;
+  int64 up_time = 4; 
+}
+
+message CltNode {
+  string node = 1;
+  int64 queue_len = 2;
+  repeated Client clients = 3;
+}
+
+message CltStatusReply {
+  repeated CltNode nodes = 1;
+}
+
+message SamplePointReq {
+  string service_name = 1 [(gogoproto.moretags) = "form:\"service_name\" validate:\"required\""];
+  string operation_name = 2 [(gogoproto.moretags) = "form:\"operation_name\" validate:\"required\""];
+  // only_error 在 errors 那个图可以指定为 true
+  bool only_error = 3 [(gogoproto.moretags) = "form:\"only_error\""];
+  // interval 使用 span-series 返回的 interval 即可
+  int64 interval = 5 [(gogoproto.moretags) = "form:\"interval\" validate:\"required\""];
+  // time 使用 time-series 返回的时间即可，相同格式型如 2006-01-02T15:04:05
+  string time = 6 [(gogoproto.moretags) = "form:\"time\" validate:\"required\""];
+}
+
+message SamplePointItem {
+  string trace_id = 1;
+  string span_id = 2;
+  int64 duration = 3;
+  bool is_error = 4;
+}
+
+message SamplePointReply {
+  repeated SamplePointItem items = 1;
+}
+
+message DependsTopologyReq {}
+
+message DependsTopologyItem {
+  string service_name = 1;
+  string depend_on = 2;
+}
+
+message DependsTopologyReply {
+  repeated DependsTopologyItem items = 1;
+}
+
+message OpsLogReq {
+  string trace_id = 1 [(gogoproto.moretags) = "form:\"trace_id\" validate:\"required\""];
+  string span_id = 2 [(gogoproto.moretags) = "form:\"span_id\""];
+  string trace_field = 3 [(gogoproto.moretags) = "form:\"trace_field\""];
+  string service_name = 4 [(gogoproto.moretags) = "form:\"service_name\""];
+  string operation_name = 5 [(gogoproto.moretags) = "form:\"operation_name\""];
+  // 开始时间
+  int64 start = 6 [(gogoproto.moretags) = "form:\"start\""];
+  // 结束时间
+  int64 end = 7[(gogoproto.moretags) = "form:\"end\""];
+}
+
+message OpsLogRecord {
+  string time = 1;
+  map<string, TagValue> fields = 2;
+  string level = 3;
+  string message = 4;
+}
+
+message OpsLogReply {
+  repeated OpsLogRecord records = 1;
+}
+
+message ServiceDependReq {
+  // service_name 不解释!
+  string service_name = 1 [(gogoproto.moretags) = "form:\"service_name\" validate:\"required\""];
+  // operation_name 当 operation_name 为空时查询所有 operation_name 然后 merge 结果
+  string operation_name = 2 [(gogoproto.moretags) = "form:\"operation_name\""];
+}
+
+message ServiceDependReply {
+  repeated ServiceDependItem items = 1;
+}
+
+message ServiceDependItem {
+  // service_name 依赖服务名称, service 为 AppID 其他为组件名 mysql, redis, http 等
+  string service_name = 1;
+  // component, 通讯组件 e.g. net/http, goRPC, gRPC
+  string component = 2;
+  // operation_names 被依赖服务的 operation_names, mysql, redis 等为空
+  repeated string operation_names = 3;
+}
+
+// DapperQuery dapper 查询服务
+service DapperQuery {
+  // ListServiceName 列出所有 service
+  rpc ListServiceName(ListServiceNameReq) returns (ListServiceNameReply) {
+    option (google.api.http) = {
+        get: "/x/internal/dapper/service-names";
+    };
+  }
+  // ListOperationName 列出某一 service  下所有 operation_name 仅 span.kind 为 server 的 operation_name
+  rpc ListOperationName(ListOperationNameReq) returns (ListOperationNameReply) {
+    option (google.api.http) = {
+      get: "/x/internal/dapper/operation-names";
+    };
+  }
+  // ListSpan 列出一个 service_name 某一 operation_name 所有采样到 Span
+  rpc ListSpan(ListSpanReq) returns (ListSpanReply) {
+    option (google.api.http) = {
+      get: "/x/internal/dapper/list-span";
+    };
+  }
+  // Trace 查询一个 Trace
+  rpc Trace(TraceReq) returns (TraceReply) {
+    option (google.api.http) = {
+      get: "/x/internal/dapper/trace";
+    };
+  }
+  // RawTrace 原始 Trace 数据
+  rpc RawTrace(RawTraceReq) returns (RawTraceReply) {
+    option (google.api.http) = {
+      get: "/x/internal/dapper/raw-trace";
+    };
+  }
+  // OperationNameRank 查询 OperationName 排名列表
+  rpc OperationNameRank(OperationNameRankReq) returns(OperationNameRankReply) {
+    option (google.api.http) = {
+      get: "/x/internal/dapper/operation-names-rank";
+    };
+  }
+  // DependsRank 查询某一个 service_name:operation_name 下所有依赖组件排名
+  rpc DependsRank(DependsRankReq) returns(DependsRankReply) {
+    option (google.api.http) = {
+      get: "/x/internal/dapper/depends-rank";
+    };
+  }
+  // SpanSeries 获取 span 的时间序列数据
+  rpc SpanSeries(SpanSeriesReq) returns (SpanSeriesReply) {
+    option (google.api.http) = {
+      get: "/x/internal/dapper/span-series";
+    };
+  }
+  // SamplePoint 获取采样点数据
+  rpc SamplePoint(SamplePointReq) returns(SamplePointReply) {
+    option (google.api.http) = {
+      get: "/x/internal/dapper/sample-point";
+    };
+  }
+  // CltStatus 获取 collector 信息
+  rpc CltStatus(CltStatusReq) returns(CltStatusReply) {
+    option (google.api.http) = {
+      get: "/x/internal/dapper/clt-status";
+    };
+  }
+  // DependsTopology 获取依赖拓扑图
+  rpc DependsTopology(DependsTopologyReq) returns (DependsTopologyReply) {
+    option (google.api.http) = {
+      get: "/x/internal/dapper/depends-topology";
+    }; 
+  }
+  // OpsLog 获取 通过 trace-id 获取 opslog 记录
+  // 如果请求的 trace-id 没有被记录到, 则需要提供 service_name operation_name 和 timestamp 进行模糊查询
+  rpc OpsLog(OpsLogReq) returns (OpsLogReply) {
+    option (google.api.http) = {
+      get: "/x/internal/dapper/ops-log";
+    }; 
+  }
+  // ServiceDepend 查询服务的直接依赖
+  // TODO: 通过最近收集的到3 个 span 实时计算的，在当前查询的服务出现不正常的时候，查询结果可能不准确
+  rpc ServiceDepend(ServiceDependReq) returns (ServiceDependReply) {
+    option (google.api.http) = {
+      get: "/x/internal/dapper/service-depend";
+    }; 
+  }
+}

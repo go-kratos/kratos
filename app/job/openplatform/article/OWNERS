@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- changxuanran
+- lijiadong
+- qiuliang
+labels:
+- job
+- job/openplatform/article
+- openplatform
+options:
+  no_parent_owners: true
+reviewers:
+- changxuanran
+- lijiadong
+- qiuliang

@@ -1,0 +1,87 @@
+filePath = "./source"
+ipv4Name = "mydata4vipday4.ipdb"
+ipv6Name = "mydata6vipday4.ipdb"
+anonymFileName = "GeoIP2-Anonymous-IP.mmdb"
+anonymKey = "cOp1pc4JZRpf"
+filterZone = ["共享地址","局域网","本机地址"]
+
+[host]
+maxmind = "https://download.maxmind.com"
+bvcip = "http://bvc-nerve.bilibili.co"
+
+[log]
+dir = "/data/log/location-service/"
+
+[db]
+    [db.zlimit]
+    name = "127.0.0.1:3306"
+    dsn = "root:test@tcp(127.0.0.1:3306)/bilibili_oversea?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    idleTimeout ="4h"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [db.zlimit.breaker]
+    window  ="3s"
+    sleep   ="100ms"
+    bucket  = 10        
+    ratio   = 0.5
+    request = 100
+
+[redis]
+    [redis.zlimit]
+    name = "location-service"
+    proto = "tcp"
+    addr = "172.18.33.61:6812"
+    #addr = "172.16.33.54:6379"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "10s"
+
+[bm]
+    [bm.inner]
+    addr = "0.0.0.0:6291"
+    timeout = "1s"
+    [bm.local]
+    addr = "0.0.0.0:6292"
+    timeout = "1s"
+	
+[rpcServer2]
+[[rpcServer2.servers]]
+    proto = "tcp"
+    addr = "0.0.0.0:6293"
+    weight = 10
+[rpcServer2.zookeeper]
+    root = "/microservice/location-service/"
+    addrs = ["172.18.33.172:2181"]
+    timeout = "30s"
+
+[wardenServer]
+    addr = "0.0.0.0:9000"
+    timeout = "1s"
+
+[liveZK]
+    addrs = ["172.22.33.130:2181"]
+    timeout = "30s"
+
+[httpClient]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "80ms"
+timeout   = "100ms"
+keepAlive = "60s"
+    [httpClient.breaker]
+    window  = "1s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.Host]
+    "api.live.bilibili.co" = {timeout = "200ms"}
+    [httpClient.url]
+    "http://api.bilibili.co/x/internal/v2/fav/video" = {timeout = "500ms"}

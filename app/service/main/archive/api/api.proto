@@ -1,0 +1,405 @@
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// use {app_id}.{version} as package name
+package archive.service.v1;
+
+option go_package = "api";
+
+// Archive grpc
+service Archive {
+    // Types 获取所有分区列表
+    rpc Types(NoArgRequest) returns(TypesReply);
+    // 获取单个稿件信息
+    rpc Arc(ArcRequest) returns(ArcReply);
+    // 批量获取稿件信息
+    rpc Arcs(ArcsRequest) returns(ArcsReply);
+    // 获取单个稿件计数信息
+    rpc Stat(StatRequest) returns(StatReply);
+    // 批量获取稿件计数信息
+    rpc Stats(StatsRequest) returns(StatsReply);
+    // 获取单个稿件+分P信息
+    rpc View(ViewRequest) returns(ViewReply);
+    // 批量获取稿件+分P信息
+    rpc Views(ViewsRequest) returns(ViewsReply);
+    // 获取稿件在各平台的点击数
+    rpc Click(ClickRequest) returns(ClickReply);
+    // 获取稿件的所有分P信息
+    rpc Page(PageRequest) returns(PageReply);
+    // 获取Up主绑定的相关推荐 *几乎废弃
+    rpc Recommend(RecommendRequest) returns(RecommendReply);
+    // 获取aid&cid对应的视频信息
+    rpc Video(VideoRequest) returns(VideoReply);
+    // 获取当前最大的aid，各子业务防刷、防脏数据时使用
+    rpc MaxAid(NoArgRequest) returns(MaxAidReply);
+    // 获取稿件的长简介信息
+    rpc Description(DescriptionRequest) returns(DescriptionReply);
+    // 内部方法，管理稿件服务缓存，请勿使用-----------------------------------------------------------------------
+    rpc ArcFieldCache(ArcFieldCacheRequest) returns(NoReply);
+    rpc ArcCache(ArcCacheRequest) returns(NoReply);
+    rpc UpVideoCache(UpVideoCacheRequest) returns(NoReply);
+    rpc DelVideoCache(DelVideoCacheRequest) returns(NoReply);
+    rpc SetStat(SetStatRequest) returns(NoReply);
+    // 内部方法，管理稿件服务缓存，请勿使用-----------------------------------------------------------------------
+}
+
+// NoArgReq
+message NoArgRequest{}
+// NoReply
+message NoReply{}
+
+message DescriptionRequest {
+    int64 aid = 1;
+}
+
+message DescriptionReply {
+    string desc = 1;
+}
+
+message MaxAidReply {
+    int64 aid = 1;
+}
+
+message ArcRequest {
+    int64 aid = 1;
+}
+
+message ArcReply {
+    Arc arc = 1;
+}
+
+message ArcsRequest {
+    repeated int64 aids = 1;
+}
+
+message ArcsReply {
+    map<int64, Arc> arcs = 1;
+}
+
+message ViewRequest {
+    int64 aid = 1;
+}
+
+message StatRequest {
+    int64 aid = 1;
+}
+
+message StatReply {
+    Stat Stat = 1;
+}
+
+message StatsRequest {
+    repeated int64 aids = 1;
+}
+
+message StatsReply {
+    map<int64, Stat> Stats = 1;
+}
+
+message ViewReply {
+    Arc arc = 1 [(gogoproto.embed) = true, (gogoproto.jsontag) = ""];
+    repeated Page pages = 2;
+}
+
+message ViewsRequest {
+    repeated int64 aids = 1;
+}
+
+message ViewsReply {
+    map<int64, ViewReply> views = 1;
+}
+
+message TypesReply {
+    map<int32, Tp> types = 1;
+}
+
+message ClickRequest {
+    int64 aid = 1;
+}
+
+message ClickReply {
+    Click click = 1;
+}
+
+message PageRequest {
+    int64 aid = 1;
+}
+
+message PageReply {
+    repeated Page pages = 1;
+}
+
+message RecommendRequest {
+    int64 aid = 1;
+}
+
+message RecommendReply {
+    repeated Arc arcs = 1;
+}
+
+message VideoRequest {
+    int64 aid = 1;
+    int64 cid = 2;
+}
+
+message VideoReply {
+    Page page = 1;
+}
+
+message Tp {
+    // 分区id
+    int32 ID = 1 [(gogoproto.jsontag) = "id"];
+    // 该分区的父级id
+    int32 pid = 2 [(gogoproto.jsontag) = "pid"];
+    // 该分区对应的名称
+    string name = 3 [(gogoproto.jsontag) = "name"];
+}
+
+message AidVideos {
+    int64 Aid = 1 [(gogoproto.jsontag) = "aid"];
+    // 分P信息
+    repeated Page Pages = 2 [(gogoproto.jsontag) = "pages"];
+}
+
+message Arc {
+    int64 Aid = 1 [(gogoproto.jsontag) = "aid"];
+    // 稿件一共有多少分P
+    int64 Videos = 2 [(gogoproto.jsontag) = "videos"];
+    // 分区ID
+    int32 TypeID = 3 [(gogoproto.jsontag) = "tid"];
+    // 分区名
+    string TypeName = 4 [(gogoproto.jsontag) = "tname"];
+    // 是否转载  1=原创  2=转载 0=历史上可能遗留的脏数据
+    int32 Copyright = 5 [(gogoproto.jsontag) = "copyright"];
+    // 稿件封面图地址，绝对地址 如 http://i0.hdslb.com/bfs/xxx.jpg
+    string Pic = 6 [(gogoproto.jsontag) = "pic"];
+    // 稿件标题
+    string Title = 7 [(gogoproto.jsontag) = "title"];
+    // 稿件发布时间 对外展示的标准时间  时间戳格式
+    int64 PubDate = 8 [(gogoproto.jsontag) = "pubdate", (gogoproto.casttype) = "go-common/library/time.Time"];
+    // 用户提交稿件的时间 一般不对外展示 时间戳格式
+    int64 Ctime = 9 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    // 稿件简介
+    string Desc = 10 [(gogoproto.jsontag) = "desc"];
+    // 稿件状态，>=0为前台用户可见状态，其他值详见 http://info.bilibili.co/pages/viewpage.action?pageId=3686597#id-%E7%A8%BF%E4%BB%B6%E5%AD%97%E6%AE%B5%E6%9E%9A%E4%B8%BE%E5%80%BC%E5%B1%9E%E6%80%A7%E8%AF%B4%E6%98%8E-%E7%A8%BF%E4%BB%B6%E7%8A%B6%E6%80%81state&access
+    int32 State = 11 [(gogoproto.jsontag) = "state"];
+    // 稿件访问属性 0=全员可见 10000=登录用户可见（极少)
+    int32 Access = 12 [(gogoproto.jsontag) = "access,omitempty"];
+    // 稿件属性 详见State字段的文档
+    int32 Attribute = 13 [(gogoproto.jsontag) = "attribute,omitempty"];
+    // 废弃字段
+    string Tag = 14 [(gogoproto.jsontag) = "-"];
+    // 废弃字段
+    repeated string Tags = 15 [(gogoproto.jsontag) = "tags,omitempty"];
+    // 稿件总时长（所有分P加起来的） 单位=秒
+    int64 Duration = 16 [(gogoproto.jsontag) = "duration"];
+    // 稿件绑定的活动id
+    int64 MissionID = 17 [(gogoproto.jsontag) = "mission_id,omitempty"];
+    // 稿件绑定的商单id
+    int64 OrderID = 18 [(gogoproto.jsontag) = "order_id,omitempty"];
+    // 稿件后台设置的强制跳转地址，如果该值不为空，则必须调转到它对应的页面上
+    string RedirectURL = 19 [(gogoproto.jsontag) = "redirect_url,omitempty"];
+    int64 Forward = 20 [(gogoproto.jsontag) = "forward,omitempty"];
+    // 见Rights字段说明
+    Rights Rights = 21 [(gogoproto.jsontag) = "rights", (gogoproto.nullable) = false];
+    // 稿件作者信息，详见Author字段说明
+    Author Author = 22 [(gogoproto.jsontag) = "owner", (gogoproto.nullable) = false];
+    // 稿件计数信息，详见Stat字段说明
+    Stat Stat = 23 [(gogoproto.jsontag) = "stat", (gogoproto.nullable) = false];
+    string ReportResult = 24 [(gogoproto.jsontag) = "report_result,omitempty"];
+    // 发布稿件时Up主设置的动态描述（仅在动态展示）
+    string Dynamic = 25 [(gogoproto.jsontag) = "dynamic"];
+    // 稿件第一P的cid，供秒开使用
+    int64 FirstCid = 26 [(gogoproto.jsontag) = "cid,omitempty"];
+    // 稿件第一P的分辨率，详见Dimession字段说明
+    Dimension Dimension = 27 [(gogoproto.jsontag) = "dimension,omitempty", (gogoproto.nullable) = false];
+    // 联合投稿信息，内部使用，详见StaffInfo说明
+    repeated StaffInfo StaffInfo  = 28 [(gogoproto.jsontag) = "-"];
+}
+
+message StaffInfo {
+    // 联合投稿的成员Up主id
+     int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+     // 联合投稿的成员角色（如 声优、字幕）
+     string Title = 2 [(gogoproto.jsontag) = "title"];
+}
+
+// Dimension 视频分辨率
+message Dimension {
+    // 宽 如 1920
+    int64 Width = 1 [(gogoproto.jsontag) = "width"];
+    // 高 如 1080
+    int64 Height = 2 [(gogoproto.jsontag) = "height"];
+    // 是否竖屏 0=否 1=是
+    int64 Rotate = 3 [(gogoproto.jsontag) = "rotate"];
+}
+
+// Rights 稿件各常用属性 0=否 1=是
+message Rights {
+    // 老版是否付费
+    int32 Bp = 1 [(gogoproto.jsontag) = "bp"];
+    // 是否支持充电 （不可直接使用，网关层请求业务方后才有值）
+    int32 Elec = 2 [(gogoproto.jsontag) = "elec"];
+    // 是否下载（不可直接使用，网关层请求业务方后才有值）
+    int32 Download = 3 [(gogoproto.jsontag) = "download"];
+    // 是否电影
+    int32 Movie = 4 [(gogoproto.jsontag) = "movie"];
+    // 是否PGC付费
+    int32 Pay = 5 [(gogoproto.jsontag) = "pay"];
+    // 无用
+    int32 HD5 = 6 [(gogoproto.jsontag) = "hd5"];
+    // 是否允许转发
+    int32 NoReprint = 7 [(gogoproto.jsontag) = "no_reprint"];
+    // 是否可以自动播放
+    int32 Autoplay = 8 [(gogoproto.jsontag) = "autoplay"];
+    // 是否UGC付费
+    int32 UGCPay = 9 [(gogoproto.jsontag) = "ugc_pay"];
+    // 是否联合投稿
+    int32 IsCooperation = 10 [(gogoproto.jsontag) = "is_cooperation"];
+}
+
+// Author 稿件作者信息
+message Author {
+    // Up主mid
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    // Up主名称
+    string Name = 2 [(gogoproto.jsontag) = "name"];
+    // Up主头像地址 绝对地址
+    string Face = 3 [(gogoproto.jsontag) = "face"];
+}
+
+// Stat 稿件的所有计数信息
+message Stat {
+    int64 Aid = 1 [(gogoproto.jsontag) = "aid"];
+    // 播放数
+    int32 View = 2 [(gogoproto.jsontag) = "view"];
+    // 弹幕数
+    int32 Danmaku = 3 [(gogoproto.jsontag) = "danmaku"];
+    // 评论数
+    int32 Reply = 4 [(gogoproto.jsontag) = "reply"];
+    // 收藏数
+    int32 Fav = 5 [(gogoproto.jsontag) = "favorite"];
+    // 投币数
+    int32 Coin = 6 [(gogoproto.jsontag) = "coin"];
+    // 分享数
+    int32 Share = 7 [(gogoproto.jsontag) = "share"];
+    // 当前排名
+    int32 NowRank = 8 [(gogoproto.jsontag) = "now_rank"];
+    // 历史最高排名
+    int32 HisRank = 9 [(gogoproto.jsontag) = "his_rank"];
+    // 点赞数
+    int32 Like = 10 [(gogoproto.jsontag) = "like"];
+    // 点踩数 已取消前台展示，现在均返回0
+    int32 DisLike = 11 [(gogoproto.jsontag) = "dislike"];
+}
+
+// Click 点击数详情，老版本播放器使用
+message Click {
+    int64 Aid = 1 [(gogoproto.jsontag) = "aid"];
+    // web端播放数
+    int32 Web = 2 [(gogoproto.jsontag) = "web"];
+    // iOS端播放数
+    int32 Ios = 3 [(gogoproto.jsontag) = "ios"];
+    // android端播放数
+    int32 Android = 4 [(gogoproto.jsontag) = "android"];
+    // h5端播放数
+    int32 H5 = 5 [(gogoproto.jsontag) = "h5"];
+    // 站外播放数
+    int32 Outter = 6 [(gogoproto.jsontag) = "outter"];
+}
+
+// Page 分P信息
+message Page {
+    // 视频的cid
+    int64 Cid = 1 [(gogoproto.jsontag) = "cid"];
+    // 视频的序号顺序，从小到大
+    int32 Page = 2 [(gogoproto.jsontag) = "page"];
+    // 视频的来源，99%为vupload=B站自己的，少部分为腾讯（qq）、湖南tv(hunan)
+    string From = 3 [(gogoproto.jsontag) = "from"];
+    // 视频的标题
+    string Part = 4 [(gogoproto.jsontag) = "part"];
+    // 视频的时长 单位=秒
+    int64 Duration = 5 [(gogoproto.jsontag) = "duration"];
+    // 站外视频才有vid属性
+    string Vid = 6 [(gogoproto.jsontag) = "vid"];
+    // 视频的简介，多P视频才可填写简介
+    string Desc = 7 [(gogoproto.jsontag) = "description,omitempty"];
+    // 站外视频跳转地址
+    string WebLink = 8 [(gogoproto.jsontag) = "weblink"];
+    // 视频分辨率信息
+    Dimension Dimension = 9 [(gogoproto.jsontag) = "dimension", (gogoproto.nullable) = false];
+}
+
+// !!!Note: only response message defined, since we put pb into http response body
+message VideoFileInfo {
+    uint64 filesize   = 1 [(gogoproto.jsontag) = "filesize", (gogoproto.casttype) = "int64"];
+    uint64 timelength = 2 [(gogoproto.jsontag) = "timelength", (gogoproto.casttype) ="int64"];
+    string ahead = 3 [(gogoproto.jsontag) = "ahead"];
+    string vhead = 4 [(gogoproto.jsontag) = "vhead"];
+}
+
+message VideoFormatFileInfo {
+    repeated VideoFileInfo infos = 1 [(gogoproto.jsontag) = "infos"];
+}
+
+message DashItem {
+    uint32 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.casttype) = "int64"];
+    string baseUrl = 2 [(gogoproto.jsontag) = "base_url"];
+    uint32 bandwidth = 3 [(gogoproto.jsontag) = "bandwidth", (gogoproto.casttype) = "int64"];
+    uint32 codecid = 4 [(gogoproto.jsontag) = "codecid", (gogoproto.casttype) = "int64"];
+}
+
+message ResponseDash {
+    repeated DashItem video = 1 [(gogoproto.jsontag) = "video"];
+    repeated DashItem audio = 2 [(gogoproto.jsontag) = "audio"];
+}
+
+message BvcVideoItem {
+    uint64   expire_time                 = 1 [(gogoproto.jsontag) = "expire_time", (gogoproto.casttype) = "int64"];
+    uint32   cid                         = 2 [(gogoproto.jsontag) = "cid", (gogoproto.casttype) ="int64"];
+    repeated uint32 support_quality      = 3 [(gogoproto.jsontag) = "support_quality", (gogoproto.casttype) = "int"];
+    repeated string support_formats      = 4 [(gogoproto.jsontag) = "support_formats"];
+    repeated string support_description  = 5 [(gogoproto.jsontag) = "support_description"];
+    uint32   quality                     = 6 [(gogoproto.jsontag) = "quality", (gogoproto.casttype) = "int"];
+    string   url                         = 7 [(gogoproto.jsontag) = "url"];
+    map<uint32, VideoFormatFileInfo> file_info = 8 [(gogoproto.jsontag) = "file_info"];
+    uint32   video_codecid               = 9 [(gogoproto.jsontag) = "video_codecid"];
+    bool     video_project               = 10 [(gogoproto.jsontag) = "video_project"];
+    uint32   fnver                       = 11 [(gogoproto.jsontag) = "fnver", (gogoproto.casttype) = "int"];
+    uint32   fnval                       = 12 [(gogoproto.jsontag) = "fnval", (gogoproto.casttype) = "int"];
+    ResponseDash dash                    = 13 [(gogoproto.jsontag) = "dash"];
+}
+
+message BvcResponseMsg {
+    uint32                         code = 1 [(gogoproto.jsontag) = "code", (gogoproto.casttype) = "int64"];
+    map<uint32, BvcVideoItem> data = 2 [(gogoproto.jsontag) = "data"];
+}
+
+// 内部方法 请勿使用--------------------------------------------------------------------------------------------
+message ArcCacheRequest {
+    int64 aid = 1;
+    string tp = 2;
+    int64 OldMid = 3;
+}
+
+message ArcFieldCacheRequest {
+    int64 aid = 1;
+    int32 typeID = 2;
+    int32 oldTypeID = 3;
+}
+
+message UpVideoCacheRequest {
+    int64 aid = 1;
+    int64 cid = 2;
+}
+
+message DelVideoCacheRequest {
+    int64 aid = 1;
+    int64 cid = 2;
+}
+
+message SetStatRequest {
+    Stat stat = 1;
+}
+// 内部方法 请勿使用--------------------------------------------------------------------------------------------

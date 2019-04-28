@@ -1,0 +1,97 @@
+[log]
+    stdout=true
+[group]
+    [group.RoomInfo]
+        num = 32
+        chan = 1024
+    [group.Attention]
+        num = 32
+        chan = 1024
+    [group.UserInfo]
+        num = 32
+        chan = 1024
+[databus]
+    [databus.PushSearch]
+        key = "ec4c0820d525d67b"
+        secret= "e20f8f664bf10722efeb6aac0cc16011"
+        group= "RoomUpdateToSearch-LiveLive-P"
+        topic= "RoomUpdateToSearch-T"
+        action="pub"
+        name = "live-search"
+        proto = "tcp"
+        addr = "172.18.33.50:6205"
+        idle = 100
+        active = 100
+        dialTimeout = "10s"
+        readTimeout = "40s"
+        writeTimeout = "10s"
+        idleTimeout = "60s"
+    [databus.RoomInfo]
+        key = "ec4c0820d525d67b"
+        secret= "e20f8f664bf10722efeb6aac0cc16011"
+        group= "ApRoomBinlog-LiveLive-S"
+        topic= "ApRoomBinlog-T"
+        action="sub"
+        name = "live-roomInfo-change"
+        proto = "tcp"
+        addr = "172.18.33.50:6205"
+        idle = 100
+        active = 100
+        dialTimeout = "10s"
+        readTimeout = "40s"
+        writeTimeout = "10s"
+        idleTimeout = "60s"
+    [databus.Attention]
+        key = "ec4c0820d525d67b"
+        secret= "e20f8f664bf10722efeb6aac0cc16011"
+        group= "LiveRelationChanged-LiveLive-S"
+        topic= "LiveRelationChanged-T"
+        action="sub"
+        name = "live-attention-change"
+        proto = "tcp"
+        addr = "172.18.33.50:6205"
+        idle = 100
+        active = 100
+        dialTimeout = "10s"
+        readTimeout = "40s"
+        writeTimeout = "10s"
+        idleTimeout = "60s"
+    [databus.UserName]
+        key = "ec4c0820d525d67b"
+        secret= "e20f8f664bf10722efeb6aac0cc16011"
+        group= "BannedUserSyn-LiveLive-Search-S"
+        topic= "BannedUserSyn-T"
+        action="sub"
+        name = "live-userName-change"
+        proto = "tcp"
+        addr = "172.18.33.50:6205"
+        idle = 100
+        active = 100
+        dialTimeout = "10s"
+        readTimeout = "40s"
+        writeTimeout = "10s"
+        idleTimeout = "60s"
+
+[SearchHBase]
+    master = ""
+    meta = ""
+    dialTimeout = "1s"
+    readTimeout = "2s"
+    readsTimeout = "5s"
+    writeTimeout = "2s"
+    writesTimeout = "5s"
+    [SearchHBase.zookeeper]
+        root = ""
+        addrs = ["172.18.33.131:2181","172.18.33.168:2181","172.18.33.169:2181"]
+        timeout = "30s"
+
+[liverpc]
+    [liverpc.room]
+        AppID = "live.room"
+        ConnTimeout = "50ms"
+    [liverpc.relation]
+        AppID = "live.relation"
+        ConnTimeout = "50ms"
+    [liverpc.user]
+        AppID = "live.user"
+        ConnTimeout = "50ms"

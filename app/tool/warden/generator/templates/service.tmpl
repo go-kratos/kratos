@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package {{.Package}};
+{{range $key, $value := .Imports}}
+import "{{$key}}";{{end}}
+
+option go_package = "v1";
+{{range .Messages}}
+message {{.Name}} { {{range .Fields}}
+    {{.FieldType}} {{.FieldName}} = {{.FieldID}};{{end}}
+}
+{{end}}
+service {{.Name}} { {{range .Methods}}
+    {{range .Comments}}// {{.}} {{end}}
+    rpc {{.Name}}({{.Req}}) returns({{.Reply}}); {{end}}
+}

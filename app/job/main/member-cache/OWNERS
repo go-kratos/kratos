@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- wanghuan01
+- zhaogangtao
+- zhoujiahui
+labels:
+- job
+- job/main/member-cache
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- wanghuan01
+- zhaogangtao
+- zhoujiahui

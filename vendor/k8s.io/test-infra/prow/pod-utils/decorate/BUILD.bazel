@@ -1,0 +1,40 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "doc.go",
+        "podspec.go",
+    ],
+    importpath = "k8s.io/test-infra/prow/pod-utils/decorate",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/sirupsen/logrus:go_default_library",
+        "//vendor/k8s.io/api/core/v1:go_default_library",
+        "//vendor/k8s.io/apimachinery/pkg/apis/meta/v1:go_default_library",
+        "//vendor/k8s.io/apimachinery/pkg/util/validation:go_default_library",
+        "//vendor/k8s.io/test-infra/prow/clonerefs:go_default_library",
+        "//vendor/k8s.io/test-infra/prow/entrypoint:go_default_library",
+        "//vendor/k8s.io/test-infra/prow/gcsupload:go_default_library",
+        "//vendor/k8s.io/test-infra/prow/initupload:go_default_library",
+        "//vendor/k8s.io/test-infra/prow/kube:go_default_library",
+        "//vendor/k8s.io/test-infra/prow/pod-utils/clone:go_default_library",
+        "//vendor/k8s.io/test-infra/prow/pod-utils/downwardapi:go_default_library",
+        "//vendor/k8s.io/test-infra/prow/pod-utils/wrapper:go_default_library",
+        "//vendor/k8s.io/test-infra/prow/sidecar:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

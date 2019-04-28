@@ -1,0 +1,89 @@
+[db.aso]
+    addr = "172.16.33.205:3306"
+    dsn = "aso:hA0DAnENNFz78kYB@tcp(172.16.33.205:3306)/aso?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "1s"
+    execTimeout = "2s"
+    tranTimeout = "2s"
+    [db.aso.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+[db.sns]
+    addr = "127.0.0.1:3306"
+    dsn = "root:root@tcp(127.0.0.1:3306)/passport_sns?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "1s"
+    execTimeout = "2s"
+    tranTimeout = "2s"
+    [db.sns.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[memcache]
+	name = "passport-sns-service"
+	proto = "tcp"
+    addr = "172.22.33.137:11219"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[databus.snsLogSub]
+    key = "4ba46ba31f9a44ef"
+    secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+    group = "PassportSnsLog-MainAccount-S"
+    topic = "PassportSnsLog-T"
+    action = "sub"
+    offset = "old"
+    buffer = 2048
+    name = "passport-sns/databus"
+    proto = "tcp"
+    addr = "172.22.33.174:6205"
+    idle = 2
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+[databus.asoBinLogSub]
+    key = "4ba46ba31f9a44ef"
+    secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+    group = "PassportUserBinlog-MainAccount-SNS-S"
+    topic = "PassportUserBinlog-T"
+    action = "sub"
+    offset = "old"
+    buffer = 2048
+    name = "passport-user/databus"
+    proto = "tcp"
+    addr = "172.22.33.174:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[databusUtil]
+	size = 100
+	num = 8
+	ticker = "1s"
+	chan = 100
+
+[syncConf]
+    incSwitch = false
+    fullSwitch = true
+    checkSwitch = true
+    chanNum = 200
+    chanSize = 10240
+    checkTicker = "1h"

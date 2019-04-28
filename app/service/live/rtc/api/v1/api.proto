@@ -1,0 +1,151 @@
+// 定义项目 API 的 proto 文件 可以同时描述 gRPC 和 HTTP API
+// protobuf 文件参考:
+//  - https://developers.google.com/protocol-buffers/
+//  - http://info.bilibili.co/display/documentation/gRPC+Proto
+// protobuf 生成 HTTP 工具:
+//  - http://git.bilibili.co/platform/go-common/tree/master/app/tool/protoc-gen-bm
+syntax = "proto3";
+
+// package 命名使用 {discovery_id}.{version} 的方式, version 形如 v1, v2, v1beta ..
+// NOTE: 不知道的 discovery_id 请询问大佬, 新项目找大佬申请 discovery_id，先到先得抢注
+// e.g. account.service.v1
+package live.rtc.v1;
+//option go_package = "v1";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+
+// NOTE: 最后请删除这些无用的注释 (゜-゜)つロ
+// 呵呵 我特么偏不删(゜-゜)つロ
+
+option go_package = "v1";
+
+service Rtc {
+    // `method:"POST"`
+    rpc JoinChannel(JoinChannelRequest) returns (JoinChannelResponse);
+    // `method:"POST"`
+    rpc LeaveChannel(LeaveChannelRequest) returns (LeaveChannelResponse);
+    // `method:"POST"`
+    rpc PublishStream(PublishStreamRequest) returns (PublishStreamResponse);
+    // `method:"POST"`
+    rpc TerminateStream(TerminateStreamRequest) returns (TerminateStreamResponse);
+    // `method:"GET"`
+    rpc Channel(ChannelRequest) returns (ChannelResponse);
+    // `method:"GET"`
+    rpc Stream(StreamRequest) returns (StreamResponse);
+    // `method:"POST"`
+    rpc SetRtcConfig(SetRtcConfigRequest) returns (SetRtcConfigResponse);
+    // `method:"GET"`
+    rpc VerifyToken(VerifyTokenRequest) returns (VerifyTokenResponse);
+}
+
+message MediaSource {
+    enum MediaType{
+        OTHER = 0;
+        VIDEO = 1;
+        AUDIO = 2;
+        DATA = 3;
+        SMALL_VIDEO = 4;
+    }
+    MediaType type = 1 [(gogoproto.jsontag) = "type"];
+    string codec = 2 [(gogoproto.jsontag) = "codec"];
+    string media_specific = 3 [(gogoproto.jsontag) = "media_specific"];
+    uint32 ssrc = 4 [(gogoproto.jsontag) = "ssrc"];
+    uint64 user_id = 5 [(gogoproto.jsontag) = "user_id"];
+}
+
+message EncoderConfig {
+    uint32 width = 1 [(gogoproto.jsontag) = "width"];
+    uint32 height = 2 [(gogoproto.jsontag) = "height"];
+    uint32 bitrate = 3 [(gogoproto.jsontag) = "bitrate"];
+    uint32 frame_rate = 4 [(gogoproto.jsontag) = "frame_rate"];
+    string video_codec = 5 [(gogoproto.jsontag) = "video_codec"];
+    string video_profile = 6 [(gogoproto.jsontag) = "video_profile"];
+    reserved 7 to 18;
+    uint32 channel = 19 [(gogoproto.jsontag) = "channel"];
+    uint32 sample_rate = 20 [(gogoproto.jsontag) = "sample_rate"];
+    string audio_codec = 21 [(gogoproto.jsontag) = "audio_codec"];
+}
+
+message JoinChannelRequest {
+    uint64 channel_id = 1 [(gogoproto.jsontag) = "channel_id"];
+    uint64 user_id = 2 [(gogoproto.jsontag) = "user_id"];
+    uint32 proto_version = 3 [(gogoproto.jsontag) = "proto_version"];
+    repeated MediaSource source = 4 [(gogoproto.jsontag) = "source"];
+}
+
+message JoinChannelResponse {
+    uint32 call_id = 1 [(gogoproto.jsontag) = "call_id"];
+    string token = 2 [(gogoproto.jsontag) = "token"];
+    repeated MediaSource source = 3 [(gogoproto.jsontag) = "source"];
+}
+
+message LeaveChannelRequest {
+    uint64 channel_id = 1 [(gogoproto.jsontag) = "channel_id"];
+    uint64 user_id = 2 [(gogoproto.jsontag) = "user_id"];
+    uint32 call_id = 3 [(gogoproto.jsontag) = "call_id"];
+}
+
+message LeaveChannelResponse {
+}
+
+message PublishStreamRequest{
+    uint64 channel_id = 1 [(gogoproto.jsontag) = "channel_id"];
+    uint64 user_id = 2 [(gogoproto.jsontag) = "user_id"];
+    uint32 call_id = 3 [(gogoproto.jsontag) = "call_id"];
+    EncoderConfig encoder_config = 4 [(gogoproto.jsontag) = "encoder_config"];
+    string mix_config = 5 [(gogoproto.jsontag) = "mix_config"];
+}
+
+message PublishStreamResponse{
+}
+
+message TerminateStreamRequest{
+    uint64 channel_id = 1 [(gogoproto.jsontag) = "channel_id"];
+    uint64 user_id = 2 [(gogoproto.jsontag) = "user_id"];
+    uint32 call_id = 3 [(gogoproto.jsontag) = "call_id"];
+}
+
+message TerminateStreamResponse{
+}
+
+message ChannelRequest{
+    uint64 channel_id = 1 [(gogoproto.jsontag) = "channel_id"];
+}
+
+message ChannelResponse{
+    repeated MediaSource media_source = 1 [(gogoproto.jsontag) = "media_source"];
+    string server = 2 [(gogoproto.jsontag) = "server"];
+    uint32 tcp_port = 3 [(gogoproto.jsontag) = "tcp_port"];
+    uint32 udp_port = 4 [(gogoproto.jsontag) = "udp_port"];
+}
+
+message StreamRequest {
+    uint64 channel_id = 1 [(gogoproto.jsontag) = "channel_id"];
+    uint64 user_id = 2 [(gogoproto.jsontag) = "user_id"];
+    uint32 call_id = 3 [(gogoproto.jsontag) = "call_id"];
+}
+
+message StreamResponse {
+    EncoderConfig encoder_config = 1 [(gogoproto.jsontag) = "encoder_config"];
+    string mix_config = 2 [(gogoproto.jsontag) = "mix_config"];
+}
+
+message SetRtcConfigRequest {
+    uint64 channel_id = 1 [(gogoproto.jsontag) = "channel_id"];
+    uint64 user_id = 2 [(gogoproto.jsontag) = "user_id"];
+    uint32 call_id = 3 [(gogoproto.jsontag) = "call_id"];
+    string config = 4 [(gogoproto.jsontag) = "config"];
+}
+
+message SetRtcConfigResponse {
+}
+
+message VerifyTokenRequest {
+    uint64 channel_id = 1 [(gogoproto.jsontag) = "channel_id"];
+    uint32 call_id = 2 [(gogoproto.jsontag) = "call_id"];
+    string token = 3 [(gogoproto.jsontag) = "token"];
+}
+
+message VerifyTokenResponse {
+    bool pass = 1 [(gogoproto.jsontag) = "pass"];
+}

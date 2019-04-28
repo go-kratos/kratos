@@ -1,0 +1,10 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liuzhen
+labels:
+- live
+- service
+- service/live/live_riskcontrol
+options:
+  no_parent_owners: true

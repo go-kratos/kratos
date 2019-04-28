@@ -1,0 +1,85 @@
+//存放订单内部的数据表结构
+
+syntax = "proto3";
+package ticket.service.sales.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "_type";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+//OrderSKU 订单包含的sku信息
+message OrderSKU {
+    int64 order_id = 1 [(gogoproto.jsontag) = "order_id", (gogoproto.customname) = "OrderID"];
+    int64 sku_id = 2 [(gogoproto.jsontag) = "sku_id", (gogoproto.customname) = "SKUID"];
+    int64 count = 3 [(gogoproto.jsontag) = "count"];
+    int64 origin_price = 4 [(gogoproto.jsontag) = "origin_price"];
+    int64 price = 5 [(gogoproto.jsontag) = "price"];
+    repeated int64 seat_ids = 6 [(gogoproto.jsontag) = "seat_ids", (gogoproto.customname) = "SeatIDs"];
+    int32 ticket_type = 7 [(gogoproto.jsontag) = "ticket_type", (gogoproto.casttype) = "int16"];
+    OrderSKUDiscounts discounts = 8 [(gogoproto.jsontag) = "discounts"];
+    int64 ctime = 9 [(gogoproto.jsontag) = "-", (gogoproto.customname) = "CTime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 10 [(gogoproto.jsontag) = "-", (gogoproto.customname) = "MTime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+//OrderPayCharge 订单支付信息
+message OrderPayCharge {
+    int64 order_id = 1 [(gogoproto.jsontag) = "order_id", (gogoproto.customname) = "OrderID"];
+    string charge_id = 2 [(gogoproto.jsontag) = "charge_id", (gogoproto.customname) = "ChargeID"];
+    int32 channel = 3 [(gogoproto.jsontag) = "channel", (gogoproto.casttype) = "int16"];
+    int32 paid = 4 [(gogoproto.jsontag) = "paid", (gogoproto.casttype) = "int16"];
+    int32 refunded = 5 [(gogoproto.jsontag) = "refunded", (gogoproto.casttype) = "int16"];
+    int64 pay_time = 6 [(gogoproto.jsontag) = "-"];
+    int64 ctime = 7 [(gogoproto.jsontag) = "-", (gogoproto.customname) = "CTime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 8 [(gogoproto.jsontag) = "-", (gogoproto.customname) = "MTime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+//OrderItemInfo 订单中的商品快照
+message OrderItemInfo {
+    string name = 1 [(gogoproto.jsontag) = "name"];
+    string img = 2 [(gogoproto.jsontag) = "img"];
+    int64 screen_id = 3 [(gogoproto.jsontag) = "screen_id", (gogoproto.customname) = "ScreenID"];
+    string screen_name = 4 [(gogoproto.jsontag) = "screen_name"];
+    int32 screen_type = 5 [(gogoproto.jsontag) = "screen_type", (gogoproto.casttype) = "int16"];
+    int32 deliver_type = 6 [(gogoproto.jsontag) = "deliver_type", (gogoproto.casttype) = "int16"];
+    int64 express_fee = 7 [(gogoproto.jsontag) = "express_fee"];
+    int32 vip_express_free = 8 [(gogoproto.jsontag) = "express_free_flag", (gogoproto.casttype) = "int16", (gogoproto.customname) = "VIPExpressFree"];
+    int64 ver_id = 9 [(gogoproto.jsontag) = "project_ver_id", (gogoproto.customname) = "VerID"];
+}
+
+//OrderSKUDiscounts 订单分摊到sku上的折扣信息
+message OrderSKUDiscounts {
+    map<int32, int64> platform = 1 [(gogoproto.jsontag) = "1"];
+    map<int32, int64> merchant = 2 [(gogoproto.jsontag) = "2"];
+}
+
+//OrderBuyer 订单购买人快照
+message OrderBuyer {
+    int64 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.customname) = "ID"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    string tel = 3 [(gogoproto.jsontag) = "tel"];
+    string personal_id = 4 [(gogoproto.jsontag) = "personal_id", (gogoproto.customname) = "PersonalID"];
+}
+
+//OrderDeliver 订单配送信息快照
+message OrderDeliver {
+    int64 addr_id = 1 [(gogoproto.jsontag) = "addr_id", (gogoproto.customname) = "AddrID"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    string tel = 3 [(gogoproto.jsontag) = "tel"];
+    string addr = 4 [(gogoproto.jsontag) = "addr"];
+}
+
+//OrderExtra 订单额外信息
+message OrderExtra {
+    int64 auto_recv_time = 1 [(gogoproto.jsontag) = "AutoRecvTime"];
+    int64 delay_recv_times = 2 [(gogoproto.jsontag) = "DelayRecvTimes"];
+}
+
+//OrderCoupon 订单优惠券信息
+message OrderCoupon {
+    string code = 1 [(gogoproto.jsontag) = "code"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    int64 money = 3 [(gogoproto.jsontag) = "money"];
+}

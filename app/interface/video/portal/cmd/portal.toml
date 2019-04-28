@@ -1,0 +1,95 @@
+version = "1.0.0"
+trace = false
+
+[app]
+key = "380787173931f128"
+secret = "72289981fa921937f0359c4cc6c49fcc"
+
+[log]
+  dir = "/data/log/portal/"
+
+[mysql]
+	addr = "127.0.0.1:3306"
+	dsn = "test:test@tcp(127.0.0.1:3306)/test?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["test:test@tcp(127.0.0.2:3306)/test? timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4","test:test@tcp(127.0.0.3:3306)/test?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "100ms"
+	execTimeout = "100ms"
+	tranTimeout = "200ms"
+
+#二级源站配置
+[leveltwosourcestation]
+	#移动
+	[leveltwosourcestation.mobile]
+		domain = ["jssz-l2-live-origin.acgvideo.com"]
+	#联通
+	[leveltwosourcestation.unicom]
+		domain = []
+	#电信
+	[leveltwosourcestation.telecom]
+		domain = ["jsnt2-dx-l2-live-origin.acgvideo.com"]
+
+#流的转推腾讯在用
+[streamforward]
+		global = ["bvc2","bvc3","bvc4"]
+	[streamforward.address]
+		# bvc1= "rtmp://live-origin.acgvideo.com/live-bvc/"
+		bvc2 = "rtmp://backup-live-origin.acgvideo.com/live-bvc/"
+		bvc3 = "rtmp://shylf-live-origin.acgvideo.com/live-bvc/"
+		bvc4 = "rtmp://shjd-live-origin.acgvideo.com/live-bvc/"
+		tx = "rtmp://txy.live-ztsend.acg.tv/live-txy/"
+		js = "rtmp://js.live-ztsend.acg.tv/live-js/"
+		ws = "rtmp://wslive-ztsend.acg.tv/live"
+		qn = "rtmp://qn.live-ztsend.acg.tv/live-qn/"
+	[streamforward.list]
+			live_9617619_6384511 =     ["bvc2", "bvc3", "bvc4", "qn", "js", "ws", "tx"]
+			ive_2306780_332_c521e483 = ["bvc2", "bvc3", "bvc4", "qn", "js", "ws", "tx"]
+			live_111191654_5895927 =   ["bvc2", "bvc3", "bvc4", "qn", "js", "ws", "tx"]
+			live_18976141_6925617 =  ["bvc2", "bvc3", "bvc4", "qn", "js", "ws", "tx"]
+			live_155494361_2075761 =   ["bvc2", "bvc3", "bvc4", "qn", "js", "ws", "tx"]
+			# 腾讯的测试房间
+			# live_53241657_2859495 = ["bvc2", "bvc3", "bvc4", "qn", "ws"]
+
+#流的转推BVC在用
+[bvcstreamforward]
+		global = ["qn","ws"]
+	[bvcstreamforward.address]
+		# bvc1= "rtmp://live-origin.acgvideo.com/live-bvc/"
+		bvc2 = "rtmp://backup-live-origin.acgvideo.com/live-bvc/"
+		bvc3 = "rtmp://shylf-live-origin.acgvideo.com/live-bvc/"
+		bvc4 = "rtmp://shjd-live-origin.acgvideo.com/live-bvc/"
+		tx = "rtmp://txy.live-ztsend.acg.tv/live-txy/"
+		js = "rtmp://js.live-ztsend.acg.tv/live-js/"
+		ws = "rtmp://wslive-ztsend.acg.tv/live"
+		qn = "rtmp://qn.live-ztsend.acg.tv/live-qn/"
+	[bvcstreamforward.list]
+			#91625
+			live_26366366_3333288 = ["tx", "qn", "ws"]
+			#7734200
+			live_50329118_9516950 = ["qn", "js", "ws", "tx"]
+			#35788
+			live_842519_2437993 = ["js", "ws", "qn"]
+			#5440
+			live_9617619_6384511 = ["qn", "js", "ws", "tx"]
+			#8016907
+			live_50329220_7780332 = ["qn", "js", "ws", "tx"]
+			#4592823
+			live_111191654_5895927 = ["qn", "js", "ws", "tx"]
+			#312785
+			live_33272823_4014225 = ["qn", "js", "ws", "tx"]
+			#504273
+			live_28272979_5242853 = ["qn", "js", "ws", "tx"]
+			#5086
+			live_2306780_332_c521e483 = ["qn", "js", "ws", "tx"]
+			#4891447
+			live_168605655_3397957 = ["qn", "js", "ws", "tx"]
+			#6285567
+			live_2551476_8920838 = ["qn", "js", "ws", "tx"]
+			#11218604
+			live_50329485_5259019 = ["qn", "js", "ws", "tx"]
+			#4891419
+			live_168605029_4772413 = ["tx", "ws"]
+			#20006
+			live_10769652_332_c521e483 = ["qn", "js", "ws", "tx"]

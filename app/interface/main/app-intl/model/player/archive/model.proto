@@ -1,0 +1,10 @@
+syntax = "proto3";
+package archive;
+
+message Info { 
+    int64 aid = 1;
+    repeated int64 cids = 2;
+    int32 state = 3;
+    int64 mid = 4;
+    int32 attribute = 5;
+}

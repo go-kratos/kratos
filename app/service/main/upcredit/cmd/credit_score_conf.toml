@@ -1,0 +1,26 @@
+[CalculateConf]
+    [CalculateConf.TimeWeight]
+        # map
+        # year_from_now = weight
+        # 0 = 100 , means this year's score weight is 100
+        0 = 100
+        1 = 60
+        2 = 30
+        3 = 10
+
+[ArticleRule]
+    AcceptOptypeData = [0, 1]
+    RejectOpTypeData = [-2, -3, -4, -5]
+    ArticleMaxOpenCount = 5 #一个最大开放次数，超过之后，将不再记录（由于一个稿件可以被up主不停的编辑并提交，状态都会变成close，然后再open）
+
+    [ArticleRule.OptypeScoreData]
+        # score = [state]
+        # state will be mapped to a credit score
+        5 = [0] # 正常通过
+        2 = [1] # 橙色通过
+        -10 = [ -2, -3, -4, -5]
+
+    [ArticleRule.InitState]
+        state = -1
+        round = 0
+        reason = 0

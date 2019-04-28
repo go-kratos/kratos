@@ -1,0 +1,67 @@
+[log]
+    stdout=true
+
+[mysql]
+	addr = "172.22.34.101:3312"
+	dsn = "livetestuat:livetestuat20180711@tcp(172.22.34.101:3312)/live-sign?timeout=2s&readTimeout=2s&writeTimeout=2s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["root:root@tcp(127.0.0.1:3306)/live-sign?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4","root:root@tcp(127.0.0.1:3306)/live-sign?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "100ms"
+	execTimeout = "100ms"
+	tranTimeout = "200ms"
+
+[Cfg]
+    ExpireCountFrequency = "0 */1 * * * ?"
+    SetExpireFrequency = "0 */1 * * * ?"
+
+[orm]
+	dsn = "livetestuat:livetestuat20180711@tcp(172.22.34.101:3312)/live-sign?timeout=2s&readTimeout=2s&writeTimeout=2s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 20
+    idle = 10
+	idleTimeout ="4h"
+
+[redis]
+	name = "xrewardcenter"
+	proto = "tcp"
+    addr = "127.0.0.1:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[memcache]
+	name = "xrewardcenter"
+	proto = "tcp"
+	addr = "127.0.0.1:11211"
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[liverpc]
+    [liverpc.room]
+        Addr = "172.18.33.82:20200"
+    [liverpc.gift]
+        Addr = "172.18.33.82:7778"
+
+[httpClient]
+    key    = "e7482d29be4a95b8"
+    secret = "9e803791cdef756e75faee68e12b7442"
+    dial      = "500ms"
+    timeout   = "1s"
+    keepAlive = "60s"
+    timer     = 128
+    [httpClient.breaker]
+        window  = "10s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100

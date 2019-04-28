@@ -1,0 +1,16 @@
+{
+    "host":
+    {
+        "geetest":"http://api.geetest.com"
+    },
+    "httpclient":
+    {
+        "dial":1,
+        "keepAlive":1
+    },
+    "secret":
+    {
+        "captchaId":"",
+        "privateKey":""
+    }
+}

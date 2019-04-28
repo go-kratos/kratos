@@ -1,0 +1,73 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "batch.go",
+        "comparer.go",
+        "db.go",
+        "db_compaction.go",
+        "db_iter.go",
+        "db_snapshot.go",
+        "db_state.go",
+        "db_transaction.go",
+        "db_util.go",
+        "db_write.go",
+        "doc.go",
+        "errors.go",
+        "filter.go",
+        "key.go",
+        "options.go",
+        "session.go",
+        "session_compaction.go",
+        "session_record.go",
+        "session_util.go",
+        "storage.go",
+        "table.go",
+        "util.go",
+        "version.go",
+    ],
+    importmap = "go-common/vendor/github.com/syndtr/goleveldb/leveldb",
+    importpath = "github.com/syndtr/goleveldb/leveldb",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/syndtr/goleveldb/leveldb/cache:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/comparer:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/errors:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/filter:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/iterator:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/journal:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/memdb:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/opt:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/storage:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/table:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/util:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/cache:all-srcs",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/comparer:all-srcs",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/errors:all-srcs",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/filter:all-srcs",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/iterator:all-srcs",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/journal:all-srcs",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/memdb:all-srcs",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/opt:all-srcs",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/storage:all-srcs",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/table:all-srcs",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/util:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

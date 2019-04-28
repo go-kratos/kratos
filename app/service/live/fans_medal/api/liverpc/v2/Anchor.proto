@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package fans_medal.v2;
+
+option go_package = "v2";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Anchor {
+    
+    /** 查看房管的勋章信息
+     * 
+     */   
+    rpc query_live_wearing (AnchorQueryLiveWearingReq) returns (AnchorQueryLiveWearingResp);
+}
+
+
+
+message AnchorQueryLiveWearingReq {
+    // 房管 uid
+    repeated int64 uid_list = 1 [(gogoproto.jsontag) = "uid_list"];
+}
+
+message AnchorQueryLiveWearingResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 勋章信息 map
+    map<int64, Medal> data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Medal {
+        // 
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 
+        int64 target_id = 2 [(gogoproto.jsontag) = "target_id"];
+        // 
+        int64 medal_id = 3 [(gogoproto.jsontag) = "medal_id"];
+        // 
+        string medal_name = 4 [(gogoproto.jsontag) = "medal_name"];
+        // 
+        int64 level = 5 [(gogoproto.jsontag) = "level"];
+    }
+}

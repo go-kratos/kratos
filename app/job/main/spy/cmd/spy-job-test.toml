@@ -1,0 +1,154 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/spy-job.pid"
+dir = "./"
+perf = "127.0.0.1:6865"
+checkFile = "/data/www/spy-job.html"
+family = "spy-job"
+
+
+[property]
+activityEvents = []
+blockAccountURL = "https://account.bilibili.com/api/member/blockAccount?"
+reportCron = "*/30 * * * * ?"
+taskTimer = 2
+userInfoShard = 100
+historyShard = 100
+configLoadTick = "60s"
+blockEvent = 2
+blockTick = "50ms"
+blockWaitTick = "2s"
+[property.block]
+cycleTimes = 3600
+cycleCron = "*/10 * * * * ?"
+
+[HTTPServer]
+	addr = "0.0.0.0:6866"
+	maxListen = 10
+	timeout = "1s"
+
+[spyRPC]
+    pullInterval = "10s"
+    [spyRPC.client]
+    timeout = "1s"
+    timer = 1000
+    [spyRPC.client.breaker]
+    window ="3s"
+    sleep ="100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [[spyRPC.backup]]
+    proto = "tcp"
+    addr = "0.0.0.0:6869"
+    timeout = "1s"
+    timer = 1000
+    [spyRPC.zookeeper]
+    root = "/microservice/spy-service/"
+    addrs = ["172.16.33.54:2181"]
+    timeout = "1s"
+
+[db]
+    addr= "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_spy?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[databus]
+    [databus.eventData]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret= "0QEO9F8JuuIxZzNDvklI"
+    group= "Spy-UGC-S"
+    topic= "Spy-T"
+    action="sub"
+    name = "spy-job/databus"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 2
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+    [databus.spyStatData]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret= "0QEO9F8JuuIxZzNDvklI"
+    group= "Spy-UGC-S"
+    topic= "Spy-T"
+    action="sub"
+    name = "spy-job/databus"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 2
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+    [databus.secLogin]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret= "0QEO9F8JuuIxZzNDvklI"
+    group= "SafeLogin-MainAccountLaw-S"
+    topic= "SafeLogin-T"
+    action="sub"
+    name = "spy-job/databus"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 2
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+
+[memcache]
+    name = "spy-job/event"
+    proto = "tcp"
+    addr = "172.18.33.60:11234"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[redis]
+name = "spy-service"
+proto = "tcp"
+addr = "172.18.33.61:6879"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "24h"
+MsgUUIDExpire = "300s"
+
+[httpClient]
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+    key = "zxnh4k92dwe61t27"
+    secret = "dnu3bwpxyswqwf1ixpsczthury1nqiew"
+    [httpClient.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+        switchoff = false

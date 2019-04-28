@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package live.approom.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// 房间提示 相关服务
+service RoomNotice {
+    // 是否弹出大航海购买提示
+    rpc buy_guard (RoomNoticeBuyGuardReq) returns (RoomNoticeBuyGuardResp);
+}
+
+message RoomNoticeBuyGuardReq {
+    // UID
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+    // 主播UID
+    int64 target_id = 2 [(gogoproto.moretags) = 'form:"target_id" validate:"required"'];
+}
+
+message RoomNoticeBuyGuardResp {
+    // 是否提示 1:弹出提示,0:不弹出
+    int64 should_notice = 1;
+    // 状态有效开始时间
+    int64 begin = 2;
+    // 状态有效结束时间
+    int64 end = 3;
+    // 当前的时间戳
+    int64 now = 7;
+    // 标题
+    string title = 4;
+    // 内容
+    string content = 5;
+    // 按钮
+    string button = 6;
+}

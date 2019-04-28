@@ -1,0 +1,40 @@
+syntax = "proto3";
+package archive.service.up.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+// UpActivity up主活跃度信息
+message UpActivity {
+  // mid up主id
+  int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+  // activity 活跃度
+  int32 activity = 2
+      [(gogoproto.jsontag) = "activity", (gogoproto.casttype) = "int8"];
+}
+
+// UpGroup up主的特殊用户组信息
+message UpGroup {
+  // id 分组ID
+  int64 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.customname) = "ID"];
+  // name 分组名
+  string name = 2 [(gogoproto.jsontag) = "name"];
+  // tag 标签名称
+  string tag = 3 [(gogoproto.jsontag) = "tag"];
+  // tag 标签简称
+  string short_tag = 4 [(gogoproto.jsontag) = "short_tag"];
+  // font_color 字体色
+  string font_color = 5 [(gogoproto.jsontag) = "font_color"];
+  // bg_color 背景色
+  string bg_color = 6 [(gogoproto.jsontag) = "bg_color"];
+  // note 备注
+  string note = 7 [(gogoproto.jsontag) = "note"];
+}
+
+// UpSpecial up主的特殊属性
+message UpSpecial {
+  // group_ids 特殊属性数组
+  repeated int64 group_ids = 1
+      [(gogoproto.jsontag) = "group_ids", (gogoproto.customname) = "GroupIDs"];
+}

@@ -1,0 +1,176 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// ZNode data in hbase are serialized protobufs with a four byte
+// 'magic' 'PBUF' prefix.
+package pb;
+
+option java_package = "org.apache.hadoop.hbase.protobuf.generated";
+option java_outer_classname = "ZooKeeperProtos";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+import "HBase.proto";
+import "ClusterStatus.proto";
+
+/**
+ * Content of the meta-region-server znode.
+ */
+message MetaRegionServer {
+  // The ServerName hosting the meta region currently, or destination server,
+  // if meta region is in transition.
+  required ServerName server = 1;
+  // The major version of the rpc the server speaks.  This is used so that
+  // clients connecting to the cluster can have prior knowledge of what version
+  // to send to a RegionServer.  AsyncHBase will use this to detect versions.
+  optional uint32 rpc_version = 2;
+
+  // State of the region transition. OPEN means fully operational 'hbase:meta'
+  optional RegionState.State state = 3;
+}
+
+/**
+ * Content of the master znode.
+ */
+message Master {
+  // The ServerName of the current Master
+  required ServerName master = 1;
+  // Major RPC version so that clients can know what version the master can accept.
+  optional uint32 rpc_version = 2;
+  optional uint32 info_port = 3;
+}
+
+/**
+ * Content of the '/hbase/running', cluster state, znode.
+ */
+message ClusterUp {
+  // If this znode is present, cluster is up.  Currently
+  // the data is cluster start_date.
+  required string start_date = 1;
+}
+
+/**
+ * What we write under unassigned up in zookeeper as a region moves through
+ * open/close, etc., regions.  Details a region in transition.
+ */
+message RegionTransition {
+  // Code for EventType gotten by doing o.a.h.h.EventHandler.EventType.getCode()
+  required uint32 event_type_code = 1;
+  // Full regionname in bytes
+  required bytes region_name = 2;
+  required uint64 create_time = 3;
+  // The region server where the transition will happen or is happening
+  required ServerName server_name = 4;
+  optional bytes payload = 5;
+}
+
+/**
+ * WAL SplitLog directory znodes have this for content.  Used doing distributed
+ * WAL splitting.  Holds current state and name of server that originated split.
+ */
+message SplitLogTask {
+  enum State {
+    UNASSIGNED = 0;
+    OWNED = 1;
+    RESIGNED = 2;
+    DONE = 3;
+    ERR = 4;
+  }
+  enum RecoveryMode {
+    UNKNOWN = 0;
+    LOG_SPLITTING = 1;
+    LOG_REPLAY = 2;
+  }
+  required State state = 1;
+  required ServerName server_name = 2;
+  optional RecoveryMode mode = 3 [default = UNKNOWN];
+}
+
+/**
+ * The znode that holds state of table.
+ */
+message Table {
+  // Table's current state
+  enum State {
+    ENABLED = 0;
+    DISABLED = 1;
+    DISABLING = 2;
+    ENABLING = 3;
+  }
+  // This is the table's state.  If no znode for a table,
+  // its state is presumed enabled.  See o.a.h.h.zookeeper.ZKTable class
+  // for more.
+  required State state = 1 [default = ENABLED];
+}
+
+/**
+ * Used by replication. Holds a replication peer key.
+ */
+message ReplicationPeer {
+  // clusterkey is the concatenation of the slave cluster's
+  // hbase.zookeeper.quorum:hbase.zookeeper.property.clientPort:zookeeper.znode.parent
+  required string clusterkey = 1;
+  optional string replicationEndpointImpl = 2;
+  repeated BytesBytesPair data = 3;
+  repeated NameStringPair configuration = 4;
+}
+
+/**
+ * Used by replication. Holds whether enabled or disabled
+ */
+message ReplicationState {
+  enum State {
+    ENABLED = 0;
+    DISABLED = 1;
+  }
+  required State state = 1;
+}
+
+/**
+ * Used by replication. Holds the current position in an WAL file.
+ */
+message ReplicationHLogPosition {
+  required int64 position = 1;
+}
+
+/**
+ * Used by replication. Used to lock a region server during failover.
+ */
+message ReplicationLock {
+  required string lock_owner = 1;
+}
+
+/**
+ * Metadata associated with a table lock in zookeeper
+ */
+message TableLock {
+  optional TableName table_name = 1;
+  optional ServerName lock_owner = 2;
+  optional int64 thread_id = 3;
+  optional bool is_shared = 4;
+  optional string purpose = 5;
+  optional int64 create_time = 6;
+}
+
+/**
+ * State of the switch.
+ */
+message SwitchState {
+  optional bool enabled = 1;
+}

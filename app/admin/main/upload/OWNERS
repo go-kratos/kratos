@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- haoguanwei
+- liangkai
+- zhapuyu
+- zhuangzhewei
+labels:
+- admin
+- admin/main/upload
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- liangkai
+- zhapuyu
+- zhuangzhewei

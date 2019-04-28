@@ -1,0 +1,158 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// This file contains protocol buffers that are used for RegionServerStatusProtocol.
+package pb;
+
+option java_package = "org.apache.hadoop.hbase.protobuf.generated";
+option java_outer_classname = "RegionServerStatusProtos";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+import "HBase.proto";
+import "ClusterStatus.proto";
+
+message RegionServerStartupRequest {
+  /** Port number this regionserver is up on */
+  required uint32 port = 1;
+
+  /** This servers' startcode */
+  required uint64 server_start_code = 2;
+
+  /** Current time of the region server in ms */
+  required uint64 server_current_time = 3;
+
+  /** hostname for region server, optional */
+  optional string use_this_hostname_instead = 4;
+}
+
+message RegionServerStartupResponse {
+  /**
+   * Configuration for the regionserver to use: e.g. filesystem,
+   * hbase rootdir, the hostname to use creating the RegionServer ServerName,
+   * etc
+   */
+  repeated NameStringPair map_entries = 1;
+}
+
+message RegionServerReportRequest {
+  required ServerName server = 1;
+
+  /** load the server is under */
+  optional ServerLoad load = 2;
+}
+
+message RegionServerReportResponse {
+}
+
+message ReportRSFatalErrorRequest {
+  /** name of the server experiencing the error */
+  required ServerName server = 1;
+
+  /** informative text to expose in the master logs and UI */
+  required string error_message = 2;
+}
+
+message ReportRSFatalErrorResponse {
+}
+
+message GetLastFlushedSequenceIdRequest {
+  /** region name */
+  required bytes region_name = 1;
+}
+
+message GetLastFlushedSequenceIdResponse {
+  /** the last WAL sequence id flushed from MemStore to HFile for the region */
+  required uint64 last_flushed_sequence_id = 1;
+
+  /** the last WAL sequence id flushed from MemStore to HFile for stores of the region */
+  repeated StoreSequenceId store_last_flushed_sequence_id = 2;
+}
+
+message RegionStateTransition {
+  required TransitionCode transition_code = 1;
+
+  /** Mutliple regions are involved during merging/splitting */
+  repeated RegionInfo region_info = 2;
+
+  /** For newly opened region, the open seq num is needed */
+  optional uint64 open_seq_num = 3;
+
+  enum TransitionCode {
+    OPENED = 0;
+    FAILED_OPEN = 1;
+    /** No failed_close, in which case region server will abort */
+    CLOSED = 2;
+
+    /** Ask master for ok to split/merge region(s) */
+    READY_TO_SPLIT = 3;
+    READY_TO_MERGE = 4;
+
+    SPLIT_PONR = 5;
+    MERGE_PONR = 6;
+
+    SPLIT = 7;
+    MERGED = 8;
+    SPLIT_REVERTED = 9;
+    MERGE_REVERTED = 10;
+  }
+}
+
+message ReportRegionStateTransitionRequest {
+  /** This region server's server name */
+  required ServerName server = 1;
+
+  repeated RegionStateTransition transition = 2;
+}
+
+message ReportRegionStateTransitionResponse {
+  /** Error message if failed to update the region state */
+  optional string error_message = 1;
+}
+
+service RegionServerStatusService {
+  /** Called when a region server first starts. */
+  rpc RegionServerStartup(RegionServerStartupRequest)
+    returns(RegionServerStartupResponse);
+
+  /** Called to report the load the RegionServer is under. */
+  rpc RegionServerReport(RegionServerReportRequest)
+    returns(RegionServerReportResponse);
+
+  /**
+   * Called by a region server to report a fatal error that is causing it to
+   * abort.
+   */
+  rpc ReportRSFatalError(ReportRSFatalErrorRequest)
+    returns(ReportRSFatalErrorResponse);
+
+  /** Called to get the sequence id of the last MemStore entry flushed to an
+   * HFile for a specified region. Used by the region server to speed up
+   * log splitting. */
+  rpc GetLastFlushedSequenceId(GetLastFlushedSequenceIdRequest)
+    returns(GetLastFlushedSequenceIdResponse);
+
+  /**
+   * Called by a region server to report the progress of a region
+   * transition. If the request fails, the transition should
+   * be aborted.
+   */
+  rpc ReportRegionStateTransition(ReportRegionStateTransitionRequest)
+    returns(ReportRegionStateTransitionResponse);
+}

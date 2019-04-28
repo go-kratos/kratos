@@ -1,0 +1,77 @@
+version = "1.0.0"
+user    = "nobody"
+pid     = "/tmp/archive-job.pid"
+dir     = "./"
+perf    = "127.0.0.1:6161"
+trace   = false
+debug   = false
+env     = "test"
+
+tick = "50ms"
+
+[xlog]
+dir = "/data/log/archive-job/"
+
+[app]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+
+[host]
+apiCo = "http://api.bilibili.co"
+
+[httpClient]
+dial      = "100ms"
+timeout   = "1s"
+keepAlive = "60s"
+timer     = 128
+
+[databus]
+key = "0Pub71WwEMKXu63qtztu"
+secret = "0Pub71WwEMKXu63qtztv"
+group = "Stat-UGC-S"
+topic = "Stat-T"
+action = "sub"
+    [databus.redis]
+    name = "archive-job/databus"
+    proto = "tcp"
+    addr = "172.16.33.56:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[kafka]
+group = "archive-job-consumer"
+topics = ["archive-push", "stat"]
+offset = false
+    [kafka.zookeeper]
+    root = "/kafka"
+    addrs = ["172.16.0.148:2181"]
+    timeout = "30s"
+
+[archiveRPC]
+    pullInterval = "10s"
+    [archiveRPC.client]
+    proto = "tcp"
+    addr = "172.16.0.26:6089"
+    timeout = "1s"
+    timer = 1000
+    [[archiveRPC.backup]]
+    proto = "tcp"
+    addr = "172.16.0.26:6089"
+    timeout = "1s"
+    timer = 1000
+    [archiveRPC.zookeeper]
+    root = "/microservice/archive-service/"
+    addrs = ["172.16.0.148:2181"]
+    timeout = "30s"
+
+[mail]
+host = "smtp.exmail.qq.com"
+port = 465
+username = "2333@bilibili.com"
+password = "2333"
+bangumi = ["233@bilibili.com"]
+movie = ["233@bilibili.com"]

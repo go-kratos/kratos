@@ -1,0 +1,39 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "go16.go",
+        "go17.go",
+        "status.go",
+    ],
+    importpath = "google.golang.org/grpc/status",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//codes:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
+        "@com_github_golang_protobuf//ptypes:go_default_library",
+        "@org_golang_google_genproto//googleapis/rpc/status:go_default_library",
+        "@org_golang_x_net//context:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = [
+        "go17_test.go",
+        "status_test.go",
+    ],
+    embed = [":go_default_library"],
+    deps = [
+        "//codes:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
+        "@com_github_golang_protobuf//ptypes:go_default_library",
+        "@io_bazel_rules_go//proto/wkt:any_go_proto",
+        "@io_bazel_rules_go//proto/wkt:duration_go_proto",
+        "@org_golang_google_genproto//googleapis/rpc/code:go_default_library",
+        "@org_golang_google_genproto//googleapis/rpc/errdetails:go_default_library",
+        "@org_golang_google_genproto//googleapis/rpc/status:go_default_library",
+        "@org_golang_x_net//context:go_default_library",
+    ],
+)

@@ -1,0 +1,192 @@
+# This is a TOML document. Boom.
+
+version = "1.0.1"
+user    = "nobody"
+pid     = "/tmp/app-tag.pid"
+dir     = "./"
+perf    = "127.0.0.1:6870"
+checkFile = "/data/www/app-tag.html"
+family = "app-tag"
+trace   = false
+debug   = false
+
+env     = "test"
+tick    = "1m"
+
+[host]
+data     = "http://data-test.bilibili.co"
+apiCo    = "http://api.bilibili.co"
+
+[tracer]
+proto = "udp"
+addr  = "172.16.33.46:5140"
+tag   = "platform/app-tag"
+
+[xlog]
+dir = "/data/log/app-tag/"
+	[xlog.elk]
+	project  = "app-tag"
+	addr     = "172.18.20.17:8520"
+	chanSize = 10240
+
+[app]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+
+[httpClient]
+dial      = "500ms"
+timeout   = "2s"
+keepAlive = "60s"
+timer = 10
+[httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    [identify.app]
+    key = "e7482d29be4a95b8"
+    secret = "9e803791cdef756e75faee68e12b7442"
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 5
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    [identify.host]
+    auth = "http://passport.bilibili.com"
+    secret = "http://open.bilibili.com"
+    [identify.authHTTPClient]
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+	[identify.authHTTPClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    timer = 512
+    [identify.secretHTTPClient]
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+	[identify.secretHTTPClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    timer = 512
+
+[multiHttp]
+	[multiHttp.outer]
+	addrs     = ["0.0.0.0:6871"]
+	maxListen = 100
+	[multiHttp.inner]
+	addrs     = ["0.0.0.0:6872"]
+	maxListen = 100
+	[multiHttp.local]
+	addrs     = ["0.0.0.0:6873"]
+	maxListen = 100
+
+[archiveRPC]
+	group = "test"
+    pullInterval = "10s"
+    [archiveRPC.client]
+    proto = "tcp"
+    timeout = "1s"
+    timer = 1000
+	token = "123456"
+	[archiveRPC.client.breaker]
+    window  ="3s"
+    sleep   ="100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [archiveRPC.zookeeper]
+    root = "/microservice/archive-service/"
+    addrs = ["172.16.33.54:2181"]
+    timeout = "30s"
+
+[accountRPC]
+    pullInterval = "10s"
+    [accountRPC.client]
+    proto = "tcp"
+    addr = "172.16.33.56:6079"
+    timeout = "1s"
+    timer = 1000
+    [accountRPC.client.breaker]
+    window  ="3s"
+    sleep   ="100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [accountRPC.zookeeper]
+    root = "/microservice/account-service/"
+    addrs = ["172.16.33.54:2181"]
+    timeout = "30s"
+
+[tagRPC]
+    pullInterval = "10s"
+    [tagRPC.client]
+    timeout = "1s"
+    timer = 1000
+    [tagRPC.client.breaker]
+    window  ="3s"
+    sleep   ="100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [[tagRPC.backup]]
+    proto = "tcp"
+    addr = "172.16.33.56:6089"
+    timeout = "1s"
+    timer = 1000
+    [tagRPC.zookeeper]
+    root = "/microservice/tag-service/"
+    addrs = ["172.16.33.54:2181"]
+    timeout = "30s"
+
+[mysql]
+	[mysql.show]
+	addr   = "172.16.33.205:3308"
+	dsn    = "test:test@tcp(172.16.33.205:3308)/bilibili_show?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 5
+	idle   = 2
+
+[redis]
+	[redis.stat]
+	name   = "app-interface/stat"
+	proto  = "tcp"
+	addr   = "172.16.33.54:6380"
+	active = 20
+	idle   = 10
+	dialTimeout  = "50ms"
+	readTimeout  = "50ms"
+	writeTimeout = "50ms"
+	idleTimeout  = "80s"
+	expire = "10s"
+
+[memcache]
+	[memcache.archive]
+	name   = "app-show/archive"
+	proto  = "tcp"
+	addr   = "172.16.33.54:11213"
+	active = 50
+	idle   = 10
+	dialTimeout  = "50ms"
+	readTimeout  = "100ms"
+	writeTimeout = "100ms"
+	idleTimeout  = "80s"
+	expire = "2h"

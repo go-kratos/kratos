@@ -1,0 +1,118 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+#user = "noboby"
+#dir = "./"
+#perf = "0.0.0.0:7400"
+family = "passport-game-cloud-job"
+env = "qa"
+
+#[xlog]
+#dir = "/data/log/passport-game-cloud-job"
+#
+#[tracer]
+#family = "passport-game-cloud-job"
+#proto = "unixgram"
+#addr = "/var/run/dapper-collect/dapper-collect.sock"
+
+#[multiHTTP]
+#[multiHTTP.inner]
+#addrs = ["0.0.0.0:7401"]
+#maxListen = 1000
+
+[game]
+# NOTE: the conf item appIDs represents the game app id list,
+# the app id 876 will always be the first item of the the final game app id list,
+# even if it's not configured in this file or configured in other order.
+appIDs = [876,900]
+delCacheURI = "http://p.biligame.com/api/notify/purge.cache"
+[game.client]
+key = "ebbec09cd271049e"
+secret = "test"
+dial = "500ms"
+timeout = "1s"
+keepAlive = "60s"
+timer = 10
+[game.client.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[db.cloud]
+addr = "172.16.33.205:3306"
+dsn = "account:wx2U1MwXRyWEuURw@tcp(172.16.33.205:3306)/member_app1?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 2
+queryTimeout = "1s"
+execTimeout = "2s"
+tranTimeout = "2s"
+[db.cloud.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+
+[memcache]
+name = "passport-game-cloud-job"
+proto = "tcp"
+addr = "172.16.33.54:21211"
+idle = 5
+active = 10
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "10h"
+
+[group]
+[group.binLog]
+size = 200
+num = 32
+ticker = "1s"
+chan = 1024
+
+[group.encryptTrans]
+size = 200
+num = 32
+ticker = "1s"
+chan = 1024
+
+[databus]
+[databus.binLogSub]
+key = "0QEO9F8JuuIxZzNDvklH"
+secret = "0QEO9F8JuuIxZzNDvklI"
+group = "PassportGame-UGC-S"
+topic = "PassportGame-T"
+action = "sub"
+offset = "old"
+buffer = 2048
+name = "passport-game-cloud-job/databus"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[databus.encryptTransSub]
+key = "0QEO9F8JuuIxZzNDvklH"
+secret = "0QEO9F8JuuIxZzNDvklI"
+group = "PassportGameTrans-ENCRYPT-S"
+topic = "PassportGameTrans-T"
+action = "sub"
+offset = "old"
+buffer = 2048
+name = "passport-game-cloud-job/databus"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"

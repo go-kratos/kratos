@@ -1,0 +1,20 @@
+{
+    "Vendor": true,
+    "Deadline": "5m",
+    "Cyclo": 50,
+    "Enable": [
+        "gofmt",
+        "vet",
+        "golint",
+        "vetshadow",
+        "gocyclo",
+        "megacheck",
+        "deadcode",
+        "gosimple",
+        "unused"
+    ],
+    "Exclude": [
+        ".+\\.pb\\.go",
+        ".+\\.pb\\.gw\\.go"
+    ]
+}

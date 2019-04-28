@@ -1,0 +1,112 @@
+[log]
+    # dir = "/tmp/log/recsys"
+    stdout = true
+
+[bm]
+    addr = "0.0.0.0:8804"
+    timeout = "2s"
+
+[mysql]
+	addr = "127.0.0.1:3306"
+	dsn = "test:test@tcp(127.0.0.1:3306)/test?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["test:test@tcp(127.0.0.2:3306)/test? timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4","test:test@tcp(127.0.0.3:3306)/test?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "100ms"
+	execTimeout = "100ms"
+	tranTimeout = "200ms"
+
+[redis]
+    name = "recsys-service.user_profile"
+    proto = "tcp"
+    addr = "172.16.38.91:6379"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1m"
+
+[bfredis]
+    name = "recsys-service.bloomfilter"
+    proto = "tcp"
+    addr = "172.16.38.91:6379"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1m"
+
+[memcache]
+	name = "recsys-service"
+	proto = "tcp"
+	addr = ""
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[httpClient]
+    [httpClient.normal]
+        dial = "500ms"
+        timeout = "1s"
+        keepAlive = "60s"
+        timer = 10
+        key = "7c7ac0db1aa05587"
+        secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    [httpClient.normal.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+    [httpClient.slow]
+        dial = "500ms"
+        timeout = "1s"
+        keepAlive = "60s"
+        timer = 10
+        key = "7c7ac0db1aa05587"
+        secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    [httpClient.slow.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[grpcClient]
+    [grpcClient.user]
+        addr = "discovery://default/bbq.service.user"
+        [grpcClient.user.wardenConf]
+            dial = "3000ms"
+            timeout = "5000ms"
+    [grpcClient.recall]
+        addr = "172.22.38.129:9000"
+        [grpcClient.recall.wardenConf]
+            dial = "3000ms"
+            timeout = "5000ms"
+    [grpcClient.relation]
+            addr = "discovery://default/account.service.relation"
+            [grpcClient.relation.wardenConf]
+                dial = "3000ms"
+                timeout = "5000ms"
+
+
+[infoc]
+    taskID = "001555"
+    proto = "tcp"
+    addr = "172.18.33.124:15140"
+    chanSize = 10240
+
+[workerPool]
+    maxWorkers = 512
+    maxIdleWorkers = 256
+    minIdleWorkers = 128
+    keepAlive = "30s"

@@ -1,0 +1,132 @@
+# This is a TOML document. Boom
+
+version = "1.0.0"
+user = "root"
+dir = "/root/golang/go-project/src/go-common/business/service/live-wallet"
+family = "live-wallet"
+address = ""
+trace = false
+debug = false
+perf = "0.0.0.0:20201"
+
+[log]
+    dir = "/data/log/live-wallet-service"
+
+[db]
+    [db.wallet]
+    addr = "172.22.34.101:3312"
+    dsn = "livetestuat:livetestuat20180711@tcp(172.22.34.101:3312)/live_wallet?timeout=5s&readTimeout=30s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "2s"
+    [db.wallet.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[bm]
+	[bm.inner]
+	addr = "0.0.0.0:9901"
+	maxListen = 10
+        timeout = "1s"
+	[bm.local]
+	addr = "0.0.0.0:9902"
+	maxListen = 10
+        timeout = "1s"
+
+[httpClient]
+    key = "fb06a25c6338edbc"
+    secret = "fd10bd177559780c2e4a44f1fa47fa83"
+    dial = "1s"
+    timeout = "4s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    csrfOn = false
+    [identify.app]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "172.16.33.251:11211"
+    active = 15
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    [identify.host]
+    auth = "http://passport.bilibili.co"
+    secret = "http://open.bilibili.co"
+  [identify.httpClient]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "30ms"
+    timeout = "100ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[memcache]
+walletExpire = "3s"
+    [memcache.wallet]
+    name = "live-wallet-service/wallet"
+    proto = "tcp"
+    addr = "172.18.33.67:11211"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[redis]
+    [redis.wallet]
+        name = "wallet/wallet"
+        proto = "tcp"
+        addr = "172.18.33.67:6379"
+        idle = 100
+        active = 100
+        dialTimeout = "500ms"
+        readTimeout = "1s"
+        writeTimeout = "1s"
+        idleTimeout = "80s"
+        expire = "10m"
+[databus]
+    [databus.Change]
+    key = "ec4c0820d525d67b"
+    secret= "2bdf3bd4ecab041b5d5640a1da4f7f81"
+    group= "LiveWalletChange-LiveLive-P"
+    topic= "LiveWalletChange-T"
+    action="pub"
+    name = "live-wallet"
+    proto = "tcp"
+    addr = "172.16.38.154:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"

@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liuguodong
+- liuzhan
+- penggenping
+labels:
+- interface
+- interface/openplatform/seo
+- openplatform
+options:
+  no_parent_owners: true
+reviewers:
+- liuguodong
+- liuzhan
+- penggenping

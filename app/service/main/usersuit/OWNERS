@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- wanghuan01
+- zhaogangtao
+- zhoujiahui
+labels:
+- main
+- service
+- service/main/usersuit
+options:
+  no_parent_owners: true
+reviewers:
+- linmiao
+- wanghuan01
+- zhaogangtao

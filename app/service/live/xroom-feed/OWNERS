@@ -1,0 +1,10 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- weixuan
+labels:
+- live
+- service
+- service/live/xroom-feed
+options:
+  no_parent_owners: true

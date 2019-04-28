@@ -1,0 +1,250 @@
+# This is a TOML document. Boom
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/melloi.pid"
+dir = "./"
+perf = "0.0.0.0:8884"
+trace = false
+debug = true
+
+[log]
+dir = "D:\\melloi_log"
+stdout = true
+
+[tracer]
+	family = "melloi"
+	proto = "udp"
+	addr = "172.16.33.46:5140"
+
+[dapper]
+    host ="http://api.bilibili.co"
+
+[PermitGRPC]
+    timeout = "500ms"
+
+[serviceTree]
+    host ="http://easyst.bilibili.co"
+
+[bfsConf]
+    host ="http://uat-bfs.bilibili.co"
+
+[serviceCluster]
+    testHost="http://uat-caster.bilibili.co"
+    uatHost="http://uat-caster.bilibili.co"
+    queryJobCpuHost = "http://merak.bilibili.co"
+
+[bm]
+	 addr = "0.0.0.0:8881"
+	 maxListen = 10000
+     timeout = "5s"
+
+[identify]
+	whiteAccessKey = ""
+	whiteMid = 0
+	[identify.app]
+	key = "6a29f8ed87407c11"
+	secret = "d3c5a85f5b895a03735b5d20a273bc57"
+	[identify.memcache]
+	name = "go-business/identify"
+	proto = "tcp"
+	addr = "172.16.33.54:11211"
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "80s"
+	[identify.host]
+	auth = "http://passport.bilibili.com"
+	secret = "http://open.bilibili.com"
+	[identify.httpClient]
+	key = "f022126a8a365e20"
+	secret = "b7b86838145d634b487e67b811b8fab2"
+	dial = "30ms"
+	timeout = "100ms"
+	keepAlive = "60s"
+	[identify.httpClient.breaker]
+	window  = "10s"
+	sleep   = "100ms"
+	bucket  = 10
+	ratio   = 0.5
+	request = 100
+	[identify.httpClient.url]
+	"http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+	"http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+	"http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[managerAuth]
+servicetreeHost = "http://easyst.bilibili.co"
+dashboardHost = "http://dashboard-mng.bilibili.co"
+dashboardCaller =  "melloi"
+[managerAuth.memcache]
+               name = "go-business/auth"
+               	proto = "tcp"
+               	addr = "172.16.33.54:11211"
+               	idle = 5
+               	active = 10
+               	dialTimeout = "1s"
+               	readTimeout = "1s"
+               	writeTimeout = "1s"
+               	idleTimeout = "10s"
+               	expire = "1h"
+
+    [managerAuth.dsHTTPClient]
+    key = "melloi"
+    secret = "d3c5a85f5b895a03735b5d20a273bc57"
+    dial = "2s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+    [managerAuth.dsHTTPClient.breaker]
+    window  ="3s"
+    sleep   ="200ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [managerAuth.stHTTPClient]
+     key = "melloi"
+        secret = "d3c5a85f5b895a03735b5d20a273bc57"
+        dial = "2s"
+        timeout = "3s"
+        keepAlive = "60s"
+        timer = 1000
+        [managerAuth.stHTTPClient.breaker]
+            window  ="3s"
+            sleep   ="100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100
+
+[redis]
+	name = "melloi"
+	proto = "tcp"
+	addr = ""
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[httpClient]
+    key = "c05dd4e1638a8af0"
+    secret = "7daa7f8c06cd33c5c3067063c746fdcb"
+    dial = "2s"
+    timeout = "10s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.breaker]
+    window  = "10s"
+    sleep   = "2000ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[memcache]
+	name = "melloi"
+	proto = "tcp"
+	addr = "172.18.33.61:11232"
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+ [orm]
+ dsn = "root:root@tcp(172.22.33.22:3306)/test?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+ active = 5
+ idle = 5
+ idleTimeout = "4h"
+
+[permit]
+    [permit.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.18.33.61:11232"
+    active = 10
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[paas]
+    apiToken="sfy3gGVkX19XQrg1NBksyt7zZQo692Mmnctq"
+    platformID="melloi"
+    businessUnit="test"
+    project= "ep"
+    app= "melloi-launch"
+    env= "dev"
+    image= "docker-reg.bilibili.co/jmeter4.0"
+    imageVersion="4.0"
+    volumes="/data/jmeter-log:/data/jmeter-log:RW"
+    resourcePoolId="7"
+    completions=1
+    retriesLimit=6
+    networkId=22
+    clusterId=1
+    treeId=39400
+    hostInfo=""
+    action="GetCurrentPromData"
+    publicKey="9c178e51a7d4dc8aa1dbef0c790b06e7574c4d0etracehubtuhui@bilibili.com"
+    signature=1
+    dataSource="docker"
+    query="job:cpu_used_total{container_env_app_id=~'test.ep.melloi-launch', container_env_deploy_env='dev',container_env_pod_name='{{.JobNamed}}'} / job:cpu_core_total{container_env_app_id=~'test.ep.melloi-launch', container_env_deploy_env='dev',container_env_pod_name='{{.JobNamed}'}"
+
+[melloi]
+    appkeyProd="2cc31960f9bffa4e"
+    secretProd="9011a2ba8eb7ab7e5d43fcbc7cca8aff"
+    appkeyUat="4daf6715162cb3a6"
+    secretUat="6317d22e47d49f36c1c5ce1f4791650f"
+    executor=["gongmenglei","chenmeng","hujianping","yuanmin","maojian","hukai"]
+    checkTime=false
+    defaultHost="172.22.22.222"
+    maxFileSize=1638400
+    maxDowloadSize = 8192000
+    recent = 4
+
+[wechat]
+   wechatHost="http://172.16.63.43:8000"
+   chatid="wuweitest"
+   msgtype="text"
+   safe=0
+   senMessage=true
+
+[mail]
+    host = "smtp.exmail.qq.com"
+    port = 465
+    username = "melloi@bilibili.com"
+    password = "*******"
+    noticeOwner = ["hujianping@bilibili.com"]
+
+ [BFSBucket]
+    keyID="t18aomj1b1k6plhn"
+    keySecret="v9j7hzvwfqwy7bb5bk9hvq35pxqnpp"
+
+[jmeter]
+    jmeterExtLibPath="/opt/apache-jmeter-4.0/lib/ext"
+    jmeterExtLibPathContainer = "/mnt/storage00/bperf_test/gongmenglei/home/apache-jmeter-4.0/lib/ext/"
+    grpcTemplatePath = "/data/peter/melloi/test/ep/melloi/grpc.jmx"
+    testTimeLimit = 1800
+    jmeterScUcodedTmp = "D:\\work\\EP\\Melloi\\ptzy_www_urlencoded.jmx"
+    jmeterScTmp = "D:\\work\\EP\\Melloi\\ptzy.jmx"
+    jmeterSampleTmp = "D:\\work\\EP\\Melloi\\jmeterSample.jmx"
+    jmeterSamplePostTmp = "D:\\work\\EP\\Melloi\\jmeterSamplePost.jmx"
+    jmeterThGroupTmp = "D:\\work\\EP\\Melloi\\ThreadGroup.jmx"
+    jmeterThGroupPostTmp = "D:\\work\\EP\\Melloi\\ThreadGroupPost.jmx"
+    jmeterThGroupDuliTmp =  "D:\\work\\EP\\Melloi\\ThreadGroupDuli.jmx"
+    jmeterThGroupPostDuliTmp = "D:\\work\\EP\\Melloi\\ThreadGroupPostDuli.jmx"
+    jmeterSceneTmp = "D:\\work\\EP\\Melloi\\jmeterScene.jmx"
+    JSONExtractorTmp = "D:\\work\\EP\\Melloi\\JSONExtractor.jmx"
+[grpc]
+    protoJavaPluginPath = "/opt/protoc-gen-grpc-java-1.15.1-linux-x86_64.exe"
+
+[dockerStatus]
+    host = "http://172.22.33.22"
+    port = 8999

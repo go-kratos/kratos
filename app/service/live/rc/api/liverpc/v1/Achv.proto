@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package rc.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Achv {
+    
+    /** 用户成就统计
+     * 用户成就统计
+     */   
+    rpc userstatus (AchvUserstatusReq) returns (AchvUserstatusResp);
+}
+
+
+
+message AchvUserstatusReq {
+    
+}
+
+message AchvUserstatusResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    Data data = 4 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 已经领取的
+        int64 point = 1 [(gogoproto.jsontag) = "point"];
+        // 已经完成
+        int64 complete = 2 [(gogoproto.jsontag) = "complete"];
+        // 完成但未领取
+        int64 unreceived_normal = 3 [(gogoproto.jsontag) = "unreceived_normal"];
+    }
+}

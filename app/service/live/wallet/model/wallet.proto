@@ -1,0 +1,198 @@
+syntax = "proto3";
+package model;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+
+message RechargeOrPayParam {
+    int64 Uid = 1 [(gogoproto.jsontag) = "uid"];
+    string CoinType = 2 [(gogoproto.jsontag) = "coin_type"];
+    int64 CoinNum = 3 [(gogoproto.jsontag) = "coin_num"];
+    string ExtendTid = 4 [(gogoproto.jsontag) = "extend_tid"];
+    int64 Timestamp = 5 [(gogoproto.jsontag) = "timestamp"];
+    string TransactionId = 6 [(gogoproto.jsontag) = "transaction_id"];
+    string BizCode = 7 [(gogoproto.jsontag) = "biz_code"];
+    int64 Area = 8 [(gogoproto.jsontag) = "area"];
+    string Source = 9 [(gogoproto.jsontag) = "source"];
+    string MetaData = 10 [(gogoproto.jsontag) = "metadata"];
+    string BizSource = 11 [(gogoproto.jsontag) = "biz_source"];
+    int64 Reason = 12 [(gogoproto.jsontag) = "biz_reason"];
+    int64 Version = 13 [(gogoproto.jsontag) = "version"];
+    string Platform = 14 [(gogoproto.jsontag) = "platform"];
+
+}
+
+message ExchangeParam {
+    int64 Uid = 1 [(gogoproto.jsontag) = "uid"];
+    string SrcCoinType = 2 [(gogoproto.jsontag) = "src_coin_type"];
+    int64 SrcCoinNum = 3 [(gogoproto.jsontag) = "src_coin_num"];
+    string DestCoinType = 4 [(gogoproto.jsontag) = "dest_coin_type"];
+    int64 DestCoinNum = 5 [(gogoproto.jsontag) = "dest_coin_num"];
+    string ExtendTid = 6 [(gogoproto.jsontag) = "extend_tid"];
+    int64 Timestamp = 7 [(gogoproto.jsontag) = "timestamp"];
+    string TransactionId = 8 [(gogoproto.jsontag) = "transaction_id"];
+    string BizCode = 9 [(gogoproto.jsontag) = "biz_code"];
+    int64 Area = 10 [(gogoproto.jsontag) = "area"];
+    string Source = 11 [(gogoproto.jsontag) = "source"];
+    string MetaData = 12 [(gogoproto.jsontag) = "metadata"];
+    string BizSource = 13 [(gogoproto.jsontag) = "biz_source"];
+    int64 Reason = 14 [(gogoproto.jsontag) = "biz_reason"];
+    int64 Version = 15 [(gogoproto.jsontag) = "version"];
+    string Platform = 16 [(gogoproto.jsontag) = "platform"];
+
+}
+
+
+message Melonseed {
+    int64 Uid = 1 [(gogoproto.jsontag) = "uid"];
+    int64 Gold = 2 [(gogoproto.jsontag) = "gold"];
+    int64 IapGold = 3 [(gogoproto.jsontag) = "iap_gold"];
+    int64 Silver = 4 [(gogoproto.jsontag) = "silver"];
+}
+
+message Detail {
+    int64 Uid = 1 [(gogoproto.jsontag) = "uid"];
+    int64 Gold = 2 [(gogoproto.jsontag) = "gold"];
+    int64 IapGold = 3 [(gogoproto.jsontag) = "iap_gold"];
+    int64 Silver = 4 [(gogoproto.jsontag) = "silver"];
+    int64 GoldRechargeCnt = 5 [(gogoproto.jsontag) = "gold_recharge_cnt"];
+    int64 GoldPayCnt = 6 [(gogoproto.jsontag) = "gold_pay_cnt"];
+    int64 SilverPayCnt = 7 [(gogoproto.jsontag) = "silver_pay_cnt"];
+    int64  CostBase = 8 [(gogoproto.jsontag) = "cost_base"];
+}
+
+message DetailWithSnapShot {
+    int64 Uid = 1 [(gogoproto.jsontag) = "uid"];
+    int64 Gold = 2 [(gogoproto.jsontag) = "gold"];
+    int64 IapGold = 3 [(gogoproto.jsontag) = "iap_gold"];
+    int64 Silver = 4 [(gogoproto.jsontag) = "silver"];
+    int64 GoldRechargeCnt = 5 [(gogoproto.jsontag) = "gold_recharge_cnt"];
+    int64 GoldPayCnt = 6 [(gogoproto.jsontag) = "gold_pay_cnt"];
+    int64 SilverPayCnt = 7 [(gogoproto.jsontag) = "silver_pay_cnt"];
+    int64  CostBase = 8 [(gogoproto.jsontag) = "cost_base"];
+    string SnapShotTime = 9 [(gogoproto.jsontag) = "snapshot_time"];
+    int64 SnapShotGold = 10 [(gogoproto.jsontag) = "snapshot_gold"];
+    int64 SnapShotIapGold = 11 [(gogoproto.jsontag) = "snapshot_iap_gold"];
+    int64 SnapShotSilver = 12 [(gogoproto.jsontag) = "snapshot_silver"];
+    int64 Reserved1 = 13 [(gogoproto.jsontag) = "reserved1"];
+    string Reserved2 = 14 [(gogoproto.jsontag) = "reserved2"];
+
+
+}
+
+message McDetail {
+    Detail Detail = 1 [(gogoproto.jsontag) = "detail"];
+    bool Exist = 2 [(gogoproto.jsontag) = "exist"];
+    int32 Version = 3 [(gogoproto.jsontag) = "version"];
+}
+
+message CoinStreamRecord {
+    int64 Uid = 1 [(gogoproto.jsontag) = "uid"];
+    string TransactionId = 2 [(gogoproto.jsontag) = "transaction_id"];
+    string ExtendTid = 3 [(gogoproto.jsontag) = "extend_tid"];
+    int32 CoinType = 4 [(gogoproto.jsontag) = "coin_type"];
+    int64 DeltaCoinNum = 5 [(gogoproto.jsontag) = "delta_coin_num"];
+    int64 OrgCoinNum = 6 [(gogoproto.jsontag) = "org_coin_num"];
+    int32 OpResult = 7 [(gogoproto.jsontag) = "op_result"];
+    int32 OpReason = 8 [(gogoproto.jsontag) = "op_reason"];
+    int32 OpType = 9 [(gogoproto.jsontag) = "op_type"];
+    int64 OpTime = 10 [(gogoproto.jsontag) = "op_time"];
+    string BizCode = 11 [(gogoproto.jsontag) = "biz_code"];
+    int64 area = 12 [(gogoproto.jsontag) = "area"];
+    string Source = 13 [(gogoproto.jsontag) = "source"];
+    string MetaData = 14 [(gogoproto.jsontag) = "metadata"];
+    string BizSource = 15 [(gogoproto.jsontag) = "biz_source"];
+    int32 Platform = 16 [(gogoproto.jsontag) = "platform"];
+    int64 Reserved1 = 17 [(gogoproto.jsontag) = "reserved1"];
+    int64 Version = 18 [(gogoproto.jsontag) = "reserved5"];
+}
+
+message CoinExchangeRecord {
+    int64 Uid = 1 [(gogoproto.jsontag) = "uid"];
+    string TransactionId = 2 [(gogoproto.jsontag) = "transaction_id"];
+    int32 SrcType = 3 [(gogoproto.jsontag) = "src_type"];
+    int32 SrcNum = 4 [(gogoproto.jsontag) = "src_num"];
+    int32 DestType = 5 [(gogoproto.jsontag) = "dest_type"];
+    int32 DestNum = 6 [(gogoproto.jsontag) = "dest_num"];
+    int32 Status = 7 [(gogoproto.jsontag) = "status"];
+    int64 ExchangeTime = 8 [(gogoproto.jsontag) = "exchange_time"];
+}
+
+message RecordCoinStreamItem {
+    string TransactionId = 1 [(gogoproto.jsontag) = "transaction_id"];
+    string ExtendTid = 2 [(gogoproto.jsontag) = "extend_tid"];
+    string CoinType = 3 [(gogoproto.jsontag) = "coin_type"];
+    int64 CoinNum = 4 [(gogoproto.jsontag) = "coin_num"];
+    int64 OrgCoinNum = 5 [(gogoproto.jsontag) = "left_coins"];
+    string Type = 6 [(gogoproto.jsontag) = "type"];
+    int64 Timestamp = 7 [(gogoproto.jsontag) = "timestamp"];
+    int64 Reserved1 = 8 [(gogoproto.jsontag) = "biz_reason"];
+}
+
+message BasicParam {
+    string TransactionId = 1 [(gogoproto.jsontag) = "transaction_id"];
+    string BizCode = 2 [(gogoproto.jsontag) = "biz_code"];
+    int64 area = 3 [(gogoproto.jsontag) = "area"];
+    string Source = 4 [(gogoproto.jsontag) = "source"];
+    string MetaData = 5 [(gogoproto.jsontag) = "metadata"];
+    string BizSource = 6 [(gogoproto.jsontag) = "biz_source"];
+    int64 Reason = 7 [(gogoproto.jsontag) = "biz_reason"];
+    int64 Version = 8 [(gogoproto.jsontag) = "version"];
+}
+
+message MelonseedResp {
+    string Gold = 1 [(gogoproto.jsontag) = "gold"];
+    string Silver = 2 [(gogoproto.jsontag) = "silver"];
+}
+
+message MelonseedWithMetalResp {
+    string Gold = 1 [(gogoproto.jsontag) = "gold"];
+    string Silver = 2 [(gogoproto.jsontag) = "silver"];
+    string Metal = 3 [(gogoproto.jsontag) = "metal"];
+}
+
+message DetailResp {
+    string Gold = 1 [(gogoproto.jsontag) = "gold"];
+    string Silver = 2 [(gogoproto.jsontag) = "silver"];
+    string GoldRechargeCnt = 5 [(gogoproto.jsontag) = "gold_recharge_cnt"];
+    string GoldPayCnt = 6 [(gogoproto.jsontag) = "gold_pay_cnt"];
+    string SilverPayCnt = 7 [(gogoproto.jsontag) = "silver_pay_cnt"];
+    int64  CostBase = 8 [(gogoproto.jsontag) = "cost_base"];
+}
+
+message DetailWithMetalResp {
+    string Gold = 1 [(gogoproto.jsontag) = "gold"];
+    string Silver = 2 [(gogoproto.jsontag) = "silver"];
+    string GoldRechargeCnt = 5 [(gogoproto.jsontag) = "gold_recharge_cnt"];
+    string GoldPayCnt = 6 [(gogoproto.jsontag) = "gold_pay_cnt"];
+    string SilverPayCnt = 7 [(gogoproto.jsontag) = "silver_pay_cnt"];
+    string Metal = 8 [(gogoproto.jsontag) = "metal"];
+    int64  CostBase = 9 [(gogoproto.jsontag) = "cost_base"];
+}
+
+message TidResp {
+    string TransactionId = 1 [(gogoproto.jsontag) = "transaction_id"];
+}
+
+message QueryResp {
+    int32 Status = 1 [(gogoproto.jsontag) = "status"];
+}
+
+message MetalData {
+    double Count = 1 [(gogoproto.jsontag) = "count"];
+}
+
+message WalletChangeMsg {
+    string Action = 1 [(gogoproto.jsontag) = "action"];
+    int64 Uid = 2 [(gogoproto.jsontag) = "uid"];
+    string CoinType = 3 [(gogoproto.jsontag) = "coin_type"];
+    string Platfrom = 4 [(gogoproto.jsontag) = "platform"];
+    int64 Number = 5 [(gogoproto.jsontag) = "number"];
+    int64 Gold = 6 [(gogoproto.jsontag) = "gold"];
+    int64 Silver = 7 [(gogoproto.jsontag) = "silver"];
+    int64 GoldRechargeCnt =8 [(gogoproto.jsontag) = "gold_recharge_cnt"];
+    int64 GoldPayCnt = 9 [(gogoproto.jsontag) = "gold_pay_cnt"];
+    int64 SilverPayCnt = 10 [(gogoproto.jsontag) = "silver_pay_cnt"];
+    string DestCoinType = 11 [(gogoproto.jsontag) = "dest_coin_type"];
+    int64 DestNumber = 12 [(gogoproto.jsontag) = "dest_number"];
+    int64  CostBase = 13 [(gogoproto.jsontag) = "cost_base"];
+}

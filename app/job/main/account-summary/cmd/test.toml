@@ -1,0 +1,133 @@
+# This is a TOML document. Boom
+
+[Log]
+stdout=true
+
+[MemberBinLog]
+key = "4ba46ba31f9a44ef"
+secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+group = "MemberBinlog-MainAccount-AccountSummary-S"
+topic = "MemberBinlog-T"
+action = "sub"
+offset = "old"
+buffer = 2048
+name = "account-summary/member-binlog"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[BlockBinLog]
+key = "4ba46ba31f9a44ef"
+secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+group = "BlockUserBinlog-MainAccount-S"
+topic = "BlockUserBinlog-T"
+action = "sub"
+offset = "old"
+buffer = 2048
+name = "account-summary/member-binlog"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[PassportBinLog]
+key = "4ba46ba31f9a44ef"
+secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+group = "PassportPurgeCache-MainAccount-AccountSummary-S"
+topic = "PassportPurgeCache-T"
+action = "sub"
+offset = "old"
+buffer = 2048
+name = "account-summary/member-binlog"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[AccountSummaryProducer]
+key = "4ba46ba31f9a44ef"
+secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+group = "AccountSummary-MainAccount-P"
+topic = "AccountSummary-T"
+action = "pub"
+offset = "old"
+buffer = 2048
+name = "account-summary/account-summary-producer"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 10
+active = 10
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[AccountSummaryHBase]
+master = ""
+meta = ""
+dialTimeout = "1s"
+readTimeout = "10s"
+readsTimeout = "10s"
+writeTimeout = "10s"
+writesTimeout = "10s"
+[AccountSummaryHBase.zookeeper]
+root = ""
+addrs = ["172.18.33.131:2181","172.18.33.168:2181","172.18.33.169:2181"]
+timeout = "30s"
+
+[MemberDB]
+addr = "172.16.33.205"
+dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_member?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 2
+IdleTimeout ="4h"
+queryTimeout = "100ms"
+execTimeout = "100ms"
+tranTimeout = "200ms"
+[MemberDB.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+
+[HTTPClient]
+key = "c1a1cb2d89c33794"
+secret = "dda47eeca111e03e6845017505baea13"
+dial = "1s"
+timeout = "3s"
+keepAlive = "60s"
+timer = 16
+[HTTPClient.breaker]
+window  = "10s"
+sleep   = "100ms"
+bucket  = 10
+ratio   = 0.5
+request = 100
+
+[Host]
+Passport="http://uat-passport.bilibili.co"
+
+[AccountSummary]
+SubProcessWorker=1
+SyncRangeStart=0
+SyncRangeEnd=300000000
+SyncRangeWorker=4
+
+[FeatureGate]
+DisableSubProcess=false
+SyncRange=false
+Initial=true

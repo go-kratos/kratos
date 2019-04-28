@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package live.livedemo.v2;
+
+option go_package = "v2";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+
+// Foo 相关服务
+service Foo {
+    // 根据uid得到uname
+    // `method:"post" midware:"auth,verify"`
+    //
+    // 这是详细说明
+    rpc uname_by_uid (Bar1Req) returns (Bar1Resp) {
+        option (google.api.http) = {
+            get:"/xlive/demo/v1/foo/uname_by_uid_custom_route"
+        };
+    }
+    // 获取房间信息
+    // `midware:"guest"`
+    rpc get_info (GetInfoReq) returns (GetInfoResp);
+    // 根据uid得到uname v3
+    rpc uname_by_uid3 (Bar1Req) returns (Bar1Resp);
+    // test comment
+    // `internal:"true"`
+    rpc uname_by_uid4 (Bar1Req) returns (Bar1Resp);
+    // `dynamic_resp:"true"`
+    rpc get_dynamic (Bar1Req) returns (Bar1Resp);
+    // `dynamic:"true"`
+    rpc nointerface (Bar1Req) returns (Bar1Resp);
+    // `method:"POST"`
+    rpc json_req(JsonReq) returns (JsonResp);
+}
+
+message JsonReq {
+    // json请求参数
+    string p1 = 1;
+    JsonSubMessage p2 = 2;
+}
+
+message JsonSubMessage {
+    // param
+    string param = 1;
+}
+message JsonResp {
+    // json请求响应
+    string p1 = 1;
+}
+
+service Foo2 {
+    rpc hello (Bar1Req) returns (Bar1Resp);
+}
+
+// Bar请求
+message Bar1Req {
+    // 用户uid
+    int32 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+}
+
+// Bar 相应
+message Bar1Resp {
+    // 用户名
+    // `mock:"hello"`
+    string uname = 2 [(gogoproto.jsontag) = "uname"];
+    // idshaha
+    // `mock:"343242"`
+    repeated int32 ids = 3 [(gogoproto.jsontag) = "ids"];
+    repeated List list = 4 [(gogoproto.jsontag) = "list"];
+    List alist = 5 [(gogoproto.jsontag) = "alist"];
+    message List {
+        // `mock:"\"withquote"`
+        string hello = 1 [(gogoproto.jsontag) = "hello"];
+        string world = 2 [(gogoproto.jsontag) = "world"];
+    }
+    map<string, List> amap = 6 [(gogoproto.jsontag) = "amap"];
+}
+
+// 获取房间信息请求
+message GetInfoReq {
+    // 房间id
+    // `mock:"123"
+    int64 room_id = 1 [(gogoproto.moretags) = 'form:"room_id" validate:"required"'];
+    repeated int64 many_ids = 2 [(gogoproto.moretags) = 'form:"many_ids"'];
+}
+
+// 获取房间信息响应
+message GetInfoResp {
+    // 房间id 注释貌似只有放在前面才能被识别，放到字段声明后面是没用的
+    int64 roomid = 1 [(gogoproto.jsontag) = "roomid"]; // 这段注释不会被理会
+    // 用户名
+    string uname = 2 [(gogoproto.jsontag) = "uname"];
+    // 开播时间
+    string live_time = 3 [(gogoproto.jsontag) = "live_time"];
+    map<int32, string> amap = 4 [(gogoproto.jsontag) = "amap"];
+    // `mock:"6.02214129e23"`
+    float rate = 5 [(gogoproto.jsontag) = "rate"];
+    // 用户mid
+    int64 mid = 6 [(gogoproto.jsontag) = "mid"];
+}

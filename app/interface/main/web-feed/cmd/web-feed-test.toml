@@ -1,0 +1,32 @@
+version = "1.0.0"
+user    = "nobody"
+pid     = "/tmp/web-feed.pid"
+dir     = "./"
+perf    = "0.0.0.0:6380"
+family  = "web-feed"
+trace   = false
+debug   = false
+
+[xlog]
+dir = "/data/log/web-feed/"
+
+[memcache]
+    name = "web-feed"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    idle = 100
+    active = 1000
+    dialTimeout = "200ms"
+    readTimeout = "200ms"
+    writeTimeout = "200ms"
+    idleTimeout = "80s"
+    feedExpire = "24h"
+
+[bm]
+     addr = "0.0.0.0:6381"
+     maxListen = 1000
+     timeout = "1000ms"
+
+[feed]
+defaultSize = 20
+maxSize = 200

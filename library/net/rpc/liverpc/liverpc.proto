@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package liverpc;
+
+option go_package = "go-common/library/net/rpc/liverpc";
+
+
+message Header {
+    // APP_NAME.xxxxx , when separated by dot,
+    // the first part is always app_name, the rest is undefined
+    string caller = 1;
+    int64 uid = 2;
+    string platform = 3;
+    string src = 4;
+    string trace_id = 5;
+    string user_ip = 7;
+    string source_group = 8;
+    string buvid = 9;
+    // session data, format is http query
+    // such as access_token=abc&SESS_DATA=def
+    string sessdata2 = 10;
+}
+
+// http is inside the protocol body
+// {"body":..., "header":..., "http":...}
+// this is used when a proxy forward a http request to a rpc request
+message HTTP {
+    int32 is_https = 1;
+    string body = 2; // the original body, only used when nessasary, usually null
+    map<string, string> cookie = 3;
+    map<string, string> header = 4;
+    string uri = 5; // user original uri
+    string method = 6; // http method
+    string protocol = 7; // not much use here
+}

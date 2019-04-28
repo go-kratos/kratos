@@ -1,0 +1,126 @@
+version = "1.0.0"
+user = "nobody"
+dir = "./"
+family = "feed-admin"
+env = "uat"
+
+[log]
+dir = "/data/log/feed-admin/"
+
+[orm]
+dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_show?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 5
+idleTimeout = "4h"
+[ormResource]
+dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_resource?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 5
+idleTimeout = "4h"
+[HTTPServer]
+    addr = "0.0.0.0:6683"
+    timeout = "1s"
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 10
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[httpClient]
+    key    = "1f2620da295d326b"
+    secret = "test"
+    dial      = "500ms"
+    timeout   = "2s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.breaker]
+        window  = "10s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+[bfs]
+#key         = "b525299741c108ef"
+#secret      = "ef1d0b536d4bcef04dd7c75014c51f"
+#addr        = "http://uat-bfs.bilibili.co/bfs/feed-admin/"
+#bucket      = "feed-admin"
+#timeout     = "10s"
+key         = "b525299741c108ef"
+secret      = "ef1d0b536d4bcef04dd7c75014c51f"
+addr        = "http://bfs.bilibili.co/bfs/feed-admin/"
+bucket      = "feed-admin"
+timeout     = "10s"
+maxFileSize = 10485760
+
+[archiveRPC]
+    timeout = "500ms"
+    [archiveRPC.conf]
+    domain = "api.bilibili.co"
+    key = "53e2fa226f5ad348"
+    secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+
+[accountRPC]
+    timeout = "500ms"
+    [accountRPC.conf]
+    domain = "api.bilibili.co"
+    key = "53e2fa226f5ad348"
+    secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+
+[memcache]
+	name = "tv-admin"
+	proto = "tcp"
+    addr = "172.18.33.60:11236"
+    active = 10
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+[cfg]
+#    HotCroFre = "*/30 * * * * *"
+#    DarkCroFre = "*/30 * * * * *"
+    HotCroFre = "0 */10 * * * *"
+    DarkCroFre = "0 */10 * * * *"
+#    DarkCroFre = "0 */10 * * * *"
+
+[host]
+manager = "http://uat-manager.bilibili.co"

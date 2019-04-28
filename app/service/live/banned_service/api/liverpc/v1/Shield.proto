@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package banned_service.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Shield {
+    
+    /** 是否是屏蔽内容
+     * 用于房主启用过滤之后，查询弹幕内容是否命中关键字
+     */   
+    rpc is_shield_content (ShieldIsShieldContentReq) returns (ShieldIsShieldContentResp);
+}
+
+
+
+message ShieldIsShieldContentReq {
+    // 房主uid
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 内容
+    string content = 2 [(gogoproto.jsontag) = "content"];
+}
+
+message ShieldIsShieldContentResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 是否是被屏蔽的内容
+        bool is_shield_content = 2 [(gogoproto.jsontag) = "is_shield_content"];
+        // 命中的屏蔽词
+        string shield_by = 3 [(gogoproto.jsontag) = "shield_by"];
+    }
+}

@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package live_user.v1;
+
+option go_package = "v1";
+
+
+service Note {
+    
+    /** 大航海续费提醒
+     * 
+     */   
+    rpc get (NoteGetReq) returns (NoteGetResp);
+}
+
+
+
+message NoteGetReq {
+    
+}
+
+message NoteGetResp {
+    // code
+    int64 code = 1;
+    // msg　
+    string msg = 2;
+    // 
+    Data data = 3;
+       
+    message Data {
+        // logo 的 url
+        string logo = 1;
+        // 标题
+        string title = 2;
+        // 内容
+        string content = 3;
+        // 跳转链接
+        string link = 4;
+    }
+}

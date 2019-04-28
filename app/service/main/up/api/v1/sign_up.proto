@@ -1,0 +1,18 @@
+syntax = "proto3";
+package archive.service.up.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+// SignUp 签约up
+message SignUp {
+  // Mid 签约up主ID
+  int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+  // State 签约状态
+  int32 State = 2 [(gogoproto.jsontag) = "state"];
+  // BeginDate 经纪签约开始时间
+  int64 BeginDate = 3 [(gogoproto.jsontag) = "begin_date", (gogoproto.casttype) = "go-common/library/time.Time"];
+  // EndDate 经纪签约结束时间
+  int64 EndDate = 4 [(gogoproto.jsontag) = "end_date", (gogoproto.casttype) = "go-common/library/time.Time"];
+}

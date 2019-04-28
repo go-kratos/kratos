@@ -1,0 +1,48 @@
+syntax = "proto3";
+package ticket.service.item.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "app/service/openplatform/ticket-item/api/grpc/v1/time.proto";
+
+option go_package = "v1";
+
+// The response message containing the TicketInfo
+message TicketInfo {
+   int64 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.moretags) = "validate:\"min=1\"", (gogoproto.customname)= "ID"];
+   string desc = 2 [(gogoproto.jsontag) = "name"];
+   // 票类型：1-单场票 2-通票 3-联票
+   int32 type = 3 [(gogoproto.jsontag) = "type", (gogoproto.moretags) = "validate:\"min=0\""];
+   // 售卖类型 1-预售票 2-现场票
+   int32 sale_type = 4 [(gogoproto.jsontag) = "stype", (gogoproto.moretags) = "validate:\"min=0\""];
+   string link_sc = 5 [(gogoproto.jsontag) = "lk_screen"];
+   string link_ticket_id = 6 [(gogoproto.jsontag) = "lk_ticket", (gogoproto.customname)= "LinkTicketID"];
+   string symbol = 7 [(gogoproto.jsontag) = "symbol"];
+   string color = 8 [(gogoproto.jsontag) = "color"];
+   int32 buy_limit = 9 [(gogoproto.jsontag) = "buy_limit", (gogoproto.moretags) = "validate:\"min=0\""];
+   string desc_detail = 10 [(gogoproto.jsontag) = "desc"];
+   int32 sale_flag = 11 [(gogoproto.jsontag) = "sale_flag", (gogoproto.moretags) = "validate:\"min=0\""];
+   TicketPriceList price_list =  12[(gogoproto.jsontag) = "price"];
+   TicketStatus status_list = 13 [(gogoproto.jsontag) = "status"];
+   TicketTime time = 14 [(gogoproto.jsontag) = "time"];
+   TicketBuyNumLimit buy_num_limit = 15 [(gogoproto.jsontag) = "buy_num_limit"];
+}
+
+message TicketBuyNumLimit {
+    map<int32,int64> normal = 1 [(gogoproto.jsontag) = "normal"];
+    map<int32,int64> vip = 2 [(gogoproto.jsontag) = "vip"];
+    map<int32,int64> annual_vip = 3 [(gogoproto.jsontag) = "annual_vip"];
+ }
+
+// The response message containing the IsSale IsVisible IsRefund
+message TicketStatus {
+    int32 is_sale = 1 [(gogoproto.jsontag) = "is_sale", (gogoproto.moretags) = "validate:\"min=0\""];
+    int32 is_visible = 2[(gogoproto.jsontag) = "is_visible", (gogoproto.moretags) = "validate:\"min=0\""];
+    int32 is_refund =3 [(gogoproto.jsontag) = "is_refund", (gogoproto.moretags) = "validate:\"min=0\""];
+}
+
+// The response message containing the Price OriginPrice MarketPrice
+message TicketPriceList {
+    int32 price = 1 [(gogoproto.jsontag) = "price", (gogoproto.moretags) = "validate:\"min=0\""];
+    int32 ori_price = 2 [(gogoproto.jsontag) = "oprice", (gogoproto.moretags) = "validate:\"min=0\""];
+    int32 mkt_price = 3 [(gogoproto.jsontag) = "mprice", (gogoproto.moretags) = "validate:\"min=0\""];
+}

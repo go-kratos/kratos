@@ -1,0 +1,44 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "advapi32.go",
+        "comctl32.go",
+        "comdlg32.go",
+        "constants.go",
+        "dwmapi.go",
+        "gdi32.go",
+        "gdiplus.go",
+        "idispatch.go",
+        "istream.go",
+        "iunknown.go",
+        "kernel32.go",
+        "ole32.go",
+        "oleaut32.go",
+        "opengl32.go",
+        "psapi.go",
+        "shell32.go",
+        "typedef.go",
+        "user32.go",
+        "utils.go",
+        "vars.go",
+    ],
+    importmap = "go-common/vendor/github.com/shirou/w32",
+    importpath = "github.com/shirou/w32",
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

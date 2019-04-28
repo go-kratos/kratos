@@ -1,0 +1,39 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["doc.go"],
+    importmap = "go-common/vendor/golang.org/x/text",
+    importpath = "golang.org/x/text",
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//vendor/golang.org/x/text/encoding:all-srcs",
+        "//vendor/golang.org/x/text/internal/gen:all-srcs",
+        "//vendor/golang.org/x/text/internal/tag:all-srcs",
+        "//vendor/golang.org/x/text/internal/triegen:all-srcs",
+        "//vendor/golang.org/x/text/internal/ucd:all-srcs",
+        "//vendor/golang.org/x/text/internal/utf8internal:all-srcs",
+        "//vendor/golang.org/x/text/language:all-srcs",
+        "//vendor/golang.org/x/text/runes:all-srcs",
+        "//vendor/golang.org/x/text/secure/bidirule:all-srcs",
+        "//vendor/golang.org/x/text/transform:all-srcs",
+        "//vendor/golang.org/x/text/unicode/bidi:all-srcs",
+        "//vendor/golang.org/x/text/unicode/cldr:all-srcs",
+        "//vendor/golang.org/x/text/unicode/norm:all-srcs",
+        "//vendor/golang.org/x/text/unicode/rangetable:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

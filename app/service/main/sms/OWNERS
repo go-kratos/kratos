@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- renwei
+- zhapuyu
+- zhoushuguang
+labels:
+- main
+- service
+- service/main/sms
+options:
+  no_parent_owners: true
+reviewers:
+- guanhuaxin
+- zhapuyu
+- zhoushuguang

@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- haoguanwei
+- shencen
+- wangzhe01
+- yanjinbin
+labels:
+- admin
+- admin/main/laser
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- shencen
+- yanjinbin

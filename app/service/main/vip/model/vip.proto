@@ -1,0 +1,65 @@
+syntax = "proto3";
+package account.service.vip;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "model";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+
+message VipInfo {
+    VipInfoDB VipInfoDB = 1		[(gogoproto.embed) = true, (gogoproto.jsontag) = ""];
+    int32 AutoRenewed = 2 [(gogoproto.jsontag) = "auto_renewed"];
+}
+
+message VipInfoDB {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 Mid = 2 [(gogoproto.jsontag) = "mid"];
+    int32 VipType = 3 [(gogoproto.jsontag) = "vip_type"];
+    int32 VipPayType = 4 [(gogoproto.jsontag) = "vip_pay_type"];
+    int32 PayChannelID = 5 [(gogoproto.jsontag) = "pay_channel_id"];
+    int32 VipStatus = 6 [(gogoproto.jsontag) = "vip_status"];
+    int64 VipStartTime = 7 [(gogoproto.jsontag) = "vip_start_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 VipRecentTime = 8 [(gogoproto.jsontag) = "vip_recent_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 VipOverdueTime = 9 [(gogoproto.jsontag) = "vip_overdue_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 AnnualVipOverdueTime = 10 [(gogoproto.jsontag) = "annual_vip_overdue_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Ctime = 11 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Mtime = 12 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 IosOverdueTime = 13 [(gogoproto.jsontag) = "ios_overdue_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Ver = 14 [(gogoproto.jsontag) = "ver"];
+}
+
+message VipPanelInfo {
+    int32 Month = 1 [(gogoproto.jsontag) = "month"];
+    string PdName = 2 [(gogoproto.jsontag) = "product_name"];
+    string PdID = 3 [(gogoproto.jsontag) = "product_id"];
+    int32 SubType = 4 [(gogoproto.jsontag) = "sub_type"];
+    int32 SuitType = 5 [(gogoproto.jsontag) = "suit_type"];
+    double OPrice = 6 [(gogoproto.jsontag) = "original_price"];
+    double DPrice = 7 [(gogoproto.jsontag) = "discount_price"];
+    string DRate = 8 [(gogoproto.jsontag) = "discount_rate"];
+    string Remark = 9 [(gogoproto.jsontag) = "remark"];
+    int32 Selected = 10 [(gogoproto.jsontag) = "selected"];
+    int64 Id = 11 [(gogoproto.jsontag) = "id"];
+    int32 Type = 12 [(gogoproto.jsontag) = "type"];
+}
+
+message OpenBindInfo {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    int64 AppID = 2 [(gogoproto.jsontag) = "app_id"];
+    string OutOpenID = 3 [(gogoproto.jsontag) = "out_open_id"];
+    int32 State = 4 [(gogoproto.jsontag) = "state"];
+    int64 Ver = 5 [(gogoproto.jsontag) = "ver"];
+    int64 ID = 6 [(gogoproto.jsontag) = "-"];
+}
+
+message OpenInfo {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    int64 AppID = 2 [(gogoproto.jsontag) = "app_id"];
+    string OpenID = 3 [(gogoproto.jsontag) = "open_id"];
+}

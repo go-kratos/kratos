@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package room_ex.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service RoomNews {
+    
+    /** 批量获取直播公告
+     * 
+     */   
+    rpc multiGet (RoomNewsMultiGetReq) returns (RoomNewsMultiGetResp);
+}
+
+
+
+message RoomNewsMultiGetReq {
+    // 房间id组成的数组
+    repeated int64 room_ids = 1 [(gogoproto.jsontag) = "room_ids"];
+    // 是否需要转码1是0否，默认0
+    int64 is_decoded = 2 [(gogoproto.jsontag) = "is_decoded"];
+}
+
+message RoomNewsMultiGetResp {
+    // 返回code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 返回msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    repeated Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 房间id
+        string roomid = 1 [(gogoproto.jsontag) = "roomid"];
+        // 主播id
+        string uid = 2 [(gogoproto.jsontag) = "uid"];
+        // 公告内容
+        string news_content = 3 [(gogoproto.jsontag) = "news_content"];
+        // 更新时间
+        string ctime = 4 [(gogoproto.jsontag) = "ctime"];
+    }
+}

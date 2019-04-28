@@ -1,0 +1,69 @@
+syntax = "proto3";
+package ticket.service.item.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option go_package = "v1";
+
+// The area service definition.
+service Area {
+    rpc AreaInfo (AreaInfoRequest) returns (AreaInfoReply) {}
+    rpc DeleteArea (DeleteAreaRequest) returns (DeleteAreaReply) {}
+}
+
+// The response message containing the area info
+message AreaInfo {
+    int64 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.customname)= "ID"];
+    string a_id = 2 [(gogoproto.jsontag) = "a_id", (gogoproto.customname)= "AID"];
+    string name = 3 [(gogoproto.jsontag) = "name"];
+    int32 seat_num = 4 [(gogoproto.jsontag) = "seat_num"];
+    int32 width = 5 [(gogoproto.jsontag) = "width"];
+    int32 height = 6 [(gogoproto.jsontag) = "height"];
+    int64 place = 7 [(gogoproto.jsontag) = "place"];
+    int32 col_start = 8 [(gogoproto.jsontag) = "col_start"];
+    int32 col_type = 9 [(gogoproto.jsontag) = "col_type"];
+    int32 col_direction = 10 [(gogoproto.jsontag) = "col_direction"];
+    string row_list = 11 [(gogoproto.jsontag) = "row_list"];
+    string seat_start = 12 [(gogoproto.jsontag) = "seat_start"];
+}
+
+// areaInfo接口请求
+message AreaInfoRequest {
+    // 待修改区域的ID（为0表示创建）
+    int64 ID = 1 [(gogoproto.jsontag) = "id", (gogoproto.moretags) = "validate:\"min=0\""];
+    // 区域自定义编号
+    string AID = 2 [(gogoproto.jsontag) = "a_id", (gogoproto.moretags) = "validate:\"min=1,max=16\""];
+    // 区域名
+    string Name = 3 [(gogoproto.jsontag) = "name", (gogoproto.moretags) = "validate:\"min=1,max=16\""];
+    // 所属场地ID
+    int64 Place = 4 [(gogoproto.jsontag) = "place", (gogoproto.moretags) = "validate:\"min=1\""];
+    // 区域坐标
+    string Coordinate = 5 [(gogoproto.jsontag) = "coordinate", (gogoproto.moretags) = "validate:\"min=1\""];
+}
+
+// areaInfo接口返回
+message AreaInfoReply {
+    // 操作结果
+    bool Success = 1 [(gogoproto.jsontag) = "success"];
+    // 操作区域ID
+    int64 ID = 2 [(gogoproto.jsontag) = "id"];
+    // 场地坐标
+    string Coordinate = 3 [(gogoproto.jsontag) = "coordinate"];
+}
+
+// deleteArea接口请求
+message DeleteAreaRequest {
+    // 待删除区域的ID
+    int64 ID = 1 [(gogoproto.jsontag) = "id", (gogoproto.moretags) = "validate:\"min=1\""];
+}
+
+// deleteArea接口返回
+message DeleteAreaReply {
+    // 操作结果
+    bool Success = 1 [(gogoproto.jsontag) = "success"];
+}

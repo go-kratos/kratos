@@ -1,0 +1,117 @@
+syntax = "proto3";
+package archive.service.up.v1;
+
+import "app/service/main/archive/api/api.proto";
+import "app/service/main/up/api/v1/archive.proto";
+import "app/service/main/up/api/v1/up.proto";
+import "app/service/main/up/api/v1/sign_up.proto";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+// NoReply 没有返回值
+message NoReply {}
+
+// UpArcsReply 单个up主的稿件信息列表返回值
+message UpArcsReply {
+  // archives 稿件信息列表
+  repeated archive.service.v1.Arc archives = 1;
+}
+
+// UpsArcsReply 多个up主的稿件信息列表返回值
+message UpsArcsReply {
+  // archives 稿件信息列表
+  map<int64, UpArcsReply> archives = 1;
+}
+
+// UpCountReply 单个up主的稿件计数返回值
+message UpCountReply {
+  // count 稿件数量
+  int64 count = 1;
+}
+
+// UpsCountReply 多个up主的稿件计数返回值
+message UpsCountReply {
+  // count 稿件数量
+  map<int64, int64> count = 1;
+}
+
+// UpAidPubTimeReply 按发布时间的单个up的稿件aid的返回值
+message UpAidPubTimeReply {
+  // archives 稿件信息列表
+  repeated AidPubTime archives = 1;
+}
+
+// UpsAidPubTimeReply 按发布时间的多个up的稿件aid的返回值
+message UpsAidPubTimeReply {
+  // archives 稿件信息列表
+  map<int64, UpAidPubTimeReply> archives = 1;
+}
+
+// UpActivityListReply  up主活跃度列表信息
+message UpActivityListReply {
+  // up_activity 活跃度up主信息列表
+  repeated UpActivity up_activitys = 1;
+  // last_id 数据最后返回的id
+  int64 last_id = 2 [(gogoproto.customname) = "LastID"];
+}
+
+// UpGroupsReply up主特殊用户组列表
+message UpGroupsReply {
+  // up_groups up主的特殊用户组信息
+  map<int64, UpGroup> up_groups = 1;
+}
+
+// UpSpecialReply up主特殊属性信息
+message UpSpecialReply {
+  // up_special up主的特殊属性
+  UpSpecial up_special = 1;
+}
+
+// UpsSpecialReply 多个up主特殊属性信息
+message UpsSpecialReply {
+  // up_specials 多个up主的特殊属性
+  map<int64, UpSpecial> up_specials = 1;
+}
+
+// UpGroupMidsReply 获取某个分组下的所有用户的返回值
+message UpGroupMidsReply {
+  // mids 分组下用户ID
+  repeated int64 mids = 1 [(gogoproto.jsontag) = "mids"];
+  int32 total = 2 [(gogoproto.jsontag) = "total", (gogoproto.casttype) = "int"];
+}
+
+// UpAttrReply 获取up主身份的返回值
+message UpAttrReply {
+  // is_author 是否有身份 0:无身份 1:有身份
+  int32 is_author = 1
+      [(gogoproto.jsontag) = "is_author", (gogoproto.casttype) = "uint8"];
+}
+
+// UpBaseStatReply 获取up主基础计数的返回值
+message UpBaseStatReply {
+  // view 播放数
+  int64 view = 1 [(gogoproto.jsontag) = "view"];
+  // reply 评论数
+  int64 reply = 2 [(gogoproto.jsontag) = "reply"];
+  // dm 弹幕数
+  int64 dm = 3 [(gogoproto.jsontag) = "dm"];
+  // fans 粉丝数
+  int64 fans = 4 [(gogoproto.jsontag) = "fans"];
+  // fav 收藏数
+  int64 fav = 5 [(gogoproto.jsontag) = "fav"];
+  // like 点赞数
+  int64 like = 6 [(gogoproto.jsontag) = "like"];
+}
+
+// UpSwitchReq 获取up主关注弹窗开关的返回值
+message UpSwitchReply {
+  // state 开关状态 0-关闭 1-打开
+  int32 state = 1
+      [(gogoproto.jsontag) = "state", (gogoproto.casttype) = "uint8"];
+}
+// HighAllyUpsReply 高能联盟up主map返回值
+message HighAllyUpsReply {
+  map<int64, SignUp> lists = 1;
+}

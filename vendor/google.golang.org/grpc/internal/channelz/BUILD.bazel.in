@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "funcs.go",
+        "types.go",
+    ],
+    importpath = "google.golang.org/grpc/internal/channelz",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//connectivity:go_default_library",
+        "//grpclog:go_default_library",
+    ],
+)

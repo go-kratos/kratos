@@ -1,0 +1,86 @@
+syntax = "proto3";
+package bbq.service.recall.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "app/job/bbq/recall/proto/forward_index.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+message RecallInfo {
+    string tag = 1 [(gogoproto.jsontag) = "tag",(gogoproto.moretags) = "form:\"tag\"",(gogoproto.customname) = "Tag"];
+    string name = 2 [(gogoproto.jsontag) = "name",(gogoproto.moretags) = "form:\"name\"",(gogoproto.customname) = "Name"];
+    string scorer = 3 [(gogoproto.jsontag) = "scorer",(gogoproto.moretags) = "form:\"scorer\"",(gogoproto.customname) = "Scorer"];
+    string filter = 4 [(gogoproto.jsontag) = "filter",(gogoproto.moretags) = "form:\"filter\"",(gogoproto.customname) = "Filter"];
+    string ranker = 5 [(gogoproto.jsontag) = "ranker",(gogoproto.moretags) = "form:\"ranker\"",(gogoproto.customname) = "Ranker"];
+    int32 priority = 6 [(gogoproto.jsontag) = "priority",(gogoproto.moretags) = "form:\"priority\"",(gogoproto.customname) = "Priority"];
+    int32 limit = 7 [(gogoproto.jsontag) = "limit",(gogoproto.moretags) = "form:\"limit\"",(gogoproto.customname) = "Limit"];
+}
+
+message RecallRequest {
+    int64 mid = 1 [(gogoproto.jsontag) = "mid",(gogoproto.moretags) = "form:\"mid\"",(gogoproto.customname) = "MID"];
+    string buvid = 2 [(gogoproto.jsontag) = "buvid",(gogoproto.moretags) = "form:\"buvid\"",(gogoproto.customname) = "BUVID"];
+    repeated RecallInfo info = 3 [(gogoproto.jsontag) = "infos",(gogoproto.moretags) = "form:\"infos\"",(gogoproto.customname) = "Infos"];
+    int32 total_limit = 4 [(gogoproto.jsontag) = "total_limit",(gogoproto.moretags) = "form:\"total_limit\"",(gogoproto.customname) = "TotalLimit"];
+}
+
+message InvertedIndex {
+    string index = 1 [(gogoproto.jsontag) = "index",(gogoproto.moretags) = "form:\"index\"",(gogoproto.customname) = "Index"];
+    string name = 2 [(gogoproto.jsontag) = "name",(gogoproto.moretags) = "form:\"name\"",(gogoproto.customname) = "Name"];
+    float score = 3 [(gogoproto.jsontag) = "score",(gogoproto.moretags) = "form:\"score\"",(gogoproto.customname) = "Score"];
+}
+
+message Video {
+    int64 svid = 1 [(gogoproto.jsontag) = "svid",(gogoproto.moretags) = "form:\"svid\"",(gogoproto.customname) = "SVID"];
+    float score = 2 [(gogoproto.jsontag) = "score",(gogoproto.moretags) = "form:\"score\"",(gogoproto.customname) = "Score"];
+    string name = 3 [(gogoproto.jsontag) = "name",(gogoproto.moretags) = "form:\"name\"",(gogoproto.customname) = "Name"];
+    bbq.job.recall.forwardindex.ForwardIndex forward_index = 4 [(gogoproto.jsontag) = "forward_index",(gogoproto.moretags) = "form:\"forward_index\"",(gogoproto.customname) = "ForwardIndex"];
+    string inverted_index = 5 [(gogoproto.jsontag) = "inverted_index",(gogoproto.moretags) = "form:\"inverted_index\"",(gogoproto.customname) = "InvertedIndex"];
+    repeated InvertedIndex indexes = 6 [(gogoproto.jsontag) = "inverted_indexes",(gogoproto.moretags) = "form:\"inverted_indexes\"",(gogoproto.customname) = "InvertedIndexes"];
+}
+
+message RecallSrc {
+    int32 total_hit = 1 [(gogoproto.jsontag) = "total_hit",(gogoproto.moretags) = "form:\"total_hit\"",(gogoproto.customname) = "TotalHit"];
+    int32 filter = 2 [(gogoproto.jsontag) = "filter",(gogoproto.moretags) = "form:\"filter\"",(gogoproto.customname) = "Filter"];
+    int32 final = 3 [(gogoproto.jsontag) = "final",(gogoproto.moretags) = "form:\"final\"",(gogoproto.customname) = "Final"];
+    string tag = 4 [(gogoproto.jsontag) = "tag",(gogoproto.moretags) = "form:\"tag\"",(gogoproto.customname) = "Tag"];
+    string name = 5 [(gogoproto.jsontag) = "name",(gogoproto.moretags) = "form:\"name\"",(gogoproto.customname) = "Name"];
+}
+
+message RecallResponse {
+    int32 total = 1 [(gogoproto.jsontag) = "total",(gogoproto.moretags) = "form:\"total\"",(gogoproto.customname) = "Total"];
+    repeated Video list = 2 [(gogoproto.jsontag) = "list",(gogoproto.moretags) = "form:\"list\"",(gogoproto.customname) = "List"];
+    repeated RecallSrc src_info = 3 [(gogoproto.jsontag) = "src_info",(gogoproto.moretags) = "form:\"src_info\"",(gogoproto.customname) = "SrcInfo"];
+}
+
+message VideoIndexRequest {
+    repeated int64 svids = 1 [(gogoproto.jsontag) = "svids",(gogoproto.moretags) = "form:\"svids\"",(gogoproto.customname) = "SVIDs"];
+}
+
+message VideoIndexResponse {
+    repeated bbq.job.recall.forwardindex.ForwardIndex list = 1 [(gogoproto.jsontag) = "list",(gogoproto.moretags) = "form:\"list\"",(gogoproto.customname) = "List"];
+}
+
+message NewIncomeVideoRequest {
+    repeated int64 svids = 1 [(gogoproto.jsontag) = "svids",(gogoproto.moretags) = "form:\"svids\"",(gogoproto.customname) = "SVIDs"];
+    string key = 2 [(gogoproto.jsontag) = "key",(gogoproto.moretags) = "form:\"key\"",(gogoproto.customname) = "Key"];
+}
+
+message VideosByIndexRequest {
+    string key = 1 [(gogoproto.jsontag) = "key",(gogoproto.moretags) = "form:\"key\"",(gogoproto.customname) = "Key"];
+}
+
+message VideosByIndexResponse {
+    string key = 1 [(gogoproto.jsontag) = "key",(gogoproto.moretags) = "form:\"key\"",(gogoproto.customname) = "Key"];
+    repeated int64 svids = 2 [(gogoproto.jsontag) = "svids",(gogoproto.moretags) = "form:\"svids\"",(gogoproto.customname) = "SVIDs"];
+}
+
+service RecsysRecall {
+    rpc Recall(RecallRequest) returns(RecallResponse);
+    rpc VideoIndex(VideoIndexRequest) returns(VideoIndexResponse);
+    rpc NewIncomeVideo(NewIncomeVideoRequest) returns(.google.protobuf.Empty);
+    rpc VideosByIndex(VideosByIndexRequest) returns(VideosByIndexResponse);
+}

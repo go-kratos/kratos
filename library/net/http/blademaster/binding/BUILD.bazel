@@ -1,0 +1,56 @@
+load(
+    "@io_bazel_rules_go//go:def.bzl",
+    "go_library",
+    "go_test",
+)
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "binding.go",
+        "default_validator.go",
+        "form.go",
+        "form_mapping.go",
+        "json.go",
+        "query.go",
+        "tags.go",
+        "xml.go",
+    ],
+    importpath = "go-common/library/net/http/blademaster/binding",
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/pkg/errors:go_default_library",
+        "//vendor/gopkg.in/go-playground/validator.v9:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = [
+        "binding_test.go",
+        "example_test.go",
+        "validate_test.go",
+    ],
+    embed = [":go_default_library"],
+    rundir = ".",
+    tags = ["automanaged"],
+    deps = ["//vendor/github.com/stretchr/testify/assert:go_default_library"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//library/net/http/blademaster/binding/example:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

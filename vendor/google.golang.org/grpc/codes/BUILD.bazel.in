@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "code_string.go",
+        "codes.go",
+    ],
+    importpath = "google.golang.org/grpc/codes",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["codes_test.go"],
+    embed = [":go_default_library"],
+    deps = ["@org_golang_google_genproto//googleapis/rpc/code:go_default_library"],
+)

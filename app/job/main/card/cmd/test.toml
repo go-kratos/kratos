@@ -1,0 +1,61 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/card-job.pid"
+dir = "./"
+perf = "0.0.0.0:6330"
+family = "card-job"
+address = "0.0.0.0"
+
+[bm]
+	addr = "0.0.0.0:7901"
+	maxListen = 1000
+	timeout = "1s"
+
+[RPCClient2]
+
+[mysql]
+	addr = "127.0.0.1:3306"
+	dsn = "root:123456@tcp(127.0.0.1:3306)/bilibili_card?timeout=3s&readTimeout=3s&writeTimeout=3s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "1s"
+	execTimeout = "1s"
+	tranTimeout = "2s"
+	[mysql.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+
+[memcache]
+	name = "card-service"
+	proto = "tcp"
+	addr = "172.18.33.60:11234"
+	idle = 5
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[dataBus]
+  [dataBus.vip]
+    key = "4ba46ba31f9a44ef"
+    secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+    group = "BiliVIPBinlog-MainAccount-Card-S"
+    topic = "BiliVIPBinlog-T"
+    action = "sub"
+    offset = "new"
+    buffer = 1024
+    name = "card-job"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"

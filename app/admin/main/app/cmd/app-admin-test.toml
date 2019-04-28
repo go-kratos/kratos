@@ -1,0 +1,92 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/app-admin.pid"
+dir = "./"
+perf = "127.0.0.1:7450"
+env     = "dev"
+
+[log]
+    dir = "/data/log/app-admin/"
+
+[tracer]
+    addr = "172.16.33.46:5140"
+    proto = "udp"
+    family = "app-admin"
+
+[auth]
+    managerHost = "http://manager.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 5
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[multiHTTP]
+    [multiHTTP.inner]
+    addrs = ["0.0.0.0:7451"]
+    maxListen = 1000
+
+[bm]
+	[bm.inner]
+	addr = "0.0.0.0:7451"
+	maxListen = 1000
+
+[orm]
+    [orm.show]
+    dsn = "test:test@tcp(172.16.33.54:3306)/bilibili_show?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    idleTimeout = "4h"
+
+[bfs]
+timeout = "2s"
+maxFileSize = 5242880
+key = "8d4e593ba7555502"
+secret = "0bdbd4c7caeeddf587c3c4daec0475"
+addr = "http://bfs.bilibili.co/bfs/archive/"
+bucket = "archive"
+
+[perms]
+    [perms.perm]
+    audit   = "AUDIT"
+    notice = "NOTICE"
+    language = "LANGUAGE"
+    wall = "WALL"
+    bottom = "BOTTOM"
+    aids = "AUDIT_AIDS"

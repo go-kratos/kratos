@@ -1,0 +1,12 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- daiwei
+labels:
+- bbq
+- service
+- service/bbq/push
+options:
+  no_parent_owners: true
+reviewers:
+- daiwei

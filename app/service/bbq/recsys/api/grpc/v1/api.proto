@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+// use {app_id}.{version} as package name
+package bbq.service.recsys.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+
+// specify golang package name
+option go_package = "v1";
+
+service Recsys {
+    rpc RecService (RecsysRequest) returns (RecsysResponse) {}
+
+    rpc RelatedRecService (RecsysRequest) returns (RecsysResponse) {}
+    rpc UpsRecService (RecsysRequest) returns (RecsysResponse) {}
+}
+
+message RecsysRequest {
+    int64 mid = 1 [(gogoproto.jsontag) = "mid",(gogoproto.moretags) = "form:\"mid\"",(gogoproto.customname)= "MID"];
+    string buvid = 2 [(gogoproto.jsontag) = "buvid",(gogoproto.moretags) = "form:\"buvid\"",(gogoproto.customname)= "BUVID"];
+    int32 limit = 3 [(gogoproto.jsontag) = "limit",(gogoproto.moretags) = "form:\"limit\""];
+    int32 offset = 4 [(gogoproto.jsontag) = "offset",(gogoproto.moretags) = "form:\"offset\""];
+    int64 svid = 5 [(gogoproto.jsontag) = "svid",(gogoproto.moretags) = "form:\"svid\"",(gogoproto.customname)= "SVID"];
+    string abtest = 6 [(gogoproto.jsontag) = "abtest",(gogoproto.moretags) = "form:\"abtest\""];
+    string traceID = 7 [(gogoproto.jsontag) = "traceID",(gogoproto.moretags) = "form:\"traceID\""];
+    bool debug_flag = 8 [(gogoproto.jsontag) = "debugFlag",(gogoproto.moretags) = "form:\"debugFlag\""];
+    string debug_type = 9 [(gogoproto.jsontag) = "debugType",(gogoproto.moretags) = "form:\"debugType\""];
+    string queryID = 10 [(gogoproto.jsontag) = "queryID",(gogoproto.moretags) = "form:\"queryID\""];
+    string app = 11 [(gogoproto.jsontag) = "app",(gogoproto.moretags) = "form:\"app\""];
+    string appVersion = 12 [(gogoproto.jsontag) = "appVersion",(gogoproto.moretags) = "form:\"appVersion\""];
+}
+
+message RecsysResponse {
+    map<string, string> message = 1;
+    repeated RecsysRecord list = 2;
+}
+
+message RecsysRecord {
+    int64 svid = 1;
+    double score = 2;
+    map<string, string> map = 3;
+}

@@ -1,0 +1,35 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "app.go",
+        "category.go",
+        "cli.go",
+        "command.go",
+        "context.go",
+        "errors.go",
+        "flag.go",
+        "flag_generated.go",
+        "funcs.go",
+        "help.go",
+        "sort.go",
+    ],
+    importmap = "go-common/vendor/github.com/urfave/cli",
+    importpath = "github.com/urfave/cli",
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

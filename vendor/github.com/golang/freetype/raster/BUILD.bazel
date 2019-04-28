@@ -1,0 +1,29 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "geom.go",
+        "paint.go",
+        "raster.go",
+        "stroke.go",
+    ],
+    importmap = "go-common/vendor/github.com/golang/freetype/raster",
+    importpath = "github.com/golang/freetype/raster",
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/golang.org/x/image/math/fixed:go_default_library"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

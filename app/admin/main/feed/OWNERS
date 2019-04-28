@@ -1,0 +1,18 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liweijia
+- quguolin
+- renwei
+- zhaoshichen
+labels:
+- admin
+- admin/main/feed
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- liweijia
+- quguolin
+- renwei
+- zhaoshichen

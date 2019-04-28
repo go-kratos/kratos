@@ -1,0 +1,37 @@
+syntax = "proto3";
+package ticket.service.item.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option go_package = "v1";
+
+// The guest service definition.
+service Guest {
+    rpc GuestInfo (GuestInfoRequest) returns (GuestInfoReply) {}
+    rpc GuestStatus (GuestStatusRequest) returns (GuestInfoReply) {}
+}
+
+// The request message containing the guest info to update/insert
+message GuestInfoRequest {
+    uint32 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.moretags) = "validate:\"min=0\"", (gogoproto.customname)= "ID"];
+    string name = 2 [(gogoproto.jsontag) = "name", (gogoproto.moretags) = "validate:\"max=32\""];
+    string guest_img = 3 [(gogoproto.jsontag) = "guest_img", (gogoproto.moretags) = "validate:\"min=0\""];
+    string description = 4 [(gogoproto.jsontag) = "description", (gogoproto.moretags) = "validate:\"max=128\""];
+    int64  guest_id = 5 [(gogoproto.jsontag) = "guest_id", (gogoproto.customname)= "GuestID"];
+}
+
+// The request message containing the required info to change guest's status
+message GuestStatusRequest {
+    int64 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.moretags) = "validate:\"required,min=1\"", (gogoproto.customname)= "ID"];
+    int32 status = 2 [(gogoproto.jsontag) = "status", (gogoproto.moretags) = "validate:\"max=1\""];
+}
+
+// The general response message contaning the result after updating/inserting the guest info
+message GuestInfoReply {
+    bool success = 1 [(gogoproto.jsontag) = "success"];
+}

@@ -1,0 +1,339 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "go-common api",
+    "description": "api",
+    "version": "1.0",
+    "contact": {
+      "email": "lintanghui@bilibili.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "paths": {
+    "/x/admin/apm/need/add": {
+      "post": {
+        "operationId": "/x/admin/apm/need/add",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "title",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "content",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "reporter",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/EmpResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x/admin/apm/need/edit": {
+      "post": {
+        "operationId": "/x/admin/apm/need/edit",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "content",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/EmpResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x/admin/apm/need/list": {
+      "get": {
+        "operationId": "/x/admin/apm/need/list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ps",
+            "description": " 默认值 20",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "pn",
+            "description": " 默认值 1",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/NListResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x/admin/apm/need/thumbsup": {
+      "post": {
+        "operationId": "/x/admin/apm/need/thumbsup",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "req_id",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "user",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "like_type",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/EmpResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x/admin/apm/need/verify": {
+      "post": {
+        "operationId": "/x/admin/apm/need/verify",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/EmpResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "EmpResp": {
+      "title": "EmpResp",
+      "description": "EmpResp is empty resp.",
+      "type": "object"
+    },
+    "NInfo": {
+      "title": "NInfo",
+      "description": "NInfo struct",
+      "type": "object",
+      "properties": {
+        "CTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Content": {
+          "type": "string"
+        },
+        "DislikeCounts": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "LikeCounts": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "MTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Reporter": {
+          "type": "string"
+        },
+        "Status": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Title": {
+          "type": "string"
+        }
+      }
+    },
+    "NListResp": {
+      "title": "NListResp",
+      "description": "NListResp is list resp struct",
+      "type": "object",
+      "properties": {
+        "Data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NInfo",
+            "type": "object"
+          }
+        },
+        "Total": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    }
+  }
+}

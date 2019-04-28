@@ -1,0 +1,166 @@
+version = "1.0.0"
+user    = "nobody"
+pid     = "/tmp/growup-job.pid"
+dir     = "./"
+perf    = "0.0.0.0:7413"
+family = "growup"
+address = ""
+trace   = false
+debug   = false
+
+spy =  500
+
+[ratio]
+    hour = 3
+    sleep = 500
+    num = 1000
+    limit = 5000
+
+[income]
+    hour = 0
+    sleep = 500
+    num = 1000
+
+[log]
+dir = "/data/log/growup-job/"
+
+[mysql]
+[mysql.growup]
+	addr = "172.16.33.205:3307"
+	dsn = "growup:test@tcp(172.16.33.205:3307)/bilibili_business_up?timeout=10s&readTimeout=50s&writeTimeout=50s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 30
+	idle = 2
+	idleTimeout = "4h"
+	queryTimeout = "10s"
+	execTimeout = "100s"
+	tranTimeout = "100s"
+	[mysql.growup.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+[mysql.allowance]
+	addr = "172.16.0.148:3306"
+	dsn = "test:test@tcp(172.16.0.148:3306)/bilibili_business_up_cooperate?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 5
+	idle = 2
+	idleTimeout = "4h"
+	queryTimeout = "200ms"
+	execTimeout = "200ms"
+	tranTimeout = "200ms"
+	[mysql.allowance.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+
+[keySecret]
+key = "a4bb50e6f2bc2e0f"
+secret = "3507b8667a3d0b6c952013db2b635f3a"
+
+[mail]
+    host = "smtp.exmail.qq.com"
+    port = 465
+    username = "2233@bilibili.com"
+    password = "2233"
+    # upincome and tag income mail
+    [[mail.send]]
+        type = 1
+        addr =  ["2233@bilibili.com"]
+    # combine mail
+    [[mail.send]]
+        type = 2
+        addr =  ["2233@bilibili.com"]
+    [[mail.send]]
+        type = 3
+        addr =  ["2233@bilibili.com"]
+    [[mail.send]]
+        type = 4
+        addr =  ["2233@bilibili.com"]
+[host]
+    archive = "http://bili-search.bilibili.co"
+    videoType = "http://172.16.33.123:6328"
+    columnType = "https://api.bilibili.com/x/article/categories"
+    dataplatform = "http://berserker.bilibili.co"
+    columnAct = "https://www.bilibili.com/activity/likes/list/"
+    profit = "http://127.0.0.1:7410"
+    vc = "https://api.vc.bilibili.co"
+    porder = "http://archive.api.bilibili.co/videoup/porder/arc/list"
+    archives = "http://api.bilibili.co/x/internal/v2/archive/archives"
+    api = "http://api.bilibili.com"
+
+[bm]
+    addr = "0.0.0.0:7414"
+    maxListen = 1000
+    timeout = "3600s"
+
+[httpClient]
+key = "c1a1cb2d89c33794"
+secret = "dda47eeca111e03e6845017505baea13"
+dial = "2s"
+timeout = "3s"
+keepAlive = "60s"
+timer = 10
+[httpClient.breaker]
+window = "10s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request =  100
+
+[dpClient]
+#key = "cadb2a78fef220e346ceb37a203b8bf3"
+#secret = "91d6a8610b6d139f8901d8605c0f43d3"
+key = "5dd53c7f7dd88b26c1de9273d9aff420"
+secret = "3f0990c3c97fc096c80b5523266f44cf"
+dial = "2s"
+timeout = "3s"
+keepAlive = "60s"
+timer = 1000
+[dpClient.breaker]
+window = "10s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request =  100
+
+[hbase]
+master = ""
+meta = ""
+dialTimeout = "1s"
+readTimeout = "150ms"
+readsTimeout = "600ms"
+writeTimeout = "200ms"
+writesTimeout = "600ms"
+    [hbase.zookeeper]
+        root = ""
+        addrs = ["10.23.58.154:2181","10.23.58.141:2181","10.23.58.20:2181"]
+        timeout = "30s"
+
+[archiveSub]
+    key = "6f3331a8932e24a2"
+    secret = "4bfa38d3d836b677990ea2bc0a6892e4"
+    group = "Archive-MobileStudio-S"
+    topic = "Archive-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "growup-job/sub"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[bubble]
+  [[bubble.bRatio]]
+  bType = 1
+  ratio = 0.8
+  [[bubble.bRatio]]
+  bType = 2
+  ratio = 0.8

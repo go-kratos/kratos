@@ -1,0 +1,14 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- wujunchen
+labels:
+- live
+- service
+- service/live/xuserex
+options:
+  no_parent_owners: true
+reviewers:
+- wujunchen
+- xiehaishen
+- zhaohailin

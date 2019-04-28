@@ -1,0 +1,62 @@
+// main.community.tag grpc api proto file.
+// discovery id: main.community.tag.
+// version: v1.
+syntax = "proto3";
+package main.community.tag.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+message ChannelCategory {
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    int32 state = 3 [(gogoproto.jsontag) = "state"];
+    int32 int_shield = 4 [(gogoproto.jsontag) = "int_shield"]; //International Shield. 国际版是否屏蔽
+    int64 ctime = 5 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 6 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message Channel {
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    int32 type = 3 [(gogoproto.jsontag) = "type"];
+    int64 type_id = 4 [(gogoproto.jsontag) = "type_id"];
+    string cover = 5 [(gogoproto.jsontag) = "cover"];
+    string head_cover = 6 [(gogoproto.jsontag) = "head_cover"];
+    string content = 7 [(gogoproto.jsontag) = "content"];
+    string short_content = 8 [(gogoproto.jsontag) = "short_content"];
+    int64 bind = 9 [(gogoproto.jsontag) = "bind"];
+    int64 sub = 10 [(gogoproto.jsontag) = "sub"];
+    int32 attention = 11 [(gogoproto.jsontag) = "attention"];
+    int32 activity = 12 [(gogoproto.jsontag) = "activity"];
+    int32 int_shield = 13 [(gogoproto.jsontag) = "int_shield"]; //International Shield. 国际版是否屏蔽
+    int32 state = 14 [(gogoproto.jsontag) = "state"];
+    int64 ctime = 15 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 16 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message ChannelSynonym {
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    string alias = 3 [(gogoproto.jsontag) = "alias"];
+    int64 ctime = 4 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 5 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message ChannelSquare {
+    Channel channel = 1;
+    repeated int64 oids = 2;
+}
+
+message ChannelHit {
+    int64 tid = 1;
+    string tname = 2;
+    repeated string hit_rules = 3;
+    repeated string hit_tnames = 4;
+}
+
+message ChannelCheckBack {
+    map<int64,ChannelHit> hits = 1;
+    int32 checkback = 2;
+}

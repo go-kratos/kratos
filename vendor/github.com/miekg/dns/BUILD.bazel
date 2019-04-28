@@ -1,0 +1,68 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "client.go",
+        "clientconfig.go",
+        "dane.go",
+        "defaults.go",
+        "dns.go",
+        "dnssec.go",
+        "dnssec_keygen.go",
+        "dnssec_keyscan.go",
+        "dnssec_privkey.go",
+        "doc.go",
+        "edns.go",
+        "format.go",
+        "generate.go",
+        "labels.go",
+        "msg.go",
+        "msg_helpers.go",
+        "nsecx.go",
+        "privaterr.go",
+        "rawmsg.go",
+        "reverse.go",
+        "sanitize.go",
+        "scan.go",
+        "scan_rr.go",
+        "scanner.go",
+        "server.go",
+        "sig0.go",
+        "singleinflight.go",
+        "smimea.go",
+        "tlsa.go",
+        "tsig.go",
+        "types.go",
+        "udp.go",
+        "update.go",
+        "version.go",
+        "xfr.go",
+        "zcompress.go",
+        "zmsg.go",
+        "ztypes.go",
+    ],
+    importmap = "go-common/vendor/github.com/miekg/dns",
+    importpath = "github.com/miekg/dns",
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/golang.org/x/crypto/ed25519:go_default_library",
+        "@org_golang_x_net//ipv4:go_default_library",
+        "@org_golang_x_net//ipv6:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

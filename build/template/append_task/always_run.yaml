@@ -1,0 +1,18 @@
+presubmits:
+  platform/go-common:
+  - name: go-common-make-update
+    always_run: true 
+    run_pr_pushed: true
+    namespace: default
+    spec:
+      containers:
+      - image: go_lint
+        name: go-common-make-update
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - ./build/update-bazel.sh

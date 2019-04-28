@@ -1,0 +1,29 @@
+syntax = "proto3";
+package model;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message NewEp {
+    string Cover = 1  [(gogoproto.jsontag) = "cover"];
+    int64 Dm = 2  [(gogoproto.jsontag) = "dm"];
+    int64 EpisodeID = 3 [(gogoproto.jsontag) = "episode_id"];
+    string Index = 4  [(gogoproto.jsontag) = "index"];
+    string IndexTitle = 5  [(gogoproto.jsontag) = "index_title"];
+    int64 Play = 6  [(gogoproto.jsontag) = "play"];
+}
+
+message Bangumi {
+    int32 BgmType = 1 [(gogoproto.jsontag) = "bgm_type"];
+    string Cover = 2 [(gogoproto.jsontag) = "cover"];
+    int32 IsFinish = 3 [(gogoproto.jsontag) = "is_finish"];
+    NewEp NewEp = 4 [(gogoproto.jsontag) = "new_ep", (gogoproto.nullable) = false];
+    int64 SeasonID = 5 [(gogoproto.jsontag) = "season_id"];
+    string Title = 6 [(gogoproto.jsontag) = "title"];
+    int64 TotalCount = 7 [(gogoproto.jsontag) = "total_count"];
+    int64 Ts = 8 [(gogoproto.jsontag) = "ts"];
+}

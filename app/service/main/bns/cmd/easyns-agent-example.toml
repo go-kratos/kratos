@@ -1,0 +1,30 @@
+version = "0.1"
+debug = false
+
+[protocol]
+version = "1"
+
+[log]
+stdout = true
+
+[backend]
+    backend = "discovery"
+    [backend.config]
+    url = "http://api.bilibili.co"
+    appKey = "0c4b8fe3ff35a4b6"
+    secret = "b370880d1aca7d3a289b9b9a7f4d6812"
+
+[dns]
+    addr = "127.0.0.1"
+    port = 15353
+    [dns.config]
+    ttl = "30s"
+    allowStale = true
+    udpAnswerLimit = 3
+    maxStale = "87600s"
+    recursorTimeout = "2s"
+    domain = "bili."
+    recursors = ["10.23.194.202"]
+[http]
+    addr = "127.0.0.1"
+    port = 15380

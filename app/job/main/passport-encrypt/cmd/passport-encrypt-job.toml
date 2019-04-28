@@ -1,0 +1,107 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "noboby"
+dir = "./"
+family = "passport-encrypt"
+env = "qa"
+
+[xlog]
+dir = "/data/log/passport-encrypt"
+
+[tracer]
+family = "passport-encrypt"
+proto = "unixgram"
+addr = "/var/run/dapper-collect/dapper-collect.sock"
+
+[stepgroup]
+    [stepgroup.group1]
+        start = 0
+        end = 400000
+        inc = 200000
+        limit = 300000000
+    [stepgroup.group2]
+        start = 0
+        end = 400000
+        inc = 200000
+        limit = 300000000
+    [stepgroup.group3]
+        start = 0
+        end = 400000
+        inc = 200000
+        limit = 300000000
+    [stepgroup.group4]
+        start = 0
+        end = 400000
+        inc = 200000
+        limit = 300000000
+
+[dataSwitch]
+    full = true
+    inc = false
+
+[bm]
+    [bm.inner]
+    addr = "0.0.0.0:6981"
+    timeout = "1s"
+    [bm.local]
+    addr = "0.0.0.0:6982"
+    timeout = "1s"
+
+[db]
+    [db.originDB]
+        addr = "172.16.33.205:3306"
+        dsn = "aso:hA0DAnENNFz78kYB@tcp(172.16.33.205:3306)/aso?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 5
+        idle = 2
+        queryTimeout = "1s"
+        execTimeout = "2s"
+        tranTimeout = "2s"
+        [db.originDB.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+
+    [db.encryptDB]
+        addr = "127.0.0.1:3306"
+        dsn = "root:123456789@tcp(127.0.0.1:3306)/test?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 5
+        idle = 2
+        queryTimeout = "1s"
+        execTimeout = "2s"
+        tranTimeout = "2s"
+        [db.encryptDB.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+
+
+[group]
+    [group.asoBinLog]
+    size = 200
+    num = 32
+    ticker = "1s"
+    chan = 1024
+
+[databus]
+    [databus.asoBinLogSub]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "PassportAccount-MainAccount-S"
+    topic = "PassportAccount-T"
+    action = "sub"
+    offset = "old"
+    buffer = 2048
+    name = "passport-encrypt/databus"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"

@@ -1,0 +1,200 @@
+# This is a TOML document. Boom.
+
+version = "2.1.0"
+user = "nobody"
+pid = "/tmp/antispam-service.pid"
+dir = "./"
+perf = "0.0.0.0:6840"
+checkFile = "/data/www/antispam-service.html"
+family = "antispam-service"
+address = "172.16.0.148"
+
+proc = 32
+maxExportRows=100000
+maxRegexpCounts=20
+
+[log]
+   #dir = "/data/log/antispam-service"
+ [log.agent]
+	project = "antispam-service"
+	taskID = "000069"
+	proto = "unixgram"
+	addr = "/var/run/lancer/collector.sock"
+	chanSize = 10240
+
+[appkeytype]
+	"e7482d29be4a95b8"=[1] #稿件
+	"33ac033ce123e590"=[4,9] #活动,活动稿件
+	"7d9f6f6fe2a898e8"=[4,9]
+	"c05dd4e1638a8af0"=[5] #直播小视频
+	"37207f2beaebf8d7"=[5] #android
+	"27eb53fc9058f8c3"=[5] #ios
+	"b2609538e67ea9cd"=[5] #ios
+	"33ac033ce123e999"=[6] #封禁信息
+	"f01da7e4526a8af0"=[7] #公告信息
+	"58344a540b61aebf"=[8,10] #直播活动、直播公告
+	"9edfa647fbfde3e2"=[11] #有文画站
+
+[syncopt]
+	open=true
+	syncIntervalSec = 100
+
+[gcopt]
+	open=false
+	intervalSec = 5
+
+[identify]
+    whiteAccessKey = "nKUPGzuhU|vTG58H!HPKLlktz{8}3^"
+    whiteMid = 88889082
+    [identify.app]
+		key = "c1a1cb2d89c33794"
+		secret = "dda47eeca111e03e6845017505baea13"
+    [identify.host]
+		auth = "http://uat-passport.bilibili.com"
+		secret = "http://uat-open.bilibili.com"
+    [identify.httpClient]
+		key = "c1a1cb2d89c33794"
+		secret = "dda47eeca111e03e6845017505baea13"
+		dial = "1s"
+		timeout = "1s"
+		keepAlive = "60s"
+		timer = 1000
+    [identify.httpClient.breaker]
+		window  ="10s"
+		sleep   ="100ms"
+		bucket  = 10
+		ratio   = 0.5
+		request = 100
+	[identify.httpClient.url]
+		"http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+		"http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+		"http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+[tracer]
+	proto = "udp"
+	addr = "172.16.33.46:5140"
+	tag = "platform/antispam-service"
+
+
+[app]
+key = "c1a1cb2d89c33794"
+secret = "dda47eeca111e03e6845017505baea13"
+
+[httpClient]
+key = "c1a1cb2d89c33794"
+secret = "dda47eeca111e03e6845017505baea13"
+dial = "500ms"
+timeout = "1s"
+keepAlive = "60s"
+timer = 1000
+	[httpClient.breaker]
+	window  ="3s"
+	sleep   ="100ms"
+	bucket  = 10
+	ratio   = 0.1
+	request = 100
+	switchoff= false
+
+[captcha]
+    [captcha.app]
+		key = "c1a1cb2d89c33794"
+		secret = "dda47eeca111e03e6845017505baea13"
+	[captcha.memcache]
+		proto = "tcp"
+		addr = "172.16.33.54:11211"
+		active = 1
+		idle = 1
+		dialTimeout = "500ms"
+		readTimeout = "1s"
+		writeTimeout = "1s"
+		idleTimeout = "80s"
+    [captcha.captcha]
+		bid = "1"
+		bidKey = "86&JHBJHJHJ)()*(*&(*"
+		expire = 360
+    [captcha.httpClient]
+		dial = "500ms"
+		timeout = "500ms"
+		keepAlive = "60s"
+		timer = 1000
+	[captcha.httpClient.breaker]
+		window  ="3s"
+		sleep   ="100ms"
+		bucket  = 10
+		ratio   = 0.1
+		request = 100
+		switchoff= false
+
+[multiHTTP]
+    [multiHTTP.inner]
+		addrs = ["127.0.0.1:7022"]
+		maxListen = 1000
+
+[rpc]
+	[[rpc.servers]]
+		discoveroff=false
+		proto = "tcp"
+		addr = ":6279"
+		weight = 10
+	[rpc.zookeeper]
+		root = "/microservice/antispam-service/"
+		addrs = ["172.18.33.50:2199","172.18.33.51:2199","172.18.33.52:2199"]
+		timeout = "1s"
+
+[ecode]
+    #domain = "172.16.33.248:6401"
+    domain = "uat-api.bilibili.co"
+    all = "1h"
+    diff = "5m"
+    [ecode.clientconfig]
+        key = "test"
+        secret = "e6c4c252dc7e3d8a90805eecd7c73396"
+        dial      = "2000ms"
+        timeout   = "2s"
+        keepAlive = "10s"
+        timer     = 128
+        [ecode.clientconfig.breaker]
+            window  ="3s"
+            sleep   ="100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100
+    [ecode.app]
+        key = "test"
+        secret = "e6c4c252dc7e3d8a90805eecd7c73396"
+
+
+[mysql]
+    [mysql.antispam]
+		addr= "172.18.33.49:3311"
+		dsn = "antispam:F49hoAI5DVVlvFmtfstkOFGqxpPxlYA0@tcp(172.16.33.205:3308)/bilibili_antispam?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+		active = 5
+		idle = 2
+		idleTimeout ="4h"
+		queryTimeout = "200ms"
+		execTimeout = "200ms"
+		tranTimeout = "200ms"
+    [mysql.antispam.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+[redis]
+	proto = "unix"
+	#addr = "172.16.33.54:6379"
+	addr = "/tmp/uat-antispam-service-redis.sock"
+	idle = 10
+	active = 10
+	dialTimeout = "500ms"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "80s"
+	indexExpire = "200s"
+
+[snowflake]
+	workerIDs = [ 0,1 ]
+	replyId = 1
+[snowflake.ZooKeeper]
+	addrs = ["172.18.33.50:2199","172.18.33.51:2199","172.18.33.52:2199"]
+	root = "/gosnowflake-servers"
+	timeout= "30s"

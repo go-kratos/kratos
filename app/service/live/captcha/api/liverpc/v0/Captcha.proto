@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package captcha.v0;
+
+option go_package = "v0";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Captcha {
+    
+    /** 校验验证码
+     * 
+     */   
+    rpc check (CaptchaCheckReq) returns (CaptchaCheckResp);
+}
+
+
+
+message CaptchaCheckReq {
+    // token值
+    string token = 1 [(gogoproto.jsontag) = "token"];
+    // 输入值
+    string phrase = 2 [(gogoproto.jsontag) = "phrase"];
+}
+
+message CaptchaCheckResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    map<int64, int64> data = 3 [(gogoproto.jsontag) = "data"];
+}

@@ -1,0 +1,156 @@
+syntax = "proto3";
+
+package fans_medal.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Medal {
+    
+    /** up主开启勋章
+     * 
+     */   
+    rpc create (MedalCreateReq) returns (MedalCreateResp);
+    
+    /** 获取up主自己的勋章，更严格的类型
+     * 
+     */   
+    rpc query (MedalQueryReq) returns (MedalQueryResp);
+    
+    /** 根据ID查询勋章详情，返回严格的类型
+     * 
+     */   
+    rpc query_id (MedalQueryIdReq) returns (MedalQueryIdResp);
+}
+
+
+
+message MedalCreateReq {
+    // 
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 
+    int64 source = 2 [(gogoproto.jsontag) = "source"];
+}
+
+message MedalCreateResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 勋章ID
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // up主uid
+        int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+        // 勋章名称
+        string medal_name = 3 [(gogoproto.jsontag) = "medal_name"];
+        // 直播开通状态 0 冻结 1 可用
+        int64 live_status = 4 [(gogoproto.jsontag) = "live_status"];
+        // 主站开通状态 0 冻结 1 可用
+        int64 master_status = 5 [(gogoproto.jsontag) = "master_status"];
+        // 勋章审核状态 -1已拒绝 0未申请 1已申请 2已开通
+        int64 status = 6 [(gogoproto.jsontag) = "status"];
+        // 审核不通过通过的理由
+        string reason = 7 [(gogoproto.jsontag) = "reason"];
+        // 申请来源
+        int64 apply_source = 8 [(gogoproto.jsontag) = "apply_source"];
+        // 最后一次修改勋章名称的时间戳
+        int64 last_rename_time = 9 [(gogoproto.jsontag) = "last_rename_time"];
+        // 改名状态
+        int64 rename_status = 10 [(gogoproto.jsontag) = "rename_status"];
+        // 充电超过该数值可获得勋章
+        int64 charge_num = 11 [(gogoproto.jsontag) = "charge_num"];
+        // 投币超过该数值可获得勋章
+        int64 coin_num = 12 [(gogoproto.jsontag) = "coin_num"];
+        // 没有勋章时为 true
+        bool is_null = 13 [(gogoproto.jsontag) = "is_null"];
+    }
+}
+
+
+
+message MedalQueryReq {
+    // 
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 
+    int64 source = 2 [(gogoproto.jsontag) = "source"];
+}
+
+message MedalQueryResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 勋章ID
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // up主uid
+        int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+        // 勋章名称
+        string medal_name = 3 [(gogoproto.jsontag) = "medal_name"];
+        // 直播开通状态 0 冻结 1 可用
+        int64 live_status = 4 [(gogoproto.jsontag) = "live_status"];
+        // 主站开通状态 0 冻结 1 可用
+        int64 master_status = 5 [(gogoproto.jsontag) = "master_status"];
+        // 勋章审核状态 -1已拒绝 0未申请 1已申请 2已开通
+        int64 status = 6 [(gogoproto.jsontag) = "status"];
+        // 审核不通过通过的理由
+        string reason = 7 [(gogoproto.jsontag) = "reason"];
+        // 申请来源
+        int64 apply_source = 8 [(gogoproto.jsontag) = "apply_source"];
+        // 最后一次修改勋章名称的时间戳
+        int64 last_rename_time = 9 [(gogoproto.jsontag) = "last_rename_time"];
+        // 改名状态
+        int64 rename_status = 10 [(gogoproto.jsontag) = "rename_status"];
+        // 充电超过该数值可获得勋章
+        int64 charge_num = 11 [(gogoproto.jsontag) = "charge_num"];
+        // 投币超过该数值可获得勋章
+        int64 coin_num = 12 [(gogoproto.jsontag) = "coin_num"];
+        // 没有勋章时为 true
+        bool is_null = 13 [(gogoproto.jsontag) = "is_null"];
+    }
+}
+
+
+
+message MedalQueryIdReq {
+    // 
+    int64 medal_id = 1 [(gogoproto.jsontag) = "medal_id"];
+}
+
+message MedalQueryIdResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 
+        int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+        // 
+        string medal_name = 3 [(gogoproto.jsontag) = "medal_name"];
+        // 
+        int64 live_status = 4 [(gogoproto.jsontag) = "live_status"];
+        // 
+        int64 master_status = 5 [(gogoproto.jsontag) = "master_status"];
+        // 
+        int64 status = 6 [(gogoproto.jsontag) = "status"];
+        // 
+        int64 reason = 7 [(gogoproto.jsontag) = "reason"];
+        // 
+        int64 last_rename_time = 8 [(gogoproto.jsontag) = "last_rename_time"];
+        // 
+        bool is_null = 9 [(gogoproto.jsontag) = "is_null"];
+    }
+}

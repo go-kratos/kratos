@@ -1,0 +1,13 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- yubaihai
+- zhaogangtao
+labels:
+- admin
+- admin/main/card
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- yubaihai

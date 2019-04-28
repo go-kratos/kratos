@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- muyang
+- wangweizhen
+- wuwei
+- yubaihai
+- zhanglin
+labels:
+- tool
+options:
+  no_parent_owners: true
+reviewers:
+- muyang
+- wangweizhen
+- wuwei
+- yubaihai

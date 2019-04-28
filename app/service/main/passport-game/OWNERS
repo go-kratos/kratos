@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- gezhangyuan
+- wanghuan01
+- wutao
+- zhoujiahui
+labels:
+- main
+- service
+- service/main/passport-game
+options:
+  no_parent_owners: true
+reviewers:
+- gezhangyuan
+- wanghuan01
+- wutao

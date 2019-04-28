@@ -1,0 +1,39 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "assertions.go",
+        "context.go",
+        "discovery.go",
+        "doc.go",
+        "init.go",
+        "nilReporter.go",
+    ],
+    importmap = "go-common/vendor/github.com/smartystreets/goconvey/convey",
+    importpath = "github.com/smartystreets/goconvey/convey",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/jtolds/gls:go_default_library",
+        "//vendor/github.com/smartystreets/assertions:go_default_library",
+        "//vendor/github.com/smartystreets/goconvey/convey/reporting:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//vendor/github.com/smartystreets/goconvey/convey/gotest:all-srcs",
+        "//vendor/github.com/smartystreets/goconvey/convey/reporting:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,143 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/figure-timer-job.pid"
+dir = "./"
+perf = "0.0.0.0:7080"
+family = "figure-timer-job"
+address = "172.16.0.148"
+
+[log]
+dir = "/data/log/figure-timer-job/"
+
+[bm]
+    addr = "0.0.0.0:7082"
+    timeout = "1s"
+    maxListen = 100
+
+[tracer]
+proto = "udp"
+addr = "172.16.33.46:5140"
+tag = "platform/figure-timer-job"
+
+[mysql]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_figure?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[hbase]
+master = ""
+meta = ""
+dialTimeout = "1s"
+readTimeout = "1s"
+readsTimeout = "1s"
+writeTimeout = "1s"
+writesTimeout = "1s"
+    [hbase.zookeeper]
+    root = ""
+    addrs = ["10.23.66.16:2181"]
+    timeout = "30s"
+
+[redis]
+name = "figure-timer-job"
+proto = "tcp"
+addr = "172.16.33.54:6379"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "192h"
+
+[property]
+PendingMidStart = 0
+PendingMidShard = 10000
+PendingMidRetry = 3
+CalcWeekOffset = 1
+CycleCron = "0 0 0 * * 1"
+ConcurrencySize = 16
+FixRecord = true
+CycleAll = true
+CycleAllCron = "0 0 0 * * 1"
+[property.calc]
+K1 = 0.1
+K2 = 0.1
+K3 = 0.1
+K4 = 0.1
+K5 = 0.1
+InitLawfulScore = 10000
+InitWideScore = 0
+InitFriendlyScore = 5000
+InitBountyScore = 0
+InitCreativityScore = 0
+lawfulNegMax = 10000.0
+lawfulPosMax = 10000.0
+lawfulPosK = 0.002
+lawfulNegK1 = 0.03
+lawfulNegK2 = 0.02
+lawfulPosL = 200.0
+lawfulNegL = 200.0
+lawfulPosC1 = 1.0
+lawfulPosC2 = 1.0
+lawfulPosC3 = 1.0
+lawfulNegC1 = 1.0
+lawfulNegC2 = 5.0
+lawfulNegC3 = 5.0
+lawfulPosQ1 = 1.0
+lawfulPosQ2 = 1.0
+lawfulPosQ3 = 1.0
+lawfulNegQ1 = 1.0
+lawfulNegQ2 = 1.0
+lawfulNegQ3 = 1.0
+widePosMax = 15000.0
+widePosK = 0.004
+wideC1 = 2.0 
+wideQ1 = 1.0
+wideC2 = 0.01 
+wideQ2 = 1.0
+friendlyPosMax = 15000.0
+friendlyNegMax = 20000.0
+friendlyPosK = 0.004
+friendlyNegK = 0.004
+friendlyPosL = 200.0
+friendlyNegL = 200.0
+friendlyPosQ1 = 1.0
+friendlyPosC1 = 1.0
+friendlyPosQ2 = 1.0
+friendlyPosC2 = 2.0
+friendlyPosQ3 = 1.0
+friendlyPosC3 = 1.0
+friendlyNegQ1 = 1.0
+friendlyNegC1 = 150.0
+friendlyNegQ2 = 1.0
+friendlyNegC2 = 80.0
+friendlyNegQ3 = 1.0
+friendlyNegC3 = 10.0
+friendlyNegQ4 = 1.0
+friendlyNegC4 = 5.0
+bountyMax = 15000.0
+bountyPosL = 200.0
+bountyK = 0.000015
+bountyQ1 = 1.0
+bountyC1 = 15.0
+bountyQ2 = 2.5
+bountyC2 = 1.0
+bountyQ3 = 1.0
+bountyC3 = 1.0
+creativityPosMax = 7000.0
+creativityPosK = 0.004
+creativityPosL1 = 200.0
+creativityQ1 = 1.0
+creativityC1 = 0.1

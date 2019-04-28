@@ -1,0 +1,120 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+
+[app]
+key    = "33ac033ce123e999"
+secret = "0b2847315d32989a248294e350ac3ede"
+
+[bfs]
+#bucket = test
+key    = "221bce6492eba70f"
+secret = "6eb80603e85842542f9736eb13b7e3"
+
+#bucket = blocked
+#key    = "a45d5d3d38441095"
+#secret = "a3690e9e11f7d356a445fe0d4ff8af"
+
+
+[xlog]
+dir = "/data/log/credit-admin"
+# family = "credit-admin"
+# [xlog.agent]
+# taskID = "000069"
+# proto = "unixgram"
+# addr = "/var/run/lancer/collector.sock"
+# chanSize = 10240
+
+
+[bm]
+	[bm.inner]
+	addr = "0.0.0.0:6824"
+	maxListen = 10
+    timeout = "1s"
+	[bm.local]
+	addr = "0.0.0.0:6825"
+    maxListen = 10
+    timeout = "1s"
+
+[httpClient]
+key = "33ac033ce123e999"
+secret = "0b2847315d32989a248294e350ac3ede"
+dial = "1s"
+timeout = "5s"
+keepAlive = "60s"
+[httpClient.breaker]
+   window = "3s"
+   sleep = "100ms"
+   bucket = 10
+   ratio = 0.5
+   request = 100
+
+[rpcClient]
+    [rpcClient.account]
+    group ="groupapp"
+    timeout = "30s"
+
+[orm]
+[orm.write]
+dsn = "blocked:mUdFycLKSbvPgdE28lCveqN77SqsGOmy@tcp(172.16.33.205:3306)/blocked?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 5
+idleTimeout = "4h"
+[orm.read]
+dsn = "blocked:mUdFycLKSbvPgdE28lCveqN77SqsGOmy@tcp(172.16.33.205:3306)/blocked?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 5
+idleTimeout = "4h"
+
+[host]
+bfs = "http://172.16.0.141"
+manager = "http://manager.bilibili.co"
+msg = "http://message.bilibili.co"
+#http://bfs.bilibili.co
+
+[chanSize]
+sysMsg = 999
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://uat-dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 10
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"

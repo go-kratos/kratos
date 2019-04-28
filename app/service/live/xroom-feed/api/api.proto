@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+package live.xroomfeed.v1;
+
+option go_package = "api";
+
+option (gogoproto.goproto_getters_all) = false;
+
+service RecPool {
+	// 根据模块位置获取投放列表 position=>RoomItem
+	rpc GetList (RecPoolReq) returns (RecPoolResp);
+}
+
+message RecPoolReq {
+    // 投放模块
+	int64 module_type = 1 [(gogoproto.moretags)='form:"module_type" validate:"required"'];
+    // 投放模块位置数
+	int64 position_num = 2 [(gogoproto.moretags)='form:"position_num" validate:"required"'];
+	// 投放模块页数 不传或传0、1都按一页算(暂时没用)
+	int64 page_num = 3 [(gogoproto.moretags)='form:"page_num"'];
+	// 当前模块已存在的位置房间（逗号分隔、有序），1~position*N（内部去重,保证同一个房间优先出现在好位置）
+	string module_exist_rooms = 4 [(gogoproto.moretags)='form:"module_exist_rooms"'];
+    // 其它模块已存在的位置房间（逗号分隔、有序），1~position*N（内部去重,保证同一个房间优先出现在好位置）
+    string other_exist_rooms = 5 [(gogoproto.moretags)='form:"other_exist_rooms"'];
+	// 请求来源
+	string from = 6 [(gogoproto.moretags)='form:"from"'];
+}
+
+message RecPoolResp {
+	// 主播position => 房间信息(依赖计算的)
+	map<int64, RoomItem> list = 1 [(gogoproto.jsontag) = "list"];
+}
+
+message RoomItem {
+	//房间id
+	int64 room_id = 1 [(gogoproto.jsontag) = 'room_id'];
+    //主播uid
+    int64 uid = 2 [(gogoproto.jsontag) = 'uid'];
+	//房间标题
+	string title = 3 [(gogoproto.jsontag) = 'title'];
+	//人气
+	int64 popularity_count = 4 [(gogoproto.jsontag) = 'popularity_count'];
+	//关键帧
+	string keyframe = 5 [(gogoproto.jsontag) = 'keyframe'];
+	//封面
+	string cover = 6 [(gogoproto.jsontag) = 'cover'];
+	//二级分区id
+	int64 area_id = 7 [(gogoproto.jsontag) = 'area_id'];
+	//一级分区id
+	int64 parent_area_id = 8 [(gogoproto.jsontag) = 'parent_area_id'];
+	//二级分区名称
+	string area_name = 9 [(gogoproto.jsontag) = 'area_name'];
+	//一级分区名称
+	string parent_area_name = 10 [(gogoproto.jsontag) = 'parent_area_name'];
+    //推荐规则 10000+rule_id
+    int64 rec_type = 11 [(gogoproto.jsontag) = 'rec_type'];
+}

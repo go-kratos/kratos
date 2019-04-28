@@ -1,0 +1,11 @@
+[push]
+	name = "broadcast/push"
+	proto = "tcp"
+	addr = "172.22.33.126:6379"
+	idle = 32
+	active = 1024
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1h"

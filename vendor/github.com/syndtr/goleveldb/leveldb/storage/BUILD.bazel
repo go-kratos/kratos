@@ -1,0 +1,32 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "file_storage.go",
+        "file_storage_nacl.go",
+        "file_storage_plan9.go",
+        "file_storage_solaris.go",
+        "file_storage_unix.go",
+        "file_storage_windows.go",
+        "mem_storage.go",
+        "storage.go",
+    ],
+    importmap = "go-common/vendor/github.com/syndtr/goleveldb/leveldb/storage",
+    importpath = "github.com/syndtr/goleveldb/leveldb/storage",
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

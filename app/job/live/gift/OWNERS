@@ -1,0 +1,10 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- shenli01
+labels:
+- job
+- job/live/gift
+- live
+options:
+  no_parent_owners: true

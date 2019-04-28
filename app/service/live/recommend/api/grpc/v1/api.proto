@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package live.recommend.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Recommend {
+    // 获取n个推荐, 得到的结果是在线的房间
+    // 去重，不会重复推荐
+    // 如果没有足够推荐的结果则返回空的结果，调用方需要补位
+    rpc random_recs_by_user (GetRandomRecReq) returns (GetRandomRecResp);
+    // 清空推荐缓存，清空推荐过的集合
+    rpc clear_recommend_cache (ClearRecommendRequest) returns (ClearRecommendResponse);
+}
+
+message ClearRecommendRequest {
+    // 用户uid
+    int64 uid = 1 [(gogoproto.moretags) = 'validate:"gt=0"'];
+}
+
+message ClearRecommendResponse {
+
+}
+
+message GetRandomRecReq {
+    // 用户uid
+    int64 uid = 1 [(gogoproto.moretags) = 'validate:"gt=0"'];
+    // 获取数量
+    uint32 count = 2 [(gogoproto.moretags) = 'validate:"gt=0"'];
+    // room_id去重
+    repeated int64 exist_ids = 3;
+}
+
+message GetRandomRecResp {
+    // 返回数量
+    uint32 count = 1;
+    // 房间id
+    repeated int64 room_ids = 2;
+}

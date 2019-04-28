@@ -1,0 +1,72 @@
+syntax = "proto3";
+package bbq.service.push.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+message Device {
+    string register_id = 1 [(gogoproto.jsontag) = "register_id",(gogoproto.moretags) = "form:\"register_id\"",(gogoproto.customname) = "RegisterID"];
+    int32 platform = 2 [(gogoproto.jsontag) = "platform",(gogoproto.moretags) = "form:\"platform\"",(gogoproto.customname) = "Platform"];
+    int32 sdk = 3 [(gogoproto.jsontag) = "sdk",(gogoproto.moretags) = "form:\"sdk\"",(gogoproto.customname) = "SDK"];
+    int64 send_no = 4 [(gogoproto.jsontag) = "send_no",(gogoproto.moretags) = "form:\"send_no\"",(gogoproto.customname) = "SendNo"];
+}
+
+message Extra {
+    string token = 1 [(gogoproto.jsontag) = "token",(gogoproto.moretags) = "form:\"token\"",(gogoproto.customname) = "Token"];
+    string schema = 2 [(gogoproto.jsontag) = "schema",(gogoproto.moretags) = "form:\"schema\"",(gogoproto.customname) = "Schema"];
+}
+
+message NotificationBody {
+    string title = 1 [(gogoproto.jsontag) = "title",(gogoproto.moretags) = "form:\"title\"",(gogoproto.customname) = "Title"];
+    string content = 2 [(gogoproto.jsontag) = "content",(gogoproto.moretags) = "form:\"content\"",(gogoproto.customname) = "Content"];
+    string sound = 3 [(gogoproto.jsontag) = "sound",(gogoproto.moretags) = "form:\"sound\"",(gogoproto.customname) = "Sound"];
+    int32 badge = 4 [(gogoproto.jsontag) = "badge",(gogoproto.moretags) = "form:\"badge\"",(gogoproto.customname) = "Badge"];
+    string extra = 5 [(gogoproto.jsontag) = "extra",(gogoproto.moretags) = "form:\"extra\"",(gogoproto.customname) = "Extra"];
+}
+
+message MessageBody {
+    string title = 1 [(gogoproto.jsontag) = "title",(gogoproto.moretags) = "form:\"title\"",(gogoproto.customname) = "Title"];
+    string content = 2 [(gogoproto.jsontag) = "content",(gogoproto.moretags) = "form:\"content\"",(gogoproto.customname) = "Content"];
+    string content_type = 3 [(gogoproto.jsontag) = "content_type",(gogoproto.moretags) = "form:\"content_type\"",(gogoproto.customname) = "ContentType"];
+    string extra = 4 [(gogoproto.jsontag) = "extra",(gogoproto.moretags) = "form:\"extra\"",(gogoproto.customname) = "Extra"];
+}
+
+message NotificationRequest {
+    repeated Device dev = 1 [(gogoproto.jsontag) = "dev",(gogoproto.moretags) = "form:\"dev\"",(gogoproto.customname) = "Dev"];
+    NotificationBody body = 2 [(gogoproto.jsontag) = "body",(gogoproto.moretags) = "form:\"body\"",(gogoproto.customname) = "Body"];
+}
+
+message PushResult {
+    string send_no = 1 [(gogoproto.jsontag) = "sendno,omitempty",(gogoproto.moretags) = "form:\"sendno\"",(gogoproto.customname) = "SendNo"];
+    string msg_id = 2 [(gogoproto.jsontag) = "msg_id,omitempty",(gogoproto.moretags) = "form:\"msg_id\"",(gogoproto.customname) = "MsgID"];
+    PushError err = 3 [(gogoproto.jsontag) = "error,omitempty",(gogoproto.moretags) = "form:\"error\"",(gogoproto.customname) = "Error"];
+}
+
+message PushError {
+    string msg = 1 [(gogoproto.jsontag) = "message",(gogoproto.moretags) = "form:\"message\"",(gogoproto.customname) = "Message"];
+    int32 code = 2 [(gogoproto.jsontag) = "code",(gogoproto.moretags) = "form:\"code\"",(gogoproto.customname) = "Code"];
+}
+
+message NotificationResponse {
+    repeated PushResult result = 1 [(gogoproto.jsontag) = "result",(gogoproto.moretags) = "form:\"result\"",(gogoproto.customname) = "Result"];
+}
+
+message MessageRequest {
+    repeated Device dev = 1 [(gogoproto.jsontag) = "dev",(gogoproto.moretags) = "form:\"dev\"",(gogoproto.customname) = "Dev"];
+    MessageBody body = 2 [(gogoproto.jsontag) = "body",(gogoproto.moretags) = "form:\"body\"",(gogoproto.customname) = "Body"];
+}
+
+message MessageResponse {
+    repeated PushResult result = 1 [(gogoproto.jsontag) = "result",(gogoproto.moretags) = "form:\"result\"",(gogoproto.customname) = "Result"];
+}
+
+service Push {
+    rpc Notification(NotificationRequest) returns (NotificationResponse);
+    rpc Message(MessageRequest) returns (MessageResponse);
+    rpc AsyncNotification(NotificationRequest) returns (NotificationResponse);
+    rpc AsyncMessage(MessageRequest) returns (MessageResponse);
+}

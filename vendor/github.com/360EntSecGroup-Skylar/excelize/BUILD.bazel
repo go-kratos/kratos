@@ -1,0 +1,55 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "cell.go",
+        "chart.go",
+        "col.go",
+        "comment.go",
+        "date.go",
+        "excelize.go",
+        "file.go",
+        "hsl.go",
+        "lib.go",
+        "picture.go",
+        "rows.go",
+        "shape.go",
+        "sheet.go",
+        "sheetpr.go",
+        "sheetview.go",
+        "styles.go",
+        "table.go",
+        "templates.go",
+        "vmlDrawing.go",
+        "xmlChart.go",
+        "xmlComments.go",
+        "xmlContentTypes.go",
+        "xmlDecodeDrawing.go",
+        "xmlDrawing.go",
+        "xmlSharedStrings.go",
+        "xmlStyles.go",
+        "xmlTable.go",
+        "xmlTheme.go",
+        "xmlWorkbook.go",
+        "xmlWorksheet.go",
+    ],
+    importmap = "go-common/vendor/github.com/360EntSecGroup-Skylar/excelize",
+    importpath = "github.com/360EntSecGroup-Skylar/excelize",
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/github.com/mohae/deepcopy:go_default_library"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

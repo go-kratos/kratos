@@ -1,0 +1,46 @@
+# This is a TOML document. Boom
+debug = true
+
+[log]
+stdout=true
+[push]
+    chan = 16
+    size = 100
+
+[routine]
+    chan = 16
+    size = 100
+
+[room]
+    batch = 40
+    signal = "1s"
+    refresh = "5s"
+
+[rpc]
+    dial = "1s"
+    timeout = "1s"
+	
+[databus]
+	key = "170e302355453683"
+	secret = "3d0e8db7bed0503949e545a469789279"
+	group = "ZergJob-MainCommunity-S"
+	topic = "ZergJob-T"
+	action ="sub"
+	name = "zerg/service"
+	proto = "tcp"
+	addr = "172.18.33.50:6205"
+	idle = 2
+	active = 5
+	offset = "old"
+	dialTimeout = "1s"
+	readTimeout = "60s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1h"
+		
+[discovery]
+    domain = "api.bilibili.co"
+	key = "6a29f8ed87407c11"
+	secret = "d3c5a85f5b895a03735b5d20a273bc57"
+	env = "dev"
+	zone = "sh001"

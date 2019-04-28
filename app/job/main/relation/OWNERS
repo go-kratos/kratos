@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- linmiao
+- lintanghui
+- niuqiang
+- zhoujiahui
+labels:
+- job
+- job/main/relation
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- lintanghui
+- niuqiang
+- zhoujiahui

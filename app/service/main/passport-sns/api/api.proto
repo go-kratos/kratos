@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+package passport.service.sns;
+
+option go_package = "api";
+
+service PassportSNS {
+    // GetAuthorizeURL get authorize url
+    rpc GetAuthorizeURL (GetAuthorizeURLReq) returns (GetAuthorizeURLReply) {
+        option (google.api.http) = {
+            get: "/x/internal/passport-sns/authorize/url";
+        };
+    }
+    // Bind bind sns account
+    rpc Bind (BindReq) returns (EmptyReply) {
+        option (google.api.http) = {
+            post: "/x/internal/passport-sns/bind";
+        };
+    }
+    // Unbind unbind sns account
+    rpc Unbind (UnbindReq) returns (EmptyReply) {
+        option (google.api.http) = {
+            post: "/x/internal/passport-sns/unbind";
+        };
+    }
+    // GetInfo get info by mid
+    rpc GetInfo (GetInfoReq) returns (GetInfoReply) {
+        option (google.api.http) = {
+            get: "/x/internal/passport-sns/info";
+        };
+    }
+    // GetInfoByCode get info by authorize code
+    rpc GetInfoByCode (GetInfoByCodeReq) returns (GetInfoByCodeReply) {
+        option (google.api.http) = {
+            get: "/x/internal/passport-sns/info/code";
+        };
+    }
+    // UpdateInfo update info
+    rpc UpdateInfo (UpdateInfoReq) returns (EmptyReply) {
+        option (google.api.http) = {
+            post: "/x/internal/passport-sns/info/update";
+        };
+    }
+}
+
+message EmptyReply {
+}
+
+message Info {
+    int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+    string platform = 2 [(gogoproto.jsontag) = "platform"];
+    string union_id = 3 [(gogoproto.jsontag) = "unionid"];
+    int64 expires = 4 [(gogoproto.jsontag) = "expires"];
+}
+
+message GetAuthorizeURLReq {
+    string app_id = 1 [(gogoproto.moretags) = "form:\"appid\" validate:\"required\""];
+    string platform = 2 [(gogoproto.moretags) = "form:\"platform\" validate:\"required\""];
+    string redirect_url = 3 [(gogoproto.moretags) = "form:\"redirect_url\" validate:\"required\""];
+    string display = 4 [(gogoproto.moretags) = "form:\"display\""];
+}
+
+message GetAuthorizeURLReply {
+    string url = 1 [(gogoproto.jsontag) = "url"];
+}
+
+message BindReq {
+    int64 mid = 1 [(gogoproto.moretags) = "form:\"mid\" validate:\"required\""];
+    string code = 2 [(gogoproto.moretags) = "form:\"code\" validate:\"required\""];
+    string app_id = 3 [(gogoproto.moretags) = "form:\"appid\" validate:\"required\""];
+    string platform = 4 [(gogoproto.moretags) = "form:\"platform\" validate:\"required\""];
+    string redirect_url = 5 [(gogoproto.moretags) = "form:\"redirect_url\" validate:\"required\""];
+}
+
+message UnbindReq {
+    int64 mid = 1 [(gogoproto.moretags) = "form:\"mid\" validate:\"required\""];
+    string app_id = 2 [(gogoproto.moretags) = "form:\"appid\""];
+    string platform = 3 [(gogoproto.moretags) = "form:\"platform\" validate:\"required\""];
+}
+
+message GetInfoReq {
+    int64 mid = 1 [(gogoproto.moretags) = "form:\"mid\" validate:\"required\""];
+}
+
+message GetInfoReply {
+    repeated Info infos = 1 [(gogoproto.jsontag) = "infos"];
+}
+
+message GetInfoByCodeReq {
+    string code = 1 [(gogoproto.moretags) = "form:\"code\" validate:\"required\""];
+    string app_id = 2 [(gogoproto.moretags) = "form:\"appid\" validate:\"required\""];
+    string platform = 3 [(gogoproto.moretags) = "form:\"platform\" validate:\"required\""];
+    string redirect_url = 4 [(gogoproto.moretags) = "form:\"redirect_url\" validate:\"required\""];
+}
+
+message GetInfoByCodeReply {
+    int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+    string union_id = 2 [(gogoproto.jsontag) = "unionid"];
+    string open_id = 3 [(gogoproto.jsontag) = "openid"];
+    int64 expires = 4 [(gogoproto.jsontag) = "expires"];
+    string token = 5 [(gogoproto.jsontag) = "token"];
+}
+
+message UpdateInfoReq {
+    string platform = 1 [(gogoproto.moretags) = "form:\"platform\" validate:\"required\""];
+    string app_id = 2 [(gogoproto.moretags) = "form:\"appid\" validate:\"required\""];
+    int64 mid = 3 [(gogoproto.moretags) = "form:\"mid\" validate:\"required\""];
+    string open_id = 4 [(gogoproto.moretags) = "form:\"openid\" validate:\"required\""];
+}

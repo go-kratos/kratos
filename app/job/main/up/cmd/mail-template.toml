@@ -1,0 +1,75 @@
+[MailTemplateConf]
+    SignTmplTitle = """[签约Up即将到期]{{Now.Format "2006-01-02"}}"""
+    SignTmplContent = """
+    <html>
+    <body>
+    <h4>您有以下签约即将到期，请尽快去<a href="http://up-profit.bilibili.co/allowance/#/contract-manage/all-contracts">【up主CRM-签约管理】查看</a></h4>
+    <table border="1">
+    <tr>
+        <td>签约id</td>
+    	<td>昵称</td>
+    	<td>uid</td>
+    	<td>到期时间</td>
+    </tr>
+    {{range .}}
+    <tr>
+        <td>{{.ID}}</td>
+    	<td>{{.Name}}</td>
+    	<td>{{.Mid}}</td>
+    	<td>{{.EndDate.Time.Format "2006-01-02"}}</td>
+    </tr>
+    {{end}}
+    </table>
+    </body>
+    </html>
+    """
+    PayTmplTitle = """"[签约Up付款即将到期]{{Now.Format "2006-01-02"}}"""
+    PayTmplContent = """
+    <html>
+    <body>
+    <h4>您有以下付款即将到期,请尽快去<a href="http://up-profit.bilibili.co/allowance/#/contract-manage/all-contracts">【up主CRM-签约管理】查看</a></h4>
+    <table border=1>
+    <tr>
+        <td>签约id</td>
+    	<td>昵称</td>
+    	<td>uid</td>
+    	<td>到期时间</td>
+    	<td>金额</td>
+    </tr>
+    {{range .}}
+    <tr>
+        <td>{{.SignID}}</td>
+    	<td>{{.Name}}</td>
+    	<td>{{.Mid}}</td>
+    	<td>{{.DueDate.Time.Format "2006-01-02"}}</td>
+    	<td>{{printf "%.2f" .GetPayValue}}</td>
+    </tr>
+    {{end}}
+    </table>
+    </body>
+    </html>"""
+    TaskTmplTitle = """[签约Up任务还未完成]{{Now.Format "2006-01-02"}}"""
+    TaskTmplContent = """
+    <html>
+    <body>
+    您录入的签约up主任务还未完成，请尽快去<a href="http://up-profit.bilibili.co/allowance/#/contract-manage/all-contracts">【up主CRM-签约管理】查看</a>
+    <table border=1>
+    <tr>
+        <td>签约id</td>
+    	<td>昵称</td>
+    	<td>uid</td>
+    	<td>到期时间</td>
+    	<td>状态</td>
+    </tr>
+    {{range .}}
+    <tr>
+        <td>{{.SignID}}</td>
+    	<td>{{.Name}}</td>
+    	<td>{{.Mid}}</td>
+    	<td>{{(.EndDate.Time.AddDate 0 0 -1).Format "2006-01-02"}}</td>
+    	<td>{{(printf "%s投稿 %d/%d" .TypeDesc .TaskCounter .TaskCondition)}}</td>
+    </tr>
+    {{end}}
+    </table>
+    </body>
+    </html>"""

@@ -1,0 +1,82 @@
+syntax = "proto3";
+package live.appucenter.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message GetRoomInfoResp {
+    int64 room_id = 1 [(gogoproto.jsontag) = 'room_id'];
+    int64 uid = 2 [(gogoproto.jsontag) = 'uid'];
+    string uname = 3 [(gogoproto.jsontag) = 'uname'];
+    string title = 4 [(gogoproto.jsontag) = 'title'];
+    string face = 5 [(gogoproto.jsontag) = 'face'];
+    string try_time = 7 [(gogoproto.jsontag) = 'try_time'];
+    int64 live_status = 8 [(gogoproto.jsontag) = 'live_status'];
+    string area_v2_name = 9 [(gogoproto.jsontag) = 'area_v2_name'];
+    int64 area_v2_id = 10 [(gogoproto.jsontag) = 'area_v2_id'];
+    int64 master_level = 11 [(gogoproto.jsontag) = 'master_level'];
+    int64 master_level_color = 12 [(gogoproto.jsontag) = 'master_level_color'];
+    int64 master_score = 13 [(gogoproto.jsontag) = 'master_score'];
+    int64 master_next_level = 14 [(gogoproto.jsontag) = 'master_next_level'];
+    int64 max_level = 15 [(gogoproto.jsontag) = 'max_level'];
+    int64 fc_num = 16 [(gogoproto.jsontag) = 'fc_num'];
+    int64 rcost = 17 [(gogoproto.jsontag) = 'rcost'];
+    int64 medal_status = 18 [(gogoproto.jsontag) = 'medal_status'];
+    string medal_name = 19 [(gogoproto.jsontag) = 'medal_name'];
+    int64 medal_rename_status = 20 [(gogoproto.jsontag) = 'medal_rename_status'];
+    int64 is_medal = 21 [(gogoproto.jsontag) = 'is_medal'];
+    string full_text = 22 [(gogoproto.jsontag) = 'full_text'];
+    int64 identify_status = 23 [(gogoproto.jsontag) = 'identify_status'];
+    int64 lock_status = 24 [(gogoproto.jsontag) = 'lock_status'];
+    string lock_time = 25 [(gogoproto.jsontag) = 'lock_time'];
+    int64 open_medal_level = 26 [(gogoproto.jsontag) = 'open_medal_level'];
+    int64 master_next_level_score = 27 [(gogoproto.jsontag) = 'master_next_level_score'];
+    int64 parent_id = 28 [(gogoproto.jsontag) = 'parent_id'];
+    string parent_name = 29 [(gogoproto.jsontag) = 'parent_name'];
+}
+message GetRoomInfoReq {
+    string platform = 1 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];
+
+}
+
+message CreateResp {
+    string room_id = 1 [(gogoproto.jsontag) = 'room_id'];
+}
+message CreateReq {
+    string platform = 1 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];
+}
+
+message GetTopicListReq {
+    string platform = 1 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];
+}
+message GetTopicListResp {
+    repeated string topic_list = 1 [(gogoproto.jsontag) = 'topic_list'];
+}
+
+message CheckTopicReq {
+    string platform = 1 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];
+    string topic = 2 [(gogoproto.moretags) = 'form:"topic" validate:"required"'];
+}
+message CheckTopicResp {
+
+}
+
+service Room {
+    //获取房间基本信息
+    //`method:"GET" midware:"auth"`
+    rpc GetInfo(GetRoomInfoReq) returns (GetRoomInfoResp);
+    //创建房间
+    //`method:"POST" midware:"auth"`
+    rpc Create(CreateReq) returns (CreateResp);
+}
+
+service Topic {
+     //获取话题列表
+     //`method:"GET" midware:"auth"`
+     rpc GetTopicList(GetTopicListReq) returns (GetTopicListResp);
+
+     //检验话题是否有效
+     //`method:"GET" midware:"auth"`
+     rpc CheckTopic(CheckTopicReq) returns (CheckTopicResp);
+
+ }

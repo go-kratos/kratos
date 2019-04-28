@@ -1,0 +1,23 @@
+autoplay-tests:
+  summary: Replaying interactive tests
+  command: |-
+    cd tests
+    set -e
+    for test in autoplay/*.go; do
+      echo "==> Running $test"
+      go run $test
+    done
+
+install-deps:
+  summary: Install all of package dependencies
+  command: |-
+    go get -t {{.files}}
+    # for autoplay tests
+    go get github.com/kr/pty
+
+tests:
+  summary: Run the test suite
+  command: go test {{.files}}
+
+variables:
+  files: '$(go list -v ./... | grep -iEv "tests|examples")'

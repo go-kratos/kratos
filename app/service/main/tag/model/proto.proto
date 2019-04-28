@@ -1,0 +1,210 @@
+syntax = "proto3";
+
+/*
+ * v0.1.0
+ *
+ * Report
+ */
+package model;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message Report {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 Oid = 2 [(gogoproto.jsontag) = "oid"];
+    int32 Type = 3 [(gogoproto.jsontag) = "type"];
+    int64 Tid = 4 [(gogoproto.jsontag) = "tid"];
+    int64 Mid = 5 [(gogoproto.jsontag) = "mid"];
+    int32 TypeID = 6 [(gogoproto.jsontag) = "type_id"];
+    int32 Action = 7 [(gogoproto.jsontag) = "action"];
+    int32 Count = 8 [(gogoproto.jsontag) = "count"];
+    int32 Reason = 9 [(gogoproto.jsontag) = "reason"];
+    string Content = 10 [(gogoproto.jsontag) = "content"];
+    int32 State = 11 [(gogoproto.jsontag) = "state"];
+    int64 CTime = 12 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 13 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int32 Score = 14 [(gogoproto.jsontag) = "score"];
+}
+
+message ReportUser {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 RptID = 2 [(gogoproto.jsontag) = "rpt"];
+    int64 Mid = 3 [(gogoproto.jsontag) = "mid"];
+    int32 Attr = 4 [(gogoproto.jsontag) = "Attr"];    
+    string Content = 5 [(gogoproto.jsontag) = "content"];
+    int32 State = 6 [(gogoproto.jsontag) = "state"];
+    int64 CTime = 7 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 8 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+/*
+ * v0.1.0
+ *
+ * tag
+ */
+
+message Tag {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int32 Type = 2 [(gogoproto.jsontag) = "type"];
+    string Name = 3 [(gogoproto.jsontag) = "name"];
+    string Cover = 4 [(gogoproto.jsontag) = "cover"];
+    string Content = 5 [(gogoproto.jsontag) = "content"];
+    int32 Verify = 6 [(gogoproto.jsontag) = "-"];
+    int32 Attr = 7 [(gogoproto.jsontag) = "-"];
+    int32 Attention = 8 [(gogoproto.jsontag) = "attention"];
+    int32 State = 9 [(gogoproto.jsontag) = "-"];
+    int64 CTime = 10 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 11 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string head_cover = 12 [(gogoproto.jsontag) = "head_cover"];
+    string short_content = 13 [(gogoproto.jsontag) = "short_content"];
+}
+
+message TagSimilar {
+    int64 TypeID = 1 [(gogoproto.jsontag) = "type_id"];
+    string TypeName = 2 [(gogoproto.jsontag) = "type_name"];
+    Tag Tag = 3 [(gogoproto.jsontag) = "tag"];
+}
+
+message TagSimilars {
+    Tag Tag = 1 [(gogoproto.jsontag) = "tag"];
+    repeated TagSimilar Similars = 2 [(gogoproto.jsontag) = "similars"];
+}
+
+message Count {
+    int64 ID = 1 [(gogoproto.jsontag) = "id,omitempty"];
+    int64 Tid = 2 [(gogoproto.jsontag) = "tid,omitempty"];
+    int64 Bind = 3 [(gogoproto.jsontag) = "bind,omitempty"];
+    int64 Sub = 4 [(gogoproto.jsontag) = "sub,omitempty"];
+    int64 CTime = 5 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 6 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+
+/*
+ * v0.1.0
+ *
+ * Subscription
+ */
+
+ message Sub {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 Tid = 2 [(gogoproto.jsontag) = "tid"];
+    int64 Mid = 3 [(gogoproto.jsontag) = "mid"];
+    int64 State = 4 [(gogoproto.jsontag) = "state"];
+    int64 CTime = 5 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 6 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+ 
+
+/*
+ * v0.1.0
+ *
+ * Resource
+ */
+
+ message Resource {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 Oid = 2 [(gogoproto.jsontag) = "oid"];
+    int32 Type = 3 [(gogoproto.jsontag) = "type"];
+    int64 Tid = 4 [(gogoproto.jsontag) = "tid"];
+    int64 Mid = 5 [(gogoproto.jsontag) = "mid"];
+    int32 Role = 6 [(gogoproto.jsontag) = "role"];
+    int32 Like = 7 [(gogoproto.jsontag) = "like"];
+    int32 Hate = 8 [(gogoproto.jsontag) = "hate"];
+    int32 State = 9 [(gogoproto.jsontag) = "state"];
+    int32 Attr = 10 [(gogoproto.jsontag) = "attr"];
+    int64 CTime = 11 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 12 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 PubDate = 13 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+    Tag   Tag = 14 [(gogoproto.jsontag) = "-"];
+}
+ 
+message ResourceAction {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 Oid = 2 [(gogoproto.jsontag) = "oid"];
+    int32 Type = 3 [(gogoproto.jsontag) = "type"];
+    int64 Tid = 4 [(gogoproto.jsontag) = "tid"];
+    int64 Mid = 5 [(gogoproto.jsontag) = "mid"];
+    int32 Action = 6 [(gogoproto.jsontag) = "action"];
+    int64 CTime = 7 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 8 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+ 
+message ResourceLimit {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 Oid = 2 [(gogoproto.jsontag) = "oid"];
+    int32 Type = 3 [(gogoproto.jsontag) = "type"];
+    int32 State = 4 [(gogoproto.jsontag) = "state"];
+    int32 Attr = 5 [(gogoproto.jsontag) = "attr"];
+    int64 CTime = 6 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 7 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+ 
+message ResourceLog {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 Oid = 2 [(gogoproto.jsontag) = "oid"];
+    int32 Type = 3 [(gogoproto.jsontag) = "type"];
+    int64 Tid = 4 [(gogoproto.jsontag) = "tid"];
+    int64 Mid = 5 [(gogoproto.jsontag) = "mid"];
+    int32 Role = 6 [(gogoproto.jsontag) = "role"];
+    int32 Action = 7 [(gogoproto.jsontag) = "action"];
+    string Remark = 8 [(gogoproto.jsontag) = "remark"];
+    int32 State = 9 [(gogoproto.jsontag) = "state"];
+    int64 CTime = 10 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 11 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+/*
+ * v0.1.0
+ *
+ * Channel
+ */
+
+ message Channel {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 Type = 2 [(gogoproto.jsontag) = "type"];
+    string Operator =3 [(gogoproto.jsontag) = "-"];
+    int32 Rank =4 [(gogoproto.jsontag) = "rank"];
+    int32 Attr = 5 [(gogoproto.jsontag) = "attr"];
+    int32 State = 6 [(gogoproto.jsontag) = "state"];
+    int64 CTime = 7 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 8 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int32 TopRank =9 [(gogoproto.jsontag) = "top_rank"];
+}
+
+message ChannelCategory {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    string Name = 2 [(gogoproto.jsontag) = "name"];
+    int32 State = 3 [(gogoproto.jsontag) = "-"];
+    int64 CTime = 4 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 5 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int32 Order = 6 [(gogoproto.jsontag) = "order"];
+    int32 Attr = 7 [(gogoproto.jsontag) = "attr"];
+}
+
+message ChannelRule {
+    int64 Tid = 1 [(gogoproto.jsontag) = "tid"];
+    string in_rule = 2 [(gogoproto.jsontag) = "in_rule"];
+    string notin_rule = 3 [(gogoproto.jsontag) = "notin_rule"];
+    string in_rule_name = 4 [(gogoproto.jsontag) = "-"];
+    string notin_rule_name = 5 [(gogoproto.jsontag) = "-"];
+    string rule_name = 6 [(gogoproto.jsontag) = "rule_name"];
+    int64 id = 7 [(gogoproto.jsontag) = "id"];
+    int32 state = 8 [(gogoproto.jsontag) = "state"];
+}
+
+message ChannelGroup {
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+    int64 ptid = 2 [(gogoproto.jsontag) = "ptid"];
+    int64 tid = 3 [(gogoproto.jsontag) = "tid"];
+    string alias = 4 [(gogoproto.jsontag) = "alias"];
+    string rank = 5 [(gogoproto.jsontag) = "rank"];
+    int64 CTime = 6 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 7 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}

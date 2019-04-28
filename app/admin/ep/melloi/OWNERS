@@ -1,0 +1,12 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- gongmenglei
+- hujianping
+- yuanmin
+labels:
+- admin
+- admin/ep/melloi
+- ep
+options:
+  no_parent_owners: true

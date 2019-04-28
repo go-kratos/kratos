@@ -1,0 +1,213 @@
+[bm]
+addr = "0.0.0.0:6392"
+timeout = "1s"
+
+[httpClient]
+key       = "6a29f8ed87407c11"
+secret    = "d3c5a85f5b895a03735b5d20a273bc57"
+dial      = "100ms"
+timeout   = "1s"
+keepAlive = "60s"
+timer     = 128
+[httpClient.breaker]
+    window ="3s"
+    sleep ="100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[db]
+name = "172.16.33.205:3308"
+dsn = "test:test@tcp(172.22.33.205:3308)/archive_stat?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 1
+queryTimeout = "100ms"
+execTimeout = "100ms"
+tranTimeout = "200ms"
+[db.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+
+[ClickDB]
+name = "172.16.33.205:3308"
+dsn = "test:test@tcp(172.16.33.205:3308)/archive_click?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 1
+queryTimeout = "100ms"
+execTimeout = "100ms"
+tranTimeout = "200ms"
+[ClickDB.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+
+[SMS]
+phone = "18321572353,18565623963"
+token = "f5a658b2-5926-4b71-96c3-7d3777b7d256"
+
+[stat]
+subInterval = "1m"
+wrtDBInterval = "1ms"
+idle = "10m"
+wrtDBNum = 8
+wrtCacheNum = 4
+sharding = 100
+
+[ViewSub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatView-MainAppSvr-StatJob-S"
+topic = "StatView-T"
+action = "sub"
+name = "stat-job/view"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[DmSub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatDM-MainAppSvr-StatJob-S"
+topic = "StatDM-T"
+action = "sub"
+name = "stat-job/dm"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[ReplySub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatReply-MainAppSvr-StatJob-S"
+topic = "StatReply-T"
+action = "sub"
+name = "stat-job/reply"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[FavSub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatFav-MainAppSvr-StatJob-S"
+topic = "StatFav-T"
+action = "sub"
+name = "stat-job/fav"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[CoinSub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatCoin-MainAppSvr-StatJob-S"
+topic = "StatCoin-T"
+action = "sub"
+name = "stat-job/coin"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[ShareSub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatShare-MainAppSvr-StatJob-S"
+topic = "StatShare-T"
+action = "sub"
+name = "stat-job/share"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[RankSub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatRank-MainAppSvr-StatJob-S"
+topic = "StatRank-T"
+action = "sub"
+name = "stat-job/rank"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[likeSub]
+key = "8e27ab7e39270b59"
+secret = "477df6a068d7332a163f95abbad2079c"
+group = "LikesBinlog-MainAppSvr-S"
+topic = "LikesBinlog-T"
+action = "sub"
+name = "stat-job/like"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+
+[[memcaches]]
+    name = "archive-service"
+    proto = "tcp"
+    addr = "172.18.33.61:11211"
+    active = 50
+    idle = 10
+    dialTimeout = "30ms"
+    readTimeout = "200ms"
+    writeTimeout = "200ms"
+    idleTimeout = "80s"
+    archiveExpire = "10h"
+    videoExpire = "10h"
+[[memcaches]]
+    name = "archive-service"
+    proto = "tcp"
+    addr = "172.18.33.61:11211"
+    active = 50
+    idle = 10
+    dialTimeout = "30ms"
+    readTimeout = "200ms"
+    writeTimeout = "200ms"
+    idleTimeout = "80s"
+    archiveExpire = "10h"
+    videoExpire = "10h"

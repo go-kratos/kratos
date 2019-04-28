@@ -1,0 +1,5 @@
+image:
+  - name: bazel_build
+    image: hub.bilibili.co/k8s-prow/bazelbuild:v20190123123430-77f54bb27
+  - name: go_lint
+    image: hub.bilibili.co/k8s-prow/golint:v20190123123017-77f54bb27

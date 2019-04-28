@@ -1,0 +1,23 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+
+proto_library(
+    name = "grpc_testing_proto",
+    srcs = ["metrics.proto"],
+    visibility = ["//visibility:public"],
+)
+
+go_proto_library(
+    name = "grpc_testing_go_proto",
+    compilers = ["@io_bazel_rules_go//proto:go_grpc"],
+    importpath = "google.golang.org/grpc/stress/grpc_testing",
+    proto = ":grpc_testing_proto",
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "go_default_library",
+    embed = [":grpc_testing_go_proto"],
+    importpath = "google.golang.org/grpc/stress/grpc_testing",
+    visibility = ["//visibility:public"],
+)

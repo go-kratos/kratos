@@ -1,0 +1,89 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+dir = "./"
+family = "sms-service"
+
+[xlog]
+    dir = "/data/log/sms-service/"
+
+[httpServer]
+    addr = "0.0.0.0:7121"
+    maxListen = 1000
+    timeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+
+[httpClient]
+    key    = "4699a07e59d7149e"
+    secret = "test"
+    dial      = "100ms"
+    timeout   = "1s"
+    keepAlive = "60s"
+    timer     = 128
+    [httpClient.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[grpc]
+    timeout = "1s"
+    addr = "0.0.0.0:9000"
+
+[mysql]
+    addr = "172.16.33.205:3306"
+    dsn = "sms:s2eEdt4kAPW4SEOk@tcp(172.16.33.205:3306)/sms?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    IdleTimeout ="4h"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [mysql.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+
+[databus]
+    key = "9765cdac5894f2ba"
+    secret="f4237d712c3ed1e7fab0137b81418b14"
+    group= "Sms-MainWebSvr-P"
+    topic= "Sms-T"
+    action="pub"
+    name = "sms-pub"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[userReport]
+    key = "2511663d546f1413"
+    secret = "cde3b480836cc76df3d635470f991caa"
+    group = "LogUserAction-MainSearch-P"
+    topic = "LogUserAction-T"
+    action = "pub"
+    buffer = 10240
+    name = "log-user-action/log-sub"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    active = 100
+    idle = 100
+    dialTimeout = "200ms"
+    readTimeout = "200ms"
+    writeTimeout = "200ms"
+    idleTimeout = "80s"
+
+[sms]
+    pickUpTask = true
+    loadTaskInteval = "5s"
+    taskWorker = 10
+    batchSize = 100

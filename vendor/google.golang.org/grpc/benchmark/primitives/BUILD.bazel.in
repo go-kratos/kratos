@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_test")
+
+go_test(
+    name = "go_default_test",
+    srcs = [
+        "code_string_test.go",
+        "context_test.go",
+        "primitives_test.go",
+    ],
+    deps = [
+        "//codes:go_default_library",
+        "@org_golang_x_net//context:go_default_library",
+    ],
+)

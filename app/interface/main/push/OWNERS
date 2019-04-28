@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- caoguoliang
+- renwei
+- wangjian
+- zhapuyu
+labels:
+- interface
+- interface/main/push
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- caoguoliang
+- wangjian
+- zhapuyu

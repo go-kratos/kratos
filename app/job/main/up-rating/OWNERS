@@ -1,0 +1,14 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- gaopeng
+- shaozhenyu
+labels:
+- job
+- job/main/up-rating
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- gaopeng
+- shaozhenyu

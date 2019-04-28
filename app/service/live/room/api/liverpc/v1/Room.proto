@@ -1,0 +1,272 @@
+syntax = "proto3";
+
+package room.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Room {
+    
+    /** 给大数据用的全量接口
+     * 
+     */   
+    rpc all_live_for_bigdata (RoomAllLiveForBigdataReq) returns (RoomAllLiveForBigdataResp);
+    
+    /** 根据房间id获取房间信息
+     * 
+     */   
+    rpc get_info_by_id (RoomGetInfoByIdReq) returns (RoomGetInfoByIdResp);
+    
+    /** uid获取房间信息
+     * 
+     */   
+    rpc get_status_info_by_uids (RoomGetStatusInfoByUidsReq) returns (RoomGetStatusInfoByUidsResp);
+    
+    /** 获取移动端房间页初始化信息
+     * 
+     */   
+    rpc mobileRoomInit (RoomMobileRoomInitReq) returns (RoomMobileRoomInitResp);
+    
+    /** 房间发送弹幕数累加
+     * 
+     */   
+    rpc incrDanmuSendNum (RoomIncrDanmuSendNumReq) returns (RoomIncrDanmuSendNumResp);
+}
+
+
+
+message RoomAllLiveForBigdataReq {
+    
+}
+
+message RoomAllLiveForBigdataResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 房间信息map
+    repeated RoomInfo data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message RoomInfo {
+        // 房间id
+        int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+        // 用户id
+        int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+        // 创建时间
+        int64 create_time = 3 [(gogoproto.jsontag) = "create_time"];
+        // 短位号
+        int64 short_id = 4 [(gogoproto.jsontag) = "short_id"];
+        // 在线人数
+        int64 online = 5 [(gogoproto.jsontag) = "online"];
+        // 分区id
+        int64 area = 6 [(gogoproto.jsontag) = "area"];
+        // 分区v2 id
+        int64 area_v2_id = 7 [(gogoproto.jsontag) = "area_v2_id"];
+        // 分区v2 父分区id
+        int64 area_v2_parent_id = 8 [(gogoproto.jsontag) = "area_v2_parent_id"];
+        // 关注人数
+        int64 attentions = 9 [(gogoproto.jsontag) = "attentions"];
+    }
+}
+
+
+
+message RoomGetInfoByIdReq {
+    // 房间id, 可以为短号
+    repeated int64 ids = 1 [(gogoproto.jsontag) = "ids"];
+    // 需要哪些字段, 不传默认所有
+    repeated string fields = 2 [(gogoproto.jsontag) = "fields"];
+}
+
+message RoomGetInfoByIdResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 房间信息map
+    map<int64, RoomInfo> data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message RoomInfo {
+        // 房间id
+        int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+        // 用户名, 不可靠.
+        string uname = 2 [(gogoproto.jsontag) = "uname"];
+        // 封面
+        string cover = 3 [(gogoproto.jsontag) = "cover"];
+        // 用户id
+        int64 uid = 4 [(gogoproto.jsontag) = "uid"];
+        // 开播时间
+        string live_time = 5 [(gogoproto.jsontag) = "live_time"];
+        // 轮播状态
+        int64 round_status = 6 [(gogoproto.jsontag) = "round_status"];
+        // 是否开播
+        int64 on_flag = 7 [(gogoproto.jsontag) = "on_flag"];
+        // 直播间标题
+        string title = 8 [(gogoproto.jsontag) = "title"];
+        // 锁定到时间
+        string lock_status = 9 [(gogoproto.jsontag) = "lock_status"];
+        // 隐藏到时间
+        string hidden_status = 10 [(gogoproto.jsontag) = "hidden_status"];
+        // 也是封面...
+        string user_cover = 11 [(gogoproto.jsontag) = "user_cover"];
+        // 短号
+        int64 short_id = 12 [(gogoproto.jsontag) = "short_id"];
+        // 在线人数
+        int64 online = 13 [(gogoproto.jsontag) = "online"];
+        // 分区id
+        int64 area = 14 [(gogoproto.jsontag) = "area"];
+        // 分区v2 id
+        int64 area_v2_id = 15 [(gogoproto.jsontag) = "area_v2_id"];
+        // 分区v2 父分区id
+        int64 area_v2_parent_id = 16 [(gogoproto.jsontag) = "area_v2_parent_id"];
+        // 分区v2名字 fields加了该字段才会给
+        string area_v2_name = 17 [(gogoproto.jsontag) = "area_v2_name"];
+        // 分区v2父分区名字 fields加了该字段才会给
+        string area_v2_parent_name = 18 [(gogoproto.jsontag) = "area_v2_parent_name"];
+        // 关注人数
+        int64 attentions = 19 [(gogoproto.jsontag) = "attentions"];
+    }
+}
+
+
+
+message RoomGetStatusInfoByUidsReq {
+    // 用户id
+    repeated int64 uids = 1 [(gogoproto.jsontag) = "uids"];
+    // 是否只获取在播的用户信息 默认0
+    int64 filter_offline = 2 [(gogoproto.jsontag) = "filter_offline"];
+    // 是否显示隐藏的房间 默认0
+    int64 show_hidden = 3 [(gogoproto.jsontag) = "show_hidden"];
+    // 是否过滤首页黑名单的房间 默认0
+    int64 filter_index_black = 4 [(gogoproto.jsontag) = "filter_index_black"];
+    // 是否过滤放映厅 默认0
+    int64 filter_video = 5 [(gogoproto.jsontag) = "filter_video"];
+    // 是否需要横竖屏信息 默认0
+    int64 need_broadcast_type = 6 [(gogoproto.jsontag) = "need_broadcast_type"];
+}
+
+message RoomGetStatusInfoByUidsResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    map<int64, RoomInfo> data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message RoomInfo {
+        // 直播间标题
+        string title = 1 [(gogoproto.jsontag) = "title"];
+        // 房间id
+        int64 room_id = 2 [(gogoproto.jsontag) = "room_id"];
+        // 用户id
+        int64 uid = 3 [(gogoproto.jsontag) = "uid"];
+        // 人气值
+        int64 online = 4 [(gogoproto.jsontag) = "online"];
+        // 开播时间
+        int64 live_time = 5 [(gogoproto.jsontag) = "live_time"];
+        // 1开播 2 轮播 0 未开播
+        int64 live_status = 6 [(gogoproto.jsontag) = "live_status"];
+        // 短号
+        int64 short_id = 7 [(gogoproto.jsontag) = "short_id"];
+        // 老的分区id (2,3)
+        int64 area = 8 [(gogoproto.jsontag) = "area"];
+        // 老的分区名字
+        string area_name = 9 [(gogoproto.jsontag) = "area_name"];
+        // 子分区id (172,189)
+        int64 area_v2_id = 10 [(gogoproto.jsontag) = "area_v2_id"];
+        // 子分区名字
+        string area_v2_name = 11 [(gogoproto.jsontag) = "area_v2_name"];
+        // 父分区名字
+        string area_v2_parent_name = 12 [(gogoproto.jsontag) = "area_v2_parent_name"];
+        // 父分区id (1,2)
+        int64 area_v2_parent_id = 13 [(gogoproto.jsontag) = "area_v2_parent_id"];
+        // 老分区标签
+        string tag_name = 14 [(gogoproto.jsontag) = "tag_name"];
+        // 房间标签
+        string tags = 15 [(gogoproto.jsontag) = "tags"];
+        // 用户昵称
+        string uname = 16 [(gogoproto.jsontag) = "uname"];
+        // 用户设定的封面
+        string cover_from_user = 17 [(gogoproto.jsontag) = "cover_from_user"];
+        // 关键帧
+        string keyframe = 18 [(gogoproto.jsontag) = "keyframe"];
+        // 锁定到的时间
+        string lock_till = 19 [(gogoproto.jsontag) = "lock_till"];
+        // 隐藏到的时间
+        string hidden_till = 20 [(gogoproto.jsontag) = "hidden_till"];
+        // 横竖屏，只有传了need_broadcast_type才会返回  0:横屏 1:竖屏 -1:异常情况
+        int64 broadcast_type = 21 [(gogoproto.jsontag) = "broadcast_type"];
+    }
+}
+
+
+
+message RoomMobileRoomInitReq {
+    // 房间号或者短位号
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+    // 语言  hant: 国际版繁体中文 hans: 国际版简体中文
+    string lang = 2 [(gogoproto.jsontag) = "lang"];
+}
+
+message RoomMobileRoomInitResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 房间号
+        int64 room_id = 1 [(gogoproto.jsontag) = "room_id"];
+        // 短号
+        int64 short_id = 2 [(gogoproto.jsontag) = "short_id"];
+        // 主播uid
+        int64 uid = 3 [(gogoproto.jsontag) = "uid"];
+        // 是否p2p
+        int64 need_p2p = 4 [(gogoproto.jsontag) = "need_p2p"];
+        // 是否锁定
+        bool is_locked = 5 [(gogoproto.jsontag) = "is_locked"];
+        // 是否隐藏
+        bool is_hidden = 6 [(gogoproto.jsontag) = "is_hidden"];
+        // 锁定时间戳
+        int64 lock_till = 7 [(gogoproto.jsontag) = "lock_till"];
+        // 隐藏时间戳
+        int64 hidden_till = 8 [(gogoproto.jsontag) = "hidden_till"];
+        // 是否加密
+        bool encrypted = 9 [(gogoproto.jsontag) = "encrypted"];
+        // 加密房间是否通过密码验证, encrypted=true时才有意义
+        bool pwd_verified = 10 [(gogoproto.jsontag) = "pwd_verified"];
+        // 是否竖屏
+        bool is_portrait = 11 [(gogoproto.jsontag) = "is_portrait"];
+        // 开播状态 0：关播 1：直播 2：轮播
+        int64 live_status = 12 [(gogoproto.jsontag) = "live_status"];
+        // 特殊直播间值  0 为普通直播间 1为付费直播间
+        int64 is_sp = 13 [(gogoproto.jsontag) = "is_sp"];
+        // 特殊直播间标志  0 为普通直播间，1为付费直播间, 2为拜年祭直播间
+        int64 special_type = 14 [(gogoproto.jsontag) = "special_type"];
+    }
+}
+
+
+
+message RoomIncrDanmuSendNumReq {
+    // 房间号
+    int64 room_id = 1 [(gogoproto.jsontag) = "room_id"];
+    // 弹幕类型0普通1抽奖
+    int64 mode = 2 [(gogoproto.jsontag) = "mode"];
+}
+
+message RoomIncrDanmuSendNumResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        
+    }
+}

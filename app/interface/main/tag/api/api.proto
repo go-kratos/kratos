@@ -1,0 +1,40 @@
+// main.community.tag grpc api proto file.
+// discovery id: main.community.tag.
+// version: v1.
+syntax = "proto3";
+package main.community.tag.v1;
+
+import "app/interface/main/tag/api/request.proto";
+import "app/interface/main/tag/api/reply.proto";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+service TagRPC {
+    // Tag get tag info by tag id.
+    rpc Tag(TagReq) returns (TagReply);
+     // TagByName get tag info by tag name.
+    rpc TagByName(TagByNameReq) returns (TagReply);
+    // Tags get tags info by tag ids.
+    rpc Tags(TagsReq) returns (TagsReply);
+     // TagByNames get tags info by tag names.
+    rpc TagByNames(TagByNamesReq) returns (TagsReply);
+
+    // Channel get a channel info, include tags, and channel synonyms.
+    rpc Channel(ChannelReq) returns (ChannelReply);
+    // ChannelCategory get channels categories by from that international version or normal app version.
+    rpc ChannelCategory(ChannelCategoryReq) returns (ChannelCategoryReply);
+    // ChanneList get channels by channel category id and the app version.
+    rpc ChanneList(ChanneListReq) returns (ChannelsReply);
+    // ChannelRecommend get a recommend channel list by mid.
+    rpc ChannelRecommend(ChannelRecommendReq) returns (ChannelsReply);
+    // ChannelDiscovery get a channel list by mid and channel state (3>2>1)
+    rpc ChannelDiscovery(ChannelDiscoveryReq) returns (ChannelsReply);
+    // ChannelSquare get channel infos and archives.
+    rpc ChannelSquare(ChannelSquareReq) returns (ChannelSquareReply);
+    // ChannelResources resource feed under channel.
+    rpc ChannelResources(ChannelResourcesReq) returns (ChannelResourcesReply);
+    // ChannelCheckBack resource channel checkback.
+    rpc ChannelCheckBack(ChannelCheckBackReq) returns (ChannelCheckBackReply);
+}

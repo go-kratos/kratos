@@ -1,0 +1,41 @@
+// Package client generate by warden_gen
+package client
+
+import (
+    "fmt"
+    {{range $key, $value := .Imports}}"{{$key}}"
+    {{end}}{{range $key, $value := .ClientImports}}"{{$key}}"
+    {{end}}
+    pb "{{.PbPackage}}"
+    "go-common/net/rpc/warden"
+    "go-common/app/warden/balancer/wrr"
+    "google.golang.org/grpc"
+)
+
+const (
+    treeID = 2233
+)
+
+// New {{.Name}} service client
+func New(conf *warden.ClientConfig) *Client {
+	target := fmt.Sprintf("discovery://default/%d", treeID)
+	wc := warden.NewClient(conf, grpc.WithBalancerName(wrr.Name))
+	conn, err := wc.Dial(context.TODO(), target)
+	if err != nil {
+		panic(err)
+	}
+    return &Client{pb.New{{.Name}}Client(conn)}
+}
+
+
+// Client service client
+type Client struct {
+    grpcClient pb.{{.Name}}Client
+}
+
+{{range .Methods}}
+// {{range .Comments}}{{.}}{{end}}
+func (c *Client) {{.Name}}({{.ParamBlock}}) ({{.ReturnBlock}}) {
+    panic("not implemented")
+}
+{{end}}

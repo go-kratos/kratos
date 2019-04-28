@@ -1,0 +1,4 @@
+#! /bin/sh
+DIR=$(dirname "$0")
+DIR="$DIR/memcached"
+go run $DIR/main.go $DIR/header_template.go $DIR/none_template.go $DIR/single_template.go $DIR/multi_template.go $@

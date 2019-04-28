@@ -1,0 +1,21 @@
+[log]
+    # dir = "/data/log/web-room"
+    stdout = true
+#     family = "live.live.web-room"
+# [log.agent]
+#         taskID = "000161"
+#         proto = "unixgram"
+#         addr = "/var/run/lancer/collector.sock"
+#         chan = 10240
+
+[DMsend]
+taskID = "582"
+proto = "tcp"
+addr = "172.18.33.125:15140"
+chanSize = 10240
+
+[DMerr]
+taskID = "1409"
+proto = "tcp"
+addr = "172.18.33.125:15140"
+chanSize = 10240

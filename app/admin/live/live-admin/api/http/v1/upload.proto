@@ -1,0 +1,70 @@
+syntax = "proto3";
+package live.liveadmin.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Token {
+	// Request for a token for upload.
+	// `method:"POST" internal:"true"`
+	rpc new (NewTokenReq) returns (NewTokenResp);
+}
+
+service Upload {
+	// `method:"POST" content-type:"multipart/form-data" midware:"cors,guest"`
+	rpc file (UploadFileReq) returns (UploadFileResp);
+}
+
+message NewTokenReq {
+	// 上传到 BFS 的 bucket
+	string bucket = 1 [(gogoproto.moretags) = 'form:"bucket" validate:"required"'];
+
+	// 上传到指定的 BFS 目录（可以用来区分业务）
+	string dir = 2 [(gogoproto.moretags) = 'form:"dir"'];
+
+	// 操作人（mlive通过dashboard授权获取到的操作人）
+	string operator = 3 [(gogoproto.moretags) = 'form:"operator" validate:"required"'];
+}
+
+message NewTokenResp {
+	// 授予的 token
+	string token = 1 [(gogoproto.jsontag) = "token"];
+}
+
+// The file/data part must use Request.FormFile() to retrieve manually.
+message UploadFileReq {
+	// 上传到 BFS 的 bucket
+	string bucket = 1 [(gogoproto.moretags) = 'form:"bucket" validate:"required"'];
+
+	// 上传到指定的 BFS 目录（可以用来区分业务）
+	string dir = 2 [(gogoproto.moretags) = 'form:"dir"'];
+
+	// 上传的到bfs的文件名（存储在bfs的文件名，不传bfs会根据文件的sha1值生成并返回）
+	string filename = 3 [(gogoproto.moretags) = 'form:"file_name"'];
+
+	// 上传的文件的类型（不指定时会自动检测文件类型）
+	string contentType = 4 [(gogoproto.moretags) = 'form:"content_type"'];
+
+	// 图片水印key，添加图片水印需要上传该参数, 新业务需要提前向bfs申请
+	string wmKey = 5 [(gogoproto.moretags) = 'form:"wm_key"'];
+
+	// 文字水印，限制不超过20个字符
+	string wmText = 6 [(gogoproto.moretags) = 'form:"wm_text"'];
+
+	// 水印位置右下角 到原图右下角 水平距离，默认10px
+	uint32 wmPaddingX = 7 [(gogoproto.moretags) = 'form:"wm_padding_x"'];
+
+	// 水印位置右下角 到原图右下角 垂直距离，默认10px
+	uint32 wmPaddingY = 8 [(gogoproto.moretags) = 'form:"wm_padding_y"'];
+
+	// 水印宽度占原图高度的比例(0,1) （只支持按照宽度压缩)，默认值: 0.035
+	double wmScale = 9 [(gogoproto.moretags) = 'form:"wm_scale"'];
+
+	// 上传 Token，通过 obtainToken 接口获取
+	string token = 10 [(gogoproto.moretags) = 'form:"token" validate:"required"'];
+}
+
+message UploadFileResp {
+	string url = 1 [(gogoproto.jsontag) = "url"];
+}
+

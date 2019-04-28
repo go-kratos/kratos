@@ -1,0 +1,283 @@
+//  - http://git.bilibili.co/platform/go-common/tree/master/app/tool/protoc-gen-bm
+// +bili:type=service
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+package tv.service.v1;
+
+option go_package = "api";
+// do not generate getXXX() method
+option (gogoproto.goproto_getters_all) = false;
+
+message UserInfoReq {
+    int64 mid = 1;
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/tv/internal/model.UserInfo
+message UserInfoReply {
+    int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+    int32 vip_type = 2 [(gogoproto.jsontag) = "vip_type", (gogoproto.casttype) = "int8"];
+    int32 pay_type = 3 [(gogoproto.jsontag) = "pay_type", (gogoproto.casttype) = "int8"];
+    string pay_channel_id = 4 [(gogoproto.jsontag) = "pay_channel_id"];
+    int32 status = 5 [(gogoproto.jsontag) = "status", (gogoproto.casttype) = "int8"];
+    int64 overdue_time = 6 [(gogoproto.jsontag) = "overdue_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message ChangeHistoryReq {
+    int32 id = 1;
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/tv/internal/model.UserChangeHistory
+message ChangeHistoryReply {
+    int32 id = 1 [(gogoproto.jsontag) = "id"];
+    int64 mid = 2 [(gogoproto.jsontag) = "mid"];
+    int32 change_type = 3 [(gogoproto.jsontag) = "change_type", (gogoproto.casttype) = "int8"];
+    int32 change_time = 4 [(gogoproto.jsontag) = "change_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string order_no = 5 [(gogoproto.jsontag) = "order_no"];
+    int32 days = 6 [(gogoproto.jsontag) = "days"];
+    string operator_id = 7 [(gogoproto.jsontag) = "operator_id"];
+    int32 ctime = 8 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int32 mtime = 9 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message ChangeHistorysReq {
+    int64 mid = 1;
+    int32 from = 2;
+    int32 to = 3;
+    int32 pn = 4;
+    int32 ps = 5;
+}
+
+message ChangeHistorysReply {
+    int32 total = 1 [(gogoproto.jsontag) = "total"];
+    repeated ChangeHistoryReply historys = 2 [(gogoproto.jsontag) = "historys"];
+}
+
+message PanelInfoReq {
+    int64 mid = 1;
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/tv/internal/model.PanelPriceConfig
+message PanelPriceConfig {
+    int32 id = 1 [(gogoproto.jsontag) = "id"];
+    int32 pid = 2 [(gogoproto.jsontag) = "pid"];
+    int32 platform = 3 [(gogoproto.jsontag) = "platform", (gogoproto.casttype) = "int8"];
+    string product_name = 4 [(gogoproto.jsontag) = "product_name"];
+    string product_id = 5 [(gogoproto.jsontag) = "product_id"];
+    int32 suit_type = 6 [(gogoproto.jsontag) = "suit_type", (gogoproto.casttype) = "int8"];
+    int32 month = 7 [(gogoproto.jsontag) = "month"];
+    int32 sub_type = 8 [(gogoproto.jsontag) = "sub_type", (gogoproto.casttype) = "int8"];
+    int32 price = 9 [(gogoproto.jsontag) = "price"];
+    int32 selected = 10 [(gogoproto.jsontag) = "selected", (gogoproto.casttype) = "int8"];
+    string remark = 11 [(gogoproto.jsontag) = "remark"];
+    int32 status = 12 [(gogoproto.jsontag) = "status", (gogoproto.casttype) = "int8"];
+    string superscript = 13 [(gogoproto.jsontag) = "superscript"];
+    int32 origin_price = 14 [(gogoproto.jsontag) = "origin_price"];
+    int32 max_num = 15 [(gogoproto.jsontag) = "max_num"];
+}
+
+message PanelPriceConfigs {
+    repeated PanelPriceConfig price_configs = 1 [(gogoproto.jsontag) = "price_configs"];
+}
+
+message PanelInfoReply {
+    map<string, PanelPriceConfigs> price_configs = 1 [(gogoproto.jsontag) = "price_configs"];
+}
+
+message GuestPanelInfoReq {
+}
+
+message GuestPanelInfoReply {
+    map<string, PanelPriceConfigs> price_configs = 1;
+}
+
+message PayOrderReq {
+    string order_no = 1;
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/tv/internal/model.PayOrder
+message PayOrderReply {
+    int32 id = 1 [(gogoproto.jsontag) = "id"];
+    string order_no = 2 [(gogoproto.jsontag) = "order_no"];
+    int32 platform = 3 [(gogoproto.jsontag) = "platform", (gogoproto.casttype) = "int8"];
+    int32 order_type = 4 [(gogoproto.jsontag) = "order_type", (gogoproto.casttype) = "int8"];
+    int64 mid = 5 [(gogoproto.jsontag) = "mid"];
+    int32 buy_months = 6 [(gogoproto.jsontag) = "buy_months", (gogoproto.casttype) = "int8"];
+    string product_id = 7 [(gogoproto.jsontag) = "product_id"];
+    int32 money = 8 [(gogoproto.jsontag) = "money"];
+    int32 quantity = 9 [(gogoproto.jsontag) = "quantity"];
+    int32 status = 10 [(gogoproto.jsontag) = "status", (gogoproto.casttype) = "int8"];
+    string third_trade_no = 11 [(gogoproto.jsontag) = "third_trade_no"];
+    int32 payment_money = 12 [(gogoproto.jsontag) = "payment_money"];
+    string payment_type = 13 [(gogoproto.jsontag) = "payment_type"];
+    int32 payment_time = 14 [(gogoproto.jsontag) = "payment_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int32 ctime = 15 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int32 mtime = 16 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message CreateQrReq {
+    int64 mid = 1;
+    int32 pid = 2;
+    int32 buy_num = 4;
+    string guid = 5;
+    string app_channel = 6;
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/tv/internal/model.QR
+message CreateQrReply {
+    int32 expire_at = 1 [(gogoproto.jsontag) = "expire_at", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string url = 2 [(gogoproto.jsontag) = "url"];
+    string token = 3 [(gogoproto.jsontag) = "token"];
+}
+
+message CreateGuestQrReq {
+    int32 pid = 1;
+    int32 buy_num = 2;
+    string guid = 3;
+    string app_channel = 4;
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/tv/internal/model.QR
+message CreateGuestQrReply {
+    int32 expire_at = 1 [(gogoproto.jsontag) = "expire_at", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string url = 2 [(gogoproto.jsontag) = "url"];
+    string token = 3 [(gogoproto.jsontag) = "token"];
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/tv/internal/model.YstPayCallbackReq
+message PayCallbackReq {
+    string seq_no = 1;
+    string trace_no = 2;
+    string trade_state = 3;
+    string contract_id = 4;
+    string sign = 5;
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/tv/internal/model.YstPayCallbackReply
+message PayCallbackReply {
+    string trace_no = 1 [(gogoproto.jsontag) = "traceno"];
+    string result = 2 [(gogoproto.jsontag) = "result"];
+    string msg = 3 [(gogoproto.jsontag) = "msg"];
+}
+
+message CreateOrderReq {
+    string token = 1;
+    int32 platform = 2 [(gogoproto.casttype) = "int8"];
+    string payment_type = 3;
+    string client_ip = 4;
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/tv/internal/model.PayInfo
+message CreateOrderReply {
+    string order_no = 1 [(gogoproto.jsontag) = "order_no"];
+    string payment_type = 2 [(gogoproto.jsontag) = "payment_type"];
+    string code_url = 3 [(gogoproto.jsontag) = "code_url"];
+    int32 payment_money = 4 [(gogoproto.jsontag) = "payment_money"];
+}
+
+message CreateGuestOrderReq {
+    int64 mid = 1;
+    string token = 2;
+    int32 platform = 3 [(gogoproto.casttype) = "int8"];
+    string payment_type = 4;
+    string client_ip = 5;
+}
+
+message CreateGuestOrderReply {
+    string order_no = 1 [(gogoproto.jsontag) = "order_no"];
+    string payment_type = 2 [(gogoproto.jsontag) = "payment_type"];
+    string code_url = 3 [(gogoproto.jsontag) = "code_url"];
+    int32 payment_money = 4 [(gogoproto.jsontag) = "payment_money"];
+}
+
+message RenewVipReq {
+    int64 mid = 1;
+}
+
+message RenewVipReply {
+
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/tv/internal/model.WxContractCallbackReq
+message WxContractCallbackReq {
+    string contract_id = 1;
+    string contract_code = 2;
+    string change_type = 3;
+    string contract_termination_mode = 4;
+    string sign = 5;
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/tv/internal/model.WxContractCallbackReply
+message WxContractCallbackReply {
+    string contract_id = 1 [(gogoproto.jsontag) = "contract_id"];
+    string result = 2 [(gogoproto.jsontag) = "result"];
+    string msg = 3 [(gogoproto.jsontag) = "msg"];
+}
+
+message TokenInfoReq {
+    repeated string token = 1;
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/tv/internal/model.TokenInfo
+message TokenInfo {
+    string order_no = 1 [(gogoproto.jsontag) = "order_no"];
+    int32 status = 2 [(gogoproto.jsontag) = "status", (gogoproto.casttype) = "int8"];
+    int64 mid = 3 [(gogoproto.jsontag) = "mid"];
+    string token = 4 [(gogoproto.jsontag) = "token"];
+}
+
+message TokenInfoReply {
+    repeated TokenInfo tokens = 1 [(gogoproto.jsontag) = "tokens"];
+}
+
+message YstUserInfoReq {
+    int64 mid = 1;
+    string sign = 2;
+}
+
+
+message YstUserInfoReply {
+    int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+    int32 vip_type = 2 [(gogoproto.jsontag) = "vip_type", (gogoproto.casttype) = "int8"];
+    int32 pay_type = 3 [(gogoproto.jsontag) = "pay_type", (gogoproto.casttype) = "int8"];
+    string pay_channel_id = 4 [(gogoproto.jsontag) = "pay_channel_id"];
+    int32 status = 5 [(gogoproto.jsontag) = "status", (gogoproto.casttype) = "int8"];
+    int64 overdue_time = 6 [(gogoproto.jsontag) = "overdue_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+
+    string result = 7 [(gogoproto.jsontag) = "result"];
+    string msg = 8 [(gogoproto.jsontag) = "msg"];
+}
+
+service TVService {
+    // 查询会员信息
+    rpc UserInfo (UserInfoReq) returns (UserInfoReply);
+    rpc ChangeHistory (ChangeHistoryReq) returns (ChangeHistoryReply);
+    rpc ChangeHistorys (ChangeHistorysReq) returns (ChangeHistorysReply);
+    rpc PanelInfo (PanelInfoReq) returns (PanelInfoReply);
+    rpc GuestPanelInfo (GuestPanelInfoReq) returns (GuestPanelInfoReply);
+    rpc PayOrder (PayOrderReq) returns (PayOrderReply);
+    rpc CreateQr (CreateQrReq) returns (CreateQrReply);
+    rpc CreateGuestQr (CreateGuestQrReq) returns (CreateGuestQrReply);
+    rpc TokenInfo (TokenInfoReq) returns (TokenInfoReply);
+
+    rpc CreateOrder (CreateOrderReq) returns (CreateOrderReply);
+    rpc CreateGuestOrder (CreateGuestOrderReq) returns (CreateGuestOrderReply);
+    rpc RenewVip (RenewVipReq) returns (RenewVipReply);
+
+    rpc YstUserInfo (YstUserInfoReq) returns (YstUserInfoReply);
+    rpc PayCallback (PayCallbackReq) returns (PayCallbackReply);
+    rpc WxContractCallback (WxContractCallbackReq) returns (WxContractCallbackReply);
+}

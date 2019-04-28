@@ -1,0 +1,196 @@
+
+
+version = "2.0.0"
+user = "nobody"
+pid = "/tmp/merlin.pid"
+dir = "./"
+
+
+[bm]
+
+ addr = "0.0.0.0:9001"
+ maxListen = 10000
+ timeout = "1000s"
+
+[httpClient]
+    key = "c05dd4e1638a8af0"
+    secret = "7daa7f8c06cd33c5c3067063c746fdcb"
+    dial = "2s"
+    timeout = "10s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.breaker]
+    window  = "10s"
+    sleep   = "2000ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[deviceFarm]
+hostList = ["10.23.35.200:3000","10.23.35.201:3000","10.23.35.202:3000","10.23.35.203:3000"]
+applyMonthTime = 3
+superOwner = ["fengyifeng","yuanmin"]
+
+[identify]
+ whiteAccessKey = ""
+ whiteMid = 0
+ [identify.app]
+ key = "6a29f8ed87407c11"
+ secret = "d3c5a85f5b895a03735b5d20a273bc57"
+ [identify.memcache]
+ name = "go-business/identify"
+ proto = "tcp"
+ addr = "172.16.33.54:11211"
+ active = 5
+ idle = 1
+ dialTimeout = "2s"
+ readTimeout = "2s"
+ writeTimeout = "2s"
+ idleTimeout = "80s"
+ [identify.host]
+ auth = "http://passport.bilibili.com"
+ secret = "http://open.bilibili.com"
+ [identify.httpClient]
+ key = "f022126a8a365e20"
+ secret = "b7b86838145d634b487e67b811b8fab2"
+ dial = "3000ms"
+ timeout = "2000ms"
+ keepAlive = "60s"
+ [identify.httpClient.breaker]
+ window  = "10s"
+ sleep   = "100ms"
+ bucket  = 10
+ ratio   = 0.5
+ request = 100
+ [identify.httpClient.url]
+ "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+ "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+ "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[paas]
+host = "http://10.23.26.21:8612"
+token = "ngriEorfjzbdyyQ2cdqMYcNxovazPD6Cbte"
+machineTimeout = "CURRENT_TIMESTAMP - INTERVAL 20 MINUTE"
+machineLimitRatio = 4.0
+
+[serviceTree]
+host = "http://easyst.bilibili.co"
+key = "merlin"
+secret = "rhRp[Lfnfrp9Jypr7aaJMGn8NC.[E+Gvb9&nRazs6Mm{fEW98.z9yzV*phu)U97#"
+
+[biliHub]
+host = "https://hub.bilibili.co"
+hostName = "hub.bilibili.co"
+username = "merlin"
+password = ""
+merlinPub = "merlinlibrary"
+sharePub = "merlinpubliclibrary"
+machineTagPri = "merlinprivatelibrary"
+supportNetWork = ["fat"]
+superOwner = ["fengyifeng1","xuneng"]
+
+[mail]
+host = "smtp.exmail.qq.com"
+port = 465
+username = "merlin@bilibili.com"
+password = "Quality1#"
+noticeOwner = ["fengyifeng@bilibili.com"]
+
+
+[Scheduler]
+#每天晚上23点查找第二天将要过期机器放入任务表
+#GetExpiredMachinesTime = "*/15 * * * * ?"
+
+
+getExpiredMachinesTime = "0 0 23 * * ?"
+#每天早上10点查找一周后要过期的机器，并发送邮件
+sendTaskMailMachinesWillExpiredTime = "0 0 10 * * ?"
+expiredDate = 7
+
+#每隔五分钟删除机器
+
+deleteExpiredMachinesInTask =  "*/20 * * * * ?"
+#DeleteExpiredMachinesInTask = "0 */5 * * * ?"
+
+#每隔二十分钟检测机器状态
+
+checkMachinesStatusInTask = "* */50 * * * ?"
+#每天10分钟更新device表
+updateMobileDeviceInTask = "0 */10 * * * ?"
+
+#每10分钟检查快照状态
+updateSnapshotStatusInDoing = "0 */10 * * * ?"
+
+active = false
+
+[orm]
+dsn = "root:123456@tcp(172.18.33.130:3306)/uat-merlin?timeout=200ms&readTimeout=2000ms&writeTimeout=2000ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 5
+idleTimeout = "4h"
+
+[memcache]
+	name = "merlin"
+	proto = "tcp"
+	addr = "172.22.33.137:11216"
+	idle = 5
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "12h"
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "merlin"
+    [auth.DsHTTPClient]
+    key = "merlin"
+    secret = "4fb521f66dfd5efcf6e77d078ed2eb0a"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1ms"
+    timeout = "1ms"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+
+
+    active = 10
+    idle = 10
+    dialTimeout = "1ms"
+    readTimeout = "1ms"
+    writeTimeout = "1ms"
+    idleTimeout = "80s"
+
+[wechat]
+   wechatHost="http://172.16.63.43:8000"
+   [wechat.wechatdevicefarm]
+   chatid="devicefarm"
+   msgtype="text"
+   safe=0
+   senMessage=true

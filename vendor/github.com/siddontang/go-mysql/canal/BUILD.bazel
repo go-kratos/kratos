@@ -1,0 +1,42 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "canal.go",
+        "config.go",
+        "dump.go",
+        "handler.go",
+        "master.go",
+        "rows.go",
+        "sync.go",
+    ],
+    importmap = "go-common/vendor/github.com/siddontang/go-mysql/canal",
+    importpath = "github.com/siddontang/go-mysql/canal",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/BurntSushi/toml:go_default_library",
+        "//vendor/github.com/juju/errors:go_default_library",
+        "//vendor/github.com/satori/go.uuid:go_default_library",
+        "//vendor/github.com/siddontang/go-mysql/client:go_default_library",
+        "//vendor/github.com/siddontang/go-mysql/dump:go_default_library",
+        "//vendor/github.com/siddontang/go-mysql/mysql:go_default_library",
+        "//vendor/github.com/siddontang/go-mysql/replication:go_default_library",
+        "//vendor/github.com/siddontang/go-mysql/schema:go_default_library",
+        "//vendor/github.com/sirupsen/logrus:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,172 @@
+# This is a TOML document. Boom.
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    [identify.app]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    [identify.host]
+    auth = "http://passport.bilibili.com"
+    secret = "http://open.bilibili.com"
+    [identify.httpClient]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "30ms"
+    timeout = "150ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  ="10s"
+    sleep   ="100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[supervisor]
+    On    = true
+    Begin = "2018-01-20T00:00:00+08:00"
+    End   = "2018-01-30T23:59:59+08:00"
+
+[log]
+    dir = "/data/log/space-interface/"
+#[log.syslog]
+#    proto = "udp"
+#    addr = "172.18.19.22:9999"
+#    project = "space"
+#    chanSize = 10240
+
+[app]
+    key = "364a740488811396"
+    secret = "995a63b0bae95afd7d1b0b892d0e14d2"
+
+[HTTPServer]
+addr = "0.0.0.0:6901"
+timeout = "1s"
+
+[mysql]
+    addr = "172.16.33.205"
+    dsn = "space:9TtI2XkoEqk6GpIL@tcp(172.16.33.205:3306)/space?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout = "4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[hbase]
+master = ""
+meta = ""
+dialTimeout = "1s"
+readTimeout = "300ms"
+readsTimeout = "600ms"
+writeTimeout = "200ms"
+writesTimeout = "600ms"
+    [hbase.zookeeper]
+    root = ""
+    addrs = ["10.23.58.154:2181","10.23.58.141:2181","10.23.58.20:2181"]
+    timeout = "30s"
+
+[redis]
+    name = "space/channel"
+    proto = "tcp"
+    addr = "172.16.33.54:6379"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    clExpire = "10m"
+    upArtExpire = "24h"
+    upArcExpire = "24h"
+
+[memcache]
+    proto = "tcp"
+    addr = "127.0.0.1:11211"
+    idle = 10
+    active = 10
+    dialTimeout = "2s"
+    readTimeout = "2s"
+    writeTimeout = "2s"
+    idleTimeout = "80s"
+    expire = "1h"
+    settingExpire = "24h"
+    noticeExpire = "24h"
+    topArcExpire = "24h"
+    mpExpire = "24h"
+    themeExpire = "24h"
+
+[rule]
+    maxChNameLen = 20
+    maxChIntroLen = 60
+    maxChLimit = 10
+    maxChArcLimit = 300
+    MaxChArcAddLimit = 100
+    maxChArcsPs = 100
+    maxRiderPs = 30
+    maxArticlePs = 30
+    chIndexCnt = 5
+    maxNoticeLen = 150
+    maxTopReasonLen = 40
+    maxMpReasonLen = 40
+    maxMpLimit = 3
+    BlackFre="3s"
+
+[httpClient]
+    [httpClient.read]
+    key = "364a740488811396"
+    secret = "995a63b0bae95afd7d1b0b892d0e14d2"
+    dial = "1s"
+    timeout = "300ms"
+    keepAlive = "60s"
+    [httpClient.write]
+    key = "364a740488811396"
+    secret = "995a63b0bae95afd7d1b0b892d0e14d2"
+    dial = "1s"
+    timeout = "2s"
+    keepAlive = "60s"
+    [httpClient.game]
+    key = "EeOpM531WqQnBvu4"
+    secret = "gHtKtXTHZJDqGP1tg9ORFs0YWV3kW12V"
+    dial = "1s"
+    timeout = "500ms"
+    keepAlive = "60s"
+
+[host]
+api = "http://uat-api.bilibili.co"
+bangumi = "http://uat-bangumi.bilibili.com"
+show = "http://uat-show.bilibili.co"
+mall = "http://fat1-mall.bilibili.co"
+apivc = "http://api.vc.bilibili.co"
+apilive = "http://api.live.bilibili.co"
+acc = "http://account.bilibili.co"
+game = "http://api.biligame.com"
+search = "http://s.search.bilibili.co"
+space = "http://space.bilibili.co"
+elec = "http://uat-elec.bilibili.com"
+#appGame = "http://line1-game-open-api.biligame.net"
+
+[routerConfig]
+    [routerConfig.supervisor]
+    On    = true
+    Begin = "2017-10-17T00:00:00+08:00"
+    End   = "2017-10-30T23:59:59+08:00"

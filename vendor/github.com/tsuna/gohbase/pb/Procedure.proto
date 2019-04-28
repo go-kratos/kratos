@@ -1,0 +1,119 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package pb;
+
+option java_package = "org.apache.hadoop.hbase.protobuf.generated";
+option java_outer_classname = "ProcedureProtos";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+import "ErrorHandling.proto";
+
+enum ProcedureState {
+  INITIALIZING = 1;         // Procedure in construction, not yet added to the executor
+  RUNNABLE = 2;             // Procedure added to the executor, and ready to be executed
+  WAITING = 3;              // The procedure is waiting on children to be completed
+  WAITING_TIMEOUT = 4;      // The procedure is waiting a timout or an external event
+  ROLLEDBACK = 5;           // The procedure failed and was rolledback
+  FINISHED = 6;             // The procedure execution is completed. may need a rollback if failed.
+}
+
+/**
+ * Procedure metadata, serialized by the ProcedureStore to be able to recover the old state.
+ */
+message Procedure {
+  // internal "static" state
+  required string class_name = 1;        // full classname to be able to instantiate the procedure
+  optional uint64 parent_id = 2;         // parent if not a root-procedure otherwise not set
+  required uint64 proc_id = 3;
+  required uint64 start_time = 4;
+  optional string owner = 5;
+
+  // internal "runtime" state
+  required ProcedureState state = 6;
+  repeated uint32 stack_id = 7;          // stack indices in case the procedure was running
+  required uint64 last_update = 8;
+  optional uint32 timeout = 9;
+
+  // user state/results
+  optional ForeignExceptionMessage exception = 10;
+  optional bytes result = 11;           // opaque (user) result structure
+  optional bytes state_data = 12;       // opaque (user) procedure internal-state
+
+  // Nonce to prevent same procedure submit by multiple times
+  optional uint64 nonce_group = 13 [default = 0];
+  optional uint64 nonce = 14 [default = 0];
+}
+
+/**
+ * SequentialProcedure data
+ */
+message SequentialProcedureData {
+  required bool executed = 1;
+}
+
+/**
+ * StateMachineProcedure data
+ */
+message StateMachineProcedureData {
+  repeated uint32 state = 1;
+}
+
+/**
+ * Procedure WAL header
+ */
+message ProcedureWALHeader {
+  required uint32 version = 1;
+  required uint32 type = 2;
+  required uint64 log_id = 3;
+  required uint64 min_proc_id = 4;
+}
+
+/**
+ * Procedure WAL trailer
+ */
+message ProcedureWALTrailer {
+  required uint32 version = 1;
+  required uint64 tracker_pos = 2;
+}
+
+message ProcedureStoreTracker {
+  message TrackerNode {
+    required uint64 start_id = 1;
+    repeated uint64 updated = 2;
+    repeated uint64 deleted = 3;
+  }
+
+  repeated TrackerNode node = 1;
+}
+
+message ProcedureWALEntry {
+  enum Type {
+    PROCEDURE_WAL_EOF     = 1;
+    PROCEDURE_WAL_INIT    = 2;
+    PROCEDURE_WAL_INSERT  = 3;
+    PROCEDURE_WAL_UPDATE  = 4;
+    PROCEDURE_WAL_DELETE  = 5;
+    PROCEDURE_WAL_COMPACT = 6;
+  }
+
+  required Type type = 1;
+  repeated Procedure procedure = 2;
+  optional uint64 proc_id = 3;
+}

@@ -1,0 +1,25 @@
+[log]
+    #dir = "/data/log/broadcast-proxy"
+    vlevel = 100
+    stdout = true
+
+[redis]
+	name = "zeus-service"
+	proto = "tcp"
+	addr = ""
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[sven]
+    treeID="80142"
+    zone="sh001"
+    env="dev"
+    build="docker-1"
+    token="e4c1cb219c08daca79a0e6cf55dc0d8c"
+[index]
+    matcher="matcher.json"

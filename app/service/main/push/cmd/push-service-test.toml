@@ -1,0 +1,152 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/push-service.pid"
+dir = "./"
+family = "push-service"
+
+[log]
+    dir = "/data/log/push-service/"
+
+[rpcServer]
+    proto = "tcp"
+    addr = "0.0.0.0:7779"
+
+[grpc]
+    timeout = "1s"
+    addr = "0.0.0.0:9000"
+
+[HTTPServer]
+    addr = "0.0.0.0:7771"
+    maxListen = 1000
+    timeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+
+[HTTPClient]
+    dial      = "50ms"
+    timeout   = "200ms"
+    keepAlive = "60s"
+    key = "f265dcfa28272742"
+    secret = "437facc22dc8698b5544669bcc12348d" 
+    [HTTPClient.breaker]
+    window  ="1s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[apns]
+    poolSize = 200
+    proxy = 0 # 0表示不使用代理
+    proxySocket = "133.130.49.92:9091"
+    timeout = "10s"
+
+[android]
+    poolSize = 50
+    timeout = "30s"
+    pushHuaweiPart = 30
+    miUseVip = 0
+
+[mysql]
+    addr = "172.16.33.205"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_push?timeout=1m&readTimeout=1m&writeTimeout=1m&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 10
+    idle = 5
+    queryTimeout = "1m"
+    execTimeout = "1m"
+    tranTimeout = "1m"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[redis]
+    name = "push-service"
+    proto = "tcp"
+    addr = "172.16.33.54:6379"
+    idle = 1000
+    active = 10000
+    dialTimeout = "10s"
+    readTimeout = "10s"
+    writeTimeout = "10s"
+    idleTimeout = "30s"
+    tokenExpire = "72h"
+    laterExpire = "72h"
+    midsExpire = "72h"
+
+[memcache]
+    name = "push-service"
+    proto = "tcp"
+    addr = "172.18.33.60:11228"
+    idle = 1000
+    active = 1000
+    dialTimeout = "10s"
+    readTimeout = "10s"
+    writeTimeout = "10s"
+    idleTimeout = "30s"
+    settingExpire = "720h"
+    reportExpire = "720h"
+    uuidExpire = "30m"
+
+[reportPub]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret="0QEO9F8JuuIxZzNDvklI"
+    group= "PushReport-Push-P"
+    topic= "PushReport-T"
+    action="pub"
+    name = "push-report-pub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[callbackPub]
+    key = "dbe67e6a4c36f877"
+    secret="6e6eb74cc73f2c8bff02fb40ee57da59"
+    group= "PushCallback-MainCommonArch-P"
+    topic= "PushCallback-T"
+    action="pub"
+    name = "push-callback-pub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[push]
+    pickUpTask = true
+    loadBusinessInteval = "5m"
+    loadTaskInteval = "1s"
+    updateTaskProgressInteval = "5s"
+    pushChanSizeAPNS = 10000
+    pushGoroutinesAPNS = 1000
+    pushChanSizeMi = 10000
+    pushGoroutinesMi = 100
+    pushChanSizeHuawei = 10000
+    pushGoroutinesHuawei = 100
+    pushChanSizeOppo = 10000
+    pushGoroutinesOppo = 100
+    pushChanSizeJpush = 10000
+    pushGoroutinesJpush = 100
+    pushChanSizeFCM = 10000
+    pushGoroutinesFCM = 100
+    passThrough = 1
+    retryTimes = 3
+    pushPartInterval = "1s"
+    pushPartChanSize = 10
+    pushPartSize = 1000
+    callbackSize = 3 # callback 聚合数
+    callbackChanLen = 1024000
+    callbackGoroutines = 10
+    upimgURL = "http://uat-api.bilibili.co/x/internal/upload/admin/image"
+    upimgMaxSize = 1048576 # 允许上传的最大图片 字节数
+    updateTaskProgressProc = 10

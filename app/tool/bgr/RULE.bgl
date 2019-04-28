@@ -1,0 +1,16 @@
+// 请填写禁止规则
+
+T expr.call.decl.comment
+V (?im)^\s*deprecated
+L e
+D 禁止调用Deprecated方法
+
+T stmt.label
+V .*
+L w
+D 请谨慎使用Label
+
+//T decl.func.comment
+//V Deprecated
+//L w
+//D 禁止声明Deprecated方法

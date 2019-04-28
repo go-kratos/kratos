@@ -1,0 +1,101 @@
+[log]
+    stdout = true
+
+[db.origin]
+    addr = "172.16.33.205:3306"
+    dsn = "aso:hA0DAnENNFz78kYB@tcp(172.16.33.205:3306)/aso?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "1s"
+    execTimeout = "2s"
+    tranTimeout = "2s"
+    [db.origin.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+[db.user]
+    addr = "127.0.0.1:3306"
+    dsn = "root:root@tcp(127.0.0.1:3306)/passport_user?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "1s"
+    execTimeout = "2s"
+    tranTimeout = "2s"
+    [db.user.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+[db.secret]
+    addr = "127.0.0.1:3306"
+    dsn = "root:root@tcp(127.0.0.1:3306)/passport_secret?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "1s"
+    execTimeout = "2s"
+    tranTimeout = "2s"
+    [db.secret.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+[db.auth]
+    addr = "127.0.0.1:3306"
+    dsn = "root:root@tcp(127.0.0.1:3306)/passport_auth?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "1s"
+    execTimeout = "2s"
+    tranTimeout = "2s"
+    [db.auth.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[redis]
+    expire = "300s"
+	name = "passport-login-interface"
+    proto = "tcp"
+    addr = ""
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[memcache.auth]
+    expire = "24h"
+	name = "passport-login-interface"
+	proto = "tcp"
+	addr = "172.18.33.61:11246"
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+[memcache.user]
+    expire = "24h"
+	name = "passport-login-interface"
+	proto = "tcp"
+	addr = "172.22.33.137:11219"
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+
+[dc]
+    num = 1
+    desc = "data center 1"
+
+[switch]
+    supportOld = true

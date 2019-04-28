@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- guhao
+- liangkai
+- renwei
+labels:
+- interface
+- interface/main/dm
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- guhao
+- liangkai
+- renwei
+- renyashun

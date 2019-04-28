@@ -1,0 +1,88 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/push-strategy.pid"
+dir = "./"
+family = "push-strategy"
+
+[log]
+    dir = "/data/log/push-strategy/"
+
+[httpClient]
+    key = "f265dcfa28272742"
+    secret = "437facc22dc8698b5544669bcc12348d"
+    dial = "500ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[HTTPServer]
+    addr = "0.0.0.0:7561"
+    maxListen = 1000
+    timeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+
+[mysql]
+    addr = "172.16.33.205"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_push?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 10
+    idle = 5
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[redis]
+    name = "push-strategy"
+    proto = "tcp"
+    addr = "172.18.33.60:6968"
+    idle = 1000
+    active = 10000
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "30s"
+    limitDayExpire = "24h"
+
+[memcache]
+    name = "push-strategy"
+    proto = "tcp"
+    addr = "172.18.33.60:11228"
+    idle = 1000
+    active = 1000
+    dialTimeout = "10s"
+    readTimeout = "10s"
+    writeTimeout = "10s"
+    idleTimeout = "30s"
+    uuidExpire = "30m"
+    cdExpire = "1h"
+
+[wechat]
+    token = "GYQeuDWBbAsCNeGz"
+    secret = "ZKpmgINTkianyMbMixyxcPQjMCSHCDrk"
+    username = "xxxxxxxxyyyyyyyyyy"
+
+[bizID]
+    live = 1
+    archive = 2
+
+[cfg]
+    loadTaskInteval = "1s"
+    loadBusinessInteval = "5m"
+    loadSettingsInteval = "1m"
+    nasPath = "/data/storage"
+    limitUserPerDay = 8
+    handleTaskGoroutines = 100
+    handleMidGoroutines = 5
+    cacheSize = 1024000

@@ -1,0 +1,180 @@
+syntax = "proto3";
+
+package ticket.service.sales.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+message Promo{
+    int64 promo_id = 1 [(gogoproto.jsontag) = "promo_id", (gogoproto.customname)= "PromoID"];
+    int32 type = 2 [(gogoproto.jsontag) = "type", (gogoproto.casttype) = "int16"];
+    int64 item_id = 3 [(gogoproto.jsontag) = "item_id", (gogoproto.customname)= "ItemID"];
+    int64 sku_id = 4 [(gogoproto.jsontag) = "sku_id", (gogoproto.customname)= "SKUID"];
+    int64 extra = 5 [(gogoproto.jsontag) = "extra"];
+    int64 expire_sec = 6 [(gogoproto.jsontag) = "expire_sec"];
+    int64 sku_count = 7 [(gogoproto.jsontag) = "sku_count", (gogoproto.customname)= "SKUCount"];
+    int64 amount = 8 [(gogoproto.jsontag) = "amount"];
+    int64 buyer_count = 9 [(gogoproto.jsontag) = "buyer_count"];
+    int64 begin_time = 10 [(gogoproto.jsontag) = "begin_time"];
+    int64 end_time = 11 [(gogoproto.jsontag) = "end_time"];
+    int32 status = 12 [(gogoproto.jsontag) = "status", (gogoproto.casttype) = "int16"];
+    int64 ctime = 13 [(gogoproto.jsontag) = "ctime"];
+    int64 mtime = 14 [(gogoproto.jsontag) = "mtime"];
+    int64 priv_sku_id = 15 [(gogoproto.jsontag) = "priv_sku_id", (gogoproto.customname)= "PrivSKUID"];
+    string usable_coupons = 16 [(gogoproto.jsontag) = "usable_coupons"];
+}
+
+message PromoGroup {
+    int64 promo_id = 1 [(gogoproto.jsontag) = "promo_id", (gogoproto.customname)= "PromoID"];
+    int64 group_id = 2 [(gogoproto.jsontag) = "group_id", (gogoproto.customname)= "GroupID"];
+    int64 uid = 3 [(gogoproto.jsontag) = "uid", (gogoproto.customname)= "UID"];
+    int64 order_count = 4 [(gogoproto.jsontag) = "order_count"];
+    int32 status =5 [(gogoproto.jsontag) = "status", (gogoproto.casttype) = "int16"];
+    int64 expire_at = 6 [(gogoproto.jsontag) = "expire_at"];
+    int64 ctime = 7 [(gogoproto.jsontag) = "ctime"];
+    int64 mtime = 8 [(gogoproto.jsontag) = "mtime"];
+}
+
+message PromoOrder {
+	int64 promo_id = 1 [(gogoproto.jsontag) = "promo_id", (gogoproto.customname)= "PromoID"];
+	int64 group_id = 2 [(gogoproto.jsontag) = "group_id", (gogoproto.customname)= "GroupID"];
+	int64 order_id = 3 [(gogoproto.jsontag) = "order_id", (gogoproto.customname)= "OrderID"];
+	int32 is_master = 4 [(gogoproto.jsontag) = "is_master", (gogoproto.casttype) = "int16"];
+	int64 uid = 5 [(gogoproto.jsontag) = "uid", (gogoproto.customname)= "UID"];
+	int32 status = 6 [(gogoproto.jsontag) = "status", (gogoproto.casttype) = "int16"];
+	int64 ctime = 7 [(gogoproto.jsontag) = "ctime"];
+	int64 mtime = 8 [(gogoproto.jsontag) = "mtime"];
+	int64 sku_id = 9 [(gogoproto.jsontag) = "sku_id", (gogoproto.customname)= "SKUID"];
+}
+
+message CreatePromoRequest{
+    int64 promo_id = 1 [(gogoproto.jsontag) = "promo_id",(gogoproto.moretags) = "form:\"promo_id\" validate:\"required\"", (gogoproto.customname)= "PromoID"];
+    int32 type = 2 [(gogoproto.jsontag) = "type",(gogoproto.moretags) = "form:\"type\"", (gogoproto.casttype) = "int16"];
+    int64 item_id = 3 [(gogoproto.jsontag) = "item_id",(gogoproto.moretags) = "form:\"item_id\" validate:\"required\"", (gogoproto.customname)= "ItemID"];
+    int64 sku_id = 4 [(gogoproto.jsontag) = "sku_id",(gogoproto.moretags) = "form:\"sku_id\" validate:\"required\"", (gogoproto.customname)= "SKUID"];
+    int64 extra = 5 [(gogoproto.jsontag) = "extra",(gogoproto.moretags) = "form:\"extra\" validate:\"required\""];
+    int64 expire_sec = 6 [(gogoproto.jsontag) = "expire_sec",(gogoproto.moretags) = "form:\"expire_sec\" validate:\"required\""];
+    int64 sku_count = 7 [(gogoproto.jsontag) = "sku_count",(gogoproto.moretags) = "form:\"sku_count\" validate:\"required\"", (gogoproto.customname)= "SKUCount"];
+    int64 amount = 8 [(gogoproto.jsontag) = "amount",(gogoproto.moretags) = "form:\"amount\" validate:\"required\""];
+    int64 buyer_count = 9 [(gogoproto.jsontag) = "buyer_count",(gogoproto.moretags) = "form:\"buyer_count\" validate:\"required\""];
+    int64 begin_time = 10 [(gogoproto.jsontag) = "begin_time",(gogoproto.moretags) = "form:\"begin_time\" validate:\"required\""];
+    int64 end_time = 11 [(gogoproto.jsontag) = "end_time",(gogoproto.moretags) = "form:\"end_time\" validate:\"required\""];
+    int64 priv_sku_id = 12 [(gogoproto.jsontag) = "priv_sku_id",(gogoproto.moretags) = "form:\"priv_sku_id\"", (gogoproto.customname)= "PrivSKUID"];
+    string usable_coupons = 13 [(gogoproto.jsontag) = "usable_coupons",(gogoproto.moretags) = "form:\"usable_coupons\""];
+}
+
+message OperatePromoRequest{
+    int64 promo_id = 1 [(gogoproto.jsontag) = "promo_id",(gogoproto.moretags) = "form:\"promo_id\" validate:\"required\"", (gogoproto.customname)= "PromoID"];
+    int32 operate_type = 2 [(gogoproto.jsontag) = "operate_type",(gogoproto.moretags) = "form:\"operate_type\" validate:\"required\"", (gogoproto.casttype) = "int16"];
+}
+
+message CheckCreatePromoOrderRequest{
+	int64 uid = 1 [(gogoproto.jsontag) = "uid",(gogoproto.moretags) = "form:\"uid\" validate:\"required\"", (gogoproto.customname)= "UID"];
+	int64 sku_id = 2 [(gogoproto.jsontag) = "sku_id",(gogoproto.moretags) = "form:\"sku_id\" validate:\"required\"", (gogoproto.customname)= "SKUID"];
+	int64 promo_id = 3 [(gogoproto.jsontag) = "promo_id",(gogoproto.moretags) = "form:\"promo_id\" validate:\"required\"", (gogoproto.customname)= "PromoID"];
+	int64 group_id = 4 [(gogoproto.jsontag) = "group_id",(gogoproto.moretags) = "form:\"group_id\"", (gogoproto.customname)= "GroupID"];
+}
+
+message RepeatOrder{
+    int64 order_id = 1 [(gogoproto.jsontag) = "order_id", (gogoproto.customname)= "OrderID"];
+    int32 is_master = 2 [(gogoproto.jsontag) = "is_master", (gogoproto.casttype) = "int16"];
+    int32 status = 3 [(gogoproto.jsontag) = "status", (gogoproto.casttype) = "int16"];
+}
+
+message CheckCreatePromoOrderResponse{
+    int64 amount = 1 [(gogoproto.jsontag) = "amount"];
+    int64 sku_id = 2 [(gogoproto.jsontag) = "sku_id", (gogoproto.customname)= "SKUID"];
+    int64 priv_sku_id = 3 [(gogoproto.jsontag) = "priv_sku_id", (gogoproto.customname)= "PrivSKUID"];
+    string usable_coupons = 4 [(gogoproto.jsontag) = "usable_coupons"];
+	RepeatOrder repeat_order = 5 [(gogoproto.jsontag) = "repeat_order"];
+}
+
+message CreatePromoOrderRequest{
+    int64 promo_id = 1 [(gogoproto.jsontag) = "promo_id",(gogoproto.moretags) = "form:\"promo_id\" validate:\"required\"", (gogoproto.customname)= "PromoID"];
+    int64 order_id = 2 [(gogoproto.jsontag) = "order_id",(gogoproto.moretags) = "form:\"order_id\" validate:\"required\"", (gogoproto.customname)= "OrderID"];
+    int64 group_id = 3 [(gogoproto.jsontag) = "group_id",(gogoproto.moretags) = "form:\"group_id\"", (gogoproto.customname)= "GroupID"];
+    int64 uid = 4 [(gogoproto.jsontag) = "uid",(gogoproto.moretags) = "form:\"uid\" validate:\"required\"", (gogoproto.customname)= "UID"];
+    int64 promo_sku_id = 5 [(gogoproto.jsontag) = "promo_sku_id",(gogoproto.moretags) = "form:\"promo_sku_id\" validate:\"required\"", (gogoproto.customname)= "PromoSKUID"];
+    int64 ctime = 6 [(gogoproto.jsontag) = "ctime",(gogoproto.moretags) = "form:\"ctime\" validate:\"required\""];
+    int64 pay_money = 7 [(gogoproto.jsontag) = "pay_money",(gogoproto.moretags) = "form:\"pay_money\""];
+}
+
+message CommonResponse {
+    int64 res = 1 [(gogoproto.jsontag) = "res"];
+}
+
+message PromoID{
+    int64 promo_id = 1 [(gogoproto.jsontag) = "promo_id",(gogoproto.moretags) = "form:\"promo_id\" validate:\"required\"", (gogoproto.customname)= "PromoID"];
+}
+
+message OrderID{
+    int64 order_id = 1 [(gogoproto.jsontag) = "order_id",(gogoproto.moretags) = "form:\"order_id\" validate:\"required\"", (gogoproto.customname)= "OrderID"];
+}
+
+message GroupID{
+    int64 group_id = 1 [(gogoproto.jsontag) = "group_id",(gogoproto.moretags) = "form:\"group_id\" validate:\"required\"", (gogoproto.customname)= "GroupID"];
+}
+
+message GetPromoGroupInfoRequest{
+    int64 order_id = 1 [(gogoproto.jsontag) = "order_id",(gogoproto.moretags) = "form:\"order_id\" validate:\"required\"", (gogoproto.customname)= "OrderID"];
+}
+
+message GetPromoGroupInfoResponse {
+    int64 promo_id = 1 [(gogoproto.jsontag) = "promo_id", (gogoproto.customname)= "PromoID"];
+    int64 sku_count = 2 [(gogoproto.jsontag) = "sku_count", (gogoproto.customname)= "SKUCount"];
+    int64 amount = 3 [(gogoproto.jsontag) = "amount"];
+    int64 group_id = 4 [(gogoproto.jsontag) = "group_id", (gogoproto.customname)= "GroupID"];
+    int64 order_count = 5 [(gogoproto.jsontag) = "order_count"];
+    int64 expire_at = 6 [(gogoproto.jsontag) = "expire_at"];
+    int32 status = 7 [(gogoproto.jsontag) = "status", (gogoproto.casttype) = "int16"];
+    int64 ctime = 8 [(gogoproto.jsontag) = "ctime"];
+}
+
+message CheckIssueResponse {
+    int64 promo_id = 1 [(gogoproto.jsontag) = "promo_id", (gogoproto.customname)= "PromoID"];
+    int64 group_id = 2 [(gogoproto.jsontag) = "group_id", (gogoproto.customname)= "GroupID"];
+    repeated OrderID paid_orders = 3 [(gogoproto.jsontag) = "paid_orders"];
+}
+
+message FinishIssueRequest {
+    int64 promo_id = 1 [(gogoproto.jsontag) = "promo_id",(gogoproto.moretags) = "form:\"promo_id\" validate:\"required\"", (gogoproto.customname)= "PromoID"];
+    int64 group_id = 2 [(gogoproto.jsontag) = "group_id",(gogoproto.moretags) = "form:\"group_id\" validate:\"required\"", (gogoproto.customname)= "GroupID"];
+}
+
+message GroupFailedRequest {
+    int64 group_id = 1 [(gogoproto.jsontag) = "group_id",(gogoproto.moretags) = "form:\"group_id\" validate:\"required\"", (gogoproto.customname)= "GroupID"];
+    int64 cancel_num = 2 [(gogoproto.jsontag) = "cancel_num",(gogoproto.moretags) = "form:\"cancel_num\" validate:\"required\""];
+}
+
+message EditPromoRequest {
+    int64 promo_id = 1 [(gogoproto.jsontag) = "promo_id",(gogoproto.moretags) = "form:\"promo_id\" validate:\"required\"", (gogoproto.customname)= "PromoID"];
+    int64 amount = 2 [(gogoproto.jsontag) = "amount",(gogoproto.moretags) = "form:\"amount\""];
+    int64 expire_sec = 3 [(gogoproto.jsontag) = "expire_sec",(gogoproto.moretags) = "form:\"expire_sec\""];
+    int64 begin_time = 4 [(gogoproto.jsontag) = "begin_time",(gogoproto.moretags) = "form:\"begin_time\""];
+    int64 end_time = 5 [(gogoproto.jsontag) = "end_time",(gogoproto.moretags) = "form:\"end_time\""];
+    int64 priv_sku_id = 6 [(gogoproto.jsontag) = "priv_sku_id",(gogoproto.moretags) = "form:\"priv_sku_id\"", (gogoproto.customname)= "PrivSKUID"];
+    string usable_coupons = 7 [(gogoproto.jsontag) = "usable_coupons",(gogoproto.moretags) = "form:\"usable_coupons\""];
+    int64 sku_count = 8 [(gogoproto.jsontag) = "sku_count",(gogoproto.moretags) = "form:\"sku_count\"", (gogoproto.customname)= "SKUCount"];
+}
+
+service Promotion{
+    rpc CreatePromo(CreatePromoRequest) returns(PromoID){};
+    rpc GetPromo(PromoID) returns(Promo){};
+    rpc OperatePromo(OperatePromoRequest) returns(CommonResponse){};
+    rpc EditPromo(EditPromoRequest) returns(CommonResponse){};
+
+    rpc GetPromoGroupInfo(GetPromoGroupInfoRequest) returns(GetPromoGroupInfoResponse){};
+    rpc GroupFailed(GroupFailedRequest) returns(GroupID){};
+
+    rpc CheckCreateStatus(CheckCreatePromoOrderRequest) returns (CheckCreatePromoOrderResponse){};
+    rpc CreatePromoOrder(CreatePromoOrderRequest) returns(OrderID){};
+    rpc PromoPayNotify(OrderID) returns(OrderID){};
+    rpc CancelOrder(OrderID) returns(OrderID){};
+    rpc CheckIssue(OrderID) returns(CheckIssueResponse){};
+    rpc FinishIssue(FinishIssueRequest) returns(GroupID){};
+    rpc PromoRefundNotify(OrderID) returns(OrderID){};
+}

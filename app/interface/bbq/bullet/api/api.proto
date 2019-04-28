@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+package bbq.interface.bullet.v1;
+
+option go_package = "api";
+option (gogoproto.goproto_getters_all) = false;
+
+message DataReport {
+	string app = 1 [(gogoproto.jsontag) = "mobi_app", (gogoproto.moretags)='form:"mobi_app"'];
+	string client = 2 [(gogoproto.jsontag) = "platform", (gogoproto.moretags)='form:"platform"'];
+	string version = 3 [(gogoproto.jsontag) = "version", (gogoproto.moretags)='form:"version"'];
+	string channel = 4 [(gogoproto.jsontag) = "channel", (gogoproto.moretags)='form:"channel"'];
+	string location = 5 [(gogoproto.jsontag) = "location", (gogoproto.moretags)='form:"location"'];
+	string query_id = 6 [(gogoproto.jsontag) = "query_id", (gogoproto.moretags)='form:"query_id"'];
+	string buvid = 7 [(gogoproto.jsontag) = "buvid", (gogoproto.moretags)='form:"buvid"'];
+	int64 svid = 8 [(gogoproto.jsontag) = "svid", (gogoproto.moretags)='form:"oid"'];
+	int32 total_duration = 9 [(gogoproto.jsontag) = "total_duration", (gogoproto.moretags)='form:"total_duration"'];
+	int32 play_duration = 10 [(gogoproto.jsontag) = "duration", (gogoproto.moretags)='form:"duration"'];
+	int32 data_type = 11 [(gogoproto.jsontag) = "data_type", (gogoproto.moretags)='form:"data_type"'];
+	int32 page = 12 [(gogoproto.jsontag) = "page_id", (gogoproto.moretags)='form:"page_id"'];
+	int32 module = 13 [(gogoproto.jsontag) = "module_id", (gogoproto.moretags)='form:"module_id"'];
+}
+
+message ListBulletReq {
+	int64 	oid 			= 1 [(gogoproto.moretags)='form:"oid"'];
+	int32 	start_ms 		= 2 [(gogoproto.moretags)='form:"start_ms"'];
+	int32 	end_ms 			= 3 [(gogoproto.moretags)='form:"end_ms"'];
+	string 	cursor_next 	= 4 [(gogoproto.moretags)='form:"cursor_next"'];
+	int64 	mid 			= 5;
+}
+
+message Bullet {
+	int64 	id 				= 1;
+	int64 	oid				= 2[(gogoproto.moretags)='form:"oid"'];
+	int64 	mid 			= 3[(gogoproto.jsontag) = "mid", (gogoproto.moretags)='form:"mid"'];
+	int32 	offset_ms 		= 4[(gogoproto.jsontag) = "offset_ms", (gogoproto.moretags)='form:"offset_ms"'];
+	int32 	offset 			= 5;
+	string 	content 		= 6[(gogoproto.jsontag) = "content", (gogoproto.moretags)='form:"content"'];
+	string 	cursor_value	= 7[(gogoproto.jsontag) = "cursor_value,omitempty"];
+}
+
+message ListBulletReply {
+	bool 			has_more 	= 1 [(gogoproto.jsontag) = "has_more"];
+	repeated Bullet list 		= 2 [(gogoproto.jsontag) = "list,omitempty"];
+}
+

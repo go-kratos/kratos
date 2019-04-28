@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package live.webucenter;
+option go_package = "http";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+
+service User {
+    // 根据uid查询用户信息
+    // `midware:"auth"`
+    rpc get_user_info (GetInfoReq) returns (GetInfoResp);
+}
+
+// GetInfoReq get user info req, uid and platform get from header.metadata
+message GetInfoReq {
+    // platform in url
+    string platform = 1 [(gogoproto.moretags) = 'form:"platform"'];
+}
+
+// GetInfoResp
+message GetInfoResp {
+    // 用户uid
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 用户名
+    string uname = 2 [(gogoproto.jsontag) = "uname"];
+    // 头像
+    string face = 3 [(gogoproto.jsontag) = "face"];
+    // 主站硬币
+    double coin = 4 [(gogoproto.jsontag) = "billCoin"];
+    // 用户银瓜子
+    int64 silver = 5 [(gogoproto.jsontag) = "silver"];
+    // 用户金瓜子
+    int64 gold = 6 [(gogoproto.jsontag) = "gold"];
+    // 用户成就点
+    int64 achieve = 7 [(gogoproto.jsontag) = "achieve"];
+    // 月费姥爷
+    int32 vip = 8 [(gogoproto.jsontag) = "vip", (gogoproto.casttype) = "int"];
+    // 年费姥爷
+    int32 svip = 9 [(gogoproto.jsontag) = "svip", (gogoproto.casttype) = "int"];
+    // 用户等级
+    int64 user_level = 10 [(gogoproto.jsontag) = "user_level"];
+    // 用户下一等级
+    int64 user_next_level = 11 [(gogoproto.jsontag) = "user_next_level"];
+    // 用户在当前等级已经获得的经验
+    int64 user_intimacy = 12 [(gogoproto.jsontag) = "user_intimacy"];
+    // 用户从当前等级升级到下一级所需总经验
+    int64 user_next_intimacy = 13 [(gogoproto.jsontag) = "user_next_intimacy"];
+    // 新增字段，判断用户是否达到满级 0:没有1:满级
+    int64 is_level_top = 14 [(gogoproto.jsontag) = "is_level_top"];
+    // 用户等级排名
+    string user_level_rank = 15 [(gogoproto.jsontag) = "user_level_rank"];
+    // 年返逻辑，已失效
+    int32 user_charged = 16 [(gogoproto.jsontag) = "user_charged", (gogoproto.casttype) = "int"];
+}

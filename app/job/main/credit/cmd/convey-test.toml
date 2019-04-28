@@ -1,0 +1,141 @@
+# This is a TOML document. Boom.
+version = "1.0.0"
+
+[xlog]
+dir = "/data/log/credit-job/"
+
+[bm]
+    addr = "0.0.0.0:6335"
+    timeout = "1s"
+
+[host]
+apiCoURI = "http://api.bilibili.co"
+accountCoURI = "http://account.bilibili.co"
+msgCoURI = "http://message.bilibili.co"
+
+[app]
+key    = "903f486ae7dc87fa"
+secret = "6b03fa3e00334166ba3659e2c04201fc"
+
+[databus]
+[databus.creditDBSub]
+key = "0QHEzXlXE9Ijewj8V4zu"
+secret = "0QHEzXlXE9Ijewj8V4zv"
+group = "BlockedBinlog-UGC-S"
+topic = "Blocked-T"
+action = "sub"
+offset = "old"
+buffer = 2048
+name = "credit-job/credit-db-sub"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[databus.replyAllSub]
+key = "875d05ffa843e297"
+secret = "24d052bae2247fc59ee925d46ffd61e2"
+group = "Reply-MainAccountLaw-S"
+topic = "Reply-T"
+action = "sub"
+offset = "old"
+buffer = 2048
+name = "credit-job/reply-all-sub"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[databus.labourSub]
+key = "875d05ffa843e297"
+secret = "24d052bae2247fc59ee925d46ffd61e2"
+group = "Credit-MainAccountLaw-P"
+topic = "Credit-T"
+action = "pub"
+offset = "new"
+buffer = 2048
+name = "credit-job/labour-sub"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[rpcClient]
+[rpcClient.archive]
+timeout = "1s"
+[rpcClient.member]
+timeout = "1s"
+
+[httpClient]
+key    = "903f486ae7dc87fa"
+secret = "6b03fa3e00334166ba3659e2c04201fc"
+dial      = "100ms"
+timeout   = "1s"
+keepAlive = "60s"
+    [httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[mysql]
+addr = "172.16.33.205:3306"
+dsn = "blocked:mUdFycLKSbvPgdE28lCveqN77SqsGOmy@tcp(172.16.33.205:3306)/blocked?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 2
+IdleTimeout ="4h"
+queryTimeout = "1s"
+execTimeout = "1s"
+tranTimeout = "2s"
+[mysql.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+
+[memcache]
+name = "credit-job"
+proto = "tcp"
+# addr = "172.16.33.54:11211"
+addr = "172.18.33.60:11219"
+idle = 5
+active = 10
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "24h"
+
+[redis]
+name = "credit"
+proto = "tcp"
+# addr = "172.16.33.54:6379"
+addr = "172.18.33.60:6893"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "720h"
+
+[clearPath]
+juryInfoCache = "http://blocked.bilibili.co/x/credit/cache/jury/del"
+
+[judge]
+confTimer="120s"
+reservedTime="600s" 

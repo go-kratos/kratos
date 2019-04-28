@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package sms.service.model;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "model";
+
+message ModelTemplate {
+    int64 id = 1 [(gogoproto.customname) = "ID", (gogoproto.moretags) = 'json:"id"'];
+    string code = 2 [(gogoproto.moretags) = 'json:"code"'];
+    string template = 3 [(gogoproto.moretags) = 'json:"template"'];
+    int32 stype = 4 [(gogoproto.moretags) = 'json:"stype"'];
+    int32 status = 5 [(gogoproto.moretags) = 'json:"status"'];
+    string approver = 6 [(gogoproto.moretags) = 'json:"approver"'];
+    string submitter = 7 [(gogoproto.moretags) = 'json:"submitter"'];
+    repeated string param = 8 [(gogoproto.moretags) = 'json:"param" gorm:"-"'];
+    int64 ctime = 9 [(gogoproto.moretags) = 'json:"ctime" gorm:"column:ctime"', (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 10 [(gogoproto.moretags) = 'json:"mtime" gorm:"column:mtime"', (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message ModelSend {
+    int64 id = 1 [(gogoproto.customname) = "ID"];
+    string mid = 2;
+    string mobile = 3;
+    string country = 4;
+    string code = 5;
+    string content = 6;
+    int32 status = 7;
+    int32 type = 8;
+    int32 pid = 9;
+}
+
+message ModelUserActionLog {
+    string msgid = 1 [(gogoproto.customname) = "MsgID"];
+    string mobile = 2;
+    string content = 3;
+    string status = 4;
+    string desc = 5;
+    int32 provider = 6;
+    int32 type = 7;
+    int32 action = 8;
+    int64 ts = 9;
+}
+
+message ModelTask {
+    int64 id = 1 [(gogoproto.customname) = "ID"];
+    int32 type = 2;
+    int32 business_id = 3 [(gogoproto.customname) = "BusinessID"];
+    string template_code = 4;
+    string template_content = 5 [(gogoproto.moretags) = 'gorm:"-"'];
+    string desc = 6;
+    string file_name = 7;
+    string file_path = 8;
+    int64 send_time = 9 [(gogoproto.casttype) = "go-common/library/time.Time"];
+    int32 status = 10;
+    int64 ctime = 11 [(gogoproto.moretags) = 'gorm:"column:ctime"', (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 12 [(gogoproto.moretags) = 'gorm:"column:mtime"', (gogoproto.casttype) = "go-common/library/time.Time"];
+}

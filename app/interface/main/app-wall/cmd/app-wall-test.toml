@@ -1,0 +1,233 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user    = "nobody"
+pid     = "/tmp/app-wall.pid"
+dir     = "./"
+family = "app-wall"
+checkFile = "/data/www/wall.html"
+
+tick    = "1m"
+
+[unicomuserInfoc2]
+taskID = "000242"
+proto = "tcp"
+addr = ""
+chanSize = 10240
+
+[unicomipInfoc2]
+taskID = "000243"
+proto = "tcp"
+addr = ""
+chanSize = 10240
+
+[unicomPackInfoc]
+taskID = "000918"
+proto = "tcp"
+addr = ""
+chanSize = 10240
+
+[host]
+apiCo               = "http://uat-api.bilibili.co"
+dotin               = "http://svr.dotinapp.com"
+live                = "http://inner.live.bilibili.co"
+apiLive             = "http://api.live.bilibili.co"
+telecom             = "https://open.fg.21cn.com"
+unicom              = "http://123.125.99.7:9001"
+unicomFlow          = "http://open.10010.com"
+broadband           = "http://114.255.201.238:8092"
+sms                 = "http://uat-api.bilibili.co"
+mall                = "http://uat-mall.bilibili.co"
+telecomReturnURL    = "http://www.bilibili.com/blackboard/preview/activity-telecom2017.html?biliStatus=1"
+telecomCancelPayURL = "http://www.bilibili.com/blackboard/preview/activity-telecom2017.html"
+
+[log]
+Dir = "/data/log/app-wall/"
+	[log.syslog]
+        project  = "app-wall"
+        proto    = "udp"
+        addr     = "172.18.19.22:9999"
+        chansize = 10240
+
+[statsd]
+project  = "app-wall"
+addr     = "172.18.20.15:8200"
+chanSize = 1024
+
+[app]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+
+[httpClient]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "500ms"
+timeout   = "2s"
+keepAlive = "60s"
+timer     = 10
+    [httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpTelecom]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "500ms"
+timeout   = "50s"
+keepAlive = "60s"
+timer     = 10
+    [httpTelecom.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[HTTPBroadband]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "500ms"
+timeout   = "4s"
+keepAlive = "60s"
+timer     = 10
+    [HTTPBroadband.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[HTTPUnicom]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "500ms"
+timeout   = "4s"
+keepAlive = "60s"
+timer     = 10
+    [HTTPUnicom.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpActive]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "500ms"
+timeout   = "2s"
+keepAlive = "60s"
+timer     = 10
+    [httpActive.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[bm]
+    [bm.outer]
+    addr = "0.0.0.0:6251"
+    timeout = "5s"
+    readTimeout = "5s"
+    writeTimeout = "5s"
+
+[mysql]
+    [mysql.show]
+    addr   = "172.16.33.205:3308"
+    dsn    = "test:test@tcp(172.16.33.205:3308)/bilibili_show?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle   = 2
+    idleTimeout ="4h"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [mysql.show.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+
+[seq]
+    businessID =1
+    token      ="Y1zHA2esXfd2T6bc1VRHkFWryD01Aswi"
+
+[seqRPC]
+    pullInterval = "10s"
+    timeout = "200ms"
+
+[iplimit]
+mobileIPFile = "/data/conf/operate/mobileip.txt"
+[iplimit.addrs]
+	unicom  = ["127.0.0.1", "111.206.133.54", "114.255.201.224", "111.206.133.34", "111.8.57.60", "111.197.4.233"]
+    telecom = ["127.0.0.1"]
+
+[redis]
+	[redis.recommend]
+	name   = "app-show/recommend"
+	proto  = "tcp"
+	addr   = "172.16.33.54:6380"
+	active = 20
+	idle   = 10
+	dialTimeout  = "50ms"
+	readTimeout  = "100ms"
+	writeTimeout = "100ms"
+	idleTimeout  = "80s"
+	expire = "2h"
+
+[memcache]
+	[memcache.operator]
+	name   = "app-show/archive"
+	proto  = "tcp"
+	addr   = "172.16.33.54:11213"
+	active = 50
+	idle   = 10
+	dialTimeout  = "50ms"
+	readTimeout  = "100ms"
+	writeTimeout = "100ms"
+	idleTimeout  = "80s"
+	expire = "1s"
+
+[reddot]
+    starttime="2018-02-26 00:00:00"
+    endtime="2028-02-26 00:00:00"
+
+[unicom]
+    keyExpired = "1s"
+    flowWait = "60s"
+
+[telecom]
+    keyExpired = "5m"
+    payKeyExpired = "5m"
+    smsTemplate = "app-wall-01"
+    smsMsgTemplate = "app-wall-04"
+    smsFlowTemplate = "app-wall-03"
+    smsOrderTemplateOK = "app-wall-02"
+    flowPercentage = 10
+    [telecom.area]
+    area=["CN50","CN44","CN31","CN43","CN14","CN13","CN45","CN35","CN37","CN46","CN64","CN23","CN62","CN63","CN15","CN21","CN41","CN36","CN12","CN42","CN53"]
+    # 重庆 CN50
+    # 广东 CN44
+    # 上海 CN31
+    # 湖南 CN43
+    # 山西 CN14
+    # 河北 CN13
+    # 广西 CN45
+    # 福建 CN35
+    # 山东 CN37
+    # 海南 CN46
+    # 宁夏 CN64
+    # 黑龙江 CN23
+    # 甘肃 CN62
+    # 青海 CN63
+    # 内蒙 CN15
+    # 辽宁 CN21
+    # 河南 CN41
+    # 江西 CN36
+    # 天津 CN12
+    # 湖北 CN42
+    # 云南 CN53

@@ -1,0 +1,44 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "comment.go",
+        "enum.go",
+        "extensions.go",
+        "field.go",
+        "group.go",
+        "import.go",
+        "message.go",
+        "oneof.go",
+        "option.go",
+        "package.go",
+        "parser.go",
+        "proto.go",
+        "range.go",
+        "reserved.go",
+        "service.go",
+        "syntax.go",
+        "token.go",
+        "visitor.go",
+        "walk.go",
+    ],
+    importmap = "go-common/vendor/github.com/emicklei/proto",
+    importpath = "go-common/app/admin/ep/melloi/service/proto",
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

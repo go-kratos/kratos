@@ -1,0 +1,37 @@
+// 定义项目 API 的 proto 文件 可以同时描述 gRPC 和 HTTP API
+// protobuf 文件参考:
+//  - https://developers.google.com/protocol-buffers/
+//  - http://info.bilibili.co/display/documentation/gRPC+Proto
+// protobuf 生成 HTTP 工具:
+//  - http://git.bilibili.co/platform/go-common/tree/master/app/tool/protoc-gen-bm
+syntax = "proto3";
+
+// package 命名使用 {discovery_id}.{version} 的方式, version 形如 v1, v2, v1beta ..
+// NOTE: 不知道的 discovery_id 请询问大佬, 新项目找大佬申请 discovery_id，先到先得抢注
+// e.g. account.service.v1
+package live.zeus.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// NOTE: 最后请删除这些无用的注释 (゜-゜)つロ 
+
+option go_package = "v1";
+
+service Zeus {
+    // `method:"POST"`
+    rpc Match(MatchRequest) returns (MatchResponse);
+}
+
+message MatchRequest {
+    string group = 1 [(gogoproto.jsontag) = "group"];
+    string platform = 2 [(gogoproto.jsontag) = "platform"];
+    string version = 3 [(gogoproto.jsontag) = "version"];
+    uint64 build = 4 [(gogoproto.jsontag) = "build"];
+    string buvid = 5 [(gogoproto.jsontag) = "buvid"];
+    uint64 uid = 6 [(gogoproto.jsontag) = "uid"];
+}
+
+message MatchResponse {
+    bool is_match = 1 [(gogoproto.jsontag) = "is_match"];
+    string extend = 2 [(gogoproto.jsontag) = "extend"];
+}

@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package gift.v0;
+
+option go_package = "v0";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Smalltv {
+    
+    /** 开启抽奖的内部接口
+     * 返回的是广播的内容列表
+     */   
+    rpc start (SmalltvStartReq) returns (SmalltvStartResp);
+}
+
+
+
+message SmalltvStartReq {
+    // 用户id
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 房间号
+    int64 roomid = 2 [(gogoproto.jsontag) = "roomid"];
+    // 道具id
+    int64 gift_id = 3 [(gogoproto.jsontag) = "gift_id"];
+    // 道具个数
+    int64 num = 4 [(gogoproto.jsontag) = "num"];
+    // 业务id
+    int64 tid = 5 [(gogoproto.jsontag) = "tid"];
+    // 公告样式id
+    int64 style_id = 6 [(gogoproto.jsontag) = "style_id"];
+}
+
+message SmalltvStartResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    repeated MSG data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message MSG {
+        // 
+        string cmd = 1 [(gogoproto.jsontag) = "cmd"];
+        // 
+        string msg = 2 [(gogoproto.jsontag) = "msg"];
+        // 
+        string msg_text = 3 [(gogoproto.jsontag) = "msg_text"];
+        // 
+        string msg_common = 4 [(gogoproto.jsontag) = "msg_common"];
+        // 
+        string msg_self = 5 [(gogoproto.jsontag) = "msg_self"];
+        // 
+        int64 rep = 6 [(gogoproto.jsontag) = "rep"];
+        // 
+        int64 styleType = 7 [(gogoproto.jsontag) = "styleType"];
+        // 
+        string url = 8 [(gogoproto.jsontag) = "url"];
+        // 
+        int64 roomid = 9 [(gogoproto.jsontag) = "roomid"];
+        // 
+        int64 real_roomid = 10 [(gogoproto.jsontag) = "real_roomid"];
+        // 
+        int64 rnd = 11 [(gogoproto.jsontag) = "rnd"];
+        // 
+        int64 broadcast_type = 12 [(gogoproto.jsontag) = "broadcast_type"];
+    }
+}

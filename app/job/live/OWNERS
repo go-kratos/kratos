@@ -1,0 +1,12 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- lidongyang
+- liuzhen
+- xiehaishen
+- yangbaibing
+- zhaohailin
+labels:
+- job
+- live
+- new-project

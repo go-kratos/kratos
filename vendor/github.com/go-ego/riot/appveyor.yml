@@ -1,0 +1,42 @@
+version: "{build}"
+image: 'Visual Studio 2017'
+# platform: x64
+
+clone_folder: c:\gopath\src\github.com\go-ego\riot
+# max_jobs: 1
+
+environment:
+  global:
+    GOPATH: C:\gopath
+    # CC: gcc.exe
+  matrix:
+    - GOARCH: amd64
+    # - GOARCH: 386
+  GOVERSION: 1.10.3
+  # GOPATH: c:\gopath
+
+install:
+  - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
+  - git submodule update --init
+  - rmdir C:\go /s /q
+  - appveyor DownloadFile https://storage.googleapis.com/golang/go%GOVERSION%.windows-%GOARCH%.zip
+  - 7z x go%GOVERSION%.windows-%GOARCH%.zip -y -oC:\ > NUL
+  - go version
+  - go env
+  # - gcc --version  
+
+# To run your custom scripts instead of automatic MSBuild
+build_script:
+  # We need to disable firewall - https://github.com/appveyor/ci/issues/1579#issuecomment-309830648
+  - ps: Disable-NetFirewallRule -DisplayName 'File and Printer Sharing (SMB-Out)'
+  - cd c:\gopath\src\github.com\go-ego\riot
+  - git branch
+  - go get -t ./...
+
+# To run your custom scripts instead of automatic tests
+test_script:
+  # Unit tests
+  - ps: Add-AppveyorTest "Unit Tests" -Outcome Running
+  # - go test -u github.com/go-ego/riot/...
+  - go test -v github.com/go-ego/riot/...
+  - ps: Update-AppveyorTest "Unit Tests" -Outcome Passed

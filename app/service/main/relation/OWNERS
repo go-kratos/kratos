@@ -1,0 +1,15 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- linmiao
+- zhaoyixuan
+- zhoujiahui
+labels:
+- main
+- service
+- service/main/relation
+options:
+  no_parent_owners: true
+reviewers:
+- linmiao
+- zhoujiahui

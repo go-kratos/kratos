@@ -1,0 +1,197 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/article-job.pid"
+env="dev" # dev or pro
+dir = "./"
+perf = "0.0.0.0:6413"
+family = "article-job"
+
+[xlog]
+    dir = "/data/log/article-job/"
+
+[tracer]
+    proto = "udp"
+    addr = "172.18.21.30:5140"
+    tag = "platform/article-job"
+
+[app]
+    key = "9cfc54570033cd61"
+    secret = "9d63835fa38fe58a62d9f49ef5da296f"
+
+[SMS]
+    phone = "11111111111,11111111111"
+    token = "token"
+
+[bm]
+     addr = "0.0.0.0:6741"
+     timeout = "1s"
+
+[HTTPClient]
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    key = "9cfc54570033cd61"
+    secret = "9d63835fa38fe58a62d9f49ef5da296f"
+    [HTTPClient.breaker]
+    window  ="10s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[GameHTTPClient]
+    key = "b336ebf10107c212"
+    secret = "ZadQSt7mCo9nwVu03SwKDEpgSlRBVtFc"
+    dial      = "50ms"
+    timeout   = "1s"
+    keepAlive = "60s"
+    [GameHTTPClient.breaker]
+    window  ="10s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[articleSub]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret = "0QEO9F8JuuIxZzNDvklI"
+    group = "Article-Binlog-S"
+    topic = "Article-T"
+    action = "sub"
+    name = "article-job/article-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[articleStatSub]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret = "0QEO9F8JuuIxZzNDvklI"
+    group = "ArticleStat-Article-S"
+    topic = "ArticleStat-T"
+    action = "sub"
+    name = "article-job/article-stat-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[LikeStatSub]
+    key = "9765cdac5894f2ba"
+    secret = "1448f5f2cd6029f6af6c5d438cd31edd"
+    group = "LikesBinlog-MainWebSvr-S"
+    topic = "LikesBinlog-T"
+    action = "sub"
+    name = "article-job/article-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[DynamicDbus]
+    key = "9765cdac5894f2ba"
+    secret = "1448f5f2cd6029f6af6c5d438cd31edd"
+    group= "CommTemplate-MainWebSvr-P"
+    topic= "CommTemplate-T"
+    action="pub"
+    name = "article/article-pub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[articleRPC]
+    pullInterval = "10s"
+    [articleRPC.client]
+    token = "123456"
+    proto = "tcp"
+    timeout = "1s"
+    timer = 1000
+    [articleRPC.client.breaker]
+    window  ="10s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [articleRPC.zookeeper]
+    root = "/microservice/article-service/"
+    addrs =  ["172.16.33.54:2181"]
+    timeout = "30s"
+
+[tagRPC]
+    pullInterval = "10s"
+    [tagRPC.client]
+    proto = "tcp"
+    addr = "172.16.33.56:6099"
+    timeout = "1s"
+    timer = 1000
+    [tagRPC.client.breaker]
+    window  ="10s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [tagRPC.zookeeper]
+    root = "/microservice/tag-service/"
+    addrs = ["172.16.33.54:2181"]
+    timeout = "30s"
+
+[db]
+    name = "172.16.0.148:3306"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_article?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[redis]
+    name = "article-job/views"
+    proto = "tcp"
+    addr = "127.0.0.1:6379"
+    active = 10
+    idle = 2
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[cheatInfoc]
+taskID = "1"
+proto = "tcp"
+addr = "127.0.0.1:80"
+chanSize = 10240
+
+[job]
+    viewCacheTTL = "30m"
+    dupViewCacheTTL = "30m"
+    updateDbInterval = "2m"
+    GameCacheExpire = "5m"
+    UpdateSortInterval = "1s"
+    HotspotInterval = "1m"
+    HotspotForceInterval = "30m"
+    actLikeURL = "http://matsuri.bilibili.co/matsuri/api/article/like"
+    FlowURL = "http://uat-archive.api.bilibili.co/videoup/flow/entry/mid"

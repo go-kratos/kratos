@@ -1,0 +1,45 @@
+syntax = "proto3";
+ 
+/*
+ * v0.1.0
+ * 收藏夹信息
+ */
+package model;
+ 
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true; 
+
+ 
+message Folder {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 Mid = 2 [(gogoproto.jsontag) = "mid"];
+    int32 Count = 3 [(gogoproto.jsontag) = "count",(gogoproto.casttype) = "int"];
+    string Name = 4 [(gogoproto.jsontag) = "name"];
+    string Cover = 5 [(gogoproto.jsontag) = "cover"];
+    string Description = 6 [(gogoproto.jsontag) = "description"];
+    int32 Type = 7 [(gogoproto.jsontag) = "type",(gogoproto.casttype) = "int8"];
+    int32 Attr = 8 [(gogoproto.jsontag) = "attr"];
+    int32 State = 9 [(gogoproto.jsontag) = "state",(gogoproto.casttype) = "int8"];    
+    int32 Favored = 10 [(gogoproto.jsontag) = "favored",(gogoproto.casttype) = "int8"]; 
+    int64 CTime = 11 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 12 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    repeated int64 RecentOids = 13 [(gogoproto.jsontag) = "recent_oids"];
+	int32 FavedCount  = 14 [(gogoproto.jsontag) = "faved_count"];
+	int32 PlayCount  = 15 [(gogoproto.jsontag) = "play_count"];
+	int32 ShareCount  = 16 [(gogoproto.jsontag) = "share_count"];
+	int32 LikeCount  = 17 [(gogoproto.jsontag) = "like_count"];
+	int32 ReplyCount  = 18 [(gogoproto.jsontag) = "reply_count"];
+	repeated  Resource RecentRes  = 19 [(gogoproto.jsontag) = "recent_res"];
+}
+
+message Resource {
+	int64 Oid = 1[(gogoproto.jsontag) = "oid"];
+	int32 Typ = 2[(gogoproto.jsontag) = "typ"];
+}

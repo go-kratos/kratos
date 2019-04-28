@@ -1,0 +1,91 @@
+[mysql]
+	addr = "127.0.0.1:3306"
+	dsn = "test:test@tcp(127.0.0.1:3306)/bilibili_ugcpay?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "100ms"
+	execTimeout = "100ms"
+	tranTimeout = "200ms"
+
+[memcache]
+	name = "ugcpay"
+	proto = "tcp"
+	addr = "172.22.33.137:11217"
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	active = 50
+	idle = 10
+	idleTimeout = "10s"
+
+[memcacheRank]
+	name = "ugcpay-rank"
+	proto = "tcp"
+	addr = "172.22.33.137:11220"
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[redis]
+	name = "ugcpay"
+	proto = "tcp"
+	addr = "172.22.33.137:6836"
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	active = 50
+	idle = 10
+	idleTimeout = "10s"
+
+[BinlogMQ]
+    key = "4ba46ba31f9a44ef"
+    secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+    group = "UgcpayBinlog-MainAccount-S"
+    topic = "UgcpayBinlog-T"
+    action = "sub"
+    buffer = 2048
+    name = "ugcpay-job/databus"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 2
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[Biz]
+	RunCASTimes = 3
+	AccountUserMin = -20000
+	[Biz.Cron]
+		TaskDailyBill = "@every 1h"
+		TaskAccountUser = "@every 1h"
+		TaskAccountBiz = "@every 1h"
+		TaskMonthlyBill = "@every 1h"
+		TaskRechargeShell = "@every 1h"
+	[Biz.Tax]
+		AssetRate = 0.05
+	[Biz.Pay]
+		ID = "10017"
+		Token = "310f84dcc88ec8a0a9247f3b75b93614"
+		CheckOrderURL    = "http://pay-mng.bilibili.co/reco/bills/queryByTxIds"
+		CheckRefundOrderURL = "http://pay-mng.bilibili.co/reco/refundbills/queryByTxIds"
+		RechargeShellURL = "http://pay.bilibili.co/bk-int/brokerage/rechargeBrokerage"
+		RechargeCallbackURL = "http://api.bilibili.co/x/internal/ugcpay/trade/pay/recharge/callback"
+		OrderQueryURL = "http://pay.bilibili.com/payplatform/pay/query"
+	[Biz.Task]
+		DailyBillPrefix = "TaskBillDaily"
+		DailyBillOffset = -1
+		AccountUserPrefix = "TaskAccountUser"
+		AccountBizPrefix = "TaskAccountBiz"
+		MonthBillPrefix = "TaskBillMonthly"
+		MonthBillOffset = -1
+		RechargeShellPrefix = "TaskRechargeShell"
+		RechargeShellOffset = -1
+[CacheTTL]
+	TaskTTL = 72000

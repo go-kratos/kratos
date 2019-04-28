@@ -1,0 +1,53 @@
+// 此服务为账号内部服务，禁止所有外部服务调用
+// 账号外部业务请使用identify service
+syntax = "proto3";
+package passport.service.auth.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// GetCookieInfoReq request param for rpc CookieInfo
+message GetCookieInfoReq {
+    // all user cookie of HTTP request
+    // example: 'SESSDATA=DEE4597D836A5A9DA29DFC1AB1EFFDEB;sid=exampleSID'
+    string cookie = 1;
+}
+
+// GetCookieInfoReply reply val for rpc CookieInfo
+message GetCookieInfoReply {
+    // 用户是否登录
+    bool is_login = 1 [(gogoproto.jsontag) = "is_login"];
+    // user mid
+    int64 mid = 2 [(gogoproto.jsontag) = "mid"];
+    // cookie csrf
+    // when token reqest this field is empty
+    string csrf = 3 [(gogoproto.jsontag) = "csrfToken"];
+    // expire time(unix timestamp)
+    int64 expires = 4 [(gogoproto.jsontag) = "expires"];
+}
+
+// GetTokenInfoReq request param for rpc TokenInfo
+message GetTokenInfoReq {
+    // user access token
+    string token = 1;
+}
+
+// GetTokenInfoReply reply val for rpc TokenInfo
+message GetTokenInfoReply {
+    // 用户是否登录
+    bool is_login = 1 [(gogoproto.jsontag) = "is_login"];
+    // user mid
+    int64 mid = 2 [(gogoproto.jsontag) = "mid"];
+    // cookie csrf
+    // when token reqest this field is empty
+    string csrf = 3 [(gogoproto.jsontag) = "csrfToken"];
+    // expire time(unix timestamp)
+    int64 expires = 4 [(gogoproto.jsontag) = "expires"];
+}
+
+service Auth {
+    // GetCookieInfo verify user info by cookie.
+    rpc GetCookieInfo (GetCookieInfoReq) returns (GetCookieInfoReply);
+    // GetTokenInfo verify user info by token.
+    rpc GetTokenInfo (GetTokenInfoReq) returns (GetTokenInfoReply);
+}

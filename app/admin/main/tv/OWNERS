@@ -1,0 +1,23 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- gukai
+- liweijia
+- renwei
+- zhaogangtao
+- zhaoshichen
+labels:
+- admin
+- admin/main/tv
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- guanyanliang
+- gukai
+- liweijia
+- renwei
+- shenpeng
+- wuhao
+- zhaogangtao
+- zhaoshichen

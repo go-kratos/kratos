@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chengfei01
+- shengpeng
+- zhaogangtao
+labels:
+- main
+- service
+- service/main/tv
+options:
+  no_parent_owners: true
+reviewers:
+- chengfei01
+- shengpeng
+- shenpeng

@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+// use {app_id}.{version} as package name
+package resource.service.v1;
+
+// specify golang package name
+option go_package = "v1";
+
+// The greeting service definition.
+service Resource {
+    //相关推荐列表
+    //-400:RequestErr -404:NothingFound
+    rpc Relate(RelateRequest) returns (SpecialReply){};
+}
+
+//相关推荐请求参数
+message RelateRequest{
+    //pgc seasonID
+    int64 id = 1;
+    string mobi_app = 2;
+    string device = 3;
+    int32 build = 4;
+}
+
+message SpecialReply{
+    //主键id
+    int64 id = 1;
+    //特殊卡片标题
+    string title = 2;
+    //特殊卡片描述
+    string desc = 3;
+    //特殊卡片单列封面
+    string cover = 4;
+    //特殊卡片双列封面
+    string scover = 5;
+    //跳转类型 URL:0 游戏小卡:1 稿件:2 番剧:3 直播:4 专栏:6 每日精选:7 歌单:8 歌曲:9 相簿:10 小视频:11
+    int32 re_type = 6;
+    //跳转参数
+    string re_value = 7;
+    //角标文字
+    string corner = 8;
+    //卡片类型 1特殊小卡 2特殊大卡 3置顶卡片
+    int32 card = 9;
+    //特殊大卡参数 如果是1020*300则封面比例为34 如果是1020*378则封面比例为27
+    string siz = 10;
+    //位置
+    int32 position = 11;
+}

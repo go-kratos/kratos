@@ -1,0 +1,76 @@
+syntax = "proto3";
+package passport.interface.login;
+option go_package = "model";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message CookieProto {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    string Session = 2 [(gogoproto.jsontag) = "session"];
+    string CSRF = 3 [(gogoproto.jsontag) = "csrf"];
+    int64 Type = 4 [(gogoproto.jsontag) = "type"];
+    int64 Expires = 5 [(gogoproto.jsontag) = "expires"];
+}
+
+message TokenProto {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    int64 AppID = 2 [(gogoproto.jsontag) = "appid"];
+    string Token = 3 [(gogoproto.jsontag) = "token"];
+    int64 Type = 4 [(gogoproto.jsontag) = "type"];
+    int64 Expires = 5 [(gogoproto.jsontag) = "expires"];
+}
+
+message RefreshProto {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    int64 AppID = 2 [(gogoproto.jsontag) = "appid"];
+    string Refresh = 3 [(gogoproto.jsontag) = "refresh"];
+    string Token = 4 [(gogoproto.jsontag) = "token"];
+    int64 Expires = 5 [(gogoproto.jsontag) = "expires"];
+}
+
+message UserBaseProto {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    string UserID = 2 [(gogoproto.jsontag) = "userid"];
+    bytes Pwd = 3 [(gogoproto.jsontag) = "pwd"];
+    string Salt = 4 [(gogoproto.jsontag) = "salt"];
+    int32 Status = 5 [(gogoproto.jsontag) = "status"];
+}
+
+message UserEmailProto {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    bytes Email = 2 [(gogoproto.jsontag) = "email"];
+    int32 Verified = 3 [(gogoproto.jsontag) = "verified"];
+    int64 EmailBindTime = 4 [(gogoproto.jsontag) = "email_bind_time"];
+}
+
+message UserTelProto {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    bytes Tel = 2 [(gogoproto.jsontag) = "tel"];
+    string Cid = 3 [(gogoproto.jsontag) = "cid"];
+    int64 TelBindTime = 4 [(gogoproto.jsontag) = "tel_bind_time"];
+}
+
+message UserRegOriginProto {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    int64 JoinIP = 2 [(gogoproto.jsontag) = "join_ip"];
+    int64 JoinTime = 3 [(gogoproto.jsontag) = "join_time"];
+    int32 Origin = 4 [(gogoproto.jsontag) = "origin"];
+    int32 RegType = 5 [(gogoproto.jsontag) = "reg_type"];
+    int64 AppID = 6 [(gogoproto.jsontag) = "appid"];
+}
+
+message UserSafeQuestionProto {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    int32 SafeQuestion = 2 [(gogoproto.jsontag) = "safe_question"];
+    bytes SafeAnswer = 3 [(gogoproto.jsontag) = "safe_answer"];
+    int64 SafeBindTime = 4 [(gogoproto.jsontag) = "safe_bind_time"];
+}
+
+message UserThirdBindProto {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 Mid = 2 [(gogoproto.jsontag) = "mid"];
+    string OpenID = 3 [(gogoproto.jsontag) = "openid"];
+    int64 PlatForm = 4 [(gogoproto.jsontag) = "platform"];
+    string Token = 5 [(gogoproto.jsontag) = "token"];
+    int64 Expires = 6 [(gogoproto.jsontag) = "expires"];
+}

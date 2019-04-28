@@ -1,0 +1,21 @@
+syntax = "proto3";
+package live.xcaptcha.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// XCaptcha
+service Captcha {
+    // 验证码校验 `internal:"true"`
+    rpc verify (XVerifyReq) returns (XVerifyResp);
+}
+
+message XVerifyReq {
+    string _anti = 1 [(gogoproto.moretags) = 'form:"_anti" validate:"required"'];
+    int64 uid = 2 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+    string client_ip = 3 [(gogoproto.moretags) = 'form:"client_ip"'];
+}
+
+message XVerifyResp {
+}
+

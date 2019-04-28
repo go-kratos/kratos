@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package live_user.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service UserSetting {
+    
+    /** 移动端首页获取用户关注标签
+     * 
+     */   
+    rpc get_tag (UserSettingGetTagReq) returns (UserSettingGetTagResp);
+}
+
+
+
+message UserSettingGetTagReq {
+    
+}
+
+message UserSettingGetTagResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Tags {
+        // tag id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // tag name
+        string name = 2 [(gogoproto.jsontag) = "name"];
+        // 标签图标
+        string pic = 3 [(gogoproto.jsontag) = "pic"];
+        // 是否为推荐标签 1是 0否
+        int64 is_advice = 4 [(gogoproto.jsontag) = "is_advice"];
+        // 父分区id
+        int64 parent_id = 5 [(gogoproto.jsontag) = "parent_id"];
+        // 父分区名
+        string parent_name = 6 [(gogoproto.jsontag) = "parent_name"];
+        // 活动id
+        int64 act_id = 7 [(gogoproto.jsontag) = "act_id"];
+    }
+       
+    message OfflineTags {
+        // 标签id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 标签名称
+        string name = 2 [(gogoproto.jsontag) = "name"];
+    }
+       
+    message Data {
+        // 常用标签列表
+        repeated Tags tags = 1 [(gogoproto.jsontag) = "tags"];
+        // 下线被删除的标签
+        repeated OfflineTags offline = 2 [(gogoproto.jsontag) = "offline"];
+        // 用户id
+        int64 uid = 3 [(gogoproto.jsontag) = "uid"];
+        // 是否灰度 1代表灰度 0不灰也就是不可见
+        int64 is_gray = 4 [(gogoproto.jsontag) = "is_gray"];
+    }
+}

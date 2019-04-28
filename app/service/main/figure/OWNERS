@@ -1,0 +1,15 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- muyang
+- zhaogangtao
+labels:
+- main
+- service
+- service/main/figure
+options:
+  no_parent_owners: true
+reviewers:
+- linmiao
+- muyang
+- zhaogangtao

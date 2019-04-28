@@ -1,0 +1,53 @@
+syntax = "proto3";
+package model;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message DM {
+	int64 ID = 1 [(gogoproto.jsontag) = "id"];
+	int32 Type = 2 [(gogoproto.jsontag) = "type"];
+	int64 Oid = 3 [(gogoproto.jsontag) = "oid"];
+    int64 Mid = 4 [(gogoproto.jsontag) = "mid"];
+	int32 Progress = 5 [(gogoproto.jsontag) = "progress"];
+	int32 Pool = 6 [(gogoproto.jsontag) = "pool"];
+    int32 Attr = 7 [(gogoproto.jsontag) = "attr"];
+	int32 State = 8 [(gogoproto.jsontag) = "state"];
+	int64 Ctime = 9 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+	int64 Mtime = 10 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    Content Content = 11 [(gogoproto.jsontag) = "content,omitempty"];
+    ContentSpecial ContentSpe = 12 [(gogoproto.jsontag) = "content_special,omitempty"];
+}
+
+message Content {
+	int64 ID = 1 [(gogoproto.jsontag) = "id"];
+	int32 FontSize = 2 [(gogoproto.jsontag) = "fontsize"];
+	int64 Color = 3 [(gogoproto.jsontag) = "color"];
+	int32 Mode = 4 [(gogoproto.jsontag) = "mode"];
+	int64 IP = 5 [(gogoproto.jsontag) = "ip"];
+	int32 Plat = 6 [(gogoproto.jsontag) = "plat"];
+	string Msg = 7 [(gogoproto.jsontag) = "msg"];
+	int64 Ctime = 8 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+	int64 Mtime = 9 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message ContentSpecial {
+	int64 ID = 1 [(gogoproto.jsontag) = "id"];
+	string Msg = 2 [(gogoproto.jsontag) = "msg"];
+	int64 Ctime = 3 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+	int64 Mtime = 4 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message Elem {
+    string Attribute = 1 [(gogoproto.jsontag) = "attribute,omitempty"];
+    string Content = 2 [(gogoproto.jsontag) = "content,omitempty"];
+}
+
+message DMSeg {
+    repeated Elem Elems = 1 [(gogoproto.jsontag) = "dms"];
+    repeated string SpecialURL = 2 [(gogoproto.jsontag) = "special_url,omitempty"];
+}

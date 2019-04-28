@@ -1,0 +1,80 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/appstatic-job.pid"
+dir = "./"
+perf = "0.0.0.0:7020"
+family = "appstatic-job"
+
+[log]
+    dir = "/data/log/appstatic-job/"
+    stdout = true
+
+[cfg]
+    [cfg.diff]
+        FreDiff = "30s"
+        folder = "/tmp"
+        Retry = "5 MINUTE"
+    [cfg.push]
+        qps = 1000
+        operation = 1001
+        url = "http://api.bilibili.co/x/internal/broadcast/push/all"
+        timeout = 30
+        fre = "2s"
+        Pause = "2s"
+    [cfg.grpc]
+        ApiAppID = "app.resource"
+        Method = "/app.resource.v1.AppResource/ModuleUpdateCache"
+
+[HTTPServer]
+    addr = "0.0.0.0:7021"
+    maxListen = 1000
+    timeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+
+[HTTPClient]
+    dial      = "1s"
+    timeout   = "3s"
+    keepAlive = "60s"
+    key = "f265dcfa28272742"
+    secret = "437facc22dc8698b5544669bcc12348d"
+    [HTTPClient.breaker]
+    window  ="10s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[mysql]
+    addr = "172.16.33.205"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_show?timeout=1m&readTimeout=1m&writeTimeout=1m&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 10
+    idle = 5
+    queryTimeout = "1m"
+    execTimeout = "1m"
+    tranTimeout = "1m"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[redis]
+        name = "appstatic-job"
+        proto = "tcp"
+        addr = "172.18.33.61:6895"
+        active = 10
+        idle = 5
+        dialTimeout = "1s"
+        readTimeout = "1s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+        expire = "24h"
+
+[bfs]
+    key    = "fed7d6b5948c614f"
+    secret = "280e9140721cff3879cd13f59fc28a"
+    host   = "http://uat-bfs.bilibili.co"
+    timeout = 1000
+

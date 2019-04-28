@@ -1,0 +1,87 @@
+syntax = "proto3";
+package account.service.relation;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "model";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message Tag {
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    int64 status = 3 [(gogoproto.jsontag) = "status"];
+    int64 ctime = 4 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time", (gogoproto.customname) = "CTime"];
+    int64 mtime = 5 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time", (gogoproto.customname) = "MTime"];
+}
+message Tags {
+   map<int64,Tag>  tags= 1 ;
+}
+message TagUser {
+    int64 fid = 1 [(gogoproto.jsontag) = "fid"];
+    repeated int64 tag = 2 [(gogoproto.jsontag) = "tag"];
+    int64 ctime = 3 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time", (gogoproto.customname) = "CTime"];
+    int64 mtime = 4 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time", (gogoproto.customname) = "MTime"];
+}
+
+message TagCount {
+    int64 tagid = 1 [(gogoproto.jsontag) = "tagid"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    int64 count = 3 [(gogoproto.jsontag) = "count"];
+}
+
+message TagCountList {
+    repeated TagCount tag_count_list = 1;
+}
+
+message Following {
+    int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+    uint32 attribute = 2 [(gogoproto.jsontag) = "attribute"];
+    uint32 source = 3 [(gogoproto.jsontag) = "-"];
+    int64 ctime = 4 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time", (gogoproto.customname) = "CTime"];
+    int64 mtime = 5 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time", (gogoproto.customname) = "MTime"];
+    repeated int64 tag = 6 [(gogoproto.jsontag) = "tag"];
+    int32 special = 7 [(gogoproto.jsontag) = "special"];
+}
+
+message FollowingList {
+    repeated Following following_list = 1;
+}
+message Stat {
+    int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+    int64 following = 2 [(gogoproto.jsontag) = "following"];
+    int64 whisper = 3 [(gogoproto.jsontag) = "whisper"];
+    int64 black = 4 [(gogoproto.jsontag) = "black"];
+    int64 follower = 5 [(gogoproto.jsontag) = "follower"];
+    int64 ctime = 6 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time", (gogoproto.customname) = "CTime"];
+    int64 mtime = 7 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time", (gogoproto.customname) = "MTime"];
+}
+
+message FollowingTags {
+    uint32 attr = 1 [(gogoproto.jsontag) = "attr"];
+    int64 ts = 2 [(gogoproto.jsontag) = "ts", (gogoproto.casttype) = "go-common/library/time.Time"];
+    repeated int64 tag_ids = 3 [(gogoproto.jsontag) = "tag"];
+    int32 special =4 [(gogoproto.jsontag) = "special"];
+}
+
+message GlobalRec {
+    repeated int64 fids = 1 [(gogoproto.jsontag) = "fids"];
+}
+
+message RelationLog {
+    int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+    int64 fid = 2 [(gogoproto.jsontag) = "fid"];
+    int64 ts = 3 [(gogoproto.jsontag) = "ts"];
+    uint32 source = 4 [(gogoproto.jsontag) = "source"];
+    string ip = 5 [(gogoproto.jsontag) = "ip"];
+    string buvid = 6 [(gogoproto.jsontag) = "buvid"];
+    uint32 from_attr = 7 [(gogoproto.jsontag) = "from_attr"];
+    uint32 to_attr = 8 [(gogoproto.jsontag) = "to_attr"];
+    uint32 from_rev_attr = 9 [(gogoproto.jsontag) = "from_rev_attr"];
+    uint32 to_rev_attr = 10 [(gogoproto.jsontag) = "to_rev_attr"];
+    map<string, string> content = 11 [(gogoproto.jsontag) = "content"];
+}

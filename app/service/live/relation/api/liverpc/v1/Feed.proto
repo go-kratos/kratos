@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+package relation.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Feed {
+    
+    /** 获取粉丝数
+     * 根据uid获取用户的粉丝数
+     */   
+    rpc GetUserFc (FeedGetUserFcReq) returns (FeedGetUserFcResp);
+    
+    /** 获取粉丝数
+     * 根据uid批量获取用户的粉丝数
+     */   
+    rpc GetUserFcBatch (FeedGetUserFcBatchReq) returns (FeedGetUserFcBatchResp);
+    
+    /** 获取关注列表
+     * 根据uid获取用户的关注列表
+     */   
+    rpc get_attention_list (FeedGetAttentionListReq) returns (FeedGetAttentionListResp);
+}
+
+
+
+message FeedGetUserFcReq {
+    // 用户uid
+    int64 follow = 1 [(gogoproto.jsontag) = "follow"];
+}
+
+message FeedGetUserFcResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    Data data = 4 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        int64 fc = 1 [(gogoproto.jsontag) = "fc"];
+    }
+}
+
+
+
+message FeedGetUserFcBatchReq {
+    // 用户uid
+    repeated int64 uids = 1 [(gogoproto.jsontag) = "uids"];
+}
+
+message FeedGetUserFcBatchResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    map<int64, RelationList> data = 4 [(gogoproto.jsontag) = "data"];
+       
+    message RelationList {
+        // 
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 
+        int64 fc = 2 [(gogoproto.jsontag) = "fc"];
+    }
+}
+
+
+
+message FeedGetAttentionListReq {
+    // 用户uid
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+}
+
+message FeedGetAttentionListResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    Data data = 4 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        repeated string list = 1 [(gogoproto.jsontag) = "list"];
+    }
+}

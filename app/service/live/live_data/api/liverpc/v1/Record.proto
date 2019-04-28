@@ -1,0 +1,266 @@
+syntax = "proto3";
+
+package live_data.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Record {
+    
+    /** sessionid批量获取动态直播卡片详情
+     * 
+     */   
+    rpc session (RecordSessionReq) returns (RecordSessionResp);
+    
+    /** roomid批量获取最近开播时间
+     * 
+     */   
+    rpc get (RecordGetReq) returns (RecordGetResp);
+    
+    /** roomid批量获取某一时间段的直播记录
+     * 
+     */   
+    rpc liveTime (RecordLiveTimeReq) returns (RecordLiveTimeResp);
+    
+    /** 外网：根据登录态获取某月份有直播记录的分区列表;内网：需要传roomid
+     * 
+     */   
+    rpc areas (RecordAreasReq) returns (RecordAreasResp);
+    
+    /** 外网：根据登录态获取某分区、月份的直播记录;内网：需要传roomid
+     * 
+     */   
+    rpc areaLive (RecordAreaLiveReq) returns (RecordAreaLiveResp);
+    
+    /** 外网：根据登录态获取某天的直播记录;内网：需要传roomid
+     * 
+     */   
+    rpc dayLive (RecordDayLiveReq) returns (RecordDayLiveResp);
+}
+
+
+
+message RecordSessionReq {
+    // sessionid
+    repeated int64 sessionids = 1 [(gogoproto.jsontag) = "sessionids"];
+}
+
+message RecordSessionResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    map<int64, LiveInfo> data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message LiveInfo {
+        // 
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 
+        int64 roomid = 2 [(gogoproto.jsontag) = "roomid"];
+        // 
+        int64 uid = 3 [(gogoproto.jsontag) = "uid"];
+        // 
+        string title = 4 [(gogoproto.jsontag) = "title"];
+        // 
+        string cover = 5 [(gogoproto.jsontag) = "cover"];
+        // 
+        string user_cover = 6 [(gogoproto.jsontag) = "user_cover"];
+        // 
+        int64 online = 7 [(gogoproto.jsontag) = "online"];
+        // 
+        string jump_url = 8 [(gogoproto.jsontag) = "jump_url"];
+        // 
+        int64 area_v2_id = 9 [(gogoproto.jsontag) = "area_v2_id"];
+        // 
+        string start_time = 10 [(gogoproto.jsontag) = "start_time"];
+        // 
+        string end_time = 11 [(gogoproto.jsontag) = "end_time"];
+        // 
+        int64 sessionid = 12 [(gogoproto.jsontag) = "sessionid"];
+    }
+}
+
+
+
+message RecordGetReq {
+    // 房间id数组
+    repeated int64 roomids = 1 [(gogoproto.jsontag) = "roomids"];
+}
+
+message RecordGetResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    map<string, TimeInfo> data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message TimeInfo {
+        // 房间
+        int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+        // 最近开播时间
+        string recent_end_time = 2 [(gogoproto.jsontag) = "recent_end_time"];
+    }
+}
+
+
+
+message RecordLiveTimeReq {
+    // 
+    repeated int64 roomids = 1 [(gogoproto.jsontag) = "roomids"];
+    // 
+    string start_time = 2 [(gogoproto.jsontag) = "start_time"];
+    // 
+    string end_time = 3 [(gogoproto.jsontag) = "end_time"];
+}
+
+message RecordLiveTimeResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    map<int64, LiveInfo> data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message LiveInfo {
+        // 
+        int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+        // 
+        int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+        // 
+        int64 area_v2_id = 3 [(gogoproto.jsontag) = "area_v2_id"];
+        // 
+        int64 area_v2_parent_id = 4 [(gogoproto.jsontag) = "area_v2_parent_id"];
+        // 
+        string start_time = 5 [(gogoproto.jsontag) = "start_time"];
+        // 
+        string end_time = 6 [(gogoproto.jsontag) = "end_time"];
+        // 该时间段内最大人气
+        int64 max_online_num = 7 [(gogoproto.jsontag) = "max_online_num"];
+        // 该时间段内最后关注数
+        int64 attention = 8 [(gogoproto.jsontag) = "attention"];
+        // 是否是后台自动切分的记录
+        int64 is_cut = 9 [(gogoproto.jsontag) = "is_cut"];
+    }
+}
+
+
+
+message RecordAreasReq {
+    // 房间id
+    int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+    // 月份 2018-09
+    string date = 2 [(gogoproto.jsontag) = "date"];
+}
+
+message RecordAreasResp {
+    // 返回code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 返回msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    repeated Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message List {
+        // 
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 
+        string name = 2 [(gogoproto.jsontag) = "name"];
+        // 
+        int64 parent_id = 3 [(gogoproto.jsontag) = "parent_id"];
+    }
+       
+    message Data {
+        // 
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 
+        string name = 2 [(gogoproto.jsontag) = "name"];
+        // 
+        repeated List list = 3 [(gogoproto.jsontag) = "list"];
+    }
+}
+
+
+
+message RecordAreaLiveReq {
+    // 房间id
+    int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+    // 月份 2018-09
+    string date = 2 [(gogoproto.jsontag) = "date"];
+    // 逗号隔开的分区id组成的字符串
+    string area_ids = 3 [(gogoproto.jsontag) = "area_ids"];
+}
+
+message RecordAreaLiveResp {
+    // 返回code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 返回msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message List {
+        // 日期 2018-09-01
+        string date = 1 [(gogoproto.jsontag) = "date"];
+        // 直播时长，分钟
+        int64 live_time = 2 [(gogoproto.jsontag) = "live_time"];
+        // 直播次数
+        int64 live_num = 3 [(gogoproto.jsontag) = "live_num"];
+        // 该日期下最大人气
+        int64 max_online = 4 [(gogoproto.jsontag) = "max_online"];
+    }
+       
+    message Count {
+        // 该月直播总时长
+        string all_live_time = 1 [(gogoproto.jsontag) = "all_live_time"];
+        // 该月直播总天数（某一天有直播记录就算一天，对直播时长没要求）
+        int64 all_live_day = 2 [(gogoproto.jsontag) = "all_live_day"];
+        // 该月最大人气
+        int64 max_online = 3 [(gogoproto.jsontag) = "max_online"];
+    }
+       
+    message Data {
+        // 
+        repeated List list = 1 [(gogoproto.jsontag) = "list"];
+        // 
+        Count count = 2 [(gogoproto.jsontag) = "count"];
+    }
+}
+
+
+
+message RecordDayLiveReq {
+    // 房间id
+    int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+    // 日期 2018-09-01
+    string day = 2 [(gogoproto.jsontag) = "day"];
+}
+
+message RecordDayLiveResp {
+    // 返回code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 返回msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message List {
+        // 日期 2018-09-01
+        string date = 1 [(gogoproto.jsontag) = "date"];
+        // 直播时长，分钟
+        int64 live_time = 2 [(gogoproto.jsontag) = "live_time"];
+        // 开播时间
+        string start_time = 3 [(gogoproto.jsontag) = "start_time"];
+        // 关播时间
+        string end_time = 4 [(gogoproto.jsontag) = "end_time"];
+        // 该日期下最大人气
+        int64 max_online = 5 [(gogoproto.jsontag) = "max_online"];
+    }
+       
+    message Data {
+        // 
+        repeated List list = 1 [(gogoproto.jsontag) = "list"];
+    }
+}

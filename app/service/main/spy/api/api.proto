@@ -1,0 +1,186 @@
+syntax = "proto3";
+
+package account.spy;
+
+
+option go_package = "v1";
+
+message ClearReliveTimesReply {
+}
+
+message ClearReliveTimesReq {
+    ModelArgReset arg = 1;
+}
+
+message HandleEventReply {
+}
+
+message HandleEventReq {
+    ModelEventMessage event_msg = 1;
+}
+
+message ModelArgReset {
+    int64 mid = 1;
+    bool re_live_time = 2;
+    bool event_score = 3;
+    bool base_score = 4;
+    string operator = 5;
+}
+
+message ModelEventMessage {
+    int64 time = 1;
+    string ip = 2;
+    string service = 3;
+    string event = 4;
+    int64 active_mid = 5;
+    int64 target_mid = 6;
+    int64 target_id = 7;
+    //FIXME type model. args = 8;
+    string result = 9;
+    string effect = 10;
+    int32 risk_level = 11;
+}
+
+message ModelStatistics {
+    int64 quantity = 1;
+    int64 event_id = 2;
+    string event_name = 3;
+}
+
+message ModelUserInfo {
+    int64 id = 1;
+    int64 mid = 2;
+    int32 score = 3;
+    int32 base_score = 4;
+    int32 event_score = 5;
+    int32 state = 6;
+    int32 relive_times = 7;
+    int64 ctime = 8;
+    int64 mtime = 9;
+}
+
+message PingReply {
+}
+
+message PingReq {
+}
+
+message PurgeUserReply {
+}
+
+message PurgeUserReq {
+    int64 mid = 1;
+    string action = 2;
+}
+
+message ReBuildPortraitReply {
+}
+
+message ReBuildPortraitReq {
+    int64 mid = 1;
+    string reason = 2;
+}
+
+message RefreshBaseScoreReply {
+}
+
+message RefreshBaseScoreReq {
+    ModelArgReset arg = 1;
+}
+
+message StatByIDGroupEventReply {
+    repeated ModelStatistics res = 1;
+}
+
+message StatByIDGroupEventReq {
+    int64 mid = 1;
+    int64 id = 2;
+}
+
+message StatByIDReply {
+    repeated ModelStatistics stat = 1;
+}
+
+message StatByIDReq {
+    int64 mid = 1;
+    int64 id = 2;
+}
+
+message UpdateBaseScoreReply {
+}
+
+message UpdateBaseScoreReq {
+    ModelArgReset arg = 1;
+}
+
+message UpdateEventScoreReply {
+}
+
+message UpdateEventScoreReq {
+    ModelArgReset arg = 1;
+}
+
+message UpdateUserScoreReply {
+}
+
+message UpdateUserScoreReq {
+    int64 mid = 1;
+    string ip = 2;
+    string effect = 3;
+}
+
+message UserInfoAsynReply {
+    ModelUserInfo ui = 1;
+}
+
+message UserInfoAsynReq {
+    int64 mid = 1;
+}
+
+message UserInfoReply {
+    ModelUserInfo ui = 1;
+}
+
+message UserInfoReq {
+    int64 mid = 1;
+    string ip = 2;
+}
+
+message InfoReq {
+    int64 mid = 1;
+}
+
+message InfoReply {
+   ModelUserInfo ui = 1;
+}
+
+service Spy {
+    // Ping check dao health.
+    rpc Ping(PingReq) returns(PingReply);
+    // Info get user info by mid.
+    rpc Info(InfoReq) returns(InfoReply);
+    // StatByID spy stat by id or mid.
+    rpc StatByID(StatByIDReq) returns(StatByIDReply);
+    // StatByIDGroupEvent spy stat by id or mid.
+    rpc StatByIDGroupEvent(StatByIDGroupEventReq) returns(StatByIDGroupEventReply);
+    // PurgeUser purge  user info
+    rpc PurgeUser(PurgeUserReq) returns(PurgeUserReply);
+    // HandleEvent handle spy-event.
+    rpc HandleEvent(HandleEventReq) returns(HandleEventReply);
+    // UserInfo get UserInfo by mid , from cache or db or generate.
+    rpc UserInfo(UserInfoReq) returns(UserInfoReply);
+    // UserInfoAsyn get UserInfo by mid , from cache or db or asyn generate.
+    rpc UserInfoAsyn(UserInfoAsynReq) returns(UserInfoAsynReply);
+    // ReBuildPortrait reBuild user info.
+    rpc ReBuildPortrait(ReBuildPortraitReq) returns(ReBuildPortraitReply);
+    // UpdateUserScore update user score
+    rpc UpdateUserScore(UpdateUserScoreReq) returns(UpdateUserScoreReply);
+    // RefreshBaseScore refresh base score.
+    rpc RefreshBaseScore(RefreshBaseScoreReq) returns(RefreshBaseScoreReply);
+    // UpdateBaseScore update base score.
+    rpc UpdateBaseScore(UpdateBaseScoreReq) returns(UpdateBaseScoreReply);
+    // UpdateEventScore update event score.
+    rpc UpdateEventScore(UpdateEventScoreReq) returns(UpdateEventScoreReply);
+    // ClearReliveTimes clear times.
+    rpc ClearReliveTimes(ClearReliveTimesReq) returns(ClearReliveTimesReply);
+}

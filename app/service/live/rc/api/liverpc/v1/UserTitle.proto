@@ -1,0 +1,156 @@
+syntax = "proto3";
+
+package rc.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service UserTitle {
+    
+    /** 根据头衔id获取头衔名称，头衔不存在不返回
+     * 
+     */   
+    rpc getTitleByIds (UserTitleGetTitleByIdsReq) returns (UserTitleGetTitleByIdsResp);
+    
+    /** 移动端获取佩戴的头衔
+     * 
+     */   
+    rpc getMobileTitle (UserTitleGetMobileTitleReq) returns (UserTitleGetMobileTitleResp);
+    
+    /** 获取弹幕头衔(需要登录态)
+     * 
+     */   
+    rpc getCommentTitle (UserTitleGetCommentTitleReq) returns (UserTitleGetCommentTitleResp);
+    
+    /** 添加头衔
+     * 
+     */   
+    rpc add (UserTitleAddReq) returns (UserTitleAddResp);
+    
+    /** 个人中心我的头衔列表
+     * 
+     */   
+    rpc getAll (UserTitleGetAllReq) returns (UserTitleGetAllResp);
+}
+
+
+
+message UserTitleGetTitleByIdsReq {
+    // 头衔ID列表
+    repeated int64 ids = 1 [(gogoproto.jsontag) = "ids"];
+}
+
+message UserTitleGetTitleByIdsResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    map<int64, string> data = 4 [(gogoproto.jsontag) = "data"];
+}
+
+
+
+message UserTitleGetMobileTitleReq {
+    // 
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+}
+
+message UserTitleGetMobileTitleResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    Data data = 4 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 头衔标识
+        string title = 1 [(gogoproto.jsontag) = "title"];
+        // 头衔名称
+        string activity = 2 [(gogoproto.jsontag) = "activity"];
+    }
+}
+
+
+
+message UserTitleGetCommentTitleReq {
+    
+}
+
+message UserTitleGetCommentTitleResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // data[0]老头衔唯一标识如 'cake-flour', data[1]新头衔唯一标识如'title-137-1', 无头衔为空数组
+    repeated string data = 3 [(gogoproto.jsontag) = "data"];
+}
+
+
+
+message UserTitleAddReq {
+    // UID
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 头衔id
+    int64 title_id = 2 [(gogoproto.jsontag) = "title_id"];
+    // 过期时间dateTime
+    string expire_time = 3 [(gogoproto.jsontag) = "expire_time"];
+    // 积分
+    int64 score = 4 [(gogoproto.jsontag) = "score"];
+}
+
+message UserTitleAddResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        
+    }
+}
+
+
+
+message UserTitleGetAllReq {
+    // UID
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+}
+
+message UserTitleGetAllResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // type -> content
+    map<int64, Data> data = 4 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        string id = 1 [(gogoproto.jsontag) = "id"];
+        // 
+        string uid = 2 [(gogoproto.jsontag) = "uid"];
+        // 头衔id
+        string tid = 3 [(gogoproto.jsontag) = "tid"];
+        // 数量
+        string num = 4 [(gogoproto.jsontag) = "num"];
+        // 
+        string score = 5 [(gogoproto.jsontag) = "score"];
+        // 
+        string create_time = 6 [(gogoproto.jsontag) = "create_time"];
+        // 
+        string expire_time = 7 [(gogoproto.jsontag) = "expire_time"];
+        // 
+        string status = 8 [(gogoproto.jsontag) = "status"];
+    }
+}

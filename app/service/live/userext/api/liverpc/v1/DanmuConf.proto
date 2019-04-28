@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+package userext.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service DanmuConf {
+    
+    /** 获取个人弹幕配置
+     * 
+     */   
+    rpc getAll (DanmuConfGetAllReq) returns (DanmuConfGetAllResp);
+    
+    /** 添加用户可佩戴的的弹幕配置特权
+     * 
+     */   
+    rpc addByType (DanmuConfAddByTypeReq) returns (DanmuConfAddByTypeResp);
+    
+    /** 获取所有弹幕特权
+     * 
+     */   
+    rpc getAllPrivilege (DanmuConfGetAllPrivilegeReq) returns (DanmuConfGetAllPrivilegeResp);
+}
+
+
+
+message DanmuConfGetAllReq {
+    // 房间号
+    int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+    // 用户id(优先取登录态)
+    int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+}
+
+message DanmuConfGetAllResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 模式
+        int64 mode = 1 [(gogoproto.jsontag) = "mode"];
+        // 颜色
+        int64 color = 2 [(gogoproto.jsontag) = "color"];
+        // 长度
+        int64 length = 3 [(gogoproto.jsontag) = "length"];
+        // roomid
+        int64 roomid = 4 [(gogoproto.jsontag) = "roomid"];
+    }
+}
+
+
+
+message DanmuConfAddByTypeReq {
+    // color:颜色, mode:弹幕模式, length:弹幕长度
+    string type = 1 [(gogoproto.jsontag) = "type"];
+    // uid
+    int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+    // 房间号,传0为全局
+    int64 roomid = 3 [(gogoproto.jsontag) = "roomid"];
+    // 不填则为永久
+    int64 expire = 4 [(gogoproto.jsontag) = "expire"];
+    // 配置值
+    int64 value = 5 [(gogoproto.jsontag) = "value"];
+}
+
+message DanmuConfAddByTypeResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // true:操作成功 false:操作失败
+        bool result = 1 [(gogoproto.jsontag) = "result"];
+    }
+}
+
+
+
+message DanmuConfGetAllPrivilegeReq {
+    // 用户id
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+}
+
+message DanmuConfGetAllPrivilegeResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    repeated Data data = 4 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // UID
+        string uid = 1 [(gogoproto.jsontag) = "uid"];
+        // roomID
+        string roomid = 2 [(gogoproto.jsontag) = "roomid"];
+        // 0：color，1：mode，2：length
+        string type = 3 [(gogoproto.jsontag) = "type"];
+        // 
+        string value = 4 [(gogoproto.jsontag) = "value"];
+        // 初始0，佩戴中1
+        string status = 5 [(gogoproto.jsontag) = "status"];
+        // 
+        string expired_at = 6 [(gogoproto.jsontag) = "expired_at"];
+    }
+}

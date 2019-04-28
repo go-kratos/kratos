@@ -1,0 +1,18 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- caoguoliang
+- daizhichen
+- guanhuaxin
+- yangjiankun
+labels:
+- main
+- service
+- service/main/riot-search
+options:
+  no_parent_owners: true
+reviewers:
+- caoguoliang
+- daizhichen
+- guanhuanxin
+- yangjiankun

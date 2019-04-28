@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package activity.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service UnionFans {
+    
+    /** 获取友爱社礼包提示
+     * 
+     */   
+    rpc getSendGift (UnionFansGetSendGiftReq) returns (UnionFansGetSendGiftResp);
+    
+    /** 查询用户特殊勋章样式
+     * 
+     */   
+    rpc getSpecialMedal (UnionFansGetSpecialMedalReq) returns (UnionFansGetSpecialMedalResp);
+}
+
+
+
+message UnionFansGetSendGiftReq {
+    // 
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+}
+
+message UnionFansGetSendGiftResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    repeated Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message GiftList {
+        // 
+        string gift_id = 1 [(gogoproto.jsontag) = "gift_id"];
+        // 
+        int64 gift_num = 2 [(gogoproto.jsontag) = "gift_num"];
+    }
+       
+    message Data {
+        // 类型
+        int64 type = 1 [(gogoproto.jsontag) = "type"];
+        // 名称
+        string giftTypeName = 2 [(gogoproto.jsontag) = "giftTypeName"];
+        // 
+        repeated GiftList gift_list = 3 [(gogoproto.jsontag) = "gift_list"];
+    }
+}
+
+
+
+message UnionFansGetSpecialMedalReq {
+    // 用户uid
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 主播uid
+    int64 ruid = 2 [(gogoproto.jsontag) = "ruid"];
+}
+
+message UnionFansGetSpecialMedalResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 特殊序章样式 为空或者为union
+        string special_medal = 1 [(gogoproto.jsontag) = "special_medal"];
+    }
+}

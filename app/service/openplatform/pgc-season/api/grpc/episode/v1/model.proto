@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+option java_package = "pleiades.business.service.season.episode.v1";
+package pgc.service.season.episode.v1;
+option java_multiple_files = true;
+option go_package = "v1";
+
+// EpisodeInfoProto .
+message EpisodeInfoProto {
+    // episode_id
+    int32 episode_id = 1;
+    // aid
+    int32 aid = 2;
+    // cid
+    int32 cid = 3;
+    // 排序值 ord
+    int32 index = 4;
+    // 短标题
+    string index_title = 5;
+    // 长标题
+    string long_title = 6;
+    // ep封面
+    string cover = 7;
+    // ep status
+    int32 episode_status = 8;
+    // season_id
+    int32 season_id = 9;
+    // 定时上线上线时是否设置对应番剧为已完结：0不设置，1设置
+    int32 online_finish = 10;
+    // ep对应分节id
+    int32 section_id = 11;
+    // 视频来源 bangumi,cid,vupload,pptv,qq
+    string from = 12;
+    // vid
+    string vid = 13;
+    // pub_real_time format:yyyy-mm-dd HH:mm:ss
+    string pub_real_time = 14;
+    // badge
+    string badge = 15;
+    // badge_type
+    int32 badge_type = 16;
+    // ep时长
+    int32 duration = 17;
+}
+
+// EpisodeCardsProto .
+message EpisodeCardsProto {
+    // episode_id
+    int32 episode_id = 1;
+    // ep status
+    int32 episode_status = 2;
+    // 短标题
+    string title = 3;
+    // 长标题
+    string long_title = 4;
+    //封面
+    string cover = 5;
+    //seasonBrief
+    EpisodeSeasonProto season = 6;
+    // ep时长
+    int32 duration = 7;
+    // 第x集 xxx
+    string show_title = 8;
+}
+
+// EpisodeSeasonProto .
+message EpisodeSeasonProto {
+    // season_id
+    int32 season_id = 1;
+    // 标题
+    string title = 2;
+    // season status
+    int32 season_status = 3;
+    // 是否完结 1完结 0未完结
+    int32 is_finish = 4;
+    // 总集数
+    int32 total_count = 5;
+    // 更新至xx话
+    string new_ep_show = 6;
+    // 最新一话epid
+    int32 new_ep_id = 7;
+    // season类型  1：番剧，2：电影，3：纪录片，4：国漫，5：电视剧
+    int32 season_type = 8;
+    // cover
+    string cover = 9;
+    // 播放数(已废弃，请使用: stat.view)
+    int64 play_count = 10;
+    // episode 所属 season 计数信息
+    StatsProto stat = 11;
+    // season类型名称
+    string season_type_name = 12;
+    // 角标
+    string badge = 13;
+    // 角标颜色
+    int32 badge_type = 14;
+    // 最新一话短标题
+    string new_ep_index = 15;
+    // 模式1：单集， 2：多集
+    int32 mode = 16;
+}
+
+message StatsProto {
+    // 追番数
+    int64 follow = 1;
+    // 播放数
+    int64 view = 2;
+    // 弹幕数
+    int64 danmaku = 3;
+}
+
+// SectionEpisodeProto .
+message SectionEpisodeProto {
+    // info
+    repeated EpisodeInfoProto info = 1;
+}
+
+// EmptyProto .
+message EmptyProto {
+
+}
+
+// EpisodeBadgeProto .
+message EpisodeBadgeProto {
+    // 角标类型，0粉色，1蓝色，2橙色
+    int32 badge_type = 1;
+    // 角标文字，如“抢先”这种
+    string badge = 2;
+}

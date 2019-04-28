@@ -1,0 +1,38 @@
+
+[mysql]
+	addr = "127.0.0.1:3306"
+	dsn = "root:123456@tcp(127.0.0.1:3306)/live_resource?timeout=2000ms&readTimeout=2000ms&writeTimeout=2000ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["root:123456@tcp(127.0.0.1:3306)/live_resource?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4","root:123456@tcp(127.0.0.1:3306)/live_resource?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "1s"
+	execTimeout = "1s"
+	tranTimeout = "1s"
+
+[memcache]
+    name = "app.service/resource"
+    proto = "tcp"
+    addr = "127.0.0.1:11211"
+    idle = 10
+    active = 10
+    dialTimeout = "2s"
+    readTimeout = "2s"
+    writeTimeout = "2s"
+    idleTimeout = "7h"
+    expire = "24h"
+    confKvExpire = "24h"
+
+[db]
+    [db.resource]
+    dsn = "root:123456@tcp(127.0.0.1:3306)/live_resource?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 1
+    idleTimeout = "4h"
+
+    # 从库
+    [db.resourceReader]
+     dsn = "root:123456@tcp(127.0.0.1:3306)/live_resource?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+     active = 5
+     idle = 1
+     idleTimeout = "4h"

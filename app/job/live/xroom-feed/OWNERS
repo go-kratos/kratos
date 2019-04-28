@@ -1,0 +1,10 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- fuyu01
+labels:
+- job
+- job/live/xroom-feed
+- live
+options:
+  no_parent_owners: true

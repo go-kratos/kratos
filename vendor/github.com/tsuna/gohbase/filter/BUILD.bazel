@@ -1,0 +1,30 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "comparator.go",
+        "filter.go",
+    ],
+    importmap = "go-common/vendor/github.com/tsuna/gohbase/filter",
+    importpath = "github.com/tsuna/gohbase/filter",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/tsuna/gohbase/pb:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

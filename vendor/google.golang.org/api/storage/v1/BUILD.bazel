@@ -1,0 +1,29 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["storage-gen.go"],
+    importmap = "k8s.io/test-infra/vendor/google.golang.org/api/storage/v1",
+    importpath = "google.golang.org/api/storage/v1",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/google.golang.org/api/gensupport:go_default_library",
+        "//vendor/google.golang.org/api/googleapi:go_default_library",
+        "@org_golang_x_net//context:go_default_library",
+        "@org_golang_x_net//context/ctxhttp:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

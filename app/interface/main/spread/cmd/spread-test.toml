@@ -1,0 +1,27 @@
+# This is a TOML document. Boom
+[log]
+dir = "/data/log/spread"
+
+[bm]
+	addr = "0.0.0.0:7642"
+	timeout = "1s"
+
+[HTTPClient]
+    key = "9cfc54570033cd61"
+    secret = "9d63835fa38fe58a62d9f49ef5da296f"
+    dial      = "100ms"
+    timeout   = "1s"
+    keepAlive = "60s"
+    timer     = 128
+    [HTTPClient.breaker]
+    window  ="10s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+[[Businesses]]
+	appkey = "douban"
+	appSecret = "douban"
+[Spread]
+BangumiContentURL = "http://uat-bangumi.bilibili.co/ext/internal/archive/channel/content"
+BangumiOffURL = "http://uat-bangumi.bilibili.co/ext/internal/archive/channel/content/offshelve"

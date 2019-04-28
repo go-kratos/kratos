@@ -1,0 +1,35 @@
+[log]
+    stdout = true
+
+[redis]
+	name = "recommend-service"
+	proto = "tcp"
+	addr = "127.0.0.1:6379"
+	idle = 20
+	active = 20
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[Feature]
+    WeightVector = [3.0519, -1.6184, -2.0771, -1.9381, -1.9873, -1.6225, -2.0000, -1.8740, -1.7568, -1.7802, -1.9143, -1.8643, -4.1616, -2.6550, -2.2589, -2.3561, -2.1690, -1.9138, -1.6899, -1.6309, -1.3955, -1.2116]
+
+[CommonFeature]
+    [CommonFeature.UserAreaInterest]
+        Type = "NumMatch"
+        Values = [1]
+        Weights = [3.0519]
+    [CommonFeature.FansNum]
+        Type = "RangeSplit"
+        Values = [100, 500, 2500, 10000]
+        Weights = [-1.6184, -2.0771, -1.9381, -1.9873, -1.6225]
+    [CommonFeature.CornerSign]
+        Type = "ReMatch"
+        Values = ["", ".*人存活", "决赛圈", "正在抽奖", ".*No\\.\\d+", "年度.*主播", "周星主播", "BLS.*"]
+        Weights = [-2.0000, -1.8740, -1.7568, -1.7802, -1.9143, -1.8643, -1.8643, -1.8643]
+    [CommonFeature.Online]
+        Type = "RangeSplit"
+        Values = [10, 50, 100, 300, 1600, 3600, 6000, 10000, 100000]
+        Weights = [-4.1616, -2.6550, -2.2589, -2.3561, -2.1690, -1.9138, -1.6899, -1.6309, -1.3955, -1.2116]

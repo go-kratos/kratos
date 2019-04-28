@@ -1,0 +1,13 @@
+
+demoExpire = "24h"
+
+[rec]
+	Name = "xroom-feed"
+	Proto = "tcp"
+	Addr = "redis-host:10010"
+	Idle = 10
+	Active = 10
+	DialTimeout = "1s"
+	ReadTimeout = "1s"
+	WriteTimeout = "1s"
+	IdleTimeout = "10s"

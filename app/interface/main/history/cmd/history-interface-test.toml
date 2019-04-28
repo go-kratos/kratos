@@ -1,0 +1,262 @@
+# This is a TOML document. Boom.
+
+version = "2.3.0"
+user = "nobody"
+pid = "/tmp/history.pid"
+dir = "./"
+perf = "0.0.0.0:6000"
+checkFile = "/data/www/history.html"
+family = "history"
+address = ""
+
+# history
+[history]
+	max = 10
+	total = 20
+	cache = 10
+	page = 20
+    size = 100
+	ticker = "30s"
+    pgc = true
+    tid = [33,120,148,149,32,94,150,151]
+    Exp = true 
+    mids = [14771787]
+    ConsumeSize = 100
+
+[xlog]
+dir = "/data/log/history/"
+
+
+[collector]
+taskID = "000078"
+proto = "tcp"
+addr = "172.19.100.20:5401"
+chanSize = 1024
+
+[thirdBusines]
+    favoriteURL = "http://api.bilibili.co/x/v2/fav/video/favoureds"
+	bangumiV2URL = "http://bangumi.bilibili.co/internal_api/get_eps_v2"
+    seasonURL = "http://bangumi.bilibili.co/api/inner/archive/aid2seasonid"
+    [thirdBusines.httpClient]
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    [thirdBusines.httpClient.breaker]
+        window  ="10s"
+        sleep   ="10ms"
+        bucket  = 10
+        ratio   = 0.1
+        request = 100
+
+[app]
+key = "f6433799dbd88751"
+secret = "36f8ddb1806207fe07013ab6a77a3935"
+
+[multiHTTP]
+    [multiHTTP.outer]
+    addrs = ["0.0.0.0:6001"]
+    maxListen = 10
+    [multiHTTP.inner]
+    addrs = ["0.0.0.0:6002"]
+    maxListen = 10
+    [multiHTTP.local]
+    addrs = ["0.0.0.0:6003"]
+    maxListen = 10
+    
+[bm]
+addr = "0.0.0.0:6001"
+maxListen = 1000
+timeout = "800ms"
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+	csrfOn = false
+    [identify.app]
+    key = "0dc647722719f2ea"
+    secret = "a3769b553680da10b40994265fb48d20"
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "172.16.0.148:11211"
+    active = 5
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"    
+    [identify.host]
+    auth = "http://passport.bilibili.co"
+    secret = "http://open.bilibili.co"
+    [identify.httpClient]
+    dial = "30ms"
+    timeout = "100ms"
+    keepAlive = "60s"
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+    
+[rpcClient2]
+    [rpcClient2.account]
+        pullInterval = "10s"
+        [rpcClient2.account.client]
+        timeout = "1s"
+        timer = 1000
+        [rpcClient2.account.client.breaker]
+            window  ="3s"
+            sleep   ="100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100
+        [[rpcClient2.account.backup]]
+        proto = "tcp"
+        addr = "172.16.33.56:6079"
+        timeout = "1s"
+        timer = 1000
+        [rpcClient2.account.zookeeper]
+        root = "/microservice/account-service/"
+        addrs = ["172.18.33.172:2181"]
+        timeout = "30s"
+
+    [rpcClient2.archive]
+    group = "test"
+        pullInterval = "10s"
+        [rpcClient2.archive.client]
+        token = "123456"
+        timeout = "1s"
+        timer = 1000
+        [rpcClient2.archive.client.breaker]
+            window  ="3s"
+            sleep   ="100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100
+        [[rpcClient2.archive.backup]]
+        proto = "tcp"
+        addr = "172.16.33.56:6089"
+        timeout = "1s"
+        timer = 1000
+        [rpcClient2.archive.zookeeper]
+        root = "/microservice/archive-service/"
+        addrs = ["172.18.33.172:2181"]
+        timeout = "30s"
+        [rpcClient2.archive.breaker]
+            window  ="3s"
+            sleep   ="100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100
+
+[toview]
+name = "history"
+proto = "tcp"
+addr = "172.16.33.54:6381"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "6h"
+
+[redis]
+name = "history"
+proto = "tcp"
+addr = "172.16.33.54:6380"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "6h"
+
+
+[databus]
+
+    [databus.merge]
+    key = "0Pub71WwEMKXu63qtztu"
+    secret= "0Pub71WwEMKXu63qtztv"
+    group= "HistoryMerge-History-P"
+    topic= "HistoryMerge-T"
+    action="pub"
+    name = "history"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+    [databus.Experience]
+    key = "0Pub71WwEMKXu63qtztu"
+    secret= "0Pub71WwEMKXu63qtztv"
+    group= "AccountExp-MainCommunity-P"
+    topic= "AccountExp-T"
+    action="pub"
+    name = "history"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[ecode]
+   domain = "172.16.33.248:6401"
+    all = "1h"
+    diff = "10m"
+    [ecode.clientconfig]
+        dial      = "2000ms"
+        timeout   = "2s"
+        keepAlive = "10s"
+        timer     = 128
+        key = "test"
+        secret = "e6c4c252dc7e3d8a90805eecd7c73396"
+        [ecode.clientconfig.breaker]
+            window  ="3s"
+            sleep   ="100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100
+
+
+[tracer]
+proto = "udp"
+addr = "172.16.33.46:5140"
+tag = "platform/history"
+
+
+[info]
+master = ""
+meta = ""
+dialTimeout = "1s"
+readTimeout = "10s"
+readsTimeout = "10s"
+writeTimeout = "10s"
+writesTimeout = "10s"
+    [info.zookeeper]
+    root = ""
+     addrs = ["172.18.33.131:2181","172.18.33.168:2181","172.18.33.169:2181"]
+    timeout = "30s"
+
+
+[grpc]
+timeout = "1s"
+addr = "0.0.0.0:6008"

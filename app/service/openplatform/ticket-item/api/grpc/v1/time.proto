@@ -1,0 +1,26 @@
+syntax = "proto3";
+package ticket.service.item.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+// The response message containing the Item related time
+message ItemTime {
+   int32 stime = 1 [(gogoproto.jsontag) = "stime"];
+   int32 etime = 2 [(gogoproto.jsontag) = "etime"];
+}
+
+// The response message containing the Screen related time
+message ScreenTime {
+   int32 stime = 1 [(gogoproto.jsontag) = "stime", (gogoproto.moretags) = "validate:\"min=0\""];
+   int32 etime = 2 [(gogoproto.jsontag) = "etime", (gogoproto.moretags) = "validate:\"min=0\""];
+   int32 sale_stime = 3 [(gogoproto.jsontag) = "sales", (gogoproto.moretags) = "validate:\"min=0\""];
+   int32 sale_etime = 4 [(gogoproto.jsontag) = "salee", (gogoproto.moretags) = "validate:\"min=0\""];
+}
+
+// The response message containing the Ticket related time
+message TicketTime {
+   int64 sale_stime = 1 [(gogoproto.jsontag) = "sales", (gogoproto.moretags) = "validate:\"min=0\""];
+   int64 sale_etime = 2 [(gogoproto.jsontag) = "salee", (gogoproto.moretags) = "validate:\"min=0\""];
+}

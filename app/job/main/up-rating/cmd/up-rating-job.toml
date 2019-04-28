@@ -1,0 +1,42 @@
+[log]
+dir = "/data/log/up-rating-job/"
+
+[mysql]
+[mysql.rating]
+	addr = "172.16.33.205:3308"
+	dsn = "gaopeng:V8ktIf7HzvpPSsZeNy5ClWw1RYFAmUDJ@tcp(172.16.33.205:3308)/bilibili_up_rating?timeout=10s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 30
+	idle = 2
+	idleTimeout = "4h"
+	queryTimeout = "10s"
+	execTimeout = "100s"
+	tranTimeout = "100s"
+	[mysql.rating.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+
+[app]
+key = "a4bb50e6f2bc2e0f"
+secret = "3507b8667a3d0b6c952013db2b635f3a"
+
+[bm]
+    addr = "0.0.0.0:8414"
+    maxListen = 1000
+    timeout = "3600s"
+
+[httpClient]
+key = "c1a1cb2d89c33794"
+secret = "dda47eeca111e03e6845017505baea13"
+dial = "2s"
+timeout = "3s"
+keepAlive = "60s"
+timer = 10
+[httpClient.breaker]
+window = "10s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request =  100

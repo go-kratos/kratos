@@ -1,0 +1,35 @@
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//app/interface/bbq:all-srcs",
+        "//app/interface/live/app-blink:all-srcs",
+        "//app/interface/live/app-interface:all-srcs",
+        "//app/interface/live/app-room:all-srcs",
+        "//app/interface/live/app-ucenter:all-srcs",
+        "//app/interface/live/live-demo:all-srcs",
+        "//app/interface/live/lottery-interface:all-srcs",
+        "//app/interface/live/open-interface/api/http/v1:all-srcs",
+        "//app/interface/live/open-interface/cmd:all-srcs",
+        "//app/interface/live/open-interface/internal/dao:all-srcs",
+        "//app/interface/live/open-interface/internal/model:all-srcs",
+        "//app/interface/live/open-interface/internal/server/http:all-srcs",
+        "//app/interface/live/open-interface/internal/service:all-srcs",
+        "//app/interface/live/push-live:all-srcs",
+        "//app/interface/live/upload:all-srcs",
+        "//app/interface/live/web-room:all-srcs",
+        "//app/interface/live/web-ucenter:all-srcs",
+        "//app/interface/main:all-srcs",
+        "//app/interface/openplatform:all-srcs",
+        "//app/interface/video:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

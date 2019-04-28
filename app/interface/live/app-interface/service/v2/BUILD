@@ -1,0 +1,97 @@
+package(default_visibility = ["//visibility:public"])
+
+load(
+    "@io_bazel_rules_go//go:def.bzl",
+    "go_library",
+    "go_test",
+)
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "activity_card.go",
+        "apprelationfilterstrategy.go",
+        "apprelationsortstrategy.go",
+        "common.go",
+        "daowrapper.go",
+        "index.go",
+        "live_rec.go",
+        "live_user.go",
+        "livehomepage.go",
+        "pic_list.go",
+        "rank.go",
+        "rec_pool.go",
+        "room_ex.go",
+        "room_list.go",
+        "sky_horse.go",
+        "tools.go",
+    ],
+    importpath = "go-common/app/interface/live/app-interface/service/v2",
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//app/interface/live/app-interface/api/http/v1:go_default_library",
+        "//app/interface/live/app-interface/api/http/v2:go_default_library",
+        "//app/interface/live/app-interface/conf:go_default_library",
+        "//app/interface/live/app-interface/dao:go_default_library",
+        "//app/interface/live/app-interface/dao/account:go_default_library",
+        "//app/interface/live/app-interface/dao/av:go_default_library",
+        "//app/interface/live/app-interface/dao/fans_medal:go_default_library",
+        "//app/interface/live/app-interface/dao/live_data:go_default_library",
+        "//app/interface/live/app-interface/dao/live_user:go_default_library",
+        "//app/interface/live/app-interface/dao/rankdb:go_default_library",
+        "//app/interface/live/app-interface/dao/relation:go_default_library",
+        "//app/interface/live/app-interface/dao/room:go_default_library",
+        "//app/interface/live/app-interface/dao/room_ex:go_default_library",
+        "//app/interface/live/app-interface/dao/user_ext:go_default_library",
+        "//app/interface/live/app-interface/dao/xuser:go_default_library",
+        "//app/interface/live/app-interface/model:go_default_library",
+        "//app/interface/live/app-interface/service/v1:go_default_library",
+        "//app/interface/live/app-interface/service/v1/relation:go_default_library",
+        "//app/service/live/av/api/liverpc/v1:go_default_library",
+        "//app/service/live/fans_medal/api/liverpc/v1:go_default_library",
+        "//app/service/live/live_data/api/liverpc/v1:go_default_library",
+        "//app/service/live/live_user/api/liverpc/v1:go_default_library",
+        "//app/service/live/recommend/api/grpc/v1:go_default_library",
+        "//app/service/live/relation/api/liverpc/v1:go_default_library",
+        "//app/service/live/room/api/liverpc/v1:go_default_library",
+        "//app/service/live/room/api/liverpc/v2:go_default_library",
+        "//app/service/live/room_ex/api/liverpc/v1:go_default_library",
+        "//app/service/live/third_api/bvc:go_default_library",
+        "//app/service/live/userext/api/liverpc/v1:go_default_library",
+        "//app/service/live/xroom-feed/api:go_default_library",
+        "//app/service/live/xuser/api/grpc/v1:go_default_library",
+        "//app/service/main/account/api:go_default_library",
+        "//app/service/main/account/model:go_default_library",
+        "//app/service/main/account/rpc/client:go_default_library",
+        "//library/ecode:go_default_library",
+        "//library/log:go_default_library",
+        "//library/net/http/blademaster:go_default_library",
+        "//library/net/metadata:go_default_library",
+        "//library/sync/errgroup:go_default_library",
+        "//library/xstr:go_default_library",
+        "//vendor/github.com/pkg/errors:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["room_list_test.go"],
+    embed = [":go_default_library"],
+    tags = ["automanaged"],
+    deps = ["//app/interface/live/app-interface/conf:go_default_library"],
+)

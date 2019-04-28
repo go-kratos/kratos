@@ -1,0 +1,20 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chenshangqiang
+- wanghuan01
+- zhoujiahui
+- zhoujixiang
+labels:
+- main
+- service
+- service/main/account
+options:
+  no_parent_owners: true
+reviewers:
+- chenshangqiang
+- haoguawnei
+- linmiao
+- wanghuan01
+- zhoujiahui
+- zhoujixiang

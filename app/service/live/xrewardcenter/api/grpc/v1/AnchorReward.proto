@@ -1,0 +1,191 @@
+syntax = "proto3";
+
+package live.xrewardcenter.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service AnchorReward {
+
+    // (主播侧)-我的主播奖励(登录态)
+    // `method:"POST" internal:"true"`
+    rpc myReward (AnchorTaskMyRewardReq) returns (AnchorTaskMyRewardResp);
+
+    /** (主播侧)-奖励使用记录(登录态)
+     * 
+     */
+    rpc useRecord (AnchorTaskUseRecordReq) returns (AnchorTaskUseRecordResp);
+
+    /** (主播侧)-使用奖励(登录态)
+     * 
+     */
+    rpc useReward (AnchorTaskUseRewardReq) returns (AnchorTaskUseRewardResp);
+
+    /** (主播侧)-奖励和任务红点(登录态)
+     * 
+     */
+    rpc isViewed (AnchorTaskIsViewedReq) returns (AnchorTaskIsViewedResp);
+
+    // (主播侧)-添加主播奖励(内部接口)
+    // `method:"POST" internal:"true"`
+    rpc addReward (AnchorTaskAddRewardReq) returns (AnchorTaskAddRewardResp);
+}
+
+message AnchorTaskAddRewardReq {
+    // 奖励id, 1:任意门
+    int64 reward_id = 4 [(gogoproto.moretags) = "form:\"reward_id\" validate:\"required\""];
+    // 房间号
+    int64 roomid = 8 [(gogoproto.moretags) = "form:\"roomid\" validate:\"required\""];
+    // 来源,1:主播任务,2:小时榜,3:周星
+    int64 source = 9 [(gogoproto.moretags) = "form:\"source\" validate:\"required\""];
+    // 主播uid
+    int64 uid = 10 [(gogoproto.moretags) = "form:\"uid\" validate:\"required\""];
+    // 流水单号
+    string order_id = 11 [(gogoproto.moretags) = "form:\"order_id\" validate:\"required\""];
+    // 礼物有效期小时数,默认24小时
+    int64 lifespan = 12 [(gogoproto.moretags) = "form:\"lifespan\" validate:\"min=0\""];
+}
+
+message AnchorTaskAddRewardResp {
+    // 是否成功
+    int64 result = 1;
+}
+
+
+message AnchorTaskMyRewardReq {
+    // 页数
+    int64 page = 1 [(gogoproto.moretags) = "form:\"page\""];
+    // 主播uid
+    int64 uid = 2 [(gogoproto.moretags) = "form:\"uid\" validate:\"required\""];
+}
+
+message AnchorTaskMyRewardResp {
+    //
+    repeated RewardObj data = 1;
+    //
+    Page page = 2;
+    // 过期奖励数量
+    int64 expire_count = 3;
+
+    message RewardObj {
+        // id
+        int64 id = 1;
+        // 奖励类型 1:ss推荐卡 2:s推荐卡、任意门
+        int64 reward_type = 2;
+        // 1:未使用,3:已使用,5:已过期
+        int64 status = 3;
+        // 奖励id
+        int64 reward_id = 4;
+        // 奖励名称
+        string name = 5;
+        // 奖励图标
+        string icon = 6;
+        // 获得时间datetime
+        string achieve_time = 7;
+        // 过期时间datetime
+        string expire_time = 8;
+        // 来源,1:主播任务,2:小时榜
+        int64 source = 9;
+        // 奖励简介
+        string reward_intro = 10;
+    }
+
+    message Page {
+        // 当前页码
+        int64 page = 1;
+        // 每页大小
+        int64 page_size = 2;
+        // 总页数
+        int64 total_page = 3;
+        // 总记录数
+        int64 total_count = 4;
+    }
+}
+
+
+message AnchorTaskUseRecordReq {
+    // 页数
+    int64 page = 1 [(gogoproto.moretags) = "form:\"page\""];
+    // 主播uid
+    int64 uid = 2 [(gogoproto.moretags) = "form:\"uid\" validate:\"required\""];
+}
+
+message AnchorTaskUseRecordResp {
+
+    message RewardObj {
+        // id
+        int64 id = 1;
+        // 奖励id
+        int64 reward_id = 2;
+        // 1:未使用,3:已使用,5:已过期
+        int64 status = 3;
+        // 奖励名称
+        string name = 4;
+        // 奖励图标
+        string icon = 5;
+        // 获得时间datetime
+        string achieve_time = 6;
+        // 获得时间datetime
+        string use_time = 10;
+        // 过期时间datetime
+        string expire_time = 7;
+        // 来源,1:主播任务,2:小时榜
+        int64 source = 8;
+        // 奖励简介
+        string reward_intro = 9;
+    }
+
+    message Page {
+        // 当前页码
+        int64 page = 1;
+        // 每页大小
+        int64 page_size = 2;
+        // 总页数
+        int64 total_page = 3;
+        // 总记录数
+        int64 total_count = 4;
+    }
+
+    //
+    repeated RewardObj data = 1;
+    //
+    Page page = 2;
+}
+
+
+message AnchorTaskUseRewardReq {
+    // 奖励列表id
+    int64 id = 1 [(gogoproto.moretags) = "form:\"id\" validate:\"required\""];
+    // 主播uid
+    int64 uid = 2 [(gogoproto.moretags) = "form:\"uid\" validate:\"required\""];
+    // 使用平台
+    string use_plat = 3 [(gogoproto.moretags) = "form:\"use_plat\" validate:\"required\""];
+}
+
+message AnchorTaskUseRewardResp {
+
+    int64 result = 1;
+}
+
+
+message AnchorTaskIsViewedReq {
+    // 主播uid
+    int64 uid = 1 [(gogoproto.moretags) = "form:\"uid\" validate:\"required\""];
+}
+
+message AnchorTaskIsViewedResp {
+
+    // 是否展示任务红点
+    int64 task_should_notice = 1;
+    // 是否展示奖励入口
+    int64 show_reward_entry = 5;
+    // 是否展示奖励红点
+    int64 reward_should_notice = 2;
+    // 任务状态, 0:没有,1:领取, 5:完成
+    int64 task_status = 3;
+    // 是否在首页黑名单中
+    int64 is_blacked = 4;
+    // 点击跳转h5链接
+    string url = 6;
+}

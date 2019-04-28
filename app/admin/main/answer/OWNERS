@@ -1,0 +1,18 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- guhao
+- liangkai
+- zhangshengchao
+- zhaogangtao
+labels:
+- admin
+- admin/main/answer
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- guhao
+- liangkai
+- zhangshengchao
+- zhaogangtao

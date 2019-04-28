@@ -1,0 +1,58 @@
+syntax = "proto3";
+package ticket.service.item.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option go_package = "v1";
+
+// The place service definition.
+service Place {
+    rpc PlaceInfo (PlaceInfoRequest) returns (PlaceInfoReply) {}
+}
+
+// The response message containing the Place info
+message PlaceInfo {
+    // 状态
+    int64 id = 1 [(gogoproto.jsontag) = "id",(gogoproto.customname)= "ID"];
+    // 场地名
+    int32 status = 2 [(gogoproto.jsontag) = "status"];
+    // 场地底图
+    string name = 3 [(gogoproto.jsontag) = "name"];
+    // 场馆ID
+    string base_pic = 4 [(gogoproto.jsontag) = "base_pic"];
+    // mis画框宽度
+    int32 d_width = 5 [(gogoproto.jsontag) = "d_width"];
+    // mis画框高度
+    int32 d_height = 6 [(gogoproto.jsontag) = "d_height"];
+}
+
+// placeInfo接口请求
+message PlaceInfoRequest {
+    // 待修改场地的ID（为0表示创建）
+    int64 ID = 1 [(gogoproto.jsontag) = "id", (gogoproto.moretags) = "validate:\"min=0\""];
+    // 状态
+    int32 Status = 2 [(gogoproto.jsontag) = "status", (gogoproto.moretags) = "validate:\"min=0,max=1\""];
+    // 场地名
+    string Name = 3 [(gogoproto.jsontag) = "name", (gogoproto.moretags) = "validate:\"max=16\""];
+    // 场地底图
+    string BasePic = 4 [(gogoproto.jsontag) = "base_pic", (gogoproto.moretags) = "validate:\"max=128\""];
+    // 场馆ID
+    int64 Venue = 5 [(gogoproto.jsontag) = "venue", (gogoproto.moretags) = "validate:\"min=1\""];
+    // mis画框宽度
+    int32 DWidth = 6 [(gogoproto.jsontag) = "d_width", (gogoproto.moretags) = "validate:\"min=0\""];
+    // mis画框高度
+    int32 DHeight = 7 [(gogoproto.jsontag) = "d_height", (gogoproto.moretags) = "validate:\"min=0\""];
+}
+
+// placeInfo接口返回
+message PlaceInfoReply {
+    // 操作结果
+    bool Success = 1 [(gogoproto.jsontag) = "success"];
+    // 操作场地ID
+    int64 ID = 2 [(gogoproto.jsontag) = "id"];
+}

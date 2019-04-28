@@ -1,0 +1,11 @@
+syntax = "proto3";
+package tests;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message Time { int64 Now = 1; }
+
+message BvcResponseMsg {
+  uint32 code = 1
+      [ (gogoproto.jsontag) = "code", (gogoproto.casttype) = "int64" ];
+}

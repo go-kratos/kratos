@@ -1,0 +1,68 @@
+version = "0.0.1"
+user    = "nobody"
+pid     = "/tmp/search-service.pid"
+dir     = "./"
+perf    = "127.0.0.1:7320"
+trace   = false
+debug   = false
+
+[xlog]
+dir = "/data/log/search-service/"
+
+
+[HTTPServer]
+    addr = "0.0.0.0:7322"
+    maxListen = 1000
+    timeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+
+[pagination]
+	pageNum = 1
+    pageSize = 30
+    maxPageNum = 5000
+    maxPageSize = 1000
+
+[es]
+    [es.archiveInternal]
+    addr = ["http://172.18.33.71:9200"]
+    [es.dmInternal]
+    addr = ["http://172.18.33.71:9200"]
+    [es.dmExternal]
+    addr = ["http://172.18.33.71:9200"]
+    [es.replyInternal]
+    addr = ["http://172.18.33.71:9200"]
+    [es.replyExternal]
+    addr = ["http://172.18.33.71:9200"]
+    [es.articleInternal]
+    addr = ["http://172.18.33.71:9200"]
+
+[redis]
+    name = "search-api"
+    proto = "tcp"
+    addr = "172.18.33.71:6379"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+
+[SMS]
+    phone = "17621966518"
+    token = "f5a658b2-5926-4b71-96c3-7d3777b7d256"
+
+[httpClient]
+    key = "app key"
+    secret = "app secret"
+    dial      = "100ms"
+    timeout   = "1s"
+    keepAlive = "60s"
+    timer     = 128
+    [httpClient.breaker]
+    window  ="10s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100

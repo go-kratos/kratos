@@ -1,0 +1,65 @@
+# This is a TOML document. Boom.
+
+[log]
+dir = "/data/log/workflow-job/"
+
+[statsd]
+project = "workflow-job"
+addr = "172.18.20.15:8200"
+chanSize = 10240
+
+[tracer]
+family = "workflow-job"
+proto = "unixgram"
+addr = "/var/run/dapper-collect/dapper-collect.sock"
+
+[HTTPServer]
+    addr = "0.0.0.0:7231"
+    maxListen = 1000
+    timeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+
+[orm]
+    [orm.write]
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_workflow?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 10
+    idle = 2
+    idleTimeout = "4h"
+    [orm.read]
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_workflow?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 10
+    idle = 2
+    idleTimeout = "4h"
+
+[redis]
+    name = "workflow-job"
+    proto = "tcp"
+    addr = "172.18.33.61:6889"
+    active = 30
+    idle = 30
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"    
+
+[httpSearch]
+    key = "6aa4286456d16b97"
+    secret = "351cf022e1ae8296109c3c524faafcc8"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.read.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[host]
+    searchURI = "http://manager.bilibili.co"
+    messageURI = "http://message.bilibili.co"
+
+[job]
+	expireProcTick = "5m"

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+package infra.databus;
+
+option go_package = "databus";
+
+message Header {
+    map<string, string> metadata = 1 [(gogoproto.jsontag) = "metadata"];
+}
+message MessagePB {
+	string key = 1 [(gogoproto.jsontag) = "key"];
+	bytes  value = 2 [(gogoproto.jsontag) = "value", (gogoproto.casttype) = "encoding/json.RawMessage"];
+	string topic = 3 [(gogoproto.jsontag) = "topic"];
+	int32  partition = 4 [(gogoproto.jsontag) = "partition"];
+	int64  offset = 5 [(gogoproto.jsontag) = "offset"];
+	int64  timestamp = 6 [(gogoproto.jsontag) = "timestamp"];	
+	map<string, string> metadata = 7 [(gogoproto.jsontag) = "metadata"];
+}

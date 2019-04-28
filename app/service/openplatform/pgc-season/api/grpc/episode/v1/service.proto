@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+option java_package = "pleiades.business.service.season.episode.v1";
+package pgc.service.season.episode.v1;
+option java_multiple_files = true;
+option go_package = "v1";
+
+import "app/service/openplatform/pgc-season/api/grpc/episode/v1/model.proto";
+
+// EpisodeInfoReq ep request param
+message EpisodeInfoReq {
+    // episode_ids
+    repeated int32 episode_ids = 1;
+}
+
+// EpAidReq aids request param
+message EpAidReq {
+    // aids
+    repeated int32 aids = 1;
+}
+
+// EpisodeInfoReply ep response
+message EpisodeInfoReply {
+    // infos
+    map<int32, EpisodeInfoProto> infos = 1;
+}
+
+// EpisodeCardsReply cards
+message EpisodeCardsReply {
+    // cards
+    map<int32, EpisodeCardsProto> cards = 1;
+}
+
+// EpReq epids请求参数
+message EpReq {
+    // aids
+    repeated int32 epids = 1;
+    // 是否要查出下架的 默认0
+    int32 need_all = 2;
+}
+
+// SectionEeq 请求参数
+message SectionEpisodeReq {
+    // sections
+    repeated int32 sections = 1;
+    // season_type
+    int32 season_type = 2;
+}
+
+// SectionReply 分节eps
+message SectionEpisodeReply {
+    // infos
+    map<int32, SectionEpisodeProto> episodes = 1;
+}
+
+// EpClearReq ClearCache请求参数
+message EpClearReq {
+    // ep_id
+    int32 ep_id = 1;
+    // aid
+    int32 aid = 2;
+}
+
+// EpisodeBadgeReq 请求参数
+message EpisodeBadgeReq {
+    //ep_id
+    int32 ep_id = 1;
+    // ep_status
+    int32 ep_status = 2;
+    // is_finished
+    int32 is_finished = 3;
+}
+
+// EpisodeBadgesReq 请求参数
+message EpisodeBadgesReq {
+    repeated EpisodeBadgeReq episode_badges = 1;
+}
+
+// EpisodeBadgesReply .
+message EpisodeBadgesReply {
+    map<int32, EpisodeBadgeProto> badges = 1;
+}
+
+// Episode service
+service Episode {
+    // 根据ep_ids 返回ep详情
+    rpc List (EpisodeInfoReq) returns (EpisodeInfoReply);
+    // 根据aids 返回ep详情
+    rpc ListByAids (EpAidReq) returns (EpisodeInfoReply);
+    // 根据section返回eps
+    rpc ListBySection (SectionEpisodeReq) returns (SectionEpisodeReply);
+    // 根据epid返回season,episode基本信息
+    rpc Cards (EpReq) returns (EpisodeCardsReply);
+    // 根据ep_id or aid清除mc缓存
+    rpc ClearCache (EpClearReq) returns (EmptyProto);
+    // 根据ep_ids 返回ep对应的badge
+    rpc Badges (EpisodeBadgesReq) returns (EpisodeBadgesReply);
+    // 根据aids 返回ep对应的EpisodeCards
+    rpc CardsByAids (EpAidReq) returns (EpisodeCardsReply);
+}

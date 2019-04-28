@@ -1,0 +1,263 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/dm2-job.pid"
+dir = "./"
+checkFile = "/data/www/dm2-job.html"
+
+[infoc2]
+taskID = "000279"
+proto = "tcp"
+addr = "172.18.33.125:15140"
+chanSize = 10240
+
+[db]
+    [db.dmwriter]
+    addr = "172.16.33.205:3310"
+    dsn = "test_3308:test_3308@tcp(172.16.33.205:3310)/bilibili_dm_meta?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8mb4"
+    active = 10
+    idle = 5
+    idleTimeout ="4h"
+    queryTimeout = "500ms"
+    execTimeout = "500ms"
+    tranTimeout = "500ms"
+    [db.dmwriter.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.dmreader]
+    addr = "172.16.33.205:3310"
+    dsn = "test_3308:test_3308@tcp(172.16.33.205:3310)/bilibili_dm_meta?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8mb4"
+    active = 10
+    idle = 5
+    idleTimeout ="4h"
+    queryTimeout = "500ms"
+    execTimeout = "500ms"
+    tranTimeout = "500ms"
+    [db.dmreader.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.biliDMWriter]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_dm?timeout=5s&readTimeout=5s&writeTimeout=15s&parseTime=true&loc=Local&charset=utf8"
+    active = 5
+    idle = 5
+    idleTimeout ="4h"
+    queryTimeout = "3s"
+    execTimeout = "3s"
+    tranTimeout = "3s"
+    [db.biliDMWriter.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[redis]
+    [redis.dm]
+    name = "dm2-job"
+    proto = "tcp"
+    addr = "127.0.0.1:6379"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+    [redis.dmRct]
+    name = "dm2-job"
+    proto = "tcp"
+    addr = "172.16.33.54:6379"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "720h"
+
+[memcache]
+    name = "dm2-job"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    expire = "24h"
+
+[subtitlememcache]
+    name = "dm2-job"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    expire = "24h"
+
+[archiveRPC]
+    group = "test"
+    timeout = "1s"
+
+[databus]
+    [databus.indexCsmr]
+    key = "0Pub71KvEMKXu63qtztq"
+    secret = "0Pub71KvEMKXu63qtztr"
+    group = "DMMeta-UGC-S"
+    topic = "DMMeta-T"
+    action = "sub"
+    name = "dm2-job"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "40s"
+    writeTimeout = "1s"
+    idleTimeout = "60s"
+    [databus.subjectCsmr]
+    key = "0Pub71KvEMKXu63qtztq"
+    secret = "0Pub71KvEMKXu63qtztr"
+    group = "DMSubject-UGC-S"
+    topic = "DMSubject-T"
+    action = "sub"
+    name = "dm2-job"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "40s"
+    writeTimeout = "1s"
+    idleTimeout = "60s"
+    [databus.actionCsmr]
+    key = "0Pub71KvEMKXu63qtztq"
+    secret = "0Pub71KvEMKXu63qtztr"
+    group = "DMAction-UGC-S"
+    topic = "DMAction-T"
+    action = "sub"
+    name = "dm2-job"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "40s"
+    writeTimeout = "1s"
+    idleTimeout = "60s"
+    [databus.reportCsmr]
+    key = "170e302355453683"
+    secret = "51b66df3ebeca2b08f0017f350b6f0ce"
+    group = "DMReport-MainCommunity-S"
+    topic = "DMReport-T"
+    action = "sub"
+    name = "dm2-job"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "40s"
+    writeTimeout = "1s"
+    idleTimeout = "60s"
+    [databus.videoupCsmr]
+    key = "170e302355453683"
+    secret = "3d0e8db7bed0503949e545a469789279"
+    group = "Videoup2Bvc-MainCommunity-S"
+    topic = "Videoup2Bvc"
+    action = "sub"
+    name = "dm2-job"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "40s"
+    writeTimeout = "1s"
+    idleTimeout = "60s"
+    [databus.subtitleAuditCsmr]
+    key = "170e302355453683"
+    secret = "3d0e8db7bed0503949e545a469789279"
+    group = "SubtitleCheck-MainCommunity-S"
+    topic = "SubtitleCheck-T"
+    action = "sub"
+    name = "dm2-job"
+    proto = "tcp"
+    addr = "172.16.38.154:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "40s"
+    writeTimeout = "1s"
+    idleTimeout = "60s"
+
+[httpClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "2s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[bfsClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "2s"
+    keepAlive = "60s"
+    timer = 1000
+    [bfsClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[host]
+    videoup = "http://uat-archive.api.bilibili.co"
+    mask = "http://172.22.33.111:8200"
+    datarank = "http://data-test.bilibili.co"
+    merakHost="http://merak.bilibili.co"
+
+[realname]
+    "1,2" = 2
+
+[seqRPC]
+    policy = "sharding"
+    timeout = "1s"
+
+[seq]
+    businessID = 10
+    token      = "Nf9phmDdzjTMW9M5V8YQuLpVTwhvn5IO"
+
+[maskCate]
+    tids=[185]
+    interval = "10m"
+
+[taskConf]
+	delInterval = "1m"
+	resInterval = "10m"
+	ResFieldLen = 7
+	DelNum      = 100
+	DelLimit    = 20
+    msgCC = ["guhao","fengduzhen"]
+    MsgPublicKey= "71f079db59672ecec5b8d6f252c4b59ab2a8a227mainsite@bilibili.com"
+    

@@ -1,0 +1,391 @@
+syntax = "proto3";
+
+// use {app_id}.{version} as package name
+package account.vip;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+message RegisterOpenIDReq {
+    int64 mid = 1;
+    int64 app_id = 2;
+}
+
+message RegisterOpenIDReply {
+     string open_id = 1;
+}
+
+message OpenBindByOutOpenIDReq {
+    string open_id = 1;
+    string out_open_id = 2;
+    int64 app_id = 3;
+}
+
+message OpenBindByOutOpenIDReply{
+}
+
+message UserInfoByOpenIDReq{
+    string ip = 1;
+    string open_id = 2;
+    int64 app_id = 3;
+}
+
+message UserInfoByOpenIDReply {
+    string name = 1;
+    int32 bind_state =2 [(gogoproto.jsontag) = "bind_state"]; 
+    string out_open_id =3;
+}
+
+message BindInfoByMidReq{
+    int64 mid = 1;
+    int64 app_id = 2;
+}
+
+message BindInfoByMidReply{
+    Account account =1;
+    BindOuter outer =2;
+}
+
+message Account {
+    int64 mid = 1;
+    string  name = 2;
+    string face =3;
+}
+
+message BindOuter {
+    string tel = 1;
+    int32 bind_state = 2 [(gogoproto.jsontag) = "bind_state"]; 
+}
+
+message BilibiliPrizeGrantReq{
+    string prize_key = 1;
+    string unique_no =2;
+    string open_id =3;
+    int64 app_id =4;
+}
+
+message BilibiliPrizeGrantReply{
+    double amount = 1;
+    double full_amount =2;
+    string description =3;
+}
+
+message BilibiliVipGrantReq{
+    string open_id = 1;
+    string out_open_id = 2;
+    string out_order_no = 3;
+    int32 duration = 4;
+    int64 app_id = 5;
+}
+
+message BilibiliVipGrantReply{
+}
+
+message CreateAssociateOrderReq {
+    int64 mid =1;
+    int32 month =2;
+    string platform=3;
+    string mobi_app =4;
+    string device = 5;
+    int64 appId = 6;
+    string appSubId = 7;
+    int32 orderType = 8;
+    int32 dtype =9;
+    string returnUrl = 10;
+    string coupon_token = 11;
+    int64 bmid = 12;
+    string panel_type = 13;
+    int64 build = 14;
+    string IP = 15;
+}
+
+message CreateAssociateOrderReply{
+    string pay_param = 1;
+    double dprice =2;
+    double oprice =3;
+    double coupon_money =4;
+}
+
+message AssociatePanelReq{
+    int64 mid = 1;
+    int32 SortTp =2;
+    string IP =3;
+    string MobiApp =4;
+    string Device =5;
+    string Platform =6;
+    int32 Plat =7;
+    string PanelType =8; 
+    int32 SubType =9;
+    int32 Month =10;
+    int64 Build =11;
+}
+
+message AssociatePanelReply{
+    repeated AssociatePanelInfo list = 1;
+}
+
+message AssociatePanelInfo {
+    int64 id =1;
+    int32 month=2;
+    string product_name=3;
+    string product_id=4;
+    int32 sub_type=5;
+    int32 suit_type=6;
+    double original_price =7;
+    double discount_price =8;
+    string discount_rate =9;
+    string remark =10;
+    int32 selected =11;
+    int32 pay_state =12 [(gogoproto.jsontag) = "pay_state"]; 
+    string pay_message =13;
+}
+
+message OpenAuthCallBackReq {
+    int64 mid  =1;
+    string third_code  =2;
+    int64 app_id =3;
+}
+
+message OpenAuthCallBackReply {
+
+}
+
+message EleRedPackagesReq {
+}
+
+message EleRedPackagesReply{
+    repeated ModelEleRedPackage list = 1;
+}
+
+message ModelEleRedPackage{
+   string  name =1;
+   double amount =2;
+   double sum_condition =3;
+}
+
+message EleSpecailFoodsReq{
+}
+
+message EleSpecailFoodsReply {
+    repeated ModelEleSpecailFoods list = 1;
+}
+
+message ModelEleSpecailFoods {
+    string restaurant_name = 1;
+    string food_name =2;
+    string food_url =3;
+    double  discount =4;
+    double amount = 5;
+    double original_amount = 6;
+    double rating_point =7;
+}
+
+message EleVipGrantReq{
+    string order_no =1;
+}
+
+message EleVipGrantReply{
+}
+
+message VipUserPanelReq{
+    int64 mid = 1;
+    int32 sortTp = 2;
+    string ip = 3;
+    string mobiApp = 4;
+    string device = 5;
+    string platform = 6;
+    int32 plat = 7;
+    string panelType = 8;
+    int32 subType = 9;
+    int32 month = 10;
+    int64 build = 11;
+    string lang = 12;
+}
+
+message VipUserPanelReply{
+    repeated ModelVipPanelInfo price_list =1;
+    CouponBySuitIDReply coupon =2;
+    int32 coupon_switch =3;
+    int32 code_switch = 4;
+    int32 give_switch = 5;
+    map<int32,ModelPrivilegeResp> privileges = 6;
+}
+
+message CouponBySuitIDReply{
+    string coupon_tip = 1;
+    ModelCouponAllowancePanelInfo  coupon_info = 2;
+}
+
+message ModelCouponAllowancePanelInfo{
+    string coupon_token = 1;
+    double coupon_amount = 2 [(gogoproto.jsontag) = "coupon_amount"];
+    int32 state = 3 [(gogoproto.jsontag) = "state"];
+    string full_limit_explain = 4;
+    string scope_explain = 5;
+    double full_amount = 6 [(gogoproto.jsontag) = "full_amount"];
+    double coupon_discount_price = 7 [(gogoproto.jsontag) = "coupon_discount_price"];
+    int64 start_time = 8 [(gogoproto.jsontag) = "start_time"];
+    int64 expire_time = 9 [(gogoproto.jsontag) = "expire_time"];
+    int32 selected = 10 [(gogoproto.jsontag) = "selected"];
+    string disables_explains = 11;
+    string order_no = 12;
+    string name = 13;
+    int32 usable = 14 [(gogoproto.jsontag) = "usable"];
+}
+
+message ModelVipPanelInfo {
+    int32 month = 1 [(gogoproto.jsontag) = "month"];
+    string product_name = 2;
+    string product_id = 3;
+    int32 sub_type = 4 [(gogoproto.jsontag) = "sub_type"];
+    int32 suit_type = 5 [(gogoproto.jsontag) = "suit_type"];
+    double original_price = 6 [(gogoproto.jsontag) = "original_price"];
+    double discount_price = 7 [(gogoproto.jsontag) = "discount_price"];
+    string discount_rate = 8;
+    string remark = 9;
+    int32 selected = 10  [(gogoproto.jsontag) = "selected"];
+    int64 id = 11 [(gogoproto.jsontag) = "id"];
+    int32 type = 12 [(gogoproto.jsontag) = "type"];
+}
+
+message ModelPrivilegeResp{
+    string title = 1;
+    repeated ModelPrivilege list = 2;
+}
+
+message ModelPrivilege {
+    string name = 1;
+    string icon_url = 2;
+    int32 type =3 [(gogoproto.jsontag) = "type"];
+}
+
+message CouponBySuitIDReq {
+    int64 mid = 1;
+    int64 sid = 2;
+    string mobiApp = 3;
+    string device = 4;
+    string platform = 5;
+    string panelType = 6;
+    int64 build = 7;
+}
+
+message WelfareReq{
+    int64 tid = 1;
+    int64 recommend = 2;
+    int64 ps = 3;
+    int64 pn = 4;
+}
+
+message WelfareReply{
+    int64 count = 1;
+    repeated WelfareListDetail list = 2;
+}
+
+message WelfareListDetail{
+    int32 id = 1 [(gogoproto.jsontag) = "id"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    string homepage_uri = 3 [(gogoproto.jsontag) = "homepage_uri"];
+    string backdrop_uri = 4 [(gogoproto.jsontag) = "backdrop_uri"];
+    int32 tid = 5 [(gogoproto.jsontag) = "tid"];
+    int32 rank = 6 [(gogoproto.jsontag) = "rank"];
+}
+
+message WelfareTypeReq{
+}
+
+message WelfareTypeReply{
+    repeated WelfareTypeListDetail list = 1;
+}
+
+message WelfareTypeListDetail{
+    int32 id = 1 [(gogoproto.jsontag) = "id"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+}
+
+message WelfareInfoReq{
+    int64 id = 1;
+    int64 mid = 2;
+}
+
+message WelfareInfoReply{
+    int32 id = 1 [(gogoproto.jsontag) = "id"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    string desc = 3 [(gogoproto.jsontag) = "desc"];
+    string homepage_uri = 4 [(gogoproto.jsontag) = "homepage_uri"];
+    string backdrop_uri = 5 [(gogoproto.jsontag) = "backdrop_uri"];
+    bool finished = 6 [(gogoproto.jsontag) = "finished"];
+    bool received = 7 [(gogoproto.jsontag) = "received"];
+    int64 vip_type = 8 [(gogoproto.jsontag) = "vip_type"];
+    int64 stime = 9 [(gogoproto.jsontag) = "stime"];
+    int64 etime = 10 [(gogoproto.jsontag) = "etime"];
+}
+
+message WelfareReceiveReq{
+    int64 wid = 1;
+    int64 mid = 2;
+}
+
+message WelfareReceiveReply{
+}
+
+message MyWelfareReq{
+    int64 mid = 1;
+}
+
+message MyWelfareReply{
+    repeated MyWelfareDetail list = 1;
+}
+
+message MyWelfareDetail{
+    int32 wid = 1 [(gogoproto.jsontag) = "wid"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    string desc = 3 [(gogoproto.jsontag) = "desc"];
+    int32 usage_form = 4 [(gogoproto.jsontag) = "usage_form"];
+    string receive_uri = 5 [(gogoproto.jsontag) = "receive_uri"];
+    string code = 6 [(gogoproto.jsontag) = "code"];
+    int64 stime = 7 [(gogoproto.jsontag) = "stime"];
+    int64 etime = 8 [(gogoproto.jsontag) = "etime"];
+    bool expired = 9 [(gogoproto.jsontag) = "expired"];
+}
+
+service Vip { 
+    // RegisterOpenIDReq register by mid. 
+    rpc RegisterOpenID(RegisterOpenIDReq) returns(RegisterOpenIDReply); 
+    // OpenBindByOutOpenID associate user bind by out_open_id [third -> bilibili].
+    rpc OpenBindByOutOpenID(OpenBindByOutOpenIDReq) returns(OpenBindByOutOpenIDReply);
+    // UserInfoByOpenID get userinfo by open_id.
+    rpc UserInfoByOpenID(UserInfoByOpenIDReq) returns(UserInfoByOpenIDReply); 
+    // BindInfoByMid bind info by mid[bilibili->third].
+    rpc BindInfoByMid(BindInfoByMidReq) returns(BindInfoByMidReply);   
+    // BilibiliPrizeGrant bilibili associate vip grant.
+    rpc BilibiliPrizeGrant(BilibiliPrizeGrantReq) returns(BilibiliPrizeGrantReply); 
+    // BilibiliVipGrant bilibili associate vip grant.
+    rpc BilibiliVipGrant(BilibiliVipGrantReq) returns(BilibiliVipGrantReply); 
+    // CreateAssociateOrder create associate order.
+    rpc CreateAssociateOrder(CreateAssociateOrderReq) returns(CreateAssociateOrderReply);
+    // AssociatePanel associate panel.
+    rpc AssociatePanel(AssociatePanelReq) returns(AssociatePanelReply);
+    // OpenAuthCallBack third open call back.
+    rpc OpenAuthCallBack(OpenAuthCallBackReq) returns(OpenAuthCallBackReply);
+    // EleRedPackages ele red packages.
+    rpc EleRedPackages(EleRedPackagesReq) returns(EleRedPackagesReply);
+    // EleRedPackages ele specail foods.
+    rpc EleSpecailFoods(EleSpecailFoodsReq) returns(EleSpecailFoodsReply);
+    // EleVipGrant ele vip grant [bilibili -> third].
+    rpc EleVipGrant(EleVipGrantReq) returns(EleVipGrantReply);
+    // VipUserPanel vip user panel
+    rpc VipUserPanel(VipUserPanelReq) returns(VipUserPanelReply);
+    // CouponBySuitID get coupon by mid and suit info.
+    rpc CouponBySuitID(CouponBySuitIDReq) returns(CouponBySuitIDReply);
+    // WelfareList get Welfare list
+    rpc WelfareList(WelfareReq) returns(WelfareReply);
+    // WelfareTypeList get Welfare type list
+    rpc WelfareTypeList(WelfareTypeReq) returns(WelfareTypeReply);
+    // WelfareInfo get Welfare detail
+    rpc WelfareInfo(WelfareInfoReq) returns(WelfareInfoReply);
+    // WelfareReceive receive welfare
+    rpc WelfareReceive(WelfareReceiveReq) returns(WelfareReceiveReply);
+    // MyWelfare get my welfares
+    rpc MyWelfare(MyWelfareReq) returns(MyWelfareReply);
+}

@@ -1,0 +1,121 @@
+[rpcServer]
+    proto = "tcp"
+    addr = "0.0.0.0:7249"
+[grpc]
+timeout = "1s"
+addr = "0.0.0.0:7245"
+[bm]
+    addr = "0.0.0.0:7246"
+     timeout = "1s"
+
+[redis]
+    name = "thumbup-service"
+    proto = "tcp"
+    addr = "172.18.33.60:6981"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+	StatsExpire     = "6h"
+	UserLikesExpire = "1h"
+	ItemLikesExpire = "6h"
+
+
+[tidb]
+    addr = "172.22.34.51"
+    dsn = "likes:wy5taQn9CBKy9z5elbZQjnwMZOgpzk0r@tcp(172.22.34.51:4000)/bilibili_likes?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+  [tidb.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[memcache]
+    name = "thumbup-service"
+    proto = "tcp"
+    addr = "172.18.33.61:11230"
+    idle = 10
+    active = 10
+    dialTimeout = "2s"
+    readTimeout = "2s"
+    writeTimeout = "2s"
+    idleTimeout = "7h"
+    StatsExpire = "6h"
+
+[statDatabus]
+    key = "9765cdac5894f2ba"
+    secret = "f4237d712c3ed1e7fab0137b81418b14"
+    group= "StatLike-MainWebSvr-P"
+    topic= "StatLike-T"
+    action="pub"
+    name = "thumbup-service/stat-pub"
+    proto = "tcp"
+    addr = "172.22.33.174:6205"
+    active = 5
+    idle = 1
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[likeDatabus]
+    key = "9765cdac5894f2ba"
+    secret = "f4237d712c3ed1e7fab0137b81418b14"
+    group = "Thumbup-MainWebSvr-P"
+    topic = "Thumbup-T"
+    action = "pub"
+    buffer = 2048
+    name = "thumbup-pub"
+    proto = "tcp"
+    addr = "172.22.33.174:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "1s"
+
+[itemDatabus]
+    key = "9765cdac5894f2ba"
+    secret = "f4237d712c3ed1e7fab0137b81418b14"
+    group= "ThumbupItem-MainWebSvr-P"
+    topic= "ThumbupItem-T"
+    action="pub"
+    name = "thumbup-service/item-pub"
+    proto = "tcp"
+    addr = "172.22.33.174:6205"
+    active = 5
+    idle = 1
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[userDatabus]
+    key = "9765cdac5894f2ba"
+    secret = "f4237d712c3ed1e7fab0137b81418b14"
+    group= "ThumbupUser-MainWebSvr-P"
+    topic= "ThumbupUser-T"
+    action="pub"
+    name = "thumbup-service/item-pub"
+    proto = "tcp"
+    addr = "172.22.33.174:6205"
+    active = 5
+    idle = 1
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+[rate]
+    [rate.urls]
+        "/x/internal/thumbup/update_upmids" = {limit = 10000.0, burst = 10000}
+[thumbup]

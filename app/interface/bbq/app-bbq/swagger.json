@@ -1,0 +1,284 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "go-common api",
+    "description": "api",
+    "version": "1.0",
+    "contact": {
+      "email": "lintanghui@bilibili.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "paths": {
+    "/bbq/app-bbq/sv/list/": {
+      "get": {
+        "operationId": "/bbq/app-bbq/sv/list/",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pagesize",
+            "description": " 最大值 20",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "MID",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "Device",
+            "type": "object"
+          },
+          {
+            "in": "query",
+            "name": "qn",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "RemoteIP",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/VideoResponse",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "UserCard": {
+      "title": "UserCard",
+      "description": "UserCard 主站返回的用户信息",
+      "type": "object",
+      "properties": {
+        "Face": {
+          "type": "string"
+        },
+        "Level": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "MID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Rank": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Sex": {
+          "type": "string"
+        },
+        "Sign": {
+          "type": "string"
+        },
+        "VIPInfo": {
+          "$ref": "#/definitions/VIPInfo",
+          "type": "object"
+        }
+      }
+    },
+    "VideoPlay": {
+      "title": "VideoPlay",
+      "description": "VideoPlay playinfo",
+      "type": "object",
+      "properties": {
+        "CID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "CurrentTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ExpireTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "FileInfo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FileInfo",
+            "type": "object"
+          }
+        },
+        "Fnval": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Fnver": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Quality": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "SupportDescription": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "SupportFormats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "SupportQuality": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "URL": {
+          "type": "string"
+        },
+        "VideoCodeCID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "VideoProject": {
+          "type": "boolean"
+        }
+      }
+    },
+    "VideoResponse": {
+      "title": "VideoResponse",
+      "description": "VideoResponse 返回视频结构",
+      "type": "object",
+      "properties": {
+        "AVID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "CID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Content": {
+          "type": "string"
+        },
+        "Ctime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Duration": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "From": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "IsLike": {
+          "type": "boolean"
+        },
+        "Like": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "MID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Pic": {
+          "type": "string"
+        },
+        "Play": {
+          "$ref": "#/definitions/VideoPlay",
+          "type": "object"
+        },
+        "Pubtime": {
+          "type": "string"
+        },
+        "Reply": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "SVID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Share": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Tag": {
+          "type": "string"
+        },
+        "Tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/VideoTag",
+            "type": "object"
+          }
+        },
+        "Title": {
+          "type": "string"
+        },
+        "UserInfo": {
+          "$ref": "#/definitions/UserCard",
+          "type": "object"
+        }
+      }
+    },
+    "VideoTag": {
+      "title": "VideoTag",
+      "description": "VideoTag 视屏标签",
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Type": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  }
+}

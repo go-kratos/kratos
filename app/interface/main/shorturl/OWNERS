@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- haoguanwei
+- peiyifei
+- zhapuyu
+- zhoushuguang
+labels:
+- interface
+- interface/main/shorturl
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- haoguanwei
+- peiyifei

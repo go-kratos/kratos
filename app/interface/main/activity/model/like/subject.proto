@@ -1,0 +1,73 @@
+syntax = "proto3";
+package activity.service;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "like";
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message SubjectItem {
+    int64 ID =  1 [(gogoproto.jsontag) ="id"];
+    int64 Oid =  2 [(gogoproto.jsontag) ="oid"];
+    int64 Type =  3 [(gogoproto.jsontag) ="type"];
+    int64 State =  4 [(gogoproto.jsontag) ="state"];
+    int64 Stime = 5 [(gogoproto.jsontag) ="stime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Etime = 6 [(gogoproto.jsontag) ="etime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Ctime = 7 [(gogoproto.jsontag) ="ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Mtime = 8 [(gogoproto.jsontag) ="mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string Name =  9 [(gogoproto.jsontag) ="name"];
+    string Author =  10 [(gogoproto.jsontag) ="author"];
+    string ActURL =  11 [(gogoproto.jsontag) ="act_url"];
+    int64 Lstime = 12 [(gogoproto.jsontag) ="lstime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Letime = 13 [(gogoproto.jsontag) ="letime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string Cover =  14 [(gogoproto.jsontag) ="cover"];
+    string Dic =  15 [(gogoproto.jsontag) ="dic"];
+    int64 Flag =  16 [(gogoproto.jsontag) ="flag"];
+    int64 Uetime = 17 [(gogoproto.jsontag) ="uetime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Ustime = 18 [(gogoproto.jsontag) ="ustime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Level =  19 [(gogoproto.jsontag) ="level"];
+    string H5_cover =  20 [(gogoproto.jsontag) ="h5_cover"];
+    int64 Rank =  21 [(gogoproto.jsontag) ="rank"];
+    int64 LikeLimit = 22 [(gogoproto.jsontag) ="like_limit"];
+    string AndroidURL = 23 [(gogoproto.jsontag) = "android_url"];
+    string IosURL = 24 [(gogoproto.jsontag) = "ios_url"];
+    int64 DailyLikeLimit = 25 [(gogoproto.jsontag) ="daily_like_limit"];
+    int64 DailySingleLikeLimit = 26 [(gogoproto.jsontag) ="daily_single_like_limit"];
+ }
+
+
+message LikeContent {
+    int64 ID =  1 [(gogoproto.jsontag) ="id"];
+    string Message =  2 [(gogoproto.jsontag) ="message"];
+    int64 IP =  3 [(gogoproto.jsontag) ="ip"];
+    int64 Plat =  4 [(gogoproto.jsontag) ="plat"];
+    int64 Device =  5 [(gogoproto.jsontag) ="device"];
+    int64 Ctime = 6 [(gogoproto.jsontag) ="ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Mtime = 7 [(gogoproto.jsontag) ="mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string Image =  8 [(gogoproto.jsontag) ="image"];
+    string Reply =  9 [(gogoproto.jsontag) ="reply"];
+    string Link =  10 [(gogoproto.jsontag) ="link"];
+    string ExName =  11 [(gogoproto.jsontag) ="ex_name"];
+}
+
+message ActSubjectProtocol {
+    int64 ID =  1 [(gogoproto.jsontag) ="id"];
+    int64 Sid =  2 [(gogoproto.jsontag) ="sid"];
+    string Protocol =  3 [(gogoproto.jsontag) ="protocol"];
+    int64 Mtime = 4 [(gogoproto.jsontag) ="mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Ctime = 5 [(gogoproto.jsontag) ="ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string Types =  6 [(gogoproto.jsontag) ="types"];
+    string Tags =  7 [(gogoproto.jsontag) ="tags"];
+    int64 Pubtime = 8 [(gogoproto.jsontag) ="pubtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Deltime = 9 [(gogoproto.jsontag) ="deltime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Editime = 10 [(gogoproto.jsontag) ="editime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Hot =  11 [(gogoproto.jsontag) ="hot"];
+    int64 BgmID =  12 [(gogoproto.jsontag) ="bgm_id"];
+    int64 PasterID =  13 [(gogoproto.jsontag) ="paster_id"];
+    string Oids =  14 [(gogoproto.jsontag) ="oids"];
+    int64 ScreenSet =  15 [(gogoproto.jsontag) ="screen_set"];
+}

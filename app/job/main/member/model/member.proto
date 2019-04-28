@@ -1,0 +1,50 @@
+syntax = "proto3";
+package model;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message LevelInfo {
+    int32 Cur = 1 [(gogoproto.jsontag) = "current_level"];
+    int32 Min = 2 [(gogoproto.jsontag) = "current_min"];
+    int32 NowExp = 3 [(gogoproto.jsontag) = "current_exp,omitempty"];
+    int32 NextExp = 4 [(gogoproto.jsontag) = "next_exp"];
+}
+message PendantInfo {
+    int32 Pid = 1 [(gogoproto.jsontag) = "pid",(gogoproto.casttype) = "int"];
+    string Name = 2 [(gogoproto.jsontag) = "name"];
+    string Image = 3 [(gogoproto.jsontag) = "image"];
+    int64 Expire = 4 [(gogoproto.jsontag) = "expire",(gogoproto.casttype) = "int"];
+}
+message NameplateInfo {
+    int32 Nid = 1 [(gogoproto.jsontag) = "nid",(gogoproto.casttype) = "int"];
+    string Name = 2 [(gogoproto.jsontag) = "name"];
+    string Image = 3 [(gogoproto.jsontag) = "image"];
+    string ImageSmall = 4 [(gogoproto.jsontag) = "image_small"];
+    string Level = 5 [(gogoproto.jsontag) = "level"];
+    string Condition = 6 [(gogoproto.jsontag) = "condition"];
+}
+message OfficialInfo {
+    int32 Type = 7 [(gogoproto.jsontag) = "type",(gogoproto.casttype) = "int8"];
+    string Desc = 8 [(gogoproto.jsontag) = "desc"];
+}
+
+message BaseInfo {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    string Name = 2 [(gogoproto.jsontag) = "name"];
+    int64 Sex = 3 [(gogoproto.jsontag) = "sex"];
+    string Face = 4 [(gogoproto.jsontag) = "face"];
+    string Sign = 5 [(gogoproto.jsontag) = "sign"];
+    int64 Rank = 8 [(gogoproto.jsontag) = "rank"];
+    int64 Birthday = 9 [(gogoproto.jsontag) = "birthday", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 CTime = 10 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 11 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+message Detail {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    int64 Birthday = 2 [(gogoproto.jsontag) = "birthday", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Place = 3 [(gogoproto.jsontag) = "place"];
+    int64 Marital = 4 [(gogoproto.jsontag) = "marital"];
+    int64 Dating = 5 [(gogoproto.jsontag) = "dating"];
+    string Tags = 6 [(gogoproto.jsontag) = "tags"];
+    int64 CTime = 7 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 8 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}

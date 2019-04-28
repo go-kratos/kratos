@@ -1,0 +1,13 @@
+syntax = "proto3";
+package live.xuser;
+option go_package = "grpc";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+enum Platform {
+    UNKNOWN = 0;
+    PC = 1;
+    ANDROID = 2;
+    IOS = 3;
+    H5 = 4;
+}

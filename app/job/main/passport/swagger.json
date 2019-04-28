@@ -1,0 +1,16 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "go-common api",
+    "description": "api",
+    "version": "1.0",
+    "contact": {
+      "email": "lintanghui@bilibili.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "paths": {}
+}

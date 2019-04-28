@@ -1,0 +1,49 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "root"
+pid = "/tmp/live-broadcast-proxy.pid"
+dir = "./"
+perf = "0.0.0.0:20215"
+family = "live-broadcast-proxy"
+trace = true
+debug = true
+
+[log]
+#dir = "/data/log/broadcast-proxy"
+vlevel = 100
+stdout = true
+
+[http]
+address = "0.0.0.0:20214"
+
+[backend]
+maxIdleConnsPerHost = 512
+probePath = "/monitor/ping"
+backendServer = ["172.18.33.69:7172","172.18.33.119:80", "172.16.38.159:80", "172.16.38.159:7172"]
+probesample = 100
+
+[zookeeper]
+address = ["172.18.33.171:2182"]
+timeout = "5s"
+configpath = "/live/setting/live_broadcast_proxy"
+
+[sinaip]
+data = "/data/conf/sinaip.dat"
+
+[ipip]
+v4= "/data/conf/v4.ipdb"
+v6= "/data/conf/v6.ipdb"
+
+[dispatch]
+maxlimit = 2
+defaultdomain = "broadcastlv.chat.bilibili.com"
+wildcarddomainsuffix=".chat.bilibili.com"
+filename="dispatch.json"
+
+[sven]
+treeID="24639"
+zone="sh001"
+env="prod"
+build="docker-1"
+token="768e1f6f4c3f4c545c8c89852c02fea6"

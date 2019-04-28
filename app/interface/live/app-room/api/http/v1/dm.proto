@@ -1,0 +1,39 @@
+syntax = "proto3";
+package live.approom.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message SendDMReq {
+    int64  roomid   = 1  [(gogoproto.moretags) = 'form:"cid" validate:"required"'];
+    string msg      = 2  [(gogoproto.moretags) = 'form:"msg" validate:"required"'];
+    string rnd      = 3  [(gogoproto.moretags) = 'form:"rnd" validate:"required"'];
+    int64  fontsize = 4  [(gogoproto.moretags) = 'form:"fontsize" validate:"required"'];
+    int64  mode     = 5  [(gogoproto.moretags) = 'form:"mode" validate:"gte=0"'];
+    int64  color    = 6  [(gogoproto.moretags) = 'form:"color" validate:"required"'];
+    int64  bubble   = 7  [(gogoproto.moretags) = 'form:"bubble"'];
+    int64  build    = 8  [(gogoproto.moretags) = 'form:"build"'];
+    string anti     = 9  [(gogoproto.moretags) = 'form:"_anti"'];
+    string platform = 10 [(gogoproto.moretags) = 'form:"platform"'];
+}
+
+message SendMsgResp {
+
+}
+
+
+message HistoryReq {
+    int64 roomid = 1 [(gogoproto.moretags) = 'form:"room_id" validate:"required"'];
+}
+
+message HistoryResp {
+    repeated string Room   = 1;
+    repeated string Admin = 2;
+}
+
+service DM{
+    // `method:"POST"`
+    rpc SendMsg(SendDMReq)     returns (SendMsgResp);
+    // `method:"POST"`
+    rpc GetHistory(HistoryReq) returns (HistoryResp);
+}

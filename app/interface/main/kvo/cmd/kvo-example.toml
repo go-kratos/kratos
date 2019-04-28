@@ -1,0 +1,95 @@
+#  toml config
+version = "1.0.0"
+user = "nobody"
+pid= "/Users/bilibili/log/kvo.pid"
+perf = "127.0.0.1:6690"
+checkFile = "/Users/bilibili/log/kvo.html"
+dir = "./"
+family = "kvo"
+address = ""
+
+env  = "test"
+docLimit = 102400
+
+[mysql]
+addr   = "localhost:3306"
+dsn    = "root:123@tcp(localhost:3306)/bilibili_kvo?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle   = 2
+idleTimeout  = "4h"
+queryTimeout = "500ms"
+execTimeout  = "500ms"
+tranTimeout  = "500ms"
+[mysql.breaker]
+window = "1s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+    
+[xlog]
+dir = "/Users/bilibili/log/kvo/"
+    [xlog.elk]
+    project = "kvo"
+    addr = "172.18.20.17:8520"
+    chanSize = 10240
+
+[tracer]
+proto = "udp"
+addr  = "172.16.33.46:5140"
+tag   = "platform/kvo"
+
+
+[multiHttp]
+    [multiHttp.outer]
+    addrs     = ["0.0.0.0:6691"]
+    maxListen = 100
+    [multiHttp.local]
+    addrs     = ["0.0.0.0:6692"]
+    maxListen = 100
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0    
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 5
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    [identify.host]
+    auth = "http://passport.bilibili.co"
+    secret = "http://open.bilibili.co"
+    [identify.httpClient]
+    key = "e7482d29be4a95b8"
+    secret = "9e803791cdef756e75faee68e12b7442"
+    dial = "300ms"
+    timeout = "500ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "300ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[memcache]
+expire = "10s"
+    [memcache.kvo]
+    name = "kvo"
+    proto = "tcp"
+    addr = "localhost:11211"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"

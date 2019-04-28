@@ -1,0 +1,21 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- hejianbing
+- wanghuan01
+- wangyuzhe
+- xiequan
+- zhaogangtao
+- zhoujiahui
+labels:
+- admin
+- admin/main/credit
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- haoguanwei
+- hejianbing
+- wangyuzhe
+- xiequan
+- zhaogangtao

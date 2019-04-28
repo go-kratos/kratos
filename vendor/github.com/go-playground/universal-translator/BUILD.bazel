@@ -1,0 +1,29 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "errors.go",
+        "import_export.go",
+        "translator.go",
+        "universal_translator.go",
+    ],
+    importmap = "go-common/vendor/github.com/go-playground/universal-translator",
+    importpath = "github.com/go-playground/universal-translator",
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/github.com/go-playground/locales:go_default_library"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,2159 @@
+default:
+  labels:
+  - addedBy: approvers
+    color: 0ffa16
+    description: Indicates a PR has been approved by an approver from all required
+      OWNERS files.
+    name: approved
+    prowPlugin: approve
+    target: prs
+  - addedBy: humans
+    color: fef2c0
+    description: Indicates a cherrypick PR into a release branch has been approved
+      by the release branch manager.
+    name: cherrypick-approved
+    target: prs
+  - addedBy: humans
+    color: fef2c0
+    description: Denotes a PR to master as a candidate for cherry picking into a release
+      branch.
+    name: cherrypick-candidate
+    target: prs
+  - addedBy: humans
+    color: d455d0
+    description: Indicates an issue is a duplicate of other open issue.
+    name: triage/duplicate
+    target: both
+  - addedBy: humans
+    color: d455d0
+    description: Indicates an issue needs more information in order to work on it.
+    name: triage/needs-information
+    target: both
+  - addedBy: humans
+    color: d455d0
+    description: Indicates an issue can not be reproduced as described.
+    name: triage/not-reproducible
+    target: both
+  - addedBy: humans
+    color: d455d0
+    description: Indicates an issue that is a support question.
+    name: triage/support
+    target: both
+  - addedBy: humans
+    color: d455d0
+    description: Indicates an issue that can not or will not be resolved.
+    name: triage/unresolved
+    target: both
+  - addedBy: anyone
+    color: c0ff4a
+    description: Denotes an issue or PR intended to be handled by the code of conduct
+      committee.
+    name: committee/conduct
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: c0ff4a
+    description: Denotes an issue or PR intended to be handled by the steering committee.
+    name: committee/steering
+    prowPlugin: label
+    target: both
+  - addedBy: prow
+    color: e11d21
+    description: Indicates the PR's author has not signed the CNCF CLA.
+    name: 'cncf-cla: no'
+    prowPlugin: cla
+    target: prs
+  - addedBy: prow
+    color: bfe5bf
+    description: Indicates the PR's author has signed the CNCF CLA.
+    name: 'cncf-cla: yes'
+    prowPlugin: cla
+    target: prs
+  - addedBy: humans
+    color: e11d21
+    description: DEPRECATED. Indicates that a PR should not merge. Label can only
+      be manually applied/removed.
+    name: do-not-merge
+    target: prs
+  - addedBy: prow
+    color: e11d21
+    description: Indicates that a PR should not merge because it touches files in
+      blocked paths.
+    name: do-not-merge/blocked-paths
+    prowPlugin: blockade
+    target: prs
+  - addedBy: mungegithub cherrypick-label-unapproved munger
+    color: e11d21
+    description: Indicates that a PR is not yet approved to merge into a release branch.
+    name: do-not-merge/cherry-pick-not-approved
+    target: prs
+  - addedBy: anyone
+    color: e11d21
+    description: Indicates that a PR should not merge because someone has issued a
+      /hold command.
+    name: do-not-merge/hold
+    prowPlugin: hold
+    target: prs
+  - addedBy: prow
+    color: e11d21
+    description: Indicates that a PR should not merge because it has an invalid OWNERS
+      file in it.
+    name: do-not-merge/invalid-owners-file
+    prowPlugin: verify-owners
+    target: prs
+  - addedBy: prow
+    color: e11d21
+    description: Indicates that a PR should not merge because it's missing one of
+      the release note labels.
+    name: do-not-merge/release-note-label-needed
+    prowPlugin: releasenote
+    target: prs
+  - addedBy: prow
+    color: e11d21
+    description: Indicates that a PR should not merge because it is a work in progress.
+    name: do-not-merge/work-in-progress
+    prowPlugin: wip
+    target: prs
+  - addedBy: anyone
+    color: 7057ff
+    description: Denotes an issue ready for a new contributor, according to the "help
+      wanted" guidelines.
+    name: good first issue
+    prowPlugin: help
+    target: issues
+  - addedBy: anyone
+    color: 006b75
+    description: Denotes an issue that needs help from a contributor. Must meet "help
+      wanted" guidelines.
+    name: help wanted
+    prowPlugin: help
+    target: issues
+  - addedBy: anyone
+    color: e11d21
+    description: Categorizes issue or PR as related to a bug.
+    name: kind/bug
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: c7def8
+    description: Categorizes issue or PR as related to cleaning up code, process,
+      or technical debt.
+    name: kind/cleanup
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: c7def8
+    description: Categorizes issue or PR as related to design.
+    name: kind/design
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: c7def8
+    description: Categorizes issue or PR as related to documentation.
+    name: kind/documentation
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: e11d21
+    description: Categorizes issue or PR as related to a consistently or frequently
+      failing test.
+    name: kind/failing-test
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: c7def8
+    description: Categorizes issue or PR as related to a new feature.
+    name: kind/feature
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: f7c6c7
+    description: Categorizes issue or PR as related to a flaky test.
+    name: kind/flake
+    prowPlugin: label
+    target: both
+  - addedBy: reviewers or members
+    color: 15dd18
+    description: Indicates that a PR is ready to be merged.
+    name: lgtm
+    prowPlugin: lgtm
+    target: prs
+  - addedBy: anyone
+    color: d3e2f0
+    description: Indicates that an issue or PR should not be auto-closed due to staleness.
+    name: lifecycle/frozen
+    prowPlugin: lifecycle
+    target: both
+  - addedBy: anyone
+    color: 8fc951
+    description: Indicates that an issue or PR is actively being worked on by a contributor.
+    name: lifecycle/active
+    prowPlugin: lifecycle
+    target: both
+  - addedBy: anyone or [@fejta-bot](https://github.com/fejta-bot) via [periodic-test-infra-rotten
+      prowjob](https://prow.k8s.io/?job=periodic-test-infra-rotten)
+    color: "604460"
+    description: Denotes an issue or PR that has aged beyond stale and will be auto-closed.
+    name: lifecycle/rotten
+    prowPlugin: lifecycle
+    target: both
+  - addedBy: anyone or [@fejta-bot](https://github.com/fejta-bot) via [periodic-test-infra-stale
+      prowjob](https://prow.k8s.io/?job=periodic-test-infra-stale)
+    color: "795548"
+    description: Denotes an issue or PR has remained open with no activity and has
+      become stale.
+    name: lifecycle/stale
+    target: ""
+  - addedBy: prow
+    color: b60205
+    description: Indicates a PR that requires an org member to verify it is safe to
+      test.
+    name: needs-ok-to-test
+    prowPlugin: trigger
+    target: prs
+  - addedBy: prow
+    color: BDBDBD
+    description: Indicates a PR cannot be merged because it has merge conflicts with
+      HEAD.
+    name: needs-rebase
+    prowPlugin: needs-rebase
+    target: prs
+  - addedBy: anyone
+    color: fef2c0
+    description: Lowest priority. Possibly useful, but not yet enough support to actually
+      get it done.
+    name: priority/awaiting-more-evidence
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: fbca04
+    description: Higher priority than priority/awaiting-more-evidence.
+    name: priority/backlog
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: e11d21
+    description: Highest priority. Must be actively worked on as someone's top priority
+      right now.
+    name: priority/critical-urgent
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: eb6420
+    description: Important over the long term, but may not be staffed and/or may need
+      multiple releases to complete.
+    name: priority/important-longterm
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: eb6420
+    description: Must be staffed and worked on either currently, or very soon, ideally
+      in time for the next release.
+    name: priority/important-soon
+    prowPlugin: label
+    target: both
+  - addedBy: humans
+    color: ffaa00
+    description: DEPRECATED.
+    name: queue/blocks-others
+    target: prs
+  - addedBy: humans
+    color: ffaa00
+    description: DEPRECATED.
+    name: queue/critical-fix
+    target: prs
+  - addedBy: humans
+    color: ffaa00
+    description: DEPRECATED.
+    name: queue/fix
+    target: prs
+  - addedBy: humans
+    color: ffaa00
+    description: DEPRECATED.
+    name: queue/multiple-rebases
+    target: prs
+  - addedBy: prow
+    color: c2e0c6
+    description: Denotes a PR that will be considered when it comes time to generate
+      release notes.
+    name: release-note
+    prowPlugin: releasenote
+    target: prs
+  - addedBy: prow
+    color: c2e0c6
+    description: Denotes a PR that introduces potentially breaking changes that require
+      user action.
+    name: release-note-action-required
+    prowPlugin: releasenote
+    target: prs
+  - addedBy: prow or member or author
+    color: c2e0c6
+    description: Denotes a PR that doesn't merit a release note.
+    name: release-note-none
+    prowPlugin: releasenote
+    target: prs
+  - addedBy: humans
+    color: eb6420
+    description: Indicates that a PR doesn't need to be retested prior to merge.
+    name: retest-not-required
+    target: prs
+  - addedBy: prow
+    color: fbca04
+    description: Indicates that a PR doesn't need to be retested prior to merge because
+      it only changes docs.
+    name: retest-not-required-docs-only
+    prowPlugin: docs-no-retest
+    target: prs
+  - addedBy: prow
+    color: ee9900
+    description: Denotes a PR that changes 100-499 lines, ignoring generated files.
+    name: size/L
+    prowPlugin: size
+    target: prs
+  - addedBy: prow
+    color: eebb00
+    description: Denotes a PR that changes 30-99 lines, ignoring generated files.
+    name: size/M
+    prowPlugin: size
+    target: prs
+  - addedBy: prow
+    color: 77bb00
+    description: Denotes a PR that changes 10-29 lines, ignoring generated files.
+    name: size/S
+    prowPlugin: size
+    target: prs
+  - addedBy: prow
+    color: ee5500
+    description: Denotes a PR that changes 500-999 lines, ignoring generated files.
+    name: size/XL
+    prowPlugin: size
+    target: prs
+  - addedBy: prow
+    color: "009900"
+    description: Denotes a PR that changes 0-9 lines, ignoring generated files.
+    name: size/XS
+    prowPlugin: size
+    target: prs
+  - addedBy: prow
+    color: ee0000
+    description: Denotes a PR that changes 1000+ lines, ignoring generated files.
+    name: size/XXL
+    prowPlugin: size
+    target: prs
+  - addedBy: 'members of a configurable github team. default: [@kubernetes/kubernetes-milestone-maintainers](https://github.com/orgs/kubernetes/teams/kubernetes-milestone-maintainers/members)'
+    color: fef2c0
+    description: Used during release burndown. Denotes an issue or PR is approved
+      to be part of the release
+    name: status/approved-for-milestone
+    prowPlugin: milestonestatus
+    target: both
+  - addedBy: 'members of a configurable github team. default: [@kubernetes/kubernetes-milestone-maintainers](https://github.com/orgs/kubernetes/teams/kubernetes-milestone-maintainers/members)'
+    color: fef2c0
+    description: Used during release burndown. Denotes that an issue is actively being
+      worked.
+    name: status/in-progress
+    prowPlugin: milestonestatus
+    target: both
+  - addedBy: 'members of a configurable github team. default: [@kubernetes/kubernetes-milestone-maintainers](https://github.com/orgs/kubernetes/teams/kubernetes-milestone-maintainers/members)'
+    color: fef2c0
+    description: Used during release burndown. Denotes that a fix for an issue is
+      actively being reviewed.
+    name: status/in-review
+    prowPlugin: milestonestatus
+    target: both
+  - addedBy: anyone
+    color: eb6420
+    description: library
+    name: library
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: f1f442
+    description: Live Department
+    name: live
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: f1f442
+    description: MTC
+    name: main
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: f1f442
+    description: Ops Department
+    name: ops
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: f1f442
+    description: EP Department
+    name: ep
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: f1f442
+    description: Openplatform Department
+    name: openplatform
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: f1f442
+    description: BBQ Department
+    name: bbq
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: f1f442
+    description: Video Department
+    name: video
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: ffb3a7
+    description: business application
+    name: business
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: ffb3a7
+    description: admin
+    name: admin
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: ffb3a7
+    description: common
+    name: common
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: ffb3a7
+    description: infra
+    name: infra
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: ffb3a7
+    description: interface
+    name: interface
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: ffb3a7
+    description: job
+    name: job
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: ffb3a7
+    description: service
+    name: service
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: ffb3a7
+    description: tool
+    name: tool
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: ffb3a7
+    description: vendor
+    name: vendor
+    prowPlugin: label
+    target: both
+  - addedBy: anyone
+    color: 4B0082
+    description: create a new project
+    name: new-project
+    prowPlugin: label
+    target: both
+  - addedBy: label
+    color: 0052cc
+    description: Issues or PRs related to config
+    name: area/chore
+    target: both
+repos:
+  platform/go-common:
+    labels:
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/ep/melloi
+      name: admin/ep/melloi
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/ep/merlin
+      name: admin/ep/merlin
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/ep/saga
+      name: admin/ep/saga
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/ep/tapd
+      name: admin/ep/tapd
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/live/live-admin
+      name: admin/live/live-admin
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/activity
+      name: admin/main/activity
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/aegis
+      name: admin/main/aegis
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/answer
+      name: admin/main/answer
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/apm
+      name: admin/main/apm
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/app
+      name: admin/main/app
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/appstatic
+      name: admin/main/appstatic
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/bfs
+      name: admin/main/bfs
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/block
+      name: admin/main/block
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/cache
+      name: admin/main/cache
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/card
+      name: admin/main/card
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/config
+      name: admin/main/config
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/coupon
+      name: admin/main/coupon
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/creative
+      name: admin/main/creative
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/credit
+      name: admin/main/credit
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/dm
+      name: admin/main/dm
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/esports
+      name: admin/main/esports
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/feed
+      name: admin/main/feed
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/filter
+      name: admin/main/filter
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/growup
+      name: admin/main/growup
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/laser
+      name: admin/main/laser
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/macross
+      name: admin/main/macross
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/manager
+      name: admin/main/manager
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/mcn
+      name: admin/main/mcn
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/member
+      name: admin/main/member
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/open
+      name: admin/main/open
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/passport
+      name: admin/main/passport
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/point
+      name: admin/main/point
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/push
+      name: admin/main/push
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/relation
+      name: admin/main/relation
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/reply
+      name: admin/main/reply
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/search
+      name: admin/main/search
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/sms
+      name: admin/main/sms
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/space
+      name: admin/main/space
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/spy
+      name: admin/main/spy
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/tag
+      name: admin/main/tag
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/tv
+      name: admin/main/tv
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/up
+      name: admin/main/up
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/up-rating
+      name: admin/main/up-rating
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/upload
+      name: admin/main/upload
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/usersuit
+      name: admin/main/usersuit
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/videoup
+      name: admin/main/videoup
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/videoup-task
+      name: admin/main/videoup-task
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/vip
+      name: admin/main/vip
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/main/workflow
+      name: admin/main/workflow
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to admin/openplatform/sug
+      name: admin/openplatform/sug
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/bbq/bullet
+      name: interface/bbq/bullet
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/bbq/video
+      name: interface/bbq/video
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/bbq/wechat
+      name: interface/bbq/wechat
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/live/app-blink
+      name: interface/live/app-blink
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/live/app-interface
+      name: interface/live/app-interface
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/live/app-room
+      name: interface/live/app-room
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/live/app-ucenter
+      name: interface/live/app-ucenter
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/live/live-demo
+      name: interface/live/live-demo
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/live/lottery-interface
+      name: interface/live/lottery-interface
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/live/push-live
+      name: interface/live/push-live
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/live/web-room
+      name: interface/live/web-room
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/live/web-ucenter
+      name: interface/live/web-ucenter
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/account
+      name: interface/main/account
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/activity
+      name: interface/main/activity
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/answer
+      name: interface/main/answer
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/app-card
+      name: interface/main/app-card
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/app-channel
+      name: interface/main/app-channel
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/app-feed
+      name: interface/main/app-feed
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/app-interface
+      name: interface/main/app-interface
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/app-intl
+      name: interface/main/app-intl
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/app-player
+      name: interface/main/app-player
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/app-resource
+      name: interface/main/app-resource
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/app-show
+      name: interface/main/app-show
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/app-tag
+      name: interface/main/app-tag
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/app-view
+      name: interface/main/app-view
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/app-wall
+      name: interface/main/app-wall
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/broadcast
+      name: interface/main/broadcast
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/captcha
+      name: interface/main/captcha
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/creative
+      name: interface/main/creative
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/credit
+      name: interface/main/credit
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/dm
+      name: interface/main/dm
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/dm2
+      name: interface/main/dm2
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/esports
+      name: interface/main/esports
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/favorite
+      name: interface/main/favorite
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/feedback
+      name: interface/main/feedback
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/growup
+      name: interface/main/growup
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/history
+      name: interface/main/history
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/kvo
+      name: interface/main/kvo
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/laser
+      name: interface/main/laser
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/mcn
+      name: interface/main/mcn
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/passport-login
+      name: interface/main/passport-login
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/player
+      name: interface/main/player
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/playlist
+      name: interface/main/playlist
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/push
+      name: interface/main/push
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/push-archive
+      name: interface/main/push-archive
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/reply
+      name: interface/main/reply
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/report-click
+      name: interface/main/report-click
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/shorturl
+      name: interface/main/shorturl
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/space
+      name: interface/main/space
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/spread
+      name: interface/main/spread
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/tag
+      name: interface/main/tag
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/tv
+      name: interface/main/tv
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/ugcpay
+      name: interface/main/ugcpay
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/ugcpay-rank
+      name: interface/main/ugcpay-rank
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/up-rating
+      name: interface/main/up-rating
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/upload
+      name: interface/main/upload
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/videoup
+      name: interface/main/videoup
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/web
+      name: interface/main/web
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/web-feed
+      name: interface/main/web-feed
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/web-goblin
+      name: interface/main/web-goblin
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/main/web-show
+      name: interface/main/web-show
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/openplatform/article
+      name: interface/openplatform/article
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/openplatform/monitor-end
+      name: interface/openplatform/monitor-end
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to interface/video/portal
+      name: interface/video/portal
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/bbq/recall
+      name: job/bbq/recall
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/bbq/video
+      name: job/bbq/video
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/live/gift
+      name: job/live/gift
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/live/push-search
+      name: job/live/push-search
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/live/recommend-job
+      name: job/live/recommend-job
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/live/wallet
+      name: job/live/wallet
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/live/xlottery
+      name: job/live/xlottery
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/account-notify
+      name: job/main/account-notify
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/account-recovery
+      name: job/main/account-recovery
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/account-summary
+      name: job/main/account-summary
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/activity
+      name: job/main/activity
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/aegis
+      name: job/main/aegis
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/answer
+      name: job/main/answer
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/app
+      name: job/main/app
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/app-player
+      name: job/main/app-player
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/app-wall
+      name: job/main/app-wall
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/archive
+      name: job/main/archive
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/archive-shjd
+      name: job/main/archive-shjd
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/block
+      name: job/main/block
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/broadcast
+      name: job/main/broadcast
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/card
+      name: job/main/card
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/click
+      name: job/main/click
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/coin
+      name: job/main/coin
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/coupon
+      name: job/main/coupon
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/creative
+      name: job/main/creative
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/credit
+      name: job/main/credit
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/credit-timer
+      name: job/main/credit-timer
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/dm
+      name: job/main/dm
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/dm2
+      name: job/main/dm2
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/favorite
+      name: job/main/favorite
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/feed
+      name: job/main/feed
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/figure
+      name: job/main/figure
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/figure-timer
+      name: job/main/figure-timer
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/growup
+      name: job/main/growup
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/history
+      name: job/main/history
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/identify
+      name: job/main/identify
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/mcn
+      name: job/main/mcn
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/member
+      name: job/main/member
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/member-cache
+      name: job/main/member-cache
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/passport
+      name: job/main/passport
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/passport-auth
+      name: job/main/passport-auth
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/passport-encrypt
+      name: job/main/passport-encrypt
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/passport-game-cloud
+      name: job/main/passport-game-cloud
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/passport-game-data
+      name: job/main/passport-game-data
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/passport-game-local
+      name: job/main/passport-game-local
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/passport-user
+      name: job/main/passport-user
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/passport-user-compare
+      name: job/main/passport-user-compare
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/playlist
+      name: job/main/playlist
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/point
+      name: job/main/point
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/push
+      name: job/main/push
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/relation
+      name: job/main/relation
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/relation-cache
+      name: job/main/relation-cache
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/reply
+      name: job/main/reply
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/reply-feed
+      name: job/main/reply-feed
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/search
+      name: job/main/search
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/sms
+      name: job/main/sms
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/spy
+      name: job/main/spy
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/stat
+      name: job/main/stat
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/tag
+      name: job/main/tag
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/tv
+      name: job/main/tv
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/ugcpay
+      name: job/main/ugcpay
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/up
+      name: job/main/up
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/up-rating
+      name: job/main/up-rating
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/upload
+      name: job/main/upload
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/usersuit
+      name: job/main/usersuit
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/videoup
+      name: job/main/videoup
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/videoup-report
+      name: job/main/videoup-report
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/vip
+      name: job/main/vip
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/web-goblin
+      name: job/main/web-goblin
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/main/workflow
+      name: job/main/workflow
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/openplatform/article
+      name: job/openplatform/article
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/openplatform/open-market
+      name: job/openplatform/open-market
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to job/openplatform/open-sug
+      name: job/openplatform/open-sug
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/bbq/notice-service
+      name: service/bbq/notice-service
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/bbq/push
+      name: service/bbq/push
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/bbq/recsys
+      name: service/bbq/recsys
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/bbq/recsys-recall
+      name: service/bbq/recsys-recall
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/bbq/search
+      name: service/bbq/search
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/bbq/sys-msg
+      name: service/bbq/sys-msg
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/bbq/user
+      name: service/bbq/user
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/bbq/video
+      name: service/bbq/video
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/bbq/video-image
+      name: service/bbq/video-image
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/ep/footman
+      name: service/ep/footman
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/ep/saga-agent
+      name: service/ep/saga-agent
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/activity
+      name: service/live/activity
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/broadcast-proxy
+      name: service/live/broadcast-proxy
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/fans_medal
+      name: service/live/fans_medal
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/gift
+      name: service/live/gift
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/grpc-demo
+      name: service/live/grpc-demo
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/live-dm
+      name: service/live/live-dm
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/live_riskcontrol
+      name: service/live/live_riskcontrol
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/rankdb
+      name: service/live/rankdb
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/recommend
+      name: service/live/recommend
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/resource
+      name: service/live/resource
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/rtc
+      name: service/live/rtc
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/userexp
+      name: service/live/userexp
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/wallet
+      name: service/live/wallet
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/xanchor
+      name: service/live/xanchor
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/xfansmedal
+      name: service/live/xfansmedal
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/xlottery
+      name: service/live/xlottery
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/xrewardcenter
+      name: service/live/xrewardcenter
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/xuser
+      name: service/live/xuser
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/live/zeus
+      name: service/live/zeus
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/account
+      name: service/main/account
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/account-recovery
+      name: service/main/account-recovery
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/antispam
+      name: service/main/antispam
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/archive
+      name: service/main/archive
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/assist
+      name: service/main/assist
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/bns
+      name: service/main/bns
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/broadcast
+      name: service/main/broadcast
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/card
+      name: service/main/card
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/coin
+      name: service/main/coin
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/config
+      name: service/main/config
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/coupon
+      name: service/main/coupon
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/dapper
+      name: service/main/dapper
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/dapper-query
+      name: service/main/dapper-query
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/dynamic
+      name: service/main/dynamic
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/favorite
+      name: service/main/favorite
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/feed
+      name: service/main/feed
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/figure
+      name: service/main/figure
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/filter
+      name: service/main/filter
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/history
+      name: service/main/history
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/identify
+      name: service/main/identify
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/identify-game
+      name: service/main/identify-game
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/location
+      name: service/main/location
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/member
+      name: service/main/member
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/msm
+      name: service/main/msm
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/notify
+      name: service/main/notify
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/open
+      name: service/main/open
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/passport
+      name: service/main/passport
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/passport-auth
+      name: service/main/passport-auth
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/passport-game
+      name: service/main/passport-game
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/point
+      name: service/main/point
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/push
+      name: service/main/push
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/push-strategy
+      name: service/main/push-strategy
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/rank
+      name: service/main/rank
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/relation
+      name: service/main/relation
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/reply-feed
+      name: service/main/reply-feed
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/resource
+      name: service/main/resource
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/riot-search
+      name: service/main/riot-search
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/search
+      name: service/main/search
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/secure
+      name: service/main/secure
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/seq-server
+      name: service/main/seq-server
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/share
+      name: service/main/share
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/sms
+      name: service/main/sms
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/spy
+      name: service/main/spy
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/tag
+      name: service/main/tag
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/thumbup
+      name: service/main/thumbup
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/tv
+      name: service/main/tv
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/ugcpay
+      name: service/main/ugcpay
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/up
+      name: service/main/up
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/upcredit
+      name: service/main/upcredit
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/usersuit
+      name: service/main/usersuit
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/videoup
+      name: service/main/videoup
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/vip
+      name: service/main/vip
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/vipinfo
+      name: service/main/vipinfo
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/main/workflow
+      name: service/main/workflow
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/openplatform/abtest
+      name: service/openplatform/abtest
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/openplatform/anti-fraud
+      name: service/openplatform/anti-fraud
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/openplatform/pgc-season
+      name: service/openplatform/pgc-season
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/openplatform/ticket-item
+      name: service/openplatform/ticket-item
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/openplatform/ticket-sales
+      name: service/openplatform/ticket-sales
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/ops/log-agent
+      name: service/ops/log-agent
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to service/video/stream-mng
+      name: service/video/stream-mng
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to tool/mkprow
+      name: tool/mkprow
+      prowPlugin: label
+      target: both
+    - addedBy: anyone
+      color: 0052cc
+      description: Categorizes an issue or PR as relevant to tool/owner
+      name: tool/owner
+      prowPlugin: label
+      target: both

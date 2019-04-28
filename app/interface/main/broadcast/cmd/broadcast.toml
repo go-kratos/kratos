@@ -1,0 +1,77 @@
+# This is a TOML document. Boom
+[broadcast]
+debug = true
+maxproc = 10
+serverTick = "5s"
+onlineTick = "10s"
+apiHost = "http://api.bilibili.com"
+apiToken = "test"
+
+[log]
+    stdout=true
+
+[http]
+    addr = "0.0.0.0:7825"
+	timeout = "1s"
+
+[wardenserver]
+	addr = "0.0.0.0:7829"
+	timeout = "1s"
+
+[wardenclient]
+	dial = "1s"
+	timeout = "1s"
+
+[discovery]
+    nodes = ["172.22.33.126:7171"]
+	key = "6a29f8ed87407c11"
+	secret = "d3c5a85f5b895a03735b5d20a273bc57"
+
+[tcp]
+	bind = ["0.0.0.0:7821"]
+	sndbuf = 2048
+	rcvbuf = 256
+	keepalive = false
+	reader = 1024
+	readBuf = 1024
+	readBufSize = 512
+	writer = 1024
+	writeBuf = 1024
+	writeBufSize = 4096
+
+[websocket]
+	bind = ["0.0.0.0:7822"]
+
+[timer]
+	timer = 256
+	timerSize = 2048
+
+[protoSection]
+	handshakeTimeout = "5s"
+	writeTimeout = "5s"
+	svrProto = 80
+	cliProto = 5
+
+[whitelist]
+	Whitelist = [123,1,2,3]
+	WhiteLog  = "/tmp/white_list.log"
+
+[bucket]
+	size = 256
+	channel = 1024
+	room = 1024
+	routineAmount = 128
+	routineSize = 20
+
+[httpClient]
+key = "test"
+secret = "test"
+dial = "300ms"
+timeout = "500ms"
+keepAlive = "60s"
+[httpClient.breaker]
+window  = "10s"
+sleep   = "50ms"
+bucket  = 10
+ratio   = 0.5
+request = 100

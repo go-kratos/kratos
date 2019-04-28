@@ -1,0 +1,18 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- linmiao
+- lintanghui
+- wangxu01
+- zhaogangtao
+- zhapuyu
+labels:
+- main
+- service
+- service/main/coin
+options:
+  no_parent_owners: true
+reviewers:
+- lintanghui
+- wangxu01
+- zhaogangtao

@@ -1,0 +1,19 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- fengyifeng
+- maojian
+- xuneng
+- yuanmin
+labels:
+- ep
+- service
+- service/ep/footman
+options:
+  no_parent_owners: true
+reviewers:
+- fengyifeng
+- wangxu01
+- xuneng
+- yuanmin
+- zhapuyu

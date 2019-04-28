@@ -1,0 +1,70 @@
+
+[mysql]
+	addr = "172.22.34.101:3312"
+	#dsn = "livetestuat:livetestuat20180711@tcp(172.22.34.101:3312)/live-ugift?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	dsn = "live:oWni@ElNs0P0C(dphdj*F1y4@tcp(172.16.38.117:3312)/live-ugift?timeout=400ms&readTimeout=400ms&writeTimeout=400ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "800ms"
+	execTimeout = "800ms"
+	tranTimeout = "800ms"
+
+[redis]
+	name = "gift-job"
+	proto = "tcp"
+	addr = "127.0.0.1:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[memcache]
+	name = "gift-job"
+	proto = "tcp"
+	addr = ""
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[databus]
+	[databus.AddGift]
+    key = "ec4c0820d525d67b"
+    secret = "e20f8f664bf10722efeb6aac0cc16011"
+    group = "LiveAddGift-LiveLive-S"
+    topic = "LiveAddGift-T"
+    action = "sub"
+    name = "gift-job/addFreeGift"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 10
+    active = 10
+    dialTimeout = "10s"
+    readTimeout = "33s"
+    writeTimeout = "10s"
+    idleTimeout = "10s"
+
+[consumer]
+    [consumer.AddGift]
+        num = 100
+
+[infoc]
+    [infoc.bagLog]
+        taskID = "000736"
+        proto = "tcp"
+        addr = "172.18.33.124:15140"
+        chanSize = 10240
+    [infoc.giftAction]
+        taskID = "000579"
+        proto = "tcp"
+        addr = "172.18.33.124:15140"
+        chanSize = 10240
+[log]
+    stdout = true

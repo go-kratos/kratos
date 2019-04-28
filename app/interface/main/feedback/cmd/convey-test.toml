@@ -1,0 +1,144 @@
+# This is a TOML document. Boom.
+
+version   = "1.0.0"
+user      = "nobody"
+pid       = "/tmp/feedback.pid"
+dir       = "./"
+perf      = "0.0.0.0:6170"
+checkFile = "/data/www/feedback.html"
+family    = "feedback"
+trace     = true
+debug     = false
+
+env       = "test"
+
+[tracer]
+family = "feedback"
+proto = "unixgram"
+addr = "172.16.33.46:5140"
+
+[xlog]
+dir = "/data/log/feedback/"
+    [xlog.agent]
+    family = "feedback"
+    taskID ="000069"
+    proto = "unixgram"
+    addr = "/var/run/lancer/collector.sock"
+    chan = 10240
+    timeout = "500ms"
+
+[app]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+
+[multiHttp]
+    [multiHttp.outer]
+    addrs     = ["0.0.0.0:6171"]
+    maxListen = 1000
+    [multiHttp.local]
+    addrs     = ["0.0.0.0:6172"]
+    maxListen = 1000
+
+[ecode]
+    domain = "172.16.33.248:6401"
+    all = "1h"
+    diff = "10m"
+    [ecode.clientconfig]
+         key = "test"
+         secret = "e6c4c252dc7e3d8a90805eecd7c73396"
+        dial      = "2s"
+        timeout   = "2s"
+        keepAlive = "10s"
+        [ecode.clientconfig.breaker]
+            window  ="3s"
+            sleep   ="100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100
+    [ecode.app]
+         key = "test"
+         secret = "e6c4c252dc7e3d8a90805eecd7c73396"
+         
+[mysql]
+    [mysql.master]
+    addr   = "172.16.33.205:3308"
+    dsn    = "test:test@tcp(172.16.33.205:3308)/bilibili_feedback?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8mb4,utf8"
+    active = 5
+    idle   = 2
+    idleTimeout ="4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [mysql.master.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    [identify.app]
+    key = "0dc647722719f2ea"
+    secret = "a3769b553680da10b40994265fb48d20"
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 5
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    [identify.host]
+    auth = "http://passport.bilibili.com"
+    secret = "http://open.bilibili.com"
+    [identify.httpClient]
+    key = "0dc647722719f2ea"
+    secret = "a3769b553680da10b40994265fb48d20"
+    dial = "30ms"
+    timeout = "100ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[bfs]
+addr        = "http://bfs.bilibili.co"
+bucket      = "test"
+key         = "221bce6492eba70f"
+secret      = "6eb80603e85842542f9736eb13b7e3"
+# 上传文件大小限制为1M
+maxFileSize = 1048576
+
+[feedback]
+# replys page size
+replysNum = 50
+# 发送内容长度限制为400字符
+maxContentSize = 400
+
+[locationRPC]
+    pullInterval = "10s"
+    [locationRPC.client]
+    timeout = "1s"
+    timer = 10
+    [locationRPC.client.breaker]
+    window  ="3s"
+    sleep   ="100ms"
+    bucket  = 10        
+    ratio   = 0.5
+    request = 100
+    [locationRPC.zookeeper]
+    root = "/microservice/location-service/"
+    addrs = ["172.18.33.172:2181"]
+    timeout = "30s"
+    

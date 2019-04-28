@@ -1,0 +1,18 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- fangrongchang
+- muyang
+- wangweizhen
+- yubaihai
+labels:
+- ep
+- service
+- service/ep/saga-agent
+options:
+  no_parent_owners: true
+reviewers:
+- fangrongchang
+- muyang
+- wangweizhen
+- yubaihai

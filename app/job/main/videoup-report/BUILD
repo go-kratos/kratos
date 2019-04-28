@@ -1,0 +1,35 @@
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//app/job/main/videoup-report/cmd:all-srcs",
+        "//app/job/main/videoup-report/conf:all-srcs",
+        "//app/job/main/videoup-report/dao/archive:all-srcs",
+        "//app/job/main/videoup-report/dao/data:all-srcs",
+        "//app/job/main/videoup-report/dao/email:all-srcs",
+        "//app/job/main/videoup-report/dao/hbase:all-srcs",
+        "//app/job/main/videoup-report/dao/manager:all-srcs",
+        "//app/job/main/videoup-report/dao/mission:all-srcs",
+        "//app/job/main/videoup-report/dao/redis:all-srcs",
+        "//app/job/main/videoup-report/dao/tag:all-srcs",
+        "//app/job/main/videoup-report/http:all-srcs",
+        "//app/job/main/videoup-report/model/archive:all-srcs",
+        "//app/job/main/videoup-report/model/data:all-srcs",
+        "//app/job/main/videoup-report/model/email:all-srcs",
+        "//app/job/main/videoup-report/model/manager:all-srcs",
+        "//app/job/main/videoup-report/model/mission:all-srcs",
+        "//app/job/main/videoup-report/model/monitor:all-srcs",
+        "//app/job/main/videoup-report/model/task:all-srcs",
+        "//app/job/main/videoup-report/model/utils:all-srcs",
+        "//app/job/main/videoup-report/service:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

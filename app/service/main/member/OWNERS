@@ -1,0 +1,20 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chenjianrong
+- wanghuan01
+- zhaogangtao
+- zhoujiahui
+- zhoujixiang
+labels:
+- main
+- service
+- service/main/member
+options:
+  no_parent_owners: true
+reviewers:
+- chenjianrong
+- wanghuan01
+- zhaogangtao
+- zhoujiahui
+- zhoujixiang

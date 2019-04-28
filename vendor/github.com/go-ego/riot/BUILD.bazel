@@ -1,0 +1,55 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "counters.go",
+        "engine.go",
+        "indexer_worker.go",
+        "info.go",
+        "ranker_worker.go",
+        "riot.go",
+        "riot_pkg.go",
+        "segment.go",
+        "stop_tokens.go",
+        "store_worker.go",
+    ],
+    importmap = "go-common/vendor/github.com/go-ego/riot",
+    importpath = "github.com/go-ego/riot",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/coreos/bbolt:go_default_library",
+        "//vendor/github.com/dgraph-io/badger:go_default_library",
+        "//vendor/github.com/go-ego/gpy:go_default_library",
+        "//vendor/github.com/go-ego/gse:go_default_library",
+        "//vendor/github.com/go-ego/murmur:go_default_library",
+        "//vendor/github.com/go-ego/riot/core:go_default_library",
+        "//vendor/github.com/go-ego/riot/store:go_default_library",
+        "//vendor/github.com/go-ego/riot/types:go_default_library",
+        "//vendor/github.com/go-ego/riot/utils:go_default_library",
+        "//vendor/github.com/go-vgo/gt/conf:go_default_library",
+        "//vendor/github.com/go-vgo/gt/info:go_default_library",
+        "//vendor/github.com/shirou/gopsutil/mem:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//vendor/github.com/go-ego/riot/core:all-srcs",
+        "//vendor/github.com/go-ego/riot/store:all-srcs",
+        "//vendor/github.com/go-ego/riot/types:all-srcs",
+        "//vendor/github.com/go-ego/riot/utils:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

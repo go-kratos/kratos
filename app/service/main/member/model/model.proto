@@ -1,0 +1,37 @@
+syntax = "proto3";
+package account.service.member;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "model";
+
+message BaseInfo {
+    int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    int64 sex = 3 [(gogoproto.jsontag) = "sex"];
+    string face = 4 [(gogoproto.jsontag) = "face"];
+    string sign = 5 [(gogoproto.jsontag) = "sign"];
+    int64 rank = 6 [(gogoproto.jsontag) = "rank"];
+    int64 birthday = 7 [(gogoproto.jsontag) = "birthday", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message LevelInfo {
+    int32 cur = 1 [(gogoproto.jsontag) = "current_level"];
+    int32 min = 2 [(gogoproto.jsontag) = "current_min"];
+    int32 now_exp = 3 [(gogoproto.jsontag) = "current_exp"];
+    int32 next_exp = 4 [(gogoproto.jsontag) = "next_exp"];
+}
+
+message OfficialInfo {
+    int32 role = 1 [(gogoproto.jsontag) = "role",(gogoproto.casttype) = "int8"];
+    string title = 2 [(gogoproto.jsontag) = "title"];
+    string desc = 3 [(gogoproto.jsontag) = "desc"];
+}
+
+message Moral {
+    int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+    int64 moral = 2 [(gogoproto.jsontag) = "moral"];
+    int64 added = 3 [(gogoproto.jsontag) = "added"];
+    int64 deducted = 4 [(gogoproto.jsontag) = "deducted"];
+    int64 last_recover_date = 5 [(gogoproto.jsontag) = "last_recover_date", (gogoproto.casttype) = "go-common/library/time.Time"];
+}

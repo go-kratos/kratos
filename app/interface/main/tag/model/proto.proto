@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+/*
+ * v0.1.0
+ *
+ * channel
+ */
+package model;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message Channel {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    string Name = 2 [(gogoproto.jsontag) = "name"];
+    int64 Type = 3 [(gogoproto.jsontag) = "type"];
+    string Cover = 4 [(gogoproto.jsontag) = "cover"];
+    string Content = 5 [(gogoproto.jsontag) = "content"];
+    int64 Bind = 6 [(gogoproto.jsontag) = "bind"];
+    int64 Sub = 7 [(gogoproto.jsontag) = "sub"];
+    int32 Attention = 8 [(gogoproto.jsontag) = "attention"];
+    int32 Rank = 9 [(gogoproto.jsontag) = "rank"];
+    int32 Attr = 10 [(gogoproto.jsontag) = "attr"];
+    int32 State = 11 [(gogoproto.jsontag) = "state"];
+    int64 CTime = 12 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 13 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int32 TopRank = 14 [(gogoproto.jsontag) = "-"];
+    string head_cover = 15 [(gogoproto.jsontag) = "head_cover"];
+    string short_content = 16 [(gogoproto.jsontag) = "short_content"];
+}
+
+message ChannelSynonym {
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+    string  Name = 2 [(gogoproto.jsontag) = "name"];
+    string alias = 3 [(gogoproto.jsontag) = "alias"];
+    string rank = 4 [(gogoproto.jsontag) = "-"];
+    int64 CTime = 5 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 6 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}

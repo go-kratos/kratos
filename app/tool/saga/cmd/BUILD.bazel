@@ -1,0 +1,43 @@
+load(
+    "@io_bazel_rules_go//go:def.bzl",
+    "go_library",
+    "go_binary",
+)
+
+go_library(
+    name = "go_default_library",
+    srcs = ["main.go"],
+    data = ["saga-test.toml"],
+    importpath = "go-common/app/tool/saga/cmd",
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+    deps = [
+        "//app/tool/saga/conf:go_default_library",
+        "//app/tool/saga/http:go_default_library",
+        "//app/tool/saga/service:go_default_library",
+        "//library/log:go_default_library",
+        "//library/net/trace:go_default_library",
+        "//library/os/signal:go_default_library",
+        "//library/syscall:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "cmd",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

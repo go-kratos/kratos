@@ -1,0 +1,42 @@
+syntax = "proto3";
+ 
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+package main.archive.creative;
+option go_package = "v1";
+
+// Creative grpc
+service Creative {
+    // FlowJudge 查询flow情况
+    rpc FlowJudge(FlowRequest) returns(FlowResponse);
+    // Sends a greeting
+    rpc CheckTaskState (TaskRequest) returns (TaskReply) {}
+    // Ping Service 
+    rpc Ping(Empty) returns(Empty); 
+    // Close Service 
+    rpc Close(Empty) returns(Empty); 
+}
+
+message FlowRequest {
+    int64 gid = 1;
+    int64 business = 2;
+    repeated int64 oids = 3;
+}
+
+message FlowResponse {
+    repeated int64 oids = 1;
+}
+
+
+// The request message containing the user's name.
+message TaskRequest {
+  int64 mid = 1;
+  int64 task_id = 2;
+}
+
+// The response message containing the greetings
+message TaskReply {
+  bool finish_state = 1;
+}
+
+message Empty{}

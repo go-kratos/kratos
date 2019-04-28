@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package rankdb.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service UserRank {
+    
+    /** 获取用户、主播等级排名
+     * 
+     */   
+    rpc getUserRank (UserRankGetUserRankReq) returns (UserRankGetUserRankResp);
+}
+
+
+
+message UserRankGetUserRankReq {
+    // 房间号
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 类型
+    string type = 2 [(gogoproto.jsontag) = "type"];
+}
+
+message UserRankGetUserRankResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        int64 rank = 1 [(gogoproto.jsontag) = "rank"];
+        // 
+        int64 score = 2 [(gogoproto.jsontag) = "score"];
+    }
+}

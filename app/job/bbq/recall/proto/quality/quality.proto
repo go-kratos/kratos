@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "quality";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+message VideoQuality {
+    string svid = 1;        //视频id
+ 
+    Quality quality_info_m = 2; //月 度视频质量指标
+    Quality quality_info_w = 3; //周 视频质量指标
+    Quality quality_info_h = 4; //天 视频质量指标
+ 
+    Quality quality_info_ms_m = 5; //月度 主站视频质量指标
+    Quality quality_info_ms_w = 6; //周 主站视频质量指标
+    Quality quality_info_ms_h = 7; //天 主站视频质量指标
+}
+
+//质量
+message Quality {
+    uint64 pub_time = 1;       //发布时间
+ 
+    uint32 play_cnt = 2;          //播放数
+    uint32 absolute_play_cnt = 3; //播完数
+    uint32 fav_cnt = 4;            //收藏数
+    uint32 like_cnt = 5;           //点赞数
+    uint32 coin_cnt = 6;           //投币数
+    uint32 share_cnt = 7;          //分享数
+    uint32 danmu_cnt = 8;          //弹幕数
+    uint32 neg_eval_cnt = 9;       //负面评价数
+    uint32 comment_add_cnt = 10;   //评论数
+    uint32 comment_like_cnt = 11;  //评论点赞
+    uint32 comment_report_cnt = 12; //评论回复
+ 
+    double absolute_play_rate = 13; //播完率:平滑 播完 / 播放数
+    double like_rate = 14;          //点赞率:平滑 点赞 / 播放数
+    double share_rate = 15;         //分享率:平滑 分享 / 播放数
+    double reply_rate = 16;         //回复率:平滑 (评论 + 评论回复 + 评论点赞) / 播放数
+    
+    uint32 imp_cnt = 17;  //曝光数
+}

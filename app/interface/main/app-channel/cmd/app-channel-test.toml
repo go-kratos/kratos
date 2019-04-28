@@ -1,0 +1,172 @@
+# This is a TOML document. Boom.
+
+version = "1.0.1"
+user    = "nobody"
+pid     = "/tmp/app-channel.pid"
+dir     = "./"
+checkFile = "/data/www/app-channel.html"
+family = "app-channel"
+debug   = false
+tick    = "1m"
+squareCount    = 2
+
+[feedInfoc2]
+taskID = "001131"
+proto = "tcp"
+addr = ""
+chanSize = 10240
+
+[channelInfoc2]
+taskID = "001140"
+proto = "tcp"
+addr = ""
+chanSize = 10240
+
+[host]
+    liveApi  = "http://api.live.bilibili.co"
+    bangumi  = "http://bangumi.bilibili.co"
+    data     = "http://data.bilibili.co"
+    apiCo    = "http://api.bilibili.co"
+    activity = "http://matsuri.bilibili.co"
+    live     = "http://live.bilibili.co"
+    shopping = "http://show.bilibili.com"
+
+[log]
+dir = "/data/log/app-channel/"
+	# [log.elk]
+	# project  = "app-channel"
+	# addr     = "172.18.20.17:8520"
+	# chanSize = 10240
+
+[app]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+
+[httpClient]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "500ms"
+timeout   = "2s"
+keepAlive = "60s"
+timer = 10
+[httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpClientAsyn]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "1s"
+timeout   = "2s"
+keepAlive = "60s"
+timer     = 10
+[httpClientAsyn.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpShopping]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "50ms"
+timeout   = "150ms"
+keepAlive = "60s"
+timer = 128
+[httpShopping.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 5
+    idle = 1
+    dialTimeout = "30ms"
+    readTimeout = "70ms"
+    writeTimeout = "70ms"
+    idleTimeout = "80s"
+    [identify.host]
+    auth = "http://passport.bilibili.com"
+    secret = "http://open.bilibili.com"
+    [identify.httpClient]
+	key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "30ms"
+    timeout = "100ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[bm]
+    [bm.outer]
+    addr = "0.0.0.0:7191"
+    timeout = "1s"
+
+[mysql]
+	[mysql.show]
+	addr   = "172.16.33.205:3308"
+	dsn    = "test:test@tcp(172.16.33.205:3308)/bilibili_show?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 5
+	idle   = 2
+    idleTimeout ="4h"
+    queryTimeout = "300ms"
+    execTimeout = "300ms"
+    tranTimeout = "300ms"
+    [mysql.show.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+    [mysql.manager]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_manager?timeout=100ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 2
+    idle = 1
+    idleTimeout  = "4h"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+        [mysql.manager.Breaker]
+        window = "1s"
+        sleep = "1s"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+
+[dislikeDatabus]
+    key = "0QNB0ZgFozbKUCQhbTq8"
+    secret = "0QNB0ZgFozbKUCQhbTq9"
+    group= "TagDislike-SkyHorse-P"
+    topic= "Dislike-T"
+    action="pub"
+    name = "app-feed/dislike"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    active = 5
+    idle = 1
+    dialTimeout = "30ms"
+    readTimeout = "80ms"
+    writeTimeout = "80ms"
+    idleTimeout = "80s"
+    expire = "1h"

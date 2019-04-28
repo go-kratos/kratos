@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package room.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service AppIndex {
+    
+    /** 根据moduleId查common房间列表
+     * 
+     */   
+    rpc getListByIds (AppIndexGetListByIdsReq) returns (AppIndexGetListByIdsResp);
+}
+
+
+
+message AppIndexGetListByIdsReq {
+    // 
+    repeated int64 ids = 1 [(gogoproto.jsontag) = "ids"];
+}
+
+message AppIndexGetListByIdsResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    map<int64, RoomList> data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message RoomInfo {
+        // 房间id
+        int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+        // 房间标题
+        string title = 2 [(gogoproto.jsontag) = "title"];
+        // 用户名
+        string uname = 3 [(gogoproto.jsontag) = "uname"];
+        // 在线人数
+        int64 online = 4 [(gogoproto.jsontag) = "online"];
+        // 封面，封面现在有3种：关键帧、封面图、秀场封面（正方形的），返回哪个由后端决定
+        string cover = 5 [(gogoproto.jsontag) = "cover"];
+        // 链接
+        string link = 6 [(gogoproto.jsontag) = "link"];
+        // 主播头像
+        string face = 7 [(gogoproto.jsontag) = "face"];
+        // 父分区id
+        int64 area_v2_parent_id = 8 [(gogoproto.jsontag) = "area_v2_parent_id"];
+        // 父分区名称
+        string area_v2_parent_name = 9 [(gogoproto.jsontag) = "area_v2_parent_name"];
+        // 二级分区id
+        int64 area_v2_id = 10 [(gogoproto.jsontag) = "area_v2_id"];
+        // 二级分区名
+        string area_v2_name = 11 [(gogoproto.jsontag) = "area_v2_name"];
+        // 秒开播放串 h264
+        string play_url = 12 [(gogoproto.jsontag) = "play_url"];
+        // 秒开播放串 h265
+        string play_url_h265 = 13 [(gogoproto.jsontag) = "play_url_h265"];
+        // 当前清晰度,清晰度 0:默认码率, 2:800 3:1500 4:原画
+        int64 current_quality = 14 [(gogoproto.jsontag) = "current_quality"];
+        // 当前拥有清晰度列表
+        repeated int64 accept_quality = 15 [(gogoproto.jsontag) = "accept_quality"];
+        // 横竖屏  0:横屏 1:竖屏 -1:异常情况
+        int64 broadcast_type = 16 [(gogoproto.jsontag) = "broadcast_type"];
+        // 新版角标-右上 默认为空 只能是文字！！！@古月 【5.29显示更新】：服务端还是吐右上（兼容老版），5.29显示在左上
+        string pendent_ru = 17 [(gogoproto.jsontag) = "pendent_ru"];
+        // 【5.29显示更新】：服务端还是吐右上，5.29客户端显示在左上,对应的背景图片
+        string pendent_ru_pic = 18 [(gogoproto.jsontag) = "pendent_ru_pic"];
+        // 新版移动端角标色值-右上
+        string pendent_ru_color = 19 [(gogoproto.jsontag) = "pendent_ru_color"];
+        // 推荐类型 1：人气 2：营收 3：运营强推 4：天马推荐（暂定）用于客户端打点
+        int64 rec_type = 20 [(gogoproto.jsontag) = "rec_type"];
+        // 当前房间pk_id，默认0 用于客户端打点
+        int64 pk_id = 21 [(gogoproto.jsontag) = "pk_id"];
+    }
+       
+    message RoomList {
+        // 
+        repeated RoomInfo list = 1 [(gogoproto.jsontag) = "list"];
+    }
+}

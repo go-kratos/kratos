@@ -1,0 +1,32 @@
+//存放api使用的模型
+syntax = "proto3";
+package open.service.antifraud.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+message RiskCheckRequest{
+    int64 mid = 1 [(gogoproto.jsontag) = "mid", (gogoproto.customname) = "MID",(gogoproto.moretags) = "form:\"mid\" validate:\"required\""];
+    string ip = 2 [(gogoproto.jsontag) = "ip", (gogoproto.customname) = "IP",(gogoproto.moretags) = "form:\"ip\" validate:\"required\""];
+    int64 item_id = 3 [(gogoproto.jsontag) = "item_id", (gogoproto.customname) = "ItemID",(gogoproto.moretags) = "form:\"item_id\" validate:\"required\""];
+    string path = 4 [(gogoproto.jsontag) = "path",(gogoproto.moretags) = "form:\"path\" validate:\"required\""];
+    int64 customer = 5 [(gogoproto.jsontag) = "customer",(gogoproto.moretags) = "form:\"customer\" validate:\"required\""];
+    int64 open_time = 6 [(gogoproto.jsontag) = "open_time",(gogoproto.moretags) = "form:\"open_time\" validate:\"required\""];
+    string voucher = 7 [(gogoproto.jsontag) = "voucher",(gogoproto.moretags) = "form:\"voucher\""];
+}
+
+message RiskCheckResponse{
+    int64 success = 1 [(gogoproto.jsontag) = "success"];
+    int64 rank = 2 [(gogoproto.jsontag) = "rank"];
+    int64 method = 3 [(gogoproto.jsontag) = "method"];
+    string desc = 4 [(gogoproto.jsontag) = "desc"];
+}
+
+service Risk {
+    // 风险检查
+    rpc RiskCheck(RiskCheckRequest) returns (RiskCheckResponse);
+}

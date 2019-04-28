@@ -1,0 +1,24 @@
+syntax = "proto3";
+package activity.service;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "kfc";
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+
+
+message BnjKfcCoupon {
+int64 ID =  1 [(gogoproto.jsontag) ="id"];
+int64 Mid =  2 [(gogoproto.jsontag) ="mid"];
+string Coupon_code =  3 [(gogoproto.jsontag) ="coupon_code"];
+string Desc =  4 [(gogoproto.jsontag) ="desc"];
+int64 State =  5 [(gogoproto.jsontag) ="state"];
+int64 Delete_time = 6 [(gogoproto.jsontag) ="-", (gogoproto.casttype) = "go-common/library/time.Time"];
+int64 Ctime = 7 [(gogoproto.jsontag) ="-", (gogoproto.casttype) = "go-common/library/time.Time"];
+int64 Mtime = 8 [(gogoproto.jsontag) ="-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}

@@ -1,0 +1,12 @@
+[mysql]
+dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_apm_v2?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 1
+idleTimeout = "4h"
+
+[httpClient]
+key = "test"
+secret = "e6c4c252dc7e3d8a90805eecd7c73396"
+dial = "1s"
+timeout = "10s"
+keepAlive = "60s"

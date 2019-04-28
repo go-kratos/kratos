@@ -1,0 +1,575 @@
+syntax = "proto3";
+
+package room.v2;
+
+option go_package = "v2";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service AppIndex {
+    
+    /** 全部列表数据
+     * 
+     */   
+    rpc getAllList (AppIndexGetAllListReq) returns (AppIndexGetAllListResp);
+    
+    /** 全部模块基础信息 5.35网关层调用
+     * 
+     */   
+    rpc getBaseMInfoList (AppIndexGetBaseMInfoListReq) returns (AppIndexGetBaseMInfoListResp);
+    
+    /** 根据moduleId查common房间列表(for app-interface 5.35+), 包括运营分区、一级分区、推荐（通用RoomList类的）
+     * 
+     */   
+    rpc getRoomListByIds (AppIndexGetRoomListByIdsReq) returns (AppIndexGetRoomListByIdsResp);
+    
+    /** 根据moduleId查common房间列表(for app-interface 5.35+), 包括分区入口（通用picList类的）
+     * 
+     */   
+    rpc getPicListByIds (AppIndexGetPicListByIdsReq) returns (AppIndexGetPicListByIdsResp);
+    
+    /** 首页banner
+     * 
+     */   
+    rpc getIndexBanner (AppIndexGetIndexBannerReq) returns (AppIndexGetIndexBannerResp);
+    
+    /** 全部列表原始数据 for app-interface 5.33+
+     * 
+     */   
+    rpc getAllRawList (AppIndexGetAllRawListReq) returns (AppIndexGetAllRawListResp);
+    
+    /** 5.32+获取多个分区房间列表-对推荐第一刷去重
+     * 
+     */   
+    rpc getMultiRoomList (AppIndexGetMultiRoomListReq) returns (AppIndexGetMultiRoomListResp);
+    
+    /** 获取活动信息
+     * go网关层调
+     */   
+    rpc getActivityCard (AppIndexGetActivityCardReq) returns (AppIndexGetActivityCardResp);
+}
+
+
+
+message AppIndexGetAllListReq {
+    // 平台
+    string platform = 1 [(gogoproto.jsontag) = "platform"];
+    // 设备
+    string device = 2 [(gogoproto.jsontag) = "device"];
+    // 分辨率
+    string scale = 3 [(gogoproto.jsontag) = "scale"];
+    // 分辨率
+    int64 build = 4 [(gogoproto.jsontag) = "build"];
+    // 模块唯一标识，不传表示获取所有模块
+    int64 module_id = 5 [(gogoproto.jsontag) = "module_id"];
+    // 关注第几刷
+    int64 relation_page = 6 [(gogoproto.jsontag) = "relation_page"];
+}
+
+message AppIndexGetAllListResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message ModuleInfo {
+        // 模块id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 标题
+        string title = 2 [(gogoproto.jsontag) = "title"];
+        // 图标
+        string pic = 3 [(gogoproto.jsontag) = "pic"];
+        // list数据类型  1: banner 2: 导航栏 3: 运营推荐分区-标准 4: 运营推荐分区-方 5：排行榜（小时榜） 6: 推荐主播-标准 7: 推荐主播-方 8:我的关注(用户相关) 9：一级分区-标准 10：一级分区-方 11: 活动卡片 12：常用标签推荐入口(用户相关) 13：常用标签推荐房间列表(用户相关) 14：大航海提示入口
+        int64 type = 4 [(gogoproto.jsontag) = "type"];
+        // 跳转链接
+        string link = 5 [(gogoproto.jsontag) = "link"];
+        // 该模块数据总数
+        int64 count = 6 [(gogoproto.jsontag) = "count"];
+        // 二级标题，目前只有小时榜才会返
+        string sub_title = 7 [(gogoproto.jsontag) = "sub_title"];
+    }
+       
+    message RoomList {
+        // 房间id
+        int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+        // 房间标题
+        string title = 2 [(gogoproto.jsontag) = "title"];
+        // 用户名
+        string uname = 3 [(gogoproto.jsontag) = "uname"];
+        // 在线人数
+        int64 online = 4 [(gogoproto.jsontag) = "online"];
+        // 封面，封面现在有3种：关键帧、封面图、秀场封面（正方形的），返回哪个由后端决定
+        string cover = 5 [(gogoproto.jsontag) = "cover"];
+        // 链接
+        string link = 6 [(gogoproto.jsontag) = "link"];
+        // 主播头像
+        string face = 7 [(gogoproto.jsontag) = "face"];
+        // 父分区id
+        int64 area_v2_parent_id = 8 [(gogoproto.jsontag) = "area_v2_parent_id"];
+        // 父分区名称
+        string area_v2_parent_name = 9 [(gogoproto.jsontag) = "area_v2_parent_name"];
+        // 二级分区id
+        int64 area_v2_id = 10 [(gogoproto.jsontag) = "area_v2_id"];
+        // 二级分区名
+        string area_v2_name = 11 [(gogoproto.jsontag) = "area_v2_name"];
+        // 秒开播放串 h264
+        string play_url = 12 [(gogoproto.jsontag) = "play_url"];
+        // 秒开播放串 h265
+        string play_url_h265 = 13 [(gogoproto.jsontag) = "play_url_h265"];
+        // 当前清晰度,清晰度 0:默认码率, 2:800 3:1500 4:原画
+        int64 current_quality = 14 [(gogoproto.jsontag) = "current_quality"];
+        // 当前拥有清晰度列表
+        repeated int64 accept_quality = 15 [(gogoproto.jsontag) = "accept_quality"];
+        // 横竖屏  0:横屏 1:竖屏 -1:异常情况
+        int64 broadcast_type = 16 [(gogoproto.jsontag) = "broadcast_type"];
+        // 新版角标-右上 默认为空 只能是文字！！！@古月 【5.29显示更新】：服务端还是吐右上（兼容老版），5.29显示在左上
+        string pendent_ru = 17 [(gogoproto.jsontag) = "pendent_ru"];
+        // 【5.29显示更新】：服务端还是吐右上，5.29客户端显示在左上,对应的背景图片
+        string pendent_ru_pic = 18 [(gogoproto.jsontag) = "pendent_ru_pic"];
+        // 新版移动端角标色值-右上
+        string pendent_ru_color = 19 [(gogoproto.jsontag) = "pendent_ru_color"];
+        // 推荐类型 1：人气 2：营收 3：运营强推 4：天马推荐（暂定）用于客户端打点
+        int64 rec_type = 20 [(gogoproto.jsontag) = "rec_type"];
+        // 当前房间pk_id，默认0 用于客户端打点
+        int64 pk_id = 21 [(gogoproto.jsontag) = "pk_id"];
+    }
+       
+    message ModuleList {
+        // 
+        ModuleInfo module_info = 1 [(gogoproto.jsontag) = "module_info"];
+        // 注意：可能是 PicList{id,pic,link,title}，需要根据ModuleInfo里的type判断
+        repeated RoomList list = 2 [(gogoproto.jsontag) = "list"];
+    }
+       
+    message Data {
+        // 客户端请求间隔 秒
+        int64 interval = 1 [(gogoproto.jsontag) = "interval"];
+        // 模块列表
+        repeated ModuleList module_list = 2 [(gogoproto.jsontag) = "module_list"];
+    }
+}
+
+
+
+message AppIndexGetBaseMInfoListReq {
+    // 模块ID，不传获取所有
+    int64 module_id = 1 [(gogoproto.jsontag) = "module_id"];
+}
+
+message AppIndexGetBaseMInfoListResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    repeated ModuleInfo data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message ModuleInfo {
+        // 模块id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 标题
+        string title = 2 [(gogoproto.jsontag) = "title"];
+        // 图标
+        string pic = 3 [(gogoproto.jsontag) = "pic"];
+        // list数据类型  1: banner 2: 导航栏 3: 运营推荐分区-标准 4: 运营推荐分区-方 5：排行榜（小时榜） 6: 推荐主播-标准 7: 推荐主播-方 8:我的关注(用户相关) 9：一级分区-标准 10：一级分区-方 11: 活动卡片 12：常用标签推荐入口(用户相关) 13：常用标签推荐房间列表(用户相关) 14：大航海提示入口
+        int64 type = 4 [(gogoproto.jsontag) = "type"];
+        // 跳转链接
+        string link = 5 [(gogoproto.jsontag) = "link"];
+        // 模块排序
+        int64 sort = 6 [(gogoproto.jsontag) = "sort"];
+        // 数量
+        int64 count = 7 [(gogoproto.jsontag) = "count"];
+    }
+}
+
+
+
+message AppIndexGetRoomListByIdsReq {
+    // 模块ids
+    repeated int64 ids = 1 [(gogoproto.jsontag) = "ids"];
+}
+
+message AppIndexGetRoomListByIdsResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    map<int64, RoomList> data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message RoomInfo {
+        // 房间id
+        int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+        // 房间标题
+        string title = 2 [(gogoproto.jsontag) = "title"];
+        // 用户名
+        string uname = 3 [(gogoproto.jsontag) = "uname"];
+        // 在线人数
+        int64 online = 4 [(gogoproto.jsontag) = "online"];
+        // 封面，封面现在有3种：关键帧、封面图、秀场封面（正方形的），返回哪个由后端决定
+        string cover = 5 [(gogoproto.jsontag) = "cover"];
+        // 链接
+        string link = 6 [(gogoproto.jsontag) = "link"];
+        // 主播头像
+        string face = 7 [(gogoproto.jsontag) = "face"];
+        // 父分区id
+        int64 area_v2_parent_id = 8 [(gogoproto.jsontag) = "area_v2_parent_id"];
+        // 父分区名称
+        string area_v2_parent_name = 9 [(gogoproto.jsontag) = "area_v2_parent_name"];
+        // 二级分区id
+        int64 area_v2_id = 10 [(gogoproto.jsontag) = "area_v2_id"];
+        // 二级分区名
+        string area_v2_name = 11 [(gogoproto.jsontag) = "area_v2_name"];
+        // 秒开播放串 h264
+        string play_url = 12 [(gogoproto.jsontag) = "play_url"];
+        // 秒开播放串 h265
+        string play_url_h265 = 13 [(gogoproto.jsontag) = "play_url_h265"];
+        // 当前清晰度,清晰度 0:默认码率, 2:800 3:1500 4:原画
+        int64 current_quality = 14 [(gogoproto.jsontag) = "current_quality"];
+        // 当前拥有清晰度列表
+        repeated int64 accept_quality = 15 [(gogoproto.jsontag) = "accept_quality"];
+        // 横竖屏  0:横屏 1:竖屏 -1:异常情况
+        int64 broadcast_type = 16 [(gogoproto.jsontag) = "broadcast_type"];
+        // 新版角标-右上 默认为空 只能是文字！！！@古月 【5.29显示更新】：服务端还是吐右上（兼容老版），5.29显示在左上
+        string pendent_ru = 17 [(gogoproto.jsontag) = "pendent_ru"];
+        // 【5.29显示更新】：服务端还是吐右上，5.29客户端显示在左上,对应的背景图片
+        string pendent_ru_pic = 18 [(gogoproto.jsontag) = "pendent_ru_pic"];
+        // 新版移动端角标色值-右上
+        string pendent_ru_color = 19 [(gogoproto.jsontag) = "pendent_ru_color"];
+        // 推荐类型 1：人气 2：营收 3：运营强推 4：天马推荐（暂定）用于客户端打点
+        int64 rec_type = 20 [(gogoproto.jsontag) = "rec_type"];
+        // 当前房间pk_id，默认0 用于客户端打点
+        int64 pk_id = 21 [(gogoproto.jsontag) = "pk_id"];
+    }
+       
+    message RoomList {
+        // 
+        repeated RoomInfo list = 1 [(gogoproto.jsontag) = "list"];
+    }
+}
+
+
+
+message AppIndexGetPicListByIdsReq {
+    // 模块ids
+    repeated int64 ids = 1 [(gogoproto.jsontag) = "ids"];
+}
+
+message AppIndexGetPicListByIdsResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    map<int64, ItemList> data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Item {
+        // 唯一标识id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 图片url
+        string pic = 2 [(gogoproto.jsontag) = "pic"];
+        // 跳转url
+        string link = 3 [(gogoproto.jsontag) = "link"];
+        // 图片标题
+        string title = 4 [(gogoproto.jsontag) = "title"];
+    }
+       
+    message ItemList {
+        // 
+        repeated Item list = 1 [(gogoproto.jsontag) = "list"];
+    }
+}
+
+
+
+message AppIndexGetIndexBannerReq {
+    // 平台
+    string platform = 1 [(gogoproto.jsontag) = "platform"];
+    // 设备
+    string device = 2 [(gogoproto.jsontag) = "device"];
+    // 版本号
+    int64 build = 3 [(gogoproto.jsontag) = "build"];
+}
+
+message AppIndexGetIndexBannerResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // banner id
+        string id = 1 [(gogoproto.jsontag) = "id"];
+        // 图片地址
+        string pic = 2 [(gogoproto.jsontag) = "pic"];
+        // 图片地址
+        string img = 3 [(gogoproto.jsontag) = "img"];
+        // 跳转链接
+        string link = 4 [(gogoproto.jsontag) = "link"];
+        // 标题
+        string title = 5 [(gogoproto.jsontag) = "title"];
+        // 第几帧
+        string position = 6 [(gogoproto.jsontag) = "position"];
+        // 权重
+        string sort_num = 7 [(gogoproto.jsontag) = "sort_num"];
+        // 注释
+        string remark = 8 [(gogoproto.jsontag) = "remark"];
+    }
+}
+
+
+
+message AppIndexGetAllRawListReq {
+    // 模块唯一标识，不传表示获取所有模块
+    int64 module_id = 1 [(gogoproto.jsontag) = "module_id"];
+}
+
+message AppIndexGetAllRawListResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message ModuleInfo {
+        // 模块id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 标题
+        string title = 2 [(gogoproto.jsontag) = "title"];
+        // 图标
+        string pic = 3 [(gogoproto.jsontag) = "pic"];
+        // list数据类型  1: banner 2: 导航栏 3: 运营推荐分区-标准 4: 运营推荐分区-方 5：排行榜（小时榜） 6: 推荐主播-标准 7: 推荐主播-方 8:我的关注(用户相关) 9：一级分区-标准 10：一级分区-方 11: 活动卡片 12：常用标签推荐入口(用户相关) 13：常用标签推荐房间列表(用户相关) 14：大航海提示入口
+        int64 type = 4 [(gogoproto.jsontag) = "type"];
+        // 跳转链接
+        string link = 5 [(gogoproto.jsontag) = "link"];
+        // 该模块数据总数
+        int64 count = 6 [(gogoproto.jsontag) = "count"];
+        // 二级标题，目前只有小时榜才会返
+        string sub_title = 7 [(gogoproto.jsontag) = "sub_title"];
+    }
+       
+    message RoomList {
+        // 房间id
+        int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+        // 房间标题
+        string title = 2 [(gogoproto.jsontag) = "title"];
+        // 用户名
+        string uname = 3 [(gogoproto.jsontag) = "uname"];
+        // 在线人数
+        int64 online = 4 [(gogoproto.jsontag) = "online"];
+        // 封面，封面现在有3种：关键帧、封面图、秀场封面（正方形的），返回哪个由后端决定
+        string cover = 5 [(gogoproto.jsontag) = "cover"];
+        // 链接
+        string link = 6 [(gogoproto.jsontag) = "link"];
+        // 主播头像
+        string face = 7 [(gogoproto.jsontag) = "face"];
+        // 父分区id
+        int64 area_v2_parent_id = 8 [(gogoproto.jsontag) = "area_v2_parent_id"];
+        // 父分区名称
+        string area_v2_parent_name = 9 [(gogoproto.jsontag) = "area_v2_parent_name"];
+        // 二级分区id
+        int64 area_v2_id = 10 [(gogoproto.jsontag) = "area_v2_id"];
+        // 二级分区名
+        string area_v2_name = 11 [(gogoproto.jsontag) = "area_v2_name"];
+        // 秒开播放串
+        string play_url = 12 [(gogoproto.jsontag) = "play_url"];
+        // 当前清晰度,清晰度 0:默认码率, 2:800 3:1500 4:原画
+        int64 current_quality = 13 [(gogoproto.jsontag) = "current_quality"];
+        // 当前拥有清晰度列表
+        repeated int64 accept_quality = 14 [(gogoproto.jsontag) = "accept_quality"];
+        // 横竖屏  0:横屏 1:竖屏 -1:异常情况
+        int64 broadcast_type = 15 [(gogoproto.jsontag) = "broadcast_type"];
+        // 新版角标-左下 默认为空 只能是文字！！！@古月  5.32+废弃
+        string pendent_ld = 16 [(gogoproto.jsontag) = "pendent_ld"];
+        // 新版角标-右上 默认为空 只能是文字！！！@古月 【5.29显示更新】：服务端还是吐右上（兼容老版），5.29显示在左上
+        string pendent_ru = 17 [(gogoproto.jsontag) = "pendent_ru"];
+        // 【5.29显示更新】：服务端还是吐右上，5.29客户端显示在左上,对应的背景图片
+        string pendent_ru_pic = 18 [(gogoproto.jsontag) = "pendent_ru_pic"];
+        // 新版移动端角标色值-左下 5.32+废弃
+        string pendent_ld_color = 19 [(gogoproto.jsontag) = "pendent_ld_color"];
+        // 新版移动端角标色值-右上
+        string pendent_ru_color = 20 [(gogoproto.jsontag) = "pendent_ru_color"];
+        // 推荐类型 1：人气 2：营收 3：运营强推 4：天马推荐（暂定）用于客户端打点
+        int64 rec_type = 21 [(gogoproto.jsontag) = "rec_type"];
+        // 当前房间pk_id，默认0 用于客户端打点
+        int64 pk_id = 22 [(gogoproto.jsontag) = "pk_id"];
+    }
+       
+    message ModuleList {
+        // 
+        ModuleInfo module_info = 1 [(gogoproto.jsontag) = "module_info"];
+        // 注意：可能是 PicList{id,pic,link,title}，需要根据ModuleInfo里的type判断
+        repeated RoomList list = 2 [(gogoproto.jsontag) = "list"];
+    }
+       
+    message Data {
+        // 客户端请求间隔 秒
+        int64 interval = 1 [(gogoproto.jsontag) = "interval"];
+        // 模块列表
+        repeated ModuleList module_list = 2 [(gogoproto.jsontag) = "module_list"];
+    }
+}
+
+
+
+message AppIndexGetMultiRoomListReq {
+    // 子分区id列表(传入格式：多个以英文逗号分隔)
+    string area_ids = 1 [(gogoproto.jsontag) = "area_ids"];
+    // 平台类型 web、ios、android
+    string platform = 2 [(gogoproto.jsontag) = "platform"];
+}
+
+message AppIndexGetMultiRoomListResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 房间信息map   分区id=>list
+    repeated InfoList data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message RoomList {
+        // 房间id
+        int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+        // 房间标题
+        string title = 2 [(gogoproto.jsontag) = "title"];
+        // 用户名
+        string uname = 3 [(gogoproto.jsontag) = "uname"];
+        // 在线人数
+        int64 online = 4 [(gogoproto.jsontag) = "online"];
+        // 封面，封面现在有3种：关键帧、封面图、秀场封面（正方形的），返回哪个由后端决定
+        string cover = 5 [(gogoproto.jsontag) = "cover"];
+        // 链接
+        string link = 6 [(gogoproto.jsontag) = "link"];
+        // 主播头像
+        string face = 7 [(gogoproto.jsontag) = "face"];
+        // 父分区id
+        int64 area_v2_parent_id = 8 [(gogoproto.jsontag) = "area_v2_parent_id"];
+        // 父分区名称
+        string area_v2_parent_name = 9 [(gogoproto.jsontag) = "area_v2_parent_name"];
+        // 二级分区id
+        int64 area_v2_id = 10 [(gogoproto.jsontag) = "area_v2_id"];
+        // 二级分区名
+        string area_v2_name = 11 [(gogoproto.jsontag) = "area_v2_name"];
+        // 秒开播放串 h264
+        string play_url = 12 [(gogoproto.jsontag) = "play_url"];
+        // 秒开播放串 h265
+        string play_url_h265 = 13 [(gogoproto.jsontag) = "play_url_h265"];
+        // 当前清晰度,清晰度 0:默认码率, 2:800 3:1500 4:原画
+        int64 current_quality = 14 [(gogoproto.jsontag) = "current_quality"];
+        // 当前拥有清晰度列表
+        repeated int64 accept_quality = 15 [(gogoproto.jsontag) = "accept_quality"];
+        // 横竖屏  0:横屏 1:竖屏 -1:异常情况
+        int64 broadcast_type = 16 [(gogoproto.jsontag) = "broadcast_type"];
+        // 新版角标-右上 默认为空 只能是文字！！！@古月 【5.29显示更新】：服务端还是吐右上（兼容老版），5.29显示在左上
+        string pendent_ru = 17 [(gogoproto.jsontag) = "pendent_ru"];
+        // 【5.29显示更新】：服务端还是吐右上，5.29客户端显示在左上,对应的背景图片
+        string pendent_ru_pic = 18 [(gogoproto.jsontag) = "pendent_ru_pic"];
+        // 新版移动端角标色值-右上
+        string pendent_ru_color = 19 [(gogoproto.jsontag) = "pendent_ru_color"];
+        // 推荐类型 1：人气 2：营收 3：运营强推 4：天马推荐（暂定）用于客户端打点
+        int64 rec_type = 20 [(gogoproto.jsontag) = "rec_type"];
+        // 当前房间pk_id，默认0 用于客户端打点
+        int64 pk_id = 21 [(gogoproto.jsontag) = "pk_id"];
+    }
+       
+    message InfoList {
+        // 二级分区id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 房间列表
+        repeated RoomList list = 2 [(gogoproto.jsontag) = "list"];
+    }
+}
+
+
+
+message AppIndexGetActivityCardReq {
+    // 活动模块ids
+    repeated int64 ids = 1 [(gogoproto.jsontag) = "ids"];
+}
+
+message AppIndexGetActivityCardResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Banner {
+        // 
+        int64 aid = 1 [(gogoproto.jsontag) = "aid"];
+        // 
+        string pic = 2 [(gogoproto.jsontag) = "pic"];
+        // 
+        string title = 3 [(gogoproto.jsontag) = "title"];
+        // 
+        string text = 4 [(gogoproto.jsontag) = "text"];
+        // 
+        string pic_link = 5 [(gogoproto.jsontag) = "pic_link"];
+        // 
+        string go_link = 6 [(gogoproto.jsontag) = "go_link"];
+        // 
+        string button_text = 7 [(gogoproto.jsontag) = "button_text"];
+        // 
+        int64 status = 8 [(gogoproto.jsontag) = "status"];
+        // 
+        int64 sort = 9 [(gogoproto.jsontag) = "sort"];
+    }
+       
+    message Room {
+        // 
+        int64 is_live = 1 [(gogoproto.jsontag) = "is_live"];
+        // 
+        int64 roomid = 2 [(gogoproto.jsontag) = "roomid"];
+        // 
+        string title = 3 [(gogoproto.jsontag) = "title"];
+        // 
+        string uname = 4 [(gogoproto.jsontag) = "uname"];
+        // 
+        int64 online = 5 [(gogoproto.jsontag) = "online"];
+        // 
+        string cover = 6 [(gogoproto.jsontag) = "cover"];
+        // 
+        int64 area_v2_parent_id = 7 [(gogoproto.jsontag) = "area_v2_parent_id"];
+        // 
+        int64 area_v2_id = 8 [(gogoproto.jsontag) = "area_v2_id"];
+        // 
+        int64 sort = 9 [(gogoproto.jsontag) = "sort"];
+    }
+       
+    message Av {
+        // 
+        int64 avid = 1 [(gogoproto.jsontag) = "avid"];
+        // 
+        string title = 2 [(gogoproto.jsontag) = "title"];
+        // 
+        int64 view_count = 3 [(gogoproto.jsontag) = "view_count"];
+        // 
+        int64 danmaku = 4 [(gogoproto.jsontag) = "danmaku"];
+        // 
+        int64 duration = 5 [(gogoproto.jsontag) = "duration"];
+        // 
+        string cover = 6 [(gogoproto.jsontag) = "cover"];
+        // 
+        int64 sort = 7 [(gogoproto.jsontag) = "sort"];
+    }
+       
+    message ActivityCard {
+        // 
+        Banner card = 1 [(gogoproto.jsontag) = "card"];
+        // 
+        repeated Room room = 2 [(gogoproto.jsontag) = "room"];
+        // 
+        repeated Av av = 3 [(gogoproto.jsontag) = "av"];
+    }
+       
+    message Data {
+        // 
+        map<int64, ActivityCard> activity_card = 1 [(gogoproto.jsontag) = "activity_card"];
+    }
+}

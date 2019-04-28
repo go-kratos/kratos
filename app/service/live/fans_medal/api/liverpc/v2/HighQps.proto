@@ -1,0 +1,153 @@
+syntax = "proto3";
+
+package fans_medal.v2;
+
+option go_package = "v2";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service HighQps {
+    
+    /** 某个up主动态,评论中的勋章信息,提供给主站调用
+     * 
+     */   
+    rpc reply_medals (HighQpsReplyMedalsReq) returns (HighQpsReplyMedalsResp);
+    
+    /** 获取直播站佩戴中的勋章
+     * 
+     */   
+    rpc live_weared (HighQpsLiveWearedReq) returns (HighQpsLiveWearedResp);
+    
+    /** 获取用户在直播站领取过的勋章
+     * 
+     */   
+    rpc live_received (HighQpsLiveReceivedReq) returns (HighQpsLiveReceivedResp);
+    
+    /** 获取某个up主的勋章状态
+     * 
+     */   
+    rpc up_medal (HighQpsUpMedalReq) returns (HighQpsUpMedalResp);
+}
+
+
+
+message HighQpsReplyMedalsReq {
+    // 
+    int64 up_uid = 1 [(gogoproto.jsontag) = "up_uid"];
+    // 
+    repeated UidList uid_list = 2 [(gogoproto.jsontag) = "uid_list"];
+       
+    message UidList {
+        // 
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    }
+}
+
+message HighQpsReplyMedalsResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    repeated Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 用户uid
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 粉丝勋章ID
+        int64 medal_id = 2 [(gogoproto.jsontag) = "medal_id"];
+        // 粉丝名称ID
+        string medal_name = 3 [(gogoproto.jsontag) = "medal_name"];
+        // 粉丝勋章等级
+        int64 level = 4 [(gogoproto.jsontag) = "level"];
+    }
+}
+
+
+
+message HighQpsLiveWearedReq {
+    // 
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+}
+
+message HighQpsLiveWearedResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 用户uid
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // up主uid
+        int64 target_id = 2 [(gogoproto.jsontag) = "target_id"];
+        // 粉丝勋章id
+        int64 medal_id = 3 [(gogoproto.jsontag) = "medal_id"];
+        // 粉丝勋章等级
+        int64 level = 4 [(gogoproto.jsontag) = "level"];
+        // 粉丝勋章名称
+        string medal_name = 5 [(gogoproto.jsontag) = "medal_name"];
+        // 粉丝勋章颜色，根据等级变色
+        int64 medal_color = 6 [(gogoproto.jsontag) = "medal_color"];
+    }
+}
+
+
+
+message HighQpsLiveReceivedReq {
+    // 
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+}
+
+message HighQpsLiveReceivedResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    repeated Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 用户uid
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // up主uid
+        int64 target_id = 2 [(gogoproto.jsontag) = "target_id"];
+        // 粉丝勋章id
+        int64 medal_id = 3 [(gogoproto.jsontag) = "medal_id"];
+        // 粉丝勋章等级
+        int64 level = 4 [(gogoproto.jsontag) = "level"];
+        // 粉丝勋章名称
+        string medal_name = 5 [(gogoproto.jsontag) = "medal_name"];
+    }
+}
+
+
+
+message HighQpsUpMedalReq {
+    // up主uid
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+}
+
+message HighQpsUpMedalResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 粉丝勋章id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // up主uid
+        int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+        // 直播站状态
+        int64 live_status = 3 [(gogoproto.jsontag) = "live_status"];
+        // 主站佩戴状态 0:未佩戴 1:佩戴中
+        int64 master_status = 4 [(gogoproto.jsontag) = "master_status"];
+        // 佩戴状态  0:未佩戴 1:佩戴中
+        int64 status = 5 [(gogoproto.jsontag) = "status"];
+    }
+}

@@ -1,0 +1,97 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/workflow-service.pid"
+dir = "./"
+perf = "127.0.0.1:7220"
+family = "workflow-service"
+
+[log]
+dir = "/data/log/workflow-service/"
+    #[log.agent]
+    #family = "workflow-service"
+    #addr = "172.18.20.17:8520"
+    #chan = 10240
+
+[tracer]
+proto = "udp"
+addr = "172.16.33.46:5140"
+tag = "platform/workflow-service"
+
+[bm]
+    addr = "0.0.0.0:7221"
+    timeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+
+[host]
+serviceURI = "http://service.bilibili.com"
+managerURI = "http://uat-manager.bilibili.co"
+
+[orm]
+    [orm.write]
+        dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_workflow?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 5
+        idle = 5
+        idleTimeout = "4h"
+
+[httpClient]
+    [httpClient.sobot]
+    key = "fLmW4cJFn7mL7pBo"
+    secret = "a9e79f60e30b42a0bf621f615d96ec25"
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.sobot.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.read] 
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 128
+    [httpClient.read.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.write]
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "80ms"
+    timeout = "700ms"
+    keepAlive = "60s"
+    timer = 128
+    [httpClient.write.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[archiveRPC]
+     timeout = "2s"
+
+[elastic]
+	host = "http://uat-manager.bilibili.co"
+	[elastic.HTTPClient]
+	    key = "3c4e41f926e51656"
+	    secret = "26a2095b60c24154521d24ae62b885bb"
+	    dial = "1s"
+	    timeout = "2s"
+	    keepAlive = "60s"
+	    timer = 1000
+	    [elastic.HTTPClient.breaker]
+	    window  ="3s"
+	    sleep   ="100ms"
+	    bucket  = 10
+	    ratio   = 0.5
+	    request = 100

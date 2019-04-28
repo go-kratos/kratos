@@ -1,0 +1,220 @@
+# This is a TOML document. Boom.
+
+[log]
+    dir = "/data/log/favorite/"
+
+#[infoc2]
+    #taskID = "000078"
+    #proto = "tcp"
+    #addr = "172.19.100.20:5401"
+    #chanSize = 1024
+
+[supervisor]
+    on = true
+    begin = "2017-10-01T15:04:05+08:00"
+    end = "2017-10-22T11:10:05+08:00"
+
+[antispam]
+	on=true
+    second=5
+    n=10
+    hour=1
+    m=5
+    [antispam.redis]
+        name = "favorite/favorite"
+        proto = "tcp"
+        addr = "172.16.33.54:6379"
+        idle = 100
+        active = 100
+        dialTimeout = "500ms"
+        readTimeout = "1s"
+        writeTimeout = "1s"
+        idleTimeout = "80s"
+        expire = "10m"
+
+[fav]
+    maxFolders = 50
+    maxPagesize = 30
+    maxNameLen = 30
+    maxDescLen = 100
+    maxOperationNum = 30
+    expire = "24h"
+
+[platform]
+    maxFolders = 100
+    maxNameLen = 60
+    maxDescLen = 250
+
+[tracer]
+    proto = "unixgram"
+    addr = "/tmp/collect/dapper-collector.sock"
+    family = "favorite"
+
+[httpClient]
+    key = "0dc647722719f2ea"
+    secret = "a3769b553680da10b40994265fb48d20"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+        [httpClient.breaker]
+            window  ="3s"
+            sleep   ="100ms"
+            bucket  = 10
+            ratio   = 0.1
+            request = 100
+
+
+[ecode]
+    domain = "172.16.33.248:6401"
+    all = "1h"
+    diff = "5m"
+    [ecode.clientconfig]
+        key = "test"
+        secret = "e6c4c252dc7e3d8a90805eecd7c73396"
+        dial      = "2000ms"
+        timeout   = "2s"
+        keepAlive = "10s"
+        timer     = 128
+        [ecode.clientconfig.breaker]
+            window  ="3s"
+            sleep   ="100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100
+    [ecode.app]
+        key = "test"
+        secret = "e6c4c252dc7e3d8a90805eecd7c73396"
+
+[bm]
+     addr = "0.0.0.0:6010"
+     maxListen = 1000
+     timeout = "100ms"
+     # readTimeout = "100ms"
+     # writeTimeout = "100ms"
+
+[mysql]
+    [mysql.fav]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_fav?timeout=2s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 20
+    idle = 10
+    idleTimeout ="4h"
+    queryTimeout = "200ms"
+    execTimeout = "200ms"
+    tranTimeout = "200ms"
+    [mysql.fav.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[redis]
+    name = "favorite/favorite"
+    proto = "tcp"
+    addr = "172.16.33.54:6379"
+    idle = 100
+    active = 100
+    dialTimeout = "500ms"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    expire = "10m"    
+    coverExpire = "30m"    
+
+[memcache]
+    name = "favorite"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    idle = 10
+    active = 10
+    dialTimeout = "2s"
+    readTimeout = "2s"
+    writeTimeout = "2s"
+    idleTimeout = "7h"
+    expire = "15m"
+
+[jobDatabus]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret= "0QEO9F8JuuIxZzNDvklI"
+    group= "FavoriteJob-UGC-P"
+    topic= "FavoriteJob-T"
+    action="pub"
+    name = "favorite/job"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+
+[rpcClient2]
+    [rpcClient2.account]
+        group = "groupapp"
+        pullInterval = "10s"
+        [rpcClient2.account.client]
+        token = "123456"
+        timeout = "1s"
+        timer = 1000
+        [rpcClient2.account.client.breaker]
+        window  ="3s"
+        sleep   ="100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+        [rpcClient2.account.zookeeper]
+        root = "/microservice/account-service/"
+        addrs = ["172.18.33.172:2181"]
+        timeout = "30s"
+    [rpcClient2.archive]
+        pullInterval = "10s"
+        group = "test"
+        [rpcClient2.archive.client]
+        token = "123456"
+        timeout = "1s"
+        timer = 1000
+        [rpcClient2.archive.client.breaker]
+        window  ="3s"
+        sleep   ="100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+        [rpcClient2.archive.zookeeper]
+        root = "/microservice/archive-service/"
+        addrs = ["172.18.33.172:2181"]
+        timeout = "30s"
+    [rpcClient2.filter]
+        pullInterval = "10s"
+        [rpcClient2.filter.client]
+        timeout = "1s"
+        timer = 1000
+        [rpcClient2.filter.client.breaker]
+        window  ="3s"
+        sleep   ="100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+        [rpcClient2.filter.zookeeper]
+        root = "/microservice/filter-service/"
+        addrs = ["172.18.33.172:2181"]
+        timeout = "30s"
+    [rpcClient2.favorite]
+        pullInterval = "10s"
+        [rpcClient2.favorite.client]
+        timeout = "1s"
+        timer = 1000
+        [rpcClient2.favorite.client.breaker]
+        window  ="3s"
+        sleep   ="100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+        [rpcClient2.favorite.zookeeper]
+        root = "/microservice/favorite/"
+        addrs = ["172.18.33.172:2181"]
+        timeout = "30s"
+

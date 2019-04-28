@@ -1,0 +1,10 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- maojian
+- zhoujiahui
+reviewers:
+- haoguanwei
+- maojian
+- wanghuan01
+- zhoujiahui

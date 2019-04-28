@@ -1,0 +1,223 @@
+env = "uat"
+chanSize = 50
+PGCAsync = 0
+UGCAsync = 0
+MonitorSize = 30
+WeChatToken = "uYsRqXPjnbyXDCba"
+WeChatSecret = "tUILeGIXJHFSUdwfLjBHDZJXmLgYpgEy"
+WeChantUsers = "peiyifei,haoguanwei"
+tick = "50ms"
+
+[bm]
+addr = "0.0.0.0:6161"
+timeout = "1s"
+[app]
+key    = "53e2fa226f5ad348"
+secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+
+[host]
+apiCo = "http://api.bilibili.co"
+
+[httpClient]
+key    = "53e2fa226f5ad348"
+secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+dial      = "100ms"
+timeout   = "1s"
+keepAlive = "60s"
+[httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[db]
+    [db.archive]
+    name = "172.18.33.49:3306"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_archive?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 20
+    idle = 10
+    idleTimeout = "4h"
+    queryTimeout = "5s"
+    execTimeout = "5s"
+    tranTimeout = "5s"
+    [db.archive.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.result]
+    name = "172.18.33.49:3306"
+    dsn = "test:test@tcp(172.16.33.205:3308)/archive_result?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 20
+    idle = 10
+    idleTimeout = "4h"
+    queryTimeout = "5s"
+    execTimeout = "5s"
+    tranTimeout = "5s"
+    [db.result.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.dede]
+    name = "172.18.33.49:3307"
+    dsn = "dede:jh3GWwFgzsLHvkWsDPiSxy5Ge2vNt4Ys@tcp(172.18.33.49:3307)/bilibili?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 20
+    idle = 10
+    idleTimeout ="4h"
+    queryTimeout = "5s"
+    execTimeout = "5s"
+    tranTimeout = "5s"
+    [db.dede.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[redis]
+name = "archive-job/trackreport"
+proto = "tcp"
+addr = "172.18.33.61:6807"
+active = 10
+idle = 1
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "80s"
+
+[archiveResultPub]
+key = "0QNB0ZgFozbKUCQhbTq8"
+secret = "0QNB0ZgFozbKUCQhbTq9"
+group = "ArchiveNotify-ArchiveJob-P"
+topic = "ArchiveNotify-T"
+action = "pub"
+name = "archive-job/archivepub"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 1
+active = 10
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[statSub]
+key = "0Q2UxI6hM1i6k6LRzDmx"
+secret= "0Q2UxI6hM1i6k6LRzDmy"
+group= "Stat-UGC-S"
+topic= "Stat-T"
+action="sub"
+name = "archive-job/stat"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+active = 1
+idle = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "1h"
+
+[DmSub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "DMSubject-MainAppSvr-S"
+topic = "DMSubject-T"
+action = "sub"
+name = "archive-job/DMSubject"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[DmPub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatDM-MainAppSvr-P"
+topic = "StatDM-T"
+action = "pub"
+name = "archive-job/dmpub"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[VideoupSub]
+key = "0QNB0ZgFozbKUCQhbTq8"
+secret = "0QNB0ZgFozbKUCQhbTq9"
+group = "ArchiveJob-Videoup2Bvc-S"
+topic = "Videoup2Bvc"
+action = "sub"
+name = "archive-job/videoupsub"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[CacheSub]
+key = "8e27ab7e39270b59"
+secret = "477df6a068d7332a163f95abbad2079c"
+group = "ArchiveUserCache-MainAppSvr-S"
+topic = "ArchiveUserCache-T"
+action = "sub"
+name = "archive-job/userCache"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "80s"
+
+[AccountNotifySub]
+key = "8e27ab7e39270b59"
+secret = "477df6a068d7332a163f95abbad2079c"
+group = "AccountNotify-MainAppSvr-S"
+topic = "AccountNotify-T"
+action = "sub"
+name = "archive-job/userCache"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "80s"
+[AccountNotifySub.discovery]
+    domain = "api.bilibili.co"
+    key = "53e2fa226f5ad348"
+    secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+    region = "sh"
+    zone = "sh001"
+    env = "prod"
+
+[mail]
+host = "smtp.exmail.qq.com"
+port = 465
+username = "2333@bilibili.com"
+password = "2333"
+bangumi = ["233@bilibili.com"]
+movie = ["233@bilibili.com"]
+
+[[ArchiveServices]]
+cluster="group1"
+[[ArchiveServices]]
+cluster="group2"

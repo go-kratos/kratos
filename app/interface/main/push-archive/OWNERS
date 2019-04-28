@@ -1,0 +1,18 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liweijia
+- renwei
+- shencen
+- wangjian
+- wangzhe01
+- zhapuyu
+labels:
+- interface
+- interface/main/push-archive
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- wangjian
+- zhapuyu

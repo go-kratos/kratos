@@ -1,0 +1,185 @@
+debug = true
+
+[app]
+    key = "c1a1cb2d89c33794"
+    secret = "dda47eeca111e03e6845017505baea13"
+
+[orm]
+    dsn = "test:test@tcp(127.0.0.1:3306)/bilibili_aegis?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    idleTimeout = "4h"
+
+[mysql]
+	[mysql.fast]
+	addr = "calibur"
+	dsn = "test:test@tcp(127.0.0.1:3306)/bilibili_aegis?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    readDSN = ["test:test@tcp(127.0.0.1:3306)/bilibili_aegis?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "100ms"
+	execTimeout = "100ms"
+	tranTimeout = "200ms"
+	[mysql.slow]
+	addr = "calibur"
+	dsn = "test:test@tcp(127.0.0.1:3306)/bilibili_aegis?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    readDSN = ["test:test@tcp(127.0.0.1:3306)/bilibili_aegis?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "200ms"
+	execTimeout = "200ms"
+	tranTimeout = "400ms"
+
+[redis]
+	name = "aegis-admin"
+	proto = "tcp"
+	addr = "127.0.0.1:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "100ms"
+	readTimeout = "100s"
+	writeTimeout = "100ms"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[memcache]
+	name = "aegis-admin"
+	proto = "tcp"
+	addr = "127.0.0.1:11211"
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[rpc]
+	[rpc.rel]
+
+[grpc]
+	[grpc.up]
+
+[host]
+    videoup = "http://uat-archive.api.bilibili.co"
+
+[databus]
+	[databus.binLogSub]
+		key = "4c76cbb7a985ac90"
+		secret = "43bb22ce34a6b13e7814f09cb8116522"
+		group = "AegisBinlog-MainArchive-S"
+		topic = "AegisBinlog-T"
+		action = "sub"
+		buffer = 2048
+		name = "aegis-job/databus"
+		proto = "tcp"
+		addr = "172.18.33.50:6205"
+		idle = 1
+		active = 1
+		dialTimeout = "1s"
+		readTimeout = "60s"
+		writeTimeout = "1s"
+		idleTimeout = "10s"
+	 [databus.taskSub]
+        key = "4c76cbb7a985ac90"
+        secret = "43bb22ce34a6b13e7814f09cb8116522"
+        group = "Aegis-MainArchive-S"
+        topic = "Aegis-T"
+        action = "sub"
+        buffer = 128
+        name = "databus"
+        proto = "tcp"
+        addr = "172.18.33.50:6205"
+        active = 1
+        idle = 1
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+	[databus.resourceSub]
+        key = "4c76cbb7a985ac90"
+        secret = "43bb22ce34a6b13e7814f09cb8116522"
+        group = "AegisResource-MainArchive-S"
+        topic = "AegisResource-T"
+        action = "sub"
+        buffer = 128
+        name = "databus"
+        proto = "tcp"
+        addr = "172.18.33.50:6205"
+        active = 1
+        idle = 1
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+    [databus.archiveSub]
+        key = "4c76cbb7a985ac90"
+        secret = "43bb22ce34a6b13e7814f09cb8116522"
+        group = "Archive-MainArchive-Aegis-S"
+        topic = "Archive-T"
+        action = "sub"
+        buffer = 128
+        name = "databus"
+        proto = "tcp"
+        addr = "172.18.33.50:6205"
+        active = 1
+        idle = 1
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+
+[databusutil]
+	[databusutil.task]
+    	size = 100
+    	chan = 1024
+    	num = 10
+    	ticker="1s"
+	[databusutil.resource]
+    	size = 100
+    	chan = 1024
+    	num = 10
+    	ticker="1s"
+
+[http]
+	[http.fast]
+	key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "40ms"
+    timeout = "400ms"
+    keepAlive = "60s"
+	[http.fast.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+	[http.slow]
+	key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "200ms"
+    timeout = "1000ms"
+    keepAlive = "60s"
+	[http.slow.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+
+[bizcfg]
+    [[bizcfg.weightopt]]
+        businessid=1
+        minute = 1
+    [[bizcfg.weightopt]]
+        businessid=2
+        minute = 3
+
+[mail]
+    host = "smtp.exmail.qq.com"
+    port = 465
+    username = "manager@bilibili.com"
+    password = "a1654OQigEsyHz2I"

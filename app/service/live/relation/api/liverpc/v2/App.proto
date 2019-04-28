@@ -1,0 +1,107 @@
+syntax = "proto3";
+
+package relation.v2;
+
+option go_package = "v2";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service App {
+    
+    /** 关注接口
+     * 【粉版APP5.33 关注排序改版】App首页我的关注部分【全量数据】
+     */   
+    rpc LiveHomePage (AppLiveHomePageReq) returns (AppLiveHomePageResp);
+}
+
+
+
+message AppLiveHomePageReq {
+    // 页号
+    int64 relation_page = 1 [(gogoproto.jsontag) = "relation_page"];
+}
+
+message AppLiveHomePageResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    Data data = 4 [(gogoproto.jsontag) = "data"];
+       
+    message Rooms {
+        // 
+        int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+        // 
+        int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+        // 
+        string uname = 3 [(gogoproto.jsontag) = "uname"];
+        // 
+        string face = 4 [(gogoproto.jsontag) = "face"];
+        // 
+        string cover = 5 [(gogoproto.jsontag) = "cover"];
+        // 
+        string title = 6 [(gogoproto.jsontag) = "title"];
+        // 
+        int64 area = 7 [(gogoproto.jsontag) = "area"];
+        // 
+        string live_time = 8 [(gogoproto.jsontag) = "live_time"];
+        // 
+        string area_name = 9 [(gogoproto.jsontag) = "area_name"];
+        // 
+        int64 area_v2_id = 10 [(gogoproto.jsontag) = "area_v2_id"];
+        // 
+        string area_v2_name = 11 [(gogoproto.jsontag) = "area_v2_name"];
+        // 
+        string area_v2_parent_name = 12 [(gogoproto.jsontag) = "area_v2_parent_name"];
+        // 
+        int64 area_v2_parent_id = 13 [(gogoproto.jsontag) = "area_v2_parent_id"];
+        // 
+        string live_tag_name = 14 [(gogoproto.jsontag) = "live_tag_name"];
+        // 
+        int64 online = 15 [(gogoproto.jsontag) = "online"];
+        // 
+        string play_url = 16 [(gogoproto.jsontag) = "play_url"];
+        // 
+        string play_url_h265 = 17 [(gogoproto.jsontag) = "play_url_h265"];
+        // 
+        repeated int64 accept_quality = 18 [(gogoproto.jsontag) = "accept_quality"];
+        // 
+        int64 current_quality = 19 [(gogoproto.jsontag) = "current_quality"];
+        // 
+        int64 pk_id = 20 [(gogoproto.jsontag) = "pk_id"];
+        // 
+        int64 official_verify = 21 [(gogoproto.jsontag) = "official_verify"];
+        // 
+        string link = 22 [(gogoproto.jsontag) = "link"];
+        // 
+        int64 special_attention = 23 [(gogoproto.jsontag) = "special_attention"];
+        // 
+        string pendent_ru = 24 [(gogoproto.jsontag) = "pendent_ru"];
+        // 
+        string pendent_ru_pic = 25 [(gogoproto.jsontag) = "pendent_ru_pic"];
+        // 
+        string pendent_ru_color = 26 [(gogoproto.jsontag) = "pendent_ru_color"];
+    }
+       
+    message Data {
+        // 
+        int64 total_count = 1 [(gogoproto.jsontag) = "total_count"];
+        // 
+        int64 card_type = 2 [(gogoproto.jsontag) = "card_type"];
+        // 
+        int64 big_card_type = 3 [(gogoproto.jsontag) = "big_card_type"];
+        // 
+        string time_desc = 4 [(gogoproto.jsontag) = "time_desc"];
+        // 
+        string uname_desc = 5 [(gogoproto.jsontag) = "uname_desc"];
+        // 
+        string tags_desc = 6 [(gogoproto.jsontag) = "tags_desc"];
+        // 
+        int64 relation_page = 7 [(gogoproto.jsontag) = "relation_page"];
+        // 
+        repeated Rooms rooms = 8 [(gogoproto.jsontag) = "rooms"];
+    }
+}

@@ -1,0 +1,20 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chenjunxi
+- wanghuan01
+- wutao
+- zhaoyixuan
+- zhoujiahui
+labels:
+- interface
+- interface/main/passport-login
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- chenjunxi
+- wanghuan01
+- wutao
+- zhaoyixuan
+- zhoujiahui

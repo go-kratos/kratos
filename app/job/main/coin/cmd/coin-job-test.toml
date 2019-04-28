@@ -1,0 +1,167 @@
+version = "0.1.0"
+perf = "127.0.0.1:6078"
+name = "127.0.0.1"
+
+[xlog]
+dir = "/data/log/coin-job/"
+
+[bm]
+     addr = "0.0.0.0:6158"
+     timeout = "1s"
+
+[databus]
+key = "0Pub71WwEMKXu63qtztu"
+secret = "0Pub71WwEMKXu63qtztv"
+group = "CoinJob-UGC-S"
+topic = "CoinJob-T"
+action = "sub"
+name = "coin-job/databus"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[logindatabus]
+key = "0QHEzXlXE9Ijewj8V4zu"
+secret = "0QHEzXlXE9Ijewj8V4zv"
+group = "PassportLog-T-Coin-S"
+topic = "LogUserAction-T"
+action = "sub"
+offset = "new"
+buffer = 2048
+name = "secure-service/databus"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[expDatabus]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "AccountExp-MainAccount-Coin-S"
+    topic = "AccountExp-T"
+    action = "sub"
+    buffer = 2048
+    name = "coin-job/databus"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+[databusutil]
+    size = 100
+    chan = 1024
+    num = 4 
+    ticker="30s"
+
+[archiveRPC]
+    pullInterval = "10s"
+    group = "group2"
+    [archiveRPC.client]
+    timeout = "1s"
+    timer = 1000
+    [archiveRPC.client.breaker]
+    window  ="3s"
+    sleep   ="100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [archiveRPC.zookeeper]
+    root = "/microservice/archive-service/"
+    addrs = ["172.16.33.54:2181"]
+    timeout = "1s"
+
+[coinRPC]
+    pullInterval = "10s"
+    group = "group2"
+    [coinRPC.client]
+    timeout = "1s"
+    timer = 1000
+    [coinRPC.client.breaker]
+    window  ="3s"
+    sleep   ="100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [coinRPC.zookeeper]
+    root = "/microservice/coin-service/"
+    addrs = ["172.16.33.54:2181"]
+    timeout = "1s"
+
+[accountRPC]
+    timeout = "1s"
+
+[memRPC]
+    timeout = "300ms"
+
+[redis]
+    name = "coin-service/coin"
+    proto = "tcp"
+    addr = "172.16.0.204:6379"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+
+
+[db]
+    [db.coin]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_coin?timeout=5s&readTimeout=30s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    #addr = "127.0.0.1:3306"
+    #dsn = "root@tcp(127.0.0.1:3306)/bilibili_coins?timeout=5s&readTimeout=30s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "2s"
+    [db.coin.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.dede]
+    addr = "172.16.33.101:3306"
+    dsn = "account:wx2U1MwXRyWEuURw@tcp(172.16.33.101:3306)/account?timeout=5s&readTimeout=30s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    queryTimeout = "2s"
+    execTimeout = "1s"
+    tranTimeout = "2s"
+    [db.dede.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[memcache]
+    name = "member-service"
+    proto = "tcp"
+    addr = "172.16.33.22:21211"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+
+[coinJob]
+start=false
+loginExpire = "72h"

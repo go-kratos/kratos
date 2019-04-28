@@ -1,0 +1,18 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- haoguanwei
+- liuxuan
+- peiyifei
+- sunyu
+labels:
+- admin
+- admin/main/app
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- haoguanwei
+- liuxuan
+- peiyifei
+- sunyu

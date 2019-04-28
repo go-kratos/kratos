@@ -1,0 +1,64 @@
+version: '2'
+services:
+  portal:
+    build: # 构建镜像所需
+      context: ../../../
+      dockerfile: ./app/interface/video/Dockerfile
+    extra_hosts:
+      - "bvc-nerve.bilibili.co:172.18.21.10"
+      - "api.bilibili.co:172.18.35.12"
+    logging:
+      driver: json-file
+      options:
+        max-size: 2m
+    networks:
+      - kratos
+    volumes:
+      - ../../../:/go/src/go-common/:rw
+    ports:
+      - 8000:8000
+    links:
+      - liveredis
+    working_dir: /go/src/go-common/app/interface/video/portal/cmd
+    command: go run main.go -appid=portal -conf=portal.toml
+  stream-mng:
+    build: # 构建镜像所需
+      context: ../../../
+      dockerfile: ./app/interface/video/Dockerfile
+    extra_hosts:
+      - "bvc-nerve.bilibili.co:172.18.21.10"
+      - "api.bilibili.co:172.18.35.12"
+      - "discovery.bilibili.co:172.18.35.12"
+    logging:
+      driver: json-file
+      options:
+        max-size: 2m
+    networks:
+      - kratos
+    volumes:
+      - ../../../:/go/src/go-common/:rw
+    ports:
+      - 8001:8000
+      - 9000:9000
+    environment:
+      - TZ=Asia/Shanghai
+      - DEPLOY_ENV=uat
+      - HOSTNAME=zhoujiahui
+      - APP_ID=video.live.stream-mng
+      - zone=sh001
+    links:
+      - liveredis
+    working_dir: /go/src/go-common/app/service/video/stream-mng/cmd
+    command: go run main.go -appid=stream-mng -conf=stream-mng.toml
+  liveredis:
+    image: redis
+    networks:
+      - kratos
+networks:
+  kratos:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.10.0/24
+          gateway: 192.168.10.1

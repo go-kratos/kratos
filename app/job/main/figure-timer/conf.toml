@@ -1,0 +1,78 @@
+[property]
+# 结算开始分片index（方便debug）
+PendingMidStart = 0
+# redis中用户列表分片数
+PendingMidShard = 10000
+# 从redis取出用户列表的重试次数（防止一次失败，导致本次结算不完整）
+PendingMidRetry = 3
+# 计算周偏移，0：结算本周分值，1：计算上周分值...以此类推
+CalcWeekOffset = 1
+# 周期计算信用分的cron表达式
+CycleCron = "0 0 0 * * 1"
+# 计算分值并发数
+ConcurrencySize = 16
+[property.calc]
+K1 = 0.1
+K2 = 0.1
+K3 = 0.1
+K4 = 0.1
+K5 = 0.1
+InitLawfulScore = 10000
+InitWideScore = 0
+InitFriendlyScore = 5000
+InitBountyScore = 0
+InitCreativityScore = 0
+lawfulNegMax = 10000.0
+lawfulPosMax = 10000.0
+lawfulPosK = 0.002
+lawfulNegK1 = 0.03
+lawfulNegK2 = 0.02
+lawfulPosL = 200.0
+lawfulNegL = 200.0
+lawfulPosC1 = 1.0
+lawfulPosC2 = 1.0
+lawfulPosC3 = 1.0
+lawfulNegC1 = 1.0
+lawfulNegC2 = 5.0
+lawfulNegC3 = 5.0
+lawfulPosQ1 = 1.0
+lawfulPosQ2 = 1.0
+lawfulPosQ3 = 1.0
+lawfulNegQ1 = 1.0
+lawfulNegQ2 = 1.0
+lawfulNegQ3 = 1.0
+widePosMax = 15000.0
+widePosK = 0.004
+wideC1 = 2.0 
+wideQ1 = 1.0
+wideC2 = 0.01 
+wideQ2 = 1.0
+friendlyPosMax = 15000.0
+friendlyNegMax = 20000.0
+friendlyPosK = 0.004
+friendlyNegK = 0.004
+friendlyPosL = 200.0
+friendlyNegL = 200.0
+friendlyPosQ1 = 1.0
+friendlyPosC1 = 1.0
+friendlyPosQ2 = 1.0
+friendlyPosC2 = 2.0
+friendlyPosQ3 = 1.0
+friendlyPosC3 = 1.0
+friendlyNegQ1 = 1.0
+friendlyNegC1 = 150.0
+friendlyNegQ2 = 1.0
+friendlyNegC2 = 80.0
+friendlyNegQ3 = 1.0
+friendlyNegC3 = 10.0
+friendlyNegQ4 = 1.0
+friendlyNegC4 = 5.0
+bountyMax = 15000.0
+bountyK = 0.005
+bountyQ1 = 1.0
+bountyC1 = 15.0
+creativityPosMax = 7000.0
+creativityPosK = 0.004
+creativityPosL1 = 200.0
+creativityQ1 = 1.0
+creativityC1 = 0.1

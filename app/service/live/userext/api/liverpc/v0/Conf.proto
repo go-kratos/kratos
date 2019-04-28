@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package userext.v0;
+
+option go_package = "v0";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Conf {
+    
+    /** 设置配置仓库
+     * 
+     */   
+    rpc set (ConfSetReq) returns (ConfSetResp);
+    
+    /** 查看用户配置
+     * 
+     */   
+    rpc get (ConfGetReq) returns (ConfGetResp);
+}
+
+
+
+message ConfSetReq {
+    // 参数结构
+    repeated Var var_list = 1 [(gogoproto.jsontag) = "var_list"];
+       
+    message Var {
+        // 用户id
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 目标id,主播uid、房间号etc
+        int64 target_id = 2 [(gogoproto.jsontag) = "target_id"];
+        // type请在 “配置仓库标识申请” 中自行分配
+        int64 type = 3 [(gogoproto.jsontag) = "type"];
+        // 设置内容
+        string content = 4 [(gogoproto.jsontag) = "content"];
+    }
+}
+
+message ConfSetResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        
+    }
+}
+
+
+
+message ConfGetReq {
+    // 用户id
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 目标id,主播uid、房间号etc
+    int64 target_id = 2 [(gogoproto.jsontag) = "target_id"];
+    // type请在 “配置仓库标识申请” 中自行分配
+    repeated int64 type = 3 [(gogoproto.jsontag) = "type"];
+}
+
+message ConfGetResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // type -> content
+    map<string, string> data = 3 [(gogoproto.jsontag) = "data"];
+}

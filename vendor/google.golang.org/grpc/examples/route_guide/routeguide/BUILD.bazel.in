@@ -1,0 +1,23 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+
+proto_library(
+    name = "routeguide_proto",
+    srcs = ["route_guide.proto"],
+    visibility = ["//visibility:public"],
+)
+
+go_proto_library(
+    name = "routeguide_go_proto",
+    compilers = ["@io_bazel_rules_go//proto:go_grpc"],
+    importpath = "google.golang.org/grpc/examples/route_guide/routeguide",
+    proto = ":routeguide_proto",
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "go_default_library",
+    embed = [":routeguide_go_proto"],
+    importpath = "google.golang.org/grpc/examples/route_guide/routeguide",
+    visibility = ["//visibility:public"],
+)

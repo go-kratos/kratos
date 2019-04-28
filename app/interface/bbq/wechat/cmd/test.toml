@@ -1,0 +1,28 @@
+[log]
+    stdout = true
+    # dir = "./log/bbq"
+    v = 5
+
+[bm]
+    addr = "0.0.0.0:8808"
+    timeout = "2s"
+
+[redis]
+	name = "bbq-web"
+	proto = "tcp"
+	addr = "172.16.38.91:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[weixin]
+    appid = "wx0cdd857da509e66d"
+    secret = "99c0b103f59ab79c7b705e3e93a1d4f3"
+
+[urls]
+    weixin = "https://api.weixin.qq.com/cgi-bin/token"
+    jsapi = "https://api.weixin.qq.com/cgi-bin/ticket/getticket"

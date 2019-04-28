@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liweijia
+- renwei
+- zhaogangtao
+- zhaoshichen
+labels:
+- interface
+- interface/main/tv
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- guanyanliang
+- wuhao
+- zhaoshichen

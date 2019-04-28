@@ -1,0 +1,5 @@
+[stats]
+    taskID = "001482"
+    proto = "tcp"
+    addr = "172.18.33.125:15140"
+    chanSize = 10240

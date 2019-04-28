@@ -1,0 +1,18 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- muyang
+- wanghuan01
+- zhaogangtao
+- zhoujiahui
+labels:
+- admin
+- admin/main/block
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- muyang
+- wanghuan01
+- zhaogangtao
+- zhoujiahui

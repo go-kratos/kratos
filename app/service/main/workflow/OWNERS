@@ -1,0 +1,15 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- haoguanwei
+- zhapuyu
+- zhoushuguang
+labels:
+- main
+- service
+- service/main/workflow
+options:
+  no_parent_owners: true
+reviewers:
+- zhapuyu
+- zhoushuguang

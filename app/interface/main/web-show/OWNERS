@@ -1,0 +1,15 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liweijia
+labels:
+- interface
+- interface/main/web-show
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- guanyanliang
+- liweijia
+- wuhao02
+- zhapuyu

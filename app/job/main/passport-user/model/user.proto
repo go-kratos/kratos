@@ -1,0 +1,54 @@
+syntax = "proto3";
+package passport.job.user;
+option go_package = "model";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message UserBaseProto {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    string UserID = 2 [(gogoproto.jsontag) = "userid"];
+    bytes Pwd = 3 [(gogoproto.jsontag) = "pwd"];
+    string Salt = 4 [(gogoproto.jsontag) = "salt"];
+    int32 Status = 5 [(gogoproto.jsontag) = "status"];
+}
+
+message UserEmailProto {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    bytes Email = 2 [(gogoproto.jsontag) = "email"];
+    int32 Verified = 3 [(gogoproto.jsontag) = "verified"];
+    int64 EmailBindTime = 4 [(gogoproto.jsontag) = "email_bind_time"];
+}
+
+message UserTelProto {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    bytes Tel = 2 [(gogoproto.jsontag) = "tel"];
+    string Cid = 3 [(gogoproto.jsontag) = "cid"];
+    int64 TelBindTime = 4 [(gogoproto.jsontag) = "tel_bind_time"];
+}
+
+message UserRegOriginProto {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    int64 JoinIP = 2 [(gogoproto.jsontag) = "join_ip"];
+    bytes JoinIPV6 = 3 [(gogoproto.jsontag) = "join_ip_v6"];
+    int32 port = 4 [(gogoproto.jsontag) = "port"];
+    int64 JoinTime = 5 [(gogoproto.jsontag) = "join_time"];
+    int32 Origin = 6 [(gogoproto.jsontag) = "origin"];
+    int32 RegType = 7 [(gogoproto.jsontag) = "reg_type"];
+    int64 AppID = 8 [(gogoproto.jsontag) = "appid"];
+}
+
+message UserSafeQuestionProto {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    int32 SafeQuestion = 2 [(gogoproto.jsontag) = "safe_question"];
+    bytes SafeAnswer = 3 [(gogoproto.jsontag) = "safe_answer"];
+    int64 SafeBindTime = 4 [(gogoproto.jsontag) = "safe_bind_time"];
+}
+
+message UserThirdBindProto {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 Mid = 2 [(gogoproto.jsontag) = "mid"];
+    string OpenID = 3 [(gogoproto.jsontag) = "openid"];
+    int64 PlatForm = 4 [(gogoproto.jsontag) = "platform"];
+    string Token = 5 [(gogoproto.jsontag) = "token"];
+    int64 Expires = 6 [(gogoproto.jsontag) = "expires"];
+}

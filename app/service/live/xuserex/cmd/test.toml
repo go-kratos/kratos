@@ -1,0 +1,43 @@
+[log]
+    stdout = true
+
+[titan]
+    treeId = 82470
+
+[memcache]
+	name = "xuserex-memcache"
+	proto = "tcp"
+	addr = "127.0.0.1:11211"
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[hbase]
+    master = ""
+    meta = ""
+    dialTimeout = "1s"
+    readTimeout = "150ms"
+    readsTimeout = "600ms"
+    writeTimeout = "200ms"
+    writesTimeout = "600ms"
+    [hbase.zookeeper]
+        root = ""
+        addrs = ["172.18.33.163:2181","172.18.33.164:2181","172.18.33.165:2181"]
+        timeout = "30s"
+
+[bmClient]
+    key = "837f620f5c0a8010"
+    secret = "2a9057021014b4b843b635664c69d5df"
+    dial = "500ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    [httpClient.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100

@@ -1,4 +1,44 @@
-go.sum
-BUILD
+# idea ignore
+.idea/
+*.ipr
+*.iml
+*.iws
+
+biligo/
+.vscode/
+
+*.swp
+
+# temp ignore
+*.log
+*.cache
+*.diff
+*.exe
+*.exe~
+*.patch
+*.tmp
+*debug.test
+
+# system ignore
 .DS_Store
-tool/kratos/kratos
+Thumbs.db
+
+# project
+*.cert
+*.key
+.test
+iprepo.txt
+
+app/*/*/cmd/cmd
+app/*/*/*/cmd/cmd
+app/*/*/cmd/debug
+app/*/*/*/cmd/debug
+app/tool/kratos/kratos
+
+bazel-bin
+bazel-genfiles
+bazel-go-common
+bazel-out
+bazel-testlogs
+bazel-test
+_output

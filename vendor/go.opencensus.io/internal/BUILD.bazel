@@ -1,0 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "internal.go",
+        "sanitize.go",
+        "traceinternals.go",
+    ],
+    importmap = "k8s.io/test-infra/vendor/go.opencensus.io/internal",
+    importpath = "go.opencensus.io/internal",
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/go.opencensus.io:go_default_library"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

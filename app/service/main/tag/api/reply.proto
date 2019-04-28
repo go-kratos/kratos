@@ -1,0 +1,73 @@
+// main.community.tag-service grpc api proto file.
+// discovery id: community.service.tag.
+// version: v1.
+syntax = "proto3";
+package community.service.tag.v1;
+
+import "app/service/main/tag/api/channel.proto";
+import "app/service/main/tag/api/tag.proto";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+message AddReportReply {
+}
+
+message TagReply {
+    Tag tag = 1;
+}
+
+message TagMapByIDReply {
+    map<int64, Tag> tags = 1;
+}
+
+message ChannelCategoriesReply {
+    repeated ChannelCategory categories = 1;
+}
+
+
+message ChannelsReply {
+    repeated Channel channels = 1;
+}
+
+message ChannelRulesReply {
+    repeated ChannelRule rules = 1;
+}
+
+message ChannelGroupReply {
+    repeated ChannelGroup groups = 1;
+}
+
+
+message ResTagReply {
+    repeated Resource resource = 1;
+}
+
+message ResTagMapReply {
+    map<int64, Resource> resource = 1;
+}
+
+message ResTag {
+    repeated Resource resource = 1;
+}
+
+message ResTagsReply {
+    map<int64,ResTag > resource = 1;
+}
+
+message ResTagActionReply {
+
+}
+
+message ResTagActionMapReply {
+    map<int64, int32> action_map = 1;
+}
+
+message UpBindReply {
+
+}
+
+message AdminBindReply {
+
+}

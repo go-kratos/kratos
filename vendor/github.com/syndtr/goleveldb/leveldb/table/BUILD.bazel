@@ -1,0 +1,38 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "reader.go",
+        "table.go",
+        "writer.go",
+    ],
+    importmap = "go-common/vendor/github.com/syndtr/goleveldb/leveldb/table",
+    importpath = "github.com/syndtr/goleveldb/leveldb/table",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/golang/snappy:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/cache:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/comparer:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/errors:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/filter:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/iterator:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/opt:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/storage:go_default_library",
+        "//vendor/github.com/syndtr/goleveldb/leveldb/util:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

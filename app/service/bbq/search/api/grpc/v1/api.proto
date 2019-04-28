@@ -1,0 +1,169 @@
+syntax = "proto3";
+package bbq.service.search.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+message SaveVideoRequest{
+    option (gogoproto.goproto_stringer) = false;
+    repeated VideoESInfo list = 1 [(gogoproto.jsontag) = "list",(gogoproto.moretags) = "form:\"list\" validate:\"required\""];
+}
+
+message VideoESInfo{
+    option (gogoproto.goproto_stringer) = false;
+    int64 svid = 1 [(gogoproto.jsontag) = "svid",(gogoproto.moretags) = "form:\"svid\"",(gogoproto.customname)= "SVID"];
+    string title = 2 [(gogoproto.jsontag) = "title",(gogoproto.moretags) = "form:\"title\""];
+    string content = 3 [(gogoproto.jsontag) = "content",(gogoproto.moretags) = "form:\"content\""];
+    int64 mid = 4 [(gogoproto.jsontag) = "mid",(gogoproto.moretags) = "form:\"mid\"",(gogoproto.customname)= "MID"];
+    int64 cid = 5 [(gogoproto.jsontag) = "cid",(gogoproto.moretags) = "form:\"cid\"",(gogoproto.customname)= "CID"];
+    int64 pubtime = 6 [(gogoproto.jsontag) = "pubtime",(gogoproto.moretags) = "form:\"pubtime\""];
+    int64 ctime = 7 [(gogoproto.jsontag) = "ctime",(gogoproto.moretags) = "form:\"ctime\""];
+    int64 mtime = 8 [(gogoproto.jsontag) = "mtime",(gogoproto.moretags) = "form:\"mtime\""];
+    int64 duration = 9 [(gogoproto.jsontag) = "duration",(gogoproto.moretags) = "form:\"duration\""];
+    int64 original = 10 [(gogoproto.jsontag) = "original",(gogoproto.moretags) = "form:\"original\""];
+    int64 state = 11 [(gogoproto.jsontag) = "state",(gogoproto.moretags) = "form:\"state\""];
+    int64 ver_id = 12 [(gogoproto.jsontag) = "ver_id",(gogoproto.moretags) = "form:\"ver_id\"",(gogoproto.customname)= "VerID"];
+    string ver = 13 [(gogoproto.jsontag) = "ver",(gogoproto.moretags) = "form:\"ver\""];
+    int64 from = 14 [(gogoproto.jsontag) = "from",(gogoproto.moretags) = "form:\"from\""];
+    int64 avid = 15 [(gogoproto.jsontag) = "avid",(gogoproto.moretags) = "form:\"avid\"",(gogoproto.customname)= "AVID"];
+    int64 tid = 16 [(gogoproto.jsontag) = "tid",(gogoproto.moretags) = "form:\"tid\""];
+    int64 sub_tid = 17 [(gogoproto.jsontag) = "sub_tid",(gogoproto.moretags) = "form:\"sub_tid\""];
+    int64 score = 18 [(gogoproto.jsontag) = "score",(gogoproto.moretags) = "form:\"score\""];
+    int64 rough_score = 19 [(gogoproto.jsontag) = "rough_score",(gogoproto.moretags) = "form:\"rough_score\""];
+    repeated VideoESTags tags = 20 [(gogoproto.jsontag) = "tags",(gogoproto.moretags) = "form:\"tags\""];
+    int64 play_hive = 21 [(gogoproto.jsontag) = "play_hive",(gogoproto.moretags) = "form:\"play_hive\""];
+    int64 fav_hive = 22 [(gogoproto.jsontag) = "fav_hive",(gogoproto.moretags) = "form:\"fav_hive\""];
+    int64 coin_hive = 23 [(gogoproto.jsontag) = "coin_hive",(gogoproto.moretags) = "form:\"coin_hive\""];
+    int64 subtitles_hive = 24 [(gogoproto.jsontag) = "subtitles_hive",(gogoproto.moretags) = "form:\"subtitles_hive\""];
+    int64 likes_hive = 25 [(gogoproto.jsontag) = "likes_hive",(gogoproto.moretags) = "form:\"likes_hive\""];
+    int64 share_hive = 26 [(gogoproto.jsontag) = "share_hive",(gogoproto.moretags) = "form:\"share_hive\""];
+    int64 report_hive = 27 [(gogoproto.jsontag) = "report_hive",(gogoproto.moretags) = "form:\"report_hive\""];
+    int64 duration_daily_hive = 28 [(gogoproto.jsontag) = "duration_daily_hive",(gogoproto.moretags) = "form:\"duration_daily_hive\""];
+    int64 duration_all_hive = 29 [(gogoproto.jsontag) = "duration_all_hive",(gogoproto.moretags) = "form:\"duration_all_hive\""];
+    int64 reply_hive = 30 [(gogoproto.jsontag) = "reply_hive",(gogoproto.moretags) = "form:\"reply_hive\""];
+    int64 share_daily_hive = 31 [(gogoproto.jsontag) = "share_daily_hive",(gogoproto.moretags) = "form:\"share_daily_hive\""];
+    int64 play_daily_hive = 32 [(gogoproto.jsontag) = "play_daily_hive",(gogoproto.moretags) = "form:\"play_daily_hive\""];
+    int64 subtitles_daily_hive = 33 [(gogoproto.jsontag) = "subtitles_daily_hive",(gogoproto.moretags) = "form:\"subtitles_daily_hive\""];
+    int64 likes_daily_hive = 34 [(gogoproto.jsontag) = "likes_daily_hive",(gogoproto.moretags) = "form:\"likes_daily_hive\""];
+    int64 fav_daily_hive = 35 [(gogoproto.jsontag) = "fav_daily_hive",(gogoproto.moretags) = "form:\"fav_daily_hive\""];
+    int64 reply_daily_hive = 36 [(gogoproto.jsontag) = "reply_daily_hive",(gogoproto.moretags) = "form:\"reply_daily_hive\""];
+    int64 access_hive = 37 [(gogoproto.jsontag) = "access_hive",(gogoproto.moretags) = "form:\"access_hive\""];
+    int64 play = 38 [(gogoproto.jsontag) = "play",(gogoproto.moretags) = "form:\"play\""];
+    int64 subtitles = 39 [(gogoproto.jsontag) = "subtitles",(gogoproto.moretags) = "form:\"subtitles\""];
+    int64 like = 40 [(gogoproto.jsontag) = "like",(gogoproto.moretags) = "form:\"like\""];
+    int64 share = 41 [(gogoproto.jsontag) = "share",(gogoproto.moretags) = "form:\"share\""];
+    int64 report = 42 [(gogoproto.jsontag) = "report",(gogoproto.moretags) = "form:\"report\""];
+    repeated int64 similar_id = 43 [(gogoproto.jsontag) = "similar_id",(gogoproto.moretags) = "form:\"similar_id\"",(gogoproto.customname)= "SimilarID"];
+    int64 is_full_screen = 44 [(gogoproto.jsontag) = "is_full_screen",(gogoproto.moretags) = "form:\"is_full_screen\"",(gogoproto.customname)= "ISFullScreen"];
+}
+
+message VideoESTags{
+    int64 id = 1 [(gogoproto.jsontag) = "id",(gogoproto.moretags) = "form:\"id\"",(gogoproto.customname)= "ID"];
+    string name = 2 [(gogoproto.jsontag) = "name",(gogoproto.moretags) = "form:\"name\""];
+    int64 type = 3 [(gogoproto.jsontag) = "type",(gogoproto.moretags) = "form:\"type\""];
+}
+
+message SaveVideoResponse{}
+
+message RecVideoInfo{
+    option (gogoproto.goproto_stringer) = false;
+    int64 svid = 1 [(gogoproto.jsontag) = "svid",(gogoproto.moretags) = "form:\"svid\"",(gogoproto.customname)= "SVID"];
+    string title = 2 [(gogoproto.jsontag) = "title",(gogoproto.moretags) = "form:\"title\""];
+    string content = 3 [(gogoproto.jsontag) = "content",(gogoproto.moretags) = "form:\"content\""];
+    int64 mid = 4 [(gogoproto.jsontag) = "mid",(gogoproto.moretags) = "form:\"mid\"",(gogoproto.customname)= "MID"];
+    int64 cid = 5 [(gogoproto.jsontag) = "cid",(gogoproto.moretags) = "form:\"cid\"",(gogoproto.customname)= "CID"];
+    int64 pubtime = 6 [(gogoproto.jsontag) = "pubtime",(gogoproto.moretags) = "form:\"pubtime\""];
+    int64 ctime = 7 [(gogoproto.jsontag) = "ctime",(gogoproto.moretags) = "form:\"ctime\""];
+    int64 mtime = 8 [(gogoproto.jsontag) = "mtime",(gogoproto.moretags) = "form:\"mtime\""];
+    int64 duration = 9 [(gogoproto.jsontag) = "duration",(gogoproto.moretags) = "form:\"duration\""];
+    int64 original = 10 [(gogoproto.jsontag) = "original",(gogoproto.moretags) = "form:\"original\""];
+    int64 state = 11 [(gogoproto.jsontag) = "state",(gogoproto.moretags) = "form:\"state\""];
+    int64 ver_id = 12 [(gogoproto.jsontag) = "ver_id",(gogoproto.moretags) = "form:\"ver_id\"",(gogoproto.customname)= "VerID"];
+    string ver = 13 [(gogoproto.jsontag) = "ver",(gogoproto.moretags) = "form:\"ver\""];
+    int64 from = 14 [(gogoproto.jsontag) = "from",(gogoproto.moretags) = "form:\"from\""];
+    int64 avid = 15 [(gogoproto.jsontag) = "avid",(gogoproto.moretags) = "form:\"avid\"",(gogoproto.customname)= "AVID"];
+    int64 tid = 16 [(gogoproto.jsontag) = "tid",(gogoproto.moretags) = "form:\"tid\""];
+    int64 sub_tid = 17 [(gogoproto.jsontag) = "sub_tid",(gogoproto.moretags) = "form:\"sub_tid\""];
+    int64 score = 18 [(gogoproto.jsontag) = "score",(gogoproto.moretags) = "form:\"score\""];
+    int64 rough_score = 19 [(gogoproto.jsontag) = "rough_score",(gogoproto.moretags) = "form:\"rough_score\""];
+    repeated VideoESTags tags = 20 [(gogoproto.jsontag) = "tags",(gogoproto.moretags) = "form:\"tags\""];
+    int64 play_hive = 21 [(gogoproto.jsontag) = "play_hive",(gogoproto.moretags) = "form:\"play_hive\""];
+    int64 fav_hive = 22 [(gogoproto.jsontag) = "fav_hive",(gogoproto.moretags) = "form:\"fav_hive\""];
+    int64 coin_hive = 23 [(gogoproto.jsontag) = "coin_hive",(gogoproto.moretags) = "form:\"coin_hive\""];
+    int64 subtitles_hive = 24 [(gogoproto.jsontag) = "subtitles_hive",(gogoproto.moretags) = "form:\"subtitles_hive\""];
+    int64 likes_hive = 25 [(gogoproto.jsontag) = "likes_hive",(gogoproto.moretags) = "form:\"likes_hive\""];
+    int64 share_hive = 26 [(gogoproto.jsontag) = "share_hive",(gogoproto.moretags) = "form:\"share_hive\""];
+    int64 report_hive = 27 [(gogoproto.jsontag) = "report_hive",(gogoproto.moretags) = "form:\"report_hive\""];
+    int64 duration_daily_hive = 28 [(gogoproto.jsontag) = "duration_daily_hive",(gogoproto.moretags) = "form:\"duration_daily_hive\""];
+    int64 duration_all_hive = 29 [(gogoproto.jsontag) = "duration_all_hive",(gogoproto.moretags) = "form:\"duration_all_hive\""];
+    int64 reply_hive = 30 [(gogoproto.jsontag) = "reply_hive",(gogoproto.moretags) = "form:\"reply_hive\""];
+    int64 share_daily_hive = 31 [(gogoproto.jsontag) = "share_daily_hive",(gogoproto.moretags) = "form:\"share_daily_hive\""];
+    int64 play_daily_hive = 32 [(gogoproto.jsontag) = "play_daily_hive",(gogoproto.moretags) = "form:\"play_daily_hive\""];
+    int64 subtitles_daily_hive = 33 [(gogoproto.jsontag) = "subtitles_daily_hive",(gogoproto.moretags) = "form:\"subtitles_daily_hive\""];
+    int64 likes_daily_hive = 34 [(gogoproto.jsontag) = "likes_daily_hive",(gogoproto.moretags) = "form:\"likes_daily_hive\""];
+    int64 fav_daily_hive = 35 [(gogoproto.jsontag) = "fav_daily_hive",(gogoproto.moretags) = "form:\"fav_daily_hive\""];
+    int64 reply_daily_hive = 36 [(gogoproto.jsontag) = "reply_daily_hive",(gogoproto.moretags) = "form:\"reply_daily_hive\""];
+    int64 access_hive = 37 [(gogoproto.jsontag) = "access_hive",(gogoproto.moretags) = "form:\"access_hive\""];
+    int64 play = 38 [(gogoproto.jsontag) = "play",(gogoproto.moretags) = "form:\"play\""];
+    int64 subtitles = 39 [(gogoproto.jsontag) = "subtitles",(gogoproto.moretags) = "form:\"subtitles\""];
+    int64 like = 40 [(gogoproto.jsontag) = "like",(gogoproto.moretags) = "form:\"like\""];
+    int64 share = 41 [(gogoproto.jsontag) = "share",(gogoproto.moretags) = "form:\"share\""];
+    int64 report = 42 [(gogoproto.jsontag) = "report",(gogoproto.moretags) = "form:\"report\""];
+    repeated int64 similar_id =43 [(gogoproto.jsontag) = "similar_id",(gogoproto.moretags) = "form:\"similar_id\"",(gogoproto.customname)= "SimilarID"];
+    float es_score = 44 [(gogoproto.jsontag) = "es_score",(gogoproto.moretags) = "form:\"es_score\"",(gogoproto.customname)= "ESScore", (gogoproto.casttype) = "float64"];
+    repeated float custom_score = 45 [(gogoproto.jsontag) = "custom_score",(gogoproto.moretags) = "form:\"custom_score\"", (gogoproto.casttype) = "float64"];
+    int64 is_full_screen = 46 [(gogoproto.jsontag) = "is_full_screen",(gogoproto.moretags) = "form:\"is_full_screen\"",(gogoproto.customname)= "ISFullScreen"];
+}
+
+message RecVideoDataRequest{
+    option (gogoproto.goproto_stringer) = false;
+    string query = 1 [(gogoproto.jsontag) = "query",(gogoproto.moretags) = "form:\"query\" validate:\"required\""];
+}
+
+message RecVideoDataResponse{
+    option (gogoproto.goproto_stringer) = false;
+    int64 total = 1 [(gogoproto.jsontag) = "total"];
+    repeated RecVideoInfo list = 2 [(gogoproto.jsontag) = "list"];
+}
+
+message VideoDataRequest{
+    option (gogoproto.goproto_stringer) = false;
+    string query = 1 [(gogoproto.jsontag) = "query",(gogoproto.moretags) = "form:\"query\" validate:\"required\""];
+}
+
+message VideoDataResponse{
+    option (gogoproto.goproto_stringer) = false;
+    int64 total = 1 [(gogoproto.jsontag) = "total"];
+    repeated VideoESInfo list = 2 [(gogoproto.jsontag) = "list"];
+}
+
+message ESVideoDataRequest{
+    option (gogoproto.goproto_stringer) = false;
+    string query = 1 [(gogoproto.jsontag) = "query",(gogoproto.moretags) = "form:\"query\" validate:\"required\""];
+}
+
+message ESVideoDataResponse{
+    option (gogoproto.goproto_stringer) = false;
+    int64 total = 1 [(gogoproto.jsontag) = "total"];
+    repeated RecVideoInfo list = 2 [(gogoproto.jsontag) = "list"];
+}
+
+message DelVideoBySVIDRequest{
+    option (gogoproto.goproto_stringer) = false;
+    repeated int64 svids= 1 [(gogoproto.jsontag) = "query",(gogoproto.moretags) = "form:\"svids\" validate:\"required\"",(gogoproto.customname)= "SVIDs"];
+}
+
+message DelVideoBySVIDResponse{}
+
+service Search{
+    rpc SaveVideo(SaveVideoRequest) returns(SaveVideoResponse);
+    rpc VideoData(VideoDataRequest) returns(VideoDataResponse);
+    rpc RecVideoData(RecVideoDataRequest) returns(RecVideoDataResponse);
+    rpc ESVideoData(ESVideoDataRequest) returns(ESVideoDataResponse);
+    rpc DelVideoBySVID(DelVideoBySVIDRequest) returns(DelVideoBySVIDResponse);
+}

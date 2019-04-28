@@ -1,0 +1,240 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// This file contains protocol buffers that are shared throughout HBase
+package pb;
+
+option java_package = "org.apache.hadoop.hbase.protobuf.generated";
+option java_outer_classname = "HBaseProtos";
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+import "Cell.proto";
+
+/**
+ * Table Name
+ */
+message TableName {
+  required bytes namespace = 1;
+  required bytes qualifier = 2;
+}
+
+/**
+ * Table Schema
+ * Inspired by the rest TableSchema
+ */
+message TableSchema {
+  optional TableName table_name = 1;
+  repeated BytesBytesPair attributes = 2;
+  repeated ColumnFamilySchema column_families = 3;
+  repeated NameStringPair configuration = 4;
+}
+
+/**
+ * Column Family Schema
+ * Inspired by the rest ColumSchemaMessage
+ */
+message ColumnFamilySchema {
+  required bytes name = 1;
+  repeated BytesBytesPair attributes = 2;
+  repeated NameStringPair configuration = 3;
+}
+
+/**
+ * Protocol buffer version of HRegionInfo.
+ */
+message RegionInfo {
+  required uint64 region_id = 1;
+  required TableName table_name = 2;
+  optional bytes start_key = 3;
+  optional bytes end_key = 4;
+  optional bool offline = 5;
+  optional bool split = 6;
+  optional int32 replica_id = 7 [default = 0];
+}
+
+/**
+ * Protocol buffer for favored nodes
+ */
+message FavoredNodes {
+  repeated ServerName favored_node = 1;
+}
+
+/**
+ * Container protocol buffer to specify a region.
+ * You can specify region by region name, or the hash
+ * of the region name, which is known as encoded
+ * region name.
+ */
+message RegionSpecifier {
+  required RegionSpecifierType type = 1;
+  required bytes value = 2;
+
+  enum RegionSpecifierType {
+    // <tablename>,<startkey>,<regionId>.<encodedName>
+    REGION_NAME = 1;
+
+    // hash of <tablename>,<startkey>,<regionId>
+    ENCODED_REGION_NAME = 2;
+  }
+}
+
+/**
+ * A range of time. Both from and to are Java time
+ * stamp in milliseconds. If you don't specify a time
+ * range, it means all time.  By default, if not
+ * specified, from = 0, and to = Long.MAX_VALUE
+ */
+message TimeRange {
+  optional uint64 from = 1;
+  optional uint64 to = 2;
+}
+
+/* ColumnFamily Specific TimeRange */
+message ColumnFamilyTimeRange {
+  required bytes column_family = 1;
+  required TimeRange time_range = 2;
+}
+
+/* Comparison operators */
+enum CompareType {
+  LESS = 0;
+  LESS_OR_EQUAL = 1;
+  EQUAL = 2;
+  NOT_EQUAL = 3;
+  GREATER_OR_EQUAL = 4;
+  GREATER = 5;
+  NO_OP = 6;
+}
+
+/**
+ * Protocol buffer version of ServerName
+ */
+message ServerName {
+  required string host_name = 1;
+  optional uint32 port = 2;
+  optional uint64 start_code = 3;
+}
+
+// Comment data structures
+
+message Coprocessor {
+  required string name = 1;
+}
+
+message NameStringPair {
+  required string name = 1;
+  required string value = 2;
+}
+
+message NameBytesPair {
+  required string name = 1;
+  optional bytes value = 2;
+}
+
+message BytesBytesPair {
+  required bytes first = 1;
+  required bytes second = 2;
+}
+
+message NameInt64Pair {
+  optional string name = 1;
+  optional int64 value = 2;
+}
+
+/**
+ * Description of the snapshot to take
+ */
+message SnapshotDescription {
+  required string name = 1;
+  optional string table = 2; // not needed for delete, but checked for in taking snapshot
+  optional int64 creation_time = 3 [default = 0];
+  enum Type {
+    DISABLED = 0;
+    FLUSH = 1;
+    SKIPFLUSH = 2;
+  }
+  optional Type type = 4 [default = FLUSH];
+  optional int32 version = 5;
+  optional string owner = 6;
+}
+
+/**
+ * Description of the distributed procedure to take
+ */
+message ProcedureDescription {
+  required string signature = 1; // the unique signature of the procedure
+  optional string instance = 2; // the procedure instance name
+  optional int64 creation_time = 3 [default = 0];
+  repeated NameStringPair configuration = 4;
+}
+
+message EmptyMsg {
+}
+
+enum TimeUnit {
+  NANOSECONDS = 1;
+  MICROSECONDS = 2;
+  MILLISECONDS = 3;
+  SECONDS = 4;
+  MINUTES = 5;
+  HOURS = 6;
+  DAYS = 7;
+}
+
+message LongMsg {
+  required int64 long_msg = 1;
+}
+
+message DoubleMsg {
+  required double double_msg = 1;
+}
+
+message BigDecimalMsg {
+  required bytes bigdecimal_msg = 1;
+}
+
+message UUID {
+  required uint64 least_sig_bits = 1;
+  required uint64 most_sig_bits = 2;
+}
+
+message NamespaceDescriptor {
+  required bytes name = 1;
+  repeated NameStringPair configuration = 2;
+}
+
+// Rpc client version info proto. Included in ConnectionHeader on connection setup
+message VersionInfo {
+  required string version = 1;
+  required string url = 2;
+  required string revision = 3;
+  required string user = 4;
+  required string date = 5;
+  required string src_checksum = 6;
+  optional uint32 version_major = 7;
+  optional uint32 version_minor = 8;
+}
+
+/**
+ * Description of the region server info
+ */
+message RegionServerInfo {
+  optional int32 infoPort = 1;
+  optional VersionInfo version_info = 2;
+}

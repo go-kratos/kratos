@@ -1,0 +1,12 @@
+syntax = "proto3";
+package passport.service.sns;
+option go_package = "model";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message SnsProto {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    string UnionID = 2 [(gogoproto.jsontag) = "unionid"];
+    int32 Platform = 3 [(gogoproto.jsontag) = "platform"];
+    int64 Expires = 4 [(gogoproto.jsontag) = "expires"];
+}

@@ -1,0 +1,9 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- anyone
+labels:
+- library
+- library/ecode
+options:
+  no_parent_owners: true

@@ -1,0 +1,220 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "go-common api",
+    "description": "api",
+    "version": "1.0",
+    "contact": {
+      "email": "lintanghui@bilibili.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "paths": {
+    "/x/riot-search/fav/aids": {
+      "get": {
+        "operationId": "/x/riot-search/fav/aids",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ids",
+            "description": "数组,按逗号分隔",
+            "type": "array"
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "pn",
+            "description": " 最小值 1",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "ps",
+            "description": " 最小值 0",
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/IDsResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x/riot-search/fav/contents": {
+      "get": {
+        "operationId": "/x/riot-search/fav/contents",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pn",
+            "description": " 最小值 1",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "ps",
+            "description": " 最小值 0",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "ids",
+            "description": "数组,按逗号分隔",
+            "type": "array"
+          },
+          {
+            "in": "query",
+            "name": "keyword",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/DocumentsResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Document": {
+      "title": "Document",
+      "description": "Document id and content",
+      "type": "object",
+      "properties": {
+        "Content": {
+          "type": "string"
+        },
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "DocumentsResp": {
+      "title": "DocumentsResp",
+      "description": "DocumentsResp resp of documents",
+      "type": "object",
+      "properties": {
+        "Documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Document",
+            "type": "object"
+          }
+        },
+        "Page": {
+          "$ref": "#/definitions/Page",
+          "type": "object"
+        },
+        "Tokens": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "IDsResp": {
+      "title": "IDsResp",
+      "description": "IDsResp resp of ids",
+      "type": "object",
+      "properties": {
+        "IDs": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "Page": {
+          "$ref": "#/definitions/Page",
+          "type": "object"
+        },
+        "Tokens": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Page": {
+      "title": "Page",
+      "description": "Page Pager",
+      "type": "object",
+      "properties": {
+        "PageNum": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "PageSize": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Total": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    }
+  }
+}

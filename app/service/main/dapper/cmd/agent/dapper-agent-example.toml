@@ -1,0 +1,12 @@
+# uat dapper-service
+#servers = ["172.16.38.143:6190"]
+servers = ["127.0.0.1:6190"]
+
+[log]
+stdout = true
+
+[queue]
+cache_dir = "queue-cache"
+
+[udp_collect]
+addr = "udp://0.0.0.0:2233"

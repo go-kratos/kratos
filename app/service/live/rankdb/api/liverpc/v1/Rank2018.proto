@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package rankdb.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Rank2018 {
+    
+    /** 获取上小时榜topN
+     * 
+     */   
+    rpc getHourRank (Rank2018GetHourRankReq) returns (Rank2018GetHourRankResp);
+}
+
+
+
+message Rank2018GetHourRankReq {
+    // 父分区id
+    int64 area_v2_parent_id = 1 [(gogoproto.jsontag) = "area_v2_parent_id"];
+    // 子分区id
+    int64 area_v2_id = 2 [(gogoproto.jsontag) = "area_v2_id"];
+    // 不传则为上小时
+    string hour = 3 [(gogoproto.jsontag) = "hour"];
+    // N
+    int64 top = 4 [(gogoproto.jsontag) = "top"];
+}
+
+message Rank2018GetHourRankResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    repeated int64 data = 3 [(gogoproto.jsontag) = "data"];
+}

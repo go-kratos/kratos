@@ -1,0 +1,96 @@
+syntax = "proto3";
+package ticket.service.item.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option go_package = "v1";
+
+// The seat service definition.
+service Seat {
+    rpc SeatInfo (SeatInfoRequest) returns (SeatInfoReply) {}
+    rpc SeatStock (SeatStockRequest) returns (SeatStockReply) {}
+    rpc RemoveSeatOrders (RemoveSeatOrdersRequest) returns (RemoveSeatOrdersReply) {}
+}
+
+// 单个座位信息
+message AreaSeatInfo {
+    // 座位图x
+    int32 X = 1 [(gogoproto.jsontag) = "x", (gogoproto.moretags) = "validate:\"min=0\""];
+    // 座位图y
+    int32 Y = 2 [(gogoproto.jsontag) = "y", (gogoproto.moretags) = "validate:\"min=0\""];
+    // 座位号
+    string Label = 3 [(gogoproto.jsontag) = "label", (gogoproto.moretags) = "validate:\"min=1\""];
+    // 背景色
+    string Bgcolor = 4 [(gogoproto.jsontag) = "bgcolor", (gogoproto.moretags) = "validate:\"min=1\""];
+    // 区域ID
+    int64 Area = 5 [(gogoproto.jsontag) = "area", (gogoproto.moretags) = "validate:\"min=1\""];
+}
+
+// seatInfo接口请求
+message SeatInfoRequest {
+    // 区域ID
+    int64 Area = 1 [(gogoproto.jsontag) = "area", (gogoproto.moretags) = "validate:\"min=1\""];
+    // 座位数
+    int32 SeatsNum = 2 [(gogoproto.jsontag) = "seats_num", (gogoproto.moretags) = "validate:\"min=1\""];
+    // 座位图
+    string SeatMap = 3 [(gogoproto.jsontag) = "seat_map", (gogoproto.moretags) = "validate:\"min=1\""];
+    // 座位数组
+    repeated AreaSeatInfo Seats = 4 [(gogoproto.jsontag) = "seats", (gogoproto.moretags) = "validate:\"min=1\""];
+    // 坐区宽度
+    int32 Width = 5 [(gogoproto.jsontag) = "width", (gogoproto.moretags) = "validate:\"min=1\""];
+    // 坐区高度
+    int32 Height = 6 [(gogoproto.jsontag) = "height", (gogoproto.moretags) = "validate:\"min=1\""];
+    // 行号序列
+    string RowList = 7 [(gogoproto.jsontag) = "row_list", (gogoproto.moretags) = "validate:\"min=1\""];
+    // 座位起始坐标
+    string SeatStart = 8 [(gogoproto.jsontag) = "seat_start", (gogoproto.moretags) = "validate:\"min=1\""];   
+}
+
+// seatInfo接口返回
+message SeatInfoReply {
+    // 操作结果
+    bool Success = 1 [(gogoproto.jsontag) = "success"];
+}
+
+// 座位票种
+message SeatPrice {
+    // 座位图x
+    int32 X = 1 [(gogoproto.jsontag) = "x", (gogoproto.moretags) = "validate:\"min=0\""];
+    // 座位图y
+    int32 Y = 2 [(gogoproto.jsontag) = "y", (gogoproto.moretags) = "validate:\"min=0\""];
+    // 票种ID
+    int64 Price = 3 [(gogoproto.jsontag) = "price", (gogoproto.moretags) = "validate:\"min=1\""];
+}
+
+// seatStock接口请求
+message SeatStockRequest {
+    // 场次ID
+    int64 Screen = 1 [(gogoproto.jsontag) = "screen", (gogoproto.moretags) = "validate:\"min=1\""];
+    // 区域ID
+    int64 Area = 2 [(gogoproto.jsontag) = "area", (gogoproto.moretags) = "validate:\"min=1\""];
+    // 座位票种定义数组
+    repeated SeatPrice SeatInfo = 3 [(gogoproto.jsontag) = "seatInfo", (gogoproto.moretags) = "validate:\"min=1\""];
+}
+
+// seatStock接口返回
+message SeatStockReply {
+    // 操作结果
+    bool Success = 1 [(gogoproto.jsontag) = "success"];
+}
+
+// removeSeatOrders接口请求
+message RemoveSeatOrdersRequest {
+    // 票价ID
+    int64 Price = 1 [(gogoproto.jsontag) = "price", (gogoproto.moretags) = "validate:\"min=1\""];
+}
+
+// removeSeatOrders接口返回
+message RemoveSeatOrdersReply {
+    // 影响的区域
+    repeated int64 Areas = 1 [(gogoproto.jsontag) = "areas"];
+}

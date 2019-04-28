@@ -1,0 +1,38 @@
+// main.community.tag-service grpc api proto file.
+// discovery id: community.service.tag.
+// version: v1.
+syntax = "proto3";
+package community.service.tag.v1;
+
+import "app/service/main/tag/api/request.proto";
+import "app/service/main/tag/api/reply.proto";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+service TagRPC {
+    // add a oid-type-tid tag report.
+    rpc AddReport(AddReportReq) returns (AddReportReply);
+
+    // channel
+    rpc ChannelCategories(ChannelCategoriesReq) returns (ChannelCategoriesReply);
+    rpc Channels(ChannelsReq) returns (ChannelsReply);
+    rpc ChannelRules(ChannelRulesReq) returns (ChannelRulesReply);
+    rpc ChannelGroup(ChannelGroupReq) returns (ChannelGroupReply);
+
+    // tag
+    rpc Tag (TagReq)  returns (TagReply);
+    rpc TagByName (TagByNameReq)  returns (TagReply);
+    rpc TagMap(TagMapByIDReq) returns (TagMapByIDReply);
+    rpc ResTag(ResTagReq) returns (ResTagReply);
+    rpc ResTagMap(ResTagReq) returns (ResTagMapReply);
+    rpc ResTags(ResTagsReq) returns (ResTagsReply);
+    rpc Like(ResTagActionReq) returns (ResTagActionReply);
+    rpc Hate(ResTagActionReq) returns (ResTagActionReply);
+    rpc ResTagActionMap(ResTagActionMapReq) returns (ResTagActionMapReply);
+    rpc UpBind(UpBindReq) returns (UpBindReply);
+    rpc AdminBind(AdminBindReq) returns (AdminBindReply);
+    rpc DefaultUpBind(UpBindReq) returns (UpBindReply);
+    rpc DefaultAdminBind(AdminBindReq) returns (AdminBindReply);
+}

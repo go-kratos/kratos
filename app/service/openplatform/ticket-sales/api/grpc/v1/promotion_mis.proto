@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package ticket.service.sales.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+
+message PromoOrderMis {
+	int64 promo_id = 1 [(gogoproto.jsontag) = "promo_id", (gogoproto.customname)= "PromoID"];
+	int64 group_id = 2 [(gogoproto.jsontag) = "group_id", (gogoproto.customname)= "GroupID"];
+	int64 order_id = 3 [(gogoproto.jsontag) = "order_id", (gogoproto.customname)= "OrderID"];
+	int32 is_master = 4 [(gogoproto.jsontag) = "is_master", (gogoproto.casttype) = "int16"];
+	int64 uid = 5 [(gogoproto.jsontag) = "uid", (gogoproto.customname)= "UID"];
+	int32 status = 6 [(gogoproto.jsontag) = "status", (gogoproto.casttype) = "int16"];
+	int64 pay_time = 7 [(gogoproto.jsontag) = "pay_time"];
+	int64 ctime = 8 [(gogoproto.jsontag) = "ctime"];
+	int64 sku_id = 9 [(gogoproto.jsontag) = "sku_id", (gogoproto.customname)= "SKUID"];
+}
+
+message GetGroupOrdersMisRequest{
+     int64 order_id = 1 [(gogoproto.jsontag) = "order_id",(gogoproto.moretags) = "form:\"order_id\"", (gogoproto.customname)= "OrderID"];
+     int64 group_id = 2 [(gogoproto.jsontag) = "group_id",(gogoproto.moretags) = "form:\"group_id\"", (gogoproto.customname)= "GroupID"];
+}
+
+message GetGroupOrdersMisResponse {
+	repeated PromoOrderMis orders = 2 [(gogoproto.jsontag) = "orders"];
+}
+
+service PromotionMis{
+    rpc GetGroupOrdersMis(GetGroupOrdersMisRequest) returns(GetGroupOrdersMisResponse){}
+}

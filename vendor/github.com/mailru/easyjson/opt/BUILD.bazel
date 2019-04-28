@@ -1,0 +1,43 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "gotemplate_Bool.go",
+        "gotemplate_Float32.go",
+        "gotemplate_Float64.go",
+        "gotemplate_Int.go",
+        "gotemplate_Int16.go",
+        "gotemplate_Int32.go",
+        "gotemplate_Int64.go",
+        "gotemplate_Int8.go",
+        "gotemplate_String.go",
+        "gotemplate_Uint.go",
+        "gotemplate_Uint16.go",
+        "gotemplate_Uint32.go",
+        "gotemplate_Uint64.go",
+        "gotemplate_Uint8.go",
+        "opts.go",
+    ],
+    importmap = "go-common/vendor/github.com/mailru/easyjson/opt",
+    importpath = "github.com/mailru/easyjson/opt",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/mailru/easyjson/jlexer:go_default_library",
+        "//vendor/github.com/mailru/easyjson/jwriter:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

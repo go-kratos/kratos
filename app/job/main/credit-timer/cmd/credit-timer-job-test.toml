@@ -1,0 +1,110 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/credit-timer.pid"
+dir = "./"
+perf = "0.0.0.0:6330"
+family = "credit-timer"
+address = "172.16.33.54"
+env = "qa"
+
+[xlog]
+dir = "/data/log/credit-timer/"
+
+[tracer]
+proto = "udp"
+addr = "172.16.33.46:5140"
+tag = "platform/credit-timer"
+
+[bm]
+    addr = "0.0.0.0:6331"
+    timeout = "1s"
+
+[identify]
+    [identify.app]
+    key = "3c4e41f926e51656"
+    secret = "26a2095b60c24154521d24ae62b885bb"
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 5
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    [identify.host]
+    auth = "http://passport.bilibili.com"
+    secret = "http://open.bilibili.com"
+    [identify.authHTTPClient]
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+    [identify.authHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.secretHTTPClient]
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+    [identify.secretHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[mysql]
+addr = "172.16.33.205:3306"
+dsn = "blocked:mUdFycLKSbvPgdE28lCveqN77SqsGOmy@tcp(172.16.33.205:3306)/blocked?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 2
+idleTimeout ="4h"
+queryTimeout = "1s"
+execTimeout = "1s"
+tranTimeout = "1s"
+[mysql.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+
+[memcache]
+name = "credit"
+proto = "tcp"
+addr = "172.16.33.54:11211"
+idle = 5
+active = 10
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "24h"
+
+[redis]
+name = "credit"
+proto = "tcp"
+addr = "172.16.33.54:6379"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "720h"
+
+
+[judge]
+votetimer="60s"
+caseTimer="60s"
+juryTimer="60s"
+confTimer="120s"
+reservedTime="600s" 

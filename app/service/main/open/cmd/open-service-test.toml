@@ -1,0 +1,25 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/open-service.pid"
+dir = "./"
+appTicker = "1m"
+
+[orm]
+    dsn = "open:w965K973LuLfj82xB2DJSr01atpN2Sec@tcp(172.22.34.101:3309)/open?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"    
+    active = 5
+    idle = 5
+    idleTimeout = "4h"
+
+[memcache]
+    proto = "tcp"
+    addr = "172.18.33.60:11236"
+    idle = 10
+    active = 10
+    dialTimeout = "2s"
+    readTimeout = "2s"
+    writeTimeout = "2s"
+    idleTimeout = "7h"
+
+[wardenServer]
+    addr = "0.0.0.0:9000"
+    timeout = "1s"

@@ -1,0 +1,44 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "backup.go",
+        "binlogstreamer.go",
+        "binlogsyncer.go",
+        "const.go",
+        "doc.go",
+        "event.go",
+        "generic_event.go",
+        "json_binary.go",
+        "parser.go",
+        "row_event.go",
+        "time.go",
+    ],
+    importmap = "go-common/vendor/github.com/siddontang/go-mysql/replication",
+    importpath = "github.com/siddontang/go-mysql/replication",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/juju/errors:go_default_library",
+        "//vendor/github.com/satori/go.uuid:go_default_library",
+        "//vendor/github.com/shopspring/decimal:go_default_library",
+        "//vendor/github.com/siddontang/go-mysql/client:go_default_library",
+        "//vendor/github.com/siddontang/go-mysql/mysql:go_default_library",
+        "//vendor/github.com/siddontang/go/hack:go_default_library",
+        "//vendor/github.com/sirupsen/logrus:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

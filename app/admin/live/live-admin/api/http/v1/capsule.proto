@@ -1,0 +1,366 @@
+syntax = "proto3";
+
+package live.liveadmin.v1;
+
+option go_package = "v1";
+
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+
+
+service Capsule{
+    // `internal:"true"`
+    rpc get_coin_list(GetCoinListReqAdmin) returns (GetCoinListRespAdmin);
+    // `method:"POST" internal:"true"`
+    rpc update_coin_config(UpdateCoinConfigReqAdmin) returns (UpdateCoinConfigRespAdmin);
+    // `method:"POST" internal:"true"`
+    rpc update_coin_status(UpdateCoinStatusReqAdmin) returns (UpdateCoinStatusRespAdmin);
+    // `method:"POST" internal:"true"`
+    rpc delete_coin(DeleteCoinReqAdmin) returns (DeleteCoinRespAdmin);
+    // `internal:"true"`
+    rpc get_pool_list(GetPoolListReqAdmin) returns (GetPoolListRespAdmin);
+    // `method:"POST" internal:"true"`
+    rpc update_pool(UpdatePoolReqAdmin) returns (UpdatePoolRespAdmin);
+    // `method:"POST" internal:"true"`
+    rpc delete_pool(DeletePoolReqAdmin) returns (DeletePoolRespAdmin);
+    // `method:"POST" internal:"true"`
+    rpc update_pool_status(UpdatePoolStatusReqAdmin) returns (UpdatePoolStatusRespAdmin);
+    // `internal:"true"`
+    rpc get_pool_prize(GetPoolPrizeReqAdmin) returns (GetPoolPrizeRespAdmin);
+    // `internal:"true"`
+    rpc get_prize_type (GetPrizeTypeReq) returns (GetPrizeTypeResp);
+    // `internal:"true"`
+    rpc get_prize_expire (GetPrizeExpireReq) returns (GetPrizeExpireResp);
+    // `method:"POST" internal:"true"`
+    rpc update_pool_prize(UpdatePoolPrizeReqAdmin) returns (UpdatePoolPrizeRespAdmin);
+    // `method:"POST" internal:"true" `
+    rpc delete_pool_prize(DeletePoolPrizeReqAdmin) returns (DeletePoolPrizeRespAdmin);
+    // `internal:"true"`
+    rpc get_coupon_list (CapsuleGetCouponListReq) returns (CapsuleGetCouponListResp);
+}
+
+message GetCoinListReqAdmin{
+    //页码，从1开始
+    int64 page = 1 [(gogoproto.moretags) = 'form:"page" validate:"required"'];
+    //页面的大小
+    int64 page_size = 2 [(gogoproto.moretags) = 'form:"page_size" validate:"required"'];
+}
+
+message GetCoinListRespAdmin{
+    int64 total = 1 [(gogoproto.jsontag) = "total"]; //
+    int64 total_page = 2 [(gogoproto.jsontag) = "total_page"];
+    repeated List list = 3 [(gogoproto.jsontag) = "list"];
+
+    message List{
+        //扭蛋ID
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        //名称 普通扭蛋, 梦幻扭蛋
+        string title = 2 [(gogoproto.jsontag) = "title"];
+        //转化数量
+        int64 change_num = 3 [(gogoproto.jsontag) = "change_num"];
+        //开始时间
+        string start_time = 4 [(gogoproto.jsontag) = "start_time"];
+        //结束时间
+        string end_time = 5 [(gogoproto.jsontag) = "end_time"];
+        //状态 0为下线，1为上线
+        int64 status = 6 [(gogoproto.jsontag) = "status"];
+        //获得方式 1为所有瓜子道具，2为所有金瓜子道具，3为指定道具ID
+        int64 gift_type = 7 [(gogoproto.jsontag) = "gift_type"];
+        // 道具的ID
+        string gift_config = 8 [(gogoproto.jsontag) = "gift_config"];
+        //活动分区
+        repeated Area_ids area_ids = 9 [(gogoproto.jsontag) = "area_ids"];
+
+        message Area_ids{
+            // 父分区ID
+            int64 parent_id = 1 [(gogoproto.jsontag) = "parent_id"];
+            // 是否全选
+            int64 is_all = 2 [(gogoproto.jsontag) = "is_all"];
+            // 子分区ID
+            repeated int64 list = 3 [(gogoproto.jsontag) = "list"];
+        }
+    }
+}
+
+message UpdateCoinConfigReqAdmin{
+    //扭蛋ID
+    int64 id = 1 [(gogoproto.moretags) = 'form:"id"'];
+    //名称 普通扭蛋, 梦幻扭蛋
+    string title = 2 [(gogoproto.moretags) = 'form:"title" validate:"required"'];
+    //转化数量
+    int64 change_num = 3 [(gogoproto.moretags) = 'form:"change_num" validate:"required"'];
+    //开始时间
+    string start_time = 4 [(gogoproto.moretags) = 'form:"start_time" validate:"required"'];
+    //结束时间
+    string end_time = 5 [(gogoproto.moretags) = 'form:"end_time" validate:"required"'];
+    //状态 0为下线，1为上线
+    int64 status = 6 [(gogoproto.moretags) = 'form:"status" validate:"required"'];
+    //获得方式 1为所有瓜子道具，2为所有金瓜子道具，3为指定道具ID
+    int64 gift_type = 7 [(gogoproto.moretags) = 'form:"gift_type" validate:"required"'];
+    // 道具的ID
+    string gift_config = 8 [(gogoproto.moretags) = 'form:"gift_config"'];
+    //里面是父分区ID，是否全选，分区ID
+    string area_ids = 9 [(gogoproto.moretags) = 'form:"area_ids" validate:"required"'];
+}
+
+message UpdateCoinConfigRespAdmin{
+    //状态
+    bool status = 1 [(gogoproto.jsontag) = "status"];
+}
+
+message UpdateCoinStatusReqAdmin{
+    //扭蛋币id
+    int64 id = 1 [(gogoproto.moretags) = 'form:"id" validate:"required"'];
+    //状态 0为下线，1为上线
+    int64 status = 2 [(gogoproto.moretags) = 'form:"status"'];
+}
+
+message UpdateCoinStatusRespAdmin{
+    //状态
+    bool status = 1 [(gogoproto.jsontag) = "status"];
+}
+
+message DeleteCoinReqAdmin{
+    //扭蛋币id
+    int64 id = 1 [(gogoproto.moretags) = 'form:"id" validate:"required"'];
+}
+
+message DeleteCoinRespAdmin{
+    //状态
+    bool status = 1 [(gogoproto.jsontag) = "status"];
+}
+
+message GetPoolListReqAdmin{
+    //页码
+    int64 page = 1 [(gogoproto.moretags) = 'form:"page" validate:"required"'];
+    //页面的大小
+    int64 page_size = 2 [(gogoproto.moretags) = 'form:"page_size" validate:"required"'];
+}
+
+message GetPoolListRespAdmin{
+    //总数
+    int64 total = 1 [(gogoproto.jsontag) = "total"];
+    //总页数
+    int64 total_page = 2 [(gogoproto.jsontag) = "total_page"];
+
+    repeated List list = 3 [(gogoproto.jsontag) = "list"];
+
+    message List{
+        // 奖池id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 扭蛋名称
+        int64 coin_id = 2 [(gogoproto.jsontag) = "coin_id"];
+        // 奖池名称
+        string title = 3 [(gogoproto.jsontag) = "title"];
+        // 奖池名称
+        string coin_title = 8 [(gogoproto.jsontag) = "coin_title"];
+        //开始时间
+        string start_time = 4 [(gogoproto.jsontag) = "start_time"];
+        //结束时间
+        string end_time = 5 [(gogoproto.jsontag) = "end_time"];
+        //状态 0为下线，1为上线
+        int64 status = 6 [(gogoproto.jsontag) = "status"];
+        //描述
+        string rule = 7 [(gogoproto.jsontag) = "rule"];
+    }
+}
+
+message UpdatePoolReqAdmin{
+    // 奖池id
+    int64 id = 1 [(gogoproto.moretags) = 'form:"id"'];
+    // 扭蛋名称
+    int64 coin_id = 2 [(gogoproto.moretags) = 'form:"coin_id" validate:"required"'];
+    //奖池名称
+    string title = 3 [(gogoproto.moretags) = 'form:"title" validate:"required"'];
+    //开始时间
+    string start_time = 4 [(gogoproto.moretags) = 'form:"start_time" validate:"required"'];
+    //结束时间
+    string end_time = 5 [(gogoproto.moretags) = 'form:"end_time" validate:"required"'];
+    //描述
+    string rule = 6 [(gogoproto.moretags) = 'form:"rule" validate:"required"'];
+}
+
+message UpdatePoolRespAdmin{
+    //状态
+    bool status = 1 [(gogoproto.jsontag) = "status"];
+}
+
+message DeletePoolReqAdmin{
+    //奖池id
+    int64 id = 1 [(gogoproto.moretags) = 'form:"id" validate:"required"'];
+}
+
+message DeletePoolRespAdmin{
+    //状态
+    bool status = 1 [(gogoproto.jsontag) = "status"];
+}
+
+message UpdatePoolStatusReqAdmin{
+    //奖池id
+    int64 id = 1 [(gogoproto.moretags) = 'form:"id" validate:"required"'];
+    //状态 0为未上线，1为上线
+    int64 status = 2 [(gogoproto.moretags) = 'form:"status"'];
+}
+
+message UpdatePoolStatusRespAdmin{
+    //状态
+    bool status = 1 [(gogoproto.jsontag) = "status"];
+}
+
+message GetPoolPrizeReqAdmin{
+    //奖池id
+    int64 pool_id = 1 [(gogoproto.moretags) = 'form:"pool_id" validate:"required"'];
+}
+
+message GetPoolPrizeRespAdmin{
+
+    repeated List list = 1 [(gogoproto.jsontag) = "list"];
+
+    message List{
+        //奖励id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        //奖池id
+        int64 pool_id = 2 [(gogoproto.jsontag) = "pool_id"];
+        //奖品类型 1为道具，2为头衔，3为经验原石，4为经验曜石，5为贤者之石，6为小号小电视，7为舰长守护，8为提督守护，9为总督守护
+        int64 type = 3 [(gogoproto.jsontag) = "type"];
+        //数量
+        int64 num = 4 [(gogoproto.jsontag) = "num"];
+        //奖品真实id
+        int64 object_id = 5 [(gogoproto.jsontag) = "object_id"];
+        //web端图片
+        string web_url = 6 [(gogoproto.jsontag) = "web_url"];
+        //移动端图片
+        string mobile_url = 7 [(gogoproto.jsontag) = "mobile_url"];
+        //奖励描述
+        string description = 8 [(gogoproto.jsontag) = "description"];
+        //跳转地址
+        string jump_url = 9 [(gogoproto.jsontag) = "jump_url"];
+        //概率类型 1为普通，2为固定每天，3为固定每周
+        int64 pro_type = 10 [(gogoproto.jsontag) = "pro_type"];
+        //概率，3位小数，''为另一种概率模式
+        string chance = 11 [(gogoproto.jsontag) = "chance"];
+        //循环的数量 0为另一种概率模式
+        int64 loop = 12 [(gogoproto.jsontag) = "loop"];
+        //限制数量 0为另一种概率模式
+        int64 limit = 13 [(gogoproto.jsontag) = "limit"];
+        // 奖励名称
+        string name = 14 [(gogoproto.jsontag) = "name"];
+        // 权重
+        int64 weight = 15 [(gogoproto.jsontag) = "weight"];
+        // 白名单用户
+        string white_uids = 16 [(gogoproto.jsontag) = "white_uids"];
+         // 过期类型
+        int64 expire = 17 [(gogoproto.jsontag) = "expire"];
+    }
+}
+
+message UpdatePoolPrizeReqAdmin{
+    //奖励id
+    int64 id = 1 [(gogoproto.moretags) = 'form:"id"'];
+    //奖池id
+    int64 pool_id = 2 [(gogoproto.moretags) = 'form:"pool_id"'];
+    //奖品类型 1为道具，2为头衔，3为经验原石，4为经验曜石，5为贤者之石，6为小号小电视，7为舰长守护，8为提督守护，9为总督守护
+    int64 type = 3 [(gogoproto.moretags) = 'form:"type" validate:"required"'];
+    //数量
+    int64 num = 4 [(gogoproto.moretags) = 'form:"num" validate:"required"'];
+    //奖品真实id
+    int64 object_id = 5 [(gogoproto.moretags) = 'form:"object_id"'];
+    //过期时间
+    int64 expire = 6 [(gogoproto.moretags) = 'form:"expire"'];
+    //web端图片
+    string web_url = 7 [(gogoproto.moretags) = 'form:"web_url" validate:"required"'];
+    //移动端图片
+    string mobile_url = 8 [(gogoproto.moretags) = 'form:"mobile_url" validate:"required"'];
+    //奖励描述
+    string description = 9 [(gogoproto.moretags) = 'form:"description" validate:"required"'];
+    //跳转地址
+    string jump_url = 10 [(gogoproto.moretags) = 'form:"jump_url"'];
+    //概率类型 1为普通，2为固定每天，3为固定每周，4位白名单
+    int64 pro_type = 11 [(gogoproto.moretags) = 'form:"pro_type" validate:"required"'];
+    //概率，3位小数，''为另一种概率模式
+    string chance = 12 [(gogoproto.moretags) = 'form:"chance"'];
+    //循环的数量 0为另一种概率模式
+    int64 loop = 13 [(gogoproto.moretags) = 'form:"loop"'];
+    //限制数量 0为另一种概率模式
+    int64 limit = 14 [(gogoproto.moretags) = 'form:"limit"'];
+    // 权重
+    int64 weight = 15 [(gogoproto.moretags) = 'form:"weight"'];
+     // 白名单用户
+    string white_uids = 16 [(gogoproto.moretags) = 'form:"white_uids"'];
+}
+
+message UpdatePoolPrizeRespAdmin{
+    //状态
+    bool status = 1 [(gogoproto.jsontag) = "status"];
+    //新增id
+    int64 prize_id = 2 [(gogoproto.jsontag) = "prize_id"];
+}
+
+message DeletePoolPrizeReqAdmin{
+    //奖励id
+    int64 id = 1 [(gogoproto.moretags) = 'form:"id" validate:"required"'];
+}
+
+message DeletePoolPrizeRespAdmin{
+    //状态
+    bool status = 1 [(gogoproto.jsontag) = "status"];
+}
+
+message GetPrizeTypeReq {
+
+}
+
+message GetPrizeTypeResp {
+    repeated List list = 3 [(gogoproto.jsontag) = "list"];
+
+    message List {
+        //
+        int64 type = 1 [(gogoproto.jsontag) = "type"];
+        //
+        string name = 2 [(gogoproto.jsontag) = "name"];
+    }
+}
+
+
+message GetPrizeExpireReq {
+
+}
+
+message GetPrizeExpireResp {
+    repeated List list = 3 [(gogoproto.jsontag) = "list"];
+
+    message List {
+        //
+        int64 expire = 1 [(gogoproto.jsontag) = "expire"];
+        //
+        string name = 2 [(gogoproto.jsontag) = "name"];
+    }
+}
+
+
+
+
+message CapsuleGetCouponListReq {
+    //
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+}
+
+message CapsuleGetCouponListResp {
+    message List {
+        //
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 中奖时间
+        string award_time = 2 [(gogoproto.jsontag) = "award_time"];
+        // 奖品名称
+        string award_name = 3 [(gogoproto.jsontag) = "award_name"];
+        // 券码
+        string award_code = 4 [(gogoproto.jsontag) = "award_code"];
+        // 0 重试 1 成功
+        int64 status = 5 [(gogoproto.jsontag) = "status"];
+        // 上次重试时间
+        string retry_time = 6 [(gogoproto.jsontag) = "retry_time"];
+    }
+
+    repeated List list = 1 [(gogoproto.jsontag) = "list"];
+}

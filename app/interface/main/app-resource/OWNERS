@@ -1,0 +1,14 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liweijia
+- peiyifei
+- sunyu
+labels:
+- interface
+- interface/main/app-resource
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- sunyu

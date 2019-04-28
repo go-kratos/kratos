@@ -1,0 +1,38 @@
+[archiveNotifySub]
+key = "0QEO9F8JuuIxZzNDvklH"
+secret = "0QEO9F8JuuIxZzNDvklI"
+group = "ArchiveNotify-App-S"
+topic = "ArchiveNotify-T"
+action = "sub"
+name = "app-job/archiveNotifysub"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[memcache]
+    name   = "app-player-job/player"
+    proto  = "tcp"
+    addr   = "172.22.33.137:11218"
+    active = 50
+    idle   = 10
+    dialTimeout  = "50ms"
+    readTimeout  = "100ms"
+    writeTimeout = "100ms"
+    idleTimeout  = "80s"
+    expireArchive = "2h"
+
+[redis]
+    name   = "app-player-job/player"
+    proto  = "tcp"
+    addr   = "172.18.33.61:6807"
+    active = 20
+    idle   = 10
+    dialTimeout  = "50ms"
+    readTimeout  = "100ms"
+    writeTimeout = "100ms"
+    idleTimeout  = "80s"

@@ -1,0 +1,42 @@
+version = "3.0.0"
+user = "nobody"
+pid = "/tmp/vipinfo-service.pid"
+dir = "./"
+perf = "127.0.0.1:7910"
+
+[bm]
+	addr = "0.0.0.0:7911"
+	maxListen = 1000
+	timeout = "1s"
+
+[mysql]
+    addr = "172.16.33.205"
+    dsn = "zhaozhihao:MN9havOfnzY3kd6L78IVucRxgywe0p2P@tcp(172.16.33.205:3308)/bilibili_vip?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    IdleTimeout ="4h"
+    QueryTimeout = "5s"
+    ExecTimeout = "5s"
+    TranTimeout = "5s"
+[mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[memcache]
+	name = "vip-service"
+	proto = "tcp"
+	addr = "172.18.33.60:11234"
+	idle = 5
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[wardenServer]
+    addr = "0.0.0.0:6077"
+    timeout = "1s"

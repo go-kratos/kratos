@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- caojunquan
+- zhaozhixin
+labels:
+- admin
+- admin/live/live-admin
+- live
+options:
+  no_parent_owners: true
+reviewers:
+- caojunquan
+- liugang
+- wangyao
+- zhaozhixin

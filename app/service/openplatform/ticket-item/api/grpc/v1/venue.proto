@@ -1,0 +1,65 @@
+syntax = "proto3";
+package ticket.service.item.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "app/service/openplatform/ticket-item/api/grpc/v1/place.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option go_package = "v1";
+
+// The venue service definition.
+service Venue {
+    rpc VenueInfo (VenueInfoRequest) returns (VenueInfoReply) {}
+}
+
+// The response message containing the VenueInfo
+message VenueInfo {
+   int64 id = 1 [(gogoproto.jsontag) = "id",(gogoproto.customname)= "ID"];
+   string name = 2 [(gogoproto.jsontag) = "name"];
+   int32 status= 3 [(gogoproto.jsontag) = "status"];
+   VenueAddrInfo addrInfo = 4 [(gogoproto.jsontag) = "addr"];
+   PlaceInfo place_info = 5 [(gogoproto.jsontag) = "place"];
+}
+
+// The response message containing the Venue location info
+message VenueAddrInfo {
+   int64 province = 1 [(gogoproto.jsontag) = "provid"];
+   int64 city = 2 [(gogoproto.jsontag) = "cityid"];
+   int64 district = 3 [(gogoproto.jsontag) = "distid"];
+   string addressDetail = 4 [(gogoproto.jsontag) = "addr"];
+   string traffic = 5 [(gogoproto.jsontag) = "traff"];
+   string lon_lat_type = 6 [(gogoproto.jsontag) = "lonlat_type"];
+   string lonLat = 7 [(gogoproto.jsontag) = "lonlat"];
+}
+
+// venueInfo接口请求
+message VenueInfoRequest {
+    // 待修改场馆的ID（为0表示创建）
+    int64 ID = 1 [(gogoproto.jsontag) = "id", (gogoproto.moretags) = "validate:\"min=0\""];
+    // 场馆名
+    string Name = 2 [(gogoproto.jsontag) = "name", (gogoproto.moretags) = "validate:\"max=25\""];
+    // 状态 1-启用 0-停用
+    int32 Status = 3 [(gogoproto.jsontag) = "status", (gogoproto.moretags) = "validate:\"min=0,max=1\""];
+    // 省份ID
+    int64 Province = 4 [(gogoproto.jsontag) = "provid", (gogoproto.moretags) = "validate:\"min=0\""];
+    // 城市ID
+    int64 City = 5 [(gogoproto.jsontag) = "cityid", (gogoproto.moretags) = "validate:\"min=0\""];
+    // 区县ID
+    int64 District = 6 [(gogoproto.jsontag) = "distid", (gogoproto.moretags) = "validate:\"min=0\""];
+    // 详细地址
+    string AddressDetail = 7 [(gogoproto.jsontag) = "addr", (gogoproto.moretags) = "validate:\"min=0,max=60\""];
+    // 交通信息
+    string Traffic = 8 [(gogoproto.jsontag) = "traff", (gogoproto.moretags) = "validate:\"min=0,max=100\""];
+}
+
+// venue接口返回
+message VenueInfoReply {
+    // 操作结果
+    bool Success = 1 [(gogoproto.jsontag) = "success"];
+    // 操作场馆ID
+    int64 ID = 2 [(gogoproto.jsontag) = "id"];
+}

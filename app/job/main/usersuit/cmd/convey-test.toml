@@ -1,0 +1,107 @@
+version = "1.0.0"
+
+NotifyURL = "http://account.bilibili.co/api/communicate/purge_cache"
+
+[xlog]
+dir = "/data/log/usersuit-job/"
+
+[app]
+key = "53e2fa226f5ad348"
+secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+
+[bm]
+    addr = "0.0.0.0:7265"
+    timeout = "1s"
+
+[mysql]
+addr = "172.16.33.205:3309"
+dsn = "usersuit:cDXL6vncmCQanx4iMgGogu6gYz33NmA1@tcp(172.16.33.205:3309)/usersuit?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 100
+idle = 10
+queryTimeout = "2s"
+execTimeout = "10s"
+tranTimeout = "5s"
+[mysql.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+
+[memcache]
+    name = "usersuit-job"
+    proto = "tcp"
+    addr = "172.16.33.54:6379"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[pendantRedis]
+    name = "usersuit-service"
+    proto = "tcp"
+    addr = "127.0.0.1:6558"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "720h"
+
+[httpClient]
+key = "53e2fa226f5ad348"
+secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+dial = "500ms"
+timeout = "1s"
+keepAlive = "60s"
+timer = 10
+[httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[properties]
+	upInfoURL = "http//127.0.0.1"
+	medalCron = "0 0 5 ? * ?"
+
+[databus]
+    [databus.vipBinLog]
+        key = "4ba46ba31f9a44ef"
+        secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+        group = "BiliVIPBinlog-MainAccount-UsersuitJob-S"
+        topic = "BiliVIPBinlog-T"
+        action = "sub"
+        offset = "old"
+        buffer = 1024
+        name = "usersuit-job/databus"
+        proto = "tcp"
+        addr = "172.18.33.50:6205"
+        idle = 1
+        active = 1
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+
+    [databus.accountNotify]
+        key = "4ba46ba31f9a44ef"
+        secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+        group = "AccountNotify-MainAccount-P"
+        topic = "AccountNotify-T"
+        action = "pub"
+        offset = "old"
+        buffer = 128
+        name = "usersuit-job/databus"
+        proto = "tcp"
+        addr = "172.18.33.50:6205"
+        active = 1
+        idle = 1
+        dialTimeout = "1s"
+        readTimeout = "1s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"

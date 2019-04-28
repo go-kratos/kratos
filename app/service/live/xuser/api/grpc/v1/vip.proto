@@ -1,0 +1,41 @@
+syntax = "proto3";
+package live.xuser.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "app/service/live/xuser/api/grpc/xuser.proto";
+
+message UidReq {
+    int64 uid = 1 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+}
+
+message Info {
+    int32 vip = 1 [(gogoproto.jsontag) = "vip", (gogoproto.casttype) = "int"];
+    int32 svip = 2 [(gogoproto.jsontag) = "svip", (gogoproto.casttype) = "int"];
+    string vip_time = 3 [(gogoproto.jsontag) = "vip_time"];
+    string svip_time = 4 [(gogoproto.jsontag) = "svip_time"];
+}
+
+message InfoReply {
+    Info info = 1;
+}
+
+message BuyReq {
+    string order_id = 1 [(gogoproto.moretags) = "validate:\"required\""];
+    int64 uid = 2 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int32 good_id = 3 [(gogoproto.moretags) = "validate:\"gt=0,required\"", (gogoproto.casttype) = "int"];
+    int32 good_num = 4 [(gogoproto.moretags) = "validate:\"gt=0,required\"", (gogoproto.casttype) = "int"];
+    Platform platform = 5 [(gogoproto.moretags) = "validate:\"required\""];
+    string source = 6 [(gogoproto.moretags) = "validate:\"required\""];
+}
+
+message BuyReply {
+    int32 status = 1 [(gogoproto.jsontag) = "status", (gogoproto.casttype) = "int"];
+}
+
+service Vip {
+    // Info 返回用户vip信息
+    rpc Info(UidReq) returns (InfoReply);
+    // Buy 购买月费/年费姥爷
+    rpc Buy(BuyReq) returns (BuyReply);
+}

@@ -1,0 +1,11 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- zhapuyu
+labels:
+- library
+- library/container/pool
+reviewers:
+- haoguanwei
+- maojian
+- zhapuyu

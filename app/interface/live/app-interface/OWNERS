@@ -1,0 +1,21 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- fuyu01
+- lidongyang
+- weixuan
+- xiehaishen
+- yangbaibing
+labels:
+- interface
+- interface/live/app-interface
+- live
+options:
+  no_parent_owners: true
+reviewers:
+- fuyu01
+- lidongyang
+- liuzhen
+- weixuan
+- xiehaishen
+- yangbaibing

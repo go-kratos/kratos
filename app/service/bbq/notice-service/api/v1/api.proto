@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package bbq.service.notice.v1;
+
+import "google/protobuf/empty.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+
+
+message GetUnreadInfoRequest {
+  // 用户mid
+  int64 mid = 1 [(gogoproto.jsontag) = "mid", (gogoproto.moretags)='form:"mid" validate:"required"'];
+}
+message UnreadInfo {
+    // 用户mid
+    repeated UnreadItem list = 1[(gogoproto.jsontag) = "list,omitempty"];
+}
+
+message UnreadItem {
+    int32 notice_type = 1 [(gogoproto.jsontag) = "notice_type"];
+    int64 unread_num = 2[(gogoproto.jsontag) = "unread_num"];
+}
+
+
+
+message ListNoticesReq {
+    // 用户mid
+    int64 mid = 1 [(gogoproto.jsontag) = "mid", (gogoproto.moretags)='form:"mid" validate:"required"'];
+    int32 notice_type = 2 [(gogoproto.jsontag) = "notice_type", (gogoproto.moretags)='form:"notice_type" validate:"required"'];
+    int64 cursor_id = 3 [(gogoproto.jsontag) = "cursor_id", (gogoproto.moretags)='form:"cursor_id"'];
+}
+message ListNoticesReply {
+    // 用户mid
+    int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+    repeated NoticeBase list = 2[(gogoproto.jsontag) = "list,omitempty"];
+}
+
+message NoticeBase {
+    int64   id              = 1  [(gogoproto.jsontag) = "id"];
+    int64   mid             = 2  [(gogoproto.jsontag) = "mid", (gogoproto.moretags)='form:"mid" validate:"required"'];
+    int64   action_mid      = 3  [(gogoproto.jsontag) = "action_mid", (gogoproto.moretags)='form:"action_mid"'];
+    int64   sv_id           = 4  [(gogoproto.jsontag) = "svid", (gogoproto.moretags)='form:"svid"'];
+    string  title           = 5  [(gogoproto.jsontag) = "title", (gogoproto.moretags)='form:"title"'];
+    string  text            = 6  [(gogoproto.jsontag) = "text", (gogoproto.moretags)='form:"text"'];
+    string  jump_url        = 7  [(gogoproto.jsontag) = "jump_url", (gogoproto.moretags)='form:"jump_url"'];
+    int32   notice_type     = 8  [(gogoproto.jsontag) = "notice_type", (gogoproto.moretags)='form:"notice_type" validate:"required"'];
+    int32   biz_type        = 9  [(gogoproto.jsontag) = "biz_type", (gogoproto.moretags)='form:"biz_type"'];
+    int64   biz_id          = 10 [(gogoproto.jsontag) = "biz_id", (gogoproto.moretags)='form:"biz_id"'];
+    int64   notice_time     = 11 [(gogoproto.jsontag) = "notice_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string  buvid           = 12 [(gogoproto.jsontag) = "buvid", (gogoproto.moretags)='form:"buvid"'];
+}
+
+
+
+message CreateNoticesReq {
+    repeated NoticeBase notices = 1 [(gogoproto.jsontag) = "notices", (gogoproto.moretags)='form:"notices" validate:"required"'];
+}
+message CreateNoticesReply {
+    // 失败的列表
+    repeated int64 fail_list = 2 [(gogoproto.jsontag) = "fail_list"];
+}
+
+message PushCallbackRequest {
+    string tid = 1 [(gogoproto.jsontag) = "tid", (gogoproto.moretags)='form:"tid" validate:"required"'];
+    string nid = 2 [(gogoproto.jsontag) = "nid", (gogoproto.moretags)='form:"nid" validate:"required"'];
+    int64 mid = 3 [(gogoproto.jsontag) = "mid", (gogoproto.moretags)='form:"mid"'];
+    string buvid = 4 [(gogoproto.jsontag) = "buvid", (gogoproto.moretags)='form:"buvid"'];
+}
+
+message UserPushDev {
+    int64   id              = 1 [(gogoproto.jsontag) = "id"];
+    int64   mid             = 2 [(gogoproto.jsontag) = "mid", (gogoproto.moretags)='form:"mid"'];
+    string  register_id     = 3 [(gogoproto.jsontag) = "register_id", (gogoproto.moretags)='form:"register_id"'];
+    string  buvid           = 4 [(gogoproto.jsontag) = "buvid", (gogoproto.moretags)='form:"buvid"'];
+    int32   sdk             = 5 [(gogoproto.jsontag) = "sdk", (gogoproto.moretags)='form:"sdk"', (gogoproto.casttype) = "int8"];
+    int32   platform        = 6 [(gogoproto.jsontag) = "platform", (gogoproto.moretags)='form:"platform"', (gogoproto.casttype) = "int8"];
+    int32   state           = 7 [(gogoproto.jsontag) = "state", (gogoproto.moretags)='form:"state"', (gogoproto.casttype) = "int8"];
+    int64   last_login_time = 8 [(gogoproto.jsontag) = "last_login_time", (gogoproto.moretags)='form:"last_login_time"', (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64   ctime           = 9 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64   mtime           = 10[(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+
+service Notice {
+    // 获取所有通知类型的未读数
+    rpc GetUnreadInfo(GetUnreadInfoRequest) returns (UnreadInfo);
+    // 获取通知列表
+    rpc ListNotices(ListNoticesReq) returns (ListNoticesReply);
+    // 批量创建消息
+    rpc CreateNotice(NoticeBase) returns (.google.protobuf.Empty);
+
+    // 推送回调
+    rpc PushCallback(PushCallbackRequest) returns (.google.protobuf.Empty);
+    // Push的login接口
+    rpc PushLogin(UserPushDev) returns (.google.protobuf.Empty);
+    // Push的logout接口
+    rpc PushLogout(UserPushDev) returns (.google.protobuf.Empty);
+}

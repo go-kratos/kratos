@@ -1,0 +1,29 @@
+syntax = "proto3";
+package ticket.service.item.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "app/service/openplatform/ticket-item/api/grpc/v1/time.proto";
+import "app/service/openplatform/ticket-item/api/grpc/v1/ticket.proto";
+
+option go_package = "v1";
+
+// The response message containing the ScreenInfo
+message ScreenInfo {
+   int64 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.moretags) = "validate:\"min=0\"", (gogoproto.customname)= "ID"];
+   string name = 2 [(gogoproto.jsontag) = "name"];
+   int32 status = 3 [(gogoproto.jsontag) = "status", (gogoproto.moretags) = "validate:\"min=0\""];
+   // 类型: 1-坐, 2-站
+   int32 type = 4 [(gogoproto.jsontag) = "type", (gogoproto.moretags) = "validate:\"min=0\""]; 
+   // 出票方式: 1-纸质票, 2-电子票, 3-外部票
+   int32 ticket_type = 5 [(gogoproto.jsontag) = "ticket_type", (gogoproto.moretags) = "validate:\"min=0\""]; 
+   // 票区分的场次类型: 1-普通场次, 2-通票场次 3-联票场次
+   int32 screen_type = 6 [(gogoproto.jsontag) = "screen_type", (gogoproto.moretags) = "validate:\"min=0\""]; 
+   // 配送方式: 1-不配送, 2-自取, 3-快递
+   int32 delivery_type = 7 [(gogoproto.jsontag) = "delivery_type", (gogoproto.moretags) = "validate:\"min=0\""]; 
+   // 是否选座 是-1，否-0
+   int32 pick_seat = 8 [(gogoproto.jsontag) = "pick_seat", (gogoproto.moretags) = "validate:\"min=0\""]; 
+   // 售卖状态
+   int32 sale_flag = 9 [(gogoproto.jsontag) = "sale_flag", (gogoproto.moretags) = "validate:\"min=0\""]; 
+   ScreenTime sc_time = 10 [(gogoproto.jsontag) = "time"];
+   map<int64,TicketInfo> Ticket = 11 [(gogoproto.jsontag) = "ticket"];
+}

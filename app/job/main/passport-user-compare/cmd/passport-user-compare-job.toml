@@ -1,0 +1,85 @@
+[log]
+	dir = "/Users/allen/data/log/passport-user-compare"
+    
+dataFixSwitch = true
+incrDataFixSwitch = true
+[fullTask]
+    switch = true
+	step = 1000
+	accountEnd = 400002500
+    accountInfoEnd = 25053
+    accountSnsEnd = 25053
+    cronFullStr = "0 35 17 * * *"
+	
+[incTask]
+    switch = false
+    startTime = "2018-09-28 16:40:00"
+    stepDuration = "10m"
+	cronIncStr = "0 */10 * * * *"
+
+[duplicateTask]
+    switch = false
+    duplicateCron = "*/30 * * * * ?"
+
+[weChat]
+    token = "GYQeuDWBbAsCNeGz"
+    secret = "ZKpmgINTkianyMbMixyxcPQjMCSHCDrk"
+    username = "wutao"
+
+[httpClient]
+    dial      = "10s"
+    timeout   = "10s"
+    keepAlive = "60s"
+    key    = "4699a07e59d7149e"
+    secret = "test"
+    [httpClient.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[db.origin]
+	addr = "172.16.33.205:3306"
+    dsn = "aso:hA0DAnENNFz78kYB@tcp(172.16.33.205:3306)/aso?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "10s"
+    execTimeout = "20s"
+    tranTimeout = "20s"
+    [db.origin.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[db.user]
+       addr = "127.0.0.1:3306"
+        dsn = "root:123456@tcp(127.0.0.1:3306)/test?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 5
+        idle = 2
+        queryTimeout = "10s"
+        execTimeout = "20s"
+        tranTimeout = "20s"
+        [db.user.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+
+[db.secret]
+       addr = "127.0.0.1:3306"
+        dsn = "root:123456@tcp(127.0.0.1:3306)/test?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 5
+        idle = 2
+        queryTimeout = "10s"
+        execTimeout = "20s"
+        tranTimeout = "20s"
+        [db.secret.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100

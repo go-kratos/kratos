@@ -1,0 +1,237 @@
+version = "1.0.0"
+user = "nobody"
+dir = "./"
+family = "block-admin"
+address = "0.0.0.0:7490"
+
+[log]
+    dir = "/data/log/block-admin"
+    family = "block-admin"
+
+[tracer]
+    addr = "172.16.33.46:5140"
+    proto = "udp"
+    family = "block-admin"
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 5
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+
+[ecode]
+    domain = "172.16.33.248:6401"
+    all = "1h"
+    diff = "10m"
+    [ecode.clientconfig]
+        key = "test"
+        secret = "e6c4c252dc7e3d8a90805eecd7c73396"
+        dial      = "2000ms"
+        timeout   = "2s"
+        keepAlive = "10s"
+        timer     = 128
+        [ecode.clientconfig.breaker]
+            window  ="3s"
+            sleep   ="100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100
+
+[bm]
+	addr = "0.0.0.0:7491"
+	maxListen = 10
+    timeout = "1s"
+
+[rpcClients]
+    [rpcClients.account]
+        pullInterval = "10s"
+        [rpcClients.account.client]
+        timeout = "1s"
+        timer = 1000
+        [rpcClients.account.client.breaker]
+        window ="3s"
+        sleep ="100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+        [rpcClients.account.zookeeper]
+        root = "/microservice/account-service/"
+        addrs = ["172.18.33.172:2181"]
+        timeout = "1s"
+    [rpcClients.figure]
+        pullInterval = "10s"
+        [rpcClients.figure.client]
+        timeout = "1s"
+        timer = 1000
+        [rpcClients.figure.client.breaker]
+        window  ="3s"
+        sleep   ="100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+        [rpcClients.figure.zookeeper]
+        root = "/microservice/figure-service/"
+        addrs = ["172.18.33.172:2181"]
+        timeout = "30s"
+    [rpcClients.spy]
+        pullInterval = "10s"
+        [rpcClients.spy.client]
+        timeout = "1s"
+        timer = 1000
+        [rpcClients.spy.client.breaker]
+        window  ="3s"
+        sleep   ="100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+        [rpcClients.spy.zookeeper]
+        root = "/microservice/spy-service/"
+        addrs = ["172.18.33.172:2181"]
+        timeout = "30s"
+
+[memcache]
+    name = "block-admin"
+    proto = "tcp"
+    addr = "172.16.33.54:11214"
+    idle = 10
+    active = 10
+    dialTimeout = "2s"
+    readTimeout = "2s"
+    writeTimeout = "2s"
+    idleTimeout = "7h"
+    [expire]
+        expire = "200s"
+
+[mysql]
+    addr = "127.0.0.1:3306"
+    dsn = "root:54985498@tcp(127.0.0.1:3306)/bilibili_block?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[httpClient]
+    key = "7d9f6f6fe2a898e8"
+    secret = "4de2ccdbd9db69be0c2c6437bfe6eb69"
+    dial = "1s"
+    timeout = "5s"
+    keepAlive = "60s"
+    [httpClient.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+
+[perms]
+    [perms.perm]
+    search   = "BLOCK_SEARCH"
+    block = "BLOCK_BLOCK"
+    remove = "BLOCK_REMOVE"
+
+[accountNotify]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "AccountNotify-MainAccount-P"
+    topic = "AccountNotify-T"
+    action = "pub"
+    buffer = 128
+    name = "usersuit-admin/databus"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    active = 1
+    idle = 1
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[property]
+    blackHouseURL = "http://api.bilibili.co/x/internal/credit/blocked/info/batch/add"
+    msgURL = "http://message.bilibili.co/api/notify/send.user.notify.do"
+    telURL = "http://passport.bilibili.co/intranet/acc/telInfo/mid"
+    mailURL =  "http://passport.bilibili.co/intranet/user/mail"
+    [property.msg]
+        [property.msg.blackHouseLimit]
+            code = "2_3_2"
+            title = "账号违规处理通知"
+            content = '抱歉，你的账号因“%s%s”，现已进行封禁%d天处理，同时需要进行解封答题考试，通过之后方可解除封禁，#{点击答题}{"http://www.bilibili.com/blackroom/releaseexame.html\"}。封禁期间将无法投稿，无法发布评论、弹幕，无法对他人评论进行回复、赞踩操作，无法发送、回复消息，无法进行投币、编辑标签、添加关注、添加收藏等操作。请遵守社区规范，共同维护良好的社区氛围！'
+        [property.msg.blackHouseForever]
+            code = "2_3_3"
+            title = "账号违规处理通知"
+            content = "抱歉，你的账号因“%s%s”，现已进行永久封禁处理。封禁期间将无法投稿，无法发布评论、弹幕，无法对他人评论进行回复、赞踩操作，无法发送、回复消息，无法进行投币、编辑标签、添加关注、添加收藏等操作。请遵守社区规范，共同维护良好的社区氛围！"
+        [property.msg.sysLimit]
+            code = "2_3_4"
+            title = "账号违规处理通知"
+            content = '抱歉，你的账号因“%s”，现已进行封禁%d天处理，同时需要进行解封答题考试，通过之后方可解除封禁，#{点击答题}{"http://www.bilibili.com/blackroom/releaseexame.html\"}。封禁期间将无法投稿，无法发布评论、弹幕，无法对他人评论进行回复、赞踩操作，无法发送、回复消息，无法进行投币、编辑标签、添加关注、添加收藏等操作。请遵守社区规范，共同维护良好的社区氛围！'
+        [property.msg.sysForever]
+            code = "2_3_5"
+            title = "账号违规处理通知"
+            content = "抱歉，你的账号因“%s”，现已进行永久封禁处理。封禁期间将无法投稿，无法发布评论、弹幕，无法对他人评论进行回复、赞踩操作，无法发送、回复消息，无法进行投币、编辑标签、添加关注、添加收藏等操作。请遵守社区规范，共同维护良好的社区氛围！"
+        [property.msg.blockRemove]
+            code = "2_3_6"
+            title = "账号违规处理通知"
+            content = "你的账号已经解除封禁，封禁期间禁止使用的各项社区功能已经恢复。请遵守社区规范，共同维护良好的社区氛围。"
+        
+[managerLog]
+    Key             =   "2511663d546f1413"
+    Secret          =   "cde3b480836cc76df3d635470f991caa"
+    Group           =   "LogAudit-MainSearch-P"
+    Topic           =   "LogAudit-T"
+    Action          =   "pub"
+    Buffer          =   10240
+    Name            =   "log-audit/log-sub"
+    Proto           =   "tcp"
+    Addr            =   "172.18.33.50:6205"
+    Active          =   10
+    Idle            =   5
+    DialTimeout     =  "200ms"
+    ReadTimeout     =  "200ms"
+    WriteTimeout    = "200ms"
+    IdleTimeout     =  "80s"

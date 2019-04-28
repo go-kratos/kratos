@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+// use {app_id}.{version} as package name
+package app.resource.v1;
+
+// specify golang package name
+option go_package = "v1";
+
+service AppResource {
+    // 更新静态资源所有缓存
+    rpc ModuleUpdateCache(NoArgRequest) returns(NoReply);
+}
+
+// NoArgReq
+message NoArgRequest{}
+// NoReply
+message NoReply{}

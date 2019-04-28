@@ -1,0 +1,105 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/sms-job.pid"
+dir = "./"
+perf = "0.0.0.0:7780"
+family = "sms-job"
+
+[log]
+    dir = "/data/log/sms-job/"
+
+[HTTPServer]
+    addr = "0.0.0.0:7781"
+    maxListen = 1000
+    timeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+
+[httpClient]
+    dial      = "10s"
+    timeout   = "10s"
+    keepAlive = "60s"
+    key    = "4699a07e59d7149e"
+    secret = "test"
+    [httpClient.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[databus]
+    key = "9765cdac5894f2ba"
+    secret = "f4237d712c3ed1e7fab0137b81418b14"
+    group = "Sms-MainWebSvr-S"
+    topic = "Sms-T"
+    action = "sub"
+    buffer = 2048
+    name = "sms-sub"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[wechat]
+    token = "GYQeuDWBbAsCNeGz"
+    secret = "ZKpmgINTkianyMbMixyxcPQjMCSHCDrk"
+    username = "wangjian"
+
+[provider]
+    providers = [2,4]
+    mengWangSmsURL  = "http://43.240.124.85:8901/sms/v2/std/single_send"
+    mengWangSmsUser = "JJ1093"
+    mengWangSmsPwd  = "000827"
+    mengWangActURL  = "http://43.240.124.85:8901/sms/v2/std/single_send"
+    mengWangBatchURL = "http://43.240.124.85:8901/sms/v2/std/batch_send"
+    mengWangActUser = "JJ1095"
+    mengWangActPwd  = "082705"
+    mengWangInternationURL  = "http://61.145.229.28:8803/sms/v2/std/single_send"
+    mengWangInternationUser = "GJ1081"
+    mengWangInternationPwd  = "082706"
+    chuangLanSmsURL = "http://smssh1.253.com/msg/send/json"
+    chuangLanSmsUser = "N5563714"
+    chuangLanSmsPwd = "IGpOWXdAcM7cfd"
+    chuangLanActURL = "http://smssh1.253.com/msg/send/json"
+    chuangLanActUser = "M2110245"
+    chuangLanActPwd = "PJMRstTDdYbb0c"
+    chuangLanInternationURL = "http://intapi.253.com/send/json"
+    chuangLanInternationUser = "I5716133"
+    chuangLanInternationPwd = "JxzpQY3sRc2066"
+    chuangLanSmsCallbackURL = "http://smssh1.253.com/msg/pull/report"
+    chuangLanActCallbackURL = "http://smssh1.253.com/msg/pull/report"
+    chuangLanInternationalCallbackURL = "http://intapi.253.com/pull/report"
+    mengWangSmsCallbackURL = "http://43.240.124.85:8901/sms/v2/std/get_rpt"
+    mengWangActCallbackURL = "http://43.240.124.85:8901/sms/v2/std/get_rpt"
+    mengWangInternationalCallbackURL = "http://61.145.229.28:8803/sms/v2/std/get_rpt"
+
+[speedup]
+    switch = false
+    mengWangSmsURL  = "http://message1.biliapi.co/sms/v2/std/single_send"
+    mengWangActURL  = "http://message1.biliapi.co/sms/v2/std/single_send"
+    mengWangBatchURL = "http://message1.biliapi.co/sms/v2/std/batch_send"
+    mengWangInternationURL  = "http://message2.biliapi.co/sms/v2/std/single_send"
+    chuangLanSmsURL = "http://smssh1.253.biliapi.com/msg/send/json"
+    chuangLanActURL = "http://smssh1.253.biliapi.com/msg/send/json"
+    chuangLanInternationURL = "http://intapi.253.biliapi.com/send/json"
+    chuangLanSmsCallbackURL = "http://smssh1.253.biliapi.com/msg/pull/report"
+    chuangLanActCallbackURL = "http://smssh1.253.biliapi.com/msg/pull/report"
+    chuangLanInternationalCallbackURL = "http://intapi.253.biliapi.com/pull/report"
+    mengWangSmsCallbackURL = "http://message1.biliapi.co/sms/v2/std/get_rpt"
+    mengWangActCallbackURL = "http://message1.biliapi.co/sms/v2/std/get_rpt"
+    mengWangInternationalCallbackURL = "http://message2.biliapi.co/sms/v2/std/get_rpt"
+
+[sms]
+    passportMobileUrl = "http://uat-passport.bilibili.co/intranet/acc/getTelByMid"
+    callbackProc = 0
+    singleSendProc = 50
+    batchSendProc = 10
+    monitorProcDuration = "5m"
+    blacklist = ["8617621660828"]

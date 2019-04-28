@@ -1,0 +1,217 @@
+// +bili:type=service
+syntax = "proto3";
+package relation.service;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "api";
+
+service Relation {
+  rpc Relation(RelationReq) returns (FollowingReply);
+  rpc Relations(RelationsReq) returns (FollowingMapReply);
+  rpc Stat(MidReq) returns (StatReply);
+  rpc Stats(MidsReq) returns (StatsReply);
+  rpc Attentions(MidReq) returns (FollowingsReply);
+  rpc Followings(MidReq) returns (FollowingsReply);
+  rpc AddFollowing(FollowingReq) returns (EmptyReply);
+  rpc DelFollowing(FollowingReq) returns (EmptyReply);
+  rpc Whispers(MidReq) returns (FollowingsReply);
+  rpc AddWhisper(FollowingReq) returns (EmptyReply);
+  rpc DelWhisper(FollowingReq) returns (EmptyReply);
+  rpc Blacks(MidReq) returns (FollowingsReply);
+  rpc AddBlack(FollowingReq) returns (EmptyReply);
+  rpc DelBlack(FollowingReq) returns (EmptyReply);
+  rpc Followers(MidReq) returns (FollowingsReply);
+  rpc DelFollower(FollowingReq) returns (EmptyReply);
+  rpc Tag(TagIdReq) returns (TagReply);
+  rpc Tags(MidReq) returns (TagsCountReply);
+  rpc UserTag(RelationReq) returns (UserTagReply);
+  rpc CreateTag(TagReq) returns (CreateTagReply);
+  rpc UpdateTag(TagUpdateReq) returns (EmptyReply);
+  rpc DelTag(TagDelReq) returns (EmptyReply);
+  rpc TagsAddUsers(TagsMoveUsersReq) returns (EmptyReply);
+  rpc TagsCopyUsers(TagsMoveUsersReq) returns (EmptyReply);
+  rpc TagsMoveUsers(TagsMoveUsersReq) returns (EmptyReply);
+  rpc Prompt(PromptReq) returns (PromptReply);
+  rpc ClosePrompt(PromptReq) returns (EmptyReply);
+  rpc AddSpecial(FollowingReq) returns (EmptyReply);
+  rpc DelSpecial(FollowingReq) returns (EmptyReply);
+  rpc Special(MidReq) returns (SpecialReply);
+  rpc FollowersUnread(MidReq) returns (FollowersUnreadReply);
+  rpc FollowersUnreadCount(MidReq) returns (FollowersUnreadCountReply);
+  rpc AchieveGet(AchieveGetReq) returns (AchieveGetReply);
+  rpc Achieve(AchieveReq) returns (AchieveReply);
+  rpc ResetFollowersUnread(MidReq) returns (EmptyReply);
+  rpc ResetFollowersUnreadCount(MidReq) returns (EmptyReply);
+  rpc DisableFollowerNotify(MidReq) returns (EmptyReply);
+  rpc EnableFollowerNotify(MidReq) returns (EmptyReply);
+  rpc FollowerNotifySetting(MidReq) returns (FollowerNotifySettingReply);
+  rpc SameFollowings(SameFollowingReq) returns (FollowingsReply);
+}
+
+message RelationReq {
+  int64 mid = 1;
+  int64 fid = 2;
+  string real_ip = 3;
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/relation/model.Following
+message FollowingReply {
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  uint32 attribute = 2 [ (gogoproto.jsontag) = "attribute" ];
+  uint32 source = 3 [ (gogoproto.jsontag) = "-" ];
+  int64 ctime = 4 [
+    (gogoproto.jsontag) = "-",
+    (gogoproto.casttype) = "go-common/library/time.Time",
+    (gogoproto.customname) = "CTime"
+  ];
+  int64 mtime = 5 [
+    (gogoproto.jsontag) = "mtime",
+    (gogoproto.casttype) = "go-common/library/time.Time",
+    (gogoproto.customname) = "MTime"
+  ];
+  repeated int64 tag = 6 [ (gogoproto.jsontag) = "tag" ];
+  int32 special = 7 [ (gogoproto.jsontag) = "special" ];
+}
+
+message RelationsReq {
+  int64 mid = 1;
+  repeated int64 fid = 2;
+  string real_ip = 3;
+}
+
+message FollowingMapReply { map<int64, FollowingReply> following_map = 1; }
+
+message FollowingsReply { repeated FollowingReply following_list = 1; }
+
+message MidReq {
+  int64 mid = 1;
+  string real_ip = 2;
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/relation/model.Stat
+message StatReply {
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  int64 following = 2 [ (gogoproto.jsontag) = "following" ];
+  int64 whisper = 3 [ (gogoproto.jsontag) = "whisper" ];
+  int64 black = 4 [ (gogoproto.jsontag) = "black" ];
+  int64 follower = 5 [ (gogoproto.jsontag) = "follower" ];
+  int64 ctime = 6 [
+    (gogoproto.jsontag) = "-",
+    (gogoproto.casttype) = "go-common/library/time.Time",
+    (gogoproto.customname) = "CTime"
+  ];
+  int64 mtime = 7 [
+    (gogoproto.jsontag) = "-",
+    (gogoproto.casttype) = "go-common/library/time.Time",
+    (gogoproto.customname) = "MTime"
+  ];
+}
+
+message MidsReq {
+  repeated int64 mids = 1;
+  string real_ip = 2;
+}
+
+message StatsReply { map<int64, StatReply> stat_reply_map = 1; }
+
+message FollowingReq {
+  int64 mid = 1;
+  int64 fid = 2;
+  uint32 source = 3 [ (gogoproto.casttype) = "uint8" ];
+  string real_ip = 4;
+  int32 action = 5 [ (gogoproto.casttype) = "int8" ];
+  map<string, string> infoc = 6;
+}
+
+message EmptyReply {}
+
+// ArgTagId tag id
+message TagIdReq {
+  int64 mid = 1;
+  int64 tag_id = 2;
+  string real_ip = 3;
+}
+
+message TagReply { repeated int64 mids = 1; }
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/relation/model.TagCount
+message TagCountReply {
+  int64 tagid = 1 [ (gogoproto.jsontag) = "tagid" ];
+  string name = 2 [ (gogoproto.jsontag) = "name" ];
+  int64 count = 3 [ (gogoproto.jsontag) = "count" ];
+}
+
+message TagsCountReply { repeated TagCountReply tag_count_list = 1; }
+
+message UserTagReply { map<int64, string> tags = 1; }
+
+message TagReq {
+  int64 mid = 1;
+  string tag = 2;
+  string real_ip = 3;
+}
+
+message TagUpdateReq {
+  int64 mid = 1;
+  int64 tag_id = 2;
+  string new = 3;
+  string real_ip = 4;
+}
+
+message TagDelReq {
+  int64 mid = 1;
+  int64 tag_id = 2;
+  string real_ip = 3;
+}
+
+message TagsMoveUsersReq {
+  int64 mid = 1;
+  int64 before_id = 2;
+  string after_tag_ids = 3;
+  string fids = 4;
+  string real_ip = 5;
+}
+
+message PromptReq {
+  int64 mid = 1;
+  int64 fid = 2;
+  int32 btype = 3 [ (gogoproto.casttype) = "int8" ];
+}
+
+message CreateTagReply { int64 tag_id = 1; }
+
+message PromptReply { bool success = 1; }
+
+message FollowersUnreadReply { bool has_unread = 1; }
+
+message FollowersUnreadCountReply { int64 unread_count = 1; }
+
+message SpecialReply { repeated int64 mids = 1; }
+
+message AchieveGetReq {
+  string award = 1;
+  int64 mid = 2;
+}
+
+message AchieveGetReply { string awardToken = 1; }
+
+message AchieveReq { string awardToken = 1; }
+
+message AchieveReply {
+  string award = 1;
+  int64 mid = 2;
+}
+
+message FollowerNotifySettingReply {
+  int64 mid = 1;
+  bool enabled = 2;
+}
+
+message SameFollowingReq {
+  int64 mid = 1;
+  int64 mid2 = 2;
+}

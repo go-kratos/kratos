@@ -1,0 +1,54 @@
+syntax = "proto3";
+package live.resource.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+//LiveCheck 移动端请求接口
+message LiveCheckReq {
+    // 平台
+    string platform = 1 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];
+    // 操作系统
+    string system = 2 [(gogoproto.moretags) = 'form:"system" validate:"required"'];
+    // 设备
+    string mobile = 3 [(gogoproto.moretags) = 'form:"mobile" validate:"required"'];
+}
+message LiveCheckResp {
+    int64 is_live = 1 [(gogoproto.jsontag) = "is_live"];
+}
+
+//提供给后台查询开播设备黑名单
+message GetLiveCheckListReq {
+}
+
+message GetLiveCheckListResp {
+
+    // android
+    repeated Platform android = 1 [(gogoproto.jsontag) = "android"];
+    // ios
+    repeated Platform ios = 2 [(gogoproto.jsontag) = "ios"];
+
+    message Platform {
+        // os
+        string system = 1 [(gogoproto.jsontag) = "system"];
+        // device
+        repeated string mobile = 2 [(gogoproto.jsontag) = "mobile"];
+    }
+}
+
+//提供给后台新增live_check添加黑名单
+message AddLiveCheckReq {
+    string live_check = 1 [(gogoproto.moretags) = 'form:"live_check" validate:"required"'];
+}
+message AddLiveCheckResp {
+}
+
+
+service LiveCheck {
+    //客户端获取能否直播接口
+    rpc LiveCheck (LiveCheckReq) returns (LiveCheckResp);
+    //后台查询所有配置设备黑名单
+    rpc GetLiveCheckList (GetLiveCheckListReq) returns (GetLiveCheckListResp);
+    //后台添加能否直播设备黑名单
+    rpc AddLiveCheck (AddLiveCheckReq) returns (AddLiveCheckResp);
+}

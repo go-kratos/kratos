@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package room.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Skin {
+    
+    /** 房间当前皮肤
+     * 
+     */   
+    rpc current (SkinCurrentReq) returns (SkinCurrentResp);
+}
+
+
+
+message SkinCurrentReq {
+    // 平台web、ios、android、ipad
+    string skin_platform = 1 [(gogoproto.jsontag) = "skin_platform"];
+    // 客户端支持的皮肤版本，如“1.0”
+    string skin_version = 2 [(gogoproto.jsontag) = "skin_version"];
+    // 房间id，支持长短号
+    int64 roomid = 3 [(gogoproto.jsontag) = "roomid"];
+    // 一级分区id
+    int64 area_v2_parent_id = 4 [(gogoproto.jsontag) = "area_v2_parent_id"];
+    // 二级分区id
+    int64 area_v2_id = 5 [(gogoproto.jsontag) = "area_v2_id"];
+}
+
+message SkinCurrentResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 皮肤id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 皮肤配置，字符串类型
+        string skin_config = 2 [(gogoproto.jsontag) = "skin_config"];
+        // 失效时间
+        int64 end_time = 3 [(gogoproto.jsontag) = "end_time"];
+        // 当前时间
+        int64 current_time = 4 [(gogoproto.jsontag) = "current_time"];
+    }
+}

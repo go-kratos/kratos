@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package live.appinterface.v1;
+
+option go_package = "v1";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// Index 相关服务
+service Index {
+    // 首页大接口
+    // 首页换一换接口
+    // `dynamic_resp:"true" midware:"guest"`
+    rpc getAllList (GetAllListReq) returns (GetAllListResp);
+    // `midware:"guest"`
+    rpc change (ChangeReq) returns (ChangeResp);
+}
+
+message GetAllListResp {
+
+}
+
+// GetAllList请求
+message GetAllListReq {
+    //平台
+    string platform = 1 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];
+    //设备
+    string device = 2 [(gogoproto.moretags) = 'form:"device" validate:"required"'];
+    //分辨率
+    string scale = 3 [(gogoproto.moretags) = 'form:"scale" validate:"required"'];
+    //版本号
+    int64 build = 4 [(gogoproto.moretags) = 'form:"build" validate:"required"'];
+    //关注页码
+    int64 relation_page = 5 [(gogoproto.moretags) = 'form:"relation_page" validate:"required"'];
+    //模块id（可选）
+    int64 module_id = 6 [(gogoproto.moretags) = 'form:"module_id"'];
+}
+
+// 换一换
+message ChangeReq {
+    // 模块id
+    // `mock:"1"`
+    int64 module_id = 1 [(gogoproto.moretags) = 'form:"module_id" validate:"required"'];
+
+    string attention_room_id = 2 [(gogoproto.moretags) = 'form:"attention_room_id" validate:"required"'];
+    // 平台
+    string platform = 3 [(gogoproto.moretags) = 'form:"platform"'];
+    //设备
+    string device = 4 [(gogoproto.moretags) = 'form:"device"'];
+    //分辨率
+    string scale = 5 [(gogoproto.moretags) = 'form:"scale"'];
+    //版本号
+    int64 build = 6 [(gogoproto.moretags) = 'form:"build"'];
+}
+
+// 换一换响应
+message ChangeResp {
+    // 返回码
+    message List {
+        int64 roomid = 1 [(gogoproto.jsontag) = 'roomid'];
+        string title = 2 [(gogoproto.jsontag) = 'title'];
+        string uname = 3 [(gogoproto.jsontag) = 'uname'];
+        int64 online = 4 [(gogoproto.jsontag) = 'online'];
+        string cover = 5 [(gogoproto.jsontag) = 'cover'];
+        string link = 6 [(gogoproto.jsontag) = 'link'];
+        string face = 7 [(gogoproto.jsontag) = 'face'];
+        int64 area_v2_parent_id = 8 [(gogoproto.jsontag) = 'area_v2_parent_id'];
+        string area_v2_parent_name = 9 [(gogoproto.jsontag) = 'area_v2_parent_name'];
+        int64 area_v2_id = 10 [(gogoproto.jsontag) = 'area_v2_id'];
+        string area_v2_name = 11 [(gogoproto.jsontag) = 'area_v2_name'];
+        string play_url = 12 [(gogoproto.jsontag) = 'play_url,omitempty'];
+        string play_url_h265 = 13 [(gogoproto.jsontag) = 'play_url_h265,omitempty'];
+        int64 current_quality = 14 [(gogoproto.jsontag) = 'current_quality,omitempty'];
+        int64 broadcast_type = 15 [(gogoproto.jsontag) = 'broadcast_type'];
+        string pendent_ru = 16 [(gogoproto.jsontag) = 'pendent_ru'];
+        string pendent_ru_pic = 17 [(gogoproto.jsontag) = 'pendent_ru_pic'];
+        string pendent_ru_color = 18 [(gogoproto.jsontag) = 'pendent_ru_color'];
+        int64 rec_type = 19 [(gogoproto.jsontag) = 'rec_type'];
+        int64 pk_id = 20 [(gogoproto.jsontag) = 'pk_id'];
+        repeated int64 accept_quality = 21 [(gogoproto.jsontag) = 'accept_quality,omitempty'];
+    }
+
+    message ModuleInfo {
+        // 模块id
+        int64 id = 1 [(gogoproto.jsontag) = 'id'];
+        // 标题
+        string title = 2 [(gogoproto.jsontag) = 'title'];
+        // 图标
+        string pic = 3 [(gogoproto.jsontag) = 'pic'];
+        // list数据类型  1: banner 2: 导航栏 3: 运营推荐分区-标准 4: 运营推荐分区-方 5：排行榜（小时榜） 6: 推荐主播-标准 7: 推荐主播-方 8:我的关注(用户相关) 9：一级分区-标准 10：一级分区-方 11: 活动卡片 12：常用标签推荐入口(用户相关) 13：常用标签推荐房间列表(用户相关) 14：大航海提示入口
+        int64 type = 4 [(gogoproto.jsontag) = 'type'];
+        // 跳转链接
+        string link = 5 [(gogoproto.jsontag) = 'link'];
+        // 该模块数据总数
+        int64 count = 6 [(gogoproto.jsontag) = 'count'];
+        int64 is_sky_horse_gray = 7 [(gogoproto.jsontag) = 'is_sky_horse_gray'];
+    }
+
+    message ModuleList {
+        //
+        ModuleInfo module_info = 1 [(gogoproto.jsontag) = 'module_info'];
+        // 注意：可能是 PicList{id,pic,link,title}，需要根据ModuleInfo里的type判断
+        repeated List list = 2 [(gogoproto.jsontag) = 'list'];
+    }
+
+    repeated ModuleList module_list = 1 [(gogoproto.jsontag) = 'module_list'];
+}

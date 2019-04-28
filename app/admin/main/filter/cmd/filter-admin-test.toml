@@ -1,0 +1,166 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/filter-admin.pid"
+dir = "./"
+family = "filter-admin"
+address = ""
+
+[property]
+    # 过滤词来源：0 上级部门;2 审核规避;4 运营规避;8 审核提示
+    sourceMask = [0,2,4,8]
+    # 过滤词类型：0 其他违禁类;1 政治宗教;2 色情;3 低俗;4 血腥暴力;5 赌博诈骗;6 运营规避
+    filterType = [0,1,2,3,4,5,6]
+    # 过滤词所有level
+    level = [10,15,20,30,40]
+    # 过滤词过期检查周期
+    expiredTick ="5s" 
+    # 后台录入正常文本检查内容
+    normalContents = ["比刚才的好太多了 果然在自然环境下练习就是不一样","难受。。","当GAY怎么这么棒啊","同款","我！小孩子！打钱！","5.55556E+18","大家快看！主播又在撩妹了","哈哈哈哈哈哈哈","好看！","差一点第一","好笑加10083","23333333333","剃毛","这脾气不太像演的","这是要靠神力了","好准","发球成功就拿分","我开始方了","噗","承包c菌","初音...","竟然是德语技能，然而这只在左边显示一行字太不明显","但是为了录语音就没有做无声处理，抱歉","无限大无限大无限大无限大无限大无限大无限大无限大无限大无限大无限大","刚刚！","2333333","表白尹钟信大叔","丝芙兰要打折了","羊仔居然不笑场","你们怕是不知道解放前喇嘛做的人皮鼓吧？","模糊看不清 高锰酸钾滴眼睛","啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊","牛肉拉满！rua","玮柏好帅","不就是增加了亮度？ 散了吧","免费的最贵","穷穷穷","我什么时候关注的啊","好刺激","这声音太萌了","双力臂一般般","无头骑士","老米：不发飙真以为我是好惹的？","美白靠精华 水基本就是补水","看成75℃2333333333","原谅被单","奕儿棒","清扬 放肆大学","进击吧","可喜可贺可喜可贺","农村人表示不觉得脏","第一嘛","膝盖给你就是6666","Sm家的人都是神颜加实力选不能选sm家的在选秀的时候对比太多","史珍香表示不服","女皇的眼神好像也变了","我还以为是鼻涕","多了。。。","wow","我跟刘烨一样也笑了","药丸","吔屎拉你","噗","再提这个梗，胳膊给你撅折","喵喵喵？","在图书馆里的我好慌","CSOL 加特林 ？？？？？","炁","坑爹","没错没有人","对面怕不是傻子吧。。。","口水出来了，去TB搜我要吃","一看到猫就折耳了，能不能好好享受视频，该不该","哈哈哈哈哈欢迎来到好莱坞！！！","卧槽真的长发萌妹？","为什么不选14嘲讽","什么时候星游记出二啊！","咦，林更新????","哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈","前方帅气三兄弟即将出场","It's Party Time~","厉害厉害","语音应该包含在内，后期可能杂音(☍﹏⁰)","xhuc","最丧的是爱上自己的哥哥233333333333333","楼下思考人生去","戴套吗？","我赞成","2.33333E+18","囍","666","听完就忘","你是个好人","你屏幕歪了","不去不去","有有有!","机器人咯","格瑞:那个拖把 天台来不来","90%的 ！！？不止吧［滑稽/］","わかい","大不了合同换一下嘛(^^)","这个地板真的大丈夫嘛www","圈套","小黄负责找，甩到一边，大狗补刀","不行，先看的贝蒂，听到这个声音萝莉就在我脑袋里晃","无限大无限大无限大无限大无限大无限大无限大无限大无限大无限大无限大","只有远景的时候着了丁健老师","舍不得结束啊","子怡被吓哭了","这就是05后啊 好6","要火","为父不接","感觉真尴尬。。。","爱上一匹野马 我的家里却没有草原","喝油汤厉害","卧槽","我要去看原著了 本来看到一半看不下去了","世界上最好的小民工！","义子，结拜大哥◑▂◐","欢迎来到实力至上主义的教师","老掉牙的撩妹开场白","这个可以有","诈尸了！！！","？？？？？？？？？","诸君何如。","厉害了","塞西尔真是太聪明了 主动给他们说话的空间","烈兔你们","卧槽。。。","腻害了","哈哈哈哈哈哈哈 央视范","苏酥","【UP】我是假的UP主！","哎阴险啊","那个妹子的衣服有点中国风的哟","摄影师牛比","真的学到好多 谢谢老师","抱林了抱林了……","。。。up你竟然玩屎","我一点也不害怕","远古素材","回合制的","5.55556E+23","怎么可以这么可爱","刀片超车！","真的很疼女儿了这都不愿意打女儿巴掌","我觉得ok","买个卡司炉子的","哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈","祭祖23333333","这身盛装真的美炸","我小时候看的时候真的完全没觉得恐怖...","23分钟前","哈哈哈","开门杀","警察来了 老铁","说出来都没人信","ccccccccccccc","我 贞德 中立","无限大无限大无限大无限大无限大无限大无限大无限大无限大无限大无限大","他们很惊讶亚洲 巡演 有那么多人来 台湾那场被吓到了","年套的时候冲个500就是特邀了，我的特邀就是这么来的","0x2=0","团子可爱","低配jb","~","跳到天亮","哦喲","欢迎收看后期超神篇","哈哈哈","先天一","不要再发没有营养的内容了","凯源凯源凯源凯源凯源凯源凯源凯源凯源凯源","我的世界开头，手撸树","好好看","秦怡老公就是帅","表白字幕君","是怎么连输7局的。。。","蕾姆蕾姆蕾姆蕾姆","哈哈哈哈反过来看你以前的视频 你以前太唯美了吧哈哈哈哈","因为肚子痛贝尔曼拉不起来了是不是","传说中的掩耳盗铃？","我秀吉老婆会被明久超过？可笑","芝士才是标配","麦考夫","看脸的男人只能娶到看脸的女人=￣ω￣=","从介绍就看出差别了，黄璐都是拿作品，刘芸拿一个杂志封面","去nm的工匠精神","3月3日","哈哈哈哈哈","为阿爸疯狂打电话","看的好累","感谢字幕组","嘤嘤嘤","拉哥这表情笑死我了","我也觉得像.Justin！","啥？鬼子敢单独来？","有","我竟然卡在这儿了"]
+    # 后台录入正常文本最大误伤百分比
+    normalHitRate = 30
+    # 后台录入防止高危内容失效检查内容
+    riskContents = ["习影帝","逼痒","近平","看色的的电影加娱乐城","白虎少妇大潮吹","习中央","肏屄","xijinping","援交","干到射","刁阿斗","肏你","冮澤民","av女优","日屄","习净平","肏她","习大大","办理真实文凭","胸推口舌","肏我","彭丽媛","性交课","血逼","彭妈妈","鬼畜轮奸","肏逼","彭麻麻","给肏","彭国母","操我","彭夫人","操b","包子帝","操死","操她","被肏","操你","草死"]
+
+[ai]
+    # AI阀值
+	threshold = 0.5
+	# AI真实分标准
+	trueScore = 98.5
+
+[host]
+    ai =  "http://data-test.bilibili.co"
+    api = "http://api.bilibili.co"
+    account = "http://account.bilibili.co"
+
+[log]
+dir = "/data/log/filter-admin/"
+
+[identify]
+    [identify.host]
+    auth = "http://passport.bilibili.co"
+    secret = "http://open.bilibili.co"
+    [identify.httpClient]
+    key = "c1a1cb2d89c33794"
+    secret = "dda47eeca111e03e6845017505baea13"
+    dial = "30ms"
+    timeout = "500ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[bm]
+    addr = "0.0.0.0:7382"
+    timeout = "1s"
+    maxListen = 10
+
+[mysql]
+    addr= "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_filter?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"    
+    active = 5 
+    idle = 2
+    IdleTimeout = "1800s"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    
+# [hbase]
+#     master = ""
+#     meta = ""
+#     dialTimeout = "1s"
+#     readTimeout = "200ms"
+#     readsTimeout = "1s"
+#     writeTimeout = "200ms"
+#     writesTimeout = "200ms"
+#     [hbase.zookeeper]
+#     root = ""
+#     addrs = ["127.0.0.1:2181"]
+#     timeout = "30s"
+
+[memcache]
+    [memcache.mc]
+        name = "filter-admin"
+        proto = "tcp"
+        addr = "172.16.33.54:11214"
+        idle = 10
+        active = 11
+        dialTimeout = "2s"
+        readTimeout = "2s"
+        writeTimeout = "2s"
+        idleTimeout = "7h"
+    [memcache.expire]
+        expire = "200s"
+
+[httpClient]
+    off=false
+    searchDomain = "http://search-manager.bilibili.co"
+    [httpClient.normal]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "500ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.normal.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "unix"
+    addr = "/tmp/uat-manager-auth-mc.sock"
+    active = 15
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"

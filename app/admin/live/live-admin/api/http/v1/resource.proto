@@ -1,0 +1,202 @@
+syntax = "proto3";
+package live.liveadmin.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// addReq
+message AddReq {
+     string platform = 1 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];
+     string title = 2 [(gogoproto.moretags) = 'form:"title" validate:"required"'];
+     string jumpPath = 3 [(gogoproto.moretags) = 'form:"jumpPath"'];
+     int64 jumpTime = 4 [(gogoproto.moretags) = 'form:"jumpTime"'];
+     string type = 5 [(gogoproto.moretags) = 'form:"type" validate:"required"'];
+     string device = 6 [(gogoproto.moretags) = 'form:"device" validate:"required"'];
+     string startTime = 7 [(gogoproto.moretags) = 'form:"startTime" validate:"required"'];
+     string endTime = 8 [(gogoproto.moretags) = 'form:"endTime" validate:"required"'];
+     string imageUrl = 9 [(gogoproto.moretags) = 'form:"imageUrl" validate:"required"'];
+     int64 jumpPathType = 10 [(gogoproto.moretags) = 'form:"jumpPathType"'];
+}
+// addResp
+message AddResp {
+    repeated int64 id = 1 [(gogoproto.jsontag) = "id"];
+}
+// editReq
+message EditReq {
+     string platform = 1 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];
+     int64  id = 2 [(gogoproto.moretags) = 'form:"id" validate:"required"'];
+     string title = 3 [(gogoproto.moretags) = 'form:"title"'];
+     string jumpPath = 4 [(gogoproto.moretags) = 'form:"jumpPath"'];
+     int64 jumpTime = 5 [(gogoproto.moretags) = 'form:"jumpTime"'];
+     string startTime = 7 [(gogoproto.moretags) = 'form:"startTime"'];
+     string endTime = 8 [(gogoproto.moretags) = 'form:"endTime"'];
+     string imageUrl = 9 [(gogoproto.moretags) = 'form:"imageUrl"'];
+     int64 jumpPathType = 10 [(gogoproto.moretags) = 'form:"jumpPathType"'];
+}
+// editResp
+message EditResp {
+
+}
+
+//下线闪屏
+message OfflineReq {
+     string platform = 1 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];
+     int64 id = 2 [(gogoproto.moretags) = 'form:"id" validate:"required"'];
+}
+message OfflineResp {
+
+}
+//获取闪屏配置列表
+message GetListReq {
+     string platform = 1 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];
+     int64 page = 2 [(gogoproto.moretags) = 'form:"page"'];
+     int64 pageSize = 3 [(gogoproto.moretags) = 'form:"pageSize"'];
+     string type = 4 [(gogoproto.moretags) = 'form:"type" validate:"required"'];
+}
+message GetListResp {
+     int64 currentPage = 1 [(gogoproto.jsontag) = "currentPage"];
+     int64 totalCount = 2 [(gogoproto.jsontag) = "totalCount"];
+     repeated List list = 3 [(gogoproto.jsontag) = "list"];
+     message List  {
+           int64  id = 1 [(gogoproto.jsontag) = "id"];
+           string title = 2 [(gogoproto.jsontag) = "title"];
+           string jumpPath = 3 [(gogoproto.jsontag) = "jumpPath"];
+           string device_platform = 4 [(gogoproto.jsontag) = "device_platform"];
+           int64  device_build = 5 [(gogoproto.jsontag) = "device_build"];
+           string startTime = 6 [(gogoproto.jsontag) = "startTime"];
+           string endTime = 7 [(gogoproto.jsontag) = "endTime"];
+           int64 status = 8 [(gogoproto.jsontag) = "status"];
+           int64 device_limit =9 [(gogoproto.jsontag) = "device_limit"];
+           string imageUrl = 10 [(gogoproto.jsontag) = "imageUrl"];
+           int64 jumpPathType = 11 [(gogoproto.jsontag) = "jumpPathType"];
+           int64 jumpTime = 12 [(gogoproto.jsontag) = "jumpTime"];
+     }
+}
+
+// 获取当前有效闪屏配置(客户端)
+message GetInfoReq {
+     string platform = 1 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];;
+     int64 build = 2 [(gogoproto.moretags) = 'form:"build" validate:"required"'];;
+}
+message GetInfoResp {
+     int64 id = 1 [(gogoproto.jsontag) = "id"];
+     string title = 2 [(gogoproto.jsontag) = "title"];
+     string jumpPath = 3 [(gogoproto.jsontag) = "jumpPath"];
+     int64 jumpTime = 4 [(gogoproto.jsontag) = "jumpTime"];
+     int64 jumpPathType = 5 [(gogoproto.jsontag) = "jumpPathType"];
+     string imageUrl = 6 [(gogoproto.jsontag) = "imageUrl"];
+}
+// 获取当前有效banner配置(客户端)
+message GetBlinkBannerReq {
+     string platform = 1 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];;
+     int64 build = 2 [(gogoproto.moretags) = 'form:"build" validate:"required"'];;
+}
+message GetBlinkBannerResp {
+     int64 id = 1 [(gogoproto.jsontag) = "id"];
+     string title = 2 [(gogoproto.jsontag) = "title"];
+     string jumpPath = 3 [(gogoproto.jsontag) = "jumpPath"];
+     int64 jumpTime = 4 [(gogoproto.jsontag) = "jumpTime"];
+     int64 jumpPathType = 5 [(gogoproto.jsontag) = "jumpPathType"];
+     string imageUrl = 6 [(gogoproto.jsontag) = "imageUrl"];
+}
+
+// 获取banner配置(客户端)
+message GetBannerReq {
+     string platform = 1 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];;
+     int64 build = 2 [(gogoproto.moretags) = 'form:"build" validate:"required"'];;
+     string type = 3 [(gogoproto.moretags) = 'form:"type" validate:"required"'];;
+}
+message GetBannerResp {
+    repeated List list = 1 [(gogoproto.jsontag) = "list"];
+    message List  {
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        string title = 2 [(gogoproto.jsontag) = "title"];
+        string jumpPath = 3 [(gogoproto.jsontag) = "jumpPath"];
+        int64 jumpTime = 4 [(gogoproto.jsontag) = "jumpTime"];
+        int64 jumpPathType = 5 [(gogoproto.jsontag) = "jumpPathType"];
+        string imageUrl = 6 [(gogoproto.jsontag) = "imageUrl"];
+    }
+}
+
+message GetPlatformListReq {
+    int64 type=1 [(gogoproto.jsontag) = "type"];
+}
+message GetPlatformListResp {
+    repeated string platform =1 [(gogoproto.jsontag) = "platform"];
+}
+
+message GetListExReq {
+     string platform = 1 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];
+     int64 page = 2 [(gogoproto.moretags) = 'form:"page"'];
+     int64 pageSize = 3 [(gogoproto.moretags) = 'form:"pageSize"'];
+     repeated string type = 4 [(gogoproto.moretags) = 'form:"type" validate:"required"'];
+     string device_platform = 5 [(gogoproto.moretags) = 'form:"device_platform"'];
+     string status = 6 [(gogoproto.moretags) = 'form:"status"'];
+     string startTime = 7 [(gogoproto.moretags) = 'form:"startTime"'];
+     string endTime = 8 [(gogoproto.moretags) = 'form:"endTime"'];
+}
+
+message GetListExResp {
+     int64 currentPage = 1 [(gogoproto.jsontag) = "currentPage"];
+     int64 totalCount = 2 [(gogoproto.jsontag) = "totalCount"];
+     repeated List list = 3 [(gogoproto.jsontag) = "list"];
+     message List  {
+           int64  id = 1 [(gogoproto.jsontag) = "id"];
+           string title = 2 [(gogoproto.jsontag) = "title"];
+           string jumpPath = 3 [(gogoproto.jsontag) = "jumpPath"];
+           string device_platform = 4 [(gogoproto.jsontag) = "device_platform"];
+           int64  device_build = 5 [(gogoproto.jsontag) = "device_build"];
+           string startTime = 6 [(gogoproto.jsontag) = "startTime"];
+           string endTime = 7 [(gogoproto.jsontag) = "endTime"];
+           int64 status = 8 [(gogoproto.jsontag) = "status"];
+           int64 device_limit =9 [(gogoproto.jsontag) = "device_limit"];
+           string imageUrl = 10 [(gogoproto.jsontag) = "imageUrl"];
+           int64 jumpPathType = 11 [(gogoproto.jsontag) = "jumpPathType"];
+           int64 jumpTime = 12 [(gogoproto.jsontag) = "jumpTime"];
+           string type = 13 [(gogoproto.jsontag) = "type"];
+     }
+}
+
+service Resource {
+    //Add 添加资源接口
+    // `method:"POST" internal:"true" `
+    rpc add(AddReq) returns (AddResp);
+
+    //AddEx 添加资源接口(不限制位置和平台)
+    // `method:"POST" internal:"true" `
+    rpc addEx(AddReq) returns (AddResp);
+
+    //Edit 编辑资源接口
+    // `method:"POST" internal:"true" `
+    rpc edit(EditReq) returns (EditResp);
+
+    //Offline 下线资源接口
+    // `method:"POST" internal:"true" `
+    rpc offline(OfflineReq) returns (OfflineResp);
+    
+    //GetList 获取资源列表
+    // `method:"GET" internal:"true" `
+    rpc getList(GetListReq) returns (GetListResp);
+
+    //获取平台列表
+    // `method:"GET" internal:"true" `
+    rpc getPlatformList(GetPlatformListReq) returns (GetPlatformListResp);
+
+    //GetListEx 获取资源列表
+    // `method:"GET" internal:"true" `
+    rpc getListEx(GetListExReq) returns (GetListExResp);
+}
+service Splash {
+    //获取有效闪屏配置
+    // `method:"GET" internal:"true" `
+    rpc getInfo(GetInfoReq) returns (GetInfoResp);
+}
+service Banner {
+    //获取有效banner配置
+    // `method:"GET" internal:"true" `
+    rpc getBlinkBanner(GetInfoReq) returns (GetInfoResp);
+
+    //获取有效banner配置
+    // `method:"GET" internal:"true" `
+    rpc getBanner(GetBannerReq) returns (GetBannerResp);
+}

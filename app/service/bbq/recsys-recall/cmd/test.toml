@@ -1,0 +1,91 @@
+[log]
+	stdout = true
+
+[bm]
+    addr = "0.0.0.0:8080"
+    timeout = "1s"
+
+[mysql]
+	addr = "172.16.38.91:3306"
+	dsn = "root:123456@tcp(172.16.38.91:3306)/bbq?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["root:123456@tcp(172.16.38.91:3306)/bbq?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "100ms"
+	execTimeout = "100ms"
+	tranTimeout = "200ms"
+
+[redis]
+	name = "recsys-recall-service"
+    proto = "tcp"
+    addr = "172.16.38.91:6379"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1m"
+
+[bfredis]
+	name = "recsys-recall-service"
+    proto = "tcp"
+    addr = "172.16.38.91:6379"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1m"
+
+[httpClient]
+    [httpClient.normal]
+        dial = "1s"
+        timeout = "10s"
+        keepAlive = "60s"
+        timer = 10
+        key = "7c7ac0db1aa05587"
+        secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    [httpClient.normal.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+    [httpClient.slow]
+        dial = "500ms"
+        timeout = "1s"
+        keepAlive = "60s"
+        timer = 10
+        key = "7c7ac0db1aa05587"
+        secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    [httpClient.slow.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[workPool]
+	capacity = 1024
+    maxWorkers = 512
+    maxIdleWorkers = 256
+    minIdleWorkers = 128
+    keepAlive = "30s"
+
+[forwardIndex]
+    localPath = "/Users/daiwei/Downloads/idx.txt"
+    remotePath = "http://172.16.38.91/fs/out.txt"
+    md5Path = "http://172.16.38.91/fs/out.md5"
+    protocol = "http"
+    reloadDucation = "1800s"
+
+[localCache]
+    l1Tags = []
+    l2Tags = []
+    level1 = "300s"
+    level2 = "600s"
+    level3 = "900s"
+    maxAge = "1800s"

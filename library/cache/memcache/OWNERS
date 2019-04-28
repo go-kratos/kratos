@@ -1,0 +1,13 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chenshangqiang
+- maojian
+- zhoujixiang
+labels:
+- library
+- library/cache/memcache
+reviewers:
+- chenshangqiang
+- maojian
+- zhoujixiang

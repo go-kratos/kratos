@@ -1,0 +1,73 @@
+syntax = "proto3";
+package model;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message CouponInfo {
+    int64 ID = 1 [(gogoproto.jsontag) = "_"];
+	string CouponToken   = 2 [(gogoproto.jsontag) = "coupon_token"];  
+    int64 Mid = 3 [(gogoproto.jsontag) = "mid"];
+    int64 State = 4 [(gogoproto.jsontag) = "state"];
+    int64 StartTime = 5 [(gogoproto.jsontag) = "start_time"];
+    int64 ExpireTime = 6 [(gogoproto.jsontag) = "expire_time"];
+    int64 Origin = 7 [(gogoproto.jsontag) = "origin"];
+    int64 CouponType = 8 [(gogoproto.jsontag) = "coupon_type"];
+    string OrderNO   = 9 [(gogoproto.jsontag) = "order_no"]; 
+    int64 Ver = 10 [(gogoproto.jsontag) = "ver"]; 
+    int64 Oid = 11 [(gogoproto.jsontag) = "oid"];
+    string Remark   = 12 [(gogoproto.jsontag) = "remark"];  
+    int64 UseVer = 13 [(gogoproto.jsontag) = "use_ver"]; 
+    int64 CTime = 14 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 15 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string BatchToken   = 16 [(gogoproto.jsontag) = "batch_token"];  
+}
+
+message PointInfoList {
+    repeated CouponInfo pointInfoList = 1;
+}
+
+message CouponBalanceInfo {
+    int64 ID = 1 [(gogoproto.jsontag) = "_"];
+	string BatchToken   = 2 [(gogoproto.jsontag) = "batch_token"];  
+    int64 Mid = 3 [(gogoproto.jsontag) = "mid"];
+    int64 Balance = 4 [(gogoproto.jsontag) = "balance"];
+    int64 StartTime = 5 [(gogoproto.jsontag) = "start_time"];
+    int64 ExpireTime = 6 [(gogoproto.jsontag) = "expire_time"];
+    int64 Origin = 7 [(gogoproto.jsontag) = "origin"];
+    int64 CouponType = 8 [(gogoproto.jsontag) = "coupon_type"];
+    int64 Ver = 9 [(gogoproto.jsontag) = "ver"]; 
+    int64 CTime = 10 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 11 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message CouponBalanceList {
+    repeated CouponBalanceInfo couponBalanceList = 1;
+}
+
+message CouponAllowanceInfo {
+    int64 ID = 1 [(gogoproto.jsontag) = "_"];
+	string CouponToken   = 2 [(gogoproto.jsontag) = "coupon_token"];  
+    int64 Mid = 3 [(gogoproto.jsontag) = "mid"];
+    int32 State = 4 [(gogoproto.jsontag) = "state"];
+    int64 StartTime = 5 [(gogoproto.jsontag) = "start_time"];
+    int64 ExpireTime = 6 [(gogoproto.jsontag) = "expire_time"];
+    int64 Origin = 7 [(gogoproto.jsontag) = "origin"];
+    string OrderNO   = 8 [(gogoproto.jsontag) = "order_no"]; 
+    int64 Ver = 9 [(gogoproto.jsontag) = "ver"]; 
+    string Remark   = 10 [(gogoproto.jsontag) = "remark"];  
+    int64 CTime = 11 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 12 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string BatchToken   = 13 [(gogoproto.jsontag) = "batch_token"];
+    double Amount = 14 [(gogoproto.jsontag) = "amount"]; 
+    double FullAmount = 15 [(gogoproto.jsontag) = "full_amount"]; 
+    int64 AppID = 16 [(gogoproto.jsontag) = "app_id"]; 
+}
+
+message CouponAllowanceList {
+    repeated CouponAllowanceInfo couponAllowanceList = 1;
+}

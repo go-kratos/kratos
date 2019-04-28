@@ -1,0 +1,40 @@
+syntax = "proto3";
+package activity.service;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "like";
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message ActLikeAchievement {
+    int64   ID      =  1 [(gogoproto.jsontag) ="id"];
+    string  Name    =  2 [(gogoproto.jsontag) ="name"];
+    string  Icon    =  3 [(gogoproto.jsontag) ="icon"];
+    string  Dic     =  4 [(gogoproto.jsontag) ="dic"];
+    int64   Unlock  =  5 [(gogoproto.jsontag) ="unlock"];
+    int64   Ctime   =  6 [(gogoproto.jsontag) ="ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64   Mtime   =  7 [(gogoproto.jsontag) ="mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64   Del     =  8 [(gogoproto.jsontag) ="del"];
+    int64   Sid     =  9 [(gogoproto.jsontag) ="sid"];
+    string  Image   =  10 [(gogoproto.jsontag) ="image"];
+    int64   Award   =  11 [(gogoproto.jsontag) ="award"];
+}
+message Achievements {
+    repeated ActLikeAchievement achievements = 1;
+}
+
+
+message ActLikeUserAchievement {
+    int64 ID =  1 [(gogoproto.jsontag) ="id"];
+    int64 Aid =  2 [(gogoproto.jsontag) ="aid"];
+    int64 Ctime = 3 [(gogoproto.jsontag) ="ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Mtime = 4 [(gogoproto.jsontag) ="mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Del =  5 [(gogoproto.jsontag) ="del"];
+    int64 Mid =  6 [(gogoproto.jsontag) ="mid"];
+    int64 Sid =  7 [(gogoproto.jsontag) ="sid"];
+    int64 Award =  8 [(gogoproto.jsontag) ="award"];
+}

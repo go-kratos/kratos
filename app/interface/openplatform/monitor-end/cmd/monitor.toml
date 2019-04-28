@@ -1,0 +1,24 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/monitor.pid"
+dir = "./"
+family = "monitor"
+trace = false
+debug = false
+apps = "mall", "ticket", "article", "mall", "ticket", "article"
+
+[xlog]
+    dir = "/data/log/monitor"
+
+[bm]
+    addr = "0.0.0.0:6888"
+    timeout = "1s"
+
+[monitor]
+    taskID  = "000069"
+    proto   = "tcp"
+    Addr    = "127.0.0.1:9988"
+    Chan    = 2048
+

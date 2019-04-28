@@ -1,0 +1,7 @@
+[client]
+	dial = "1s"
+	timeout = "1s"
+
+[server]
+    addr = "0.0.0.0:7839"
+    timeout = "1s"

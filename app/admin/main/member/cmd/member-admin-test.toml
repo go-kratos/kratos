@@ -1,0 +1,308 @@
+# This is a TOML document. Boom
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/member.pid"
+dir = "./"
+
+[log]
+dir = "/data/log/member"
+stdout=true
+
+[bm]
+	addr = "0.0.0.0:7711"
+	maxListen = 10
+	timeout = "1s"
+
+[identify]
+	whiteAccessKey = ""
+	whiteMid = 0
+	[identify.app]
+	key = "6a29f8ed87407c11"
+	secret = "d3c5a85f5b895a03735b5d20a273bc57"
+	[identify.memcache]
+	name = "go-business/identify"
+	proto = "tcp"
+	addr = "172.16.33.54:11211"
+	active = 5
+	idle = 5
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "80s"
+	[identify.host]
+	auth = "http://passport.bilibili.com"
+	secret = "http://open.bilibili.com"
+	[identify.httpClient]
+	key = "f022126a8a365e20"
+	secret = "b7b86838145d634b487e67b811b8fab2"
+	dial = "30ms"
+	timeout = "100ms"
+	keepAlive = "60s"
+	[identify.httpClient.breaker]
+	window  = "10s"
+	sleep   = "100ms"
+	bucket  = 10
+	ratio   = 0.5
+	request = 100
+	[identify.httpClient.url]
+	"http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+	"http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+	"http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+
+
+[orm]
+[orm.member]
+	dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_member?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 5
+	idle = 5
+	idleTimeout = "4h"
+[orm.memberRead]
+	dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_member?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 5
+	idle = 5
+	idleTimeout = "4h"
+[orm.account]
+    dsn = "account:wx2U1MwXRyWEuURw@tcp(172.16.33.205:3306)/account?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 5
+	idle = 5
+	idleTimeout = "4h"
+
+[host]
+#search = "http://uat-bili-search.bilibili.co"
+message = "http://uat-message.bilibili.co"
+passport = "http://uat-passport.bilibili.co"
+merak = "http://merak.bilibili.co"
+
+[httpClient]
+    [httpClient.read]
+    key = "c1a1cb2d89c33794"
+    secret = "dda47eeca111e03e6845017505baea13"
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 16
+    [httpClient.read.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.write]
+    key = "c1a1cb2d89c33794"
+    secret = "dda47eeca111e03e6845017505baea13"
+    dial = "100ms"
+    timeout = "800ms"
+    keepAlive = "60s"
+    timer = 16
+    [httpClient.write.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.Passport]
+    key = "c1a1cb2d89c33794"
+    secret = "dda47eeca111e03e6845017505baea13"
+    dial = "100ms"
+    timeout = "800ms"
+    keepAlive = "60s"
+    timer = 16
+
+[hbase]
+    master = ""
+    meta = ""
+    dialTimeout = "1s"
+    readTimeout = "10s"
+    readsTimeout = "10s"
+    writeTimeout = "10s"
+    writesTimeout = "10s"
+        [hbase.zookeeper]
+        root = ""
+        addrs =["172.18.33.75:2181"]
+        timeout = "30s"
+
+[expMsgDatabus]
+    key = "4ba46ba31f9a44ef"
+    secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+    group = "AccountExp-MainAccount-P"
+    topic = "AccountExp-T"
+    action = "pub"
+    name = "member-admin/databus"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://uat-dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 5
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+
+
+[fhbyophbase]
+    master = ""
+    meta = ""
+    dialTimeout = "1s"
+    readTimeout = "10s"
+    readsTimeout = "10s"
+    writeTimeout = "10s"
+    writesTimeout = "10s"
+        [fhbyophbase.zookeeper]
+        root = ""
+        addrs =["bigdata-test-02:2181","bigdata-test-03:2181","bigdata-test-04:2181"]
+        timeout = "30s"
+
+[fhbymidhbase]
+    master = ""
+    meta = ""
+    dialTimeout = "1s"
+    readTimeout = "10s"
+    readsTimeout = "10s"
+    writeTimeout = "10s"
+    writesTimeout = "10s"
+        [fhbymidhbase.zookeeper]
+        root = ""
+        addrs =["bigdata-test-02:2181","bigdata-test-03:2181","bigdata-test-04:2181"]
+        timeout = "30s"
+[facepribfs]
+    timeout="500ms"
+    maxFileSize=8388608
+    url="http://bfs.bilibili.co/bfs/"
+    bucket="facepri"
+    key="8923aff2e1124bb2"
+    secret="b237e8927823cc2984aee980123cb0"
+[facebfs]
+    timeout="500ms"
+    url="http://bfs.bilibili.co/bfs/"
+    bucket="face"
+    key="792d70f16e958493"
+    secret="08525fe929bdb26c3a6009afd7318f"
+[rpcClient]
+  [rpcClient.coin]
+    timeout = "1s"
+
+[blockMemcache]
+    name = "block-admin"
+    proto = "tcp"
+    addr = "172.16.33.54:11214"
+    idle = 10
+    active = 10
+    dialTimeout = "2s"
+    readTimeout = "2s"
+    writeTimeout = "2s"
+    idleTimeout = "7h"
+    [expire]
+        expire = "200s"
+
+[blockMysql]
+    addr = "127.0.0.1:3306"
+    dsn = "root:54985498@tcp(127.0.0.1:3306)/bilibili_block?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[accountNotify]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "AccountNotify-MainAccount-P"
+    topic = "AccountNotify-T"
+    action = "pub"
+    buffer = 128
+    name = "usersuit-admin/databus"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    active = 1
+    idle = 1
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[blockProperty]
+    blackHouseURL = "http://api.bilibili.co/x/internal/credit/blocked/info/batch/add"
+    msgURL = "http://message.bilibili.co/api/notify/send.user.notify.do"
+    telURL = "http://passport.bilibili.co/intranet/acc/telInfo/mid"
+    mailURL =  "http://passport.bilibili.co/intranet/user/mail"
+
+[realname]
+    imageURLTemplate = "http://uat-manager.bilibili.co/x/admin/member/realname/image?token=%s"
+    dataDir = "/data/storage/realname"
+
+[reviewNotify]
+    users = []
+
+[redis]
+    name = "member-admin"
+    proto = "tcp"
+    addr = "127.0.0.1:6379"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[memcache]
+    name = "member-admin"
+    proto = "tcp"
+    addr = "127.0.0.1:11211"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"

@@ -1,0 +1,44 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "auth.go",
+        "bucket.go",
+        "client.go",
+        "conf.go",
+        "conn.go",
+        "const.go",
+        "crc.go",
+        "download.go",
+        "error.go",
+        "mime.go",
+        "model.go",
+        "multicopy.go",
+        "multipart.go",
+        "option.go",
+        "progress.go",
+        "transport_1_6.go",
+        "transport_1_7.go",
+        "type.go",
+        "upload.go",
+        "utils.go",
+    ],
+    importmap = "go-common/vendor/github.com/aliyun/aliyun-oss-go-sdk/oss",
+    importpath = "github.com/aliyun/aliyun-oss-go-sdk/oss",
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

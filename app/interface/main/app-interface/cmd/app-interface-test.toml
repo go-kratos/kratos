@@ -1,0 +1,449 @@
+tick    = "1m"
+roundTick ="30m"
+localCache  = false
+
+[searchBuildLimit]
+    PGCHighlightIOS       = 9999
+    PGCHighlightAndroid   = 9999999
+    PGCALLIOS             = 8229
+    PGCALLAndroid         = 9999999
+    SpecialerGuideIOS     = 9999
+    SpecialerGuideAndroid = 9999999
+    SearchArticleIOS      = 9999
+    SearchArticleAndroid  = 9999999
+    ComicIOS              = 8229
+    ComicAndroid          = 9999999
+    ChannelIOS            = 8229
+    ChannelAndroid        = 9999999
+    CooperationIOS        = 9999
+    CooperationAndroid    = 9999999
+    QueryCorIOS           = 9999
+    QueryCorAndroid       = 9999999
+    SugDetailIOS          = 9999
+    SugDetailAndroid      = 9999999
+    NewTwitterIOS         = 9999
+    NewTwitterAndroid     = 9999999
+
+[searchDynamicSwitch]
+    isUP     = true
+    isCount  = true
+
+[xlog]
+dir = "/data/log/app-interface"
+
+[Infoc]
+taskID = "001723"
+proto = "tcp"
+addr = "172.18.33.124:15140"
+chanSize = 10240
+
+[useractPub]
+key = "0QNB0ZgFozbKUCQhbTq8"
+secret = "0QNB0ZgFozbKUCQhbTq9"
+group = "RecUseract-App-P"
+topic = "RecUseract-T"
+action = "pub"
+name = "app-interface/useract"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+active = 1
+idle = 1
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[dislikePub]
+key = "0QNB0ZgFozbKUCQhbTq8"
+secret= "0QNB0ZgFozbKUCQhbTq9"
+group= "TagDislike-SkyHorse-P"
+topic= "Dislike-T"
+action="pub"
+name = "app-feed/dislike"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+active = 100
+idle = 50
+dialTimeout = "50ms"
+readTimeout = "200ms"
+writeTimeout = "200ms"
+idleTimeout = "80s"
+
+[host]
+account = "http://uat-account.bilibili.com"
+bangumi = "http://uat-bangumi.bilibili.com"
+apiCo   = "http://uat-api.bilibili.co"
+apiCom  = "http://uat-api.bilibili.com"
+im9     = "http://www.im9.com"
+space   = "http://uat-space.bilibili.com"
+search  = "http://uat-s.search.bilibili.co"
+game    = "http://interface.biligame.com"
+live    = "http://uat-live.bilibili.com"
+elec    = "http://uat-elec.bilibili.com"
+ad      = "http://uat-cm.bilibili.co"
+vc      = "http://uat-api.vc.bilibili.co"
+apiLiveCo  = "http://api.live.bilibili.co"
+show    =  "http://show.bilibili.co"
+www     = "http://uat-www.bilibili.com"
+pay     = "http://pay.bilibili.co"
+member  = "http://member.bilibili.co"
+mall    = "http://fat1-mall.bilibili.co"
+
+[search]
+seasonNum  = 3
+movieNum   = 3
+seasonMore = 1
+movieMore  = 1
+upUserNum  = 1
+uvLimit    = 1
+userNum    = 1
+userVideoLimit = 1
+biliUserNum =1
+biliUserVideoLimit=1
+iPadSearchBangumi = 2
+iPadSearchFt = 2
+
+[space]
+forbidMid = [40153618,6887420,178431199,58010653,15528977,304022040,53148642,258502589,11458153,21841193,39329259,20003749,161652222,67916241]
+
+[gameApp]
+key = "QGSfvPhlsTtv3BMK"
+secret = "ygcWHXbEGGiO0octq3eIPMPInKsq1LYp"
+
+[identify]
+    whiteAccessKey = "a2a1eb0ac97d6ba08b85aa0151528f34"
+    whiteMid = 23675773
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "unix"
+    addr = "/tmp/uat-platform-identify-mc.sock"
+    active = 10
+    idle = 10
+    dialTimeout = "80s"
+    readTimeout = "200ms"
+    writeTimeout = "200ms"
+    idleTimeout = "80s"
+    [identify.host]
+    auth = "http://uat-passport.bilibili.co"
+    secret = "http://uat-open.bilibili.co"
+    [identify.httpClient]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://uat-passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://uat-passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://uat-open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[httpClient]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "30ms"
+timeout   = "500ms"
+keepAlive = "60s"
+    [httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpIm9]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "80ms"
+timeout   = "150ms"
+keepAlive = "60s"
+    [httpIm9.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpSearch]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "30ms"
+timeout   = "800ms"
+keepAlive = "60s"
+    [httpSearch.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpWrite]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "30ms"
+timeout   = "700ms"
+keepAlive = "60s"
+    [httpWrite.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpLive]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "30ms"
+timeout   = "100ms"
+keepAlive = "60s"
+    [httpLive.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpBangumi]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "30ms"
+timeout   = "300ms"
+keepAlive = "60s"
+    [httpBangumi.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpAD]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "80ms"
+timeout   = "300ms"
+keepAlive = "60s"
+    [httpAD.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpBPlus]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "80ms"
+timeout   = "300ms"
+keepAlive = "60s"
+    [httpBPlus.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpGame]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "80ms"
+timeout   = "300ms"
+keepAlive = "60s"
+    [httpGame.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[bm]
+    [bm.outer]
+    addr = "0.0.0.0:6131"
+    timeout = "1s"
+
+[mysql]
+    [mysql.show]
+    addr   = "172.22.34.101:3306"
+    dsn    = "show:UJYgc9UkHIaGovEDUXpTU4U0rjBpZtwb@tcp(172.22.34.101:3306)/bilibili_show?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 10
+    idle   = 5
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [mysql.show.breaker]
+     window = "3s"
+     sleep = "100ms"
+     bucket = 10
+     ratio = 0.5
+     request = 100
+
+[redis]
+    [redis.relate]
+    name   = "app-interface/relate"
+    proto  = "tcp"
+    addr   = "172.16.33.54:6380"
+    active = 20
+    idle   = 10
+    dialTimeout  = "50ms"
+    readTimeout  = "50ms"
+    writeTimeout = "50ms"
+    idleTimeout  = "80s"
+    [redis.stat]
+    name   = "app-interface/stat"
+    proto  = "tcp"
+    addr   = "172.16.33.54:6380"
+    active = 20
+    idle   = 10
+    dialTimeout  = "50ms"
+    readTimeout  = "50ms"
+    writeTimeout = "50ms"
+    idleTimeout  = "80s"
+    expire = "10s"
+    [redis.contribute]
+    name   = "app-interface/contribute"
+    proto  = "tcp"
+    addr   = "172.16.33.54:6380"
+    active = 20
+    idle   = 10
+    dialTimeout  = "50ms"
+    readTimeout  = "50ms"
+    writeTimeout = "50m"
+    idleTimeout  = "80s"
+
+[localRedis]
+    [localRedis.stat]
+    name   = "app-interface/local_stat"
+    proto  = "unix"
+    addr   = "/var/run/redis/redis.sock"
+    active = 20
+    idle   = 10
+    dialTimeout  = "50ms"
+    readTimeout  = "100ms"
+    writeTimeout = "100ms"
+    idleTimeout  = "80s"
+    expire = "10s"
+
+[memcache]
+    [memcache.archive]
+    name   = "app-interface/archive"
+    proto  = "unix"
+    addr   = "/tmp/uat-app-mc.sock"
+    active = 50
+    idle   = 10
+    dialTimeout   = "50ms"
+    readTimeout   = "50ms"
+    writeTimeout  = "50ms"
+    idleTimeout   = "80s"
+    archiveExpire = "20m"
+    relateExpire  = "20m"
+    addonExpire   = "5m"
+    recommedExpire= "10m"
+
+[localMemcache]
+    [localMemcache.archive]
+    name   = "app-interface/local_archive"
+    proto  = "unix"
+    addr   = "/var/run/memcached/memcached.sock"
+    active = 50
+    idle   = 10
+    dialTimeout   = "50ms"
+    readTimeout   = "50ms"
+    writeTimeout  = "50ms"
+    idleTimeout   = "80s"
+
+[contributePub]
+key = ""
+secret = ""
+group = ""
+topic = ""
+action = "pub"
+offset = "old"
+buffer = 128
+name = "app-interface/contribute"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[[IOSSections]]
+Title = "创作中心"
+[[IOSSections.Items]]
+Title = "创作首页"
+URI = "bilibili://uper/homevc"
+Icon = "http://i0.hdslb.com/bfs/archive/03b380fb10fda3075e40a6e30c07abc76681eb9d.png"
+[[IOSSections.Items]]
+Title = "稿件管理"
+URI = "bilibili://uper/user_center/archive_list"
+Icon = "http://i0.hdslb.com/bfs/archive/0aea1fb991709811f6938fe90704a2020bf9f046.png"
+[[IOSSections.Items]]
+Title = "创作激励"
+URI = "https://member.bilibili.com/studio/up-allowance-h5#/"
+Icon = "http://i0.hdslb.com/bfs/archive/f15ab617709507f4852c6510183c1ca3c2c5b296.png"
+[[IOSSections.Items]]
+Title = "征稿公告"
+URI = "https://member.bilibili.com/studio/videoup-banner"
+Icon = "http://i0.hdslb.com/bfs/archive/0f38c69aa03addb6522ec986d279e90bbcc1050c.png"
+
+[[IOSSections]]
+Title = "个人中心"
+[[IOSSections.Items]]
+Title = "离线缓存"
+URI = "bilibili://user_center/download"
+Icon = "http://i0.hdslb.com/bfs/archive/021850f46b7d323a5a6a7402dd8dba966021288d.png"
+[[IOSSections.Items]]
+Title = "历史记录"
+URI = "bilibili://user_center/history"
+Icon = "http://i0.hdslb.com/bfs/archive/d513ebe76661d32963578f24b44469cfc17beb5c.png"
+[[IOSSections.Items]]
+Title = "我的收藏"
+NeedLogin = 1
+URI = "bilibili://user_center/favourite"
+Icon = "http://i0.hdslb.com/bfs/archive/7f347348c5d30e519e7b61994dca7bea27364c83.png"
+[[IOSSections.Items]]
+Title = "我的关注"
+NeedLogin = 1
+URI = "bilibili://user_center/myfollows"
+Icon = "http://i0.hdslb.com/bfs/archive/961279ea4f75c20d5b9a22f5956264662e97e77d.png"
+[[IOSSections.Items]]
+Title = "稍后再看"
+NeedLogin = 1
+URI = "bilibili://user_center/watch_later"
+Icon = "http://i0.hdslb.com/bfs/archive/2f2f58d3f74684c59814467dca5f78577744ca09.png"
+[[IOSSections.Items]]
+Title = "B币钱包"
+NeedLogin = 1
+URI = "bilibili://bilipay/wallet"
+Icon = "http://i0.hdslb.com/bfs/archive/65486287e36d789c631b630a6bc6e2a527dd48bb.png"
+[[IOSSections.Items]]
+Title = "会员购中心"
+URI = "bilibili://mall/mine?msource=mine"
+Icon = "http://i0.hdslb.com/bfs/archive/83e9831e358d7cafeaccab44967b3414653c973c.png"
+[[IOSSections.Items]]
+Title = "直播中心"
+NeedLogin = 1
+URI = "bilibili://user_center/live_center"
+Icon = "http://i0.hdslb.com/bfs/archive/9b37e79d5bd19ae4884c2426ff722b7ac3270c21.png"
+
+[[IOSSections]]
+Title = "我的服务"
+[[IOSSections.Items]]
+Title = "大会员"
+NeedLogin = 1
+URI = "bilibili://user_center/vip"
+Icon = "http://i0.hdslb.com/bfs/archive/34ff922443e5e1dd8b1bddb8ce938a61e13bbf56.png"
+[[IOSSections.Items]]
+Title = "看视频免流量"
+URI = "bilibili://user_center/free_traffic"
+Icon = "http://i0.hdslb.com/bfs/archive/c8c72498d59c33e2b5adaac31db022f6dcdb9064.png"
+[[IOSSections.Items]]
+Title = "我的客服"
+URI = "bilibili://user_center/feedback"
+Icon = "http://i0.hdslb.com/bfs/archive/d8906fde3144e1c6e5f1cf3492c948bfcfdb6287.png"

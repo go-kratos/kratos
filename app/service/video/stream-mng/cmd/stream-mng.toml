@@ -1,0 +1,69 @@
+[log]
+   stdout=true
+
+[mysql]
+	addr = "172.16.33.205:3306"
+	dsn = "bvc_live:2Yu4VAaSmY6mI4A80uO13br3xcTSpRhK@tcp(172.16.33.205:3306)/bvc_live?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["bvc_live_reader:MVArfTM1l6xBNpLUC1JviZOPuGhl5WNP@tcp(172.16.33.205:3306)/bvc_live?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4","bvc_live_reader:MVArfTM1l6xBNpLUC1JviZOPuGhl5WNP@tcp(172.16.33.205:3306)/bvc_live?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "500ms"
+	execTimeout = "500ms"
+	tranTimeout = "500ms"
+
+[tidb]
+	addr = "172.16.33.205:3306"
+	dsn = "bvc_live:2Yu4VAaSmY6mI4A80uO13br3xcTSpRhK@tcp(172.16.33.205:3306)/bvc_live?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["bvc_live_reader:MVArfTM1l6xBNpLUC1JviZOPuGhl5WNP@tcp(172.16.33.205:3306)/bvc_live?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4","bvc_live_reader:MVArfTM1l6xBNpLUC1JviZOPuGhl5WNP@tcp(172.16.33.205:3306)/bvc_live?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "1s"
+	execTimeout = "500ms"
+	tranTimeout = "500ms"
+
+[httpClient]
+    key = "8491859e21fd4aa0"
+    secret = "0f2d9d5df64511bd40d6bf085c981c40"
+    dial = "500ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+ 
+[redis]
+	name = "stream-mng-service"
+	proto = "tcp"
+	addr = "liveredis:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[memcache]
+	name = "stream-mng-service"
+	proto = "tcp"
+	addr = ""
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[upDispatch]
+    dispatch = [8,4,2,8,4,2,8,4,2,1]
+
+[dropCDN]
+    dropCDN = []

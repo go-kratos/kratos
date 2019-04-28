@@ -1,0 +1,85 @@
+#  toml config
+[bm]
+addr = "0.0.0.0:6831"
+timeout = "15s"
+
+[orm]
+	dsn = "test:test@tcp(172.16.33.205:3308)/bfs?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 10
+    idle = 10
+    idleTimeout = "4h"
+
+[xlog]
+dir = "/data/log/bfs_upload/"
+    #[xlog.elk]
+    #project = "upload"
+    #addr = "172.18.20.17:8520"
+    #chanSize = 10240
+
+[bfs]
+BfsUrl = "uat-bfs.bilibili.co"
+WaterMarkUrl = "http://172.18.33.121:8090/imageserver/watermark/gen"
+ImageGenURL = "http://172.18.33.121:8090/imageserver/image/gen"
+TimeOut = "10s"
+WmTimeOut = "10s"
+ImageGenTimeOut = "10s"
+
+[antispam]
+Switch = true
+Second = 2
+N = 1
+Hour = 1
+M = 100
+[antispam.redis]
+Name  = "bfs-upload"
+Proto = "tcp"
+Addr  = "172.18.33.60:6931"
+Auth  = ""
+Active = 10
+Idle   = 10
+DialTimeout = "10s"
+ReadTimeout = "10s"
+WriteTimeout = "10s"
+IdleTimeout = "10s"
+
+[BfsBucket]
+Bucket = "active"
+Key = "fb8937a9ccd9b987"
+Sercet = "1b05f83578281f293a5b4dc7305fb2"
+
+[[Auths]]
+AppKey = "17760953ff"
+AppSercet = "d5563249e1a5105d5eb3"
+[[Auths]]
+AppKey = "pushflow"
+AppSercet = "ac78fe240a217b30f75e"
+[Auths.BfsBucket]
+Bucket = "live"
+Key = "b4cfeeadca80f6f5"
+Sercet = "b6e9e018302b96bc089a4c23046d16"
+[[Auths]]
+AppKey = "creative"
+AppSercet = "ec396e082dfec9638e3f"
+[Auths.BfsBucket]
+Bucket = "archive"
+Key = "8d4e593ba7555502"
+Sercet = "0bdbd4c7caeeddf587c3c4daec0475"
+[[Auths]]
+AppKey = "bigfun"
+AppSercet = "935fb994018b0ceed6fd"
+[Auths.BfsBucket]
+Bucket = "bigfun"
+Key = "710020da99a6f606"
+Sercet = "e04327de9cf3e3893194959061995b"
+
+[AuthInter]
+DisableCSRF = true
+[AuthInter.Identify]
+Dial = "500ms"
+Timeout = "5s"
+
+[AuthOut]
+DisableCSRF = false
+[AuthOut.Identify]
+Dial = "500ms"
+Timeout = "1s"

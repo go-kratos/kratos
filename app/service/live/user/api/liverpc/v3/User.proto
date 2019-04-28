@@ -1,0 +1,130 @@
+syntax = "proto3";
+
+package user.v3;
+
+option go_package = "v3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service User {
+    
+    /** uid获取房间信息
+     * 
+     */   
+    rpc getMultiple (UserGetMultipleReq) returns (UserGetMultipleResp);
+    
+    /** uid获取房间信息
+     * 
+     */   
+    rpc getUserLevelInfo (UserGetUserLevelInfoReq) returns (UserGetUserLevelInfoResp);
+}
+
+
+
+message UserGetMultipleReq {
+    // 用户id
+    repeated int64 uids = 1 [(gogoproto.jsontag) = "uids"];
+    // 属性
+    repeated string attributes = 2 [(gogoproto.jsontag) = "attributes"];
+}
+
+message UserGetMultipleResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    map<int64, UserInfo> data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Official_verify {
+        // 
+        int64 type = 1 [(gogoproto.jsontag) = "type"];
+        // 
+        string desc = 2 [(gogoproto.jsontag) = "desc"];
+        // 
+        int64 role = 3 [(gogoproto.jsontag) = "role"];
+    }
+       
+    message Info {
+        // uid
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 昵称
+        string uname = 2 [(gogoproto.jsontag) = "uname"];
+        // 头像
+        string face = 3 [(gogoproto.jsontag) = "face"];
+        // 等级
+        int64 rank = 4 [(gogoproto.jsontag) = "rank"];
+        // 用户id
+        int64 platform_user_level = 5 [(gogoproto.jsontag) = "platform_user_level"];
+        // 人气值
+        int64 mobile_verify = 6 [(gogoproto.jsontag) = "mobile_verify"];
+        // 认证
+        Official_verify official_verify = 7 [(gogoproto.jsontag) = "official_verify"];
+        // 类型
+        int64 vip_type = 8 [(gogoproto.jsontag) = "vip_type"];
+        // 年龄
+        int64 gender = 9 [(gogoproto.jsontag) = "gender"];
+    }
+       
+    message Master_level {
+        // 
+        int64 level = 1 [(gogoproto.jsontag) = "level"];
+        // 
+        repeated int64 current = 2 [(gogoproto.jsontag) = "current"];
+        // 
+        repeated int64 next = 3 [(gogoproto.jsontag) = "next"];
+        // 
+        int64 color = 4 [(gogoproto.jsontag) = "color"];
+    }
+       
+    message Exp {
+        // 
+        int64 cost = 1 [(gogoproto.jsontag) = "cost"];
+        // 
+        int64 rcost = 2 [(gogoproto.jsontag) = "rcost"];
+        // 
+        int64 user_level = 3 [(gogoproto.jsontag) = "user_level"];
+        // 
+        Master_level master_level = 4 [(gogoproto.jsontag) = "master_level"];
+        // 
+        int64 color = 5 [(gogoproto.jsontag) = "color"];
+        // 
+        int64 ul_cost = 6 [(gogoproto.jsontag) = "ul_cost"];
+        // 
+        int64 unext = 7 [(gogoproto.jsontag) = "unext"];
+        // 
+        int64 rnext = 8 [(gogoproto.jsontag) = "rnext"];
+    }
+       
+    message UserInfo {
+        // 直播间标题
+        Info info = 1 [(gogoproto.jsontag) = "info"];
+        // 直播间标题
+        Exp exp = 2 [(gogoproto.jsontag) = "exp"];
+    }
+}
+
+
+
+message UserGetUserLevelInfoReq {
+    // 用户id
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+}
+
+message UserGetUserLevelInfoResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        int64 level = 1 [(gogoproto.jsontag) = "level"];
+        // 
+        int64 exp = 2 [(gogoproto.jsontag) = "exp"];
+        // 
+        int64 color = 3 [(gogoproto.jsontag) = "color"];
+    }
+}

@@ -1,0 +1,151 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+dir = "./"
+debug = false
+
+[log]
+    dir = "/tmp/log/anti-fraud"
+
+[db]
+    [db.antiFraud]
+        addr = "172.16.33.203:3306"
+        dsn = "root:123456@tcp(172.16.33.203:3306)/tickets?timeout=5s&readTimeout=30s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 5
+        idle = 5
+        queryTimeout = "1s"
+        execTimeout = "1s"
+        tranTimeout = "2s"
+    [db.antiFraud.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+    [db.payShield]
+            addr = "127.0.0.1:3306"
+            dsn = "root:123456@tcp(127.0.0.1:3306)/shield?timeout=5s&readTimeout=30s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+            active = 5
+            idle = 5
+            queryTimeout = "1s"
+            execTimeout = "1s"
+            tranTimeout = "2s"
+        [db.payShield.breaker]
+            window = "3s"
+            sleep = "100ms"
+            bucket = 10
+            ratio = 0.5
+            request = 100
+    [db.payShield1]
+        addr = "172.22.33.156:3306"
+        dsn = "pay:QaJvNP7FGxDjpMI3tcVXUusZ80w6gmbk@tcp(172.22.33.156:3306)/shield?timeout=5s&readTimeout=30s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 5
+        idle = 5
+        queryTimeout = "1s"
+        execTimeout = "1s"
+        tranTimeout = "2s"
+    [db.payShield1.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+
+[redis]
+    name = "antifraud"
+    proto = "tcp"
+    addr = "172.16.33.203:9379"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+    verifyCdTimes = "2h"
+
+[httpClient]
+    [httpClient.read]
+        key = "7c7ac0db1aa05587"
+        secret = "9a6d62d93290c5f771ad381e9ca23f26"
+        dial = "1s"
+        timeout = "4s"
+        keepAlive = "60s"
+        timer = 1000
+        [httpClient.read.breaker]
+            window  = "3s"
+            sleep   = "100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100
+    [httpClient.write]
+        key = "7c7ac0db1aa05587"
+        secret = "9a6d62d93290c5f771ad381e9ca23f26"
+        dial = "1s"
+        timeout = "3s"
+        keepAlive = "60s"
+        timer = 1000
+        [httpClient.write.breaker]
+            window  = "3s"
+            sleep   = "100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100
+[geetest]
+    #极验每小时拉起的总数 to do
+    count = 20
+
+[limit]
+    Name = "ticket"
+    SaleTimeOut = 86400
+    #mid下单时间限制 to do
+    MIDCreateTimeOut = 3600
+    #mid最大下单次数 to do
+    MIDCreateMax = 10
+    #ip下单时间限制 to do
+    IPCreateTimeOut = 3600
+    #ip最大下单次数 to do
+    IPCreateMax = 20
+    #ip白名单
+    IPWhiteList = ["222.73.196.18"]
+    #ip修改时间间隔
+    IPChangeInterval = 2
+
+[rule]
+    [rule.10001]
+        Name = "ticket"
+        SaleTimeOut = 86400
+        #mid下单时间限制 to do
+        MIDCreateTimeOut = 3600
+        #mid最大下单次数 to do
+        MIDCreateMax = 10
+        #ip下单时间限制 to do
+        IPCreateTimeOut = 3600
+        #ip最大下单次数 to do
+        IPCreateMax = 20
+        #ip白名单
+        IPWhiteList = ["222.73.196.18"]
+        #ip修改时间间隔
+        IPChangeInterval = 100
+    [rule.10002]
+        Name = "mall"
+        SaleTimeOut = 86400
+        #mid下单时间限制 to do
+        MIDCreateTimeOut = 3600
+        #mid最大下单次数 to do
+        MIDCreateMax = 10
+        #ip下单时间限制 to do
+        IPCreateTimeOut = 3600
+        #ip最大下单次数 to do
+        IPCreateMax = 20
+        #ip白名单
+        IPWhiteList = ["222.73.196.18"]
+        #ip修改时间间隔
+        IPChangeInterval = 2
+
+[url]
+    shield = "http://10.23.144.107:8080/payplatform/shield/askasync"
+
+[base]
+    shieldListTime = 8886400

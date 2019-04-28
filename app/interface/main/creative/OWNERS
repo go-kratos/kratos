@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- fengpengfei
+- shaojiatong
+- shencen
+- wangzhe01
+labels:
+- interface
+- interface/main/creative
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- fengpengfei
+- shaojiatong
+- shencen

@@ -1,0 +1,11 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- daiwei
+- luxiaowei
+labels:
+- bbq
+- interface
+- interface/bbq/bullet
+options:
+  no_parent_owners: true

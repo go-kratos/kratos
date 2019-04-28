@@ -1,0 +1,93 @@
+// main.community.tag-service grpc api proto file.
+// discovery id: community.service.tag.
+// version: v1.
+syntax = "proto3";
+package community.service.tag.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+message AddReportReq {
+    int64 oid = 1;
+    int64 tid = 2;
+    int32 type = 3;
+    int64 mid = 4;
+    int32 part_id = 5;
+    int32 reason_id = 6;
+    int32 score = 7;
+}
+
+message TagReq {
+    int64 mid = 1;
+    int64 tid = 2;
+}
+
+message TagByNameReq {
+    int64 mid = 1;
+    string tname = 2;
+}
+
+message TagMapByIDReq {
+    int64 mid = 1;
+    repeated int64 tids = 2;
+}
+
+message ChannelCategoriesReq {
+    int64 start_id = 1;
+    int32 num = 2;
+    int32 state = 3;
+}
+
+message ChannelsReq {
+    int64 start_id = 1;
+    int32 num = 2;
+}
+
+message ChannelRulesReq {
+    int64 start_id = 1;
+    int32 num = 2;
+    int32 state = 3;
+}
+
+message ChannelGroupReq {
+    int64 tid = 1;
+}
+
+message ResTagReq {
+    int64 oid = 1;
+    int32 type = 2;
+}
+
+message ResTagsReq {
+    repeated int64 oids = 1;
+    int32 type = 2;
+}
+
+message ResTagActionReq {
+    int64 mid = 1 [(gogoproto.moretags) = "form:\"mid\" validate:\"required,min=1\""];
+    int64 tid = 2 [(gogoproto.moretags) = "form:\"tid\" validate:\"required,min=1\""];
+    int64 oid = 3 [(gogoproto.moretags) = "form:\"oid\" validate:\"required,min=1\""];
+    int32 type = 4 [(gogoproto.moretags) = "form:\"type\" validate:\"gte=0\""];
+}
+
+message ResTagActionMapReq {
+    int64 oid = 1 [(gogoproto.moretags) = "form:\"oid\" validate:\"required,min=1\""];
+    int64 mid = 2 [(gogoproto.moretags) = "form:\"mid\" validate:\"required,min=1\""];
+    int32 type = 3 [(gogoproto.moretags) = "form:\"type\" validate:\"gte=0\""];
+    repeated int64 tids = 4 [(gogoproto.moretags) = "form:\"tids,split\" validate:\"required,min=1,dive,gt=0\""];
+}
+
+message UpBindReq {
+    int64 oid = 1 [(gogoproto.moretags) = "form:\"oid\" validate:\"required,min=1\""];
+    int64 mid = 2 [(gogoproto.moretags) = "form:\"mid\" validate:\"required,min=1\""];
+    int32 type = 3 [(gogoproto.moretags) = "form:\"type\" validate:\"gte=0\""];
+    repeated int64 tids = 4 [(gogoproto.moretags) = "form:\"tids,split\" validate:\"required,min=1,dive,gt=0\""];
+}
+
+message AdminBindReq {
+    int64 oid = 1 [(gogoproto.moretags) = "form:\"oid\" validate:\"required,min=1\""];
+    int64 mid = 2 [(gogoproto.moretags) = "form:\"mid\" validate:\"required,min=1\""];
+    int32 type = 3 [(gogoproto.moretags) = "form:\"type\" validate:\"gte=0\""];
+    repeated int64 tids = 4 [(gogoproto.moretags) = "form:\"tids,split\" validate:\"required,min=1,dive,gt=0\""];
+}

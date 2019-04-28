@@ -1,0 +1,24 @@
+[log]
+	stdout = true
+
+[jpush]
+    appKey = "43a726afe88848e30a87fe25"
+    secretKey = "6f31834066f0c6a1a9a2e655"
+    timeout = "3s"
+    apnsProduction = false
+
+[rpcConf]
+    addr = "0.0.0.0:9092"
+
+[workPool]
+	capacity = 1024
+    maxWorkers = 512
+    maxIdleWorkers = 256
+    minIdleWorkers = 128
+    keepAlive = "30s"
+
+[infoc]
+    taskID = "001730"
+    proto = "tcp"
+    addr = "172.18.33.124:15140"
+    chanSize = 10240

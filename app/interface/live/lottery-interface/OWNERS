@@ -1,0 +1,13 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- hongshengjie
+- libaolin
+- longsifan
+- zhaohailin
+labels:
+- interface
+- interface/live/lottery-interface
+- live
+options:
+  no_parent_owners: true

@@ -1,0 +1,5 @@
+debug
+.idea
+*.iml
+.vscode
+go_install.sh

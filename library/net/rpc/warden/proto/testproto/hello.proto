@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package testproto;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+  
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+
+  // A bidirectional streaming RPC call recvice HelloRequest return HelloReply
+  rpc StreamHello(stream HelloRequest) returns (stream HelloReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1 [(gogoproto.jsontag) = "name", (gogoproto.moretags) = "validate:\"required\""];
+  int32  age  = 2 [(gogoproto.jsontag) = "age", (gogoproto.moretags) = "validate:\"min=0\""];
+}
+
+// The response message containing the greetings
+message HelloReply {
+  string message = 1;
+  bool success = 2;
+}

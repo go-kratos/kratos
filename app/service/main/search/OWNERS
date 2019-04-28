@@ -1,0 +1,19 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- guanhuaxin
+- liweijia
+- renwei
+- zhapuyu
+- zhoushuguang
+labels:
+- main
+- service
+- service/main/search
+options:
+  no_parent_owners: true
+reviewers:
+- guanhuaxin
+- renwei
+- zhapuyu
+- zhoushuguang

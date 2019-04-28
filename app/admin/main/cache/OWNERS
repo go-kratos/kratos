@@ -1,0 +1,13 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- lintanghui
+labels:
+- admin
+- admin/main/cache
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- haoguanwei
+- lintanghui

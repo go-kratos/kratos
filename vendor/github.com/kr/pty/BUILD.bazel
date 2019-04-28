@@ -1,0 +1,50 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "doc.go",
+        "ioctl.go",
+        "ioctl_bsd.go",
+        "pty_darwin.go",
+        "pty_dragonfly.go",
+        "pty_freebsd.go",
+        "pty_linux.go",
+        "pty_openbsd.go",
+        "pty_unsupported.go",
+        "run.go",
+        "util.go",
+        "ztypes_386.go",
+        "ztypes_amd64.go",
+        "ztypes_arm.go",
+        "ztypes_arm64.go",
+        "ztypes_dragonfly_amd64.go",
+        "ztypes_freebsd_386.go",
+        "ztypes_freebsd_amd64.go",
+        "ztypes_freebsd_arm.go",
+        "ztypes_mipsx.go",
+        "ztypes_openbsd_386.go",
+        "ztypes_openbsd_amd64.go",
+        "ztypes_ppc64.go",
+        "ztypes_ppc64le.go",
+        "ztypes_s390x.go",
+    ],
+    cgo = True,
+    importmap = "go-common/vendor/github.com/kr/pty",
+    importpath = "github.com/kr/pty",
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

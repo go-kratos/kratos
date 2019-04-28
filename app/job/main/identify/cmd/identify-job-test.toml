@@ -1,0 +1,98 @@
+# This is a TOML document. Boom.
+
+[databus]
+    [databus.identifySub]
+        key = "4ba46ba31f9a44ef"
+        secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+        group = "Passport-MainAccount-Identify-S"
+        topic = "Passport-T"
+        action = "sub"
+        offset = "old"
+        buffer = 2048
+        name = "identify-job-live/databus"
+        proto = "tcp"
+        addr = "172.18.33.50:6205"
+        idle = 1
+        active = 1
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+	[databus.identifySub.discovery]
+   		domain = "api.bilibili.co"
+   		key = "7634436ea852e3f4"
+   		secret = "test"
+    [databus.authDataBus]
+        group = "PassportAuthBinlog-MainAccount-Identify-S"
+	    key = "4ba46ba31f9a44ef"
+	    secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+	    topic = "PassportAuthBinlog-T"
+	    action = "sub"
+	    offset = "old"
+	    buffer = 2048
+	    name = "passport-auth-job/databus"
+	    proto = "tcp"
+	    addr = "172.18.33.50:6205"
+	    idle = 1
+	    active = 1
+	    dialTimeout = "1s"
+	    readTimeout = "60s"
+	    writeTimeout = "1s"
+	    idleTimeout = "10s"
+	[databus.authDataBus.discovery]
+   		domain = "api.bilibili.co"
+   		key = "7634436ea852e3f4"
+   		secret = "test"
+
+
+[databusutil]
+    size = 100
+    chan = 1024
+    num = 2
+    ticker="1s"
+
+[memcaches]
+[memcaches.identify]
+prefix = "i_"
+name = "test"
+proto = "tcp"
+addr = "127.0.0.1:11211"
+active = 5
+idle = 1
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "80s"
+
+[authDB]
+    addr = "127.0.0.1:3306"
+    dsn = "root:root@tcp(127.0.0.1:3306)/passport_auth?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "1s"
+    execTimeout = "2s"
+    tranTimeout = "2s"
+    [db.auth.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[authMC]
+	name = "passport-auth"
+	proto = "tcp"
+	addr = "172.18.33.61:11246"
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+
+[checkConf]
+    switch = true
+    chanNum = 2
+    chanSize = 10240
+    ticker = "1s"
+    count = 10

@@ -1,0 +1,161 @@
+[Redis]
+name = "archive-job/track"
+proto = "unix"
+addr = "/tmp/shjd-archive-service-group1-redis.sock"
+active = 1000
+idle = 20
+dialTimeout = "80ms"
+readTimeout = "200ms"
+writeTimeout = "200ms"
+idleTimeout = "80s"
+
+[Databus]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "ArcResult-SHJD-MainAppSvr-S"
+topic = "ArcResult-SHJD-T"
+action = "sub"
+name = "stat-job/databus"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[ViewSub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatView-MainAppSvr-SHJD-S"
+topic = "StatView-T"
+action = "sub"
+name = "stat-job/view"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[DmSub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatDM-MainAppSvr-SHJD-S"
+topic = "StatDM-T"
+action = "sub"
+name = "stat-job/dm"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[ReplySub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatReply-MainAppSvr-SHJD-S"
+topic = "StatReply-T"
+action = "sub"
+name = "stat-job/reply"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[FavSub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatFav-MainAppSvr-SHJD-S"
+topic = "StatFav-T"
+action = "sub"
+name = "stat-job/fav"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[CoinSub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatCoin-MainAppSvr-SHJD-S"
+topic = "StatCoin-T"
+action = "sub"
+name = "stat-job/coin"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[ShareSub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatShare-MainAppSvr-SHJD-S"
+topic = "StatShare-T"
+action = "sub"
+name = "stat-job/share"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[RankSub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatRank-MainAppSvr-SHJD-S"
+topic = "StatRank-T"
+action = "sub"
+name = "stat-job/rank"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+	
+[likeSub]
+key = "8e27ab7e39270b59"
+secret = "4b8c2e03c48f0b21eacd7a11e2a3b003"
+group = "StatLike-MainAppSvr-SHJD-S"
+topic = "StatLike-T"
+action = "sub"
+name = "stat-job/like"
+proto = "tcp"
+addr = "172.18.21.41:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[[ArchiveRPCs]]
+    cluster = "group1"
+    zone = "sh004"
+[[ArchiveRPCs]]
+    cluster = "group2"
+    zone = "sh004"

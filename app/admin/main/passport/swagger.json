@@ -1,0 +1,145 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "go-common api",
+    "description": "api",
+    "version": "1.0",
+    "contact": {
+      "email": "lintanghui@bilibili.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "paths": {
+    "/x/admin/passport/userBindLog": {
+      "get": {
+        "operationId": "/x/admin/passport/userBindLog",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "mid",
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/UserBindLogRes",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Page": {
+      "title": "Page",
+      "description": "Page Page",
+      "type": "object",
+      "properties": {
+        "Num": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Size": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Total": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "UserBindLog": {
+      "title": "UserBindLog",
+      "description": "UserBindLog UserBindLog",
+      "type": "object",
+      "properties": {
+        "EMail": {
+          "type": "string"
+        },
+        "Mid": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Phone": {
+          "type": "string"
+        },
+        "Time": {
+          "type": "string"
+        }
+      }
+    },
+    "UserBindLogRes": {
+      "title": "UserBindLogRes",
+      "description": "UserBindLogRes UserBindLogRes",
+      "type": "object",
+      "properties": {
+        "Page": {
+          "$ref": "#/definitions/Page",
+          "type": "object"
+        },
+        "Result": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserBindLog",
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

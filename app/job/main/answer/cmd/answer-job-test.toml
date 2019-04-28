@@ -1,0 +1,93 @@
+[log]
+dir = "/data/log/answer-job/"
+
+[bm]
+	addr = "0.0.0.0:9002"
+	maxListen = 10
+	timeout = "1s"
+
+[mysql]
+    addr = "127.0.0.1:3306"
+    dsn = "root:123456@tcp(127.0.0.1:3306)/bilibili_answer?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[bfs]
+    timeout="5s"
+    maxFileSize=5242880
+    bucket="member"
+    url="http://test-bfs.bilibili.co/bfs/member/"
+    method="PUT"
+    key="3d34b1ea1dbbb0ca"
+    secret="d4caa344f3b115e302033b05dd0aa4"
+    host="test-bfs.bilibili.co"
+
+[databus]
+[databus.labour]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret= "0QEO9F8JuuIxZzNDvklI"
+    group= "MemberExpLog-UGC-S"
+    topic= "MemberExpLog-T"
+    action="sub"
+    name = "figure-job/databus"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 2
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+[databus.account]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret= "0QEO9F8JuuIxZzNDvklI"
+    group= "MemberExpLog-UGC-S"
+    topic= "MemberExpLog-T"
+    action="sub"
+    name = "figure-job/databus"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 2
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+
+ [httpClient]
+    dial = "500ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 10
+    key = "zxnh4k92dwe61t27"
+    secret = "dnu3bwpxyswqwf1ixpsczthury1nqiew"
+    [httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[backoff]
+maxDelay = 60
+baseDelay = 5
+factor = 1.6
+jitter = 0.2
+
+[properties]
+    uploadInterval = "10s"
+    maxRetries = 10
+    accountIntranetURI = "http://account.bilibili.co"
+    debug = true
+    fontFilePath = "/data/yahei.ttf"

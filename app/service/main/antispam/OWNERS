@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chenzhihui
+- lujinhui
+- xiahaiming
+labels:
+- main
+- service
+- service/main/antispam
+options:
+  no_parent_owners: true
+reviewers:
+- chenzhihui
+- lujinhui
+- xiahaiming

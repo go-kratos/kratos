@@ -1,0 +1,175 @@
+version = "0.0.1"
+user    = "nobody"
+pid     = "/tmp/search-admin.pid"
+dir = "./"
+perf = "127.0.0.1:8086"
+env     = "dev"
+
+[log]
+dir = "/data/log/search-admin/"
+
+[auth]
+    managerHost = "http://manager.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "50ms"
+    timeout = "500ms"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "50ms"
+    timeout = "500ms"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 86400
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "unix"
+    addr = "/tmp/shylf-manager-admin-mc.sock"
+    active = 10
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[bm]
+	addr = "0.0.0.0:7311"
+	maxListen = 1000
+    timeout = "1s"
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    csrfOn = true
+    [identify.app]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    [identify.host]
+    auth = "http://passport.bilibili.com"
+    secret = "http://open.bilibili.com"
+    [identify.HTTPClient]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+    [identify.HTTPClient.breaker]
+    window  ="10s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[pagination]
+	pageNum = 1
+    pageSize = 30
+    maxPageNum = 5000
+    maxPageSize = 1000
+
+[db]
+   [db.search]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_search?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+    active = 5
+    idle = 5
+    idleTimeout  = "4h"
+    queryTimeout = "10s"
+    execTimeout  = "10s"
+    tranTimeout  = "10s"
+    [db.search.breaker]
+      window = "10s"
+      sleep = "100ms"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+
+[es]
+    [es.pcie_dm_in]    
+    addr = ["http://172.22.33.127:9201"]
+    cluster = "pcie_dm_in"
+    owner = "guanhuaxin,daizhichen,libingqi,zhapuyu"
+    [es.pcie_dm_out]
+    addr = ["http://172.22.33.127:9201"]
+    owner = "guanhuaxin,daizhichen,libingqi"
+    [es.log]
+    addr = ["http://172.22.33.120:9201"]
+    owner = "guanhuaxin,daizhichen,libingqi"
+    [es.log_live]
+    addr = ["http://172.22.33.120:9201"]
+    [es.pcie_pub_out01]
+    addr = ["http://172.22.33.120:9201"]
+    [es.pcie_fav]
+    addr = ["http://172.22.33.120:9201"]
+    [es.ssd_reply_in]
+    addr = ["http://172.22.33.120:9201"]
+    [es.ssd_reply_out]
+    addr = ["http://172.22.33.120:9201"]
+    [es.ssd_archive]
+    addr = ["http://172.22.33.120:9201"]
+    [es.ssd_pub_in01]
+    addr = ["http://172.22.33.120:9201"]
+    [es.ssd_pub_in02]
+    addr = ["http://172.18.33.71:9200"]
+    [es.open]
+    addr = ["http://172.18.33.71:9200"]
+    [es.ops_log]
+    addr = ["http://ops-log.bilibili.co/elasticsearch/"]
+    [es.creative_reply]
+    addr = ["http://172.18.33.71:9200"]
+    
+
+[redis]
+    name = "search-api"
+    proto = "tcp"
+    addr = "172.18.33.71:6379"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+
+[sms]
+    phone = "17621966518"
+    token = "f5a658b2-5926-4b71-96c3-7d3777b7d256"
+    interval = 300
+
+[prop]
+	manager = "http://uat-manager.bilibili.co/"
+	api = "http://api.bilibili.co/"
+
+[httpClient]
+    key = "ad4bb9b8f5d9d4a7"
+    secret = "6912080d78d58be7cb94f57d50d438f6"
+    dial = "1s"
+    timeout = "10s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100

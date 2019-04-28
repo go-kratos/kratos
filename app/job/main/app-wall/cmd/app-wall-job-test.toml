@@ -1,0 +1,221 @@
+# This is a TOML document. Boom
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/app-wall-job.pid"
+dir = "./"
+perf = "0.0.0.0:7610"
+
+chanNum = 8
+chanDBNum = 8
+tick = "20s"
+monthly=false
+
+[unicomuserInfoc2]
+taskID = "000951"
+proto = "tcp"
+addr = ""
+chanSize = 10240
+
+[unicomPackInfoc]
+taskID = "000918"
+proto = "tcp"
+addr = ""
+chanSize = 10240
+
+[log]
+	dir = "/data/log/app-wall-job"
+
+[tracer]
+	family = "app-wall-job"
+	proto = "unixgram"
+	addr = "/var/run/dapper-collect/dapper-collect.sock"
+
+[host]
+app      	= "http://app.bilibili.co"
+unicomFlow  = "http://open.10010.com"
+unicom      = "http://123.125.99.7:9001"
+
+[bm]
+	[bm.inner]
+	addr = "0.0.0.0:7611"
+	maxListen = 10
+	timeout = "1s"
+	[bm.local]
+	addr = "0.0.0.0:7612"
+	maxListen = 10
+	timeout = "1s"
+
+[identify]
+	whiteAccessKey = ""
+	whiteMid = 0
+	[identify.app]
+	key = "6a29f8ed87407c11"
+	secret = "d3c5a85f5b895a03735b5d20a273bc57"
+	[identify.memcache]
+	name = "go-business/identify"
+	proto = "tcp"
+	addr = "172.16.33.54:11211"
+	active = 5
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "80s"
+	[identify.host]
+	auth = "http://passport.bilibili.com"
+	secret = "http://open.bilibili.com"
+	[identify.httpClient]
+	key = "f022126a8a365e20"
+	secret = "b7b86838145d634b487e67b811b8fab2"
+	dial = "30ms"
+	timeout = "100ms"
+	keepAlive = "60s"
+	[identify.httpClient.breaker]
+	window  = "10s"
+	sleep   = "100ms"
+	bucket  = 10
+	ratio   = 0.5
+	request = 100
+	[identify.httpClient.url]
+	"http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+	"http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+	"http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[ecode]
+	domain = "uat-api.bilibili.co"
+	all = "1h"
+	diff = "5m"
+	[ecode.clientconfig]
+		key = "c1a1cb2d89c33794"
+		secret = "dda47eeca111e03e6845017505baea13"
+		dial      = "2000ms"
+		timeout   = "2s"
+		keepAlive = "10s"
+		timer     = 128
+		[ecode.clientconfig.breaker]
+			window  ="3s"
+			sleep   ="100ms"
+			bucket  = 10
+			ratio   = 0.5
+			request = 100
+
+[mysql]
+    [mysql.show]
+    addr   = "172.16.33.205:3308"
+    dsn    = "test:test@tcp(172.16.33.205:3308)/bilibili_show?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle   = 2
+    idleTimeout ="4h"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [mysql.show.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+
+[redis]
+	[redis.feed]
+	name   = "app-wall-job/active"
+	proto  = "tcp"
+	addr   = "172.16.0.148:6379"
+	active = 10
+	idle   = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[seq]
+    businessID =1
+    token      ="Y1zHA2esXfd2T6bc1VRHkFWryD01Aswi"
+
+[seqRPC]
+    pullInterval = "10s"
+    [seqRPC.client]
+    timeout = "200ms"
+    [seqRPC.client.breaker]
+    window  ="3s"
+    sleep   ="100ms"
+    bucket  = 10        
+    ratio   = 0.5
+    request = 100
+    [seqRPC.zookeeper]
+    root = "/microservice/seq-proxy/"
+    addrs = ["172.16.33.169:2181"]
+    timeout = "30s"
+
+[consumer]
+    topic = "app-wall-job"
+    group  = "lancer_main_dw_channel_new_devices"
+    Offset = "new"
+    Brokers = ["172.19.40.183:9092,172.19.40.184:9092,172.19.40.185:9092,172.19.40.186:9092,172.19.40.187:9092,172.19.40.188:92,172.19.40.189:9092,172.19.40.190:9092,172.19.40.191:9092,172.19.40.192:9092"]
+
+[httpClient]
+	key    = "e7482d29be4a95b8"
+	secret = "9e803791cdef756e75faee68e12b7442"
+	dial      = "30ms"
+	timeout   = "100ms"
+	keepAlive = "60s"
+	[httpClient.breaker]
+		window  = "10s"
+		sleep   = "100ms"
+		bucket  = 10
+		ratio   = 0.5
+		request = 100
+
+[HTTPUnicom]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "500ms"
+timeout   = "4s"
+keepAlive = "60s"
+timer     = 10
+    [HTTPUnicom.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[unicom]
+	packKeyExpired = "24h"
+	keyExpired = "24h"
+
+[memcache]
+	[memcache.operator]
+	name   = "app-show/archive"
+	proto  = "tcp"
+	addr   = "172.16.33.54:11213"
+	active = 50
+	idle   = 10
+	dialTimeout  = "50ms"
+	readTimeout  = "100ms"
+	writeTimeout = "100ms"
+	idleTimeout  = "80s"
+	expire = "10s"
+
+[reportDatabus]
+	key = "8e27ab7e39270b59"
+	secret = "477df6a068d7332a163f95abbad2079c"
+	group = "ArchiveClick-MainAppSvr-2-S"
+	topic = "ArchiveClick-T"
+	action = "sub"
+	name = "report-click/sub"
+	proto = "tcp"
+	addr = "172.18.33.50:6205"
+	active = 5
+	idle = 1
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+
+# [consumer]
+# 	topic = "lancer_main_dw_channel_new_devices"
+# 	group  = "app-wall-job"
+# 	offset = "new"
+# 	brokers = ["172.19.40.183:9092"]

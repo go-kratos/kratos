@@ -1,0 +1,18 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- haoguanwei
+- maojian
+- weicheng
+- zhoujixiang
+labels:
+- main
+- service
+- service/main/dapper
+options:
+  no_parent_owners: true
+reviewers:
+- haoguanwei
+- maojian
+- weicheng
+- zhoujixiang

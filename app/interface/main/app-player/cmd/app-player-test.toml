@@ -1,0 +1,61 @@
+aidGray = 1
+padAid  = 34943774
+padCid  = 61219854
+phoneAid  = 34108719
+phoneCid  = 59830850
+padHDAid  = 34108719
+padHDCid  = 59830850
+
+[log]
+dir = "/data/log/app-player"
+
+[host]
+playurl = "http://uat-videodispatch-ugc.bilibili.co"
+playurlBk = "http://uat-videodispatch-ugc-bk.bilibili.co"
+
+[httpClient]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "30ms"
+timeout   = "500ms"
+keepAlive = "60s"
+    [httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[bm]
+    addr = "0.0.0.0:6131"
+    timeout = "1s"
+
+[accountRPC]
+    timeout = "300ms"
+
+[archiveRPC]
+    timeout = "200ms"
+
+
+[memcache]
+    name   = "app-player-job/player"
+    proto  = "tcp"
+    addr   = "172.22.33.137:11218"
+    active = 50
+    idle   = 10
+    dialTimeout  = "50ms"
+    readTimeout  = "100ms"
+    writeTimeout = "100ms"
+    idleTimeout  = "80s"
+    expireArchive = "2h"
+
+[redis]
+    name   = "app-player-job/player"
+    proto  = "tcp"
+    addr   = "172.18.33.61:6807"
+    active = 20
+    idle   = 10
+    dialTimeout  = "50ms"
+    readTimeout  = "100ms"
+    writeTimeout = "100ms"
+    idleTimeout  = "80s"

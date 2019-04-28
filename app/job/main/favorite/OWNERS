@@ -1,0 +1,19 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- caoguoliang
+- chenzhihui
+- libingqi
+- zhangshengchao
+- zhapuyu
+labels:
+- job
+- job/main/favorite
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- caoguoliang
+- chenzhihui
+- libingqi
+- zhangshengchao

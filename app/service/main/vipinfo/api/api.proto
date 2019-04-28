@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+// use {app_id}.{version} as package name
+package vipinfo.service.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+message InfoReply { 
+    ModelInfo res = 1;
+}
+
+message InfoReq { 
+    int64 mid = 2;
+}
+
+message InfosReply { 
+    map<int64, ModelInfo> res = 1;
+}
+
+message InfosReq { 
+    repeated int64 mids = 2;
+}
+
+message ModelInfo {
+   int32 type = 1 [(gogoproto.jsontag) = "type"];
+   int32 status = 2 [(gogoproto.jsontag) = "status"];
+   int64 due_date = 3 [(gogoproto.jsontag) = "due_date"];
+   int32 vip_pay_type = 4 [(gogoproto.jsontag) = "vip_pay_type"];
+}
+
+service VipInfo { 
+    // Info get vipinfo by mid. 
+    rpc Info(InfoReq) returns(InfoReply); 
+    // Infos get vipinfos by mids 
+    rpc Infos(InfosReq) returns(InfosReply); 
+}

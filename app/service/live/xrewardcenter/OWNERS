@@ -1,0 +1,15 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- wujunchen
+- xiehaishen
+labels:
+- live
+- service
+- service/live/xrewardcenter
+options:
+  no_parent_owners: true
+reviewers:
+- liugang
+- wujunchen
+- xiehaishen

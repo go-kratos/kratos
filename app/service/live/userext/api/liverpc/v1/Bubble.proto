@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package userext.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Bubble {
+    
+    /** 获取用户当前气泡框
+     * 获取用户当前气泡框
+     */   
+    rpc getCurrent (BubbleGetCurrentReq) returns (BubbleGetCurrentResp);
+    
+    /** 获取用户当前房间的气泡框
+     * 获取用户当前房间的气泡框
+     */   
+    rpc getBubble (BubbleGetBubbleReq) returns (BubbleGetBubbleResp);
+    
+    /** 校验用户气泡框
+     * 校验用户气泡框
+     */   
+    rpc checkAuth (BubbleCheckAuthReq) returns (BubbleCheckAuthResp);
+    
+    /** 给用户下发气泡框
+     * 给用户下发气泡框
+     */   
+    rpc multiAdd (BubbleMultiAddReq) returns (BubbleMultiAddResp);
+}
+
+
+
+message BubbleGetCurrentReq {
+    // 用户 uid
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 房间号
+    int64 room_id = 2 [(gogoproto.jsontag) = "room_id"];
+    // 全区ID
+    int64 category = 3 [(gogoproto.jsontag) = "category"];
+    // 分区ID
+    int64 sub_category = 4 [(gogoproto.jsontag) = "sub_category"];
+}
+
+message BubbleGetCurrentResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    Data data = 4 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 当前气泡框ID
+        int64 bubble = 1 [(gogoproto.jsontag) = "bubble"];
+    }
+}
+
+
+
+message BubbleGetBubbleReq {
+    // 用户 uid
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 房间号
+    int64 room_id = 2 [(gogoproto.jsontag) = "room_id"];
+    // 上报上来的气泡框ID
+    int64 bubble_id = 3 [(gogoproto.jsontag) = "bubble_id"];
+    // 上报上来的大航海信息
+    int64 guard_level = 4 [(gogoproto.jsontag) = "guard_level"];
+}
+
+message BubbleGetBubbleResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    Data data = 4 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 当前气泡框ID
+        int64 bubble = 1 [(gogoproto.jsontag) = "bubble"];
+    }
+}
+
+
+
+message BubbleCheckAuthReq {
+    // 用户uid
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 房间号
+    int64 room_id = 2 [(gogoproto.jsontag) = "room_id"];
+    // 气泡ID
+    int64 bubble_id = 3 [(gogoproto.jsontag) = "bubble_id"];
+}
+
+message BubbleCheckAuthResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    Data data = 4 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 逻辑错误码 -1 非法 0 合法
+        int64 code = 1 [(gogoproto.jsontag) = "code"];
+        // 错误原因
+        string message = 2 [(gogoproto.jsontag) = "message"];
+    }
+}
+
+
+
+message BubbleMultiAddReq {
+    // 用户uid逗号拼接
+    string uid_list = 1 [(gogoproto.jsontag) = "uid_list"];
+    // 气泡ID
+    int64 bubble_id = 2 [(gogoproto.jsontag) = "bubble_id"];
+    // 过期的时间戳
+    int64 expired_at = 3 [(gogoproto.jsontag) = "expired_at"];
+    // 业务描述
+    string desc = 4 [(gogoproto.jsontag) = "desc"];
+    // 大区ID
+    int64 category = 5 [(gogoproto.jsontag) = "category"];
+    // 分区ID
+    int64 sub_category = 6 [(gogoproto.jsontag) = "sub_category"];
+    // 房间号
+    int64 room_id = 7 [(gogoproto.jsontag) = "room_id"];
+}
+
+message BubbleMultiAddResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    Data data = 4 [(gogoproto.jsontag) = "data"];
+       
+    message UidList {
+        // 
+        repeated int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    }
+       
+    message Data {
+        // 
+        UidList success = 1 [(gogoproto.jsontag) = "success"];
+        // 
+        UidList failed = 2 [(gogoproto.jsontag) = "failed"];
+    }
+}

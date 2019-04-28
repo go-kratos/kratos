@@ -1,0 +1,10 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- yangbaibing
+labels:
+- live
+- service
+- service/live/live-dm
+options:
+  no_parent_owners: true

@@ -1,0 +1,65 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/push.pid"
+dir = "./"
+family = "push"
+
+[log]
+    dir = "/data/log/push/"
+
+[HTTPServer]
+    addr = "0.0.0.0:7011"
+    maxListen = 1000
+    timeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+
+[HTTPClient]
+    dial      = "50ms"
+    timeout   = "200ms"
+    keepAlive = "60s"
+    key = "f265dcfa28272742"
+    secret = "437facc22dc8698b5544669bcc12348d" 
+    [HTTPClient.breaker]
+    window  ="1s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[reportPub]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret="0QEO9F8JuuIxZzNDvklI"
+    group= "PushReport-Push-P"
+    topic= "PushReport-T"
+    action="pub"
+    name = "push-report-pub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[callbackPub]
+    key = "dbe67e6a4c36f877"
+    secret="6e6eb74cc73f2c8bff02fb40ee57da59"
+    group= "PushCallback-MainCommonArch-P"
+    topic= "PushCallback-T"
+    action="pub"
+    name = "push-callback-pub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[push]
+    callbackSize = 3 # callback 聚合数
+    callbackChanLen = 1024000
+    callbackGoroutines = 10

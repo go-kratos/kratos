@@ -1,0 +1,201 @@
+debug = "local"
+bucket = "archive"
+admin = "481"
+[consumer]
+    onexp = 600
+    roleexp = 86400
+[gray]
+    [[gray.biz]]
+    businessID = 1
+    [[gray.biz.options]]
+        [[gray.biz.options.fields]]
+        name = "OID"
+        value = "oid1,oid3"
+    [[gray.biz.options]]
+        [[gray.biz.options.fields]]
+        name = "MID"
+        value = "1,2"
+    [[gray.biz.options]]
+        [[gray.biz.options.fields]]
+        name = "Extra2"
+        value = "3,4"
+        [[gray.biz.options.fields]]
+        name = "OID"
+        value = "oid6"
+
+[auditstate]
+    1 = "1,2"
+    2 = "3,4"
+
+[log]
+    dir="/data/log/aegis"
+
+[app]
+    key = "c1a1cb2d89c33794"
+    secret = "dda47eeca111e03e6845017505baea13"
+
+[orm]
+    dsn = "test:test@tcp(127.0.0.1:3306)/bilibili_aegis?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    idleTimeout = "4h"
+
+[mysql]
+	addr = "aegis"
+	dsn = "test:test@tcp(127.0.0.1:3306)/bilibili_aegis?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    readDSN = ["test:test@tcp(127.0.0.1:3306)/bilibili_aegis?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "100ms"
+	execTimeout = "100ms"
+	tranTimeout = "200ms"
+
+[redis]
+    netExpire = "30m"
+    [redis.cluster]
+	    name = "aegis-admin"
+	    proto = "tcp"
+	    addr = "127.0.0.1:6379"
+	    idle = 10
+	    active = 10
+	    dialTimeout = "100ms"
+	    readTimeout = "100s"
+	    writeTimeout = "100ms"
+	    idleTimeout = "10s"
+	    expire = "1m"
+
+[memcache]
+	name = "aegis-admin"
+	proto = "tcp"
+	addr = "127.0.0.1:11211"
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[bm]
+    addr = "0.0.0.0:8000"
+    maxListen = 10
+    timeout = "1s"
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "unix"
+    addr = "/tmp/uat-manager-auth-mc.sock"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[rpc]
+    [rpc.acc]
+	[rpc.up]
+	[rpc.rel]
+
+[host]
+    api = "http://uat-api.bilibili.co"
+    manager = "http://uat-manager.bilibili.co"
+
+[httpClient]
+    [httpClient.read]
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "80ms"
+    timeout = "800ms"
+    keepAlive = "60s"
+    [httpClient.read.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.write]
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "50ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    [httpClient.write.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.es]
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "1s"
+    timeout = "2s"
+    keepAlive = "60s"
+    [httpClient.es.breaker]
+    window  = "10s"
+    sleep   = "1000ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[aegisPub]
+    key = "0PtMsLLxWyyvoTgAyLCD"
+    secret = "0PtMsLLxWyyvoTgAyLCE"
+    group = "Aegis-P"
+    topic = "Aegis"
+    action = "pub"
+    name = "aegis-admin/databus"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    active = 1
+    idle = 1
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[bfs]
+    key    = "ef42d94858dd49b2"
+    secret = "351c300573a330a5271226835be496"
+    host   = "http://uat-bfs.bilibili.co"
+    timeout = 1000
+    maxFileSize = 5242880
+
+[grpc]
+    [accRPC]
+        timeout = "1s"

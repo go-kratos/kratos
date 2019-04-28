@@ -1,0 +1,283 @@
+[log]
+    dir = "/data/log/push-archive/"
+    # [log.agent]
+    # family = "push-archive"
+    # taskID = "000057"
+    # proto = "unixgram"
+    # addr = "/var/run/lancer/collector.sock"
+    # chan = 10240
+
+[HTTPClient]
+    dial      = "1s"
+    timeout   = "2s"
+    keepAlive = "60s"
+    key = "f265dcfa28272742"
+    secret = "437facc22dc8698b5544669bcc12348d"
+    [HTTPClient.breaker]
+    window  ="1s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[wechat]
+username="chenxi01"
+token="GYQeuDWBbAsCNeGz"
+secret="ZKpmgINTkianyMbMixyxcPQjMCSHCDrk"
+
+[mysql]
+    addr = "172.16.0.148"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_push_archive?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 10
+    idle = 5
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[hbase]
+    master = ""
+    meta = ""
+    dialTimeout = "1s"
+    readTimeout = "2s"
+    readsTimeout = "5s"
+    writeTimeout = "2s"
+    writesTimeout = "5s"
+    [hbase.zookeeper]
+    root = ""
+    addrs = ["127.0.0.1:2181"]
+    timeout = "30s"
+
+[fansHBase]
+    master = ""
+    meta = ""
+    dialTimeout = "1s"
+    readTimeout = "2s"
+    readsTimeout = "5s"
+    writeTimeout = "2s"
+    writesTimeout = "5s"
+    [fansHBase.zookeeper]
+    root = ""
+    addrs = ["172.18.33.131:2181","172.18.33.168:2181","172.18.33.169:2181"]
+    timeout = "30s"
+
+[redis]
+    name = "push-archive"
+    proto = "tcp"
+    addr = "172.16.33.54:6379"
+    idle = 1000
+    active = 1000
+    dialTimeout = "10s"
+    readTimeout = "10s"
+    writeTimeout = "10s"
+    idleTimeout = "30s"
+
+[archiveSub]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret="0QEO9F8JuuIxZzNDvklI"
+    group= "ArchiveNotify-Push-S"
+    topic= "ArchiveNotify-T"
+    action="sub"
+    name = "interface/push-archive"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 10
+    active = 100
+    dialTimeout = "10s"
+    readTimeout = "10s"
+    writeTimeout = "10s"
+    idleTimeout = "60s"
+
+[relationSub]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret="0QEO9F8JuuIxZzNDvklI"
+    group= "Relation-Push-S"
+    topic= "Relation-T"
+    action="sub"
+    name = "interface/push-archive"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 10
+    active = 100
+    dialTimeout = "10s"
+    readTimeout = "10s"
+    writeTimeout = "10s"
+    idleTimeout = "60s"
+
+[accountRPC]
+    timeout = "200ms"
+
+[pushRPC]
+    timeout = "800ms"
+
+[anti]
+    on=true
+    second=4
+    n=1
+    hour=12
+    m=10
+    [anti.redis]
+    name = "push-archive"
+    proto = "tcp"
+    addr = "172.16.33.54:6379"
+    idle = 1000
+    active = 1000
+    dialTimeout = "10s"
+    readTimeout = "10s"
+    writeTimeout = "10s"
+    idleTimeout = "30s"
+
+[bm]
+    addr="0.0.0.0:7031"
+	maxListen=1000
+	timeout="1s"
+	readTimeout="1s"
+	writeTimeout="1s"
+
+[push]
+    prodSwitch = true
+    addAPI = "http://api.bilibili.co/x/internal/push-strategy/task/add"
+    multiAPI = "http://api.bilibili.co/x/internal/push/task/add"
+    businessID = 2
+    businessToken = "ynt2nxa3uevlf4goejd99zelborhn07s"
+    businessSpecialID = 3
+    businessSpecialToken = ""
+    loadSettingsInterval = "5s"
+
+[abtest]
+    hbaseBlacklistTable = "ai:pushlist_black"
+    hbaseBlacklistFamily = ["m"]
+    hbaseeWhitelistTable = "ai:pushlist_recover"
+    hbaseWhitelistFamily = ["m"]
+    testGroup = [0,1]
+    comparisonGroup = [2,3]
+    testMids = [91221505]
+
+[arcPush]
+    upperLimitExpire = "30m"
+    pushStatisticsKeepDays = 3
+    pushStatisticsClearTime = "12:53:32"
+    order = ["1#ab_test_attention", "2#ab_test_special", "1#ab_comparison_attention", "2#ab_comparison_special", "1#attention", "2#special"]
+    activeTime = []
+    [[arcPush.forbidTimes]]
+       pushForbidStartTime = "00:00:00"
+       pushForbidEndTime = "08:00:00"
+    [[arcPush.forbidTimes]]
+       pushForbidStartTime = "23:00:00"
+       pushForbidEndTime = "23:59:59"
+    [[arcPush.proportions]]
+         proportionStartFrom = "10"
+         proportion = "0.30"
+    [[arcPush.fanGroup]]
+        name = "ai:pushlist_follow_recent"
+        desc = "最近关注up主的粉丝"
+        relationType = 1
+        hitby = "hbase"
+        limit = 1
+        perUpperLimit = 0
+        limitExpire = "1h"
+        hbaseTable = "ai:pushlist_follow_recent"
+        hbaseFamily = ["m"]
+        msgTemplateDesc = "你最近关注的%s刚发了视频\r\n%s"
+        msgTemplate = "225c75346636305c75363730305c75386664315c75353137335c75366365385c753736383425735c75353231615c75353364315c75346538365c75383963365c75393839315c725c6e257322"
+    [[arcPush.fanGroup]]
+        name = "ai:pushlist_play_recent"
+        desc = "最近常看up主的粉丝"
+        relationType = 1
+        hitby = "hbase"
+        limit = 1
+        perUpperLimit = 0
+        limitExpire = "1h"
+        hbaseTable = "ai:pushlist_play_recent"
+        hbaseFamily = ["m"]
+        msgTemplateDesc = "你最近常看的%s刚发了视频\r\n%s"
+        msgTemplate = "225c75346636305c75363730305c75386664315c75356533385c75373730625c753736383425735c75353231615c75353364315c75346538365c75383963365c75393839315c725c6e257322"
+    [[arcPush.fanGroup]]
+        name = "ai:pushlist_offline_up"
+        desc = "与up主亲密的粉丝"
+        relationType = 1
+        hitby = "hbase"
+        limit = 1
+        perUpperLimit = 0
+        limitExpire = "1h"
+        hbaseTable = "ai:pushlist_offline_up"
+        hbaseFamily = ["m"]
+        msgTemplateDesc = "你关注的%s刚发了视频\r\n%s"
+        msgTemplate = "225c75346636305c75353137335c75366365385c753736383425735c75353231615c75353364315c75346538365c75383963365c75393839315c725c6e257322"
+    [[arcPush.fanGroup]]
+        name = "attention"
+        desc = "普通关注粉丝"
+        relationType = 1
+        hitby = "default"
+        limit = 1
+        perUpperLimit = 0
+        limitExpire = "3h"
+        hbaseTable = ""
+        hbaseFamily = []
+        msgTemplateDesc = "你关注的%s刚发了视频\r\n%s"
+        msgTemplate = "225c75346636305c75353137335c75366365385c753736383425735c75353231615c75353364315c75346538365c75383963365c75393839315c725c6e257322"
+    [[arcPush.fanGroup]]
+        name = "special"
+        desc = "特别关注up主的粉丝"
+        relationType = 2
+        hitby = "default"
+        limit = 1
+        perUpperLimit = 0
+        limitExpire = "3h"
+        hbaseTable = ""
+        hbaseFamily = []
+        msgTemplateDesc = "你特别关注的%s刚发了视频\r\n%s"
+        msgTemplate = "225c75346636305c75373237395c75353232625c75353137335c75366365385c753736383425735c75353231615c75353364315c75346538365c75383963365c75393839315c725c6e257322"
+    [[arcPush.fanGroup]]
+        name = "ab_test_attention"
+        desc = "abtest普通关注粉丝"
+        relationType = 1
+        hitby = "ab_test"
+        limit = 1
+        perUpperLimit = 0
+        limitExpire = "3h"
+        hbaseTable = ""
+        hbaseFamily = []
+        msgTemplateDesc = "你关注的%s刚发了视频\r\n%s"
+        msgTemplate = "225c75346636305c75353137335c75366365385c753736383425735c75353231615c75353364315c75346538365c75383963365c75393839315c725c6e257322"
+    [[arcPush.fanGroup]]
+        name = "ab_test_special"
+        desc = "abtest特别关注up主的粉丝"
+        relationType = 2
+        hitby = "ab_test"
+        limit = 1
+        perUpperLimit = 0
+        limitExpire = "3h"
+        hbaseTable = ""
+        hbaseFamily = []
+        msgTemplateDesc = "你特别关注的%s刚发了视频\r\n%s"
+        msgTemplate = "225c75346636305c75373237395c75353232625c75353137335c75366365385c753736383425735c75353231615c75353364315c75346538365c75383963365c75393839315c725c6e257322"
+   [[arcPush.fanGroup]]
+        name = "ab_comparison_attention"
+        desc = "abtest对照组 普通关注粉丝"
+        relationType = 1
+        hitby = "ab_comparison"
+        limit = 1
+        perUpperLimit = 0
+        limitExpire = "3h"
+        hbaseTable = ""
+        hbaseFamily = []
+        msgTemplateDesc = "你关注的%s刚发了视频\r\n%s"
+        msgTemplate = "225c75346636305c75353137335c75366365385c753736383425735c75353231615c75353364315c75346538365c75383963365c75393839315c725c6e257322"
+    [[arcPush.fanGroup]]
+        name = "ab_comparison_special"
+        desc = "abtest对照组 特别关注up主的粉丝"
+        relationType = 2
+        hitby = "ab_comparison"
+        limit = 1
+        perUpperLimit = 0
+        limitExpire = "3h"
+        hbaseTable = ""
+        hbaseFamily = []
+        msgTemplateDesc = "你特别关注的%s刚发了视频\r\n%s"
+        msgTemplate = "225c75346636305c75373237395c75353232625c75353137335c75366365385c753736383425735c75353231615c75353364315c75346538365c75383963365c75393839315c725c6e257322"

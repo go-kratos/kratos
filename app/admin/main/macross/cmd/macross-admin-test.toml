@@ -1,0 +1,108 @@
+reload = "1m"
+
+[log]
+    dir = "/data/log/macross/"
+
+[bm]
+    [bm.inner]
+    addr = "0.0.0.0:5001"
+    timeout = "1s"
+    [bm.local]
+    addr = "0.0.0.0:5003"
+    timeout = "1s"
+
+[oss]
+    accessKeyID = "LTAItAbov41J7Wea"
+    accessKeySecret = "yaPQXRPLicxe8xLOgPsCffYEIO843a"
+    endpoint = "http://oss-cn-shanghai.aliyuncs.com"
+    bucket = "dl-hdslb-com"
+    originDir = "mobile/test"
+    publishDir = "mobile/latest"
+
+[db]
+    [db.macross]
+    name = "127.0.0.1:3306"
+    dsn = "root:test@tcp(127.0.0.1:3306)/mtc_macross?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [db.manager.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[httpClient]
+    key     = "f022126a8a365e20"
+    secret  = "b7b86838145d634b487e67b811b8fab2"
+    dial = "500ms"
+    timeout = "2s"
+    keepAlive = "60s"
+    timer = 1000
+        [httpClient.breaker]
+        window  ="10s"
+        sleep   ="10ms"
+        bucket  = 10
+        ratio   = 0.1
+        request = 10
+
+[property]
+    [property.mail]
+        host = "smtp.exmail.qq.com"
+        port = 465
+        address = "no-reply@bilibili.com"
+        pwd = ""
+        name = "App Builder"
+        
+    [property.package]
+        URLPrefix = "http://test"
+        savePath = "/Users/yourname"
+
+
+[auth]
+    managerHost = "http://macross.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "android-apk"
+    [auth.DsHTTPClient]
+    key     = "manager-go"
+    secret  = "2pnik62rr8xgrrleag2vx2l0svvnrfld"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key     = "f022126a8a365e20"
+    secret  = "b7b86838145d634b487e67b811b8fab2"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 10
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"

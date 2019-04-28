@@ -1,0 +1,100 @@
+[bm]
+ addr = "0.0.0.0:9001"
+ maxListen = 10000
+ timeout = "1000s"
+
+[httpClient]
+    key = "c05dd4e1638a8af0"
+    secret = "7daa7f8c06cd33c5c3067063c746fdcb"
+    dial = "2s"
+    timeout = "10s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.breaker]
+    window  = "10s"
+    sleep   = "2000ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+
+[mail]
+host = "smtp.exmail.qq.com"
+port = 465
+username = "merlin@bilibili.com"
+password = ""
+noticeOwner = ["fengyifeng@bilibili.com"]
+
+[orm]
+dsn = "root:123456@tcp(172.18.33.130:3306)/tapd?timeout=200ms&readTimeout=2000ms&writeTimeout=2000ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 5
+idleTimeout = "4h"
+
+[memcache]
+	name = "merlin"
+	proto = "tcp"
+	addr = "172.18.33.61:11232"
+	idle = 5
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "12h"
+
+[Tapd]
+callbackToken = "hRp[Lfnfrp9Jypr7aaJMGn8NC.[E+Gvb9&nRazs6Mm{fEW98.z9yzV*phu)U97#"
+useCache = true
+
+
+[Scheduler]
+updateHookURLCacheTask = "0 */10 * * * ?"
+
+active = false
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "merlin"
+    [auth.DsHTTPClient]
+    key = "merlin"
+    secret = "4fb521f66dfd5efcf6e77d078ed2eb0a"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1ms"
+    timeout = "1ms"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+
+
+    active = 10
+    idle = 10
+    dialTimeout = "1ms"
+    readTimeout = "1ms"
+    writeTimeout = "1ms"
+    idleTimeout = "80s"

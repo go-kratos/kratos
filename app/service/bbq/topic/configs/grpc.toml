@@ -1,0 +1,4 @@
+
+[server]
+    addr = "0.0.0.0:9005"
+    timeout = "1s"

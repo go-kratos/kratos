@@ -1,0 +1,74 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// This file contains protocol buffers that are used for filters
+package pb;
+
+option java_package = "org.apache.hadoop.hbase.protobuf.generated";
+option java_outer_classname = "ComparatorProtos";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+// This file contains protocol buffers that are used for comparators (e.g. in filters)
+
+message Comparator {
+  required string name = 1;
+  optional bytes serialized_comparator = 2;
+}
+
+message ByteArrayComparable {
+  optional bytes value = 1;
+}
+
+message BinaryComparator {
+  required ByteArrayComparable comparable = 1;
+}
+
+message LongComparator {
+  required ByteArrayComparable comparable = 1;
+}
+
+message BinaryPrefixComparator {
+  required ByteArrayComparable comparable = 1;
+}
+
+message BitComparator {
+  required ByteArrayComparable comparable = 1;
+  required BitwiseOp bitwise_op = 2;
+
+  enum BitwiseOp {
+    AND = 1;
+    OR = 2;
+    XOR = 3;
+  }
+}
+
+message NullComparator {
+}
+
+message RegexStringComparator {
+  required string pattern = 1;
+  required int32 pattern_flags = 2;
+  required string charset = 3;
+  optional string engine = 4;
+}
+
+message SubstringComparator {
+  required string substr = 1;
+}

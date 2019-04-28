@@ -1,0 +1,68 @@
+syntax = "proto3";
+package archive.service.up.v1;
+
+import "app/service/main/up/api/v1/request.proto";
+import "app/service/main/up/api/v1/reply.proto";
+
+import "google/api/annotations.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+// Up up主相关的稿件接口
+service Up {
+  // UpArcs 单个up主的稿件列表接口-带分页
+  rpc UpArcs(UpArcsReq) returns (UpArcsReply) {
+    option (google.api.http) = {
+      get: "/x/internal/uper/archive/up/passed"
+    };
+  }
+  // UpsArcs 多个up主的稿件列表接口-带分页
+  rpc UpsArcs(UpsArcsReq) returns (UpsArcsReply) {
+    option (google.api.http) = {
+      get: "/x/internal/uper/archive/ups/passed"
+    };
+  }
+  // UpCount 单个up主的稿件计数接口
+  rpc UpCount(UpCountReq) returns (UpCountReply) {
+    option (google.api.http) = {
+      get: "/x/internal/uper/archive/up/count"
+    };
+  }
+  // UpsCount 多个up主的稿件计数接口
+  rpc UpsCount(UpsCountReq) returns (UpsCountReply) {
+    option (google.api.http) = {
+      get: "/x/internal/uper/archive/ups/count"
+    };
+  }
+  // UpsAidPubTime archives 多个up主的按分布时间排序的aid接口
+  rpc UpsAidPubTime(UpsArcsReq) returns (UpsAidPubTimeReply);
+  // AddUpPassedCacheByStaff staff变更 新增或者变更up主稿件信息列表和计数接口
+  rpc AddUpPassedCacheByStaff(UpCacheReq) returns (NoReply);
+  // AddUpPassedCache archive变更 新增或者变更up主稿件信息列表和计数接口
+  rpc AddUpPassedCache(UpCacheReq) returns (NoReply);
+  // DelUpPassedCacheByStaff staff解除 删除的up主稿件信息列表和计数接口
+  rpc DelUpPassedCacheByStaff(UpCacheReq) returns (NoReply);
+  // DelUpPassedCache archive失效 删除的up主稿件信息列表和计数接口
+  rpc DelUpPassedCache(UpCacheReq) returns (NoReply);
+  // UpInfoActivitys 获取up主活跃度列表信息的接口
+  rpc UpInfoActivitys(UpListByLastIDReq) returns (UpActivityListReply);
+  // UpSpecial 获取up主的特殊属性信息的接口
+  rpc UpSpecial(UpSpecialReq) returns (UpSpecialReply);
+  // UpsSpecial 获取多个up主的特殊属性信息的接口
+  rpc UpsSpecial(UpsSpecialReq) returns (UpsSpecialReply);
+  // UpGroups 获取所有特殊用户组信息的接口
+  rpc UpGroups(NoArgReq) returns (UpGroupsReply);
+  // UpGroupMids 获取某个分组下的所有用户的接口
+  rpc UpGroupMids(UpGroupMidsReq) returns (UpGroupMidsReply);
+  // UpAttr 获取up主身份属性的接口
+  rpc UpAttr(UpAttrReq) returns (UpAttrReply);
+  // UpBaseStats 获取up主基础计数的接口
+  rpc UpBaseStats(UpStatReq) returns (UpBaseStatReply);
+  // SetUpSwitch 设置up主关注弹窗开关的接口
+  rpc SetUpSwitch(UpSwitchReq) returns (NoReply);
+  // UpSwitch 获取up主关注弹窗开关的接口
+  rpc UpSwitch(UpSwitchReq) returns (UpSwitchReply);
+  // GetHighAllyUps 获取高能联盟up主列表
+  rpc GetHighAllyUps(HighAllyUpsReq) returns (HighAllyUpsReply);
+}

@@ -1,0 +1,14 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- maojian
+- wangxu01
+labels:
+- library
+- library/database/tidb
+reviewers:
+- chenzhihui
+- haoguanwei
+- maojian
+- wangxu01
+- zhapuyu

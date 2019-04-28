@@ -1,0 +1,188 @@
+# This is a TOML document. Boom
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/account-recovery-service.pid"
+dir = "./"
+
+[log]
+    stdout = true
+   dir = "/data/log/account-recovery"
+
+[mysql]
+	addr = "172.16.33.205"
+	dsn = "account:wx2U1MwXRyWEuURw@tcp(172.16.33.205:3306)/account?timeout=500ms&readTimeout=500ms&writeTimeout=500ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["account:wx2U1MwXRyWEuURw@tcp(172.16.33.205:3306)/account?timeout=500ms&readTimeout=500ms&writeTimeout=500ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	#readDSN = ["test:test@tcp(127.0.0.2:3306)/test? timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4","test:test@tcp(127.0.0.3:3306)/test?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "1000ms"
+	execTimeout = "500ms"
+	tranTimeout = "2000ms"
+	[mysql.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+
+[redis]
+	name = "account-recovery-service"
+	proto = "tcp"
+	addr = "127.0.0.1:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "100ms"
+	readTimeout = "350ms"
+	writeTimeout = "350ms"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[AccRecover]
+MidInfoURL = "http://passport.bilibili.co/intranet/acc/midinfo/byCon"
+UpPwdURL = "http://passport.bilibili.co/intranet/acc/midinfo/pwd"
+UpBatchPwdURL = "http://passport.bilibili.co/intranet/acc/midinfo/batchpwd"
+CheckSafeURL = "http://passport.bilibili.co/intranet/acc/midinfo/check/safe"
+GameURL = "http://interface.biligame.com/api/internal/activity.games"
+CheckRegURL = "http://passport.bilibili.co/intranet/acc/midinfo/check/reg"
+CheckUserURL = "http://manager.bilibili.co/x/admin/passport/userBindLog"
+CheckCardURL = "http://api.bilibili.co/x/internal/member/realname/check"
+CheckPwdURL = "http://api.bilibili.co/x/internal/passport/history/pwd/check"
+GetLoginIPURL = "http://api.bilibili.co/x/internal/passport/records/loginlog"
+GetUserInfoURL = "http://passport.bilibili.co/intranet/acc/detail"
+
+
+[HttpClientConfig]
+    key = "e74eaed756f64154"
+    secret = "testSecret"
+    dial = "100ms"
+    timeout = "10s"
+    keepAlive = "60s"
+    timer = 1024
+    [HttpClientConfig.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 1.0
+        request = 100
+
+[MailConf]
+    host = "smtp.exmail.qq.com"
+    port = 465
+    username = "manager@bilibili.com"
+    password = ""
+
+[CaptchaConf]
+	TokenBID = "account"
+	tokenURL = "http://api.bilibili.co/x/internal/v1/captcha/token"
+	verifyURL = "http://api.bilibili.co/x/internal/v1/captcha/verify"
+
+[AccountRPC]
+    timeout = "1s"
+
+[locationrpc]
+    timeout = "1s"
+
+[memberGRPC]
+    timeout = "1s"
+
+[chanSize]
+    MailMsg = 999
+
+
+[bm]
+addr = "0.0.0.0:8000"
+Timeout = "2s"
+readTimeout = "10s"
+writeTimeout = "10s"
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://uat-dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 10
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[AESEncode]
+    salt = ""
+    aesKey = "0123456789abcdef"
+
+[elastic]
+host = "http://uat-manager.bilibili.co"
+#host = "http://127.0.0.1:8080"
+[elastic.HTTPClient]
+    key = "3c4e41f926e51656"
+    secret = "26a2095b60c24154521d24ae62b885bb"
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+    [elastic.HTTPClient.breaker]
+    window  ="3s"
+    sleep   ="100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[bfs]
+key         = "2wf7m69kng83cl5h"
+secret      = "jr0po1k2e9mtai5l8g3shn7dqxwc4u"
+addr        = "http://uat-bfs.bilibili.co/bfs/account/recovery"
+bucket      = "account"
+timeout     = "10s"
+
+[databus]
+[databus.UserActLog]
+key = "2511663d546f1413"
+secret = "cde3b480836cc76df3d635470f991caa"
+group = "LogUserAction-MainSearch-P"
+topic = "LogUserAction-T"
+action = "pub"
+buffer = 10240
+name = "log-user-action/log-sub"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"

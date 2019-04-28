@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package model;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// result of http access info.
+message accessInfo {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    int64 AppID = 2 [(gogoproto.jsontag) = "appid"];
+    string Token = 3 [(gogoproto.jsontag) = "access_key"];
+    int64 CreateAt = 4 [(gogoproto.jsontag) = "create_at"];
+    string UserID = 5 [(gogoproto.jsontag) = "userid"];
+    string Name = 6 [(gogoproto.jsontag) = "uname"];
+    int64 Expires = 7 [(gogoproto.jsontag) = "expires"];
+    string Permission = 8 [(gogoproto.jsontag) = "permission"];
+}
+
+message renewInfo {
+    int64 Expires = 1 [(gogoproto.jsontag) = "expires"];
+}

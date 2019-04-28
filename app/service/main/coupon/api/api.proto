@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+// use {app_id}.{version} as package name
+package account.coupon;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+message CaptchaTokenReq {
+    string ip = 1;
+}
+
+message CaptchaTokenReply {
+     string token = 1;
+     string url = 2;
+}
+
+message UseCouponCodeReq{
+    string token =1;
+    string code = 2;
+    string verify =3;
+    string ip =4;
+    int64 mid = 5;
+}
+
+message  UseCouponCodeResp{
+    string coupon_token = 1;
+    double  coupon_amount = 2;
+    double  full_amount = 3;
+    string  platfrom_limit_explain = 4;
+    int32  product_limit_month = 5;
+    int32  product_limit_renewal = 6;
+}
+
+message UsableAllowanceCouponV2Req{
+    int64 mid =1;
+    repeated  ModelPriceInfo priceInfo = 2;
+}
+
+message ModelPriceInfo {
+    double price = 1;
+    int64 plat = 2;
+    int32 prodLimMonth = 3;
+    int32 prodLimRenewal = 4;
+}
+
+message UsableAllowanceCouponV2Reply{
+    string coupon_tip = 1;
+    ModelCouponAllowancePanelInfo  coupon_info = 2;
+}
+
+message ModelCouponAllowancePanelInfo{
+    string coupon_token = 1;
+    double coupon_amount = 2;
+    int32 state = 3;
+    string full_limit_explain = 4;
+    string scope_explain = 5;
+    double full_amount = 6;
+    double coupon_discount_price = 7;
+    int64 start_time = 8;
+    int64 expire_time = 9;
+    int32 selected = 10;
+    string disables_explains = 11;
+    string order_no = 12;
+    string name = 13;
+    int32 usable = 14;
+}
+
+service Coupon { 
+    // CaptchaToken captcha token. 
+    rpc CaptchaToken(CaptchaTokenReq) returns(CaptchaTokenReply); 
+    // UseCouponCode use coupon code. 
+    rpc UseCouponCode(UseCouponCodeReq) returns(UseCouponCodeResp); 
+    // UsableAllowanceCouponV2 use allowance coupon v2. 
+    rpc UsableAllowanceCouponV2(UsableAllowanceCouponV2Req) returns(UsableAllowanceCouponV2Reply); 
+}

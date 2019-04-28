@@ -1,0 +1,61 @@
+version = "1.0.0"
+user    = "nobody"
+pid     = "/tmp/feed-job.pid"
+dir     = "./"
+perf    = "0.0.0.0:6411"
+trace   = false
+debug   = false
+env     = "test"
+
+[xlog]
+dir = "/data/log/feed-job/"
+
+[bm]
+     addr = "0.0.0.0:6410"
+     timeout = "1s"
+
+[feedRPC]
+    pullInterval = "10s"
+    [feedRPC.client]
+    proto = "tcp"
+    timeout = "1s"
+    timer = 1000
+    [[feedRPC.backup]]
+    proto = "tcp"
+    addr = "172.16.33.56:6089"
+    timeout = "1s"
+    timer = 1000
+    [feedRPC.zookeeper]
+    root = "/microservice/feed-service/"
+    addrs = ["172.16.33.54:2181"]
+    timeout = "30s"
+
+[archiveSub]
+key = ""
+secret = ""
+group = ""
+topic = "Archive-T"
+action = "sub"
+    [archiveSub.redis]
+    name = "go-common/app/job/main/feed/archivesub"
+    proto = "tcp"
+    addr = "172.16.33.56:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[SMS]
+phone = "11111111111,11111111111"
+token = "token"
+
+[httpClient]
+dial      = "100ms"
+timeout   = "1s"
+keepAlive = "60s"
+timer     = 128
+
+
+

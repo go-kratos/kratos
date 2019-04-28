@@ -1,0 +1,139 @@
+syntax = "proto3";
+package live.approom.v1;
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Gift{
+    // 每日礼包接口
+    // `midware:"guest"`
+    rpc daily_bag(DailyBagReq) returns (DailyBagResp);
+
+    // `midware:"auth"`
+    rpc NeedTipRecharge (NeedTipRechargeReq) returns (NeedTipRechargeResp);
+
+    // `midware:"auth" method:"post"`
+    rpc TipRechargeAction (TipRechargeActionReq) returns(TipRechargeActionResp);
+
+    //礼物全量配置
+    rpc gift_config(GiftConfigReq) returns (GiftConfigResp);
+}
+
+message DailyBagReq{
+}
+
+message DailyBagResp{
+    int64 bag_status=1 [(gogoproto.jsontag)="bag_status"];
+    int64 bag_expire_status=2 [(gogoproto.jsontag)="bag_expire_status"];
+    BagToast bag_toast = 3 [(gogoproto.jsontag)="bag_toast"];
+    message BagToast{
+        int64 toast_status=1 [(gogoproto.jsontag)="toast_status"];
+        string toast_message=2 [(gogoproto.jsontag)="toast_message"];
+    }
+    repeated BagList bag_list = 4 [(gogoproto.jsontag)="bag_list"];
+    message BagList{
+        int64 type=1 [(gogoproto.jsontag)="type"];
+        string bag_name=2 [(gogoproto.jsontag)="bag_name"];
+        Source source = 3 [(gogoproto.jsontag)="source"];
+        message Source{
+            int64 medal_id = 1 [(gogoproto.jsontag)="medal_id"];
+            string medal_name = 2 [(gogoproto.jsontag)="medal_name"];
+            int64 level = 3 [(gogoproto.jsontag)="level"];
+            int64 user_level = 4 [(gogoproto.jsontag)="user_level"];
+        }
+        repeated GiftList gift_list = 4 [(gogoproto.jsontag)="gift_list"];
+        message GiftList{
+            string gift_id=1 [(gogoproto.jsontag)="gift_id"];
+            int64 gift_num=2 [(gogoproto.jsontag)="gift_num"];
+            int64 expire_at=3 [(gogoproto.jsontag)="expire_at"];
+        }
+    }
+}
+
+message GiftConfigReq{
+    string platform = 1 [(gogoproto.moretags) = 'form:"platform"'];
+    int64 build = 2 [(gogoproto.moretags) = 'form:"build"'];
+}
+
+message GiftConfigResp{
+    repeated Config list = 1 [(gogoproto.jsontag)="list"];
+    message Config{
+        int64 id = 1 [(gogoproto.jsontag)="id"];
+        string name = 2 [(gogoproto.jsontag)="name"];
+        int64 price = 3 [(gogoproto.jsontag)="price"];
+        int64 type = 4 [(gogoproto.jsontag)="type"];
+        string coin_type = 5 [(gogoproto.jsontag)="coin_type"];
+        int64 bag_gift = 6 [(gogoproto.jsontag)="bag_gift"];
+        int64 effect = 7 [(gogoproto.jsontag)="effect"];
+        string corner_mark = 8 [(gogoproto.jsontag)="corner_mark"];
+        int64 broadcast = 9 [(gogoproto.jsontag)="broadcast"];
+        int64 draw = 10 [(gogoproto.jsontag)="draw"];
+        int64 stay_time = 11 [(gogoproto.jsontag)="stay_time"];
+        int64 animation_frame_num = 12 [(gogoproto.jsontag)="animation_frame_num"];
+        string desc = 13 [(gogoproto.jsontag)="desc"];
+        string rule = 14 [(gogoproto.jsontag)="rule"];
+        string rights = 15 [(gogoproto.jsontag)="rights"];
+        int64 privilege_required = 16 [(gogoproto.jsontag)="privilege_required"];
+        repeated CountMap count_map = 17 [(gogoproto.jsontag)="count_map"];
+        string img_basic = 18 [(gogoproto.jsontag)="img_basic"];
+        string img_dynamic = 19 [(gogoproto.jsontag)="img_dynamic"];
+        string frame_animation = 20 [(gogoproto.jsontag)="frame_animation"];
+        string gif = 21 [(gogoproto.jsontag)="gif"];
+        string webp = 22 [(gogoproto.jsontag)="webp"];
+        string full_sc_web = 23 [(gogoproto.jsontag)="full_sc_web"];
+        string full_sc_horizontal = 24 [(gogoproto.jsontag)="full_sc_horizontal"];
+        string full_sc_vertical = 25 [(gogoproto.jsontag)="full_sc_vertical"];
+        string full_sc_horizontal_svga = 26 [(gogoproto.jsontag)="full_sc_horizontal_svga"];
+        string full_sc_vertical_svga = 27 [(gogoproto.jsontag)="full_sc_vertical_svga"];
+        string bullet_head = 28 [(gogoproto.jsontag)="bullet_head"];
+        string bullet_tail = 29 [(gogoproto.jsontag)="bullet_tail"];
+        int64 limit_interval = 30 [(gogoproto.jsontag)="limit_interval"];
+    }
+    message CountMap{
+        int64 num = 1 [(gogoproto.jsontag)="num"];
+        string text = 2 [(gogoproto.jsontag)="text"];
+    }
+}
+
+enum from {
+    None = 0;
+    Gold = 1;
+    Silver = 2;
+}
+
+enum userAction {
+    ActionNone = 0;
+    StopPush = 1;
+}
+
+message NeedTipRechargeReq {
+    // 来源 1金瓜子 2 银瓜子
+    from from = 1 [(gogoproto.moretags) = 'form:"from" validate:"required"'];
+    // 需要的金瓜子  如果From=2　那么直接传0
+    int64 needGold = 2 [(gogoproto.moretags) = 'form:"needGold"'];
+    // 平台 android ios
+    string platform = 3 [(gogoproto.moretags) = 'form:"platform" validate:"required"'];
+}
+
+message NeedTipRechargeResp {
+    // 是否展示
+    int32 show = 1 [(gogoproto.jsontag) = "show"];
+    // bp
+    float bp = 2 [(gogoproto.jsontag) = "bp"];
+    // bp券
+    float bpCoupon = 3 [(gogoproto.jsontag) = "bpCoupon"];
+    // 需要充值的金瓜子
+    int64 rechargeGold = 4 [(gogoproto.jsontag) = "rechargeGold"];
+}
+
+
+message TipRechargeActionReq {
+    // 来源 1金瓜子 2 银瓜子
+    from from = 1 [(gogoproto.moretags) = 'form:"from" validate:"required"'];
+    //行为 1 停止推送
+    userAction action = 2 [(gogoproto.moretags) = 'form:"action" validate:"required"'];
+}
+
+message TipRechargeActionResp {
+}

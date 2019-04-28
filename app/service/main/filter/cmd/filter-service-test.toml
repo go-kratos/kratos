@@ -1,0 +1,115 @@
+[log]
+    dir = "/data/log/filter-service/"
+
+[bm]
+    addr = "0.0.0.0:6272"
+    maxListen = 10
+    timeout = "1s"
+
+[rpcServer2]
+    discoverOff = true
+[[rpcServer2.servers]]
+    proto = "tcp"
+    addr = ":6279"
+    weight = 10
+[rpcServer2.zookeeper]
+    root = "/microservice/filter-service/"
+    addrs = ["172.18.33.172:2181"]
+    timeout = "1s"
+
+[rpcClient]
+    [rpcClient.antispam]
+    pullInterval = "10s"
+    timeout = "30s"
+    [rpcClient.spy]
+    pullInterval = "10s"
+    timeout = "30s"
+
+[mysql]
+   addr= "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_filter?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    IdleTimeout = "1800s"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "2s"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+# [hbase]
+#     master = ""
+#     meta = ""
+#     dialTimeout = "1s"
+#     readTimeout = "200ms"
+#     readsTimeout = "1s"
+#     writeTimeout = "200ms"
+#     writesTimeout = "200ms"
+#     [hbase.zookeeper]
+#     root = ""
+#     addrs = ["127.0.0.1:2181"]
+#     timeout = "30s"
+
+[memcache]
+    [memcache.mc]
+        name = "filter-service"
+        proto = "tcp"
+        addr = "172.16.33.54:11214"
+        idle = 10
+        active = 10
+        dialTimeout = "2s"
+        readTimeout = "2s"
+        writeTimeout = "2s"
+        idleTimeout = "7h"
+    [memcache.expire]
+        filterKeyExpire = "1s"
+        filterExpire = "1s"
+
+[httpClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "500ms"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[wardenServer]
+    addr = "0.0.0.0:6077"
+    timeout = "1s"
+
+[property]
+    sourceMask = [0,2,4,8]  # 过滤词来源：0 上级部门;2 审核规避;4 运营规避;8 审核提示
+    reloadTick ="10s" # 过滤词reload周期
+    secondReloadTick ="1s"
+    expiredTick ="5s"  # 过滤词过期检查周期
+    lruTick = "1s"
+    lruLen = 1024
+    parallelSize=100 # 并发执行正则时，并发单元执行正则数，如设为10且将过滤1000个正则，则会拆分100个goroutine执行
+    criticalFilterLevel = 15 # 过滤高危等级，>criticalFilterLevel的过滤词才会被加*，且level会返回业务方（为了防止部分业务方仅判断level>0就屏蔽的情况）
+	goMaxProce = 4   # go p 倍数 ： p = 核心数 * goMaxProce
+    maxMpostSplitSize = 300  # 文本分片最大长度 (Byte)
+    maxHitSplitSize = 2000
+    filterMpostURL = "http://api.bilibili.co/x/internal/filter/mpost"  # 分片过滤url
+    filterHitURL = "http://api.bilibili.co/x/internal/filter/v2/hit"
+    filterCacheShortMaxSize = 60  # 短文本cache最大长度 (Byte)
+    filterCacheLongMinSize = 6000  # 长文本cache最小长度 (Byte)
+    filterFullLevelList = ["live_danmu", "live_biaoti", "live_tag", "live_jianjie", "live_xiaoshipinbiaoti", "live_xuyuanping", "live_xiangbubiaoqian", "live_xiangbubiaoti", "live_xiangbujianjie", "live_xiaoshipindanmu", "mall", "open_ticket", "open_cms", "bplus_dongtai", "bplus_xiaoxi", "bplus_xiaoxiqunjianjie", "bplus_xiaoxiqunbiaoti", "bplus_xiaoxiliaotianshi"] # 全level过滤名单
+    aiDelayTick = "10s"
+    [property.ai]
+	threshold = 0.5  # AI阀值
+	trueScore = 98.5 # AI真实分标准
+    [property.aihost]
+    ai = "http://data-test.bilibili.co"
+	api = "http://api.bilibili.co"
+	manager = "http://manager.bilibili.co"
+

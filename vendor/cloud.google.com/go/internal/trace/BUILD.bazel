@@ -1,0 +1,33 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "go18.go",
+        "not_go18.go",
+    ],
+    importmap = "k8s.io/test-infra/vendor/cloud.google.com/go/internal/trace",
+    importpath = "cloud.google.com/go/internal/trace",
+    visibility = ["//vendor/cloud.google.com/go:__subpackages__"],
+    deps = [
+        "//vendor/go.opencensus.io/trace:go_default_library",
+        "//vendor/google.golang.org/api/googleapi:go_default_library",
+        "//vendor/google.golang.org/genproto/googleapis/rpc/code:go_default_library",
+        "@org_golang_google_grpc//status:go_default_library",
+        "@org_golang_x_net//context:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,31 @@
+// Package server generate by warden_gen
+package server
+
+import (
+    {{range $key, $value := .Imports}}"{{$key}}"{{end}}
+
+    service "{{.RecvPackage}}"
+    pb "{{.PbPackage}}"
+    "go-common/library/net/rpc/warden"
+)
+
+// New {{.Name}} warden rpc server
+func New(c *warden.ServerConfig, svr *service.{{.RecvName}}) (*warden.Server) {
+	ws := warden.NewServer(c)
+	pb.Register{{.Name}}Server(ws.Server(), &server{svr})
+	return ws
+}
+
+type server struct {
+    svr *service.{{.RecvName}}
+}
+
+var _ pb.{{.Name}}Server = &server{}
+
+{{range .Methods}}
+// {{range .Comments}}{{.}}{{end}}
+func(s *server) {{.Name}}(ctx context.Context, req *pb.{{.Name}}Req) (*pb.{{.Name}}Reply, error) {
+    panic("not implemented")
+}
+{{end}}
+

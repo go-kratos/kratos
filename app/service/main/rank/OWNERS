@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chenzhihui
+- guanhuaxin
+- libingqi
+- zhapuyu
+labels:
+- main
+- service
+- service/main/rank
+options:
+  no_parent_owners: true
+reviewers:
+- chenzhihui
+- libingqi
+- zhapuyu

@@ -1,0 +1,285 @@
+# This is a TOML document. Boom.
+
+version = "2.3.0"
+user = "nobody"
+pid = "/tmp/tv-job.pid"
+dir = "./"
+family = "tv-job"
+address = ""
+
+[cfg]
+    titleFilter = ["预告","番外","花絮","先导","彩蛋","特别篇","PV","总集","剧场版","SP","干颜篇","精编版","小剧场","合集","新年篇","序幕","宣传"]
+    lessStrategy = 1
+    pgcTypes = ["番剧","电视剧","电影","纪录片"]
+    pgcZonesID = [1,2,3,4,5]
+    [cfg.merak]
+        host = "http://merak.bilibili.co/"
+        Key = "71f079db59672ecec5b8d6f252c4b59ab2a8a227mainsite@bilibili.com"
+        Secret = "37ba757817b4e9c45c7e97f6ed5eee4e1c7bac52"
+        Names = ['hekai01','huangyi01','zhaoshichen']
+        Template = "今日season状态同步完成。上线season：%s，下线season：%s。"
+        Title = "TV CMS自动上下架操作"
+        cron = "0 0 18 * * *" # every minute, test
+        onlyFree = true
+    [cfg.SyncRetry]
+        MaxRetry = 10
+        RetryFre = "15s"
+    [cfg.UgcZones]
+    [cfg.UgcZones.6]
+        TID=3
+        Name="音乐"
+    [cfg.UgcZones.7]
+        TID=4
+        Name="游戏"
+    [cfg.UgcZones.8]
+        TID=36
+        Name="科技"
+    [cfg.UgcZones.9]
+        TID=160
+        Name="生活"
+    [cfg.UgcZones.10]
+        TID=155
+        Name="时尚"
+
+[search]
+    UgcSwitch = "off"
+    sugPath = "/tmp/tvsug"
+    md5Path = "/tmp/tvsug.md5"
+    PgcContPath = "/tmp/tvpgc"
+    PgcContMd5Path = "/tmp/tvpgc.md5"
+    UgcContPath = "/tmp/tvugc"
+    UgcContMd5Path = "/tmp/tvugc.md5"
+    [search.cfg]
+        UploadFre = "100s"
+    [search.ftp]
+        PASS="MhxzKhl"
+        USER="work"
+        HOST="172.16.33.203:21"
+        URL="/home/work/open/tvsug/"
+        Timeout="5s"
+        UseEPSV=false
+        RemoteFName="tvsug"
+        RemoteMd5="tvsug.md5"
+        RemotePgcURL="/home/work/open/tvpgc/"
+        RemotePgcCont="tvpgc"
+        RemotePgcContMd5="tvpgc.md5"
+        RemoteUgcURL="/home/work/open/tvugc/"
+        RemoteUgcCont="tvugc"
+        RemoteUgcContMd5="tvugc.md5"
+
+[sync]
+    NbMsg = 1
+    HTTPTimeout = "5s"
+    DialTimeout = "800ms"
+    LogSize = 400
+    AuditPrefix = "xds"
+    UGCPrefix = "ugc"
+    sign = "timer-import_BILIBILI"
+    [sync.LConf]
+        SizeMsg = 80
+        NbSeason = 10
+        CPCode = "BILIBILI"
+    [sync.PlayURL]
+        upsigsecret = "20170607920cbd5211831ce2a97066a8b544fa7b"
+        deadline = "720h"
+        playpath = "upos-hz-tvshenhe.acgvideo.com"
+        #api = "http://videodispatch-pgc.bilibili.co/v2/playurl"
+        api = "http://uat-manager.bilibili.co/api/v4/test/playurltest"
+        qn = "16"
+        deadcodes = [10005]
+    [sync.Frequency]
+         FreModSeason = "20s"
+         ErrorWait = "10s"
+         WaitCall = 60
+         RejectWait = 86400
+    [sync.API]
+        AddURL = "http://183.3.131.82:8012/importAgent/bilibili/add2.0"
+        UpdateURL = "http://uat-manager.bilibili.co/api/v4/test/tvtest"
+        DelSeasonURL = "http://183.3.131.82:8012/importAgent/bilibili/ps_del2.0"
+        DelEPURL = "http://183.3.131.82:8012/importAgent/bilibili/p_del2.0"
+
+[ugcSync]
+    [ugcSync.Frequency]
+        ErrorWait = 100
+        ManualFre = "30s"
+        ImportFre = "30s"
+        SyncFre = "10s"
+        TypesCron = "0 */5 * * * *"
+        UpperRefresh = "10m"
+        UpInitFre = "10s"
+        ProducerFre = "2s" # 生产全量缓存时候的间隙时间
+        UpperPause = "30s"
+        FullRefreshFre = "2h"
+        FullRefArcFre = "20ms"
+    [ugcSync.Batch]
+        ManualNum = 20
+        ImportNum = 20
+        ArcPS = 20
+        SyncPS = 2
+        ReportCidPS = 100
+        ProducerPS = 5 # 生产全量缓存时的ps大小
+        ReshelfPS = 2
+    [ugcSync.cfg]
+        Copyright = "bilibili"
+        ReportCidURL = "http://172.18.33.140:7703/api/v1/task/push/batch/watermarkless"
+        BFSPrefix = "http://i0.hdslb.com"
+        SendUpper = true
+        CriticalCid = 12780000
+        ThreadLimit = 1024
+
+[archiveNotifySub]
+    key = "9765cdac5894f2ba"
+    secret = "f4237d712c3ed1e7fab0137b81418b14"
+    group = "ArchiveNotify-MainWebSvr-S"
+    topic = "ArchiveNotify-T"
+    action = "sub"
+    name = "tv-job/archiveNotifysub"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[contentSub]
+    key = "9765cdac5894f2ba"
+    secret="f4237d712c3ed1e7fab0137b81418b14"
+    group= "PgcTvBinlog-MainWebSvr-S"
+    topic= "PgcTvBinlog-T"
+    action="sub"
+    name = "tv-job/content-sub" #?
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[mysql]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_tv?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 100
+    idle = 10
+    queryTimeout = "2s"
+    execTimeout = "10s"
+    tranTimeout = "5s"
+    [mysql.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+
+[log]
+	dir = "/data/log/tv-job/"
+
+[HTTPServer]
+    addr = "0.0.0.0:6431"
+    timeout = "1s"
+
+[memcache]
+    name = "tv"
+    proto = "tcp"
+    #addr = "172.16.33.54:11211"
+    addr = "127.0.0.1:9393"
+    idle = 50
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "240h" #都改为10天
+    expireMedia = "240h" #都改为10天
+
+[playControl]
+    ProducerCron = "* */10 * * * *"
+    pieceSize = 50
+
+[httpClient]
+    key    = "cadf599ba8b3796a"
+    secret = "42fbb979aa742013d713a088f912673b"
+    dial      = "2s"
+    timeout   = "10s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.breaker]
+        window  = "10s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[redis]
+    name = "tv-job"
+    proto = "tcp"
+    addr = "127.0.0.1:6379"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+    cronPGC = "0 */5 * * * *"
+    cronUGC = "59 */5 * * * * "
+
+[archiveRPC]
+    pullInterval = "10s"
+    group = "uat"
+    env = "uat"
+    timeout = "3s"
+
+[accountRPC]
+    timeout = "1s"
+
+[ugcSub]
+    key = "9765cdac5894f2ba"
+    secret="1448f5f2cd6029f6af6c5d438cd31edd"
+    group= "UgcTvBinlog-MainWebSvr-S"
+    topic= "UgcTvBinlog-T"
+    action="sub"
+    name = "tv-job/ugc-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[dpClient]
+    key = "8a16e50429e739278daeb4b65fa349f6"
+    secret="69bbb1c1016d9055fed6202d70b24a05"
+    dial = "2s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [dpClient.breaker]
+        window = "10s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request =  100
+
+[report]
+    reportURI = "http://berserker.bilibili.co/avenger/api/133/query"
+    upDataURI = "http://data.capture.atianqi.com:8090/xdstvlog"
+    env = "uat"
+    cronAc = "0 5 * * * *"
+    cronAd = "0 15 * * * *"
+    cronPd = "0 25 * * * *"
+    cronVe = "0 40 * * * *"
+    timeDelay = "24h"      # 获取昨天的数据
+    sendDataDelay = "10ms" # 给牌照方发数据
+    seTimeSpan = "1h"      # 获取时间内的数据
+    routineCount = 5
+    readSize = 500
+    expire = "240h"
+
+[style]
+    labelSpan = "168h"
+    styleSpan = "5m"

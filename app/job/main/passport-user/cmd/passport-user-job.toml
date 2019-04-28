@@ -1,0 +1,133 @@
+[xlog]
+dir = "/data/log/passport-user"
+
+[incSync]
+    switch = true
+
+[fullSync]
+    asoCountryCodeSwitch = false
+    [fullSync.asoAccount]
+        switch = true
+        chanNum = 2
+        chanSize = 1024
+        start = 0
+        end = 100
+        count = 10
+    [fullSync.asoAccountInfo]
+        switch = false
+        chanNum = 2
+        chanSize = 1024
+        start = 0
+        end = 100000
+        count = 10000
+    [fullSync.asoAccountReg]
+        switch = false
+        chanNum = 2
+        chanSize = 1024
+        start = 0
+        end = 100000
+        count = 10000
+    [fullSync.asoAccountSns]
+        switch = false
+        chanNum = 2
+        chanSize = 1024
+        start = 0
+        end = 100000
+        count = 10000
+    [fullSync.asoTelBindLog]
+        switch = false
+        chanNum = 2
+        chanSize = 1024
+        start = 0
+        end = 100000
+        count = 10000
+
+[scheduler]
+    switch = false
+    telDuplicateCron = "*/5 * * * * ?"
+    emailDuplicateCron = "*/5 * * * * ?"
+
+[bm]
+    addr = "0.0.0.0:8000"
+    timeout = "1s"
+
+[db]
+    [db.originDB]
+        addr = "172.16.33.205:3306"
+        dsn = "aso:hA0DAnENNFz78kYB@tcp(172.16.33.205:3306)/aso?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 5
+        idle = 2
+        queryTimeout = "1s"
+        execTimeout = "2s"
+        tranTimeout = "2s"
+        [db.originDB.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+    [db.userDB]
+        addr = "127.0.0.1:3306"
+        dsn = "root:root@tcp(127.0.0.1:3306)/user?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 5
+        idle = 2
+        queryTimeout = "1s"
+        execTimeout = "2s"
+        tranTimeout = "2s"
+        [db.userDB.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+    [db.encryptDB]
+        addr = "127.0.0.1:3306"
+        dsn = "root:root@tcp(127.0.0.1:3306)/user?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 5
+        idle = 2
+        queryTimeout = "1s"
+        execTimeout = "2s"
+        tranTimeout = "2s"
+        [db.encryptDB.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+
+
+[databusUtil]
+    size = 200
+    num = 32
+    ticker = "1s"
+    chan = 1024
+
+[databus]
+    [databus.asoBinLogSub]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "PassportUserBinlog-MainAccount-S"
+    topic = "PassportUserBinlog-T"
+    action = "sub"
+    offset = "old"
+    buffer = 2048
+    name = "passport-user/databus"
+    proto = "tcp"
+    addr = "172.16.38.154:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[memcache]
+    name = "passport-user-service"
+    proto = "tcp"
+    addr = "172.22.33.137:11219"
+    idle = 1000
+    active = 1000
+    dialTimeout = "10s"
+    readTimeout = "10s"
+    writeTimeout = "10s"
+    idleTimeout = "30s"

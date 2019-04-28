@@ -1,0 +1,15 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chenjianrong
+- linmiao
+- zhoujiahui
+- zhoujixiang
+labels:
+- job
+- job/main/member
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- chenjianrong

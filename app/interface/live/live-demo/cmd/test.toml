@@ -1,0 +1,15 @@
+[log]
+    stdout = true
+
+[redis]
+	name = "live-demo-interface"
+	proto = "tcp"
+	addr = ""
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+

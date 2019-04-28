@@ -1,0 +1,896 @@
+version = "1.1.1"
+user    = "nobody"
+pid     = "/tmp/search-job.pid"
+dir     = "./"
+debug   = false
+
+[xlog]
+dir = "/data/log/search-job/"
+
+[tracer]
+family = "search-job"
+proto = "unixgram"
+addr = "/var/run/dapper-collect/dapper-collect.sock"
+
+[hbase]
+master = ""
+meta = ""
+dialTimeout = "10s"
+readTimeout = "10s"
+readsTimeout = "10s"
+writeTimeout = "10s"
+writesTimeout = "10s"
+  [hbase.zookeeper]
+  root = ""
+  addrs = ["10.23.58.154:2181","10.23.58.141:2181","10.23.58.20:2181"]
+  timeout = "30s"
+
+[business]
+env = "fav_playlist"
+index = true
+
+[db]
+    [db.bilibili_lottery]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_lottery?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 10
+    idle = 5
+    idleTimeout  = "4h"
+    queryTimeout = "500ms"
+    execTimeout  = "500ms"
+    tranTimeout  = "500ms"
+    [db.bilibili_lottery.breaker]
+      window = "3s"
+      sleep = "100ms"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+    [db.feedback]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_feedback?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 10
+    idle = 5
+    idleTimeout  = "4h"
+    queryTimeout = "500ms"
+    execTimeout  = "500ms"
+    tranTimeout  = "500ms"
+    [db.feedback.breaker]
+      window = "3s"
+      sleep = "100ms"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+    [db.search]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_search?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+    active = 10
+    idle = 5
+    idleTimeout  = "4h"
+    queryTimeout = "10s"
+    execTimeout  = "10s"
+    tranTimeout  = "10s"
+    [db.search.breaker]
+      window = "10s"
+      sleep = "100ms"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+    [db.archive]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_archive?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 10
+    idle = 5
+    idleTimeout  = "4h"
+    queryTimeout = "500ms"
+    execTimeout  = "500ms"
+    tranTimeout  = "500ms"
+    [db.archive.breaker]
+      window = "3s"
+      sleep = "500ms"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+    [db.manager]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_manager?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 10
+    idle = 5
+    idleTimeout  = "4h"
+    queryTimeout = "500ms"
+    execTimeout  = "500ms"
+    tranTimeout  = "500ms"
+    [db.manager.breaker]
+      window = "3s"
+      sleep = "500ms"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+    [db.dmmeta]
+    addr = "172.16.33.205:3310"
+    dsn = "test_3308:test_3308@tcp(172.16.33.205:3310)/bilibili_dm_meta?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 10
+    idle = 5
+    idleTimeout  = "4h"
+    queryTimeout = "10s"
+    execTimeout  = "10s"
+    tranTimeout  = "10s"
+    [db.dmmeta.breaker]
+      window = "3s"
+      sleep = "3s"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+    [db.dm]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_dm?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 10
+    idle = 5
+    idleTimeout  = "4h"
+    queryTimeout = "200ms"
+    execTimeout  = "200ms"
+    tranTimeout  = "200ms"
+    [db.dm.breaker]
+      window = "3s"
+      sleep = "100ms"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+    [db.bilibili_esports]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_esports?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 10
+    idle = 5
+    idleTimeout  = "4h"
+    queryTimeout = "200ms"
+    execTimeout  = "200ms"
+    tranTimeout  = "200ms"
+    [db.bilibili_esports.breaker]
+      window = "3s"
+      sleep = "100ms"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+    [db.archive_stat]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/archive_stat?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 10
+    idle = 5
+    idleTimeout  = "4h"
+    queryTimeout = "200ms"
+    execTimeout  = "200ms"
+    tranTimeout  = "200ms"
+    [db.archive_stat.breaker]
+      window = "3s"
+      sleep = "100ms"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+    [db.bilibili_archive]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_archive?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 10
+    idle = 5
+    idleTimeout  = "4h"
+    queryTimeout = "200ms"
+    execTimeout  = "200ms"
+    tranTimeout  = "200ms"
+    [db.bilibili_archive.breaker]
+      window = "3s"
+      sleep = "100ms"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+    [db.archivestat]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/archive_stat?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 10
+    idle = 5
+    idleTimeout  = "4h"
+    queryTimeout = "500ms"
+    execTimeout  = "500ms"
+    tranTimeout  = "500ms"
+    [db.archivestat.breaker]
+      window = "3s"
+      sleep = "500ms"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+    [db.blocked]
+    addr = "172.16.33.205:3306"
+    dsn = "blocked:mUdFycLKSbvPgdE28lCveqN77SqsGOmy@tcp(172.16.33.205:3306)/blocked?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 10
+    idle = 5
+    idleTimeout  = "4h"
+    queryTimeout = "5s"
+    execTimeout  = "5s"
+    tranTimeout  = "5s"
+    [db.blocked.breaker]
+    window = "3s"
+    sleep = "500ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.bilibili_reply]
+     addr = "172.16.33.205:3308"
+     dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_reply?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+     active = 10
+     idle = 5
+     idleTimeout  = "4h"
+     queryTimeout = "500ms"
+     execTimeout  = "500ms"
+     tranTimeout  = "500ms"
+    [db.bilibili_reply.breaker]
+      window = "3s"
+      sleep = "500ms"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+    [db.workflow]
+     addr = "172.16.33.205:3308"
+     dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_workflow?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+     active = 10
+     idle = 5
+     idleTimeout  = "4h"
+     queryTimeout = "10s"
+     execTimeout  = "10s"
+     tranTimeout  = "10s"
+     [db.workflow.breaker]
+       window = "10s"
+       sleep = "100ms"
+       bucket = 10
+       ratio = 0.5
+       request = 100
+    [db.music]
+      addr = "172.16.33.227:3306"
+      dsn = "root:123456@tcp(172.16.33.227:3306)/music?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+      active = 10
+      idle = 5
+      idleTimeout  = "4h"
+      queryTimeout = "10s"
+      execTimeout  = "10s"
+      tranTimeout  = "10s"
+      [db.music.breaker]
+        window = "10s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+    [db.pgc_review]
+    addr = "172.16.33.205:3307"
+    dsn = "pgc_review:pgc_test@tcp(172.16.33.205:3307)/pgc_review?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 10
+    idle = 5
+    idleTimeout  = "4h"
+    queryTimeout = "5s"
+    execTimeout  = "5s"
+    tranTimeout  = "5s"
+    [db.pgc_review.breaker]
+    window = "3s"
+    sleep = "500ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.aso]
+      addr = "172.16.33.205:3306"
+      dsn = "aso:hA0DAnENNFz78kYB@tcp(172.16.33.205:3306)/aso?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+      active = 10
+      idle = 5
+      idleTimeout  = "4h"
+      queryTimeout = "10s"
+      execTimeout  = "10s"
+      tranTimeout  = "10s"
+    [db.aso.breaker]
+      window = "3s"
+      sleep = "500ms"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+    [db.pgc_media]
+      addr = "172.16.33.205:3307"
+      dsn = "pgc_test:pgc_test@tcp(172.16.33.205:3307)/pgc_media?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+      active = 10
+      idle = 5
+      idleTimeout  = "4h"
+      queryTimeout = "10s"
+      execTimeout  = "10s"
+      tranTimeout  = "10s"
+    [db.pgc_media.breaker]
+      window = "3s"
+      sleep = "500ms"
+      bucket = 10
+      ratio = 0.5
+      request = 100
+    [db.vip]
+     addr = "172.16.0.28:3306"
+     dsn = "bilibili:12345@tcp(172.16.0.28:3306)/vip?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+     active = 10
+     idle = 5
+     idleTimeout  = "4h"
+     queryTimeout = "10s"
+     execTimeout  = "10s"
+     tranTimeout  = "10s"
+     [db.vip.breaker]
+       window = "10s"
+       sleep = "100ms"
+       bucket = 10
+       ratio = 0.5
+       request = 100
+    [db.bilibili_vip]
+     addr = "172.16.0.28:3306"
+     dsn = "bilibili:12345@tcp(172.16.0.28:3306)/bilibili_vip?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+     active = 10
+     idle = 5
+     idleTimeout  = "4h"
+     queryTimeout = "10s"
+     execTimeout  = "10s"
+     tranTimeout  = "10s"
+     [db.bilibili_vip.breaker]
+       window = "10s"
+       sleep = "100ms"
+       bucket = 10
+       ratio = 0.5
+       request = 100
+    [db.bilibili_article]
+     addr = "172.16.33.205:3308"
+     dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_article?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+     active = 10
+     idle = 5
+     idleTimeout  = "4h"
+     queryTimeout = "10s"
+     execTimeout  = "10s"
+     tranTimeout  = "10s"
+     [db.bilibili_article.breaker]
+       window = "10s"
+       sleep = "100ms"
+       bucket = 10
+       ratio = 0.5
+       request = 100
+    [db.user]
+     addr = "172.16.33.205:3306"
+     dsn = "account:wx2U1MwXRyWEuURw@tcp(172.16.33.205:3306)/relation?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+     active = 10
+     idle = 5
+     idleTimeout  = "4h"
+     queryTimeout = "10s"
+     execTimeout  = "10s"
+     tranTimeout  = "10s"
+     [db.user.breaker]
+       window = "10s"
+       sleep = "100ms"
+       bucket = 10
+       ratio = 0.5
+       request = 100
+    [db.lottery]
+     addr = "172.16.33.205:3306"
+     dsn = "account:wx2U1MwXRyWEuURw@tcp(172.16.33.205:3306)/bilibili_lottery?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+     active = 10
+     idle = 5
+     idleTimeout  = "4h"
+     queryTimeout = "10s"
+     execTimeout  = "10s"
+     tranTimeout  = "10s"
+     [db.lottery.breaker]
+       window = "10s"
+       sleep = "100ms"
+       bucket = 10
+       ratio = 0.5
+       request = 100
+    [db.aso_account]
+     addr = "172.16.33.205:3306"
+     dsn = "aso:hA0DAnENNFz78kYB@tcp(172.16.33.205:3306)/aso?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+     active = 10
+     idle = 5
+     idleTimeout  = "4h"
+     queryTimeout = "10s"
+     execTimeout  = "10s"
+     tranTimeout  = "10s"
+     [db.aso_account.breaker]
+       window = "10s"
+       sleep = "100ms"
+       bucket = 10
+       ratio = 0.5
+       request = 100
+    [db.pgc]
+     addr = "172.16.33.205:3306"
+     dsn = "bangumi:SbBR5yRCYuMdYyor@tcp(172.16.33.205:3306)/bili2_statement?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+     active = 10
+     idle = 5
+     idleTimeout  = "4h"
+     queryTimeout = "10s"
+     execTimeout  = "10s"
+     tranTimeout  = "10s"
+     [db.pgc.breaker]
+       window = "10s"
+       sleep = "100ms"
+       bucket = 10
+       ratio = 0.5
+       request = 100
+    [db.bilibili_member]
+     addr = "172.16.33.205:3308"
+     dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_member?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+     active = 10
+     idle = 5
+     idleTimeout  = "4h"
+     queryTimeout = "10s"
+     execTimeout  = "10s"
+     tranTimeout  = "10s"
+     [db.bilibili_member.breaker]
+       window = "10s"
+       sleep = "100ms"
+       bucket = 10
+       ratio = 0.5
+       request = 100
+     [db.platform_tag]
+      addr = "172.16.33.205:3308"
+      dsn = "test:test@tcp(172.16.33.205:3308)/platform_tag?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+      active = 10
+      idle = 5
+      idleTimeout  = "4h"
+      queryTimeout = "10s"
+      execTimeout  = "10s"
+      tranTimeout  = "10s"
+      [db.platform_tag.breaker]
+        window = "10s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+    [db.tickets]
+      addr = "172.16.33.203:3306"
+      dsn = "root:123456@tcp(172.16.33.203:3306)/tickets?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+      active = 10
+      idle = 5
+      idleTimeout  = "4h"
+      queryTimeout = "10s"
+      execTimeout  = "10s"
+      tranTimeout  = "10s"
+      [db.tickets.breaker]
+        window = "10s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+    [db.bilibili_upcrm]
+      addr = "172.16.33.205:3306"
+      dsn = "upcrm:DdL6c5JaWCYKMAQ10PURbfeImow9HXlx@tcp(172.16.33.205:3306)/bilibili_upcrm?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+      active = 10
+      idle = 5
+      idleTimeout  = "4h"
+      queryTimeout = "10s"
+      execTimeout  = "10s"
+      tranTimeout  = "10s"
+      [db.bilibili_upcrm.breaker]
+        window = "10s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+    [db.bilibili_fav]
+      addr = "172.16.33.205:3308"
+      dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_fav?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+      active = 10
+      idle = 5
+      idleTimeout  = "4h"
+      queryTimeout = "10s"
+      execTimeout  = "10s"
+      tranTimeout  = "10s"
+      [db.bilibili_fav.breaker]
+        window = "10s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+    [db.bilibili_creative]
+      addr = "172.16.33.205:3308"
+      dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_creative?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+      active = 10
+      idle = 5
+      idleTimeout  = "4h"
+      queryTimeout = "10s"
+      execTimeout  = "10s"
+      tranTimeout  = "10s"
+      [db.bilibili_creative.breaker]
+        window = "10s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100    
+    [db.bilibili_tv]
+      addr = "172.16.33.205:3308"
+      dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_tv?timeout=10s&readTimeout=10s&writeTimeout=10s&parseTime=true&loc=Local&charset=utf8"
+      active = 10
+      idle = 5
+      idleTimeout  = "4h"
+      queryTimeout = "10s"
+      execTimeout  = "10s"
+      tranTimeout  = "10s"
+      [db.bilibili_tv.breaker]
+        window = "10s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+
+[databus]
+    [databus.dm]
+    key = "615f0ad9d4ba4c01"
+    secret = "8dd405b9124f1ff1da67d026cedc471f"
+    group = "DMMeta-MainManager-S"
+    topic = "DMMeta-T"
+    action = "sub"
+    name = "search-job/dm-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [databus.dm_monitor]
+    key = "615f0ad9d4ba4c01"
+    secret = "8dd405b9124f1ff1da67d026cedc471f"
+    group = "DMSubject-MainManager-S"
+    topic = "DMSubject-T"
+    action = "sub"
+    name = "search-job/dm_monitor-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [databus.dm_search]
+    key = "2511663d546f1413"
+    secret = "971d048a2818e37ae124a0293c300e89"
+    group = "DMMeta-MainSearch-S"
+    topic = "DMMeta-T"
+    action = "sub"
+    name = "search-job/dm_search-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [databus.dm_date]
+    key = "2511663d546f1413"
+    secret = "971d048a2818e37ae124a0293c300e89"
+    group = "DMMeta-MainSearchDMHistory-S"
+    topic = "DMMeta-T"
+    action = "sub"
+    name = "search-job/dm_date-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [databus.dmreport]
+    key = "2511663d546f1413"
+    secret = "971d048a2818e37ae124a0293c300e89"
+    group = "BiliDMBinlog-MainSearch-S"
+    topic = "BiliDMBinlog-T"
+    action = "sub"
+    name = "search-job/dm_report-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [databus.blocked_info]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret = "0QEO9F8JuuIxZzNDvklI"
+    group = "Blocked-SearchInfo-S"
+    topic = "Blocked-T"
+    action = "sub"
+    name = "search-job/blocked-info-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "10s"
+    readTimeout = "60s"
+    writeTimeout = "10s"
+    idleTimeout = "10s"
+    [databus.blocked_case]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret = "0QEO9F8JuuIxZzNDvklI"
+    group = "Blocked-SearchCase-S"
+    topic = "Blocked-T"
+    action = "sub"
+    name = "search-job/blocked-case-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "10s"
+    readTimeout = "60s"
+    writeTimeout = "10s"
+    idleTimeout = "10s"
+    [databus.blocked_jury]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret = "0QEO9F8JuuIxZzNDvklI"
+    group = "Blocked-SearchJury-S"
+    topic = "Blocked-T"
+    action = "sub"
+    name = "search-job/blocked-jury-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "10s"
+    readTimeout = "60s"
+    writeTimeout = "10s"
+    idleTimeout = "10s"
+    [databus.blocked_opinion]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret = "0QEO9F8JuuIxZzNDvklI"
+    group = "Blocked-SearchOpinion-S"
+    topic = "Blocked-T"
+    action = "sub"
+    name = "search-job/blocked-opinion-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "10s"
+    readTimeout = "60s"
+    writeTimeout = "10s"
+    idleTimeout = "10s"
+    [databus.blocked_publish]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret = "0QEO9F8JuuIxZzNDvklI"
+    group = "Blocked-SearchPublish-S"
+    topic = "Blocked-T"
+    action = "sub"
+    name = "search-job/blocked-publish-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "10s"
+    readTimeout = "60s"
+    writeTimeout = "10s"
+    idleTimeout = "10s"
+    [databus.blocked_kpi_point]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret = "0QEO9F8JuuIxZzNDvklI"
+    group = "Blocked-Search-S"
+    topic = "Blocked-T"
+    action = "sub"
+    name = "search-job/blocked-kpi-point-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "10s"
+    readTimeout = "60s"
+    writeTimeout = "10s"
+    idleTimeout = "10s"
+    [databus.archive_video_relation]
+    key = "615f0ad9d4ba4c01"
+    secret = "8dd405b9124f1ff1da67d026cedc471f"
+    group = "Archive-MainManager-2-S"
+    topic = "Archive-T"
+    action = "sub"
+    name = "search-job/video_relation-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+   [databus.pgc_order]
+    key = "2511663d546f1413"
+    secret = "971d048a2818e37ae124a0293c300e89"
+    group = "Pgc-MainSearch-S"
+    topic = "Pgc-T"
+    action = "sub"
+    name = "search-job/pgc-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [databus.log_audit]
+    key = "2511663d546f1413"
+    secret = "971d048a2818e37ae124a0293c300e89"
+    group = "LogAudit-MainSearch-S"
+    topic = "LogAudit-T"
+    action = "sub"
+    name = "search-job/log-sub"
+    proto = "tcp"
+    addr = "172.16.38.154:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [databus.log_user_action]
+    key = "2511663d546f1413"
+    secret = "971d048a2818e37ae124a0293c300e89"
+    group = "LogUserAction-MainSearch-S"
+    topic = "LogUserAction-T"
+    action = "sub"
+    name = "search-job/log-sub"
+    proto = "tcp"
+    addr = "172.16.38.154:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [databus.favorite]
+    key = "2511663d546f1413"
+    secret = "971d048a2818e37ae124a0293c300e89"
+    group = "Favorite-MainSearch-S"
+    topic = "Favorite-T"
+    action = "sub"
+    name = "search-job/favorite-sub"
+    proto = "tcp"
+    addr = "172.16.38.154:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [databus.esports_fav]
+    key = "2511663d546f1413"
+    secret = "971d048a2818e37ae124a0293c300e89"
+    group = "Favorite-MainSearch-Esports-S"
+    topic = "Favorite-T"
+    action = "sub"
+    name = "search-job/favorite-sub"
+    proto = "tcp"
+    addr = "172.16.38.154:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [databus.up_crm_info]
+    key = "2511663d546f1413"
+    secret = "cde3b480836cc76df3d635470f991caa"
+    group = "UpCRMBinLog-MainSearch-S"
+    topic = "UpCRMBinLog-T"
+    action = "sub"
+    name = "search-job/upcrm-sub"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [databus.dm_subtitle]
+    key = "2511663d546f1413"
+    secret = "cde3b480836cc76df3d635470f991caa"
+    group = "BiliDMBinlog-MainSearch-Subtitle-S"
+    topic = "BiliDMBinlog-T"
+    action = "sub"
+    name = "search-job/dm-sub"
+    proto = "tcp"
+    addr = "172.16.38.154:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [databus.creative_archive]
+    key = "2511663d546f1413"
+    secret = "971d048a2818e37ae124a0293c300e89"
+    group = "Archive-MainSearch-CreativeArchive-S"
+    topic = "Archive-T"
+    action = "sub"
+    name = "search-job/archive-sub"
+    proto = "tcp"
+    addr = "172.16.38.154:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [databus.workflow_group_common]
+    key = "2511663d546f1413"
+    secret = "971d048a2818e37ae124a0293c300e89"
+    group = "WorkflowBinlog-MainSearch-Group-S"
+    topic = "WorkflowBinlog-T"
+    action = "sub"
+    name = "search-job/workflow-sub"
+    proto = "tcp"
+    addr = "172.16.38.154:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [databus.workflow_chall_common]
+    key = "2511663d546f1413"
+    secret = "971d048a2818e37ae124a0293c300e89"
+    group = "WorkflowBinlog-MainSearch-Chall-S"
+    topic = "WorkflowBinlog-T"
+    action = "sub"
+    name = "search-job/workflow-sub"
+    proto = "tcp"
+    addr = "172.16.38.154:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[HTTPServer]
+    addr = "0.0.0.0:6217"
+    maxListen = 1000
+    timeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+
+[es]
+    [es.pcie_dm_in]
+    addr = ["http://172.18.33.71:9200"]
+    [es.ssd_pub_in01]
+    addr = ["http://172.22.33.120:9201"]
+    [es.pcie_fav]
+    addr = ["http://172.18.33.71:9200"]
+    [es.replyInternal]
+    addr = ["http://172.18.33.71:9200"]
+    [es.replyExternal]
+    addr = ["http://172.18.33.71:9200"]
+    [es.archive]
+    addr = ["http://172.18.33.71:9200"]
+    [es.externalPublic]
+    addr = ["http://172.18.33.71:9200"]
+    [es.vip]
+    addr = ["http://172.18.33.71:9200"]
+    [es.log]
+    addr = ["http://172.18.33.71:9200"]
+    [es.article]
+    addr = ["http://172.18.33.71:9200"]
+    [es.internalPublic]
+    addr = ["http://172.18.33.71:9200"]
+    [es.open]
+    addr = ["http://172.18.33.71:9200"]
+    [es.fav]
+    addr = ["http://172.18.33.71:9200"]
+
+[redis]
+    name = "search-job"
+    proto = "tcp"
+    addr = "172.18.33.71:6379"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+
+[sms]
+    phone = "17621966518"
+    token = "f5a658b2-5926-4b71-96c3-7d3777b7d256"
+    interval = 300

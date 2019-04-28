@@ -1,0 +1,115 @@
+syntax = "proto3";
+package archive;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message Archive3 {
+    int64 Aid = 1 [(gogoproto.jsontag) = "aid"];
+    int64 Videos = 2 [(gogoproto.jsontag) = "videos"];
+    int32 TypeID = 3 [(gogoproto.jsontag) = "tid"];
+    string TypeName = 4 [(gogoproto.jsontag) = "tname"];
+    int32 Copyright = 5 [(gogoproto.jsontag) = "copyright"];
+    string Pic = 6 [(gogoproto.jsontag) = "pic"];
+    string Title = 7 [(gogoproto.jsontag) = "title"];
+    int64 PubDate = 8 [(gogoproto.jsontag) = "pubdate", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Ctime = 9 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string Desc = 10 [(gogoproto.jsontag) = "desc"];
+    int32 State = 11 [(gogoproto.jsontag) = "state"];
+    int32 Access = 12 [(gogoproto.jsontag) = "access,omitempty"];
+    int32 Attribute = 13 [(gogoproto.jsontag) = "attribute,omitempty"];
+    string Tag = 14 [(gogoproto.jsontag) = "-"];
+    repeated string Tags = 15 [(gogoproto.jsontag) = "tags,omitempty"];
+    int64 Duration = 16 [(gogoproto.jsontag) = "duration"];
+    int64 MissionID = 17 [(gogoproto.jsontag) = "mission_id,omitempty"];
+    int64 OrderID = 18 [(gogoproto.jsontag) = "order_id,omitempty"];
+    string RedirectURL = 19 [(gogoproto.jsontag) = "redirect_url,omitempty"];
+    int64 Forward = 20 [(gogoproto.jsontag) = "forward,omitempty"];
+    Rights3 Rights = 21 [(gogoproto.jsontag) = "rights", (gogoproto.nullable) = false];
+    Author3 Author = 22 [(gogoproto.jsontag) = "owner", (gogoproto.nullable) = false];
+    Stat3 Stat = 23 [(gogoproto.jsontag) = "stat", (gogoproto.nullable) = false];
+    string ReportResult = 24 [(gogoproto.jsontag) = "report_result,omitempty"];
+    string Dynamic = 25 [(gogoproto.jsontag) = "dynamic"];
+    int64 FirstCid = 26 [(gogoproto.jsontag) = "cid,omitempty"];
+    Dimension Dimension = 27 [(gogoproto.jsontag) = "dimension,omitempty", (gogoproto.nullable) = false];
+    repeated StaffInfo StaffInfo  = 28 [(gogoproto.jsontag) = "-"];
+}
+
+message StaffInfo {
+     int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+     string Title = 2 [(gogoproto.jsontag) = "title"];
+}
+
+message Dimension {
+    int64 Width = 1 [(gogoproto.jsontag) = "width"];
+    int64 Height = 2 [(gogoproto.jsontag) = "height"];
+    int64 Rotate = 3 [(gogoproto.jsontag) = "rotate"];
+}
+
+message Rights3 {
+    int32 Bp = 1 [(gogoproto.jsontag) = "bp"];
+    int32 Elec = 2 [(gogoproto.jsontag) = "elec"];
+    int32 Download = 3 [(gogoproto.jsontag) = "download"];
+    int32 Movie = 4 [(gogoproto.jsontag) = "movie"];
+    int32 Pay = 5 [(gogoproto.jsontag) = "pay"];
+    int32 HD5 = 6 [(gogoproto.jsontag) = "hd5"];
+    int32 NoReprint = 7 [(gogoproto.jsontag) = "no_reprint"];
+    int32 Autoplay = 8 [(gogoproto.jsontag) = "autoplay"];
+    int32 UGCPay = 9 [(gogoproto.jsontag) = "ugc_pay"];
+    int32 IsCooperation = 10 [(gogoproto.jsontag) = "is_cooperation"];
+}
+
+message Author3 {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    string Name = 2 [(gogoproto.jsontag) = "name"];
+    string Face = 3 [(gogoproto.jsontag) = "face"];
+}
+
+message Stat3 {
+    int64 Aid = 1 [(gogoproto.jsontag) = "aid"];
+    int32 View = 2 [(gogoproto.jsontag) = "view"];
+    int32 Danmaku = 3 [(gogoproto.jsontag) = "danmaku"];
+    int32 Reply = 4 [(gogoproto.jsontag) = "reply"];
+    int32 Fav = 5 [(gogoproto.jsontag) = "favorite"];
+    int32 Coin = 6 [(gogoproto.jsontag) = "coin"];
+    int32 Share = 7 [(gogoproto.jsontag) = "share"];
+    int32 NowRank = 8 [(gogoproto.jsontag) = "now_rank"];
+    int32 HisRank = 9 [(gogoproto.jsontag) = "his_rank"];
+    int32 Like = 10 [(gogoproto.jsontag) = "like"];
+    int32 DisLike = 11 [(gogoproto.jsontag) = "dislike"];
+}
+
+message Click3 {
+    int64 Aid = 1 [(gogoproto.jsontag) = "aid"];
+    int32 Web = 2 [(gogoproto.jsontag) = "web"];
+    int32 Ios = 3 [(gogoproto.jsontag) = "ios"];
+    int32 Android = 4 [(gogoproto.jsontag) = "android"];
+    int32 H5 = 5 [(gogoproto.jsontag) = "h5"];
+    int32 Outter = 6 [(gogoproto.jsontag) = "outter"];
+}
+
+message AidVideos3 {
+    int64 Aid = 1 [(gogoproto.jsontag) = "aid"];
+    repeated Page3 Pages = 2 [(gogoproto.jsontag) = "pages"];
+}
+
+message View3 {
+    Archive3 Archive = 1 [(gogoproto.embed) = true, (gogoproto.jsontag) = ""];
+    repeated Page3 Pages = 2 [(gogoproto.jsontag) = "pages,omitempty"];
+}
+
+message Page3 {
+    int64 Cid = 1 [(gogoproto.jsontag) = "cid"];
+    int32 Page = 2 [(gogoproto.jsontag) = "page"];
+    string From = 3 [(gogoproto.jsontag) = "from"];
+    string Part = 4 [(gogoproto.jsontag) = "part"];
+    int64 Duration = 5 [(gogoproto.jsontag) = "duration"];
+    string Vid = 6 [(gogoproto.jsontag) = "vid"];
+    string Desc = 7 [(gogoproto.jsontag) = "description,omitempty"];
+    string WebLink = 8 [(gogoproto.jsontag) = "weblink"];
+    Dimension Dimension = 9 [(gogoproto.jsontag) = "dimension", (gogoproto.nullable) = false];
+}

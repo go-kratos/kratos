@@ -1,0 +1,32 @@
+syntax = "proto3";
+ 
+/*
+ * v0.1.0
+ * 收藏夹信息
+ */
+package model;
+ 
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true; 
+
+message Field {
+    bool Flag = 1 [(gogoproto.jsontag) = "flag"];
+    int64 Oid = 2 [(gogoproto.jsontag) = "oid"];
+    int32 Pid = 3 [(gogoproto.jsontag) = "pid",(gogoproto.casttype) = "int16"];
+    int32 Click = 4 [(gogoproto.jsontag) = "click",(gogoproto.casttype) = "int"];
+    int64 Pubtime = 5 [(gogoproto.jsontag) = "pubtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int32 Result = 6 [(gogoproto.jsontag) = "result",(gogoproto.casttype) = "int8"];
+    int32 Deleted = 7 [(gogoproto.jsontag) = "deleted",(gogoproto.casttype) = "int8"];
+    int32 Valid = 8 [(gogoproto.jsontag) = "valid",(gogoproto.casttype) = "int8"];
+}
+
+message Fields{
+    repeated Field Fields= 1;
+}

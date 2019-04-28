@@ -1,0 +1,83 @@
+# This is a TOML document. Boom.
+[Identify]
+authHost = "http://passport.bilibili.co"
+# sync whith userlog databus
+LoginLogConsumerSize = 10
+IntranetCIDR = ["172.16.0.0/12", "10.0.0.0/8", "192.168.0.0/16"]
+
+[rpcServer2]
+[[rpcServer2.servers]]
+    proto = "tcp"
+    addr = "0.0.0.0:7379"
+    weight = 10
+[rpcServer2.zookeeper]
+    root = "/microservice/identify-service/"
+    addrs = ["172.18.33.172:2181"]
+    timeout = "1s"
+
+[bm]
+    addr = "0.0.0.0:7371"
+    timeout = "1s"
+
+[HTTPClient]
+    dial      = "50ms"
+    timeout   = "200ms"
+    keepAlive = "60s"
+    key = "f265dcfa28272742"
+    secret = "437facc22dc8698b5544669bcc12348d" 
+    [HTTPClient.breaker]
+    window  ="1s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[Memcache]
+    name = "identify-service"
+    proto = "tcp"
+    addr = "172.18.33.61:11234"
+    idle = 1000
+    active = 1000
+    dialTimeout = "10s"
+    readTimeout = "10s"
+    writeTimeout = "10s"
+    idleTimeout = "30s"
+    settingExpire = "720h"
+    reportExpire = "720h"
+
+[wardenServer]
+    addr = "0.0.0.0:6077"
+    timeout = "1s"
+[liveZK]
+    addrs = ["172.16.33.249:2189"]
+    timeout = "1s"
+
+[databus.userLog]
+key = "2511663d546f1413"
+secret = "cde3b480836cc76df3d635470f991caa"
+group = "LogUserAction-MainSearch-P"
+topic = "LogUserAction-T"
+action = "pub"
+buffer = 10240
+name = "log-user-action/log-sub"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 10
+active = 10
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[MemcacheLoginLog]
+    name = "identify-service"
+    proto = "tcp"
+    addr = "172.18.33.61:11234"
+    idle = 1000
+    active = 1000
+    dialTimeout = "10s"
+    readTimeout = "10s"
+    writeTimeout = "10s"
+    idleTimeout = "30s"
+    settingExpire = "720h"
+    reportExpire = "720h"

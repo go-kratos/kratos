@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+package live_user.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Guard {
+    
+    /** 根据uid获取大航海信息
+     * 
+     */   
+    rpc getByUidTargetId (GuardGetByUidTargetIdReq) returns (GuardGetByUidTargetIdResp);
+    
+    /** 根据uid获取大航海信息
+     * 
+     */   
+    rpc getByUid (GuardGetByUidReq) returns (GuardGetByUidResp);
+}
+
+
+
+message GuardGetByUidTargetIdReq {
+    // uid
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 主播id
+    int64 target_id = 2 [(gogoproto.jsontag) = "target_id"];
+    // 是否只返回最高等级的守护，为1时会改变返回数据结构
+    int64 is_limit_one = 3 [(gogoproto.jsontag) = "is_limit_one"];
+}
+
+message GuardGetByUidTargetIdResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    repeated Data data = 4 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 
+        int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+        // up主id
+        int64 target_id = 3 [(gogoproto.jsontag) = "target_id"];
+        // 1:总督,2:提督,3:舰长
+        int64 privilege_type = 4 [(gogoproto.jsontag) = "privilege_type"];
+        // 开始时间
+        string start_time = 5 [(gogoproto.jsontag) = "start_time"];
+        // 过期时间
+        string expired_time = 6 [(gogoproto.jsontag) = "expired_time"];
+        // 创建时间
+        string ctime = 7 [(gogoproto.jsontag) = "ctime"];
+        // 修改时间
+        string utime = 8 [(gogoproto.jsontag) = "utime"];
+    }
+}
+
+
+
+message GuardGetByUidReq {
+    // uid
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 是否包含过期的守护，默认包含
+    int64 inc_expire = 2 [(gogoproto.jsontag) = "inc_expire"];
+    // 是否只返回等级最高的一条,默认0
+    int64 is_limit_one = 3 [(gogoproto.jsontag) = "is_limit_one"];
+}
+
+message GuardGetByUidResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    repeated Data data = 4 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 
+        int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+        // up主id
+        int64 target_id = 3 [(gogoproto.jsontag) = "target_id"];
+        // 1:总督,2:提督,3:舰长
+        int64 privilege_type = 4 [(gogoproto.jsontag) = "privilege_type"];
+        // 开始时间
+        string start_time = 5 [(gogoproto.jsontag) = "start_time"];
+        // 过期时间
+        string expired_time = 6 [(gogoproto.jsontag) = "expired_time"];
+        // 创建时间
+        string ctime = 7 [(gogoproto.jsontag) = "ctime"];
+        // 修改时间
+        string utime = 8 [(gogoproto.jsontag) = "utime"];
+    }
+}

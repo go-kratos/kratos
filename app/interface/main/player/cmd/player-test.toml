@@ -1,0 +1,131 @@
+[tick]
+    carouselTick = "5m"
+    paramTick = "5m"
+    iconTick = "1m"
+
+[rule]
+    vsTimeout = "200ms"
+    noAssistMid = 0
+    tokenQn = [116,112,74]
+    vipQn = [116,112,74]
+    loginQn = 32
+    maxFreeQn = 80
+    playurlGray = 10
+
+[ugcPay]
+    aid = 10110688
+    cid = 10134389
+
+[Broadcast]
+tcpAddr = "172.16.0.238:4080"
+wsAddr = "172.16.0.238:4090"
+wssAddr = "chat2.bilibili.com:4095"
+begin = "2016-10-31 00:00:00"
+end = "2017-01-20 23:59:59"
+
+[policy]
+id=1
+des="D区广告方案新版灰度"
+type="用户随机-尾号"
+start="2016-12-06 00:00:00"
+end="2017-12-01 00:00:00"
+mtime="2016-12-07 15:09:00"
+
+[[pitem]]
+Id=1
+Data="new"
+Comment="新样式"
+ExtData="00-04"
+
+[[pitem]]
+Id=2
+Data="old"
+Comment="旧样式"
+ExtData="05-99"
+
+[[pitem]]
+Id=3
+Data="old"
+Comment="默认/未登录"
+ExtData="default"
+
+[matsuri]
+pastID = 5461206
+matID = 5461533
+matTime = "2016-12-15T16:57:03+08:00"
+tick = "10s"
+
+[player]
+IPFile = "/data/conf/iprepo/iprepo.txt"
+
+[host]
+apiCo = "http://api.bilibili.co"
+accCo = "http://account.bilibili.co"
+playurlCo = "http://videodispatch-ugc.bilibili.co"
+
+[xlog]
+    dir = "/data/log/player-interface/"
+
+[httpClient]
+key = "3c4e41f926e51656"
+secret = "26a2095b60c24154521d24ae62b885bb"
+dial = "500ms"
+timeout = "500ms"
+keepAlive = "60s"
+timer = 1000
+[httpClient.breaker]
+window  ="3s"
+sleep   ="100ms"
+bucket  = 10
+ratio   = 0.5
+request = 100
+
+[bm]
+    [bm.outer]
+    addr = "0.0.0.0:6261"
+    timeout = "1s"
+    [bm.local]
+    addr = "0.0.0.0:6263"
+    timeout = "1s"
+
+[mysql]
+    [mysql.player]
+    addr = "172.16.33.54"
+    dsn = "test:test@tcp(172.16.33.54:3306)/bilibili_player?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [mysql.player.breaker]
+    window  ="3s"
+    sleep   ="100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [mysql.show]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_show?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [mysql.show.breaker]
+    window  ="3s"
+    sleep   ="100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[infoc2]
+    taskID = "000078"
+    proto = "tcp"
+    addr = "172.19.100.20:5401"
+    chanSize = 1024
+
+[playURLToken]
+    secret = "iSqObdc9EoGijd2i"
+    playerToken = "150362b0b3bb145b9377fb49e1063241"

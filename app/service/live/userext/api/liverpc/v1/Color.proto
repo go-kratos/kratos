@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package userext.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Color {
+    
+    /** 获取昵称颜色
+     * 
+     */   
+    rpc getUnameColor (ColorGetUnameColorReq) returns (ColorGetUnameColorResp);
+}
+
+
+
+message ColorGetUnameColorReq {
+    // 
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 
+    int64 room_id = 2 [(gogoproto.jsontag) = "room_id"];
+}
+
+message ColorGetUnameColorResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        string uname_color = 1 [(gogoproto.jsontag) = "uname_color"];
+    }
+}

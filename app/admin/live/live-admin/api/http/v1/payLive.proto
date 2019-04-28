@@ -1,0 +1,177 @@
+syntax = "proto3";
+
+package live.liveadmin.v1;
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service PayLive {
+    // `method:"POST" internal:"true"` 生成付费直播信息
+    rpc add (PayLiveAddReq) returns (PayLiveAddResp);
+
+    // `method:"POST" internal:"true"` 更新付费直播信息
+    rpc update (PayLiveUpdateReq) returns (PayLiveUpdateResp);
+
+    // `internal:"true"` 获取付费直播列表
+    rpc getList (PayLiveGetListReq) returns (PayLiveGetListResp);
+
+    // `method:"POST" internal:"true"` 关闭鉴权
+    rpc close (PayLiveCloseReq) returns (PayLiveCloseResp);
+
+    // `method:"POST" internal:"true"` 开启鉴权
+    rpc open (PayLiveOpenReq) returns (PayLiveOpenResp);
+}
+
+message PayLiveAddReq {
+    // 平台
+    string platform = 1 [(gogoproto.moretags) = 'form:"platform"'];
+    // 商品名称
+    int64 room_id = 2 [(gogoproto.moretags) = 'form:"room_id" validate:"required"'];
+    // 商品名称
+    string title = 3 [(gogoproto.moretags) = 'form:"title" validate:"required"'];
+    // 鉴权状态，1开，0关
+    int64 status = 4 [(gogoproto.moretags) = 'form:"status"'];
+    // 开始时间
+    string start_time = 5 [(gogoproto.moretags) = 'form:"start_time" validate:"required"'];
+    // 结束时间
+    string end_time = 6 [(gogoproto.moretags) = 'form:"end_time" validate:"required"'];
+    // 正片结束时间
+    string live_end_time = 7 [(gogoproto.moretags) = 'form:"live_end_time"'];
+    // 正片保底图
+    string live_pic = 8 [(gogoproto.moretags) = 'form:"live_pic" validate:"required"'];
+    // 广告图
+    string ad_pic = 9 [(gogoproto.moretags) = 'form:"ad_pic" validate:"required"'];
+    // 购买链接
+    string goods_link = 10 [(gogoproto.moretags) = 'form:"goods_link" validate:"required"'];
+    // 门票id，逗号分隔
+    string goods_id = 11 [(gogoproto.moretags) = 'form:"goods_id" validate:"required"'];
+    // ip限制，0不限制，1仅限大陆，2仅限港澳台，3大陆+港澳台
+    int64 ip_limit = 12 [(gogoproto.moretags) = 'form:"ip_limit"'];
+    // 购买门票id
+    int64 buy_goods_id = 13 [(gogoproto.moretags) = 'form:"buy_goods_id" validate:"required"'];
+
+}
+
+message PayLiveAddResp {
+
+}
+
+
+
+message PayLiveUpdateReq {
+    // id
+    int64 live_id = 1 [(gogoproto.moretags) = 'form:"live_id" validate:"required"'];
+    // 平台
+    string platform = 2 [(gogoproto.moretags) = 'form:"platform"'];
+    // 商品名称
+    int64 room_id = 3 [(gogoproto.moretags) = 'form:"room_id" validate:"required"'];
+    // 商品名称
+    string title = 4 [(gogoproto.moretags) = 'form:"title" validate:"required"'];
+    // 鉴权状态，1开，0关
+    int64 status = 5 [(gogoproto.moretags) = 'form:"status"'];
+    // 开始时间
+    string start_time = 6 [(gogoproto.moretags) = 'form:"start_time" validate:"required"'];
+    // 结束时间
+    string end_time = 7 [(gogoproto.moretags) = 'form:"end_time" validate:"required"'];
+    // 正片结束时间
+    string live_end_time = 8 [(gogoproto.moretags) = 'form:"live_end_time" validate:"required"'];
+    // 正片保底图
+    string live_pic = 9 [(gogoproto.moretags) = 'form:"live_pic" validate:"required"'];
+    // 广告图
+    string ad_pic = 10 [(gogoproto.moretags) = 'form:"ad_pic" validate:"required"'];
+    // 购买链接
+    string goods_link = 11 [(gogoproto.moretags) = 'form:"goods_link" validate:"required"'];
+    // 门票id，逗号分隔
+    string goods_id = 12 [(gogoproto.moretags) = 'form:"goods_id" validate:"required"'];
+    // ip限制，0不限制，1仅限大陆，2仅限港澳台，3大陆+港澳台
+    int64 ip_limit = 13 [(gogoproto.moretags) = 'form:"ip_limit"'];
+    // 购买门票id
+    int64 buy_goods_id = 14 [(gogoproto.moretags) = 'form:"buy_goods_id" validate:"required"'];
+
+}
+
+message PayLiveUpdateResp {
+
+}
+
+
+
+message PayLiveGetListReq {
+    // 房间id
+    int64 room_id = 1 [(gogoproto.moretags) = 'form:"room_id"'];
+    // 商品名称
+    string title = 2 [(gogoproto.moretags) = 'form:"title"'];
+    // ip限制
+    int64 ip_limit = 3 [(gogoproto.moretags) = 'form:"ip_limit"'];
+    // 页号，0开始
+    int64 page_num = 4 [(gogoproto.moretags) = 'form:"page_num"'];
+    // 每页个数
+    int64 page_size = 5 [(gogoproto.moretags) = 'form:"page_size" validate:"required"'];
+}
+
+message PayLiveGetListResp {
+    message PageInfo {
+        // 记录总数
+        int64 total_count = 1 [(gogoproto.jsontag) = "total_count"];
+        // 当前页号
+        int64 page_num = 2 [(gogoproto.jsontag) = "page_num"];
+    }
+
+    message GoodsInfo {
+        // 房间id
+        int64 room_id = 1 [(gogoproto.jsontag) = "room_id"];
+        // 付费直播id
+        int64 live_id = 2 [(gogoproto.jsontag) = "live_id"];
+        // 标题
+        string title = 3 [(gogoproto.jsontag) = "title"];
+        // 平台
+        string platform = 4 [(gogoproto.jsontag) = "platform"];
+        // 生效状态，1生效，0未生效
+        int64 pay_live_status = 5 [(gogoproto.jsontag) = "pay_live_status"];
+        // 开始购票时间
+        string start_time = 6 [(gogoproto.jsontag) = "start_time"];
+        // 结束购票时间
+        string end_time = 7 [(gogoproto.jsontag) = "end_time"];
+        // 正片结束
+        string live_end_time = 8 [(gogoproto.jsontag) = "live_end_time"];
+        // 正片保底图
+        string live_pic = 9 [(gogoproto.jsontag) = "live_pic"];
+        // 广告图
+        string ad_pic = 10 [(gogoproto.jsontag) = "ad_pic"];
+        // 购票链接
+        string goods_link = 11 [(gogoproto.jsontag) = "goods_link"];
+        // 购票id
+        string goods_id = 12 [(gogoproto.jsontag) = "goods_id"];
+        // ip限制
+        int64 ip_limit = 13 [(gogoproto.jsontag) = "ip_limit"];
+        // 鉴权状态，0关闭，1开启
+        int64 status = 14 [(gogoproto.jsontag) = "status"];
+        // 引导购票id
+        int64 buy_goods_id = 15 [(gogoproto.jsontag) = "buy_goods_id"];
+    }
+
+    PageInfo page_info = 1 [(gogoproto.jsontag) = "page_info"];
+    repeated GoodsInfo goods_info = 2 [(gogoproto.jsontag) = "goods_info"];
+}
+
+message PayLiveCloseReq {
+    // 直播id
+    int64 live_id = 1 [(gogoproto.moretags) = 'form:"live_id" validate:"required"'];
+}
+
+message PayLiveCloseResp {
+
+}
+
+
+
+message PayLiveOpenReq {
+    // 直播id
+    int64 live_id = 1 [(gogoproto.moretags) = 'form:"live_id" validate:"required"'];
+}
+
+message PayLiveOpenResp {
+
+}

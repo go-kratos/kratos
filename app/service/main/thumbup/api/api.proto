@@ -1,0 +1,247 @@
+syntax = "proto3";
+package community.service.thumbup.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "api";
+option (gogoproto.goproto_getters_all) = false;
+
+service Thumbup {
+    // 点赞接口
+    rpc Like(LikeReq) returns(LikeReply);
+    // 查询计数接口
+    rpc Stats(StatsReq) returns(StatsReply);
+    // 批量查询计数接口
+    rpc MultiStats(MultiStatsReq) returns(MultiStatsReply);
+    // 查询是否点赞接口
+    rpc HasLike(HasLikeReq) returns (HasLikeReply);
+    // 用户对业务的点赞列表
+    rpc UserLikes(UserLikesReq) returns(UserLikesReply);
+    // 对象的点赞人列表
+    rpc ItemLikes(ItemLikesReq) returns(ItemLikesReply);
+    // 修改计数的值
+    rpc UpdateCount(UpdateCountReq) returns(.google.protobuf.Empty);
+    // 查询原始计数 未修改的值
+    rpc RawStat(RawStatReq) returns(RawStatReply);
+}
+
+enum Action {
+    // The first value represents the default and must be == 0.
+    ACTION_UNSPECIFIED = 0;
+    ACTION_LIKE = 1;
+    ACTION_CANCEL_LIKE = 2;
+    ACTION_DISLIKE = 3;
+    ACTION_CANCEL_DISLIKE = 4;
+}
+
+enum State {
+     // The first value represents the default and must be == 0.
+    STATE_UNSPECIFIED = 0;
+    STATE_LIKE = 1;
+    STATE_DISLIKE = 2;
+}
+
+message LikeReq {
+    // 业务
+    string business = 1 [(gogoproto.moretags) = 'form:"business" validate:"required"'];
+    // mid
+    int64 mid = 2 [(gogoproto.moretags) = 'form:"mid" validate:"required,min=1"'];
+    // up 主mid
+    int64 up_mid = 3 [(gogoproto.moretags) = 'form:"up_mid"'];
+    // 来源id
+    int64 origin_id = 4 [(gogoproto.moretags) = 'form:"origin_id"', (gogoproto.customname) = "OriginID"];
+    // 对象id
+    int64 message_id = 5 [(gogoproto.moretags) = 'form:"message_id" validate:"required"', (gogoproto.customname) = "MessageID"];
+    Action action = 6 [(gogoproto.moretags) = 'form:"action_id" validate:"required"'];
+    // ip
+    string ip = 7 [(gogoproto.jsontag) = "ip", (gogoproto.customname) = "IP"];
+}
+
+message StatState {
+    // 来源id
+    int64 origin_id = 1 [(gogoproto.customname) = "OriginID"];
+    // 对象id
+    int64 message_id = 2 [(gogoproto.customname) = "MessageID"];
+     // 点赞数
+    int64 like_number = 3;
+     // 点踩数
+    int64 dislike_number = 4;
+     // 点赞状态
+    State like_state = 5;
+}
+
+message LikeReply {
+     // 来源id
+    int64 origin_id = 1 [(gogoproto.customname) = "OriginID"];
+    // 对象id
+    int64 message_id = 2 [(gogoproto.customname) = "MessageID"];
+     // 点赞数
+    int64 like_number = 3;
+     // 点踩数
+    int64 dislike_number = 4;
+}
+
+message StatsReq {
+    // 业务
+    string business = 1 [(gogoproto.moretags) = 'form:"business" validate:"required"'];
+    // 来源id
+    int64 origin_id = 2 [(gogoproto.moretags) = 'form:"origin_id"', (gogoproto.customname) = "OriginID"];
+    // 对象id
+    repeated int64 message_ids = 3 [(gogoproto.moretags) = 'form:"message_ids" validate:"required"'];
+    // mid 可选参数 不需要返回like_state不要填
+    int64 mid = 4 [(gogoproto.moretags) = 'form:"mid"'];
+    // ip
+    string ip = 5 [(gogoproto.jsontag) = "ip", (gogoproto.customname) = "IP"];
+}
+
+message StatsReply {
+    map<int64, StatState> stats = 1;
+}
+
+message HasLikeReq {
+     // 业务
+    string business = 1 [(gogoproto.moretags) = 'form:"business" validate:"required"'];
+    // 对象id
+    repeated int64 message_ids = 2 [(gogoproto.moretags) = 'form:"message_ids" validate:"required"'];
+    // mid
+    int64 mid = 3 [(gogoproto.moretags) = 'form:"mid" validate:"required"'];
+    // ip
+    string ip = 4 [(gogoproto.jsontag) = "ip", (gogoproto.customname) = "IP"];
+}
+
+message HasLikeReply {
+    map<int64, UserLikeState> states = 1;
+}
+
+message UserLikeState {
+    // mid
+    int64 mid = 1;
+    // 点赞时间
+    int64 time = 2[(gogoproto.casttype) = "go-common/library/time.Time"];
+    State state = 3;
+}
+
+message UserLikesReq {
+     // 业务
+    string business = 1 [(gogoproto.moretags) = 'form:"business" validate:"required"'];
+    // mid
+    int64 mid = 2 [(gogoproto.moretags) = 'form:"mid" validate:"required"'];
+     // pn
+     int64 pn = 3 [(gogoproto.moretags) = 'form:"pn" validate:"required,min=1"'];
+     // ps
+     int64 ps = 4 [(gogoproto.moretags) = 'form:"ps" validate:"required,min=1"'];
+    // ip
+    string ip = 5 [(gogoproto.jsontag) = "ip", (gogoproto.customname) = "IP"];
+}
+
+message ItemRecord {
+    // 对象id
+    int64 message_id = 1 [(gogoproto.customname) = "MessageID"];
+    // 点赞时间
+    int64 time = 2[(gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+
+message UserLikesReply {
+    int64 total = 1;
+    repeated ItemRecord items = 2;
+}
+
+message UserRecord {
+    // mid
+    int64 mid = 1;
+    // 点赞时间
+    int64 time = 2[(gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message ItemLikesReq {
+     // 业务
+    string business = 1 [(gogoproto.moretags) = 'form:"business" validate:"required"'];
+    // 来源id
+    int64 origin_id = 2 [(gogoproto.moretags) = 'form:"origin_id"', (gogoproto.customname) = "OriginID"];
+    // 对象id
+    int64 message_id = 3 [(gogoproto.moretags) = 'form:"message_id" validate:"required"', (gogoproto.customname) = "MessageID"];
+    // last_mid 上个mid 去重用
+    int64 last_mid = 4 [(gogoproto.moretags) = 'form:"last_mid" json:"last_mid"'];
+     // pn
+     int64 pn = 5 [(gogoproto.moretags) = 'form:"pn" validate:"required,min=1"'];
+     // ps
+     int64 ps = 6 [(gogoproto.moretags) = 'form:"ps" validate:"required,min=1"'];
+    // ip
+    string ip = 7 [(gogoproto.jsontag) = "ip", (gogoproto.customname) = "IP"];
+}
+
+message ItemLikesReply {
+    repeated UserRecord users = 1;
+}
+
+message UpdateCountReq {
+      // 业务
+    string business = 1 [(gogoproto.moretags) = 'form:"business" validate:"required"'];
+    // 来源id
+    int64 origin_id = 2 [(gogoproto.moretags) = 'form:"origin_id"', (gogoproto.customname) = "OriginID"];
+    // 对象id
+    int64 message_id = 3 [(gogoproto.moretags) = 'form:"message_id" validate:"required"', (gogoproto.customname) = "MessageID"];
+    // 点赞数修改(增量)
+    int64 like_change = 4;
+    // 点踩数修改(增量)
+    int64 dislike_change = 5;
+    // 操作人
+    string operator = 6;
+    // ip
+    string ip = 7 [(gogoproto.jsontag) = "ip", (gogoproto.customname) = "IP"];
+}
+
+message RawStatReq {
+       // 业务
+    string business = 1 [(gogoproto.moretags) = 'form:"business" validate:"required"'];
+    // 来源id
+    int64 origin_id = 2 [(gogoproto.moretags) = 'form:"origin_id"', (gogoproto.customname) = "OriginID"];
+    // 对象id
+    int64 message_id = 3 [(gogoproto.moretags) = 'form:"message_id" validate:"required"', (gogoproto.customname) = "MessageID"];
+    // ip
+    string ip = 4 [(gogoproto.jsontag) = "ip", (gogoproto.customname) = "IP"];
+}
+
+message RawStatReply {
+     // 来源id
+    int64 origin_id = 1 [(gogoproto.moretags) = 'form:"origin_id"', (gogoproto.customname) = "OriginID"];
+    // 对象id
+    int64 message_id = 2 [(gogoproto.moretags) = 'form:"message_id" validate:"required"', (gogoproto.customname) = "MessageID"];
+     // 点赞数
+    int64 like_number = 3;
+    // 点踩数
+    int64 dislike_number = 4;
+     // 点赞数修改(增量)
+    int64 like_change = 5;
+    // 点踩数修改(增量)
+    int64 dislike_change = 6;
+}
+
+message MultiStatsReq {
+    message Record {
+     // 来源id
+    int64 origin_id = 1 [(gogoproto.moretags) = 'form:"origin_id"', (gogoproto.customname) = "OriginID"];
+    // 对象id
+    int64 message_id = 2 [(gogoproto.moretags) = 'form:"message_id" validate:"required"', (gogoproto.customname) = "MessageID"];
+    }
+    message Business {
+        repeated Record records = 1;
+    }
+    // mid
+    int64 mid = 1 [(gogoproto.moretags) = 'form:"mid" validate:"required"'];
+    // business and records
+    map<string, Business> business = 2;
+    // ip
+    string ip = 3 [(gogoproto.jsontag) = "ip", (gogoproto.customname) = "IP"];
+}
+
+message MultiStatsReply {
+    message Records {
+        map<int64, StatState> records = 1;
+    }
+    // business and records
+    map<string, Records> business = 1;
+}
+

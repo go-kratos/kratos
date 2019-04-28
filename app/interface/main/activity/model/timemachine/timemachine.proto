@@ -1,0 +1,54 @@
+syntax = "proto3";
+package activity.job;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "timemachine";
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message Item {
+    int64  Mid                 = 1 [(gogoproto.jsontag) = "mid"];
+    int64  IsUp                = 2 [(gogoproto.jsontag) = "is_up"];
+    int64  DurationHour        = 3 [(gogoproto.jsontag) = "duration_hour"];
+    int64  AvDurationHour      = 4 [(gogoproto.jsontag) = "av_duration_hour"];
+    int64  ArchiveVv           = 5 [(gogoproto.jsontag) = "archive_vv"];
+    int64  LikeTagID           = 6 [(gogoproto.jsontag) = "like_tag_id"];
+    int64  LikeSubtidVv        = 7 [(gogoproto.jsontag) = "like_subtid_vv"];
+    string LikesUgc3Avids      = 8 [(gogoproto.jsontag) = "likes_ugc_3avids"];
+    string LikePgc3Avids       = 9 [(gogoproto.jsontag) = "like_pgc_3avids"];
+    int64  LikeBestUpID        = 10 [(gogoproto.jsontag) = "like_best_upid"];
+    int64  LikeUpAvDuration    = 11 [(gogoproto.jsontag) = "like_up_av_duration"];
+    int64  LikeUpLiveDuration  = 12 [(gogoproto.jsontag) = "like_up_live_duration"];
+    string LikeUp3Avs          = 13 [(gogoproto.jsontag) = "like_up_3avs"];
+    string LikeLiveUpSubTname  = 14 [(gogoproto.jsontag) = "like_live_up_sub_tname"];
+    string BrainwashCirTime    = 15 [(gogoproto.jsontag) = "brainwash_cir_time"];
+    int64  BrainwashCirAvid    = 16 [(gogoproto.jsontag) = "brainwash_cir_avid"];
+    int64  BrainwashCirVv      = 17 [(gogoproto.jsontag) = "brainwash_cir_vv"];
+    int64  FirstSubmitAvid     = 18 [(gogoproto.jsontag) = "first_submit_avid"];
+    string FirstSubmitTime     = 19 [(gogoproto.jsontag) = "first_submit_time"];
+    int64  FirstSubmitType     = 20 [(gogoproto.jsontag) = "first_submit_type"];
+    string SubmitAvsRds        = 21 [(gogoproto.jsontag) = "submit_avs_rds"];
+    int64  BestAvid            = 22 [(gogoproto.jsontag) = "best_avid"];
+    int64  BestAvidType        = 23 [(gogoproto.jsontag) = "best_avid_type"];
+    int64  BestAvidOld         = 24 [(gogoproto.jsontag) = "best_avid_old"];
+    int64  BestAvidOldType     = 25 [(gogoproto.jsontag) = "best_avid_old_type"];
+    int64  OldAvVv             = 26 [(gogoproto.jsontag) = "old_av_vv"];
+    int64  AllVv               = 27 [(gogoproto.jsontag) = "all_vv"];
+    int64  UpLiveDuration      = 28 [(gogoproto.jsontag) = "up_live_duration"];
+    int64  IsLiveUp            = 29 [(gogoproto.jsontag) = "is_live_up"];
+    int64  ValidLiveDays       = 30 [(gogoproto.jsontag) = "valid_live_days"];
+    string MaxCdnNumDate       = 31 [(gogoproto.jsontag) = "max_cdn_num_date"];
+    int64  MaxCdnNum           = 32 [(gogoproto.jsontag) = "max_cdn_num"];
+    int64  Attentions          = 33 [(gogoproto.jsontag) = "attentions"];
+    string UpBestFanVv         = 34 [(gogoproto.jsontag) = "up_best_fan_vv"];
+    string UpBestFanLiveMinute = 35 [(gogoproto.jsontag) = "up_best_fan_live_minute"];
+    string Like2Tids           = 36 [(gogoproto.jsontag) = "like_2tids"];
+    string Like2subTids        = 37 [(gogoproto.jsontag) = "like_2sub_tids"];
+    string WinRatio            = 38 [(gogoproto.jsontag) = "win_ratio"];
+    int64  PlayDurationHourRep = 39 [(gogoproto.jsontag) = "play_duration_hour_rep"];
+    int64  LikeUpAvDurationRep = 40 [(gogoproto.jsontag) = "like_up_av_duration_rep"];
+}

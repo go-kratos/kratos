@@ -1,0 +1,19 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- hekai
+- wanghuan01
+- wucongyou
+- zhaogangtao
+- zhoujiahui
+labels:
+- admin
+- admin/main/usersuit
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- hekai
+- wanghuan01
+- wucongyou
+- zhaogangtao

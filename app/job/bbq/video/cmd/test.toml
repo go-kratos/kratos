@@ -1,0 +1,366 @@
+[log]
+    # dir = "/tmp/log/bbq"
+	stdout = true
+
+[download]
+	file = "/data/"
+
+[bm]
+    [bm.server]
+        addr = "0.0.0.0:9999"
+        timeout = "1s"
+    [bm.client]
+        key = "c8c48e784e05acfb"
+        secret = "aa63ee0a10afa358d02a07e7abcec546"
+        dial = "1000ms"
+        timeout = "30s"
+        keepAlive = "60s"
+        timer = 10
+    [bm.client.breaker]
+        window  = "3s"
+        sleep   = "1000ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[mysql]
+	addr = "172.16.38.91:3306"
+	dsn = "root:123456@tcp(172.16.38.91:3306)/bbq?timeout=2000ms&readTimeout=2000ms&writeTimeout=2000ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["root:123456@tcp(172.16.38.91:3306)/bbq?timeout=2000ms&readTimeout=2000ms&writeTimeout=2000ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 10
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "1000ms"
+	execTimeout = "2000ms"
+	tranTimeout = "2000ms"
+[mysqlcms]
+	addr = "172.16.38.91:3306"
+	dsn = "root:123456@tcp(172.16.38.91:3306)/bbq_cms?timeout=2000ms&readTimeout=2000ms&writeTimeout=2000ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["root:123456@tcp(172.16.38.91:3306)/bbq_cms?timeout=2000ms&readTimeout=2000ms&writeTimeout=2000ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 10
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "1000ms"
+	execTimeout = "2000ms"
+	tranTimeout = "2000ms"
+
+[redis]
+	name = "video-job"
+	proto = "tcp"
+	addr = "172.16.38.91:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[bfredis]
+	name = "video-job-bloomfilter"
+	proto = "tcp"
+	addr = "172.16.38.91:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[memcache]
+	name = "video-job"
+	proto = "tcp"
+	addr = ""
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[grpcClient]
+	[grpcClient.video]
+        addr = "discovery://default/bbq.service.video"
+        [grpcClient.video.wardenconf]
+            dial = "300ms"
+            timeout = "2s"
+    [grpcClient.search]
+		addr = "discovery://default/bbq.service.search"
+		[grpcClient.search.wardenconf]
+        	dial = "100ms"
+        	timeout = "500ms"
+	[grpcClient.account]
+		addr = "discovery://default/account.service"
+        [grpcClient.account.wardenconf]
+            dial = "1s"
+            timeout = "2s"
+    [grpcClient.notice]
+        addr = "discovery://default/bbq.service.notice"
+        [grpcClient.notice.wardenconf]
+            dial = "3000ms"
+            timeout = "5000ms"
+
+[scheduler]
+    # #每天4点，同步全量视频数据到es
+    # checkVideo2ES = "0 0 4 * * *"
+    # #每天0点10分，同步用户画像
+    # syncUserDmg = "0 30 0 * * *"
+    # #每天3点00分，同步主站视频库
+    # SyncVideo = "0 0 3 * * *"
+    # #每天1点00分，同步主站up主信息
+    # SyncUpUserDmg = "0 0 1 * * *"
+    # #心跳测试
+    # Test = "*/1 * * * * *"
+    #每1分，视频增量脚本
+    checkVideo = "0 */1 * * * *"
+    checkVideoSt = "0 */1 * * * *"
+    checkVideoStHv = "0 */1 * * * *"
+    checkVideoTag = "0 */1 * * * *"
+    checkTag = "0 */1 * * * *"
+    #运营筛选视频导入，1分钟check一次信号
+    SyncVideoOper = "0 0 2 * * *"
+    #同步cms任务
+    TransToCheckBack = "1 * * * * *"
+	#每天晚上9点更新userbase
+	SyncUsrSta = "0 30 21 * * *"
+    # checkVideo = "0 */1 * * * *"
+    # checkVideoSt = "0 */1 * * * *"
+    # checkVideoStHv = "0 */1 * * * *"
+    # checkVideoTag = "0 */1 * * * *"
+    # checkTag = "0 */1 * * * *"
+    # #运营筛选视频导入，1分钟check一次信号
+    # SyncVideoOper = "0 0 2 * * *"
+    # #同步cms任务
+    # DeliveryNewVideoToCms = "0 0 3 * * *"
+	## 去重BloomFilter重建
+	videoViewHistory = "0 */1 * * * *"
+	# 系统消息任务
+	SysMsgTask = "0 */1 * * * *"
+	## UsrProfileBbq
+	UserProfileBbq = "0 0 9 * * *"
+
+[berserker]
+	[berserker.key]
+		[berserker.key.yyc]
+		    appkey = "dcf555f4f314ccdfad7cb8a3288f1643"
+		    secret = "4efd3443561e66832b3ba9128a1ad720"
+		[berserker.key.hsc]
+		    appkey = "0bcf67ecf921576350a4f916c1edecbf"
+		    secret = "1003e5a9babe66ef6834fe839ce8223f"
+		[berserker.key.lzq]
+			appkey = "e51d04f43e9c9bca8678dcb4586c76db"
+			secret = "7c53bf6d17c2d51253b927bc057abeae"
+		[berserker.key.lj]
+			appkey = "4ddb82b57e863ebd888713061a08ba10"
+			secret = "49c4e3eb4fd8aff9d3862447113e032f"
+		[berserker.key.dw]
+			appkey = "66ed588a742c72408bc2d876afa8f7ca"
+			secret = "7d7a63e37fe6af52a58fb4755b62360e"
+		[berserker.key.hm]
+			appkey = "0b685519ff66471faf3f000cc67661eb"
+			secret = "e345a3281f0009b51016fab9a9076877"
+	[berserker.api]
+        rankmonthly = "http://berserker.bilibili.co/avenger/api/92/query"
+		rankdaily = "http://berserker.bilibili.co/avenger/api/102/query"
+		userdmg = "http://berserker.bilibili.co/avenger/api/137/query"
+		upuserdmg = "http://berserker.bilibili.co/avenger/api/125/query"
+		operaonce = "http://berserker.bilibili.co/avenger/api/121/query"
+		userbasic = "http://berserker.bilibili.co/avenger/api/147/query"
+		upmid = "http://berserker.bilibili.co/avenger/api/149/query"
+		videoView = "http://berserker.bilibili.co/avenger/api/154/query"
+		UserProfile = "http://berserker.bilibili.co/avenger/api/178/query"
+		UserProfileBuvid = "http://berserker.bilibili.co/avenger/api/186/query"
+
+[tagmap]
+	[tagmap.tagtidmap]
+		1   = "动画"
+		3   = "音乐"
+		4   = "游戏"
+		5   = "娱乐"
+		11  = "电视剧"
+		13  = "番剧"
+		23  = "电影"
+		36  = "科技"
+		119 = "鬼畜"
+		129 = "舞蹈"
+		155 = "时尚"
+		160 = "生活"
+		165 = "广告"
+		167 = "国创"
+		177 = "纪录片"
+		181 = "影视"
+	[tagmap.tagsubtidmap]
+		24=  "MAD·AMV"
+		25=  "MMD·3D"
+		27=  "综合"
+		47=  "短片·手书·配音"
+		28=  "原创音乐"
+		29=  "三次元音乐"
+		30=  "VOCALOID·UTAU"
+		31=  "翻唱"
+		54=  "OP/ED/OST"
+		59=  "演奏"
+		130= "音乐选集"
+		17=  "单机联机"
+		19=  "Mugen"
+		65=  "网络游戏"
+		121= "GMV"
+		136= "音游"
+		171= "电子竞技"
+		172= "手机游戏"
+		173= "桌游棋牌"
+		71=  "综艺"
+		131= "Korea相关"
+		137= "明星"
+		185= "国产剧"
+		187= "海外剧"
+		32=  "完结动画"
+		33=  "连载动画"
+		51=  "资讯"
+		152= "官方延伸"
+		83=  "其他国家"
+		145= "欧美电影"
+		146= "日本电影"
+		147= "国产电影"
+		39=  "演讲• 公开课"
+		95=  "数码"
+		96=  "星海"
+		98=  "机械"
+		122= "野生技术协会"
+		124= "趣味科普人文"
+		176= "汽车"
+		22=  "鬼畜调教"
+		26=  "音MAD"
+		126= "人力VOCALOID"
+		127= "教程演示"
+		20=  "宅舞"
+		154= "三次元舞蹈"
+		156= "舞蹈教程"
+		157= "美妆"
+		158= "服饰"
+		159= "资讯"
+		164= "健身"
+		21=  "日常"
+		75=  "动物圈"
+		76=  "美食圈"
+		138= "搞笑"
+		161= "手工"
+		162= "绘画"
+		163= "运动"
+		174= "其他"
+		175= "ASMR"
+		166= "广告"
+		153= "国产动画"
+		168= "国产原创相关"
+		169= "布袋戏"
+		170= "资讯"
+		37=  "人文历史"
+		178= "科学探索"
+		179= "热血军事"
+		180= "舌尖上的旅行"
+		85=  "短片"
+		86=  "特摄"
+		182= "影视杂谈"
+		183= "影视剪辑"
+		184= "预告·资讯"
+
+[databus]
+    [databus.videosub]
+        key = "36ff3e402f7c310a"
+        secret = "dbd11b140486dc0bc263cf7ec540186c"
+        group = "BBQVideo-BbqBbq-S"
+        topic = "BBQVideo-T"
+        action = "sub"
+        buffer = 1024
+        name = "app-job/video"
+        proto = "tcp"
+        addr = "172.22.33.174:6205 "
+        idle = 1
+        active = 1
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+	[databus.videosub.discovery]
+			domain = "uat-api.bilibili.co"
+			key = "c8c48e784e05acfb"
+			secret = "aa63ee0a10afa358d02a07e7abcec546"
+			region = "sh"
+			zone = "sh001"
+			env = "uat"
+    [databus.videorep]
+        key = "36ff3e402f7c310a"
+        secret = "dbd11b140486dc0bc263cf7ec540186c"
+        group = "BBQVideoRep-BbqBbq-S"
+        topic = "BBQVideoRep-T"
+        action = "sub"
+        buffer = 1024
+        name = "history"
+        proto = "tcp"
+        addr = "172.22.33.174:6205 "
+        idle = 1
+        active = 1
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+		[databus.videorep.discovery]
+			domain = "uat-api.bilibili.co"
+			key = "c8c48e784e05acfb"
+			secret = "aa63ee0a10afa358d02a07e7abcec546"
+			region = "sh"
+			zone = "sh001"
+			env = "uat"
+	[databus.bvcsub]
+        key = "36ff3e402f7c310a"
+        secret = "dbd11b140486dc0bc263cf7ec540186c"
+        group = "BBQCms-BbqBbq-S"
+        topic = "BBQCms-T"
+        action = "sub"
+        buffer = 1024
+        name = "history"
+        proto = "tcp"
+        addr = "172.22.33.174:6205"
+        idle = 1
+        active = 1
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+		[databus.bvcsub.discovery]
+			domain = "uat-api.bilibili.co"
+			key = "c8c48e784e05acfb"
+			secret = "aa63ee0a10afa358d02a07e7abcec546"
+			region = "sh"
+			zone = "sh001"
+			env = "uat"
+		
+[mail]
+host = "smtp.exmail.qq.com"
+port = 465
+from = "jiangdongqi@bilibili.com"
+password = "l"
+to = ["jiangdongqi@bilibili.com"]
+
+[urls]
+	reply_reg = "http://uat-api.bilibili.co/x/internal/v2/reply/subject/regist"
+	account = "http://uat-api.bilibili.co/x/internal/v3/account/info"
+	bvc_push = "http://127.0.0.1:8802/bbq/internal/sv/trans/commit"
+
+[ftp]
+ addr = "172.16.33.203:21"
+ user = "work"
+ password = "MhxzKhl"
+ 	[ftp.remotepath]
+		search = "/home/work/open/%s"
+ timeout = "1000ms"
+	[ftp.localpath]
+		search = "/tmp/"
+[vst]
+	tmpstatus = -3
+[path]
+	cids="/Users/Cheney/go/src/go-common/app/job/bbq/video/cmd/cids"
+[subbvccontrol]
+	control = 1

@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package room.v2;
+
+option go_package = "v2";
+
+
+service Room {
+
+    /** 根据房间id获取房间信息v2
+     * 修正：原来的get_info_by_id 在传了fields字段但是不包含roomid的情况下 依然会返回所有字段， 新版修正这个问题， 只会返回指定的字段.
+     */
+    rpc get_by_ids (RoomGetByIdsReq) returns (RoomGetByIdsResp);
+}
+
+
+message RoomGetByIdsReq {
+    repeated int64 ids = 1; // 房间id, 尽可能传长号（支持短号，eg.短号1->长号40000，则返回的房间信息map key是40000）
+    int64 need_uinfo = 2; // 是否需要附加uname、face字段，need_uinfo=1  尽量别传，传了请和@小卫报备！！
+    int64 need_broadcast_type = 3; // 是否需要broadcast_type字段，need_broadcast_type=1
+    repeated string fields = 4; // 需要哪些字段, 不传默认给大多数字段
+    string from = 5; // 调用方来源，英文，格式约定：部门_服务_业务 eg.live_activity_spring
+}
+
+message RoomGetByIdsResp {
+    int64 code = 1; // code
+    string msg = 2; // msg
+    map<string, RoomInfo> data = 3; // 房间信息map
+
+    message RoomInfo {
+        int64 roomid = 1; // 房间id
+        string uname = 2; // 用户名
+        string face = 3; // 用户头像
+        string verify = 4; // 加v认证信息
+        string cover = 5; // 关键帧 注：need_uinfo=1时，该字段优先表示封面图
+        int64 uid = 6; // 用户id
+        string live_time = 7; // 开播时间
+        int64 round_status = 8; // 轮播投递状态 1开启 0关闭
+        int64 on_flag = 9; // 轮播开启状态 1开启 0关闭
+        string title = 10; // 直播间标题
+        string tags = 11; // 直播间标签
+        string lock_status = 12; // 锁定到时间
+        string hidden_status = 13; // 隐藏到时间
+        string user_cover = 14; // 封面
+        int64 short_id = 15; // 短号
+        int64 online = 16; // 在线人数
+        int64 area = 17; // 分区id
+        int64 area_v2_id = 18; // 分区v2 id
+        int64 area_v2_parent_id = 19; // 分区v2 父分区id
+        int64 area_pk_status = 20; // 分区是否开放pk 0关闭 1开放
+        string area_v2_name = 21; // 分区v2名字
+        string area_v2_parent_name = 22; // 分区v2父分区名字
+        int64 attentions = 23; // 关注人数
+        string background = 24; // 房间背景图
+        int64 room_silent = 25; // 是否静默 0否,1注册会员,2全部
+        int64 room_shield = 26; // 是否使用房主的屏蔽用户，作为房间全局屏蔽用户，0：不使用，1：使用
+        string try_time = 27; // 试用直播间到期时间
+        int64 live_status = 28; // 直播间状态 0关播 1直播中 2轮播中
+        int64 broadcast_type = 29; // 横竖屏，只有传了need_broadcast_type才会返回  0横屏  1竖屏 -1异常情况
+    }
+}

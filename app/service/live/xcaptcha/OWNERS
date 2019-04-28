@@ -1,0 +1,15 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- fanzhenfei
+- zhaohailin
+labels:
+- live
+- service
+- service/live/xcaptcha
+options:
+  no_parent_owners: true
+reviewers:
+- fanzhenfei
+- liugang
+- zhaohailin

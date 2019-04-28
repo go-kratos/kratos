@@ -1,0 +1,12 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liuzhiquan
+labels:
+- bbq
+- service
+- service/bbq/recsys
+options:
+  no_parent_owners: true
+reviewers:
+- daiwei

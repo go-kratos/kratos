@@ -1,0 +1,196 @@
+[rule]
+    guessCount = 5
+    maxGuessCoin = 1
+    suitPids = [1]
+    suitExpire = 100
+    tickQq = "1m"
+    qqTryCount = 5
+    dTimeout = "3s"
+    qqStartTime = "20180101"
+    qqEndTime = "20181231"
+    qqYear = "2017"
+    playerYear = "2017"
+    bwsMids = [111,222,333,908085]
+    bwsAwardMids = [444]
+    bwsLotteryMids = [555]
+    bwsLotteryAids = [3,4,5,6]
+    needInitAchieve = true
+    dialectTags = [1,2,3]
+    dialectRegions = [1,2,3]
+    dialectSid = 111
+    spylike = 40
+    lotteryActID = 313
+
+[rpcServer]
+    proto = "tcp"
+    addr = ":6889"
+
+[httpClient]
+    key = "33ac033ce123e590"
+    secret = "0b2847315d32989a248294e350ac3ede"
+    dial = "500ms"
+    timeout = "2s"
+    keepAlive = "60s"
+
+[httpClientSports]
+    key = "33ac033ce123e590"
+    secret = "0b2847315d32989a248294e350ac3ede"
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+
+[httpClientBnj]
+    key = "33ac033ce123e590"
+    secret = "0b2847315d32989a248294e350ac3ede"
+    dial = "500ms"
+    timeout = "300ms"
+    keepAlive = "60s"
+[httpClientKfc]
+    key = "33ac033ce123e590"
+    secret = "0b2847315d32989a248294e350ac3ede"
+    dial = "500ms"
+    timeout = "300ms"
+    keepAlive = "60s"
+[databus]
+    [databus.bnj]
+    key = "9765cdac5894f2ba"
+    secret = "f4237d712c3ed1e7fab0137b81418b14"
+    group = "ActBnjPreview-MainWebSvr-P"
+    topic = "ActBnjPreview-T"
+    action = "pub"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[memcache]
+    accessExpire = "10s"
+    likeExpire = "3s"
+    likeIPExpire = "30s"
+    perpetualExpire = "0s"
+    itemExpire = "60s"
+    qqExpire = "600s"
+    bwsExpire = "600m"
+    kfcExpire = "10m"
+    kfcCodeExpire = "1h"
+    sourceItemExpire = "5m"
+    protocolExpire = "1h"
+    [memcache.like]
+    name = "go-common/app/interface/main/activity/test"
+    proto = "tcp"
+    addr = "172.18.33.61:11220"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"   
+
+[redis]
+    name = "activity-service"
+    proto = "tcp"
+    addr = "127.0.0.1:32770"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "10s"
+    matchExpire = "24h"
+    followExpire = "2400h"
+    userAchExpire = "1h"
+    userPointExpire = "1h"
+    achCntExpire = "1h"
+    hotDotExpire = "720h"
+    randomExpire = "300s"
+    resetExpire = "5s"
+    rewardExpire = "720h"
+
+[rpcClient2]
+    [rpcClient2.account]
+        timeout = "1s"
+    [rpcClient2.archive]
+        timeout = "1s"
+    [rpcClient2.coin]
+        timeout = "1s"
+    [rpcClient2.suit]
+        timeout = "1s"
+
+[mysql]
+    [mysql.like]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_lottery?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "2s"
+    [mysql.like.breaker]
+    window  ="3s"
+    sleep   ="100ms"
+    bucket  = 10
+    ratio   = 0.5
+
+[host]
+    sports  = "http://open.sports.qq.com"
+    qqNews  = "http://openapi.inews.qq.com"
+    activity = "http://www.bilibili.com"
+    apiCo   = "http://api.bilibili.co"
+    liveCo    ="http://api.live.bilibili.co"
+
+[interval]
+    newestSubTsInterval = "10m"
+    pullArcTypeInterval = "10m"
+    actSourceInterval = "10m"
+
+[bnj2019]
+    timelinePic = "//activity.hdslb.com/blackboard/static/20180122/3f23658826b7a0a46f812d368533dc9f/images/j60y4n9j83.png"
+    gameCancel = 0
+    [[bnj2019.timeline]]
+        name = "1111"
+        start = "2018-06-04T00:00:00+08:00"
+        end = "2018-06-05T10:00:00+08:00"
+        cover = "//activity.hdslb.com/blackboard/static/20180122/3f23658826b7a0a46f812d368533dc9f/images/j60y4n9j83.png"
+    [[bnj2019.timeline]]
+        name = "2222"
+        start = "2018-06-04T00:00:00+08:00"
+        end = "2018-06-05T10:00:00+08:00"
+        cover = "//i0.hdslb.com/bfs/activity-plat/cover/20180209/m6pvmmnpxx.jpg"
+    [[bnj2019.reward]]
+        step = 1
+        condition = 1000000
+        rewardID = "111"
+        expire = 365
+        rewardType = "pendant"
+    [[bnj2019.reward]]
+        step = 2
+        condition = 2000000
+        rewardID = "111"
+        rewardType = "medal"
+    [[bnj2019.reward]]
+        step = 3
+        condition = 3000000
+        rewardID = "111"
+        rewardType = "coupon"
+    [[bnj2019.reward]]
+        step = 4
+        condition = 4000000
+        rewardID = "111"
+        rewardType = "live"
+    [[bnj2019.info]]
+        nav = "nav1"
+        pic = "//activity.hdslb.com/blackboard/static/20180122/3f23658826b7a0a46f812d368533dc9f/images/j60y4n9j83.png"
+        aid = 10111175
+        detail = "detail1"
+        publish = "2018-11-29T00:00:00+08:00"
+    [[bnj2019.info]]
+        nav = "nav2"
+        pic = "//activity.hdslb.com/blackboard/static/20180122/3f23658826b7a0a46f812d368533dc9f/images/j60y4n9j83.png"
+        aid = 10111172
+        detail = "detail2"
+        publish = "2018-11-29T00:00:00+08:00"
+

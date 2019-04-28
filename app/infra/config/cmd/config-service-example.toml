@@ -1,0 +1,60 @@
+# This is a TOML document. Boom.
+
+pollTimeout = "30s"
+pathCache = "/tmp/"
+
+[log]
+stdout = true
+
+[antispam]
+    on=true
+    second=60
+    n=10
+    hour=12
+    m=500
+    [antispam.redis]
+        name = "config-service/hosts"
+        proto = "tcp"
+        addr = "172.18.33.61:6811"
+        idle = 100
+        active = 100
+        dialTimeout = "1s"
+        readTimeout = "1s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+        expire = "24h"
+        
+[ecode]
+    domain = "172.16.33.248:6401"
+
+[db]
+    name = "[config]tcp@172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_apm?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    queryTimeout = "500ms"
+    execTimeout = "500ms"
+    tranTimeout = "500ms"
+    [db.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[redis]
+    name = "config-service/hosts"
+    proto = "tcp"
+    addr = "172.18.33.61:6811"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[orm]
+dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_config?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 5
+idleTimeout = "4h"

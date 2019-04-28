@@ -1,0 +1,69 @@
+IsTest = true
+
+[log]
+    stdout = true
+#    dir = "/data/log/up/"
+
+[Upcrm]
+    dsn = "upcrm:DdL6c5JaWCYKMAQ10PURbfeImow9HXlx@tcp(172.16.33.205:3306)/bilibili_upcrm?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 1
+    idleTimeout = "4h"
+[ArchiveOrm]
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_archive?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 1
+    idleTimeout = "4h"
+
+[job]
+    UpCheckDateDueTaskTime = "0 0 7 * * ?"
+    TaskScheduleTime = "0 0 1 * * ?"
+    CheckStateJobTime = "0 30 /1 * * ?"
+    UpdateUpTidJobTime = "0 15 0 * * ?"
+
+[MailConf]
+    host = "smtp.exmail.qq.com"
+    port = 465
+    username = "manager@bilibili.com"
+    password = "123"
+    DueMailReceivers = [""] # 需要发送的额外管理员名称
+
+
+[DatabusConf]
+    [DatabusConf.ArchiveNotify]
+        key = "4c76cbb7a985ac90"
+        secret= "43bb22ce34a6b13e7814f09cb8116522"
+        group= "ArchiveNotify-MainArchive-UpArchives-S"
+        topic= "ArchiveNotify-T"
+        action = "sub"
+        name = "up-job"
+        proto = "tcp"
+        addr = "172.18.33.50:6205"
+        idle = 5
+        active = 20
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+    [DatabusConf.Archive]
+        key = "4c76cbb7a985ac90"
+        secret= "43bb22ce34a6b13e7814f09cb8116522"
+        group= "Archive-MainArchive-UpService-S"
+        topic= "Archive-T"
+        action = "sub"
+        name = "up-job"
+        proto = "tcp"
+        addr = "172.18.33.50:6205"
+        idle = 5
+        active = 20
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+
+
+[grpcclient]
+    [grpcclient.up]
+        timeout = "5s"
+    [grpcclient.archive]
+        timeout = "2s"

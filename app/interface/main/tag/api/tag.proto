@@ -1,0 +1,30 @@
+// main.community.tag grpc api proto file.
+// discovery id: main.community.tag.
+// version: v1.
+syntax = "proto3";
+package main.community.tag.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+message Tag {
+    int64 id=1 [(gogoproto.jsontag) = "id"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    int32 type = 3 [(gogoproto.jsontag) = "type"];
+    string cover = 4 [(gogoproto.jsontag) = "cover"];
+    string head_cover = 5 [(gogoproto.jsontag) = "head_cover"];
+    string content = 6 [(gogoproto.jsontag) = "content"];
+    string short_content = 7 [(gogoproto.jsontag) = "short_content"];
+    int32 verify = 8 [(gogoproto.jsontag) = "-"];
+    int32 attention = 10 [(gogoproto.jsontag) = "attention"];
+    int32 state = 11 [(gogoproto.jsontag) = "-"];
+    int64 sub = 12 [(gogoproto.jsontag) = "sub"];
+    int64 bind = 13 [(gogoproto.jsontag) = "bind"];
+    int64 likes = 14 [(gogoproto.jsontag) = "likes"];
+    int64 hates = 15 [(gogoproto.jsontag) = "hates"];
+    int32 liked = 16 [(gogoproto.jsontag) = "liked"];
+    int32 hated = 17 [(gogoproto.jsontag) = "hated"];
+    int64 ctime = 18 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 19 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}

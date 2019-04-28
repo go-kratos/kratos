@@ -1,0 +1,22 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liangkai
+- renwei
+- renyashun
+- wangxu01
+- zhangshengchao
+- zhapuyu
+labels:
+- main
+- service
+- service/main/history
+options:
+  no_parent_owners: true
+reviewers:
+- chenzhihui
+- liangkai
+- renyashun
+- wangxu01
+- zhangshengchao
+- zhapuyu

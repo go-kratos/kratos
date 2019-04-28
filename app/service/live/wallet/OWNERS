@@ -1,0 +1,15 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- zhaohailin
+- zhouzhichao
+labels:
+- live
+- service
+- service/live/wallet
+options:
+  no_parent_owners: true
+reviewers:
+- liuzhen
+- zhaohailin
+- zhouzhichao

@@ -1,0 +1,33 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "doc_index_data.go",
+        "doc_info.go",
+        "engine_init_options.go",
+        "index.go",
+        "indexer_init_options.go",
+        "scoring_criteria.go",
+        "search_request.go",
+        "search_response.go",
+    ],
+    importmap = "go-common/vendor/github.com/go-ego/riot/types",
+    importpath = "github.com/go-ego/riot/types",
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/github.com/go-ego/riot/utils:go_default_library"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

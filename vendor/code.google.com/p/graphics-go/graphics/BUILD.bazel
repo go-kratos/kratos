@@ -1,0 +1,52 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "affine.go",
+        "blur.go",
+        "rotate.go",
+        "scale.go",
+        "thumbnail.go",
+    ],
+    importmap = "go-common/vendor/code.google.com/p/graphics-go/graphics",
+    importpath = "code.google.com/p/graphics-go/graphics",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/code.google.com/p/graphics-go/graphics/convolve:go_default_library",
+        "//vendor/code.google.com/p/graphics-go/graphics/interp:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = [
+        "blur_test.go",
+        "rotate_test.go",
+        "scale_test.go",
+        "shared_test.go",
+        "thumbnail_test.go",
+    ],
+    embed = [":go_default_library"],
+    deps = ["//vendor/code.google.com/p/graphics-go/graphics/graphicstest:go_default_library"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//vendor/code.google.com/p/graphics-go/graphics/convolve:all-srcs",
+        "//vendor/code.google.com/p/graphics-go/graphics/detect:all-srcs",
+        "//vendor/code.google.com/p/graphics-go/graphics/graphicstest:all-srcs",
+        "//vendor/code.google.com/p/graphics-go/graphics/interp:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,136 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "root"
+pid = "/tmp/live-userexp-service.pid"
+dir = "./"
+perf = "0.0.0.0:20101"
+family = "live-userexp-service"
+
+[log]
+    dir = "/data/log/live-userexp-service"
+
+[db]
+    [db.exp]
+    addr = "172.16.33.69:3306"
+    dsn = "live:oWni@ElNs0P0C(dphdj*F1y4@tcp(172.16.33.69:3306)/live_user_exp?timeout=5s&readTimeout=30s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "2s"
+    [db.exp.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[memcache]
+expExpire = "3s"
+    [memcache.exp]
+    name = "live-userexp-service/exp"
+    proto = "tcp"
+    addr = "172.16.33.251:11211"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[bm]
+	[bm.inner]
+	addr = "0.0.0.0:8801"
+	maxListen = 10
+	timeout = "1s"
+	[bm.local]
+	addr = "0.0.0.0:8802"
+	maxListen = 10
+	timeout = "1s"
+
+[httpClient]
+    [httpClient.read]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "1s"
+    timeout = "4s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.read.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+    [httpClient.write]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.write.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[app]
+key = "7c7ac0db1aa05587"
+secret = "9a6d62d93290c5f771ad381e9ca23f26"
+
+[Report]
+    key = "2511663d546f1413"
+    secret = "cde3b480836cc76df3d635470f991caa"
+    group = "LogUserAction-MainSearch-P"
+    topic = "LogUserAction-T"
+    action = "pub"
+    buffer = 10240
+    name = "log-user-action/log-sub"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    active = 100
+    idle = 100
+    dialTimeout = "200ms"
+    readTimeout = "200ms"
+    writeTimeout = "200ms"
+    idleTimeout = "80s"
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    csrfOn = false
+    [identify.app]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "172.16.33.251:11211"
+    active = 5
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    [identify.host]
+    auth = "http://passport.bilibili.co"
+    secret = "http://open.bilibili.co"
+  [identify.httpClient]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "30ms"
+    timeout = "100ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}

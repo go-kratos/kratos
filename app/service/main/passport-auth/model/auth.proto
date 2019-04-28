@@ -1,0 +1,44 @@
+syntax = "proto3";
+package passport.service.auth;
+option go_package = "model";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// AuthReply auth reply
+message AuthReply {
+    // if cookie or token in life time, login is true
+    // else login is false and mid csrf expires is empty
+    bool Login = 1 [(gogoproto.jsontag) = "login"];
+    // user identify id
+    int64 Mid = 2 [(gogoproto.jsontag) = "mid"];
+    // use cookie request this field will return
+    // use token request ignore this field
+    string CSRF = 3 [(gogoproto.jsontag) = "csrf_token"];
+    // expiration date
+    // unix timestamp
+    int64 Expires = 4 [(gogoproto.jsontag) = "expires"];
+}
+
+message Cookie {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    string Session = 2 [(gogoproto.jsontag) = "session"];
+    string CSRF = 3 [(gogoproto.jsontag) = "csrf"];
+    int64 Type = 4 [(gogoproto.jsontag) = "type"];
+    int64 Expires = 5 [(gogoproto.jsontag) = "expires"];
+}
+
+message Token {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    int32 AppID = 2 [(gogoproto.jsontag) = "appid"];
+    string Token = 3 [(gogoproto.jsontag) = "token"];
+    int64 Type = 4 [(gogoproto.jsontag) = "type"];
+    int64 Expires = 5 [(gogoproto.jsontag) = "expires"];
+}
+
+message Refresh {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    int32 AppID = 2 [(gogoproto.jsontag) = "appid"];
+    string Refresh = 3 [(gogoproto.jsontag) = "refresh"];
+    string Token = 4 [(gogoproto.jsontag) = "token"];
+    int64 Expires = 5 [(gogoproto.jsontag) = "expires"];
+}

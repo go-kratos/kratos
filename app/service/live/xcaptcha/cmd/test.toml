@@ -1,0 +1,53 @@
+[redis]
+	name = "xcaptcha"
+	proto = "tcp"
+    addr = "127.0.0.1:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+[databus]
+    [databus.captchaAnti]
+        key = "ec4c0820d525d67b"
+        secret= "e20f8f664bf10722efeb6aac0cc16011"
+        group = "CaptchaAnti-LiveLive-P"
+        topic = "CaptchaAnti-T"
+        action = "pub"
+        buffer = 1024
+        name = "live.xcaptcha"
+        proto = "tcp"
+        addr = "172.18.33.50:6205"
+        idle = 1
+        active = 1
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+[geeTest]
+    on = 1
+    id = "902f4c9b1b89198603fd65bf5a72553e"
+    key = "1e37837a105a80fb52150ad2d72bc114"
+    Timeout = 500
+    Qps = 100
+   	Slice = 10
+    [geeTest.Get]
+   	   Timeout = 400
+   	   KeepAlive = 60
+    [geeTest.Post]
+       Timeout = 50
+       KeepAlive = 60
+[logStream]
+    LogId = "001741"
+    Token = "1234567844"
+    Address = "172.18.33.125:15140"
+    Capacity = 10240
+    Timeout = "5s"
+
+[liverpc]
+    [liverpc.captcha]
+        Addr = "172.22.37.80:20825"
+[log]
+    stdout = true

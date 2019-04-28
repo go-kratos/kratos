@@ -1,0 +1,145 @@
+syntax = "proto3";
+
+package live.liveadmin.v1;
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service PayGoods {
+    // `method:"POST" internal:"true"` 生成一张付费直播票
+    rpc add (PayGoodsAddReq) returns (PayGoodsAddResp);
+
+    // `method:"POST" internal:"true"` 更新一张付费直播票
+    rpc update (PayGoodsUpdateReq) returns (PayGoodsUpdateResp);
+
+    // `internal:"true"` 获取付费直播票列表
+    rpc getList (PayGoodsGetListReq) returns (PayGoodsGetListResp);
+
+    // `method:"POST" internal:"true"` 关闭购票
+    rpc close (PayGoodsCloseReq) returns (PayGoodsCloseResp);
+
+    // `method:"POST" internal:"true"` 开启购票
+    rpc open (PayGoodsOpenReq) returns (PayGoodsOpenResp);
+}
+
+message PayGoodsAddReq {
+    // 平台
+    string platform = 1 [(gogoproto.moretags) = 'form:"platform"'];
+    // 商品名称
+    string title = 2 [(gogoproto.moretags) = 'form:"title" validate:"required"'];
+    // 商品类型 2 付费直播门票
+    int64 type = 3 [(gogoproto.moretags) = 'form:"type" validate:"required"'];
+    // 商品价格(分)
+    int64 price = 4 [(gogoproto.moretags) = 'form:"price" validate:"required"'];
+    // 开始时间
+    string start_time = 5 [(gogoproto.moretags) = 'form:"start_time" validate:"required"'];
+    // 结束时间
+    string end_time = 6 [(gogoproto.moretags) = 'form:"end_time" validate:"required"'];
+    // ip限制，0不限制，1仅限大陆，2仅限港澳台，3大陆+港澳台
+    int64 ip_limit = 7 [(gogoproto.moretags) = 'form:"ip_limit"'];
+}
+
+message PayGoodsAddResp {
+
+}
+
+
+
+message PayGoodsUpdateReq {
+    // 购票id
+    int64 id = 1 [(gogoproto.moretags) = 'form:"id"'];
+    // 平台
+    string platform = 2 [(gogoproto.moretags) = 'form:"platform"'];
+    // 商品名称
+    string title = 3 [(gogoproto.moretags) = 'form:"title"'];
+    // 商品类型 2 付费直播门票
+    int64 type = 4 [(gogoproto.moretags) = 'form:"type"'];
+    // 商品价格(分)
+    int64 price = 5 [(gogoproto.moretags) = 'form:"price"'];
+    // 开始时间
+    string start_time = 6 [(gogoproto.moretags) = 'form:"start_time"'];
+    // 结束时间
+    string end_time = 7 [(gogoproto.moretags) = 'form:"end_time"'];
+    // ip限制，0不限制，1仅限大陆，2仅限港澳台，3大陆+港澳台
+    int64 ip_limit = 8 [(gogoproto.moretags) = 'form:"ip_limit"'];
+}
+
+message PayGoodsUpdateResp {
+
+}
+
+
+
+message PayGoodsGetListReq {
+    // 购票id
+    int64 id = 1 [(gogoproto.moretags) = 'form:"id"'];
+    // 平台
+    string platform = 2 [(gogoproto.moretags) = 'form:"platform"'];
+    // 商品名称
+    string title = 3 [(gogoproto.moretags) = 'form:"title"'];
+    // 商品类型 2 付费直播门票
+    int64 type = 4 [(gogoproto.moretags) = 'form:"type"'];
+    // ip限制，0不限制，1仅限大陆，2仅限港澳台，3大陆+港澳台
+    int64 ip_limit = 5 [(gogoproto.moretags) = 'form:"ip_limit"'];
+    // 页号，0开始
+    int64 page_num = 6 [(gogoproto.moretags) = 'form:"page_num"'];
+    // 每页个数
+    int64 page_size = 7 [(gogoproto.moretags) = 'form:"page_size"'];
+}
+
+message PayGoodsGetListResp {
+    message PageInfo {
+        // 记录总数
+        int64 total_count = 1 [(gogoproto.jsontag) = "total_count"];
+        // 当前页号
+        int64 page_num = 2 [(gogoproto.jsontag) = "page_num"];
+    }
+
+    message GoodsInfo {
+        // 购票id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 标题
+        string title = 2 [(gogoproto.jsontag) = "title"];
+        // 平台
+        string platform = 3 [(gogoproto.jsontag) = "platform"];
+        // 类型，2为付费直播
+        int64 type = 4 [(gogoproto.jsontag) = "type"];
+        // 价格，分
+        int64 price = 5 [(gogoproto.jsontag) = "price"];
+        // 开始购票时间
+        string start_time = 6 [(gogoproto.jsontag) = "start_time"];
+        // 结束购票时间
+        string end_time = 7 [(gogoproto.jsontag) = "end_time"];
+        // ip限制
+        int64 ip_limit = 8 [(gogoproto.jsontag) = "ip_limit"];
+        // 购票状态，0关闭，1购票中，2未开始
+        int64 status = 9 [(gogoproto.jsontag) = "status"];
+    }
+
+    //
+    PageInfo page_info = 1 [(gogoproto.jsontag) = "page_info"];
+    //
+    repeated GoodsInfo goods_info = 2 [(gogoproto.jsontag) = "goods_info"];
+}
+
+message PayGoodsCloseReq {
+    // 购票id
+    int64 id = 1 [(gogoproto.moretags) = 'form:"id" validate:"required"'];
+}
+
+message PayGoodsCloseResp {
+
+}
+
+
+
+message PayGoodsOpenReq {
+    // 购票id
+    int64 id = 1 [(gogoproto.moretags) = 'form:"id" validate:"required"'];
+}
+
+message PayGoodsOpenResp {
+
+}

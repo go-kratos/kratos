@@ -1,0 +1,17 @@
+[property]
+    # 信用分同步数据目录
+    spypath = "./data/spy"
+    # vip同步数据目录
+    vippath = "./data/vip"
+    # 启动同步数据开关
+    sync = false
+    # 守序初始分
+	lawful = 8000
+    # 博览初始分
+	wide = 0
+    # 有爱初始分
+	friendly = 5000
+    # 慷慨初始分
+	bounty = 0
+    # 创造初始分
+	creativity = 0

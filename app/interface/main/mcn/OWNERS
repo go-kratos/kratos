@@ -1,0 +1,20 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- hejianbing
+- shencen
+- wangzhe01
+labels:
+- interface
+- interface/main/mcn
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- hejianbing
+- limengqing
+- liyixin
+- shencen
+- wangyuzhe
+- wangzhe01
+- yanjinbin

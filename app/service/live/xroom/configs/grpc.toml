@@ -1,0 +1,6 @@
+
+[server]
+    addr = "0.0.0.0:9000"
+    timeout = "1s"
+[client]
+    timeout = "1s"

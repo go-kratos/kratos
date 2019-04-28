@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package banned_service.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service SilentMng {
+    
+    /** 查询是否是黑名单
+     * 
+     */   
+    rpc is_block_user (SilentMngIsBlockUserReq) returns (SilentMngIsBlockUserResp);
+}
+
+
+
+message SilentMngIsBlockUserReq {
+    // 
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 
+    int64 roomid = 2 [(gogoproto.jsontag) = "roomid"];
+    // 1表示弹幕禁言，2表示房间信息
+    int64 type = 3 [(gogoproto.jsontag) = "type"];
+}
+
+message SilentMngIsBlockUserResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 
+        int64 roomid = 2 [(gogoproto.jsontag) = "roomid"];
+        // 
+        bool is_block_user = 3 [(gogoproto.jsontag) = "is_block_user"];
+        // 
+        int64 type = 4 [(gogoproto.jsontag) = "type"];
+        // 禁言到期时间戳
+        int64 block_end_time = 5 [(gogoproto.jsontag) = "block_end_time"];
+    }
+}

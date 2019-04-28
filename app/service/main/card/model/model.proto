@@ -1,0 +1,18 @@
+syntax = "proto3";
+package account.service.card;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "model";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message UserEquip {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    int64 CardID = 2 [(gogoproto.jsontag) = "card_id"];
+    int64 ExpireTime = 3 [(gogoproto.jsontag) = "expire_time"];
+}

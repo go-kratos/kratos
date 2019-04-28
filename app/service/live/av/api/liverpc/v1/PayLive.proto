@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package av.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service PayLive {
+    
+    /** 付费直播鉴权
+     * 
+     */   
+    rpc liveValidate (PayLiveLiveValidateReq) returns (PayLiveLiveValidateResp);
+}
+
+
+
+message PayLiveLiveValidateReq {
+    // 房间id
+    int64 room_id = 1 [(gogoproto.jsontag) = "room_id"];
+    // 来源：pc：表示PC端；pc_link：表示PC直播姬；ios：表示ios端；ios_link：表示ios_link端；android：安卓端；android_link：安卓link端；ipad：ipad；android_pad:安卓pad端；live_mng：表示live后台;vc_mng：表示vc后台;"
+    string platform = 2 [(gogoproto.jsontag) = "platform"];
+}
+
+message PayLiveLiveValidateResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 1 允许 ; 0 不允许
+        int64 permission = 1 [(gogoproto.jsontag) = "permission"];
+    }
+}

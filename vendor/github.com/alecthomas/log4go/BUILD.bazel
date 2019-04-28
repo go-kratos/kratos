@@ -1,0 +1,31 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "config.go",
+        "filelog.go",
+        "log4go.go",
+        "pattlog.go",
+        "socklog.go",
+        "termlog.go",
+        "wrapper.go",
+    ],
+    importmap = "go-common/vendor/github.com/alecthomas/log4go",
+    importpath = "github.com/alecthomas/log4go",
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

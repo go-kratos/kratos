@@ -1,0 +1,175 @@
+
+env = "dev"
+
+apptoken = "a999eb3371de0a7be87d92823be36817"
+
+[utBaseLine]
+coverage = 60
+passrate = 100
+
+superman = ["haoguanwei","linli"]
+
+[pprof]
+dir = "/data/pprof"
+#goPath = "/usr/local/go/bin/go"
+
+[databusConfig]
+partitions = 3
+factor = 1
+
+[tree]
+platformID = "2F3b8fDVGlMnj8aCDlMaW"
+msmPlatformID = "VH7rmAQ+9)T/tLXdCAwQ.X*evJFxWWjKA7)xYeG]p]UB{4jGY,rBBr"
+
+[host]
+apiCo = "http://172.22.33.185:7171"
+svenCo = "http://fat1-sven.bilibili.co"
+managerCo = "http://uat-manager.bilibili.co"
+dapperCo = "http://172.16.38.143:6193"
+
+
+[canal]
+canalsvenCo = "http://fat1-sven.bilibili.co"
+reviewer = ["fengshanshan"]
+
+[discovery]
+api = ["172.22.33.185:7171","172.22.33.174:7171","172.22.33.183:7171"]
+
+[log]
+stdout = true
+# dir = "/data/log/apm-admin"
+#    [log.agent]
+#    family = "apm-manager"
+#    taskID = "000069"
+#    proto = "unixgram"
+#    addr = "/var/run/lancer/collector.sock"
+#    chan = 10240
+
+[httpClient]
+    key = "3c4e41f926e51656"
+    secret = "26a2095b60c24154521d24ae62b885bb"
+    dial = "3s"
+    timeout = "10s"
+    keepAlive = "60s"
+
+[orm]
+dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_apm_v2?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+#dsn = "root:root@tcp(127.0.0.1:3306)/bilibili_apm_v2?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 1
+idleTimeout = "4h"
+
+[ormdatabus]
+dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_databus_v2?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 1
+idleTimeout = "4h"
+
+[ormcanal]
+dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_canal?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 1
+idleTimeout = "4h"
+
+[ormapmmonitor]
+dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_apm?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 1
+idleTimeout = "4h"
+
+[kafka]
+"test_kafka_9092-266" = { brokers = ["172.16.38.154:9192"] }
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "sven"
+    [auth.DsHTTPClient]
+    key = "sven"
+    secret = "a9564ebc3289b7a14551baf8ad5ec60a"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "sven-apm"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 10
+    idle = 10
+    dialTimeout = "10ms"
+    readTimeout = "10ms"
+    writeTimeout = "10ms"
+    idleTimeout = "80s"
+
+[bfs]
+addr        = "http://bfs.bilibili.co"
+bucket      = "test"
+key         = "221bce6492eba70f"
+secret      = "6eb80603e85842542f9736eb13b7e3"
+# 上传文件大小限制为1M
+maxFileSize = 1048576
+
+[prometheus]
+url = "http://merak.bilibili.co/"
+key = "71f079db59672ecec5b8d6f252c4b59ab2a8a227mainsite@bilibili.com"
+secret = "37ba757817b4e9c45c7e97f6ed5eee4e1c7bac52"
+
+[apps]
+name = ["main.account.member-service", "main.account.vip-service"]
+max = 1000
+
+[broadcast]
+tencent = ["tx-bj-pf-broadcast-01","tx-bj-pf-broadcast-02","tx-bj-pf-broadcast-03","tx-bj-pf-broadcast-04","tx-bj-pf-broadcast-05",
+        "tx-bj-pf-broadcast-06","tx-bj-pf-broadcast-07",
+        "tx-gz-pf-broadcast-001","tx-gz-pf-broadcast-002","tx-gz-pf-broadcast-003","tx-gz-pf-broadcast-004","tx-gz-pf-broadcast-005",
+        "tx-gz-pf-broadcast-006","tx-gz-pf-broadcast-007",
+        ]
+kingsoft = ["ks-sh2-pf-dmcmt-pm-01", "ks-sh2-pf-dmcmt-pm-02",
+        "ks-pf-broadcast-001","ks-pf-broadcast-002","ks-pf-broadcast-003","ks-pf-broadcast-004","ks-pf-broadcast-005",]
+
+[cron]
+crontab = "0 0 23 * * *"
+crontabRepo = "0 0 19 * * *"
+
+[wechat]
+users = ["chengxing"]
+chatid = "utbroadcasttest"
+
+[gitlab]
+    api = "http://git.bilibili.co/api/v4"
+    # personal token
+    token= "UfzT-r-dhEXpGopxYFYW"
+
+[redis]
+name = "apm-admin/apm"
+proto = "tcp"
+addr = "172.22.33.117:6816"
+idle = 2
+active = 10
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+expireTime  = "1h"

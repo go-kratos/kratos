@@ -1,0 +1,22 @@
+#!/usr/bin/env groovy
+node {
+    try {
+      parallel (
+          checkout: {
+            stage('Checkout'){
+              checkout scm
+            }
+          },
+      ) 
+
+      stage('build') {
+	sh  'make build-keep-going'
+      } 
+
+    } catch (e) {
+      currentBuild.result = "FAILED"
+      throw e
+    } finally {
+      echo 'final'
+    }
+}

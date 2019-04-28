@@ -1,0 +1,21 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- haoguanwei
+- hejianbing
+- shencen
+- wangzhe01
+labels:
+- main
+- service
+- service/main/up
+options:
+  no_parent_owners: true
+reviewers:
+- haoguanwei
+- hejianbing
+- limengqing
+- liyixin
+- shencen
+- wangzhe01
+- yanjinbin

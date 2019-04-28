@@ -1,0 +1,25 @@
+syntax = "proto3";
+package account.service.member.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// +bili:deepcopy-gen:structs=go-common/app/tool/gengo/cmd/deepcopy-gen/examples/model.MemberBase
+message BaseInfoReply {
+  int64 mid = 1 [ (gogoproto.jsontag) = "mid" ];
+  string name = 2 [ (gogoproto.jsontag) = "name" ];
+  int64 sex = 3 [ (gogoproto.jsontag) = "sex" ];
+  string face = 4 [ (gogoproto.jsontag) = "face" ];
+  string sign = 5 [ (gogoproto.jsontag) = "sign" ];
+  int64 rank = 6 [ (gogoproto.jsontag) = "rank" ];
+  int64 birthday = 7 [
+    (gogoproto.jsontag) = "birthday",
+    (gogoproto.casttype) = "go-common/library/time.Time"
+  ];
+}
+
+// +bili:deepcopy-gen:structs=go-common/app/tool/gengo/cmd/deepcopy-gen/examples/model.Names
+message NamesReply { map<int64, string> names = 1; }
+
+// +bili:deepcopy-gen:structs=go-common/app/tool/gengo/cmd/deepcopy-gen/examples/model.Mids
+message MidsReply { repeated int64 mids = 1; }

@@ -1,0 +1,37 @@
+[log]
+    stdout=true
+
+[host]
+    liveRpc = "http://rpc.live.bilibili.co"
+
+
+[httpClient]
+    key    = "fb06a25c6338edbc"
+    secret = "fd10bd177559780c2e4a44f1fa47fa83"
+    dial      = "100ms"
+    timeout   = "5s"
+    keepAlive = "60s"
+    [httpClient.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[liverpc]
+    [liverpc.room]
+        Addr = "172.18.35.12:20200"
+    [liverpc.rc]
+
+    [liverpc.rankdb]
+
+
+[warden]
+	dial = "1s"
+	timeout = "1s"
+
+[accountRPC]
+    pullInterval = "10s"
+    [accountRPC.client]
+        timeout = "1s"
+        timer = 1000

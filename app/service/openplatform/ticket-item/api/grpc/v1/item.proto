@@ -1,0 +1,247 @@
+syntax = "proto3";
+package ticket.service.item.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "app/service/openplatform/ticket-item/api/grpc/v1/screen.proto";
+import "app/service/openplatform/ticket-item/api/grpc/v1/bulletin.proto";
+import "app/service/openplatform/ticket-item/api/grpc/v1/guest.proto";
+import "app/service/openplatform/ticket-item/api/grpc/v1/time.proto";
+import "app/service/openplatform/ticket-item/api/grpc/v1/venue.proto";
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option go_package = "v1";
+
+// The get service definition.
+service Item {
+    // Info Servcie
+    rpc Info (InfoRequest) returns (InfoReply) {}
+    // cards Servcie
+    rpc Cards (CardsRequest) returns (CardsReply) {}
+    // BillInfo Servcie
+    rpc BillInfo (BillRequest) returns (BillReply) {}
+    // Wish Service
+    rpc Wish (WishRequest) returns (WishReply) {}
+    // Version Service
+    rpc Version (VersionRequest) returns (VersionReply) {}
+    // VersionReview Service
+    rpc VersionReview (VersionReviewRequest) returns (VersionReviewReply) {}
+    // VersionStatus Service
+    rpc VersionStatus (VersionStatusRequest) returns (VersionStatusReply) {}
+    // BannerEdit Service
+    rpc BannerEdit (BannerEditRequest) returns (BannerEditReply) {}
+}
+
+// The request message containing the itemID.
+message InfoRequest {
+  int64 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.moretags) = "validate:\"required\"", (gogoproto.customname)= "ID"];
+}
+
+// The request message containing the itemIDs.
+message CardsRequest {
+  repeated int64 ids = 1 [(gogoproto.jsontag) = "ids", (gogoproto.moretags) = "validate:\"required\"", (gogoproto.customname)= "IDs"];
+}
+
+// The request message containing the itemIDs ScIDs TicketIDs.
+message BillRequest {
+  repeated int64 ids = 1 [(gogoproto.jsontag) = "ids", (gogoproto.moretags) = "validate:\"required\"",(gogoproto.customname)= "IDs"];
+  repeated int64 tk_ids = 2 [(gogoproto.jsontag) = "sc_ids", (gogoproto.moretags) = "validate:\"required\"", (gogoproto.customname)= "ScIDs"];
+  repeated int64 sc_ids = 3 [(gogoproto.jsontag) = "tk_ids", (gogoproto.moretags) = "validate:\"required\"", (gogoproto.customname)= "TkIDs"];
+}
+
+// The response message containing the itembaseinfo and related screeninfo,ticketinfo
+message InfoReply {
+  int64 id  = 1 [(gogoproto.jsontag) = "id", (gogoproto.moretags) = "validate:\"min=1\"", (gogoproto.customname)= "ID"];
+  string name  = 2 [(gogoproto.jsontag) = "name"];
+  int32 status = 3 [(gogoproto.jsontag) = "status", (gogoproto.moretags) = "validate:\"min=1\""];
+  int32 type = 4 [(gogoproto.jsontag) = "type", (gogoproto.moretags) = "validate:\"min=0\""];
+  int32 rec = 5 [(gogoproto.jsontag) = "rec", (gogoproto.moretags) = "validate:\"min=0\""];
+  int32 is_sale = 6 [(gogoproto.jsontag) = "is_sale", (gogoproto.moretags) = "validate:\"min=0\""];
+  string ticket_desc = 7 [(gogoproto.jsontag) = "desc"];
+  int32 sale_flag = 8 [(gogoproto.jsontag) = "sale_flag", (gogoproto.moretags) = "validate:\"min=1\""];
+  string prom_tag = 9 [(gogoproto.jsontag) = "promo_tags"];
+  ImgList img = 10 [(gogoproto.jsontag) = "img"];
+  ItemTime time = 11 [(gogoproto.jsontag) = "time"];
+  map<int64,ScreenInfo> screen = 12 [(gogoproto.jsontag) = "screen"];
+  ItemExt ext = 13 [(gogoproto.jsontag) = "ext"];
+  BillOpt bill_opt = 14 [(gogoproto.jsontag) = "bill_opt"];
+}
+
+// The response message containing the map type cardinfo
+message CardsReply{
+    map<int64,CardReply> cards = 1 [(gogoproto.jsontag) = "list"];
+}
+
+// The response message containing the itembaseInfo
+message CardReply {
+  int64 id  = 1 [(gogoproto.jsontag) = "id", (gogoproto.moretags) = "validate:\"min=1\"", (gogoproto.customname)= "ID"];
+  string name  = 2 [(gogoproto.jsontag) = "name"];
+  int32 status = 3 [(gogoproto.jsontag) = "status", (gogoproto.moretags) = "validate:\"min=1\""];
+  int32 type = 4 [(gogoproto.jsontag) = "type", (gogoproto.moretags) = "validate:\"min=0\""];
+  int32 rec = 5 [(gogoproto.jsontag) = "rec", (gogoproto.moretags) = "validate:\"min=0\""];
+  int32 is_sale = 6 [(gogoproto.jsontag) = "is_sale", (gogoproto.moretags) = "validate:\"min=0\""];
+  string ticket_desc = 7 [(gogoproto.jsontag) = "desc"];
+  int32 sale_flag = 8 [(gogoproto.jsontag) = "sale_flag", (gogoproto.moretags) = "validate:\"min=1\""];
+  string prom_tag = 9 [(gogoproto.jsontag) = "promo_tags"];
+  ImgList img = 10 [(gogoproto.jsontag) = "img"];
+  ItemTime time = 11 [(gogoproto.jsontag) = "time"];
+  VenueInfo venue = 12 [(gogoproto.jsontag) = "venue"];
+}
+
+
+// The response message containing billinfo
+message BillReply {
+  map<int64,ItemBase> base_info= 1 [(gogoproto.jsontag) = "base_info"];
+  map<int64,BillOpt> bill_opt= 2 [(gogoproto.jsontag) = "bill_opt"];
+}
+
+
+// The response message containing the itembaseinfo and map type screeninfo
+message ItemBase {
+  int64 id  = 1 [(gogoproto.jsontag) = "id", (gogoproto.moretags) = "validate:\"min=1\"", (gogoproto.customname)= "ID"];
+  int32 status = 2 [(gogoproto.jsontag) = "status", (gogoproto.moretags) = "validate:\"min=0\""];
+  string name  = 3 [(gogoproto.jsontag) = "name"];
+  int32 type = 4 [(gogoproto.jsontag) = "type", (gogoproto.moretags) = "validate:\"min=0\""];
+  int32 is_sale = 5 [(gogoproto.jsontag) = "is_sale", (gogoproto.moretags) = "validate:\"min=0\""];
+  string prom_tag = 6 [(gogoproto.jsontag) = "promo_tags"];
+  uint64 ver_id = 7 [(gogoproto.jsontag) = "ver_id", (gogoproto.moretags) = "validate:\"min=0\"", (gogoproto.customname)= "VerID"];
+  ItemTime time = 8 [(gogoproto.jsontag) = "time"];
+  ImgList img = 9 [(gogoproto.jsontag) = "img"];
+  map<int64,ScreenInfo> screen = 10 [(gogoproto.jsontag) = "screen"];
+}
+
+// The response message containing the ItemExtinfo
+message ItemExt {
+    string label = 1 [(gogoproto.jsontag) = "label"];
+    int32 sp_type = 2 [(gogoproto.jsontag) = "sponsor_type", (gogoproto.moretags) = "validate:\"min=0\""];
+    uint64 ver_id = 3 [(gogoproto.jsontag) = "ver_id", (gogoproto.moretags) = "validate:\"min=0\"", (gogoproto.customname)= "VerID"];
+    string detail = 4 [(gogoproto.jsontag) = "detail"];
+    VenueInfo venue = 5 [(gogoproto.jsontag) = "venue"];
+    repeated BulletinInfo bulletin = 6 [(gogoproto.jsontag) = "bulletin"];
+    repeated GuestInfoRequest guest = 7 [(gogoproto.jsontag) = "guest"];
+}
+
+// The response message containing the ImgList
+message ImgList {
+    string first  = 1 [(gogoproto.jsontag) = "first"];
+    string banner  = 2 [(gogoproto.jsontag) = "banner"];
+}
+
+// The response message containing the ItemBillOption
+message BillOpt {
+    string buyerInfo = 1 [(gogoproto.jsontag) = "buyer_info"];
+    int32 exp_tip = 2 [(gogoproto.jsontag) = "exptip"];
+    int32 exp_free = 3 [(gogoproto.jsontag) = "expfree"];
+    int32 vip_exp_free = 4 [(gogoproto.jsontag) = "vip_exp_free"];
+    BuyNumLimit buy_limit = 5 [(gogoproto.jsontag) = "buy_num_limit"];
+}
+
+// 项目限购结构
+message BuyNumLimit {
+    repeated BnlLevel level = 1 [(gogoproto.jsontag) = "level"];
+    int32 per = 2 [(gogoproto.jsontag) = "per"];
+    map<int32, BnlLevel> vip = 3 [(gogoproto.jsontag) = "vip", (gogoproto.customname) = "VIP"];
+}
+
+message BnlLevel {
+    int32 apply_to_vip = 1 [(gogoproto.jsontag) = "apply_to_vip"];
+    int32 max = 2 [(gogoproto.jsontag) = "max"];
+    int32 min = 3 [(gogoproto.jsontag) = "min"];
+}
+
+// The request message containing ItemID MID Face.
+message WishRequest {
+    int64 item_id = 1 [(gogoproto.jsontag) = "item_id", (gogoproto.moretags) = "validate:\"required\"", (gogoproto.customname)= "ItemID"];
+    int64 mid = 2 [(gogoproto.jsontag) = "mid", (gogoproto.moretags) = "validate:\"required\"", (gogoproto.customname)= "MID"];
+    string face = 3 [(gogoproto.jsontag) = "face"];
+}
+
+// The response message containing the ITEMID MID
+message WishReply {
+    int64 item_id = 1 [(gogoproto.jsontag) = "item_id", (gogoproto.moretags) = "validate:\"required\"", (gogoproto.customname)= "ItemID"];
+    int64 mid = 2 [(gogoproto.jsontag) = "mid", (gogoproto.moretags) = "validate:\"required\"", (gogoproto.customname)= "MID"];
+}
+
+
+// FavRequest 收藏
+message FavRequest {
+    int64 item_id = 1 [(gogoproto.jsontag) = "item_id", (gogoproto.moretags) = "validate:\"required\"", (gogoproto.customname)= "ItemID"];
+    int64 mid = 2 [(gogoproto.jsontag) = "mid", (gogoproto.moretags) = "validate:\"required\"", (gogoproto.customname)= "MID"];
+    int32 type = 3 [(gogoproto.jsontag) = "type", (gogoproto.moretags) = "validate:\"required,min=1,max=3\"", (gogoproto.customname)= "Type"];
+    int32 Status = 4 [(gogoproto.jsontag) = "status", (gogoproto.moretags) = "validate:\"required,min=0,max=1\"", (gogoproto.customname)= "Status"];
+}
+
+// FavReply 收藏
+message FavReply {
+    int64 item_id = 1 [(gogoproto.jsontag) = "item_id", (gogoproto.moretags) = "validate:\"required\"", (gogoproto.customname)= "ItemID"];
+    int64 mid = 2 [(gogoproto.jsontag) = "mid", (gogoproto.moretags) = "validate:\"required\"", (gogoproto.customname)= "MID"];
+    int32 type = 3 [(gogoproto.jsontag) = "type", (gogoproto.moretags) = "validate:\"required,min=0,max=1\"", (gogoproto.customname)= "Type"];
+    int32 Status = 4 [(gogoproto.jsontag) = "status", (gogoproto.moretags) = "validate:\"required,min=0,max=1\"", (gogoproto.customname)= "Status"];
+}
+
+
+// The request message containing the version info to update/insert project
+message VersionRequest {
+    uint64 ver_id = 1 [(gogoproto.jsontag) = "ver_id", (gogoproto.moretags) = "validate:\"required,min=0\""];
+    uint32 op_type = 2 [(gogoproto.jsontag) = "op_type", (gogoproto.moretags) = "validate:\"max=1\""];
+}
+
+
+// The general response message containing the result after updating/inserting the project info
+message VersionReply {
+    int64 project_id = 1 [(gogoproto.jsontag) = "project_id"];
+}
+
+
+// The request message containing the info to add/edit a banner
+message BannerEditRequest {
+    uint64 ver_id = 1 [(gogoproto.jsontag) = "ver_id"];
+    int32 op_type = 2 [(gogoproto.jsontag) = "op_type"];
+    string name = 3 [(gogoproto.jsontag) = "name"];
+    int32 position = 4 [(gogoproto.jsontag) = "position"];
+    int32 sub_position = 5 [(gogoproto.jsontag) = "sub_position"];
+    int32 order = 6 [(gogoproto.jsontag) = "order"];
+    int64 pub_start = 7 [(gogoproto.jsontag) = "pub_start"];
+    int64 pub_end = 8 [(gogoproto.jsontag) = "pub_end"];
+    string pic = 9 [(gogoproto.jsontag) = "pic"];
+    string url = 10 [(gogoproto.jsontag) = "url"];
+    string from = 11 [(gogoproto.jsontag) = "from"];
+    string location = 12 [(gogoproto.jsontag) = "location"];
+    string uname = 13 [(gogoproto.jsontag) = "uname"];
+    int32 target_user = 14 [(gogoproto.jsontag) = "target_user"];
+}
+
+
+// The response message containing the result after adding/editing a banner
+message BannerEditReply {
+    int64 banner_id = 1 [(gogoproto.jsontag) = "banner_id"];
+}
+
+// The request message containing the info to pass/reject a version
+message VersionReviewRequest {
+    uint64 ver_id = 1 [(gogoproto.jsontag) = "ver_id"];
+    int32 op_type = 2 [(gogoproto.jsontag) = "op_type"];
+    int32 ver_type = 3 [(gogoproto.jsontag) = "ver_type"];
+    string msg = 4 [(gogoproto.jsontag) = "msg"];
+    string uname = 5 [(gogoproto.jsontag) = "uname"];
+}
+
+// The response message containing the result after passing/rejecting a version
+message VersionReviewReply {
+    uint64 ver_id = 1 [(gogoproto.jsontag) = "ver_id"];
+}
+
+// The request message containing the info to change a version's status
+message VersionStatusRequest {
+    uint64 ver_id = 1 [(gogoproto.jsontag) = "ver_id"];
+    int32 op_type = 2 [(gogoproto.jsontag) = "op_type"];
+    int32 ver_type = 3 [(gogoproto.jsontag) = "ver_type"];
+    string uname = 4 [(gogoproto.jsontag) = "uname"];
+}
+
+// The response message containing the result after changing a version's status
+message VersionStatusReply {
+    uint64 ver_id = 1 [(gogoproto.jsontag) = "ver_id"];
+}

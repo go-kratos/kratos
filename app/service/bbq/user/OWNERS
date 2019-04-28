@@ -1,0 +1,12 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- daiwei
+- jiangdongqi
+- luxiaowei
+labels:
+- bbq
+- service
+- service/bbq/user
+options:
+  no_parent_owners: true

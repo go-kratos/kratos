@@ -1,0 +1,72 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "disk.go",
+        "disk_darwin.go",
+        "disk_darwin.h",
+        "disk_darwin_386.go",
+        "disk_darwin_amd64.go",
+        "disk_darwin_arm64.go",
+        "disk_darwin_cgo.go",
+        "disk_darwin_nocgo.go",
+        "disk_fallback.go",
+        "disk_freebsd.go",
+        "disk_freebsd_386.go",
+        "disk_freebsd_amd64.go",
+        "disk_linux.go",
+        "disk_openbsd.go",
+        "disk_openbsd_amd64.go",
+        "disk_solaris.go",
+        "disk_unix.go",
+        "disk_windows.go",
+    ],
+    cgo = True,
+    clinkopts = select({
+        "@io_bazel_rules_go//go/platform:darwin": [
+            "-lobjc -framework Foundation -framework IOKit",
+        ],
+        "//conditions:default": [],
+    }),
+    importmap = "go-common/vendor/github.com/shirou/gopsutil/disk",
+    importpath = "github.com/shirou/gopsutil/disk",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/shirou/gopsutil/internal/common:go_default_library",
+    ] + select({
+        "@io_bazel_rules_go//go/platform:darwin": [
+            "//vendor/golang.org/x/sys/unix:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:freebsd": [
+            "//vendor/golang.org/x/sys/unix:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:linux": [
+            "//vendor/golang.org/x/sys/unix:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:openbsd": [
+            "//vendor/golang.org/x/sys/unix:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:solaris": [
+            "//vendor/golang.org/x/sys/unix:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:windows": [
+            "//vendor/golang.org/x/sys/windows:go_default_library",
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

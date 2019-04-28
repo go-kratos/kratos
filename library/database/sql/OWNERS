@@ -1,0 +1,11 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- maojian
+labels:
+- library
+- library/database/sql
+reviewers:
+- chenzhihui
+- maojian
+- zhapuyu

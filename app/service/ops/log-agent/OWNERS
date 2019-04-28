@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- maojian
+- wangxiangyu
+labels:
+- ops
+- service
+- service/ops/log-agent
+options:
+  no_parent_owners: true
+reviewers:
+- chenzhihui
+- maojian
+- wangxiangyu
+- weicheng

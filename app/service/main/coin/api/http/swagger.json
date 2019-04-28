@@ -1,0 +1,334 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "go-common api",
+    "description": "api",
+    "version": "1.0",
+    "contact": {
+      "email": "lintanghui@bilibili.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "paths": {
+    "/x/internal/v1/coin/add": {
+      "get": {
+        "operationId": "/x/internal/v1/coin/add",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "mid",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "max_coin",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "aid",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "business",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "number",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "ip",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "upmid",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "typeid",
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "query",
+            "name": "pub_time",
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/AddCoinReply",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x/internal/v1/coin/user/count": {
+      "get": {
+        "operationId": "/x/internal/v1/coin/user/count",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "mid",
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/UserCoinsReply",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x/internal/v1/coin/user/log": {
+      "get": {
+        "operationId": "/x/internal/v1/coin/user/log",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "mid",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "recent",
+            "type": "boolean"
+          },
+          {
+            "in": "query",
+            "name": "translate",
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/CoinsLogReply",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x/internal/v1/coin/user/modify": {
+      "post": {
+        "operationId": "/x/internal/v1/coin/user/modify",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ts",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "mid",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "ip",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "operator",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "check_zero",
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/ModifyCoinsReply",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "AddCoinReply": {
+      "title": "AddCoinReply",
+      "type": "object"
+    },
+    "CoinsLogReply": {
+      "title": "CoinsLogReply",
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ModelLog",
+            "type": "object"
+          }
+        }
+      }
+    },
+    "ModelLog": {
+      "title": "ModelLog",
+      "required": [
+        "ip"
+      ],
+      "type": "object",
+      "properties": {
+        "desc": {
+          "type": "string"
+        },
+        "from": {
+          "type": "number",
+          "format": "double"
+        },
+        "ip": {
+          "type": "string"
+        },
+        "time_stamp": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "to": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "ModifyCoinsReply": {
+      "title": "ModifyCoinsReply",
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "UserCoinsReply": {
+      "title": "UserCoinsReply",
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    }
+  }
+}

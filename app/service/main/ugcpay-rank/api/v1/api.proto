@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+
+package ugcpay.service.rank.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "app/service/main/ugcpay-rank/internal/model/model.proto";
+import "google/protobuf/empty.proto";
+
+message RankElecAVReq{
+    int64 UPMID = 1 ; 
+    int64 AVID = 2 ;
+    int64 RankSize = 3 [(gogoproto.casttype) = "int"];
+}
+
+message RankElecUPReq{
+    int64 UPMID = 1 ;
+    int64 RankSize = 2 [(gogoproto.casttype) = "int"];
+}
+
+message RankElecMonthReq{
+    int64 UPMID = 1 ;
+    int64 AVID = 2 ;
+    int64 RankSize = 3 [(gogoproto.casttype) = "int"];
+}
+
+message RankElecMonthResp{
+    main.account.ugcpay.service.model.RankElecUPProto UP = 1 ;
+    main.account.ugcpay.service.model.RankElecAVProto AV = 2 ;
+}
+
+message RankElecUPResp{
+    main.account.ugcpay.service.model.RankElecUPProto UP = 1 ;
+}
+
+message RankElecAVResp{
+    main.account.ugcpay.service.model.RankElecAVProto AV = 1 ;
+}
+
+message RankElecUpdateOrderReq{
+    int64 AVID = 1 ;
+    int64 UPMID = 2 ;
+    int64 PayMID = 3 ;
+    int64 Ver = 4 ;
+    int64 Fee = 5 ;
+}
+
+message RankElecUpdateMessageReq{
+    int64 AVID = 1 ;
+    int64 UPMID = 2 ;
+    int64 PayMID = 3 ;
+    int64 Ver = 4 ; 
+    string Message = 5 ; 
+    bool Hidden = 6 ;
+}
+
+service UGCPayRank {
+    rpc RankElecAllAV(RankElecAVReq) returns (RankElecAVResp);
+    rpc RankElecMonthAV(RankElecAVReq) returns (RankElecAVResp);
+    rpc RankElecMonthUP(RankElecUPReq) returns (RankElecUPResp);
+    rpc RankElecMonth(RankElecMonthReq) returns (RankElecMonthResp);
+    rpc RankElecUpdateOrder(RankElecUpdateOrderReq) returns (.google.protobuf.Empty);
+    rpc RankElecUpdateMessage(RankElecUpdateMessageReq) returns (.google.protobuf.Empty);
+}

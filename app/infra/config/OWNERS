@@ -1,0 +1,26 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chenshangqiang
+- chenzhihui
+- haoguanwei
+- linli
+- lintanghui
+- maojian
+- zhoujixiang
+labels:
+- infra
+- infra/config
+- main
+- service
+- service/main/config
+options:
+  no_parent_owners: true
+reviewers:
+- chenshangqiang
+- chenzhihui
+- haoguanwei
+- linli
+- lintanghui
+- maojian
+- zhoujixiang

@@ -1,0 +1,182 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/spy-service.pid"
+dir = "./"
+checkFile = "/data/www/spy-service.html"
+family = "spy-service"
+
+account = "http://passport.bilibili.co"
+
+[xlog]
+dir = "/data/log/spy-service"
+
+[db]
+    [db.spy]
+    addr= "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_spy?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.spy.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[rpc]
+    [rpc.account]
+
+[bm]
+	[bm.inner]
+	addr = "0.0.0.0:7651"
+	maxListen = 10
+	timeout = "1s"
+
+[httpClient]
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+    key = "zxnh4k92dwe61t27"
+    secret = "dnu3bwpxyswqwf1ixpsczthury1nqiew"
+    [httpClient.breaker]
+        window  = "3s"
+        sleep   = "500ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+        switchoff = false
+
+[identify]
+    [identify.host]
+    auth = "http://passport.bilibili.co"
+    secret = "http://open.bilibili.co"
+    [identify.httpClient]
+    key = "zxnh4k92dwe61t27"
+    secret = "dnu3bwpxyswqwf1ixpsczthury1nqiew"
+    dial = "30ms"
+    timeout = "100ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[rpcServer2]
+    [[rpcServer2.servers]]
+    proto = "tcp"
+    addr = "0.0.0.0:6869"
+    weight = 10
+    [rpcServer2.zookeeper]
+    root = "/microservice/spy-service/"
+    addrs = ["172.18.33.172:2181"]
+    timeout = "30s"
+
+[memcache]
+    userExpire = "1m"
+    [memcache.user]
+        name = "spy-service/user"
+        proto = "tcp"
+        addr = "172.16.33.22:21211"
+        idle = 5
+        active = 10
+        dialTimeout = "1s"
+        readTimeout = "1s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+
+[property]
+    telValidateURL = "http://passport.bilibili.co/intranet/acc/validateTel"
+    blockAccountURL = "https://account.bilibili.com/api/member/blockAccount"
+    securityLoginURL = "http://passport.bilibili.co/intranet/acc/security/mid"
+    telInfoByMidURL = "http://passport.bilibili.co/intranet/acc/telInfo/mid"
+    profileInfoByMidURL = "http://api.bilibili.co/x/internal/v3/account/profile"
+    unicomGiftStateURL = "http://app.bilibili.com/x/wall/unicom/bind/state"
+    loadEventTick = "60s"
+    doubleCheckLevel = 4
+    configLoadTick = "60s"
+    userInfoShard = 100
+    historyShard = 100
+    autoBlockSwitch = true
+    [property.score]
+    baseInit = 100
+    eventInit = 100
+    [property.punishment]
+    scoreThreshold = 30
+    times = 3
+    [property.event]
+    serviceName = "spy_service"
+    initEventID = 1
+    bindMailAndTelLowRisk = "bind_mail_and_tel_low_risk"
+    bindMailOnly = "bind_mail_only"
+    bindNothing = "bind_nothing"
+    bindTelLowRiskOnly = "bind_tel_low_risk_only"
+    bindTelMediumRisk = "bind_tel_medium_risk"
+    bindTelHighRisk = "bind_tel_high_risk"
+    bindTelUnknownRisk = "bind_tel_unknown_risk"
+    bindTelLowRiskAndIdenAuth = "bind_tel_low_risk_and_iden_auth"
+    bindTelLowRiskAndIdenUnauth = "bind_tel_low_risk_and_iden_unauth"
+    bindTelUnknownRiskAndIdenAuth = "bind_tel_unknown_risk_and_iden_auth"
+    bindTelMediumRiskAndIdenAuth = "bind_tel_medium_risk_and_iden_auth"
+    bindTelUnknownRiskAndIdenUnauth = "bind_tel_unknown_risk_and_iden_unauth"
+    bindTelMediumRiskAndIdenUnauth = "bind_tel_medium_risk_and_iden_unauth"
+    bindMailAndIdenUnknown = "bind_mail_and_iden_unknown"
+    bindTelHighRiskAndIdenAuth = "bind_tel_high_risk_and_iden_auth"
+    bindNothingV2 = "bind_nothing_v2"
+    bindNothingAndIdenAuth = "bind_nothing_and_iden_auth"
+    bindTelHighRiskAndIdenUnauth = "bind_tel_high_risk_and_iden_unauth"
+    [property.block]
+    cycleTimes = 3600
+    [property.white]
+    [[property.white.tels]]
+        from = 23333330000
+        to = 23333340000
+
+
+[redis]
+name = "spy-service"
+proto = "tcp"
+addr = "172.16.33.54:6379"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "24h"
+verifyCdTimes = "2h"
+
+[dBScoreChange]
+key = "0QNB0ZgFozbKUCQhbTq8"
+secret= "0QNB0ZgFozbKUCQhbTq9"
+group= "SpyFigure-UGC-P"
+topic= "SpyFigure-T"
+action="pub"
+name = "spy-service/databus"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 2
+active = 10
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "1h"
+
+[qcloud]
+path = "RegisterProtection"
+region = "sh"
+secretID = ""
+secretKey = ""
+charset = "utf-8"
+baseURL = "csec.api.qcloud.com/v2/index.php"

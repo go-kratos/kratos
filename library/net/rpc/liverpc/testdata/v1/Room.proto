@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+package room.v1;
+
+option go_package = "v1";
+
+
+service Room {
+
+    /** 根据房间id获取房间信息
+     *
+     */
+    rpc get_info_by_id (RoomGetInfoByIdReq) returns (RoomGetInfoByIdResp);
+
+    /** 获取房间基本信息接口，前端/移动端房间页使用
+     *
+     */
+    rpc get_info (RoomGetInfoReq) returns (RoomGetInfoResp);
+}
+
+
+message RoomGetInfoByIdReq {
+    repeated int64 ids = 1; // 房间id, 可以为短号
+    repeated string fields = 2; // 需要哪些字段, 不传默认所有
+}
+
+message RoomGetInfoByIdResp {
+    int64 code = 1; // code
+    string msg = 2; // msg
+    map<string, RoomInfo> data = 3; // 房间信息map
+
+    message RoomInfo {
+        int64 roomid = 1; // 房间id
+        string uname = 2; // 用户名, 不可靠.
+        string cover = 3; // 封面
+        int64 uid = 4; // 用户id
+        string live_time = 5; // 开播时间
+        int64 round_status = 6; // 轮播状态
+        int64 on_flag = 7; // 是否开播
+        string title = 8; // 直播间标题
+        string lock_status = 9; // 锁定到时间
+        string hidden_status = 10; // 隐藏到时间
+        string user_cover = 11; // 也是封面...
+        int64 short_id = 12; // 短号
+        int64 online = 13; // 在线人数
+        int64 area = 14; // 分区id
+        int64 area_v2_id = 15; // 分区v2 id
+        int64 area_v2_parent_id = 16; // 分区v2 父分区id
+        string area_v2_name = 17; // 分区v2名字 fields加了该字段才会给
+        string area_v2_parent_name = 18; // 分区v2父分区名字 fields加了该字段才会给
+        int64 attentions = 19; // 关注人数
+    }
+}
+
+
+message RoomGetInfoReq {
+    int64 id = 1; // 房间号或者短号
+    string from = 2; // 来源 房间页：room link中心： link_center
+}
+
+message RoomGetInfoResp {
+    int64 code = 1; // code
+    string msg = 2; // msg
+    Data data = 3; //
+
+    message PendantWithDesc {
+        string name = 1; // 名字、标识
+        int64 position = 2; // 位置0无1左上2右上3右下4左下
+        string value = 3; // name对应的value，可以是挂件的展示名字/对应的图片地址
+        string desc = 4; // 描述
+    }
+
+    message Pendant {
+        string name = 1; // 名字、标识
+        int64 position = 2; // 位置0无1左上2右上3右下4左下
+        string value = 3; // name对应的value，可以是挂件的展示名字/对应的图片地址
+    }
+
+    message Pendants {
+        PendantWithDesc frame = 1; // web端房间页头像边框
+        PendantWithDesc badge = 2; // web端房间页头像角标
+        Pendant mobile_frame = 3; // 移动端房间页头像边框
+        Pendant mobile_badge = 4; // 移动端房间页头像角标
+    }
+
+    message Data {
+        int64 uid = 1; //
+        int64 room_id = 2; // 房间id
+        int64 short_id = 3; // 短号
+        string keyframe = 4; // 关键帧
+        int64 online = 5; // 在线人数
+        bool is_portrait = 6; // true为竖屏
+        string room_silent_type = 7; // 禁言类型 member medal level 或者空字符串
+        int64 room_silent_second = 8; // 剩余禁言时间，秒数
+        int64 room_silent_level = 9; // 禁言等级
+        int64 live_status = 10; // 闲置中0 直播中1 轮播中2
+        int64 area_id = 11; // 分区id
+        int64 parent_area_id = 12; // 父分区id
+        string area_name = 13; // 分区名字
+        string parent_area_name = 14; // 父分区名字
+        int64 old_area_id = 15; // 老分区id
+        string background = 16; // 背景url
+        string title = 17; // 房间标题
+        bool is_strict_room = 18; // 是否是限制房间 如果是 应该不连接弹幕 不展示礼物等等
+        string user_cover = 19; // 房间封面
+        string live_time = 20; // 开播时间
+        string pendants = 21; // 挂件列表
+        string area_pendants = 22; // 分区第一标志, 待定.
+        string description = 23; // 房间简介.
+        string tags = 24; // 房间标签, 逗号分隔字符串
+        string verify = 25; // 认证信息 没认证为空字符串
+        repeated string hot_words = 26; // 弹幕热词
+        int64 allow_change_area_time = 27; // 允许修改分区时间戳(主播可能被审核禁止修改分区),0表示没有限制 主播才有此字段
+        int64 allow_upload_cover_time = 28; // 允许上传封面的时间 0表示没有限制 主播才有此字段gs
+        Pendants new_pendants = 29; // 新挂件
+        string up_session = 30; // 一次开播标记
+        int64 pk_status = 31; // 0为该房间不处于pk中  1表示处于pk中(需调用pk基础信息接口获取pk信息)
+    }
+}

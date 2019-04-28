@@ -1,0 +1,15 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- yubaihai
+- zhaogangtao
+labels:
+- admin
+- admin/main/point
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- linmiao
+- yubaihai
+- zhaogangtao

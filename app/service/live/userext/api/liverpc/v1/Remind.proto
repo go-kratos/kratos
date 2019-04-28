@@ -1,0 +1,135 @@
+syntax = "proto3";
+
+package userext.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Remind {
+    
+    /** 预约、取消提醒
+     * 
+     */   
+    rpc operate (RemindOperateReq) returns (RemindOperateResp);
+    
+    /** 查询预约状态
+     * 
+     */   
+    rpc query (RemindQueryReq) returns (RemindQueryResp);
+    
+    /** 预约、取消提醒
+     * 
+     */   
+    rpc submit (RemindSubmitReq) returns (RemindSubmitResp);
+    
+    /** 查询预约状态
+     * 
+     */   
+    rpc get (RemindGetReq) returns (RemindGetResp);
+}
+
+
+
+message RemindOperateReq {
+    // 活动 id
+    int64 aid = 1 [(gogoproto.jsontag) = "aid"];
+    // 0.取消 1.预约
+    int64 action = 2 [(gogoproto.jsontag) = "action"];
+}
+
+message RemindOperateResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg　
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        
+    }
+}
+
+
+
+message RemindQueryReq {
+    // 活动 id
+    int64 aid = 1 [(gogoproto.jsontag) = "aid"];
+}
+
+message RemindQueryResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg　
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 活动 ID
+        int64 aid = 1 [(gogoproto.jsontag) = "aid"];
+        // 1.已经预约 2.没有预约
+        int64 status = 2 [(gogoproto.jsontag) = "status"];
+    }
+}
+
+
+
+message RemindSubmitReq {
+    // 事件类型
+    int64 type = 1 [(gogoproto.jsontag) = "type"];
+    // 事件 id (多个用逗号拼接)
+    string event_id = 2 [(gogoproto.jsontag) = "event_id"];
+    // 提交来源
+    int64 source = 3 [(gogoproto.jsontag) = "source"];
+    // 1.预约 2.取消预约
+    int64 action = 4 [(gogoproto.jsontag) = "action"];
+}
+
+message RemindSubmitResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg　(预约成功，已过期，未开始)
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        
+    }
+}
+
+
+
+message RemindGetReq {
+    // 事件类型
+    int64 type = 1 [(gogoproto.jsontag) = "type"];
+    // 事件 id
+    string event_id = 2 [(gogoproto.jsontag) = "event_id"];
+}
+
+message RemindGetResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg　
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message List {
+        // 事件类型
+        int64 type = 1 [(gogoproto.jsontag) = "type"];
+        // 活动 ID
+        int64 event_id = 2 [(gogoproto.jsontag) = "event_id"];
+        // 1.已经预约 2.没有预约
+        int64 status = 3 [(gogoproto.jsontag) = "status"];
+        // 预约的时间
+        string date = 4 [(gogoproto.jsontag) = "date"];
+    }
+       
+    message Data {
+        // 
+        repeated List list = 1 [(gogoproto.jsontag) = "list"];
+    }
+}

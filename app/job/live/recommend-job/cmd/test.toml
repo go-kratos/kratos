@@ -1,0 +1,31 @@
+[redis]
+	name = "recommend-job"
+	proto = "tcp"
+	addr = "127.0.0.1:6379"
+	idle = 2000
+	active = 2000
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[log]
+    stdout = true
+[hadoop]
+    tarUrl = "http://livedev.bilibili.co/download/hadoop-2.8.4.tar.gz"
+    hadoopDir = "/tmp"
+
+[itemcfJob]
+    schedule = "30 50 16 * * *" # 秒 分钟 小时 天 月 星期
+    workerNum = 1000
+    inputFile = "/department/live/recommend/item-cf-output"
+    hadoopFile = "/department/live/recommend/%s/item-cf-output"
+    localTmpFile = "/tmp/recommend-cf-output-%s"
+
+[userAreaJob]
+    schedule = "20 37 14 * * *" # 秒 分钟 小时 天 月 星期
+    workerNum = 1000
+    inputFile = "/Users/liugang/Downloads/user-area.txt"
+    hadoopFile = "/department/live/recommend/%s/user-area"
+    localTmpFile = "/tmp/user-area-output-%s"

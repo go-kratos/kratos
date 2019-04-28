@@ -1,0 +1,84 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/seq-server.pid"
+dir = "./"
+perf = "127.0.0.1:7110"
+family = "seq-server"
+
+tick = "2s"
+seqSvrs = ["0.0.0.0:7111"]
+
+[log]
+dir = "/data/log/seq-server/"
+    [log.agent]
+    family = "seq-server"
+    taskID = "000161"
+    proto = "unixgram"
+    addr = "/var/run/lancer/collector.sock"
+    chan = 10240
+
+
+[tracer]
+family = "seq-server"
+proto = "unixgram"
+addr = "/var/run/dapper-collect/dapper-collect.sock"
+
+[identify]
+    whiteAccessKey = "a2a1eb0ac97d6ba08b85aa0151528f34"
+    whiteMid = 23675773
+    [identify.app]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    [identify.host]
+    auth = "http://passport.bilibili.co"
+    secret = "http://open.bilibili.co"
+    [identify.httpClient]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "30ms"
+    timeout = "100ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[multiHTTP]
+    [multiHTTP.inner]
+    addrs = ["0.0.0.0:7112"]
+
+[db]
+    [db.number]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/sequence?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 50
+    idle = 10
+    idleTimeout ="4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.number.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[rpcServer2]
+discoverOff = false
+[[rpcServer2.servers]]
+    proto = "tcp"
+    addr = "0.0.0.0:7111"
+    weight = 10
+[rpcServer2.zookeeper]
+    root = "/microservice/seq-server/"
+    addrs = ["172.18.33.172:2181"]
+    timeout = "30s"

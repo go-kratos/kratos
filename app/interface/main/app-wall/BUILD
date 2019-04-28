@@ -1,0 +1,37 @@
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//app/interface/main/app-wall/cmd:all-srcs",
+        "//app/interface/main/app-wall/conf:all-srcs",
+        "//app/interface/main/app-wall/dao/account:all-srcs",
+        "//app/interface/main/app-wall/dao/callback:all-srcs",
+        "//app/interface/main/app-wall/dao/live:all-srcs",
+        "//app/interface/main/app-wall/dao/mobile:all-srcs",
+        "//app/interface/main/app-wall/dao/offer:all-srcs",
+        "//app/interface/main/app-wall/dao/padding:all-srcs",
+        "//app/interface/main/app-wall/dao/seq:all-srcs",
+        "//app/interface/main/app-wall/dao/shopping:all-srcs",
+        "//app/interface/main/app-wall/dao/telecom:all-srcs",
+        "//app/interface/main/app-wall/dao/unicom:all-srcs",
+        "//app/interface/main/app-wall/dao/wall:all-srcs",
+        "//app/interface/main/app-wall/http:all-srcs",
+        "//app/interface/main/app-wall/model:all-srcs",
+        "//app/interface/main/app-wall/service/mobile:all-srcs",
+        "//app/interface/main/app-wall/service/offer:all-srcs",
+        "//app/interface/main/app-wall/service/operator:all-srcs",
+        "//app/interface/main/app-wall/service/ping:all-srcs",
+        "//app/interface/main/app-wall/service/telecom:all-srcs",
+        "//app/interface/main/app-wall/service/unicom:all-srcs",
+        "//app/interface/main/app-wall/service/wall:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

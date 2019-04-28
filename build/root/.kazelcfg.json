@@ -1,0 +1,22 @@
+{
+	"GoPrefix": "go-common",
+	"SkippedPaths": [
+		"^release",
+		"^//release",
+		"^//app/tool/protoc-gen-bm/third_party",
+		"^app/tool/protoc-gen-bm/third_party",
+		"^//vendor/github.com/gogo",
+		"^vendor/github.com/gogo",
+		"^//vendor/github.com/golang/protobuf",
+		"^vendor/github.com/golang/protobuf",
+		"^vendor/google.golang.org/grpc",
+		"^//vendor/google.golang.org/grpc",
+		"^vendor/github.com/tsuna/gohbase/pb",
+		"^//vendor/github.com/tsuna/gohbase/pb",
+		"^//vendor/golang.org/x/net",
+		"^vendor/golang.org/x/net"
+	],
+	"AddSourcesRules": true,
+	"VendorMultipleBuildFiles": true,
+	"ManageGoRules": true
+}

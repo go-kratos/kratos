@@ -1,0 +1,52 @@
+syntax = "proto3";
+package live.livedm.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+
+message SendMsgReq {
+    int64  uid      = 1  [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+    int64  roomid   = 2  [(gogoproto.moretags) = 'form:"roomid" validate:"required"'];
+    string msg      = 3  [(gogoproto.moretags) = 'form:"msg" validate:"required"'];
+    string rnd      = 4  [(gogoproto.moretags) = 'form:"rnd"'];
+    string ip       = 5  [(gogoproto.moretags) = 'form:"ip"'];
+    int64  fontsize = 7  [(gogoproto.moretags) = 'form:"fontsize" validate:"gte=0"'];
+    int64  mode     = 8  [(gogoproto.moretags) = 'form:"mode" validate:"gte=0"'];
+    string platform = 9  [(gogoproto.moretags) = 'form:"platform"'];
+    int64  msgtype  = 10 [(gogoproto.moretags) = 'form:"msgtype" validate:"gte=0"'];
+    int64  bubble   = 11 [(gogoproto.moretags) = 'form:"bubble"'];
+    lancer lancer   = 12 [(gogoproto.moretags) = 'form:"lancer"'];
+}
+
+message lancer {
+    string buvid     = 1 [(gogoproto.moretags) = 'form:"buvid"'];
+    string userAgent = 2 [(gogoproto.moretags) = 'form:"userAgent"'];
+    string refer     = 3 [(gogoproto.moretags) = 'form:"refer"'];
+    string cookie    = 4 [(gogoproto.moretags) = 'form:"cookie"'];
+    int64  build     = 5 [(gogoproto.moretags) = 'form:"build"'];
+}
+
+message SendMsgResp {
+    bool   isLimit  = 1 [(gogoproto.jsontag) = "islimit"];
+    string limitMsg = 2 [(gogoproto.jsontag) = "limitmsg"];
+    int32  code    = 3 [(gogoproto.jsontag) = "code"];
+}
+
+message HistoryReq {
+    int64 roomid = 1 [(gogoproto.moretags) = 'form:"roomid" validate:"required"'];
+}
+
+message HistoryResp{
+    repeated string room  = 1 [(gogoproto.jsontag) = "room"];
+    repeated string admin = 2 [(gogoproto.jsontag) = "admin"];
+}
+
+message ErrMsg {
+    string message =1;
+}
+
+service DM {
+    rpc SendMsg(SendMsgReq) returns (SendMsgResp);
+    rpc GetHistory(HistoryReq) returns (HistoryResp);
+}

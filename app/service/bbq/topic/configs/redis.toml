@@ -1,0 +1,13 @@
+
+topicExpire = "10m"
+
+[topic]
+	name = "topic"
+	proto = "tcp"
+	addr = "172.16.38.91:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"

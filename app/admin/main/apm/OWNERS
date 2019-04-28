@@ -1,0 +1,21 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chenjianrong
+- chenzhihui
+- haoguanwei
+- linli
+- lintanghui
+labels:
+- admin
+- admin/main/apm
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- chengxing
+- chenjianrong
+- haoguanwei
+- hedan
+- linli
+- lintanghui

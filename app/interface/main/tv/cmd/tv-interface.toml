@@ -1,0 +1,307 @@
+# This is a TOML document. Boom.
+version = "1.0.0"
+user = "nobody"
+dir = "./"
+family = "tv-interface"
+env = "qa"
+tick = "10m"
+
+# Add Zone's middle. Migrate Home's cfg to Zone.0
+[Newzone]
+    [Newzone.0]
+        Name = "home"
+        Top = 14
+        Middle = 10
+        Bottom = 10
+        MiddleM = 21
+    [Newzone.1]
+        Name = "jp"
+        Top = 5
+        Middle = 12
+        Bottom = 59
+        TopM = 8
+        MiddleM = 64
+    [Newzone.4]
+        Name = "cn"
+        Top = 5
+        Middle = 12
+        Bottom = 59
+    [Newzone.2]
+        Name = "movie"
+        Top = 5
+        Bottom = 59
+    [Newzone.3]
+        Name = "documentary"
+        Top = 6
+        Bottom = 39
+    [Newzone.5]
+        Name = "tv"
+        Top = 5
+        Bottom = 59
+
+[Search]
+    URL = "http://s.search.bilibili.co/main/suggest"
+	MainVer = "v4"
+	SugNum = 15
+	SugType = "tv"
+	SugPGCBuild = 1011
+	Highlight = "true"
+	HotwordFre = "3m"
+	ResultURL = "http://s.search.bilibili.co/tv/search"
+	UserSearch = "http://s.search.bilibili.co"
+
+[searchClient]
+    key    = "d1941c223cebf297"
+    secret = "33a369a06f3fcec200dfb9d9f5e8a868"
+    dial      = "500ms"
+    timeout   = "2s"
+    keepAlive = "60s"
+    timer = 10
+
+[TVApp]
+    MobiApp = "android"
+    Build = "1007"
+    Platform = "android"
+
+[Homepage]
+    FollowSize = 10
+    MaxRecomIntervs = 5
+    LoadDuration = "10m"
+    HideIndexShow = ["cn","jp"]
+
+[httpClient]
+    key    = "cadf599ba8b3796a"
+    secret = "42fbb979aa742013d713a088f912673b"
+    dial      = "500ms"
+    timeout   = "2s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.breaker]
+        window  = "10s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[PlayurlClient]
+    key    = "cadf599ba8b3796a"
+    secret = "42fbb979aa742013d713a088f912673b"
+    dial      = "500ms"
+    timeout   = "500ms"
+    keepAlive = "60s"
+    timer = 10
+    [PlayurlClient.breaker]
+        window  = "10s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[mysql]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_tv?timeout=2s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 20
+    idle = 10
+    idleTimeout ="4h"
+    queryTimeout = "200ms"
+    execTimeout = "200ms"
+    tranTimeout = "200ms"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 100
+    ratio = 0.5
+    request = 100
+
+[memcache]
+    name   = "tv/memcache"
+    proto  = "tcp"
+    addr   = "172.18.33.60:11231"
+    active = 50
+    idle   = 10
+    dialTimeout   = "50ms"
+    readTimeout   = "100ms"
+    writeTimeout  = "100ms"
+    idleTimeout   = "80s"
+    relateExpire  = "20m"
+    arcExpire  = "1h"
+    viewExpire = "1h"
+    cmsExpire = "36h"
+    hisExpire = "20m"
+    mangoExpire = "10m"
+
+[log]
+dir = "/data/log/tv/"
+stdout = true
+
+[archiveRPC]
+    timeout = "1s"
+
+[accountRPC]
+    timeout = "1s"
+
+[favoriteRPC]
+    timeout = "1s"
+
+[hisRPC]
+    timeout = "3s"
+
+[cfg]
+zoneps = 40
+ModsReload = "70s"
+TypesReload = "1h"
+PageReload = "30m"
+IndexShowReload = "20m"
+EsIntervReload = "2m"
+DefaultSplash = "http://i0.hdslb.com/bfs/tvcover/39a900048b7f2e969661b03e72cf836fde2226e3.png"
+FavPs = 50
+PGCFilterBuild = 1011
+vipQns = ["74","112","116","64"]
+[cfg.AuditSign]
+    key = "bili"
+    secret = "bili.tv"
+[cfg.EmptyArc]
+    ChanSize = 1024
+    UnshelvePS = 2
+[cfg.ZonesInfo]
+    pgcZonesID = [1,2,3,4,5]
+    ugcZonesID = [6,7,8,9,10]
+    zonesName = ["jp", "cn", "tv", "movie", "documentary"]
+    TargetTypes = [3,4,36,155,160]
+    ugcTypes = [160, 36, 4, 155, 3, 5, 167, 1, 165, 181, 129, 119]
+    oldIdxMapping = {3=6,4=7,36=8,160=9,155=10}
+    oldIdxJump = 1
+[cfg.AuthMsg]
+    pgcOffline = "该内容已经PGC下架了，先看看别的吧"
+    cmsInvalid = "该内容已经CMS下架了，先看看别的吧"
+    licenseReject = "云视听播控平台鉴权失败，该内容暂时无法观看"
+[cfg.Dangbei]
+	Pagesize = 50
+	Expire = "1m"
+	MangoPS = 30
+[cfg.HisCfg]
+    Pagesize = 1000
+    Businesses = ["archive","pgc"]
+[cfg.EsIdx]
+    [cfg.EsIdx.PgcIdx]
+        Business = "pgc_media"
+        Index = "pgc_media"
+    [cfg.EsIdx.UgcIdx]
+        Business = "tv_ugc_archive"
+        Index = "tv_ugc_archive"
+[cfg.IndexLabel]
+    Fre = "30m"
+    PGCOrder = ["style_id","season_version","area","is_finish","copyright","season_status","season_month","producer_id","pubdate","year"]
+    UGCOrder = ["typeid","pubtime"]
+    YearParam = ["pub_date","year"]
+    [cfg.IndexLabel.YearV]
+        [cfg.IndexLabel.YearV."80年代"]
+            dur = "1980-1989"
+        [cfg.IndexLabel.YearV."90年代"]
+            dur = "1990-1999"
+        [cfg.IndexLabel.YearV."更早"]
+            dur = "1900-1979"
+[cfg.vipMark]
+    V1HideChargeable = false
+    EpFree = 2
+    [cfg.vipMark.EP]
+        Title = "vip"
+        Cover = "http://i0.hdslb.com/bfs/tvcover/39a900048b7f2e969661b03e72cf836fde2226e3.png"
+    [cfg.vipMark.LoadepMsg]
+        Build = 101500
+        Msg = "当前版本不支持会员内容播放，请升级至最新版本哦"
+[cfg.SnVipCorner]
+    Title = "sn_vip_title"
+    Cover = "sn_vip_cover"
+
+[HTTPServer]
+    addr = "0.0.0.0:6683"
+    timeout = "1s"
+
+[identify]
+    whiteAccessKey = "a2a1eb0ac97d6ba08b85aa0151528f34"
+    whiteMid = 23675773
+    csrf = false
+    [identify.app]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 10
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    [identify.host]
+    auth = "http://passport.bilibili.co"
+    secret = "http://open.bilibili.co"
+    [identify.httpClient]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+
+[redis]
+    name = "tv-interface"
+    proto = "tcp"
+    #addr = "172.18.33.61:6886"
+    addr = "localhost:6379"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+    cron = "*/5 * * * * *"
+
+[Host]
+    data      = "http://data.bilibili.co"
+    ApiIndex = "http://api.bilibili.co/pgc/internal/tv/rank/index"
+    ApiZone = "http://api.bilibili.co/pgc/internal/tv/rank/list"
+    APIFollow = "http://bangumi.bilibili.com/api/mydynamic_follows"
+    APIMedia = "https://bangumi.bilibili.com/view/api/season"
+    APIMediaV2 = "http://api.bilibili.com/pgc/view/app/season"
+    APIRecom = "https://bangumi.bilibili.com/api/season/v2/recommend"
+    ApiNewindex = "http://api.bilibili.co/pgc/internal/season/cards"
+    UgcPlayURL = "http://uat-tv-ugc.bilibili.co/v2/playurl"
+    AIUgcType = "http://data-test.bilibili.co/data/rank/all_region-%d-tv.json"
+    FavAdd = "http://api.bilibili.co/x/internal/v2/fav/video/add"
+    FavDel = "http://api.bilibili.co/x/internal/v2/fav/video/del"
+    ESHost = "http://uat-manager.bilibili.co"
+    ApiCo   = "http://uat-api.bilibili.co"
+
+[Wild]
+    [Wild.wildSearch]
+        userNum = 1
+        userVideoLimit = 1
+        biliUserNum = 1
+        biliUserVl = 1
+        seasonNum  = 3
+        movieNum   = 3
+        seasonMore = 1
+        movieMore  = 1
+
+[region]
+    stopSpan = "5m"
+[style]
+    labelSpan = "5m"
+
+[IP]
+    [IP.White]
+        TvVip = ["183.3.131.82", "10.23.162.22"]

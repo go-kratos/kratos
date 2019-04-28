@@ -1,0 +1,52 @@
+load(
+    "@io_bazel_rules_go//proto:def.bzl",
+    "go_proto_library",
+)
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "Admin.pb.go",
+        "Authentication.pb.go",
+        "Cell.pb.go",
+        "Client.pb.go",
+        "ClusterId.pb.go",
+        "ClusterStatus.pb.go",
+        "Comparator.pb.go",
+        "ErrorHandling.pb.go",
+        "FS.pb.go",
+        "Filter.pb.go",
+        "HBase.pb.go",
+        "Master.pb.go",
+        "MultiRowMutation.pb.go",
+        "Procedure.pb.go",
+        "Quota.pb.go",
+        "RPC.pb.go",
+        "RegionServerStatus.pb.go",
+        "Tracing.pb.go",
+        "WAL.pb.go",
+        "ZooKeeper.pb.go",
+        "generate.go",
+        "marshal.go",
+    ],
+    importmap = "go-common/vendor/github.com/tsuna/gohbase/pb",
+    importpath = "github.com/tsuna/gohbase/pb",
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_golang_protobuf//proto:go_default_library"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

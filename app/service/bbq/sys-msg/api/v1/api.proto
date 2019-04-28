@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package bbq.service.sysmsg.v1;
+
+import "google/protobuf/empty.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+
+
+
+message ListSysMsgReq {
+    repeated int64 ids = 1 [(gogoproto.jsontag) = "ids", (gogoproto.moretags)='form:"ids" validate:"required"'];
+}
+
+message ListSysMsgReply {
+    // 用户mid
+    int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+    repeated SysMsg list = 2[(gogoproto.jsontag) = "list,omitempty"];
+}
+
+message SysMsg {
+    int64   id          = 1 [(gogoproto.jsontag) = "id"];
+    int32   type        = 2 [(gogoproto.jsontag) = "type", (gogoproto.moretags)='form:"type" validate:"required"'];
+    int64   sender      = 3 [(gogoproto.jsontag) = "sender", (gogoproto.moretags)='form:"sender" validate:"required"'];
+    int64   receiver    = 4 [(gogoproto.jsontag) = "receiver", (gogoproto.moretags)='form:"receiver" validate:"required"'];
+    string  jump_url    = 5 [(gogoproto.jsontag) = "jump_url", (gogoproto.moretags)='form:"jump_url"'];
+    string  text        = 6 [(gogoproto.jsontag) = "text", (gogoproto.moretags)='form:"text" validate:"required"'];
+    int32   state       = 7 [(gogoproto.jsontag) = "state", (gogoproto.moretags)='form:"state"'];
+    int64   ctime       = 8 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+
+//还记得那年大明湖畔的东起吗
+//还记得那年大明湖畔的东起吗
+
+service SysMsgService {
+    // 获取系统通知
+    rpc ListSysMsg(ListSysMsgReq) returns (ListSysMsgReply);
+    // 创建消息
+    rpc CreateSysMsg(SysMsg) returns (.google.protobuf.Empty);
+    // 更新，一般是状态更新
+    rpc UpdateSysMsg(SysMsg) returns (.google.protobuf.Empty);
+
+}
+

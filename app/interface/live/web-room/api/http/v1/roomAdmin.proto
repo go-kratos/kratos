@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package live.webroom.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// History 相关服务
+service RoomAdmin {
+
+    // 获取主播拥有的的所有房管, 无需登录态
+    // `method:"GET"
+    rpc get_by_room (RoomAdminGetByRoomReq) returns (RoomAdminGetByRoomResp);
+}
+
+message RoomAdminGetByRoomReq {
+    // 页数
+    int64 page = 1 [(gogoproto.moretags) = 'form:"page"'];
+    // 房间号
+    int64 roomid = 2 [(gogoproto.moretags) = 'form:"roomid" validate:"required"'];
+    // 每页数量
+    int64 page_size = 3 [(gogoproto.moretags) = 'form:"page_size"'];
+}
+
+message RoomAdminGetByRoomResp {
+    //
+    Page page = 1;
+
+    //
+    repeated Data data = 2 [(gogoproto.jsontag) = "data"];
+
+    message Data {
+        // 用户id
+        int64 uid = 3 [(gogoproto.jsontag) = "uid"];
+        // 用户名
+        string uname = 4 [(gogoproto.jsontag) = "uname"];
+        // 用户头像
+        string face = 5 [(gogoproto.jsontag) = "face"];
+        // 上任时间
+        string ctime = 6 [(gogoproto.jsontag) = "ctime"];
+    }
+
+    message Page {
+        // 当前页码
+        int64 page = 1;
+        // 每页大小
+        int64 page_size = 2;
+        // 总页数
+        int64 total_page = 3;
+        // 总记录数
+        int64 total_count = 4;
+    }
+}

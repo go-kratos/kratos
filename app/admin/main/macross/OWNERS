@@ -1,0 +1,22 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- huangyimin
+- laiying
+- liweijia
+- peiyifei
+- yujia
+- zhangxinzheng
+labels:
+- admin
+- admin/main/macross
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- huangyimin
+- laiying
+- liweijia
+- peiyifei
+- yujia
+- zhangxinzheng

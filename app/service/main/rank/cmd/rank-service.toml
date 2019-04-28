@@ -1,0 +1,99 @@
+# uat config.
+
+[bm]
+	addr = "0.0.0.0:7861"
+    timeout = "1s"
+
+[rpcServer]
+    proto = "tcp"
+	addr = "0.0.0.0:7869"
+
+[rank]
+    switchAll = false
+    ticker = "10s"
+	rowsLimit = 1000
+	batchSleep = "10ms"
+	batchStep = "24h"
+	filePath = "/data/backup/rank-service/"
+	fileName = "rmap_%d.pb"
+
+
+[log]
+	dir="/data/log/rank-service"
+
+[mysql]
+	[mysql.bilibiliArchive]
+	addr = "172.22.34.101:3306"
+	dsn = "bili_search:BzwF6Ez64RT6Yy2alSKDFGCPgGX5tMlj@tcp(172.22.34.101:3306)/bilibili_archive?timeout=500ms&readTimeout=500ms&writeTimeout=500ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "5s"
+	execTimeout = "5s"
+	tranTimeout = "5s"
+	[mysql.archiveStat]
+	addr = "172.22.34.101:3306"
+	dsn = "bili_search:BzwF6Ez64RT6Yy2alSKDFGCPgGX5tMlj@tcp(172.22.34.101:3306)/archive_stat?timeout=500ms&readTimeout=500ms&writeTimeout=500ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "5s"
+	execTimeout = "5s"
+	tranTimeout = "5s"
+	[mysql.bilibiliTV]
+	addr = "172.22.34.101:3309"
+	dsn = "bili_search:OsQ2cmCoWpafd91gEAPIiNV87Fjq6nZu@tcp(172.22.34.101:3309)/bilibili_tv?timeout=500ms&readTimeout=500ms&writeTimeout=500ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "5s"
+	execTimeout = "5s"
+	tranTimeout = "5s"
+
+[databus]
+	[databus.Archive]
+    key = "2511663d546f1413"
+    secret = "cde3b480836cc76df3d635470f991caa"
+    group = "Archive-MainSearch-S"
+    topic = "Archive-T"
+    action = "sub"
+    name = "rank-service/archive-sub"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+	[databus.StatView]
+    key = "2511663d546f1413"
+    secret = "cde3b480836cc76df3d635470f991caa"
+    group = "StatView-MainSearch-S"
+    topic = "StatView-T"
+    action = "sub"
+    name = "rank-service/statView-sub"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+	[databus.UgcTvBinlog]
+    key = "2511663d546f1413"
+    secret = "cde3b480836cc76df3d635470f991caa"
+    group = "UgcTvBinlog-MainSearch-S"
+    topic = "UgcTvBinlog-T"
+    action = "sub"
+    name = "rank-service/ugcTvBinlog-sub"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+

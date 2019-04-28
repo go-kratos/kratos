@@ -1,0 +1,10 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liugang
+labels:
+- interface
+- interface/live/live-demo
+- live
+options:
+  no_parent_owners: true

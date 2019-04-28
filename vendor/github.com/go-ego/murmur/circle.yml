@@ -1,0 +1,22 @@
+# circle.yml #
+# machine:
+#   go:
+#     version: 1.9.1
+
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: govgo/go:1.10.3
+    working_directory: /gopath/src/github.com/go-ego/murmur
+    steps:
+      - checkout
+      # specify any bash command here prefixed with `run: `
+      - run: go get -v -t -d ./...
+      - run: go test -v ./... 
+       # codecov.io
+      - run: go test -v -covermode=count -coverprofile=coverage.out
+      - run: bash <(curl -s https://codecov.io/bash)   
+
+   

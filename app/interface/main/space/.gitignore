@@ -1,0 +1,10 @@
+.idea/*
+.project
+.buildpath
+.externalToolBuilders
+.settings
+.DS_Store
+.a
+*.iml
+.vscode/*
+space

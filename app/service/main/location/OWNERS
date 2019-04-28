@@ -1,0 +1,21 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- haoguanwei
+- liweijia
+- peiyifei
+- yujia
+- liangkai
+- zhangshengchao
+labels:
+- main
+- service
+- service/main/location
+options:
+  no_parent_owners: true
+reviewers:
+- haoguanwei
+- peiyifei
+- yujia
+- liangkai
+- zhangshengchao

@@ -1,0 +1,15 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- yubaihai
+- zhaogangtao
+- zhaozhihao
+labels:
+- main
+- service
+- service/main/vip
+options:
+  no_parent_owners: true
+reviewers:
+- yubaihai
+- zhaozhihao

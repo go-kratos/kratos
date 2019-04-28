@@ -1,0 +1,47 @@
+[log]
+    stdout = true
+
+[mysql]
+    addr = "127.0.0.1:3306"
+    dsn = "root:root@tcp(127.0.0.1:3306)/passport_sns?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "1s"
+    execTimeout = "2s"
+    tranTimeout = "2s"
+    [db.user.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[databus.snsLogPub]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "PassportSnslog-MainAccount-P"
+    topic = "PassportSnslog-T"
+    action = "pub"
+    offset = "old"
+    buffer = 2048
+    name = "passport-sns/databus"
+    proto = "tcp"
+    addr = "172.16.38.154:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[memcache]
+	name = "passport-sns-service"
+	proto = "tcp"
+    addr = "172.22.33.137:11219"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"

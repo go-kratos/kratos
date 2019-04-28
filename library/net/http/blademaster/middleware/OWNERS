@@ -1,0 +1,12 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- caoguoliang
+- lintnaghui
+- maojian
+- zhoujiahui
+reviewers:
+- caoguoliang
+- lintnaghui
+- maojian
+- zhoujiahui

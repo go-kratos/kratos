@@ -1,0 +1,210 @@
+changeDebug = true
+changeMid = 111
+
+specialUp = [1684013, 37195767, 15555180, 3078992, 1386981, 3404853]
+tels = "15871451480,18733334444"
+
+[bm]
+    addr="0.0.0.0:6801"
+ 	maxListen=1000
+ 	timeout="1s"
+ 	readTimeout="1s"
+ 	writeTimeout="1s"
+
+[host]
+message = "http://message.bilibili.com"
+monitor = "http://ops-mng.bilibili.co"
+api = "http://api.bilibili.co"
+act = "http://172.16.33.104"
+reccover="http://coverrec.bilibili.co"
+[host.bvc]
+    bvc = "http://bvc-playurl.bilibili.co"
+    gapKey = "--->"
+    appendKey = "aXWe(h*xX6!YR8px"
+[host.push]
+    appID = "3"
+    businessID = "5"
+    token = "ynt2nxa3uevlf4goejd99zelborhn07s"
+[app]
+key = "c05dd4e1638a8af0"
+secret = "7daa7f8c06cd33c5c3067063c746fdcb"
+
+[xlog]
+dir = "/data/log/videoup-job/"
+
+[httpClient]
+key = "c05dd4e1638a8af0"
+secret = "7daa7f8c06cd33c5c3067063c746fdcb"
+dial = "2s"
+timeout = "3s"
+keepAlive = "60s"
+timer = 10
+[httpClient.breaker]
+window  = "10s"
+sleep   = "100ms"
+bucket  = 10
+ratio   = 0.5
+request = 100
+
+[db]
+   [db.archive]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_archive?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.archive.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.archiveRead]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_archive?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.archiveRead.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.manager]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_manager?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.manager.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[bvc2VuSub]
+key = "0PtMsLLxWyyvoTgAyLCD"
+secret = "0PtMsLLxWyyvoTgAyLCE"
+group = "Videoup-Bvc2Videoup-S"
+topic = "Bvc2Videoup"
+action = "sub"
+offset = "old"
+buffer = 128
+name = "videoup-job/bvc-sub"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+active = 1
+idle = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[videoupSub]
+key = "0PtMsLLxWyyvoTgAyLCD"
+secret = "0PtMsLLxWyyvoTgAyLCE"
+group = "Videoup-Videoup2Bvc-S"
+topic = "Videoup2Bvc"
+action = "sub"
+offset = "old"
+buffer = 128
+name = "videoup-job/videoup-sub"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+active = 1
+idle = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[ArcResultSub]
+    key = "4c76cbb7a985ac90"
+    secret = "f36fbb15a85c6e21b0ee22a560ef3a67"
+    group = "ArchiveNotify-MainArchive-S"
+    topic = "ArchiveNotify-T"
+    action = "sub"
+    name = "videoup-job/videoup-sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[statSub]
+key = "4c76cbb7a985ac90"
+secret = "43bb22ce34a6b13e7814f09cb8116522"
+group = "StatView-MainArchive-S"
+topic = "StatView-T"
+action = "sub"
+offset = "new"
+name = "videoup-job/stat"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[videoupPub]
+key = "0PtMsLLxWyyvoTgAyLCD"
+secret = "0PtMsLLxWyyvoTgAyLCE"
+group = "Videoup-Videoup2Bvc-P"
+topic = "Videoup2Bvc"
+action = "pub"
+offset = "old"
+buffer = 128
+name = "videoup-job/videoup-pub"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+active = 10
+idle = 5
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[blogPub]
+key = "4c76cbb7a985ac90"
+secret = "f36fbb15a85c6e21b0ee22a560ef3a67"
+group = "CommTemplate-MainArchive-P"
+topic = "CommTemplate-T"
+action = "pub"
+offset = "old"
+buffer = 128
+name = "videoup-job/blog-pub"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+active = 10
+idle = 5
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[redis]
+name = "videoup-job/track"
+proto = "tcp"
+addr = "172.16.33.54:6381"
+active = 10
+idle = 2
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "80s"

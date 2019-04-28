@@ -1,0 +1,3 @@
+[property]
+    # 加载分值段信息周期
+    loadRankPeriod = "1m"

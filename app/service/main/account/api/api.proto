@@ -1,0 +1,240 @@
+// +bili:type=service
+syntax = "proto3";
+package account.service;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "api";
+
+message Card {
+  int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+  string name = 2 [(gogoproto.jsontag) = "name"];
+  string sex = 3 [(gogoproto.jsontag) = "sex"];
+  string face = 4 [(gogoproto.jsontag) = "face"];
+  string sign = 5 [(gogoproto.jsontag) = "sign"];
+  int32 rank = 6 [(gogoproto.jsontag) = "rank"];
+  int32 level = 7 [(gogoproto.jsontag) = "level"];
+  int32 silence = 8 [(gogoproto.jsontag) = "silence"];
+  VipInfo vip = 9 [(gogoproto.jsontag) = "vip", (gogoproto.nullable) = false];
+  PendantInfo pendant = 10
+      [(gogoproto.jsontag) = "pendant", (gogoproto.nullable) = false];
+  NameplateInfo nameplate = 11
+      [(gogoproto.jsontag) = "nameplate", (gogoproto.nullable) = false];
+  OfficialInfo official = 12
+      [(gogoproto.jsontag) = "official", (gogoproto.nullable) = false];
+}
+
+message Info {
+  int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+  string name = 2 [(gogoproto.jsontag) = "name"];
+  string sex = 3 [(gogoproto.jsontag) = "sex"];
+  string face = 4 [(gogoproto.jsontag) = "face"];
+  string sign = 5 [(gogoproto.jsontag) = "sign"];
+  int32 rank = 6 [(gogoproto.jsontag) = "rank"];
+}
+
+message Profile {
+  int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+  string name = 2 [(gogoproto.jsontag) = "name"];
+  string sex = 3 [(gogoproto.jsontag) = "sex"];
+  string face = 4 [(gogoproto.jsontag) = "face"];
+  string sign = 5 [(gogoproto.jsontag) = "sign"];
+  int32 rank = 6 [(gogoproto.jsontag) = "rank"];
+  int32 level = 7 [(gogoproto.jsontag) = "level"];
+  int32 join_time = 8 [(gogoproto.jsontag) = "jointime"];
+  int32 moral = 9 [(gogoproto.jsontag) = "moral"];
+  int32 silence = 10 [(gogoproto.jsontag) = "silence"];
+  int32 email_status = 11 [(gogoproto.jsontag) = "email_status"];
+  int32 tel_status = 12 [(gogoproto.jsontag) = "tel_status"];
+  int32 identification = 13 [(gogoproto.jsontag) = "identification"];
+  VipInfo vip = 14 [(gogoproto.jsontag) = "vip", (gogoproto.nullable) = false];
+  PendantInfo pendant = 15
+      [(gogoproto.jsontag) = "pendant", (gogoproto.nullable) = false];
+  NameplateInfo nameplate = 16
+      [(gogoproto.jsontag) = "nameplate", (gogoproto.nullable) = false];
+  OfficialInfo official = 17
+      [(gogoproto.jsontag) = "official", (gogoproto.nullable) = false];
+  int64 birthday = 18 [
+    (gogoproto.jsontag) = "birthday",
+    (gogoproto.casttype) = "go-common/library/time.Time"
+  ];
+  int32 is_tourist = 19 [(gogoproto.jsontag) = "is_tourist"];
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/member/model.LevelInfo
+message LevelInfo {
+  int32 cur = 1 [(gogoproto.jsontag) = "current_level"];
+  int32 min = 2 [(gogoproto.jsontag) = "current_min"];
+  int32 now_exp = 3 [(gogoproto.jsontag) = "current_exp"];
+  int32 next_exp = 4 [(gogoproto.jsontag) = "next_exp"];
+}
+
+message VipInfo {
+  int32 type = 1 [(gogoproto.jsontag) = "type"];
+  int32 status = 2 [(gogoproto.jsontag) = "status"];
+  int64 due_date = 3 [(gogoproto.jsontag) = "due_date"];
+  int32 vip_pay_type = 4 [(gogoproto.jsontag) = "vip_pay_type"];
+}
+
+message PendantInfo {
+  int32 pid = 1 [(gogoproto.jsontag) = "pid", (gogoproto.casttype) = "int"];
+  string name = 2 [(gogoproto.jsontag) = "name"];
+  string image = 3 [(gogoproto.jsontag) = "image"];
+  int64 expire = 4
+      [(gogoproto.jsontag) = "expire", (gogoproto.casttype) = "int"];
+}
+
+message NameplateInfo {
+  int32 nid = 1 [(gogoproto.jsontag) = "nid", (gogoproto.casttype) = "int"];
+  string name = 2 [(gogoproto.jsontag) = "name"];
+  string image = 3 [(gogoproto.jsontag) = "image"];
+  string image_small = 4 [(gogoproto.jsontag) = "image_small"];
+  string level = 5 [(gogoproto.jsontag) = "level"];
+  string condition = 6 [(gogoproto.jsontag) = "condition"];
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/member/model.OfficialInfo
+message OfficialInfo {
+  int32 role = 1 [(gogoproto.jsontag) = "role", (gogoproto.casttype) = "int8"];
+  string title = 2 [(gogoproto.jsontag) = "title"];
+  string desc = 3 [(gogoproto.jsontag) = "desc"];
+}
+
+message MidReq {
+  int64 mid = 1 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+  string real_ip = 2;
+}
+
+message MidsReq {
+  repeated int64 mids = 1
+      [(gogoproto.moretags) = "validate:\"gt=0,dive,gt=0\""];
+  string real_ip = 2;
+}
+
+message NamesReq {
+  repeated string names = 1
+      [(gogoproto.moretags) = "validate:\"gt=0,dive,gt=0\""];
+  string real_ip = 2;
+}
+
+message ExpReq {
+  int64 mid = 1 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+  double exp = 2;
+  string operater = 3;
+  string operate = 4;
+  string reason = 5;
+  string real_ip = 6;
+}
+
+message MoralReq {
+  int64 mid = 1 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+  double moral = 2;
+  string oper = 3;
+  string reason = 4;
+  string remark = 5;
+  string real_ip = 6;
+}
+
+message RelationReq {
+  int64 mid = 1 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+  int64 owner = 2;
+  string real_ip = 3;
+}
+
+message RelationsReq {
+  int64 mid = 1 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+  repeated int64 owners = 2;
+  string real_ip = 3;
+}
+
+message RichRelationReq {
+  int64 owner = 1;
+  repeated int64 mids = 2
+      [(gogoproto.moretags) = "validate:\"gt=0,dive,gt=0\""];
+  string real_ip = 3;
+}
+
+message InfoReply {
+  Info info = 1;
+}
+
+message InfosReply {
+  map<int64, Info> infos = 1;
+}
+
+message CardReply {
+  Card card = 1;
+}
+
+message CardsReply {
+  map<int64, Card> cards = 1;
+}
+
+message ProfileReply {
+  Profile profile = 1;
+}
+
+message ProfileStatReply {
+  Profile profile = 1;
+  LevelInfo level_info = 2 [(gogoproto.nullable) = false];
+  double coins = 3;
+  int64 following = 4;
+  int64 follower = 5;
+}
+
+message RelationReply {
+  bool following = 1;
+}
+
+message AttentionsReply {
+  repeated int64 attentions = 1;
+}
+
+message BlacksReply {
+  map<int64, bool> black_list = 1;
+}
+
+message RelationsReply {
+  map<int64, RelationReply> relations = 1;
+}
+
+message RichRelationsReply {
+  map<int64, int32> rich_relations = 1;
+}
+
+// +bili:deepcopy-gen=true
+// +bili:deepcopy-gen:structs=go-common/app/service/main/account/api.VipInfo
+message VipReply {
+  int32 type = 1;
+  int32 status = 2;
+  int64 due_date = 3;
+  int32 vip_pay_type = 4;
+}
+
+message VipsReply {
+  map<int64, VipReply> vips = 1;
+}
+
+message ExpReply {}
+message MoralReply {}
+
+service Account {
+  rpc Info3(MidReq) returns (InfoReply);
+  rpc Infos3(MidsReq) returns (InfosReply);
+  rpc InfosByName3(NamesReq) returns (InfosReply);
+  rpc Card3(MidReq) returns (CardReply);
+  rpc Cards3(MidsReq) returns (CardsReply);
+  rpc Profile3(MidReq) returns (ProfileReply);
+  rpc ProfileWithStat3(MidReq) returns (ProfileStatReply);
+  rpc AddExp3(ExpReq) returns (ExpReply);
+  rpc AddMoral3(MoralReq) returns (MoralReply);
+  rpc Relation3(RelationReq) returns (RelationReply);
+  rpc Attentions3(MidReq) returns (AttentionsReply);
+  rpc Blacks3(MidReq) returns (BlacksReply);
+  rpc Relations3(RelationsReq) returns (RelationsReply);
+  rpc RichRelations3(RichRelationReq) returns (RichRelationsReply);
+  rpc Vip3(MidReq) returns (VipReply);
+  rpc Vips3(MidsReq) returns (VipsReply);
+}

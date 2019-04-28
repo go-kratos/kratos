@@ -1,0 +1,173 @@
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/protobuf/empty.proto";
+
+package bbq.service.topic.v1;
+
+option go_package = "api";
+option (gogoproto.goproto_getters_all) = false;
+
+message ListExtensionReq {
+	repeated int64 svids = 1;
+}
+message ListExtensionReply {
+	repeated VideoExtension list = 1;
+}
+
+message UpdateVideoScoreReq {
+	int64   svid        = 1;
+	double  score       = 2;
+}
+message UpdateVideoStateReq {
+	int64   svid    = 1;
+	int32   state   = 2;
+}
+
+message TopicVideosReq {
+	int64   topic_id    = 1[(gogoproto.moretags)='form:"topic_id"'];
+	string  cursor_prev = 2[(gogoproto.moretags)='form:"cursor_prev"'];
+	string  cursor_next = 3[(gogoproto.moretags)='form:"cursor_next"'];
+}
+message ListMultiTopicVideosReq {
+	repeated TopicVideosReq list = 1;
+}
+message VideoItem {
+	int64   svid    		= 1;
+	string  cursor_value  	= 2;
+    int64   hot_type        = 3;
+}
+message TopicDetail {
+	TopicInfo           topic_info 		= 1;
+	repeated VideoItem  list        	= 2;
+	bool 				has_more		= 3[(gogoproto.jsontag) = "has_more"];
+}
+message ListDiscoveryTopicReq {
+	int32 page = 1[(gogoproto.moretags)='form:"page" validate:"required"'];
+}
+message ListDiscoveryTopicReply {
+	repeated TopicDetail 	list = 1;
+	bool 					has_more = 2;
+}
+
+message ListTopicsReq {
+	int32 page = 1[(gogoproto.moretags)='form:"page" validate:"required"'];
+}
+message ListTopicsReply {
+	bool                    has_more    = 1[(gogoproto.jsontag) = "has_more"];
+	repeated TopicInfo      list        = 2;
+}
+
+message StickTopicReq {
+	int64 topic_id 	= 1[(gogoproto.moretags)='form:"topic_id" validate:"required"'];
+	int64 op 		= 2[(gogoproto.moretags)='form:"op"'];// 0表示取消置顶，1表示置顶
+}
+message StickTopicVideoReq {
+	int64 topic_id 	= 1[(gogoproto.moretags)='form:"topic_id" validate:"required"'];
+	int64 svid 		= 2[(gogoproto.moretags)='form:"svid" validate:"required"'];
+	int64 op 		= 3[(gogoproto.moretags)='form:"op"'];// 0表示取消置顶，1表示置顶
+}
+message SetStickTopicVideoReq {
+    int64           topic_id 	= 1[(gogoproto.moretags)='form:"topic_id" validate:"required"'];
+    repeated int64  svids       = 2[(gogoproto.moretags)='form:"svids"'];
+}
+
+
+// 所有查找走同一个接口
+message ListCmsTopicsReq {
+    int32   page        = 1[(gogoproto.moretags)='form:"page" validate:"required"'];
+    string  name        = 2[(gogoproto.moretags)='form:"name"'];
+    int64   topic_id    = 3[(gogoproto.moretags)='form:"topic_id"'];
+    int32   state       = 4[(gogoproto.moretags)='form:"state"'];
+
+}
+message ListCmsTopicsReply {
+    bool                    has_more    = 1[(gogoproto.jsontag) = "has_more"];
+    repeated TopicInfo      list        = 2;
+}
+
+service Topic {
+	////////////////extension////////////////
+	rpc Register (VideoExtension) returns (.google.protobuf.Empty);
+	rpc ListExtension (ListExtensionReq) returns (ListExtensionReply);
+
+	//////////////////topic///////////////////
+	rpc UpdateVideoScore(UpdateVideoScoreReq) returns (.google.protobuf.Empty);
+	rpc UpdateVideoState(UpdateVideoStateReq) returns (.google.protobuf.Empty);
+	// 获取话题下的视频
+	rpc ListTopicVideos (TopicVideosReq) returns (TopicDetail);
+	// TODO: to deleted. 发现页分成先请求话题，再请求话题下视频
+    // 获取发现页下的话题
+	rpc ListDiscoveryTopics (ListDiscoveryTopicReq) returns (ListDiscoveryTopicReply);
+	// 推荐的话题，不会返回话题内的视频
+	rpc ListTopics (ListTopicsReq) returns (ListTopicsReply);
+
+	///// cms /////
+    rpc StickTopic(StickTopicReq) returns (.google.protobuf.Empty);
+    // 置顶、取消置顶话题下的视频（需要cms先去判断该视频是否可以放在话题中）
+    rpc StickTopicVideo(StickTopicVideoReq) returns (.google.protobuf.Empty);
+    rpc SetStickTopicVideo(SetStickTopicVideoReq) returns (.google.protobuf.Empty);
+
+    // 注意：该接口不支持复杂条件，当以下三种同时请求的时候只会按顺序选择一种进行返回：
+    //   话题name查找接口，不区分隐藏，返回数组，但是暂时只会完全匹配，
+    //   话题隐藏列表接口，按照时间反向排序
+    //   话题推荐列表接口，按照热度反向排序，其中第一页会包含置顶话题
+    rpc ListCmsTopics(ListCmsTopicsReq) returns (ListCmsTopicsReply);
+
+    // 修改话题简介，topic_id必传传，直接放在http请求里
+    rpc UpdateTopicDesc(TopicInfo) returns (.google.protobuf.Empty);
+    rpc UpdateTopicState(TopicInfo) returns (.google.protobuf.Empty);
+    // 话题详情页，含话题信息+视频信息
+    //     使用video-c的topic/detail接口，php内部转换成cms逻辑
+
+    // 根据svid返回topic_id列表
+    rpc VideoTopic(VideoTopicReq) returns (VideoTopicReply);
+
+}
+
+message TopicVideoItem {
+    int64   topic_id    = 1;
+    int64   svid        = 2;
+    double  score       = 3;
+    int32   state       = 4;
+}
+message VideoTopicReq {
+    int64 svid = 1[(gogoproto.moretags)='form:"svid"'];
+}
+message VideoTopicReply {
+    repeated TopicVideoItem list = 1;
+}
+
+message UpdateTopicStateReq {
+    int64   topic_id    = 1[(gogoproto.moretags)='form:"topic_id"'];
+    int32   op          = 2[(gogoproto.moretags)='form:"op"'];// 0表示通过，1表示下架
+}
+
+message TopicInfo {
+	int64   topic_id    = 1[(gogoproto.moretags)='form:"topic_id"'];
+	string  name        = 2;
+	string  desc        = 3[(gogoproto.moretags)='form:"desc"'];
+	double 	score		= 4;
+	int32 	state		= 5[(gogoproto.moretags)='form:"state"'];// 0表示通过，1表示下架
+    int32 	hot_type	= 6[(gogoproto.jsontag)="hot_type"];
+    string 	cover_url   = 7[(gogoproto.moretags)='form:"cover_url"'];
+}
+
+message TitleExtraItem {
+	int64   id          = 1[(gogoproto.jsontag) = "id"];
+	int64   type        = 2[(gogoproto.jsontag) = "type"];
+	string  name        = 3[(gogoproto.jsontag) = "name"];
+	int64   start       = 4[(gogoproto.jsontag) = "start"];
+	int64   end         = 5[(gogoproto.jsontag) = "end"];
+	string  scheme      = 6[(gogoproto.jsontag) = "scheme"];
+}
+
+// 用于传递给上游的extension，通过序列化赋值给extension
+message VideoExtension {
+	int64   svid        = 1;
+	string  extension   = 2; // 序列化后的Extension会放在这里
+}
+// 结构化的extension，真正的extension
+message Extension {
+	repeated TitleExtraItem title_extra = 1;
+}

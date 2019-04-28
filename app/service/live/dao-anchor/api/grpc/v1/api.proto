@@ -1,0 +1,322 @@
+syntax = "proto3";
+package live.daoanchor.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message AnchorLevel {
+    // 当前等级
+    int64 level = 1;
+    // 当前等级颜色
+    int64 color = 2;
+    // 当前积分
+    int64 score = 3;
+    // 当前等级最小积分
+    int64 left = 4;
+    // 当前等级最大积分
+    int64 right = 5;
+    // 最大等级
+    int64 max_level = 6;
+}
+
+message TagData {
+    int64 tag_id = 1;
+    int64 tag_sub_id = 2;
+    int64 tag_value = 3;
+    string tag_ext = 4;
+    int64 tag_expire_at = 5;
+}
+
+message RoomData {
+    int64 uid = 1 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 room_id = 2 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 short_id = 3 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    string title = 4 [(gogoproto.moretags) = "validate:\"required\""];
+    string cover = 5;
+    string tags = 6;
+    string background = 7;
+    string description = 8;
+    int64 live_status = 9 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 live_start_time = 10 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 live_screen_type = 11 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 live_mark = 12;
+    int64 lock_status = 13;
+    int64 lock_time = 14;
+    int64 hidden_status = 15 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 hidden_time = 16;
+    int64 area_id = 17 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    string area_name = 18 [(gogoproto.moretags) = "validate:\"required\""];
+    int64 parent_area_id = 19 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    string parent_area_name = 20 [(gogoproto.moretags) = "validate:\"required\""];
+    string keyframe = 21;
+    int64 popularity_count = 22;
+    repeated TagData tag_list = 23;
+    int64 anchor_profile_type = 25;
+    AnchorLevel anchor_level = 26;
+    int64 anchor_round_switch = 27;
+    int64 anchor_round_status = 28;
+    int64 anchor_record_switch = 29;
+    int64 anchor_record_status = 30;
+    int64 anchor_san = 31;
+    // 0默认 1摄像头直播 2录屏直播 3语音直播
+    int64 live_type = 32;
+}
+
+message RoomByIDsReq {
+    repeated int64 room_ids = 1;
+    repeated int64 uids = 2;
+    repeated string fields = 3;
+    int64 default_fields = 4;
+}
+
+message RoomByIDsResp {
+    map<int64, RoomData> room_data_set = 1;
+}
+
+message RoomOnlineListReq {
+    string filter = 1;
+    string sort = 2;
+    int64 page = 3;
+    int64 page_size = 4;
+    repeated string fields = 5;
+}
+
+message RoomOnlineListResp {
+    map<int64, RoomData> room_data_list = 1;
+}
+
+message RoomOnlineListByAreaReq {
+    repeated int64 area_ids = 1;
+}
+
+message RoomOnlineListByAreaResp {
+    repeated int64 room_ids = 1;
+}
+
+message RoomCreateReq {
+    int64 uid = 1 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 room_id = 2;
+}
+
+message RoomCreateResp {
+    int64 room_id = 1;
+}
+
+message UpdateResp {
+    int64 affected_rows = 1;
+}
+
+message RoomUpdateReq {
+    repeated string fields = 1 [(gogoproto.moretags) = "validate:\"required\""];
+    int64 room_id = 2 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    string title = 3;
+    string cover = 4;
+    string tags = 5;
+    string background = 6;
+    string description = 7;
+    int64 live_start_time = 8;
+    int64 live_screen_type = 9;
+    int64 lock_status = 10;
+    int64 lock_time = 11;
+    int64 hidden_time = 12;
+    int64 area_id = 13;
+    int64 anchor_round_switch = 14;
+    int64 anchor_record_switch = 15;
+    int64 live_type = 16;
+}
+
+message RoomBatchUpdateReq {
+    repeated RoomUpdateReq reqs = 1 [(gogoproto.moretags) = "validate:\"required\""];
+}
+
+message AnchorUpdateReq {
+    repeated string fields = 1 [(gogoproto.moretags) = "validate:\"required\""];
+    int64 uid = 2 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 profile_type = 3;
+    int64 san_score = 4;
+    int64 round_status = 5;
+    int64 record_status = 6;
+    int64 exp = 7;
+}
+
+message AnchorBatchUpdateReq {
+    repeated AnchorUpdateReq reqs = 1 [(gogoproto.moretags) = "validate:\"required\""];
+}
+
+message AnchorIncreReq {
+    string req_id = 1 [(gogoproto.moretags) = "validate:\"required\""];
+    repeated string fields = 2 [(gogoproto.moretags) = "validate:\"required\""];
+    int64 uid = 3 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 san_score = 4;
+    int64 exp = 5;
+}
+
+message AnchorBatchIncreReq {
+    repeated AnchorIncreReq reqs = 1 [(gogoproto.moretags) = "validate:\"required\""];
+}
+
+message RoomExtendUpdateReq {
+    repeated string fields = 1 [(gogoproto.moretags) = "validate:\"required\""];
+    int64 room_id = 2 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    string keyframe = 3;
+    int64 danmu_count = 4;
+    int64 popularity_count = 5;
+    int64 audience_count = 6;
+    int64 gift_count = 7;
+    int64 gift_gold_amount = 8;
+    int64 gift_gold_count = 9;
+}
+
+message RoomExtendBatchUpdateReq {
+    repeated RoomExtendUpdateReq reqs = 1 [(gogoproto.moretags) = "validate:\"required\""];
+}
+
+message RoomExtendIncreReq {
+    string req_id = 1 [(gogoproto.moretags) = "validate:\"required\""];
+    repeated string fields = 2 [(gogoproto.moretags) = "validate:\"required\""];
+    int64 room_id = 3 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 danmu_count = 4;
+    int64 popularity_count = 5;
+    int64 audience_count = 6;
+    int64 gift_count = 7;
+    int64 gift_gold_amount = 8;
+    int64 gift_gold_count = 9;
+}
+
+message RoomExtendBatchIncreReq {
+    repeated RoomExtendIncreReq reqs = 1 [(gogoproto.moretags) = "validate:\"required\""];
+}
+
+message RoomTagCreateReq {
+    int64 room_id = 1 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 tag_id = 2 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 tag_sub_id = 3;
+    int64 tag_value = 4;
+    string tag_ext = 5;
+    int64 tag_expire_at = 6;
+}
+
+message RoomAttrCreateReq {
+    int64 room_id = 1 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 attr_id = 2 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 attr_sub_id = 3;
+    int64 attr_value = 4;
+    string attr_ext = 5;
+}
+
+message RoomAttrSetExReq {
+    int64 room_id = 1 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 attr_id = 2 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 attr_sub_id = 3;
+    int64 attr_value = 4;
+    string attr_ext = 5;
+}
+
+message FetchAreasReq {
+    int64 area_id = 1;
+}
+
+message AreaInfo {
+    int64 area_id = 1;
+    string area_name = 2;
+}
+
+message FetchAreasResp {
+    AreaInfo info = 1;
+    repeated AreaInfo areas = 2;
+}
+
+message FetchAttrByIDsReq {
+    repeated int64 room_ids = 1 [(gogoproto.moretags) = "validate:\"dive,gt=0,required\""];
+    int64 attr_id = 2 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 attr_sub_id = 3 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+}
+
+message AttrData {
+    int64 room_id = 1;
+    int64 attr_id = 2;
+    int64 attr_sub_id = 3;
+    int64 attr_value = 4;
+}
+
+message FetchAttrByIDsResp {
+    map<int64, AttrData> attrs = 1;
+}
+
+message AttrReq {
+    int64 attr_id = 1;
+    int64 attr_sub_id = 2;
+}
+
+message RoomOnlineListByAttrsReq {
+    repeated AttrReq attrs = 1;
+}
+
+message AttrResp {
+    int64 uid = 1 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 room_id = 2 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 area_id = 3 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 parent_area_id = 4 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    repeated TagData tag_list = 5;
+    repeated AttrData attr_list = 6;
+    int64 popularity_count = 7;
+    int64 anchor_profile_type = 8;
+}
+
+message RoomOnlineListByAttrsResp {
+    map<int64, AttrResp> attrs = 1;
+}
+
+message DeleteAttrReq {
+    int64 attr_id = 1 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+    int64 attr_sub_id = 2 [(gogoproto.moretags) = "validate:\"gt=0,required\""];
+}
+
+service DaoAnchor {
+    // FetchRoomByIDs 查询房间信息
+    rpc FetchRoomByIDs(RoomByIDsReq) returns (RoomByIDsResp);
+
+    // RoomOnlineList 在线房间列表
+    rpc RoomOnlineList(RoomOnlineListReq) returns (RoomOnlineListResp);
+    // RoomOnlineListByArea 分区在线房间列表(只返回room_id列表，不传分区，默认查找所有)
+    rpc RoomOnlineListByArea(RoomOnlineListByAreaReq) returns (RoomOnlineListByAreaResp);
+    // RoomOnlineListByAttrs 在线房间维度信息(不传attrs，不查询attr)
+    rpc RoomOnlineListByAttrs(RoomOnlineListByAttrsReq) returns (RoomOnlineListByAttrsResp);
+
+    // RoomCreate 房间创建
+    rpc RoomCreate(RoomCreateReq) returns (RoomCreateResp);
+    // RoomUpdate 房间信息更新
+    rpc RoomUpdate(RoomUpdateReq) returns (UpdateResp);
+    // RoomBatchUpdate 房间信息批量更新
+    rpc RoomBatchUpdate(RoomBatchUpdateReq) returns (UpdateResp);
+    // RoomExtendUpdate 房间扩展信息更新
+    rpc RoomExtendUpdate(RoomExtendUpdateReq) returns (UpdateResp);
+    // RoomExtendBatchUpdate 房间扩展信息批量更新
+    rpc RoomExtendBatchUpdate(RoomExtendBatchUpdateReq) returns (UpdateResp);
+    // RoomExtendIncre 房间信息增量更新
+    rpc RoomExtendIncre(RoomExtendIncreReq) returns (UpdateResp);
+    // RoomExtendBatchIncre 房间信息批量增量更新
+    rpc RoomExtendBatchIncre(RoomExtendBatchIncreReq) returns (UpdateResp);
+    // RoomTagCreate 房间Tag创建
+    rpc RoomTagCreate(RoomTagCreateReq) returns (UpdateResp);
+    // RoomAttrCreate 房间Attr创建
+    rpc RoomAttrCreate(RoomAttrCreateReq) returns (UpdateResp);
+    // RoomAttrSetEx 房间Attr更新
+    rpc RoomAttrSetEx(RoomAttrSetExReq) returns (UpdateResp);
+
+    // AnchorUpdate 主播信息更新
+    rpc AnchorUpdate(AnchorUpdateReq) returns (UpdateResp);
+    // AnchorBatchUpdate 主播信息批量更新
+    rpc AnchorBatchUpdate(AnchorBatchUpdateReq) returns (UpdateResp);
+    // AnchorIncre 主播信息增量更新
+    rpc AnchorIncre(AnchorIncreReq) returns (UpdateResp);
+    // AnchorBatchIncre 主播信息批量增量更新
+    rpc AnchorBatchIncre(AnchorBatchIncreReq) returns (UpdateResp);
+
+    // FetchAreas 根据父分区号查询子分区
+    rpc FetchAreas(FetchAreasReq) returns (FetchAreasResp);
+    // FetchAttrByIDs 批量根据房间号查询指标
+    rpc FetchAttrByIDs(FetchAttrByIDsReq) returns (FetchAttrByIDsResp);
+    // DeleteAttr 删除某一个指标
+    rpc DeleteAttr(DeleteAttrReq) returns (UpdateResp);
+}

@@ -1,0 +1,187 @@
+//存放api使用的模型
+
+syntax = "proto3";
+package ticket.service.sales.v1;
+
+import "app/service/openplatform/ticket-sales/api/grpc/type/order.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+//ListOrdersRequest 用户订单列表请求参数
+message ListOrdersRequest {
+    string uid = 1 [(gogoproto.customname) = "UID"];
+    repeated int64 order_id = 2 [(gogoproto.customname) = "OrderID"];
+    int64 item_id = 3 [(gogoproto.customname) = "ItemID"];
+    repeated int32 status = 4 [(gogoproto.casttype) = "int16"];
+    repeated int32 sub_status = 5 [(gogoproto.casttype) = "int16"];
+    repeated int32 refund_status = 6 [(gogoproto.casttype) = "int16"];
+    int64 limit = 7;
+    int64 offset = 8;
+    string order_by = 9;
+}
+
+//ListOrdersResponse 用户订单列表返回
+message ListOrdersResponse {
+    repeated OrderResponse list = 1;
+    int64 count = 2;
+    int64 next_offset = 3;
+}
+
+//OrderResponse 单个订单响应
+message OrderResponse {
+    int64 order_id = 1 [(gogoproto.jsontag) = "order_id", (gogoproto.customname) = "OrderID"];
+    string uid = 2 [(gogoproto.jsontag) = "uid", (gogoproto.customname) = "UID"];
+    int32 order_type = 3 [(gogoproto.jsontag) = "order_type", (gogoproto.casttype) = "int16"];
+    int64 item_id = 4 [(gogoproto.jsontag) = "item_id", (gogoproto.customname) = "ItemID"];
+    OrderItemInfo item_info = 5 [(gogoproto.jsontag) = "item_info"];
+    int64 count = 6 [(gogoproto.jsontag) = "count"];
+    int64 total_money = 7 [(gogoproto.jsontag) = "total_money"];
+    int64 pay_money = 8 [(gogoproto.jsontag) = "pay_money"];
+    int64 express_fee = 9 [(gogoproto.jsontag) = "express_fee"];
+    int32 status = 10 [(gogoproto.jsontag) = "status", (gogoproto.casttype) = "int16"];
+    int32 sub_status = 11 [(gogoproto.jsontag) = "sub_status", (gogoproto.casttype) = "int16"];
+    int32 refund_status = 12 [(gogoproto.jsontag) = "refund_status", (gogoproto.casttype) = "int16"];
+    string source = 13 [(gogoproto.jsontag) = "source"];
+    int32 is_deleted = 14 [(gogoproto.jsontag) = "is_deleted", (gogoproto.casttype) = "int16"];
+    repeated OrderSKU skus = 15 [(gogoproto.jsontag) = "order_sku", (gogoproto.customname) = "SKUs"];
+    OrderResponseMore detail = 16 [(gogoproto.jsontag) = "detail"];
+    OrderPayCharge pay_charge = 17 [(gogoproto.jsontag) = "pay_charge"];
+    int64 ctime = 18 [(gogoproto.jsontag) = "ctime", (gogoproto.customname) = "CTime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 19 [(gogoproto.jsontag) = "mtime", (gogoproto.customname) = "MTime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+//OrderResponseMore 更详细的订单响应信息
+message OrderResponseMore {
+    OrderCoupon coupon = 1 [(gogoproto.jsontag) = "coupon"];
+    repeated OrderBuyer buyers = 2 [(gogoproto.jsontag) = "buyers"];
+    OrderExtra extra = 3 [(gogoproto.jsontag) = "extra"];
+    OrderDeliver deliver = 4 [(gogoproto.jsontag) = "deliver"];
+    string remark = 5 [(gogoproto.jsontag) = "remark"];
+    int32 device_type = 6 [(gogoproto.jsontag) = "device_type", (gogoproto.casttype) = "int16"];
+    uint32 ip = 7 [(gogoproto.jsontag) = "ip", (gogoproto.customname) = "IP"];
+    string msource = 8 [(gogoproto.jsontag) = "msource", (gogoproto.customname) = "MSource"];
+    string express_co = 9 [(gogoproto.jsontag) = "-", (gogoproto.customname) = "ExpressCO"];
+    string express_no = 10 [(gogoproto.jsontag) = "-", (gogoproto.customname) = "ExpressNO"];
+    int32 express_type = 11 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "int16"];
+}
+
+//CreateOrderSKU 创建订单的sku请求
+message CreateOrderSKU {
+    int64 sku_id = 1 [(gogoproto.customname) = "SKUID"];
+    int64 count = 2;
+}
+
+//CreateOrderRequest 单个订单创建请求
+message CreateOrderRequest {
+    int64 project_id = 1 [(gogoproto.customname) = "ProjectID"];
+    int64 screen_id = 2 [(gogoproto.customname) = "ScreenID"];
+    repeated CreateOrderSKU skus = 3 [(gogoproto.customname) = "SKUs"];
+    int64 uid = 4 [(gogoproto.customname) = "UID"];
+    int64 pay_money = 5;
+    int32 order_type = 6 [(gogoproto.casttype) = "int16"];
+    int64 ts = 7 [(gogoproto.customname) = "TS"];
+    int64 promo_id = 8 [(gogoproto.customname) = "PromoID"];
+    int64 promo_group_id = 9 [(gogoproto.customname) = "PromoGroupID"];
+    repeated .ticket.service.sales.v1.OrderBuyer buyers = 10;
+    .ticket.service.sales.v1.OrderDeliver deliver_detail = 11;
+    repeated uint64 seats = 12;
+    repeated string coupons = 13;
+    int64 lock_id = 14 [(gogoproto.customname) = "LockID"];
+    string source = 15;
+    int32 is_deleted = 16 [(gogoproto.casttype) = "int16"];
+    int32 device_type = 17 [(gogoproto.casttype) = "int16"];
+}
+
+//CreateOrdersRequest 创建订单请求
+message CreateOrdersRequest {
+    repeated CreateOrderRequest orders = 1;
+}
+
+//CreateOrderResult 创建订单结果
+message CreateOrderResult {
+    int64 order_id = 1 [(gogoproto.customname) = "OrderID"];
+    int32 code = 2 [(gogoproto.casttype) = "int"];
+    string message = 3;
+}
+
+//CreateOrdersResponse 创建订单响应
+message CreateOrdersResponse {
+    uint32 count = 1;
+    repeated CreateOrderResult result = 2;
+}
+
+//UpBuyerRequest 更新购买人信息
+message UpBuyerRequest{
+    int64 order_id = 1 [(gogoproto.customname) = "OrderID"];
+    .ticket.service.sales.v1.OrderBuyer buyers = 2;
+}
+
+//UpDeliveryRequest 更新配送信息
+message UpDeliveryRequest{
+    int64 order_id = 1 [(gogoproto.customname) = "OrderID"];
+    OrderDeliver deliver_detail = 2 [(gogoproto.jsontag) = "deliver_detail"];
+}
+
+//UpDetailResponse 更新返回数据
+message UpDetailResponse{
+     int64 order_id = 1 [(gogoproto.customname) = "OrderID"];
+     int32  is_update= 2 [(gogoproto.customname) = "IsUpdate",(gogoproto.jsontag) = "update",(gogoproto.casttype) = "int16"];
+}
+
+//OrderLog 订单日志
+message OrderLog {
+    int64 id = 1 [(gogoproto.customname) = "ID"];
+    string uid = 2 [(gogoproto.customname) = "UID"];
+    int64 order_id = 3 [(gogoproto.customname) = "OID"];
+    string ip = 4 [(gogoproto.customname) = "IP"];
+    string op_data = 5 [(gogoproto.customname) = "OpData"];
+    string remark = 6 [(gogoproto.customname) = "Remark"];
+    string op_object = 7 [(gogoproto.customname) = "OpObject"];
+    string op_name = 8 [(gogoproto.customname) = "OpName"];
+    int64 ctime = 9 [(gogoproto.customname) = "CTime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 10 [(gogoproto.customname) = "MTime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+
+
+//ListOrdersLogRequest 订单日志
+message ListOrderLogRequest {
+    int64 order_id = 1 [(gogoproto.customname) = "OrderID"];
+    int64 limit = 2;
+    int64 offset = 3;
+    string order_by = 4;
+}
+
+
+//ListOrderLogResponse 订单日志相应
+message ListOrderLogResponse {
+   repeated OrderLog list = 1;
+   int64  cnt = 2;
+}
+
+
+//AddOrderLogRequest 订单日志插入
+message AddOrderLogRequest {
+    OrderLog data = 1;
+}
+
+
+//AddOrderLogResponse 订单日志插入相应
+message AddOrderLogResponse {
+   int64  id = 1;
+}
+
+
+
+service Trade {
+    rpc ListOrders (ListOrdersRequest) returns (ListOrdersResponse);
+    rpc CreateOrders (CreateOrdersRequest) returns (CreateOrdersResponse);
+    rpc UpdateBuyer (UpBuyerRequest) returns (UpDetailResponse);
+    rpc UpdateDelivery (UpDeliveryRequest) returns (UpDetailResponse);
+    rpc ListOrderLogs (ListOrderLogRequest) returns (ListOrderLogResponse);
+    rpc AddOrderLogs (AddOrderLogRequest) returns (AddOrderLogResponse);
+}

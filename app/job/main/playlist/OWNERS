@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- guanyanliang
+- liweijia
+- wuhao02
+labels:
+- job
+- job/main/playlist
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- guanyanliang
+- liweijia
+- wuhao02
+- zhapuyu

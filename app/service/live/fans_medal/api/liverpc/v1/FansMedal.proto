@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+package fans_medal.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service FansMedal {
+    
+    /** 获取已佩戴的勋章
+     * 
+     */   
+    rpc get_weared_medal (FansMedalGetWearedMedalReq) returns (FansMedalGetWearedMedalResp);
+    
+    /** 用户卡
+     * 基于某房间|主播的 用户卡片信息
+     */   
+    rpc targetsWithMedal (FansMedalTargetsWithMedalReq) returns (FansMedalTargetsWithMedalResp);
+}
+
+
+
+message FansMedalGetWearedMedalReq {
+    // 
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 
+    int64 source = 2 [(gogoproto.jsontag) = "source"];
+    // 
+    bool need_rank = 3 [(gogoproto.jsontag) = "need_rank"];
+    // 
+    bool need_today_intimacy = 4 [(gogoproto.jsontag) = "need_today_intimacy"];
+    // 
+    bool ignore_userinfo = 5 [(gogoproto.jsontag) = "ignore_userinfo"];
+}
+
+message FansMedalGetWearedMedalResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message List {
+        // 用户uid
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // up主uid
+        int64 target_id = 2 [(gogoproto.jsontag) = "target_id"];
+        // 勋章id
+        int64 medal_id = 3 [(gogoproto.jsontag) = "medal_id"];
+        // 勋章总经验值
+        int64 score = 4 [(gogoproto.jsontag) = "score"];
+        // 勋章等级
+        int64 level = 5 [(gogoproto.jsontag) = "level"];
+        // 当前等级亲密度
+        int64 intimacy = 6 [(gogoproto.jsontag) = "intimacy"];
+        // 当前等级升级所需
+        int64 next_intimacy = 7 [(gogoproto.jsontag) = "next_intimacy"];
+        // 佩戴状态  0:未佩戴 1:佩戴中
+        int64 status = 8 [(gogoproto.jsontag) = "status"];
+        // 来源 1直播 2:投币 3:充电
+        int64 source = 9 [(gogoproto.jsontag) = "source"];
+        // 领取渠道 1直播 2:主站
+        int64 receive_channel = 10 [(gogoproto.jsontag) = "receive_channel"];
+        // 是否已经领取
+        int64 is_receive = 11 [(gogoproto.jsontag) = "is_receive"];
+        // 主站佩戴状态 0:未佩戴 1:佩戴中
+        int64 master_status = 12 [(gogoproto.jsontag) = "master_status"];
+        // 领取时间
+        string receive_time = 13 [(gogoproto.jsontag) = "receive_time"];
+        // 今日亲密度上限
+        int64 today_intimacy = 14 [(gogoproto.jsontag) = "today_intimacy"];
+        // 最后佩戴的时间戳
+        int64 last_wear_time = 15 [(gogoproto.jsontag) = "last_wear_time"];
+        // 勋章名称
+        string medal_name = 16 [(gogoproto.jsontag) = "medal_name"];
+        // 用户uid
+        int64 master_available = 17 [(gogoproto.jsontag) = "master_available"];
+        // up主昵称
+        string target_name = 18 [(gogoproto.jsontag) = "target_name"];
+        // up主头像
+        string target_face = 19 [(gogoproto.jsontag) = "target_face"];
+        // 排名
+        string rank = 20 [(gogoproto.jsontag) = "rank"];
+        // 勋章颜色 不同等级颜色不同
+        int64 medal_color = 21 [(gogoproto.jsontag) = "medal_color"];
+        // 今天增加亲密度
+        int64 today_feed = 22 [(gogoproto.jsontag) = "today_feed"];
+        // 大航海类型 1 总督 2 提督 3 舰长
+        int64 guard_type = 23 [(gogoproto.jsontag) = "guard_type"];
+        // 今日亲密度上限
+        int64 day_limit = 24 [(gogoproto.jsontag) = "day_limit"];
+    }
+       
+    message Data {
+        // 
+        int64 max = 1 [(gogoproto.jsontag) = "max"];
+        // 
+        int64 cnt = 2 [(gogoproto.jsontag) = "cnt"];
+        // 
+        repeated List list = 3 [(gogoproto.jsontag) = "list"];
+    }
+}
+
+
+
+message FansMedalTargetsWithMedalReq {
+    // 用户id
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 主播id
+    repeated int64 target_ids = 2 [(gogoproto.jsontag) = "target_ids"];
+}
+
+message FansMedalTargetsWithMedalResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    string message = 3 [(gogoproto.jsontag) = "message"];
+    // 
+    repeated int64 data = 4 [(gogoproto.jsontag) = "data"];
+}

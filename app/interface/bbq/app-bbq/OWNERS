@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- daiwei
+- jiangdongqi
+- luxiaowei
+labels:
+- bbq
+- interface
+- interface/bbq/app-bbq
+- interface/bbq/video
+options:
+  no_parent_owners: true
+reviewers:
+- daiwei
+- jiangdongqi
+- luxiaowei

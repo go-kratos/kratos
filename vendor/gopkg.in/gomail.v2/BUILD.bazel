@@ -1,0 +1,33 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "auth.go",
+        "doc.go",
+        "message.go",
+        "mime.go",
+        "mime_go14.go",
+        "send.go",
+        "smtp.go",
+        "writeto.go",
+    ],
+    importmap = "go-common/vendor/gopkg.in/gomail.v2",
+    importpath = "gopkg.in/gomail.v2",
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/gopkg.in/alexcesaro/quotedprintable.v3:go_default_library"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

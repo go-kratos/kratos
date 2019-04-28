@@ -1,0 +1,485 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "go-common api",
+    "description": "api",
+    "version": "1.0",
+    "contact": {
+      "email": "lintanghui@bilibili.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "paths": {
+    "/ep/admin/saga/v1/projects": {
+      "get": {
+        "operationId": "/ep/admin/saga/v1/projects",
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/ProjectsResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ep/admin/saga/v1/projects/favorite": {
+      "get": {
+        "operationId": "/ep/admin/saga/v1/projects/favorite",
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/FavoriteProjectsResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ep/admin/saga/v1/projects/favorite/edit": {
+      "post": {
+        "operationId": "/ep/admin/saga/v1/projects/favorite/edit",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "proj_id",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "star",
+            "required": true,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/EmptyResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ep/admin/saga/v1/tasks/project": {
+      "get": {
+        "operationId": "/ep/admin/saga/v1/tasks/project",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ProjID",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "Statuses",
+            "description": "3 - running, 4 - waiting, 默认查运行中和等待的任务 默认值 3,4",
+            "type": "array"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/TasksResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ep/admin/saga/v1/tasks/simple": {
+      "get": {
+        "operationId": "/ep/admin/saga/v1/tasks/simple",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "Statuses",
+            "description": "3 - running, 4 - waiting, 默认查运行中和等待的任务 默认值 3,4",
+            "type": "array"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/SimpleTasksResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ep/admin/saga/v1/user": {
+      "get": {
+        "operationId": "/ep/admin/saga/v1/user",
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/User",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "EmptyResp": {
+      "title": "EmptyResp",
+      "description": "EmptyResp resp for response without data",
+      "type": "object"
+    },
+    "FavoriteProjectsResp": {
+      "title": "FavoriteProjectsResp",
+      "description": "FavoriteProjectsResp resp for favorite projects",
+      "type": "object",
+      "properties": {
+        "projects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Project",
+            "type": "object"
+          }
+        }
+      }
+    },
+    "MyProject": {
+      "title": "MyProject",
+      "description": "MyProject mask as star",
+      "required": [
+        "is_star"
+      ],
+      "type": "object",
+      "properties": {
+        "is_star": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Project def",
+      "required": [
+        "name",
+        "description",
+        "web_url",
+        "avatar_url",
+        "git_ssh_url",
+        "git_http_url",
+        "namespace",
+        "visibility_level",
+        "path_with_namespace",
+        "default_branch",
+        "homepage",
+        "url",
+        "ssh_url",
+        "http_url"
+      ],
+      "type": "object",
+      "properties": {
+        "avatar_url": {
+          "type": "string"
+        },
+        "default_branch": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "git_http_url": {
+          "type": "string"
+        },
+        "git_ssh_url": {
+          "type": "string"
+        },
+        "homepage": {
+          "type": "string"
+        },
+        "http_url": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "path_with_namespace": {
+          "type": "string"
+        },
+        "ssh_url": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "visibility_level": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "web_url": {
+          "type": "string"
+        }
+      }
+    },
+    "ProjectsResp": {
+      "title": "ProjectsResp",
+      "description": "ProjectsResp resp for query projects with start mark",
+      "required": [
+        "projects"
+      ],
+      "type": "object",
+      "properties": {
+        "projects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MyProject",
+            "type": "object"
+          }
+        }
+      }
+    },
+    "SimpleProject": {
+      "title": "SimpleProject",
+      "description": "SimpleProject with project id, project name and tasks",
+      "required": [
+        "proj_id",
+        "proj_name",
+        "tasks"
+      ],
+      "type": "object",
+      "properties": {
+        "proj_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "proj_name": {
+          "type": "string"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SimpleTask",
+            "type": "object"
+          }
+        }
+      }
+    },
+    "SimpleTasksResp": {
+      "title": "SimpleTasksResp",
+      "description": "SimpleTasksResp resp for simple tasks",
+      "required": [
+        "projects"
+      ],
+      "type": "object",
+      "properties": {
+        "projects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SimpleProject",
+            "type": "object"
+          }
+        }
+      }
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Task def",
+      "type": "object",
+      "properties": {
+        "author": {
+          "type": "string"
+        },
+        "event_type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "mr_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "proj_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "source_branch": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "target_branch": {
+          "type": "string"
+        },
+        "task_details": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "TasksResp": {
+      "title": "TasksResp",
+      "description": "TasksResp resp for tasks",
+      "type": "object",
+      "properties": {
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Task",
+            "type": "object"
+          }
+        }
+      }
+    },
+    "User": {
+      "title": "User",
+      "description": "User def",
+      "required": [
+        "name",
+        "username",
+        "avatar_url"
+      ],
+      "type": "object",
+      "properties": {
+        "avatar_url": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

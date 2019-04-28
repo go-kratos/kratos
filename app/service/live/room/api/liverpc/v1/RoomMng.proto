@@ -1,0 +1,188 @@
+syntax = "proto3";
+
+package room.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service RoomMng {
+    
+    /** 开通直播间
+     * 
+     */   
+    rpc createRoom (RoomMngCreateRoomReq) returns (RoomMngCreateRoomResp);
+    
+    /** 获取监控列表
+     * 
+     */   
+    rpc getSecondVerifyList (RoomMngGetSecondVerifyListReq) returns (RoomMngGetSecondVerifyListResp);
+    
+    /** 查询是否是黑名单，没有roomid参数时返回全部黑名单map
+     * 
+     */   
+    rpc isBlack (RoomMngIsBlackReq) returns (RoomMngIsBlackResp);
+    
+    /** 主播填写公告命中审核词生成审核记录写入db
+     * 
+     */   
+    rpc saveHistory (RoomMngSaveHistoryReq) returns (RoomMngSaveHistoryResp);
+    
+    /** 是否全网封禁
+     * 
+     */   
+    rpc isAllNetBanned (RoomMngIsAllNetBannedReq) returns (RoomMngIsAllNetBannedResp);
+}
+
+
+
+message RoomMngCreateRoomReq {
+    // 用户uid
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 是否开通轮播
+    int64 virtual = 2 [(gogoproto.jsontag) = "virtual"];
+}
+
+message RoomMngCreateRoomResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        string roomid = 1 [(gogoproto.jsontag) = "roomid"];
+    }
+}
+
+
+
+message RoomMngGetSecondVerifyListReq {
+    // 房间id
+    int64 room_id = 1 [(gogoproto.jsontag) = "room_id"];
+    // 分区id多个
+    string area = 2 [(gogoproto.jsontag) = "area"];
+    // 页数
+    int64 page = 3 [(gogoproto.jsontag) = "page"];
+    // 页码
+    int64 pagesize = 4 [(gogoproto.jsontag) = "pagesize"];
+    // 业务，0直播监控1直播鉴黄2房间举报
+    string biz = 5 [(gogoproto.jsontag) = "biz"];
+}
+
+message RoomMngGetSecondVerifyListResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Result {
+        // 日志id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 当天切断记录
+        int64 recent_cut_times = 2 [(gogoproto.jsontag) = "recent_cut_times"];
+        // 当天警告记录
+        int64 recent_warn_times = 3 [(gogoproto.jsontag) = "recent_warn_times"];
+        // 总计警告
+        int64 warn_times = 4 [(gogoproto.jsontag) = "warn_times"];
+        // 用户名
+        string uname = 5 [(gogoproto.jsontag) = "uname"];
+        // 房间号
+        int64 room_id = 6 [(gogoproto.jsontag) = "room_id"];
+        // 主播id
+        int64 uid = 7 [(gogoproto.jsontag) = "uid"];
+        // 房间标题
+        string title = 8 [(gogoproto.jsontag) = "title"];
+        // 分区名
+        string area_v2_name = 9 [(gogoproto.jsontag) = "area_v2_name"];
+        // 粉丝数
+        int64 fc = 10 [(gogoproto.jsontag) = "fc"];
+        // 警告理由
+        string warn_reason = 11 [(gogoproto.jsontag) = "warn_reason"];
+        // 警告时间
+        string break_time = 12 [(gogoproto.jsontag) = "break_time"];
+        // 证据图片
+        string proof_img = 13 [(gogoproto.jsontag) = "proof_img"];
+    }
+       
+    message Data {
+        // 
+        repeated Result result = 1 [(gogoproto.jsontag) = "result"];
+        // 总数
+        int64 count = 2 [(gogoproto.jsontag) = "count"];
+        // 页码
+        int64 page = 3 [(gogoproto.jsontag) = "page"];
+        // 分页大小
+        int64 pagesize = 4 [(gogoproto.jsontag) = "pagesize"];
+    }
+}
+
+
+
+message RoomMngIsBlackReq {
+    // 房间号
+    int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+}
+
+message RoomMngIsBlackResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    map<int64, int64> data = 3 [(gogoproto.jsontag) = "data"];
+}
+
+
+
+message RoomMngSaveHistoryReq {
+    // 
+    repeated List list = 1 [(gogoproto.jsontag) = "list"];
+       
+    message List {
+        // 用户名
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 房间号
+        int64 roomid = 2 [(gogoproto.jsontag) = "roomid"];
+        // 描述
+        string content = 3 [(gogoproto.jsontag) = "content"];
+        // 类型
+        int64 area = 4 [(gogoproto.jsontag) = "area"];
+        // 审核标志
+        int64 status = 5 [(gogoproto.jsontag) = "status"];
+        // 操作人
+        string oname = 6 [(gogoproto.jsontag) = "oname"];
+    }
+}
+
+message RoomMngSaveHistoryResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+}
+
+
+
+message RoomMngIsAllNetBannedReq {
+    // 用户uid
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+}
+
+message RoomMngIsAllNetBannedResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        bool is_net_banned = 1 [(gogoproto.jsontag) = "is_net_banned"];
+    }
+}

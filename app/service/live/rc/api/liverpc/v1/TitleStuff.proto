@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package rc.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service TitleStuff {
+    
+    /** 添加头衔经验原石
+     * 
+     */   
+    rpc add (TitleStuffAddReq) returns (TitleStuffAddResp);
+}
+
+
+
+message TitleStuffAddReq {
+    // UID
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 原石id
+    int64 sid = 2 [(gogoproto.jsontag) = "sid"];
+    // 原石数量
+    int64 num = 3 [(gogoproto.jsontag) = "num"];
+}
+
+message TitleStuffAddResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        
+    }
+}

@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liweijia
+- renwei
+- wangxu01
+- zhapuyu
+labels:
+- job
+- job/main/feed
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- wangxu01
+- zhapuyu

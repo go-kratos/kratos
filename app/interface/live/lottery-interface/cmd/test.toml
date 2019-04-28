@@ -1,0 +1,13 @@
+
+[infoc]
+	taskID = "000573"
+	proto  = "tcp"
+	addr   = "172.18.33.125:15142"
+	chanSize  = 10240
+
+[ShortClient]
+	timeout = "150ms"
+
+[LongClient]
+	timeout = "400ms"
+

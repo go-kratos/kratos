@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+package live.broadcastproxy.v1;
+
+option go_package = "v1";
+
+service Danmaku {
+    rpc RoomMessage (RoomMessageRequest) returns (GeneralResponse);
+    rpc BroadcastMessage (BroadcastMessageRequest) returns(GeneralResponse);
+    rpc MultiRoomMessage (MultiRoomMessageRequest) returns(GeneralResponse);
+    rpc BatchRoomMessage(BatchRoomMessageRequest) returns(GeneralResponse);
+    rpc UserMessage(UserMessageRequest)returns(GeneralResponse);
+    rpc BatchUserMessage(BatchUserMessageRequest)returns(GeneralResponse);
+    rpc Dispatch(DispatchRequest)returns(DispatchResponse);
+    rpc SetAngryValue(SetAngryValueRequest)returns(SetAngryValueResponse);
+    rpc GetRoomOnlineCount(GetRoomOnlineCountRequest)returns(GetRoomOnlineCountResponse);
+}
+
+message GeneralResponse {
+}
+
+message RoomMessageRequest {
+    int32 room_id = 1 [(gogoproto.jsontag) = "room_id"];
+    string message = 2 [(gogoproto.jsontag) = "msg"];
+    int32 ensure = 3;
+}
+
+message BroadcastMessageRequest {
+    string message = 1;
+    repeated int32 exclude_room_id = 2;
+}
+
+message MultiRoomMessageRequest {
+    repeated int32 room_id = 1 [(gogoproto.jsontag) = "room_id"];
+    string message = 2 [(gogoproto.jsontag) = "msg"];
+    int32 ensure = 3;
+}
+
+message BatchRoomMessageRequest {
+    repeated RoomMessageRequest room_message = 1 [(gogoproto.jsontag) = "data"];
+}
+
+message UserMessageRequest {
+    int64 user_id = 1 [(gogoproto.jsontag) = "uid"];
+    string message = 2 [(gogoproto.jsontag) = "msg"];
+}
+
+message BatchUserMessageRequest {
+    repeated UserMessageRequest user_message = 1 [(gogoproto.jsontag) = "data"];
+}
+
+message DispatchRequest {
+    int64 user_id = 1 [(gogoproto.jsontag) = "uid"];
+    string user_ip = 2 [(gogoproto.jsontag) = "ip"];
+}
+
+message DispatchResponse {
+    repeated string ip = 1 [(gogoproto.jsontag) = "ip"];
+    repeated string host = 2 [(gogoproto.jsontag) = "host"];
+}
+
+message SetAngryValueRequest {
+    map<uint64,uint64> angry_value = 1 [(gogoproto.jsontag) = "angry_value"];
+}
+
+message SetAngryValueResponse {
+
+}
+
+message GetRoomOnlineCountRequest {
+    repeated uint64 room_id = 1 [(gogoproto.jsontag) = "room_id"];
+}
+
+message GetRoomOnlineCountResponse {
+    map<uint64,uint64> room_online_count = 1 [(gogoproto.jsontag) = "room_online_count"];
+}

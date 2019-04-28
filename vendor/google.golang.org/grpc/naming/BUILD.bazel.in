@@ -1,0 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "dns_resolver.go",
+        "go17.go",
+        "go18.go",
+        "naming.go",
+    ],
+    importpath = "google.golang.org/grpc/naming",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//grpclog:go_default_library",
+        "@org_golang_x_net//context:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = [
+        "dns_resolver_test.go",
+        "go17_test.go",
+        "go18_test.go",
+    ],
+    embed = [":go_default_library"],
+    deps = ["@org_golang_x_net//context:go_default_library"],
+)

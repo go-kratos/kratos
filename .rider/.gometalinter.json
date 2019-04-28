@@ -1,0 +1,19 @@
+{
+  "Linters": {},
+  "Vendor": true,
+  "Deadline": "5m",
+  "Cyclo": 50,
+  "Enable": [
+    "gofmt",
+    "vet",
+    "golint",
+    "vetshadow",
+    "gocyclo",
+    "deadcode"
+  ],
+  "Exclude": [
+    ".+\\.pb\\.go",
+    ".+\\.pb\\.gw\\.go"
+  ],
+  "MinConfidence": 0.81
+}

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+package share.service.v1;
+
+option go_package = "v1";
+
+// Share grpc
+service Share {
+    rpc AddShare(AddShareRequest) returns(AddShareReply);
+}
+
+message AddShareRequest{
+    int64 oid = 1;
+    int64 mid = 2;
+    int32 type = 3;
+    string ip = 4;
+}
+
+message AddShareReply {
+    int64 shares = 1;
+}

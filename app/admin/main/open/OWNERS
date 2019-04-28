@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- tuliang
+- zhapuyu
+- zhoushuguang
+labels:
+- admin
+- admin/main/open
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- tuliang
+- zhapuyu
+- zhoushuguang

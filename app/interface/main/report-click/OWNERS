@@ -1,0 +1,20 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liangkai
+- liweijia
+- peiyifei
+- renyashun
+- zhangshengchao
+- zhaoshichen
+labels:
+- interface
+- interface/main/report-click
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- liangkai
+- renyashun
+- zhangshengchao
+- zhaoshichen

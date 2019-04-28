@@ -1,0 +1,35 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "auth.go",
+        "conn.go",
+        "req.go",
+        "resp.go",
+        "stmt.go",
+    ],
+    importmap = "go-common/vendor/github.com/siddontang/go-mysql/client",
+    importpath = "github.com/siddontang/go-mysql/client",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/juju/errors:go_default_library",
+        "//vendor/github.com/siddontang/go-mysql/mysql:go_default_library",
+        "//vendor/github.com/siddontang/go-mysql/packet:go_default_library",
+        "//vendor/github.com/siddontang/go/hack:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,137 @@
+# This is a TOML document. Boom.
+
+[log]
+	dir = "/data/log/history-job/"
+
+[multiHTTP]
+    [multiHTTP.outer]
+    addrs = ["0.0.0.0:6431"]
+    maxListen = 10
+    	
+[job]
+    max = 10240
+    batch = 100
+	expire = "5s"
+    url = "http://api.bilibili.co/x/internal/v2/history/flush"
+    ServiceBatch = 100
+    DeleteLimit = 1000
+    DeleteStartHour = 10
+    DeleteEndHour = 15
+	CacheLen = 1000
+	QPSLimit = 10000
+	IgnoreMsg = false  
+    RetryTime = "1s"
+    DeleteStep = "5m"
+    [job.Client]
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    [job.Client.breaker]
+        window  ="10s"
+        sleep   ="10ms"
+        bucket  = 10
+        ratio   = 0.1
+        request = 100
+		
+[hisSub]
+key = "0Pub71WwEMKXu63qtztu"
+secret = "0Pub71WwEMKXu63qtztv"
+group = "HistoryMerge-HistoryJob-S"
+topic = "HistoryMerge-T"
+action = "sub"
+[hisSub.redis]
+    name = "history-job/historysub"
+    proto = "tcp"
+    addr = "172.16.33.56:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+[mysql]
+   addr = "127.0.0.1:4000"
+   dsn = "root:@tcp(127.0.0.1:4000)/bilibili_history?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "1s"
+	execTimeout = "1s"
+	tranTimeout = "1s"
+[LongDB]
+   addr = "127.0.0.1:4000"
+   dsn = "root:@tcp(127.0.0.1:4000)/bilibili_history?timeout=1h&readTimeout=1h&writeTimeout=1h&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "1h"
+	execTimeout = "1h"
+	tranTimeout = "1h"
+
+[tidb]
+   addr = "127.0.0.1:4000"
+   dsn = "root:@tcp(127.0.0.1:4000)/bilibili_history?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "1s"
+	execTimeout = "1s"
+	tranTimeout = "1s"
+[Longtidb]
+   addr = "127.0.0.1:4000"
+   dsn = "root:@tcp(127.0.0.1:4000)/bilibili_history?timeout=1h&readTimeout=1h&writeTimeout=1h&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "1h"
+	execTimeout = "1h"
+	tranTimeout = "1h"
+
+[ServiceHisSub]
+    key = "170e302355453683"
+    secret = "3d0e8db7bed0503949e545a469789279"
+    group= "HistoryServiceMerge-MainCommunity-S"
+    topic= "HistoryServiceMerge-T"
+    action="pub"
+    name = "history"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 1
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+   [info]
+    master = ""
+    meta = ""
+    testRowKey = "history"
+    dialTimeout = "100ms"
+    readTimeout = "250ms"
+    readsTimeout = "300ms"
+    writeTimeout = "250ms"
+    writesTimeout = "300ms"
+        [info.zookeeper]
+        root = ""
+        addrs = ["172.18.33.131:2181","172.18.33.168:2181","172.18.33.169:2181"]
+        timeout = "30s"
+
+[redis]
+	name = "history-service"
+	proto = "tcp"
+	addr = "127.0.0.1:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+[merge]
+	MaxSize = 51200
+	Interval = "1m"
+	Buffer = 10240
+	Worker = 100

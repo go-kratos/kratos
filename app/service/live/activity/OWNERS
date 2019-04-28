@@ -1,0 +1,13 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- longsifan
+labels:
+- live
+- service
+- service/live/activity
+options:
+  no_parent_owners: true
+reviewers:
+- longsifan
+- zhaohailin

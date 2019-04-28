@@ -1,0 +1,65 @@
+syntax = "proto3";
+package live.xcaptcha.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+
+// XCaptcha
+service XCaptcha {
+    // 创建验证码
+    rpc create (XCreateCaptchaReq) returns (XCreateCaptchaResp);
+
+    // 二次校验checkToken  `internal:"true"`
+    rpc verify (XVerifyReq) returns (XVerifyResp);
+
+    // 验证码校验 `internal:"true"`
+    rpc check (CheckReq) returns (CheckResp);
+}
+
+message XCreateCaptchaReq {
+    int64 type = 1 [(gogoproto.moretags) = 'form:"type"'];
+    string client_type = 2 [(gogoproto.moretags) = 'form:"client_type"'];
+    int64 height = 3 [(gogoproto.moretags) = 'form:"height"'];
+    int64 width = 4 [(gogoproto.moretags) = 'form:"width"'];
+    int64 uid = 5 [(gogoproto.moretags) = 'form:"uid"'];
+    string client_ip = 6 [(gogoproto.moretags) = 'form:"client_ip"'];
+}
+
+message XCreateCaptchaResp{
+    int64 type = 1 [(gogoproto.jsontag) = "type"];
+    GeeTest geetest = 2 [(gogoproto.jsontag) = "geetest"];
+    Image image = 3 [(gogoproto.jsontag) = "image"];
+}
+
+message GeeTest{
+    string gt = 1 [(gogoproto.jsontag) = "gt"];
+    string challenge = 2 [(gogoproto.jsontag) = "challenge"];
+}
+message Image{
+    string tips = 1 [(gogoproto.jsontag) = "tips"];
+    string token = 2 [(gogoproto.jsontag) = "token"];
+    string content = 3 [(gogoproto.jsontag) = "content"];
+}
+
+
+message XVerifyReq {
+    string _anti = 1 [(gogoproto.moretags) = 'form:"_anti" validate:"required"'];
+    int64 uid = 2 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+    string client_ip = 3 [(gogoproto.moretags) = 'form:"client_ip"'];
+    int64 room_id = 4 [(gogoproto.moretags) = 'form:"room_id"'];
+}
+
+message XVerifyResp{
+}
+
+message CheckReq{
+    string anti = 1 [(gogoproto.moretags) = 'form:"anti" validate:"required"'];
+    int64 uid = 2 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+    string client_ip = 3 [(gogoproto.moretags) = 'form:"client_ip"'];
+}
+
+message CheckResp{
+    int64 type = 1 [(gogoproto.jsontag) = "type"];
+    string token = 2 [(gogoproto.jsontag) = "token"];
+}

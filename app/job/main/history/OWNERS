@@ -1,0 +1,19 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- renwei
+- renyashun
+- wangxu01
+- zhangshengchao
+labels:
+- job
+- job/main/history
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- chenzhihui
+- renyashun
+- wangxu01
+- zhangshengchao
+- zhapuyu

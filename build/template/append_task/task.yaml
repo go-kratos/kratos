@@ -1,0 +1,282 @@
+presubmits:
+  platform/go-common:
+  - name: go-common-build-common
+    always_run: true 
+    namespace: default
+    run_pr_pushed: true
+    trusted_labels: 
+    - library
+    - new-project
+    spec:
+      containers:
+      - image: bazel_build
+        name: go-common-build-common
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - ci-bazel-build-common
+  - name: go-common-build-infra
+    always_run: true 
+    namespace: default
+    run_pr_pushed: true
+    trusted_labels: 
+    - library
+    - new-project
+    spec:
+      containers:
+      - image: bazel_build
+        name: go-common-build-infra
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - ci-bazel-build-infra  
+  - name: go-common-build-tool
+    always_run: true 
+    namespace: default
+    run_pr_pushed: true
+    trusted_labels: 
+    - library
+    - new-project
+    spec:
+      containers:
+      - image: bazel_build
+        name: go-common-build-tool
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - ci-bazel-build-tool
+  - name: go-common-build-live
+    always_run: true 
+    namespace: default
+    run_pr_pushed: true
+    trusted_labels: 
+    - library
+    - new-project
+    spec:
+      containers:
+      - image: bazel_build
+        name: go-common-build-live
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - ci-bazel-build-live
+  - name: go-common-build-ep
+    always_run: true 
+    namespace: default
+    run_pr_pushed: true
+    trusted_labels: 
+    - library
+    - new-project
+    spec:
+      containers:
+      - image: bazel_build
+        name: go-common-build-ep
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - ci-bazel-build-ep
+  - name: go-common-build-openplatform
+    always_run: true 
+    namespace: default
+    run_pr_pushed: true
+    trusted_labels: 
+    - library
+    - new-project
+    spec:
+      containers:
+      - image: bazel_build
+        name: go-common-build-openplatform
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - ci-bazel-build-openplatform
+  - name: go-common-build-bbq
+    always_run: true 
+    namespace: default
+    run_pr_pushed: true
+    trusted_labels: 
+    - library
+    - new-project
+    spec:
+      containers:
+      - image: bazel_build
+        name: go-common-build-bbq
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - ci-bazel-build-bbq
+  - name: go-common-build-video
+    always_run: true 
+    namespace: default
+    run_pr_pushed: true
+    trusted_labels: 
+    - library
+    - new-project
+    spec:
+      containers:
+      - image: bazel_build
+        name: go-common-build-video
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - ci-bazel-build-video
+  - name: go-common-build-ops
+    always_run: true 
+    namespace: default
+    run_pr_pushed: true
+    trusted_labels: 
+    - library
+    - new-project
+    spec:
+      containers:
+      - image: bazel_build
+        name: go-common-build-ops
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - ci-bazel-build-ops
+  - name: go-common-build-library
+    always_run: true 
+    namespace: default
+    run_pr_pushed: true
+    trusted_labels: 
+    - library
+    - new-project
+    spec:
+      containers:
+      - image: bazel_build
+        name: go-common-build-library
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - ci-bazel-build-library
+  - name: go-common-build-service-main
+    always_run: true 
+    namespace: default
+    run_pr_pushed: true
+    trusted_labels: 
+    - library
+    - new-service-main-project
+    spec:
+      containers:
+      - image: bazel_build
+        name: go-common-build-service-main
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - ci-bazel-build-service-main
+  - name: go-common-build-interface-main
+    always_run: true 
+    namespace: default
+    run_pr_pushed: true
+    trusted_labels: 
+    - library
+    - new-interface-main-project
+    spec:
+      containers:
+      - image: bazel_build
+        name: go-common-build-interface-main
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - ci-bazel-build-interface-main
+  - name: go-common-build-job-main
+    always_run: true 
+    namespace: default
+    run_pr_pushed: true
+    trusted_labels: 
+    - library
+    - new-job-main-project
+    spec:
+      containers:
+      - image: bazel_build
+        name: go-common-build-job-main
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - ci-bazel-build-job-main
+  - name: go-common-build-admin-main
+    always_run: true 
+    namespace: default
+    run_pr_pushed: true
+    trusted_labels: 
+    - library
+    - new-admin-main-project
+    spec:
+      containers:
+      - image: bazel_build
+        name: go-common-build-admin-main
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - ci-bazel-build-admin-main

@@ -1,0 +1,33 @@
+syntax = "proto3";
+package community.reply.feed.v1;
+
+option go_package = "v1";
+
+service ReplyFeed {
+    rpc HotReply (HotReplyReq) returns (HotReplyRes);
+    rpc Reply (ReplyReq) returns (ReplyRes);
+}
+
+message HotReplyReq {
+    int64 mid = 1;
+    int64 oid = 2;
+    int32 tp = 3;
+    int32 pn = 4;
+    int32 ps = 5;
+}
+
+message HotReplyRes {
+    string name = 1;
+    repeated int64 rpIDs = 2[packed=true];
+    int32 count = 3;
+}
+
+message ReplyReq {
+    int64 mid = 1;
+    int32 pn = 2;
+    int32 ps = 3;
+}
+
+message ReplyRes {
+    string name = 1;
+}

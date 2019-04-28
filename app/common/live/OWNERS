@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- kuangxibin
+- liugang
+- liuzhen
+- zhaohailin
+labels:
+- common
+- library
+- live
+reviewers:
+- kuangxibin
+- liugang
+- liuzhen
+- zhaohailin

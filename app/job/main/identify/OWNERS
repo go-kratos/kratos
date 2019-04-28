@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chenjunxi
+- linmiao
+- wanghuan01
+- wutao
+labels:
+- job
+- job/main/identify
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- chenjunxi
+- wanghuan01
+- wutao

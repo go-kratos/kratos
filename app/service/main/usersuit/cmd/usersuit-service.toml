@@ -1,0 +1,129 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+dir = "./"
+family = "usersuit-service"
+env = "qa"
+
+accountIntranetURI = "http://account.bilibili.co"
+accountURI = "https://account.bilibili.com"
+vipURI = "http://vip.bilibili.co"
+payURL = "http://pay.bilibili.com/api/add.pay.order"
+NotifyURL = "http://account.bilibili.co/api/communicate/purge_cache"
+
+[xlog]
+dir = "/data/log/usersuit-service"
+
+[payinfo]
+    MerchantID="1"
+    MerchantProductID="1"
+    CallBackURL="http://account.bilibili.com/api/pendant/orderpendantcallback"
+
+[bm]
+addr = "0.0.0.0:7261"
+maxListen = 1000
+timeout = "1s"
+
+[rpcServer]
+    proto = "tcp"
+    addr = "0.0.0.0:7269"
+
+[gorpcclient]
+    [member]
+        timeout = "1s"
+
+    [coin]
+        timeout = "30s"
+
+    [point]
+        timeout = "30s"
+
+
+[mysql]
+addr = "172.16.33.205:3309"
+dsn = "usersuit:cDXL6vncmCQanx4iMgGogu6gYz33NmA1@tcp(172.16.33.205:3309)/usersuit?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 100
+idle = 10
+queryTimeout = "2s"
+execTimeout = "10s"
+tranTimeout = "5s"
+[mysql.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+
+[redis]
+    name = "usersuit-service"
+    proto = "tcp"
+    addr = "172.16.33.54:6379"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    inviteExpire = "30s"
+    pendantExpire = "24h"
+
+[memcache]
+    name = "usersuit-service"
+    proto = "tcp"
+    # addr = "172.16.33.54:6379"
+    addr = "127.0.0.1:11211"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    medalexpire  = "720h"
+	pointexpire = "168h"
+
+[MedalCache]
+size = 10000
+expire = "3s"
+
+[EquipCache]
+size = 10000
+expire = "3s"
+
+
+[httpClient]
+key = "837f620f5c0a8010"
+secret = "2a9057021014b4b843b635664c69d5df"
+dial = "500ms"
+timeout = "1s"
+keepAlive = "60s"
+timer = 10
+[httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[accountNotify]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "AccountNotify-MainAccount-P"
+    topic = "AccountNotify-T"
+    action = "pub"
+    buffer = 128
+    name = "usersuit-admin/databus"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    active = 1
+    idle = 1
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+    [host]
+    messageCo = "http://message.bilibili.co"
+    accountCoURI = "http://account.bilibili.co"
+    apiCoURI = "http://api.bilibili.co"
+    liveAPICo = "http://api.live.bilibili.co"

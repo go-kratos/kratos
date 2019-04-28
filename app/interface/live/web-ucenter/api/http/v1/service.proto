@@ -1,0 +1,474 @@
+syntax="proto3";
+
+package live.webucenter.v1;
+option go_package ="v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// History 相关服务
+service history {
+    // 根据uid查询直播关键历史记录
+    // `midware:"auth"`
+    rpc get_history_by_uid (GetHistoryReq) returns (GetHistoryResp);
+    // 删除直播历史记录
+    // `method:"POST" midware:"auth"`
+    rpc del_history (DelHistoryReq) returns (DelHistoryResp);
+
+}
+
+service Capsule{
+    // `midware:"auth"`
+    rpc get_detail(CapsuleGetDetailReq) returns (CapsuleGetDetailResp);
+    // `method:"POST" midware:"auth"`
+    rpc open_capsule(CapsuleOpenCapsuleReq) returns (CapsuleOpenCapsuleResp);
+    // `midware:"guest"`
+    rpc get_capsule_info (CapsuleGetCapsuleInfoReq) returns (CapsuleGetCapsuleInfoResp);
+    // `method:"POST" midware:"auth"`
+    rpc open_capsule_by_type (CapsuleOpenCapsuleByTypeReq) returns (CapsuleOpenCapsuleByTypeResp);
+}
+
+// 历史记录请求参数定义
+message GetHistoryReq {
+
+}
+
+// 获取接口返回响应
+message GetHistoryResp {
+    string title = 1 [(gogoproto.jsontag) = 'title'];
+    int32 count = 4 [(gogoproto.jsontag) = 'count'];
+    repeated List list = 5 [(gogoproto.jsontag) = 'list'];
+    message List {
+        int64 roomid = 1 [(gogoproto.jsontag) = 'roomid'];
+        int32 uid = 2 [(gogoproto.jsontag) = 'uid'];
+        string uname =3;
+        string user_cover = 4 [(gogoproto.jsontag) = 'user_cover'];
+        string title = 5 [(gogoproto.jsontag) = 'title'];
+        string face = 6 [(gogoproto.jsontag) = 'face'];
+        string tags = 7 [(gogoproto.jsontag) = 'tags'];
+        int32 live_status = 9 [(gogoproto.jsontag) = 'live_status'];
+        int32 fans_num = 10 [(gogoproto.jsontag) = 'fans_num'];
+        int32 is_attention = 12 [(gogoproto.jsontag) = 'is_attention'];
+        int32   area_v2_id = 13;
+        string area_v2_name = 14 [(gogoproto.jsontag) = 'area_v2_name'];
+        string area_v2_parent_name = 15 [(gogoproto.jsontag) = 'area_v2_parent_name'];
+        int32   area_v2_parent_id = 16;
+    }
+
+}
+
+// 删除历史记录参数定义
+message DelHistoryReq {
+
+}
+
+
+// 删除直播历史记录响应
+message DelHistoryResp {
+}
+
+
+
+
+
+
+service AnchorTask {
+
+    // (主播侧)-我的主播奖励(登录态)
+    // `midware:"auth"`
+    rpc myReward (AnchorTaskMyRewardReq) returns (AnchorTaskMyRewardResp);
+
+    // (主播侧)-奖励使用记录(登录态)
+    // `midware:"auth"`
+    rpc useRecord (AnchorTaskUseRecordReq) returns (AnchorTaskUseRecordResp);
+
+    // (主播侧)-使用奖励(登录态)
+    // `method:"POST" midware:"auth"`
+    rpc useReward (AnchorTaskUseRewardReq) returns (AnchorTaskUseRewardResp);
+
+    // (主播侧)-奖励和任务红点(登录态)
+    // `midware:"auth"`
+    rpc isViewed (AnchorTaskIsViewedReq) returns (AnchorTaskIsViewedResp);
+
+    // (主播侧)-添加主播奖励(内部接口)
+    // `method:"POST" internal:"true"`
+    rpc addReward (AnchorTaskAddRewardReq) returns (AnchorTaskAddRewardResp);
+}
+
+message AnchorTaskAddRewardReq {
+    // 奖励id, 1:任意门
+    int64 reward_id = 4 [(gogoproto.moretags) = "form:\"reward_id\" validate:\"required\""];
+    // 房间号
+    int64 roomid = 8 [(gogoproto.moretags) = "form:\"roomid\" validate:\"required\""];
+    // 来源,1:主播任务,2:小时榜
+    int64 source = 9 [(gogoproto.moretags) = "form:\"source\" validate:\"required\""];
+    // 主播uid
+    int64 uid = 10 [(gogoproto.moretags) = "form:\"uid\" validate:\"required\""];
+    // 流水单号
+    string order_id = 11 [(gogoproto.moretags) = "form:\"order_id\" validate:\"required\""];
+}
+
+message AnchorTaskAddRewardResp {
+    int64 result = 1 [(gogoproto.jsontag) = 'result'];
+}
+
+
+message AnchorTaskMyRewardReq {
+    // 页数
+    int64 page = 1 [(gogoproto.moretags) = "form:\"page\""];
+}
+
+message AnchorTaskMyRewardResp {
+    //
+    repeated RewardObj data = 1 [(gogoproto.jsontag) = 'data'];
+    //
+    Page page = 2 [(gogoproto.jsontag) = 'page'];
+    // 过期奖励数量
+    int64 expire_count = 3 [(gogoproto.jsontag) = 'expire_count'];
+
+    message RewardObj {
+        // id
+        int64 id = 1 [(gogoproto.jsontag) = 'id'];
+        // 奖励类型 1:ss推荐卡 2:s推荐卡、任意门
+        int64 reward_type = 2 [(gogoproto.jsontag) = 'reward_type'];
+        // 1:未使用,3:已使用,5:已过期
+        int64 status = 3 [(gogoproto.jsontag) = 'status'];
+        // 奖励id
+        int64 reward_id = 4 [(gogoproto.jsontag) = 'reward_id'];
+        // 奖励名称
+        string name = 5 [(gogoproto.jsontag) = 'name'];
+        // 奖励图标
+        string icon = 6 [(gogoproto.jsontag) = 'icon'];
+        // 获得时间datetime
+        string achieve_time = 7 [(gogoproto.jsontag) = 'achieve_time'];
+        // 过期时间datetime
+        string expire_time = 8 [(gogoproto.jsontag) = 'expire_time'];
+        // 来源,1:主播任务,2:小时榜
+        int64 source = 9 [(gogoproto.jsontag) = 'source'];
+        // 奖励简介
+        string reward_intro = 10 [(gogoproto.jsontag) = 'reward_intro'];
+    }
+
+    message Page {
+        // 当前页码
+        int64 page = 1 [(gogoproto.jsontag) = 'page'];
+        // 每页大小
+        int64 page_size = 2 [(gogoproto.jsontag) = 'page_size'];
+        // 总页数
+        int64 total_page = 3 [(gogoproto.jsontag) = 'total_page'];
+        // 总记录数
+        int64 total_count = 4 [(gogoproto.jsontag) = 'total_count'];
+    }
+}
+
+
+
+message AnchorTaskUseRecordReq {
+    // 页数
+    int64 page = 1 [(gogoproto.moretags) = "form:\"page\""];
+}
+
+message AnchorTaskUseRecordResp {
+
+    message RewardObj {
+        // id
+        int64 id = 1 [(gogoproto.jsontag) = 'id'];
+        // 奖励id
+        int64 reward_id = 2 [(gogoproto.jsontag) = 'reward_id'];
+        // 1:未使用,3:已使用,5:已过期
+        int64 status = 3 [(gogoproto.jsontag) = 'status'];
+        // 奖励名称
+        string name = 4 [(gogoproto.jsontag) = 'name'];
+        // 奖励图标
+        string icon = 5 [(gogoproto.jsontag) = 'icon'];
+        // 获得时间datetime
+        string achieve_time = 6 [(gogoproto.jsontag) = 'achieve_time'];
+        // 过期时间datetime
+        string expire_time = 7 [(gogoproto.jsontag) = 'expire_time'];
+        // 来源,1:主播任务,2:小时榜
+        int64 source = 8 [(gogoproto.jsontag) = 'source'];
+        // 奖励简介
+        string reward_intro = 9 [(gogoproto.jsontag) = 'reward_intro'];
+        // 获得时间datetime
+        string use_time = 10 [(gogoproto.jsontag) = 'use_time'];
+    }
+
+    message Page {
+        // 当前页码
+        int64 page = 1 [(gogoproto.jsontag) = 'page'];
+        // 每页大小
+        int64 page_size = 2 [(gogoproto.jsontag) = 'page_size'];
+        // 总页数
+        int64 total_page = 3 [(gogoproto.jsontag) = 'total_page'];
+        // 总记录数
+        int64 total_count = 4 [(gogoproto.jsontag) = 'total_count'];
+    }
+
+    //
+    repeated RewardObj data = 1 [(gogoproto.jsontag) = 'data'];
+    //
+    Page page = 2 [(gogoproto.jsontag) = 'page'];
+}
+
+
+
+message AnchorTaskUseRewardReq {
+    // 奖励列表id
+    int64 id = 1 [(gogoproto.moretags) = "form:\"id\" validate:\"required\""];
+    // 使用平台
+    string platform = 2 [(gogoproto.moretags) = "form:\"platform\""];
+}
+
+message AnchorTaskUseRewardResp {
+
+    int64 result = 1 [(gogoproto.jsontag) = 'result'];
+}
+
+
+message AnchorTaskIsViewedReq {
+
+}
+
+message AnchorTaskIsViewedResp {
+
+    // 是否展示任务红点
+    int64 task_should_notice = 1 [(gogoproto.jsontag) = 'task_should_notice'];
+    // 是否展示奖励入口
+    int64 show_reward_entry = 5 [(gogoproto.jsontag) = 'show_reward_entry'];
+    // 是否展示奖励红点
+    int64 reward_should_notice = 2 [(gogoproto.jsontag) = 'reward_should_notice'];
+    // 任务状态, 0:没有,1:领取, 5:完成
+    int64 task_status = 3 [(gogoproto.jsontag) = 'task_status'];
+    // 是否在首页黑名单中
+    int64 is_blacked = 4 [(gogoproto.jsontag) = 'is_blacked'];
+    // 点击跳转h5链接
+    string url = 6 [(gogoproto.jsontag) = 'url'];
+}
+
+
+
+message CapsuleGetDetailReq {
+    // 来源 h5 web room
+    string from = 2 [(gogoproto.moretags) = 'form:"from"'];
+}
+
+message Usage {
+    // 用法描述
+    string text = 1 [(gogoproto.jsontag) = "text"];
+    // 跳转链接
+    string url = 2 [(gogoproto.jsontag) = "url"];
+}
+
+message Progress {
+    // 当前进度
+    int64 now = 1 [(gogoproto.jsontag) = "now"];
+    // 最大进度
+    int64 max = 2 [(gogoproto.jsontag) = "max"];
+}
+
+message CapsuleGetDetailResp {
+    // 普通扭蛋信息
+    CapsuleInfo normal = 1 [(gogoproto.jsontag) = "normal"];
+    // 梦幻扭蛋信息，若梦幻扭蛋status=false，则无coin、change、process、gift、list字段
+    CapsuleInfo colorful = 2 [(gogoproto.jsontag) = "colorful"];
+
+    message Gift {
+        // 礼物名称
+        string name = 2 [(gogoproto.jsontag) = "name"];
+        // 礼物图片
+        string image = 3 [(gogoproto.jsontag) = "image"];
+        // 用法
+        Usage usage = 4 [(gogoproto.jsontag) = "usage"];
+        // web礼物图片
+        string web_image = 5 [(gogoproto.jsontag) = "web_image"];
+        // mobile礼物图片
+        string mobile_image = 6 [(gogoproto.jsontag) = "mobile_image"];
+    }
+
+    message List {
+        // 数量
+        int64 num = 1 [(gogoproto.jsontag) = "num"];
+        // 礼物名称
+        string gift = 2 [(gogoproto.jsontag) = "gift"];
+        // 时间
+        string date = 3 [(gogoproto.jsontag) = "date"];
+        // 用户名
+        string name = 4 [(gogoproto.jsontag) = "name"];
+    }
+
+    message CapsuleInfo {
+        //
+        bool status = 1 [(gogoproto.jsontag) = "status"];
+        // 扭蛋数量
+        int64 coin = 2 [(gogoproto.jsontag) = "coin"];
+        // 变化值
+        int64 change = 3 [(gogoproto.jsontag) = "change"];
+        // 进度
+        Progress progress = 4 [(gogoproto.jsontag) = "progress"];
+        // 规则
+        string rule = 5 [(gogoproto.jsontag) = "rule"];
+        // 奖品列表
+        repeated Gift gift = 6 [(gogoproto.jsontag) = "gift"];
+        // 历史获奖列表
+        repeated List list = 7 [(gogoproto.jsontag) = "list"];
+    }
+}
+
+
+
+message CapsuleOpenCapsuleReq {
+    // 扭蛋类型
+    string type = 2 [(gogoproto.moretags) = 'form:"type" validate:"required"'];
+    // 扭的个数
+    int64 count = 3 [(gogoproto.moretags) = 'form:"count" validate:"required"'];
+
+    string platform = 4 [(gogoproto.moretags) = 'form:"platform"'];
+}
+
+message CapsuleOpenCapsuleResp {
+    // 扭蛋币扣除状态
+    bool status = 1 [(gogoproto.jsontag) = "status"];
+    // 奖品文案
+    repeated string text = 2 [(gogoproto.jsontag) = "text"];
+    // 是否包含实物奖品
+    bool isEntity = 3 [(gogoproto.jsontag) = "isEntity"];
+    // 用户扭蛋币拥有状态
+    Info info = 4 [(gogoproto.jsontag) = "info"];
+    // 头衔? 恒为空字符串, 忽略之
+    string showTitle = 5 [(gogoproto.jsontag) = "showTitle"];
+    // 奖品列表
+    repeated Award awards = 6 [(gogoproto.jsontag) = "awards"];
+
+    message CapsuleInfo {
+        // 拥有的币
+        int64 coin = 1 [(gogoproto.jsontag) = "coin"];
+        // 变化值
+        int64 change = 2 [(gogoproto.jsontag) = "change"];
+        // 进度
+        Progress progress = 3 [(gogoproto.jsontag) = "progress"];
+    }
+
+    message Info {
+        // 普通扭蛋币
+        CapsuleInfo normal = 1 [(gogoproto.jsontag) = "normal"];
+        // 梦幻扭蛋币
+        CapsuleInfo colorful = 2 [(gogoproto.jsontag) = "colorful"];
+    }
+
+    message Award {
+        // 奖品名字
+        string name = 2 [(gogoproto.jsontag) = "name"];
+        // 奖品数量
+        int64 num = 3 [(gogoproto.jsontag) = "num"];
+        // 奖品 X 数量
+        string text = 4 [(gogoproto.jsontag) = "text"];
+        // 奖品图片
+        string img = 5 [(gogoproto.jsontag) = "img"];
+        // 奖品用法说明
+        Usage usage = 6 [(gogoproto.jsontag) = "usage"];
+        // web礼物图片
+        string web_image = 7 [(gogoproto.jsontag) = "web_image"];
+        // mobile礼物图片
+        string mobile_image = 8 [(gogoproto.jsontag) = "mobile_image"];
+    }
+}
+
+
+message CapsuleGetCapsuleInfoReq {
+     // 扭蛋类型
+     string type = 2 [(gogoproto.moretags) = 'form:"type" validate:"required"'];
+    // 来源 h5 web room
+     string from = 3 [(gogoproto.moretags) = 'form:"from" validate:"required"'];
+}
+
+message CapsuleGetCapsuleInfoResp {
+    message GiftList {
+        // 礼物id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 礼物名称
+        string name = 2 [(gogoproto.jsontag) = "name"];
+        // 礼物数量
+        int64 num = 3 [(gogoproto.jsontag) = "num"];
+        // 礼物图片
+        string web_url = 5 [(gogoproto.jsontag) = "web_url"];
+        // 礼物图片
+        string mobile_url = 6 [(gogoproto.jsontag) = "mobile_url"];
+        // 用法
+        Usage usage = 7 [(gogoproto.jsontag) = "usage"];
+        // 奖品类型 2 头衔
+        int64 type = 8 [(gogoproto.jsontag) = "type"];
+        // 过期时间
+        string expire = 9 [(gogoproto.jsontag) = "expire"];
+    }
+
+    message GiftFilter {
+        // 礼物id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 礼物名称
+        string name = 2 [(gogoproto.jsontag) = "name"];
+        // 礼物图片
+        string web_url = 3 [(gogoproto.jsontag) = "web_url"];
+        // 礼物图片
+        string mobile_url = 4 [(gogoproto.jsontag) = "mobile_url"];
+        // 用法
+        Usage usage = 5 [(gogoproto.jsontag) = "usage"];
+    }
+
+    // 扭蛋数量
+    int64 coin = 1 [(gogoproto.jsontag) = "coin"];
+    // 规则
+    string rule = 2 [(gogoproto.jsontag) = "rule"];
+    // 奖品列表，包含数量
+    repeated GiftList gift_list = 3 [(gogoproto.jsontag) = "gift_list"];
+    // 奖品列表，不包含数量，同一类别只有一条
+    repeated GiftFilter gift_filter = 4 [(gogoproto.jsontag) = "gift_filter"];
+}
+
+
+
+message CapsuleOpenCapsuleByTypeReq {
+     // 扭蛋类型
+     string type = 2 [(gogoproto.moretags) = 'form:"type" validate:"required"'];
+     // 扭的个数
+     int64 count = 3 [(gogoproto.moretags) = 'form:"count" validate:"required"'];
+
+     string platform = 4 [(gogoproto.moretags) = 'form:"platform"'];
+}
+
+message CapsuleOpenCapsuleByTypeResp {
+    message CapsuleInfo {
+        // 拥有的币
+        int64 coin = 1 [(gogoproto.jsontag) = "coin"];
+    }
+    message Award {
+        // 奖品id
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 奖品名字
+        string name = 2 [(gogoproto.jsontag) = "name"];
+        // 奖品数量
+        int64 num = 3 [(gogoproto.jsontag) = "num"];
+        // 奖品 X 数量
+        string text = 4 [(gogoproto.jsontag) = "text"];
+        // 礼物图片
+        string web_url = 5 [(gogoproto.jsontag) = "web_url"];
+        // 礼物图片
+        string mobile_url = 6 [(gogoproto.jsontag) = "mobile_url"];
+        // 奖品用法说明
+        Usage usage = 7 [(gogoproto.jsontag) = "usage"];
+        // 奖品类型 2 头衔
+        int64 type = 8 [(gogoproto.jsontag) = "type"];
+        // 过期时间
+        string expire = 9 [(gogoproto.jsontag) = "expire"];
+    }
+
+    // 扭蛋币扣除状态
+    bool status = 1 [(gogoproto.jsontag) = "status"];
+    // 是否包含实物奖品
+    bool isEntity = 2 [(gogoproto.jsontag) = "isEntity"];
+    // 用户扭蛋币拥有状态
+    CapsuleInfo info = 3 [(gogoproto.jsontag) = "info"];
+    // 奖品列表
+    repeated Award awards = 4 [(gogoproto.jsontag) = "awards"];
+    // 奖品列表
+    repeated string text = 5 [(gogoproto.jsontag) = "text"];
+}
+

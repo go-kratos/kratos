@@ -1,0 +1,37 @@
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//app/interface/main/account/cmd:all-srcs",
+        "//app/interface/main/account/conf:all-srcs",
+        "//app/interface/main/account/dao/account:all-srcs",
+        "//app/interface/main/account/dao/geetest:all-srcs",
+        "//app/interface/main/account/dao/passport:all-srcs",
+        "//app/interface/main/account/dao/realname:all-srcs",
+        "//app/interface/main/account/dao/relation:all-srcs",
+        "//app/interface/main/account/dao/reply:all-srcs",
+        "//app/interface/main/account/dao/usersuit:all-srcs",
+        "//app/interface/main/account/dao/vip:all-srcs",
+        "//app/interface/main/account/http:all-srcs",
+        "//app/interface/main/account/model:all-srcs",
+        "//app/interface/main/account/service/card:all-srcs",
+        "//app/interface/main/account/service/coupon:all-srcs",
+        "//app/interface/main/account/service/geetest:all-srcs",
+        "//app/interface/main/account/service/member:all-srcs",
+        "//app/interface/main/account/service/passport:all-srcs",
+        "//app/interface/main/account/service/point:all-srcs",
+        "//app/interface/main/account/service/realname:all-srcs",
+        "//app/interface/main/account/service/relation:all-srcs",
+        "//app/interface/main/account/service/usersuit:all-srcs",
+        "//app/interface/main/account/service/vip:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

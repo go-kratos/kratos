@@ -1,0 +1,45 @@
+[rpcServer2]
+[[rpcServer2.servers]]
+    proto = "tcp"
+    addr = "0.0.0.0:9009"
+    weight = 10
+[rpcServer2.zookeeper]
+    root = "/microservice/passport-auth-service/"
+    addrs = ["172.18.33.50:2199","172.18.33.51:2199","172.18.33.52:2199"]
+    timeout = "1s"
+
+[mysql]
+	addr = "172.22.34.101:3308"
+	dsn = "auth:ABQ3ewVrxyZsLpWb0EkJuCvN9M8aidf7@tcp(172.22.34.101:3308)/passport_auth?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["auth_reader:3odEZJ7YlOLpNzt4XVDxHTw9bi08C1M2@tcp(172.22.34.101:3308)/passport_auth?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 10
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "100ms"
+	execTimeout = "100ms"
+	tranTimeout = "200ms"
+	[mysql.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+
+[memcache]
+	name = "passport-auth-service"
+	proto = "tcp"
+	addr = ""
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[dc]
+    num = 1
+    desc = "data center 1"
+
+[switch]
+    supportOld = true

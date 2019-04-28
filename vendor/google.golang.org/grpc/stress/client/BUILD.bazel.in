@@ -1,0 +1,26 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["main.go"],
+    importpath = "google.golang.org/grpc/stress/client",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//:go_default_library",
+        "//codes:go_default_library",
+        "//credentials:go_default_library",
+        "//grpclog:go_default_library",
+        "//interop:go_default_library",
+        "//interop/grpc_testing:go_default_library",
+        "//status:go_default_library",
+        "//stress/grpc_testing:go_default_library",
+        "//testdata:go_default_library",
+        "@org_golang_x_net//context:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "client",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)

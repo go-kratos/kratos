@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package live.xuser.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// UserExp 相关服务
+service UserExp {
+    // GetUserExpMulti 获取用户经验与等级信息,支持批量
+    rpc GetUserExp(GetUserExpReq) returns (GetUserExpResp);
+    // AddUserExp 增加用户经验,不支持批量
+    rpc AddUserExp(AddUserExpReq) returns (AddUserExpResp);
+}
+
+message AddUserExpReq {
+    UserExpChunk userInfo = 1 [(gogoproto.moretags) = 'form:"userInfo" validate:"required"'];
+
+}
+
+message UserExpChunk {
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"gt=0,required"'];
+    int64 req_biz = 2 [(gogoproto.moretags) = 'form:"req_biz" validate:"required"'];
+    int64 type = 3 [(gogoproto.moretags) = 'form:"type" validate:"gt=0,required"'];
+    int64 num = 4 [(gogoproto.moretags) = 'form:"num" validate:"gt=0,required"'];
+}
+
+message AddUserExpResp{
+
+}
+
+// GetUserExpReq 请求
+message GetUserExpReq {
+    repeated int64 uids = 1 [(gogoproto.moretags) = 'form:"uids" validate:"gt=0,required"'];
+}
+
+// GetUserExpResp 响应
+message GetUserExpResp {
+    map<int64, LevelInfo> data = 1 [(gogoproto.jsontag) = "data"];
+}
+message LevelInfo {
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    UserLevelInfo userLevel = 2 [(gogoproto.jsontag) = "userLevel"];
+    AnchorLevelInfo anchorLevel = 3 [(gogoproto.jsontag) = "anchorLevel"];
+}
+
+message UserLevelInfo {
+    // 当前用户等级
+    int64 level = 1 [(gogoproto.jsontag) = "level"];
+    // 下一等级
+    int64 nextLevel = 2 [(gogoproto.jsontag) = "nextLevel"];
+    // 当前等级对应的经验
+    int64 userExpLeft = 3 [(gogoproto.jsontag) = "userExpLeft"];
+    // 下一等级对应的经验
+    int64 userExpRight = 4 [(gogoproto.jsontag) = "userExpRight"];
+    // 用户当前经验
+    int64 userExp = 5 [(gogoproto.jsontag) = "userExp"];
+    // 升级到下一等级对应的经验
+    int64 userExpNextLevel = 6 [(gogoproto.jsontag) = "userExpNextLevel"];
+    // 当前等级颜色
+    int64 color = 7 [(gogoproto.jsontag) = "color"];
+    // 下一等级左侧对应的经验
+    int64 userExpNextLeft = 8 [(gogoproto.jsontag) = "userExpNextLeft"];
+    // 下一等级右侧对应的经验
+    int64 userExpNextRight = 9 [(gogoproto.jsontag) = "userExpNextRight"];
+    int64 isLevelTop = 10 [(gogoproto.jsontag) = "isLevelTop"];
+}
+
+message AnchorLevelInfo {
+    // 当前用户等级
+    int64 level = 1 [(gogoproto.jsontag) = "level"];
+    // 下一等级
+    int64 nextLevel = 2 [(gogoproto.jsontag) = "nextLevel"];
+    // 当前等级对应的经验
+    int64 userExpLeft = 3 [(gogoproto.jsontag) = "userExpLeft"];
+    // 下一等级对应的经验
+    int64 userExpRight = 4 [(gogoproto.jsontag) = "userExpRight"];
+    // 用户当前经验
+    int64 userExp = 5 [(gogoproto.jsontag) = "userExp"];
+    // 升级到下一等级对应的经验
+    int64 userExpNextLevel = 6 [(gogoproto.jsontag) = "userExpNextLevel"];
+    // 当前等级颜色
+    int64 color = 7 [(gogoproto.jsontag) = "color"];
+    // 下一等级左侧对应的经验
+    int64 userExpNextLeft = 8 [(gogoproto.jsontag) = "userExpNextLeft"];
+    // 下一等级右侧对应的经验
+    int64 userExpNextRight = 9 [(gogoproto.jsontag) = "userExpNextRight"];
+    // 主播积分,userExp/100
+    int64 anchorScore = 10 [(gogoproto.jsontag) = "anchorScore"];
+    int64 isLevelTop = 11 [(gogoproto.jsontag) = "isLevelTop"];
+}

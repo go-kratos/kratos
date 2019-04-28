@@ -1,0 +1,17 @@
+[antispam]
+	on=true
+	second=2
+	n=1
+	hour=12
+	m=100
+[antispam.redis]
+	name = "ugcpay-interface"
+	proto = "tcp"
+	addr = "172.16.33.54:6379"
+	idle = 100
+	active = 100
+	dialTimeout = "500ms"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "80s"
+	expire = "10m"

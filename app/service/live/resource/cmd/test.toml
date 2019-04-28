@@ -1,0 +1,38 @@
+
+[mysql]
+	addr = "172.22.34.101:3312"
+	dsn = "livetestuat:livetestuat20180711@tcp(172.22.34.101:3312)/live_resource?timeout=2000ms&readTimeout=2000ms&writeTimeout=2000ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["livetestuat:livetestuat20180711@tcp(172.22.34.101:3312)/live_resource?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4","livetestuat:livetestuat20180711@tcp(172.22.34.101:3312)/live_resource?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "1s"
+	execTimeout = "1s"
+	tranTimeout = "1s"
+
+
+[db]
+    [db.resource]
+    dsn = "livetestuat:livetestuat20180711@tcp(172.22.34.101:3312)/live_resource?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 1
+    idleTimeout = "4h"
+
+    # 从库
+    [db.resourceReader]
+     dsn = "livetestuat:livetestuat20180711@tcp(172.22.34.101:3312)/live_resource?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+     active = 5
+     idle = 1
+     idleTimeout = "4h"
+
+[httpClient]
+    Key = "aaa"
+    Secret = "test"
+    Dial = "1s"
+    Timeout = "500ms"
+    KeepAlive = "5s"
+    [Breaker]
+    [URL]
+    [Host]
+[log]
+    stdout = true

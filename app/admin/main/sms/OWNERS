@@ -1,0 +1,15 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- renwei
+- wangjian
+- zhapuyu
+labels:
+- admin
+- admin/main/sms
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- wangjian
+- zhapuyu

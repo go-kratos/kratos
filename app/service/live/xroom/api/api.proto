@@ -1,0 +1,166 @@
+// 定义项目 API 的 proto 文件 可以同时描述 gRPC 和 HTTP API
+// protobuf 文件参考:
+//  - https://developers.google.com/protocol-buffers/
+//  - http://info.bilibili.co/display/documentation/gRPC+Proto
+// protobuf 生成 HTTP 工具:
+//  - http://git.bilibili.co/platform/go-common/tree/master/app/tool/protoc-gen-bm
+// gRPC Golang Model:
+//  - http://info.bilibili.co/display/documentation/gRPC+Golang+Model
+// gRPC Golang Warden Gen:
+//  - http://info.bilibili.co/display/documentation/gRPC+Golang+Warden+Gen
+// gRPC http 调试工具(无需pb文件):
+//  - http://info.bilibili.co/pages/viewpage.action?pageId=12877366
+// grpc 命令行调试工具(无需pb文件):
+//  - http://info.bilibili.co/pages/viewpage.action?pageId=11869411
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+package live.xroom.v1;
+
+option go_package = "api";
+
+option (gogoproto.goproto_getters_all) = false;
+
+service Room {
+	// 批量根据room_ids获取房间信息
+	rpc getMultiple (RoomIDsReq) returns (RoomIDsInfosResp);
+	// 批量根据uids获取房间信息
+	rpc getMultipleByUids (UIDsReq) returns (UIDsInfosResp);
+	// 批量根据uids判断是否是主播，如果是返回主播的room_id，否则返回0
+	rpc isAnchor (IsAnchorUIDsReq) returns (IsAnchorUIDsResp);
+}
+
+message RoomIDsReq {
+	// room_ids数组，长号
+	repeated int64 room_ids = 1 [(gogoproto.moretags) = 'form:"room_ids" validate:"required,gt=0,dive,gt=0"'];
+	// 要获取的房间信息维度 status:状态相关 show:展示相关 area:分区相关 anchor:主播相关
+	repeated string attrs = 2 [(gogoproto.moretags) = 'form:"attrs" validate:"required,gt=0,dive,gt=0"'];
+}
+message UIDsReq {
+	// 主播uids
+	repeated int64 uids = 1 [(gogoproto.moretags) = 'form:"uids" validate:"required,gt=0,dive,gt=0"'];
+	// 要获取的房间信息维度 status:状态相关 show:展示相关 area:分区相关 anchor:主播相关
+	repeated string attrs = 2 [(gogoproto.moretags) = 'form:"attrs" validate:"required,gt=0,dive,gt=0"'];
+}
+message IsAnchorUIDsReq {
+	// 主播uids
+	repeated int64 uids = 1 [(gogoproto.moretags) = 'form:"uids" validate:"required,gt=0,dive,gt=0"'];
+}
+
+message IsAnchorUIDsResp {
+	// uid => room_id(长号)，room_id=0表示没有创建房间
+	map<int64, int64> list = 1 [(gogoproto.jsontag) = "list"];
+}
+// 批量根据room_ids获取房间信息
+message RoomIDsInfosResp {
+	// 主播room_id => 房间维度信息
+	map<int64, Infos> list = 1 [(gogoproto.jsontag) = "list"];
+}
+// 批量根据uids获取房间信息
+message UIDsInfosResp {
+	// 主播UID => 房间维度信息
+	map<int64, Infos> list = 1 [(gogoproto.jsontag) = "list"];
+}
+message Infos {
+	// room_id 房间长号
+	int64 room_id = 1 [(gogoproto.jsontag) = "room_id"];
+	// uid 主播uid
+	int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+	// Model1：房间信息（状态相关）
+	RoomStatusInfo status = 3 [(gogoproto.jsontag) = "status"];
+	// Model2：房间信息（展示相关）
+	RoomShowInfo show = 4 [(gogoproto.jsontag) = "show"];
+	// Model3：房间信息（分区相关）
+	RoomAreaInfo area = 5 [(gogoproto.jsontag) = "area"];
+	// Model4：房间信息（主播相关）
+	RoomAnchorInfo anchor = 6 [(gogoproto.jsontag) = "anchor"];
+}
+
+// 房间信息(状态）
+message RoomStatusInfo {
+	// 直播间状态 0未开播，1直播中；2轮播中；
+	int64 live_status = 1 [(gogoproto.jsontag) = "live_status"];
+	// 横竖屏方向 0横屏，1竖屏
+	int64 live_screen_type = 2 [(gogoproto.jsontag) = "live_screen_type"];
+	// 是否开播过标识
+	int64 live_mark = 3 [(gogoproto.jsontag) = "live_mark"];
+	// 封禁状态：0未封禁；1审核封禁; 2全网封禁
+	int64 lock_status = 4 [(gogoproto.jsontag) = "lock_status"];
+	// 封禁时间戳
+	int64 lock_time = 5 [(gogoproto.jsontag) = "lock_time"];
+	// 隐藏状态 0不隐藏，1隐藏
+	int64 hidden_status = 6 [(gogoproto.jsontag) = "hidden_status"];
+	// 隐藏时间戳
+	int64 hidden_time = 7 [(gogoproto.jsontag) = "hidden_time"];
+	// 直播类型 0默认 1摄像头直播 2录屏直播 3语音直播
+	int64 live_type = 8 [(gogoproto.jsontag) = "live_type"];
+}
+
+// 房间信息(展示)
+message RoomShowInfo {
+	// short_id 短号
+	int64 short_id = 1 [(gogoproto.jsontag) = "short_id"];
+	// 直播间标题
+	string title = 2 [(gogoproto.jsontag) = "title"];
+	// 直播间封面
+	string cover = 3 [(gogoproto.jsontag) = "cover"];
+	// 直播间标签
+	string tags = 4 [(gogoproto.jsontag) = "tags"];
+	// 直播间背景图
+	string background = 5 [(gogoproto.jsontag) = "background"];
+	// 直播间简介
+	string description = 6 [(gogoproto.jsontag) = "description"];
+	// 关键帧
+	string keyframe = 7 [(gogoproto.jsontag) = "keyframe"];
+	// 人气值
+	int64 popularity_count = 8 [(gogoproto.jsontag) = "popularity_count"];
+	// 房间tag（角标）
+	repeated TagData tag_list = 9 [(gogoproto.jsontag) = "tag_list"];
+	// 最近一次开播时间戳
+	int64 live_start_time = 10 [(gogoproto.jsontag) = "live_start_time"];
+}
+
+// 房间信息(分区)
+message RoomAreaInfo {
+	// 直播间分区id
+	int64 area_id = 1 [(gogoproto.jsontag) = "area_id"];
+	// 直播间分区名称
+	string area_name = 2 [(gogoproto.jsontag) = "area_name"];
+	// 直播间父分区id
+	int64 parent_area_id = 3 [(gogoproto.jsontag) = "parent_area_id"];
+	// 直播间父分区名称
+	string parent_area_name = 4 [(gogoproto.jsontag) = "parent_area_name"];
+}
+
+// 主播信息(展示)
+message RoomAnchorInfo {
+	// 主播类型
+	int64 anchor_profile_type = 1 [(gogoproto.jsontag) = "anchor_profile_type"];
+	// 主播等级
+	AnchorLevel anchor_level = 2 [(gogoproto.jsontag) = "anchor_level"];
+}
+
+// 房间角标、tag
+message TagData {
+	int64 tag_id = 1 [(gogoproto.jsontag) = "tag_id"];
+	int64 tag_sub_id = 2 [(gogoproto.jsontag) = "tag_sub_id"];
+	int64 tag_value = 3 [(gogoproto.jsontag) = "tag_value"];
+	string tag_ext = 4 [(gogoproto.jsontag) = "tag_ext"];
+}
+
+// 主播经验定义
+message AnchorLevel {
+	// 等级
+	int64 level = 1 [(gogoproto.jsontag) = "level"];
+	// 当前等级颜色
+	int64 color = 2 [(gogoproto.jsontag) = "color"];
+	// 当前积分
+	int64 score = 3 [(gogoproto.jsontag) = "score"];
+	// 当前等级最小积分
+	int64 left = 4 [(gogoproto.jsontag) = "left"];
+	// 下一等级起始积分
+	int64 right = 5 [(gogoproto.jsontag) = "right"];
+	// 下一个经验值
+	int64 max_level = 6 [(gogoproto.jsontag) = "max_level"];
+}

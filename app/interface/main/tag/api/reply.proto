@@ -1,0 +1,47 @@
+// main.community.tag grpc api proto file.
+// discovery id: main.community.tag.
+// version: v1.
+syntax = "proto3";
+package main.community.tag.v1;
+
+import "app/interface/main/tag/api/tag.proto";
+import "app/interface/main/tag/api/channel.proto";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+message TagReply {
+    Tag tag = 1;
+}
+
+message TagsReply {
+    map<int64, Tag> tags = 1;
+}
+
+message ChannelCategoryReply {
+    repeated ChannelCategory categories = 1;
+}
+
+message ChannelsReply {
+    repeated Channel channels = 1;
+}
+
+message ChannelResourcesReply {
+    repeated int64 oids = 1;
+    bool failover = 2;
+    bool whether_channel = 3;
+}
+
+message ChannelSquareReply {
+    repeated ChannelSquare squares = 1;
+}
+
+message ChannelCheckBackReply {
+    map<int64,ChannelCheckBack> checkbacks = 1;
+}
+
+message ChannelReply {
+    Channel channel = 1;
+    repeated ChannelSynonym synonyms = 2;
+}

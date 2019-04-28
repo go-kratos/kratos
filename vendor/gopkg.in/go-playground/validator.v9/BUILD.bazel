@@ -1,0 +1,36 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "baked_in.go",
+        "cache.go",
+        "doc.go",
+        "errors.go",
+        "field_level.go",
+        "regexes.go",
+        "struct_level.go",
+        "translations.go",
+        "util.go",
+        "validator.go",
+        "validator_instance.go",
+    ],
+    importmap = "go-common/vendor/gopkg.in/go-playground/validator.v9",
+    importpath = "gopkg.in/go-playground/validator.v9",
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/github.com/go-playground/universal-translator:go_default_library"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

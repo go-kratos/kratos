@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+// use {app_id}.{version} as package name
+package card.service.v1;
+
+option go_package = "v1";
+
+message AllGroupReply { 
+    ModelAllGroupResp res = 1;
+}
+
+message AllGroupReq { 
+    int64 mid = 2;
+}
+
+message CardHotsReply { 
+    repeated ModelCard data_0 = 1;
+}
+
+message CardHotsReq { 
+}
+
+message CardReply { 
+    ModelCard data_0 = 1;
+}
+
+message CardReq { 
+    int64 id = 2;
+}
+
+message CardsByGidReply { 
+    repeated ModelCard data_0 = 1;
+}
+
+message CardsByGidReq { 
+    int64 gid = 2;
+}
+
+message DemountEquipReply { 
+}
+
+message DemountEquipReq { 
+    int64 mid = 2;
+}
+
+message EquipReply { 
+}
+
+message EquipReq { 
+    ModelArgEquip arg = 2;
+}
+
+message ModelAllGroupResp { 
+    repeated ModelGroupInfo list = 1;
+    ModelUserCard user_card = 2;
+}
+
+message ModelArgEquip { 
+    int64 mid = 1;
+    int64 card_id = 2;
+}
+
+message ModelCard { 
+    int64 id = 1;
+    string name = 2;
+    int32 state = 3;
+    int32 deleted = 4;
+    int32 is_hot = 5;
+    string card_url = 6;
+    string big_card_url = 7;
+    int32 card_type = 8;
+    string card_type_name = 9;
+}
+
+message ModelGroupInfo { 
+    int64 group_id = 1;
+    string group_name = 2;
+    repeated ModelCard cards = 3;
+}
+
+message ModelUserCard { 
+    int64 mid = 1;
+    int64 id = 2;
+    string card_url = 3;
+    int32 card_type = 4;
+    string name = 5;
+    int64 expire_time = 6;
+    string card_type_name = 7;
+    string big_card_url = 8;
+}
+
+
+message UserCardReply { 
+    ModelUserCard res = 1;
+}
+
+message UserCardReq { 
+    int64 mid = 2;
+}
+
+message UserCardsReply { 
+    map<int64, ModelUserCard> res = 1;
+}
+
+message UserCardsReq { 
+    repeated int64 mids = 2;
+}
+
+service Card { 
+    // Card get card info. 
+    rpc Card(CardReq) returns(CardReply); 
+    // CardHots get card hots. 
+    rpc CardHots(CardHotsReq) returns(CardHotsReply); 
+    // CardsByGid get card by gid. 
+    rpc CardsByGid(CardsByGidReq) returns(CardsByGidReply); 
+    // UserCard get user card info. 
+    rpc UserCard(UserCardReq) returns(UserCardReply); 
+    // UserCards get user card infos. 
+    rpc UserCards(UserCardsReq) returns(UserCardsReply); 
+    // Equip user equip card. 
+    rpc Equip(EquipReq) returns(EquipReply); 
+    // DemountEquip delete equip. 
+    rpc DemountEquip(DemountEquipReq) returns(DemountEquipReply); 
+    // AllGroup all group. 
+    rpc AllGroup(AllGroupReq) returns(AllGroupReply); 
+}

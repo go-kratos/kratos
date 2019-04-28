@@ -1,0 +1,76 @@
+[MemberBinLog]
+    key = "4ba46ba31f9a44ef"
+    secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+    group = "MemberBinlog-MainAccount-S"
+    topic = "MemberBinlog-T"
+    action = "sub"
+    offset = "old"
+    buffer = 2048
+    name = "member-cache-job/databus"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[BlockBinLog]
+    key = "4ba46ba31f9a44ef"
+    secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+    group = "BlockBinlog-MainAccount-S"
+    topic = "BlockBinlog-T"
+    action = "sub"
+    offset = "old"
+    buffer = 2048
+    name = "member-cache-job/databus"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[AccountNotify]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "AccountNotify-Notify-P"
+    topic = "AccountNotify-T"
+    action = "pub"
+    buffer = 2048
+    name = "account-notify-job/databus"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[MemberMemcache]
+    name = "member"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+
+[BlockMemcache]
+    name = "block"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"

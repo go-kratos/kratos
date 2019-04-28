@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package live.resource.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+
+service titans {
+    // 获取配置 请求参数逗号隔开的字符串 返回`internal:"true"`
+    rpc getMultiConfigs(MultiConfigReq) returns (MultiConfigResp);
+
+    // 获取服务级配置 `internal:"true"`
+    rpc getServiceConfig(ServiceConfigReq) returns (ServiceConfigResp);
+
+    //插入服务配置 `method:"POST" internal:"true"`
+    rpc setServiceConfig(SetReq) returns (SetResp);
+
+    // 获取服务级配置 `internal:"true"`
+    rpc getServiceConfigList(ServiceListReq) returns (ServiceListResp);
+
+    // 获取已配置的discoveryId `internal:"true"`
+    rpc getTreeIds(TreeIdsReq) returns (TreeIdsResp);
+
+    // 获取用户的应用树 `internal:"true"`
+    //rpc getMyTreeApps(TreeAppsReq) returns (TreeAppsResp);
+
+    // 获取运营数据列表 `internal:"true"`
+    rpc getEasyList(EasyGetReq) returns (EasyGetResp);
+
+    // 设置运营列表 `method:"POST" internal:"true"`
+    rpc setEasyList(EasySetReq) returns (EasySetResp);
+}
+
+message EasyGetReq{
+    int64 id = 1 [(gogoproto.moretags) = 'form:"id"'];
+    int64 page = 2 [(gogoproto.moretags) = 'form:"page"'];
+}
+
+message EasyGetResp{
+    repeated EasyList list = 1 [(gogoproto.jsontag) = "list"];
+}
+
+message EasyList{
+    string tree_name = 1 [(gogoproto.jsontag) = "tree_name"];
+    string tree_path = 2 [(gogoproto.jsontag) = "tree_path"];
+    int64 tree_id = 3 [(gogoproto.jsontag) = "tree_id"];
+    string keyword = 4 [(gogoproto.jsontag) = "keyword"];
+    string name = 5 [(gogoproto.jsontag) = "name"];
+}
+
+message EasySetReq{
+    int64 id = 1 [(gogoproto.moretags) = 'form:"id"'];
+}
+
+message EasySetResp{
+    int64 eId = 1 [(gogoproto.jsontag) = "eId"];
+}
+
+
+message TreeAppsReq{
+    string node = 1 [(gogoproto.moretags) = 'form:"node"'];
+    string team = 2 [(gogoproto.moretags) = 'form:"team"'];
+}
+
+message TreeAppsResp{
+    repeated Node list = 1 [(gogoproto.jsontag) = "list"];
+}
+message Node{
+    string name = 1 [(gogoproto.jsontag) = "name"];
+    string path = 2 [(gogoproto.jsontag) = "path"];
+    int64 tree_id = 3 [(gogoproto.jsontag) = "tree_id"];
+}
+
+
+message MultiConfigReq{
+    string values = 1 [(gogoproto.moretags) = 'form:"values"'];
+}
+
+message MultiConfigResp{
+    map<int64, mChild> list = 1 [(gogoproto.jsontag) = "list"];
+}
+message mChild {
+    map<string, string> keys = 1 [(gogoproto.jsontag) = "keys"];
+}
+
+message ServiceConfigReq {
+    int64 tree_id = 1 [(gogoproto.moretags) = 'form:"tree_id"'];
+}
+
+message ServiceConfigResp{
+    map<string, string> list = 1 [(gogoproto.jsontag) = "list"];
+}
+
+
+message SetReq {
+    string tree_name = 1 [(gogoproto.moretags) = 'form:"tree_name" required'];
+    string tree_path = 2 [(gogoproto.moretags) = 'form:"tree_path"'];
+    int64 tree_id = 3 [(gogoproto.moretags) = 'form:"tree_id" required'];
+    string service = 4 [(gogoproto.moretags) = 'form:"service"'];
+    string keyword = 5 [(gogoproto.moretags) = 'form:"keyword"'];
+    int64  template = 6 [(gogoproto.moretags) = 'form:"template"'];
+    string name = 7 [(gogoproto.moretags) = 'form:"name"'];
+    string value = 8 [(gogoproto.moretags) = 'form:"value"'];
+    int64 status = 9 [(gogoproto.moretags) = 'form:"status"'];
+    int64 id = 10 [(gogoproto.moretags) = 'form:"id"'];
+}
+
+message SetResp {
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+}
+
+message ServiceListReq{
+    string tree_name = 1 [(gogoproto.moretags) = 'form:"tree_name" required'];
+    int64 tree_id = 2 [(gogoproto.moretags) = 'form:"tree_id"'];
+    string service = 3 [(gogoproto.moretags) = 'form:"service"'];
+    string keyword = 4 [(gogoproto.moretags) = 'form:"keyword"'];
+    int64  page = 5 [(gogoproto.moretags) = 'form:"page"'];
+    int64  page_size = 6 [(gogoproto.moretags) = 'form:"page_size"'];
+    string name = 7 [(gogoproto.moretags) = 'form:"name"'];
+    int64  status = 8 [(gogoproto.moretags) = 'form:"status"'];
+}
+
+message ServiceListResp{
+    repeated mList list = 1 [(gogoproto.jsontag) = "list"];
+    int64 total_num = 2 [(gogoproto.jsontag) = "total_num"];
+}
+
+message mList {
+    //Id
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+    //tree_name
+    string tree_name = 2 [(gogoproto.jsontag) = "tree_name"];
+    string tree_path = 3 [(gogoproto.jsontag) = "tree_path"];
+    int64 tree_id = 4 [(gogoproto.jsontag) = "tree_id"];
+    string service = 5 [(gogoproto.jsontag) = "service"];
+    //索引名称
+    int64 template = 6 [(gogoproto.jsontag) = "template"];
+    string keyword = 7 [(gogoproto.jsontag) = "keyword"];
+    //配置值
+    string value = 8 [(gogoproto.jsontag) = "value"];
+    //配置解释
+    string name = 9 [(gogoproto.jsontag) = "name"];
+    //创建时间
+    string ctime = 10 [(gogoproto.jsontag) = "ctime"];
+    //最近更新时间
+    string mtime = 11 [(gogoproto.jsontag) = "mtime"];
+    //状态
+    int64 status = 12 [(gogoproto.jsontag) = "status"];
+}
+
+message TreeIdsReq {
+    string tree_name = 1 [(gogoproto.moretags) = 'form:"tree_name" required'];
+}
+
+message TreeIdsResp{
+    repeated int64 list = 1 [(gogoproto.jsontag) = "list"];
+}

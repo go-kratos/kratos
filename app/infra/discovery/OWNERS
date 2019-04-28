@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chenshangqiang
+- haoguanwei
+- lintanghui
+labels:
+- infra
+- infra/discovery
+options:
+  no_parent_owners: true
+reviewers:
+- chenshangqiang
+- haoguanwei
+- lintanghui
+- maojian

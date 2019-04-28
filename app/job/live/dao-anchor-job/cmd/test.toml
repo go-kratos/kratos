@@ -1,0 +1,22 @@
+[httpCli]
+    key    = "fb06a25c6338edbc"
+    secret = "fd10bd177559780c2e4a44f1fa47fa83"
+    dial      = "100ms"
+    timeout   = "5s"
+    keepAlive = "60s"
+    [httpClient.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[coverControl]
+    CoverCron = "0 */5 * * * *"
+    pieceSize = 50
+[MinuteControl]
+    MinuteCron = "0 */1 * * * *"
+    pieceSize = 50
+[Minute3Control]
+    Minute3Cron = "0 */3 * * * *"
+    pieceSize = 50

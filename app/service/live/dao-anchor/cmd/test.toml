@@ -1,0 +1,180 @@
+[Common]
+    ExpireTime = 86400
+
+[Log]
+    Stdout = true
+
+[LRUCache]
+    InstCnt = 1
+    Bucket = 1
+    Capacity = 1024
+    Timeout = 10
+
+[client]
+    timeout = "10s"
+
+[mysql]
+	addr = "172.16.38.158:3312"
+	dsn = "live:oWni@ElNs0P0C(dphdj*F1y4@tcp(172.16.38.158:3312)/xanchor?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["live:oWni@ElNs0P0C(dphdj*F1y4@tcp(172.16.38.158:3312)/xanchor?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "1s"
+	execTimeout = "1s"
+	tranTimeout = "2s"
+
+[LiveAppMySQL]
+    dsn = "live:oWni@ElNs0P0C(dphdj*F1y4@tcp(172.16.38.158:3312)/live-app?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 1
+    idleTimeout = "4h"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "2s"
+
+[redis]
+	name = "dao-anchor-service"
+	proto = "tcp"
+	addr = "172.16.38.158:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[memcache]
+	name = "dao-anchor-service"
+	proto = "tcp"
+	addr = ""
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[liveDanmuSub]
+    key = "ec4c0820d525d67b"
+    secret = "e20f8f664bf10722efeb6aac0cc16011"
+    group = "LiveDanmuSend-LiveLive-Daoanchor-S"
+    topic = "LiveDanmuSend-T"
+    action ="sub"
+    name = "service/dao-anchor"
+    proto = "tcp"
+    addr = "172.22.33.174:6205"
+    idle = 10
+    active = 100
+    dialTimeout = "10s"
+    readTimeout = "40s"
+    writeTimeout = "10s"
+    idleTimeout = "60s"
+[liveGiftSendByPaySub]
+     key = "ec4c0820d525d67b"
+     secret = "e20f8f664bf10722efeb6aac0cc16011"
+      group = "LiveGiftSendByPay-LiveLive-Daoanchor-S"
+      topic = "LiveGiftSendByPay-T"
+      action ="sub"
+      name = "service/dao-anchor"
+      proto = "tcp"
+     addr = "172.22.33.174:6205"
+      idle = 10
+      active = 100
+      dialTimeout = "10s"
+      readTimeout = "40s"
+      writeTimeout = "10s"
+      idleTimeout = "60s"
+[liveGiftSendByFreeSub]
+    key = "ec4c0820d525d67b"
+    secret = "e20f8f664bf10722efeb6aac0cc16011"
+    group = "liveGiftSendByFree-LiveLive-Daoanchor-S"
+    topic = "LiveGiftSendByFree-T"
+    action ="sub"
+    name = "service/dao-anchor"
+    proto = "tcp"
+    addr = "172.22.33.174:6205"
+    idle = 10
+    active = 100
+    dialTimeout = "10s"
+    readTimeout = "40s"
+    writeTimeout = "10s"
+    idleTimeout = "60s"
+[LiveGuardBuySub]
+    key = "ec4c0820d525d67b"
+    secret = "e20f8f664bf10722efeb6aac0cc16011"
+    group = "LiveGuardBuy-LiveLive-Daoanchor-S"
+    topic = "LiveGuardBuy-T"
+    action ="sub"
+    name = "service/dao-anchor"
+    proto = "tcp"
+    addr = "172.22.33.174:6205"
+    idle = 10
+    active = 100
+    dialTimeout = "10s"
+    readTimeout = "40s"
+    writeTimeout = "10s"
+    idleTimeout = "60s"
+[livePopularitySub]
+     key = "ec4c0820d525d67b"
+     secret = "e20f8f664bf10722efeb6aac0cc16011"
+      group = "LivePopularity-LiveLive-Daoanchor-S"
+      topic = "LivePopularity-T"
+      action ="sub"
+      name = "service/dao-anchor"
+      proto = "tcp"
+       addr = "172.22.33.174:6205"
+      idle = 10
+      active = 100
+      dialTimeout = "10s"
+      readTimeout = "40s"
+      writeTimeout = "10s"
+      idleTimeout = "60s"
+
+[liveValidLiveDaysSub]
+     key = "ec4c0820d525d67b"
+     secret = "e20f8f664bf10722efeb6aac0cc16011"
+      group = "LiveValidLiveDays-LiveLive-Daoanchor-S"
+      topic = "LiveValidLiveDays-T"
+      action ="sub"
+      name = "service/dao-anchor"
+      proto = "tcp"
+      addr = "172.22.33.174:6205"
+      idle = 10
+      active = 100
+      dialTimeout = "10s"
+      readTimeout = "40s"
+      writeTimeout = "10s"
+      idleTimeout = "60s"
+[liveRoomTagSub]
+      key = "ec4c0820d525d67b"
+      secret = "e20f8f664bf10722efeb6aac0cc16011"
+      group = "LiveRoomTag-LiveLive-Daoanchor-S"
+      topic = "LiveRoomTag-T"
+      action ="sub"
+      name = "service/dao-anchor"
+      proto = "tcp"
+      addr = "172.22.33.174:6205"
+      idle = 10
+      active = 100
+      dialTimeout = "10s"
+      readTimeout = "40s"
+      writeTimeout = "10s"
+      idleTimeout = "60s"
+[liveRankListSub]
+      key = "ec4c0820d525d67b"
+      secret = "e20f8f664bf10722efeb6aac0cc16011"
+      group = "LiveRankList-LiveLive-Daoanchor-S"
+      topic = "LiveRankList-T"
+      action ="sub"
+      name = "service/dao-anchor"
+      proto = "tcp"
+   addr = "172.22.33.174:6205"
+      idle = 10
+      active = 100
+      dialTimeout = "10s"
+      readTimeout = "40s"
+      writeTimeout = "10s"
+      idleTimeout = "60s"

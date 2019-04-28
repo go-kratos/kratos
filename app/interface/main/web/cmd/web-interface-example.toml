@@ -1,0 +1,104 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/web-interface.pid"
+dir = "./"
+perf = "127.0.0.1:6260"
+checkFile = "/data/www/web-interface.html"
+family = "web-interface"
+address = "172.16.33.56"
+
+env = "test"
+tick = "5m"
+
+accountURI = "http://account.bilibili.com"
+
+[matsuri]
+pastID = 5461206
+matID = 5461533
+matTime = "2016-12-15T16:57:03+08:00"
+tick = "10s"
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    [identify.app]
+    key = "c05dd4e1638a8af0"
+    secret = "d3c5a85f5b895a03735b5d20a273bc57"
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 5
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    [identify.host]
+    auth = "http://passport.bilibili.com"
+    secret = "http://open.bilibili.com"
+    [identify.authHTTPClient]
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+    [identify.secretHTTPClient]
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+
+[web-interface]
+IPFile = "/data/conf/iprepo/iprepo.txt"
+
+[host]
+apiCo = "http://api.bilibili.co"
+
+[log]
+    dir = "/data/log/web-interface/"
+
+[app]
+key = "7c7ac0db1aa05587"
+secret = "9a6d62d93290c5f771ad381e9ca23f26"
+
+[infoc2]
+    taskID = "000078"
+    proto = "tcp"
+    addr = "172.19.100.20:5401"
+    chanSize = 1024
+
+[httpClient]
+    [httpClient.read]
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.write]
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+
+
+[multiHttp]
+    [multiHttp.inner]
+    addrs = ["0.0.0.0:6281"]
+    maxListen = 1000
+    [multiHttp.local]
+    addrs = ["0.0.0.0:6282"]
+    maxListen = 1000
+
+[bm]
+    [bm.outer]
+    addr = "0.0.0.0:6351"
+    timeout = "1s"
+    [bm.local]
+    addr = "0.0.0.0:6352"
+    timeout = "1s"
+
+
+[web]
+    pullRegionInterval = "1m"
+

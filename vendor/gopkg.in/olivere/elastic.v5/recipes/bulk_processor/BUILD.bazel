@@ -1,0 +1,34 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_binary")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["main.go"],
+    importmap = "go-common/vendor/gopkg.in/olivere/elastic.v5/recipes/bulk_processor",
+    importpath = "gopkg.in/olivere/elastic.v5/recipes/bulk_processor",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//vendor/github.com/google/uuid:go_default_library",
+        "//vendor/gopkg.in/olivere/elastic.v5:go_default_library",
+        "//vendor/gopkg.in/olivere/elastic.v5/config:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "bulk_processor",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

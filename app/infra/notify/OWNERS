@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- haoguanwei
+- lintanghui
+labels:
+- infra
+- infra/notify
+- main
+- service
+- service/main/notify
+options:
+  no_parent_owners: true
+reviewers:
+- haoguanwei
+- lintanghui

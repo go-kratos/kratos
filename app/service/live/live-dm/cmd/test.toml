@@ -1,0 +1,118 @@
+[HTTPClient]
+    key       = "e7482d29be4a95b8"
+    secret    = "9e803791cdef756e75faee68e12b7442"
+    dial      = "100ms"
+    timeout   = "5s"
+    keepAlive = "60s"
+[HTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+[Redis]
+	name = "dm-service"
+	proto = "tcp"
+	addr = "172.18.33.171:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+
+[WhiteListRedis]
+	name = "dm-service"
+	proto = "tcp"
+	addr = "172.16.38.166:10028"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[BNJRoomList]
+    544641 = true
+    2233 = true
+
+[BNDatabus]
+    key = "ec4c0820d525d67b"
+    secret = "e20f8f664bf10722efeb6aac0cc16011"
+    group = "LiveDanmuSend-LiveLive-P"
+    topic = "LiveDanmuSend-T"
+    action = "pub"
+    buffer = 128
+    name = "live-dm/databus"
+    proto = "tcp"
+    addr = "172.16.33.50:6205"
+    active = 1
+    idle = 1
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[CacheDatabus]
+    Size = 1024
+
+[LiveRPC.bannedService]
+	AppID = "live.bannedservice"
+	ConnTimeout = "50ms"
+[LiveRPC.room]
+    AppID = "live.room"
+    ConnTimeout = "50ms"
+[LiveRPC.liveUser]
+    AppID = "live.liveuser"
+    ConnTimeout = "50ms"
+[LiveRPC.activity]
+    AppID = "live.activity"
+    ConnTimeout = "50ms"
+[LiveRPC.avService]
+    AppID = "live.av"
+    ConnTimeout = "50ms"
+[LiveRPC.fansMedal]
+    AppID = "live.fansmedal"
+    ConnTimeout = "50ms"
+[LiveRPC.rc]
+    AppID = "live.rc"
+    ConnTimeout = "50ms"
+[LiveRPC.rankdbService]
+    AppID = "live.rankdb"
+    ConnTimeout = "50ms"
+[LiveRPC.userext]
+    AppID = "live.userext"
+    ConnTimeout = "50ms"
+[LiveRPC.user]
+    AppID = "live.user"
+    ConnTimeout = "50ms"
+	
+
+[DmRules]
+    AreaLimit = false
+    RealName = false
+    PhoneLimit = true
+	AllUserLimit = false
+    LevelLimitStatus = false
+	LevelLimit  = -1
+    MsgLength = 20
+    DmNum = 20
+    DMPercent = 25
+[DmRules.Nixiang]
+[DmRules.Color]
+
+
+[Lancer.DMsend]
+taskID = "000582"
+proto = "tcp"
+addr = "172.18.33.124:15140"
+chanSize = 10240
+
+[Lancer.DMErr]
+taskID = "001409"
+proto = "tcp"
+addr = "172.18.33.124:15140"
+chanSize = 10240

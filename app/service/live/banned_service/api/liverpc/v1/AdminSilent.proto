@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package banned_service.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service AdminSilent {
+    
+    /** 查询运营规则
+     * 拿着规则直接用就好了，有就肯定是当前生效的配置
+     */   
+    rpc get_shield_rule (AdminSilentGetShieldRuleReq) returns (AdminSilentGetShieldRuleResp);
+}
+
+
+
+message AdminSilentGetShieldRuleReq {
+    // 
+    int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+}
+
+message AdminSilentGetShieldRuleResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 为0表示全局规则
+        int64 roomid = 2 [(gogoproto.jsontag) = "roomid"];
+        // 房间真实分要求
+        int64 real_score = 3 [(gogoproto.jsontag) = "real_score"];
+        // 范围0~10, 乘以了10
+        int64 ai_score = 4 [(gogoproto.jsontag) = "ai_score"];
+    }
+}

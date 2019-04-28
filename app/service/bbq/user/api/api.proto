@@ -1,0 +1,188 @@
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/protobuf/empty.proto";
+
+package bbq.service.user.v1;
+
+option go_package = "api";
+option (gogoproto.goproto_getters_all) = false;
+
+////////////////////////////////Relation Service/////////////////////////////////
+message ListRelationUserInfoReq {
+    int64   mid         = 1 [(gogoproto.moretags)='form:"mid"'];
+    int64   up_mid      = 2 [(gogoproto.moretags)='form:"up_mid" validate:"required"'];
+    string  cursor_prev = 3 [(gogoproto.moretags)='form:"cursor_prev"'];
+    string  cursor_next = 4 [(gogoproto.moretags)='form:"cursor_next"'];
+}
+
+message ListUserInfoReply {
+             bool       has_more    = 1 [(gogoproto.jsontag) = "has_more"];
+    repeated UserInfo   list        = 2 [(gogoproto.jsontag) = "list,omitempty"];
+}
+
+message ListRelationReq {
+    int64 mid = 1[(gogoproto.moretags)='form:"mid" validate:"required"'];
+}
+message ListRelationReply {
+    repeated int64 list = 1 [(gogoproto.jsontag) = "list,omitempty"];
+}
+
+message ModifyRelationReq {
+    int64 mid       = 1 [(gogoproto.moretags)='form:"mid" validate:"required"'];
+    int64 up_mid    = 2 [(gogoproto.moretags)='form:"up_mid" validate:"required"'];
+    int32 action    = 3 [(gogoproto.moretags)='form:"action" validate:"required"'];
+}
+message ModifyRelationReply {
+    int32  follow_state = 1 [(gogoproto.jsontag) = "follow_state", (gogoproto.casttype) = "int8"];
+}
+
+////////////////////////////////User Service/////////////////////////////////
+message ListUserInfoReq {
+    int64           mid     = 1 [(gogoproto.moretags)='form:"mid"'];
+    repeated int64  up_mid  = 2 [(gogoproto.moretags)='form:"up_mid,omitempty" validate:"required"'];
+    // 是否需要用户信息数组，如区域、性别的字符串化
+    bool need_desc          = 3 [(gogoproto.moretags)='form:"need_desc"'];
+    // 用户统计信息UserStat
+    bool need_stat          = 4 [(gogoproto.moretags)='form:"need_stat"'];
+    // 用户关注信息是否需要
+    bool need_follow_state  = 5 [(gogoproto.moretags)='form:"need_follow_state"'];
+}
+
+// 获取UserInfo的配置，默认是只有UserBase的
+message ListUserInfoConf {
+    // 是否需要用户信息数组，如区域、性别的字符串化
+    bool need_desc          = 1 [(gogoproto.moretags)='form:"need_desc"'];
+    // 用户统计信息UserStat
+    bool need_stat          = 2 [(gogoproto.moretags)='form:"need_stat"'];
+    // 用户关注信息是否需要
+    bool need_follow_state  = 3 [(gogoproto.moretags)='form:"need_follow_state"'];
+}
+
+message PhoneCheckReq {
+    int64   mid             = 1 [(gogoproto.moretags)='form:"mid"'];
+}
+
+message PhoneCheckReply {
+    int32   tel_status    = 2;// 0未绑定，1已绑定有效手机号
+}
+
+////////////////////////////////Like Service/////////////////////////////////
+message LikeReq {
+    int64   mid     = 1 [(gogoproto.moretags)='form:"mid" validate:"required"'];
+    int64   up_mid  = 2 [(gogoproto.moretags)='form:"up_mid" validate:"required"'];
+    int64   opid    = 3 [(gogoproto.moretags)='form:"opid" validate:"required"'];
+}
+message LikeReply {
+    int64 affected_num = 1; // 返回是否操作了数据库
+}
+
+message ListUserLikeReq {
+//    int64   mid         = 1 [(gogoproto.moretags)='form:"mid"'];
+    int64   up_mid      = 2 [(gogoproto.moretags)='form:"up_mid" validate:"required"'];
+    string  cursor_prev = 3 [(gogoproto.moretags)='form:"cursor_prev"'];
+    string  cursor_next = 4 [(gogoproto.moretags)='form:"cursor_next"'];
+}
+message LikeSv {
+    int64   svid            = 1 [(gogoproto.jsontag) = "svid"];
+    string  cursor_value    = 2 [(gogoproto.jsontag) = "cursor_value"];
+}
+message ListUserLikeReply {
+    bool            has_more    = 1 [(gogoproto.jsontag) = "has_more"];
+    repeated LikeSv list        = 2 [(gogoproto.jsontag) = "list,omitempty"];
+}
+message IsLikeReq {
+    int64 mid = 1[(gogoproto.moretags)='form:"mid"'];
+    repeated int64 svids = 2[(gogoproto.moretags)='form:"svids"'];
+}
+message IsLikeReply {
+    repeated int64 list = 1[(gogoproto.jsontag) = "has_more,omitempty"];
+}
+
+////////////////////////////////User Service/////////////////////////////////
+service User {
+    rpc Login (UserBase) returns (UserBase);
+    rpc PhoneCheck (PhoneCheckReq) returns (PhoneCheckReply);
+    rpc UserEdit (UserBase) returns (.google.protobuf.Empty);
+    rpc ListUserInfo (ListUserInfoReq) returns (ListUserInfoReply);
+
+    /////////////like/////////////
+    rpc AddLike (LikeReq) returns (LikeReply);
+    rpc CancelLike (LikeReq) returns (LikeReply);
+    rpc ListUserLike(ListUserLikeReq) returns (ListUserLikeReply);
+    rpc IsLike(IsLikeReq) returns (IsLikeReply);
+
+    ////////////Relation///////////
+    rpc ModifyRelation (ModifyRelationReq) returns (ModifyRelationReply);
+    // 返回UserInfo的列表，分页
+    rpc ListFollowUserInfo (ListRelationUserInfoReq) returns (ListUserInfoReply);
+    rpc ListFanUserInfo (ListRelationUserInfoReq) returns (ListUserInfoReply);
+    rpc ListBlackUserInfo (ListRelationUserInfoReq) returns (ListUserInfoReply);
+    // 仅仅返回全部mid列表，不包含UserInfo
+    rpc ListFollow (ListRelationReq) returns (ListRelationReply);
+    rpc ListBlack (ListRelationReq) returns (ListRelationReply);
+}
+
+
+////////////////////////////////UserInfo/////////////////////////////////
+message UserBase {
+    int64   mid                 = 1 [(gogoproto.jsontag) = "mid", (gogoproto.moretags)='form:"mid"'];
+    string  uname               = 2 [(gogoproto.jsontag) = "uname", (gogoproto.moretags)='form:"uname"'];
+    string  face                = 3 [(gogoproto.jsontag) = "face", (gogoproto.moretags)='form:"face"'];
+    string  birthday            = 4 [(gogoproto.jsontag) = "birthday", (gogoproto.moretags)='form:"birthday"'];
+    int64   exp                 = 5 [(gogoproto.moretags)='form:"exp"'];
+    int64   level               = 6 [(gogoproto.moretags)='form:"level"'];
+    int64   ctime               = 7 [(gogoproto.casttype) = "go-common/library/time.Time"];
+    int64   mtime               = 8 [(gogoproto.casttype) = "go-common/library/time.Time"];
+    int32   sex                 = 9 [(gogoproto.jsontag) = "sex", (gogoproto.moretags)='form:"sex"', (gogoproto.casttype) = "int8"];
+    int64   region              = 10[(gogoproto.jsontag) = "region", (gogoproto.moretags)='form:"region"'];
+    string  signature           = 11[(gogoproto.jsontag) = "signature", (gogoproto.moretags)='form:"signature"'];
+    int32   user_type           = 12[(gogoproto.jsontag) = "user_type", (gogoproto.casttype) = "int8"];
+    int32   complete_degree     = 13[(gogoproto.jsontag) = "complete_degree", (gogoproto.casttype) = "int8"];
+    int32   new_tag             = 14[(gogoproto.jsontag) = "new_tag", (gogoproto.moretags)='form:"new_tag"', (gogoproto.casttype) = "int8"]; // 是否是新注册用户
+    string  region_name         = 21 [(gogoproto.jsontag) = "region_name"];
+    repeated string user_desc   = 22 [(gogoproto.jsontag) = "user_desc,omitempty"];
+    string  face_uptime         = 23 [(gogoproto.jsontag) = "face_uptime", (gogoproto.moretags)='form:"uptime"'];
+}
+
+message UserStat {
+    int64   sv      = 1 [(gogoproto.jsontag) = "sv"];
+    int64   like    = 2 [(gogoproto.jsontag) = "like"];
+    int64   liked   = 3 [(gogoproto.jsontag) = "liked"];
+    int64   follow  = 4 [(gogoproto.jsontag) = "follow"];
+    int64   fan     = 5 [(gogoproto.jsontag) = "fan"];
+    int64   black   = 6 [(gogoproto.jsontag) = "black"];
+    int64   view    = 7 [(gogoproto.jsontag) = "view"];
+}
+
+message UserInfo {
+    UserBase        user_base       = 1 [(gogoproto.jsontag) = "user_base,omitempty"];
+    UserStat        user_stat       = 2 [(gogoproto.jsontag) = "user_stat,omitempty"];
+    int32           follow_state    = 3 [(gogoproto.jsontag) = "follow_state", (gogoproto.casttype) = "int8"];
+    string          cursor_value    = 4 [(gogoproto.jsontag) = "cursor_value"];
+}
+
+message LocationItem {
+    int32                   id      = 1[(gogoproto.jsontag) = "id"];
+    int32                   pid     = 2[(gogoproto.jsontag) = "pid"];
+    string                  name    = 3[(gogoproto.jsontag) = "name"];
+    repeated LocationItem   child   = 4[(gogoproto.jsontag) = "child,omitempty"];
+}
+
+message UserVideoView {
+    int64 mid = 1 [(gogoproto.moretags)='form:"mid"'];
+    int64 views = 2 [(gogoproto.moretags)='form:"views"'];
+}
+
+//message LocationAllReq {
+//    int64 version = 1[(gogoproto.moretags)='form:"version"'];
+//}
+//
+//message LocationAllReply {
+//    bool                    need_update = 1[(gogoproto.jsontag) = "need_update"];
+//    repeated LocationItem   list        = 2 [(gogoproto.jsontag) = "list,omitempty"];
+//}
+//
+//service Location {
+//    rpc LocationAll(LocationAllReq) returns (LocationAllReply);
+//}

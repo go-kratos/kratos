@@ -1,0 +1,152 @@
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+http_archive(
+    name = "io_bazel_rules_go",
+    url = "http://bazel-cabin.bilibili.co/go/rules_go/rules_go-0.16.4-hack.tar.gz",
+    sha256 = "891470f5ea5026891f76f66122c7a7d13255c1905cb5ce4ee01c4b46278f9201",
+)
+
+http_archive(
+    name = "bazel_skylib",
+    sha256 = "b5f6abe419da897b7901f90cbab08af958b97a8f3575b0d3dd062ac7ce78541f",
+    strip_prefix = "bazel-skylib-0.5.0",
+    urls = ["http://bazel-cabin.bilibili.co/bazel-skylib/0.5.0.tar.gz"],    
+)
+
+http_archive(
+    name = "bazel_gazelle",
+    urls = ["http://bazel-cabin.bilibili.co/go/gazelle/bazel-gazelle-0.15.0.tar.gz"],
+    sha256 = "6e875ab4b6bf64a38c352887760f21203ab054676d9c1b274963907e0768740d",
+)
+
+load("@bazel_skylib//:lib.bzl", "versions")
+
+versions.check(minimum_bazel_version = "0.15.0")
+
+load("@io_bazel_rules_go//go:def.bzl", "go_download_sdk")
+
+go_download_sdk(
+    name = "go_sdk",
+    urls = ["http://bazel-cabin.bilibili.co/go/{}"],
+    sdks = {
+        "linux_amd64":   ("go1.11.4.linux-amd64.tar.gz",
+	        "fb26c30e6a04ad937bbc657a1b5bba92f80096af1e8ee6da6430c045a8db3a5b"),
+        "darwin_amd64":  ("go1.11.4.darwin-amd64.tar.gz",
+            "48ea987fb610894b3108ecf42e7a4fd1c1e3eabcaeb570e388c75af1f1375f80"),
+        "windows_amd64": ("go1.11.4.windows-amd64.zip",
+            "eeb20e21702f2b9469d9381df5de85e2f731b64a1f54effe196d0f7d0227fe14"),
+    },
+)
+
+
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+#go_repository(
+#    name = "org_golang_x_tools",
+#    # release-branch.go1.9, as of 2017-08-25
+#    urls = ["http://bazel-cabin.bilibili.co/golang-lib/tools/3e7aa9e59977626dc60433e9aeadf1bb63d28295"],
+#    importpath = "golang.org/x/tools",
+#    strip_prefix = "tools-3e7aa9e59977626dc60433e9aeadf1bb63d28295",
+#    type = "zip",
+#    patches = [
+#            "@io_bazel_rules_go//third_party:org_golang_x_tools-gazelle.patch",
+#            "@io_bazel_rules_go//third_party:org_golang_x_tools-extras.patch",
+#    ],
+#    patch_args = ["-p1"],
+#)#
+
+go_repository(
+    name = "com_google_protobuf",
+    build_file_proto_mode = "disable_global",
+    importpath = "github.com/google/protobuf",
+    urls = ["http://bazel-cabin.bilibili.co/google/protobuf/48cb18e5c419ddd23d9badcfe4e9df7bde1979b2"],
+    strip_prefix = "protobuf-48cb18e5c419ddd23d9badcfe4e9df7bde1979b2",
+    type = "zip",
+)
+
+go_repository(
+    name = "org_golang_x_net",
+    urls = ["http://bazel-cabin.bilibili.co/golang-lib/golang/net/4dfa2610cdf3b287375bbba5b8f2a14d3b01d8de"],
+    importpath = "golang.org/x/net",
+    strip_prefix = "net-4dfa2610cdf3b287375bbba5b8f2a14d3b01d8de",
+    type = "zip",
+)
+
+go_repository(
+    name = "org_golang_google_genproto",
+    build_file_proto_mode = "disable_global",
+    urls = ["http://bazel-cabin.bilibili.co/golang-lib/go-genproto/c7e5094acea1ca1b899e2259d80a6b0f882f81f8"],
+    strip_prefix = "go-genproto-c7e5094acea1ca1b899e2259d80a6b0f882f81f8",
+    type = "zip",
+    importpath = "github.com/google/go-genproto",
+)
+
+go_repository(
+    name = "com_github_gogo_protobuf",
+    build_file_proto_mode = "disable_global",
+    urls = ["http://bazel-cabin.bilibili.co/golang-lib/gogo/636bf0302bc95575d69441b25a2603156ffdddf1"],
+    strip_prefix = "protobuf-636bf0302bc95575d69441b25a2603156ffdddf1",
+    importpath = "github.com/gogo/protobuf",
+    type = "zip",
+)
+
+go_repository(
+    name = "org_golang_x_text",
+    urls = ["http://bazel-cabin.bilibili.co/golang-lib/golang/text/f21a4dfb5e38f5895301dc265a8def02365cc3d0"],
+    strip_prefix = "text-f21a4dfb5e38f5895301dc265a8def02365cc3d0",
+    type = "zip",
+    importpath = "golang.org/x/text",
+)#
+
+go_repository(
+    name = "org_golang_google_grpc",
+    #build_file_proto_mode = "disable_global",
+    urls = ["http://bazel-cabin.bilibili.co/golang-lib/grpc-go/df014850f6dee74ba2fc94874043a9f3f75fbfd8"],
+    strip_prefix = "grpc-go-df014850f6dee74ba2fc94874043a9f3f75fbfd8",
+    type = "zip",
+    importpath = "google.golang.org/grpc",
+)
+
+go_repository(
+    name = "go_googleapis",
+    build_file_proto_mode = "disable_global",
+    urls = ["http://bazel-cabin.bilibili.co/golang-lib/googleapis/b71d0c74de0b84f2f10a2c61cd66fbb48873709f"],
+    strip_prefix = "googleapis-b71d0c74de0b84f2f10a2c61cd66fbb48873709f",
+    type = "zip",
+    importpath = "google.golang.org/api",
+    patches = [
+            "@io_bazel_rules_go//third_party:go_googleapis-directives.patch",
+            "@io_bazel_rules_go//third_party:go_googleapis-gazelle.patch",
+            "@io_bazel_rules_go//third_party:go_googleapis-fix.patch",
+    ],
+    patch_args = ["-p1"],
+)
+
+go_repository(
+    name = "com_github_golang_protobuf",
+    build_file_proto_mode = "disable_global",
+    urls = ["http://bazel-cabin.bilibili.co/golang-lib/golang/protobuf/aa810b61a9c79d51363740d207bb46cf8e620ed5"],
+    strip_prefix = "protobuf-aa810b61a9c79d51363740d207bb46cf8e620ed5",
+    type = "zip",
+    importpath = "github.com/golang/protobuf",
+    patch_args = ["-p1"],
+    patches = ["@io_bazel_rules_go//third_party:com_github_golang_protobuf-extras.patch"],
+)
+
+go_repository(
+    name = "org_golang_x_sys",
+    importpath = "golang.org/x/sys",
+    urls = ["http://bazel-cabin.bilibili.co/golang-lib/sys/e4b3c5e9061176387e7cea65e4dc5853801f3fb7"],
+    strip_prefix = "sys-e4b3c5e9061176387e7cea65e4dc5853801f3fb7",
+    type = "zip",
+)
+
+
+gazelle_dependencies()
+
+
+load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
+go_rules_dependencies()
+go_register_toolchains()
+
+load("//build:workspace.bzl", "bili_workspace")
+bili_workspace()

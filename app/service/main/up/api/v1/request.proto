@@ -1,0 +1,152 @@
+syntax = "proto3";
+package archive.service.up.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+// NoArgReq 没有请求参数
+message NoArgReq {}
+
+// UpArcsReq 单个up主的稿件列表信息请求参数
+message UpArcsReq {
+  // mid 用户id 必传
+  int64 mid = 1
+      [(gogoproto.moretags) = "form:\"mid\" validate:\"min=1,required\""];
+  // pn 第几页 非必传
+  int32 pn = 2 [(gogoproto.moretags) = "form:\"pn\" default:\"1\""];
+  // ps 分页大小 非必传
+  int32 ps = 3 [(gogoproto.moretags) = "form:\"ps\" default:\"20\""];
+}
+
+// UpsArcsReq 多个up主的稿件列表信息请求参数
+message UpsArcsReq {
+  // mids 多个用户id 必传 最大100个
+  repeated int64 mids = 1
+      [(gogoproto.moretags) =
+           "form:\"mids,split\" validate:\"min=1,max=100,required\""];
+  // pn 第几页 非必传
+  int32 pn = 2 [(gogoproto.moretags) = "form:\"pn\" default:\"1\""];
+  // ps 分页大小 非必传
+  int32 ps = 3 [(gogoproto.moretags) = "form:\"ps\" default:\"20\""];
+}
+
+// UpCountReq 单个up主的稿件计数的请求参数
+message UpCountReq {
+  // mid 用户id 必传
+  int64 mid = 1
+      [(gogoproto.moretags) = "form:\"mid\" validate:\"min=1,required\""];
+}
+
+// UpsCountReq 多个up主的稿件计数的请求参数
+message UpsCountReq {
+  // mids 多个用户id 必传 最大100个
+  repeated int64 mids = 1
+      [(gogoproto.moretags) =
+           "form:\"mids,split\" validate:\"min=1,max=100,required\""];
+}
+
+// UpCacheReq up主的cache更新的请求参数
+message UpCacheReq {
+  // mid 用户id 必传
+  int64 mid = 1 [(gogoproto.moretags) = "form:\"mid\" validate:\"required\""];
+  // aid 稿件id 必传
+  int64 aid = 2 [(gogoproto.moretags) = "form:\"aid\" validate:\"required\""];
+}
+
+// UpListByLastIDReq 获取up主活跃度信息通过最后id获取
+message UpListByLastIDReq {
+  // LastID 获取的数据最后id
+  int64 last_id = 1 [
+    (gogoproto.customname) = "LastID",
+    (gogoproto.moretags) = "form:\"last_id\" validate:\"min=0\""
+  ];
+  // 获取数量 最大1000个
+  int32 ps = 2 [
+    (gogoproto.casttype) = "int",
+    (gogoproto.moretags) =
+        "form:\"ps\" validate:\"min=1,max=1000\" default:\"100\""
+  ];
+}
+
+// UpSpecialReq up主特殊用户属性请求参数
+message UpSpecialReq {
+  // mid 用户id 必传
+  int64 mid = 1
+      [(gogoproto.moretags) = "form:\"mid\" validate:\"min=1,required\""];
+}
+
+// UpsSpecialReq 多个up主特殊用户属性请求参数
+message UpsSpecialReq {
+  // mids 多个用户id 必传 最大100个
+  repeated int64 mids = 1
+      [(gogoproto.moretags) =
+           "form:\"mids,split\" validate:\"min=1,max=100,required\""];
+}
+
+// UpGroupMidsReq 获取某个分组下的所有用户的请求参数
+message UpGroupMidsReq {
+  // GroupID 分组ID
+  int64 group_id = 1 [
+    (gogoproto.customname) = "GroupID",
+    (gogoproto.moretags) = "form:\"group_id\" validate:\"min=1,required\""
+  ];
+  // pn 第几页 非必传
+  int32 pn = 2 [
+    (gogoproto.casttype) = "int",
+    (gogoproto.moretags) =
+        "form:\"pn\"  validate:\"min=1,max=100\" default:\"1\""
+  ];
+  // ps 分页大小 非必传
+  int32 ps = 3 [
+    (gogoproto.casttype) = "int",
+    (gogoproto.moretags) =
+        "form:\"ps\" validate:\"min=1,max=10000\" default:\"1000\""
+  ];
+}
+
+// UpAttrReq 获取up主身份属性的请求参数
+message UpAttrReq {
+  // mid 用户id 必传
+  int64 mid = 1
+      [(gogoproto.moretags) = "form:\"mid\" validate:\"min=1,required\""];
+  // from 0 - 稿件作者（至少有一个通过稿件）; 1 - 移动投稿作者(至少有一个稿件);
+  // 2 - live(直播up主); 3 - live(直播白名单)
+  int32 from = 2 [
+    (gogoproto.moretags) = "form:\"from\" validate:\"min=0,max=1\"",
+    (gogoproto.casttype) = "uint8"
+  ];
+}
+
+// UpStatReq 获取up计数的请求参数
+message UpStatReq {
+  // mid 用户id 必传
+  int64 mid = 1
+      [(gogoproto.moretags) = "form:\"mid\" validate:\"min=1,required\""];
+  // date 获取计数时间范围
+  int64 date = 2 [
+    (gogoproto.moretags) = "form:\"date\"",
+    (gogoproto.casttype) = "go-common/library/time.Time"
+  ];
+}
+
+// UpSwitchReq 获取up主关注弹窗开关的请求参数
+message UpSwitchReq {
+  // mid 用户id 必传
+  int64 mid = 1
+      [(gogoproto.moretags) = "form:\"mid\" validate:\"min=1,required\""];
+  // from 业务来源 0-播放器关注开关 1-up主荣誉周报是否退订
+  int32 from = 2
+      [(gogoproto.moretags) = "form:\"from\"", (gogoproto.casttype) = "uint8"];
+  // state 开关状态 0-关闭 1-打开
+  int32 state = 3 [
+    (gogoproto.moretags) = "form:\"state\" validate:\"min=0,max=1\"",
+    (gogoproto.casttype) = "uint8"
+  ];
+}
+
+// HighAllyUpReq 高能联盟up主请求参数
+message HighAllyUpsReq {
+  // mids 用户id数组 必传
+  repeated int64 mids = 1 [(gogoproto.moretags) = "form:\"mids\" validate:\"required\""];
+}

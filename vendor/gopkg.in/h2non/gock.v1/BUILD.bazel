@@ -1,0 +1,34 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "gock.go",
+        "matcher.go",
+        "matchers.go",
+        "mock.go",
+        "request.go",
+        "responder.go",
+        "response.go",
+        "store.go",
+        "transport.go",
+        "version.go",
+    ],
+    importmap = "go-common/vendor/gopkg.in/h2non/gock.v1",
+    importpath = "gopkg.in/h2non/gock.v1",
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

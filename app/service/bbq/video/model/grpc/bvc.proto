@@ -1,0 +1,34 @@
+syntax="proto3";
+
+package video.vod.playurlbbq;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "grpc";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+message RequestMsg {
+    repeated string keys     = 1;
+    string platform          = 2;
+    string uip               = 3[(gogoproto.customname)= "UIP"];
+    uint32 uiplong           = 4;
+    uint32 backup            = 5;
+    string uuid              = 6[(gogoproto.customname)= "UUID"];
+}
+
+message VideoKeyItem {
+    uint32 etime        = 1;
+    repeated string url = 2[(gogoproto.customname)= "URL"];
+}
+
+message ResponseMsg {
+    uint32 code = 1;
+    map<string, VideoKeyItem> data = 2;
+}
+
+//// Following defines rpc services.
+service PlayurlService {
+  rpc ProtobufPlayurl(RequestMsg) returns (ResponseMsg);
+};

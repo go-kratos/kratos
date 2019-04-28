@@ -1,0 +1,21 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liweijia
+- peiyifei
+- renwei
+- zhaoshichen
+- zhapuyu
+labels:
+- job
+- job/main/appstatic
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- guanyanliang
+- liuxuan
+- liweijia
+- renwei
+- wuhao
+- zhaoshichen

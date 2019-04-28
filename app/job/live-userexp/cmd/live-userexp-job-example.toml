@@ -1,0 +1,58 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "root"
+pid = "/tmp/live-userexp-job.pid"
+dir = "./"
+perf = "0.0.0.0:20102"
+family = "live-userexp-job"
+env = dev
+
+[log]
+    dir = "/data/log/live-userexp-job"
+
+[db]
+    [db.exp]
+    addr = "172.16.33.69:3306"
+    dsn = "live:oWni@ElNs0P0C(dphdj*F1y4@tcp(172.16.33.69:3306)/live_user_exp?timeout=5s&readTimeout=30s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "2s"
+    [db.exp.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[memcache]
+levelExpire = 86400
+    [memcache.exp]
+    name = "live-userexp-service/exp"
+    proto = "tcp"
+    addr = "172.16.33.251:11211"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[expSub]
+key = "ec4c0820d525d67b"
+secret = "2bdf3bd4ecab041b5d5640a1da4f7f81"
+group = "LiveUserExpBinlog-LiveLive-S"
+topic = "LiveUserExpBinlog-T"
+action = "sub"
+offset = "new"
+name = "liveuser-job/exp-sub"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"

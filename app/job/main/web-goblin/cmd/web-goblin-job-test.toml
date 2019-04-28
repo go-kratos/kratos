@@ -1,0 +1,94 @@
+
+[log]
+   #stdout = true
+    dir = "/data/log/web-goblin-job/"
+
+[rule]
+    broadFeed = 5000
+    before = "2h"
+    sleepInterval = "5m"
+    alertTitle = "你订阅的比赛即将开播了"
+    alertBodyDefault = "%s中,你订阅的赛程【%s %s VS %s】即将开播，快前去观看比赛吧! %s"
+    alertBodySpecial = "%s中,你订阅的赛程【%s %s】即将开播，快前去观看比赛吧! %s"
+    scoreSleep = "1h"
+    coinPercent = 0.4
+    favPercent = 0.3
+    dmPercent = 0.4
+    replyPercent = 0.4
+    viewPercent = 0.25
+    likePercent = 0.4
+    sharePercent = 0.6
+    newDay = 14.0
+    newPercent = 1.5
+
+[httpClient]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+[messageHTTPClient]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    dial      = "50ms"
+    timeout   = "1s"
+    keepAlive = "60s"
+
+
+[host]
+    api   = "http://api.bilibili.co"
+
+
+[favoriteRPC]
+    timeout = "1s"
+
+[app]
+    key = "7c7ac0db1aa05587"
+    secret = "9a6d62d93290c5f771ad381e9ca23f26"
+
+[db]
+    [db.esports]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_esports?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout = "4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.esports.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+
+[push]
+    businessID = 1
+    businessToken = "fi6xf5xmldudexsh5tgukerohn3mgrl3"
+    retryTimes = 3
+    partSize = 100000
+    title = "你订阅的比赛开播了～"
+    bodyDefault = "%s %s VS %s 已开播，快来观看比赛吧！ %s"
+    bodySpecial = "%s %s 已开播，快来观看比赛吧！%s"
+    onlyMids = "27905253,94012604"
+
+[message]
+    URL = "http://message.bilibili.co/api/notify/send.user.notify.do"
+    MC = "1_4_2"
+
+[archiveNotifySub]
+    key = "9765cdac5894f2ba"
+    secret = "68bc8df51f0935d5f4d24721fbc15a80"
+    group = "ArchiveNotify-MainWebSvr-Search-S"
+    topic = "ArchiveNotify-T"
+    action = "sub"
+    name = "web-goblin-job/archiveNotifysub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+

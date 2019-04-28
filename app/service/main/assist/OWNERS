@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- haoguanwei
+- shaojiatong
+- shencen
+- wangzhe01
+labels:
+- main
+- service
+- service/main/assist
+options:
+  no_parent_owners: true
+reviewers:
+- haoguanwei
+- shaojiatong
+- shencen

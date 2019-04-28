@@ -1,0 +1,212 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/figure-job.pid"
+dir = "./"
+perf = "127.0.0.1:7070"
+checkFile = "/data/www/figure-job.html"
+family = "figure-job"
+
+[log]
+dir = "/data/log/figure-job"
+
+[bm]
+    addr = "0.0.0.0:7072"
+    timeout = "1s"
+    maxListen = 100 
+
+[figure]
+    spypath = "./data/spy"
+    vippath = "./data/vip"
+    sync = false
+	lawful = 80
+	wide = 0
+	friendly = 50
+	bounty = 0
+	creativity = 0
+
+[mysql]
+    addr = "172.16.0.28:3306"
+    dsn = "root:123456@tcp(172.16.0.28:3306)/bilibili_figure?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[dataSource]
+    [dataSource.accountExp]
+        key = "0QEO9F8JuuIxZzNDvklH"
+        secret= "0QEO9F8JuuIxZzNDvklI"
+        group= "AccountLog-MainAccount-Figure-S"
+        topic= "AccountLog-T"
+        action="sub"
+        name = "figure-job/databus"
+        proto = "tcp"
+        addr = "172.16.33.158:6205"
+        idle = 2
+        active = 10
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+        expire = "1h"
+    [dataSource.accountReg]
+        key = "0QEO9F8JuuIxZzNDvklH"
+        secret= "0QEO9F8JuuIxZzNDvklI"
+        group= "PassportPurgeCache-Figure-S"
+        topic= "PassportPurgeCache-T"
+        action="sub"
+        name = "figure-job/databus"
+        proto = "tcp"
+        addr = "172.16.33.158:6205"
+        idle = 2
+        active = 10
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+        expire = "1h"
+    [dataSource.vip]
+        key = "0QEO9F8JuuIxZzNDvklH"
+        secret= "0QEO9F8JuuIxZzNDvklI"
+        group= "VipBinlog-Figure-S"
+        topic= "VipBinlog-T"
+        action="sub"
+        name = "figure-job/databus"
+        proto = "tcp"
+        addr = "172.16.33.158:6205"
+        idle = 2
+        active = 10
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+        expire = "1h"
+    [dataSource.spy]
+        key = "0QEO9F8JuuIxZzNDvklH"
+        secret= "0QEO9F8JuuIxZzNDvklI"
+        group= "Spy-Figure-S"
+        topic= "Spy-T"
+        action="sub"
+        name = "figure-job/databus"
+        proto = "tcp"
+        addr = "172.16.33.158:6205"
+        idle = 2
+        active = 10
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+        expire = "1h"
+    [dataSource.coin]
+        key = "0QEO9F8JuuIxZzNDvklH"
+        secret= "0QEO9F8JuuIxZzNDvklI"
+        group= "Coin-Figure-S"
+        topic= "Coin-T"
+        action="sub"
+        name = "figure-job/databus"
+        proto = "tcp"
+        addr = "172.16.33.158:6205"
+        idle = 2
+        active = 10
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+        expire = "1h"
+    [dataSource.replyInfo]
+        key = "0QEO9F8JuuIxZzNDvklH"
+        secret= "0QEO9F8JuuIxZzNDvklI"
+        group= "Reply-Figure-S"
+        topic= "Reply-T"
+        action="sub"
+        name = "figure-job/databus"
+        proto = "tcp"
+        addr = "172.16.33.158:6205"
+        idle = 2
+        active = 10
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+        expire = "1h"
+    # [dataSource.pay]
+    #     key = "0QEO9F8JuuIxZzNDvklH"
+    #     secret= "0QEO9F8JuuIxZzNDvklI"
+    #     group= "PayBinlog-Figure-S"
+    #     topic= "PayBinlog-T"
+    #     action="sub"
+    #     name = "figure-job/databus"
+    #     proto = "tcp"
+    #     addr = "172.16.33.158:6205"
+    #     idle = 2
+    #     active = 10
+    #     dialTimeout = "1s"
+    #     readTimeout = "60s"
+    #     writeTimeout = "1s"
+    #     idleTimeout = "10s"
+    #     expire = "1h"
+    # [dataSource.blocked]
+    #     key = "0QEO9F8JuuIxZzNDvklH"
+    #     secret= "0QEO9F8JuuIxZzNDvklI"
+    #     group= "Blocked-Figure-S"
+    #     topic= "Blocked-T"
+    #     action="sub"
+    #     name = "figure-job/databus"
+    #     proto = "tcp"
+    #     addr = "172.16.33.158:6205"
+    #     idle = 2
+    #     active = 10
+    #     dialTimeout = "1s"
+    #     readTimeout = "60s"
+    #     writeTimeout = "1s"
+    #     idleTimeout = "10s"
+    #     expire = "1h"
+    # [dataSource.danmaku]
+    #     key = "0QEO9F8JuuIxZzNDvklH"
+    #     secret= "0QEO9F8JuuIxZzNDvklI"
+    #     group= "DMAction-Figure-S"
+    #     topic= "DMAction-T"
+    #     action="sub"
+    #     name = "figure-job/databus"
+    #     proto = "tcp"
+    #     addr = "172.16.33.158:6205"
+    #     idle = 2
+    #     active = 10
+    #     dialTimeout = "1s"
+    #     readTimeout = "60s"
+    #     writeTimeout = "1s"
+    #     idleTimeout = "10s"
+    #     expire = "1h"
+
+[hbase]
+    master = ""
+    meta = ""
+    dialTimeout = "1s"
+    readTimeout = "10s"
+    readsTimeout = "10s"
+    writeTimeout = "10s"
+    writesTimeout = "10s"
+    [hbase.zookeeper]
+        root = ""
+        addrs = ["10.23.66.145:2181"]
+        timeout = "30s"
+
+[redis]
+    name = "figure-service"
+    proto = "tcp"
+    addr = "172.16.33.54:6379"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+    waiteMidExpire = "192h"

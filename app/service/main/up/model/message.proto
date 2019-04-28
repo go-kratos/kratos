@@ -1,0 +1,51 @@
+syntax = "proto3";
+package model;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message UpSpecial {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 GroupID = 2 [(gogoproto.jsontag) = "group_id"];
+    string GroupName = 3 [(gogoproto.jsontag) = "group_name"];
+    string GroupTag = 4 [(gogoproto.jsontag) = "group_tag"];
+    int64 Mid = 5 [(gogoproto.jsontag) = "mid"];
+    string Note = 6 [(gogoproto.jsontag) = "note"];
+    int64 CTime = 7 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 UID = 8 [(gogoproto.jsontag) = "uid"];
+    int64 MTime = 9 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string FontColor = 10 [(gogoproto.jsontag) = "font_color"];
+    string BgColor = 11 [(gogoproto.jsontag) = "bg_color"];
+}
+
+message UpInfo {
+    int32 isAuthor = 1 [(gogoproto.jsontag) = "isAuthor"];
+}
+
+message UpGroup {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    string tag = 3 [(gogoproto.jsontag) = "tag"];
+    string short_tag = 4 [(gogoproto.jsontag) = "short_tag"];
+    string remark = 5 [(gogoproto.jsontag) = "remark"];
+    int32 state = 6 [(gogoproto.jsontag) = "state"];
+    string FontColor = 7 [(gogoproto.jsontag) = "font_color"];
+    string BgColor = 8 [(gogoproto.jsontag) = "bg_color"];
+}
+
+message UpBaseStat  {
+    int64 View = 1 [(gogoproto.jsontag) = "view"];
+    int64 Reply =2[(gogoproto.jsontag) ="reply"];
+    int64 Dm =3 [(gogoproto.jsontag) ="dm"];
+    int64 Fans = 4 [(gogoproto.jsontag) ="fans"];
+    int64 Fav = 5[(gogoproto.jsontag) ="fav"];
+    int64 Like = 6 [(gogoproto.jsontag) ="like"];
+}
+
+
+message PBSetUpSwitchRes {
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+}
+
+message PBUpSwitch {
+    int32 state = 1 [(gogoproto.jsontag) = "state"];
+}

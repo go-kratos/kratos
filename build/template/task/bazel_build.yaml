@@ -1,0 +1,22 @@
+presubmits:
+  platform/go-common:
+  - name: __bazel_build_job_name__
+    always_run: true 
+    namespace: default
+    untrusted_labels: 
+    - library
+    - new-project
+    spec:
+      containers:
+      - image: bazel_build
+        imagePullPolicy: IfNotPresent
+        args:
+        - --id=$(BUILD_ID)
+        - --job=$(JOB_NAME)
+        - --root=/root/go/src
+        - --repo=git.bilibili.co/$(REPO_OWNER)/$(REPO_NAME)=$(PULL_REFS)
+        - --command
+        - make 
+        - bazel-build 
+        - WHAT=<<bazel_dir_param>>
+  

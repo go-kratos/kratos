@@ -1,0 +1,45 @@
+load(
+    "@io_bazel_rules_go//go:def.bzl",
+    "go_library",
+)
+load(
+    "@io_bazel_rules_go//proto:def.bzl",
+    "go_proto_library",
+)
+
+proto_library(
+    name = "example_proto",
+    srcs = ["test.proto"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)
+
+go_proto_library(
+    name = "example_go_proto",
+    compilers = ["@io_bazel_rules_go//proto:go_proto"],
+    importpath = "go-common/library/net/http/blademaster/binding/example",
+    proto = ":example_proto",
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "go_default_library",
+    embed = [":example_go_proto"],
+    importpath = "go-common/net/http/blademaster/binding/example",
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

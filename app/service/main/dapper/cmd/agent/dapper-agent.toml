@@ -1,0 +1,11 @@
+# uat dapper-service
+servers = ["172.16.38.143:6190"]
+
+[log]
+dir = "/data/log/dapper-agent"
+
+[queue]
+cache_dir = "/data/log/dapper-collect/data"
+
+[udp_collect]
+addr = "unixgram:///var/run/dapper-collect/dapper-collect.sock"

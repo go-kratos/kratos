@@ -1,0 +1,376 @@
+syntax = "proto3";
+
+package video.live.streamng.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// EmptyStruct 空的message，对应真实service只返回error，没有具体返回值
+message EmptyStruct {
+}
+
+// ChangeSrcReq 切换上行
+message ChangeSrcReq {
+    // 房间号
+    int64 room_id = 1;
+    // src
+    int64 src = 2;
+    // 来源平台
+    string source = 3;
+    // 操作人
+    string operate_name = 4;
+    // 原因
+    string reason = 5;
+}
+
+// ClearStreamStatusReq 清理互推
+message ClearStreamStatusReq {
+    // 房间号
+    int64 room_id = 1;
+}
+
+// CloseReply  CloseReply
+message CloseReply {
+}
+
+// CloseReq CloseReq
+message CloseReq {
+}
+
+// CreateOfficalStreamReply 创建流
+message CreateOfficalStreamReply {
+    // 是否成功
+    bool success = 1;
+}
+
+// CreateOfficalStreamReq 创建流
+message CreateOfficalStreamReq {
+    // 流名
+    string stream_name = 1;
+    // key
+    string key = 2;
+    // 房间号
+    int64 room_id = 3;
+    // 是否线下测试
+    string debug = 4;
+    // 线下测试必传
+    int64 uid = 5;
+}
+
+// AdapterStream 上行流信息
+message AdapterStream {
+    // src
+    int64 src = 1;
+    // 房间号
+    int64 room_id = 2 [(gogoproto.jsontag) = "room_id"];
+    // 上行
+    int64 up_rank = 3 [(gogoproto.jsontag) = "up_rank"];
+    // 上行名称
+    string src_name = 4 [(gogoproto.jsontag) = "src_name"];
+}
+
+// GetAdapterStreamByStreamNameReply 适配PHP代码
+message GetAdapterStreamByStreamNameReply {
+    // 流名map流具体信息
+    map<string, AdapterStream> list = 1;
+}
+
+// GetAdapterStreamByStreamNameReq 适配PHP代码
+message GetAdapterStreamByStreamNameReq {
+    // 流名
+    string stream_names = 1 [(gogoproto.jsontag) = "stream_names"];
+}
+
+// LineList 线路信息
+message LineList {
+    // 上行
+    int64 src = 1;
+    // 是否被使用
+    bool use = 2;
+    // 描述
+    string desc = 3;
+}
+
+// GetLineListByRoomIDReply 获取线路信息
+message GetLineListByRoomIDReply {
+    // 线路信息， 多条
+    repeated LineList list = 1;
+}
+
+// GetLineListByRoomIDReq 获取线路信息
+message GetLineListByRoomIDReq {
+    // 房间号
+    int64 room_id = 1;
+}
+
+// GetMultiScreenShotReply 获取批量截图
+message GetMultiScreenShotReply {
+    // 房间号map截图地址
+    map<int64, string> list = 1;
+}
+
+// GetMultiScreenShotReq 获取批量截图
+message GetMultiScreenShotReq {
+    // 房间号
+    string room_ids = 1;
+    // 时间戳
+    int64 ts = 2;
+    // channel 是否为鉴黄
+    string channel = 3;
+}
+
+// GetMultiStreamInfoReply 批量获取房间信息
+message GetMultiStreamInfoReply {
+    // code
+    int32 code = 1;
+    // message
+    string message = 2;
+    // 房间号map流详细信息
+    map<uint32, StreamFullInfo> data = 3;
+}
+
+// GetMultiStreamInfoReq 批量获取房间信息
+message GetMultiStreamInfoReq {
+    // 房间号
+    repeated uint32 room_ids = 1;
+}
+
+// GetOriginScreenShotPicReply 获取原图
+message GetOriginScreenShotPicReply {
+    // 房间号map截图地址
+    map<int64, string> list = 1;
+}
+
+// GetOriginScreenShotPicReq 获取原图
+message GetOriginScreenShotPicReq {
+    // 房间号
+    string room_ids = 1;
+    // 时间戳
+    int64 ts = 2;
+}
+
+// GetRoomIDByStreamNameReply 获取房间号
+message GetRoomIDByStreamNameReply {
+    // 房间号
+    int64 room_id = 1;
+}
+
+// GetRoomIDByStreamNameReq 获取房间号
+message GetRoomIDByStreamNameReq {
+    // 流名
+    string stream_name = 1;
+}
+
+// GetSingleScreeShotReply 获取单个截图
+message GetSingleScreeShotReply {
+    // 截图列表
+    repeated string list = 1;
+}
+
+// GetSingleScreeShotReq 获取单个截图
+message GetSingleScreeShotReq {
+    // 房间号
+    int64 room_id = 1;
+    // 开始时间
+    string start_time = 2;
+    // 结束时间
+    string end_time = 3;
+    // channel
+    string channel = 4;
+}
+
+// RoomSrcCheck 上行
+message RoomSrcCheck {
+    // 上行
+    int64 src = 1;
+    // 是否被选择， 1或者0
+    int32 checked = 2;
+    // 上行名称
+    string desc = 3;
+}
+
+// GetSrcByRoomIDReply 获取上行信息
+message GetSrcByRoomIDReply {
+    // 上行列表
+    repeated RoomSrcCheck list = 1;
+}
+
+// GetSrcByRoomIDReq 获取上行信息
+message GetSrcByRoomIDReq {
+    // 房间号
+    int64 room_id = 1;
+}
+
+// GetStreamInfoReply 获取单个流信息
+message GetStreamInfoReply {
+    // code
+    int32 code = 1;
+    // message
+    string message = 2;
+    // 流详细信息
+    StreamFullInfo data = 3;
+}
+
+// GetStreamInfoReq 获取单个流信息
+message GetStreamInfoReq {
+    // 房间号
+    uint32 room_id = 1;
+    // 流名
+    string stream_name = 2;
+}
+
+// GetStreamLastTimeReply 获取最后推流时间
+message GetStreamLastTimeReply {
+    // 最后推流时间， -1 正在推流
+    int64 last_time = 1;
+}
+
+// GetStreamLastTimeReq 获取最后推流时间
+message GetStreamLastTimeReq {
+    // 房间号
+    int64 room_id = 1;
+}
+
+// GetStreamNameByRoomIDReply 获取流名
+message GetStreamNameByRoomIDReply {
+    // 流名
+    string stream_name = 1;
+}
+
+// GetStreamNameByRoomIDReq 获取流名
+message GetStreamNameByRoomIDReq {
+    // 房间号
+    int64 room_id = 1;
+}
+
+// GetUpStreamRtmpReply 获取上行推流地址
+message GetUpStreamRtmpReply {
+    // 上行推流地址
+    UpStreamRtmp up = 1;
+}
+
+// GetUpStreamRtmpReq 获取上行推流地址
+message GetUpStreamRtmpReq {
+    // 房间号
+    int64 room_id = 1;
+    // 免流
+    string free_flow = 2;
+    // ip
+    string ip = 3;
+    // 所在区域
+    int64 area_id = 4;
+    // 关注数
+    int32 attentions = 5;
+    // uid
+    int64 uid = 6;
+    // 平台
+    string platform = 7;
+}
+
+// StreamBase 流基本信息
+message StreamBase {
+    // 流名
+    string stream_name = 1;
+    // 默认上行
+    uint32 default_upstream = 2 [(gogoproto.jsontag) = "default_upstream"];
+    // 正在推流上行
+    uint32 origin = 3;
+    // 转推cdn
+    repeated uint32 forward = 4;
+    // 主流1或者备用流2
+    uint32 type = 5;
+    // 推流码
+    string key = 6;
+    // options
+    uint32 options = 7;
+}
+
+// StreamFullInfo 流信息完整结构
+message StreamFullInfo {
+    // 房间号
+    uint32 room_id = 1;
+    // 是否为冷热流
+    uint32 hot = 2;
+    // 流列表
+    repeated StreamBase list = 3;
+}
+
+// PingReply PingReply
+message PingReply {
+}
+
+// PingReq PingReq
+message PingReq {
+}
+
+// UpStreamRtmp 上行推流地址详细信息
+message UpStreamRtmp {
+    // 推流地址
+    string addr = 1;
+    // 推流码
+    string code = 2;
+    // new link
+    string new_link = 3;
+}
+
+// StreamCutReq 切流
+message StreamCutReq {
+    // 房间号
+    int64 room_id = 1;
+    // 切流时间
+    int64 cut_time = 2;
+}
+
+// TimeTime 时间
+message TimeTime {
+}
+
+message CheckLiveStreamReq {
+    repeated int64 room_id = 1;
+}
+
+message CheckLiveStreamReply {
+    map<int64, bool> list = 1;
+}
+
+// Stream service
+service Stream {
+    // GetSingleScreeShot
+    rpc GetSingleScreeShot (GetSingleScreeShotReq) returns (GetSingleScreeShotReply);
+    // GetMultiScreenShot
+    rpc GetMultiScreenShot (GetMultiScreenShotReq) returns (GetMultiScreenShotReply);
+    // GetOriginScreenShotPic
+    rpc GetOriginScreenShotPic (GetOriginScreenShotPicReq) returns (GetOriginScreenShotPicReply);
+    // CreateOfficeStream 创建正式流
+    rpc CreateOfficalStream (CreateOfficalStreamReq) returns (CreateOfficalStreamReply);
+    // GetStreamInfo 获取单个流信息
+    rpc GetStreamInfo (GetStreamInfoReq) returns (GetStreamInfoReply);
+    // GetMultiStreamInfo 批量获取流信息
+    rpc GetMultiStreamInfo (GetMultiStreamInfoReq) returns (GetMultiStreamInfoReply);
+    // ChangeSrc 切换cdn
+    rpc ChangeSrc (ChangeSrcReq) returns (EmptyStruct);
+    // GetStreamLastTime 得到流到最后推流时间;主流的推流时间up_rank = 1
+    rpc GetStreamLastTime (GetStreamLastTimeReq) returns (GetStreamLastTimeReply);
+    // GetStreamNameByRoomID 需要考虑备用流 + 考虑短号
+    rpc GetStreamNameByRoomID (GetStreamNameByRoomIDReq) returns (GetStreamNameByRoomIDReply);
+    // GetRoomIDByStreamName 查询房间号
+    rpc GetRoomIDByStreamName (GetRoomIDByStreamNameReq) returns (GetRoomIDByStreamNameReply);
+    // GetAdapterStreamByStreamName 适配结果输出, 此处也可以输入备用流， 该结果只输出直推上行
+    rpc GetAdapterStreamByStreamName (GetAdapterStreamByStreamNameReq) returns (GetAdapterStreamByStreamNameReply);
+    // GetSrcByRoomID
+    rpc GetSrcByRoomID (GetSrcByRoomIDReq) returns (GetSrcByRoomIDReply);
+    // GetLineListByRoomID
+    rpc GetLineListByRoomID (GetLineListByRoomIDReq) returns (GetLineListByRoomIDReply);
+    // GetUpStreamRtmp UpStream
+    rpc GetUpStreamRtmp (GetUpStreamRtmpReq) returns (GetUpStreamRtmpReply);
+    // StreamCut 切流的房间和时间, 内部调用
+    rpc StreamCut (StreamCutReq) returns (EmptyStruct);
+    // Ping Service
+    rpc Ping (PingReq) returns (PingReply);
+    // Close Service
+    rpc Close (CloseReq) returns (CloseReply);
+    // ClearRetweetRecord
+    rpc ClearStreamStatus (ClearStreamStatusReq) returns (EmptyStruct);
+    // CheckLiveStreamList
+    rpc CheckLiveStreamList(CheckLiveStreamReq) returns (CheckLiveStreamReply);
+}

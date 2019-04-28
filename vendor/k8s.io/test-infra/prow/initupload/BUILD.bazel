@@ -1,0 +1,32 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "doc.go",
+        "options.go",
+        "run.go",
+    ],
+    importpath = "k8s.io/test-infra/prow/initupload",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/k8s.io/test-infra/prow/gcsupload:go_default_library",
+        "//vendor/k8s.io/test-infra/prow/pod-utils/clone:go_default_library",
+        "//vendor/k8s.io/test-infra/prow/pod-utils/downwardapi:go_default_library",
+        "//vendor/k8s.io/test-infra/prow/pod-utils/gcs:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

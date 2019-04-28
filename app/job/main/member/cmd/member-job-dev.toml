@@ -1,0 +1,430 @@
+#This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/member-job.pid"
+dir = "./"
+perf = "0.0.0.0:6330"
+family = "member-job"
+address = "0.0.0.0"
+
+[log]
+    dir = "/data/log/member-job"
+    stdout=true
+
+[tracer]
+    proto = "udp"
+    addr = "172.16.33.46:5140"
+    tag = "platform/member-job"
+
+[multiHTTP]
+    [multiHTTP.inner]
+        addrs = ["0.0.0.0:6688"]
+        maxListen = 10
+
+[app]
+    key    = "4699a07e59d7149e"
+    secret = "test"
+
+[path]
+    accountInfo="http://uat-account.bilibili.co/api/internal/data/info"
+
+[httpClient]
+    dial      = "1s"
+    timeout   = "2s"
+    keepAlive = "60s"
+    timer     = 128
+    key    = "4699a07e59d7149e"
+    secret = "test"
+        [httpClient.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[memcache]
+    name = "member"
+    proto = "tcp"
+#    addr = "172.16.33.54:11211"
+    addr = "172.18.33.60:11233"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+
+[mysql]
+    addr = "172.16.33.205"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_member?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    IdleTimeout ="4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[accCheckMysql]
+    addr = "172.16.33.205:3306"
+    dsn = "account:wx2U1MwXRyWEuURw@tcp(172.16.33.205:3306)/account?timeout=50ms&readTimeout=300ms&writeTimeout=300ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 50
+    idle = 5
+    idleTimeout = "4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [accCheckMysql.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[accMysql]
+    addr = "172.16.33.205:3306"
+    dsn = "account:wx2U1MwXRyWEuURw@tcp(172.16.33.205:3306)/account?timeout=50ms&readTimeout=300ms&writeTimeout=300ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 50
+    idle = 5
+    idleTimeout = "4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [accMysql.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[asoMysql]
+    addr = "172.16.33.205:3306"
+    dsn = "aso:hA0DAnENNFz78kYB@tcp(172.16.33.205:3306)/aso?timeout=50ms&readTimeout=300ms&writeTimeout=300ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 50
+    idle = 5
+    idleTimeout = "4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [asoMysql.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[PasslogMysql]
+    addr = "172.16.33.205"
+    dsn = "account:wx2U1MwXRyWEuURw@tcp(172.16.33.205:3306)/account?timeout=500ms&readTimeout=500ms&writeTimeout=500ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 20
+    idle = 10
+    idleTimeout ="4h"
+    queryTimeout = "1000ms"
+    execTimeout = "500ms"
+    tranTimeout = "2000ms"
+    [PasslogMysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[PLogDatabus]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "AccountLog-MainAccount-S"
+    topic = "AccountLog-T"
+    action = "sub"
+    offset = "old"
+    buffer = 2048
+    name = "member-job/databus"
+    proto = "tcp"
+#    addr = "172.16.33.158:6205"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[logdatabus]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "AccountLog-MainAccount-S"
+    topic = "AccountLog-T"
+    action = "sub"
+    offset = "old"
+    buffer = 2048
+    name = "member-job/databus"
+    proto = "tcp"
+#    addr = "172.16.33.158:6205"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[expdatabus]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "AccountExp-MainAccount-S"
+    topic = "AccountExp-T"
+    action = "sub"
+    offset = "old"
+    buffer = 2048
+    name = "member-job/databus"
+    proto = "tcp"
+#    addr = "172.16.33.158:6205"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[logindatabus]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "PassportLog-MainAccount-S"
+    topic = "PassportLog-T"
+    action = "sub"
+    offset = "old"
+    buffer = 2048
+    name = "member-job/databus"
+    proto = "tcp"
+#    addr = "172.16.33.158:6205"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[awarddatabus]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "AccountLoginAward-MainAccount-S"
+    topic = "AccountLoginAward-T"
+    action = "sub"
+    offset = "new"
+    buffer = 2048
+    name = "coin-job/databus"
+    proto = "tcp"
+#    addr = "172.16.33.158:6205"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[accountnotify]
+    key = "4ba46ba31f9a44ef"
+    secret = "99985eb4451cfb1b899ca0fbe3c4bdc8"
+    group = "AccountNotify-Notify-P"
+    topic = "AccountNotify-T"
+    action = "pub"
+    buffer = 2048
+    name = "account-notify-job/databus"
+    proto = "tcp"
+#    addr = "172.16.33.158:6205"
+    addr = "172.18.33.50:6205"
+#    addr = "172.18.33.61:6889"
+#    addr = "172.16.33.56:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[sharemiddatabus]
+    key = "4ba46ba31f9a44ef"
+    secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+    group = "ShareMid-MainAccount-S"
+    topic = "ShareMid-T"
+    action = "sub"
+    offset = "old"
+    buffer = 2048
+    name = "member-job/databus"
+    proto = "tcp"
+#    addr = "172.16.33.158:6205"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[databus]
+    key = "4ba46ba31f9a44ef"
+    secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+    group = "MemberBinlog-MainAccount-S"
+    topic = "MemberBinlog-T"
+    action = "sub"
+    offset = "old"
+    buffer = 2048
+    name = "member-job/databus"
+    proto = "tcp"
+#    addr = "172.16.33.158:6205"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[passortDataBus]
+    key = "4ba46ba31f9a44ef"
+    secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+    group = "PassportPurgeCache-MainAccount-S"
+    topic = "PassportPurgeCache-T"
+    action = "sub"
+    offset = "old"
+    buffer = 2048
+    name = "member-job/databus"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[accDataBus]
+    key = "4ba46ba31f9a44ef"
+    secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+    group = "UserActive-MainAccount-S"
+    topic = "UserActive-T"
+    action = "sub"
+    offset = "old"
+    buffer = 2048
+    name = "member-job/databus"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[databusutil]
+    size = 100
+    chan = 1024
+    num = 4
+    ticker="30s"
+
+[redis]
+    name = "member-service"
+    proto = "tcp"
+#    addr = "172.16.33.54:6379"
+    addr = "172.18.33.60:6893"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "720h"
+    ansCountExpire = "12h"
+    ansAddFlagCountExpire = "1m"
+
+[report]
+taskID = "000293"
+proto = "unixgram"
+addr = "/var/run/lancer/collector.sock"
+chan = 1024
+timeout = "200ms"
+
+
+[blockdb]
+#	addr = "172.22.34.101:3306"
+#	dsn = "block:fGCs8LbV6c0nSXoyA9kdKwOpIiHa5hBq@tcp(172.22.34.101:3306)/bilibili_block?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	addr = "127.0.0.1:3306"
+	dsn = "test:test@tcp(127.0.0.1:3306)/test?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "1s"
+	execTimeout = "1s"
+	tranTimeout = "2s"
+	[db.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+
+[blockMemcache]
+	name = "block-service"
+	proto = "unix"
+	addr = "/tmp/uat-block-service-mc.sock"
+	idle = 5
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+
+[blockCreditDatabus]
+    key = "875d05ffa843e297"
+    secret= "1b58f18382f0e3662f64f8457c05c049"
+    group= "Credit-MainAccountLaw-S"
+    topic= "Credit-T"
+    action="sub"
+    name = "block-job/databus"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 2
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+
+[blockProperty]
+	limitExpireCheckLimit = 100
+	limitExpireCheckTick = "5m"
+	creditExpireCheckLimit = 100
+	creditExpireCheckTick = "5m"
+	msgURL = "http://message.bilibili.co/api/notify/send.user.notify.do"
+	[property.flag]
+	# 自动解禁检查
+	expireCheck = true
+	# 小黑屋答题状态订阅
+	creditSub = true
+	# 同步老库db
+    [property.msg]
+    	[property.msg.blockRemove]
+            code = "2_3_6"
+            title = "账号封禁解除通知"
+            content = "你的账号已经解除封禁，封禁期间禁止使用的各项社区功能已经恢复。请遵守社区规范，共同维护良好的社区氛围。"
+
+[biz]
+	realnameAlipayCheckTick  = "5m"
+	realnameAlipayCheckLimit = 100
+	realnameAlipayAppID      = "https://openapi.alipay.com/gateway.do"
+	realnameAlipayGateway = "2018062060353784"
+
+[ParsedRealnameAgent]
+TaskID="001826"
+Proto="tcp"
+Addr="dataflow.bilibili.co:5401"

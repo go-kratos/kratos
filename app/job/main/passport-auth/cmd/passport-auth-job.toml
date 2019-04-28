@@ -1,0 +1,110 @@
+synclines = 1000
+
+[AuthJobConfig]
+asoCleanUrl = "http://passport.bilibili.co/intranet/auth/delCache"
+
+[mysql]
+	addr = "172.22.34.101:3308"
+	dsn = "auth:ABQ3ewVrxyZsLpWb0EkJuCvN9M8aidf7@tcp(172.22.34.101:3308)/passport_auth?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["auth_reader:3odEZJ7YlOLpNzt4XVDxHTw9bi08C1M2@tcp(172.22.34.101:3308)/passport_auth?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 10
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "100ms"
+	execTimeout = "100ms"
+	tranTimeout = "200ms"
+	[mysql.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+
+[OldMySQL]
+	addr = "172.22.34.101:3309"
+	dsn = "aso:WsjbodupJcZlBeWPEiYyK8HOTIcp3n3Z@tcp(172.22.34.101:3309)/aso?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["aso:WsjbodupJcZlBeWPEiYyK8HOTIcp3n3Z@tcp(172.22.34.101:3309)/aso?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 10
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "100ms"
+	execTimeout = "100ms"
+	tranTimeout = "200ms"
+	[OldMySQL.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+
+[databus]
+	key = "4ba46ba31f9a44ef"
+	secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+	group = "Passport-MainAccount-AuthSync-S"
+	topic = "Passport-T"
+	action = "sub"
+	offset = "old"
+	buffer = 2048
+	name = "passport-auth-job/databus"
+	proto = "tcp"
+	addr = "172.18.33.50:6205"
+	idle = 1
+	active = 1
+	dialTimeout = "1s"
+	readTimeout = "60s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+
+[AuthDataBus]
+	key = "4ba46ba31f9a44ef"
+	secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+	group = "PassportAuthBinlog-MainAccount-S"
+	topic = "PassportAuthBinlog-T"
+	action = "sub"
+	offset = "old"
+	buffer = 2048
+	name = "passport-auth-job/databus"
+	proto = "tcp"
+	addr = "172.18.33.50:6205"
+	idle = 1
+	active = 1
+	dialTimeout = "1s"
+	readTimeout = "60s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+#	[AuthDataBus.discovery]
+#   		domain = "api.bilibili.co"
+#   		key = "7634436ea852e3f4"
+#   		secret = "test"
+
+[databusUtil]
+	size = 1
+	num = 2
+	ticker = "500ms"
+	chan = 100
+
+[memcache]
+	name = "passport-auth-job"
+	proto = "tcp"
+	addr = ""
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[HttpClientConfig]
+    key = "7634436ea852e3f4"
+    secret = "test"
+    dial = "100ms"
+    timeout = "350ms"
+    keepAlive = "60s"
+    timer = 1024
+    [HttpClientConfig.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 1.0
+        request = 100

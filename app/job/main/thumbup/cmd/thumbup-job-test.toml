@@ -1,0 +1,153 @@
+# thumbup job 
+
+[redis]
+    name = "thumbup-job"
+    proto = "tcp"
+    addr = "172.18.33.60:6981"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    statsExpire = "6h"
+    userLikesExpire = "1h"
+	itemLikesExpire = "6h"
+
+[memcache]
+    name = "thumbup-job"
+    proto = "tcp"
+    addr = "172.18.33.61:11230"
+    idle = 10
+    active = 10
+    dialTimeout = "2s"
+    readTimeout = "2s"
+    writeTimeout = "2s"
+    idleTimeout = "7h"
+    StatsExpire = "6h"
+
+[tidb]
+    addr = "172.22.34.51"
+    dsn = "likes:wy5taQn9CBKy9z5elbZQjnwMZOgpzk0r@tcp(172.22.34.51:4000)/bilibili_likes?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [tidb.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[itemTidb]    
+    addr = "172.22.34.51"
+    dsn = "likes:wy5taQn9CBKy9z5elbZQjnwMZOgpzk0r@tcp(172.22.34.51:4000)/bilibili_likes?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"
+    [itemTidb.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+
+[databus]
+    [databus.stat]
+        key = "9765cdac5894f2ba"
+        secret = "f4237d712c3ed1e7fab0137b81418b14"
+        group= "StatLike-MainWebSvr-P"
+        topic= "StatLike-T"
+        action="pub"
+        name = "thumbup-service/stat-pub"
+        proto = "tcp"
+        addr = "172.22.33.183:6205"
+        active = 5
+        idle = 1
+        dialTimeout = "1s"
+        readTimeout = "1s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+    [databus.like]
+        key = "9765cdac5894f2ba"
+        secret = "f4237d712c3ed1e7fab0137b81418b14"
+        group = "Thumbup-MainWebSvr-S"
+        topic = "Thumbup-T"
+        action = "sub"
+        name = "thumbup-T-sub"
+        proto = "tcp"
+        addr = "172.22.33.183:6205"
+        idle = 1
+        active = 1
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+    [databus.itemLikes]
+        key = "9765cdac5894f2ba"
+        secret = "f4237d712c3ed1e7fab0137b81418b14"
+        group = "ThumbupItem-MainWebSvr-S"
+        topic = "ThumbupItem-T"
+        action = "sub"
+        buffer = 2048
+        name = "itemLikes-sub"
+        proto = "tcp"
+        addr = "172.22.33.183:6205"
+        idle = 100
+        active = 100
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+    [databus.userLikes]
+        key = "9765cdac5894f2ba"
+        secret = "f4237d712c3ed1e7fab0137b81418b14"
+        group = "ThumbupUser-MainWebSvr-S"
+        topic = "ThumbupUser-T"
+        action = "sub"
+        buffer = 2048
+        name = "userLikes-sub"
+        proto = "tcp"
+        addr = "172.22.33.174:6205"
+        idle = 100
+        active = 100
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"    
+
+[thumbup]
+
+[merge]
+    maxSize = 51200
+    interval = "1m"
+    buffer = 10240
+    worker = 9
+
+[likedatabusutil]
+    size = 1
+    chan = 10240
+    num = 1
+    ticker = "1s"    
+[itemlikesdatabusutil]    
+    size = 100
+    chan = 10240
+    num = 10
+    ticker = "1s"
+[userlikesdatabusutil]
+    size = 100
+    chan = 10240
+    num = 10
+    ticker = "1s"
+    
+[statMerge]
+    business = "archive"
+    target = 8
+    sources = [1,2,3]

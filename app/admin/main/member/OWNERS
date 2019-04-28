@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- chenjianrong
+- muyang
+- zhaogangtao
+- zhoujiahui
+labels:
+- admin
+- admin/main/member
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- muyang
+- zhoujiahui

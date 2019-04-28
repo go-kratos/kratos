@@ -1,0 +1,37 @@
+[memcache]
+	name = "seo-interface"
+	proto = "tcp"
+	addr = "172.22.33.137:11221"
+	active = 50
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+#[log]
+#	dir = "/tmp/log/seo"
+
+[seo]
+	expire = 3600
+	maxAge = 3600
+	botList = ["bot", "spider"]
+
+[[sitemaps]]
+	host = "show.bilibili.com"
+	url = "http://uat-bfs.bilibili.co/openplatform/sitemaps/project.xml"
+[[sitemaps]]
+	host = "mall.bilibili.com"
+	url = "http://uat-bfs.bilibili.co/openplatform/sitemaps/item.xml"
+
+[[pages]]
+	name = "pro"
+	url = "http://uat-show.bilibili.com/platform/detail.html?id=%d"
+	bfs = "http://uat-bfs.bilibili.co/openplatform/project/%d.html"
+	path = "/tmp/seo/html/project/%d.html"
+[[pages]]
+	name = "item"
+	url = "http://uat-mall.bilibili.com/detail.html?itemsId=%d"
+	bfs = "http://uat-bfs.bilibili.co/openplatform/item/%d.html"
+	path = "/tmp/seo/html/item/%d.html"

@@ -1,0 +1,102 @@
+syntax = "proto3";
+package filter.service.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message FilterReq {
+    // area 过滤词库
+    string area = 1 ;
+    // message 过滤文本
+    string message = 2 ;
+    // type_id 分区id(非必要,默认0)
+    int64 type_id = 3 ;
+    // id 内容id(非必要,默认0)
+    int64 id = 4 ;
+    // oid 内容作用域id(非必要,默认0)
+    int64 oid = 5 ;
+    // mid 内容产生者mid(非必要,默认0)
+    int64 mid = 6 ;
+    // keys key维度过滤(非必要，默认"")
+    repeated string keys = 7 ;
+    // reply_type 评论稿件类型(非必要,默认0)
+    int32 reply_type = 8 ;
+}
+
+message ModelAiScore {
+    // scores:分值（越大越垃圾）
+    repeated double scores = 1;
+    // threshold：AI建议阀值
+    double threshold = 2;
+    // note
+    string note = 3;
+}
+
+message FilterReply {
+    // result 敏感词过滤返回文本(加*)
+    string result = 1 ;
+    // level 敏感词命中level
+    int32 level = 2 ;
+    // 命中的分区列表
+    repeated int64 type_ids = 3;
+    // 命中敏感词列表(与后台录入敏感词文本一致)
+    repeated string hit_rules = 4;
+    // limit 反垃圾code
+    int64 limit = 5 ;
+    // AI过滤返回结果
+    ModelAiScore ai = 6;
+
+}
+
+message MFilterReq {
+    // area 词库
+    string area = 1;
+    // msg_map map[index]msg,index为业务自定义,并透传返回
+    map<string,string> msg_map = 2;
+    // type_id 分区id(非必要,默认0)
+    int64 type_id = 3;
+}
+
+message MFilterReply {
+    // r_map map[index]FilterReply
+    map<string,FilterReply> r_map = 1;
+}
+
+message HitReq {
+    // area 词库
+    string area = 1;
+    // msg 过滤的文本
+    string msg = 2;
+    // tpid 分区id(非必要,默认0)
+    int64 type_id = 3;
+}
+
+message HitReply {
+    // hits []string,命中的词条
+    repeated string hits = 1;
+}
+
+message MHitReq {
+    // area 词库
+    string area = 1;
+    // msg_map map[index]msg,index为业务自定义,并透传返回
+    map<string,string> msg_map = 2;
+    // type_id 分区id(非必要,默认0)
+    int64 type_id = 3;
+}
+
+message MHitReply {
+    // r_map map[index]HitReply
+    map<string,HitReply> r_map = 1;
+}
+
+service Filter {
+    // Filter 单个过滤
+    rpc Filter(FilterReq) returns(FilterReply);
+    // MFilter 批量过滤
+    rpc MFilter(MFilterReq) returns(MFilterReply);
+    // Hit 返回命中记录
+    rpc Hit(HitReq) returns(HitReply);
+    // MHit
+    rpc MHit(MHitReq) returns(MHitReply);
+}

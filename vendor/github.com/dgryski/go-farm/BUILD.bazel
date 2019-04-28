@@ -1,0 +1,30 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "basics.go",
+        "farmhashcc.go",
+        "farmhashmk.go",
+        "farmhashna.go",
+        "farmhashuo.go",
+        "platform.go",
+    ],
+    importmap = "go-common/vendor/github.com/dgryski/go-farm",
+    importpath = "github.com/dgryski/go-farm",
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

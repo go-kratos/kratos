@@ -1,0 +1,13 @@
+syntax = "proto3";
+package live.approom.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// 获取banner配置(客户端)
+message GetBannerResp {
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+    string img = 2 [(gogoproto.jsontag) = "img"];
+    string link = 3 [(gogoproto.jsontag) = "link"];
+    string title = 4 [(gogoproto.jsontag) = "title"];
+}

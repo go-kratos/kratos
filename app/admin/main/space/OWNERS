@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- guanyanliang
+- liweijia
+- renwei
+- wuhao02
+labels:
+- admin
+- admin/main/space
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- guanyanliang
+- liweijia
+- wuhao02

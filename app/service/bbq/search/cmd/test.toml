@@ -1,0 +1,41 @@
+[log]
+    dir = "/data/log/bbq"
+
+[bm]
+    addr = "0.0.0.0:8803"
+    timeout = "1s"
+
+
+[mysql]
+	#addr = "127.0.0.1:3306"
+	#dsn = "root:123456@tcp(127.0.0.1:3306)/bbq?allowNativePasswords=true&timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	#readDSN = ["root:123456@tcp(127.0.0.2:3306)/bbq?allowNativePasswords=true&timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	addr = "172.16.38.91:3306"
+	dsn = "root:123456@tcp(172.16.38.91:3306)/bbq?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["root:123456@tcp(172.16.38.91:3306)/bbq?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "100ms"
+	execTimeout = "100ms"
+	tranTimeout = "200ms"
+
+[redis]
+	name = "search-service"
+	proto = "tcp"
+	addr = ""
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[es]
+    [es.bbq]
+        addr = ["http://172.16.38.91:9200"]
+        timeout = "1s"
+    [es.cms]
+        addr = ["http://172.16.38.91:9200"]
+        timeout = "1s"

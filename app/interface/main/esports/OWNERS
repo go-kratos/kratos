@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- guanyanliang
+- liweijia
+- zhapuyu
+labels:
+- interface
+- interface/main/esports
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- guanyanliang
+- liweijia
+- wuhao02

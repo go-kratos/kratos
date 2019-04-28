@@ -1,0 +1,31 @@
+syntax = "proto3";
+package live.riskcontrol.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// GetForbiddenReq
+message GetForbiddenReq {
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+    string uri = 2 [(gogoproto.moretags) = 'form:"uri" validate:"required"'];
+    string ip = 3 [(gogoproto.moretags) = 'form:"ip" validate:"required"'];
+    string method = 4 [(gogoproto.moretags) = 'form:"method" validate:"required"'];
+    map<string,string> header = 5 [(gogoproto.moretags) = 'form:"header" validate:"required"'];
+    string body = 6 [(gogoproto.moretags) = 'form:"body"  validate:"required"'];
+}
+
+// GetForbiddenReply
+message GetForbiddenReply {
+    enum ForbiddenRes {
+        PASS = 0;
+        FORBIDDEN = 1;
+        DOUBT = 2;
+    }
+    ForbiddenRes is_forbidden = 1 [(gogoproto.jsontag) = "is_forbidden"];
+    bool is_cache = 2 [(gogoproto.jsontag) = "is_cache"];
+    string reason = 3 [(gogoproto.jsontag) = "reason"];
+}
+
+service IsForbidden {
+    rpc GetForbidden(GetForbiddenReq) returns (GetForbiddenReply);
+}

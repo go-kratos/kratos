@@ -1,0 +1,84 @@
+# This is a TOML document. Boom.
+
+[compare]
+# NOTE:
+# startTime the mtime for compareproc to check from
+
+# endTime the mtime for compareproc to check to
+
+# stepDuration the duration step of compareproc to increase mtime,
+# need to be greater than zero,
+# the default value is 15m.
+
+# loopDuration the duration between two adjacent loops of compareproc,
+# need to be greater than or equal to zero,
+# the default value is 3s.
+
+# batchSize the batch size of selecting aso accounts from local aso_account table,
+# the default value is 1000.
+
+# batchMissRetryCount batch miss retry count of retrive aso accounts from local aso_account table,
+# the default value is 3.
+
+# debug if show debug messages,
+# if switch this to on, will log additional compareproc info,
+# such as the start time and end time of every loop.
+
+[compare.cloud2Local]
+on = false
+offsetFilePath = "/data/passport-game-data-job.c2l.offset"
+useOldOffset = true
+end = true
+startTime = "2017-11-15 22:24:45"
+endTime = "2018-01-25 12:00:00"
+delayDuration="15m"
+stepDuration = "10m"
+loopDuration = "1s"
+batchSize = 1001
+batchMissRetryCount = 4
+fix = true
+
+[compare.Local2Cloud]
+on = true
+offsetFilePath = "/data/passport-game-data-job.l2c.offset"
+useOldOffset = false
+end = true
+startTime = "2018-02-06 11:36:09"
+endTime = "2018-02-06 12:00:00"
+delayDuration="10m"
+stepDuration = "10m"
+loopDuration = "1s"
+batchSize = 1001
+batchMissRetryCount = 4
+fix =  true
+
+[db]
+[db.local]
+addr = "172.16.33.205:3306"
+dsn = "aso:hA0DAnENNFz78kYB@tcp(172.16.33.205:3306)/aso?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 2
+queryTimeout = "1s"
+execTimeout = "2s"
+tranTimeout = "2s"
+[db.local.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+
+[db.cloud]
+addr = "172.16.33.205:3306"
+dsn = "account:wx2U1MwXRyWEuURw@tcp(172.16.33.205:3306)/member_app1?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 2
+queryTimeout = "1s"
+execTimeout = "2s"
+tranTimeout = "2s"
+[db.cloud.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100

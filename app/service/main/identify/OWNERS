@@ -1,0 +1,14 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- wanghuan01
+- wucongyou
+labels:
+- main
+- service
+- service/main/identify
+options:
+  no_parent_owners: true
+reviewers:
+- wanghuan01
+- wucongyou

@@ -1,0 +1,23 @@
+syntax = "proto3";
+package model;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message VipInfo {
+    int64 Mid = 1 [(gogoproto.jsontag) = "mid"];
+    int32 VipType = 2 [(gogoproto.jsontag) = "vip_type"];
+    int32 VipStatus = 3 [(gogoproto.jsontag) = "vip_status"];
+    int64 VipStartTime = 4 [(gogoproto.jsontag) = "vip_start_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 VipOverdueTime = 5 [(gogoproto.jsontag) = "vip_overdue_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 AnnualVipOverdueTime = 6 [(gogoproto.jsontag) = "annual_vip_overdue_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int32 AccessStatus = 7 [(gogoproto.jsontag) = "access_status"];
+    int64 FrozenDate = 8 [(gogoproto.jsontag) = "frozen_date", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string VipStatusWarn = 9 [(gogoproto.jsontag) = "vip_status_warn"];
+    int64 VipRecentTime = 10 [(gogoproto.jsontag) = "vip_recent_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+

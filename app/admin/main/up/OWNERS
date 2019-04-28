@@ -1,0 +1,18 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- fengpengfei
+- shaojiatong
+- shencen
+- wangzhe01
+labels:
+- admin
+- admin/main/up
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- fengpengfei
+- haoguanwei
+- shaojiatong
+- shencen

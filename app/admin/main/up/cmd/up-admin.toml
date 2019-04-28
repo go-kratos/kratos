@@ -1,0 +1,201 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+
+consume = true
+istest = true
+IsMaster = true
+
+[host]
+    api = "http://api.bilibili.co"
+    live = "http://api.live.bilibili.co"
+    search = "http://bili-search.bilibili.co"
+    manager = "http://manager.bilibili.co"
+    data = "http://data.bilibili.co"
+    tag = "http://dl-test.bilibili.com"
+    videoup = "http://archive.api.bilibili.co"
+
+[xlog]
+    stdout = true
+
+[httpClient]
+    [httpClient.normal]
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "500ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.normal.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.slow]
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "1s"
+    timeout = "10s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.slow.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[HTTPServer]
+    addr = "0.0.0.0:7810"
+    timeout = "5s"
+
+[db]
+    [db.creative]
+    name = "[creative]tcp@172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_creative?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    idleTimeout ="4h"
+	queryTimeout = "5s"
+	execTimeout = "5s"
+	tranTimeout = "5s"
+	[db.creative.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+
+    [db.manager]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_manager?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "5s"
+    execTimeout = "5s"
+    tranTimeout = "10s"
+    [db.manager.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+    [db.upcrm]
+    dsn = "upcrm:DdL6c5JaWCYKMAQ10PURbfeImow9HXlx@tcp(172.16.33.205:3306)/bilibili_upcrm?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 1
+    idleTimeout = "4h"
+
+    [db.archiveOrm]
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_archive?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 1
+    idleTimeout = "4h"
+
+[articleRPC]
+    timeout = "1s"
+
+[GRPCClient]
+    [GRPCClient.Archive]
+      timeout = "30s"
+    [GRPCClient.Account]
+      timeout = "30s"
+
+[monitor]
+    moni="http://moni.bilibili.co/dashboard/db/databus?orgId=1"
+    host = "http://bap.bilibili.co"
+    username="fengpengfei"
+    appToken = "jLgSvndTeranxGMN"
+    appSecret = "CcCdlEBYqxqrgAieJuFVZUsgPmweLRms"
+    intervalAlarm = "5m"
+
+[memcache]
+    upExpire = "1800s"
+    [memcache.up]
+        name = "up-admin"
+        proto = "tcp"
+        addr = "172.16.0.148:11211"
+        idle = 5
+        active = 10
+        dialTimeout = "1s"
+        readTimeout = "1s"
+        writeTimeout = "1s"
+        idleTimeout = "80s"
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "3s"
+    timeout = "3s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "unix"
+    addr = "/tmp/uat-manager-auth-mc.sock"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[hbase]
+    master = ""
+    meta = ""
+    dialTimeout = "1s"
+    readTimeout = "150ms"
+    readsTimeout = "600ms"
+    writeTimeout = "200ms"
+    writesTimeout = "600ms"
+    [hbase.zookeeper]
+        root = ""
+        addrs = ["172.18.33.163:2181","172.18.33.164:2181","172.18.33.165:2181"]
+        timeout = "30s"
+
+[BfsConf]
+    addr        = "http://uat-bfs.bilibili.co"
+    bucket      = "upcrm"
+    key         = "9a261e35316e49b1"
+    secret      = "906c328bbabb0ffa140c1b291b7259"
+    # 上传文件大小限制为10M
+    maxFileSize = 10485760
+
+[TimeConf]
+    # 每天定时刷新排行
+    RefreshUpRankTime = "15:00:00"
+
+[MailConf]
+    host = "smtp.exmail.qq.com"
+    port = 465
+    username = "2333@bilibili.com"
+    password = "2333"

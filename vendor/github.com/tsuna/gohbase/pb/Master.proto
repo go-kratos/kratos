@@ -1,0 +1,797 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// All to do with the Master.  Includes schema management since these
+// changes are run by the Master process.
+package pb;
+
+option java_package = "org.apache.hadoop.hbase.protobuf.generated";
+option java_outer_classname = "MasterProtos";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+import "HBase.proto";
+import "Client.proto";
+import "ClusterStatus.proto";
+import "ErrorHandling.proto";
+import "Procedure.proto";
+import "Quota.proto";
+
+/* Column-level protobufs */
+
+message AddColumnRequest {
+  required TableName table_name = 1;
+  required ColumnFamilySchema column_families = 2;
+  optional uint64 nonce_group = 3 [default = 0];
+  optional uint64 nonce = 4 [default = 0];
+}
+
+message AddColumnResponse {
+}
+
+message DeleteColumnRequest {
+  required TableName table_name = 1;
+  required bytes column_name = 2;
+  optional uint64 nonce_group = 3 [default = 0];
+  optional uint64 nonce = 4 [default = 0];
+}
+
+message DeleteColumnResponse {
+}
+
+message ModifyColumnRequest {
+  required TableName table_name = 1;
+  required ColumnFamilySchema column_families = 2;
+  optional uint64 nonce_group = 3 [default = 0];
+  optional uint64 nonce = 4 [default = 0];
+}
+
+message ModifyColumnResponse {
+}
+
+/* Region-level Protos */
+
+message MoveRegionRequest {
+  required RegionSpecifier region = 1;
+  optional ServerName dest_server_name = 2;
+}
+
+message MoveRegionResponse {
+}
+
+/**
+ * Dispatch merging the specified regions.
+ */
+message DispatchMergingRegionsRequest {
+  required RegionSpecifier region_a = 1;
+  required RegionSpecifier region_b = 2;
+  optional bool forcible = 3 [default = false];
+}
+
+message DispatchMergingRegionsResponse {
+}
+
+message AssignRegionRequest {
+  required RegionSpecifier region = 1;
+}
+
+message AssignRegionResponse {
+}
+
+message UnassignRegionRequest {
+  required RegionSpecifier region = 1;
+  optional bool force = 2 [default = false];
+}
+
+message UnassignRegionResponse {
+}
+
+message OfflineRegionRequest {
+  required RegionSpecifier region = 1;
+}
+
+message OfflineRegionResponse {
+}
+
+/* Table-level protobufs */
+
+message CreateTableRequest {
+  required TableSchema table_schema = 1;
+  repeated bytes split_keys = 2;
+  optional uint64 nonce_group = 3 [default = 0];
+  optional uint64 nonce = 4 [default = 0];
+}
+
+message CreateTableResponse {
+  optional uint64 proc_id = 1;
+}
+
+message DeleteTableRequest {
+  required TableName table_name = 1;
+  optional uint64 nonce_group = 2 [default = 0];
+  optional uint64 nonce = 3 [default = 0];
+}
+
+message DeleteTableResponse {
+  optional uint64 proc_id = 1;
+}
+
+message TruncateTableRequest {
+  required TableName tableName = 1;
+  optional bool preserveSplits = 2 [default = false];
+  optional uint64 nonce_group = 3 [default = 0];
+  optional uint64 nonce = 4 [default = 0];
+}
+
+message TruncateTableResponse {
+}
+
+message EnableTableRequest {
+  required TableName table_name = 1;
+  optional uint64 nonce_group = 2 [default = 0];
+  optional uint64 nonce = 3 [default = 0];
+}
+
+message EnableTableResponse {
+  optional uint64 proc_id = 1;
+}
+
+message DisableTableRequest {
+  required TableName table_name = 1;
+  optional uint64 nonce_group = 2 [default = 0];
+  optional uint64 nonce = 3 [default = 0];
+}
+
+message DisableTableResponse {
+  optional uint64 proc_id = 1;
+}
+
+message ModifyTableRequest {
+  required TableName table_name = 1;
+  required TableSchema table_schema = 2;
+  optional uint64 nonce_group = 3 [default = 0];
+  optional uint64 nonce = 4 [default = 0];
+}
+
+message ModifyTableResponse {
+}
+
+/* Namespace-level protobufs */
+
+message CreateNamespaceRequest {
+  required NamespaceDescriptor namespaceDescriptor = 1;
+  optional uint64 nonce_group = 2 [default = 0];
+  optional uint64 nonce = 3 [default = 0];
+}
+
+message CreateNamespaceResponse {
+}
+
+message DeleteNamespaceRequest {
+  required string namespaceName = 1;
+  optional uint64 nonce_group = 2 [default = 0];
+  optional uint64 nonce = 3 [default = 0];
+}
+
+message DeleteNamespaceResponse {
+}
+
+message ModifyNamespaceRequest {
+  required NamespaceDescriptor namespaceDescriptor = 1;
+  optional uint64 nonce_group = 2 [default = 0];
+  optional uint64 nonce = 3 [default = 0];
+}
+
+message ModifyNamespaceResponse {
+}
+
+message GetNamespaceDescriptorRequest {
+  required string namespaceName = 1;
+}
+
+message GetNamespaceDescriptorResponse {
+  required NamespaceDescriptor namespaceDescriptor = 1;
+}
+
+message ListNamespaceDescriptorsRequest {
+}
+
+message ListNamespaceDescriptorsResponse {
+  repeated NamespaceDescriptor namespaceDescriptor = 1;
+}
+
+message ListTableDescriptorsByNamespaceRequest {
+  required string namespaceName = 1;
+}
+
+message ListTableDescriptorsByNamespaceResponse {
+  repeated TableSchema tableSchema = 1;
+}
+
+message ListTableNamesByNamespaceRequest {
+  required string namespaceName = 1;
+}
+
+message ListTableNamesByNamespaceResponse {
+  repeated TableName tableName = 1;
+}
+
+/* Cluster-level protobufs */
+
+
+message ShutdownRequest {
+}
+
+message ShutdownResponse {
+}
+
+message StopMasterRequest {
+}
+
+message StopMasterResponse {
+}
+
+message BalanceRequest {
+  optional bool force = 1;
+}
+
+message BalanceResponse {
+  required bool balancer_ran = 1;
+}
+
+message SetBalancerRunningRequest {
+  required bool on = 1;
+  optional bool synchronous = 2;
+}
+
+message SetBalancerRunningResponse {
+  optional bool prev_balance_value = 1;
+}
+
+message IsBalancerEnabledRequest {
+}
+
+message IsBalancerEnabledResponse {
+  required bool enabled = 1;
+}
+
+enum MasterSwitchType {
+  SPLIT = 0;
+  MERGE = 1;
+}
+
+message SetSplitOrMergeEnabledRequest {
+  required bool enabled = 1;
+  optional bool synchronous = 2;
+  repeated MasterSwitchType switch_types = 3;
+}
+
+message SetSplitOrMergeEnabledResponse {
+  repeated bool prev_value = 1;
+}
+
+message IsSplitOrMergeEnabledRequest {
+  required MasterSwitchType switch_type = 1;
+}
+
+message IsSplitOrMergeEnabledResponse {
+  required bool enabled = 1;
+}
+
+message NormalizeRequest {
+}
+
+message NormalizeResponse {
+  required bool normalizer_ran = 1;
+}
+
+message SetNormalizerRunningRequest {
+  required bool on = 1;
+}
+
+message SetNormalizerRunningResponse {
+  optional bool prev_normalizer_value = 1;
+}
+
+message IsNormalizerEnabledRequest {
+}
+
+message IsNormalizerEnabledResponse {
+  required bool enabled = 1;
+}
+
+message RunCatalogScanRequest {
+}
+
+message RunCatalogScanResponse {
+  optional int32 scan_result = 1;
+}
+
+message EnableCatalogJanitorRequest {
+  required bool enable = 1;
+}
+
+message EnableCatalogJanitorResponse {
+  optional bool prev_value = 1;
+}
+
+message IsCatalogJanitorEnabledRequest {
+}
+
+message IsCatalogJanitorEnabledResponse {
+  required bool value = 1;
+}
+
+message SnapshotRequest {
+	required SnapshotDescription snapshot = 1;
+}
+
+message SnapshotResponse {
+	required int64 expected_timeout = 1;
+}
+
+message GetCompletedSnapshotsRequest {
+}
+
+message GetCompletedSnapshotsResponse {
+	repeated SnapshotDescription snapshots = 1;
+}
+
+message DeleteSnapshotRequest {
+	required SnapshotDescription snapshot = 1;
+}
+
+message DeleteSnapshotResponse {
+}
+
+message RestoreSnapshotRequest {
+  required SnapshotDescription snapshot = 1;
+}
+
+message RestoreSnapshotResponse {
+}
+
+/* if you don't send the snapshot, then you will get it back
+ * in the response (if the snapshot is done) so you can check the snapshot
+ */
+message IsSnapshotDoneRequest {
+	optional SnapshotDescription snapshot = 1;
+}
+
+message IsSnapshotDoneResponse {
+	optional bool done = 1 [default = false];
+	optional SnapshotDescription snapshot = 2;
+}
+
+message IsRestoreSnapshotDoneRequest {
+  optional SnapshotDescription snapshot = 1;
+}
+
+message IsRestoreSnapshotDoneResponse {
+  optional bool done = 1 [default = false];
+}
+
+message GetSchemaAlterStatusRequest {
+  required TableName table_name = 1;
+}
+
+message GetSchemaAlterStatusResponse {
+  optional uint32 yet_to_update_regions = 1;
+  optional uint32 total_regions = 2;
+}
+
+message GetTableDescriptorsRequest {
+  repeated TableName table_names = 1;
+  optional string regex = 2;
+  optional bool include_sys_tables = 3 [default=false];
+  optional string namespace = 4;
+}
+
+message GetTableDescriptorsResponse {
+  repeated TableSchema table_schema = 1;
+}
+
+message GetTableNamesRequest {
+  optional string regex = 1;
+  optional bool include_sys_tables = 2 [default=false];
+  optional string namespace = 3;
+}
+
+message GetTableNamesResponse {
+  repeated TableName table_names = 1;
+}
+
+message GetClusterStatusRequest {
+}
+
+message GetClusterStatusResponse {
+  required ClusterStatus cluster_status = 1;
+}
+
+message IsMasterRunningRequest {
+}
+
+message IsMasterRunningResponse {
+  required bool is_master_running = 1;
+}
+
+message ExecProcedureRequest {
+  required ProcedureDescription procedure = 1;
+}
+
+message ExecProcedureResponse {
+  optional int64 expected_timeout = 1;
+  optional bytes return_data = 2;
+}
+
+message IsProcedureDoneRequest {
+  optional ProcedureDescription procedure = 1;
+}
+
+message IsProcedureDoneResponse {
+  optional bool done = 1 [default = false];
+  optional ProcedureDescription snapshot = 2;
+}
+
+message GetProcedureResultRequest {
+  required uint64 proc_id = 1;
+}
+
+message GetProcedureResultResponse {
+  enum State {
+    NOT_FOUND = 0;
+    RUNNING = 1;
+    FINISHED = 2;
+  }
+
+  required State state = 1;
+  optional uint64 start_time = 2;
+  optional uint64 last_update = 3;
+  optional bytes result = 4;
+  optional ForeignExceptionMessage exception = 5;
+}
+
+message AbortProcedureRequest {
+  required uint64 proc_id = 1;
+  optional bool mayInterruptIfRunning = 2 [default = true];
+}
+
+message AbortProcedureResponse {
+  required bool is_procedure_aborted = 1;
+}
+
+message ListProceduresRequest {
+}
+
+message ListProceduresResponse {
+  repeated Procedure procedure = 1;
+}
+
+message SetQuotaRequest {
+  optional string user_name = 1;
+  optional string user_group = 2;
+  optional string namespace = 3;
+  optional TableName table_name = 4;
+
+  optional bool remove_all = 5;
+  optional bool bypass_globals = 6;
+  optional ThrottleRequest throttle = 7;
+}
+
+message SetQuotaResponse {
+}
+
+message MajorCompactionTimestampRequest {
+  required TableName table_name = 1;
+}
+
+message MajorCompactionTimestampForRegionRequest {
+  required RegionSpecifier region = 1;
+}
+
+message MajorCompactionTimestampResponse {
+  required int64 compaction_timestamp = 1;
+}
+
+message SecurityCapabilitiesRequest {
+}
+
+message SecurityCapabilitiesResponse {
+  enum Capability {
+    SIMPLE_AUTHENTICATION = 0;
+    SECURE_AUTHENTICATION = 1;
+    AUTHORIZATION = 2;
+    CELL_AUTHORIZATION = 3;
+    CELL_VISIBILITY = 4;
+  }
+
+  repeated Capability capabilities = 1;
+}
+
+service MasterService {
+  /** Used by the client to get the number of regions that have received the updated schema */
+  rpc GetSchemaAlterStatus(GetSchemaAlterStatusRequest)
+    returns(GetSchemaAlterStatusResponse);
+
+  /** Get list of TableDescriptors for requested tables. */
+  rpc GetTableDescriptors(GetTableDescriptorsRequest)
+    returns(GetTableDescriptorsResponse);
+
+  /** Get the list of table names. */
+  rpc GetTableNames(GetTableNamesRequest)
+    returns(GetTableNamesResponse);
+
+  /** Return cluster status. */
+  rpc GetClusterStatus(GetClusterStatusRequest)
+    returns(GetClusterStatusResponse);
+
+  /** return true if master is available */
+  rpc IsMasterRunning(IsMasterRunningRequest) returns(IsMasterRunningResponse);
+
+  /** Adds a column to the specified table. */
+  rpc AddColumn(AddColumnRequest)
+    returns(AddColumnResponse);
+
+  /** Deletes a column from the specified table. Table must be disabled. */
+  rpc DeleteColumn(DeleteColumnRequest)
+    returns(DeleteColumnResponse);
+
+  /** Modifies an existing column on the specified table. */
+  rpc ModifyColumn(ModifyColumnRequest)
+    returns(ModifyColumnResponse);
+
+  /** Move the region region to the destination server. */
+  rpc MoveRegion(MoveRegionRequest)
+    returns(MoveRegionResponse);
+
+ /** Master dispatch merging the regions */
+  rpc DispatchMergingRegions(DispatchMergingRegionsRequest)
+    returns(DispatchMergingRegionsResponse);
+
+  /** Assign a region to a server chosen at random. */
+  rpc AssignRegion(AssignRegionRequest)
+    returns(AssignRegionResponse);
+
+  /**
+   * Unassign a region from current hosting regionserver.  Region will then be
+   * assigned to a regionserver chosen at random.  Region could be reassigned
+   * back to the same server.  Use MoveRegion if you want
+   * to control the region movement.
+   */
+  rpc UnassignRegion(UnassignRegionRequest)
+    returns(UnassignRegionResponse);
+
+  /**
+   * Offline a region from the assignment manager's in-memory state.  The
+   * region should be in a closed state and there will be no attempt to
+   * automatically reassign the region as in unassign.   This is a special
+   * method, and should only be used by experts or hbck.
+   */
+  rpc OfflineRegion(OfflineRegionRequest)
+    returns(OfflineRegionResponse);
+
+  /** Deletes a table */
+  rpc DeleteTable(DeleteTableRequest)
+    returns(DeleteTableResponse);
+
+  /** Truncate a table */
+  rpc truncateTable(TruncateTableRequest)
+    returns(TruncateTableResponse);
+
+  /** Puts the table on-line (only needed if table has been previously taken offline) */
+  rpc EnableTable(EnableTableRequest)
+    returns(EnableTableResponse);
+
+  /** Take table offline */
+  rpc DisableTable(DisableTableRequest)
+    returns(DisableTableResponse);
+
+  /** Modify a table's metadata */
+  rpc ModifyTable(ModifyTableRequest)
+    returns(ModifyTableResponse);
+
+  /** Creates a new table asynchronously */
+  rpc CreateTable(CreateTableRequest)
+    returns(CreateTableResponse);
+
+    /** Shutdown an HBase cluster. */
+  rpc Shutdown(ShutdownRequest)
+    returns(ShutdownResponse);
+
+  /** Stop HBase Master only.  Does not shutdown the cluster. */
+  rpc StopMaster(StopMasterRequest)
+    returns(StopMasterResponse);
+
+  /**
+   * Run the balancer.  Will run the balancer and if regions to move, it will
+   * go ahead and do the reassignments.  Can NOT run for various reasons.
+   * Check logs.
+   */
+  rpc Balance(BalanceRequest)
+    returns(BalanceResponse);
+
+  /**
+   * Turn the load balancer on or off.
+   * If synchronous is true, it waits until current balance() call, if outstanding, to return.
+   */
+  rpc SetBalancerRunning(SetBalancerRunningRequest)
+    returns(SetBalancerRunningResponse);
+
+  /**
+   * Query whether the Region Balancer is running.
+   */
+  rpc IsBalancerEnabled(IsBalancerEnabledRequest)
+    returns(IsBalancerEnabledResponse);
+
+  /**
+   * Turn the split or merge switch on or off.
+   * If synchronous is true, it waits until current operation call, if outstanding, to return.
+   */
+  rpc SetSplitOrMergeEnabled(SetSplitOrMergeEnabledRequest)
+    returns(SetSplitOrMergeEnabledResponse);
+
+  /**
+   * Query whether the split or merge switch is on/off.
+   */
+  rpc IsSplitOrMergeEnabled(IsSplitOrMergeEnabledRequest)
+    returns(IsSplitOrMergeEnabledResponse);
+
+  /**
+   * Run region normalizer. Can NOT run for various reasons. Check logs.
+   */
+  rpc Normalize(NormalizeRequest)
+  returns(NormalizeResponse);
+
+  /**
+   * Turn region normalizer on or off.
+   */
+  rpc SetNormalizerRunning(SetNormalizerRunningRequest)
+  returns(SetNormalizerRunningResponse);
+
+  /**
+   * Query whether region normalizer is enabled.
+   */
+  rpc IsNormalizerEnabled(IsNormalizerEnabledRequest)
+  returns(IsNormalizerEnabledResponse);
+
+  /** Get a run of the catalog janitor */
+  rpc RunCatalogScan(RunCatalogScanRequest)
+     returns(RunCatalogScanResponse);
+
+  /**
+   * Enable the catalog janitor on or off.
+   */
+  rpc EnableCatalogJanitor(EnableCatalogJanitorRequest)
+     returns(EnableCatalogJanitorResponse);
+
+  /**
+   * Query whether the catalog janitor is enabled.
+   */
+  rpc IsCatalogJanitorEnabled(IsCatalogJanitorEnabledRequest)
+     returns(IsCatalogJanitorEnabledResponse);
+
+  /**
+   * Call a master coprocessor endpoint
+   */
+  rpc ExecMasterService(CoprocessorServiceRequest)
+    returns(CoprocessorServiceResponse);
+
+  /**
+   * Create a snapshot for the given table.
+   */
+  rpc Snapshot(SnapshotRequest) returns(SnapshotResponse);
+
+  /**
+   * Get completed snapshots.
+   * Returns a list of snapshot descriptors for completed snapshots
+   */
+  rpc GetCompletedSnapshots(GetCompletedSnapshotsRequest) returns(GetCompletedSnapshotsResponse);
+
+  /**
+   * Delete an existing snapshot. This method can also be used to clean up an aborted snapshot.
+   */
+  rpc DeleteSnapshot(DeleteSnapshotRequest) returns(DeleteSnapshotResponse);
+
+  /**
+   * Determine if the snapshot is done yet.
+   */
+  rpc IsSnapshotDone(IsSnapshotDoneRequest) returns(IsSnapshotDoneResponse);
+
+  /**
+   * Restore a snapshot
+   */
+  rpc RestoreSnapshot(RestoreSnapshotRequest) returns(RestoreSnapshotResponse);
+
+  /**
+   * Determine if the snapshot restore is done yet.
+   */
+  rpc IsRestoreSnapshotDone(IsRestoreSnapshotDoneRequest) returns(IsRestoreSnapshotDoneResponse);
+
+  /**
+   * Execute a distributed procedure.
+   */
+  rpc ExecProcedure(ExecProcedureRequest) returns(ExecProcedureResponse);
+
+  /**
+   * Execute a distributed procedure with return data.
+   */
+  rpc ExecProcedureWithRet(ExecProcedureRequest) returns(ExecProcedureResponse);
+
+  /**
+   * Determine if the procedure is done yet.
+   */
+  rpc IsProcedureDone(IsProcedureDoneRequest) returns(IsProcedureDoneResponse);
+
+  /** return true if master is available */
+  /** rpc IsMasterRunning(IsMasterRunningRequest) returns(IsMasterRunningResponse); */
+
+  /** Modify a namespace's metadata */
+  rpc ModifyNamespace(ModifyNamespaceRequest)
+    returns(ModifyNamespaceResponse);
+
+  /** Creates a new namespace synchronously */
+  rpc CreateNamespace(CreateNamespaceRequest)
+    returns(CreateNamespaceResponse);
+
+  /** Deletes namespace synchronously */
+  rpc DeleteNamespace(DeleteNamespaceRequest)
+    returns(DeleteNamespaceResponse);
+
+  /** Get a namespace descriptor by name */
+  rpc GetNamespaceDescriptor(GetNamespaceDescriptorRequest)
+    returns(GetNamespaceDescriptorResponse);
+
+  /** returns a list of namespaces */
+  rpc ListNamespaceDescriptors(ListNamespaceDescriptorsRequest)
+    returns(ListNamespaceDescriptorsResponse);
+
+  /** returns a list of tables for a given namespace*/
+  rpc ListTableDescriptorsByNamespace(ListTableDescriptorsByNamespaceRequest)
+    returns(ListTableDescriptorsByNamespaceResponse);
+
+  /** returns a list of tables for a given namespace*/
+  rpc ListTableNamesByNamespace(ListTableNamesByNamespaceRequest)
+    returns(ListTableNamesByNamespaceResponse);
+
+  /** Apply the new quota settings */
+  rpc SetQuota(SetQuotaRequest) returns(SetQuotaResponse);
+
+  /** Returns the timestamp of the last major compaction */
+  rpc getLastMajorCompactionTimestamp(MajorCompactionTimestampRequest)
+    returns(MajorCompactionTimestampResponse);
+
+  /** Returns the timestamp of the last major compaction */
+  rpc getLastMajorCompactionTimestampForRegion(MajorCompactionTimestampForRegionRequest)
+    returns(MajorCompactionTimestampResponse);
+
+  rpc getProcedureResult(GetProcedureResultRequest)
+    returns(GetProcedureResultResponse);
+
+  /** Returns the security capabilities in effect on the cluster */
+  rpc getSecurityCapabilities(SecurityCapabilitiesRequest)
+    returns(SecurityCapabilitiesResponse);
+
+  /** Abort a procedure */
+  rpc AbortProcedure(AbortProcedureRequest)
+    returns(AbortProcedureResponse);
+
+  /** returns a list of procedures */
+  rpc ListProcedures(ListProceduresRequest)
+    returns(ListProceduresResponse);
+}

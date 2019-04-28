@@ -1,0 +1,13 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liangkai
+- zhapuyu
+- zhuangzhewei
+labels:
+- library
+- library/database/bfs
+reviewers:
+- liangkai
+- zhapuyu
+- zhuangzhewei

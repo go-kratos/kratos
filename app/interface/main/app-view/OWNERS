@@ -1,0 +1,18 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liweijia
+- peiyifei
+- xiequan
+- yujia
+labels:
+- interface
+- interface/main/app-view
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- haoguanwei
+- peiyifei
+- xiequan
+- yujia

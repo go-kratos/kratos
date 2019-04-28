@@ -1,0 +1,483 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// This file contains protocol buffers that are used for Client service.
+package pb;
+
+option java_package = "org.apache.hadoop.hbase.protobuf.generated";
+option java_outer_classname = "ClientProtos";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+import "HBase.proto";
+import "Filter.proto";
+import "Cell.proto";
+import "Comparator.proto";
+//import "MapReduce.proto";
+
+/**
+ * The protocol buffer version of Authorizations.
+ */
+message Authorizations {
+  repeated string label = 1;
+}
+
+/**
+ * The protocol buffer version of CellVisibility.
+ */
+message CellVisibility {
+  required string expression = 1;
+}
+
+/**
+ * Container for a list of column qualifier names of a family.
+ */
+message Column {
+  required bytes family = 1;
+  repeated bytes qualifier = 2;
+}
+
+/**
+ * Consistency defines the expected consistency level for an operation.
+ */
+enum Consistency {
+  STRONG   = 0;
+  TIMELINE = 1;
+}
+
+/**
+ * The protocol buffer version of Get.
+ * Unless existence_only is specified, return all the requested data
+ * for the row that matches exactly, or the one that immediately
+ * precedes it if closest_row_before is specified.
+ */
+message Get {
+  required bytes row = 1;
+  repeated Column column = 2;
+  repeated NameBytesPair attribute = 3;
+  optional Filter filter = 4;
+  optional TimeRange time_range = 5;
+  optional uint32 max_versions = 6 [default = 1];
+  optional bool cache_blocks = 7 [default = true];
+  optional uint32 store_limit = 8;
+  optional uint32 store_offset = 9;
+
+  // The result isn't asked for, just check for
+  // the existence.
+  optional bool existence_only = 10 [default = false];
+
+  // If the row to get doesn't exist, return the
+  // closest row before.
+  optional bool closest_row_before = 11 [default = false];
+
+  optional Consistency consistency = 12 [default = STRONG];
+  repeated ColumnFamilyTimeRange cf_time_range = 13;
+}
+
+message Result {
+  // Result includes the Cells or else it just has a count of Cells
+  // that are carried otherwise.
+  repeated Cell cell = 1;
+  // The below count is set when the associated cells are
+  // not part of this protobuf message; they are passed alongside
+  // and then this Message is just a placeholder with metadata.
+  // The count is needed to know how many to peel off the block of Cells as
+  // ours.  NOTE: This is different from the pb managed cell_count of the
+  // 'cell' field above which is non-null when the cells are pb'd.
+  optional int32 associated_cell_count = 2;
+
+  // used for Get to check existence only. Not set if existence_only was not set to true
+  //  in the query.
+  optional bool exists = 3;
+
+  // Whether or not the results are coming from possibly stale data 
+  optional bool stale = 4 [default = false];
+
+  // Whether or not the entire result could be returned. Results will be split when
+  // the RPC chunk size limit is reached. Partial results contain only a subset of the
+  // cells for a row and must be combined with a result containing the remaining cells
+  // to form a complete result
+  optional bool partial = 5 [default = false];
+}
+
+/**
+ * The get request. Perform a single Get operation.
+ */
+message GetRequest {
+  required RegionSpecifier region = 1;
+  required Get get = 2;
+}
+
+message GetResponse {
+  optional Result result = 1;
+}
+
+/**
+ * Condition to check if the value of a given cell (row,
+ * family, qualifier) matches a value via a given comparator.
+ *
+ * Condition is used in check and mutate operations.
+ */
+message Condition {
+  required bytes row = 1;
+  required bytes family = 2;
+  required bytes qualifier = 3;
+  required CompareType compare_type = 4;
+  required Comparator comparator = 5;
+}
+
+
+/**
+ * A specific mutation inside a mutate request.
+ * It can be an append, increment, put or delete based
+ * on the mutation type.  It can be fully filled in or
+ * only metadata present because data is being carried
+ * elsewhere outside of pb.
+ */
+message MutationProto {
+  optional bytes row = 1;
+  optional MutationType mutate_type = 2;
+  repeated ColumnValue column_value = 3;
+  optional uint64 timestamp = 4;
+  repeated NameBytesPair attribute = 5;
+  optional Durability durability = 6 [default = USE_DEFAULT];
+
+  // For some mutations, a result may be returned, in which case,
+  // time range can be specified for potential performance gain
+  optional TimeRange time_range = 7;
+  // The below count is set when the associated cells are NOT
+  // part of this protobuf message; they are passed alongside
+  // and then this Message is a placeholder with metadata.  The
+  // count is needed to know how many to peel off the block of Cells as
+  // ours.  NOTE: This is different from the pb managed cell_count of the
+  // 'cell' field above which is non-null when the cells are pb'd.
+  optional int32 associated_cell_count = 8;
+
+  optional uint64 nonce = 9;
+
+  enum Durability {
+    USE_DEFAULT  = 0;
+    SKIP_WAL     = 1;
+    ASYNC_WAL    = 2;
+    SYNC_WAL     = 3;
+    FSYNC_WAL    = 4;
+  }
+
+  enum MutationType {
+    APPEND = 0;
+    INCREMENT = 1;
+    PUT = 2;
+    DELETE = 3;
+  }
+
+  enum DeleteType {
+    DELETE_ONE_VERSION = 0;
+    DELETE_MULTIPLE_VERSIONS = 1;
+    DELETE_FAMILY = 2;
+    DELETE_FAMILY_VERSION = 3;
+  }
+
+  message ColumnValue {
+    required bytes family = 1;
+    repeated QualifierValue qualifier_value = 2;
+
+    message QualifierValue {
+      optional bytes qualifier = 1;
+      optional bytes value = 2;
+      optional uint64 timestamp = 3;
+      optional DeleteType delete_type = 4;
+      optional bytes tags = 5;
+    }
+  }
+}
+
+/**
+ * The mutate request. Perform a single Mutate operation.
+ *
+ * Optionally, you can specify a condition. The mutate
+ * will take place only if the condition is met.  Otherwise,
+ * the mutate will be ignored.  In the response result,
+ * parameter processed is used to indicate if the mutate
+ * actually happened.
+ */
+message MutateRequest {
+  required RegionSpecifier region = 1;
+  required MutationProto mutation = 2;
+  optional Condition condition = 3;
+  optional uint64 nonce_group = 4;
+}
+
+message MutateResponse {
+  optional Result result = 1;
+
+  // used for mutate to indicate processed only
+  optional bool processed = 2;
+}
+
+/**
+ * Instead of get from a table, you can scan it with optional filters.
+ * You can specify the row key range, time range, the columns/families
+ * to scan and so on.
+ *
+ * This scan is used the first time in a scan request. The response of
+ * the initial scan will return a scanner id, which should be used to
+ * fetch result batches later on before it is closed.
+ */
+message Scan {
+  repeated Column column = 1;
+  repeated NameBytesPair attribute = 2;
+  optional bytes start_row = 3;
+  optional bytes stop_row = 4;
+  optional Filter filter = 5;
+  optional TimeRange time_range = 6;
+  optional uint32 max_versions = 7 [default = 1];
+  optional bool cache_blocks = 8 [default = true];
+  optional uint32 batch_size = 9;
+  optional uint64 max_result_size = 10;
+  optional uint32 store_limit = 11;
+  optional uint32 store_offset = 12;
+  optional bool load_column_families_on_demand = 13; /* DO NOT add defaults to load_column_families_on_demand. */
+  optional bool small = 14;
+  optional bool reversed = 15 [default = false];
+  optional Consistency consistency = 16 [default = STRONG];
+  optional uint32 caching = 17;
+  optional bool allow_partial_results = 18;
+  repeated ColumnFamilyTimeRange cf_time_range = 19;
+}
+
+/**
+ * A scan request. Initially, it should specify a scan. Later on, you
+ * can use the scanner id returned to fetch result batches with a different
+ * scan request.
+ *
+ * The scanner will remain open if there are more results, and it's not
+ * asked to be closed explicitly.
+ *
+ * You can fetch the results and ask the scanner to be closed to save
+ * a trip if you are not interested in remaining results.
+ */
+message ScanRequest {
+  optional RegionSpecifier region = 1;
+  optional Scan scan = 2;
+  optional uint64 scanner_id = 3;
+  optional uint32 number_of_rows = 4;
+  optional bool close_scanner = 5;
+  optional uint64 next_call_seq = 6;
+  optional bool client_handles_partials = 7;
+  optional bool client_handles_heartbeats = 8;
+  optional bool track_scan_metrics = 9;
+  optional bool renew = 10 [default = false];
+}
+
+/**
+ * The scan response. If there are no more results, more_results will
+ * be false.  If it is not specified, it means there are more.
+ */
+message ScanResponse {
+  // This field is filled in if we are doing cellblocks.  A cellblock is made up
+  // of all Cells serialized out as one cellblock BUT responses from a server
+  // have their Cells grouped by Result.  So we can reconstitute the
+  // Results on the client-side, this field is a list of counts of Cells
+  // in each Result that makes up the response.  For example, if this field
+  // has 3, 3, 3 in it, then we know that on the client, we are to make
+  // three Results each of three Cells each.
+  repeated uint32 cells_per_result = 1;
+
+  optional uint64 scanner_id = 2;
+  optional bool more_results = 3;
+  optional uint32 ttl = 4;
+  // If cells are not carried in an accompanying cellblock, then they are pb'd here.
+  // This field is mutually exclusive with cells_per_result (since the Cells will
+  // be inside the pb'd Result)
+  repeated Result results = 5;
+  optional bool stale = 6;
+
+  // This field is filled in if we are doing cellblocks. In the event that a row
+  // could not fit all of its cells into a single RPC chunk, the results will be
+  // returned as partials, and reconstructed into a complete result on the client
+  // side. This field is a list of flags indicating whether or not the result
+  // that the cells belong to is a partial result. For example, if this field
+  // has false, false, true in it, then we know that on the client side, we need to
+  // make another RPC request since the last result was only a partial.
+  repeated bool partial_flag_per_result = 7;
+
+  // A server may choose to limit the number of results returned to the client for
+  // reasons such as the size in bytes or quantity of results accumulated. This field
+  // will true when more results exist in the current region.
+  optional bool more_results_in_region = 8;
+  
+  // This field is filled in if the server is sending back a heartbeat message.
+  // Heartbeat messages are sent back to the client to prevent the scanner from
+  // timing out. Seeing a heartbeat message communicates to the Client that the
+  // server would have continued to scan had the time limit not been reached.
+  optional bool heartbeat_message = 9;
+  
+  // This field is filled in if the client has requested that scan metrics be tracked.
+  // The metrics tracked here are sent back to the client to be tracked together with 
+  // the existing client side metrics.
+  //optional ScanMetrics scan_metrics = 10; // not in gohbase
+}
+
+/**
+ * Atomically bulk load multiple HFiles (say from different column families)
+ * into an open region.
+ */
+message BulkLoadHFileRequest {
+  required RegionSpecifier region = 1;
+  repeated FamilyPath family_path = 2;
+  optional bool assign_seq_num = 3;
+
+  message FamilyPath {
+    required bytes family = 1;
+    required string path = 2;
+  }
+}
+
+message BulkLoadHFileResponse {
+  required bool loaded = 1;
+}
+
+message CoprocessorServiceCall {
+  required bytes row = 1;
+  required string service_name = 2;
+  required string method_name = 3;
+  required bytes request = 4;
+}
+
+message CoprocessorServiceResult {
+  optional NameBytesPair value = 1;
+}
+
+message CoprocessorServiceRequest {
+  required RegionSpecifier region = 1;
+  required CoprocessorServiceCall call = 2;
+}
+
+message CoprocessorServiceResponse {
+  required RegionSpecifier region = 1;
+  required NameBytesPair value = 2;
+}
+
+// Either a Get or a Mutation
+message Action {
+  // If part of a multi action, useful aligning
+  // result with what was originally submitted.
+  optional uint32 index = 1;
+  optional MutationProto mutation = 2;
+  optional Get get = 3;
+  optional CoprocessorServiceCall service_call = 4;
+}
+
+/**
+ * Actions to run against a Region.
+ */
+message RegionAction {
+  required RegionSpecifier region = 1;
+  // When set, run mutations as atomic unit.
+  optional bool atomic = 2;
+  repeated Action action = 3;
+}
+
+/*
+* Statistics about the current load on the region
+*/
+message RegionLoadStats {
+  // Percent load on the memstore. Guaranteed to be positive, between 0 and 100.
+  optional int32 memstoreLoad = 1 [default = 0];
+  // Percent JVM heap occupancy. Guaranteed to be positive, between 0 and 100.
+  // We can move this to "ServerLoadStats" should we develop them.
+  optional int32 heapOccupancy = 2 [default = 0];
+  // Compaction pressure. Guaranteed to be positive, between 0 and 100.
+  optional int32 compactionPressure = 3 [default = 0];
+}
+
+message MultiRegionLoadStats{
+  repeated RegionSpecifier region = 1;
+  repeated RegionLoadStats stat = 2;
+}
+
+/**
+ * Either a Result or an Exception NameBytesPair (keyed by
+ * exception name whose value is the exception stringified)
+ * or maybe empty if no result and no exception.
+ */
+message ResultOrException {
+  // If part of a multi call, save original index of the list of all
+  // passed so can align this response w/ original request.
+  optional uint32 index = 1;
+  optional Result result = 2;
+  optional NameBytesPair exception = 3;
+  // result if this was a coprocessor service call
+  optional CoprocessorServiceResult service_result = 4;
+  // current load on the region
+  optional RegionLoadStats loadStats = 5 [deprecated=true];
+}
+
+/**
+ * The result of a RegionAction.
+ */
+message RegionActionResult {
+  repeated ResultOrException resultOrException = 1;
+  // If the operation failed globally for this region, this exception is set
+  optional NameBytesPair exception = 2;
+}
+
+/**
+ * Execute a list of actions on a given region in order.
+ * Nothing prevents a request to contains a set of RegionAction on the same region.
+ * For this reason, the matching between the MultiRequest and the MultiResponse is not
+ *  done by the region specifier but by keeping the order of the RegionActionResult vs.
+ *  the order of the RegionAction.
+ */
+message MultiRequest {
+  repeated RegionAction regionAction = 1;
+  optional uint64 nonceGroup = 2;
+  optional Condition condition = 3;
+}
+
+message MultiResponse {
+  repeated RegionActionResult regionActionResult = 1;
+  // used for mutate to indicate processed only
+  optional bool processed = 2;
+  optional MultiRegionLoadStats regionStatistics = 3;
+}
+
+
+service ClientService {
+  rpc Get(GetRequest)
+    returns(GetResponse);
+
+  rpc Mutate(MutateRequest)
+    returns(MutateResponse);
+
+  rpc Scan(ScanRequest)
+    returns(ScanResponse);
+
+  rpc BulkLoadHFile(BulkLoadHFileRequest)
+    returns(BulkLoadHFileResponse);
+
+  rpc ExecService(CoprocessorServiceRequest)
+    returns(CoprocessorServiceResponse);
+    
+  rpc ExecRegionServerService(CoprocessorServiceRequest)
+    returns(CoprocessorServiceResponse);
+
+  rpc Multi(MultiRequest)
+    returns(MultiResponse);
+}

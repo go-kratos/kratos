@@ -1,0 +1,246 @@
+[job]
+proc = 8
+searchNum = 20
+searchFlush = "100ms"
+batchNumber = 20
+
+[Xlog]
+stdout=true
+
+[bm]
+    addr = "0.0.0.0:10000"
+    timeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+
+[weight]
+like = 2
+hate = 4
+
+[statTypes] 
+"archive" = 1
+"article" = 12
+"playlist" = 18
+
+[host]
+activity = "http://uat-www.bilibili.com"
+message = "http://uat-message.bilibili.com"
+drawYoo = "http://uat-h.bilibili.com"
+search = "http://bili-search.bilibili.co"
+blackroom = "http://uat-blocked.bilibili.co"
+api = "http://uat-api.bilibili.co"
+liveVC = "http://api.vc.bilibili.co"
+liveAct = "http://api.live.bilibili.co"
+bangumi = "http://bangumi.bilibili.co"
+
+[httpClient]
+    key = "c1a1cb2d89c33794"
+    secret = "dda47eeca111e03e6845017505baea13"
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.breaker]
+    window  ="3s"
+    sleep   ="100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[drawyooHTTPClient]
+    key = "49df034922d68827"
+    secret = "92ce984f5c8b8415366838c6ee3e039f"
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+    [drawyooHTTPClient.breaker]
+    window  ="3s"
+    sleep   ="100ms"
+    bucket  = 10
+    ratio   = 0.1
+    request = 100
+
+[app]
+key = "c1a1cb2d89c33794"
+secret = "dda47eeca111e03e6845017505baea13"
+
+[rpcClient2]
+    [rpcClient2.account]
+        timeout = "30s"
+    [rpcClient2.archive]
+        timeout = "30s"
+    [rpcClient2.assist]
+        timeout = "30s"
+    [rpcClient2.article]
+        timeout = "30s"
+
+[mysql]
+    [mysql.reply]
+    addr= "172.22.34.101:3306"
+    dsn = "test_3306:UJPZaGKjpb2ylFx3HNhmLuwOYft4MCAi@tcp(172.22.34.101:3306)/bilibili_reply?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "200ms"
+    execTimeout = "200ms"
+    tranTimeout = "200ms"
+    [mysql.reply.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[redis]
+proto = "tcp"
+addr = "172.18.33.60:6889"
+idle = 10
+active = 10
+dialTimeout = "500ms"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "80s"
+indexExpire = "8h"
+userActExpire="1h"
+reportExpire = "24h"
+userCntExpire = "30s"
+notifyExpire = "24h"
+
+[memcache]
+proto = "tcp"
+addr = "172.18.33.61:11213"
+idle = 10
+active = 10
+dialTimeout = "2s"
+readTimeout = "2s"
+writeTimeout = "2s"
+idleTimeout = "80s"
+expire = "1h"
+
+[databus]
+    [databus.event]
+    key = "170e302355453683"
+    secret = "3d0e8db7bed0503949e545a469789279"
+    group = "Reply-MainCommunity-P"
+    topic = "Reply-T"
+    action ="pub"
+    name = "reply/event"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 2
+    active = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+    [databus.stats]
+    key = "170e302355453683"
+    secret = "3d0e8db7bed0503949e545a469789279"
+    group = "StatReply-MainCommunity-P"
+    topic = "StatReply-T"
+    action ="pub"
+    name = "reply/stats"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 2
+    active = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+    [databus.consumer]
+    key = "170e302355453683"
+    secret = "3d0e8db7bed0503949e545a469789279"
+    group = "ReplyAdd-MainCommunity-S"
+    topic = "ReplyAdd-T"
+    action ="sub"
+    name = "reply/job"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 2
+    active = 5
+    dialTimeout = "1s"
+    readTimeout = "40s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+    [databus.consumer.discovery]
+    domain = "api.bilibili.co"
+    key = "0c4b8fe3ff35a4b6"
+    secret = "b370880d1aca7d3a289b9b9a7f4d6812"
+    [databus.like]
+    key = "170e302355453683"
+    secret = "3d0e8db7bed0503949e545a469789279"
+    group = "StatLike-MainCommunity-S"
+    topic = "StatLike-T"
+    action ="sub"
+    name = "reply/job"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 2
+    active = 5
+    dialTimeout = "1s"
+    readTimeout = "40s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+    [databus.like.discovery]
+    domain = "api.bilibili.co"
+    key = "0c4b8fe3ff35a4b6"
+    secret = "b370880d1aca7d3a289b9b9a7f4d6812"
+
+[[stats]]
+    key = "0Pub71WwEMKXu63qtztu"
+    secret = "0Pub71WwEMKXu63qtztv"
+    group = "Stat-UGC-P"
+    topic = "Stat-T"
+    action ="pub"
+    name = "archive-service/stat"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    type = 1
+    field = "aid"
+[[stats]]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret = "0QEO9F8JuuIxZzNDvklI"
+    group = "ArticleStat-Article-P"
+    topic = "ArticleStat-T"
+    action ="pub"
+    name = "archive-service/stat"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    type = 12
+    field = "aid"
+[[stats]]
+    key = "0QEO9F8JuuIxZzNDvklH"
+    secret= "0QEO9F8JuuIxZzNDvklI"
+    group= "PlaylistStat-Playlist-P"
+    topic= "PlaylistStat-T"
+    action="pub"
+    name = "playlist-service/stat"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+    type = 18
+    field = "pid"

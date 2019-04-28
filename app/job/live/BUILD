@@ -1,0 +1,37 @@
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//app/job/live/dao-anchor-job/api/v1:all-srcs",
+        "//app/job/live/dao-anchor-job/cmd:all-srcs",
+        "//app/job/live/dao-anchor-job/internal/conf:all-srcs",
+        "//app/job/live/dao-anchor-job/internal/dao:all-srcs",
+        "//app/job/live/dao-anchor-job/internal/model:all-srcs",
+        "//app/job/live/dao-anchor-job/internal/server/http:all-srcs",
+        "//app/job/live/dao-anchor-job/internal/service:all-srcs",
+        "//app/job/live/gift:all-srcs",
+        "//app/job/live/push-search/cmd:all-srcs",
+        "//app/job/live/push-search/conf:all-srcs",
+        "//app/job/live/push-search/dao:all-srcs",
+        "//app/job/live/push-search/http:all-srcs",
+        "//app/job/live/push-search/model:all-srcs",
+        "//app/job/live/push-search/service:all-srcs",
+        "//app/job/live/recommend-job:all-srcs",
+        "//app/job/live/wallet:all-srcs",
+        "//app/job/live/xlottery:all-srcs",
+        "//app/job/live/xroom-feed/cmd:all-srcs",
+        "//app/job/live/xroom-feed/internal/dao:all-srcs",
+        "//app/job/live/xroom-feed/internal/model:all-srcs",
+        "//app/job/live/xroom-feed/internal/server/http:all-srcs",
+        "//app/job/live/xroom-feed/internal/service:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

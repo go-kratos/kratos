@@ -1,0 +1,574 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "go-common api",
+    "description": "api",
+    "version": "1.0",
+    "contact": {
+      "email": "lintanghui@bilibili.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "paths": {
+    "/x/admin/cache/cluster": {
+      "get": {
+        "operationId": "/x/admin/cache/cluster",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "app_id",
+            "description": "关联的appid",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Cluster",
+                    "type": "object"
+                  }
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x/admin/cache/cluster/add": {
+      "post": {
+        "operationId": "/x/admin/cache/cluster/add",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "hash_tag",
+            "description": "key hash 标识",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "description": "集群名字",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "node_conn",
+            "description": "集群内及诶单连接数 默认值 10",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "description": "缓存类型(memcache,redis,redis-cluster)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "hash_method",
+            "description": "哈希方法  默认fvn1a_64 默认值 fnv1a_64",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "ping_fail_limit",
+            "description": "节点失败检测次数",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "query",
+            "name": "dail_timeout",
+            "description": "dial 超时 默认值 100",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "query",
+            "name": "read_timeout",
+            "description": "read 超时 默认值 100",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "query",
+            "name": "listen_proto",
+            "description": "协议 默认值 tcp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "listen_addr",
+            "description": "监听地址",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "app_id",
+            "description": "集群关联的appid",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "write_timeout",
+            "description": "write 超时 默认值 100",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "query",
+            "name": "ping_auto_reject",
+            "description": "是否自动剔除节点",
+            "required": true,
+            "type": "boolean"
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "description": "主键id 更新的时候使用",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "hash_distribution",
+            "description": "key分布策略 默认为ketama一致性hash 默认值 ketama",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/EmpResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x/admin/cache/cluster/detail": {
+      "get": {
+        "operationId": "/x/admin/cache/cluster/detail",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "description": "集群id",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "Name",
+            "description": "集群名字",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/ClusterDtlResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x/admin/cache/cluster/modify": {
+      "post": {
+        "operationId": "/x/admin/cache/cluster/modify",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "Nodes",
+            "description": "节点信息 json数组 [{\"id\":11,\"addr\":\"11\",\"weight\":1,\"alias\":\"alias\"}]",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "description": "集群id",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "description": "操作(1 添加节点，2 删除节点；删除节点时只需要传alias)",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/EmpResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x/admin/cache/clusters": {
+      "get": {
+        "operationId": "/x/admin/cache/clusters",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "PN",
+            "description": " 默认值 1",
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "in": "query",
+            "name": "PS",
+            "description": " 默认值 20",
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务成功响应内容",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "错误码描述",
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/definitions/ClustersResp",
+                  "type": "object"
+                },
+                "message": {
+                  "description": "错误码文本描述",
+                  "type": "string"
+                },
+                "ttl": {
+                  "description": "客户端限速时间",
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Cluster": {
+      "title": "Cluster",
+      "description": "Cluster resp result of clusters.",
+      "required": [
+        "id",
+        "name",
+        "type",
+        "app_id",
+        "hash_method",
+        "hash_distribution",
+        "hash_tag",
+        "dail_timeout",
+        "read_timeout",
+        "write_timeout",
+        "node_conn",
+        "ping_fail_limit",
+        "ping_auto_reject",
+        "listen_proto",
+        "listen_addr",
+        "hit",
+        "qps",
+        "state",
+        "mem_ratio",
+        "nodes"
+      ],
+      "type": "object",
+      "properties": {
+        "app_id": {
+          "type": "string"
+        },
+        "dail_timeout": {
+          "description": "dial 超时",
+          "type": "integer",
+          "format": "int32"
+        },
+        "hash_distribution": {
+          "description": "key分布策略 默认为ketama一致性hash",
+          "type": "string"
+        },
+        "hash_method": {
+          "description": "哈希方法  默认sha1",
+          "type": "string"
+        },
+        "hash_tag": {
+          "description": "key hash 标识",
+          "type": "string"
+        },
+        "hit": {
+          "description": "集群命中率",
+          "type": "integer",
+          "format": "int64"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "listen_addr": {
+          "type": "string"
+        },
+        "listen_proto": {
+          "type": "string"
+        },
+        "mem_ratio": {
+          "description": "内存使用率",
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "description": "集群名字",
+          "type": "string"
+        },
+        "node_conn": {
+          "description": "集群内节点连接数",
+          "type": "integer",
+          "format": "int32"
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NodeDtl",
+            "type": "object"
+          }
+        },
+        "ping_auto_reject": {
+          "description": "是否自动剔除节点",
+          "type": "boolean"
+        },
+        "ping_fail_limit": {
+          "description": "节点失败检测次数",
+          "type": "integer",
+          "format": "int32"
+        },
+        "qps": {
+          "description": "集群qps",
+          "type": "integer",
+          "format": "int64"
+        },
+        "read_timeout": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "state": {
+          "description": "集群状态 （0-online ;1-offline）",
+          "type": "integer",
+          "format": "int64"
+        },
+        "type": {
+          "description": "缓存类型. (memcache,redis,redis-cluster)",
+          "type": "string"
+        },
+        "write_timeout": {
+          "description": "read 超时",
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "ClusterDtlResp": {
+      "title": "ClusterDtlResp",
+      "description": "ClusterDtlResp resp result of cluster detail.",
+      "required": [
+        "nodes"
+      ],
+      "type": "object",
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NodeDtl",
+            "type": "object"
+          }
+        }
+      }
+    },
+    "ClustersResp": {
+      "title": "ClustersResp",
+      "description": "ClustersResp resp result of clusters.",
+      "required": [
+        "clusters",
+        "total"
+      ],
+      "type": "object",
+      "properties": {
+        "clusters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Cluster",
+            "type": "object"
+          }
+        },
+        "total": {
+          "description": "总数量",
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "EmpResp": {
+      "title": "EmpResp",
+      "description": "EmpResp is empty resp.",
+      "type": "object"
+    },
+    "NodeDtl": {
+      "title": "NodeDtl",
+      "description": "NodeDtl cluster node detaiwl",
+      "required": [
+        "id",
+        "cid",
+        "addr",
+        "weight",
+        "alias",
+        "state",
+        "qps",
+        "mem_use",
+        "mem_toal"
+      ],
+      "type": "object",
+      "properties": {
+        "addr": {
+          "type": "string"
+        },
+        "alias": {
+          "type": "string"
+        },
+        "cid": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "mem_toal": {
+          "type": "number",
+          "format": "float"
+        },
+        "mem_use": {
+          "type": "number",
+          "format": "float"
+        },
+        "qps": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "state": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "weight": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  }
+}

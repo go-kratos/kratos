@@ -1,0 +1,16 @@
+[push]
+	key = "170e302355453683"
+	secret = "3d0e8db7bed0503949e545a469789279"
+	group = "BroadcastJob-MainCommunity-P"
+	topic = "BroadcastJob-T"
+	action ="pub"
+	name = "broadcast/service"
+	proto = "tcp"
+	addr = "172.18.33.50:6205"
+	idle = 2
+	active = 5
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1h"

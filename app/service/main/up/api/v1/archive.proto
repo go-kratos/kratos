@@ -1,0 +1,19 @@
+syntax = "proto3";
+package archive.service.up.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+// AidPubTime 发布时间的稿件aid的信息
+message AidPubTime {
+  // aid 稿件aid
+  int64 aid = 1 [(gogoproto.jsontag) = "aid"];
+  // pub_date 发布时间
+  int64 pub_date = 2 [
+    (gogoproto.jsontag) = "pubdate",
+    (gogoproto.casttype) = "go-common/library/time.Time"
+  ];
+  // copyright 版权来源
+  int32 copyright = 3 [(gogoproto.jsontag) = "copyright"];
+}

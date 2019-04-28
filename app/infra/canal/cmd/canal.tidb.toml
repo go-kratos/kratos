@@ -1,0 +1,11 @@
+[instance]
+  name = "thumbup"
+ 	ClusterID     = "1"
+ 	Addrs         = [""]
+ 	Offset        = 0
+ 	CommitTS      = 0
+ 	monitor_period = "1s"
+  [[instance.db]]
+    schema = "bilibili_likes"
+    [[instance.db.table]]
+      name = "counts"

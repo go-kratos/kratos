@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package captcha.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Captcha {
+    
+    /** 创建图片数字验证码
+     * 
+     */   
+    rpc create (CaptchaCreateReq) returns (CaptchaCreateResp);
+}
+
+
+
+message CaptchaCreateReq {
+    // 宽度
+    int64 width = 1 [(gogoproto.jsontag) = "width"];
+    // 高度
+    int64 height = 2 [(gogoproto.jsontag) = "height"];
+}
+
+message CaptchaCreateResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        string token = 1 [(gogoproto.jsontag) = "token"];
+        // 
+        string image = 2 [(gogoproto.jsontag) = "image"];
+    }
+}

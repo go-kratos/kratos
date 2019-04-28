@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package test.ep.sagaadmin.v1;
+
+option go_package = "v1";
+
+message PushMsgReq {
+  repeated string username = 1;
+  string content = 2;
+}
+
+message PushMsgReply {}
+
+service SagaAdmin {
+  rpc PushMsg(PushMsgReq) returns(PushMsgReply);
+}

@@ -1,0 +1,155 @@
+syntax = "proto3";
+
+package community.service.history.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "app/service/main/history/model/history.proto";
+
+option go_package = "v1";
+
+// AddHistoryReply reply
+message AddHistoryReply {
+}
+
+// AddHistoryReq req
+message AddHistoryReq {
+    // mid
+    int64 mid = 1 [(gogoproto.moretags) = "form:\"mid\" validate:\"required\""];
+    // business 业务
+    string business = 2 [(gogoproto.moretags) = "form:\"business\" validate:\"required\""];
+    // kid 业务中唯一id
+    int64 kid = 3 [(gogoproto.moretags) = "form:\"kid\" validate:\"required\""];
+    // aid
+    int64 aid = 4 [(gogoproto.moretags) = "form:\"aid\""];
+    // sid
+    int64 sid = 5 [(gogoproto.moretags) = "form:\"sid\""];
+    // epid
+    int64 epid = 6 [(gogoproto.moretags) = "form:\"epid\""];
+    // cid
+    int64 cid = 7 [(gogoproto.moretags) = "form:\"cid\""];
+    // sub_type 子类型
+    int32 sub_type = 8 [(gogoproto.moretags) = "form:\"sub_type\""];
+    // device 设备类型
+    int32 device = 9 [(gogoproto.moretags) = "form:\"device\""];
+    // progress 进度
+    int32 progress = 10 [(gogoproto.moretags) = "form:\"progress\""];
+    // 观看时间
+    int64 view_at = 11 [(gogoproto.moretags) = "form:\"view_at\" validate:\"required\""];
+}
+
+// AddHistoriesReq 增加多条记录
+message AddHistoriesReq {
+    repeated AddHistoryReq histories = 1;
+}
+
+// AddHistoriesReply .
+message AddHistoriesReply {
+}
+
+// DelHistoriesReq del histories request
+message DelHistoriesReq {
+    // mid
+    int64 mid = 1 [(gogoproto.moretags) = "form:\"mid\" validate:\"required,min=1\""];
+    message Record {
+        // business 业务
+        string business = 1 [(gogoproto.moretags) = "form:\"business\" validate:\"required\""];
+        // id
+        int64 id = 2 [(gogoproto.moretags) = "form:\"id\" validate:\"required\"", (gogoproto.customname) = "ID"];
+    }
+    repeated Record records = 2 [(gogoproto.moretags) = "validate:\"required\""];
+}
+
+//DelHistoriesReply del histories reply
+message DelHistoriesReply {
+}
+
+// ClearHistoryReq clear histories request
+message ClearHistoryReq {
+    // businesses 业务 为空为全部业务
+    repeated string businesses = 1 [(gogoproto.moretags) = 'form:"businesses,split"'];
+    // mid
+    int64 mid = 2 [(gogoproto.moretags) = "form:\"mid\" validate:\"required,min=1\""];
+}
+
+//ClearHistoryReply clear histories reply
+message ClearHistoryReply {
+}
+
+// UserHistoriesReq .
+message UserHistoriesReq {
+    // mid
+    int64 mid = 1 [(gogoproto.moretags) = "form:\"mid\" validate:\"required,min=1\""];
+    // businesses 查询的业务范围 为空为全部业务
+    repeated string businesses = 2 [(gogoproto.moretags) = 'form:"businesses,split"'];
+    // business 上一条的业务类型
+    string business = 3 [(gogoproto.moretags) = 'form:"business"'];
+    // kid 上一条的id 业务中唯一id
+    int64 kid = 4 [(gogoproto.moretags) = "form:\"kid\""];
+    // 上一条的观看时间
+    int64 view_at = 5 [(gogoproto.moretags) = 'form:"view_at" validate:"required"'];
+    // 每页几条
+    int64 Ps = 6[(gogoproto.moretags) = 'form:"ps" validate:"required,min=1,max=1000"'];
+}
+
+// UserHistoriesReply .
+message UserHistoriesReply {
+    repeated History histories = 1[(gogoproto.jsontag) = "histories"];
+}
+
+// HistoriesReq .
+message HistoriesReq {
+    // mid
+    int64 mid = 1 [(gogoproto.moretags) = "form:\"mid\" validate:\"required,min=1\""];
+    // business 业务
+    string business = 2 [(gogoproto.moretags) = 'form:"business" validate:"required"'];
+    // kids 业务id
+    repeated int64 kids = 3 [(gogoproto.moretags) = 'form:"kids,split" validate:"required"'];
+}
+
+// AddHistoriesReply .
+message HistoriesReply {
+    map<int64, History> histories = 1[(gogoproto.jsontag) = "histories"];
+}
+
+// UserHideReq req
+message UserHideReq {
+    // mid
+    int64 mid = 1 [(gogoproto.moretags) = "form:\"mid\" validate:\"required,min=1\""];
+}
+
+// UserHideReply reply
+message UserHideReply {
+    bool hide = 1 [(gogoproto.jsontag) = "hide"];
+}
+
+// UpdateUserHideReq req
+message UpdateUserHideReq {
+    // mid
+    int64 mid = 1 [(gogoproto.moretags) = 'form:"mid" validate:"required,min=1"'];
+    bool hide = 2 [(gogoproto.moretags) = 'form:"hide"'];
+}
+
+// UpdateUserHideReply reply
+message UpdateUserHideReply {
+}
+
+// History rpc
+service History {
+    // AddHistory add history. 增加播放历史接口
+    rpc AddHistory (AddHistoryReq) returns (AddHistoryReply);
+    // AddHistories 增加多条播放历史记录
+    rpc AddHistories (AddHistoriesReq) returns (AddHistoriesReply);
+    // DelHistories delete histories. 批量删除播放历史接口
+    rpc DelHistories (DelHistoriesReq) returns (DelHistoriesReply);
+    // ClearHistory clear history 按照业务删除所有播放记录
+    rpc ClearHistory (ClearHistoryReq) returns (ClearHistoryReply);
+    // UserHistories 查询用户的播放历史列表
+    rpc UserHistories (UserHistoriesReq) returns (UserHistoriesReply);
+    // Histories 根据id查询播放历史
+    rpc Histories (HistoriesReq) returns (HistoriesReply);
+    // UserHide 查询是否记录播放历史
+    rpc UserHide(UserHideReq) returns (UserHideReply);
+    // UpdateUserHide 修改是否记录播放历史
+    rpc UpdateUserHide(UpdateUserHideReq) returns (UpdateUserHideReply);
+}
+

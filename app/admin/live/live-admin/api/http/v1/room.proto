@@ -1,0 +1,64 @@
+syntax = "proto3";
+package live.liveadmin.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message RoomMngGetSecondVerifyListReq {
+  // 房间id
+  int64 room_id = 1 [(gogoproto.moretags) = 'form:"room_id"'];
+  // 分区id多个
+  string area = 2 [(gogoproto.moretags) = 'form:"area"'];
+  // 页数
+  int64 page = 3 [(gogoproto.moretags) = 'form:"page" validate:"required"'];
+  // 页码
+  int64 pagesize = 4 [(gogoproto.moretags) = 'form:"pagesize"'];
+  // 业务，0直播监控1直播鉴黄2房间举报
+  string biz = 5 [(gogoproto.moretags) = 'form:"biz"'];
+}
+
+message RoomMngGetSecondVerifyListResp {
+     
+  message Result {
+      // 日志id
+      int64 id = 1 [(gogoproto.jsontag) = "id"];
+      // 当天切断记录
+      int64 recent_cut_times = 2 [(gogoproto.jsontag) = "recent_cut_times"];
+      // 当天警告记录
+      int64 recent_warn_times = 3 [(gogoproto.jsontag) = "recent_warn_times"];
+      // 用户名
+      string uname = 4 [(gogoproto.jsontag) = "uname"];
+      // 房间号
+      int64 room_id = 5 [(gogoproto.jsontag) = "room_id"];
+      // 主播id
+      int64 uid = 6 [(gogoproto.jsontag) = "uid"];
+      // 房间标题
+      string title = 7 [(gogoproto.jsontag) = "title"];
+      // 分区名
+      string area_v2_name = 8 [(gogoproto.jsontag) = "area_v2_name"];
+      // 粉丝数
+      int64 fc = 9 [(gogoproto.jsontag) = "fc"];
+      // 警告理由
+      string warn_reason = 10 [(gogoproto.jsontag) = "warn_reason"];
+      // 图片列表
+      repeated string pics = 11 [(gogoproto.jsontag) = "pics"];
+      // 警告时间
+      string break_time = 12 [(gogoproto.jsontag) = "break_time"];
+      // 共计警告时间
+      int64 warn_times = 13 [(gogoproto.jsontag) = "warn_times"];
+  }
+      // 
+  repeated Result result = 1 [(gogoproto.jsontag) = "result"];
+  // 总数
+  int64 count = 2 [(gogoproto.jsontag) = "count"];
+  // 页码
+  int64 page = 3 [(gogoproto.jsontag) = "page"];
+  // 分页大小
+  int64 pagesize = 4 [(gogoproto.jsontag) = "pagesize"];
+}
+
+service roomMng{
+  // 获取带有图片地址的二次审核列表
+  // `method:"GET" internal:"true" `
+  rpc getSecondVerifyListWithPics(RoomMngGetSecondVerifyListReq) returns(RoomMngGetSecondVerifyListResp);
+}

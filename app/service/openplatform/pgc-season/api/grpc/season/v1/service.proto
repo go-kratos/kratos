@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+option java_package = "pleiades.business.service.season.season.v1";
+package pgc.service.season.season.v1;
+option java_multiple_files = true;
+option go_package = "v1";
+
+import "app/service/openplatform/pgc-season/api/grpc/season/v1/model.proto";
+
+// SeasonInfoReq season请求参数
+message SeasonInfoReq {
+    // season_ids
+    repeated int32 season_ids = 1;
+}
+
+// CardsInfoReply 卡片列表返回值
+message CardsInfoReply {
+    // cards
+    map<int32, CardInfoProto> cards = 1;
+}
+
+// SeasonIdReq season请求参数
+message SeasonIdReq {
+    // season_id
+    int32 season_id = 1;
+}
+
+// ProfileInfoReply 详情返回值
+message ProfileInfoReply {
+    // prfile
+    ProfileInfoProto profile = 1;
+}
+
+// SeasonAidReq aids请求参数
+message SeasonAidReq {
+    //aids
+    repeated int32 aids = 1;
+}
+
+// SectionReq 请求参数
+message SectionReq {
+    // season_ids
+    repeated int32 season_ids = 1;
+}
+
+// SectionReply 分节信息返回值
+message SectionReply {
+    // sections
+    map<int32, SectionProto> sections = 1;
+}
+
+// SeriesReq 请求参数
+message SeriesSeasonReq {
+    // series_ids
+    repeated int32 series_ids = 1;
+}
+
+// SeriesReply series
+message SeriesSeasonReply {
+    // seriesSeason
+    map<int32, SeriesSeasonsProto> seasons = 1;
+}
+
+// TimelineReq  时间表请求参数
+message TimelineReq {
+    // 开始时间戳
+    int64 start = 1;
+    // 结束时间戳
+    int64 end = 2;
+    // 类型
+    repeated int32 types = 3;
+    // 排序方式，默认0，按照更新时间正序，1表示按照更新时间倒序
+    int32 sort = 4;
+}
+
+// TimelineReply  时间表返回
+message TimelineReply {
+    repeated TimelineProto timeline = 1;
+}
+
+// Season service
+service Season {
+    // 根据season_ids返回卡片信息
+    rpc Cards (SeasonInfoReq) returns (CardsInfoReply);
+    // 根据aids返回卡片信息
+    rpc CardsByAids (SeasonAidReq) returns (CardsInfoReply);
+    // 根据season_id返回详情
+    rpc Profile (SeasonIdReq) returns (ProfileInfoReply);
+    // 根据开始结束时间和type获取时间表信息
+    rpc Timeline (TimelineReq) returns (TimelineReply);
+    // 根据season_ids返回分节信息
+    rpc Sections (SectionReq) returns (SectionReply);
+    // 根据series返回season信息
+    rpc SeriesSeason (SeriesSeasonReq) returns (SeriesSeasonReply);
+    // 根据season_id清除season相关mc 缓存
+    rpc ClearCache (SeasonIdReq) returns (EmptyProto);
+}

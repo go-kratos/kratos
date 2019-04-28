@@ -1,0 +1,974 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api/v1/api.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/x/internal/dapper/clt-status": {
+      "get": {
+        "summary": "CltStatus 获取 collector 信息",
+        "operationId": "CltStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CltStatusReply"
+            }
+          }
+        },
+        "tags": [
+          "DapperQuery"
+        ]
+      }
+    },
+    "/x/internal/dapper/depends-rank": {
+      "get": {
+        "summary": "DependsRank 查询某一个 service_name:operation_name 下所有依赖组件排名",
+        "operationId": "DependsRank",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DependsRankReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "rank_type",
+            "description": "排序类型 max_duration 最大耗时, min_duration 最小耗时, avg_duration 平均耗时, errors 错误数.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DapperQuery"
+        ]
+      }
+    },
+    "/x/internal/dapper/depends-topology": {
+      "get": {
+        "summary": "DependsTopology 获取依赖拓扑图",
+        "operationId": "DependsTopology",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DependsTopologyReply"
+            }
+          }
+        },
+        "tags": [
+          "DapperQuery"
+        ]
+      }
+    },
+    "/x/internal/dapper/list-span": {
+      "get": {
+        "summary": "ListSpan 列出一个 service_name 某一 operation_name 所有采样到 Span",
+        "operationId": "ListSpan",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListSpanReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "operation_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "order",
+            "description": "目前支持的 order \ntime:desc time:asc 按时间排序\nduration:desc duration:asc 按耗时排序.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "only_error",
+            "description": "只显示 error 的 span.",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "DapperQuery"
+        ]
+      }
+    },
+    "/x/internal/dapper/operation-names": {
+      "get": {
+        "summary": "ListOperationName 列出某一 service  下所有 operation_name 仅 span.kind 为 server 的 operation_name",
+        "operationId": "ListOperationName",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListOperationNameReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DapperQuery"
+        ]
+      }
+    },
+    "/x/internal/dapper/operation-names-rank": {
+      "get": {
+        "summary": "OperationNameRank 查询 OperationName 排名列表",
+        "operationId": "OperationNameRank",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1OperationNameRankReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "rank_type",
+            "description": "排序类型 max_duration 最大耗时, min_duration 最小耗时, avg_duration 平均耗时, errors 错误数.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DapperQuery"
+        ]
+      }
+    },
+    "/x/internal/dapper/ops-log": {
+      "get": {
+        "summary": "OpsLog 获取 通过 trace-id 获取 opslog 记录\n如果请求的 trace-id 没有被记录到, 则需要提供 service_name operation_name 和 timestamp 进行模糊查询",
+        "operationId": "OpsLog",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1OpsLogReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "trace_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "span_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "trace_field",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "service_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "operation_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "start",
+            "description": "开始时间.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "end",
+            "description": "结束时间.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "DapperQuery"
+        ]
+      }
+    },
+    "/x/internal/dapper/raw-trace": {
+      "get": {
+        "summary": "RawTrace 原始 Trace 数据",
+        "operationId": "RawTrace",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1RawTraceReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "trace_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DapperQuery"
+        ]
+      }
+    },
+    "/x/internal/dapper/sample-point": {
+      "get": {
+        "summary": "SamplePoint 获取采样点数据",
+        "operationId": "SamplePoint",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1SamplePointReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "operation_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "only_error",
+            "description": "only_error 在 errors 那个图可以指定为 true.",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "interval",
+            "description": "interval 使用 span-series 返回的 interval 即可.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "time",
+            "description": "time 使用 time-series 返回的时间即可，相同格式型如 2006-01-02T15:04:05.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DapperQuery"
+        ]
+      }
+    },
+    "/x/internal/dapper/service-depend": {
+      "get": {
+        "summary": "ServiceDepend 查询服务的直接依赖\nTODO: 通过最近收集的到3 个 span 实时计算的，在当前查询的服务出现不正常的时候，查询结果可能不准确",
+        "operationId": "ServiceDepend",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ServiceDependReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_name",
+            "description": "service_name 不解释!.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "operation_name",
+            "description": "operation_name 当 operation_name 为空时查询所有 operation_name 然后 merge 结果.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DapperQuery"
+        ]
+      }
+    },
+    "/x/internal/dapper/service-names": {
+      "get": {
+        "summary": "ListServiceName 列出所有 service",
+        "operationId": "ListServiceName",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListServiceNameReply"
+            }
+          }
+        },
+        "tags": [
+          "DapperQuery"
+        ]
+      }
+    },
+    "/x/internal/dapper/span-series": {
+      "get": {
+        "summary": "SpanSeries 获取 span 的时间序列数据",
+        "operationId": "SpanSeries",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1SpanSeriesReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "operation_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "fields",
+            "description": "可选的 fields 有 max_duration, min_duration, avg_duration, errors\n其中除 errors 返回的是一段时间内的总数 其他返回的都是平均数\nfields 是个数组可以通过 fields=max_duration,min_duration,avg_duration 逗号分隔.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DapperQuery"
+        ]
+      }
+    },
+    "/x/internal/dapper/trace": {
+      "get": {
+        "summary": "Trace 查询一个 Trace",
+        "operationId": "Trace",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1TraceReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "trace_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "span_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DapperQuery"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "v1Client": {
+      "type": "object",
+      "properties": {
+        "addr": {
+          "type": "string"
+        },
+        "err_count": {
+          "type": "string",
+          "format": "int64"
+        },
+        "rate": {
+          "type": "string",
+          "format": "int64"
+        },
+        "up_time": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1CltNode": {
+      "type": "object",
+      "properties": {
+        "node": {
+          "type": "string"
+        },
+        "queue_len": {
+          "type": "string",
+          "format": "int64"
+        },
+        "clients": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Client"
+          }
+        }
+      }
+    },
+    "v1CltStatusReply": {
+      "type": "object",
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1CltNode"
+          }
+        }
+      }
+    },
+    "v1DependsRankReply": {
+      "type": "object",
+      "properties": {
+        "rank_type": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1RankItem"
+          }
+        }
+      }
+    },
+    "v1DependsTopologyItem": {
+      "type": "object",
+      "properties": {
+        "service_name": {
+          "type": "string"
+        },
+        "depend_on": {
+          "type": "string"
+        }
+      }
+    },
+    "v1DependsTopologyReply": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1DependsTopologyItem"
+          }
+        }
+      }
+    },
+    "v1Field": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "v1ListOperationNameReply": {
+      "type": "object",
+      "properties": {
+        "operation_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "v1ListServiceNameReply": {
+      "type": "object",
+      "properties": {
+        "service_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "v1ListSpanReply": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1SpanListItem"
+          }
+        }
+      }
+    },
+    "v1Log": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Field"
+          }
+        }
+      }
+    },
+    "v1OperationNameRankReply": {
+      "type": "object",
+      "properties": {
+        "rank_type": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1RankItem"
+          }
+        }
+      }
+    },
+    "v1OpsLogRecord": {
+      "type": "object",
+      "properties": {
+        "time": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/v1TagValue"
+          }
+        },
+        "level": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "v1OpsLogReply": {
+      "type": "object",
+      "properties": {
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1OpsLogRecord"
+          }
+        }
+      }
+    },
+    "v1RankItem": {
+      "type": "object",
+      "properties": {
+        "service_name": {
+          "type": "string"
+        },
+        "operation_name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number",
+          "format": "double",
+          "title": "当 rank type 是 max_duration, min_duration, avg_duration 时 value 是纳秒\n当 rank type 是 errors 是 value 是错误数"
+        }
+      }
+    },
+    "v1RawTraceReply": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Span"
+          }
+        }
+      }
+    },
+    "v1SamplePointItem": {
+      "type": "object",
+      "properties": {
+        "trace_id": {
+          "type": "string"
+        },
+        "span_id": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string",
+          "format": "int64"
+        },
+        "is_error": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
+    "v1SamplePointReply": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1SamplePointItem"
+          }
+        }
+      }
+    },
+    "v1SeriesItem": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "title": "名称一般是请求的 field+{count|mean}"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          }
+        }
+      }
+    },
+    "v1ServiceDependItem": {
+      "type": "object",
+      "properties": {
+        "service_name": {
+          "type": "string",
+          "title": "service_name 依赖服务名称, service 为 AppID 其他为组件名 mysql, redis, http 等"
+        },
+        "component": {
+          "type": "string",
+          "title": "component, 通讯组件 e.g. net/http, goRPC, gRPC"
+        },
+        "operation_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "operation_names 被依赖服务的 operation_names, mysql, redis 等为空"
+        }
+      }
+    },
+    "v1ServiceDependReply": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1ServiceDependItem"
+          }
+        }
+      }
+    },
+    "v1Span": {
+      "type": "object",
+      "properties": {
+        "service_name": {
+          "type": "string"
+        },
+        "operation_name": {
+          "type": "string"
+        },
+        "trace_id": {
+          "type": "string"
+        },
+        "span_id": {
+          "type": "string"
+        },
+        "parent_id": {
+          "type": "string"
+        },
+        "start_time": {
+          "type": "string",
+          "format": "int64"
+        },
+        "duration": {
+          "type": "string",
+          "format": "int64"
+        },
+        "tags": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/v1TagValue"
+          }
+        },
+        "logs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Log"
+          }
+        },
+        "level": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "childs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Span"
+          }
+        }
+      }
+    },
+    "v1SpanListItem": {
+      "type": "object",
+      "properties": {
+        "trace_id": {
+          "type": "string"
+        },
+        "span_id": {
+          "type": "string"
+        },
+        "parent_id": {
+          "type": "string"
+        },
+        "service_name": {
+          "type": "string"
+        },
+        "operation_name": {
+          "type": "string"
+        },
+        "start_time": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/v1TagValue"
+          }
+        },
+        "is_error": {
+          "type": "boolean",
+          "format": "boolean",
+          "title": "Deprecated: use tags"
+        },
+        "container_ip": {
+          "type": "string"
+        },
+        "region_zone": {
+          "type": "string"
+        },
+        "mark": {
+          "type": "string"
+        }
+      }
+    },
+    "v1SpanSeriesReply": {
+      "type": "object",
+      "properties": {
+        "interval": {
+          "type": "string",
+          "format": "int64",
+          "title": "返回点的间隔"
+        },
+        "times": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1SeriesItem"
+          }
+        }
+      }
+    },
+    "v1TagValue": {
+      "type": "object",
+      "properties": {
+        "string_value": {
+          "type": "string"
+        },
+        "int64_value": {
+          "type": "string",
+          "format": "int64"
+        },
+        "bool_value": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "float_value": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    },
+    "v1TraceReply": {
+      "type": "object",
+      "properties": {
+        "service_count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "span_count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "max_level": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "root": {
+          "$ref": "#/definitions/v1Span"
+        }
+      }
+    }
+  }
+}

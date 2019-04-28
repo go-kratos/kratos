@@ -1,0 +1,487 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "app/service/main/up/api/v1/api.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/x/internal/uper/archive/up/count": {
+      "get": {
+        "summary": "UpCount 单个up主的稿件计数接口",
+        "operationId": "UpCount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpCountReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "mid",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Up"
+        ]
+      }
+    },
+    "/x/internal/uper/archive/up/passed": {
+      "get": {
+        "summary": "UpArcs 单个up主的稿件列表接口-带分页",
+        "operationId": "UpArcs",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpArcsReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "mid",
+            "description": "mid 用户id 必传.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "pn",
+            "description": "pn 第几页 非必传.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "ps",
+            "description": "ps 分页大小 非必传.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Up"
+        ]
+      }
+    },
+    "/x/internal/uper/archive/ups/count": {
+      "get": {
+        "summary": "UpsCount 多个up主的稿件计数接口",
+        "operationId": "UpsCount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpsCountReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "mids",
+            "description": "mids 多个用户id 必传 最大100个.",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "int64"
+            }
+          }
+        ],
+        "tags": [
+          "Up"
+        ]
+      }
+    },
+    "/x/internal/uper/archive/ups/passed": {
+      "get": {
+        "summary": "UpsArcs 多个up主的稿件列表接口-带分页",
+        "operationId": "UpsArcs",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpsArcsReply"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "mids",
+            "description": "mids 多个用户id 必传 最大100个.",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "pn",
+            "description": "pn 第几页 非必传.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "ps",
+            "description": "ps 分页大小 非必传.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Up"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "v1AidPubTime": {
+      "type": "object",
+      "properties": {
+        "Aid": {
+          "type": "string",
+          "format": "int64",
+          "title": "Aid 稿件aid"
+        },
+        "PubDate": {
+          "type": "string",
+          "format": "int64",
+          "title": "PubDate 发布时间"
+        },
+        "Copyright": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Copyright 版权来源"
+        }
+      },
+      "title": "AidPubTime 发布时间的稿件aid的信息"
+    },
+    "v1Arc": {
+      "type": "object",
+      "properties": {
+        "Aid": {
+          "type": "string",
+          "format": "int64"
+        },
+        "Videos": {
+          "type": "string",
+          "format": "int64"
+        },
+        "TypeID": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "TypeName": {
+          "type": "string"
+        },
+        "Copyright": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Pic": {
+          "type": "string"
+        },
+        "Title": {
+          "type": "string"
+        },
+        "PubDate": {
+          "type": "string",
+          "format": "int64"
+        },
+        "Ctime": {
+          "type": "string",
+          "format": "int64"
+        },
+        "Desc": {
+          "type": "string"
+        },
+        "State": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Access": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Attribute": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Tag": {
+          "type": "string"
+        },
+        "Tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "Duration": {
+          "type": "string",
+          "format": "int64"
+        },
+        "MissionID": {
+          "type": "string",
+          "format": "int64"
+        },
+        "OrderID": {
+          "type": "string",
+          "format": "int64"
+        },
+        "RedirectURL": {
+          "type": "string"
+        },
+        "Forward": {
+          "type": "string",
+          "format": "int64"
+        },
+        "Rights": {
+          "$ref": "#/definitions/v1Rights"
+        },
+        "Author": {
+          "$ref": "#/definitions/v1Author"
+        },
+        "Stat": {
+          "$ref": "#/definitions/v1Stat"
+        },
+        "ReportResult": {
+          "type": "string"
+        },
+        "Dynamic": {
+          "type": "string"
+        },
+        "FirstCid": {
+          "type": "string",
+          "format": "int64"
+        },
+        "Dimension": {
+          "$ref": "#/definitions/v1Dimension"
+        }
+      }
+    },
+    "v1Author": {
+      "type": "object",
+      "properties": {
+        "Mid": {
+          "type": "string",
+          "format": "int64"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Face": {
+          "type": "string"
+        }
+      }
+    },
+    "v1Dimension": {
+      "type": "object",
+      "properties": {
+        "Width": {
+          "type": "string",
+          "format": "int64"
+        },
+        "Height": {
+          "type": "string",
+          "format": "int64"
+        },
+        "Rotate": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1NoReply": {
+      "type": "object",
+      "title": "NoReply 没有返回值"
+    },
+    "v1Rights": {
+      "type": "object",
+      "properties": {
+        "Bp": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Elec": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Download": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Movie": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Pay": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "HD5": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "NoReprint": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Autoplay": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "UGCPay": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "v1Stat": {
+      "type": "object",
+      "properties": {
+        "Aid": {
+          "type": "string",
+          "format": "int64"
+        },
+        "View": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Danmaku": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Reply": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Fav": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Coin": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Share": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "NowRank": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "HisRank": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Like": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "DisLike": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "v1UpAidPubTimeReply": {
+      "type": "object",
+      "properties": {
+        "archives": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1AidPubTime"
+          }
+        }
+      },
+      "title": "UpAidPubTimeReply 按发布时间的单个up的稿件aid的返回值"
+    },
+    "v1UpArcsReply": {
+      "type": "object",
+      "properties": {
+        "archives": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Arc"
+          }
+        }
+      },
+      "title": "UpArcsReply 单个up主的稿件信息列表返回值"
+    },
+    "v1UpCountReply": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "title": "UpCountReply 单个up主的稿件计数返回值"
+    },
+    "v1UpsAidPubTimeReply": {
+      "type": "object",
+      "properties": {
+        "archives": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/v1UpAidPubTimeReply"
+          }
+        }
+      },
+      "title": "UpsAidPubTimeReply 按发布时间的多个up的稿件aid的返回值"
+    },
+    "v1UpsArcsReply": {
+      "type": "object",
+      "properties": {
+        "archives": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/v1UpArcsReply"
+          }
+        }
+      },
+      "title": "UpsArcsReply 多个up主的稿件信息列表返回值"
+    },
+    "v1UpsCountReply": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "int64"
+          }
+        }
+      },
+      "title": "UpsCountReply 多个up主的稿件计数返回值"
+    }
+  }
+}

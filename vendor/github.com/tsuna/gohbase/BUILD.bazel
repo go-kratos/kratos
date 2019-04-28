@@ -1,0 +1,46 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "admin_client.go",
+        "caches.go",
+        "client.go",
+        "rpc.go",
+        "scanner.go",
+    ],
+    importmap = "go-common/vendor/github.com/tsuna/gohbase",
+    importpath = "github.com/tsuna/gohbase",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/cznic/b:go_default_library",
+        "//vendor/github.com/sirupsen/logrus:go_default_library",
+        "//vendor/github.com/tsuna/gohbase/hrpc:go_default_library",
+        "//vendor/github.com/tsuna/gohbase/pb:go_default_library",
+        "//vendor/github.com/tsuna/gohbase/region:go_default_library",
+        "//vendor/github.com/tsuna/gohbase/zk:go_default_library",
+        "//vendor/golang.org/x/time/rate:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//vendor/github.com/tsuna/gohbase/filter:all-srcs",
+        "//vendor/github.com/tsuna/gohbase/hrpc:all-srcs",
+        "//vendor/github.com/tsuna/gohbase/pb:all-srcs",
+        "//vendor/github.com/tsuna/gohbase/region:all-srcs",
+        "//vendor/github.com/tsuna/gohbase/zk:all-srcs",
+    ],
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+)

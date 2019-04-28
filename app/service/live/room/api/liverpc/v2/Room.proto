@@ -1,0 +1,261 @@
+syntax = "proto3";
+
+package room.v2;
+
+option go_package = "v2";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Room {
+    
+    /** 根据房间id获取房间信息v2
+     * 修正：原来的get_info_by_id 在传了fields字段但是不包含roomid的情况下 依然会返回所有字段， 新版修正这个问题， 只会返回指定的字段.
+     */   
+    rpc get_by_ids (RoomGetByIdsReq) returns (RoomGetByIdsResp);
+    
+    /** 从uid得到room_id
+     * 
+     */   
+    rpc room_id_by_uid (RoomRoomIdByUidReq) returns (RoomRoomIdByUidResp);
+    
+    /** 批量从uids得到room_ids
+     * 
+     */   
+    rpc room_id_by_uid_multi (RoomRoomIdByUidMultiReq) returns (RoomRoomIdByUidMultiResp);
+    
+    /** 获取所有/分区在线房间id
+     * 只能内部调用
+     */   
+    rpc getOnlineRoomIds (RoomGetOnlineRoomIdsReq) returns (RoomGetOnlineRoomIdsResp);
+    
+    /** app房间页tab v2
+     * 
+     */   
+    rpc mobileTab (RoomMobileTabReq) returns (RoomMobileTabResp);
+}
+
+
+
+message RoomGetByIdsReq {
+    // 房间id, 尽可能传长号（支持短号，eg.短号1->长号40000，则返回的房间信息map key是40000）
+    repeated int64 ids = 1 [(gogoproto.jsontag) = "ids"];
+    // 是否需要附加uname、face字段，need_uinfo=1  尽量别传，传了请和@小卫报备！！
+    int64 need_uinfo = 2 [(gogoproto.jsontag) = "need_uinfo"];
+    // 是否需要broadcast_type字段，need_broadcast_type=1
+    int64 need_broadcast_type = 3 [(gogoproto.jsontag) = "need_broadcast_type"];
+    // 需要哪些字段, 不传默认给大多数字段
+    repeated string fields = 4 [(gogoproto.jsontag) = "fields"];
+    // 调用方来源，英文，格式约定：部门_服务_业务 eg.live_activity_spring
+    string from = 5 [(gogoproto.jsontag) = "from"];
+}
+
+message RoomGetByIdsResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 房间信息map
+    map<int64, RoomInfo> data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message RoomInfo {
+        // 房间id
+        int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+        // 用户名
+        string uname = 2 [(gogoproto.jsontag) = "uname"];
+        // 用户头像
+        string face = 3 [(gogoproto.jsontag) = "face"];
+        // 加v认证信息
+        string verify = 4 [(gogoproto.jsontag) = "verify"];
+        // 关键帧 注：need_uinfo=1时，该字段优先表示封面图
+        string cover = 5 [(gogoproto.jsontag) = "cover"];
+        // 用户id
+        int64 uid = 6 [(gogoproto.jsontag) = "uid"];
+        // 开播时间
+        string live_time = 7 [(gogoproto.jsontag) = "live_time"];
+        // 轮播投递状态 1开启 0关闭
+        int64 round_status = 8 [(gogoproto.jsontag) = "round_status"];
+        // 轮播开启状态 1开启 0关闭
+        int64 on_flag = 9 [(gogoproto.jsontag) = "on_flag"];
+        // 直播间标题
+        string title = 10 [(gogoproto.jsontag) = "title"];
+        // 直播间标签
+        string tags = 11 [(gogoproto.jsontag) = "tags"];
+        // 锁定到时间
+        string lock_status = 12 [(gogoproto.jsontag) = "lock_status"];
+        // 隐藏到时间
+        string hidden_status = 13 [(gogoproto.jsontag) = "hidden_status"];
+        // 封面
+        string user_cover = 14 [(gogoproto.jsontag) = "user_cover"];
+        // 短号
+        int64 short_id = 15 [(gogoproto.jsontag) = "short_id"];
+        // 在线人数
+        int64 online = 16 [(gogoproto.jsontag) = "online"];
+        // 分区id
+        int64 area = 17 [(gogoproto.jsontag) = "area"];
+        // 分区v2 id
+        int64 area_v2_id = 18 [(gogoproto.jsontag) = "area_v2_id"];
+        // 分区v2 父分区id
+        int64 area_v2_parent_id = 19 [(gogoproto.jsontag) = "area_v2_parent_id"];
+        // 分区是否开放pk 0关闭 1开放
+        int64 area_pk_status = 20 [(gogoproto.jsontag) = "area_pk_status"];
+        // 分区v2名字
+        string area_v2_name = 21 [(gogoproto.jsontag) = "area_v2_name"];
+        // 分区v2父分区名字
+        string area_v2_parent_name = 22 [(gogoproto.jsontag) = "area_v2_parent_name"];
+        // 关注人数
+        int64 attentions = 23 [(gogoproto.jsontag) = "attentions"];
+        // 房间背景图
+        string background = 24 [(gogoproto.jsontag) = "background"];
+        // 是否静默 0否,1注册会员,2全部
+        int64 room_silent = 25 [(gogoproto.jsontag) = "room_silent"];
+        // 是否使用房主的屏蔽用户，作为房间全局屏蔽用户，0：不使用，1：使用
+        int64 room_shield = 26 [(gogoproto.jsontag) = "room_shield"];
+        // 试用直播间到期时间
+        string try_time = 27 [(gogoproto.jsontag) = "try_time"];
+        // 直播间状态 0关播 1直播中 2轮播中
+        int64 live_status = 28 [(gogoproto.jsontag) = "live_status"];
+        // 横竖屏，只有传了need_broadcast_type才会返回  0横屏  1竖屏 -1异常情况
+        int64 broadcast_type = 29 [(gogoproto.jsontag) = "broadcast_type"];
+        // 
+        int64 virtual = 30 [(gogoproto.jsontag) = "virtual"];
+        // 
+        string ctime = 31 [(gogoproto.jsontag) = "ctime"];
+        // 
+        string mtime = 32 [(gogoproto.jsontag) = "mtime"];
+    }
+}
+
+
+
+message RoomRoomIdByUidReq {
+    // 用户uid
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+}
+
+message RoomRoomIdByUidResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // room_id
+        int64 room_id = 1 [(gogoproto.jsontag) = "room_id"];
+    }
+}
+
+
+
+message RoomRoomIdByUidMultiReq {
+    // 用户uids,单次请求数量限制：400
+    repeated int64 uids = 1 [(gogoproto.jsontag) = "uids"];
+}
+
+message RoomRoomIdByUidMultiResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 房间id map ['uid1' => roomid1, 'uid2' => roomid2]
+    map<string, string> data = 3 [(gogoproto.jsontag) = "data"];
+}
+
+
+
+message RoomGetOnlineRoomIdsReq {
+    // 父分区id，不传给所有
+    int64 parent_area_id = 1 [(gogoproto.jsontag) = "parent_area_id"];
+    // 二级分区id，不传给所有
+    int64 area_id = 2 [(gogoproto.jsontag) = "area_id"];
+    // 调用方来源 eg. live.lottery.xxx
+    string from = 3 [(gogoproto.jsontag) = "from"];
+}
+
+message RoomGetOnlineRoomIdsResp {
+    // 
+    string msg = 1 [(gogoproto.jsontag) = "msg"];
+    // 
+    int64 code = 2 [(gogoproto.jsontag) = "code"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // roomid 逗号分隔的字符串
+        string room_ids = 1 [(gogoproto.jsontag) = "room_ids"];
+    }
+}
+
+
+
+message RoomMobileTabReq {
+    // 房间号
+    int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+}
+
+message RoomMobileTabResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    repeated Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Grand {
+        // tab类型
+        string type = 1 [(gogoproto.jsontag) = "type"];
+        // 中文标题
+        string desc = 2 [(gogoproto.jsontag) = "desc"];
+        // h5链接
+        string url = 3 [(gogoproto.jsontag) = "url"];
+        // 1展示0不展示
+        int64 status = 4 [(gogoproto.jsontag) = "status"];
+        // 排序，值越小越靠前
+        int64 order = 5 [(gogoproto.jsontag) = "order"];
+        // 文案
+        string documents = 6 [(gogoproto.jsontag) = "documents"];
+        // 名称
+        string rank_name = 7 [(gogoproto.jsontag) = "rank_name"];
+    }
+       
+    message Sub {
+        // tab类型
+        string type = 1 [(gogoproto.jsontag) = "type"];
+        // 中文标题
+        string desc = 2 [(gogoproto.jsontag) = "desc"];
+        // h5链接
+        string url = 3 [(gogoproto.jsontag) = "url"];
+        // 1展示0不展示
+        int64 status = 4 [(gogoproto.jsontag) = "status"];
+        // 排序，值越小越靠前
+        int64 order = 5 [(gogoproto.jsontag) = "order"];
+        // 文案
+        string documents = 6 [(gogoproto.jsontag) = "documents"];
+        // 名称
+        string rank_name = 7 [(gogoproto.jsontag) = "rank_name"];
+        // 三级默认定位tab
+        string default_sub_tab = 8 [(gogoproto.jsontag) = "default_sub_tab"];
+        // 三级tab
+        repeated Grand sub_tab = 9 [(gogoproto.jsontag) = "sub_tab"];
+    }
+       
+    message Data {
+        // tab类型
+        string type = 1 [(gogoproto.jsontag) = "type"];
+        // 中文标题
+        string desc = 2 [(gogoproto.jsontag) = "desc"];
+        // h5链接，用来区分native还是h5
+        string url = 3 [(gogoproto.jsontag) = "url"];
+        // 1展示0不展示
+        int64 status = 4 [(gogoproto.jsontag) = "status"];
+        // 排序，值越小越靠前
+        int64 order = 5 [(gogoproto.jsontag) = "order"];
+        // 1默认定位0不是
+        int64 default = 6 [(gogoproto.jsontag) = "default"];
+        // 二级默认定位tab
+        string default_sub_tab = 7 [(gogoproto.jsontag) = "default_sub_tab"];
+        // 二级tab
+        repeated Sub sub_tab = 8 [(gogoproto.jsontag) = "sub_tab"];
+    }
+}

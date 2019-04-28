@@ -1,0 +1,143 @@
+syntax = "proto3";
+package live.daoanchor.v0;
+option go_package = "v0";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+message CreateCacheListReq {
+     repeated int64 room_ids = 1;
+     string content = 2;
+}
+
+message CreateCacheListResp {
+}
+
+message CreateLiveCacheListReq {
+     repeated int64 room_ids = 1;
+     string content = 2;
+}
+
+message CreateLiveCacheListResp {
+}
+
+message GetContentMapReq {
+
+}
+
+message GetContentMapResp {
+    map<string,int64> list = 1;
+}
+
+message CreateDBDataReq {
+      repeated int64 room_ids = 1;
+      string content = 2;
+}
+
+message CreateDBDataResp {
+}
+
+service CreateData {
+    // CreateCacheList 生成历史数据缓存列表
+    rpc CreateCacheList(CreateCacheListReq) returns (CreateCacheListResp);
+    // CreateLiveCacheList 生成开播历史数据缓存列表
+        rpc CreateLiveCacheList(CreateLiveCacheListReq) returns (CreateLiveCacheListResp);
+    // GetContentMap 获取需要生成历史数据的对象列表
+    rpc GetContentMap(GetContentMapReq) returns (GetContentMapResp);
+    rpc CreateDBData(CreateDBDataReq) returns (CreateDBDataResp);
+}
+
+message GetAnchorGradeListReq {
+
+}
+message GetAnchorGradeListResp {
+     repeated List list = 1 [(gogoproto.jsontag) = 'list'];
+        message List {
+            //主播评级id 1=>S;2=>A;3=>B...
+            int64 grade_id = 1 [(gogoproto.jsontag) = 'grade_id'];
+            //主播评级名称 S;A;B...
+            string grade_name = 2 [(gogoproto.jsontag) = 'grade_name'];
+            //人数基数
+            int64 base_online =3 [(gogoproto.jsontag) = 'online_base'];
+            //人气倍数
+            int64 popularity_rate =4 [(gogoproto.jsontag) = 'popularity_rate'];
+        }
+}
+message EditAnchorGradeReq {
+    int64 grade_id =1 [(gogoproto.moretags) = "validate:\"dive,gt=0,required\""];
+    int64 online_base = 2 [(gogoproto.moretags) = "validate:\"dive,gt=0,required\""];
+    int64 popularity_rate = 3 [(gogoproto.moretags) = "validate:\"dive,gt=0,required\""];
+}
+message EditAnchorGradeResp {
+
+}
+message AddAnchorGradeReq {
+    int64 id =1 [(gogoproto.moretags) = "validate:\"dive,gt=0,required\""];
+    int64 online_base = 2 [(gogoproto.moretags) = "validate:\"dive,gt=0,required\""];
+    int64 popularity_rate = 3 [(gogoproto.moretags) = "validate:\"dive,gt=0,required\""];
+}
+message AddAnchorGradeResp {
+
+}
+
+message GetContentListReq {
+    int64 page = 1;
+    int64 page_size = 2;
+}
+message GetContentListResp {
+     int64 page = 1;
+     int64 page_size = 2;
+     int64 total_count = 3;
+     repeated List list = 4 [(gogoproto.jsontag) = 'list'];
+        message List {
+            //父分区id
+            int64 parent_area_id = 1 [(gogoproto.jsontag) = 'parent_area_id'];
+            //父分区名称
+            string parent_area_name =2 [(gogoproto.jsontag) = 'parent_area_name'];
+            //二级分区信息<id,name>
+            map<int64,string> area_list = 3 [(gogoproto.jsontag) = 'area_list'];
+            //人气倍率系数
+            int64 popularity_rate =4 [(gogoproto.jsontag) = 'popularity_rate'];
+        }
+}
+message EditContentReq {
+    int64 id = 1 [(gogoproto.moretags) = "validate:\"dive,gt=0,required\""];
+    int64 popularity_rate = 2;
+    repeated int64 list =3;
+    int64 parent_id = 4;
+    int64 is_all =5;
+}
+message EditContentResp {
+
+}
+message AddContentReq {
+    int64 parent_id = 1 [(gogoproto.moretags) = "validate:\"dive,gt=0,required\""];
+    repeated int64 list = 2 [(gogoproto.moretags) = "validate:\"dive,gt=0,required\""];
+    int64 popularity_rate = 3 [(gogoproto.moretags) = "validate:\"dive,gt=0,required\""];
+    int64 is_all =4 [(gogoproto.moretags) = "validate:\"dive,gt=0,required\""];
+}
+message AddContentResp {
+
+}
+
+message DeleteContentReq {
+    int64 id = 1 [(gogoproto.moretags) = "validate:\"dive,gt=0,required\""];
+}
+message DeleteContentResp {
+
+}
+
+//人气相关接口
+service Popularity {
+    // GetAnchorGradeList 获取人气值主播评级列表
+    rpc GetAnchorGradeList(GetAnchorGradeListReq) returns (GetAnchorGradeListResp);
+    // EditAnchorGrade  编辑主播评级对应的人气值数据
+    rpc EditAnchorGrade(EditAnchorGradeReq) returns (EditAnchorGradeResp);
+    // GetContentList  人气内容系数列表
+    rpc GetContentList(GetContentListReq) returns (GetContentListResp);
+    // AddContent 添加内容系数
+    rpc AddContent(AddContentReq) returns (AddContentResp);
+    // EditContent 编辑内容系数
+    rpc EditContent(EditContentReq) returns (EditContentResp);
+    // DeleteContent 删除内容系数
+    rpc DeleteContent(DeleteContentReq) returns (DeleteContentResp);
+}

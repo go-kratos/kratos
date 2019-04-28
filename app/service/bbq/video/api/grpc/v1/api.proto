@@ -1,0 +1,239 @@
+syntax = "proto3";
+package bbq.service.video.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+message ImportVideoInfo{
+    int64 avid = 1 [(gogoproto.jsontag) = "avid",(gogoproto.moretags) = "form:\"avid\"",(gogoproto.customname)= "AVID"];
+    int64 cid = 2 [(gogoproto.jsontag) = "cid",(gogoproto.moretags) = "form:\"avid\"",(gogoproto.customname)= "CID"];
+    int64 mid = 3 [(gogoproto.jsontag) = "mid",(gogoproto.moretags) = "form:\"mid\"",(gogoproto.customname)= "MID"];
+    string title = 4 [(gogoproto.jsontag) = "title",(gogoproto.moretags) = "form:\"title\""];
+    string content = 5 [(gogoproto.jsontag) = "content",(gogoproto.moretags) = "form:\"content\""];
+    int64 original = 6 [(gogoproto.jsontag) = "original",(gogoproto.moretags) = "form:\"original\""];
+    int64 duration = 7 [(gogoproto.jsontag) = "duration",(gogoproto.moretags) = "form:\"duration\""];
+    int64 state = 8 [(gogoproto.jsontag) = "state",(gogoproto.moretags) = "form:\"state\""];
+    string tag = 9 [(gogoproto.jsontag) = "tag",(gogoproto.moretags) = "form:\"tag\""];
+    string pubtime = 10 [(gogoproto.jsontag) = "pubtime",(gogoproto.moretags) = "form:\"pubtime\""];
+    int64 tid = 11 [(gogoproto.jsontag) = "tid",(gogoproto.moretags) = "form:\"tid\"",(gogoproto.customname)= "TID"];
+    int64 sub_tid = 12 [(gogoproto.jsontag) = "sub_tid",(gogoproto.moretags) = "form:\"sub_tid\"",(gogoproto.customname)= "SubTID"];
+    int64 is_full_screen = 13 [(gogoproto.jsontag) = "is_full_screen",(gogoproto.moretags) = "form:\"is_full_screen\""];
+    string cover_url = 14 [(gogoproto.jsontag) = "cover_url",(gogoproto.moretags) = "form:\"cover_url\""];
+    int64 cover_width = 15 [(gogoproto.jsontag) = "cover_width",(gogoproto.moretags) = "form:\"cover_width\""];
+    int64 cover_height = 16 [(gogoproto.jsontag) = "cover_height",(gogoproto.moretags) = "form:\"cover_height\""];
+    int64 from = 17 [(gogoproto.jsontag) = "from",(gogoproto.moretags) = "form:\"from\""];
+    int64 svid = 18 [(gogoproto.jsontag) = "svid",(gogoproto.moretags) = "form:\"svid\""];
+    string home_img_url = 19 [(gogoproto.jsontag) = "home_img_url",(gogoproto.moretags) = "form:\"home_img_url\""];
+    int64 home_img_width = 20 [(gogoproto.jsontag) = "home_img_width",(gogoproto.moretags) = "form:\"home_img_width\""];
+    int64 home_img_height = 21 [(gogoproto.jsontag) = "home_img_height",(gogoproto.moretags) = "form:\"home_img_height\""];
+}
+
+message VideoBase{
+    int64   avid            = 1  [(gogoproto.jsontag) = "avid",(gogoproto.moretags) = "form:\"avid\""];
+    int64   cid             = 2  [(gogoproto.jsontag) = "cid",(gogoproto.moretags) = "form:\"avid\""];
+    int64   mid             = 3  [(gogoproto.jsontag) = "mid",(gogoproto.moretags) = "form:\"mid\""];
+    string  title           = 4  [(gogoproto.jsontag) = "title",(gogoproto.moretags) = "form:\"title\""];
+    string  content         = 5  [(gogoproto.jsontag) = "content",(gogoproto.moretags) = "form:\"content\""];
+    int64   original        = 6  [(gogoproto.jsontag) = "original",(gogoproto.moretags) = "form:\"original\""];
+    int64   duration        = 7  [(gogoproto.jsontag) = "duration",(gogoproto.moretags) = "form:\"duration\""];
+    int64   state           = 8  [(gogoproto.jsontag) = "state",(gogoproto.moretags) = "form:\"state\""];
+    string  tag             = 9  [(gogoproto.jsontag) = "tag",(gogoproto.moretags) = "form:\"tag\""];
+    int64   pubtime         = 10 [(gogoproto.jsontag) = "pubtime", (gogoproto.moretags) = 'form:"tag"', (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64   tid             = 11 [(gogoproto.jsontag) = "tid",(gogoproto.moretags) = "form:\"tid\""];
+    int64   sub_tid         = 12 [(gogoproto.jsontag) = "sub_tid",(gogoproto.moretags) = "form:\"sub_tid\""];
+    int64   is_full_screen  = 13 [(gogoproto.jsontag) = "is_full_screen",(gogoproto.moretags) = "form:\"is_full_screen\""];
+    string  cover_url       = 14 [(gogoproto.jsontag) = "cover_url",(gogoproto.moretags) = "form:\"cover_url\""];
+    int64   cover_width     = 15 [(gogoproto.jsontag) = "cover_width",(gogoproto.moretags) = "form:\"cover_width\""];
+    int64   cover_height    = 16 [(gogoproto.jsontag) = "cover_height",(gogoproto.moretags) = "form:\"cover_height\""];
+    int64   from            = 17 [(gogoproto.jsontag) = "from",(gogoproto.moretags) = "form:\"from\""];
+    int64   svid            = 18 [(gogoproto.jsontag) = "svid",(gogoproto.moretags) = "form:\"svid\""];
+    uint64  limits          = 19 [(gogoproto.jsontag) = "limits"];
+}
+
+message SyncVideoTagRequest{
+    repeated TagInfo tag_infos = 1 [(gogoproto.jsontag) = "tag_infos",(gogoproto.moretags) = "form:\"tag_infos\""];
+}
+message TagInfo{
+    int32 tag_type = 1 [(gogoproto.jsontag) = "tag_type",(gogoproto.moretags) = "form:\"tag_type\""];
+    string tag_name = 2 [(gogoproto.jsontag) = "tag_name",(gogoproto.moretags) = "form:\"tag_name\""];
+}
+
+message SvStatisticsInfoReq{
+    repeated int64 svid_list = 1 [(gogoproto.jsontag) = "svid_list",(gogoproto.moretags) = "form:\"svid_list\""];
+}
+message SvStatisticsInfoRes{
+    map<int64,SvStInfo> svst_info_map =1 [(gogoproto.jsontag) = "svst_info_map",(gogoproto.moretags) = "form:\"svst_info_map\""];
+}
+message SvStInfo{
+    int64 svid = 1 [(gogoproto.jsontag) = "svid",(gogoproto.moretags) = "form:\"svid\""];
+    int64 play =2 [(gogoproto.jsontag) = "play",(gogoproto.moretags) = "form:\"play\""];
+    int64 subtitles = 3 [(gogoproto.jsontag) = "subtitles",(gogoproto.moretags) = "form:\"subtitles\""];
+    int64 like = 4 [(gogoproto.jsontag) = "like",(gogoproto.moretags) = "form:\"like\""];
+    int64 share = 5 [(gogoproto.jsontag) = "share",(gogoproto.moretags) = "form:\"share\""];
+    int64 report = 6 [(gogoproto.jsontag) = "report",(gogoproto.moretags) = "form:\"report\""];
+    int64 reply = 7 [(gogoproto.jsontag) = "reply",(gogoproto.moretags) = "form:\"reply\""];
+}
+message SyncMidRequset{
+    int64 mid = 1 [(gogoproto.jsontag) = "mid",(gogoproto.moretags) = "form:\"mid\"",(gogoproto.customname)= "MID"];
+}
+message SyncUserBaseResponse{
+    int64 affc = 1 [(gogoproto.jsontag) = "affc",(gogoproto.moretags) = "form:\"affc\""];
+}
+message SyncMidsRequset{
+    repeated int64 mids = 1 [(gogoproto.jsontag) = "mids",(gogoproto.moretags) = "form:\"mids\"",(gogoproto.customname)= "MIDS"];
+}
+message BVideoTransRequset{
+    int64 svid = 1 [(gogoproto.jsontag) = "svid",(gogoproto.moretags) = "form:\"svid\" validate:\"min=0\"",(gogoproto.customname)= "SVID"];
+    int64 cid = 2 [(gogoproto.jsontag) = "cid",(gogoproto.moretags) = "form:\"cid\" validate:\"min=0\"",(gogoproto.customname)= "CID"];
+}
+
+message BVCTransBackRequset{
+    string flow_id = 1 [(gogoproto.jsontag) = "flow_id",(gogoproto.moretags) = "form:\"flow_id\" validate:\"min=0\"",(gogoproto.customname)= "FlowID"];
+    int64 flow_type = 2 [(gogoproto.jsontag) = "flow_type",(gogoproto.moretags) = "form:\"flow_type\" validate:\"min=0\"",(gogoproto.customname)= "FlowType",(gogoproto.casttype)="int8"];
+    int64 svid = 3 [(gogoproto.jsontag) = "svid",(gogoproto.moretags) = "form:\"svid\" validate:\"min=0\"",(gogoproto.customname)= "SVID"];
+    repeated BVCTransInfo trans_res= 4 [(gogoproto.jsontag) = "trans_res",(gogoproto.moretags) = "form:\"trans_res\""];
+    SvPic pic = 5 [(gogoproto.jsontag) = "pic",(gogoproto.moretags) = "form:\"pic\" validate:\"required\"",(gogoproto.customname)= "PIC"];
+}
+message SvPic{
+    string pic_url = 1 [(gogoproto.jsontag) = "pic_url",(gogoproto.moretags) = "form:\"pic_url\" validate:\"required\"",(gogoproto.customname)= "PicURL"];
+    int64 pic_width = 2 [(gogoproto.jsontag) = "pic_width",(gogoproto.moretags) = "form:\"pic_width\" validate:\"required\""];
+    int64 pic_height = 3 [(gogoproto.jsontag) = "pic_height",(gogoproto.moretags) = "form:\"pic_height\" validate:\"required\""];
+}
+message BVCTransInfo{
+    string path = 2 [(gogoproto.jsontag) = "path",(gogoproto.moretags) = "form:\"path\" validate:\"required\""];
+    string ppi = 3 [(gogoproto.jsontag) = "ppi",(gogoproto.moretags) = "form:\"ppi\" validate:\"required\"",(gogoproto.customname)= "PPI"];
+    string bps = 4 [(gogoproto.jsontag) = "bps",(gogoproto.moretags) = "form:\"bps\" validate:\"required\"",(gogoproto.customname)= "BPS"];
+    string video_code = 5 [(gogoproto.jsontag) = "video_code",(gogoproto.moretags) = "form:\"video_code\" validate:\"required\""];
+    int64 filesize = 6 [(gogoproto.jsontag) = "filesize",(gogoproto.moretags) = "form:\"filesize\" validate:\"required\""];
+    int64 duration = 8 [(gogoproto.jsontag) = "duration",(gogoproto.moretags) = "form:\"duration\" validate:\"required\""];
+}
+
+message CreateIDRequest {
+    int64 mid   = 1 [(gogoproto.moretags) = 'form:"mid" validate:"required"'];
+    int64 time  = 2 [(gogoproto.moretags) = 'form:"time"'];
+}
+message CreateIDResponse {
+    int64 new_id = 1;
+}
+
+message VideoInfo {
+    VideoBase video_base = 1[(gogoproto.jsontag) = 'vidoe_base'];
+}
+
+message ListVideoInfoRequest {
+    repeated int64 svIDs = 1 [(gogoproto.moretags) = 'form:"svids" validate:"required"'];
+}
+message ListVideoInfoResponse {
+    repeated VideoInfo list = 1[(gogoproto.jsontag) = 'list,omitempty'];
+}
+
+message ModifyLimitsRequest {
+    int64   svid        = 1 [(gogoproto.moretags) = 'form:"svid" validate:"required"'];
+    uint64  limit_type  = 2 [(gogoproto.moretags) = 'form:"limit_type" validate:"required"']; // 表示此次修改是针对哪种类型，如弹幕发布等
+    uint64  limit_op    = 3 [(gogoproto.moretags) = 'form:"limit_op"']; // 操作，0表示清零去除该类型的限制，1表示开启限制
+}
+message ModifyLimitsResponse {
+}
+message PreUploadRequest{
+    string title = 1 [(gogoproto.jsontag) = 'title',(gogoproto.moretags) = 'form:"title" validate:"required"'];
+    int64 mid = 2 [(gogoproto.jsontag) = 'mid',(gogoproto.moretags) = 'form:"mid" validate:"required"'];
+    string topic = 3 [(gogoproto.jsontag) = 'topic',(gogoproto.moretags) = 'form:"topic"'];
+    int64 from = 4 [(gogoproto.jsontag) = 'from',(gogoproto.moretags) = 'form:"from" validate:"required"'];
+    string file_ext = 5 [(gogoproto.jsontag) = 'file_ext',(gogoproto.moretags) = 'form:"file_ext" validate:"required"'];
+    string entension = 6 [(gogoproto.jsontag) = 'entension',(gogoproto.moretags) = 'form:"entension"'];
+}
+message PreUploadResponse{
+    int64 svid = 1 [(gogoproto.jsontag) = 'biz_id',(gogoproto.moretags) = 'form:"biz_id"'];
+    string upos_uri = 2 [(gogoproto.jsontag) = 'upos_uri',(gogoproto.moretags) = 'form:"upos_uri"'];
+    string end_point = 3 [(gogoproto.jsontag) = 'endpoint',(gogoproto.moretags) = 'form:"endpoint"'];
+    repeated string end_points = 4 [(gogoproto.jsontag) = 'endpoints',(gogoproto.moretags) = 'form:"endpoints"'];
+    string auth = 5 [(gogoproto.jsontag) = 'auth',(gogoproto.moretags) = 'form:"auth"'];
+}
+
+message CallBackRequest{
+    int64 svid = 1 [(gogoproto.jsontag) = 'svid',(gogoproto.moretags) = 'form:"svid" validate:"required"'];
+    int64 mid = 2 [(gogoproto.jsontag) = 'mid',(gogoproto.moretags) = 'form:"mid" validate:"required"'];
+}
+
+message VideoUnshelfRequest {
+    int64 svid = 1 [(gogoproto.jsontag) = "svid",(gogoproto.moretags) = 'form:"svid" validate:"required"'];
+}
+
+message VideoDeleteRequest {
+    int64 svid = 1 [(gogoproto.jsontag) = "svid",(gogoproto.moretags) = 'form:"svid"'];
+    int64 up_mid = 2 [(gogoproto.jsontag) = "up_mid",(gogoproto.moretags) = 'form:"up_mid"'];
+}
+
+message UploadingVideo {
+    int64   svid            = 1;
+    int64   mid             = 2;
+    string  title           = 3[(gogoproto.jsontag) = 'title'];
+    int64   upload_status   = 4[(gogoproto.jsontag) = 'upload_status'];
+    int64   retry_time      = 5;
+    string  home_img_url    = 6[(gogoproto.jsontag) = 'home_img_url'];
+    int64   home_img_height = 7[(gogoproto.jsontag) = 'home_img_height'];
+    int64   home_img_width  = 8[(gogoproto.jsontag) = 'home_img_width'];
+}
+message PrepareVideoRequest {
+    int64 mid = 1;
+}
+message PrepareVideoResponse {
+    repeated UploadingVideo list = 1;
+}
+
+message HomeImgCreateRequest {
+    int64 svid = 1 [(gogoproto.jsontag) = 'svid',(gogoproto.moretags) = 'form:"svid" validate:"required"'];
+    int64 mid = 2 [(gogoproto.jsontag) = 'mid',(gogoproto.moretags) = 'form:"mid" validate:"required"'];
+    int64 width = 3 [(gogoproto.jsontag) = 'width',(gogoproto.moretags) = 'form:"width" validate:"required"'];
+    string url = 4 [(gogoproto.jsontag) = 'url',(gogoproto.moretags) = 'form:"url" validate:"required"'];
+    int64 height = 5 [(gogoproto.jsontag) = 'height',(gogoproto.moretags) = 'form:"height" validate:"required"'];
+}
+message PlayInfoRequest{
+    repeated int64 svid = 1 [(gogoproto.jsontag) = 'svid',(gogoproto.moretags) = 'form:"svid" validate:"required"'];
+}
+message PlayInfoResponse{
+    map<int64,PlayInfo> list = 1[(gogoproto.jsontag) = 'list'];
+}
+message PlayInfo{
+    int64 svid = 1[(gogoproto.jsontag) = ''];
+    int64 expire_time = 2[(gogoproto.jsontag) = 'expire_time'];
+    int64 quality = 3[(gogoproto.jsontag) = 'quality'];
+    string url = 4[(gogoproto.jsontag) = 'url'];
+    int64 current_time = 5[(gogoproto.jsontag) = 'current_time'];
+    repeated FileInfo file_info = 6[(gogoproto.jsontag) = 'file_info'];
+    repeated int64 support_quality = 7[(gogoproto.jsontag) = 'support_quality'];
+}
+message FileInfo{
+    string ahead = 1[(gogoproto.jsontag) = 'ahead'];
+    int64  filesize = 2[(gogoproto.jsontag) = 'filesize'];
+    int64  timelength = 3[(gogoproto.jsontag) = 'timelength'];
+    string vhead = 4[(gogoproto.jsontag) = 'vhead'];
+    string path = 5[(gogoproto.jsontag) = 'path'];
+    string url = 6[(gogoproto.jsontag) = 'url'];
+    string url_bc = 7[(gogoproto.jsontag) = 'url_bc'];
+}
+service Video{
+    rpc ImportVideo(ImportVideoInfo) returns(.google.protobuf.Empty);
+    rpc SyncTag(SyncVideoTagRequest) returns(.google.protobuf.Empty);
+    rpc SvStatisticsInfo(SvStatisticsInfoReq)returns(SvStatisticsInfoRes);
+    rpc SyncUserBase(SyncMidRequset) returns(SyncUserBaseResponse);
+    rpc SyncUserSta(SyncMidRequset) returns(SyncUserBaseResponse);
+    rpc SyncUserBases(SyncMidsRequset) returns(SyncUserBaseResponse);
+    rpc SyncUserStas(SyncMidsRequset) returns(SyncUserBaseResponse);
+    rpc CreateID(CreateIDRequest) returns (CreateIDResponse);
+    rpc BVCTransCommit(BVideoTransRequset) returns(.google.protobuf.Empty);
+    rpc ListVideoInfo(ListVideoInfoRequest) returns (ListVideoInfoResponse);
+    rpc ModifyLimits (ModifyLimitsRequest) returns (ModifyLimitsResponse); // 修改视频的限制，比如弹幕发布权限等
+    rpc PreUpload(PreUploadRequest) returns (PreUploadResponse);
+    rpc CallBack(CallBackRequest) returns (.google.protobuf.Empty);
+    rpc VideoUnshelf(VideoUnshelfRequest) returns (.google.protobuf.Empty);
+    rpc VideoDelete(VideoDeleteRequest) returns (.google.protobuf.Empty);
+    rpc ListPrepareVideo(PrepareVideoRequest) returns (PrepareVideoResponse);
+    rpc HomeImgCreate(HomeImgCreateRequest) returns (.google.protobuf.Empty);
+    rpc PlayInfo(PlayInfoRequest) returns(PlayInfoResponse);
+}

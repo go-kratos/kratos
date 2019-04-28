@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package live.openinterface.v1;
+
+option go_package = "v1";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+
+service dm {
+    // `method:"POST"`
+    rpc sendmsg (SendMsgReq) returns (SendMsgResp) { 
+        option (google.api.http) = { 
+            post:"/xlive/open-interface/v1/dm/sendmsg"
+        };
+    };
+    rpc getConf (GetConfReq) returns (GetConfResp) { 
+        option (google.api.http) = { 
+            get:"/xlive/open-interface/v1/dm/getConf" 
+        };
+    };
+}
+
+message SendMsgReq {
+    string Msg     = 1 [(gogoproto.moretags) = 'form:"msg" validate:"required"'];
+    string Ts      = 2 [(gogoproto.moretags) = 'form:"ts"  validate:"required"'];
+    int64 RoomID   = 3 [(gogoproto.moretags) = 'form:"room_id" validate:"required"'];
+    string Group   = 4 [(gogoproto.moretags) = 'form:"group" validate:"required"'];
+    string Sign    = 5 [(gogoproto.moretags) = 'form:"sign" validate:"required"'];
+}
+
+message SendMsgResp {
+
+}
+
+message GetConfReq {
+    string Ts      = 1 [(gogoproto.moretags) = 'form:"ts"  validate:"required"'];
+    string Sign    = 2 [(gogoproto.moretags) = 'form:"sign" validate:"required"'];
+    string Group   = 3 [(gogoproto.moretags) = 'form:"group" validate:"required"'];
+}
+
+message GetConfResp {   
+    repeated int64 WSPort       = 1 [(gogoproto.jsontag) = 'ws_port'];
+    repeated int64 WSSPort      = 2 [(gogoproto.jsontag) = 'wss_port'];
+    repeated int64 TCPPort      = 3 [(gogoproto.jsontag) = 'tcp_port'];
+    repeated string IPList      = 4 [(gogoproto.jsontag) = 'ip_list'];
+    repeated string DomianList  = 5 [(gogoproto.jsontag) = 'domain_list'];
+}

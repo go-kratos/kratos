@@ -1,0 +1,93 @@
+# This is a TOML document. Boom.
+
+
+[log]
+    dir = "/data/log/laser-admin/"
+
+[bm]
+   addr = "0.0.0.0:7500"
+   maxListen = 10
+   timeout = "1000s"
+
+
+[httpClient]
+    key = "6aa4286456d16b97"
+    secret = "351cf022e1ae8296109c3c524faafcc8"
+    dial = "50ms"
+    timeout = "10s"
+    keepAlive = "60s"
+    timer = 16
+    [httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[host]
+    manager = "http://uat-manager.bilibili.co"
+
+[mysql]
+addr   = "172.16.33.205:3306"
+dsn    = "yanjinbin:HXjFexIsMilwDARW3ZCKP1fEGymdbzBV@tcp(172.16.33.205:3306)/bilibili_laser?timeout=500s&readTimeout=500s&writeTimeout=500s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+idleTimeout  = "4h"
+queryTimeout = "500s"
+execTimeout  = "500s"
+tranTimeout  = "500s"
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "laser-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "unix"
+    addr = "/tmp/uat-laser-auth-mc.sock"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[memcache]
+    [memcache.laser]
+    name = "creative/archive"
+    proto = "tcp"
+    addr = "172.16.0.148:11211"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    expire = "6h"

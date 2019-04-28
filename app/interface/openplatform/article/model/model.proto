@@ -1,0 +1,134 @@
+syntax = "proto3";
+package article.service;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+option go_package = "model";
+
+message Category {
+    int64 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.customname) = "ID"];
+    int64 parent_id = 2 [(gogoproto.jsontag) = "parent_id", (gogoproto.customname) = "ParentID"];
+    string name = 3 [(gogoproto.jsontag) = "name"];
+    int64 position = 4 [(gogoproto.jsontag) = "-"];
+    repeated Category children = 5 [(gogoproto.jsontag) = "children,omitempty"];
+    string banner_url = 6 [(gogoproto.jsontag) = "banner_url,omitempty", (gogoproto.customname) = "BannerURL"];
+}
+
+message Stats {
+    int64 view = 1 [(gogoproto.jsontag) = "view"];
+    int64 favorite = 2  [(gogoproto.jsontag) = "favorite"];
+    int64 like= 3 [(gogoproto.jsontag) = "like"];
+    int64 dislike= 4 [(gogoproto.jsontag) = "dislike"];
+    int64 reply= 5 [(gogoproto.jsontag) = "reply"];
+    int64 share= 6 [(gogoproto.jsontag) = "share"];
+    int64 coin= 7 [(gogoproto.jsontag) = "coin"];
+    int64 dynamic= 8 [(gogoproto.jsontag) = "dynamic"];
+}
+
+message Meta {
+    int64 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.customname) = "ID"];
+    Category  category = 2 [(gogoproto.jsontag) = "category"];
+    repeated Category categories = 3 [(gogoproto.jsontag) = "categories"];
+    string title = 4 [(gogoproto.jsontag) = "title"];
+    string summary = 5 [(gogoproto.jsontag) = "summary"];
+    string banner_url = 6  [(gogoproto.jsontag) = "banner_url", (gogoproto.customname) = "BannerURL"];
+    int32 template_id = 7  [(gogoproto.jsontag) = "template_id", (gogoproto.customname) = "TemplateID"];
+    int32 state  =  8 [(gogoproto.jsontag) = "state"];
+    Author author = 9  [(gogoproto.jsontag) = "author"];
+    int32 reprint  = 10  [(gogoproto.jsontag) = "reprint"];
+    repeated string image_urls = 11 [(gogoproto.jsontag) = "image_urls", (gogoproto.customname) = "ImageURLs"];
+    int64 publish_time = 12 [(gogoproto.jsontag) = "publish_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 ctime = 13 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 14 [(gogoproto.jsontag) = "mtime,omitempty", (gogoproto.casttype) = "go-common/library/time.Time"];
+    Stats stats = 15  [(gogoproto.jsontag) = "stats,omitempty"];
+    repeated Tag tags = 16 [(gogoproto.jsontag) = "tags,omitempty"];
+    int32 attributes  = 17 [(gogoproto.jsontag) = "attributes,omitempty"];
+    string  reason = 18 [(gogoproto.jsontag) = "reason,omitempty"];
+    int64 words = 19  [(gogoproto.jsontag) = "words"];
+    string  dynamic = 20 [(gogoproto.jsontag) = "dynamic,omitempty"];
+    repeated string origin_image_urls = 21 [(gogoproto.jsontag) = "origin_image_urls", (gogoproto.customname) = "OriginImageURLs"];
+    List list = 22 [(gogoproto.jsontag) = "list"];
+    bool isLike = 23 [(gogoproto.jsontag) = "is_like", (gogoproto.customname) = "IsLike"];
+    Media media = 24 [(gogoproto.jsontag) = "media", (gogoproto.customname) = "Media"];
+    string apply_time = 25 [(gogoproto.jsontag) = "apply_time", (gogoproto.customname) = "ApplyTime"];
+    string check_time = 26 [(gogoproto.jsontag) = "check_time", (gogoproto.customname) = "CheckTime"];
+}
+
+message Media {
+    int32 score = 1 [(gogoproto.jsontag) = "score", (gogoproto.customname) = "Score"];
+    int64 media_id = 2 [(gogoproto.jsontag) = "media_id", (gogoproto.customname) = "MediaID"];
+    string title = 3 [(gogoproto.jsontag) = "title", (gogoproto.customname) = "Title"];
+    string cover = 4 [(gogoproto.jsontag) = "cover", (gogoproto.customname) = "Cover"];
+    string area = 5 [(gogoproto.jsontag) = "area", (gogoproto.customname) = "Area"];
+    int32 type_id = 6 [(gogoproto.jsontag) = "type_id", (gogoproto.customname) = "TypeID"];
+    string type_name = 7 [(gogoproto.jsontag) = "type_name", (gogoproto.customname) = "TypeName"];
+    int32 spoiler = 8 [(gogoproto.jsontag) = "spoiler", (gogoproto.customname) = "Spoiler"];
+}
+
+message OfficialVerify {
+    int64 type = 1 [(gogoproto.jsontag) = "type"];
+    string desc = 2  [(gogoproto.jsontag) = "desc"];
+}
+
+message Author {
+    int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    string face = 3 [(gogoproto.jsontag) = "face"];
+    Pendant pendant = 4 [(gogoproto.jsontag) = "pendant", (gogoproto.nullable) = false];
+    OfficialVerify official_verify = 5 [(gogoproto.jsontag) = "official_verify", (gogoproto.nullable) = false];
+    Nameplate nameplate = 6 [(gogoproto.jsontag) = "nameplate", (gogoproto.nullable) = false];
+    VipInfo vip = 7 [(gogoproto.jsontag) = "vip", (gogoproto.nullable) = false];
+}
+
+message VipInfo {
+  int32 type = 1 [(gogoproto.jsontag) = "type"];
+  int32 status = 2 [(gogoproto.jsontag) = "status"];
+  int64 due_date = 3 [(gogoproto.jsontag) = "due_date"];
+  int32 vip_pay_type = 4 [(gogoproto.jsontag) = "vip_pay_type"];
+}
+
+message Nameplate {
+    int32 nid = 1 [(gogoproto.jsontag) = "nid",(gogoproto.casttype) = "int"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    string image = 3 [(gogoproto.jsontag) = "image"];
+    string image_small = 4 [(gogoproto.jsontag) = "image_small"];
+    string level = 5 [(gogoproto.jsontag) = "level"];
+    string condition = 6 [(gogoproto.jsontag) = "condition"];
+}
+
+message Pendant {
+ int32 pid = 1 [(gogoproto.jsontag) = "pid"];
+ string name = 2 [(gogoproto.jsontag) = "name"];
+ string image = 3 [(gogoproto.jsontag) = "image"];
+ int32 expire = 4 [(gogoproto.jsontag) = "expire"];
+}
+
+message Tag {
+ int64 tid = 1 [(gogoproto.jsontag) = "tid"];
+ string name = 2 [(gogoproto.jsontag) = "name"];
+}
+
+message Article {
+  Meta meta = 1 [(gogoproto.jsontag) = "", (gogoproto.embed) = true];
+  string content = 2 [(gogoproto.jsontag) = "content,omitempty"];
+  string keywords = 3 [(gogoproto.jsontag) = "keywords", (gogoproto.customname) = "Keywords"];
+}
+
+message List {
+  int64 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.customname) = "ID"];
+  int64 mid = 2[(gogoproto.jsontag) = "mid"];
+  string name = 3 [(gogoproto.jsontag) = "name"];
+  string image_url = 4  [(gogoproto.jsontag) = "image_url", (gogoproto.customname) = "ImageURL"];
+  int64 update_time = 5 [(gogoproto.jsontag) = "update_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+  int64 ctime = 6 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+  int64 publish_time = 7 [(gogoproto.jsontag) = "publish_time", (gogoproto.casttype) = "go-common/library/time.Time"];
+  string summary = 8 [(gogoproto.jsontag) = "summary"];
+  int64 words = 9 [(gogoproto.jsontag) = "words"];
+  int64 read = 10 [(gogoproto.jsontag) = "read"];
+  int64 articles_count = 11 [(gogoproto.jsontag) = "articles_count"];
+}

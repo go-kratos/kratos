@@ -1,0 +1,57 @@
+[Log]
+  dir = "/data/log/activity-admin/"
+[HTTPServer]
+    addr = "0.0.0.0:7741"
+    maxListen = 1000
+    timeout = "10m"
+    readTimeout = "10m"
+    writeTimeout = "10m"
+
+[httpClient]
+    key = "b1014d7c339a5649"
+    secret = "75b74b612aa792b112e6504cae44c319"
+    dial = "10s"
+    timeout = "10s"
+    keepAlive = "60s"
+
+[orm]
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_lottery?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    idleTimeout = "4h"
+
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 10
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[Host]
+  API = "http://uat-api.bilibili.co"

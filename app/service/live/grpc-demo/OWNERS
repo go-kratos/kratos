@@ -1,0 +1,10 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liugang
+labels:
+- live
+- service
+- service/live/grpc-demo
+options:
+  no_parent_owners: true

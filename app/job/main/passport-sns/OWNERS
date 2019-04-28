@@ -1,0 +1,11 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- wanghuan01
+- wutao
+labels:
+- job
+- job/main/passport-sns
+- main
+options:
+  no_parent_owners: true

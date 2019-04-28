@@ -1,0 +1,426 @@
+syntax = "proto3";
+
+package community.service.favorite;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "app/service/main/favorite/model/fav.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "api";
+
+message ModelPage { 
+    int32 num = 1;
+    int32 size = 2;
+    int32 count = 3;
+}
+
+message ModelFavorite { 
+    int64 id = 1;
+    int64 oid = 2;
+    int64 mid = 3;
+    int64 fid = 4;
+    int32 type = 5;
+    int32 state = 6;
+    int64 ctime = 7;
+    int64 mtime = 8;
+}
+
+message ModelPartition { 
+    int32 tid = 1;
+    string name = 2;
+    int32 count = 3;
+}
+
+message ModelFavorites { 
+    ModelPage page = 1;
+    repeated ModelFavorite list = 2;
+}
+
+message AddFavReply { 
+}
+
+message AddFavReq { 
+    int32 tp = 2;
+    int64 mid = 3;
+    int64 fid = 4;
+    int64 oid = 5;
+	int32 otype = 6;
+}
+
+message DelFavReply { 
+}
+
+message DelFavReq { 
+    int32 tp = 2;
+    int64 mid = 3;
+    int64 fid = 4;
+    int64 oid = 5;
+	int32 otype = 6;
+}
+
+
+message FavoritesReply { 
+    ModelFavorites res = 1;
+}
+
+message FavoritesReq { 
+    int32 tp = 2;
+    int64 mid = 3;
+    int64 uid = 4;
+    int64 fid = 5;
+    int32 pn = 6;
+    int32 ps = 7;
+    int32 tid = 8;
+    int32 tv = 9;
+    string keyword = 10;
+    string order = 11;
+}
+
+message TlistsReply { 
+    repeated ModelPartition res = 1;
+}
+
+message TlistsReq { 
+    int32 tp = 2;
+    int64 mid = 3;
+    int64 uid = 4;
+    int64 fid = 5;
+}
+
+message RecentFavsReply { 
+    repeated int64 res = 1;
+}
+
+message RecentFavsReq { 
+    int32 tp = 2;
+    int64 mid = 3;
+    int32 size = 4;
+}
+
+
+message IsFavoredReply { 
+    bool faved = 1;
+}
+
+message IsFavoredReq { 
+    int32 typ = 2;
+    int64 mid = 3;
+    int64 oid = 4;
+}
+
+message IsFavoredByFidReq {
+	int32 type = 1;
+	int64 mid  = 2; 
+	int64 oid  = 3;
+	int64 fid  = 4;
+}
+
+message IsFavoredsReply { 
+    map<int64,bool> faveds = 1;
+}
+
+message IsFavoredsReq{
+	int32 typ = 2;
+    int64 mid = 3;
+    repeated int64 oids = 4;
+}
+
+message UserFoldersReply { 
+    repeated .model.Folder res = 1;
+}
+
+message UserFoldersReq { 
+    int32 typ = 2;
+    int64 mid = 3;
+    int64 vmid = 4;
+    int64 oid = 5;
+	bool allCount = 6;
+	int32 otype = 7;
+}
+
+message UserFolderReply {
+    .model.Folder res = 1;
+}
+
+message UserFolderReq { 
+    int32 typ = 2;
+    int64 mid = 3;
+    int64 vmid = 4;
+    int64 fid = 5;
+	bool allCount = 6;
+}
+
+message AddFolderReq {
+	int32 typ = 1;      
+	int64 mid = 2;    
+	string name = 3;
+	string description = 4;
+	string	cover = 5;
+	int32 public = 6;    
+	string cookie = 7;    
+	string accessKey = 8;  
+}
+
+message AddFolderReply {
+	int64 fid = 1;
+}
+
+message UpdateFolderReq {
+	int32 typ =1;
+	int64 fid =2;
+	int64 mid =3;
+	string name =4;
+	string description =5;
+	string cover =6; 
+	int32 public =7;
+	string cookie =8;
+	string accessKey =9;
+}
+
+message AdminUpdateFolderReq {
+	int32 typ =1;
+	int64 fid =2;
+	int64 mid =3;
+	string name =4;
+	string description =5;
+	string cover =6;
+	int32  state =7;
+	int32  attr =8;
+}
+
+message DelFolderReq  {
+	int32 typ  =1;
+	int64 mid  =2;
+	int64 fid  =3;
+}
+
+message MultiAddReq {
+	int32 typ  =1; 
+	int64 mid =2;    
+	repeated int64 oids =3;
+	int64 fid =4;
+}
+
+message MultiDelReq {
+	int32 typ  =1; 
+	int64 mid =2;    
+	repeated int64 oids =3;
+	int64 fid =4;
+}
+
+message InDefaultFolderReq  {
+	int32 typ =1;  
+	int64 mid =2;   
+	int64 oid =3;
+}
+
+message InDefaultFolderReply  {
+	bool isIn =1;
+}
+
+message CntUserFoldersReq  {
+	int32 typ =1;  
+	int64 mid =2;  
+	int64 vmid =3;  
+}
+
+message CntUserFoldersReply  {
+	int32 count =1;
+}
+
+message User {
+	int64 id =1;        
+	int64 oid =2;       
+	int64 mid =3;  
+	int32 typ =4;     
+	int32 state =5;      
+	int64 ctime =6; 
+	int64 mtime =7; 
+}
+
+message FavedUsersReply  {
+	ModelPage page =1;
+	repeated  User user =2;
+}
+
+message FavedUsersReq {
+	int32 Type =1;    
+	int64 Oid =2;   
+	int32 pn  =3;  
+	int32 ps  =4;   
+}
+
+message SetFolderSortReq {
+	int32 typ =1;    
+	int64 mid =3;  
+	repeated int64 fids =4;  
+}
+
+message FoldersReply {
+    repeated .model.Folder res = 1;
+}
+
+message FoldersReq { 
+	// id = fid*100 + mid%100
+	repeated FolderID ids = 1;
+    int32 typ = 2;
+    int64 mid = 3;
+}
+
+message FolderID {
+	int64 fid = 1;
+	int64 mid = 2;
+}
+
+message MoveFavsReq {
+	int32 typ = 1;
+	int64 mid = 2;
+	int64 oldFid = 3;
+	int64 newFid = 4;
+	repeated int64 oids = 5;
+}
+
+message CopyFavsReq {
+	int32 typ = 1;
+	int64 oldMid = 2;
+	int64 mid = 3;
+	int64 oldFid = 4;
+	int64 newFid = 5;
+	repeated int64 oids = 6;
+}
+
+message CleanStateReq {
+	int32 typ =1;
+	int64 mid =2;
+	int64 fid =3;
+}
+
+message CleanStateReply {
+	int32 cleanState =1;
+}
+
+message CleanInvalidFavsReq {
+	int32 typ =1;
+	int64 mid =2;
+	int64 fid =3;
+}
+
+message FavAddFoldersReq {
+	int64 oid = 1;
+	int32 typ = 2;
+	repeated int64 fids = 3;
+	int64 mid = 4;
+	int32 otype = 5;
+}
+
+message FavDelFoldersReq {
+	int64 oid = 1;
+	int32 typ = 2;
+	repeated int64 fids = 3;
+	int64 mid = 4;
+	int32 otype = 5;
+}
+
+message SortFavsReq{
+	repeated SortFav sorts = 1;
+	int64 mid = 2;
+	int64 fid = 3;
+	int32 typ = 4;
+}
+
+message SortFav {
+	.model.Resource pre = 1;
+	.model.Resource insert = 2;
+}
+message UpFolderNameReq {
+	int32 typ =1;
+	int64 fid =2;
+	int64 mid =3;
+	string name =4;
+	string cookie =5;
+	string accessKey =6;
+}
+
+message UpFolderAttrReq {
+	int32 typ =1;
+	int64 fid =2;
+	int64 mid =3;
+	int32 public =4;
+}
+
+message RecentResourcesReq {
+	int32 tp = 2;
+    int64 mid = 3;
+    int32 size = 4;
+}
+
+message RecentResourcesReply {
+	repeated .model.Resource res = 1;
+}
+
+service Favorite {
+	// 更新收藏夹V2版本
+	rpc AdminUpdateFolder(AdminUpdateFolderReq) returns(.google.protobuf.Empty);
+	// 删除一个资源从多个收藏夹
+	rpc FavDelFolders(FavDelFoldersReq) returns(.google.protobuf.Empty);
+	// 添加一个资源至多个收藏夹
+	rpc FavAddFolders(FavAddFoldersReq) returns(.google.protobuf.Empty);
+	// 收藏夹重命名
+	rpc UpFolderName(UpFolderNameReq) returns(.google.protobuf.Empty);
+	// 设置收藏夹公开
+	rpc UpFolderAttr(UpFolderAttrReq) returns(.google.protobuf.Empty);
+	// 清除不合法的收藏资源  
+	rpc CleanInvalidFavs(CleanInvalidFavsReq) returns(.google.protobuf.Empty);
+	// 返回某个收藏夹是否已经是clean的
+	rpc CleanState(CleanStateReq) returns(CleanStateReply);
+	// 拷贝收藏夹内的资源至另外一个收藏夹
+	rpc CopyFavs(CopyFavsReq) returns(.google.protobuf.Empty);
+	// 移动收藏夹内的资源至另外一个收藏夹
+	rpc MoveFavs(MoveFavsReq) returns(.google.protobuf.Empty);
+	// 收藏夹排序
+	rpc SetFolderSort(SetFolderSortReq) returns(.google.protobuf.Empty);
+	// 哪些用户收藏了该资源
+	rpc FavedUsers(FavedUsersReq) returns(FavedUsersReply);
+	// 用户收藏夹数量
+	rpc CntUserFolders(CntUserFoldersReq) returns(CntUserFoldersReply);
+	// 该资源是否在默认收藏夹中
+	rpc InDefault(InDefaultFolderReq) returns(InDefaultFolderReply);
+	// 批量删除多个资源
+	rpc MultiDel(MultiDelReq) returns(.google.protobuf.Empty); 
+	// 批量添加多个资源
+	rpc MultiAdd(MultiAddReq) returns(.google.protobuf.Empty); 
+	// 删除收藏夹
+	rpc DelFolder(DelFolderReq) returns(.google.protobuf.Empty);
+	// 更新收藏夹
+	rpc UpdateFolder(UpdateFolderReq) returns(.google.protobuf.Empty);
+	// 创建收藏夹
+	rpc AddFolder(AddFolderReq) returns(AddFolderReply);
+	// 收藏夹内的资源列表(只显示和收藏夹相同type的资源)
+    rpc Favorites(FavoritesReq) returns(FavoritesReply); 
+	// 收藏夹内的资源列表(显示所有资源)
+	rpc FavoritesAll(FavoritesReq) returns(FavoritesReply); 
+	// 分区信息
+    rpc Tlists(TlistsReq) returns(TlistsReply); 
+    // 该用户最近收藏
+    rpc RecentFavs(RecentFavsReq) returns(RecentFavsReply); 
+	// 该用户最近收藏的资源
+	rpc RecentResources(RecentResourcesReq) returns(RecentResourcesReply); 
+	// 用户是否收藏该资源
+    rpc IsFavored(IsFavoredReq) returns(IsFavoredReply); 
+	// 该资源是否在某个收藏夹内
+	rpc IsFavoredByFid(IsFavoredByFidReq) returns(IsFavoredReply); 
+	// 多个资源是否被用户收藏
+	rpc IsFavoreds(IsFavoredsReq) returns(IsFavoredsReply); 
+	// 添加收藏
+ 	rpc AddFav(AddFavReq) returns(AddFavReply); 
+	// 删除收藏
+    rpc DelFav(DelFavReq) returns(DelFavReply); 
+	// 用户的收藏夹列表
+    rpc UserFolders(UserFoldersReq) returns(UserFoldersReply); 
+	// 用户的一个收藏夹
+    rpc UserFolder(UserFolderReq) returns(UserFolderReply); 
+	// 通过ID批量返回收藏夹 id = fid*100 + mid%100
+	rpc Folders(FoldersReq) returns(FoldersReply); 
+	// 改变被搜藏的元素的顺序
+	rpc SortFavs(SortFavsReq) returns(.google.protobuf.Empty); 
+}

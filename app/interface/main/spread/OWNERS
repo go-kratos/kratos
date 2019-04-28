@@ -1,0 +1,15 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- renwei
+- wangxu01
+- zhapuyu
+labels:
+- interface
+- interface/main/spread
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- wangxu01
+- zhapuyu

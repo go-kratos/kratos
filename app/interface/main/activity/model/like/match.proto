@@ -1,0 +1,69 @@
+syntax = "proto3";
+package activity.service;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "like";
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message Match {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 Sid = 2 [(gogoproto.jsontag) = "sid"];
+    int64 MaxStake = 3 [(gogoproto.jsontag) = "max_stake"];
+    int64 Stake = 4 [(gogoproto.jsontag) = "stake"];
+    string Name = 5 [(gogoproto.jsontag) = "name"];
+    string Url = 6 [(gogoproto.jsontag) = "url"];
+    string Cover = 7 [(gogoproto.jsontag) = "cover"];
+    int64 Ctime = 8 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Mtime = 9 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message MatchList {
+    repeated Match matchList = 1;
+}
+
+message Object {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 MatchId = 2 [(gogoproto.jsontag) = "match_id"];
+    int64 Sid = 3 [(gogoproto.jsontag) = "sid"];
+    string HomeName = 4 [(gogoproto.jsontag) = "home_name"];
+    string HomeLogo = 5 [(gogoproto.jsontag) = "home_logo"];
+    int64 HomeScore = 6 [(gogoproto.jsontag) = "home_score"];
+    string AwayName = 7 [(gogoproto.jsontag) = "away_name"];
+    string AwayLogo = 8 [(gogoproto.jsontag) = "away_logo"];
+    int64 AwayScore = 9 [(gogoproto.jsontag) = "away_score"];
+    int64 Result = 10 [(gogoproto.jsontag) = "result"];
+    int64 Ctime = 11 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Mtime = 12 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Stime = 13 [(gogoproto.jsontag) = "stime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Etime = 14 [(gogoproto.jsontag) = "etime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 UserResult = 15 [(gogoproto.jsontag) = "user_result"];
+    int64 GameStime = 16 [(gogoproto.jsontag) = "game_stime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    string MatchName = 17 [(gogoproto.jsontag) = "match_name,omitempty"];
+}
+
+message UserLog {
+    int64 ID = 1 [(gogoproto.jsontag) = "id"];
+    int64 MatchId = 2 [(gogoproto.jsontag) = "match_id"];
+    int64 MOId = 3 [(gogoproto.jsontag) = "m_o_id"];
+    int64 Sid = 4 [(gogoproto.jsontag) = "sid"];
+    int64 Mid = 5 [(gogoproto.jsontag) = "mid"];
+    int64 Result = 6 [(gogoproto.jsontag) = "result"];
+    int64 Stake = 7 [(gogoproto.jsontag) = "stake"];
+    int64 Ctime = 8 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Mtime = 9 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 ObjResult = 10 [(gogoproto.jsontag) = "obj_result"];
+    string HomeName = 11 [(gogoproto.jsontag) = "home_name"];
+    string AwayName = 12 [(gogoproto.jsontag) = "away_name"];
+    int64 GameStime = 13 [(gogoproto.jsontag) = "game_stime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message UserGuess {
+    int64 Total = 1 [(gogoproto.jsontag) = "total"];
+    int64 Win = 2 [(gogoproto.jsontag) = "win"];
+}
+

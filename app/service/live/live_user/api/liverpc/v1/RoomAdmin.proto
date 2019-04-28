@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package live_user.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service RoomAdmin {
+    
+    /** 判断是否房管,防止和room循环调用,传入所有参数
+     * 
+     */   
+    rpc is_room_admin (RoomAdminIsRoomAdminReq) returns (RoomAdminIsRoomAdminResp);
+}
+
+
+
+message RoomAdminIsRoomAdminReq {
+    // 用户id
+    string uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 主播的用户 roomid
+    int64 roomid = 2 [(gogoproto.jsontag) = "roomid"];
+    // 主播的用户 anchor_id
+    int64 anchor_id = 3 [(gogoproto.jsontag) = "anchor_id"];
+}
+
+message RoomAdminIsRoomAdminResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message UI {
+        // 用户id
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 用户名
+        string uname = 2 [(gogoproto.jsontag) = "uname"];
+    }
+       
+    message Data {
+        // banner
+        UI userinfo = 1 [(gogoproto.jsontag) = "userinfo"];
+        // 房管的用户id
+        int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+        // 房间号
+        int64 roomid = 3 [(gogoproto.jsontag) = "roomid"];
+        // 创建时间　"2017-07-26 17:12:51"
+        string ctime = 4 [(gogoproto.jsontag) = "ctime"];
+    }
+}

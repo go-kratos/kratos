@@ -1,0 +1,87 @@
+# This is a TOML document. Boom.
+
+# 这个项目比较特殊，部署在云上的，需要保留一下配置
+proxy = false
+accountURI = "http://account.bilibili.co"
+passportURI = "http://passport.bilibili.com"
+
+family = "passport-game-service"
+env = "qa"
+
+[db.cloud]
+addr = "172.16.33.205:3306"
+dsn = "account:wx2U1MwXRyWEuURw@tcp(172.16.33.205:3306)/member_app1?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 2
+queryTimeout = "1s"
+execTimeout = "2s"
+tranTimeout = "2s"
+[db.cloud.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+[db.otherRegion]
+addr = "172.16.33.205:3306"
+dsn = "account:wx2U1MwXRyWEuURw@tcp(172.16.33.205:3306)/member_app2?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 2
+queryTimeout = "1s"
+execTimeout = "2s"
+tranTimeout = "2s"
+[db.otherRegion.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+
+[memcache]
+name = "passport-game-service"
+proto = "tcp"
+addr = "172.16.33.54:21211"
+idle = 5
+active = 10
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "10h"
+
+[httpClient]
+key = "868fb9ea57619022"
+secret = "test"
+dial = "5s"
+timeout = "10s"
+keepAlive = "6s"
+timer = 10
+[httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[dispatcher]
+name = "t1"
+[dispatcher.oauth]
+"origin"="http://api.bilibili.co/x/internal/identify-game/oauth"
+"t1" = "http://api.bilibili.com/x/passport-game/oauth"
+"t2" = "http://t2-api.bilibili.com/x/passport-game/oauth"
+[dispatcher.renewToken]
+"origin"="http://api.bilibili.co/x/internal/identify-game/renewtoken"
+"t1" = "http://api.bilibili.com/x/passport-game/renewtoken"
+"t2" = "http://t2-api.bilibili.com/x/passport-game/renewtoken"
+
+[[dispatcher.regionInfos]]
+region = "市北"
+tokenSuffix = ""
+
+[[dispatcher.regionInfos]]
+region = "腾讯云1"
+tokenSuffix = "t1"
+
+[[dispatcher.regionInfos]]
+region = "腾讯云2"
+tokenSuffix = "t2"

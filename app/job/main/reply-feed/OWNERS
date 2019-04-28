@@ -1,0 +1,14 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- caoguoliang
+- yangjiankun
+labels:
+- job
+- job/main/reply-feed
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- caoguoliang
+- yangjiankun

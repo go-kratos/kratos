@@ -1,0 +1,291 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user    = "nobody"
+pid     = "/tmp/app-view.pid"
+dir     = "./"
+checkFile = "/data/www/app-view.html"
+family = "app-view"
+address = ""
+trace   = false
+debug   = false
+
+env = "test"
+tick = "1m"
+roundTick = "30m"
+vipTick = "2s"
+autoLimit = 100000
+relateCnt = 3
+
+[bnj2019]
+tick = "10s"
+mainAid = 10111165
+adAv = 10111164
+aidList = [10111164,10111163,10111162,10111161,10111160,10111159,10111158,10111157,10111156,10111155,10111154,10111153,10111152,10111151,10111150,10111149,10111148,10111147,10111146,10111145,10111144,10111143,10111142,10111141]
+elecBigText = "给参与拜年祭的UP主"
+elecSmallText = "本次充电所有的收入，将会在扣除成本之后，按照一定规则，"
+
+[playURL]
+secret = "62Mt3F1kpbvp3LKC"
+
+dmRegion = [36]
+
+[xlog]
+dir = "/data/log/app-view/"
+
+[infocCoin]
+taskID = "000078"
+proto = "tcp"
+addr = "172.19.100.20:5401"
+chanSize = 1024
+
+[infocView]
+taskID = "000025"
+project = "app-view"
+name    = "view"
+path    = "/data/infoc/app-view/info.log"
+
+[infocRelate]
+project = "app-view"
+name    = "relate"
+path    = "/data/infoc/app-view/relate.log"
+
+[useractPub]
+key = "0PtMsLLxWyyvoTgAyLCD"
+secret = "0PtMsLLxWyyvoTgAyLCE"
+group = "RecUseract-App-P"
+topic = "RecUseract-T"
+action = "pub"
+name = "app-view/useract"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+active = 1
+idle = 1
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[dislikePub]
+key = "0PtMsVFzWyyvoTgAyLCG"
+secret= "0PtMsVFzWyyvoTgAyLCH"
+group= "TagDislike-SkyHorse-P"
+topic= "Dislike-T"
+action="pub"
+name = "app-feed/dislike"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+active = 100
+idle = 50
+dialTimeout = "50ms"
+readTimeout = "200ms"
+writeTimeout = "200ms"
+idleTimeout = "80s"
+
+[tracer]
+proto = "udp"
+addr  = "172.16.33.46:5140"
+tag   = "platform/app-view"
+
+[app]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+
+[httpClient]
+key = "7c7ac0db1aa05587"
+secret = "9a6d62d93290c5f771ad381e9ca23f26"
+dial      = "30ms"
+timeout   = "800ms"
+keepAlive = "60s"
+timer     = 1024
+    [httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpAsync]
+key = "7c7ac0db1aa05587"
+secret = "9a6d62d93290c5f771ad381e9ca23f26"
+dial      = "30ms"
+timeout   = "2s"
+keepAlive = "60s"
+timer     = 1024
+    [httpAsync.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+
+[httpWrite]
+key = "7c7ac0db1aa05587"
+secret = "9a6d62d93290c5f771ad381e9ca23f26"
+dial      = "30ms"
+timeout   = "700ms"
+keepAlive = "60s"
+timer     = 1024
+    [httpWrite.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpBangumi]
+key = "7c7ac0db1aa05587"
+secret = "9a6d62d93290c5f771ad381e9ca23f26"
+dial      = "30ms"
+timeout   = "300ms"
+keepAlive = "60s"
+timer     = 1024
+    [httpBangumi.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpAD]
+key = "7c7ac0db1aa05587"
+secret = "9a6d62d93290c5f771ad381e9ca23f26"
+dial      = "30ms"
+timeout   = "300ms"
+keepAlive = "60s"
+timer     = 1024
+    [httpAD.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpAudio]
+key = "7c7ac0db1aa05587"
+secret = "9a6d62d93290c5f771ad381e9ca23f26"
+dial      = "30ms"
+timeout   = "300ms"
+keepAlive = "60s"
+timer     = 1024
+    [httpAudio.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpGame]
+key = "EeOpM531WqQnBvu4"
+secret = "gHtKtXTHZJDqGP1tg9ORFs0YWV3kW12V"
+dial      = "30ms"
+timeout   = "300ms"
+keepAlive = "60s"
+timer     = 1024
+    [httpGame.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpGameAsync]
+key = "EeOpM531WqQnBvu4"
+secret = "gHtKtXTHZJDqGP1tg9ORFs0YWV3kW12V"
+dial      = "1s"
+timeout   = "2s"
+keepAlive = "60s"
+timer     = 1024
+    [httpGameAsync.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[httpSearch]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "50ms"
+timeout   = "150ms"
+keepAlive = "60s"
+timer = 128
+[httpSearch.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    
+[bm]
+    [bm.outer]
+    addr = "0.0.0.0:6961"
+    timeout = "1s"
+
+[buildLimit]
+    CooperationIOS     = 8290
+    CooperationAndroid = 5365000
+
+[host]
+account   = "http://account.bilibili.co"
+bangumi   = "http://bangumi.bilibili.co"
+apiCo     = "http://api.bilibili.co"
+elec      = "http://elec.bilibili.co"
+apiLiveCo = "http://api.live.bilibili.co"
+ad        = "http://cm.bilibili.co"
+data      = "http://data.bilibili.co"
+archive   = "http://archive.api.bilibili.co"
+game      = "http://api.bilibili.co"
+vip       = "http://vip.bilibili.co"
+activity  = "http://matsuri.bilibili.co"
+ai        = "http://172.22.33.111:8101"
+bvcvod = "http://bvc-vod.bilibili.co"
+
+[mysql]
+    [mysql.show]
+    addr   = "172.16.33.205:3306"
+    dsn    = "test:test@tcp(172.16.33.205:3306)/bilibili_show?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle   = 2
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [mysql.show.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+    [mysql.manager]
+    addr   = "172.16.33.54:3306"
+    dsn    = "test:test@tcp(172.16.33.54:3306)/bilibili_manager?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle   = 2
+    idleTimeout  = "4h"
+    queryTimeout = "200ms"
+    execTimeout  = "200ms"
+    tranTimeout  = "200ms"
+    [mysql.manager.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+
+[memcache]
+    [memcache.archive]
+    name   = "app-view/archive"
+    proto  = "tcp"
+    addr   = "172.16.33.54:11213"
+    active = 50
+    idle   = 10
+    dialTimeout   = "50ms"
+    readTimeout   = "50ms"
+    writeTimeout  = "50ms"
+    idleTimeout   = "80s"
+    archiveExpire = "20m"
+    viewExpire    = "20m"
+    relateExpire  = "20m"
+    addonExpire   = "5m"
+    recommedExpire= "10m"

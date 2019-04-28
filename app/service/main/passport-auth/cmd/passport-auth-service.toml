@@ -1,0 +1,47 @@
+# This is a TOML document. Boom.
+[rpcServer2]
+[[rpcServer2.servers]]
+    proto = "tcp"
+    addr = "0.0.0.0:7579"
+    weight = 10
+[rpcServer2.zookeeper]
+    root = "/microservice/passport-auth-service/"
+    addrs = ["172.18.33.172:2181"]
+    timeout = "1s"
+
+[mysql]
+    #addr = "172.16.33.205:3309"
+    #dsn = "auth:Ftqx1hwV3WoGX7Ms9udTAzmbkgR5ZHyl@tcp(172.16.33.205:3309)/passport_auth?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    addr = "127.0.0.1:3306"
+    dsn = "root:root@tcp(127.0.0.1:3306)/passport-auth?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    IdleTimeout ="4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [mysql.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[Memcache]
+    name = "passport-auth-service"
+    proto = "tcp"
+    #addr = "172.16.33.54:11211"
+    addr = "127.0.0.1:11211"
+    idle = 1000
+    active = 1000
+    dialTimeout = "10s"
+    readTimeout = "10s"
+    writeTimeout = "10s"
+    idleTimeout = "30s"
+
+[dc]
+    num = 1
+    desc = "data center 1"
+
+[switch]
+    supportOld = true

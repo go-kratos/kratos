@@ -1,0 +1,83 @@
+[log]
+	stdout = true
+
+[mysql]
+	addr = "172.16.38.91:3306"
+	dsn = "root:123456@tcp(172.16.38.91:3306)/bbq?allowNativePasswords=true&timeout=800ms&readTimeout=1200ms&writeTimeout=800ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["root:123456@tcp(172.16.38.91:3306)/bbq?allowNativePasswords=true&timeout=800ms&readTimeout=1200ms&writeTimeout=800ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "800ms"
+	execTimeout = "800ms"
+	tranTimeout = "1000ms"
+
+[offlineMysql]
+	addr = "172.16.38.91:3306"
+	dsn = "root:123456@tcp(172.16.38.91:3306)/bbq?allowNativePasswords=true&timeout=800ms&readTimeout=1200ms&writeTimeout=800ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["root:123456@tcp(172.16.38.91:3306)/bbq?allowNativePasswords=true&timeout=800ms&readTimeout=1200ms&writeTimeout=800ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "800ms"
+	execTimeout = "800ms"
+	tranTimeout = "1000ms"
+
+[cmsMysql]
+	addr = "172.16.38.91:3306"
+	dsn = "root:123456@tcp(172.16.38.91:3306)/bbq_cms?allowNativePasswords=true&timeout=800ms&readTimeout=1200ms&writeTimeout=800ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["root:123456@tcp(172.16.38.91:3306)/bbq_cms?allowNativePasswords=true&timeout=800ms&readTimeout=1200ms&writeTimeout=800ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "800ms"
+	execTimeout = "800ms"
+	tranTimeout = "1000ms"
+
+[redis]
+	name = "bbq-web"
+	proto = "tcp"
+	addr = "172.16.38.91:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[bfredis]
+	name = "bbq-bf"
+	proto = "tcp"
+	addr = "172.16.38.91:6379"
+	idle = 10
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "1m"
+
+[berserker]
+	[[berserker.keys]]
+		owner = "daiwei"
+		appkey = "66ed588a742c72408bc2d876afa8f7ca"
+		secret = "7d7a63e37fe6af52a58fb4755b62360e"
+	[[berserker.api]]
+		name = "video_quality"
+		url = "http://berserker.bilibili.co/avenger/api/175/query"
+	[[berserker.api]]
+		name = "video_view"
+		url = "http://berserker.bilibili.co/avenger/api/154/query"
+
+[job]
+	[job.forwardIndex]
+		jobName = "genForwardIndex"
+		schedule = "@every 30m"
+		input = "/Users/daiwei/Desktop/"
+		output = "/Users/daiwei/forward_index.txt"
+	[job.bloomfilter]
+		jobName = "genBloomFilter"
+		schedule = "@every 30m"
+		input = ""
+		output = ""

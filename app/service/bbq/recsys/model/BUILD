@@ -1,0 +1,34 @@
+package(default_visibility = ["//visibility:public"])
+
+load(
+    "@io_bazel_rules_go//go:def.bzl",
+    "go_library",
+)
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "debug.go",
+        "field.go",
+        "model.go",
+        "user.go",
+    ],
+    importpath = "go-common/app/service/bbq/recsys/model",
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/github.com/Dai0522/go-hash/bloomfilter:go_default_library"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,447 @@
+# This is a TOML document. Boom.
+consume = false
+hotswitch = false
+honorSwitch = false
+honorStep = 20
+honorFlushSpec = "0 0 12 * * 0"
+honorMSGSpec = "0 0 19 * * 0"
+sendEveryWeek = true
+
+[task]
+    #扫表任务配置
+    rowLimit     = 12   # 每次从表中取的最大数据量
+	tableJobNum  = 100 # 开启n张表的扫描任务的协程数量
+	tableConsumeNum = 10  # 开启消费表数据的协程数量
+
+	chanSize    = 1024 # chan 缓冲长度
+    switchDatabus = false # 消息qps较小的消费开关
+    switchHighQPS = false # 播放/点赞等高qps消费开关
+    databusQueueLen = 500 # 消息qps较小的消费队列长度
+    statLikeQueueLen = 1000 # 点赞消费队列长度
+    statViewQueueLen = 2000 # 播放消费队列长度
+
+    #过期任务通知
+    switchMsgNotify = true #开启消息通知
+    testNotifyMids = "1,2,3,4"  #test mids 逗号隔开
+    taskMsgCode = "1_17_2"
+    taskTitle   = "你的新手任务尚未完成"
+	taskContent = "亲爱的UP主，你的新手任务尚未完成，快来完成新手任务，领取丰厚礼包吧！请前往web端点击 #{任务成就入口}{\"https://member.bilibili.com/v2#/mission-achieve/taskManage\"} 参与完成哦~"
+    taskExpireTime = 600 #设置多久过期 单位/s，3600*24*30=2592000 s 对第30天未完成新手任务的UP主，发送消息通知
+    taskSendHour = 16 #几点发送
+    taskSendMiniute = 51 #几分发送
+    taskSendSecond = 5 #几秒发送
+    taskBatchMidNum = 100 #过期任务通知每次批量发送多个mid
+
+	taskTableJobNum = 100 #开启n张表的扫描任务的协程数量
+    taskRowLimitNum    = 100 #每次从表中取的最大数据量
+	taskTableConsumeNum = 10  # 开启消费表数据的协程数量
+    
+    #奖品通知
+    rewardMsgCode = "1_17_3"
+    rewardTitle   = "你当前有待领取的奖励"
+	rewardContent = "亲爱的UP主，您有新的任务成就礼包待领取，快来领取奖品吧！请前往web端点击 #{任务成就入口}{\"https://member.bilibili.com/v2#/mission-achieve/taskManage\"} 领取哦~"
+    
+    rewardTableJobNum = 1 #开启n张表的扫描任务的协程数量
+    rewardRowLimitNum    = 100 #每次从表中取的最大数据量
+	rewardTableConsumeNum = 10  # 开启消费表数据的协程数量
+    rewardWeek = 1 #设置周几跑奖品通知 0-6 发送时间为每周六的20:00，用户为上周周六18:00 - 本周周六17:59所有达到领取奖励且未领取的用户
+    rewardLastDay = -30 #从过去多少天开始
+    rewardLastHour = 0 #从过去开始几点 0-23
+    rewardLastMiniute = 1 #从过去开始几分 0-59
+    rewardLastSecond = 0 #从过去开始几秒 0-59
+
+    rewardNowHour = 15 #从当前时间几点开始
+    rewardNowMiniute = 58 #从当前时间几分开始
+    rewardNowSecond = 5 #从当前时间几秒开始
+    rewardBatchMidNum = 100 #奖励通知每次批量发送多个mid
+
+    rewardSendHour = 0 #基于当前时间往后多少小时发送
+    rewardSendMiniute = 0 #基于当前时间往后多少分钟发送
+    rewardSendSecond = 5 #基于当前时间往后多少秒发送
+
+  
+    biliMid = 37090048 #哔哩哔哩创作中心公众号
+
+    #新手和进阶粉丝数
+    newFollower = 1
+    advancedFollower=2
+
+    #计数下限
+    statView = 1
+    statLike = 1
+    statReply = 1
+    statShare = 1
+    statFav = 1
+    statCoin = 1
+    statDM = 1
+    #计数上限
+    statViewUp = 3
+    statLikeUp = 3
+    statReplyUp = 3
+    statShareUp = 3
+    statFavUp = 3
+    statCoinUp = 3
+    statDMUp = 3
+
+[host]
+    message = "http://message.bilibili.co"
+    api = "http://api.bilibili.co"
+    videoup = "http://uat-archive.api.bilibili.co"
+    
+[log]
+    dir = "/data/log/creative-job/"
+    stdout = false
+    [log.syslog]
+    project = "creative-job"
+    chanSize = 10240
+[bm]
+	[bm.outer]
+    addr = "0.0.0.0:7461"
+    maxListen = 1000
+    timeout="1s"
+    readTimeout="1s"
+    writeTimeout="1s"
+
+[httpClient]
+    [httpClient.normal]
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "500ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.normal.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.slow]
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "1s"
+    timeout = "10s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.slow.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+ 
+[db]
+    [db.creative]
+    name = "[creative]tcp@172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_creative?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    idleTimeout ="4h"
+	queryTimeout = "5s"
+	execTimeout = "5s"
+	tranTimeout = "5s"
+	[db.creative.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+
+[hbaseOld]
+    master = ""
+    meta = ""
+    dialTimeout = "1s"
+    readTimeout = "150ms"
+    readsTimeout = "600ms"
+    writeTimeout = "200ms"
+    writesTimeout = "600ms"
+    [hbaseOld.zookeeper]
+    root = ""
+    addrs = ["10.23.58.154:2181","10.23.58.141:2181","10.23.58.20:2181"]
+    timeout = "30s"
+
+[arcSub]
+    key = "4c76cbb7a985ac90"
+    secret = "f36fbb15a85c6e21b0ee22a560ef3a67"
+    group = "Archive-MainArchive-S"
+    topic = "Archive-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[arcNotifySub]
+    key = "4c76cbb7a985ac90"
+    secret = "f36fbb15a85c6e21b0ee22a560ef3a67"
+    group = "ArchiveNotify-MainArchive-S"
+    topic = "ArchiveNotify-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/sub/arcNotify"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[upPub]
+    key = "4c76cbb7a985ac90"
+    secret = "f36fbb15a85c6e21b0ee22a560ef3a67"
+    group = "Creative-MainArchive-P"
+    topic = "Creative-T"
+    action = "pub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/pub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[monitor]
+    moni="http://moni.bilibili.co/dashboard/db/databus?orgId=1"
+    host = "http://bap.bilibili.co"
+    username="fengpengfei"
+    appToken = "jLgSvndTeranxGMN"
+    appSecret = "CcCdlEBYqxqrgAieJuFVZUsgPmweLRms"
+
+
+
+[taskSub]
+    key = "4c76cbb7a985ac90"
+    secret = "43bb22ce34a6b13e7814f09cb8116522"
+    group = "CreativeTask-MainArchive-S"
+    topic = "CreativeTask-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/sub/task"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[shareSub]
+    key = "4c76cbb7a985ac90"
+    secret = "43bb22ce34a6b13e7814f09cb8116522"
+    group = "ShareMid-MainArchive-S"
+    topic = "ShareMid-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/sub/share"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[relationSub]
+    key = "4c76cbb7a985ac90"
+    secret = "43bb22ce34a6b13e7814f09cb8116522"
+    group = "Relation-MainArchive-CreativeNewcomer-S"
+    topic = "Relation-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/sub/relation"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[statLikeSub]
+    key = "4c76cbb7a985ac90"
+    secret = "43bb22ce34a6b13e7814f09cb8116522"
+    group = "StatLike-MainArchive-CreativeNewcomer-S"
+    topic = "StatLike-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/sub/statLike"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[statShareSub]
+    key = "4c76cbb7a985ac90"
+    secret = "43bb22ce34a6b13e7814f09cb8116522"
+    group = "StatShare-MainArchive-CreativeNewcomer-S"
+    topic = "StatShare-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/sub/statShare"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[statCoinSub]
+    key = "4c76cbb7a985ac90"
+    secret = "43bb22ce34a6b13e7814f09cb8116522"
+    group = "StatCoin-MainArchive-CreativeNewcomer-S"
+    topic = "StatCoin-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/sub/statCoin"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[statFavSub]
+    key = "4c76cbb7a985ac90"
+    secret = "43bb22ce34a6b13e7814f09cb8116522"
+    group = "StatFav-MainArchive-CreativeNewcomer-S"
+    topic = "StatFav-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/sub/statFav"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[statReplySub]
+    key = "4c76cbb7a985ac90"
+    secret = "43bb22ce34a6b13e7814f09cb8116522"
+    group = "StatReply-MainArchive-CreativeNewcomer-S"
+    topic = "StatReply-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/sub/statReply"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+
+[statDMSub]
+    key = "4c76cbb7a985ac90"
+    secret = "43bb22ce34a6b13e7814f09cb8116522"
+    group = "StatDM-MainArchive-CreativeNewcomer-S"
+    topic = "StatDM-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/sub/statDM"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[statViewSub]
+    key = "4c76cbb7a985ac90"
+    secret = "43bb22ce34a6b13e7814f09cb8116522"
+    group = "StatView-MainArchive-CreativeNewcomer-S"
+    topic = "StatView-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/sub/statView"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[newUpSub]
+    key = "4c76cbb7a985ac90"
+    secret = "f36fbb15a85c6e21b0ee22a560ef3a67"
+    group = "ArchiveNotify-MainArchive-CreativeNewcomer-S"
+    topic = "ArchiveNotify-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/sub/newup"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[mobileUpSub]
+    key = "4c76cbb7a985ac90"
+    secret = "f36fbb15a85c6e21b0ee22a560ef3a67"
+    group = "Videoup2Bvc-MainArchive-CreativeNewcomer-S"
+    topic = "Videoup2Bvc"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "creative-job/sub/mobileup"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[weeklyHonorInfoc]
+    taskID = "001810"
+    proto = "tcp"
+    addr = "172.18.33.125:15140"
+    chanSize = 10240

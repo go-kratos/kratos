@@ -1,0 +1,22 @@
+syntax = "proto3";
+package bbq.service.image.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+message ImgUploadRequest {
+	string filename = 1 [(gogoproto.jsontag) = "filename",(gogoproto.moretags) = "form:\"filename\"",(gogoproto.customname)= "Filename"];
+	string dir = 2 [(gogoproto.jsontag) = "dir",(gogoproto.moretags) = "form:\"dir\"",(gogoproto.customname)= "Dir"];
+	bytes file = 3 [(gogoproto.jsontag) = "file",(gogoproto.moretags) = "form:\"file\"",(gogoproto.customname)= "File"];
+}
+message ImgUploadResponse {
+	string location = 1 [(gogoproto.jsontag) = "location",(gogoproto.moretags) = "form:\"location\"",(gogoproto.customname)= "Location"];
+	string etag = 2 [(gogoproto.jsontag) = "etag",(gogoproto.moretags) = "form:\"etag\"",(gogoproto.customname)= "Etag"];
+}
+service VideoImage {
+	rpc ImgUpload(ImgUploadRequest) returns(ImgUploadResponse);
+}

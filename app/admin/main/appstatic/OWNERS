@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liweijia
+- renwei
+- zhaoshichen
+labels:
+- admin
+- admin/main/appstatic
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- guanyanliang
+- liuxuan
+- wuhao
+- zhaoshichen

@@ -1,0 +1,3 @@
+#! /bin/sh
+DIR=$(dirname "$0")
+go run $DIR/main.go $DIR/single_template.go $DIR/multi_template.go $DIR/none_template.go $DIR/header_template.go $@

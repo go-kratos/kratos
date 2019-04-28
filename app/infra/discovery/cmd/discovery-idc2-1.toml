@@ -1,0 +1,51 @@
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/discovery.pid"
+dir = "./"
+
+nodes = ["127.0.0.1:7181", "127.0.0.1:7182"]
+
+[zones]
+"127.0.0.1:7171"="zone1"
+
+[log]
+dir = "/data/log/discovery/"
+
+[bm]
+    [bm.inner]
+    addr = "0.0.0.0:7181"
+    timeout = "40s"
+
+[identify]
+    [identify.host]
+    auth = "http://passport.bilibili.co"
+    secret = "http://open.bilibili.co"
+    [identify.httpClient]
+    key = "0c4b8fe3ff35a4b6"
+    secret = "b370880d1aca7d3a289b9b9a7f4d6812"
+    dial = "30ms"
+    timeout = "100ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[httpClient]
+key = "0c4b8fe3ff35a4b6"
+secret = "b370880d1aca7d3a289b9b9a7f4d6812"
+dial = "500ms"
+timeout = "1s"
+keepAlive = "60s"
+    [httpClient.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100

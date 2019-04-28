@@ -1,0 +1,10 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- daiwei
+labels:
+- admin
+- admin/bbq/comment
+- bbq
+options:
+  no_parent_owners: true

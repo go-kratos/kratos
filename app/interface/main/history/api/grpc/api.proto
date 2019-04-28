@@ -1,0 +1,130 @@
+syntax = "proto3";
+
+package community.service.history;
+
+
+option go_package = "v1";
+
+message AddHistoryReply { 
+}
+
+message AddHistoryReq { 
+    int64 mid = 2;
+    int64 rtime = 3;
+    ModelHistory h = 4;
+}
+
+message ClearHistoryReply { 
+}
+
+message ClearHistoryReq { 
+    int64 mid = 2;
+    repeated string businesses = 3;
+}
+
+message DeleteReply { 
+}
+
+message DeleteReq { 
+    int64 mid = 2;
+    repeated ModelHistory his = 3;
+}
+
+message FlushHistoryReply { 
+}
+
+message FlushHistoryReq { 
+    repeated int64 mids = 2;
+    int64 stime = 3;
+}
+
+message HistoriesReply { 
+    repeated ModelResource res = 1;
+}
+
+message HistoriesReq { 
+    int64 mid = 2;
+    string business = 3;
+    int32 pn = 4;
+    int32 ps = 5;
+}
+
+message HistoryCursorReply { 
+    repeated ModelResource res = 1;
+}
+
+message HistoryCursorReq { 
+    int64 mid = 2;
+    int64 max = 3;
+    int64 view_at = 4;
+    int32 ps = 5;
+    string business = 6;
+    repeated string businesses = 7;
+    string ip = 8;
+}
+
+message ModelHistory { 
+    int64 mid = 1;
+    int64 aid = 2;
+    int64 sid = 3;
+    int64 epid = 4;
+    int32 tp = 5;
+    string business = 6;
+    int32 stp = 7;
+    int64 cid = 8;
+    int32 dt = 9;
+    int64 pro = 10;
+    int64 unix = 11;
+}
+
+message ModelResource { 
+    int64 mid = 1;
+    int64 oid = 2;
+    int64 sid = 3;
+    int64 epid = 4;
+    int32 tp = 5;
+    int32 stp = 6;
+    int64 cid = 7;
+    string business = 8;
+    int32 dt = 9;
+    int64 pro = 10;
+    int64 unix = 11;
+}
+
+message PositionReply { 
+    ModelHistory res = 1;
+}
+
+message PositionReq { 
+    int64 mid = 2;
+    int64 aid = 3;
+    string business = 4;
+}
+
+message ProgressReply { 
+    map<int64, ModelHistory> res = 1;
+}
+
+message ProgressReq { 
+    int64 mid = 2;
+    repeated int64 aids = 3;
+}
+
+service History { 
+    // AddHistory add hisotry progress into hbase. 
+    rpc AddHistory(AddHistoryReq) returns(AddHistoryReply); 
+    // Progress get view progress from cache/hbase. 
+    rpc Progress(ProgressReq) returns(ProgressReply); 
+    // Position get view progress from cache/hbase. 
+    rpc Position(PositionReq) returns(PositionReply); 
+    // ClearHistory clear user's historys. 
+    rpc ClearHistory(ClearHistoryReq) returns(ClearHistoryReply); 
+    // Histories return the user all av  history. 
+    rpc Histories(HistoriesReq) returns(HistoriesReply); 
+    // HistoryCursor return the user all av  history. 
+    rpc HistoryCursor(HistoryCursorReq) returns(HistoryCursorReply); 
+    // Delete . 
+    rpc Delete(DeleteReq) returns(DeleteReply); 
+    // FlushHistory flush to hbase from cache. 
+    rpc FlushHistory(FlushHistoryReq) returns(FlushHistoryReply); 
+}

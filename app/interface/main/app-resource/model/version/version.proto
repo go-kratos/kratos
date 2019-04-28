@@ -1,0 +1,15 @@
+syntax = "proto3";
+package version;
+
+message VerUpdate{
+    string ver=1;
+    int32 build=2;
+    string info=3;
+    int32 size=4;
+    string url=5;
+    string hash=6;
+    int32 policy=7;
+    int32 isForce=8;
+    int32 isGray=9;
+    int64 mtime=10;
+}

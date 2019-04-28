@@ -1,0 +1,250 @@
+syntax = "proto3";
+
+package live.xuser.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// History 相关服务
+service RoomAdmin {
+    // 根据登录态获取功能入口是否显示, 需要登录态
+    rpc is_any (RoomAdminShowEntryReq) returns (RoomAdminShowEntryResp);
+    // 获取用户拥有的的所有房管身份
+    rpc get_by_uid (RoomAdminGetByUidReq) returns (RoomAdminGetByUidResp);
+    // 辞职房管
+    rpc resign (RoomAdminResignRoomAdminReq) returns (RoomAdminResignRoomAdminResp);
+    // 查询需要添加的房管
+    rpc search_for_admin (RoomAdminSearchForAdminReq) returns (RoomAdminSearchForAdminResp);
+    // 获取主播拥有的的所有房管
+    rpc get_by_anchor (RoomAdminGetByAnchorReq) returns (RoomAdminGetByAnchorResp);
+    // 获取主播拥有的的所有房管,房间号维度
+    rpc get_by_room (RoomAdminGetByRoomReq) returns (RoomAdminGetByRoomResp);
+    // 撤销房管
+    rpc dismiss (RoomAdminDismissAdminReq) returns (RoomAdminDismissAdminResp);
+    // 任命房管
+    rpc appoint (RoomAdminAddReq) returns (RoomAdminAddResp);
+    // 是否房管
+    rpc is_admin (RoomAdminIsAdminReq) returns (RoomAdminIsAdminResp);
+    // 是否房管, 不额外返回用户信息, 不判断是否主播自己
+    rpc is_admin_short (RoomAdminIsAdminShortReq) returns (RoomAdminIsAdminShortResp);
+}
+
+// 历史记录请求参数定义
+message RoomAdminShowEntryReq {
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+}
+
+// 获取接口返回响应
+message RoomAdminShowEntryResp {
+    // 是否有房管
+    int64 has_admin = 1;
+}
+
+message RoomAdminSearchForAdminReq {
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+
+    string key_word = 2 [(gogoproto.moretags) = 'form:"key_word" validate:"required"'];
+}
+
+message RoomAdminSearchForAdminResp {
+    repeated Data data = 3 [(gogoproto.jsontag) = "data"];
+
+    message Data {
+        // 用户id
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 是否房管
+        int64 is_admin = 2 [(gogoproto.jsontag) = "is_admin"];
+        // 用户名
+        string uname = 4 [(gogoproto.jsontag) = "uname"];
+        // 用户头像
+        string face = 5 [(gogoproto.jsontag) = "face"];
+        // 粉丝勋章名称
+        string medal_name = 6 [(gogoproto.jsontag) = "medal_name"];
+        // 粉丝勋章等级
+        int64 level = 7 [(gogoproto.jsontag) = "level"];
+    }
+}
+
+
+message RoomAdminResignRoomAdminReq {
+    // 房间号
+    int64 roomid = 1 [(gogoproto.moretags) = 'form:"roomid" validate:"required"'];
+    // 用户uid
+    int64 uid = 2 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+}
+
+message RoomAdminResignRoomAdminResp {
+
+}
+
+message RoomAdminGetByUidReq {
+    // 用户uid
+    int64 uid = 2 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+    // 页数
+    int64 page = 1 [(gogoproto.moretags) = 'form:"page"'];
+}
+
+message RoomAdminGetByUidResp {
+    //
+    Page page = 1;
+
+    //
+    repeated Data data = 3 [(gogoproto.jsontag) = "data"];
+
+    message Data {
+        // 用户id
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 房间号
+        int64 roomid = 2 [(gogoproto.jsontag) = "roomid"];
+        // 主播的用户id
+        int64 anchor_id = 3 [(gogoproto.jsontag) = "anchor_id"];
+        // 主播用户名
+        string uname = 4 [(gogoproto.jsontag) = "uname"];
+        // 主播封面
+        string anchor_cover = 5 [(gogoproto.jsontag) = "anchor_cover"];
+        // 上任时间
+        string ctime = 6 [(gogoproto.jsontag) = "ctime"];
+    }
+
+    message Page {
+        // 当前页码
+        int64 page = 1;
+        // 每页大小
+        int64 page_size = 2;
+        // 总页数
+        int64 total_page = 3;
+        // 总记录数
+        int64 total_count = 4;
+    }
+}
+
+message RoomAdminGetByAnchorReq {
+    // 页数
+    int64 page = 1 [(gogoproto.moretags) = 'form:"page"'];
+    // 用户uid
+    int64 uid = 2 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+}
+
+message RoomAdminGetByRoomReq {
+    // 房间号
+    int64 roomid = 1 [(gogoproto.moretags) = 'form:"roomid" validate:"required"'];
+}
+
+message RoomAdminGetByAnchorResp {
+    //
+    Page page = 1;
+
+    //
+    repeated Data data = 3 [(gogoproto.jsontag) = "data"];
+
+    message Data {
+        // 用户id
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 用户名
+        string uname = 4 [(gogoproto.jsontag) = "uname"];
+        // 用户头像
+        string face = 5 [(gogoproto.jsontag) = "face"];
+        // 上任时间
+        string ctime = 6 [(gogoproto.jsontag) = "ctime"];
+        // 粉丝勋章名称
+        string medal_name = 8 [(gogoproto.jsontag) = "medal_name"];
+        // 粉丝勋章等级
+        int64 level = 9 [(gogoproto.jsontag) = "level"];
+        // 房间号
+        int64 roomid = 10 [(gogoproto.jsontag) = "roomid"];
+    }
+
+    message Page {
+        // 当前页码
+        int64 page = 1;
+        // 每页大小
+        int64 page_size = 2;
+        // 总页数
+        int64 total_page = 3;
+        // 总记录数
+        int64 total_count = 4;
+    }
+}
+
+message RoomAdminDismissAdminReq {
+    // 房管的用户uid
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+    // 主播uid
+    int64 anchor_id = 2 [(gogoproto.moretags) = 'form:"anchor_id" validate:"required"'];
+}
+
+message RoomAdminDismissAdminResp {
+}
+
+message RoomAdminAddReq {
+    // 房管的uid
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+    // 主播uid
+    int64 anchor_id = 2 [(gogoproto.moretags) = 'form:"anchor_id" validate:"required"'];
+}
+
+message RoomAdminAddResp {
+    message UI {
+        // 用户id
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 用户名
+        string uname = 2 [(gogoproto.jsontag) = "uname"];
+    }
+
+    // banner
+    UI userinfo = 1 [(gogoproto.jsontag) = "userinfo"];
+    // 房管的用户id
+    int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+    // 房间号
+    int64 roomid = 3 [(gogoproto.jsontag) = "roomid"];
+}
+
+message RoomAdminIsAdminShortReq {
+    // 房管的uid
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+    // 房间号
+    int64 roomid = 3 [(gogoproto.moretags) = 'form:"roomid" validate:"required"'];
+}
+
+message RoomAdminIsAdminReq {
+    // 房管的uid
+    int64 uid = 1 [(gogoproto.moretags) = 'form:"uid" validate:"required"'];
+    // 主播uid
+    int64 anchor_id = 2 [(gogoproto.moretags) = 'form:"anchor_id" validate:"required"'];
+    // 房间号
+    int64 roomid = 3 [(gogoproto.moretags) = 'form:"roomid" validate:"required"'];
+}
+
+message RoomAdminIsAdminShortResp {
+    // 是否房管 0:不是,1:是
+    int64 result = 1 [(gogoproto.jsontag) = "result"];
+}
+
+message RoomAdminIsAdminResp {
+    message UI {
+        // 用户id
+        int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+        // 用户名
+        string uname = 2 [(gogoproto.jsontag) = "uname"];
+    }
+
+    // banner
+    UI userinfo = 1 [(gogoproto.jsontag) = "userinfo"];
+    // 房管的用户id
+    int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+    // 房间号
+    int64 roomid = 3 [(gogoproto.jsontag) = "roomid"];
+}
+
+message RoomAdminGetByRoomResp {
+    repeated Data data = 1 [(gogoproto.jsontag) = "data"];
+
+    message Data {
+        // 上任时间
+        string ctime = 1 [(gogoproto.jsontag) = "ctime"];
+        // 房管的用户id
+        int64 uid = 2 [(gogoproto.jsontag) = "uid"];
+        // 房间号
+        int64 roomid = 3 [(gogoproto.jsontag) = "roomid"];
+    }
+}

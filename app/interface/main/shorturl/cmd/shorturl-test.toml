@@ -1,0 +1,47 @@
+version = "1.1.0"
+user    = "nobody"
+pid     = "/tmp/shorturl.pid"
+dir     = "./"
+perf    = "127.0.0.1:5101"
+
+env     = "dev"
+
+[xlog]
+dir = "/data/log/shorturl/"
+
+[host]
+default = "http://b23.tv/"
+
+[mysql]
+name   = "[bilibili_shorturl]tcp@172.16.33.205:3308"
+dsn    = "test:test@tcp(172.16.33.205:3308)/bilibili_shorturl?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+#dsn    = "peiyifei:123456@tcp(0.0.0.0:3306)/pyfdb?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle   = 2
+queryTimeout = "100ms"
+execTimeout = "100ms"
+tranTimeout = "200ms"
+[mysql.breaker]
+     window = "3s"
+     sleep = "100ms"
+     bucket = 10
+     ratio = 0.5
+     request = 100
+
+[bm]
+    addr = "0.0.0.0:5102"
+    timeout = "1s"
+
+
+[memcache]
+name   = "shorturl/memcache"
+proto  = "tcp"
+addr   = "172.16.33.54:11213"
+active = 50
+idle   = 10
+dialTimeout   = "50ms"
+readTimeout   = "100ms"
+writeTimeout  = "100ms"
+idleTimeout   = "80s"
+archiveExpire = "5m"
+relateExpire  = "20m"

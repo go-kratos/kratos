@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- liuzhen
+- wangyao
+- wujunchen
+- xiehaishen
+- yangbaibing
+labels:
+- interface
+- interface/live/app-ucenter
+- live
+options:
+  no_parent_owners: true
+reviewers:
+- liuzhen
+- yangbaibing

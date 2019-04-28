@@ -1,0 +1,54 @@
+[mysql]
+	addr = "127.0.0.1:3306"
+	dsn = "test:test@tcp(127.0.0.1:3306)/bilibili_ugcrank?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["test:test@tcp(127.0.0.1:3306)/bilibili_ugcrank?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4","test:test@tcp(127.0.0.1:3306)/bilibili_ugcrank?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "100ms"
+	execTimeout = "100ms"
+	tranTimeout = "200ms"
+
+[elecmysql]
+	addr = "127.0.0.1:3306"
+	dsn = "test:test@tcp(127.0.0.1:3306)/bilibili_elec?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	readDSN = ["test:test@tcp(127.0.0.1:3306)/bilibili_elec?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4","test:test@tcp(127.0.0.1:3306)/bilibili_elec?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "100ms"
+	execTimeout = "100ms"
+	tranTimeout = "200ms"
+
+[memcache]
+	name = "ugcpay-rank-interface"
+	proto = "tcp"
+	addr = "172.22.33.137:11220"
+	active = 50
+	idle = 10 
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[LocalCache]
+	ElecAVRankSize    = 1024
+	ElecAVRankTTL     = "5s"
+	ElecUPRankSize    = 1024
+	ElecUPRankTTL     = "5s"
+	
+
+[CacheTTL]
+	ElecUPRankTTL     = 5
+	ElecAVRankTTL     = 5
+	ElecPrepUPRankTTL = 300
+	ElecPrepAVRankTTL = 300
+	ElecUserSettingTTL = 300
+	
+[Biz]
+	ElecAVRankSize = 30
+	ElecUPRankSize = 30
+	RAMAVIDs = [2333]
+	RAMUPIDs = [6658426]
+	ReloadDuration = "10s"

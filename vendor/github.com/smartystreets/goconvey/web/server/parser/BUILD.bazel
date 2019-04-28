@@ -1,0 +1,33 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "packageParser.go",
+        "parser.go",
+        "rules.go",
+        "testParser.go",
+        "util.go",
+    ],
+    importmap = "go-common/vendor/github.com/smartystreets/goconvey/web/server/parser",
+    importpath = "github.com/smartystreets/goconvey/web/server/parser",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/smartystreets/goconvey/convey/reporting:go_default_library",
+        "//vendor/github.com/smartystreets/goconvey/web/server/contract:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<!--
+Copyright 2011 The Graphics-Go Authors. All rights reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+-->
+<opencv_storage>
+<name_of_cascade type_id="opencv-haar-classifier">
+  <size>20 20</size>
+  <stages>
+    <_>
+      <!-- stage 0 -->
+      <trees>
+        <_>
+          <!-- tree 0 -->
+          <_>
+            <!-- root node -->
+            <feature>
+              <rects>
+                <_>0 0 3 4 -1.</_>
+                <_>3 4 2 2 3.1</_></rects>
+              <tilted>0</tilted></feature>
+            <threshold>0.03</threshold>
+            <left_val>0.01</left_val>
+            <right_val>0.8</right_val>
+          </_>
+        </_>
+        <_>
+          <!-- tree 1 -->
+          <_>
+            <!-- root node -->
+            <feature>
+              <rects>
+                <_>3 7 14 4 -3.2</_>
+                <_>3 9 14 2 2.</_></rects>
+              <tilted>0</tilted></feature>
+            <threshold>0.11</threshold>
+            <left_val>0.03</left_val>
+            <right_val>0.83</right_val>
+          </_>
+        </_>
+      </trees>
+      <stage_threshold>0.82</stage_threshold>
+      <parent>-1</parent>
+      <next>-1</next>
+    </_>
+    <_>
+      <!-- stage 1 -->
+      <trees>
+        <_>
+          <!-- tree 0 -->
+          <_>
+            <!-- root node -->
+            <feature>
+              <rects>
+                <_>1 1 2 2 -1.</_>
+                <_>3 3 2 2 2.5</_></rects>
+              <tilted>0</tilted></feature>
+            <threshold>0.07</threshold>
+            <left_val>0.2</left_val>
+            <right_val>0.4</right_val>
+          </_>
+        </_>
+      </trees>
+      <stage_threshold>0.22</stage_threshold>
+      <parent>0</parent>
+      <next>-1</next>
+    </_>
+  </stages>
+</name_of_cascade>
+</opencv_storage>

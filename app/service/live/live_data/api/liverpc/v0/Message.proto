@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package live_data.v0;
+
+option go_package = "v0";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Message {
+    
+    /** 监控队列： topic：RoomStatusNotify-T
+     * 
+     */   
+    rpc liveNotify (MessageLiveNotifyReq) returns (MessageLiveNotifyResp);
+    
+    /** 监控队列： topic：OneLiveRoomAreaChange-T
+     * 
+     */   
+    rpc areaNotify (MessageAreaNotifyReq) returns (MessageAreaNotifyResp);
+}
+
+
+
+message MessageLiveNotifyReq {
+    
+}
+
+message MessageLiveNotifyResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        
+    }
+}
+
+
+
+message MessageAreaNotifyReq {
+    
+}
+
+message MessageAreaNotifyResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        
+    }
+}

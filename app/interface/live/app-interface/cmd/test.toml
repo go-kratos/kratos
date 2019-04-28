@@ -1,0 +1,95 @@
+SkyHorseStatus = true
+[log]
+    stdout = true
+
+[rpctimeout]
+    relation = 200
+    allList  = 100
+    getMyTag = 100
+    getMultiRoomList = 100
+    seaPatrol = 50
+    activityQuery = 100
+    clientRecStrong = 100
+    getByIds = 50
+    getPendantByIds = 50
+    "room/v2/Room/room_id_by_uid_multi" = 100
+    "room/v1/Room/get_status_info_by_uids" = 100
+    "user/v3/User/getMultiple" = 100
+    "live_data/v1/Record/get" = 100
+    "/room_ex/v1/RoomNews/multiGet" = 100
+    "/room_ex/v1/Banner/getNewBanner" = 50
+    "/room/v1/RoomPendant/getPendantMulti" = 100
+    "av/v1/Pk/getPkIdsByRoomIds" = 100
+    "fans_medal/v1/FansMedal/targetsWithMedal" = 100
+
+[httpClient]
+    key    = "fb06a25c6338edbc"
+    secret = "fd10bd177559780c2e4a44f1fa47fa83"
+    dial      = "100ms"
+    timeout   = "100ms"
+    keepAlive = "60s"
+    [httpClient.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+    [httpClient.Host]
+        [httpClient.Host."172.18.33.110:12250"]
+            dial      = "100ms"
+            timeout   = "200ms"
+[liverpc]
+    [liverpc.room]
+        AppID = "live.room"
+        ConnTimeout = "50ms"
+    [liverpc.user]
+        AppID = "live.user"
+        ConnTimeout = "50ms"
+    [liverpc.userext]
+        AppID = "live.userext"
+        ConnTimeout = "50ms"
+    [liverpc.relation]
+        AppID = "live.relation"
+        ConnTimeout = "50ms"
+    [liverpc.live_user]
+        AppID = "live.live_user"
+        ConnTimeout = "50ms"
+    [liverpc.av]
+        AppID = "live.av"
+        ConnTimeout = "50ms"
+    [liverpc.roomex]
+        AppID = "live.roomex"
+        ConnTimeout = "50ms"
+    [liverpc.livedata]
+        AppID = "live.livedata"
+        ConnTimeout = "50ms"
+    [liverpc.fansmedal]
+        AppID = "live.fansmedal"
+        ConnTimeout = "50ms"
+    [liverpc.rankdb]
+        AppID = "live.rankdb"
+        ConnTimeout = "50ms"
+[SkyHorseGray]
+    07 = true
+    27 = true
+    47 = true
+    67 = true
+    29 = true
+    31 = true
+[bvc]
+    host = "uat-live-playurl.bilibili.co"
+[DummyUid]
+    enable = 1
+
+[ChunkSize]
+	"room/v2/Room/room_id_by_uid_multi" = 30
+	"room/v1/Room/get_status_info_by_uids" = 30
+	"user/v3/User/getMultiple" = 30
+	"live_data/v1/Record/get" = 20
+	"/room_ex/v1/RoomNews/multiGet" = 20
+	"/room/v1/RoomPendant/getPendantMulti" = 20
+	"av/v1/Pk/getPkIdsByRoomIds" = 20
+	"fans_medal/v1/FansMedal/targetsWithMedal" = 20
+
+[AppConf]
+    roomAttention = '{"isShowAttentionBubble": 1,"attentionBubbleWaitTime": 120,"isShowAttentionBubbleWithMedal": 1,"isShowAttentionAlert": 1,"attentionAlertWaitTime": 1500 }'

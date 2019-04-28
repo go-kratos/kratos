@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package banned_service.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service SiteBlockMng {
+    
+    /** 是否封禁
+     * room-ex调用
+     */   
+    rpc isBlockUser (SiteBlockMngIsBlockUserReq) returns (SiteBlockMngIsBlockUserResp);
+}
+
+
+
+message SiteBlockMngIsBlockUserReq {
+    // 
+    int64 tuid = 1 [(gogoproto.jsontag) = "tuid"];
+}
+
+message SiteBlockMngIsBlockUserResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        bool is_block = 1 [(gogoproto.jsontag) = "is_block"];
+    }
+}

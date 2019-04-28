@@ -1,0 +1,250 @@
+# This is a TOML document. Boom.
+version = "1.0.0"
+
+[xlog]
+dir = "/tmp/"
+
+[bm]
+    addr = "0.0.0.0:6651"
+    timeout = "1s"
+
+[uri]
+setToken = "http://passport.bilibili.co/intranet/auth/setToken"
+delCache = "http://passport.bilibili.co/intranet/acc/job/delCache"
+
+[game]
+# NOTE: the conf item appIDs represents the game app id list,
+# the app id 876 will always be the first item of the the final game app id list,
+# even if it's not configured in this file or configured in other order.
+appIDs = [876,900]
+delCacheURI = "http://p.biligame.com/api/notify/purge.cache"
+[game.client]
+key = "ebbec09cd271049e"
+secret = "test"
+dial = "500ms"
+timeout = "1s"
+keepAlive = "60s"
+timer = 10
+[game.client.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[rpc]
+[rpc.identifyGame]
+pullInterval = "10s"
+[rpc.identifyGame.client]
+proto = "tcp"
+timeout = "30s"
+timer = 1000
+[rpc.identifyGame.client.breaker]
+window  = "3s"
+sleep   = "100ms"
+bucket  = 10
+ratio   = 0.5
+request = 100
+[rpc.identifyGame.zookeeper]
+root = "/microservice/identify-game-service/"
+addrs = ["172.18.33.172:2181"]
+timeout = "30s"
+
+[db]
+[db.log]
+addr = "172.16.33.205:3306"
+dsn = "aso:hA0DAnENNFz78kYB@tcp(172.16.33.205:3306)/aso?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+active = 5
+idle = 2
+queryTimeout = "1s"
+execTimeout = "2s"
+tranTimeout = "2s"
+[db.log.breaker]
+window = "3s"
+sleep = "100ms"
+bucket = 10
+ratio = 0.5
+request = 100
+    [db.aso]
+        addr = "172.16.33.205:3306"
+        dsn = "aso:hA0DAnENNFz78kYB@tcp(172.16.33.205:3306)/aso?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 5
+        idle = 2
+        queryTimeout = "1s"
+        execTimeout = "2s"
+        tranTimeout = "2s"
+    [db.aso.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+
+[httpClient]
+key = "ebbec09cd271049e"
+secret = "test"
+dial = "500ms"
+timeout = "1s"
+keepAlive = "60s"
+timer = 10
+[httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[group]
+[group.asoBinLog]
+size = 1024
+num = 32
+ticker = "5s"
+chan = 1024
+
+[group.user]
+size = 1024
+num = 32
+ticker = "5s"
+chan = 1024
+
+[group.log]
+size = 1024
+num = 32
+ticker = "5s"
+chan = 1024
+
+[group.contactBindLog]
+size = 2
+num = 2
+ticker = "5s"
+chan = 2
+
+[group.pwdLog]
+size = 2
+num = 2
+ticker = "5s"
+chan = 2
+
+[databus]
+[databus.asoBinLog]
+key = "0QHEzXlXE9Ijewj8V4zu"
+secret = "0QHEzXlXE9Ijewj8V4zv"
+group = "PassportBinlog-UGC-S"
+topic = "Passport-T"
+action = "sub"
+offset = "old"
+buffer = 2048
+name = "passport-job/databus"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[databus.user]
+key = "0QHEzXlXE9Ijewj8V4zu"
+secret = "0QHEzXlXE9Ijewj8V4zv"
+group = "PassportUserInfo-SetUserInfo-S"
+topic = "PassportUserInfo-T"
+action = "sub"
+offset = "old"
+buffer = 2048
+name = "passport-job/databus"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[databus.log]
+key = "0QEO9F8JuuIxZzNDvklH"
+secret = "0QEO9F8JuuIxZzNDvklI"
+group = "PassportLog-Job-S"
+topic = "PassportLog-T"
+action = "sub"
+offset = "old"
+buffer = 2048
+name = "passport-job/databus"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[databus.contactBindLog]
+key = "dbe67e6a4c36f877"
+secret = "8c775ea242caa367ba5c876c04576571"
+group = "Test1-MainCommonArch-S"
+topic = "test1"
+action = "sub"
+offset = "old"
+buffer = 2048
+name = "databus"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+
+[databus.userLog]
+key = "2511663d546f1413"
+secret = "cde3b480836cc76df3d635470f991caa"
+group = "LogUserAction-MainSearch-P"
+topic = "LogUserAction-T"
+action = "pub"
+buffer = 10240
+name = "log-user-action/log-sub"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[hbase]
+[hbase.loginLog]
+master = ""
+meta = ""
+testRowKey = "passport-job-ping"
+dialTimeout = "1s"
+readTimeout = "10s"
+readsTimeout = "10s"
+writeTimeout = "10s"
+writesTimeout = "10s"
+[hbase.loginLog.zookeeper]
+root = ""
+addrs = ["172.18.33.131:2181","172.18.33.168:2181","172.18.33.169:2181"]
+#addrs = ["127.0.0.1:12181"]
+timeout = "30s"
+[hbase.pwdLog]
+master = ""
+meta = ""
+testRowKey = "passport-job-ping"
+dialTimeout = "1s"
+readTimeout = "10s"
+readsTimeout = "10s"
+writeTimeout = "10s"
+writesTimeout = "10s"
+[hbase.pwdLog.zookeeper]
+root = ""
+addrs = ["172.18.33.131:2181","172.18.33.168:2181","172.18.33.169:2181"]
+timeout = "30s"
+
+[encode]
+salt = "12345678"
+aesKey = "0123456789abcdef"

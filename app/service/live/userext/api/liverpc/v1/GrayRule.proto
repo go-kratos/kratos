@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package userext.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service GrayRule {
+    
+    /** 获取灰度策略配置
+     * 
+     */   
+    rpc getByMark (GrayRuleGetByMarkReq) returns (GrayRuleGetByMarkResp);
+}
+
+
+
+message GrayRuleGetByMarkReq {
+    // 
+    string mark = 1 [(gogoproto.jsontag) = "mark"];
+}
+
+message GrayRuleGetByMarkResp {
+    // 返回code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 返回msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        int64 id = 1 [(gogoproto.jsontag) = "id"];
+        // 
+        string mark = 2 [(gogoproto.jsontag) = "mark"];
+        // 
+        string name = 3 [(gogoproto.jsontag) = "name"];
+        // 
+        string content = 4 [(gogoproto.jsontag) = "content"];
+    }
+}

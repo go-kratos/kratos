@@ -1,0 +1,49 @@
+[db.ticketDB]
+    addr = "172.22.34.101:3310"
+    dsn = "ticket:i9HXWAvzWiqPxMxlfsQ8DRqYydjf3pYa@tcp(172.22.34.101:3310)/open_ticket?timeout=5s&readTimeout=30s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 2
+    queryTimeout = "5000ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.ticketDB.breaker]
+        window = "3s"
+        sleep = "1000ms"
+        bucket = 10
+        ratio = 0.5
+        request = 500
+
+[httpClient]
+    key = "654af11b5df0c9d3"
+    secret = "a7512b8b243b82f4bdb72cf2824b3f8e"
+    dial = "500ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+
+[bm]
+    [bm.inner]
+    addr = "0.0.0.0:7081"
+    timeout = "1s"
+
+[elasticSearch]
+    addr = ["http://172.16.38.66:9201"]
+    check = "10s"
+    timeout = "3s"
+
+[elasticSearchUgc]
+    addr = ["http://172.16.38.66:9200"]
+    check = "10s"
+    timeout = "3s"
+
+[berserker]
+    appkey = "7a374e9a8fd3938ac682cc6cb07855e8"
+    secret = "ad994843be00732bd6e65f9f95887bac"
+    url = "http://berserker.bilibili.co/avenger/api/77/query"

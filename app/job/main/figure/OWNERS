@@ -1,0 +1,17 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- muyang
+- yubaihai
+- zhaogangtao
+labels:
+- job
+- job/main/figure
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- linmiao
+- muyang
+- yubaihai
+- zhaogangtao

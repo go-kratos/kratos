@@ -1,0 +1,96 @@
+# This is a TOML document. Boom.
+
+[log]
+    dir = "/data/log/abtest"
+
+[db]
+    [db.ab]
+        addr = "172.16.33.203:3306"
+        dsn = "root:123456@tcp(172.16.33.203:3306)/tickets?timeout=5s&readTimeout=30s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 5
+        idle = 5
+        queryTimeout = "1s"
+        execTimeout = "1s"
+        tranTimeout = "2s"
+    [db.ab.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+    
+[bm]
+    [bm.inner]
+        addr = "0.0.0.0:8801"
+        timeout = "2s"
+    [bm.outer]
+        addr = "0.0.0.0:8802"
+        timeout = "2s"
+
+[redis]
+    name = "abtest-service"
+    proto = "tcp"
+    addr = "172.16.33.203:6379"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+    verifyCdTimes = "2h"
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    csrfOn = false
+    [identify.app]
+        key = "7c7ac0db1aa05587"
+        secret = "9a6d62d93290c5f771ad381e9ca23f26"
+    [identify.host]
+        auth = "http://passport.bilibili.co"
+        secret = "http://open.bilibili.co"
+    [identify.httpClient]
+        key = "7c7ac0db1aa05587"
+        secret = "9a6d62d93290c5f771ad381e9ca23f26"
+        dial = "30ms"
+        timeout = "100ms"
+        keepAlive = "60s"
+    [identify.httpClient.breaker]
+        window  = "10s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+    [identify.httpClient.url]
+        "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+        "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+        "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[httpClient]
+    [httpClient.read]
+        key = "7c7ac0db1aa05587"
+        secret = "9a6d62d93290c5f771ad381e9ca23f26"
+        dial = "1s"
+        timeout = "4s"
+        keepAlive = "60s"
+        timer = 1000
+        [httpClient.read.breaker]
+            window  = "3s"
+            sleep   = "100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100
+    [httpClient.write]
+        key = "7c7ac0db1aa05587"
+        secret = "9a6d62d93290c5f771ad381e9ca23f26"
+        dial = "1s"
+        timeout = "3s"
+        keepAlive = "60s"
+        timer = 1000
+        [httpClient.write.breaker]
+            window  = "3s"
+            sleep   = "100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100

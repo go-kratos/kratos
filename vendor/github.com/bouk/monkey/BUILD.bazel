@@ -1,0 +1,30 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "monkey.go",
+        "monkey_386.go",
+        "monkey_amd64.go",
+        "replace.go",
+        "replace_unix.go",
+        "replace_windows.go",
+    ],
+    importmap = "go-common/vendor/github.com/bouk/monkey",
+    importpath = "github.com/bouk/monkey",
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

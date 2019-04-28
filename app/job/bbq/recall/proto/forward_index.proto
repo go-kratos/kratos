@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package bbq.job.recall.forwardindex;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "app/job/bbq/recall/proto/quality/quality.proto";
+
+option go_package = "proto";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+message ForwardIndex {
+    uint64 svid = 1 [(gogoproto.customname) = "SVID"];        //视频id
+    VideoInfo basic_info = 2 [(gogoproto.customname) = "BasicInfo"];
+    VideoQuality video_quality = 3 [(gogoproto.customname) = "VideoQuality"]; //月 度视频质量指标
+}
+
+message VideoInfo {
+    uint64 svid = 1 [(gogoproto.customname) = "SVID"];
+    string title = 2 [(gogoproto.customname) = "Title"];
+    string content = 3 [(gogoproto.customname) = "Content"];
+    uint64 mid = 4 [(gogoproto.customname) = "MID"];
+    uint64 avid = 5 [(gogoproto.customname) = "AVID"];
+    uint64 cid = 6 [(gogoproto.customname) = "CID"];
+    int64 pubtime = 7 [(gogoproto.customname) = "PubTime"];
+    int64 ctime = 8 [(gogoproto.customname) = "CTime"];
+    int64 mtime = 9 [(gogoproto.customname) = "MTime"];
+    uint32 duration = 10 [(gogoproto.customname) = "Duration"];
+    int32 state = 11 [(gogoproto.customname) = "State"];
+    repeated Tag tags = 12 [(gogoproto.customname) = "Tags"];
+}
+
+message Tag {
+    string name = 1 [(gogoproto.customname) = "TagName"];
+    int32 type = 2 [(gogoproto.customname) = "TagType"];
+    int32 ID = 3 [(gogoproto.customname) = "TagID"];
+}

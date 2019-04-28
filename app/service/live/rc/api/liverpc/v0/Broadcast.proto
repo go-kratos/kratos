@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package rc.v0;
+
+option go_package = "v0";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Broadcast {
+    
+    /** 发送 NOTICE_MSG 广播接口
+     * 如果有定义默认样式的, 且如果样式字段没有传, 会被补全; 最终输出字段格式参考 http://info.bilibili.co/pages/viewpage.action?pageId=3693681#id-%E5%BC%B9%E5%B9%95%E9%80%9A%E7%9F%A5%E5%8D%8F%E8%AE%AE-%E6%96%B0%E7%89%88%E5%BC%B9%E5%B9%95%E9%80%9A%E7%9F%A5%E5%8D%8F%E8%AE%AE
+     */   
+    rpc send_notice_msg (BroadcastSendNoticeMsgReq) returns (BroadcastSendNoticeMsgResp);
+}
+
+
+
+message BroadcastSendNoticeMsgReq {
+    // 场景常数 1: 全局 2: 一级分区 3: 二级分区 4: 房间
+    string scene_key = 1 [(gogoproto.jsontag) = "scene_key"];
+    // 场景值(一级分区号, 二级分区号, 房间号; 当scene_key = 1时此值被忽略)
+    string scene_value = 2 [(gogoproto.jsontag) = "scene_value"];
+    // 
+    MSG msg = 3 [(gogoproto.jsontag) = "msg"];
+       
+    message FullData {
+        // 头图
+        string head_icon = 1 [(gogoproto.jsontag) = "head_icon"];
+        // 尾图
+        string tail_icon = 2 [(gogoproto.jsontag) = "tail_icon"];
+        // 序列帧格式头图
+        string head_icon_fa = 3 [(gogoproto.jsontag) = "head_icon_fa"];
+        // 序列帧格式尾图
+        string tail_icon_fa = 4 [(gogoproto.jsontag) = "tail_icon_fa"];
+        // 背景颜色
+        string background = 5 [(gogoproto.jsontag) = "background"];
+        // 普通文字颜色
+        string color = 6 [(gogoproto.jsontag) = "color"];
+        // 高亮文字颜色
+        string highlight = 7 [(gogoproto.jsontag) = "highlight"];
+        // 持续时间
+        int64 time = 8 [(gogoproto.jsontag) = "time"];
+    }
+       
+    message HalfData {
+        // 头图
+        string head_icon = 1 [(gogoproto.jsontag) = "head_icon"];
+        // 尾图
+        string tail_icon = 2 [(gogoproto.jsontag) = "tail_icon"];
+        // 背景颜色
+        string background = 3 [(gogoproto.jsontag) = "background"];
+        // 普通文字颜色
+        string color = 4 [(gogoproto.jsontag) = "color"];
+        // 高亮文字颜色
+        string highlight = 5 [(gogoproto.jsontag) = "highlight"];
+        // 持续时间
+        int64 time = 6 [(gogoproto.jsontag) = "time"];
+    }
+       
+    message MSG {
+        // 
+        int64 roomid = 1 [(gogoproto.jsontag) = "roomid"];
+        // 
+        string msg_common = 2 [(gogoproto.jsontag) = "msg_common"];
+        // 
+        string msg_self = 3 [(gogoproto.jsontag) = "msg_self"];
+        // 
+        string link_url = 4 [(gogoproto.jsontag) = "link_url"];
+        // 1-系统公告；2-小电视/摩天大楼抽奖公告； 3-总督抽奖公告；4-总督进场; 5-小电视/摩天大楼抽奖中奖公告; 6-高能公告
+        int64 msg_type = 5 [(gogoproto.jsontag) = "msg_type"];
+        // 
+        FullData full = 6 [(gogoproto.jsontag) = "full"];
+        // 
+        HalfData half = 7 [(gogoproto.jsontag) = "half"];
+    }
+}
+
+message BroadcastSendNoticeMsgResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    repeated int64 data = 3 [(gogoproto.jsontag) = "data"];
+}

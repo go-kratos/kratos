@@ -1,0 +1,31 @@
+
+
+[database]
+    [database.lottery]
+        addr = "172.16.38.117:3312"
+        dsn = "live:oWni@ElNs0P0C(dphdj*F1y4@tcp(172.16.38.117:3312)/live-app?timeout=5s&readTimeout=30s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+        active = 5
+        idle = 5
+        queryTimeout = "3s"
+        execTimeout = "3s"
+        tranTimeout = "3s"
+        [db.wallet.breaker]
+        window = "3s"
+        sleep = "100ms"
+        bucket = 10
+        ratio = 0.5
+        request = 100
+[redis]
+    [redis.lottery]
+        name = "lottery-service"
+    	proto = "tcp"
+    	addr = "172.18.33.127:6379"
+    	idle = 10
+    	active = 10
+    	dialTimeout = "1s"
+    	readTimeout = "1s"
+    	writeTimeout = "1s"
+    	idleTimeout = "10s"
+    	expire = "1m"
+
+

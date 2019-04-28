@@ -1,0 +1,25 @@
+// 支付相关接口
+
+syntax = "proto3";
+package ticket.service.sales.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+service Pay {
+    rpc PayNotify (PayNotifyRequest) returns (PayNotifyResponse);
+}
+
+message PayNotifyRequest {
+    string msgID = 1 [(gogoproto.customname) = "MsgID"];
+    string msgContent = 2;
+    bool testMode = 3;
+}
+
+message PayNotifyResponse {
+
+}

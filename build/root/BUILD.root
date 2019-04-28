@@ -1,0 +1,38 @@
+load(
+    "@io_bazel_rules_go//go:def.bzl",
+    "go_binary",
+    "go_library",
+)
+
+# gazelle:prefix go-common
+
+package(default_visibility = ["//visibility:public"])
+
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
+gazelle(name = "gazelle")
+
+xcode_version(
+    name = "xcode_version",
+    version = "10.0",
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"], exclude=["bazel-*/**", ".git/**", ".idea/**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//app:all-srcs",
+        "//build:all-srcs",
+        "//library:all-srcs",
+        "//vendor:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

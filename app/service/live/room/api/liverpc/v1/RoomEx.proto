@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package room.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service RoomEx {
+    
+    /** 轮播接口
+     * 
+     */   
+    rpc getRoundPlayVideo (RoomExGetRoundPlayVideoReq) returns (RoomExGetRoundPlayVideoResp);
+}
+
+
+
+message RoomExGetRoundPlayVideoReq {
+    // 房间id
+    int64 room_id = 1 [(gogoproto.jsontag) = "room_id"];
+    // 播放类型 flv
+    string type = 2 [(gogoproto.jsontag) = "type"];
+}
+
+message RoomExGetRoundPlayVideoResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 分p id
+        int64 cid = 1 [(gogoproto.jsontag) = "cid"];
+        // 播放时间
+        int64 play_time = 2 [(gogoproto.jsontag) = "play_time"];
+        // 轮播序号
+        int64 sequence = 3 [(gogoproto.jsontag) = "sequence"];
+        // av号
+        int64 aid = 4 [(gogoproto.jsontag) = "aid"];
+        // 标题
+        string title = 5 [(gogoproto.jsontag) = "title"];
+        // 稿件序号
+        int64 pid = 6 [(gogoproto.jsontag) = "pid"];
+        // 播放地址
+        string play_url = 7 [(gogoproto.jsontag) = "play_url"];
+    }
+}

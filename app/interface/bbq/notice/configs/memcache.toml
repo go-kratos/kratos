@@ -1,0 +1,13 @@
+
+demoExpire = "24h"
+
+[demo]
+	name = "notice"
+	proto = "tcp"
+	addr = "127.0.0.1:11211"
+	active = 50
+	idle = 10
+	dialTimeout = "100ms"
+	readTimeout = "200ms"
+	writeTimeout = "300ms"
+	idleTimeout = "80s"

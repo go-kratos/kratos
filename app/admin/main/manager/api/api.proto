@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package main.manager.admin;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "api";
+
+// Permit
+service Permit {
+    rpc Login(LoginReq) returns(LoginReply);
+    rpc Permissions(PermissionReq) returns(PermissionReply);
+}
+
+message LoginReq {
+    string mngsid = 1;
+    string dsbsid = 2;
+}
+
+message LoginReply {
+    string sid = 1;
+    string username = 2;
+}
+
+message PermissionReq {
+    string username = 1;
+}
+
+message PermissionReply {
+    int64 uid = 1;
+    repeated string perms = 2;
+}

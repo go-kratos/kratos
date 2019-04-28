@@ -1,0 +1,192 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/coin-service.pid"
+dir = "./"
+perf = "127.0.0.1:6150"
+checkFile = "/data/www/coin-service.html"
+family = "coin-service"
+address = "172.16.0.148"
+dingURL = "http://api.bilibili.com/ding/dingcoin"
+tagURL = "http://api.bilibili.com/x/tag/archive/tags"
+accountURL = "http://account.bilibili.co"
+
+[httpClient]
+    dial = "500ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 10
+    key = "d6f625dd1867c36b"
+    secret = "eafdf317b90019bdef34917fd509390b"
+    [httpClient.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+
+[log]
+dir = "/data/log/coin-service/"
+[log.agent]
+    taskID= "000003"
+    addr=   "172.16.0.204:514"
+    proto=  "tcp"
+    chan=   1024
+
+[report]
+family = "coin-service"
+taskID = "000293"
+proto = "unixgram"
+addr = "/var/run/lancer/collector.sock"
+chan = 10240
+
+[dbCoinJob]
+key = "0Pub71WwEMKXu63qtztu"
+secret = "0Pub71WwEMKXu63qtztv"
+group = "CoinJob-UGC-P"
+topic = "CoinJob-T"
+action = "pub"
+name = "coin-job/databus"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+
+[dbBigData]
+key = "0PtNTguCX35XCtPpjUGC"
+secret= "0PtNTguCX35XCtPpjUGD"
+group= "Coin-UGC-P"
+topic= "Coin-T"
+action="pub"
+name = "coin-service/coin"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "1h"
+
+[grpc]
+timeout = "1s"
+addr = "0.0.0.0:6158"
+
+[bm]
+     addr = "0.0.0.0:6152"
+     timeout = "1s"
+
+[db]
+    [db.coin]
+    addr = "172.16.33.205:3306"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_coin?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "2s"
+    [db.coin.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[redis]
+    name = "coin-service/coin"
+    proto = "tcp"
+    addr = "172.16.0.204:6379"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+
+[antispam]
+	on=true
+    second=15
+    n=30
+    hour=24
+    m=1000
+[antispam.redis]
+    name = "coin-service/coin"
+    proto = "tcp"
+    addr = "172.16.0.204:6379"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "1h"
+
+[stat]
+    [stat.databus]
+        key = "0QEO9F8JuuIxZzNDvklH"
+        secret= "0QEO9F8JuuIxZzNDvklI"
+        group= "ArticleStat-Article-P"
+        topic= "ArticleStat-T"
+        action="pub"
+        name = "article/article-pub"
+        proto = "tcp"
+        addr = "172.16.33.158:6205"
+        idle = 100
+        active = 100
+        dialTimeout = "1s"
+        readTimeout = "60s"
+        writeTimeout = "1s"
+        idleTimeout = "10s"
+
+[tracer]
+proto = "udp"
+addr = "172.16.33.46:5140"
+family = "coin-service"
+
+[memcache]
+    name = "member-service"
+    proto = "tcp"
+    addr = "172.16.33.22:21211"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "24h"
+    ExpExpire = "72h"
+
+[[Businesses]]
+	ID = 1
+	Name = "archive"
+	AddCoinReason      = "Rating for %d : %d"
+	AddCoinUpperReason = "Rating for %d : {%d} from %d"
+	AddExpReason       = "视频投币奖励"
+[[Businesses]]
+	ID =  2                
+	Name = "article"
+	AddCoinReason      = "cv Rating for %d : %d"
+	AddCoinUpperReason = "cv Rating for %d : {%d} from %d"
+	AddExpReason       = "文章投币奖励"
+
+[[Businesses]]
+	ID = 3                 
+	Name = "audio"
+	AddCoinReason      = "mv Rating for %d : %d"
+	AddCoinUpperReason = "mv Rating for %d : {%d} from %d"
+	AddExpReason       = "音乐投币奖励"
+[StatMerge]
+	Business = "archive"
+	Target   = 8
+	Sources  = [1,2,3]
+[Coin]
+ ESLogURL= "http://bili-search.bilibili.co/x/admin/search/log"

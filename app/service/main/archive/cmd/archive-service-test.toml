@@ -1,0 +1,343 @@
+tick = "5m"
+
+playerQn = [15, 16, 32, 48, 64, 80]
+playerVipQn = [74,112,116]
+PlayerAPI = "http://172.18.33.143:13500/playurl/batch"
+PGCPlayerAPI = "http://api.bilibili.co/pgc/internal/dynamic/aid/list"
+PlayerSwitch = true
+
+[videoshot]
+uri = "http://i3.hdslb.com/bfs/videoshot/"
+key = "f555a0f529152dc8c6b1ae60c2af4164"
+
+[xlog]
+dir = "/data/log/archive-service/"
+
+[statsd]
+project = "archive-service"
+addr = "172.18.20.15:8200"
+chanSize = 10240
+
+[app]
+key = "53e2fa226f5ad348"
+secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+
+[bm]
+    [bm.inner]
+    addr = "0.0.0.0:6081"
+    timeout = "1s"
+    [bm.local]
+    addr = "0.0.0.0:6082"
+    timeout = "1s"
+
+[rpcServer2]
+discoverOff = false
+token = "123456"
+[[rpcServer2.servers]]
+    proto = "tcp"
+    addr = "0.0.0.0:6089"
+    weight = 10
+    group = "test"
+[rpcServer2.zookeeper]
+    root = "/microservice/archive-service/"
+    addrs = ["172.18.33.172:2181"]
+    timeout = "30s"
+
+[db]
+    [db.arc]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_archive?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 1
+    idleTimeout ="4h"
+    queryTimeout = "150ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.arc.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.arcRead]
+    addr = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_archive?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    idleTimeout = "4h"
+    queryTimeout = "150ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.arcRead.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.arcResult]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/archive_result?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8"
+    active = 5
+    idle = 1
+    idleTimeout = "4h"
+    queryTimeout = "150ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.arcResult.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.stat]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/archive_stat?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8"
+    active = 5
+    idle = 1
+    idleTimeout = "4h"
+    queryTimeout = "150ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.stat.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.click]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/archive_click?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8"
+    active = 5
+    idle = 1
+    idleTimeout = "4h"
+    queryTimeout = "150ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.click.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.like]
+    name = "172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/archive_like?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8"
+    active = 10
+    idle = 5
+    idleTimeout = "4h"
+    queryTimeout = "150ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.like.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+[ecode]
+domain = "172.16.33.248:6401"
+all = "1h"
+diff = "5m"
+[ecode.clientconfig]
+    key = "test"
+    secret = "e6c4c252dc7e3d8a90805eecd7c73396"
+    dial      = "2000ms"
+    timeout   = "2s"
+    keepAlive = "10s"
+    timer     = 128
+    [ecode.clientconfig.breaker]
+        window  ="3s"
+        sleep   ="100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+[ecode.app]
+    key = "test"
+    secret = "e6c4c252dc7e3d8a90805eecd7c73396"
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    [identify.app]
+    key = "6a29f8ed87407c11"
+    secret = "d3c5a85f5b895a03735b5d20a273bc57"
+    [identify.host]
+    auth = "http://passport.bilibili.com"
+    secret = "http://open.bilibili.com"
+    [identify.httpClient]
+    key = "6a29f8ed87407c11"
+    secret = "d3c5a85f5b895a03735b5d20a273bc57"
+    dial = "30ms"
+    timeout = "100ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+    
+[memcache]
+    [memcache.archive]
+    name = "archive-service"
+    proto = "tcp"
+    addr = "172.18.33.61:11211"
+    active = 50
+    idle = 10
+    dialTimeout = "30ms"
+    readTimeout = "200ms"
+    writeTimeout = "200ms"
+    idleTimeout = "80s"
+    archiveExpire = "10h"
+    videoExpire = "10h"
+
+[redis]
+    [redis.archive]
+    name = "archive-service/archive"
+    proto = "tcp"
+    addr = "172.16.33.54:6379"
+    idle = 50
+    active = 100
+    dialTimeout = "100ms"
+    readTimeout = "200ms"
+    writeTimeout = "200ms"
+    idleTimeout = "80s"
+    expire = "8h"
+    [redis.relation]
+    name = "archive-service/relation"
+    proto = "tcp"
+    addr = "172.16.33.54:6379"
+    idle = 10
+    active = 10
+    dialTimeout = "5s"
+    readTimeout = "200ms"
+    writeTimeout = "200ms"
+    idleTimeout = "80s"
+    [redis.like]
+    name = "archive-service/like"
+    proto = "tcp"
+    addr = "172.16.33.54:6379"
+    idle = 10
+    active = 10
+    dialTimeout = "30ms"
+    readTimeout = "200ms"
+    writeTimeout = "200ms"
+    idleTimeout = "80s"
+
+[kafkaProducer]
+firstShareTopic = "share_first"
+brokers = ["172.16.33.54:9092"]
+sync = false
+    [kafkaProducer.zookeeper]
+    root = "/kafka"
+    addrs = ["172.18.33.172:2181"]
+    timeout = "30s"
+
+[databus]
+key = "0PtNTguCX35XCtPpjUGC"
+secret= "0PtNTguCX35XCtPpjUGD"
+group= "Stat-UGC-P"
+topic= "Stat-T"
+action="pub"
+name = "archive-service/stat"
+proto = "tcp"
+addr = "172.16.33.56:6201"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "1h"
+
+[CacheDatabus]
+key = "8e27ab7e39270b59"
+secret= "477df6a068d7332a163f95abbad2079c"
+group= "ArchiveUserCache-MainAppSvr-P"
+topic= "ArchiveUserCache-T"
+action="pub"
+name = "archive-service/stat"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 5
+active = 50
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "1h"
+
+[StatDatabus]
+key = "4c76cbb7a985ac90"
+secret= "8c22a196bf00d623b69cba4e61b1f7dc"
+group= "StatShare-MainArchive-P"
+topic= "StatShare-T"
+action="pub"
+offset="old"
+buffer=1024
+name = "archive-service/StatShare"
+proto = "tcp"
+addr = "172.16.33.56:6201"
+idle = 5
+active = 50
+dialTimeout = "80ms"
+readTimeout = "80ms"
+writeTimeout = "80ms"
+idleTimeout = "80s"
+
+[shareDatabus]
+key = "8e27ab7e39270b59"
+secret= "e5d94158a1118c14e1449481023edacf"
+group= "AccountExp-MainAppSvr-P"
+topic= "AccountExp-T"
+action="pub"
+name = "archive-service/share"
+proto = "tcp"
+addr = "172.16.33.56:6201"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "1s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+expire = "1h"
+
+[limiter]
+domain = "api.bilibili.co"
+family = "archive-service"
+all = "2h"
+diff = "2s"
+[limiter.clientconfig]
+key = "53e2fa226f5ad348"
+secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+dial      = "1s"
+timeout   = "2s"
+keepAlive = "10s"
+timer     = 128
+[limiter.clientconfig.breaker]
+window  ="3s"
+sleep   ="100ms"
+bucket  = 10
+ratio   = 0.5
+request = 100
+[limiter.app]
+key = "53e2fa226f5ad348"
+secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+
+[playerClient]
+key = "53e2fa226f5ad348"
+secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+dial      = "50ms"
+timeout   = "500ms"
+keepAlive = "60s"
+    [playerClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100

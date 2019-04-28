@@ -1,0 +1,33 @@
+
+[log]
+stdout = true
+
+[zookeepers]
+[zookeepers.uat]
+rackRoot = "/rack"
+volumeRoot = "/volume"
+groupRoot = "/group"
+pitchRoot = "/pitchfork"
+addrs = [
+    "172.18.33.120:2181",
+    "172.18.33.121:2181",
+    "172.18.33.122:2181",
+]
+timeout = "30s"
+
+[host]
+pitchfork = "http://172.22.33.114:2233"
+
+[httpClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "2s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100

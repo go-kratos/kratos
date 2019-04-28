@@ -1,0 +1,150 @@
+# This is a TOML document. Boom
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/bfs-upload-job.pid"
+dir = "./"
+DonwloadHost = "http://uat-i0.hdslb.com"
+UploadHost = "http://uat-bfs.bilibili.co"
+UploadAdminHost = "http://uat-manager.bilibili.co/x/admin/upload"
+HTTPTimeout = "5s"
+
+[bm]
+	[bm.inner]
+	addr = "0.0.0.0:9001"
+	maxListen = 10
+	timeout = "1s"
+	[bm.local]
+	addr = "0.0.0.0:9002"
+	maxListen = 10
+	timeout = "1s"
+
+[multiHTTP]
+	[multiHTTP.outer]
+	addrs = ["0.0.0.0:6121"]
+	maxListen = 10
+	[multiHTTP.inner]
+	addrs = ["0.0.0.0:6122"]
+	maxListen = 10
+	[multiHTTP.local]
+	addrs = ["0.0.0.0:6123"]
+	maxListen = 10
+
+[identify]
+	whiteAccessKey = ""
+	whiteMid = 0
+	[identify.app]
+	key = "6a29f8ed87407c11"
+	secret = "d3c5a85f5b895a03735b5d20a273bc57"
+	[identify.memcache]
+	name = "go-business/identify"
+	proto = "tcp"
+	addr = "172.16.33.54:11211"
+	active = 5
+	idle = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "80s"
+	[identify.host]
+	auth = "http://uat-passport.bilibili.com"
+	secret = "http://uat-open.bilibili.com"
+	[identify.httpClient]
+	key = "f022126a8a365e20"
+	secret = "b7b86838145d634b487e67b811b8fab2"
+	dial = "30ms"
+	timeout = "100ms"
+	keepAlive = "60s"
+	[identify.httpClient.breaker]
+	window  = "10s"
+	sleep   = "100ms"
+	bucket  = 10
+	ratio   = 0.5
+	request = 100
+	[identify.httpClient.url]
+	"http://uat-passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+	"http://uat-passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+	"http://uat-open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[ecode]
+	domain = "uat-api.bilibili.co"
+	all = "1h"
+	diff = "5m"
+	[ecode.clientconfig]
+		key = "c1a1cb2d89c33794"
+		secret = "dda47eeca111e03e6845017505baea13"
+		dial      = "2000ms"
+		timeout   = "2s"
+		keepAlive = "10s"
+		timer     = 128
+		[ecode.clientconfig.breaker]
+			window  ="3s"
+			sleep   ="100ms"
+			bucket  = 10
+			ratio   = 0.5
+			request = 100
+
+[Databus]
+	key = "dbe67e6a4c36f877"
+	secret = "8c775ea242caa367ba5c876c04576571"
+	group= "Bfs-SHY-MainCommonArch-S"
+	topic= "Bfs-SHY-T"
+	action="sub"
+	proto = "tcp"
+	addr = "172.18.33.50:6205"
+	idle = 100
+	active = 100
+	dialTimeout = "1s"
+	readTimeout = "60s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+
+[AIYellowing]
+	ExceptBuckets = []
+
+	[AIYellowing.producer]
+	key = "dbe67e6a4c36f877"
+	secret = "8c775ea242caa367ba5c876c04576571"
+	group= "Bfs-Yellow-Req-MainCommonArch-P"
+	topic= "Bfs-Yellow-Req-T"
+	action="pub"
+	proto = "tcp"
+	addr = "172.18.33.50:6205"
+	idle = 100
+	active = 100
+	dialTimeout = "1s"
+	readTimeout = "60s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+
+	[AIYellowing.consumer]
+	key = "dbe67e6a4c36f877"
+	secret = "8c775ea242caa367ba5c876c04576571"
+	group= "Bfs-Yellow-Res-MainCommonArch-S"
+	topic= "Bfs-Yellow-Res-T"
+	action="sub"
+	proto = "tcp"
+	addr = "172.18.33.50:6205"
+	idle = 100
+	active = 100
+	dialTimeout = "1s"
+	readTimeout = "60s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+
+[threshold]
+	sex = 9500
+
+[httpClient]
+	key = "ad4bb9b8f5d9d4a7"
+    secret = "6912080d78d58be7cb94f57d50d438f6"
+    dial = "1s"
+    timeout = "10s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.breaker]
+        window  = "10s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100

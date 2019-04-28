@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package gift.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service Gift {
+    
+    /** 增加包裹道具
+     * 
+     */   
+    rpc addFreeGift (GiftAddFreeGiftReq) returns (GiftAddFreeGiftResp);
+}
+
+
+
+message GiftAddFreeGiftReq {
+    // 用户uid
+    int64 uid = 1 [(gogoproto.jsontag) = "uid"];
+    // 礼物id
+    int64 giftid = 2 [(gogoproto.jsontag) = "giftid"];
+    // 数量
+    int64 num = 3 [(gogoproto.jsontag) = "num"];
+    // 过期时间
+    int64 expireat = 4 [(gogoproto.jsontag) = "expireat"];
+    // 
+    string code = 5 [(gogoproto.jsontag) = "code"];
+    // 
+    string caller = 6 [(gogoproto.jsontag) = "caller"];
+}
+
+message GiftAddFreeGiftResp {
+    // 
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // 
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    Data data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message Data {
+        // 
+        int64 bag_id = 1 [(gogoproto.jsontag) = "bag_id"];
+    }
+}

@@ -1,0 +1,71 @@
+# This is a TOML document. Boom.
+
+[bm]
+     addr = "0.0.0.0:6362"
+     timeout = "1s"
+
+[rpcServer]
+    proto = "tcp"
+    addr = "0.0.0.0:6361"
+
+[accountRPC]
+
+[archiveRPC]
+
+[articleRPC]
+
+[multiRedis]
+maxArcsNum = 50 # 对每个up主回源时候 一次最多拿多少个稿件 也是每个up主稿件缓存的限制量
+TTLUpper = "480h"
+expireUpper = "480h"
+expireFeed = "16h"
+[multiRedis.Cache]
+    name = "feed-service"
+    proto = "tcp"
+    addr = "172.18.33.60:6891"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+
+[memcache]
+    name = "feed-service"
+    proto = "tcp"
+    addr = "172.18.33.61:11230"
+    idle = 10
+    active = 10
+    dialTimeout = "2s"
+    readTimeout = "2s"
+    writeTimeout = "2s"
+    idleTimeout = "7h"
+    expire = "15m"
+    bangumiExpire = "15m"
+
+[httpClient]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+dial      = "500ms"
+timeout   = "2s"
+keepAlive = "60s"
+timer = 10
+[httpClient.breaker]
+    window  ="10s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[feed]
+  appLength = 200
+  webLength = 400
+  archiveFeedLength = 200
+  archiveFeedExpire = "5m"
+  bangumiFeedExpire = "5m"
+  appPullInterval = "5m"
+  webPullInterval = "15s"
+  bulkSize = 500
+  minUpCnt    = 10
+  maxTotalCnt = 100

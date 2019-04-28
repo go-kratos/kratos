@@ -1,0 +1,50 @@
+//存放api使用的模型
+syntax = "proto3";
+package open.service.antifraud.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+
+message GraphPrepareRequest{
+    int64 mid = 1 [(gogoproto.jsontag) = "mid", (gogoproto.customname) = "MID",(gogoproto.moretags) = "form:\"mid\" validate:\"required\""];
+    string ip = 2 [(gogoproto.jsontag) = "ip", (gogoproto.customname) = "IP",(gogoproto.moretags) = "form:\"ip\" validate:\"required\""];
+    int64 customer = 3 [(gogoproto.jsontag) = "customer", (gogoproto.moretags) = "form:\"customer\" validate:\"required\""];
+    int64 item_id = 4 [(gogoproto.jsontag) = "item_id", (gogoproto.customname) = "ItemID", (gogoproto.moretags) = "form:\"item_id\" validate:\"required\""];
+    string client_type = 5 [(gogoproto.jsontag) = "client_type", (gogoproto.moretags) = "form:\"client_type\" validate:\"required\""];
+}
+
+message GraphPrepareResponse{
+    int64 success = 1 [(gogoproto.jsontag) = "success"];
+    string captcha_id = 2 [(gogoproto.jsontag) = "captcha_id", (gogoproto.customname) = "CaptchaID"];
+    string challenge = 3 [(gogoproto.jsontag) = "challenge"];
+    int64 new_captcha = 4 [(gogoproto.jsontag) = "new_captcha"];
+    string voucher = 5 [(gogoproto.jsontag) = "voucher"];
+}
+
+message GraphCheckRequest{
+    int64 mid = 1 [(gogoproto.jsontag) = "mid", (gogoproto.customname) = "MID",(gogoproto.moretags) = "form:\"mid\" validate:\"required\""];
+    string ip = 2 [(gogoproto.jsontag) = "ip", (gogoproto.customname) = "IP",(gogoproto.moretags) = "form:\"ip\" validate:\"required\""];
+    int64 customer = 3 [(gogoproto.jsontag) = "customer", (gogoproto.moretags) = "form:\"customer\" validate:\"required\""];
+    int64 item_id = 4 [(gogoproto.jsontag) = "item_id", (gogoproto.customname) = "ItemID",(gogoproto.moretags) = "form:\"item_id\" validate:\"required\""];
+    string voucher = 5 [(gogoproto.jsontag) = "voucher", (gogoproto.moretags) = "form:\"voucher\" validate:\"required\""];
+    string challenge = 6 [(gogoproto.jsontag) = "challenge", (gogoproto.moretags) = "form:\"challenge\" validate:\"required\""];
+    string validate = 7 [(gogoproto.jsontag) = "validate", (gogoproto.moretags) = "form:\"validate\" validate:\"required\""];
+    string seccode = 8 [(gogoproto.jsontag) = "seccode", (gogoproto.moretags) = "form:\"seccode\" validate:\"required\""];
+    string client_type = 9 [(gogoproto.jsontag) = "client_type", (gogoproto.moretags) = "form:\"client_type\" validate:\"required\""];
+    int64 success = 10 [(gogoproto.jsontag) = "success", (gogoproto.moretags) = "form:\"success\" validate:\"required\""];
+}
+
+message GraphCheckResponse{
+    string new_voucher = 1 [(gogoproto.jsontag) = "new_voucher"];
+}
+
+service Graph {
+    // 拉起极验
+    rpc GraphPrepare(GraphPrepareRequest) returns (GraphPrepareResponse);
+    // 极验验证
+    rpc GraphCheck(GraphCheckRequest) returns (GraphCheckResponse);
+}

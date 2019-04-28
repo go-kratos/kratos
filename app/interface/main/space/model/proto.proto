@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "model";
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message AidReason {
+    int64   Aid     =  1 [(gogoproto.jsontag) ="aid"];
+    string  Reason  =  2 [(gogoproto.jsontag) ="reason"];
+}
+
+message AidReasons {
+    repeated AidReason List = 1;
+}
+
+message ThemeDetail {
+    int64   ID           =  1 [(gogoproto.jsontag) ="id"];
+    string  Name         =  2 [(gogoproto.jsontag) ="name"];
+    string  Icon         =  3 [(gogoproto.jsontag) ="icon"];
+    string  TopPhoto     =  4 [(gogoproto.jsontag) ="top_photo"];
+    string  BgImg        =  5 [(gogoproto.jsontag) ="bg_img"];
+    int64   IsActivated  =  6 [(gogoproto.jsontag) ="is_activated"];
+}
+
+message ThemeDetails {
+    repeated ThemeDetail List = 1;
+}
+
+message Notice {
+    string  Notice    =  1 [(gogoproto.jsontag) ="notice"];
+    int64   IsForbid  =  2 [(gogoproto.jsontag) ="is_forbid"];
+}

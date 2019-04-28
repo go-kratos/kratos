@@ -1,0 +1,54 @@
+syntax = "proto3";
+package archive;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+// !!!Note: only response message defined, since we put pb into http response body
+message VideoFileInfo {
+    uint64 filesize   = 1 [(gogoproto.jsontag) = "filesize", (gogoproto.casttype) = "int64"];
+    uint64 timelength = 2 [(gogoproto.jsontag) = "timelength", (gogoproto.casttype) ="int64"];
+    string ahead = 3 [(gogoproto.jsontag) = "ahead"];
+    string vhead = 4 [(gogoproto.jsontag) = "vhead"];
+}
+
+message VideoFormatFileInfo {
+    repeated VideoFileInfo infos = 1 [(gogoproto.jsontag) = "infos"];
+}
+
+message DashItem {
+    uint32 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.casttype) = "int64"];
+    string baseUrl = 2 [(gogoproto.jsontag) = "base_url"];
+    uint32 bandwidth = 3 [(gogoproto.jsontag) = "bandwidth", (gogoproto.casttype) = "int64"];
+    uint32 codecid = 4 [(gogoproto.jsontag) = "codecid", (gogoproto.casttype) = "int64"];
+}
+
+message ResponseDash {
+    repeated DashItem video = 1 [(gogoproto.jsontag) = "video"];
+    repeated DashItem audio = 2 [(gogoproto.jsontag) = "audio"];
+}
+
+message BvcVideoItem {
+    uint64   expire_time                 = 1 [(gogoproto.jsontag) = "expire_time", (gogoproto.casttype) = "int64"];
+    uint32   cid                         = 2 [(gogoproto.jsontag) = "cid", (gogoproto.casttype) ="int64"];
+    repeated uint32 support_quality      = 3 [(gogoproto.jsontag) = "support_quality", (gogoproto.casttype) = "int"];
+    repeated string support_formats      = 4 [(gogoproto.jsontag) = "support_formats"];
+    repeated string support_description  = 5 [(gogoproto.jsontag) = "support_description"];
+    uint32   quality                     = 6 [(gogoproto.jsontag) = "quality", (gogoproto.casttype) = "int"];
+    string   url                         = 7 [(gogoproto.jsontag) = "url"];
+    map<uint32, VideoFormatFileInfo> file_info = 8 [(gogoproto.jsontag) = "file_info"];
+    uint32   video_codecid               = 9 [(gogoproto.jsontag) = "video_codecid"];
+    bool     video_project               = 10 [(gogoproto.jsontag) = "video_project"];
+    uint32   fnver                       = 11 [(gogoproto.jsontag) = "fnver", (gogoproto.casttype) = "int"];
+    uint32   fnval                       = 12 [(gogoproto.jsontag) = "fnval", (gogoproto.casttype) = "int"];
+    ResponseDash dash                    = 13 [(gogoproto.jsontag) = "dash"];
+}
+
+message BvcResponseMsg {
+    uint32                         code = 1 [(gogoproto.jsontag) = "code", (gogoproto.casttype) = "int64"];
+    map<uint32, BvcVideoItem> data = 2 [(gogoproto.jsontag) = "data"];
+}

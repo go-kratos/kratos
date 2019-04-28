@@ -1,0 +1,50 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "association.go",
+        "callback.go",
+        "callback_create.go",
+        "callback_delete.go",
+        "callback_query.go",
+        "callback_query_preload.go",
+        "callback_row_query.go",
+        "callback_save.go",
+        "callback_update.go",
+        "dialect.go",
+        "dialect_common.go",
+        "dialect_mysql.go",
+        "dialect_postgres.go",
+        "dialect_sqlite3.go",
+        "errors.go",
+        "field.go",
+        "interface.go",
+        "join_table_handler.go",
+        "logger.go",
+        "main.go",
+        "model.go",
+        "model_struct.go",
+        "scope.go",
+        "search.go",
+        "utils.go",
+    ],
+    importmap = "go-common/vendor/github.com/jinzhu/gorm",
+    importpath = "github.com/jinzhu/gorm",
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/github.com/jinzhu/inflection:go_default_library"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

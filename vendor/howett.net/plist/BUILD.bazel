@@ -1,0 +1,43 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "bplist.go",
+        "bplist_generator.go",
+        "bplist_parser.go",
+        "decode.go",
+        "doc.go",
+        "encode.go",
+        "marshal.go",
+        "must.go",
+        "plist.go",
+        "plist_types.go",
+        "text_generator.go",
+        "text_parser.go",
+        "text_tables.go",
+        "typeinfo.go",
+        "unmarshal.go",
+        "util.go",
+        "xml_generator.go",
+        "xml_parser.go",
+        "zerocopy.go",
+    ],
+    importmap = "go-common/vendor/howett.net/plist",
+    importpath = "howett.net/plist",
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

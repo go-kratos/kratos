@@ -1,0 +1,38 @@
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [
+        ":package-srcs",
+        "//app/interface/main/activity/cmd:all-srcs",
+        "//app/interface/main/activity/conf:all-srcs",
+        "//app/interface/main/activity/dao/bnj:all-srcs",
+        "//app/interface/main/activity/dao/bws:all-srcs",
+        "//app/interface/main/activity/dao/kfc:all-srcs",
+        "//app/interface/main/activity/dao/like:all-srcs",
+        "//app/interface/main/activity/dao/sports:all-srcs",
+        "//app/interface/main/activity/dao/timemachine:all-srcs",
+        "//app/interface/main/activity/http:all-srcs",
+        "//app/interface/main/activity/model/bnj:all-srcs",
+        "//app/interface/main/activity/model/bws:all-srcs",
+        "//app/interface/main/activity/model/kfc:all-srcs",
+        "//app/interface/main/activity/model/like:all-srcs",
+        "//app/interface/main/activity/model/sports:all-srcs",
+        "//app/interface/main/activity/model/timemachine:all-srcs",
+        "//app/interface/main/activity/rpc/client:all-srcs",
+        "//app/interface/main/activity/rpc/server:all-srcs",
+        "//app/interface/main/activity/service/bnj:all-srcs",
+        "//app/interface/main/activity/service/bws:all-srcs",
+        "//app/interface/main/activity/service/kfc:all-srcs",
+        "//app/interface/main/activity/service/like:all-srcs",
+        "//app/interface/main/activity/service/sports:all-srcs",
+        "//app/interface/main/activity/service/timemachine:all-srcs",
+    ],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,190 @@
+syntax = "proto3";
+package ugcpay.service.v1;
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// EmptyStruct，填充返回值
+message EmptyStruct{}
+
+// Asset
+
+message AssetRegisterReq {
+    int64 mid = 1 ;
+    // oid 内容ID
+    int64 oid = 2 ;
+    // otype 内容类型
+    string otype = 3 ;
+    // currency 货币类型
+    string currency = 4 ;
+    // price 注册价格(分)
+    int64 price = 5 ;
+}
+
+message AssetQueryReq {
+    // oid 内容ID
+    int64 oid = 1 ;
+    // otype 内容类型
+    string otype = 2 ;
+    // currency 货币类型
+    string currency = 3 ;
+}
+
+message AssetQueryResp {
+    // price 内容注册价格(分)
+    int64 price = 1 ;
+    // platform_price 平台价格(分)
+    map<string,int64> platform_price = 2 ;
+}
+
+message AssetRelationReq {
+    int64 mid = 1 ;
+    // oid 内容ID
+    int64 oid = 2 ;
+    // otype 内容类型
+    string otype = 3 ;
+}
+
+message AssetRelationResp {
+    // state 关系状态
+    string state = 1 ;
+}
+
+message AssetRelationDetailReq {
+    int64 mid = 1 ;
+    // oid 内容ID
+    int64 oid = 2 ;
+    // otype 内容类型
+    string otype = 3 ;
+     // currency 货币类型
+    string currency = 4 ;
+}
+
+message AssetRelationDetailResp {
+    // relation_state 关系状态
+    string relation_state = 1 ;
+    // asset_price 内容注册价格(分)
+    int64 asset_price = 2 ;
+    // asset_platform_price 平台价格(分)
+    map<string,int64> asset_platform_price = 3 ;
+}
+
+// Trade
+
+message TradeCreateReq {
+    // platform 支付平台
+    string platform = 1 ;
+    int64 mid = 2 ;
+    // oid 内容ID
+    int64 oid = 3 ;
+    // otype 内容类型
+    string otype = 4 ;
+     // currency 货币类型
+    string currency = 5 ;
+}
+
+message TradeCreateResp {
+    // order_id 订单ID
+    string order_id = 1 ;
+    // pay_data 支付平台参数
+    string pay_data = 2 ;
+}
+
+message TradeOrderReq {
+    // id 订单号
+    string id = 1 ;
+}
+
+message TradeOrderResp {
+    // order_id 订单号
+    string order_id = 1 ;
+    int64 mid = 2 ;
+    // biz 业务渠道
+    string biz = 3 ;
+    // platform 支付平台
+    string platform = 4 ;
+    int64 oid = 5 ;
+    string otype = 6 ;
+    // fee 支付费用
+    int64 fee = 7 ;
+    // currency 货币类型
+    string currency = 8 ;
+    // pay_id 支付平台支付ID
+    string pay_id = 9 ;
+    // state 订单状态
+    string state = 10 ;
+    string reason = 11 ;
+}
+
+// Income
+
+message IncomeUserAssetOverviewReq {
+    int64 mid = 1 ;
+}
+
+message IncomeUserAssetOverviewResp {
+    // total 累计收入
+    int64 total = 1 ;
+    // total_buy_times 累计购买次数
+    int64 total_buy_times = 2 ;
+    // month_new 新增月收入（待结算）
+    int64 month_new = 3 ;
+    // day_new 新增日收入（待结算）
+    int64 day_new = 4 ;
+}
+
+message IncomeUserAssetListReq {
+    int64 mid = 1 ;
+    // ver 月版本号，如:201809
+    int64 ver = 2 ;
+    int64 ps = 3 ;
+    int64 pn = 4;
+}
+
+message IncomeUserAssetListResp {
+    // list 内容维度月收入信息
+    repeated IncomeUserAsset list = 1 ;
+    Page page = 2 ;
+}
+
+message IncomeUserAsset {
+    int64 oid = 1 ;
+    string otype = 2 ;
+    string currency = 3 ;
+    int64 price = 4 ;
+    int64 total_buy_times = 5 ;
+    int64 new_buy_times = 6 ;
+    int64 total_err_times = 7;
+    int64 new_err_times = 8 ;
+}
+
+message Page {
+    int64 Num = 1 ;
+    int64 Size = 2 ;
+    int64 Total = 3 ;
+}
+
+service UGCPay {
+    // AssetRegister 内容注册
+    rpc AssetRegister(AssetRegisterReq) returns(EmptyStruct);
+    // AssetQuery 内容查询
+    rpc AssetQuery(AssetQueryReq) returns(AssetQueryResp);
+    // AssetRelation 内容关系查询
+    rpc AssetRelation(AssetRelationReq) returns(AssetRelationResp);
+    // AssetRelationDetail 内容关系详情
+    rpc AssetRelationDetail(AssetRelationDetailReq) returns(AssetRelationDetailResp);
+    // TradeCreate 支付创建
+    rpc TradeCreate(TradeCreateReq) returns(TradeCreateResp);
+    // TradeQuery 支付查询
+    rpc TradeQuery(TradeOrderReq) returns(TradeOrderResp);
+    // TradeCancel 支付取消
+    rpc TradeCancel(TradeOrderReq) returns(EmptyStruct);
+    // TradeConfirm 支付确认（请求支付平台）
+    rpc TradeConfirm(TradeOrderReq) returns(TradeOrderResp);
+    // TradeRefund 支付退款（原路返回）
+    rpc TradeRefund(TradeOrderReq) returns(EmptyStruct);
+    // IncomeUserAssetOverview 用户收入总览
+    rpc IncomeUserAssetOverview(IncomeUserAssetOverviewReq) returns(IncomeUserAssetOverviewResp);
+    // IncomeUserAssetList 用户资产维度收入
+    rpc IncomeUserAssetList(IncomeUserAssetListReq) returns(IncomeUserAssetListResp);
+}

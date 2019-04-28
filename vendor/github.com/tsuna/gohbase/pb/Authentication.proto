@@ -1,0 +1,82 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package pb;
+
+option java_package = "org.apache.hadoop.hbase.protobuf.generated";
+option java_outer_classname = "AuthenticationProtos";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+message AuthenticationKey {
+    required int32 id = 1;
+    required int64 expiration_date = 2;
+    required bytes key = 3;
+}
+
+
+message TokenIdentifier {
+    enum Kind {
+        HBASE_AUTH_TOKEN = 0;
+    }
+    required Kind kind = 1;
+    required bytes username = 2;
+    required int32 key_id = 3;
+    optional int64 issue_date = 4;
+    optional int64 expiration_date = 5;
+    optional int64 sequence_number = 6;
+}
+
+
+// Serialization of the org.apache.hadoop.security.token.Token class
+// Note that this is a Hadoop class, so fields may change!
+message Token {
+    // the TokenIdentifier in serialized form
+    // Note: we can't use the protobuf directly because the Hadoop Token class
+    // only stores the serialized bytes
+    optional bytes identifier = 1;
+    optional bytes password = 2;
+    optional bytes service = 3;
+}
+
+
+// RPC request & response messages
+message GetAuthenticationTokenRequest {
+}
+
+message GetAuthenticationTokenResponse {
+    optional Token token = 1;
+}
+
+message WhoAmIRequest {
+}
+
+message WhoAmIResponse {
+    optional string username = 1;
+    optional string auth_method = 2;
+}
+
+
+// RPC service
+service AuthenticationService {
+    rpc GetAuthenticationToken(GetAuthenticationTokenRequest)
+        returns (GetAuthenticationTokenResponse);
+
+    rpc WhoAmI(WhoAmIRequest)
+        returns (WhoAmIResponse);
+}

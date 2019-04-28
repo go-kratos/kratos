@@ -1,0 +1,238 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "nobody"
+pid = "/tmp/upcredit-service.pid"
+dir = "./"
+log = "/data/log/upcredit-service/"
+family = "upcredit-service"
+trace = false
+debug = false
+istest = true
+
+[app]
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+
+[xlog]
+    dir = "/data/log/upcredit-service/"
+    family = "upcredit-service"
+    stdout = true
+
+[statsd]
+    project = "upcredit-service"
+    addr = "172.18.20.15:8200"
+    chanSize = 10240
+
+[httpClient]
+    [httpClient.normal]
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "500ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.normal.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.slow]
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "1s"
+    timeout = "10s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.slow.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[bm]
+    [bm.inner]
+    addr = "0.0.0.0:7730"
+    maxListen = 1000
+    timeout = "1s"
+    [bm.local]
+    addr = "0.0.0.0:7731"
+    maxListen = 100
+    timeout = "1s"
+
+[db]
+    [db.upcrm]
+    dsn = "upcrm:DdL6c5JaWCYKMAQ10PURbfeImow9HXlx@tcp(172.16.33.205:3306)/bilibili_upcrm?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 1
+    idleTimeout ="4h"
+
+    # crm读库
+    [db.upcrmreader]
+    dsn = "upcrm:DdL6c5JaWCYKMAQ10PURbfeImow9HXlx@tcp(172.16.33.205:3306)/bilibili_upcrm?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 1
+    idleTimeout ="4h"
+
+[ecode]
+    domain = "uat-api.bilibili.co"
+    all = "1h"
+    diff = "5m"
+
+[ecode.clientconfig]
+    key = "c05dd4e1638a8af0"
+    secret = "7daa7f8c06cd33c5c3067063c746fdcb"
+    dial      = "2000ms"
+    timeout   = "2s"
+    keepAlive = "10s"
+    timer     = 128
+    [ecode.clientconfig.breaker]
+        window  ="3s"
+        sleep   ="100ms"
+        bucket  = 10
+        ratio   = 0.5
+        request = 100
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    csrf = false
+    [identify.app]
+    key = "53e2fa226f5ad348"
+    secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "/tmp/uat-platform-identify-mc.sock"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    [identify.host]
+    auth = "http://uat-passport.bilibili.com"
+    secret = "http://uat-open.bilibili.com"
+    [identify.httpClient]
+    key = "53e2fa226f5ad348"
+    secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+    dial = "500ms"
+    timeout = "800ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://uat-passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://uat-passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://uat-open.bilibili.co/api/getsecret" = {timeout = "500ms"} 
+
+[monitor]
+    moni="http://moni.bilibili.co/dashboard/db/databus?orgId=1"
+    host = "http://bap.bilibili.co"
+    username="fengpengfei"
+    appToken = "jLgSvndTeranxGMN"
+    appSecret = "CcCdlEBYqxqrgAieJuFVZUsgPmweLRms"
+    intervalAlarm = "5m"
+
+[auth]
+    managerHost = "http://uat-manager.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "unix"
+    addr = "/tmp/uat-manager-auth-mc.sock"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[CreditLogSub]
+    key = "0PvKGhAqDvsK7zitmS8t"
+    secret = "0PvKGhAqDvsK7zitmS8u"
+    group = "UpCreditLog-MainArchive-S"
+    topic = "UpCreditLog-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "upcredit-service/sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "5s"
+    upChanSize = 1024
+    consumeLimit = 10
+    routineLimit = 5
+
+[BusinessBinLogSub]
+    key = "0PvKGhAqDvsK7zitmS8t"
+    secret = "0PvKGhAqDvsK7zitmS8u"
+    group = "BusinessUpBinLog-MainArchive-S"
+    topic = "BusinessUpBinLog-T"
+    action = "sub"
+    offset = "old"
+    buffer = 128
+    name = "upcredit-service/sub"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 1
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "5s"
+    upChanSize = 1024
+
+[RunStatJobConf]
+    StartTime = "16:41:00"
+    WorkerNumber = 10
+
+[MiscConf]
+    CreditLogWriteRoutineNum = 2
+    BusinessBinLogLimitRate = 500.0
+
+[ElectionZooKeeper]
+    Root = "/microservice/upcredit-service"
+	Addrs = ["172.18.33.50:2199"]
+	Timeout = "5s"

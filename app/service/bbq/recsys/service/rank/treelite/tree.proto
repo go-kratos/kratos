@@ -1,0 +1,62 @@
+syntax = "proto2";
+
+package treelite;
+
+message Model {
+  repeated Tree trees = 1;
+  optional int32 num_feature = 2;
+  optional int32 num_output_group = 3;   // >1 for multi-class classification;
+                                         // =1 for everything else
+  optional bool random_forest_flag = 4;  // true for random forest
+                                         // false for gradient boosted trees
+  map<string, string> extra_params = 5;  // extra parameters
+}
+
+message Tree {
+  optional Node head = 1;
+}
+
+message Node {
+   optional Node left_child = 1;     // Left child; missing if leaf
+   optional Node right_child = 2;    // Right child; missing if leaf
+   optional bool default_left = 3;   // Default direction for missing values
+                                     // true: default to left
+                                     // false: default to right
+   optional int32 split_index = 4;   // Feature index used for the split;
+                                     // missing if leaf
+   enum SplitFeatureType {
+     NUMERICAL = 0;
+     CATEGORICAL = 1;
+   }
+   optional SplitFeatureType split_type = 5;
+                                     // Type of feature used for the split
+                                     // missing if leaf
+   optional string op = 6;           // Operation used for comparison (e.g. "<")
+                                     // of form [feature value] OP [threshold].
+                                     // The left child is taken if the
+                                     // expression evaluates to true; the right
+                                     // child is taken otherwise.
+                                     // missing if leaf or categorical split
+   optional double threshold = 7;    // Decision threshold
+                                     // missing if leaf or categorical split
+   repeated uint32 left_categories = 8;
+                                     // List of all categories belonging to
+                                     // the left child. All other categories
+                                     // will belong to the right child.
+                                     // missing if leaf or numerical split
+   optional double leaf_value = 9;   // Leaf value; missing if non-leaf
+                                     // also missing if leaf_vector field exists
+   repeated double leaf_vector = 10; // Usually missing; only used for random
+                                     // forests with multi-class classification
+   optional uint64 data_count = 11;  // number of data points whose traversal
+                                     // paths include this node. May be
+                                     // ommitted if unavailable
+   optional double sum_hess = 12;    // sum of hessian values for all data
+                                     // points whose traversal paths include
+                                     // this node. This value is generally
+                                     // correlated positively with the data
+                                     // count. May be omitted if unavailable
+   optional double gain = 13;        // change in loss that is attributed to
+                                     // particular split; may be omitted if
+                                     // unavailable
+}

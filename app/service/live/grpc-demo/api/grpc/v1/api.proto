@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package live.grpcdemo.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+
+service Greeter {
+    // `method:"POST" internal:"true"`
+    rpc say_hello_internal(GeeterReq) returns (GreeterResp);
+    rpc say_hello(GeeterReq) returns (GreeterResp);
+}
+
+message GeeterReq {
+    int32 uid = 1 [(gogoproto.moretags) = "form:\"uid\" validate:\"required\""];
+}
+
+message GreeterResp {
+    int32 uid = 1 [(gogoproto.jsontag) = "uid"];
+}

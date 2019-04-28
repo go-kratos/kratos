@@ -1,0 +1,49 @@
+// main.community.tag-service grpc api proto file.
+// discovery id: community.service.tag.
+// version: v1.
+syntax = "proto3";
+package community.service.tag.v1;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+message Channel {
+    int64 tid = 1 [(gogoproto.jsontag) = "tid"];
+    int64 type = 2 [(gogoproto.jsontag) = "type"];
+    int32 rank =3 [(gogoproto.jsontag) = "rank"];
+    string operator = 4 [(gogoproto.jsontag) = "-"];
+    int32 attr = 5 [(gogoproto.jsontag) = "attr"];
+    int32 state = 6 [(gogoproto.jsontag) = "state"];
+    int64 ctime = 7 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 8 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int32 top_rank =9 [(gogoproto.jsontag) = "top_rank"];
+}
+
+message ChannelCategory {
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    int32 state = 3 [(gogoproto.jsontag) = "-"];
+    int64 ctime = 4 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 mtime = 5 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int32 order = 6 [(gogoproto.jsontag) = "order"];
+    int32 int_shield = 7 [(gogoproto.jsontag) = "int_shield"];
+}
+
+message ChannelRule {
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+    int64 tid = 2 [(gogoproto.jsontag) = "tid"];
+    string in_rule = 3 [(gogoproto.jsontag) = "in_rule"];
+    string notin_rule = 4 [(gogoproto.jsontag) = "notin_rule"];
+    int32 state = 5 [(gogoproto.jsontag) = "state"];
+}
+
+message ChannelGroup {
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+    int64 ptid = 2 [(gogoproto.jsontag) = "ptid"];
+    int64 tid = 3 [(gogoproto.jsontag) = "tid"];
+    string tname = 4 [(gogoproto.jsontag) = "tname"];
+    string alias = 5 [(gogoproto.jsontag) = "alias"];
+    string rank = 6 [(gogoproto.jsontag) = "rank"];
+    int64 CTime = 7 [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 MTime = 8 [(gogoproto.jsontag) = "-", (gogoproto.casttype) = "go-common/library/time.Time"];
+}

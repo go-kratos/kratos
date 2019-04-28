@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package live.appinterface.v1;
+
+option go_package = "v1";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+
+service config {
+    rpc getConf (GetConfReq) returns (GetConfResp);
+}
+
+message GetConfReq {
+    string key = 1 [(gogoproto.moretags) = 'form:"key" validate:"required"'];
+}
+
+message GetConfResp {
+    string value = 1  [(gogoproto.moretags) = 'form:"value"'];
+}

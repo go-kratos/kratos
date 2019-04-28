@@ -1,0 +1,61 @@
+[databus]
+[databus.compareDatabus]
+    key = "4ba46ba31f9a44ef"
+    secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+    group = "AccountRecovery-MainAccount-S"
+    topic = "AccountRecovery-T"
+    action = "sub"
+    offset = "new"
+    buffer = 2048
+    name = "account-recovery-job/databus"
+    proto = "tcp"
+    addr = "172.16.33.50:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+	[databus.compareDatabus.discovery]
+   		domain = "api.bilibili.co"
+   		key = "7634436ea852e3f4"
+   		secret = "test"
+[databus.sendMailDatabus]
+    key = "4ba46ba31f9a44ef"
+    secret = "e4c5a7fce28695209e6b4f0af8cf91c5"
+    group = "AccountRecovery-MainAccount-SendMail-S"
+    topic = "AccountRecovery-T"
+    action = "sub"
+    offset = "new"
+    buffer = 2048
+    name = "account-recovery-job/databus"
+    proto = "tcp"
+    addr = "172.16.33.50:6205"
+    idle = 1
+    active = 1
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+	[databus.sendMailDatabus.discovery]
+   		domain = "api.bilibili.co"
+   		key = "7634436ea852e3f4"
+   		secret = "test"
+
+[HttpClientConfig]
+    key = "7d9f6f6fe2a898e8"
+    secret = "4de2ccdbd9db69be0c2c6437bfe6eb69"
+    dial = "100ms"
+    timeout = "350ms"
+    keepAlive = "60s"
+    timer = 1024
+    [HttpClientConfig.breaker]
+        window  = "3s"
+        sleep   = "100ms"
+        bucket  = 10
+        ratio   = 1.0
+        request = 100
+
+[AccRecover]
+CompareURL = "http://api.bilibili.co/x/internal/account-recovery/compare"
+SendMailURL = "http://api.bilibili.co/x/internal/account-recovery/sendMail"

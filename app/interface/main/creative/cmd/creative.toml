@@ -1,0 +1,446 @@
+# This is a TOML document. Boom.
+
+TplMaxCnt = 5
+LimitCntFans = 1000
+AppealTag = 91
+HonorDegradeSwitch = false
+
+[academy]
+    OfficialID = 1
+    EditorChoiceID = 6
+    NewbCourseID = 1
+
+[host]
+    search = "http://172.18.33.135:12999"
+    api = "http://uat-api.bilibili.co"
+    data="http://data.bilibili.co"
+    member = "http://uat-member.bilibili.com"
+    act = "http://act.bilibili.com"
+    activity = "http://uat-www.bilibili.com"
+    videoup = "http://uat-archive.api.bilibili.co"
+    passport = "http://uat-passport.bilibili.com"
+    tag = "http://dl-test.bilibili.com"
+    upMng = "http://uat-cm.bilibili.co"
+    elec = "http://uat-elec.bilibili.com"
+    geetest = "http://api.geetest.com"
+    account = "http://uat-account.bilibili.co"
+    platform = "http://uat-api.bilibili.co"
+    live = "http://api.live.bilibili.co"
+    matsuri = "http://uat-matsuri.bilibili.co"
+    growup = "http://uat-up-profit.bilibili.co"
+    message = "http://uat-message.bilibili.com"
+    mainsearch = "http://uat-manager.bilibili.co"
+    dynamic = "http://uat-api.vc.bilibili.co"
+    mall = "http://uat-mall.bilibili.co"
+    bpay = "http://uat-pay.bilibili.co"
+    pendant= "http://uat-api.bilibili.co"
+    bigmember = "http://uat-api.bilibili.co"
+    profit = "http://up-profit.bilibili.co"
+    notify = "http://message.bilibili.co"
+    chaodian = "http://chaodian.bilibili.co"
+
+[UgcPay]
+    ProtocolID = "e28a5cb06a594ae79961485d3112f0e9"
+    AllowDeleteDays = 30
+    AllowEditDays = 60 
+
+[H5Page]
+FAQVideoEditor = "https://member.bilibili.com/studio/videoup-faq/index.html"
+HotAct = "https://www.bilibili.com/blackboard/x/activity-tougao-h5/all"
+CreativeCollege = "https://member.bilibili.com/college"
+Draft = "https://member.bilibili.com/creative/app/article_drafts"
+Passport = "https://passport.bilibili.com/mobile/index.html"
+Mission = "https://member.bilibili.com/studio/gabriel/mission-system"
+Cooperate = "https://member.bilibili.com/studio/annyroal/bgm-detail"
+
+[AppIcon]
+    [AppIcon.CameraInput]
+    name = "手摄拍摄入口红点"
+    state = true
+    url = ""
+    [AppIcon.CameraCoo]
+    name = "合拍入口红点"
+    state = true
+    url = "http://uat-www.bilibili.com/blackboard/x/activity-tougao-h5/cowork"
+
+[Coefficient]
+    ActHeat = 100.0
+
+[log]
+    dir = "/data/log/creative/"
+    stdout = false
+    [xlog.syslog]
+    project = "creative"
+    chanSize = 10240
+
+
+[app]
+key = "b8f239ca38a53308"
+secret = "5460ef72fe13c10dfb53442b9111427e"
+
+[geetest]
+captchaId = "6c49e5671cfccdfd8ddc5b2808e2711d"
+privateKey = "1d4790b20490207866b0be53b23cc692"
+mcaptchaId = "422a6f52459f01953ca806f4f2fb68cd"
+mprivateKey = "51c53ec7fc53d72b312572d2952fb35d"
+
+
+[httpClient]
+    [httpClient.UpMng]
+    key = "creative"
+    secret = "8c34f29cb765f4f353d785f63156e26e"
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.UpMng.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.normal]
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "500ms"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.normal.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.slow]
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "1s"
+    timeout = "10s"
+    keepAlive = "60s"
+    timer = 10
+    [httpClient.slow.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.fast]
+    key = "b8f239ca38a53308"
+    secret = "5460ef72fe13c10dfb53442b9111427e"
+    dial = "50ms"
+    timeout = "100ms"
+    keepAlive = "60s"
+    timer = 128
+    [httpClient.fast.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.chaodian]
+    key = "chaodian_20190117tangseng"
+    secret = "chaodian_20190117tangseng"
+    dial = "1s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.chaodian.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[bm]
+	[bm.outer]
+    addr = "0.0.0.0:6341"
+    maxListen = 1000
+    timeout = "2s"
+
+[db]
+   [db.archive]
+    name = "[archive]tcp@172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_archive?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 5
+    idle = 5
+    idleTimeout ="4h"
+	queryTimeout = "5s"
+	execTimeout = "5s"
+	tranTimeout = "5s"
+	[db.archive.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+    [db.oper]
+    name = "[archive]tcp@172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_operation?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5   
+    idleTimeout ="4h"
+	queryTimeout = "5s"
+	execTimeout = "5s"
+	tranTimeout = "5s"
+	[db.oper.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+    [db.creative]
+    name = "[archive]tcp@172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_creative?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    idleTimeout ="4h"
+	queryTimeout = "5s"
+	execTimeout = "5s"
+	tranTimeout = "5s"
+	[db.creative.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+    [db.manager]
+    name = "[archive]tcp@172.16.33.205:3308"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_manager?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    active = 5
+    idle = 5
+    idleTimeout ="4h"
+	queryTimeout = "5s"
+	execTimeout = "5s"
+	tranTimeout = "5s"
+	[db.manager.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+
+[whitelist]
+    dataMids = [207526951,15555180, 191407, 18352698, 27515256, 31168827,644370]
+    arcMids = [15555180, 191407, 18352698, 27515256, 31168827,644370, 27515317]
+    forbidVideoupMids = [91513044]
+    
+[memcache]
+    [memcache.archive]
+    name = "creative/archive"
+    proto = "tcp"
+    addr = "172.16.33.54:11213"
+    active = 10
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    tplExpire = "60s"
+
+    [memcache.data]
+    name = "creative/archive"
+    proto = "tcp"
+    addr = "172.16.33.54:11213"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    dataExpire = "60s"
+    indexExpire = "1h"
+    centerExpire = "1h"
+   [memcache.article]
+    name = "creative/article"
+    proto = "tcp"
+    addr = "172.16.33.54:11213"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    submitExpire = "2m"
+    [memcache.honor]
+    name = "creative/article"
+    proto = "tcp"
+    addr = "172.16.33.54:11213"
+    idle = 5
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    honorExpire = "200h"
+    clickExpire = "1m"
+
+[hbase]
+master = ""
+meta = ""
+dialTimeout = "1s"
+readTimeout = "150ms"
+readsTimeout = "600ms"
+writeTimeout = "200ms"
+writesTimeout = "600ms"
+    [hbase.zookeeper]
+    root = ""
+    addrs = ["10.23.58.154:2181","10.23.58.141:2181","10.23.58.20:2181"]
+    timeout = "30s"
+
+[hbaseOld]
+master = ""
+meta = ""
+dialTimeout = "1s"
+readTimeout = "150ms"
+readsTimeout = "600ms"
+writeTimeout = "200ms"
+writesTimeout = "600ms"
+    [hbaseOld.zookeeper]
+    root = ""
+    addrs = ["10.23.58.154:2181","10.23.58.141:2181","10.23.58.20:2181"]
+    timeout = "30s"
+    
+
+[bfs]
+timeout="5s"
+maxFileSize=5242880
+bucket="article"
+url="http://bfs.bilibili.co/bfs/article/"
+method="PUT"
+key="4d08035f0b341509"
+secret="ed4161d96c7612b670f75fa4be4e15"
+
+[userInfoSub]
+key = "0QHEzXlXE9Ijewj8V4zu"
+secret = "0QHEzXlXE9Ijewj8V4zv"
+group = "PassportPurgeCache-UserInfo-S"
+topic = "PassportPurgeCache-T"
+action = "sub"
+offset = "old"
+buffer = 128
+name = "creative/userInfo"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[watermark]
+unamemark = "/data/watermark/mark.png"
+uidmark   = "/data/watermark/uid_mark.png"
+saveimg   = "/data/watermark/"
+fontfile  = "/data/watermark/SourceHanSansSC-Bold.ttf"
+fontsize  = 32
+consume  =  true
+
+[redis]
+    [redis.cover]
+    name = "creative"
+    proto = "tcp"
+    addr = "172.18.33.61:6820"
+    active = 100
+    idle = 2
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[RouterAntispam]
+	on=true
+    	second=3
+    	n=100
+    	hour=12
+    	m=1000
+[RouterAntispam.redis]
+    name = "creative"
+    proto = "tcp"
+    addr = "172.16.33.54:6379"
+    idle = 10
+    active = 100
+    dialTimeout = "500ms"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    expire = "10m"
+
+[DmAntispam]
+	on=true
+    	second=10
+    	n=20
+    	hour=12
+    	m=1000
+[DmAntispam.redis]
+    name = "creative"
+    proto = "tcp"
+    addr = "172.18.21.251:36385"
+    active = 1024
+    idle = 128
+    dialTimeout = "30ms"
+    readTimeout = "50ms"
+    writeTimeout = "50ms"
+    idleTimeout = "80s"
+    expire = "32h"
+
+[Growup]
+LimitFanCnt = 3
+LimitTotalClick = 500000
+
+[game]
+    OpenHost = "http://line1-game-open-api.biligame.net"
+    [game.app]
+    key = "EeOpM531WqQnBvu4"
+    secret = "gHtKtXTHZJDqGP1tg9ORFs0YWV3kW12V"
+
+[rpcServer2]
+    discoverOff = true
+    token = "123456"
+    [[rpcServer2.servers]]
+        proto = "tcp"
+        addr = "0.0.0.0:6079"
+        weight = 10
+        group = "test"
+    [rpcServer2.zookeeper]
+        root = "/microservice/creative/"
+        addrs = ["172.18.33.50:2199","172.18.33.51:2199","172.18.33.52:2199"]
+        timeout = "1s"
+
+[taskPub]
+    key = "4c76cbb7a985ac90"
+    secret = "43bb22ce34a6b13e7814f09cb8116522"
+    group = "CreativeTask-MainArchive-P"
+    topic = "CreativeTask-T"
+    action = "pub"
+    offset = "old"
+    buffer = 128
+    name = "creative/pub/task"
+    proto = "tcp"
+    addr = "172.18.33.50:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "60s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[taskCondition]
+    fans = 100
+    receiveMsg = "领取成功"
+    receiveMsgPendant = "奖励会在12月1日起，陆续发送至你的个人中心—我的头像中"
+    whiteSwitch = false
+    appIndexSwitch = false
+
+[staffConf]
+    isGray = true
+    [[staffConf.typeList]]
+        typeId = 0
+        maxStaff = 6
+    [[staffConf.typeList]]
+        typeId = 22
+        maxStaff = 10
+
+[CoinClient]
+    Timeout = "60s"

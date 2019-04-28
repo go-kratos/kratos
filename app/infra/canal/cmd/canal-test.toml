@@ -1,0 +1,25 @@
+[monitor]
+user = ""
+token = ""
+secret = ""
+
+[httpClient]
+key    = "654af11b5df0c9d3"
+secret = "a7512b8b243b82f4bdb72cf2824b3f8e"
+dial      = "1s"
+timeout   = "1s"
+keepAlive = "60s"
+
+[log]
+dir = "/data/log/canal/"
+Stdout = true
+
+[db]
+#    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_canal?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    dsn = "test:test@tcp(127.0.0.1:3306)/bilibili_canal?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4&allowNativePasswords=True"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "1s"
+    execTimeout = "1s"
+    tranTimeout = "1s"

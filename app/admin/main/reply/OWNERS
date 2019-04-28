@@ -1,0 +1,16 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- caoguoliang
+- chenzhihui
+- wangxu01
+- zhapuyu
+labels:
+- admin
+- admin/main/reply
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- caoguoliang
+- chenzhihui

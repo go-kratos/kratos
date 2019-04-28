@@ -1,0 +1,63 @@
+# This is a TOML document. Boom.
+
+[bm]
+    addr = "0.0.0.0:7391"
+    timeout = "1s"
+
+[rpcServer]
+    proto = "tcp"
+    addr = "0.0.0.0:7399"
+    timeout = "30s"
+
+[passport]
+    [passport.host]
+    auth = "http://passport.bilibili.co"
+
+
+[HTTPClient]
+    key = "7d9f6f6fe2a898e8"
+    secret = "4de2ccdbd9db69be0c2c6437bfe6eb69"
+    dial      = "50ms"
+    timeout   = "200ms"
+    keepAlive = "60s"
+    [HTTPClient.breaker]
+    window  ="1s"
+    sleep   ="10ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+
+[memcache]
+   name = "identify-game-service"
+   proto = "tcp"
+   addr = "172.18.33.61:11235"
+   idle = 5
+   active = 10
+   dialTimeout = "1s"
+   readTimeout = "1s"
+   writeTimeout = "1s"
+   idleTimeout = "10s"
+   expire = "10h"
+
+[dispatcher]
+name = "origin"
+[dispatcher.oauth]
+"origin" = "http://passport.bilibili.com/api/oauth"
+"t1" = "http://api.bilibili.com/x/passport-game/oauth"
+"t2" = "http://t2-api.bilibili.com/x/passport-game/oauth"
+[dispatcher.renewToken]
+"origin" = "http://passport.bilibili.com/api/login/renewToken"
+"t1" = "http://api.bilibili.com/x/passport-game/renewtoken"
+"t2" = "http://t2-api.bilibili.com/x/passport-game/renewtoken"
+
+[[dispatcher.regionInfos]]
+region = "市北"
+tokenSuffix = ""
+
+[[dispatcher.regionInfos]]
+region = "腾讯云1"
+tokenSuffix = "t1"
+
+[[dispatcher.regionInfos]]
+region = "腾讯云2"
+tokenSuffix = "t2"

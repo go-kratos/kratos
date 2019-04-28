@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package manager.service.open;
+
+
+option go_package = "v1";
+
+message AppIDReply { 
+    int64 app_id = 1;
+}
+
+message AppIDReq { 
+    string app_key = 2;
+}
+
+message CloseReply { 
+}
+
+message CloseReq { 
+}
+
+message PingReply { 
+}
+
+message PingReq { 
+}
+
+message SecretReply { 
+    string res = 1;
+}
+
+message SecretReq { 
+    string sapp_key = 2;
+}
+
+service Open { 
+    // Ping check dao health. 
+    rpc Ping(PingReq) returns(PingReply); 
+    // Close close all dao. 
+    rpc Close(CloseReq) returns(CloseReply); 
+    // Secret . 
+    rpc Secret(SecretReq) returns(SecretReply); 
+    // AppID . 
+    rpc AppID(AppIDReq) returns(AppIDReply); 
+}

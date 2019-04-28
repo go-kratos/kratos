@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package room_ex.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+service BannerMng {
+    
+    /** 获取新后台配置的banner
+     * 
+     */   
+    rpc getNewBanner (BannerMngGetNewBannerReq) returns (BannerMngGetNewBannerResp);
+}
+
+
+
+message BannerMngGetNewBannerReq {
+    // 业务id，首页为0，web主站hove为1
+    int64 platform = 1 [(gogoproto.jsontag) = "platform"];
+    // 第几帧，0表示取全部
+    int64 position = 2 [(gogoproto.jsontag) = "position"];
+    // 平台
+    string userPlatform = 3 [(gogoproto.jsontag) = "userPlatform"];
+    // 设备
+    string userDevice = 4 [(gogoproto.jsontag) = "userDevice"];
+    // 版本号
+    int64 build = 5 [(gogoproto.jsontag) = "build"];
+    // 是否返回所有版本配置：是，则不论build传的值，全返回banner和版本配置
+    int64 returnBuilds = 6 [(gogoproto.jsontag) = "returnBuilds"];
+}
+
+message BannerMngGetNewBannerResp {
+    // code
+    int64 code = 1 [(gogoproto.jsontag) = "code"];
+    // msg
+    string msg = 2 [(gogoproto.jsontag) = "msg"];
+    // 
+    repeated NewBanner data = 3 [(gogoproto.jsontag) = "data"];
+       
+    message NewBanner {
+        // banner id
+        string id = 1 [(gogoproto.jsontag) = "id"];
+        // 图片地址
+        string pic = 2 [(gogoproto.jsontag) = "pic"];
+        // 图片地址
+        string img = 3 [(gogoproto.jsontag) = "img"];
+        // 跳转链接
+        string link = 4 [(gogoproto.jsontag) = "link"];
+        // 标题
+        string title = 5 [(gogoproto.jsontag) = "title"];
+        // 第几帧
+        string position = 6 [(gogoproto.jsontag) = "position"];
+        // 权重
+        string sort_num = 7 [(gogoproto.jsontag) = "sort_num"];
+        // 注释
+        string remark = 8 [(gogoproto.jsontag) = "remark"];
+    }
+}

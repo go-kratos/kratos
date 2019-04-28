@@ -1,0 +1,244 @@
+# This is a TOML document. Boom.
+
+version = "1.6.0"
+user    = "nobody"
+pid     = "/tmp/app-show.pid"
+dir     = "./"
+perf    = "127.0.0.1:6100"
+checkFile = "/data/www/app-show.html"
+family = "app-show"
+address = ""
+trace   = false
+debug   = false
+
+env     = "dev"
+showLog = "/data/infoc/app-show/info.log"
+tick    = "30s"
+
+[duration]
+splash = "2h"
+search = "-504h"
+
+[infoc]
+path = "/data/infoc/app-show/info.log"
+project = "app-show"
+name = "app-show"
+
+[json]
+staticDir = "/app-show-static/"
+
+[host]
+live     = "http://live.bilibili.com"
+bangumi  = "http://bangumi.bilibili.com"
+hetongzi = "http://data-test.bilibili.co"
+data     = "http://data-test.bilibili.co"
+mipush   = "https://api.xmpush.xiaomi.com"
+apiCo    = "http://api.bilibili.co"
+apiCoX    = "http://api.bilibili.co"
+www      = "http://www.bilibili.com"
+ad       = "http://ad.bilibili.co"
+
+[tracer]
+proto = "udp"
+addr  = "172.16.33.46:5140"
+tag   = "platform/app-show"
+
+[xlog]
+dir = "/data/log/app-show/"
+	[xlog.elk]
+	project  = "app-show"
+	addr     = "172.18.20.17:8520"
+	chanSize = 10240
+
+[app]
+key    = "e7482d29be4a95b8"
+secret = "9e803791cdef756e75faee68e12b7442"
+
+[httpClient]
+dial      = "500ms"
+timeout   = "2s"
+keepAlive = "60s"
+timer     = 10
+
+[httpClientAsyn]
+dial      = "1s"
+timeout   = "2s"
+keepAlive = "60s"
+timer = 10
+
+[httpData]
+dial      = "500ms"
+timeout   = "2s"
+keepAlive = "60s"
+timer     = 10
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+    [identify.app]
+    key = "6a29f8ed87407c11"
+    secret = "d3c5a85f5b895a03735b5d20a273bc57"
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 5
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+    [identify.host]
+    auth = "http://passport.bilibili.com"
+    secret = "http://open.bilibili.com"
+    [identify.authHTTPClient]
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+    [identify.secretHTTPClient]
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+
+[multiHttp]
+	[multiHttp.outer]
+	addrs     = ["0.0.0.0:6101"]
+	maxListen = 100
+	[multiHttp.inner]
+	addrs     = ["0.0.0.0:6102"]
+	maxListen = 100
+	[multiHttp.local]
+	addrs     = ["0.0.0.0:6103"]
+	maxListen = 100
+
+[archiveRPC]
+    pullInterval = "10s"
+    [archiveRPC.client]
+    proto = "tcp"
+    addr = "172.16.0.26:6089"
+    timeout = "1s"
+    timer = 1000
+    [[archiveRPC.backup]]
+    proto = "tcp"
+    addr = "172.16.0.26:6089"
+    timeout = "1s"
+    timer = 1000
+    [archiveRPC.zookeeper]
+    root = "/microservice/archive-service/"
+    addrs = ["172.16.0.148:2181"]
+    timeout = "1s"
+
+[accountRPC]
+    pullInterval = "10s"
+    [accountRPC.client]
+    proto = "tcp"
+    addr = "172.16.33.56:6079"
+    timeout = "1s"
+    timer = 1000
+    [[accountRPC.backup]]
+    proto = "tcp"
+    addr = "172.16.33.56:6079"
+    timeout = "1s"
+    timer = 1000
+    [accountRPC.zookeeper]
+    root = "/microservice/account-service/"
+    addrs = ["172.16.33.54:2181"]
+    timeout = "30s"
+
+[mysql]
+	[mysql.show]
+	addr   = "172.16.0.148:3306"
+	dsn    = "test:test@tcp(172.16.0.148:3306)/bilibili_show?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 5
+	idle   = 2
+	[mysql.resource]
+	addr   = "172.16.0.148:3306"
+	dsn    = "test:test@tcp(172.16.0.148:3306)/bilibili_resource?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 5
+	idle   = 2
+	[mysql.cpt]
+	addr   = "172.16.0.116:3306"
+	dsn    = "test:test@tcp(172.16.0.116:3306)/bilibili_cpt?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 5
+	idle   = 2
+
+[redis]
+	[redis.recommend]
+	name   = "app-show/recommend"
+	proto  = "tcp"
+	addr   = "172.16.0.148:6379"
+	active = 20
+	idle   = 10
+	dialTimeout  = "50ms"
+	readTimeout  = "100ms"
+	writeTimeout = "100ms"
+	idleTimeout  = "80s"
+	expire = "2h"
+	[redis.stat]
+	name   = "app-interface/stat"
+	proto  = "tcp"
+	addr   = "172.16.0.148:6379"
+	active = 20
+	idle   = 10
+	dialTimeout  = "50ms"
+	readTimeout  = "100ms"
+	writeTimeout = "100ms"
+	idleTimeout  = "80s"
+	expire = "10s"
+
+[memcache]
+	[memcache.archive]
+	name   = "app-show/archive"
+	proto  = "tcp"
+	addr   = "172.16.0.148:11211"
+	active = 50
+	idle   = 10
+	dialTimeout  = "50ms"
+	readTimeout  = "100ms"
+	writeTimeout = "100ms"
+	idleTimeout  = "80s"
+	expire = "2h"
+
+[DislikeDatabus]
+		key = ""
+		secret= ""
+		group= "bigdata-sky-horse-group"
+		topic= "Dislike-T"
+		action="pub"
+		[databus.redis]
+		name = "app-feed/dislike"
+		proto = "tcp"
+		addr = ""
+		active = 100
+		idle = 50
+		dialTimeout = "50ms"
+		readTimeout = "200ms"
+		writeTimeout = "200ms"
+		idleTimeout = "80s"
+
+[recommend]
+[recommend.host]
+	1 = ["172.16.33.62"]
+[recommend.group]
+	0  = 1
+	1  = 1
+	2  = 1
+	3  = 1
+	4  = 1
+	5  = 1
+	6  = 1
+	7  = 1
+	8  = 1
+	9  = 1
+	10 = 1
+	11 = 1
+	12 = 1
+	13 = 1
+	14 = 1
+	15 = 1
+	16 = 1
+	17 = 1
+	18 = 1
+	19 = 1

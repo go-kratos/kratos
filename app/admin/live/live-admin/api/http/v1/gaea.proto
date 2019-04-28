@@ -1,0 +1,154 @@
+syntax = "proto3";
+
+package live.liveadmin.v1;
+
+option go_package = "v1";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+
+service gaea {
+    //获取team下某个keyword的配置 `internal:"true"`
+    rpc get_config_by_keyword(GetConfigReq) returns (GetConfigResp);
+
+    //`method:"POST" internal:"true"`  设置team下某个keyword配置
+    rpc set_config_by_keyword(SetConfigReq) returns (SetConfigResp);
+
+    //管理后台根据条件获取配置 `internal:"true"`
+    rpc get_configs_by_params(ParamsConfigReq) returns (ParamsConfigResp);
+
+    //获取单个team的全部配置 `internal:"true"`
+    rpc get_configs_by_team(TeamConfigReq) returns (TeamConfigResp);
+
+    //通过keyword获取配置 `internal:"true"`
+    rpc get_configs_by_keyword(GetConfigsReq) returns (GetConfigsResp);
+
+    //获取多个team下的全部配置 `internal:"true"`
+    rpc get_configs_by_teams(TeamsConfigReq) returns (TeamsConfigResp);
+}
+// 通过参数获取一条记录的信息
+message GetConfigReq {
+    //team
+    int64 team = 1 [(gogoproto.moretags) = 'form:"team"'];
+    //索引名称
+    string keyword = 2 [(gogoproto.moretags) = 'form:"keyword"'];
+    //id
+    int64 id = 3 [(gogoproto.moretags) = 'form:"id"'];
+}
+
+message GetConfigResp {
+    //team
+    int64 team = 1 [(gogoproto.jsontag) = "team"];
+    //索引名称
+    string keyword = 2 [(gogoproto.jsontag) = "keyword"];
+    //配置值
+    string value = 3 [(gogoproto.jsontag) = "value"];
+    //配置解释
+    string name = 4 [(gogoproto.jsontag) = "name"];
+    //创建时间
+    string ctime = 5 [(gogoproto.jsontag) = "ctime"];
+    //最近更新时间
+    string mtime = 6 [(gogoproto.jsontag) = "mtime"];
+    //状态
+    int64 status = 7 [(gogoproto.jsontag) = "status"];
+    //id
+    int64 id = 8 [(gogoproto.jsontag) = "id"];
+}
+
+// 设置某个key的信息
+message SetConfigReq {
+    //team
+    int64 team = 1 [(gogoproto.moretags) = 'form:"team"'];
+    //索引名称
+    string keyword = 2 [(gogoproto.moretags) = 'form:"keyword" validate:"required"'];
+    //配置值
+    string value = 3 [(gogoproto.moretags) = 'form:"value" validate:"required"'];
+    //配置解释
+    string name = 4 [(gogoproto.moretags) = 'form:"name"'];
+    //编辑时id
+    int64 id = 5 [(gogoproto.moretags) = 'form:"id"'];
+    //状态
+    int64 status = 6 [(gogoproto.moretags) = 'form:"status"'];
+}
+
+message SetConfigResp {
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+
+}
+// 管理后台通过参数获取列表
+message ParamsConfigReq{
+    int64 team = 1 [(gogoproto.moretags) = 'form:"team"'];
+    string keyword = 2 [(gogoproto.moretags) = 'form:"keyword"'];
+    string name = 3 [(gogoproto.moretags) = 'form:"name"'];
+    int64 status = 4 [(gogoproto.moretags) = 'form:"status"'];
+    int64 page = 5 [(gogoproto.moretags) = 'form:"page" validate:"required"'];
+    //页量
+    int64 page_size = 6 [(gogoproto.moretags) = 'form:"page_size" validate:"required"'];
+    //id
+    int64 id = 7 [(gogoproto.moretags) = 'form:"id"'];
+}
+message ParamsConfigResp{
+    repeated List list =1 [(gogoproto.jsontag) = "list"];
+    //记录总数
+    int64 total_num = 2 [(gogoproto.jsontag) = "total_num"];
+}
+
+message TeamConfigReq{
+    //team
+    string team = 1 [(gogoproto.moretags) = 'form:"team" validate:"required"'];
+    //页码 从1开始
+    int64 page = 2 [(gogoproto.moretags) = 'form:"page" validate:"required"'];
+    //页量
+    int64 page_size = 3 [(gogoproto.moretags) = 'form:"page_size" validate:"required"'];
+}
+
+message TeamConfigResp{
+    //数据列表
+    repeated List list = 1 [(gogoproto.jsontag) = "list"];
+    //记录总数
+    int64 total_num = 2 [(gogoproto.jsontag) = "total_num"];
+}
+
+message GetConfigsReq{
+    //索引名称
+    string keyword = 1 [(gogoproto.moretags) = 'form:"keyword" validate:"required"'];
+    //页码
+    int64 page = 2 [(gogoproto.moretags) = 'form:"page" validate:"required"'];
+    //页量
+    int64 page_size = 3 [(gogoproto.moretags) = 'form:"page_size" validate:"required"'];
+}
+message GetConfigsResp{
+    //数据列表
+    repeated List list = 1 [(gogoproto.jsontag) = "list"];
+    //记录总数
+    int64 total_num = 2 [(gogoproto.jsontag) = "total_num"];
+
+}
+
+message List {
+    //Id
+    int64 id = 1 [(gogoproto.jsontag) = "id"];
+    //team
+    int64 team = 2 [(gogoproto.jsontag) = "team"];
+    //索引名称
+    string keyword = 3 [(gogoproto.jsontag) = "keyword"];
+    //配置值
+    string value = 4 [(gogoproto.jsontag) = "value"];
+    //配置解释
+    string name = 5 [(gogoproto.jsontag) = "name"];
+    //创建时间
+    string ctime = 6 [(gogoproto.jsontag) = "ctime"];
+    //最近更新时间
+    string mtime = 7 [(gogoproto.jsontag) = "mtime"];
+    //状态
+    int64 status = 8 [(gogoproto.jsontag) = "status"];
+}
+
+message TeamsConfigReq{
+    //team
+    repeated int64 team = 1 [(gogoproto.moretags) = 'form:"team" validate:"required"'];
+}
+
+message TeamsConfigResp{
+    string list = 1 [(gogoproto.jsontag) = "list"];
+}

@@ -1,0 +1,102 @@
+# This is a TOML document. Boom
+
+version = "1.0.0"
+
+
+[log]
+dir = "/data/log/point-admin"
+
+[bm]
+	addr = "0.0.0.0:9001"
+	maxListen = 10
+	timeout = "1s"
+
+[auth]
+    managerHost = "http://manager.bilibili.co"
+    dashboardHost = "http://dashboard-mng.bilibili.co"
+    dashboardCaller = "manager-go"
+    [auth.DsHTTPClient]
+    key = "manager-go"
+    secret = "949bbb2dd3178252638c2407578bc7ad"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.DsHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.MaHTTPClient]
+    key = "f6433799dbd88751"
+    secret = "36f8ddb1806207fe07013ab6a77a3935"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    [auth.MaHTTPClient.breaker]
+    window  = "3s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [auth.session]
+    sessionIDLength = 32
+    cookieLifeTime = 1800
+    cookieName = "mng-go"
+    domain = ".bilibili.co"
+    [auth.session.Memcache]
+    name = "go-business/auth"
+    proto = "tcp"
+    addr = "172.16.33.54:11211"
+    active = 5
+    idle = 5
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"
+
+[mysql]
+	addr = "172.22.34.101:3308"
+	dsn = "bilibili_point:QC9YPHkRv7fItBMK5Zb41dEn0WU63Xes@tcp(172.22.34.101:3308)/bilibili_point?timeout=200ms&readTimeout=200ms&writeTimeout=200ms&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+	active = 20
+	idle = 10
+	idleTimeout ="4h"
+	queryTimeout = "1s"
+	execTimeout = "1s"
+	tranTimeout = "2s"
+	[mysql.breaker]
+	window = "3s"
+	sleep = "100ms"
+	bucket = 10
+	ratio = 0.5
+	request = 100
+
+[memcache]
+	name = "point"
+	proto = "tcp"
+	addr = ""
+	idle = 5
+	active = 10
+	dialTimeout = "1s"
+	readTimeout = "1s"
+	writeTimeout = "1s"
+	idleTimeout = "10s"
+	expire = "24h"
+
+[httpClient]
+    key = "ad4bb9b8f5d9d4a7"
+    secret = "6912080d78d58be7cb94f57d50d438f6"
+    dial = "1s"
+    timeout = "10s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.breaker]
+       window  = "10s"
+       sleep   = "100ms"
+       bucket  = 10
+       ratio   = 0.5
+       request = 100
+
+[rpc]
+    [rpc.point]
+    timeout = "1s"

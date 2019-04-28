@@ -1,0 +1,206 @@
+syntax = "proto3";
+package account.service.usersuit;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "model";
+
+message ArgPendantHistory  {
+	int64 mid      =1   [(gogoproto.jsontag) = "mid"];
+	int32 source_type  =2 [(gogoproto.jsontag) = "sourceType"];
+	int64 start_time   =3 [(gogoproto.jsontag) = "startTime"];
+	int64 end_time     =4 [(gogoproto.jsontag) = "endTime"];
+	int64 page        =5 [(gogoproto.jsontag) = "page"];
+}
+
+message ArgOrderHistory  {
+	string order_id   = 1 [(gogoproto.jsontag) = "oderID", (gogoproto.customname) = "OrderID"];
+	string pay_id    = 2 [(gogoproto.jsontag) = "payID", (gogoproto.customname) = "PayID"];
+	int64 mid      = 3 [(gogoproto.jsontag) = "mid"];
+	int64 pid      = 4 [(gogoproto.jsontag) = "pid"];
+	int32 status    = 5 [(gogoproto.jsontag) = "status"];
+	int32 pay_type   =6 [(gogoproto.jsontag) = "payType"];
+	int64 start_time  =7 [(gogoproto.jsontag) = "startTime"];
+	int64 end_time   =8 [(gogoproto.jsontag) = "endTime"];
+	int64 page      =9 [(gogoproto.jsontag) = "page"];
+}
+
+message PendantGroupInfo  {
+	int64 id      = 1   [(gogoproto.jsontag) = "id", (gogoproto.customname) = "ID"];
+	string name   = 2    [(gogoproto.jsontag) = "group_name"];
+	int32 rank      = 3    [(gogoproto.jsontag) = "rank"];
+	int32 status    = 4      [(gogoproto.jsontag) = "status"];
+	string image     =5     [(gogoproto.jsontag) = "image"];
+	string image_model  =6    [(gogoproto.jsontag) = "image_model"];
+	int32 frequency_limit   =7   [(gogoproto.jsontag) = "-"];
+	int32 time_limit        =8   [(gogoproto.jsontag) = "-"];
+	int64 number         =9   [(gogoproto.jsontag) = "group_count"];
+	repeated Pendant sub_pendant   = 10 [(gogoproto.jsontag) = "pendant_info"];
+}
+
+message PendantGroup  {
+	int64	id   = 1    [(gogoproto.jsontag) = "id", (gogoproto.customname) = "ID"];
+	int64	gid  = 2    [(gogoproto.jsontag) = "gid"];
+	int64	pid  = 3    [(gogoproto.jsontag) = "pid"];
+
+}
+
+message PendantPrice {
+	int64 id    = 1   [(gogoproto.jsontag) = "id", (gogoproto.customname) = "ID"];
+	int64 pid   = 2     [(gogoproto.jsontag) = "pid"];
+	int64 type  = 3     [(gogoproto.jsontag) = "type"];
+	int64 price = 4      [(gogoproto.jsontag) = "price"];
+}
+
+message PendantHistory  {
+	int64 id    = 1   [(gogoproto.jsontag) = "id", (gogoproto.customname) = "ID"];
+	int64 mid    = 2    [(gogoproto.jsontag) = "mid"];
+	int64 pid    = 3     [(gogoproto.jsontag) = "pid"];
+	int32 source_type  = 4   [(gogoproto.jsontag) = "source_type"];
+	int64 expire    = 5    [(gogoproto.jsontag) = "expire"];
+	string operator_name = 6   [(gogoproto.jsontag) = "opeartor_name"];
+	int32 operator_action = 7  [(gogoproto.jsontag) = "opeartor_action"];
+
+}
+
+message PendantOrderInfo  {
+	int64 id   =1     [(gogoproto.jsontag) = "_", (gogoproto.customname) = "ID"];
+	int64 mid  = 2    [(gogoproto.jsontag) = "mid"];
+	string order_id = 3  [(gogoproto.jsontag) = "order_id", (gogoproto.customname) = "OrderID"];
+	string pay_id = 4 [(gogoproto.jsontag) = "pay_id", (gogoproto.customname) = "PayID"];
+	int64 pay_type  = 5  [(gogoproto.jsontag) = "pay_type"];
+	double pay_price = 6  [(gogoproto.jsontag) = "pay_price"];
+	int64 app_id  = 7 [(gogoproto.jsontag) = "app_id", (gogoproto.customname) = "AppID"];
+	int32 stauts  = 8 [(gogoproto.jsontag) = "status"];
+	int64 pid    = 9  [(gogoproto.jsontag) = "pid"];
+	int64 time_length = 10    [(gogoproto.jsontag) = "time_length"];
+	string cost    = 11  [(gogoproto.jsontag) = "cost"];
+	int64 buy_time  = 12  [(gogoproto.jsontag) = "buy_time"];
+	int32 is_callback = 13  [(gogoproto.jsontag) = "is_callback"];
+	int64 callback_time = 14  [(gogoproto.jsontag) = "callback_time"];
+	string image      = 15  [(gogoproto.jsontag) = "image"];
+	string name       = 16 [(gogoproto.jsontag) = "name"];
+}
+
+message PayInfo  {
+	string order_id = 1 [(gogoproto.jsontag) = "order_id", (gogoproto.customname) = "OrderID"];
+	string order_num = 2  [(gogoproto.jsontag) = "order_no"];
+	string pay_url   = 3 [(gogoproto.jsontag) = "pay_url", (gogoproto.customname) = "PayURL"];
+}
+
+message Pendant  {
+	int64 id   =1        [(gogoproto.jsontag) = "pid", (gogoproto.customname) = "ID"];
+	string name   = 2    [(gogoproto.jsontag) = "name"];
+	string image    = 3  [(gogoproto.jsontag) = "image"];
+	string image_model  =4  [(gogoproto.jsontag) = "image_model"];
+	int32 status         =5 [(gogoproto.jsontag) = "status"];
+	int64 coin          =6  [(gogoproto.jsontag) = "coin"];
+	int64 point         =7  [(gogoproto.jsontag) = "point"];
+	int64 bcoin         =8  [(gogoproto.jsontag) = "bcoin", (gogoproto.customname) = "BCoin"];
+	int64 expires       =9  [(gogoproto.jsontag) = "expire"];
+	int64 gid           =10  [(gogoproto.jsontag) = "gid"];
+	int32 rank      = 11    [(gogoproto.jsontag) = "rank"];
+}
+
+message PendantPackage {
+    int64 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.customname) = "ID"];
+    int64 mid = 2 [(gogoproto.jsontag) = "mid"];
+    int64 pid = 3 [(gogoproto.jsontag) = "pid"];
+	int64 expires =4      [(gogoproto.jsontag) = "expire"];
+	int64 type    =5   [(gogoproto.jsontag) = "type"];
+	int32 status  =6    [(gogoproto.jsontag) = "status"];
+	int32 is_vip   =7    [(gogoproto.jsontag) = "isVIP", (gogoproto.customname) = "IsVIP"];
+	Pendant pendant =8 [(gogoproto.jsontag) = "pendant"];
+}
+
+message PendantEquip  {
+    int64 mid = 1 [(gogoproto.jsontag) = "mid"];
+    int64 pid = 2 [(gogoproto.jsontag) = "pid"];
+	int64 expires =3      [(gogoproto.jsontag) = "expire"];
+    Pendant pendant =4 [(gogoproto.jsontag) = "pendant"];
+}
+
+message GroupPendantList {
+	int64 pkgExpires   = 1         [(gogoproto.jsontag) = "pkg_expires"];
+	int32 pkgStatus    = 2         [(gogoproto.jsontag) = "pkg_status"];
+	Pendant pendant    = 3 		   [(gogoproto.embed) = true, (gogoproto.jsontag) = ""];
+}
+
+message MedalInfo {
+	int64 ID 			= 1		[(gogoproto.jsontag) = "nid"];
+	string Name 		= 2     [(gogoproto.jsontag) = "name"];
+	string Description  = 3		[(gogoproto.jsontag) = "description"];
+	string Image        = 4     [(gogoproto.jsontag) = "image"];
+	string ImageSmall   = 5     [(gogoproto.jsontag) = "image_small"];
+	string Condition    = 6		[(gogoproto.jsontag) = "condition"];
+	int64 GID 			= 7		[(gogoproto.jsontag) = "gid"];
+	int32 Level        	= 8     [(gogoproto.jsontag) = "level,omitempty"];
+	string LevelRank   	= 9     [(gogoproto.jsontag) = "level_rank,omitempty"];
+	string LevelDesc   	= 10    [(gogoproto.jsontag) = "level_desc,omitempty"];
+	int32 Sort			= 11	[(gogoproto.jsontag) = "sort,omitempty"];
+	int32 IsOnline		= 12 	[(gogoproto.jsontag) = "is_online,omitempty"];
+	int32 IsGet			= 13 	[(gogoproto.jsontag) = "is_get,omitempty"];
+	int64 Ctime 		= 14 	[(gogoproto.jsontag) = "ctime,omitempty", (gogoproto.casttype) = "go-common/library/time.Time"];
+	int64 Mtime 		= 15 	[(gogoproto.jsontag) = "mtime,omitempty", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message MedalHomeInfo {
+	string Description  = 1		[(gogoproto.jsontag) = "description"];
+	string Image        = 2     [(gogoproto.jsontag) = "image"];
+	string ImageSmall   = 3     [(gogoproto.jsontag) = "image_small"];  
+	int32 IsActivated   = 4     [(gogoproto.jsontag) = "is_activated"];
+    string Level        = 5     [(gogoproto.jsontag) = "level"];  
+    string Name         = 6     [(gogoproto.jsontag) = "name"];  
+    int64 NID           = 7     [(gogoproto.jsontag) = "nid"];  
+}
+
+message MedalUserInfo {
+	string Name         = 1     [(gogoproto.jsontag) = "name"];
+	string Face         = 2     [(gogoproto.jsontag) = "face"];
+	int32 Level         = 3     [(gogoproto.jsontag) = "level"];  
+	bool TrueLove       = 4     [(gogoproto.jsontag) = "truelove"];
+    int64 NID           = 5     [(gogoproto.jsontag) = "nid"];  
+    string ImageSmall   = 6     [(gogoproto.jsontag) = "image_small"]; 
+}
+
+message MedalPopup {
+    int64 NID       = 1     [(gogoproto.jsontag) = "nid"];
+    string Name     = 2     [(gogoproto.jsontag) = "name"];
+    string Image    = 3     [(gogoproto.jsontag) = "image"];
+}
+
+message MedalMyInfo{
+	MedalInfo MedalInfo = 1		[(gogoproto.embed) = true, (gogoproto.jsontag) = ""];
+	int32 IsActivated	= 2 	[(gogoproto.jsontag) = "is_activated"];
+	int32 IsNewGet		= 3 	[(gogoproto.jsontag) = "is_new_get"];
+	int64 GetTime		= 4 	[(gogoproto.jsontag) = "get_time,omitempty", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message MedalMyInfos{
+	int32 Count					= 1		[(gogoproto.jsontag) = "count"];
+	string Name 				= 2     [(gogoproto.jsontag) = "name"];
+	repeated MedalMyInfo List 	= 3		[(gogoproto.jsontag) = "list"];
+}
+
+message MedalAllInfos{
+	int64 HasActivated 				= 1		[(gogoproto.jsontag) = "has_activated"];
+	bool RedPoint 					= 2		[(gogoproto.jsontag) = "is_show_red_point"];
+	repeated int64 HasGet 			= 3		[(gogoproto.jsontag) = "has_get"];
+	map<int64, MedalCategoryInfo> List	= 4 	[(gogoproto.jsontag) = "list"];
+}
+
+message MedalCategoryInfo{
+	int32 Count					= 1		[(gogoproto.jsontag) = "count"];
+	string Name 				= 2     [(gogoproto.jsontag) = "name"];
+	repeated MedalItemInfo Data 	= 3		[(gogoproto.jsontag) = "data"];
+}
+message MedalItemInfo{
+	MedalInfo Left			= 1		[(gogoproto.jsontag) = "left"];
+	int32 Count 				= 2     [(gogoproto.jsontag) = "count"];
+	repeated MedalInfo Right 	= 3		[(gogoproto.jsontag) = "right,omitempty"];
+}
+
+message PointFlag{
+	bool Pendant  = 1 	[(gogoproto.jsontag) = "pendant"];
+	bool  Medal   = 2 	[(gogoproto.jsontag) = "medal"];
+}

@@ -1,0 +1,18 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- guanyanliang
+- laiying
+- liweijia
+- wuhao02
+labels:
+- interface
+- interface/main/activity
+- main
+options:
+  no_parent_owners: true
+reviewers:
+- guanyanliang
+- laiying
+- liweijia
+- wuhao02

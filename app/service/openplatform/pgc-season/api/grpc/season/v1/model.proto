@@ -1,0 +1,257 @@
+syntax = "proto3";
+
+option java_package = "pleiades.business.service.season.season.v1";
+package pgc.service.season.season.v1;
+option java_multiple_files = true;
+option go_package = "v1";
+
+// CardInfoProto .
+message CardInfoProto {
+    // season_id
+    int32 season_id = 1;
+    // media_id
+    int32 media_id = 2;
+    // season类型  1：番剧，2：电影，3：纪录片，4：国漫，5：电视剧
+    int32 season_type = 3;
+    // season类型显示名  1：番剧，2：电影，3：纪录片，4：国漫，5：电视剧
+    string season_type_name = 4;
+    // 标题
+    string title = 5;
+    // 封面
+    string cover = 6;
+    // 总集数
+    int32 total_count = 7;
+    // 是否完结 1完结 0未完结
+    int32 is_finish = 8;
+    // 是否开播 1开播 0未开播
+    int32 is_started = 9;
+    // 是否可以播放 0-不可以 1-可以
+    int32 is_play = 10;
+    // 角标文字，如“抢先”这种
+    string badge = 11;
+    // 角标类型，0粉色，1蓝色，2橙色
+    int32 badge_type = 12;
+    // 扩展字段开关
+    RightsProto rights = 13;
+    // 计数统计
+    StatsProto stat = 14;
+    // 最新一话相关信息
+    NewEpProto new_ep = 15;
+    // 评分信息
+    RatingProto rating = 16;
+    // 方图
+    string square_cover = 17;
+    // season付费状态
+    int32 season_status = 18;
+    // 分季标题 第一季
+    string season_title = 19;
+}
+
+// ProfileInfoProto .
+message ProfileInfoProto {
+    // season_id
+    int32 season_id = 1;
+    // media_id
+    int32 media_id = 2;
+    // season类型  1：番剧，2：电影，3：纪录片，4：国漫，5：电视剧
+    int32 season_type = 3;
+    // season类型显示名  1：番剧，2：电影，3：纪录片，4：国漫，5：电视剧
+    string season_type_name = 4;
+    // 标题
+    string title = 5;
+    // 封面
+    string cover = 6;
+    // 方图
+    string square_cover = 7;
+    // 总集数
+    int32 total_count = 8;
+    // 是否完结 1完结 0未完结
+    int32 is_finish = 9;
+    // 是否开播 1开播 0未开播
+    int32 is_started = 10;
+    // 是否可以播放 0-不可以 1-可以
+    int32 is_play = 11;
+    // 角标文字，如“抢先”这种
+    string badge = 12;
+    // 角标类型，0粉色，1蓝色，2橙色
+    int32 badge_type = 13;
+    // season付费状态
+    int32 season_status = 14;
+    // 扩展字段开关
+    RightsProto rights = 15;
+    // 计数统计
+    StatsProto stat = 16;
+    // 最新一话相关信息
+    NewEpProto new_ep = 17;
+    // 评分信息
+    RatingProto rating = 18;
+    // 系列信息
+    SeriesProto series = 19;
+    // 分节信息
+    repeated SectionProto section = 20;
+    // 分季标题 第一季
+    string season_title = 21;
+    // 剧集模式 1单集 2多集
+    int32 mode = 22;
+    // 简介
+    string evaluate = 23;
+    // publish
+    PublishProto publish = 24;
+    // mid
+    int64 mid = 25;
+    // 备案号
+    string record = 26;
+    // 更新时间信息
+    string renewal_time = 27;
+}
+
+// RatingProto 评分信息
+message RatingProto {
+    // 评分数
+    float score = 1;
+    // 评分人数
+    int32 count = 2;
+}
+
+// NewEpProto 最新一话相关信息
+message NewEpProto {
+    // epid
+    int32 id = 1;
+    // 更新至xx话
+    string index_show = 2;
+    // 最新一话封面
+    string cover = 3;
+    // 最新一话短标题
+    string title = 4;
+    // 最新一话长标题
+    string long_title = 5;
+    // 上线时间
+    string pub_time = 6;
+}
+
+// StatsProto 计数
+message StatsProto {
+    // 追番数
+    int64 follow = 1;
+    // 播放数
+    int64 view = 2;
+    // 弹幕数
+    int64 danmaku = 3;
+}
+
+// RightsProto  扩展字段开关
+message RightsProto {
+    // 是否允许点评 1 允许点评 0 禁止点评
+    int32 allow_review = 1;
+    // 是否允许承包
+    int32 allow_bp = 2;
+    // 是否允许下周
+    int32 allow_download = 3;
+    // 是否允许预览
+    int32 allow_preview = 4;
+}
+
+// SeriesProto  系列信息
+message SeriesProto {
+    // 系列id
+    int32 series_id = 1;
+    // 系列标题
+    string title = 2;
+}
+
+// SectionProto  分节信息
+message SectionProto {
+    // 系列id
+    int32 section_id = 1;
+    // seasonId
+    int32 season_id = 2;
+    // 地区限制
+    int32 limit_group = 3;
+    // 平台限制
+    int32 watch_platform = 4;
+    // 类别 0正片1预告片2其他
+    int32 type = 5;
+    // 版权
+    string copyright = 6;
+    // 分节标题
+    string title = 7;
+    //禁播地区展示1.版权受限 2.隐藏剧集 3.下架剧集
+    int32 ban_area_show = 8;
+}
+
+// SeriesSeasonProto season信息
+message SeriesSeasonProto {
+    // season_id
+    int32 season_id = 1;
+    // season_title
+    string season_title = 2;
+    // new_ep
+    NewEpProto new_ep = 3;
+}
+
+// SeriesSeasonsProto season信息
+message SeriesSeasonsProto {
+    // seriesSeasons
+    repeated SeriesSeasonProto seriesSeasons = 1;
+}
+
+// PublishProto publish信息
+message PublishProto {
+    // pub_time
+    string pub_time = 1;
+    // pub_time_show
+    string pub_time_show = 2;
+}
+
+// TimelineProto  时间表信息
+message TimelineProto {
+    // 日期
+    string date = 1;
+    // 日期时间戳
+    int64 date_ts = 2;
+    // 周几
+    int32 day_of_week = 3;
+    // 是否是今天
+    int32 is_today = 4;
+    // 该日期对应上线的剧集
+    repeated TimelineEpisodeProto episodes = 5;
+}
+
+// TimelineEpisodeProto  时间表下剧集信息
+message TimelineEpisodeProto {
+    // 分季封面
+    string cover = 1;
+    // 剧集id
+    int32 episode_id = 2;
+    // 收藏数
+    int64 favorites = 3;
+    // 是否收藏过
+    int32 follow = 4;
+    // 是否已发布
+    int32 published = 5;
+    // 第x话
+    string pub_index = 6;
+    // 发布时间
+    string pub_time = 7;
+    // 上线时间戳
+    int64 pub_ts = 8;
+    // 分季id
+    int32 season_id = 9;
+    // 分季方图
+    string square_cover = 10;
+    // 分季标题
+    string title = 11;
+    // 是否delay
+    int32 delay = 12;
+    // delay id
+    int32 delay_id = 13;
+    // 停更原因
+    string delay_reason = 14;
+    // 停更那一话的短标题
+    string delay_index = 15;
+}
+
+// EmptyProto
+message EmptyProto {
+
+}

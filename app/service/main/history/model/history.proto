@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "model";
+
+// History model
+message History {
+    // ctime
+    int64 ctime = 1  [(gogoproto.jsontag) = "ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    // mtime
+    int64 mtime = 2 [(gogoproto.jsontag) = "mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    // mid
+    int64 mid = 3 [(gogoproto.jsontag) = "mid", (gogoproto.moretags) = 'form:"mid" validate:"required,min=1"'];
+    // business_id
+    int64 business_id = 4[(gogoproto.jsontag) = "business_id", (gogoproto.customname) = "BusinessID"];
+    // business 业务
+    string business = 5 [(gogoproto.jsontag) = "business", (gogoproto.moretags) = 'form:"business" validate:"required"'];
+    // kid 业务中唯一id
+    int64 kid = 6 [(gogoproto.jsontag) = "kid", (gogoproto.moretags) = 'form:"kid"'];
+    // aid
+    int64 aid = 7 [(gogoproto.moretags) = 'form:"aid"'];
+    // sid
+    int64 sid = 8 [(gogoproto.moretags) = 'form:"sid"'];
+    // epid
+    int64 epid = 9 [(gogoproto.moretags) = 'form:"epid"'];
+    // cid
+    int64 cid = 10 [(gogoproto.moretags) = 'form:"cid"'];
+    // sub_type 子类型
+    int32 sub_type = 11 [(gogoproto.moretags) = 'form:"sub_type"'];
+    // device 设备类型
+    int32 device = 12 [(gogoproto.jsontag) = "device", (gogoproto.moretags) = 'form:"device"'];
+    // progress 进度
+    int32 progress = 13 [(gogoproto.jsontag) = "progress", (gogoproto.moretags) = 'form:"progress"'];
+    // 观看时间
+    int64 view_at = 14 [(gogoproto.jsontag) = "view_at", (gogoproto.moretags) = 'form:"view_at"'];
+}
+// Business model
+message Business {
+    // id
+    int64 id = 1[(gogoproto.jsontag) = "id", (gogoproto.customname) = "ID"];
+    // name
+    string name = 2 [(gogoproto.jsontag) = "name"];
+    // ttl
+    int64 ttl = 3[(gogoproto.customname) = "TTL"];
+}
+
+// Merge model
+message Merge {
+     // mid
+    int64 mid = 1 [(gogoproto.moretags) = "validate:\"required\""];
+    // bid
+    int64 bid = 2 [(gogoproto.jsontag) = "bid", (gogoproto.customname) = "Bid", (gogoproto.moretags) = 'validate:"required"'];
+    // business 业务
+    string business = 3 [(gogoproto.jsontag) = "-"];
+     // time
+     int64 time = 4 [(gogoproto.moretags) = 'validate:"required"'];
+     // kid
+     int64 kid = 5 [(gogoproto.moretags) = 'validate:"required"'];
+}

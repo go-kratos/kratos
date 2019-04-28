@@ -1,0 +1,65 @@
+# This is a TOML document. Boom.
+
+version = "1.0.0"
+user = "noboby"
+dir = "./"
+perf = "0.0.0.0:6980"
+family = "passport-game-local-job"
+env = "qa"
+
+[xlog]
+dir = "/data/log/passport-game-local-job"
+
+[tracer]
+family = "passport-game-local-job"
+proto = "unixgram"
+addr = "/var/run/dapper-collect/dapper-collect.sock"
+
+[multiHTTP]
+[multiHTTP.inner]
+addrs = ["0.0.0.0:6981"]
+maxListen = 1000
+
+[group]
+[group.asoBinLog]
+size = 200
+num = 32
+ticker = "1s"
+chan = 1024
+
+[databus]
+[databus.asoBinLogSub]
+key = "0QEO9F8JuuIxZzNDvklH"
+secret = "0QEO9F8JuuIxZzNDvklI"
+group = "PassportAccount-ASO-S"
+topic = "PassportAccount-T"
+action = "sub"
+offset = "old"
+buffer = 2048
+name = "passport-game-local-job/databus"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[databus.encryptTransPub]
+key = "0QEO9F8JuuIxZzNDvklH"
+secret = "0QEO9F8JuuIxZzNDvklI"
+group = "PassportGameTrans-ENCRYPT-P"
+topic = "PassportGameTrans-T"
+action = "pub"
+offset = "old"
+buffer = 2048
+name = "passport-game-local-job/databus"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 1
+active = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"

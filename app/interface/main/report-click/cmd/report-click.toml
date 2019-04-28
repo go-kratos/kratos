@@ -1,0 +1,171 @@
+# This is a TOML document. Boom.
+
+version = "2.0.0"
+user = "nobody"
+pid = "/tmp/report-click.pid"
+dir = "./"
+perf = "127.0.0.1:6180"
+checkFile = "/data/www/report-click.html"
+family = "report-click"
+address = ""
+
+env = "dev"
+
+
+[infoc2]
+    [infoc2.realTime]
+        taskID = "000146"
+        proto = "tcp"
+        addr = "172.16.113.149:15140"
+        chanSize = 10240
+    [infoc2.statistics]
+        taskID = "000891"
+        proto = "tcp"
+        addr = "172.19.100.20:5401"
+        chanSize = 10240
+
+[tracer]
+proto = "udp"
+addr = "172.16.33.46:5140"
+tag = "platform/report-click"
+
+[xlog]
+ dir = "/data/log/report-click/"
+    # [xlog.elk]
+    # project = "report_click"
+    # addr = "172.18.20.17:8520"
+    # chanSize = 1024
+
+[app]
+    key = "53e2fa226f5ad348"
+    secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+
+
+[identify]
+    whiteAccessKey = ""
+    whiteMid = 0
+	csrfOn = false
+    [identify.app]
+    key = "53e2fa226f5ad348"
+    secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+    [identify.memcache]
+    name = "go-business/identify"
+    proto = "tcp"
+    addr = "172.16.0.148:11211"
+    active = 5
+    idle = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "80s"    
+    [identify.host]
+    auth = "http://passport.bilibili.co"
+    secret = "http://open.bilibili.co"
+    [identify.httpClient]
+    key = "53e2fa226f5ad348"
+    secret = "3cf6bd1b0ff671021da5f424fea4b04a"
+    dial = "30ms"
+    timeout = "100ms"
+    keepAlive = "60s"
+    [identify.httpClient.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [identify.httpClient.url]
+    "http://passport.bilibili.co/intranet/auth/tokenInfo" = {timeout = "100ms"}
+    "http://passport.bilibili.co/intranet/auth/cookieInfo" = {timeout = "100ms"}
+    "http://open.bilibili.co/api/getsecret" = {timeout = "500ms"}
+
+[multiHttp]
+    [multiHttp.outer]
+    addrs = ["0.0.0.0:6181"]
+    maxListen = 1000
+    [multiHttp.local]
+    addrs = ["0.0.0.0:6182"]
+    maxListen = 1000
+
+[bm]
+addr = "0.0.0.0:6181"
+maxListen = 1000
+timeout = "800ms"
+
+
+[accRPC]
+    policy=""
+    color=""
+    [accRPC.client]
+    proto = "tcp"
+    timeout = "1s"
+    timer = 1000
+    [accRPC.client.breaker]
+            window  ="3s"
+            sleep   ="100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100
+    [accRPC.conf]
+        domain="api.bilibili.co"
+        key="170e302355453683"
+        secret="6037a2b881a004e23349d8d3120097ba"
+[hisRPC]
+    pullInterval = "10s"
+    [hisRPC.client]
+    proto = "tcp"
+    addr = "172.16.33.56:6009"
+    timeout = "1s"
+    timer = 1000
+    [hisRPC.client.breaker]
+            window  ="3s"
+            sleep   ="100ms"
+            bucket  = 10
+            ratio   = 0.5
+            request = 100
+    [hisRPC.zookeeper]
+    root = "/microservice/history/"
+    addrs = ["172.16.33.54:2181"]
+    timeout = "30s"
+
+[databus]
+    [databus.Merge]
+    key = "170e302355453683"
+    secret= "6037a2b881a004e23349d8d3120097ba"
+    group= "ClickMerge-MainCommunity-P"
+    topic= "ClickMerge-T"
+    action="pub"
+    name = "report-click"
+    proto = "tcp"
+    addr = "172.16.33.158:6205"
+    idle = 100
+    active = 100
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+
+[kafkaProducer]
+    brokers = ["172.16.33.54:9092"]
+    sync = true
+    [kafkaProducer.zookeeper]
+    root = "/kafka"
+    addrs = ["172.16.33.54:2181"]
+    timeout = "30s"
+	
+#	WebReport :0 关闭,1 全开,2 只开番剧 ,ground:true 落地，false 不落地
+[click]
+    webSecret = "903ef99b5be1300f843b4adf2ca55410"
+    outSecret = "57184ba1409f2a151f6a595630a882c7"
+    aesKey = ""
+    aesIv = ""
+    aesSalt = ""
+    aesKey2 = ""
+    aesIv2 = ""
+    aesSalt2 = ""
+    playTopic = "count-log"
+	WebReport = 1
+    ground = true
+	reportURL = "http://api.bilibili.co/x/internal/v2/history/report"
+	From = [761]
+	FromInline = [7140]
+	InlineDuration = 10

@@ -1,0 +1,98 @@
+load(
+    "@io_bazel_rules_go//go:def.bzl",
+    "go_test",
+    "go_library",
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = [
+        "account_test.go",
+        "dao_test.go",
+        "distrib_test.go",
+        "item_test.go",
+        "order_detail_test.go",
+        "order_log_test.go",
+        "order_test.go",
+        "promotion_group_test.go",
+        "promotion_order_test.go",
+        "promotion_test.go",
+        "stock_test.go",
+        "ticket_test.go",
+    ],
+    embed = [":go_default_library"],
+    rundir = ".",
+    tags = ["automanaged"],
+    deps = [
+        "//app/service/openplatform/ticket-sales/api/grpc/type:go_default_library",
+        "//app/service/openplatform/ticket-sales/api/grpc/v1:go_default_library",
+        "//app/service/openplatform/ticket-sales/conf:go_default_library",
+        "//app/service/openplatform/ticket-sales/model:go_default_library",
+        "//app/service/openplatform/ticket-sales/model/consts:go_default_library",
+        "//library/conf/paladin:go_default_library",
+        "//vendor/github.com/smartystreets/goconvey/convey:go_default_library",
+    ],
+)
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "account.go",
+        "dao.cache.go",
+        "dao.go",
+        "distrib.go",
+        "item.go",
+        "order.go",
+        "order_detail.go",
+        "order_log.go",
+        "promotion.go",
+        "promotion_group.go",
+        "promotion_order.go",
+        "redis.go",
+        "stock.go",
+        "ticket.go",
+    ],
+    importpath = "go-common/app/service/openplatform/ticket-sales/dao",
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//app/common/openplatform/encoding:go_default_library",
+        "//app/service/main/account/api:go_default_library",
+        "//app/service/openplatform/ticket-item/api/grpc/v1:go_default_library",
+        "//app/service/openplatform/ticket-sales/api/grpc/type:go_default_library",
+        "//app/service/openplatform/ticket-sales/api/grpc/v1:go_default_library",
+        "//app/service/openplatform/ticket-sales/conf:go_default_library",
+        "//app/service/openplatform/ticket-sales/model:go_default_library",
+        "//app/service/openplatform/ticket-sales/model/consts:go_default_library",
+        "//library/cache:go_default_library",
+        "//library/cache/redis:go_default_library",
+        "//library/database/sql:go_default_library",
+        "//library/ecode:go_default_library",
+        "//library/log:go_default_library",
+        "//library/naming/discovery:go_default_library",
+        "//library/net/http/blademaster:go_default_library",
+        "//library/net/metadata:go_default_library",
+        "//library/net/rpc/warden:go_default_library",
+        "//library/net/rpc/warden/resolver:go_default_library",
+        "//library/queue/databus:go_default_library",
+        "//library/stat/prom:go_default_library",
+        "//library/time:go_default_library",
+        "//library/xstr:go_default_library",
+        "//vendor/github.com/pkg/errors:go_default_library",
+        "@com_github_gogo_protobuf//types:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "package-srcs",
+    srcs = glob(["**"]),
+    tags = ["automanaged"],
+    visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "all-srcs",
+    srcs = [":package-srcs"],
+    tags = ["automanaged"],
+    visibility = ["//visibility:public"],
+)

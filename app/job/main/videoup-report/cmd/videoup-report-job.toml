@@ -1,0 +1,322 @@
+# This is a TOML document. Boom.
+
+[host]
+data = "http://data-test.bilibili.co"
+api = "http://api.bilibili.co"
+archive = "http://uat-archive.api.bilibili.co"
+profit = "http://up-profit.bilibili.co"
+www = "http://www.bilibili.com"
+
+[xlog]
+dir = "/data/log/videoup-report-job/"
+    [xlog.elk]
+    project = "videoup-report-job"
+    addr = "172.18.20.17:8520"
+    chanSize = 10240
+
+[archiveSub]
+key = "0Pub71WwEMKXu63qtztu"
+secret = "0Pub71WwEMKXu63qtztv"
+group = "ArchiveBinlog-ReportJob-S"
+topic = "Archive-T"
+action = "sub"
+name = "videoup-report-job/archivesub"
+proto = "tcp"
+addr = "172.16.33.158:6205"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[archiveResultSub]
+key = "0Pub71WwEMKXu63qtztu"
+secret = "0Pub71WwEMKXu63qtztv"
+group = "ArchiveNotify-MainArchive-ReportJob-S"
+topic = "ArchiveNotify-T"
+action = "sub"
+name = "videoup-report-job/archive-result-sub"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+idle = 100
+active = 100
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[videoupSub]
+key = ""
+secret = ""
+group = "Videoup2Bvc-MainArchive-ReportJob-S"
+topic = "Videoup2Bvc"
+action = "sub"
+offset = "old"
+buffer = 128
+name = "videoup-job/bvc-sub"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+active = 1
+idle = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[managerDBSub]
+key = ""
+secret = ""
+group = "ManagerBinLog-MainArchive-S"
+topic = "ManagerBinLog-T"
+action = "sub"
+name = "videoup-report-job/databus"
+proto = "tcp"
+addr = "172.18.33.50:6205"
+active = 1
+idle = 1
+dialTimeout = "1s"
+readTimeout = "60s"
+writeTimeout = "1s"
+idleTimeout = "10s"
+
+[app]
+key = "c05dd4e1638a8af0"
+secret = "7daa7f8c06cd33c5c3067063c746fdcb"
+
+[httpClient]
+    [httpClient.read]
+    key = "6aa4286456d16b97"
+    secret = "351cf022e1ae8296109c3c524faafcc8"
+    dial = "1s"
+    timeout = "1s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.read.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+    [httpClient.write]
+    key = "6aa4286456d16b97"
+    secret = "351cf022e1ae8296109c3c524faafcc8"
+    dial = "50s"
+    timeout = "3s"
+    keepAlive = "60s"
+    timer = 1000
+    [httpClient.write.breaker]
+    window  = "10s"
+    sleep   = "100ms"
+    bucket  = 10
+    ratio   = 0.5
+    request = 100
+[bm]
+	addr = "0.0.0.0:6791"
+	maxListen = 1000
+	timeout = "1s"
+
+[db]
+    [db.archive]
+    name = "172.16.33.54:3306"
+    dsn = "test:test@tcp(172.16.33.205:3308)/bilibili_archive?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"
+    readDSN = ["test:test@tcp(172.16.33.205:3308)/bilibili_archive?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8,utf8mb4"]
+    active = 5
+    idle = 2
+    queryTimeout = "10s"
+    execTimeout = "10s"
+    tranTimeout = "10s"
+    [db.archive.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+    [db.manager]
+    name = "172.16.33.54:3306"
+    dsn = "test:test@tcp(172.16.33.54:3306)/bilibili_manager?timeout=5s&readTimeout=5s&writeTimeout=5s&parseTime=true&loc=Local&charset=utf8"
+    active = 5
+    idle = 2
+    idleTimeout ="4h"
+    queryTimeout = "100ms"
+    execTimeout = "100ms"
+    tranTimeout = "200ms"
+    [db.manager.breaker]
+    window = "3s"
+    sleep = "100ms"
+    bucket = 10
+    ratio = 0.5
+    request = 100
+
+
+[redis]
+    [redis.track]
+    name = "video-admin/track"
+    proto = "tcp"
+    addr = "172.16.33.54:6381"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    expire = "10s"
+    [redis.mail]
+    name = "video-admin/track"
+    proto = "tcp"
+    addr = "172.16.33.54:6381"
+    idle = 10
+    active = 10
+    dialTimeout = "1s"
+    readTimeout = "1s"
+    writeTimeout = "1s"
+    idleTimeout = "10s"
+    [redis.secondary]
+        name = "videoup-report-job/secondary"
+        proto = "unix"
+        addr = "172.22.33.137:6835"
+        active = 10
+        idle = 2
+        dialTimeout = "1s"
+        readTimeout = "1s"
+        writeTimeout = "1s"
+        idleTimeout = "80s"
+
+[archiveRPCGroup2]
+    timeout = "1s"
+
+[hbase]
+master = ""
+meta = ""
+dialTimeout = "5s"
+readTimeout = "10s"
+readsTimeout = "10s"
+writeTimeout = "10s"
+writesTimeout = "10s"
+    [hbase.zookeeper]
+    root = ""
+    addrs = ["172.18.33.131:2181","172.18.33.168:2181","172.18.33.169:2181"]
+    timeout = "30s"
+
+
+[tagDisRPC]
+     timeout = "1s"
+
+
+[mail]
+    host = "smtp.exmail.qq.com"
+    port = 465
+    username = "2333@bilibili.com"
+    password = "2333"
+    speedThreshold = 3
+    overspeedThreshold = 2
+    [[mail.addr]]
+        type = "4"
+        desc = "游戏"
+        addr = []
+    [[mail.addr]]
+        type = "11"
+        desc = "电视剧"
+        addr = []
+    [[mail.addr]]
+        type = "1"
+        desc = "动画"
+        addr = []
+    [[mail.addr]]
+        type = "23"
+        desc = "电影"
+        addr = []
+    [[mail.addr]]
+        type = "119"
+        desc = "鬼畜"
+        addr = []
+    [[mail.addr]]
+        type = "155"
+        desc = "时尚"
+        addr = []
+     [[mail.addr]]
+        type = "160"
+        desc = "生活"
+        addr = []
+    [[mail.addr]]
+        type = "36"
+        desc = "科技"
+        addr = []
+    [[mail.addr]]
+        type = "5"
+        desc = "娱乐"
+        addr = []
+     [[mail.addr]]
+        type = "3"
+        desc = "音乐"
+        addr = []
+    [[mail.addr]]
+        type = "129"
+        desc = "舞蹈"
+        addr = []
+    [[mail.addr]]
+        type = "13"
+        desc = "番剧"
+        addr = []
+    [[mail.addr]]
+        type = "167"
+        desc = "国创"
+        addr = []
+    [[mail.addr]]
+        type = "181"
+        desc = "影视"
+        addr = []
+    [[mail.addr]]
+        type = "177"
+        desc = "纪录片"
+        addr = []
+    [[mail.addr]]
+        type = "signed"
+        desc = "签约up主"
+        addr = []
+    [[mail.privateAddr]]
+        type = "155"
+        desc = "时尚"
+        addr = []
+    [[mail.privateAddr]]
+        type = "160"
+        desc = "生活"
+        addr = []
+    [[mail.privateAddr]]
+        type = "119"
+        desc = "鬼畜"
+        addr = []
+    [[mail.privateAddr]]
+        type = "36"
+        desc = "科技"
+        addr = []
+    [[mail.privateAddr]]
+        type = "3"
+        desc = "音乐"
+        addr = []
+    [[mail.privateAddr]]
+        type = "129"
+        desc = "舞蹈"
+        addr = []
+    [[mail.privateAddr]]
+        type = "4"
+        desc = "游戏"
+        addr = []
+    [[mail.privateAddr]]
+        type = "181"
+        desc = "影视"
+        addr = []
+    [[mail.privateAddr]]
+        type = "1"
+        desc = "动画"
+        addr = []
+    [[mail.privateAddr]]
+        type = "CC"
+        desc = "抄送列表"
+        addr = []
+
+[grpc]
+    [grpc.accRPC]
+        timeout = "1s"
+    [grpc.upsRPC]
+        timeout = "1s"

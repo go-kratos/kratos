@@ -1,0 +1,54 @@
+syntax = "proto3";
+package ticket.service.item.v1;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+
+// The bulletin service definition.
+service Bulletin {
+   rpc BulletinInfo (BulletinInfoRequest) returns (BulletinReply) {}
+   rpc BulletinCheck (BulletinCheckRequest) returns (BulletinReply) {}
+   rpc BulletinState (BulletinStateRequest) returns (BulletinReply) {}
+}
+
+// The response message containing the bulletin info
+message BulletinInfo {
+   int64 id = 1 [(gogoproto.jsontag) = "id", (gogoproto.moretags) = "validate:\"min=1\"", (gogoproto.customname)= "ID"];
+   string title = 2 [(gogoproto.jsontag) = "title"];
+   string content = 3 [(gogoproto.jsontag) = "content"];
+   string detail = 4 [(gogoproto.jsontag) = "detail"];
+   string ctime = 5 [(gogoproto.jsontag) = "ctime", (gogoproto.moretags) = "validate:\"min=0\""];
+   string mtime = 6 [(gogoproto.jsontag) = "mtime", (gogoproto.moretags) = "validate:\"min=0\""];
+   uint64 ver_id  = 7 [(gogoproto.jsontag) = "ver_id", (gogoproto.moretags) = "validate:\"min=0\"", (gogoproto.customname)= "VerID"];
+}
+
+// The request message containing the bulletin info to update
+message BulletinInfoRequest {
+   uint64  ver_id = 1 [(gogoproto.jsontag) = "ver_id", (gogoproto.customname)= "VerID"];
+   string title = 2 [(gogoproto.jsontag) = "title", (gogoproto.moretags) = "validate:\"required,max=32\""];
+   string content = 3 [(gogoproto.jsontag) = "content", (gogoproto.moretags) = "validate:\"max=128\""];
+   string detail = 4 [(gogoproto.jsontag) = "detail"];
+   int64  target_item = 5 [(gogoproto.jsontag) = "target_item"];
+   int64  parent_id = 6 [(gogoproto.jsontag) = "parent_id", (gogoproto.moretags) = "validate:\"required,min=1\"", (gogoproto.customname)= "ParentID"];
+}
+
+// The request message containing the required version info to review the bulletin
+message BulletinCheckRequest {
+   uint64 ver_id = 1 [(gogoproto.jsontag) = "ver_id", (gogoproto.moretags) = "validate:\"required,min=1\"", (gogoproto.customname)= "VerID"];
+   int32 op_type = 2 [(gogoproto.jsontag) = "op_type", (gogoproto.moretags) = "validate:\"min=0,max=1\""];
+   string comment = 3 [(gogoproto.jsontag) = "comment"];
+   string reviewer = 4 [(gogoproto.jsontag) = "reviewer", (gogoproto.moretags) = "validate:\"required\""];
+}
+
+// The request message containing the required version info to change the bulletin's status
+message BulletinStateRequest {
+   uint64 ver_id = 1 [(gogoproto.jsontag) = "ver_id", (gogoproto.moretags) = "validate:\"required,min=1\"", (gogoproto.customname)= "VerID"];
+   int32 op_type = 2 [(gogoproto.jsontag) = "op_type", (gogoproto.moretags) = "validate:\"min=0,max=1\""];
+   int32 source = 3 [(gogoproto.jsontag) = "source", (gogoproto.moretags) = "validate:\"min=1,max=2\""];
+}
+
+// The general response message containing the result after updating/inserting the bulletin info
+message BulletinReply {
+   bool success = 1 [(gogoproto.jsontag) = "success"];
+}

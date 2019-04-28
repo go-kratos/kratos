@@ -1,0 +1,36 @@
+syntax = "proto3";
+package activity.service;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "like";
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+
+message MissionGroup {
+    int64 ID =  1 [(gogoproto.jsontag) ="id"];
+    int64 Sid =  2 [(gogoproto.jsontag) ="sid"];
+    int64 Mid =  3 [(gogoproto.jsontag) ="mid"];
+    int64 State =  4 [(gogoproto.jsontag) ="state"];
+    int64 Ctime = 5 [(gogoproto.jsontag) ="ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Mtime = 6 [(gogoproto.jsontag) ="mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+}
+
+message ActMissionGroup {
+    int64 ID =  1 [(gogoproto.jsontag) ="id"];
+    int64 Lid =  2 [(gogoproto.jsontag) ="lid"];
+    int64 Mid =  3 [(gogoproto.jsontag) ="mid"];
+    int64 Action =  4 [(gogoproto.jsontag) ="action"];
+    int64 Ctime = 5 [(gogoproto.jsontag) ="ctime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Mtime = 6 [(gogoproto.jsontag) ="mtime", (gogoproto.casttype) = "go-common/library/time.Time"];
+    int64 Sid =  7 [(gogoproto.jsontag) ="sid"];
+    int64 IP =  8 [(gogoproto.jsontag) ="ip"];
+    bytes IPv6 = 9 [(gogoproto.jsontag) ="ipv6"];
+}
+
+message ActMissionGroups{
+ repeated ActMissionGroup actMissionGroups = 1;
+}
