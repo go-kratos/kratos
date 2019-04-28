@@ -1,4 +1,4 @@
-package xstr
+package str
 
 import (
 	"bytes"

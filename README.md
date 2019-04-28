@@ -35,10 +35,10 @@ Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，
 
 ```shell
 go get -u github.com/bilibili/kratos/tool/kratos
-kratos init
+kratos new kratos-demo
 ```
 
-`kratos init`会快速生成基于kratos库的脚手架代码，如生成[kratos-demo](https://github.com/bilibili/kratos-demo)
+`kratos new`会快速生成基于kratos库的脚手架代码，如生成[kratos-demo](https://github.com/bilibili/kratos-demo)
 
 ```shell
 cd kratos-demo/cmd
