@@ -32,7 +32,7 @@ Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，
 
 ## Required
 
-Go version>=1.11 and GO111MODULE=on
+Go version>=1.12 and GO111MODULE=on
 
 ## Quick start
 
