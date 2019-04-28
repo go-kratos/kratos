@@ -30,6 +30,10 @@ Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，
 
 *名字来源于:《[战神](https://baike.baidu.com/item/%E6%88%98%E7%A5%9E/5896427)》游戏以希腊神话为背景，讲述由凡人成为战神的奎托斯（Kratos）成为战神并展开弑神屠杀的冒险历程。*
 
+## Required
+
+Go version>=1.11 and GO111MODULE=on
+
 ## Quick start
 
 ```shell
