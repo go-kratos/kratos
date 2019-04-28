@@ -1,9 +1,6 @@
 # Kratos
 
-Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，包含大量微服务相关框架及工具。
-
-名字来源于:《[战神](https://baike.baidu.com/item/%E6%88%98%E7%A5%9E/5896427)》游戏以希腊神话为背景，讲述由凡人成为战神的奎托斯（Kratos）成为战神并展开弑神屠杀的冒险历程。
-
+Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，包含大量微服务相关框架及工具：
 
 - [HTTP框架: Blademaster(bm)](doc/wiki-cn/blademaster.md)
 
@@ -30,6 +27,8 @@ Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，
   * [kratos tool](doc/wiki-cn/kratos-tool.md)：kratos相关工具量，包括项目快速生成、pb文件代码生成、swagger文档生成等。
 
 我们致力于提供完整的微服务研发体验，整合相关框架及工具后，微服务治理相关部分可对整体业务开发周期无感，从而更加聚焦于业务交付。对每位开发者而言，整套Kratos框架也是不错的学习仓库，可以了解和参考到[bilibili](https://www.bilibili.com)在微服务方面的技术积累和经验。
+
+***名字来源于:《[战神](https://baike.baidu.com/item/%E6%88%98%E7%A5%9E/5896427)》游戏以希腊神话为背景，讲述由凡人成为战神的奎托斯（Kratos）成为战神并展开弑神屠杀的冒险历程。***
 
 ## Quick start
 
