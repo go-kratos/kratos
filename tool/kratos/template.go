@@ -98,11 +98,15 @@ func main() {
 		switch s {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
 			ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
-			defer cancel()
-			grpcSrv.Shutdown(ctx)
-			httpSrv.Shutdown(ctx)
+			if err := grpcSrv.Shutdown(ctx); err != nil 
+				log.Error("grpcSrv.Shutdown error(%v)", err)
+			} // grpc	
+			if err := httpSrv.Shutdown(ctx); err != nil {
+				log.Error("httpSrv.Shutdown error(%v)", err)
+			}
 			log.Info("{{.Name}} exit")
 			svc.Close()
+			cancel()
 			time.Sleep(time.Second)
 			return
 		case syscall.SIGHUP:
