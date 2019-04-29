@@ -1,4 +1,4 @@
-![kratos](doc/img/kratos.png)  
+![kratos](doc/img/kratos3.png)
 
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
 
