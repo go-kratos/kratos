@@ -1,4 +1,6 @@
-# Kratos
+![kratos](doc/img/kratos.png)  
+
+[![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
 
 Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，包含大量微服务相关框架及工具：
 
