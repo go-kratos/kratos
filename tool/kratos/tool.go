@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go/build"
 	"os"
 	"os/exec"
 	"path"
@@ -15,16 +16,21 @@ import (
 	"github.com/urfave/cli"
 )
 
+const (
+	toolDoc = "https://github.com/bilibili/kratos/blob/master/doc/wiki-cn/kratos-tool.md"
+)
+
 func toolAction(c *cli.Context) (err error) {
 	if c.NArg() == 0 {
 		sort.Slice(toolIndexs, func(i, j int) bool { return toolIndexs[i].BuildTime.After(toolIndexs[j].BuildTime) })
 		for _, t := range toolIndexs {
 			updateTime := t.BuildTime.Format("2006/01/02")
-			fmt.Printf("%s%s: %s %s (%s) [%s]\n", color.HiMagentaString(t.Name), getNotice(t), color.HiCyanString(t.Summary), t.URL, t.Author, updateTime)
+			fmt.Printf("%s%s: %s Author(%s) [%s]\n", color.HiMagentaString(t.Name), getNotice(t), color.HiCyanString(t.Summary), t.Author, updateTime)
 		}
-		fmt.Println("\n执行 install 安装程序  如: kratos tool install demo")
-		fmt.Println("执行 工具名称 运行程序 如: kratos tool demo")
-		fmt.Println("\n安装全部工具:  kratos tool install all")
+		fmt.Println("\n安装工具: kratos tool install demo")
+		fmt.Println("执行工具: kratos tool demo")
+		fmt.Println("安装全部工具: kratos tool install all")
+		fmt.Println("\n详细文档：", toolDoc)
 		return
 	}
 	if c.Args().First() == "install" {
@@ -129,7 +135,6 @@ type Tool struct {
 	Summary   string    `json:"summary"`
 	Platform  []string  `json:"platform"`
 	Author    string    `json:"author"`
-	URL       string    `json:"url"`
 }
 
 func (t Tool) supportOS() bool {
@@ -143,7 +148,7 @@ func (t Tool) supportOS() bool {
 
 func (t Tool) install() {
 	if t.Install == "" {
-		fmt.Fprintf(os.Stderr, color.RedString("%s: 自动安装失败 详情请查看文档 %s\n", t.Name, t.URL))
+		fmt.Fprintf(os.Stderr, color.RedString("%s: 自动安装失败详情请查看文档：%s\n", t.Name, toolDoc))
 		return
 	}
 	cmds := strings.Split(t.Install, " ")
@@ -173,4 +178,29 @@ func (t Tool) toolPath() string {
 func (t Tool) installed() bool {
 	_, err := os.Stat(t.toolPath())
 	return err == nil
+}
+
+func goPath() (gp string) {
+	gopaths := strings.Split(os.Getenv("GOPATH"), ":")
+	if len(gopaths) == 1 {
+		return gopaths[0]
+	}
+	pwd, err := os.Getwd()
+	if err != nil {
+		return
+	}
+	abspwd, err := filepath.Abs(pwd)
+	if err != nil {
+		return
+	}
+	for _, gopath := range gopaths {
+		absgp, err := filepath.Abs(gopath)
+		if err != nil {
+			return
+		}
+		if strings.HasPrefix(abspwd, absgp) {
+			return absgp
+		}
+	}
+	return build.Default.GOPATH
 }

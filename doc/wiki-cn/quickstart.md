@@ -1,18 +1,20 @@
 # 快速开始
 
-快速使用kratos项目，可以使用`kratos tool`，如下：
+快速使用kratos项目，可以使用`kratos`工具，如下：
 
 ```shell
 go get -u github.com/bilibili/kratos/tool/kratos
-kratos init
+cd $GOPATH/src
+kratos new kratos-demo
 ```
+
 根据提示可以快速创建项目，如[kratos-demo](https://github.com/bilibili/kratos-demo)就是通过工具创建生成。目录结构如下：
 
 ```
 ├── CHANGELOG.md           # CHANGELOG
 ├── CONTRIBUTORS.md        # CONTRIBUTORS
 ├── README.md              # README
-├── api                    # api目录为对外保留的proto文件，及生成的pb.go文件
+├── api                    # api目录为对外保留的proto文件及生成的pb.go文件，注：需要"--grpc"参数
 │   ├── api.proto
 │   ├── api.pb.go          # 通过go generate生成的pb.go文件
 │   └── generate.go
@@ -51,9 +53,7 @@ go build
 
 打开浏览器访问：[http://localhost:8000/kratos-demo/start](http://localhost:8000/kratos-demo/start)，你会看到输出了`Golang 大法好 ！！！`
 
-# 动图说明
-
-![kratos init](/doc/img/kratosinit.gif)
+[kratos工具](kratos-tool.md)
 
 -------------
 

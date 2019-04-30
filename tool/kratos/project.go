@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
+	"runtime"
 	"strings"
 	"text/template"
 )
@@ -38,6 +38,7 @@ const (
 	_tplTypeModel
 	_tplTypeGRPCServer
 	_tplTypeAPIGenerate
+	_tplTypeGomod
 )
 
 var (
@@ -49,6 +50,7 @@ var (
 		_tplTypeContributors: "/CONTRIBUTORS.md",
 		_tplTypeReadme:       "/README.md",
 		// init project
+		_tplTypeGomod:      "/go.mod",
 		_tplTypeMain:       "/cmd/main.go",
 		_tplTypeDao:        "/internal/dao/dao.go",
 		_tplTypeHTTPServer: "/internal/server/http/http.go",
@@ -78,24 +80,9 @@ var (
 		_tplTypeAppToml:      _tplAppToml,
 		_tplTypeHTTPToml:     _tplHTTPToml,
 		_tplTypeModel:        _tplModel,
+		_tplTypeGomod:        _tplGoMod,
 	}
 )
-
-func validate() (ok bool) {
-	if p.Name == "" {
-		fmt.Println("[-n] Invalid project name.")
-		return
-	}
-	if p.Path == "" {
-		if p.Here {
-			pwd, _ := os.Getwd()
-			p.Path = path.Join(pwd, p.Name)
-		} else {
-			p.Path = path.Join(goPath(), "src", p.Name)
-		}
-	}
-	return true
-}
 
 func create() (err error) {
 	if p.WithGRPC {
@@ -127,6 +114,10 @@ func create() (err error) {
 	if p.WithGRPC {
 		if err = genpb(); err != nil {
 			return
+		}
+		if runtime.GOOS != "darwin" {
+			fmt.Println("您的操作系统不是macos，kprotoc工具无法正常运行，请参看kratos tool文档！")
+			fmt.Println("地址：", toolDoc)
 		}
 	}
 	return
