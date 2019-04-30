@@ -19,8 +19,6 @@ Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，
   
   * [log](doc/wiki-cn/logger.md)：基于[zap](https://github.com/uber-go/zap)的field方式实现的高性能log库，集成了我们提供的[log-agent敬请期待]()日志收集方案。
   
-  * [database](doc/wiki-cn/database.md)：集成MySQL&HBase&TiDB的SDK，其中TiDB使用服务发现方案。
-  
   * [cache](doc/wiki-cn/cache.md)：集成memcache&redis的SDK，注意无redis-cluster实现，推荐使用代理模式[overlord](https://github.com/bilibili/overlord)。
   
   * [database](doc/wiki-cn/database.md)：集成MySQL&HBase&TiDB的SDK，其中TiDB使用服务发现方案。
