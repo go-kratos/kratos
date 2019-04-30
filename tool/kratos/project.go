@@ -2,10 +2,12 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"runtime"
 	"strings"
 	"text/template"
@@ -38,6 +40,7 @@ const (
 	_tplTypeModel
 	_tplTypeGRPCServer
 	_tplTypeAPIGenerate
+	_tplTypeAPIGenerateWin
 	_tplTypeGomod
 )
 
@@ -66,21 +69,22 @@ var (
 	}
 	// tpls type => content
 	tpls = map[int]string{
-		_tplTypeDao:          _tplDao,
-		_tplTypeHTTPServer:   _tplHTTPServer,
-		_tplTypeAPIProto:     _tplAPIProto,
-		_tplTypeAPIGenerate:  _tplAPIGenerate,
-		_tplTypeMain:         _tplMain,
-		_tplTypeChangeLog:    _tplChangeLog,
-		_tplTypeContributors: _tplContributors,
-		_tplTypeReadme:       _tplReadme,
-		_tplTypeMySQLToml:    _tplMySQLToml,
-		_tplTypeMCToml:       _tplMCToml,
-		_tplTypeRedisToml:    _tplRedisToml,
-		_tplTypeAppToml:      _tplAppToml,
-		_tplTypeHTTPToml:     _tplHTTPToml,
-		_tplTypeModel:        _tplModel,
-		_tplTypeGomod:        _tplGoMod,
+		_tplTypeDao:            _tplDao,
+		_tplTypeHTTPServer:     _tplHTTPServer,
+		_tplTypeAPIProto:       _tplAPIProto,
+		_tplTypeAPIGenerate:    _tplAPIGenerate,
+		_tplTypeAPIGenerateWin: _tplAPIGenerateWin,
+		_tplTypeMain:           _tplMain,
+		_tplTypeChangeLog:      _tplChangeLog,
+		_tplTypeContributors:   _tplContributors,
+		_tplTypeReadme:         _tplReadme,
+		_tplTypeMySQLToml:      _tplMySQLToml,
+		_tplTypeMCToml:         _tplMCToml,
+		_tplTypeRedisToml:      _tplRedisToml,
+		_tplTypeAppToml:        _tplAppToml,
+		_tplTypeHTTPToml:       _tplHTTPToml,
+		_tplTypeModel:          _tplModel,
+		_tplTypeGomod:          _tplGoMod,
 	}
 )
 
@@ -88,13 +92,14 @@ func create() (err error) {
 	if p.WithGRPC {
 		files[_tplTypeGRPCServer] = "/internal/server/grpc/server.go"
 		files[_tplTypeAPIProto] = "/api/api.proto"
-		files[_tplTypeAPIGenerate] = "/api/generate.go"
+		files[_tplTypeAPIGenerate] = "/api/gen.go"
+		files[_tplTypeAPIGenerateWin] = "/api/gen_windows.go"
 		tpls[_tplTypeGRPCServer] = _tplGRPCServer
 		tpls[_tplTypeGRPCToml] = _tplGRPCToml
 		tpls[_tplTypeService] = _tplGPRCService
 	} else {
 		tpls[_tplTypeService] = _tplService
-		tpls[_tplTypeMain] = delgrpc(_tplMain)
+		tpls[_tplTypeMain] = delGRPC(_tplMain)
 	}
 	if err = os.MkdirAll(p.Path, 0755); err != nil {
 		return
@@ -112,23 +117,48 @@ func create() (err error) {
 		}
 	}
 	if p.WithGRPC {
-		if err = genpb(); err != nil {
+		if err = checkProtobuf(); err != nil {
 			return
 		}
-		if runtime.GOOS != "darwin" {
-			fmt.Println("您的操作系统不是macos，kprotoc工具无法正常运行，请参看kratos tool文档！")
-			fmt.Println("地址：", toolDoc)
+		if err = genGRPC(); err != nil {
+			return
 		}
 	}
 	return
 }
 
-func genpb() error {
-	cmd := exec.Command("go", "generate", p.Path+"/api/generate.go")
-	return cmd.Run()
+func checkProtobuf() error {
+	if _, err := exec.LookPath("protoc"); err != nil {
+		switch runtime.GOOS {
+		case "darwin":
+			// MacOS
+			fmt.Println("brew install protobuf..")
+			cmd := exec.Command("brew", "install", "protobuf")
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err = cmd.Run(); err != nil {
+				return err
+			}
+		default:
+			return errors.New("生成 gRPC API 失败，您还没安装protobuf，请进行手动安装：https://github.com/protocolbuffers/protobuf/releases")
+		}
+	}
+	return nil
 }
 
-func delgrpc(tpl string) string {
+func genGRPC() error {
+	dir := path.Join(p.Path, "api")
+	cmd := exec.Command("go", "generate", dir)
+	cmd.Dir = dir
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("generate gRPC error(%v)", err)
+	}
+	return nil
+}
+
+func delGRPC(tpl string) string {
 	var buf bytes.Buffer
 	lines := strings.Split(tpl, "\n")
 	for _, l := range lines {
