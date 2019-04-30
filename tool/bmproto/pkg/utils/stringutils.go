@@ -1,5 +1,5 @@
 
-package stringutils
+package utils
 
 import (
 	"strings"

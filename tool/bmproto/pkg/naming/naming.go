@@ -4,7 +4,7 @@ import (
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	"github.com/pkg/errors"
 	"github.com/siddontang/go/ioutil2"
-	"github.com/bilibili/kratos/tool/bmproto/pkg/stringutils"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/utils"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,12 +25,12 @@ func GetVersionPrefix(pkg string) string {
 }
 
 func ServiceName(service *descriptor.ServiceDescriptorProto) string {
-	return stringutils.CamelCase(service.GetName())
+	return utils.CamelCase(service.GetName())
 }
 
 // MethodName ...
 func MethodName(method *descriptor.MethodDescriptorProto) string {
-	return stringutils.CamelCase(method.GetName())
+	return utils.CamelCase(method.GetName())
 }
 
 // GetGoImportPathForPb 得到 proto 文件对应的 go import路径
@@ -71,7 +71,7 @@ func GoPackageName(f *descriptor.FileDescriptorProto) (name string, explicit boo
 		return pkg, false
 	}
 	// Use the file base name.
-	return stringutils.BaseName(f.GetName()), false
+	return utils.BaseName(f.GetName()), false
 }
 
 // goPackageOption interprets the file's go_package option.

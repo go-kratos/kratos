@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/bilibili/kratos/tool/bmproto/pkg/naming"
 	"github.com/bilibili/kratos/tool/bmproto/pkg/gen"
-	"github.com/bilibili/kratos/tool/bmproto/pkg/stringutils"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/utils"
 	"github.com/bilibili/kratos/tool/bmproto/pkg/typemap"
 	"go/parser"
 	"go/printer"
@@ -121,9 +121,9 @@ func (t *Base) Setup(in *plugin.CodeGeneratorRequest, paramsOpt ...GeneratorPara
 			// This is a dependency. Use its package name.
 			name := f.GetPackage()
 			if name == "" {
-				name = stringutils.BaseName(f.GetName())
+				name = utils.BaseName(f.GetName())
 			}
-			name = stringutils.CleanIdentifier(name)
+			name = utils.CleanIdentifier(name)
 			alias := t.RegisterPackageName(name)
 			t.fileToGoPackageName[f] = alias
 		}
@@ -174,7 +174,7 @@ func DeduceGenPkgName(genFiles []*descriptor.FileDescriptorProto) (string, error
 	for _, f := range genFiles {
 		name, explicit := naming.GoPackageName(f)
 		if explicit {
-			name = stringutils.CleanIdentifier(name)
+			name = utils.CleanIdentifier(name)
 			if genPkgName != "" && genPkgName != name {
 				// Make sure they're all set consistently.
 				return "", errors.Errorf("files have conflicting go_package settings, must be the same: %q and %q", genPkgName, name)
@@ -191,7 +191,7 @@ func DeduceGenPkgName(genFiles []*descriptor.FileDescriptorProto) (string, error
 	// consistent.
 	for _, f := range genFiles {
 		name, _ := naming.GoPackageName(f)
-		name = stringutils.CleanIdentifier(name)
+		name = utils.CleanIdentifier(name)
 		if genPkgName != "" && genPkgName != name {
 			return "", errors.Errorf("files have conflicting package names, must be the same or overridden with go_package: %q and %q", genPkgName, name)
 		}

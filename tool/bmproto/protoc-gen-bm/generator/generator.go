@@ -2,17 +2,15 @@ package generator
 
 import (
 	"fmt"
-	"github.com/bilibili/kratos/tool/bmproto/pkg/generator"
-	"github.com/bilibili/kratos/tool/bmproto/pkg/naming"
-	"github.com/bilibili/kratos/tool/bmproto/pkg/tag"
-	"github.com/bilibili/kratos/tool/bmproto/pkg/utils"
 	"reflect"
 	"sort"
 	"strings"
 
-	"github.com/bilibili/kratos/tool/bmproto/pkg/stringutils"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/generator"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/naming"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/tag"
+	"github.com/bilibili/kratos/tool/bmproto/pkg/utils"
 	"github.com/bilibili/kratos/tool/bmproto/pkg/typemap"
-
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
@@ -165,7 +163,7 @@ func (t *bm) generateBMRoute(
 	// generate each route method
 	servName := naming.ServiceName(service)
 	versionPrefix := naming.GetVersionPrefix(t.GenPkgName)
-	svcName := utils.LcFirst(stringutils.CamelCase(versionPrefix)) + servName + "Svc"
+	svcName := utils.LcFirst(utils.CamelCase(versionPrefix)) + servName + "Svc"
 	t.P(`var `, svcName, ` `, servName, `BMServer`)
 
 	type methodInfo struct {
@@ -205,8 +203,8 @@ func (t *bm) generateBMRoute(
 		methName := naming.MethodName(method)
 		inputType := t.GoTypeName(method.GetInputType())
 
-		routeName := utils.LcFirst(stringutils.CamelCase(servName) +
-			stringutils.CamelCase(methName))
+		routeName := utils.LcFirst(utils.CamelCase(servName) +
+			utils.CamelCase(methName))
 
 		methList = append(methList, methodInfo{
 			apiInfo:       apiInfo,
@@ -241,7 +239,7 @@ func (t *bm) generateBMRoute(
 
 	// 注册老的路由的方法
 	if isLegacyPkg {
-		funcName := `Register` + stringutils.CamelCase(versionPrefix) + servName + `Service`
+		funcName := `Register` + utils.CamelCase(versionPrefix) + servName + `Service`
 		t.P(`// `, funcName, ` Register the blademaster route with middleware map`)
 		t.P(`// midMap is the middleware map, the key is defined in proto`)
 		t.P(`func `, funcName, `(e *bm.Engine, svc `, servName, "BMServer, midMap map[string]bm.HandlerFunc)", ` {`)
