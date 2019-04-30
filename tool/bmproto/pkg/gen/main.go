@@ -84,8 +84,3 @@ func Error(err error, msgs ...string) {
 	log.Print("error:", s)
 	os.Exit(1)
 }
-
-// Info ...
-func Info(msg string, format ...interface{}) {
-	log.Printf(msg+"\n", format...)
-}
