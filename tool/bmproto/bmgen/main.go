@@ -28,6 +28,7 @@ type bmgenConf struct {
 var fileConf = &bmgenConf{}
 var flagVerbose bool
 var flagExplicitHTTP bool
+var flagGenSwagger bool
 var flagTpl bool
 var flagAppID string
 
@@ -54,6 +55,11 @@ func main() {
 			Name:        "vv",
 			Destination: &flagVerbose,
 			Usage:       "打印详细信息",
+		},
+		cli.BoolFlag{
+			Name:        "swagger, s",
+			Destination: &flagGenSwagger,
+			Usage:       "生成.swagger.json",
 		},
 		cli.BoolFlag{
 			Name:        "tpl, t",
@@ -226,16 +232,20 @@ func generateForFile(f string, goPath string) (err error) {
 	var (
 		tplOutArg     string
 		bmOutArg      string
+		swaggerOutArg string
 	)
 	if flagTpl {
 		tplOutArg = "--tpl_out=."
 	}
+	if flagGenSwagger {
+		swaggerOutArg = fmt.Sprintf("--bswagger_out=explicit_http=%d:.", explicitHTTPArg)
+	}
 	bmOutArg = fmt.Sprintf("--bm_out=explicit_http=%d:.", explicitHTTPArg)
 	if !strings.Contains(relativePath, "api/http") {
 		genGrpcArg := "--gogofast_out=plugins=grpc:."
-		cmd = fmt.Sprintf(`cd "%s" && protoc %s %s %s`+
+		cmd = fmt.Sprintf(`cd "%s" && protoc %s %s %s %s`+
 			` -I%s -I"%s/github.com/bilibili/kratos/tool/bmproto/pkg/extensions" "%s"`,
-			goSrcPath, bmOutArg, tplOutArg, genGrpcArg,
+			goSrcPath, bmOutArg, tplOutArg,swaggerOutArg, genGrpcArg,
 			goSrcPath, goSrcPath, relativeInGoPath)
 	} else {
 		// 只生成http的代码
@@ -254,9 +264,9 @@ func generateForFile(f string, goPath string) (err error) {
 		} else {
 			pbOutArg = "--gogofast_out=."
 		}
-		cmd = fmt.Sprintf(`cd "%s" && protoc %s %s %s`+
+		cmd = fmt.Sprintf(`cd "%s" && protoc %s %s %s %s`+
 			` -I"%s" -I"%s/github.com/bilibili/kratos/tool/bmproto/pkg/extensions" "%s"`,
-			goSrcPath, bmOutArg, tplOutArg, pbOutArg,
+			goSrcPath, bmOutArg, tplOutArg,swaggerOutArg, pbOutArg,
 			goSrcPath, goSrcPath, relativeInGoPath)
 	}
 	err = runCmd(cmd)

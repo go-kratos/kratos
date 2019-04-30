@@ -1,0 +1,150 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "github.com/bilibili/kratos/tool/bmproto/examples/api/api.proto",
+        "version": ""
+    },
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "consumes": [
+        "application/json",
+        "multipart/form-data"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/department.app.Greeter/SayHello": {
+            "get": {
+                "summary": "api 标题",
+                "description": "api 说明",
+                "responses": {
+                    "200": {
+                        "description": "A successful response.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "integer"
+                                },
+                                "message": {
+                                    "type": "string"
+                                },
+                                "data": {
+                                    "$ref": "#/definitions/.department.app.HelloResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "param1",
+                        "description": "请求参数说明",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "department.app.Greeter"
+                ]
+            }
+        },
+        "/department.app.Greeter/SayHelloPost": {
+            "post": {
+                "summary": "/department.app.Greeter/SayHelloPost",
+                "responses": {
+                    "200": {
+                        "description": "A successful response.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "integer"
+                                },
+                                "message": {
+                                    "type": "string"
+                                },
+                                "data": {
+                                    "$ref": "#/definitions/.department.app.HelloResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/.department.app.HelloRequest"
+                        }
+                    }
+                ],
+                "tags": [
+                    "department.app.Greeter"
+                ]
+            }
+        },
+        "/say_hello12345": {
+            "get": {
+                "summary": "/say_hello12345",
+                "responses": {
+                    "200": {
+                        "description": "A successful response.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "integer"
+                                },
+                                "message": {
+                                    "type": "string"
+                                },
+                                "data": {
+                                    "$ref": "#/definitions/.department.app.HelloResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "param1",
+                        "description": "请求参数说明",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "department.app.Greeter"
+                ]
+            }
+        }
+    },
+    "definitions": {
+        ".department.app.HelloRequest": {
+            "type": "object",
+            "properties": {
+                "param1": {
+                    "type": "string",
+                    "description": "请求参数说明"
+                }
+            }
+        },
+        ".department.app.HelloResponse": {
+            "type": "object",
+            "properties": {
+                "ret_string": {
+                    "type": "string",
+                    "description": "返回字段说明"
+                }
+            }
+        }
+    }
+}

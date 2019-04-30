@@ -78,6 +78,14 @@ func Fail(msgs ...string) {
 	os.Exit(1)
 }
 
+// Fail log and exit
+func Info(msgs ...string) {
+	s := strings.Join(msgs, " ")
+	log.Print("info:", s)
+	os.Exit(1)
+}
+
+
 // Error log and exit
 func Error(err error, msgs ...string) {
 	s := strings.Join(msgs, " ") + ":" + err.Error()
