@@ -32,7 +32,7 @@ func goPath() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		if fileExist(absgp + "/src/go-common") {
+		if fileExist(absgp + "/src/github.com/bilibili/kratos/") || fileExist(absgp + "/src/kratos/") {
 			return absgp, nil
 		}
 	}

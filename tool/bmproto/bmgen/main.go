@@ -207,14 +207,12 @@ func initProjConf(projPath string) {
 func generateForFile(f string, goPath string) (err error) {
 	absPath, _ := filepath.Abs(f)
 	projPath := project.LookupProjPath(absPath)
-	fileFolder := filepath.Dir(absPath)
 	var relativePath string
 	if projPath != "" {
 		relativePath = absPath[len(projPath)+1:]
 	}
 	var goSrcPath = goPath + "/src"
 	var relativeInGoPath = absPath[len(goPath+"/src")+1:]
-
 	var cmd string
 	if strings.Index(relativePath, "api/liverpc") == 0 {
 		// need not generate for liverpc
@@ -225,7 +223,6 @@ func generateForFile(f string, goPath string) (err error) {
 	if flagExplicitHTTP {
 		explicitHTTPArg = 1
 	}
-
 	var (
 		tplOutArg     string
 		bmOutArg      string
@@ -235,35 +232,16 @@ func generateForFile(f string, goPath string) (err error) {
 	}
 	bmOutArg = fmt.Sprintf("--bm_out=explicit_http=%d:.", explicitHTTPArg)
 	if !strings.Contains(relativePath, "api/http") {
-		//非http 生成grpc和http的代码
-		isInsideGoCommon := strings.Contains(fileFolder, "go-common")
-		if _, protocShRunned := protocShRunnedMap[fileFolder]; !protocShRunned && isInsideGoCommon {
-			//protoc.sh 只能在大仓库中使用
-			protocShRunnedMap[fileFolder] = struct{}{}
-			cmd = fmt.Sprintf(`cd "%s" && "%s/src/kratos/tool/warden/protoc.sh"`, fileFolder, goPath)
-			err = runCmd(cmd)
-			if err != nil {
-				return
-			}
-		}
 		genGrpcArg := "--gogofast_out=plugins=grpc:."
-		if isInsideGoCommon {
-			genGrpcArg = ""
-		}
-
 		cmd = fmt.Sprintf(`cd "%s" && protoc %s %s %s`+
-			` -I%s -I"%s/go-common" -I"%s/go-common/vendor" "%s"`,
+			` -I%s -I"%s/github/bilibili/kratos %s"`,
 			goSrcPath, bmOutArg, tplOutArg, genGrpcArg,
-			goSrcPath, goSrcPath, goSrcPath, relativeInGoPath)
+			goSrcPath, goSrcPath, relativeInGoPath)
 	} else {
 		// 只生成http的代码
 		var pbOutArg string
 		if strings.LastIndex(f, ".pb") == len(f)-3 {
 			// ends with .pb
-
-			errorf("\n======！！！！WARNING！！！！========\n" +
-				".pb文件生成代码的功能已经不再维护，请尽快迁移到.proto\n" +
-				"======！！！！WARNING！！！！========")
 			e := runCmd("which protoc-gen-gogofasterg")
 			if e != nil {
 				infof("Installing protoc-gen-gogofasterg")
@@ -272,17 +250,15 @@ func generateForFile(f string, goPath string) (err error) {
 					return
 				}
 			}
-
 			pbOutArg = "--gogofasterg_out=json_emitdefault=1,suffix=.pbg.go:."
 		} else {
 			pbOutArg = "--gogofast_out=."
 		}
 		cmd = fmt.Sprintf(`cd "%s" && protoc %s %s %s`+
-			` -I"%s" -I"%s/go-common" -I"%s/go-common/vendor" "%s"`,
+			` -I"%s" -I"%s/github/bilibili/kratos" "%s"`,
 			goSrcPath, bmOutArg, tplOutArg, pbOutArg,
-			goSrcPath, goSrcPath, goSrcPath, relativeInGoPath)
+			goSrcPath, goSrcPath, relativeInGoPath)
 	}
-
 	err = runCmd(cmd)
 	if err != nil {
 		return
@@ -311,11 +287,6 @@ func findGoPkgForFile(file string) string {
 // actionUpdate update the tools its self
 func actionUpdate(ctx *cli.Context) (err error) {
 	logf("Updating bmgen.....")
-	goPath := initGopath()
-	goCommonPath := goPath + "/src/go-common"
-	if !fileExist(goCommonPath) {
-		return cli.NewExitError("go-common not exist : "+goCommonPath, 1)
-	}
 	cmd := fmt.Sprintf(`go install "github.com/bilibili/kratos/tool/bmproto/..."`)
 	if err = runCmd(cmd); err != nil {
 		err = cli.NewExitError(err.Error(), 1)
