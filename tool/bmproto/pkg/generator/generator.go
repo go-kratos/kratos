@@ -21,8 +21,8 @@ import (
 
 const Version = "v0.1"
 
-var GoModuleImportPath = "kratos"
-var GoModuleDirName = "kratos"
+var GoModuleImportPath = "github.com/bilibili/kratos"
+var GoModuleDirName = "github.com/bilibili/kratos"
 
 type Base struct {
 	Reg *typemap.Registry

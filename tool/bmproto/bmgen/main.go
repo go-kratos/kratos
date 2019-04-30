@@ -234,7 +234,7 @@ func generateForFile(f string, goPath string) (err error) {
 	if !strings.Contains(relativePath, "api/http") {
 		genGrpcArg := "--gogofast_out=plugins=grpc:."
 		cmd = fmt.Sprintf(`cd "%s" && protoc %s %s %s`+
-			` -I"%s" -I"%s/github.com/bilibili/kratos/tool/bmproto/pkg/extensions" "%s"`,
+			` -I%s -I"%s/github.com/bilibili/kratos/tool/bmproto/pkg/extensions" "%s"`,
 			goSrcPath, bmOutArg, tplOutArg, genGrpcArg,
 			goSrcPath, goSrcPath, relativeInGoPath)
 	} else {

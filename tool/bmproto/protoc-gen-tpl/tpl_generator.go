@@ -60,6 +60,8 @@ func (t *tpl) generateServiceImpl(file *descriptor.FileDescriptorProto, svc *des
 	prefix := naming.GetVersionPrefix(t.GenPkgName)
 	importPath, err := naming.GetGoImportPathForPb(file.GetName(),
 		generator.GoModuleImportPath, generator.GoModuleDirName)
+	// panic(fmt.Sprintf("%v %v %v %v %v", file.GetName(),
+	// 	generator.GoModuleImportPath, generator.GoModuleDirName,importPath, err))
 	if err != nil {
 		importPath = "UNKNOWN IMPORT PATH, PLEASE CHANGE THIS YOURSELF, " + err.Error()
 	}
