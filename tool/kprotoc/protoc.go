@@ -21,16 +21,18 @@ func protocAction(c *cli.Context) error {
 	if _, err := exec.LookPath("protoc"); err != nil {
 		switch runtime.GOOS {
 		case "darwin":
-			fmt.Println("brew install protobuf..")
+			fmt.Println("brew install protobuf")
 			cmd := exec.Command("brew", "install", "protobuf")
+			cmd.Stdin = os.Stdin
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			if err = cmd.Run(); err != nil {
 				return err
 			}
 		case "linux":
-			fmt.Println("snap install --classic protobuf..")
+			fmt.Println("snap install --classic protobuf")
 			cmd := exec.Command("snap", "install", "--classic", "protobuf")
+			cmd.Stdin = os.Stdin
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			if err = cmd.Run(); err != nil {
@@ -47,6 +49,7 @@ func protocAction(c *cli.Context) error {
 	args = append(args, c.Args()...)
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Dir, _ = os.Getwd()
+	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
@@ -69,6 +72,7 @@ func installProtocGen() error {
 			cmd.Env = append(cmd.Env, env)
 		}
 		cmd.Env = append(cmd.Env, "GO111MODULE=off")
+		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		if err = cmd.Run(); err != nil {
