@@ -302,6 +302,15 @@ func (s *Service) SayHello(ctx context.Context, req *pb.HelloReq) (reply *empty.
 	return
 }
 
+// SayHelloURL bm demo func.
+func (s *Service) SayHelloURL(ctx context.Context, req *pb.HelloReq) (reply *pb.HelloResp, err error) {
+	reply = &pb.HelloResp{
+		Content: "hello " + req.Name,
+	}
+	fmt.Printf("hello url %s", req.Name)
+	return
+}
+
 // Ping ping the resource.
 func (s *Service) Ping(ctx context.Context) (err error) {
 	return s.dao.Ping(ctx)
@@ -317,6 +326,7 @@ func (s *Service) Close() {
 import (
 	"net/http"
 
+	pb "{{.Name}}/api"
 	"{{.Name}}/internal/model"
 	"{{.Name}}/internal/service"
 
@@ -343,6 +353,7 @@ func New(s *service.Service) (engine *bm.Engine) {
 	}
 	svc = s
 	engine = bm.DefaultServer(hc.Server)
+	pb.RegisterDemoBMServer(engine, svc)
 	initRouter(engine)
 	if err := engine.Start(); err != nil {
 		panic(err)
@@ -381,6 +392,7 @@ syntax = "proto3";
 
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
 
 // package 命名使用 {appid}.{version} 的方式, version 形如 v1, v2 ..
 package demo.service.v1;
@@ -392,16 +404,25 @@ option (gogoproto.goproto_getters_all) = false;
 
 service Demo {
 	rpc SayHello (HelloReq) returns (.google.protobuf.Empty);
+	rpc SayHelloURL(HelloReq) returns (HelloResp) {
+        option (google.api.http) = {
+            get:"/{{.Name}}/say_hello"
+        };
+    };
 }
 
 message HelloReq {
 	string name = 1 [(gogoproto.moretags)='form:"name" validate:"required"'];
 }
+
+message HelloResp {
+    string Content = 1 [(gogoproto.jsontag) = 'content'];
+}
 `
 	_tplAPIGenerate = `package api
 
 // 生成 gRPC 代码
-//go:generate kratos tool kprotoc api.proto
+//go:generate kratos tool protoc api.proto
 `
 	_tplModel = `package model
 
