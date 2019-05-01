@@ -98,7 +98,7 @@ func main() {
 		switch s {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
 			ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
-			if err := grpcSrv.Shutdown(ctx); err != nil 
+			if err := grpcSrv.Shutdown(ctx); err != nil {
 				log.Error("grpcSrv.Shutdown error(%v)", err)
 			} // grpc	
 			if err := httpSrv.Shutdown(ctx); err != nil {
@@ -377,17 +377,6 @@ func howToStart(c *bm.Context) {
 	_tplAPIProto = `// 定义项目 API 的 proto 文件 可以同时描述 gRPC 和 HTTP API
 // protobuf 文件参考:
 //  - https://developers.google.com/protocol-buffers/
-//  - TODO：待补充文档URL
-// protobuf 生成 HTTP 工具:
-//  - TODO：待补充文档URL
-// gRPC Golang Model:
-//  - TODO：待补充文档URL
-// gRPC Golang Warden Gen:
-//  - TODO：待补充文档URL
-// gRPC http 调试工具(无需pb文件):
-//  - TODO：待补充文档URL
-// grpc 命令行调试工具(无需pb文件):
-//  - TODO：待补充文档URL
 syntax = "proto3";
 
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
@@ -399,7 +388,6 @@ package demo.service.v1;
 // NOTE: 最后请删除这些无用的注释 (゜-゜)つロ 
 
 option go_package = "api";
-// do not generate getXXX() method 
 option (gogoproto.goproto_getters_all) = false;
 
 service Demo {
@@ -413,7 +401,7 @@ message HelloReq {
 	_tplAPIGenerate = `package api
 
 // 生成 gRPC 代码
-//go:generate kratos tool kprotoc
+//go:generate kratos tool kprotoc api.proto
 `
 	_tplModel = `package model
 
