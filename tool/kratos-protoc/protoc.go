@@ -3,10 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"runtime"
+	"strings"
 
 	"github.com/urfave/cli"
 )
@@ -67,4 +70,53 @@ func checkProtoc() error {
 		}
 	}
 	return nil
+}
+
+func generate(ctx *cli.Context, protoc string) error {
+	pwd, _ := os.Getwd()
+	gosrc := path.Join(os.Getenv("GOPATH"), "src")
+	ext, err := latestKratos()
+	if err != nil {
+		return err
+	}
+	line := fmt.Sprintf(protoc, gosrc, ext, pwd)
+	log.Println(line, strings.Join(ctx.Args(), " "))
+	args := strings.Split(line, " ")
+	args = append(args, ctx.Args()...)
+	cmd := exec.Command(args[0], args[1:]...)
+	cmd.Dir = pwd
+	cmd.Env = os.Environ()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func goget(url string) error {
+	args := strings.Split(url, " ")
+	cmd := exec.Command(args[0], args[1:]...)
+	cmd.Env = os.Environ()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	log.Println(url)
+	return cmd.Run()
+}
+
+func latestKratos() (string, error) {
+	gopath := os.Getenv("GOPATH")
+	ext := path.Join(gopath, "src/github.com/bilibili/kratos/tool/protobuf/extensions")
+	if _, err := os.Stat(ext); !os.IsNotExist(err) {
+		return ext, nil
+	}
+	ext = path.Join(gopath, "pkg/mod/github.com/bilibili")
+	files, err := ioutil.ReadDir(ext)
+	if err != nil {
+		return "", err
+	}
+	if len(files) == 0 {
+		return "", errors.New("not found kratos package")
+	}
+	return path.Join(ext, files[len(files)-1].Name(), "tool/protobuf/extensions"), nil
 }
