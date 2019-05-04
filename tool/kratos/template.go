@@ -401,7 +401,7 @@ message HelloReq {
 	_tplAPIGenerate = `package api
 
 // 生成 gRPC 代码
-//go:generate kratos tool kprotoc api.proto
+//go:generate kratos tool protoc --grpc api.proto
 `
 	_tplModel = `package model
 
