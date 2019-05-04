@@ -52,10 +52,11 @@ func main() {
 		},
 
 		{
-			Name:    "tool",
-			Aliases: []string{"t"},
-			Usage:   "kratos tool",
-			Action:  toolAction,
+			Name:            "tool",
+			Aliases:         []string{"t"},
+			Usage:           "kratos tool",
+			Action:          toolAction,
+			SkipFlagParsing: true,
 		},
 		{
 			Name:    "version",
