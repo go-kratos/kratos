@@ -390,7 +390,7 @@ func howToStart(c *bm.Context) {
 //  - https://developers.google.com/protocol-buffers/
 syntax = "proto3";
 
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "gogoproto/gogo.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 
