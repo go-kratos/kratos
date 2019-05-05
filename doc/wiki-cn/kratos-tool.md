@@ -117,7 +117,7 @@ protoc -I$GOPATH/src:$KRATOS_HOME/tool/protobuf/pkg/extensions:$KRATOS_DEMO/api 
 ### Tool examples
 ```shell
 // new a project
-cd $GOPATH
+cd $GOPATH/src
 kratos new kratos-demo -o Tinker --proto
 
 // build & run
