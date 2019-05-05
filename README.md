@@ -1,6 +1,7 @@
 ![kratos](doc/img/kratos3.png)
 
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
+[![Build Status](https://travis-ci.org/bilibili/kratos.svg?branch=master)](https://travis-ci.org/bilibili/kratos)
 [![GoDoc](https://godoc.org/github.com/bilibili/kratos?status.svg)](https://godoc.org/github.com/bilibili/kratos)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bilibili/kratos)](https://goreportcard.com/report/github.com/bilibili/kratos)
 
