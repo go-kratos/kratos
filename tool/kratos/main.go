@@ -31,8 +31,8 @@ func main() {
 					Destination: &p.Path,
 				},
 				cli.BoolFlag{
-					Name:        "grpc",
-					Usage:       "whether to use grpc for create project",
+					Name:        "proto",
+					Usage:       "whether to use protobuf for create project",
 					Destination: &p.WithGRPC,
 				},
 			},
@@ -50,12 +50,12 @@ func main() {
 			Usage:   "kratos run",
 			Action:  runAction,
 		},
-
 		{
-			Name:    "tool",
-			Aliases: []string{"t"},
-			Usage:   "kratos tool",
-			Action:  toolAction,
+			Name:            "tool",
+			Aliases:         []string{"t"},
+			Usage:           "kratos tool",
+			Action:          toolAction,
+			SkipFlagParsing: true,
 		},
 		{
 			Name:    "version",

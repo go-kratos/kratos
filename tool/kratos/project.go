@@ -2,11 +2,9 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 	"text/template"
 )
@@ -115,16 +113,14 @@ func create() (err error) {
 		if err = genpb(); err != nil {
 			return
 		}
-		if runtime.GOOS != "darwin" {
-			fmt.Println("您的操作系统不是macos，kprotoc工具无法正常运行，请参看kratos tool文档！")
-			fmt.Println("地址：", toolDoc)
-		}
 	}
 	return
 }
 
 func genpb() error {
 	cmd := exec.Command("go", "generate", p.Path+"/api/generate.go")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
 

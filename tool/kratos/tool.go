@@ -130,6 +130,7 @@ func runTool(name, dir, cmd string, args []string) (err error) {
 // Tool .
 type Tool struct {
 	Name      string    `json:"name"`
+	Alias     string    `json:"alias"`
 	BuildTime time.Time `json:"build_time"`
 	Install   string    `json:"install"`
 	Summary   string    `json:"summary"`
@@ -151,6 +152,7 @@ func (t Tool) install() {
 		fmt.Fprintf(os.Stderr, color.RedString("%s: 自动安装失败详情请查看文档：%s\n", t.Name, toolDoc))
 		return
 	}
+	fmt.Println(t.Install)
 	cmds := strings.Split(t.Install, " ")
 	if len(cmds) > 0 {
 		if err := runTool(t.Name, path.Dir(t.toolPath()), cmds[0], cmds[1:]); err == nil {
@@ -172,7 +174,7 @@ func (t Tool) updated() bool {
 }
 
 func (t Tool) toolPath() string {
-	return filepath.Join(goPath(), "bin", t.Name)
+	return filepath.Join(gopath(), "bin", t.Alias)
 }
 
 func (t Tool) installed() bool {
@@ -180,7 +182,7 @@ func (t Tool) installed() bool {
 	return err == nil
 }
 
-func goPath() (gp string) {
+func gopath() (gp string) {
 	gopaths := strings.Split(os.Getenv("GOPATH"), ":")
 	if len(gopaths) == 1 {
 		return gopaths[0]
