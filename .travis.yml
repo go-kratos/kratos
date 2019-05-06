@@ -9,11 +9,12 @@ git:
 
 # Force-enable Go modules. This will be unnecessary when Go 1.12 lands.
 env:
-  - GO111MODULE=on
-  - REGION=sh
-  - ZONE=sh001
-  - DEPLOY_ENV=dev
-  - DISCOVERY_NODES=127.0.0.1:7171
+  global:
+   - GO111MODULE=on
+   - REGION=sh
+   - ZONE=sh001
+   - DEPLOY_ENV=dev
+   - DISCOVERY_NODES=127.0.0.1:7171
 
 # Skip the install step. Don't `go get` dependencies. Only build with the code
 # in vendor/
