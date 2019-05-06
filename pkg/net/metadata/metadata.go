@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 // MD is a mapping from metadata keys to values.
@@ -130,5 +132,25 @@ func Bool(ctx context.Context, key string) bool {
 		return ok
 	default:
 		return false
+	}
+}
+
+// Range range value from metadata in context filtered by filterFunc.
+func Range(ctx context.Context, rangeFunc func(key string, value interface{}), filterFunc ...func(key string) bool) {
+	var filter func(key string) bool
+	filterLen := len(filterFunc)
+	if filterLen > 1 {
+		panic(errors.New("metadata: Range got the lenth of filterFunc must less than 2"))
+	} else if filterLen == 1 {
+		filter = filterFunc[0]
+	}
+	md, ok := ctx.Value(mdKey{}).(MD)
+	if !ok {
+		return
+	}
+	for key, value := range md {
+		if filter == nil || filter(key) {
+			rangeFunc(key, value)
+		}
 	}
 }

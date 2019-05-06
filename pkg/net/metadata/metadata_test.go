@@ -94,3 +94,56 @@ func TestInt64(t *testing.T) {
 	mdcontext = NewContext(context.Background(), MD{Mid: 10})
 	assert.NotEqual(t, int64(10), Int64(mdcontext, Mid))
 }
+
+func TestRange(t *testing.T) {
+	for _, test := range []struct {
+		filterFunc func(key string) bool
+		md         MD
+		want       MD
+	}{
+		{
+			nil,
+			Pairs("foo", "bar"),
+			Pairs("foo", "bar"),
+		},
+		{
+			IsOutgoingKey,
+			Pairs("foo", "bar", RemoteIP, "127.0.0.1", Color, "red", Mirror, "false"),
+			Pairs(RemoteIP, "127.0.0.1", Color, "red", Mirror, "false"),
+		},
+		{
+			IsOutgoingKey,
+			Pairs("foo", "bar", Caller, "app-feed", RemoteIP, "127.0.0.1", Color, "red", Mirror, "true"),
+			Pairs(RemoteIP, "127.0.0.1", Color, "red", Mirror, "true"),
+		},
+		{
+			IsIncomingKey,
+			Pairs("foo", "bar", Caller, "app-feed", RemoteIP, "127.0.0.1", Color, "red", Mirror, "true"),
+			Pairs(Caller, "app-feed", RemoteIP, "127.0.0.1", Color, "red", Mirror, "true"),
+		},
+	} {
+		var mds []MD
+		c := NewContext(context.Background(), test.md)
+		ctx := WithContext(c)
+		Range(ctx,
+			func(key string, value interface{}) {
+				mds = append(mds, Pairs(key, value))
+			},
+			test.filterFunc)
+		rmd := Join(mds...)
+		if !reflect.DeepEqual(rmd, test.want) {
+			t.Fatalf("Range(%v) = %v, want %v", test.md, rmd, test.want)
+		}
+		if test.filterFunc == nil {
+			var mds []MD
+			Range(ctx,
+				func(key string, value interface{}) {
+					mds = append(mds, Pairs(key, value))
+				})
+			rmd := Join(mds...)
+			if !reflect.DeepEqual(rmd, test.want) {
+				t.Fatalf("Range(%v) = %v, want %v", test.md, rmd, test.want)
+			}
+		}
+	}
+}
