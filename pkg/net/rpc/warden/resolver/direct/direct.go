@@ -43,21 +43,20 @@ func (d *Direct) Scheme() string {
 	return Name
 }
 
-// Watch a tree
+// Watch a tree.
 func (d *Direct) Watch() <-chan struct{} {
 	ch := make(chan struct{}, 1)
 	ch <- struct{}{}
 	return ch
 }
 
-//Unwatch a tree
+// Unwatch a tree.
 func (d *Direct) Unwatch(id string) {
 }
 
-//Fetch fetch isntances
-func (d *Direct) Fetch(ctx context.Context) (insMap map[string][]*naming.Instance, found bool) {
+//Fetch fetch isntances.
+func (d *Direct) Fetch(ctx context.Context) (res *naming.InstancesInfo, found bool) {
 	var ins []*naming.Instance
-
 	addrs := strings.Split(d.id, ",")
 	for _, addr := range addrs {
 		ins = append(ins, &naming.Instance{
@@ -67,7 +66,9 @@ func (d *Direct) Fetch(ctx context.Context) (insMap map[string][]*naming.Instanc
 	if len(ins) > 0 {
 		found = true
 	}
-	insMap = map[string][]*naming.Instance{env.Zone: ins}
+	res = &naming.InstancesInfo{
+		Instances: map[string][]*naming.Instance{env.Zone: ins},
+	}
 	return
 }
 
