@@ -39,6 +39,8 @@ var (
 	AppID string
 	// Color is the identification of different experimental group in one caster cluster.
 	Color string
+	// DiscoveryNodes is seed nodes.
+	DiscoveryNodes string
 )
 
 func init() {
@@ -57,6 +59,7 @@ func addFlag(fs *flag.FlagSet) {
 	fs.StringVar(&AppID, "appid", os.Getenv("APP_ID"), "appid is global unique application id, register by service tree. or use APP_ID env variable.")
 	fs.StringVar(&DeployEnv, "deploy.env", defaultString("DEPLOY_ENV", _deployEnv), "deploy env. or use DEPLOY_ENV env variable, value: dev/fat1/uat/pre/prod etc.")
 	fs.StringVar(&Color, "deploy.color", os.Getenv("DEPLOY_COLOR"), "deploy.color is the identification of different experimental group.")
+	fs.StringVar(&DiscoveryNodes, "discovery.nodes", os.Getenv("DISCOVERY_NODES"), "discovery.nodes is seed nodes. value: 127.0.0.1:7171,127.0.0.2:7171 etc.")
 }
 
 func defaultString(env, value string) string {

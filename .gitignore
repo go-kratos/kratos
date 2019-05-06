@@ -1,4 +1,29 @@
+# idea ignore
+.idea/
+*.ipr
+*.iml
+*.iws
+.vscode/
+
+# temp ignore
+*.log
+*.cache
+*.diff
+*.exe
+*.exe~
+*.patch
+*.swp
+*.tmp
 go.sum
-BUILD
+
+# system ignore
 .DS_Store
+Thumbs.db
+
+# project
+*.cert
+*.key
 tool/kratos/kratos
+tool/kratos/kratos-protoc/kratos-protoc
+tool/kratos/protobuf/protoc-gen-bm/protoc-gen-bm
+tool/kratos/protobuf/protoc-gen-bswagger/protoc-gen-bswagger

@@ -2,6 +2,7 @@ package resolver
 
 import (
 	"context"
+
 	"github.com/bilibili/kratos/pkg/conf/env"
 	"github.com/bilibili/kratos/pkg/naming"
 )
@@ -25,19 +26,18 @@ func (mb *mockDiscoveryBuilder) Scheme() string {
 }
 
 type mockDiscoveryResolver struct {
-	//instances map[string]*naming.Instance
 	d       *mockDiscoveryBuilder
 	watchch chan struct{}
 }
 
 var _ naming.Resolver = &mockDiscoveryResolver{}
 
-func (md *mockDiscoveryResolver) Fetch(ctx context.Context) (map[string][]*naming.Instance, bool) {
+func (md *mockDiscoveryResolver) Fetch(ctx context.Context) (*naming.InstancesInfo, bool) {
 	zones := make(map[string][]*naming.Instance)
 	for _, v := range md.d.instances {
 		zones[v.Zone] = append(zones[v.Zone], v)
 	}
-	return zones, len(zones) > 0
+	return &naming.InstancesInfo{Instances: zones}, len(zones) > 0
 }
 
 func (md *mockDiscoveryResolver) Watch() <-chan struct{} {

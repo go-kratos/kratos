@@ -16,14 +16,14 @@ var _schema = "tidb://"
 
 func (db *DB) nodeList() (nodes []string) {
 	var (
-		insMap map[string][]*naming.Instance
-		ins    []*naming.Instance
-		ok     bool
+		insZone *naming.InstancesInfo
+		ins     []*naming.Instance
+		ok      bool
 	)
-	if insMap, ok = db.dis.Fetch(context.Background()); !ok {
+	if insZone, ok = db.dis.Fetch(context.Background()); !ok {
 		return
 	}
-	if ins, ok = insMap[env.Zone]; !ok || len(ins) == 0 {
+	if ins, ok = insZone.Instances[env.Zone]; !ok || len(ins) == 0 {
 		return
 	}
 	for _, in := range ins {

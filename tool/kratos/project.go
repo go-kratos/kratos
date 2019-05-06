@@ -91,6 +91,7 @@ func create() (err error) {
 		tpls[_tplTypeGRPCToml] = _tplGRPCToml
 		tpls[_tplTypeService] = _tplGPRCService
 	} else {
+		tpls[_tplTypeHTTPServer] = delgrpc(_tplHTTPServer)
 		tpls[_tplTypeService] = _tplService
 		tpls[_tplTypeMain] = delgrpc(_tplMain)
 	}
@@ -132,6 +133,9 @@ func delgrpc(tpl string) string {
 			continue
 		}
 		if strings.Contains(l, "warden") {
+			continue
+		}
+		if strings.Contains(l, "pb") {
 			continue
 		}
 		buf.WriteString(l)
