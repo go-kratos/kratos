@@ -1,7 +1,6 @@
 package resolver
 
 import (
-	"context"
 	"fmt"
 	"math/rand"
 	"net/url"
@@ -16,7 +15,7 @@ import (
 	"github.com/bilibili/kratos/pkg/naming"
 	wmeta "github.com/bilibili/kratos/pkg/net/rpc/warden/internal/metadata"
 
-	"github.com/dgryski/go-farm"
+	farm "github.com/dgryski/go-farm"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/resolver"
 )
@@ -128,17 +127,19 @@ func (r *Resolver) updateproc() {
 				return
 			}
 		}
-		if insMap, ok := r.nr.Fetch(context.Background()); ok {
-			instances, ok := insMap[r.zone]
+		if ins, ok := r.nr.Fetch(); ok {
+			instances, ok := ins.Instances[r.zone]
 			if !ok {
-				for _, value := range insMap {
+				for _, value := range ins.Instances {
 					instances = append(instances, value...)
 				}
 			}
 			if r.subsetSize > 0 && len(instances) > 0 {
 				instances = r.subset(instances, env.Hostname, r.subsetSize)
 			}
-			r.newAddress(instances)
+			if len(instances) > 0 {
+				r.newAddress(instances)
+			}
 		}
 	}
 }

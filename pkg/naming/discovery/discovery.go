@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -16,13 +15,10 @@ import (
 
 	"github.com/bilibili/kratos/pkg/conf/env"
 	"github.com/bilibili/kratos/pkg/ecode"
-	"github.com/bilibili/kratos/pkg/log"
 	"github.com/bilibili/kratos/pkg/naming"
-	bm "github.com/bilibili/kratos/pkg/net/http/blademaster"
-	"github.com/bilibili/kratos/pkg/net/netutil"
-	"github.com/bilibili/kratos/pkg/net/netutil/breaker"
-	xstr "github.com/bilibili/kratos/pkg/str"
+	http "github.com/bilibili/kratos/pkg/net/http/blademaster"
 	xtime "github.com/bilibili/kratos/pkg/time"
+	log "github.com/golang/glog"
 )
 
 const (
@@ -30,16 +26,12 @@ const (
 	_setURL      = "http://%s/discovery/set"
 	_cancelURL   = "http://%s/discovery/cancel"
 	_renewURL    = "http://%s/discovery/renew"
-
-	_pollURL  = "http://%s/discovery/polls"
-	_nodesURL = "http://%s/discovery/nodes"
+	_pollURL     = "http://%s/discovery/polls"
 
 	_registerGap = 30 * time.Second
 
 	_statusUP = "1"
-)
 
-const (
 	_appid = "infra.discovery"
 )
 
@@ -53,123 +45,94 @@ var (
 
 // Config discovery configures.
 type Config struct {
-	Nodes []string
-	Zone  string
-	Env   string
-	Host  string
+	Nodes  []string
+	Region string
+	Zone   string
+	Env    string
+	Host   string
 }
 
 type appData struct {
-	ZoneInstances map[string][]*naming.Instance `json:"zone_instances"`
-	LastTs        int64                         `json:"latest_timestamp"`
-	Err           string                        `json:"err"`
+	Instances map[string][]*naming.Instance `json:"instances"`
+	LastTs    int64                         `json:"latest_timestamp"`
 }
 
 // Discovery is discovery client.
 type Discovery struct {
+	c          *Config
 	once       sync.Once
-	conf       *Config
 	ctx        context.Context
 	cancelFunc context.CancelFunc
-	httpClient *bm.Client
+	httpClient *http.Client
+
+	node    atomic.Value
+	nodeIdx uint64
 
 	mutex       sync.RWMutex
 	apps        map[string]*appInfo
 	registry    map[string]struct{}
 	lastHost    string
 	cancelPolls context.CancelFunc
-	idx         uint64
-	node        atomic.Value
-	delete      chan *appInfo
+
+	delete chan *appInfo
 }
 
 type appInfo struct {
+	resolver map[*Resolve]struct{}
 	zoneIns  atomic.Value
-	resolver map[*Resolver]struct{}
 	lastTs   int64 // latest timestamp
 }
 
 func fixConfig(c *Config) {
 	if len(c.Nodes) == 0 {
-		c.Nodes = []string{"NOTE: please config a default HOST"}
+		c.Nodes = strings.Split(env.DiscoveryNodes, ",")
 	}
-	if env.Zone != "" {
+	if c.Region == "" {
+		c.Region = env.Region
+	}
+	if c.Zone == "" {
 		c.Zone = env.Zone
 	}
-	if env.DeployEnv != "" {
+	if c.Env == "" {
 		c.Env = env.DeployEnv
 	}
-	if env.Hostname != "" {
+	if c.Host == "" {
 		c.Host = env.Hostname
-	} else {
-		c.Host, _ = os.Hostname()
 	}
-}
-
-var (
-	once              sync.Once
-	_defaultDiscovery *Discovery
-)
-
-func initDefault() {
-	once.Do(func() {
-		_defaultDiscovery = New(nil)
-	})
-}
-
-// Builder return default discvoery resolver builder.
-func Builder() naming.Builder {
-	if _defaultDiscovery == nil {
-		initDefault()
-	}
-	return _defaultDiscovery
-}
-
-// Build register resolver into default discovery.
-func Build(id string) naming.Resolver {
-	if _defaultDiscovery == nil {
-		initDefault()
-	}
-	return _defaultDiscovery.Build(id)
 }
 
 // New new a discovery client.
 func New(c *Config) (d *Discovery) {
 	if c == nil {
-		c = &Config{}
+		c = new(Config)
 	}
 	fixConfig(c)
 	ctx, cancel := context.WithCancel(context.Background())
 	d = &Discovery{
+		c:          c,
 		ctx:        ctx,
 		cancelFunc: cancel,
-		conf:       c,
 		apps:       map[string]*appInfo{},
 		registry:   map[string]struct{}{},
 		delete:     make(chan *appInfo, 10),
 	}
 	// httpClient
-	cfg := &bm.ClientConfig{
-		Dial:    xtime.Duration(3 * time.Second),
-		Timeout: xtime.Duration(40 * time.Second),
-		Breaker: &breaker.Config{
-			Window:  100,
-			Sleep:   3,
-			Bucket:  10,
-			Ratio:   0.5,
-			Request: 100,
-		},
+	cfg := &http.ClientConfig{
+		Dial:      xtime.Duration(3 * time.Second),
+		Timeout:   xtime.Duration(40 * time.Second),
+		KeepAlive: xtime.Duration(40 * time.Second),
 	}
-	d.httpClient = bm.NewClient(cfg)
+	d.httpClient = http.NewClient(cfg)
+	// discovery self
 	resolver := d.Build(_appid)
 	event := resolver.Watch()
 	_, ok := <-event
 	if !ok {
 		panic("discovery watch failed")
 	}
-	ins, ok := resolver.Fetch(context.Background())
+	ins, ok := resolver.Fetch()
 	if ok {
-		d.newSelf(ins)
+		d.newSelf(ins.Instances)
 	}
 	go d.selfproc(resolver, event)
 	return
@@ -181,15 +144,15 @@ func (d *Discovery) selfproc(resolver naming.Resolver, event <-chan struct{}) {
 		if !ok {
 			return
 		}
-		zones, ok := resolver.Fetch(context.Background())
+		zones, ok := resolver.Fetch()
 		if ok {
-			d.newSelf(zones)
+			d.newSelf(zones.Instances)
 		}
 	}
 }
 
 func (d *Discovery) newSelf(zones map[string][]*naming.Instance) {
-	ins, ok := zones[d.conf.Zone]
+	ins, ok := zones[d.c.Zone]
 	if !ok {
 		return
 	}
@@ -203,22 +166,22 @@ func (d *Discovery) newSelf(zones map[string][]*naming.Instance) {
 		}
 	}
 	// diff old nodes
-	olds, ok := d.node.Load().([]string)
-	if ok {
-		var diff int
-		for _, n := range nodes {
-			for _, o := range olds {
+	var olds int
+	for _, n := range nodes {
+		if node, ok := d.node.Load().([]string); ok {
+			for _, o := range node {
 				if o == n {
-					diff++
+					olds++
 					break
 				}
 			}
 		}
-		if len(nodes) == diff {
-			return
-		}
 	}
-	rand.Shuffle(len(nodes), func(i, j int) {
+	if len(nodes) == olds {
+		return
+	}
+	// FIXME: we should use rand.Shuffle() in golang 1.10
+	shuffle(len(nodes), func(i, j int) {
 		nodes[i], nodes[j] = nodes[j], nodes[i]
 	})
 	d.node.Store(nodes)
@@ -226,7 +189,7 @@ func (d *Discovery) newSelf(zones map[string][]*naming.Instance) {
 
 // Build disovery resovler builder.
 func (d *Discovery) Build(appid string) naming.Resolver {
-	r := &Resolver{
+	r := &Resolve{
 		id:    appid,
 		d:     d,
 		event: make(chan struct{}, 1),
@@ -235,7 +198,7 @@ func (d *Discovery) Build(appid string) naming.Resolver {
 	app, ok := d.apps[appid]
 	if !ok {
 		app = &appInfo{
-			resolver: make(map[*Resolver]struct{}),
+			resolver: make(map[*Resolve]struct{}),
 		}
 		d.apps[appid] = app
 		cancel := d.cancelPolls
@@ -251,7 +214,7 @@ func (d *Discovery) Build(appid string) naming.Resolver {
 		default:
 		}
 	}
-	log.Info("disocvery: AddWatch(%s) already watch(%v)", appid, ok)
+	log.Infof("disocvery: AddWatch(%s) already watch(%v)", appid, ok)
 	d.once.Do(func() {
 		go d.serverproc()
 	})
@@ -263,32 +226,32 @@ func (d *Discovery) Scheme() string {
 	return "discovery"
 }
 
-// Resolver discveory resolver.
-type Resolver struct {
+// Resolve discveory resolver.
+type Resolve struct {
 	id    string
 	event chan struct{}
 	d     *Discovery
 }
 
 // Watch watch instance.
-func (r *Resolver) Watch() <-chan struct{} {
+func (r *Resolve) Watch() <-chan struct{} {
 	return r.event
 }
 
 // Fetch fetch resolver instance.
-func (r *Resolver) Fetch(c context.Context) (ins map[string][]*naming.Instance, ok bool) {
+func (r *Resolve) Fetch() (ins *naming.InstancesInfo, ok bool) {
 	r.d.mutex.RLock()
 	app, ok := r.d.apps[r.id]
 	r.d.mutex.RUnlock()
 	if ok {
-		ins, ok = app.zoneIns.Load().(map[string][]*naming.Instance)
+		ins, ok = app.zoneIns.Load().(*naming.InstancesInfo)
 		return
 	}
 	return
 }
 
 // Close close resolver.
-func (r *Resolver) Close() error {
+func (r *Resolve) Close() error {
 	r.d.mutex.Lock()
 	if app, ok := r.d.apps[r.id]; ok && len(app.resolver) != 0 {
 		delete(app.resolver, r)
@@ -298,23 +261,11 @@ func (r *Resolver) Close() error {
 	return nil
 }
 
-func (d *Discovery) pickNode() string {
-	nodes, ok := d.node.Load().([]string)
-	if !ok || len(nodes) == 0 {
-		return d.conf.Nodes[d.idx%uint64(len(d.conf.Nodes))]
-	}
-	return nodes[d.idx%uint64(len(nodes))]
-}
-
-func (d *Discovery) switchNode() {
-	atomic.AddUint64(&d.idx, 1)
-}
-
 // Reload reload the config
 func (d *Discovery) Reload(c *Config) {
 	fixConfig(c)
 	d.mutex.Lock()
-	d.conf = c
+	d.c = c
 	d.mutex.Unlock()
 }
 
@@ -325,7 +276,7 @@ func (d *Discovery) Close() error {
 }
 
 // Register Register an instance with discovery and renew automatically
-func (d *Discovery) Register(c context.Context, ins *naming.Instance) (cancelFunc context.CancelFunc, err error) {
+func (d *Discovery) Register(ins *naming.Instance) (cancelFunc context.CancelFunc, err error) {
 	d.mutex.Lock()
 	if _, ok := d.registry[ins.AppID]; ok {
 		err = ErrDuplication
@@ -336,13 +287,15 @@ func (d *Discovery) Register(c context.Context, ins *naming.Instance) (cancelFun
 	if err != nil {
 		return
 	}
-	if err = d.register(c, ins); err != nil {
+
+	ctx, cancel := context.WithCancel(d.ctx)
+	if err = d.register(ctx, ins); err != nil {
 		d.mutex.Lock()
 		delete(d.registry, ins.AppID)
 		d.mutex.Unlock()
+		cancel()
 		return
 	}
-	ctx, cancel := context.WithCancel(d.ctx)
 	ch := make(chan struct{}, 1)
 	cancelFunc = context.CancelFunc(func() {
 		cancel()
@@ -355,10 +308,10 @@ func (d *Discovery) Register(c context.Context, ins *naming.Instance) (cancelFun
 			select {
 			case <-ticker.C:
 				if err := d.renew(ctx, ins); err != nil && ecode.NothingFound.Equal(err) {
-					d.register(ctx, ins)
+					_ = d.register(ctx, ins)
 				}
 			case <-ctx.Done():
-				d.cancel(ins)
+				_ = d.cancel(ins)
 				ch <- struct{}{}
 				return
 			}
@@ -367,52 +320,16 @@ func (d *Discovery) Register(c context.Context, ins *naming.Instance) (cancelFun
 	return
 }
 
-// Set set ins status and metadata.
-func (d *Discovery) Set(ins *naming.Instance) error {
-	return d.set(context.Background(), ins)
-}
-
-// cancel Remove the registered instance from discovery
-func (d *Discovery) cancel(ins *naming.Instance) (err error) {
-	d.mutex.RLock()
-	conf := d.conf
-	d.mutex.RUnlock()
-
-	res := new(struct {
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-	})
-	uri := fmt.Sprintf(_cancelURL, d.pickNode())
-	params := d.newParams(conf)
-	params.Set("appid", ins.AppID)
-	// request
-	if err = d.httpClient.Post(context.Background(), uri, "", params, &res); err != nil {
-		d.switchNode()
-		log.Error("discovery cancel client.Get(%v) env(%s) appid(%s) hostname(%s) error(%v)",
-			uri, conf.Env, ins.AppID, conf.Host, err)
-		return
-	}
-	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
-		log.Warn("discovery cancel client.Get(%v)  env(%s) appid(%s) hostname(%s) code(%v)",
-			uri, conf.Env, ins.AppID, conf.Host, res.Code)
-		err = ec
-		return
-	}
-	log.Info("discovery cancel client.Get(%v)  env(%s) appid(%s) hostname(%s) success",
-		uri, conf.Env, ins.AppID, conf.Host)
-	return
-}
-
 // register Register an instance with discovery
 func (d *Discovery) register(ctx context.Context, ins *naming.Instance) (err error) {
 	d.mutex.RLock()
-	conf := d.conf
+	c := d.c
 	d.mutex.RUnlock()
 
 	var metadata []byte
 	if ins.Metadata != nil {
 		if metadata, err = json.Marshal(ins.Metadata); err != nil {
-			log.Error("discovery:register instance Marshal metadata(%v) failed!error(%v)", ins.Metadata, err)
+			log.Errorf("discovery:register instance Marshal metadata(%v) failed!error(%v)", ins.Metadata, err)
 		}
 	}
 	res := new(struct {
@@ -420,7 +337,7 @@ func (d *Discovery) register(ctx context.Context, ins *naming.Instance) (err err
 		Message string `json:"message"`
 	})
 	uri := fmt.Sprintf(_registerURL, d.pickNode())
-	params := d.newParams(conf)
+	params := d.newParams(c)
 	params.Set("appid", ins.AppID)
 	params.Set("addrs", strings.Join(ins.Addrs, ","))
 	params.Set("version", ins.Version)
@@ -428,25 +345,90 @@ func (d *Discovery) register(ctx context.Context, ins *naming.Instance) (err err
 	params.Set("metadata", string(metadata))
 	if err = d.httpClient.Post(ctx, uri, "", params, &res); err != nil {
 		d.switchNode()
-		log.Error("discovery: register client.Get(%v)  zone(%s) env(%s) appid(%s) addrs(%v) error(%v)",
-			uri, conf.Zone, conf.Env, ins.AppID, ins.Addrs, err)
+		log.Errorf("discovery: register client.Get(%v)  zone(%s) env(%s) appid(%s) addrs(%v) error(%v)",
+			uri, c.Zone, c.Env, ins.AppID, ins.Addrs, err)
 		return
 	}
 	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
-		log.Warn("discovery: register client.Get(%v)  env(%s) appid(%s) addrs(%v)  code(%v)",
-			uri, conf.Env, ins.AppID, ins.Addrs, res.Code)
+		log.Warningf("discovery: register client.Get(%v)  env(%s) appid(%s) addrs(%v) code(%v)", uri, c.Env, ins.AppID, ins.Addrs, res.Code)
 		err = ec
 		return
 	}
-	log.Info("discovery: register client.Get(%v) env(%s) appid(%s) addrs(%s) success",
-		uri, conf.Env, ins.AppID, ins.Addrs)
+	log.Infof("discovery: register client.Get(%v) env(%s) appid(%s) addrs(%s) success", uri, c.Env, ins.AppID, ins.Addrs)
 	return
 }
 
-// rset set  instance info with discovery
+// renew Renew an instance with discovery
+func (d *Discovery) renew(ctx context.Context, ins *naming.Instance) (err error) {
+	d.mutex.RLock()
+	c := d.c
+	d.mutex.RUnlock()
+
+	res := new(struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	})
+	uri := fmt.Sprintf(_renewURL, d.pickNode())
+	params := d.newParams(c)
+	params.Set("appid", ins.AppID)
+	if err = d.httpClient.Post(ctx, uri, "", params, &res); err != nil {
+		d.switchNode()
+		log.Errorf("discovery: renew client.Get(%v)  env(%s) appid(%s) hostname(%s) error(%v)",
+			uri, c.Env, ins.AppID, c.Host, err)
+		return
+	}
+	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
+		err = ec
+		if ec.Equal(ecode.NothingFound) {
+			return
+		}
+		log.Errorf("discovery: renew client.Get(%v) env(%s) appid(%s) hostname(%s) code(%v)",
+			uri, c.Env, ins.AppID, c.Host, res.Code)
+		return
+	}
+	return
+}
+
+// cancel Remove the registered instance from discovery
+func (d *Discovery) cancel(ins *naming.Instance) (err error) {
+	d.mutex.RLock()
+	c := d.c
+	d.mutex.RUnlock()
+
+	res := new(struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	})
+	uri := fmt.Sprintf(_cancelURL, d.pickNode())
+	params := d.newParams(c)
+	params.Set("appid", ins.AppID)
+	// request
+	if err = d.httpClient.Post(context.TODO(), uri, "", params, &res); err != nil {
+		d.switchNode()
+		log.Errorf("discovery cancel client.Get(%v) env(%s) appid(%s) hostname(%s) error(%v)",
+			uri, c.Env, ins.AppID, c.Host, err)
+		return
+	}
+	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
+		log.Warningf("discovery cancel client.Get(%v)  env(%s) appid(%s) hostname(%s) code(%v)",
+			uri, c.Env, ins.AppID, c.Host, res.Code)
+		err = ec
+		return
+	}
+	log.Infof("discovery cancel client.Get(%v)  env(%s) appid(%s) hostname(%s) success",
+		uri, c.Env, ins.AppID, c.Host)
+	return
+}
+
+// Set set ins status and metadata.
+func (d *Discovery) Set(ins *naming.Instance) error {
+	return d.set(context.Background(), ins)
+}
+
+// set set instance info with discovery
 func (d *Discovery) set(ctx context.Context, ins *naming.Instance) (err error) {
 	d.mutex.RLock()
-	conf := d.conf
+	conf := d.c
 	d.mutex.RUnlock()
 	res := new(struct {
 		Code    int    `json:"code"`
@@ -456,59 +438,28 @@ func (d *Discovery) set(ctx context.Context, ins *naming.Instance) (err error) {
 	params := d.newParams(conf)
 	params.Set("appid", ins.AppID)
 	params.Set("version", ins.Version)
-	params.Set("status", strconv.FormatInt(ins.Status, 10))
+	params.Set("status", _statusUP)
 	if ins.Metadata != nil {
 		var metadata []byte
 		if metadata, err = json.Marshal(ins.Metadata); err != nil {
-			log.Error("discovery:set instance Marshal metadata(%v) failed!error(%v)", ins.Metadata, err)
+			log.Errorf("discovery:set instance Marshal metadata(%v) failed!error(%v)", ins.Metadata, err)
+			return
 		}
 		params.Set("metadata", string(metadata))
 	}
 	if err = d.httpClient.Post(ctx, uri, "", params, &res); err != nil {
 		d.switchNode()
-		log.Error("discovery: set client.Get(%v)  zone(%s) env(%s) appid(%s) addrs(%v) error(%v)",
+		log.Errorf("discovery: set client.Get(%v)  zone(%s) env(%s) appid(%s) addrs(%v) error(%v)",
 			uri, conf.Zone, conf.Env, ins.AppID, ins.Addrs, err)
 		return
 	}
 	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
-		log.Warn("discovery: set client.Get(%v)  env(%s) appid(%s) addrs(%v)  code(%v)",
+		log.Warningf("discovery: set client.Get(%v)  env(%s) appid(%s) addrs(%v)  code(%v)",
 			uri, conf.Env, ins.AppID, ins.Addrs, res.Code)
 		err = ec
 		return
 	}
-	log.Info("discovery: set client.Get(%v) env(%s) appid(%s) addrs(%s) success",
-		uri+"?"+params.Encode(), conf.Env, ins.AppID, ins.Addrs)
-	return
-}
-
-// renew Renew an instance with discovery
-func (d *Discovery) renew(ctx context.Context, ins *naming.Instance) (err error) {
-	d.mutex.RLock()
-	conf := d.conf
-	d.mutex.RUnlock()
-
-	res := new(struct {
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-	})
-	uri := fmt.Sprintf(_renewURL, d.pickNode())
-	params := d.newParams(conf)
-	params.Set("appid", ins.AppID)
-	if err = d.httpClient.Post(ctx, uri, "", params, &res); err != nil {
-		d.switchNode()
-		log.Error("discovery: renew client.Get(%v)  env(%s) appid(%s) hostname(%s) error(%v)",
-			uri, conf.Env, ins.AppID, conf.Host, err)
-		return
-	}
-	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
-		err = ec
-		if ec.Equal(ecode.NothingFound) {
-			return
-		}
-		log.Error("discovery: renew client.Get(%v) env(%s) appid(%s) hostname(%s) code(%v)",
-			uri, conf.Env, ins.AppID, conf.Host, res.Code)
-		return
-	}
+	log.Infof("discovery: set client.Get(%v) env(%s) appid(%s) addrs(%s) success", uri+"?"+params.Encode(), conf.Env, ins.AppID, ins.Addrs)
 	return
 }
 
@@ -518,7 +469,6 @@ func (d *Discovery) serverproc() {
 		ctx    context.Context
 		cancel context.CancelFunc
 	)
-	bc := netutil.DefaultBackoffConfig
 	ticker := time.NewTicker(time.Minute * 30)
 	defer ticker.Stop()
 	for {
@@ -531,16 +481,17 @@ func (d *Discovery) serverproc() {
 		select {
 		case <-d.ctx.Done():
 			return
+		case <-ticker.C:
 		default:
 		}
-		apps, err := d.polls(ctx, d.pickNode())
+		apps, err := d.polls(ctx)
 		if err != nil {
 			d.switchNode()
 			if ctx.Err() == context.Canceled {
 				ctx = nil
 				continue
 			}
-			time.Sleep(bc.Backoff(retry))
+			time.Sleep(time.Second)
 			retry++
 			continue
 		}
@@ -549,38 +500,23 @@ func (d *Discovery) serverproc() {
 	}
 }
 
-func (d *Discovery) nodes() (nodes []string) {
-	res := new(struct {
-		Code int `json:"code"`
-		Data []struct {
-			Addr string `json:"addr"`
-		} `json:"data"`
-	})
-	uri := fmt.Sprintf(_nodesURL, d.pickNode())
-	if err := d.httpClient.Get(d.ctx, uri, "", nil, res); err != nil {
-		d.switchNode()
-		log.Error("discovery: consumer client.Get(%v)error(%+v)", uri, err)
-		return
+func (d *Discovery) pickNode() string {
+	nodes, ok := d.node.Load().([]string)
+	if !ok || len(nodes) == 0 {
+		return d.c.Nodes[rand.Intn(len(d.c.Nodes))]
 	}
-	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
-		log.Error("discovery: consumer client.Get(%v) error(%v)", uri, res.Code)
-		return
-	}
-	if len(res.Data) == 0 {
-		log.Warn("discovery: get nodes(%s) failed,no nodes found!", uri)
-		return
-	}
-	nodes = make([]string, 0, len(res.Data))
-	for i := range res.Data {
-		nodes = append(nodes, res.Data[i].Addr)
-	}
-	return
+	return nodes[atomic.LoadUint64(&d.nodeIdx)%uint64(len(nodes))]
 }
 
-func (d *Discovery) polls(ctx context.Context, host string) (apps map[string]appData, err error) {
+func (d *Discovery) switchNode() {
+	atomic.AddUint64(&d.nodeIdx, 1)
+}
+
+func (d *Discovery) polls(ctx context.Context) (apps map[string]*naming.InstancesInfo, err error) {
 	var (
-		lastTs  []int64
-		appid   []string
+		lastTss []int64
+		appIDs  []string
+		host    = d.pickNode()
 		changed bool
 	)
 	if host != d.lastHost {
@@ -588,46 +524,41 @@ func (d *Discovery) polls(ctx context.Context, host string) (apps map[string]app
 		changed = true
 	}
 	d.mutex.RLock()
-	conf := d.conf
+	c := d.c
 	for k, v := range d.apps {
 		if changed {
 			v.lastTs = 0
 		}
-		appid = append(appid, k)
-		lastTs = append(lastTs, v.lastTs)
+		appIDs = append(appIDs, k)
+		lastTss = append(lastTss, v.lastTs)
 	}
 	d.mutex.RUnlock()
-	if len(appid) == 0 {
+	if len(appIDs) == 0 {
 		return
 	}
 	uri := fmt.Sprintf(_pollURL, host)
 	res := new(struct {
-		Code    int                `json:"code"`
-		Message string             `json:"message"`
-		Data    map[string]appData `json:"data"`
+		Code int                              `json:"code"`
+		Data map[string]*naming.InstancesInfo `json:"data"`
 	})
 	params := url.Values{}
-	params.Set("env", conf.Env)
-	params.Set("hostname", conf.Host)
-	params.Set("appid", strings.Join(appid, ","))
-	params.Set("latest_timestamp", xstr.JoinInts(lastTs))
+	params.Set("env", c.Env)
+	params.Set("hostname", c.Host)
+	for _, appid := range appIDs {
+		params.Add("appid", appid)
+	}
+	for _, ts := range lastTss {
+		params.Add("latest_timestamp", strconv.FormatInt(ts, 10))
+	}
 	if err = d.httpClient.Get(ctx, uri, "", params, res); err != nil {
-		log.Error("discovery: client.Get(%s) error(%+v)", uri+"?"+params.Encode(), err)
+		d.switchNode()
+		log.Errorf("discovery: client.Get(%s) error(%+v)", uri+"?"+params.Encode(), err)
 		return
 	}
 	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
 		if !ec.Equal(ecode.NotModified) {
-			log.Error("discovery: client.Get(%s) get error code(%d) message(%s)", uri+"?"+params.Encode(), res.Code, res.Message)
+			log.Errorf("discovery: client.Get(%s) get error code(%d)", uri+"?"+params.Encode(), res.Code)
 			err = ec
-			if ec.Equal(ecode.NothingFound) {
-				for appID, value := range res.Data {
-					if value.Err != "" {
-						errInfo := fmt.Sprintf("discovery: app(%s) on ENV(%s) %s!\n", appID, conf.Env, value.Err)
-						log.Error(errInfo)
-						fmt.Fprintf(os.Stderr, errInfo)
-					}
-				}
-			}
 		}
 		return
 	}
@@ -635,22 +566,21 @@ func (d *Discovery) polls(ctx context.Context, host string) (apps map[string]app
 	for _, app := range res.Data {
 		if app.LastTs == 0 {
 			err = ecode.ServerErr
-			log.Error("discovery: client.Get(%s) latest_timestamp is 0,instances:(%s)", uri+"?"+params.Encode(), info)
+			log.Errorf("discovery: client.Get(%s) latest_timestamp is 0,instances:(%s)", uri+"?"+params.Encode(), info)
 			return
 		}
 	}
-	log.Info("discovery: polls uri(%s)", uri+"?"+params.Encode())
-	log.Info("discovery: successfully polls(%s) instances (%s)", uri+"?"+params.Encode(), info)
+	log.Infof("discovery: successfully polls(%s) instances (%s)", uri+"?"+params.Encode(), info)
 	apps = res.Data
 	return
 }
 
-func (d *Discovery) broadcast(apps map[string]appData) {
-	for id, v := range apps {
+func (d *Discovery) broadcast(apps map[string]*naming.InstancesInfo) {
+	for appID, v := range apps {
 		var count int
-		for zone, ins := range v.ZoneInstances {
+		for zone, ins := range v.Instances {
 			if len(ins) == 0 {
-				delete(v.ZoneInstances, zone)
+				delete(v.Instances, zone)
 			}
 			count += len(ins)
 		}
@@ -658,11 +588,11 @@ func (d *Discovery) broadcast(apps map[string]appData) {
 			continue
 		}
 		d.mutex.RLock()
-		app, ok := d.apps[id]
+		app, ok := d.apps[appID]
 		d.mutex.RUnlock()
 		if ok {
 			app.lastTs = v.LastTs
-			app.zoneIns.Store(v.ZoneInstances)
+			app.zoneIns.Store(v)
 			d.mutex.RLock()
 			for rs := range app.resolver {
 				select {
@@ -675,10 +605,38 @@ func (d *Discovery) broadcast(apps map[string]appData) {
 	}
 }
 
-func (d *Discovery) newParams(conf *Config) url.Values {
+func (d *Discovery) newParams(c *Config) url.Values {
 	params := url.Values{}
-	params.Set("zone", conf.Zone)
-	params.Set("env", conf.Env)
-	params.Set("hostname", conf.Host)
+	params.Set("region", c.Region)
+	params.Set("zone", c.Zone)
+	params.Set("env", c.Env)
+	params.Set("hostname", c.Host)
 	return params
+}
+
+var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+// shuffle pseudo-randomizes the order of elements.
+// n is the number of elements. Shuffle panics if n < 0.
+// swap swaps the elements with indexes i and j.
+func shuffle(n int, swap func(i, j int)) {
+	if n < 0 {
+		panic("invalid argument to Shuffle")
+	}
+
+	// Fisher-Yates shuffle: https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+	// Shuffle really ought not be called with n that doesn't fit in 32 bits.
+	// Not only will it take a very long time, but with 2³¹! possible permutations,
+	// there's no way that any PRNG can have a big enough internal state to
+	// generate even a minuscule percentage of the possible permutations.
+	// Nevertheless, the right API signature accepts an int n, so handle it as best we can.
+	i := n - 1
+	for ; i > 1<<31-1-1; i-- {
+		j := int(r.Int63n(int64(i + 1)))
+		swap(i, j)
+	}
+	for ; i > 0; i-- {
+		j := int(r.Int31n(int32(i + 1)))
+		swap(i, j)
+	}
 }

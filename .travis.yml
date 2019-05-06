@@ -10,6 +10,10 @@ git:
 # Force-enable Go modules. This will be unnecessary when Go 1.12 lands.
 env:
   - GO111MODULE=on
+  - REGION=sh
+  - ZONE=sh001
+  - DEPLOY_ENV=dev
+  - DISCOVERY_NODES=127.0.0.1:7171
 
 # Skip the install step. Don't `go get` dependencies. Only build with the code
 # in vendor/
@@ -19,11 +23,14 @@ install: true
 # build and immediately stop. It's sorta like having set -e enabled in bash.
 # Make sure golangci-lint is vendored.
 before_script:
-  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $GOPATH/bin
+  - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $GOPATH/bin
+  - curl -sfL https://raw.githubusercontent.com/bilibili/discovery/master/install.sh | sh -s -- -b $GOPATH/bin
+  - curl -sfL https://raw.githubusercontent.com/bilibili/discovery/master/cmd/discovery/discovery-example.toml -o $GOPATH/bin/discovery.toml
+  - nohup bash -c "$GOPATH/bin/discovery -conf $GOPATH/bin/discovery.toml &"
 
 script:
-  - go test ./...
   - go build ./...
+  - go test ./...
 
 after_success:
   - golangci-lint run       # run a bunch of code checkers/linters in parallel 
