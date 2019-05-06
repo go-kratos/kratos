@@ -43,6 +43,24 @@ var (
 	ErrDuplication = errors.New("discovery: instance duplicate registration")
 )
 
+var (
+	_once    sync.Once
+	_builder naming.Builder
+)
+
+// Builder return default discvoery resolver builder.
+func Builder() naming.Builder {
+	_once.Do(func() {
+		_builder = New(nil)
+	})
+	return _builder
+}
+
+// Build register resolver into default discovery.
+func Build(id string) naming.Resolver {
+	return Builder().Build(id)
+}
+
 // Config discovery configures.
 type Config struct {
 	Nodes  []string
