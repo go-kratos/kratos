@@ -55,7 +55,7 @@ kratos new kratos-demo
 kratos new kratos-demo -o YourName -d YourPath
 ```
 
-注意，`kratos new`默认是不会生成通过protobuf定义的`grpc`和`bm`示例代码的，如需生成请加`--proto`，如下：
+注意，`kratos new`默认是不会生成通过 protobuf 定义的`grpc`和`bm`示例代码的，如需生成请加`--proto`，如下：
 
 ```shell
 kratos new kratos-demo -o YourName -d YourPath --proto
@@ -89,7 +89,7 @@ kratos(已安装): Kratos工具集本体 Author(kratos) [2019/04/02]
 
 目前已经集成的工具有：
 * kratos 为本体工具，只用于安装更新使用；
-* protoc 用于快速生成gRPC、HTTP、Swagger文件，该命令Windows，Linux用户需要手动安装 protobuf compiler 工具。
+* protoc 用于快速生成gRPC、HTTP、Swagger文件，该命令Windows，Linux用户需要手动安装 protobuf 工具。
 * swagger  用于显示自动生成的HTTP API接口文档，通过 `kratos tool swagger serve api/api.swagger.json` 可以查看文档。
 
 ### kratos tool protoc
