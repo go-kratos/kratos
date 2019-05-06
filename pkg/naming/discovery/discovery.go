@@ -15,10 +15,10 @@ import (
 
 	"github.com/bilibili/kratos/pkg/conf/env"
 	"github.com/bilibili/kratos/pkg/ecode"
+	"github.com/bilibili/kratos/pkg/log"
 	"github.com/bilibili/kratos/pkg/naming"
 	http "github.com/bilibili/kratos/pkg/net/http/blademaster"
 	xtime "github.com/bilibili/kratos/pkg/time"
-	log "github.com/golang/glog"
 )
 
 const (
@@ -232,7 +232,7 @@ func (d *Discovery) Build(appid string) naming.Resolver {
 		default:
 		}
 	}
-	log.Infof("disocvery: AddWatch(%s) already watch(%v)", appid, ok)
+	log.Info("disocvery: AddWatch(%s) already watch(%v)", appid, ok)
 	d.once.Do(func() {
 		go d.serverproc()
 	})
@@ -347,7 +347,7 @@ func (d *Discovery) register(ctx context.Context, ins *naming.Instance) (err err
 	var metadata []byte
 	if ins.Metadata != nil {
 		if metadata, err = json.Marshal(ins.Metadata); err != nil {
-			log.Errorf("discovery:register instance Marshal metadata(%v) failed!error(%v)", ins.Metadata, err)
+			log.Error("discovery:register instance Marshal metadata(%v) failed!error(%v)", ins.Metadata, err)
 		}
 	}
 	res := new(struct {
@@ -363,16 +363,16 @@ func (d *Discovery) register(ctx context.Context, ins *naming.Instance) (err err
 	params.Set("metadata", string(metadata))
 	if err = d.httpClient.Post(ctx, uri, "", params, &res); err != nil {
 		d.switchNode()
-		log.Errorf("discovery: register client.Get(%v)  zone(%s) env(%s) appid(%s) addrs(%v) error(%v)",
+		log.Error("discovery: register client.Get(%v)  zone(%s) env(%s) appid(%s) addrs(%v) error(%v)",
 			uri, c.Zone, c.Env, ins.AppID, ins.Addrs, err)
 		return
 	}
 	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
-		log.Warningf("discovery: register client.Get(%v)  env(%s) appid(%s) addrs(%v) code(%v)", uri, c.Env, ins.AppID, ins.Addrs, res.Code)
+		log.Warn("discovery: register client.Get(%v)  env(%s) appid(%s) addrs(%v) code(%v)", uri, c.Env, ins.AppID, ins.Addrs, res.Code)
 		err = ec
 		return
 	}
-	log.Infof("discovery: register client.Get(%v) env(%s) appid(%s) addrs(%s) success", uri, c.Env, ins.AppID, ins.Addrs)
+	log.Info("discovery: register client.Get(%v) env(%s) appid(%s) addrs(%s) success", uri, c.Env, ins.AppID, ins.Addrs)
 	return
 }
 
@@ -391,7 +391,7 @@ func (d *Discovery) renew(ctx context.Context, ins *naming.Instance) (err error)
 	params.Set("appid", ins.AppID)
 	if err = d.httpClient.Post(ctx, uri, "", params, &res); err != nil {
 		d.switchNode()
-		log.Errorf("discovery: renew client.Get(%v)  env(%s) appid(%s) hostname(%s) error(%v)",
+		log.Error("discovery: renew client.Get(%v)  env(%s) appid(%s) hostname(%s) error(%v)",
 			uri, c.Env, ins.AppID, c.Host, err)
 		return
 	}
@@ -400,7 +400,7 @@ func (d *Discovery) renew(ctx context.Context, ins *naming.Instance) (err error)
 		if ec.Equal(ecode.NothingFound) {
 			return
 		}
-		log.Errorf("discovery: renew client.Get(%v) env(%s) appid(%s) hostname(%s) code(%v)",
+		log.Error("discovery: renew client.Get(%v) env(%s) appid(%s) hostname(%s) code(%v)",
 			uri, c.Env, ins.AppID, c.Host, res.Code)
 		return
 	}
@@ -423,17 +423,17 @@ func (d *Discovery) cancel(ins *naming.Instance) (err error) {
 	// request
 	if err = d.httpClient.Post(context.TODO(), uri, "", params, &res); err != nil {
 		d.switchNode()
-		log.Errorf("discovery cancel client.Get(%v) env(%s) appid(%s) hostname(%s) error(%v)",
+		log.Error("discovery cancel client.Get(%v) env(%s) appid(%s) hostname(%s) error(%v)",
 			uri, c.Env, ins.AppID, c.Host, err)
 		return
 	}
 	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
-		log.Warningf("discovery cancel client.Get(%v)  env(%s) appid(%s) hostname(%s) code(%v)",
+		log.Warn("discovery cancel client.Get(%v)  env(%s) appid(%s) hostname(%s) code(%v)",
 			uri, c.Env, ins.AppID, c.Host, res.Code)
 		err = ec
 		return
 	}
-	log.Infof("discovery cancel client.Get(%v)  env(%s) appid(%s) hostname(%s) success",
+	log.Info("discovery cancel client.Get(%v)  env(%s) appid(%s) hostname(%s) success",
 		uri, c.Env, ins.AppID, c.Host)
 	return
 }
@@ -460,24 +460,24 @@ func (d *Discovery) set(ctx context.Context, ins *naming.Instance) (err error) {
 	if ins.Metadata != nil {
 		var metadata []byte
 		if metadata, err = json.Marshal(ins.Metadata); err != nil {
-			log.Errorf("discovery:set instance Marshal metadata(%v) failed!error(%v)", ins.Metadata, err)
+			log.Error("discovery:set instance Marshal metadata(%v) failed!error(%v)", ins.Metadata, err)
 			return
 		}
 		params.Set("metadata", string(metadata))
 	}
 	if err = d.httpClient.Post(ctx, uri, "", params, &res); err != nil {
 		d.switchNode()
-		log.Errorf("discovery: set client.Get(%v)  zone(%s) env(%s) appid(%s) addrs(%v) error(%v)",
+		log.Error("discovery: set client.Get(%v)  zone(%s) env(%s) appid(%s) addrs(%v) error(%v)",
 			uri, conf.Zone, conf.Env, ins.AppID, ins.Addrs, err)
 		return
 	}
 	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
-		log.Warningf("discovery: set client.Get(%v)  env(%s) appid(%s) addrs(%v)  code(%v)",
+		log.Warn("discovery: set client.Get(%v)  env(%s) appid(%s) addrs(%v)  code(%v)",
 			uri, conf.Env, ins.AppID, ins.Addrs, res.Code)
 		err = ec
 		return
 	}
-	log.Infof("discovery: set client.Get(%v) env(%s) appid(%s) addrs(%s) success", uri+"?"+params.Encode(), conf.Env, ins.AppID, ins.Addrs)
+	log.Info("discovery: set client.Get(%v) env(%s) appid(%s) addrs(%s) success", uri+"?"+params.Encode(), conf.Env, ins.AppID, ins.Addrs)
 	return
 }
 
@@ -570,12 +570,12 @@ func (d *Discovery) polls(ctx context.Context) (apps map[string]*naming.Instance
 	}
 	if err = d.httpClient.Get(ctx, uri, "", params, res); err != nil {
 		d.switchNode()
-		log.Errorf("discovery: client.Get(%s) error(%+v)", uri+"?"+params.Encode(), err)
+		log.Error("discovery: client.Get(%s) error(%+v)", uri+"?"+params.Encode(), err)
 		return
 	}
 	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
 		if !ec.Equal(ecode.NotModified) {
-			log.Errorf("discovery: client.Get(%s) get error code(%d)", uri+"?"+params.Encode(), res.Code)
+			log.Error("discovery: client.Get(%s) get error code(%d)", uri+"?"+params.Encode(), res.Code)
 			err = ec
 		}
 		return
@@ -584,11 +584,11 @@ func (d *Discovery) polls(ctx context.Context) (apps map[string]*naming.Instance
 	for _, app := range res.Data {
 		if app.LastTs == 0 {
 			err = ecode.ServerErr
-			log.Errorf("discovery: client.Get(%s) latest_timestamp is 0,instances:(%s)", uri+"?"+params.Encode(), info)
+			log.Error("discovery: client.Get(%s) latest_timestamp is 0,instances:(%s)", uri+"?"+params.Encode(), info)
 			return
 		}
 	}
-	log.Infof("discovery: successfully polls(%s) instances (%s)", uri+"?"+params.Encode(), info)
+	log.Info("discovery: successfully polls(%s) instances (%s)", uri+"?"+params.Encode(), info)
 	apps = res.Data
 	return
 }
