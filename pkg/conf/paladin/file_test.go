@@ -83,7 +83,7 @@ func TestFileEvent(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, cli)
 	ch := cli.WatchEvent(context.Background(), "test.toml", "abc.toml")
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(time.Millisecond * 200)
 	ioutil.WriteFile(path+"test.toml", []byte(`hello`), 0644)
 	timeout := time.NewTimer(time.Second)
 	select {
@@ -94,6 +94,7 @@ func TestFileEvent(t *testing.T) {
 		assert.Equal(t, "hello", ev.Value)
 	}
 	ioutil.WriteFile(path+"abc.toml", []byte(`test`), 0644)
+	time.Sleep(time.Millisecond * 200)
 	select {
 	case <-timeout.C:
 		t.Fatalf("run test timeout")
