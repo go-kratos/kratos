@@ -1,6 +1,8 @@
 package resolver
 
 import (
+	"context"
+
 	"github.com/bilibili/kratos/pkg/conf/env"
 	"github.com/bilibili/kratos/pkg/naming"
 )
@@ -30,7 +32,7 @@ type mockDiscoveryResolver struct {
 
 var _ naming.Resolver = &mockDiscoveryResolver{}
 
-func (md *mockDiscoveryResolver) Fetch() (*naming.InstancesInfo, bool) {
+func (md *mockDiscoveryResolver) Fetch(ctx context.Context) (*naming.InstancesInfo, bool) {
 	zones := make(map[string][]*naming.Instance)
 	for _, v := range md.d.instances {
 		zones[v.Zone] = append(zones[v.Zone], v)

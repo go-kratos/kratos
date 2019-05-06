@@ -1,6 +1,7 @@
 package tidb
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -19,7 +20,7 @@ func (db *DB) nodeList() (nodes []string) {
 		ins     []*naming.Instance
 		ok      bool
 	)
-	if insZone, ok = db.dis.Fetch(); !ok {
+	if insZone, ok = db.dis.Fetch(context.Background()); !ok {
 		return
 	}
 	if ins, ok = insZone.Instances[env.Zone]; !ok || len(ins) == 0 {

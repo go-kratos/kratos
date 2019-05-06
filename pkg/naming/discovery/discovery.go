@@ -148,7 +148,7 @@ func New(c *Config) (d *Discovery) {
 	if !ok {
 		panic("discovery watch failed")
 	}
-	ins, ok := resolver.Fetch()
+	ins, ok := resolver.Fetch(context.Background())
 	if ok {
 		d.newSelf(ins.Instances)
 	}
@@ -162,7 +162,7 @@ func (d *Discovery) selfproc(resolver naming.Resolver, event <-chan struct{}) {
 		if !ok {
 			return
 		}
-		zones, ok := resolver.Fetch()
+		zones, ok := resolver.Fetch(context.Background())
 		if ok {
 			d.newSelf(zones.Instances)
 		}
@@ -257,7 +257,7 @@ func (r *Resolve) Watch() <-chan struct{} {
 }
 
 // Fetch fetch resolver instance.
-func (r *Resolve) Fetch() (ins *naming.InstancesInfo, ok bool) {
+func (r *Resolve) Fetch(ctx context.Context) (ins *naming.InstancesInfo, ok bool) {
 	r.d.mutex.RLock()
 	app, ok := r.d.apps[r.id]
 	r.d.mutex.RUnlock()
@@ -294,7 +294,7 @@ func (d *Discovery) Close() error {
 }
 
 // Register Register an instance with discovery and renew automatically
-func (d *Discovery) Register(ins *naming.Instance) (cancelFunc context.CancelFunc, err error) {
+func (d *Discovery) Register(ctx context.Context, ins *naming.Instance) (cancelFunc context.CancelFunc, err error) {
 	d.mutex.Lock()
 	if _, ok := d.registry[ins.AppID]; ok {
 		err = ErrDuplication

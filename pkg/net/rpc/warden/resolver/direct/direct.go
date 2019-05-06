@@ -1,6 +1,7 @@
 package direct
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -54,7 +55,7 @@ func (d *Direct) Unwatch(id string) {
 }
 
 //Fetch fetch isntances.
-func (d *Direct) Fetch() (res *naming.InstancesInfo, found bool) {
+func (d *Direct) Fetch(ctx context.Context) (res *naming.InstancesInfo, found bool) {
 	var ins []*naming.Instance
 	addrs := strings.Split(d.id, ",")
 	for _, addr := range addrs {

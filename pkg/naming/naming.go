@@ -39,14 +39,14 @@ type Instance struct {
 
 // Resolver resolve naming service
 type Resolver interface {
-	Fetch() (*InstancesInfo, bool)
+	Fetch(context.Context) (*InstancesInfo, bool)
 	Watch() <-chan struct{}
 	Close() error
 }
 
 // Registry Register an instance and renew automatically.
 type Registry interface {
-	Register(ins *Instance) (cancel context.CancelFunc, err error)
+	Register(ctx context.Context, ins *Instance) (cancel context.CancelFunc, err error)
 	Close() error
 }
 

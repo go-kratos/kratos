@@ -1,6 +1,7 @@
 package resolver
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"net/url"
@@ -127,7 +128,7 @@ func (r *Resolver) updateproc() {
 				return
 			}
 		}
-		if ins, ok := r.nr.Fetch(); ok {
+		if ins, ok := r.nr.Fetch(context.Background()); ok {
 			instances, ok := ins.Instances[r.zone]
 			if !ok {
 				for _, value := range ins.Instances {
