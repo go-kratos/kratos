@@ -107,6 +107,8 @@ func (c *Client) handle() grpc.UnaryClientInterceptor {
 			return
 		}
 		defer onBreaker(brk, &err)
+		_, ctx, cancel = conf.Timeout.Shrink(ctx)
+		defer cancel()
 		nmd.Range(ctx,
 			func(key string, value interface{}) {
 				if valstr, ok := value.(string); ok {
