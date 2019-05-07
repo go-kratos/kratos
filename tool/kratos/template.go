@@ -100,7 +100,7 @@ func main() {
 			ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
 			if err := grpcSrv.Shutdown(ctx); err != nil {
 				log.Error("grpcSrv.Shutdown error(%v)", err)
-			} // grpc	
+			}
 			if err := httpSrv.Shutdown(ctx); err != nil {
 				log.Error("httpSrv.Shutdown error(%v)", err)
 			}
