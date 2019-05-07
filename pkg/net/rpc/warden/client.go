@@ -43,10 +43,6 @@ var (
 	_defaultClient *Client
 )
 
-func init() {
-	resolver.Register(discovery.New(nil))
-}
-
 func baseMetadata() metadata.MD {
 	gmd := metadata.MD{nmd.Caller: []string{env.AppID}}
 	if env.Color != "" {
