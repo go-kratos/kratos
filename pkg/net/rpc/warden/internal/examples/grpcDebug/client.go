@@ -77,7 +77,7 @@ func main() {
 	if file != "" {
 		content, err := ioutil.ReadFile(file)
 		if err != nil {
-			fmt.Println("ioutil.ReadFile %s failed!err:=%v", file, err)
+			fmt.Printf("ioutil.ReadFile(%s) error(%v)\n", file, err)
 			os.Exit(1)
 		}
 		if len(content) > 0 {

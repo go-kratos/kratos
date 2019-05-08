@@ -50,6 +50,8 @@ var (
 
 func init() {
 	addFlag(flag.CommandLine)
+	h = newHandlers(nil)
+	c = new(Config)
 }
 
 var (

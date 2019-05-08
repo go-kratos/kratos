@@ -298,6 +298,8 @@ func (s *Server) Start() (*Server, error) {
 		return nil, err
 	}
 	reflection.Register(s.server)
+
+	log.Info("warden: start grpc listen addr: %s", s.conf.Addr)
 	go func() {
 		if err := s.Serve(lis); err != nil {
 			panic(err)

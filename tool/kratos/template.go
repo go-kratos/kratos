@@ -98,9 +98,9 @@ func main() {
 		switch s {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
 			ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
-			if err := grpcSrv.Shutdown(ctx); err != nil 
+			if err := grpcSrv.Shutdown(ctx); err != nil {
 				log.Error("grpcSrv.Shutdown error(%v)", err)
-			} // grpc	
+			}
 			if err := httpSrv.Shutdown(ctx); err != nil {
 				log.Error("httpSrv.Shutdown error(%v)", err)
 			}
@@ -302,6 +302,15 @@ func (s *Service) SayHello(ctx context.Context, req *pb.HelloReq) (reply *empty.
 	return
 }
 
+// SayHelloURL bm demo func.
+func (s *Service) SayHelloURL(ctx context.Context, req *pb.HelloReq) (reply *pb.HelloResp, err error) {
+	reply = &pb.HelloResp{
+		Content: "hello " + req.Name,
+	}
+	fmt.Printf("hello url %s", req.Name)
+	return
+}
+
 // Ping ping the resource.
 func (s *Service) Ping(ctx context.Context) (err error) {
 	return s.dao.Ping(ctx)
@@ -317,6 +326,7 @@ func (s *Service) Close() {
 import (
 	"net/http"
 
+	pb "{{.Name}}/api"
 	"{{.Name}}/internal/model"
 	"{{.Name}}/internal/service"
 
@@ -343,6 +353,7 @@ func New(s *service.Service) (engine *bm.Engine) {
 	}
 	svc = s
 	engine = bm.DefaultServer(hc.Server)
+	pb.RegisterDemoBMServer(engine, svc)
 	initRouter(engine)
 	if err := engine.Start(); err != nil {
 		panic(err)
@@ -377,21 +388,11 @@ func howToStart(c *bm.Context) {
 	_tplAPIProto = `// 定义项目 API 的 proto 文件 可以同时描述 gRPC 和 HTTP API
 // protobuf 文件参考:
 //  - https://developers.google.com/protocol-buffers/
-//  - TODO：待补充文档URL
-// protobuf 生成 HTTP 工具:
-//  - TODO：待补充文档URL
-// gRPC Golang Model:
-//  - TODO：待补充文档URL
-// gRPC Golang Warden Gen:
-//  - TODO：待补充文档URL
-// gRPC http 调试工具(无需pb文件):
-//  - TODO：待补充文档URL
-// grpc 命令行调试工具(无需pb文件):
-//  - TODO：待补充文档URL
 syntax = "proto3";
 
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "gogoproto/gogo.proto";
 import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
 
 // package 命名使用 {appid}.{version} 的方式, version 形如 v1, v2 ..
 package demo.service.v1;
@@ -399,21 +400,29 @@ package demo.service.v1;
 // NOTE: 最后请删除这些无用的注释 (゜-゜)つロ 
 
 option go_package = "api";
-// do not generate getXXX() method 
 option (gogoproto.goproto_getters_all) = false;
 
 service Demo {
 	rpc SayHello (HelloReq) returns (.google.protobuf.Empty);
+	rpc SayHelloURL(HelloReq) returns (HelloResp) {
+        option (google.api.http) = {
+            get:"/{{.Name}}/say_hello"
+        };
+    };
 }
 
 message HelloReq {
 	string name = 1 [(gogoproto.moretags)='form:"name" validate:"required"'];
 }
+
+message HelloResp {
+    string Content = 1 [(gogoproto.jsontag) = 'content'];
+}
 `
 	_tplAPIGenerate = `package api
 
 // 生成 gRPC 代码
-//go:generate kratos tool kprotoc
+//go:generate kratos tool protoc api.proto
 `
 	_tplModel = `package model
 

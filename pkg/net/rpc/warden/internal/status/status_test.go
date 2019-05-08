@@ -140,24 +140,24 @@ func TestToEcode(t *testing.T) {
 	t.Run("input pb.Error and ecode.Status", func(t *testing.T) {
 		gst := status.New(codes.InvalidArgument, "requesterr")
 		gst, _ = gst.WithDetails(
-			&pb.Error{ErrCode: 1122, ErrMessage: "message"},
-			ecode.Errorf(ecode.AccessKeyErr, "AccessKeyErr").Proto(),
+			&pb.Error{ErrCode: 401, ErrMessage: "message"},
+			ecode.Errorf(ecode.Unauthorized, "Unauthorized").Proto(),
 		)
 		ec := ToEcode(gst)
 
-		assert.Equal(t, int(ecode.AccessKeyErr), ec.Code())
-		assert.Equal(t, "AccessKeyErr", ec.Message())
+		assert.Equal(t, int(ecode.Unauthorized), ec.Code())
+		assert.Equal(t, "Unauthorized", ec.Message())
 	})
 
 	t.Run("input encode.Status", func(t *testing.T) {
 		m := &timestamp.Timestamp{Seconds: time.Now().Unix()}
-		st, _ := ecode.Errorf(ecode.AccessKeyErr, "AccessKeyErr").WithDetails(m)
+		st, _ := ecode.Errorf(ecode.Unauthorized, "Unauthorized").WithDetails(m)
 		gst := status.New(codes.InvalidArgument, "requesterr")
 		gst, _ = gst.WithDetails(st.Proto())
 		ec := ToEcode(gst)
 
-		assert.Equal(t, int(ecode.AccessKeyErr), ec.Code())
-		assert.Equal(t, "AccessKeyErr", ec.Message())
+		assert.Equal(t, int(ecode.Unauthorized), ec.Code())
+		assert.Equal(t, "Unauthorized", ec.Message())
 		assert.Len(t, ec.Details(), 1)
 		assert.IsType(t, m, ec.Details()[0])
 	})

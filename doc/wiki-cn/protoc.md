@@ -9,7 +9,17 @@
 安装好对应工具后，我们可以进入`api`目录，执行如下命令：
 
 ```shell
-protoc -I/Users/felix/work/go/src:/usr/local/include --gogofast_out=plugins=grpc:/Users/felix/work/go/src /Users/felix/work/go/src/kratos-demo/api/api.proto
+export $KRATOS_HOME = kratos路径
+export $KRATOS_DEMO = 项目路径
+
+// 生成：api.pb.go
+protoc -I$GOPATH/src:$KRATOS_HOME/tool/protobuf/pkg/extensions:$KRATOS_DEMO/api --gogofast_out=plugins=grpc:$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
+
+// 生成：api.bm.go
+protoc -I$GOPATH/src:$KRATOS_HOME/tool/protobuf/pkg/extensions:$KRATOS_DEMO/api --bm_out=$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
+
+// 生成：api.swagger.json
+protoc -I$GOPATH/src:$KRATOS_HOME/tool/protobuf/pkg/extensions:$KRATOS_DEMO/api --bswagger_out=$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
 ```
 
 请注意替换`/Users/felix/work/go/src`目录为你本地开发环境对应GOPATH目录，其中`--gogofast_out`意味着告诉`protoc`工具需要使用`gogo protobuf`的工具生成代码。
