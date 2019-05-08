@@ -15,7 +15,7 @@ type FieldType int32
 const (
 	UnknownType FieldType = iota
 	StringType
-	IntTpye
+	IntType
 	Int64Type
 	UintType
 	Uint64Type
