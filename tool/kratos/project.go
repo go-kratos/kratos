@@ -51,7 +51,7 @@ var (
 		_tplTypeGomod:      "/go.mod",
 		_tplTypeMain:       "/cmd/main.go",
 		_tplTypeDao:        "/internal/dao/dao.go",
-		_tplTypeHTTPServer: "/internal/server/http/http.go",
+		_tplTypeHTTPServer: "/internal/server/http/server.go",
 		_tplTypeService:    "/internal/service/service.go",
 		_tplTypeModel:      "/internal/model/model.go",
 		// init config

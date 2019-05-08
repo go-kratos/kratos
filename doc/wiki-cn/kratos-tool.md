@@ -94,7 +94,7 @@ kratos(已安装): Kratos工具集本体 Author(kratos) [2019/04/02]
 
 ### kratos tool protoc
 
-```
+```shell
 // generate all
 kratos tool protoc api.proto
 // generate gRPC
@@ -126,10 +126,12 @@ protoc -I$GOPATH/src:$KRATOS_HOME/tool/protobuf/pkg/extensions:$KRATOS_DEMO/api 
 
 大家也可以参考该命令进行`proto`生成，也可以参考[protobuf](https://github.com/google/protobuf)官方参数。
 
-kratos tool swagger
+### kratos tool swagger
+
 ```shell
 kratos tool swagger serve api/api.swagger.json
 ```
+
 执行命令后，浏览器会自动打开swagger文档地址。  
 同时也可以查看更多的 [go-swagger](https://github.com/go-swagger/go-swagger) 官方参数进行使用。
 
