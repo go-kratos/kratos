@@ -45,7 +45,7 @@ func toMap(args ...D) map[string]interface{} {
 	d := make(map[string]interface{}, 10+len(args))
 	for _, arg := range args {
 		switch arg.Type {
-		case core.UintType, core.Uint64Type, core.IntTpye, core.Int64Type:
+		case core.UintType, core.Uint64Type, core.IntType, core.Int64Type:
 			d[arg.Key] = arg.Int64Val
 		case core.StringType:
 			d[arg.Key] = arg.StringVal
