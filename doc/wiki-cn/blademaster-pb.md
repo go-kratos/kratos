@@ -10,7 +10,7 @@
 `kratos tool protoc`工具可以生成`warden` `bm` `swagger`对应的代码和文档，想要单独生成`bm`代码只需加上`--bm`如：
 
 ```shell
-// generate BM HTTP
+# generate BM HTTP
 kratos tool protoc --bm api.proto
 ```
 
@@ -58,4 +58,19 @@ func (s *Service) SayHelloURL(ctx context.Context, req *pb.HelloReq) (reply *pb.
 	fmt.Printf("hello url %s", req.Name)
 	return
 }
+```
+
+# 文档
+
+基于同一份`proto`文件还可以生成对应的`swagger`文档，运行命令如下：
+
+```shell
+# generate swagger
+kratos tool protoc --swagger api.proto
+```
+
+该命令将生成对应的`swagger.json`文件，可用于`swagger`工具通过WEBUI的方式打开使用，可运行命令如下：
+
+```shell
+kratos tool swagger serve api/api.swagger.json
 ```
