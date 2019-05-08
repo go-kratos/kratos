@@ -26,7 +26,12 @@ func (m *Map) Store(values map[string]*Value) {
 
 // Load returns the value set by the most recent Store.
 func (m *Map) Load() map[string]*Value {
-	return m.values.Load().(map[string]*Value)
+	src := m.values.Load().(map[string]*Value)
+	dst := make(map[string]*Value, len(src))
+	for k, v := range src {
+		dst[k] = v
+	}
+	return dst
 }
 
 // Exist check if values map exist a key.
