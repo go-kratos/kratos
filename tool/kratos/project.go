@@ -69,6 +69,7 @@ var (
 		_tplTypeAPIProto:     _tplAPIProto,
 		_tplTypeAPIGenerate:  _tplAPIGenerate,
 		_tplTypeMain:         _tplMain,
+		_tplTypeService:      _tplService,
 		_tplTypeChangeLog:    _tplChangeLog,
 		_tplTypeContributors: _tplContributors,
 		_tplTypeReadme:       _tplReadme,
@@ -87,13 +88,11 @@ func create() (err error) {
 		files[_tplTypeGRPCServer] = "/internal/server/grpc/server.go"
 		files[_tplTypeAPIProto] = "/api/api.proto"
 		files[_tplTypeAPIGenerate] = "/api/generate.go"
+		tpls[_tplTypeHTTPServer] = _tplPBHTTPServer
 		tpls[_tplTypeGRPCServer] = _tplGRPCServer
 		tpls[_tplTypeGRPCToml] = _tplGRPCToml
 		tpls[_tplTypeService] = _tplGPRCService
-	} else {
-		tpls[_tplTypeHTTPServer] = delgrpc(_tplHTTPServer)
-		tpls[_tplTypeService] = _tplService
-		tpls[_tplTypeMain] = delgrpc(_tplMain)
+		tpls[_tplTypeMain] = _tplGRPCMain
 	}
 	if err = os.MkdirAll(p.Path, 0755); err != nil {
 		return
@@ -123,25 +122,6 @@ func genpb() error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
-}
-
-func delgrpc(tpl string) string {
-	var buf bytes.Buffer
-	lines := strings.Split(tpl, "\n")
-	for _, l := range lines {
-		if strings.Contains(l, "grpc") {
-			continue
-		}
-		if strings.Contains(l, "warden") {
-			continue
-		}
-		if strings.Contains(l, "pb") {
-			continue
-		}
-		buf.WriteString(l)
-		buf.WriteString("\n")
-	}
-	return buf.String()
 }
 
 func write(name, tpl string) (err error) {

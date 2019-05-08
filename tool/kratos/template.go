@@ -72,6 +72,56 @@ import (
 	"syscall"
 	"time"
 
+	"{{.Name}}/internal/server/http"
+	"{{.Name}}/internal/service"
+	"github.com/bilibili/kratos/pkg/conf/paladin"
+	"github.com/bilibili/kratos/pkg/log"
+)
+
+func main() {
+	flag.Parse()
+	if err := paladin.Init(); err != nil {
+		panic(err)
+	}
+	log.Init(nil) // debug flag: log.dir={path}
+	defer log.Close()
+	log.Info("{{.Name}} start")
+	svc := service.New()
+	httpSrv := http.New(svc)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
+	for {
+		s := <-c
+		log.Info("get a signal %s", s.String())
+		switch s {
+		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
+			ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
+			if err := httpSrv.Shutdown(ctx); err != nil {
+				log.Error("httpSrv.Shutdown error(%v)", err)
+			}
+			log.Info("{{.Name}} exit")
+			svc.Close()
+			cancel()
+			time.Sleep(time.Second)
+			return
+		case syscall.SIGHUP:
+		default:
+			return
+		}
+	}
+}
+`
+
+	_tplGRPCMain = `package main
+
+import (
+	"context"
+	"flag"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"{{.Name}}/internal/server/grpc"
 	"{{.Name}}/internal/server/http"
 	"{{.Name}}/internal/service"
@@ -326,6 +376,67 @@ func (s *Service) Close() {
 import (
 	"net/http"
 
+	"{{.Name}}/internal/model"
+	"{{.Name}}/internal/service"
+
+	"github.com/bilibili/kratos/pkg/conf/paladin"
+	"github.com/bilibili/kratos/pkg/log"
+	bm "github.com/bilibili/kratos/pkg/net/http/blademaster"
+)
+
+var (
+	svc *service.Service
+)
+
+// New new a bm server.
+func New(s *service.Service) (engine *bm.Engine) {
+	var (
+		hc struct {
+			Server *bm.ServerConfig
+		}
+	)
+	if err := paladin.Get("http.toml").UnmarshalTOML(&hc); err != nil {
+		if err != paladin.ErrNotExist {
+			panic(err)
+		}
+	}
+	svc = s
+	engine = bm.DefaultServer(hc.Server)
+	initRouter(engine)
+	if err := engine.Start(); err != nil {
+		panic(err)
+	}
+	return
+}
+
+func initRouter(e *bm.Engine) {
+	e.Ping(ping)
+	g := e.Group("/{{.Name}}")
+	{
+		g.GET("/start", howToStart)
+	}
+}
+
+func ping(ctx *bm.Context) {
+	if err := svc.Ping(ctx); err != nil {
+		log.Error("ping error(%v)", err)
+		ctx.AbortWithStatus(http.StatusServiceUnavailable)
+	}
+}
+
+// example for http request handler.
+func howToStart(c *bm.Context) {
+	k := &model.Kratos{
+		Hello: "Golang 大法好 !!!",
+	}
+	c.JSON(k, nil)
+}
+`
+	_tplPBHTTPServer = `package http
+
+import (
+	"net/http"
+
 	pb "{{.Name}}/api"
 	"{{.Name}}/internal/model"
 	"{{.Name}}/internal/service"
@@ -385,6 +496,7 @@ func howToStart(c *bm.Context) {
 }
 
 `
+
 	_tplAPIProto = `// 定义项目 API 的 proto 文件 可以同时描述 gRPC 和 HTTP API
 // protobuf 文件参考:
 //  - https://developers.google.com/protocol-buffers/
