@@ -5,7 +5,7 @@
 * 安装`kratos tool protoc`工具，请看[kratos工具](kratos-tool.md)
 * 编写`proto`文件，示例可参考[kratos-demon内proto文件](https://github.com/bilibili/kratos-demo/blob/master/api/api.proto)
 
-# kratos工具说明
+### kratos工具说明
 
 `kratos tool protoc`工具可以生成`warden` `bm` `swagger`对应的代码和文档，想要单独生成`bm`代码只需加上`--bm`如：
 
@@ -18,12 +18,12 @@ kratos tool protoc --bm api.proto
 
 请注意想要生成`bm`代码，需要特别在`proto`的`service`内指定`google.api.http`配置，如下：
 
-```proto
+```go
 service Demo {
 	rpc SayHello (HelloReq) returns (.google.protobuf.Empty);
 	rpc SayHelloURL(HelloReq) returns (HelloResp) {
-        option (google.api.http) = {     # 该配置指定SayHelloURL方法对应的url
-            get:"/kratos-demo/say_hello" # 指定url和请求方式为GET
+        option (google.api.http) = {     // 该配置指定SayHelloURL方法对应的url
+            get:"/kratos-demo/say_hello" // 指定url和请求方式为GET
         };
     };
 }
