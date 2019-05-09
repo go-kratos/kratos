@@ -74,7 +74,7 @@ func NewFile(base string) (Client, error) {
 		notify:   notify,
 		watchers: make(map[*watcher]struct{}),
 	}
-	go f.watch(base)
+	go f.watchproc(base)
 	return f, nil
 }
 
@@ -111,7 +111,7 @@ func (f *file) Close() error {
 }
 
 // file config daemon to watch file modification
-func (f *file) watch(base string) {
+func (f *file) watchproc(base string) {
 	if err := f.notify.Add(base); err != nil {
 		log.Printf("paladin: create fsnotify for base path %s fail %s, reload function will lose efficacy", base, err)
 		return
