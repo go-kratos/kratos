@@ -8,18 +8,18 @@
 
 * `api.proto`是gRPC server的描述文件
 * `api.pb.go`是基于`api.proto`生成的代码文件
-* `generate.go`是用于`kratos tool kprotoc`执行`go generate`进行代码生成的临时文件
+* `generate.go`是用于`kratos tool protoc`执行`go generate`进行代码生成的临时文件
 
 接下来可以将以上三个文件全部删除或者保留`generate.go`，之后编写自己的proto文件，确认proto无误后，进行代码生成：
 
-* 可直接执行`kratos tool kprotoc`，该命令会调用protoc工具生成`.pb.go`文件
-* 如`generate.go`没删除，也可以执行`go generate`命令，将调用`kratos tool kprotoc`工具进行代码生成
+* 可直接执行`kratos tool protoc`，该命令会调用protoc工具生成`.pb.go`文件
+* 如`generate.go`没删除，也可以执行`go generate`命令，将调用`kratos tool protoc`工具进行代码生成
 
-[kprotoc说明请看](kratos-tool.md)
+[kratos工具请看](kratos-tool.md)
 
 ### 如没看kprotoc文档，请看下面这段话
 
-`kratos tool kprotoc`用于快速生成`pb.go`文件，但目前不支持windows，Linux也需要先自己安装`protoc`工具，具体请看[protoc说明](protoc.md)。
+`kratos tool protoc`用于快速生成`pb.go`文件，但目前windows和Linux需要先自己安装`protoc`工具，具体请看[protoc说明](protoc.md)。
 
 # 注册server
 
@@ -70,6 +70,7 @@ func (s *Service) SayHello(ctx context.Context, req *pb.HelloReq) (reply *empty.
 ```
 
 请进入`internal/service`内找到`SayHello`方法，注意方法的入参和出参，都是按照gRPC的方法声明对应的：
+
 * 第一个参数必须是`context.Context`，第二个必须是proto内定义的`message`对应生成的结构体
 * 第一个返回值必须是proto内定义的`message`对应生成的结构体，第二个参数必须是`error`
 * 在http框架bm中，如果共用proto文件生成bm代码，那么也可以直接使用该service方法
@@ -84,7 +85,7 @@ func (s *Service) SayHello(ctx context.Context, req *pb.HelloReq) (reply *empty.
 * 拷贝proto文件到自己项目下并且执行代码生成
 * 直接import服务端的api package
 
-***PS:这也是业务代码我们加了一层`internal`的关系，服务对外暴露的只有接口***
+> 这也是业务代码我们加了一层`internal`的关系，服务对外暴露的只有接口
 
 不管哪一种方式，以下初始化gRPC client的代码建议伴随生成的代码存放在统一目录下：
 
