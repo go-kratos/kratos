@@ -30,4 +30,21 @@ var toolIndexs = []*Tool{
 		Platform:  []string{"darwin", "linux", "windows"},
 		Author:    "goswagger.io",
 	},
+    &Tool{
+        Name:      "kratos-gen-bts",
+        Alias:     "kratos-gen-bts",
+        BuildTime: time.Date(2019, 5, 5, 0, 0, 0, 0, time.Local),
+        Install:   "go get -u github.com/bilibili/kratos/tool/kratos-gen-bts",
+        Summary:   "缓存回源逻辑代码生成器",
+        Platform:  []string{"darwin", "linux", "windows"},
+        Author:    "kratos",
+    },	&Tool{
+        Name:      "kratos-gen-mc",
+        Alias:     "kratos-gen-mc",
+        BuildTime: time.Date(2019, 5, 5, 0, 0, 0, 0, time.Local),
+        Install:   "go get -u github.com/bilibili/kratos/tool/kratos-gen-mc",
+        Summary:   "mc缓存代码生成",
+        Platform:  []string{"darwin", "linux", "windows"},
+        Author:    "kratos",
+    },
 }
