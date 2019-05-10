@@ -3,7 +3,11 @@
 基于proto文件可以快速生成`bm`框架对应的代码，提前需要准备以下工作：
 
 * 安装`kratos tool protoc`工具，请看[kratos工具](kratos-tool.md)
+<<<<<<< HEAD
 * 编写`proto`文件，示例可参考[kratos-demo内proto文件](https://github.com/bilibili/kratos-demo/blob/master/api/api.proto)
+=======
+* 编写`proto`文件，示例可参考[kratos-demon内proto文件](https://github.com/bilibili/kratos-demo/blob/master/api/api.proto)
+>>>>>>> 60766fc104c40d83156bd35f0d0ba3c61db7e48f
 
 ### kratos工具说明
 
