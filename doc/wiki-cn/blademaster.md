@@ -23,14 +23,16 @@
 
 ![bm-arch](/doc/img/bm-arch-2-2.png)
 
-blademaster 由几个非常精简的内部模块组成。其中 Router 用于根据请求的路径分发请求，Context 包含了一个完整的请求信息，Handler 则负责处理传入的 Context，Handlers 为一个列表，一个串一个地执行。  
-所有的中间件均以 Handler 的形式存在，这样可以保证 blademaster 自身足够精简，且扩展性足够强。
+`blademaster`由几个非常精简的内部模块组成。其中`Router`用于根据请求的路径分发请求，`Context`包含了一个完整的请求信息，`Handler`则负责处理传入的`Context`，`Handlers`为一个列表，一个串一个地执行。  
+所有的`middlerware`均以`Handler`的形式存在，这样可以保证`blademaster`自身足够精简且扩展性足够强。
 
 ![bm-arch](/doc/img/bm-arch-2-3.png)
 
-blademaster 处理请求的模式非常简单，大部分的逻辑都被封装在了各种 Handler 中。一般而言，业务逻辑作为最后一个 Handler。正常情况下，每个 Handler 按照顺序一个一个串形地执行下去。  
-但是 Handler 中可以也中断整个处理流程，直接输出 Response。这种模式常被用于校验登陆的中间件中；一旦发现请求不合法，直接响应拒绝。  
-请求处理的流程中也可以使用 Render 来辅助渲染 Response，比如对于不同的请求需要响应不同的数据格式（JSON、XML），此时可以使用不同的 Render 来简化逻辑。  
+`blademaster`处理请求的模式非常简单，大部分的逻辑都被封装在了各种`Handler`中。一般而言，业务逻辑作为最后一个`Handler`。
+
+正常情况下每个`Handler`按照顺序一个一个串形地执行下去，但是`Handler`中可以也中断整个处理流程，直接输出`Response`。这种模式常被用于校验登陆的`middleware`中：一旦发现请求不合法，直接响应拒绝。
+
+请求处理的流程中也可以使用`Render`来辅助渲染`Response`，比如对于不同的请求需要响应不同的数据格式`JSON`、`XML`，此时可以使用不同的`Render`来简化逻辑。  
 
 # 扩展阅读
 

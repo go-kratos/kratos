@@ -126,6 +126,7 @@ package dao
 import(
 	demoapi "kratos-demo/api"
 	grpcempty "github.com/golang/protobuf/ptypes/empty"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden"
 
 	"github.com/pkg/errors"
 )
@@ -135,10 +136,12 @@ type Dao struct{
 }
 
 // New account dao.
-func New(c *conf.Config) (d *Dao) {
+func New() (d *Dao) {
+	cfg := &warden.ClientConfig{}
+	paladin.Get("grpc.toml").UnmarshalTOML(cfg)
 	d = &Dao{}
 	var err error
-	if d.demoClient, err = demoapi.NewClient(c.DemoRPC); err != nil { // NOTE: DemoRPC为warden包内的ClientConfig对象
+	if d.demoClient, err = demoapi.NewClient(cfg); err != nil {
 		panic(err)
 	}
 	return
