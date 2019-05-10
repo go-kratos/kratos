@@ -8,7 +8,7 @@ option (gogoproto.unmarshaler_all) = true;
 option (gogoproto.marshaler_all) = true;
 option (gogoproto.sizer_all) = true;
 
-message Article {
+message Demo {
     int64 ID = 1 [(gogoproto.jsontag) = "id"];
     string Title = 3 [(gogoproto.jsontag) = "title"];
 }

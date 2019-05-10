@@ -8,7 +8,7 @@
 		model.proto
 
 	It has these top-level messages:
-		Article
+		Demo
 */
 package testdata
 
@@ -30,20 +30,20 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type Article struct {
+type Demo struct {
 	ID    int64  `protobuf:"varint,1,opt,name=ID,proto3" json:"id"`
 	Title string `protobuf:"bytes,3,opt,name=Title,proto3" json:"title"`
 }
 
-func (m *Article) Reset()                    { *m = Article{} }
-func (m *Article) String() string            { return proto.CompactTextString(m) }
-func (*Article) ProtoMessage()               {}
-func (*Article) Descriptor() ([]byte, []int) { return fileDescriptorModel, []int{0} }
+func (m *Demo) Reset()                    { *m = Demo{} }
+func (m *Demo) String() string            { return proto.CompactTextString(m) }
+func (*Demo) ProtoMessage()               {}
+func (*Demo) Descriptor() ([]byte, []int) { return fileDescriptorModel, []int{0} }
 
 func init() {
-	proto.RegisterType((*Article)(nil), "model.Article")
+	proto.RegisterType((*Demo)(nil), "model.Demo")
 }
-func (m *Article) Marshal() (dAtA []byte, err error) {
+func (m *Demo) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalTo(dAtA)
@@ -53,7 +53,7 @@ func (m *Article) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *Article) MarshalTo(dAtA []byte) (int, error) {
+func (m *Demo) MarshalTo(dAtA []byte) (int, error) {
 	var i int
 	_ = i
 	var l int
@@ -81,7 +81,7 @@ func encodeVarintModel(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return offset + 1
 }
-func (m *Article) Size() (n int) {
+func (m *Demo) Size() (n int) {
 	var l int
 	_ = l
 	if m.ID != 0 {
@@ -107,7 +107,7 @@ func sovModel(x uint64) (n int) {
 func sozModel(x uint64) (n int) {
 	return sovModel(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *Article) Unmarshal(dAtA []byte) error {
+func (m *Demo) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -130,10 +130,10 @@ func (m *Article) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: Article: wiretype end group for non-group")
+			return fmt.Errorf("proto: Demo: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Article: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: Demo: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:

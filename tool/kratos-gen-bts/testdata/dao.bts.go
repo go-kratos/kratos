@@ -4,14 +4,14 @@
   Package testdata is a generated cache proxy package.
   It is generated from:
   type _bts interface {
-		// bts: -batch=2 -max_group=20 -batch_err=break -nullcache=&Article{ID:-1} -check_null_code=$.ID==-1
-		Articles(c context.Context, keys []int64) (map[int64]*Article, error)
-		// bts: -sync=true -nullcache=&Article{ID:-1} -check_null_code=$.ID==-1
-		Article(c context.Context, key int64) (*Article, error)
+		// bts: -batch=2 -max_group=20 -batch_err=break -nullcache=&Demo{ID:-1} -check_null_code=$.ID==-1
+		Demos(c context.Context, keys []int64) (map[int64]*Demo, error)
+		// bts: -sync=true -nullcache=&Demo{ID:-1} -check_null_code=$.ID==-1
+		Demo(c context.Context, key int64) (*Demo, error)
 		// bts: -paging=true
-		Article1(c context.Context, key int64, pn int, ps int) (*Article, error)
-		// bts: -nullcache=&Article{ID:-1} -check_null_code=$.ID==-1
-		None(c context.Context) (*Article, error)
+		Demo1(c context.Context, key int64, pn int, ps int) (*Demo, error)
+		// bts: -nullcache=&Demo{ID:-1} -check_null_code=$.ID==-1
+		None(c context.Context) (*Demo, error)
 	}
 */
 
@@ -27,13 +27,13 @@ import (
 
 var _ _bts
 
-// Articles get data from cache if miss will call source method, then add to cache.
-func (d *Dao) Articles(c context.Context, keys []int64) (res map[int64]*Article, err error) {
+// Demos get data from cache if miss will call source method, then add to cache.
+func (d *Dao) Demos(c context.Context, keys []int64) (res map[int64]*Demo, err error) {
 	if len(keys) == 0 {
 		return
 	}
 	addCache := true
-	if res, err = d.CacheArticles(c, keys); err != nil {
+	if res, err = d.CacheDemos(c, keys); err != nil {
 		addCache = false
 		res = nil
 		err = nil
@@ -44,7 +44,7 @@ func (d *Dao) Articles(c context.Context, keys []int64) (res map[int64]*Article,
 			miss = append(miss, key)
 		}
 	}
-	prom.CacheHit.Add("Articles", int64(len(keys)-len(miss)))
+	prom.CacheHit.Add("Demos", int64(len(keys)-len(miss)))
 	for k, v := range res {
 		if v.ID == -1 {
 			delete(res, k)
@@ -54,8 +54,8 @@ func (d *Dao) Articles(c context.Context, keys []int64) (res map[int64]*Article,
 	if missLen == 0 {
 		return
 	}
-	missData := make(map[int64]*Article, missLen)
-	prom.CacheMiss.Add("Articles", int64(missLen))
+	missData := make(map[int64]*Demo, missLen)
+	prom.CacheMiss.Add("Demos", int64(missLen))
 	var mutex sync.Mutex
 	group := errgroup.WithCancel(c)
 	if missLen > 20 {
@@ -63,7 +63,7 @@ func (d *Dao) Articles(c context.Context, keys []int64) (res map[int64]*Article,
 	}
 	var run = func(ms []int64) {
 		group.Go(func(ctx context.Context) (err error) {
-			data, err := d.RawArticles(ctx, ms)
+			data, err := d.RawDemos(ctx, ms)
 			mutex.Lock()
 			for k, v := range data {
 				missData[k] = v
@@ -84,7 +84,7 @@ func (d *Dao) Articles(c context.Context, keys []int64) (res map[int64]*Article,
 	}
 	err = group.Wait()
 	if res == nil {
-		res = make(map[int64]*Article, len(keys))
+		res = make(map[int64]*Demo, len(keys))
 	}
 	for k, v := range missData {
 		res[k] = v
@@ -94,22 +94,22 @@ func (d *Dao) Articles(c context.Context, keys []int64) (res map[int64]*Article,
 	}
 	for _, key := range miss {
 		if res[key] == nil {
-			missData[key] = &Article{ID: -1}
+			missData[key] = &Demo{ID: -1}
 		}
 	}
 	if !addCache {
 		return
 	}
 	d.cache.Do(c, func(c context.Context) {
-		d.AddCacheArticles(c, missData)
+		d.AddCacheDemos(c, missData)
 	})
 	return
 }
 
-// Article get data from cache if miss will call source method, then add to cache.
-func (d *Dao) Article(c context.Context, key int64) (res *Article, err error) {
+// Demo get data from cache if miss will call source method, then add to cache.
+func (d *Dao) Demo(c context.Context, key int64) (res *Demo, err error) {
 	addCache := true
-	res, err = d.CacheArticle(c, key)
+	res, err = d.CacheDemo(c, key)
 	if err != nil {
 		addCache = false
 		err = nil
@@ -120,40 +120,40 @@ func (d *Dao) Article(c context.Context, key int64) (res *Article, err error) {
 		}
 	}()
 	if res != nil {
-		prom.CacheHit.Incr("Article")
+		prom.CacheHit.Incr("Demo")
 		return
 	}
-	prom.CacheMiss.Incr("Article")
-	res, err = d.RawArticle(c, key)
+	prom.CacheMiss.Incr("Demo")
+	res, err = d.RawDemo(c, key)
 	if err != nil {
 		return
 	}
 	miss := res
 	if miss == nil {
-		miss = &Article{ID: -1}
+		miss = &Demo{ID: -1}
 	}
 	if !addCache {
 		return
 	}
-	d.AddCacheArticle(c, key, miss)
+	d.AddCacheDemo(c, key, miss)
 	return
 }
 
-// Article1 get data from cache if miss will call source method, then add to cache.
-func (d *Dao) Article1(c context.Context, key int64, pn int, ps int) (res *Article, err error) {
+// Demo1 get data from cache if miss will call source method, then add to cache.
+func (d *Dao) Demo1(c context.Context, key int64, pn int, ps int) (res *Demo, err error) {
 	addCache := true
-	res, err = d.CacheArticle1(c, key, pn, ps)
+	res, err = d.CacheDemo1(c, key, pn, ps)
 	if err != nil {
 		addCache = false
 		err = nil
 	}
 	if res != nil {
-		prom.CacheHit.Incr("Article1")
+		prom.CacheHit.Incr("Demo1")
 		return
 	}
-	var miss *Article
-	prom.CacheMiss.Incr("Article1")
-	res, miss, err = d.RawArticle1(c, key, pn, ps)
+	var miss *Demo
+	prom.CacheMiss.Incr("Demo1")
+	res, miss, err = d.RawDemo1(c, key, pn, ps)
 	if err != nil {
 		return
 	}
@@ -161,13 +161,13 @@ func (d *Dao) Article1(c context.Context, key int64, pn int, ps int) (res *Artic
 		return
 	}
 	d.cache.Do(c, func(c context.Context) {
-		d.AddCacheArticle1(c, key, miss, pn, ps)
+		d.AddCacheDemo1(c, key, miss, pn, ps)
 	})
 	return
 }
 
 // None get data from cache if miss will call source method, then add to cache.
-func (d *Dao) None(c context.Context) (res *Article, err error) {
+func (d *Dao) None(c context.Context) (res *Demo, err error) {
 	addCache := true
 	res, err = d.CacheNone(c)
 	if err != nil {
@@ -190,7 +190,7 @@ func (d *Dao) None(c context.Context) (res *Article, err error) {
 	}
 	var miss = res
 	if miss == nil {
-		miss = &Article{ID: -1}
+		miss = &Demo{ID: -1}
 	}
 	if !addCache {
 		return

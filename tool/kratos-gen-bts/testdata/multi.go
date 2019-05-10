@@ -6,25 +6,25 @@ import (
 
 // mock test
 var (
-	_multiCacheFunc    func(c context.Context, keys []int64) (map[int64]*Article, error)
-	_multiRawFunc      func(c context.Context, keys []int64) (map[int64]*Article, error)
-	_multiAddCacheFunc func(c context.Context, values map[int64]*Article) error
+	_multiCacheFunc    func(c context.Context, keys []int64) (map[int64]*Demo, error)
+	_multiRawFunc      func(c context.Context, keys []int64) (map[int64]*Demo, error)
+	_multiAddCacheFunc func(c context.Context, values map[int64]*Demo) error
 )
 
-// CacheArticles .
-func (d *Dao) CacheArticles(c context.Context, keys []int64) (map[int64]*Article, error) {
+// CacheDemos .
+func (d *Dao) CacheDemos(c context.Context, keys []int64) (map[int64]*Demo, error) {
 	// get data from cache
 	return _multiCacheFunc(c, keys)
 }
 
-// RawArticles .
-func (d *Dao) RawArticles(c context.Context, keys []int64) (map[int64]*Article, error) {
+// RawDemos .
+func (d *Dao) RawDemos(c context.Context, keys []int64) (map[int64]*Demo, error) {
 	// get data from db
 	return _multiRawFunc(c, keys)
 }
 
-// AddCacheArticles .
-func (d *Dao) AddCacheArticles(c context.Context, values map[int64]*Article) error {
+// AddCacheDemos .
+func (d *Dao) AddCacheDemos(c context.Context, values map[int64]*Demo) error {
 	// add to cache
 	return _multiAddCacheFunc(c, values)
 }

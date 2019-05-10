@@ -5,16 +5,16 @@ import (
 	"testing"
 )
 
-func TestArticle(t *testing.T) {
+func TestDemo(t *testing.T) {
 	d := New()
 	c := context.TODO()
-	art := &Article{ID: 1, Title: "title"}
-	err := d.AddCacheArticle(c, art.ID, art)
+	art := &Demo{ID: 1, Title: "title"}
+	err := d.AddCacheDemo(c, art.ID, art)
 	if err != nil {
 		t.Errorf("err should be nil, get: %v", err)
 		t.FailNow()
 	}
-	art1, err := d.CacheArticle(c, art.ID)
+	art1, err := d.CacheDemo(c, art.ID)
 	if err != nil {
 		t.Errorf("err should be nil, get: %v", err)
 		t.FailNow()
@@ -23,12 +23,12 @@ func TestArticle(t *testing.T) {
 		t.Error("art not equal")
 		t.FailNow()
 	}
-	err = d.DelCacheArticle(c, art.ID)
+	err = d.DelCacheDemo(c, art.ID)
 	if err != nil {
 		t.Errorf("err should be nil, get: %v", err)
 		t.FailNow()
 	}
-	art1, err = d.CacheArticle(c, art.ID)
+	art1, err = d.CacheDemo(c, art.ID)
 	if (art1 != nil) || (err != nil) {
 		t.Errorf("art %v, err: %v", art1, err)
 		t.FailNow()
@@ -38,7 +38,7 @@ func TestArticle(t *testing.T) {
 func TestNone(t *testing.T) {
 	d := New()
 	c := context.TODO()
-	art := &Article{ID: 1, Title: "title"}
+	art := &Demo{ID: 1, Title: "title"}
 	err := d.AddCacheNone(c, art)
 	if err != nil {
 		t.Errorf("err should be nil, get: %v", err)
@@ -65,17 +65,17 @@ func TestNone(t *testing.T) {
 	}
 }
 
-func TestArticles(t *testing.T) {
+func TestDemos(t *testing.T) {
 	d := New()
 	c := context.TODO()
-	art1 := &Article{ID: 1, Title: "title"}
-	art2 := &Article{ID: 2, Title: "title"}
-	err := d.AddCacheArticles(c, map[int64]*Article{1: art1, 2: art2})
+	art1 := &Demo{ID: 1, Title: "title"}
+	art2 := &Demo{ID: 2, Title: "title"}
+	err := d.AddCacheDemos(c, map[int64]*Demo{1: art1, 2: art2})
 	if err != nil {
 		t.Errorf("err should be nil, get: %v", err)
 		t.FailNow()
 	}
-	arts, err := d.CacheArticles(c, []int64{art1.ID, art2.ID})
+	arts, err := d.CacheDemos(c, []int64{art1.ID, art2.ID})
 	if err != nil {
 		t.Errorf("err should be nil, get: %v", err)
 		t.FailNow()
@@ -84,12 +84,12 @@ func TestArticles(t *testing.T) {
 		t.Error("art not equal")
 		t.FailNow()
 	}
-	err = d.DelCacheArticles(c, []int64{art1.ID, art2.ID})
+	err = d.DelCacheDemos(c, []int64{art1.ID, art2.ID})
 	if err != nil {
 		t.Errorf("err should be nil, get: %v", err)
 		t.FailNow()
 	}
-	arts, err = d.CacheArticles(c, []int64{art1.ID, art2.ID})
+	arts, err = d.CacheDemos(c, []int64{art1.ID, art2.ID})
 	if (arts != nil) || (err != nil) {
 		t.Errorf("art %v, err: %v", art1, err)
 		t.FailNow()

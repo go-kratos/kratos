@@ -38,7 +38,8 @@ var toolIndexs = []*Tool{
         Summary:   "缓存回源逻辑代码生成器",
         Platform:  []string{"darwin", "linux", "windows"},
         Author:    "kratos",
-    },	&Tool{
+    },
+    &Tool{
         Name:      "kratos-gen-mc",
         Alias:     "kratos-gen-mc",
         BuildTime: time.Date(2019, 5, 5, 0, 0, 0, 0, time.Local),

@@ -13,7 +13,7 @@ import (
 // Dao .
 type Dao struct {
 	mc            *memcache.Memcache
-	articleExpire int32
+	demoExpire int32
 }
 
 // New new dao
@@ -34,53 +34,53 @@ func New() (d *Dao) {
 	}
 	d = &Dao{
 		mc:            memcache.New(cfg),
-		articleExpire: int32(5),
+		demoExpire: int32(5),
 	}
 	return
 }
 
 //go:generate kratos tool kratos-gen-mc
 type _mc interface {
-	// mc: -key=articleKey
-	CacheArticles(c context.Context, keys []int64) (map[int64]*Article, error)
-	// mc: -key=articleKey
-	CacheArticle(c context.Context, key int64) (*Article, error)
+	// mc: -key=demoKey
+	CacheDemos(c context.Context, keys []int64) (map[int64]*Demo, error)
+	// mc: -key=demoKey
+	CacheDemo(c context.Context, key int64) (*Demo, error)
 	// mc: -key=keyMid
-	CacheArticle1(c context.Context, key int64, mid int64) (*Article, error)
+	CacheDemo1(c context.Context, key int64, mid int64) (*Demo, error)
 	// mc: -key=noneKey
-	CacheNone(c context.Context) (*Article, error)
-	// mc: -key=articleKey
+	CacheNone(c context.Context) (*Demo, error)
+	// mc: -key=demoKey
 	CacheString(c context.Context, key int64) (string, error)
 
-	// mc: -key=articleKey -expire=d.articleExpire -encode=json
-	AddCacheArticles(c context.Context, values map[int64]*Article) error
-	// mc: -key=article2Key -expire=d.articleExpire -encode=json
-	AddCacheArticles2(c context.Context, values map[int64]*Article, tp int64) error
+	// mc: -key=demoKey -expire=d.demoExpire -encode=json
+	AddCacheDemos(c context.Context, values map[int64]*Demo) error
+	// mc: -key=demo2Key -expire=d.demoExpire -encode=json
+	AddCacheDemos2(c context.Context, values map[int64]*Demo, tp int64) error
 	// 这里也支持自定义注释 会替换默认的注释
-	// mc: -key=articleKey -expire=d.articleExpire -encode=json|gzip
-	AddCacheArticle(c context.Context, key int64, value *Article) error
-	// mc: -key=keyMid -expire=d.articleExpire -encode=gob
-	AddCacheArticle1(c context.Context, key int64, value *Article, mid int64) error
+	// mc: -key=demoKey -expire=d.demoExpire -encode=json|gzip
+	AddCacheDemo(c context.Context, key int64, value *Demo) error
+	// mc: -key=keyMid -expire=d.demoExpire -encode=gob
+	AddCacheDemo1(c context.Context, key int64, value *Demo, mid int64) error
 	// mc: -key=noneKey
-	AddCacheNone(c context.Context, value *Article) error
-	// mc: -key=articleKey -expire=d.articleExpire
+	AddCacheNone(c context.Context, value *Demo) error
+	// mc: -key=demoKey -expire=d.demoExpire
 	AddCacheString(c context.Context, key int64, value string) error
 
-	// mc: -key=articleKey
-	DelCacheArticles(c context.Context, keys []int64) error
-	// mc: -key=articleKey
-	DelCacheArticle(c context.Context, key int64) error
+	// mc: -key=demoKey
+	DelCacheDemos(c context.Context, keys []int64) error
+	// mc: -key=demoKey
+	DelCacheDemo(c context.Context, key int64) error
 	// mc: -key=keyMid
-	DelCacheArticle1(c context.Context, key int64, mid int64) error
+	DelCacheDemo1(c context.Context, key int64, mid int64) error
 	// mc: -key=noneKey
 	DelCacheNone(c context.Context) error
 }
 
-func articleKey(id int64) string {
+func demoKey(id int64) string {
 	return fmt.Sprintf("art_%d", id)
 }
 
-func article2Key(id, tp int64) string {
+func demo2Key(id, tp int64) string {
 	return fmt.Sprintf("art_%d_%d", id, tp)
 }
 
