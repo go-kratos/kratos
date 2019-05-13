@@ -39,7 +39,7 @@ func New() (d *Dao) {
 	return
 }
 
-//go:generate kratos tool kratos-gen-mc
+//go:generate kratos tool genmc
 type _mc interface {
 	// mc: -key=demoKey
 	CacheDemos(c context.Context, keys []int64) (map[int64]*Demo, error)

@@ -22,7 +22,7 @@ func New() *Dao {
 	return &Dao{cache: fanout.New("cache")}
 }
 
-//go:generate kratos tool kratos-gen-bts
+//go:generate kratos tool genbts
 type _bts interface {
 	// bts: -batch=2 -max_group=20 -batch_err=break -nullcache=&Demo{ID:-1} -check_null_code=$.ID==-1
 	Demos(c context.Context, keys []int64) (map[int64]*Demo, error)

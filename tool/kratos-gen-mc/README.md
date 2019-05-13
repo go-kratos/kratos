@@ -1,5 +1,5 @@
 
-#### kratos-gen-mc
+#### genmc
 
 > mc缓存代码生成
 

@@ -31,7 +31,7 @@ var toolIndexs = []*Tool{
 		Author:    "goswagger.io",
 	},
     &Tool{
-        Name:      "kratos-gen-bts",
+        Name:      "genbts",
         Alias:     "kratos-gen-bts",
         BuildTime: time.Date(2019, 5, 5, 0, 0, 0, 0, time.Local),
         Install:   "go get -u github.com/bilibili/kratos/tool/kratos-gen-bts",
@@ -40,7 +40,7 @@ var toolIndexs = []*Tool{
         Author:    "kratos",
     },
     &Tool{
-        Name:      "kratos-gen-mc",
+        Name:      "genmc",
         Alias:     "kratos-gen-mc",
         BuildTime: time.Date(2019, 5, 5, 0, 0, 0, 0, time.Local),
         Install:   "go get -u github.com/bilibili/kratos/tool/kratos-gen-mc",

@@ -1,4 +1,4 @@
-#### kratos-gen-bts
+#### genbts
 
 > 缓存代码生成
 
