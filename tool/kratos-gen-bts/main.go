@@ -464,7 +464,7 @@ func main() {
 	log.SetFlags(0)
 	defer func() {
 		if err := recover(); err != nil {
-			log.Fatalf("程序解析失败, err: %+v  请企业微信联系 @wangxu01", err)
+			log.Fatalf("程序解析失败, err: %+v", err)
 		}
 	}()
 	options := parse(pkg.NewSource(pkg.SourceText()))

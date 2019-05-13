@@ -97,7 +97,7 @@ func SourceText() string {
 	file := os.Getenv("GOFILE")
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
-		log.Fatal("can't open file", file)
+		log.Fatal("请使用go generate执行", file)
 	}
 	return string(data)
 }
