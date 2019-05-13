@@ -14,7 +14,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/bilibili/kratos/tool/common"
+	"github.com/bilibili/kratos/tool/pkg"
 )
 
 var (
@@ -96,12 +96,12 @@ type options struct {
 func getOptions(opt *options, comment string) {
 	os.Args = []string{os.Args[0]}
 	if regexp.MustCompile(`\s+//\s*bts:.+`).Match([]byte(comment)) {
-		args := strings.Split(common.RegexpReplace(`//\s*bts:(?P<arg>.+)`, comment, "$arg"), " ")
+		args := strings.Split(pkg.RegexpReplace(`//\s*bts:(?P<arg>.+)`, comment, "$arg"), " ")
 		for _, arg := range args {
 			arg = strings.TrimSpace(arg)
 			if arg != "" {
 				// validate option name
-				argName := common.RegexpReplace(`-(?P<name>[\w_-]+)=.+`, arg, "$name")
+				argName := pkg.RegexpReplace(`-(?P<name>[\w_-]+)=.+`, arg, "$name")
 				if !optionNamesMap[argName] {
 					log.Fatalf("选项:%s 不存在 请检查拼写\n", argName)
 				}
@@ -124,7 +124,7 @@ func getOptions(opt *options, comment string) {
 	opt.CustomMethod = *customMethod
 }
 
-func processList(s *common.Source, list *ast.Field) (opt options) {
+func processList(s *pkg.Source, list *ast.Field) (opt options) {
 	fset := s.Fset
 	src := s.Src
 	lines := strings.Split(src, "\n")
@@ -133,7 +133,7 @@ func processList(s *common.Source, list *ast.Field) (opt options) {
 	line := fset.Position(list.Pos()).Line - 3
 	if len(lines)-1 >= line {
 		comment := lines[line]
-		opt.Comment = common.RegexpReplace(`\s+//(?P<name>.+)`, comment, "$name")
+		opt.Comment = pkg.RegexpReplace(`\s+//(?P<name>.+)`, comment, "$name")
 		opt.Comment = strings.TrimSpace(opt.Comment)
 	}
 	// get options
@@ -303,7 +303,7 @@ func processList(s *common.Source, list *ast.Field) (opt options) {
 }
 
 // parse parse options
-func parse(s *common.Source) (opts []*options) {
+func parse(s *pkg.Source) (opts []*options) {
 	c := s.F.Scope.Lookup(_interfaceName)
 	if (c == nil) || (c.Kind != ast.Typ) {
 		log.Fatalln("无法找到缓存声明")
@@ -467,10 +467,10 @@ func main() {
 			log.Fatalf("程序解析失败, err: %+v  请企业微信联系 @wangxu01", err)
 		}
 	}()
-	options := parse(common.NewSource(common.SourceText()))
+	options := parse(pkg.NewSource(pkg.SourceText()))
 	header := genHeader(options)
 	body := genBody(options)
-	code := common.FormatCode(header + "\n" + body)
+	code := pkg.FormatCode(header + "\n" + body)
 	// Write to file.
 	dir := filepath.Dir(".")
 	outputName := filepath.Join(dir, "dao.bts.go")
