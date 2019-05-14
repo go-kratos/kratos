@@ -2,9 +2,9 @@
 
 > 缓存代码生成
 
-在internal/dao/dao.go中添加mc缓存interface定义，可以指定对应的[注解参数](../../tool/kratos-gen-mc/README.md)；
-并且在接口前面添加`go:generate kratos tool genmc`；
-然后在当前目录执行`go generate`，可以看到自动生成的mc.cache.go代码。
+在internal/dao/dao.go中添加mc缓存interface定义，可以指定对应的[注解参数](../../tool/kratos-gen-mc/README.md)；  
+并且在接口前面添加`go:generate kratos tool genmc`；  
+然后在当前目录执行`go generate`，可以看到自动生成的mc.cache.go代码。  
 
 ### 缓存模板
 ```go
