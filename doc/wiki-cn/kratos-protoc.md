@@ -10,7 +10,7 @@ kratos tool protoc --bm api.proto
 // generate swagger
 kratos tool protoc --swagger api.proto
 ```
-执行对应生成 `api.pb.go/api.bm.go/api.swagger.json` 源文档。
+执行对应生成 `api.pb.go/api.bm.go/api.swagger.json` 源文档。
 
 > 该工具在Windows/Linux下运行，需提前安装好 protobuf 工具
 
@@ -30,7 +30,7 @@ protoc -I$GOPATH/src:$KRATOS_HOME/tool/protobuf/pkg/extensions:$KRATOS_DEMO/api 
 protoc -I$GOPATH/src:$KRATOS_HOME/tool/protobuf/pkg/extensions:$KRATOS_DEMO/api --bswagger_out=$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
 ```
 
-大家也可以参考该命令进行`proto`生成，也可以参考[protobuf](https://github.com/google/protobuf)官方参数。
+大家也可以参考该命令进行`proto`生成，也可以参考 [protobuf](https://github.com/google/protobuf) 官方参数。
 
 
 -------------
