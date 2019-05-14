@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"path"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -27,8 +25,8 @@ var patternMap = map[string]func(map[string]interface{}) string{
 	"i": keyFactory(_instanceID),
 	"e": keyFactory(_deplyEnv),
 	"z": keyFactory(_zone),
-	"S": longSource,
-	"s": shortSource,
+	"S": keyFactory(_source),
+	"s": keyFactory(_source),
 	"M": message,
 }
 
@@ -114,20 +112,6 @@ func keyFactory(key string) func(map[string]interface{}) string {
 		}
 		return ""
 	}
-}
-
-func longSource(map[string]interface{}) string {
-	if _, file, lineNo, ok := runtime.Caller(6); ok {
-		return fmt.Sprintf("%s:%d", file, lineNo)
-	}
-	return "unknown:0"
-}
-
-func shortSource(map[string]interface{}) string {
-	if _, file, lineNo, ok := runtime.Caller(6); ok {
-		return fmt.Sprintf("%s:%d", path.Base(file), lineNo)
-	}
-	return "unknown:0"
 }
 
 func longTime(map[string]interface{}) string {

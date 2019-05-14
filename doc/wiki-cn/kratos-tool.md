@@ -61,7 +61,8 @@ kratos new kratos-demo -o YourName -d YourPath
 kratos new kratos-demo -o YourName -d YourPath --proto
 ```
 
-> 特别注意，如果不是MacOS系统，需要自己进行手动安装protoc，用于生成的示例项目`api`目录下的`proto`文件并不会自动生成对应的`.pb.go`和`.bm.go`文件。 
+> 特别注意，如果不是MacOS系统，需要自己进行手动安装protoc，用于生成的示例项目`api`目录下的`proto`文件并不会自动生成对应的`.pb.go`和`.bm.go`文件。
+
 > 也可以参考以下说明进行生成：[protoc说明](protoc.md)
 
 # kratos build & run
@@ -72,7 +73,7 @@ kratos new kratos-demo -o YourName -d YourPath --proto
 
 `kratos tool`是基于proto生成http&grpc代码，生成缓存回源代码，生成memcache执行代码，生成swagger文档等工具集，先看下的执行效果：
 
-```shell
+```
 kratos tool
 
 swagger(已安装): swagger api文档 Author(goswagger.io) [2019/05/05]
@@ -85,9 +86,11 @@ kratos(已安装): Kratos工具集本体 Author(kratos) [2019/04/02]
 
 详细文档： https://github.com/bilibili/kratos/blob/master/doc/wiki-cn/kratos-tool.md
 ```
+
 > 小小说明：如未安装工具，第一次运行也可自动安装，不需要特别执行install
 
 目前已经集成的工具有：
+
 * kratos 为本体工具，只用于安装更新使用；
 * protoc 用于快速生成gRPC、HTTP、Swagger文件，该命令Windows，Linux用户需要手动安装 protobuf 工具；
 * swagger 用于显示自动生成的HTTP API接口文档，通过 `kratos tool swagger serve api/api.swagger.json` 可以查看文档；

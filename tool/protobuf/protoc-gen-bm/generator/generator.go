@@ -91,7 +91,7 @@ func (t *bm) generateFileHeader(file *descriptor.FileDescriptorProto, pkgName st
 		// doc for the first file
 		t.P("/*")
 		t.P("Package ", t.GenPkgName, " is a generated blademaster stub package.")
-		t.P("This code was generated with kratos/tool/bmgen/protoc-gen-bm ", generator.Version, ".")
+		t.P("This code was generated with kratos/tool/protobuf/protoc-gen-bm ", generator.Version, ".")
 		t.P()
 		comment, err := t.Reg.FileComments(file)
 		if err == nil && comment.Leading != "" {

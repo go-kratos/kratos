@@ -15,7 +15,7 @@ type FieldType int32
 const (
 	UnknownType FieldType = iota
 	StringType
-	IntTpye
+	IntType
 	Int64Type
 	UintType
 	Uint64Type
@@ -43,7 +43,7 @@ func (f Field) AddTo(enc ObjectEncoder) {
 	switch f.Type {
 	case StringType:
 		enc.AddString(f.Key, f.StringVal)
-	case IntTpye:
+	case IntType:
 		enc.AddInt(f.Key, int(f.Int64Val))
 	case Int64Type:
 		enc.AddInt64(f.Key, f.Int64Val)
