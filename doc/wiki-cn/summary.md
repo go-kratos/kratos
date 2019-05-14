@@ -25,3 +25,7 @@
   * [memcache](cache-mc.md)
   * [redis](cache-redis.md)
 * [kratos工具](kratos-tool.md)
+  * [protoc](kratos-protoc.md)
+  * [swagger](kratos-swagger.md)
+  * [genmc](kratos-genmc.md)
+  * [genbts](kratos-genbts.md)
