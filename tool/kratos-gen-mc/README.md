@@ -35,8 +35,8 @@ mc Add方法需要用注解 -type=only_add单独指定
 | ----------- | ------------------- | ---------------- | ------------------------------------------------------------ | ---------------------------- | -------------------------- |
 | encode      | 根据值类型raw或json | set/add/replace  | 数据存储的格式                                               | json/pb/raw/gob/gzip         | json 或 json\|gzip 或gob等 |
 | type        | 前缀推断            | 全部             | mc方法 set/get/delete...                                     | get/set/del/replace/only_add | get 或 replace 等          |
-| key         | 根据方法名称生成    | 全部             | 缓存key名称                                                  | -                            | articleKey                 |
-| expire      | 根据方法名称生成    | 全部             | 缓存过期时间                                                 | -                            | d.articleExpire            |
+| key         | 根据方法名称生成    | 全部             | 缓存key名称                                                  | -                            | demoKey                 |
+| expire      | 根据方法名称生成    | 全部             | 缓存过期时间                                                 | -                            | d.demoExpire            |
 | batch       |                     | get(限多key模板) | 批量获取数据 每组大小                                        | -                            | 100                        |
 | max_group   |                     | get(限多key模板) | 批量获取数据 最大组数量                                      | -                            | 10                         |
 | batch_err   | break               | get(限多key模板) | 批量获取数据回源错误的时候 降级继续请求(continue)还是直接返回(break) | break 或 continue            | continue                   |
