@@ -19,7 +19,7 @@
 - 支持忽略参数
 
 ##### 使用方式:
-1. 在dao package中 增加注解 //go:generate btsgen 定义_cache接口 声明需要的方法
+1. 在dao package中 增加注解 //go:generate kratos tool genbts 定义bts接口 声明需要的方法
 2. 在dao 文件夹中执行 go generate命令 将会生成相应的缓存代码
 3. 调用生成的XXX方法
 4. 示例见testdata/dao.go
