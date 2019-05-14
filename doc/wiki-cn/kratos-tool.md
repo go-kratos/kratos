@@ -91,11 +91,11 @@ kratos(已安装): Kratos工具集本体 Author(kratos) [2019/04/02]
 
 目前已经集成的工具有：
 
-* kratos 为本体工具，只用于安装更新使用；
-* protoc 用于快速生成gRPC、HTTP、Swagger文件，该命令Windows，Linux用户需要手动安装 protobuf 工具；
-* swagger 用于显示自动生成的HTTP API接口文档，通过 `kratos tool swagger serve api/api.swagger.json` 可以查看文档；
-* genmc 用于自动生成memcached缓存代码；
-* genbts 用于生成缓存回源代码生成，如果miss则调用回源函数从数据源获取，然后塞入缓存；
+* [kratos](kratos-tool.md) 为本体工具，只用于安装更新使用；
+* [protoc](kratos-protoc.md) 用于快速生成gRPC、HTTP、Swagger文件，该命令Windows，Linux用户需要手动安装 protobuf 工具；
+* [swagger](kratos-swagger.md) 用于显示自动生成的HTTP API接口文档，通过 `kratos tool swagger serve api/api.swagger.json` 可以查看文档；
+* [genmc](kratos-genmc.md) 用于自动生成memcached缓存代码；
+* [genbts](kratos-genbts.md) 用于生成缓存回源代码生成，如果miss则调用回源函数从数据源获取，然后塞入缓存；
 
 -------------
 
