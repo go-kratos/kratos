@@ -89,49 +89,10 @@ kratos(已安装): Kratos工具集本体 Author(kratos) [2019/04/02]
 
 目前已经集成的工具有：
 * kratos 为本体工具，只用于安装更新使用；
-* protoc 用于快速生成gRPC、HTTP、Swagger文件，该命令Windows，Linux用户需要手动安装 protobuf 工具。
-* swagger  用于显示自动生成的HTTP API接口文档，通过 `kratos tool swagger serve api/api.swagger.json` 可以查看文档。
-
-### kratos tool protoc
-
-```
-// generate all
-kratos tool protoc api.proto
-// generate gRPC
-kratos tool protoc --grpc api.proto
-// generate BM HTTP
-kratos tool protoc --bm api.proto
-// generate swagger
-kratos tool protoc --swagger api.proto
-```
-执行对应生成 `api.pb.go/api.bm.go/api.swagger.json` 源文档。
-
-> 该工具在Windows/Linux下运行，需提前安装好 protobuf 工具
-
-该工具实际是一段`shell`脚本，其中自动将`protoc`命令进行了拼接，识别了需要的`*.proto`文件和当前目录下的`proto`文件，最终会拼接为如下命令进行执行：
-
-```shell
-export $KRATOS_HOME = kratos路径
-export $KRATOS_DEMO = 项目路径
-
-// 生成：api.pb.go
-protoc -I$GOPATH/src:$KRATOS_HOME/tool/protobuf/pkg/extensions:$KRATOS_DEMO/api --gogofast_out=plugins=grpc:$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
-
-// 生成：api.bm.go
-protoc -I$GOPATH/src:$KRATOS_HOME/tool/protobuf/pkg/extensions:$KRATOS_DEMO/api --bm_out=$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
-
-// 生成：api.swagger.json
-protoc -I$GOPATH/src:$KRATOS_HOME/tool/protobuf/pkg/extensions:$KRATOS_DEMO/api --bswagger_out=$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
-```
-
-大家也可以参考该命令进行`proto`生成，也可以参考[protobuf](https://github.com/google/protobuf)官方参数。
-
-kratos tool swagger
-```shell
-kratos tool swagger serve api/api.swagger.json
-```
-执行命令后，浏览器会自动打开swagger文档地址。  
-同时也可以查看更多的 [go-swagger](https://github.com/go-swagger/go-swagger) 官方参数进行使用。
+* protoc 用于快速生成gRPC、HTTP、Swagger文件，该命令Windows，Linux用户需要手动安装 protobuf 工具；
+* swagger 用于显示自动生成的HTTP API接口文档，通过 `kratos tool swagger serve api/api.swagger.json` 可以查看文档；
+* genmc 用于自动生成memcached缓存代码；
+* genbts 用于生成缓存回源代码生成，如果miss则调用回源函数从数据源获取，然后塞入缓存；
 
 -------------
 
