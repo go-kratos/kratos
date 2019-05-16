@@ -5,14 +5,14 @@ import (
 	"math"
 	"sync/atomic"
 	"time"
-	
-	"github.com/Bilibili/kratos/pkg/container/group"
-	"github.com/Bilibili/kratos/pkg/ecode"
-	"github.com/Bilibili/kratos/pkg/log"
-	limit "github.com/Bilibili/kratos/pkg/ratelimit"
-	"github.com/Bilibili/kratos/pkg/stat/metric"
 
-	cpustat "github.com/Bilibili/kratos/pkg/stat/sys/cpu"
+	"github.com/bilibili/kratos/pkg/container/group"
+	"github.com/bilibili/kratos/pkg/ecode"
+	"github.com/bilibili/kratos/pkg/log"
+	limit "github.com/bilibili/kratos/pkg/ratelimit"
+	"github.com/bilibili/kratos/pkg/stat/metric"
+
+	cpustat "github.com/bilibili/kratos/pkg/stat/sys/cpu"
 )
 
 var (
