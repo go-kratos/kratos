@@ -90,7 +90,7 @@ func TestBBRMinRt(t *testing.T) {
 	assert.Equal(t, int64(math.Ceil(math.MaxFloat64)), bbr.minRT())
 }
 
-func TestBBRMaxQps(t *testing.T) {
+func TestBBRMaxInflight(t *testing.T) {
 	bucketDuration := time.Millisecond * 100
 	passStat := metric.NewRollingCounter(metric.RollingCounterOpts{Size: 10, BucketDuration: bucketDuration})
 	rtStat := metric.NewRollingGauge(metric.RollingGaugeOpts{Size: 10, BucketDuration: bucketDuration})
@@ -108,7 +108,7 @@ func TestBBRMaxQps(t *testing.T) {
 		rtStat:          rtStat,
 		winBucketPerSec: 10,
 	}
-	assert.Equal(t, int64(60), bbr.maxQPS())
+	assert.Equal(t, int64(60), bbr.maxFlight())
 }
 
 func TestBBRShouldDrop(t *testing.T) {
