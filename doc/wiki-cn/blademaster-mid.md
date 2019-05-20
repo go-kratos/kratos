@@ -103,6 +103,32 @@ func Example() {
 }
 ```
 
+# 内置中间件
+
+## 自适应限流
+
+更多关于自适应限流的信息，请参考：[kratos 自适应限流](/doc/wiki-cn/ratelimit.md)
+
+```go
+func Example() {
+	myHandler := func(ctx *bm.Context) {
+    		mid := metadata.Int64(ctx, metadata.Mid)
+    		ctx.JSON(fmt.Sprintf("%d", mid), nil)
+    	}
+    
+    
+    	e := bm.DefaultServer(nil)
+    
+    	// 挂载自适应限流中间件到 bm engine，使用默认配置
+    	limiter := bm.NewRateLimiter(nil)
+    	e.Use(limiter.Limit())
+    
+    	e.GET("/user", myHandler)
+    
+    	e.Start()
+}
+```
+
 # 扩展阅读
 
 [bm快速开始](blademaster-quickstart.md) [bm模块说明](blademaster-mod.md)  [bm基于pb生成](blademaster-pb.md)
