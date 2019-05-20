@@ -59,7 +59,7 @@ func (d *Dao) NAME(c context.Context, {{.IDName}} []KEY{{.ExtraArgsType}}) (res 
 			{{if .BatchErrBreak}}
 				group := errgroup.WithCancel(c)
 			{{else}}
-				group := &errgroup.WithContext(c)
+				group := errgroup.WithContext(c)
 			{{end}}
 			if missLen > MAXGROUP {
 			group.GOMAXPROCS(MAXGROUP)
