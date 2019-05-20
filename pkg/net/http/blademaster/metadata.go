@@ -1,6 +1,7 @@
 package blademaster
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -8,6 +9,8 @@ import (
 
 	"github.com/bilibili/kratos/pkg/conf/env"
 	"github.com/bilibili/kratos/pkg/log"
+	criticalityPkg "github.com/bilibili/kratos/pkg/net/criticality"
+	"github.com/bilibili/kratos/pkg/net/metadata"
 
 	"github.com/pkg/errors"
 )
@@ -20,7 +23,27 @@ const (
 	_httpHeaderMirror       = "x1-bmspy-mirror"
 	_httpHeaderRemoteIP     = "x-backend-bm-real-ip"
 	_httpHeaderRemoteIPPort = "x-backend-bm-real-ipport"
+	_httpHeaderCriticality  = "x-backend-bili-criticality"
 )
+
+const (
+	_httpHeaderMetadata = "x-bili-metadata-"
+)
+
+var _outgoingHeader = map[string]string{
+	metadata.Color:       _httpHeaderColor,
+	metadata.Criticality: _httpHeaderCriticality,
+	metadata.Mirror:      _httpHeaderMirror,
+}
+
+func setMetadata(req *http.Request, key string, value interface{}) {
+	strV, ok := value.(string)
+	if !ok {
+		return
+	}
+	header := fmt.Sprintf("%s%s", _httpHeaderMetadata, strings.ReplaceAll(key, "_", "-"))
+	req.Header.Set(header, strV)
+}
 
 // mirror return true if x-bmspy-mirror in http header and its value is 1 or true.
 func mirror(req *http.Request) bool {
@@ -77,6 +100,12 @@ func timeout(req *http.Request) time.Duration {
 		timeout -= 20 // reduce 20ms every time.
 	}
 	return time.Duration(timeout) * time.Millisecond
+}
+
+// criticality get criticality from http request.
+func criticality(req *http.Request) criticalityPkg.Criticality {
+	raw := req.Header.Get(_httpHeaderCriticality)
+	return criticalityPkg.Parse(raw)
 }
 
 // remoteIP implements a best effort algorithm to return the real client IP, it parses

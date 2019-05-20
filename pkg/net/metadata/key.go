@@ -36,13 +36,17 @@ const (
 
 	// Device 客户端信息
 	Device = "device"
+
+	// Criticality 重要性
+	Criticality = "criticality"
 )
 
 var outgoingKey = map[string]struct{}{
-	Color:      struct{}{},
-	RemoteIP:   struct{}{},
-	RemotePort: struct{}{},
-	Mirror:     struct{}{},
+	Color:       struct{}{},
+	RemoteIP:    struct{}{},
+	RemotePort:  struct{}{},
+	Mirror:      struct{}{},
+	Criticality: struct{}{},
 }
 
 var incomingKey = map[string]struct{}{
