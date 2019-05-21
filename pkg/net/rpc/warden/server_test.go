@@ -267,7 +267,7 @@ func testBreaker(t *testing.T) {
 	}
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
-	for i := 0; i < 35; i++ {
+	for i := 0; i < 50; i++ {
 		_, err := c.SayHello(context.Background(), &pb.HelloRequest{Name: "breaker_test"})
 		if err != nil {
 			if ecode.ServiceUnavailable.Equal(err) {

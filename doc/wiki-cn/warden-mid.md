@@ -320,6 +320,52 @@ func serverLogging() grpc.UnaryServerInterceptor {
 }
 ```
 
+# 内置拦截器
+
+## 自适应限流拦截器
+
+更多关于自适应限流的信息，请参考：[kratos 自适应限流](/doc/wiki-cn/ratelimit.md)
+
+```go
+package grpc
+
+import (
+	pb "kratos-demo/api"
+	"kratos-demo/internal/service"
+	"github.com/bilibili/kratos/pkg/conf/paladin"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden/ratelimiter"
+)
+
+// New new a grpc server.
+func New(svc *service.Service) *warden.Server {
+	var rc struct {
+		Server *warden.ServerConfig
+	}
+	if err := paladin.Get("grpc.toml").UnmarshalTOML(&rc); err != nil {
+		if err != paladin.ErrNotExist {
+			panic(err)
+		}
+	}
+	ws := warden.NewServer(rc.Server)
+	
+	// 挂载自适应限流拦截器到 warden server，使用默认配置
+	limiter := ratelimiter.New(nil)
+	ws.Use(limiter.Limit())
+	
+	// 注意替换这里：
+	// RegisterDemoServer方法是在"api"目录下代码生成的
+	// 对应proto文件内自定义的service名字，请使用正确方法名替换
+	pb.RegisterDemoServer(ws.Server(), svc)
+	
+	ws, err := ws.Start()
+	if err != nil {
+		panic(err)
+	}
+	return ws
+}
+```
+
 # 扩展阅读
 
 [warden快速开始](warden-quickstart.md) [warden基于pb生成](warden-pb.md) [warden负载均衡](warden-balancer.md) [warden服务发现](warden-resolver.md)
