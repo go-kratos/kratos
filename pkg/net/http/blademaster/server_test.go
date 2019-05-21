@@ -87,7 +87,7 @@ func TestCriticality(t *testing.T) {
 	for _, testCase := range tests {
 		req, err := http.NewRequest("GET", uri(SockAddr, testCase.path), nil)
 		assert.NoError(t, err)
-		req.Header.Set(_httpHeaderCriticality, string(testCase.crtl))
+		req.Header.Set("x-bm-metadata-criticality", string(testCase.crtl))
 		resp, err := client.Do(req)
 		assert.NoError(t, err)
 		defer resp.Body.Close()
@@ -126,7 +126,7 @@ func TestNoneCriticality(t *testing.T) {
 	for _, testCase := range tests {
 		req, err := http.NewRequest("GET", uri(SockAddr, testCase.path), nil)
 		assert.NoError(t, err)
-		req.Header.Set(_httpHeaderCriticality, string(testCase.crtl))
+		req.Header.Set("x-bm-metadata-criticality", string(testCase.crtl))
 		resp, err := client.Do(req)
 		assert.NoError(t, err)
 		defer resp.Body.Close()

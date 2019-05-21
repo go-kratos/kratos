@@ -9,7 +9,7 @@ import (
 
 	"github.com/bilibili/kratos/pkg/conf/env"
 	"github.com/bilibili/kratos/pkg/log"
-	criticalityPkg "github.com/bilibili/kratos/pkg/net/criticality"
+	"github.com/bilibili/kratos/pkg/net/criticality"
 	"github.com/bilibili/kratos/pkg/net/metadata"
 
 	"github.com/pkg/errors"
@@ -18,22 +18,50 @@ import (
 const (
 	// http head
 	_httpHeaderUser         = "x1-bmspy-user"
-	_httpHeaderColor        = "x1-bmspy-color"
 	_httpHeaderTimeout      = "x1-bmspy-timeout"
-	_httpHeaderMirror       = "x1-bmspy-mirror"
 	_httpHeaderRemoteIP     = "x-backend-bm-real-ip"
 	_httpHeaderRemoteIPPort = "x-backend-bm-real-ipport"
-	_httpHeaderCriticality  = "x-backend-bili-criticality"
 )
 
 const (
-	_httpHeaderMetadata = "x-bili-metadata-"
+	_httpHeaderMetadata = "x-bm-metadata-"
 )
 
-var _outgoingHeader = map[string]string{
-	metadata.Color:       _httpHeaderColor,
-	metadata.Criticality: _httpHeaderCriticality,
-	metadata.Mirror:      _httpHeaderMirror,
+var _parser = map[string]func(string) interface{}{
+	"mirror": func(mirrorStr string) interface{} {
+		if mirrorStr == "" {
+			return false
+		}
+		val, err := strconv.ParseBool(mirrorStr)
+		if err != nil {
+			log.Warn("blademaster: failed to parse mirror: %+v", errors.Wrap(err, mirrorStr))
+			return false
+		}
+		if !val {
+			log.Warn("blademaster: request mirrorStr value :%s is false", mirrorStr)
+		}
+		return val
+	},
+	"criticality": func(in string) interface{} {
+		if crtl := criticality.Criticality(in); crtl != criticality.EmptyCriticality {
+			return string(crtl)
+		}
+		return string(criticality.Critical)
+	},
+}
+
+func parseMetadataTo(req *http.Request, to metadata.MD) {
+	for rawKey := range req.Header {
+		key := strings.ReplaceAll(strings.TrimLeft(strings.ToLower(rawKey), _httpHeaderMetadata), "-", "_")
+		rawValue := req.Header.Get(rawKey)
+		var value interface{} = rawValue
+		parser, ok := _parser[key]
+		if ok {
+			value = parser(rawValue)
+		}
+		to[key] = value
+	}
+	return
 }
 
 func setMetadata(req *http.Request, key string, value interface{}) {
@@ -45,45 +73,9 @@ func setMetadata(req *http.Request, key string, value interface{}) {
 	req.Header.Set(header, strV)
 }
 
-// mirror return true if x-bmspy-mirror in http header and its value is 1 or true.
-func mirror(req *http.Request) bool {
-	mirrorStr := req.Header.Get(_httpHeaderMirror)
-	if mirrorStr == "" {
-		return false
-	}
-	val, err := strconv.ParseBool(mirrorStr)
-	if err != nil {
-		log.Warn("blademaster: failed to parse mirror: %+v", errors.Wrap(err, mirrorStr))
-		return false
-	}
-	if !val {
-		log.Warn("blademaster: request mirrorStr value :%s is false", mirrorStr)
-	}
-	return val
-}
-
 // setCaller set caller into http request.
 func setCaller(req *http.Request) {
 	req.Header.Set(_httpHeaderUser, env.AppID)
-}
-
-// caller get caller from http request.
-func caller(req *http.Request) string {
-	return req.Header.Get(_httpHeaderUser)
-}
-
-// setColor set color into http request.
-func setColor(req *http.Request, color string) {
-	req.Header.Set(_httpHeaderColor, color)
-}
-
-// color get color from http request.
-func color(req *http.Request) string {
-	c := req.Header.Get(_httpHeaderColor)
-	if c == "" {
-		c = env.Color
-	}
-	return c
 }
 
 // setTimeout set timeout into http request.
@@ -100,12 +92,6 @@ func timeout(req *http.Request) time.Duration {
 		timeout -= 20 // reduce 20ms every time.
 	}
 	return time.Duration(timeout) * time.Millisecond
-}
-
-// criticality get criticality from http request.
-func criticality(req *http.Request) criticalityPkg.Criticality {
-	raw := req.Header.Get(_httpHeaderCriticality)
-	return criticalityPkg.Parse(raw)
 }
 
 // remoteIP implements a best effort algorithm to return the real client IP, it parses
