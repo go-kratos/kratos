@@ -156,6 +156,7 @@ func NewConn(target string, opt ...grpc.DialOption) (*grpc.ClientConn, error) {
 // NewClient returns a new blank Client instance with a default client interceptor.
 // opt can be used to add grpc dial options.
 func NewClient(conf *ClientConfig, opt ...grpc.DialOption) *Client {
+	// Do not initialize in the registration, otherwise it may cause the resvoler in the business code to not register.
 	resolver.Register(direct.New())
 	c := new(Client)
 	if err := c.SetConfig(conf); err != nil {
@@ -170,6 +171,7 @@ func NewClient(conf *ClientConfig, opt ...grpc.DialOption) *Client {
 // DefaultClient returns a new default Client instance with a default client interceptor and default dialoption.
 // opt can be used to add grpc dial options.
 func DefaultClient() *Client {
+	// Do not initialize in the registration, otherwise it may cause the resvoler in the business code to not register.
 	resolver.Register(direct.New())
 	_once.Do(func() {
 		_defaultClient = NewClient(nil)
