@@ -14,7 +14,7 @@ import (
 func main() {
 	log.Init(&log.Config{Stdout: true})
 	flag.Parse()
-	conn, err := warden.NewClient(nil).Dial(context.Background(), "127.0.0.1:8081")
+	conn, err := warden.NewClient(nil).Dial(context.Background(), "direct://d/127.0.0.1:8081")
 	if err != nil {
 		panic(err)
 	}
