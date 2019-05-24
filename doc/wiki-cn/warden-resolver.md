@@ -10,7 +10,7 @@ direct://default/127.0.0.1:9000,127.0.0.1:9091
 
 其中`direct`为协议类型，此处表示直接使用该`URL`内提供的地址`127.0.0.1:9000,127.0.0.1:9091`进行连接，而`default`在此处无意义仅当做占位符。
 
-# gRPC Resolver
+# gRPC Resolver
 
 gRPC暴露了服务发现的接口`resolver.Builder`和`resolver.ClientConn`和`resolver.Resolver`，[官方代码位置](https://github.com/grpc/grpc-go/blob/master/resolver/resolver.go)：
 
