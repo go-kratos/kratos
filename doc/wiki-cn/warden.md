@@ -21,16 +21,7 @@ gRPC暴露了两个拦截器接口，分别是：
 
 # 服务发现
 
-gRPC暴露了服务发现的接口`resolver.Resolver`，`warden/resolver/resolver.go`实现了该接口，并基于了`pkg/naming/naming.go`内的`Resolver`接口进行`Fetch``Watch`等操作。
-
-`pkg/naming/discovery/discovery.go`内实现了`pkg/naming/naming.go`内的`Resolver`接口，使用[discovery](https://github.com/bilibili/discovery)来进行服务发现。
-
-注意：`pkg/naming/naming.go`内的`Resolver`接口是`kratos`的一层封装，暴露的接口主要：
-
-* 相对原生`resolver.Resolver`内`ResolveNow`更友好的方法`Fetch``Watch`
-* 统一应用的实例信息结构体`naming.Instance`
-
-想要用非[discovery](https://github.com/bilibili/discovery)的请参考下面文档进行开发。
+`warden`默认使用`direct`方式直连，正常线上都会使用第三方服务注册与发现中间件，`warden`内包含了[discovery](https://github.com/bilibili/discovery)的逻辑实现，想使用如`etcd`、`zookeeper`等也可以，都请看下面文档。
 
 [warden服务发现](warden-resolver.md)
 
