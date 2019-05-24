@@ -19,8 +19,6 @@ import (
 	//this package is for json format response
 	_ "github.com/bilibili/kratos/pkg/net/rpc/warden/internal/encoding/json"
 	"github.com/bilibili/kratos/pkg/net/rpc/warden/internal/status"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver/direct"
 
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -137,7 +135,7 @@ func (s *Server) handle() grpc.UnaryServerInterceptor {
 
 func init() {
 	addFlag(flag.CommandLine)
-	resolver.Register(direct.New())
+
 }
 
 func addFlag(fs *flag.FlagSet) {

@@ -18,6 +18,8 @@ import (
 	"github.com/bilibili/kratos/pkg/net/netutil/breaker"
 	"github.com/bilibili/kratos/pkg/net/rpc/warden/balancer/p2c"
 	"github.com/bilibili/kratos/pkg/net/rpc/warden/internal/status"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver/direct"
 	"github.com/bilibili/kratos/pkg/net/trace"
 	xtime "github.com/bilibili/kratos/pkg/time"
 
@@ -47,6 +49,10 @@ func baseMetadata() metadata.MD {
 		gmd[nmd.Color] = []string{env.Color}
 	}
 	return gmd
+}
+
+func init() {
+	resolver.Register(direct.New())
 }
 
 // ClientConfig is rpc client conf.
@@ -222,7 +228,7 @@ func (c *Client) UseOpt(opt ...grpc.DialOption) *Client {
 
 // Dial creates a client connection to the given target.
 // Target format is scheme://authority/endpoint?query_arg=value
-// example: direct://default/192.168.1.1:8080,192.168.1.2:8081
+// example: direct://default/192.168.1.1:9000,192.168.1.2:9001
 func (c *Client) Dial(ctx context.Context, target string, opt ...grpc.DialOption) (conn *grpc.ClientConn, err error) {
 	if !c.conf.NonBlock {
 		c.opt = append(c.opt, grpc.WithBlock())

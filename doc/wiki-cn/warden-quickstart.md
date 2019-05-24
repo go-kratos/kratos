@@ -100,13 +100,13 @@ import (
 	"google.golang.org/grpc"
 )
 
-// AppID unique app id for service discovery
-const AppID = "your app id"
+// target server addrs.
+const target = "direct://default/127.0.0.1:9000,127.0.0.1:9091" // NOTE: example
 
 // NewClient new member grpc client
 func NewClient(cfg *warden.ClientConfig, opts ...grpc.DialOption) (DemoClient, error) {
 	client := warden.NewClient(cfg, opts...)
-	conn, err := client.Dial(context.Background(), "discovery://default/"+AppID)
+	conn, err := client.Dial(context.Background(), target)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func NewClient(cfg *warden.ClientConfig, opts ...grpc.DialOption) (DemoClient, e
 }
 ```
 
-其中，`"discovery://default/"+AppID`为gRPC target，提供给resolver用于discovery服务发现的，如果在使用其他服务发现组件，可以根据自己的实现情况传入。
+其中，`target`为gRPC用于服务发现的目标，使用标准url资源格式提供给resolver用于服务发现。`warden`默认使用`direct`直连方式，直接与`server`端进行连接。如果在使用其他服务发现组件请看[warden服务发现](warden-resolver.md)。
 
 有了初始化`Client`的代码，我们的`Dao`对象即可进行初始化和使用，以下以直接import服务端api包为例：
 
