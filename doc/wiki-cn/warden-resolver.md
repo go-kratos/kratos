@@ -6,7 +6,7 @@
 direct://default/127.0.0.1:9000,127.0.0.1:9091
 ```
 
-> 关于`target`就是标准的`URL`资源定位符[查看WIKI](https://zh.wikipedia.org/wiki/%E7%BB%9F%E4%B8%80%E8%B5%84%E6%BA%90%E5%AE%9A%E4%BD%8D%E7%AC%A6)
+> `target`就是标准的`URL`资源定位符[查看WIKI](https://zh.wikipedia.org/wiki/%E7%BB%9F%E4%B8%80%E8%B5%84%E6%BA%90%E5%AE%9A%E4%BD%8D%E7%AC%A6)
 
 其中`direct`为协议类型，此处表示直接使用该`URL`内提供的地址`127.0.0.1:9000,127.0.0.1:9091`进行连接，而`default`在此处无意义仅当做占位符。
 
@@ -129,14 +129,15 @@ import (
 // AppID your appid, ensure unique.
 const AppID = "demo.service" // NOTE: example
 
-// NewClient new member grpc client
-func NewClient(cfg *warden.ClientConfig, opts ...grpc.DialOption) (DemoClient, error) {
-
+func init(){
 	// NOTE: 注意这段代码，表示要使用discovery进行服务发现
 	// NOTE: 还需注意的是，resolver.Register是全局生效的，所以建议该代码放在进程初始化的时候执行
-	// NOTE: ！！！切记不要在一个进程内进行不同中间件的Register！！！
+	// NOTE: ！！！切记不要在一个进程内进行多个不同中间件的Register！！！
 	resolver.Register(discovery.Builder())
+}
 
+// NewClient new member grpc client
+func NewClient(cfg *warden.ClientConfig, opts ...grpc.DialOption) (DemoClient, error) {
 	client := warden.NewClient(cfg, opts...)
 	conn, err := client.Dial(context.Background(), "discovery://default/"+AppID)
 	if err != nil {
@@ -149,7 +150,13 @@ func NewClient(cfg *warden.ClientConfig, opts ...grpc.DialOption) (DemoClient, e
 }
 ```
 
-注意看传入`client.Dial`的`target`是`discovery://default/${appid}`，当gRPC进行解析后会得到`scheme`=`discovery`，`warden/resolver.Builder`会通过该`scheme`获取到`naming/discovery.Discovery`对象。而`naming/discovery.Discovery`对象基于`id`就知道要获取哪个服务的实例信息。
+> 注意：`resolver.Register`是全局行为，建议放在包加载阶段或main方法开始时执行，该方法执行后会在gRPC内注册构造方法
+
+`target`是`discovery://default/${appid}`，当gRPC内进行解析后会得到`scheme`=`discovery`和`appid`，然后进行以下逻辑：
+
+1. `warden/resolver.Builder`会通过`scheme`获取到`naming/discovery.Builder`对象（靠`resolver.Register`注册过的）
+2. 拿到`naming/discovery.Builder`后执行`Build(appid)`构造`naming/discovery.Discovery`
+3. `naming/discovery.Discovery`对象基于`appid`就知道要获取哪个服务的实例信息
 
 # 服务注册
 
