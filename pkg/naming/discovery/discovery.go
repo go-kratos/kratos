@@ -119,7 +119,7 @@ func fixConfig(c *Config) error {
 	}
 	if len(c.Nodes) == 0 || c.Region == "" || c.Zone == "" || c.Env == "" || c.Host == "" {
 		return fmt.Errorf(
-			"invalid discovery config nodes:%+s region:%s zone:%s deployEnv:%s host:%s",
+			"invalid discovery config nodes:%+v region:%s zone:%s deployEnv:%s host:%s",
 			c.Nodes,
 			c.Region,
 			c.Zone,
