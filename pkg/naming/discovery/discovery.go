@@ -101,7 +101,7 @@ type appInfo struct {
 	lastTs   int64 // latest timestamp
 }
 
-func fixConfig(c *Config) {
+func fixConfig(c *Config) error {
 	if len(c.Nodes) == 0 {
 		c.Nodes = strings.Split(env.DiscoveryNodes, ",")
 	}
@@ -117,6 +117,17 @@ func fixConfig(c *Config) {
 	if c.Host == "" {
 		c.Host = env.Hostname
 	}
+	if len(c.Nodes) == 0 || c.Region == "" || c.Zone == "" || c.Env == "" || c.Host == "" {
+		return fmt.Errorf(
+			"invalid discovery config nodes:%+v region:%s zone:%s deployEnv:%s host:%s",
+			c.Nodes,
+			c.Region,
+			c.Zone,
+			c.Env,
+			c.Host,
+		)
+	}
+	return nil
 }
 
 // New new a discovery client.
@@ -124,7 +135,9 @@ func New(c *Config) (d *Discovery) {
 	if c == nil {
 		c = new(Config)
 	}
-	fixConfig(c)
+	if err := fixConfig(c); err != nil {
+		panic(err)
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	d = &Discovery{
 		c:          c,
