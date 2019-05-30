@@ -35,7 +35,6 @@ const (
 	_tplTypeGRPCToml
 	_tplTypeModel
 	_tplTypeGRPCServer
-	_tplTypeAPIGenerate
 	_tplTypeGomod
 )
 
@@ -67,7 +66,6 @@ var (
 		_tplTypeDao:          _tplDao,
 		_tplTypeHTTPServer:   _tplHTTPServer,
 		_tplTypeAPIProto:     _tplAPIProto,
-		_tplTypeAPIGenerate:  _tplAPIGenerate,
 		_tplTypeMain:         _tplMain,
 		_tplTypeService:      _tplService,
 		_tplTypeChangeLog:    _tplChangeLog,
@@ -87,7 +85,6 @@ func create() (err error) {
 	if p.WithGRPC {
 		files[_tplTypeGRPCServer] = "/internal/server/grpc/server.go"
 		files[_tplTypeAPIProto] = "/api/api.proto"
-		files[_tplTypeAPIGenerate] = "/api/generate.go"
 		tpls[_tplTypeHTTPServer] = _tplPBHTTPServer
 		tpls[_tplTypeGRPCServer] = _tplGRPCServer
 		tpls[_tplTypeGRPCToml] = _tplGRPCToml
@@ -118,7 +115,7 @@ func create() (err error) {
 }
 
 func genpb() error {
-	cmd := exec.Command("go", "generate", p.Path+"/api/generate.go")
+	cmd := exec.Command("kratos", "tool", "protoc", p.Name+"/api/api.proto")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
