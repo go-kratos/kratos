@@ -116,19 +116,21 @@ func goget(url string) error {
 
 func latestKratos() (string, error) {
 	gopath := gopath()
-	ext := path.Join(gopath, "src/github.com/bilibili/kratos/tool/protobuf/pkg/extensions")
+	ext := path.Join(gopath, "src/github.com/bilibili/kratos/third_party")
 	if _, err := os.Stat(ext); !os.IsNotExist(err) {
 		return ext, nil
 	}
-	ext = path.Join(gopath, "pkg/mod/github.com/bilibili")
-	files, err := ioutil.ReadDir(ext)
+	baseMod := path.Join(gopath, "pkg/mod/github.com/bilibili")
+	files, err := ioutil.ReadDir(baseMod)
 	if err != nil {
 		return "", err
 	}
-	if len(files) == 0 {
-		return "", errors.New("not found kratos package")
+	for i := len(files) - 1; i >= 0; i-- {
+		if strings.HasPrefix(files[i].Name(), "kratos@") {
+			return path.Join(baseMod, files[i].Name(), "third_party"), nil
+		}
 	}
-	return path.Join(ext, files[len(files)-1].Name(), "tool/protobuf/pkg/extensions"), nil
+	return "", errors.New("not found kratos package")
 }
 
 func gopath() (gp string) {

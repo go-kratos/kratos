@@ -1,0 +1,636 @@
+// Copyright 2018 Google LLC.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+syntax = "proto3";
+
+package google.devtools.resultstore.v2;
+
+import "google/api/annotations.proto";
+import "google/devtools/resultstore/v2/action.proto";
+import "google/devtools/resultstore/v2/configuration.proto";
+import "google/devtools/resultstore/v2/configured_target.proto";
+import "google/devtools/resultstore/v2/file_set.proto";
+import "google/devtools/resultstore/v2/invocation.proto";
+import "google/devtools/resultstore/v2/target.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "google.golang.org/genproto/googleapis/devtools/resultstore/v2;resultstore";
+option java_multiple_files = true;
+option java_package = "com.google.devtools.resultstore.v2";
+
+// This is the interface used to upload information to the ResultStore database,
+// to update that information as necessary, and to make it immutable at the end.
+// Every Update and Append method supports an update_mask field for restricting
+// the affected fields.
+service ResultStoreUpload {
+  // Creates the given invocation. Generally, a unique ID will be assigned to
+  // the invocation's name field by the server. This is not an implicitly
+  // idempotent API, so a request id is required to make it idempotent.
+  //
+  // Returns an empty Invocation proto with only the name and ID fields
+  // populated.
+  //
+  // An error will be reported in the following cases:
+  // - If an invocation with the same ID already exists.
+  rpc CreateInvocation(CreateInvocationRequest) returns (Invocation) {
+    option (google.api.http) = {
+      post: "/v2/invocations"
+      body: "invocation"
+    };
+  }
+
+  // Applies a standard update to the invocation identified by the given proto's
+  // name.  For all types of fields (primitive, message, or repeated), replaces
+  // them with the given proto fields if they are under the given field mask
+  // paths.  Fields that match the mask but aren't populated in the given
+  // invocation are cleared. This is an implicitly idempotent API.
+  //
+  // Returns an empty Invocation proto with only the name and ID fields
+  // populated.
+  //
+  // An error will be reported in the following cases:
+  // - If the invocation does not exist.
+  // - If the invocation is finished.
+  // - If no field mask was given.
+  rpc UpdateInvocation(UpdateInvocationRequest) returns (Invocation) {
+    option (google.api.http) = {
+      patch: "/v2/{invocation.name=invocations/*}"
+      body: "invocation"
+    };
+  }
+
+  // Declares the invocation with the given name as finished and immutable.
+  // This is an implicitly idempotent API.
+  //
+  // If an Invocation is not updated for 24 hours, some time after that
+  // this will be called automatically.
+  //
+  // An error will be reported in the following cases:
+  // - If the invocation does not exist.
+  rpc FinishInvocation(FinishInvocationRequest)
+      returns (FinishInvocationResponse) {
+    option (google.api.http) = {
+      post: "/v2/{name=invocations/*}:finish"
+      body: "*"
+    };
+  }
+
+  // Creates the given target under the given parent invocation. The given
+  // target ID is URL encoded, converted to the full resource name, and assigned
+  // to the target's name field. This is not an implicitly idempotent API, so a
+  // request id is required to make it idempotent.
+  //
+  // Returns an empty Target proto with only the name and ID fields populated.
+  //
+  // An error will be reported in the following cases:
+  // - If no target ID is provided.
+  // - If the parent invocation does not exist.
+  // - If the parent invocation is finished.
+  // - If a target with the same name already exists.
+  rpc CreateTarget(CreateTargetRequest) returns (Target) {
+    option (google.api.http) = {
+      post: "/v2/{parent=invocations/*}/targets"
+      body: "target"
+    };
+  }
+
+  // Applies a standard update to the target identified by the given proto's
+  // name. For all types of fields (primitive, message, or repeated), replaces
+  // them with the given proto fields if they are under the given field mask
+  // paths. Fields that match the mask but aren't populated in the given
+  // target are cleared. This is an implicitly idempotent API.
+  //
+  // Returns an empty Target proto with only the name and ID fields populated.
+  //
+  // An error will be reported in the following cases:
+  // - If the target does not exist.
+  // - If the target or parent invocation is finished.
+  // - If no field mask was given.
+  rpc UpdateTarget(UpdateTargetRequest) returns (Target) {
+    option (google.api.http) = {
+      patch: "/v2/{target.name=invocations/*/targets/*}"
+      body: "target"
+    };
+  }
+
+  // Declares the target with the given name as finished and immutable.
+  // This is an implicitly idempotent API.
+  //
+  // An error will be reported in the following cases:
+  // - If the target does not exist.
+  rpc FinishTarget(FinishTargetRequest) returns (FinishTargetResponse) {
+    option (google.api.http) = {
+      post: "/v2/{name=invocations/*/targets/*}:finish"
+      body: "*"
+    };
+  }
+
+  // Creates the given configured target under the given parent target.
+  // The given configured target ID is URL encoded, converted to the full
+  // resource name, and assigned to the configured target's name field.
+  // This is not an implicitly idempotent API, so a request id is required
+  // to make it idempotent.
+  //
+  // Returns an empty ConfiguredTarget proto with only the name and ID fields
+  // populated.
+  //
+  // An error will be reported in the following cases:
+  // - If no config ID is provided.
+  // - If a configured target with the same ID already exists.
+  // - If the parent target does not exist.
+  // - If the parent target or invocation is finished.
+  rpc CreateConfiguredTarget(CreateConfiguredTargetRequest)
+      returns (ConfiguredTarget) {
+    option (google.api.http) = {
+      post: "/v2/{parent=invocations/*/targets/*}/configuredTargets"
+      body: "configured_target"
+    };
+  }
+
+  // Applies a standard update to the configured target identified by the given
+  // proto's name. For all types of fields (primitive, message, or repeated),
+  // replaces them with the given proto fields if they are under the given
+  // field mask paths. Fields that match the mask but aren't populated in the
+  // given configured target are cleared. This is an implicitly idempotent API.
+  //
+  // Returns an empty ConfiguredTarget proto with only the name and ID fields
+  // populated.
+  //
+  // An error will be reported in the following cases:
+  // - If the configured target does not exist.
+  // - If the parent target or invocation is finished.
+  // - If no field mask was given.
+  rpc UpdateConfiguredTarget(UpdateConfiguredTargetRequest)
+      returns (ConfiguredTarget) {
+    option (google.api.http) = {
+      patch: "/v2/{configured_target.name=invocations/*/targets/*/configuredTargets/*}"
+      body: "configured_target"
+    };
+  }
+
+  // Declares the configured target with the given name as finished and
+  // immutable. This is an implicitly idempotent API.
+  //
+  // An error will be reported in the following cases:
+  // - If the configured target does not exist.
+  rpc FinishConfiguredTarget(FinishConfiguredTargetRequest)
+      returns (FinishConfiguredTargetResponse) {
+    option (google.api.http) = {
+      post: "/v2/{name=invocations/*/targets/*/configuredTargets/*}:finish"
+      body: "*"
+    };
+  }
+
+  // Creates the given action under the given configured target. The given
+  // action ID is URL encoded, converted to the full resource name, and
+  // assigned to the action's name field. This is not an implicitly
+  // idempotent API, so a request id is required to make it idempotent.
+  //
+  // Returns an empty Action proto with only the name and ID fields populated.
+  //
+  // An error will be reported in the following cases:
+  // - If no action ID provided.
+  // - If the parent configured target does not exist.
+  // - If the parent target or invocation is finished.
+  // - If an action  with the same name already exists.
+  rpc CreateAction(CreateActionRequest) returns (Action) {
+    option (google.api.http) = {
+      post: "/v2/{parent=invocations/*/targets/*/configuredTargets/*}/actions"
+      body: "action"
+    };
+  }
+
+  // Applies a standard update to the action identified by the given
+  // proto's name.  For all types of fields (primitive, message, or repeated),
+  // replaces them with the given proto fields if they are under the given
+  // field mask paths.  Fields that match the mask but aren't populated in the
+  // given action are cleared.  This is an implicitly idempotent API.
+  //
+  // Returns an empty Action proto with only the name and ID fields populated.
+  //
+  // An error will be reported in the following cases:
+  // - If the action does not exist.
+  // - If the parent target or invocation is finished.
+  // - If no field mask was given.
+  rpc UpdateAction(UpdateActionRequest) returns (Action) {
+    option (google.api.http) = {
+      patch: "/v2/{action.name=invocations/*/targets/*/configuredTargets/*/actions/*}"
+      body: "action"
+    };
+  }
+
+  // Creates the given configuration under the given parent invocation. The
+  // given configuration ID is URL encoded, converted to the full resource name,
+  // and assigned to the configuration's name field. The configuration ID of
+  // "default" should be preferred for the default configuration in a
+  // single-config invocation. This is not an implicitly idempotent API, so a
+  // request id is required to make it idempotent.
+  //
+  // Returns an empty Configuration proto with only the name and ID fields
+  // populated.
+  //
+  // An error will be reported in the following cases:
+  // - If no configuration ID is provided.
+  // - If the parent invocation does not exist.
+  // - If the parent invocation is finished.
+  // - If a configuration with the same name already exists.
+  rpc CreateConfiguration(CreateConfigurationRequest) returns (Configuration) {
+    option (google.api.http) = {
+      post: "/v2/{parent=invocations/*}/configs"
+      body: "configuration"
+    };
+  }
+
+  // Applies a standard update to the configuration identified by the given
+  // proto's name. For all types of fields (primitive, message, or repeated),
+  // replaces them with the given proto fields if they are under the given field
+  // mask paths. Fields that match the mask but aren't populated in the given
+  // configuration are cleared. This is an implicitly idempotent API.
+  //
+  // Returns an empty Configuration proto with only the name and ID fields
+  // populated.
+  //
+  // An error will be reported in the following cases:
+  // - If the configuration does not exist.
+  // - If the parent invocation is finished.
+  // - If no field mask was given.
+  // - If a given field mask path is not valid.
+  rpc UpdateConfiguration(UpdateConfigurationRequest) returns (Configuration) {
+    option (google.api.http) = {
+      patch: "/v2/{configuration.name=invocations/*/configs/*}"
+      body: "configuration"
+    };
+  }
+
+  // Creates the given file set under the given parent invocation. The given
+  // file set ID is URL encoded, converted to the full resource name, and
+  // assigned to the file set's name field. This is not an implicitly idempotent
+  // API, so a request id is required to make it idempotent.
+  //
+  // Returns an empty FileSet proto with only the name and ID fields populated.
+  //
+  // An error will be reported in the following cases:
+  // - If no file set ID is provided.
+  // - If a file set with the same name already exists.
+  // - If the parent invocation does not exist.
+  // - If the parent invocation is finished.
+  rpc CreateFileSet(CreateFileSetRequest) returns (FileSet) {
+    option (google.api.http) = {
+      post: "/v2/{parent=invocations/*}/fileSets"
+      body: "file_set"
+    };
+  }
+
+  // Applies a standard update to the file set identified by the given proto's
+  // name. For all types of fields (primitive, message, or repeated), replaces
+  // them with the given proto fields if they are under the given field mask
+  // paths. Fields that match the mask but aren't populated in the given
+  // configuration are cleared. This is an implicitly idempotent API.
+  //
+  // Returns an empty FileSet proto with only the name and ID fields populated.
+  //
+  // An error will be reported in the following cases:
+  // - If the file set does not exist.
+  // - If the parent invocation is finished.
+  // - If no field mask was given.
+  // - If a given field mask path is not valid.
+  rpc UpdateFileSet(UpdateFileSetRequest) returns (FileSet) {
+    option (google.api.http) = {
+      patch: "/v2/{file_set.name=invocations/*/fileSets/*}"
+      body: "file_set"
+    };
+  }
+}
+
+// Request passed into CreateInvocation
+message CreateInvocationRequest {
+  // A unique identifier for this request. Must be set to a different value for
+  // each request that affects a given resource (eg. a random UUID). Required
+  // for the operation to be idempotent. This is achieved by ignoring this
+  // request if the last successful operation on the resource had the same
+  // request ID. If set, invocation_id must also be provided.
+  // Restricted to 36 utf-8 bytes.
+  string request_id = 1;
+
+  // The invocation ID.  If left empty then a new unique ID will be
+  // assigned by the server. If populated, a RFC 4122-compliant v4 UUID is
+  // preferred, but v3 or v5 UUIDs are allowed too.
+  string invocation_id = 2;
+
+  // The invocation to create.  Its name field will be ignored, since the name
+  // will be derived from the id field above and assigned by the server.
+  Invocation invocation = 3;
+
+  // This is a token to authorize upload access to this invocation. It must be
+  // set to a RFC 4122-compliant v3, v4, or v5 UUID. Once this is set in
+  // CreateInvocation, all other upload RPCs for that Invocation and any of its
+  // child resources must also include the exact same token, or they will be
+  // rejected. The generated token should be unique to this invocation, and it
+  // should be kept secret.
+  //
+  // The purpose of this field is to prevent other users and tools from
+  // clobbering your upload intentionally or accidentally. The standard way of
+  // using this token is to create a second v4 UUID when the invocation_id is
+  // created, and storing them together during the upload. Essentially, this is
+  // a "password" to the invocation.
+  string authorization_token = 4;
+
+  // By default, Invocations are auto-finished if they are not modified for 24
+  // hours. If you need auto-finish to happen sooner, set this field to the time
+  // you'd like auto-finish to occur.
+  google.protobuf.Timestamp auto_finish_time = 5;
+}
+
+// Request passed into UpdateInvocation
+message UpdateInvocationRequest {
+  // Contains the name and the fields of the invocation to be updated.  The
+  // name format must be: invocations/${INVOCATION_ID}
+  Invocation invocation = 3;
+
+  // Indicates which fields to update.
+  google.protobuf.FieldMask update_mask = 4;
+
+  // This is a token to authorize access to this invocation. It must be set to
+  // the same value that was provided in the CreateInvocationRequest.
+  string authorization_token = 5;
+}
+
+// Request passed into FinishInvocation
+message FinishInvocationRequest {
+  // The name of the invocation.  Its format must be:
+  // invocations/${INVOCATION_ID}
+  string name = 1;
+
+  // This is a token to authorize access to this invocation. It must be set to
+  // the same value that was provided in the CreateInvocationRequest.
+  string authorization_token = 3;
+}
+
+// Response returned from FinishInvocation
+message FinishInvocationResponse {
+  // The name of the invocation.  Its format will be:
+  // invocations/${INVOCATION_ID}
+  string name = 1;
+
+  // The resource ID components that identify the Invocation.
+  Invocation.Id id = 2;
+}
+
+// Request passed into CreateTarget
+message CreateTargetRequest {
+  // A unique identifier for this request. Must be set to a different value for
+  // each request that affects a given resource (eg. a random UUID). Required
+  // for the operation to be idempotent. This is achieved by ignoring this
+  // request if the last successful operation on the resource had the same
+  // request ID.  Restricted to 36 utf-8 bytes.
+  string request_id = 1;
+
+  // The name of the parent invocation in which the target is created.
+  // Its format must be invocations/${INVOCATION_ID}
+  string parent = 2;
+
+  // The target identifier.  It can be any UTF-8 string up to 1024 bytes long
+  // except for the reserved id '-'.
+  string target_id = 3;
+
+  // The target to create.  Its name field will be ignored, since the name will
+  // be derived from the id field above and assigned by the server.
+  Target target = 4;
+
+  // This is a token to authorize access to this invocation. It must be set to
+  // the same value that was provided in the CreateInvocationRequest.
+  string authorization_token = 5;
+}
+
+// Request passed into UpdateTarget
+message UpdateTargetRequest {
+  // Contains the name and the fields of the target to be updated.  The name
+  // format must be: invocations/${INVOCATION_ID}/targets/${TARGET_ID}
+  Target target = 3;
+
+  // Indicates which fields to update.
+  google.protobuf.FieldMask update_mask = 4;
+
+  // This is a token to authorize access to this invocation. It must be set to
+  // the same value that was provided in the CreateInvocationRequest.
+  string authorization_token = 5;
+}
+
+// Request passed into FinishTarget
+message FinishTargetRequest {
+  // The name of the target.  Its format must be:
+  // invocations/${INVOCATION_ID}/targets/${TARGET_ID}
+  string name = 1;
+
+  // This is a token to authorize access to this invocation. It must be set to
+  // the same value that was provided in the CreateInvocationRequest.
+  string authorization_token = 3;
+}
+
+// Response returned from FinishTarget
+message FinishTargetResponse {
+  // The name of the target.  Its format will be:
+  // invocations/${INVOCATION_ID}/targets/${TARGET_ID}
+  string name = 1;
+
+  // The resource ID components that identify the Target.
+  Target.Id id = 2;
+}
+
+// Request passed into CreateConfiguredTarget
+message CreateConfiguredTargetRequest {
+  // A unique identifier for this request. Must be set to a different value for
+  // each request that affects a given resource (eg. a random UUID). Required
+  // for the operation to be idempotent. This is achieved by ignoring this
+  // request if the last successful operation on the resource had the same
+  // request ID.  Restricted to 36 utf-8 bytes.
+  string request_id = 1;
+
+  // The name of the parent target in which the configured target is created.
+  // Its format must be:
+  // invocations/${INVOCATION_ID}/targets/${TARGET_ID}
+  string parent = 2;
+
+  // The configuration identifier. This must match the ID of an existing
+  // Configuration under this Invocation. Cannot be the reserved id '-'.
+  string config_id = 3;
+
+  // The configured target to create. Its name field will be ignored, since the
+  // name will be derived from the id field above and assigned by the server.
+  ConfiguredTarget configured_target = 4;
+
+  // This is a token to authorize access to this invocation. It must be set to
+  // the same value that was provided in the CreateInvocationRequest.
+  string authorization_token = 5;
+}
+
+// Request passed into UpdateConfiguredTarget
+message UpdateConfiguredTargetRequest {
+  // Contains the name and the fields of the configured target to be updated.
+  // The name format must be:
+  // invocations/${INVOCATION_ID}/targets/${TARGET_ID}/configuredTargets/${CONFIG_ID}
+  ConfiguredTarget configured_target = 3;
+
+  // Indicates which fields to update.
+  google.protobuf.FieldMask update_mask = 4;
+
+  // This is a token to authorize access to this invocation. It must be set to
+  // the same value that was provided in the CreateInvocationRequest.
+  string authorization_token = 5;
+}
+
+// Request passed into FinishConfiguredTarget
+message FinishConfiguredTargetRequest {
+  // The name of the configured target. Its format must be:
+  // invocations/${INVOCATION_ID}/targets/${TARGET_ID}/configuredTargets/${CONFIG_ID}
+  string name = 1;
+
+  // This is a token to authorize access to this invocation. It must be set to
+  // the same value that was provided in the CreateInvocationRequest.
+  string authorization_token = 3;
+}
+
+// Response returned from FinishConfiguredTarget
+message FinishConfiguredTargetResponse {
+  // The name of the configured target. Its format must be:
+  // invocations/${INVOCATION_ID}/targets/${TARGET_ID}/configuredTargets/${CONFIG_ID}
+  string name = 1;
+
+  // The resource ID components that identify the ConfiguredTarget.
+  ConfiguredTarget.Id id = 2;
+}
+
+// Request passed into CreateAction
+message CreateActionRequest {
+  // A unique identifier for this request. Must be set to a different value for
+  // each request that affects a given resource (eg. a random UUID). Required
+  // for the operation to be idempotent. This is achieved by ignoring this
+  // request if the last successful operation on the resource had the same
+  // request ID.  Restricted to 36 utf-8 bytes.
+  string request_id = 1;
+
+  // The name of the parent configured target in which the action is created.
+  // Its format must be:
+  // invocations/${INVOCATION_ID}/targets/${TARGET_ID}/configuredTargets/${CONFIG_ID}
+  string parent = 2;
+
+  // The action identifier. It can be any UTF-8 string up to 512 bytes long,
+  // except for the reserved id '-'.
+  string action_id = 3;
+
+  // The action to create.  Its name field will be ignored, since the
+  // name will be derived from the id field above and assigned by the server.
+  Action action = 4;
+
+  // This is a token to authorize access to this invocation. It must be set to
+  // the same value that was provided in the CreateInvocationRequest.
+  string authorization_token = 5;
+}
+
+// Request passed into UpdateAction
+message UpdateActionRequest {
+  // Contains the name and the fields of the action to be updated.  The
+  // name format must be:
+  // invocations/${INVOCATION_ID}/targets/${TARGET_ID}/configuredTargets/${CONFIG_ID}/actions/${ACTION_ID}
+  Action action = 3;
+
+  // Indicates which fields to update.
+  google.protobuf.FieldMask update_mask = 4;
+
+  // This is a token to authorize access to this invocation. It must be set to
+  // the same value that was provided in the CreateInvocationRequest.
+  string authorization_token = 5;
+}
+
+// Request passed into CreateConfiguration
+message CreateConfigurationRequest {
+  // A unique identifier for this request. Must be set to a different value for
+  // each request that affects a given resource (eg. a random UUID). Required
+  // for the operation to be idempotent. This is achieved by ignoring this
+  // request if the last successful operation on the resource had the same
+  // request ID.  Restricted to 36 utf-8 bytes.
+  string request_id = 1;
+
+  // The name of the parent invocation in which the configuration is created.
+  // Its format must be invocations/${INVOCATION_ID}
+  string parent = 2;
+
+  // The configuration identifier. It can be any UTF-8 string up to 256 bytes
+  // long. The configuration ID of "default" should be preferred for the default
+  // configuration in a single-config invocation. Cannot be the reserved id '-'.
+  string config_id = 3;
+
+  // The configuration to create. Its name field will be ignored, since the name
+  // will be derived from the id field above and assigned by the server.
+  Configuration configuration = 4;
+
+  // This is a token to authorize access to this invocation. It must be set to
+  // the same value that was provided in the CreateInvocationRequest.
+  string authorization_token = 5;
+}
+
+// Request passed into UpdateConfiguration
+message UpdateConfigurationRequest {
+  // Contains the name and fields of the configuration to be updated. The name
+  // format must be: invocations/${INVOCATION_ID}/configs/${CONFIG_ID}
+  Configuration configuration = 3;
+
+  // Indicates which fields to update.
+  google.protobuf.FieldMask update_mask = 4;
+
+  // This is a token to authorize access to this invocation. It must be set to
+  // the same value that was provided in the CreateInvocationRequest.
+  string authorization_token = 5;
+}
+
+// Request passed into CreateFileSet
+message CreateFileSetRequest {
+  // A unique identifier for this request. Must be set to a different value for
+  // each request that affects a given resource (eg. a random UUID). Required
+  // for the operation to be idempotent. This is achieved by ignoring this
+  // request if the last successful operation on the resource had the same
+  // request ID.  Restricted to 36 utf-8 bytes.
+  string request_id = 1;
+
+  // The name of the parent invocation in which the file set is created.
+  // Its format must be invocations/${INVOCATION_ID}
+  string parent = 2;
+
+  // The file set identifier. It can be any UTF-8 string up to 256 bytes long.
+  string file_set_id = 3;
+
+  // The file set to create. Its name field will be ignored, since the name will
+  // be derived from the id field above and assigned by the server.
+  FileSet file_set = 4;
+
+  // This is a token to authorize access to this invocation. It must be set to
+  // the same value that was provided in the CreateInvocationRequest.
+  string authorization_token = 5;
+}
+
+// Request passed into UpdateFileSet
+message UpdateFileSetRequest {
+  // Contains the name and fields of the file set to be updated. The name format
+  // must be: invocations/${INVOCATION_ID}/fileSets/${FILE_SET_ID}
+  FileSet file_set = 1;
+
+  // Indicates which fields to update.
+  google.protobuf.FieldMask update_mask = 2;
+
+  // This is a token to authorize access to this invocation. It must be set to
+  // the same value that was provided in the CreateInvocationRequest.
+  string authorization_token = 3;
+}

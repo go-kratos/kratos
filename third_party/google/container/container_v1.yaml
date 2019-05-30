@@ -1,0 +1,82 @@
+type: google.api.Service
+config_version: 3
+name: container.googleapis.com
+title: Kubernetes Engine API
+
+apis:
+- name: google.container.v1.ClusterManager
+
+documentation:
+  summary: |-
+    The Google Kubernetes Engine API is used for building and managing container
+    based applications, powered by the open source Kubernetes technology.
+
+backend:
+  rules:
+  - selector: google.container.v1.ClusterManager.ListClusters
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.GetCluster
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.CreateCluster
+    deadline: 45.0
+  - selector: google.container.v1.ClusterManager.UpdateCluster
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.UpdateNodePool
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.SetNodePoolAutoscaling
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.SetLoggingService
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.SetMonitoringService
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.SetAddonsConfig
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.SetLocations
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.UpdateMaster
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.SetMasterAuth
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.DeleteCluster
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.ListOperations
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.GetOperation
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.CancelOperation
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.GetServerConfig
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.ListNodePools
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.GetNodePool
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.CreateNodePool
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.DeleteNodePool
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.RollbackNodePoolUpgrade
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.SetNodePoolManagement
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.SetLabels
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.SetLegacyAbac
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.StartIPRotation
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.CompleteIPRotation
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.SetNodePoolSize
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.SetNetworkPolicy
+    deadline: 20.0
+  - selector: google.container.v1.ClusterManager.SetMaintenancePolicy
+    deadline: 20.0
+
+authentication:
+  rules:
+  - selector: '*'
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform

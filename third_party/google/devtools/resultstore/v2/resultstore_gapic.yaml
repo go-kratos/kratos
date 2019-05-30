@@ -1,0 +1,718 @@
+type: com.google.api.codegen.ConfigProto
+config_schema_version: 1.0.0
+# The settings of generated code in a specific language.
+language_settings:
+  java:
+    package_name: com.google.cloud.devtools.resultstore.v2
+  python:
+    package_name: google.cloud.devtools.resultstore_v2.gapic
+  go:
+    package_name: cloud.google.com/go/devtools/resultstore/apiv2
+  csharp:
+    package_name: Google.Devtools.Resultstore.V2
+  ruby:
+    package_name: Google::Cloud::Devtools::Resultstore::V2
+  php:
+    package_name: Google\Cloud\Devtools\Resultstore\V2
+  nodejs:
+    package_name: resultstore.v2
+# A list of API interface configurations.
+interfaces:
+  # The fully qualified name of the API interface.
+- name: google.devtools.resultstore.v2.ResultStoreDownload
+  # A list of resource collection configurations.
+  # Consists of a name_pattern and an entity_name.
+  # The name_pattern is a pattern to describe the names of the resources of this
+  # collection, using the platform's conventions for URI patterns. A generator
+  # may use this to generate methods to compose and decompose such names. The
+  # pattern should use named placeholders as in `shelves/{shelf}/books/{book}`;
+  # those will be taken as hints for the parameter names of the generated
+  # methods. If empty, no name methods are generated.
+  # The entity_name is the name to be used as a basis for generated methods and
+  # classes.
+  collections:
+  - name_pattern: invocations/{invocation}
+    entity_name: invocation
+  - name_pattern: invocations/{invocation}/configs/{config}
+    entity_name: config
+  - name_pattern: invocations/{invocation}/fileSets/{file_set}
+    entity_name: file_set
+  - name_pattern: invocations/{invocation}/targets/{target}
+    entity_name: target
+  - name_pattern: invocations/{invocation}/targets/{target}/configuredTargets/{configured_target}
+    entity_name: configured_target
+  - name_pattern: invocations/{invocation}/targets/{target}/configuredTargets/{configured_target}/actions/{action}
+    entity_name: action
+  # Definition for retryable codes.
+  retry_codes_def:
+  - name: idempotent
+    retry_codes:
+    - UNAVAILABLE
+  - name: non_idempotent
+    retry_codes: []
+  # Definition for retry/backoff parameters.
+  retry_params_def:
+  - name: default
+    initial_retry_delay_millis: 100
+    retry_delay_multiplier: 1.3
+    max_retry_delay_millis: 60000
+    initial_rpc_timeout_millis: 20000
+    rpc_timeout_multiplier: 1
+    max_rpc_timeout_millis: 20000
+    total_timeout_millis: 600000
+  # A list of method configurations.
+  # Common properties:
+  #
+  #   name - The simple name of the method.
+  #
+  #   flattening - Specifies the configuration for parameter flattening.
+  #   Describes the parameter groups for which a generator should produce method
+  #   overloads which allow a client to directly pass request message fields as
+  #   method parameters. This information may or may not be used, depending on
+  #   the target language.
+  #   Consists of groups, which each represent a list of parameters to be
+  #   flattened. Each parameter listed must be a field of the request message.
+  #
+  #   required_fields - Fields that are always required for a request to be
+  #   valid.
+  #
+  #   resource_name_treatment - An enum that specifies how to treat the resource
+  #   name formats defined in the field_name_patterns and
+  #   response_field_name_patterns fields.
+  #   UNSET: default value
+  #   NONE: the collection configs will not be used by the generated code.
+  #   VALIDATE: string fields will be validated by the client against the
+  #   specified resource name formats.
+  #   STATIC_TYPES: the client will use generated types for resource names.
+  #
+  #   page_streaming - Specifies the configuration for paging.
+  #   Describes information for generating a method which transforms a paging
+  #   list RPC into a stream of resources.
+  #   Consists of a request and a response.
+  #   The request specifies request information of the list method. It defines
+  #   which fields match the paging pattern in the request. The request consists
+  #   of a page_size_field and a token_field. The page_size_field is the name of
+  #   the optional field specifying the maximum number of elements to be
+  #   returned in the response. The token_field is the name of the field in the
+  #   request containing the page token.
+  #   The response specifies response information of the list method. It defines
+  #   which fields match the paging pattern in the response. The response
+  #   consists of a token_field and a resources_field. The token_field is the
+  #   name of the field in the response containing the next page token. The
+  #   resources_field is the name of the field in the response containing the
+  #   list of resources belonging to the page.
+  #
+  #   retry_codes_name - Specifies the configuration for retryable codes. The
+  #   name must be defined in interfaces.retry_codes_def.
+  #
+  #   retry_params_name - Specifies the configuration for retry/backoff
+  #   parameters. The name must be defined in interfaces.retry_params_def.
+  #
+  #   field_name_patterns - Maps the field name of the request type to
+  #   entity_name of interfaces.collections.
+  #   Specifies the string pattern that the field must follow.
+  #
+  #   timeout_millis - Specifies the default timeout for a non-retrying call. If
+  #   the call is retrying, refer to retry_params_name instead.
+  methods:
+  - name: GetInvocation
+    flattening:
+      groups:
+      - parameters:
+        - name
+    required_fields:
+    - name
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      name: invocation
+    timeout_millis: 60000
+  - name: SearchInvocations
+    flattening:
+      groups:
+      - parameters:
+        - query
+        - project_id
+    required_fields:
+    - query
+    - project_id
+    page_streaming:
+      request:
+        page_size_field: page_size
+        token_field: page_token
+      response:
+        token_field: next_page_token
+        resources_field: invocations
+    retry_codes_name: idempotent
+    retry_params_name: default
+    timeout_millis: 60000
+  - name: GetConfiguration
+    flattening:
+      groups:
+      - parameters:
+        - name
+    required_fields:
+    - name
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      name: config
+    timeout_millis: 60000
+  - name: ListConfigurations
+    flattening:
+      groups:
+      - parameters:
+        - parent
+    required_fields:
+    - parent
+    page_streaming:
+      request:
+        page_size_field: page_size
+        token_field: page_token
+      response:
+        token_field: next_page_token
+        resources_field: configurations
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      parent: invocation
+    timeout_millis: 60000
+  - name: GetTarget
+    flattening:
+      groups:
+      - parameters:
+        - name
+    required_fields:
+    - name
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      name: target
+    timeout_millis: 60000
+  - name: ListTargets
+    flattening:
+      groups:
+      - parameters:
+        - parent
+    required_fields:
+    - parent
+    page_streaming:
+      request:
+        page_size_field: page_size
+        token_field: page_token
+      response:
+        token_field: next_page_token
+        resources_field: targets
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      parent: invocation
+    timeout_millis: 60000
+  - name: GetConfiguredTarget
+    flattening:
+      groups:
+      - parameters:
+        - name
+    required_fields:
+    - name
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      name: configured_target
+    timeout_millis: 60000
+  - name: ListConfiguredTargets
+    flattening:
+      groups:
+      - parameters:
+        - parent
+    required_fields:
+    - parent
+    page_streaming:
+      request:
+        page_size_field: page_size
+        token_field: page_token
+      response:
+        token_field: next_page_token
+        resources_field: configured_targets
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      parent: target
+    timeout_millis: 60000
+  - name: GetAction
+    flattening:
+      groups:
+      - parameters:
+        - name
+    required_fields:
+    - name
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      name: action
+    timeout_millis: 60000
+  - name: ListActions
+    flattening:
+      groups:
+      - parameters:
+        - parent
+    required_fields:
+    - parent
+    page_streaming:
+      request:
+        page_size_field: page_size
+        token_field: page_token
+      response:
+        token_field: next_page_token
+        resources_field: actions
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      parent: configured_target
+    timeout_millis: 60000
+  - name: GetFileSet
+    flattening:
+      groups:
+      - parameters:
+        - name
+    required_fields:
+    - name
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      name: file_set
+    timeout_millis: 60000
+  - name: ListFileSets
+    flattening:
+      groups:
+      - parameters:
+        - parent
+    required_fields:
+    - parent
+    page_streaming:
+      request:
+        page_size_field: page_size
+        token_field: page_token
+      response:
+        token_field: next_page_token
+        resources_field: file_sets
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      parent: invocation
+    timeout_millis: 60000
+  # The fully qualified name of the API interface.
+- name: google.devtools.resultstore.v2.ResultStoreFileDownload
+  # A list of resource collection configurations.
+  # Consists of a name_pattern and an entity_name.
+  # The name_pattern is a pattern to describe the names of the resources of this
+  # collection, using the platform's conventions for URI patterns. A generator
+  # may use this to generate methods to compose and decompose such names. The
+  # pattern should use named placeholders as in `shelves/{shelf}/books/{book}`;
+  # those will be taken as hints for the parameter names of the generated
+  # methods. If empty, no name methods are generated.
+  # The entity_name is the name to be used as a basis for generated methods and
+  # classes.
+  collections:
+  - name_pattern: file/tail/{tail}
+    entity_name: tail
+  - name_pattern: file/{file}
+    entity_name: file
+  # Definition for retryable codes.
+  retry_codes_def:
+  - name: idempotent
+    retry_codes:
+    - UNAVAILABLE
+  - name: non_idempotent
+    retry_codes: []
+  # Definition for retry/backoff parameters.
+  retry_params_def:
+  - name: default
+    initial_retry_delay_millis: 100
+    retry_delay_multiplier: 1.3
+    max_retry_delay_millis: 60000
+    initial_rpc_timeout_millis: 20000
+    rpc_timeout_multiplier: 1
+    max_rpc_timeout_millis: 20000
+    total_timeout_millis: 600000
+  # A list of method configurations.
+  # Common properties:
+  #
+  #   name - The simple name of the method.
+  #
+  #   flattening - Specifies the configuration for parameter flattening.
+  #   Describes the parameter groups for which a generator should produce method
+  #   overloads which allow a client to directly pass request message fields as
+  #   method parameters. This information may or may not be used, depending on
+  #   the target language.
+  #   Consists of groups, which each represent a list of parameters to be
+  #   flattened. Each parameter listed must be a field of the request message.
+  #
+  #   required_fields - Fields that are always required for a request to be
+  #   valid.
+  #
+  #   resource_name_treatment - An enum that specifies how to treat the resource
+  #   name formats defined in the field_name_patterns and
+  #   response_field_name_patterns fields.
+  #   UNSET: default value
+  #   NONE: the collection configs will not be used by the generated code.
+  #   VALIDATE: string fields will be validated by the client against the
+  #   specified resource name formats.
+  #   STATIC_TYPES: the client will use generated types for resource names.
+  #
+  #   page_streaming - Specifies the configuration for paging.
+  #   Describes information for generating a method which transforms a paging
+  #   list RPC into a stream of resources.
+  #   Consists of a request and a response.
+  #   The request specifies request information of the list method. It defines
+  #   which fields match the paging pattern in the request. The request consists
+  #   of a page_size_field and a token_field. The page_size_field is the name of
+  #   the optional field specifying the maximum number of elements to be
+  #   returned in the response. The token_field is the name of the field in the
+  #   request containing the page token.
+  #   The response specifies response information of the list method. It defines
+  #   which fields match the paging pattern in the response. The response
+  #   consists of a token_field and a resources_field. The token_field is the
+  #   name of the field in the response containing the next page token. The
+  #   resources_field is the name of the field in the response containing the
+  #   list of resources belonging to the page.
+  #
+  #   retry_codes_name - Specifies the configuration for retryable codes. The
+  #   name must be defined in interfaces.retry_codes_def.
+  #
+  #   retry_params_name - Specifies the configuration for retry/backoff
+  #   parameters. The name must be defined in interfaces.retry_params_def.
+  #
+  #   field_name_patterns - Maps the field name of the request type to
+  #   entity_name of interfaces.collections.
+  #   Specifies the string pattern that the field must follow.
+  #
+  #   timeout_millis - Specifies the default timeout for a non-retrying call. If
+  #   the call is retrying, refer to retry_params_name instead.
+  methods:
+  - name: GetFile
+    flattening:
+      groups:
+      - parameters:
+        - uri
+        - read_offset
+        - read_limit
+    required_fields:
+    - uri
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      uri: file
+    timeout_millis: 60000
+  - name: GetFileTail
+    flattening:
+      groups:
+      - parameters:
+        - uri
+        - read_offset
+        - read_limit
+    required_fields:
+    - uri
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      uri: tail
+    timeout_millis: 60000
+# The fully qualified name of the API interface.
+- name: google.devtools.resultstore.v2.ResultStoreUpload
+  # A list of resource collection configurations.
+  # Consists of a name_pattern and an entity_name.
+  # The name_pattern is a pattern to describe the names of the resources of this
+  # collection, using the platform's conventions for URI patterns. A generator
+  # may use this to generate methods to compose and decompose such names. The
+  # pattern should use named placeholders as in `shelves/{shelf}/books/{book}`;
+  # those will be taken as hints for the parameter names of the generated
+  # methods. If empty, no name methods are generated.
+  # The entity_name is the name to be used as a basis for generated methods and
+  # classes.
+  collections:
+  - name_pattern: invocations/{invocation}
+    entity_name: invocation
+  - name_pattern: invocations/{invocation}/configs/{config}
+    entity_name: config
+  - name_pattern: invocations/{invocation}/fileSets/{file_set}
+    entity_name: file_set
+  - name_pattern: invocations/{invocation}/targets/{target}
+    entity_name: target
+  - name_pattern: invocations/{invocation}/targets/{target}/configuredTargets/{configured_target}
+    entity_name: configured_target
+  - name_pattern: invocations/{invocation}/targets/{target}/configuredTargets/{configured_target}/actions/{action}
+    entity_name: action
+  # Definition for retryable codes.
+  retry_codes_def:
+  - name: idempotent
+    retry_codes:
+    - UNAVAILABLE
+  - name: non_idempotent
+    retry_codes: []
+  # Definition for retry/backoff parameters.
+  retry_params_def:
+  - name: default
+    initial_retry_delay_millis: 100
+    retry_delay_multiplier: 1.3
+    max_retry_delay_millis: 60000
+    initial_rpc_timeout_millis: 20000
+    rpc_timeout_multiplier: 1
+    max_rpc_timeout_millis: 20000
+    total_timeout_millis: 600000
+  # A list of method configurations.
+  # Common properties:
+  #
+  #   name - The simple name of the method.
+  #
+  #   flattening - Specifies the configuration for parameter flattening.
+  #   Describes the parameter groups for which a generator should produce method
+  #   overloads which allow a client to directly pass request message fields as
+  #   method parameters. This information may or may not be used, depending on
+  #   the target language.
+  #   Consists of groups, which each represent a list of parameters to be
+  #   flattened. Each parameter listed must be a field of the request message.
+  #
+  #   required_fields - Fields that are always required for a request to be
+  #   valid.
+  #
+  #   resource_name_treatment - An enum that specifies how to treat the resource
+  #   name formats defined in the field_name_patterns and
+  #   response_field_name_patterns fields.
+  #   UNSET: default value
+  #   NONE: the collection configs will not be used by the generated code.
+  #   VALIDATE: string fields will be validated by the client against the
+  #   specified resource name formats.
+  #   STATIC_TYPES: the client will use generated types for resource names.
+  #
+  #   page_streaming - Specifies the configuration for paging.
+  #   Describes information for generating a method which transforms a paging
+  #   list RPC into a stream of resources.
+  #   Consists of a request and a response.
+  #   The request specifies request information of the list method. It defines
+  #   which fields match the paging pattern in the request. The request consists
+  #   of a page_size_field and a token_field. The page_size_field is the name of
+  #   the optional field specifying the maximum number of elements to be
+  #   returned in the response. The token_field is the name of the field in the
+  #   request containing the page token.
+  #   The response specifies response information of the list method. It defines
+  #   which fields match the paging pattern in the response. The response
+  #   consists of a token_field and a resources_field. The token_field is the
+  #   name of the field in the response containing the next page token. The
+  #   resources_field is the name of the field in the response containing the
+  #   list of resources belonging to the page.
+  #
+  #   retry_codes_name - Specifies the configuration for retryable codes. The
+  #   name must be defined in interfaces.retry_codes_def.
+  #
+  #   retry_params_name - Specifies the configuration for retry/backoff
+  #   parameters. The name must be defined in interfaces.retry_params_def.
+  #
+  #   field_name_patterns - Maps the field name of the request type to
+  #   entity_name of interfaces.collections.
+  #   Specifies the string pattern that the field must follow.
+  #
+  #   timeout_millis - Specifies the default timeout for a non-retrying call. If
+  #   the call is retrying, refer to retry_params_name instead.
+  methods:
+  - name: CreateInvocation
+    required_fields:
+    - request_id
+    - invocation
+    - authorization_token
+    retry_codes_name: non_idempotent
+    retry_params_name: default
+    timeout_millis: 60000
+  - name: UpdateInvocation
+    flattening:
+      groups:
+      - parameters:
+        - update_mask
+        - authorization_token
+    required_fields:
+    - invocation
+    - update_mask
+    - authorization_token
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      invocation.name: invocation
+    timeout_millis: 60000
+  - name: FinishInvocation
+    flattening:
+      groups:
+      - parameters:
+        - name
+        - authorization_token
+    required_fields:
+    - name
+    - authorization_token
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      name: invocation
+    timeout_millis: 60000
+  - name: CreateTarget
+    required_fields:
+    - request_id
+    - parent
+    - target_id
+    - target
+    - authorization_token
+    retry_codes_name: non_idempotent
+    retry_params_name: default
+    field_name_patterns:
+      parent: invocation
+    timeout_millis: 60000
+  - name: UpdateTarget
+    flattening:
+      groups:
+      - parameters:
+        - update_mask
+        - authorization_token
+    required_fields:
+    - target
+    - update_mask
+    - authorization_token
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      target.name: target
+    timeout_millis: 60000
+  - name: FinishTarget
+    flattening:
+      groups:
+      - parameters:
+        - name
+        - authorization_token
+    required_fields:
+    - name
+    - authorization_token
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      name: target
+    timeout_millis: 60000
+  - name: CreateConfiguredTarget
+    required_fields:
+    - request_id
+    - parent
+    - config_id
+    - configured_target
+    - authorization_token
+    retry_codes_name: non_idempotent
+    retry_params_name: default
+    field_name_patterns:
+      parent: target
+    timeout_millis: 60000
+  - name: UpdateConfiguredTarget
+    flattening:
+      groups:
+      - parameters:
+        - update_mask
+        - authorization_token
+    required_fields:
+    - configured_target
+    - update_mask
+    - authorization_token
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      configured_target.name: configured_target
+    timeout_millis: 60000
+  - name: FinishConfiguredTarget
+    flattening:
+      groups:
+      - parameters:
+        - name
+        - authorization_token
+    required_fields:
+    - name
+    - authorization_token
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      name: configured_target
+    timeout_millis: 60000
+  - name: CreateAction
+    required_fields:
+    - request_id
+    - parent
+    - action_id
+    - action
+    - authorization_token
+    retry_codes_name: non_idempotent
+    retry_params_name: default
+    field_name_patterns:
+      parent: configured_target
+    timeout_millis: 60000
+  - name: UpdateAction
+    flattening:
+      groups:
+      - parameters:
+        - update_mask
+        - authorization_token
+    required_fields:
+    - action
+    - update_mask
+    - authorization_token
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      action.name: action
+    timeout_millis: 60000
+  - name: CreateConfiguration
+    required_fields:
+    - request_id
+    - parent
+    - config_id
+    - configuration
+    - authorization_token
+    retry_codes_name: non_idempotent
+    retry_params_name: default
+    field_name_patterns:
+      parent: invocation
+    timeout_millis: 60000
+  - name: UpdateConfiguration
+    flattening:
+      groups:
+      - parameters:
+        - update_mask
+        - authorization_token
+    required_fields:
+    - configuration
+    - update_mask
+    - authorization_token
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      configuration.name: config
+    timeout_millis: 60000
+  - name: CreateFileSet
+    required_fields:
+    - request_id
+    - parent
+    - file_set_id
+    - file_set
+    - authorization_token
+    retry_codes_name: non_idempotent
+    retry_params_name: default
+    field_name_patterns:
+      parent: invocation
+    timeout_millis: 60000
+  - name: UpdateFileSet
+    flattening:
+      groups:
+      - parameters:
+        - update_mask
+        - authorization_token
+    required_fields:
+    - file_set
+    - update_mask
+    - authorization_token
+    retry_codes_name: idempotent
+    retry_params_name: default
+    field_name_patterns:
+      file_set.name: file_set
+    timeout_millis: 60000
+

@@ -1,0 +1,56 @@
+type: google.api.Service
+config_version: 3
+name: cloudtasks.googleapis.com
+title: Cloud Tasks API
+
+apis:
+  - name: google.cloud.tasks.v2.CloudTasks
+
+documentation:
+  summary: Manages the execution of large numbers of distributed requests.
+  overview: |-
+    Cloud Tasks manages the execution of large numbers of distributed requests.
+
+    For more information, see https://cloud.google.com/tasks/.
+
+backend:
+  rules:
+    - selector: google.cloud.tasks.v2.CloudTasks.ListQueues
+      deadline: 15.0
+    - selector: google.cloud.tasks.v2.CloudTasks.GetQueue
+      deadline: 10.0
+    - selector: google.cloud.tasks.v2.CloudTasks.CreateQueue
+      deadline: 10.0
+    - selector: google.cloud.tasks.v2.CloudTasks.UpdateQueue
+      deadline: 10.0
+    - selector: google.cloud.tasks.v2.CloudTasks.DeleteQueue
+      deadline: 10.0
+    - selector: google.cloud.tasks.v2.CloudTasks.PurgeQueue
+      deadline: 10.0
+    - selector: google.cloud.tasks.v2.CloudTasks.PauseQueue
+      deadline: 10.0
+    - selector: google.cloud.tasks.v2.CloudTasks.ResumeQueue
+      deadline: 10.0
+    - selector: google.cloud.tasks.v2.CloudTasks.GetIamPolicy
+      deadline: 10.0
+    - selector: google.cloud.tasks.v2.CloudTasks.SetIamPolicy
+      deadline: 10.0
+    - selector: google.cloud.tasks.v2.CloudTasks.TestIamPermissions
+      deadline: 10.0
+    - selector: google.cloud.tasks.v2.CloudTasks.ListTasks
+      deadline: 10.0
+    - selector: google.cloud.tasks.v2.CloudTasks.GetTask
+      deadline: 10.0
+    - selector: google.cloud.tasks.v2.CloudTasks.CreateTask
+      deadline: 10.0
+    - selector: google.cloud.tasks.v2.CloudTasks.DeleteTask
+      deadline: 10.0
+    - selector: google.cloud.tasks.v2.CloudTasks.RunTask
+      deadline: 10.0
+
+authentication:
+  rules:
+    - selector: 'google.cloud.tasks.v2.CloudTasks.*'
+      oauth:
+        canonical_scopes: |-
+          https://www.googleapis.com/auth/cloud-platform

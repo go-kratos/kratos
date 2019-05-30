@@ -1,0 +1,344 @@
+// Copyright 2017 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package google.cloud.videointelligence.v1beta1;
+
+import "google/api/annotations.proto";
+import "google/longrunning/operations.proto";
+import "google/protobuf/timestamp.proto";
+import "google/rpc/status.proto";
+
+option csharp_namespace = "Google.Cloud.VideoIntelligence.V1Beta1";
+option go_package = "google.golang.org/genproto/googleapis/cloud/videointelligence/v1beta1;videointelligence";
+option java_multiple_files = true;
+option java_outer_classname = "VideoIntelligenceServiceProto";
+option java_package = "com.google.cloud.videointelligence.v1beta1";
+option php_namespace = "Google\\Cloud\\VideoIntelligence\\V1beta1";
+
+// Service that implements Google Cloud Video Intelligence API.
+service VideoIntelligenceService {
+  // Performs asynchronous video annotation. Progress and results can be
+  // retrieved through the `google.longrunning.Operations` interface.
+  // `Operation.metadata` contains `AnnotateVideoProgress` (progress).
+  // `Operation.response` contains `AnnotateVideoResponse` (results).
+  rpc AnnotateVideo(AnnotateVideoRequest)
+      returns (google.longrunning.Operation) {
+    option (google.api.http) = {
+      post: "/v1beta1/videos:annotate"
+      body: "*"
+    };
+  }
+}
+
+// Video annotation request.
+message AnnotateVideoRequest {
+  // Input video location. Currently, only
+  // [Google Cloud Storage](https://cloud.google.com/storage/) URIs are
+  // supported, which must be specified in the following format:
+  // `gs://bucket-id/object-id` (other URI formats return
+  // [google.rpc.Code.INVALID_ARGUMENT][google.rpc.Code.INVALID_ARGUMENT]). For
+  // more information, see [Request URIs](/storage/docs/reference-uris). A video
+  // URI may include wildcards in `object-id`, and thus identify multiple
+  // videos. Supported wildcards: '*' to match 0 or more characters;
+  // '?' to match 1 character. If unset, the input video should be embedded
+  // in the request as `input_content`. If set, `input_content` should be unset.
+  string input_uri = 1;
+
+  // The video data bytes. Encoding: base64. If unset, the input video(s)
+  // should be specified via `input_uri`. If set, `input_uri` should be unset.
+  string input_content = 6;
+
+  // Requested video annotation features.
+  repeated Feature features = 2;
+
+  // Additional video context and/or feature-specific parameters.
+  VideoContext video_context = 3;
+
+  // Optional location where the output (in JSON format) should be stored.
+  // Currently, only [Google Cloud Storage](https://cloud.google.com/storage/)
+  // URIs are supported, which must be specified in the following format:
+  // `gs://bucket-id/object-id` (other URI formats return
+  // [google.rpc.Code.INVALID_ARGUMENT][google.rpc.Code.INVALID_ARGUMENT]). For
+  // more information, see [Request URIs](/storage/docs/reference-uris).
+  string output_uri = 4;
+
+  // Optional cloud region where annotation should take place. Supported cloud
+  // regions: `us-east1`, `us-west1`, `europe-west1`, `asia-east1`. If no region
+  // is specified, a region will be determined based on video file location.
+  string location_id = 5;
+}
+
+// Video context and/or feature-specific parameters.
+message VideoContext {
+  // Video segments to annotate. The segments may overlap and are not required
+  // to be contiguous or span the whole video. If unspecified, each video
+  // is treated as a single segment.
+  repeated VideoSegment segments = 1;
+
+  // If label detection has been requested, what labels should be detected
+  // in addition to video-level labels or segment-level labels. If unspecified,
+  // defaults to `SHOT_MODE`.
+  LabelDetectionMode label_detection_mode = 2;
+
+  // Whether the video has been shot from a stationary (i.e. non-moving) camera.
+  // When set to true, might improve detection accuracy for moving objects.
+  bool stationary_camera = 3;
+
+  // Model to use for label detection.
+  // Supported values: "latest" and "stable" (the default).
+  string label_detection_model = 4;
+
+  // Model to use for face detection.
+  // Supported values: "latest" and "stable" (the default).
+  string face_detection_model = 5;
+
+  // Model to use for shot change detection.
+  // Supported values: "latest" and "stable" (the default).
+  string shot_change_detection_model = 6;
+
+  // Model to use for safe search detection.
+  // Supported values: "latest" and "stable" (the default).
+  string safe_search_detection_model = 7;
+}
+
+// Video segment.
+message VideoSegment {
+  // Start offset in microseconds (inclusive). Unset means 0.
+  int64 start_time_offset = 1;
+
+  // End offset in microseconds (inclusive). Unset means 0.
+  int64 end_time_offset = 2;
+}
+
+// Label location.
+message LabelLocation {
+  // Video segment. Set to [-1, -1] for video-level labels.
+  // Set to [timestamp, timestamp] for frame-level labels.
+  // Otherwise, corresponds to one of `AnnotateSpec.segments`
+  // (if specified) or to shot boundaries (if requested).
+  VideoSegment segment = 1;
+
+  // Confidence that the label is accurate. Range: [0, 1].
+  float confidence = 2;
+
+  // Label level.
+  LabelLevel level = 3;
+}
+
+// Label annotation.
+message LabelAnnotation {
+  // Textual description, e.g. `Fixed-gear bicycle`.
+  string description = 1;
+
+  // Language code for `description` in BCP-47 format.
+  string language_code = 2;
+
+  // Where the label was detected and with what confidence.
+  repeated LabelLocation locations = 3;
+}
+
+// Safe search annotation (based on per-frame visual signals only).
+// If no unsafe content has been detected in a frame, no annotations
+// are present for that frame. If only some types of unsafe content
+// have been detected in a frame, the likelihood is set to `UNKNOWN`
+// for all other types of unsafe content.
+message SafeSearchAnnotation {
+  // Likelihood of adult content.
+  Likelihood adult = 1;
+
+  // Likelihood that an obvious modification was made to the original
+  // version to make it appear funny or offensive.
+  Likelihood spoof = 2;
+
+  // Likelihood of medical content.
+  Likelihood medical = 3;
+
+  // Likelihood of violent content.
+  Likelihood violent = 4;
+
+  // Likelihood of racy content.
+  Likelihood racy = 5;
+
+  // Video time offset in microseconds.
+  int64 time_offset = 6;
+}
+
+// Bounding box.
+message BoundingBox {
+  // Left X coordinate.
+  int32 left = 1;
+
+  // Right X coordinate.
+  int32 right = 2;
+
+  // Bottom Y coordinate.
+  int32 bottom = 3;
+
+  // Top Y coordinate.
+  int32 top = 4;
+}
+
+// Face location.
+message FaceLocation {
+  // Bounding box in a frame.
+  BoundingBox bounding_box = 1;
+
+  // Video time offset in microseconds.
+  int64 time_offset = 2;
+}
+
+// Face annotation.
+message FaceAnnotation {
+  // Thumbnail of a representative face view (in JPEG format). Encoding: base64.
+  string thumbnail = 1;
+
+  // All locations where a face was detected.
+  // Faces are detected and tracked on a per-video basis
+  // (as opposed to across multiple videos).
+  repeated VideoSegment segments = 2;
+
+  // Face locations at one frame per second.
+  repeated FaceLocation locations = 3;
+}
+
+// Annotation results for a single video.
+message VideoAnnotationResults {
+  // Video file location in
+  // [Google Cloud Storage](https://cloud.google.com/storage/).
+  string input_uri = 1;
+
+  // Label annotations. There is exactly one element for each unique label.
+  repeated LabelAnnotation label_annotations = 2;
+
+  // Face annotations. There is exactly one element for each unique face.
+  repeated FaceAnnotation face_annotations = 3;
+
+  // Shot annotations. Each shot is represented as a video segment.
+  repeated VideoSegment shot_annotations = 4;
+
+  // Safe search annotations.
+  repeated SafeSearchAnnotation safe_search_annotations = 6;
+
+  // If set, indicates an error. Note that for a single `AnnotateVideoRequest`
+  // some videos may succeed and some may fail.
+  google.rpc.Status error = 5;
+}
+
+// Video annotation response. Included in the `response`
+// field of the `Operation` returned by the `GetOperation`
+// call of the `google::longrunning::Operations` service.
+message AnnotateVideoResponse {
+  // Annotation results for all videos specified in `AnnotateVideoRequest`.
+  repeated VideoAnnotationResults annotation_results = 1;
+}
+
+// Annotation progress for a single video.
+message VideoAnnotationProgress {
+  // Video file location in
+  // [Google Cloud Storage](https://cloud.google.com/storage/).
+  string input_uri = 1;
+
+  // Approximate percentage processed thus far.
+  // Guaranteed to be 100 when fully processed.
+  int32 progress_percent = 2;
+
+  // Time when the request was received.
+  google.protobuf.Timestamp start_time = 3;
+
+  // Time of the most recent update.
+  google.protobuf.Timestamp update_time = 4;
+}
+
+// Video annotation progress. Included in the `metadata`
+// field of the `Operation` returned by the `GetOperation`
+// call of the `google::longrunning::Operations` service.
+message AnnotateVideoProgress {
+  // Progress metadata for all videos specified in `AnnotateVideoRequest`.
+  repeated VideoAnnotationProgress annotation_progress = 1;
+}
+
+// Video annotation feature.
+enum Feature {
+  // Unspecified.
+  FEATURE_UNSPECIFIED = 0;
+
+  // Label detection. Detect objects, such as dog or flower.
+  LABEL_DETECTION = 1;
+
+  // Human face detection and tracking.
+  FACE_DETECTION = 2;
+
+  // Shot change detection.
+  SHOT_CHANGE_DETECTION = 3;
+
+  // Safe search detection.
+  SAFE_SEARCH_DETECTION = 4;
+}
+
+// Label level (scope).
+enum LabelLevel {
+  // Unspecified.
+  LABEL_LEVEL_UNSPECIFIED = 0;
+
+  // Video-level. Corresponds to the whole video.
+  VIDEO_LEVEL = 1;
+
+  // Segment-level. Corresponds to one of `AnnotateSpec.segments`.
+  SEGMENT_LEVEL = 2;
+
+  // Shot-level. Corresponds to a single shot (i.e. a series of frames
+  // without a major camera position or background change).
+  SHOT_LEVEL = 3;
+
+  // Frame-level. Corresponds to a single video frame.
+  FRAME_LEVEL = 4;
+}
+
+// Label detection mode.
+enum LabelDetectionMode {
+  // Unspecified.
+  LABEL_DETECTION_MODE_UNSPECIFIED = 0;
+
+  // Detect shot-level labels.
+  SHOT_MODE = 1;
+
+  // Detect frame-level labels.
+  FRAME_MODE = 2;
+
+  // Detect both shot-level and frame-level labels.
+  SHOT_AND_FRAME_MODE = 3;
+}
+
+// Bucketized representation of likelihood.
+enum Likelihood {
+  // Unknown likelihood.
+  UNKNOWN = 0;
+
+  // Very unlikely.
+  VERY_UNLIKELY = 1;
+
+  // Unlikely.
+  UNLIKELY = 2;
+
+  // Possible.
+  POSSIBLE = 3;
+
+  // Likely.
+  LIKELY = 4;
+
+  // Very likely.
+  VERY_LIKELY = 5;
+}

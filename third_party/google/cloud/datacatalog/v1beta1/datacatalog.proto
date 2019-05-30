@@ -1,0 +1,129 @@
+// Copyright 2019 Google LLC.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+syntax = "proto3";
+
+package google.cloud.datacatalog.v1beta1;
+
+import "google/api/annotations.proto";
+import "google/cloud/datacatalog/v1beta1/schema.proto";
+import "google/cloud/datacatalog/v1beta1/table_spec.proto";
+import "google/cloud/datacatalog/v1beta1/timestamps.proto";
+
+option cc_enable_arenas = true;
+option go_package = "google.golang.org/genproto/googleapis/cloud/datacatalog/v1beta1;datacatalog";
+option java_multiple_files = true;
+option java_package = "com.google.cloud.datacatalog";
+
+// Cloud Data Catalog is a service that allows clients to discover,
+// manage, and understand their Google Cloud data resources.
+service DataCatalog {
+  // Get an entry by target resource name. This method allows clients to use
+  // the resource name from the source Google Cloud Platform service to get the
+  // Cloud Data Catalog Entry.
+  rpc LookupEntry(LookupEntryRequest) returns (Entry) {
+    option (google.api.http) = {
+      get: "/v1beta1/entries:lookup"
+    };
+  }
+}
+
+// Request message for
+// [LookupEntry][google.cloud.datacatalog.v1beta1.DataCatalog.LookupEntry].
+message LookupEntryRequest {
+  // Represents either the Google Cloud Platform resource or SQL name for a
+  // Google Cloud Platform resource.
+  oneof target_name {
+    // The full name of the Google Cloud Platform resource the Data Catalog
+    // entry represents. See:
+    // https://cloud.google.com/apis/design/resource_names#full_resource_name
+    // Full names are case-sensitive.
+    //
+    // Examples:
+    // "//bigquery.googleapis.com/projects/projectId/datasets/datasetId/tables/tableId".
+    // "//pubsub.googleapis.com/projects/projectId/topics/topicId"
+    string linked_resource = 1;
+
+    // The SQL name of the entry. SQL names are case-sensitive.
+    //
+    // Examples:
+    // 1. cloud_pubsub.project_id.topic_id
+    // 2. bigquery.project_id.dataset_id.table_id
+    // 3. datacatalog.project_id.location_id.entry_group_id.entry_id
+    string sql_resource = 3;
+  }
+}
+
+// Entry Metadata.
+// A Data Catalog Entry resource represents another resource in Google
+// Cloud Platform, such as a BigQuery Dataset or a Pub/Sub Topic. Clients can
+// use the `linked_resource` field in the Entry resource to refer to the
+// original resource id of the source system.
+//
+// An Entry resource contains resource details, such as its schema.
+message Entry {
+  // Output only. The Data Catalog resource name of the entry in URL format. For
+  // example,
+  // "projects/{project_id}/locations/{location}/entryGroups/{entry_group_id}/entries/{entry_id}".
+  string name = 1;
+
+  // The full name of the cloud resource the entry belongs to. See:
+  // https://cloud.google.com/apis/design/resource_names#full_resource_name
+  //
+  // Data Catalog supports resources from select Google Cloud Platform systems.
+  // `linked_resource` is the full name of the Google Cloud Platform resource.
+  // For example, the `linked_resource` for a table resource from BigQuery is:
+  //
+  // "//bigquery.googleapis.com/projects/projectId/datasets/datasetId/tables/tableId".
+  string linked_resource = 9;
+
+  // Type of entry.
+  EntryType type = 2;
+
+  // Type specification information.
+  oneof type_spec {
+    // Specification that applies to a BigQuery table. This is only valid on
+    // entries of type TABLE.
+    BigQueryTableSpec bigquery_table_spec = 12;
+  }
+
+  // Display information such as title and description.
+  // A short name to identify the entry, for example,
+  // "Analytics Data - Jan 2011".
+  string display_name = 3;
+
+  // Entry description, which can consist of several sentences or paragraphs
+  // that describe entry contents.
+  string description = 4;
+
+  // Schema of the entry.
+  Schema schema = 5;
+
+  // Timestamps about the underlying Google Cloud Platform resource -- not about
+  // this Data Catalog Entry.
+  SystemTimestamps source_system_timestamps = 7;
+}
+
+// Entry resources in Cloud Data Catalog can be of different types e.g. BigQuery
+// Table entry is of type 'TABLE'. This enum describes all the possible types
+// Cloud Data Catalog contains.
+enum EntryType {
+  // Default unknown type
+  ENTRY_TYPE_UNSPECIFIED = 0;
+  // The type of entry that has a GoogleSQL schema, including logical views.
+  TABLE = 2;
+  // An entry type which is used for streaming entries. Example - Pub/Sub.
+  DATA_STREAM = 3;
+}

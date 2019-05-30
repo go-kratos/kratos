@@ -1,0 +1,56 @@
+type: google.api.Service
+config_version: 1
+name: cloudresourcemanager.googleapis.com
+title: Google Cloud Resource Manager API
+
+apis:
+- name: google.cloud.resourcemanager.v2.Folders
+
+types:
+- name: google.cloud.resourcemanager.v2.FolderOperation
+
+documentation:
+  summary: |-
+    The Google Cloud Resource Manager API provides methods for creating,
+    reading, and updating project metadata.
+
+backend:
+  rules:
+  - selector: google.cloud.resourcemanager.v2.Folders.ListFolders
+    deadline: 30.0
+  - selector: google.cloud.resourcemanager.v2.Folders.SearchFolders
+    deadline: 30.0
+  - selector: google.cloud.resourcemanager.v2.Folders.GetFolder
+    deadline: 30.0
+  - selector: google.cloud.resourcemanager.v2.Folders.CreateFolder
+    deadline: 30.0
+  - selector: google.cloud.resourcemanager.v2.Folders.UpdateFolder
+    deadline: 30.0
+  - selector: google.cloud.resourcemanager.v2.Folders.MoveFolder
+    deadline: 30.0
+  - selector: google.cloud.resourcemanager.v2.Folders.DeleteFolder
+    deadline: 30.0
+  - selector: google.cloud.resourcemanager.v2.Folders.UndeleteFolder
+    deadline: 30.0
+  - selector: google.cloud.resourcemanager.v2.Folders.GetIamPolicy
+    deadline: 30.0
+  - selector: google.cloud.resourcemanager.v2.Folders.SetIamPolicy
+    deadline: 30.0
+  - selector: google.cloud.resourcemanager.v2.Folders.TestIamPermissions
+    deadline: 30.0
+
+authentication:
+  rules:
+  - selector: '*'
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform
+  - selector: |-
+      google.cloud.resourcemanager.v2.Folders.GetFolder,
+      google.cloud.resourcemanager.v2.Folders.GetIamPolicy,
+      google.cloud.resourcemanager.v2.Folders.ListFolders,
+      google.cloud.resourcemanager.v2.Folders.SearchFolders
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform,
+        https://www.googleapis.com/auth/cloud-platform.read-only
