@@ -41,7 +41,7 @@ func WithCancel(ctx context.Context) *Group {
 	return &Group{ctx: ctx, cancel: cancel}
 }
 
-func (g *Group) do(f func(ctx context.Context) error) {
+func (g *Group) do(f func(ctx context.Context,args ...interface{}) error) {
 	ctx := g.ctx
 	if ctx == nil {
 		ctx = context.Background()
@@ -98,6 +98,14 @@ func (g *Group) Go(f func(ctx context.Context) error) {
 		return
 	}
 	go g.do(f)
+}
+
+
+
+func (g *Group) GoWithArgs(f func(ctx context.Context, args ...interface{}) error, args ...interface{}) {
+	g.Go(func(ctx context.Context) error{
+		return f(ctx, args...)
+	})
 }
 
 // Wait blocks until all function calls from the Go method have returned, then
