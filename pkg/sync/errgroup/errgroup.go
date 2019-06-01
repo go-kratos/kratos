@@ -41,7 +41,7 @@ func WithCancel(ctx context.Context) *Group {
 	return &Group{ctx: ctx, cancel: cancel}
 }
 
-func (g *Group) do(f func(ctx context.Context,args ...interface{}) error) {
+func (g *Group) do(f func(ctx context.Context) error) {
 	ctx := g.ctx
 	if ctx == nil {
 		ctx = context.Background()
@@ -99,8 +99,6 @@ func (g *Group) Go(f func(ctx context.Context) error) {
 	}
 	go g.do(f)
 }
-
-
 
 func (g *Group) GoWithArgs(f func(ctx context.Context, args ...interface{}) error, args ...interface{}) {
 	g.Go(func(ctx context.Context) error{
