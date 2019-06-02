@@ -2,12 +2,14 @@ package log
 
 import (
 	"context"
-	"testing"
-
 	"github.com/bilibili/kratos/pkg/net/metadata"
-
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
+
+func packageInit() {
+
+}
 
 func initStdout() {
 	conf := &Config{
@@ -51,6 +53,12 @@ func testLog(t *testing.T) {
 		Infoc(context.Background(), "keys: %s %s...", "key1", "key2")
 		Infow(context.Background(), "key1", "value1", "key2", "value2")
 	})
+}
+
+func TestPackageInit(t *testing.T) {
+	packageInit()
+	testLog(t)
+	assert.Equal(t, nil, Close())
 }
 
 func TestFile(t *testing.T) {

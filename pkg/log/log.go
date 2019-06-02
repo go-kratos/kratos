@@ -48,12 +48,6 @@ var (
 	c *Config
 )
 
-func init() {
-	addFlag(flag.CommandLine)
-	h = newHandlers(nil)
-	c = new(Config)
-}
-
 var (
 	_v      int
 	_stdout bool
@@ -61,6 +55,24 @@ var (
 	_filter logFilter
 	_module = verboseModule{}
 )
+
+func init() {
+	addFlag(flag.CommandLine)
+	c = &Config{
+		Stdout: _stdout,
+		Dir:    _dir,
+		V:      int32(_v),
+		Module: _module,
+		Filter: _filter,
+		AppID:  "",
+	}
+	if len(env.AppID) != 0 {
+		c.AppID = env.AppID
+	}
+	c.Host = getHostname()
+	var hs = []Handler{NewStdout()}
+	h = newHandlers(c.Filter, hs...)
+}
 
 // addFlag init log from dsn.
 func addFlag(fs *flag.FlagSet) {
@@ -70,10 +82,10 @@ func addFlag(fs *flag.FlagSet) {
 	_stdout, _ = strconv.ParseBool(os.Getenv("LOG_STDOUT"))
 	_dir = os.Getenv("LOG_DIR")
 	if tm := os.Getenv("LOG_MODULE"); len(tm) > 0 {
-		_module.Set(tm)
+		_ = _module.Set(tm)
 	}
 	if tf := os.Getenv("LOG_FILTER"); len(tf) > 0 {
-		_filter.Set(tf)
+		_ = _filter.Set(tf)
 	}
 	// get val from flag
 	fs.IntVar(&_v, "log.v", _v, "log verbose level, or use LOG_V env variable.")
@@ -83,27 +95,25 @@ func addFlag(fs *flag.FlagSet) {
 	fs.Var(&_filter, "log.filter", "log field for sensitive message, or use LOG_FILTER env variable, format: field1,field2.")
 }
 
+func getHostname() string {
+	host := env.Hostname
+	if len(host) == 0 {
+		host, _ = os.Hostname()
+	}
+	return host
+}
+
 // Init create logger with context.
 func Init(conf *Config) {
 	var isNil bool
 	if conf == nil {
 		isNil = true
-		conf = &Config{
-			Stdout: _stdout,
-			Dir:    _dir,
-			V:      int32(_v),
-			Module: _module,
-			Filter: _filter,
-		}
+		conf = c
 	}
 	if conf.AppID == "" && len(env.AppID) != 0 {
 		conf.AppID = env.AppID
 	}
-	conf.Host = env.Hostname
-	if len(conf.Host) == 0 {
-		host, _ := os.Hostname()
-		conf.Host = host
-	}
+	conf.Host = getHostname()
 	var hs []Handler
 	// when env is dev
 	if isNil || conf.Stdout {
