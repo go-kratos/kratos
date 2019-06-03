@@ -253,9 +253,11 @@ func (client *Client) Raw(c context.Context, req *xhttp.Request, v ...string) (b
 	setTimeout(req, timeout)
 	req = req.WithContext(c)
 	setCaller(req)
-	if color := metadata.String(c, metadata.Color); color != "" {
-		setColor(req, color)
-	}
+	metadata.Range(c,
+		func(key string, value interface{}) {
+			setMetadata(req, key, value)
+		},
+		metadata.IsOutgoingKey)
 	if resp, err = client.client.Do(req); err != nil {
 		err = pkgerr.Wrapf(err, "host:%s, url:%s", req.URL.Host, realURL(req))
 		code = "failed"
