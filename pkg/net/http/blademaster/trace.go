@@ -52,8 +52,8 @@ func (c *closeTracker) Close() error {
 	return err
 }
 
-// NewTraceTracesport NewTraceTracesport
-func NewTraceTracesport(rt http.RoundTripper, peerService string, internalTags ...trace.Tag) *TraceTransport {
+// NewTraceTransport NewTraceTransport
+func NewTraceTransport(rt http.RoundTripper, peerService string, internalTags ...trace.Tag) *TraceTransport {
 	return &TraceTransport{RoundTripper: rt, peerService: peerService, internalTags: internalTags}
 }
 
