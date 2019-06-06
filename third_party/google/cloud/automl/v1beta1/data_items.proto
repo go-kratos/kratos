@@ -1,0 +1,109 @@
+// Copyright 2018 Google LLC.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+syntax = "proto3";
+
+package google.cloud.automl.v1beta1;
+
+import "google/api/annotations.proto";
+import "google/cloud/automl/v1beta1/io.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "google.golang.org/genproto/googleapis/cloud/automl/v1beta1;automl";
+option java_multiple_files = true;
+option java_package = "com.google.cloud.automl.v1beta1";
+option php_namespace = "Google\\Cloud\\AutoMl\\V1beta1";
+
+
+// A representation of an image.
+// Only images up to 30MB in size are supported.
+message Image {
+  // Input only. The data representing the image.
+  // For Predict calls [image_bytes][] must be set, as other options are not
+  // currently supported by prediction API. You can read the contents of an
+  // uploaded image by using the [content_uri][] field.
+  oneof data {
+    // Image content represented as a stream of bytes.
+    // Note: As with all `bytes` fields, protobuffers use a pure binary
+    // representation, whereas JSON representations use base64.
+    bytes image_bytes = 1;
+
+    // An input config specifying the content of the image.
+    InputConfig input_config = 6;
+  }
+
+  // Output only. HTTP URI to the thumbnail image.
+  string thumbnail_uri = 4;
+}
+
+// A representation of a text snippet.
+message TextSnippet {
+  // Required. The content of the text snippet as a string. Up to 250000
+  // characters long.
+  string content = 1;
+
+  // The format of the source text. Currently the only two allowed values are
+  // "text/html" and "text/plain". If left blank the format is automatically
+  // determined from the type of the uploaded content.
+  string mime_type = 2;
+
+  // Output only. HTTP URI where you can download the content.
+  string content_uri = 4;
+}
+
+// A structured text document e.g. a PDF.
+message Document {
+  // An input config specifying the content of the document.
+  DocumentInputConfig input_config = 1;
+}
+
+// A representation of a row in a relational table.
+message Row {
+  // The resource IDs of the column specs describing the columns of the row.
+  // If set must contain, but possibly in a different order, all input feature
+  //
+  // [column_spec_ids][google.cloud.automl.v1beta1.TablesModelMetadata.input_feature_column_specs]
+  // of the Model this row is being passed to.
+  // Note: The below `values` field must match order of this field, if this
+  // field is set.
+  repeated string column_spec_ids = 2;
+
+  // Required. The values of the row cells, given in the same order as the
+  // column_spec_ids, or, if not set, then in the same order as input feature
+  //
+  // [column_specs][google.cloud.automl.v1beta1.TablesModelMetadata.input_feature_column_specs]
+  // of the Model this row is being passed to.
+  repeated google.protobuf.Value values = 3;
+}
+
+// Example data used for training or prediction.
+message ExamplePayload {
+  // Required. Input only. The example data.
+  oneof payload {
+    // Example image.
+    Image image = 1;
+
+    // Example text.
+    TextSnippet text_snippet = 2;
+
+    // Example document.
+    Document document = 4;
+
+    // Example relational table row.
+    Row row = 3;
+  }
+}

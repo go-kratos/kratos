@@ -1,0 +1,417 @@
+type: com.google.api.codegen.ConfigProto
+config_schema_version: 1.0.0
+# The settings of generated code in a specific language.
+language_settings:
+  java:
+    package_name: com.google.cloud.language.v1
+  python:
+    package_name: google.cloud.language_v1.gapic
+  go:
+    package_name: cloud.google.com/go/language/apiv1
+  csharp:
+    package_name: Google.Cloud.Language.V1
+  ruby:
+    package_name: Google::Cloud::Language::V1
+  php:
+    package_name: Google\Cloud\Language\V1
+  nodejs:
+    package_name: language.v1
+    domain_layer_location: google-cloud
+# A list of API interface configurations.
+interfaces:
+  # The fully qualified name of the API interface.
+- name: google.cloud.language.v1.LanguageService
+  # A list of resource collection configurations.
+  # Consists of a name_pattern and an entity_name.
+  # The name_pattern is a pattern to describe the names of the resources of this
+  # collection, using the platform's conventions for URI patterns. A generator
+  # may use this to generate methods to compose and decompose such names. The
+  # pattern should use named placeholders as in `shelves/{shelf}/books/{book}`;
+  # those will be taken as hints for the parameter names of the generated
+  # methods. If empty, no name methods are generated.
+  # The entity_name is the name to be used as a basis for generated methods and
+  # classes.
+  collections: []
+  # Definition for retryable codes.
+  retry_codes_def:
+  - name: idempotent
+    retry_codes:
+    - UNAVAILABLE
+  - name: non_idempotent
+    retry_codes: []
+  # Definition for retry/backoff parameters.
+  retry_params_def:
+  - name: default
+    initial_retry_delay_millis: 100
+    retry_delay_multiplier: 1.3
+    max_retry_delay_millis: 60000
+    initial_rpc_timeout_millis: 20000
+    rpc_timeout_multiplier: 1
+    max_rpc_timeout_millis: 20000
+    total_timeout_millis: 600000
+  # A list of method configurations.
+  # Common properties:
+  #
+  #   name - The simple name of the method.
+  #
+  #   flattening - Specifies the configuration for parameter flattening.
+  #   Describes the parameter groups for which a generator should produce method
+  #   overloads which allow a client to directly pass request message fields as
+  #   method parameters. This information may or may not be used, depending on
+  #   the target language.
+  #   Consists of groups, which each represent a list of parameters to be
+  #   flattened. Each parameter listed must be a field of the request message.
+  #
+  #   required_fields - Fields that are always required for a request to be
+  #   valid.
+  #
+  #   resource_name_treatment - An enum that specifies how to treat the resource
+  #   name formats defined in the field_name_patterns and
+  #   response_field_name_patterns fields.
+  #   UNSET: default value
+  #   NONE: the collection configs will not be used by the generated code.
+  #   VALIDATE: string fields will be validated by the client against the
+  #   specified resource name formats.
+  #   STATIC_TYPES: the client will use generated types for resource names.
+  #
+  #   page_streaming - Specifies the configuration for paging.
+  #   Describes information for generating a method which transforms a paging
+  #   list RPC into a stream of resources.
+  #   Consists of a request and a response.
+  #   The request specifies request information of the list method. It defines
+  #   which fields match the paging pattern in the request. The request consists
+  #   of a page_size_field and a token_field. The page_size_field is the name of
+  #   the optional field specifying the maximum number of elements to be
+  #   returned in the response. The token_field is the name of the field in the
+  #   request containing the page token.
+  #   The response specifies response information of the list method. It defines
+  #   which fields match the paging pattern in the response. The response
+  #   consists of a token_field and a resources_field. The token_field is the
+  #   name of the field in the response containing the next page token. The
+  #   resources_field is the name of the field in the response containing the
+  #   list of resources belonging to the page.
+  #
+  #   retry_codes_name - Specifies the configuration for retryable codes. The
+  #   name must be defined in interfaces.retry_codes_def.
+  #
+  #   retry_params_name - Specifies the configuration for retry/backoff
+  #   parameters. The name must be defined in interfaces.retry_params_def.
+  #
+  #   field_name_patterns - Maps the field name of the request type to
+  #   entity_name of interfaces.collections.
+  #   Specifies the string pattern that the field must follow.
+  #
+  #   timeout_millis - Specifies the default timeout for a non-retrying call. If
+  #   the call is retrying, refer to retry_params_name instead.
+  methods:
+  - name: AnalyzeSentiment
+    flattening:
+      groups:
+      - parameters:
+        - document
+        - encoding_type
+      - parameters:
+        - document
+    required_fields:
+    - document
+    retry_codes_name: idempotent
+    retry_params_name: default
+    timeout_millis: 60000
+    samples:
+      standalone:
+      - value_sets: [language_sentiment_text]
+        region_tag: language_sentiment_text
+      - value_sets: [language_sentiment_gcs]
+        region_tag: language_sentiment_gcs
+      - region_tag: analyze_text_sentiment
+        value_sets: [analyze_text_sentiment]
+    sample_value_sets:
+    - id: analyze_text_sentiment
+      description: This sample demonstrates analyzing the sentiment of text
+      parameters:
+        defaults:
+        - document.type=PLAIN_TEXT
+        - document.content="I am so happy"
+    - id: language_sentiment_text
+      description: "Analyze sentiment of text"
+      parameters:
+        defaults:
+        - document.type=PLAIN_TEXT
+        - document.content="I am so happy and joyful."
+        attributes:
+        - parameter: document.content
+          sample_argument_name: text_content
+      on_success:
+      - define: sentiment=$resp.document_sentiment
+      - print: ["Sentiment score: %s", sentiment.score]
+      - print: ["Magnitude: %s", sentiment.magnitude]
+    - id: language_sentiment_gcs
+      description: "Analyze sentiment of text stored in GCS"
+      parameters:
+        defaults:
+        - document.type=PLAIN_TEXT
+        - document.gcs_content_uri="gs://cloud-samples-data/language/sentiment-positive.txt"
+        attributes:
+        - parameter: document.gcs_content_uri
+          sample_argument_name: gcs_uri
+      on_success:
+      - define: sentiment=$resp.document_sentiment
+      - print: ["Sentiment score: %s", sentiment.score]
+      - print: ["Magnitude: %s", sentiment.magnitude]
+  - name: AnalyzeEntities
+    flattening:
+      groups:
+      - parameters:
+        - document
+        - encoding_type
+      - parameters:
+        - document
+    required_fields:
+    - document
+    retry_codes_name: idempotent
+    retry_params_name: default
+    timeout_millis: 60000
+    samples:
+      standalone:
+      - value_sets: [language_entities_text]
+        region_tag: language_entities_text
+      - value_sets: [language_entities_gcs]
+        region_tag: language_entities_gcs
+    sample_value_sets:
+    - id: language_entities_text
+      description: "Analyze entities in text"
+      parameters:
+        defaults:
+        - document.type=PLAIN_TEXT
+        - document.content="California is a state."
+        attributes:
+        - parameter: document.content
+          sample_argument_name: text_content
+      on_success:
+      - loop:
+          collection: $resp.entities
+          variable: entity
+          body:
+          - print: ["Entity name: %s", entity.name]
+          - print: ["Entity type: %s", entity.type]
+          - print: ["Entity salience score: %s", entity.salience]
+          - loop:
+              collection: entity.mentions
+              variable: mention
+              body:
+              - print: ["Mention: %s", mention.text.content]
+              - print: ["Mention type: %s", mention.type]
+    - id: language_entities_gcs
+      description: "Analyze entities in text stored in GCS"
+      parameters:
+        defaults:
+        - document.type=PLAIN_TEXT
+        - document.gcs_content_uri="gs://cloud-samples-data/language/entity.txt"
+        attributes:
+        - parameter: document.gcs_content_uri
+          sample_argument_name: gcs_ur
+      on_success:
+      - loop:
+          collection: $resp.entities
+          variable: entity
+          body:
+          - print: ["Entity name: %s", entity.name]
+          - print: ["Entity type: %s", entity.type]
+          - print: ["Entity salience score: %s", entity.salience]
+          - loop:
+              collection: entity.mentions
+              variable: mention
+              body:
+              - print: ["Mention: %s", mention.text.content]
+              - print: ["Mention type: %s", mention.type]
+  - name: AnalyzeEntitySentiment
+    flattening:
+      groups:
+      - parameters:
+        - document
+        - encoding_type
+      - parameters:
+        - document
+    required_fields:
+    - document
+    retry_codes_name: idempotent
+    retry_params_name: default
+    timeout_millis: 60000
+    samples:
+      standalone:
+      - value_sets: [language_entity_sentiment_text]
+        region_tag: language_entity_sentiment_text
+      - value_sets: [language_entity_sentiment_gcs]
+        region_tag: language_entity_sentiment_gcs
+    sample_value_sets:
+    - id: language_entity_sentiment_text
+      description: "Analyze Sentiment of Entities in Text"
+      parameters:
+        defaults:
+        - document.type=PLAIN_TEXT
+        - document.content="Grapes are good. Bananas are bad."
+        attributes:
+        - parameter: document.content
+          sample_argument_name: text_content
+      on_success:
+      - loop:
+          collection: $resp.entities
+          variable: entity
+          body:
+          - print: ["Entity name: %s", entity.name]
+          - print: ["Entity sentiment score: %s", entity.sentiment.score]
+          - loop:
+              collection: entity.mentions
+              variable: mention
+              body:
+              - print: ["Mention: %s", mention.text.content]
+              - print: ["Mention type: %s", mention.type]
+              - print: ["Mention sentiment score: %s", mention.sentiment.score]
+              - print:
+                - "Mention sentiment magnitude: %s"
+                - mention.sentiment.magnitude
+    - id: language_entity_sentiment_gcs
+      description: "Analyze Sentiment of Entities in Text stored in GCS"
+      parameters:
+        defaults:
+        - document.type=PLAIN_TEXT
+        - document.gcs_content_uri="gs://cloud-samples-data/language/entity-sentiment.txt"
+        attributes:
+        - parameter: document.gcs_content_uri
+          sample_argument_name: gcs_ur
+      on_success:
+      - loop:
+          collection: $resp.entities
+          variable: entity
+          body:
+          - print: ["Entity name: %s", entity.name]
+          - print: ["Entity sentiment score: %s", entity.sentiment.score]
+          - loop:
+              collection: entity.mentions
+              variable: mention
+              body:
+              - print: ["Mention: %s", mention.text.content]
+              - print: ["Mention type: %s", mention.type]
+              - print: ["Mention sentiment score: %s", mention.sentiment.score]
+              - print:
+                - "Mention sentiment magnitude: %s"
+                - mention.sentiment.magnitude
+  - name: AnalyzeSyntax
+    flattening:
+      groups:
+      - parameters:
+        - document
+        - encoding_type
+      - parameters:
+        - document
+    required_fields:
+    - document
+    retry_codes_name: idempotent
+    retry_params_name: default
+    timeout_millis: 60000
+    samples:
+      standalone:
+      - value_sets: [language_syntax_text]
+        region_tag: language_syntax_text
+      - value_sets: [language_syntax_gcs]
+        region_tag: language_syntax_gcs
+    sample_value_sets:
+    - id: language_syntax_text
+      description: "Analyze syntax of text"
+      parameters:
+        defaults:
+        - document.type=PLAIN_TEXT
+        - document.content="This is a short sentence."
+        attributes:
+        - parameter: document.content
+          sample_argument_name: text_content
+      on_success:
+      - define: tokens=$resp.tokens
+      - loop:
+          variable: token
+          collection: tokens
+          body:
+          - print: ["Part of speech: %s", token.part_of_speech.tag]
+          - print: ["Text: %s", token.text.content]
+    - id: language_syntax_gcs
+      description: "Analyze syntax of text in GCS"
+      parameters:
+        defaults:
+        - document.type=PLAIN_TEXT
+        - document.gcs_content_uri="gs://cloud-samples-data/language/syntax-sentence.txt"
+        attributes:
+        - parameter: document.gcs_content_uri
+          sample_argument_name: gcs_urs
+      on_success:
+      - define: tokens=$resp.tokens
+      - loop:
+          variable: token
+          collection: tokens
+          body:
+          - print: ["Part of speech: %s", token.part_of_speech.tag]
+          - print: ["Text: %s", token.text.content]
+  - name: ClassifyText
+    flattening:
+      groups:
+      - parameters:
+        - document
+    required_fields:
+    - document
+    retry_codes_name: idempotent
+    retry_params_name: default
+    timeout_millis: 60000
+    samples:
+      standalone:
+      - value_sets: [language_classify_text]
+        region_tag: language_classify_text
+      - value_sets: [language_classify_gcs]
+        region_tag: language_classify_gcs
+    sample_value_sets:
+    - id: language_classify_text
+      description: "Classify text"
+      parameters:
+        defaults:
+        - document.type=PLAIN_TEXT
+        - document.content="This is about film and movies and television and acting and movie theatres and theatre and drama and entertainment and the arts."
+        attributes:
+        - parameter: document.content
+          sample_argument_name: text_content
+      on_success:
+      - loop:
+          collection: $resp.categories
+          variable: category
+          body:
+          - print: ["Category name: %s", category.name]
+          - print: ["Confidence: %s", category.confidence]
+    - id: language_classify_gcs
+      description: "Classify text in GCS"
+      parameters:
+        defaults:
+        - document.type=PLAIN_TEXT
+        - document.gcs_content_uri="gs://cloud-samples-data/language/classify-entertainment.txt"
+        attributes:
+        - parameter: document.gcs_content_uri
+          sample_argument_name: gcs_urs
+      on_success:
+      - loop:
+          collection: $resp.categories
+          variable: category
+          body:
+          - print: ["Category name: %s", category.name]
+          - print: ["Confidence: %s", category.confidence]
+  - name: AnnotateText
+    flattening:
+      groups:
+      - parameters:
+        - document
+        - features
+        - encoding_type
+      - parameters:
+        - document
+        - features
+    required_fields:
+    - document
+    - features
+    retry_codes_name: idempotent
+    retry_params_name: default
+    timeout_millis: 60000

@@ -1,0 +1,44 @@
+type: google.api.Service
+config_version: 3
+name: cloudkms.googleapis.com
+title: Cloud Key Management Service (KMS) API
+
+apis:
+- name: google.cloud.kms.v1.KeyManagementService
+
+types:
+- name: google.cloud.kms.v1.LocationMetadata
+
+documentation:
+  summary: |-
+    Manages keys and performs cryptographic operations in a central cloud
+    service, for direct use by other cloud resources and applications.
+
+http:
+  rules:
+  - selector: google.iam.v1.IAMPolicy.SetIamPolicy
+    post: '/v1/{resource=projects/*/locations/*/keyRings/*}:setIamPolicy'
+    body: '*'
+    additional_bindings:
+    - post: '/v1/{resource=projects/*/locations/*/keyRings/*/cryptoKeys/*}:setIamPolicy'
+      body: '*'
+
+  - selector: google.iam.v1.IAMPolicy.GetIamPolicy
+    get: '/v1/{resource=projects/*/locations/*/keyRings/*}:getIamPolicy'
+    additional_bindings:
+    - get: '/v1/{resource=projects/*/locations/*/keyRings/*/cryptoKeys/*}:getIamPolicy'
+
+  - selector: google.iam.v1.IAMPolicy.TestIamPermissions
+    post: '/v1/{resource=projects/*/locations/*/keyRings/*}:testIamPermissions'
+    body: '*'
+    additional_bindings:
+    - post: '/v1/{resource=projects/*/locations/*/keyRings/*/cryptoKeys/*}:testIamPermissions'
+      body: '*'
+
+
+authentication:
+  rules:
+  - selector: '*'
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform

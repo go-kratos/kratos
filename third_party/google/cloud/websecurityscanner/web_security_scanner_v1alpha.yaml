@@ -1,0 +1,17 @@
+type: google.api.Service
+config_version: 3
+name: websecurityscanner.googleapis.com
+title: Web Security Scanner API
+
+apis:
+- name: google.cloud.websecurityscanner.v1alpha.WebSecurityScanner
+
+documentation:
+  summary: Web Security Scanner API (under development).
+
+authentication:
+  rules:
+  - selector: '*'
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform
