@@ -1,6 +1,6 @@
 # 准备工作
 
-1. 推荐使用[kratos工具](kratos-tool.md)快速生成项目，如我们生成一个叫`kratos-demo`的项目。目录结构如下：
+推荐使用[kratos工具](kratos-tool.md)快速生成项目，如我们生成一个叫`kratos-demo`的项目。目录结构如下：
 
 ```
 ├── CHANGELOG.md
@@ -159,7 +159,7 @@ func (d *Dao) CacheDemo(c context.Context, id int64) (res *Demo, err error) {
 
 如上为代码生成器生成的进行批量查询的代码片段，这里使用到mc.GetMulti(c,keys)方法获得返回值，与单个查询类似地，我们需要再使用scan方法将memcache的返回值转换为我们定义的结构体。
 
-## 新增
+## 设置KV
 
 ```go
 // AddCacheDemo Set data to mc
@@ -205,7 +205,7 @@ const(
 )
 ```
 
-## 删除
+## 删除KV
 
 ```go
 // DelCacheDemo delete data from mc
