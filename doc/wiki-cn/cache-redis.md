@@ -91,7 +91,7 @@ type Dao struct {
 	}
 ```
 
-使用kratos/pkg/cache/redis包的New方法进行连接池对象的初始化，需要传入上文解析的配置。
+使用kratos/pkg/cache/redis包的NewPool方法进行连接池对象的初始化，需要传入上文解析的配置。
 
 ## Ping
 
@@ -140,50 +140,38 @@ func (d *Dao) DemoIncrby(c context.Context, pid int) (err error) {
 	return
 }
 ```
-如上为向redis server发送一个命令的用法示意。这里需要使用redis连接池的Get方法获取一个redis连接conn，再使用conn.Do方法即可发送一条指令。
+如上为向redis server发送单个命令的用法示意。这里需要使用redis连接池的Get方法获取一个redis连接conn，再使用conn.Do方法即可发送一条指令。
 注意，在使用该连接完毕后，需要使用conn.Close方法将该连接关闭。
 
 ## 批量发送命令 Pipeline
 
-kratos/pkg/cache/redis包除了支持发送单个命令，也支持批量发送命令（redis pipeline)
+kratos/pkg/cache/redis包除了支持发送单个命令，也支持批量发送命令（redis pipeline)，比如：
 
 ```go
 // DemoIncrbys .
-func (d *Dao) DemoIncrbys(c context.Context, pid int, ) (err error) {
-	cacheKey1 := keyDemo(pid)
-	cacheKey2 := keyDemo2(pid)
+func (d *Dao) DemoIncrbys(c context.Context, pid int) (err error) {
+	cacheKey := keyDemo(pid)
 	conn := d.redis.Get(c)
 	defer conn.Close()
-    if err = conn.Send("INCRBY", cacheKey1, 1); err != nil {
-        log.Error("DemoIncrby conn.Do(INCRBY) key(%s) error(%v)", cacheKey, err)
+    if err = conn.Send("INCRBY", cacheKey, 1); err != nil {
         return 
     }
-    if err = conn.Send("EXPIRE", cacheKey1, d.redisExpire); err != nil {
-        log.Error("conn.Do(EXPIRE, %s, %d) error(%v)", hKey, _hkeyExpire, err)
+    if err = conn.Send("EXPIRE", cacheKey, d.redisExpire); err != nil {
         return
     }
-    if err = conn.Send("INCRBY", cacheKey2, 1); err != nil {
-        log.Error("DemoIncrby conn.Do(INCRBY) key(%s) error(%v)", cacheKey, err)
-        return 
+    if err = conn.Flush(); err != nil {
+        log.Error("conn.Flush error(%v)", err)
+        return
     }
-	if err = conn.Send("EXPIRE", cacheKey2, d.redisExpire); err != nil {
-		log.Error("conn.Do(EXPIRE, %s, %d) error(%v)", hbvKey, _hkeyExpire, err)
-		return
-	}
-	if err = conn.Flush(); err != nil {
-		log.Error("conn.Flush error(%v)", err)
-		return
-	}
-	for i := 0; i < 4; i++ {
-		if _, err = conn.Receive(); err != nil {
-			log.Error("conn.Receive error(%v)", err)
-			return
-		}
-	}
-	return
+    for i := 0; i < 2; i++ {
+        if _, err = conn.Receive(); err != nil {
+            log.Error("conn.Receive error(%v)", err)
+            return
+        }
+    }
+    return
 }
 ```
-如上为向redis server批量发送命令的用法示意。
 
 和发送单个命令类似地，这里需要使用redis连接池的Get方法获取一个redis连接conn，在使用该连接完毕后，需要使用conn.Close方法将该连接关闭。
 
@@ -192,7 +180,7 @@ func (d *Dao) DemoIncrbys(c context.Context, pid int, ) (err error) {
 
 ## 返回值转换 
 
-与[memcache包](cache-memcache.md)类似地，kratos/pkg/cache/redis包中也提供了Scan方法将redis server的返回值转换为golang类型。
+与[memcache包](cache-mc.md)类似地，kratos/pkg/cache/redis包中也提供了Scan方法将redis server的返回值转换为golang类型。
 
 除此之外，kratos/pkg/cache/redis包提供了大量返回值转换的快捷方式:
 
@@ -231,4 +219,4 @@ func (d *Dao) HGETALLDemo(c context.Context, pid int64) (res map[string]int64, e
 
 # 扩展阅读
 
-[memcache模块说明](cache-memcache.md)
+[memcache模块说明](cache-mc.md)
