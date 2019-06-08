@@ -3,6 +3,7 @@ package log
 import (
 	"context"
 	"time"
+	"sync"
 
 	pkgerr "github.com/pkg/errors"
 )
@@ -72,10 +73,21 @@ func newHandlers(filters []string, handlers ...Handler) *Handlers {
 type Handlers struct {
 	filters  map[string]struct{}
 	handlers []Handler
+	once *sync.Once
+}
+
+// GetHandler gets the handler slice
+func (hs *Handlers) GetHandler() []Handler{
+	if len(hs.handlers) == 0{ // if no handler, provide stdout
+		hs.once.Do(func(){
+			hs.handlers = append([]Handler{}, _defaultStdout)
+		})
+	}
+	return hs.handlers
 }
 
 // Log handlers logging.
-func (hs Handlers) Log(c context.Context, lv Level, d ...D) {
+func (hs *Handlers) Log(c context.Context, lv Level, d ...D) {
 	var hasSource bool
 	for i := range d {
 		if _, ok := hs.filters[d[i].Key]; ok {
@@ -90,14 +102,14 @@ func (hs Handlers) Log(c context.Context, lv Level, d ...D) {
 		d = append(d, KVString(_source, fn))
 	}
 	d = append(d, KV(_time, time.Now()), KVInt64(_levelValue, int64(lv)), KVString(_level, lv.String()))
-	for _, h := range hs.handlers {
+	for _, h := range hs.GetHandler() {
 		h.Log(c, lv, d...)
 	}
 }
 
 // Close close resource.
-func (hs Handlers) Close() (err error) {
-	for _, h := range hs.handlers {
+func (hs *Handlers) Close() (err error) {
+	for _, h := range hs.GetHandler() {
 		if e := h.Close(); e != nil {
 			err = pkgerr.WithStack(e)
 		}
@@ -106,8 +118,8 @@ func (hs Handlers) Close() (err error) {
 }
 
 // SetFormat .
-func (hs Handlers) SetFormat(format string) {
-	for _, h := range hs.handlers {
+func (hs *Handlers) SetFormat(format string) {
+	for _, h := range hs.GetHandler() {
 		h.SetFormat(format)
 	}
 }
