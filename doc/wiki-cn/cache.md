@@ -8,9 +8,13 @@
 
 # Memcache
 
+提供protobuf，gob，json序列化方式，gzip的memcache接口
+
 [memcache模块说明](cache-mc.md)
 
 # Redis
+
+提供redis操作的各类接口以及各类将redis server返回值转换为golang类型的快捷方法。
 
 [redis模块说明](cache-redis.md)
 
