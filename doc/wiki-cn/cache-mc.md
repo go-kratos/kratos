@@ -89,7 +89,7 @@ type Dao struct {
 	}
 ```
 
-使用memcache包的New方法进行连接池对象的初始化，需要传入上文解析的配置。
+使用kratos/pkg/cache/memcache包的New方法进行连接池对象的初始化，需要传入上文解析的配置。
 
 ## Ping
 
@@ -118,13 +118,13 @@ func (d *Dao) Close() {
 }
 ```
 
-在关闭dao层时，通过调用连接池对象的Close方法，我们可以关闭该连接池，从而释放相关资源。
+在关闭dao层时，通过调用memcache连接池对象的Close方法，我们可以关闭该连接池，从而释放相关资源。
 
 # 常用方法
 
 推荐使用[memcache代码生成器](kratos-genmc.md)帮助我们生成memcache操作的相关代码。
 
-以下我们来逐一解析以下memcache包中提供的常用方法。
+以下我们来逐一解析以下kratos/pkg/cache/memcache包中提供的常用方法。
 
 ## 单个查询
 
@@ -148,7 +148,7 @@ func (d *Dao) CacheDemo(c context.Context, id int64) (res *Demo, err error) {
 }
 ```
 
-如上为代码生成器生成的进行单个查询的代码，使用到mc.Get(c,key)方法获得返回值，再使用scan方法将memcache的返回值转换为我们定义的结构体。
+如上为代码生成器生成的进行单个查询的代码，使用到mc.Get(c,key)方法获得返回值，再使用scan方法将memcache的返回值转换为golang中的类型（如string，bool, 结构体等）。
 
 ## 批量查询使用
 
@@ -189,7 +189,7 @@ func (d *Dao) AddCacheDemo(c context.Context, id int64, val *Demo) (err error) {
 
 上文添加结构体进入memcache中，使用到的flags为：memcache.FlagJSON | memcache.FlagGzip代表着：使用json作为编码方式，gzip作为压缩方式。
 
-Flags的相关常量在memcache包中进行定义，包含编码方式如gob, json, protobuf，和压缩方式gzip。
+Flags的相关常量在kratos/pkg/cache/memcache包中进行定义，包含编码方式如gob, json, protobuf，和压缩方式gzip。
 
 ```go
 const(
