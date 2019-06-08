@@ -53,7 +53,8 @@ demoExpire = "24h"
 ```
 在该配置文件中我们可以配置memcache的连接方式proto、连接地址addr、连接池的闲置连接数idle、最大连接数active以及各类超时。
 
-通过paladin配置管理工具，将memcache.toml中的配置解析到*memcache.Config中，这里可选添加mc的过期时间设置。
+这里可选添加mc的过期时间设置。
+
 
 ## 初始化
 
@@ -121,7 +122,9 @@ func (d *Dao) Close() {
 
 # 常用方法
 
-这里我们可以选择使用[memcache代码生成器](kratos-genmc.md)帮助我们生成memcache操作的相关代码。
+推荐使用[memcache代码生成器](kratos-genmc.md)帮助我们生成memcache操作的相关代码。
+
+以下我们来逐一解析以下memcache包中提供的常用方法。
 
 ## 单个查询
 
@@ -224,7 +227,7 @@ func (d *Dao) DelCacheDemo(c context.Context, id int64) (err error) {
 }
 ```
 如上为代码生成器生成的从memcache中删除KV的代码，这里需要使用到的是mc.Delete方法。
-和查询时类似地，当memcache中不存在参数中的key时，会返回error为memcache.ErrNotFound。如果不需要处理这种error，可以和如上代码类似地，将返回出去的error置为nil。
+和查询时类似地，当memcache中不存在参数中的key时，会返回error为memcache.ErrNotFound。如果不需要处理这种error，可以参考上述代码将返回出去的error置为nil。
 
 # 扩展阅读
 
