@@ -117,7 +117,7 @@ func (d *Dao) Close() {
 func (d *Dao) GetDemo(c context.Context, did int64) (demo int8, err error) {
 	err = d.db.QueryRow(c, _getDemoSQL, did).Scan(&demo)
 	if err != nil && err != sql.ErrNoRows {
-		log.Error("d.managerDB.Query error(%v)", err)
+		log.Error("d.GetDemo.Query error(%v)", err)
 		return
 	}
 	return demo, nil
