@@ -4,17 +4,18 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/bilibili/kratos/pkg/conf/env"
+	"github.com/bilibili/kratos/pkg/stat/prom"
 )
 
 // Config log config.
 type Config struct {
-	AppID string
-	Host  string
+	Family string
+	Host   string
 
 	// stdout
 	Stdout bool
@@ -43,23 +44,39 @@ type Config struct {
 	Filter []string
 }
 
+// errProm prometheus error counter.
+var errProm = prom.BusinessErrCount
+
+// Render render log output
+type Render interface {
+	Render(io.Writer, map[string]interface{}) error
+	RenderString(map[string]interface{}) string
+}
+
 var (
 	h Handler
 	c *Config
 )
 
 func init() {
+	host, _ := os.Hostname()
+	c = &Config{
+		Family: env.AppID,
+		Host:   host,
+	}
+	h = newHandlers([]string{}, NewStdout())
+
 	addFlag(flag.CommandLine)
-	h = newHandlers(nil)
-	c = new(Config)
 }
 
 var (
-	_v      int
-	_stdout bool
-	_dir    string
-	_filter logFilter
-	_module = verboseModule{}
+	_v        int
+	_stdout   bool
+	_dir      string
+	_agentDSN string
+	_filter   logFilter
+	_module   = verboseModule{}
+	_noagent  bool
 )
 
 // addFlag init log from dsn.
@@ -75,12 +92,15 @@ func addFlag(fs *flag.FlagSet) {
 	if tf := os.Getenv("LOG_FILTER"); len(tf) > 0 {
 		_filter.Set(tf)
 	}
+	_noagent, _ = strconv.ParseBool(os.Getenv("LOG_NO_AGENT"))
 	// get val from flag
 	fs.IntVar(&_v, "log.v", _v, "log verbose level, or use LOG_V env variable.")
 	fs.BoolVar(&_stdout, "log.stdout", _stdout, "log enable stdout or not, or use LOG_STDOUT env variable.")
 	fs.StringVar(&_dir, "log.dir", _dir, "log file `path, or use LOG_DIR env variable.")
+	fs.StringVar(&_agentDSN, "log.agent", _agentDSN, "log agent dsn, or use LOG_AGENT env variable.")
 	fs.Var(&_module, "log.module", "log verbose for specified module, or use LOG_MODULE env variable, format: file=1,file2=2.")
 	fs.Var(&_filter, "log.filter", "log field for sensitive message, or use LOG_FILTER env variable, format: field1,field2.")
+	fs.BoolVar(&_noagent, "log.noagent", _noagent, "force disable log agent print log to stderr,  or use LOG_NO_AGENT")
 }
 
 // Init create logger with context.
@@ -96,8 +116,8 @@ func Init(conf *Config) {
 			Filter: _filter,
 		}
 	}
-	if conf.AppID == "" && len(env.AppID) != 0 {
-		conf.AppID = env.AppID
+	if len(env.AppID) != 0 {
+		conf.Family = env.AppID // for caster
 	}
 	conf.Host = env.Hostname
 	if len(conf.Host) == 0 {
@@ -106,7 +126,7 @@ func Init(conf *Config) {
 	}
 	var hs []Handler
 	// when env is dev
-	if isNil || conf.Stdout {
+	if conf.Stdout || (isNil && (env.DeployEnv == "" || env.DeployEnv == env.DeployEnvDev)) || _noagent {
 		hs = append(hs, NewStdout())
 	}
 	if conf.Dir != "" {
@@ -114,21 +134,6 @@ func Init(conf *Config) {
 	}
 	h = newHandlers(conf.Filter, hs...)
 	c = conf
-}
-
-type logFilter []string
-
-func (f *logFilter) String() string {
-	return fmt.Sprint(*f)
-}
-
-// Set sets the value of the named command-line flag.
-// format: -log.filter key1,key2
-func (f *logFilter) Set(value string) error {
-	for _, i := range strings.Split(value, ",") {
-		*f = append(*f, strings.TrimSpace(i))
-	}
-	return nil
 }
 
 // Info logs a message at the info log level.
@@ -176,6 +181,36 @@ func Errorv(ctx context.Context, args ...D) {
 	h.Log(ctx, _errorLevel, args...)
 }
 
+func logw(args []interface{}) []D {
+	if len(args)%2 != 0 {
+		Warn("log: the variadic must be plural, the last one will ignored")
+	}
+	ds := make([]D, 0, len(args)/2)
+	for i := 0; i < len(args)-1; i = i + 2 {
+		if key, ok := args[i].(string); ok {
+			ds = append(ds, KV(key, args[i+1]))
+		} else {
+			Warn("log: key must be string, get %T, ignored", args[i])
+		}
+	}
+	return ds
+}
+
+// Infow logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
+func Infow(ctx context.Context, args ...interface{}) {
+	h.Log(ctx, _infoLevel, logw(args)...)
+}
+
+// Warnw logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
+func Warnw(ctx context.Context, args ...interface{}) {
+	h.Log(ctx, _warnLevel, logw(args)...)
+}
+
+// Errorw logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
+func Errorw(ctx context.Context, args ...interface{}) {
+	h.Log(ctx, _errorLevel, logw(args)...)
+}
+
 // SetFormat only effective on stdout and file handler
 // %T time format at "15:04:05.999" on stdout handler, "15:04:05 MST" on file handler
 // %t time format at "15:04:05" on stdout handler, "15:04" on file on file handler
@@ -194,39 +229,15 @@ func SetFormat(format string) {
 	h.SetFormat(format)
 }
 
-// Infow logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
-func Infow(ctx context.Context, args ...interface{}) {
-	h.Log(ctx, _infoLevel, logw(args)...)
-}
-
-// Warnw logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
-func Warnw(ctx context.Context, args ...interface{}) {
-	h.Log(ctx, _warnLevel, logw(args)...)
-}
-
-// Errorw logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
-func Errorw(ctx context.Context, args ...interface{}) {
-	h.Log(ctx, _errorLevel, logw(args)...)
-}
-
-func logw(args []interface{}) []D {
-	if len(args)%2 != 0 {
-		Warn("log: the variadic must be plural, the last one will ignored")
-	}
-	ds := make([]D, 0, len(args)/2)
-	for i := 0; i < len(args)-1; i = i + 2 {
-		if key, ok := args[i].(string); ok {
-			ds = append(ds, KV(key, args[i+1]))
-		} else {
-			Warn("log: key must be string, get %T, ignored", args[i])
-		}
-	}
-	return ds
-}
-
 // Close close resource.
 func Close() (err error) {
 	err = h.Close()
 	h = _defaultStdout
 	return
+}
+
+func errIncr(lv Level, source string) {
+	if lv == _errorLevel {
+		errProm.Incr(source)
+	}
 }

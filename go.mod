@@ -25,7 +25,7 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20190321074620-2f0d2b0e0001 // indirect
 	github.com/samuel/go-zookeeper v0.0.0-20180130194729-c4fab1ac1bec // indirect
 	github.com/siddontang/go v0.0.0-20180604090527-bdc77568d726
-	github.com/sirupsen/logrus v1.4.1 // indirect
+	github.com/sirupsen/logrus v1.4.1
 	github.com/stretchr/testify v1.3.0
 	github.com/tsuna/gohbase v0.0.0-20190201102810-d3184c1526df
 	github.com/urfave/cli v1.20.0

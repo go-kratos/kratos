@@ -2,7 +2,6 @@ package log
 
 import (
 	"context"
-	"fmt"
 	"math"
 	"runtime"
 	"strconv"
@@ -16,11 +15,7 @@ import (
 
 func addExtraField(ctx context.Context, fields map[string]interface{}) {
 	if t, ok := trace.FromContext(ctx); ok {
-		if s, ok := t.(fmt.Stringer); ok {
-			fields[_tid] = s.String()
-		} else {
-			fields[_tid] = fmt.Sprintf("%s", t)
-		}
+		fields[_tid] = t.TraceID()
 	}
 	if caller := metadata.String(ctx, metadata.Caller); caller != "" {
 		fields[_caller] = caller
@@ -28,16 +23,27 @@ func addExtraField(ctx context.Context, fields map[string]interface{}) {
 	if color := metadata.String(ctx, metadata.Color); color != "" {
 		fields[_color] = color
 	}
+	if env.Color != "" {
+		fields[_envColor] = env.Color
+	}
 	if cluster := metadata.String(ctx, metadata.Cluster); cluster != "" {
 		fields[_cluster] = cluster
 	}
 	fields[_deplyEnv] = env.DeployEnv
 	fields[_zone] = env.Zone
-	fields[_appID] = c.AppID
+	fields[_appID] = c.Family
 	fields[_instanceID] = c.Host
-	if metadata.Bool(ctx, metadata.Mirror) {
+	if metadata.String(ctx, metadata.Mirror) != "" {
 		fields[_mirror] = true
 	}
+}
+
+// funcName get func name.
+func funcName(skip int) (name string) {
+	if _, file, lineNo, ok := runtime.Caller(skip); ok {
+		return file + ":" + strconv.Itoa(lineNo)
+	}
+	return "unknown:0"
 }
 
 // toMap convert D slice to map[string]interface{} for legacy file and stdout.
@@ -45,7 +51,7 @@ func toMap(args ...D) map[string]interface{} {
 	d := make(map[string]interface{}, 10+len(args))
 	for _, arg := range args {
 		switch arg.Type {
-		case core.UintType, core.Uint64Type, core.IntType, core.Int64Type:
+		case core.UintType, core.Uint64Type, core.IntTpye, core.Int64Type:
 			d[arg.Key] = arg.Int64Val
 		case core.StringType:
 			d[arg.Key] = arg.StringVal
@@ -60,12 +66,4 @@ func toMap(args ...D) map[string]interface{} {
 		}
 	}
 	return d
-}
-
-// funcName get func name.
-func funcName(skip int) (name string) {
-	if _, file, lineNo, ok := runtime.Caller(skip); ok {
-		return file + ":" + strconv.Itoa(lineNo)
-	}
-	return "unknown:0"
 }

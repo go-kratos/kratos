@@ -18,7 +18,7 @@ func KVString(key string, value string) D {
 
 // KVInt construct Field with int value.
 func KVInt(key string, value int) D {
-	return D{Key: key, Type: core.IntType, Int64Val: int64(value)}
+	return D{Key: key, Type: core.IntTpye, Int64Val: int64(value)}
 }
 
 // KVInt64 construct D with int64 value.

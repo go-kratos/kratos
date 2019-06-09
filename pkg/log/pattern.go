@@ -4,16 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"path"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
 )
-
-// Render render log output
-type Render interface {
-	Render(io.Writer, map[string]interface{}) error
-	RenderString(map[string]interface{}) string
-}
 
 var patternMap = map[string]func(map[string]interface{}) string{
 	"T": longTime,
@@ -25,8 +21,8 @@ var patternMap = map[string]func(map[string]interface{}) string{
 	"i": keyFactory(_instanceID),
 	"e": keyFactory(_deplyEnv),
 	"z": keyFactory(_zone),
-	"S": keyFactory(_source),
-	"s": keyFactory(_source),
+	"S": longSource,
+	"s": shortSource,
 	"M": message,
 }
 
@@ -78,6 +74,7 @@ func (p *pattern) Render(w io.Writer, d map[string]interface{}) error {
 	for _, f := range p.funcs {
 		buf.WriteString(f(d))
 	}
+
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -112,6 +109,20 @@ func keyFactory(key string) func(map[string]interface{}) string {
 		}
 		return ""
 	}
+}
+
+func longSource(map[string]interface{}) string {
+	if _, file, lineNo, ok := runtime.Caller(6); ok {
+		return fmt.Sprintf("%s:%d", file, lineNo)
+	}
+	return "unknown:0"
+}
+
+func shortSource(map[string]interface{}) string {
+	if _, file, lineNo, ok := runtime.Caller(6); ok {
+		return fmt.Sprintf("%s:%d", path.Base(file), lineNo)
+	}
+	return "unknown:0"
 }
 
 func longTime(map[string]interface{}) string {
