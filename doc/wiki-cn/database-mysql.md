@@ -113,7 +113,7 @@ func (d *Dao) Close() {
 ## 单个查询 
 
 ```go
-// GetUserRole 用户角色
+// GetDemo 用户角色
 func (d *Dao) GetDemo(c context.Context, did int64) (demo int8, err error) {
 	err = d.db.QueryRow(c, _getDemoSQL, did).Scan(&demo)
 	if err != nil && err != sql.ErrNoRows {
@@ -125,6 +125,8 @@ func (d *Dao) GetDemo(c context.Context, did int64) (demo int8, err error) {
 ```
 
 db.QueryRow方法用于返回最多一条记录的查询，在QueryRow方法后使用Scan方法即可将mysql的返回值转换为Golang的数据类型。
+
+当mysql查询不到对应数据时，会返回sql.ErrNoRows，如果不需处理，可以参考如上代码忽略此error。
 
 ## 批量查询
 
