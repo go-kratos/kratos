@@ -21,10 +21,10 @@ Kratos是bilibili开源的一套Go微服务框架，包含大量微服务相关�
 ### Features
 * HTTP Blademaster: 模块化设计，核心足够轻量；
 * GRPC Warden: 服务发现轻量化，并融合P2C负载均衡算法；
-* Trace: 组件化的trace支持（gRPC/HTTP/MySQL/Redis/Memcached）
-* Log: 高性能的日志库，结合log-agent实现远程日志管理；
-* Cache: 高级别的接口化设计，非常方便的缓存序列化；
+* Cache: 优雅的接口化设计，非常方便的缓存序列化；
 * Database: 数据层熔断和统计支持，快速发现数据层压力；
+* Log: 高性能的日志库，结合log-agent实现远程日志管理；
+* Trace: 组件化的trace支持（gRPC/HTTP/MySQL/Redis/Memcached）
 * Kratos Tool: 快速生成标准化项目，友好Protobuf支持，方便地生成gRPC、HTTP、swagger的生成；
 
 # 
