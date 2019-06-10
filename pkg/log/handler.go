@@ -16,6 +16,8 @@ const (
 	_level = "level"
 	// log time.
 	_time = "time"
+	// request path.
+	// _title = "title"
 	// log file.
 	_source = "source"
 	// common log filed.
@@ -27,7 +29,7 @@ const (
 	// uniq ID from trace.
 	_tid = "traceid"
 	// request time.
-	_ts = "ts"
+	// _ts = "ts"
 	// requester.
 	_caller = "caller"
 	// container environment: prod, pre, uat, fat.
@@ -38,6 +40,8 @@ const (
 	_mirror = "mirror"
 	// color.
 	_color = "color"
+	// env_color
+	_envColor = "env_color"
 	// cluster.
 	_cluster = "cluster"
 )
@@ -75,8 +79,8 @@ type Handlers struct {
 }
 
 // Log handlers logging.
-func (hs Handlers) Log(c context.Context, lv Level, d ...D) {
-	var hasSource bool
+func (hs Handlers) Log(ctx context.Context, lv Level, d ...D) {
+	hasSource := false
 	for i := range d {
 		if _, ok := hs.filters[d[i].Key]; ok {
 			d[i].Value = "***"
@@ -87,11 +91,12 @@ func (hs Handlers) Log(c context.Context, lv Level, d ...D) {
 	}
 	if !hasSource {
 		fn := funcName(3)
+		errIncr(lv, fn)
 		d = append(d, KVString(_source, fn))
 	}
 	d = append(d, KV(_time, time.Now()), KVInt64(_levelValue, int64(lv)), KVString(_level, lv.String()))
 	for _, h := range hs.handlers {
-		h.Log(c, lv, d...)
+		h.Log(ctx, lv, d...)
 	}
 }
 

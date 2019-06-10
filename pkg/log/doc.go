@@ -2,21 +2,23 @@
 
 一、主要功能：
 
-	1. 日志打印到本地
-	2. 日志打印到标准输出
-	3. verbose日志实现，参考glog实现，可通过设置不同verbose级别，默认不开启
+	1. 日志打印到elk
+	2. 日志打印到本地，内部使用log4go
+	3. 日志打印到标准输出
+	4. verbose日志实现，参考glog实现，可通过设置不同verbose级别，默认不开启
 
 二、日志配置
 
-1. 默认配置
+1. 默认agent配置
 
-	目前日志已经实现默认配置。可以直接使用以下方式：
+	目前日志已经实现默认配置，可以根据env自动切换远程日志。可以直接使用以下方式：
 	log.Init(nil)
 
 2. 启动参数 or 环境变量
 
 	启动参数		环境变量		说明
 	log.stdout	LOG_STDOUT	是否开启标准输出
+	log.agent	LOG_AGENT	远端日志地址：unixpacket:///var/run/lancer/collector_tcp.sock?timeout=100ms&chan=1024
 	log.dir		LOG_DIR		文件日志路径
 	log.v		LOG_V		verbose日志级别
 	log.module	LOG_MODULE	可单独配置每个文件的verbose级别：file=1,file2=2
@@ -30,9 +32,14 @@
 		stdout = true
 		vLevel = 3
 		filter = ["fileld1", "field2"]
-		[log.module]
-			"dao_user" = 2
-			"servic*" = 1
+	[log.module]
+		"dao_user" = 2
+		"servic*" = 1
+	[log.agent]
+		taskID = "00000x"
+		proto = "unixpacket"
+		addr = "/var/run/lancer/collector_tcp.sock"
+		chanSize = 10240
 
 三、配置说明
 
@@ -47,5 +54,16 @@
 2. log.module
 
 	可单独配置每个文件的verbose级别
+
+3. log.agent
+远端日志配置项
+	taskID		lancer分配的taskID
+	proto		网络协议，常见：tcp, udp, unixgram
+	addr		网络地址，常见：ip:prot, sock
+	chanSize	日志队列长度
+
+四、最佳实践
+
+1. KVString 使用 KVString 代替 KV 可以减少对象分配, 避免给 golang GC 造成压力.
 */
 package log
