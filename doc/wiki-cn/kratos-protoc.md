@@ -21,13 +21,13 @@ export $KRATOS_HOME = kratos路径
 export $KRATOS_DEMO = 项目路径
 
 // 生成：api.pb.go
-protoc -I$GOPATH/src:$KRATOS_HOME/tool/protobuf/pkg/extensions:$KRATOS_DEMO/api --gofast_out=plugins=grpc:$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
+protoc -I$GOPATH/src:$KRATOS_HOME/third_party:$KRATOS_DEMO/api --gofast_out=plugins=grpc:$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
 
 // 生成：api.bm.go
-protoc -I$GOPATH/src:$KRATOS_HOME/tool/protobuf/pkg/extensions:$KRATOS_DEMO/api --bm_out=$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
+protoc -I$GOPATH/src:$KRATOS_HOME/third_party:$KRATOS_DEMO/api --bm_out=$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
 
 // 生成：api.swagger.json
-protoc -I$GOPATH/src:$KRATOS_HOME/tool/protobuf/pkg/extensions:$KRATOS_DEMO/api --bswagger_out=$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
+protoc -I$GOPATH/src:$KRATOS_HOME/third_party:$KRATOS_DEMO/api --bswagger_out=$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
 ```
 
 大家也可以参考该命令进行`proto`生成，也可以参考 [protobuf](https://github.com/google/protobuf) 官方参数。
