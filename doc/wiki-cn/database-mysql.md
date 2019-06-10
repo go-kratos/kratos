@@ -60,11 +60,11 @@
 进入项目的internal/dao目录，打开dao.go，其中：
 
 ```go
-    var (
+	var (
 		dc struct {
 			Demo *sql.Config
 		}
-    )
+	)
 	checkErr(paladin.Get("mysql.toml").UnmarshalTOML(&dc))
 ```
 使用paladin配置管理工具将上文中的mysql.toml中的配置解析为我们需要使用mysql的相关配置。
