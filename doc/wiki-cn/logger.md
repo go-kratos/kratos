@@ -1,4 +1,4 @@
-# log
+# 日志基础库
 
 ## 概览
 基于[zap](https://github.com/uber-go/zap)的field方式实现的高性能log库，提供Info、Warn、Error日志级别；  
