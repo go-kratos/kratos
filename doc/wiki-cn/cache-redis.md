@@ -63,13 +63,13 @@ demoExpire = "24h"
 进入项目的internal/dao目录，打开dao.go，其中：
 
 ```go
-	var (
-		rc struct {
-			Demo       *redis.Config
-			DemoExpire xtime.Duration
-		}
-	)
-	checkErr(paladin.Get("redis.toml").UnmarshalTOML(&rc))
+var (
+    rc struct {
+        Demo       *redis.Config
+        DemoExpire xtime.Duration
+    }
+)
+checkErr(paladin.Get("redis.toml").UnmarshalTOML(&rc))
 ```
 使用paladin配置管理工具将上文中的redis.toml中的配置解析为我们需要使用的配置。
 
@@ -84,11 +84,11 @@ type Dao struct {
 在dao的主结构提中定义了redis的连接池对象和过期时间。
 
 ```go
-	dao = &Dao{
-		// redis
-		redis:       redis.NewPool(rc.Demo),
-		redisExpire: int32(time.Duration(rc.DemoExpire) / time.Second),
-	}
+dao = &Dao{
+    // redis
+    redis:       redis.NewPool(rc.Demo),
+    redisExpire: int32(time.Duration(rc.DemoExpire) / time.Second),
+}
 ```
 
 使用kratos/pkg/cache/redis包的NewPool方法进行连接池对象的初始化，需要传入上文解析的配置。

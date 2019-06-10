@@ -61,13 +61,13 @@ demoExpire = "24h"
 进入项目的internal/dao目录，打开dao.go，其中：
 
 ```go
-	var (
-		mc struct {
-			Demo       *memcache.Config
-			DemoExpire xtime.Duration
-		}
-	)
-	checkErr(paladin.Get("memcache.toml").UnmarshalTOML(&mc))
+var (
+    mc struct {
+        Demo       *memcache.Config
+        DemoExpire xtime.Duration
+    }
+)
+checkErr(paladin.Get("memcache.toml").UnmarshalTOML(&mc))
 ```
 使用paladin配置管理工具将上文中的memcache.toml中的配置解析为我们需要使用的配置。
 
@@ -82,11 +82,11 @@ type Dao struct {
 在dao的主结构提中定义了memcache的连接池对象和过期时间。
 
 ```go
-	dao = &Dao{
-		// memcache
-		mc:       memcache.New(mc.Demo),
-		mcExpire: int32(time.Duration(mc.DemoExpire) / time.Second),
-	}
+dao = &Dao{
+    // memcache
+    mc:       memcache.New(mc.Demo),
+    mcExpire: int32(time.Duration(mc.DemoExpire) / time.Second),
+}
 ```
 
 使用kratos/pkg/cache/memcache包的New方法进行连接池对象的初始化，需要传入上文解析的配置。
@@ -153,11 +153,11 @@ func (d *Dao) CacheDemo(c context.Context, id int64) (res *Demo, err error) {
 ## 批量查询使用
 
 ```go
-	replies, err := d.mc.GetMulti(c, keys)
-	for _, key := range replies.Keys() {
-		v := &Demo{}
-		err = replies.Scan(key, v)
-	}
+replies, err := d.mc.GetMulti(c, keys)
+for _, key := range replies.Keys() {
+    v := &Demo{}
+    err = replies.Scan(key, v)
+}
 ```
 
 如上为代码生成器生成的进行批量查询的代码片段，这里使用到mc.GetMulti(c,keys)方法获得返回值，与单个查询类似地，我们需要再使用scan方法将memcache的返回值转换为我们定义的结构体。
