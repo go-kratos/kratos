@@ -60,12 +60,12 @@
 进入项目的internal/dao目录，打开dao.go，其中：
 
 ```go
-	var (
-		dc struct {
-			Demo *sql.Config
-		}
-	)
-	checkErr(paladin.Get("mysql.toml").UnmarshalTOML(&dc))
+var (
+    dc struct {
+        Demo *sql.Config
+    }
+)
+checkErr(paladin.Get("mysql.toml").UnmarshalTOML(&dc))
 ```
 使用paladin配置管理工具将上文中的mysql.toml中的配置解析为我们需要使用mysql的相关配置。
 
@@ -79,9 +79,9 @@ type Dao struct {
 在dao的主结构提中定义了mysql的连接池对象。
 
 ```go
-	dao = &Dao{
-        db: sql.NewMySQL(dc.Demo),
-	}
+dao = &Dao{
+    db: sql.NewMySQL(dc.Demo),
+}
 ```
 
 使用kratos/pkg/database/sql包的NewMySQL方法进行连接池对象的初始化，需要传入上文解析的配置。
@@ -191,37 +191,37 @@ kratos/pkg/database/sql包支持事务操作，具体操作示例如下：
 开启一个事务：
 
 ```go
-	tx := d.db.Begin()
-	if err = tx.Error; err != nil {
-		log.Error("db begin transcation failed, err=%+v", err)
-		return
-	}
+tx := d.db.Begin()
+if err = tx.Error; err != nil {
+    log.Error("db begin transcation failed, err=%+v", err)
+    return
+}
 ```
 
 在事务中执行语句：
 
 ```go
-    res, err := tx.Exec(_demoSQL, did)
-	if err != nil {
-		return
-	}
-	rows := res.RowsAffected()
+res, err := tx.Exec(_demoSQL, did)
+if err != nil {
+    return
+}
+rows := res.RowsAffected()
 ```
 
 提交事务：
 
 ```go
-    if err = tx.Commit().Error; err!=nil{
-        log.Error("db commit transcation failed, err=%+v", err)
-    }
+if err = tx.Commit().Error; err!=nil{
+    log.Error("db commit transcation failed, err=%+v", err)
+}
 ```
 
 回滚事务：
 
 ```go
-    if err = tx.Rollback().Error; err!=nil{
-    	log.Error("db rollback failed, err=%+v", rollbackErr)
-    }
+if err = tx.Rollback().Error; err!=nil{
+    log.Error("db rollback failed, err=%+v", rollbackErr)
+}
 ```
 
 # 扩展阅读
