@@ -15,3 +15,7 @@ HBase客户端，支持trace、slowlog和统计功能。
 ## TiDB
 TiDB客户端，支持服务发现和熔断功能。  
 [tidb client](database-tidb.md)
+
+-------------
+
+[文档目录树](summary.md)

@@ -123,7 +123,9 @@ go tool pprof http://127.0.0.1:8000/debug/pprof/profile
 
 # 扩展阅读
 
-[bm模块说明](blademaster-mod.md) [bm中间件](blademaster-mid.md)  [bm基于pb生成](blademaster-pb.md)
+[bm模块说明](blademaster-mod.md)  
+[bm中间件](blademaster-mid.md)  
+[bm基于pb生成](blademaster-pb.md)  
 
 -------------
 

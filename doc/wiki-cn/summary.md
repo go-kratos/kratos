@@ -14,6 +14,8 @@
   * [warden resolver](warden-resolver.md) 
   * [warden balancer](warden-balancer.md) 
   * [warden protobuf](warden-pb.md) 
+* [config](config.md)
+  * [paladin](config-paladin.md)
 * [dapper trace](dapper.md)
 * [log](logger.md)
   * [log-agent](log-agent.md)

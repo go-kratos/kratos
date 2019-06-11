@@ -231,5 +231,9 @@ func (d *Dao) DelCacheDemo(c context.Context, id int64) (err error) {
 
 # 扩展阅读
 
-[memcache代码生成器](kratos-genmc.md)
-[redis模块说明](cache-redis.md)
+[memcache代码生成器](kratos-genmc.md)  
+[redis模块说明](cache-redis.md)  
+
+-------------
+
+[文档目录树](summary.md)

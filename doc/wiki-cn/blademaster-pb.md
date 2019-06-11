@@ -77,7 +77,9 @@ kratos tool swagger serve api/api.swagger.json
 
 # 扩展阅读
 
-[bm快速开始](blademaster-quickstart.md) [bm模块说明](blademaster-mod.md) [bm中间件](blademaster-mid.md)
+[bm快速开始](blademaster-quickstart.md)  
+[bm模块说明](blademaster-mod.md)  
+[bm中间件](blademaster-mid.md)  
 
 -------------
 
