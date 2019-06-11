@@ -25,8 +25,8 @@
 | http | HTTP | tcp://0.0.0.0:8000/?timeout=1s | http 监听端口 |
 | http.perf | HTTP_PERF | tcp://0.0.0.0:2233/?timeout=1s | http perf 监听端口 |
 | grpc | GRPC | tcp://0.0.0.0:9000/?timeout=1s&idle_timeout=60s | grpc 监听端口 |
-| grpc.target | - | - | 指定服务运行：<br>-grpc.target=seq.service=127.0.0.1:9000 |
-| discovery.nodes | DISCOVERY_NODES | - | 服务发现节点 |
+| grpc.target | - | - | 指定服务运行：<br>-grpc.target=demo.service=127.0.0.1:9000 <br>-grpc.target=demo.service=127.0.0.2:9000 |
+| discovery.nodes | DISCOVERY_NODES | - | 服务发现节点：127.0.0.1:7171,127.0.0.2:7171 |
 | log.v | LOG_V |  0 | 日志级别：<br>DEBUG:0 INFO:1 WARN:2 ERROR:3 FATAL:4 |
 | log.stdout | LOG_STDOUT | false | 是否标准输出：true、false|
 | log.dir | LOG_DIR | - | 日志文件目录，如果配置会输出日志到文件，否则不输出日志文件 |
