@@ -131,7 +131,9 @@ func Example() {
 
 # 扩展阅读
 
-[bm快速开始](blademaster-quickstart.md) [bm模块说明](blademaster-mod.md)  [bm基于pb生成](blademaster-pb.md)
+[bm快速开始](blademaster-quickstart.md)   
+[bm模块说明](blademaster-mod.md)  
+[bm基于pb生成](blademaster-pb.md)  
 
 -------------
 

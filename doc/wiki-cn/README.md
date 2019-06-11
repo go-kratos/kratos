@@ -27,7 +27,11 @@ Kratos是bilibili开源的一套Go微服务框架，包含大量微服务相关�
 * Trace: 组件化的trace支持（gRPC/HTTP/MySQL/Redis/Memcached）
 * Kratos Tool: 快速生成标准化项目，友好的Protobuf支持，非常方便生成gRPC、HTTP、swagger标准化代码和文档；
 
-# 
+
+<br>  
+
+-------------
+
 > 名字来源于:《战神》游戏以希腊神话为背景，讲述由凡人成为战神的奎托斯（Kratos）成为战神并展开弑神屠杀的冒险历程。
 
 -------------

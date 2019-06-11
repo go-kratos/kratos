@@ -23,3 +23,7 @@ protoc -I$GOPATH/src:$KRATOS_HOME/tool/protobuf/pkg/extensions:$KRATOS_DEMO/api 
 ```
 
 请注意替换`/Users/felix/work/go/src`目录为你本地开发环境对应GOPATH目录，其中`--gogofast_out`意味着告诉`protoc`工具需要使用`gogo protobuf`的工具生成代码。
+
+-------------
+
+[文档目录树](summary.md)
