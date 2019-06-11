@@ -19,13 +19,14 @@ Kratos是bilibili开源的一套Go微服务框架，包含大量微服务相关�
 * 工具链：包含大量工具链，比如cache代码生成，lint工具等等
 
 ### Features
-* HTTP Blademaster: 模块化设计，核心足够轻量；
-* GRPC Warden: 服务发现轻量化，并融合P2C负载均衡算法；
-* Cache: 优雅的接口化设计，非常方便的缓存序列化；
-* Database: 数据层熔断和统计支持，快速发现数据层压力；
-* Log: 高性能的日志库，结合log-agent实现远程日志管理；
-* Trace: 组件化的trace支持（gRPC/HTTP/MySQL/Redis/Memcached）
-* Kratos Tool: 快速生成标准化项目，友好的Protobuf支持，非常方便生成gRPC、HTTP、swagger标准化代码和文档；
+* HTTP Blademaster：核心基于[gin](https://github.com/gin-gonic/gin)进行模块化设计，简单易用、核心足够轻量；
+* GRPC Warden：基于官方gRPC开发，集成[discovery](https://github.com/bilibili/discovery)服务发现，并融合P2C负载均衡；
+* Cache：优雅的接口化设计，非常方便的缓存序列化，推荐结合代理模式[overlord](https://github.com/bilibili/overlord)；
+* Database：集成MySQL/HBase/TiDB，添加熔断保护和统计支持，可快速发现数据层压力；
+* Config：方便易用的[paladin sdk](doc/wiki-cn/config.md)，可配合远程配置中心，实现配置版本管理和更新；
+* Log：类似[zap](https://github.com/uber-go/zap)的field实现高性能日志库，并结合log-agent实现远程日志管理；
+* Trace：基于opentracing，集成了全链路trace支持（gRPC/HTTP/MySQL/Redis/Memcached）；
+* Kratos Tool：工具链，可快速生成标准项目，或者通过Protobuf生成代码，非常便捷使用gRPC、HTTP、swagger文档；
 
 
 <br>  
