@@ -23,7 +23,7 @@ Kratos是bilibili开源的一套Go微服务框架，包含大量微服务相关�
 * GRPC Warden：基于官方gRPC开发，集成[discovery](https://github.com/bilibili/discovery)服务发现，并融合P2C负载均衡；
 * Cache：优雅的接口化设计，非常方便的缓存序列化，推荐结合代理模式[overlord](https://github.com/bilibili/overlord)；
 * Database：集成MySQL/HBase/TiDB，添加熔断保护和统计支持，可快速发现数据层压力；
-* Config：方便易用的[paladin sdk](doc/wiki-cn/config.md)，可配合远程配置中心，实现配置版本管理和更新；
+* Config：方便易用的[paladin sdk](config-paladin.md)，可配合远程配置中心，实现配置版本管理和更新；
 * Log：类似[zap](https://github.com/uber-go/zap)的field实现高性能日志库，并结合log-agent实现远程日志管理；
 * Trace：基于opentracing，集成了全链路trace支持（gRPC/HTTP/MySQL/Redis/Memcached）；
 * Kratos Tool：工具链，可快速生成标准项目，或者通过Protobuf生成代码，非常便捷使用gRPC、HTTP、swagger文档；
