@@ -66,7 +66,7 @@ func main() {
   
 # server.go
 func NewServer() {
-    # 默认配置用nil
+    # 默认配置用nil，这时读取HTTP/gRPC构架中的flag或者环境变量（可能是docker注入的环境变量，默认端口：8000/9000）
     engine := bm.DefaultServer(nil)
   
     # 除非自己要替换了配置，用http.toml
