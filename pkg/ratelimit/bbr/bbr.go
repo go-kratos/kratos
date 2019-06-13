@@ -32,13 +32,15 @@ func init() {
 }
 
 func cpuproc() {
+	ticker := time.NewTicker(time.Millisecond * 250)
 	defer func() {
+		ticker.Stop()
 		if err := recover(); err != nil {
 			log.Error("rate.limit.cpuproc() err(%+v)", err)
 			go cpuproc()
 		}
 	}()
-	ticker := time.NewTicker(time.Millisecond * 250)
+
 	// EMA algorithm: https://blog.csdn.net/m0_38106113/article/details/81542863
 	for range ticker.C {
 		stat := &cpustat.Stat{}
