@@ -20,6 +20,50 @@ var (
 	statsServer = stat.RPCServer
 )
 
+// Warden Log Flag
+const (
+	// disable all log.
+	LogFlagDisable = 1 << iota
+	// disable print args on log.
+	LogFlagDisableArgs
+	// disable info level log.
+	LogFlagDisableInfo
+)
+
+type logOption struct {
+	grpc.EmptyDialOption
+	grpc.EmptyCallOption
+	flag int8
+}
+
+// WithLogFlag disable client access log.
+func WithLogFlag(flag int8) grpc.CallOption {
+	return logOption{flag: flag}
+}
+
+// WithDialLogFlag set client level log behaviour.
+func WithDialLogFlag(flag int8) grpc.DialOption {
+	return logOption{flag: flag}
+}
+
+func extractLogCallOption(opts []grpc.CallOption) (flag int8) {
+	for _, opt := range opts {
+		if logOpt, ok := opt.(logOption); ok {
+			return logOpt.flag
+		}
+	}
+	return
+}
+
+func extractLogDialOption(opts []grpc.DialOption) (flag int8) {
+	for _, opt := range opts {
+		if logOpt, ok := opt.(logOption); ok {
+			return logOpt.flag
+		}
+	}
+	return
+}
+
 func logFn(code int, dt time.Duration) func(context.Context, ...log.D) {
 	switch {
 	case code < 0:
@@ -34,8 +78,11 @@ func logFn(code int, dt time.Duration) func(context.Context, ...log.D) {
 }
 
 // clientLogging warden grpc logging
-func clientLogging() grpc.UnaryClientInterceptor {
+func clientLogging(dialOptions ...grpc.DialOption) grpc.UnaryClientInterceptor {
+	defaultFlag := extractLogDialOption(dialOptions)
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		logFlag := extractLogCallOption(opts) | defaultFlag
+
 		startTime := time.Now()
 		var peerInfo peer.Peer
 		opts = append(opts, grpc.Peer(&peerInfo))
@@ -50,21 +97,27 @@ func clientLogging() grpc.UnaryClientInterceptor {
 		statsClient.Timing(method, int64(duration/time.Millisecond))
 		statsClient.Incr(method, strconv.Itoa(code))
 
-		var ip string
-		if peerInfo.Addr != nil {
-			ip = peerInfo.Addr.String()
+		if logFlag&LogFlagDisable != 0 {
+			return err
 		}
-		logFields := []log.D{
-			log.KVString("ip", ip),
-			log.KVString("path", method),
-			log.KVInt("ret", code),
+		// TODO: find better way to deal with slow log.
+		if logFlag&LogFlagDisableInfo != 0 && err == nil && duration < 500*time.Millisecond {
+			return err
+		}
+		logFields := make([]log.D, 0, 7)
+		logFields = append(logFields, log.KVString("path", method))
+		logFields = append(logFields, log.KVInt("ret", code))
+		logFields = append(logFields, log.KVFloat64("ts", duration.Seconds()))
+		logFields = append(logFields, log.KVString("source", "grpc-access-log"))
+		if peerInfo.Addr != nil {
+			logFields = append(logFields, log.KVString("ip", peerInfo.Addr.String()))
+		}
+		if logFlag&LogFlagDisableArgs == 0 {
 			// TODO: it will panic if someone remove String method from protobuf message struct that auto generate from protoc.
-			log.KVString("args", req.(fmt.Stringer).String()),
-			log.KVFloat64("ts", duration.Seconds()),
-			log.KVString("source", "grpc-access-log"),
+			logFields = append(logFields, log.KVString("args", req.(fmt.Stringer).String()))
 		}
 		if err != nil {
-			logFields = append(logFields, log.KV("error", err.Error()), log.KVString("stack", fmt.Sprintf("%+v", err)))
+			logFields = append(logFields, log.KVString("error", err.Error()), log.KVString("stack", fmt.Sprintf("%+v", err)))
 		}
 		logFn(code, duration)(ctx, logFields...)
 		return err
@@ -72,7 +125,7 @@ func clientLogging() grpc.UnaryClientInterceptor {
 }
 
 // serverLogging warden grpc logging
-func serverLogging() grpc.UnaryServerInterceptor {
+func serverLogging(logFlag int8) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		startTime := time.Now()
 		caller := metadata.String(ctx, metadata.Caller)
@@ -94,23 +147,32 @@ func serverLogging() grpc.UnaryServerInterceptor {
 		// after server response
 		code := ecode.Cause(err).Code()
 		duration := time.Since(startTime)
-
 		// monitor
 		statsServer.Timing(caller, int64(duration/time.Millisecond), info.FullMethod)
 		statsServer.Incr(caller, info.FullMethod, strconv.Itoa(code))
+
+		if logFlag&LogFlagDisable != 0 {
+			return resp, err
+		}
+		// TODO: find better way to deal with slow log.
+		if logFlag&LogFlagDisableInfo != 0 && err == nil && duration < 500*time.Millisecond {
+			return resp, err
+		}
 		logFields := []log.D{
 			log.KVString("user", caller),
 			log.KVString("ip", remoteIP),
 			log.KVString("path", info.FullMethod),
 			log.KVInt("ret", code),
-			// TODO: it will panic if someone remove String method from protobuf message struct that auto generate from protoc.
-			log.KVString("args", req.(fmt.Stringer).String()),
 			log.KVFloat64("ts", duration.Seconds()),
 			log.KVFloat64("timeout_quota", quota),
 			log.KVString("source", "grpc-access-log"),
 		}
+		if logFlag&LogFlagDisableArgs == 0 {
+			// TODO: it will panic if someone remove String method from protobuf message struct that auto generate from protoc.
+			logFields = append(logFields, log.KVString("args", req.(fmt.Stringer).String()))
+		}
 		if err != nil {
-			logFields = append(logFields, log.KV("error", err.Error()), log.KV("stack", fmt.Sprintf("%+v", err)))
+			logFields = append(logFields, log.KVString("error", err.Error()), log.KVString("stack", fmt.Sprintf("%+v", err)))
 		}
 		logFn(code, duration)(ctx, logFields...)
 		return resp, err

@@ -13,6 +13,7 @@ import (
 	"github.com/bilibili/kratos/pkg/conf/dsn"
 	"github.com/bilibili/kratos/pkg/log"
 	nmd "github.com/bilibili/kratos/pkg/net/metadata"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden/ratelimiter"
 	"github.com/bilibili/kratos/pkg/net/trace"
 	xtime "github.com/bilibili/kratos/pkg/time"
 
@@ -64,6 +65,9 @@ type ServerConfig struct {
 	// KeepAliveTimeout  is After having pinged for keepalive check, the server waits for a duration of Timeout and if no activity is seen even after that
 	// the connection is closed.
 	KeepAliveTimeout xtime.Duration `dsn:"query.keepaliveTimeout"`
+	// LogFlag to control log behaviour. e.g. LogFlag: warden.LogFlagDisableLog.
+	// Disable: 1 DisableArgs: 2 DisableInfo: 4
+	LogFlag int8 `dsn:"query.logFlag"`
 }
 
 // Server is the framework's server side instance, it contains the GrpcServer, interceptor and interceptors.
@@ -135,7 +139,6 @@ func (s *Server) handle() grpc.UnaryServerInterceptor {
 
 func init() {
 	addFlag(flag.CommandLine)
-
 }
 
 func addFlag(fs *flag.FlagSet) {
@@ -166,6 +169,8 @@ func NewServer(conf *ServerConfig, opt ...grpc.ServerOption) (s *Server) {
 			fmt.Fprint(os.Stderr, "[warden] please call flag.Parse() before Init warden server, some configure may not effect\n")
 		}
 		conf = parseDSN(_grpcDSN)
+	} else {
+		fmt.Fprintf(os.Stderr, "[warden] config is Deprecated, argument will be ignored. please use -grpc flag or GRPC env to configure warden server.\n")
 	}
 	s = new(Server)
 	if err := s.SetConfig(conf); err != nil {
@@ -180,7 +185,8 @@ func NewServer(conf *ServerConfig, opt ...grpc.ServerOption) (s *Server) {
 	})
 	opt = append(opt, keepParam, grpc.UnaryInterceptor(s.interceptor))
 	s.server = grpc.NewServer(opt...)
-	s.Use(s.recovery(), s.handle(), serverLogging(), s.stats(), s.validate())
+	s.Use(s.recovery(), s.handle(), serverLogging(conf.LogFlag), s.stats(), s.validate())
+	s.Use(ratelimiter.New(nil).Limit())
 	return
 }
 
@@ -299,8 +305,6 @@ func (s *Server) Start() (*Server, error) {
 		return nil, err
 	}
 	reflection.Register(s.server)
-
-	log.Info("warden: start grpc listen addr: %s", s.conf.Addr)
 	go func() {
 		if err := s.Serve(lis); err != nil {
 			panic(err)
