@@ -189,8 +189,14 @@ import (
 	xtime "github.com/bilibili/kratos/pkg/time"
 )
 
-// Dao dao.
-type Dao struct {
+// Dao dao interface
+type Dao interface {
+   Close()
+   Ping(ctx context.Context) (err error)
+}
+
+// dao dao.
+type dao struct {
 	db          *sql.DB
 	redis       *redis.Pool
 	redisExpire int32
@@ -205,7 +211,7 @@ func checkErr(err error) {
 }
 
 // New new a dao and return.
-func New() (dao *Dao) {
+func New() (Dao) {
 	var (
 		dc struct {
 			Demo *sql.Config
@@ -222,7 +228,7 @@ func New() (dao *Dao) {
 	checkErr(paladin.Get("mysql.toml").UnmarshalTOML(&dc))
 	checkErr(paladin.Get("redis.toml").UnmarshalTOML(&rc))
 	checkErr(paladin.Get("memcache.toml").UnmarshalTOML(&mc))
-	dao = &Dao{
+	return &dao{
 		// mysql
 		db: sql.NewMySQL(dc.Demo),
 		// redis
@@ -232,18 +238,17 @@ func New() (dao *Dao) {
 		mc:       memcache.New(mc.Demo),
 		mcExpire: int32(time.Duration(mc.DemoExpire) / time.Second),
 	}
-	return
 }
 
 // Close close the resource.
-func (d *Dao) Close() {
+func (d *dao) Close() {
 	d.mc.Close()
 	d.redis.Close()
 	d.db.Close()
 }
 
 // Ping ping the resource.
-func (d *Dao) Ping(ctx context.Context) (err error) {
+func (d *dao) Ping(ctx context.Context) (err error) {
 	if err = d.pingMC(ctx); err != nil {
 		return
 	}
@@ -253,14 +258,14 @@ func (d *Dao) Ping(ctx context.Context) (err error) {
 	return d.db.Ping(ctx)
 }
 
-func (d *Dao) pingMC(ctx context.Context) (err error) {
+func (d *dao) pingMC(ctx context.Context) (err error) {
 	if err = d.mc.Set(ctx, &memcache.Item{Key: "ping", Value: []byte("pong"), Expiration: 0}); err != nil {
 		log.Error("conn.Set(PING) error(%v)", err)
 	}
 	return
 }
 
-func (d *Dao) pingRedis(ctx context.Context) (err error) {
+func (d *dao) pingRedis(ctx context.Context) (err error) {
 	conn := d.redis.Get(ctx)
 	defer conn.Close()
 	if _, err = conn.Do("SET", "ping", "pong"); err != nil {
@@ -286,7 +291,7 @@ import (
 // Service service.
 type Service struct {
 	ac  *paladin.Map
-	dao *dao.Dao
+	dao dao.Dao
 }
 
 // New new a service and return.
@@ -329,7 +334,7 @@ import (
 // Service service.
 type Service struct {
 	ac  *paladin.Map
-	dao *dao.Dao
+	dao dao.Dao
 }
 
 // New new a service and return.
