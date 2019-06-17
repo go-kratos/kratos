@@ -6,80 +6,43 @@ import (
 	"time"
 )
 
-var (
-	cores   uint64
-	maxFreq uint64
-	quota   float64
-	usage   uint64
-
-	preSystem uint64
-	preTotal  uint64
+const (
+	interval time.Duration = time.Millisecond * 500
 )
 
-func init() {
-	cpus, err := perCPUUsage()
-	if err != nil {
-		panic(fmt.Errorf("stat/sys/cpu: perCPUUsage() failed!err:=%v", err))
-	}
-	cores = uint64(len(cpus))
+var (
+	stats CPU
+	usage uint64
+)
 
-	sets, err := cpuSets()
+type CPU interface {
+	Usage() (u uint64, e error)
+	Info() Info
+}
+
+func init() {
+	var (
+		err error
+	)
+	stats, err = newCgroupCPU()
 	if err != nil {
-		panic(fmt.Errorf("stat/sys/cpu: cpuSets() failed!err:=%v", err))
-	}
-	quota = float64(len(sets))
-	cq, err := cpuQuota()
-	if err == nil {
-		if cq != -1 {
-			var period uint64
-			if period, err = cpuPeriod(); err != nil {
-				panic(fmt.Errorf("stat/sys/cpu: cpuPeriod() failed!err:=%v", err))
-			}
-			limit := float64(cq) / float64(period)
-			if limit < quota {
-				quota = limit
-			}
+		fmt.Printf("cgroup cpu init failed(%v),switch to psutil cpu\n", err)
+		stats, err = newPsutilCPU(interval)
+		if err != nil {
+			panic(fmt.Sprintf("cgroup cpu init failed!err:=%v", err))
 		}
 	}
-	maxFreq = cpuMaxFreq()
-
-	preSystem, err = systemCPUUsage()
-	if err != nil {
-		panic(fmt.Errorf("sys/cpu: systemCPUUsage() failed!err:=%v", err))
-	}
-	preTotal, err = totalCPUUsage()
-	if err != nil {
-		panic(fmt.Errorf("sys/cpu: totalCPUUsage() failed!err:=%v", err))
-	}
-
 	go func() {
-		ticker := time.NewTicker(time.Millisecond * 250)
+		ticker := time.NewTicker(interval)
 		defer ticker.Stop()
 		for {
 			<-ticker.C
-			cpu := refreshCPU()
-			if cpu != 0 {
-				atomic.StoreUint64(&usage, cpu)
+			u, err := stats.Usage()
+			if err == nil && u != 0 {
+				atomic.StoreUint64(&usage, u)
 			}
 		}
 	}()
-}
-
-func refreshCPU() (u uint64) {
-	total, err := totalCPUUsage()
-	if err != nil {
-		return
-	}
-	system, err := systemCPUUsage()
-	if err != nil {
-		return
-	}
-	if system != preSystem {
-		u = uint64(float64((total-preTotal)*cores*1e3) / (float64(system-preSystem) * quota))
-	}
-	preSystem = system
-	preTotal = total
-	return u
 }
 
 // Stat cpu stat.
@@ -100,8 +63,5 @@ func ReadStat(stat *Stat) {
 
 // GetInfo get cpu info.
 func GetInfo() Info {
-	return Info{
-		Frequency: maxFreq,
-		Quota:     quota,
-	}
+	return stats.Info()
 }
