@@ -1,5 +1,9 @@
 ### net/rpc/warden
-##### Version 1.1.12
+
+##### Version 1.1.14
+1. p2c balancer增加filter保护
+
+##### Version 1.1.13
 1. 设置 caller 为 no_user 如果 user 不存在
 
 ##### Version 1.1.12

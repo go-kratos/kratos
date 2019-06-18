@@ -10,13 +10,11 @@ import (
 	"time"
 
 	"github.com/bilibili/kratos/pkg/ecode"
-	epb "github.com/bilibili/kratos/pkg/ecode/pb"
 	"github.com/bilibili/kratos/pkg/log"
 	"github.com/bilibili/kratos/pkg/net/rpc/warden"
 	pb "github.com/bilibili/kratos/pkg/net/rpc/warden/internal/proto/testproto"
 	xtime "github.com/bilibili/kratos/pkg/time"
 
-	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"
 )
 
@@ -26,9 +24,7 @@ type helloServer struct {
 
 func (s *helloServer) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	if in.Name == "err_detail_test" {
-		any, _ := ptypes.MarshalAny(&pb.HelloReply{Success: true, Message: "this is test detail"})
-		err := epb.From(ecode.AccessDenied)
-		err.ErrDetail = any
+		err, _ := ecode.Error(ecode.AccessDenied, "AccessDenied").WithDetails(&pb.HelloReply{Success: true, Message: "this is test detail"})
 		return nil, err
 	}
 	return &pb.HelloReply{Message: fmt.Sprintf("hello %s from %s", in.Name, s.addr)}, nil

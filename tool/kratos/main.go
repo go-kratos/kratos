@@ -10,9 +10,34 @@ import (
 func main() {
 	app := cli.NewApp()
 	app.Name = "kratos"
-	app.Usage = "kratos tool"
+	app.Usage = "kratos工具集"
 	app.Version = Version
 	app.Commands = []cli.Command{
+		{
+			Name:    "new",
+			Aliases: []string{"n"},
+			Usage:   "create new project",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:        "o",
+					Value:       "",
+					Usage:       "project owner for create project",
+					Destination: &p.Owner,
+				},
+				cli.StringFlag{
+					Name:        "d",
+					Value:       "",
+					Usage:       "project directory for create project",
+					Destination: &p.Path,
+				},
+				cli.BoolFlag{
+					Name:        "proto",
+					Usage:       "whether to use protobuf for create project",
+					Destination: &p.WithGRPC,
+				},
+			},
+			Action: runNew,
+		},
 		{
 			Name:    "build",
 			Aliases: []string{"b"},
@@ -20,35 +45,17 @@ func main() {
 			Action:  buildAction,
 		},
 		{
-			Name:    "init",
-			Aliases: []string{"i"},
-			Usage:   "create new project",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:        "n",
-					Value:       "",
-					Usage:       "project name for create project",
-					Destination: &p.Name,
-				},
-				cli.StringFlag{
-					Name:        "o",
-					Value:       "",
-					Usage:       "project owner for create project",
-					Destination: &p.Owner,
-				},
-				cli.BoolFlag{
-					Name:        "grpc",
-					Usage:       "whether to use grpc for create project",
-					Destination: &p.WithGRPC,
-				},
-			},
-			Action: runInit,
+			Name:    "run",
+			Aliases: []string{"r"},
+			Usage:   "kratos run",
+			Action:  runAction,
 		},
 		{
-			Name:    "tool",
-			Aliases: []string{"t"},
-			Usage:   "kratos tool",
-			Action:  toolAction,
+			Name:            "tool",
+			Aliases:         []string{"t"},
+			Usage:           "kratos tool",
+			Action:          toolAction,
+			SkipFlagParsing: true,
 		},
 		{
 			Name:    "version",

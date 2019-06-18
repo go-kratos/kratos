@@ -1,0 +1,124 @@
+// Copyright 2019 Google LLC.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+syntax = "proto3";
+
+package google.ads.googleads.v1.common;
+
+import "google/protobuf/wrappers.proto";
+import "google/api/annotations.proto";
+
+option csharp_namespace = "Google.Ads.GoogleAds.V1.Common";
+option go_package = "google.golang.org/genproto/googleapis/ads/googleads/v1/common;common";
+option java_multiple_files = true;
+option java_outer_classname = "SimulationProto";
+option java_package = "com.google.ads.googleads.v1.common";
+option objc_class_prefix = "GAA";
+option php_namespace = "Google\\Ads\\GoogleAds\\V1\\Common";
+option ruby_package = "Google::Ads::GoogleAds::V1::Common";
+
+// Proto file describing simulation points.
+
+// A container for simulation points for simulations of type BID_MODIFIER.
+message BidModifierSimulationPointList {
+  // Projected metrics for a series of bid modifier amounts.
+  repeated BidModifierSimulationPoint points = 1;
+}
+
+// A container for simulation points for simulations of type CPC_BID.
+message CpcBidSimulationPointList {
+  // Projected metrics for a series of cpc bid amounts.
+  repeated CpcBidSimulationPoint points = 1;
+}
+
+// A container for simulation points for simulations of type TARGET_CPA.
+message TargetCpaSimulationPointList {
+  // Projected metrics for a series of target cpa amounts.
+  repeated TargetCpaSimulationPoint points = 1;
+}
+
+// Projected metrics for a specific bid modifier amount.
+message BidModifierSimulationPoint {
+  // The simulated bid modifier upon which projected metrics are based.
+  google.protobuf.DoubleValue bid_modifier = 1;
+
+  // Projected number of biddable conversions.
+  google.protobuf.DoubleValue biddable_conversions = 2;
+
+  // Projected total value of biddable conversions.
+  google.protobuf.DoubleValue biddable_conversions_value = 3;
+
+  // Projected number of clicks.
+  google.protobuf.Int64Value clicks = 4;
+
+  // Projected cost in micros.
+  google.protobuf.Int64Value cost_micros = 5;
+
+  // Projected number of impressions.
+  google.protobuf.Int64Value impressions = 6;
+
+  // Projected number of top slot impressions.
+  google.protobuf.Int64Value top_slot_impressions = 7;
+}
+
+// Projected metrics for a specific cpc bid amount.
+message CpcBidSimulationPoint {
+  // The simulated cpc bid upon which projected metrics are based.
+  google.protobuf.Int64Value cpc_bid_micros = 1;
+
+  // Projected number of biddable conversions.
+  google.protobuf.DoubleValue biddable_conversions = 2;
+
+  // Projected total value of biddable conversions.
+  google.protobuf.DoubleValue biddable_conversions_value = 3;
+
+  // Projected number of clicks.
+  google.protobuf.Int64Value clicks = 4;
+
+  // Projected cost in micros.
+  google.protobuf.Int64Value cost_micros = 5;
+
+  // Projected number of impressions.
+  google.protobuf.Int64Value impressions = 6;
+
+  // Projected number of top slot impressions.
+  // Display network does not support this field at the ad group level.
+  google.protobuf.Int64Value top_slot_impressions = 7;
+}
+
+// Projected metrics for a specific target cpa amount.
+message TargetCpaSimulationPoint {
+  // The simulated target cpa upon which projected metrics are based.
+  google.protobuf.Int64Value target_cpa_micros = 1;
+
+  // Projected number of biddable conversions.
+  google.protobuf.DoubleValue biddable_conversions = 2;
+
+  // Projected total value of biddable conversions.
+  google.protobuf.DoubleValue biddable_conversions_value = 3;
+
+  // Projected number of clicks.
+  google.protobuf.Int64Value clicks = 4;
+
+  // Projected cost in micros.
+  google.protobuf.Int64Value cost_micros = 5;
+
+  // Projected number of impressions.
+  google.protobuf.Int64Value impressions = 6;
+
+  // Projected number of top slot impressions.
+  // Display network does not support this field at the ad group level.
+  google.protobuf.Int64Value top_slot_impressions = 7;
+}

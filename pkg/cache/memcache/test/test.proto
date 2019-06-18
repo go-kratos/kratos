@@ -1,0 +1,12 @@
+syntax = "proto3";  
+package proto;
+
+enum FOO 
+{ 
+    X = 0; 
+};
+
+message TestItem{
+    string Name = 1;  
+    int32 Age = 2;    
+}

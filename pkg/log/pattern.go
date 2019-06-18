@@ -11,12 +11,6 @@ import (
 	"time"
 )
 
-// Render render log output
-type Render interface {
-	Render(io.Writer, map[string]interface{}) error
-	RenderString(map[string]interface{}) string
-}
-
 var patternMap = map[string]func(map[string]interface{}) string{
 	"T": longTime,
 	"t": shortTime,
@@ -80,6 +74,7 @@ func (p *pattern) Render(w io.Writer, d map[string]interface{}) error {
 	for _, f := range p.funcs {
 		buf.WriteString(f(d))
 	}
+
 	_, err := buf.WriteTo(w)
 	return err
 }

@@ -1,0 +1,52 @@
+type: google.api.Service
+config_version: 3
+name: videointelligence.googleapis.com
+title: Cloud Video Intelligence API
+
+apis:
+- name: google.cloud.videointelligence.v1p1beta1.VideoIntelligenceService
+
+types:
+- name: google.cloud.videointelligence.v1p1beta1.AnnotateVideoResponse
+- name: google.cloud.videointelligence.v1p1beta1.AnnotateVideoProgress
+- name: google.cloud.videointelligence.v1p1beta1.VideoSegment
+- name: google.rpc.Status
+
+documentation:
+  summary: Cloud Video Intelligence API.
+
+backend:
+  rules:
+  - selector: google.longrunning.Operations.ListOperations
+    deadline: 600.0
+  - selector: google.longrunning.Operations.GetOperation
+    deadline: 600.0
+  - selector: google.longrunning.Operations.DeleteOperation
+    deadline: 600.0
+  - selector: google.longrunning.Operations.CancelOperation
+    deadline: 600.0
+  - selector: google.cloud.videointelligence.v1p1beta1.VideoIntelligenceService.AnnotateVideo
+    deadline: 600.0
+
+http:
+  rules:
+  - selector: google.longrunning.Operations.ListOperations
+    get: /v1p1beta1/operations
+
+  - selector: google.longrunning.Operations.GetOperation
+    get: '/v1p1beta1/operations/{name=*}'
+
+  - selector: google.longrunning.Operations.DeleteOperation
+    delete: '/v1p1beta1/operations/{name=*}'
+
+  - selector: google.longrunning.Operations.CancelOperation
+    post: '/v1p1beta1/operations/{name=*}:cancel'
+    body: '*'
+
+
+authentication:
+  rules:
+  - selector: '*'
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform

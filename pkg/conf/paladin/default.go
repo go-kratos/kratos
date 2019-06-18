@@ -3,15 +3,12 @@ package paladin
 import (
 	"context"
 	"flag"
-
-	"github.com/bilibili/kratos/pkg/log"
 )
 
 var (
 	// DefaultClient default client.
 	DefaultClient Client
 	confPath      string
-	vars          = make(map[string][]Setter) // NOTE: no thread safe
 )
 
 func init() {
@@ -23,26 +20,12 @@ func Init() (err error) {
 	if confPath != "" {
 		DefaultClient, err = NewFile(confPath)
 	} else {
-		// TODO: config service
-		return
+		// TODO: Get the configuration from the remote service
+		panic("Please specify a file or dir name by -conf flag.")
 	}
 	if err != nil {
 		return
 	}
-	go func() {
-		for event := range DefaultClient.WatchEvent(context.Background()) {
-			if event.Event != EventUpdate && event.Event != EventAdd {
-				continue
-			}
-			if sets, ok := vars[event.Key]; ok {
-				for _, s := range sets {
-					if err := s.Set(event.Value); err != nil {
-						log.Error("paladin: vars:%v event:%v error(%v)", s, event, err)
-					}
-				}
-			}
-		}
-	}()
 	return
 }
 
@@ -56,7 +39,11 @@ func Watch(key string, s Setter) error {
 	if err := s.Set(str); err != nil {
 		return err
 	}
-	vars[key] = append(vars[key], s)
+	go func() {
+		for event := range WatchEvent(context.Background(), key) {
+			s.Set(event.Value)
+		}
+	}()
 	return nil
 }
 

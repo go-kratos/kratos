@@ -73,11 +73,17 @@ func (c *Context) Protobuf(data proto.Message, err error)
 
 ![handler](/doc/img/bm-handlers.png)
 
-初次接触 blademaster 的用户可能会对其 Handler 的流程处理产生不小的疑惑，实际上 bm 对 Handler 对处理非常简单。  
-将 Router 模块中预先注册的中间件与其他 Handler 合并，放入 Context 的 handlers 字段，并将 index 置 0，然后通过 Next() 方法一个个执行下去。  
-部分中间件可能想要在过程中中断整个流程，此时可以使用 Abort() 方法提前结束处理。  
-有些中间件还想在所有 Handler 执行完后再执行部分逻辑，此时可以在自身 Handler 中显式调用 Next() 方法，并将这些逻辑放在调用了 Next() 方法之后。  
+初次接触`blademaster`的用户可能会对其`Handler`的流程处理产生不小的疑惑，实际上`bm`对`Handler`对处理非常简单：
 
+* 将`Router`模块中预先注册的`middleware`与其他`Handler`合并，放入`Context`的`handlers`字段，并将`index`字段置`0`
+* 然后通过`Next()`方法一个个执行下去，部分`middleware`可能想要在过程中中断整个流程，此时可以使用`Abort()`方法提前结束处理
+* 有些`middleware`还想在所有`Handler`执行完后再执行部分逻辑，此时可以在自身`Handler`中显式调用`Next()`方法，并将这些逻辑放在调用了`Next()`方法之后
+
+# 扩展阅读
+
+[bm快速开始](blademaster-quickstart.md)  
+[bm中间件](blademaster-mid.md)  
+[bm基于pb生成](blademaster-pb.md)  
 
 -------------
 

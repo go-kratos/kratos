@@ -1,0 +1,19 @@
+type: google.api.Service
+config_version: 3
+name: remoteexecution.googleapis.com
+title: Remote Execution API
+
+apis:
+- name: google.bytestream.ByteStream
+- name: google.devtools.remoteexecution.v1test.ActionCache
+- name: google.devtools.remoteexecution.v1test.ContentAddressableStorage
+- name: google.devtools.remoteexecution.v1test.Execution
+- name: google.longrunning.Operations
+- name: google.watcher.v1.Watcher
+
+types:
+- name: google.devtools.remoteexecution.v1test.Command
+- name: google.devtools.remoteexecution.v1test.ExecuteResponse
+- name: google.devtools.remoteexecution.v1test.ExecuteOperationMetadata
+- name: google.devtools.remoteexecution.v1test.RequestMetadata
+- name: google.devtools.remoteexecution.v1test.Tree

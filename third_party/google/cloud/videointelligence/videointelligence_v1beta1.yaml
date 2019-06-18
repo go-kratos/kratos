@@ -1,0 +1,35 @@
+type: google.api.Service
+config_version: 3
+name: videointelligence.googleapis.com
+title: Google Cloud Video Intelligence API
+
+apis:
+- name: google.cloud.videointelligence.v1beta1.VideoIntelligenceService
+
+documentation:
+  summary:
+    Google Cloud Video Intelligence API.
+
+authentication:
+  rules:
+    - selector: '*'
+      oauth:
+        canonical_scopes: https://www.googleapis.com/auth/cloud-platform
+
+types:
+- name: google.cloud.videointelligence.v1beta1.AnnotateVideoResponse
+- name: google.cloud.videointelligence.v1beta1.AnnotateVideoProgress
+- name: google.cloud.videointelligence.v1beta1.VideoSegment
+- name: google.rpc.Status
+
+http:
+  rules:
+  - selector: google.longrunning.Operations.GetOperation
+    get: '/v1/operations/{name=*}'
+  - selector: google.longrunning.Operations.ListOperations
+    get: '/v1/operations'
+  - selector: google.longrunning.Operations.CancelOperation
+    post: '/v1/operations/{name=*}:cancel'
+    body: '*'
+  - selector: google.longrunning.Operations.DeleteOperation
+    delete: '/v1/operations/{name=*}'

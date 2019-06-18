@@ -14,12 +14,12 @@ import (
 	"github.com/bilibili/kratos/pkg/conf/flagvar"
 	"github.com/bilibili/kratos/pkg/ecode"
 	"github.com/bilibili/kratos/pkg/naming"
-	"github.com/bilibili/kratos/pkg/naming/discovery"
 	nmd "github.com/bilibili/kratos/pkg/net/metadata"
 	"github.com/bilibili/kratos/pkg/net/netutil/breaker"
 	"github.com/bilibili/kratos/pkg/net/rpc/warden/balancer/p2c"
 	"github.com/bilibili/kratos/pkg/net/rpc/warden/internal/status"
 	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver/direct"
 	"github.com/bilibili/kratos/pkg/net/trace"
 	xtime "github.com/bilibili/kratos/pkg/time"
 
@@ -51,6 +51,10 @@ func baseMetadata() metadata.MD {
 	return gmd
 }
 
+func init() {
+	resolver.Register(direct.New())
+}
+
 // ClientConfig is rpc client conf.
 type ClientConfig struct {
 	Dial     xtime.Duration
@@ -79,7 +83,6 @@ func (c *Client) handle() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
 		var (
 			ok     bool
-			cmd    nmd.MD
 			t      trace.Trace
 			gmd    metadata.MD
 			conf   *ClientConfig
@@ -110,17 +113,13 @@ func (c *Client) handle() grpc.UnaryClientInterceptor {
 		defer onBreaker(brk, &err)
 		_, ctx, cancel = conf.Timeout.Shrink(ctx)
 		defer cancel()
-		if cmd, ok = nmd.FromContext(ctx); ok {
-			for netKey, val := range cmd {
-				if !nmd.IsOutgoingKey(netKey) {
-					continue
+		nmd.Range(ctx,
+			func(key string, value interface{}) {
+				if valstr, ok := value.(string); ok {
+					gmd[key] = []string{valstr}
 				}
-				valstr, ok := val.(string)
-				if ok {
-					gmd[netKey] = []string{valstr}
-				}
-			}
-		}
+			},
+			nmd.IsOutgoingKey)
 		// merge with old matadata if exists
 		if oldmd, ok := metadata.FromOutgoingContext(ctx); ok {
 			gmd = metadata.Join(gmd, oldmd)
@@ -161,7 +160,6 @@ func NewConn(target string, opt ...grpc.DialOption) (*grpc.ClientConn, error) {
 // NewClient returns a new blank Client instance with a default client interceptor.
 // opt can be used to add grpc dial options.
 func NewClient(conf *ClientConfig, opt ...grpc.DialOption) *Client {
-	resolver.Register(discovery.Builder())
 	c := new(Client)
 	if err := c.SetConfig(conf); err != nil {
 		panic(err)
@@ -175,7 +173,6 @@ func NewClient(conf *ClientConfig, opt ...grpc.DialOption) *Client {
 // DefaultClient returns a new default Client instance with a default client interceptor and default dialoption.
 // opt can be used to add grpc dial options.
 func DefaultClient() *Client {
-	resolver.Register(discovery.Builder())
 	_once.Do(func() {
 		_defaultClient = NewClient(nil)
 	})
@@ -231,7 +228,7 @@ func (c *Client) UseOpt(opt ...grpc.DialOption) *Client {
 
 // Dial creates a client connection to the given target.
 // Target format is scheme://authority/endpoint?query_arg=value
-// example: discovery://default/account.account.service?cluster=shfy01&cluster=shfy02
+// example: direct://default/192.168.1.1:9000,192.168.1.2:9001
 func (c *Client) Dial(ctx context.Context, target string, opt ...grpc.DialOption) (conn *grpc.ClientConn, err error) {
 	if !c.conf.NonBlock {
 		c.opt = append(c.opt, grpc.WithBlock())

@@ -2,11 +2,9 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
 	"strings"
 	"text/template"
 )
@@ -37,7 +35,7 @@ const (
 	_tplTypeGRPCToml
 	_tplTypeModel
 	_tplTypeGRPCServer
-	_tplTypeAPIGenerate
+	_tplTypeGomod
 )
 
 var (
@@ -49,9 +47,10 @@ var (
 		_tplTypeContributors: "/CONTRIBUTORS.md",
 		_tplTypeReadme:       "/README.md",
 		// init project
+		_tplTypeGomod:      "/go.mod",
 		_tplTypeMain:       "/cmd/main.go",
 		_tplTypeDao:        "/internal/dao/dao.go",
-		_tplTypeHTTPServer: "/internal/server/http/http.go",
+		_tplTypeHTTPServer: "/internal/server/http/server.go",
 		_tplTypeService:    "/internal/service/service.go",
 		_tplTypeModel:      "/internal/model/model.go",
 		// init config
@@ -67,8 +66,8 @@ var (
 		_tplTypeDao:          _tplDao,
 		_tplTypeHTTPServer:   _tplHTTPServer,
 		_tplTypeAPIProto:     _tplAPIProto,
-		_tplTypeAPIGenerate:  _tplAPIGenerate,
 		_tplTypeMain:         _tplMain,
+		_tplTypeService:      _tplService,
 		_tplTypeChangeLog:    _tplChangeLog,
 		_tplTypeContributors: _tplContributors,
 		_tplTypeReadme:       _tplReadme,
@@ -78,36 +77,19 @@ var (
 		_tplTypeAppToml:      _tplAppToml,
 		_tplTypeHTTPToml:     _tplHTTPToml,
 		_tplTypeModel:        _tplModel,
+		_tplTypeGomod:        _tplGoMod,
 	}
 )
-
-func validate() (ok bool) {
-	if p.Name == "" {
-		fmt.Println("[-n] Invalid project name.")
-		return
-	}
-	if p.Path == "" {
-		if p.Here {
-			pwd, _ := os.Getwd()
-			p.Path = path.Join(pwd, p.Name)
-		} else {
-			p.Path = path.Join(goPath(), "src", p.Name)
-		}
-	}
-	return true
-}
 
 func create() (err error) {
 	if p.WithGRPC {
 		files[_tplTypeGRPCServer] = "/internal/server/grpc/server.go"
 		files[_tplTypeAPIProto] = "/api/api.proto"
-		files[_tplTypeAPIGenerate] = "/api/generate.go"
+		tpls[_tplTypeHTTPServer] = _tplPBHTTPServer
 		tpls[_tplTypeGRPCServer] = _tplGRPCServer
 		tpls[_tplTypeGRPCToml] = _tplGRPCToml
 		tpls[_tplTypeService] = _tplGPRCService
-	} else {
-		tpls[_tplTypeService] = _tplService
-		tpls[_tplTypeMain] = delgrpc(_tplMain)
+		tpls[_tplTypeMain] = _tplGRPCMain
 	}
 	if err = os.MkdirAll(p.Path, 0755); err != nil {
 		return
@@ -133,24 +115,10 @@ func create() (err error) {
 }
 
 func genpb() error {
-	cmd := exec.Command("go", "generate", p.Path+"/api/generate.go")
+	cmd := exec.Command("kratos", "tool", "protoc", p.Name+"/api/api.proto")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	return cmd.Run()
-}
-
-func delgrpc(tpl string) string {
-	var buf bytes.Buffer
-	lines := strings.Split(tpl, "\n")
-	for _, l := range lines {
-		if strings.Contains(l, "grpc") {
-			continue
-		}
-		if strings.Contains(l, "warden") {
-			continue
-		}
-		buf.WriteString(l)
-		buf.WriteString("\n")
-	}
-	return buf.String()
 }
 
 func write(name, tpl string) (err error) {

@@ -5,6 +5,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"text/template"
 
 	"github.com/bilibili/kratos/pkg/ecode"
 	"github.com/bilibili/kratos/pkg/net/http/blademaster/binding"
@@ -144,9 +145,8 @@ func (c *Context) Render(code int, r render.Render) {
 	}
 
 	params := c.Request.Form
-
-	cb := params.Get("callback")
-	jsonp := cb != "" && params.Get("jsonp") == "jsonp"
+	cb := template.JSEscapeString(params.Get("callback"))
+	jsonp := cb != ""
 	if jsonp {
 		c.Writer.Write([]byte(cb))
 		c.Writer.Write(_openParen)

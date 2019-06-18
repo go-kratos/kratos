@@ -5,27 +5,21 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/smartystreets/goconvey/convey"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/bilibili/kratos/pkg/ecode/types"
 )
 
 func TestEqual(t *testing.T) {
-	convey.Convey("Equal", t, func(ctx convey.C) {
-		ctx.Convey("When err1=Error(RequestErr, 'test') and err2=Errorf(RequestErr, 'test')", func(ctx convey.C) {
-			err1 := Error(RequestErr, "test")
-			err2 := Errorf(RequestErr, "test")
-			ctx.Convey("Then err1=err2, err1 != nil", func(ctx convey.C) {
-				ctx.So(err1, convey.ShouldResemble, err2)
-				ctx.So(err1, convey.ShouldNotBeNil)
-			})
-		})
-	})
-	// assert.True(t, OK.Equal(nil))
-	// assert.True(t, err1.Equal(err2))
-	// assert.False(t, err1.Equal(nil))
-	// assert.True(t, Equal(nil, nil))
+	var (
+		err1 = Error(RequestErr, "test")
+		err2 = Errorf(RequestErr, "test")
+	)
+	assert.Equal(t, err1, err2)
+	assert.True(t, OK.Equal(nil))
+	assert.True(t, err1.Equal(err2))
+	assert.False(t, err1.Equal(nil))
+	assert.True(t, Equal(nil, nil))
 }
 
 func TestDetail(t *testing.T) {

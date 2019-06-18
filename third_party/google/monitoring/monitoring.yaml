@@ -1,0 +1,159 @@
+type: google.api.Service
+config_version: 3
+name: monitoring.googleapis.com
+title: Stackdriver Monitoring API
+
+apis:
+- name: google.monitoring.v3.AlertPolicyService
+- name: google.monitoring.v3.GroupService
+- name: google.monitoring.v3.MetricService
+- name: google.monitoring.v3.NotificationChannelService
+- name: google.monitoring.v3.UptimeCheckService
+
+types:
+- name: google.monitoring.v3.DroppedLabels
+- name: google.monitoring.v3.SpanContext
+
+documentation:
+  summary: |-
+    Manages your Stackdriver Monitoring data and configurations. Most projects
+    must be associated with a Stackdriver account, with a few exceptions as
+    noted on the individual method pages.
+
+backend:
+  rules:
+  - selector: google.monitoring.v3.AgentTranslationService.CreateCollectdTimeSeries
+    deadline: 30.0
+  - selector: google.monitoring.v3.AlertPolicyService.ListAlertPolicies
+    deadline: 30.0
+  - selector: google.monitoring.v3.AlertPolicyService.GetAlertPolicy
+    deadline: 30.0
+  - selector: google.monitoring.v3.AlertPolicyService.CreateAlertPolicy
+    deadline: 30.0
+  - selector: google.monitoring.v3.AlertPolicyService.DeleteAlertPolicy
+    deadline: 30.0
+  - selector: google.monitoring.v3.AlertPolicyService.UpdateAlertPolicy
+    deadline: 30.0
+  - selector: google.monitoring.v3.GroupService.ListGroups
+    deadline: 30.0
+  - selector: google.monitoring.v3.GroupService.GetGroup
+    deadline: 30.0
+  - selector: google.monitoring.v3.GroupService.CreateGroup
+    deadline: 30.0
+  - selector: google.monitoring.v3.GroupService.UpdateGroup
+    deadline: 30.0
+  - selector: google.monitoring.v3.GroupService.DeleteGroup
+    deadline: 30.0
+  - selector: google.monitoring.v3.GroupService.ListGroupMembers
+    deadline: 30.0
+  - selector: google.monitoring.v3.MetricService.ListMonitoredResourceDescriptors
+    deadline: 30.0
+  - selector: google.monitoring.v3.MetricService.GetMonitoredResourceDescriptor
+    deadline: 30.0
+  - selector: google.monitoring.v3.MetricService.ListMetricDescriptors
+    deadline: 30.0
+  - selector: google.monitoring.v3.MetricService.GetMetricDescriptor
+    deadline: 30.0
+  - selector: google.monitoring.v3.MetricService.CreateMetricDescriptor
+    deadline: 30.0
+  - selector: google.monitoring.v3.MetricService.DeleteMetricDescriptor
+    deadline: 30.0
+  - selector: google.monitoring.v3.MetricService.ListTimeSeries
+    deadline: 30.0
+  - selector: google.monitoring.v3.MetricService.CreateTimeSeries
+    deadline: 12.0
+  - selector: google.monitoring.v3.NotificationChannelService.ListNotificationChannelDescriptors
+    deadline: 30.0
+  - selector: google.monitoring.v3.NotificationChannelService.GetNotificationChannelDescriptor
+    deadline: 30.0
+  - selector: google.monitoring.v3.NotificationChannelService.ListNotificationChannels
+    deadline: 30.0
+  - selector: google.monitoring.v3.NotificationChannelService.GetNotificationChannel
+    deadline: 30.0
+  - selector: google.monitoring.v3.NotificationChannelService.CreateNotificationChannel
+    deadline: 30.0
+  - selector: google.monitoring.v3.NotificationChannelService.UpdateNotificationChannel
+    deadline: 30.0
+  - selector: google.monitoring.v3.NotificationChannelService.DeleteNotificationChannel
+    deadline: 30.0
+  - selector: google.monitoring.v3.NotificationChannelService.SendNotificationChannelVerificationCode
+    deadline: 30.0
+  - selector: google.monitoring.v3.NotificationChannelService.GetNotificationChannelVerificationCode
+    deadline: 30.0
+  - selector: google.monitoring.v3.NotificationChannelService.VerifyNotificationChannel
+    deadline: 30.0
+
+authentication:
+  rules:
+  - selector: '*'
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform,
+        https://www.googleapis.com/auth/monitoring
+  - selector: |-
+      google.monitoring.v3.MetricService.GetMetricDescriptor,
+      google.monitoring.v3.MetricService.GetMonitoredResourceDescriptor,
+      google.monitoring.v3.MetricService.ListMetricDescriptors,
+      google.monitoring.v3.MetricService.ListMonitoredResourceDescriptors
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform,
+        https://www.googleapis.com/auth/monitoring,
+        https://www.googleapis.com/auth/monitoring.read,
+        https://www.googleapis.com/auth/monitoring.write
+  - selector: |-
+      google.monitoring.v3.NotificationChannelService.GetNotificationChannel,
+      google.monitoring.v3.NotificationChannelService.GetNotificationChannelDescriptor,
+      google.monitoring.v3.NotificationChannelService.ListNotificationChannelDescriptors,
+      google.monitoring.v3.NotificationChannelService.ListNotificationChannels
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform,
+        https://www.googleapis.com/auth/monitoring,
+        https://www.googleapis.com/auth/monitoring.read
+  - selector: |-
+      google.monitoring.v3.GroupService.GetGroup,
+      google.monitoring.v3.GroupService.ListGroupMembers,
+      google.monitoring.v3.GroupService.ListGroups
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform,
+        https://www.googleapis.com/auth/monitoring,
+        https://www.googleapis.com/auth/monitoring.read
+  - selector: |-
+      google.monitoring.v3.UptimeCheckService.GetUptimeCheckConfig,
+      google.monitoring.v3.UptimeCheckService.ListUptimeCheckConfigs,
+      google.monitoring.v3.UptimeCheckService.ListUptimeCheckIps
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform,
+        https://www.googleapis.com/auth/monitoring,
+        https://www.googleapis.com/auth/monitoring.read
+  - selector: |-
+      google.monitoring.v3.AlertPolicyService.GetAlertPolicy,
+      google.monitoring.v3.AlertPolicyService.ListAlertPolicies
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform,
+        https://www.googleapis.com/auth/monitoring,
+        https://www.googleapis.com/auth/monitoring.read
+  - selector: |-
+      google.monitoring.v3.MetricService.CreateMetricDescriptor,
+      google.monitoring.v3.MetricService.CreateTimeSeries
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform,
+        https://www.googleapis.com/auth/monitoring,
+        https://www.googleapis.com/auth/monitoring.write
+  - selector: google.monitoring.v3.AgentTranslationService.CreateCollectdTimeSeries
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform,
+        https://www.googleapis.com/auth/monitoring,
+        https://www.googleapis.com/auth/monitoring.write
+  - selector: google.monitoring.v3.MetricService.ListTimeSeries
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform,
+        https://www.googleapis.com/auth/monitoring,
+        https://www.googleapis.com/auth/monitoring.read

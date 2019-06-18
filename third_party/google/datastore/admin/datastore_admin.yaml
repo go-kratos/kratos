@@ -1,0 +1,40 @@
+type: google.api.Service
+config_version: 3
+name: datastore.googleapis.com
+title: Google Cloud Datastore Admin API
+
+apis:
+- name: google.datastore.admin.v1.DatastoreAdmin
+
+types:
+- name: google.datastore.admin.v1.ExportEntitiesMetadata
+- name: google.datastore.admin.v1.ExportEntitiesResponse
+- name: google.datastore.admin.v1.ImportEntitiesMetadata
+- name: google.datastore.admin.v1.IndexOperationMetadata
+
+documentation:
+  summary: |-
+    Accesses the schemaless NoSQL database to provide fully managed, robust,
+    scalable storage for your application.
+
+http:
+  rules:
+  - selector: google.longrunning.Operations.ListOperations
+    get: '/v1/{name=projects/*}/operations'
+
+  - selector: google.longrunning.Operations.GetOperation
+    get: '/v1/{name=projects/*/operations/*}'
+
+  - selector: google.longrunning.Operations.DeleteOperation
+    delete: '/v1/{name=projects/*/operations/*}'
+
+  - selector: google.longrunning.Operations.CancelOperation
+    post: '/v1/{name=projects/*/operations/*}:cancel'
+
+authentication:
+  rules:
+  - selector: '*'
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform,
+        https://www.googleapis.com/auth/datastore

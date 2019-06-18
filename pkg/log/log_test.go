@@ -37,19 +37,16 @@ func testLog(t *testing.T) {
 		Error("hello %s", "world")
 		Errorv(context.Background(), KV("key", 2222222), KV("test2", "test"))
 		Errorc(context.Background(), "keys: %s %s...", "key1", "key2")
-		Errorw(context.Background(), "key1", "value1", "key2", "value2")
 	})
 	t.Run("Warn", func(t *testing.T) {
 		Warn("hello %s", "world")
 		Warnv(context.Background(), KV("key", 2222222), KV("test2", "test"))
 		Warnc(context.Background(), "keys: %s %s...", "key1", "key2")
-		Warnw(context.Background(), "key1", "value1", "key2", "value2")
 	})
 	t.Run("Info", func(t *testing.T) {
 		Info("hello %s", "world")
 		Infov(context.Background(), KV("key", 2222222), KV("test2", "test"))
 		Infoc(context.Background(), "keys: %s %s...", "key1", "key2")
-		Infow(context.Background(), "key1", "value1", "key2", "value2")
 	})
 }
 
@@ -86,4 +83,23 @@ func TestLogWithMirror(t *testing.T) {
 
 	Infov(context.Background(), KV("key1", "val1"), KV("key2", ""), KV("log", "log content"), KV("msg", "msg content"))
 
+}
+
+func TestOverwriteSouce(t *testing.T) {
+	ctx := context.Background()
+	t.Run("test source kv string", func(t *testing.T) {
+		Infov(ctx, KVString("source", "test"))
+	})
+	t.Run("test source kv string", func(t *testing.T) {
+		Infov(ctx, KV("source", "test"))
+	})
+}
+
+func BenchmarkLog(b *testing.B) {
+	ctx := context.Background()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			Infov(ctx, KVString("test", "hello"), KV("int", 34), KV("hhh", "hhhh"))
+		}
+	})
 }

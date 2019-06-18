@@ -1,0 +1,99 @@
+type: google.api.Service
+config_version: 3
+name: datalabeling.googleapis.com
+title: Data Labeling API
+
+apis:
+- name: google.cloud.datalabeling.v1beta1.DataLabelingService
+
+documentation:
+  summary: Public API for Google Cloud AI Data Labeling Service.
+
+backend:
+  rules:
+  - selector: google.longrunning.Operations.ListOperations
+    deadline: 60.0
+  - selector: google.longrunning.Operations.GetOperation
+    deadline: 60.0
+  - selector: google.longrunning.Operations.DeleteOperation
+    deadline: 60.0
+  - selector: google.longrunning.Operations.CancelOperation
+    deadline: 60.0
+  - selector: google.longrunning.Operations.WaitOperation
+    deadline: 60.0
+  - selector: google.iam.v1.IAMPolicy.SetIamPolicy
+    deadline: 60.0
+  - selector: google.iam.v1.IAMPolicy.GetIamPolicy
+    deadline: 60.0
+  - selector: google.iam.v1.IAMPolicy.TestIamPermissions
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.CreateDataset
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.GetDataset
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.ListDatasets
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.DeleteDataset
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.ImportData
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.ExportData
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.GetDataItem
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.ListDataItems
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.GetAnnotatedDataset
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.ListAnnotatedDatasets
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.LabelImage
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.LabelVideo
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.LabelText
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.LabelAudio
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.GetExample
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.ListExamples
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.CreateAnnotationSpecSet
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.GetAnnotationSpecSet
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.ListAnnotationSpecSets
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.DeleteAnnotationSpecSet
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.CreateInstruction
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.GetInstruction
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.ListInstructions
+    deadline: 60.0
+  - selector: google.cloud.datalabeling.v1beta1.DataLabelingService.DeleteInstruction
+    deadline: 60.0
+
+http:
+  rules:
+  - selector: google.longrunning.Operations.ListOperations
+    get: '/v1beta1/{name=projects/*}/operations'
+
+  - selector: google.longrunning.Operations.GetOperation
+    get: '/v1beta1/{name=projects/*/operations/*}'
+
+  - selector: google.longrunning.Operations.DeleteOperation
+    delete: '/v1beta1/{name=projects/*/operations/*}'
+
+  - selector: google.longrunning.Operations.CancelOperation
+    post: '/v1beta1/{name=projects/*/operations/*}:cancel'
+
+
+authentication:
+  rules:
+  - selector: '*'
+    oauth:
+      canonical_scopes: |-
+        https://www.googleapis.com/auth/cloud-platform

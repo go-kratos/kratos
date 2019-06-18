@@ -15,6 +15,7 @@ import (
 
 	"github.com/bilibili/kratos/pkg/conf/dsn"
 	"github.com/bilibili/kratos/pkg/log"
+	"github.com/bilibili/kratos/pkg/net/criticality"
 	"github.com/bilibili/kratos/pkg/net/ip"
 	"github.com/bilibili/kratos/pkg/net/metadata"
 	"github.com/bilibili/kratos/pkg/stat"
@@ -261,12 +262,11 @@ func (engine *Engine) handleContext(c *Context) {
 		tm = ctm
 	}
 	md := metadata.MD{
-		metadata.Color:      color(req),
-		metadata.RemoteIP:   remoteIP(req),
-		metadata.RemotePort: remotePort(req),
-		metadata.Caller:     caller(req),
-		metadata.Mirror:     mirror(req),
+		metadata.RemoteIP:    remoteIP(req),
+		metadata.RemotePort:  remotePort(req),
+		metadata.Criticality: string(criticality.Critical),
 	}
+	parseMetadataTo(req, md)
 	ctx := metadata.NewContext(context.Background(), md)
 	if tm > 0 {
 		c.Context, cancel = context.WithTimeout(ctx, tm)

@@ -1,0 +1,123 @@
+test:
+  suites:
+  - name: Natural Language V1
+    cases:
+
+    - name: Analyze Syntax
+      spec:
+      - call: {sample: language_syntax_text}
+      - assert_contains:
+        - literal: "Text: This"
+        - literal: "Text: is"
+        - literal: "Text: short"
+        - literal: "Text: sentence"
+        - literal: "Text: ."
+
+    - name: Analyze Syntax – GCS
+      spec:
+      - call:
+          sample: language_syntax_gcs
+      - assert_contains:
+        - literal: "Text: This"
+        - literal: "Text: is"
+        - literal: "Text: short"
+        - literal: "Text: sentence"
+        - literal: "Text: ."
+
+    - name: Analyze Sentiment
+      spec:
+      - call: {sample: language_sentiment_text}
+      - assert_contains:
+        # Default message should return positive: 'I am so happy and joyful'
+        - literal: "Sentiment score: 0."
+        - literal: "Magnitude: 0."
+
+    - name: Analyze Sentiment – Negative
+      spec:
+      - call:
+          sample: language_sentiment_text
+          params:
+            text_content:
+              literal: "I am so sad and upset."
+      - assert_contains:
+        - literal: "Sentiment score: -0."
+        - literal: "Magnitude: 0."
+
+    - name: Analyze Sentiment – GCS
+      spec:
+      - call: {sample: language_sentiment_gcs}
+      - assert_contains:
+        # Default message should return positive: 'I am so happy and joyful'
+        - literal: "Sentiment score: 0."
+        - literal: "Magnitude: 0."
+
+    - name: Analyze Sentiment – GCS – Negative
+      spec:
+      - call:
+          sample: language_sentiment_gcs
+          params:
+            gcs_uri:
+              literal: "gs://cloud-samples-data/language/sentiment-negative.txt"
+      - assert_contains:
+        - literal: "Sentiment score: -0."
+        - literal: "Magnitude: 0."
+
+    - name: Analyze Entities
+      spec:
+      - call: {sample: language_entities_text}
+      - assert_contains:
+        - literal: "Entity name: California"
+        - literal: "Entity salience score: 1"
+        - literal: "Mention: California"
+        - literal: "Mention: state"
+
+    - name: Analyze Entities – GCS
+      spec:
+      - call: {sample: language_entities_gcs}
+      - assert_contains:
+        - literal: "Entity name: California"
+        - literal: "Entity salience score: 1"
+        - literal: "Mention: California"
+        - literal: "Mention: state"
+
+    - name: Analyze Entity Sentiment
+      spec:
+      - call: {sample: language_entity_sentiment_text}
+      - assert_contains:
+        - literal: "Entity name: Grapes"
+        - literal: "Entity sentiment score: 0."
+        - literal: "Mention: Grapes"
+        - literal: "Mention sentiment score: 0."
+        - literal: "Mention sentiment magnitude: 0."
+        - literal: "Entity name: Bananas"
+        - literal: "Entity sentiment score: -0."
+        - literal: "Mention: Bananas"
+        - literal: "Mention sentiment score: -0."
+
+    - name: Analyze Entity Sentiment – GCS
+      spec:
+      - call: {sample: language_entity_sentiment_gcs}
+      - assert_contains:
+        - literal: "Entity name: Grapes"
+        - literal: "Entity sentiment score: 0."
+        - literal: "Mention: Grapes"
+        - literal: "Mention sentiment score: 0."
+        - literal: "Mention sentiment magnitude: 0."
+        - literal: "Entity name: Bananas"
+        - literal: "Entity sentiment score: -0."
+        - literal: "Mention: Bananas"
+        - literal: "Mention sentiment score: -0."
+
+    - name: Classify Text
+      spec:
+      - call: {sample: language_classify_text}
+      - assert_contains:
+        - literal: "Category name: /Arts & Entertainment"
+        - literal: "Confidence: 0."
+
+    - name: Classify Text – GCS
+      spec:
+      - call: {sample: language_classify_gcs}
+      - assert_contains:
+        - literal: "Category name: /Arts & Entertainment"
+        - literal: "Confidence: 0."

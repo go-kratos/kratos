@@ -82,8 +82,9 @@ func TestFileEvent(t *testing.T) {
 	cli, err := NewFile(path)
 	assert.Nil(t, err)
 	assert.NotNil(t, cli)
+	time.Sleep(time.Millisecond * 100)
 	ch := cli.WatchEvent(context.Background(), "test.toml", "abc.toml")
-	time.Sleep(time.Millisecond)
+	time.Sleep(time.Millisecond * 100)
 	ioutil.WriteFile(path+"test.toml", []byte(`hello`), 0644)
 	timeout := time.NewTimer(time.Second)
 	select {
@@ -93,16 +94,4 @@ func TestFileEvent(t *testing.T) {
 		assert.Equal(t, EventUpdate, ev.Event)
 		assert.Equal(t, "hello", ev.Value)
 	}
-	ioutil.WriteFile(path+"abc.toml", []byte(`test`), 0644)
-	select {
-	case <-timeout.C:
-		t.Fatalf("run test timeout")
-	case ev := <-ch:
-		assert.Equal(t, EventUpdate, ev.Event)
-		assert.Equal(t, "test", ev.Value)
-	}
-	content1, _ := cli.Get("test.toml").String()
-	assert.Equal(t, "hello", content1)
-	content2, _ := cli.Get("abc.toml").String()
-	assert.Equal(t, "test", content2)
 }
