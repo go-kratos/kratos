@@ -70,7 +70,7 @@ type BBR struct {
 	inFlight        int64
 	winBucketPerSec int64
 	conf            *Config
-	prevDrop        time.Time
+	prevDrop        int64
 }
 
 // Config contains configs of bbr limiter.
@@ -130,7 +130,8 @@ func (l *BBR) shouldDrop() bool {
 	inFlight := atomic.LoadInt64(&l.inFlight)
 	maxInflight := l.maxFlight()
 	if l.cpu() < l.conf.CPUThreshold {
-		if time.Now().Sub(l.prevDrop) <= 1000*time.Millisecond {
+		prevDrop := atomic.LoadInt64(&l.prevDrop)
+		if time.Now().Unix()-prevDrop <= 1 {
 			return inFlight > 1 && inFlight > maxInflight
 		}
 		return false
@@ -157,7 +158,7 @@ func (l *BBR) Allow(ctx context.Context, opts ...limit.AllowOption) (func(info l
 		opt.Apply(&allowOpts)
 	}
 	if l.shouldDrop() {
-		l.prevDrop = time.Now()
+		atomic.StoreInt64(&l.prevDrop, time.Now().Unix())
 		return nil, ecode.LimitExceed
 	}
 	atomic.AddInt64(&l.inFlight, 1)
@@ -193,7 +194,6 @@ func newLimiter(conf *Config) limit.Limiter {
 		passStat:        passStat,
 		rtStat:          rtStat,
 		winBucketPerSec: int64(time.Second) / (int64(conf.Window) / int64(conf.WinBucket)),
-		prevDrop:        time.Unix(0, 0),
 	}
 	return limiter
 }

@@ -133,7 +133,6 @@ func TestBBRShouldDrop(t *testing.T) {
 		passStat:        passStat,
 		rtStat:          rtStat,
 		winBucketPerSec: 10,
-		prevDrop:        time.Unix(0, 0),
 		conf:            defaultConf,
 	}
 	// cpu >=  800, inflight < maxQps
