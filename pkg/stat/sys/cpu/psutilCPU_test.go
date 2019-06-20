@@ -11,8 +11,9 @@ func Test_PsutilCPU(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newPsutilCPU failed!err:=%v", err)
 	}
+	time.Sleep(time.Millisecond * 600)
 	for i := 0; i < 6; i++ {
-		time.Sleep(time.Millisecond * 500)
+		time.Sleep(time.Millisecond * 600)
 		u, err := cpu.Usage()
 		if u == 0 {
 			t.Fatalf("get cpu from psutil failed!cpu usage is zero!err:=%v", err)
