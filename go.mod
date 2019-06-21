@@ -24,6 +24,7 @@ require (
 	github.com/prometheus/client_golang v0.9.2
 	github.com/remyoudompheng/bigfft v0.0.0-20190321074620-2f0d2b0e0001 // indirect
 	github.com/samuel/go-zookeeper v0.0.0-20180130194729-c4fab1ac1bec // indirect
+	github.com/shirou/gopsutil v2.18.12+incompatible
 	github.com/siddontang/go v0.0.0-20180604090527-bdc77568d726
 	github.com/sirupsen/logrus v1.4.1
 	github.com/stretchr/testify v1.3.0

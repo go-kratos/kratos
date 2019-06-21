@@ -1,5 +1,3 @@
-// +build linux
-
 package cpu
 
 import (
@@ -12,12 +10,97 @@ import (
 	"github.com/pkg/errors"
 )
 
+type cgroupCPU struct {
+	frequency uint64
+	quota     float64
+	cores     uint64
+
+	preSystem uint64
+	preTotal  uint64
+	usage     uint64
+}
+
+func newCgroupCPU() (cpu *cgroupCPU, err error) {
+	cpus, err := perCPUUsage()
+	if err != nil {
+		err = errors.Errorf("perCPUUsage() failed!err:=%v", err)
+		return
+	}
+	cores := uint64(len(cpus))
+
+	sets, err := cpuSets()
+	if err != nil {
+		err = errors.Errorf("cpuSets() failed!err:=%v", err)
+		return
+	}
+	quota := float64(len(sets))
+	cq, err := cpuQuota()
+	if err == nil && cq != -1 {
+		var period uint64
+		if period, err = cpuPeriod(); err != nil {
+			err = errors.Errorf("cpuPeriod() failed!err:=%v", err)
+			return
+		}
+		limit := float64(cq) / float64(period)
+		if limit < quota {
+			quota = limit
+		}
+	}
+	maxFreq := cpuMaxFreq()
+
+	preSystem, err := systemCPUUsage()
+	if err != nil {
+		err = errors.Errorf("systemCPUUsage() failed!err:=%v", err)
+		return
+	}
+	preTotal, err := totalCPUUsage()
+	if err != nil {
+		err = errors.Errorf("totalCPUUsage() failed!err:=%v", err)
+	}
+	cpu = &cgroupCPU{
+		frequency: maxFreq,
+		quota:     quota,
+		cores:     cores,
+		preSystem: preSystem,
+		preTotal:  preTotal,
+	}
+	return
+}
+
+func (cpu *cgroupCPU) Usage() (u uint64, err error) {
+	var (
+		total  uint64
+		system uint64
+	)
+	total, err = totalCPUUsage()
+	if err != nil {
+		return
+	}
+	system, err = systemCPUUsage()
+	if err != nil {
+		return
+	}
+	if system != cpu.preSystem {
+		u = uint64(float64((total-cpu.preTotal)*cpu.cores*1e3) / (float64(system-cpu.preSystem) * cpu.quota))
+	}
+	cpu.preSystem = system
+	cpu.preTotal = total
+	return
+}
+
+func (cpu *cgroupCPU) Info() Info {
+	return Info{
+		Frequency: cpu.frequency,
+		Quota:     cpu.quota,
+	}
+}
+
 const nanoSecondsPerSecond = 1e9
 
 // ErrNoCFSLimit is no quota limit
 var ErrNoCFSLimit = errors.Errorf("no quota limit")
 
-var clockTicksPerSecond = uint64(GetClockTicks())
+var clockTicksPerSecond = uint64(getClockTicks())
 
 // systemCPUUsage returns the host system's cpu usage in
 // nanoseconds. An error is returned if the format of the underlying
@@ -144,4 +227,17 @@ func cpuMaxFreq() uint64 {
 		feq = cfeq
 	}
 	return feq
+}
+
+//GetClockTicks get the OS's ticks per second
+func getClockTicks() int {
+	// TODO figure out a better alternative for platforms where we're missing cgo
+	//
+	// TODO Windows. This could be implemented using Win32 QueryPerformanceFrequency().
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/ms644905(v=vs.85).aspx
+	//
+	// An example of its usage can be found here.
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/dn553408(v=vs.85).aspx
+
+	return 100
 }
