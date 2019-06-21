@@ -23,7 +23,7 @@ func (ps *psutilCPU) Usage() (u uint64, err error) {
 	var percents []float64
 	percents, err = cpu.Percent(ps.interval, false)
 	if err == nil {
-		u = uint64(percents[0] * 10000000)
+		u = uint64(percents[0] * 10)
 	}
 	return
 }
