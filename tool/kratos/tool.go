@@ -174,7 +174,7 @@ func (t Tool) updated() bool {
 }
 
 func (t Tool) toolPath() string {
-	if gobin := os.Getenv("GOBIN");len(gobin) > 0 {
+	if gobin := os.Getenv("GOBIN"); len(gobin) > 0 {
 		return filepath.Join(gobin, t.Alias)
 	}
 	return filepath.Join(gopath(), "bin", t.Alias)
