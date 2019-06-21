@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	_getGRPCGen = "go get github.com/gogo/protobuf/protoc-gen-gofast"
+	_getGRPCGen = "go get -u github.com/gogo/protobuf/protoc-gen-gofast"
 	_grpcProtoc = `protoc --proto_path=%s --proto_path=%s --proto_path=%s --gofast_out=plugins=grpc:.`
 )
 
