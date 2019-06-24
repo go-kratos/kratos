@@ -169,7 +169,6 @@ func NewClient(conf *ClientConfig, opt ...grpc.DialOption) *Client {
 // DefaultClient returns a new default Client instance with a default client interceptor and default dialoption.
 // opt can be used to add grpc dial options.
 func DefaultClient() *Client {
-	resolver.Register(discovery.Builder())
 	_once.Do(func() {
 		_defaultClient = NewClient(nil)
 	})
