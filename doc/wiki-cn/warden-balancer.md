@@ -10,7 +10,7 @@ grpc-go内置了round-robin轮询，但由于自带的轮询算法不支持权�
 本算法通过随机选择两个node选择优胜者来避免羊群效应，并通过ewma尽量获取服务端的实时状态。
 
 服务端：
-服务端获取最近500ms内的CPU使用率（需要将cgroup设置的限制考虑进去，并除于CPU核心数），并将CPUC使用率乘与1000后塞入每次grpc请求中的的Trailer中夹带返回：
+服务端获取最近500ms内的CPU使用率（需要将cgroup设置的限制考虑进去，并除于CPU核心数），并将CPU使用率乘与1000后塞入每次grpc请求中的的Trailer中夹带返回：
 cpu_usage
 uint64 encoded with string	
 cpu_usage : 1000
