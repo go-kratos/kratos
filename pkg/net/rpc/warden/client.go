@@ -14,12 +14,10 @@ import (
 	"github.com/bilibili/kratos/pkg/conf/flagvar"
 	"github.com/bilibili/kratos/pkg/ecode"
 	"github.com/bilibili/kratos/pkg/naming"
-	"github.com/bilibili/kratos/pkg/naming/discovery"
 	nmd "github.com/bilibili/kratos/pkg/net/metadata"
 	"github.com/bilibili/kratos/pkg/net/netutil/breaker"
 	"github.com/bilibili/kratos/pkg/net/rpc/warden/balancer/p2c"
 	"github.com/bilibili/kratos/pkg/net/rpc/warden/internal/status"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver"
 	"github.com/bilibili/kratos/pkg/net/trace"
 	xtime "github.com/bilibili/kratos/pkg/time"
 
@@ -156,7 +154,6 @@ func NewConn(target string, opt ...grpc.DialOption) (*grpc.ClientConn, error) {
 // NewClient returns a new blank Client instance with a default client interceptor.
 // opt can be used to add grpc dial options.
 func NewClient(conf *ClientConfig, opt ...grpc.DialOption) *Client {
-	resolver.Register(discovery.Builder())
 	c := new(Client)
 	if err := c.SetConfig(conf); err != nil {
 		panic(err)
