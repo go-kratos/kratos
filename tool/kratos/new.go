@@ -16,7 +16,7 @@ func runNew(ctx *cli.Context) error {
 	p.Name = ctx.Args()[0]
 
 	if p.ModuleName == "" {
-		p.ModuleName = path.Join(p.Owner, p.Name)
+		p.ModuleName = p.Name
 	}
 
 	if p.Path != "" {
