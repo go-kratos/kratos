@@ -66,9 +66,9 @@ func replyToError(line []byte) error {
 }
 
 func (c *asiiConn) Populate(ctx context.Context, cmd string, key string, flags uint32, expiration int32, cas uint64, data []byte) error {
+	var err error
 	c.conn.SetWriteDeadline(shrinkDeadline(ctx, c.writeTimeout))
 	// <command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
-	var err error
 	if cmd == "cas" {
 		_, err = fmt.Fprintf(c.rw, "%s %s %d %d %d %d\r\n", cmd, key, flags, expiration, len(data), cas)
 	} else {
@@ -127,14 +127,14 @@ func (c *asiiConn) Err() error {
 }
 
 func (c *asiiConn) Get(ctx context.Context, key string) (result *Item, err error) {
-	c.conn.SetWriteDeadline(time.Now().Add(c.writeTimeout))
+	c.conn.SetWriteDeadline(shrinkDeadline(ctx, c.writeTimeout))
 	if _, err = fmt.Fprintf(c.rw, "gets %s\r\n", key); err != nil {
 		return nil, c.fatal(err)
 	}
 	if err = c.rw.Flush(); err != nil {
 		return nil, c.fatal(err)
 	}
-	if err = c.parseGetReply(func(it *Item) {
+	if err = c.parseGetReply(ctx, func(it *Item) {
 		result = it
 	}); err != nil {
 		return
@@ -155,7 +155,7 @@ func (c *asiiConn) GetMulti(ctx context.Context, keys ...string) (map[string]*It
 		return nil, c.fatal(err)
 	}
 	results := make(map[string]*Item, len(keys))
-	if err = c.parseGetReply(func(it *Item) {
+	if err = c.parseGetReply(ctx, func(it *Item) {
 		results[it.Key] = it
 	}); err != nil {
 		return nil, err
@@ -163,8 +163,8 @@ func (c *asiiConn) GetMulti(ctx context.Context, keys ...string) (map[string]*It
 	return results, nil
 }
 
-func (c *asiiConn) parseGetReply(f func(*Item)) error {
-	c.conn.SetReadDeadline(shrinkDeadline(context.TODO(), c.readTimeout))
+func (c *asiiConn) parseGetReply(ctx context.Context, f func(*Item)) error {
+	c.conn.SetReadDeadline(shrinkDeadline(ctx, c.readTimeout))
 	for {
 		line, err := c.rw.ReadSlice('\n')
 		if err != nil {
@@ -209,7 +209,7 @@ func scanGetReply(line []byte, item *Item) (size int, err error) {
 }
 
 func (c *asiiConn) Touch(ctx context.Context, key string, expire int32) error {
-	line, err := c.writeReadLine("touch %s %d\r\n", key, expire)
+	line, err := c.writeReadLine(ctx, "touch %s %d\r\n", key, expire)
 	if err != nil {
 		return err
 	}
@@ -217,7 +217,7 @@ func (c *asiiConn) Touch(ctx context.Context, key string, expire int32) error {
 }
 
 func (c *asiiConn) IncrDecr(ctx context.Context, cmd, key string, delta uint64) (uint64, error) {
-	line, err := c.writeReadLine("%s %s %d\r\n", cmd, key, delta)
+	line, err := c.writeReadLine(ctx, "%s %s %d\r\n", cmd, key, delta)
 	if err != nil {
 		return 0, err
 	}
@@ -236,23 +236,24 @@ func (c *asiiConn) IncrDecr(ctx context.Context, cmd, key string, delta uint64) 
 }
 
 func (c *asiiConn) Delete(ctx context.Context, key string) error {
-	line, err := c.writeReadLine("delete %s\r\n", key)
+	line, err := c.writeReadLine(ctx, "delete %s\r\n", key)
 	if err != nil {
 		return err
 	}
 	return replyToError(line)
 }
 
-func (c *asiiConn) writeReadLine(format string, args ...interface{}) ([]byte, error) {
-	c.conn.SetWriteDeadline(shrinkDeadline(context.TODO(), c.writeTimeout))
-	_, err := fmt.Fprintf(c.rw, format, args...)
+func (c *asiiConn) writeReadLine(ctx context.Context, format string, args ...interface{}) ([]byte, error) {
+	var err error
+	c.conn.SetWriteDeadline(shrinkDeadline(ctx, c.writeTimeout))
+	_, err = fmt.Fprintf(c.rw, format, args...)
 	if err != nil {
 		return nil, c.fatal(pkgerr.WithStack(err))
 	}
 	if err = c.rw.Flush(); err != nil {
 		return nil, c.fatal(pkgerr.WithStack(err))
 	}
-	c.conn.SetReadDeadline(shrinkDeadline(context.TODO(), c.readTimeout))
+	c.conn.SetReadDeadline(shrinkDeadline(ctx, c.readTimeout))
 	line, err := c.rw.ReadSlice('\n')
 	if err != nil {
 		return line, c.fatal(pkgerr.WithStack(err))

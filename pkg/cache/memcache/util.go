@@ -80,10 +80,9 @@ func ProtobufItem(key string, message proto.Message, flags uint32, expiration in
 }
 
 func shrinkDeadline(ctx context.Context, timeout time.Duration) time.Time {
-	// TODO: ignored context deadline to compatible old behaviour.
-	//deadline, ok := ctx.Deadline()
-	//if ok {
-	//	return deadline
-	//}
-	return time.Now().Add(timeout)
+	timeoutTime := time.Now().Add(timeout)
+	if deadline, ok := ctx.Deadline(); ok && timeoutTime.After(deadline) {
+		return deadline
+	}
+	return timeoutTime
 }

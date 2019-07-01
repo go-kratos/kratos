@@ -86,7 +86,7 @@ func (pc *poolConn) Err() error {
 }
 
 func (pc *poolConn) Set(item *Item) (err error) {
-	return pc.c.SetContext(pc.ctx, item)
+	return pc.SetContext(pc.ctx, item)
 }
 
 func (pc *poolConn) Add(item *Item) (err error) {
@@ -102,15 +102,15 @@ func (pc *poolConn) CompareAndSwap(item *Item) (err error) {
 }
 
 func (pc *poolConn) Get(key string) (r *Item, err error) {
-	return pc.c.GetContext(pc.ctx, key)
+	return pc.GetContext(pc.ctx, key)
 }
 
 func (pc *poolConn) GetMulti(keys []string) (res map[string]*Item, err error) {
-	return pc.c.GetMultiContext(pc.ctx, keys)
+	return pc.GetMultiContext(pc.ctx, keys)
 }
 
 func (pc *poolConn) Touch(key string, timeout int32) (err error) {
-	return pc.c.TouchContext(pc.ctx, key, timeout)
+	return pc.TouchContext(pc.ctx, key, timeout)
 }
 
 func (pc *poolConn) Scan(item *Item, v interface{}) error {
@@ -118,15 +118,15 @@ func (pc *poolConn) Scan(item *Item, v interface{}) error {
 }
 
 func (pc *poolConn) Delete(key string) (err error) {
-	return pc.c.DeleteContext(pc.ctx, key)
+	return pc.DeleteContext(pc.ctx, key)
 }
 
 func (pc *poolConn) Increment(key string, delta uint64) (newValue uint64, err error) {
-	return pc.c.IncrementContext(pc.ctx, key, delta)
+	return pc.IncrementContext(pc.ctx, key, delta)
 }
 
 func (pc *poolConn) Decrement(key string, delta uint64) (newValue uint64, err error) {
-	return pc.c.DecrementContext(pc.ctx, key, delta)
+	return pc.DecrementContext(pc.ctx, key, delta)
 }
 
 func (pc *poolConn) AddContext(ctx context.Context, item *Item) error {
