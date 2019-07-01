@@ -36,6 +36,7 @@ const (
 	_tplTypeModel
 	_tplTypeGRPCServer
 	_tplTypeGomod
+	_tplTypeMakefile
 )
 
 var (
@@ -46,6 +47,8 @@ var (
 		_tplTypeChangeLog:    "/CHANGELOG.md",
 		_tplTypeContributors: "/CONTRIBUTORS.md",
 		_tplTypeReadme:       "/README.md",
+		//init Makefile
+		_tplTypeMakefile:	  "/Makefile",
 		// init project
 		_tplTypeGomod:      "/go.mod",
 		_tplTypeMain:       "/cmd/main.go",
@@ -78,6 +81,7 @@ var (
 		_tplTypeHTTPToml:     _tplHTTPToml,
 		_tplTypeModel:        _tplModel,
 		_tplTypeGomod:        _tplGoMod,
+		_tplTypeMakefile:     _tplMakefile,
 	}
 )
 

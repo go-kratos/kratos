@@ -598,4 +598,24 @@ func New(svc *service.Service) *warden.Server {
 	return ws
 }
 `
+
+	_tplMakefile = `// 定义项目 Makefile 工具
+hello:
+	echo "Hello"
+
+build:
+	kratos build
+
+run:
+	kratos run
+
+
+compile:
+	echo "Compiling for every OS and Platform"
+	GOOS=linux GOARCH=arm kratos build
+	GOOS=linux GOARCH=arm64 kratos build
+	GOOS=freebsd GOARCH=386 kratos build
+
+all: hello build
+`
 )
