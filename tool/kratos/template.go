@@ -72,8 +72,8 @@ import (
 	"syscall"
 	"time"
 
-	"{{.Name}}/internal/server/http"
-	"{{.Name}}/internal/service"
+	"{{.ModuleName}}/internal/server/http"
+	"{{.ModuleName}}/internal/service"
 	"github.com/bilibili/kratos/pkg/conf/paladin"
 	"github.com/bilibili/kratos/pkg/log"
 )
@@ -122,9 +122,9 @@ import (
 	"syscall"
 	"time"
 
-	"{{.Name}}/internal/server/grpc"
-	"{{.Name}}/internal/server/http"
-	"{{.Name}}/internal/service"
+	"{{.ModuleName}}/internal/server/grpc"
+	"{{.ModuleName}}/internal/server/http"
+	"{{.ModuleName}}/internal/service"
 	"github.com/bilibili/kratos/pkg/conf/paladin"
 	"github.com/bilibili/kratos/pkg/log"
 )
@@ -284,7 +284,7 @@ func (d *dao) pingRedis(ctx context.Context) (err error) {
 import (
 	"context"
 
-	"{{.Name}}/internal/dao"
+	"{{.ModuleName}}/internal/dao"
 	"github.com/bilibili/kratos/pkg/conf/paladin"
 )
 
@@ -324,8 +324,8 @@ import (
 	"context"
 	"fmt"
 
-	pb "{{.Name}}/api"
-	"{{.Name}}/internal/dao"
+	pb "{{.ModuleName}}/api"
+	"{{.ModuleName}}/internal/dao"
 	"github.com/bilibili/kratos/pkg/conf/paladin"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -381,8 +381,8 @@ func (s *Service) Close() {
 import (
 	"net/http"
 
-	"{{.Name}}/internal/model"
-	"{{.Name}}/internal/service"
+	"{{.ModuleName}}/internal/model"
+	"{{.ModuleName}}/internal/service"
 
 	"github.com/bilibili/kratos/pkg/conf/paladin"
 	"github.com/bilibili/kratos/pkg/log"
@@ -442,9 +442,9 @@ func howToStart(c *bm.Context) {
 import (
 	"net/http"
 
-	pb "{{.Name}}/api"
-	"{{.Name}}/internal/model"
-	"{{.Name}}/internal/service"
+	pb "{{.ModuleName}}/api"
+	"{{.ModuleName}}/internal/model"
+	"{{.ModuleName}}/internal/service"
 
 	"github.com/bilibili/kratos/pkg/conf/paladin"
 	"github.com/bilibili/kratos/pkg/log"
@@ -542,7 +542,7 @@ message HelloResp {
 type Kratos struct {
 	Hello string
 }`
-	_tplGoMod = `module {{.Name}}
+	_tplGoMod = `module {{.ModuleName}}
 
 go 1.12
 
@@ -573,8 +573,8 @@ replace (
 	_tplGRPCServer = `package grpc
 
 import (
-	pb "{{.Name}}/api"
-	"{{.Name}}/internal/service"
+	pb "{{.ModuleName}}/api"
+	"{{.ModuleName}}/internal/service"
 	"github.com/bilibili/kratos/pkg/conf/paladin"
 	"github.com/bilibili/kratos/pkg/net/rpc/warden"
 )
@@ -597,5 +597,9 @@ func New(svc *service.Service) *warden.Server {
 	}
 	return ws
 }
+`
+	_tplGogen = `package api
+
+//go:generate kratos tool protoc --swagger --grpc --bm api.proto
 `
 )
