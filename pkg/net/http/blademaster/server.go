@@ -124,7 +124,8 @@ type Engine struct {
 
 	address string
 
-	mux       *mux.Router                       // mux.Router
+	gmux      *mux.Router // mux.Router
+	mux       *http.ServeMux
 	server    atomic.Value                      // store *http.Server
 	metastore map[string]map[string]interface{} // metastore is the path as key and the metadata of this path as value, it export via /metadata
 
@@ -154,7 +155,8 @@ func NewServer(conf *ServerConfig) *Engine {
 			root:     true,
 		},
 		address:       ip.InternalIP(),
-		mux:           mux.NewRouter(),
+		gmux:          mux.NewRouter(),
+		mux:           http.NewServeMux(),
 		metastore:     make(map[string]map[string]interface{}),
 		methodConfigs: make(map[string]*MethodConfig),
 	}
@@ -196,8 +198,13 @@ func (engine *Engine) addRoute(method, path string, handlers ...HandlerFunc) {
 	if _, ok := engine.metastore[path]; !ok {
 		engine.metastore[path] = make(map[string]interface{})
 	}
+
+	if _, ok := engine.metastore[path][method]; ok {
+		panic("blademaster: multiple registrations for " + method + "  " + path)
+	}
 	engine.metastore[path][method] = method
-	engine.mux.HandleFunc(path, func(w http.ResponseWriter, req *http.Request) {
+
+	engine.gmux.HandleFunc(path, func(w http.ResponseWriter, req *http.Request) {
 		c := &Context{
 			Context:  nil,
 			engine:   engine,
