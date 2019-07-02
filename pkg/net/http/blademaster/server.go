@@ -20,6 +20,7 @@ import (
 	"github.com/bilibili/kratos/pkg/net/metadata"
 	"github.com/bilibili/kratos/pkg/stat"
 	xtime "github.com/bilibili/kratos/pkg/time"
+	"github.com/gorilla/mux"
 
 	"github.com/pkg/errors"
 )
@@ -123,7 +124,7 @@ type Engine struct {
 
 	address string
 
-	mux       *http.ServeMux                    // http mux router
+	mux       *mux.Router                       // mux.Router
 	server    atomic.Value                      // store *http.Server
 	metastore map[string]map[string]interface{} // metastore is the path as key and the metadata of this path as value, it export via /metadata
 
@@ -153,7 +154,7 @@ func NewServer(conf *ServerConfig) *Engine {
 			root:     true,
 		},
 		address:       ip.InternalIP(),
-		mux:           http.NewServeMux(),
+		mux:           mux.NewRouter(),
 		metastore:     make(map[string]map[string]interface{}),
 		methodConfigs: make(map[string]*MethodConfig),
 	}
@@ -195,7 +196,7 @@ func (engine *Engine) addRoute(method, path string, handlers ...HandlerFunc) {
 	if _, ok := engine.metastore[path]; !ok {
 		engine.metastore[path] = make(map[string]interface{})
 	}
-	engine.metastore[path]["method"] = method
+	engine.metastore[path][method] = method
 	engine.mux.HandleFunc(path, func(w http.ResponseWriter, req *http.Request) {
 		c := &Context{
 			Context:  nil,
@@ -213,7 +214,7 @@ func (engine *Engine) addRoute(method, path string, handlers ...HandlerFunc) {
 		c.method = method
 
 		engine.handleContext(c)
-	})
+	}).Methods(method)
 }
 
 // SetConfig is used to set the engine configuration.
