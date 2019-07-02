@@ -544,7 +544,7 @@ type Kratos struct {
 }`
 	_tplGoMod = `module {{.ModuleName}}
 
-go 1.12
+go 1.11
 
 require (
 	github.com/bilibili/kratos v0.1.0

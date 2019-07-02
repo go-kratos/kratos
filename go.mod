@@ -1,6 +1,6 @@
 module github.com/bilibili/kratos
 
-go 1.12
+go 1.11
 
 require (
 	github.com/BurntSushi/toml v0.3.1
