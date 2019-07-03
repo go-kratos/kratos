@@ -1,5 +1,8 @@
 ### net/rpc/warden
 
+##### Version 1.1.18
+1. 修复resolver过滤导致的子集bug
+
 ##### Version 1.1.17
 1. 移除 bbr feature flag，默认开启自适应限流 
 

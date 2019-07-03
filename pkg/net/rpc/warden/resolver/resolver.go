@@ -135,14 +135,41 @@ func (r *Resolver) updateproc() {
 					instances = append(instances, value...)
 				}
 			}
-			if r.subsetSize > 0 && len(instances) > 0 {
-				instances = r.subset(instances, env.Hostname, r.subsetSize)
-			}
-			if len(instances) > 0 {
-				r.newAddress(instances)
-			}
+			r.newAddress(r.filter(instances))
 		}
 	}
+}
+
+func (r *Resolver) filter(backends []*naming.Instance) (instances []*naming.Instance) {
+	for _, ins := range backends {
+		//如果r.clusters的长度大于0说明需要进行集群选择
+		if _, ok := r.clusters[ins.Metadata[naming.MetaCluster]]; !ok && len(r.clusters) > 0 {
+			continue
+		}
+		var addr string
+		for _, a := range ins.Addrs {
+			u, err := url.Parse(a)
+			if err == nil && u.Scheme == Scheme {
+				addr = u.Host
+			}
+		}
+		if addr == "" {
+			fmt.Fprintf(os.Stderr, "resolver: app(%s,%s) no valid grpc address(%v) found!", ins.AppID, ins.Hostname, ins.Addrs)
+			log.Warn("resolver: invalid rpc address(%s,%s,%v) found!", ins.AppID, ins.Hostname, ins.Addrs)
+			continue
+		}
+		instances = append(instances, ins)
+	}
+	if len(instances) == 0 {
+		for _, bkend := range backends {
+			log.Warn("resolver: backends(%d) invalid instance:%v", len(backends), bkend)
+		}
+		return
+	}
+	if r.subsetSize > 0 {
+		instances = r.subset(instances, env.Hostname, r.subsetSize)
+	}
+	return
 }
 
 func (r *Resolver) subset(backends []*naming.Instance, clientID string, size int64) []*naming.Instance {
@@ -172,12 +199,6 @@ func (r *Resolver) newAddress(instances []*naming.Instance) {
 	}
 	addrs := make([]resolver.Address, 0, len(instances))
 	for _, ins := range instances {
-		if len(r.clusters) > 0 {
-			if _, ok := r.clusters[ins.Metadata[naming.MetaCluster]]; !ok {
-				continue
-			}
-		}
-
 		var weight int64
 		if weight, _ = strconv.ParseInt(ins.Metadata[naming.MetaWeight], 10, 64); weight <= 0 {
 			weight = 10
@@ -189,11 +210,6 @@ func (r *Resolver) newAddress(instances []*naming.Instance) {
 				rpc = u.Host
 			}
 		}
-		if rpc == "" {
-			fmt.Fprintf(os.Stderr, "warden/resolver: app(%s,%s) no valid grpc address(%v) found!", ins.AppID, ins.Hostname, ins.Addrs)
-			log.Warn("warden/resolver: invalid rpc address(%s,%s,%v) found!", ins.AppID, ins.Hostname, ins.Addrs)
-			continue
-		}
 		addr := resolver.Address{
 			Addr:       rpc,
 			Type:       resolver.Backend,
@@ -202,5 +218,6 @@ func (r *Resolver) newAddress(instances []*naming.Instance) {
 		}
 		addrs = append(addrs, addr)
 	}
+	log.Info("resolver: finally get %d instances", len(addrs))
 	r.cc.NewAddress(addrs)
 }
