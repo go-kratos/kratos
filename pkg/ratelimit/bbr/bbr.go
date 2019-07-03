@@ -17,10 +17,10 @@ import (
 
 var (
 	cpu         int64
-	decay       = 0.75
+	decay       = 0.95
 	defaultConf = &Config{
-		Window:       time.Second * 5,
-		WinBucket:    50,
+		Window:       time.Second * 10,
+		WinBucket:    100,
 		CPUThreshold: 800,
 	}
 )
@@ -31,6 +31,7 @@ func init() {
 	go cpuproc()
 }
 
+// cpu = cpuᵗ⁻¹ * decay + cpuᵗ * (1 - decay)	
 func cpuproc() {
 	ticker := time.NewTicker(time.Millisecond * 250)
 	defer func() {
@@ -136,7 +137,11 @@ func (l *BBR) shouldDrop() bool {
 		}
 		return false
 	}
-	return inFlight > 1 && inFlight > maxInflight
+	drop := inFlight > 1 && inFlight > maxInflight
+	if drop {
+		atomic.StoreInt64(&l.prevDrop, time.Now().Unix())
+	}
+	return drop
 }
 
 // Stat tasks a snapshot of the bbr limiter.
@@ -158,7 +163,6 @@ func (l *BBR) Allow(ctx context.Context, opts ...limit.AllowOption) (func(info l
 		opt.Apply(&allowOpts)
 	}
 	if l.shouldDrop() {
-		atomic.StoreInt64(&l.prevDrop, time.Now().Unix())
 		return nil, ecode.LimitExceed
 	}
 	atomic.AddInt64(&l.inFlight, 1)
