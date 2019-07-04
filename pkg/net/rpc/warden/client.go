@@ -34,9 +34,11 @@ var _grpcTarget flagvar.StringVars
 var (
 	_once           sync.Once
 	_defaultCliConf = &ClientConfig{
-		Dial:    xtime.Duration(time.Second * 10),
-		Timeout: xtime.Duration(time.Millisecond * 250),
-		Subset:  50,
+		Dial:              xtime.Duration(time.Second * 10),
+		Timeout:           xtime.Duration(time.Millisecond * 250),
+		Subset:            50,
+		KeepAliveInterval: xtime.Duration(time.Second * 60),
+		KeepAliveTimeout:  xtime.Duration(time.Second * 20),
 	}
 	_defaultClient *Client
 )
@@ -51,14 +53,17 @@ func baseMetadata() metadata.MD {
 
 // ClientConfig is rpc client conf.
 type ClientConfig struct {
-	Dial     xtime.Duration
-	Timeout  xtime.Duration
-	Breaker  *breaker.Config
-	Method   map[string]*ClientConfig
-	Clusters []string
-	Zone     string
-	Subset   int
-	NonBlock bool
+	Dial                   xtime.Duration
+	Timeout                xtime.Duration
+	Breaker                *breaker.Config
+	Method                 map[string]*ClientConfig
+	Clusters               []string
+	Zone                   string
+	Subset                 int
+	NonBlock               bool
+	KeepAliveInterval      xtime.Duration
+	KeepAliveTimeout       xtime.Duration
+	KeepAliveWithoutStream bool
 }
 
 // Client is the framework's client side instance, it contains the ctx, opt and interceptors.
@@ -185,6 +190,12 @@ func (c *Client) SetConfig(conf *ClientConfig) (err error) {
 	}
 	if conf.Subset <= 0 {
 		conf.Subset = 50
+	}
+	if conf.KeepAliveInterval <= 0 {
+		conf.KeepAliveInterval = xtime.Duration(time.Second * 60)
+	}
+	if conf.KeepAliveTimeout <= 0 {
+		conf.KeepAliveTimeout = xtime.Duration(time.Second * 20)
 	}
 
 	// FIXME(maojian) check Method dial/timeout
