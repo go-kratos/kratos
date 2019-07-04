@@ -35,6 +35,11 @@ func main() {
 					Usage:       "whether to use protobuf for create project",
 					Destination: &p.WithGRPC,
 				},
+				cli.StringFlag{
+					Name:        "m",
+					Usage:       "project module name for create project, for `go mod init`",
+					Destination: &p.ModuleName,
+				},
 			},
 			Action: runNew,
 		},

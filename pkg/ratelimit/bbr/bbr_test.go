@@ -145,7 +145,13 @@ func TestBBRShouldDrop(t *testing.T) {
 	bbr.inFlight = 80
 	assert.Equal(t, true, bbr.shouldDrop())
 
+	// cpu < 800, inflight > maxQps, cold duration
+	cpu = 700
+	bbr.inFlight = 80
+	assert.Equal(t, true, bbr.shouldDrop())
+ 
 	// cpu < 800, inflight > maxQps
+	time.Sleep(2 * time.Second)
 	cpu = 700
 	bbr.inFlight = 80
 	assert.Equal(t, false, bbr.shouldDrop())

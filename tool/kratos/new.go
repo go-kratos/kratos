@@ -14,6 +14,11 @@ func runNew(ctx *cli.Context) error {
 		return errors.New("required project name")
 	}
 	p.Name = ctx.Args()[0]
+
+	if p.ModuleName == "" {
+		p.ModuleName = p.Name
+	}
+
 	if p.Path != "" {
 		p.Path = path.Join(p.Path, p.Name)
 	} else {
@@ -26,6 +31,7 @@ func runNew(ctx *cli.Context) error {
 	}
 	fmt.Printf("Project: %s\n", p.Name)
 	fmt.Printf("Owner: %s\n", p.Owner)
+	fmt.Printf("Module Name: %s\n", p.ModuleName)
 	fmt.Printf("WithGRPC: %t\n", p.WithGRPC)
 	fmt.Printf("Directory: %s\n\n", p.Path)
 	fmt.Println("The application has been created.")

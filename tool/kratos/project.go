@@ -11,11 +11,12 @@ import (
 
 // project project config
 type project struct {
-	Name     string
-	Owner    string
-	Path     string
-	WithGRPC bool
-	Here     bool
+	Name       string
+	Owner      string
+	Path       string
+	WithGRPC   bool
+	Here       bool
+	ModuleName string // 支持项目的自定义module名 （go.mod init）
 }
 
 const (
@@ -36,6 +37,7 @@ const (
 	_tplTypeModel
 	_tplTypeGRPCServer
 	_tplTypeGomod
+	_tplTypeAPIGogen
 )
 
 var (
@@ -78,6 +80,7 @@ var (
 		_tplTypeHTTPToml:     _tplHTTPToml,
 		_tplTypeModel:        _tplModel,
 		_tplTypeGomod:        _tplGoMod,
+		_tplTypeAPIGogen:     _tplGogen,
 	}
 )
 
@@ -85,6 +88,7 @@ func create() (err error) {
 	if p.WithGRPC {
 		files[_tplTypeGRPCServer] = "/internal/server/grpc/server.go"
 		files[_tplTypeAPIProto] = "/api/api.proto"
+		files[_tplTypeAPIGogen] = "/api/generate.go"
 		tpls[_tplTypeHTTPServer] = _tplPBHTTPServer
 		tpls[_tplTypeGRPCServer] = _tplGRPCServer
 		tpls[_tplTypeGRPCToml] = _tplGRPCToml

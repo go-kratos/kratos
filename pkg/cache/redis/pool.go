@@ -61,18 +61,16 @@ func NewPool(c *Config, options ...DialOption) (p *Pool) {
 	if c.DialTimeout <= 0 || c.ReadTimeout <= 0 || c.WriteTimeout <= 0 {
 		panic("must config redis timeout")
 	}
+	ops := []DialOption{
+		DialConnectTimeout(time.Duration(c.DialTimeout)),
+		DialReadTimeout(time.Duration(c.ReadTimeout)),
+		DialWriteTimeout(time.Duration(c.WriteTimeout)),
+		DialPassword(c.Auth),
+	}
+	ops = append(ops, options...)
 	p1 := pool.NewSlice(c.Config)
-	cnop := DialConnectTimeout(time.Duration(c.DialTimeout))
-	options = append(options, cnop)
-	rdop := DialReadTimeout(time.Duration(c.ReadTimeout))
-	options = append(options, rdop)
-	wrop := DialWriteTimeout(time.Duration(c.WriteTimeout))
-	options = append(options, wrop)
-	auop := DialPassword(c.Auth)
-	options = append(options, auop)
-	// new pool
 	p1.New = func(ctx context.Context) (io.Closer, error) {
-		conn, err := Dial(c.Proto, c.Addr, options...)
+		conn, err := Dial(c.Proto, c.Addr, ops...)
 		if err != nil {
 			return nil, err
 		}
