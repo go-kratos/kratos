@@ -1,5 +1,9 @@
 ### net/rpc/warden
 
+##### Version 1.1.19
+1. 升级grpc至1.22.0
+2. client增加keepAlive选项
+
 ##### Version 1.1.18
 1. 修复resolver过滤导致的子集bug
 
