@@ -159,7 +159,7 @@ func (v *Value) UnmarshalTOML(dst interface{}) error {
 }
 
 // UnmarshalJSON unmarhsal json to struct.
-func (v *Value) UnmarshalJson(dst interface{}) error {
+func (v *Value) UnmarshalJSON(dst interface{}) error {
 	text, err := v.Raw()
 	if err != nil {
 		return err
@@ -167,7 +167,7 @@ func (v *Value) UnmarshalJson(dst interface{}) error {
 	return json.Unmarshal([]byte(text), dst)
 }
 
-func (v *Value) UnmarshalYaml(dst interface{}) error {
+func (v *Value) UnmarshalYAML(dst interface{}) error {
 	text, err := v.Raw()
 	if err != nil {
 		return err
