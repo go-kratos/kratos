@@ -3,6 +3,7 @@ module github.com/bilibili/kratos
 go 1.12
 
 require (
+	cloud.google.com/go v0.41.0 // indirect
 	github.com/BurntSushi/toml v0.3.1
 	github.com/aristanetworks/goarista v0.0.0-20190409234242-46f4bc7b73ef // indirect
 	github.com/cznic/b v0.0.0-20181122101859-a26611c4d92d // indirect
@@ -15,7 +16,9 @@ require (
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gogo/protobuf v1.2.0
-	github.com/golang/protobuf v1.2.0
+	github.com/golang/mock v1.3.1 // indirect
+	github.com/golang/protobuf v1.3.1
+	github.com/kr/pty v1.1.8 // indirect
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
@@ -30,13 +33,24 @@ require (
 	github.com/stretchr/testify v1.3.0
 	github.com/tsuna/gohbase v0.0.0-20190201102810-d3184c1526df
 	github.com/urfave/cli v1.20.0
-	golang.org/x/net v0.0.0-20190311183353-d8887717615a
+	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5 // indirect
+	golang.org/x/lint v0.0.0-20190511005446-959b441ac422 // indirect
+	golang.org/x/mod v0.1.0 // indirect
+	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
+	golang.org/x/oauth2 v0.0.0-20190614102709-0f29369cfe45 // indirect
+	golang.org/x/sync v0.0.0-20190427212804-112230192c58 // indirect
+	golang.org/x/sys v0.0.0-20190602015325-4c4f7f33c9ed // indirect
+	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
-	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
-	google.golang.org/grpc v1.20.1
+	golang.org/x/tools v0.0.0-20190606050223-4d9ae51c2468 // indirect
+	google.golang.org/appengine v1.6.1 // indirect
+	google.golang.org/genproto v0.0.0-20190701230453-710ae3a149df
+	google.golang.org/grpc v1.22.0
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.26.0
 	gopkg.in/yaml.v2 v2.2.2
+	honnef.co/go/tools v0.0.0-20190605142022-0a11fc526260 // indirect
+
 )
 
 replace (
