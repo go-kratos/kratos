@@ -45,8 +45,12 @@ var (
 
 func init() {
 	var err error
-	if Hostname, err = os.Hostname(); err != nil || Hostname == "" {
-		Hostname = os.Getenv("HOSTNAME")
+	Hostname = os.Getenv("HOSTNAME")
+	if Hostname == "" {
+		Hostname, err = os.Hostname()
+		if err != nil {
+			Hostname = ""
+		}
 	}
 
 	addFlag(flag.CommandLine)
