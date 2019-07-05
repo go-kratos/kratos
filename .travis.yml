@@ -15,6 +15,7 @@ env:
    - ZONE=sh001
    - DEPLOY_ENV=dev
    - DISCOVERY_NODES=127.0.0.1:7171
+   - HTTP_PERF=tcp://0.0.0.0:0
 
 # Skip the install step. Don't `go get` dependencies. Only build with the code
 # in vendor/
