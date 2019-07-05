@@ -38,7 +38,7 @@ var (
 type DB struct {
 	write  *conn
 	read   []*conn
-	idx    int64
+	idx    uint64
 	master *DB
 }
 
@@ -217,8 +217,8 @@ func (db *DB) readIndex() int {
 	if len(db.read) == 0 {
 		return 0
 	}
-	v := atomic.AddInt64(&db.idx, 1)
-	return int(v) % len(db.read)
+	v := atomic.AddUint64(&db.idx, 1)
+	return int(v % uint64(len(db.read)))
 }
 
 // Close closes the write and read database, releasing any open resources.
