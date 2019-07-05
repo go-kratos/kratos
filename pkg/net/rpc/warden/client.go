@@ -77,6 +77,16 @@ type Client struct {
 	handlers []grpc.UnaryClientInterceptor
 }
 
+type TimeOutCallOption struct {
+	*grpc.EmptyCallOption
+	Timeout time.Duration
+}
+
+// WithTimeoutCallOption can override the timeout in ctx and the timeout in the configuration file
+func WithTimeoutCallOption(timeout time.Duration) *TimeOutCallOption {
+	return &TimeOutCallOption{&grpc.EmptyCallOption{}, timeout}
+}
+
 // handle returns a new unary client interceptor for OpenTracing\Logging\LinkTimeout.
 func (c *Client) handle() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
@@ -110,7 +120,20 @@ func (c *Client) handle() grpc.UnaryClientInterceptor {
 			return
 		}
 		defer onBreaker(brk, &err)
-		_, ctx, cancel = conf.Timeout.Shrink(ctx)
+		var timeOpt *TimeOutCallOption
+		for _, opt := range opts {
+			var tok bool
+			timeOpt, tok = opt.(*TimeOutCallOption)
+			if tok {
+				break
+			}
+		}
+		if timeOpt != nil && timeOpt.Timeout > 0 {
+			ctx, cancel = context.WithTimeout(nmd.WithContext(ctx), timeOpt.Timeout)
+		} else {
+			_, ctx, cancel = conf.Timeout.Shrink(ctx)
+		}
+
 		defer cancel()
 		nmd.Range(ctx,
 			func(key string, value interface{}) {

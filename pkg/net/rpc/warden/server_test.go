@@ -130,7 +130,12 @@ func (s *helloServer) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.He
 		}
 		reply := &pb.HelloReply{Message: "status", Success: true}
 		return reply, nil
+	} else if in.Name == "time_opt" {
+		time.Sleep(time.Second)
+		reply := &pb.HelloReply{Message: "status", Success: true}
+		return reply, nil
 	}
+
 	return &pb.HelloReply{Message: "Hello " + in.Name, Success: true}, nil
 }
 
@@ -201,6 +206,7 @@ func Test_Warden(t *testing.T) {
 	testValidation(t)
 	testServerRecovery(t)
 	testClientRecovery(t)
+	testTimeoutOpt(t)
 	testErrorDetail(t)
 	testECodeStatus(t)
 	testColorPass(t)
@@ -216,6 +222,26 @@ func testValidation(t *testing.T) {
 	_, err := runClient(context.Background(), &clientConfig, t, "", 0)
 	if !ecode.RequestErr.Equal(err) {
 		t.Fatalf("testValidation should return ecode.RequestErr,but is %v", err)
+	}
+}
+
+func testTimeoutOpt(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*100)
+	defer cancel()
+	client := NewClient(&clientConfig)
+	conn, err := client.Dial(ctx, "127.0.0.1:8080")
+	if err != nil {
+		t.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	c := pb.NewGreeterClient(conn)
+	start := time.Now()
+	_, err = c.SayHello(ctx, &pb.HelloRequest{Name: "time_opt", Age: 0}, WithTimeoutCallOption(time.Millisecond*500))
+	if err == nil {
+		t.Fatalf("recovery must return error")
+	}
+	if time.Since(start) < time.Millisecond*400 {
+		t.Fatalf("client timeout must be greater than 400 Milliseconds;err:=%v", err)
 	}
 }
 

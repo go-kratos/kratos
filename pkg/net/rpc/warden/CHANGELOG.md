@@ -1,5 +1,8 @@
 ### net/rpc/warden
 
+##### Version 1.1.20
+1. client增加timeoutCallOpt强制覆盖每次请求的timeout
+
 ##### Version 1.1.19
 1. 升级grpc至1.22.0
 2. client增加keepAlive选项
