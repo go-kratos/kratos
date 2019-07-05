@@ -20,7 +20,6 @@ import (
 var (
 	sonce sync.Once
 
-	SockAddr  = "localhost:18080"
 	curEngine atomic.Value
 )
 
@@ -50,16 +49,17 @@ func setupHandler(engine *Engine) {
 	})
 }
 
-func startServer() {
+func startServer(addr string) {
 	e := DefaultServer(nil)
 	setupHandler(e)
-	go e.Run(SockAddr)
+	go e.Run(addr)
 	curEngine.Store(e)
 	time.Sleep(time.Second)
 }
 
 func TestCriticality(t *testing.T) {
-	startServer()
+	addr := "localhost:18001"
+	startServer(addr)
 	defer shutdown()
 
 	tests := []*struct {
@@ -85,7 +85,7 @@ func TestCriticality(t *testing.T) {
 	}
 	client := &http.Client{}
 	for _, testCase := range tests {
-		req, err := http.NewRequest("GET", uri(SockAddr, testCase.path), nil)
+		req, err := http.NewRequest("GET", uri(addr, testCase.path), nil)
 		assert.NoError(t, err)
 		req.Header.Set("x-bm-metadata-criticality", string(testCase.crtl))
 		resp, err := client.Do(req)
@@ -98,7 +98,8 @@ func TestCriticality(t *testing.T) {
 }
 
 func TestNoneCriticality(t *testing.T) {
-	startServer()
+	addr := "localhost:18002"
+	startServer(addr)
 	defer shutdown()
 
 	tests := []*struct {
@@ -124,7 +125,7 @@ func TestNoneCriticality(t *testing.T) {
 	}
 	client := &http.Client{}
 	for _, testCase := range tests {
-		req, err := http.NewRequest("GET", uri(SockAddr, testCase.path), nil)
+		req, err := http.NewRequest("GET", uri(addr, testCase.path), nil)
 		assert.NoError(t, err)
 		req.Header.Set("x-bm-metadata-criticality", string(testCase.crtl))
 		resp, err := client.Do(req)
