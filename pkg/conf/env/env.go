@@ -49,7 +49,7 @@ func init() {
 	if Hostname == "" {
 		Hostname, err = os.Hostname()
 		if err != nil {
-			Hostname = Hostname = strconv.Itoa(int(time.Now().UnixNano()))
+			Hostname = strconv.Itoa(int(time.Now().UnixNano()))
 		}
 	}
 	addFlag(flag.CommandLine)
