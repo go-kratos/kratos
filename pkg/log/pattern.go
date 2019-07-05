@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"path"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -111,16 +110,16 @@ func keyFactory(key string) func(map[string]interface{}) string {
 	}
 }
 
-func longSource(map[string]interface{}) string {
-	if _, file, lineNo, ok := runtime.Caller(6); ok {
-		return fmt.Sprintf("%s:%d", file, lineNo)
+func longSource(d map[string]interface{}) string {
+	if fn, ok := d[_source].(string); ok {
+		return fn
 	}
 	return "unknown:0"
 }
 
-func shortSource(map[string]interface{}) string {
-	if _, file, lineNo, ok := runtime.Caller(6); ok {
-		return fmt.Sprintf("%s:%d", path.Base(file), lineNo)
+func shortSource(d map[string]interface{}) string {
+	if fn, ok := d[_source].(string); ok {
+		return path.Base(fn)
 	}
 	return "unknown:0"
 }

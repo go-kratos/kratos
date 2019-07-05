@@ -2,11 +2,13 @@ package paladin
 
 import (
 	"encoding"
+	"encoding/json"
 	"reflect"
 	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/pkg/errors"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // ErrNotExist value key not exist.
@@ -154,4 +156,21 @@ func (v *Value) UnmarshalTOML(dst interface{}) error {
 		return err
 	}
 	return toml.Unmarshal([]byte(text), dst)
+}
+
+// UnmarshalJSON unmarhsal json to struct.
+func (v *Value) UnmarshalJSON(dst interface{}) error {
+	text, err := v.Raw()
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal([]byte(text), dst)
+}
+
+func (v *Value) UnmarshalYAML(dst interface{}) error {
+	text, err := v.Raw()
+	if err != nil {
+		return err
+	}
+	return yaml.Unmarshal([]byte(text), dst)
 }
