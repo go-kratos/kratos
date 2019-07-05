@@ -48,7 +48,9 @@ require (
 	google.golang.org/grpc v1.22.0
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.26.0
+	gopkg.in/yaml.v2 v2.2.2
 	honnef.co/go/tools v0.0.0-20190605142022-0a11fc526260 // indirect
+
 )
 
 replace (
