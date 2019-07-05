@@ -5,6 +5,8 @@ package env
 import (
 	"flag"
 	"os"
+	"strconv"
+	"time"
 )
 
 // deploy env.
@@ -49,10 +51,9 @@ func init() {
 	if Hostname == "" {
 		Hostname, err = os.Hostname()
 		if err != nil {
-			Hostname = ""
+			Hostname = strconv.Itoa(int(time.Now().UnixNano()))
 		}
 	}
-
 	addFlag(flag.CommandLine)
 }
 
