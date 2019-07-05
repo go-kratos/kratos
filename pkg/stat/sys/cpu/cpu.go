@@ -15,6 +15,7 @@ var (
 	usage uint64
 )
 
+// CPU is cpu stat usage.
 type CPU interface {
 	Usage() (u uint64, e error)
 	Info() Info
@@ -26,7 +27,7 @@ func init() {
 	)
 	stats, err = newCgroupCPU()
 	if err != nil {
-		fmt.Printf("cgroup cpu init failed(%v),switch to psutil cpu\n", err)
+		// fmt.Printf("cgroup cpu init failed(%v),switch to psutil cpu\n", err)
 		stats, err = newPsutilCPU(interval)
 		if err != nil {
 			panic(fmt.Sprintf("cgroup cpu init failed!err:=%v", err))
