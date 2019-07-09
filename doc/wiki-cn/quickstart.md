@@ -14,7 +14,7 @@ kratos new kratos-demo
 ├── CHANGELOG.md           # CHANGELOG
 ├── CONTRIBUTORS.md        # CONTRIBUTORS
 ├── README.md              # README
-├── api                    # api目录为对外保留的proto文件及生成的pb.go文件，注：需要"--grpc"参数
+├── api                    # api目录为对外保留的proto文件及生成的pb.go文件，注：需要"--proto"参数
 │   ├── api.proto
 │   ├── api.pb.go          # 通过go generate生成的pb.go文件
 │   └── generate.go
