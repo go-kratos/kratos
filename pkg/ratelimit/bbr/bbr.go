@@ -67,11 +67,11 @@ type Stat struct {
 type BBR struct {
 	cpu             cpuGetter
 	passStat        metric.RollingCounter
-	rtStat          metric.RollingGauge
+	rtStat          metric.RollingCounter
 	inFlight        int64
 	winBucketPerSec int64
 	conf            *Config
-	prevDrop        int64
+	prevDrop        atomic.Value
 }
 
 // Config contains configs of bbr limiter.
@@ -128,18 +128,21 @@ func (l *BBR) maxFlight() int64 {
 }
 
 func (l *BBR) shouldDrop() bool {
-	inFlight := atomic.LoadInt64(&l.inFlight)
-	maxInflight := l.maxFlight()
 	if l.cpu() < l.conf.CPUThreshold {
-		prevDrop := atomic.LoadInt64(&l.prevDrop)
-		if time.Now().Unix()-prevDrop <= 1 {
-			return inFlight > 1 && inFlight > maxInflight
+		prevDrop, ok := l.prevDrop.Load().(time.Time)
+		if !ok {
+			return false
+		}
+		if time.Since(prevDrop) <= time.Second {
+			inFlight := atomic.LoadInt64(&l.inFlight)
+			return inFlight > 1 && inFlight > l.maxFlight()
 		}
 		return false
 	}
-	drop := inFlight > 1 && inFlight > maxInflight
+	inFlight := atomic.LoadInt64(&l.inFlight)
+	drop := inFlight > 1 && inFlight > l.maxFlight()
 	if drop {
-		atomic.StoreInt64(&l.prevDrop, time.Now().Unix())
+		l.prevDrop.Store(time.Now())
 	}
 	return drop
 }
@@ -188,7 +191,7 @@ func newLimiter(conf *Config) limit.Limiter {
 	size := conf.WinBucket
 	bucketDuration := conf.Window / time.Duration(conf.WinBucket)
 	passStat := metric.NewRollingCounter(metric.RollingCounterOpts{Size: size, BucketDuration: bucketDuration})
-	rtStat := metric.NewRollingGauge(metric.RollingGaugeOpts{Size: size, BucketDuration: bucketDuration})
+	rtStat := metric.NewRollingCounter(metric.RollingCounterOpts{Size: size, BucketDuration: bucketDuration})
 	cpu := func() int64 {
 		return atomic.LoadInt64(&cpu)
 	}
