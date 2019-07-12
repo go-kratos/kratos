@@ -171,7 +171,7 @@ func TestGroup(t *testing.T) {
 
 func BenchmarkBBRAllowUnderLowLoad(b *testing.B) {
 	cpuGetter := func() int64 {
-		return 50
+		return 500
 	}
 	bucketDuration := time.Millisecond * 100
 	passStat := metric.NewRollingCounter(metric.RollingCounterOpts{Size: 10, BucketDuration: bucketDuration})
@@ -194,7 +194,7 @@ func BenchmarkBBRAllowUnderLowLoad(b *testing.B) {
 
 func BenchmarkBBRAllowUnderHighLoad(b *testing.B) {
 	cpuGetter := func() int64 {
-		return 90
+		return 900
 	}
 	bucketDuration := time.Millisecond * 100
 	passStat := metric.NewRollingCounter(metric.RollingCounterOpts{Size: 10, BucketDuration: bucketDuration})
@@ -217,7 +217,7 @@ func BenchmarkBBRAllowUnderHighLoad(b *testing.B) {
 
 func BenchmarkBBRShouldDropUnderLowLoad(b *testing.B) {
 	cpuGetter := func() int64 {
-		return 50
+		return 500
 	}
 	bucketDuration := time.Millisecond * 100
 	passStat := metric.NewRollingCounter(metric.RollingCounterOpts{Size: 10, BucketDuration: bucketDuration})
@@ -244,7 +244,7 @@ func BenchmarkBBRShouldDropUnderLowLoad(b *testing.B) {
 
 func BenchmarkBBRShouldDropUnderHighLoad(b *testing.B) {
 	cpuGetter := func() int64 {
-		return 90
+		return 900
 	}
 	bucketDuration := time.Millisecond * 100
 	passStat := metric.NewRollingCounter(metric.RollingCounterOpts{Size: 10, BucketDuration: bucketDuration})
