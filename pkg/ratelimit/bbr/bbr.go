@@ -18,6 +18,7 @@ import (
 var (
 	cpu         int64
 	decay       = 0.95
+	initTime    = time.Now()
 	defaultConf = &Config{
 		Window:       time.Second * 10,
 		WinBucket:    100,
@@ -72,6 +73,9 @@ type BBR struct {
 	winBucketPerSec int64
 	conf            *Config
 	prevDrop        atomic.Value
+	prevDropHit     int32
+	rawMaxPASS      int64
+	rawMinRt        int64
 }
 
 // Config contains configs of bbr limiter.
@@ -85,9 +89,13 @@ type Config struct {
 }
 
 func (l *BBR) maxPASS() int64 {
-	val := int64(l.passStat.Reduce(func(iterator metric.Iterator) float64 {
+	rawMaxPass := atomic.LoadInt64(&l.rawMaxPASS)
+	if rawMaxPass > 0 && l.passStat.Timespan() < 1 {
+		return rawMaxPass
+	}
+	rawMaxPass = int64(l.passStat.Reduce(func(iterator metric.Iterator) float64 {
 		var result = 1.0
-		for iterator.Next() {
+		for i := 1; iterator.Next() && i < l.conf.WinBucket; i++ {
 			bucket := iterator.Bucket()
 			count := 0.0
 			for _, p := range bucket.Points {
@@ -97,16 +105,21 @@ func (l *BBR) maxPASS() int64 {
 		}
 		return result
 	}))
-	if val == 0 {
-		return 1
+	if rawMaxPass == 0 {
+		rawMaxPass = 1
 	}
-	return val
+	atomic.StoreInt64(&l.rawMaxPASS, rawMaxPass)
+	return rawMaxPass
 }
 
 func (l *BBR) minRT() int64 {
-	val := l.rtStat.Reduce(func(iterator metric.Iterator) float64 {
+	rawMinRT := atomic.LoadInt64(&l.rawMinRt)
+	if rawMinRT > 0 && l.rtStat.Timespan() < 1 {
+		return rawMinRT
+	}
+	rawMinRT = int64(math.Ceil(l.rtStat.Reduce(func(iterator metric.Iterator) float64 {
 		var result = math.MaxFloat64
-		for iterator.Next() {
+		for i := 1; iterator.Next() && i < l.conf.WinBucket; i++ {
 			bucket := iterator.Bucket()
 			if len(bucket.Points) == 0 {
 				continue
@@ -119,8 +132,12 @@ func (l *BBR) minRT() int64 {
 			result = math.Min(result, avg)
 		}
 		return result
-	})
-	return int64(math.Ceil(val))
+	})))
+	if rawMinRT <= 0 {
+		rawMinRT = 1
+	}
+	atomic.StoreInt64(&l.rawMinRt, rawMinRT)
+	return rawMinRT
 }
 
 func (l *BBR) maxFlight() int64 {
@@ -129,20 +146,28 @@ func (l *BBR) maxFlight() int64 {
 
 func (l *BBR) shouldDrop() bool {
 	if l.cpu() < l.conf.CPUThreshold {
-		prevDrop, ok := l.prevDrop.Load().(time.Time)
-		if !ok {
+		prevDrop, _ := l.prevDrop.Load().(time.Duration)
+		if prevDrop == 0 {
 			return false
 		}
-		if time.Since(prevDrop) <= time.Second {
+		if time.Since(initTime)-prevDrop <= time.Second {
+			if atomic.LoadInt32(&l.prevDropHit) == 0 {
+				atomic.StoreInt32(&l.prevDropHit, 1)
+			}
 			inFlight := atomic.LoadInt64(&l.inFlight)
 			return inFlight > 1 && inFlight > l.maxFlight()
 		}
+		l.prevDrop.Store(time.Duration(0))
 		return false
 	}
 	inFlight := atomic.LoadInt64(&l.inFlight)
 	drop := inFlight > 1 && inFlight > l.maxFlight()
 	if drop {
-		l.prevDrop.Store(time.Now())
+		prevDrop, _ := l.prevDrop.Load().(time.Duration)
+		if prevDrop != 0 {
+			return drop
+		}
+		l.prevDrop.Store(time.Since(initTime))
 	}
 	return drop
 }
@@ -169,9 +194,9 @@ func (l *BBR) Allow(ctx context.Context, opts ...limit.AllowOption) (func(info l
 		return nil, ecode.LimitExceed
 	}
 	atomic.AddInt64(&l.inFlight, 1)
-	stime := time.Now()
+	stime := time.Since(initTime)
 	return func(do limit.DoneInfo) {
-		rt := int64(time.Since(stime) / time.Millisecond)
+		rt := int64((time.Since(initTime) - stime) / time.Millisecond)
 		l.rtStat.Add(rt)
 		atomic.AddInt64(&l.inFlight, -1)
 		switch do.Op {
