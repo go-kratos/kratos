@@ -20,8 +20,8 @@ func TestSpan(t *testing.T) {
 	t.Run("test fork", func(t *testing.T) {
 		sp1 := t1.New("testfork").(*Span)
 		sp2 := sp1.Fork("xxx", "opt_2").(*Span)
-		assert.Equal(t, sp1.context.traceID, sp2.context.traceID)
-		assert.Equal(t, sp1.context.spanID, sp2.context.parentID)
+		assert.Equal(t, sp1.context.TraceID, sp2.context.TraceID)
+		assert.Equal(t, sp1.context.SpanID, sp2.context.ParentID)
 		t.Run("test max fork", func(t *testing.T) {
 			sp3 := sp2.Fork("xx", "xxx")
 			for i := 0; i < 100; i++ {

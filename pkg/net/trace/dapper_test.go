@@ -40,12 +40,12 @@ func TestDapperPropagation(t *testing.T) {
 		sp1.Finish(nil)
 
 		assert.Len(t, report.sps, 3)
-		assert.Equal(t, report.sps[2].context.parentID, uint64(0))
-		assert.Equal(t, report.sps[0].context.traceID, report.sps[1].context.traceID)
-		assert.Equal(t, report.sps[2].context.traceID, report.sps[1].context.traceID)
+		assert.Equal(t, report.sps[2].context.ParentID, uint64(0))
+		assert.Equal(t, report.sps[0].context.TraceID, report.sps[1].context.TraceID)
+		assert.Equal(t, report.sps[2].context.TraceID, report.sps[1].context.TraceID)
 
-		assert.Equal(t, report.sps[1].context.parentID, report.sps[2].context.spanID)
-		assert.Equal(t, report.sps[0].context.parentID, report.sps[1].context.spanID)
+		assert.Equal(t, report.sps[1].context.ParentID, report.sps[2].context.SpanID)
+		assert.Equal(t, report.sps[0].context.ParentID, report.sps[1].context.SpanID)
 	})
 	t.Run("test gRPC progagation", func(t *testing.T) {
 		report := &mockReport{}
@@ -64,12 +64,12 @@ func TestDapperPropagation(t *testing.T) {
 		sp1.Finish(nil)
 
 		assert.Len(t, report.sps, 3)
-		assert.Equal(t, report.sps[2].context.parentID, uint64(0))
-		assert.Equal(t, report.sps[0].context.traceID, report.sps[1].context.traceID)
-		assert.Equal(t, report.sps[2].context.traceID, report.sps[1].context.traceID)
+		assert.Equal(t, report.sps[2].context.ParentID, uint64(0))
+		assert.Equal(t, report.sps[0].context.TraceID, report.sps[1].context.TraceID)
+		assert.Equal(t, report.sps[2].context.TraceID, report.sps[1].context.TraceID)
 
-		assert.Equal(t, report.sps[1].context.parentID, report.sps[2].context.spanID)
-		assert.Equal(t, report.sps[0].context.parentID, report.sps[1].context.spanID)
+		assert.Equal(t, report.sps[1].context.ParentID, report.sps[2].context.SpanID)
+		assert.Equal(t, report.sps[0].context.ParentID, report.sps[1].context.SpanID)
 	})
 	t.Run("test normal", func(t *testing.T) {
 		report := &mockReport{}
@@ -94,12 +94,12 @@ func TestDapperPropagation(t *testing.T) {
 		sp1.Finish(nil)
 
 		assert.Len(t, report.sps, 3)
-		assert.Equal(t, report.sps[2].context.parentID, uint64(0))
-		assert.Equal(t, report.sps[0].context.traceID, report.sps[1].context.traceID)
-		assert.Equal(t, report.sps[2].context.traceID, report.sps[1].context.traceID)
+		assert.Equal(t, report.sps[2].context.ParentID, uint64(0))
+		assert.Equal(t, report.sps[0].context.TraceID, report.sps[1].context.TraceID)
+		assert.Equal(t, report.sps[2].context.TraceID, report.sps[1].context.TraceID)
 
-		assert.Equal(t, report.sps[1].context.parentID, report.sps[2].context.spanID)
-		assert.Equal(t, report.sps[0].context.parentID, report.sps[1].context.spanID)
+		assert.Equal(t, report.sps[1].context.ParentID, report.sps[2].context.SpanID)
+		assert.Equal(t, report.sps[0].context.ParentID, report.sps[1].context.SpanID)
 	})
 }
 
