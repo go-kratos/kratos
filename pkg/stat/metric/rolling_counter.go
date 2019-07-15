@@ -13,6 +13,7 @@ var _ Aggregation = &rollingCounter{}
 type RollingCounter interface {
 	Metric
 	Aggregation
+	Timespan() int
 	// Reduce applies the reduction function to all buckets within the window.
 	Reduce(func(Iterator) float64) float64
 }
@@ -65,4 +66,8 @@ func (r *rollingCounter) Sum() float64 {
 
 func (r *rollingCounter) Value() int64 {
 	return int64(r.Sum())
+}
+
+func (r *rollingCounter) Timespan() int {
+	return r.policy.timespan()
 }
