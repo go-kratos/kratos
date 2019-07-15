@@ -20,14 +20,14 @@ var (
 	errSpanVersion = errs.New("trace: marshal not support version")
 )
 
-func marshalSpan(sp *span, version int32) ([]byte, error) {
+func marshalSpan(sp *Span, version int32) ([]byte, error) {
 	if version == protoVersion1 {
 		return marshalSpanV1(sp)
 	}
 	return nil, errSpanVersion
 }
 
-func marshalSpanV1(sp *span) ([]byte, error) {
+func marshalSpanV1(sp *Span) ([]byte, error) {
 	protoSpan := new(protogen.Span)
 	protoSpan.Version = protoVersion1
 	protoSpan.ServiceName = sp.dapper.serviceName
