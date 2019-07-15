@@ -31,7 +31,10 @@ var (
 	_     IRouter = &Engine{}
 	stats         = stat.HTTPServer
 
-	_httpDSN string
+	_httpDSN       string
+	default405Body = []byte("405 method not allowed")
+	default404Body = []byte("404 page not found")
+
 )
 
 func init() {
@@ -122,7 +125,7 @@ type Engine struct {
 
 	address string
 
-	mux       *http.ServeMux                    // http mux router
+	trees     methodTrees
 	server    atomic.Value                      // store *http.Server
 	metastore map[string]map[string]interface{} // metastore is the path as key and the metadata of this path as value, it export via /metadata
 
@@ -130,6 +133,28 @@ type Engine struct {
 	methodConfigs map[string]*MethodConfig
 
 	injections []injection
+
+	// If enabled, the url.RawPath will be used to find parameters.
+	UseRawPath bool
+
+	// If true, the path value will be unescaped.
+	// If UseRawPath is false (by default), the UnescapePathValues effectively is true,
+	// as url.Path gonna be used, which is already unescaped.
+	UnescapePathValues bool
+
+	// If enabled, the router checks if another method is allowed for the
+	// current route, if the current request can not be routed.
+	// If this is the case, the request is answered with 'Method Not Allowed'
+	// and HTTP status code 405.
+	// If no other Method is allowed, the request is delegated to the NotFound
+	// handler.
+	HandleMethodNotAllowed bool
+
+	allNoRoute  []HandlerFunc
+	allNoMethod []HandlerFunc
+	noRoute     []HandlerFunc
+	noMethod    []HandlerFunc
+
 }
 
 type injection struct {
@@ -151,18 +176,28 @@ func NewServer(conf *ServerConfig) *Engine {
 			basePath: "/",
 			root:     true,
 		},
-		address:       ip.InternalIP(),
-		mux:           http.NewServeMux(),
-		metastore:     make(map[string]map[string]interface{}),
-		methodConfigs: make(map[string]*MethodConfig),
-	}
-	if err := engine.SetConfig(conf); err != nil {
-		panic(err)
+		conf: &ServerConfig{
+			Timeout: xtime.Duration(time.Second),
+		},
+		address:                ip.InternalIP(),
+		trees:                  make(methodTrees, 0, 9),
+		metastore:              make(map[string]map[string]interface{}),
+		methodConfigs:          make(map[string]*MethodConfig),
+		HandleMethodNotAllowed: true,
+		injections:             make([]injection, 0),
 	}
 	engine.RouterGroup.engine = engine
 	// NOTE add prometheus monitor location
 	engine.addRoute("GET", "/metrics", monitor())
 	engine.addRoute("GET", "/metadata", engine.metadata())
+	engine.NoRoute(func(c *Context) {
+		c.Bytes(404, "text/plain", default404Body)
+		c.Abort()
+	})
+	engine.NoMethod(func(c *Context) {
+		c.Bytes(405, "text/plain", []byte(http.StatusText(405)))
+		c.Abort()
+	})
 	startPerf()
 	return engine
 }
@@ -195,46 +230,60 @@ func (engine *Engine) addRoute(method, path string, handlers ...HandlerFunc) {
 		engine.metastore[path] = make(map[string]interface{})
 	}
 	engine.metastore[path]["method"] = method
-	engine.mux.HandleFunc(path, func(w http.ResponseWriter, req *http.Request) {
-		c := &Context{
-			Context:  nil,
-			engine:   engine,
-			index:    -1,
-			handlers: nil,
-			Keys:     nil,
-			method:   "",
-			Error:    nil,
-		}
+	root := engine.trees.get(method)
+	if root == nil {
+		root = new(node)
+		engine.trees = append(engine.trees, methodTree{method: method, root: root})
+	}
 
-		c.Request = req
-		c.Writer = w
-		c.handlers = handlers
+	prelude := func(c *Context) {
 		c.method = method
-
-		engine.handleContext(c)
-	})
+		c.RoutePath = path
+	}
+	handlers = append([]HandlerFunc{prelude}, handlers...)
+	root.addRoute(path, handlers)
 }
 
-// SetConfig is used to set the engine configuration.
-// Only the valid config will be loaded.
-func (engine *Engine) SetConfig(conf *ServerConfig) (err error) {
-	if conf.Timeout <= 0 {
-		return errors.New("blademaster: config timeout must greater than 0")
+func (engine *Engine) prepareHandler(c *Context) {
+	httpMethod := c.Request.Method
+	rPath := c.Request.URL.Path
+	unescape := false
+	if engine.UseRawPath && len(c.Request.URL.RawPath) > 0 {
+		rPath = c.Request.URL.RawPath
+		unescape = engine.UnescapePathValues
 	}
-	if conf.Network == "" {
-		conf.Network = "tcp"
+	rPath = cleanPath(rPath)
+
+	// Find root of the tree for the given HTTP method
+	t := engine.trees
+	for i, tl := 0, len(t); i < tl; i++ {
+		if t[i].method != httpMethod {
+			continue
+		}
+		root := t[i].root
+		// Find route in tree
+		handlers, params, _ := root.getValue(rPath, c.Params, unescape)
+		if handlers != nil {
+			c.handlers = handlers
+			c.Params = params
+			return
+		}
+		break
 	}
-	engine.lock.Lock()
-	engine.conf = conf
-	engine.lock.Unlock()
+
+	if engine.HandleMethodNotAllowed {
+		for _, tree := range engine.trees {
+			if tree.method == httpMethod {
+				continue
+			}
+			if handlers, _, _ := tree.root.getValue(rPath, nil, unescape); handlers != nil {
+				c.handlers = engine.allNoMethod
+				return
+			}
+		}
+	}
+	c.handlers = engine.allNoRoute
 	return
-}
-
-func (engine *Engine) methodConfig(path string) *MethodConfig {
-	engine.pcLock.RLock()
-	mc := engine.methodConfigs[path]
-	engine.pcLock.RUnlock()
-	return mc
 }
 
 func (engine *Engine) handleContext(c *Context) {
@@ -274,12 +323,35 @@ func (engine *Engine) handleContext(c *Context) {
 		c.Context, cancel = context.WithCancel(ctx)
 	}
 	defer cancel()
+	engine.prepareHandler(c)
 	c.Next()
+}
+
+// SetConfig is used to set the engine configuration.
+// Only the valid config will be loaded.
+func (engine *Engine) SetConfig(conf *ServerConfig) (err error) {
+	if conf.Timeout <= 0 {
+		return errors.New("blademaster: config timeout must greater than 0")
+	}
+	if conf.Network == "" {
+		conf.Network = "tcp"
+	}
+	engine.lock.Lock()
+	engine.conf = conf
+	engine.lock.Unlock()
+	return
+}
+
+func (engine *Engine) methodConfig(path string) *MethodConfig {
+	engine.pcLock.RLock()
+	mc := engine.methodConfigs[path]
+	engine.pcLock.RUnlock()
+	return mc
 }
 
 // Router return a http.Handler for using http.ListenAndServe() directly.
 func (engine *Engine) Router() http.Handler {
-	return engine.mux
+	return engine
 }
 
 // Server is used to load stored http server.
@@ -305,6 +377,8 @@ func (engine *Engine) Shutdown(ctx context.Context) error {
 // For example, this is the right place for a logger or error management middleware.
 func (engine *Engine) UseFunc(middleware ...HandlerFunc) IRoutes {
 	engine.RouterGroup.UseFunc(middleware...)
+	engine.rebuild404Handlers()
+	engine.rebuild405Handlers()
 	return engine
 }
 
@@ -333,7 +407,7 @@ func (engine *Engine) Run(addr ...string) (err error) {
 	address := resolveAddress(addr)
 	server := &http.Server{
 		Addr:    address,
-		Handler: engine.mux,
+		Handler: engine,
 	}
 	engine.server.Store(server)
 	if err = server.ListenAndServe(); err != nil {
@@ -348,7 +422,7 @@ func (engine *Engine) Run(addr ...string) (err error) {
 func (engine *Engine) RunTLS(addr, certFile, keyFile string) (err error) {
 	server := &http.Server{
 		Addr:    addr,
-		Handler: engine.mux,
+		Handler: engine,
 	}
 	engine.server.Store(server)
 	if err = server.ListenAndServeTLS(certFile, keyFile); err != nil {
@@ -369,7 +443,7 @@ func (engine *Engine) RunUnix(file string) (err error) {
 	}
 	defer listener.Close()
 	server := &http.Server{
-		Handler: engine.mux,
+		Handler: engine,
 	}
 	engine.server.Store(server)
 	if err = server.Serve(listener); err != nil {
@@ -381,7 +455,7 @@ func (engine *Engine) RunUnix(file string) (err error) {
 // RunServer will serve and start listening HTTP requests by given server and listener.
 // Note: this method will block the calling goroutine indefinitely unless an error happens.
 func (engine *Engine) RunServer(server *http.Server, l net.Listener) (err error) {
-	server.Handler = engine.mux
+	server.Handler = engine
 	engine.server.Store(server)
 	if err = server.Serve(l); err != nil {
 		err = errors.Wrapf(err, "listen server: %+v/%+v", server, l)
@@ -402,4 +476,42 @@ func (engine *Engine) Inject(pattern string, handlers ...HandlerFunc) {
 		pattern:  regexp.MustCompile(pattern),
 		handlers: handlers,
 	})
+}
+
+// ServeHTTP conforms to the http.Handler interface.
+func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	c := &Context{
+		Context:  nil,
+		engine:   engine,
+		index:    -1,
+		handlers: nil,
+		Keys:     nil,
+		method:   "",
+		Error:    nil,
+	}
+
+	c.Request = req
+	c.Writer = w
+
+	engine.handleContext(c)
+}
+
+// NoRoute adds handlers for NoRoute. It return a 404 code by default.
+func (engine *Engine) NoRoute(handlers ...HandlerFunc) {
+	engine.noRoute = handlers
+	engine.rebuild404Handlers()
+}
+
+// NoMethod sets the handlers called when... TODO.
+func (engine *Engine) NoMethod(handlers ...HandlerFunc) {
+	engine.noMethod = handlers
+	engine.rebuild405Handlers()
+}
+
+func (engine *Engine) rebuild404Handlers() {
+	engine.allNoRoute = engine.combineHandlers(engine.noRoute)
+}
+
+func (engine *Engine) rebuild405Handlers() {
+	engine.allNoMethod = engine.combineHandlers(engine.noMethod)
 }
