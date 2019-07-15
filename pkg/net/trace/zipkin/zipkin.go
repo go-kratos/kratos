@@ -25,9 +25,10 @@ func newReport(c *Config) *report {
 
 // WriteSpan write a trace span to queue.
 func (r *report) WriteSpan(raw *trace.Span) (err error) {
-	traceID := model.TraceID{Low: raw.Tid()}
-	spanID := model.ID(raw.SpanID())
-	parentID := model.ID(raw.ParentID())
+	ctx := raw.Context()
+	traceID := model.TraceID{Low: ctx.TraceID}
+	spanID := model.ID(ctx.SpanID)
+	parentID := model.ID(ctx.ParentID)
 	span := model.SpanModel{
 		SpanContext: model.SpanContext{
 			TraceID:  traceID,
@@ -42,7 +43,16 @@ func (r *report) WriteSpan(raw *trace.Span) (err error) {
 	for _, tag := range raw.Tags() {
 		switch tag.Key {
 		case trace.TagSpanKind:
-			span.Kind = model.Kind(tag.Value.(string))
+			switch tag.Value.(string) {
+			case "client":
+				span.Kind = model.Client
+			case "server":
+				span.Kind = model.Server
+			case "producer":
+				span.Kind = model.Producer
+			case "consumer":
+				span.Kind = model.Consumer
+			}
 		case trace.TagPeerService:
 			span.LocalEndpoint = &model.Endpoint{ServiceName: tag.Value.(string)}
 		default:
@@ -53,6 +63,9 @@ func (r *report) WriteSpan(raw *trace.Span) (err error) {
 				span.Tags[tag.Key] = fmt.Sprint(v)
 			}
 		}
+	}
+	for _, lg := range raw.Logs() {
+		span.Tags[lg.Key] = string(lg.Value)
 	}
 	r.rpt.Send(span)
 	return

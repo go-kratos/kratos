@@ -60,13 +60,13 @@ func (d *dapper) New(operationName string, opts ...Option) Trace {
 	} else {
 		sampled, probability = d.sampler.IsSampled(traceID, operationName)
 	}
-	pctx := spanContext{traceID: traceID}
+	pctx := spanContext{TraceID: traceID}
 	if sampled {
-		pctx.flags = flagSampled
-		pctx.probability = probability
+		pctx.Flags = flagSampled
+		pctx.Probability = probability
 	}
 	if opt.Debug {
-		pctx.flags |= flagDebug
+		pctx.Flags |= flagDebug
 		return d.newSpanWithContext(operationName, pctx).SetTag(TagString(TagSpanKind, "server")).SetTag(TagBool("debug", true))
 	}
 	// 为了兼容临时为 New 的 Span 设置 span.kind
@@ -80,21 +80,21 @@ func (d *dapper) newSpanWithContext(operationName string, pctx spanContext) Trac
 	//	sp.context = pctx
 	//	return sp
 	//}
-	if pctx.level > _maxLevel {
+	if pctx.Level > _maxLevel {
 		// if span reach max limit level return noopspan
 		return noopspan{}
 	}
-	level := pctx.level + 1
+	level := pctx.Level + 1
 	nctx := spanContext{
-		traceID:  pctx.traceID,
-		parentID: pctx.spanID,
-		flags:    pctx.flags,
-		level:    level,
+		TraceID:  pctx.TraceID,
+		ParentID: pctx.SpanID,
+		Flags:    pctx.Flags,
+		Level:    level,
 	}
-	if pctx.spanID == 0 {
-		nctx.spanID = pctx.traceID
+	if pctx.SpanID == 0 {
+		nctx.SpanID = pctx.TraceID
 	} else {
-		nctx.spanID = genID()
+		nctx.SpanID = genID()
 	}
 	sp.operationName = operationName
 	sp.context = nctx

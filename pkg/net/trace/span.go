@@ -43,20 +43,16 @@ func (s *Span) TraceID() string {
 	return s.context.String()
 }
 
-func (s *Span) Tid() uint64 {
-	return s.context.traceID
-}
-
-func (s *Span) SpanID() uint64 {
-	return s.context.spanID
-}
-
-func (s *Span) ParentID() uint64 {
-	return s.context.parentID
+func (s *Span) Context() spanContext {
+	return s.context
 }
 
 func (s *Span) Tags() []Tag {
 	return s.tags
+}
+
+func (s *Span) Logs() []*protogen.Log {
+	return s.logs
 }
 
 func (s *Span) Fork(serviceName, operationName string) Trace {
