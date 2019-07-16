@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"testing"
 	"time"
-	
+
 	"github.com/bilibili/kratos/pkg/stat/metric"
 	xtime "github.com/bilibili/kratos/pkg/time"
 
@@ -29,7 +29,6 @@ func getSREBreaker() *sreBreaker {
 	stat := metric.NewRollingCounter(counterOpts)
 	return &sreBreaker{
 		stat: stat,
-		r:    rand.New(rand.NewSource(time.Now().UnixNano())),
 
 		request: 100,
 		k:       2,
@@ -145,6 +144,21 @@ func TestSRESummary(t *testing.T) {
 		assert.Equal(t, succ, int64(0))
 		assert.Equal(t, total, int64(0))
 	})
+}
+
+func TestTrueOnProba(t *testing.T) {
+	const proba = math.Pi / 10
+	const total = 100000
+	const epsilon = 0.05
+	var count int
+	for i := 0; i < total; i++ {
+		if trueOnProba(proba) {
+			count++
+		}
+	}
+
+	ratio := float64(count) / float64(total)
+	assert.InEpsilon(t, proba, ratio, epsilon)
 }
 
 func BenchmarkSreBreakerAllow(b *testing.B) {
