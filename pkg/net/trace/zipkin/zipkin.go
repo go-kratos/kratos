@@ -29,6 +29,8 @@ func (r *report) WriteSpan(raw *trace.Span) (err error) {
 	traceID := model.TraceID{Low: ctx.TraceID}
 	spanID := model.ID(ctx.SpanID)
 	parentID := model.ID(ctx.ParentID)
+	tags := raw.Tags()
+	logs := raw.Logs()
 	span := model.SpanModel{
 		SpanContext: model.SpanContext{
 			TraceID:  traceID,
@@ -38,9 +40,9 @@ func (r *report) WriteSpan(raw *trace.Span) (err error) {
 		Name:      raw.Name(),
 		Timestamp: raw.StartTime(),
 		Duration:  raw.Duration(),
-		Tags:      make(map[string]string, len(raw.Tags())),
+		Tags:      make(map[string]string, len(tags)+len(logs)),
 	}
-	for _, tag := range raw.Tags() {
+	for _, tag := range tags {
 		switch tag.Key {
 		case trace.TagSpanKind:
 			switch tag.Value.(string) {
@@ -64,7 +66,7 @@ func (r *report) WriteSpan(raw *trace.Span) (err error) {
 			}
 		}
 	}
-	for _, lg := range raw.Logs() {
+	for _, lg := range logs {
 		span.Tags[lg.Key] = string(lg.Value)
 	}
 	r.rpt.Send(span)
