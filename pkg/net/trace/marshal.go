@@ -20,22 +20,22 @@ var (
 	errSpanVersion = errs.New("trace: marshal not support version")
 )
 
-func marshalSpan(sp *span, version int32) ([]byte, error) {
+func marshalSpan(sp *Span, version int32) ([]byte, error) {
 	if version == protoVersion1 {
 		return marshalSpanV1(sp)
 	}
 	return nil, errSpanVersion
 }
 
-func marshalSpanV1(sp *span) ([]byte, error) {
+func marshalSpanV1(sp *Span) ([]byte, error) {
 	protoSpan := new(protogen.Span)
 	protoSpan.Version = protoVersion1
 	protoSpan.ServiceName = sp.dapper.serviceName
 	protoSpan.OperationName = sp.operationName
-	protoSpan.TraceId = sp.context.traceID
-	protoSpan.SpanId = sp.context.spanID
-	protoSpan.ParentId = sp.context.parentID
-	protoSpan.SamplingProbability = sp.context.probability
+	protoSpan.TraceId = sp.context.TraceID
+	protoSpan.SpanId = sp.context.SpanID
+	protoSpan.ParentId = sp.context.ParentID
+	protoSpan.SamplingProbability = sp.context.Probability
 	protoSpan.StartTime = &timestamp.Timestamp{
 		Seconds: sp.startTime.Unix(),
 		Nanos:   int32(sp.startTime.Nanosecond()),
