@@ -13,9 +13,10 @@ const (
 	_maxLogs   = 256
 )
 
-var _ Trace = &span{}
+var _ Trace = &Span{}
 
-type span struct {
+// Span is a trace span.
+type Span struct {
 	dapper        *dapper
 	context       spanContext
 	operationName string
@@ -26,11 +27,35 @@ type span struct {
 	childs        int
 }
 
-func (s *span) TraceID() string {
+func (s *Span) Name() string {
+	return s.operationName
+}
+
+func (s *Span) StartTime() time.Time {
+	return s.startTime
+}
+
+func (s *Span) Duration() time.Duration {
+	return s.duration
+}
+
+func (s *Span) TraceID() string {
 	return s.context.String()
 }
 
-func (s *span) Fork(serviceName, operationName string) Trace {
+func (s *Span) Context() spanContext {
+	return s.context
+}
+
+func (s *Span) Tags() []Tag {
+	return s.tags
+}
+
+func (s *Span) Logs() []*protogen.Log {
+	return s.logs
+}
+
+func (s *Span) Fork(serviceName, operationName string) Trace {
 	if s.childs > _maxChilds {
 		// if child span more than max childs set return noopspan
 		return noopspan{}
@@ -40,11 +65,11 @@ func (s *span) Fork(serviceName, operationName string) Trace {
 	return s.dapper.newSpanWithContext(operationName, s.context).SetTag(TagString(TagSpanKind, "client"))
 }
 
-func (s *span) Follow(serviceName, operationName string) Trace {
+func (s *Span) Follow(serviceName, operationName string) Trace {
 	return s.Fork(serviceName, operationName).SetTag(TagString(TagSpanKind, "producer"))
 }
 
-func (s *span) Finish(perr *error) {
+func (s *Span) Finish(perr *error) {
 	s.duration = time.Since(s.startTime)
 	if perr != nil && *perr != nil {
 		err := *perr
@@ -57,7 +82,7 @@ func (s *span) Finish(perr *error) {
 	s.dapper.report(s)
 }
 
-func (s *span) SetTag(tags ...Tag) Trace {
+func (s *Span) SetTag(tags ...Tag) Trace {
 	if !s.context.isSampled() && !s.context.isDebug() {
 		return s
 	}
@@ -72,7 +97,7 @@ func (s *span) SetTag(tags ...Tag) Trace {
 
 // LogFields is an efficient and type-checked way to record key:value
 // NOTE current unsupport
-func (s *span) SetLog(logs ...LogField) Trace {
+func (s *Span) SetLog(logs ...LogField) Trace {
 	if !s.context.isSampled() && !s.context.isDebug() {
 		return s
 	}
@@ -85,7 +110,7 @@ func (s *span) SetLog(logs ...LogField) Trace {
 	return s
 }
 
-func (s *span) setLog(logs ...LogField) Trace {
+func (s *Span) setLog(logs ...LogField) Trace {
 	protoLog := &protogen.Log{
 		Timestamp: time.Now().UnixNano(),
 		Fields:    make([]*protogen.Field, len(logs)),
@@ -98,15 +123,15 @@ func (s *span) setLog(logs ...LogField) Trace {
 }
 
 // Visit visits the k-v pair in trace, calling fn for each.
-func (s *span) Visit(fn func(k, v string)) {
+func (s *Span) Visit(fn func(k, v string)) {
 	fn(KratosTraceID, s.context.String())
 }
 
 // SetTitle reset trace title
-func (s *span) SetTitle(operationName string) {
+func (s *Span) SetTitle(operationName string) {
 	s.operationName = operationName
 }
 
-func (s *span) String() string {
+func (s *Span) String() string {
 	return s.context.String()
 }

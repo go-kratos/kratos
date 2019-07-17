@@ -10,10 +10,10 @@ import (
 )
 
 type mockReport struct {
-	sps []*span
+	sps []*Span
 }
 
-func (m *mockReport) WriteSpan(sp *span) error {
+func (m *mockReport) WriteSpan(sp *Span) error {
 	m.sps = append(m.sps, sp)
 	return nil
 }
@@ -25,8 +25,8 @@ func (m *mockReport) Close() error {
 func TestDapperPropagation(t *testing.T) {
 	t.Run("test HTTP progagation", func(t *testing.T) {
 		report := &mockReport{}
-		t1 := newTracer("service1", report, &Config{DisableSample: true})
-		t2 := newTracer("service2", report, &Config{DisableSample: true})
+		t1 := NewTracer("service1", report, true)
+		t2 := NewTracer("service2", report, true)
 		sp1 := t1.New("opt_1")
 		sp2 := sp1.Fork("", "opt_client")
 		header := make(http.Header)
@@ -40,17 +40,17 @@ func TestDapperPropagation(t *testing.T) {
 		sp1.Finish(nil)
 
 		assert.Len(t, report.sps, 3)
-		assert.Equal(t, report.sps[2].context.parentID, uint64(0))
-		assert.Equal(t, report.sps[0].context.traceID, report.sps[1].context.traceID)
-		assert.Equal(t, report.sps[2].context.traceID, report.sps[1].context.traceID)
+		assert.Equal(t, report.sps[2].context.ParentID, uint64(0))
+		assert.Equal(t, report.sps[0].context.TraceID, report.sps[1].context.TraceID)
+		assert.Equal(t, report.sps[2].context.TraceID, report.sps[1].context.TraceID)
 
-		assert.Equal(t, report.sps[1].context.parentID, report.sps[2].context.spanID)
-		assert.Equal(t, report.sps[0].context.parentID, report.sps[1].context.spanID)
+		assert.Equal(t, report.sps[1].context.ParentID, report.sps[2].context.SpanID)
+		assert.Equal(t, report.sps[0].context.ParentID, report.sps[1].context.SpanID)
 	})
 	t.Run("test gRPC progagation", func(t *testing.T) {
 		report := &mockReport{}
-		t1 := newTracer("service1", report, &Config{DisableSample: true})
-		t2 := newTracer("service2", report, &Config{DisableSample: true})
+		t1 := NewTracer("service1", report, true)
+		t2 := NewTracer("service2", report, true)
 		sp1 := t1.New("opt_1")
 		sp2 := sp1.Fork("", "opt_client")
 		md := make(metadata.MD)
@@ -64,23 +64,23 @@ func TestDapperPropagation(t *testing.T) {
 		sp1.Finish(nil)
 
 		assert.Len(t, report.sps, 3)
-		assert.Equal(t, report.sps[2].context.parentID, uint64(0))
-		assert.Equal(t, report.sps[0].context.traceID, report.sps[1].context.traceID)
-		assert.Equal(t, report.sps[2].context.traceID, report.sps[1].context.traceID)
+		assert.Equal(t, report.sps[2].context.ParentID, uint64(0))
+		assert.Equal(t, report.sps[0].context.TraceID, report.sps[1].context.TraceID)
+		assert.Equal(t, report.sps[2].context.TraceID, report.sps[1].context.TraceID)
 
-		assert.Equal(t, report.sps[1].context.parentID, report.sps[2].context.spanID)
-		assert.Equal(t, report.sps[0].context.parentID, report.sps[1].context.spanID)
+		assert.Equal(t, report.sps[1].context.ParentID, report.sps[2].context.SpanID)
+		assert.Equal(t, report.sps[0].context.ParentID, report.sps[1].context.SpanID)
 	})
 	t.Run("test normal", func(t *testing.T) {
 		report := &mockReport{}
-		t1 := newTracer("service1", report, &Config{Probability: 0.000000001})
+		t1 := NewTracer("service1", report, true)
 		sp1 := t1.New("test123")
 		sp1.Finish(nil)
 	})
 	t.Run("test debug progagation", func(t *testing.T) {
 		report := &mockReport{}
-		t1 := newTracer("service1", report, &Config{})
-		t2 := newTracer("service2", report, &Config{})
+		t1 := NewTracer("service1", report, true)
+		t2 := NewTracer("service2", report, true)
 		sp1 := t1.New("opt_1", EnableDebug())
 		sp2 := sp1.Fork("", "opt_client")
 		header := make(http.Header)
@@ -94,19 +94,19 @@ func TestDapperPropagation(t *testing.T) {
 		sp1.Finish(nil)
 
 		assert.Len(t, report.sps, 3)
-		assert.Equal(t, report.sps[2].context.parentID, uint64(0))
-		assert.Equal(t, report.sps[0].context.traceID, report.sps[1].context.traceID)
-		assert.Equal(t, report.sps[2].context.traceID, report.sps[1].context.traceID)
+		assert.Equal(t, report.sps[2].context.ParentID, uint64(0))
+		assert.Equal(t, report.sps[0].context.TraceID, report.sps[1].context.TraceID)
+		assert.Equal(t, report.sps[2].context.TraceID, report.sps[1].context.TraceID)
 
-		assert.Equal(t, report.sps[1].context.parentID, report.sps[2].context.spanID)
-		assert.Equal(t, report.sps[0].context.parentID, report.sps[1].context.spanID)
+		assert.Equal(t, report.sps[1].context.ParentID, report.sps[2].context.SpanID)
+		assert.Equal(t, report.sps[0].context.ParentID, report.sps[1].context.SpanID)
 	})
 }
 
 func BenchmarkSample(b *testing.B) {
 	err := fmt.Errorf("test error")
 	report := &mockReport{}
-	t1 := newTracer("service1", report, &Config{})
+	t1 := NewTracer("service1", report, true)
 	for i := 0; i < b.N; i++ {
 		sp1 := t1.New("test_opt1")
 		sp1.SetTag(TagString("test", "123"))
@@ -122,7 +122,7 @@ func BenchmarkSample(b *testing.B) {
 func BenchmarkDisableSample(b *testing.B) {
 	err := fmt.Errorf("test error")
 	report := &mockReport{}
-	t1 := newTracer("service1", report, &Config{DisableSample: true})
+	t1 := NewTracer("service1", report, true)
 	for i := 0; i < b.N; i++ {
 		sp1 := t1.New("test_opt1")
 		sp1.SetTag(TagString("test", "123"))

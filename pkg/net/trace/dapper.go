@@ -8,21 +8,21 @@ import (
 )
 
 const (
-	_maxLevel    = 64
+	_maxLevel = 64
+	// hard code reset probability at 0.00025, 1/4000
 	_probability = 0.00025
 )
 
-func newTracer(serviceName string, report reporter, cfg *Config) Tracer {
-	// hard code reset probability at 0.00025, 1/4000
-	cfg.Probability = _probability
-	sampler := newSampler(cfg.Probability)
+// NewTracer new a tracer.
+func NewTracer(serviceName string, report reporter, disableSample bool) Tracer {
+	sampler := newSampler(_probability)
 
 	// default internal tags
 	tags := extendTag()
 	stdlog := log.New(os.Stderr, "trace", log.LstdFlags)
 	return &dapper{
-		cfg:         cfg,
-		serviceName: serviceName,
+		serviceName:   serviceName,
+		disableSample: disableSample,
 		propagators: map[interface{}]propagator{
 			HTTPFormat: httpPropagator{},
 			GRPCFormat: grpcPropagator{},
@@ -30,20 +30,20 @@ func newTracer(serviceName string, report reporter, cfg *Config) Tracer {
 		reporter: report,
 		sampler:  sampler,
 		tags:     tags,
-		pool:     &sync.Pool{New: func() interface{} { return new(span) }},
+		pool:     &sync.Pool{New: func() interface{} { return new(Span) }},
 		stdlog:   stdlog,
 	}
 }
 
 type dapper struct {
-	cfg         *Config
-	serviceName string
-	tags        []Tag
-	reporter    reporter
-	propagators map[interface{}]propagator
-	pool        *sync.Pool
-	stdlog      *log.Logger
-	sampler     sampler
+	serviceName   string
+	disableSample bool
+	tags          []Tag
+	reporter      reporter
+	propagators   map[interface{}]propagator
+	pool          *sync.Pool
+	stdlog        *log.Logger
+	sampler       sampler
 }
 
 func (d *dapper) New(operationName string, opts ...Option) Trace {
@@ -54,19 +54,19 @@ func (d *dapper) New(operationName string, opts ...Option) Trace {
 	traceID := genID()
 	var sampled bool
 	var probability float32
-	if d.cfg.DisableSample {
+	if d.disableSample {
 		sampled = true
 		probability = 1
 	} else {
 		sampled, probability = d.sampler.IsSampled(traceID, operationName)
 	}
-	pctx := spanContext{traceID: traceID}
+	pctx := spanContext{TraceID: traceID}
 	if sampled {
-		pctx.flags = flagSampled
-		pctx.probability = probability
+		pctx.Flags = flagSampled
+		pctx.Probability = probability
 	}
 	if opt.Debug {
-		pctx.flags |= flagDebug
+		pctx.Flags |= flagDebug
 		return d.newSpanWithContext(operationName, pctx).SetTag(TagString(TagSpanKind, "server")).SetTag(TagBool("debug", true))
 	}
 	// 为了兼容临时为 New 的 Span 设置 span.kind
@@ -80,21 +80,21 @@ func (d *dapper) newSpanWithContext(operationName string, pctx spanContext) Trac
 	//	sp.context = pctx
 	//	return sp
 	//}
-	if pctx.level > _maxLevel {
+	if pctx.Level > _maxLevel {
 		// if span reach max limit level return noopspan
 		return noopspan{}
 	}
-	level := pctx.level + 1
+	level := pctx.Level + 1
 	nctx := spanContext{
-		traceID:  pctx.traceID,
-		parentID: pctx.spanID,
-		flags:    pctx.flags,
-		level:    level,
+		TraceID:  pctx.TraceID,
+		ParentID: pctx.SpanID,
+		Flags:    pctx.Flags,
+		Level:    level,
 	}
-	if pctx.spanID == 0 {
-		nctx.spanID = pctx.traceID
+	if pctx.SpanID == 0 {
+		nctx.SpanID = pctx.TraceID
 	} else {
-		nctx.spanID = genID()
+		nctx.SpanID = genID()
 	}
 	sp.operationName = operationName
 	sp.context = nctx
@@ -160,7 +160,7 @@ func (d *dapper) Close() error {
 	return d.reporter.Close()
 }
 
-func (d *dapper) report(sp *span) {
+func (d *dapper) report(sp *Span) {
 	if sp.context.isSampled() {
 		if err := d.reporter.WriteSpan(sp); err != nil {
 			d.stdlog.Printf("marshal trace span error: %s", err)
@@ -169,7 +169,7 @@ func (d *dapper) report(sp *span) {
 	d.putSpan(sp)
 }
 
-func (d *dapper) putSpan(sp *span) {
+func (d *dapper) putSpan(sp *Span) {
 	if len(sp.tags) > 32 {
 		sp.tags = nil
 	}
@@ -179,8 +179,8 @@ func (d *dapper) putSpan(sp *span) {
 	d.pool.Put(sp)
 }
 
-func (d *dapper) getSpan() *span {
-	sp := d.pool.Get().(*span)
+func (d *dapper) getSpan() *Span {
+	sp := d.pool.Get().(*Span)
 	sp.dapper = d
 	sp.childs = 0
 	sp.tags = sp.tags[:0]

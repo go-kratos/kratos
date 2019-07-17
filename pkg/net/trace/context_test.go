@@ -6,10 +6,10 @@ import (
 
 func TestSpanContext(t *testing.T) {
 	pctx := &spanContext{
-		parentID: genID(),
-		spanID:   genID(),
-		traceID:  genID(),
-		flags:    flagSampled,
+		ParentID: genID(),
+		SpanID:   genID(),
+		TraceID:  genID(),
+		Flags:    flagSampled,
 	}
 	if !pctx.isSampled() {
 		t.Error("expect sampled")
@@ -20,7 +20,7 @@ func TestSpanContext(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if pctx2.parentID != pctx.parentID || pctx2.spanID != pctx.spanID || pctx2.traceID != pctx.traceID || pctx2.flags != pctx.flags {
+	if pctx2.ParentID != pctx.ParentID || pctx2.SpanID != pctx.SpanID || pctx2.TraceID != pctx.TraceID || pctx2.Flags != pctx.Flags {
 		t.Errorf("wrong spancontext get %+v -> %+v", pctx, pctx2)
 	}
 }

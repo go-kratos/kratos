@@ -12,16 +12,16 @@ import (
 
 func TestSpan(t *testing.T) {
 	report := &mockReport{}
-	t1 := newTracer("service1", report, &Config{DisableSample: true})
+	t1 := NewTracer("service1", report, true)
 	t.Run("test span string", func(t *testing.T) {
-		sp1 := t1.New("testfinish").(*span)
+		sp1 := t1.New("testfinish").(*Span)
 		assert.NotEmpty(t, fmt.Sprint(sp1))
 	})
 	t.Run("test fork", func(t *testing.T) {
-		sp1 := t1.New("testfork").(*span)
-		sp2 := sp1.Fork("xxx", "opt_2").(*span)
-		assert.Equal(t, sp1.context.traceID, sp2.context.traceID)
-		assert.Equal(t, sp1.context.spanID, sp2.context.parentID)
+		sp1 := t1.New("testfork").(*Span)
+		sp2 := sp1.Fork("xxx", "opt_2").(*Span)
+		assert.Equal(t, sp1.context.TraceID, sp2.context.TraceID)
+		assert.Equal(t, sp1.context.SpanID, sp2.context.ParentID)
 		t.Run("test max fork", func(t *testing.T) {
 			sp3 := sp2.Fork("xx", "xxx")
 			for i := 0; i < 100; i++ {
@@ -39,14 +39,14 @@ func TestSpan(t *testing.T) {
 	})
 	t.Run("test finish", func(t *testing.T) {
 		t.Run("test finish ok", func(t *testing.T) {
-			sp1 := t1.New("testfinish").(*span)
+			sp1 := t1.New("testfinish").(*Span)
 			time.Sleep(time.Millisecond)
 			sp1.Finish(nil)
 			assert.True(t, sp1.startTime.Unix() > 0)
 			assert.True(t, sp1.duration > time.Microsecond)
 		})
 		t.Run("test finish error", func(t *testing.T) {
-			sp1 := t1.New("testfinish").(*span)
+			sp1 := t1.New("testfinish").(*Span)
 			time.Sleep(time.Millisecond)
 			err := fmt.Errorf("🍻")
 			sp1.Finish(&err)
@@ -71,7 +71,7 @@ func TestSpan(t *testing.T) {
 			assert.True(t, messageLog)
 		})
 		t.Run("test finish error stack", func(t *testing.T) {
-			sp1 := t1.New("testfinish").(*span)
+			sp1 := t1.New("testfinish").(*Span)
 			time.Sleep(time.Millisecond)
 			err := fmt.Errorf("🍻")
 			err = errors.WithStack(err)
@@ -87,7 +87,7 @@ func TestSpan(t *testing.T) {
 			assert.True(t, ok, "LogStack set")
 		})
 		t.Run("test too many tags", func(t *testing.T) {
-			sp1 := t1.New("testfinish").(*span)
+			sp1 := t1.New("testfinish").(*Span)
 			for i := 0; i < 1024; i++ {
 				sp1.SetTag(Tag{Key: strconv.Itoa(i), Value: "hello"})
 			}
@@ -96,7 +96,7 @@ func TestSpan(t *testing.T) {
 			assert.Equal(t, sp1.tags[_maxTags].Value, "too many tags")
 		})
 		t.Run("test too many logs", func(t *testing.T) {
-			sp1 := t1.New("testfinish").(*span)
+			sp1 := t1.New("testfinish").(*Span)
 			for i := 0; i < 1024; i++ {
 				sp1.SetLog(LogField{Key: strconv.Itoa(i), Value: "hello"})
 			}
