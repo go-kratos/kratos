@@ -99,11 +99,6 @@ func (group *RouterGroup) Handle(httpMethod, relativePath string, handlers ...Ha
 	return group.handle(httpMethod, relativePath, handlers...)
 }
 
-// HEAD is a shortcut for router.Handle("HEAD", path, handle).
-func (group *RouterGroup) HEAD(relativePath string, handlers ...HandlerFunc) IRoutes {
-	return group.handle("HEAD", relativePath, handlers...)
-}
-
 // GET is a shortcut for router.Handle("GET", path, handle).
 func (group *RouterGroup) GET(relativePath string, handlers ...HandlerFunc) IRoutes {
 	return group.handle("GET", relativePath, handlers...)
@@ -123,6 +118,22 @@ func (group *RouterGroup) PUT(relativePath string, handlers ...HandlerFunc) IRou
 func (group *RouterGroup) DELETE(relativePath string, handlers ...HandlerFunc) IRoutes {
 	return group.handle("DELETE", relativePath, handlers...)
 }
+
+// PATCH is a shortcut for router.Handle("PATCH", path, handle).
+func (group *RouterGroup) PATCH(relativePath string, handlers ...HandlerFunc) IRoutes {
+	return group.handle("PATCH", relativePath, handlers...)
+}
+
+// OPTIONS is a shortcut for router.Handle("OPTIONS", path, handle).
+func (group *RouterGroup) OPTIONS(relativePath string, handlers ...HandlerFunc) IRoutes {
+	return group.handle("OPTIONS", relativePath, handlers...)
+}
+
+// HEAD is a shortcut for router.Handle("HEAD", path, handle).
+func (group *RouterGroup) HEAD(relativePath string, handlers ...HandlerFunc) IRoutes {
+	return group.handle("HEAD", relativePath, handlers...)
+}
+
 
 func (group *RouterGroup) combineHandlers(handlerGroups ...[]HandlerFunc) []HandlerFunc {
 	finalSize := len(group.Handlers)
@@ -164,3 +175,19 @@ func (group *RouterGroup) injections(relativePath string) []HandlerFunc {
 	}
 	return nil
 }
+
+// Any registers a route that matches all the HTTP methods.
+// GET, POST, PUT, PATCH, HEAD, OPTIONS, DELETE, CONNECT, TRACE.
+func (group *RouterGroup) Any(relativePath string, handlers ...HandlerFunc) IRoutes {
+	group.handle("GET", relativePath, handlers...)
+	group.handle("POST", relativePath, handlers...)
+	group.handle("PUT", relativePath, handlers...)
+	group.handle("PATCH", relativePath, handlers...)
+	group.handle("HEAD", relativePath, handlers...)
+	group.handle("OPTIONS", relativePath, handlers...)
+	group.handle("DELETE", relativePath, handlers...)
+	group.handle("CONNECT", relativePath, handlers...)
+	group.handle("TRACE", relativePath, handlers...)
+	return group.returnObj()
+}
+

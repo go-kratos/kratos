@@ -45,6 +45,11 @@ type Context struct {
 
 	method string
 	engine *Engine
+
+	RoutePath string
+
+	Params Params
+
 }
 
 /************************************/
@@ -56,20 +61,12 @@ type Context struct {
 // See example in godoc.
 func (c *Context) Next() {
 	c.index++
-	s := int8(len(c.handlers))
-	for ; c.index < s; c.index++ {
-		// only check method on last handler, otherwise middlewares
-		// will never be effected if request method is not matched
-		if c.index == s-1 && c.method != c.Request.Method {
-			code := http.StatusMethodNotAllowed
-			c.Error = ecode.MethodNotAllowed
-			http.Error(c.Writer, http.StatusText(code), code)
-			return
-		}
-
+	for c.index < int8(len(c.handlers)) {
 		c.handlers[c.index](c)
+		c.index++
 	}
 }
+
 
 // Abort prevents pending handlers from being called. Note that this will not stop the current handler.
 // Let's say you have an authorization middleware that validates that the current request is authorized.
