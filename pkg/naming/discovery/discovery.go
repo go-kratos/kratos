@@ -609,6 +609,10 @@ func (d *Discovery) polls(ctx context.Context) (apps map[string]*naming.Instance
 func (d *Discovery) broadcast(apps map[string]*naming.InstancesInfo) {
 	for appID, v := range apps {
 		var count int
+		// v maybe nil in old version(less than v1.1) discovery,check incase of panic
+		if v==nil {
+			continue
+		}
 		for zone, ins := range v.Instances {
 			if len(ins) == 0 {
 				delete(v.Instances, zone)
