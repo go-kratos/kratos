@@ -85,6 +85,5 @@ func TestNew(t *testing.T) {
 	fmt.Println("取消app2")
 	app2Cancel()
 
-	wait := make(chan int, 0)
-	wait <- 1
+	time.Sleep(30*time.Second)
 }
