@@ -5,20 +5,22 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/bilibili/kratos/pkg/log"
 	"github.com/bilibili/kratos/pkg/naming"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/mvcc/mvccpb"
 )
+
 const (
 	Prefix = "kratos_etcd3"
 
 	RegisterTTL = 30
 )
+
 var (
 	_once    sync.Once
 	_builder naming.Builder
@@ -33,47 +35,48 @@ func Builder(c *clientv3.Config) naming.Builder {
 	})
 	return _builder
 }
+
 // Build register resolver into default etcd.
-func Build(c *clientv3.Config,id string) naming.Resolver {
+func Build(c *clientv3.Config, id string) naming.Resolver {
 	return Builder(c).Build(id)
 }
+
 //Etcd is a etcd clientv3 builder
 type EtcdBuilder struct {
-	cli *clientv3.Client
+	cli        *clientv3.Client
 	ctx        context.Context
 	cancelFunc context.CancelFunc
 
-	mutex       sync.RWMutex
-	apps        map[string]*appInfo
-	registry    map[string]struct{}
+	mutex    sync.RWMutex
+	apps     map[string]*appInfo
+	registry map[string]struct{}
 }
 type appInfo struct {
 	resolver map[*Resolve]struct{}
-	ins  atomic.Value
-	e     *EtcdBuilder
-	once       sync.Once
+	ins      atomic.Value
+	e        *EtcdBuilder
+	once     sync.Once
 }
+
 // Resolve etch resolver.
 type Resolve struct {
 	id    string
 	event chan struct{}
 	e     *EtcdBuilder
-
 }
 
-func New(c *clientv3.Config) (e *EtcdBuilder){
-	cli,err := clientv3.New(*c)
-	if(err != nil){
+func New(c *clientv3.Config) (e *EtcdBuilder) {
+	cli, err := clientv3.New(*c)
+	if err != nil {
 		panic(err)
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	e = &EtcdBuilder{
-		cli: cli,
+		cli:        cli,
 		ctx:        ctx,
 		cancelFunc: cancel,
 		apps:       map[string]*appInfo{},
 		registry:   map[string]struct{}{},
-		delete:     make(chan *appInfo, 10),
 	}
 	return
 }
@@ -90,7 +93,7 @@ func (e *EtcdBuilder) Build(appid string) naming.Resolver {
 	if !ok {
 		app = &appInfo{
 			resolver: make(map[*Resolve]struct{}),
-			e:e,
+			e:        e,
 		}
 		e.apps[appid] = app
 	}
@@ -103,7 +106,7 @@ func (e *EtcdBuilder) Build(appid string) naming.Resolver {
 		}
 	}
 
-	app.once.Do(func(){
+	app.once.Do(func() {
 		go app.watch(appid)
 		log.Info("etcd: AddWatch(%s) already watch(%v)", appid, ok)
 	})
@@ -145,7 +148,7 @@ func (e *EtcdBuilder) Register(ctx context.Context, ins *naming.Instance) (cance
 
 	go func() {
 		//提前2秒续约 避免续约操作缓慢时租约过期
-		ticker := time.NewTicker((RegisterTTL-2)*time.Second)
+		ticker := time.NewTicker((RegisterTTL - 2) * time.Second)
 		defer ticker.Stop()
 		for {
 			select {
@@ -160,28 +163,29 @@ func (e *EtcdBuilder) Register(ctx context.Context, ins *naming.Instance) (cance
 	}()
 	return
 }
+
 //注册和续约公用一个操作
-func (e *EtcdBuilder)register(ctx context.Context, ins *naming.Instance) (err error){
+func (e *EtcdBuilder) register(ctx context.Context, ins *naming.Instance) (err error) {
 	prefix := e.getprefix(ins)
-	val ,_ := json.Marshal(ins)
+	val, _ := json.Marshal(ins)
 
 	ttlResp, err := e.cli.Grant(context.TODO(), int64(RegisterTTL))
-	if(err != nil){
-		log.Error("etcd: register client.Grant(%v) error(%v)",RegisterTTL,err)
+	if err != nil {
+		log.Error("etcd: register client.Grant(%v) error(%v)", RegisterTTL, err)
 		return err
 	}
-	_,err = e.cli.Put(ctx,prefix,string(val),clientv3.WithLease(ttlResp.ID))
-	if(err != nil){
+	_, err = e.cli.Put(ctx, prefix, string(val), clientv3.WithLease(ttlResp.ID))
+	if err != nil {
 		log.Error("etcd: register client.Put(%v) appid(%s) hostname(%s) error(%v)",
-			prefix,ins.AppID,ins.Hostname, err)
+			prefix, ins.AppID, ins.Hostname, err)
 		return err
 	}
 	return nil
 }
-func (e *EtcdBuilder)unregister(ins *naming.Instance) (err error){
+func (e *EtcdBuilder) unregister(ins *naming.Instance) (err error) {
 	prefix := e.getprefix(ins)
 
-	if _,err = e.cli.Delete(context.TODO(),prefix); err != nil{
+	if _, err = e.cli.Delete(context.TODO(), prefix); err != nil {
 		log.Error("etcd: unregister client.Delete(%v) appid(%s) hostname(%s) error(%v)",
 			prefix, ins.AppID, ins.Hostname, err)
 	}
@@ -190,72 +194,72 @@ func (e *EtcdBuilder)unregister(ins *naming.Instance) (err error){
 	return
 }
 
-
-func (e *EtcdBuilder)getprefix(ins *naming.Instance) string{
-	return fmt.Sprintf("/%s/%s/%s", Prefix, ins.AppID,ins.Hostname)
+func (e *EtcdBuilder) getprefix(ins *naming.Instance) string {
+	return fmt.Sprintf("/%s/%s/%s", Prefix, ins.AppID, ins.Hostname)
 }
+
 // Close stop all running process including etcdfetch and register
 func (e *EtcdBuilder) Close() error {
 	e.cancelFunc()
 	return nil
 }
-func (a *appInfo)watch(appID string){
+func (a *appInfo) watch(appID string) {
 	_ = a.fetchstore(appID)
-	prefix := fmt.Sprintf("/%s/%s/",Prefix,appID)
+	prefix := fmt.Sprintf("/%s/%s/", Prefix, appID)
 	rch := a.e.cli.Watch(a.e.ctx, prefix, clientv3.WithPrefix())
 	for wresp := range rch {
 		for _, ev := range wresp.Events {
-			if(ev.Type == mvccpb.PUT || ev.Type == mvccpb.DELETE){
+			if ev.Type == mvccpb.PUT || ev.Type == mvccpb.DELETE {
 				_ = a.fetchstore(appID)
 			}
 		}
 	}
 }
 
-func (a *appInfo)fetchstore(appID string)(err error){
+func (a *appInfo) fetchstore(appID string) (err error) {
 	prefix := fmt.Sprintf("/%s/%s/", Prefix, appID)
-	resp ,err := a.e.cli.Get(a.e.ctx,prefix,clientv3.WithPrefix())
-	if(err != nil){
+	resp, err := a.e.cli.Get(a.e.ctx, prefix, clientv3.WithPrefix())
+	if err != nil {
 		log.Error("etcd: fetch client.Get(%s) error(%+v)", prefix, err)
 		return err
 	}
 
-	ins,err := a.paserIns(resp)
-	if(err != nil){
+	ins, err := a.paserIns(resp)
+	if err != nil {
 		return err
 	}
 	a.store(ins)
 	return nil
 }
-func (a *appInfo)store(ins *naming.InstancesInfo){
+func (a *appInfo) store(ins *naming.InstancesInfo) {
 
-		a.ins.Store(ins)
-		a.e.mutex.RLock()
-		for rs := range a.resolver {
-			select {
-			case rs.event <- struct{}{}:
-			default:
-			}
+	a.ins.Store(ins)
+	a.e.mutex.RLock()
+	for rs := range a.resolver {
+		select {
+		case rs.event <- struct{}{}:
+		default:
 		}
-		a.e.mutex.RUnlock()
+	}
+	a.e.mutex.RUnlock()
 }
 
-
-func (a *appInfo)paserIns(resp *clientv3.GetResponse)(ins *naming.InstancesInfo,err error){
+func (a *appInfo) paserIns(resp *clientv3.GetResponse) (ins *naming.InstancesInfo, err error) {
 	ins = &naming.InstancesInfo{
-		Instances:make(map[string][]*naming.Instance,0),
+		Instances: make(map[string][]*naming.Instance, 0),
 	}
 	for _, ev := range resp.Kvs {
 		in := new(naming.Instance)
 
-		err := json.Unmarshal(ev.Value,in)
-		if(err != nil){
-			return nil,err
+		err := json.Unmarshal(ev.Value, in)
+		if err != nil {
+			return nil, err
 		}
-		ins.Instances[in.Zone] = append(ins.Instances[in.Zone],in)
+		ins.Instances[in.Zone] = append(ins.Instances[in.Zone], in)
 	}
-	return ins,nil
+	return ins, nil
 }
+
 // Watch watch instance.
 func (r *Resolve) Watch() <-chan struct{} {
 	return r.event

@@ -12,7 +12,7 @@ import (
 func TestNew(t *testing.T) {
 
 	config := &clientv3.Config{
-		Endpoints:[]string{"127.0.0.1:2379",},
+		Endpoints: []string{"127.0.0.1:2379"},
 	}
 
 	builder := New(config)
@@ -20,57 +20,56 @@ func TestNew(t *testing.T) {
 
 	go func() {
 		fmt.Printf("Watch \n")
-		for{
-			select{
-			case <- app1.Watch():
+		for {
+			select {
+			case <-app1.Watch():
 				fmt.Printf("app1 节点发生变化 \n")
-		}
+			}
 
 		}
 
 	}()
 
-
 	time.Sleep(time.Second)
 
-	app1Cancel,err := builder.Register(context.Background(),&naming.Instance{
-		AppID:"app1",
-		Hostname:"h1",
-		Zone:"z1",
+	app1Cancel, err := builder.Register(context.Background(), &naming.Instance{
+		AppID:    "app1",
+		Hostname: "h1",
+		Zone:     "z1",
 	})
 
-	app2Cancel,err := builder.Register(context.Background(),&naming.Instance{
-		AppID:"app2",
-		Hostname:"h5",
-		Zone:"z3",
+	app2Cancel, err := builder.Register(context.Background(), &naming.Instance{
+		AppID:    "app2",
+		Hostname: "h5",
+		Zone:     "z3",
 	})
 
-	if(err != nil){
+	if err != nil {
 		fmt.Println(err)
 	}
 
 	app2 := builder.Build("app2")
 
-	go func(){
+	go func() {
 		fmt.Println("节点列表")
 		for {
 			fmt.Printf("app1: ")
-			r1,_ := app1.Fetch(context.Background())
-			if(r1 != nil){
-				for z,ins := range r1.Instances{
-					fmt.Printf("zone: %s :",z)
-					for _,in := range ins{
-						fmt.Printf("app: %s host %s \n",in.AppID,in.Hostname)
+			r1, _ := app1.Fetch(context.Background())
+			if r1 != nil {
+				for z, ins := range r1.Instances {
+					fmt.Printf("zone: %s :", z)
+					for _, in := range ins {
+						fmt.Printf("app: %s host %s \n", in.AppID, in.Hostname)
 					}
 				}
 			}
 			fmt.Printf("app2: ")
-			r2,_ := app2.Fetch(context.Background())
-			if(r2 != nil){
-				for z,ins := range r2.Instances{
-					fmt.Printf("zone: %s :",z)
-					for _,in := range ins{
-						fmt.Printf("app: %s host %s \n",in.AppID,in.Hostname)
+			r2, _ := app2.Fetch(context.Background())
+			if r2 != nil {
+				for z, ins := range r2.Instances {
+					fmt.Printf("zone: %s :", z)
+					for _, in := range ins {
+						fmt.Printf("app: %s host %s \n", in.AppID, in.Hostname)
 					}
 				}
 			}
@@ -78,16 +77,14 @@ func TestNew(t *testing.T) {
 		}
 	}()
 
-	time.Sleep(time.Second*5)
+	time.Sleep(time.Second * 5)
 	fmt.Println("取消app1")
 	app1Cancel()
 
-	time.Sleep(time.Second*10)
+	time.Sleep(time.Second * 10)
 	fmt.Println("取消app2")
 	app2Cancel()
 
-
-
-	wait := make(chan int,0)
+	wait := make(chan int, 0)
 	wait <- 1
 }
