@@ -16,6 +16,7 @@ import (
 )
 
 const (
+	//Prefix is a etcd globe key prefix
 	Prefix = "kratos_etcd3"
 
 	RegisterTTL = 30
@@ -24,7 +25,7 @@ const (
 var (
 	_once    sync.Once
 	_builder naming.Builder
-
+	//ErrDuplication is a register duplication err
 	ErrDuplication = errors.New("etcd: instance duplicate registration")
 )
 
@@ -41,7 +42,7 @@ func Build(c *clientv3.Config, id string) naming.Resolver {
 	return Builder(c).Build(id)
 }
 
-//Etcd is a etcd clientv3 builder
+//EtcdBuilder is a etcd clientv3 EtcdBuilder
 type EtcdBuilder struct {
 	cli        *clientv3.Client
 	ctx        context.Context
@@ -64,7 +65,7 @@ type Resolve struct {
 	event chan struct{}
 	e     *EtcdBuilder
 }
-
+//New is new a etcdbuilder
 func New(c *clientv3.Config) (e *EtcdBuilder) {
 	cli, err := clientv3.New(*c)
 	if err != nil {
@@ -119,7 +120,7 @@ func (e *EtcdBuilder) Scheme() string {
 
 }
 
-//
+//Register is register instance
 func (e *EtcdBuilder) Register(ctx context.Context, ins *naming.Instance) (cancelFunc context.CancelFunc, err error) {
 	e.mutex.Lock()
 	if _, ok := e.registry[ins.AppID]; ok {
