@@ -177,15 +177,15 @@ func NewServer(conf *ServerConfig) *Engine {
 			basePath: "/",
 			root:     true,
 		},
-		conf: &ServerConfig{
-			Timeout: xtime.Duration(time.Second),
-		},
 		address:                ip.InternalIP(),
 		trees:                  make(methodTrees, 0, 9),
 		metastore:              make(map[string]map[string]interface{}),
 		methodConfigs:          make(map[string]*MethodConfig),
 		HandleMethodNotAllowed: true,
 		injections:             make([]injection, 0),
+	}
+	if err := engine.SetConfig(conf); err != nil {
+		panic(err)
 	}
 	engine.RouterGroup.engine = engine
 	// NOTE add prometheus monitor location
