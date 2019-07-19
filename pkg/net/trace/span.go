@@ -27,7 +27,11 @@ type Span struct {
 	childs        int
 }
 
-func (s *Span) Name() string {
+func (s *Span) ServiceName() string {
+	return s.dapper.serviceName
+}
+
+func (s *Span) OperationName() string {
 	return s.operationName
 }
 
