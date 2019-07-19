@@ -192,8 +192,58 @@ if err != nil {
 // 特别注意！！！
 // cancel必须在进程退出时执行！！！
 cancel()
-
 ```
+
+
+
+# 使用ETCD
+
+和使用discovery类似,只需要在注册时使用etcd naming即可。
+
+```go
+package dao
+
+import (
+	"context"
+
+	"github.com/bilibili/kratos/pkg/naming/etcd"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver"
+
+	"google.golang.org/grpc"
+)
+
+// AppID your appid, ensure unique.
+const AppID = "demo.service" // NOTE: example
+
+func init(){
+	// NOTE: 注意这段代码，表示要使用etcd进行服务发现 ,其他事项参考discovery的说明
+    // NOTE: 在启动应用时，可以通过flag(-etcd.endpoints) 或者 环境配置(ETCD_ENDPOINTS)指定etcd节点
+	resolver.Register(etcd.Builder(nil))
+}
+
+// NewClient new member grpc client
+func NewClient(cfg *warden.ClientConfig, opts ...grpc.DialOption) (DemoClient, error) {
+	client := warden.NewClient(cfg, opts...)
+  	// 这里使用etcd scheme
+	conn, err := client.Dial(context.Background(), "etcd://default/"+AppID)
+	if err != nil {
+		return nil, err
+	}
+	// 注意替换这里：
+	// NewDemoClient方法是在"api"目录下代码生成的
+	// 对应proto文件内自定义的service名字，请使用正确方法名替换
+	return NewDemoClient(conn), nil
+}
+```
+
+etcd的服务注册与discovery基本相同,可以传入详细的etcd配置项, 或者传入nil后通过flag(-etcd.endpoints)/环境配置(ETCD_ENDPOINTS)来指定etcd节点。
+
+### 其他配置项
+
+etcd默认的全局keyPrefix为kratos_etcd,当该keyPrefix与项目中其他keyPrefix冲突时可以通过flag(-etcd.prefix)或者环境配置(ETCD_PREFIX)来指定keyPrefix。
+
+
 
 # 扩展阅读
 
