@@ -304,7 +304,7 @@ func (s *Server) Start() (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Info("start grpc listen addr: %v", lis.Addr())
+	log.Info("warden: start grpc listen addr: %v", lis.Addr())
 	reflection.Register(s.server)
 	go func() {
 		if err := s.Serve(lis); err != nil {
