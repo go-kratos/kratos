@@ -12,12 +12,12 @@ import (
 func TestNew(t *testing.T) {
 
 	config := &clientv3.Config{
-		Endpoints: []string{"127.0.0.1:2379"},
-		DialTimeout:time.Second*3,
+		Endpoints:   []string{"127.0.0.1:2379"},
+		DialTimeout: time.Second * 3,
 	}
-	builder,err := New(config)
+	builder, err := New(config)
 
-	if(err != nil){
+	if err != nil {
 		fmt.Println("etcd 连接失败")
 		return
 	}
@@ -67,7 +67,7 @@ func TestNew(t *testing.T) {
 						fmt.Printf("app: %s host %s \n", in.AppID, in.Hostname)
 					}
 				}
-			}else{
+			} else {
 				fmt.Printf("\n")
 			}
 			fmt.Printf("app2: ")
@@ -79,7 +79,7 @@ func TestNew(t *testing.T) {
 						fmt.Printf("app: %s host %s \n", in.AppID, in.Hostname)
 					}
 				}
-			}else{
+			} else {
 				fmt.Printf("\n")
 			}
 			time.Sleep(time.Second)
@@ -94,5 +94,5 @@ func TestNew(t *testing.T) {
 	fmt.Println("取消app2")
 	app2Cancel()
 
-	time.Sleep(30*time.Second)
+	time.Sleep(30 * time.Second)
 }
