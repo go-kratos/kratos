@@ -53,9 +53,7 @@ func TestNew(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	fmt.Println(1111)
 	app2 := builder.Build("app2")
-	fmt.Println(1111)
 
 	go func() {
 		fmt.Println("节点列表")
@@ -69,6 +67,8 @@ func TestNew(t *testing.T) {
 						fmt.Printf("app: %s host %s \n", in.AppID, in.Hostname)
 					}
 				}
+			}else{
+				fmt.Println("\n")
 			}
 			fmt.Printf("app2: ")
 			r2, _ := app2.Fetch(context.Background())
@@ -79,12 +79,13 @@ func TestNew(t *testing.T) {
 						fmt.Printf("app: %s host %s \n", in.AppID, in.Hostname)
 					}
 				}
+			}else{
+				fmt.Printf("\n")
 			}
 			time.Sleep(time.Second)
 		}
 	}()
 
-	fmt.Println(1111)
 	time.Sleep(time.Second * 5)
 	fmt.Println("取消app1")
 	app1Cancel()
@@ -93,6 +94,5 @@ func TestNew(t *testing.T) {
 	fmt.Println("取消app2")
 	app2Cancel()
 
-	fmt.Println(1111)
 	time.Sleep(30*time.Second)
 }
