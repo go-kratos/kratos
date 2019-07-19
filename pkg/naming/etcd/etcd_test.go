@@ -68,7 +68,7 @@ func TestNew(t *testing.T) {
 					}
 				}
 			}else{
-				fmt.Println("\n")
+				fmt.Printf("\n")
 			}
 			fmt.Printf("app2: ")
 			r2, _ := app2.Fetch(context.Background())
