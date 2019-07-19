@@ -42,7 +42,6 @@ func TestNew(t *testing.T) {
 		Zone:     "z1",
 	})
 
-	fmt.Println(2222)
 	app2Cancel, err := builder.Register(context.Background(), &naming.Instance{
 		AppID:    "app2",
 		Hostname: "h5",
