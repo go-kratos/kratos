@@ -28,7 +28,7 @@ type Span struct {
 }
 
 func (s *Span) ServiceName() string {
-	return s.operationName
+	return s.dapper.serviceName
 }
 
 func (s *Span) OperationName() string {
