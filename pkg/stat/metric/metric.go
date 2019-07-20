@@ -48,7 +48,7 @@ const (
 )
 
 var (
-	_defaultBuckets = []float64{5, 10, 25, 50, 100, 250, 500},
+	_defaultBuckets = []float64{5, 10, 25, 50, 100, 250, 500}
 )
 
 // NewBusinessMetricCount business Metric count vec.
