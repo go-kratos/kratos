@@ -37,12 +37,12 @@ func codeFromErr(err error) string {
 	switch err {
 	case gohbase.ErrClientClosed:
 		code = "client_closed"
-	case gohbase.ErrConnotFindRegion:
+	case gohbase.ErrCannotFindRegion:
 		code = "connot_find_region"
 	case gohbase.TableNotFound:
 		code = "table_not_found"
-	case gohbase.ErrRegionUnavailable:
-		code = "region_unavailable"
+	//case gohbase.ErrRegionUnavailable:
+	//	code = "region_unavailable"
 	}
 	return code
 }
