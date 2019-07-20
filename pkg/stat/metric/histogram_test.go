@@ -6,47 +6,34 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGaugeAdd(t *testing.T) {
-	gauge := NewGauge(GaugeOpts{})
-	gauge.Add(100)
-	gauge.Add(-50)
-	val := gauge.Value()
-	assert.Equal(t, val, int64(50))
-}
-
-func TestGaugeSet(t *testing.T) {
-	gauge := NewGauge(GaugeOpts{})
-	gauge.Add(100)
-	gauge.Set(50)
-	val := gauge.Value()
-	assert.Equal(t, val, int64(50))
-}
-
-func TestGaugeVec(t *testing.T) {
-	gaugeVec := NewGaugeVec(&GaugeVecOpts{
+func TestHistogramVec(t *testing.T) {
+	histogramVec := NewHistogramVec(&HistogramVecOpts{
 		Namespace: "test",
 		Subsystem: "test",
 		Name:      "test",
 		Help:      "this is test metrics.",
 		Labels:    []string{"name", "addr"},
+		Buckets:   _defaultBuckets,
 	})
-	gaugeVec.Set(float64(22.33), "name1", "127.0.0.1")
+	histogramVec.Observe(int64(1), "name1", "127.0.0.1")
 	assert.Panics(t, func() {
-		NewGaugeVec(&GaugeVecOpts{
+		NewHistogramVec(&HistogramVecOpts{
 			Namespace: "test",
 			Subsystem: "test",
 			Name:      "test",
 			Help:      "this is test metrics.",
 			Labels:    []string{"name", "addr"},
+			Buckets:   _defaultBuckets,
 		})
 	}, "Expected to panic.")
 	assert.NotPanics(t, func() {
-		NewGaugeVec(&GaugeVecOpts{
+		NewHistogramVec(&HistogramVecOpts{
 			Namespace: "test",
 			Subsystem: "test",
 			Name:      "test2",
 			Help:      "this is test metrics.",
 			Labels:    []string{"name", "addr"},
+			Buckets:   _defaultBuckets,
 		})
 	}, "Expected normal. no panic.")
 }

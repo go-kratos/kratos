@@ -279,12 +279,12 @@ func (db *conn) begin(c context.Context) (tx *Tx, err error) {
 		}()
 	}
 	if err = db.breaker.Allow(); err != nil {
-		stats.Incr("mysql:begin", "breaker")
+		_metricReqErr.Inc(db.conf.Addr, db.conf.Addr, "begin", "breaker")
 		return
 	}
 	_, c, cancel := db.conf.TranTimeout.Shrink(c)
 	rtx, err := db.BeginTx(c, nil)
-	stats.Timing("mysql:begin", int64(time.Since(now)/time.Millisecond))
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.conf.Addr, db.conf.Addr, "begin")
 	if err != nil {
 		err = errors.WithStack(err)
 		cancel()
@@ -303,14 +303,14 @@ func (db *conn) exec(c context.Context, query string, args ...interface{}) (res 
 		defer t.Finish(&err)
 	}
 	if err = db.breaker.Allow(); err != nil {
-		stats.Incr("mysql:exec", "breaker")
+		_metricReqErr.Inc(db.conf.Addr, db.conf.Addr, "exec", "breaker")
 		return
 	}
 	_, c, cancel := db.conf.ExecTimeout.Shrink(c)
 	res, err = db.ExecContext(c, query, args...)
 	cancel()
 	db.onBreaker(&err)
-	stats.Timing("mysql:exec", int64(time.Since(now)/time.Millisecond))
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.conf.Addr, db.conf.Addr, "exec")
 	if err != nil {
 		err = errors.Wrapf(err, "exec:%s, args:%+v", query, args)
 	}
@@ -326,14 +326,14 @@ func (db *conn) ping(c context.Context) (err error) {
 		defer t.Finish(&err)
 	}
 	if err = db.breaker.Allow(); err != nil {
-		stats.Incr("mysql:ping", "breaker")
+		_metricReqErr.Inc(db.conf.Addr, db.conf.Addr, "ping", "breaker")
 		return
 	}
 	_, c, cancel := db.conf.ExecTimeout.Shrink(c)
 	err = db.PingContext(c)
 	cancel()
 	db.onBreaker(&err)
-	stats.Timing("mysql:ping", int64(time.Since(now)/time.Millisecond))
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.conf.Addr, db.conf.Addr, "ping")
 	if err != nil {
 		err = errors.WithStack(err)
 	}
@@ -383,13 +383,13 @@ func (db *conn) query(c context.Context, query string, args ...interface{}) (row
 		defer t.Finish(&err)
 	}
 	if err = db.breaker.Allow(); err != nil {
-		stats.Incr("mysql:query", "breaker")
+		_metricReqErr.Inc(db.conf.Addr, db.conf.Addr, "query", "breaker")
 		return
 	}
 	_, c, cancel := db.conf.QueryTimeout.Shrink(c)
 	rs, err := db.DB.QueryContext(c, query, args...)
 	db.onBreaker(&err)
-	stats.Timing("mysql:query", int64(time.Since(now)/time.Millisecond))
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.conf.Addr, db.conf.Addr, "query")
 	if err != nil {
 		err = errors.Wrapf(err, "query:%s, args:%+v", query, args)
 		cancel()
@@ -408,12 +408,12 @@ func (db *conn) queryRow(c context.Context, query string, args ...interface{}) *
 		t.SetTag(trace.String(trace.TagAddress, db.conf.Addr), trace.String(trace.TagComment, query))
 	}
 	if err := db.breaker.Allow(); err != nil {
-		stats.Incr("mysql:queryrow", "breaker")
+		_metricReqErr.Inc(db.conf.Addr, db.conf.Addr, "queryRow", "breaker")
 		return &Row{db: db, t: t, err: err}
 	}
 	_, c, cancel := db.conf.QueryTimeout.Shrink(c)
 	r := db.DB.QueryRowContext(c, query, args...)
-	stats.Timing("mysql:queryrow", int64(time.Since(now)/time.Millisecond))
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.conf.Addr, db.conf.Addr, "queryrow")
 	return &Row{db: db, Row: r, query: query, args: args, t: t, cancel: cancel}
 }
 
@@ -449,7 +449,7 @@ func (s *Stmt) Exec(c context.Context, args ...interface{}) (res sql.Result, err
 		defer t.Finish(&err)
 	}
 	if err = s.db.breaker.Allow(); err != nil {
-		stats.Incr("mysql:stmt:exec", "breaker")
+		_metricReqErr.Inc(s.db.conf.Addr, s.db.conf.Addr, "stmt:exec", "breaker")
 		return
 	}
 	stmt, ok := s.stmt.Load().(*sql.Stmt)
@@ -461,7 +461,7 @@ func (s *Stmt) Exec(c context.Context, args ...interface{}) (res sql.Result, err
 	res, err = stmt.ExecContext(c, args...)
 	cancel()
 	s.db.onBreaker(&err)
-	stats.Timing("mysql:stmt:exec", int64(time.Since(now)/time.Millisecond))
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), s.db.conf.Addr, s.db.conf.Addr, "stmt:exec")
 	if err != nil {
 		err = errors.Wrapf(err, "exec:%s, args:%+v", s.query, args)
 	}
@@ -487,7 +487,7 @@ func (s *Stmt) Query(c context.Context, args ...interface{}) (rows *Rows, err er
 		defer t.Finish(&err)
 	}
 	if err = s.db.breaker.Allow(); err != nil {
-		stats.Incr("mysql:stmt:query", "breaker")
+		_metricReqErr.Inc(s.db.conf.Addr, s.db.conf.Addr, "stmt:query", "breaker")
 		return
 	}
 	stmt, ok := s.stmt.Load().(*sql.Stmt)
@@ -498,7 +498,7 @@ func (s *Stmt) Query(c context.Context, args ...interface{}) (rows *Rows, err er
 	_, c, cancel := s.db.conf.QueryTimeout.Shrink(c)
 	rs, err := stmt.QueryContext(c, args...)
 	s.db.onBreaker(&err)
-	stats.Timing("mysql:stmt:query", int64(time.Since(now)/time.Millisecond))
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), s.db.conf.Addr, s.db.conf.Addr, "stmt:query")
 	if err != nil {
 		err = errors.Wrapf(err, "query:%s, args:%+v", s.query, args)
 		cancel()
@@ -531,7 +531,7 @@ func (s *Stmt) QueryRow(c context.Context, args ...interface{}) (row *Row) {
 		row.t = t
 	}
 	if row.err = s.db.breaker.Allow(); row.err != nil {
-		stats.Incr("mysql:stmt:queryrow", "breaker")
+		_metricReqErr.Inc(s.db.conf.Addr, s.db.conf.Addr, "stmt:queryrow", "breaker")
 		return
 	}
 	stmt, ok := s.stmt.Load().(*sql.Stmt)
@@ -541,7 +541,7 @@ func (s *Stmt) QueryRow(c context.Context, args ...interface{}) (row *Row) {
 	_, c, cancel := s.db.conf.QueryTimeout.Shrink(c)
 	row.Row = stmt.QueryRowContext(c, args...)
 	row.cancel = cancel
-	stats.Timing("mysql:stmt:queryrow", int64(time.Since(now)/time.Millisecond))
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), s.db.conf.Addr, s.db.conf.Addr, "stmt:queryrow")
 	return
 }
 
@@ -582,7 +582,7 @@ func (tx *Tx) Exec(query string, args ...interface{}) (res sql.Result, err error
 		tx.t.SetTag(trace.String(trace.TagAnnotation, fmt.Sprintf("exec %s", query)))
 	}
 	res, err = tx.tx.ExecContext(tx.c, query, args...)
-	stats.Timing("mysql:tx:exec", int64(time.Since(now)/time.Millisecond))
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), tx.db.conf.Addr, tx.db.conf.Addr, "tx:exec")
 	if err != nil {
 		err = errors.Wrapf(err, "exec:%s, args:%+v", query, args)
 	}
@@ -597,7 +597,7 @@ func (tx *Tx) Query(query string, args ...interface{}) (rows *Rows, err error) {
 	now := time.Now()
 	defer slowLog(fmt.Sprintf("Query query(%s) args(%+v)", query, args), now)
 	defer func() {
-		stats.Timing("mysql:tx:query", int64(time.Since(now)/time.Millisecond))
+		_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), tx.db.conf.Addr, tx.db.conf.Addr, "tx:query")
 	}()
 	rs, err := tx.tx.QueryContext(tx.c, query, args...)
 	if err == nil {
@@ -618,7 +618,7 @@ func (tx *Tx) QueryRow(query string, args ...interface{}) *Row {
 	now := time.Now()
 	defer slowLog(fmt.Sprintf("QueryRow query(%s) args(%+v)", query, args), now)
 	defer func() {
-		stats.Timing("mysql:tx:queryrow", int64(time.Since(now)/time.Millisecond))
+		_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), tx.db.conf.Addr, tx.db.conf.Addr, "tx:queryrow")
 	}()
 	r := tx.tx.QueryRowContext(tx.c, query, args...)
 	return &Row{Row: r, db: tx.db, query: query, args: args}

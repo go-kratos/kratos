@@ -6,8 +6,8 @@
   type _bts interface {
 		// bts: -batch=2 -max_group=20 -batch_err=break -nullcache=&Demo{ID:-1} -check_null_code=$.ID==-1
 		Demos(c context.Context, keys []int64) (map[int64]*Demo, error)
-	    // bts: -batch=2 -max_group=20 -batch_err=continue -nullcache=&Demo{ID:-1} -check_null_code=$.ID==-1
-	    Demos1(c context.Context, keys []int64) (map[int64]*Demo, error)
+		// bts: -batch=2 -max_group=20 -batch_err=continue -nullcache=&Demo{ID:-1} -check_null_code=$.ID==-1
+		Demos1(c context.Context, keys []int64) (map[int64]*Demo, error)
 		// bts: -sync=true -nullcache=&Demo{ID:-1} -check_null_code=$.ID==-1
 		Demo(c context.Context, key int64) (*Demo, error)
 		// bts: -paging=true
@@ -23,11 +23,15 @@ import (
 	"context"
 	"sync"
 
-	"github.com/bilibili/kratos/pkg/stat/prom"
+	"github.com/bilibili/kratos/pkg/stat/metric"
 	"github.com/bilibili/kratos/pkg/sync/errgroup"
 )
 
-var _ _bts
+var (
+	_             _bts
+	_metricHits   = metric.NewBusinessMetricCount("hits_total", "NAME")
+	_metricMisses = metric.NewBusinessMetricCount("misses_total", "NAME")
+)
 
 // Demos get data from cache if miss will call source method, then add to cache.
 func (d *Dao) Demos(c context.Context, keys []int64) (res map[int64]*Demo, err error) {
@@ -46,7 +50,7 @@ func (d *Dao) Demos(c context.Context, keys []int64) (res map[int64]*Demo, err e
 			miss = append(miss, key)
 		}
 	}
-	prom.CacheHit.Add("Demos", int64(len(keys)-len(miss)))
+	_metricHits.Add(float64(len(keys)-len(miss)), "Demos")
 	for k, v := range res {
 		if v.ID == -1 {
 			delete(res, k)
@@ -57,7 +61,7 @@ func (d *Dao) Demos(c context.Context, keys []int64) (res map[int64]*Demo, err e
 		return
 	}
 	missData := make(map[int64]*Demo, missLen)
-	prom.CacheMiss.Add("Demos", int64(missLen))
+	_metricMisses.Add(int64(missLen), "Demos")
 	var mutex sync.Mutex
 	group := errgroup.WithCancel(c)
 	if missLen > 20 {
@@ -125,7 +129,7 @@ func (d *Dao) Demos1(c context.Context, keys []int64) (res map[int64]*Demo, err 
 			miss = append(miss, key)
 		}
 	}
-	prom.CacheHit.Add("Demos1", int64(len(keys)-len(miss)))
+	_metricHits.Add(float64(len(keys)-len(miss)), "Demos1")
 	for k, v := range res {
 		if v.ID == -1 {
 			delete(res, k)
@@ -136,7 +140,7 @@ func (d *Dao) Demos1(c context.Context, keys []int64) (res map[int64]*Demo, err 
 		return
 	}
 	missData := make(map[int64]*Demo, missLen)
-	prom.CacheMiss.Add("Demos1", int64(missLen))
+	_metricMisses.Add(int64(missLen), "Demos1")
 	var mutex sync.Mutex
 	group := errgroup.WithContext(c)
 	if missLen > 20 {
@@ -261,10 +265,10 @@ func (d *Dao) None(c context.Context) (res *Demo, err error) {
 		}
 	}()
 	if res != nil {
-		prom.CacheHit.Incr("None")
+		_metricHits.Incr("None")
 		return
 	}
-	prom.CacheMiss.Incr("None")
+	_metricMisses.Incr("None")
 	res, err = d.RawNone(c)
 	if err != nil {
 		return

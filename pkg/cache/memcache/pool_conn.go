@@ -7,10 +7,7 @@ import (
 	"time"
 
 	"github.com/bilibili/kratos/pkg/container/pool"
-	"github.com/bilibili/kratos/pkg/stat"
 )
-
-var stats = stat.Cache
 
 // Pool memcache connection pool struct.
 // Deprecated: Use Memcache instead
@@ -62,13 +59,15 @@ type poolConn struct {
 	ctx context.Context
 }
 
-func pstat(key string, t time.Time, err error) {
-	stats.Timing(key, int64(time.Since(t)/time.Millisecond))
+func (pc *poolConn) pstat(key string, t time.Time, err error) {
+	_metricReqDur.Observe(int64(time.Since(t)/time.Millisecond), pc.p.c.Name, pc.p.c.Addr, key)
 	if err != nil {
-		if msg := formatErr(err); msg != "" {
-			stats.Incr("memcache", msg)
+		if msg := pc.formatErr(err); msg != "" {
+			_metricReqErr.Inc(pc.p.c.Name, pc.p.c.Addr, key, msg)
 		}
+		return
 	}
+	_metricHits.Inc(pc.p.c.Name, pc.p.c.Addr)
 }
 
 func (pc *poolConn) Close() error {
@@ -132,28 +131,28 @@ func (pc *poolConn) Decrement(key string, delta uint64) (newValue uint64, err er
 func (pc *poolConn) AddContext(ctx context.Context, item *Item) error {
 	now := time.Now()
 	err := pc.c.AddContext(ctx, item)
-	pstat("memcache:add", now, err)
+	pc.pstat("add", now, err)
 	return err
 }
 
 func (pc *poolConn) SetContext(ctx context.Context, item *Item) error {
 	now := time.Now()
 	err := pc.c.SetContext(ctx, item)
-	pstat("memcache:set", now, err)
+	pc.pstat("set", now, err)
 	return err
 }
 
 func (pc *poolConn) ReplaceContext(ctx context.Context, item *Item) error {
 	now := time.Now()
 	err := pc.c.ReplaceContext(ctx, item)
-	pstat("memcache:replace", now, err)
+	pc.pstat("replace", now, err)
 	return err
 }
 
 func (pc *poolConn) GetContext(ctx context.Context, key string) (*Item, error) {
 	now := time.Now()
 	item, err := pc.c.Get(key)
-	pstat("memcache:get", now, err)
+	pc.pstat("get", now, err)
 	return item, err
 }
 
@@ -164,41 +163,41 @@ func (pc *poolConn) GetMultiContext(ctx context.Context, keys []string) (map[str
 	}
 	now := time.Now()
 	items, err := pc.c.GetMulti(keys)
-	pstat("memcache:gets", now, err)
+	pc.pstat("gets", now, err)
 	return items, err
 }
 
 func (pc *poolConn) DeleteContext(ctx context.Context, key string) error {
 	now := time.Now()
 	err := pc.c.Delete(key)
-	pstat("memcache:delete", now, err)
+	pc.pstat("delete", now, err)
 	return err
 }
 
 func (pc *poolConn) IncrementContext(ctx context.Context, key string, delta uint64) (uint64, error) {
 	now := time.Now()
 	newValue, err := pc.c.IncrementContext(ctx, key, delta)
-	pstat("memcache:increment", now, err)
+	pc.pstat("increment", now, err)
 	return newValue, err
 }
 
 func (pc *poolConn) DecrementContext(ctx context.Context, key string, delta uint64) (uint64, error) {
 	now := time.Now()
 	newValue, err := pc.c.DecrementContext(ctx, key, delta)
-	pstat("memcache:decrement", now, err)
+	pc.pstat("decrement", now, err)
 	return newValue, err
 }
 
 func (pc *poolConn) CompareAndSwapContext(ctx context.Context, item *Item) error {
 	now := time.Now()
 	err := pc.c.CompareAndSwap(item)
-	pstat("memcache:cas", now, err)
+	pc.pstat("cas", now, err)
 	return err
 }
 
 func (pc *poolConn) TouchContext(ctx context.Context, key string, seconds int32) error {
 	now := time.Now()
 	err := pc.c.Touch(key, seconds)
-	pstat("memcache:touch", now, err)
+	pc.pstat("touch", now, err)
 	return err
 }
