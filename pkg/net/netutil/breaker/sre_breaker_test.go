@@ -29,6 +29,7 @@ func getSREBreaker() *sreBreaker {
 	stat := metric.NewRollingCounter(counterOpts)
 	return &sreBreaker{
 		stat: stat,
+		r:    rand.New(rand.NewSource(time.Now().UnixNano())),
 
 		request: 100,
 		k:       2,
@@ -151,8 +152,9 @@ func TestTrueOnProba(t *testing.T) {
 	const total = 100000
 	const epsilon = 0.05
 	var count int
+	b := getSREBreaker()
 	for i := 0; i < total; i++ {
-		if trueOnProba(proba) {
+		if b.trueOnProba(proba) {
 			count++
 		}
 	}

@@ -15,15 +15,14 @@ import (
 // sreBreaker is a sre CircuitBreaker pattern.
 type sreBreaker struct {
 	stat metric.RollingCounter
+	r    *rand.Rand
+	// rand.New(...) returns a non thread safe object
+	randLock sync.Mutex
 
 	k       float64
 	request int64
 
 	state int32
-
-	random *rand.Rand
-	// rand.New(...) returns a non thread safe object
-	randLock sync.Mutex
 }
 
 func newSRE(c *Config) Breaker {
@@ -34,11 +33,11 @@ func newSRE(c *Config) Breaker {
 	stat := metric.NewRollingCounter(counterOpts)
 	return &sreBreaker{
 		stat: stat,
+		r:    rand.New(rand.NewSource(time.Now().UnixNano())),
 
 		request: c.Request,
 		k:       c.K,
 		state:   StateClosed,
-		random:  rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 
@@ -95,7 +94,7 @@ func (b *sreBreaker) MarkFailed() {
 
 func (b *sreBreaker) trueOnProba(proba float64) (truth bool) {
 	b.randLock.Lock()
-	truth = b.random.Float64() < proba
+	truth = b.r.Float64() < proba
 	b.randLock.Unlock()
 	return
 }
