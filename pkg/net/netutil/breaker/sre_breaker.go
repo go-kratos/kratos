@@ -12,12 +12,6 @@ import (
 	"github.com/bilibili/kratos/pkg/stat/metric"
 )
 
-var (
-	// rand.New(...) returns a non thread safe object
-	random = rand.New(rand.NewSource(time.Now().UnixNano()))
-	lock   sync.Mutex
-)
-
 // sreBreaker is a sre CircuitBreaker pattern.
 type sreBreaker struct {
 	stat metric.RollingCounter
@@ -26,6 +20,10 @@ type sreBreaker struct {
 	request int64
 
 	state int32
+
+	random *rand.Rand
+	// rand.New(...) returns a non thread safe object
+	randLock sync.Mutex
 }
 
 func newSRE(c *Config) Breaker {
@@ -40,6 +38,7 @@ func newSRE(c *Config) Breaker {
 		request: c.Request,
 		k:       c.K,
 		state:   StateClosed,
+		random:  rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 
@@ -74,7 +73,7 @@ func (b *sreBreaker) Allow() error {
 		atomic.CompareAndSwapInt32(&b.state, StateClosed, StateOpen)
 	}
 	dr := math.Max(0, (float64(total)-k)/float64(total+1))
-	drop := trueOnProba(dr)
+	drop := b.trueOnProba(dr)
 	if log.V(5) {
 		log.Info("breaker: drop ratio: %f, drop: %t", dr, drop)
 	}
@@ -94,9 +93,9 @@ func (b *sreBreaker) MarkFailed() {
 	b.stat.Add(0)
 }
 
-func trueOnProba(proba float64) (truth bool) {
-	lock.Lock()
-	truth = random.Float64() < proba
-	lock.Unlock()
+func (b *sreBreaker) trueOnProba(proba float64) (truth bool) {
+	b.randLock.Lock()
+	truth = b.random.Float64() < proba
+	b.randLock.Unlock()
 	return
 }
