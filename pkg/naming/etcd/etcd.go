@@ -25,7 +25,7 @@ var (
 	etcdPrefix string
 
 	//Time units is second
-	registerTTL        = 30
+	registerTTL        = 90
 	defaultDialTimeout = 30
 )
 
@@ -183,8 +183,8 @@ func (e *EtcdBuilder) Register(ctx context.Context, ins *naming.Instance) (cance
 	})
 
 	go func() {
-		//提前2秒续约 避免续约操作缓慢时租约过期
-		ticker := time.NewTicker(time.Duration(registerTTL-2) * time.Second)
+
+		ticker := time.NewTicker(time.Duration(registerTTL/3) * time.Second)
 		defer ticker.Stop()
 		for {
 			select {
