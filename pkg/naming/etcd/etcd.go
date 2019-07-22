@@ -16,6 +16,7 @@ import (
 	"github.com/bilibili/kratos/pkg/naming"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -99,6 +100,7 @@ func New(c *clientv3.Config) (e *EtcdBuilder, err error) {
 		c = &clientv3.Config{
 			Endpoints:   strings.Split(endpoints, ","),
 			DialTimeout: time.Second * time.Duration(defaultDialTimeout),
+			DialOptions: []grpc.DialOption{grpc.WithBlock()},
 		}
 	}
 	cli, err := clientv3.New(*c)
