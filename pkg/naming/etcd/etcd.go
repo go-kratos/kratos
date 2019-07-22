@@ -14,8 +14,8 @@ import (
 
 	"github.com/bilibili/kratos/pkg/log"
 	"github.com/bilibili/kratos/pkg/naming"
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/mvcc/mvccpb"
 )
 
 var (
@@ -23,7 +23,9 @@ var (
 	endpoints  string
 	etcdPrefix string
 
-	RegisterTTL = 30
+	//Time units is second
+	registerTTL        = 30
+	defaultDialTimeout = 30
 )
 
 var (
@@ -96,7 +98,7 @@ func New(c *clientv3.Config) (e *EtcdBuilder, err error) {
 		}
 		c = &clientv3.Config{
 			Endpoints:   strings.Split(endpoints, ","),
-			DialTimeout: time.Second * 30,
+			DialTimeout: time.Second * time.Duration(defaultDialTimeout),
 		}
 	}
 	cli, err := clientv3.New(*c)
@@ -180,7 +182,7 @@ func (e *EtcdBuilder) Register(ctx context.Context, ins *naming.Instance) (cance
 
 	go func() {
 		//提前2秒续约 避免续约操作缓慢时租约过期
-		ticker := time.NewTicker(time.Duration(RegisterTTL-2) * time.Second)
+		ticker := time.NewTicker(time.Duration(registerTTL-2) * time.Second)
 		defer ticker.Stop()
 		for {
 			select {
@@ -201,9 +203,9 @@ func (e *EtcdBuilder) register(ctx context.Context, ins *naming.Instance) (err e
 	prefix := e.keyPrefix(ins)
 	val, _ := json.Marshal(ins)
 
-	ttlResp, err := e.cli.Grant(context.TODO(), int64(RegisterTTL))
+	ttlResp, err := e.cli.Grant(context.TODO(), int64(registerTTL))
 	if err != nil {
-		log.Error("etcd: register client.Grant(%v) error(%v)", RegisterTTL, err)
+		log.Error("etcd: register client.Grant(%v) error(%v)", registerTTL, err)
 		return err
 	}
 	_, err = e.cli.Put(ctx, prefix, string(val), clientv3.WithLease(ttlResp.ID))

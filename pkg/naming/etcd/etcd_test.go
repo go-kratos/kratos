@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/bilibili/kratos/pkg/naming"
-	"github.com/coreos/etcd/clientv3"
+	"go.etcd.io/etcd/clientv3"
 	"testing"
 	"time"
 )
