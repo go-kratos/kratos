@@ -17,7 +17,6 @@ require (
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gogo/protobuf v1.2.1
-	github.com/golang/glog v0.0.0-20170312005925-543a34c32e4d // indirect
 	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
 	github.com/golang/mock v1.3.1 // indirect
 	github.com/golang/protobuf v1.3.2
