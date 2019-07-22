@@ -66,19 +66,3 @@ require (
 	gopkg.in/go-playground/validator.v9 v9.26.0
 	gopkg.in/yaml.v2 v2.2.2
 )
-
-replace (
-	cloud.google.com/go => github.com/googleapis/google-cloud-go v0.26.0
-	golang.org/x/crypto => github.com/golang/crypto v0.0.0-20190605123033-f99c8df09eb5
-	golang.org/x/lint => golang.org/x/lint v0.0.0-20190511005446-959b441ac422
-	golang.org/x/net => golang.org/x/net v0.0.0-20190628185345-da137c7871d7
-	golang.org/x/oauth2 => golang.org/x/oauth2 v0.0.0-20190614102709-0f29369cfe45
-	golang.org/x/sync => github.com/golang/sync v0.0.0-20190427212804-112230192c58
-	golang.org/x/sys => github.com/golang/sys v0.0.0-20190602015325-4c4f7f33c9ed
-	golang.org/x/text => github.com/golang/text v0.3.2
-	golang.org/x/time => github.com/golang/time v0.0.0-20190308202827-9d24e82272b4
-	golang.org/x/tools => github.com/golang/tools v0.0.0-20190606050223-4d9ae51c2468
-	google.golang.org/appengine => github.com/golang/appengine v1.6.1
-	google.golang.org/genproto => github.com/google/go-genproto v0.0.0-20190701230453-710ae3a149df
-	google.golang.org/grpc => github.com/grpc/grpc-go v1.22.0
-)
