@@ -3,10 +3,11 @@ package etcd
 import (
 	"context"
 	"fmt"
-	"github.com/bilibili/kratos/pkg/naming"
-	"github.com/coreos/etcd/clientv3"
 	"testing"
 	"time"
+	"github.com/bilibili/kratos/pkg/naming"
+	"go.etcd.io/etcd/clientv3"
+	"google.golang.org/grpc"
 )
 
 func TestNew(t *testing.T) {
@@ -14,6 +15,7 @@ func TestNew(t *testing.T) {
 	config := &clientv3.Config{
 		Endpoints:   []string{"127.0.0.1:2379"},
 		DialTimeout: time.Second * 3,
+		DialOptions: []grpc.DialOption{grpc.WithBlock()},
 	}
 	builder, err := New(config)
 

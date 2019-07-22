@@ -219,6 +219,7 @@ const AppID = "demo.service" // NOTE: example
 func init(){
 	// NOTE: 注意这段代码，表示要使用etcd进行服务发现 ,其他事项参考discovery的说明
     // NOTE: 在启动应用时，可以通过flag(-etcd.endpoints) 或者 环境配置(ETCD_ENDPOINTS)指定etcd节点
+    // NOTE: 如果需要自己指定配置时 需要同时设置DialTimeout 与 DialOptions: []grpc.DialOption{grpc.WithBlock()}
 	resolver.Register(etcd.Builder(nil))
 }
 
