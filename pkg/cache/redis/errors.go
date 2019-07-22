@@ -6,10 +6,13 @@ import (
 	pkgerr "github.com/pkg/errors"
 )
 
-func formatErr(err error) string {
+func formatErr(err error, name, addr string) string {
 	e := pkgerr.Cause(err)
 	switch e {
 	case ErrNil, nil:
+		if e == ErrNil {
+			_metricMisses.Inc(name, addr)
+		}
 		return ""
 	default:
 		es := e.Error()

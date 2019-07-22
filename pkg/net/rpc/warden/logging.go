@@ -12,12 +12,6 @@ import (
 	"github.com/bilibili/kratos/pkg/ecode"
 	"github.com/bilibili/kratos/pkg/log"
 	"github.com/bilibili/kratos/pkg/net/metadata"
-	"github.com/bilibili/kratos/pkg/stat"
-)
-
-var (
-	statsClient = stat.RPCClient
-	statsServer = stat.RPCServer
 )
 
 // Warden Log Flag
@@ -94,8 +88,8 @@ func clientLogging(dialOptions ...grpc.DialOption) grpc.UnaryClientInterceptor {
 		code := ecode.Cause(err).Code()
 		duration := time.Since(startTime)
 		// monitor
-		statsClient.Timing(method, int64(duration/time.Millisecond))
-		statsClient.Incr(method, strconv.Itoa(code))
+		_metricClientReqDur.Observe(int64(duration/time.Millisecond), method)
+		_metricClientReqCodeTotal.Inc(method, strconv.Itoa(code))
 
 		if logFlag&LogFlagDisable != 0 {
 			return err
@@ -148,8 +142,8 @@ func serverLogging(logFlag int8) grpc.UnaryServerInterceptor {
 		code := ecode.Cause(err).Code()
 		duration := time.Since(startTime)
 		// monitor
-		statsServer.Timing(caller, int64(duration/time.Millisecond), info.FullMethod)
-		statsServer.Incr(caller, info.FullMethod, strconv.Itoa(code))
+		_metricServerReqDur.Observe(int64(duration/time.Millisecond), info.FullMethod, caller)
+		_metricServerReqCodeTotal.Inc(info.FullMethod, caller, strconv.Itoa(code))
 
 		if logFlag&LogFlagDisable != 0 {
 			return resp, err

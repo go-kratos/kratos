@@ -9,13 +9,11 @@ import (
 	"github.com/bilibili/kratos/pkg/log"
 	"github.com/bilibili/kratos/pkg/net/metadata"
 	"github.com/bilibili/kratos/pkg/net/trace"
-	"github.com/bilibili/kratos/pkg/stat/prom"
 )
 
 var (
 	// ErrFull chan full.
 	ErrFull   = errors.New("fanout: chan full")
-	stats     = prom.BusinessInfoCount
 	traceTags = []trace.Tag{
 		trace.Tag{Key: trace.TagSpanKind, Value: "background"},
 		trace.Tag{Key: trace.TagComponent, Value: "sync/pipeline/fanout"},
@@ -97,7 +95,7 @@ func (c *Fanout) proc() {
 		select {
 		case t := <-c.ch:
 			wrapFunc(t.f)(t.ctx)
-			stats.State(c.name+"_channel", int64(len(c.ch)))
+			_metricChanSize.Set(float64(len(c.ch)), c.name)
 		case <-c.ctx.Done():
 			return
 		}
@@ -136,7 +134,7 @@ func (c *Fanout) Do(ctx context.Context, f func(ctx context.Context)) (err error
 	default:
 		err = ErrFull
 	}
-	stats.State(c.name+"_channel", int64(len(c.ch)))
+	_metricChanSize.Set(float64(len(c.ch)), c.name)
 	return
 }
 

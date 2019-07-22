@@ -18,7 +18,6 @@ import (
 	"github.com/bilibili/kratos/pkg/net/criticality"
 	"github.com/bilibili/kratos/pkg/net/ip"
 	"github.com/bilibili/kratos/pkg/net/metadata"
-	"github.com/bilibili/kratos/pkg/stat"
 	xtime "github.com/bilibili/kratos/pkg/time"
 
 	"github.com/pkg/errors"
@@ -29,13 +28,11 @@ const (
 )
 
 var (
-	_     IRouter = &Engine{}
-	stats         = stat.HTTPServer
+	_ IRouter = &Engine{}
 
 	_httpDSN       string
 	default405Body = []byte("405 method not allowed")
 	default404Body = []byte("404 page not found")
-
 )
 
 func init() {
@@ -155,7 +152,6 @@ type Engine struct {
 	allNoMethod []HandlerFunc
 	noRoute     []HandlerFunc
 	noMethod    []HandlerFunc
-
 }
 
 type injection struct {

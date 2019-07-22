@@ -3,14 +3,11 @@ package sql
 import (
 	"github.com/bilibili/kratos/pkg/log"
 	"github.com/bilibili/kratos/pkg/net/netutil/breaker"
-	"github.com/bilibili/kratos/pkg/stat"
 	"github.com/bilibili/kratos/pkg/time"
 
 	// database driver
 	_ "github.com/go-sql-driver/mysql"
 )
-
-var stats = stat.DB
 
 // Config mysql config.
 type Config struct {

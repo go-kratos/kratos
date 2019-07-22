@@ -36,14 +36,14 @@ func (d *{{.StructName}}) NAME(c context.Context, id KEY {{.ExtraArgsType}}) (re
 			return
 		}
 		{{end}}
-		prom.BusinessErrCount.Incr("mc:NAME")
+		_metricErrCount.Inc("NAME")
 		log.Errorv(c, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
 	{{if .GetSimpleValue}}
 		r, err := {{.ConvertBytes2Value}}
 		if err != nil {
-			prom.BusinessErrCount.Incr("mc:NAME")
+			_metricErrCount.Incr("NAME")
 			log.Errorv(c, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 			return
 		}
@@ -74,7 +74,7 @@ func (d *{{.StructName}}) NAME(c context.Context, id KEY, val VALUE {{.ExtraArgs
 		item := &memcache.Item{Key: key, Object: val, Expiration: {{.ExpireCode}}, Flags: {{.Encode}}}
 	{{end}}
 	if err = d.mc.Set(c, item); err != nil {
-		prom.BusinessErrCount.Incr("mc:NAME")
+		_metricErrCount.Incr("NAME")
 		log.Errorv(c, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
@@ -93,7 +93,7 @@ func (d *{{.StructName}}) NAME(c context.Context, id KEY {{.ExtraArgsType}}) (er
 			err = nil
 			return
 		}
-		prom.BusinessErrCount.Incr("mc:NAME")
+		_metricErrCount.Incr("NAME")
 		log.Errorv(c, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}

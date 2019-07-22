@@ -123,7 +123,7 @@ func (c *Client) handle() grpc.UnaryClientInterceptor {
 		c.mutex.RUnlock()
 		brk := c.breaker.Get(method)
 		if err = brk.Allow(); err != nil {
-			statsClient.Incr(method, "breaker")
+			_metricClientReqCodeTotal.Inc(method, "breaker")
 			return
 		}
 		defer onBreaker(brk, &err)

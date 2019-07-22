@@ -19,12 +19,15 @@ import (
 	{{if .UseStrConv}}"strconv"{{end}}
 	{{if .EnableBatch }}"sync"{{end}}
 NEWLINE
-	"github.com/bilibili/kratos/pkg/stat/prom"
+	"github.com/bilibili/kratos/pkg/stat/metric"
 	{{if .UseMemcached }}"github.com/bilibili/kratos/pkg/cache/memcache"{{end}}
 	{{if .EnableBatch }}"github.com/bilibili/kratos/pkg/sync/errgroup"{{end}}
 	"github.com/bilibili/kratos/pkg/log"
 	{{.ImportPackage}}
 )
 
-var _ _mc
+var (
+	_ _mc
+	_metricErrCount = metric.NewBusinessMetricCount("mc_error_total", "NAME")
+)
 `

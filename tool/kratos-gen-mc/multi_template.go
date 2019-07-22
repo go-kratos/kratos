@@ -44,7 +44,7 @@ func (d *{{.StructName}}) NAME(c context.Context, ids []KEY {{.ExtraArgsType}}) 
 					}
 					replies, err := d.mc.GetMulti(c, keys)
 					if err != nil {
-						prom.BusinessErrCount.Incr("mc:NAME")
+						_metricErrCount.Inc("NAME")
 						log.Errorv(ctx, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("keys", keys))
 						return
 					}
@@ -67,14 +67,14 @@ func (d *{{.StructName}}) NAME(c context.Context, ids []KEY {{.ExtraArgsType}}) 
 							{{end}}
 						{{end}}
 						if err != nil {
-							prom.BusinessErrCount.Incr("mc:NAME")
+							_metricErrCount.Inc("NAME")
 							log.Errorv(ctx, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 							return
 						}
 						{{if .GetSimpleValue}}
 							r, err := {{.ConvertBytes2Value}}
 							if err != nil {
-								prom.BusinessErrCount.Incr("mc:NAME")
+								_metricErrCount.Inc("NAME")
 								log.Errorv(ctx, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 								return res, err
 							}
@@ -114,7 +114,7 @@ func (d *{{.StructName}}) NAME(c context.Context, ids []KEY {{.ExtraArgsType}}) 
 		}
 		replies, err := d.mc.GetMulti(c, keys)
 		if err != nil {
-			prom.BusinessErrCount.Incr("mc:NAME")
+			_metricErrCount.Inc("NAME")
 			log.Errorv(c, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("keys", keys))
 			return
 		}
@@ -132,14 +132,14 @@ func (d *{{.StructName}}) NAME(c context.Context, ids []KEY {{.ExtraArgsType}}) 
 				{{end}}
 			{{end}}
 			if err != nil {
-				prom.BusinessErrCount.Incr("mc:NAME")
+				_metricErrCount.Inc("NAME")
 				log.Errorv(c, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 				return
 			}
 			{{if .GetSimpleValue}}
 				r, err := {{.ConvertBytes2Value}}
 				if err != nil {
-					prom.BusinessErrCount.Incr("mc:NAME")
+					_metricErrCount.Inc("NAME")
 					log.Errorv(c, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 					return res, err
 				}
@@ -174,7 +174,7 @@ func (d *{{.StructName}}) NAME(c context.Context, values map[KEY]VALUE {{.ExtraA
 			item := &memcache.Item{Key: key, Object: val, Expiration: {{.ExpireCode}}, Flags: {{.Encode}}}
 		{{end}}
 		if err = d.mc.Set(c, item); err != nil {
-			prom.BusinessErrCount.Incr("mc:NAME")
+			_metricErrCount.Inc("NAME")
 			log.Errorv(c, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 			return
 		}
@@ -198,7 +198,7 @@ func (d *{{.StructName}}) NAME(c context.Context, ids []KEY {{.ExtraArgsType}}) 
 				err = nil
 				continue
 			}
-			prom.BusinessErrCount.Incr("mc:NAME")
+			_metricErrCount.Inc("NAME")
 			log.Errorv(c, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 			return
 		}

@@ -27,16 +27,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/stat"
-
 	"github.com/pkg/errors"
 )
 
-var stats = stat.Cache
-
 // conn is the low-level implementation of Conn
 type conn struct {
-
 	// Shared
 	mu      sync.Mutex
 	pending int
@@ -57,20 +52,6 @@ type conn struct {
 
 	// Scratch space for formatting integers and floats.
 	numScratch [40]byte
-	// stat func,default prom
-	stat func(string, *error) func()
-}
-
-func statfunc(cmd string, err *error) func() {
-	now := time.Now()
-	return func() {
-		stats.Timing(fmt.Sprintf("redis:%s", cmd), int64(time.Since(now)/time.Millisecond))
-		if err != nil {
-			if msg := formatErr(*err); msg != "" {
-				stats.Incr("redis", msg)
-			}
-		}
-	}
 }
 
 // DialTimeout acts like Dial but takes timeouts for establishing the
@@ -95,14 +76,6 @@ type dialOptions struct {
 	dial         func(network, addr string) (net.Conn, error)
 	db           int
 	password     string
-	stat         func(string, *error) func()
-}
-
-// DialStats specifies stat func for stats.default statfunc.
-func DialStats(fn func(string, *error) func()) DialOption {
-	return DialOption{func(do *dialOptions) {
-		do.stat = fn
-	}}
 }
 
 // DialReadTimeout specifies the timeout for reading a single command reply.
@@ -171,7 +144,6 @@ func Dial(network, address string, options ...DialOption) (Conn, error) {
 		br:           bufio.NewReader(netConn),
 		readTimeout:  do.readTimeout,
 		writeTimeout: do.writeTimeout,
-		stat:         statfunc,
 	}
 
 	if do.password != "" {
@@ -186,9 +158,6 @@ func Dial(network, address string, options ...DialOption) (Conn, error) {
 			netConn.Close()
 			return nil, errors.WithStack(err)
 		}
-	}
-	if do.stat != nil {
-		c.stat = do.stat
 	}
 	return c, nil
 }
@@ -551,7 +520,6 @@ func (c *conn) Do(cmd string, args ...interface{}) (interface{}, error) {
 		return nil, nil
 	}
 	var err error
-	defer c.stat(cmd, &err)()
 	if cmd != "" {
 		err = c.writeCommand(cmd, args)
 	}

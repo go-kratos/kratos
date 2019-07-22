@@ -8,17 +8,18 @@ import (
 	"github.com/bilibili/kratos/pkg/log"
 	limit "github.com/bilibili/kratos/pkg/ratelimit"
 	"github.com/bilibili/kratos/pkg/ratelimit/bbr"
-	"github.com/bilibili/kratos/pkg/stat/prom"
-
+	"github.com/bilibili/kratos/pkg/stat/metric"
 	"google.golang.org/grpc"
 )
 
-const (
-	_statName = "go_grpc_bbr"
-)
-
 var (
-	stats = prom.New().WithState("go_grpc_bbr", []string{"url"})
+	_metricServerBBR = metric.NewCounterVec(&metric.CounterVecOpts{
+		Namespace: "grpc_server",
+		Subsystem: "",
+		Name:      "bbr_total",
+		Help:      "grpc server bbr total.",
+		Labels:    []string{"url"},
+	})
 )
 
 // RateLimiter bbr middleware.
@@ -50,7 +51,7 @@ func (b *RateLimiter) Limit() grpc.UnaryServerInterceptor {
 		limiter := b.group.Get(uri)
 		done, err := limiter.Allow(ctx)
 		if err != nil {
-			stats.Incr(_statName, uri)
+			_metricServerBBR.Inc(uri)
 			return
 		}
 		defer func() {

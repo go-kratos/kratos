@@ -49,10 +49,13 @@ func (pe protocolError) Error() string {
 	return fmt.Sprintf("memcache: %s (possible server error or unsupported concurrent read by application)", string(pe))
 }
 
-func formatErr(err error) string {
+func (pc *poolConn) formatErr(err error) string {
 	e := pkgerr.Cause(err)
 	switch e {
 	case ErrNotFound, ErrExists, ErrNotStored, nil:
+		if e == ErrNotFound {
+			_metricMisses.Inc(pc.p.c.Name, pc.p.c.Addr)
+		}
 		return ""
 	default:
 		es := e.Error()
