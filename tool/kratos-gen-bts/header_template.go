@@ -17,7 +17,7 @@ import (
 	"context"
 	{{if .EnableBatch }}"sync"{{end}}
 NEWLINE
-	"github.com/bilibili/kratos/pkg/stat/metric"
+	"github.com/bilibili/kratos/pkg/cache"
 	{{if .EnableBatch }}"github.com/bilibili/kratos/pkg/sync/errgroup"{{end}}
 	{{.ImportPackage}}
 NEWLINE
@@ -26,8 +26,6 @@ NEWLINE
 
 var (
 	_ _bts
-	_metricHits = metric.NewBusinessMetricCount("hits_total", "name")
-	_metricMisses = metric.NewBusinessMetricCount("misses_total", "name")
 )
 {{if .EnableSingleFlight}}
 var cacheSingleFlights = [SFCOUNT]*singleflight.Group{SFINIT} 

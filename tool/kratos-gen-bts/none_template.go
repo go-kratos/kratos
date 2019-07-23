@@ -21,20 +21,20 @@ func (d *Dao) NAME(c context.Context) (res VALUE, err error) {
 	{{else}}
 	if res != {{.ZeroValue}} {
 	{{end}}
-		_metricHits.Incr("NAME")
+		cache.MetricHits.Inc("bts:NAME")
 		return
 	}
 	{{if .EnableSingleFlight}}
 		var rr interface{}
 		sf := d.cacheSFNAME()
 		rr, err, _ = cacheSingleFlights[SFNUM].Do(sf, func() (r interface{}, e error) {
-			_metricMisses.Incr("NAME")
+			cache.MetricMisses.Inc("bts:NAME")
 			r, e = RAWFUNC(c)
 			return
 		})
 		res = rr.(VALUE)
 	{{else}}
-		_metricMisses.Incr("NAME")
+		cache.MetricMisses.Inc("bts:NAME")
 		res, err = RAWFUNC(c)
 	{{end}}
 	if err != nil {
