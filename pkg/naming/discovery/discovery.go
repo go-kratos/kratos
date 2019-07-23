@@ -513,6 +513,7 @@ func (d *Discovery) serverproc() {
 		case <-d.ctx.Done():
 			return
 		case <-ticker.C:
+			d.switchNode()
 		default:
 		}
 		apps, err := d.polls(ctx)
