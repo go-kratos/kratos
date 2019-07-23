@@ -23,14 +23,12 @@ import (
 	"context"
 	"sync"
 
-	"github.com/bilibili/kratos/pkg/stat/metric"
+	"github.com/bilibili/kratos/pkg/cache"
 	"github.com/bilibili/kratos/pkg/sync/errgroup"
 )
 
 var (
-	_             _bts
-	_metricHits   = metric.NewBusinessMetricCount("hits_total", "NAME")
-	_metricMisses = metric.NewBusinessMetricCount("misses_total", "NAME")
+	_ _bts
 )
 
 // Demos get data from cache if miss will call source method, then add to cache.
@@ -50,7 +48,7 @@ func (d *Dao) Demos(c context.Context, keys []int64) (res map[int64]*Demo, err e
 			miss = append(miss, key)
 		}
 	}
-	_metricHits.Add(float64(len(keys)-len(miss)), "Demos")
+	cache.MetricHits.Add(float64(len(keys)-len(miss)), "bts:Demos")
 	for k, v := range res {
 		if v.ID == -1 {
 			delete(res, k)
@@ -61,7 +59,7 @@ func (d *Dao) Demos(c context.Context, keys []int64) (res map[int64]*Demo, err e
 		return
 	}
 	missData := make(map[int64]*Demo, missLen)
-	_metricMisses.Add(int64(missLen), "Demos")
+	cache.MetricMisses.Add(float64(missLen), "bts:Demos")
 	var mutex sync.Mutex
 	group := errgroup.WithCancel(c)
 	if missLen > 20 {
@@ -129,7 +127,7 @@ func (d *Dao) Demos1(c context.Context, keys []int64) (res map[int64]*Demo, err 
 			miss = append(miss, key)
 		}
 	}
-	_metricHits.Add(float64(len(keys)-len(miss)), "Demos1")
+	cache.MetricHits.Add(float64(len(keys)-len(miss)), "bts:Demos1")
 	for k, v := range res {
 		if v.ID == -1 {
 			delete(res, k)
@@ -140,7 +138,7 @@ func (d *Dao) Demos1(c context.Context, keys []int64) (res map[int64]*Demo, err 
 		return
 	}
 	missData := make(map[int64]*Demo, missLen)
-	_metricMisses.Add(int64(missLen), "Demos1")
+	cache.MetricMisses.Add(float64(missLen), "bts:Demos1")
 	var mutex sync.Mutex
 	group := errgroup.WithContext(c)
 	if missLen > 20 {
@@ -205,10 +203,10 @@ func (d *Dao) Demo(c context.Context, key int64) (res *Demo, err error) {
 		}
 	}()
 	if res != nil {
-		prom.CacheHit.Incr("Demo")
+		cache.MetricHits.Inc("bts:Demo")
 		return
 	}
-	prom.CacheMiss.Incr("Demo")
+	cache.MetricMisses.Inc("bts:Demo")
 	res, err = d.RawDemo(c, key)
 	if err != nil {
 		return
@@ -233,11 +231,11 @@ func (d *Dao) Demo1(c context.Context, key int64, pn int, ps int) (res *Demo, er
 		err = nil
 	}
 	if res != nil {
-		prom.CacheHit.Incr("Demo1")
+		cache.MetricHits.Inc("bts:Demo1")
 		return
 	}
 	var miss *Demo
-	prom.CacheMiss.Incr("Demo1")
+	cache.MetricMisses.Inc("bts:Demo1")
 	res, miss, err = d.RawDemo1(c, key, pn, ps)
 	if err != nil {
 		return
@@ -265,10 +263,10 @@ func (d *Dao) None(c context.Context) (res *Demo, err error) {
 		}
 	}()
 	if res != nil {
-		_metricHits.Incr("None")
+		cache.MetricHits.Inc("bts:None")
 		return
 	}
-	_metricMisses.Incr("None")
+	cache.MetricMisses.Inc("bts:None")
 	res, err = d.RawNone(c)
 	if err != nil {
 		return
