@@ -48,12 +48,10 @@ import (
 
 	"github.com/bilibili/kratos/pkg/cache/memcache"
 	"github.com/bilibili/kratos/pkg/log"
-	"github.com/bilibili/kratos/pkg/stat/metric"
 )
 
 var (
-	_               _mc
-	_metricErrCount = metric.NewBusinessMetricCount("mc_error_total", "NAME")
+	_ _mc
 )
 
 // CacheDemos get data from mc
@@ -71,7 +69,6 @@ func (d *Dao) CacheDemos(c context.Context, ids []int64) (res map[int64]*Demo, e
 	}
 	replies, err := d.mc.GetMulti(c, keys)
 	if err != nil {
-		_metricErrCount.Inc("CacheDemos")
 		log.Errorv(c, log.KV("CacheDemos", fmt.Sprintf("%+v", err)), log.KV("keys", keys))
 		return
 	}
@@ -79,7 +76,6 @@ func (d *Dao) CacheDemos(c context.Context, ids []int64) (res map[int64]*Demo, e
 		v := &Demo{}
 		err = replies.Scan(key, v)
 		if err != nil {
-			_metricErrCount.Inc("CacheDemos")
 			log.Errorv(c, log.KV("CacheDemos", fmt.Sprintf("%+v", err)), log.KV("key", key))
 			return
 		}
@@ -102,7 +98,6 @@ func (d *Dao) CacheDemo(c context.Context, id int64) (res *Demo, err error) {
 		}
 	}
 	if err != nil {
-		_metricErrCount.Inc("CacheDemo")
 		log.Errorv(c, log.KV("CacheDemo", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
@@ -120,7 +115,6 @@ func (d *Dao) CacheDemo1(c context.Context, id int64, mid int64) (res *Demo, err
 		}
 	}
 	if err != nil {
-		_metricErrCount.Inc("CacheDemo1")
 		log.Errorv(c, log.KV("CacheDemo1", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
@@ -139,7 +133,6 @@ func (d *Dao) CacheNone(c context.Context) (res *Demo, err error) {
 		}
 	}
 	if err != nil {
-		_metricErrCount.Inc("CacheNone")
 		log.Errorv(c, log.KV("CacheNone", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
@@ -155,7 +148,6 @@ func (d *Dao) CacheString(c context.Context, id int64) (res string, err error) {
 			err = nil
 			return
 		}
-		_metricErrCount.Inc("CacheString")
 		log.Errorv(c, log.KV("CacheString", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
@@ -171,7 +163,6 @@ func (d *Dao) AddCacheDemos(c context.Context, values map[int64]*Demo) (err erro
 		key := demoKey(id)
 		item := &memcache.Item{Key: key, Object: val, Expiration: d.demoExpire, Flags: memcache.FlagJSON}
 		if err = d.mc.Set(c, item); err != nil {
-			_metricErrCount.Inc("AddCacheDemos")
 			log.Errorv(c, log.KV("AddCacheDemos", fmt.Sprintf("%+v", err)), log.KV("key", key))
 			return
 		}
@@ -188,7 +179,6 @@ func (d *Dao) AddCacheDemos2(c context.Context, values map[int64]*Demo, tp int64
 		key := demo2Key(id, tp)
 		item := &memcache.Item{Key: key, Object: val, Expiration: d.demoExpire, Flags: memcache.FlagJSON}
 		if err = d.mc.Set(c, item); err != nil {
-			_metricErrCount.Inc("AddCacheDemos2")
 			log.Errorv(c, log.KV("AddCacheDemos2", fmt.Sprintf("%+v", err)), log.KV("key", key))
 			return
 		}
@@ -204,7 +194,6 @@ func (d *Dao) AddCacheDemo(c context.Context, id int64, val *Demo) (err error) {
 	key := demoKey(id)
 	item := &memcache.Item{Key: key, Object: val, Expiration: d.demoExpire, Flags: memcache.FlagJSON | memcache.FlagGzip}
 	if err = d.mc.Set(c, item); err != nil {
-		_metricErrCount.Incr("AddCacheDemo")
 		log.Errorv(c, log.KV("AddCacheDemo", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
@@ -219,7 +208,6 @@ func (d *Dao) AddCacheDemo1(c context.Context, id int64, val *Demo, mid int64) (
 	key := keyMid(id, mid)
 	item := &memcache.Item{Key: key, Object: val, Expiration: d.demoExpire, Flags: memcache.FlagGOB}
 	if err = d.mc.Set(c, item); err != nil {
-		_metricErrCount.Incr("AddCacheDemo1")
 		log.Errorv(c, log.KV("AddCacheDemo1", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
@@ -234,7 +222,6 @@ func (d *Dao) AddCacheNone(c context.Context, val *Demo) (err error) {
 	key := noneKey()
 	item := &memcache.Item{Key: key, Object: val, Expiration: d.demoExpire, Flags: memcache.FlagJSON}
 	if err = d.mc.Set(c, item); err != nil {
-		_metricErrCount.Inc("AddCacheNone")
 		log.Errorv(c, log.KV("AddCacheNone", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
@@ -250,7 +237,6 @@ func (d *Dao) AddCacheString(c context.Context, id int64, val string) (err error
 	bs := []byte(val)
 	item := &memcache.Item{Key: key, Value: bs, Expiration: d.demoExpire, Flags: memcache.FlagRAW}
 	if err = d.mc.Set(c, item); err != nil {
-		_metricErrCount.Incr("AddCacheString")
 		log.Errorv(c, log.KV("AddCacheString", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
@@ -269,7 +255,6 @@ func (d *Dao) DelCacheDemos(c context.Context, ids []int64) (err error) {
 				err = nil
 				continue
 			}
-			_metricErrCount.Inc("DelCacheDemos")
 			log.Errorv(c, log.KV("DelCacheDemos", fmt.Sprintf("%+v", err)), log.KV("key", key))
 			return
 		}
@@ -285,7 +270,6 @@ func (d *Dao) DelCacheDemo(c context.Context, id int64) (err error) {
 			err = nil
 			return
 		}
-		_metricErrCount.Incr("DelCacheDemo")
 		log.Errorv(c, log.KV("DelCacheDemo", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
@@ -300,7 +284,6 @@ func (d *Dao) DelCacheDemo1(c context.Context, id int64, mid int64) (err error) 
 			err = nil
 			return
 		}
-		_metricErrCount.Incr("DelCacheDemo1")
 		log.Errorv(c, log.KV("DelCacheDemo1", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
@@ -315,7 +298,6 @@ func (d *Dao) DelCacheNone(c context.Context) (err error) {
 			err = nil
 			return
 		}
-		_metricErrCount.Inc("DelCacheNone")
 		log.Errorv(c, log.KV("DelCacheNone", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
