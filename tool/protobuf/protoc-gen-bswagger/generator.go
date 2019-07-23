@@ -74,7 +74,9 @@ func (t *swaggerGen) generateSwagger(file *descriptor.FileDescriptorProto) *plug
 			}
 			apiInfo := t.GetHttpInfoCached(file, svc, meth)
 			pathItem := swaggerPathItemObject{}
-
+			if originPathItem, ok := swaggerObj.Paths[apiInfo.Path]; ok {
+				pathItem = originPathItem
+			}
 			op := t.getOperationByHTTPMethod(apiInfo.HttpMethod, &pathItem)
 			op.Summary = apiInfo.Title
 			op.Description = apiInfo.Description
