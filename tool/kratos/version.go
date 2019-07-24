@@ -8,9 +8,9 @@ import (
 
 var (
 	// Version is version
-	Version = "0.3.0"
+	Version = "0.2.1"
 	// BuildTime is BuildTime
-	BuildTime = "2019/07/19"
+	BuildTime = "2019/07/24"
 )
 
 // VersionOptions include version
