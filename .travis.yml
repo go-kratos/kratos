@@ -31,6 +31,7 @@ before_script:
   - nohup bash -c "$GOPATH/bin/discovery -conf $GOPATH/bin/discovery.toml &"
 
 script:
+  - go get -u go get -u github.com/bilibili/kratos/tool/kratos@$TRAVIS_COMMIT
   - go build ./...
   - go test ./...
 
