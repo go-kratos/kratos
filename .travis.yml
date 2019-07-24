@@ -31,9 +31,9 @@ before_script:
   - nohup bash -c "$GOPATH/bin/discovery -conf $GOPATH/bin/discovery.toml &"
 
 script:
+  - echo "go get -u github.com/bilibili/kratos/tool/kratos@$TRAVIS_COMMIT"
   - go build ./...
   - go test ./...
-  - go get -u github.com/bilibili/kratos/tool/kratos@"$TRAVIS_COMMIT"
 
 after_success:
   - golangci-lint run       # run a bunch of code checkers/linters in parallel 
