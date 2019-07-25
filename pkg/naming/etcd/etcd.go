@@ -245,6 +245,11 @@ func (a *appInfo) watch(appID string) {
 	prefix := fmt.Sprintf("/%s/%s/", etcdPrefix, appID)
 	retry := 0
 	for{
+		select {
+			case <- a.e.ctx.Done():
+				return
+			default:
+		}
 		rch := a.e.cli.Watch(a.e.ctx, prefix, clientv3.WithPrefix(),clientv3.WithRev(a.curRevision))
 		for wresp := range rch {
 			//when watch cancel retry
@@ -259,6 +264,11 @@ func (a *appInfo) watch(appID string) {
 				if ev.Type == mvccpb.PUT || ev.Type == mvccpb.DELETE {
 					var err error
 					for {
+						select {
+						case <- a.e.ctx.Done():
+							return
+						default:
+						}
 						// when fetch fail retry
 						if err = a.fetchstore(appID);err == nil{
 							break
@@ -267,6 +277,7 @@ func (a *appInfo) watch(appID string) {
 				}
 			}
 		}
+
 	}
 
 }
