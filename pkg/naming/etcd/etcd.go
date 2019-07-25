@@ -82,6 +82,7 @@ type appInfo struct {
 	ins      atomic.Value
 	e        *EtcdBuilder
 	once     sync.Once
+	curRevision int64
 }
 
 // Resolve etch resolver.
@@ -242,14 +243,32 @@ func (e *EtcdBuilder) Close() error {
 func (a *appInfo) watch(appID string) {
 	_ = a.fetchstore(appID)
 	prefix := fmt.Sprintf("/%s/%s/", etcdPrefix, appID)
-	rch := a.e.cli.Watch(a.e.ctx, prefix, clientv3.WithPrefix())
-	for wresp := range rch {
-		for _, ev := range wresp.Events {
-			if ev.Type == mvccpb.PUT || ev.Type == mvccpb.DELETE {
-				_ = a.fetchstore(appID)
+	retry := 0
+	for{
+		rch := a.e.cli.Watch(a.e.ctx, prefix, clientv3.WithPrefix(),clientv3.WithRev(a.curRevision))
+		for wresp := range rch {
+			//when watch cancel retry
+			//sometime watch will be canceled
+			if(wresp.Canceled){
+				log.Info("etcd: watch canceled appinof.watch(%v) appid(%s) retry(%d)",
+					prefix, appID,retry)
+				retry++
+				break
+			}
+			for _, ev := range wresp.Events {
+				if ev.Type == mvccpb.PUT || ev.Type == mvccpb.DELETE {
+					var err error
+					for {
+						// when fetch fail retry
+						if err = a.fetchstore(appID);err == nil{
+							break
+						}
+					}
+				}
 			}
 		}
 	}
+
 }
 
 func (a *appInfo) fetchstore(appID string) (err error) {
@@ -259,12 +278,14 @@ func (a *appInfo) fetchstore(appID string) (err error) {
 		log.Error("etcd: fetch client.Get(%s) error(%+v)", prefix, err)
 		return err
 	}
-
+	a.curRevision = resp.Header.Revision
 	ins, err := a.paserIns(resp)
 	if err != nil {
 		return err
 	}
 	a.store(ins)
+
+	a.curRevision ++
 	return nil
 }
 func (a *appInfo) store(ins *naming.InstancesInfo) {
