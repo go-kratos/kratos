@@ -33,7 +33,7 @@ var toolIndexs = []*Tool{
 	&Tool{
 		Name:      "genbts",
 		Alias:     "kratos-gen-bts",
-		BuildTime: time.Date(2019, 5, 5, 0, 0, 0, 0, time.Local),
+		BuildTime: time.Date(2019, 7, 23, 0, 0, 0, 0, time.Local),
 		Install:   "go get -u github.com/bilibili/kratos/tool/kratos-gen-bts",
 		Summary:   "缓存回源逻辑代码生成器",
 		Platform:  []string{"darwin", "linux", "windows"},
@@ -42,7 +42,7 @@ var toolIndexs = []*Tool{
 	&Tool{
 		Name:      "genmc",
 		Alias:     "kratos-gen-mc",
-		BuildTime: time.Date(2019, 5, 5, 0, 0, 0, 0, time.Local),
+		BuildTime: time.Date(2019, 7, 23, 0, 0, 0, 0, time.Local),
 		Install:   "go get -u github.com/bilibili/kratos/tool/kratos-gen-mc",
 		Summary:   "mc缓存代码生成",
 		Platform:  []string{"darwin", "linux", "windows"},

@@ -52,7 +52,7 @@ var _parser = map[string]func(string) interface{}{
 
 func parseMetadataTo(req *http.Request, to metadata.MD) {
 	for rawKey := range req.Header {
-		key := strings.ReplaceAll(strings.TrimLeft(strings.ToLower(rawKey), _httpHeaderMetadata), "-", "_")
+		key := strings.ReplaceAll(strings.TrimPrefix(strings.ToLower(rawKey), _httpHeaderMetadata), "-", "_")
 		rawValue := req.Header.Get(rawKey)
 		var value interface{} = rawValue
 		parser, ok := _parser[key]

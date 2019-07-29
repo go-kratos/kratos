@@ -41,6 +41,8 @@ type Pool struct {
 	*pool.Slice
 	// config
 	c *Config
+	// statfunc
+	statfunc func(name, addr, cmd string, t time.Time, err error) func()
 }
 
 // Config client settings.
@@ -76,7 +78,7 @@ func NewPool(c *Config, options ...DialOption) (p *Pool) {
 		}
 		return &traceConn{Conn: conn, connTags: []trace.Tag{trace.TagString(trace.TagPeerAddress, c.Addr)}}, nil
 	}
-	p = &Pool{Slice: p1, c: c}
+	p = &Pool{Slice: p1, c: c, statfunc: pstat}
 	return
 }
 
@@ -126,6 +128,24 @@ func initSentinel() {
 	}
 }
 
+// SetStatFunc set stat func.
+func (p *Pool) SetStatFunc(fn func(name, addr, cmd string, t time.Time, err error) func()) {
+	p.statfunc = fn
+}
+
+func pstat(name, addr, cmd string, t time.Time, err error) func() {
+	return func() {
+		_metricReqDur.Observe(int64(time.Since(t)/time.Millisecond), name, addr, cmd)
+		if err != nil {
+			if msg := formatErr(err, name, addr); msg != "" {
+				_metricReqErr.Inc(name, addr, cmd, msg)
+			}
+			return
+		}
+		_metricHits.Inc(name, addr)
+	}
+}
+
 func (pc *pooledConnection) Close() error {
 	c := pc.c
 	if _, ok := c.(errorConnection); ok {
@@ -169,9 +189,11 @@ func (pc *pooledConnection) Err() error {
 }
 
 func (pc *pooledConnection) Do(commandName string, args ...interface{}) (reply interface{}, err error) {
+	now := time.Now()
 	ci := LookupCommandInfo(commandName)
 	pc.state = (pc.state | ci.Set) &^ ci.Clear
 	reply, err = pc.c.Do(commandName, args...)
+	pc.p.statfunc(pc.p.c.Name, pc.p.c.Addr, commandName, now, err)()
 	return
 }
 
@@ -193,7 +215,9 @@ func (pc *pooledConnection) Flush() error {
 func (pc *pooledConnection) Receive() (reply interface{}, err error) {
 	reply, err = pc.c.Receive()
 	if len(pc.cmds) > 0 {
+		cmd := pc.cmds[0]
 		pc.cmds = pc.cmds[1:]
+		pc.p.statfunc(pc.p.c.Name, pc.p.c.Addr, cmd, pc.now, err)()
 	}
 	return
 }

@@ -37,14 +37,12 @@ func (d *{{.StructName}}) NAME(c context.Context) (res VALUE, err error) {
 			return
 		}
 		{{end}}
-		prom.BusinessErrCount.Incr("mc:NAME")
 		log.Errorv(c, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
 	{{if .GetSimpleValue}}
 		r, err := {{.ConvertBytes2Value}}
 		if err != nil {
-			prom.BusinessErrCount.Incr("mc:NAME")
 			log.Errorv(c, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 			return
 		}
@@ -75,7 +73,6 @@ func (d *{{.StructName}}) NAME(c context.Context, val VALUE) (err error) {
 		item := &memcache.Item{Key: key, Object: val, Expiration: {{.ExpireCode}}, Flags: {{.Encode}}}
 	{{end}}
 	if err = d.mc.Set(c, item); err != nil {
-		prom.BusinessErrCount.Incr("mc:NAME")
 		log.Errorv(c, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}
@@ -94,7 +91,6 @@ func (d *{{.StructName}}) NAME(c context.Context) (err error) {
 			err = nil
 			return
 		}
-		prom.BusinessErrCount.Incr("mc:NAME")
 		log.Errorv(c, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return
 	}

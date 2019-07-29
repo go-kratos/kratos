@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"testing"
 	"time"
-	
+
 	"github.com/bilibili/kratos/pkg/stat/metric"
 	xtime "github.com/bilibili/kratos/pkg/time"
 
@@ -145,6 +145,22 @@ func TestSRESummary(t *testing.T) {
 		assert.Equal(t, succ, int64(0))
 		assert.Equal(t, total, int64(0))
 	})
+}
+
+func TestTrueOnProba(t *testing.T) {
+	const proba = math.Pi / 10
+	const total = 100000
+	const epsilon = 0.05
+	var count int
+	b := getSREBreaker()
+	for i := 0; i < total; i++ {
+		if b.trueOnProba(proba) {
+			count++
+		}
+	}
+
+	ratio := float64(count) / float64(total)
+	assert.InEpsilon(t, proba, ratio, epsilon)
 }
 
 func BenchmarkSreBreakerAllow(b *testing.B) {

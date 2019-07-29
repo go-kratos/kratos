@@ -3,6 +3,8 @@ package warden
 import (
 	"context"
 	"fmt"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver/direct"
 	"net/url"
 	"os"
 	"strconv"
@@ -49,6 +51,11 @@ func baseMetadata() metadata.MD {
 		gmd[nmd.Color] = []string{env.Color}
 	}
 	return gmd
+}
+
+// Register direct resolver by default to handle direct:// scheme.
+func init() {
+	resolver.Register(direct.New())
 }
 
 // ClientConfig is rpc client conf.
@@ -116,7 +123,7 @@ func (c *Client) handle() grpc.UnaryClientInterceptor {
 		c.mutex.RUnlock()
 		brk := c.breaker.Get(method)
 		if err = brk.Allow(); err != nil {
-			statsClient.Incr(method, "breaker")
+			_metricClientReqCodeTotal.Inc(method, "breaker")
 			return
 		}
 		defer onBreaker(brk, &err)

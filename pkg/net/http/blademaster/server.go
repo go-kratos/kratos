@@ -18,7 +18,6 @@ import (
 	"github.com/bilibili/kratos/pkg/net/criticality"
 	"github.com/bilibili/kratos/pkg/net/ip"
 	"github.com/bilibili/kratos/pkg/net/metadata"
-	"github.com/bilibili/kratos/pkg/stat"
 	xtime "github.com/bilibili/kratos/pkg/time"
 
 	"github.com/pkg/errors"
@@ -29,13 +28,11 @@ const (
 )
 
 var (
-	_     IRouter = &Engine{}
-	stats         = stat.HTTPServer
+	_ IRouter = &Engine{}
 
 	_httpDSN       string
 	default405Body = []byte("405 method not allowed")
 	default404Body = []byte("404 page not found")
-
 )
 
 func init() {
@@ -155,7 +152,6 @@ type Engine struct {
 	allNoMethod []HandlerFunc
 	noRoute     []HandlerFunc
 	noMethod    []HandlerFunc
-
 }
 
 type injection struct {
@@ -177,15 +173,15 @@ func NewServer(conf *ServerConfig) *Engine {
 			basePath: "/",
 			root:     true,
 		},
-		conf: &ServerConfig{
-			Timeout: xtime.Duration(time.Second),
-		},
 		address:                ip.InternalIP(),
 		trees:                  make(methodTrees, 0, 9),
 		metastore:              make(map[string]map[string]interface{}),
 		methodConfigs:          make(map[string]*MethodConfig),
 		HandleMethodNotAllowed: true,
 		injections:             make([]injection, 0),
+	}
+	if err := engine.SetConfig(conf); err != nil {
+		panic(err)
 	}
 	engine.RouterGroup.engine = engine
 	// NOTE add prometheus monitor location

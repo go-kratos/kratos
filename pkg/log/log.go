@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/bilibili/kratos/pkg/conf/env"
-	"github.com/bilibili/kratos/pkg/stat/prom"
+	"github.com/bilibili/kratos/pkg/stat/metric"
 )
 
 // Config log config.
@@ -44,8 +44,10 @@ type Config struct {
 	Filter []string
 }
 
-// errProm prometheus error counter.
-var errProm = prom.BusinessErrCount
+// metricErrCount prometheus error counter.
+var (
+	metricErrCount = metric.NewBusinessMetricCount("log_error_total", "source")
+)
 
 // Render render log output
 type Render interface {
@@ -238,6 +240,6 @@ func Close() (err error) {
 
 func errIncr(lv Level, source string) {
 	if lv == _errorLevel {
-		errProm.Incr(source)
+		metricErrCount.Inc(source)
 	}
 }

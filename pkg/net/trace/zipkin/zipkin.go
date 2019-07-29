@@ -37,11 +37,12 @@ func (r *report) WriteSpan(raw *trace.Span) (err error) {
 			ID:       spanID,
 			ParentID: &parentID,
 		},
-		Name:      raw.Name(),
+		Name:      raw.OperationName(),
 		Timestamp: raw.StartTime(),
 		Duration:  raw.Duration(),
 		Tags:      make(map[string]string, len(tags)+len(logs)),
 	}
+	span.LocalEndpoint = &model.Endpoint{ServiceName: raw.ServiceName()}
 	for _, tag := range tags {
 		switch tag.Key {
 		case trace.TagSpanKind:
@@ -55,8 +56,6 @@ func (r *report) WriteSpan(raw *trace.Span) (err error) {
 			case "consumer":
 				span.Kind = model.Consumer
 			}
-		case trace.TagPeerService:
-			span.LocalEndpoint = &model.Endpoint{ServiceName: tag.Value.(string)}
 		default:
 			v, ok := tag.Value.(string)
 			if ok {

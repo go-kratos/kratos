@@ -31,9 +31,6 @@ const (
 	// Mid 外网账户用户id
 	Mid = "mid" // NOTE: ！！！业务可重新修改key名！！！
 
-	// Username LDAP平台的username
-	Username = "username"
-
 	// Device 客户端信息
 	Device = "device"
 
