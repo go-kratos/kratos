@@ -4,8 +4,8 @@
 
 ##### Requirments
 
-- [Grafana](https://grafana.com)
-- [Prometheus](https://prometheus.io) 
+- [Grafana](https://grafana.com) >= v6.1.4
+- [Prometheus](https://prometheus.io) >= 2.x
 
 ##### Quick start
 
