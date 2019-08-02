@@ -71,22 +71,22 @@ func (r *report) WriteSpan(raw *trace.Span) (err error) {
 	return
 }
 
-func (r *report)converLogsToAnnotations(logs []*protogen.Log) (annotations []model.Annotation){
-	annotations = make([]model.Annotation,0,len(annotations))
+func (r *report) converLogsToAnnotations(logs []*protogen.Log) (annotations []model.Annotation) {
+	annotations = make([]model.Annotation, 0, len(annotations))
 	for _, lg := range logs {
-		annotations = append(annotations,r.converLogToAnnotation(lg)...)
+		annotations = append(annotations, r.converLogToAnnotation(lg)...)
 	}
 	return annotations
 }
-func (r *report)converLogToAnnotation(log *protogen.Log) (annotations []model.Annotation){
-	annotations = make([]model.Annotation,0,len(log.Fields))
-	for _,field := range log.Fields{
+func (r *report) converLogToAnnotation(log *protogen.Log) (annotations []model.Annotation) {
+	annotations = make([]model.Annotation, 0, len(log.Fields))
+	for _, field := range log.Fields {
 		val := string(field.Value)
 		annotation := model.Annotation{
-			Timestamp: time.Unix(0,log.Timestamp),
-			Value: field.Key + " : "+val,
+			Timestamp: time.Unix(0, log.Timestamp),
+			Value:     field.Key + " : " + val,
 		}
-		annotations = append(annotations,annotation)
+		annotations = append(annotations, annotation)
 	}
 	return annotations
 }
