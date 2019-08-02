@@ -54,7 +54,8 @@ go build
 
 ## Documentation
 
-[简体中文](doc/wiki-cn/summary.md)
+> [简体中文](doc/wiki-cn/summary.md)  
+> [FAQ](doc/wiki-cn/FAQ.md)  
 
 ## License
 Kratos is under the MIT license. See the [LICENSE](./LICENSE) file for details.
