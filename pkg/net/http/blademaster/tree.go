@@ -5,9 +5,9 @@
 package blademaster
 
 import (
-"net/url"
-"strings"
-"unicode"
+	"net/url"
+	"strings"
+	"unicode"
 )
 
 // Param is a single URL parameter, consisting of a key and a value.

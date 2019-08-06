@@ -16,7 +16,7 @@ type RateLimiter struct {
 	logTime int64
 }
 
-// New return a ratelimit middleware.
+// NewRateLimiter return a ratelimit middleware.
 func NewRateLimiter(conf *bbr.Config) (s *RateLimiter) {
 	return &RateLimiter{
 		group:   bbr.NewGroup(conf),
