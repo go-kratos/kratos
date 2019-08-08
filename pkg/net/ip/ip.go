@@ -66,6 +66,7 @@ func InternalIP() string {
 		}
 	}
 	return ""
+
 }
 
 // isUp Interface is up
