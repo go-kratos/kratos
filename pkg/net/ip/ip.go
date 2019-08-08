@@ -48,6 +48,9 @@ func InternalIP() string {
 		return ""
 	}
 	for _, inter := range inters {
+		if !isUp(inter.Flags) {
+			continue
+		}
 		if !strings.HasPrefix(inter.Name, "lo") {
 			addrs, err := inter.Addrs()
 			if err != nil {
@@ -63,4 +66,9 @@ func InternalIP() string {
 		}
 	}
 	return ""
+}
+
+// isUp Interface is up 
+func isUp(v net.Flags) bool {
+	 return v&net.FlagUp == net.FlagUp 
 }
