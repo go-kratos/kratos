@@ -1,6 +1,10 @@
 # 准备工作
 
-推荐使用[kratos工具](kratos-tool.md)快速生成带`--grpc`的项目，如我们生成一个叫`kratos-demo`的项目。
+推荐使用[kratos工具](kratos-tool.md)快速生成带`grpc`的项目，如我们生成一个叫`kratos-demo`的项目。
+
+```
+kratos new kratos-demo --proto
+```
 
 # pb文件
 
