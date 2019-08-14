@@ -128,19 +128,24 @@ func (r *Resolver) updateproc() {
 				return
 			}
 		}
-		if ins, ok := r.nr.Fetch(context.Background()); ok {
-			instances, ok := ins.Instances[r.zone]
-			if !ok {
-				for _, value := range ins.Instances {
+		if insMap, ok := r.nr.Fetch(context.Background()); ok {
+			instances, _ := insMap[r.zone]
+			res := r.filter(instances)
+			if len(res) == 0 {
+				for _, value := range insMap {
 					instances = append(instances, value...)
 				}
+				res = r.filter(instances)
 			}
-			r.newAddress(r.filter(instances))
+			r.newAddress(res)
 		}
 	}
 }
 
 func (r *Resolver) filter(backends []*naming.Instance) (instances []*naming.Instance) {
+	if len(backends) == 0 {
+		return
+	}
 	for _, ins := range backends {
 		//如果r.clusters的长度大于0说明需要进行集群选择
 		if _, ok := r.clusters[ins.Metadata[naming.MetaCluster]]; !ok && len(r.clusters) > 0 {
