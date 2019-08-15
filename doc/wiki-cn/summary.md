@@ -21,6 +21,7 @@
   * [log-agent](log-agent.md)
 * [database](database.md)
   * [mysql](database-mysql.md)
+  * [mysql-orm](database-mysql-orm.md)
   * [hbase](database-hbase.md)
   * [tidb](database-tidb.md)
 * [cache](cache.md)
