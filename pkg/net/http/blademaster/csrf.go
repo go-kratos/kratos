@@ -5,7 +5,25 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/bilibili/kratos/pkg/log"
+	"go-common/library/log"
+)
+
+var (
+	_allowHosts = []string{
+		".bilibili.com",
+		".bilibili.co",
+		".biligame.com",
+		".im9.com",
+		".acg.tv",
+		".hdslb.com",
+		".ibilibili.cn",
+	}
+	_allowPatterns = []string{
+		// match by wechat appid
+		`^http(?:s)?://([\w\d]+\.)?servicewechat.com/(wx7564fd5313d24844|wx618ca8c24bf06c33)`,
+	}
+
+	validations = []func(*url.URL) bool{}
 )
 
 func matchHostSuffix(suffix string) func(*url.URL) bool {
@@ -20,29 +38,37 @@ func matchPattern(pattern *regexp.Regexp) func(*url.URL) bool {
 	}
 }
 
-// CSRF returns the csrf middleware to prevent invalid cross site request.
-// Only referer is checked currently.
-func CSRF(allowHosts []string, allowPattern []string) HandlerFunc {
-	validations := []func(*url.URL) bool{}
+// addHostSuffix add host suffix into validations
+func addHostSuffix(suffix string) {
+	validations = append(validations, matchHostSuffix(suffix))
+}
 
-	addHostSuffix := func(suffix string) {
-		validations = append(validations, matchHostSuffix(suffix))
-	}
-	addPattern := func(pattern string) {
-		validations = append(validations, matchPattern(regexp.MustCompile(pattern)))
-	}
+// addPattern add referer pattern into validations
+func addPattern(pattern string) {
+	validations = append(validations, matchPattern(regexp.MustCompile(pattern)))
+}
 
-	for _, r := range allowHosts {
+func init() {
+	for _, r := range _allowHosts {
 		addHostSuffix(r)
 	}
-	for _, p := range allowPattern {
+	for _, p := range _allowPatterns {
 		addPattern(p)
 	}
+}
 
+// CSRF returns the csrf middleware to prevent invalid cross site request.
+// Only referer is checked currently.
+func CSRF() HandlerFunc {
 	return func(c *Context) {
 		referer := c.Request.Header.Get("Referer")
+		params := c.Request.Form
+		cross := (params.Get("callback") != "" && params.Get("jsonp") == "jsonp") || (params.Get("cross_domain") != "")
 		if referer == "" {
-			log.V(5).Info("The request's Referer or Origin header is empty.")
+			if !cross {
+				return
+			}
+			log.V(5).Info("The request's Referer header is empty.")
 			c.AbortWithStatus(403)
 			return
 		}

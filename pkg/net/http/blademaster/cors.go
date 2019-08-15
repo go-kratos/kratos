@@ -6,9 +6,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/log"
+	"go-common/library/log"
 
 	"github.com/pkg/errors"
+)
+
+var (
+	allowOriginHosts = []string{
+		".bilibili.com",
+		".biligame.com",
+		".bilibili.co",
+		".im9.com",
+		".acg.tv",
+		".hdslb.com",
+		".ibilibili.cn",
+	}
 )
 
 // CORSConfig represents all available options for the middleware.
@@ -74,7 +86,7 @@ func (c *CORSConfig) Validate() error {
 }
 
 // CORS returns the location middleware with default configuration.
-func CORS(allowOriginHosts []string) HandlerFunc {
+func CORS() HandlerFunc {
 	config := &CORSConfig{
 		AllowMethods:     []string{"GET", "POST"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type"},
