@@ -71,10 +71,6 @@ func (e Code) Message() string {
 // Details return details.
 func (e Code) Details() []interface{} { return nil }
 
-// Equal for compatible.
-// Deprecated: please use ecode.EqualError.
-func (e Code) Equal(err error) bool { return EqualError(e, err) }
-
 // Int parse code int to error.
 func Int(i int) Code { return Code(i) }
 
