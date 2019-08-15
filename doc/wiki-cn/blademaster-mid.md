@@ -105,28 +105,68 @@ func Example() {
 
 # 内置中间件
 
-## 自适应限流
+## Recovery
 
-更多关于自适应限流的信息，请参考：[kratos 自适应限流](/doc/wiki-cn/ratelimit.md)
+代码位于`pkg/net/http/blademaster/recovery.go`内，用于recovery panic。会被`DefaultServer`默认注册，建议使用`NewServer`的话也将其作为首个中间件注册。
+
+## Trace
+
+代码位于`pkg/net/http/blademaster/trace.go`内，用于trace设置，并且实现了`net/http/httptrace`的接口，能够收集官方库内的调用栈详情。会被`DefaultServer`默认注册，建议使用`NewServer`的话也将其作为第二个中间件注册。
+
+## Logger
+
+代码位于`pkg/net/http/blademaster/logger.go`内，用于请求日志记录。会被`DefaultServer`默认注册，建议使用`NewServer`的话也将其作为第三个中间件注册。
+
+## CSRF
+
+代码位于`pkg/net/http/blademaster/csrf.go`内，用于防跨站请求。如要使用如下：
 
 ```go
-func Example() {
-	myHandler := func(ctx *bm.Context) {
-    		mid := metadata.Int64(ctx, metadata.Mid)
-    		ctx.JSON(fmt.Sprintf("%d", mid), nil)
-    	}
-    
-    
-    	e := bm.DefaultServer(nil)
-    
-    	// 挂载自适应限流中间件到 bm engine，使用默认配置
-    	limiter := bm.NewRateLimiter(nil)
-    	e.Use(limiter.Limit())
-    
-    	e.GET("/user", myHandler)
-    
-    	e.Start()
-}
+e := bm.DefaultServer(nil)
+// 挂载自适应限流中间件到 bm engine，使用默认配置
+csrf := bm.CSRF([]string{"bilibili.com"}, []string{"/a/api"})
+e.Use(csrf)
+// 或者
+e.GET("/api", csrf, myHandler)
+```
+
+## CORS
+
+代码位于`pkg/net/http/blademaster/cors.go`内，用于跨域允许请求。请注意该：
+1. 使用该中间件进行全局注册后，可"省略"单独为`OPTIONS`请求注册路由，如示例一。
+2. 使用该中间单独为某路由注册，需要为该路由再注册一个`OPTIONS`方法的同路径路由，如示例二。
+
+示例一：
+```go
+e := bm.DefaultServer(nil)
+// 挂载自适应限流中间件到 bm engine，使用默认配置
+cors := bm.CORS([]string{"github.com"})
+e.Use(cors)
+// 该路由可以默认针对 OPTIONS /api 的跨域请求支持
+e.POST("/api", myHandler)
+```
+
+示例二：
+```go
+e := bm.DefaultServer(nil)
+// 挂载自适应限流中间件到 bm engine，使用默认配置
+cors := bm.CORS([]string{"github.com"})
+// e.Use(cors) 不进行全局注册
+e.OPTIONS("/api", cors, myHandler) // 需要单独为/api进行OPTIONS方法注册
+e.POST("/api", cors, myHandler)
+```
+
+## 自适应限流
+
+更多关于自适应限流的信息可参考：[kratos 自适应限流](/doc/wiki-cn/ratelimit.md)。如要使用如下：
+
+```go
+e := bm.DefaultServer(nil)
+// 挂载自适应限流中间件到 bm engine，使用默认配置
+limiter := bm.NewRateLimiter(nil)
+e.Use(limiter.Limit())
+// 或者
+e.GET("/api", csrf, myHandler)
 ```
 
 # 扩展阅读
