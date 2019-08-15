@@ -220,7 +220,7 @@ func Test_Warden(t *testing.T) {
 
 func testValidation(t *testing.T) {
 	_, err := runClient(context.Background(), &clientConfig, t, "", 0)
-	if !ecode.RequestErr.Equal(err) {
+	if !ecode.EqualError(ecode.RequestErr, err) {
 		t.Fatalf("testValidation should return ecode.RequestErr,but is %v", err)
 	}
 }
@@ -296,7 +296,7 @@ func testBreaker(t *testing.T) {
 	for i := 0; i < 50; i++ {
 		_, err := c.SayHello(context.Background(), &pb.HelloRequest{Name: "breaker_test"})
 		if err != nil {
-			if ecode.ServiceUnavailable.Equal(err) {
+			if ecode.EqualError(ecode.ServiceUnavailable, err) {
 				return
 			}
 		}
@@ -334,7 +334,7 @@ func testLinkTimeout(t *testing.T) {
 	if err == nil {
 		t.Fatalf("testLinkTimeout must return error")
 	}
-	if !ecode.Deadline.Equal(err) {
+	if !ecode.EqualError(ecode.Deadline, err) {
 		t.Fatalf("testLinkTimeout must return error RPCDeadline,err:%v", err)
 	}
 
@@ -344,7 +344,7 @@ func testClientConfig(t *testing.T) {
 	if err == nil {
 		t.Fatalf("testLinkTimeout must return error")
 	}
-	if !ecode.Deadline.Equal(err) {
+	if !ecode.EqualError(ecode.Deadline, err) {
 		t.Fatalf("testLinkTimeout must return error RPCDeadline,err:%v", err)
 	}
 }
@@ -397,7 +397,7 @@ func testClientRecovery(t *testing.T) {
 		t.Fatalf("recovery must return ecode error")
 	}
 
-	if !ecode.ServerErr.Equal(e) {
+	if !ecode.EqualError(ecode.ServerErr, e) {
 		t.Fatalf("recovery must return ecode.RPCClientErr")
 	}
 }

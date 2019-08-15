@@ -193,7 +193,7 @@ func (db *DB) Prepared(query string) (stmt *Stmt) {
 func (db *DB) Query(c context.Context, query string, args ...interface{}) (rows *Rows, err error) {
 	idx := db.readIndex()
 	for i := range db.read {
-		if rows, err = db.read[(idx+i)%len(db.read)].query(c, query, args...); !ecode.ServiceUnavailable.Equal(err) {
+		if rows, err = db.read[(idx+i)%len(db.read)].query(c, query, args...); !ecode.EqualError(ecode.ServiceUnavailable, err) {
 			return
 		}
 	}
@@ -206,7 +206,7 @@ func (db *DB) Query(c context.Context, query string, args ...interface{}) (rows 
 func (db *DB) QueryRow(c context.Context, query string, args ...interface{}) *Row {
 	idx := db.readIndex()
 	for i := range db.read {
-		if row := db.read[(idx+i)%len(db.read)].queryRow(c, query, args...); !ecode.ServiceUnavailable.Equal(row.err) {
+		if row := db.read[(idx+i)%len(db.read)].queryRow(c, query, args...); !ecode.EqualError(ecode.ServiceUnavailable, row.err) {
 			return row
 		}
 	}

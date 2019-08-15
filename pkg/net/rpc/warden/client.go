@@ -3,14 +3,15 @@ package warden
 import (
 	"context"
 	"fmt"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver/direct"
 	"net/url"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver"
+	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver/direct"
 
 	"github.com/bilibili/kratos/pkg/conf/env"
 	"github.com/bilibili/kratos/pkg/conf/flagvar"
@@ -84,14 +85,15 @@ type Client struct {
 	handlers []grpc.UnaryClientInterceptor
 }
 
-type TimeOutCallOption struct {
+// TimeoutCallOption timeout option.
+type TimeoutCallOption struct {
 	*grpc.EmptyCallOption
 	Timeout time.Duration
 }
 
 // WithTimeoutCallOption can override the timeout in ctx and the timeout in the configuration file
-func WithTimeoutCallOption(timeout time.Duration) *TimeOutCallOption {
-	return &TimeOutCallOption{&grpc.EmptyCallOption{}, timeout}
+func WithTimeoutCallOption(timeout time.Duration) *TimeoutCallOption {
+	return &TimeoutCallOption{&grpc.EmptyCallOption{}, timeout}
 }
 
 // handle returns a new unary client interceptor for OpenTracing\Logging\LinkTimeout.
@@ -127,10 +129,10 @@ func (c *Client) handle() grpc.UnaryClientInterceptor {
 			return
 		}
 		defer onBreaker(brk, &err)
-		var timeOpt *TimeOutCallOption
+		var timeOpt *TimeoutCallOption
 		for _, opt := range opts {
 			var tok bool
-			timeOpt, tok = opt.(*TimeOutCallOption)
+			timeOpt, tok = opt.(*TimeoutCallOption)
 			if tok {
 				break
 			}
@@ -173,9 +175,10 @@ func (c *Client) handle() grpc.UnaryClientInterceptor {
 
 func onBreaker(breaker breaker.Breaker, err *error) {
 	if err != nil && *err != nil {
-		if ecode.ServerErr.Equal(*err) || ecode.ServiceUnavailable.Equal(*err) || ecode.Deadline.Equal(*err) || ecode.LimitExceed.Equal(*err) {
+		if ecode.EqualError(ecode.ServerErr, *err) || ecode.EqualError(ecode.ServiceUnavailable, *err) || ecode.EqualError(ecode.Deadline, *err) || ecode.EqualError(ecode.LimitExceed, *err) {
 			breaker.MarkFailed()
 			return
+
 		}
 	}
 	breaker.MarkSuccess()
