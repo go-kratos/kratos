@@ -11,7 +11,6 @@ import (
 
 // Config mysql config.
 type Config struct {
-	Addr         string          // for trace
 	DSN          string          // write data source name.
 	ReadDSN      []string        // read data source name.
 	Active       int             // pool
