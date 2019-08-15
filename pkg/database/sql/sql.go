@@ -8,10 +8,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"go-common/library/ecode"
-	"go-common/library/log"
-	"go-common/library/net/netutil/breaker"
-	"go-common/library/net/trace"
+	"github.com/bilibili/kratos/pkg/ecode"
+	"github.com/bilibili/kratos/pkg/log"
+	"github.com/bilibili/kratos/pkg/net/netutil/breaker"
+	"github.com/bilibili/kratos/pkg/net/trace"
 
 	"github.com/pkg/errors"
 )
