@@ -134,7 +134,6 @@ func (group *RouterGroup) HEAD(relativePath string, handlers ...HandlerFunc) IRo
 	return group.handle("HEAD", relativePath, handlers...)
 }
 
-
 func (group *RouterGroup) combineHandlers(handlerGroups ...[]HandlerFunc) []HandlerFunc {
 	finalSize := len(group.Handlers)
 	for _, handlers := range handlerGroups {
@@ -190,4 +189,3 @@ func (group *RouterGroup) Any(relativePath string, handlers ...HandlerFunc) IRou
 	group.handle("TRACE", relativePath, handlers...)
 	return group.returnObj()
 }
-
