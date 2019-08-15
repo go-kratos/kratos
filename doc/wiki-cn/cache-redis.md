@@ -180,7 +180,7 @@ func (d *Dao) DemoIncrbys(c context.Context, pid int) (err error) {
 
 ## 返回值转换 
 
-与[memcache包](cache-mc.md)类似地，kratos/pkg/cache/redis包中也提供了Scan方法将redis server的返回值转换为golang类型。
+kratos/pkg/cache/redis包中也提供了Scan方法将redis server的返回值转换为golang类型。
 
 除此之外，kratos/pkg/cache/redis包提供了大量返回值转换的快捷方式:
 

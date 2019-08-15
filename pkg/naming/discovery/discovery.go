@@ -338,7 +338,7 @@ func (d *Discovery) Register(ctx context.Context, ins *naming.Instance) (cancelF
 		for {
 			select {
 			case <-ticker.C:
-				if err := d.renew(ctx, ins); err != nil && ecode.NothingFound.Equal(err) {
+				if err := d.renew(ctx, ins); err != nil && ecode.EqualError(ecode.NothingFound, err) {
 					_ = d.register(ctx, ins)
 				}
 			case <-ctx.Done():
@@ -380,7 +380,7 @@ func (d *Discovery) register(ctx context.Context, ins *naming.Instance) (err err
 			uri, c.Zone, c.Env, ins.AppID, ins.Addrs, err)
 		return
 	}
-	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
+	if ec := ecode.Int(res.Code); !ecode.Equal(ecode.OK, ec) {
 		log.Warn("discovery: register client.Get(%v)  env(%s) appid(%s) addrs(%v) code(%v)", uri, c.Env, ins.AppID, ins.Addrs, res.Code)
 		err = ec
 		return
@@ -408,9 +408,9 @@ func (d *Discovery) renew(ctx context.Context, ins *naming.Instance) (err error)
 			uri, c.Env, ins.AppID, c.Host, err)
 		return
 	}
-	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
+	if ec := ecode.Int(res.Code); !ecode.Equal(ecode.OK, ec) {
 		err = ec
-		if ec.Equal(ecode.NothingFound) {
+		if ecode.Equal(ecode.NothingFound, ec) {
 			return
 		}
 		log.Error("discovery: renew client.Get(%v) env(%s) appid(%s) hostname(%s) code(%v)",
@@ -440,7 +440,7 @@ func (d *Discovery) cancel(ins *naming.Instance) (err error) {
 			uri, c.Env, ins.AppID, c.Host, err)
 		return
 	}
-	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
+	if ec := ecode.Int(res.Code); !ecode.Equal(ecode.OK, ec) {
 		log.Warn("discovery cancel client.Get(%v)  env(%s) appid(%s) hostname(%s) code(%v)",
 			uri, c.Env, ins.AppID, c.Host, res.Code)
 		err = ec
@@ -484,7 +484,7 @@ func (d *Discovery) set(ctx context.Context, ins *naming.Instance) (err error) {
 			uri, conf.Zone, conf.Env, ins.AppID, ins.Addrs, err)
 		return
 	}
-	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
+	if ec := ecode.Int(res.Code); !ecode.Equal(ecode.OK, ec) {
 		log.Warn("discovery: set client.Get(%v)  env(%s) appid(%s) addrs(%v)  code(%v)",
 			uri, conf.Env, ins.AppID, ins.Addrs, res.Code)
 		err = ec
@@ -587,8 +587,8 @@ func (d *Discovery) polls(ctx context.Context) (apps map[string]*naming.Instance
 		log.Error("discovery: client.Get(%s) error(%+v)", uri+"?"+params.Encode(), err)
 		return
 	}
-	if ec := ecode.Int(res.Code); !ec.Equal(ecode.OK) {
-		if !ec.Equal(ecode.NotModified) {
+	if ec := ecode.Int(res.Code); !ecode.Equal(ecode.OK, ec) {
+		if !ecode.Equal(ecode.NotModified, ec) {
 			log.Error("discovery: client.Get(%s) get error code(%d)", uri+"?"+params.Encode(), res.Code)
 			err = ec
 		}
@@ -611,7 +611,7 @@ func (d *Discovery) broadcast(apps map[string]*naming.InstancesInfo) {
 	for appID, v := range apps {
 		var count int
 		// v maybe nil in old version(less than v1.1) discovery,check incase of panic
-		if v==nil {
+		if v == nil {
 			continue
 		}
 		for zone, ins := range v.Instances {
