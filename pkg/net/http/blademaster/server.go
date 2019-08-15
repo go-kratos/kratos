@@ -383,6 +383,8 @@ func (engine *Engine) UseFunc(middleware ...HandlerFunc) IRoutes {
 // For example, this is the right place for a logger or error management middleware.
 func (engine *Engine) Use(middleware ...Handler) IRoutes {
 	engine.RouterGroup.Use(middleware...)
+	engine.rebuild404Handlers()
+	engine.rebuild405Handlers()
 	return engine
 }
 
