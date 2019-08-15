@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	_messages atomic.Value         // NOTE: stored map[string]map[int]string
+	_messages atomic.Value         // NOTE: stored map[int]string
 	_codes    = map[int]struct{}{} // register codes.
 )
 

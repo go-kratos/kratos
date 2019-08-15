@@ -74,12 +74,6 @@ func (s *Status) WithDetails(pbs ...proto.Message) (*Status, error) {
 	return s, nil
 }
 
-// Equal for compatible.
-// Deprecated: please use ecode.EqualError.
-func (s *Status) Equal(err error) bool {
-	return EqualError(s, err)
-}
-
 // Proto return origin protobuf message
 func (s *Status) Proto() *types.Status {
 	return s.s
