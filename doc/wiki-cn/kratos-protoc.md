@@ -1,37 +1,30 @@
 ### kratos tool protoc
 
-```
-// generate all
+```shell
+# generate all
 kratos tool protoc api.proto
-// generate gRPC
+# generate gRPC
 kratos tool protoc --grpc api.proto
-// generate BM HTTP
+# generate BM HTTP
 kratos tool protoc --bm api.proto
-// generate swagger
+# generate ecode
+kratos tool protoc --ecode api.proto
+# generate swagger
 kratos tool protoc --swagger api.proto
 ```
-执行对应生成 `api.pb.go/api.bm.go/api.swagger.json` 源文档。
 
-> 该工具在Windows/Linux下运行，需提前安装好 protobuf 工具
+执行生成如 `api.pb.go/api.bm.go/api.swagger.json/api.ecode.go` 的对应文件，需要注意的是：`ecode`生成有固定规则，需要首先是`enum`类型，且`enum`名字要以`ErrCode`结尾，如`enum UserErrCode`。详情可见：[example](https://github.com/bilibili/kratos/tree/master/example/protobuf)
 
-该工具实际是一段`shell`脚本，其中自动将`protoc`命令进行了拼接，识别了需要的`*.proto`文件和当前目录下的`proto`文件，最终会拼接为如下命令进行执行：
+> 该工具在Windows/Linux下运行，需提前安装好 [protobuf](https://github.com/google/protobuf) 工具
+
+`kratos tool protoc`本质上是拼接好了`protoc`命令然后进行执行，在执行时会打印出对应执行的`protoc`命令，如下可见：
 
 ```shell
-export $KRATOS_HOME = kratos路径
-export $KRATOS_DEMO = 项目路径
-
-// 生成：api.pb.go
-protoc -I$GOPATH/src:$KRATOS_HOME/third_party:$KRATOS_DEMO/api --gofast_out=plugins=grpc:$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
-
-// 生成：api.bm.go
-protoc -I$GOPATH/src:$KRATOS_HOME/third_party:$KRATOS_DEMO/api --bm_out=$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
-
-// 生成：api.swagger.json
-protoc -I$GOPATH/src:$KRATOS_HOME/third_party:$KRATOS_DEMO/api --bswagger_out=$KRATOS_DEMO/api $KRATOS_DEMO/api/api.proto
+protoc --proto_path=$GOPATH --proto_path=$GOPATH/github.com/bilibili/kratos/third_party --proto_path=. --bm_out=:. api.proto
+protoc --proto_path=$GOPATH --proto_path=$GOPATH/github.com/bilibili/kratos/third_party --proto_path=. --gofast_out=plugins=grpc:. api.proto
+protoc --proto_path=$GOPATH --proto_path=$GOPATH/github.com/bilibili/kratos/third_party --proto_path=. --bswagger_out=:. api.proto
+protoc --proto_path=$GOPATH --proto_path=$GOPATH/github.com/bilibili/kratos/third_party --proto_path=. --ecode_out=:. api.proto
 ```
-
-大家也可以参考该命令进行`proto`生成，也可以参考 [protobuf](https://github.com/google/protobuf) 官方参数。
-
 
 -------------
 
