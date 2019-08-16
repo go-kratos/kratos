@@ -56,6 +56,7 @@ func newCgroupCPU() (cpu *cgroupCPU, err error) {
 	preTotal, err := totalCPUUsage()
 	if err != nil {
 		err = errors.Errorf("totalCPUUsage() failed!err:=%v", err)
+		return
 	}
 	cpu = &cgroupCPU{
 		frequency: maxFreq,
