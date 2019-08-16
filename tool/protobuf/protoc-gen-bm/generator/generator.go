@@ -44,9 +44,6 @@ func (t *bm) Generate(in *plugin.CodeGeneratorRequest) *plugin.CodeGeneratorResp
 
 func (t *bm) generateForFile(file *descriptor.FileDescriptorProto) *plugin.CodeGeneratorResponse_File {
 	resp := new(plugin.CodeGeneratorResponse_File)
-	//if len(file.Service) == 0 {
-	//	return nil
-	//}
 
 	t.generateFileHeader(file, t.GenPkgName)
 	t.generateImports(file)
@@ -56,11 +53,8 @@ func (t *bm) generateForFile(file *descriptor.FileDescriptorProto) *plugin.CodeG
 		count += t.generateBMInterface(file, service)
 		t.generateBMRoute(file, service, i)
 	}
-	//if count == 0 {
-	//	return nil
-	//}
 
-	resp.Name = proto.String(naming.GoFileName(file, ".bm.go"))
+	resp.Name = proto.String(naming.GenFileName(file, ".bm.go"))
 	resp.Content = proto.String(t.FormattedOutput())
 	t.Output.Reset()
 
@@ -88,13 +82,13 @@ func (t *bm) generateFileHeader(file *descriptor.FileDescriptorProto, pkgName st
 	t.P("// source: ", file.GetName())
 	t.P()
 	if t.filesHandled == 0 {
-		// doc for the first file
-		t.P("/*")
-		t.P("Package ", t.GenPkgName, " is a generated blademaster stub package.")
-		t.P("This code was generated with kratos/tool/protobuf/protoc-gen-bm ", generator.Version, ".")
-		t.P()
 		comment, err := t.Reg.FileComments(file)
 		if err == nil && comment.Leading != "" {
+			// doc for the first file
+			t.P("/*")
+			t.P("Package ", t.GenPkgName, " is a generated blademaster stub package.")
+			t.P("This code was generated with kratos/tool/protobuf/protoc-gen-bm ", generator.Version, ".")
+			t.P()
 			for _, line := range strings.Split(comment.Leading, "\n") {
 				line = strings.TrimPrefix(line, " ")
 				// ensure we don't escape from the block comment
@@ -102,12 +96,12 @@ func (t *bm) generateFileHeader(file *descriptor.FileDescriptorProto, pkgName st
 				t.P(line)
 			}
 			t.P()
+			t.P("It is generated from these files:")
+			for _, f := range t.GenFiles {
+				t.P("\t", f.GetName())
+			}
+			t.P("*/")
 		}
-		t.P("It is generated from these files:")
-		for _, f := range t.GenFiles {
-			t.P("\t", f.GetName())
-		}
-		t.P("*/")
 	}
 	t.P(`package `, pkgName)
 	t.P()

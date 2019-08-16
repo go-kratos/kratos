@@ -27,6 +27,11 @@ func main() {
 			Usage:       "whether to use swagger for generation",
 			Destination: &withSwagger,
 		},
+		cli.BoolFlag{
+			Name:        "ecode",
+			Usage:       "whether to use ecode for generation",
+			Destination: &withEcode,
+		},
 	}
 	app.Action = func(c *cli.Context) error {
 		return protocAction(c)

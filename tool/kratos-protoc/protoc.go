@@ -20,16 +20,18 @@ var (
 	withBM      bool
 	withGRPC    bool
 	withSwagger bool
+	withEcode   bool
 )
 
 func protocAction(ctx *cli.Context) (err error) {
 	if err = checkProtoc(); err != nil {
 		return err
 	}
-	if !withGRPC && !withBM && !withSwagger {
+	if !withGRPC && !withBM && !withSwagger && !withEcode {
 		withBM = true
 		withGRPC = true
 		withSwagger = true
+		withEcode = true
 	}
 	if withBM {
 		if err = installBMGen(); err != nil {
@@ -52,6 +54,14 @@ func protocAction(ctx *cli.Context) (err error) {
 			return
 		}
 		if err = genSwagger(ctx); err != nil {
+			return
+		}
+	}
+	if withEcode {
+		if err = installEcodeGen(); err != nil {
+			return
+		}
+		if err = genEcode(ctx); err != nil {
 			return
 		}
 	}
