@@ -10,16 +10,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/conf/dsn"
-	"github.com/bilibili/kratos/pkg/log"
-	nmd "github.com/bilibili/kratos/pkg/net/metadata"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/ratelimiter"
-	"github.com/bilibili/kratos/pkg/net/trace"
-	xtime "github.com/bilibili/kratos/pkg/time"
+	"go-common/library/conf/dsn"
+	"go-common/library/log"
+	nmd "go-common/library/net/metadata"
+	"go-common/library/net/rpc/warden/ratelimiter"
+	"go-common/library/net/trace"
+	xtime "go-common/library/time"
 
 	//this package is for json format response
-	_ "github.com/bilibili/kratos/pkg/net/rpc/warden/internal/encoding/json"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/internal/status"
+	_ "go-common/library/net/rpc/warden/internal/encoding/json"
+	"go-common/library/net/rpc/warden/internal/status"
 
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -110,6 +110,7 @@ func (s *Server) handle() grpc.UnaryServerInterceptor {
 		var t trace.Trace
 		cmd := nmd.MD{}
 		if gmd, ok := metadata.FromIncomingContext(ctx); ok {
+			t, _ = trace.Extract(trace.GRPCFormat, gmd)
 			for key, vals := range gmd {
 				if nmd.IsIncomingKey(key) {
 					cmd[key] = vals[0]
@@ -225,6 +226,11 @@ func (s *Server) SetConfig(conf *ServerConfig) (err error) {
 	return nil
 }
 
+// Config return the server's config.
+func (s *Server) Config() ServerConfig {
+	return *s.conf
+}
+
 // interceptor is a single interceptor out of a chain of many interceptors.
 // Execution is done in left-to-right order, including passing of context.
 // For example ChainUnaryServer(one, two, three) will execute one before two before three, and three
@@ -304,7 +310,6 @@ func (s *Server) Start() (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Info("warden: start grpc listen addr: %v", lis.Addr())
 	reflection.Register(s.server)
 	go func() {
 		if err := s.Serve(lis); err != nil {

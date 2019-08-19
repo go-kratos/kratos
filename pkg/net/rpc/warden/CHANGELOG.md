@@ -1,23 +1,15 @@
 ### net/rpc/warden
 
-##### Version 1.1.21
-1. fix resolver bug
-
-##### Version 1.1.20
-1. client增加timeoutCallOpt强制覆盖每次请求的timeout
-
-##### Version 1.1.19
-1. 升级grpc至1.22.0
-2. client增加keepAlive选项
-
 ##### Version 1.1.18
-1. 修复resolver过滤导致的子集bug
+1. 更新grp
+2. 增加 GetConfig
 
 ##### Version 1.1.17
 1. 移除 bbr feature flag，默认开启自适应限流 
 
 ##### Version 1.1.16
-1. 使用 flag(grpc.bbr) 绑定 BBR 限流
+1. client 增加timeoutOpt 强制刷新timeout
+2. 使用 flag(grpc.bbr) 绑定 BBR 限流
 
 ##### Version 1.1.15
 1. warden使用 metadata.Range 方法
