@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/ecode"
-	"github.com/bilibili/kratos/pkg/log"
-	"github.com/bilibili/kratos/pkg/net/metadata"
+	"go-common/library/ecode"
+	"go-common/library/log"
+	"go-common/library/net/metadata"
 )
 
 // Logger is logger  middleware
@@ -26,6 +26,10 @@ func Logger() HandlerFunc {
 
 		c.Next()
 
+		var mid int64
+		if v, ok := c.Get("mid"); ok {
+			mid, _ = v.(int64)
+		}
 		err := c.Error
 		cerr := ecode.Cause(err)
 		dt := time.Since(now)
@@ -34,8 +38,18 @@ func Logger() HandlerFunc {
 			caller = noUser
 		}
 
-		_metricServerReqCodeTotal.Inc(c.RoutePath[1:], caller, strconv.FormatInt(int64(cerr.Code()), 10))
-		_metricServerReqDur.Observe(int64(dt/time.Millisecond), c.RoutePath[1:], caller)
+		buvid := ""
+		if dev, ok := c.Get("device"); ok {
+			device, ok := dev.(*Device)
+			if ok {
+				buvid = device.Buvid
+			}
+		}
+
+		if c.RoutePath != "" {
+			MetricServerReqCodeTotal.Inc(c.RoutePath[1:], caller, strconv.FormatInt(int64(cerr.Code()), 10))
+			MetricServerReqDur.Observe(int64(dt/time.Millisecond), c.RoutePath[1:], caller)
+		}
 
 		lf := log.Infov
 		errmsg := ""
@@ -53,6 +67,7 @@ func Logger() HandlerFunc {
 		}
 		lf(c,
 			log.KVString("method", req.Method),
+			log.KVInt64("mid", mid),
 			log.KVString("ip", ip),
 			log.KVString("user", caller),
 			log.KVString("path", path),
@@ -63,6 +78,7 @@ func Logger() HandlerFunc {
 			log.KVString("err", errmsg),
 			log.KVFloat64("timeout_quota", quota),
 			log.KVFloat64("ts", dt.Seconds()),
+			log.KVString("buvid", buvid),
 			log.KVString("source", "http-access-log"),
 		)
 	}

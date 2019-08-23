@@ -1,0 +1,10 @@
+syntax = "proto3";
+package wdcli;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "wdcli";
+
+extend google.protobuf.FileOptions {
+	string appid = 1000;
+}

@@ -1,0 +1,16 @@
+syntax = "proto3";
+package ecode;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "ecode";
+
+extend google.protobuf.FileOptions {
+	bool in_go_common = 1000; // 是否在go-common/library/eocde内
+}
+
+extend google.protobuf.EnumOptions {
+	bool keep_ok = 1000; // 需要和in_go_common配合使用，必须在go-common/library/ecode内才能使OK生效
+	int32 range_begin = 1001;
+	int32 range_end = 1002;
+}

@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/bilibili/kratos/pkg/ecode"
-	"github.com/bilibili/kratos/pkg/net/http/blademaster/binding"
-	"github.com/bilibili/kratos/pkg/net/http/blademaster/render"
+	"go-common/library/ecode"
+	"go-common/library/net/http/blademaster/binding"
+	"go-common/library/net/http/blademaster/render"
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/gogo/protobuf/types"
@@ -49,7 +49,6 @@ type Context struct {
 	RoutePath string
 
 	Params Params
-
 }
 
 /************************************/
@@ -66,7 +65,6 @@ func (c *Context) Next() {
 		c.index++
 	}
 }
-
 
 // Abort prevents pending handlers from being called. Note that this will not stop the current handler.
 // Let's say you have an authorization middleware that validates that the current request is authorized.
@@ -142,8 +140,10 @@ func (c *Context) Render(code int, r render.Render) {
 	}
 
 	params := c.Request.Form
-	cb := template.JSEscapeString(params.Get("callback"))
-	jsonp := cb != ""
+
+	cb := params.Get("callback")
+	cb = template.JSEscapeString(cb)
+	jsonp := cb != "" && params.Get("jsonp") == "jsonp"
 	if jsonp {
 		c.Writer.Write([]byte(cb))
 		c.Writer.Write(_openParen)
@@ -272,32 +272,35 @@ func (c *Context) Redirect(code int, location string) {
 }
 
 // BindWith bind req arg with parser.
-func (c *Context) BindWith(obj interface{}, b binding.Binding) error {
-	return c.mustBindWith(obj, b)
+func (c *Context) BindWith(obj interface{}, binds ...binding.Binding) error {
+	return c.mustBindWith(obj, binds...)
 }
 
-// Bind bind req arg with defult form binding.
+// Bind bind req arg with defult form binding and request binding.
 func (c *Context) Bind(obj interface{}) error {
-	return c.mustBindWith(obj, binding.Form)
+	return c.mustBindWith(obj, binding.Form, binding.Request)
 }
 
 // mustBindWith binds the passed struct pointer using the specified binding engine.
 // It will abort the request with HTTP 400 if any error ocurrs.
 // See the binding package.
-func (c *Context) mustBindWith(obj interface{}, b binding.Binding) (err error) {
-	if err = b.Bind(c.Request, obj); err != nil {
-		c.Error = ecode.RequestErr
-		c.Render(http.StatusOK, render.JSON{
-			Code:    ecode.RequestErr.Code(),
-			Message: err.Error(),
-			Data:    nil,
-		})
-		c.Abort()
+func (c *Context) mustBindWith(obj interface{}, binds ...binding.Binding) error {
+	for _, b := range binds {
+		if err := b.Bind(c.Request, obj); err != nil {
+			c.Error = ecode.RequestErr
+			c.Render(http.StatusOK, render.JSON{
+				Code:    ecode.RequestErr.Code(),
+				Message: err.Error(),
+				Data:    nil,
+			})
+			c.Abort()
+			return err
+		}
 	}
-	return
+	return nil
 }
 
 func writeStatusCode(w http.ResponseWriter, ecode int) {
 	header := w.Header()
-	header.Set("kratos-status-code", strconv.FormatInt(int64(ecode), 10))
+	header.Set("bili-status-code", strconv.FormatInt(int64(ecode), 10))
 }

@@ -8,10 +8,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/ecode"
-	"github.com/bilibili/kratos/pkg/log"
-	"github.com/bilibili/kratos/pkg/net/netutil/breaker"
-	"github.com/bilibili/kratos/pkg/net/trace"
+	"go-common/library/ecode"
+	"go-common/library/log"
+	"go-common/library/net/netutil/breaker"
+	"go-common/library/net/trace"
 
 	"github.com/pkg/errors"
 )
@@ -196,7 +196,7 @@ func (db *DB) Prepared(query string) (stmt *Stmt) {
 func (db *DB) Query(c context.Context, query string, args ...interface{}) (rows *Rows, err error) {
 	idx := db.readIndex()
 	for i := range db.read {
-		if rows, err = db.read[(idx+i)%len(db.read)].query(c, query, args...); !ecode.EqualError(ecode.ServiceUnavailable, err) {
+		if rows, err = db.read[(idx+i)%len(db.read)].query(c, query, args...); !ecode.ServiceUnavailable.Equal(err) {
 			return
 		}
 	}
@@ -209,7 +209,7 @@ func (db *DB) Query(c context.Context, query string, args ...interface{}) (rows 
 func (db *DB) QueryRow(c context.Context, query string, args ...interface{}) *Row {
 	idx := db.readIndex()
 	for i := range db.read {
-		if row := db.read[(idx+i)%len(db.read)].queryRow(c, query, args...); !ecode.EqualError(ecode.ServiceUnavailable, row.err) {
+		if row := db.read[(idx+i)%len(db.read)].queryRow(c, query, args...); !ecode.ServiceUnavailable.Equal(row.err) {
 			return row
 		}
 	}
