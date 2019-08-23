@@ -2,6 +2,7 @@ package naming
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -23,6 +24,16 @@ func GetVersionPrefix(pkg string) string {
 		return pkg
 	}
 	return ""
+}
+
+// GenFileName returns the output name for the generated Go file.
+func GenFileName(f *descriptor.FileDescriptorProto, suffix string) string {
+	name := *f.Name
+	if ext := path.Ext(name); ext == ".pb" || ext == ".proto" || ext == ".protodevel" {
+		name = name[:len(name)-len(ext)]
+	}
+	name += suffix
+	return name
 }
 
 func ServiceName(service *descriptor.ServiceDescriptorProto) string {

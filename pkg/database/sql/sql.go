@@ -38,7 +38,7 @@ var (
 type DB struct {
 	write  *conn
 	read   []*conn
-	idx    uint64
+	idx    int64
 	master *DB
 }
 
@@ -47,6 +47,7 @@ type conn struct {
 	*sql.DB
 	breaker breaker.Breaker
 	conf    *Config
+	addr    string
 }
 
 // Tx transaction.
@@ -130,17 +131,19 @@ func Open(c *Config) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	addr := parseDSNAddr(c.DSN)
 	brkGroup := breaker.NewGroup(c.Breaker)
-	brk := brkGroup.Get(c.Addr)
-	w := &conn{DB: d, breaker: brk, conf: c}
+	brk := brkGroup.Get(addr)
+	w := &conn{DB: d, breaker: brk, conf: c, addr: addr}
 	rs := make([]*conn, 0, len(c.ReadDSN))
 	for _, rd := range c.ReadDSN {
 		d, err := connect(c, rd)
 		if err != nil {
 			return nil, err
 		}
-		brk := brkGroup.Get(parseDSNAddr(rd))
-		r := &conn{DB: d, breaker: brk, conf: c}
+		addr = parseDSNAddr(rd)
+		brk := brkGroup.Get(addr)
+		r := &conn{DB: d, breaker: brk, conf: c, addr: addr}
 		rs = append(rs, r)
 	}
 	db.write = w
@@ -193,7 +196,7 @@ func (db *DB) Prepared(query string) (stmt *Stmt) {
 func (db *DB) Query(c context.Context, query string, args ...interface{}) (rows *Rows, err error) {
 	idx := db.readIndex()
 	for i := range db.read {
-		if rows, err = db.read[(idx+i)%len(db.read)].query(c, query, args...); !ecode.ServiceUnavailable.Equal(err) {
+		if rows, err = db.read[(idx+i)%len(db.read)].query(c, query, args...); !ecode.EqualError(ecode.ServiceUnavailable, err) {
 			return
 		}
 	}
@@ -206,7 +209,7 @@ func (db *DB) Query(c context.Context, query string, args ...interface{}) (rows 
 func (db *DB) QueryRow(c context.Context, query string, args ...interface{}) *Row {
 	idx := db.readIndex()
 	for i := range db.read {
-		if row := db.read[(idx+i)%len(db.read)].queryRow(c, query, args...); !ecode.ServiceUnavailable.Equal(row.err) {
+		if row := db.read[(idx+i)%len(db.read)].queryRow(c, query, args...); !ecode.EqualError(ecode.ServiceUnavailable, row.err) {
 			return row
 		}
 	}
@@ -217,8 +220,8 @@ func (db *DB) readIndex() int {
 	if len(db.read) == 0 {
 		return 0
 	}
-	v := atomic.AddUint64(&db.idx, 1)
-	return int(v % uint64(len(db.read)))
+	v := atomic.AddInt64(&db.idx, 1)
+	return int(v) % len(db.read)
 }
 
 // Close closes the write and read database, releasing any open resources.
@@ -271,7 +274,7 @@ func (db *conn) begin(c context.Context) (tx *Tx, err error) {
 	t, ok := trace.FromContext(c)
 	if ok {
 		t = t.Fork(_family, "begin")
-		t.SetTag(trace.String(trace.TagAddress, db.conf.Addr), trace.String(trace.TagComment, ""))
+		t.SetTag(trace.String(trace.TagAddress, db.addr), trace.String(trace.TagComment, ""))
 		defer func() {
 			if err != nil {
 				t.Finish(&err)
@@ -279,12 +282,12 @@ func (db *conn) begin(c context.Context) (tx *Tx, err error) {
 		}()
 	}
 	if err = db.breaker.Allow(); err != nil {
-		_metricReqErr.Inc(db.conf.Addr, db.conf.Addr, "begin", "breaker")
+		_metricReqErr.Inc(db.addr, db.addr, "begin", "breaker")
 		return
 	}
 	_, c, cancel := db.conf.TranTimeout.Shrink(c)
 	rtx, err := db.BeginTx(c, nil)
-	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.conf.Addr, db.conf.Addr, "begin")
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.addr, db.addr, "begin")
 	if err != nil {
 		err = errors.WithStack(err)
 		cancel()
@@ -299,18 +302,18 @@ func (db *conn) exec(c context.Context, query string, args ...interface{}) (res 
 	defer slowLog(fmt.Sprintf("Exec query(%s) args(%+v)", query, args), now)
 	if t, ok := trace.FromContext(c); ok {
 		t = t.Fork(_family, "exec")
-		t.SetTag(trace.String(trace.TagAddress, db.conf.Addr), trace.String(trace.TagComment, query))
+		t.SetTag(trace.String(trace.TagAddress, db.addr), trace.String(trace.TagComment, query))
 		defer t.Finish(&err)
 	}
 	if err = db.breaker.Allow(); err != nil {
-		_metricReqErr.Inc(db.conf.Addr, db.conf.Addr, "exec", "breaker")
+		_metricReqErr.Inc(db.addr, db.addr, "exec", "breaker")
 		return
 	}
 	_, c, cancel := db.conf.ExecTimeout.Shrink(c)
 	res, err = db.ExecContext(c, query, args...)
 	cancel()
 	db.onBreaker(&err)
-	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.conf.Addr, db.conf.Addr, "exec")
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.addr, db.addr, "exec")
 	if err != nil {
 		err = errors.Wrapf(err, "exec:%s, args:%+v", query, args)
 	}
@@ -322,18 +325,18 @@ func (db *conn) ping(c context.Context) (err error) {
 	defer slowLog("Ping", now)
 	if t, ok := trace.FromContext(c); ok {
 		t = t.Fork(_family, "ping")
-		t.SetTag(trace.String(trace.TagAddress, db.conf.Addr), trace.String(trace.TagComment, ""))
+		t.SetTag(trace.String(trace.TagAddress, db.addr), trace.String(trace.TagComment, ""))
 		defer t.Finish(&err)
 	}
 	if err = db.breaker.Allow(); err != nil {
-		_metricReqErr.Inc(db.conf.Addr, db.conf.Addr, "ping", "breaker")
+		_metricReqErr.Inc(db.addr, db.addr, "ping", "breaker")
 		return
 	}
 	_, c, cancel := db.conf.ExecTimeout.Shrink(c)
 	err = db.PingContext(c)
 	cancel()
 	db.onBreaker(&err)
-	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.conf.Addr, db.conf.Addr, "ping")
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.addr, db.addr, "ping")
 	if err != nil {
 		err = errors.WithStack(err)
 	}
@@ -379,17 +382,17 @@ func (db *conn) query(c context.Context, query string, args ...interface{}) (row
 	defer slowLog(fmt.Sprintf("Query query(%s) args(%+v)", query, args), now)
 	if t, ok := trace.FromContext(c); ok {
 		t = t.Fork(_family, "query")
-		t.SetTag(trace.String(trace.TagAddress, db.conf.Addr), trace.String(trace.TagComment, query))
+		t.SetTag(trace.String(trace.TagAddress, db.addr), trace.String(trace.TagComment, query))
 		defer t.Finish(&err)
 	}
 	if err = db.breaker.Allow(); err != nil {
-		_metricReqErr.Inc(db.conf.Addr, db.conf.Addr, "query", "breaker")
+		_metricReqErr.Inc(db.addr, db.addr, "query", "breaker")
 		return
 	}
 	_, c, cancel := db.conf.QueryTimeout.Shrink(c)
 	rs, err := db.DB.QueryContext(c, query, args...)
 	db.onBreaker(&err)
-	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.conf.Addr, db.conf.Addr, "query")
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.addr, db.addr, "query")
 	if err != nil {
 		err = errors.Wrapf(err, "query:%s, args:%+v", query, args)
 		cancel()
@@ -405,15 +408,15 @@ func (db *conn) queryRow(c context.Context, query string, args ...interface{}) *
 	t, ok := trace.FromContext(c)
 	if ok {
 		t = t.Fork(_family, "queryrow")
-		t.SetTag(trace.String(trace.TagAddress, db.conf.Addr), trace.String(trace.TagComment, query))
+		t.SetTag(trace.String(trace.TagAddress, db.addr), trace.String(trace.TagComment, query))
 	}
 	if err := db.breaker.Allow(); err != nil {
-		_metricReqErr.Inc(db.conf.Addr, db.conf.Addr, "queryRow", "breaker")
+		_metricReqErr.Inc(db.addr, db.addr, "queryRow", "breaker")
 		return &Row{db: db, t: t, err: err}
 	}
 	_, c, cancel := db.conf.QueryTimeout.Shrink(c)
 	r := db.DB.QueryRowContext(c, query, args...)
-	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.conf.Addr, db.conf.Addr, "queryrow")
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), db.addr, db.addr, "queryrow")
 	return &Row{db: db, Row: r, query: query, args: args, t: t, cancel: cancel}
 }
 
@@ -445,11 +448,11 @@ func (s *Stmt) Exec(c context.Context, args ...interface{}) (res sql.Result, err
 		}
 	} else if t, ok := trace.FromContext(c); ok {
 		t = t.Fork(_family, "exec")
-		t.SetTag(trace.String(trace.TagAddress, s.db.conf.Addr), trace.String(trace.TagComment, s.query))
+		t.SetTag(trace.String(trace.TagAddress, s.db.addr), trace.String(trace.TagComment, s.query))
 		defer t.Finish(&err)
 	}
 	if err = s.db.breaker.Allow(); err != nil {
-		_metricReqErr.Inc(s.db.conf.Addr, s.db.conf.Addr, "stmt:exec", "breaker")
+		_metricReqErr.Inc(s.db.addr, s.db.addr, "stmt:exec", "breaker")
 		return
 	}
 	stmt, ok := s.stmt.Load().(*sql.Stmt)
@@ -461,7 +464,7 @@ func (s *Stmt) Exec(c context.Context, args ...interface{}) (res sql.Result, err
 	res, err = stmt.ExecContext(c, args...)
 	cancel()
 	s.db.onBreaker(&err)
-	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), s.db.conf.Addr, s.db.conf.Addr, "stmt:exec")
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), s.db.addr, s.db.addr, "stmt:exec")
 	if err != nil {
 		err = errors.Wrapf(err, "exec:%s, args:%+v", s.query, args)
 	}
@@ -483,11 +486,11 @@ func (s *Stmt) Query(c context.Context, args ...interface{}) (rows *Rows, err er
 		}
 	} else if t, ok := trace.FromContext(c); ok {
 		t = t.Fork(_family, "query")
-		t.SetTag(trace.String(trace.TagAddress, s.db.conf.Addr), trace.String(trace.TagComment, s.query))
+		t.SetTag(trace.String(trace.TagAddress, s.db.addr), trace.String(trace.TagComment, s.query))
 		defer t.Finish(&err)
 	}
 	if err = s.db.breaker.Allow(); err != nil {
-		_metricReqErr.Inc(s.db.conf.Addr, s.db.conf.Addr, "stmt:query", "breaker")
+		_metricReqErr.Inc(s.db.addr, s.db.addr, "stmt:query", "breaker")
 		return
 	}
 	stmt, ok := s.stmt.Load().(*sql.Stmt)
@@ -498,7 +501,7 @@ func (s *Stmt) Query(c context.Context, args ...interface{}) (rows *Rows, err er
 	_, c, cancel := s.db.conf.QueryTimeout.Shrink(c)
 	rs, err := stmt.QueryContext(c, args...)
 	s.db.onBreaker(&err)
-	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), s.db.conf.Addr, s.db.conf.Addr, "stmt:query")
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), s.db.addr, s.db.addr, "stmt:query")
 	if err != nil {
 		err = errors.Wrapf(err, "query:%s, args:%+v", s.query, args)
 		cancel()
@@ -527,11 +530,11 @@ func (s *Stmt) QueryRow(c context.Context, args ...interface{}) (row *Row) {
 		}
 	} else if t, ok := trace.FromContext(c); ok {
 		t = t.Fork(_family, "queryrow")
-		t.SetTag(trace.String(trace.TagAddress, s.db.conf.Addr), trace.String(trace.TagComment, s.query))
+		t.SetTag(trace.String(trace.TagAddress, s.db.addr), trace.String(trace.TagComment, s.query))
 		row.t = t
 	}
 	if row.err = s.db.breaker.Allow(); row.err != nil {
-		_metricReqErr.Inc(s.db.conf.Addr, s.db.conf.Addr, "stmt:queryrow", "breaker")
+		_metricReqErr.Inc(s.db.addr, s.db.addr, "stmt:queryrow", "breaker")
 		return
 	}
 	stmt, ok := s.stmt.Load().(*sql.Stmt)
@@ -541,7 +544,7 @@ func (s *Stmt) QueryRow(c context.Context, args ...interface{}) (row *Row) {
 	_, c, cancel := s.db.conf.QueryTimeout.Shrink(c)
 	row.Row = stmt.QueryRowContext(c, args...)
 	row.cancel = cancel
-	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), s.db.conf.Addr, s.db.conf.Addr, "stmt:queryrow")
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), s.db.addr, s.db.addr, "stmt:queryrow")
 	return
 }
 
@@ -582,7 +585,7 @@ func (tx *Tx) Exec(query string, args ...interface{}) (res sql.Result, err error
 		tx.t.SetTag(trace.String(trace.TagAnnotation, fmt.Sprintf("exec %s", query)))
 	}
 	res, err = tx.tx.ExecContext(tx.c, query, args...)
-	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), tx.db.conf.Addr, tx.db.conf.Addr, "tx:exec")
+	_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), tx.db.addr, tx.db.addr, "tx:exec")
 	if err != nil {
 		err = errors.Wrapf(err, "exec:%s, args:%+v", query, args)
 	}
@@ -597,7 +600,7 @@ func (tx *Tx) Query(query string, args ...interface{}) (rows *Rows, err error) {
 	now := time.Now()
 	defer slowLog(fmt.Sprintf("Query query(%s) args(%+v)", query, args), now)
 	defer func() {
-		_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), tx.db.conf.Addr, tx.db.conf.Addr, "tx:query")
+		_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), tx.db.addr, tx.db.addr, "tx:query")
 	}()
 	rs, err := tx.tx.QueryContext(tx.c, query, args...)
 	if err == nil {
@@ -618,7 +621,7 @@ func (tx *Tx) QueryRow(query string, args ...interface{}) *Row {
 	now := time.Now()
 	defer slowLog(fmt.Sprintf("QueryRow query(%s) args(%+v)", query, args), now)
 	defer func() {
-		_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), tx.db.conf.Addr, tx.db.conf.Addr, "tx:queryrow")
+		_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), tx.db.addr, tx.db.addr, "tx:queryrow")
 	}()
 	r := tx.tx.QueryRowContext(tx.c, query, args...)
 	return &Row{Row: r, db: tx.db, query: query, args: args}

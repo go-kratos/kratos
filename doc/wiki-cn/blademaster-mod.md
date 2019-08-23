@@ -26,6 +26,7 @@ type Context struct {
 ```
 
 * 首先可以看到 blademaster 的 Context 结构体中会 embed 一个标准库中的 Context 实例，bm 中的 Context 也是直接通过该实例来实现标准库中的 Context 接口。
+* blademaster 会使用配置的 server timeout (默认1s) 作为一次请求整个过程中的超时时间，使用该context调用dao做数据库、缓存操作查询时均会将该超时时间传递下去，一旦抵达deadline，后续相关操作均会返回`context deadline exceeded`。
 * Request 和 Writer 字段用于获取当前请求的与输出响应。
 * index 和 handlers 用于 handler 的流程控制；handlers 中存储了当前请求需要执行的所有 handler，index 用于标记当前正在执行的 handler 的索引位。
 * Keys 用于在 handler 之间传递一些额外的信息。

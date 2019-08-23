@@ -206,7 +206,7 @@ func (engine *Engine) SetMethodConfig(path string, mc *MethodConfig) {
 	engine.pcLock.Unlock()
 }
 
-// DefaultServer returns an Engine instance with the Recovery, Logger and CSRF middleware already attached.
+// DefaultServer returns an Engine instance with the Recovery and Logger middleware already attached.
 func DefaultServer(conf *ServerConfig) *Engine {
 	engine := NewServer(conf)
 	engine.Use(Recovery(), Trace(), Logger())
@@ -383,6 +383,8 @@ func (engine *Engine) UseFunc(middleware ...HandlerFunc) IRoutes {
 // For example, this is the right place for a logger or error management middleware.
 func (engine *Engine) Use(middleware ...Handler) IRoutes {
 	engine.RouterGroup.Use(middleware...)
+	engine.rebuild404Handlers()
+	engine.rebuild405Handlers()
 	return engine
 }
 

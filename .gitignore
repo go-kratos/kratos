@@ -28,4 +28,5 @@ tool/kratos-gen-bts/kratos-gen-bts
 tool/kratos-gen-mc/kratos-gen-mc
 tool/kratos/kratos-protoc/kratos-protoc
 tool/kratos/protobuf/protoc-gen-bm/protoc-gen-bm
+tool/kratos/protobuf/protoc-gen-ecode/protoc-gen-ecode
 tool/kratos/protobuf/protoc-gen-bswagger/protoc-gen-bswagger

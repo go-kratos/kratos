@@ -1,5 +1,8 @@
 ### net/rpc/warden
 
+##### Version 1.1.21
+1. fix resolver bug
+
 ##### Version 1.1.20
 1. client增加timeoutCallOpt强制覆盖每次请求的timeout
 

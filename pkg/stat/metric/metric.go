@@ -1,6 +1,9 @@
 package metric
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 // Opts contains the common arguments for creating Metric.
 type Opts struct {
@@ -62,6 +65,7 @@ func NewBusinessMetricCount(name string, labels ...string) CounterVec {
 		Subsystem: _businessSubsystemCount,
 		Name:      name,
 		Labels:    labels,
+		Help:      fmt.Sprintf("business metric count %s", name),
 	})
 }
 
@@ -76,6 +80,7 @@ func NewBusinessMetricGauge(name string, labels ...string) GaugeVec {
 		Subsystem: _businessSubSystemGauge,
 		Name:      name,
 		Labels:    labels,
+		Help:      fmt.Sprintf("business metric gauge %s", name),
 	})
 }
 
@@ -94,5 +99,6 @@ func NewBusinessMetricHistogram(name string, buckets []float64, labels ...string
 		Name:      name,
 		Labels:    labels,
 		Buckets:   buckets,
+		Help:      fmt.Sprintf("business metric histogram %s", name),
 	})
 }

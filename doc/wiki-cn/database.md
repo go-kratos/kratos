@@ -6,7 +6,8 @@
 
 ## MySQL
 MySQL数据库驱动，支持读写分离、context、timeout、trace和统计功能，以及错误熔断防止数据库雪崩。  
-[mysql client](database-mysql.md)
+[mysql client](database-mysql.md)  
+[mysql client orm](database-mysql-orm.md)
 
 ## HBase
 HBase客户端，支持trace、slowlog和统计功能。  
