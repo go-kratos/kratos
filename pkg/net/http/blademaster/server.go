@@ -163,7 +163,7 @@ type injection struct {
 func NewServer(conf *ServerConfig) *Engine {
 	if conf == nil {
 		if !flag.Parsed() {
-			fmt.Fprint(os.Stderr, "[blademaster] please call flag.Parse() before Init warden server, some configure may not effect.\n")
+			fmt.Fprint(os.Stderr, "[blademaster] please call flag.Parse() before Init blademaster server, some configure may not effect.\n")
 		}
 		conf = parseDSN(_httpDSN)
 	}
