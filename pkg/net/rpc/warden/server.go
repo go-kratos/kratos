@@ -23,6 +23,7 @@ import (
 
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
+	_ "google.golang.org/grpc/encoding/gzip" // NOTE: use grpc gzip by header grpc-accept-encoding
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"

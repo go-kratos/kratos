@@ -195,7 +195,7 @@ func NewServer(conf *ServerConfig) *Engine {
 		c.Bytes(405, "text/plain", []byte(http.StatusText(405)))
 		c.Abort()
 	})
-	startPerf()
+	startPerf(engine)
 	return engine
 }
 
