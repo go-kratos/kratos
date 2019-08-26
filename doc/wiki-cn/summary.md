@@ -16,6 +16,7 @@
   * [warden protobuf](warden-pb.md) 
 * [config](config.md)
   * [paladin](config-paladin.md)
+* [ecode](ecode.md)
 * [dapper trace](dapper.md)
 * [log](logger.md)
   * [log-agent](log-agent.md)
