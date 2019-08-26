@@ -193,7 +193,9 @@ func (pc *pooledConnection) Do(commandName string, args ...interface{}) (reply i
 	ci := LookupCommandInfo(commandName)
 	pc.state = (pc.state | ci.Set) &^ ci.Clear
 	reply, err = pc.c.Do(commandName, args...)
-	pc.p.statfunc(pc.p.c.Name, pc.p.c.Addr, commandName, now, err)()
+	if pc.p.statfunc != nil {
+		pc.p.statfunc(pc.p.c.Name, pc.p.c.Addr, commandName, now, err)()
+	}
 	return
 }
 
@@ -217,7 +219,9 @@ func (pc *pooledConnection) Receive() (reply interface{}, err error) {
 	if len(pc.cmds) > 0 {
 		cmd := pc.cmds[0]
 		pc.cmds = pc.cmds[1:]
-		pc.p.statfunc(pc.p.c.Name, pc.p.c.Addr, cmd, pc.now, err)()
+		if pc.p.statfunc != nil {
+			pc.p.statfunc(pc.p.c.Name, pc.p.c.Addr, cmd, pc.now, err)()
+		}
 	}
 	return
 }
