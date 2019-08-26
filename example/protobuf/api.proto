@@ -3,6 +3,7 @@ syntax = "proto3";
 package user.api;
 
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/protobuf/empty.proto";
 
 option go_package = "api";
 
@@ -30,4 +31,5 @@ message InfoReply {
 
 service User {
   rpc Info(UserReq) returns (InfoReply);
+  rpc Card(UserReq) returns (google.protobuf.Empty);
 }
