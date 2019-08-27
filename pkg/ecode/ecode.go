@@ -9,13 +9,21 @@ import (
 )
 
 var (
-	_messages atomic.Value         // NOTE: stored map[int]string
-	_codes    = map[int]struct{}{} // register codes.
+	_localizedMessage atomic.Value         // NOTE: map[int]map[string]string
+	_messages         atomic.Value         // NOTE: stored map[string]map[int]string
+	_codes            = map[int]struct{}{} // register codes.
 )
 
 // Register register ecode message map.
-func Register(cm map[int]string) {
+func Register(codes map[int]map[string]string) {
+	cm := make(map[int]string, len(codes))
+	for id, messages := range codes {
+		if msg, ok := messages[LangDefault]; ok {
+			cm[id] = msg
+		}
+	}
 	_messages.Store(cm)
+	_localizedMessage.Store(codes)
 }
 
 // New new a ecode.Codes by int value.
@@ -46,6 +54,9 @@ type Codes interface {
 	Message() string
 	//Detail get error detail,it may be nil.
 	Details() []interface{}
+	// Equal for compatible.
+	// Deprecated: please use ecode.EqualError.
+	Equal(error) bool
 }
 
 // A Code is an int error code spec.
@@ -70,6 +81,10 @@ func (e Code) Message() string {
 
 // Details return details.
 func (e Code) Details() []interface{} { return nil }
+
+// Equal for compatible.
+// Deprecated: please use ecode.EqualError.
+func (e Code) Equal(err error) bool { return EqualError(e, err) }
 
 // Int parse code int to error.
 func Int(i int) Code { return Code(i) }
