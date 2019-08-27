@@ -111,6 +111,7 @@ func (s *Server) handle() grpc.UnaryServerInterceptor {
 		var t trace.Trace
 		cmd := nmd.MD{}
 		if gmd, ok := metadata.FromIncomingContext(ctx); ok {
+			t, _ = trace.Extract(trace.GRPCFormat, gmd)
 			for key, vals := range gmd {
 				if nmd.IsIncomingKey(key) {
 					cmd[key] = vals[0]
