@@ -10,19 +10,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver/direct"
-
-	"github.com/bilibili/kratos/pkg/conf/env"
-	"github.com/bilibili/kratos/pkg/conf/flagvar"
-	"github.com/bilibili/kratos/pkg/ecode"
-	"github.com/bilibili/kratos/pkg/naming"
-	nmd "github.com/bilibili/kratos/pkg/net/metadata"
-	"github.com/bilibili/kratos/pkg/net/netutil/breaker"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/balancer/p2c"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/internal/status"
-	"github.com/bilibili/kratos/pkg/net/trace"
-	xtime "github.com/bilibili/kratos/pkg/time"
+	"go-common/library/conf/env"
+	"go-common/library/conf/flagvar"
+	"go-common/library/ecode"
+	"go-common/library/naming"
+	"go-common/library/naming/discovery"
+	nmd "go-common/library/net/metadata"
+	"go-common/library/net/netutil/breaker"
+	"go-common/library/net/rpc/warden/balancer/p2c"
+	"go-common/library/net/rpc/warden/internal/status"
+	"go-common/library/net/rpc/warden/resolver"
+	"go-common/library/net/trace"
+	xtime "go-common/library/time"
 
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -47,16 +46,11 @@ var (
 )
 
 func baseMetadata() metadata.MD {
-	gmd := metadata.MD{nmd.Caller: []string{env.AppID}}
+	gmd := metadata.MD{nmd.Caller: []string{env.AppID}, nmd.Zone: []string{env.Zone}}
 	if env.Color != "" {
 		gmd[nmd.Color] = []string{env.Color}
 	}
 	return gmd
-}
-
-// Register direct resolver by default to handle direct:// scheme.
-func init() {
-	resolver.Register(direct.New())
 }
 
 // ClientConfig is rpc client conf.
@@ -85,15 +79,13 @@ type Client struct {
 	handlers []grpc.UnaryClientInterceptor
 }
 
-// TimeoutCallOption timeout option.
-type TimeoutCallOption struct {
+type TimeOutCallOption struct {
 	*grpc.EmptyCallOption
 	Timeout time.Duration
 }
 
-// WithTimeoutCallOption can override the timeout in ctx and the timeout in the configuration file
-func WithTimeoutCallOption(timeout time.Duration) *TimeoutCallOption {
-	return &TimeoutCallOption{&grpc.EmptyCallOption{}, timeout}
+func WithTimeoutCallOption(timeout time.Duration) *TimeOutCallOption {
+	return &TimeOutCallOption{&grpc.EmptyCallOption{}, timeout}
 }
 
 // handle returns a new unary client interceptor for OpenTracing\Logging\LinkTimeout.
@@ -129,10 +121,10 @@ func (c *Client) handle() grpc.UnaryClientInterceptor {
 			return
 		}
 		defer onBreaker(brk, &err)
-		var timeOpt *TimeoutCallOption
+		var timeOpt *TimeOutCallOption
 		for _, opt := range opts {
 			var tok bool
-			timeOpt, tok = opt.(*TimeoutCallOption)
+			timeOpt, tok = opt.(*TimeOutCallOption)
 			if tok {
 				break
 			}
@@ -142,7 +134,6 @@ func (c *Client) handle() grpc.UnaryClientInterceptor {
 		} else {
 			_, ctx, cancel = conf.Timeout.Shrink(ctx)
 		}
-
 		defer cancel()
 		nmd.Range(ctx,
 			func(key string, value interface{}) {
@@ -175,10 +166,9 @@ func (c *Client) handle() grpc.UnaryClientInterceptor {
 
 func onBreaker(breaker breaker.Breaker, err *error) {
 	if err != nil && *err != nil {
-		if ecode.EqualError(ecode.ServerErr, *err) || ecode.EqualError(ecode.ServiceUnavailable, *err) || ecode.EqualError(ecode.Deadline, *err) || ecode.EqualError(ecode.LimitExceed, *err) {
+		if ecode.ServerErr.Equal(*err) || ecode.ServiceUnavailable.Equal(*err) || ecode.Deadline.Equal(*err) || ecode.LimitExceed.Equal(*err) {
 			breaker.MarkFailed()
 			return
-
 		}
 	}
 	breaker.MarkSuccess()
@@ -192,6 +182,7 @@ func NewConn(target string, opt ...grpc.DialOption) (*grpc.ClientConn, error) {
 // NewClient returns a new blank Client instance with a default client interceptor.
 // opt can be used to add grpc dial options.
 func NewClient(conf *ClientConfig, opt ...grpc.DialOption) *Client {
+	resolver.Register(discovery.Builder())
 	c := new(Client)
 	if err := c.SetConfig(conf); err != nil {
 		panic(err)
@@ -204,6 +195,7 @@ func NewClient(conf *ClientConfig, opt ...grpc.DialOption) *Client {
 // DefaultClient returns a new default Client instance with a default client interceptor and default dialoption.
 // opt can be used to add grpc dial options.
 func DefaultClient() *Client {
+	resolver.Register(discovery.Builder())
 	_once.Do(func() {
 		_defaultClient = NewClient(nil)
 	})
@@ -230,7 +222,6 @@ func (c *Client) SetConfig(conf *ClientConfig) (err error) {
 	if conf.KeepAliveTimeout <= 0 {
 		conf.KeepAliveTimeout = xtime.Duration(time.Second * 20)
 	}
-
 	// FIXME(maojian) check Method dial/timeout
 	c.mutex.Lock()
 	c.conf = conf
@@ -268,7 +259,6 @@ func (c *Client) cloneOpts() []grpc.DialOption {
 	copy(dialOptions, c.opts)
 	return dialOptions
 }
-
 func (c *Client) dial(ctx context.Context, target string, opts ...grpc.DialOption) (conn *grpc.ClientConn, err error) {
 	dialOptions := c.cloneOpts()
 	if !c.conf.NonBlock {
