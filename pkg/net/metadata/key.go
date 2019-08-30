@@ -2,40 +2,41 @@ package metadata
 
 // metadata common key
 const (
-
 	// Network
 	RemoteIP   = "remote_ip"
 	RemotePort = "remote_port"
-	ServerAddr = "server_addr"
-	ClientAddr = "client_addr"
 
 	// Router
-	Cluster = "cluster"
-	Color   = "color"
-
-	// Trace
-	Trace  = "trace"
+	Color  = "color"
 	Caller = "caller"
-
-	// Timeout
-	Timeout = "timeout"
-
-	// Dispatch
-	CPUUsage = "cpu_usage"
-	Errors   = "errors"
-	Requests = "requests"
+	Zone   = "zone"
 
 	// Mirror
 	Mirror = "mirror"
 
-	// Mid 外网账户用户id
-	Mid = "mid" // NOTE: ！！！业务可重新修改key名！！！
+	// Mid
+	// 外网账户用户id
+	Mid = "mid"
 
-	// Device 客户端信息
+	// Uid
+	// 内网manager平台的用户id user_id
+	Uid = "uid"
+
+	// Username
+	// LDAP平台的username
+	Username = "username"
+
+	// Device
 	Device = "device"
 
-	// Criticality 重要性
+	// Cluster cluster info key
+	Cluster = "cluster"
+
+	// Criticality
 	Criticality = "criticality"
+
+	// Locale locale language.
+	Locale = "locale"
 )
 
 var outgoingKey = map[string]struct{}{
@@ -48,6 +49,7 @@ var outgoingKey = map[string]struct{}{
 
 var incomingKey = map[string]struct{}{
 	Caller: struct{}{},
+	Zone:   struct{}{},
 }
 
 // IsOutgoingKey represent this key should propagate by rpc.
