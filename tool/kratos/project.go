@@ -33,7 +33,6 @@ const (
 	_tplTypeMCToml
 	_tplTypeRedisToml
 	_tplTypeHTTPToml
-	_tplTypeGRPCToml
 	_tplTypeModel
 	_tplTypeGRPCServer
 	_tplTypeGomod
@@ -61,7 +60,6 @@ var (
 		_tplTypeMCToml:    "/configs/memcache.toml",
 		_tplTypeRedisToml: "/configs/redis.toml",
 		_tplTypeHTTPToml:  "/configs/http.toml",
-		_tplTypeGRPCToml:  "/configs/grpc.toml",
 	}
 	// tpls type => content
 	tpls = map[int]string{
@@ -91,7 +89,6 @@ func create() (err error) {
 		files[_tplTypeAPIGogen] = "/api/generate.go"
 		tpls[_tplTypeHTTPServer] = _tplPBHTTPServer
 		tpls[_tplTypeGRPCServer] = _tplGRPCServer
-		tpls[_tplTypeGRPCToml] = _tplGRPCToml
 		tpls[_tplTypeService] = _tplGPRCService
 		tpls[_tplTypeMain] = _tplGRPCMain
 	}

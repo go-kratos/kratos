@@ -51,11 +51,6 @@ demoExpire = "24h"
     addr = "0.0.0.0:8000"
     timeout = "1s"
 `
-	_tplGRPCToml = `
-[server]
-    addr = "0.0.0.0:9000"
-    timeout = "1s"
-`
 
 	_tplChangeLog = `## {{.Name}}
 
@@ -564,15 +559,7 @@ import (
 
 // New new a grpc server.
 func New(svc *service.Service) *warden.Server {
-	var rc struct {
-		Server *warden.ServerConfig
-	}
-	if err := paladin.Get("grpc.toml").UnmarshalTOML(&rc); err != nil {
-		if err != paladin.ErrNotExist {
-			panic(err)
-		}
-	}
-	ws := warden.NewServer(rc.Server)
+	ws := warden.NewServer(nil)
 	pb.RegisterDemoServer(ws.Server(), svc)
 	ws, err := ws.Start()
 	if err != nil {
