@@ -9,9 +9,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
 
-	"github.com/bilibili/kratos/pkg/ecode"
-	"github.com/bilibili/kratos/pkg/log"
-	"github.com/bilibili/kratos/pkg/net/metadata"
+	"go-common/library/ecode"
+	"go-common/library/log"
+	"go-common/library/net/metadata"
 )
 
 // Warden Log Flag
@@ -126,6 +126,10 @@ func serverLogging(logFlag int8) grpc.UnaryServerInterceptor {
 		if caller == "" {
 			caller = "no_user"
 		}
+		zone := metadata.String(ctx, metadata.Zone)
+		if zone == "" {
+			zone = "undefined"
+		}
 		var remoteIP string
 		if peerInfo, ok := peer.FromContext(ctx); ok {
 			remoteIP = peerInfo.Addr.String()
@@ -154,6 +158,7 @@ func serverLogging(logFlag int8) grpc.UnaryServerInterceptor {
 		}
 		logFields := []log.D{
 			log.KVString("user", caller),
+			log.KVString("caller_zone", zone),
 			log.KVString("ip", remoteIP),
 			log.KVString("path", info.FullMethod),
 			log.KVInt("ret", code),

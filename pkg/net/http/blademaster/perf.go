@@ -7,7 +7,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/bilibili/kratos/pkg/conf/dsn"
+	"go-common/library/conf/dsn"
 
 	"github.com/pkg/errors"
 )

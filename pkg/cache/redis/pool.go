@@ -25,9 +25,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/container/pool"
-	"github.com/bilibili/kratos/pkg/net/trace"
-	xtime "github.com/bilibili/kratos/pkg/time"
+	"go-common/library/container/pool"
+	"go-common/library/net/trace"
+	xtime "go-common/library/time"
 )
 
 var beginTime, _ = time.Parse("2006-01-02 15:04:05", "2006-01-02 15:04:05")
@@ -56,6 +56,7 @@ type Config struct {
 	DialTimeout  xtime.Duration
 	ReadTimeout  xtime.Duration
 	WriteTimeout xtime.Duration
+	SlowLog      xtime.Duration
 }
 
 // NewPool creates a new pool.
@@ -63,20 +64,29 @@ func NewPool(c *Config, options ...DialOption) (p *Pool) {
 	if c.DialTimeout <= 0 || c.ReadTimeout <= 0 || c.WriteTimeout <= 0 {
 		panic("must config redis timeout")
 	}
-	ops := []DialOption{
-		DialConnectTimeout(time.Duration(c.DialTimeout)),
-		DialReadTimeout(time.Duration(c.ReadTimeout)),
-		DialWriteTimeout(time.Duration(c.WriteTimeout)),
-		DialPassword(c.Auth),
+	if c.SlowLog <= 0 {
+		c.SlowLog = xtime.Duration(250 * time.Millisecond)
 	}
-	ops = append(ops, options...)
 	p1 := pool.NewSlice(c.Config)
+	cnop := DialConnectTimeout(time.Duration(c.DialTimeout))
+	options = append(options, cnop)
+	rdop := DialReadTimeout(time.Duration(c.ReadTimeout))
+	options = append(options, rdop)
+	wrop := DialWriteTimeout(time.Duration(c.WriteTimeout))
+	options = append(options, wrop)
+	auop := DialPassword(c.Auth)
+	options = append(options, auop)
+	// new pool
 	p1.New = func(ctx context.Context) (io.Closer, error) {
-		conn, err := Dial(c.Proto, c.Addr, ops...)
+		conn, err := Dial(c.Proto, c.Addr, options...)
 		if err != nil {
 			return nil, err
 		}
-		return &traceConn{Conn: conn, connTags: []trace.Tag{trace.TagString(trace.TagPeerAddress, c.Addr)}}, nil
+		return &traceConn{
+			Conn:             conn,
+			connTags:         []trace.Tag{trace.TagString(trace.TagPeerAddress, c.Addr)},
+			slowLogThreshold: time.Duration(c.SlowLog),
+		}, nil
 	}
 	p = &Pool{Slice: p1, c: c, statfunc: pstat}
 	return

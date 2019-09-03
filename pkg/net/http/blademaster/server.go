@@ -13,12 +13,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/conf/dsn"
-	"github.com/bilibili/kratos/pkg/log"
-	"github.com/bilibili/kratos/pkg/net/criticality"
-	"github.com/bilibili/kratos/pkg/net/ip"
-	"github.com/bilibili/kratos/pkg/net/metadata"
-	xtime "github.com/bilibili/kratos/pkg/time"
+	"go-common/library/conf/dsn"
+	"go-common/library/log"
+	criticalityPkg "go-common/library/net/criticality"
+	"go-common/library/net/ip"
+	"go-common/library/net/metadata"
+	xtime "go-common/library/time"
 
 	"github.com/pkg/errors"
 )
@@ -45,6 +45,7 @@ func addFlag(fs *flag.FlagSet) {
 		v = "tcp://0.0.0.0:8000/?timeout=1s"
 	}
 	fs.StringVar(&_httpDSN, "http", v, "listen http dsn, or use HTTP env variable.")
+
 }
 
 func parseDSN(rawdsn string) *ServerConfig {
@@ -74,7 +75,8 @@ func (f HandlerFunc) ServeHTTP(c *Context) {
 
 // ServerConfig is the bm server config model
 type ServerConfig struct {
-	Network      string         `dsn:"network"`
+	Network string `dsn:"network"`
+	// FIXME: rename to Address
 	Addr         string         `dsn:"address"`
 	Timeout      xtime.Duration `dsn:"query.timeout"`
 	ReadTimeout  xtime.Duration `dsn:"query.readTimeout"`
@@ -159,14 +161,53 @@ type injection struct {
 	handlers []HandlerFunc
 }
 
+// New returns a new blank Engine instance without any middleware attached.
+//
+// Deprecated: please use NewServer.
+func New() *Engine {
+	engine := &Engine{
+		RouterGroup: RouterGroup{
+			Handlers: nil,
+			basePath: "/",
+			root:     true,
+		},
+		address: ip.InternalIP(),
+		conf: &ServerConfig{
+			Timeout: xtime.Duration(time.Second),
+		},
+		trees:                  make(methodTrees, 0, 9),
+		metastore:              make(map[string]map[string]interface{}),
+		methodConfigs:          make(map[string]*MethodConfig),
+		injections:             make([]injection, 0),
+		HandleMethodNotAllowed: true,
+	}
+	engine.RouterGroup.engine = engine
+	// NOTE add prometheus monitor location
+	engine.addRoute("GET", "/metrics", monitor())
+	engine.addRoute("GET", "/metadata", engine.metadata())
+	engine.NoRoute(func(c *Context) {
+		c.Bytes(404, "text/plain", default404Body)
+		c.Abort()
+	})
+	engine.NoMethod(func(c *Context) {
+		c.Bytes(405, "text/plain", []byte(http.StatusText(405)))
+		c.Abort()
+	})
+	startPerf(engine)
+	return engine
+}
+
 // NewServer returns a new blank Engine instance without any middleware attached.
 func NewServer(conf *ServerConfig) *Engine {
 	if conf == nil {
 		if !flag.Parsed() {
-			fmt.Fprint(os.Stderr, "[blademaster] please call flag.Parse() before Init blademaster server, some configure may not effect.\n")
+			fmt.Fprint(os.Stderr, "[blademaster] please call flag.Parse() before Init warden server, some configure may not effect.\n")
 		}
 		conf = parseDSN(_httpDSN)
+	} else {
+		fmt.Fprintf(os.Stderr, "[blademaster] config will be deprecated, argument will be ignored. please use -http flag or HTTP env to configure http server.\n")
 	}
+
 	engine := &Engine{
 		RouterGroup: RouterGroup{
 			Handlers: nil,
@@ -178,7 +219,6 @@ func NewServer(conf *ServerConfig) *Engine {
 		metastore:              make(map[string]map[string]interface{}),
 		methodConfigs:          make(map[string]*MethodConfig),
 		HandleMethodNotAllowed: true,
-		injections:             make([]injection, 0),
 	}
 	if err := engine.SetConfig(conf); err != nil {
 		panic(err)
@@ -206,10 +246,20 @@ func (engine *Engine) SetMethodConfig(path string, mc *MethodConfig) {
 	engine.pcLock.Unlock()
 }
 
-// DefaultServer returns an Engine instance with the Recovery and Logger middleware already attached.
+// DefaultServer returns an Engine instance with the Recovery, Logger and CSRF middleware already attached.
 func DefaultServer(conf *ServerConfig) *Engine {
 	engine := NewServer(conf)
-	engine.Use(Recovery(), Trace(), Logger())
+	engine.Use(Recovery(), Trace(), Logger(), CSRF(), Mobile())
+	engine.Use(NewRateLimiter(nil).Limit())
+	return engine
+}
+
+// Default returns an Engine instance with the Recovery, Logger and CSRF middleware already attached.
+//
+// Deprecated: please use DefaultServer.
+func Default() *Engine {
+	engine := New()
+	engine.Use(Recovery(), Trace(), Logger(), CSRF(), Mobile())
 	return engine
 }
 
@@ -227,6 +277,7 @@ func (engine *Engine) addRoute(method, path string, handlers ...HandlerFunc) {
 		engine.metastore[path] = make(map[string]interface{})
 	}
 	engine.metastore[path]["method"] = method
+
 	root := engine.trees.get(method)
 	if root == nil {
 		root = new(node)
@@ -300,18 +351,23 @@ func (engine *Engine) handleContext(c *Context) {
 	tm := time.Duration(engine.conf.Timeout)
 	engine.lock.RUnlock()
 	// the method config is preferred
-	if pc := engine.methodConfig(c.Request.URL.Path); pc != nil {
+	if pc := engine.methodConfig(c.RoutePath); pc != nil {
 		tm = time.Duration(pc.Timeout)
 	}
 	if ctm := timeout(req); ctm > 0 && tm > ctm {
 		tm = ctm
 	}
 	md := metadata.MD{
+		metadata.Color:       color(req),
 		metadata.RemoteIP:    remoteIP(req),
 		metadata.RemotePort:  remotePort(req),
-		metadata.Criticality: string(criticality.Critical),
+		metadata.Caller:      caller(req),
+		metadata.Mirror:      mirror(req),
+		metadata.Criticality: string(criticalityPkg.Critical),
 	}
-	parseMetadataTo(req, md)
+	if crtl := criticality(req); crtl != criticalityPkg.EmptyCriticality {
+		md[metadata.Criticality] = string(crtl)
+	}
 	ctx := metadata.NewContext(context.Background(), md)
 	if tm > 0 {
 		c.Context, cancel = context.WithTimeout(ctx, tm)
@@ -390,7 +446,7 @@ func (engine *Engine) Use(middleware ...Handler) IRoutes {
 
 // Ping is used to set the general HTTP ping handler.
 func (engine *Engine) Ping(handler HandlerFunc) {
-	engine.GET("/ping", handler)
+	engine.GET("/monitor/ping", handler)
 }
 
 // Register is used to export metadata to discovery.

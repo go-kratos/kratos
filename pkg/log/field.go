@@ -2,9 +2,10 @@ package log
 
 import (
 	"math"
+	"strconv"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/log/internal/core"
+	"go-common/library/log/internal/core"
 )
 
 // D represents a map of entry level data used for structured logging.
@@ -55,4 +56,39 @@ func KVDuration(key string, value time.Duration) D {
 // NOTE: use KV{type name} can avoid object alloc and get better performance. []~(￣▽￣)~*干杯
 func KV(key string, value interface{}) D {
 	return D{Key: key, Value: value}
+}
+
+// String construct Field with string value.
+func String(value string) D {
+	return D{Type: core.StringType, StringVal: value}
+}
+
+// Int construct Field with int value.
+func Int(value int) D {
+	return D{Type: core.IntTpye, Int64Val: int64(value)}
+}
+
+// Int64 construct D with int64 value.
+func Int64(value int64) D {
+	return D{Type: core.Int64Type, Int64Val: value}
+}
+
+// Float32 construct D with float32 value.
+func Float32(value float32) D {
+	return D{Type: core.Float32Type, Int64Val: int64(math.Float64bits(float64(value)))}
+}
+
+// Float64 construct D with float64 value.
+func Float64(value float64) D {
+	return D{Type: core.Float64Type, Int64Val: int64(math.Float64bits(value))}
+}
+
+// Bool construct D with bool value.
+func Bool(value bool) D {
+	return D{Type: core.BoolType, StringVal: strconv.FormatBool(value)}
+}
+
+// Raw construct D with interface{} value.
+func Raw(value interface{}) D{
+	return D{Value: value}
 }
