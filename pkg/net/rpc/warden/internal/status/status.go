@@ -4,14 +4,14 @@ import (
 	"context"
 	"strconv"
 
+	"go-common/library/ecode"
+	"go-common/library/net/rpc/warden/internal/pb"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	"github.com/bilibili/kratos/pkg/ecode"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/internal/pb"
 )
 
 // togRPCCode convert ecode.Codo to gRPC code
@@ -112,10 +112,11 @@ func gRPCStatusFromEcode(code ecode.Codes) (*status.Status, error) {
 	// NOTE: compatible with PHP swoole gRPC put code in status message as string.
 	// gst := status.New(togRPCCode(st), strconv.Itoa(st.Code()))
 	gst := status.New(codes.Unknown, strconv.Itoa(st.Code()))
-	pbe := &pb.Error{ErrCode: int32(st.Code()), ErrMessage: gst.Message()}
+	// pbe := &pb.Error{ErrCode: int32(st.Code()), ErrMessage: gst.Message()}
 	// NOTE: server return ecode.Status will be covert to pb.Error details will be ignored
 	// and put it at details[0] for compatible old client
-	return gst.WithDetails(pbe, st.Proto())
+	// NOTE: remove incompatible status 2019/09/03
+	return gst.WithDetails(st.Proto())
 }
 
 // ToEcode convert grpc.status to ecode.Codes
