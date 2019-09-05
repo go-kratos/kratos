@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bilibili/kratos/pkg/conf/env"
-	"github.com/bilibili/kratos/pkg/naming"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver"
+	"go-common/library/conf/env"
+	"go-common/library/naming"
+	"go-common/library/net/rpc/warden/resolver"
 )
 
 const (
@@ -34,7 +34,7 @@ type Direct struct {
 }
 
 // Build direct build.
-func (d *Direct) Build(id string) naming.Resolver {
+func (d *Direct) Build(id string, opt ...naming.BuildOpt) naming.Resolver {
 	return &Direct{id: id}
 }
 
@@ -43,20 +43,21 @@ func (d *Direct) Scheme() string {
 	return Name
 }
 
-// Watch a tree.
+// Watch a tree
 func (d *Direct) Watch() <-chan struct{} {
 	ch := make(chan struct{}, 1)
 	ch <- struct{}{}
 	return ch
 }
 
-// Unwatch a tree.
+//Unwatch a tree
 func (d *Direct) Unwatch(id string) {
 }
 
-//Fetch fetch isntances.
-func (d *Direct) Fetch(ctx context.Context) (res *naming.InstancesInfo, found bool) {
+//Fetch fetch isntances
+func (d *Direct) Fetch(ctx context.Context) (insMap map[string][]*naming.Instance, found bool) {
 	var ins []*naming.Instance
+
 	addrs := strings.Split(d.id, ",")
 	for _, addr := range addrs {
 		ins = append(ins, &naming.Instance{
@@ -66,9 +67,7 @@ func (d *Direct) Fetch(ctx context.Context) (res *naming.InstancesInfo, found bo
 	if len(ins) > 0 {
 		found = true
 	}
-	res = &naming.InstancesInfo{
-		Instances: map[string][]*naming.Instance{env.Zone: ins},
-	}
+	insMap = map[string][]*naming.Instance{env.Zone: ins}
 	return
 }
 
