@@ -4,14 +4,12 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/bilibili/kratos/pkg/ecode"
+
 	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	"github.com/bilibili/kratos/pkg/ecode"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/internal/pb"
 )
 
 // togRPCCode convert ecode.Codo to gRPC code
@@ -93,9 +91,6 @@ func FromError(svrErr error) (gst *status.Status) {
 func gRPCStatusFromEcode(code ecode.Codes) (*status.Status, error) {
 	var st *ecode.Status
 	switch v := code.(type) {
-	// compatible old pb.Error remove it after nobody use pb.Error.
-	case *pb.Error:
-		return status.New(codes.Unknown, v.Error()).WithDetails(v)
 	case *ecode.Status:
 		st = v
 	case ecode.Code:
@@ -108,40 +103,14 @@ func gRPCStatusFromEcode(code ecode.Codes) (*status.Status, error) {
 			}
 		}
 	}
-	// gst := status.New(togRPCCode(st), st.Message())
-	// NOTE: compatible with PHP swoole gRPC put code in status message as string.
-	// gst := status.New(togRPCCode(st), strconv.Itoa(st.Code()))
 	gst := status.New(codes.Unknown, strconv.Itoa(st.Code()))
-	pbe := &pb.Error{ErrCode: int32(st.Code()), ErrMessage: gst.Message()}
-	// NOTE: server return ecode.Status will be covert to pb.Error details will be ignored
-	// and put it at details[0] for compatible old client
-	return gst.WithDetails(pbe, st.Proto())
+	return gst.WithDetails(st.Proto())
 }
 
 // ToEcode convert grpc.status to ecode.Codes
 func ToEcode(gst *status.Status) ecode.Codes {
 	details := gst.Details()
-	// reverse range details, details may contain three case,
-	// if details contain pb.Error and ecode.Status use eocde.Status first.
-	//
-	// Details layout:
-	// pb.Error [0: pb.Error]
-	// both pb.Error and ecode.Status [0: pb.Error, 1: ecode.Status]
-	// ecode.Status [0: ecode.Status]
-	for i := len(details) - 1; i >= 0; i-- {
-		detail := details[i]
-		// compatible with old pb.Error.
-		if pe, ok := detail.(*pb.Error); ok {
-			st := ecode.Error(ecode.Code(pe.ErrCode), pe.ErrMessage)
-			if pe.ErrDetail != nil {
-				dynMsg := new(ptypes.DynamicAny)
-				// TODO deal with unmarshalAny error.
-				if err := ptypes.UnmarshalAny(pe.ErrDetail, dynMsg); err == nil {
-					st, _ = st.WithDetails(dynMsg.Message)
-				}
-			}
-			return st
-		}
+	for _, detail := range details {
 		// convert detail to status only use first detail
 		if pb, ok := detail.(proto.Message); ok {
 			return ecode.FromProto(pb)

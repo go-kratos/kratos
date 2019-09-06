@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	pkgerr "github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -15,7 +14,6 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/bilibili/kratos/pkg/ecode"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/internal/pb"
 )
 
 func TestCodeConvert(t *testing.T) {
@@ -89,16 +87,6 @@ func TestFromError(t *testing.T) {
 		assert.Equal(t, codes.Unknown, gst.Code())
 		assert.Equal(t, "-504", gst.Message())
 	})
-	t.Run("input pb.Error", func(t *testing.T) {
-		m := &timestamp.Timestamp{Seconds: time.Now().Unix()}
-		detail, _ := ptypes.MarshalAny(m)
-		err := &pb.Error{ErrCode: 2233, ErrMessage: "message", ErrDetail: detail}
-		gst := FromError(err)
-
-		assert.Equal(t, codes.Unknown, gst.Code())
-		assert.Len(t, gst.Details(), 1)
-		assert.Equal(t, "2233", gst.Message())
-	})
 	t.Run("input ecode.Status", func(t *testing.T) {
 		m := &timestamp.Timestamp{Seconds: time.Now().Unix()}
 		err, _ := ecode.Error(ecode.Unauthorized, "unauthorized").WithDetails(m)
@@ -107,10 +95,9 @@ func TestFromError(t *testing.T) {
 		//assert.Equal(t, codes.Unauthenticated, gst.Code())
 		// NOTE: set all grpc.status as Unkown when error is ecode.Codes for compatible
 		assert.Equal(t, codes.Unknown, gst.Code())
-		assert.Len(t, gst.Details(), 2)
+		assert.Len(t, gst.Details(), 1)
 		details := gst.Details()
-		assert.IsType(t, &pb.Error{}, details[0])
-		assert.IsType(t, err.Proto(), details[1])
+		assert.IsType(t, err.Proto(), details[0])
 	})
 }
 
@@ -123,32 +110,6 @@ func TestToEcode(t *testing.T) {
 		assert.Equal(t, "-500", ec.Message())
 		assert.Len(t, ec.Details(), 0)
 	})
-
-	t.Run("input pb.Error", func(t *testing.T) {
-		m := &timestamp.Timestamp{Seconds: time.Now().Unix()}
-		detail, _ := ptypes.MarshalAny(m)
-		gst := status.New(codes.InvalidArgument, "requesterr")
-		gst, _ = gst.WithDetails(&pb.Error{ErrCode: 1122, ErrMessage: "message", ErrDetail: detail})
-		ec := ToEcode(gst)
-
-		assert.Equal(t, 1122, ec.Code())
-		assert.Equal(t, "message", ec.Message())
-		assert.Len(t, ec.Details(), 1)
-		assert.IsType(t, m, ec.Details()[0])
-	})
-
-	t.Run("input pb.Error and ecode.Status", func(t *testing.T) {
-		gst := status.New(codes.InvalidArgument, "requesterr")
-		gst, _ = gst.WithDetails(
-			&pb.Error{ErrCode: 401, ErrMessage: "message"},
-			ecode.Errorf(ecode.Unauthorized, "Unauthorized").Proto(),
-		)
-		ec := ToEcode(gst)
-
-		assert.Equal(t, int(ecode.Unauthorized), ec.Code())
-		assert.Equal(t, "Unauthorized", ec.Message())
-	})
-
 	t.Run("input encode.Status", func(t *testing.T) {
 		m := &timestamp.Timestamp{Seconds: time.Now().Unix()}
 		st, _ := ecode.Errorf(ecode.Unauthorized, "Unauthorized").WithDetails(m)
