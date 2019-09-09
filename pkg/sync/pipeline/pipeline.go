@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"go-common/library/net/metadata"
-	"go-common/library/stat/metric"
-	xtime "go-common/library/time"
+	"github.com/bilibili/kratos/pkg/net/metadata"
+	"github.com/bilibili/kratos/pkg/stat/metric"
+	xtime "github.com/bilibili/kratos/pkg/time"
 )
 
 // ErrFull channel full error
