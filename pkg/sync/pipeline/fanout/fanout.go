@@ -6,9 +6,9 @@ import (
 	"runtime"
 	"sync"
 
-	"go-common/library/log"
-	"go-common/library/net/metadata"
-	"go-common/library/net/trace"
+	"github.com/bilibili/kratos/pkg/log"
+	"github.com/bilibili/kratos/pkg/net/metadata"
+	"github.com/bilibili/kratos/pkg/net/trace"
 )
 
 var (
