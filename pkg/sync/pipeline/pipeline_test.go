@@ -92,7 +92,6 @@ func TestPipelineSmooth(t *testing.T) {
 		Interval: xtime.Duration(time.Second),
 		Buffer:   100,
 		Worker:   10,
-		Smooth:   true,
 	}
 	type result struct {
 		index int

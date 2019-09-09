@@ -15,8 +15,8 @@ var (
 	// ErrFull chan full.
 	ErrFull   = errors.New("fanout: chan full")
 	traceTags = []trace.Tag{
-		trace.Tag{Key: trace.TagSpanKind, Value: "background"},
-		trace.Tag{Key: trace.TagComponent, Value: "sync/pipeline/fanout"},
+		{Key: trace.TagSpanKind, Value: "background"},
+		{Key: trace.TagComponent, Value: "sync/pipeline/fanout"},
 	}
 )
 
@@ -67,7 +67,7 @@ type Fanout struct {
 // New new a fanout struct.
 func New(name string, opts ...Option) *Fanout {
 	if name == "" {
-		name = "fanout"
+		name = "anonymous"
 	}
 	o := &options{
 		worker: 1,
@@ -96,6 +96,7 @@ func (c *Fanout) proc() {
 		case t := <-c.ch:
 			wrapFunc(t.f)(t.ctx)
 			_metricChanSize.Set(float64(len(c.ch)), c.name)
+			_metricCount.Inc(c.name)
 		case <-c.ctx.Done():
 			return
 		}
