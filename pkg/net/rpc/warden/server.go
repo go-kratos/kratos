@@ -10,24 +10,28 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/conf/dsn"
-	"github.com/bilibili/kratos/pkg/log"
-	nmd "github.com/bilibili/kratos/pkg/net/metadata"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/ratelimiter"
-	"github.com/bilibili/kratos/pkg/net/trace"
-	xtime "github.com/bilibili/kratos/pkg/time"
+	"go-common/library/conf/dsn"
+	"go-common/library/log"
+	nmd "go-common/library/net/metadata"
+	"go-common/library/net/rpc/warden/ratelimiter"
+	"go-common/library/net/trace"
+	xtime "go-common/library/time"
 
-	//this package is for json format response
-	_ "github.com/bilibili/kratos/pkg/net/rpc/warden/internal/encoding/json"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/internal/status"
+	// this package is for json format response
+	_ "go-common/library/net/rpc/warden/internal/encoding/json"
+	"go-common/library/net/rpc/warden/internal/status"
 
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
-	_ "google.golang.org/grpc/encoding/gzip" // NOTE: use grpc gzip by header grpc-accept-encoding
+	"google.golang.org/grpc/health"
+	healthgrpc "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/reflection"
+
+	// enable gzip encoding
+	_ "google.golang.org/grpc/encoding/gzip"
 )
 
 var (
@@ -227,6 +231,11 @@ func (s *Server) SetConfig(conf *ServerConfig) (err error) {
 	return nil
 }
 
+// Config return the server's config.
+func (s *Server) Config() ServerConfig {
+	return *s.conf
+}
+
 // interceptor is a single interceptor out of a chain of many interceptors.
 // Execution is done in left-to-right order, including passing of context.
 // For example ChainUnaryServer(one, two, three) will execute one before two before three, and three
@@ -282,6 +291,7 @@ func (s *Server) Run(addr string) error {
 		return err
 	}
 	reflection.Register(s.server)
+	healthgrpc.RegisterHealthServer(s.server, health.NewServer())
 	return s.Serve(lis)
 }
 
@@ -295,6 +305,7 @@ func (s *Server) RunUnix(file string) error {
 		return err
 	}
 	reflection.Register(s.server)
+	healthgrpc.RegisterHealthServer(s.server, health.NewServer())
 	return s.Serve(lis)
 }
 
@@ -306,8 +317,8 @@ func (s *Server) Start() (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Info("warden: start grpc listen addr: %v", lis.Addr())
 	reflection.Register(s.server)
+	healthgrpc.RegisterHealthServer(s.server, health.NewServer())
 	go func() {
 		if err := s.Serve(lis); err != nil {
 			panic(err)

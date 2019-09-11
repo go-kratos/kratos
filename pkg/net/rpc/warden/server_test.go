@@ -8,23 +8,23 @@ import (
 	"net"
 	"os"
 	"strconv"
-	"strings"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/ecode"
-	"github.com/bilibili/kratos/pkg/log"
-	nmd "github.com/bilibili/kratos/pkg/net/metadata"
-	"github.com/bilibili/kratos/pkg/net/netutil/breaker"
-	pb "github.com/bilibili/kratos/pkg/net/rpc/warden/internal/proto/testproto"
-	xtrace "github.com/bilibili/kratos/pkg/net/trace"
-	xtime "github.com/bilibili/kratos/pkg/time"
+	"go-common/library/ecode"
+	nmd "go-common/library/net/metadata"
+	"go-common/library/net/netutil/breaker"
+	pb "go-common/library/net/rpc/warden/internal/proto/testproto"
+	xtrace "go-common/library/net/trace"
+	"go-common/library/net/trace/mocktrace"
+	xtime "go-common/library/time"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
 )
 
@@ -119,7 +119,7 @@ func (s *helloServer) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.He
 	} else if in.Name == "general_error" {
 		return nil, fmt.Errorf("haha is error")
 	} else if in.Name == "ecode_code_error" {
-		return nil, ecode.Conflict
+		return nil, ecode.RequestErr
 	} else if in.Name == "pb_error_error" {
 		return nil, ecode.Error(ecode.Code(11122), "haha")
 	} else if in.Name == "ecode_status_error" {
@@ -135,7 +135,6 @@ func (s *helloServer) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.He
 		reply := &pb.HelloReply{Message: "status", Success: true}
 		return reply, nil
 	}
-
 	return &pb.HelloReply{Message: "Hello " + in.Name, Success: true}, nil
 }
 
@@ -193,16 +192,10 @@ func runClient(ctx context.Context, cc *ClientConfig, t *testing.T, name string,
 	return
 }
 
-func TestMain(t *testing.T) {
-	log.Init(nil)
-}
-
 func Test_Warden(t *testing.T) {
-	xtrace.Init(&xtrace.Config{Addr: "127.0.0.1:9982", Timeout: xtime.Duration(time.Second * 3)})
+	xtrace.Init(&xtrace.Config{Addr: "127.0.0.1:9982", Proto: "udp", Timeout: xtime.Duration(time.Second * 3)})
 	go _testOnce.Do(runServer(t))
 	go runClient(context.Background(), &clientConfig, t, "trace_test", 0)
-	//testTrace(t, 9982, false)
-	//testInterceptorChain(t)
 	testValidation(t)
 	testServerRecovery(t)
 	testClientRecovery(t)
@@ -215,33 +208,30 @@ func Test_Warden(t *testing.T) {
 	testClientConfig(t)
 	testBreaker(t)
 	testAllErrorCase(t)
+	testHealthCheck(t)
 	testGracefulShutDown(t)
 }
 
-func testValidation(t *testing.T) {
-	_, err := runClient(context.Background(), &clientConfig, t, "", 0)
-	if !ecode.EqualError(ecode.RequestErr, err) {
-		t.Fatalf("testValidation should return ecode.RequestErr,but is %v", err)
-	}
-}
-
-func testTimeoutOpt(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*100)
-	defer cancel()
+func testHealthCheck(t *testing.T) {
 	client := NewClient(&clientConfig)
-	conn, err := client.Dial(ctx, "127.0.0.1:8080")
+	conn, err := client.Dial(context.Background(), "127.0.0.1:8080")
 	if err != nil {
 		t.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	c := pb.NewGreeterClient(conn)
-	start := time.Now()
-	_, err = c.SayHello(ctx, &pb.HelloRequest{Name: "time_opt", Age: 0}, WithTimeoutCallOption(time.Millisecond*500))
-	if err == nil {
-		t.Fatalf("recovery must return error")
+	cli := grpc_health_v1.NewHealthClient(conn)
+	req := &grpc_health_v1.HealthCheckRequest{}
+	resp, err := cli.Check(context.Background(), req)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if time.Since(start) < time.Millisecond*400 {
-		t.Fatalf("client timeout must be greater than 400 Milliseconds;err:=%v", err)
+	t.Log(resp.Status)
+}
+
+func testValidation(t *testing.T) {
+	_, err := runClient(context.Background(), &clientConfig, t, "", 0)
+	if !ecode.RequestErr.Equal(err) {
+		t.Fatalf("testValidation should return ecode.RequestErr,but is %v", err)
 	}
 }
 
@@ -267,9 +257,9 @@ func testAllErrorCase(t *testing.T) {
 	t.Run("ecode_code_error", func(t *testing.T) {
 		_, err := runClient(ctx, &clientConfig, t, "ecode_code_error", 0)
 		ec := ecode.Cause(err)
-		assert.Equal(t, ecode.Conflict.Code(), ec.Code())
+		assert.Equal(t, ecode.RequestErr.Code(), ec.Code())
 		// remove this assert in future
-		assert.Equal(t, "-409", ec.Message())
+		assert.Equal(t, "-400", ec.Message())
 	})
 	t.Run("pb_error_error", func(t *testing.T) {
 		_, err := runClient(ctx, &clientConfig, t, "pb_error_error", 0)
@@ -293,10 +283,10 @@ func testBreaker(t *testing.T) {
 	}
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 35; i++ {
 		_, err := c.SayHello(context.Background(), &pb.HelloRequest{Name: "breaker_test"})
 		if err != nil {
-			if ecode.EqualError(ecode.ServiceUnavailable, err) {
+			if ecode.ServiceUnavailable.Equal(err) {
 				return
 			}
 		}
@@ -334,7 +324,7 @@ func testLinkTimeout(t *testing.T) {
 	if err == nil {
 		t.Fatalf("testLinkTimeout must return error")
 	}
-	if !ecode.EqualError(ecode.Deadline, err) {
+	if !ecode.Deadline.Equal(err) {
 		t.Fatalf("testLinkTimeout must return error RPCDeadline,err:%v", err)
 	}
 
@@ -344,7 +334,7 @@ func testClientConfig(t *testing.T) {
 	if err == nil {
 		t.Fatalf("testLinkTimeout must return error")
 	}
-	if !ecode.EqualError(ecode.Deadline, err) {
+	if !ecode.Deadline.Equal(err) {
 		t.Fatalf("testLinkTimeout must return error RPCDeadline,err:%v", err)
 	}
 }
@@ -373,6 +363,26 @@ func testGracefulShutDown(t *testing.T) {
 	wg.Wait()
 }
 
+func testTimeoutOpt(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*100)
+	defer cancel()
+	client := NewClient(&clientConfig)
+	conn, err := client.Dial(ctx, "127.0.0.1:8080")
+	if err != nil {
+		t.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	c := pb.NewGreeterClient(conn)
+	start := time.Now()
+	_, err = c.SayHello(ctx, &pb.HelloRequest{Name: "time_opt", Age: 0}, WithTimeoutCallOption(time.Millisecond*500))
+	if err == nil {
+		t.Fatalf("recovery must return error")
+	}
+	if time.Since(start) < time.Millisecond*400 {
+		t.Fatalf("client timeout must be greater than 400 Milliseconds;err:=%v", err)
+	}
+}
+
 func testClientRecovery(t *testing.T) {
 	ctx := context.Background()
 	client := NewClient(&clientConfig)
@@ -397,7 +407,7 @@ func testClientRecovery(t *testing.T) {
 		t.Fatalf("recovery must return ecode error")
 	}
 
-	if !ecode.EqualError(ecode.ServerErr, e) {
+	if !ecode.ServerErr.Equal(e) {
 		t.Fatalf("recovery must return ecode.RPCClientErr")
 	}
 }
@@ -424,14 +434,6 @@ func testServerRecovery(t *testing.T) {
 
 	if e.Code() != ecode.ServerErr.Code() {
 		t.Fatalf("recovery must return ecode.ServerErr")
-	}
-}
-
-func testInterceptorChain(t *testing.T) {
-	// NOTE: don't delete this sleep
-	time.Sleep(time.Millisecond)
-	if outPut[0] != "1" || outPut[1] != "3" || outPut[2] != "1" || outPut[3] != "3" || outPut[4] != "4" || outPut[5] != "2" || outPut[6] != "4" || outPut[7] != "2" {
-		t.Fatalf("outPut shoud be [1 3 1 3 4 2 4 2]!")
 	}
 }
 
@@ -464,32 +466,6 @@ func testECodeStatus(t *testing.T) {
 	detail := st.Details()[0].(*pb.HelloReply)
 	if !detail.Success || detail.Message != "status" {
 		t.Fatalf("wrong detail")
-	}
-}
-
-func testTrace(t *testing.T, port int, isStream bool) {
-	listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP("127.0.0.1"), Port: port})
-	if err != nil {
-		t.Fatalf("listent udp failed, %v", err)
-		return
-	}
-	data := make([]byte, 1024)
-	strs := make([][]string, 0)
-	for {
-		var n int
-		n, _, err = listener.ReadFromUDP(data)
-		if err != nil {
-			t.Fatalf("read from udp faild, %v", err)
-		}
-		str := strings.Split(string(data[:n]), _separator)
-		strs = append(strs, str)
-
-		if len(strs) == 2 {
-			break
-		}
-	}
-	if len(strs[0]) == 0 || len(strs[1]) == 0 {
-		t.Fatalf("trace str's length must be greater than 0")
 	}
 }
 
@@ -593,4 +569,22 @@ func TestMetadata(t *testing.T) {
 	})
 	_, err := cli.SayHello(ctx, &pb.HelloRequest{Name: "test"})
 	assert.Nil(t, err)
+}
+
+func TestTrace(t *testing.T) {
+	var extracted bool
+	mockTracer := &mocktrace.MockTrace{}
+	mockTracer.ExtractFn = func(interface{}, interface{}) (xtrace.Trace, error) {
+		extracted = true
+		return &mocktrace.MockSpan{MockTrace: mockTracer}, nil
+	}
+	xtrace.SetGlobalTracer(mockTracer)
+	cli, cancel := NewTestServerClient(func(ctx context.Context, req *pb.HelloRequest) (*pb.HelloReply, error) {
+		return &pb.HelloReply{}, nil
+	}, nil, nil)
+	defer cancel()
+
+	_, err := cli.SayHello(context.Background(), &pb.HelloRequest{Name: "test"})
+	assert.Nil(t, err)
+	assert.True(t, extracted)
 }
