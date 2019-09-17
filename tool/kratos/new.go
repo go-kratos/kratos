@@ -11,7 +11,7 @@ import (
 
 func runNew(ctx *cli.Context) error {
 	if len(ctx.Args()) == 0 {
-		return errors.New("required project name")
+		return errors.New("project name required, please enter a project name you want to create")
 	}
 	p.Name = ctx.Args()[0]
 
