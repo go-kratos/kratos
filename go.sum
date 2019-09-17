@@ -171,6 +171,8 @@ github.com/openzipkin/zipkin-go v0.2.1 h1:noL5/5Uf1HpVl3wNsfkZhIKbSWCVi5jgqkONNx
 github.com/openzipkin/zipkin-go v0.2.1/go.mod h1:NaW6tEwdmWMaCDZzg8sh+IBNOxHMPnhQw8ySjnjRyN4=
 github.com/otokaze/mock v0.0.0-20190125081256-8282b7a7c7c3 h1:zjmNboC3QFuMdJSaZJ7Qvi3HUxWXPdj7wb3rc4jH5HI=
 github.com/otokaze/mock v0.0.0-20190125081256-8282b7a7c7c3/go.mod h1:pLR8n2aimFxvvDJ6n8JuQWthMGezCYMjuhlaTjPTZf0=
+github.com/philchia/agollo v2.3.1+incompatible h1:C4zDDuOcP1Qynikz2rSJQSMjwexv4GfDpwBHJRinhPc=
+github.com/philchia/agollo v2.3.1+incompatible/go.mod h1:EXNdWdQkS+QBi0nb/Xm+sBBuQ1PM7/NIPr1JDzOlt8A=
 github.com/pierrec/lz4 v0.0.0-20190327172049-315a67e90e41/go.mod h1:3/3N9NVKO0jef7pBehbT1qWhCMrIgbYNnFAZCqQ5LRc=
 github.com/pierrec/lz4 v1.0.2-0.20190131084431-473cd7ce01a1/go.mod h1:3/3N9NVKO0jef7pBehbT1qWhCMrIgbYNnFAZCqQ5LRc=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
