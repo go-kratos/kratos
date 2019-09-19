@@ -7,6 +7,9 @@ go:
 git:
   depth: 1
 
+service:
+  - mysql
+
 # Force-enable Go modules. This will be unnecessary when Go 1.12 lands.
 env:
   global:
