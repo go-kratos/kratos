@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/bilibili/kratos/pkg/ecode/types"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 )
@@ -81,7 +82,7 @@ func (s *Status) Proto() *types.Status {
 
 // FromCode create status from ecode
 func FromCode(code Code) *Status {
-	return &Status{s: &types.Status{Code: int32(code)}}
+	return &Status{s: &types.Status{Code: int32(code), Message: code.Message()}}
 }
 
 // FromProto new status from grpc detail

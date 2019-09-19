@@ -34,8 +34,10 @@ func Logger() HandlerFunc {
 			caller = noUser
 		}
 
-		_metricServerReqCodeTotal.Inc(c.RoutePath[1:], caller, strconv.FormatInt(int64(cerr.Code()), 10))
-		_metricServerReqDur.Observe(int64(dt/time.Millisecond), c.RoutePath[1:], caller)
+		if len(c.RoutePath) > 0 {
+			_metricServerReqCodeTotal.Inc(c.RoutePath[1:], caller, strconv.FormatInt(int64(cerr.Code()), 10))
+			_metricServerReqDur.Observe(int64(dt/time.Millisecond), c.RoutePath[1:], caller)
+		}
 
 		lf := log.Infov
 		errmsg := ""

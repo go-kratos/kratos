@@ -125,18 +125,7 @@ func (t *bm) generateImports(file *descriptor.FileDescriptorProto) {
 	deps := make(map[string]string) // Map of package name to quoted import path.
 	deps = t.DeduceDeps(file)
 	for pkg, importPath := range deps {
-		for _, service := range file.Service {
-			for _, method := range service.Method {
-				inputType := t.GoTypeName(method.GetInputType())
-				outputType := t.GoTypeName(method.GetOutputType())
-				if strings.HasPrefix(pkg, outputType) || strings.HasPrefix(pkg, inputType) {
-					t.P(`import `, pkg, ` `, importPath)
-				}
-			}
-		}
-	}
-	if len(deps) > 0 {
-		t.P()
+		t.P(`import `, pkg, ` `, importPath)
 	}
 	t.P()
 	t.P(`// to suppressed 'imported but not used warning'`)

@@ -370,7 +370,9 @@ func (d *Discovery) register(ctx context.Context, ins *naming.Instance) (err err
 	uri := fmt.Sprintf(_registerURL, d.pickNode())
 	params := d.newParams(c)
 	params.Set("appid", ins.AppID)
-	params.Set("addrs", strings.Join(ins.Addrs, ","))
+	for _, addr := range ins.Addrs {
+		params.Add("addrs", addr)
+	}
 	params.Set("version", ins.Version)
 	params.Set("status", _statusUP)
 	params.Set("metadata", string(metadata))
