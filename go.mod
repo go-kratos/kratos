@@ -30,10 +30,9 @@ require (
 	github.com/openzipkin/zipkin-go v0.2.1
 	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v1.0.0
-	github.com/prometheus/client_model v0.0.0-20190220174349-fd36f4220a90 // indirect
 	github.com/prometheus/common v0.6.0 // indirect
 	github.com/prometheus/procfs v0.0.3 // indirect
-	github.com/remyoudompheng/bigfft v0.0.0-20190806203942-babf20351dd7e3ac320adedbbe5eb311aec8763c // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20190728182440-6a916e37a237 // indirect
 	github.com/samuel/go-zookeeper v0.0.0-20180130194729-c4fab1ac1bec // indirect
 	github.com/shirou/gopsutil v2.19.6+incompatible
 	github.com/siddontang/go v0.0.0-20180604090527-bdc77568d726
