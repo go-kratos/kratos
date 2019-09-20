@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	dsn = "root:secret@tcp(127.0.0.1:3306)/mysql?timeout=20s&readTimeout=20s"
+	dsn = "root@tcp(127.0.0.1:3306)/mysql?timeout=20s&readTimeout=20s"
 )
 
 func TestOpen(t *testing.T) {
