@@ -7,7 +7,7 @@ go:
 git:
   depth: 1
 
-service:
+services:
   - mysql
 
 # Force-enable Go modules. This will be unnecessary when Go 1.12 lands.
