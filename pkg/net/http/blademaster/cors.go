@@ -6,9 +6,22 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/log"
+	"go-common/library/log"
 
 	"github.com/pkg/errors"
+)
+
+var (
+	allowOriginHosts = []string{
+		".bilibili.com",
+		".biligame.com",
+		".bilibili.co",
+		".im9.com",
+		".acg.tv",
+		".hdslb.com",
+		".ibilibili.cn",
+		".biliapi.net",
+	}
 )
 
 // CORSConfig represents all available options for the middleware.
@@ -74,7 +87,7 @@ func (c *CORSConfig) Validate() error {
 }
 
 // CORS returns the location middleware with default configuration.
-func CORS(allowOriginHosts []string) HandlerFunc {
+func CORS() Handler {
 	config := &CORSConfig{
 		AllowMethods:     []string{"GET", "POST"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type"},
@@ -93,7 +106,7 @@ func CORS(allowOriginHosts []string) HandlerFunc {
 }
 
 // newCORS returns the location middleware with user-defined custom configuration.
-func newCORS(config *CORSConfig) HandlerFunc {
+func newCORS(config *CORSConfig) *cors {
 	if err := config.Validate(); err != nil {
 		panic(err.Error())
 	}
@@ -106,9 +119,11 @@ func newCORS(config *CORSConfig) HandlerFunc {
 		preflightHeaders: generatePreflightHeaders(config),
 	}
 
-	return func(c *Context) {
-		cors.applyCORS(c)
-	}
+	return cors
+}
+
+func (cors *cors) ServeHTTP(c *Context) {
+	cors.applyCORS(c)
 }
 
 func (cors *cors) applyCORS(c *Context) {
