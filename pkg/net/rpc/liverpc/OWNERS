@@ -1,0 +1,12 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+approvers:
+- zhaohailin
+- ouyangxu
+- liuzhen
+labels:
+- library
+reviewers:
+- zhaohailin
+- ouyangxu
+- liuzhen

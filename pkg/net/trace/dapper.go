@@ -3,26 +3,24 @@ package trace
 import (
 	"log"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 )
 
-const (
-	_maxLevel = 64
-	// hard code reset probability at 0.00025, 1/4000
-	_probability = 0.00025
-)
+const _maxLevel = 64
 
-// NewTracer new a tracer.
-func NewTracer(serviceName string, report reporter, disableSample bool) Tracer {
-	sampler := newSampler(_probability)
+func newTracer(serviceName string, report reporter, cfg *Config) Tracer {
+	// hard code reset probability at 0.00025, 1/4000
+	cfg.Probability = 0.00025
+	sampler := newSampler(cfg.Probability)
 
 	// default internal tags
 	tags := extendTag()
 	stdlog := log.New(os.Stderr, "trace", log.LstdFlags)
 	return &dapper{
-		serviceName:   serviceName,
-		disableSample: disableSample,
+		cfg:         cfg,
+		serviceName: serviceName,
 		propagators: map[interface{}]propagator{
 			HTTPFormat: httpPropagator{},
 			GRPCFormat: grpcPropagator{},
@@ -30,20 +28,20 @@ func NewTracer(serviceName string, report reporter, disableSample bool) Tracer {
 		reporter: report,
 		sampler:  sampler,
 		tags:     tags,
-		pool:     &sync.Pool{New: func() interface{} { return new(Span) }},
+		pool:     &sync.Pool{New: func() interface{} { return new(span) }},
 		stdlog:   stdlog,
 	}
 }
 
 type dapper struct {
-	serviceName   string
-	disableSample bool
-	tags          []Tag
-	reporter      reporter
-	propagators   map[interface{}]propagator
-	pool          *sync.Pool
-	stdlog        *log.Logger
-	sampler       sampler
+	cfg         *Config
+	serviceName string
+	tags        []Tag
+	reporter    reporter
+	propagators map[interface{}]propagator
+	pool        *sync.Pool
+	stdlog      *log.Logger
+	sampler     sampler
 }
 
 func (d *dapper) New(operationName string, opts ...Option) Trace {
@@ -54,19 +52,19 @@ func (d *dapper) New(operationName string, opts ...Option) Trace {
 	traceID := genID()
 	var sampled bool
 	var probability float32
-	if d.disableSample {
+	if d.cfg.DisableSample {
 		sampled = true
 		probability = 1
 	} else {
 		sampled, probability = d.sampler.IsSampled(traceID, operationName)
 	}
-	pctx := spanContext{TraceID: traceID}
+	pctx := spanContext{traceID: traceID}
 	if sampled {
-		pctx.Flags = flagSampled
-		pctx.Probability = probability
+		pctx.flags = flagSampled
+		pctx.probability = probability
 	}
 	if opt.Debug {
-		pctx.Flags |= flagDebug
+		pctx.flags |= flagDebug
 		return d.newSpanWithContext(operationName, pctx).SetTag(TagString(TagSpanKind, "server")).SetTag(TagBool("debug", true))
 	}
 	// 为了兼容临时为 New 的 Span 设置 span.kind
@@ -80,21 +78,21 @@ func (d *dapper) newSpanWithContext(operationName string, pctx spanContext) Trac
 	//	sp.context = pctx
 	//	return sp
 	//}
-	if pctx.Level > _maxLevel {
+	if pctx.level > _maxLevel {
 		// if span reach max limit level return noopspan
 		return noopspan{}
 	}
-	level := pctx.Level + 1
+	level := pctx.level + 1
 	nctx := spanContext{
-		TraceID:  pctx.TraceID,
-		ParentID: pctx.SpanID,
-		Flags:    pctx.Flags,
-		Level:    level,
+		traceID:  pctx.traceID,
+		parentID: pctx.spanID,
+		flags:    pctx.flags,
+		level:    level,
 	}
-	if pctx.SpanID == 0 {
-		nctx.SpanID = pctx.TraceID
+	if pctx.spanID == 0 {
+		nctx.spanID = pctx.traceID
 	} else {
-		nctx.SpanID = genID()
+		nctx.spanID = genID()
 	}
 	sp.operationName = operationName
 	sp.context = nctx
@@ -148,7 +146,11 @@ func (d *dapper) extract(format interface{}, carrier interface{}) (Trace, error)
 			return nil, err
 		}
 	}
-	pctx, err := contextFromString(carr.Get(KratosTraceID))
+	contextStr := carr.Get(BiliTraceID)
+	if contextStr == "" {
+		return d.legacyExtract(carr)
+	}
+	pctx, err := contextFromString(contextStr)
 	if err != nil {
 		return nil, err
 	}
@@ -156,11 +158,30 @@ func (d *dapper) extract(format interface{}, carrier interface{}) (Trace, error)
 	return d.newSpanWithContext("", pctx), nil
 }
 
+func (d *dapper) legacyExtract(carr Carrier) (Trace, error) {
+	traceIDstr := carr.Get(KeyTraceID)
+	if traceIDstr == "" {
+		return nil, ErrTraceNotFound
+	}
+	traceID, err := strconv.ParseUint(traceIDstr, 10, 64)
+	if err != nil {
+		return nil, ErrTraceCorrupted
+	}
+	sampled, _ := strconv.ParseBool(carr.Get(KeyTraceSampled))
+	spanID, _ := strconv.ParseUint(carr.Get(KeyTraceSpanID), 10, 64)
+	parentID, _ := strconv.ParseUint(carr.Get(KeyTraceParentID), 10, 64)
+	pctx := spanContext{traceID: traceID, spanID: spanID, parentID: parentID}
+	if sampled {
+		pctx.flags = flagSampled
+	}
+	return d.newSpanWithContext("", pctx), nil
+}
+
 func (d *dapper) Close() error {
 	return d.reporter.Close()
 }
 
-func (d *dapper) report(sp *Span) {
+func (d *dapper) report(sp *span) {
 	if sp.context.isSampled() {
 		if err := d.reporter.WriteSpan(sp); err != nil {
 			d.stdlog.Printf("marshal trace span error: %s", err)
@@ -169,7 +190,7 @@ func (d *dapper) report(sp *Span) {
 	d.putSpan(sp)
 }
 
-func (d *dapper) putSpan(sp *Span) {
+func (d *dapper) putSpan(sp *span) {
 	if len(sp.tags) > 32 {
 		sp.tags = nil
 	}
@@ -179,8 +200,8 @@ func (d *dapper) putSpan(sp *Span) {
 	d.pool.Put(sp)
 }
 
-func (d *dapper) getSpan() *Span {
-	sp := d.pool.Get().(*Span)
+func (d *dapper) getSpan() *span {
+	sp := d.pool.Get().(*span)
 	sp.dapper = d
 	sp.childs = 0
 	sp.tags = sp.tags[:0]
