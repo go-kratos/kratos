@@ -28,6 +28,7 @@ require (
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/montanaflynn/stats v0.5.0
 	github.com/openzipkin/zipkin-go v0.2.1
+	github.com/otokaze/mock v0.0.0-20190125081256-8282b7a7c7c3
 	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v1.0.0
 	github.com/prometheus/client_model v0.0.0-20190220174349-fd36f4220a90 // indirect
@@ -38,6 +39,7 @@ require (
 	github.com/shirou/gopsutil v2.19.6+incompatible
 	github.com/siddontang/go v0.0.0-20180604090527-bdc77568d726
 	github.com/sirupsen/logrus v1.4.2
+	github.com/smartystreets/goconvey v0.0.0-20190731233626-505e41936337
 	github.com/stretchr/testify v1.3.0
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5 // indirect
 	github.com/tsuna/gohbase v0.0.0-20190502052937-24ffed0537aa
@@ -49,6 +51,7 @@ require (
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
 	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect
 	golang.org/x/time v0.0.0-20190513212739-9d24e82272b4 // indirect
+	golang.org/x/tools v0.0.0-20190606124116-d0a3d012864b
 	google.golang.org/appengine v1.6.1 // indirect
 	google.golang.org/genproto v0.0.0-20190716160619-c506a9f90610
 	google.golang.org/grpc v1.22.0
