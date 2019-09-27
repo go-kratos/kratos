@@ -10,7 +10,7 @@
 - 提供一站式解决 UT 服务依赖的工具版本 (testcli)
 
 ### 编译安装
-*使用本工具/库需要前置安装好 docker&docker-compose*
+*使用本工具/库需要前置安装好 docker&docker-compose*
 
 #### Method 1. With go get
 ```shell
@@ -109,6 +109,7 @@ testcli -f ../../test/docker-compose.yaml run go test -v ./
 - Step2. 使用  flag.Set("f", "../../test/docker-compose.yaml") 指定 docker-compose.yaml 文件的路径。
 - Step3. 在 flag.Parse() 后即可使用 lich.Setup() 安装依赖&初始化数据（注意测试用例执行结束后 lich.Teardown() 回收下～）
 - Step4. 运行 `go test -v ./ `看看效果吧～
+
 example:
 ```Go
 package dao
