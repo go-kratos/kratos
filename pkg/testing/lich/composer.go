@@ -37,7 +37,7 @@ func Setup() (err error) {
 	pathHash = fmt.Sprintf("%x", md5.Sum([]byte(yamlPath)))[:9]
 	var args = []string{"-f", yamlPath, "-p", pathHash, "up", "-d"}
 	if err = exec.Command("docker-compose", args...).Run(); err != nil {
-		log.Printf("exec.Command(docker-composer) args(%v) error(%v)", args, err)
+		log.Printf("exec.Command(docker-compose) args(%v) error(%v)", args, err)
 		Teardown()
 		return
 	}
@@ -67,7 +67,7 @@ func Teardown() (err error) {
 	pathHash = fmt.Sprintf("%x", md5.Sum([]byte(yamlPath)))[:9]
 	args := []string{"-f", yamlPath, "-p", pathHash, "down"}
 	if output, err := exec.Command("docker-compose", args...).CombinedOutput(); err != nil {
-		log.Fatalf("exec.Command(docker-composer) args(%v) stdout(%s) error(%v)", args, string(output), err)
+		log.Fatalf("exec.Command(docker-compose) args(%v) stdout(%s) error(%v)", args, string(output), err)
 		return err
 	}
 	return
@@ -76,7 +76,7 @@ func Teardown() (err error) {
 func getServices() (output []byte, err error) {
 	var args = []string{"-f", yamlPath, "-p", pathHash, "config", "--services"}
 	if output, err = exec.Command("docker-compose", args...).CombinedOutput(); err != nil {
-		log.Printf("exec.Command(docker-composer) args(%v) stdout(%s) error(%v)", args, string(output), err)
+		log.Printf("exec.Command(docker-compose) args(%v) stdout(%s) error(%v)", args, string(output), err)
 		return
 	}
 	services = make(map[string]*Container)
@@ -84,7 +84,7 @@ func getServices() (output []byte, err error) {
 	for _, svr := range bytes.Split(output, []byte("\n")) {
 		args = []string{"-f", yamlPath, "-p", pathHash, "ps", "-a", "-q", string(svr)}
 		if output, err = exec.Command("docker-compose", args...).CombinedOutput(); err != nil {
-			log.Printf("exec.Command(docker-composer) args(%v) stdout(%s) error(%v)", args, string(output), err)
+			log.Printf("exec.Command(docker-compose) args(%v) stdout(%s) error(%v)", args, string(output), err)
 			return
 		}
 		var id = string(bytes.TrimSpace(output))

@@ -10,7 +10,7 @@
 - 提供一站式解决 UT 服务依赖的工具版本 (testcli)
 
 ### 编译安装
-*使用本工具/库需要前置安装好 docker&docker-compose*
+*使用本工具/库需要前置安装好 docker & docker-compose@v1.24.1^*
 
 #### Method 1. With go get
 ```shell
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `YOUR_TABLE_NAME` (
     execTimeout = "1s"
     tranTimeout = "1s"
 ```
-在 *Step 1* 我们以及指定了服务对外暴露的端口为3306（这当然也可以是你指定的任何值），那理所应当的我们也要修改项目连接数据库的配置～
+在 *Step 1* 我们已经指定了服务对外暴露的端口为3306（这当然也可以是你指定的任何值），那理所应当的我们也要修改项目连接数据库的配置～
 
 Great! 至此你已经完成了运行所需要用到的数据配置，接下来就来运行它。
 

@@ -35,7 +35,6 @@ require (
 	github.com/shirou/gopsutil v2.19.6+incompatible
 	github.com/siddontang/go v0.0.0-20180604090527-bdc77568d726
 	github.com/sirupsen/logrus v1.4.2
-	github.com/smartystreets/goconvey v0.0.0-20190731233626-505e41936337
 	github.com/stretchr/testify v1.3.0
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5 // indirect
 	github.com/tsuna/gohbase v0.0.0-20190502052937-24ffed0537aa
