@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/urfave/cli"
 )
@@ -25,6 +26,7 @@ func runNew(ctx *cli.Context) error {
 		pwd, _ := os.Getwd()
 		p.Path = path.Join(pwd, p.Name)
 	}
+	p.Path = filepath.FromSlash(p.Path)
 	// Create a project
 	if err := create(); err != nil {
 		return err
