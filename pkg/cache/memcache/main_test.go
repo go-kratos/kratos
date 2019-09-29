@@ -1,15 +1,13 @@
 package memcache
 
 import (
-	"flag"
 	"log"
 	"os"
 	"testing"
 	"time"
 
-	"go-common/library/container/pool"
-	"go-common/library/testing/lich"
-	xtime "go-common/library/time"
+	"github.com/bilibili/kratos/pkg/container/pool"
+	xtime "github.com/bilibili/kratos/pkg/time"
 )
 
 var testConnASCII Conn
@@ -70,12 +68,12 @@ func setupTestPool(addr string) {
 }
 
 func TestMain(m *testing.M) {
-	flag.Set("f", "./test/docker-compose.yaml")
-	flag.Parse()
-	if err := lich.Setup(); err != nil {
-		panic(err)
+	testMemcacheAddr = os.Getenv("TEST_MEMCACHE_ADDR")
+	if testExampleAddr == "" {
+		log.Print("TEST_MEMCACHE_ADDR not provide skip test.")
+		// ignored test.
+		os.Exit(0)
 	}
-	testMemcacheAddr = "127.0.0.1:11211"
 	setupTestConnASCII(testMemcacheAddr)
 	setupTestMemcache(testMemcacheAddr)
 	setupTestPool(testMemcacheAddr)
@@ -83,6 +81,5 @@ func TestMain(m *testing.M) {
 	testExampleAddr = testMemcacheAddr
 
 	ret := m.Run()
-	lich.Teardown()
 	os.Exit(ret)
 }
