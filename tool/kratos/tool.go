@@ -186,14 +186,7 @@ func (t Tool) installed() bool {
 }
 
 func gopath() (gp string) {
-	var gopaths []string
-
-	switch runtime.GOOS {
-	case "windows":
-		gopaths = strings.Split(os.Getenv("GOPATH"), ";")
-	default:
-		gopaths = strings.Split(os.Getenv("GOPATH"), ":")
-	}
+	gopaths := strings.Split(os.Getenv("GOPATH"), string(filepath.ListSeparator))
 
 	if len(gopaths) == 1 && gopaths[0] != "" {
 		return gopaths[0]
