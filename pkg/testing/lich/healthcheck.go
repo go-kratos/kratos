@@ -1,13 +1,13 @@
 package lich
 
 import (
+	"database/sql"
 	"fmt"
-	"log"
 	"net"
 	"strconv"
 	"strings"
 
-	"database/sql"
+	"github.com/bilibili/kratos/pkg/log"
 	// Register go-sql-driver stuff
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -18,7 +18,7 @@ var healthchecks = map[string]func(*Container) error{"mysql": checkMysql, "maria
 func (c *Container) Healthcheck() (err error) {
 	if status, health := c.State.Status, c.State.Health.Status; !c.State.Running || (health != "" && health != "healthy") {
 		err = fmt.Errorf("service: %s | container: %s not running", c.GetImage(), c.GetID())
-		log.Printf("docker status(%s) health(%s) error(%v)", status, health, err)
+		log.Error("docker status(%s) health(%s) error(%v)", status, health, err)
 		return
 	}
 	if check, ok := healthchecks[c.GetImage()]; ok {
@@ -27,7 +27,7 @@ func (c *Container) Healthcheck() (err error) {
 	}
 	for proto, ports := range c.NetworkSettings.Ports {
 		if id := c.GetID(); !strings.Contains(proto, "tcp") {
-			log.Printf("container: %s proto(%s) unsupported.", id, proto)
+			log.Error("container: %s proto(%s) unsupported.", id, proto)
 			continue
 		}
 		for _, pulish := range ports {
@@ -38,7 +38,7 @@ func (c *Container) Healthcheck() (err error) {
 				tcpConn *net.TCPConn
 			)
 			if tcpConn, err = net.DialTCP("tcp", nil, tcpAddr); err != nil {
-				log.Printf("net.DialTCP(%s:%s) error(%v)", pulish.HostIP, pulish.HostPort, err)
+				log.Error("net.DialTCP(%s:%s) error(%v)", pulish.HostIP, pulish.HostPort, err)
 				return
 			}
 			tcpConn.Close()
@@ -74,11 +74,11 @@ func checkMysql(c *Container) (err error) {
 	}
 	var dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/", user, passwd, ip, port)
 	if db, err = sql.Open("mysql", dsn); err != nil {
-		log.Printf("sql.Open(mysql) dsn(%s) error(%v)", dsn, err)
+		log.Error("sql.Open(mysql) dsn(%s) error(%v)", dsn, err)
 		return
 	}
 	if err = db.Ping(); err != nil {
-		log.Printf("ping(db) dsn(%s) error(%v)", dsn, err)
+		log.Error("ping(db) dsn(%s) error(%v)", dsn, err)
 	}
 	defer db.Close()
 	return

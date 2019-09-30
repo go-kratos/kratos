@@ -9,14 +9,6 @@ import (
 	"github.com/bilibili/kratos/pkg/testing/lich"
 )
 
-var (
-	noDown bool
-)
-
-func init() {
-	flag.BoolVar(&noDown, "nodown", false, "containers are not recycled.")
-}
-
 func parseArgs() (flags map[string]string) {
 	flags = make(map[string]string)
 	for idx, arg := range os.Args {
@@ -48,9 +40,7 @@ func main() {
 	if err := lich.Setup(); err != nil {
 		panic(err)
 	}
-	if !noDown {
-		defer lich.Teardown()
-	}
+	defer lich.Teardown()
 	cmds := strings.Split(flags["run"], " ")
 	cmd := exec.Command(cmds[0], cmds[1:]...)
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr

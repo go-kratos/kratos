@@ -37,5 +37,5 @@ var (
                        自己动手分田地;
                        你若气死谁如意?
                        谈笑风生活长命.
-// Release 1.2.3. Powered by 主站质保团队`
+// Release 1.2.3. Powered by Kratos`
 )

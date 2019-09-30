@@ -6,15 +6,17 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
+
+	"github.com/bilibili/kratos/pkg/log"
 )
 
 var (
 	retry    int
+	noDown   bool
 	yamlPath string
 	pathHash string
 	services map[string]*Container
@@ -22,85 +24,78 @@ var (
 
 func init() {
 	flag.StringVar(&yamlPath, "f", "docker-compose.yaml", "composer yaml path.")
+	flag.BoolVar(&noDown, "nodown", false, "containers are not recycled.")
+}
+
+func runCompose(args ...string) (output []byte, err error) {
+	if _, err = os.Stat(yamlPath); os.IsNotExist(err) {
+		log.Error("os.Stat(%s) composer yaml is not exist!", yamlPath)
+		return
+	}
+	if yamlPath, err = filepath.Abs(yamlPath); err != nil {
+		log.Error("filepath.Abs(%s) error(%v)", yamlPath, err)
+		return
+	}
+	pathHash = fmt.Sprintf("%x", md5.Sum([]byte(yamlPath)))[:9]
+	args = append([]string{"-f", yamlPath, "-p", pathHash}, args...)
+	if output, err = exec.Command("docker-compose", args...).CombinedOutput(); err != nil {
+		log.Error("exec.Command(docker-compose) args(%v) stdout(%s) error(%v)", args, string(output), err)
+		return
+	}
+	return
 }
 
 // Setup setup UT related environment dependence for everything.
 func Setup() (err error) {
-	if _, err = os.Stat(yamlPath); os.IsNotExist(err) {
-		log.Println("composer yaml is not exist!", yamlPath)
+	if _, err = runCompose("up", "-d"); err != nil {
 		return
 	}
-	if yamlPath, err = filepath.Abs(yamlPath); err != nil {
-		log.Printf("filepath.Abs(%s) error(%v)", yamlPath, err)
-		return
-	}
-	pathHash = fmt.Sprintf("%x", md5.Sum([]byte(yamlPath)))[:9]
-	var args = []string{"-f", yamlPath, "-p", pathHash, "up", "-d"}
-	if err = exec.Command("docker-compose", args...).Run(); err != nil {
-		log.Printf("exec.Command(docker-compose) args(%v) error(%v)", args, err)
-		Teardown()
-		return
-	}
-	// 拿到yaml文件中的服务名，同时通过服务名获取到启动的容器ID
+	defer func() {
+		if err != err {
+			go Teardown()
+		}
+	}()
 	if _, err = getServices(); err != nil {
-		Teardown()
 		return
 	}
-	// 通过容器ID检测容器的状态，包括容器服务的状态
-	if _, err = checkServices(); err != nil {
-		Teardown()
-		return
-	}
+	_, err = checkServices()
 	return
 }
 
 // Teardown unsetup all environment dependence.
 func Teardown() (err error) {
-	if _, err = os.Stat(yamlPath); os.IsNotExist(err) {
-		log.Println("composer yaml is not exist!")
-		return
-	}
-	if yamlPath, err = filepath.Abs(yamlPath); err != nil {
-		log.Printf("filepath.Abs(%s) error(%v)", yamlPath, err)
-		return
-	}
-	pathHash = fmt.Sprintf("%x", md5.Sum([]byte(yamlPath)))[:9]
-	args := []string{"-f", yamlPath, "-p", pathHash, "down"}
-	if output, err := exec.Command("docker-compose", args...).CombinedOutput(); err != nil {
-		log.Fatalf("exec.Command(docker-compose) args(%v) stdout(%s) error(%v)", args, string(output), err)
-		return err
+	if !noDown {
+		_, err = runCompose("down")
 	}
 	return
 }
 
 func getServices() (output []byte, err error) {
-	var args = []string{"-f", yamlPath, "-p", pathHash, "config", "--services"}
-	if output, err = exec.Command("docker-compose", args...).CombinedOutput(); err != nil {
-		log.Printf("exec.Command(docker-compose) args(%v) stdout(%s) error(%v)", args, string(output), err)
+	if output, err = runCompose("config", "--services"); err != nil {
 		return
 	}
 	services = make(map[string]*Container)
 	output = bytes.TrimSpace(output)
 	for _, svr := range bytes.Split(output, []byte("\n")) {
-		args = []string{"-f", yamlPath, "-p", pathHash, "ps", "-a", "-q", string(svr)}
-		if output, err = exec.Command("docker-compose", args...).CombinedOutput(); err != nil {
-			log.Printf("exec.Command(docker-compose) args(%v) stdout(%s) error(%v)", args, string(output), err)
+		if output, err = runCompose("ps", "-a", "-q", string(svr)); err != nil {
 			return
 		}
-		var id = string(bytes.TrimSpace(output))
-		args = []string{"inspect", id, "--format", "'{{json .}}'"}
+		var (
+			id   = string(bytes.TrimSpace(output))
+			args = []string{"inspect", id, "--format", "'{{json .}}'"}
+		)
 		if output, err = exec.Command("docker", args...).CombinedOutput(); err != nil {
-			log.Printf("exec.Command(docker) args(%v) stdout(%s) error(%v)", args, string(output), err)
+			log.Error("exec.Command(docker) args(%v) stdout(%s) error(%v)", args, string(output), err)
 			return
 		}
 		if output = bytes.TrimSpace(output); bytes.Equal(output, []byte("")) {
 			err = fmt.Errorf("service: %s | container: %s fails to launch", svr, id)
-			log.Printf("exec.Command(docker) args(%v) error(%v)", args, err)
+			log.Error("exec.Command(docker) args(%v) error(%v)", args, err)
 			return
 		}
 		var c = &Container{}
 		if err = json.Unmarshal(bytes.Trim(output, "'"), c); err != nil {
-			log.Printf("json.Unmarshal(%s) error(%v)", string(output), err)
+			log.Error("json.Unmarshal(%s) error(%v)", string(output), err)
 			return
 		}
 		services[string(svr)] = c
@@ -121,7 +116,7 @@ func checkServices() (output []byte, err error) {
 	}()
 	for svr, c := range services {
 		if err = c.Healthcheck(); err != nil {
-			log.Printf("healthcheck(%s) error(%v) retrying %d times...", svr, err, 5-retry)
+			log.Error("healthcheck(%s) error(%v) retrying %d times...", svr, err, 5-retry)
 			return
 		}
 		// TODO About container check and more...
