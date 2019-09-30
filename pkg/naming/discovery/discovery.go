@@ -102,7 +102,7 @@ type appInfo struct {
 }
 
 func fixConfig(c *Config) error {
-	if len(c.Nodes) == 0 {
+	if len(c.Nodes) == 0 && env.DiscoveryNodes != "" {
 		c.Nodes = strings.Split(env.DiscoveryNodes, ",")
 	}
 	if c.Region == "" {
