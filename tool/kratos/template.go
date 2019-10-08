@@ -76,6 +76,8 @@ import (
 	"{{.ModuleName}}/internal/service"
 	"github.com/bilibili/kratos/pkg/conf/paladin"
 	"github.com/bilibili/kratos/pkg/log"
+
+	_ "go.uber.org/automaxprocs"
 )
 
 func main() {
@@ -127,6 +129,8 @@ import (
 	"{{.ModuleName}}/internal/service"
 	"github.com/bilibili/kratos/pkg/conf/paladin"
 	"github.com/bilibili/kratos/pkg/log"
+
+	_ "go.uber.org/automaxprocs"
 )
 
 func main() {
