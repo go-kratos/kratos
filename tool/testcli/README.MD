@@ -142,8 +142,7 @@ func TestMain(m *testing.M) {
     defer lich.Teardown()
     d = New()
     if code := m.Run(); code != 0 {
-        lich.Teardown()
-        os.Exit(code)
+        panic(code)
     }
 }
  ```
