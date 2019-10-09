@@ -222,7 +222,8 @@ func (j *jaegerUDPReport) calcSizeOfSerializedThrift(thriftStruct thrift.TStruct
 	return j.thriftBuffer.Len()
 }
 
-func newJaegerUDPReport(hostPort string, maxPacketSize int) (reporter, error) {
+// NewJaegerUDPReport report trace to jaeger use udp.
+func NewJaegerUDPReport(hostPort string, maxPacketSize int) (reporter, error) {
 	if len(hostPort) == 0 {
 		hostPort = fmt.Sprintf("%s:%d", DefaultUDPSpanServerHost, DefaultUDPSpanServerPort)
 	}
@@ -298,10 +299,14 @@ func (j *jaegerUDPReport) Close() error {
 	return j.client.Close()
 }
 
-func newJaegerHTTPReport(entrypoint string) (reporter, error) {
+// NewJaegerHTTPReport report trace to jaeger use http protocol.
+func NewJaegerHTTPReport(entrypoint string, batchSize int) (reporter, error) {
 	// TODO: support multi entrypoint and custom path.
 	if !strings.HasPrefix(entrypoint, "http://") {
 		entrypoint = fmt.Sprintf("http://%s/api/traces", entrypoint)
+	}
+	if batchSize == 0 {
+		batchSize = defaultHTTPBatchSize
 	}
 	httpReport := &jaegerHTTPReport{
 		entrypoint: entrypoint,

@@ -40,6 +40,7 @@ type Config struct {
 	Probability float32 `dsn:"-"`
 	// ProtocolVersion
 	ProtocolVersion int32 `dsn:"query.protocol_version,2"`
+	BatchSize       int   `dsn:"query.batch_size,100"`
 }
 
 func parseDSN(rawdsn string) (*Config, error) {
@@ -58,13 +59,16 @@ func newReport(cfg *Config) (reporter, error) {
 	switch cfg.Network {
 	case "jaeger+udp":
 		jaegerReportProtocolCounter.Inc("jaeger_udp")
-		return newJaegerUDPReport(cfg.Addr, 0)
+		return NewJaegerUDPReport(cfg.Addr, 0)
 	case "jaeger+http":
 		jaegerReportProtocolCounter.Inc("jaeger_http")
-		return newJaegerHTTPReport(cfg.Addr)
+		return NewJaegerHTTPReport(cfg.Addr, cfg.BatchSize)
+	case "zipkin+http":
+		jaegerReportProtocolCounter.Inc("zipkin_http")
+		return NewZipKinHTTPReport(cfg.Addr, cfg.BatchSize, time.Duration(cfg.Timeout)), nil
 	default:
 		jaegerReportProtocolCounter.Inc("dapper_udp")
-		return newDapperReport(cfg.Network, cfg.Addr, time.Duration(cfg.Timeout), cfg.ProtocolVersion), nil
+		return NewDapperReport(cfg.Network, cfg.Addr, time.Duration(cfg.Timeout), cfg.ProtocolVersion), nil
 	}
 }
 
@@ -89,7 +93,7 @@ func Init(cfg *Config) {
 		// NOTE compatible proto field
 		cfg.Network = cfg.Proto
 		fmt.Fprintf(os.Stderr, "[deprecated] trace.Init() with conf is Deprecated, argument will be ignored. please use flag -trace or env TRACE to configure trace.\n")
-		report := newDapperReport(cfg.Network, cfg.Addr, time.Duration(cfg.Timeout), cfg.ProtocolVersion)
+		report := NewDapperReport(cfg.Network, cfg.Addr, time.Duration(cfg.Timeout), cfg.ProtocolVersion)
 		SetGlobalTracer(NewTracer(serviceName, report, cfg))
 		return
 	}

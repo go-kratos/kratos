@@ -39,7 +39,7 @@ func TestReportTCP(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	report := newDapperReport("tcp", "127.0.0.1:6077", 0, 0).(*connReport)
+	report := NewDapperReport("tcp", "127.0.0.1:6077", 0, 0).(*connReport)
 	data := []byte("hello, world")
 	report.writePackage(data)
 	if err := report.Close(); err != nil {
@@ -77,7 +77,7 @@ func TestReportUnixgram(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	report := newDapperReport("unixgram", "/tmp/trace.sock", 0, 0).(*connReport)
+	report := NewDapperReport("unixgram", "/tmp/trace.sock", 0, 0).(*connReport)
 	data := []byte("hello, world")
 	report.writePackage(data)
 	if err := report.Close(); err != nil {

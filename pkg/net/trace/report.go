@@ -24,8 +24,8 @@ type reporter interface {
 	Close() error
 }
 
-// newDapperReport with network address
-func newDapperReport(network, address string, timeout time.Duration, protocolVersion int32) reporter {
+// NewDapperReport with network address
+func NewDapperReport(network, address string, timeout time.Duration, protocolVersion int32) reporter {
 	if timeout == 0 {
 		timeout = _defaultWriteTimeout
 	}

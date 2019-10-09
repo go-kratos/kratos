@@ -1,14 +1,10 @@
-package zipkin
+package trace
 
 import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
-
-	"github.com/bilibili/kratos/pkg/net/trace"
-	xtime "github.com/bilibili/kratos/pkg/time"
 )
 
 func TestZipkin(t *testing.T) {
@@ -25,24 +21,18 @@ func TestZipkin(t *testing.T) {
 		t.Logf("%s\n", aSpanPayload)
 	}))
 	defer ts.Close()
-
-	c := &Config{
-		Endpoint:  ts.URL,
-		Timeout:   xtime.Duration(time.Second * 5),
-		BatchSize: 100,
-	}
 	//c.Endpoint = "http://127.0.0.1:9411/api/v2/spans"
-	report := newReport(c)
-	t1 := trace.NewTracer("service1", report, true)
-	t2 := trace.NewTracer("service2", report, true)
+	report := NewZipKinHTTPReport(ts.URL, 100, 0)
+	t1 := NewTracer("service1", report, &testcfg)
+	t2 := NewTracer("service2", report, &testcfg)
 	sp1 := t1.New("option_1")
 	sp2 := sp1.Fork("service3", "opt_client")
-	sp2.SetLog(trace.Log("log_k","log_v"))
+	sp2.SetLog(Log("log_k", "log_v"))
 	// inject
 	header := make(http.Header)
-	t1.Inject(sp2, trace.HTTPFormat, header)
+	t1.Inject(sp2, HTTPFormat, header)
 	t.Log(header)
-	sp3, err := t2.Extract(trace.HTTPFormat, header)
+	sp3, err := t2.Extract(HTTPFormat, header)
 	if err != nil {
 		t.Fatal(err)
 	}

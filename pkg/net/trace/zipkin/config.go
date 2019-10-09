@@ -26,5 +26,6 @@ func Init(c *Config) {
 	if c.Timeout == 0 {
 		c.Timeout = xtime.Duration(200 * time.Millisecond)
 	}
-	trace.SetGlobalTracer(trace.NewTracer(env.AppID, newReport(c), &trace.Config{DisableSample: c.DisableSample}))
+	zipkinReport := trace.NewZipKinHTTPReport(c.Endpoint, c.BatchSize, time.Duration(c.Timeout))
+	trace.SetGlobalTracer(trace.NewTracer(env.AppID, zipkinReport, &trace.Config{DisableSample: c.DisableSample}))
 }

@@ -1,31 +1,43 @@
-package zipkin
+package trace
 
 import (
 	"fmt"
-	protogen "github.com/bilibili/kratos/pkg/net/trace/proto"
+	"strings"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/net/trace"
 	"github.com/openzipkin/zipkin-go/model"
-	"github.com/openzipkin/zipkin-go/reporter"
+	zipkinreporter "github.com/openzipkin/zipkin-go/reporter"
 	"github.com/openzipkin/zipkin-go/reporter/http"
+
+	protogen "github.com/bilibili/kratos/pkg/net/trace/proto"
 )
 
-type report struct {
-	rpt reporter.Reporter
+type zipkinHTTPReport struct {
+	rpt zipkinreporter.Reporter
 }
 
-func newReport(c *Config) *report {
-	return &report{
-		rpt: http.NewReporter(c.Endpoint,
-			http.Timeout(time.Duration(c.Timeout)),
-			http.BatchSize(c.BatchSize),
+// NewZipKinHTTPReport report trace to zipkin.
+func NewZipKinHTTPReport(endpoint string, batchSize int, timeout time.Duration) *zipkinHTTPReport {
+	// TODO: support multi entrypoint and custom path.
+	if !strings.HasPrefix(endpoint, "http://") {
+		endpoint = fmt.Sprintf("http://%s/api/v2/spans", endpoint)
+	}
+	if batchSize == 0 {
+		batchSize = 100
+	}
+	if timeout == 0 {
+		timeout = 200 * time.Millisecond
+	}
+	return &zipkinHTTPReport{
+		rpt: http.NewReporter(endpoint,
+			http.Timeout(time.Duration(timeout)),
+			http.BatchSize(batchSize),
 		),
 	}
 }
 
 // WriteSpan write a trace span to queue.
-func (r *report) WriteSpan(raw *trace.Span) (err error) {
+func (r *zipkinHTTPReport) WriteSpan(raw *Span) (err error) {
 	ctx := raw.Context()
 	traceID := model.TraceID{Low: ctx.TraceID}
 	spanID := model.ID(ctx.SpanID)
@@ -45,7 +57,7 @@ func (r *report) WriteSpan(raw *trace.Span) (err error) {
 	span.LocalEndpoint = &model.Endpoint{ServiceName: raw.ServiceName()}
 	for _, tag := range tags {
 		switch tag.Key {
-		case trace.TagSpanKind:
+		case TagSpanKind:
 			switch tag.Value.(string) {
 			case "client":
 				span.Kind = model.Client
@@ -71,14 +83,14 @@ func (r *report) WriteSpan(raw *trace.Span) (err error) {
 	return
 }
 
-func (r *report) converLogsToAnnotations(logs []*protogen.Log) (annotations []model.Annotation) {
+func (r *zipkinHTTPReport) converLogsToAnnotations(logs []*protogen.Log) (annotations []model.Annotation) {
 	annotations = make([]model.Annotation, 0, len(annotations))
 	for _, lg := range logs {
 		annotations = append(annotations, r.converLogToAnnotation(lg)...)
 	}
 	return annotations
 }
-func (r *report) converLogToAnnotation(log *protogen.Log) (annotations []model.Annotation) {
+func (r *zipkinHTTPReport) converLogToAnnotation(log *protogen.Log) (annotations []model.Annotation) {
 	annotations = make([]model.Annotation, 0, len(log.Fields))
 	for _, field := range log.Fields {
 		val := string(field.Value)
@@ -91,7 +103,7 @@ func (r *report) converLogToAnnotation(log *protogen.Log) (annotations []model.A
 	return annotations
 }
 
-// Close close the report.
-func (r *report) Close() error {
+// Close close the zipkinHTTPReport.
+func (r *zipkinHTTPReport) Close() error {
 	return r.rpt.Close()
 }
