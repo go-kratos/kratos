@@ -20,6 +20,7 @@ require (
 	github.com/golang/mock v1.3.1 // indirect
 	github.com/golang/protobuf v1.3.2
 	github.com/google/btree v1.0.0 // indirect
+	github.com/google/uuid v1.0.0
 	github.com/gorilla/websocket v1.4.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.9.4 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect

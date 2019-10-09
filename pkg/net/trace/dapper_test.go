@@ -9,6 +9,8 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+var testcfg = Config{DisableSample: true}
+
 type mockReport struct {
 	sps []*Span
 }
@@ -25,8 +27,8 @@ func (m *mockReport) Close() error {
 func TestDapperPropagation(t *testing.T) {
 	t.Run("test HTTP progagation", func(t *testing.T) {
 		report := &mockReport{}
-		t1 := NewTracer("service1", report, true)
-		t2 := NewTracer("service2", report, true)
+		t1 := NewTracer("service1", report, &testcfg)
+		t2 := NewTracer("service2", report, &testcfg)
 		sp1 := t1.New("opt_1")
 		sp2 := sp1.Fork("", "opt_client")
 		header := make(http.Header)
@@ -49,8 +51,8 @@ func TestDapperPropagation(t *testing.T) {
 	})
 	t.Run("test gRPC progagation", func(t *testing.T) {
 		report := &mockReport{}
-		t1 := NewTracer("service1", report, true)
-		t2 := NewTracer("service2", report, true)
+		t1 := NewTracer("service1", report, &testcfg)
+		t2 := NewTracer("service2", report, &testcfg)
 		sp1 := t1.New("opt_1")
 		sp2 := sp1.Fork("", "opt_client")
 		md := make(metadata.MD)
@@ -73,14 +75,14 @@ func TestDapperPropagation(t *testing.T) {
 	})
 	t.Run("test normal", func(t *testing.T) {
 		report := &mockReport{}
-		t1 := NewTracer("service1", report, true)
+		t1 := NewTracer("service1", report, &testcfg)
 		sp1 := t1.New("test123")
 		sp1.Finish(nil)
 	})
 	t.Run("test debug progagation", func(t *testing.T) {
 		report := &mockReport{}
-		t1 := NewTracer("service1", report, true)
-		t2 := NewTracer("service2", report, true)
+		t1 := NewTracer("service1", report, &testcfg)
+		t2 := NewTracer("service2", report, &testcfg)
 		sp1 := t1.New("opt_1", EnableDebug())
 		sp2 := sp1.Fork("", "opt_client")
 		header := make(http.Header)
@@ -106,7 +108,7 @@ func TestDapperPropagation(t *testing.T) {
 func BenchmarkSample(b *testing.B) {
 	err := fmt.Errorf("test error")
 	report := &mockReport{}
-	t1 := NewTracer("service1", report, true)
+	t1 := NewTracer("service1", report, &testcfg)
 	for i := 0; i < b.N; i++ {
 		sp1 := t1.New("test_opt1")
 		sp1.SetTag(TagString("test", "123"))
@@ -122,7 +124,7 @@ func BenchmarkSample(b *testing.B) {
 func BenchmarkDisableSample(b *testing.B) {
 	err := fmt.Errorf("test error")
 	report := &mockReport{}
-	t1 := NewTracer("service1", report, true)
+	t1 := NewTracer("service1", report, &testcfg)
 	for i := 0; i < b.N; i++ {
 		sp1 := t1.New("test_opt1")
 		sp1.SetTag(TagString("test", "123"))

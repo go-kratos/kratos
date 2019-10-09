@@ -9,7 +9,7 @@ import (
 
 func TestFromContext(t *testing.T) {
 	report := &mockReport{}
-	t1 := NewTracer("service1", report, true)
+	t1 := NewTracer("service1", report, &testcfg)
 	sp1 := t1.New("test123")
 	ctx := context.Background()
 	ctx = NewContext(ctx, sp1)

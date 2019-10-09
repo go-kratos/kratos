@@ -6,7 +6,7 @@ import (
 
 func TestMarshalSpanV1(t *testing.T) {
 	report := &mockReport{}
-	t1 := NewTracer("service1", report, true)
+	t1 := NewTracer("service1", report, &testcfg)
 	sp1 := t1.New("opt_test").(*Span)
 	sp1.SetLog(Log("hello", "test123"))
 	sp1.SetTag(TagString("tag1", "hell"), TagBool("booltag", true), TagFloat64("float64tag", 3.14159))

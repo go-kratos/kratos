@@ -12,7 +12,7 @@ import (
 
 func TestSpan(t *testing.T) {
 	report := &mockReport{}
-	t1 := NewTracer("service1", report, true)
+	t1 := NewTracer("service1", report, &testcfg)
 	t.Run("test span string", func(t *testing.T) {
 		sp1 := t1.New("testfinish").(*Span)
 		assert.NotEmpty(t, fmt.Sprint(sp1))

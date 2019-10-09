@@ -9,7 +9,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/bilibili/kratos/pkg/conf/dsn"
-	"github.com/bilibili/kratos/pkg/conf/env"
 	xtime "github.com/bilibili/kratos/pkg/time"
 )
 
@@ -29,14 +28,18 @@ type Config struct {
 	// For TCP and UDP networks, the addr has the form "host:port".
 	// For Unix networks, the address must be a file system path.
 	Addr string `dsn:"address"`
+	// DEPRECATED
+	Proto string `dsn:"network"`
+	// DEPRECATED
+	Chan int `dsn:"query.chan,"`
 	// Report timeout
 	Timeout xtime.Duration `dsn:"query.timeout,200ms"`
 	// DisableSample
 	DisableSample bool `dsn:"query.disable_sample"`
-	// ProtocolVersion
-	ProtocolVersion int32 `dsn:"query.protocol_version,1"`
-	// Probability probability sampling
+	// probabilitySampling
 	Probability float32 `dsn:"-"`
+	// ProtocolVersion
+	ProtocolVersion int32 `dsn:"query.protocol_version,2"`
 }
 
 func parseDSN(rawdsn string) (*Config, error) {
@@ -51,25 +54,53 @@ func parseDSN(rawdsn string) (*Config, error) {
 	return cfg, nil
 }
 
+func newReport(cfg *Config) (reporter, error) {
+	switch cfg.Network {
+	case "jaeger+udp":
+		jaegerReportProtocolCounter.Inc("jaeger_udp")
+		return newJaegerUDPReport(cfg.Addr, 0)
+	case "jaeger+http":
+		jaegerReportProtocolCounter.Inc("jaeger_http")
+		return newJaegerHTTPReport(cfg.Addr)
+	default:
+		jaegerReportProtocolCounter.Inc("dapper_udp")
+		return newDapperReport(cfg.Network, cfg.Addr, time.Duration(cfg.Timeout), cfg.ProtocolVersion), nil
+	}
+}
+
 // TracerFromEnvFlag new tracer from env and flag
 func TracerFromEnvFlag() (Tracer, error) {
 	cfg, err := parseDSN(_traceDSN)
 	if err != nil {
 		return nil, err
 	}
-	report := newReport(cfg.Network, cfg.Addr, time.Duration(cfg.Timeout), cfg.ProtocolVersion)
-	return NewTracer(env.AppID, report, cfg.DisableSample), nil
+	report, err := newReport(cfg)
+	if err != nil {
+		return nil, err
+	}
+	serviceName := serviceNameFromEnv()
+	return NewTracer(serviceName, report, cfg), nil
 }
 
-// Init init trace report.
+// Init 兼容以前的 Init 写法
 func Init(cfg *Config) {
-	if cfg == nil {
-		// paser config from env
-		var err error
-		if cfg, err = parseDSN(_traceDSN); err != nil {
-			panic(fmt.Errorf("parse trace dsn error: %s", err))
-		}
+	serviceName := serviceNameFromEnv()
+	if cfg != nil {
+		// NOTE compatible proto field
+		cfg.Network = cfg.Proto
+		fmt.Fprintf(os.Stderr, "[deprecated] trace.Init() with conf is Deprecated, argument will be ignored. please use flag -trace or env TRACE to configure trace.\n")
+		report := newDapperReport(cfg.Network, cfg.Addr, time.Duration(cfg.Timeout), cfg.ProtocolVersion)
+		SetGlobalTracer(NewTracer(serviceName, report, cfg))
+		return
 	}
-	report := newReport(cfg.Network, cfg.Addr, time.Duration(cfg.Timeout), cfg.ProtocolVersion)
-	SetGlobalTracer(NewTracer(env.AppID, report, cfg.DisableSample))
+	// paser config from env
+	cfg, err := parseDSN(_traceDSN)
+	if err != nil {
+		panic(fmt.Errorf("parse trace dsn error: %s", err))
+	}
+	report, err := newReport(cfg)
+	if err != nil {
+		panic(fmt.Errorf("new trace report error: %s", err))
+	}
+	SetGlobalTracer(NewTracer(serviceName, report, cfg))
 }

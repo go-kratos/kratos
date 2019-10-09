@@ -26,5 +26,5 @@ func Init(c *Config) {
 	if c.Timeout == 0 {
 		c.Timeout = xtime.Duration(200 * time.Millisecond)
 	}
-	trace.SetGlobalTracer(trace.NewTracer(env.AppID, newReport(c), c.DisableSample))
+	trace.SetGlobalTracer(trace.NewTracer(env.AppID, newReport(c), &trace.Config{DisableSample: c.DisableSample}))
 }
