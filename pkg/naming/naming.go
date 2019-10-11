@@ -35,6 +35,8 @@ type Instance struct {
 	// Metadata is the information associated with Addr, which may be used
 	// to make load balancing decision.
 	Metadata map[string]string `json:"metadata"`
+	// Status instance status, eg: 1UP 2Waiting
+	Status int64 `json:"status"`
 }
 
 // Resolver resolve naming service
