@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	pscpu "github.com/shirou/gopsutil/cpu"
 )
 
 type cgroupCPU struct {
@@ -22,17 +21,12 @@ type cgroupCPU struct {
 }
 
 func newCgroupCPU() (cpu *cgroupCPU, err error) {
-	var cores int
-	cores, err = pscpu.Counts(true)
-	if err != nil || cores == 0 {
-		var cpus []uint64
-		cpus, err = perCPUUsage()
-		if err != nil {
-			err = errors.Errorf("perCPUUsage() failed!err:=%v", err)
-			return
-		}
-		cores = len(cpus)
+	cpus, err := perCPUUsage()
+	if err != nil {
+		err = errors.Errorf("perCPUUsage() failed!err:=%v", err)
+		return
 	}
+	cores := uint64(len(cpus))
 
 	sets, err := cpuSets()
 	if err != nil {
@@ -67,11 +61,10 @@ func newCgroupCPU() (cpu *cgroupCPU, err error) {
 	cpu = &cgroupCPU{
 		frequency: maxFreq,
 		quota:     quota,
-		cores:     uint64(cores),
+		cores:     cores,
 		preSystem: preSystem,
 		preTotal:  preTotal,
 	}
-	fmt.Printf("get cpu info:%+v \n", cpu)
 	return
 }
 
