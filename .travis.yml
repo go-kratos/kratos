@@ -3,6 +3,9 @@ language: go
 go:
   - 1.12.x
 
+services:
+  - docker
+
 # Only clone the most recent commit.
 git:
   depth: 1
