@@ -51,8 +51,8 @@ func Setup() (err error) {
 		return
 	}
 	defer func() {
-		if err != err {
-			go Teardown()
+		if err != nil {
+			Teardown()
 		}
 	}()
 	if _, err = getServices(); err != nil {
