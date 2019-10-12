@@ -5,6 +5,8 @@ go 1.12
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/aristanetworks/goarista v0.0.0-20190912214011-b54698eaaca6 // indirect
+	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f // indirect
+	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
 	github.com/cznic/b v0.0.0-20181122101859-a26611c4d92d // indirect
 	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
 	github.com/cznic/strutil v0.0.0-20181122101858-275e90344537 // indirect
@@ -15,10 +17,11 @@ require (
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/gogo/protobuf v1.2.1
+	github.com/gogo/protobuf v1.3.0
 	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
 	github.com/golang/mock v1.3.1 // indirect
 	github.com/golang/protobuf v1.3.2
+	github.com/google/uuid v1.1.1 // indirect
 	github.com/gorilla/websocket v1.4.0 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/leodido/go-urn v1.1.0 // indirect
@@ -37,15 +40,16 @@ require (
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5 // indirect
 	github.com/tsuna/gohbase v0.0.0-20190502052937-24ffed0537aa
 	github.com/urfave/cli v1.20.0
-	go.etcd.io/etcd v3.4.1+incompatible
+	go.etcd.io/etcd v0.0.0-20190917205325-a14579fbfb1a
 	go.uber.org/atomic v1.4.0 // indirect
+	go.uber.org/multierr v1.2.0 // indirect
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
-	golang.org/x/net v0.0.0-20190912160710-24e19bdeb0f2
-	golang.org/x/time v0.0.0-20190513212739-9d24e82272b4 // indirect
+	golang.org/x/net v0.0.0-20191011234655-491137f69257
+	golang.org/x/sys v0.0.0-20191010194322-b09406accb47 // indirect
 	golang.org/x/tools v0.0.0-20190912185636-87d9f09c5d89
 	google.golang.org/appengine v1.6.1 // indirect
-	google.golang.org/genproto v0.0.0-20190716160619-c506a9f90610
-	google.golang.org/grpc v1.23.1
+	google.golang.org/genproto v0.0.0-20191009194640-548a555dbc03
+	google.golang.org/grpc v1.24.0
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/yaml.v2 v2.2.2
