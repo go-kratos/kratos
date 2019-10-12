@@ -3,6 +3,9 @@ language: go
 go:
   - 1.12.x
 
+services:
+  - docker
+
 # Only clone the most recent commit.
 git:
   depth: 1
@@ -16,6 +19,13 @@ env:
    - DEPLOY_ENV=dev
    - DISCOVERY_NODES=127.0.0.1:7171
    - HTTP_PERF=tcp://0.0.0.0:0
+   - DOCKER_COMPOSE_VERSION=1.24.1
+
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
 
 # Skip the install step. Don't `go get` dependencies. Only build with the code
 # in vendor/
