@@ -13,7 +13,7 @@ type Mock struct {
 }
 
 // NewMock new a config mock client.
-func NewMock(vs map[string]string) *Mock {
+func NewMock(vs map[string]string) Client {
 	values := make(map[string]*Value, len(vs))
 	for k, v := range vs {
 		values[k] = &Value{val: v, raw: v}
