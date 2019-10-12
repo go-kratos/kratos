@@ -27,6 +27,7 @@ require (
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/montanaflynn/stats v0.5.0
 	github.com/openzipkin/zipkin-go v0.2.1
+	github.com/otokaze/mock v0.0.0-20190125081256-8282b7a7c7c3
 	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v1.1.0
 	github.com/remyoudompheng/bigfft v0.0.0-20190728182440-6a916e37a237 // indirect
@@ -44,6 +45,7 @@ require (
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
 	golang.org/x/net v0.0.0-20190912160710-24e19bdeb0f2
 	golang.org/x/time v0.0.0-20190513212739-9d24e82272b4 // indirect
+	golang.org/x/tools v0.0.0-20190912185636-87d9f09c5d89
 	google.golang.org/appengine v1.6.1 // indirect
 	google.golang.org/genproto v0.0.0-20190716160619-c506a9f90610
 	google.golang.org/grpc v1.23.1
