@@ -16,16 +16,18 @@ package redis
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 )
 
 // NewLoggingConn returns a logging wrapper around a connection.
+// ATTENTION: ONLY use loggingConn in developing, DO NOT use this in production.
 func NewLoggingConn(conn Conn, logger *log.Logger, prefix string) Conn {
 	if prefix != "" {
 		prefix = prefix + "."
 	}
-	return &loggingConn{conn, logger, prefix}
+	return &loggingConn{Conn: conn, logger: logger, prefix: prefix}
 }
 
 type loggingConn struct {
@@ -98,20 +100,24 @@ func (c *loggingConn) print(method, commandName string, args []interface{}, repl
 	c.logger.Output(3, buf.String())
 }
 
-func (c *loggingConn) Do(commandName string, args ...interface{}) (interface{}, error) {
-	reply, err := c.Conn.Do(commandName, args...)
+func (c *loggingConn) Do(commandName string, args ...interface{}) (reply interface{}, err error) {
+	reply, err = c.Conn.Do(commandName, args...)
 	c.print("Do", commandName, args, reply, err)
 	return reply, err
 }
 
-func (c *loggingConn) Send(commandName string, args ...interface{}) error {
-	err := c.Conn.Send(commandName, args...)
+func (c *loggingConn) Send(commandName string, args ...interface{}) (err error) {
+	err = c.Conn.Send(commandName, args...)
 	c.print("Send", commandName, args, nil, err)
-	return err
+	return
 }
 
 func (c *loggingConn) Receive() (interface{}, error) {
 	reply, err := c.Conn.Receive()
 	c.print("Receive", "", nil, reply, err)
 	return reply, err
+}
+
+func (c *loggingConn) WithContext(ctx context.Context) Conn {
+	return c
 }
