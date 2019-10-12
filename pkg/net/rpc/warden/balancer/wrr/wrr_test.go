@@ -137,8 +137,8 @@ func TestBalancerDone(t *testing.T) {
 
 	latency, count := picker.(*wrrPicker).subConns[0].latencySummary()
 	expectLatency := float64(100*time.Millisecond) / 1e5
-	if !(expectLatency < latency && latency < (expectLatency+100)) {
-		t.Fatalf("latency is less than 100ms or greter than 100ms, %f", latency)
+	if latency < expectLatency || latency > (expectLatency+500) {
+		t.Fatalf("latency is less than 100ms or greater than 150ms, %f", latency)
 	}
 	assert.Equal(t, int64(1), count)
 
