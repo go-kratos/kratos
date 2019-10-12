@@ -105,7 +105,7 @@ example:
 testcli -f ../../test/docker-compose.yaml run go test -v ./
 ```
 #### Method 2. Import with Kratos pkg
-- Step1. 在 Dao|Service 层中的 TestMain 单测主入口中，import  "go-common/library/testing/lich" 引入testcli工具的go库版本。
+- Step1. 在 Dao|Service 层中的 TestMain 单测主入口中，import  "github.com/bilibili/kratos/pkg/testing/lich" 引入testcli工具的go库版本。
 - Step2. 使用  flag.Set("f", "../../test/docker-compose.yaml") 指定 docker-compose.yaml 文件的路径。
 - Step3. 在 flag.Parse() 后即可使用 lich.Setup() 安装依赖&初始化数据（注意测试用例执行结束后 lich.Teardown() 回收下～）
 - Step4. 运行 `go test -v ./ `看看效果吧～
