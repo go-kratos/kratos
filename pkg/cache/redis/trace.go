@@ -122,9 +122,7 @@ func (t *traceConn) Receive() (reply interface{}, err error) {
 
 func (t *traceConn) WithContext(ctx context.Context) Conn {
 	t.Conn = t.Conn.WithContext(ctx)
-	if root, ok := trace.FromContext(ctx); ok {
-		t.tr = root
-	}
+	t.tr, _ = trace.FromContext(ctx)
 	return t
 }
 
