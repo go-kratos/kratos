@@ -21,8 +21,8 @@ func TestProbabilitySampling(t *testing.T) {
 				count++
 			}
 		}
-		if count < 60 || count > 120 {
-			t.Errorf("expect count between 60~120 get %d", count)
+		if count < 60 || count > 150 {
+			t.Errorf("expect count between 60~150 get %d", count)
 		}
 	})
 }

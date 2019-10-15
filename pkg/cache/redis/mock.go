@@ -1,8 +1,6 @@
 package redis
 
-import (
-	"context"
-)
+import "context"
 
 // MockErr for unit test.
 type MockErr struct {

@@ -16,6 +16,9 @@ package redis
 
 import (
 	"context"
+
+	"github.com/bilibili/kratos/pkg/container/pool"
+	xtime "github.com/bilibili/kratos/pkg/time"
 )
 
 // Error represents an error returned in a command reply.
@@ -23,29 +26,53 @@ type Error string
 
 func (err Error) Error() string { return string(err) }
 
-// Conn represents a connection to a Redis server.
-type Conn interface {
-	// Close closes the connection.
-	Close() error
+// Config client settings.
+type Config struct {
+	*pool.Config
 
-	// Err returns a non-nil value if the connection is broken. The returned
-	// value is either the first non-nil value returned from the underlying
-	// network connection or a protocol parsing error. Applications should
-	// close broken connections.
-	Err() error
+	Name         string // redis name, for trace
+	Proto        string
+	Addr         string
+	Auth         string
+	DialTimeout  xtime.Duration
+	ReadTimeout  xtime.Duration
+	WriteTimeout xtime.Duration
+	SlowLog      xtime.Duration
+}
 
-	// Do sends a command to the server and returns the received reply.
-	Do(commandName string, args ...interface{}) (reply interface{}, err error)
+type Redis struct {
+	pool *Pool
+	conf *Config
+}
 
-	// Send writes the command to the client's output buffer.
-	Send(commandName string, args ...interface{}) error
+func NewRedis(c *Config, options ...DialOption) *Redis {
+	return &Redis{
+		pool: NewPool(c, options...),
+		conf: c,
+	}
+}
 
-	// Flush flushes the output buffer to the Redis server.
-	Flush() error
+// Do gets a new conn from pool, then execute Do with this conn, finally close this conn.
+// ATTENTION: Don't use this method with transaction command like MULTI etc. Because every Do will close conn automatically, use r.Conn to get a raw conn for this situation.
+func (r *Redis) Do(ctx context.Context, commandName string, args ...interface{}) (reply interface{}, err error) {
+	conn := r.pool.Get(ctx)
+	defer conn.Close()
+	reply, err = conn.Do(commandName, args...)
+	return
+}
 
-	// Receive receives a single reply from the Redis server
-	Receive() (reply interface{}, err error)
+// Close closes connection pool
+func (r *Redis) Close() error {
+	return r.pool.Close()
+}
 
-	// WithContext
-	WithContext(ctx context.Context) Conn
+// Conn direct gets a connection
+func (r *Redis) Conn(ctx context.Context) Conn {
+	return r.pool.Get(ctx)
+}
+
+func (r *Redis) Pipeline() (p Pipeliner) {
+	return &pipeliner{
+		pool: r.pool,
+	}
 }
