@@ -193,7 +193,7 @@ func runClient(ctx context.Context, cc *ClientConfig, t *testing.T, name string,
 	return
 }
 
-func TestMain(m *testing.M) {
+func TestMain(t *testing.T) {
 	log.Init(nil)
 }
 
