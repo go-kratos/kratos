@@ -71,7 +71,6 @@ func newCgroupCPU() (cpu *cgroupCPU, err error) {
 		preSystem: preSystem,
 		preTotal:  preTotal,
 	}
-	fmt.Printf("get cpu info:%+v \n", cpu)
 	return
 }
 
