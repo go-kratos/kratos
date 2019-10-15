@@ -193,7 +193,7 @@ func runClient(ctx context.Context, cc *ClientConfig, t *testing.T, name string,
 	return
 }
 
-func TestMain(t *testing.T) {
+func TestMain(m *testing.M) {
 	log.Init(nil)
 }
 
@@ -594,3 +594,15 @@ func TestMetadata(t *testing.T) {
 	_, err := cli.SayHello(ctx, &pb.HelloRequest{Name: "test"})
 	assert.Nil(t, err)
 }
+
+func TestStartWithAddr(t *testing.T) {
+	configuredAddr := "127.0.0.1:0"
+	server = NewServer(&ServerConfig{Addr: configuredAddr, Timeout: xtime.Duration(time.Second)})
+	if _, realAddr, err := server.StartWithAddr(); err == nil && realAddr != nil {
+		assert.NotEqual(t, realAddr.String(), configuredAddr)
+	} else {
+		assert.NotNil(t, realAddr)
+		assert.Nil(t, err)
+	}
+}
+

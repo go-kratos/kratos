@@ -316,6 +316,25 @@ func (s *Server) Start() (*Server, error) {
 	return s, nil
 }
 
+// StartWithAddr create a new goroutine run server with configured listen addr
+// will panic if any error happend
+// return server itself and the actually listened address (if configured listen
+// port is zero, the os will allocate an unused port)
+func (s *Server) StartWithAddr() (*Server, net.Addr, error) {
+	lis, err := net.Listen(s.conf.Network, s.conf.Addr)
+	if err != nil {
+		return nil, nil, err
+	}
+	log.Info("warden: start grpc listen addr: %v", lis.Addr())
+	reflection.Register(s.server)
+	go func() {
+		if err := s.Serve(lis); err != nil {
+			panic(err)
+		}
+	}()
+	return s, lis.Addr(), nil
+}
+
 // Serve accepts incoming connections on the listener lis, creating a new
 // ServerTransport and service goroutine for each.
 // Serve will return a non-nil error unless Stop or GracefulStop is called.
