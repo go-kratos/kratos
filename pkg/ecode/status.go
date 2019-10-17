@@ -88,7 +88,7 @@ func FromCode(code Code) *Status {
 // FromProto new status from grpc detail
 func FromProto(pbMsg proto.Message) Codes {
 	if msg, ok := pbMsg.(*types.Status); ok {
-		if msg.Message == "" {
+		if msg.Message == "" || msg.Message == strconv.FormatInt(int64(msg.Code), 10) {
 			// NOTE: if message is empty convert to pure Code, will get message from config center.
 			return Code(msg.Code)
 		}
