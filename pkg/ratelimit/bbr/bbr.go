@@ -32,7 +32,7 @@ func init() {
 	go cpuproc()
 }
 
-// cpu = cpuᵗ⁻¹ * decay + cpuᵗ * (1 - decay)	
+// cpu = cpuᵗ⁻¹ * decay + cpuᵗ * (1 - decay)
 func cpuproc() {
 	ticker := time.NewTicker(time.Millisecond * 250)
 	defer func() {

@@ -60,9 +60,8 @@ func ExampleClient() {
 		Timeout: xtime.Duration(time.Second * 10),
 		Breaker: &breaker.Config{
 			Window:  xtime.Duration(3 * time.Second),
-			Sleep:   xtime.Duration(3 * time.Second),
 			Bucket:  10,
-			Ratio:   0.3,
+			K:       1.5,
 			Request: 20,
 		},
 	})

@@ -38,11 +38,6 @@
 ```go
 type Config struct {
 	SwitchOff bool // 熔断器开关,默认关 false.
-    
-     //目前熔断器只实现了 sreBreaker 所以以下2个参数暂时没用到
-	Ratio float32 
-	Sleep xtime.Duration 
-
 
 	K float64  //触发熔断的错误率（K = 1 - 1/错误率）
 
