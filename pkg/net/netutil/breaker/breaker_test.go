@@ -28,9 +28,7 @@ func TestGroup(t *testing.T) {
 	g := NewGroup(_conf)
 	c := &Config{
 		Window:    xtime.Duration(1 * time.Second),
-		Sleep:     xtime.Duration(100 * time.Millisecond),
 		Bucket:    10,
-		Ratio:     0.5,
 		Request:   100,
 		SwitchOff: !_conf.SwitchOff,
 	}
@@ -44,9 +42,7 @@ func TestInit(t *testing.T) {
 	switchOff := _conf.SwitchOff
 	c := &Config{
 		Window:    xtime.Duration(3 * time.Second),
-		Sleep:     xtime.Duration(100 * time.Millisecond),
 		Bucket:    10,
-		Ratio:     0.5,
 		Request:   100,
 		SwitchOff: !switchOff,
 	}
@@ -69,9 +65,7 @@ func TestGo(t *testing.T) {
 
 	_group.Reload(&Config{
 		Window:    xtime.Duration(3 * time.Second),
-		Sleep:     xtime.Duration(100 * time.Millisecond),
 		Bucket:    10,
-		Ratio:     0.5,
 		Request:   100,
 		SwitchOff: true,
 	})

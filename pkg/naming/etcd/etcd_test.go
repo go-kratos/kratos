@@ -3,11 +3,11 @@ package etcd
 import (
 	"context"
 	"fmt"
-	"testing"
-	"time"
 	"github.com/bilibili/kratos/pkg/naming"
 	"go.etcd.io/etcd/clientv3"
 	"google.golang.org/grpc"
+	"testing"
+	"time"
 )
 
 func TestNew(t *testing.T) {
