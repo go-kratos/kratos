@@ -167,7 +167,7 @@ func loadValues(base string) (map[string]*Value, error) {
 			return nil, fmt.Errorf("paladin: read dir %s error: %s", base, err)
 		}
 		for _, file := range files {
-			if !file.IsDir() {
+			if !file.IsDir() && (file.Mode()&os.ModeSymlink) != os.ModeSymlink {
 				paths = append(paths, path.Join(base, file.Name()))
 			}
 		}
