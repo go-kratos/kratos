@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -13,10 +12,6 @@ import (
 	"github.com/bilibili/kratos/pkg/log"
 	"github.com/bilibili/kratos/pkg/naming"
 	"github.com/go-zookeeper/zk"
-)
-
-const (
-	RootPath = "/"
 )
 
 type Config struct {
@@ -176,7 +171,9 @@ func (z *ZookeeperBuilder) Register(ctx context.Context, ins *naming.Instance) (
 						continue
 					}
 				}
-			case <-time.After(time.Second):
+			case <-ctx.Done():
+				ch <- struct{}{}
+				return
 			}
 		}
 	}()
@@ -226,25 +223,13 @@ func (z *ZookeeperBuilder) register(ctx context.Context, ins *naming.Instance) (
 		log.Warn(fmt.Sprintf("register, fail to registerPerServer node error:(%v)", err))
 	}
 
-	var svrAddr string
 	for _, val := range ins.Addrs {
-		if strings.HasPrefix(val, "grpc://") {
-			svrAddr = strings.TrimPrefix(val, "grpc://")
-			break
+		err = z.registerEphServer(prefix, "/"+val, ins)
+		if err != nil {
+			log.Warn(fmt.Sprintf("registerServer, fail to RegisterEphServer node error:(%v)", err))
+		} else {
+			log.Info(fmt.Sprintf("registerServer, succeed to RegistServer node."))
 		}
-	}
-	if svrAddr == "" {
-		errInfo := fmt.Sprintf("register, error occur, grpc svrAddr is null")
-		log.Error(errInfo)
-		return errors.New(errInfo)
-	}
-
-	err = z.registerEphServer(prefix, RootPath+svrAddr, ins)
-	if err != nil {
-		log.Error(fmt.Sprintf("registerServer, fail to RegisterEphServer node error:(%v)", err))
-		//return
-	} else {
-		log.Info(fmt.Sprintf("registerServer, succeed to RegistServer node."))
 	}
 
 	return nil
@@ -255,35 +240,25 @@ func (z *ZookeeperBuilder) unregister(ins *naming.Instance) (err error) {
 	log.Info("zookeeper unregister enter, instance Addrs:(%v)", ins.Addrs)
 	prefix := z.keyPrefix(ins)
 
-	var svrAddr string
 	for _, val := range ins.Addrs {
-		if strings.HasPrefix(val, "grpc://") {
-			svrAddr = strings.TrimPrefix(val, "grpc://")
-			break
-		}
-	}
-	if svrAddr == "" {
-		errInfo := fmt.Sprintf("unregister, error occur, grpc svrAddr is null")
-		log.Error(errInfo)
-		return errors.New(errInfo)
-	}
-
-	strNode := prefix + RootPath + svrAddr
-	exists, _, err := z.cli.Exists(strNode)
-	if err != nil {
-		log.Error("zk.Conn.Exists node:(%v), error:(%s)", strNode, err.Error())
-		return err
-	}
-	if exists {
-		_, s, err := z.cli.Get(strNode)
+		strNode := prefix + "/" + val
+		exists, _, err := z.cli.Exists(strNode)
 		if err != nil {
-			log.Error("zk.Conn.Get node:(%s), error:(%s)", strNode, err.Error())
+			log.Error("zk.Conn.Exists node:(%v), error:(%s)", strNode, err.Error())
 			return err
 		}
-		return z.cli.Delete(strNode, s.Version)
+		if exists {
+			_, s, err := z.cli.Get(strNode)
+			if err != nil {
+				log.Error("zk.Conn.Get node:(%s), error:(%s)", strNode, err.Error())
+				return err
+			}
+			return z.cli.Delete(strNode, s.Version)
+		}
+
+		log.Info(fmt.Sprintf("unregister, client.Delete:(%v), appid:(%v), hostname:(%v) success", strNode, ins.AppID, ins.Hostname))
 	}
 
-	log.Info(fmt.Sprintf("unregister, client.Delete:(%v), appid:(%v), hostname:(%v) success", strNode, ins.AppID, ins.Hostname))
 	return
 }
 
@@ -336,7 +311,7 @@ func (a *appInfo) fetchstore(appID string) (err error) {
 
 	//for range childs
 	for _, child := range childs {
-		strNode = prefix + RootPath + child
+		strNode = prefix + "/" + child
 		resp, _, err := a.zkb.cli.Get(strNode)
 		if err != nil {
 			log.Error("zookeeper: fetch client.Get(%s) error(%v)", strNode, err)
