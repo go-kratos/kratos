@@ -34,7 +34,7 @@ type Direct struct {
 }
 
 // Build direct build.
-func (d *Direct) Build(id string) naming.Resolver {
+func (d *Direct) Build(id string, opt ...naming.BuildOpt) naming.Resolver {
 	return &Direct{id: id}
 }
 

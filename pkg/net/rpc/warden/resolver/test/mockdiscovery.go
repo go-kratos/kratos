@@ -12,7 +12,7 @@ type mockDiscoveryBuilder struct {
 	watchch   map[string][]*mockDiscoveryResolver
 }
 
-func (mb *mockDiscoveryBuilder) Build(id string) naming.Resolver {
+func (mb *mockDiscoveryBuilder) Build(id string, opts ...naming.BuildOpt) naming.Resolver {
 	mr := &mockDiscoveryResolver{
 		d:       mb,
 		watchch: make(chan struct{}, 1),
