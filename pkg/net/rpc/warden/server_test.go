@@ -41,11 +41,9 @@ var (
 		Dial:    xtime.Duration(time.Second * 10),
 		Timeout: xtime.Duration(time.Second * 10),
 		Breaker: &breaker.Config{
-			Window:  xtime.Duration(3 * time.Second),
-			Sleep:   xtime.Duration(3 * time.Second),
-			Bucket:  10,
-			Ratio:   0.3,
-			Request: 20,
+			Window: xtime.Duration(3 * time.Second),
+			Bucket: 10,
+			K:      1.5,
 		},
 	}
 	clientConfig2 = ClientConfig{
@@ -53,10 +51,9 @@ var (
 		Timeout: xtime.Duration(time.Second * 10),
 		Breaker: &breaker.Config{
 			Window:  xtime.Duration(3 * time.Second),
-			Sleep:   xtime.Duration(3 * time.Second),
 			Bucket:  10,
-			Ratio:   0.3,
 			Request: 20,
+			K:       1.5,
 		},
 		Method: map[string]*ClientConfig{`/testproto.Greeter/SayHello`: {Timeout: xtime.Duration(time.Millisecond * 200)}},
 	}
@@ -293,7 +290,7 @@ func testBreaker(t *testing.T) {
 	}
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 1000; i++ {
 		_, err := c.SayHello(context.Background(), &pb.HelloRequest{Name: "breaker_test"})
 		if err != nil {
 			if ecode.EqualError(ecode.ServiceUnavailable, err) {

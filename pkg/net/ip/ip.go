@@ -68,7 +68,7 @@ func InternalIP() string {
 	return ""
 }
 
-// isUp Interface is up 
+// isUp Interface is up
 func isUp(v net.Flags) bool {
-	 return v&net.FlagUp == net.FlagUp 
+	return v&net.FlagUp == net.FlagUp
 }

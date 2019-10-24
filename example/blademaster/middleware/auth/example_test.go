@@ -3,8 +3,8 @@ package auth_test
 import (
 	"fmt"
 
-	bm "github.com/bilibili/kratos/pkg/net/http/blademaster"
 	"github.com/bilibili/kratos/example/blademaster/middleware/auth"
+	bm "github.com/bilibili/kratos/pkg/net/http/blademaster"
 	"github.com/bilibili/kratos/pkg/net/metadata"
 )
 
