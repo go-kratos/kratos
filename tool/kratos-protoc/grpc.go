@@ -2,8 +2,6 @@ package main
 
 import (
 	"os/exec"
-
-	"github.com/urfave/cli"
 )
 
 const (
@@ -20,6 +18,6 @@ func installGRPCGen() error {
 	return nil
 }
 
-func genGRPC(ctx *cli.Context) error {
-	return generate(ctx, _grpcProtoc)
+func genGRPC(files []string) error {
+	return generate(_grpcProtoc, files)
 }
