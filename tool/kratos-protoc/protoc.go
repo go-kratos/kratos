@@ -27,6 +27,10 @@ func protocAction(ctx *cli.Context) (err error) {
 	if err = checkProtoc(); err != nil {
 		return err
 	}
+	files := []string(ctx.Args())
+	if len(files) == 0 {
+		files, _ = filepath.Glob("*.proto")
+	}
 	if !withGRPC && !withBM && !withSwagger && !withEcode {
 		withBM = true
 		withGRPC = true
@@ -37,7 +41,7 @@ func protocAction(ctx *cli.Context) (err error) {
 		if err = installBMGen(); err != nil {
 			return
 		}
-		if err = genBM(ctx); err != nil {
+		if err = genBM(files); err != nil {
 			return
 		}
 	}
@@ -45,7 +49,7 @@ func protocAction(ctx *cli.Context) (err error) {
 		if err = installGRPCGen(); err != nil {
 			return err
 		}
-		if err = genGRPC(ctx); err != nil {
+		if err = genGRPC(files); err != nil {
 			return
 		}
 	}
@@ -53,7 +57,7 @@ func protocAction(ctx *cli.Context) (err error) {
 		if err = installSwaggerGen(); err != nil {
 			return
 		}
-		if err = genSwagger(ctx); err != nil {
+		if err = genSwagger(files); err != nil {
 			return
 		}
 	}
@@ -61,11 +65,11 @@ func protocAction(ctx *cli.Context) (err error) {
 		if err = installEcodeGen(); err != nil {
 			return
 		}
-		if err = genEcode(ctx); err != nil {
+		if err = genEcode(files); err != nil {
 			return
 		}
 	}
-	log.Printf("generate %v success.\n", ctx.Args())
+	log.Printf("generate %s success.\n", strings.Join(files, " "))
 	return nil
 }
 
@@ -95,7 +99,7 @@ func checkProtoc() error {
 	return nil
 }
 
-func generate(ctx *cli.Context, protoc string) error {
+func generate(protoc string, files []string) error {
 	pwd, _ := os.Getwd()
 	gosrc := path.Join(gopath(), "src")
 	ext, err := latestKratos()
@@ -103,9 +107,9 @@ func generate(ctx *cli.Context, protoc string) error {
 		return err
 	}
 	line := fmt.Sprintf(protoc, gosrc, ext, pwd)
-	log.Println(line, strings.Join(ctx.Args(), " "))
+	log.Println(line, strings.Join(files, " "))
 	args := strings.Split(line, " ")
-	args = append(args, ctx.Args()...)
+	args = append(args, files...)
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Dir = pwd
 	cmd.Env = os.Environ()
