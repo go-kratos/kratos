@@ -28,7 +28,7 @@ func (m *TOML) UnmarshalText(text []byte) error {
 	}
 	values := map[string]*Value{}
 	for k, v := range raws {
-		k = keyNamed(k)
+		k = KeyNamed(k)
 		rv := reflect.ValueOf(v)
 		switch rv.Kind() {
 		case reflect.Map:
