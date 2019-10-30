@@ -98,6 +98,40 @@ func NewClient(c *ClientConfig) *Client {
 	return client
 }
 
+// NewClient new a http client.
+func NewHttpsClient(c *ClientConfig,clientTLSConf *tls.Config) *Client {
+	client := new(Client)
+	client.conf = c
+	client.dialer = &net.Dialer{
+		Timeout:   time.Duration(c.Dial),
+		KeepAlive: time.Duration(c.KeepAlive),
+	}
+
+	originTransport := &xhttp.Transport{
+		DialContext:     client.dialer.DialContext,
+		TLSClientConfig: clientTLSConf,
+	}
+
+	// wraps RoundTripper for tracer
+	client.transport = &TraceTransport{RoundTripper: originTransport}
+	client.client = &xhttp.Client{
+		Transport: client.transport,
+	}
+	client.urlConf = make(map[string]*ClientConfig)
+	client.hostConf = make(map[string]*ClientConfig)
+	client.breaker = breaker.NewGroup(c.Breaker)
+	if c.Timeout <= 0 {
+		panic("must config http timeout!!!")
+	}
+	for uri, cfg := range c.URL {
+		client.urlConf[uri] = cfg
+	}
+	for host, cfg := range c.Host {
+		client.hostConf[host] = cfg
+	}
+	return client
+}
+
 // SetTransport set client transport
 func (client *Client) SetTransport(t xhttp.RoundTripper) {
 	client.transport = t

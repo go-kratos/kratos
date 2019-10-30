@@ -2,6 +2,7 @@ package blademaster
 
 import (
 	"context"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"net"
@@ -102,6 +103,33 @@ func (engine *Engine) Start() error {
 	}
 	go func() {
 		if err := engine.RunServer(server, l); err != nil {
+			if errors.Cause(err) == http.ErrServerClosed {
+				log.Info("blademaster: server closed")
+				return
+			}
+			panic(errors.Wrapf(err, "blademaster: engine.ListenServer(%+v, %+v)", server, l))
+		}
+	}()
+
+	return nil
+}
+
+// Start listen and serve bm engine by given DSN.
+func (engine *Engine) StartTls(tlsCfg *tls.Config) error {
+	conf := engine.conf
+	l, err := net.Listen(conf.Network, conf.Addr)
+	if err != nil {
+		errors.Wrapf(err, "blademaster: listen tcp: %s", conf.Addr)
+		return err
+	}
+
+	log.Info("blademaster: start http listen addr: %s", conf.Addr)
+	server := &http.Server{
+		ReadTimeout:  time.Duration(conf.ReadTimeout),
+		WriteTimeout: time.Duration(conf.WriteTimeout),
+	}
+	go func() {
+		if err := engine.RunTlsServer(server, l,tlsCfg); err != nil {
 			if errors.Cause(err) == http.ErrServerClosed {
 				log.Info("blademaster: server closed")
 				return
@@ -456,6 +484,19 @@ func (engine *Engine) RunServer(server *http.Server, l net.Listener) (err error)
 	server.Handler = engine
 	engine.server.Store(server)
 	if err = server.Serve(l); err != nil {
+		err = errors.Wrapf(err, "listen server: %+v/%+v", server, l)
+		return
+	}
+	return
+}
+
+// RunServer will serve and start listening HTTP requests by given server and listener.
+// Note: this method will block the calling goroutine indefinitely unless an error happens.
+func (engine *Engine) RunTlsServer(server *http.Server, l net.Listener,tlsCfg *tls.Config) (err error) {
+	server.Handler = engine
+	server.TLSConfig = tlsCfg
+	engine.server.Store(server)
+	if err = server.ServeTLS(l,"",""); err != nil {
 		err = errors.Wrapf(err, "listen server: %+v/%+v", server, l)
 		return
 	}
