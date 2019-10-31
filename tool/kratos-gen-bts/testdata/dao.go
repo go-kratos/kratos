@@ -13,13 +13,13 @@ type Demo struct {
 }
 
 // Dao .
-type Dao struct {
+type dao struct {
 	cache *fanout.Fanout
 }
 
 // New .
-func New() *Dao {
-	return &Dao{cache: fanout.New("cache")}
+func New() *dao {
+	return &dao{cache: fanout.New("cache")}
 }
 
 //go:generate kratos tool genbts
