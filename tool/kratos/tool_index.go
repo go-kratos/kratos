@@ -15,7 +15,7 @@ var toolIndexs = []*Tool{
 	&Tool{
 		Name:      "protoc",
 		Alias:     "kratos-protoc",
-		BuildTime: time.Date(2019, 6, 21, 0, 0, 0, 0, time.Local),
+		BuildTime: time.Date(2019, 10, 31, 0, 0, 0, 0, time.Local),
 		Install:   "go get -u github.com/bilibili/kratos/tool/kratos-protoc",
 		Summary:   "快速方便生成pb.go的protoc封装，windows、Linux请先安装protoc工具",
 		Platform:  []string{"darwin", "linux", "windows"},
