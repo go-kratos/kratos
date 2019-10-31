@@ -36,6 +36,7 @@ dao里面需要有cache对象 代码会调用d.cache来新增缓存
 | ---------------- | ------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | -nullcache       |        | 空指针对象(存正常业务不会出现的内容 id的话像是-1这样的)      | &Demo{ID:-1} 或-1 或"null"                                |
 | -check_null_code |        | 开启空缓存并且value为指针对象时必填 用于判断是否是空缓存 $来指代对象名 | `-check_null_code=$!=nil&&$.ID==-1  或  $ == -1`             |
+| -cache_err       |continue| 缓存出错的时候的行为 continue: 继续执行 break: 抛出错误 方法返回|break|
 | -batch           |        | (限多key模板) 批量获取数据 每组大小                          | 100                                                          |
 | -max_group       |        | (限多key模板)批量获取数据 最大组数量                         | 10                                                           |
 | -batch_err       | break  | (限多key模板)批量获取数据回源错误的时候 降级继续请求(continue)还是直接返回(break) | break 或 continue                                            |
@@ -44,3 +45,4 @@ dao里面需要有cache对象 代码会调用d.cache来新增缓存
 | -paging          | false  | (限单key模板)分页 数据源应返回2个值 第一个为对外数据 第二个为全量数据 用于新增缓存 | false                                                        |
 | -ignores         |        | 用于依赖的三个方法参数和主方法参数不一致的情况. 忽略方法的某些参数 用\|分隔方法逗号分隔参数 | pn,ps\|pn\|origin 表示"缓存获取"方法忽略pn,ps两个参数 回源方法忽略pn参数 加缓存方法忽略origin参数 |
 | -custom_method   | false  | 自定义方法名 \|分隔 缓存获取方法名\|回源方法名\|增加缓存方法名 | d.mc.AddDemo\|d.mysql.Demo\|d.mc.AddDemo            |
+| -struct_name     | dao    | 所属结构体名称  | Dao|
