@@ -4,32 +4,48 @@
 
 ```
 ├── CHANGELOG.md
-├── CONTRIBUTORS.md
-├── LICENSE
+├── OWNERS
 ├── README.md
+├── api
+│   ├── api.bm.go
+│   ├── api.pb.go
+│   ├── api.proto
+│   └── client.go
 ├── cmd
 │   ├── cmd
 │   └── main.go
 ├── configs
 │   ├── application.toml
+│   ├── db.toml
 │   ├── grpc.toml
 │   ├── http.toml
-│   ├── log.toml
 │   ├── memcache.toml
-│   ├── mysql.toml
 │   └── redis.toml
 ├── go.mod
 ├── go.sum
-└── internal
-    ├── dao
-    │   └── dao.go
-    ├── model
-    │   └── model.go
-    ├── server
-    │   └── http
-    │       └── http.go
-    └── service
-        └── service.go
+├── internal
+│   ├── dao
+│   │   ├── dao.bts.go
+│   │   ├── dao.go
+│   │   ├── db.go
+│   │   ├── mc.cache.go
+│   │   ├── mc.go
+│   │   └── redis.go
+│   ├── di
+│   │   ├── app.go
+│   │   ├── wire.go
+│   │   └── wire_gen.go
+│   ├── model
+│   │   └── model.go
+│   ├── server
+│   │   ├── grpc
+│   │   │   └── server.go
+│   │   └── http
+│   │       └── server.go
+│   └── service
+│       └── service.go
+└── test
+    └── docker-compose.yaml
 ```
 
 # 开始使用
@@ -39,9 +55,8 @@
 创建项目成功后，进入项目中的configs目录，打开memcache.toml，我们可以看到：
 
 ```toml
-demoExpire = "24h"
-[demo]
-	name = "kratos-demo"
+[Client]
+	name = "abc"
 	proto = "tcp"
 	addr = "127.0.0.1:11211"
 	active = 50
@@ -49,31 +64,25 @@ demoExpire = "24h"
 	dialTimeout = "100ms"
 	readTimeout = "200ms"
 	writeTimeout = "300ms"
-	idleTimeout = "80s"
+    idleTimeout = "80s"
 ```
 在该配置文件中我们可以配置memcache的连接方式proto、连接地址addr、连接池的闲置连接数idle、最大连接数active以及各类超时。
 
-这里可选添加mc的过期时间设置。
-
-
 ## 初始化
 
-进入项目的internal/dao目录，打开dao.go，其中：
+进入项目的internal/dao目录，打开mc.go，其中：
 
 ```go
-var (
-    mc struct {
-        Demo       *memcache.Config
-        DemoExpire xtime.Duration
-    }
-)
+var cfg struct {
+    Client *memcache.Config
+}
 checkErr(paladin.Get("memcache.toml").UnmarshalTOML(&mc))
 ```
 使用paladin配置管理工具将上文中的memcache.toml中的配置解析为我们需要使用的配置。
 
 ```go
-// Dao dao.
-type Dao struct {
+// dao dao.
+type dao struct {
 	mc          *memcache.Memcache
 	mcExpire    int32
 }
@@ -82,7 +91,7 @@ type Dao struct {
 在dao的主结构提中定义了memcache的连接池对象和过期时间。
 
 ```go
-dao = &Dao{
+d = &dao{
     // memcache
     mc:       memcache.New(mc.Demo),
     mcExpire: int32(time.Duration(mc.DemoExpire) / time.Second),
@@ -95,11 +104,11 @@ dao = &Dao{
 
 ```go
 // Ping ping the resource.
-func (d *Dao) Ping(ctx context.Context) (err error) {
+func (d *dao) Ping(ctx context.Context) (err error) {
 	return d.pingMC(ctx)
 }
 
-func (d *Dao) pingMC(ctx context.Context) (err error) {
+func (d *dao) pingMC(ctx context.Context) (err error) {
 	if err = d.mc.Set(ctx, &memcache.Item{Key: "ping", Value: []byte("pong"), Expiration: 0}); err != nil {
 		log.Error("conn.Set(PING) error(%v)", err)
 	}

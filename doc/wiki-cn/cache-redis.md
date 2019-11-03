@@ -4,32 +4,48 @@
 
 ```
 ├── CHANGELOG.md
-├── CONTRIBUTORS.md
-├── LICENSE
+├── OWNERS
 ├── README.md
+├── api
+│   ├── api.bm.go
+│   ├── api.pb.go
+│   ├── api.proto
+│   └── client.go
 ├── cmd
 │   ├── cmd
 │   └── main.go
 ├── configs
 │   ├── application.toml
+│   ├── db.toml
 │   ├── grpc.toml
 │   ├── http.toml
-│   ├── log.toml
 │   ├── memcache.toml
-│   ├── mysql.toml
 │   └── redis.toml
 ├── go.mod
 ├── go.sum
-└── internal
-    ├── dao
-    │   └── dao.go
-    ├── model
-    │   └── model.go
-    ├── server
-    │   └── http
-    │       └── http.go
-    └── service
-        └── service.go
+├── internal
+│   ├── dao
+│   │   ├── dao.bts.go
+│   │   ├── dao.go
+│   │   ├── db.go
+│   │   ├── mc.cache.go
+│   │   ├── mc.go
+│   │   └── redis.go
+│   ├── di
+│   │   ├── app.go
+│   │   ├── wire.go
+│   │   └── wire_gen.go
+│   ├── model
+│   │   └── model.go
+│   ├── server
+│   │   ├── grpc
+│   │   │   └── server.go
+│   │   └── http
+│   │       └── server.go
+│   └── service
+│       └── service.go
+└── test
+    └── docker-compose.yaml
 ```
 
 # 开始使用
@@ -39,9 +55,7 @@
 创建项目成功后，进入项目中的configs目录，打开redis.toml，我们可以看到：
 
 ```toml
-demoExpire = "24h"
-
-[demo]
+[Client]
 	name = "kratos-demo"
 	proto = "tcp"
 	addr = "127.0.0.1:6389"
@@ -55,20 +69,14 @@ demoExpire = "24h"
 
 在该配置文件中我们可以配置redis的连接方式proto、连接地址addr、连接池的闲置连接数idle、最大连接数active以及各类超时。
 
-这里可选添加redis的过期时间设置。
-
-
 ## 初始化
 
-进入项目的internal/dao目录，打开dao.go，其中：
+进入项目的internal/dao目录，打开redis.go，其中：
 
 ```go
-var (
-    rc struct {
-        Demo       *redis.Config
-        DemoExpire xtime.Duration
-    }
-)
+var cfg struct {
+    Client *memcache.Config
+}
 checkErr(paladin.Get("redis.toml").UnmarshalTOML(&rc))
 ```
 使用paladin配置管理工具将上文中的redis.toml中的配置解析为我们需要使用的配置。
@@ -84,7 +92,7 @@ type Dao struct {
 在dao的主结构提中定义了redis的连接池对象和过期时间。
 
 ```go
-dao = &Dao{
+d = &dao{
     // redis
     redis:       redis.NewPool(rc.Demo),
     redisExpire: int32(time.Duration(rc.DemoExpire) / time.Second),
@@ -97,11 +105,11 @@ dao = &Dao{
 
 ```go
 // Ping ping the resource.
-func (d *Dao) Ping(ctx context.Context) (err error) {
+func (d *dao) Ping(ctx context.Context) (err error) {
 	return d.pingRedis(ctx)
 }
 
-func (d *Dao) pingRedis(ctx context.Context) (err error) {
+func (d *dao) pingRedis(ctx context.Context) (err error) {
 	conn := d.redis.Get(ctx)
 	defer conn.Close()
 	if _, err = conn.Do("SET", "ping", "pong"); err != nil {
@@ -130,7 +138,7 @@ func (d *Dao) Close() {
 
 ```go
 // DemoIncrby .
-func (d *Dao) DemoIncrby(c context.Context, pid int) (err error) {
+func (d *dao) DemoIncrby(c context.Context, pid int) (err error) {
 	cacheKey := keyDemo(pid)
 	conn := d.redis.Get(c)
 	defer conn.Close()
@@ -149,7 +157,7 @@ kratos/pkg/cache/redis包除了支持发送单个命令，也支持批量发送�
 
 ```go
 // DemoIncrbys .
-func (d *Dao) DemoIncrbys(c context.Context, pid int) (err error) {
+func (d *dao) DemoIncrbys(c context.Context, pid int) (err error) {
 	cacheKey := keyDemo(pid)
 	conn := d.redis.Get(c)
 	defer conn.Close()
