@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"text/template"
@@ -486,7 +487,9 @@ func main() {
 	log.SetFlags(0)
 	defer func() {
 		if err := recover(); err != nil {
-			log.Fatalf("程序解析失败, err: %+v", err)
+			buf := make([]byte, 64*1024)
+			buf = buf[:runtime.Stack(buf, false)]
+			log.Fatalf("程序解析失败, err: %+v stack: %s", err, buf)
 		}
 	}()
 	options := parse(pkg.NewSource(pkg.SourceText()))

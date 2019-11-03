@@ -516,7 +516,7 @@ func main() {
 		if err := recover(); err != nil {
 			buf := make([]byte, 64*1024)
 			buf = buf[:runtime.Stack(buf, false)]
-			log.Fatalf("程序解析失败, err: %+v stack: %s  请企业微信联系 @wangxu01", err, buf)
+			log.Fatalf("程序解析失败, err: %+v stack: %s", err, buf)
 		}
 	}()
 	options := parse(common.NewSource(common.SourceText()))

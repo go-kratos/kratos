@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/bilibili/kratos/tool/pkg"
 	"github.com/urfave/cli"
 )
 
@@ -40,7 +42,9 @@ func modPath(p string) string {
 	dir := filepath.Dir(p)
 	for {
 		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
-			return strings.TrimPrefix(filepath.Dir(p), filepath.Dir(dir)+string(os.PathSeparator)) + "/"
+			content, _ := ioutil.ReadFile(filepath.Join(dir, "go.mod"))
+			mod := pkg.RegexpReplace(`module\s+(?P<name>[\S]+)`, string(content), "$name")
+			return fmt.Sprintf("%s/%s/", mod, strings.TrimPrefix(filepath.Dir(p), dir+string(os.PathSeparator)))
 		}
 		parent := filepath.Dir(dir)
 		if dir == parent {
