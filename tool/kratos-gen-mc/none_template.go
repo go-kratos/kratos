@@ -72,6 +72,11 @@ func (d *{{.StructName}}) NAME(c context.Context, val VALUE) (err error) {
 	{{else}}
 		item := &memcache.Item{Key: key, Object: val, Expiration: {{.ExpireCode}}, Flags: {{.Encode}}}
 	{{end}}
+	{{if .EnableNullCode}}
+		if {{.CheckNullCode}} {
+			item.Expiration = {{.ExpireNullCode}}
+		}
+	{{end}}
 	if err = d.mc.Set(c, item); err != nil {
 		log.Errorv(c, log.KV("NAME", fmt.Sprintf("%+v", err)), log.KV("key", key))
 		return

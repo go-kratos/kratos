@@ -25,7 +25,5 @@ NEWLINE
 	{{.ImportPackage}}
 )
 
-var (
-	_ _mc
-)
+var _ _mc
 `
