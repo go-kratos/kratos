@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/bilibili/kratos/pkg/ecode/types"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 )
@@ -81,13 +82,13 @@ func (s *Status) Proto() *types.Status {
 
 // FromCode create status from ecode
 func FromCode(code Code) *Status {
-	return &Status{s: &types.Status{Code: int32(code)}}
+	return &Status{s: &types.Status{Code: int32(code), Message: code.Message()}}
 }
 
 // FromProto new status from grpc detail
 func FromProto(pbMsg proto.Message) Codes {
 	if msg, ok := pbMsg.(*types.Status); ok {
-		if msg.Message == "" {
+		if msg.Message == "" || msg.Message == strconv.FormatInt(int64(msg.Code), 10) {
 			// NOTE: if message is empty convert to pure Code, will get message from config center.
 			return Code(msg.Code)
 		}

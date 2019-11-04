@@ -5,8 +5,8 @@ import (
 	"sync/atomic"
 )
 
-// keyNamed key naming to lower case.
-func keyNamed(key string) string {
+// KeyNamed key naming to lower case.
+func KeyNamed(key string) string {
 	return strings.ToLower(key)
 }
 
@@ -19,7 +19,7 @@ type Map struct {
 func (m *Map) Store(values map[string]*Value) {
 	dst := make(map[string]*Value, len(values))
 	for k, v := range values {
-		dst[keyNamed(k)] = v
+		dst[KeyNamed(k)] = v
 	}
 	m.values.Store(dst)
 }
@@ -36,13 +36,13 @@ func (m *Map) Load() map[string]*Value {
 
 // Exist check if values map exist a key.
 func (m *Map) Exist(key string) bool {
-	_, ok := m.Load()[keyNamed(key)]
+	_, ok := m.Load()[KeyNamed(key)]
 	return ok
 }
 
 // Get return get value by key.
 func (m *Map) Get(key string) *Value {
-	v, ok := m.Load()[keyNamed(key)]
+	v, ok := m.Load()[KeyNamed(key)]
 	if ok {
 		return v
 	}

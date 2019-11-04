@@ -2,6 +2,7 @@ package paladin
 
 import (
 	"context"
+	"errors"
 	"flag"
 )
 
@@ -16,12 +17,30 @@ func init() {
 }
 
 // Init init config client.
-func Init() (err error) {
+// If confPath is set, it inits file client by default
+// Otherwise we could pass args to init remote client
+// args[0]: driver name, string type
+func Init(args ...interface{}) (err error) {
 	if confPath != "" {
 		DefaultClient, err = NewFile(confPath)
 	} else {
-		// TODO: Get the configuration from the remote service
-		panic("Please specify a file or dir name by -conf flag.")
+		var (
+			driver Driver
+		)
+		argsLackErr := errors.New("lack of remote config center args")
+		if len(args) == 0 {
+			panic(argsLackErr.Error())
+		}
+		argsInvalidErr := errors.New("invalid remote config center args")
+		driverName, ok := args[0].(string)
+		if !ok {
+			panic(argsInvalidErr.Error())
+		}
+		driver, err = GetDriver(driverName)
+		if err != nil {
+			return
+		}
+		DefaultClient, err = driver.New()
 	}
 	if err != nil {
 		return

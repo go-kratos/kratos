@@ -49,7 +49,6 @@ type Context struct {
 	RoutePath string
 
 	Params Params
-
 }
 
 /************************************/
@@ -66,7 +65,6 @@ func (c *Context) Next() {
 		c.index++
 	}
 }
-
 
 // Abort prevents pending handlers from being called. Note that this will not stop the current handler.
 // Let's say you have an authorization middleware that validates that the current request is authorized.
@@ -276,9 +274,17 @@ func (c *Context) BindWith(obj interface{}, b binding.Binding) error {
 	return c.mustBindWith(obj, b)
 }
 
-// Bind bind req arg with defult form binding.
+// Bind checks the Content-Type to select a binding engine automatically,
+// Depending the "Content-Type" header different bindings are used:
+//     "application/json" --> JSON binding
+//     "application/xml"  --> XML binding
+// otherwise --> returns an error.
+// It parses the request's body as JSON if Content-Type == "application/json" using JSON or XML as a JSON input.
+// It decodes the json payload into the struct specified as a pointer.
+// It writes a 400 error and sets Content-Type header "text/plain" in the response if input is not valid.
 func (c *Context) Bind(obj interface{}) error {
-	return c.mustBindWith(obj, binding.Form)
+	b := binding.Default(c.Request.Method, c.Request.Header.Get("Content-Type"))
+	return c.mustBindWith(obj, b)
 }
 
 // mustBindWith binds the passed struct pointer using the specified binding engine.

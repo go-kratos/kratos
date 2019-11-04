@@ -30,6 +30,33 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Conn represents a connection to a Redis server.
+type Conn interface {
+	// Close closes the connection.
+	Close() error
+
+	// Err returns a non-nil value if the connection is broken. The returned
+	// value is either the first non-nil value returned from the underlying
+	// network connection or a protocol parsing error. Applications should
+	// close broken connections.
+	Err() error
+
+	// Do sends a command to the server and returns the received reply.
+	Do(commandName string, args ...interface{}) (reply interface{}, err error)
+
+	// Send writes the command to the client's output buffer.
+	Send(commandName string, args ...interface{}) error
+
+	// Flush flushes the output buffer to the Redis server.
+	Flush() error
+
+	// Receive receives a single reply from the Redis server
+	Receive() (reply interface{}, err error)
+
+	// WithContext returns Conn with the input ctx.
+	WithContext(ctx context.Context) Conn
+}
+
 // conn is the low-level implementation of Conn
 type conn struct {
 	// Shared
@@ -37,6 +64,8 @@ type conn struct {
 	pending int
 	err     error
 	conn    net.Conn
+
+	ctx context.Context
 
 	// Read
 	readTimeout time.Duration
@@ -226,6 +255,7 @@ func NewConn(c *Config) (cn Conn, err error) {
 
 func (c *conn) Close() error {
 	c.mu.Lock()
+	c.ctx = nil
 	err := c.err
 	if c.err == nil {
 		c.err = errors.New("redigo: closed")
@@ -295,7 +325,7 @@ func (c *conn) writeFloat64(n float64) error {
 
 func (c *conn) writeCommand(cmd string, args []interface{}) (err error) {
 	if c.writeTimeout != 0 {
-		c.conn.SetWriteDeadline(time.Now().Add(c.writeTimeout))
+		c.conn.SetWriteDeadline(shrinkDeadline(c.ctx, c.writeTimeout))
 	}
 	c.writeLen('*', 1+len(args))
 	err = c.writeString(cmd)
@@ -478,7 +508,7 @@ func (c *conn) Send(cmd string, args ...interface{}) (err error) {
 
 func (c *conn) Flush() (err error) {
 	if c.writeTimeout != 0 {
-		c.conn.SetWriteDeadline(time.Now().Add(c.writeTimeout))
+		c.conn.SetWriteDeadline(shrinkDeadline(c.ctx, c.writeTimeout))
 	}
 	if err = c.bw.Flush(); err != nil {
 		c.fatal(err)
@@ -488,7 +518,7 @@ func (c *conn) Flush() (err error) {
 
 func (c *conn) Receive() (reply interface{}, err error) {
 	if c.readTimeout != 0 {
-		c.conn.SetReadDeadline(time.Now().Add(c.readTimeout))
+		c.conn.SetReadDeadline(shrinkDeadline(c.ctx, c.readTimeout))
 	}
 	if reply, err = c.readReply(); err != nil {
 		return nil, c.fatal(err)
@@ -511,7 +541,7 @@ func (c *conn) Receive() (reply interface{}, err error) {
 	return
 }
 
-func (c *conn) Do(cmd string, args ...interface{}) (interface{}, error) {
+func (c *conn) Do(cmd string, args ...interface{}) (reply interface{}, err error) {
 	c.mu.Lock()
 	pending := c.pending
 	c.pending = 0
@@ -519,7 +549,7 @@ func (c *conn) Do(cmd string, args ...interface{}) (interface{}, error) {
 	if cmd == "" && pending == 0 {
 		return nil, nil
 	}
-	var err error
+
 	if cmd != "" {
 		err = c.writeCommand(cmd, args)
 	}
@@ -530,7 +560,7 @@ func (c *conn) Do(cmd string, args ...interface{}) (interface{}, error) {
 		return nil, c.fatal(err)
 	}
 	if c.readTimeout != 0 {
-		c.conn.SetReadDeadline(time.Now().Add(c.readTimeout))
+		c.conn.SetReadDeadline(shrinkDeadline(c.ctx, c.readTimeout))
 	}
 	if cmd == "" {
 		reply := make([]interface{}, pending)
@@ -548,7 +578,6 @@ func (c *conn) Do(cmd string, args ...interface{}) (interface{}, error) {
 		return reply, nil
 	}
 
-	var reply interface{}
 	for i := 0; i <= pending; i++ {
 		var e error
 		if reply, e = c.readReply(); e != nil {
@@ -561,5 +590,20 @@ func (c *conn) Do(cmd string, args ...interface{}) (interface{}, error) {
 	return reply, err
 }
 
-// WithContext FIXME: implement WithContext
-func (c *conn) WithContext(ctx context.Context) Conn { return c }
+func (c *conn) copy() *conn {
+	return &conn{
+		pending:      c.pending,
+		err:          c.err,
+		conn:         c.conn,
+		bw:           c.bw,
+		br:           c.br,
+		readTimeout:  c.readTimeout,
+		writeTimeout: c.writeTimeout,
+	}
+}
+
+func (c *conn) WithContext(ctx context.Context) Conn {
+	c2 := c.copy()
+	c2.ctx = ctx
+	return c2
+}

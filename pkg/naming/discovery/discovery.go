@@ -102,7 +102,7 @@ type appInfo struct {
 }
 
 func fixConfig(c *Config) error {
-	if len(c.Nodes) == 0 {
+	if len(c.Nodes) == 0 && env.DiscoveryNodes != "" {
 		c.Nodes = strings.Split(env.DiscoveryNodes, ",")
 	}
 	if c.Region == "" {
@@ -370,9 +370,15 @@ func (d *Discovery) register(ctx context.Context, ins *naming.Instance) (err err
 	uri := fmt.Sprintf(_registerURL, d.pickNode())
 	params := d.newParams(c)
 	params.Set("appid", ins.AppID)
-	params.Set("addrs", strings.Join(ins.Addrs, ","))
+	for _, addr := range ins.Addrs {
+		params.Add("addrs", addr)
+	}
 	params.Set("version", ins.Version)
-	params.Set("status", _statusUP)
+	if ins.Status == 0 {
+		params.Set("status", _statusUP)
+	} else {
+		params.Set("status", strconv.FormatInt(ins.Status, 10))
+	}
 	params.Set("metadata", string(metadata))
 	if err = d.httpClient.Post(ctx, uri, "", params, &res); err != nil {
 		d.switchNode()
@@ -469,7 +475,7 @@ func (d *Discovery) set(ctx context.Context, ins *naming.Instance) (err error) {
 	params := d.newParams(conf)
 	params.Set("appid", ins.AppID)
 	params.Set("version", ins.Version)
-	params.Set("status", _statusUP)
+	params.Set("status", strconv.FormatInt(ins.Status, 10))
 	if ins.Metadata != nil {
 		var metadata []byte
 		if metadata, err = json.Marshal(ins.Metadata); err != nil {

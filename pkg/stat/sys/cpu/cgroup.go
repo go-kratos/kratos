@@ -56,7 +56,10 @@ func (c *cgroup) CPUAcctUsagePerCPU() ([]uint64, error) {
 		if u, err = parseUint(v); err != nil {
 			return nil, err
 		}
-		usage = append(usage, u)
+		// fix possible_cpu:https://www.ibm.com/support/knowledgecenter/en/linuxonibm/com.ibm.linux.z.lgdd/lgdd_r_posscpusparm.html
+		if u != 0 {
+			usage = append(usage, u)
+		}
 	}
 	return usage, nil
 }

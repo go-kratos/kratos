@@ -25,6 +25,14 @@ type Value struct {
 	raw   string
 }
 
+// NewValue new a value
+func NewValue(val interface{}, raw string) *Value {
+	return &Value{
+		val: val,
+		raw: raw,
+	}
+}
+
 // Bool return bool value.
 func (v *Value) Bool() (bool, error) {
 	if v.val == nil {
@@ -112,7 +120,7 @@ func (v *Value) Raw() (string, error) {
 	return v.raw, nil
 }
 
-// Slice scan a slcie interface, if slice has element it will be discard.
+// Slice scan a slice interface, if slice has element it will be discard.
 func (v *Value) Slice(dst interface{}) error {
 	// NOTE: val is []interface{}, slice is []type
 	if v.val == nil {
@@ -167,6 +175,7 @@ func (v *Value) UnmarshalJSON(dst interface{}) error {
 	return json.Unmarshal([]byte(text), dst)
 }
 
+// UnmarshalYAML unmarshal yaml to struct.
 func (v *Value) UnmarshalYAML(dst interface{}) error {
 	text, err := v.Raw()
 	if err != nil {

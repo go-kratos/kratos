@@ -186,8 +186,9 @@ func (t Tool) installed() bool {
 }
 
 func gopath() (gp string) {
-	gopaths := strings.Split(os.Getenv("GOPATH"), ":")
-	if len(gopaths) == 1 {
+	gopaths := strings.Split(os.Getenv("GOPATH"), string(filepath.ListSeparator))
+
+	if len(gopaths) == 1 && gopaths[0] != "" {
 		return gopaths[0]
 	}
 	pwd, err := os.Getwd()
@@ -199,6 +200,9 @@ func gopath() (gp string) {
 		return
 	}
 	for _, gopath := range gopaths {
+		if gopath == "" {
+			continue
+		}
 		absgp, err := filepath.Abs(gopath)
 		if err != nil {
 			return

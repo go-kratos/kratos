@@ -31,7 +31,7 @@ func (w *watcher) HasKey(key string) bool {
 		return true
 	}
 	for _, k := range w.keys {
-		if keyNamed(k) == key {
+		if KeyNamed(k) == key {
 			return true
 		}
 	}
@@ -138,7 +138,7 @@ func (f *file) reloadFile(fpath string) (err error) {
 	if err != nil {
 		return
 	}
-	key := keyNamed(path.Base(fpath))
+	key := KeyNamed(path.Base(fpath))
 	raws := f.values.Load()
 	raws[key] = value
 	f.values.Store(raws)
@@ -167,7 +167,7 @@ func loadValues(base string) (map[string]*Value, error) {
 			return nil, fmt.Errorf("paladin: read dir %s error: %s", base, err)
 		}
 		for _, file := range files {
-			if !file.IsDir() {
+			if !file.IsDir() && (file.Mode()&os.ModeSymlink) != os.ModeSymlink {
 				paths = append(paths, path.Join(base, file.Name()))
 			}
 		}

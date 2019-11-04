@@ -2,8 +2,6 @@ package main
 
 import (
 	"os/exec"
-
-	"github.com/urfave/cli"
 )
 
 const (
@@ -20,6 +18,6 @@ func installSwaggerGen() error {
 	return nil
 }
 
-func genSwagger(ctx *cli.Context) error {
-	return generate(ctx, _swaggerProtoc)
+func genSwagger(files []string) error {
+	return generate(_swaggerProtoc, files)
 }

@@ -11,10 +11,9 @@
 > 4. 默认配置如下所示：
     _conf = &Config{
             Window:  xtime.Duration(3 * time.Second),
-            Sleep:   xtime.Duration(100 * time.Millisecond),
             Bucket:  10,
-            Ratio:   0.5,
             Request: 100,
+            K:1.5,
     }
 
 ##### 测试

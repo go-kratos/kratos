@@ -3,9 +3,9 @@ package gen
 import (
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
-	"log"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
@@ -70,7 +70,6 @@ func writeResponse(w io.Writer, resp *plugin.CodeGeneratorResponse) {
 	}
 }
 
-
 // Fail log and exit
 func Fail(msgs ...string) {
 	s := strings.Join(msgs, " ")
@@ -84,7 +83,6 @@ func Info(msgs ...string) {
 	log.Print("info:", s)
 	os.Exit(1)
 }
-
 
 // Error log and exit
 func Error(err error, msgs ...string) {
