@@ -30,8 +30,8 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
   # zookeeper
-  - wget "http://apache.cs.utah.edu/zookeeper/zookeeper-${ZK_VERSION}/zookeeper-${ZK_VERSION}.tar.gz"
-  - tar -xvf "zookeeper-${ZK_VERSION}.tar.gz"
+  - wget "http://apache.cs.utah.edu/zookeeper/zookeeper-${ZK_VERSION}/apache-zookeeper-${ZK_VERSION}.tar.gz"
+  - tar -xvf "apache-zookeeper-${ZK_VERSION}.tar.gz"
 
 # Skip the install step. Don't `go get` dependencies. Only build with the code
 # in vendor/
@@ -47,7 +47,7 @@ before_script:
   - curl -sfL https://raw.githubusercontent.com/bilibili/discovery/master/cmd/discovery/discovery-example.toml -o $GOPATH/bin/discovery.toml
   - nohup bash -c "$GOPATH/bin/discovery -conf $GOPATH/bin/discovery.toml &"
   # zookeeper
-  - ./zookeeper-${ZK_VERSION}/bin/zkServer.sh start ./zk/conf/zoo_sample.cfg 1> /dev/null
+  - ./apache-zookeeper-${ZK_VERSION}/bin/zkServer.sh start ./zk/conf/zoo_sample.cfg 1> /dev/null
 
 script:
   - go build ./...
