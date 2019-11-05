@@ -30,6 +30,8 @@ import (
 
 const (
 	_separator = "\001"
+
+	_testAddr = "127.0.0.1:9090"
 )
 
 var (
@@ -156,7 +158,7 @@ func (s *helloServer) StreamHello(ss pb.Greeter_StreamHelloServer) error {
 
 func runServer(t *testing.T, interceptors ...grpc.UnaryServerInterceptor) func() {
 	return func() {
-		server = NewServer(&ServerConfig{Addr: "127.0.0.1:8080", Timeout: xtime.Duration(time.Second)})
+		server = NewServer(&ServerConfig{Addr: _testAddr, Timeout: xtime.Duration(time.Second)})
 		pb.RegisterGreeterServer(server.Server(), &helloServer{t})
 		server.Use(
 			func(ctx context.Context, req interface{}, args *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
@@ -180,7 +182,7 @@ func runServer(t *testing.T, interceptors ...grpc.UnaryServerInterceptor) func()
 func runClient(ctx context.Context, cc *ClientConfig, t *testing.T, name string, age int32, interceptors ...grpc.UnaryClientInterceptor) (resp *pb.HelloReply, err error) {
 	client := NewClient(cc)
 	client.Use(interceptors...)
-	conn, err := client.Dial(context.Background(), "127.0.0.1:8080")
+	conn, err := client.Dial(context.Background(), _testAddr)
 	if err != nil {
 		panic(fmt.Errorf("did not connect: %v,req: %v %v", err, name, age))
 	}
@@ -226,7 +228,7 @@ func testTimeoutOpt(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*100)
 	defer cancel()
 	client := NewClient(&clientConfig)
-	conn, err := client.Dial(ctx, "127.0.0.1:8080")
+	conn, err := client.Dial(ctx, _testAddr)
 	if err != nil {
 		t.Fatalf("did not connect: %v", err)
 	}
@@ -284,7 +286,7 @@ func testAllErrorCase(t *testing.T) {
 
 func testBreaker(t *testing.T) {
 	client := NewClient(&clientConfig)
-	conn, err := client.Dial(context.Background(), "127.0.0.1:8080")
+	conn, err := client.Dial(context.Background(), _testAddr)
 	if err != nil {
 		t.Fatalf("did not connect: %v", err)
 	}
@@ -378,7 +380,7 @@ func testClientRecovery(t *testing.T) {
 		panic("client recovery test")
 	})
 
-	conn, err := client.Dial(ctx, "127.0.0.1:8080")
+	conn, err := client.Dial(ctx, _testAddr)
 	if err != nil {
 		t.Fatalf("did not connect: %v", err)
 	}
@@ -403,7 +405,7 @@ func testServerRecovery(t *testing.T) {
 	ctx := context.Background()
 	client := NewClient(&clientConfig)
 
-	conn, err := client.Dial(ctx, "127.0.0.1:8080")
+	conn, err := client.Dial(ctx, _testAddr)
 	if err != nil {
 		t.Fatalf("did not connect: %v", err)
 	}
@@ -491,7 +493,7 @@ func testTrace(t *testing.T, port int, isStream bool) {
 }
 
 func BenchmarkServer(b *testing.B) {
-	server := NewServer(&ServerConfig{Addr: "127.0.0.1:8080", Timeout: xtime.Duration(time.Second)})
+	server := NewServer(&ServerConfig{Addr: _testAddr, Timeout: xtime.Duration(time.Second)})
 	go func() {
 		pb.RegisterGreeterServer(server.Server(), &helloServer{})
 		if _, err := server.Start(); err != nil {
@@ -503,7 +505,7 @@ func BenchmarkServer(b *testing.B) {
 		server.Server().Stop()
 	}()
 	client := NewClient(&clientConfig)
-	conn, err := client.Dial(context.Background(), "127.0.0.1:8080")
+	conn, err := client.Dial(context.Background(), _testAddr)
 	if err != nil {
 		conn.Close()
 		b.Fatalf("did not connect: %v", err)
@@ -602,4 +604,3 @@ func TestStartWithAddr(t *testing.T) {
 		assert.Nil(t, err)
 	}
 }
-
