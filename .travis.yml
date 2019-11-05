@@ -33,7 +33,7 @@ before_install:
   - wget "http://apache.cs.utah.edu/zookeeper/zookeeper-${ZK_VERSION}/apache-zookeeper-${ZK_VERSION}-bin.tar.gz"
   - tar -xvf "apache-zookeeper-${ZK_VERSION}-bin.tar.gz"
   - mv apache-zookeeper-${ZK_VERSION}-bin zk
-  - chmod +x ./apache-zookeeper-${ZK_VERSION}-bin/bin/zkServer.sh
+  - chmod +x ./zk/bin/zkServer.sh
 
 # Skip the install step. Don't `go get` dependencies. Only build with the code
 # in vendor/
