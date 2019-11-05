@@ -2,12 +2,16 @@ package main
 
 var _noneTemplate = `
 // NAME {{or .Comment "get data from cache if miss will call source method, then add to cache."}} 
-func (d *Dao) NAME(c context.Context) (res VALUE, err error) {
+func (d *{{.StructName}}) NAME(c context.Context) (res VALUE, err error) {
 	addCache := true
 	res, err = CACHEFUNC(c)
 	if err != nil {
+		{{if .CacheErrContinue}}
 		addCache = false
 		err = nil
+		{{else}}
+		return
+		{{end}}
 	}
 	{{if .EnableNullCache}}
 	defer func() {
@@ -21,7 +25,7 @@ func (d *Dao) NAME(c context.Context) (res VALUE, err error) {
 	{{else}}
 	if res != {{.ZeroValue}} {
 	{{end}}
-		cache.MetricHits.Inc("bts:NAME")
+	cache.MetricHits.Inc("bts:NAME")
 		return
 	}
 	{{if .EnableSingleFlight}}

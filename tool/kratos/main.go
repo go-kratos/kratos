@@ -14,34 +14,11 @@ func main() {
 	app.Version = Version
 	app.Commands = []cli.Command{
 		{
-			Name:    "new",
-			Aliases: []string{"n"},
-			Usage:   "create new project",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:        "o",
-					Value:       "",
-					Usage:       "project owner for create project",
-					Destination: &p.Owner,
-				},
-				cli.StringFlag{
-					Name:        "d",
-					Value:       "",
-					Usage:       "project directory for create project",
-					Destination: &p.Path,
-				},
-				cli.BoolFlag{
-					Name:        "proto",
-					Usage:       "whether to use protobuf for create project",
-					Destination: &p.WithGRPC,
-				},
-				cli.StringFlag{
-					Name:        "m",
-					Usage:       "project module name for create project, for `go mod init`",
-					Destination: &p.ModuleName,
-				},
-			},
-			Action: runNew,
+			Name:            "new",
+			Aliases:         []string{"n"},
+			Usage:           "创建新项目",
+			Action:          runNew,
+			SkipFlagParsing: true,
 		},
 		{
 			Name:    "build",
@@ -81,4 +58,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func runNew(ctx *cli.Context) error {
+	return installAndRun("genproject", ctx.Args())
 }

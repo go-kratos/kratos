@@ -24,9 +24,9 @@ NEWLINE
 	{{if .EnableSingleFlight}}	"golang.org/x/sync/singleflight" {{end}}
 )
 
-var (
-	_ _bts
-)
+{{if .UseBTS}}
+var _ _bts
+{{end }}
 {{if .EnableSingleFlight}}
 var cacheSingleFlights = [SFCOUNT]*singleflight.Group{SFINIT} 
 {{end }}

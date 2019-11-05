@@ -27,12 +27,10 @@ import (
 	"github.com/bilibili/kratos/pkg/sync/errgroup"
 )
 
-var (
-	_ _bts
-)
+var _ _bts
 
 // Demos get data from cache if miss will call source method, then add to cache.
-func (d *Dao) Demos(c context.Context, keys []int64) (res map[int64]*Demo, err error) {
+func (d *dao) Demos(c context.Context, keys []int64) (res map[int64]*Demo, err error) {
 	if len(keys) == 0 {
 		return
 	}
@@ -111,7 +109,7 @@ func (d *Dao) Demos(c context.Context, keys []int64) (res map[int64]*Demo, err e
 }
 
 // Demos1 get data from cache if miss will call source method, then add to cache.
-func (d *Dao) Demos1(c context.Context, keys []int64) (res map[int64]*Demo, err error) {
+func (d *dao) Demos1(c context.Context, keys []int64) (res map[int64]*Demo, err error) {
 	if len(keys) == 0 {
 		return
 	}
@@ -190,7 +188,7 @@ func (d *Dao) Demos1(c context.Context, keys []int64) (res map[int64]*Demo, err 
 }
 
 // Demo get data from cache if miss will call source method, then add to cache.
-func (d *Dao) Demo(c context.Context, key int64) (res *Demo, err error) {
+func (d *dao) Demo(c context.Context, key int64) (res *Demo, err error) {
 	addCache := true
 	res, err = d.CacheDemo(c, key)
 	if err != nil {
@@ -223,7 +221,7 @@ func (d *Dao) Demo(c context.Context, key int64) (res *Demo, err error) {
 }
 
 // Demo1 get data from cache if miss will call source method, then add to cache.
-func (d *Dao) Demo1(c context.Context, key int64, pn int, ps int) (res *Demo, err error) {
+func (d *dao) Demo1(c context.Context, key int64, pn int, ps int) (res *Demo, err error) {
 	addCache := true
 	res, err = d.CacheDemo1(c, key, pn, ps)
 	if err != nil {
@@ -250,7 +248,7 @@ func (d *Dao) Demo1(c context.Context, key int64, pn int, ps int) (res *Demo, er
 }
 
 // None get data from cache if miss will call source method, then add to cache.
-func (d *Dao) None(c context.Context) (res *Demo, err error) {
+func (d *dao) None(c context.Context) (res *Demo, err error) {
 	addCache := true
 	res, err = d.CacheNone(c)
 	if err != nil {

@@ -118,7 +118,9 @@ func FormatCode(source string) string {
 // Packages get import packages
 func (s *Source) Packages(f *ast.Field) (res []string) {
 	fs := f.Type.(*ast.FuncType).Params.List
-	fs = append(fs, f.Type.(*ast.FuncType).Results.List...)
+	if f.Type.(*ast.FuncType).Results != nil {
+		fs = append(fs, f.Type.(*ast.FuncType).Results.List...)
+	}
 	var types []string
 	resMap := make(map[string]bool)
 	for _, field := range fs {
