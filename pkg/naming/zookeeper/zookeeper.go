@@ -249,6 +249,7 @@ func (z *Zookeeper) register(ctx context.Context, ins *naming.Instance) (err err
 		if err != nil {
 			continue
 		}
+		// grpc://127.0.0.1:8000 to 127.0.0.1
 		nodePath := prefix + "/" + strings.SplitN(u.Host, ":", 2)[0]
 		if err = z.registerPeerServer(nodePath, ins); err != nil {
 			log.Warn(fmt.Sprintf("registerServer, fail to RegisterPeerServer node:%s error:(%v)", addr, err))
@@ -267,6 +268,7 @@ func (z *Zookeeper) unregister(ins *naming.Instance) (err error) {
 		if err != nil {
 			continue
 		}
+		// grpc://127.0.0.1:8000 to 127.0.0.1
 		nodePath := prefix + "/" + strings.SplitN(u.Host, ":", 2)[0]
 		exists, _, err := z.cli.Exists(nodePath)
 		if err != nil {
@@ -310,6 +312,7 @@ func (a *appInfo) watch(appID string) {
 			if err != nil {
 				log.Error("zk ChildrenW fail to watch:%s error:(%v)", prefix, err)
 				time.Sleep(time.Second)
+				_ = a.fetchstore(appID)
 				continue
 			}
 			log.Info(fmt.Sprintf("zk ChildrenW ok, prefix:%s snapshot:(%v)", prefix, snapshot))
@@ -325,27 +328,24 @@ func (a *appInfo) watch(appID string) {
 
 func (a *appInfo) fetchstore(appID string) (err error) {
 	prefix := a.zkb.keyPrefix(appID)
-	a.zkb.createPath(prefix)
 	childs, _, err := a.zkb.cli.Children(prefix)
 	if err != nil {
 		log.Error(fmt.Sprintf("fetchstore, fail to get Children of node:(%v), error:(%v)", prefix, err))
-	} else {
-		log.Info(fmt.Sprintf("fetchstore, ok to get Children of node:(%v), childs:(%v)", prefix, childs))
+		return
 	}
+	log.Info(fmt.Sprintf("fetchstore, ok to get Children of node:(%v), childs:(%v)", prefix, childs))
 	ins := &naming.InstancesInfo{
 		Instances: make(map[string][]*naming.Instance, 0),
 	}
-	strNode := ""
 	for _, child := range childs {
-		strNode = prefix + "/" + child
-		resp, _, err := a.zkb.cli.Get(strNode)
+		nodePath := prefix + "/" + child
+		resp, _, err := a.zkb.cli.Get(nodePath)
 		if err != nil {
-			log.Error("zookeeper: fetch client.Get(%s) error:(%v)", strNode, err)
+			log.Error("zookeeper: fetch client.Get(%s) error:(%v)", nodePath, err)
 			return err
 		}
 		in := new(naming.Instance)
-		err = json.Unmarshal(resp, in)
-		if err != nil {
+		if err = json.Unmarshal(resp, in); err != nil {
 			return err
 		}
 		ins.Instances[in.Zone] = append(ins.Instances[in.Zone], in)

@@ -3,7 +3,6 @@ package zookeeper
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/bilibili/kratos/pkg/naming"
 )
@@ -30,16 +29,13 @@ func TestZookeeper(t *testing.T) {
 		t.Fatal(err)
 	}
 	res := zk.Build(_testAppid)
-	go func() {
-		for event := range res.Watch() {
-			t.Log(event)
-		}
-	}()
+	event := res.Watch()
 	_, err = zk.Register(context.TODO(), _testIns)
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(time.Second * 3)
+	<-event
+	<-event
 	in, ok := res.Fetch(context.TODO())
 	if !ok {
 		t.Fatal("failed to resolver fetch")
