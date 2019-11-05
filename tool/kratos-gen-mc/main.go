@@ -9,26 +9,29 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"text/template"
 
-	"github.com/bilibili/kratos/tool/pkg"
+	common "github.com/bilibili/kratos/tool/pkg"
 )
 
 var (
-	encode     = flag.String("encode", "", "encode type: json/pb/raw/gob/gzip")
-	mcType     = flag.String("type", "", "type: get/set/del/replace/only_add")
-	key        = flag.String("key", "", "key name method")
-	expire     = flag.String("expire", "", "expire time code")
-	structName = flag.String("struct_name", "Dao", "struct name")
-	batchSize  = flag.Int("batch", 0, "batch size")
-	batchErr   = flag.String("batch_err", "break", "batch err to contine or break")
-	maxGroup   = flag.Int("max_group", 0, "max group size")
+	encode        = flag.String("encode", "", "encode type: json/pb/raw/gob/gzip")
+	mcType        = flag.String("type", "", "type: get/set/del/replace/only_add")
+	key           = flag.String("key", "", "key name method")
+	expire        = flag.String("expire", "", "expire time code")
+	structName    = flag.String("struct_name", "dao", "struct name")
+	batchSize     = flag.Int("batch", 0, "batch size")
+	batchErr      = flag.String("batch_err", "break", "batch err to contine or break")
+	maxGroup      = flag.Int("max_group", 0, "max group size")
+	checkNullCode = flag.String("check_null_code", "", "check null code")
+	nullExpire    = flag.String("null_expire", "", "null cache expire time code")
 
 	mcValidTypes   = []string{"set", "replace", "del", "get", "only_add"}
 	mcValidPrefix  = []string{"set", "replace", "del", "get", "cache", "add"}
-	optionNamesMap = map[string]bool{"batch": true, "max_group": true, "encode": true, "type": true, "key": true, "expire": true, "batch_err": true, "struct_name": true}
+	optionNamesMap = map[string]bool{"batch": true, "max_group": true, "encode": true, "type": true, "key": true, "expire": true, "batch_err": true, "struct_name": true, "check_null_code": true, "null_expire": true}
 	simpleTypes    = []string{"int", "int8", "int16", "int32", "int64", "float32", "float64", "uint", "uint8", "uint16", "uint32", "uint64", "bool", "string", "[]byte"}
 	lenTypes       = []string{"[]", "map"}
 )
@@ -51,6 +54,9 @@ func resetFlag() {
 	*batchSize = 0
 	*maxGroup = 0
 	*batchErr = "break"
+	*checkNullCode = ""
+	*nullExpire = ""
+	*structName = "dao"
 }
 
 // options options
@@ -88,17 +94,20 @@ type options struct {
 	LenType            bool
 	PointType          bool
 	StructName         string
+	CheckNullCode      string
+	ExpireNullCode     string
+	EnableNullCode     bool
 }
 
 func getOptions(opt *options, comment string) {
 	os.Args = []string{os.Args[0]}
 	if regexp.MustCompile(`\s+//\s*mc:.+`).Match([]byte(comment)) {
-		args := strings.Split(pkg.RegexpReplace(`//\s*mc:(?P<arg>.+)`, comment, "$arg"), " ")
+		args := strings.Split(common.RegexpReplace(`//\s*mc:(?P<arg>.+)`, comment, "$arg"), " ")
 		for _, arg := range args {
 			arg = strings.TrimSpace(arg)
 			if arg != "" {
 				// validate option name
-				argName := pkg.RegexpReplace(`-(?P<name>[\w_-]+)=.+`, arg, "$name")
+				argName := common.RegexpReplace(`-(?P<name>[\w_-]+)=.+`, arg, "$name")
 				if !optionNamesMap[argName] {
 					log.Fatalf("选项:%s 不存在 请检查拼写\n", argName)
 				}
@@ -122,9 +131,16 @@ func getOptions(opt *options, comment string) {
 	opt.GroupSize = *batchSize
 	opt.MaxGroup = *maxGroup
 	opt.StructName = *structName
+	opt.CheckNullCode = *checkNullCode
+	if *nullExpire != "" {
+		opt.ExpireNullCode = *nullExpire
+	}
+	if opt.CheckNullCode != "" {
+		opt.EnableNullCode = true
+	}
 }
 
-func getTypeFromPrefix(opt *options, params []*ast.Field, s *pkg.Source) {
+func getTypeFromPrefix(opt *options, params []*ast.Field, s *common.Source) {
 	if opt.MCType == "" {
 		for _, t := range mcValidPrefix {
 			if strings.HasPrefix(strings.ToLower(opt.name), t) {
@@ -160,7 +176,7 @@ func getTypeFromPrefix(opt *options, params []*ast.Field, s *pkg.Source) {
 	}
 }
 
-func processList(s *pkg.Source, list *ast.Field) (opt options) {
+func processList(s *common.Source, list *ast.Field) (opt options) {
 	src := s.Src
 	fset := s.Fset
 	lines := strings.Split(src, "\n")
@@ -168,11 +184,12 @@ func processList(s *pkg.Source, list *ast.Field) (opt options) {
 	opt.name = list.Names[0].Name
 	opt.KeyMethod = "key" + opt.name
 	opt.ExpireCode = "d.mc" + opt.name + "Expire"
+	opt.ExpireNullCode = "300" // 默认5分钟
 	// get comment
 	line := fset.Position(list.Pos()).Line - 3
 	if len(lines)-1 >= line {
 		comment := lines[line]
-		opt.Comment = pkg.RegexpReplace(`\s+//(?P<name>.+)`, comment, "$name")
+		opt.Comment = common.RegexpReplace(`\s+//(?P<name>.+)`, comment, "$name")
 		opt.Comment = strings.TrimSpace(opt.Comment)
 	}
 	// get options
@@ -235,7 +252,7 @@ func processList(s *pkg.Source, list *ast.Field) (opt options) {
 	return
 }
 
-func getKeyValueType(opt *options, params, results []*ast.Field, s *pkg.Source) {
+func getKeyValueType(opt *options, params, results []*ast.Field, s *common.Source) {
 	// check
 	if s.ExprString(results[len(results)-1].Type) != "error" {
 		log.Fatalln("最后返回值参数需为error")
@@ -352,7 +369,7 @@ func getKeyValueType(opt *options, params, results []*ast.Field, s *pkg.Source) 
 	}
 }
 
-func parse(s *pkg.Source) (opts []*options) {
+func parse(s *common.Source) (opts []*options) {
 	c := s.F.Scope.Lookup(_interfaceName)
 	if (c == nil) || (c.Kind != ast.Typ) {
 		log.Fatalln("无法找到缓存声明")
@@ -476,6 +493,9 @@ func genBody(opts []*options) (res string) {
 		src = strings.Replace(src, "VALUE", option.ValueType, -1)
 		src = strings.Replace(src, "GROUPSIZE", strconv.Itoa(option.GroupSize), -1)
 		src = strings.Replace(src, "MAXGROUP", strconv.Itoa(option.MaxGroup), -1)
+		if option.EnableNullCode {
+			option.CheckNullCode = strings.Replace(option.CheckNullCode, "$", "val", -1)
+		}
 		t := template.Must(template.New("cache").Parse(src))
 		var buffer bytes.Buffer
 		err := t.Execute(&buffer, option)
@@ -494,13 +514,15 @@ func main() {
 	log.SetFlags(0)
 	defer func() {
 		if err := recover(); err != nil {
-			log.Fatalf("程序解析失败, err: %+v", err)
+			buf := make([]byte, 64*1024)
+			buf = buf[:runtime.Stack(buf, false)]
+			log.Fatalf("程序解析失败, err: %+v stack: %s", err, buf)
 		}
 	}()
-	options := parse(pkg.NewSource(pkg.SourceText()))
+	options := parse(common.NewSource(common.SourceText()))
 	header := genHeader(options)
 	body := genBody(options)
-	code := pkg.FormatCode(header + "\n" + body)
+	code := common.FormatCode(header + "\n" + body)
 	// Write to file.
 	dir := filepath.Dir(".")
 	outputName := filepath.Join(dir, "mc.cache.go")

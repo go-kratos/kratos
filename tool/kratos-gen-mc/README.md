@@ -40,5 +40,6 @@ mc Add方法需要用注解 -type=only_add单独指定
 | batch       |                     | get(限多key模板) | 批量获取数据 每组大小                                        | -                            | 100                        |
 | max_group   |                     | get(限多key模板) | 批量获取数据 最大组数量                                      | -                            | 10                         |
 | batch_err   | break               | get(限多key模板) | 批量获取数据回源错误的时候 降级继续请求(continue)还是直接返回(break) | break 或 continue            | continue                   |
-| struct_name | Dao                 | 全部             | 用户自定义Dao结构体名称                                      |                              | MemcacheDao                |
-
+| struct_name | dao                 | 全部             | 用户自定义Dao结构体名称                                      |                              | MemcacheDao                |
+|check_null_code||add/set|(和null_expire配套使用)判断是否是空缓存的代码 用于为空缓存独立设定过期时间||$.ID==-1 或者 $=="-1"等|
+|null_expire|300(5分钟)|add/set|(和check_null_code配套使用)空缓存的过期时间||d.nullExpire|

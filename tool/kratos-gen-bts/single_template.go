@@ -2,12 +2,16 @@ package main
 
 var _singleTemplate = `
 // NAME {{or .Comment "get data from cache if miss will call source method, then add to cache."}} 
-func (d *Dao) NAME(c context.Context, {{.IDName}} KEY{{.ExtraArgsType}}) (res VALUE, err error) {
+func (d *{{.StructName}}) NAME(c context.Context, {{.IDName}} KEY{{.ExtraArgsType}}) (res VALUE, err error) {
 	addCache := true
 	res, err = CACHEFUNC(c, {{.IDName}} {{.ExtraCacheArgs}})
 	if err != nil {
+		{{if .CacheErrContinue}}
 		addCache = false
 		err = nil
+		{{else}}
+		return
+		{{end}}
 	}
 	{{if .EnableNullCache}}
 	defer func() {

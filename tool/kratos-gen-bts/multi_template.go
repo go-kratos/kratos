@@ -2,15 +2,19 @@ package main
 
 var _multiTemplate = `
 // NAME {{or .Comment "get data from cache if miss will call source method, then add to cache."}} 
-func (d *Dao) NAME(c context.Context, {{.IDName}} []KEY{{.ExtraArgsType}}) (res map[KEY]VALUE, err error) {
+func (d *{{.StructName}}) NAME(c context.Context, {{.IDName}} []KEY{{.ExtraArgsType}}) (res map[KEY]VALUE, err error) {
 	if len({{.IDName}}) == 0 {
 		return
 	}
 	addCache := true
 	if res, err = CACHEFUNC(c, {{.IDName}} {{.ExtraCacheArgs}});err != nil {
+		{{if .CacheErrContinue}}
 		addCache = false
 		res = nil
 		err = nil
+		{{else}}
+		return
+		{{end}}
 	}
 	var miss []KEY
 	for _, key := range {{.IDName}} {
