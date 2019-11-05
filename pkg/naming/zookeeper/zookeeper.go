@@ -61,6 +61,7 @@ type Resolve struct {
 }
 
 // Zookeeper is a zookeeper client Builder.
+// path: /{root}/{appid}/{ip} -> json(instance)
 type Zookeeper struct {
 	c          *Config
 	cli        *zk.Conn
