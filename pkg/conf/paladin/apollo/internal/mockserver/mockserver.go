@@ -137,7 +137,7 @@ func initServer() {
 	mux.Handle("/notifications/", http.HandlerFunc(server.NotificationHandler))
 	mux.Handle("/configs/", http.HandlerFunc(server.ConfigHandler))
 	server.server.Handler = mux
-	server.server.Addr = ":8080"
+	server.server.Addr = ":8010"
 }
 
 // Close mock server
