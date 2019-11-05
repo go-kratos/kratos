@@ -39,7 +39,7 @@ func TestZookeeper(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(time.Second)
+	time.Sleep(time.Second * 3)
 	in, ok := res.Fetch(context.TODO())
 	if !ok {
 		t.Fatal("failed to resolver fetch")
