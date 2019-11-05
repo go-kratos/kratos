@@ -28,13 +28,13 @@ func TestZookeeper(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	res := zk.Build(_testAppid)
-	event := res.Watch()
 	_, err = zk.Register(context.TODO(), _testIns)
 	if err != nil {
 		t.Fatal(err)
 	}
-	<-event
+	// fetch&watch
+	res := zk.Build(_testAppid)
+	event := res.Watch()
 	<-event
 	in, ok := res.Fetch(context.TODO())
 	if !ok {
