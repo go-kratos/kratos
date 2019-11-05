@@ -43,7 +43,7 @@ func TestApollo(t *testing.T) {
 	os.Setenv("APOLLO_APP_ID", "SampleApp")
 	os.Setenv("APOLLO_CLUSTER", "default")
 	os.Setenv("APOLLO_CACHE_DIR", "/tmp")
-	os.Setenv("APOLLO_META_ADDR", "localhost:8080")
+	os.Setenv("APOLLO_META_ADDR", "localhost:8010")
 	os.Setenv("APOLLO_NAMESPACES", fmt.Sprintf("%s,%s", testAppYAML, testClientJSON))
 	mockserver.Set(testAppYAML, "content", testAppYAMLContent1)
 	mockserver.Set(testClientJSON, "content", testClientJSONContent)

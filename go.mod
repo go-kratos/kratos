@@ -18,6 +18,7 @@ require (
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
+	github.com/go-zookeeper/zk v1.0.1
 	github.com/gobuffalo/packr/v2 v2.7.1
 	github.com/gogo/protobuf v1.3.0
 	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
@@ -28,6 +29,7 @@ require (
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/montanaflynn/stats v0.5.0
 	github.com/openzipkin/zipkin-go v0.2.1
 	github.com/otokaze/mock v0.0.0-20190125081256-8282b7a7c7c3
