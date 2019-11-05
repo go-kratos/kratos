@@ -32,6 +32,7 @@ before_install:
   # zookeeper
   - wget "http://apache.cs.utah.edu/zookeeper/zookeeper-${ZK_VERSION}/apache-zookeeper-${ZK_VERSION}-bin.tar.gz"
   - tar -xvf "apache-zookeeper-${ZK_VERSION}-bin.tar.gz"
+  - mv apache-zookeeper-${ZK_VERSION}-bin zk
   - chmod +x ./apache-zookeeper-${ZK_VERSION}-bin/bin/zkServer.sh
 
 # Skip the install step. Don't `go get` dependencies. Only build with the code
@@ -48,7 +49,7 @@ before_script:
   - curl -sfL https://raw.githubusercontent.com/bilibili/discovery/master/cmd/discovery/discovery-example.toml -o $GOPATH/bin/discovery.toml
   - nohup bash -c "$GOPATH/bin/discovery -conf $GOPATH/bin/discovery.toml &"
   # zookeeper
-  - sudo ./apache-zookeeper-${ZK_VERSION}-bin/bin/zkServer.sh start ./zk/conf/zoo_sample.cfg 1> /dev/null
+  - sudo ./zk/bin/zkServer.sh start ./zk/conf/zoo_sample.cfg 1> /dev/null
 
 script:
   - go build ./...
