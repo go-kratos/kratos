@@ -5,25 +5,30 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"path"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/bilibili/kratos/pkg/log"
 	"github.com/bilibili/kratos/pkg/naming"
+	xtime "github.com/bilibili/kratos/pkg/time"
 	"github.com/go-zookeeper/zk"
 )
 
+// Config is zookeeper config.
 type Config struct {
-	// Endpoints is a list of URLs.
-	Endpoints []string `json:"endpoints"`
+	Root      string         `json:"root"`
+	Endpoints []string       `json:"endpoints"`
+	Timeout   xtime.Duration `json:"timeout"`
 }
 
 var (
 	_once    sync.Once
 	_builder naming.Builder
 
-	//ErrDuplication is a register duplication err
+	// ErrDuplication is a register duplication err
 	ErrDuplication = errors.New("zookeeper: instance duplicate registration")
 )
 
@@ -40,8 +45,23 @@ func Build(c *Config, id string) naming.Resolver {
 	return Builder(c).Build(id)
 }
 
-// ZookeeperBuilder is a zookeeper client Builder
-type ZookeeperBuilder struct {
+type appInfo struct {
+	resolver map[*Resolve]struct{}
+	ins      atomic.Value
+	zkb      *Zookeeper
+	once     sync.Once
+}
+
+// Resolve zookeeper resolver.
+type Resolve struct {
+	id    string
+	event chan struct{}
+	zkb   *Zookeeper
+}
+
+// Zookeeper is a zookeeper client Builder.
+type Zookeeper struct {
+	c          *Config
 	cli        *zk.Conn
 	connEvent  <-chan zk.Event
 	ctx        context.Context
@@ -52,39 +72,27 @@ type ZookeeperBuilder struct {
 	registry map[string]struct{}
 }
 
-type appInfo struct {
-	resolver map[*Resolve]struct{}
-	ins      atomic.Value
-	zkb      *ZookeeperBuilder
-	once     sync.Once
-}
-
-// Resolve zookeeper resolver.
-type Resolve struct {
-	id    string
-	event chan struct{}
-	zkb   *ZookeeperBuilder
-}
-
-// New is new a zookeeper builder
-func New(c *Config) (zkb *ZookeeperBuilder, err error) {
-	//example: endpointSli = []string{"192.168.1.78:2181", "192.168.1.79:2181", "192.168.1.80:2181"}
+// New is new a zookeeper builder.
+func New(c *Config) (zkb *Zookeeper, err error) {
+	if c.Timeout == 0 {
+		c.Timeout = xtime.Duration(time.Second)
+	}
 	if len(c.Endpoints) == 0 {
 		errInfo := fmt.Sprintf("zookeeper New failed, endpoints is null")
 		log.Error(errInfo)
 		return nil, errors.New(errInfo)
 	}
 
-	zkConn, connEvent, err := zk.Connect(c.Endpoints, 5*time.Second)
+	zkConn, connEvent, err := zk.Connect(c.Endpoints, time.Duration(c.Timeout))
 	if err != nil {
 		log.Error(fmt.Sprintf("zk Connect err:(%v)", err))
 		return
-	} else {
-		log.Info(fmt.Sprintf("zk Connect ok!"))
 	}
+	log.Info(fmt.Sprintf("zk Connect ok!"))
 
 	ctx, cancel := context.WithCancel(context.Background())
-	zkb = &ZookeeperBuilder{
+	zkb = &Zookeeper{
+		c:          c,
 		cli:        zkConn,
 		connEvent:  connEvent,
 		ctx:        ctx,
@@ -96,7 +104,7 @@ func New(c *Config) (zkb *ZookeeperBuilder, err error) {
 }
 
 // Build zookeeper resovler builder.
-func (z *ZookeeperBuilder) Build(appid string) naming.Resolver {
+func (z *Zookeeper) Build(appid string) naming.Resolver {
 	r := &Resolve{
 		id:    appid,
 		zkb:   z,
@@ -119,21 +127,19 @@ func (z *ZookeeperBuilder) Build(appid string) naming.Resolver {
 		default:
 		}
 	}
-
 	app.once.Do(func() {
 		go app.watch(appid)
-		log.Info("zookeeper: AddWatch(%s) already watch(%v)", appid, ok)
 	})
 	return r
 }
 
-// Scheme return zookeeper's scheme
-func (z *ZookeeperBuilder) Scheme() string {
+// Scheme return zookeeper's scheme.
+func (z *Zookeeper) Scheme() string {
 	return "zookeeper"
 }
 
-// Register is register instance
-func (z *ZookeeperBuilder) Register(ctx context.Context, ins *naming.Instance) (cancelFunc context.CancelFunc, err error) {
+// Register is register instance.
+func (z *Zookeeper) Register(ctx context.Context, ins *naming.Instance) (cancelFunc context.CancelFunc, err error) {
 	z.mutex.Lock()
 	if _, ok := z.registry[ins.AppID]; ok {
 		err = ErrDuplication
@@ -157,16 +163,13 @@ func (z *ZookeeperBuilder) Register(ctx context.Context, ins *naming.Instance) (
 		cancel()
 		<-ch
 	})
-
 	go func() {
 		for {
 			select {
 			case connEvent := <-z.connEvent:
-				log.Warn("watch zkClient state, connEvent:(%v)", connEvent)
+				log.Info("watch zkClient state, connEvent:(%+v)", connEvent)
 				if connEvent.State == zk.StateHasSession {
-					log.Warn("watch zkClient state, state is StateHasSession...")
-					err = z.register(ctx, ins)
-					if err != nil {
+					if err = z.register(ctx, ins); err != nil {
 						log.Warn(fmt.Sprintf("watch zkClient state, fail to register node error:(%v)", err))
 						continue
 					}
@@ -180,110 +183,120 @@ func (z *ZookeeperBuilder) Register(ctx context.Context, ins *naming.Instance) (
 	return
 }
 
-func (z *ZookeeperBuilder) registerPerServer(name string) (err error) {
+func (z *Zookeeper) createPath(paths string) error {
 	var (
-		str string
+		lastPath = "/"
+		seps     = strings.Split(paths, "/")
 	)
-
-	str, err = z.cli.Create(name, nil, 0, zk.WorldACL(zk.PermAll))
-	if err != nil {
-		log.Warn(fmt.Sprintf("registerPerServer, fail to Create node:(%s). err:(%v)", name, err))
-	} else {
-		log.Info(fmt.Sprintf("registerPerServer, succeed to Create node:(%s). retStr:(%s)", name, str))
+	for _, part := range seps {
+		if part == "" {
+			continue
+		}
+		lastPath = path.Join(lastPath, part)
+		ok, _, err := z.cli.Exists(lastPath)
+		if err != nil {
+			return err
+		}
+		if ok {
+			continue
+		}
+		ret, err := z.cli.Create(lastPath, nil, 0, zk.WorldACL(zk.PermAll))
+		if err != nil {
+			log.Warn(fmt.Sprintf("createPath, fail to Create node:(%s). error:(%v)", paths, err))
+			return err
+		}
+		log.Info(fmt.Sprintf("createPath, succeed to Create node:(%s). retStr:(%s)", paths, ret))
 	}
-
-	return
+	return nil
 }
 
-func (z *ZookeeperBuilder) registerEphServer(name, host string, ins *naming.Instance) (err error) {
+func (z *Zookeeper) registerPeerServer(name, host string, ins *naming.Instance) (err error) {
 	var (
 		str string
 	)
-
-	val, _ := json.Marshal(ins)
-	log.Info(fmt.Sprintf("registerEphServer, ins after json.Marshal:(%v)", string(val)))
-
+	val, err := json.Marshal(ins)
+	if err != nil {
+		return
+	}
+	log.Info(fmt.Sprintf("registerPeerServer, ins after json.Marshal:(%v)", string(val)))
 	str, err = z.cli.Create(name+host, val, zk.FlagEphemeral, zk.WorldACL(zk.PermAll))
 	if err != nil {
-		log.Warn(fmt.Sprintf("registerEphServer, fail to Create node:%s. err:(%v)", name+host, err))
+		log.Warn(fmt.Sprintf("registerPeerServer, fail to Create node:%s. error:(%v)", name+host, err))
 	} else {
-		log.Info(fmt.Sprintf("registerEphServer, succeed to Create node:%s. retStr:(%s)", name+host, str))
+		log.Info(fmt.Sprintf("registerPeerServer, succeed to Create node:%s. retStr:(%s)", name+host, str))
 	}
-
 	return
 }
 
-// register 注册zookeeper节点
-func (z *ZookeeperBuilder) register(ctx context.Context, ins *naming.Instance) (err error) {
+// register is register instance to zookeeper.
+func (z *Zookeeper) register(ctx context.Context, ins *naming.Instance) (err error) {
 	log.Info("zookeeper register enter, instance Addrs:(%v)", ins.Addrs)
-	prefix := z.keyPrefix(ins)
 
-	err = z.registerPerServer(prefix)
-	if err != nil {
-		log.Warn(fmt.Sprintf("register, fail to registerPerServer node error:(%v)", err))
+	prefix := z.keyPrefix(ins.AppID)
+	if err = z.createPath(prefix); err != nil {
+		log.Warn(fmt.Sprintf("register, fail to createPath node error:(%v)", err))
 	}
-
-	for _, val := range ins.Addrs {
-		err = z.registerEphServer(prefix, "/"+val, ins)
-		if err != nil {
-			log.Warn(fmt.Sprintf("registerServer, fail to RegisterEphServer node error:(%v)", err))
+	for _, addr := range ins.Addrs {
+		addr = strings.Replace(addr, "://", ":", 1)
+		if err = z.registerPeerServer(prefix, "/"+addr, ins); err != nil {
+			log.Warn(fmt.Sprintf("registerServer, fail to RegisterPeerServer node:%s error:(%v)", addr, err))
 		} else {
 			log.Info(fmt.Sprintf("registerServer, succeed to RegistServer node."))
 		}
 	}
-
 	return nil
 }
 
-// unregister 删除zookeeper中节点信息
-func (z *ZookeeperBuilder) unregister(ins *naming.Instance) (err error) {
+func (z *Zookeeper) unregister(ins *naming.Instance) (err error) {
 	log.Info("zookeeper unregister enter, instance Addrs:(%v)", ins.Addrs)
-	prefix := z.keyPrefix(ins)
-
-	for _, val := range ins.Addrs {
-		strNode := prefix + "/" + val
+	prefix := z.keyPrefix(ins.AppID)
+	for _, addr := range ins.Addrs {
+		addr = strings.Replace(addr, ":", "://", 1)
+		strNode := prefix + "/" + addr
 		exists, _, err := z.cli.Exists(strNode)
 		if err != nil {
-			log.Error("zk.Conn.Exists node:(%v), error:(%s)", strNode, err.Error())
-			return err
+			log.Error("zk.Conn.Exists node:(%v), error:(%v)", strNode, err)
+			continue
 		}
 		if exists {
 			_, s, err := z.cli.Get(strNode)
 			if err != nil {
-				log.Error("zk.Conn.Get node:(%s), error:(%s)", strNode, err.Error())
-				return err
+				log.Error("zk.Conn.Get node:(%s), error:(%v)", strNode, err)
+				continue
 			}
-			return z.cli.Delete(strNode, s.Version)
+			if err = z.cli.Delete(strNode, s.Version); err != nil {
+				log.Error("zk.Conn.Delete node:(%s), error:(%v)", strNode, err)
+				continue
+			}
 		}
 
 		log.Info(fmt.Sprintf("unregister, client.Delete:(%v), appid:(%v), hostname:(%v) success", strNode, ins.AppID, ins.Hostname))
 	}
-
 	return
 }
 
-func (z *ZookeeperBuilder) keyPrefix(ins *naming.Instance) string {
-	return fmt.Sprintf("/%s", ins.AppID)
+func (z *Zookeeper) keyPrefix(appID string) string {
+	return path.Join(z.c.Root, appID)
 }
 
-// Close stop all running process including zk fetch and register
-func (z *ZookeeperBuilder) Close() error {
+// Close stop all running process including zk fetch and register.
+func (z *Zookeeper) Close() error {
 	z.cancelFunc()
 	return nil
 }
 
 func (a *appInfo) watch(appID string) {
 	_ = a.fetchstore(appID)
-	prefix := fmt.Sprintf("/%s", appID)
-
+	prefix := a.zkb.keyPrefix(appID)
 	go func() {
 		for {
 			log.Info(fmt.Sprintf("zk ChildrenW enter, prefix:(%v)", prefix))
 			snapshot, _, event, err := a.zkb.cli.ChildrenW(prefix)
 			if err != nil {
+				log.Error("zk ChildrenW fail to watch:%s error:(%v)", prefix, err)
+				time.Sleep(time.Second)
 				continue
 			}
-
 			log.Info(fmt.Sprintf("zk ChildrenW ok, snapshot:(%v)", snapshot))
 			for ev := range event {
 				log.Info(fmt.Sprintf("zk ChildrenW ok, prefix:(%v), event Path:(%v), Type:(%v)", prefix, ev.Path, ev.Type))
@@ -296,28 +309,24 @@ func (a *appInfo) watch(appID string) {
 }
 
 func (a *appInfo) fetchstore(appID string) (err error) {
-	prefix := fmt.Sprintf("/%s", appID)
-	strNode := ""
+	prefix := a.zkb.keyPrefix(appID)
 	childs, _, err := a.zkb.cli.Children(prefix)
 	if err != nil {
-		log.Error(fmt.Sprintf("fetchstore, fail to get Children of node:(%v), err:(%v)", prefix, err))
+		log.Error(fmt.Sprintf("fetchstore, fail to get Children of node:(%v), error:(%v)", prefix, err))
 	} else {
 		log.Info(fmt.Sprintf("fetchstore, ok to get Children of node:(%v), childs:(%v)", prefix, childs))
 	}
-
 	ins := &naming.InstancesInfo{
 		Instances: make(map[string][]*naming.Instance, 0),
 	}
-
-	//for range childs
+	strNode := ""
 	for _, child := range childs {
 		strNode = prefix + "/" + child
 		resp, _, err := a.zkb.cli.Get(strNode)
 		if err != nil {
-			log.Error("zookeeper: fetch client.Get(%s) error(%v)", strNode, err)
+			log.Error("zookeeper: fetch client.Get(%s) error:(%v)", strNode, err)
 			return err
 		}
-
 		in := new(naming.Instance)
 		err = json.Unmarshal(resp, in)
 		if err != nil {
@@ -327,12 +336,10 @@ func (a *appInfo) fetchstore(appID string) (err error) {
 
 	}
 	a.store(ins)
-
 	return nil
 }
 
 func (a *appInfo) store(ins *naming.InstancesInfo) {
-
 	a.ins.Store(ins)
 	a.zkb.mutex.RLock()
 	for rs := range a.resolver {
