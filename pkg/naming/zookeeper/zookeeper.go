@@ -106,7 +106,7 @@ func New(c *Config) (zkb *Zookeeper, err error) {
 }
 
 // Build zookeeper resovler builder.
-func (z *Zookeeper) Build(appid string) naming.Resolver {
+func (z *Zookeeper) Build(appid string, options ...naming.BuildOpt) naming.Resolver {
 	r := &Resolve{
 		id:    appid,
 		zkb:   z,
