@@ -16,7 +16,7 @@ func main() {
 	flag.Parse()
 	log.Init(nil) // debug flag: log.dir={path}
 	defer log.Close()
-	log.Info("abc start")
+	log.Info("{{.Name}} start")
 	paladin.Init()
 	_, closeFunc, err := di.InitApp()
 	if err != nil {
@@ -30,7 +30,7 @@ func main() {
 		switch s {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
 			closeFunc()
-			log.Info("abc exit")
+			log.Info("{{.Name}} exit")
 			time.Sleep(time.Second)
 			return
 		case syscall.SIGHUP:
