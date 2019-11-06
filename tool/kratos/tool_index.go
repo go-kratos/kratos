@@ -51,6 +51,7 @@ var toolIndexs = []*Tool{
 	},
 	{
 		Name:      "wire",
+		Alias:     "wire",
 		BuildTime: time.Date(2019, 8, 20, 0, 0, 0, 0, time.Local),
 		Install:   "go get -u github.com/google/wire/cmd/wire",
 		Platform:  []string{"darwin", "linux", "windows"},

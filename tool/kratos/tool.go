@@ -180,9 +180,9 @@ func (t Tool) toolPath() string {
 		name = t.Name
 	}
 	if gobin := os.Getenv("GOBIN"); len(gobin) > 0 {
-		return filepath.Join(gobin, t.Alias)
+		return filepath.Join(gobin, name)
 	}
-	return filepath.Join(gopath(), "bin", t.Alias)
+	return filepath.Join(gopath(), "bin", name)
 }
 
 func (t Tool) installed() bool {

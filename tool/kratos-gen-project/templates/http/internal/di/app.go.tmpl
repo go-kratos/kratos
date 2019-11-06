@@ -10,7 +10,7 @@ import (
 	bm "github.com/bilibili/kratos/pkg/net/http/blademaster"
 )
 
-//go:generate wire
+//go:generate kratos tool wire
 type App struct {
 	svc *service.Service
 	http *bm.Engine

@@ -10,7 +10,7 @@ import (
 	"github.com/bilibili/kratos/pkg/net/rpc/warden"
 )
 
-//go:generate wire
+//go:generate kratos tool wire
 type App struct {
 	svc *service.Service
 	grpc *warden.Server
