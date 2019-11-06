@@ -35,7 +35,7 @@ func New(s pb.DemoServer) (engine *bm.Engine, err error) {
 
 func initRouter(e *bm.Engine) {
 	e.Ping(ping)
-	g := e.Group("/abc")
+	g := e.Group("/{{.Name}}")
 	{
 		g.GET("/start", howToStart)
 	}

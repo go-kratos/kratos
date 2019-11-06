@@ -56,7 +56,7 @@
 
 ```toml
 [Client]
-	name = "abc"
+	name = "demo"
 	proto = "tcp"
 	addr = "127.0.0.1:11211"
 	active = 50

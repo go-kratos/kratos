@@ -20,7 +20,7 @@ service Demo {
 	rpc SayHello (HelloReq) returns (.google.protobuf.Empty);
 	rpc SayHelloURL(HelloReq) returns (HelloResp) {
         option (google.api.http) = {
-            get:"/abc/say_hello"
+            get:"/kratos-demo/say_hello"
         };
     };
 }
