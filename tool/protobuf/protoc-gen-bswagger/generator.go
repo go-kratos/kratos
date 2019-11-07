@@ -166,7 +166,7 @@ func (t *swaggerGen) getOperationByHTTPMethod(httpMethod string, pathItem *swagg
 	case http.MethodPut:
 		pathItem.Put = op
 	case http.MethodDelete:
-		pathItem.Put = op
+		pathItem.Delete = op
 	case http.MethodPatch:
 		pathItem.Patch = op
 	default:
