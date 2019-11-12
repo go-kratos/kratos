@@ -16,7 +16,7 @@ func runAction(c *cli.Context) error {
 	}
 	dir := buildDir(base, "cmd", 5)
 	conf := path.Join(filepath.Dir(dir), "configs")
-	args := append([]string{"run", "main.go", "-conf", conf}, c.Args()...)
+	args := append([]string{"run", "main.go", "-conf", conf}, c.Args().Slice()...)
 	cmd := exec.Command("go", args...)
 	cmd.Dir = dir
 	cmd.Stdout = os.Stdout

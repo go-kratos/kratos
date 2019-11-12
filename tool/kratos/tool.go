@@ -71,7 +71,7 @@ func toolAction(c *cli.Context) (err error) {
 		}
 		return
 	}
-	if e := installAndRun(commond, c.Args()[1:]); e != nil {
+	if e := installAndRun(commond, c.Args().Slice()[1:]); e != nil {
 		fmt.Fprintf(os.Stderr, fmt.Sprintf("%v\n", e))
 	}
 	return

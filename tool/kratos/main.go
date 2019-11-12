@@ -12,7 +12,7 @@ func main() {
 	app.Name = "kratos"
 	app.Usage = "kratos工具集"
 	app.Version = Version
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
 		{
 			Name:            "new",
 			Aliases:         []string{"n"},
@@ -61,5 +61,5 @@ func main() {
 }
 
 func runNew(ctx *cli.Context) error {
-	return installAndRun("genproject", ctx.Args())
+	return installAndRun("genproject", ctx.Args().Slice())
 }
