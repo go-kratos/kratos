@@ -65,7 +65,7 @@ func (r *RollingPolicy) add(f func(offset int, val float64), val float64) {
 			offset = i
 		}
 		r.offset = offset
-		r.lastAppendTime = time.Now()
+		r.lastAppendTime = r.lastAppendTime.Add(time.Duration(timespan * int(r.bucketDuration)))
 	}
 	f(r.offset, val)
 	r.mu.Unlock()
