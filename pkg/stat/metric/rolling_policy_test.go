@@ -24,12 +24,8 @@ func Handler(t *testing.T, table []map[string][]int) {
 			policy.Add(1)
 			offset, points := offsetAndPoints[2*i], offsetAndPoints[2*i+1]
 
-			for _, b := range policy.window.window {
-				fmt.Println(b.Points)
-			}
-
 			if int(policy.window.window[offset].Points[0]) != points {
-				t.Errorf("error, time since last append: %v, last offset: %v", totalTs, lastOffset)
+				t.Errorf("error, time since last append: %vms, last offset: %v", totalTs, lastOffset)
 			}
 			lastOffset = offset
 		}
@@ -39,15 +35,24 @@ func Handler(t *testing.T, table []map[string][]int) {
 func TestRollingPolicy_Add(t *testing.T) {
 	rand.Seed(time.Now().Unix())
 
+	// test add after 400ms and 601ms relative to the policy created time
+	policy := GetRollingPolicy()
+	time.Sleep(400 * time.Millisecond)
+	policy.Add(1)
+	time.Sleep(201 * time.Millisecond)
+	policy.Add(1)
+	for _, b := range policy.window.window {
+		fmt.Println(b.Points)
+	}
+	if int(policy.window.window[1].Points[0]) != 1 {
+		t.Errorf("error, time since last append: %vms, last offset: %v", 300, 0)
+	}
+	if int(policy.window.window[2].Points[0]) != 1 {
+		t.Errorf("error, time since last append: %vms, last offset: %v", 301, 0)
+	}
+
+	// test func timespan return real span
 	table := []map[string][]int{
-		{
-			"timeSleep":       []int{299, 2},
-			"offsetAndPoints": []int{0, 1, 1, 1},
-		},
-		{
-			"timeSleep":       []int{294, 7, 600},
-			"offsetAndPoints": []int{0, 1, 1, 1, 3, 1},
-		},
 		{
 			"timeSleep":       []int{294, 3200},
 			"offsetAndPoints": []int{0, 1, 0, 1},
