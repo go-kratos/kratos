@@ -96,7 +96,7 @@ func buildConfigForApollo() (c *Config, err error) {
 	if clusterFromEnv := os.Getenv("APOLLO_CLUSTER"); clusterFromEnv != "" {
 		confCluster = clusterFromEnv
 	}
-	if confAppID == "" {
+	if confCluster == "" {
 		err = errors.New("invalid apollo cluster, pass it via APOLLO_CLUSTER=xxx with env or --apollo.cluster=xxx with flag")
 		return
 	}

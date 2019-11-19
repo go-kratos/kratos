@@ -33,7 +33,7 @@ Go version>=1.13
 
 ### Installation
 ```shell
-go get -u github.com/bilibili/kratos/tool/kratos
+GO111MODULE=on && go get -u github.com/bilibili/kratos/tool/kratos
 cd $GOPATH/src
 kratos new kratos-demo
 ```
