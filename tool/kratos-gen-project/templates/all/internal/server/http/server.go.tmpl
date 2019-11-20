@@ -10,10 +10,10 @@ import (
 	bm "github.com/bilibili/kratos/pkg/net/http/blademaster"
 )
 
-var svc pb.DemoServer
+var svc pb.DemoBMServer
 
 // New new a bm server.
-func New(s pb.DemoServer) (engine *bm.Engine, err error) {
+func New(s pb.DemoBMServer) (engine *bm.Engine, err error) {
 	var (
 		hc struct {
 			Server *bm.ServerConfig
