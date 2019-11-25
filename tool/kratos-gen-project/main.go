@@ -53,7 +53,7 @@ func main() {
 		cli.BoolFlag{
 			Name:        "grpc",
 			Usage:       "只使用grpc 不使用http",
-			Destination: &p.onlyHTTP,
+			Destination: &p.onlyGRPC,
 		},
 		cli.BoolFlag{
 			Name:        "proto",
