@@ -82,9 +82,8 @@ func TestFileEvent(t *testing.T) {
 	cli, err := NewFile(path)
 	assert.Nil(t, err)
 	assert.NotNil(t, cli)
-	time.Sleep(time.Millisecond * 100)
 	ch := cli.WatchEvent(context.Background(), "test.toml", "abc.toml")
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(time.Millisecond)
 	ioutil.WriteFile(path+"test.toml", []byte(`hello`), 0644)
 	timeout := time.NewTimer(time.Second)
 	select {
@@ -94,4 +93,39 @@ func TestFileEvent(t *testing.T) {
 		assert.Equal(t, EventUpdate, ev.Event)
 		assert.Equal(t, "hello", ev.Value)
 	}
+	ioutil.WriteFile(path+"abc.toml", []byte(`test`), 0644)
+	select {
+	case <-timeout.C:
+		t.Fatalf("run test timeout")
+	case ev := <-ch:
+		assert.Equal(t, EventUpdate, ev.Event)
+		assert.Equal(t, "test", ev.Value)
+	}
+	content1, _ := cli.Get("test.toml").String()
+	assert.Equal(t, "hello", content1)
+	content2, _ := cli.Get("abc.toml").String()
+	assert.Equal(t, "test", content2)
+}
+
+func TestHiddenFile(t *testing.T) {
+	path := "/tmp/test_hidden_event/"
+	assert.Nil(t, os.MkdirAll(path, 0700))
+	assert.Nil(t, ioutil.WriteFile(path+"test.toml", []byte(`hello`), 0644))
+	assert.Nil(t, ioutil.WriteFile(path+".abc.toml", []byte(`
+		text = "hello"	
+		number = 100
+	`), 0644))
+	// test client
+	// test client
+	cli, err := NewFile(path)
+	assert.Nil(t, err)
+	assert.NotNil(t, cli)
+	cli.WatchEvent(context.Background(), "test.toml")
+	time.Sleep(time.Millisecond)
+	ioutil.WriteFile(path+".abc.toml", []byte(`hello`), 0644)
+	time.Sleep(time.Second)
+	content1, _ := cli.Get("test.toml").String()
+	assert.Equal(t, "hello", content1)
+	_, err = cli.Get(".abc.toml").String()
+	assert.NotNil(t, err)
 }
