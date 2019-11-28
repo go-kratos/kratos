@@ -27,6 +27,7 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
 	gstatus "google.golang.org/grpc/status"
@@ -274,6 +275,11 @@ func (c *Client) dial(ctx context.Context, target string, opts ...grpc.DialOptio
 	if !c.conf.NonBlock {
 		dialOptions = append(dialOptions, grpc.WithBlock())
 	}
+	dialOptions = append(dialOptions, grpc.WithKeepaliveParams(keepalive.ClientParameters{
+		Time:                time.Duration(c.conf.KeepAliveInterval),
+		Timeout:             time.Duration(c.conf.KeepAliveTimeout),
+		PermitWithoutStream: !c.conf.KeepAliveWithoutStream,
+	}))
 	dialOptions = append(dialOptions, opts...)
 
 	// init default handler

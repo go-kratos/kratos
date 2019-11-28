@@ -36,7 +36,7 @@ var (
 		Network:           "tcp",
 		Addr:              "0.0.0.0:9000",
 		Timeout:           xtime.Duration(time.Second),
-		IdleTimeout:       xtime.Duration(time.Second * 60),
+		IdleTimeout:       xtime.Duration(time.Second * 180),
 		MaxLifeTime:       xtime.Duration(time.Hour * 2),
 		ForceCloseWait:    xtime.Duration(time.Second * 20),
 		KeepAliveInterval: xtime.Duration(time.Second * 60),
