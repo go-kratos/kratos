@@ -276,13 +276,21 @@ func (r *Resolve) Fetch(ctx context.Context) (ins *naming.InstancesInfo, ok bool
 	app, ok := r.d.apps[r.id]
 	r.d.mutex.RUnlock()
 	if ok {
-		appIns, _ := app.zoneIns.Load().(*naming.InstancesInfo)
+		var appIns naming.InstancesInfo
+		appIns, ok = app.zoneIns.Load().(naming.InstancesInfo)
 		ins = new(naming.InstancesInfo)
+		ins.LastTs = appIns.LastTs
+		ins.Scheduler = appIns.Scheduler
 		if r.opt.Filter != nil {
 			ins.Instances = r.opt.Filter(appIns.Instances)
+		} else {
+			ins.Instances = make(map[string][]*naming.Instance)
+			for zone, in := range appIns.Instances {
+				ins.Instances[zone] = in
+			}
 		}
 		if r.opt.Scheduler != nil {
-			ins.Instances[r.opt.ClientZone] = r.opt.Scheduler(appIns)
+			ins.Instances[r.opt.ClientZone] = r.opt.Scheduler(ins)
 		}
 		if r.opt.Subset != nil && r.opt.SubsetSize != 0 {
 			for zone, inss := range ins.Instances {
