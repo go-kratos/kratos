@@ -276,8 +276,8 @@ func (r *Resolve) Fetch(ctx context.Context) (ins *naming.InstancesInfo, ok bool
 	app, ok := r.d.apps[r.id]
 	r.d.mutex.RUnlock()
 	if ok {
-		var appIns naming.InstancesInfo
-		appIns, ok = app.zoneIns.Load().(naming.InstancesInfo)
+		var appIns *naming.InstancesInfo
+		appIns, ok = app.zoneIns.Load().(*naming.InstancesInfo)
 		ins = new(naming.InstancesInfo)
 		ins.LastTs = appIns.LastTs
 		ins.Scheduler = appIns.Scheduler
