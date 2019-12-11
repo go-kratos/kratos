@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"text/template"
@@ -22,6 +23,7 @@ var (
 	singleFlight  = flag.Bool("singleflight", false, "enable singleflight")
 	nullCache     = flag.String("nullcache", "", "null cache")
 	checkNullCode = flag.String("check_null_code", "", "check null code")
+	cacheErr      = flag.String("cache_err", "continue", "cache err to contine or break")
 	batchSize     = flag.Int("batch", 0, "batch size")
 	batchErr      = flag.String("batch_err", "break", "batch err to contine or break")
 	maxGroup      = flag.Int("max_group", 0, "max group size")
@@ -29,18 +31,19 @@ var (
 	paging        = flag.Bool("paging", false, "use paging in single template")
 	ignores       = flag.String("ignores", "", "ignore params")
 	customMethod  = flag.String("custom_method", "", "自定义方法名 |分隔: 缓存|回源|增加缓存")
+	structName    = flag.String("struct_name", "dao", "struct name")
 
 	numberTypes    = []string{"int", "int8", "int16", "int32", "int64", "float32", "float64", "uint", "uint8", "uint16", "uint32", "uint64"}
 	simpleTypes    = []string{"int", "int8", "int16", "int32", "int64", "float32", "float64", "uint", "uint8", "uint16", "uint32", "uint64", "bool", "string", "[]byte"}
-	optionNames    = []string{"singleflight", "nullcache", "check_null_code", "batch", "max_group", "sync", "paging", "ignores", "batch_err", "custom_method"}
+	optionNames    = []string{"singleflight", "nullcache", "check_null_code", "batch", "max_group", "sync", "paging", "ignores", "batch_err", "custom_method", "cache_err", "struct_name"}
 	optionNamesMap = map[string]bool{}
+	interfaceName  string
 )
 
 const (
-	_interfaceName = "_bts"
-	_multiTpl      = 1
-	_singleTpl     = 2
-	_noneTpl       = 3
+	_multiTpl  = 1
+	_singleTpl = 2
+	_noneTpl   = 3
 )
 
 func resetFlag() {
@@ -52,8 +55,10 @@ func resetFlag() {
 	*sync = false
 	*paging = false
 	*batchErr = "break"
+	*cacheErr = "continue"
 	*ignores = ""
 	*customMethod = ""
+	*structName = "dao"
 }
 
 // options options
@@ -91,6 +96,10 @@ type options struct {
 	Comment            string
 	CustomMethod       string
 	IDName             string
+	CacheErrContinue   bool
+	StructName         string
+	hasDec             bool
+	UseBTS             bool
 }
 
 func getOptions(opt *options, comment string) {
@@ -108,6 +117,7 @@ func getOptions(opt *options, comment string) {
 				os.Args = append(os.Args, arg)
 			}
 		}
+		opt.hasDec = true
 	}
 	resetFlag()
 	flag.Parse()
@@ -122,13 +132,15 @@ func getOptions(opt *options, comment string) {
 	opt.GroupSize = *batchSize
 	opt.MaxGroup = *maxGroup
 	opt.CustomMethod = *customMethod
+	opt.CacheErrContinue = *cacheErr == "continue"
+	opt.StructName = *structName
 }
 
 func processList(s *pkg.Source, list *ast.Field) (opt options) {
 	fset := s.Fset
 	src := s.Src
 	lines := strings.Split(src, "\n")
-	opt = options{Args: s.GetDef(_interfaceName), importPackages: s.Packages(list)}
+	opt = options{name: list.Names[0].Name, Args: s.GetDef(interfaceName), importPackages: s.Packages(list)}
 	// get comment
 	line := fset.Position(list.Pos()).Line - 3
 	if len(lines)-1 >= line {
@@ -140,8 +152,11 @@ func processList(s *pkg.Source, list *ast.Field) (opt options) {
 	line = fset.Position(list.Pos()).Line - 2
 	comment := lines[line]
 	getOptions(&opt, comment)
+	if !opt.hasDec {
+		log.Printf("%s: 无声明 忽略此方法\n", opt.name)
+		return
+	}
 	// get func
-	opt.name = list.Names[0].Name
 	params := list.Type.(*ast.FuncType).Params.List
 	if len(params) == 0 {
 		log.Fatalln(opt.name + "参数不足")
@@ -304,15 +319,26 @@ func processList(s *pkg.Source, list *ast.Field) (opt options) {
 
 // parse parse options
 func parse(s *pkg.Source) (opts []*options) {
-	c := s.F.Scope.Lookup(_interfaceName)
-	if (c == nil) || (c.Kind != ast.Typ) {
+	var c *ast.Object
+	for _, name := range []string{"_bts", "Dao"} {
+		c = s.F.Scope.Lookup(name)
+		if (c == nil) || (c.Kind != ast.Typ) {
+			c = nil
+			continue
+		}
+		interfaceName = name
+		break
+	}
+	if c == nil {
 		log.Fatalln("无法找到缓存声明")
 	}
 	lists := c.Decl.(*ast.TypeSpec).Type.(*ast.InterfaceType).Methods.List
 	for _, list := range lists {
 		opt := processList(s, list)
-		opt.Check()
-		opts = append(opts, &opt)
+		if opt.hasDec {
+			opt.Check()
+			opts = append(opts, &opt)
+		}
 	}
 	return
 }
@@ -339,10 +365,6 @@ func (option *options) Check() {
 		if option.SimpleValue && option.NullCache == option.ZeroValue {
 			log.Fatalf("%s: %s 不能作为空缓存值 \n", option.name, option.NullCache)
 		}
-		if strings.Contains(option.NullCache, "{}") {
-			// -nullcache=[]*model.OrderMain{} 这种无效
-			log.Fatalf("%s: %s 不能作为空缓存值 会导致空缓存无效 \n", option.name, option.NullCache)
-		}
 		if strings.Contains(option.CheckNullCode, "len") && strings.Contains(strings.Replace(option.CheckNullCode, " ", "", -1), "==0") {
 			// -check_null_code=len($)==0 这种无效
 			log.Fatalf("%s: -check_null_code=%s 错误 会有无意义的赋值\n", option.name, option.CheckNullCode)
@@ -352,6 +374,7 @@ func (option *options) Check() {
 
 func genHeader(opts []*options) (src string) {
 	option := options{PkgName: os.Getenv("GOPACKAGE")}
+	option.UseBTS = interfaceName == "_bts"
 	var sfCount int
 	var packages, sfInit []string
 	packagesMap := map[string]bool{`"context"`: true}
@@ -464,7 +487,9 @@ func main() {
 	log.SetFlags(0)
 	defer func() {
 		if err := recover(); err != nil {
-			log.Fatalf("程序解析失败, err: %+v", err)
+			buf := make([]byte, 64*1024)
+			buf = buf[:runtime.Stack(buf, false)]
+			log.Fatalf("程序解析失败, err: %+v stack: %s", err, buf)
 		}
 	}()
 	options := parse(pkg.NewSource(pkg.SourceText()))

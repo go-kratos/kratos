@@ -4,32 +4,48 @@
 
 ```
 ├── CHANGELOG.md
-├── CONTRIBUTORS.md
-├── LICENSE
+├── OWNERS
 ├── README.md
+├── api
+│   ├── api.bm.go
+│   ├── api.pb.go
+│   ├── api.proto
+│   └── client.go
 ├── cmd
 │   ├── cmd
 │   └── main.go
 ├── configs
 │   ├── application.toml
+│   ├── db.toml
 │   ├── grpc.toml
 │   ├── http.toml
-│   ├── log.toml
 │   ├── memcache.toml
-│   ├── mysql.toml
 │   └── redis.toml
 ├── go.mod
 ├── go.sum
-└── internal
-    ├── dao
-    │   └── dao.go
-    ├── model
-    │   └── model.go
-    ├── server
-    │   └── http
-    │       └── http.go
-    └── service
-        └── service.go
+├── internal
+│   ├── dao
+│   │   ├── dao.bts.go
+│   │   ├── dao.go
+│   │   ├── db.go
+│   │   ├── mc.cache.go
+│   │   ├── mc.go
+│   │   └── redis.go
+│   ├── di
+│   │   ├── app.go
+│   │   ├── wire.go
+│   │   └── wire_gen.go
+│   ├── model
+│   │   └── model.go
+│   ├── server
+│   │   ├── grpc
+│   │   │   └── server.go
+│   │   └── http
+│   │       └── server.go
+│   └── service
+│       └── service.go
+└── test
+    └── docker-compose.yaml
 ```
 
 # 开始使用
@@ -57,17 +73,15 @@
 
 ## 初始化
 
-进入项目的internal/dao目录，打开dao.go，其中：
+进入项目的internal/dao目录，打开db.go，其中：
 
 ```go
-var (
-    dc struct {
-        Demo *sql.Config
-    }
-)
-checkErr(paladin.Get("mysql.toml").UnmarshalTOML(&dc))
+var cfg struct {
+    Client *sql.Config
+}
+checkErr(paladin.Get("db.toml").UnmarshalTOML(&dc))
 ```
-使用paladin配置管理工具将上文中的mysql.toml中的配置解析为我们需要使用mysql的相关配置。
+使用paladin配置管理工具将上文中的db.toml中的配置解析为我们需要使用db的相关配置。
 
 ```go
 // Dao dao.
@@ -79,7 +93,7 @@ type Dao struct {
 在dao的主结构提中定义了mysql的连接池对象。
 
 ```go
-dao = &Dao{
+d = &dao{
     db: sql.NewMySQL(dc.Demo),
 }
 ```
@@ -90,7 +104,7 @@ dao = &Dao{
 
 ```go
 // Ping ping the resource.
-func (d *Dao) Ping(ctx context.Context) (err error) {
+func (d *dao) Ping(ctx context.Context) (err error) {
 	return d.db.Ping(ctx)
 }
 ```
@@ -101,7 +115,7 @@ func (d *Dao) Ping(ctx context.Context) (err error) {
 
 ```go
 // Close close the resource.
-func (d *Dao) Close() {
+func (d *dao) Close() {
 	d.db.Close()
 }
 ```
@@ -114,7 +128,7 @@ func (d *Dao) Close() {
 
 ```go
 // GetDemo 用户角色
-func (d *Dao) GetDemo(c context.Context, did int64) (demo int8, err error) {
+func (d *dao) GetDemo(c context.Context, did int64) (demo int8, err error) {
 	err = d.db.QueryRow(c, _getDemoSQL, did).Scan(&demo)
 	if err != nil && err != sql.ErrNoRows {
 		log.Error("d.GetDemo.Query error(%v)", err)
@@ -132,7 +146,7 @@ db.QueryRow方法用于返回最多一条记录的查询，在QueryRow方法后�
 
 ```go
 // ResourceLogs ResourceLogs.
-func (d *Dao) GetDemos(c context.Context, dids []int64) (demos []int8, err error) {
+func (d *dao) GetDemos(c context.Context, dids []int64) (demos []int8, err error) {
 	rows, err := d.db.Query(c, _getDemosSQL, dids)
 	if err != nil {
 		log.Error("query  error(%v)", err)

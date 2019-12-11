@@ -293,9 +293,16 @@ func (t *Base) GoTypeName(protoName string) string {
 	return prefix + name
 }
 
+func streamingMethod(method *descriptor.MethodDescriptorProto) bool {
+	return (method.ServerStreaming != nil && *method.ServerStreaming) || (method.ClientStreaming != nil && *method.ClientStreaming)
+}
+
 func (t *Base) ShouldGenForMethod(file *descriptor.FileDescriptorProto,
 	service *descriptor.ServiceDescriptorProto,
 	method *descriptor.MethodDescriptorProto) bool {
+	if streamingMethod(method) {
+		return false
+	}
 	if !t.Params.ExplicitHTTP {
 		return true
 	}

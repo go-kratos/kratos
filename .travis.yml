@@ -21,12 +21,19 @@ env:
    - DISCOVERY_NODES=127.0.0.1:7171
    - HTTP_PERF=tcp://0.0.0.0:0
    - DOCKER_COMPOSE_VERSION=1.24.1
+   - ZK_VERSION=3.5.6
 
 before_install:
+  # docker-compose
   - sudo rm /usr/local/bin/docker-compose
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
+  # zookeeper
+  - wget "http://apache.cs.utah.edu/zookeeper/zookeeper-${ZK_VERSION}/apache-zookeeper-${ZK_VERSION}-bin.tar.gz"
+  - tar -xvf "apache-zookeeper-${ZK_VERSION}-bin.tar.gz"
+  - mv apache-zookeeper-${ZK_VERSION}-bin zk
+  - chmod +x ./zk/bin/zkServer.sh
 
 # Skip the install step. Don't `go get` dependencies. Only build with the code
 # in vendor/
@@ -37,9 +44,12 @@ install: true
 # Make sure golangci-lint is vendored.
 before_script:
   - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $GOPATH/bin
+  # discovery
   - curl -sfL https://raw.githubusercontent.com/bilibili/discovery/master/install.sh | sh -s -- -b $GOPATH/bin
   - curl -sfL https://raw.githubusercontent.com/bilibili/discovery/master/cmd/discovery/discovery-example.toml -o $GOPATH/bin/discovery.toml
   - nohup bash -c "$GOPATH/bin/discovery -conf $GOPATH/bin/discovery.toml &"
+  # zookeeper
+  - sudo ./zk/bin/zkServer.sh start ./zk/conf/zoo_sample.cfg 1> /dev/null
 
 script:
   - go build ./...

@@ -38,6 +38,7 @@ const (
 var (
 	_ naming.Builder  = &Discovery{}
 	_ naming.Registry = &Discovery{}
+	_ naming.Resolver = &Resolve{}
 
 	// ErrDuplication duplication treeid.
 	ErrDuplication = errors.New("discovery: instance duplicate registration")
@@ -68,11 +69,6 @@ type Config struct {
 	Zone   string
 	Env    string
 	Host   string
-}
-
-type appData struct {
-	Instances map[string][]*naming.Instance `json:"instances"`
-	LastTs    int64                         `json:"latest_timestamp"`
 }
 
 // Discovery is discovery client.
@@ -219,11 +215,15 @@ func (d *Discovery) newSelf(zones map[string][]*naming.Instance) {
 }
 
 // Build disovery resovler builder.
-func (d *Discovery) Build(appid string) naming.Resolver {
+func (d *Discovery) Build(appid string, opts ...naming.BuildOpt) naming.Resolver {
 	r := &Resolve{
 		id:    appid,
 		d:     d,
 		event: make(chan struct{}, 1),
+		opt:   new(naming.BuildOptions),
+	}
+	for _, opt := range opts {
+		opt.Apply(r.opt)
 	}
 	d.mutex.Lock()
 	app, ok := d.apps[appid]
@@ -262,6 +262,7 @@ type Resolve struct {
 	id    string
 	event chan struct{}
 	d     *Discovery
+	opt   *naming.BuildOptions
 }
 
 // Watch watch instance.
@@ -276,7 +277,17 @@ func (r *Resolve) Fetch(ctx context.Context) (ins *naming.InstancesInfo, ok bool
 	r.d.mutex.RUnlock()
 	if ok {
 		ins, ok = app.zoneIns.Load().(*naming.InstancesInfo)
-		return
+		if r.opt.Filter != nil {
+			ins.Instances = r.opt.Filter(ins.Instances)
+		}
+		if r.opt.Scheduler != nil {
+			ins.Instances[r.opt.ClientZone] = r.opt.Scheduler(ins)
+		}
+		if r.opt.Subset != nil && r.opt.SubsetSize != 0 {
+			for zone, inss := range ins.Instances {
+				ins.Instances[zone] = r.opt.Subset(inss, r.opt.SubsetSize)
+			}
+		}
 	}
 	return
 }

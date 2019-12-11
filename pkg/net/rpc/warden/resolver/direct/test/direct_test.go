@@ -42,8 +42,8 @@ func createServer(name, listen string) *warden.Server {
 func TestMain(m *testing.M) {
 	resolver.Register(direct.New())
 	ctx := context.TODO()
-	s1 := createServer("server1", "127.0.0.1:18081")
-	s2 := createServer("server2", "127.0.0.1:18082")
+	s1 := createServer("server1", "127.0.0.1:18001")
+	s2 := createServer("server2", "127.0.0.1:18002")
 	defer s1.Shutdown(ctx)
 	defer s2.Shutdown(ctx)
 	os.Exit(m.Run())
@@ -68,7 +68,7 @@ func createTestClient(t *testing.T, connStr string) pb.GreeterClient {
 }
 
 func TestDirect(t *testing.T) {
-	cli := createTestClient(t, "direct://default/127.0.0.1:18083,127.0.0.1:18082")
+	cli := createTestClient(t, "direct://default/127.0.0.1:18003,127.0.0.1:18002")
 	count := 0
 	for i := 0; i < 10; i++ {
 		if resp, err := cli.SayHello(context.TODO(), &pb.HelloRequest{Age: 1, Name: "hello"}); err != nil {

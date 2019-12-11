@@ -12,19 +12,19 @@ var (
 )
 
 // CacheNone .
-func (d *Dao) CacheNone(c context.Context) (*Demo, error) {
+func (d *dao) CacheNone(c context.Context) (*Demo, error) {
 	// get data from cache
 	return _noneCacheFunc(c)
 }
 
 // RawNone .
-func (d *Dao) RawNone(c context.Context) (*Demo, error) {
+func (d *dao) RawNone(c context.Context) (*Demo, error) {
 	// get data from db
 	return _noneRawFunc(c)
 }
 
 // AddCacheNone .
-func (d *Dao) AddCacheNone(c context.Context, value *Demo) error {
+func (d *dao) AddCacheNone(c context.Context, value *Demo) error {
 	// add to cache
 	return _noneAddCacheFunc(c, value)
 }

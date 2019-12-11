@@ -2,8 +2,6 @@ package main
 
 import (
 	"os/exec"
-
-	"github.com/urfave/cli"
 )
 
 const (
@@ -20,6 +18,6 @@ func installBMGen() error {
 	return nil
 }
 
-func genBM(ctx *cli.Context) error {
-	return generate(ctx, _bmProtoc)
+func genBM(files []string) error {
+	return generate(_bmProtoc, files)
 }

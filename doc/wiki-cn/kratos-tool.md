@@ -55,10 +55,16 @@ kratos new kratos-demo
 kratos new kratos-demo -o YourName -d YourPath
 ```
 
-注意，`kratos new`默认是不会生成通过 protobuf 定义的`grpc`和`bm`示例代码的，如需生成请加`--proto`，如下：
+注意，`kratos new`默认会生成通过 protobuf 定义的`grpc`和`bm`示例代码的，如只生成bm请加`--http`，如下：
 
 ```shell
-kratos new kratos-demo -o YourName -d YourPath --proto
+kratos new kratos-demo -o YourName -d YourPath --http
+```
+
+如只生成grpc请加`--grpc`，如下：
+
+```shell
+kratos new kratos-demo -o YourName -d YourPath --grpc
 ```
 
 > 特别注意，如果不是MacOS系统，需要自己进行手动安装protoc，用于生成的示例项目`api`目录下的`proto`文件并不会自动生成对应的`.pb.go`和`.bm.go`文件。
@@ -76,13 +82,16 @@ kratos new kratos-demo -o YourName -d YourPath --proto
 ```
 kratos tool
 
+protoc(已安装): 快速方便生成pb.go的protoc封装，windows、Linux请先安装protoc工具 Author(kratos) [2019/10/31]
+genbts(已安装): 缓存回源逻辑代码生成器 Author(kratos) [2019/10/31]
+testcli(已安装): 测试代码生成 Author(kratos) [2019/09/09]
+genmc(已安装): mc缓存代码生成 Author(kratos) [2019/07/23]
 swagger(已安装): swagger api文档 Author(goswagger.io) [2019/05/05]
-protoc(已安装): 快速方便生成pb.go和bm.go的protoc封装，windows、Linux请先安装protoc工具 Author(kratos) [2019/05/04]
-kratos(已安装): Kratos工具集本体 Author(kratos) [2019/04/02]
 
 安装工具: kratos tool install demo
 执行工具: kratos tool demo
 安装全部工具: kratos tool install all
+全部升级: kratos tool upgrade all
 
 详细文档： https://github.com/bilibili/kratos/blob/master/doc/wiki-cn/kratos-tool.md
 ```

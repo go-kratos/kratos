@@ -38,7 +38,7 @@ func NewRollingPolicy(window *Window, opts RollingPolicyOpts) *RollingPolicy {
 
 func (r *RollingPolicy) timespan() int {
 	v := int(time.Since(r.lastAppendTime) / r.bucketDuration)
-	if v < r.size && v > -1 { // maybe time backwards
+	if v > -1 { // maybe time backwards
 		return v
 	}
 	return r.size
@@ -48,9 +48,13 @@ func (r *RollingPolicy) add(f func(offset int, val float64), val float64) {
 	r.mu.Lock()
 	timespan := r.timespan()
 	if timespan > 0 {
+		r.lastAppendTime = r.lastAppendTime.Add(time.Duration(timespan * int(r.bucketDuration)))
 		offset := r.offset
 		// reset the expired buckets
 		s := offset + 1
+		if timespan > r.size {
+			timespan = r.size
+		}
 		e, e1 := s+timespan, 0 // e: reset offset must start from offset+1
 		if e > r.size {
 			e1 = e - r.size
@@ -65,7 +69,6 @@ func (r *RollingPolicy) add(f func(offset int, val float64), val float64) {
 			offset = i
 		}
 		r.offset = offset
-		r.lastAppendTime = time.Now()
 	}
 	f(r.offset, val)
 	r.mu.Unlock()

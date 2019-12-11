@@ -29,11 +29,11 @@ Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，
 
 ### Requirments
 
-Go version>=1.12 and GO111MODULE=on
+Go version>=1.13
 
 ### Installation
 ```shell
-go get -u github.com/bilibili/kratos/tool/kratos
+GO111MODULE=on && go get -u github.com/bilibili/kratos/tool/kratos
 cd $GOPATH/src
 kratos new kratos-demo
 ```
