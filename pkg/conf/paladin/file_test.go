@@ -116,7 +116,6 @@ func TestHiddenFile(t *testing.T) {
 		number = 100
 	`), 0644))
 	// test client
-	// test client
 	cli, err := NewFile(path)
 	assert.Nil(t, err)
 	assert.NotNil(t, cli)
@@ -128,4 +127,20 @@ func TestHiddenFile(t *testing.T) {
 	assert.Equal(t, "hello", content1)
 	_, err = cli.Get(".abc.toml").String()
 	assert.NotNil(t, err)
+}
+
+func TestOneLevelSymbolicFile(t *testing.T) {
+	path := "/tmp/test_symbolic_link/"
+	path2 := "/tmp/test_symbolic_link/configs/"
+	assert.Nil(t, os.MkdirAll(path2, 0700))
+	assert.Nil(t, ioutil.WriteFile(path+"test.toml", []byte(`hello`), 0644))
+	assert.Nil(t, os.Symlink(path+"test.toml", path2+"test.toml.ln"))
+	// test client
+	cli, err := NewFile(path2)
+	assert.Nil(t, err)
+	assert.NotNil(t, cli)
+	content, _ := cli.Get("test.toml.ln").String()
+	assert.Equal(t, "hello", content)
+	os.Remove(path+"test.toml")
+	os.Remove(path2+"test.toml.ln")
 }
