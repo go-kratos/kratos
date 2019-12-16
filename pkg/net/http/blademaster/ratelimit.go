@@ -39,7 +39,7 @@ func (b *RateLimiter) Limit() HandlerFunc {
 		limiter := b.group.Get(uri)
 		done, err := limiter.Allow(c)
 		if err != nil {
-			_metricServerBBR.Inc(uri)
+			_metricServerBBR.Inc(uri, c.Request.Method)
 			c.JSON(nil, err)
 			c.Abort()
 			return

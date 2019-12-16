@@ -35,8 +35,8 @@ func Logger() HandlerFunc {
 		}
 
 		if len(c.RoutePath) > 0 {
-			_metricServerReqCodeTotal.Inc(c.RoutePath[1:], caller, strconv.FormatInt(int64(cerr.Code()), 10))
-			_metricServerReqDur.Observe(int64(dt/time.Millisecond), c.RoutePath[1:], caller)
+			_metricServerReqCodeTotal.Inc(c.RoutePath[1:], caller, req.Method, strconv.FormatInt(int64(cerr.Code()), 10))
+			_metricServerReqDur.Observe(int64(dt/time.Millisecond), c.RoutePath[1:], caller, req.Method)
 		}
 
 		lf := log.Infov
