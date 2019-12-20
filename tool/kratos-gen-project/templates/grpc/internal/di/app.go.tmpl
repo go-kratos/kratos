@@ -26,7 +26,6 @@ func NewApp(svc *service.Service, g *warden.Server) (app *App, closeFunc func(),
 		if err := g.Shutdown(ctx); err != nil {
 			log.Error("grpcSrv.Shutdown error(%v)", err)
 		}
-		svc.Close()
 		cancel()
 	}
 	return

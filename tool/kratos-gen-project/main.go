@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -11,7 +10,7 @@ import (
 var appHelpTemplate = `{{if .Usage}}{{.Usage}}{{end}}
 
 USAGE:
-   {{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}{{if .Version}}{{if not .HideVersion}}
+   kratos new {{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}{{if .Version}}{{if not .HideVersion}}
 
 VERSION:
    {{.Version}}{{end}}{{end}}{{if .Description}}
@@ -35,7 +34,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = ""
 	app.Usage = "kratos 新项目创建工具"
-	app.UsageText = "name [options]"
+	app.UsageText = "项目名 [options]"
 	app.HideVersion = true
 	app.CustomAppHelpTemplate = appHelpTemplate
 	app.Flags = []cli.Flag{
@@ -63,8 +62,8 @@ func main() {
 		},
 	}
 	if len(os.Args) < 2 || strings.HasPrefix(os.Args[1], "-") {
-		fmt.Fprintf(os.Stderr, "未填写项目名称\n")
-		os.Exit(-1)
+		app.Run([]string{"-h"})
+		return
 	}
 	p.Name = os.Args[1]
 	app.Action = runNew

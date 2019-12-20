@@ -8,14 +8,19 @@ import (
 	"github.com/bilibili/kratos/pkg/log"
 )
 
-func NewRedis() (r *redis.Redis, err error) {
-	var cfg struct {
-		Client *redis.Config
-	}
-	if err = paladin.Get("redis.toml").UnmarshalTOML(&cfg); err != nil {
+func NewRedis() (r *redis.Redis, cf func(), err error) {
+	var (
+		cfg redis.Config
+		ct paladin.Map
+	)
+	if err = paladin.Get("redis.toml").Unmarshal(&ct); err != nil {
 		return
 	}
-	r = redis.NewRedis(cfg.Client)
+	if err = ct.Get("Client").UnmarshalTOML(&cfg); err != nil {
+		return
+	}
+	r = redis.NewRedis(&cfg)
+	cf = func(){r.Close()}
 	return
 }
 
