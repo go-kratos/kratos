@@ -10,7 +10,7 @@ import (
 	"github.com/bilibili/kratos/pkg/log"
 )
 
-//go:generate kratos tool mcgen
+//go:generate kratos tool genmc
 type _mc interface {
 	// mc: -key=keyArt -type=get
 	CacheArticle(c context.Context, id int64) (*model.Article, error)

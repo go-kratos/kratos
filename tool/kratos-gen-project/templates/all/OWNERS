@@ -1,7 +1,2 @@
-# See the OWNERS docs at https://go.k8s.io/owners
-
-approvers:
-- 
-labels:
-options:
-  no_parent_owners: false
+# Author
+# Reviewer
