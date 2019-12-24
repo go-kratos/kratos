@@ -26,7 +26,6 @@ func NewApp(svc *service.Service, h *bm.Engine) (app *App, closeFunc func(), err
 		if err := h.Shutdown(ctx); err != nil {
 			log.Error("httpSrv.Shutdown error(%v)", err)
 		}
-		svc.Close()
 		cancel()
 	}
 	return

@@ -4,17 +4,14 @@
 package di
 
 import (
-	pb "{{.ModPrefix}}{{.Name}}/api"
 	"{{.ModPrefix}}{{.Name}}/internal/dao"
-	"{{.ModPrefix}}{{.Name}}/internal/server/grpc"
 	"{{.ModPrefix}}{{.Name}}/internal/service"
+	"{{.ModPrefix}}{{.Name}}/internal/server/grpc"
 
 	"github.com/google/wire"
 )
 
-var daoProvider = wire.NewSet(dao.New, dao.NewDB, dao.NewRedis, dao.NewMC)
-var serviceProvider = wire.NewSet(service.New, wire.Bind(new(pb.DemoServer), new(*service.Service)))
-
+//go:generate kratos t wire
 func InitApp() (*App, func(), error) {
-	panic(wire.Build(daoProvider, serviceProvider, grpc.New, NewApp))
+	panic(wire.Build(dao.Provider, service.Provider, grpc.New, NewApp))
 }

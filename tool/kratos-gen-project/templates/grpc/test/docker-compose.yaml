@@ -3,7 +3,7 @@
     db:
       image: mysql:5.6
       ports:
-      - 3306:3306
+      - 13306:3306
       environment:
       - MYSQL_ROOT_PASSWORD=root
       - TZ=Asia/Shanghai
@@ -22,7 +22,7 @@
     redis:
       image: redis
       ports:
-        - 6379:6379
+        - 16379:6379
       healthcheck:
         test: ["CMD", "redis-cli","ping"]
         interval: 20s
@@ -32,7 +32,7 @@
     memcached:
       image: memcached
       ports:
-        - 11211:11211 
+        - 21211:11211
       healthcheck:
         test: ["CMD", "echo", "stats", "|",  "nc", "127.0.0.1", "11211"]
         interval: 20s

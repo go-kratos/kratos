@@ -20,14 +20,19 @@ type _mc interface {
 	DeleteArticleCache(c context.Context, id int64) (err error)
 }
 
-func NewMC() (mc *memcache.Memcache, err error) {
-	var cfg struct {
-		Client *memcache.Config
-	}
-	if err = paladin.Get("memcache.toml").UnmarshalTOML(&cfg); err != nil {
+func NewMC() (mc *memcache.Memcache, cf func(), err error) {
+	var (
+		cfg memcache.Config
+		ct paladin.TOML
+	)
+	if err = paladin.Get("memcache.toml").Unmarshal(&ct); err != nil {
 		return
 	}
-	mc =  memcache.New(cfg.Client)
+	if err = ct.Get("Client").UnmarshalTOML(&cfg); err != nil {
+		return
+	}
+	mc =  memcache.New(&cfg)
+	cf = func() {mc.Close()}
 	return
 }
 

@@ -9,7 +9,10 @@ import (
 	"github.com/bilibili/kratos/pkg/conf/paladin"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/google/wire"
 )
+
+var Provider = wire.NewSet(New, wire.Bind(new(pb.DemoServer), new(*Service)))
 
 // Service service.
 type Service struct {
@@ -18,11 +21,12 @@ type Service struct {
 }
 
 // New new a service and return.
-func New(d dao.Dao) (s *Service, err error) {
+func New(d dao.Dao) (s *Service, cf func(), err error) {
 	s = &Service{
 		ac:  &paladin.TOML{},
 		dao: d,
 	}
+	cf = s.Close
 	err = paladin.Watch("application.toml", s.ac)
 	return
 }
@@ -50,5 +54,4 @@ func (s *Service) Ping(ctx context.Context, e *empty.Empty) (*empty.Empty, error
 
 // Close close the resource.
 func (s *Service) Close() {
-	s.dao.Close()
 }
