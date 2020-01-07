@@ -15,18 +15,17 @@ var svc pb.DemoServer
 // New new a bm server.
 func New(s pb.DemoServer) (engine *bm.Engine, err error) {
 	var (
-		hc struct {
-			Server *bm.ServerConfig
-		}
+		cfg bm.ServerConfig
+		ct paladin.TOML
 	)
-	if err = paladin.Get("http.toml").UnmarshalTOML(&hc); err != nil {
-		if err != paladin.ErrNotExist {
-			return
-		}
-		err = nil
+	if err = paladin.Get("http.toml").Unmarshal(&ct); err != nil {
+		return
+	}
+	if err = ct.Get("Server").UnmarshalTOML(&cfg); err != nil {
+		return
 	}
 	svc = s
-	engine = bm.DefaultServer(hc.Server)
+	engine = bm.DefaultServer(&cfg)
 	pb.RegisterDemoBMServer(engine, s)
 	initRouter(engine)
 	err = engine.Start()

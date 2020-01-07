@@ -8,14 +8,19 @@ import (
 	"github.com/bilibili/kratos/pkg/database/sql"
 )
 
-func NewDB() (db *sql.DB, err error) {
-	var cfg struct {
-		Client *sql.Config
-	}
-	if err = paladin.Get("db.toml").UnmarshalTOML(&cfg); err != nil {
+func NewDB() (db *sql.DB, cf func(), err error) {
+	var (
+		cfg sql.Config
+		ct paladin.TOML
+	)
+	if err = paladin.Get("db.toml").Unmarshal(&ct); err != nil {
 		return
 	}
-	db = sql.NewMySQL(cfg.Client)
+	if err = ct.Get("Client").UnmarshalTOML(&cfg); err != nil {
+		return
+	}
+	db = sql.NewMySQL(&cfg)
+	cf = func() {db.Close()}
 	return
 }
 

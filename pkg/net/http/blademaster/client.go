@@ -213,16 +213,16 @@ func (client *Client) Raw(c context.Context, req *xhttp.Request, v ...string) (b
 	brk := client.breaker.Get(uri)
 	if err = brk.Allow(); err != nil {
 		code = "breaker"
-		_metricClientReqCodeTotal.Inc(uri, code)
+		_metricClientReqCodeTotal.Inc(uri, req.Method, code)
 		return
 	}
 	defer client.onBreaker(brk, &err)
 	// stat
 	now := time.Now()
 	defer func() {
-		_metricClientReqDur.Observe(int64(time.Since(now)/time.Millisecond), uri)
+		_metricClientReqDur.Observe(int64(time.Since(now)/time.Millisecond), uri, req.Method)
 		if code != "" {
-			_metricClientReqCodeTotal.Inc(uri, code)
+			_metricClientReqCodeTotal.Inc(uri, req.Method, code)
 		}
 	}()
 	// get config

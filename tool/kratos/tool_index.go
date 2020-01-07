@@ -61,7 +61,7 @@ var toolIndexs = []*Tool{
 		Name:         "genproject",
 		Alias:        "kratos-gen-project",
 		Install:      "go get -u github.com/bilibili/kratos/tool/kratos-gen-project",
-		BuildTime:    time.Date(2019, 11, 6, 0, 0, 0, 0, time.Local),
+		BuildTime:    time.Date(2019, 12, 22, 0, 0, 0, 0, time.Local),
 		Platform:     []string{"darwin", "linux", "windows"},
 		Hidden:       true,
 		Requirements: []string{"wire"},

@@ -58,14 +58,17 @@ func create() (err error) {
 		}
 	}
 
-	if err = generate(); err != nil {
+	if err = generate("./..."); err != nil {
+		return
+	}
+	if err = generate("./internal/dao/wire.go"); err != nil {
 		return
 	}
 	return
 }
 
-func generate() error {
-	cmd := exec.Command("go", "generate", "./...")
+func generate(path string) error {
+	cmd := exec.Command("go", "generate", "-x", path)
 	cmd.Dir = p.path
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

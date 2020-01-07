@@ -11,7 +11,11 @@ import (
 	"github.com/bilibili/kratos/pkg/database/sql"
 	"github.com/bilibili/kratos/pkg/sync/pipeline/fanout"
 	xtime "github.com/bilibili/kratos/pkg/time"
+
+	"github.com/google/wire"
 )
+
+var Provider = wire.NewSet(New, NewDB, NewRedis, NewMC)
 
 //go:generate kratos tool genbts
 // Dao dao interface
@@ -32,7 +36,11 @@ type dao struct {
 }
 
 // New new a dao and return.
-func New(r *redis.Redis, mc *memcache.Memcache, db *sql.DB) (d Dao, err error) {
+func New(r *redis.Redis, mc *memcache.Memcache, db *sql.DB) (d Dao, cf func(), err error) {
+	return newDao(r, mc, db)
+}
+
+func newDao(r *redis.Redis, mc *memcache.Memcache, db *sql.DB) (d *dao, cf func(), err error) {
 	var cfg struct{
 		DemoExpire xtime.Duration
 	}
@@ -46,14 +54,12 @@ func New(r *redis.Redis, mc *memcache.Memcache, db *sql.DB) (d Dao, err error) {
 		cache: fanout.New("cache"),
 		demoExpire: int32(time.Duration(cfg.DemoExpire) / time.Second),
 	}
+	cf = d.Close
 	return
 }
 
 // Close close the resource.
 func (d *dao) Close() {
-	d.mc.Close()
-	d.redis.Close()
-	d.db.Close()
 	d.cache.Close()
 }
 

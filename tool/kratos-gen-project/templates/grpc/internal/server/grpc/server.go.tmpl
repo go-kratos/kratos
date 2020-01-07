@@ -9,14 +9,17 @@ import (
 
 // New new a grpc server.
 func New(svc pb.DemoServer) (ws *warden.Server, err error) {
-	var rc struct {
-		Server *warden.ServerConfig
+	var (
+		cfg warden.ServerConfig
+		ct paladin.TOML
+	)
+	if err = paladin.Get("grpc.toml").Unmarshal(&ct); err != nil {
+		return
 	}
-	err = paladin.Get("grpc.toml").UnmarshalTOML(&rc)
-	if err == paladin.ErrNotExist {
-		err = nil
+	if err = ct.Get("Server").UnmarshalTOML(&cfg); err != nil {
+		return
 	}
-	ws = warden.NewServer(rc.Server)
+	ws = warden.NewServer(&cfg)
 	pb.RegisterDemoServer(ws.Server(), svc)
 	ws, err = ws.Start()
 	return
