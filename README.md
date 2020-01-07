@@ -5,7 +5,8 @@
 [![GoDoc](https://godoc.org/github.com/bilibili/kratos?status.svg)](https://godoc.org/github.com/bilibili/kratos)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bilibili/kratos)](https://goreportcard.com/report/github.com/bilibili/kratos)
 
-# Kratos
+# Kratos 
+![kratos](https://docs.google.com/drawings/d/e/2PACX-1vSsjNDb4h2HRyNQUx6rmiLKAZdBhmh9KOwXNJAzaF2-qUcoGXXwLTgqQN0045pPOVLwANMm_kf1jFzv/pub?w=300&h=300)
 
 Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，包含大量微服务相关框架及工具。  
 
