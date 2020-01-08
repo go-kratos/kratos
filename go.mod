@@ -7,7 +7,7 @@ require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/aristanetworks/goarista v0.0.0-20190912214011-b54698eaaca6 // indirect
 	github.com/coreos/bbolt v1.3.3 // indirect
-	github.com/coreos/etcd v3.3.18+incompatible // indirect
+	github.com/coreos/etcd v3.3.18+incompatible
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f // indirect
 	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
