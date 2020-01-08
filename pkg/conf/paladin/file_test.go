@@ -12,7 +12,7 @@ import (
 
 func TestNewFile(t *testing.T) {
 	// test data
-	path := "/tmp/test_conf/"
+	path := "/tmp/test_new_file/"
 	assert.Nil(t, os.MkdirAll(path, 0700))
 	assert.Nil(t, ioutil.WriteFile(path+"test.toml", []byte(`
 		text = "hello"	
@@ -39,7 +39,7 @@ func TestNewFile(t *testing.T) {
 
 func TestNewFilePath(t *testing.T) {
 	// test data
-	path := "/tmp/test_conf/"
+	path := "/tmp/test_new_file_path/"
 	assert.Nil(t, os.MkdirAll(path, 0700))
 	assert.Nil(t, ioutil.WriteFile(path+"test.toml", []byte(`
 		text = "hello"	
@@ -141,6 +141,6 @@ func TestOneLevelSymbolicFile(t *testing.T) {
 	assert.NotNil(t, cli)
 	content, _ := cli.Get("test.toml.ln").String()
 	assert.Equal(t, "hello", content)
-	os.Remove(path+"test.toml")
-	os.Remove(path2+"test.toml.ln")
+	os.Remove(path + "test.toml")
+	os.Remove(path2 + "test.toml.ln")
 }
