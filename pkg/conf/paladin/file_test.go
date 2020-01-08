@@ -94,12 +94,18 @@ func TestFileEvent(t *testing.T) {
 		assert.Equal(t, "hello", ev.Value)
 	}
 	ioutil.WriteFile(path+"abc.toml", []byte(`test`), 0644)
-	select {
-	case <-timeout.C:
-		t.Fatalf("run test timeout")
-	case ev := <-ch:
-		assert.Equal(t, EventUpdate, ev.Event)
-		assert.Equal(t, "test", ev.Value)
+	for {
+		select {
+		case <-timeout.C:
+			t.Fatalf("run test timeout")
+		case ev := <-ch:
+			if ev.Key == "test.toml" {
+				continue // ignore duplicate notify by O_TRUNC
+			}
+			assert.Equal(t, EventUpdate, ev.Event)
+			assert.Equal(t, "test", ev.Value)
+		}
+		break
 	}
 	content1, _ := cli.Get("test.toml").String()
 	assert.Equal(t, "hello", content1)
