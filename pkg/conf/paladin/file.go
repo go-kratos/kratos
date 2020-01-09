@@ -195,7 +195,7 @@ func (f *file) reloadFile(name string) {
 
 	for _, ch := range chs {
 		select {
-		case ch <- Event{Event: EventUpdate, Value: val.raw}:
+		case ch <- Event{Event: EventUpdate, Key: key, Value: val.raw}:
 		default:
 			log.Printf("event channel full discard file %s update event", name)
 		}
