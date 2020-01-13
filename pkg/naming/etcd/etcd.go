@@ -14,8 +14,8 @@ import (
 
 	"github.com/bilibili/kratos/pkg/log"
 	"github.com/bilibili/kratos/pkg/naming"
+	"github.com/etcd-io/etcd/mvcc/mvccpb"
 	"go.etcd.io/etcd/clientv3"
-	"go.etcd.io/etcd/mvcc/mvccpb"
 	"google.golang.org/grpc"
 )
 

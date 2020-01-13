@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	validator "gopkg.in/go-playground/validator.v9"
+	"github.com/go-playground/validator/v10"
 )
 
 var _validator *validator.Validate

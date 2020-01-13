@@ -5,8 +5,8 @@ import (
 
 	"github.com/bilibili/kratos/pkg/ecode"
 
+	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 var validate = validator.New()
