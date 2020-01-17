@@ -122,9 +122,14 @@ func (p *Pipeline) Start() {
 }
 
 // SyncAdd sync add a value to channal, channel shard in split method
-func (p *Pipeline) SyncAdd(c context.Context, key string, value interface{}) {
+func (p *Pipeline) SyncAdd(c context.Context, key string, value interface{}) (err error) {
 	ch, msg := p.add(c, key, value)
-	ch <- msg
+	select {
+	case ch <- msg:
+	case <-c.Done():
+		err = c.Err()
+	}
+	return
 }
 
 // Add async add a value to channal, channel shard in split method
