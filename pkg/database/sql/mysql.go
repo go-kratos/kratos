@@ -20,6 +20,7 @@ type Config struct {
 	ExecTimeout  time.Duration   // execute sql timeout
 	TranTimeout  time.Duration   // transaction sql timeout
 	Breaker      *breaker.Config // breaker
+	LogQuery     bool            // LogQuery
 }
 
 // NewMySQL new db and retry connection when has error.

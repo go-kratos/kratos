@@ -32,6 +32,8 @@ var (
 	ErrNoRows = sql.ErrNoRows
 	// ErrTxDone transaction done.
 	ErrTxDone = sql.ErrTxDone
+	// Config is need to logQueryString
+	LogQuery = false
 )
 
 // DB database.
@@ -72,7 +74,7 @@ type Row struct {
 
 // Scan copies the columns from the matched row into the values pointed at by dest.
 func (r *Row) Scan(dest ...interface{}) (err error) {
-	defer slowLog(fmt.Sprintf("Scan query(%s) args(%+v)", r.query, r.args), time.Now())
+	defer logQuery(fmt.Sprintf("Scan query(%s) args(%+v)", r.query, r.args), time.Now())
 	if r.t != nil {
 		defer r.t.Finish(&err)
 	}
@@ -270,7 +272,7 @@ func (db *conn) onBreaker(err *error) {
 
 func (db *conn) begin(c context.Context) (tx *Tx, err error) {
 	now := time.Now()
-	defer slowLog("Begin", now)
+	defer logQuery("Begin", now)
 	t, ok := trace.FromContext(c)
 	if ok {
 		t = t.Fork(_family, "begin")
@@ -299,7 +301,7 @@ func (db *conn) begin(c context.Context) (tx *Tx, err error) {
 
 func (db *conn) exec(c context.Context, query string, args ...interface{}) (res sql.Result, err error) {
 	now := time.Now()
-	defer slowLog(fmt.Sprintf("Exec query(%s) args(%+v)", query, args), now)
+	defer logQuery(fmt.Sprintf("Exec query(%s) args(%+v)", query, args), now)
 	if t, ok := trace.FromContext(c); ok {
 		t = t.Fork(_family, "exec")
 		t.SetTag(trace.String(trace.TagAddress, db.addr), trace.String(trace.TagComment, query))
@@ -322,7 +324,7 @@ func (db *conn) exec(c context.Context, query string, args ...interface{}) (res 
 
 func (db *conn) ping(c context.Context) (err error) {
 	now := time.Now()
-	defer slowLog("Ping", now)
+	defer logQuery("Ping", now)
 	if t, ok := trace.FromContext(c); ok {
 		t = t.Fork(_family, "ping")
 		t.SetTag(trace.String(trace.TagAddress, db.addr), trace.String(trace.TagComment, ""))
@@ -344,7 +346,7 @@ func (db *conn) ping(c context.Context) (err error) {
 }
 
 func (db *conn) prepare(query string) (*Stmt, error) {
-	defer slowLog(fmt.Sprintf("Prepare query(%s)", query), time.Now())
+	defer logQuery(fmt.Sprintf("Prepare query(%s)", query), time.Now())
 	stmt, err := db.Prepare(query)
 	if err != nil {
 		err = errors.Wrapf(err, "prepare %s", query)
@@ -356,7 +358,7 @@ func (db *conn) prepare(query string) (*Stmt, error) {
 }
 
 func (db *conn) prepared(query string) (stmt *Stmt) {
-	defer slowLog(fmt.Sprintf("Prepared query(%s)", query), time.Now())
+	defer logQuery(fmt.Sprintf("Prepared query(%s)", query), time.Now())
 	stmt = &Stmt{query: query, db: db}
 	s, err := db.Prepare(query)
 	if err == nil {
@@ -379,7 +381,7 @@ func (db *conn) prepared(query string) (stmt *Stmt) {
 
 func (db *conn) query(c context.Context, query string, args ...interface{}) (rows *Rows, err error) {
 	now := time.Now()
-	defer slowLog(fmt.Sprintf("Query query(%s) args(%+v)", query, args), now)
+	defer logQuery(fmt.Sprintf("Query query(%s) args(%+v)", query, args), now)
 	if t, ok := trace.FromContext(c); ok {
 		t = t.Fork(_family, "query")
 		t.SetTag(trace.String(trace.TagAddress, db.addr), trace.String(trace.TagComment, query))
@@ -404,7 +406,7 @@ func (db *conn) query(c context.Context, query string, args ...interface{}) (row
 
 func (db *conn) queryRow(c context.Context, query string, args ...interface{}) *Row {
 	now := time.Now()
-	defer slowLog(fmt.Sprintf("QueryRow query(%s) args(%+v)", query, args), now)
+	defer logQuery(fmt.Sprintf("QueryRow query(%s) args(%+v)", query, args), now)
 	t, ok := trace.FromContext(c)
 	if ok {
 		t = t.Fork(_family, "queryrow")
@@ -441,7 +443,7 @@ func (s *Stmt) Exec(c context.Context, args ...interface{}) (res sql.Result, err
 		return
 	}
 	now := time.Now()
-	defer slowLog(fmt.Sprintf("Exec query(%s) args(%+v)", s.query, args), now)
+	defer logQuery(fmt.Sprintf("Exec query(%s) args(%+v)", s.query, args), now)
 	if s.tx {
 		if s.t != nil {
 			s.t.SetTag(trace.String(trace.TagAnnotation, s.query))
@@ -479,7 +481,7 @@ func (s *Stmt) Query(c context.Context, args ...interface{}) (rows *Rows, err er
 		return
 	}
 	now := time.Now()
-	defer slowLog(fmt.Sprintf("Query query(%s) args(%+v)", s.query, args), now)
+	defer logQuery(fmt.Sprintf("Query query(%s) args(%+v)", s.query, args), now)
 	if s.tx {
 		if s.t != nil {
 			s.t.SetTag(trace.String(trace.TagAnnotation, s.query))
@@ -518,7 +520,7 @@ func (s *Stmt) Query(c context.Context, args ...interface{}) (rows *Rows, err er
 // Otherwise, the *Row's Scan scans the first selected row and discards the rest.
 func (s *Stmt) QueryRow(c context.Context, args ...interface{}) (row *Row) {
 	now := time.Now()
-	defer slowLog(fmt.Sprintf("QueryRow query(%s) args(%+v)", s.query, args), now)
+	defer logQuery(fmt.Sprintf("QueryRow query(%s) args(%+v)", s.query, args), now)
 	row = &Row{db: s.db, query: s.query, args: args}
 	if s == nil {
 		row.err = ErrStmtNil
@@ -580,7 +582,7 @@ func (tx *Tx) Rollback() (err error) {
 // UPDATE.
 func (tx *Tx) Exec(query string, args ...interface{}) (res sql.Result, err error) {
 	now := time.Now()
-	defer slowLog(fmt.Sprintf("Exec query(%s) args(%+v)", query, args), now)
+	defer logQuery(fmt.Sprintf("Exec query(%s) args(%+v)", query, args), now)
 	if tx.t != nil {
 		tx.t.SetTag(trace.String(trace.TagAnnotation, fmt.Sprintf("exec %s", query)))
 	}
@@ -598,7 +600,7 @@ func (tx *Tx) Query(query string, args ...interface{}) (rows *Rows, err error) {
 		tx.t.SetTag(trace.String(trace.TagAnnotation, fmt.Sprintf("query %s", query)))
 	}
 	now := time.Now()
-	defer slowLog(fmt.Sprintf("Query query(%s) args(%+v)", query, args), now)
+	defer logQuery(fmt.Sprintf("Query query(%s) args(%+v)", query, args), now)
 	defer func() {
 		_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), tx.db.addr, tx.db.addr, "tx:query")
 	}()
@@ -619,7 +621,7 @@ func (tx *Tx) QueryRow(query string, args ...interface{}) *Row {
 		tx.t.SetTag(trace.String(trace.TagAnnotation, fmt.Sprintf("queryrow %s", query)))
 	}
 	now := time.Now()
-	defer slowLog(fmt.Sprintf("QueryRow query(%s) args(%+v)", query, args), now)
+	defer logQuery(fmt.Sprintf("QueryRow query(%s) args(%+v)", query, args), now)
 	defer func() {
 		_metricReqDur.Observe(int64(time.Since(now)/time.Millisecond), tx.db.addr, tx.db.addr, "tx:queryrow")
 	}()
@@ -647,7 +649,7 @@ func (tx *Tx) Prepare(query string) (*Stmt, error) {
 	if tx.t != nil {
 		tx.t.SetTag(trace.String(trace.TagAnnotation, fmt.Sprintf("prepare %s", query)))
 	}
-	defer slowLog(fmt.Sprintf("Prepare query(%s)", query), time.Now())
+	defer logQuery(fmt.Sprintf("Prepare query(%s)", query), time.Now())
 	stmt, err := tx.tx.Prepare(query)
 	if err != nil {
 		err = errors.Wrapf(err, "prepare %s", query)
@@ -668,9 +670,9 @@ func parseDSNAddr(dsn string) (addr string) {
 	return cfg.Addr
 }
 
-func slowLog(statement string, now time.Time) {
+func logQuery(statement string, now time.Time) {
 	du := time.Since(now)
-	if du > _slowLogDuration {
-		log.Warn("%s slow log statement: %s time: %v", _family, statement, du)
+	if LogQuery || du > _slowLogDuration {
+		log.Warn("%s log statement: %s time: %v", _family, statement, du)
 	}
 }
