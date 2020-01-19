@@ -9,7 +9,7 @@ import (
 
 	common "github.com/bilibili/kratos/tool/pkg"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 func runNew(ctx *cli.Context) (err error) {

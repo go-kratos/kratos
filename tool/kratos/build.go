@@ -8,7 +8,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 func buildAction(c *cli.Context) error {
@@ -16,7 +16,7 @@ func buildAction(c *cli.Context) error {
 	if err != nil {
 		panic(err)
 	}
-	args := append([]string{"build"}, c.Args()...)
+	args := append([]string{"build"}, c.Args().Slice()...)
 	cmd := exec.Command("go", args...)
 	cmd.Dir = buildDir(base, "cmd", 5)
 	cmd.Stdout = os.Stdout

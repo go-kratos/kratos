@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var appHelpTemplate = `{{if .Usage}}{{.Usage}}{{end}}
@@ -38,23 +38,23 @@ func main() {
 	app.HideVersion = true
 	app.CustomAppHelpTemplate = appHelpTemplate
 	app.Flags = []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:        "d",
 			Value:       "",
 			Usage:       "指定项目所在目录",
 			Destination: &p.path,
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:        "http",
 			Usage:       "只使用http 不使用grpc",
 			Destination: &p.onlyHTTP,
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:        "grpc",
 			Usage:       "只使用grpc 不使用http",
 			Destination: &p.onlyGRPC,
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:        "proto",
 			Usage:       "废弃参数 无作用",
 			Destination: &p.none,
