@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -71,7 +71,7 @@ func toolAction(c *cli.Context) (err error) {
 		}
 		return
 	}
-	if e := installAndRun(commond, c.Args()[1:]); e != nil {
+	if e := installAndRun(commond, c.Args().Slice()[1:]); e != nil {
 		fmt.Fprintf(os.Stderr, fmt.Sprintf("%v\n", e))
 	}
 	return
@@ -179,7 +179,8 @@ func (t Tool) toolPath() string {
 	if name == "" {
 		name = t.Name
 	}
-	if gobin := os.Getenv("GOBIN"); len(gobin) > 0 {
+	gobin := Getenv("GOBIN")
+	if gobin != "" {
 		return filepath.Join(gobin, name)
 	}
 	return filepath.Join(gopath(), "bin", name)
@@ -226,7 +227,7 @@ func (t Tool) updated() bool {
 }
 
 func gopath() (gp string) {
-	gopaths := strings.Split(os.Getenv("GOPATH"), string(filepath.ListSeparator))
+	gopaths := strings.Split(Getenv("GOPATH"), string(filepath.ListSeparator))
 
 	if len(gopaths) == 1 && gopaths[0] != "" {
 		return gopaths[0]
