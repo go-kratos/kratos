@@ -227,7 +227,6 @@ func (t *bm) generateBMRoute(
 	}
 
 	sort.Strings(midList)
-
 	// 注册老的路由的方法
 	if isLegacyPkg {
 		funcName := `Register` + utils.CamelCase(versionPrefix) + servName + `Service`
@@ -259,10 +258,25 @@ func (t *bm) generateBMRoute(
 		// 新的注册路由的方法
 		var bmFuncName = fmt.Sprintf("Register%sBMServer", servName)
 		t.P(`// `, bmFuncName, ` Register the blademaster route`)
-		t.P(`func `, bmFuncName, `(e *bm.Engine, server `, servName, `BMServer) {`)
+		t.P(`func `, bmFuncName, `(e *bm.Engine, server `, servName, `BMServer, midMap map[string]bm.HandlerFunc) {`)
+		var keys []string
+		for m := range allMidwareMap {
+			keys = append(keys, m)
+		}
+		// to keep generated code consistent
+		sort.Strings(keys)
+		for _, m := range keys {
+			t.P(m, ` := midMap["`, m, `"]`)
+		}
 		t.P(svcName, ` = server`)
 		for _, methInfo := range methList {
-			t.P(`e.`, methInfo.apiInfo.HttpMethod, `("`, methInfo.apiInfo.NewPath, `",`, methInfo.routeFuncName, ` )`)
+			var midArgStr string
+			if len(methInfo.midwares) == 0 {
+				midArgStr = ""
+			} else {
+				midArgStr = strings.Join(methInfo.midwares, ", ") + ", "
+			}
+			t.P(`e.`, methInfo.apiInfo.HttpMethod, `("`, methInfo.apiInfo.NewPath, `",`, midArgStr, methInfo.routeFuncName, ` )`)
 		}
 		t.P(`	}`)
 	}
