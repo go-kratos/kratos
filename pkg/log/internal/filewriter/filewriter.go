@@ -274,9 +274,7 @@ func (f *FileWriter) Close() error {
 
 func (f *FileWriter) checkRotate(t time.Time) {
 	formatFname := func(format string, num int) string {
-		if num == 0 {
-			return fmt.Sprintf("%s.%s", f.fname, format)
-		}
+		num++
 		return fmt.Sprintf("%s.%s.%03d", f.fname, format, num)
 	}
 	format := t.Format(f.opt.RotateFormat)
