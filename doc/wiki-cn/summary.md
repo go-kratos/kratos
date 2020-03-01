@@ -17,7 +17,7 @@
 * [config](config.md)
   * [paladin](config-paladin.md)
 * [ecode](ecode.md)
-* [trace](dapper.md)
+* [trace](trace.md)
 * [log](logger.md)
   * [log-agent](log-agent.md)
 * [database](database.md)
