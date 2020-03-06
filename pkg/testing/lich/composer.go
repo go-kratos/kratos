@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/bilibili/kratos/pkg/log"
@@ -24,6 +25,7 @@ var (
 
 func init() {
 	flag.StringVar(&yamlPath, "f", "docker-compose.yaml", "composer yaml path.")
+	flag.IntVar(&retry, "retry", 5, "number of retries on network failure.")
 	flag.BoolVar(&noDown, "nodown", false, "containers are not recycled.")
 }
 
@@ -74,10 +76,13 @@ func getServices() (output []byte, err error) {
 	if output, err = runCompose("config", "--services"); err != nil {
 		return
 	}
+	var eol = []byte("\n")
+	if output = bytes.TrimSpace(output); runtime.GOOS == "windows" {
+		eol = []byte("\r\n")
+	}
 	services = make(map[string]*Container)
-	output = bytes.TrimSpace(output)
-	for _, svr := range bytes.Split(output, []byte("\n")) {
-		if output, err = runCompose("ps", "-a", "-q", string(svr)); err != nil {
+	for _, svr := range bytes.Split(output, eol) {
+		if output, err = runCompose("ps", "-q", string(svr)); err != nil {
 			return
 		}
 		var (
@@ -105,18 +110,17 @@ func getServices() (output []byte, err error) {
 
 func checkServices() (output []byte, err error) {
 	defer func() {
-		if err != nil && retry < 4 {
-			retry++
+		if err != nil && retry > 0 {
+			retry--
 			getServices()
 			time.Sleep(time.Second * 5)
 			output, err = checkServices()
 			return
 		}
-		retry = 0
 	}()
 	for svr, c := range services {
 		if err = c.Healthcheck(); err != nil {
-			log.Error("healthcheck(%s) error(%v) retrying %d times...", svr, err, 5-retry)
+			log.Error("healthcheck(%s) error(%v) retrying %d times...", svr, err, retry)
 			return
 		}
 		// TODO About container check and more...
