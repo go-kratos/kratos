@@ -321,15 +321,13 @@ func getValidateComment(field *descriptor.FieldDescriptorProto) string {
 	var (
 		tags []reflect.StructTag
 	)
-	comment := ""
 	//get required info from gogoproto.moretags
 	moretags := tag.GetMoreTags(field)
 	if moretags != nil {
 		tags = []reflect.StructTag{reflect.StructTag(*moretags)}
 	}
 	validateTag := tag.GetTagValue("validate", tags)
-	if len(validateTag) > 0 {
-		comment = validateTag
-	}
+	re, _ := regexp.Compile("required *,*")
+	comment := re.ReplaceAllString(validateTag, "")
 	return comment
 }
