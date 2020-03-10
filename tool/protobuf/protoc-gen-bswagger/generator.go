@@ -327,7 +327,15 @@ func getValidateComment(field *descriptor.FieldDescriptorProto) string {
 		tags = []reflect.StructTag{reflect.StructTag(*moretags)}
 	}
 	validateTag := tag.GetTagValue("validate", tags)
-	re, _ := regexp.Compile("required *,*")
-	comment := re.ReplaceAllString(validateTag, "")
-	return comment
+
+	// trim
+	regStr := []string{
+		"required *,*",
+		"omitempty *,*",
+	}
+	for _, v := range regStr {
+		re, _ := regexp.Compile(v)
+		validateTag = re.ReplaceAllString(validateTag, "")
+	}
+	return validateTag
 }
