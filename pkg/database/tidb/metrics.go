@@ -1,6 +1,6 @@
 package tidb
 
-import "github.com/bilibili/kratos/pkg/stat/metric"
+import "github.com/go-kratos/kratos/pkg/stat/metric"
 
 const namespace = "tidb_client"
 

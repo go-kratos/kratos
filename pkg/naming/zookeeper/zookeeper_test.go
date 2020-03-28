@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/bilibili/kratos/pkg/naming"
+	"github.com/go-kratos/kratos/pkg/naming"
 )
 
 var (

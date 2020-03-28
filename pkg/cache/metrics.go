@@ -1,6 +1,6 @@
 package cache
 
-import "github.com/bilibili/kratos/pkg/stat/metric"
+import "github.com/go-kratos/kratos/pkg/stat/metric"
 
 const _metricNamespace = "cache"
 

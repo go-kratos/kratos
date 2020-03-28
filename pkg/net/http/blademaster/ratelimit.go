@@ -5,9 +5,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/log"
-	limit "github.com/bilibili/kratos/pkg/ratelimit"
-	"github.com/bilibili/kratos/pkg/ratelimit/bbr"
+	"github.com/go-kratos/kratos/pkg/log"
+	limit "github.com/go-kratos/kratos/pkg/ratelimit"
+	"github.com/go-kratos/kratos/pkg/ratelimit/bbr"
 )
 
 // RateLimiter bbr middleware.

@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"{{.ModPrefix}}{{.Name}}/internal/model"
-	"github.com/bilibili/kratos/pkg/conf/paladin"
-	"github.com/bilibili/kratos/pkg/database/sql"
+	"github.com/go-kratos/kratos/pkg/conf/paladin"
+	"github.com/go-kratos/kratos/pkg/database/sql"
 )
 
 func NewDB() (db *sql.DB, cf func(), err error) {

@@ -6,8 +6,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/conf/env"
-	"github.com/bilibili/kratos/pkg/net/ip"
+	"github.com/go-kratos/kratos/pkg/conf/env"
+	"github.com/go-kratos/kratos/pkg/net/ip"
 
 	"github.com/pkg/errors"
 )

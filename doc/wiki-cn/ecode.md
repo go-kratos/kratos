@@ -5,7 +5,7 @@
 
 ## 错误码之Codes
 
-在`kratos`里，错误码被设计成`Codes`接口，声明如下[代码位置](https://github.com/bilibili/kratos/blob/master/pkg/ecode/ecode.go)：
+在`kratos`里，错误码被设计成`Codes`接口，声明如下[代码位置](https://github.com/go-kratos/kratos/blob/master/pkg/ecode/ecode.go)：
 
 ```go
 // Codes ecode error interface which has a code & message.
@@ -47,9 +47,9 @@ fmt.Println(ecode.OK.Message()) // 输出：很好很强大！
 ### Details
 
 `Details`接口为`gRPC`预留，`gRPC`传递异常会将服务端的错误码pb序列化之后赋值给`Details`，客户端拿到之后反序列化得到，具体可阅读`status`的实现：
-1. `ecode`包内的`Status`结构体实现了`Codes`接口[代码位置](https://github.com/bilibili/kratos/blob/master/pkg/ecode/status.go)
-2. `warden/internal/status`包内包装了`ecode.Status`和`grpc.Status`进行互相转换的方法[代码位置](https://github.com/bilibili/kratos/blob/master/pkg/net/rpc/warden/internal/status/status.go)
-3. `warden`的`client`和`server`则使用转换方法将`gRPC`底层返回的`error`最终转换为`ecode.Status` [代码位置](https://github.com/bilibili/kratos/blob/master/pkg/net/rpc/warden/client.go#L162)
+1. `ecode`包内的`Status`结构体实现了`Codes`接口[代码位置](https://github.com/go-kratos/kratos/blob/master/pkg/ecode/status.go)
+2. `warden/internal/status`包内包装了`ecode.Status`和`grpc.Status`进行互相转换的方法[代码位置](https://github.com/go-kratos/kratos/blob/master/pkg/net/rpc/warden/internal/status/status.go)
+3. `warden`的`client`和`server`则使用转换方法将`gRPC`底层返回的`error`最终转换为`ecode.Status` [代码位置](https://github.com/go-kratos/kratos/blob/master/pkg/net/rpc/warden/client.go#L162)
 
 ## 转换为ecode
 
@@ -90,7 +90,7 @@ enum UserErrCode {
 package ecode
 
 import (
-    "github.com/bilibili/kratos/pkg/ecode"
+    "github.com/go-kratos/kratos/pkg/ecode"
 )
 
 var _ ecode.Codes

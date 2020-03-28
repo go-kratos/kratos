@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/log"
-	"github.com/bilibili/kratos/pkg/net/trace"
+	"github.com/go-kratos/kratos/pkg/log"
+	"github.com/go-kratos/kratos/pkg/net/trace"
 )
 
 const (

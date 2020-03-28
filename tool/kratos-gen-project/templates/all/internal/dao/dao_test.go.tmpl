@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bilibili/kratos/pkg/conf/paladin"
-	"github.com/bilibili/kratos/pkg/testing/lich"
+	"github.com/go-kratos/kratos/pkg/conf/paladin"
+	"github.com/go-kratos/kratos/pkg/testing/lich"
 )
 
 var d *dao

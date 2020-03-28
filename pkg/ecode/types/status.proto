@@ -4,7 +4,7 @@ package bilibili.rpc;
 
 import "google/protobuf/any.proto";
 
-option go_package = "github.com/bilibili/Kratos/pkg/ecode/types;types";
+option go_package = "github.com/go-kratos/kratos/pkg/ecode/types;types";
 option java_multiple_files = true;
 option java_outer_classname = "StatusProto";
 option java_package = "com.bilibili.rpc";
