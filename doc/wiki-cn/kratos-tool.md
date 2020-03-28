@@ -6,7 +6,7 @@ kratos包含了一批好用的工具集，比如项目一键生成、基于proto
 
 执行以下命令，即可快速安装好`kratos`工具
 ```shell
-go get -u github.com/bilibili/kratos/tool/kratos
+go get -u github.com/go-kratos/kratos/tool/kratos
 ```
 
 那么接下来让我们快速开始熟悉工具的用法~
@@ -93,7 +93,7 @@ swagger(已安装): swagger api文档 Author(goswagger.io) [2019/05/05]
 安装全部工具: kratos tool install all
 全部升级: kratos tool upgrade all
 
-详细文档： https://github.com/bilibili/kratos/blob/master/doc/wiki-cn/kratos-tool.md
+详细文档： https://github.com/go-kratos/kratos/blob/master/doc/wiki-cn/kratos-tool.md
 ```
 
 > 小小说明：如未安装工具，第一次运行也可自动安装，不需要特别执行install

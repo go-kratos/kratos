@@ -1,4 +1,4 @@
-module github.com/bilibili/kratos
+module github.com/go-kratos/kratos
 
 go 1.13
 

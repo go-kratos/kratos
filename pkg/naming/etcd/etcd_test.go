@@ -3,7 +3,7 @@ package etcd
 import (
 	"context"
 	"fmt"
-	"github.com/bilibili/kratos/pkg/naming"
+	"github.com/go-kratos/kratos/pkg/naming"
 	"go.etcd.io/etcd/clientv3"
 	"google.golang.org/grpc"
 	"testing"

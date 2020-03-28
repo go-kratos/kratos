@@ -146,7 +146,7 @@ func TestUsers(t *testing.T) {
 ```
 
 #### 使用建议
-强烈建议使用 [testgen](https://github.com/bilibili/kratos/blob/master/doc/wiki-cn/ut-testgen.md) 进行测试用例的生成，生成后每个方法将包含一个符合以下规范的正向用例。
+强烈建议使用 [testgen](https://github.com/go-kratos/kratos/blob/master/doc/wiki-cn/ut-testgen.md) 进行测试用例的生成，生成后每个方法将包含一个符合以下规范的正向用例。
 
 用例规范：
 1. 每个方法至少包含一个测试方法（命名为Test[PackageName][FunctionName]）

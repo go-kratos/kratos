@@ -3,7 +3,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bilibili/kratos/pkg/net/rpc/warden"
+	"github.com/go-kratos/kratos/pkg/net/rpc/warden"
 
 	"google.golang.org/grpc"
 )

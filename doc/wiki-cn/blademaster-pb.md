@@ -3,7 +3,7 @@
 基于proto文件可以快速生成`bm`框架对应的代码，提前需要准备以下工作：
 
 * 安装`kratos tool protoc`工具，请看[kratos工具](kratos-tool.md)
-* 编写`proto`文件，示例可参考[kratos-demo内proto文件](https://github.com/bilibili/kratos-demo/blob/master/api/api.proto)
+* 编写`proto`文件，示例可参考[kratos-demo内proto文件](https://github.com/go-kratos/kratos-demo/blob/master/api/api.proto)
 
 ### kratos工具说明
 
@@ -31,7 +31,7 @@ service Demo {
 
 # 使用
 
-建议在项目`api`目录下编写`proto`文件及生成对应的代码，可参考[kratos-demo内的api目录](https://github.com/bilibili/kratos-demo/tree/master/api)。
+建议在项目`api`目录下编写`proto`文件及生成对应的代码，可参考[kratos-demo内的api目录](https://github.com/go-kratos/kratos-demo/tree/master/api)。
 
 执行命令后生成的`api.bm.go`代码，注意其中的`type DemoBMServer interface`和`RegisterDemoBMServer`，其中：
 
@@ -39,7 +39,7 @@ service Demo {
 * `RegisterDemoBMServer`方法提供注册`DemoBMServer`接口的实现对象，和`bm`的`Engine`用于注册路由
 * `DemoBMServer`接口的实现，一般为`internal/service`内的业务逻辑代码，需要实现`DemoBMServer`接口
 
-使用`RegisterDemoBMServer`示例代码请参考[kratos-demo内的http](https://github.com/bilibili/kratos-demo/blob/master/internal/server/http/server.go)内的如下代码：
+使用`RegisterDemoBMServer`示例代码请参考[kratos-demo内的http](https://github.com/go-kratos/kratos-demo/blob/master/internal/server/http/server.go)内的如下代码：
 
 ```go
 engine = bm.DefaultServer(hc.Server)
@@ -47,7 +47,7 @@ pb.RegisterDemoBMServer(engine, svc)
 initRouter(engine)
 ```
 
-`internal/service`内的`Service`结构实现了`DemoBMServer`接口可参考[kratos-demo内的service](https://github.com/bilibili/kratos-demo/blob/master/internal/service/service.go)内的如下代码：
+`internal/service`内的`Service`结构实现了`DemoBMServer`接口可参考[kratos-demo内的service](https://github.com/go-kratos/kratos-demo/blob/master/internal/service/service.go)内的如下代码：
 
 ```go
 // SayHelloURL bm demo func.

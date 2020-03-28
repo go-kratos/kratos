@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	_getSwaggerGen = "go get -u github.com/bilibili/kratos/tool/protobuf/protoc-gen-bswagger"
+	_getSwaggerGen = "go get -u github.com/go-kratos/kratos/tool/protobuf/protoc-gen-bswagger"
 	_swaggerProtoc = "protoc --proto_path=%s --proto_path=%s --proto_path=%s --bswagger_out=:."
 )
 

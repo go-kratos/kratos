@@ -2,7 +2,7 @@
 
 * [介绍](README.md)
   * [快速开始](quickstart.md)
-  * [案例](https://github.com/bilibili/kratos-demo)
+  * [案例](https://github.com/go-kratos/kratos-demo)
 * [http blademaster](blademaster.md)
   * [bm quickstart](blademaster-quickstart.md) 
   * [bm module](blademaster-mod.md) 
