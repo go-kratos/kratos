@@ -180,6 +180,9 @@ func (t Tool) toolPath() string {
 		name = t.Name
 	}
 	gobin := Getenv("GOBIN")
+	if runtime.GOOS == "windows" {
+		name += ".exe"
+	}
 	if gobin != "" {
 		return filepath.Join(gobin, name)
 	}
