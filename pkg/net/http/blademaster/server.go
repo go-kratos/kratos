@@ -244,8 +244,8 @@ func (engine *Engine) prepareHandler(c *Context) {
 	httpMethod := c.Request.Method
 	rPath := c.Request.URL.Path
 	unescape := false
-	if engine.UseRawPath && len(c.Request.URL.RawPath) > 0 {
-		rPath = c.Request.URL.RawPath
+	if engine.UseRawPath && len(c.Request.URL.EscapedPath()) > 0 {
+		rPath = c.Request.URL.EscapedPath()
 		unescape = engine.UnescapePathValues
 	}
 	rPath = cleanPath(rPath)
