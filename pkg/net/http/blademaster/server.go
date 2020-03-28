@@ -91,8 +91,7 @@ func (engine *Engine) Start() error {
 	conf := engine.conf
 	l, err := net.Listen(conf.Network, conf.Addr)
 	if err != nil {
-		errors.Wrapf(err, "blademaster: listen tcp: %s", conf.Addr)
-		return err
+		return errors.Wrapf(err, "blademaster: listen tcp: %s", conf.Addr)
 	}
 
 	log.Info("blademaster: start http listen addr: %s", conf.Addr)
