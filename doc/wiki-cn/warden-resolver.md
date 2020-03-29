@@ -107,11 +107,11 @@ type Builder interface {
 * `Build`只需要传对应的服务`id`即可：`warden/resolver/resolver.go`在gRPC进行调用后，会根据`Scheme`方法查询对应的`naming.Builder`实现并调用`Build`将`id`传入，而`naming.Resolver`的实现即可通过`id`去对应的服务发现中间件进行实例信息的查询
 * 而`Resolver`则对方法进行了扩展，除了简单进行`Fetch`操作外还多了`Watch`方法，用于监听服务发现中间件的节点变化情况，从而能够实时的进行服务实例信息的更新
 
-在`naming/discovery`内实现了基于[discovery](https://github.com/bilibili/discovery)为中间件的服务注册与发现逻辑。如果要实现其他中间件如`etcd`|`zookeeper`等的逻辑，参考`naming/discovery/discovery.go`内的逻辑，将与`discovery`的交互逻辑替换掉即可（后续会默认将etcd/zk等实现，敬请期待）。
+在`naming/discovery`内实现了基于[discovery](https://github.com/go-kratos/discovery)为中间件的服务注册与发现逻辑。如果要实现其他中间件如`etcd`|`zookeeper`等的逻辑，参考`naming/discovery/discovery.go`内的逻辑，将与`discovery`的交互逻辑替换掉即可（后续会默认将etcd/zk等实现，敬请期待）。
 
 # 使用discovery
 
-因为`warden`内默认使用`direct`的方式，所以要使用[discovery](https://github.com/bilibili/discovery)需要在业务的`NewClient`前进行注册，代码如下：
+因为`warden`内默认使用`direct`的方式，所以要使用[discovery](https://github.com/go-kratos/discovery)需要在业务的`NewClient`前进行注册，代码如下：
 
 ```go
 package dao
@@ -161,7 +161,7 @@ func NewClient(cfg *warden.ClientConfig, opts ...grpc.DialOption) (DemoClient, e
 
 # 服务注册
 
-客户端既然使用了[discovery](https://github.com/bilibili/discovery)进行服务发现，也就意味着服务端启动后必须将自己注册给[discovery](https://github.com/bilibili/discovery)知道。
+客户端既然使用了[discovery](https://github.com/go-kratos/discovery)进行服务发现，也就意味着服务端启动后必须将自己注册给[discovery](https://github.com/go-kratos/discovery)知道。
 
 相对服务发现来讲，服务注册则简单很多，看`naming/discovery/discovery.go`内的代码实现了`naming/naming.go`内的`Registry`接口，服务端启动时可以参考下面代码进行注册：
 
