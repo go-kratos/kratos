@@ -1,7 +1,6 @@
 package log
 
 import (
-	"bytes"
 	"fmt"
 	"strconv"
 	"strings"
@@ -25,14 +24,13 @@ func (f *logFilter) Set(value string) error {
 }
 
 func (m verboseModule) String() string {
-	// FIXME strings.Builder
-	var buf bytes.Buffer
+	var b strings.Builder
 	for k, v := range m {
-		buf.WriteString(k)
-		buf.WriteString(strconv.FormatInt(int64(v), 10))
-		buf.WriteString(",")
+		b.WriteString(k)
+		b.WriteString(strconv.FormatInt(int64(v), 10))
+		b.WriteString(",")
 	}
-	return buf.String()
+	return b.String()
 }
 
 // Set sets the value of the named command-line flag.

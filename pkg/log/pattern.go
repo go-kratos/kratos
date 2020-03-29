@@ -1,7 +1,6 @@
 package log
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"path"
@@ -28,7 +27,7 @@ var patternMap = map[string]func(map[string]interface{}) string{
 // newPatternRender new pattern render
 func newPatternRender(format string) Render {
 	p := &pattern{
-		bufPool: sync.Pool{New: func() interface{} { return &bytes.Buffer{} }},
+		bufPool: sync.Pool{New: func() interface{} { return &strings.Builder{} }},
 	}
 	b := make([]byte, 0, len(format))
 	for i := 0; i < len(format); i++ {
@@ -65,32 +64,31 @@ type pattern struct {
 
 // Render implemet Formater
 func (p *pattern) Render(w io.Writer, d map[string]interface{}) error {
-	buf := p.bufPool.Get().(*bytes.Buffer)
+	builder := p.bufPool.Get().(*strings.Builder)
 	defer func() {
-		buf.Reset()
-		p.bufPool.Put(buf)
+		builder.Reset()
+		p.bufPool.Put(builder)
 	}()
 	for _, f := range p.funcs {
-		buf.WriteString(f(d))
+		builder.WriteString(f(d))
 	}
 
-	_, err := buf.WriteTo(w)
+	_, err := w.Write([]byte(builder.String()))
 	return err
 }
 
 // Render implemet Formater as string
 func (p *pattern) RenderString(d map[string]interface{}) string {
-	// TODO strings.Builder
-	buf := p.bufPool.Get().(*bytes.Buffer)
+	builder := p.bufPool.Get().(*strings.Builder)
 	defer func() {
-		buf.Reset()
-		p.bufPool.Put(buf)
+		builder.Reset()
+		p.bufPool.Put(builder)
 	}()
 	for _, f := range p.funcs {
-		buf.WriteString(f(d))
+		builder.WriteString(f(d))
 	}
 
-	return buf.String()
+	return builder.String()
 }
 
 func textFactory(text string) func(map[string]interface{}) string {
