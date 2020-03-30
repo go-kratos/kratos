@@ -13,7 +13,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var (
@@ -27,7 +27,7 @@ func protocAction(ctx *cli.Context) (err error) {
 	if err = checkProtoc(); err != nil {
 		return err
 	}
-	files := []string(ctx.Args())
+	files := ctx.Args().Slice()
 	if len(files) == 0 {
 		files, _ = filepath.Glob("*.proto")
 	}

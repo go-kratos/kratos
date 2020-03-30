@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 func main() {
@@ -12,22 +12,22 @@ func main() {
 	app.Name = "protc"
 	app.Usage = "protobuf生成工具"
 	app.Flags = []cli.Flag{
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:        "bm",
 			Usage:       "whether to use BM for generation",
 			Destination: &withBM,
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:        "grpc",
 			Usage:       "whether to use gRPC for generation",
 			Destination: &withGRPC,
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:        "swagger",
 			Usage:       "whether to use swagger for generation",
 			Destination: &withSwagger,
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:        "ecode",
 			Usage:       "whether to use ecode for generation",
 			Destination: &withEcode,
