@@ -70,6 +70,7 @@ func TestNewFilePath(t *testing.T) {
 func TestFileEvent(t *testing.T) {
 	// test data
 	path := "/tmp/test_conf_event/"
+	assert.Nil(t, os.MkdirAll(path, 0700))
 	// test client
 	cli, err := NewFile(path)
 	assert.Nil(t, err)
