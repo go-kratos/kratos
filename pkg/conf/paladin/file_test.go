@@ -71,6 +71,14 @@ func TestFileEvent(t *testing.T) {
 	// test data
 	path := "/tmp/test_conf_event/"
 	assert.Nil(t, os.MkdirAll(path, 0700))
+	assert.Nil(t, ioutil.WriteFile(filepath.Join(path, "test.toml"), []byte(`
+		text = "hello"	
+		number = 100
+	`), 0644))
+	assert.Nil(t, ioutil.WriteFile(filepath.Join(path, "abc.toml"), []byte(`
+		text = "hello"	
+		number = 100
+	`), 0644))
 	// test client
 	cli, err := NewFile(path)
 	assert.Nil(t, err)
