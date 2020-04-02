@@ -157,7 +157,7 @@ func TestBalancerPick(t *testing.T) {
 	picker := b.Build(scs)
 	res := []string{"test1", "test1", "test1", "test1"}
 	for i := 0; i < 3; i++ {
-		conn, _, err := picker.Pick(context.Background(), balancer.PickOptions{})
+		conn, _, err := picker.Pick(context.Background(), balancer.PickInfo{})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
@@ -169,7 +169,7 @@ func TestBalancerPick(t *testing.T) {
 
 	ctx := nmd.NewContext(context.Background(), nmd.New(map[string]interface{}{"color": "black"}))
 	for i := 0; i < 4; i++ {
-		conn, _, err := picker.Pick(ctx, balancer.PickOptions{})
+		conn, _, err := picker.Pick(ctx, balancer.PickInfo{})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
@@ -182,7 +182,7 @@ func TestBalancerPick(t *testing.T) {
 	env.Color = "purple"
 	ctx2 := context.Background()
 	for i := 0; i < 4; i++ {
-		conn, _, err := picker.Pick(ctx2, balancer.PickOptions{})
+		conn, _, err := picker.Pick(ctx2, balancer.PickInfo{})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
@@ -205,7 +205,7 @@ func Benchmark_Wrr(b *testing.B) {
 	}
 	wpb := &p2cPickerBuilder{}
 	picker := wpb.Build(scs)
-	opt := balancer.PickOptions{}
+	opt := balancer.PickInfo{}
 	ctx := context.Background()
 	for idx := 0; idx < b.N; idx++ {
 		_, done, err := picker.Pick(ctx, opt)
@@ -262,7 +262,7 @@ type controller struct {
 }
 
 func (c *controller) launch(concurrency int) {
-	opt := balancer.PickOptions{}
+	opt := balancer.PickInfo{}
 	bkg := context.Background()
 	for i := range c.clients {
 		for j := 0; j < concurrency; j++ {
