@@ -217,7 +217,7 @@ func Benchmark_Wrr(b *testing.B) {
 
 func TestChaosPick(t *testing.T) {
 	flag.Parse()
-	fmt.Printf("start chaos test!svrNum:%d cliNum:%d concurrency:%d exLoad:%d exDelay:%d\n", serverNum, cliNum, concurrency, extraLoad, extraDelay)
+	t.Logf("start chaos test!svrNum:%d cliNum:%d concurrency:%d exLoad:%d exDelay:%d\n", serverNum, cliNum, concurrency, extraLoad, extraDelay)
 	c := newController(serverNum, cliNum)
 	c.launch(concurrency)
 	go c.updateStatics()
