@@ -155,7 +155,7 @@ type p2cPicker struct {
 	lk       sync.Mutex
 }
 
-func (p *p2cPicker) Pick(ctx context.Context, opts balancer.PickOptions) (balancer.SubConn, func(balancer.DoneInfo), error) {
+func (p *p2cPicker) Pick(ctx context.Context, opts balancer.PickInfo) (balancer.SubConn, func(balancer.DoneInfo), error) {
 	// FIXME refactor to unify the color logic
 	color := nmd.String(ctx, nmd.Color)
 	if color == "" && env.Color != "" {
@@ -187,7 +187,7 @@ func (p *p2cPicker) prePick() (nodeA *subConn, nodeB *subConn) {
 	return
 }
 
-func (p *p2cPicker) pick(ctx context.Context, opts balancer.PickOptions) (balancer.SubConn, func(balancer.DoneInfo), error) {
+func (p *p2cPicker) pick(ctx context.Context, opts balancer.PickInfo) (balancer.SubConn, func(balancer.DoneInfo), error) {
 	var pc, upc *subConn
 	start := time.Now().UnixNano()
 

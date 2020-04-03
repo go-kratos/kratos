@@ -84,7 +84,7 @@ func TestFileEvent(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, cli)
 	ch := cli.WatchEvent(context.Background(), "test.toml", "abc.toml")
-	time.Sleep(time.Millisecond)
+	time.Sleep(time.Second)
 	timeout := time.NewTimer(time.Second)
 
 	// for file test.toml

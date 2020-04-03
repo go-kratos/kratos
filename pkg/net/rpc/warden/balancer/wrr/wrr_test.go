@@ -3,10 +3,11 @@ package wrr
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"testing"
 	"time"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/go-kratos/kratos/pkg/conf/env"
 	nmd "github.com/go-kratos/kratos/pkg/net/metadata"
@@ -66,7 +67,7 @@ func TestBalancerPick(t *testing.T) {
 	picker := b.Build(scs)
 	res := []string{"test1", "test1", "test1", "test1"}
 	for i := 0; i < 3; i++ {
-		conn, _, err := picker.Pick(context.Background(), balancer.PickOptions{})
+		conn, _, err := picker.Pick(context.Background(), balancer.PickInfo{})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
@@ -78,7 +79,7 @@ func TestBalancerPick(t *testing.T) {
 	res2 := []string{"test2", "test3", "test2", "test2", "test3", "test2"}
 	ctx := nmd.NewContext(context.Background(), nmd.New(map[string]interface{}{"color": "red"}))
 	for i := 0; i < 6; i++ {
-		conn, _, err := picker.Pick(ctx, balancer.PickOptions{})
+		conn, _, err := picker.Pick(ctx, balancer.PickInfo{})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
@@ -89,7 +90,7 @@ func TestBalancerPick(t *testing.T) {
 	}
 	ctx = nmd.NewContext(context.Background(), nmd.New(map[string]interface{}{"color": "black"}))
 	for i := 0; i < 4; i++ {
-		conn, _, err := picker.Pick(ctx, balancer.PickOptions{})
+		conn, _, err := picker.Pick(ctx, balancer.PickInfo{})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
@@ -103,7 +104,7 @@ func TestBalancerPick(t *testing.T) {
 	ctx = context.Background()
 	env.Color = "red"
 	for i := 0; i < 6; i++ {
-		conn, _, err := picker.Pick(ctx, balancer.PickOptions{})
+		conn, _, err := picker.Pick(ctx, balancer.PickInfo{})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
@@ -128,7 +129,7 @@ func TestBalancerDone(t *testing.T) {
 	b := &wrrPickerBuilder{}
 	picker := b.Build(scs)
 
-	_, done, _ := picker.Pick(context.Background(), balancer.PickOptions{})
+	_, done, _ := picker.Pick(context.Background(), balancer.PickInfo{})
 	time.Sleep(100 * time.Millisecond)
 	done(balancer.DoneInfo{Err: status.Errorf(codes.Unknown, "test")})
 	err, req := picker.(*wrrPicker).subConns[0].errSummary()
@@ -142,7 +143,7 @@ func TestBalancerDone(t *testing.T) {
 	}
 	assert.Equal(t, int64(1), count)
 
-	_, done, _ = picker.Pick(context.Background(), balancer.PickOptions{})
+	_, done, _ = picker.Pick(context.Background(), balancer.PickInfo{})
 	done(balancer.DoneInfo{Err: status.Errorf(codes.Aborted, "test")})
 	err, req = picker.(*wrrPicker).subConns[0].errSummary()
 	assert.Equal(t, int64(1), err)
