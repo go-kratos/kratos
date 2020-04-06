@@ -43,3 +43,8 @@ func kindOfData(data interface{}) reflect.Kind {
 	}
 	return valueType
 }
+
+func (v *defaultValidator) GetValidate() *validator.Validate {
+	v.lazyinit()
+	return v.validate
+}

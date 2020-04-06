@@ -37,6 +37,9 @@ type StructValidator interface {
 	// NOTE: if the key already exists, the previous validation function will be replaced.
 	// NOTE: this method is not thread-safe it is intended that these all be registered prior to any validation
 	RegisterValidation(string, validator.Func) error
+
+	//GetValidate return the default validate
+	GetValidate() *validator.Validate
 }
 
 // Validator default validator.
