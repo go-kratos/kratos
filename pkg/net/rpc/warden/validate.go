@@ -29,3 +29,8 @@ func (s *Server) validate() grpc.UnaryServerInterceptor {
 func (s *Server) RegisterValidation(key string, fn validator.Func) error {
 	return validate.RegisterValidation(key, fn)
 }
+
+//GetValidate return the default validate
+func (s *Server) GetValidate() *validator.Validate {
+	return validate
+}
