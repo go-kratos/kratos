@@ -2,6 +2,7 @@ package ecode
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 	"sync/atomic"
 
@@ -24,6 +25,11 @@ func New(e int) Code {
 	if e <= 0 {
 		panic("business ecode must greater than zero")
 	}
+
+	if e <= http.StatusNetworkAuthenticationRequired {
+		panic("code lte 511 reserved for http status,customer ecode must greater than 511")
+	}
+
 	return add(e)
 }
 

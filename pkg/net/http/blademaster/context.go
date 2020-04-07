@@ -131,8 +131,21 @@ func (c *Context) Status(code int) {
 // Render http response with http code by a render instance.
 func (c *Context) Render(code int, r render.Render) {
 	r.WriteContentType(c.Writer)
-	if code > 0 {
+	if code < 0 {
+		code = -code
+	}
+
+	// TODO app allow 5xx?
+	/*
+		if code == 500 {
+			code = http.StatusServiceUnavailable
+		}
+	*/
+
+	if code >= http.StatusContinue && code <= http.StatusNetworkAuthenticationRequired {
 		c.Status(code)
+	} else {
+		c.Status(http.StatusOK)
 	}
 
 	if !bodyAllowedForStatus(code) {
@@ -162,17 +175,11 @@ func (c *Context) Render(code int, r render.Render) {
 // JSON serializes the given struct as JSON into the response body.
 // It also sets the Content-Type as "application/json".
 func (c *Context) JSON(data interface{}, err error) {
-	code := http.StatusOK
 	c.Error = err
 	bcode := ecode.Cause(err)
-	// TODO app allow 5xx?
-	/*
-		if bcode.Code() == -500 {
-			code = http.StatusServiceUnavailable
-		}
-	*/
+
 	writeStatusCode(c.Writer, bcode.Code())
-	c.Render(code, render.JSON{
+	c.Render(bcode.Code(), render.JSON{
 		Code:    bcode.Code(),
 		Message: bcode.Message(),
 		Data:    data,
@@ -182,37 +189,25 @@ func (c *Context) JSON(data interface{}, err error) {
 // JSONMap serializes the given map as map JSON into the response body.
 // It also sets the Content-Type as "application/json".
 func (c *Context) JSONMap(data map[string]interface{}, err error) {
-	code := http.StatusOK
 	c.Error = err
 	bcode := ecode.Cause(err)
-	// TODO app allow 5xx?
-	/*
-		if bcode.Code() == -500 {
-			code = http.StatusServiceUnavailable
-		}
-	*/
+
 	writeStatusCode(c.Writer, bcode.Code())
 	data["code"] = bcode.Code()
 	if _, ok := data["message"]; !ok {
 		data["message"] = bcode.Message()
 	}
-	c.Render(code, render.MapJSON(data))
+	c.Render(bcode.Code(), render.MapJSON(data))
 }
 
 // XML serializes the given struct as XML into the response body.
 // It also sets the Content-Type as "application/xml".
 func (c *Context) XML(data interface{}, err error) {
-	code := http.StatusOK
 	c.Error = err
 	bcode := ecode.Cause(err)
-	// TODO app allow 5xx?
-	/*
-		if bcode.Code() == -500 {
-			code = http.StatusServiceUnavailable
-		}
-	*/
+
 	writeStatusCode(c.Writer, bcode.Code())
-	c.Render(code, render.XML{
+	c.Render(bcode.Code(), render.XML{
 		Code:    bcode.Code(),
 		Message: bcode.Message(),
 		Data:    data,
@@ -226,7 +221,6 @@ func (c *Context) Protobuf(data proto.Message, err error) {
 		bytes []byte
 	)
 
-	code := http.StatusOK
 	c.Error = err
 	bcode := ecode.Cause(err)
 
@@ -240,7 +234,7 @@ func (c *Context) Protobuf(data proto.Message, err error) {
 		any.Value = bytes
 	}
 	writeStatusCode(c.Writer, bcode.Code())
-	c.Render(code, render.PB{
+	c.Render(bcode.Code(), render.PB{
 		Code:    int64(bcode.Code()),
 		Message: bcode.Message(),
 		Data:    any,
