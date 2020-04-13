@@ -45,7 +45,7 @@ type Context struct {
 	// Keys is a key/value pair exclusively for the context of each request.
 	Keys map[string]interface{}
 	// This mutex protect Keys map
-	keysMutex *sync.RWMutex
+	keysMutex sync.RWMutex
 
 	Error error
 
@@ -65,7 +65,6 @@ func (c *Context) reset() {
 	c.index = -1
 	c.handlers = nil
 	c.Keys = nil
-	c.keysMutex = new(sync.RWMutex)
 	c.Error = nil
 	c.method = ""
 	c.RoutePath = ""
@@ -114,10 +113,6 @@ func (c *Context) IsAborted() bool {
 // Set is used to store a new key/value pair exclusively for this context.
 // It also lazy initializes  c.Keys if it was not used previously.
 func (c *Context) Set(key string, value interface{}) {
-	if c.keysMutex == nil {
-		c.keysMutex = &sync.RWMutex{}
-	}
-
 	c.keysMutex.Lock()
 	if c.Keys == nil {
 		c.Keys = make(map[string]interface{})
@@ -129,10 +124,6 @@ func (c *Context) Set(key string, value interface{}) {
 // Get returns the value for the given key, ie: (value, true).
 // If the value does not exists it returns (nil, false)
 func (c *Context) Get(key string) (value interface{}, exists bool) {
-	if c.keysMutex == nil {
-		c.keysMutex = &sync.RWMutex{}
-	}
-
 	c.keysMutex.RLock()
 	value, exists = c.Keys[key]
 	c.keysMutex.RUnlock()
