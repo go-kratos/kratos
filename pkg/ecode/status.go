@@ -1,6 +1,7 @@
 package ecode
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -20,6 +21,14 @@ func Errorf(code Code, format string, args ...interface{}) *Status {
 	return Error(code, fmt.Sprintf(format, args...))
 }
 
+func Parse(errMsg string) *Status {
+	st := &types.Status{}
+	if err := json.Unmarshal([]byte(errMsg), st); err != nil {
+		st.Message = errMsg
+	}
+	return &Status{s: st}
+}
+
 var _ Codes = &Status{}
 
 // Status statusError is an alias of a status proto
@@ -30,7 +39,11 @@ type Status struct {
 
 // Error implement error
 func (s *Status) Error() string {
-	return s.Message()
+	if s == nil {
+		return ""
+	}
+	b, _ := json.Marshal(s.s)
+	return string(b)
 }
 
 // Code return error code

@@ -55,3 +55,28 @@ func TestEmpty(t *testing.T) {
 	st = nil
 	assert.Len(t, st.Details(), 0)
 }
+
+func TestParse(t *testing.T) {
+	var (
+		err error
+		st  *Status
+	)
+	t.Run("parse ecode.Status", func(t *testing.T) {
+		err = FromCode(RequestErr)
+		st = Parse(err.Error())
+		assert.Equal(t, RequestErr.Code(), st.Code())
+
+		errMsg := "name is required"
+		err = Error(RequestErr, errMsg)
+		st = Parse(err.Error())
+		assert.Equal(t, RequestErr.Code(), st.Code())
+		assert.Equal(t, errMsg, st.Message())
+	})
+
+	t.Run("parse ecode.Code", func(t *testing.T) {
+		err = ServerErr
+		st = Parse(err.Error())
+
+		assert.Equal(t, ServerErr.Error(), st.Message())
+	})
+}
