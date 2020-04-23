@@ -60,7 +60,7 @@ go build
 ./cmd -conf ../configs
 ```
 
-打开浏览器访问：[http://localhost:8000/kratos-new/start](http://localhost:8000/kratos-demo/start)，你会看到输出了`Golang 大法好 ！！！`
+打开浏览器访问：[http://localhost:8000/kratos-new/start](http://localhost:8000/kratos-new/start)，你会看到输出了`Golang 大法好 ！！！`
 
 [kratos工具](kratos-tool.md)
 
