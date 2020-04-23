@@ -7,7 +7,7 @@
 
 # Kratos
 
-Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，包含大量微服务相关框架及工具。  
+Kratos是[bilibili](https://www.bilibili.com)开源的一套Go微服务框架，包含大量微服务相关框架及工具。
 
 > 名字来源于:《战神》游戏以希腊神话为背景，讲述由凡人成为战神的奎托斯（Kratos）成为战神并展开弑神屠杀的冒险历程。
 
@@ -38,7 +38,7 @@ cd $GOPATH/src
 kratos new kratos-demo
 ```
 
-通过 `kratos new` 会快速生成基于kratos库的脚手架代码，如生成 [kratos-demo](https://github.com/go-kratos/kratos-demo) 
+通过 `kratos new` 会快速生成基于kratos库的脚手架代码，如生成 [kratos-demo](https://github.com/go-kratos/kratos-demo)
 
 ### Build & Run
 
@@ -48,14 +48,14 @@ go build
 ./cmd -conf ../configs
 ```
 
-打开浏览器访问：[http://localhost:8000/kratos-demo/start](http://localhost:8000/kratos-demo/start)，你会看到输出了`Golang 大法好 ！！！`
+打开浏览器访问：[http://localhost:8000/kratos-new/start](http://localhost:8000/kratos-demo/start)，你会看到输出了`Golang 大法好 ！！！`
 
 [快速开始](doc/wiki-cn/quickstart.md)  [kratos工具](doc/wiki-cn/kratos-tool.md)
 
 ## Documentation
 
-> [简体中文](doc/wiki-cn/summary.md)  
-> [FAQ](doc/wiki-cn/FAQ.md)  
+> [简体中文](doc/wiki-cn/summary.md)
+> [FAQ](doc/wiki-cn/FAQ.md)
 
 ## License
 Kratos is under the MIT license. See the [LICENSE](./LICENSE) file for details.
