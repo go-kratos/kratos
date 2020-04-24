@@ -1,6 +1,7 @@
 package ecode
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/pkg/errors"
+	"google.golang.org/grpc/status"
 )
 
 // Error new status with code and message
@@ -21,12 +24,50 @@ func Errorf(code Code, format string, args ...interface{}) *Status {
 	return Error(code, fmt.Sprintf(format, args...))
 }
 
-func Parse(errMsg string) *Status {
-	st := &types.Status{}
-	if err := json.Unmarshal([]byte(errMsg), st); err != nil {
-		st.Message = errMsg
+func statusFromCodes(code Codes) (st *Status, err error) {
+	switch v := code.(type) {
+	case *Status:
+		st = v
+	case Code:
+		st = FromCode(v)
+	default:
+		st = Error(Code(code.Code()), code.Message())
+		for _, detail := range code.Details() {
+			if msg, ok := detail.(proto.Message); ok {
+				if _, err = st.WithDetails(msg); err != nil {
+					break
+				}
+			}
+		}
 	}
-	return &Status{s: st}
+	return st, err
+}
+
+func Parse(err error) (st *Status) {
+	if err == nil {
+		return FromCode(OK)
+	}
+	v := errors.Cause(err)
+
+	if codes, ok := v.(Codes); ok {
+		if st, err = statusFromCodes(codes); err == nil {
+			return
+		}
+	}
+
+	switch v {
+	case context.Canceled:
+		st, _ = statusFromCodes(Canceled)
+	case context.DeadlineExceeded:
+		st, _ = statusFromCodes(Deadline)
+	default:
+		if gst, ok := status.FromError(err); ok {
+			return Error(Code(gst.Code()), gst.Message())
+		}
+		return Error(ServerErr, err.Error())
+	}
+
+	return
 }
 
 var _ Codes = &Status{}
@@ -90,7 +131,7 @@ func (s *Status) WithDetails(pbs ...proto.Message) (*Status, error) {
 
 // Proto return origin protobuf message
 func (s *Status) Proto() *types.Status {
-	return s.s
+	return proto.Clone(s.s).(*types.Status)
 }
 
 // FromCode create status from ecode
