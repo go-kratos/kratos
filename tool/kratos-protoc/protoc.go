@@ -134,7 +134,7 @@ func latestKratos() (string, error) {
 	if _, err := os.Stat(ext); !os.IsNotExist(err) {
 		return ext, nil
 	}
-	ext = path.Join(gopath, "src/go-kratos/kratos/third_party")
+	ext = path.Join(gopath, "src/kratos/third_party")
 	if _, err := os.Stat(ext); !os.IsNotExist(err) {
 		return ext, nil
 	}
