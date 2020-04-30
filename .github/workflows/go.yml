@@ -34,7 +34,8 @@ jobs:
         chmod +x docker-compose
         sudo mv docker-compose /usr/local/bin
         wget https://github.com/google/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-        unzip protoc-3.11.4-linux-x86_64.zip.zip
+        unzip protoc-3.11.4-linux-x86_64.zip
+        chmod +x protoc
         sudo mv protoc /usr/local/bin
         go get -u github.com/golang/protobuf/protoc-gen-go
 
