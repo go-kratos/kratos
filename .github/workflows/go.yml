@@ -19,7 +19,7 @@ jobs:
         go-version: 1.13
       id: go
 
-    - name: setup env
+    - name: Set up Env
       run: |
         echo "::set-env name=GOPATH::$(go env GOPATH)"
         echo "::add-path::$(go env GOPATH)/bin"
@@ -52,4 +52,6 @@ jobs:
     - name: Tool
       run: |
         go install ./...
-        kratos new test-project 
+        kratos new kratos-demo
+        cd kratos-demo
+        go build ./...
