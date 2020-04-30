@@ -52,6 +52,8 @@ jobs:
     - name: Tool
       run: |
         go install ./...
+        mkdir -p $GOPATH/src
+        ln -s kratos $GOPATH/src/kratos
         kratos new kratos-demo
         cd kratos-demo
         go build ./...
