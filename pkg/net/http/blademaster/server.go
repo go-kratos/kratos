@@ -94,7 +94,7 @@ func (engine *Engine) Start() error {
 		return errors.Wrapf(err, "blademaster: listen tcp: %s", conf.Addr)
 	}
 
-	log.Info("blademaster: start http listen addr: %s", conf.Addr)
+	log.Info("blademaster: start http listen addr: %s", l.Addr().String())
 	server := &http.Server{
 		ReadTimeout:  time.Duration(conf.ReadTimeout),
 		WriteTimeout: time.Duration(conf.WriteTimeout),
