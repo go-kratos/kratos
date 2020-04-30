@@ -19,6 +19,11 @@ jobs:
         go-version: 1.13
       id: go
 
+    - name: Set up Env
+      run: |
+        echo "::set-env name=GOPATH::$(go env GOPATH)"
+        echo "::add-path::$(go env GOPATH)/bin"
+
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
@@ -33,8 +38,24 @@ jobs:
         curl -L https://github.com/docker/compose/releases/download/1.25.5/docker-compose-`uname -s`-`uname -m` > docker-compose
         chmod +x docker-compose
         sudo mv docker-compose /usr/local/bin
+        wget https://github.com/google/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
+        unzip protoc-3.11.4-linux-x86_64.zip
+        chmod +x bin/protoc
+        sudo mv bin/protoc /usr/local/bin
+        sudo mv include /usr/local/bin
+        go get -u github.com/golang/protobuf/protoc-gen-go
+        go get -u github.com/gogo/protobuf/protoc-gen-gofast
 
     - name: Build
       run: go build ./...
     - name: Test
       run: go test ./...
+    - name: Tool
+      run: |
+        go install ./...
+        mkdir -p $GOPATH/src
+        cp -R ../kratos $GOPATH/src
+        cd $GOPATH/src
+        kratos new kratos-demo
+        cd kratos-demo
+        go build ./...
