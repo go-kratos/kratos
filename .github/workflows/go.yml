@@ -54,7 +54,7 @@ jobs:
       run: |
         go install ./...
         mkdir -p $GOPATH/src
-        mv ../kratos $GOPATH/src
+        cp -R ../kratos $GOPATH/src
         cd $GOPATH/src
         kratos new kratos-demo
         cd kratos-demo
