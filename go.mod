@@ -29,6 +29,7 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.14.3 // indirect
+	github.com/jinzhu/gorm v1.9.12
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
@@ -45,6 +46,7 @@ require (
 	github.com/shirou/gopsutil v2.19.11+incompatible
 	github.com/siddontang/go v0.0.0-20180604090527-bdc77568d726
 	github.com/sirupsen/logrus v1.5.0
+	github.com/smartystreets/goconvey v1.6.4
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20200122045848-3419fae592fc // indirect
