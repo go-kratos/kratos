@@ -98,7 +98,7 @@ type statistics struct {
 	ewt      int64
 	cs       float64
 	ss       float64
-	lantency float64
+	latency float64
 	cpu      float64
 	req      int64
 }
@@ -273,7 +273,7 @@ func (p *wrrPicker) pick(ctx context.Context, opts balancer.PickInfo) (balancer.
 					cs = 0.2
 				}
 				conn.score = math.Sqrt((cs * ss * ss * 1e9) / (lagv * cpu))
-				stats[i] = statistics{cs: cs, ss: ss, lantency: lagv, cpu: cpu, req: req}
+				stats[i] = statistics{cs: cs, ss: ss, latency: lagv, cpu: cpu, req: req}
 			}
 			stats[i].addr = conn.addr.Addr
 
