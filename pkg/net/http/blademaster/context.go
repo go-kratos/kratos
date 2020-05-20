@@ -367,6 +367,20 @@ func (c *Context) Bind(obj interface{}) error {
 	return c.mustBindWith(obj, b)
 }
 
+// Value returns the value associated with this context for key, or nil
+// if no value is associated with key. Successive calls to Value with
+// the same key returns the same result.
+func (c *Context) Value(key interface{}) interface{} {
+	if key == 0 {
+		return c.Request
+	}
+	if keyAsString, ok := key.(string); ok {
+		val, _ := c.Get(keyAsString)
+		return val
+	}
+	return nil
+}
+
 // mustBindWith binds the passed struct pointer using the specified binding engine.
 // It will abort the request with HTTP 400 if any error ocurrs.
 // See the binding package.
