@@ -16,6 +16,8 @@ const (
 	MIMEPlain             = "text/plain"
 	MIMEPOSTForm          = "application/x-www-form-urlencoded"
 	MIMEMultipartPOSTForm = "multipart/form-data"
+	MIMEPROTOBUF          = "application/x-protobuf"
+	MIMEBINARY            = "application/octet-stream"
 )
 
 // Binding http binding request interface.

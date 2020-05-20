@@ -21,6 +21,17 @@ import (
 )
 
 const (
+	MIMEJSON  = binding.MIMEJSON
+	MIMEHTML  = binding.MIMEHTML
+	MIMEXML   = binding.MIMEXML
+	MIMEPlain = binding.MIMEPlain
+	//MIMEPOSTForm          = binding.MIMEPOSTForm
+	//MIMEMultipartPOSTForm = binding.MIMEMultipartPOSTForm
+	MIMEPROTOBUF = binding.MIMEPROTOBUF
+	MIMEBINARY   = binding.MIMEBINARY
+)
+
+const (
 	_abortIndex int8 = math.MaxInt8 / 2
 )
 
