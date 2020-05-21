@@ -417,3 +417,27 @@ func (c *Context) RemoteIP() (remoteIP string) {
 
 	return
 }
+
+func (c *Context) RespWithAccept(data interface{}, err error) {
+	Accept := c.Request.Header.Get("Accept")
+	switch Accept {
+	case MIMEJSON:
+		c.JSON(data, err)
+		return
+	case MIMEXML:
+		c.XML(data, err)
+		return
+	case MIMEPROTOBUF:
+		c.Protobuf(data.(proto.Message), err)
+		return
+	case MIMEPlain:
+		//c.String(data, err)
+		return
+	case MIMEBINARY:
+		//c.Bytes(http.StatusOK,MIMEBINARY,data)
+		return
+	default:
+		c.JSON(data, err)
+		return
+	}
+}
