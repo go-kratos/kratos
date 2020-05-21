@@ -215,7 +215,7 @@ func (t *bm) generateBMRoute(
 		t.P(`		return`)
 		t.P(`	}`)
 		t.P(`	resp, err := `, svcName, `.`, methName, `(c, p)`)
-		t.P(`	c.JSON(resp, err)`)
+		t.P(`	c.RespWithAccept(resp, err)`)
 		t.P(`}`)
 		t.P(``)
 	}
