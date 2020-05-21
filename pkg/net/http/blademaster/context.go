@@ -346,9 +346,40 @@ func (c *Context) Bytes(code int, contentType string, data ...[]byte) {
 	})
 }
 
+// Bytes writes service return protobuf serializes into the response body.
+// Sets the ContentType as "application/octet-stream".
+// Not recommended use this function unless You want return origin proto message.
+func (c *Context) ProtoBytes(data proto.Message, err error) {
+	code := http.StatusOK
+	bytes := [][]byte{}
+	ProtoBytes, err := proto.Marshal(data)
+
+	if err != nil {
+		c.Render(code, render.Data{
+			ContentType: MIMEBINARY,
+		})
+		return
+	}
+
+	c.Render(code, render.Data{
+		ContentType: MIMEBINARY,
+		Data:        append(bytes, ProtoBytes),
+	})
+}
+
 // String writes the given string into the response body.
 func (c *Context) String(code int, format string, values ...interface{}) {
 	c.Render(code, render.String{Format: format, Data: values})
+}
+
+// String writes Protobuf message into the response body.
+// sets the ContentType as "text/plain".
+// Not recommended use this function
+func (c *Context) ProtoString(data proto.Message, err error) {
+	code := http.StatusOK
+	bcode := ecode.Cause(err)
+	s := proto.MarshalTextString(data)
+	c.String(code, "code:%d,message:%s,data:%s", bcode.Code(), bcode.Message(), s)
 }
 
 // Redirect returns a HTTP redirect to the specific location.
@@ -431,10 +462,10 @@ func (c *Context) RespWithAccept(data interface{}, err error) {
 		c.Protobuf(data.(proto.Message), err)
 		return
 	case MIMEPlain:
-		//c.String(data, err)
+		c.ProtoString(data.(proto.Message), err)
 		return
 	case MIMEBINARY:
-		//c.Bytes(http.StatusOK,MIMEBINARY,data)
+		c.ProtoBytes(data.(proto.Message), err)
 		return
 	default:
 		c.JSON(data, err)
