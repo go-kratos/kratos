@@ -5,7 +5,7 @@ kratos 工具
 
 ## 安装
 
-`go get -u github.com/go-kratos/kratos/tool/kratos`
+`go get -u github.com/ptechen/kratos/tool/kratos`
 
 ## 使用说明
 

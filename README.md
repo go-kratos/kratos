@@ -1,7 +1,7 @@
 ![kratos](doc/img/kratos3.png)
 
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
-[![Build Status](https://github.com/go-kratos/kratos/workflows/Go/badge.svg)](https://github.com/go-kratos/kratos/actions)
+[![Build Status](https://github.com/ptechen/kratos/workflows/Go/badge.svg)](https://github.com/ptechen/kratos/actions)
 [![GoDoc](https://godoc.org/github.com/go-kratos/kratos?status.svg)](https://godoc.org/github.com/go-kratos/kratos)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-kratos/kratos)](https://goreportcard.com/report/github.com/go-kratos/kratos)
 
@@ -33,7 +33,7 @@ Go version>=1.13
 
 ### Installation
 ```shell
-GO111MODULE=on && go get -u github.com/go-kratos/kratos/tool/kratos
+GO111MODULE=on && go get -u github.com/ptechen/kratos/tool/kratos
 cd $GOPATH/src
 kratos new kratos-demo
 ```

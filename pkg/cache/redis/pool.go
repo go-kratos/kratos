@@ -25,9 +25,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kratos/kratos/pkg/container/pool"
-	"github.com/go-kratos/kratos/pkg/net/trace"
-	xtime "github.com/go-kratos/kratos/pkg/time"
+	"github.com/ptechen/kratos/pkg/container/pool"
+	"github.com/ptechen/kratos/pkg/net/trace"
+	xtime "github.com/ptechen/kratos/pkg/time"
 )
 
 var beginTime, _ = time.Parse("2006-01-02 15:04:05", "2006-01-02 15:04:05")

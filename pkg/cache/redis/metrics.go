@@ -1,7 +1,7 @@
 package redis
 
 import (
-	"github.com/go-kratos/kratos/pkg/stat/metric"
+	"github.com/ptechen/kratos/pkg/stat/metric"
 )
 
 const namespace = "redis_client"

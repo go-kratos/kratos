@@ -3,7 +3,7 @@
 快速使用kratos项目，可以使用`kratos`工具，如下：
 
 ```shell
-go get -u github.com/go-kratos/kratos/tool/kratos
+go get -u github.com/ptechen/kratos/tool/kratos
 cd $GOPATH/src
 kratos new kratos-demo
 ```

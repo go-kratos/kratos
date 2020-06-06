@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	pb "github.com/go-kratos/kratos/pkg/cache/memcache/test"
+	pb "github.com/ptechen/kratos/pkg/cache/memcache/test"
 
 	"github.com/stretchr/testify/assert"
 )

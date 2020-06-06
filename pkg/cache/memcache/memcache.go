@@ -3,8 +3,8 @@ package memcache
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/pkg/container/pool"
-	xtime "github.com/go-kratos/kratos/pkg/time"
+	"github.com/ptechen/kratos/pkg/container/pool"
+	xtime "github.com/ptechen/kratos/pkg/time"
 )
 
 const (

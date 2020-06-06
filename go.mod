@@ -1,4 +1,4 @@
-module github.com/go-kratos/kratos
+module github.com/ptechen/kratos
 
 go 1.13
 

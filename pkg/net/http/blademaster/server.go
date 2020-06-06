@@ -13,12 +13,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-kratos/kratos/pkg/conf/dsn"
-	"github.com/go-kratos/kratos/pkg/log"
-	"github.com/go-kratos/kratos/pkg/net/criticality"
-	"github.com/go-kratos/kratos/pkg/net/ip"
-	"github.com/go-kratos/kratos/pkg/net/metadata"
-	xtime "github.com/go-kratos/kratos/pkg/time"
+	"github.com/ptechen/kratos/pkg/conf/dsn"
+	"github.com/ptechen/kratos/pkg/log"
+	"github.com/ptechen/kratos/pkg/net/criticality"
+	"github.com/ptechen/kratos/pkg/net/ip"
+	"github.com/ptechen/kratos/pkg/net/metadata"
+	xtime "github.com/ptechen/kratos/pkg/time"
 
 	"github.com/pkg/errors"
 )

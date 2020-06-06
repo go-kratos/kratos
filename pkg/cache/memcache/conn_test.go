@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	test "github.com/go-kratos/kratos/pkg/cache/memcache/test"
+	test "github.com/ptechen/kratos/pkg/cache/memcache/test"
 	"github.com/gogo/protobuf/proto"
 )
 

@@ -89,7 +89,7 @@ func UnaryInterceptor(i UnaryServerInterceptor) ServerOption {
 
 > Only one unary interceptor can be installed. The construction of multiple interceptors (e.g., chaining) can be implemented at the caller.
 
-`gRPC`本身只支持一个`interceptor`，想要多`interceptors`需要自己实现~~所以`warden`基于`grpc.UnaryClientInterceptor`实现了`interceptor chain`，请看下面代码[代码位置](https://github.com/go-kratos/kratos/blob/master/pkg/net/rpc/warden/server.go)：
+`gRPC`本身只支持一个`interceptor`，想要多`interceptors`需要自己实现~~所以`warden`基于`grpc.UnaryClientInterceptor`实现了`interceptor chain`，请看下面代码[代码位置](https://github.com/ptechen/kratos/blob/master/pkg/net/rpc/warden/server.go)：
 
 ```go
 // Use attachs a global inteceptor to the server.
@@ -211,7 +211,7 @@ func WithUnaryInterceptor(f UnaryClientInterceptor) DialOption {
 }
 ```
 
-需要注意的是客户端的拦截器在官方`gRPC`内也只能支持注册一个，与服务端拦截器`interceptor chain`逻辑类似`warden`在客户端拦截器也做了相同处理，并且在客户端连接时进行注册，请看下面代码[代码位置](https://github.com/go-kratos/kratos/blob/master/pkg/net/rpc/warden/client.go)：
+需要注意的是客户端的拦截器在官方`gRPC`内也只能支持注册一个，与服务端拦截器`interceptor chain`逻辑类似`warden`在客户端拦截器也做了相同处理，并且在客户端连接时进行注册，请看下面代码[代码位置](https://github.com/ptechen/kratos/blob/master/pkg/net/rpc/warden/client.go)：
 
 ```go
 // Use attachs a global inteceptor to the Client.
@@ -332,9 +332,9 @@ package grpc
 import (
 	pb "kratos-demo/api"
 	"kratos-demo/internal/service"
-	"github.com/go-kratos/kratos/pkg/conf/paladin"
-	"github.com/go-kratos/kratos/pkg/net/rpc/warden"
-	"github.com/go-kratos/kratos/pkg/net/rpc/warden/ratelimiter"
+	"github.com/ptechen/kratos/pkg/conf/paladin"
+	"github.com/ptechen/kratos/pkg/net/rpc/warden"
+	"github.com/ptechen/kratos/pkg/net/rpc/warden/ratelimiter"
 )
 
 // New new a grpc server.

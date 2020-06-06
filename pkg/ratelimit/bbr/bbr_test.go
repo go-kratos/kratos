@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/pkg/ratelimit"
-	"github.com/go-kratos/kratos/pkg/stat/metric"
+	"github.com/ptechen/kratos/pkg/ratelimit"
+	"github.com/ptechen/kratos/pkg/stat/metric"
 	"github.com/stretchr/testify/assert"
 )
 

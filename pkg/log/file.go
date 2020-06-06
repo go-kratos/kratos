@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/go-kratos/kratos/pkg/log/internal/filewriter"
+	"github.com/ptechen/kratos/pkg/log/internal/filewriter"
 )
 
 // level idx

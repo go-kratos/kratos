@@ -1,7 +1,7 @@
 ## testcli UT运行环境构建工具
 基于 docker-compose 实现跨平台跨语言环境的容器依赖管理方案，以解决运行ut场景下的 (mysql, redis, mc)容器依赖问题。
 
-*这个是testing/lich的二进制工具版本（Go请直接使用库版本：github.com/go-kratos/kratos/pkg/testing/lich)*
+*这个是testing/lich的二进制工具版本（Go请直接使用库版本：github.com/ptechen/kratos/pkg/testing/lich)*
 
 ### 功能和特性
 - 自动读取 test 目录下的 yaml 并启动依赖
@@ -14,18 +14,18 @@
 
 #### Method 1. With go get
 ```shell
-go get -u github.com/go-kratos/kratos/tool/testcli
+go get -u github.com/ptechen/kratos/tool/testcli
 $GOPATH/bin/testcli -h
 ```
 #### Method 2. Build with Go
 ```shell
-cd github.com/go-kratos/kratos/tool/testcli
+cd github.com/ptechen/kratos/tool/testcli
 go build -o $GOPATH/bin/testcli
 $GOPATH/bin/testcli -h
 ```
 #### Method 3. Import with Kratos pkg
 ```Go
-import "github.com/go-kratos/kratos/pkg/testing/lich"
+import "github.com/ptechen/kratos/pkg/testing/lich"
 ```
 
 ### 构建数据
@@ -105,7 +105,7 @@ example:
 testcli -f ../../test/docker-compose.yaml run go test -v ./
 ```
 #### Method 2. Import with Kratos pkg
-- Step1. 在 Dao|Service 层中的 TestMain 单测主入口中，import  "github.com/go-kratos/kratos/pkg/testing/lich" 引入testcli工具的go库版本。
+- Step1. 在 Dao|Service 层中的 TestMain 单测主入口中，import  "github.com/ptechen/kratos/pkg/testing/lich" 引入testcli工具的go库版本。
 - Step2. 使用  flag.Set("f", "../../test/docker-compose.yaml") 指定 docker-compose.yaml 文件的路径。
 - Step3. 在 flag.Parse() 后即可使用 lich.Setup() 安装依赖&初始化数据（注意测试用例执行结束后 lich.Teardown() 回收下～）
 - Step4. 运行 `go test -v ./ `看看效果吧～
@@ -121,8 +121,8 @@ import (
     "strings"
     "testing"
  
-    "github.com/go-kratos/kratos/pkg/conf/paladin"
-    "github.com/go-kratos/kratos/pkg/testing/lich"
+    "github.com/ptechen/kratos/pkg/conf/paladin"
+    "github.com/ptechen/kratos/pkg/testing/lich"
  )
  
 var (

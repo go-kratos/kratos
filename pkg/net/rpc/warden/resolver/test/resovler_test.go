@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/pkg/conf/env"
-	"github.com/go-kratos/kratos/pkg/naming"
-	"github.com/go-kratos/kratos/pkg/net/netutil/breaker"
-	"github.com/go-kratos/kratos/pkg/net/rpc/warden"
-	pb "github.com/go-kratos/kratos/pkg/net/rpc/warden/internal/proto/testproto"
-	"github.com/go-kratos/kratos/pkg/net/rpc/warden/resolver"
-	xtime "github.com/go-kratos/kratos/pkg/time"
+	"github.com/ptechen/kratos/pkg/conf/env"
+	"github.com/ptechen/kratos/pkg/naming"
+	"github.com/ptechen/kratos/pkg/net/netutil/breaker"
+	"github.com/ptechen/kratos/pkg/net/rpc/warden"
+	pb "github.com/ptechen/kratos/pkg/net/rpc/warden/internal/proto/testproto"
+	"github.com/ptechen/kratos/pkg/net/rpc/warden/resolver"
+	xtime "github.com/ptechen/kratos/pkg/time"
 
 	"github.com/stretchr/testify/assert"
 )

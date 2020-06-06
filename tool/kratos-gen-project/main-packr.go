@@ -5,4 +5,4 @@
 // and any other packr generated files.
 package main
 
-import _ "github.com/go-kratos/kratos/tool/kratos-gen-project/packrd"
+import _ "github.com/ptechen/kratos/tool/kratos-gen-project/packrd"

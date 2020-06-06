@@ -3,9 +3,9 @@ package dao
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/pkg/cache/redis"
-	"github.com/go-kratos/kratos/pkg/conf/paladin"
-	"github.com/go-kratos/kratos/pkg/log"
+	"github.com/ptechen/kratos/pkg/cache/redis"
+	"github.com/ptechen/kratos/pkg/conf/paladin"
+	"github.com/ptechen/kratos/pkg/log"
 )
 
 func NewRedis() (r *redis.Redis, cf func(), err error) {

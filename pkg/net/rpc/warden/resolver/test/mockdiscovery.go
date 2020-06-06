@@ -3,8 +3,8 @@ package resolver
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/pkg/conf/env"
-	"github.com/go-kratos/kratos/pkg/naming"
+	"github.com/ptechen/kratos/pkg/conf/env"
+	"github.com/ptechen/kratos/pkg/naming"
 )
 
 type mockDiscoveryBuilder struct {

@@ -6,7 +6,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/go-kratos/kratos/pkg/log"
+	"github.com/ptechen/kratos/pkg/log"
 )
 
 // Recovery returns a middleware that recovers from any panics and writes a 500 if there was one.

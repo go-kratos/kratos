@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-kratos/kratos/pkg/log"
+	"github.com/ptechen/kratos/pkg/log"
 	// Register go-sql-driver stuff
 	_ "github.com/go-sql-driver/mysql"
 )
