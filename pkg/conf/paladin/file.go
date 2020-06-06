@@ -39,6 +39,13 @@ func isHiddenFile(name string) bool {
 	return strings.HasPrefix(filepath.Base(name), ".")
 }
 
+func removeSuffix(name string) string {
+	if strings.HasSuffix(name, "~") {
+		name = strings.TrimSuffix(name, "~")
+	}
+	return name
+}
+
 func readAllPaths(base string) ([]string, error) {
 	fi, err := os.Stat(base)
 	if err != nil {
@@ -177,6 +184,9 @@ func (f *file) reloadFile(name string) {
 	if isHiddenFile(name) {
 		return
 	}
+	
+	name = removeSuffix(name)
+	
 	// NOTE: in some case immediately read file content after receive event
 	// will get old content, sleep 100ms make sure get correct content.
 	time.Sleep(200 * time.Millisecond)
