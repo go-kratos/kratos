@@ -184,7 +184,9 @@ func (f *file) reloadFile(name string) {
 	if isHiddenFile(name) {
 		return
 	}
+
 	name = removeSuffix(name)
+
 	// NOTE: in some case immediately read file content after receive event
 	// will get old content, sleep 100ms make sure get correct content.
 	time.Sleep(200 * time.Millisecond)
