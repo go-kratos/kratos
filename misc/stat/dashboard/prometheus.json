@@ -1604,7 +1604,7 @@
                 }
               ],
               "intervalFactor": 1,
-              "legendFormat": "{{caller}} => {{method}}",
+              "legendFormat": "{{caller}} => {{path}}",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
