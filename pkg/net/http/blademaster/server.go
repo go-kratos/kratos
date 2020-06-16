@@ -94,7 +94,7 @@ func (engine *Engine) Start() error {
 		return errors.Wrapf(err, "blademaster: listen tcp: %s", conf.Addr)
 	}
 
-	log.Info("blademaster: start http listen addr: %s", conf.Addr)
+	log.Info("blademaster: start http listen addr: %s", l.Addr().String())
 	server := &http.Server{
 		ReadTimeout:  time.Duration(conf.ReadTimeout),
 		WriteTimeout: time.Duration(conf.WriteTimeout),
@@ -151,6 +151,8 @@ type Engine struct {
 	allNoMethod []HandlerFunc
 	noRoute     []HandlerFunc
 	noMethod    []HandlerFunc
+
+	pool sync.Pool
 }
 
 type injection struct {
@@ -181,6 +183,9 @@ func NewServer(conf *ServerConfig) *Engine {
 	}
 	if err := engine.SetConfig(conf); err != nil {
 		panic(err)
+	}
+	engine.pool.New = func() interface{} {
+		return engine.newContext()
 	}
 	engine.RouterGroup.engine = engine
 	// NOTE add prometheus monitor location
@@ -477,20 +482,18 @@ func (engine *Engine) Inject(pattern string, handlers ...HandlerFunc) {
 
 // ServeHTTP conforms to the http.Handler interface.
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	c := &Context{
-		Context:  nil,
-		engine:   engine,
-		index:    -1,
-		handlers: nil,
-		Keys:     nil,
-		method:   "",
-		Error:    nil,
-	}
-
+	c := engine.pool.Get().(*Context)
 	c.Request = req
 	c.Writer = w
+	c.reset()
 
 	engine.handleContext(c)
+	engine.pool.Put(c)
+}
+
+//newContext for sync.pool
+func (engine *Engine) newContext() *Context {
+	return &Context{engine: engine}
 }
 
 // NoRoute adds handlers for NoRoute. It return a 404 code by default.

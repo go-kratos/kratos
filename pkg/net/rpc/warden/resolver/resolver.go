@@ -50,7 +50,7 @@ type Builder struct {
 }
 
 // Build returns itself for Resolver, because it's both a builder and a resolver.
-func (b *Builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOption) (resolver.Resolver, error) {
+func (b *Builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
 	var zone = env.Zone
 	ss := int64(50)
 	clusters := map[string]struct{}{}
@@ -107,7 +107,7 @@ func (r *Resolver) Close() {
 }
 
 // ResolveNow is a noop for Resolver.
-func (r *Resolver) ResolveNow(o resolver.ResolveNowOption) {
+func (r *Resolver) ResolveNow(o resolver.ResolveNowOptions) {
 }
 
 func (r *Resolver) updateproc() {

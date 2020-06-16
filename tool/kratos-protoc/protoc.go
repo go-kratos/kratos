@@ -134,6 +134,10 @@ func latestKratos() (string, error) {
 	if _, err := os.Stat(ext); !os.IsNotExist(err) {
 		return ext, nil
 	}
+	ext = path.Join(gopath, "src/kratos/third_party")
+	if _, err := os.Stat(ext); !os.IsNotExist(err) {
+		return ext, nil
+	}
 	baseMod := path.Join(gopath, "pkg/mod/github.com/go-kratos")
 	files, err := ioutil.ReadDir(baseMod)
 	if err != nil {

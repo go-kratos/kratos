@@ -5,7 +5,11 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
+	"sync"
 	"text/template"
+
+	"github.com/go-kratos/kratos/pkg/net/metadata"
 
 	"github.com/go-kratos/kratos/pkg/ecode"
 	"github.com/go-kratos/kratos/pkg/net/http/blademaster/binding"
@@ -40,6 +44,8 @@ type Context struct {
 
 	// Keys is a key/value pair exclusively for the context of each request.
 	Keys map[string]interface{}
+	// This mutex protect Keys map
+	keysMutex sync.RWMutex
 
 	Error error
 
@@ -49,6 +55,20 @@ type Context struct {
 	RoutePath string
 
 	Params Params
+}
+
+/************************************/
+/********** CONTEXT CREATION ********/
+/************************************/
+func (c *Context) reset() {
+	c.Context = nil
+	c.index = -1
+	c.handlers = nil
+	c.Keys = nil
+	c.Error = nil
+	c.method = ""
+	c.RoutePath = ""
+	c.Params = c.Params[0:0]
 }
 
 /************************************/
@@ -93,16 +113,76 @@ func (c *Context) IsAborted() bool {
 // Set is used to store a new key/value pair exclusively for this context.
 // It also lazy initializes  c.Keys if it was not used previously.
 func (c *Context) Set(key string, value interface{}) {
+	c.keysMutex.Lock()
 	if c.Keys == nil {
 		c.Keys = make(map[string]interface{})
 	}
 	c.Keys[key] = value
+	c.keysMutex.Unlock()
 }
 
 // Get returns the value for the given key, ie: (value, true).
 // If the value does not exists it returns (nil, false)
 func (c *Context) Get(key string) (value interface{}, exists bool) {
+	c.keysMutex.RLock()
 	value, exists = c.Keys[key]
+	c.keysMutex.RUnlock()
+	return
+}
+
+// GetString returns the value associated with the key as a string.
+func (c *Context) GetString(key string) (s string) {
+	if val, ok := c.Get(key); ok && val != nil {
+		s, _ = val.(string)
+	}
+	return
+}
+
+// GetBool returns the value associated with the key as a boolean.
+func (c *Context) GetBool(key string) (b bool) {
+	if val, ok := c.Get(key); ok && val != nil {
+		b, _ = val.(bool)
+	}
+	return
+}
+
+// GetInt returns the value associated with the key as an integer.
+func (c *Context) GetInt(key string) (i int) {
+	if val, ok := c.Get(key); ok && val != nil {
+		i, _ = val.(int)
+	}
+	return
+}
+
+// GetUint returns the value associated with the key as an unsigned integer.
+func (c *Context) GetUint(key string) (ui uint) {
+	if val, ok := c.Get(key); ok && val != nil {
+		ui, _ = val.(uint)
+	}
+	return
+}
+
+// GetInt64 returns the value associated with the key as an integer.
+func (c *Context) GetInt64(key string) (i64 int64) {
+	if val, ok := c.Get(key); ok && val != nil {
+		i64, _ = val.(int64)
+	}
+	return
+}
+
+// GetUint64 returns the value associated with the key as an unsigned integer.
+func (c *Context) GetUint64(key string) (ui64 uint64) {
+	if val, ok := c.Get(key); ok && val != nil {
+		ui64, _ = val.(uint64)
+	}
+	return
+}
+
+// GetFloat64 returns the value associated with the key as a float64.
+func (c *Context) GetFloat64(key string) (f64 float64) {
+	if val, ok := c.Get(key); ok && val != nil {
+		f64, _ = val.(float64)
+	}
 	return
 }
 
@@ -306,4 +386,23 @@ func (c *Context) mustBindWith(obj interface{}, b binding.Binding) (err error) {
 func writeStatusCode(w http.ResponseWriter, ecode int) {
 	header := w.Header()
 	header.Set("kratos-status-code", strconv.FormatInt(int64(ecode), 10))
+}
+
+// RemoteIP implements a best effort algorithm to return the real client IP, it parses
+// X-Real-IP and X-Forwarded-For in order to work properly with reverse-proxies such us: nginx or haproxy.
+// Use X-Forwarded-For before X-Real-Ip as nginx uses X-Real-Ip with the proxy's IP.
+// Notice: metadata.RemoteIP take precedence over X-Forwarded-For and X-Real-Ip
+func (c *Context) RemoteIP() (remoteIP string) {
+	remoteIP = metadata.String(c, metadata.RemoteIP)
+	if remoteIP != "" {
+		return
+	}
+
+	remoteIP = c.Request.Header.Get("X-Forwarded-For")
+	remoteIP = strings.TrimSpace(strings.Split(remoteIP, ",")[0])
+	if remoteIP == "" {
+		remoteIP = strings.TrimSpace(c.Request.Header.Get("X-Real-Ip"))
+	}
+
+	return
 }
