@@ -33,7 +33,15 @@ Go version>=1.13
 
 ### Installation
 ```shell
+# Unix/Linux
 GO111MODULE=on && go get -u github.com/go-kratos/kratos/tool/kratos
+
+# Windows (Powershell)
+go env GO111MODULE=on ; go get -u github.com/go-kratos/kratos/tool/kratos
+
+# Windows (CMD)
+go env GO111MODULE=on && go get -u github.com/go-kratos/kratos/tool/kratos
+
 cd $GOPATH/src
 kratos new kratos-demo
 ```
