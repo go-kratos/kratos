@@ -1,6 +1,7 @@
 package gorm_test
 
 import (
+	"context"
 	"os"
 	"reflect"
 	"testing"
@@ -14,20 +15,20 @@ func TestCreate(t *testing.T) {
 	now := time.Now()
 	user := User{Name: "CreateUser", Age: 18, Birthday: &now, UserNum: Num(111), PasswordHash: []byte{'f', 'a', 'k', '4'}, Latitude: float}
 
-	if !DB.NewRecord(user) || !DB.NewRecord(&user) {
+	if !DB.NewRecord(context.Background(), user) || !DB.NewRecord(context.Background(), &user) {
 		t.Error("User should be new record before create")
 	}
 
-	if count := DB.Save(&user).RowsAffected; count != 1 {
+	if count := DB.Save(context.Background(), &user).RowsAffected; count != 1 {
 		t.Error("There should be one record be affected when create record")
 	}
 
-	if DB.NewRecord(user) || DB.NewRecord(&user) {
+	if DB.NewRecord(context.Background(), user) || DB.NewRecord(context.Background(), &user) {
 		t.Error("User should not new record after save")
 	}
 
 	var newUser User
-	if err := DB.First(&newUser, user.Id).Error; err != nil {
+	if err := DB.First(context.Background(), &newUser, user.Id).Error; err != nil {
 		t.Errorf("No error should happen, but got %v", err)
 	}
 
@@ -55,8 +56,8 @@ func TestCreate(t *testing.T) {
 		t.Errorf("Should have created_at after create")
 	}
 
-	DB.Model(user).Update("name", "create_user_new_name")
-	DB.First(&user, user.Id)
+	DB.Model(user).Update(context.Background(), "name", "create_user_new_name")
+	DB.First(context.Background(), &user, user.Id)
 	if user.CreatedAt.Format(time.RFC3339Nano) != newUser.CreatedAt.Format(time.RFC3339Nano) {
 		t.Errorf("CreatedAt should not be changed after update")
 	}
@@ -68,7 +69,7 @@ func TestCreateEmptyStrut(t *testing.T) {
 	}
 	DB.AutoMigrate(&EmptyStruct{})
 
-	if err := DB.Create(&EmptyStruct{}).Error; err != nil {
+	if err := DB.Create(context.Background(), &EmptyStruct{}).Error; err != nil {
 		t.Errorf("No error should happen when creating user, but got %v", err)
 	}
 }
@@ -79,7 +80,7 @@ func TestCreateWithExistingTimestamp(t *testing.T) {
 	timeA := now.MustParse("2016-01-01")
 	user.CreatedAt = timeA
 	user.UpdatedAt = timeA
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 
 	if user.CreatedAt.UTC().Format(time.RFC3339) != timeA.UTC().Format(time.RFC3339) {
 		t.Errorf("CreatedAt should not be changed")
@@ -90,7 +91,7 @@ func TestCreateWithExistingTimestamp(t *testing.T) {
 	}
 
 	var newUser User
-	DB.First(&newUser, user.Id)
+	DB.First(context.Background(), &newUser, user.Id)
 
 	if newUser.CreatedAt.UTC().Format(time.RFC3339) != timeA.UTC().Format(time.RFC3339) {
 		t.Errorf("CreatedAt should not be changed")
@@ -115,7 +116,7 @@ func TestCreateWithNowFuncOverride(t *testing.T) {
 	// call .New again to check the override is carried over as well during clone
 	db1 = db1.New()
 
-	db1.Save(&user1)
+	db1.Save(context.Background(), &user1)
 
 	if user1.CreatedAt.UTC().Format(time.RFC3339) != timeA.UTC().Format(time.RFC3339) {
 		t.Errorf("CreatedAt be using the nowFuncOverride")
@@ -131,7 +132,7 @@ func TestCreateWithNowFuncOverride(t *testing.T) {
 
 	db2 := DB.New()
 
-	db2.Save(&user2)
+	db2.Save(context.Background(), &user2)
 
 	if user2.CreatedAt.UTC().Format(time.RFC3339) == timeA.UTC().Format(time.RFC3339) {
 		t.Errorf("CreatedAt no longer be using the nowFuncOverride")
@@ -156,8 +157,8 @@ func TestCreateWithAutoIncrement(t *testing.T) {
 	user1 := AutoIncrementUser{}
 	user2 := AutoIncrementUser{}
 
-	DB.Create(&user1)
-	DB.Create(&user2)
+	DB.Create(context.Background(), &user1)
+	DB.Create(context.Background(), &user2)
 
 	if user2.Sequence-user1.Sequence != 1 {
 		t.Errorf("Auto increment should apply on Sequence")
@@ -170,7 +171,7 @@ func TestCreateWithNoGORMPrimayKey(t *testing.T) {
 	}
 
 	jt := JoinTable{From: 1, To: 2}
-	err := DB.Create(&jt).Error
+	err := DB.Create(context.Background(), &jt).Error
 	if err != nil {
 		t.Errorf("No error should happen when create a record without a GORM primary key. But in the database this primary key exists and is the union of 2 or more fields\n But got: %s", err)
 	}
@@ -178,7 +179,7 @@ func TestCreateWithNoGORMPrimayKey(t *testing.T) {
 
 func TestCreateWithNoStdPrimaryKeyAndDefaultValues(t *testing.T) {
 	animal := Animal{Name: "Ferdinand"}
-	if DB.Save(&animal).Error != nil {
+	if DB.Save(context.Background(), &animal).Error != nil {
 		t.Errorf("No error should happen when create a record without std primary key")
 	}
 
@@ -193,14 +194,14 @@ func TestCreateWithNoStdPrimaryKeyAndDefaultValues(t *testing.T) {
 	// Test create with default value not overrided
 	an := Animal{From: "nerdz"}
 
-	if DB.Save(&an).Error != nil {
+	if DB.Save(context.Background(), &an).Error != nil {
 		t.Errorf("No error should happen when create an record without std primary key")
 	}
 
 	// We must fetch the value again, to have the default fields updated
 	// (We can't do this in the update statements, since sql default can be expressions
 	// And be different from the fields' type (eg. a time.Time fields has a default value of "now()"
-	DB.Model(Animal{}).Where(&Animal{Counter: an.Counter}).First(&an)
+	DB.Model(Animal{}).Where(&Animal{Counter: an.Counter}).First(context.Background(), &an)
 
 	if an.Name != "galeone" {
 		t.Errorf("Default value should fill the field. But got %v", an.Name)
@@ -209,10 +210,10 @@ func TestCreateWithNoStdPrimaryKeyAndDefaultValues(t *testing.T) {
 
 func TestAnonymousScanner(t *testing.T) {
 	user := User{Name: "anonymous_scanner", Role: Role{Name: "admin"}}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 
 	var user2 User
-	DB.First(&user2, "name = ?", "anonymous_scanner")
+	DB.First(context.Background(), &user2, "name = ?", "anonymous_scanner")
 	if user2.Role.Name != "admin" {
 		t.Errorf("Should be able to get anonymous scanner")
 	}
@@ -224,11 +225,11 @@ func TestAnonymousScanner(t *testing.T) {
 
 func TestAnonymousField(t *testing.T) {
 	user := User{Name: "anonymous_field", Company: Company{Name: "company"}}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 
 	var user2 User
-	DB.First(&user2, "name = ?", "anonymous_field")
-	DB.Model(&user2).Related(&user2.Company)
+	DB.First(context.Background(), &user2, "name = ?", "anonymous_field")
+	DB.Model(&user2).Related(context.Background(), &user2.Company)
 	if user2.Company.Name != "company" {
 		t.Errorf("Should be able to get anonymous field")
 	}
@@ -236,11 +237,11 @@ func TestAnonymousField(t *testing.T) {
 
 func TestSelectWithCreate(t *testing.T) {
 	user := getPreparedUser("select_user", "select_with_create")
-	DB.Select("Name", "BillingAddress", "CreditCard", "Company", "Emails").Create(user)
+	DB.Select("Name", "BillingAddress", "CreditCard", "Company", "Emails").Create(context.Background(), user)
 
 	var queryuser User
 	DB.Preload("BillingAddress").Preload("ShippingAddress").
-		Preload("CreditCard").Preload("Emails").Preload("Company").First(&queryuser, user.Id)
+		Preload("CreditCard").Preload("Emails").Preload("Company").First(context.Background(), &queryuser, user.Id)
 
 	if queryuser.Name != user.Name || queryuser.Age == user.Age {
 		t.Errorf("Should only create users with name column")
@@ -254,11 +255,11 @@ func TestSelectWithCreate(t *testing.T) {
 
 func TestOmitWithCreate(t *testing.T) {
 	user := getPreparedUser("omit_user", "omit_with_create")
-	DB.Omit("Name", "BillingAddress", "CreditCard", "Company", "Emails").Create(user)
+	DB.Omit("Name", "BillingAddress", "CreditCard", "Company", "Emails").Create(context.Background(), user)
 
 	var queryuser User
 	DB.Preload("BillingAddress").Preload("ShippingAddress").
-		Preload("CreditCard").Preload("Emails").Preload("Company").First(&queryuser, user.Id)
+		Preload("CreditCard").Preload("Emails").Preload("Company").First(context.Background(), &queryuser, user.Id)
 
 	if queryuser.Name == user.Name || queryuser.Age != user.Age {
 		t.Errorf("Should only create users with age column")
@@ -275,14 +276,14 @@ func TestCreateIgnore(t *testing.T) {
 	now := time.Now()
 	user := User{Name: "CreateUser", Age: 18, Birthday: &now, UserNum: Num(111), PasswordHash: []byte{'f', 'a', 'k', '4'}, Latitude: float}
 
-	if !DB.NewRecord(user) || !DB.NewRecord(&user) {
+	if !DB.NewRecord(context.Background(), user) || !DB.NewRecord(context.Background(), &user) {
 		t.Error("User should be new record before create")
 	}
 
-	if count := DB.Create(&user).RowsAffected; count != 1 {
+	if count := DB.Create(context.Background(), &user).RowsAffected; count != 1 {
 		t.Error("There should be one record be affected when create record")
 	}
-	if DB.Dialect().GetName() == "mysql" && DB.Set("gorm:insert_modifier", "IGNORE").Create(&user).Error != nil {
+	if DB.Dialect().GetName() == "mysql" && DB.Set("gorm:insert_modifier", "IGNORE").Create(context.Background(), &user).Error != nil {
 		t.Error("Should ignore duplicate user insert by insert modifier:IGNORE ")
 	}
 }
