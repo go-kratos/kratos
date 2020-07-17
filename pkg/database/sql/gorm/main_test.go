@@ -1221,6 +1221,13 @@ func TestSaveAssociations(t *testing.T) {
 	}
 }
 
+type Toy struct {
+	Id        int
+	Name      string
+	OwnerId   int
+	OwnerType string
+}
+
 func TestBlockGlobalUpdate(t *testing.T) {
 	db := DB.New()
 	db.Create(context.Background(), &Toy{Name: "Stuffed Animal", OwnerType: "Nobody"})
