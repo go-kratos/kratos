@@ -19,7 +19,7 @@ func setIdentityInsert(scope *gorm.Scope) {
 	if scope.Dialect().GetName() == "mssql" {
 		for _, field := range scope.PrimaryFields() {
 			if _, ok := field.TagSettingsGet("AUTO_INCREMENT"); ok && !field.IsBlank {
-				scope.NewDB().Exec(fmt.Sprintf("SET IDENTITY_INSERT %v ON", scope.TableName()))
+				scope.NewDB().Exec(scope.C, fmt.Sprintf("SET IDENTITY_INSERT %v ON", scope.TableName()))
 				scope.InstanceSet("mssql:identity_insert_on", true)
 			}
 		}
@@ -29,7 +29,7 @@ func setIdentityInsert(scope *gorm.Scope) {
 func turnOffIdentityInsert(scope *gorm.Scope) {
 	if scope.Dialect().GetName() == "mssql" {
 		if _, ok := scope.InstanceGet("mssql:identity_insert_on"); ok {
-			scope.NewDB().Exec(fmt.Sprintf("SET IDENTITY_INSERT %v OFF", scope.TableName()))
+			scope.NewDB().Exec(scope.C, fmt.Sprintf("SET IDENTITY_INSERT %v OFF", scope.TableName()))
 		}
 	}
 }

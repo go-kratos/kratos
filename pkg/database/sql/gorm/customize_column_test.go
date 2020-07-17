@@ -1,6 +1,7 @@
 package gorm_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -39,22 +40,22 @@ func TestCustomizeColumn(t *testing.T) {
 	now := time.Now()
 	cc := CustomizeColumn{ID: 666, Name: expected, Date: &now}
 
-	if count := DB.Create(&cc).RowsAffected; count != 1 {
+	if count := DB.Create(context.Background(), &cc).RowsAffected; count != 1 {
 		t.Error("There should be one record be affected when create record")
 	}
 
 	var cc1 CustomizeColumn
-	DB.First(&cc1, 666)
+	DB.First(context.Background(), &cc1, 666)
 
 	if cc1.Name != expected {
 		t.Errorf("Failed to query CustomizeColumn")
 	}
 
 	cc.Name = "bar"
-	DB.Save(&cc)
+	DB.Save(context.Background(), &cc)
 
 	var cc2 CustomizeColumn
-	DB.First(&cc2, 666)
+	DB.First(context.Background(), &cc2, 666)
 	if cc2.Name != "bar" {
 		t.Errorf("Failed to query CustomizeColumn")
 	}
@@ -87,17 +88,17 @@ func TestManyToManyWithCustomizedColumn(t *testing.T) {
 		Accounts: []CustomizeAccount{account},
 	}
 
-	if err := DB.Create(&account).Error; err != nil {
+	if err := DB.Create(context.Background(), &account).Error; err != nil {
 		t.Errorf("no error should happen, but got %v", err)
 	}
 
-	if err := DB.Create(&person).Error; err != nil {
+	if err := DB.Create(context.Background(), &person).Error; err != nil {
 		t.Errorf("no error should happen, but got %v", err)
 	}
 
 	var person1 CustomizePerson
 	scope := DB.NewScope(nil)
-	if err := DB.Preload("Accounts").First(&person1, scope.Quote("idPerson")+" = ?", person.IdPerson).Error; err != nil {
+	if err := DB.Preload("Accounts").First(context.Background(), &person1, scope.Quote("idPerson")+" = ?", person.IdPerson).Error; err != nil {
 		t.Errorf("no error should happen when preloading customized column many2many relations, but got %v", err)
 	}
 
@@ -128,11 +129,11 @@ func TestOneToOneWithCustomizedColumn(t *testing.T) {
 		Address: "hello@example.com",
 	}
 
-	DB.Create(&user)
-	DB.Create(&invitation)
+	DB.Create(context.Background(), &user)
+	DB.Create(context.Background(), &invitation)
 
 	var invitation2 CustomizeInvitation
-	if err := DB.Preload("Person").Find(&invitation2, invitation.ID).Error; err != nil {
+	if err := DB.Preload("Person").Find(context.Background(), &invitation2, invitation.ID).Error; err != nil {
 		t.Errorf("no error should happen, but got %v", err)
 	}
 
@@ -184,12 +185,12 @@ func TestOneToManyWithCustomizedColumn(t *testing.T) {
 		},
 	}
 
-	if err := DB.Create(&discount).Error; err != nil {
+	if err := DB.Create(context.Background(), &discount).Error; err != nil {
 		t.Errorf("no error should happen but got %v", err)
 	}
 
 	var discount1 PromotionDiscount
-	if err := DB.Preload("Coupons").First(&discount1, "id = ?", discount.ID).Error; err != nil {
+	if err := DB.Preload("Coupons").First(context.Background(), &discount1, "id = ?", discount.ID).Error; err != nil {
 		t.Errorf("no error should happen but got %v", err)
 	}
 
@@ -198,7 +199,7 @@ func TestOneToManyWithCustomizedColumn(t *testing.T) {
 	}
 
 	var coupon PromotionCoupon
-	if err := DB.Preload("Discount").First(&coupon, "code = ?", "newyear1").Error; err != nil {
+	if err := DB.Preload("Discount").First(context.Background(), &coupon, "code = ?", "newyear1").Error; err != nil {
 		t.Errorf("no error should happen but got %v", err)
 	}
 
@@ -222,12 +223,12 @@ func TestHasOneWithPartialCustomizedColumn(t *testing.T) {
 		},
 	}
 
-	if err := DB.Create(&discount).Error; err != nil {
+	if err := DB.Create(context.Background(), &discount).Error; err != nil {
 		t.Errorf("no error should happen but got %v", err)
 	}
 
 	var discount1 PromotionDiscount
-	if err := DB.Preload("Rule").First(&discount1, "id = ?", discount.ID).Error; err != nil {
+	if err := DB.Preload("Rule").First(context.Background(), &discount1, "id = ?", discount.ID).Error; err != nil {
 		t.Errorf("no error should happen but got %v", err)
 	}
 
@@ -236,7 +237,7 @@ func TestHasOneWithPartialCustomizedColumn(t *testing.T) {
 	}
 
 	var rule PromotionRule
-	if err := DB.Preload("Discount").First(&rule, "name = ?", "time_limited").Error; err != nil {
+	if err := DB.Preload("Discount").First(context.Background(), &rule, "name = ?", "time_limited").Error; err != nil {
 		t.Errorf("no error should happen but got %v", err)
 	}
 
@@ -257,12 +258,12 @@ func TestBelongsToWithPartialCustomizedColumn(t *testing.T) {
 		},
 	}
 
-	if err := DB.Create(&discount).Error; err != nil {
+	if err := DB.Create(context.Background(), &discount).Error; err != nil {
 		t.Errorf("no error should happen but got %v", err)
 	}
 
 	var discount1 PromotionDiscount
-	if err := DB.Preload("Benefits").First(&discount1, "id = ?", discount.ID).Error; err != nil {
+	if err := DB.Preload("Benefits").First(context.Background(), &discount1, "id = ?", discount.ID).Error; err != nil {
 		t.Errorf("no error should happen but got %v", err)
 	}
 
@@ -271,7 +272,7 @@ func TestBelongsToWithPartialCustomizedColumn(t *testing.T) {
 	}
 
 	var benefit PromotionBenefit
-	if err := DB.Preload("Discount").First(&benefit, "name = ?", "free cod").Error; err != nil {
+	if err := DB.Preload("Discount").First(context.Background(), &benefit, "name = ?", "free cod").Error; err != nil {
 		t.Errorf("no error should happen but got %v", err)
 	}
 
@@ -294,12 +295,12 @@ func TestSelfReferencingMany2ManyColumn(t *testing.T) {
 	}
 
 	friend1 := SelfReferencingUser{Name: "friend1_m2m"}
-	if err := DB.Create(&friend1).Error; err != nil {
+	if err := DB.Create(context.Background(), &friend1).Error; err != nil {
 		t.Errorf("no error should happen, but got %v", err)
 	}
 
 	friend2 := SelfReferencingUser{Name: "friend2_m2m"}
-	if err := DB.Create(&friend2).Error; err != nil {
+	if err := DB.Create(context.Background(), &friend2).Error; err != nil {
 		t.Errorf("no error should happen, but got %v", err)
 	}
 
@@ -308,16 +309,16 @@ func TestSelfReferencingMany2ManyColumn(t *testing.T) {
 		Friends: []*SelfReferencingUser{&friend1, &friend2},
 	}
 
-	if err := DB.Create(&user).Error; err != nil {
+	if err := DB.Create(context.Background(), &user).Error; err != nil {
 		t.Errorf("no error should happen, but got %v", err)
 	}
 
-	if DB.Model(&user).Association("Friends").Count() != 2 {
+	if DB.Model(&user).Association(context.Background(), "Friends").Count() != 2 {
 		t.Errorf("Should find created friends correctly")
 	}
 
 	var count int
-	if err := DB.Table("UserFriends").Count(&count).Error; err != nil {
+	if err := DB.Table("UserFriends").Count(context.Background(), &count).Error; err != nil {
 		t.Errorf("no error should happen, but got %v", err)
 	}
 	if count == 0 {
@@ -326,7 +327,7 @@ func TestSelfReferencingMany2ManyColumn(t *testing.T) {
 
 	var newUser = SelfReferencingUser{}
 
-	if err := DB.Preload("Friends").First(&newUser, "id = ?", user.ID).Error; err != nil {
+	if err := DB.Preload("Friends").First(context.Background(), &newUser, "id = ?", user.ID).Error; err != nil {
 		t.Errorf("no error should happen, but got %v", err)
 	}
 
@@ -334,24 +335,24 @@ func TestSelfReferencingMany2ManyColumn(t *testing.T) {
 		t.Errorf("Should preload created frineds for self reference m2m")
 	}
 
-	DB.Model(&newUser).Association("Friends").Append(&SelfReferencingUser{Name: "friend3_m2m"})
-	if DB.Model(&user).Association("Friends").Count() != 3 {
+	DB.Model(&newUser).Association(context.Background(), "Friends").Append(&SelfReferencingUser{Name: "friend3_m2m"})
+	if DB.Model(&user).Association(context.Background(), "Friends").Count() != 3 {
 		t.Errorf("Should find created friends correctly")
 	}
 
-	DB.Model(&newUser).Association("Friends").Replace(&SelfReferencingUser{Name: "friend4_m2m"})
-	if DB.Model(&user).Association("Friends").Count() != 1 {
+	DB.Model(&newUser).Association(context.Background(), "Friends").Replace(&SelfReferencingUser{Name: "friend4_m2m"})
+	if DB.Model(&user).Association(context.Background(), "Friends").Count() != 1 {
 		t.Errorf("Should find created friends correctly")
 	}
 
 	friend := SelfReferencingUser{}
-	DB.Model(&newUser).Association("Friends").Find(&friend)
+	DB.Model(&newUser).Association(context.Background(), "Friends").Find(&friend)
 	if friend.Name != "friend4_m2m" {
 		t.Errorf("Should find created friends correctly")
 	}
 
-	DB.Model(&newUser).Association("Friends").Delete(friend)
-	if DB.Model(&user).Association("Friends").Count() != 0 {
+	DB.Model(&newUser).Association(context.Background(), "Friends").Delete(friend)
+	if DB.Model(&user).Association(context.Background(), "Friends").Count() != 0 {
 		t.Errorf("All friends should be deleted")
 	}
 }

@@ -1,6 +1,7 @@
 package gorm_test
 
 import (
+	"context"
 	"database/sql"
 	"database/sql/driver"
 	"errors"
@@ -263,7 +264,7 @@ func (nt NullTime) Value() (driver.Value, error) {
 
 func getPreparedUser(name string, role string) *User {
 	var company Company
-	DB.Where(Company{Name: role}).FirstOrCreate(&company)
+	DB.Where(Company{Name: role}).FirstOrCreate(context.Background(), &company)
 
 	return &User{
 		Name:            name,
@@ -289,7 +290,7 @@ func runMigration() {
 	}
 
 	for _, table := range []string{"animals", "user_languages"} {
-		DB.Exec(fmt.Sprintf("drop table %v;", table))
+		DB.Exec(context.Background(), fmt.Sprintf("drop table %v;", table))
 	}
 
 	values := []interface{}{&Short{}, &ReallyLongThingThatReferencesShort{}, &ReallyLongTableNameToTestMySQLNameLengthLimit{}, &NotSoLongTableName{}, &Product{}, &Email{}, &Address{}, &CreditCard{}, &Company{}, &Role{}, &Language{}, &HNPost{}, &EngadgetPost{}, &Animal{}, &User{}, &JoinTable{}, &Post{}, &Category{}, &Comment{}, &Cat{}, &Dog{}, &Hamster{}, &Toy{}, &ElementWithIgnoredField{}, &Place{}}
@@ -343,17 +344,17 @@ func TestIndexes(t *testing.T) {
 		t.Errorf("Email should have index idx_email_email_and_user_id")
 	}
 
-	if DB.Save(&User{Name: "unique_indexes", Emails: []Email{{Email: "user1@example.comiii"}, {Email: "user1@example.com"}, {Email: "user1@example.com"}}}).Error == nil {
+	if DB.Save(context.Background(), &User{Name: "unique_indexes", Emails: []Email{{Email: "user1@example.comiii"}, {Email: "user1@example.com"}, {Email: "user1@example.com"}}}).Error == nil {
 		t.Errorf("Should get to create duplicate record when having unique index")
 	}
 
 	var user = User{Name: "sample_user"}
-	DB.Save(&user)
-	if DB.Model(&user).Association("Emails").Append(Email{Email: "not-1duplicated@gmail.com"}, Email{Email: "not-duplicated2@gmail.com"}).Error != nil {
+	DB.Save(context.Background(), &user)
+	if DB.Model(&user).Association(context.Background(), "Emails").Append(Email{Email: "not-1duplicated@gmail.com"}, Email{Email: "not-duplicated2@gmail.com"}).Error != nil {
 		t.Errorf("Should get no error when append two emails for user")
 	}
 
-	if DB.Model(&user).Association("Emails").Append(Email{Email: "duplicated@gmail.com"}, Email{Email: "duplicated@gmail.com"}).Error == nil {
+	if DB.Model(&user).Association(context.Background(), "Emails").Append(Email{Email: "duplicated@gmail.com"}, Email{Email: "duplicated@gmail.com"}).Error == nil {
 		t.Errorf("Should get no duplicated email error when insert duplicated emails for a user")
 	}
 
@@ -365,7 +366,7 @@ func TestIndexes(t *testing.T) {
 		t.Errorf("Email's index idx_email_email_and_user_id should be deleted")
 	}
 
-	if DB.Save(&User{Name: "unique_indexes", Emails: []Email{{Email: "user1@example.com"}, {Email: "user1@example.com"}}}).Error != nil {
+	if DB.Save(context.Background(), &User{Name: "unique_indexes", Emails: []Email{{Email: "user1@example.com"}, {Email: "user1@example.com"}}}).Error != nil {
 		t.Errorf("Should be able to create duplicated emails after remove unique index")
 	}
 }
@@ -388,7 +389,7 @@ func TestAutoMigration(t *testing.T) {
 	}
 
 	now := time.Now()
-	DB.Save(&EmailWithIdx{Email: "jinzhu@example.org", UserAgent: "pc", RegisteredAt: &now})
+	DB.Save(context.Background(), &EmailWithIdx{Email: "jinzhu@example.org", UserAgent: "pc", RegisteredAt: &now})
 
 	scope := DB.NewScope(&EmailWithIdx{})
 	if !scope.Dialect().HasIndex(scope.TableName(), "idx_email_agent") {
@@ -400,7 +401,7 @@ func TestAutoMigration(t *testing.T) {
 	}
 
 	var bigemail EmailWithIdx
-	DB.First(&bigemail, "user_agent = ?", "pc")
+	DB.First(context.Background(), &bigemail, "user_agent = ?", "pc")
 	if bigemail.Email != "jinzhu@example.org" || bigemail.UserAgent != "pc" || bigemail.RegisteredAt.IsZero() {
 		t.Error("Big Emails should be saved and fetched correctly")
 	}
@@ -471,7 +472,7 @@ func TestMultipleIndexes(t *testing.T) {
 		t.Errorf("Auto Migrate should not raise any error")
 	}
 
-	DB.Save(&MultipleIndexes{UserID: 1, Name: "jinzhu", Email: "jinzhu@example.org", Other: "foo"})
+	DB.Save(context.Background(), &MultipleIndexes{UserID: 1, Name: "jinzhu", Email: "jinzhu@example.org", Other: "foo"})
 
 	scope := DB.NewScope(&MultipleIndexes{})
 	if !scope.Dialect().HasIndex(scope.TableName(), "uix_multipleindexes_user_name") {
@@ -495,25 +496,25 @@ func TestMultipleIndexes(t *testing.T) {
 	}
 
 	var mutipleIndexes MultipleIndexes
-	DB.First(&mutipleIndexes, "name = ?", "jinzhu")
+	DB.First(context.Background(), &mutipleIndexes, "name = ?", "jinzhu")
 	if mutipleIndexes.Email != "jinzhu@example.org" || mutipleIndexes.Name != "jinzhu" {
 		t.Error("MutipleIndexes should be saved and fetched correctly")
 	}
 
 	// Check unique constraints
-	if err := DB.Save(&MultipleIndexes{UserID: 1, Name: "name1", Email: "jinzhu@example.org", Other: "foo"}).Error; err == nil {
+	if err := DB.Save(context.Background(), &MultipleIndexes{UserID: 1, Name: "name1", Email: "jinzhu@example.org", Other: "foo"}).Error; err == nil {
 		t.Error("MultipleIndexes unique index failed")
 	}
 
-	if err := DB.Save(&MultipleIndexes{UserID: 1, Name: "name1", Email: "foo@example.org", Other: "foo"}).Error; err != nil {
+	if err := DB.Save(context.Background(), &MultipleIndexes{UserID: 1, Name: "name1", Email: "foo@example.org", Other: "foo"}).Error; err != nil {
 		t.Error("MultipleIndexes unique index failed")
 	}
 
-	if err := DB.Save(&MultipleIndexes{UserID: 2, Name: "name1", Email: "jinzhu@example.org", Other: "foo"}).Error; err == nil {
+	if err := DB.Save(context.Background(), &MultipleIndexes{UserID: 2, Name: "name1", Email: "jinzhu@example.org", Other: "foo"}).Error; err == nil {
 		t.Error("MultipleIndexes unique index failed")
 	}
 
-	if err := DB.Save(&MultipleIndexes{UserID: 2, Name: "name1", Email: "foo2@example.org", Other: "foo"}).Error; err != nil {
+	if err := DB.Save(context.Background(), &MultipleIndexes{UserID: 2, Name: "name1", Email: "foo2@example.org", Other: "foo"}).Error; err != nil {
 		t.Error("MultipleIndexes unique index failed")
 	}
 }

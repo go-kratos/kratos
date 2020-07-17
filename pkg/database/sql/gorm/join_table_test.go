@@ -1,6 +1,7 @@
 package gorm_test
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
@@ -29,12 +30,12 @@ func (*PersonAddress) Add(handler gorm.JoinTableHandlerInterface, db *gorm.DB, f
 	if result := db.Unscoped().Model(&PersonAddress{}).Where(map[string]interface{}{
 		"person_id":  foreignPrimaryKey,
 		"address_id": associationPrimaryKey,
-	}).Update(map[string]interface{}{
+	}).Update(context.Background(), map[string]interface{}{
 		"person_id":  foreignPrimaryKey,
 		"address_id": associationPrimaryKey,
 		"deleted_at": gorm.Expr("NULL"),
 	}).RowsAffected; result == 0 {
-		return db.Create(&PersonAddress{
+		return db.Create(context.Background(), &PersonAddress{
 			PersonID:  foreignPrimaryKey,
 			AddressID: associationPrimaryKey,
 		}).Error
@@ -44,7 +45,7 @@ func (*PersonAddress) Add(handler gorm.JoinTableHandlerInterface, db *gorm.DB, f
 }
 
 func (*PersonAddress) Delete(handler gorm.JoinTableHandlerInterface, db *gorm.DB, sources ...interface{}) error {
-	return db.Delete(&PersonAddress{}).Error
+	return db.Delete(context.Background(), &PersonAddress{}).Error
 }
 
 func (pa *PersonAddress) JoinWith(handler gorm.JoinTableHandlerInterface, db *gorm.DB, source interface{}) *gorm.DB {
@@ -62,13 +63,13 @@ func TestJoinTable(t *testing.T) {
 	person := &Person{Name: "person", Addresses: []*Address{address1, address2}}
 	DB.Save(nil, person)
 
-	DB.Model(person).Association("Addresses").Delete(address1)
+	DB.Model(person).Association(context.Background(), "Addresses").Delete(address1)
 
 	if DB.Find(nil, &[]PersonAddress{}, "person_id = ?", person.Id).RowsAffected != 1 {
 		t.Errorf("Should found one address")
 	}
 
-	if DB.Model(person).Association("Addresses").Count() != 1 {
+	if DB.Model(person).Association(context.Background(), "Addresses").Count() != 1 {
 		t.Errorf("Should found one address")
 	}
 
@@ -76,7 +77,7 @@ func TestJoinTable(t *testing.T) {
 		t.Errorf("Found two addresses with Unscoped")
 	}
 
-	if DB.Model(person).Association("Addresses").Clear(); DB.Model(person).Association("Addresses").Count() != 0 {
+	if DB.Model(person).Association(context.Background(), "Addresses").Clear(); DB.Model(person).Association(context.Background(), "Addresses").Count() != 0 {
 		t.Errorf("Should deleted all addresses")
 	}
 }
@@ -102,11 +103,11 @@ func TestEmbeddedMany2ManyRelationship(t *testing.T) {
 		t.Errorf("no error should return when save embedded many2many relationship, but got %v", err)
 	}
 
-	if err := DB.Model(person).Association("Addresses").Delete(address1).Error; err != nil {
+	if err := DB.Model(person).Association(context.Background(), "Addresses").Delete(address1).Error; err != nil {
 		t.Errorf("no error should return when delete embedded many2many relationship, but got %v", err)
 	}
 
-	association := DB.Model(person).Association("Addresses")
+	association := DB.Model(person).Association(context.Background(), "Addresses")
 	if count := association.Count(); count != 1 || association.Error != nil {
 		t.Errorf("Should found one address, but got %v, error is %v", count, association.Error)
 	}

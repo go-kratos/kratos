@@ -1,6 +1,9 @@
 package gorm_test
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 type BasePost struct {
 	Id    int64
@@ -44,18 +47,18 @@ func TestPrefixColumnNameForEmbeddedStruct(t *testing.T) {
 }
 
 func TestSaveAndQueryEmbeddedStruct(t *testing.T) {
-	DB.Save(&HNPost{BasePost: BasePost{Title: "news"}})
-	DB.Save(&HNPost{BasePost: BasePost{Title: "hn_news"}})
+	DB.Save(context.Background(), &HNPost{BasePost: BasePost{Title: "news"}})
+	DB.Save(context.Background(), &HNPost{BasePost: BasePost{Title: "hn_news"}})
 	var news HNPost
-	if err := DB.First(&news, "title = ?", "hn_news").Error; err != nil {
+	if err := DB.First(context.Background(), &news, "title = ?", "hn_news").Error; err != nil {
 		t.Errorf("no error should happen when query with embedded struct, but got %v", err)
 	} else if news.Title != "hn_news" {
 		t.Errorf("embedded struct's value should be scanned correctly")
 	}
 
-	DB.Save(&EngadgetPost{BasePost: BasePost{Title: "engadget_news"}})
+	DB.Save(context.Background(), &EngadgetPost{BasePost: BasePost{Title: "engadget_news"}})
 	var egNews EngadgetPost
-	if err := DB.First(&egNews, "title = ?", "engadget_news").Error; err != nil {
+	if err := DB.First(context.Background(), &egNews, "title = ?", "engadget_news").Error; err != nil {
 		t.Errorf("no error should happen when query with embedded struct, but got %v", err)
 	} else if egNews.BasePost.Title != "engadget_news" {
 		t.Errorf("embedded struct's value should be scanned correctly")
@@ -78,10 +81,10 @@ func TestEmbeddedPointerTypeStruct(t *testing.T) {
 		Upvotes int32
 	}
 
-	DB.Create(&HNPost{BasePost: &BasePost{Title: "embedded_pointer_type"}})
+	DB.Create(context.Background(), &HNPost{BasePost: &BasePost{Title: "embedded_pointer_type"}})
 
 	var hnPost HNPost
-	if err := DB.First(&hnPost, "title = ?", "embedded_pointer_type").Error; err != nil {
+	if err := DB.First(context.Background(), &hnPost, "title = ?", "embedded_pointer_type").Error; err != nil {
 		t.Errorf("No error should happen when find embedded pointer type, but got %v", err)
 	}
 

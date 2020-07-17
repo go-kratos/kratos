@@ -113,90 +113,90 @@ func TestStringPrimaryKey(t *testing.T) {
 	DB.AutoMigrate(&UUIDStruct{})
 
 	data := UUIDStruct{ID: "uuid", Name: "hello"}
-	if err := DB.Save(&data).Error; err != nil || data.ID != "uuid" || data.Name != "hello" {
+	if err := DB.Save(context.Background(), &data).Error; err != nil || data.ID != "uuid" || data.Name != "hello" {
 		t.Errorf("string primary key should not be populated")
 	}
 
 	data = UUIDStruct{ID: "uuid", Name: "hello world"}
-	if err := DB.Save(&data).Error; err != nil || data.ID != "uuid" || data.Name != "hello world" {
+	if err := DB.Save(context.Background(), &data).Error; err != nil || data.ID != "uuid" || data.Name != "hello world" {
 		t.Errorf("string primary key should not be populated")
 	}
 }
 
 func TestExceptionsWithInvalidSql(t *testing.T) {
 	var columns []string
-	if DB.Where("sdsd.zaaa = ?", "sd;;;aa").Pluck("aaa", &columns).Error == nil {
+	if DB.Where("sdsd.zaaa = ?", "sd;;;aa").Pluck(context.Background(), "aaa", &columns).Error == nil {
 		t.Errorf("Should got error with invalid SQL")
 	}
 
-	if DB.Model(&User{}).Where("sdsd.zaaa = ?", "sd;;;aa").Pluck("aaa", &columns).Error == nil {
+	if DB.Model(&User{}).Where("sdsd.zaaa = ?", "sd;;;aa").Pluck(context.Background(), "aaa", &columns).Error == nil {
 		t.Errorf("Should got error with invalid SQL")
 	}
 
-	if DB.Where("sdsd.zaaa = ?", "sd;;;aa").Find(&User{}).Error == nil {
+	if DB.Where("sdsd.zaaa = ?", "sd;;;aa").Find(context.Background(), &User{}).Error == nil {
 		t.Errorf("Should got error with invalid SQL")
 	}
 
 	var count1, count2 int64
-	DB.Model(&User{}).Count(&count1)
+	DB.Model(&User{}).Count(context.Background(), &count1)
 	if count1 <= 0 {
 		t.Errorf("Should find some users")
 	}
 
-	if DB.Where("name = ?", "jinzhu; delete * from users").First(&User{}).Error == nil {
+	if DB.Where("name = ?", "jinzhu; delete * from users").First(context.Background(), &User{}).Error == nil {
 		t.Errorf("Should got error with invalid SQL")
 	}
 
-	DB.Model(&User{}).Count(&count2)
+	DB.Model(&User{}).Count(context.Background(), &count2)
 	if count1 != count2 {
 		t.Errorf("No user should not be deleted by invalid SQL")
 	}
 }
 
 func TestSetTable(t *testing.T) {
-	DB.Create(getPreparedUser("pluck_user1", "pluck_user"))
-	DB.Create(getPreparedUser("pluck_user2", "pluck_user"))
-	DB.Create(getPreparedUser("pluck_user3", "pluck_user"))
+	DB.Create(context.Background(), getPreparedUser("pluck_user1", "pluck_user"))
+	DB.Create(context.Background(), getPreparedUser("pluck_user2", "pluck_user"))
+	DB.Create(context.Background(), getPreparedUser("pluck_user3", "pluck_user"))
 
-	if err := DB.Table("users").Where("role = ?", "pluck_user").Pluck("age", &[]int{}).Error; err != nil {
+	if err := DB.Table("users").Where("role = ?", "pluck_user").Pluck(context.Background(), "age", &[]int{}).Error; err != nil {
 		t.Error("No errors should happen if set table for pluck", err)
 	}
 
 	var users []User
-	if DB.Table("users").Find(&[]User{}).Error != nil {
+	if DB.Table("users").Find(context.Background(), &[]User{}).Error != nil {
 		t.Errorf("No errors should happen if set table for find")
 	}
 
-	if DB.Table("invalid_table").Find(&users).Error == nil {
+	if DB.Table("invalid_table").Find(context.Background(), &users).Error == nil {
 		t.Errorf("Should got error when table is set to an invalid table")
 	}
 
-	DB.Exec("drop table deleted_users;")
+	DB.Exec(context.Background(), "drop table deleted_users;")
 	if DB.Table("deleted_users").CreateTable(&User{}).Error != nil {
 		t.Errorf("Create table with specified table")
 	}
 
-	DB.Table("deleted_users").Save(&User{Name: "DeletedUser"})
+	DB.Table("deleted_users").Save(context.Background(), &User{Name: "DeletedUser"})
 
 	var deletedUsers []User
-	DB.Table("deleted_users").Find(&deletedUsers)
+	DB.Table("deleted_users").Find(context.Background(), &deletedUsers)
 	if len(deletedUsers) != 1 {
 		t.Errorf("Query from specified table")
 	}
 
 	var user User
-	DB.Table("deleted_users").First(&user, "name = ?", "DeletedUser")
+	DB.Table("deleted_users").First(context.Background(), &user, "name = ?", "DeletedUser")
 
 	user.Age = 20
-	DB.Table("deleted_users").Save(&user)
-	if DB.Table("deleted_users").First(&user, "name = ? AND age = ?", "DeletedUser", 20).RecordNotFound() {
+	DB.Table("deleted_users").Save(context.Background(), &user)
+	if DB.Table("deleted_users").First(context.Background(), &user, "name = ? AND age = ?", "DeletedUser", 20).RecordNotFound() {
 		t.Errorf("Failed to found updated user")
 	}
 
-	DB.Save(getPreparedUser("normal_user", "reset_table"))
-	DB.Table("deleted_users").Save(getPreparedUser("deleted_user", "reset_table"))
+	DB.Save(context.Background(), getPreparedUser("normal_user", "reset_table"))
+	DB.Table("deleted_users").Save(context.Background(), getPreparedUser("deleted_user", "reset_table"))
 	var user1, user2, user3 User
-	DB.Where("role = ?", "reset_table").First(&user1).Table("deleted_users").First(&user2).Table("").First(&user3)
+	DB.Where("role = ?", "reset_table").First(context.Background(), &user1).Table("deleted_users").First(context.Background(), &user2).Table("").First(context.Background(), &user3)
 	if (user1.Name != "normal_user") || (user2.Name != "deleted_user") || (user3.Name != "normal_user") {
 		t.Errorf("unset specified table with blank string")
 	}
@@ -322,7 +322,7 @@ func TestNullValues(t *testing.T) {
 	DB.DropTable(&NullValue{})
 	DB.AutoMigrate(&NullValue{})
 
-	if err := DB.Save(&NullValue{
+	if err := DB.Save(context.Background(), &NullValue{
 		Name:    sql.NullString{String: "hello", Valid: true},
 		Gender:  &sql.NullString{String: "M", Valid: true},
 		Age:     sql.NullInt64{Int64: 18, Valid: true},
@@ -334,13 +334,13 @@ func TestNullValues(t *testing.T) {
 	}
 
 	var nv NullValue
-	DB.First(&nv, "name = ?", "hello")
+	DB.First(context.Background(), &nv, "name = ?", "hello")
 
 	if nv.Name.String != "hello" || nv.Gender.String != "M" || nv.Age.Int64 != 18 || nv.Male.Bool != true || nv.Height.Float64 != 100.11 || nv.AddedAt.Valid != true {
 		t.Errorf("Should be able to fetch null value")
 	}
 
-	if err := DB.Save(&NullValue{
+	if err := DB.Save(context.Background(), &NullValue{
 		Name:    sql.NullString{String: "hello-2", Valid: true},
 		Gender:  &sql.NullString{String: "F", Valid: true},
 		Age:     sql.NullInt64{Int64: 18, Valid: false},
@@ -352,12 +352,12 @@ func TestNullValues(t *testing.T) {
 	}
 
 	var nv2 NullValue
-	DB.First(&nv2, "name = ?", "hello-2")
+	DB.First(context.Background(), &nv2, "name = ?", "hello-2")
 	if nv2.Name.String != "hello-2" || nv2.Gender.String != "F" || nv2.Age.Int64 != 0 || nv2.Male.Bool != true || nv2.Height.Float64 != 100.11 || nv2.AddedAt.Valid != false {
 		t.Errorf("Should be able to fetch null value")
 	}
 
-	if err := DB.Save(&NullValue{
+	if err := DB.Save(context.Background(), &NullValue{
 		Name:    sql.NullString{String: "hello-3", Valid: false},
 		Gender:  &sql.NullString{String: "M", Valid: true},
 		Age:     sql.NullInt64{Int64: 18, Valid: false},
@@ -376,7 +376,7 @@ func TestNullValuesWithFirstOrCreate(t *testing.T) {
 	}
 
 	var nv2 NullValue
-	result := DB.Where(nv1).FirstOrCreate(&nv2)
+	result := DB.Where(nv1).FirstOrCreate(context.Background(), &nv2)
 
 	if result.RowsAffected != 1 {
 		t.Errorf("RowsAffected should be 1 after create some record")
@@ -390,7 +390,7 @@ func TestNullValuesWithFirstOrCreate(t *testing.T) {
 		t.Errorf("first or create with nullvalues")
 	}
 
-	if err := DB.Where(nv1).Assign(NullValue{Age: sql.NullInt64{Int64: 18, Valid: true}}).FirstOrCreate(&nv2).Error; err != nil {
+	if err := DB.Where(nv1).Assign(NullValue{Age: sql.NullInt64{Int64: 18, Valid: true}}).FirstOrCreate(context.Background(), &nv2).Error; err != nil {
 		t.Errorf("Should not raise any error, but got %v", err)
 	}
 
@@ -402,11 +402,11 @@ func TestNullValuesWithFirstOrCreate(t *testing.T) {
 func TestTransaction(t *testing.T) {
 	tx := DB.Begin()
 	u := User{Name: "transcation"}
-	if err := tx.Save(&u).Error; err != nil {
+	if err := tx.Save(context.Background(), &u).Error; err != nil {
 		t.Errorf("No error should raise")
 	}
 
-	if err := tx.First(&User{}, "name = ?", "transcation").Error; err != nil {
+	if err := tx.First(context.Background(), &User{}, "name = ?", "transcation").Error; err != nil {
 		t.Errorf("Should find saved record")
 	}
 
@@ -416,49 +416,49 @@ func TestTransaction(t *testing.T) {
 
 	tx.Rollback()
 
-	if err := tx.First(&User{}, "name = ?", "transcation").Error; err == nil {
+	if err := tx.First(context.Background(), &User{}, "name = ?", "transcation").Error; err == nil {
 		t.Errorf("Should not find record after rollback")
 	}
 
 	tx2 := DB.Begin()
 	u2 := User{Name: "transcation-2"}
-	if err := tx2.Save(&u2).Error; err != nil {
+	if err := tx2.Save(context.Background(), &u2).Error; err != nil {
 		t.Errorf("No error should raise")
 	}
 
-	if err := tx2.First(&User{}, "name = ?", "transcation-2").Error; err != nil {
+	if err := tx2.First(context.Background(), &User{}, "name = ?", "transcation-2").Error; err != nil {
 		t.Errorf("Should find saved record")
 	}
 
 	tx2.Commit()
 
-	if err := DB.First(&User{}, "name = ?", "transcation-2").Error; err != nil {
+	if err := DB.First(context.Background(), &User{}, "name = ?", "transcation-2").Error; err != nil {
 		t.Errorf("Should be able to find committed record")
 	}
 
 	tx3 := DB.Begin()
 	u3 := User{Name: "transcation-3"}
-	if err := tx3.Save(&u3).Error; err != nil {
+	if err := tx3.Save(context.Background(), &u3).Error; err != nil {
 		t.Errorf("No error should raise")
 	}
 
-	if err := tx3.First(&User{}, "name = ?", "transcation-3").Error; err != nil {
+	if err := tx3.First(context.Background(), &User{}, "name = ?", "transcation-3").Error; err != nil {
 		t.Errorf("Should find saved record")
 	}
 
 	tx3.RollbackUnlessCommitted()
 
-	if err := tx.First(&User{}, "name = ?", "transcation").Error; err == nil {
+	if err := tx.First(context.Background(), &User{}, "name = ?", "transcation").Error; err == nil {
 		t.Errorf("Should not find record after rollback")
 	}
 
 	tx4 := DB.Begin()
 	u4 := User{Name: "transcation-4"}
-	if err := tx4.Save(&u4).Error; err != nil {
+	if err := tx4.Save(context.Background(), &u4).Error; err != nil {
 		t.Errorf("No error should raise")
 	}
 
-	if err := tx4.First(&User{}, "name = ?", "transcation-4").Error; err != nil {
+	if err := tx4.First(context.Background(), &User{}, "name = ?", "transcation-4").Error; err != nil {
 		t.Errorf("Should find saved record")
 	}
 
@@ -466,7 +466,7 @@ func TestTransaction(t *testing.T) {
 
 	tx4.RollbackUnlessCommitted()
 
-	if err := DB.First(&User{}, "name = ?", "transcation-4").Error; err != nil {
+	if err := DB.First(context.Background(), &User{}, "name = ?", "transcation-4").Error; err != nil {
 		t.Errorf("Should be able to find committed record")
 	}
 }
@@ -484,11 +484,11 @@ func TestTransactionWithBlock(t *testing.T) {
 	// rollback
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		u := User{Name: "transcation"}
-		if err := tx.Save(&u).Error; err != nil {
+		if err := tx.Save(context.Background(), &u).Error; err != nil {
 			t.Errorf("No error should raise")
 		}
 
-		if err := tx.First(&User{}, "name = ?", "transcation").Error; err != nil {
+		if err := tx.First(context.Background(), &User{}, "name = ?", "transcation").Error; err != nil {
 			t.Errorf("Should find saved record")
 		}
 
@@ -499,24 +499,24 @@ func TestTransactionWithBlock(t *testing.T) {
 		t.Errorf("Transaction return error will equal the block returns error")
 	}
 
-	if err := DB.First(&User{}, "name = ?", "transcation").Error; err == nil {
+	if err := DB.First(context.Background(), &User{}, "name = ?", "transcation").Error; err == nil {
 		t.Errorf("Should not find record after rollback")
 	}
 
 	// commit
 	DB.Transaction(func(tx *gorm.DB) error {
 		u2 := User{Name: "transcation-2"}
-		if err := tx.Save(&u2).Error; err != nil {
+		if err := tx.Save(context.Background(), &u2).Error; err != nil {
 			t.Errorf("No error should raise")
 		}
 
-		if err := tx.First(&User{}, "name = ?", "transcation-2").Error; err != nil {
+		if err := tx.First(context.Background(), &User{}, "name = ?", "transcation-2").Error; err != nil {
 			t.Errorf("Should find saved record")
 		}
 		return nil
 	})
 
-	if err := DB.First(&User{}, "name = ?", "transcation-2").Error; err != nil {
+	if err := DB.First(context.Background(), &User{}, "name = ?", "transcation-2").Error; err != nil {
 		t.Errorf("Should be able to find committed record")
 	}
 
@@ -524,11 +524,11 @@ func TestTransactionWithBlock(t *testing.T) {
 	assertPanic(t, func() {
 		DB.Transaction(func(tx *gorm.DB) error {
 			u3 := User{Name: "transcation-3"}
-			if err := tx.Save(&u3).Error; err != nil {
+			if err := tx.Save(context.Background(), &u3).Error; err != nil {
 				t.Errorf("No error should raise")
 			}
 
-			if err := tx.First(&User{}, "name = ?", "transcation-3").Error; err != nil {
+			if err := tx.First(context.Background(), &User{}, "name = ?", "transcation-3").Error; err != nil {
 				t.Errorf("Should find saved record")
 			}
 
@@ -536,7 +536,7 @@ func TestTransactionWithBlock(t *testing.T) {
 		})
 	})
 
-	if err := DB.First(&User{}, "name = ?", "transcation-3").Error; err == nil {
+	if err := DB.First(context.Background(), &User{}, "name = ?", "transcation-3").Error; err == nil {
 		t.Errorf("Should not find record after panic rollback")
 	}
 }
@@ -544,7 +544,7 @@ func TestTransactionWithBlock(t *testing.T) {
 func TestTransaction_NoErrorOnRollbackAfterCommit(t *testing.T) {
 	tx := DB.Begin()
 	u := User{Name: "transcation"}
-	if err := tx.Save(&u).Error; err != nil {
+	if err := tx.Save(context.Background(), &u).Error; err != nil {
 		t.Errorf("No error should raise")
 	}
 
@@ -569,13 +569,13 @@ func TestTransactionReadonly(t *testing.T) {
 
 	tx := DB.Begin()
 	u := User{Name: "transcation"}
-	if err := tx.Save(&u).Error; err != nil {
+	if err := tx.Save(context.Background(), &u).Error; err != nil {
 		t.Errorf("No error should raise")
 	}
 	tx.Commit()
 
 	tx = DB.BeginTx(context.Background(), &sql.TxOptions{ReadOnly: true})
-	if err := tx.First(&User{}, "name = ?", "transcation").Error; err != nil {
+	if err := tx.First(context.Background(), &User{}, "name = ?", "transcation").Error; err != nil {
 		t.Errorf("Should find saved record")
 	}
 
@@ -584,7 +584,7 @@ func TestTransactionReadonly(t *testing.T) {
 	}
 
 	u = User{Name: "transcation-2"}
-	if err := tx.Save(&u).Error; err == nil {
+	if err := tx.Save(context.Background(), &u).Error; err == nil {
 		t.Errorf("Error should have been raised in a readonly transaction")
 	}
 
@@ -595,9 +595,9 @@ func TestRow(t *testing.T) {
 	user1 := User{Name: "RowUser1", Age: 1, Birthday: parseTime("2000-1-1")}
 	user2 := User{Name: "RowUser2", Age: 10, Birthday: parseTime("2010-1-1")}
 	user3 := User{Name: "RowUser3", Age: 20, Birthday: parseTime("2020-1-1")}
-	DB.Save(&user1).Save(&user2).Save(&user3)
+	DB.Save(context.Background(), &user1).Save(context.Background(), &user2).Save(context.Background(), &user3)
 
-	row := DB.Table("users").Where("name = ?", user2.Name).Select("age").Row()
+	row := DB.Table("users").Where("name = ?", user2.Name).Select("age").Row(context.Background())
 	var age int64
 	row.Scan(&age)
 	if age != 10 {
@@ -609,9 +609,9 @@ func TestRows(t *testing.T) {
 	user1 := User{Name: "RowsUser1", Age: 1, Birthday: parseTime("2000-1-1")}
 	user2 := User{Name: "RowsUser2", Age: 10, Birthday: parseTime("2010-1-1")}
 	user3 := User{Name: "RowsUser3", Age: 20, Birthday: parseTime("2020-1-1")}
-	DB.Save(&user1).Save(&user2).Save(&user3)
+	DB.Save(context.Background(), &user1).Save(context.Background(), &user2).Save(context.Background(), &user3)
 
-	rows, err := DB.Table("users").Where("name = ? or name = ?", user2.Name, user3.Name).Select("name, age").Rows()
+	rows, err := DB.Table("users").Where("name = ? or name = ?", user2.Name, user3.Name).Select("name, age").Rows(context.Background())
 	if err != nil {
 		t.Errorf("Not error should happen, got %v", err)
 	}
@@ -633,9 +633,9 @@ func TestScanRows(t *testing.T) {
 	user1 := User{Name: "ScanRowsUser1", Age: 1, Birthday: parseTime("2000-1-1")}
 	user2 := User{Name: "ScanRowsUser2", Age: 10, Birthday: parseTime("2010-1-1")}
 	user3 := User{Name: "ScanRowsUser3", Age: 20, Birthday: parseTime("2020-1-1")}
-	DB.Save(&user1).Save(&user2).Save(&user3)
+	DB.Save(context.Background(), &user1).Save(context.Background(), &user2).Save(context.Background(), &user3)
 
-	rows, err := DB.Table("users").Where("name = ? or name = ?", user2.Name, user3.Name).Select("name, age").Rows()
+	rows, err := DB.Table("users").Where("name = ? or name = ?", user2.Name, user3.Name).Select("name, age").Rows(context.Background())
 	if err != nil {
 		t.Errorf("Not error should happen, got %v", err)
 	}
@@ -648,7 +648,7 @@ func TestScanRows(t *testing.T) {
 	var results []Result
 	for rows.Next() {
 		var result Result
-		if err := DB.ScanRows(rows, &result); err != nil {
+		if err := DB.ScanRows(context.Background(), rows, &result); err != nil {
 			t.Errorf("should get no error, but got %v", err)
 		}
 		results = append(results, result)
@@ -663,7 +663,7 @@ func TestScan(t *testing.T) {
 	user1 := User{Name: "ScanUser1", Age: 1, Birthday: parseTime("2000-1-1")}
 	user2 := User{Name: "ScanUser2", Age: 10, Birthday: parseTime("2010-1-1")}
 	user3 := User{Name: "ScanUser3", Age: 20, Birthday: parseTime("2020-1-1")}
-	DB.Save(&user1).Save(&user2).Save(&user3)
+	DB.Save(context.Background(), &user1).Save(context.Background(), &user2).Save(context.Background(), &user3)
 
 	type result struct {
 		Name string
@@ -671,13 +671,13 @@ func TestScan(t *testing.T) {
 	}
 
 	var res result
-	DB.Table("users").Select("name, age").Where("name = ?", user3.Name).Scan(&res)
+	DB.Table("users").Select("name, age").Where("name = ?", user3.Name).Scan(context.Background(), &res)
 	if res.Name != user3.Name {
 		t.Errorf("Scan into struct should work")
 	}
 
 	var doubleAgeRes = &result{}
-	if err := DB.Table("users").Select("age + age as age").Where("name = ?", user3.Name).Scan(&doubleAgeRes).Error; err != nil {
+	if err := DB.Table("users").Select("age + age as age").Where("name = ?", user3.Name).Scan(context.Background(), &doubleAgeRes).Error; err != nil {
 		t.Errorf("Scan to pointer of pointer")
 	}
 	if doubleAgeRes.Age != res.Age*2 {
@@ -685,7 +685,7 @@ func TestScan(t *testing.T) {
 	}
 
 	var ress []result
-	DB.Table("users").Select("name, age").Where("name in (?)", []string{user2.Name, user3.Name}).Scan(&ress)
+	DB.Table("users").Select("name, age").Where("name in (?)", []string{user2.Name, user3.Name}).Scan(context.Background(), &ress)
 	if len(ress) != 2 || ress[0].Name != user2.Name || ress[1].Name != user3.Name {
 		t.Errorf("Scan into struct map")
 	}
@@ -695,7 +695,7 @@ func TestRaw(t *testing.T) {
 	user1 := User{Name: "ExecRawSqlUser1", Age: 1, Birthday: parseTime("2000-1-1")}
 	user2 := User{Name: "ExecRawSqlUser2", Age: 10, Birthday: parseTime("2010-1-1")}
 	user3 := User{Name: "ExecRawSqlUser3", Age: 20, Birthday: parseTime("2020-1-1")}
-	DB.Save(&user1).Save(&user2).Save(&user3)
+	DB.Save(context.Background(), &user1).Save(context.Background(), &user2).Save(context.Background(), &user3)
 
 	type result struct {
 		Name  string
@@ -703,12 +703,12 @@ func TestRaw(t *testing.T) {
 	}
 
 	var ress []result
-	DB.Raw("SELECT name, age FROM users WHERE name = ? or name = ?", user2.Name, user3.Name).Scan(&ress)
+	DB.Raw("SELECT name, age FROM users WHERE name = ? or name = ?", user2.Name, user3.Name).Scan(context.Background(), &ress)
 	if len(ress) != 2 || ress[0].Name != user2.Name || ress[1].Name != user3.Name {
 		t.Errorf("Raw with scan")
 	}
 
-	rows, _ := DB.Raw("select name, age from users where name = ?", user3.Name).Rows()
+	rows, _ := DB.Raw("select name, age from users where name = ?", user3.Name).Rows(context.Background())
 	count := 0
 	for rows.Next() {
 		count++
@@ -717,14 +717,14 @@ func TestRaw(t *testing.T) {
 		t.Errorf("Raw with Rows should find one record with name 3")
 	}
 
-	DB.Exec("update users set name=? where name in (?)", "jinzhu", []string{user1.Name, user2.Name, user3.Name})
-	if DB.Where("name in (?)", []string{user1.Name, user2.Name, user3.Name}).First(&User{}).Error != gorm.ErrRecordNotFound {
+	DB.Exec(context.Background(), "update users set name=? where name in (?)", "jinzhu", []string{user1.Name, user2.Name, user3.Name})
+	if DB.Where("name in (?)", []string{user1.Name, user2.Name, user3.Name}).First(context.Background(), &User{}).Error != gorm.ErrRecordNotFound {
 		t.Error("Raw sql to update records")
 	}
 }
 
 func TestGroup(t *testing.T) {
-	rows, err := DB.Select("name").Table("users").Group("name").Rows()
+	rows, err := DB.Select("name").Table("users").Group("name").Rows(context.Background())
 
 	if err == nil {
 		defer rows.Close()
@@ -743,34 +743,34 @@ func TestJoins(t *testing.T) {
 		CreditCard: CreditCard{Number: "411111111111"},
 		Emails:     []Email{{Email: "join1@example.com"}, {Email: "join2@example.com"}},
 	}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 
 	var users1 []User
-	DB.Joins("left join emails on emails.user_id = users.id").Where("name = ?", "joins").Find(&users1)
+	DB.Joins("left join emails on emails.user_id = users.id").Where("name = ?", "joins").Find(context.Background(), &users1)
 	if len(users1) != 2 {
 		t.Errorf("should find two users using left join")
 	}
 
 	var users2 []User
-	DB.Joins("left join emails on emails.user_id = users.id AND emails.email = ?", "join1@example.com").Where("name = ?", "joins").First(&users2)
+	DB.Joins("left join emails on emails.user_id = users.id AND emails.email = ?", "join1@example.com").Where("name = ?", "joins").First(context.Background(), &users2)
 	if len(users2) != 1 {
 		t.Errorf("should find one users using left join with conditions")
 	}
 
 	var users3 []User
-	DB.Joins("join emails on emails.user_id = users.id AND emails.email = ?", "join1@example.com").Joins("join credit_cards on credit_cards.user_id = users.id AND credit_cards.number = ?", "411111111111").Where("name = ?", "joins").First(&users3)
+	DB.Joins("join emails on emails.user_id = users.id AND emails.email = ?", "join1@example.com").Joins("join credit_cards on credit_cards.user_id = users.id AND credit_cards.number = ?", "411111111111").Where("name = ?", "joins").First(context.Background(), &users3)
 	if len(users3) != 1 {
 		t.Errorf("should find one users using multiple left join conditions")
 	}
 
 	var users4 []User
-	DB.Joins("join emails on emails.user_id = users.id AND emails.email = ?", "join1@example.com").Joins("join credit_cards on credit_cards.user_id = users.id AND credit_cards.number = ?", "422222222222").Where("name = ?", "joins").First(&users4)
+	DB.Joins("join emails on emails.user_id = users.id AND emails.email = ?", "join1@example.com").Joins("join credit_cards on credit_cards.user_id = users.id AND credit_cards.number = ?", "422222222222").Where("name = ?", "joins").First(context.Background(), &users4)
 	if len(users4) != 0 {
 		t.Errorf("should find no user when searching with unexisting credit card")
 	}
 
 	var users5 []User
-	db5 := DB.Joins("join emails on emails.user_id = users.id AND emails.email = ?", "join1@example.com").Joins("join credit_cards on credit_cards.user_id = users.id AND credit_cards.number = ?", "411111111111").Where(User{Id: 1}).Where(Email{Id: 1}).Not(Email{Id: 10}).First(&users5)
+	db5 := DB.Joins("join emails on emails.user_id = users.id AND emails.email = ?", "join1@example.com").Joins("join credit_cards on credit_cards.user_id = users.id AND credit_cards.number = ?", "411111111111").Where(User{Id: 1}).Where(Email{Id: 1}).Not(Email{Id: 10}).First(context.Background(), &users5)
 	if db5.Error != nil {
 		t.Errorf("Should not raise error for join where identical fields in different tables. Error: %s", db5.Error.Error())
 	}
@@ -791,13 +791,13 @@ func TestScanIdenticalColumnNames(t *testing.T) {
 		},
 		Emails: []Email{{Email: "join1@example.com"}, {Email: "join2@example.com"}},
 	}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 
 	var users []JoinedIds
 	DB.Select("users.id, addresses.id, emails.id").Table("users").
 		Joins("left join addresses on users.billing_address_id = addresses.id").
 		Joins("left join emails on emails.user_id = users.id").
-		Where("name = ?", "joinsIds").Scan(&users)
+		Where("name = ?", "joinsIds").Scan(context.Background(), &users)
 
 	if len(users) != 2 {
 		t.Fatal("should find two rows using left join")
@@ -840,10 +840,10 @@ func TestJoinsWithSelect(t *testing.T) {
 		Name:   "joins_with_select",
 		Emails: []Email{{Email: "join1@example.com"}, {Email: "join2@example.com"}},
 	}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 
 	var results []result
-	DB.Table("users").Select("name, emails.email").Joins("left join emails on emails.user_id = users.id").Where("name = ?", "joins_with_select").Scan(&results)
+	DB.Table("users").Select("name, emails.email").Joins("left join emails on emails.user_id = users.id").Where("name = ?", "joins_with_select").Scan(context.Background(), &results)
 
 	sort.Slice(results, func(i, j int) bool {
 		return strings.Compare(results[i].Email, results[j].Email) < 0
@@ -855,7 +855,7 @@ func TestJoinsWithSelect(t *testing.T) {
 }
 
 func TestHaving(t *testing.T) {
-	rows, err := DB.Select("name, count(*) as total").Table("users").Group("name").Having("name IN (?)", []string{"2", "3"}).Rows()
+	rows, err := DB.Select("name, count(*) as total").Table("users").Group("name").Having("name IN (?)", []string{"2", "3"}).Rows(context.Background())
 
 	if err == nil {
 		defer rows.Close()
@@ -878,24 +878,24 @@ func TestHaving(t *testing.T) {
 
 func TestQueryBuilderSubselectInWhere(t *testing.T) {
 	user := User{Name: "query_expr_select_ruser1", Email: "root@user1.com", Age: 32}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 	user = User{Name: "query_expr_select_ruser2", Email: "nobody@user2.com", Age: 16}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 	user = User{Name: "query_expr_select_ruser3", Email: "root@user3.com", Age: 64}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 	user = User{Name: "query_expr_select_ruser4", Email: "somebody@user3.com", Age: 128}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 
 	var users []User
 	DB.Select("*").Where("name IN (?)", DB.
-		Select("name").Table("users").Where("name LIKE ?", "query_expr_select%").QueryExpr()).Find(&users)
+		Select("name").Table("users").Where("name LIKE ?", "query_expr_select%").QueryExpr()).Find(context.Background(), &users)
 
 	if len(users) != 4 {
 		t.Errorf("Four users should be found, instead found %d", len(users))
 	}
 
 	DB.Select("*").Where("name LIKE ?", "query_expr_select%").Where("age >= (?)", DB.
-		Select("AVG(age)").Table("users").Where("name LIKE ?", "query_expr_select%").QueryExpr()).Find(&users)
+		Select("AVG(age)").Table("users").Where("name LIKE ?", "query_expr_select%").QueryExpr()).Find(context.Background(), &users)
 
 	if len(users) != 2 {
 		t.Errorf("Two users should be found, instead found %d", len(users))
@@ -904,11 +904,11 @@ func TestQueryBuilderSubselectInWhere(t *testing.T) {
 
 func TestQueryBuilderRawQueryWithSubquery(t *testing.T) {
 	user := User{Name: "subquery_test_user1", Age: 10}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 	user = User{Name: "subquery_test_user2", Age: 11}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 	user = User{Name: "subquery_test_user3", Age: 12}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 
 	var count int
 	err := DB.Raw("select count(*) from (?) tmp",
@@ -917,7 +917,7 @@ func TestQueryBuilderRawQueryWithSubquery(t *testing.T) {
 			Where("age >= ? and name in (?)", 10, []string{"subquery_test_user1", "subquery_test_user2"}).
 			Group("name").
 			QueryExpr(),
-	).Count(&count).Error
+	).Count(context.Background(), &count).Error
 
 	if err != nil {
 		t.Errorf("Expected to get no errors, but got %v", err)
@@ -933,7 +933,7 @@ func TestQueryBuilderRawQueryWithSubquery(t *testing.T) {
 			Not("age <= ?", 10).Not("name in (?)", []string{"subquery_test_user1", "subquery_test_user2"}).
 			Group("name").
 			QueryExpr(),
-	).Count(&count).Error
+	).Count(context.Background(), &count).Error
 
 	if err != nil {
 		t.Errorf("Expected to get no errors, but got %v", err)
@@ -945,17 +945,17 @@ func TestQueryBuilderRawQueryWithSubquery(t *testing.T) {
 
 func TestQueryBuilderSubselectInHaving(t *testing.T) {
 	user := User{Name: "query_expr_having_ruser1", Email: "root@user1.com", Age: 64}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 	user = User{Name: "query_expr_having_ruser2", Email: "root@user2.com", Age: 128}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 	user = User{Name: "query_expr_having_ruser3", Email: "root@user1.com", Age: 64}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 	user = User{Name: "query_expr_having_ruser4", Email: "root@user2.com", Age: 128}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 
 	var users []User
 	DB.Select("AVG(age) as avgage").Where("name LIKE ?", "query_expr_having_%").Group("email").Having("AVG(age) > (?)", DB.
-		Select("AVG(age)").Where("name LIKE ?", "query_expr_having_%").Table("users").QueryExpr()).Find(&users)
+		Select("AVG(age)").Where("name LIKE ?", "query_expr_having_%").Table("users").QueryExpr()).Find(context.Background(), &users)
 
 	if len(users) != 1 {
 		t.Errorf("Two user group should be found, instead found %d", len(users))
@@ -987,7 +987,7 @@ func TestTimeWithZone(t *testing.T) {
 			user.Birthday = &utcBirthday
 		}
 
-		DB.Save(&user)
+		DB.Save(context.Background(), &user)
 		expectedBirthday := "2013-02-18 17:51:49 +0000"
 		foundBirthday := user.Birthday.UTC().Format(format)
 		if foundBirthday != expectedBirthday {
@@ -995,17 +995,17 @@ func TestTimeWithZone(t *testing.T) {
 		}
 
 		var findUser, findUser2, findUser3 User
-		DB.First(&findUser, "name = ?", name)
+		DB.First(context.Background(), &findUser, "name = ?", name)
 		foundBirthday = findUser.Birthday.UTC().Format(format)
 		if foundBirthday != expectedBirthday {
 			t.Errorf("User's birthday should not be changed after find for name=%s, expected bday=%+v but actual value=%+v", name, expectedBirthday, foundBirthday)
 		}
 
-		if DB.Where("id = ? AND birthday >= ?", findUser.Id, user.Birthday.Add(-time.Minute)).First(&findUser2).RecordNotFound() {
+		if DB.Where("id = ? AND birthday >= ?", findUser.Id, user.Birthday.Add(-time.Minute)).First(context.Background(), &findUser2).RecordNotFound() {
 			t.Errorf("User should be found")
 		}
 
-		if !DB.Where("id = ? AND birthday >= ?", findUser.Id, user.Birthday.Add(time.Minute)).First(&findUser3).RecordNotFound() {
+		if !DB.Where("id = ? AND birthday >= ?", findUser.Id, user.Birthday.Add(time.Minute)).First(context.Background(), &findUser3).RecordNotFound() {
 			t.Errorf("User should not be found")
 		}
 	}
@@ -1021,12 +1021,12 @@ func TestHstore(t *testing.T) {
 		t.Skip()
 	}
 
-	if err := DB.Exec("CREATE EXTENSION IF NOT EXISTS hstore").Error; err != nil {
+	if err := DB.Exec(context.Background(), "CREATE EXTENSION IF NOT EXISTS hstore").Error; err != nil {
 		fmt.Println("\033[31mHINT: Must be superuser to create hstore extension (ALTER USER gorm WITH SUPERUSER;)\033[0m")
 		panic(fmt.Sprintf("No error should happen when create hstore extension, but got %+v", err))
 	}
 
-	DB.Exec("drop table details")
+	DB.Exec(context.Background(), "drop table details")
 
 	if err := DB.CreateTable(&Details{}).Error; err != nil {
 		panic(fmt.Sprintf("No error should happen when create table, but got %+v", err))
@@ -1039,10 +1039,10 @@ func TestHstore(t *testing.T) {
 		"opinion":       &opinion,
 	}
 	d := Details{Bulk: bulk}
-	DB.Save(&d)
+	DB.Save(context.Background(), &d)
 
 	var d2 Details
-	if err := DB.First(&d2).Error; err != nil {
+	if err := DB.First(context.Background(), &d2).Error; err != nil {
 		t.Errorf("Got error when tried to fetch details: %+v", err)
 	}
 
@@ -1084,14 +1084,14 @@ func TestCompatibilityMode(t *testing.T) {
 	})
 
 	var users []User
-	DB.Find(&users)
+	DB.Find(context.Background(), &users)
 	if (users[0].Name != "Tim") || len(users) != 3 {
 		t.Errorf("Unexcepted result returned")
 	}
 }
 
 func TestOpenExistingDB(t *testing.T) {
-	DB.Save(&User{Name: "jnfeinstein"})
+	DB.Save(context.Background(), &User{Name: "jnfeinstein"})
 	dialect := os.Getenv("GORM_DIALECT")
 
 	db, err := gorm.Open(dialect, DB.DB())
@@ -1100,7 +1100,7 @@ func TestOpenExistingDB(t *testing.T) {
 	}
 
 	var user User
-	if db.Where("name = ?", "jnfeinstein").First(&user).Error == gorm.ErrRecordNotFound {
+	if db.Where("name = ?", "jnfeinstein").First(context.Background(), &user).Error == gorm.ErrRecordNotFound {
 		t.Errorf("Should have found existing record")
 	}
 }
@@ -1118,7 +1118,7 @@ func TestDdlErrors(t *testing.T) {
 		}
 	}()
 
-	if err := DB.Find(&User{}).Error; err == nil {
+	if err := DB.Find(context.Background(), &User{}).Error; err == nil {
 		t.Errorf("Expected operation on closed db to produce an error, but err was nil")
 	}
 }
@@ -1136,7 +1136,7 @@ func TestOpenWithOneParameter(t *testing.T) {
 func TestSaveAssociations(t *testing.T) {
 	db := DB.New()
 	deltaAddressCount := 0
-	if err := db.Model(&Address{}).Count(&deltaAddressCount).Error; err != nil {
+	if err := db.Model(&Address{}).Count(context.Background(), &deltaAddressCount).Error; err != nil {
 		t.Errorf("failed to fetch address count")
 		t.FailNow()
 	}
@@ -1150,12 +1150,12 @@ func TestSaveAssociations(t *testing.T) {
 	ownerAddress2 := &Address{
 		Address1: "address2",
 	}
-	db.Create(placeAddress)
+	db.Create(context.Background(), placeAddress)
 
 	addressCountShouldBe := func(t *testing.T, expectedCount int) {
 		countFromDB := 0
 		t.Helper()
-		err := db.Model(&Address{}).Count(&countFromDB).Error
+		err := db.Model(&Address{}).Count(context.Background(), &countFromDB).Error
 		if err != nil {
 			t.Error("failed to fetch address count")
 		}
@@ -1171,7 +1171,7 @@ func TestSaveAssociations(t *testing.T) {
 		PlaceAddress:   placeAddress,
 		OwnerAddress:   ownerAddress1,
 	}
-	err := db.Create(place1).Error
+	err := db.Create(context.Background(), place1).Error
 	if err != nil {
 		t.Errorf("failed to store place: %s", err.Error())
 	}
@@ -1187,7 +1187,7 @@ func TestSaveAssociations(t *testing.T) {
 		OwnerAddress:   ownerAddress2,
 		OwnerAddressID: 778,
 	}
-	err = db.Create(place2).Error
+	err = db.Create(context.Background(), place2).Error
 	if err != nil {
 		t.Errorf("failed to store place: %s", err.Error())
 	}
@@ -1197,7 +1197,7 @@ func TestSaveAssociations(t *testing.T) {
 	db.Model(&Place{}).Where(&Place{
 		PlaceAddressID: placeAddress.ID,
 		OwnerAddressID: ownerAddress1.ID,
-	}).Count(&count)
+	}).Count(context.Background(), &count)
 	if count != 1 {
 		t.Errorf("only one instance of (%d, %d) should be available, found: %d",
 			placeAddress.ID, ownerAddress1.ID, count)
@@ -1206,7 +1206,7 @@ func TestSaveAssociations(t *testing.T) {
 	db.Model(&Place{}).Where(&Place{
 		PlaceAddressID: placeAddress.ID,
 		OwnerAddressID: ownerAddress2.ID,
-	}).Count(&count)
+	}).Count(context.Background(), &count)
 	if count != 1 {
 		t.Errorf("only one instance of (%d, %d) should be available, found: %d",
 			placeAddress.ID, ownerAddress2.ID, count)
@@ -1214,7 +1214,7 @@ func TestSaveAssociations(t *testing.T) {
 
 	db.Model(&Place{}).Where(&Place{
 		PlaceAddressID: placeAddress.ID,
-	}).Count(&count)
+	}).Count(context.Background(), &count)
 	if count != 2 {
 		t.Errorf("two instances of (%d) should be available, found: %d",
 			placeAddress.ID, count)
@@ -1223,37 +1223,37 @@ func TestSaveAssociations(t *testing.T) {
 
 func TestBlockGlobalUpdate(t *testing.T) {
 	db := DB.New()
-	db.Create(&Toy{Name: "Stuffed Animal", OwnerType: "Nobody"})
+	db.Create(context.Background(), &Toy{Name: "Stuffed Animal", OwnerType: "Nobody"})
 
-	err := db.Model(&Toy{}).Update("OwnerType", "Human").Error
+	err := db.Model(&Toy{}).Update(context.Background(), "OwnerType", "Human").Error
 	if err != nil {
 		t.Error("Unexpected error on global update")
 	}
 
-	err = db.Delete(&Toy{}).Error
+	err = db.Delete(context.Background(), &Toy{}).Error
 	if err != nil {
 		t.Error("Unexpected error on global delete")
 	}
 
 	db.BlockGlobalUpdate(true)
 
-	db.Create(&Toy{Name: "Stuffed Animal", OwnerType: "Nobody"})
+	db.Create(context.Background(), &Toy{Name: "Stuffed Animal", OwnerType: "Nobody"})
 
-	err = db.Model(&Toy{}).Update("OwnerType", "Human").Error
+	err = db.Model(&Toy{}).Update(context.Background(), "OwnerType", "Human").Error
 	if err == nil {
 		t.Error("Expected error on global update")
 	}
 
-	err = db.Model(&Toy{}).Where(&Toy{OwnerType: "Martian"}).Update("OwnerType", "Astronaut").Error
+	err = db.Model(&Toy{}).Where(&Toy{OwnerType: "Martian"}).Update(context.Background(), "OwnerType", "Astronaut").Error
 	if err != nil {
 		t.Error("Unxpected error on conditional update")
 	}
 
-	err = db.Delete(&Toy{}).Error
+	err = db.Delete(context.Background(), &Toy{}).Error
 	if err == nil {
 		t.Error("Expected error on global delete")
 	}
-	err = db.Where(&Toy{OwnerType: "Martian"}).Delete(&Toy{}).Error
+	err = db.Where(&Toy{OwnerType: "Martian"}).Delete(context.Background(), &Toy{}).Error
 	if err != nil {
 		t.Error("Unexpected error on conditional delete")
 	}
@@ -1261,20 +1261,20 @@ func TestBlockGlobalUpdate(t *testing.T) {
 
 func TestCountWithHaving(t *testing.T) {
 	db := DB.New()
-	db.Delete(User{})
-	defer db.Delete(User{})
+	db.Delete(context.Background(), User{})
+	defer db.Delete(context.Background(), User{})
 
-	DB.Create(getPreparedUser("user1", "pluck_user"))
-	DB.Create(getPreparedUser("user2", "pluck_user"))
+	DB.Create(context.Background(), getPreparedUser("user1", "pluck_user"))
+	DB.Create(context.Background(), getPreparedUser("user2", "pluck_user"))
 	user3 := getPreparedUser("user3", "pluck_user")
 	user3.Languages = []Language{}
-	DB.Create(user3)
+	DB.Create(context.Background(), user3)
 
 	var count int
 	err := db.Model(User{}).Select("users.id").
 		Joins("LEFT JOIN user_languages ON user_languages.user_id = users.id").
 		Joins("LEFT JOIN languages ON user_languages.language_id = languages.id").
-		Group("users.id").Having("COUNT(languages.id) > 1").Count(&count).Error
+		Group("users.id").Having("COUNT(languages.id) > 1").Count(context.Background(), &count).Error
 
 	if err != nil {
 		t.Error("Unexpected error on query count with having")
@@ -1287,15 +1287,15 @@ func TestCountWithHaving(t *testing.T) {
 
 func TestPluck(t *testing.T) {
 	db := DB.New()
-	db.Delete(User{})
-	defer db.Delete(User{})
+	db.Delete(context.Background(), User{})
+	defer db.Delete(context.Background(), User{})
 
-	DB.Create(&User{Id: 1, Name: "user1"})
-	DB.Create(&User{Id: 2, Name: "user2"})
-	DB.Create(&User{Id: 3, Name: "user3"})
+	DB.Create(context.Background(), &User{Id: 1, Name: "user1"})
+	DB.Create(context.Background(), &User{Id: 2, Name: "user2"})
+	DB.Create(context.Background(), &User{Id: 3, Name: "user3"})
 
 	var ids []int64
-	err := db.Model(User{}).Order("id").Pluck("id", &ids).Error
+	err := db.Model(User{}).Order("id").Pluck(context.Background(), "id", &ids).Error
 
 	if err != nil {
 		t.Error("Unexpected error on pluck")
@@ -1305,7 +1305,7 @@ func TestPluck(t *testing.T) {
 		t.Error("Unexpected result on pluck")
 	}
 
-	err = db.Model(User{}).Order("id").Pluck("id", &ids).Error
+	err = db.Model(User{}).Order("id").Pluck(context.Background(), "id", &ids).Error
 
 	if err != nil {
 		t.Error("Unexpected error on pluck again")
@@ -1318,17 +1318,17 @@ func TestPluck(t *testing.T) {
 
 func TestCountWithQueryOption(t *testing.T) {
 	db := DB.New()
-	db.Delete(User{})
-	defer db.Delete(User{})
+	db.Delete(context.Background(), User{})
+	defer db.Delete(context.Background(), User{})
 
-	DB.Create(&User{Name: "user1"})
-	DB.Create(&User{Name: "user2"})
-	DB.Create(&User{Name: "user3"})
+	DB.Create(context.Background(), &User{Name: "user1"})
+	DB.Create(context.Background(), &User{Name: "user2"})
+	DB.Create(context.Background(), &User{Name: "user3"})
 
 	var count int
 	err := db.Model(User{}).Select("users.id").
 		Set("gorm:query_option", "WHERE users.name='user2'").
-		Count(&count).Error
+		Count(context.Background(), &count).Error
 
 	if err != nil {
 		t.Error("Unexpected error on query count with query_option")
@@ -1342,7 +1342,7 @@ func TestCountWithQueryOption(t *testing.T) {
 func TestQueryHint1(t *testing.T) {
 	db := DB.New()
 
-	_, err := db.Model(User{}).Raw("select 1").Rows()
+	_, err := db.Model(User{}).Raw("select 1").Rows(context.Background())
 
 	if err != nil {
 		t.Error("Unexpected error on query count with query_option")
@@ -1358,7 +1358,7 @@ func TestQueryHint2(t *testing.T) {
 	DB.AutoMigrate(&TestStruct{})
 
 	data := TestStruct{ID: "uuid", Name: "hello"}
-	if err := DB.Set("gorm:query_hint", "/*master*/").Save(&data).Error; err != nil {
+	if err := DB.Set("gorm:query_hint", "/*master*/").Save(context.Background(), &data).Error; err != nil {
 		t.Error("Unexpected error on query count with query_option")
 	}
 }
@@ -1376,7 +1376,7 @@ func TestFloatColumnPrecision(t *testing.T) {
 	DB.AutoMigrate(&FloatTest{})
 
 	data := FloatTest{ID: "uuid", FloatValue: 112.57315}
-	if err := DB.Save(&data).Error; err != nil || data.ID != "uuid" || data.FloatValue != 112.57315 {
+	if err := DB.Save(context.Background(), &data).Error; err != nil || data.ID != "uuid" || data.FloatValue != 112.57315 {
 		t.Errorf("Float value should not lose precision")
 	}
 }
@@ -1398,7 +1398,7 @@ func TestWhereUpdates(t *testing.T) {
 	DB.AutoMigrate(&SomeEntity{})
 
 	a := SomeEntity{Name: "test"}
-	DB.Model(&a).Where(a).Updates(SomeEntity{Name: "test2"})
+	DB.Model(&a).Where(a).Updates(context.Background(), SomeEntity{Name: "test2"})
 }
 
 func BenchmarkGorm(b *testing.B) {
@@ -1408,13 +1408,13 @@ func BenchmarkGorm(b *testing.B) {
 		now := time.Now()
 		email := EmailWithIdx{Email: e, UserAgent: "pc", RegisteredAt: &now}
 		// Insert
-		DB.Save(&email)
+		DB.Save(context.Background(), &email)
 		// Query
-		DB.First(&EmailWithIdx{}, "email = ?", e)
+		DB.First(context.Background(), &EmailWithIdx{}, "email = ?", e)
 		// Update
-		DB.Model(&email).UpdateColumn("email", "new-"+e)
+		DB.Model(&email).UpdateColumn(context.Background(), "email", "new-"+e)
 		// Delete
-		DB.Delete(&email)
+		DB.Delete(context.Background(), &email)
 	}
 }
 

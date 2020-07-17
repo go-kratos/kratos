@@ -1,6 +1,7 @@
 package gorm_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"reflect"
@@ -18,7 +19,7 @@ func TestBelongsTo(t *testing.T) {
 		MainCategory: Category{Name: "Main Category 1"},
 	}
 
-	if err := DB.Save(&post).Error; err != nil {
+	if err := DB.Save(context.Background(), &post).Error; err != nil {
 		t.Error("Got errors when save post", err)
 	}
 
@@ -32,28 +33,28 @@ func TestBelongsTo(t *testing.T) {
 
 	// Query
 	var category1 Category
-	DB.Model(&post).Association("Category").Find(&category1)
+	DB.Model(&post).Association(context.Background(), "Category").Find(&category1)
 	if category1.Name != "Category 1" {
 		t.Errorf("Query belongs to relations with Association")
 	}
 
 	var mainCategory1 Category
-	DB.Model(&post).Association("MainCategory").Find(&mainCategory1)
+	DB.Model(&post).Association(context.Background(), "MainCategory").Find(&mainCategory1)
 	if mainCategory1.Name != "Main Category 1" {
 		t.Errorf("Query belongs to relations with Association")
 	}
 
 	var category11 Category
-	DB.Model(&post).Related(&category11)
+	DB.Model(&post).Related(context.Background(), &category11)
 	if category11.Name != "Category 1" {
 		t.Errorf("Query belongs to relations with Related")
 	}
 
-	if DB.Model(&post).Association("Category").Count() != 1 {
+	if DB.Model(&post).Association(context.Background(), "Category").Count() != 1 {
 		t.Errorf("Post's category count should be 1")
 	}
 
-	if DB.Model(&post).Association("MainCategory").Count() != 1 {
+	if DB.Model(&post).Association(context.Background(), "MainCategory").Count() != 1 {
 		t.Errorf("Post's main category count should be 1")
 	}
 
@@ -61,20 +62,20 @@ func TestBelongsTo(t *testing.T) {
 	var category2 = Category{
 		Name: "Category 2",
 	}
-	DB.Model(&post).Association("Category").Append(&category2)
+	DB.Model(&post).Association(context.Background(), "Category").Append(&category2)
 
 	if category2.ID == 0 {
 		t.Errorf("Category should has ID when created with Append")
 	}
 
 	var category21 Category
-	DB.Model(&post).Related(&category21)
+	DB.Model(&post).Related(context.Background(), &category21)
 
 	if category21.Name != "Category 2" {
 		t.Errorf("Category should be updated with Append")
 	}
 
-	if DB.Model(&post).Association("Category").Count() != 1 {
+	if DB.Model(&post).Association(context.Background(), "Category").Count() != 1 {
 		t.Errorf("Post's category count should be 1")
 	}
 
@@ -82,25 +83,25 @@ func TestBelongsTo(t *testing.T) {
 	var category3 = Category{
 		Name: "Category 3",
 	}
-	DB.Model(&post).Association("Category").Replace(&category3)
+	DB.Model(&post).Association(context.Background(), "Category").Replace(&category3)
 
 	if category3.ID == 0 {
 		t.Errorf("Category should has ID when created with Replace")
 	}
 
 	var category31 Category
-	DB.Model(&post).Related(&category31)
+	DB.Model(&post).Related(context.Background(), &category31)
 	if category31.Name != "Category 3" {
 		t.Errorf("Category should be updated with Replace")
 	}
 
-	if DB.Model(&post).Association("Category").Count() != 1 {
+	if DB.Model(&post).Association(context.Background(), "Category").Count() != 1 {
 		t.Errorf("Post's category count should be 1")
 	}
 
 	// Delete
-	DB.Model(&post).Association("Category").Delete(&category2)
-	if DB.Model(&post).Related(&Category{}).RecordNotFound() {
+	DB.Model(&post).Association(context.Background(), "Category").Delete(&category2)
+	if DB.Model(&post).Related(context.Background(), &Category{}).RecordNotFound() {
 		t.Errorf("Should not delete any category when Delete a unrelated Category")
 	}
 
@@ -108,28 +109,28 @@ func TestBelongsTo(t *testing.T) {
 		t.Errorf("Post's category should not be reseted when Delete a unrelated Category")
 	}
 
-	DB.Model(&post).Association("Category").Delete(&category3)
+	DB.Model(&post).Association(context.Background(), "Category").Delete(&category3)
 
 	if post.Category.Name != "" {
 		t.Errorf("Post's category should be reseted after Delete")
 	}
 
 	var category41 Category
-	DB.Model(&post).Related(&category41)
+	DB.Model(&post).Related(context.Background(), &category41)
 	if category41.Name != "" {
 		t.Errorf("Category should be deleted with Delete")
 	}
 
-	if count := DB.Model(&post).Association("Category").Count(); count != 0 {
+	if count := DB.Model(&post).Association(context.Background(), "Category").Count(); count != 0 {
 		t.Errorf("Post's category count should be 0 after Delete, but got %v", count)
 	}
 
 	// Clear
-	DB.Model(&post).Association("Category").Append(&Category{
+	DB.Model(&post).Association(context.Background(), "Category").Append(&Category{
 		Name: "Category 2",
 	})
 
-	if DB.Model(&post).Related(&Category{}).RecordNotFound() {
+	if DB.Model(&post).Related(context.Background(), &Category{}).RecordNotFound() {
 		t.Errorf("Should find category after append")
 	}
 
@@ -137,17 +138,17 @@ func TestBelongsTo(t *testing.T) {
 		t.Errorf("Post's category should has value after Append")
 	}
 
-	DB.Model(&post).Association("Category").Clear()
+	DB.Model(&post).Association(context.Background(), "Category").Clear()
 
 	if post.Category.Name != "" {
 		t.Errorf("Post's category should be cleared after Clear")
 	}
 
-	if !DB.Model(&post).Related(&Category{}).RecordNotFound() {
+	if !DB.Model(&post).Related(context.Background(), &Category{}).RecordNotFound() {
 		t.Errorf("Should not find any category after Clear")
 	}
 
-	if count := DB.Model(&post).Association("Category").Count(); count != 0 {
+	if count := DB.Model(&post).Association(context.Background(), "Category").Count(); count != 0 {
 		t.Errorf("Post's category count should be 0 after Clear, but got %v", count)
 	}
 
@@ -155,27 +156,27 @@ func TestBelongsTo(t *testing.T) {
 	category6 := Category{
 		Name: "Category 6",
 	}
-	DB.Model(&post).Association("Category").Append(&category6)
+	DB.Model(&post).Association(context.Background(), "Category").Append(&category6)
 
-	if count := DB.Model(&post).Association("Category").Count(); count != 1 {
+	if count := DB.Model(&post).Association(context.Background(), "Category").Count(); count != 1 {
 		t.Errorf("Post's category count should be 1 after Append, but got %v", count)
 	}
 
-	DB.Delete(&category6)
+	DB.Delete(context.Background(), &category6)
 
-	if count := DB.Model(&post).Association("Category").Count(); count != 0 {
+	if count := DB.Model(&post).Association(context.Background(), "Category").Count(); count != 0 {
 		t.Errorf("Post's category count should be 0 after the category has been deleted, but got %v", count)
 	}
 
-	if err := DB.Model(&post).Association("Category").Find(&Category{}).Error; err == nil {
+	if err := DB.Model(&post).Association(context.Background(), "Category").Find(&Category{}).Error; err == nil {
 		t.Errorf("Post's category is not findable after Delete")
 	}
 
-	if count := DB.Unscoped().Model(&post).Association("Category").Count(); count != 1 {
+	if count := DB.Unscoped().Model(&post).Association(context.Background(), "Category").Count(); count != 1 {
 		t.Errorf("Post's category count should be 1 when query with Unscoped, but got %v", count)
 	}
 
-	if err := DB.Unscoped().Model(&post).Association("Category").Find(&Category{}).Error; err != nil {
+	if err := DB.Unscoped().Model(&post).Association(context.Background(), "Category").Find(&Category{}).Error; err != nil {
 		t.Errorf("Post's category should be findable when query with Unscoped, got %v", err)
 	}
 }
@@ -229,7 +230,7 @@ func TestHasOne(t *testing.T) {
 		CreditCard: CreditCard{Number: "411111111111"},
 	}
 
-	if err := DB.Save(&user).Error; err != nil {
+	if err := DB.Save(context.Background(), &user).Error; err != nil {
 		t.Error("Got errors when save user", err.Error())
 	}
 
@@ -239,20 +240,20 @@ func TestHasOne(t *testing.T) {
 
 	// Query
 	var creditCard1 CreditCard
-	DB.Model(&user).Related(&creditCard1)
+	DB.Model(&user).Related(context.Background(), &creditCard1)
 
 	if creditCard1.Number != "411111111111" {
 		t.Errorf("Query has one relations with Related")
 	}
 
 	var creditCard11 CreditCard
-	DB.Model(&user).Association("CreditCard").Find(&creditCard11)
+	DB.Model(&user).Association(context.Background(), "CreditCard").Find(&creditCard11)
 
 	if creditCard11.Number != "411111111111" {
 		t.Errorf("Query has one relations with Related")
 	}
 
-	if DB.Model(&user).Association("CreditCard").Count() != 1 {
+	if DB.Model(&user).Association(context.Background(), "CreditCard").Count() != 1 {
 		t.Errorf("User's credit card count should be 1")
 	}
 
@@ -260,19 +261,19 @@ func TestHasOne(t *testing.T) {
 	var creditcard2 = CreditCard{
 		Number: "411111111112",
 	}
-	DB.Model(&user).Association("CreditCard").Append(&creditcard2)
+	DB.Model(&user).Association(context.Background(), "CreditCard").Append(&creditcard2)
 
 	if creditcard2.ID == 0 {
 		t.Errorf("Creditcard should has ID when created with Append")
 	}
 
 	var creditcard21 CreditCard
-	DB.Model(&user).Related(&creditcard21)
+	DB.Model(&user).Related(context.Background(), &creditcard21)
 	if creditcard21.Number != "411111111112" {
 		t.Errorf("CreditCard should be updated with Append")
 	}
 
-	if DB.Model(&user).Association("CreditCard").Count() != 1 {
+	if DB.Model(&user).Association(context.Background(), "CreditCard").Count() != 1 {
 		t.Errorf("User's credit card count should be 1")
 	}
 
@@ -280,40 +281,40 @@ func TestHasOne(t *testing.T) {
 	var creditcard3 = CreditCard{
 		Number: "411111111113",
 	}
-	DB.Model(&user).Association("CreditCard").Replace(&creditcard3)
+	DB.Model(&user).Association(context.Background(), "CreditCard").Replace(&creditcard3)
 
 	if creditcard3.ID == 0 {
 		t.Errorf("Creditcard should has ID when created with Replace")
 	}
 
 	var creditcard31 CreditCard
-	DB.Model(&user).Related(&creditcard31)
+	DB.Model(&user).Related(context.Background(), &creditcard31)
 	if creditcard31.Number != "411111111113" {
 		t.Errorf("CreditCard should be updated with Replace")
 	}
 
-	if DB.Model(&user).Association("CreditCard").Count() != 1 {
+	if DB.Model(&user).Association(context.Background(), "CreditCard").Count() != 1 {
 		t.Errorf("User's credit card count should be 1")
 	}
 
 	// Delete
-	DB.Model(&user).Association("CreditCard").Delete(&creditcard2)
+	DB.Model(&user).Association(context.Background(), "CreditCard").Delete(&creditcard2)
 	var creditcard4 CreditCard
-	DB.Model(&user).Related(&creditcard4)
+	DB.Model(&user).Related(context.Background(), &creditcard4)
 	if creditcard4.Number != "411111111113" {
 		t.Errorf("Should not delete credit card when Delete a unrelated CreditCard")
 	}
 
-	if DB.Model(&user).Association("CreditCard").Count() != 1 {
+	if DB.Model(&user).Association(context.Background(), "CreditCard").Count() != 1 {
 		t.Errorf("User's credit card count should be 1")
 	}
 
-	DB.Model(&user).Association("CreditCard").Delete(&creditcard3)
-	if !DB.Model(&user).Related(&CreditCard{}).RecordNotFound() {
+	DB.Model(&user).Association(context.Background(), "CreditCard").Delete(&creditcard3)
+	if !DB.Model(&user).Related(context.Background(), &CreditCard{}).RecordNotFound() {
 		t.Errorf("Should delete credit card with Delete")
 	}
 
-	if DB.Model(&user).Association("CreditCard").Count() != 0 {
+	if DB.Model(&user).Association(context.Background(), "CreditCard").Count() != 0 {
 		t.Errorf("User's credit card count should be 0 after Delete")
 	}
 
@@ -321,22 +322,22 @@ func TestHasOne(t *testing.T) {
 	var creditcard5 = CreditCard{
 		Number: "411111111115",
 	}
-	DB.Model(&user).Association("CreditCard").Append(&creditcard5)
+	DB.Model(&user).Association(context.Background(), "CreditCard").Append(&creditcard5)
 
-	if DB.Model(&user).Related(&CreditCard{}).RecordNotFound() {
+	if DB.Model(&user).Related(context.Background(), &CreditCard{}).RecordNotFound() {
 		t.Errorf("Should added credit card with Append")
 	}
 
-	if DB.Model(&user).Association("CreditCard").Count() != 1 {
+	if DB.Model(&user).Association(context.Background(), "CreditCard").Count() != 1 {
 		t.Errorf("User's credit card count should be 1")
 	}
 
-	DB.Model(&user).Association("CreditCard").Clear()
-	if !DB.Model(&user).Related(&CreditCard{}).RecordNotFound() {
+	DB.Model(&user).Association(context.Background(), "CreditCard").Clear()
+	if !DB.Model(&user).Related(context.Background(), &CreditCard{}).RecordNotFound() {
 		t.Errorf("Credit card should be deleted with Clear")
 	}
 
-	if DB.Model(&user).Association("CreditCard").Count() != 0 {
+	if DB.Model(&user).Association(context.Background(), "CreditCard").Count() != 0 {
 		t.Errorf("User's credit card count should be 0 after Clear")
 	}
 
@@ -344,27 +345,27 @@ func TestHasOne(t *testing.T) {
 	var creditcard6 = CreditCard{
 		Number: "411111111116",
 	}
-	DB.Model(&user).Association("CreditCard").Append(&creditcard6)
+	DB.Model(&user).Association(context.Background(), "CreditCard").Append(&creditcard6)
 
-	if count := DB.Model(&user).Association("CreditCard").Count(); count != 1 {
+	if count := DB.Model(&user).Association(context.Background(), "CreditCard").Count(); count != 1 {
 		t.Errorf("User's credit card count should be 1 after Append, but got %v", count)
 	}
 
-	DB.Delete(&creditcard6)
+	DB.Delete(context.Background(), &creditcard6)
 
-	if count := DB.Model(&user).Association("CreditCard").Count(); count != 0 {
+	if count := DB.Model(&user).Association(context.Background(), "CreditCard").Count(); count != 0 {
 		t.Errorf("User's credit card count should be 0 after credit card deleted, but got %v", count)
 	}
 
-	if err := DB.Model(&user).Association("CreditCard").Find(&CreditCard{}).Error; err == nil {
+	if err := DB.Model(&user).Association(context.Background(), "CreditCard").Find(&CreditCard{}).Error; err == nil {
 		t.Errorf("User's creditcard is not findable after Delete")
 	}
 
-	if count := DB.Unscoped().Model(&user).Association("CreditCard").Count(); count != 1 {
+	if count := DB.Unscoped().Model(&user).Association(context.Background(), "CreditCard").Count(); count != 1 {
 		t.Errorf("User's credit card count should be 1 when query with Unscoped, but got %v", count)
 	}
 
-	if err := DB.Unscoped().Model(&user).Association("CreditCard").Find(&CreditCard{}).Error; err != nil {
+	if err := DB.Unscoped().Model(&user).Association(context.Background(), "CreditCard").Find(&CreditCard{}).Error; err != nil {
 		t.Errorf("User's creditcard should be findable when query with Unscoped, got %v", err)
 	}
 }
@@ -419,7 +420,7 @@ func TestHasMany(t *testing.T) {
 		Comments: []*Comment{{Content: "Comment 1"}, {Content: "Comment 2"}},
 	}
 
-	if err := DB.Save(&post).Error; err != nil {
+	if err := DB.Save(context.Background(), &post).Error; err != nil {
 		t.Error("Got errors when save post", err)
 	}
 
@@ -440,82 +441,82 @@ func TestHasMany(t *testing.T) {
 	}
 
 	// Query
-	if DB.First(&Comment{}, "content = ?", "Comment 1").Error != nil {
+	if DB.First(context.Background(), &Comment{}, "content = ?", "Comment 1").Error != nil {
 		t.Errorf("Comment 1 should be saved")
 	}
 
 	var comments1 []Comment
-	DB.Model(&post).Association("Comments").Find(&comments1)
+	DB.Model(&post).Association(context.Background(), "Comments").Find(&comments1)
 	if !compareComments(comments1, []string{"Comment 1", "Comment 2"}) {
 		t.Errorf("Query has many relations with Association")
 	}
 
 	var comments11 []Comment
-	DB.Model(&post).Related(&comments11)
+	DB.Model(&post).Related(context.Background(), &comments11)
 	if !compareComments(comments11, []string{"Comment 1", "Comment 2"}) {
 		t.Errorf("Query has many relations with Related")
 	}
 
-	if DB.Model(&post).Association("Comments").Count() != 2 {
+	if DB.Model(&post).Association(context.Background(), "Comments").Count() != 2 {
 		t.Errorf("Post's comments count should be 2")
 	}
 
 	// Append
-	DB.Model(&post).Association("Comments").Append(&Comment{Content: "Comment 3"})
+	DB.Model(&post).Association(context.Background(), "Comments").Append(&Comment{Content: "Comment 3"})
 
 	var comments2 []Comment
-	DB.Model(&post).Related(&comments2)
+	DB.Model(&post).Related(context.Background(), &comments2)
 	if !compareComments(comments2, []string{"Comment 1", "Comment 2", "Comment 3"}) {
 		t.Errorf("Append new record to has many relations")
 	}
 
-	if DB.Model(&post).Association("Comments").Count() != 3 {
+	if DB.Model(&post).Association(context.Background(), "Comments").Count() != 3 {
 		t.Errorf("Post's comments count should be 3 after Append")
 	}
 
 	// Delete
-	DB.Model(&post).Association("Comments").Delete(comments11)
+	DB.Model(&post).Association(context.Background(), "Comments").Delete(comments11)
 
 	var comments3 []Comment
-	DB.Model(&post).Related(&comments3)
+	DB.Model(&post).Related(context.Background(), &comments3)
 	if !compareComments(comments3, []string{"Comment 3"}) {
 		t.Errorf("Delete an existing resource for has many relations")
 	}
 
-	if DB.Model(&post).Association("Comments").Count() != 1 {
+	if DB.Model(&post).Association(context.Background(), "Comments").Count() != 1 {
 		t.Errorf("Post's comments count should be 1 after Delete 2")
 	}
 
 	// Replace
-	DB.Model(&Post{Id: 999}).Association("Comments").Replace()
+	DB.Model(&Post{Id: 999}).Association(context.Background(), "Comments").Replace()
 
 	var comments4 []Comment
-	DB.Model(&post).Related(&comments4)
+	DB.Model(&post).Related(context.Background(), &comments4)
 	if len(comments4) == 0 {
 		t.Errorf("Replace for other resource should not clear all comments")
 	}
 
-	DB.Model(&post).Association("Comments").Replace(&Comment{Content: "Comment 4"}, &Comment{Content: "Comment 5"})
+	DB.Model(&post).Association(context.Background(), "Comments").Replace(&Comment{Content: "Comment 4"}, &Comment{Content: "Comment 5"})
 
 	var comments41 []Comment
-	DB.Model(&post).Related(&comments41)
+	DB.Model(&post).Related(context.Background(), &comments41)
 	if !compareComments(comments41, []string{"Comment 4", "Comment 5"}) {
 		t.Errorf("Replace has many relations")
 	}
 
 	// Clear
-	DB.Model(&Post{Id: 999}).Association("Comments").Clear()
+	DB.Model(&Post{Id: 999}).Association(context.Background(), "Comments").Clear()
 
 	var comments5 []Comment
-	DB.Model(&post).Related(&comments5)
+	DB.Model(&post).Related(context.Background(), &comments5)
 	if len(comments5) == 0 {
 		t.Errorf("Clear should not clear all comments")
 	}
 
-	DB.Model(&post).Association("Comments").Clear()
+	DB.Model(&post).Association(context.Background(), "Comments").Clear()
 
 	var comments51 []Comment
-	DB.Model(&post).Related(&comments51)
+	DB.Model(&post).Related(context.Background(), &comments51)
 	if len(comments51) != 0 {
 		t.Errorf("Clear has many relations")
 	}
@@ -524,29 +525,29 @@ func TestHasMany(t *testing.T) {
 	var comment6 = Comment{
 		Content: "comment 6",
 	}
-	DB.Model(&post).Association("Comments").Append(&comment6)
+	DB.Model(&post).Association(context.Background(), "Comments").Append(&comment6)
 
-	if count := DB.Model(&post).Association("Comments").Count(); count != 1 {
+	if count := DB.Model(&post).Association(context.Background(), "Comments").Count(); count != 1 {
 		t.Errorf("post's comments count should be 1 after Append, but got %v", count)
 	}
 
-	DB.Delete(&comment6)
+	DB.Delete(context.Background(), &comment6)
 
-	if count := DB.Model(&post).Association("Comments").Count(); count != 0 {
+	if count := DB.Model(&post).Association(context.Background(), "Comments").Count(); count != 0 {
 		t.Errorf("post's comments count should be 0 after comment been deleted, but got %v", count)
 	}
 
 	var comments6 []Comment
-	if DB.Model(&post).Association("Comments").Find(&comments6); len(comments6) != 0 {
+	if DB.Model(&post).Association(context.Background(), "Comments").Find(&comments6); len(comments6) != 0 {
 		t.Errorf("post's comments count should be 0 when find with Find, but got %v", len(comments6))
 	}
 
-	if count := DB.Unscoped().Model(&post).Association("Comments").Count(); count != 1 {
+	if count := DB.Unscoped().Model(&post).Association(context.Background(), "Comments").Count(); count != 1 {
 		t.Errorf("post's comments count should be 1 when query with Unscoped, but got %v", count)
 	}
 
 	var comments61 []Comment
-	if DB.Unscoped().Model(&post).Association("Comments").Find(&comments61); len(comments61) != 1 {
+	if DB.Unscoped().Model(&post).Association(context.Background(), "Comments").Find(&comments61); len(comments61) != 1 {
 		t.Errorf("post's comments count should be 1 when query with Unscoped, but got %v", len(comments61))
 	}
 }
@@ -598,96 +599,96 @@ func TestManyToMany(t *testing.T) {
 	DB.Raw("delete from languages")
 	var languages = []Language{{Name: "ZH"}, {Name: "EN"}}
 	user := User{Name: "Many2Many", Languages: languages}
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 
 	// Query
 	var newLanguages []Language
-	DB.Model(&user).Related(&newLanguages, "Languages")
+	DB.Model(&user).Related(context.Background(), &newLanguages, "Languages")
 	if len(newLanguages) != len([]string{"ZH", "EN"}) {
 		t.Errorf("Query many to many relations")
 	}
 
-	DB.Model(&user).Association("Languages").Find(&newLanguages)
+	DB.Model(&user).Association(context.Background(), "Languages").Find(&newLanguages)
 	if len(newLanguages) != len([]string{"ZH", "EN"}) {
 		t.Errorf("Should be able to find many to many relations")
 	}
 
-	if DB.Model(&user).Association("Languages").Count() != len([]string{"ZH", "EN"}) {
+	if DB.Model(&user).Association(context.Background(), "Languages").Count() != len([]string{"ZH", "EN"}) {
 		t.Errorf("Count should return correct result")
 	}
 
 	// Append
-	DB.Model(&user).Association("Languages").Append(&Language{Name: "DE"})
-	if DB.Where("name = ?", "DE").First(&Language{}).RecordNotFound() {
+	DB.Model(&user).Association(context.Background(), "Languages").Append(&Language{Name: "DE"})
+	if DB.Where("name = ?", "DE").First(context.Background(), &Language{}).RecordNotFound() {
 		t.Errorf("New record should be saved when append")
 	}
 
 	languageA := Language{Name: "AA"}
-	DB.Save(&languageA)
-	DB.Model(&User{Id: user.Id}).Association("Languages").Append(&languageA)
+	DB.Save(context.Background(), &languageA)
+	DB.Model(&User{Id: user.Id}).Association(context.Background(), "Languages").Append(&languageA)
 
 	languageC := Language{Name: "CC"}
-	DB.Save(&languageC)
-	DB.Model(&user).Association("Languages").Append(&[]Language{{Name: "BB"}, languageC})
+	DB.Save(context.Background(), &languageC)
+	DB.Model(&user).Association(context.Background(), "Languages").Append(&[]Language{{Name: "BB"}, languageC})
 
-	DB.Model(&User{Id: user.Id}).Association("Languages").Append(&[]Language{{Name: "DD"}, {Name: "EE"}})
+	DB.Model(&User{Id: user.Id}).Association(context.Background(), "Languages").Append(&[]Language{{Name: "DD"}, {Name: "EE"}})
 
 	totalLanguages := []string{"ZH", "EN", "DE", "AA", "BB", "CC", "DD", "EE"}
 
-	if DB.Model(&user).Association("Languages").Count() != len(totalLanguages) {
+	if DB.Model(&user).Association(context.Background(), "Languages").Count() != len(totalLanguages) {
 		t.Errorf("All appended languages should be saved")
 	}
 
 	// Delete
 	user.Languages = []Language{}
-	DB.Model(&user).Association("Languages").Find(&user.Languages)
+	DB.Model(&user).Association(context.Background(), "Languages").Find(&user.Languages)
 
 	var language Language
-	DB.Where("name = ?", "EE").First(&language)
-	DB.Model(&user).Association("Languages").Delete(language, &language)
+	DB.Where("name = ?", "EE").First(context.Background(), &language)
+	DB.Model(&user).Association(context.Background(), "Languages").Delete(language, &language)
 
-	if DB.Model(&user).Association("Languages").Count() != len(totalLanguages)-1 || len(user.Languages) != len(totalLanguages)-1 {
+	if DB.Model(&user).Association(context.Background(), "Languages").Count() != len(totalLanguages)-1 || len(user.Languages) != len(totalLanguages)-1 {
 		t.Errorf("Relations should be deleted with Delete")
 	}
-	if DB.Where("name = ?", "EE").First(&Language{}).RecordNotFound() {
+	if DB.Where("name = ?", "EE").First(context.Background(), &Language{}).RecordNotFound() {
 		t.Errorf("Language EE should not be deleted")
 	}
 
-	DB.Where("name IN (?)", []string{"CC", "DD"}).Find(&languages)
+	DB.Where("name IN (?)", []string{"CC", "DD"}).Find(context.Background(), &languages)
 
 	user2 := User{Name: "Many2Many_User2", Languages: languages}
-	DB.Save(&user2)
+	DB.Save(context.Background(), &user2)
 
-	DB.Model(&user).Association("Languages").Delete(languages, &languages)
-	if DB.Model(&user).Association("Languages").Count() != len(totalLanguages)-3 || len(user.Languages) != len(totalLanguages)-3 {
+	DB.Model(&user).Association(context.Background(), "Languages").Delete(languages, &languages)
+	if DB.Model(&user).Association(context.Background(), "Languages").Count() != len(totalLanguages)-3 || len(user.Languages) != len(totalLanguages)-3 {
 		t.Errorf("Relations should be deleted with Delete")
 	}
 
-	if DB.Model(&user2).Association("Languages").Count() == 0 {
+	if DB.Model(&user2).Association(context.Background(), "Languages").Count() == 0 {
 		t.Errorf("Other user's relations should not be deleted")
 	}
 
 	// Replace
 	var languageB Language
-	DB.Where("name = ?", "BB").First(&languageB)
-	DB.Model(&user).Association("Languages").Replace(languageB)
-	if len(user.Languages) != 1 || DB.Model(&user).Association("Languages").Count() != 1 {
+	DB.Where("name = ?", "BB").First(context.Background(), &languageB)
+	DB.Model(&user).Association(context.Background(), "Languages").Replace(languageB)
+	if len(user.Languages) != 1 || DB.Model(&user).Association(context.Background(), "Languages").Count() != 1 {
 		t.Errorf("Relations should be replaced")
 	}
 
-	DB.Model(&user).Association("Languages").Replace()
-	if len(user.Languages) != 0 || DB.Model(&user).Association("Languages").Count() != 0 {
+	DB.Model(&user).Association(context.Background(), "Languages").Replace()
+	if len(user.Languages) != 0 || DB.Model(&user).Association(context.Background(), "Languages").Count() != 0 {
 		t.Errorf("Relations should be replaced with empty")
 	}
 
-	DB.Model(&user).Association("Languages").Replace(&[]Language{{Name: "FF"}, {Name: "JJ"}})
-	if len(user.Languages) != 2 || DB.Model(&user).Association("Languages").Count() != len([]string{"FF", "JJ"}) {
+	DB.Model(&user).Association(context.Background(), "Languages").Replace(&[]Language{{Name: "FF"}, {Name: "JJ"}})
+	if len(user.Languages) != 2 || DB.Model(&user).Association(context.Background(), "Languages").Count() != len([]string{"FF", "JJ"}) {
 		t.Errorf("Relations should be replaced")
 	}
 
 	// Clear
-	DB.Model(&user).Association("Languages").Clear()
-	if len(user.Languages) != 0 || DB.Model(&user).Association("Languages").Count() != 0 {
+	DB.Model(&user).Association(context.Background(), "Languages").Clear()
+	if len(user.Languages) != 0 || DB.Model(&user).Association(context.Background(), "Languages").Count() != 0 {
 		t.Errorf("Relations should be cleared")
 	}
 
@@ -695,29 +696,29 @@ func TestManyToMany(t *testing.T) {
 	var language6 = Language{
 		Name: "language 6",
 	}
-	DB.Model(&user).Association("Languages").Append(&language6)
+	DB.Model(&user).Association(context.Background(), "Languages").Append(&language6)
 
-	if count := DB.Model(&user).Association("Languages").Count(); count != 1 {
+	if count := DB.Model(&user).Association(context.Background(), "Languages").Count(); count != 1 {
 		t.Errorf("user's languages count should be 1 after Append, but got %v", count)
 	}
 
-	DB.Delete(&language6)
+	DB.Delete(context.Background(), &language6)
 
-	if count := DB.Model(&user).Association("Languages").Count(); count != 0 {
+	if count := DB.Model(&user).Association(context.Background(), "Languages").Count(); count != 0 {
 		t.Errorf("user's languages count should be 0 after language been deleted, but got %v", count)
 	}
 
 	var languages6 []Language
-	if DB.Model(&user).Association("Languages").Find(&languages6); len(languages6) != 0 {
+	if DB.Model(&user).Association(context.Background(), "Languages").Find(&languages6); len(languages6) != 0 {
 		t.Errorf("user's languages count should be 0 when find with Find, but got %v", len(languages6))
 	}
 
-	if count := DB.Unscoped().Model(&user).Association("Languages").Count(); count != 1 {
+	if count := DB.Unscoped().Model(&user).Association(context.Background(), "Languages").Count(); count != 1 {
 		t.Errorf("user's languages count should be 1 when query with Unscoped, but got %v", count)
 	}
 
 	var languages61 []Language
-	if DB.Unscoped().Model(&user).Association("Languages").Find(&languages61); len(languages61) != 1 {
+	if DB.Unscoped().Model(&user).Association(context.Background(), "Languages").Find(&languages61); len(languages61) != 1 {
 		t.Errorf("user's languages count should be 1 when query with Unscoped, but got %v", len(languages61))
 	}
 }
@@ -732,7 +733,7 @@ func TestRelated(t *testing.T) {
 		Company:         Company{Name: "company1"},
 	}
 
-	if err := DB.Save(&user).Error; err != nil {
+	if err := DB.Save(context.Background(), &user).Error; err != nil {
 		t.Errorf("No error should happen when saving user")
 	}
 
@@ -749,61 +750,61 @@ func TestRelated(t *testing.T) {
 	}
 
 	var emails []Email
-	DB.Model(&user).Related(&emails)
+	DB.Model(&user).Related(context.Background(), &emails)
 	if len(emails) != 2 {
 		t.Errorf("Should have two emails")
 	}
 
 	var emails2 []Email
-	DB.Model(&user).Where("email = ?", "jinzhu@example.com").Related(&emails2)
+	DB.Model(&user).Where("email = ?", "jinzhu@example.com").Related(context.Background(), &emails2)
 	if len(emails2) != 1 {
 		t.Errorf("Should have two emails")
 	}
 
 	var emails3 []*Email
-	DB.Model(&user).Related(&emails3)
+	DB.Model(&user).Related(context.Background(), &emails3)
 	if len(emails3) != 2 {
 		t.Errorf("Should have two emails")
 	}
 
 	var user1 User
-	DB.Model(&user).Related(&user1.Emails)
+	DB.Model(&user).Related(context.Background(), &user1.Emails)
 	if len(user1.Emails) != 2 {
 		t.Errorf("Should have only one email match related condition")
 	}
 
 	var address1 Address
-	DB.Model(&user).Related(&address1, "BillingAddressId")
+	DB.Model(&user).Related(context.Background(), &address1, "BillingAddressId")
 	if address1.Address1 != "Billing Address - Address 1" {
 		t.Errorf("Should get billing address from user correctly")
 	}
 
 	user1 = User{}
-	DB.Model(&address1).Related(&user1, "BillingAddressId")
-	if DB.NewRecord(user1) {
+	DB.Model(&address1).Related(context.Background(), &user1, "BillingAddressId")
+	if DB.NewRecord(context.Background(), user1) {
 		t.Errorf("Should get user from address correctly")
 	}
 
 	var user2 User
-	DB.Model(&emails[0]).Related(&user2)
+	DB.Model(&emails[0]).Related(context.Background(), &user2)
 	if user2.Id != user.Id || user2.Name != user.Name {
 		t.Errorf("Should get user from email correctly")
 	}
 
 	var creditcard CreditCard
 	var user3 User
-	DB.First(&creditcard, "number = ?", "1234567890")
-	DB.Model(&creditcard).Related(&user3)
+	DB.First(context.Background(), &creditcard, "number = ?", "1234567890")
+	DB.Model(&creditcard).Related(context.Background(), &user3)
 	if user3.Id != user.Id || user3.Name != user.Name {
 		t.Errorf("Should get user from credit card correctly")
 	}
 
-	if !DB.Model(&CreditCard{}).Related(&User{}).RecordNotFound() {
+	if !DB.Model(&CreditCard{}).Related(context.Background(), &User{}).RecordNotFound() {
 		t.Errorf("RecordNotFound for Related")
 	}
 
 	var company Company
-	if DB.Model(&user).Related(&company, "Company").RecordNotFound() || company.Name != "company1" {
+	if DB.Model(&user).Related(context.Background(), &company, "Company").RecordNotFound() || company.Name != "company1" {
 		t.Errorf("RecordNotFound for Related")
 	}
 }
@@ -882,7 +883,7 @@ func TestHasManyChildrenWithOneStruct(t *testing.T) {
 		},
 	}
 
-	DB.Save(&category)
+	DB.Save(context.Background(), &category)
 }
 
 func TestAutoSaveBelongsToAssociation(t *testing.T) {
@@ -898,42 +899,42 @@ func TestAutoSaveBelongsToAssociation(t *testing.T) {
 		Company   Company `gorm:"association_autoupdate:false;association_autocreate:false;"`
 	}
 
-	DB.Where("name = ?", "auto_save_association").Delete(&Company{})
+	DB.Where("name = ?", "auto_save_association").Delete(context.Background(), &Company{})
 	DB.AutoMigrate(&Company{}, &User{})
 
-	DB.Save(&User{Name: "jinzhu", Company: Company{Name: "auto_save_association"}})
+	DB.Save(context.Background(), &User{Name: "jinzhu", Company: Company{Name: "auto_save_association"}})
 
-	if !DB.Where("name = ?", "auto_save_association").First(&Company{}).RecordNotFound() {
+	if !DB.Where("name = ?", "auto_save_association").First(context.Background(), &Company{}).RecordNotFound() {
 		t.Errorf("Company auto_save_association should not have been saved when autosave is false")
 	}
 
 	// if foreign key is set, this should be saved even if association isn't
 	company := Company{Name: "auto_save_association"}
-	DB.Save(&company)
+	DB.Save(context.Background(), &company)
 
 	company.Name = "auto_save_association_new_name"
 	user := User{Name: "jinzhu", Company: company}
 
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 
-	if !DB.Where("name = ?", "auto_save_association_new_name").First(&Company{}).RecordNotFound() {
+	if !DB.Where("name = ?", "auto_save_association_new_name").First(context.Background(), &Company{}).RecordNotFound() {
 		t.Errorf("Company should not have been updated")
 	}
 
-	if DB.Where("id = ? AND company_id = ?", user.ID, company.ID).First(&User{}).RecordNotFound() {
+	if DB.Where("id = ? AND company_id = ?", user.ID, company.ID).First(context.Background(), &User{}).RecordNotFound() {
 		t.Errorf("User's foreign key should have been saved")
 	}
 
 	user2 := User{Name: "jinzhu_2", Company: Company{Name: "auto_save_association_2"}}
-	DB.Set("gorm:association_autocreate", true).Save(&user2)
-	if DB.Where("name = ?", "auto_save_association_2").First(&Company{}).RecordNotFound() {
+	DB.Set("gorm:association_autocreate", true).Save(context.Background(), &user2)
+	if DB.Where("name = ?", "auto_save_association_2").First(context.Background(), &Company{}).RecordNotFound() {
 		t.Errorf("Company auto_save_association_2 should been created when autocreate is true")
 	}
 
 	user2.Company.Name = "auto_save_association_2_newname"
-	DB.Set("gorm:association_autoupdate", true).Save(&user2)
+	DB.Set("gorm:association_autoupdate", true).Save(context.Background(), &user2)
 
-	if DB.Where("name = ?", "auto_save_association_2_newname").First(&Company{}).RecordNotFound() {
+	if DB.Where("name = ?", "auto_save_association_2_newname").First(context.Background(), &Company{}).RecordNotFound() {
 		t.Errorf("Company should been updated")
 	}
 }
@@ -951,28 +952,28 @@ func TestAutoSaveHasOneAssociation(t *testing.T) {
 		Company Company `gorm:"association_autoupdate:false;association_autocreate:false;"`
 	}
 
-	DB.Where("name = ?", "auto_save_has_one_association").Delete(&Company{})
+	DB.Where("name = ?", "auto_save_has_one_association").Delete(context.Background(), &Company{})
 	DB.AutoMigrate(&Company{}, &User{})
 
-	DB.Save(&User{Name: "jinzhu", Company: Company{Name: "auto_save_has_one_association"}})
+	DB.Save(context.Background(), &User{Name: "jinzhu", Company: Company{Name: "auto_save_has_one_association"}})
 
-	if !DB.Where("name = ?", "auto_save_has_one_association").First(&Company{}).RecordNotFound() {
+	if !DB.Where("name = ?", "auto_save_has_one_association").First(context.Background(), &Company{}).RecordNotFound() {
 		t.Errorf("Company auto_save_has_one_association should not have been saved when autosave is false")
 	}
 
 	company := Company{Name: "auto_save_has_one_association"}
-	DB.Save(&company)
+	DB.Save(context.Background(), &company)
 
 	company.Name = "auto_save_has_one_association_new_name"
 	user := User{Name: "jinzhu", Company: company}
 
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 
-	if !DB.Where("name = ?", "auto_save_has_one_association_new_name").First(&Company{}).RecordNotFound() {
+	if !DB.Where("name = ?", "auto_save_has_one_association_new_name").First(context.Background(), &Company{}).RecordNotFound() {
 		t.Errorf("Company should not have been updated")
 	}
 
-	if !DB.Where("name = ? AND user_id = ?", "auto_save_has_one_association", user.ID).First(&Company{}).RecordNotFound() {
+	if !DB.Where("name = ? AND user_id = ?", "auto_save_has_one_association", user.ID).First(context.Background(), &Company{}).RecordNotFound() {
 		t.Errorf("Company should not have been updated")
 	}
 
@@ -981,15 +982,15 @@ func TestAutoSaveHasOneAssociation(t *testing.T) {
 	}
 
 	company.Name = "auto_save_has_one_association_2_new_name"
-	DB.Set("gorm:association_autoupdate", true).Save(&user)
+	DB.Set("gorm:association_autoupdate", true).Save(context.Background(), &user)
 
-	if DB.Where("name = ? AND user_id = ?", "auto_save_has_one_association_new_name", user.ID).First(&Company{}).RecordNotFound() {
+	if DB.Where("name = ? AND user_id = ?", "auto_save_has_one_association_new_name", user.ID).First(context.Background(), &Company{}).RecordNotFound() {
 		t.Errorf("Company should been updated")
 	}
 
 	user2 := User{Name: "jinzhu_2", Company: Company{Name: "auto_save_has_one_association_2"}}
-	DB.Set("gorm:association_autocreate", true).Save(&user2)
-	if DB.Where("name = ?", "auto_save_has_one_association_2").First(&Company{}).RecordNotFound() {
+	DB.Set("gorm:association_autocreate", true).Save(context.Background(), &user2)
+	if DB.Where("name = ?", "auto_save_has_one_association_2").First(context.Background(), &Company{}).RecordNotFound() {
 		t.Errorf("Company auto_save_has_one_association_2 should been created when autocreate is true")
 	}
 }
@@ -1008,43 +1009,43 @@ func TestAutoSaveMany2ManyAssociation(t *testing.T) {
 
 	DB.AutoMigrate(&Company{}, &User{})
 
-	DB.Save(&User{Name: "jinzhu", Companies: []Company{{Name: "auto_save_m2m_association"}}})
+	DB.Save(context.Background(), &User{Name: "jinzhu", Companies: []Company{{Name: "auto_save_m2m_association"}}})
 
-	if !DB.Where("name = ?", "auto_save_m2m_association").First(&Company{}).RecordNotFound() {
+	if !DB.Where("name = ?", "auto_save_m2m_association").First(context.Background(), &Company{}).RecordNotFound() {
 		t.Errorf("Company auto_save_m2m_association should not have been saved when autosave is false")
 	}
 
 	company := Company{Name: "auto_save_m2m_association"}
-	DB.Save(&company)
+	DB.Save(context.Background(), &company)
 
 	company.Name = "auto_save_m2m_association_new_name"
 	user := User{Name: "jinzhu", Companies: []Company{company, {Name: "auto_save_m2m_association_new_name_2"}}}
 
-	DB.Save(&user)
+	DB.Save(context.Background(), &user)
 
-	if !DB.Where("name = ?", "auto_save_m2m_association_new_name").First(&Company{}).RecordNotFound() {
+	if !DB.Where("name = ?", "auto_save_m2m_association_new_name").First(context.Background(), &Company{}).RecordNotFound() {
 		t.Errorf("Company should not have been updated")
 	}
 
-	if !DB.Where("name = ?", "auto_save_m2m_association_new_name_2").First(&Company{}).RecordNotFound() {
+	if !DB.Where("name = ?", "auto_save_m2m_association_new_name_2").First(context.Background(), &Company{}).RecordNotFound() {
 		t.Errorf("Company should not been created")
 	}
 
-	if DB.Model(&user).Association("Companies").Count() != 1 {
+	if DB.Model(&user).Association(context.Background(), "Companies").Count() != 1 {
 		t.Errorf("Relationship should been saved")
 	}
 
-	DB.Set("gorm:association_autoupdate", true).Set("gorm:association_autocreate", true).Save(&user)
+	DB.Set("gorm:association_autoupdate", true).Set("gorm:association_autocreate", true).Save(context.Background(), &user)
 
-	if DB.Where("name = ?", "auto_save_m2m_association_new_name").First(&Company{}).RecordNotFound() {
+	if DB.Where("name = ?", "auto_save_m2m_association_new_name").First(context.Background(), &Company{}).RecordNotFound() {
 		t.Errorf("Company should been updated")
 	}
 
-	if DB.Where("name = ?", "auto_save_m2m_association_new_name_2").First(&Company{}).RecordNotFound() {
+	if DB.Where("name = ?", "auto_save_m2m_association_new_name_2").First(context.Background(), &Company{}).RecordNotFound() {
 		t.Errorf("Company should been created")
 	}
 
-	if DB.Model(&user).Association("Companies").Count() != 2 {
+	if DB.Model(&user).Association(context.Background(), "Companies").Count() != 2 {
 		t.Errorf("Relationship should been updated")
 	}
 }

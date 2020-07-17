@@ -1,6 +1,7 @@
 package gorm_test
 
 import (
+	"context"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
@@ -22,13 +23,13 @@ func TestScannableSlices(t *testing.T) {
 		},
 	}
 
-	if err := DB.Save(&r1).Error; err != nil {
+	if err := DB.Save(context.Background(), &r1).Error; err != nil {
 		t.Errorf("Should save record with slice values")
 	}
 
 	var r2 RecordWithSlice
 
-	if err := DB.Find(&r2).Error; err != nil {
+	if err := DB.Find(context.Background(), &r2).Error; err != nil {
 		t.Errorf("Should fetch record with slice values")
 	}
 
