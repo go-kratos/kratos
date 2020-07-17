@@ -88,6 +88,7 @@ const (
 	TagAnnotation = "legacy.annotation"
 	TagAddress    = "legacy.address"
 	TagComment    = "legacy.comment"
+	TagCommentExt = "legacy.comment.ext"
 )
 
 //  Standard log tags

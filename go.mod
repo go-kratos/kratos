@@ -11,14 +11,16 @@ require (
 	github.com/cznic/b v0.0.0-20181122101859-a26611c4d92d // indirect
 	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
 	github.com/cznic/strutil v0.0.0-20181122101858-275e90344537 // indirect
+	github.com/denisenkom/go-mssqldb v0.0.0-20200620013148-b91950f658ec
 	github.com/dgryski/go-farm v0.0.0-20190423205320-6a90982ecee2
 	github.com/dustin/go-humanize v1.0.0 // indirect
+	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5
 	github.com/fatih/color v1.7.0
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
-	github.com/go-sql-driver/mysql v1.4.1
+	github.com/go-sql-driver/mysql v1.5.0
 	github.com/go-zookeeper/zk v1.0.1
 	github.com/gobuffalo/packr/v2 v2.7.1
 	github.com/gogo/protobuf v1.3.1
@@ -29,9 +31,14 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.14.3 // indirect
+	github.com/jinzhu/gorm v1.9.14
+	github.com/jinzhu/inflection v1.0.0
+	github.com/jinzhu/now v1.1.1
 	github.com/leodido/go-urn v1.1.0 // indirect
+	github.com/lib/pq v1.7.0
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/montanaflynn/stats v0.5.0
 	github.com/openzipkin/zipkin-go v0.2.1
 	github.com/otokaze/mock v0.0.0-20190125081256-8282b7a7c7c3

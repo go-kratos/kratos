@@ -98,7 +98,7 @@ d = &dao{
 }
 ```
 
-使用kratos/pkg/database/sql包的NewMySQL方法进行连接池对象的初始化，需要传入上文解析的配置。
+# 使用kratos/pkg/database/sql包的NewMySQL方法进行连接池对象的初始化，需要传入上文解析的配置。
 
 ## Ping
 
