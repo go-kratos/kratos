@@ -26,6 +26,10 @@ func (f formBinding) Bind(req *http.Request, obj interface{}) error {
 	return validate(obj)
 }
 
+func (f formBinding) BindBody(body []byte, obj interface{}) error {
+	return nil
+}
+
 func (f formPostBinding) Name() string {
 	return "form-urlencoded"
 }
@@ -40,6 +44,10 @@ func (f formPostBinding) Bind(req *http.Request, obj interface{}) error {
 	return validate(obj)
 }
 
+func (f formPostBinding) BindBody(body []byte, obj interface{}) error {
+	return nil
+}
+
 func (f formMultipartBinding) Name() string {
 	return "multipart/form-data"
 }
@@ -52,4 +60,8 @@ func (f formMultipartBinding) Bind(req *http.Request, obj interface{}) error {
 		return err
 	}
 	return validate(obj)
+}
+
+func (f formMultipartBinding) BindBody(body []byte, obj interface{}) error {
+	return nil
 }

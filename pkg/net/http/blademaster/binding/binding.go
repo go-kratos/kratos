@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"gopkg.in/go-playground/validator.v9"
+	validator "gopkg.in/go-playground/validator.v9"
 )
 
 // MIME
@@ -22,6 +22,7 @@ const (
 type Binding interface {
 	Name() string
 	Bind(*http.Request, interface{}) error
+	BindBody([]byte, interface{}) error
 }
 
 // StructValidator http validator interface.

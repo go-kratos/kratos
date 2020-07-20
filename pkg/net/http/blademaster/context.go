@@ -2,12 +2,15 @@ package blademaster
 
 import (
 	"context"
+	"io/ioutil"
 	"math"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync"
 	"text/template"
+	"time"
 
 	"github.com/go-kratos/kratos/pkg/net/metadata"
 
@@ -21,7 +24,8 @@ import (
 )
 
 const (
-	_abortIndex int8 = math.MaxInt8 / 2
+	_abortIndex   int8 = math.MaxInt8 / 2
+	_bodyBytesKey      = "kratos/bodybyteskey"
 )
 
 var (
@@ -55,6 +59,9 @@ type Context struct {
 	RoutePath string
 
 	Params Params
+
+	// queryCache use url.ParseQuery cached the param query result from c.Request.URL.Query()
+	queryCache url.Values
 }
 
 /************************************/
@@ -184,6 +191,117 @@ func (c *Context) GetFloat64(key string) (f64 float64) {
 		f64, _ = val.(float64)
 	}
 	return
+}
+
+// GetTime returns the value associated with the key as time.
+func (c *Context) GetTime(key string) (t time.Time) {
+	if val, ok := c.Get(key); ok && val != nil {
+		t, _ = val.(time.Time)
+	}
+	return
+}
+
+// GetDuration returns the value associated with the key as a duration.
+func (c *Context) GetDuration(key string) (d time.Duration) {
+	if val, ok := c.Get(key); ok && val != nil {
+		d, _ = val.(time.Duration)
+	}
+	return
+}
+
+// GetStringSlice returns the value associated with the key as a slice of strings.
+func (c *Context) GetStringSlice(key string) (ss []string) {
+	if val, ok := c.Get(key); ok && val != nil {
+		ss, _ = val.([]string)
+	}
+	return
+}
+
+// GetStringMap returns the value associated with the key as a map of interfaces.
+func (c *Context) GetStringMap(key string) (sm map[string]interface{}) {
+	if val, ok := c.Get(key); ok && val != nil {
+		sm, _ = val.(map[string]interface{})
+	}
+	return
+}
+
+/************************************/
+/************ INPUT DATA ************/
+/************************************/
+
+// Param returns the value of the URL param.
+// It is a shortcut for c.Params.ByName(key)
+//     router.GET("/user/:id", func(c *gin.Context) {
+//         // a GET request to /user/john
+//         id := c.Param("id") // id == "john"
+//     })
+func (c *Context) Param(key string) string {
+	return c.Params.ByName(key)
+}
+
+// Query returns the keyed url query value if it exists,
+// otherwise it returns an empty string `("")`.
+// It is shortcut for `c.Request.URL.Query().Get(key)`
+//     GET /path?id=1234&name=Manu&value=
+// 	   c.Query("id") == "1234"
+// 	   c.Query("name") == "Manu"
+// 	   c.Query("value") == ""
+// 	   c.Query("wtf") == ""
+func (c *Context) Query(key string) string {
+	value, _ := c.GetQuery(key)
+	return value
+}
+
+// DefaultQuery returns the keyed url query value if it exists,
+// otherwise it returns the specified defaultValue string.
+// See: Query() and GetQuery() for further information.
+//     GET /?name=Manu&lastname=
+//     c.DefaultQuery("name", "unknown") == "Manu"
+//     c.DefaultQuery("id", "none") == "none"
+//     c.DefaultQuery("lastname", "none") == ""
+func (c *Context) DefaultQuery(key, defaultValue string) string {
+	if value, ok := c.GetQuery(key); ok {
+		return value
+	}
+	return defaultValue
+}
+
+// GetQuery is like Query(), it returns the keyed url query value
+// if it exists `(value, true)` (even when the value is an empty string),
+// otherwise it returns `("", false)`.
+// It is shortcut for `c.Request.URL.Query().Get(key)`
+//     GET /?name=Manu&lastname=
+//     ("Manu", true) == c.GetQuery("name")
+//     ("", false) == c.GetQuery("id")
+//     ("", true) == c.GetQuery("lastname")
+func (c *Context) GetQuery(key string) (string, bool) {
+	if values, ok := c.GetQueryArray(key); ok {
+		return values[0], ok
+	}
+	return "", false
+}
+
+// QueryArray returns a slice of strings for a given query key.
+// The length of the slice depends on the number of params with the given key.
+func (c *Context) QueryArray(key string) []string {
+	values, _ := c.GetQueryArray(key)
+	return values
+}
+
+func (c *Context) getQueryCache() {
+	if c.queryCache == nil {
+		c.queryCache = c.Request.URL.Query()
+	}
+}
+
+// GetQueryArray returns a slice of strings for a given query key, plus
+// a boolean value whether at least one value exists for the given key.
+func (c *Context) GetQueryArray(key string) ([]string, bool) {
+	c.getQueryCache()
+	if values, ok := c.queryCache[key]; ok && len(values) > 0 {
+		return values, true
+	}
+	return []string{}, false
 }
 
 /************************************/
@@ -380,6 +498,55 @@ func (c *Context) mustBindWith(obj interface{}, b binding.Binding) (err error) {
 		})
 		c.Abort()
 	}
+	return
+}
+
+// BindBody checks the Content-Type to select a binding engine automatically,
+// Depending the "Content-Type" header different bindings are used:
+//     "application/json" --> JSON binding
+//     "application/xml"  --> XML binding
+// Only support application/json and application/xml now.
+func (c *Context) BindBody(obj interface{}) error {
+	b := binding.Default(c.Request.Method, c.Request.Header.Get("Content-Type"))
+	if b != binding.JSON && b != binding.XML {
+		return errors.New("only application/json and application/xml can bind body")
+
+	}
+
+	return c.mustBindBodyWith(obj, b)
+}
+
+// ShouldBindBodyWith is similar with ShouldBindWith, but it stores the request
+// body into the context, and reuse when it is called again.
+//
+// NOTE: This method reads the body before binding. So you should use
+// ShouldBindWith for better performance if you need to call only once.
+func (c *Context) mustBindBodyWith(obj interface{}, b binding.Binding) (err error) {
+	var body []byte
+	if cb, ok := c.Get(_bodyBytesKey); ok {
+		if cbb, ok := cb.([]byte); ok {
+			body = cbb
+		}
+	}
+
+	if body == nil {
+		body, err = ioutil.ReadAll(c.Request.Body)
+		if err != nil {
+			return err
+		}
+		c.Set(_bodyBytesKey, body)
+	}
+
+	if err = b.BindBody(body, obj); err != nil {
+		c.Error = ecode.RequestErr
+		c.Render(http.StatusOK, render.JSON{
+			Code:    ecode.RequestErr.Code(),
+			Message: err.Error(),
+			Data:    nil,
+		})
+		c.Abort()
+	}
+
 	return
 }
 

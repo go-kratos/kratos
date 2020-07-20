@@ -17,3 +17,7 @@ func (queryBinding) Bind(req *http.Request, obj interface{}) error {
 	}
 	return validate(obj)
 }
+
+func (queryBinding) BindBody(body []byte, obj interface{}) error {
+	return nil
+}
