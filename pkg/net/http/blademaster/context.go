@@ -24,8 +24,8 @@ import (
 )
 
 const (
-	_abortIndex   int8 = math.MaxInt8 / 2
-	_bodyBytesKey      = "kratos/bodybyteskey"
+	_abortIndex  int8 = math.MaxInt8 / 2
+	BodyBytesKey      = "kratos/bodybyteskey"
 )
 
 var (
@@ -523,7 +523,7 @@ func (c *Context) BindBody(obj interface{}) error {
 // ShouldBindWith for better performance if you need to call only once.
 func (c *Context) mustBindBodyWith(obj interface{}, b binding.Binding) (err error) {
 	var body []byte
-	if cb, ok := c.Get(_bodyBytesKey); ok {
+	if cb, ok := c.Get(BodyBytesKey); ok {
 		if cbb, ok := cb.([]byte); ok {
 			body = cbb
 		}
@@ -534,7 +534,7 @@ func (c *Context) mustBindBodyWith(obj interface{}, b binding.Binding) (err erro
 		if err != nil {
 			return err
 		}
-		c.Set(_bodyBytesKey, body)
+		c.Set(BodyBytesKey, body)
 	}
 
 	if err = b.BindBody(body, obj); err != nil {
