@@ -14,7 +14,7 @@
  //初始化熔断器组
  //一组熔断器公用同一个配置项，可从分组内取出单个熔断器使用。可用在比如mysql主从分离等场景。
  brkGroup := breaker.NewGroup(&breaker.Config{}) 
- //为每一个连接指定一个brekaker
+ //为每一个连接指定一个breaker
  //此处假设一个客户端连接对象实例为conn
  //breakName定义熔断器名称 一般可以使用连接地址
  breakName = conn.Addr
@@ -25,7 +25,7 @@
 		return
   }
  
- //连接执行成功或失败将结果告知braker
+ //连接执行成功或失败将结果告知breaker
  if(respErr != nil){
       conn.breaker.MarkFailed()
  }else{
