@@ -510,7 +510,6 @@ func (c *Context) BindBody(obj interface{}) error {
 	b := binding.Default(c.Request.Method, c.Request.Header.Get("Content-Type"))
 	if b != binding.JSON && b != binding.XML {
 		return errors.New("only application/json and application/xml can bind body")
-
 	}
 
 	return c.mustBindBodyWith(obj, b)
@@ -520,7 +519,7 @@ func (c *Context) BindBody(obj interface{}) error {
 // body into the context, and reuse when it is called again.
 //
 // NOTE: This method reads the body before binding. So you should use
-// ShouldBindWith for better performance if you need to call only once.
+// Bind for better performance if you need to call only once.
 func (c *Context) mustBindBodyWith(obj interface{}, b binding.Binding) (err error) {
 	var body []byte
 	if cb, ok := c.Get(BodyBytesKey); ok {
