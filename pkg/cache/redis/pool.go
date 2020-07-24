@@ -58,6 +58,7 @@ func NewPool(c *Config, options ...DialOption) (p *Pool) {
 		DialReadTimeout(time.Duration(c.ReadTimeout)),
 		DialWriteTimeout(time.Duration(c.WriteTimeout)),
 		DialPassword(c.Auth),
+		DialDatabase(c.Db),
 	}
 	ops = append(ops, options...)
 	p1 := pool.NewSlice(c.Config)
