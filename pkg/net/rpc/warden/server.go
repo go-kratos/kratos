@@ -43,6 +43,7 @@ var (
 		KeepAliveTimeout:  xtime.Duration(time.Second * 20),
 	}
 	_abortIndex int8 = math.MaxInt8 / 2
+	RpcServerPort int
 )
 
 // ServerConfig is rpc server conf.
@@ -302,10 +303,11 @@ func (s *Server) RunUnix(file string) error {
 // will panic if any error happend
 // return server itself
 func (s *Server) Start() (*Server, error) {
-	_, err := s.startWithAddr()
+	addr, err := s.startWithAddr()
 	if err != nil {
 		return nil, err
 	}
+	RpcServerPort = addr.(*net.TCPAddr).Port
 	return s, nil
 }
 

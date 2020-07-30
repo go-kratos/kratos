@@ -33,6 +33,7 @@ var (
 	_httpDSN       string
 	default405Body = []byte("405 method not allowed")
 	default404Body = []byte("404 page not found")
+	HttpServerPort int
 )
 
 func init() {
@@ -93,7 +94,7 @@ func (engine *Engine) Start() error {
 	if err != nil {
 		return errors.Wrapf(err, "blademaster: listen tcp: %s", conf.Addr)
 	}
-
+	HttpServerPort = l.Addr().(*net.TCPAddr).Port
 	log.Info("blademaster: start http listen addr: %s", l.Addr().String())
 	server := &http.Server{
 		ReadTimeout:  time.Duration(conf.ReadTimeout),
