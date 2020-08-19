@@ -1,7 +1,6 @@
 package p2c
 
 import (
-	"context"
 	"math"
 	"math/rand"
 	"strconv"
@@ -39,7 +38,7 @@ const Name = "p2c"
 
 // newBuilder creates a new weighted-roundrobin balancer builder.
 func newBuilder() balancer.Builder {
-	return base.NewBalancerBuilder(Name, &p2cPickerBuilder{})
+	return base.NewBalancerBuilder(Name, &p2cPickerBuilder{}, base.Config{})
 }
 
 func init() {
@@ -107,13 +106,15 @@ type statistic struct {
 
 type p2cPickerBuilder struct{}
 
-func (*p2cPickerBuilder) Build(readySCs map[resolver.Address]balancer.SubConn) balancer.Picker {
+func (*p2cPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
+	readySCs := info.ReadySCs
 	p := &p2cPicker{
 		colors: make(map[string]*p2cPicker),
 		r:      rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
-	for addr, sc := range readySCs {
-		meta, ok := addr.Metadata.(wmd.MD)
+	for sc, sci := range readySCs {
+		addr := sci.Address
+		meta, ok := sci.Address.Metadata.(wmd.MD)
 		if !ok {
 			meta = wmd.MD{
 				Weight: 10,
@@ -155,18 +156,18 @@ type p2cPicker struct {
 	lk       sync.Mutex
 }
 
-func (p *p2cPicker) Pick(ctx context.Context, opts balancer.PickInfo) (balancer.SubConn, func(balancer.DoneInfo), error) {
+func (p *p2cPicker) Pick(opts balancer.PickInfo) (balancer.PickResult, error) {
 	// FIXME refactor to unify the color logic
-	color := nmd.String(ctx, nmd.Color)
+	color := nmd.String(opts.Ctx, nmd.Color)
 	if color == "" && env.Color != "" {
 		color = env.Color
 	}
 	if color != "" {
 		if cp, ok := p.colors[color]; ok {
-			return cp.pick(ctx, opts)
+			return cp.pick(opts)
 		}
 	}
-	return p.pick(ctx, opts)
+	return p.pick(opts)
 }
 
 // choose two distinct nodes
@@ -187,12 +188,12 @@ func (p *p2cPicker) prePick() (nodeA *subConn, nodeB *subConn) {
 	return
 }
 
-func (p *p2cPicker) pick(ctx context.Context, opts balancer.PickInfo) (balancer.SubConn, func(balancer.DoneInfo), error) {
+func (p *p2cPicker) pick(opts balancer.PickInfo) (balancer.PickResult, error) {
 	var pc, upc *subConn
 	start := time.Now().UnixNano()
 
 	if len(p.subConns) <= 0 {
-		return nil, nil, balancer.ErrNoSubConnAvailable
+		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	} else if len(p.subConns) == 1 {
 		pc = p.subConns[0]
 	} else {
@@ -218,54 +219,57 @@ func (p *p2cPicker) pick(ctx context.Context, opts balancer.PickInfo) (balancer.
 	}
 	atomic.AddInt64(&pc.inflight, 1)
 	atomic.AddInt64(&pc.reqs, 1)
-	return pc.conn, func(di balancer.DoneInfo) {
-		atomic.AddInt64(&pc.inflight, -1)
-		now := time.Now().UnixNano()
-		// get moving average ratio w
-		stamp := atomic.SwapInt64(&pc.stamp, now)
-		td := now - stamp
-		if td < 0 {
-			td = 0
-		}
-		w := math.Exp(float64(-td) / float64(tau))
+	return balancer.PickResult{
+		SubConn: pc.conn,
+		Done: func(di balancer.DoneInfo) {
+			atomic.AddInt64(&pc.inflight, -1)
+			now := time.Now().UnixNano()
+			// get moving average ratio w
+			stamp := atomic.SwapInt64(&pc.stamp, now)
+			td := now - stamp
+			if td < 0 {
+				td = 0
+			}
+			w := math.Exp(float64(-td) / float64(tau))
 
-		lag := now - start
-		if lag < 0 {
-			lag = 0
-		}
-		oldLag := atomic.LoadUint64(&pc.lag)
-		if oldLag == 0 {
-			w = 0.0
-		}
-		lag = int64(float64(oldLag)*w + float64(lag)*(1.0-w))
-		atomic.StoreUint64(&pc.lag, uint64(lag))
+			lag := now - start
+			if lag < 0 {
+				lag = 0
+			}
+			oldLag := atomic.LoadUint64(&pc.lag)
+			if oldLag == 0 {
+				w = 0.0
+			}
+			lag = int64(float64(oldLag)*w + float64(lag)*(1.0-w))
+			atomic.StoreUint64(&pc.lag, uint64(lag))
 
-		success := uint64(1000) // error value ,if error set 1
-		if di.Err != nil {
-			if st, ok := status.FromError(di.Err); ok {
-				// only counter the local grpc error, ignore any business error
-				if st.Code() != codes.Unknown && st.Code() != codes.OK {
-					success = 0
+			success := uint64(1000) // error value ,if error set 1
+			if di.Err != nil {
+				if st, ok := status.FromError(di.Err); ok {
+					// only counter the local grpc error, ignore any business error
+					if st.Code() != codes.Unknown && st.Code() != codes.OK {
+						success = 0
+					}
 				}
 			}
-		}
-		oldSuc := atomic.LoadUint64(&pc.success)
-		success = uint64(float64(oldSuc)*w + float64(success)*(1.0-w))
-		atomic.StoreUint64(&pc.success, success)
+			oldSuc := atomic.LoadUint64(&pc.success)
+			success = uint64(float64(oldSuc)*w + float64(success)*(1.0-w))
+			atomic.StoreUint64(&pc.success, success)
 
-		trailer := di.Trailer
-		if strs, ok := trailer[wmd.CPUUsage]; ok {
-			if cpu, err2 := strconv.ParseUint(strs[0], 10, 64); err2 == nil && cpu > 0 {
-				atomic.StoreUint64(&pc.svrCPU, cpu)
+			trailer := di.Trailer
+			if strs, ok := trailer[wmd.CPUUsage]; ok {
+				if cpu, err2 := strconv.ParseUint(strs[0], 10, 64); err2 == nil && cpu > 0 {
+					atomic.StoreUint64(&pc.svrCPU, cpu)
+				}
 			}
-		}
 
-		logTs := atomic.LoadInt64(&p.logTs)
-		if now-logTs > int64(time.Second*3) {
-			if atomic.CompareAndSwapInt64(&p.logTs, logTs, now) {
-				p.printStats()
+			logTs := atomic.LoadInt64(&p.logTs)
+			if now-logTs > int64(time.Second*3) {
+				if atomic.CompareAndSwapInt64(&p.logTs, logTs, now) {
+					p.printStats()
+				}
 			}
-		}
+		},
 	}, nil
 }
 
