@@ -33,6 +33,11 @@ type TestLog struct {
 }
 
 func testLog(t *testing.T) {
+	t.Run("Fatal", func(t *testing.T) {
+		Fatal("hello %s", "world")
+		Fatalv(context.Background(), KV("key", 2222222), KV("test2", "test"))
+		Fatalc(context.Background(), "keys: %s %s...", "key1", "key2")
+	})
 	t.Run("Error", func(t *testing.T) {
 		Error("hello %s", "world")
 		Errorv(context.Background(), KV("key", 2222222), KV("test2", "test"))
@@ -47,6 +52,11 @@ func testLog(t *testing.T) {
 		Info("hello %s", "world")
 		Infov(context.Background(), KV("key", 2222222), KV("test2", "test"))
 		Infoc(context.Background(), "keys: %s %s...", "key1", "key2")
+	})
+	t.Run("Debug", func(t *testing.T) {
+		Debug("hello %s", "world")
+		Debugv(context.Background(), KV("key", 2222222), KV("test2", "test"))
+		Debugc(context.Background(), "keys: %s %s...", "key1", "key2")
 	})
 }
 
