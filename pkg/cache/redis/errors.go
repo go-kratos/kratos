@@ -20,6 +20,9 @@ func formatErr(err error, name, addr string) string {
 		case strings.HasPrefix(es, "read"):
 			return "read timeout"
 		case strings.HasPrefix(es, "dial"):
+			if strings.Contains(es, "connection refused") {
+				return "connection refused"
+			}
 			return "dial timeout"
 		case strings.HasPrefix(es, "write"):
 			return "write timeout"
@@ -29,6 +32,10 @@ func formatErr(err error, name, addr string) string {
 			return "reset"
 		case strings.Contains(es, "broken"):
 			return "broken pipe"
+		case strings.Contains(es, "pool exhausted"):
+			return "pool exhausted"
+		case strings.Contains(es, "pool closed"):
+			return "pool closed"
 		default:
 			return "unexpected err"
 		}
