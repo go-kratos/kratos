@@ -368,4 +368,7 @@ func New(svc *service.Service) *warden.Server {
 
 # 扩展阅读
 
-[warden快速开始](warden-quickstart.md) [warden基于pb生成](warden-pb.md) [warden负载均衡](warden-balancer.md) [warden服务发现](warden-resolver.md)
+[warden快速开始](warden-quickstart.md)  
+[warden基于pb生成](warden-pb.md)  
+[warden负载均衡](warden-balancer.md)   
+[warden服务发现](warden-resolver.md)  

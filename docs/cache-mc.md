@@ -1,58 +1,8 @@
-# 准备工作
-
-推荐使用[kratos工具](kratos-tool.md)快速生成项目，如我们生成一个叫`kratos-demo`的项目。目录结构如下：
-
-```
-├── CHANGELOG.md
-├── OWNERS
-├── README.md
-├── api
-│   ├── api.bm.go
-│   ├── api.pb.go
-│   ├── api.proto
-│   └── client.go
-├── cmd
-│   ├── cmd
-│   └── main.go
-├── configs
-│   ├── application.toml
-│   ├── db.toml
-│   ├── grpc.toml
-│   ├── http.toml
-│   ├── memcache.toml
-│   └── redis.toml
-├── go.mod
-├── go.sum
-├── internal
-│   ├── dao
-│   │   ├── dao.bts.go
-│   │   ├── dao.go
-│   │   ├── db.go
-│   │   ├── mc.cache.go
-│   │   ├── mc.go
-│   │   └── redis.go
-│   ├── di
-│   │   ├── app.go
-│   │   ├── wire.go
-│   │   └── wire_gen.go
-│   ├── model
-│   │   └── model.go
-│   ├── server
-│   │   ├── grpc
-│   │   │   └── server.go
-│   │   └── http
-│   │       └── server.go
-│   └── service
-│       └── service.go
-└── test
-    └── docker-compose.yaml
-```
-
 # 开始使用
 
 ## 配置
 
-创建项目成功后，进入项目中的configs目录，打开memcache.toml，我们可以看到：
+进入项目中的configs目录，打开memcache.toml，我们可以看到：
 
 ```toml
 [Client]

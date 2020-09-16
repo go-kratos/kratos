@@ -248,4 +248,7 @@ etcd默认的全局keyPrefix为kratos_etcd,当该keyPrefix与项目中其他keyP
 
 # 扩展阅读
 
-[warden快速开始](warden-quickstart.md) [warden拦截器](warden-mid.md) [warden基于pb生成](warden-pb.md) [warden负载均衡](warden-balancer.md)
+[warden快速开始](warden-quickstart.md)  
+[warden拦截器](warden-mid.md)  
+[warden基于pb生成](warden-pb.md)  
+[warden负载均衡](warden-balancer.md)
