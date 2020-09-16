@@ -10,15 +10,21 @@
 </head>
 <body>
   <div id="app"></div>
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-edit-on-github"></script>
   <script>
     window.$docsify = {
       loadSidebar: true,
       auto2top: true,
       autoHeader: true,
       name: 'go-kratos/kratos',
-      repo: 'https://github.com/go-kratos/kratos'
+      repo: 'https://github.com/go-kratos/kratos',
+      search: 'auto',
+      plugins: [
+        EditOnGithubPlugin.create('https://github.com/go-kratos/kratos/blob/master/docs/')
+      ]
     }
   </script>
-  <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
 </body>
 </html>
