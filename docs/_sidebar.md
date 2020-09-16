@@ -1,6 +1,5 @@
 * [介绍](README.md)
-  * [快速开始](quickstart.md)
-  * [案例](https://github.com/go-kratos/kratos-demo)
+  * [快速开始 - 项目初始化](quickstart.md)
 * [FAQ](FAQ.md)
 * [http blademaster](blademaster.md)
   * [bm quickstart](blademaster-quickstart.md) 
