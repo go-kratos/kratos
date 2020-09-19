@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [ master ]
 
-
 jobs:
 
   build:
@@ -27,11 +26,6 @@ jobs:
         go-version: ${{ matrix.go_version }}
       id: go
 
-    - name: Set up Env
-      run: |
-        echo "::set-env name=GOPATH::$(go env GOPATH)"
-        echo "::add-path::$(go env GOPATH)/bin"
-
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
@@ -53,17 +47,6 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
         fi
-        sudo rm /usr/local/bin/docker-compose
-        curl -L https://github.com/docker/compose/releases/download/1.25.5/docker-compose-`uname -s`-`uname -m` > docker-compose
-        chmod +x docker-compose
-        sudo mv docker-compose /usr/local/bin
-        wget https://github.com/google/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-        unzip protoc-3.11.4-linux-x86_64.zip
-        chmod +x bin/protoc
-        sudo mv bin/protoc /usr/local/bin
-        sudo mv include /usr/local/bin
-        go get -u github.com/golang/protobuf/protoc-gen-go
-        go get -u github.com/gogo/protobuf/protoc-gen-gofast
 
     - name: Build
       run: go build ./...
@@ -73,7 +56,7 @@ jobs:
     
     - name: Coverage
       run: bash <(curl -s https://codecov.io/bash)
-    
+
   scaffold:
   
     name: Scaffold Test on ${{ matrix.os }} - Go${{ matrix.go_version }}
@@ -93,11 +76,25 @@ jobs:
         go-version: ${{ matrix.go_version }}
       id: go
 
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        # Cache
+        path: ~/go/pkg/mod
+        # Cache key
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        # An ordered list of keys to use for restoring the cache if no cache hit occurred for key
+        restore-keys: |
+          ${{ runner.os }}-go-
+
     - name: Set up Env
       run: |
         echo "::set-env name=GOPATH::$(go env GOPATH)"
         echo "::add-path::$(go env GOPATH)/bin"
-
+  
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
@@ -119,10 +116,6 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
         fi
-        sudo rm /usr/local/bin/docker-compose
-        curl -L https://github.com/docker/compose/releases/download/1.25.5/docker-compose-`uname -s`-`uname -m` > docker-compose
-        chmod +x docker-compose
-        sudo mv docker-compose /usr/local/bin
         wget https://github.com/google/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
         unzip protoc-3.11.4-linux-x86_64.zip
         chmod +x bin/protoc
