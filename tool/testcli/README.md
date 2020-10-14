@@ -151,4 +151,4 @@ func TestMain(m *testing.M) {
 
 当然你也可以在使用 testcli 时加上 --nodown，使其不用每次跑都新建容器，只在第一次跑的时候会初始化容器，后面都进行复用，这样速度会快很多。
 
-成功启动后就欢乐奔放的玩耍吧～ Good Lucky!
+成功启动后就欢乐奔放的玩耍吧～ Good Luck!
