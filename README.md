@@ -38,7 +38,7 @@ cd $GOPATH/src
 kratos new kratos-demo
 ```
 
-通过 `kratos new` 会快速生成基于kratos库的脚手架代码，如生成 [kratos-demo](https://github.com/go-kratos/kratos-demo) 
+通过 `kratos new` 会快速生成基于kratos库的脚手架代码，如生成 [kratos-demo](https://github.com/bilibili/kratos-demo) 
 
 ### Build & Run
 
