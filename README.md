@@ -4,6 +4,7 @@
 [![Build Status](https://github.com/go-kratos/kratos/workflows/Go/badge.svg)](https://github.com/go-kratos/kratos/actions)
 [![GoDoc](https://godoc.org/github.com/go-kratos/kratos?status.svg)](https://godoc.org/github.com/go-kratos/kratos)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-kratos/kratos)](https://goreportcard.com/report/github.com/go-kratos/kratos)
+[![Discord](https://img.shields.io/discord/766619759214854164?label=chat&logo=discord)](https://discord.gg/BWzJsUJ)
 
 # Kratos
 
@@ -62,4 +63,5 @@ Kratos is under the MIT license. See the [LICENSE](./LICENSE) file for details.
 
 -------------
 
-*Please report bugs, concerns, suggestions by issues, or join QQ-group 716486124 to discuss problems around source code.*
+*Please report bugs, concerns, suggestions by issues,on Discord [![Discord](https://img.shields.io/discord/766619759214854164?label=chat&logo=discord)](https://discord.gg/BWzJsUJ)
+ or join QQ-group 716486124 to discuss problems around source code.*
