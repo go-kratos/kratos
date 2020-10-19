@@ -34,7 +34,7 @@ Go version>=1.13
 
 ### Installation
 ```shell
-# Unix/Linux
+# Linux/macOS
 GO111MODULE=on && go get -u github.com/go-kratos/kratos/tool/kratos
 
 # Windows (Powershell)
