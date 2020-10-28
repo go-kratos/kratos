@@ -1,6 +1,8 @@
 # 快速开始
 
-快速使用kratos项目，可以使用`kratos`工具，如下：
+**在安装之前，请确认您的开发环境中正确安装了[golang](https://golang.org/), [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), 和[protoc](https://grpc.io/docs/protoc-installation/)**
+
+创建kratos项目，可以使用`kratos`工具，如下：
 
 ```shell
 go get -u github.com/go-kratos/kratos/tool/kratos
