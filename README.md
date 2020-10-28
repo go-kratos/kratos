@@ -64,6 +64,7 @@ go build
 ## Documentation
 
 > [简体中文](https://go-kratos.github.io/kratos)  
+> [简体中文（国内镜像）](https://go-kratos.gitee.io/kratos/)  
 > [FAQ](https://go-kratos.github.io/kratos/#/FAQ)  
 
 ## License
