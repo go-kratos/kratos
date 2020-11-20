@@ -1,9 +1,0 @@
-version: "3.7"
-
-services:
-  mc:
-    image: memcached:1
-    ports:
-      - 11211:11211
-
-      

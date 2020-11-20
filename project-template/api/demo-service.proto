@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package kratos.demo.v1;
+
+// 多语言特定包名，用于源代码引用
+option go_package = "github.com/go-kratos/kratos/demo/v1;v1";
+option java_multiple_files = true;
+option java_package = "com.github.kratos.demo.v1";
+option objc_class_prefix = "KratosDemoV1";
+
+// 描述该服务的信息
+service Greeter {
+    // 描述该方法的功能
+    rpc SayHello (HelloRequest) returns (HelloReply);
+}
+// Hello请求参数
+message HelloRequest {
+    // 用户名字
+    string name = 1;
+}
+// Hello返回结果
+message HelloReply {
+    // 结果信息
+    string message = 1;
+}

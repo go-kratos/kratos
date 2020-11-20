@@ -1,8 +1,0 @@
-[Client]
-	dsn = "root:root@tcp(127.0.0.1:13306)/kratos_demo?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8mb4,utf8"
-	active = 20
-	idle = 10
-	idleTimeout ="4h"
-	queryTimeout = "200ms"
-	execTimeout = "300ms"
-	tranTimeout = "400ms"
