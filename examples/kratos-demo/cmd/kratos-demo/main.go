@@ -1,18 +1,36 @@
 package main
 
 import (
-	"fmt"
-
-	"github.com/go-kratos/kratos/v2/errors"
-	ec "github.com/go-kratos/kratos/v2/examples/kratos-demo/api/errors"
-	code "github.com/go-kratos/kratos/v2/examples/kratos-demo/errors"
+	"github.com/go-kratos/kratos/v2/examples/kratos-demo/api/kratos/demo/codes"
+	"github.com/go-kratos/kratos/v2/examples/kratos-demo/errors"
+	"github.com/go-kratos/kratos/v2/status"
 )
 
 func main() {
-	err := errors.BadRequest(
-		errors.ErrorInfo{Reason: ec.Errors_MissingField.String()},
-	)
-	err = code.WithErrorInfo(ec.Errors_RequestBlocked.String(), map[string]string{"field_name": "name"})
+}
 
-	fmt.Println(err)
+func error01() error {
+	return status.BadRequest(
+		&status.ErrorInfo{Reason: codes.Kratos_MissingField.String()},
+	)
+}
+
+func error02() error {
+	return status.InternalServerError(
+		&errors.ErrMissingField,
+	)
+}
+
+func error03() error {
+	err := errors.ErrMissingField
+	err.WithMetadata("name", "empty")
+	return status.InternalServerError(
+		&err,
+	)
+}
+
+func error04() error {
+	return status.InternalServerError(
+		errors.RequestBlocked("my_resources"),
+	)
 }

@@ -1,29 +1,25 @@
 package errors
 
 import (
-	"github.com/go-kratos/kratos/v2/errors"
-	code "github.com/go-kratos/kratos/v2/examples/kratos-demo/api/errors"
+	"github.com/go-kratos/kratos/v2/examples/kratos-demo/api/kratos/demo/codes"
+	"github.com/go-kratos/kratos/v2/status"
 )
 
 var (
-	domain = "api.go-kratos.dev"
+	domain = "go-kratos.dev"
+
+	// ErrMissingField is A required field on a resource has not been set.
+	ErrMissingField = status.ErrorInfo{
+		Reason: codes.Kratos_MissingField.String(),
+		Domain: domain,
+	}
 )
 
-func WithErrorInfo(reason string, md map[string]string) error {
-	return &errors.ErrorInfo{
-		Reason:   reason,
+// RequestBlocked is the requesting user was blocked.
+func RequestBlocked(resouces string) *status.ErrorInfo {
+	return &status.ErrorInfo{
+		Reason:   codes.Kratos_RequestBlocked.String(),
 		Domain:   domain,
-		Metadata: md,
+		Metadata: map[string]string{"resouces": resouces},
 	}
-}
-
-// ErrMissingField is A required field on a resource has not been set.
-func ErrMissingField(md map[string]string) error {
-	return errors.BadRequest(
-		errors.ErrorInfo{
-			Reason:   code.Errors_MissingField.String(),
-			Domain:   domain,
-			Metadata: md,
-		},
-	)
 }

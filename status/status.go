@@ -1,9 +1,11 @@
-package errors
+package status
 
-import "fmt"
+import (
+	"fmt"
+)
 
-// Error contains an error response from the server.
-type Error struct {
+// Status contains an error response from the server.
+type Status struct {
 	// Code is the HTTP response status code and will always be populated.
 	Code int `json:"code"`
 	// Message is the server response message and is only populated when
@@ -14,28 +16,31 @@ type Error struct {
 }
 
 // WithDetails provided details messages appended to the errors.
-func (e *Error) WithDetails(details ...interface{}) {
+func (e *Status) WithDetails(details ...interface{}) {
 	e.Details = append(e.Details, details...)
 }
 
-func (e *Error) Error() string {
+// Is each error in a chain for a match with a target value.
+func (e *Status) Is(target error) bool {
+	te, ok := target.(*ErrorInfo)
+	if !ok {
+		return false
+	}
+	for _, d := range e.Details {
+		if err, ok := d.(*ErrorInfo); ok {
+			return err.Reason == te.Reason && err.Domain == te.Domain
+		}
+	}
+	return false
+}
+
+func (e *Status) Error() string {
 	return fmt.Sprintf("error: code = %d desc = %s details = %+v", e.Code, e.Message, e.Details)
-}
-
-// ErrorInfo the cause of the error with structured details.
-type ErrorInfo struct {
-	Reason   string            `json:"reason"`
-	Domain   string            `json:"domain"`
-	Metadata map[string]string `json:"metadata"`
-}
-
-func (e *ErrorInfo) Error() string {
-	return fmt.Sprintf("error: reason = %s domain = %s metadata = %+v", e.Reason, e.Domain, e.Metadata)
 }
 
 // New returns a Status representing c and msg.
 func New(code int, message string, details ...interface{}) error {
-	return &Error{Code: code, Message: message, Details: details}
+	return &Status{Code: code, Message: message, Details: details}
 }
 
 // Newf returns New(c, fmt.Sprintf(format, a...)).
