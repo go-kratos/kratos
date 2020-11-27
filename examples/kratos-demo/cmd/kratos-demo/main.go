@@ -16,21 +16,9 @@ func error01() error {
 }
 
 func error02() error {
-	return status.InternalServerError(
-		&errors.ErrMissingField,
-	)
+	return errors.ErrMissingField
 }
 
 func error03() error {
-	err := errors.ErrMissingField
-	err.WithMetadata("name", "empty")
-	return status.InternalServerError(
-		&err,
-	)
-}
-
-func error04() error {
-	return status.InternalServerError(
-		errors.RequestBlocked("my_resources"),
-	)
+	return errors.RequestBlocked("my_resources")
 }
