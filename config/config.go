@@ -28,8 +28,8 @@ type Watcher interface {
 	Next() (Value, error)
 }
 
-// Paladin is an interface abstraction for configuration.
-type Paladin interface {
+// Config is an interface abstraction for configuration.
+type Config interface {
 	Var(v expvar.Var) error
 	Value(key string) Value
 	Watch(key ...string) (Watcher, error)
