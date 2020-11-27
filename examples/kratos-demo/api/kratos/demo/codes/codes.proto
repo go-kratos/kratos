@@ -6,7 +6,7 @@ package kratos.demo.codes;
 option go_package = ".;codes";
 option java_multiple_files = true;
 option java_package = "com.github.kratos.demo.codes";
-option objc_class_prefix = "KratosDemoErrors";
+option objc_class_prefix = "KratosDemoCodes";
 
 enum Kratos {
     RequestBlocked = 0;     // 请求已被封禁
