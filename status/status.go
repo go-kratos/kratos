@@ -16,26 +16,67 @@ type Status struct {
 }
 
 // WithDetails provided details messages appended to the errors.
-func (e *Status) WithDetails(details ...interface{}) {
-	e.Details = append(e.Details, details...)
+func (s *Status) WithDetails(details ...interface{}) {
+	s.Details = append(s.Details, details...)
 }
 
 // Is each error in a chain for a match with a target value.
-func (e *Status) Is(target error) bool {
-	te, ok := target.(*ErrorInfo)
+func (s *Status) Is(target error) bool {
+	st, ok := target.(*Status)
 	if !ok {
 		return false
 	}
-	for _, d := range e.Details {
-		if err, ok := d.(*ErrorInfo); ok {
-			return err.Reason == te.Reason && err.Domain == te.Domain
+	if s.Code != st.Code {
+		return false
+	}
+	var (
+		err1 *ErrorInfo
+		err2 *ErrorInfo
+	)
+	for _, d := range s.Details {
+		if e, ok := d.(*ErrorInfo); ok {
+			err1 = e
+			break
 		}
+	}
+	for _, d := range st.Details {
+		if e, ok := d.(*ErrorInfo); ok {
+			err2 = e
+			break
+		}
+	}
+	if err1 != nil && err2 != nil &&
+		err1.Reason == err2.Reason && err1.Domain == err2.Domain {
+		return true
+	}
+	if err1 == nil && err2 == nil {
+		return s.Code == st.Code
 	}
 	return false
 }
 
-func (e *Status) Error() string {
-	return fmt.Sprintf("error: code = %d desc = %s details = %+v", e.Code, e.Message, e.Details)
+func (s *Status) Error() string {
+	return fmt.Sprintf("error: code = %d desc = %s details = %+v", s.Code, s.Message, s.Details)
+}
+
+// ErrorInfo the cause of the error with structured details.
+type ErrorInfo struct {
+	Reason   string            `json:"reason"`
+	Domain   string            `json:"domain"`
+	Metadata map[string]string `json:"metadata"`
+}
+
+// WithMetadata .
+func (e *ErrorInfo) WithMetadata(k, v string) {
+	if e.Metadata == nil {
+		e.Metadata = map[string]string{k: v}
+	} else {
+		e.Metadata[k] = v
+	}
+}
+
+func (e *ErrorInfo) String() string {
+	return fmt.Sprintf("error: reason = %s domain = %s metadata = %+v", e.Reason, e.Domain, e.Metadata)
 }
 
 // New returns a Status representing c and msg.
