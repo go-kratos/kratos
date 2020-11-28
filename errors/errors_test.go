@@ -25,4 +25,8 @@ func TestErrorsMatch(t *testing.T) {
 	if !errors.Is(s, st) {
 		t.Errorf("error is not match: %+v -> %+v", s, st)
 	}
+
+	if !Is(s, "test_reason") {
+		t.Errorf("error is not match: %+v -> %+v", s, st)
+	}
 }

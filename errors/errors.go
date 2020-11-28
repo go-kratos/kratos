@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -51,10 +52,10 @@ func Newf(code int, format string, a ...interface{}) error {
 	return New(code, fmt.Sprintf(format, a...))
 }
 
-// Equal equal error by reason.
-func Equal(err error, reason string) bool {
-	e, ok := err.(*Error)
-	if !ok {
+// Is each error in a chain for a match with a reason string.
+func Is(err error, reason string) bool {
+	var e *Error
+	if !errors.As(err, &e) {
 		return false
 	}
 	for _, d := range e.Details {
