@@ -1,13 +1,13 @@
-package status
+package errors
 
 import (
 	"errors"
 	"testing"
 )
 
-func TestStatusMatch(t *testing.T) {
-	s := &Status{Code: 1}
-	st := &Status{Code: 2}
+func TestErrorsMatch(t *testing.T) {
+	s := &Error{Code: 1}
+	st := &Error{Code: 2}
 
 	if errors.Is(s, st) {
 		t.Errorf("error is not match: %+v -> %+v", s, st)
@@ -19,8 +19,8 @@ func TestStatusMatch(t *testing.T) {
 		t.Errorf("error is not match: %+v -> %+v", s, st)
 	}
 
-	s.WithDetails(&ErrorInfo{Reason: "test_reason", Domain: "test_domain"})
-	st.WithDetails(&ErrorInfo{Reason: "test_reason", Domain: "test_domain"})
+	s.WithDetails(&ErrorInfo{Reason: "test_reason"})
+	st.WithDetails(&ErrorInfo{Reason: "test_reason"})
 
 	if !errors.Is(s, st) {
 		t.Errorf("error is not match: %+v -> %+v", s, st)
