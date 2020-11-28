@@ -6,10 +6,10 @@ import (
 
 // IsRequestBlocked determines if err is an error which indicates that the request failed due to an RequestBlocked.
 func IsRequestBlocked(err error) bool {
-	return errors.ReasonForError(err) == Kratos_RequestBlocked.String()
+	return errors.Reason(err) == Kratos_RequestBlocked.String()
 }
 
 // IsMissingField determines if err is an error which indicates that the request failed due to an MissingField.
 func IsMissingField(err error) bool {
-	return errors.ReasonForError(err) == Kratos_MissingField.String()
+	return errors.Reason(err) == Kratos_MissingField.String()
 }

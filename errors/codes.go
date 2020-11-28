@@ -3,7 +3,7 @@ package errors
 // Cancelled The operation was cancelled, typically by the caller.
 // HTTP Mapping: 499 Client Closed Request
 func Cancelled(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    1,
 		Message: "Canceled",
 		Details: []interface{}{
@@ -15,7 +15,7 @@ func Cancelled(reason, message string) error {
 // Unknown error.
 // HTTP Mapping: 500 Internal Server Error
 func Unknown(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    2,
 		Message: "Unknown",
 		Details: []interface{}{
@@ -27,7 +27,7 @@ func Unknown(reason, message string) error {
 // InvalidArgument The client specified an invalid argument.
 // HTTP Mapping: 400 Bad Request
 func InvalidArgument(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    3,
 		Message: "InvalidArgument",
 		Details: []interface{}{
@@ -39,7 +39,7 @@ func InvalidArgument(reason, message string) error {
 // DeadlineExceeded .The deadline expired before the operation could complete.
 // HTTP Mapping: 504 Gateway Timeout
 func DeadlineExceeded(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    4,
 		Message: "DeadlineExceeded",
 		Details: []interface{}{
@@ -51,7 +51,7 @@ func DeadlineExceeded(reason, message string) error {
 // NotFound Some requested entity (e.g., file or directory) was not found.
 // HTTP Mapping: 404 Not Found
 func NotFound(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    5,
 		Message: "NotFound",
 		Details: []interface{}{
@@ -63,7 +63,7 @@ func NotFound(reason, message string) error {
 // AlreadyExists The entity that a client attempted to create (e.g., file or directory) already exists.
 // HTTP Mapping: 409 Conflict
 func AlreadyExists(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    6,
 		Message: "AlreadyExists",
 		Details: []interface{}{
@@ -75,7 +75,7 @@ func AlreadyExists(reason, message string) error {
 // PermissionDenied The caller does not have permission to execute the specified operation.
 // HTTP Mapping: 403 Forbidden
 func PermissionDenied(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    7,
 		Message: "PermissionDenied",
 		Details: []interface{}{
@@ -88,7 +88,7 @@ func PermissionDenied(reason, message string) error {
 // perhaps the entire file system is out of space.
 // HTTP Mapping: 429 Too Many Requests
 func ResourceExhausted(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    8,
 		Message: "ResourceExhausted",
 		Details: []interface{}{
@@ -101,7 +101,7 @@ func ResourceExhausted(reason, message string) error {
 // required for the operation's execution.
 // HTTP Mapping: 400 Bad Request
 func FailedPrecondition(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    9,
 		Message: "FailedPrecondition",
 		Details: []interface{}{
@@ -114,7 +114,7 @@ func FailedPrecondition(reason, message string) error {
 // a sequencer check failure or transaction abort.
 // HTTP Mapping: 409 Conflict
 func Aborted(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    10,
 		Message: "Aborted",
 		Details: []interface{}{
@@ -127,7 +127,7 @@ func Aborted(reason, message string) error {
 // reading past end-of-file.
 // HTTP Mapping: 400 Bad Request
 func OutOfRange(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    11,
 		Message: "OutOfRange",
 		Details: []interface{}{
@@ -139,7 +139,7 @@ func OutOfRange(reason, message string) error {
 // Unimplemented The operation is not implemented or is not supported/enabled in this service.
 // HTTP Mapping: 501 Not Implemented
 func Unimplemented(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    12,
 		Message: "Unimplemented",
 		Details: []interface{}{
@@ -154,7 +154,7 @@ func Unimplemented(reason, message string) error {
 //
 // HTTP Mapping: 500 Internal Server Error
 func Internal(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    13,
 		Message: "Internal",
 		Details: []interface{}{
@@ -166,7 +166,7 @@ func Internal(reason, message string) error {
 // Unavailable The service is currently unavailable.
 // HTTP Mapping: 503 Service Unavailable
 func Unavailable(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    14,
 		Message: "Unavailable",
 		Details: []interface{}{
@@ -178,7 +178,7 @@ func Unavailable(reason, message string) error {
 // DataLoss Unrecoverable data loss or corruption.
 // HTTP Mapping: 500 Internal Server Error
 func DataLoss(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    15,
 		Message: "DataLoss",
 		Details: []interface{}{
@@ -190,7 +190,7 @@ func DataLoss(reason, message string) error {
 // Unauthorized The request does not have valid authentication credentials for the operation.
 // HTTP Mapping: 401 Unauthorized
 func Unauthorized(reason, message string) error {
-	return &Error{
+	return &StatusError{
 		Code:    16,
 		Message: "Unauthenticated",
 		Details: []interface{}{

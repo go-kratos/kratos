@@ -1,11 +1,12 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 )
 
-// Error contains an error response from the server.
-type Error struct {
+// StatusError contains an error response from the server.
+type StatusError struct {
 	// Code is the gRPC response status code and will always be populated.
 	Code int `json:"code"`
 	// Message is the server response message and is only populated when
@@ -24,43 +25,53 @@ type ErrorInfo struct {
 }
 
 // WithDetails provided details messages appended to the errors.
-func (e *Error) WithDetails(details ...interface{}) {
+func (e *StatusError) WithDetails(details ...interface{}) {
 	e.Details = append(e.Details, details...)
 }
 
 // Is each error in a chain for a match with a target value.
-func (e *Error) Is(target error) bool {
-	fmt.Println(target, "is")
-	err, ok := target.(*Error)
+func (e *StatusError) Is(target error) bool {
+	err, ok := target.(*StatusError)
 	if ok {
 		return e.Code == err.Code
 	}
-	fmt.Println(target, false)
 	return false
 }
 
-func (e *Error) Error() string {
+func (e *StatusError) Error() string {
 	return fmt.Sprintf("error: code = %d desc = %s details = %+v", e.Code, e.Message, e.Details)
 }
 
-// New returns a Status representing c and msg.
-func New(code int, message string, details ...interface{}) error {
-	return &Error{Code: code, Message: message, Details: details}
+// Error returns a Status representing c and msg.
+func Error(code int, message string, details ...interface{}) error {
+	return &StatusError{Code: code, Message: message, Details: details}
 }
 
-// Newf returns New(c, fmt.Sprintf(format, a...)).
-func Newf(code int, format string, a ...interface{}) error {
-	return New(code, fmt.Sprintf(format, a...))
+// Errorf returns New(c, fmt.Sprintf(format, a...)).
+func Errorf(code int, format string, a ...interface{}) error {
+	return Error(code, fmt.Sprintf(format, a...))
 }
 
-// ReasonForError returns the gRPC status for a particular error.
+// Reason returns the gRPC status for a particular reason.
 // It supports wrapped errors.
-func ReasonForError(err error) string {
-	e, ok := err.(*Error)
-	if ok {
-		for _, d := range e.Details {
-			if ei, ok := d.(*ErrorInfo); ok {
-				return ei.Reason
+func Reason(err error) string {
+	if se := new(StatusError); errors.As(err, &se) {
+		for _, d := range se.Details {
+			if e, ok := d.(*ErrorInfo); ok {
+				return e.Reason
+			}
+		}
+	}
+	return ""
+}
+
+// ReasonMessage returns the gRPC status for a particular message.
+// It supports wrapped errors.
+func ReasonMessage(err error) string {
+	if se := new(StatusError); errors.As(err, &se) {
+		for _, d := range se.Details {
+			if e, ok := d.(*ErrorInfo); ok {
+				return e.Message
 			}
 		}
 	}
