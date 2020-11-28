@@ -8,7 +8,10 @@ import (
 
 func main() {
 	err := error01()
-	if errors.Is(err, codes.Kratos_MissingField.String()) {
+	if codes.IsMissingField(err) {
+		// TODO
+	}
+	if errors.ReasonForError(err) == codes.Kratos_MissingField.String() {
 		// TODO
 	}
 }
@@ -21,7 +24,7 @@ func error01() error {
 }
 
 func error02() error {
-	return myerr.ErrMissingField
+	return myerr.MissingField()
 }
 
 func error03() error {

@@ -1,13 +1,12 @@
 package errors
 
 import (
-	"errors"
 	"fmt"
 )
 
 // Error contains an error response from the server.
 type Error struct {
-	// Code is the HTTP response status code and will always be populated.
+	// Code is the gRPC response status code and will always be populated.
 	Code int `json:"code"`
 	// Message is the server response message and is only populated when
 	// explicitly referenced by the JSON server response.
@@ -31,11 +30,13 @@ func (e *Error) WithDetails(details ...interface{}) {
 
 // Is each error in a chain for a match with a target value.
 func (e *Error) Is(target error) bool {
+	fmt.Println(target, "is")
 	err, ok := target.(*Error)
-	if !ok {
-		return false
+	if ok {
+		return e.Code == err.Code
 	}
-	return e.Code == err.Code
+	fmt.Println(target, false)
+	return false
 }
 
 func (e *Error) Error() string {
@@ -52,16 +53,16 @@ func Newf(code int, format string, a ...interface{}) error {
 	return New(code, fmt.Sprintf(format, a...))
 }
 
-// Is each error in a chain for a match with a reason string.
-func Is(err error, reason string) bool {
-	var e *Error
-	if !errors.As(err, &e) {
-		return false
-	}
-	for _, d := range e.Details {
-		if ei, ok := d.(*ErrorInfo); ok && ei.Reason == reason {
-			return true
+// ReasonForError returns the gRPC status for a particular error.
+// It supports wrapped errors.
+func ReasonForError(err error) string {
+	e, ok := err.(*Error)
+	if ok {
+		for _, d := range e.Details {
+			if ei, ok := d.(*ErrorInfo); ok {
+				return ei.Reason
+			}
 		}
 	}
-	return false
+	return ""
 }

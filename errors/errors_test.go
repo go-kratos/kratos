@@ -2,6 +2,7 @@ package errors
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 )
 
@@ -26,7 +27,28 @@ func TestErrorsMatch(t *testing.T) {
 		t.Errorf("error is not match: %+v -> %+v", s, st)
 	}
 
-	if !Is(s, "test_reason") {
+	if ReasonForError(s) != "test_reason" {
 		t.Errorf("error is not match: %+v -> %+v", s, st)
+	}
+}
+
+func TestErrorIs(t *testing.T) {
+	err1 := &Error{Code: 1}
+	t.Log(err1)
+	err2 := fmt.Errorf("wrap : %w", err1)
+	t.Log(err2)
+
+	if !(errors.Is(err2, err1)) {
+		t.Errorf("error is not match: a: %v b: %v ", err2, err1)
+	}
+}
+
+func TestErrorAs(t *testing.T) {
+	err1 := &Error{Code: 1}
+	err2 := fmt.Errorf("wrap : %w", err1)
+
+	err3 := new(Error)
+	if !errors.As(err2, &err3) {
+		t.Errorf("error is not match: %v", err2)
 	}
 }
