@@ -7,6 +7,10 @@ import (
 )
 
 func main() {
+	err := error01()
+	if errors.Equal(err, codes.Kratos_MissingField.String()) {
+
+	}
 }
 
 func error01() error {

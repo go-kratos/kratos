@@ -23,10 +23,6 @@ type ErrorInfo struct {
 	Message string `json:"message"`
 }
 
-func (e *ErrorInfo) Error() string {
-	return fmt.Sprintf("error: reason = %s message = %s", e.Reason, e.Message)
-}
-
 // WithDetails provided details messages appended to the errors.
 func (e *Error) WithDetails(details ...interface{}) {
 	e.Details = append(e.Details, details...)
@@ -35,21 +31,10 @@ func (e *Error) WithDetails(details ...interface{}) {
 // Is each error in a chain for a match with a target value.
 func (e *Error) Is(target error) bool {
 	err, ok := target.(*Error)
-	if ok {
-		return e.Code == err.Code
-	}
-	ei, ok := target.(*ErrorInfo)
 	if !ok {
 		return false
 	}
-	for _, d := range e.Details {
-		if e, ok := d.(*ErrorInfo); ok {
-			if e.Reason == ei.Reason {
-				return true
-			}
-		}
-	}
-	return false
+	return e.Code == err.Code
 }
 
 func (e *Error) Error() string {
@@ -64,4 +49,18 @@ func New(code int, message string, details ...interface{}) error {
 // Newf returns New(c, fmt.Sprintf(format, a...)).
 func Newf(code int, format string, a ...interface{}) error {
 	return New(code, fmt.Sprintf(format, a...))
+}
+
+// Equal equal error by reason.
+func Equal(err error, reason string) bool {
+	e, ok := err.(*Error)
+	if !ok {
+		return false
+	}
+	for _, d := range e.Details {
+		if ei, ok := d.(*ErrorInfo); ok && ei.Reason == reason {
+			return true
+		}
+	}
+	return false
 }
