@@ -34,6 +34,8 @@ func rendering(e errorWrapper) string {
 	if err != nil {
 		panic(err)
 	}
-	tmpl.Execute(buf, e)
+	if err := tmpl.Execute(buf, e); err != nil {
+		panic(err)
+	}
 	return string(buf.Bytes())
 }
