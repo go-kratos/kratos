@@ -11,7 +11,7 @@ const (
 	errorsPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/errors")
 )
 
-// generateFile generates a _grpc.pb.go file containing gRPC service definitions.
+// generateFile generates a _http.pb.go file containing kratos errors definitions.
 func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.GeneratedFile {
 	if len(file.Enums) == 0 {
 		return nil
@@ -26,7 +26,7 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.Generated
 	return g
 }
 
-// generateFileContent generates the gRPC service definitions, excluding the package statement.
+// generateFileContent generates the kratos errors definitions, excluding the package statement.
 func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile) {
 	if len(file.Enums) == 0 {
 		return

@@ -36,7 +36,7 @@ func InvalidArgument(reason, message string) error {
 	}
 }
 
-// DeadlineExceeded .The deadline expired before the operation could complete.
+// DeadlineExceeded The deadline expired before the operation could complete.
 // HTTP Mapping: 504 Gateway Timeout
 func DeadlineExceeded(reason, message string) error {
 	return &StatusError{
@@ -148,7 +148,7 @@ func Unimplemented(reason, message string) error {
 	}
 }
 
-// Internal  This means that some invariants expected by the
+// Internal This means that some invariants expected by the
 // underlying system have been broken.  This error code is reserved
 // for serious errors.
 //
