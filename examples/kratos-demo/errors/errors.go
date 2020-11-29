@@ -8,7 +8,7 @@ import (
 // MissingField is A required field on a resource has not been set.
 func MissingField() error {
 	return errors.InvalidArgument(
-		apierr.Kratos_MissingField.String(),
+		apierr.Kratos_MissingField,
 		"name is missing",
 	)
 }
@@ -16,7 +16,7 @@ func MissingField() error {
 // RequestBlocked is the requesting user was blocked.
 func RequestBlocked(message string) error {
 	return errors.InvalidArgument(
-		apierr.Kratos_RequestBlocked.String(),
+		apierr.Kratos_RequestBlocked,
 		"request is blocked",
 	)
 }

@@ -5,6 +5,13 @@ import (
 	"fmt"
 )
 
+const (
+	// UnknownReason is unknown reason for error info.
+	UnknownReason = ""
+	// SupportPackageIsVersion1 These constants should not be referenced from any other code.
+	SupportPackageIsVersion1 = true
+)
+
 // StatusError contains an error response from the server.
 type StatusError struct {
 	// Code is the gRPC response status code and will always be populated.
@@ -52,28 +59,15 @@ func Errorf(code int, format string, a ...interface{}) error {
 	return Error(code, fmt.Sprintf(format, a...))
 }
 
-// Reason returns the gRPC status for a particular reason.
+// Reason returns the gRPC status for a particular error.
 // It supports wrapped errors.
-func Reason(err error) string {
+func Reason(err error) *ErrorInfo {
 	if se := new(StatusError); errors.As(err, &se) {
 		for _, d := range se.Details {
 			if e, ok := d.(*ErrorInfo); ok {
-				return e.Reason
+				return e
 			}
 		}
 	}
-	return ""
-}
-
-// ReasonMessage returns the gRPC status for a particular message.
-// It supports wrapped errors.
-func ReasonMessage(err error) string {
-	if se := new(StatusError); errors.As(err, &se) {
-		for _, d := range se.Details {
-			if e, ok := d.(*ErrorInfo); ok {
-				return e.Message
-			}
-		}
-	}
-	return ""
+	return &ErrorInfo{Reason: UnknownReason}
 }

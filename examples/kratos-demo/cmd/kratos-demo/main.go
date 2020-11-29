@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/go-kratos/kratos/v2/errors"
 	apierr "github.com/go-kratos/kratos/v2/examples/kratos-demo/api/kratos/demo/errors"
 	myerr "github.com/go-kratos/kratos/v2/examples/kratos-demo/errors"
@@ -13,18 +11,14 @@ func main() {
 	if apierr.IsMissingField(err) {
 		// TODO
 	}
-	if errors.Reason(err) == apierr.Kratos_MissingField.String() {
+	if errors.Reason(err).Reason == apierr.Kratos_MissingField {
 		// TODO
 	}
-
-	message := errors.ReasonMessage(err)
-
-	fmt.Println(message)
 }
 
 func error01() error {
 	return errors.InvalidArgument(
-		apierr.Kratos_MissingField.String(),
+		apierr.Kratos_MissingField,
 		"name is missing",
 	)
 }
