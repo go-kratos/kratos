@@ -12,6 +12,8 @@ const (
 	SupportPackageIsVersion1 = true
 )
 
+var _ error = &StatusError{}
+
 // StatusError contains an error response from the server.
 type StatusError struct {
 	// Code is the gRPC response status code and will always be populated.

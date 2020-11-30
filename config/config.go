@@ -16,8 +16,11 @@ type Value interface {
 
 	Bool(def bool) bool
 	Int(def int) int
-	String(def string) string
+	Int32(def int32) int32
+	Int64(def int64) int64
+	Float32(def float32) float32
 	Float64(def float64) float64
+	String(def string) string
 	Duration(def time.Duration) time.Duration
 
 	Scan(val interface{}) error
