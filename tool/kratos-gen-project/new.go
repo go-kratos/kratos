@@ -26,7 +26,7 @@ func runNew(ctx *cli.Context) (err error) {
 		pwd, _ := os.Getwd()
 		p.path = filepath.Join(pwd, p.Name)
 	}
-	p.ModPrefix = modPath(p.path)
+	p.ModPrefix = strings.ReplaceAll(modPath(p.path), "\\", "/")
 	// creata a project
 	if err := create(); err != nil {
 		return err
