@@ -61,7 +61,6 @@ func NewSlice(c *Config) *Slice {
 // Reload reload config.
 func (p *Slice) Reload(c *Config) error {
 	p.mu.Lock()
-	//p.startCleanerLocked(time.Duration(c.IdleTimeout))
 	p.setActive(c.Active)
 	p.setIdle(c.Idle)
 	p.conf = c
