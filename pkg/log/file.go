@@ -11,16 +11,20 @@ import (
 
 // level idx
 const (
-	_infoIdx = iota
+	_debugIdx = iota
+	_infoIdx
 	_warnIdx
 	_errorIdx
+	_fatalIdx
 	_totalIdx
 )
 
 var _fileNames = map[int]string{
+	_debugIdx: "debug.log",
 	_infoIdx:  "info.log",
 	_warnIdx:  "warning.log",
 	_errorIdx: "error.log",
+	_fatalIdx: "fatal.log",
 }
 
 // FileHandler .
@@ -63,10 +67,14 @@ func (h *FileHandler) Log(ctx context.Context, lv Level, args ...D) {
 	d[_time] = time.Now().Format(_timeFormat)
 	var w io.Writer
 	switch lv {
+	case _debugLevel:
+		w = h.fws[_debugIdx]
 	case _warnLevel:
 		w = h.fws[_warnIdx]
 	case _errorLevel:
 		w = h.fws[_errorIdx]
+	case _fatalLevel:
+		w = h.fws[_fatalIdx]
 	default:
 		w = h.fws[_infoIdx]
 	}

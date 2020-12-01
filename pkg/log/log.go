@@ -138,49 +138,109 @@ func Init(conf *Config) {
 	c = conf
 }
 
+// Debug logs a message at the debug log level.
+func Debug(format string, args ...interface{}) {
+	if int32(_debugLevel) >= c.V {
+		h.Log(context.Background(), _debugLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	}
+}
+
 // Info logs a message at the info log level.
 func Info(format string, args ...interface{}) {
-	h.Log(context.Background(), _infoLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	if int32(_infoLevel) >= c.V {
+		h.Log(context.Background(), _infoLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	}
 }
 
 // Warn logs a message at the warning log level.
 func Warn(format string, args ...interface{}) {
-	h.Log(context.Background(), _warnLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	if int32(_warnLevel) >= c.V {
+		h.Log(context.Background(), _warnLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	}
 }
 
 // Error logs a message at the error log level.
 func Error(format string, args ...interface{}) {
-	h.Log(context.Background(), _errorLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	if int32(_errorLevel) >= c.V {
+		h.Log(context.Background(), _errorLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	}
+}
+
+// Fatal logs a message at the fatal log level.
+func Fatal(format string, args ...interface{}) {
+	if int32(_fatalLevel) >= c.V {
+		h.Log(context.Background(), _fatalLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	}
+}
+
+// Debugc logs a message at the debug log level.
+func Debugc(ctx context.Context, format string, args ...interface{}) {
+	if int32(_debugLevel) >= c.V {
+		h.Log(ctx, _debugLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	}
 }
 
 // Infoc logs a message at the info log level.
 func Infoc(ctx context.Context, format string, args ...interface{}) {
-	h.Log(ctx, _infoLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	if int32(_infoLevel) >= c.V {
+		h.Log(ctx, _infoLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	}
 }
 
 // Errorc logs a message at the error log level.
 func Errorc(ctx context.Context, format string, args ...interface{}) {
-	h.Log(ctx, _errorLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	if int32(_errorLevel) >= c.V {
+		h.Log(ctx, _errorLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	}
 }
 
 // Warnc logs a message at the warning log level.
 func Warnc(ctx context.Context, format string, args ...interface{}) {
-	h.Log(ctx, _warnLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	if int32(_warnLevel) >= c.V {
+		h.Log(ctx, _warnLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	}
+}
+
+// Fatalc logs a message at the fatal log level.
+func Fatalc(ctx context.Context, format string, args ...interface{}) {
+	if int32(_fatalLevel) >= c.V {
+		h.Log(ctx, _fatalLevel, KVString(_log, fmt.Sprintf(format, args...)))
+	}
+}
+
+// Debugv logs a message at the debug log level.
+func Debugv(ctx context.Context, args ...D) {
+	if int32(_debugLevel) >= c.V {
+		h.Log(ctx, _debugLevel, args...)
+	}
 }
 
 // Infov logs a message at the info log level.
 func Infov(ctx context.Context, args ...D) {
-	h.Log(ctx, _infoLevel, args...)
+	if int32(_infoLevel) >= c.V {
+		h.Log(ctx, _infoLevel, args...)
+	}
 }
 
 // Warnv logs a message at the warning log level.
 func Warnv(ctx context.Context, args ...D) {
-	h.Log(ctx, _warnLevel, args...)
+	if int32(_warnLevel) >= c.V {
+		h.Log(ctx, _warnLevel, args...)
+	}
 }
 
 // Errorv logs a message at the error log level.
 func Errorv(ctx context.Context, args ...D) {
-	h.Log(ctx, _errorLevel, args...)
+	if int32(_errorLevel) >= c.V {
+		h.Log(ctx, _errorLevel, args...)
+	}
+}
+
+// Fatalv logs a message at the error log level.
+func Fatalv(ctx context.Context, args ...D) {
+	if int32(_fatalLevel) >= c.V {
+		h.Log(ctx, _fatalLevel, args...)
+	}
 }
 
 func logw(args []interface{}) []D {
@@ -198,19 +258,39 @@ func logw(args []interface{}) []D {
 	return ds
 }
 
+// Debugw logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
+func Debugw(ctx context.Context, args ...interface{}) {
+	if int32(_debugLevel) >= c.V {
+		h.Log(ctx, _debugLevel, logw(args)...)
+	}
+}
+
 // Infow logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
 func Infow(ctx context.Context, args ...interface{}) {
-	h.Log(ctx, _infoLevel, logw(args)...)
+	if int32(_infoLevel) >= c.V {
+		h.Log(ctx, _infoLevel, logw(args)...)
+	}
 }
 
 // Warnw logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
 func Warnw(ctx context.Context, args ...interface{}) {
-	h.Log(ctx, _warnLevel, logw(args)...)
+	if int32(_warnLevel) >= c.V {
+		h.Log(ctx, _warnLevel, logw(args)...)
+	}
 }
 
 // Errorw logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
 func Errorw(ctx context.Context, args ...interface{}) {
-	h.Log(ctx, _errorLevel, logw(args)...)
+	if int32(_errorLevel) >= c.V {
+		h.Log(ctx, _errorLevel, logw(args)...)
+	}
+}
+
+// Fatalw logs a message with some additional context. The variadic key-value pairs are treated as they are in With.
+func Fatalw(ctx context.Context, args ...interface{}) {
+	if int32(_fatalLevel) >= c.V {
+		h.Log(ctx, _fatalLevel, logw(args)...)
+	}
 }
 
 // SetFormat only effective on stdout and file handler
