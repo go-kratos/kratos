@@ -50,7 +50,6 @@ func NewList(c *Config) *List {
 // Reload reload config.
 func (p *List) Reload(c *Config) error {
 	p.mu.Lock()
-	p.startCleanerLocked(time.Duration(c.IdleTimeout))
 	p.conf = c
 	p.mu.Unlock()
 	return nil

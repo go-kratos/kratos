@@ -61,7 +61,6 @@ func NewSlice(c *Config) *Slice {
 // Reload reload config.
 func (p *Slice) Reload(c *Config) error {
 	p.mu.Lock()
-	p.startCleanerLocked(time.Duration(c.IdleTimeout))
 	p.setActive(c.Active)
 	p.setIdle(c.Idle)
 	p.conf = c
@@ -260,7 +259,6 @@ func (p *Slice) openNewItem(ctx context.Context) {
 //
 // If n <= 0, no idle items are retained.
 func (p *Slice) setIdle(n int) {
-	p.mu.Lock()
 	if n > 0 {
 		p.conf.Idle = n
 	} else {
@@ -278,7 +276,6 @@ func (p *Slice) setIdle(n int) {
 		closing = p.freeItem[maxIdle:]
 		p.freeItem = p.freeItem[:maxIdle]
 	}
-	p.mu.Unlock()
 	for _, c := range closing {
 		c.close()
 	}
@@ -293,13 +290,11 @@ func (p *Slice) setIdle(n int) {
 // If n <= 0, then there is no limit on the number of open items.
 // The default is 0 (unlimited).
 func (p *Slice) setActive(n int) {
-	p.mu.Lock()
 	p.conf.Active = n
 	if n < 0 {
 		p.conf.Active = 0
 	}
 	syncIdle := p.conf.Active > 0 && p.maxIdleItemsLocked() > p.conf.Active
-	p.mu.Unlock()
 	if syncIdle {
 		p.setIdle(n)
 	}
