@@ -92,7 +92,7 @@ jobs:
 
     - name: Set up Env
       run: |
-        echo "::set-env name=GOPATH::$(go env GOPATH)"
+        # echo "::set-env name=GOPATH::$(go env GOPATH)"
         echo "::add-path::$(go env GOPATH)/bin"
   
     - name: Check out code into the Go module directory
