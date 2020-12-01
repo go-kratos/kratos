@@ -1604,7 +1604,7 @@
                 }
               ],
               "intervalFactor": 1,
-              "legendFormat": "{{caller}} => {{method}}",
+              "legendFormat": "{{caller}} => {{path}}",
               "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
@@ -5736,10 +5736,6 @@
   "templating": {
     "list": [
       {
-        "current": {
-          "text": "LIVE",
-          "value": "LIVE"
-        },
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -5748,7 +5744,6 @@
         "options": [],
         "query": "prometheus",
         "refresh": 1,
-        "regex": "LIVE",
         "skipUrlSync": false,
         "type": "datasource"
       },
