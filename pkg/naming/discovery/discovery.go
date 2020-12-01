@@ -278,6 +278,9 @@ func (r *Resolve) Fetch(ctx context.Context) (ins *naming.InstancesInfo, ok bool
 	if ok {
 		var appIns *naming.InstancesInfo
 		appIns, ok = app.zoneIns.Load().(*naming.InstancesInfo)
+		if !ok {
+			return
+		}
 		ins = new(naming.InstancesInfo)
 		ins.LastTs = appIns.LastTs
 		ins.Scheduler = appIns.Scheduler
