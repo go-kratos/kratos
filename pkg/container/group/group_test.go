@@ -36,10 +36,10 @@ func TestGroupReset(t *testing.T) {
 	})
 
 	length := 0
-	g.objs.Range(func(_, _ interface{}) bool {
+	for _,_ = range g.objs {
 		length++
-		return true
-	})
+	}
+
 	assert.Equal(t, 0, length)
 
 	g.Get("/x/internal/dummy/user")
@@ -52,18 +52,16 @@ func TestGroupClear(t *testing.T) {
 	})
 	g.Get("/x/internal/dummy/user")
 	length := 0
-	g.objs.Range(func(_, _ interface{}) bool {
+	for _,_ = range g.objs {
 		length++
-		return true
-	})
+	}
 	assert.Equal(t, 1, length)
 
 	g.Clear()
 	length = 0
-	g.objs.Range(func(_, _ interface{}) bool {
+	for _,_ = range g.objs {
 		length++
-		return true
-	})
+	}
 	assert.Equal(t, 0, length)
 
 }
