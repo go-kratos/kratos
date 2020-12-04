@@ -38,7 +38,7 @@ const Name = "p2c"
 
 // newBuilder creates a new weighted-roundrobin balancer builder.
 func newBuilder() balancer.Builder {
-	return base.NewBalancerBuilder(Name, &p2cPickerBuilder{}, base.Config{HealthCheck: true})
+	return base.NewBalancerBuilder(Name, &p2cPickerBuilder{}, base.Config{HealthCheck: true}) // FIXME: config
 }
 
 func init() {
@@ -155,17 +155,18 @@ type p2cPicker struct {
 	lk       sync.Mutex
 }
 
-func (p *p2cPicker) Pick(opts balancer.PickInfo) (balancer.PickResult, error) {
-	color := nmd.String(ctx, nmd.Color)
+func (p *p2cPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
+	// FIXME refactor to unify the color logic
+	color := nmd.String(info.Ctx, nmd.Color)
 	if color == "" && env.Color != "" {
 		color = env.Color
 	}
 	if color != "" {
 		if cp, ok := p.colors[color]; ok {
-			return cp.pick(opts)
+			return cp.pick(info)
 		}
 	}
-	return p.pick(opts)
+	return p.pick(info)
 }
 
 // choose two distinct nodes
@@ -186,7 +187,7 @@ func (p *p2cPicker) prePick() (nodeA *subConn, nodeB *subConn) {
 	return
 }
 
-func (p *p2cPicker) pick(opts balancer.PickInfo) (balancer.PickResult, error) {
+func (p *p2cPicker) pick(info balancer.PickInfo) (balancer.PickResult, error) {
 	var pc, upc *subConn
 	start := time.Now().UnixNano()
 

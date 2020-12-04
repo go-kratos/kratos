@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-kratos/kratos/pkg/conf/env"
 
+	nmd "github.com/go-kratos/kratos/pkg/net/metadata"
 	wmeta "github.com/go-kratos/kratos/pkg/net/rpc/warden/internal/metadata"
 
 	"google.golang.org/grpc/balancer"
@@ -163,7 +164,7 @@ func TestBalancerPick(t *testing.T) {
 	picker := b.Build(buildInfo)
 	res := []string{"test1", "test1", "test1", "test1"}
 	for i := 0; i < 3; i++ {
-		result, err := picker.Pick(balancer.PickInfo{})
+		result, err := picker.Pick(balancer.PickInfo{Ctx: context.Background()})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
@@ -174,7 +175,8 @@ func TestBalancerPick(t *testing.T) {
 	}
 
 	for i := 0; i < 4; i++ {
-		result, err := picker.Pick(balancer.PickInfo{})
+		ctx := nmd.NewContext(context.Background(), nmd.New(map[string]interface{}{"color": "black"}))
+		result, err := picker.Pick(balancer.PickInfo{Ctx: ctx})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
@@ -186,7 +188,7 @@ func TestBalancerPick(t *testing.T) {
 
 	env.Color = "purple"
 	for i := 0; i < 4; i++ {
-		result, err := picker.Pick(balancer.PickInfo{})
+		result, err := picker.Pick(balancer.PickInfo{Ctx: context.Background()})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
@@ -214,7 +216,7 @@ func Benchmark_Wrr(b *testing.B) {
 	}
 	buildInfo := base.PickerBuildInfo{ReadySCs: rscs}
 	picker := wpb.Build(buildInfo)
-	opt := balancer.PickInfo{}
+	opt := balancer.PickInfo{Ctx: context.Background()}
 	for idx := 0; idx < b.N; idx++ {
 		result, err := picker.Pick(opt)
 		if err != nil {
@@ -276,8 +278,8 @@ type controller struct {
 }
 
 func (c *controller) launch(concurrency int) {
-	opt := balancer.PickInfo{}
 	bkg := context.Background()
+	opt := balancer.PickInfo{Ctx: bkg}
 	for i := range c.clients {
 		for j := 0; j < concurrency; j++ {
 			picker := c.clients[i]

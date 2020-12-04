@@ -32,7 +32,7 @@ const Name = "wrr"
 
 // newBuilder creates a new weighted-roundrobin balancer builder.
 func newBuilder() balancer.Builder {
-	return base.NewBalancerBuilder(Name, &wrrPickerBuilder{})
+	return base.NewBalancerBuilder(Name, &wrrPickerBuilder{}, base.Config{HealthCheck: true}) // FIXME: config
 }
 
 func init() {
@@ -94,13 +94,13 @@ func (c *subConn) latencySummary() (latency float64, count int64) {
 
 // statistics is info for log
 type statistics struct {
-	addr     string
-	ewt      int64
-	cs       float64
-	ss       float64
+	addr    string
+	ewt     int64
+	cs      float64
+	ss      float64
 	latency float64
-	cpu      float64
-	req      int64
+	cpu     float64
+	req     int64
 }
 
 // Stats is grpc Interceptor for client to collect server stats
@@ -136,11 +136,12 @@ func Stats() grpc.UnaryClientInterceptor {
 
 type wrrPickerBuilder struct{}
 
-func (*wrrPickerBuilder) Build(readySCs map[resolver.Address]balancer.SubConn) balancer.Picker {
+func (*wrrPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	p := &wrrPicker{
 		colors: make(map[string]*wrrPicker),
 	}
-	for addr, sc := range readySCs {
+	for sc, info := range info.ReadySCs {
+		addr := info.Address
 		meta, ok := addr.Metadata.(wmeta.MD)
 		if !ok {
 			meta = wmeta.MD{
@@ -192,27 +193,27 @@ type wrrPicker struct {
 	mu sync.Mutex
 }
 
-func (p *wrrPicker) Pick(ctx context.Context, opts balancer.PickInfo) (balancer.SubConn, func(balancer.DoneInfo), error) {
+func (p *wrrPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 	// FIXME refactor to unify the color logic
-	color := nmd.String(ctx, nmd.Color)
+	color := nmd.String(info.Ctx, nmd.Color)
 	if color == "" && env.Color != "" {
 		color = env.Color
 	}
 	if color != "" {
 		if cp, ok := p.colors[color]; ok {
-			return cp.pick(ctx, opts)
+			return cp.pick(info)
 		}
 	}
-	return p.pick(ctx, opts)
+	return p.pick(info)
 }
 
-func (p *wrrPicker) pick(ctx context.Context, opts balancer.PickInfo) (balancer.SubConn, func(balancer.DoneInfo), error) {
+func (p *wrrPicker) pick(info balancer.PickInfo) (balancer.PickResult, error) {
 	var (
 		conn        *subConn
 		totalWeight int64
 	)
 	if len(p.subConns) <= 0 {
-		return nil, nil, balancer.ErrNoSubConnAvailable
+		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	}
 	p.mu.Lock()
 	// nginx wrr load balancing algorithm: http://blog.csdn.net/zhangskd/article/details/50194069
@@ -223,80 +224,81 @@ func (p *wrrPicker) pick(ctx context.Context, opts balancer.PickInfo) (balancer.
 			conn = sc
 		}
 	}
-	conn.cwt -= totalWeight
+	conn.cwt -= totalWeightgo
 	p.mu.Unlock()
 	start := time.Now()
-	if cmd, ok := nmd.FromContext(ctx); ok {
+	if cmd, ok := nmd.FromContext(info.Ctx); ok {
 		cmd["conn"] = conn
 	}
 	//if !feature.DefaultGate.Enabled(dwrrFeature) {
 	//	return conn.conn, nil, nil
 	//}
-	return conn.conn, func(di balancer.DoneInfo) {
-		ev := int64(0) // error value ,if error set 1
-		if di.Err != nil {
-			if st, ok := status.FromError(di.Err); ok {
-				// only counter the local grpc error, ignore any business error
-				if st.Code() != codes.Unknown && st.Code() != codes.OK {
-					ev = 1
+	return balancer.PickResult{SubConn: conn.conn,
+		Done: func(di balancer.DoneInfo) {
+			ev := int64(0) // error value ,if error set 1
+			if di.Err != nil {
+				if st, ok := status.FromError(di.Err); ok {
+					// only counter the local grpc error, ignore any business error
+					if st.Code() != codes.Unknown && st.Code() != codes.OK {
+						ev = 1
+					}
 				}
 			}
-		}
-		conn.err.Add(ev)
+			conn.err.Add(ev)
 
-		now := time.Now()
-		conn.latency.Add(now.Sub(start).Nanoseconds() / 1e5)
-		u := atomic.LoadInt64(&p.updateAt)
-		if now.UnixNano()-u < int64(time.Second) {
-			return
-		}
-		if !atomic.CompareAndSwapInt64(&p.updateAt, u, now.UnixNano()) {
-			return
-		}
-		var (
-			stats = make([]statistics, len(p.subConns))
-			count int
-			total float64
-		)
-		for i, conn := range p.subConns {
-			cpu := float64(atomic.LoadInt64(&conn.si.cpu))
-			ss := math.Float64frombits(atomic.LoadUint64(&conn.si.success))
-			errc, req := conn.errSummary()
-			lagv, lagc := conn.latencySummary()
+			now := time.Now()
+			conn.latency.Add(now.Sub(start).Nanoseconds() / 1e5)
+			u := atomic.LoadInt64(&p.updateAt)
+			if now.UnixNano()-u < int64(time.Second) {
+				return
+			}
+			if !atomic.CompareAndSwapInt64(&p.updateAt, u, now.UnixNano()) {
+				return
+			}
+			var (
+				stats = make([]statistics, len(p.subConns))
+				count int
+				total float64
+			)
+			for i, conn := range p.subConns {
+				cpu := float64(atomic.LoadInt64(&conn.si.cpu))
+				ss := math.Float64frombits(atomic.LoadUint64(&conn.si.success))
+				errc, req := conn.errSummary()
+				lagv, lagc := conn.latencySummary()
 
-			if req > 0 && lagc > 0 && lagv > 0 {
-				// client-side success ratio
-				cs := 1 - (float64(errc) / float64(req))
-				if cs <= 0 {
-					cs = 0.1
-				} else if cs <= 0.2 && req <= 5 {
-					cs = 0.2
+				if req > 0 && lagc > 0 && lagv > 0 {
+					// client-side success ratio
+					cs := 1 - (float64(errc) / float64(req))
+					if cs <= 0 {
+						cs = 0.1
+					} else if cs <= 0.2 && req <= 5 {
+						cs = 0.2
+					}
+					conn.score = math.Sqrt((cs * ss * ss * 1e9) / (lagv * cpu))
+					stats[i] = statistics{cs: cs, ss: ss, latency: lagv, cpu: cpu, req: req}
 				}
-				conn.score = math.Sqrt((cs * ss * ss * 1e9) / (lagv * cpu))
-				stats[i] = statistics{cs: cs, ss: ss, latency: lagv, cpu: cpu, req: req}
-			}
-			stats[i].addr = conn.addr.Addr
+				stats[i].addr = conn.addr.Addr
 
-			if conn.score > 0 {
-				total += conn.score
-				count++
+				if conn.score > 0 {
+					total += conn.score
+					count++
+				}
 			}
-		}
-		// count must be greater than 1,otherwise will lead ewt to 0
-		if count < 2 {
-			return
-		}
-		avgscore := total / float64(count)
-		p.mu.Lock()
-		for i, conn := range p.subConns {
-			if conn.score <= 0 {
-				conn.score = avgscore
+			// count must be greater than 1,otherwise will lead ewt to 0
+			if count < 2 {
+				return
 			}
-			conn.ewt = int64(conn.score * float64(conn.meta.Weight))
-			stats[i].ewt = conn.ewt
-		}
-		p.mu.Unlock()
-		log.Info("warden wrr(%s): %+v", conn.addr.ServerName, stats)
+			avgscore := total / float64(count)
+			p.mu.Lock()
+			for i, conn := range p.subConns {
+				if conn.score <= 0 {
+					conn.score = avgscore
+				}
+				conn.ewt = int64(conn.score * float64(conn.meta.Weight))
+				stats[i].ewt = conn.ewt
+			}
+			p.mu.Unlock()
+			log.Info("warden wrr(%s): %+v", conn.addr.ServerName, stats)
+		},
 	}, nil
-
 }
