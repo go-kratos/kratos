@@ -24,8 +24,7 @@ require (
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/mock v1.3.1 // indirect
-	github.com/golang/protobuf v1.3.5
-	github.com/google/uuid v1.1.1 // indirect
+	github.com/golang/protobuf v1.4.3
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.14.3 // indirect
@@ -48,7 +47,7 @@ require (
 	github.com/siddontang/go v0.0.0-20180604090527-bdc77568d726
 	github.com/sirupsen/logrus v1.5.0
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.5.1
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20200122045848-3419fae592fc // indirect
 	github.com/tsuna/gohbase v0.0.0-20190502052937-24ffed0537aa
 	github.com/uber/jaeger-client-go v2.25.0+incompatible
@@ -56,14 +55,14 @@ require (
 	github.com/urfave/cli/v2 v2.1.1
 	go.etcd.io/etcd v0.0.0-20200402134248-51bdeb39e698
 	go.uber.org/atomic v1.6.0
-	golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59 // indirect
-	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
-	golang.org/x/sys v0.0.0-20200331124033-c3d80250170d // indirect
+	golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb
+	golang.org/x/sys v0.0.0-20201202213521-69691e467435 // indirect
+	golang.org/x/text v0.3.4 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.0.0-20191105231337-689d0f08e67a
 	google.golang.org/appengine v1.6.1 // indirect
-	google.golang.org/genproto v0.0.0-20200402124713-8ff61da6d932
-	google.golang.org/grpc v1.29.1
+	google.golang.org/genproto v0.0.0-20201203001206-6486ece9c497
+	google.golang.org/grpc v1.34.0
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/yaml.v2 v2.2.8

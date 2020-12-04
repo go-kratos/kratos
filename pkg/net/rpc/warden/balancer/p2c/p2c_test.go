@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"google.golang.org/grpc/balancer/base"
 	"math/rand"
 	"strconv"
 	"sync/atomic"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/go-kratos/kratos/pkg/conf/env"
 
-	nmd "github.com/go-kratos/kratos/pkg/net/metadata"
 	wmeta "github.com/go-kratos/kratos/pkg/net/rpc/warden/internal/metadata"
 
 	"google.golang.org/grpc/balancer"
@@ -153,40 +153,44 @@ func TestBalancerPick(t *testing.T) {
 	scs[sc2.addr] = sc2
 	scs[sc3.addr] = sc3
 	scs[sc4.addr] = sc4
+
+	rscs := make(map[balancer.SubConn]base.SubConnInfo)
+	for a, c := range scs {
+		rscs[c] = base.SubConnInfo{Address: a}
+	}
+	buildInfo := base.PickerBuildInfo{ReadySCs: rscs}
 	b := &p2cPickerBuilder{}
-	picker := b.Build(scs)
+	picker := b.Build(buildInfo)
 	res := []string{"test1", "test1", "test1", "test1"}
 	for i := 0; i < 3; i++ {
-		conn, _, err := picker.Pick(context.Background(), balancer.PickInfo{})
+		result, err := picker.Pick(balancer.PickInfo{})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
-		sc := conn.(*testSubConn)
+		sc := result.SubConn.(*testSubConn)
 		if sc.addr.Addr != res[i] {
 			t.Fatalf("the subconn picked(%s),but expected(%s)", sc.addr.Addr, res[i])
 		}
 	}
 
-	ctx := nmd.NewContext(context.Background(), nmd.New(map[string]interface{}{"color": "black"}))
 	for i := 0; i < 4; i++ {
-		conn, _, err := picker.Pick(ctx, balancer.PickInfo{})
+		result, err := picker.Pick(balancer.PickInfo{})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
-		sc := conn.(*testSubConn)
+		sc := result.SubConn.(*testSubConn)
 		if sc.addr.Addr != res[i] {
 			t.Fatalf("the (%d) subconn picked(%s),but expected(%s)", i, sc.addr.Addr, res[i])
 		}
 	}
 
 	env.Color = "purple"
-	ctx2 := context.Background()
 	for i := 0; i < 4; i++ {
-		conn, _, err := picker.Pick(ctx2, balancer.PickInfo{})
+		result, err := picker.Pick(balancer.PickInfo{})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
-		sc := conn.(*testSubConn)
+		sc := result.SubConn.(*testSubConn)
 		if sc.addr.Addr != "test4" {
 			t.Fatalf("the (%d) subconn picked(%s),but expected(%s)", i, sc.addr.Addr, res[i])
 		}
@@ -204,13 +208,17 @@ func Benchmark_Wrr(b *testing.B) {
 		scs[addr] = &testSubConn{addr: addr}
 	}
 	wpb := &p2cPickerBuilder{}
-	picker := wpb.Build(scs)
+	rscs := make(map[balancer.SubConn]base.SubConnInfo)
+	for a, c := range scs {
+		rscs[c] = base.SubConnInfo{Address: a}
+	}
+	buildInfo := base.PickerBuildInfo{ReadySCs: rscs}
+	picker := wpb.Build(buildInfo)
 	opt := balancer.PickInfo{}
-	ctx := context.Background()
 	for idx := 0; idx < b.N; idx++ {
-		_, done, err := picker.Pick(ctx, opt)
+		result, err := picker.Pick(opt)
 		if err != nil {
-			done(balancer.DoneInfo{})
+			result.Done(balancer.DoneInfo{})
 		}
 	}
 }
@@ -243,9 +251,15 @@ func newController(svrNum int, cliNum int) *controller {
 	for _, v := range servers {
 		scs[v.addr] = v
 	}
+	rscs := make(map[balancer.SubConn]base.SubConnInfo)
+	for a, c := range scs {
+		rscs[c] = base.SubConnInfo{Address: a}
+	}
+	buildInfo := base.PickerBuildInfo{ReadySCs: rscs}
+
 	for i := 0; i < cliNum; i++ {
 		wpb := &p2cPickerBuilder{}
-		picker := wpb.Build(scs)
+		picker := wpb.Build(buildInfo)
 		clients = append(clients, picker)
 	}
 
@@ -270,8 +284,8 @@ func (c *controller) launch(concurrency int) {
 			go func() {
 				for {
 					ctx, cancel := context.WithTimeout(bkg, time.Millisecond*250)
-					sc, done, _ := picker.Pick(ctx, opt)
-					server := sc.(*testSubConn)
+					result, _ := picker.Pick(opt)
+					server := result.SubConn.(*testSubConn)
 					server.connect(ctx)
 					var err error
 					if ctx.Err() != nil {
@@ -281,7 +295,7 @@ func (c *controller) launch(concurrency int) {
 					cpu := atomic.LoadInt64(&server.cpu)
 					md := make(map[string]string)
 					md[wmeta.CPUUsage] = strconv.FormatInt(cpu, 10)
-					done(balancer.DoneInfo{Trailer: metadata.New(md), Err: err})
+					result.Done(balancer.DoneInfo{Trailer: metadata.New(md), Err: err})
 					time.Sleep(time.Millisecond * 10)
 				}
 			}()
