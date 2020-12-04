@@ -224,7 +224,7 @@ func (p *wrrPicker) pick(info balancer.PickInfo) (balancer.PickResult, error) {
 			conn = sc
 		}
 	}
-	conn.cwt -= totalWeightgo
+	conn.cwt -= totalWeight
 	p.mu.Unlock()
 	start := time.Now()
 	if cmd, ok := nmd.FromContext(info.Ctx); ok {
