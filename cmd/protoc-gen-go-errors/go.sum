@@ -10,6 +10,8 @@ github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7
 github.com/go-kratos/kratos v0.6.0 h1:aGuIQQoj1EiWtBCIaPHvhPBcDx3WfL/Mw6q+5C5ehgg=
 github.com/go-kratos/kratos/v2 v2.0.0-20201205165131-10618a745c96 h1:Qyiy167FmsHZucnc4vZ+hv938YyNTkodXVgb5PC2Y+U=
 github.com/go-kratos/kratos/v2 v2.0.0-20201205165131-10618a745c96/go.mod h1:YwgE84UUomqngCzthva1VOYcuIZqXtYo5nTu22i1nbo=
+github.com/go-kratos/kratos/v2 v2.0.0-20201205170920-f2b7f99a678c h1:V4dxjxZX4QEp8vAtumiA/6ibbqU9XZUUTA81piwk8nc=
+github.com/go-kratos/kratos/v2 v2.0.0-20201205170920-f2b7f99a678c/go.mod h1:YwgE84UUomqngCzthva1VOYcuIZqXtYo5nTu22i1nbo=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
@@ -19,6 +21,7 @@ github.com/golang/protobuf v1.4.0-rc.1.0.20200221234624-67d41d38c208/go.mod h1:x
 github.com/golang/protobuf v1.4.0-rc.2/go.mod h1:LlEzMj4AhA7rCAGe4KMBDvJI+AwstrUpVNzEA03Pprs=
 github.com/golang/protobuf v1.4.0-rc.4.0.20200313231945-b860323f09d0/go.mod h1:WU3c8KckQ9AFe+yFwt9sWVRKCVIyN9cPHBJSNnbL67w=
 github.com/golang/protobuf v1.4.0/go.mod h1:jodUvKwWbYaEsadDk5Fwe5c77LiNKVO9IDvqG2KuDX0=
+github.com/golang/protobuf v1.4.1 h1:ZFgWrT+bLgsYPirOnRfKLYJLvssAegOj/hgyMFdJZe0=
 github.com/golang/protobuf v1.4.1/go.mod h1:U8fpvMrcmy5pZrNK1lt4xCsGvpyWQ/VVv6QDs8UjoX8=
 github.com/google/go-cmp v0.2.0/go.mod h1:oXzfMopK8JAjlY9xF4vHSVASa0yLyX7SntLO5aqRK0M=
 github.com/google/go-cmp v0.3.0/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMywk6iLU=
