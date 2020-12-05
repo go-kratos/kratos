@@ -7,8 +7,8 @@ import (
 )
 
 func TestErrorsMatch(t *testing.T) {
-	s := &Error{Code: 1}
-	st := &Error{Code: 2}
+	s := &StatusError{Code: 1}
+	st := &StatusError{Code: 2}
 
 	if errors.Is(s, st) {
 		t.Errorf("error is not match: %+v -> %+v", s, st)
@@ -27,13 +27,13 @@ func TestErrorsMatch(t *testing.T) {
 		t.Errorf("error is not match: %+v -> %+v", s, st)
 	}
 
-	if Reason(s) != "test_reason" {
+	if Reason(s).Reason != "test_reason" {
 		t.Errorf("error is not match: %+v -> %+v", s, st)
 	}
 }
 
 func TestErrorIs(t *testing.T) {
-	err1 := &Error{Code: 1}
+	err1 := &StatusError{Code: 1}
 	t.Log(err1)
 	err2 := fmt.Errorf("wrap : %w", err1)
 	t.Log(err2)
@@ -44,10 +44,10 @@ func TestErrorIs(t *testing.T) {
 }
 
 func TestErrorAs(t *testing.T) {
-	err1 := &Error{Code: 1}
+	err1 := &StatusError{Code: 1}
 	err2 := fmt.Errorf("wrap : %w", err1)
 
-	err3 := new(Error)
+	err3 := new(StatusError)
 	if !errors.As(err2, &err3) {
 		t.Errorf("error is not match: %v", err2)
 	}
