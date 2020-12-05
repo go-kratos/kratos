@@ -1,9 +1,5 @@
-module github.com/go-kratos/cli
+module github.com/go-kratos/kratos/v2/cmd/kratos
 
 go 1.15
 
-require (
-	github.com/mitchellh/go-homedir v1.1.0
-	github.com/spf13/cobra v1.1.1
-	github.com/spf13/viper v1.7.0
-)
+require github.com/spf13/cobra v1.1.1
