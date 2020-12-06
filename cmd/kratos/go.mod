@@ -1,4 +1,4 @@
-module github.com/go-kratos/kratos/v2/cmd/kratos
+module github.com/go-kratos/kratos/cmd/kratos
 
 go 1.15
 
