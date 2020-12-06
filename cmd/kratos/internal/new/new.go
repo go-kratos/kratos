@@ -27,7 +27,7 @@ import (
 // CmdNew represents the init command
 var CmdNew = &cobra.Command{
 	Use:   "new",
-	Short: "Create a service template template",
+	Short: "Create a service template",
 	Long:  `Create a service project using the repository template. Example: kratos new helloworld`,
 	Run:   run,
 }
