@@ -4,7 +4,7 @@ import (
 	"context"
 	"path"
 
-	"github.com/go-kratos/kratos/v2/cmd/kratos/internal/base"
+	"github.com/go-kratos/kratos/cmd/kratos/internal/base"
 )
 
 const (
