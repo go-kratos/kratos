@@ -1,6 +1,6 @@
-package version
+package main
 
-// go build -ldflags "-X github.com/go-kratos/kratos/version.Version=x.y.yz"
+// go build -ldflags "-X main.Version=x.y.yz"
 var (
 	// Version is the version of the compiled software.
 	Version string
