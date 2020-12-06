@@ -16,27 +16,31 @@ limitations under the License.
 package new
 
 import (
+	"context"
+	"log"
+	"os"
+	"time"
+
 	"github.com/spf13/cobra"
 )
 
 // CmdNew represents the init command
 var CmdNew = &cobra.Command{
 	Use:   "new",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-
-		newProject(args[0])
-
-	},
+	Short: "Create a service template template",
+	Long:  `Create a service project using the repository template. Example: kratos new helloworld`,
+	Run:   run,
 }
 
-func newProject(name string) {
-	p := &Project{Name: name}
-	p.Generate("./")
+func run(cmd *cobra.Command, args []string) {
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	p := &Project{Name: args[0]}
+	if err := p.Generate(ctx, wd); err != nil {
+		log.Fatal(err)
+	}
 }
