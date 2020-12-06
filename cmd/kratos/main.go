@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/go-kratos/kratos/v2/cmd/kratos/internal/gen"
-	"github.com/go-kratos/kratos/v2/cmd/kratos/internal/new"
+	"github.com/go-kratos/kratos/cmd/kratos/internal/add"
+	"github.com/go-kratos/kratos/cmd/kratos/internal/new"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +16,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(new.CmdNew)
-	rootCmd.AddCommand(gen.CmdGen)
+	rootCmd.AddCommand(add.CmdAdd)
 }
 
 func main() {

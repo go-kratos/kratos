@@ -19,16 +19,15 @@ func Is{{.Value}}(err error) bool {
 {{- end }}
 `
 
-// Error is a enum error.
-type Error struct {
+type errorInfo struct {
 	Name  string
 	Value string
 }
 type errorWrapper struct {
-	Errors []*Error
+	Errors []*errorInfo
 }
 
-func rendering(e errorWrapper) string {
+func (e *errorWrapper) execute() string {
 	buf := new(bytes.Buffer)
 	tmpl, err := template.New("errors").Parse(errorsTemplate)
 	if err != nil {

@@ -48,11 +48,11 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	}
 	var ew errorWrapper
 	for _, v := range enum.Values {
-		err := &Error{
+		err := &errorInfo{
 			Name:  string(enum.Desc.Name()),
 			Value: string(v.Desc.Name()),
 		}
 		ew.Errors = append(ew.Errors, err)
 	}
-	g.P(rendering(ew))
+	g.P(ew.execute())
 }

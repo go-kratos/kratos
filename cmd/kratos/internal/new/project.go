@@ -2,6 +2,8 @@ package new
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"path"
 
 	"github.com/go-kratos/kratos/cmd/kratos/internal/base"
@@ -20,6 +22,10 @@ type Project struct {
 // Generate .
 func (p *Project) Generate(ctx context.Context, dir string) error {
 	to := path.Join(dir, p.Name)
+	if _, err := os.Stat(to); !os.IsNotExist(err) {
+		return fmt.Errorf("%s already exists", p.Name)
+	}
+	fmt.Printf("Creating service %s\n", p.Name)
 	repo := base.NewRepo()
 	return repo.CopyTo(ctx, serviceLayoutName, serviceLayoutURL, to)
 }
