@@ -8,7 +8,7 @@ import "sync"
 // Group is a lazy load container.
 type Group struct {
 	new  func() interface{}
-	objs sync.Map
+	objs map[string]interface{}
 	sync.RWMutex
 }
 
@@ -19,19 +19,29 @@ func NewGroup(new func() interface{}) *Group {
 	}
 	return &Group{
 		new: new,
+		objs: make(map[string]interface{}),
 	}
 }
 
 // Get gets the object by the given key.
 func (g *Group) Get(key string) interface{} {
 	g.RLock()
-	new := g.new
-	g.RUnlock()
-	obj, ok := g.objs.Load(key)
-	if !ok {
-		obj = new()
-		g.objs.Store(key, obj)
+	obj, ok := g.objs[key]
+	if ok {
+		g.RUnlock()
+		return obj
 	}
+	g.RUnlock()
+
+	// double check
+	g.Lock()
+	defer g.Unlock()
+	obj, ok = g.objs[key]
+	if ok {
+		return obj
+	}
+	obj = g.new()
+	g.objs[key] = obj
 	return obj
 }
 
@@ -48,8 +58,7 @@ func (g *Group) Reset(new func() interface{}) {
 
 // Clear deletes all objects.
 func (g *Group) Clear() {
-	g.objs.Range(func(key, value interface{}) bool {
-		g.objs.Delete(key)
-		return true
-	})
+	g.Lock()
+	g.objs = make(map[string]interface{})
+	g.Unlock()
 }

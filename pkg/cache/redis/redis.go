@@ -34,6 +34,7 @@ type Config struct {
 	Proto        string
 	Addr         string
 	Auth         string
+	Db           int
 	DialTimeout  xtime.Duration
 	ReadTimeout  xtime.Duration
 	WriteTimeout xtime.Duration
