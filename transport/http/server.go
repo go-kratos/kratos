@@ -14,12 +14,12 @@ var _ transport.Server = new(Server)
 type Server struct {
 	*http.Server
 
-	opts ServerOptions
+	opts serverOptions
 }
 
 // NewServer creates a HTTP server by options.
 func NewServer(opts ...ServerOption) *Server {
-	options := ServerOptions{}
+	options := serverOptions{}
 	for _, o := range opts {
 		o(&options)
 	}

@@ -15,12 +15,12 @@ var _ transport.Server = new(Server)
 type Server struct {
 	*grpc.Server
 
-	opts ServerOptions
+	opts serverOptions
 }
 
 // NewServer creates a gRPC server by options.
 func NewServer(opts ...ServerOption) *Server {
-	options := ServerOptions{}
+	options := serverOptions{}
 	for _, o := range opts {
 		o(&options)
 	}

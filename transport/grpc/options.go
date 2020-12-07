@@ -1,16 +1,15 @@
 package grpc
 
 // ServerOption is gRPC server option.
-type ServerOption func(o *ServerOptions)
+type ServerOption func(o *serverOptions)
 
-// ServerOptions is gRPC server options.
-type ServerOptions struct {
+type serverOptions struct {
 	Address string
 }
 
-// WithAddress is address option.
+// WithAddress is bind address option.
 func WithAddress(a string) ServerOption {
-	return func(o *ServerOptions) {
+	return func(o *serverOptions) {
 		o.Address = a
 	}
 }
