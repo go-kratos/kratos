@@ -30,7 +30,6 @@ func run(cmd *cobra.Command, args []string) {
 		GoPackage:   goPackage(pkgName),
 		JavaPackage: javaPackage(pkgName),
 		Service:     serviceName(fileName),
-		Method:      serviceName(fileName),
 	}
 	if err := p.Generate(); err != nil {
 		fmt.Println(err)

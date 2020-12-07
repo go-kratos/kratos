@@ -12,7 +12,6 @@ type Proto struct {
 	Name        string
 	Path        string
 	Service     string
-	Method      string
 	Package     string
 	GoPackage   string
 	JavaPackage string
@@ -28,7 +27,7 @@ func (p *Proto) Generate() error {
 	if err != nil {
 		panic(err)
 	}
-	to := path.Join(wd, "api", p.Path)
+	to := path.Join(wd, p.Path)
 	if _, err := os.Stat(to); os.IsNotExist(err) {
 		if err := os.MkdirAll(to, 0700); err != nil {
 			return err

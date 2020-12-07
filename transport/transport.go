@@ -1,13 +1,15 @@
 package transport
 
 import (
+	"context"
+
 	"github.com/go-kratos/kratos/v2/metadata"
 )
 
 // Server is a server interface.
 type Server interface {
-	Start() error
-	Stop() error
+	Start(context.Context) error
+	Stop(context.Context) error
 }
 
 // ServerInfo is the server request infomation.
