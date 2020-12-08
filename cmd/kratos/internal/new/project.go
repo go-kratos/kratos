@@ -1,12 +1,15 @@
 package new
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 
 	"github.com/go-kratos/kratos/cmd/kratos/internal/base"
+	"golang.org/x/mod/modfile"
 )
 
 const (
@@ -27,5 +30,14 @@ func (p *Project) Generate(ctx context.Context, dir string) error {
 	}
 	fmt.Printf("Creating service %s\n", p.Name)
 	repo := base.NewRepo()
-	return repo.CopyTo(ctx, serviceLayoutName, serviceLayoutURL, to)
+	if err := repo.CopyTo(ctx, serviceLayoutName, serviceLayoutURL, to); err != nil {
+		return err
+	}
+	mod := path.Join(to, "go.mod")
+	modBytes, err := ioutil.ReadFile(mod)
+	if err != nil {
+		return err
+	}
+	modName := modfile.ModulePath(modBytes)
+	return ioutil.WriteFile(mod, bytes.Replace(modBytes, []byte(modName), []byte(p.Name), 1), 0644)
 }
