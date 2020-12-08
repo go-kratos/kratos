@@ -28,12 +28,12 @@ type options struct {
 	signalFn func(*App, os.Signal)
 }
 
-// StartTimeout withstart timeout.
+// StartTimeout with start timeout.
 func StartTimeout(d time.Duration) Option {
 	return func(o *options) { o.startTimeout = d }
 }
 
-// StopTimeout with start timeout.
+// StopTimeout with stop timeout.
 func StopTimeout(d time.Duration) Option {
 	return func(o *options) { o.stopTimeout = d }
 }
