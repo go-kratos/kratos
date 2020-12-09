@@ -16,12 +16,14 @@ type Server struct {
 
 	handlers []http.Handler
 
-	opts serverOptions
+	opts ServerOptions
 }
 
 // NewServer creates a HTTP server by options.
 func NewServer(opts ...ServerOption) *Server {
-	options := serverOptions{}
+	options := ServerOptions{
+		ErrorHandler: DefaultErrorHandler,
+	}
 	for _, o := range opts {
 		o(&options)
 	}
@@ -54,4 +56,9 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	for _, h := range s.handlers {
 		h.ServeHTTP(res, req)
 	}
+}
+
+// Options returns the server options.
+func (s *Server) Options() ServerOptions {
+	return s.opts
 }
