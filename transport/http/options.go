@@ -19,9 +19,16 @@ type ServerOptions struct {
 // ErrorHandler is encoding an error to the ResponseWriter.
 type ErrorHandler func(ctx context.Context, err error, codec encoding.Codec, w http.ResponseWriter)
 
-// WithAddress is bind address option.
+// WithAddress with bind address option.
 func WithAddress(a string) ServerOption {
 	return func(o *ServerOptions) {
 		o.Address = a
+	}
+}
+
+// WithErrorHandler with error handler option.
+func WithErrorHandler(h ErrorHandler) ServerOption {
+	return func(o *ServerOptions) {
+		o.ErrorHandler = h
 	}
 }

@@ -1,6 +1,8 @@
 package json
 
 import (
+	"encoding/json"
+
 	"github.com/go-kratos/kratos/v2/encoding"
 
 	"google.golang.org/protobuf/encoding/protojson"
@@ -18,11 +20,19 @@ func init() {
 type codec struct{}
 
 func (codec) Marshal(v interface{}) ([]byte, error) {
-	return protojson.Marshal(v.(proto.Message))
+	m, ok := v.(proto.Message)
+	if ok {
+		return protojson.Marshal(m)
+	}
+	return json.Marshal(v)
 }
 
 func (codec) Unmarshal(data []byte, v interface{}) error {
-	return protojson.Unmarshal(data, v.(proto.Message))
+	m, ok := v.(proto.Message)
+	if ok {
+		return protojson.Unmarshal(data, m)
+	}
+	return json.Unmarshal(data, v)
 }
 
 func (codec) Name() string {
