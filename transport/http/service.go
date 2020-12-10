@@ -63,7 +63,8 @@ type MethodDesc struct {
 
 // RegisterService registers a service and its implementation to the HTTP server.
 func (s *Server) RegisterService(sd *ServiceDesc, ss interface{}) {
-	for _, m := range sd.Methods {
+	for _, method := range sd.Methods {
+		m := method
 		s.router.HandleFunc(m.Path, func(res http.ResponseWriter, req *http.Request) {
 
 			ctx := req.Context()
@@ -72,6 +73,7 @@ func (s *Server) RegisterService(sd *ServiceDesc, ss interface{}) {
 				s.encodeError(ctx, err, codec, res)
 				return
 			}
+			// TODO Middleware
 			reply, err := m.Handler(ss, ctx, func(v interface{}) error {
 				return s.decodeRequest(ctx, v, codec, req)
 			})

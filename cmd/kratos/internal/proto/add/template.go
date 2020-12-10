@@ -39,14 +39,14 @@ message List{{.Service}}Request {}
 message List{{.Service}}Reply {}
 `
 
-func (p *Proto) execute() (string, error) {
+func (p *Proto) execute() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	tmpl, err := template.New("proto").Parse(strings.TrimSpace(protoTemplate))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if err := tmpl.Execute(buf, p); err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(buf.Bytes()), nil
+	return buf.Bytes(), nil
 }
