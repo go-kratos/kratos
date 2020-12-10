@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	_jaegerAppID    = "APPID"
+	_jaegerAppID    = env.AppID
 	_jaegerEndpoint = "http://127.0.0.1:9191"
 )
 
@@ -29,5 +29,5 @@ func init() {
 // Init Init
 func Init() {
 	c := &Config{Endpoint: _jaegerEndpoint, BatchSize: 120}
-	trace.SetGlobalTracer(trace.NewTracer(env.AppID, newReport(c), true))
+	trace.SetGlobalTracer(trace.NewTracer(_jaegerAppID, newReport(c), true))
 }
