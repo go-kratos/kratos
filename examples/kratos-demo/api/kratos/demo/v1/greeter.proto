@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package kratos.demo.v1;
 
+import "google/api/annotations.proto";
+
 // 多语言特定包名，用于源代码引用
 option go_package = "github.com/go-kratos/kratos/demo/v1;v1";
 option java_multiple_files = true;
@@ -11,7 +13,11 @@ option objc_class_prefix = "KratosDemoV1";
 // 描述该服务的信息
 service Greeter {
     // 描述该方法的功能
-    rpc SayHello (HelloRequest) returns (HelloReply);
+    rpc SayHello (HelloRequest) returns (HelloReply) {
+        option (google.api.http) = {
+            post: "/v1/hello",
+        };
+    }
 }
 // Hello请求参数
 message HelloRequest {
