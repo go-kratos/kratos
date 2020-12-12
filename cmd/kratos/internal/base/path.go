@@ -1,7 +1,7 @@
 package base
 
 import (
-	"io"
+	"bytes"
 	"io/ioutil"
 	"log"
 	"os"
@@ -32,32 +32,28 @@ func kratosHomeWithDir(dir string) string {
 	return home
 }
 
-func copyFile(src, dst string) error {
+func copyFile(src, dst string, replaces []string) error {
 	var err error
-	var srcfd *os.File
-	var dstfd *os.File
-	var srcinfo os.FileInfo
-
-	if srcfd, err = os.Open(src); err != nil {
+	srcinfo, err := os.Stat(src)
+	if err != nil {
 		return err
 	}
-	defer srcfd.Close()
-
-	if dstfd, err = os.Create(dst); err != nil {
+	buf, err := ioutil.ReadFile(src)
+	if err != nil {
 		return err
 	}
-	defer dstfd.Close()
-
-	if _, err = io.Copy(dstfd, srcfd); err != nil {
-		return err
+	var old string
+	for i, next := range replaces {
+		if i%2 == 0 {
+			old = next
+			continue
+		}
+		buf = bytes.ReplaceAll(buf, []byte(old), []byte(next))
 	}
-	if srcinfo, err = os.Stat(src); err != nil {
-		return err
-	}
-	return os.Chmod(dst, srcinfo.Mode())
+	return ioutil.WriteFile(dst, buf, srcinfo.Mode())
 }
 
-func copyDir(src, dst string, ignores []string) error {
+func copyDir(src, dst string, replaces, ignores []string) error {
 	var err error
 	var fds []os.FileInfo
 	var srcinfo os.FileInfo
@@ -82,11 +78,11 @@ func copyDir(src, dst string, ignores []string) error {
 		dstfp := path.Join(dst, fd.Name())
 
 		if fd.IsDir() {
-			if err = copyDir(srcfp, dstfp, ignores); err != nil {
+			if err = copyDir(srcfp, dstfp, replaces, ignores); err != nil {
 				return err
 			}
 		} else {
-			if err = copyFile(srcfp, dstfp); err != nil {
+			if err = copyFile(srcfp, dstfp, replaces); err != nil {
 				return err
 			}
 		}

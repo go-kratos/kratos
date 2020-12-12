@@ -9,6 +9,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// SupportPackageIsVersion1 These constants should not be referenced from any other code.
+const SupportPackageIsVersion1 = true
+
 var _ transport.Server = new(Server)
 
 // Server is a HTTP server wrapper.

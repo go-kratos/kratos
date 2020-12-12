@@ -56,9 +56,11 @@ type methodHandler func(srv interface{}, ctx context.Context, dec func(interface
 
 // MethodDesc represents a HTTP service's method specification.
 type MethodDesc struct {
-	Path    string
-	Method  string
-	Handler methodHandler
+	Path         string
+	Method       string
+	Body         string
+	ResponseBody string
+	Handler      methodHandler
 }
 
 // RegisterService registers a service and its implementation to the HTTP server.
