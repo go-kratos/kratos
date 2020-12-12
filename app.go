@@ -24,8 +24,8 @@ type options struct {
 	startTimeout time.Duration
 	stopTimeout  time.Duration
 
-	signals  []os.Signal
-	signalFn func(*App, os.Signal)
+	sigs  []os.Signal
+	sigFn func(*App, os.Signal)
 }
 
 // StartTimeout with start timeout.
@@ -39,13 +39,11 @@ func StopTimeout(d time.Duration) Option {
 }
 
 // Signal with os signals.
-func Signal(sig ...os.Signal) Option {
-	return func(o *options) { o.signals = sig }
-}
-
-// SignalFn with signals handler.
-func SignalFn(fn func(*App, os.Signal)) Option {
-	return func(o *options) { o.signalFn = fn }
+func Signal(fn func(*App, os.Signal), sigs ...os.Signal) Option {
+	return func(o *options) {
+		o.sigFn = fn
+		o.sigs = sigs
+	}
 }
 
 // App is an application components lifecycle manager
@@ -61,12 +59,12 @@ func New(opts ...Option) *App {
 	options := options{
 		startTimeout: time.Second * 30,
 		stopTimeout:  time.Second * 30,
-		signals: []os.Signal{
+		sigs: []os.Signal{
 			syscall.SIGTERM,
 			syscall.SIGQUIT,
 			syscall.SIGINT,
 		},
-		signalFn: func(a *App, sig os.Signal) {
+		sigFn: func(a *App, sig os.Signal) {
 			switch sig {
 			case syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM:
 				a.Stop()
@@ -108,19 +106,19 @@ func (a *App) Run() error {
 			})
 		}
 	}
-	if len(a.opts.signals) == 0 {
+	if len(a.opts.sigs) == 0 {
 		return g.Wait()
 	}
-	c := make(chan os.Signal, len(a.opts.signals))
-	signal.Notify(c, a.opts.signals...)
+	c := make(chan os.Signal, len(a.opts.sigs))
+	signal.Notify(c, a.opts.sigs...)
 	g.Go(func() error {
 		for {
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
 			case sig := <-c:
-				if a.opts.signalFn != nil {
-					a.opts.signalFn(a, sig)
+				if a.opts.sigFn != nil {
+					a.opts.sigFn(a, sig)
 				}
 			}
 		}
