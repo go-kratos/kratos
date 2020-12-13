@@ -2,8 +2,6 @@ package transport
 
 import (
 	"context"
-
-	"github.com/go-kratos/kratos/v2/metadata"
 )
 
 // Server is a server interface.
@@ -14,8 +12,7 @@ type Server interface {
 
 // ServerInfo is the server request infomation.
 type ServerInfo interface {
+	Server() interface{}
 	Path() string
 	Method() string
-	ContentType() string
-	Metadata() metadata.MD
 }

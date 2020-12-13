@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 )
 
@@ -64,7 +63,7 @@ func ErrCodecMarshal(message string) error {
 }
 
 // DefaultErrorHandler is default errors handler.
-func DefaultErrorHandler(ctx context.Context, err error, codec encoding.Codec, w http.ResponseWriter) {
+func DefaultErrorHandler(ctx context.Context, err error, codec Codec, w http.ResponseWriter) {
 	se := httpError(err)
 	w.WriteHeader(se.Code)
 	if codec != nil {

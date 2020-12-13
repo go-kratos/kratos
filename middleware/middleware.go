@@ -1,19 +1,13 @@
 package middleware
 
-import "context"
+import (
+	"context"
 
-// Endpoint is the server endpoint.
-type Endpoint func(ctx context.Context, request interface{}) (response interface{}, err error)
+	"github.com/go-kratos/kratos/v2/transport"
+)
 
-// Middleware is transport middleware.
-type Middleware func(Endpoint) Endpoint
+// Handler defines the handler invoked by Middleware.
+type Handler func(ctx context.Context, req interface{}) (interface{}, error)
 
-// Chain is the middleare function for the given pattern.
-func Chain(outer Middleware, others ...Middleware) Middleware {
-	return func(next Endpoint) Endpoint {
-		for i := len(others) - 1; i >= 0; i-- {
-			next = others[i](next)
-		}
-		return outer(next)
-	}
-}
+// Middleware is HTTP/gRPC transport middleware.
+type Middleware func(ctx context.Context, req interface{}, info *transport.ServerInfo, handler Handler) (resp interface{}, err error)

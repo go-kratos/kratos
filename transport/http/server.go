@@ -2,7 +2,7 @@ package http
 
 import (
 	"context"
-	"net"
+	"errors"
 	"net/http"
 
 	"github.com/go-kratos/kratos/v2/transport"
@@ -19,12 +19,11 @@ type Server struct {
 	*http.Server
 
 	router *mux.Router
-
-	opts ServerOptions
+	opts   ServerOptions
 }
 
 // NewServer creates a HTTP server by options.
-func NewServer(opts ...ServerOption) *Server {
+func NewServer(addr string, opts ...ServerOption) *Server {
 	options := ServerOptions{
 		ErrorHandler: DefaultErrorHandler,
 	}
@@ -33,11 +32,12 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 	router := mux.NewRouter()
 	return &Server{
+		opts:   options,
+		router: router,
 		Server: &http.Server{
+			Addr:    addr,
 			Handler: router,
 		},
-		router: router,
-		opts:   options,
 	}
 }
 
@@ -53,14 +53,13 @@ func (s *Server) HandleFunc(path string, h func(http.ResponseWriter, *http.Reque
 
 // Start start the HTTP server.
 func (s *Server) Start(ctx context.Context) error {
-	lis, err := net.Listen("tcp", s.opts.Address)
-	if err != nil {
-		return err
-	}
-	return s.Serve(lis)
+	return s.ListenAndServe()
 }
 
 // Stop stop the HTTP server.
 func (s *Server) Stop(ctx context.Context) error {
-	return s.Shutdown(ctx)
+	if err := s.Shutdown(ctx); !errors.Is(err, http.ErrServerClosed) {
+		return err
+	}
+	return nil
 }
