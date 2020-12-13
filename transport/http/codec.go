@@ -85,7 +85,7 @@ func (v Value) String() string {
 }
 
 // Bool converts.
-func (v Value) Bool(val string) (bool, error) {
+func (v Value) Bool() (bool, error) {
 	return strconv.ParseBool(string(v))
 }
 
