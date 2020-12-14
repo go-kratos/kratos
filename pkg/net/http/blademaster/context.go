@@ -2,14 +2,12 @@ package blademaster
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/pkg/net/metadata"
 	"math"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync"
-	"text/template"
-
-	"github.com/go-kratos/kratos/pkg/net/metadata"
 
 	"github.com/go-kratos/kratos/pkg/ecode"
 	"github.com/go-kratos/kratos/pkg/net/http/blademaster/binding"
@@ -22,11 +20,6 @@ import (
 
 const (
 	_abortIndex int8 = math.MaxInt8 / 2
-)
-
-var (
-	_openParen  = []byte("(")
-	_closeParen = []byte(")")
 )
 
 // Context is the most important part. It allows us to pass variables between
@@ -219,24 +212,11 @@ func (c *Context) Render(code int, r render.Render) {
 		return
 	}
 
-	params := c.Request.Form
-	cb := template.JSEscapeString(params.Get("callback"))
-	jsonp := cb != ""
-	if jsonp {
-		c.Writer.Write([]byte(cb))
-		c.Writer.Write(_openParen)
-	}
-
 	if err := r.Render(c.Writer); err != nil {
 		c.Error = err
 		return
 	}
 
-	if jsonp {
-		if _, err := c.Writer.Write(_closeParen); err != nil {
-			c.Error = errors.WithStack(err)
-		}
-	}
 }
 
 // JSON serializes the given struct as JSON into the response body.
@@ -256,6 +236,35 @@ func (c *Context) JSON(data interface{}, err error) {
 		Code:    bcode.Code(),
 		Message: bcode.Message(),
 		Data:    data,
+	})
+}
+
+// JSONP serializes the given struct as JSON into the response body.
+// It adds padding to response body to request data from a server residing in a different domain than the client.
+// It also sets the Content-Type as "application/javascript".
+func (c *Context) JSONP(data interface{}, err error) {
+	callback := c.Request.Form.Get("callback")
+	if callback == "" {
+		c.JSON(data, err)
+		return
+	}
+	code := http.StatusOK
+	c.Error = err
+	bcode := ecode.Cause(err)
+	// TODO app allow 5xx?
+	/*
+		if bcode.Code() == -500 {
+			code = http.StatusServiceUnavailable
+		}
+	*/
+	writeStatusCode(c.Writer, bcode.Code())
+	c.Render(code, render.JsonpJSON{
+		Data: render.JSON{
+			Code:    bcode.Code(),
+			Message: bcode.Message(),
+			Data:    data,
+		},
+		Callback: callback,
 	})
 }
 
