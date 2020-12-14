@@ -1,14 +1,12 @@
 package config
 
 import (
+	"strings"
+
 	"github.com/ghodss/yaml"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
-	"strings"
 )
-
-
-type Spec interface{}
 
 func ApplyYAML(yml string, pb proto.Message) error {
 	js, err := yaml.YAMLToJSON([]byte(yml))
@@ -17,7 +15,6 @@ func ApplyYAML(yml string, pb proto.Message) error {
 	}
 	return ApplyJSON(string(js), pb)
 }
-
 
 func ApplyJSON(js string, pb proto.Message) error {
 	reader := strings.NewReader(js)
