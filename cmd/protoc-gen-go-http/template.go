@@ -18,12 +18,32 @@ func Register{{.ServiceType}}HTTPServer(s http.ServiceRegistrar, srv {{.ServiceT
 }
 
 {{ range .Methods }}
-func _HTTP_{{.ServiceType}}_{{.Name}}(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
+func _HTTP_{{.ServiceType}}_{{.Name}}(srv interface{}, ctx context.Context, m http.Marshaler) ([]byte, error) {
 	in := new({{.Request}})
-	if err := dec(in); err != nil {
+	if err := m.Unmarshal(in{{.Body}}); err != nil {
 		return nil, err
 	}
-	return srv.({{.ServiceType}}Server).{{.Name}}(ctx, in)
+
+{{ if ne (len .Params) 0 }}
+	var(
+		err error
+		vars = m.PathParams()
+	)
+{{ end }}
+{{ range .Params }}
+
+	{{.ProtoName}}, ok := vars["{{.ProtoName}}"]
+	if !ok {
+		return nil, http.ErrInvalidArgument("missing parameter: {{.ProtoName}}")
+	}
+	in.{{.GoName}} = {{.ProtoName}}
+{{- end }}
+
+	reply, err := srv.({{.ServiceType}}Server).{{.Name}}(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+	return m.Marshal(reply{{.ResponseBody}})
 }
 {{- end }}
 
@@ -35,8 +55,6 @@ var _HTTP_{{.ServiceType}}_serviceDesc = http.ServiceDesc{
 		{
 			Path:    "{{.Path}}",
 			Method:  "{{.Method}}",
-			Body:    "{{.Body}}",
-			ResponseBody: "{{.ResponseBody}}",
 			Handler: _HTTP_{{.ServiceType}}_{{.Name}},
 		},
 {{- end }}
@@ -57,6 +75,7 @@ type methodDesc struct {
 	ServiceType string // Greeter
 	// method
 	Name    string
+	Params  []pathParam
 	Request string
 	Reply   string
 	// http_rule
@@ -64,6 +83,12 @@ type methodDesc struct {
 	Method       string
 	Body         string
 	ResponseBody string
+}
+
+type pathParam struct {
+	GoName    string
+	ProtoName string
+	Type      string
 }
 
 func (s *serviceDesc) execute() string {

@@ -48,6 +48,11 @@ func ErrUnknownCodec(message string) error {
 	return errors.InvalidArgument("Errors_UnknownCodec", message)
 }
 
+// ErrInvalidArgument returns a invalid argument error.
+func ErrInvalidArgument(message string) error {
+	return errors.InvalidArgument("Errors_InvalidArgument", message)
+}
+
 // ErrDataLoss returns a data loss error.
 func ErrDataLoss(message string) error {
 	return errors.InvalidArgument("Errors_DataLoss", message)
