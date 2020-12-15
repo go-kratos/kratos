@@ -32,9 +32,8 @@ func NewServer(addr string, opts ...ServerOption) *Server {
 		opts:        options,
 		middlewares: make(map[interface{}][]middleware.Middleware),
 	}
-	srv.Server = grpc.NewServer(grpc.UnaryInterceptor(srv.interceptor()))
+	srv.Server = grpc.NewServer(append(options.grpcOpts, grpc.UnaryInterceptor(srv.interceptor()))...)
 	return srv
-
 }
 
 func (s *Server) interceptor() grpc.UnaryServerInterceptor {
