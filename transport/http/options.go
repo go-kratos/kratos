@@ -14,7 +14,7 @@ type ServerOptions struct {
 }
 
 // ErrorHandler is encoding an error to the ResponseWriter.
-type ErrorHandler func(ctx context.Context, err error, codec Codec, w http.ResponseWriter)
+type ErrorHandler func(ctx context.Context, err error, m Marshaler, w http.ResponseWriter)
 
 // WithErrorHandler with error handler option.
 func WithErrorHandler(h ErrorHandler) ServerOption {

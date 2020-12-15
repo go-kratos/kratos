@@ -18,15 +18,13 @@ type ServiceDesc struct {
 	Metadata    interface{}
 }
 
-type methodHandler func(srv interface{}, ctx context.Context, c Codec) ([]byte, error)
+type methodHandler func(srv interface{}, ctx context.Context, m Marshaler) ([]byte, error)
 
 // MethodDesc represents a HTTP service's method specification.
 type MethodDesc struct {
-	Path         string
-	Method       string
-	Body         string
-	ResponseBody string
-	Handler      methodHandler
+	Path    string
+	Method  string
+	Handler methodHandler
 }
 
 // RegisterService registers a service and its implementation to the HTTP server.
@@ -53,14 +51,14 @@ func (s *Server) RegisterService(sd *ServiceDesc, ss interface{}) {
 	}
 }
 
-func (s *Server) encodeError(ctx context.Context, err error, codec Codec, res http.ResponseWriter) {
-	s.opts.ErrorHandler(ctx, err, codec, res)
+func (s *Server) encodeError(ctx context.Context, err error, m Marshaler, res http.ResponseWriter) {
+	s.opts.ErrorHandler(ctx, err, m, res)
 }
 
-func (s *Server) encodeResponse(ctx context.Context, out interface{}, codec Codec, res http.ResponseWriter) {
-	body, err := codec.Marshal(out)
+func (s *Server) encodeResponse(ctx context.Context, out interface{}, m Marshaler, res http.ResponseWriter) {
+	body, err := m.Marshal(out)
 	if err != nil {
-		s.encodeError(ctx, ErrCodecMarshal(err.Error()), codec, res)
+		s.encodeError(ctx, ErrCodecMarshal(err.Error()), m, res)
 		return
 	}
 	res.Write(body)

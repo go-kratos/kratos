@@ -26,7 +26,8 @@ var errMapping = map[int]int{
 	16: http.StatusUnauthorized,
 }
 
-func httpError(err error) *errors.StatusError {
+// StatusError converts error to http error.
+func StatusError(err error) *errors.StatusError {
 	se, ok := err.(*errors.StatusError)
 	if !ok {
 		se = &errors.StatusError{
@@ -63,11 +64,11 @@ func ErrCodecMarshal(message string) error {
 }
 
 // DefaultErrorHandler is default errors handler.
-func DefaultErrorHandler(ctx context.Context, err error, codec Codec, w http.ResponseWriter) {
-	se := httpError(err)
+func DefaultErrorHandler(ctx context.Context, err error, m Marshaler, w http.ResponseWriter) {
+	se := StatusError(err)
 	w.WriteHeader(se.Code)
-	if codec != nil {
-		b, _ := codec.Marshal(se)
+	if m != nil {
+		b, _ := m.Marshal(se)
 		w.Write(b)
 	}
 }
