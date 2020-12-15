@@ -9,12 +9,12 @@ import (
 type ServerOption func(o *serverOptions)
 
 type serverOptions struct {
-	grpcOpts    []grpc.ServerOption
-	middlewares []middleware.Middleware
+	grpcOpts   []grpc.ServerOption
+	middleware middleware.Middleware
 }
 
-func ServerMiddleware(m ...middleware.Middleware) ServerOption {
-	return func(o *serverOptions) { o.middlewares = append(o.middlewares, m...) }
+func ServerMiddleware(m middleware.Middleware) ServerOption {
+	return func(o *serverOptions) { o.middleware = m }
 }
 
 func ServerOptions(s ...grpc.ServerOption) ServerOption {

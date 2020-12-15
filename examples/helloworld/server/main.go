@@ -58,7 +58,7 @@ func logger3() middleware.Middleware {
 func main() {
 	s := &server{}
 
-	srv := grpc.NewServer(":9000", grpc.ServerMiddleware(logger(), logger2()))
+	srv := grpc.NewServer(":9000", grpc.ServerMiddleware(middleware.Chain(logger(), logger2())))
 	srv.Use(s, logger3())
 
 	pb.RegisterGreeterServer(srv, s)

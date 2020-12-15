@@ -16,9 +16,9 @@ var _ transport.Server = new(Server)
 type Server struct {
 	*grpc.Server
 
-	addr        string
-	opts        serverOptions
-	middlewares map[interface{}][]middleware.Middleware
+	addr       string
+	opts       serverOptions
+	middleware map[interface{}]middleware.Middleware
 }
 
 // NewServer creates a gRPC server by options.
@@ -28,9 +28,9 @@ func NewServer(addr string, opts ...ServerOption) *Server {
 		o(&options)
 	}
 	srv := &Server{
-		addr:        addr,
-		opts:        options,
-		middlewares: make(map[interface{}][]middleware.Middleware),
+		addr:       addr,
+		opts:       options,
+		middleware: make(map[interface{}]middleware.Middleware),
 	}
 	srv.Server = grpc.NewServer(append(options.grpcOpts, grpc.UnaryInterceptor(srv.interceptor()))...)
 	return srv
@@ -41,19 +41,19 @@ func (s *Server) interceptor() grpc.UnaryServerInterceptor {
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return handler(ctx, req)
 		}
-		for _, m := range s.middlewares[info.Server] {
+		if m, ok := s.middleware[info.Server]; ok {
 			h = m(h)
 		}
-		for _, m := range s.opts.middlewares {
-			h = m(h)
+		if s.opts.middleware != nil {
+			h = s.opts.middleware(h)
 		}
 		return h(ctx, req)
 	}
 }
 
 // Use .
-func (s *Server) Use(srv interface{}, m ...middleware.Middleware) {
-	s.middlewares[srv] = append(s.middlewares[srv], m...)
+func (s *Server) Use(srv interface{}, m middleware.Middleware) {
+	s.middleware[srv] = m
 }
 
 // Start start the gRPC server.
