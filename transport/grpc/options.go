@@ -1,15 +1,14 @@
 package grpc
 
+import "github.com/go-kratos/kratos/v2/middleware"
+
 // ServerOption is gRPC server option.
 type ServerOption func(o *serverOptions)
 
 type serverOptions struct {
-	Address string
+	middlewares []middleware.Middleware
 }
 
-// WithAddress is bind address option.
-func WithAddress(a string) ServerOption {
-	return func(o *serverOptions) {
-		o.Address = a
-	}
+func ServerMiddleware(m ...middleware.Middleware) ServerOption {
+	return func(o *serverOptions) { o.middlewares = append(o.middlewares, m...) }
 }
