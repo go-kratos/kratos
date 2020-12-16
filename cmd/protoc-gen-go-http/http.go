@@ -65,7 +65,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 			responseBody string
 		)
 		rule, ok := proto.GetExtension(m.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
-		if ok {
+		if rule != nil && ok {
 			switch pattern := rule.Pattern.(type) {
 			case *annotations.HttpRule_Get:
 				path = pattern.Get

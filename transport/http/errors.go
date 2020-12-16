@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -74,6 +75,9 @@ func DefaultErrorHandler(ctx context.Context, err error, m Marshaler, w http.Res
 	w.WriteHeader(se.Code)
 	if m != nil {
 		b, _ := m.Marshal(se)
+		w.Write(b)
+	} else {
+		b, _ := json.Marshal(se)
 		w.Write(b)
 	}
 }

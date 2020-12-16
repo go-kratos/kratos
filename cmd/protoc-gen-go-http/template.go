@@ -18,7 +18,7 @@ func Register{{.ServiceType}}HTTPServer(s http.ServiceRegistrar, srv {{.ServiceT
 }
 
 {{ range .Methods }}
-func _HTTP_{{.ServiceType}}_{{.Name}}(srv interface{}, ctx context.Context, m http.Marshaler) ([]byte, error) {
+func _HTTP_{{.ServiceType}}_{{.Name}}(srv interface{}, ctx context.Context, m http.Marshaler) (interface{}, error) {
 	in := new({{.Request}})
 	if err := m.Unmarshal(in{{.Body}}); err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func _HTTP_{{.ServiceType}}_{{.Name}}(srv interface{}, ctx context.Context, m ht
 	if err != nil {
 		return nil, err
 	}
-	return m.Marshal(reply{{.ResponseBody}})
+	return reply{{.ResponseBody}}, nil
 }
 {{- end }}
 

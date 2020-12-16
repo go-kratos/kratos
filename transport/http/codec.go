@@ -3,7 +3,6 @@ package http
 import (
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/encoding"
@@ -84,23 +83,4 @@ func (c *codec) Unmarshal(v interface{}) error {
 		return ErrCodecUnmarshal(err.Error())
 	}
 	return nil
-}
-
-// Bool converts.
-func Bool(val string) (bool, error) {
-	return strconv.ParseBool(val)
-}
-
-// Float64 converts.
-func Float64(val string) (float64, error) {
-	return strconv.ParseFloat(val, 64)
-}
-
-// Float32 converts.
-func Float32(val string) (float32, error) {
-	f, err := strconv.ParseFloat(val, 32)
-	if err != nil {
-		return 0, err
-	}
-	return float32(f), nil
 }

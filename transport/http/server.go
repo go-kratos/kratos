@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/gorilla/mux"
 )
@@ -18,14 +19,15 @@ var _ transport.Server = new(Server)
 type Server struct {
 	*http.Server
 
-	router *mux.Router
-	opts   ServerOptions
+	router      *mux.Router
+	opts        serverOptions
+	middlewares map[interface{}]middleware.Middleware
 }
 
 // NewServer creates a HTTP server by options.
 func NewServer(addr string, opts ...ServerOption) *Server {
-	options := ServerOptions{
-		ErrorHandler: DefaultErrorHandler,
+	options := serverOptions{
+		errorHandler: DefaultErrorHandler,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -38,7 +40,12 @@ func NewServer(addr string, opts ...ServerOption) *Server {
 			Addr:    addr,
 			Handler: router,
 		},
+		middlewares: make(map[interface{}]middleware.Middleware),
 	}
+}
+
+func (s *Server) Use(srv interface{}, m middleware.Middleware) {
+	s.middlewares[srv] = m
 }
 
 // Handle registers a new route with a matcher for the URL path.
