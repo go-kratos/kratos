@@ -65,9 +65,9 @@ func main() {
 	s := &server{}
 	app := kratos.New()
 
-	httpSrv := http.NewServer(":8000", http.ServerMiddleware(middleware.Chain(logger(), logger2())))
+	httpSrv := http.NewServer("tcp", ":8000", http.ServerMiddleware(middleware.Chain(logger(), logger2())))
 	httpSrv.Use(s, logger3())
-	grpcSrv := grpc.NewServer(":9000", grpc.ServerMiddleware(middleware.Chain(logger(), logger2())))
+	grpcSrv := grpc.NewServer("tcp", ":9000", grpc.ServerMiddleware(middleware.Chain(logger(), logger2())))
 	grpcSrv.Use(s, logger3())
 
 	pb.RegisterGreeterServer(grpcSrv, s)

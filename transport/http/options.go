@@ -14,6 +14,8 @@ type ServerOption func(o *serverOptions)
 type serverOptions struct {
 	errorHandler ErrorHandler
 	middleware   middleware.Middleware
+	certFile     string
+	keyFile      string
 }
 
 // ErrorHandler is encoding an error to the ResponseWriter.
@@ -28,4 +30,11 @@ func WithErrorHandler(h ErrorHandler) ServerOption {
 
 func ServerMiddleware(m middleware.Middleware) ServerOption {
 	return func(o *serverOptions) { o.middleware = m }
+}
+
+func ServerTLSCert(certFile, keyFile string) ServerOption {
+	return func(o *serverOptions) {
+		o.certFile = certFile
+		o.keyFile = keyFile
+	}
 }

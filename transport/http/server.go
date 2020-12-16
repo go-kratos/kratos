@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"errors"
+	"net"
 	"net/http"
 
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -19,13 +20,15 @@ var _ transport.Server = new(Server)
 type Server struct {
 	*http.Server
 
+	network     string
+	addr        string
 	router      *mux.Router
 	opts        serverOptions
 	middlewares map[interface{}]middleware.Middleware
 }
 
 // NewServer creates a HTTP server by options.
-func NewServer(addr string, opts ...ServerOption) *Server {
+func NewServer(network, addr string, opts ...ServerOption) *Server {
 	options := serverOptions{
 		errorHandler: DefaultErrorHandler,
 	}
@@ -34,16 +37,18 @@ func NewServer(addr string, opts ...ServerOption) *Server {
 	}
 	router := mux.NewRouter()
 	return &Server{
-		opts:   options,
-		router: router,
+		network: network,
+		addr:    addr,
+		opts:    options,
+		router:  router,
 		Server: &http.Server{
-			Addr:    addr,
 			Handler: router,
 		},
 		middlewares: make(map[interface{}]middleware.Middleware),
 	}
 }
 
+// Use .
 func (s *Server) Use(srv interface{}, m middleware.Middleware) {
 	s.middlewares[srv] = m
 }
@@ -60,7 +65,14 @@ func (s *Server) HandleFunc(path string, h func(http.ResponseWriter, *http.Reque
 
 // Start start the HTTP server.
 func (s *Server) Start(ctx context.Context) error {
-	return s.ListenAndServe()
+	lis, err := net.Listen(s.network, s.addr)
+	if err != nil {
+		return err
+	}
+	if s.opts.certFile != "" && s.opts.keyFile != "" {
+		return s.ServeTLS(lis, s.opts.certFile, s.opts.keyFile)
+	}
+	return s.Serve(lis)
 }
 
 // Stop stop the HTTP server.
