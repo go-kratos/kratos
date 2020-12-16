@@ -27,7 +27,7 @@ func NewServer(opts ...ServerOption) *Server {
 	return srv
 }
 
-// ServeGRPC .
+// ServeGRPC returns a unary server interceptor.
 func (s *Server) ServeGRPC() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -43,7 +43,7 @@ func (s *Server) ServeGRPC() grpc.UnaryServerInterceptor {
 	}
 }
 
-// Use .
-func (s *Server) Use(srv interface{}, m middleware.Middleware) {
-	s.middlewares[srv] = m
+// Use use a middleware to the transport.
+func (s *Server) Use(srv interface{}, m ...middleware.Middleware) {
+	s.middlewares[srv] = middleware.Chain(m[0], m[1:]...)
 }

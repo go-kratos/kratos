@@ -56,9 +56,9 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 }
 
-// Use .
-func (s *Server) Use(srv interface{}, m middleware.Middleware) {
-	s.middlewares[srv] = m
+// Use use a middleware to the transport.
+func (s *Server) Use(srv interface{}, m ...middleware.Middleware) {
+	s.middlewares[srv] = middleware.Chain(m[0], m[1:]...)
 }
 
 // Handle registers a new route with a matcher for the URL path.
