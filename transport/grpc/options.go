@@ -12,6 +12,8 @@ type serverOptions struct {
 }
 
 // ServerMiddleware .
-func ServerMiddleware(m middleware.Middleware) ServerOption {
-	return func(o *serverOptions) { o.middleware = m }
+func ServerMiddleware(m ...middleware.Middleware) ServerOption {
+	return func(o *serverOptions) {
+		o.middleware = middleware.Chain(m[0], m[1:]...)
+	}
 }

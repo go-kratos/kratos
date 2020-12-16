@@ -22,7 +22,7 @@ type serverOptions struct {
 type errorHandler func(ctx context.Context, err error, m Marshaler, w http.ResponseWriter)
 
 // ResponseHandler is encoding an data to the ResponseWriter.
-type responseHandler func(ctx context.Context, out interface{}, m Marshaler, w http.ResponseWriter) error
+type responseHandler func(ctx context.Context, out interface{}, m Marshaler, w http.ResponseWriter)
 
 // ErrorHandler with error handler option.
 func ErrorHandler(h errorHandler) ServerOption {
@@ -39,8 +39,10 @@ func ResponseHandler(h responseHandler) ServerOption {
 }
 
 // ServerMiddleware .
-func ServerMiddleware(m middleware.Middleware) ServerOption {
-	return func(o *serverOptions) { o.middleware = m }
+func ServerMiddleware(m ...middleware.Middleware) ServerOption {
+	return func(o *serverOptions) {
+		o.middleware = middleware.Chain(m[0], m[1:]...)
+	}
 }
 
 // DefaultErrorHandler is default errors handler.
@@ -57,11 +59,12 @@ func DefaultErrorHandler(ctx context.Context, err error, m Marshaler, w http.Res
 }
 
 // DefaultResponseHandler is default response handler.
-func DefaultResponseHandler(ctx context.Context, out interface{}, m Marshaler, w http.ResponseWriter) error {
+func DefaultResponseHandler(ctx context.Context, out interface{}, m Marshaler, w http.ResponseWriter) {
 	data, err := m.Marshal(out)
 	if err != nil {
-		return err
+		DefaultErrorHandler(ctx, err, m, w)
+		return
 	}
 	_, err = w.Write(data)
-	return err
+	return
 }

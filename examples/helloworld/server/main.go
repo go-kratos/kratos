@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net"
-	"net/http"
 
 	"github.com/go-kratos/kratos/v2"
 	pb "github.com/go-kratos/kratos/v2/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2/middleware"
+	servergrpc "github.com/go-kratos/kratos/v2/server/grpc"
+	serverhttp "github.com/go-kratos/kratos/v2/server/http"
 	transportgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	transporthttp "github.com/go-kratos/kratos/v2/transport/http"
 
@@ -69,41 +69,20 @@ func main() {
 	s := &server{}
 	app := kratos.New()
 
-	httpSrv := transporthttp.NewServer(transporthttp.ServerMiddleware(middleware.Chain(logger(), logger2())))
-	httpSrv.Use(s, logger3())
+	httpTransport := transporthttp.NewServer(transporthttp.ServerMiddleware(logger()))
+	httpTransport.Use(s, logger3())
 
-	grpcSrv := transportgrpc.NewServer(transportgrpc.ServerMiddleware(middleware.Chain(logger(), logger2())))
-	grpcSrv.Use(s, logger3())
+	grpcTransport := transportgrpc.NewServer(transportgrpc.ServerMiddleware(logger(), logger2()))
+	grpcTransport.Use(s, logger3())
 
-	baseHTTPServer := &http.Server{Addr: ":8000", Handler: httpSrv}
-	baseGRPCServer := grpc.NewServer(grpc.UnaryInterceptor(grpcSrv.ServeGRPC()))
-	app.Append(kratos.Hook{
-		OnStart: func(ctx context.Context) error {
-			lis, err := net.Listen("tcp", ":9000")
-			if err != nil {
-				return err
-			}
-			pb.RegisterGreeterHTTPServer(httpSrv, s)
-			return baseHTTPServer.Serve(lis)
-		},
-		OnStop: func(ctx context.Context) error {
-			return baseHTTPServer.Shutdown(ctx)
-		},
-	})
-	app.Append(kratos.Hook{
-		OnStart: func(ctx context.Context) error {
-			lis, err := net.Listen("tcp", ":9000")
-			if err != nil {
-				return err
-			}
-			pb.RegisterGreeterServer(baseGRPCServer, s)
-			return baseGRPCServer.Serve(lis)
-		},
-		OnStop: func(ctx context.Context) error {
-			baseGRPCServer.GracefulStop()
-			return nil
-		},
-	})
+	httpServer := serverhttp.NewServer("tcp", ":8000", serverhttp.ServerHandler(httpTransport))
+	grpcServer := servergrpc.NewServer("tcp", ":9000", grpc.UnaryInterceptor(grpcTransport.ServeGRPC()))
+
+	pb.RegisterGreeterServer(grpcServer, s)
+	pb.RegisterGreeterHTTPServer(httpTransport, s)
+
+	app.Append(kratos.Hook{OnStart: httpServer.Start, OnStop: httpServer.Stop})
+	app.Append(kratos.Hook{OnStart: grpcServer.Start, OnStop: grpcServer.Stop})
 
 	if err := app.Run(); err != nil {
 		log.Println(err)

@@ -1,4 +1,4 @@
-package transport
+package server
 
 import (
 	"context"
