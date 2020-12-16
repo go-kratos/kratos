@@ -8,7 +8,7 @@ import (
 const (
 	// UnknownReason is unknown reason for error info.
 	UnknownReason = ""
-	// SupportPackageIsVersion1 These constants should not be referenced from any other code.
+	// SupportPackageIsVersion1 this constant should not be referenced by any other code.
 	SupportPackageIsVersion1 = true
 )
 
@@ -38,7 +38,7 @@ func (e *StatusError) WithDetails(details ...interface{}) {
 	e.Details = append(e.Details, details...)
 }
 
-// Is each error in a chain for a match with a target value.
+// Is matches each error in the chain with the target value.
 func (e *StatusError) Is(target error) bool {
 	err, ok := target.(*StatusError)
 	if ok {
