@@ -1,4 +1,4 @@
-package kratos
+package http
 
 import (
 	"fmt"
