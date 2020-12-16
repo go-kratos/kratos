@@ -1,8 +1,6 @@
 package http
 
 import (
-	"context"
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -67,17 +65,4 @@ func ErrCodecUnmarshal(message string) error {
 // ErrCodecMarshal returns a codec marshal error.
 func ErrCodecMarshal(message string) error {
 	return errors.InvalidArgument("Errors_CodecMarshal", message)
-}
-
-// DefaultErrorHandler is default errors handler.
-func DefaultErrorHandler(ctx context.Context, err error, m Marshaler, w http.ResponseWriter) {
-	se := StatusError(err)
-	w.WriteHeader(se.Code)
-	if m != nil {
-		b, _ := m.Marshal(se)
-		w.Write(b)
-	} else {
-		b, _ := json.Marshal(se)
-		w.Write(b)
-	}
 }

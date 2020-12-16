@@ -2,48 +2,56 @@ package http
 
 import (
 	"context"
-	"errors"
-	"net"
 	"net/http"
 
 	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/gorilla/mux"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
 const SupportPackageIsVersion1 = true
 
-var _ transport.Server = new(Server)
+// ServiceRegistrar wraps a single method that supports service registration.
+type ServiceRegistrar interface {
+	RegisterService(desc *ServiceDesc, impl interface{})
+}
+
+// ServiceDesc represents a HTTP service's specification.
+type ServiceDesc struct {
+	ServiceName string
+	HandlerType interface{}
+	Methods     []MethodDesc
+	Metadata    interface{}
+}
+
+type methodHandler func(srv interface{}, ctx context.Context, m Marshaler) (interface{}, error)
+
+// MethodDesc represents a HTTP service's method specification.
+type MethodDesc struct {
+	Path    string
+	Method  string
+	Handler methodHandler
+}
 
 // Server is a HTTP server wrapper.
 type Server struct {
-	*http.Server
-
-	network     string
-	addr        string
 	router      *mux.Router
 	opts        serverOptions
 	middlewares map[interface{}]middleware.Middleware
 }
 
 // NewServer creates a HTTP server by options.
-func NewServer(network, addr string, opts ...ServerOption) *Server {
+func NewServer(opts ...ServerOption) *Server {
 	options := serverOptions{
-		errorHandler: DefaultErrorHandler,
+		errorHandler:    DefaultErrorHandler,
+		responseHandler: DefaultResponseHandler,
 	}
 	for _, o := range opts {
 		o(&options)
 	}
-	router := mux.NewRouter()
 	return &Server{
-		network: network,
-		addr:    addr,
-		opts:    options,
-		router:  router,
-		Server: &http.Server{
-			Handler: router,
-		},
+		opts:        options,
+		router:      mux.NewRouter(),
 		middlewares: make(map[interface{}]middleware.Middleware),
 	}
 }
@@ -63,22 +71,45 @@ func (s *Server) HandleFunc(path string, h func(http.ResponseWriter, *http.Reque
 	s.router.HandleFunc(path, h)
 }
 
-// Start start the HTTP server.
-func (s *Server) Start(ctx context.Context) error {
-	lis, err := net.Listen(s.network, s.addr)
-	if err != nil {
-		return err
-	}
-	if s.opts.certFile != "" && s.opts.keyFile != "" {
-		return s.ServeTLS(lis, s.opts.certFile, s.opts.keyFile)
-	}
-	return s.Serve(lis)
+// ServeHTTP should write reply headers and data to the ResponseWriter and then return.
+func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	s.router.ServeHTTP(res, req)
 }
 
-// Stop stop the HTTP server.
-func (s *Server) Stop(ctx context.Context) error {
-	if err := s.Shutdown(ctx); !errors.Is(err, http.ErrServerClosed) {
-		return err
+// RegisterService registers a service and its implementation to the HTTP server.
+func (s *Server) RegisterService(sd *ServiceDesc, ss interface{}) {
+	for _, method := range sd.Methods {
+		s.registerHandle(ss, method)
 	}
-	return nil
+}
+
+func (s *Server) registerHandle(srv interface{}, md MethodDesc) {
+	s.router.HandleFunc(md.Path, func(res http.ResponseWriter, req *http.Request) {
+
+		ctx := req.Context()
+		m, err := codecForReq(req)
+		if err != nil {
+			s.opts.errorHandler(ctx, err, m, res)
+			return
+		}
+
+		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return md.Handler(srv, ctx, m)
+		}
+		if m, ok := s.middlewares[srv]; ok {
+			handler = m(handler)
+		}
+		if s.opts.middleware != nil {
+			handler = s.opts.middleware(handler)
+		}
+
+		reply, err := handler(ctx, req)
+		if err != nil {
+			s.opts.errorHandler(ctx, err, m, res)
+			return
+		}
+
+		s.opts.responseHandler(ctx, reply, m, res)
+
+	}).Methods(md.Method)
 }
