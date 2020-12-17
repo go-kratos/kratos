@@ -18,7 +18,7 @@ timeout: 99
 		panic(err)
 	}
 
-	x, err := New(c.Address, c.Options()...)
+	x, err := New(c.Address, ApplyOptions(c)...)
 	if err != nil {
 		panic(err)
 	}

@@ -1,53 +1,50 @@
 package example
 
-import "github.com/golang/protobuf/ptypes/wrappers"
+type Option func(*exampleOptions) error
 
-type Option func(e *ExampleClient) error
-
-func (c *ExampleConfig) Options() []Option {
-	return []Option{
-		ApplyPassword(c.Password),
-		ApplyTimeout(c.Timeout),
-	}
-}
-
-type ExampleClient struct {
-	addr     string
+type exampleOptions struct {
 	password string
 	timeout  int64
 }
 
-func ApplyPassword(v *wrappers.StringValue) func(e *ExampleClient) error {
-	return func(e *ExampleClient) error {
-		if v != nil {
-			e.password = v.Value
-		} else {
-			e.password = "dangerous"
-		}
-		return nil
-	}
+var defaultExampleOptions = exampleOptions{
+	password: "dangerous",
+	timeout:  100,
 }
 
-func ApplyTimeout(v *wrappers.Int64Value) func(e *ExampleClient) error {
-	return func(e *ExampleClient) error {
-		if v != nil {
-			e.timeout = v.Value
-		} else {
-			e.timeout = 1000
-		}
-		return nil
+func ApplyOptions(c *ExampleConfig) []Option {
+	opts := make([]Option, 0)
+	if c.Password != nil {
+		opts = append(opts, func(o *exampleOptions) error {
+			o.password = c.Password.Value
+			return nil
+		})
 	}
+	if c.Timeout != nil {
+		opts = append(opts, func(o *exampleOptions) error {
+			o.timeout = c.Timeout.Value
+			return nil
+		})
+	}
+	return opts
+}
+
+type ExampleClient struct {
+	addr string
+	opts exampleOptions
 }
 
 func New(addr string, options ...Option) (*ExampleClient, error) {
 	e := &ExampleClient{
 		addr: addr,
 	}
-	for _, opt := range options {
-		err := opt(e)
+	opts := defaultExampleOptions
+	for _, o := range options {
+		err := o(&opts)
 		if err != nil {
 			panic(err)
 		}
 	}
+	e.opts = opts
 	return e, nil
 }
