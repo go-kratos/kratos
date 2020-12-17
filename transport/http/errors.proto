@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package google.rpc;
+package kratos.errors;
 
 import "google/protobuf/any.proto";
 

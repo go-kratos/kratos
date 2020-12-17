@@ -4,6 +4,8 @@ package helloworld
 
 import (
 	context "context"
+
+	"github.com/go-kratos/kratos/v2/errors"
 	http "github.com/go-kratos/kratos/v2/transport/http"
 )
 
@@ -33,7 +35,7 @@ func _HTTP_Greeter_SayHello(srv interface{}, ctx context.Context, m http.Marshal
 
 	name, ok := vars["name"]
 	if !ok {
-		return nil, http.ErrInvalidArgument("missing parameter: name")
+		return nil, errors.InvalidArgument("Errors_InvalidArgument", "missing parameter: name")
 	}
 	in.Name = name
 

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/gorilla/mux"
 )
 
@@ -34,7 +35,7 @@ func codecForReq(req *http.Request) (Marshaler, error) {
 	contentType := req.Header.Get("content-type")
 	cc := encoding.GetCodec(contentSubtype(contentType))
 	if cc == nil {
-		return nil, ErrUnknownCodec(contentType)
+		return nil, errors.InvalidArgument("Errors_UnknownCodec", contentType)
 	}
 	return &codec{codec: cc, req: req}, nil
 }
@@ -68,7 +69,7 @@ func (c *codec) Marshal(v interface{}) ([]byte, error) {
 func (c *codec) ReadBody() ([]byte, error) {
 	data, err := ioutil.ReadAll(c.req.Body)
 	if err != nil {
-		return nil, ErrDataLoss(err.Error())
+		return nil, errors.DataLoss("Errors_DataLoss", err.Error())
 	}
 	defer c.req.Body.Close()
 	return data, nil
@@ -80,7 +81,7 @@ func (c *codec) Unmarshal(v interface{}) error {
 		return err
 	}
 	if err = c.codec.Unmarshal(data, v); err != nil {
-		return ErrCodecUnmarshal(err.Error())
+		return errors.InvalidArgument("Errors_CodecUnmarshal", err.Error())
 	}
 	return nil
 }
