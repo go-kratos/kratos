@@ -13,32 +13,32 @@ type ServerOption func(o *serverOptions)
 
 // serverOptions is HTTP server options.
 type serverOptions struct {
-	errorHandler    errorHandler
-	responseHandler responseHandler
+	errorHandler    ErrorHandler
+	responseHandler ResponseHandler
 	middleware      middleware.Middleware
 }
 
 // ErrorHandler is encoding an error to the ResponseWriter.
-type errorHandler func(ctx context.Context, err error, m Marshaler, w http.ResponseWriter)
+type ErrorHandler func(ctx context.Context, err error, m Marshaler, w http.ResponseWriter)
 
 // ResponseHandler is encoding an data to the ResponseWriter.
-type responseHandler func(ctx context.Context, out interface{}, m Marshaler, w http.ResponseWriter)
+type ResponseHandler func(ctx context.Context, out interface{}, m Marshaler, w http.ResponseWriter)
 
-// ErrorHandler with error handler option.
-func ErrorHandler(h errorHandler) ServerOption {
+// ServerErrorHandler with error handler option.
+func ServerErrorHandler(h ErrorHandler) ServerOption {
 	return func(o *serverOptions) {
 		o.errorHandler = h
 	}
 }
 
-// ResponseHandler with error handler option.
-func ResponseHandler(h responseHandler) ServerOption {
+// ServerResponseHandler with error handler option.
+func ServerResponseHandler(h ResponseHandler) ServerOption {
 	return func(o *serverOptions) {
 		o.responseHandler = h
 	}
 }
 
-// ServerMiddleware .
+// ServerMiddleware with server middleware option.
 func ServerMiddleware(m ...middleware.Middleware) ServerOption {
 	return func(o *serverOptions) {
 		o.middleware = middleware.Chain(m[0], m[1:]...)

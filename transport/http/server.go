@@ -90,14 +90,14 @@ func (s *Server) registerHandle(srv interface{}, md MethodDesc) {
 	s.router.HandleFunc(md.Path, func(res http.ResponseWriter, req *http.Request) {
 
 		ctx := req.Context()
-		m, err := codecForReq(req)
+		codec, err := codecForReq(req)
 		if err != nil {
-			s.opts.errorHandler(ctx, err, m, res)
+			s.opts.errorHandler(ctx, err, codec, res)
 			return
 		}
 
 		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return md.Handler(srv, ctx, m)
+			return md.Handler(srv, ctx, codec)
 		}
 		if m, ok := s.middlewares[srv]; ok {
 			handler = m(handler)
@@ -108,11 +108,11 @@ func (s *Server) registerHandle(srv interface{}, md MethodDesc) {
 
 		reply, err := handler(ctx, req)
 		if err != nil {
-			s.opts.errorHandler(ctx, err, m, res)
+			s.opts.errorHandler(ctx, err, codec, res)
 			return
 		}
 
-		s.opts.responseHandler(ctx, reply, m, res)
+		s.opts.responseHandler(ctx, reply, codec, res)
 
 	}).Methods(md.Method)
 }

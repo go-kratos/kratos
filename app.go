@@ -10,6 +10,12 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// Lifecycle is component lifecycle.
+type Lifecycle interface {
+	Start(context.Context) error
+	Stop(context.Context) error
+}
+
 // Hook is a pair of start and stop callbacks.
 type Hook struct {
 	OnStart func(context.Context) error
@@ -78,8 +84,20 @@ func New(opts ...Option) *App {
 	return &App{opts: options}
 }
 
-// Append register callbacks that are executed on application start and stop.
-func (a *App) Append(hook Hook) {
+// Append register interface that are executed on application start and stop.
+func (a *App) Append(lc Lifecycle) {
+	a.hooks = append(a.hooks, Hook{
+		OnStart: func(ctx context.Context) error {
+			return lc.Start(ctx)
+		},
+		OnStop: func(ctx context.Context) error {
+			return lc.Stop(ctx)
+		},
+	})
+}
+
+// AppendHook register callbacks that are executed on application start and stop.
+func (a *App) AppendHook(hook Hook) {
 	a.hooks = append(a.hooks, hook)
 }
 

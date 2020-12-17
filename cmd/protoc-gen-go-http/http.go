@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	annotations "github.com/go-kratos/kratos/v2/api/google/api"
+	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"

@@ -15,9 +15,6 @@ import (
 	transporthttp "github.com/go-kratos/kratos/v2/transport/http"
 
 	"google.golang.org/grpc"
-
-	_ "github.com/go-kratos/kratos/v2/encoding/json"
-	_ "github.com/go-kratos/kratos/v2/encoding/proto"
 )
 
 // server is used to implement helloworld.GreeterServer.
@@ -72,8 +69,6 @@ func logger3() middleware.Middleware {
 				fmt.Printf("grpc: %s\n", g.FullMethod)
 			}
 
-			fmt.Println("111")
-
 			return handler(ctx, req)
 		}
 	}
@@ -83,7 +78,7 @@ func main() {
 	s := &server{}
 	app := kratos.New()
 
-	httpTransport := transporthttp.NewServer(transporthttp.ServerMiddleware(logger()))
+	httpTransport := transporthttp.NewServer(transporthttp.ServerMiddleware(logger(), logger2()))
 	httpTransport.Use(s, logger3())
 
 	grpcTransport := transportgrpc.NewServer(transportgrpc.ServerMiddleware(logger(), logger2()))
@@ -95,8 +90,8 @@ func main() {
 	pb.RegisterGreeterServer(grpcServer, s)
 	pb.RegisterGreeterHTTPServer(httpTransport, s)
 
-	app.Append(kratos.Hook{OnStart: httpServer.Start, OnStop: httpServer.Stop})
-	app.Append(kratos.Hook{OnStart: grpcServer.Start, OnStop: grpcServer.Stop})
+	app.Append(httpServer)
+	app.Append(grpcServer)
 
 	if err := app.Run(); err != nil {
 		log.Println(err)

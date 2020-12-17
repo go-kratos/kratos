@@ -3,6 +3,8 @@ package http
 import (
 	"context"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // ServerInfo is HTTP server infomation.
@@ -22,4 +24,9 @@ func NewContext(ctx context.Context, s ServerInfo) context.Context {
 func FromContext(ctx context.Context) (s ServerInfo, ok bool) {
 	s, ok = ctx.Value(serverKey{}).(ServerInfo)
 	return
+}
+
+// PathParams returns path parameters.
+func PathParams(req *http.Request) map[string]string {
+	return mux.Vars(req)
 }

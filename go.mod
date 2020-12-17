@@ -8,6 +8,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
+	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
 	google.golang.org/grpc v1.33.2
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect

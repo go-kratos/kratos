@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -40,6 +41,11 @@ func StatusError(err error) *errors.StatusError {
 		se.Code = http.StatusInternalServerError
 	}
 	return se
+}
+
+// NewInvalidArgument returns a invalid argument error.
+func NewInvalidArgument(format string, a ...string) error {
+	return errors.InvalidArgument("Errors_InvalidArgument", fmt.Sprintf(format, a))
 }
 
 // ErrUnknownCodec returns a unknown codec error.

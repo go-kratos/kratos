@@ -19,7 +19,7 @@ package google.api;
 import "google/api/http.proto";
 import "google/protobuf/descriptor.proto";
 
-option go_package = "github.com/go-kratos/kratos/v2/api/google/api;annotations";
+option go_package = "google.golang.org/genproto/googleapis/api/annotations;annotations";
 option java_multiple_files = true;
 option java_outer_classname = "AnnotationsProto";
 option java_package = "com.google.api";
