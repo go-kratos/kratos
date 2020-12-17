@@ -26,6 +26,17 @@ func _HTTP_Greeter_SayHello(srv interface{}, ctx context.Context, m http.Marshal
 		return nil, err
 	}
 
+	var (
+		err  error
+		vars = m.PathParams()
+	)
+
+	name, ok := vars["name"]
+	if !ok {
+		return nil, http.ErrInvalidArgument("missing parameter: name")
+	}
+	in.Name = name
+
 	reply, err := srv.(GreeterServer).SayHello(ctx, in)
 	if err != nil {
 		return nil, err
@@ -39,8 +50,8 @@ var _HTTP_Greeter_serviceDesc = http.ServiceDesc{
 	Methods: []http.MethodDesc{
 
 		{
-			Path:    "/helloworld.Greeter/SayHello",
-			Method:  "POST",
+			Path:    "/helloworld/{name}",
+			Method:  "GET",
 			Handler: _HTTP_Greeter_SayHello,
 		},
 	},

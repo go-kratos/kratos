@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/go-kratos/kratos/v2/middleware"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 // ServerOption is HTTP server option.
@@ -47,10 +49,23 @@ func ServerMiddleware(m ...middleware.Middleware) ServerOption {
 
 // DefaultErrorHandler is default errors handler.
 func DefaultErrorHandler(ctx context.Context, err error, m Marshaler, w http.ResponseWriter) {
-	se := StatusError(err)
-	w.WriteHeader(se.Code)
+	se, code := StatusError(err)
+	w.WriteHeader(code)
+	e := &Error{
+		Error: &Error_Status{
+			Code:    se.Code,
+			Message: se.Message,
+		},
+	}
+	for _, detail := range se.Details {
+		if msg, ok := detail.(proto.Message); ok {
+			if any, err := anypb.New(msg); err == nil {
+				e.Error.Details = append(e.Error.Details, any)
+			}
+		}
+	}
 	if m != nil {
-		b, _ := m.Marshal(se)
+		b, _ := m.Marshal(e)
 		w.Write(b)
 	} else {
 		b, _ := json.Marshal(se)

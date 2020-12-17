@@ -7,7 +7,7 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 )
 
-var errMapping = map[int]int{
+var errMapping = map[int32]int{
 	0:  http.StatusOK,
 	1:  http.StatusInternalServerError,
 	2:  http.StatusInternalServerError,
@@ -27,7 +27,7 @@ var errMapping = map[int]int{
 }
 
 // StatusError converts error to http error.
-func StatusError(err error) *errors.StatusError {
+func StatusError(err error) (*errors.StatusError, int) {
 	se, ok := err.(*errors.StatusError)
 	if !ok {
 		se = &errors.StatusError{
@@ -36,11 +36,9 @@ func StatusError(err error) *errors.StatusError {
 		}
 	}
 	if code, ok := errMapping[se.Code]; ok {
-		se.Code = code
-	} else {
-		se.Code = http.StatusInternalServerError
+		return se, code
 	}
-	return se
+	return se, http.StatusInternalServerError
 }
 
 // NewInvalidArgument returns a invalid argument error.

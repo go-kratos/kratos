@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package kratos.errors;
+
+option go_package = "github.com/go-kratos/kratos/v2/errors;errors";
+option java_multiple_files = true;
+option java_outer_classname = "ErrorsProto";
+option java_package = "dev.kratos.api";
+option objc_class_prefix = "Errors";
+
+// ErrorItem is a detailed error code & message from the API frontend.
+message ErrorItem {
+	// Reason is the typed error code. For example: "some_example".
+    string reason = 1;
+	// Message is the human-readable description of the error.
+    string message = 2;
+}

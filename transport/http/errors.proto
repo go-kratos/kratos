@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package google.rpc;
+
+import "google/protobuf/any.proto";
+
+option go_package = "github.com/go-kratos/kratos/v2/transport/http;http";
+option java_multiple_files = true;
+option java_outer_classname = "ErrorsProto";
+option java_package = "dev.kratos.api";
+option objc_class_prefix = "Errors";
+
+// The error schema for Google REST APIs. NOTE: this schema is not used for
+// other wire protocols.
+message Error {
+  // This message has the same semantics as `google.rpc.Status`. It has an extra
+  // field `status` for backward compatibility with Google API Client Library.
+  message Status {
+    // This corresponds to `google.rpc.Status.code`.
+    int32 code = 1;
+    // This corresponds to `google.rpc.Status.message`.
+    string message = 2;
+    // This corresponds to `google.rpc.Status.details`.
+    repeated google.protobuf.Any details = 3;
+  }
+  // The actual error payload. The nested message structure is for backward
+  // compatibility with Google API client libraries. It also makes the error
+  // more readable to developers.
+  Status error = 1;
+}
