@@ -10,8 +10,8 @@ option objc_class_prefix = "Errors";
 
 // ErrorItem is a detailed error code & message from the API frontend.
 message ErrorItem {
-	// Reason is the typed error code. For example: "some_example".
+    // Reason is the typed error code. For example: "some_example".
     string reason = 1;
-	// Message is the human-readable description of the error.
+    // Message is the human-readable description of the error.
     string message = 2;
 }
