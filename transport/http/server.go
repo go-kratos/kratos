@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/gorilla/mux"
 )
 
@@ -73,7 +74,9 @@ func (s *Server) HandleFunc(path string, h func(http.ResponseWriter, *http.Reque
 
 // ServeHTTP should write reply headers and data to the ResponseWriter and then return.
 func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	s.router.ServeHTTP(res, req)
+	ctx := transport.NewContext(req.Context(), transport.Transport{Kind: "HTTP"})
+	ctx = NewContext(ctx, ServerInfo{Request: req, Response: res})
+	s.router.ServeHTTP(res, req.WithContext(ctx))
 }
 
 // RegisterService registers a service and its implementation to the HTTP server.

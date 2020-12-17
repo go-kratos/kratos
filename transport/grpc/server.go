@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
 
 	"google.golang.org/grpc"
 )
@@ -30,6 +31,8 @@ func NewServer(opts ...ServerOption) *Server {
 // ServeGRPC returns a unary server interceptor.
 func (s *Server) ServeGRPC() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		ctx = transport.NewContext(ctx, transport.Transport{Kind: "GRPC"})
+		ctx = NewContext(ctx, ServerInfo{Server: info.Server, FullMethod: info.FullMethod})
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return handler(ctx, req)
 		}
