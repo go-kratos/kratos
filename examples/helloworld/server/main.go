@@ -10,6 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	servergrpc "github.com/go-kratos/kratos/v2/server/grpc"
 	serverhttp "github.com/go-kratos/kratos/v2/server/http"
+	"github.com/go-kratos/kratos/v2/transport"
 	transportgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	transporthttp "github.com/go-kratos/kratos/v2/transport/http"
 
@@ -31,23 +32,23 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 }
 
 func logger() middleware.Middleware {
-	return func(h middleware.Handler) middleware.Handler {
+	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 
-			fmt.Println("start")
+			fmt.Println("before")
 
-			return h(ctx, req)
+			return handler(ctx, req)
 		}
 	}
 }
 
 func logger2() middleware.Middleware {
-	return func(h middleware.Handler) middleware.Handler {
+	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 
-			resp, err := h(ctx, req)
+			resp, err := handler(ctx, req)
 
-			fmt.Println("end")
+			fmt.Println("after")
 
 			return resp, err
 		}
@@ -55,12 +56,25 @@ func logger2() middleware.Middleware {
 }
 
 func logger3() middleware.Middleware {
-	return func(h middleware.Handler) middleware.Handler {
+	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
+
+			tr, ok := transport.FromContext(ctx)
+			if ok {
+				fmt.Printf("transport: %+v\n", tr)
+			}
+			h, ok := transporthttp.FromContext(ctx)
+			if ok {
+				fmt.Printf("http: [%s] %s\n", h.Request.Method, h.Request.URL.Path)
+			}
+			g, ok := transportgrpc.FromContext(ctx)
+			if ok {
+				fmt.Printf("grpc: %s\n", g.FullMethod)
+			}
 
 			fmt.Println("111")
 
-			return h(ctx, req)
+			return handler(ctx, req)
 		}
 	}
 }
