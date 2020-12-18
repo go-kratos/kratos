@@ -12,6 +12,7 @@ option objc_class_prefix = "Errors";
 
 // The error schema for Google REST APIs. NOTE: this schema is not used for
 // other wire protocols.
+// References: https://cloud.google.com/apis/design/errors
 message Error {
   // This message has the same semantics as `google.rpc.Status`. It has an extra
   // field `status` for backward compatibility with Google API Client Library.

@@ -18,20 +18,16 @@ func Register{{.ServiceType}}HTTPServer(s http.ServiceRegistrar, srv {{.ServiceT
 }
 
 {{ range .Methods }}
-func _HTTP_{{.ServiceType}}_{{.Name}}(srv interface{}, ctx context.Context, m http.Marshaler) (interface{}, error) {
+func _HTTP_{{.ServiceType}}_{{.Name}}(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
 	in := new({{.Request}})
 	if err := m.Unmarshal(in{{.Body}}); err != nil {
 		return nil, err
 	}
 
 {{ if ne (len .Params) 0 }}
-	var(
-		err error
-		vars = m.PathParams()
-	)
+	vars := m.PathParams()
 {{ end }}
 {{ range .Params }}
-
 	{{.ProtoName}}, ok := vars["{{.ProtoName}}"]
 	if !ok {
 		return nil, http.ErrInvalidArgument("missing parameter: {{.ProtoName}}")

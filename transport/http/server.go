@@ -25,7 +25,7 @@ type ServiceDesc struct {
 	Metadata    interface{}
 }
 
-type methodHandler func(srv interface{}, ctx context.Context, m Marshaler) (interface{}, error)
+type methodHandler func(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error)
 
 // MethodDesc represents a HTTP service's method specification.
 type MethodDesc struct {
@@ -44,8 +44,9 @@ type Server struct {
 // NewServer creates a HTTP server by options.
 func NewServer(opts ...ServerOption) *Server {
 	options := serverOptions{
-		errorHandler:    DefaultErrorHandler,
-		responseHandler: DefaultResponseHandler,
+		requestDecoder:  DefaultRequestDecoder,
+		responseEncoder: DefaultResponseEncoder,
+		errorEncoder:    DefaultErrorEncoder,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -89,15 +90,10 @@ func (s *Server) RegisterService(sd *ServiceDesc, ss interface{}) {
 func (s *Server) registerHandle(srv interface{}, md MethodDesc) {
 	s.router.HandleFunc(md.Path, func(res http.ResponseWriter, req *http.Request) {
 
-		ctx := req.Context()
-		codec, err := codecForReq(req)
-		if err != nil {
-			s.opts.errorHandler(ctx, err, codec, res)
-			return
-		}
-
-		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return md.Handler(srv, ctx, codec)
+		handler := func(ctx context.Context, in interface{}) (interface{}, error) {
+			return md.Handler(srv, ctx, func(in interface{}) error {
+				return s.opts.requestDecoder(ctx, in, req)
+			}, req)
 		}
 		if m, ok := s.middlewares[srv]; ok {
 			handler = m(handler)
@@ -106,13 +102,16 @@ func (s *Server) registerHandle(srv interface{}, md MethodDesc) {
 			handler = s.opts.middleware(handler)
 		}
 
-		reply, err := handler(ctx, req)
+		reply, err := handler(req.Context(), req)
 		if err != nil {
-			s.opts.errorHandler(ctx, err, codec, res)
+			s.opts.errorEncoder(req.Context(), err, res, req)
 			return
 		}
 
-		s.opts.responseHandler(ctx, reply, codec, res)
+		if err := s.opts.responseEncoder(req.Context(), reply, res, req); err != nil {
+			s.opts.errorEncoder(req.Context(), err, res, req)
+			return
+		}
 
 	}).Methods(md.Method)
 }

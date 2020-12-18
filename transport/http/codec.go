@@ -1,16 +1,21 @@
 package http
 
 import (
+	"context"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/gorilla/mux"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
-const baseContentType = "application"
+const (
+	baseContentType    = "application"
+	defaultContentType = "application/json"
+)
 
 func contentSubtype(contentType string) string {
 	if contentType == baseContentType {
@@ -31,57 +36,86 @@ func contentSubtype(contentType string) string {
 	}
 }
 
-func codecForReq(req *http.Request) (Marshaler, error) {
+// RequestCodec returns request codec.
+func RequestCodec(req *http.Request) (encoding.Codec, error) {
 	contentType := req.Header.Get("content-type")
-	cc := encoding.GetCodec(contentSubtype(contentType))
-	if cc == nil {
+	codec := encoding.GetCodec(contentSubtype(contentType))
+	if codec == nil {
 		return nil, errors.InvalidArgument("Errors_UnknownCodec", contentType)
 	}
-	return &codec{codec: cc, req: req}, nil
+	return codec, nil
 }
 
-// Marshaler defines the interface HTTP uses to encode and decode messages.
-type Marshaler interface {
-	PathParams() map[string]string
-	ReadHeader() http.Header
-	ReadBody() ([]byte, error)
-	Marshal(v interface{}) ([]byte, error)
-	Unmarshal(v interface{}) error
-}
-
-type codec struct {
-	codec encoding.Codec
-	req   *http.Request
-}
-
-func (c *codec) PathParams() map[string]string {
-	return mux.Vars(c.req)
-}
-
-func (c *codec) ReadHeader() http.Header {
-	return c.req.Header
-}
-
-func (c *codec) Marshal(v interface{}) ([]byte, error) {
-	return c.codec.Marshal(v)
-}
-
-func (c *codec) ReadBody() ([]byte, error) {
-	data, err := ioutil.ReadAll(c.req.Body)
-	if err != nil {
-		return nil, errors.DataLoss("Errors_DataLoss", err.Error())
+// ResponseCodec returns response codec.
+func ResponseCodec(req *http.Request) (string, encoding.Codec, error) {
+	accepts := req.Header.Values("accept")
+	for _, contentType := range accepts {
+		if codec := encoding.GetCodec(contentSubtype(contentType)); codec != nil {
+			return contentType, codec, nil
+		}
 	}
-	defer c.req.Body.Close()
-	return data, nil
+	if codec := encoding.GetCodec("json"); codec != nil {
+		return defaultContentType, codec, nil
+	}
+	return "", nil, errors.InvalidArgument("Error_UnknownCodec", strings.Join(accepts, "; "))
 }
 
-func (c *codec) Unmarshal(v interface{}) error {
-	data, err := c.ReadBody()
+// DefaultRequestDecoder default request decoder.
+func DefaultRequestDecoder(ctx context.Context, in interface{}, req *http.Request) error {
+	codec, err := RequestCodec(req)
 	if err != nil {
 		return err
 	}
-	if err = c.codec.Unmarshal(data, v); err != nil {
+	data, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return errors.DataLoss("Errors_DataLoss", err.Error())
+	}
+	defer req.Body.Close()
+	if err = codec.Unmarshal(data, in); err != nil {
 		return errors.InvalidArgument("Errors_CodecUnmarshal", err.Error())
 	}
 	return nil
+}
+
+// DefaultResponseEncoder is default response encoder.
+func DefaultResponseEncoder(ctx context.Context, out interface{}, res http.ResponseWriter, req *http.Request) error {
+	contentType, codec, err := ResponseCodec(req)
+	if err != nil {
+		return err
+	}
+	data, err := codec.Marshal(out)
+	if err != nil {
+		return err
+	}
+	res.Header().Set("content-type", contentType)
+	res.Write(data)
+	return nil
+}
+
+// DefaultErrorEncoder is default errors encoder.
+func DefaultErrorEncoder(ctx context.Context, err error, res http.ResponseWriter, req *http.Request) {
+	status, se := StatusError(err)
+	e := &Error{
+		Error: &Error_Status{
+			Code:    se.Code,
+			Message: se.Message,
+		},
+	}
+	for _, detail := range se.Details {
+		if any, err := anypb.New(detail); err == nil {
+			e.Error.Details = append(e.Error.Details, any)
+		}
+	}
+	contentType, codec, err := ResponseCodec(req)
+	if err != nil {
+		data, _ := json.Marshal(se)
+		res.Header().Set("content-type", contentType)
+		res.WriteHeader(status)
+		res.Write(data)
+	} else {
+		data, _ := codec.Marshal(e)
+		res.Header().Set("content-type", contentType)
+		res.WriteHeader(status)
+		res.Write(data)
+	}
 }

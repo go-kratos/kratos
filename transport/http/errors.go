@@ -6,6 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 )
 
+// References: https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
 var errMapping = map[int32]int{
 	0:  http.StatusOK,
 	1:  http.StatusInternalServerError,
@@ -26,7 +27,7 @@ var errMapping = map[int32]int{
 }
 
 // StatusError converts error to http error.
-func StatusError(err error) (*errors.StatusError, int) {
+func StatusError(err error) (int, *errors.StatusError) {
 	se, ok := err.(*errors.StatusError)
 	if !ok {
 		se = &errors.StatusError{
@@ -34,8 +35,8 @@ func StatusError(err error) (*errors.StatusError, int) {
 			Message: "Unknown: " + err.Error(),
 		}
 	}
-	if code, ok := errMapping[se.Code]; ok {
-		return se, code
+	if status, ok := errMapping[se.Code]; ok {
+		return status, se
 	}
-	return se, http.StatusInternalServerError
+	return http.StatusInternalServerError, se
 }

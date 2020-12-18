@@ -4,41 +4,36 @@ package helloworld
 
 import (
 	context "context"
+	"net/http"
 
 	"github.com/go-kratos/kratos/v2/errors"
-	http "github.com/go-kratos/kratos/v2/transport/http"
+	transport "github.com/go-kratos/kratos/v2/transport/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
 // context.Context
-const _ = http.SupportPackageIsVersion1
+const _ = transport.SupportPackageIsVersion1
 
 type GreeterHTTPServer interface {
 	SayHello(context.Context, *HelloRequest) (*HelloReply, error)
 }
 
-func RegisterGreeterHTTPServer(s http.ServiceRegistrar, srv GreeterHTTPServer) {
+func RegisterGreeterHTTPServer(s transport.ServiceRegistrar, srv GreeterHTTPServer) {
 	s.RegisterService(&_HTTP_Greeter_serviceDesc, srv)
 }
 
-func _HTTP_Greeter_SayHello(srv interface{}, ctx context.Context, m http.Marshaler) (interface{}, error) {
+func _HTTP_Greeter_SayHello(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
 	in := new(HelloRequest)
-	if err := m.Unmarshal(in); err != nil {
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-
-	var (
-		err  error
-		vars = m.PathParams()
-	)
-
+	vars := transport.PathParams(req)
 	name, ok := vars["name"]
 	if !ok {
 		return nil, errors.InvalidArgument("Errors_InvalidArgument", "missing parameter: name")
 	}
 	in.Name = name
-
 	reply, err := srv.(GreeterServer).SayHello(ctx, in)
 	if err != nil {
 		return nil, err
@@ -46,10 +41,10 @@ func _HTTP_Greeter_SayHello(srv interface{}, ctx context.Context, m http.Marshal
 	return reply, nil
 }
 
-var _HTTP_Greeter_serviceDesc = http.ServiceDesc{
+var _HTTP_Greeter_serviceDesc = transport.ServiceDesc{
 	ServiceName: "helloworld.Greeter",
 	HandlerType: (*GreeterHTTPServer)(nil),
-	Methods: []http.MethodDesc{
+	Methods: []transport.MethodDesc{
 
 		{
 			Path:    "/helloworld/{name}",
