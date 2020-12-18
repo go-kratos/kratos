@@ -7,12 +7,15 @@ import (
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 const (
-	contextPackage = protogen.GoImportPath("context")
-	httpPackage    = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
+	contextPackage   = protogen.GoImportPath("context")
+	httpPackage      = protogen.GoImportPath("net/http")
+	transportPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
+	errorsPackage    = protogen.GoImportPath("github.com/go-kratos/kratos/v2/errors")
 )
 
 // generateFile generates a _http.pb.go file containing kratos errors definitions.
@@ -37,13 +40,47 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	}
 	g.P("// This is a compile-time assertion to ensure that this generated file")
 	g.P("// is compatible with the kratos package it is being compiled against.")
-	g.P("// ", contextPackage.Ident("Context"))
-	g.P("const _ = ", httpPackage.Ident("SupportPackageIsVersion1"))
+	g.P("// ", contextPackage.Ident(""), "/", httpPackage.Ident(""), "/", errorsPackage.Ident(""))
+	g.P("const _ = ", transportPackage.Ident("SupportPackageIsVersion1"))
 	g.P()
 
 	for _, service := range file.Services {
 		genService(gen, file, g, service)
 	}
+}
+
+func fieldKind(input *protogen.Message, name string) string {
+	names := strings.Split(name, ".")
+	for _, f := range input.Fields {
+		if string(f.Desc.Name()) != names[0] {
+			continue
+		}
+		switch f.Desc.Kind() {
+		case protoreflect.BoolKind:
+			return "Bool"
+		case protoreflect.EnumKind:
+			return "Enum"
+		case protoreflect.Int32Kind:
+			return "Int32"
+		case protoreflect.Int64Kind:
+			return "Int64"
+		case protoreflect.Uint32Kind:
+			return "Uint32"
+		case protoreflect.Uint64Kind:
+			return "Uint64"
+		case protoreflect.FloatKind:
+			return "Float32"
+		case protoreflect.DoubleKind:
+			return "Float64"
+		case protoreflect.StringKind:
+			return "String"
+		case protoreflect.BytesKind:
+			return "Bytes"
+		case protoreflect.MessageKind:
+			return fieldKind(f.Message, strings.Join(names[1:], "."))
+		}
+	}
+	return ""
 }
 
 func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, service *protogen.Service) {
@@ -92,7 +129,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 			path = fmt.Sprintf("/%s/%s", service.Desc.FullName(), m.Desc.Name())
 			method = "POST"
 		}
-		m := &methodDesc{
+		md := &methodDesc{
 			// service
 			ServiceType: sd.ServiceType,
 			// method
@@ -104,24 +141,33 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 			Method: method,
 		}
 		if body != "" {
-			m.Body = "." + camelCase(body)
+			md.Body = "." + camelCaseVars(body)
 		}
 		if responseBody != "" {
-			m.ResponseBody = "." + camelCase(responseBody)
+			md.ResponseBody = "." + camelCaseVars(responseBody)
 		}
-		vars := strings.Split(m.Path, "/")
+		vars := strings.Split(md.Path, "/")
 		for _, v := range vars {
 			if strings.HasPrefix(v, "{") && strings.HasSuffix(v, "}") {
 				name := v[1 : len(v)-1]
-				m.Params = append(m.Params, pathParam{GoName: camelCase(name), ProtoName: name})
+				md.Params = append(md.Params, pathParam{GoName: camelCaseVars(name), ProtoName: name, Kind: fieldKind(m.Input, name)})
 			}
 		}
-		sd.Methods = append(sd.Methods, m)
+		sd.Methods = append(sd.Methods, md)
 	}
 	g.P(sd.execute())
 }
 
-const deprecationComment = "// Deprecated: Do not use."
+func camelCaseVars(s string) string {
+	var (
+		vars []string
+		subs = strings.Split(s, ".")
+	)
+	for _, sub := range subs {
+		vars = append(vars, camelCase(sub))
+	}
+	return strings.Join(vars, ".")
+}
 
 // camelCase returns the CamelCased name.
 // If there is an interior underscore followed by a lower case letter,
@@ -179,3 +225,5 @@ func isASCIILower(c byte) bool {
 func isASCIIDigit(c byte) bool {
 	return '0' <= c && c <= '9'
 }
+
+const deprecationComment = "// Deprecated: Do not use."

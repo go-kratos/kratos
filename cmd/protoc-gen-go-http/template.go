@@ -8,52 +8,62 @@ import (
 
 var httpTemplate = `
 type {{.ServiceType}}HTTPServer interface {
-{{ range .Methods }}
+{{range .Methods}}
 	{{.Name}}(context.Context, *{{.Request}}) (*{{.Reply}}, error)
-{{- end }}
+{{end}}
 }
 
-func Register{{.ServiceType}}HTTPServer(s http.ServiceRegistrar, srv {{.ServiceType}}HTTPServer) {
+func Register{{.ServiceType}}HTTPServer(s http1.ServiceRegistrar, srv {{.ServiceType}}HTTPServer) {
 	s.RegisterService(&_HTTP_{{.ServiceType}}_serviceDesc, srv)
 }
 
-{{ range .Methods }}
+{{range .Methods}}
 func _HTTP_{{.ServiceType}}_{{.Name}}(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
-	in := new({{.Request}})
-	if err := m.Unmarshal(in{{.Body}}); err != nil {
+	var in {{.Request}}
+{{if eq .Body ".*"}}
+	if err := dec(&in); err != nil {
 		return nil, err
 	}
-
-{{ if ne (len .Params) 0 }}
-	vars := m.PathParams()
-{{ end }}
-{{ range .Params }}
-	{{.ProtoName}}, ok := vars["{{.ProtoName}}"]
-	if !ok {
-		return nil, http.ErrInvalidArgument("missing parameter: {{.ProtoName}}")
+{{else if ne .Body ""}}
+	if err := dec(&in{{.Body}}); err != nil {
+		return nil, err
 	}
-	in.{{.GoName}} = {{.ProtoName}}
-{{- end }}
-
-	reply, err := srv.({{.ServiceType}}Server).{{.Name}}(ctx, in)
+{{end}}
+{{if ne (len .Params) 0}}
+	var (
+		ok bool
+		err error
+		value string
+		params = http1.PathParams(req)
+	)
+{{end }}
+{{range .Params}}
+	if value, ok = params["{{.ProtoName}}"]; !ok {
+		return nil, errors.InvalidArgument("Errors_InvalidArgument", "Missing parameter: {{.ProtoName}}")
+	}
+	if in.{{.GoName}}, err = http1.{{.Kind}}(value); err != nil {
+		return nil, errors.InvalidArgument("Errors_InvalidArgument", "Failed to parse {{.ProtoName}}: %s error = %v", value, err)
+	}
+{{end}}
+	out, err := srv.({{.ServiceType}}Server).{{.Name}}(ctx, &in)
 	if err != nil {
 		return nil, err
 	}
-	return reply{{.ResponseBody}}, nil
+	return out{{.ResponseBody}}, nil
 }
-{{- end }}
+{{end}}
 
-var _HTTP_{{.ServiceType}}_serviceDesc = http.ServiceDesc{
+var _HTTP_{{.ServiceType}}_serviceDesc = http1.ServiceDesc{
 	ServiceName: "{{.ServiceName}}",
 	HandlerType: (*{{.ServiceType}}HTTPServer)(nil),
-	Methods: []http.MethodDesc{
-{{ range .Methods }}
+	Methods: []http1.MethodDesc{
+{{range .Methods}}
 		{
 			Path:    "{{.Path}}",
 			Method:  "{{.Method}}",
 			Handler: _HTTP_{{.ServiceType}}_{{.Name}},
 		},
-{{- end }}
+{{end}}
 	},
 	Metadata: "{{.Metadata}}",
 }
@@ -82,9 +92,9 @@ type methodDesc struct {
 }
 
 type pathParam struct {
+	Kind      string
 	GoName    string
 	ProtoName string
-	Type      string
 }
 
 func (s *serviceDesc) execute() string {

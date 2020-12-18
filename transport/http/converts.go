@@ -19,11 +19,6 @@ func Bool(val string) (bool, error) {
 	return strconv.ParseBool(val)
 }
 
-// Float64 converts.
-func Float64(val string) (float64, error) {
-	return strconv.ParseFloat(val, 64)
-}
-
 // Float32 converts.
 func Float32(val string) (float32, error) {
 	f, err := strconv.ParseFloat(val, 32)
@@ -33,9 +28,9 @@ func Float32(val string) (float32, error) {
 	return float32(f), nil
 }
 
-// Int64 converts.
-func Int64(val string) (int64, error) {
-	return strconv.ParseInt(val, 0, 64)
+// Float64 converts.
+func Float64(val string) (float64, error) {
+	return strconv.ParseFloat(val, 64)
 }
 
 // Int32 converts.
@@ -47,9 +42,9 @@ func Int32(val string) (int32, error) {
 	return int32(i), nil
 }
 
-// Uint64 converts.
-func Uint64(val string) (uint64, error) {
-	return strconv.ParseUint(val, 0, 64)
+// Int64 converts.
+func Int64(val string) (int64, error) {
+	return strconv.ParseInt(val, 0, 64)
 }
 
 // Uint32 converts.
@@ -59,6 +54,11 @@ func Uint32(val string) (uint32, error) {
 		return 0, err
 	}
 	return uint32(i), nil
+}
+
+// Uint64 converts.
+func Uint64(val string) (uint64, error) {
+	return strconv.ParseUint(val, 0, 64)
 }
 
 // Timestamp converts.
