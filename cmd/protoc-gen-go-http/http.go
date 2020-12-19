@@ -150,7 +150,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 		for _, v := range vars {
 			if strings.HasPrefix(v, "{") && strings.HasSuffix(v, "}") {
 				name := v[1 : len(v)-1]
-				md.Params = append(md.Params, pathParam{GoName: camelCaseVars(name), ProtoName: name, Kind: fieldKind(m.Input, name)})
+				md.Vars = append(md.Vars, pathParam{GoName: camelCaseVars(name), ProtoName: name, Kind: fieldKind(m.Input, name)})
 			}
 		}
 		sd.Methods = append(sd.Methods, md)

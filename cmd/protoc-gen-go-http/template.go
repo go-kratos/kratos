@@ -29,16 +29,16 @@ func _HTTP_{{.ServiceType}}_{{.Name}}(srv interface{}, ctx context.Context, dec 
 		return nil, err
 	}
 {{end}}
-{{if ne (len .Params) 0}}
+{{if ne (len .Vars) 0}}
 	var (
 		ok bool
 		err error
 		value string
-		params = http1.PathParams(req)
+		vars = http1.Vars(req)
 	)
 {{end }}
-{{range .Params}}
-	if value, ok = params["{{.ProtoName}}"]; !ok {
+{{range .Vars}}
+	if value, ok = vars["{{.ProtoName}}"]; !ok {
 		return nil, errors.InvalidArgument("Errors_InvalidArgument", "Missing parameter: {{.ProtoName}}")
 	}
 	if in.{{.GoName}}, err = http1.{{.Kind}}(value); err != nil {
@@ -81,7 +81,7 @@ type methodDesc struct {
 	ServiceType string // Greeter
 	// method
 	Name    string
-	Params  []pathParam
+	Vars    []pathParam
 	Request string
 	Reply   string
 	// http_rule

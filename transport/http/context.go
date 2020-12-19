@@ -26,7 +26,7 @@ func FromContext(ctx context.Context) (s ServerInfo, ok bool) {
 	return
 }
 
-// PathParams returns path parameters.
-func PathParams(req *http.Request) map[string]string {
+// Vars returns the route variables for the current request, if any.
+func Vars(req *http.Request) map[string]string {
 	return mux.Vars(req)
 }

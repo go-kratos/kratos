@@ -4,47 +4,52 @@ package helloworld
 
 import (
 	context "context"
-	"net/http"
-
-	"github.com/go-kratos/kratos/v2/errors"
-	transport "github.com/go-kratos/kratos/v2/transport/http"
+	errors "github.com/go-kratos/kratos/v2/errors"
+	http1 "github.com/go-kratos/kratos/v2/transport/http"
+	http "net/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
-// context.Context
-const _ = transport.SupportPackageIsVersion1
+// context./http./errors.
+const _ = http1.SupportPackageIsVersion1
 
 type GreeterHTTPServer interface {
 	SayHello(context.Context, *HelloRequest) (*HelloReply, error)
 }
 
-func RegisterGreeterHTTPServer(s transport.ServiceRegistrar, srv GreeterHTTPServer) {
+func RegisterGreeterHTTPServer(s http1.ServiceRegistrar, srv GreeterHTTPServer) {
 	s.RegisterService(&_HTTP_Greeter_serviceDesc, srv)
 }
 
 func _HTTP_Greeter_SayHello(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
-	in := new(HelloRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+	var in HelloRequest
+
+	var (
+		ok    bool
+		err   error
+		value string
+		vars  = http1.Vars(req)
+	)
+
+	if value, ok = vars["name"]; !ok {
+		return nil, errors.InvalidArgument("Errors_InvalidArgument", "Missing parameter: name")
 	}
-	vars := transport.PathParams(req)
-	name, ok := vars["name"]
-	if !ok {
-		return nil, errors.InvalidArgument("Errors_InvalidArgument", "missing parameter: name")
+	if in.Name, err = http1.String(value); err != nil {
+		return nil, errors.InvalidArgument("Errors_InvalidArgument", "Failed to parse name: %s error = %v", value, err)
 	}
-	in.Name = name
-	reply, err := srv.(GreeterServer).SayHello(ctx, in)
+
+	out, err := srv.(GreeterServer).SayHello(ctx, &in)
 	if err != nil {
 		return nil, err
 	}
-	return reply, nil
+	return out, nil
 }
 
-var _HTTP_Greeter_serviceDesc = transport.ServiceDesc{
+var _HTTP_Greeter_serviceDesc = http1.ServiceDesc{
 	ServiceName: "helloworld.Greeter",
 	HandlerType: (*GreeterHTTPServer)(nil),
-	Methods: []transport.MethodDesc{
+	Methods: []http1.MethodDesc{
 
 		{
 			Path:    "/helloworld/{name}",
