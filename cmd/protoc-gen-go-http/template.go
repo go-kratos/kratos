@@ -23,12 +23,12 @@ func _HTTP_{{$.ServiceType}}_{{.Name}}_{{.Num}}(srv interface{}, ctx context.Con
 {{if ne (len .Vars) 0}}
 	if err := http1.PopulateVars(&in, req, []string{
 	{{range .Vars}} "{{.}}", {{end}}
-	}); err != nil {
+	}, nil); err != nil {
 		return nil, err
 	}
 {{end}}
 {{if eq .Body ""}}
-	if err := http1.PopulateForm(&in, req, []string{
+	if err := http1.PopulateForm(&in, req, nil, []string{
 	{{range .Vars}} "{{.}}", {{end}}
 	}); err != nil {
 		return nil, err
