@@ -6,11 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/pkg/net/trace"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/go-kratos/kratos/pkg/net/trace"
 )
 
-const testTraceSlowLogThreshold = time.Duration(250 * time.Millisecond)
+const testTraceSlowLogThreshold = 250 * time.Millisecond
 
 type mockTrace struct {
 	tags          []trace.Tag
@@ -181,7 +182,7 @@ func BenchmarkTraceConn(b *testing.B) {
 		t := &traceConn{
 			Conn:             c,
 			connTags:         []trace.Tag{trace.TagString(trace.TagPeerAddress, "abc")},
-			slowLogThreshold: time.Duration(1 * time.Second),
+			slowLogThreshold: 1 * time.Second,
 		}
 		c2 := t.WithContext(context.TODO())
 		if _, err := c2.Do("PING"); err != nil {
@@ -199,7 +200,7 @@ func TestTraceConnPending(t *testing.T) {
 	tc := &traceConn{
 		Conn:             c,
 		connTags:         []trace.Tag{trace.TagString(trace.TagPeerAddress, "abc")},
-		slowLogThreshold: time.Duration(1 * time.Second),
+		slowLogThreshold: 1 * time.Second,
 	}
 	err = tc.Send("SET", "a", "x")
 	if err != nil {

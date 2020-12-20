@@ -24,7 +24,7 @@ var (
 	expire        = flag.String("expire", "", "expire time code")
 	structName    = flag.String("struct_name", "dao", "struct name")
 	batchSize     = flag.Int("batch", 0, "batch size")
-	batchErr      = flag.String("batch_err", "break", "batch err to contine or break")
+	batchErr      = flag.String("batch_err", "break", "batch err to continue or break")
 	maxGroup      = flag.Int("max_group", 0, "max group size")
 	checkNullCode = flag.String("check_null_code", "", "check null code")
 	nullExpire    = flag.String("null_expire", "", "null cache expire time code")

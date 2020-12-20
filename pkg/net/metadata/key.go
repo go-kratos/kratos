@@ -39,15 +39,15 @@ const (
 )
 
 var outgoingKey = map[string]struct{}{
-	Color:       struct{}{},
-	RemoteIP:    struct{}{},
-	RemotePort:  struct{}{},
-	Mirror:      struct{}{},
-	Criticality: struct{}{},
+	Color:       {},
+	RemoteIP:    {},
+	RemotePort:  {},
+	Mirror:      {},
+	Criticality: {},
 }
 
 var incomingKey = map[string]struct{}{
-	Caller: struct{}{},
+	Caller: {},
 }
 
 // IsOutgoingKey represent this key should propagate by rpc.

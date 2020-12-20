@@ -5,9 +5,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/go-kratos/kratos/tool/protobuf/pkg/utils"
 	"github.com/pkg/errors"
 	"github.com/siddontang/go/ioutil2"
+
+	"github.com/go-kratos/kratos/tool/protobuf/pkg/utils"
 )
 
 // if proto file is inside a project (that has a /api directory)
@@ -73,6 +74,7 @@ func NewProjInfo(file string, modDirName string, modImportPath string) (projInfo
 	i := strings.Index(projInfo.AbsolutePath, modDirName)
 	if i == -1 {
 		err = errors.Errorf("project is not inside module, project=%s, module=%s", projPath, modDirName)
+		return nil, err
 	}
 	relativePath := projInfo.AbsolutePath[i+len(modDirName):]
 	projInfo.ImportPath = modImportPath + relativePath

@@ -84,7 +84,6 @@ func TestBool(t *testing.T) {
 
 	mdcontext = NewContext(context.Background(), MD{Mirror: "0"})
 	assert.Equal(t, false, Bool(mdcontext, Mirror))
-
 }
 func TestInt64(t *testing.T) {
 	mdcontext := NewContext(context.Background(), MD{Mid: int64(1)})

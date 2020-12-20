@@ -191,7 +191,6 @@ func TestBalancerPick(t *testing.T) {
 			t.Fatalf("the (%d) subconn picked(%s),but expected(%s)", i, sc.addr.Addr, res[i])
 		}
 	}
-
 }
 
 func Benchmark_Wrr(b *testing.B) {
@@ -299,7 +298,6 @@ func (c *controller) updateStatics() {
 			sc.prevUsage = usage
 		}
 	}
-
 }
 
 func (c *controller) control(extraLoad, extraDelay int64) {

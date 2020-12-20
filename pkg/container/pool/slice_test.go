@@ -167,7 +167,7 @@ func TestSlicePoolExhausted(t *testing.T) {
 	conn, err := pool.Get(context.TODO())
 	assert.Nil(t, err)
 	_, err = pool.Get(ctx)
-	// config active == 1, so no avaliable conns make connection exhausted.
+	// config active == 1, so no available conns make connection exhausted.
 	assert.NotNil(t, err)
 	pool.Put(context.TODO(), conn, false)
 	_, err = pool.Get(ctx)

@@ -128,7 +128,6 @@ func TestPoolReuse(t *testing.T) {
 		c2.Do("PING")
 		c1.Close()
 		c2.Close()
-
 	}
 
 	d.check("before close", p, 2, 2)

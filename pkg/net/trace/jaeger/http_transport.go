@@ -253,7 +253,7 @@ func buildTag(tag *Tag, maxTagValueLength int) *j.Tag {
 		jTag.VLong = &vLong
 		jTag.VType = j.TagType_LONG
 	case int64:
-		vLong := int64(value)
+		vLong := value
 		jTag.VLong = &vLong
 		jTag.VType = j.TagType_LONG
 	case uint64:
@@ -265,7 +265,7 @@ func buildTag(tag *Tag, maxTagValueLength int) *j.Tag {
 		jTag.VDouble = &vDouble
 		jTag.VType = j.TagType_DOUBLE
 	case float64:
-		vDouble := float64(value)
+		vDouble := value
 		jTag.VDouble = &vDouble
 		jTag.VType = j.TagType_DOUBLE
 	case bool:

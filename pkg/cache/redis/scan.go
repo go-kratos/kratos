@@ -326,7 +326,6 @@ var (
 )
 
 func structSpecForType(t reflect.Type) *structSpec {
-
 	structSpecMutex.RLock()
 	ss, found := structSpecCache[t]
 	structSpecMutex.RUnlock()

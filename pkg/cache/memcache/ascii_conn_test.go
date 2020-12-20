@@ -167,10 +167,8 @@ func TestASCIIConnGetMulti(t *testing.T) {
 				reply = r["get_multi_2"]
 				compareItem(t, reply, test.a[1])
 			}
-
 		})
 	}
-
 }
 
 func TestASCIIConnSet(t *testing.T) {

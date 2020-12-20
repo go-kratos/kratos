@@ -59,7 +59,7 @@ func MaxSize(n int64) Option {
 	}
 }
 
-// ChanSize set internal chan size default 8192 use about 64k memory on x64 platfrom static,
+// ChanSize set internal chan size default 8192 use about 64k memory on x64 platform static,
 // because filewriter has internal object pool, change chan size bigger may cause filewriter use
 // a lot of memory, because sync.Pool can't set expire time memory won't free until program exit.
 func ChanSize(n int) Option {
