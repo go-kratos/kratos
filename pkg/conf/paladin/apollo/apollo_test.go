@@ -32,7 +32,7 @@ func teardown() {
 	mockserver.Close()
 }
 
-func TestApollo(t *testing.T) {
+func TestApolloMock(t *testing.T) {
 	var (
 		testAppYAML           = "app.yml"
 		testAppYAMLContent1   = "test: test12234\ntest2: test333"
