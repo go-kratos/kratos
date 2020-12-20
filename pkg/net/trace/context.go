@@ -69,9 +69,9 @@ var emptyContext = spanContext{}
 // sample-rate: s-{base16(BigEndian(float32))}
 func (c spanContext) String() string {
 	base := make([]string, 4)
-	base[0] = strconv.FormatUint(uint64(c.TraceID), 16)
-	base[1] = strconv.FormatUint(uint64(c.SpanID), 16)
-	base[2] = strconv.FormatUint(uint64(c.ParentID), 16)
+	base[0] = strconv.FormatUint(c.TraceID, 16)
+	base[1] = strconv.FormatUint(c.SpanID, 16)
+	base[2] = strconv.FormatUint(c.ParentID, 16)
 	base[3] = strconv.FormatUint(uint64(c.Flags), 16)
 	return strings.Join(base, ":")
 }

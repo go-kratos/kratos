@@ -4,11 +4,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-kratos/kratos/tool/protobuf/pkg/generator"
-	"github.com/go-kratos/kratos/tool/protobuf/pkg/naming"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
+
+	"github.com/go-kratos/kratos/tool/protobuf/pkg/generator"
+	"github.com/go-kratos/kratos/tool/protobuf/pkg/naming"
 )
 
 type ecode struct {

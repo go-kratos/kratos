@@ -1,0 +1,138 @@
+# [index] https://github.com/golangci/golangci-lint
+# [example] https://github.com/golangci/golangci-lint/blob/master/.golangci.example.yml
+
+run:
+  tests: true   #是否包含测试文件
+  issues-exit-code: 0
+
+linters-settings:
+  # govet:
+  #   check-shadowing: true #启用了对同名变量名在函数中被隐藏的警告
+  gofmt:
+    simplify: true
+  goimports:
+    local-prefixes: "github.com/go-kratos/kratos" # 格式化代码时，本地代码单独块
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      # - style
+      # - performance
+    disabled-checks:
+      #- wrapperFunc
+      #- dupImport # https://github.com/go-critic/go-critic/issues/845
+      - commentedOutCode
+      - ifElseChain
+      - elseif
+    settings: # settings passed to gocritic
+      captLocal: # must be valid enabled check name
+        paramsOnly: true
+      # rangeValCopy:
+      #   sizeThreshold: 32
+  lll:
+    line-length: 500
+  funlen:
+    lines: 500
+    statements: 500
+  gocyclo:
+    min-complexity: 100
+
+linters:
+  disable-all: true
+  enable:
+    #  https://golangci-lint.run/usage/configuration/
+    - bodyclose         # http.resp.body 内存泄露检查
+    - deadcode          # 无用的变量声明检查
+    - depguard          # 自定义依赖包白、黑名单 控制导包
+    - dogsled           # 空白标识符的赋值检查  默认为2
+    #- dupl             # 重复代码检查
+    - errcheck          # 未判断的error返回值检查
+    - funlen            # 接口最大行数检查
+    #- gochecknoinits   # 包中定义init()函数检查
+    #- goconst          # 常量字符串检查
+    - gocritic          #
+    - gocyclo           # 代码复杂度检查
+    - gofmt             # 优化代码
+    - goimports         # 自动增加和删除包
+    - golint            # 代码风格检查
+    #- gomnd            # 参数、赋值、用例、条件、操作和返回语句检查
+    - goprintffuncname  #
+    - gosec             # 源代码安全检查
+    - gosimple          # 可以优化的代码检查 注：该工具已整合到staticcheck中
+    - govet             # 代码正确性检查
+    - ineffassign       # 无效赋值检查
+    - interfacer        # 建议接口的使用方式
+    - lll               # 行最大字符
+    - misspell          # 拼写错误检查
+    - nakedret          # 大于指定函数长度的函数的无约束返回值检查
+    - nolintlint        #
+    - rowserrcheck      # sql.Rows.Err检查
+    - scopelint         # 循环变量引用检查,排除test文件
+    - staticcheck       # 静态检查
+    - structcheck       # 结构体字段的约束条件检查
+    - stylecheck        # 代码风格检查
+    - typecheck         # 类型检查
+    - unconvert         # 类型转换检查
+    - unparam           # 未使用参数检查
+    #- unused           # 未使用变量、函数检查
+    - varcheck          # 报告exported变量和常量
+    - whitespace        # 空行检查
+
+severity:
+  # Default value is empty string.
+  # Set the default severity for issues. If severity rules are defined and the issues
+  # do not match or no severity is provided to the rule this will be the default
+  # severity applied. Severities should match the supported severity names of the
+  # selected out format.
+  # - Code climate: https://docs.codeclimate.com/docs/issues#issue-severity
+  # -   Checkstyle: https://checkstyle.sourceforge.io/property_types.html#severity
+  # -       Github: https://help.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-error-message
+  default-severity: error
+  # The default value is false.
+  # If set to true severity-rules regular expressions become case sensitive.
+  case-sensitive: false
+  # Default value is empty list.
+  # When a list of severity rules are provided, severity information will be added to lint
+  # issues. Severity rules have the same filtering capability as exclude rules except you
+  # are allowed to specify one matcher per severity rule.
+  # Only affects out formats that support setting severity information.
+  rules:
+    - linters:
+      - dupl
+      - nakedret
+      - lll
+      - misspell
+      - goprintffuncname
+      - stylecheck
+      - deadcode
+      - whitespace
+      - unparam
+      - golint
+      - gosec
+      - staticcheck
+      - structcheck
+      - gocritic
+      - errcheck
+      - rowserrcheck
+      - unconvert
+      - gosimple
+      - rowserrcheck
+      - ineffassign
+      severity: warning
+
+issues:
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gomnd
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+        - scopelint
+        - interfacer
+        - govet
+    # https://github.com/go-critic/go-critic/issues/926
+    - linters:
+        - gocritic
+      text: "unnecessaryDefer:"

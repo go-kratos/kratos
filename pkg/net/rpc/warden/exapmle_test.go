@@ -38,7 +38,6 @@ func (s *helloServer) StreamHello(ss pb.Greeter_StreamHelloServer) error {
 		}
 	}
 	return nil
-
 }
 
 func ExampleServer() {

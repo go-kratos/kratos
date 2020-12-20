@@ -12,11 +12,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-kratos/kratos/pkg/log"
-	"github.com/go-kratos/kratos/pkg/naming"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"google.golang.org/grpc"
+
+	"github.com/go-kratos/kratos/pkg/log"
+	"github.com/go-kratos/kratos/pkg/naming"
 )
 
 var (
@@ -155,7 +156,6 @@ func (e *EtcdBuilder) Build(appid string, opts ...naming.BuildOpt) naming.Resolv
 // Scheme return etcd's scheme
 func (e *EtcdBuilder) Scheme() string {
 	return "etcd"
-
 }
 
 // Register is register instance
@@ -185,7 +185,6 @@ func (e *EtcdBuilder) Register(ctx context.Context, ins *naming.Instance) (cance
 	})
 
 	go func() {
-
 		ticker := time.NewTicker(time.Duration(registerTTL/3) * time.Second)
 		defer ticker.Stop()
 		for {
@@ -270,7 +269,6 @@ func (a *appInfo) fetchstore(appID string) (err error) {
 	return nil
 }
 func (a *appInfo) store(ins *naming.InstancesInfo) {
-
 	a.ins.Store(ins)
 	a.e.mutex.RLock()
 	for rs := range a.resolver {
@@ -284,7 +282,7 @@ func (a *appInfo) store(ins *naming.InstancesInfo) {
 
 func (a *appInfo) paserIns(resp *clientv3.GetResponse) (ins *naming.InstancesInfo, err error) {
 	ins = &naming.InstancesInfo{
-		Instances: make(map[string][]*naming.Instance, 0),
+		Instances: make(map[string][]*naming.Instance),
 	}
 	for _, ev := range resp.Kvs {
 		in := new(naming.Instance)

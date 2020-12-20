@@ -27,7 +27,7 @@ func (s *Server) recovery() grpc.UnaryServerInterceptor {
 				}
 				buf = buf[:rs]
 				pl := fmt.Sprintf("grpc server panic: %v\n%v\n%s\n", req, rerr, buf)
-				fmt.Fprintf(os.Stderr, pl)
+				fmt.Fprint(os.Stderr, pl)
 				log.Error(pl)
 				err = status.Errorf(codes.Unknown, ecode.ServerErr.Error())
 			}

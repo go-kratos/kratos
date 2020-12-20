@@ -30,36 +30,36 @@ func Test_Subset(t *testing.T) {
 
 func Test_FilterClusters(t *testing.T) {
 	inss := map[string][]*Instance{
-		"sh001": []*Instance{&Instance{
+		"sh001": {{
 			Addrs:    []string{"grpc://127.0.0.1:9000"},
 			Metadata: map[string]string{MetaCluster: "c1"},
-		}, &Instance{
+		}, {
 			Addrs:    []string{"http://127.0.0.2:9000"},
 			Metadata: map[string]string{MetaCluster: "c1"},
-		}, &Instance{
+		}, {
 			Addrs:    []string{"grpc://127.0.0.3:9000"},
 			Metadata: map[string]string{MetaCluster: "c2"},
 		}},
-		"sh002": []*Instance{&Instance{
+		"sh002": {{
 			Addrs:    []string{"grpc://127.0.0.1:9000"},
 			Metadata: map[string]string{MetaCluster: "c3"},
-		}, &Instance{
+		}, {
 			Addrs:    []string{"zk://127.0.0.2:9000"},
 			Metadata: map[string]string{MetaCluster: "c3"},
 		}},
 	}
 	res := map[string][]*Instance{
-		"sh001": []*Instance{&Instance{
+		"sh001": {{
 			Addrs:    []string{"grpc://127.0.0.1:9000"},
 			Metadata: map[string]string{MetaCluster: "c1"},
 		}},
-		"sh002": []*Instance{&Instance{
+		"sh002": {{
 			Addrs:    []string{"grpc://127.0.0.1:9000"},
 			Metadata: map[string]string{MetaCluster: "c3"},
 		}},
 	}
 	var opt BuildOptions
-	f := Filter("grpc", map[string]struct{}{"c1": struct{}{}, "c3": struct{}{}})
+	f := Filter("grpc", map[string]struct{}{"c1": {}, "c3": {}})
 	f.Apply(&opt)
 	filtered := opt.Filter(inss)
 	equal := reflect.DeepEqual(filtered, res)
@@ -70,33 +70,33 @@ func Test_FilterClusters(t *testing.T) {
 
 func Test_FilterInvalidAddr(t *testing.T) {
 	inss := map[string][]*Instance{
-		"sh001": []*Instance{&Instance{
+		"sh001": {{
 			Addrs:    []string{"grpc://127.0.0.1:9000"},
 			Metadata: map[string]string{MetaCluster: "c1"},
-		}, &Instance{
+		}, {
 			Addrs:    []string{"http://127.0.0.2:9000"},
 			Metadata: map[string]string{MetaCluster: "c1"},
-		}, &Instance{
+		}, {
 			Addrs:    []string{"grpc://127.0.0.3:9000"},
 			Metadata: map[string]string{MetaCluster: "c2"},
 		}},
-		"sh002": []*Instance{&Instance{
+		"sh002": {{
 			Addrs:    []string{"grpc://127.0.0.1:9000"},
 			Metadata: map[string]string{MetaCluster: "c3"},
-		}, &Instance{
+		}, {
 			Addrs:    []string{"zk://127.0.0.2:9000"},
 			Metadata: map[string]string{MetaCluster: "c3"},
 		}},
 	}
 	res := map[string][]*Instance{
-		"sh001": []*Instance{&Instance{
+		"sh001": {{
 			Addrs:    []string{"grpc://127.0.0.1:9000"},
 			Metadata: map[string]string{MetaCluster: "c1"},
-		}, &Instance{
+		}, {
 			Addrs:    []string{"grpc://127.0.0.3:9000"},
 			Metadata: map[string]string{MetaCluster: "c2"},
 		}},
-		"sh002": []*Instance{&Instance{
+		"sh002": {{
 			Addrs:    []string{"grpc://127.0.0.1:9000"},
 			Metadata: map[string]string{MetaCluster: "c3"},
 		}},
@@ -114,33 +114,33 @@ func Test_FilterInvalidAddr(t *testing.T) {
 func Test_Schedule(t *testing.T) {
 	app := &InstancesInfo{
 		Instances: map[string][]*Instance{
-			"sh001": []*Instance{&Instance{
+			"sh001": {{
 				Zone:     "sh001",
 				Addrs:    []string{"grpc://127.0.0.1:9000"},
 				Metadata: map[string]string{MetaCluster: "c1"},
-			}, &Instance{
+			}, {
 				Zone:     "sh001",
 				Addrs:    []string{"grpc://127.0.0.2:9000"},
 				Metadata: map[string]string{MetaCluster: "c1"},
-			}, &Instance{
+			}, {
 				Zone:     "sh001",
 				Addrs:    []string{"grpc://127.0.0.3:9000"},
 				Metadata: map[string]string{MetaCluster: "c2"},
 			}},
-			"sh002": []*Instance{&Instance{
+			"sh002": {{
 				Zone:     "sh002",
 				Addrs:    []string{"grpc://127.0.0.1:9000"},
 				Metadata: map[string]string{MetaCluster: "c3"},
-			}, &Instance{
+			}, {
 				Zone:     "sh002",
 				Addrs:    []string{"grpc://127.0.0.2:9000"},
 				Metadata: map[string]string{MetaCluster: "c3"},
 			}},
 		},
-		Scheduler: &Scheduler{map[string]*ZoneStrategy{"sh001": &ZoneStrategy{
+		Scheduler: &Scheduler{map[string]*ZoneStrategy{"sh001": {
 			Zones: map[string]*Strategy{
-				"sh001": &Strategy{10},
-				"sh002": &Strategy{20},
+				"sh001": {10},
+				"sh002": {20},
 			},
 		}}},
 	}
@@ -156,10 +156,10 @@ func Test_Schedule(t *testing.T) {
 func Test_Schedule2(t *testing.T) {
 	app := &InstancesInfo{
 		Instances: map[string][]*Instance{},
-		Scheduler: &Scheduler{map[string]*ZoneStrategy{"sh001": &ZoneStrategy{
+		Scheduler: &Scheduler{map[string]*ZoneStrategy{"sh001": {
 			Zones: map[string]*Strategy{
-				"sh001": &Strategy{10},
-				"sh002": &Strategy{20},
+				"sh001": {10},
+				"sh002": {20},
 			},
 		}}},
 	}
@@ -191,10 +191,10 @@ func Test_Schedule2(t *testing.T) {
 func Test_Schedule3(t *testing.T) {
 	app := &InstancesInfo{
 		Instances: map[string][]*Instance{},
-		Scheduler: &Scheduler{map[string]*ZoneStrategy{"sh001": &ZoneStrategy{
+		Scheduler: &Scheduler{map[string]*ZoneStrategy{"sh001": {
 			Zones: map[string]*Strategy{
-				"sh001": &Strategy{1},
-				"sh002": &Strategy{30},
+				"sh001": {1},
+				"sh002": {30},
 			},
 		}}},
 	}
@@ -226,10 +226,10 @@ func Test_Schedule3(t *testing.T) {
 func Test_Schedule4(t *testing.T) {
 	app := &InstancesInfo{
 		Instances: map[string][]*Instance{},
-		Scheduler: &Scheduler{map[string]*ZoneStrategy{"sh001": &ZoneStrategy{
+		Scheduler: &Scheduler{map[string]*ZoneStrategy{"sh001": {
 			Zones: map[string]*Strategy{
-				"sh001": &Strategy{1},
-				"sh002": &Strategy{30},
+				"sh001": {1},
+				"sh002": {30},
 			},
 		}}},
 	}
@@ -254,9 +254,9 @@ func Test_Schedule4(t *testing.T) {
 func Test_Schedule5(t *testing.T) {
 	app := &InstancesInfo{
 		Instances: map[string][]*Instance{},
-		Scheduler: &Scheduler{map[string]*ZoneStrategy{"sh001": &ZoneStrategy{
+		Scheduler: &Scheduler{map[string]*ZoneStrategy{"sh001": {
 			Zones: map[string]*Strategy{
-				"sh002": &Strategy{30},
+				"sh002": {30},
 			},
 		}}},
 	}

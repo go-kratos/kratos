@@ -6,14 +6,15 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/protoc-gen-go/descriptor"
+	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
+
 	"github.com/go-kratos/kratos/tool/protobuf/pkg/generator"
 	"github.com/go-kratos/kratos/tool/protobuf/pkg/naming"
 	"github.com/go-kratos/kratos/tool/protobuf/pkg/tag"
 	"github.com/go-kratos/kratos/tool/protobuf/pkg/typemap"
 	"github.com/go-kratos/kratos/tool/protobuf/pkg/utils"
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/protoc-gen-go/descriptor"
-	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
 )
 
 type bm struct {
@@ -122,8 +123,7 @@ func (t *bm) generateImports(file *descriptor.FileDescriptorProto) {
 	// It's legal to import a message and use it as an input or output for a
 	// method. Make sure to import the package of any such message. First, dedupe
 	// them.
-	deps := make(map[string]string) // Map of package name to quoted import path.
-	deps = t.DeduceDeps(file)
+	deps := t.DeduceDeps(file)
 	for pkg, importPath := range deps {
 		t.P(`import `, pkg, ` `, importPath)
 	}
@@ -132,7 +132,6 @@ func (t *bm) generateImports(file *descriptor.FileDescriptorProto) {
 	t.P(`var _ *bm.Context`)
 	t.P(`var _ context.Context`)
 	t.P(`var _ binding.StructValidator`)
-
 }
 
 // Big header comments to makes it easier to visually parse a generated file.

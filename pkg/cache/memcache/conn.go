@@ -84,7 +84,7 @@ func Dial(network, address string, options ...DialOption) (Conn, error) {
 		return nil, pkgerr.WithStack(err)
 	}
 	pconn, err := newASCIIConn(netConn, do.readTimeout, do.writeTimeout)
-	return &conn{pconn: pconn, ed: newEncodeDecoder()}, nil
+	return &conn{pconn: pconn, ed: newEncodeDecoder()}, err
 }
 
 type conn struct {

@@ -16,7 +16,7 @@ type testUnmarshler struct {
 func TestValueUnmarshal(t *testing.T) {
 	s := `
 		int = 100
-		text = "hello"	
+		text = "hello"
 	`
 	v := Value{val: s, raw: s}
 	obj := new(testUnmarshler)
@@ -36,7 +36,7 @@ func TestValue(t *testing.T) {
 			"text",
 		},
 		{
-			time.Duration(time.Second * 10),
+			time.Second * 10,
 			"10s",
 		},
 		{

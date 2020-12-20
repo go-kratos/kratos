@@ -50,7 +50,6 @@ func main() {
 	}
 	wg.Wait()
 	fmt.Printf("per request cost %v\n", all/int64(request*concurrency))
-
 }
 
 func sayHello(in *pb.HelloRequest) {

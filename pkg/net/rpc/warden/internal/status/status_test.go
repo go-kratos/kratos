@@ -70,7 +70,7 @@ func TestFromError(t *testing.T) {
 		gst := FromError(err)
 
 		//assert.Equal(t, codes.InvalidArgument, gst.Code())
-		// NOTE: set all grpc.status as Unkown when error is ecode.Codes for compatible
+		// NOTE: set all grpc.status as Unknown when error is ecode.Codes for compatible
 		assert.Equal(t, codes.Unknown, gst.Code())
 		// NOTE: gst.Message == str(ecode.Code) for compatible php leagcy code
 		assert.Equal(t, err.Message(), gst.Message())
@@ -93,7 +93,7 @@ func TestFromError(t *testing.T) {
 		gst := FromError(err)
 
 		//assert.Equal(t, codes.Unauthenticated, gst.Code())
-		// NOTE: set all grpc.status as Unkown when error is ecode.Codes for compatible
+		// NOTE: set all grpc.status as Unknown when error is ecode.Codes for compatible
 		assert.Equal(t, codes.Unknown, gst.Code())
 		assert.Len(t, gst.Details(), 1)
 		details := gst.Details()

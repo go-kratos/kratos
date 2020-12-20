@@ -36,7 +36,6 @@ func TestCoDel200(t *testing.T) {
 	testPush(q, qps, delay, drop, tm)
 	fmt.Printf("qps %v process time %v drop %d timeout %d \n", int64(time.Second/qps), delay, *drop, *tm)
 	time.Sleep(time.Second)
-
 }
 
 func TestCoDel100(t *testing.T) {
@@ -46,7 +45,6 @@ func TestCoDel100(t *testing.T) {
 	delay := time.Millisecond * 1000
 	testPush(q, qps, delay, drop, tm)
 	fmt.Printf("qps %v process time %v drop %d timeout %d \n", int64(time.Second/qps), delay, *drop, *tm)
-
 }
 
 func TestCoDel50(t *testing.T) {

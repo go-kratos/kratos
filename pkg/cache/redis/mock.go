@@ -19,7 +19,9 @@ func (m MockErr) Err() error { return m.Error }
 func (m MockErr) Close() error { return m.Error }
 
 // Do .
-func (m MockErr) Do(commandName string, args ...interface{}) (interface{}, error) { return nil, m.Error }
+func (m MockErr) Do(commandName string, args ...interface{}) (interface{}, error) {
+	return nil, m.Error
+}
 
 // Send .
 func (m MockErr) Send(commandName string, args ...interface{}) error { return m.Error }

@@ -71,7 +71,6 @@ func (b *Builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 				if t, err := strconv.ParseInt(sub[0], 10, 64); err == nil {
 					ss = t
 				}
-
 			}
 		}
 	}
