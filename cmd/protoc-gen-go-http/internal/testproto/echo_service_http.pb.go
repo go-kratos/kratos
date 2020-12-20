@@ -36,7 +36,9 @@ func _HTTP_EchoService_Echo_0(srv interface{}, ctx context.Context, dec func(int
 		return nil, err
 	}
 
-	if err := http1.PopulateForm(&in, req, []string{}); err != nil {
+	if err := http1.PopulateForm(&in, req, []string{
+		"id", "num",
+	}); err != nil {
 		return nil, err
 	}
 
@@ -56,7 +58,9 @@ func _HTTP_EchoService_Echo_1(srv interface{}, ctx context.Context, dec func(int
 		return nil, err
 	}
 
-	if err := http1.PopulateForm(&in, req, []string{}); err != nil {
+	if err := http1.PopulateForm(&in, req, []string{
+		"id", "num", "lang",
+	}); err != nil {
 		return nil, err
 	}
 
@@ -76,7 +80,9 @@ func _HTTP_EchoService_Echo_2(srv interface{}, ctx context.Context, dec func(int
 		return nil, err
 	}
 
-	if err := http1.PopulateForm(&in, req, []string{}); err != nil {
+	if err := http1.PopulateForm(&in, req, []string{
+		"id", "line_num", "status.note",
+	}); err != nil {
 		return nil, err
 	}
 
@@ -96,7 +102,9 @@ func _HTTP_EchoService_Echo_3(srv interface{}, ctx context.Context, dec func(int
 		return nil, err
 	}
 
-	if err := http1.PopulateForm(&in, req, []string{}); err != nil {
+	if err := http1.PopulateForm(&in, req, []string{
+		"no.note",
+	}); err != nil {
 		return nil, err
 	}
 
@@ -116,7 +124,9 @@ func _HTTP_EchoService_Echo_4(srv interface{}, ctx context.Context, dec func(int
 		return nil, err
 	}
 
-	if err := http1.PopulateForm(&in, req, []string{}); err != nil {
+	if err := http1.PopulateForm(&in, req, []string{
+		"id",
+	}); err != nil {
 		return nil, err
 	}
 

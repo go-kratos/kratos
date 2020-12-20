@@ -19,9 +19,9 @@ import (
 )
 
 // PopulateVars sets a value in a nested Protobuf structure.
-func PopulateVars(msg proto.Message, req *http.Request, filters []string) error {
+func PopulateVars(msg proto.Message, req *http.Request, include []string) error {
 	for key, value := range Vars(req) {
-		if populateFilters(key, filters) {
+		if populateFilters(key, include) {
 			continue
 		}
 		if err := populateFieldValueFromPath(msg.ProtoReflect(), strings.Split(key, "."), []string{value}); err != nil {
@@ -32,12 +32,12 @@ func PopulateVars(msg proto.Message, req *http.Request, filters []string) error 
 }
 
 // PopulateForm parses query parameters
-func PopulateForm(msg proto.Message, req *http.Request, filters []string) error {
+func PopulateForm(msg proto.Message, req *http.Request, exclude []string) error {
 	if err := req.ParseForm(); err != nil {
 		return err
 	}
 	for key, values := range req.Form {
-		if populateFilters(key, filters) {
+		if !populateFilters(key, exclude) {
 			continue
 		}
 		if err := populateFieldValueFromPath(msg.ProtoReflect(), strings.Split(key, "."), values); err != nil {
@@ -315,9 +315,6 @@ func parseMessage(msgDescriptor protoreflect.MessageDescriptor, value string) (p
 }
 
 func populateFilters(key string, filters []string) bool {
-	if len(filters) == 0 {
-		return false
-	}
 	for _, s := range filters {
 		if s == key {
 			return false

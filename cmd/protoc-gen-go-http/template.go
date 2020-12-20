@@ -28,7 +28,9 @@ func _HTTP_{{$.ServiceType}}_{{.Name}}_{{.Num}}(srv interface{}, ctx context.Con
 	}
 {{end}}
 {{if eq .Body ""}}
-	if err := http1.PopulateForm(&in, req, []string{}); err != nil {
+	if err := http1.PopulateForm(&in, req, []string{
+	{{range .Vars}} "{{.}}", {{end}}
+	}); err != nil {
 		return nil, err
 	}
 {{else if eq .Body ".*"}}
