@@ -8,7 +8,7 @@ import (
 
 var httpTemplate = `
 type {{.ServiceType}}HTTPServer interface {
-{{range .Methods}}
+{{range .MethodSets}}
 	{{.Name}}(context.Context, *{{.Request}}) (*{{.Reply}}, error)
 {{end}}
 }
@@ -18,34 +18,29 @@ func Register{{.ServiceType}}HTTPServer(s http1.ServiceRegistrar, srv {{.Service
 }
 
 {{range .Methods}}
-func _HTTP_{{.ServiceType}}_{{.Name}}(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
+func _HTTP_{{$.ServiceType}}_{{.Name}}_{{.Num}}(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
 	var in {{.Request}}
-{{if eq .Body ".*"}}
+{{if ne (len .Vars) 0}}
+	if err := http1.PopulateVars(&in, req, []string{
+	{{range .Vars}} "{{.}}", {{end}}
+	}); err != nil {
+		return nil, err
+	}
+{{end}}
+{{if eq .Body ""}}
+	if err := http1.PopulateForm(&in, req, []string{}); err != nil {
+		return nil, err
+	}
+{{else if eq .Body ".*"}}
 	if err := dec(&in); err != nil {
 		return nil, err
 	}
-{{else if ne .Body ""}}
+{{else}}
 	if err := dec(&in{{.Body}}); err != nil {
 		return nil, err
 	}
 {{end}}
-{{if ne (len .Vars) 0}}
-	var (
-		ok bool
-		err error
-		value string
-		vars = http1.Vars(req)
-	)
-{{end }}
-{{range .Vars}}
-	if value, ok = vars["{{.ProtoName}}"]; !ok {
-		return nil, errors.InvalidArgument("Errors_InvalidArgument", "Missing parameter: {{.ProtoName}}")
-	}
-	if in.{{.GoName}}, err = http1.{{.Kind}}(value); err != nil {
-		return nil, errors.InvalidArgument("Errors_InvalidArgument", "Failed to parse {{.ProtoName}}: %s error = %v", value, err)
-	}
-{{end}}
-	out, err := srv.({{.ServiceType}}Server).{{.Name}}(ctx, &in)
+	out, err := srv.({{$.ServiceType}}Server).{{.Name}}(ctx, &in)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +56,7 @@ var _HTTP_{{.ServiceType}}_serviceDesc = http1.ServiceDesc{
 		{
 			Path:    "{{.Path}}",
 			Method:  "{{.Method}}",
-			Handler: _HTTP_{{.ServiceType}}_{{.Name}},
+			Handler: _HTTP_{{$.ServiceType}}_{{.Name}}_{{.Num}},
 		},
 {{end}}
 	},
@@ -74,14 +69,15 @@ type serviceDesc struct {
 	ServiceName string // helloworld.Greeter
 	Metadata    string // api/helloworld/helloworld.proto
 	Methods     []*methodDesc
+	MethodSets  map[string]*methodDesc
 }
 
 type methodDesc struct {
-	// service
-	ServiceType string // Greeter
 	// method
 	Name    string
-	Vars    []pathParam
+	Num     int
+	Vars    []string
+	Forms   []string
 	Request string
 	Reply   string
 	// http_rule
@@ -91,13 +87,11 @@ type methodDesc struct {
 	ResponseBody string
 }
 
-type pathParam struct {
-	Kind      string
-	GoName    string
-	ProtoName string
-}
-
 func (s *serviceDesc) execute() string {
+	s.MethodSets = make(map[string]*methodDesc)
+	for _, m := range s.Methods {
+		s.MethodSets[m.Name] = m
+	}
 	buf := new(bytes.Buffer)
 	tmpl, err := template.New("http").Parse(strings.TrimSpace(httpTemplate))
 	if err != nil {

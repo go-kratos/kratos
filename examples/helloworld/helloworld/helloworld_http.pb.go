@@ -4,14 +4,13 @@ package helloworld
 
 import (
 	context "context"
-	errors "github.com/go-kratos/kratos/v2/errors"
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
 	http "net/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
-// context./http./errors.
+// context./http.
 const _ = http1.SupportPackageIsVersion1
 
 type GreeterHTTPServer interface {
@@ -22,21 +21,13 @@ func RegisterGreeterHTTPServer(s http1.ServiceRegistrar, srv GreeterHTTPServer) 
 	s.RegisterService(&_HTTP_Greeter_serviceDesc, srv)
 }
 
-func _HTTP_Greeter_SayHello(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
+func _HTTP_Greeter_SayHello_0(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
 	var in HelloRequest
 
-	var (
-		ok    bool
-		err   error
-		value string
-		vars  = http1.Vars(req)
-	)
-
-	if value, ok = vars["name"]; !ok {
-		return nil, errors.InvalidArgument("Errors_InvalidArgument", "Missing parameter: name")
-	}
-	if in.Name, err = http1.String(value); err != nil {
-		return nil, errors.InvalidArgument("Errors_InvalidArgument", "Failed to parse name: %s error = %v", value, err)
+	if err := http1.PopulateVars(&in, req, []string{
+		"name",
+	}); err != nil {
+		return nil, err
 	}
 
 	out, err := srv.(GreeterServer).SayHello(ctx, &in)
@@ -54,8 +45,8 @@ var _HTTP_Greeter_serviceDesc = http1.ServiceDesc{
 		{
 			Path:    "/helloworld/{name}",
 			Method:  "GET",
-			Handler: _HTTP_Greeter_SayHello,
+			Handler: _HTTP_Greeter_SayHello_0,
 		},
 	},
-	Metadata: "helloworld.proto",
+	Metadata: "helloworld/helloworld.proto",
 }

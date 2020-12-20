@@ -7,7 +7,6 @@ import (
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
@@ -15,8 +14,9 @@ const (
 	contextPackage   = protogen.GoImportPath("context")
 	httpPackage      = protogen.GoImportPath("net/http")
 	transportPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
-	errorsPackage    = protogen.GoImportPath("github.com/go-kratos/kratos/v2/errors")
 )
+
+var methodSets = make(map[string]int)
 
 // generateFile generates a _http.pb.go file containing kratos errors definitions.
 func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.GeneratedFile {
@@ -40,7 +40,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	}
 	g.P("// This is a compile-time assertion to ensure that this generated file")
 	g.P("// is compatible with the kratos package it is being compiled against.")
-	g.P("// ", contextPackage.Ident(""), "/", httpPackage.Ident(""), "/", errorsPackage.Ident(""))
+	g.P("// ", contextPackage.Ident(""), "/", httpPackage.Ident(""))
 	g.P("const _ = ", transportPackage.Ident("SupportPackageIsVersion1"))
 	g.P()
 
@@ -49,113 +49,93 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	}
 }
 
-func fieldKind(input *protogen.Message, name string) string {
-	names := strings.Split(name, ".")
-	for _, f := range input.Fields {
-		if string(f.Desc.Name()) != names[0] {
-			continue
-		}
-		switch f.Desc.Kind() {
-		case protoreflect.BoolKind:
-			return "Bool"
-		case protoreflect.EnumKind:
-			return "Enum"
-		case protoreflect.Int32Kind:
-			return "Int32"
-		case protoreflect.Int64Kind:
-			return "Int64"
-		case protoreflect.Uint32Kind:
-			return "Uint32"
-		case protoreflect.Uint64Kind:
-			return "Uint64"
-		case protoreflect.FloatKind:
-			return "Float32"
-		case protoreflect.DoubleKind:
-			return "Float64"
-		case protoreflect.StringKind:
-			return "String"
-		case protoreflect.BytesKind:
-			return "Bytes"
-		case protoreflect.MessageKind:
-			return fieldKind(f.Message, strings.Join(names[1:], "."))
-		}
-	}
-	return ""
-}
-
 func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, service *protogen.Service) {
 	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() {
 		g.P("//")
 		g.P(deprecationComment)
 	}
-	// Server interface.
+	// HTTP Server.
 	sd := &serviceDesc{
 		ServiceType: service.GoName,
 		ServiceName: string(service.Desc.FullName()),
 		Metadata:    file.Desc.Path(),
 	}
-	for _, m := range service.Methods {
-		var (
-			path         string
-			method       string
-			body         string
-			responseBody string
-		)
-		rule, ok := proto.GetExtension(m.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
+	for _, method := range service.Methods {
+		rule, ok := proto.GetExtension(method.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
 		if rule != nil && ok {
-			switch pattern := rule.Pattern.(type) {
-			case *annotations.HttpRule_Get:
-				path = pattern.Get
-				method = "GET"
-			case *annotations.HttpRule_Put:
-				path = pattern.Put
-				method = "PUT"
-			case *annotations.HttpRule_Post:
-				path = pattern.Post
-				method = "POST"
-			case *annotations.HttpRule_Delete:
-				path = pattern.Delete
-				method = "DELETE"
-			case *annotations.HttpRule_Patch:
-				path = pattern.Patch
-				method = "PATCH"
-			case *annotations.HttpRule_Custom:
-				path = pattern.Custom.Path
-				method = pattern.Custom.Kind
+			for _, bind := range rule.AdditionalBindings {
+				sd.Methods = append(sd.Methods, buildHTTPRule(method, bind))
 			}
-			body = rule.Body
-			responseBody = rule.ResponseBody
+			sd.Methods = append(sd.Methods, buildHTTPRule(method, rule))
 		} else {
-			path = fmt.Sprintf("/%s/%s", service.Desc.FullName(), m.Desc.Name())
-			method = "POST"
+			path := fmt.Sprintf("/%s/%s", service.Desc.FullName(), method.Desc.Name())
+			sd.Methods = append(sd.Methods, buildMethodDesc(method, "POST", path))
+
 		}
-		md := &methodDesc{
-			// service
-			ServiceType: sd.ServiceType,
-			// method
-			Name:    m.GoName,
-			Request: m.Input.GoIdent.GoName,
-			Reply:   m.Output.GoIdent.GoName,
-			// http_rule
-			Path:   path,
-			Method: method,
-		}
-		if body != "" {
-			md.Body = "." + camelCaseVars(body)
-		}
-		if responseBody != "" {
-			md.ResponseBody = "." + camelCaseVars(responseBody)
-		}
-		vars := strings.Split(md.Path, "/")
-		for _, v := range vars {
-			if strings.HasPrefix(v, "{") && strings.HasSuffix(v, "}") {
-				name := v[1 : len(v)-1]
-				md.Vars = append(md.Vars, pathParam{GoName: camelCaseVars(name), ProtoName: name, Kind: fieldKind(m.Input, name)})
-			}
-		}
-		sd.Methods = append(sd.Methods, md)
 	}
 	g.P(sd.execute())
+}
+
+func buildHTTPRule(m *protogen.Method, rule *annotations.HttpRule) *methodDesc {
+	var (
+		path         string
+		method       string
+		body         string
+		responseBody string
+	)
+	switch pattern := rule.Pattern.(type) {
+	case *annotations.HttpRule_Get:
+		path = pattern.Get
+		method = "GET"
+	case *annotations.HttpRule_Put:
+		path = pattern.Put
+		method = "PUT"
+	case *annotations.HttpRule_Post:
+		path = pattern.Post
+		method = "POST"
+	case *annotations.HttpRule_Delete:
+		path = pattern.Delete
+		method = "DELETE"
+	case *annotations.HttpRule_Patch:
+		path = pattern.Patch
+		method = "PATCH"
+	case *annotations.HttpRule_Custom:
+		path = pattern.Custom.Path
+		method = pattern.Custom.Kind
+	}
+	body = rule.Body
+	responseBody = rule.ResponseBody
+	md := buildMethodDesc(m, method, path)
+	if body != "" {
+		md.Body = "." + camelCaseVars(body)
+	}
+	if responseBody != "" {
+		md.ResponseBody = "." + camelCaseVars(responseBody)
+	}
+	return md
+}
+
+func buildMethodDesc(m *protogen.Method, method, path string) *methodDesc {
+	defer func() { methodSets[m.GoName]++ }()
+	return &methodDesc{
+		Name:    m.GoName,
+		Num:     methodSets[m.GoName],
+		Request: m.Input.GoIdent.GoName,
+		Reply:   m.Output.GoIdent.GoName,
+		Path:    path,
+		Method:  method,
+		Vars:    buildPathVars(m, path),
+	}
+}
+
+func buildPathVars(method *protogen.Method, path string) (res []string) {
+	for _, v := range strings.Split(path, "/") {
+		if strings.HasPrefix(v, "{") && strings.HasSuffix(v, "}") {
+			name := strings.TrimRight(strings.TrimLeft(v, "{"), "}")
+			res = append(res, name)
+		}
+	}
+	return
 }
 
 func camelCaseVars(s string) string {
