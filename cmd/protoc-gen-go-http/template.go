@@ -21,16 +21,12 @@ func Register{{.ServiceType}}HTTPServer(s http1.ServiceRegistrar, srv {{.Service
 func _HTTP_{{$.ServiceType}}_{{.Name}}_{{.Num}}(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
 	var in {{.Request}}
 {{if ne (len .Vars) 0}}
-	if err := http1.PopulateVars(&in, req, []string{
-	{{range .Vars}} "{{.}}", {{end}}
-	}, nil); err != nil {
+	if err := http1.PopulateVars(&in, req); err != nil {
 		return nil, err
 	}
 {{end}}
 {{if eq .Body ""}}
-	if err := http1.PopulateForm(&in, req, nil, []string{
-	{{range .Vars}} "{{.}}", {{end}}
-	}); err != nil {
+	if err := http1.PopulateForm(&in, req); err != nil {
 		return nil, err
 	}
 {{else if eq .Body ".*"}}
