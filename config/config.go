@@ -8,6 +8,7 @@ import (
 // MD is the value metadata.
 type MD interface {
 	Key() string
+	Type() string
 }
 
 // Value is the config value interface.
