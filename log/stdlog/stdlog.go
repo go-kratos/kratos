@@ -77,7 +77,7 @@ func NewStdLogger(opts ...Option) log.Logger {
 	}
 }
 
-func callerPath(path string) string {
+func stackTrace(path string) string {
 	idx := strings.LastIndexByte(path, '/')
 	if idx == -1 {
 		return path
@@ -98,7 +98,7 @@ func (s *stdLogger) Print(kvpair ...interface{}) {
 	}
 	buf := s.pool.Get().(*bytes.Buffer)
 	if _, file, line, ok := runtime.Caller(s.opts.skip); ok {
-		buf.WriteString(fmt.Sprintf("source=%s:%d ", callerPath(file), line))
+		buf.WriteString(fmt.Sprintf("source=%s:%d ", stackTrace(file), line))
 	}
 	for i := 0; i < len(kvpair); i += 2 {
 		fmt.Fprintf(buf, "%s=%s ", kvpair[i], kvpair[i+1])
