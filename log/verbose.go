@@ -14,5 +14,5 @@ func (v Verbose) String() string {
 
 // Enabled .
 func (v Verbose) Enabled(n Verbose) bool {
-	return n >= v
+	return v > n
 }

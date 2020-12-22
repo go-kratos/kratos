@@ -41,7 +41,7 @@ func NewHelper(name string, l Logger, opts ...Option) *Helper {
 	for _, o := range opts {
 		o(&options)
 	}
-	return &Helper{Logger: WithPrefix(l, "module", name), opts: options}
+	return &Helper{Logger: With(l, "module", name), opts: options}
 }
 
 // V logs a message at verbose level.
@@ -49,7 +49,7 @@ func (h *Helper) V(v Verbose) Logger {
 	if h.opts.verbose.Enabled(v) {
 		return nop
 	}
-	return WithPrefix(h, VerboseKey, v)
+	return With(h, VerboseKey, v)
 }
 
 // Debug logs a message at debug level.
