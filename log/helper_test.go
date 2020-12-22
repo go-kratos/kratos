@@ -1,19 +1,18 @@
 package log
 
 import (
-	"os"
 	"testing"
 )
 
 func TestHelper(t *testing.T) {
-	log := NewHelper("test", NewStdLogger(os.Stdout))
+	log := NewHelper("test", &testLogger{t})
 	log.Debug("test log")
 	log.Debugf("test %s", "log")
 	log.Debugw("test", "log")
 }
 
 func TestHelperLevel(t *testing.T) {
-	log := NewHelper("test", NewStdLogger(os.Stdout), AllowLevel(LevelInfo))
+	log := NewHelper("test", &testLogger{t})
 	log.Debug("test log")
 	log.Info("test log")
 	log.Warn("test log")
@@ -21,7 +20,7 @@ func TestHelperLevel(t *testing.T) {
 }
 
 func TestHelperVerbose(t *testing.T) {
-	log := NewHelper("test", NewStdLogger(os.Stdout), AllowVerbose(10))
+	log := NewHelper("test", &testLogger{t})
 	log.V(1).Print("log", "test log")
 	log.V(5).Print("log", "test log")
 	log.V(10).Print("log", "test log")
