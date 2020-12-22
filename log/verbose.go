@@ -11,3 +11,8 @@ type Verbose int
 func (v Verbose) String() string {
 	return strconv.Itoa(int(v))
 }
+
+// Enabled .
+func (v Verbose) Enabled(n Verbose) bool {
+	return n >= v
+}
