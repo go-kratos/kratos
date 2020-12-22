@@ -13,7 +13,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
-var _ log.Logger = new(stdLogger)
+var _ log.Logger = (*stdLogger)(nil)
 
 // Option is std logger option.
 type Option func(*options)
