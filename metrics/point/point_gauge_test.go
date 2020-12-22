@@ -1,8 +1,9 @@
-package metrics
+package point
 
 import (
 	"testing"
 
+	"github.com/go-kratos/kratos/v2/metrics/rolling"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,7 +12,7 @@ func TestPointGaugeAdd(t *testing.T) {
 	pointGauge := NewPointGauge(opts)
 	listBuckets := func() [][]float64 {
 		buckets := make([][]float64, 0)
-		pointGauge.Reduce(func(i Iterator) float64 {
+		pointGauge.Reduce(func(i rolling.Iterator) float64 {
 			for i.Next() {
 				bucket := i.Bucket()
 				buckets = append(buckets, bucket.Points)
@@ -39,7 +40,7 @@ func TestPointGaugeReduce(t *testing.T) {
 	for i := 0; i < opts.Size; i++ {
 		pointGauge.Add(int64(i))
 	}
-	var _ = pointGauge.Reduce(func(i Iterator) float64 {
+	var _ = pointGauge.Reduce(func(i rolling.Iterator) float64 {
 		idx := 0
 		for i.Next() {
 			bucket := i.Bucket()

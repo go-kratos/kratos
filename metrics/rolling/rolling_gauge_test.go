@@ -1,4 +1,4 @@
-package metrics
+package rolling
 
 import (
 	"math/rand"

@@ -1,6 +1,8 @@
-package metrics
+package rolling
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Iterator iterates the buckets within the window.
 type Iterator struct {

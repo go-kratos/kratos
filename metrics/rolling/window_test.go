@@ -1,8 +1,9 @@
-package metrics
+package rolling
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWindowResetWindow(t *testing.T) {

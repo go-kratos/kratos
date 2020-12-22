@@ -1,18 +1,20 @@
-package metrics
+package rolling
 
 import (
 	"fmt"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/metrics"
 )
 
-var _ Metric = &rollingCounter{}
-var _ Aggregation = &rollingCounter{}
+var _ metrics.Metric = &rollingCounter{}
+var _ metrics.Aggregation = &rollingCounter{}
 
 // RollingCounter represents a ring window based on time duration.
 // e.g. [[1], [3], [5]]
 type RollingCounter interface {
-	Metric
-	Aggregation
+	metrics.Metric
+	metrics.Aggregation
 	Timespan() int
 	// Reduce applies the reduction function to all buckets within the window.
 	Reduce(func(Iterator) float64) float64

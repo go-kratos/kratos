@@ -1,6 +1,8 @@
-package metrics
+package rolling
 
-import "sync"
+import (
+	"sync"
+)
 
 // PointPolicy is a policy of points within the window.
 // PointPolicy wraps the window and make it seem like ring-buf.

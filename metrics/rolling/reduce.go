@@ -1,4 +1,4 @@
-package metrics
+package rolling
 
 // Sum the values within the window.
 func Sum(iterator Iterator) float64 {

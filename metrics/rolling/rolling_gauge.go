@@ -1,15 +1,19 @@
-package metrics
+package rolling
 
-import "time"
+import (
+	"time"
 
-var _ Metric = &rollingGauge{}
-var _ Aggregation = &rollingGauge{}
+	"github.com/go-kratos/kratos/v2/metrics"
+)
+
+var _ metrics.Metric = &rollingGauge{}
+var _ metrics.Aggregation = &rollingGauge{}
 
 // RollingGauge represents a ring window based on time duration.
 // e.g. [[1, 2], [1, 2, 3], [1,2, 3, 4]]
 type RollingGauge interface {
-	Metric
-	Aggregation
+	metrics.Metric
+	metrics.Aggregation
 	// Reduce applies the reduction function to all buckets within the window.
 	Reduce(func(Iterator) float64) float64
 }
