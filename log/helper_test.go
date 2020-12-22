@@ -6,14 +6,14 @@ import (
 )
 
 func TestHelper(t *testing.T) {
-	log := GetHelper("", NewStdLogger(os.Stdout))
+	log := NewHelper("", NewStdLogger(os.Stdout))
 	log.Debug("test log")
 	log.Debugf("test %s", "log")
 	log.Debugw("test", "log")
 }
 
 func TestHelperLevel(t *testing.T) {
-	log := GetHelper("", NewStdLogger(os.Stdout), AllowLevel(LevelInfo))
+	log := NewHelper("", NewStdLogger(os.Stdout), AllowLevel(LevelInfo))
 	log.Debug("test log")
 	log.Info("test log")
 	log.Warn("test log")
@@ -21,7 +21,7 @@ func TestHelperLevel(t *testing.T) {
 }
 
 func TestHelperVerbose(t *testing.T) {
-	log := GetHelper("", NewStdLogger(os.Stdout), AllowVerbose(10))
+	log := NewHelper("test", NewStdLogger(os.Stdout), AllowVerbose(10))
 	log.V(1).Print("test log")
 	log.V(5).Print("test log")
 	log.V(10).Print("test log")

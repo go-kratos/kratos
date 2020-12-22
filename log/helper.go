@@ -35,8 +35,8 @@ type Helper struct {
 	opts options
 }
 
-// GetHelper returns a logger helper.
-func GetHelper(name string, l Logger, opts ...Option) *Helper {
+// NewHelper new a logger helper.
+func NewHelper(name string, l Logger, opts ...Option) *Helper {
 	options := options{}
 	for _, o := range opts {
 		o(&options)
