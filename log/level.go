@@ -1,11 +1,11 @@
 package log
 
-// level is a logger level.
-type level int8
+// Level is a logger level.
+type Level int8
 
 const (
 	// LevelDebug is logger debug level.
-	LevelDebug level = iota
+	LevelDebug Level = iota
 	// LevelInfo is logger info level.
 	LevelInfo
 	// LevelWarn is logger warn level.
@@ -14,15 +14,17 @@ const (
 	LevelError
 )
 
-// LevelKey is logger level key.
-const LevelKey = "level"
+const (
+	// LevelKey is logger level key.
+	LevelKey = "level"
+)
 
 // Enabled .
-func (l level) Enabled(lv level) bool {
+func (l Level) Enabled(lv Level) bool {
 	return lv >= l
 }
 
-func (l level) String() string {
+func (l Level) String() string {
 	switch l {
 	case LevelDebug:
 		return "DEBUG"

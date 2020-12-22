@@ -1,11 +1,12 @@
 package log
 
 import (
+	"os"
 	"testing"
 )
 
 func TestLogger(t *testing.T) {
-	log := GetLogger("test")
+	log := NewStdLogger(os.Stdout)
 	log.Print("log", "test")
 
 	Debug(log).Print("log", "test")
