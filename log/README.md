@@ -5,7 +5,8 @@
 ### Structured logging
 
 ```
-log := NewHelper("module_name", stdlog.NewLogger(stdlog.Writer(os.Stdout)))
+logger := stdlog.NewLogger(stdlog.Writer(os.Stdout))
+log := log.NewHelper("module_name", logger)
 // Levels
 log.Info("some log")
 log.Infof("format %s", "some log")
