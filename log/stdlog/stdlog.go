@@ -63,6 +63,7 @@ type stdLogger struct {
 func NewLogger(opts ...Option) log.Logger {
 	options := options{
 		flag: stdlog.LstdFlags,
+		skip: 2,
 		out:  os.Stdout,
 	}
 	for _, o := range opts {
