@@ -57,8 +57,8 @@ type stdLogger struct {
 	pool *sync.Pool
 }
 
-// NewStdLogger .
-func NewStdLogger(opts ...Option) log.Logger {
+// NewLogger new a std logger with options.
+func NewLogger(opts ...Option) log.Logger {
 	options := options{
 		flag: stdlog.LstdFlags,
 		out:  os.Stdout,

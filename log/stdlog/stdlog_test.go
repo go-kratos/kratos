@@ -9,7 +9,7 @@ import (
 )
 
 func TestLogger(t *testing.T) {
-	logger := NewStdLogger(Writer(os.Stdout))
+	logger := NewLogger(Writer(os.Stdout))
 	logger.Print("log", "test")
 
 	log.Debug(logger).Print("log", "test")
@@ -20,7 +20,7 @@ func TestLogger(t *testing.T) {
 
 func BenchmarkLoggerPrint(b *testing.B) {
 	b.SetParallelism(100)
-	log := NewStdLogger(Writer(ioutil.Discard))
+	log := NewLogger(Writer(ioutil.Discard))
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			log.Print("log", "test")
@@ -29,7 +29,7 @@ func BenchmarkLoggerPrint(b *testing.B) {
 }
 func BenchmarkLoggerHelperV(b *testing.B) {
 	b.SetParallelism(100)
-	log := log.NewHelper("test", NewStdLogger(Writer(ioutil.Discard)))
+	log := log.NewHelper("test", NewLogger(Writer(ioutil.Discard)))
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			log.V(10).Print("log", "test")
@@ -38,7 +38,7 @@ func BenchmarkLoggerHelperV(b *testing.B) {
 }
 func BenchmarkLoggerHelperInfo(b *testing.B) {
 	b.SetParallelism(100)
-	log := log.NewHelper("test", NewStdLogger(Writer(ioutil.Discard)))
+	log := log.NewHelper("test", NewLogger(Writer(ioutil.Discard)))
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			log.Info("log", "test")
@@ -47,7 +47,7 @@ func BenchmarkLoggerHelperInfo(b *testing.B) {
 }
 func BenchmarkLoggerHelperInfof(b *testing.B) {
 	b.SetParallelism(100)
-	log := log.NewHelper("test", NewStdLogger(Writer(ioutil.Discard)))
+	log := log.NewHelper("test", NewLogger(Writer(ioutil.Discard)))
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			log.Infof("log %s", "test")
@@ -56,7 +56,7 @@ func BenchmarkLoggerHelperInfof(b *testing.B) {
 }
 func BenchmarkLoggerHelperInfow(b *testing.B) {
 	b.SetParallelism(100)
-	log := log.NewHelper("test", NewStdLogger(Writer(ioutil.Discard)))
+	log := log.NewHelper("test", NewLogger(Writer(ioutil.Discard)))
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			log.Infow("log", "test")
