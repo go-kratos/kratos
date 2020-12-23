@@ -5,29 +5,25 @@ import (
 	"time"
 )
 
-// MD is the value metadata.
-type MD interface {
-	Key() string
-	Type() string
-}
-
 // Value is the config value interface.
 type Value interface {
-	Metadata() MD
-
-	Bool(def bool) bool
-	Int(def int) int
-	Int32(def int32) int32
-	Int64(def int64) int64
-	Float32(def float32) float32
-	Float64(def float64) float64
-	String(def string) string
-	Duration(def time.Duration) time.Duration
-
-	Scan(val interface{}) error
+	Bool() (bool, error)
+	Int() (int, error)
+	Int32() (int32, error)
+	Int64() (int64, error)
+	Float32() (float32, error)
+	Float64() (float64, error)
+	String() (string, error)
+	Duration() (time.Duration, error)
+	Scan(interface{}) error
 }
 
-// Watcher is the config watcher.
+// Source is a config source.
+type Source interface {
+	Resolve(key string) (Value, error)
+}
+
+// Watcher is a config watcher.
 type Watcher interface {
 	Next() (Value, error)
 }
