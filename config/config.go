@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Value is the config value interface.
+// Value is config value interface.
 type Value interface {
 	Bool() (bool, error)
 	Int() (int, error)
@@ -18,17 +18,17 @@ type Value interface {
 	Scan(interface{}) error
 }
 
-// Source is a config source.
-type Source interface {
-	Resolve(key string) (Value, error)
+// Resolver is config resolver.
+type Resolver interface {
+	Value(key string) (Value, bool)
 }
 
-// Watcher is a config watcher.
+// Watcher is config watcher.
 type Watcher interface {
 	Next() (Value, error)
 }
 
-// Config is an interface abstraction for configuration.
+// Config is a config interface.
 type Config interface {
 	Var(v expvar.Var) error
 	Value(key string) Value

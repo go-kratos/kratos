@@ -2,14 +2,15 @@ package example
 
 import (
 	"fmt"
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/go-kratos/kratos/v2/config/decoder"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {
 	c := new(ExampleConfig)
-	err := config.ApplyYAML(`
+	err := decoder.ApplyYAML(`
 address: localhost
 timeout: 99
 `, c)
