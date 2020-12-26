@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -37,6 +38,23 @@ func PopulateForm(msg proto.Message, req *http.Request) error {
 		if err := populateFieldValueFromPath(msg.ProtoReflect(), strings.Split(key, "."), values); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// PopulateBody parses body payload.
+func PopulateBody(msg proto.Message, req *http.Request) error {
+	codec, err := RequestCodec(req)
+	if err != nil {
+		return err
+	}
+	data, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return err
+	}
+	defer req.Body.Close()
+	if err = codec.Unmarshal(data, msg); err != nil {
+		return err
 	}
 	return nil
 }

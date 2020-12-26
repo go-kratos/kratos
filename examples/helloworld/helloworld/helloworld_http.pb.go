@@ -4,8 +4,9 @@ package helloworld
 
 import (
 	context "context"
-	http1 "github.com/go-kratos/kratos/v2/transport/http"
 	http "net/http"
+
+	http1 "github.com/go-kratos/kratos/v2/transport/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -21,7 +22,7 @@ func RegisterGreeterHTTPServer(s http1.ServiceRegistrar, srv GreeterHTTPServer) 
 	s.RegisterService(&_HTTP_Greeter_serviceDesc, srv)
 }
 
-func _HTTP_Greeter_SayHello_0(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
+func _HTTP_Greeter_SayHello_0(srv interface{}, ctx context.Context, req *http.Request) (interface{}, error) {
 	var in HelloRequest
 
 	if err := http1.PopulateVars(&in, req); err != nil {

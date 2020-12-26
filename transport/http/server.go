@@ -25,7 +25,7 @@ type ServiceDesc struct {
 	Metadata    interface{}
 }
 
-type methodHandler func(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error)
+type methodHandler func(srv interface{}, ctx context.Context, req *http.Request) (interface{}, error)
 
 // MethodDesc represents a HTTP service's method specification.
 type MethodDesc struct {
@@ -91,9 +91,7 @@ func (s *Server) registerHandle(srv interface{}, md MethodDesc) {
 	s.router.HandleFunc(md.Path, func(res http.ResponseWriter, req *http.Request) {
 
 		handler := func(ctx context.Context, in interface{}) (interface{}, error) {
-			return md.Handler(srv, ctx, func(in interface{}) error {
-				return s.opts.requestDecoder(ctx, in, req)
-			}, req)
+			return md.Handler(srv, ctx, req)
 		}
 		if m, ok := s.middlewares[srv]; ok {
 			handler = m(handler)

@@ -27,18 +27,14 @@ func RegisterEchoServiceHTTPServer(s http1.ServiceRegistrar, srv EchoServiceHTTP
 	s.RegisterService(&_HTTP_EchoService_serviceDesc, srv)
 }
 
-func _HTTP_EchoService_Echo_0(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
+func _HTTP_EchoService_Echo_0(srv interface{}, ctx context.Context, req *http.Request) (interface{}, error) {
 	var in SimpleMessage
 
-	if err := http1.PopulateVars(&in, req, []string{
-		"id", "num",
-	}, nil); err != nil {
+	if err := http1.PopulateVars(&in, req); err != nil {
 		return nil, err
 	}
 
-	if err := http1.PopulateForm(&in, req, nil, []string{
-		"id", "num",
-	}); err != nil {
+	if err := http1.PopulateForm(&in, req); err != nil {
 		return nil, err
 	}
 
@@ -49,18 +45,14 @@ func _HTTP_EchoService_Echo_0(srv interface{}, ctx context.Context, dec func(int
 	return out, nil
 }
 
-func _HTTP_EchoService_Echo_1(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
+func _HTTP_EchoService_Echo_1(srv interface{}, ctx context.Context, req *http.Request) (interface{}, error) {
 	var in SimpleMessage
 
-	if err := http1.PopulateVars(&in, req, []string{
-		"id", "num", "lang",
-	}, nil); err != nil {
+	if err := http1.PopulateVars(&in, req); err != nil {
 		return nil, err
 	}
 
-	if err := http1.PopulateForm(&in, req, nil, []string{
-		"id", "num", "lang",
-	}); err != nil {
+	if err := http1.PopulateForm(&in, req); err != nil {
 		return nil, err
 	}
 
@@ -71,18 +63,14 @@ func _HTTP_EchoService_Echo_1(srv interface{}, ctx context.Context, dec func(int
 	return out, nil
 }
 
-func _HTTP_EchoService_Echo_2(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
+func _HTTP_EchoService_Echo_2(srv interface{}, ctx context.Context, req *http.Request) (interface{}, error) {
 	var in SimpleMessage
 
-	if err := http1.PopulateVars(&in, req, []string{
-		"id", "line_num", "status.note",
-	}, nil); err != nil {
+	if err := http1.PopulateVars(&in, req); err != nil {
 		return nil, err
 	}
 
-	if err := http1.PopulateForm(&in, req, nil, []string{
-		"id", "line_num", "status.note",
-	}); err != nil {
+	if err := http1.PopulateForm(&in, req); err != nil {
 		return nil, err
 	}
 
@@ -93,18 +81,14 @@ func _HTTP_EchoService_Echo_2(srv interface{}, ctx context.Context, dec func(int
 	return out, nil
 }
 
-func _HTTP_EchoService_Echo_3(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
+func _HTTP_EchoService_Echo_3(srv interface{}, ctx context.Context, req *http.Request) (interface{}, error) {
 	var in SimpleMessage
 
-	if err := http1.PopulateVars(&in, req, []string{
-		"no.note",
-	}, nil); err != nil {
+	if err := http1.PopulateVars(&in, req); err != nil {
 		return nil, err
 	}
 
-	if err := http1.PopulateForm(&in, req, nil, []string{
-		"no.note",
-	}); err != nil {
+	if err := http1.PopulateForm(&in, req); err != nil {
 		return nil, err
 	}
 
@@ -115,18 +99,14 @@ func _HTTP_EchoService_Echo_3(srv interface{}, ctx context.Context, dec func(int
 	return out, nil
 }
 
-func _HTTP_EchoService_Echo_4(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
+func _HTTP_EchoService_Echo_4(srv interface{}, ctx context.Context, req *http.Request) (interface{}, error) {
 	var in SimpleMessage
 
-	if err := http1.PopulateVars(&in, req, []string{
-		"id",
-	}, nil); err != nil {
+	if err := http1.PopulateVars(&in, req); err != nil {
 		return nil, err
 	}
 
-	if err := http1.PopulateForm(&in, req, nil, []string{
-		"id",
-	}); err != nil {
+	if err := http1.PopulateForm(&in, req); err != nil {
 		return nil, err
 	}
 
@@ -137,10 +117,10 @@ func _HTTP_EchoService_Echo_4(srv interface{}, ctx context.Context, dec func(int
 	return out, nil
 }
 
-func _HTTP_EchoService_EchoBody_0(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
+func _HTTP_EchoService_EchoBody_0(srv interface{}, ctx context.Context, req *http.Request) (interface{}, error) {
 	var in SimpleMessage
 
-	if err := dec(&in); err != nil {
+	if err := http1.PopulateBody(&in, req); err != nil {
 		return nil, err
 	}
 
@@ -151,10 +131,10 @@ func _HTTP_EchoService_EchoBody_0(srv interface{}, ctx context.Context, dec func
 	return out, nil
 }
 
-func _HTTP_EchoService_EchoDelete_0(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
+func _HTTP_EchoService_EchoDelete_0(srv interface{}, ctx context.Context, req *http.Request) (interface{}, error) {
 	var in SimpleMessage
 
-	if err := http1.PopulateForm(&in, req, nil, []string{}); err != nil {
+	if err := http1.PopulateForm(&in, req); err != nil {
 		return nil, err
 	}
 
@@ -165,10 +145,10 @@ func _HTTP_EchoService_EchoDelete_0(srv interface{}, ctx context.Context, dec fu
 	return out, nil
 }
 
-func _HTTP_EchoService_EchoPatch_0(srv interface{}, ctx context.Context, dec func(interface{}) error, req *http.Request) (interface{}, error) {
+func _HTTP_EchoService_EchoPatch_0(srv interface{}, ctx context.Context, req *http.Request) (interface{}, error) {
 	var in DynamicMessageUpdate
 
-	if err := dec(&in.Body); err != nil {
+	if err := http1.PopulateBody(in.Body, req); err != nil {
 		return nil, err
 	}
 
