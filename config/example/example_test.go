@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/config/decoder"
+	"github.com/go-kratos/kratos/v2/config"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {
 	c := new(ExampleConfig)
-	err := decoder.ApplyYAML(`
+	err := config.ApplyYAML(`
 address: localhost
 timeout: 99
 `, c)
