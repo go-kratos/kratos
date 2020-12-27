@@ -42,6 +42,6 @@ func (f *file) Load() (kvs []provider.KeyValue, err error) {
 	return nil, nil
 }
 
-func (f *file) Watch() (provider.Watcher, error) {
-	return nil, nil
+func (f *file) Watch() <-chan provider.KeyValue {
+	return nil
 }

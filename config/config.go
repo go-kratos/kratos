@@ -2,7 +2,9 @@ package config
 
 import (
 	"expvar"
+	"sync"
 
+	"github.com/go-kratos/kratos/v2/config/parser"
 	"github.com/go-kratos/kratos/v2/config/provider"
 )
 
@@ -10,7 +12,7 @@ import (
 type Config interface {
 	Var(key string, v expvar.Var) error
 	Value(key string) Value
-	Watch(key ...string) (Watcher, error)
+	Watch(key ...string) <-chan Value
 }
 
 // Option is config option.
@@ -18,57 +20,71 @@ type Option func(*options)
 
 type options struct {
 	providers []provider.Provider
+	parsers   map[string]parser.Parser
+}
+
+// WithProvider .
+func WithProvider(p ...provider.Provider) Option {
+	return func(o *options) {
+		o.providers = p
+	}
+}
+
+// WithParser .
+func WithParser(p ...parser.Parser) Option {
+	return func(o *options) {
+		if o.parsers == nil {
+			o.parsers = make(map[string]parser.Parser)
+		}
+		for _, parser := range p {
+			o.parsers[parser.Format()] = parser
+		}
+	}
 }
 
 type config struct {
-	vars      map[string][]expvar.Var
+	vars      sync.Map
+	cached    sync.Map
 	resolvers []Resolver
+	opts      options
 }
 
-func (c *config) setVar(key string, v expvar.Var) error {
-	val := c.Value(key)
-	switch vv := v.(type) {
-	case *expvar.Int:
-		intVal, err := val.Int64()
-		if err != nil {
-			return err
-		}
-		vv.Set(intVal)
-	case *expvar.Float:
-		floatVal, err := val.Float64()
-		if err != nil {
-			return err
-		}
-		vv.Set(floatVal)
-	case *expvar.String:
-		stringVal, err := val.String()
-		if err != nil {
-			return err
-		}
-		vv.Set(stringVal)
+// New new a config with options.
+func New(opts ...Option) Config {
+	options := options{}
+	for _, o := range opts {
+		o(&options)
 	}
-	return nil
+	c := &config{opts: options}
+	for _, p := range options.providers {
+		c.resolvers = append(c.resolvers, newResolver(p, options.parsers))
+	}
+	return c
 }
 
 func (c *config) Var(key string, v expvar.Var) error {
-	if err := c.setVar(key, v); err != nil {
+	if err := setVar(key, v, c.Value(key)); err != nil {
 		return err
 	}
-	c.vars[key] = append(c.vars[key], v)
+	c.vars.Store(key, v)
 	return nil
 }
 
 func (c *config) Value(key string) Value {
+	if v, ok := c.cached.Load(key); ok {
+		return v.(Value)
+	}
 	for _, r := range c.resolvers {
 		v, ok := r.Resolve(key)
 		if ok {
+			c.cached.Store(key, v)
 			return v
 		}
 	}
 	return &errValue{err: ErrNotFound}
 }
 
-func (c *config) Watch(key ...string) (Watcher, error) {
+func (c *config) Watch(key ...string) <-chan Value {
 	// TODO
-	return nil, nil
+	return nil
 }

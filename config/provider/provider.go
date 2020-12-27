@@ -11,13 +11,8 @@ type KeyValue struct {
 	Timestamp time.Time
 }
 
-// Watcher is config watcher.
-type Watcher interface {
-	Next() (KeyValue, error)
-}
-
 // Provider is config provider.
 type Provider interface {
 	Load() ([]KeyValue, error)
-	Watch() (Watcher, error)
+	Watch() <-chan KeyValue
 }
