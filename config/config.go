@@ -63,7 +63,7 @@ func New(opts ...Option) Config {
 }
 
 func (c *config) Var(key string, v expvar.Var) error {
-	if err := setVar(key, v, c.Value(key)); err != nil {
+	if err := setVar(v, c.Value(key)); err != nil {
 		return err
 	}
 	c.vars.Store(key, v)

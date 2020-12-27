@@ -2,7 +2,7 @@ package config
 
 import "expvar"
 
-func setVar(key string, v expvar.Var, val Value) error {
+func setVar(v expvar.Var, val Value) error {
 	switch vv := v.(type) {
 	case *expvar.Int:
 		intVal, err := val.Int64()
