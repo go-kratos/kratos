@@ -2,16 +2,12 @@ package config
 
 import (
 	"encoding/json"
-	"errors"
 	"time"
 
 	simplejson "github.com/bitly/go-simplejson"
 )
 
 var (
-	// ErrNotFound is value not found.
-	ErrNotFound = errors.New("error key not found")
-
 	_ Value = (*jsonValue)(nil)
 	_ Value = (*errValue)(nil)
 )

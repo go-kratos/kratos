@@ -1,15 +1,27 @@
 package config
 
 import (
+	"errors"
 	"expvar"
 	"sync"
 
 	"github.com/go-kratos/kratos/v2/config/parser"
+	"github.com/go-kratos/kratos/v2/config/parser/json"
+	"github.com/go-kratos/kratos/v2/config/parser/toml"
+	"github.com/go-kratos/kratos/v2/config/parser/yaml"
 	"github.com/go-kratos/kratos/v2/config/provider"
+)
+
+var (
+	// ErrNotFound is value not found.
+	ErrNotFound = errors.New("error key not found")
+
+	_ Config = (*config)(nil)
 )
 
 // Config is a config interface.
 type Config interface {
+	Load() error
 	Var(key string, v expvar.Var) error
 	Value(key string) Value
 	Watch(key ...string) <-chan Value
@@ -19,8 +31,8 @@ type Config interface {
 type Option func(*options)
 
 type options struct {
+	parsers   []parser.Parser
 	providers []provider.Provider
-	parsers   map[string]parser.Parser
 }
 
 // WithProvider .
@@ -33,12 +45,7 @@ func WithProvider(p ...provider.Provider) Option {
 // WithParser .
 func WithParser(p ...parser.Parser) Option {
 	return func(o *options) {
-		if o.parsers == nil {
-			o.parsers = make(map[string]parser.Parser)
-		}
-		for _, parser := range p {
-			o.parsers[parser.Format()] = parser
-		}
+		o.parsers = p
 	}
 }
 
@@ -51,15 +58,32 @@ type config struct {
 
 // New new a config with options.
 func New(opts ...Option) Config {
-	options := options{}
+	options := options{
+		parsers: []parser.Parser{
+			json.NewParser(),
+			yaml.NewParser(),
+			toml.NewParser(),
+		},
+	}
 	for _, o := range opts {
 		o(&options)
 	}
-	c := &config{opts: options}
-	for _, p := range options.providers {
-		c.resolvers = append(c.resolvers, newResolver(p, options.parsers))
+	return &config{opts: options}
+}
+
+func (c *config) Load() error {
+	parsers := make(map[string]parser.Parser)
+	for _, parser := range c.opts.parsers {
+		parsers[parser.Format()] = parser
 	}
-	return c
+	for _, p := range c.opts.providers {
+		r, err := newResolver(p, parsers)
+		if err != nil {
+			return err
+		}
+		c.resolvers = append(c.resolvers, r)
+	}
+	return nil
 }
 
 func (c *config) Var(key string, v expvar.Var) error {

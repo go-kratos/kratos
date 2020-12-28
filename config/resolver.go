@@ -1,6 +1,8 @@
 package config
 
 import (
+	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/config/parser"
@@ -16,18 +18,17 @@ type Resolver interface {
 
 type resolver struct {
 	provider provider.Provider
-	parser   map[string]parser.Parser
+	parsers  map[string]parser.Parser
 	kvs      map[string]*simplejson.Json
 }
 
-func newResolver(provider provider.Provider, parser map[string]parser.Parser) Resolver {
+func newResolver(provider provider.Provider, parsers map[string]parser.Parser) (Resolver, error) {
 	r := &resolver{
 		provider: provider,
-		parser:   parser,
+		parsers:  parsers,
 		kvs:      make(map[string]*simplejson.Json),
 	}
-	r.load()
-	return r
+	return r, r.load()
 }
 
 func (r *resolver) load() error {
@@ -36,8 +37,19 @@ func (r *resolver) load() error {
 		return err
 	}
 	for _, kv := range kvs {
-		// TODO parser to json
-		raw, err := simplejson.NewJson(kv.Value)
+		parser, ok := r.parsers[kv.Format]
+		if !ok {
+			return fmt.Errorf("unsupported parsing formats: %s", kv.Format)
+		}
+		var v interface{}
+		if err := parser.Unmarshal(kv.Value, &v); err != nil {
+			return err
+		}
+		data, err := json.Marshal(v)
+		if err != nil {
+			return err
+		}
+		raw, err := simplejson.NewJson(data)
 		if err != nil {
 			return err
 		}
