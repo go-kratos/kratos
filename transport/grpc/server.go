@@ -28,8 +28,8 @@ func NewServer(opts ...ServerOption) *Server {
 	return srv
 }
 
-// ServeGRPC returns a unary server interceptor.
-func (s *Server) ServeGRPC() grpc.UnaryServerInterceptor {
+// Interceptor returns a unary server interceptor.
+func (s *Server) Interceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 		ctx = transport.NewContext(ctx, transport.Transport{Kind: "GRPC"})
 		ctx = NewContext(ctx, ServerInfo{Server: info.Server, FullMethod: info.FullMethod})
