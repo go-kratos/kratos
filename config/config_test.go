@@ -19,30 +19,30 @@ test:
     addr: 127.0.0.1
     port: 8000
 `
-	_json = `
-{
-	"test": {
-		"settings" : {
-			"int_key": 100,
-			"float_key": 1000.1, 
-			"string_key": "string_value"
-		},
-		"server": {
-			"addr": "127.0.0.1",
-			"port": 8000
-		}
-	}
-}`
 	_toml = `
 [test]
 [test.settings]
-	int_key = 100
-	float_key = 1000.1
-	string_key = "string_value"
+  int_key = 100
+  float_key = 1000.1
+  string_key = "string_value"
 [test.server]
-	addr = '127.0.0.1'
-	port = 8000
+  addr = '127.0.0.1'
+  port = 8000
 `
+	_json = `
+{
+  "test": {
+    "settings" : {
+      "int_key": 100,
+      "float_key": 1000.1, 
+      "string_key": "string_value"
+    },
+    "server": {
+      "addr": "127.0.0.1",
+      "port": 8000
+    }
+  }
+}`
 )
 
 func TestConfigYAML(t *testing.T) {
@@ -56,23 +56,23 @@ func TestConfigYAML(t *testing.T) {
 	testConfig(t, c)
 }
 
-func TestConfigJSON(t *testing.T) {
-	c := New(WithProvider(
-		memory.New(nil, provider.KeyValue{
-			Format: "json",
-			Key:    "test",
-			Value:  []byte(strings.TrimSpace(_json)),
-		})),
-	)
-	testConfig(t, c)
-}
-
 func TestConfigTOML(t *testing.T) {
 	c := New(WithProvider(
 		memory.New(nil, provider.KeyValue{
 			Format: "toml",
 			Key:    "test",
 			Value:  []byte(strings.TrimSpace(_toml)),
+		})),
+	)
+	testConfig(t, c)
+}
+
+func TestConfigJSON(t *testing.T) {
+	c := New(WithProvider(
+		memory.New(nil, provider.KeyValue{
+			Format: "json",
+			Key:    "test",
+			Value:  []byte(strings.TrimSpace(_json)),
 		})),
 	)
 	testConfig(t, c)
