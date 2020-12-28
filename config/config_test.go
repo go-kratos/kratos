@@ -8,12 +8,8 @@ import (
 	"github.com/go-kratos/kratos/v2/config/provider/memory"
 )
 
-func TestConfigYAML(t *testing.T) {
-	c := New(WithProvider(
-		memory.New(nil, provider.KeyValue{
-			Format: "yaml",
-			Key:    "test",
-			Value: []byte(strings.TrimSpace(`
+const (
+	_yaml = `
 test:
   settings:
     int_key: 100
@@ -21,7 +17,40 @@ test:
     string_key: string_value
   server:
     addr: 127.0.0.1
-    port: 8000`)),
+    port: 8000
+`
+	_json = `
+{
+	"test": {
+		"settings" : {
+			"int_key": 100,
+			"float_key": 1000.1, 
+			"string_key": "string_value"
+		},
+		"server": {
+			"addr": "127.0.0.1",
+			"port": 8000
+		}
+	}
+}`
+	_toml = `
+[test]
+[test.settings]
+	int_key = 100
+	float_key = 1000.1
+	string_key = "string_value"
+[test.server]
+	addr = '127.0.0.1'
+	port = 8000
+`
+)
+
+func TestConfigYAML(t *testing.T) {
+	c := New(WithProvider(
+		memory.New(nil, provider.KeyValue{
+			Format: "yaml",
+			Key:    "test",
+			Value:  []byte(strings.TrimSpace(_yaml)),
 		})),
 	)
 	testConfig(t, c)
@@ -32,21 +61,7 @@ func TestConfigJSON(t *testing.T) {
 		memory.New(nil, provider.KeyValue{
 			Format: "json",
 			Key:    "test",
-			Value: []byte(`
-		{
-			"test": {
-				"settings" : {
-					"int_key": 100,
-					"float_key": 1000.1, 
-					"string_key": "string_value"
-				},
-				"server": {
-					"addr": "127.0.0.1",
-					"port": 8000
-				}
-			}
-		}
-			`),
+			Value:  []byte(strings.TrimSpace(_json)),
 		})),
 	)
 	testConfig(t, c)
@@ -57,16 +72,7 @@ func TestConfigTOML(t *testing.T) {
 		memory.New(nil, provider.KeyValue{
 			Format: "toml",
 			Key:    "test",
-			Value: []byte(strings.TrimSpace(`
-[test]
-[test.settings]
-int_key = 100
-float_key = 1000.1
-string_key = "string_value"
-[test.server]
-addr = '127.0.0.1'
-port = 8000
-			`)),
+			Value:  []byte(strings.TrimSpace(_toml)),
 		})),
 	)
 	testConfig(t, c)
