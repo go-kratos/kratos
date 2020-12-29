@@ -3,6 +3,7 @@ package config
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/config/provider"
 	"github.com/go-kratos/kratos/v2/config/provider/memory"
@@ -13,7 +14,9 @@ const (
 test:
   settings:
     int_key: 100
+    int64_key: 1000
     float_key: 1000.1
+    duration: 10000
     string_key: string_value
   server:
     addr: 127.0.0.1
@@ -23,7 +26,9 @@ test:
 [test]
 [test.settings]
   int_key = 100
+  int64_key = 1000
   float_key = 1000.1
+  duration = 10000
   string_key = "string_value"
 [test.server]
   addr = '127.0.0.1'
@@ -34,7 +39,9 @@ test:
   "test": {
     "settings" : {
       "int_key": 100,
+      "int64_key": 1000,
       "float_key": 1000.1, 
+      "duration": 10000, 
       "string_key": "string_value"
     },
     "server": {
@@ -79,35 +86,52 @@ func TestConfigJSON(t *testing.T) {
 }
 
 func testConfig(t *testing.T, c Config) {
+	var expected = map[string]interface{}{
+		"test.settings.int_key":    int(100),
+		"test.settings.int64_key":  int64(1000),
+		"test.settings.float_key":  float64(1000.1),
+		"test.settings.duration":   time.Duration(10000),
+		"test.settings.string_key": "string_value",
+		"test.server.addr":         "127.0.0.1",
+		"test.server.port":         int(8000),
+	}
 	if err := c.Load(); err != nil {
 		t.Error(err)
 	}
-	if v, err := c.Value("test.settings.int_key").Int(); err != nil {
-		t.Error(err)
-	} else {
-		t.Logf("int_key: %d", v)
+	for key, value := range expected {
+		switch value.(type) {
+		case int:
+			if v, err := c.Value(key).Int(); err != nil {
+				t.Error(key, value, err)
+			} else if v != value {
+				t.Errorf("no expect key: %s value: %v, but got: %v", key, value, v)
+			}
+		case int64:
+			if v, err := c.Value(key).Int64(); err != nil {
+				t.Error(key, value, err)
+			} else if v != value {
+				t.Errorf("no expect key: %s value: %v, but got: %v", key, value, v)
+			}
+		case float64:
+			if v, err := c.Value(key).Float64(); err != nil {
+				t.Error(key, value, err)
+			} else if v != value {
+				t.Errorf("no expect key: %s value: %v, but got: %v", key, value, v)
+			}
+		case string:
+			if v, err := c.Value(key).String(); err != nil {
+				t.Error(key, value, err)
+			} else if v != value {
+				t.Errorf("no expect key: %s value: %v, but got: %v", key, value, v)
+			}
+		case time.Duration:
+			if v, err := c.Value(key).Duration(); err != nil {
+				t.Error(key, value, err)
+			} else if v != value {
+				t.Errorf("no expect key: %s value: %v, but got: %v", key, value, v)
+			}
+		}
 	}
-	if v, err := c.Value("test.settings.float_key").Float64(); err != nil {
-		t.Error(err)
-	} else {
-		t.Logf("float_key: %f", v)
-	}
-	if v, err := c.Value("test.settings.string_key").String(); err != nil {
-		t.Error(err)
-	} else {
-		t.Logf("string_key: %s", v)
-	}
-	if v, err := c.Value("test.server.addr").String(); err != nil {
-		t.Error(err)
-	} else {
-		t.Logf("server.addr: %s", v)
-	}
-	if v, err := c.Value("test.server.port").Int(); err != nil {
-		t.Error(err)
-	} else {
-		t.Logf("server.port: %d", v)
-	}
-
 	// scan
 	var settings struct {
 		IntKey    int     `json:"int_key"`
