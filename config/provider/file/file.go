@@ -3,36 +3,34 @@ package file
 import (
 	"io/ioutil"
 	"path"
+	"strings"
 
 	"github.com/go-kratos/kratos/v2/config/provider"
 )
-
-// Option is config file option.
-type Option func(*file)
 
 type file struct {
 	path string
 }
 
 // New new a file provider.
-func New() provider.Provider {
-	return &file{}
+func New(path string) provider.Provider {
+	return &file{path: path}
 }
 
-func (f *file) Load() (kvs []provider.KeyValue, err error) {
+func (f *file) Load() (kvs []*provider.KeyValue, err error) {
 	files, err := ioutil.ReadDir(f.path)
 	if err != nil {
 		return nil, err
 	}
 	for _, file := range files {
-		if file.IsDir() {
+		if file.IsDir() || strings.HasPrefix(file.Name(), ".") {
 			continue
 		}
 		data, err := ioutil.ReadFile(path.Join(f.path, file.Name()))
 		if err != nil {
 			return nil, err
 		}
-		kvs = append(kvs, provider.KeyValue{
+		kvs = append(kvs, &provider.KeyValue{
 			Key:       file.Name(),
 			Value:     data,
 			Format:    format(file.Name()),
@@ -42,6 +40,6 @@ func (f *file) Load() (kvs []provider.KeyValue, err error) {
 	return nil, nil
 }
 
-func (f *file) Watch() <-chan provider.KeyValue {
-	return nil
+func (f *file) Watch() (provider.Watcher, error) {
+	return newWatcher(f)
 }

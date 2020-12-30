@@ -2,16 +2,16 @@ package config
 
 import "expvar"
 
-func setVar(v expvar.Var, val Value) error {
+func setVariable(v expvar.Var, val Value) error {
 	switch vv := v.(type) {
 	case *expvar.Int:
-		intVal, err := val.Int64()
+		intVal, err := val.Int()
 		if err != nil {
 			return err
 		}
 		vv.Set(intVal)
 	case *expvar.Float:
-		floatVal, err := val.Float64()
+		floatVal, err := val.Float()
 		if err != nil {
 			return err
 		}

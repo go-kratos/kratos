@@ -13,8 +13,7 @@ const (
 	_yaml = `
 test:
   settings:
-    int_key: 100
-    int64_key: 1000
+    int_key: 1000
     float_key: 1000.1
     duration: 10000
     string_key: string_value
@@ -25,8 +24,7 @@ test:
 	_toml = `
 [test]
 [test.settings]
-  int_key = 100
-  int64_key = 1000
+  int_key = 1000
   float_key = 1000.1
   duration = 10000
   string_key = "string_value"
@@ -38,8 +36,7 @@ test:
 {
   "test": {
     "settings" : {
-      "int_key": 100,
-      "int64_key": 1000,
+      "int_key": 1000,
       "float_key": 1000.1, 
       "duration": 10000, 
       "string_key": "string_value"
@@ -54,7 +51,7 @@ test:
 
 func TestConfigYAML(t *testing.T) {
 	c := New(WithProvider(
-		memory.New(nil, provider.KeyValue{
+		memory.New(&provider.KeyValue{
 			Format: "yaml",
 			Key:    "test",
 			Value:  []byte(strings.TrimSpace(_yaml)),
@@ -65,7 +62,7 @@ func TestConfigYAML(t *testing.T) {
 
 func TestConfigTOML(t *testing.T) {
 	c := New(WithProvider(
-		memory.New(nil, provider.KeyValue{
+		memory.New(&provider.KeyValue{
 			Format: "toml",
 			Key:    "test",
 			Value:  []byte(strings.TrimSpace(_toml)),
@@ -76,7 +73,7 @@ func TestConfigTOML(t *testing.T) {
 
 func TestConfigJSON(t *testing.T) {
 	c := New(WithProvider(
-		memory.New(nil, provider.KeyValue{
+		memory.New(&provider.KeyValue{
 			Format: "json",
 			Key:    "test",
 			Value:  []byte(strings.TrimSpace(_json)),
@@ -87,33 +84,26 @@ func TestConfigJSON(t *testing.T) {
 
 func testConfig(t *testing.T, c Config) {
 	var expected = map[string]interface{}{
-		"test.settings.int_key":    int(100),
-		"test.settings.int64_key":  int64(1000),
-		"test.settings.float_key":  float64(1000.1),
+		"test.settings.int_key":    1000,
+		"test.settings.float_key":  1000.1,
 		"test.settings.duration":   time.Duration(10000),
 		"test.settings.string_key": "string_value",
 		"test.server.addr":         "127.0.0.1",
-		"test.server.port":         int(8000),
+		"test.server.port":         8000,
 	}
 	if err := c.Load(); err != nil {
 		t.Error(err)
 	}
 	for key, value := range expected {
 		switch value.(type) {
-		case int:
+		case int64:
 			if v, err := c.Value(key).Int(); err != nil {
 				t.Error(key, value, err)
 			} else if v != value {
 				t.Errorf("no expect key: %s value: %v, but got: %v", key, value, v)
 			}
-		case int64:
-			if v, err := c.Value(key).Int64(); err != nil {
-				t.Error(key, value, err)
-			} else if v != value {
-				t.Errorf("no expect key: %s value: %v, but got: %v", key, value, v)
-			}
 		case float64:
-			if v, err := c.Value(key).Float64(); err != nil {
+			if v, err := c.Value(key).Float(); err != nil {
 				t.Error(key, value, err)
 			} else if v != value {
 				t.Errorf("no expect key: %s value: %v, but got: %v", key, value, v)
@@ -134,9 +124,10 @@ func testConfig(t *testing.T, c Config) {
 	}
 	// scan
 	var settings struct {
-		IntKey    int     `json:"int_key"`
-		FloatKey  float32 `json:"float_key"`
-		StringKey string  `json:"string_key"`
+		IntKey      float32 `json:"int_key"`
+		FloatKey    float32 `json:"float_key"`
+		DurationKey float32 `json:"duration"`
+		StringKey   string  `json:"string_key"`
 	}
 	if err := c.Value("test.settings").Scan(&settings); err != nil {
 		t.Error(err)

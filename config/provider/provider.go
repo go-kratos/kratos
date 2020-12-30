@@ -13,6 +13,12 @@ type KeyValue struct {
 
 // Provider is config provider.
 type Provider interface {
-	Load() ([]KeyValue, error)
-	Watch() <-chan KeyValue
+	Load() ([]*KeyValue, error)
+	Watch() (Watcher, error)
+}
+
+// Watcher watches a provider for changes
+type Watcher interface {
+	Next() ([]*KeyValue, error)
+	Close() error
 }

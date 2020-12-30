@@ -7,8 +7,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/config/parser"
 	"github.com/go-kratos/kratos/v2/config/provider"
-
-	simplejson "github.com/bitly/go-simplejson"
 )
 
 // Resolver is config resolver.
@@ -19,14 +17,14 @@ type Resolver interface {
 type resolver struct {
 	provider provider.Provider
 	parsers  map[string]parser.Parser
-	kvs      map[string]*simplejson.Json
+	values   map[string]jsonValue
 }
 
 func newResolver(provider provider.Provider, parsers map[string]parser.Parser) (Resolver, error) {
 	r := &resolver{
 		provider: provider,
 		parsers:  parsers,
-		kvs:      make(map[string]*simplejson.Json),
+		values:   make(map[string]jsonValue),
 	}
 	return r, r.load()
 }
@@ -49,20 +47,20 @@ func (r *resolver) load() error {
 		if err != nil {
 			return err
 		}
-		raw, err := simplejson.NewJson(data)
-		if err != nil {
+		jv := jsonValue{}
+		if err := json.Unmarshal(data, &jv.raw); err != nil {
 			return err
 		}
-		r.kvs[kv.Key] = raw
+		r.values[kv.Key] = jv
 	}
 	return nil
 }
 
 func (r *resolver) Resolve(key string) (Value, bool) {
 	path := strings.Split(key, ".")
-	for _, v := range r.kvs {
-		if raw := v.GetPath(path...); raw.Interface() != nil {
-			return &jsonValue{raw: raw}, true
+	for _, v := range r.values {
+		if val := v.GetPath(path...); val.raw != nil {
+			return &jsonValue{raw: val.raw}, true
 		}
 	}
 	return nil, false

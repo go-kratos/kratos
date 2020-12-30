@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/v2
 go 1.15
 
 require (
-	github.com/bitly/go-simplejson v0.5.0
+	github.com/fsnotify/fsnotify v1.4.9
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/protobuf v1.4.3
 	github.com/gorilla/mux v1.8.0

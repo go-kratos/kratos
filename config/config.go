@@ -12,8 +12,10 @@ import (
 )
 
 var (
-	// ErrNotFound is value not found.
-	ErrNotFound = errors.New("error key not found")
+	// ErrNotFound is key not found.
+	ErrNotFound = errors.New("key not found")
+	// ErrTypeAssert is type assert error.
+	ErrTypeAssert = errors.New("type assert error")
 
 	_ Config = (*config)(nil)
 )
@@ -64,7 +66,7 @@ func (c *config) Load() error {
 }
 
 func (c *config) Var(key string, v expvar.Var) error {
-	if err := setVar(v, c.Value(key)); err != nil {
+	if err := setVariable(v, c.Value(key)); err != nil {
 		return err
 	}
 	c.vars.Store(key, v)
