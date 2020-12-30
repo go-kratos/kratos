@@ -73,7 +73,7 @@ func Filter(schema string, clusters map[string]struct{}) BuildOpt {
 
 func defulatSubset(inss []*Instance, size int) []*Instance {
 	backends := inss
-	if len(backends) <= int(size) {
+	if len(backends) <= size {
 		return backends
 	}
 	clientID := env.Hostname
@@ -93,7 +93,7 @@ func defulatSubset(inss []*Instance, size int) []*Instance {
 		backends[i], backends[j] = backends[j], backends[i]
 	})
 	start := (id % uint64(count)) * uint64(size)
-	return backends[int(start) : int(start)+int(size)]
+	return backends[int(start) : int(start)+size]
 }
 
 // Subset Subset option.
@@ -159,9 +159,7 @@ func ScheduleNode(clientZone string) BuildOpt {
 				}
 			}
 			for _, zone := range zones {
-				for _, ins := range zone.inss {
-					instances = append(instances, ins)
-				}
+				instances = append(instances, zone.inss...)
 			}
 			//如果没有拿到节点，则选择直接获取
 			if len(instances) == 0 {

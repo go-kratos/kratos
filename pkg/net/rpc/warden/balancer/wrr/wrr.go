@@ -8,11 +8,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-kratos/kratos/pkg/conf/env"
-	"github.com/go-kratos/kratos/pkg/log"
-	nmd "github.com/go-kratos/kratos/pkg/net/metadata"
-	wmeta "github.com/go-kratos/kratos/pkg/net/rpc/warden/internal/metadata"
-	"github.com/go-kratos/kratos/pkg/stat/metric"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
@@ -20,6 +15,12 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/status"
+
+	"github.com/go-kratos/kratos/pkg/conf/env"
+	"github.com/go-kratos/kratos/pkg/log"
+	nmd "github.com/go-kratos/kratos/pkg/net/metadata"
+	wmeta "github.com/go-kratos/kratos/pkg/net/rpc/warden/internal/metadata"
+	"github.com/go-kratos/kratos/pkg/stat/metric"
 )
 
 var _ base.PickerBuilder = &wrrPickerBuilder{}
@@ -94,13 +95,13 @@ func (c *subConn) latencySummary() (latency float64, count int64) {
 
 // statistics is info for log
 type statistics struct {
-	addr     string
-	ewt      int64
-	cs       float64
-	ss       float64
+	addr    string
+	ewt     int64
+	cs      float64
+	ss      float64
 	latency float64
-	cpu      float64
-	req      int64
+	cpu     float64
+	req     int64
 }
 
 // Stats is grpc Interceptor for client to collect server stats
@@ -298,5 +299,4 @@ func (p *wrrPicker) pick(ctx context.Context, opts balancer.PickInfo) (balancer.
 		p.mu.Unlock()
 		log.Info("warden wrr(%s): %+v", conn.addr.ServerName, stats)
 	}, nil
-
 }

@@ -219,7 +219,6 @@ func TestRedis_Do(t *testing.T) {
 }
 
 func TestRedis_Conn(t *testing.T) {
-
 	type args struct {
 		ctx context.Context
 	}

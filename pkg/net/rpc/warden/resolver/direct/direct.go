@@ -54,7 +54,7 @@ func (d *Direct) Watch() <-chan struct{} {
 func (d *Direct) Unwatch(id string) {
 }
 
-//Fetch fetch isntances.
+//Fetch fetch instances.
 func (d *Direct) Fetch(ctx context.Context) (res *naming.InstancesInfo, found bool) {
 	var ins []*naming.Instance
 	addrs := strings.Split(d.id, ",")

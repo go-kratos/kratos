@@ -10,12 +10,8 @@ func fakeRunTask(ctx context.Context) error {
 
 func ExampleGroup_group() {
 	g := Group{}
-	g.Go(func(context.Context) error {
-		return fakeRunTask(context.Background())
-	})
-	g.Go(func(context.Context) error {
-		return fakeRunTask(context.Background())
-	})
+	g.Go(fakeRunTask)
+	g.Go(fakeRunTask)
 	if err := g.Wait(); err != nil {
 		// handle err
 	}
@@ -23,12 +19,8 @@ func ExampleGroup_group() {
 
 func ExampleGroup_ctx() {
 	g := WithContext(context.Background())
-	g.Go(func(ctx context.Context) error {
-		return fakeRunTask(ctx)
-	})
-	g.Go(func(ctx context.Context) error {
-		return fakeRunTask(ctx)
-	})
+	g.Go(fakeRunTask)
+	g.Go(fakeRunTask)
 	if err := g.Wait(); err != nil {
 		// handle err
 	}
@@ -36,12 +28,8 @@ func ExampleGroup_ctx() {
 
 func ExampleGroup_cancel() {
 	g := WithCancel(context.Background())
-	g.Go(func(ctx context.Context) error {
-		return fakeRunTask(ctx)
-	})
-	g.Go(func(ctx context.Context) error {
-		return fakeRunTask(ctx)
-	})
+	g.Go(fakeRunTask)
+	g.Go(fakeRunTask)
 	if err := g.Wait(); err != nil {
 		// handle err
 	}
@@ -51,12 +39,8 @@ func ExampleGroup_maxproc() {
 	g := Group{}
 	// set max concurrency
 	g.GOMAXPROCS(2)
-	g.Go(func(ctx context.Context) error {
-		return fakeRunTask(context.Background())
-	})
-	g.Go(func(ctx context.Context) error {
-		return fakeRunTask(context.Background())
-	})
+	g.Go(fakeRunTask)
+	g.Go(fakeRunTask)
 	if err := g.Wait(); err != nil {
 		// handle err
 	}

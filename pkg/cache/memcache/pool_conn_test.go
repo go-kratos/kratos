@@ -404,7 +404,6 @@ func TestNewPool(t *testing.T) {
 }
 
 func TestPool_Get(t *testing.T) {
-
 	type args struct {
 		ctx context.Context
 	}
@@ -474,7 +473,6 @@ func TestPool_Get(t *testing.T) {
 }
 
 func TestPool_Close(t *testing.T) {
-
 	type args struct {
 		ctx context.Context
 	}

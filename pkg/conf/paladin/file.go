@@ -87,7 +87,7 @@ func loadValue(fpath string) (*Value, error) {
 // conf = /data/conf/app/
 // conf = /data/conf/app/xxx.toml
 func NewFile(base string) (Client, error) {
-	// paltform slash
+	// platform slash
 	base = filepath.FromSlash(base)
 
 	paths, err := readAllPaths(base)

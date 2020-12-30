@@ -61,7 +61,6 @@ func TestBindingDefault(t *testing.T) {
 
 	assert.Equal(t, Default("POST", MIMEMultipartPOSTForm), Form)
 	assert.Equal(t, Default("PUT", MIMEMultipartPOSTForm), Form)
-
 }
 
 func TestStripContentType(t *testing.T) {

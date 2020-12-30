@@ -99,5 +99,4 @@ func TestScript(t *testing.T) {
 	if !reflect.DeepEqual(v, reply) {
 		t.Errorf("s.Send(c, ..); c.Receive() = %v, want %v", v, reply)
 	}
-
 }

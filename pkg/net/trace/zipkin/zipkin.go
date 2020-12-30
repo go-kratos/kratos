@@ -2,13 +2,15 @@ package zipkin
 
 import (
 	"fmt"
-	protogen "github.com/go-kratos/kratos/pkg/net/trace/proto"
 	"time"
 
-	"github.com/go-kratos/kratos/pkg/net/trace"
+	protogen "github.com/go-kratos/kratos/pkg/net/trace/proto"
+
 	"github.com/openzipkin/zipkin-go/model"
 	"github.com/openzipkin/zipkin-go/reporter"
 	"github.com/openzipkin/zipkin-go/reporter/http"
+
+	"github.com/go-kratos/kratos/pkg/net/trace"
 )
 
 type report struct {

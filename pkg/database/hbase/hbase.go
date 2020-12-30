@@ -285,7 +285,7 @@ func (c *Client) Ping(ctx context.Context) (err error) {
 	if c.config.TestRowKey != "" {
 		testRowKey = c.config.TestRowKey
 	}
-	values := map[string]map[string][]byte{"test": map[string][]byte{"test": []byte("test")}}
+	values := map[string]map[string][]byte{"test": {"test": []byte("test")}}
 	_, err = c.PutStr(ctx, "test", testRowKey, values)
 	return
 }

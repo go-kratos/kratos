@@ -113,7 +113,6 @@ func main() {
 			}
 			wg.Done()
 		}(i)
-
 	}
 	wg.Wait()
 
@@ -140,7 +139,6 @@ func main() {
 	log.Printf("received requests_OK : %d\n", atomic.LoadUint64(&transOK))
 	log.Printf("throughput  (TPS)    : %d\n", int64(c*m)*1000/totalT)
 	log.Printf("mean: %v ms, median: %v ms, max: %v ms, min: %v ms, p99: %v ms, p999:%v ms\n", mean/1e6, median/1e6, max/1e6, min/1e6, tp99/1e6, tp999/1e6)
-
 }
 
 func prepareArgs() *proto.BenchmarkMessage {

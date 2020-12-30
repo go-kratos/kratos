@@ -92,7 +92,6 @@ func TestLogWithMirror(t *testing.T) {
 	Infov(mdcontext, KV("key1", "val1"), KV("key2", ""), KV("log", "log content"), KV("msg", "msg content"))
 
 	Infov(context.Background(), KV("key1", "val1"), KV("key2", ""), KV("log", "log content"), KV("msg", "msg content"))
-
 }
 
 func TestOverwriteSouce(t *testing.T) {
