@@ -2,6 +2,7 @@ package blademaster
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -110,7 +111,7 @@ func remoteIP(req *http.Request) (remote string) {
 	if remote = req.Header.Get("X-Real-IP"); remote != "" {
 		return
 	}
-	remote = req.RemoteAddr[:strings.Index(req.RemoteAddr, ":")]
+	remote, _, _ = net.SplitHostPort(req.RemoteAddr)
 	return
 }
 
