@@ -1,4 +1,4 @@
-package provider
+package source
 
 import "time"
 
@@ -11,14 +11,14 @@ type KeyValue struct {
 	Timestamp time.Time
 }
 
-// Provider is config provider.
-type Provider interface {
+// Source is config source.
+type Source interface {
 	Load() ([]*KeyValue, error)
 	Watch() (Watcher, error)
 }
 
 // Watcher watches a provider for changes
 type Watcher interface {
-	Next() ([]*KeyValue, error)
+	Next() (*KeyValue, error)
 	Close() error
 }

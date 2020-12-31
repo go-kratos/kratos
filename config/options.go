@@ -2,21 +2,21 @@ package config
 
 import (
 	"github.com/go-kratos/kratos/v2/config/parser"
-	"github.com/go-kratos/kratos/v2/config/provider"
+	"github.com/go-kratos/kratos/v2/config/source"
 )
 
 // Option is config option.
 type Option func(*options)
 
 type options struct {
-	parsers   []parser.Parser
-	providers []provider.Provider
+	parsers []parser.Parser
+	sources []source.Source
 }
 
-// WithProvider .
-func WithProvider(p ...provider.Provider) Option {
+// WithSource .
+func WithSource(s ...source.Source) Option {
 	return func(o *options) {
-		o.providers = p
+		o.sources = s
 	}
 }
 

@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/config/provider"
-	"github.com/go-kratos/kratos/v2/config/provider/memory"
+	"github.com/go-kratos/kratos/v2/config/source"
+	"github.com/go-kratos/kratos/v2/config/source/memory"
 )
 
 const (
@@ -15,7 +15,7 @@ test:
   settings:
     int_key: 1000
     float_key: 1000.1
-    duration: 10000
+    duration_key: 10000
     string_key: string_value
   server:
     addr: 127.0.0.1
@@ -26,7 +26,7 @@ test:
 [test.settings]
   int_key = 1000
   float_key = 1000.1
-  duration = 10000
+  duration_key = 10000
   string_key = "string_value"
 [test.server]
   addr = '127.0.0.1'
@@ -38,7 +38,7 @@ test:
     "settings" : {
       "int_key": 1000,
       "float_key": 1000.1, 
-      "duration": 10000, 
+      "duration_key": 10000, 
       "string_key": "string_value"
     },
     "server": {
@@ -50,8 +50,8 @@ test:
 )
 
 func TestConfigYAML(t *testing.T) {
-	c := New(WithProvider(
-		memory.New(&provider.KeyValue{
+	c := New(WithSource(
+		memory.New(&source.KeyValue{
 			Format: "yaml",
 			Key:    "test",
 			Value:  []byte(strings.TrimSpace(_yaml)),
@@ -61,8 +61,8 @@ func TestConfigYAML(t *testing.T) {
 }
 
 func TestConfigTOML(t *testing.T) {
-	c := New(WithProvider(
-		memory.New(&provider.KeyValue{
+	c := New(WithSource(
+		memory.New(&source.KeyValue{
 			Format: "toml",
 			Key:    "test",
 			Value:  []byte(strings.TrimSpace(_toml)),
@@ -72,8 +72,8 @@ func TestConfigTOML(t *testing.T) {
 }
 
 func TestConfigJSON(t *testing.T) {
-	c := New(WithProvider(
-		memory.New(&provider.KeyValue{
+	c := New(WithSource(
+		memory.New(&source.KeyValue{
 			Format: "json",
 			Key:    "test",
 			Value:  []byte(strings.TrimSpace(_json)),
@@ -84,12 +84,12 @@ func TestConfigJSON(t *testing.T) {
 
 func testConfig(t *testing.T, c Config) {
 	var expected = map[string]interface{}{
-		"test.settings.int_key":    1000,
-		"test.settings.float_key":  1000.1,
-		"test.settings.duration":   time.Duration(10000),
-		"test.settings.string_key": "string_value",
-		"test.server.addr":         "127.0.0.1",
-		"test.server.port":         8000,
+		"test.settings.int_key":      int64(1000),
+		"test.settings.float_key":    float64(1000.1),
+		"test.settings.string_key":   "string_value",
+		"test.settings.duration_key": time.Duration(10000),
+		"test.server.addr":           "127.0.0.1",
+		"test.server.port":           int64(8000),
 	}
 	if err := c.Load(); err != nil {
 		t.Error(err)
@@ -124,15 +124,26 @@ func testConfig(t *testing.T, c Config) {
 	}
 	// scan
 	var settings struct {
-		IntKey      float32 `json:"int_key"`
-		FloatKey    float32 `json:"float_key"`
-		DurationKey float32 `json:"duration"`
-		StringKey   string  `json:"string_key"`
+		IntKey      int64         `json:"int_key"`
+		FloatKey    float64       `json:"float_key"`
+		StringKey   string        `json:"string_key"`
+		DurationKey time.Duration `json:"duration_key"`
 	}
 	if err := c.Value("test.settings").Scan(&settings); err != nil {
 		t.Error(err)
 	}
-	t.Log(settings)
+	if v := expected["test.settings.int_key"]; settings.IntKey != v {
+		t.Errorf("no expect int_key value: %v, but got: %v", settings.IntKey, v)
+	}
+	if v := expected["test.settings.float_key"]; settings.FloatKey != v {
+		t.Errorf("no expect float_key value: %v, but got: %v", settings.FloatKey, v)
+	}
+	if v := expected["test.settings.string_key"]; settings.StringKey != v {
+		t.Errorf("no expect string_key value: %v, but got: %v", settings.StringKey, v)
+	}
+	if v := expected["test.settings.duration_key"]; settings.DurationKey != v {
+		t.Errorf("no expect duration_key value: %v, but got: %v", settings.DurationKey, v)
+	}
 
 	// not found
 	if _, err := c.Value("not_found_key").Bool(); err == nil {

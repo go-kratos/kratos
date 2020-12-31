@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"sync/atomic"
 	"time"
 )
 
 var (
-	_ Value = (*jsonValue)(nil)
+	_ Value = (*atomicValue)(nil)
 	_ Value = (*errValue)(nil)
 )
 
@@ -21,35 +22,15 @@ type Value interface {
 	String() (string, error)
 	Duration() (time.Duration, error)
 	Scan(interface{}) error
+	Map() (map[string]interface{}, error)
 }
 
-type jsonValue struct {
-	raw interface{}
+type atomicValue struct {
+	raw atomic.Value
 }
 
-func (v *jsonValue) Map() (map[string]interface{}, error) {
-	if m, ok := (v.raw).(map[string]interface{}); ok {
-		return m, nil
-	}
-	return nil, ErrTypeAssert
-}
-func (v *jsonValue) Get(key string) *jsonValue {
-	if m, err := v.Map(); err == nil {
-		if val, ok := m[key]; ok {
-			return &jsonValue{raw: val}
-		}
-	}
-	return &jsonValue{raw: nil}
-}
-func (v *jsonValue) GetPath(path ...string) *jsonValue {
-	var next = v
-	for _, key := range path {
-		next = next.Get(key)
-	}
-	return next
-}
-func (v *jsonValue) Bool() (bool, error) {
-	switch val := v.raw.(type) {
+func (v *atomicValue) Bool() (bool, error) {
+	switch val := v.raw.Load().(type) {
 	case bool:
 		return val, nil
 	case int64, float64, string:
@@ -57,8 +38,8 @@ func (v *jsonValue) Bool() (bool, error) {
 	}
 	return false, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.raw))
 }
-func (v *jsonValue) Int() (int64, error) {
-	switch val := v.raw.(type) {
+func (v *atomicValue) Int() (int64, error) {
+	switch val := v.raw.Load().(type) {
 	case int64:
 		return int64(val), nil
 	case float64:
@@ -68,8 +49,8 @@ func (v *jsonValue) Int() (int64, error) {
 	}
 	return 0, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.raw))
 }
-func (v *jsonValue) Float() (float64, error) {
-	switch val := v.raw.(type) {
+func (v *atomicValue) Float() (float64, error) {
+	switch val := v.raw.Load().(type) {
 	case float64:
 		return float64(val), nil
 	case int64:
@@ -79,8 +60,8 @@ func (v *jsonValue) Float() (float64, error) {
 	}
 	return 0.0, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.raw))
 }
-func (v *jsonValue) String() (string, error) {
-	switch val := v.raw.(type) {
+func (v *atomicValue) String() (string, error) {
+	switch val := v.raw.Load().(type) {
 	case string:
 		return val, nil
 	case bool, int64, float64:
@@ -88,28 +69,40 @@ func (v *jsonValue) String() (string, error) {
 	}
 	return "", fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.raw))
 }
-func (v *jsonValue) Duration() (time.Duration, error) {
+func (v *atomicValue) Duration() (time.Duration, error) {
 	val, err := v.Int()
 	if err != nil {
 		return 0, err
 	}
 	return time.Duration(val), nil
 }
-func (v *jsonValue) Scan(obj interface{}) error {
-	data, err := json.Marshal(v.raw)
+func (v *atomicValue) Scan(obj interface{}) error {
+	data, err := json.Marshal(v.raw.Load())
 	if err != nil {
 		return err
 	}
 	return json.Unmarshal(data, obj)
+}
+func (v *atomicValue) Map() (map[string]interface{}, error) {
+	raw := v.raw.Load()
+	if raw == nil {
+		return nil, ErrNotFound
+	}
+	m, ok := raw.(map[string]interface{})
+	if !ok {
+		return nil, ErrTypeAssert
+	}
+	return m, nil
 }
 
 type errValue struct {
 	err error
 }
 
-func (v errValue) Bool() (bool, error)              { return false, v.err }
-func (v errValue) Int() (int64, error)              { return 0, v.err }
-func (v errValue) Float() (float64, error)          { return 0.0, v.err }
-func (v errValue) Duration() (time.Duration, error) { return 0, v.err }
-func (v errValue) String() (string, error)          { return "", v.err }
-func (v errValue) Scan(interface{}) error           { return v.err }
+func (v errValue) Bool() (bool, error)                  { return false, v.err }
+func (v errValue) Int() (int64, error)                  { return 0, v.err }
+func (v errValue) Float() (float64, error)              { return 0.0, v.err }
+func (v errValue) Duration() (time.Duration, error)     { return 0, v.err }
+func (v errValue) String() (string, error)              { return "", v.err }
+func (v errValue) Scan(interface{}) error               { return v.err }
+func (v errValue) Map() (map[string]interface{}, error) { return nil, v.err }

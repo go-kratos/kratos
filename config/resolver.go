@@ -4,64 +4,90 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/go-kratos/kratos/v2/config/parser"
-	"github.com/go-kratos/kratos/v2/config/provider"
+	"github.com/go-kratos/kratos/v2/config/source"
 )
 
-// Resolver is config resolver.
-type Resolver interface {
-	Resolve(key string) (Value, bool)
-}
-
 type resolver struct {
-	provider provider.Provider
-	parsers  map[string]parser.Parser
-	values   map[string]jsonValue
+	source  source.Source
+	parsers map[string]parser.Parser
+	values  sync.Map
 }
 
-func newResolver(provider provider.Provider, parsers map[string]parser.Parser) (Resolver, error) {
+func newResolver(s source.Source, p map[string]parser.Parser) (*resolver, error) {
 	r := &resolver{
-		provider: provider,
-		parsers:  parsers,
-		values:   make(map[string]jsonValue),
+		source:  s,
+		parsers: p,
 	}
 	return r, r.load()
 }
 
+func (r *resolver) reload(kv *source.KeyValue) error {
+	parser, ok := r.parsers[kv.Format]
+	if !ok {
+		return fmt.Errorf("unsupported parsing formats: %s", kv.Format)
+	}
+	var v interface{}
+	if err := parser.Unmarshal(kv.Value, &v); err != nil {
+		return err
+	}
+	data, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	var raw interface{}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	jv := &atomicValue{}
+	jv.raw.Store(raw)
+	r.values.Store(kv.Key, jv)
+	return nil
+}
+
 func (r *resolver) load() error {
-	kvs, err := r.provider.Load()
+	kvs, err := r.source.Load()
 	if err != nil {
 		return err
 	}
 	for _, kv := range kvs {
-		parser, ok := r.parsers[kv.Format]
-		if !ok {
-			return fmt.Errorf("unsupported parsing formats: %s", kv.Format)
-		}
-		var v interface{}
-		if err := parser.Unmarshal(kv.Value, &v); err != nil {
+		if err := r.reload(kv); err != nil {
 			return err
 		}
-		data, err := json.Marshal(v)
-		if err != nil {
-			return err
-		}
-		jv := jsonValue{}
-		if err := json.Unmarshal(data, &jv.raw); err != nil {
-			return err
-		}
-		r.values[kv.Key] = jv
 	}
 	return nil
 }
 
-func (r *resolver) Resolve(key string) (Value, bool) {
-	path := strings.Split(key, ".")
-	for _, v := range r.values {
-		if val := v.GetPath(path...); val.raw != nil {
-			return &jsonValue{raw: val.raw}, true
+func (r *resolver) extractValue(values map[string]interface{}, path string) Value {
+	keys := strings.Split(path, ".")
+	for idx, key := range keys {
+		v, ok := values[key]
+		if !ok {
+			return nil
+		}
+		if idx == len(keys)-1 {
+			jv := &atomicValue{}
+			jv.raw.Store(v)
+			return jv
+		}
+		if values, ok = v.(map[string]interface{}); !ok {
+			return nil
 		}
 	}
-	return nil, false
+	return nil
+}
+
+func (r *resolver) Resolve(path string) (ret Value) {
+	r.values.Range(func(k, v interface{}) bool {
+		if values, err := v.(Value).Map(); err == nil {
+			if next := r.extractValue(values, path); next != nil {
+				ret = next
+				return false
+			}
+		}
+		return true
+	})
+	return
 }
