@@ -60,7 +60,8 @@ func (c *config) watch(r *resolver, w source.Watcher) {
 		r.reload(kv)
 		c.cached.Range(func(key, value interface{}) bool {
 			for _, r := range c.resolvers {
-				if v := r.Resolve(key.(string)); v != value {
+				if v := r.Resolve(key.(string)); v != nil {
+					value.(Value).Store(v)
 					c.cached.Store(key, v)
 				}
 			}
@@ -70,16 +71,12 @@ func (c *config) watch(r *resolver, w source.Watcher) {
 }
 
 func (c *config) Load() error {
-	parsers := make(map[string]parser.Parser)
-	for _, parser := range c.opts.parsers {
-		parsers[parser.Format()] = parser
-	}
 	for _, source := range c.opts.sources {
 		w, err := source.Watch()
 		if err != nil {
 			return err
 		}
-		r, err := newResolver(source, parsers)
+		r, err := newResolver(source, c.opts.parsers)
 		if err != nil {
 			return err
 		}

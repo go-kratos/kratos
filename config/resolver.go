@@ -16,10 +16,13 @@ type resolver struct {
 	values  sync.Map
 }
 
-func newResolver(s source.Source, p map[string]parser.Parser) (*resolver, error) {
+func newResolver(s source.Source, ps []parser.Parser) (*resolver, error) {
 	r := &resolver{
 		source:  s,
-		parsers: p,
+		parsers: make(map[string]parser.Parser),
+	}
+	for _, parser := range ps {
+		r.parsers[parser.Format()] = parser
 	}
 	return r, r.load()
 }
@@ -29,21 +32,21 @@ func (r *resolver) reload(kv *source.KeyValue) error {
 	if !ok {
 		return fmt.Errorf("unsupported parsing formats: %s", kv.Format)
 	}
-	var v interface{}
-	if err := parser.Unmarshal(kv.Value, &v); err != nil {
+	var m interface{}
+	if err := parser.Unmarshal(kv.Value, &m); err != nil {
 		return err
 	}
-	data, err := json.Marshal(v)
+	data, err := json.Marshal(m)
 	if err != nil {
 		return err
 	}
-	var raw interface{}
-	if err := json.Unmarshal(data, &raw); err != nil {
+	var v interface{}
+	if err := json.Unmarshal(data, &v); err != nil {
 		return err
 	}
-	jv := &atomicValue{}
-	jv.raw.Store(raw)
-	r.values.Store(kv.Key, jv)
+	av := &atomicValue{}
+	av.Store(v)
+	r.values.Store(kv.Key, av)
 	return nil
 }
 
@@ -60,19 +63,23 @@ func (r *resolver) load() error {
 	return nil
 }
 
-func (r *resolver) extractValue(values map[string]interface{}, path string) Value {
+func (r *resolver) extractValue(values interface{}, path string) Value {
+	next, ok := values.(map[string]interface{})
+	if !ok {
+		return nil
+	}
 	keys := strings.Split(path, ".")
 	for idx, key := range keys {
-		v, ok := values[key]
+		v, ok := next[key]
 		if !ok {
 			return nil
 		}
 		if idx == len(keys)-1 {
-			jv := &atomicValue{}
-			jv.raw.Store(v)
-			return jv
+			av := &atomicValue{}
+			av.Store(v)
+			return av
 		}
-		if values, ok = v.(map[string]interface{}); !ok {
+		if next, ok = v.(map[string]interface{}); !ok {
 			return nil
 		}
 	}
@@ -81,7 +88,7 @@ func (r *resolver) extractValue(values map[string]interface{}, path string) Valu
 
 func (r *resolver) Resolve(path string) (ret Value) {
 	r.values.Range(func(k, v interface{}) bool {
-		if values, err := v.(Value).Map(); err == nil {
+		if values := v.(Value).Load(); values != nil {
 			if next := r.extractValue(values, path); next != nil {
 				ret = next
 				return false
