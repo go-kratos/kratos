@@ -1,25 +1,25 @@
 package config
 
-import "github.com/go-kratos/kratos/v2/config/source"
-
 // Watcher is config watcher.
 type Watcher interface {
 	Next() (Value, error)
 	Close() error
 }
 
-// Observer is config watch observer.
-type Observer func(*source.KeyValue)
-
 type watcher struct {
+	ch chan Value
 }
 
 func newWatcher() Watcher {
 	return &watcher{}
 }
 
+func (w *watcher) update(v Value) {
+	w.ch <- v
+}
+
 func (w *watcher) Next() (Value, error) {
-	return nil, nil
+	return <-w.ch, nil
 }
 
 func (w *watcher) Close() error { return nil }

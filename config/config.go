@@ -21,17 +21,20 @@ var (
 	_ Config = (*config)(nil)
 )
 
+// Observer is config observer.
+type Observer func(string, Value)
+
 // Config is a config interface.
 type Config interface {
 	Load() error
 	Value(key string) Value
-	Watch(key ...string) (Watcher, error)
+	Watch(key string, o Observer) error
 }
 
 type config struct {
 	cached    sync.Map
+	watchers  sync.Map
 	resolvers []*resolver
-	watchers  []source.Watcher
 	opts      options
 }
 
@@ -59,10 +62,14 @@ func (c *config) watch(r *resolver, w source.Watcher) {
 		}
 		r.reload(kv)
 		c.cached.Range(func(key, value interface{}) bool {
+			k := key.(string)
+			v := value.(Value)
 			for _, r := range c.resolvers {
-				if v := r.Resolve(key.(string)); v != nil {
-					value.(Value).Store(v)
-					c.cached.Store(key, v)
+				if n := r.Resolve(k); n != nil && n.Load() != v.Load() {
+					if o, ok := c.watchers.Load(k); ok {
+						o.(Observer)(k, v)
+					}
+					v.Store(n.Load())
 				}
 			}
 			return true
@@ -99,6 +106,10 @@ func (c *config) Value(key string) Value {
 	return &errValue{err: ErrNotFound}
 }
 
-func (c *config) Watch(key ...string) (Watcher, error) {
-	return newWatcher(), nil
+func (c *config) Watch(key string, o Observer) error {
+	if v := c.Value(key); v.Load() == nil {
+		return ErrNotFound
+	}
+	c.watchers.Store(key, o)
+	return nil
 }

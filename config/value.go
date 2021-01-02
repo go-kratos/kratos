@@ -66,7 +66,7 @@ func (v *atomicValue) String() (string, error) {
 	case string:
 		return val, nil
 	case bool, int64, float64:
-		return fmt.Sprint(v.Load()), nil
+		return fmt.Sprint(val), nil
 	}
 	return "", fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
 }
