@@ -51,7 +51,7 @@ test:
 
 func TestConfigYAML(t *testing.T) {
 	c := New(WithSource(
-		memory.New(&source.KeyValue{
+		memory.New(nil, &source.KeyValue{
 			Format: "yaml",
 			Key:    "test",
 			Value:  []byte(strings.TrimSpace(_yaml)),
@@ -62,7 +62,7 @@ func TestConfigYAML(t *testing.T) {
 
 func TestConfigTOML(t *testing.T) {
 	c := New(WithSource(
-		memory.New(&source.KeyValue{
+		memory.New(nil, &source.KeyValue{
 			Format: "toml",
 			Key:    "test",
 			Value:  []byte(strings.TrimSpace(_toml)),
@@ -73,7 +73,7 @@ func TestConfigTOML(t *testing.T) {
 
 func TestConfigJSON(t *testing.T) {
 	c := New(WithSource(
-		memory.New(&source.KeyValue{
+		memory.New(nil, &source.KeyValue{
 			Format: "json",
 			Key:    "test",
 			Value:  []byte(strings.TrimSpace(_json)),
@@ -146,7 +146,7 @@ func testConfig(t *testing.T, c Config) {
 	}
 
 	// not found
-	if _, err := c.Value("not_found_key").Bool(); err == nil {
+	if _, err := c.Value("not_found_key").Bool(); err != ErrNotFound {
 		t.Logf("not_found_key not match: %v", err)
 	}
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/config/parser"
 	"github.com/go-kratos/kratos/v2/config/parser/json"
+	"github.com/go-kratos/kratos/v2/config/parser/text"
 	"github.com/go-kratos/kratos/v2/config/parser/toml"
 	"github.com/go-kratos/kratos/v2/config/parser/yaml"
 	"github.com/go-kratos/kratos/v2/config/source"
@@ -29,11 +30,13 @@ type Config interface {
 	Load() error
 	Value(key string) Value
 	Watch(key string, o Observer) error
+	Close() error
 }
 
 type config struct {
 	cached    sync.Map
-	watchers  sync.Map
+	observers sync.Map
+	watchers  []source.Watcher
 	resolvers []*resolver
 	opts      options
 }
@@ -42,6 +45,7 @@ type config struct {
 func New(opts ...Option) Config {
 	options := options{
 		parsers: []parser.Parser{
+			text.NewParser(),
 			json.NewParser(),
 			yaml.NewParser(),
 			toml.NewParser(),
@@ -66,10 +70,10 @@ func (c *config) watch(r *resolver, w source.Watcher) {
 			v := value.(Value)
 			for _, r := range c.resolvers {
 				if n := r.Resolve(k); n != nil && n.Load() != v.Load() {
-					if o, ok := c.watchers.Load(k); ok {
+					v.Store(n.Load())
+					if o, ok := c.observers.Load(k); ok {
 						o.(Observer)(k, v)
 					}
-					v.Store(n.Load())
 				}
 			}
 			return true
@@ -87,6 +91,7 @@ func (c *config) Load() error {
 		if err != nil {
 			return err
 		}
+		c.watchers = append(c.watchers, w)
 		c.resolvers = append(c.resolvers, r)
 		go c.watch(r, w)
 	}
@@ -110,6 +115,15 @@ func (c *config) Watch(key string, o Observer) error {
 	if v := c.Value(key); v.Load() == nil {
 		return ErrNotFound
 	}
-	c.watchers.Store(key, o)
+	c.observers.Store(key, o)
+	return nil
+}
+
+func (c *config) Close() error {
+	for _, w := range c.watchers {
+		if err := w.Close(); err != nil {
+			return err
+		}
+	}
 	return nil
 }

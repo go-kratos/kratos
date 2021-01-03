@@ -13,14 +13,14 @@ func NewParser() parser.Parser {
 	return &jsonParser{}
 }
 
-func (j *jsonParser) Format() string {
+func (p *jsonParser) Format() string {
 	return "json"
 }
 
-func (j *jsonParser) Marshal(v interface{}) ([]byte, error) {
+func (p *jsonParser) Marshal(v interface{}) ([]byte, error) {
 	return json.Marshal(v)
 }
 
-func (j *jsonParser) Unmarshal(data []byte, v interface{}) error {
+func (p *jsonParser) Unmarshal(data []byte, v interface{}) error {
 	return json.Unmarshal(data, v)
 }

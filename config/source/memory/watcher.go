@@ -6,8 +6,8 @@ type watcher struct {
 	ch chan *source.KeyValue
 }
 
-func newWatcher() source.Watcher {
-	return &watcher{ch: make(chan *source.KeyValue)}
+func newWatcher(ch chan *source.KeyValue) source.Watcher {
+	return &watcher{ch: ch}
 }
 
 func (w *watcher) Next() (*source.KeyValue, error) {

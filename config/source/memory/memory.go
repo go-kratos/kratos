@@ -7,12 +7,13 @@ import (
 var _ source.Source = (*memory)(nil)
 
 type memory struct {
+	ch  chan *source.KeyValue
 	kvs []*source.KeyValue
 }
 
 // New new a memory provider.
-func New(kvs ...*source.KeyValue) source.Source {
-	return &memory{kvs: kvs}
+func New(ch chan *source.KeyValue, kvs ...*source.KeyValue) source.Source {
+	return &memory{ch: ch, kvs: kvs}
 }
 
 func (m *memory) Load() ([]*source.KeyValue, error) {
@@ -20,5 +21,5 @@ func (m *memory) Load() ([]*source.KeyValue, error) {
 }
 
 func (m *memory) Watch() (source.Watcher, error) {
-	return newWatcher(), nil
+	return newWatcher(m.ch), nil
 }
