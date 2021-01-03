@@ -5,6 +5,8 @@ import (
 	"github.com/pelletier/go-toml"
 )
 
+var _ parser.Parser = (*tomlParser)(nil)
+
 type tomlParser struct{}
 
 // NewParser new a toml parser.

@@ -10,7 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/server"
 )
 
-var _ server.Server = new(Server)
+var _ server.Server = (*Server)(nil)
 
 // ServerOption is HTTP server option.
 type ServerOption func(o *serverOptions)

@@ -16,12 +16,12 @@ type resolver struct {
 	values  sync.Map
 }
 
-func newResolver(s source.Source, ps []parser.Parser) (*resolver, error) {
+func newResolver(s source.Source, opts options) (*resolver, error) {
 	r := &resolver{
 		source:  s,
 		parsers: make(map[string]parser.Parser),
 	}
-	for _, parser := range ps {
+	for _, parser := range opts.parsers {
 		r.parsers[parser.Format()] = parser
 	}
 	return r, r.load()

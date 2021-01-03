@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-var _ server.Server = new(Server)
+var _ server.Server = (*Server)(nil)
 
 // Server is a gRPC server wrapper.
 type Server struct {

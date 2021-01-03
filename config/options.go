@@ -2,6 +2,10 @@ package config
 
 import (
 	"github.com/go-kratos/kratos/v2/config/parser"
+	"github.com/go-kratos/kratos/v2/config/parser/json"
+	"github.com/go-kratos/kratos/v2/config/parser/text"
+	"github.com/go-kratos/kratos/v2/config/parser/toml"
+	"github.com/go-kratos/kratos/v2/config/parser/yaml"
 	"github.com/go-kratos/kratos/v2/config/source"
 )
 
@@ -11,6 +15,17 @@ type Option func(*options)
 type options struct {
 	parsers []parser.Parser
 	sources []source.Source
+}
+
+func defaultOptions() options {
+	return options{
+		parsers: []parser.Parser{
+			text.NewParser(),
+			json.NewParser(),
+			yaml.NewParser(),
+			toml.NewParser(),
+		},
+	}
 }
 
 // WithSource .

@@ -9,6 +9,8 @@ import (
 	"github.com/go-kratos/kratos/v2/config/source"
 )
 
+var _ source.Source = (*file)(nil)
+
 type file struct {
 	path string
 }

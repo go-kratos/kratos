@@ -5,11 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/config/parser"
-	"github.com/go-kratos/kratos/v2/config/parser/json"
-	"github.com/go-kratos/kratos/v2/config/parser/text"
-	"github.com/go-kratos/kratos/v2/config/parser/toml"
-	"github.com/go-kratos/kratos/v2/config/parser/yaml"
 	"github.com/go-kratos/kratos/v2/config/source"
 )
 
@@ -43,14 +38,7 @@ type config struct {
 
 // New new a config with options.
 func New(opts ...Option) Config {
-	options := options{
-		parsers: []parser.Parser{
-			text.NewParser(),
-			json.NewParser(),
-			yaml.NewParser(),
-			toml.NewParser(),
-		},
-	}
+	options := defaultOptions()
 	for _, o := range opts {
 		o(&options)
 	}
@@ -87,7 +75,7 @@ func (c *config) Load() error {
 		if err != nil {
 			return err
 		}
-		r, err := newResolver(source, c.opts.parsers)
+		r, err := newResolver(source, c.opts)
 		if err != nil {
 			return err
 		}

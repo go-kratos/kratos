@@ -3,25 +3,30 @@ package kratos
 import (
 	"log"
 
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	servergrpc "github.com/go-kratos/kratos/v2/server/grpc"
+	serverhttp "github.com/go-kratos/kratos/v2/server/http"
+	transportgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
+	transporthttp "github.com/go-kratos/kratos/v2/transport/http"
+	"google.golang.org/grpc"
 )
 
 func ExampleApp() {
-	// init & defer
-	// TODO do something
+
+	httpTransport := transporthttp.NewServer()
+	grpcTransport := transportgrpc.NewServer()
 
 	// transport server
-	httpSrv := http.NewServer(http.WithAddress(":8000"))
-	grpcSrv := grpc.NewServer(grpc.WithAddress(":9000"))
+	httpServer := serverhttp.NewServer("tcp", ":8000", serverhttp.ServerHandler(httpTransport))
+	grpcServer := servergrpc.NewServer("tcp", ":9000", grpc.UnaryInterceptor(grpcTransport.Interceptor()))
 
 	// application lifecycle
 	app := New()
-	app.Append(Hook{OnStart: httpSrv.Start, OnStop: httpSrv.Stop})
-	app.Append(Hook{OnStart: grpcSrv.Start, OnStop: grpcSrv.Stop})
+	app.Append(httpServer)
+	app.Append(grpcServer)
 
 	// start and wait for stop signal
 	if err := app.Run(); err != nil {
 		log.Printf("app failed: %v\n", err)
 	}
+
 }

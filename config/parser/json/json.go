@@ -6,6 +6,8 @@ import (
 	"github.com/go-kratos/kratos/v2/config/parser"
 )
 
+var _ parser.Parser = (*jsonParser)(nil)
+
 type jsonParser struct{}
 
 // NewParser new a json parser.

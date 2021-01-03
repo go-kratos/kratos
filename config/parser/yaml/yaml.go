@@ -5,6 +5,8 @@ import (
 	"github.com/go-kratos/kratos/v2/config/parser"
 )
 
+var _ parser.Parser = (*yamlParser)(nil)
+
 type yamlParser struct{}
 
 // NewParser new a yaml parser.
