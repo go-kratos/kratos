@@ -67,11 +67,10 @@ go build
 > [简体中文（国内镜像）](https://go-kratos.gitee.io/kratos/)  
 > [FAQ](https://go-kratos.github.io/kratos/#/FAQ)  
 
-## License
-Kratos is under the MIT license. See the [LICENSE](./LICENSE) file for details.
-
--------------
 ## 社区
 * [官方微信群](https://github.com/go-kratos/kratos/issues/682) (推荐)
 * [Discord Group](https://discord.gg/BWzJsUJ)
+
+## License
+Kratos is under the MIT license. See the [LICENSE](./LICENSE) file for details.
 
