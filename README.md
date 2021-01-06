@@ -71,6 +71,7 @@ go build
 Kratos is under the MIT license. See the [LICENSE](./LICENSE) file for details.
 
 -------------
+## 社区
+* [官方微信群](https://github.com/go-kratos/kratos/issues/682) (推荐)
+* [Discord Group](https://discord.gg/BWzJsUJ)
 
-*Please report bugs, concerns, suggestions by issues, on [Discord Group](https://discord.gg/BWzJsUJ)
- or join QQ-group 716486124 to discuss problems around source code.*
