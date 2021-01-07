@@ -3,6 +3,7 @@ package metrics
 // Counter is metrics counter.
 type Counter interface {
 	With(lvs ...string) Counter
+	Inc()
 	Add(delta float64)
 }
 
