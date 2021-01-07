@@ -2,16 +2,20 @@ package metrics
 
 // Counter is metrics counter.
 type Counter interface {
-	Add(delta float64, lvs ...string)
+	With(lvs ...string) Counter
+	Add(delta float64)
 }
 
 // Gauge is metrics gauge.
 type Gauge interface {
-	Set(value float64, lvs ...string)
-	Add(delta float64, lvs ...string)
+	With(lvs ...string) Gauge
+	Set(value float64)
+	Add(delta float64)
+	Sub(delta float64)
 }
 
-// Histogram is metrics histogram.
-type Histogram interface {
-	Observe(value float64, lvs ...string)
+// Observer is metrics observer.
+type Observer interface {
+	With(lvs ...string) Observer
+	Observe(float64)
 }
