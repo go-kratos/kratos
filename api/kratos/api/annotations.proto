@@ -4,7 +4,7 @@ package kratos.api;
 option go_package = "github.com/go-kratos/kratos/api;api";
 option java_multiple_files = true;
 option java_package = "com.github.kratos.api";
-option objc_class_prefix = "KratosApi";
+option objc_class_prefix = "KratosAPI";
 
 import "google/protobuf/descriptor.proto";
 
