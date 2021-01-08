@@ -6,7 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
-var opts = make([]Option, 0)
+var opts = []Option{FluentHost("127.0.0.1"), FluentPort(24224)}
 
 func TestLogger(t *testing.T) {
 	logger := NewLogger(opts...)

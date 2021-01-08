@@ -29,6 +29,73 @@ type options struct {
 	ForceStopAsyncSend bool
 }
 
+func FluentPort(val int) Option {
+	return func(opts *options) {
+		opts.FluentPort = val
+	}
+}
+func FluentHost(val string) Option {
+	return func(opts *options) {
+		opts.FluentHost = val
+	}
+}
+
+func FluentNetwork(val string) Option {
+	return func(opts *options) {
+		opts.FluentNetwork = val
+	}
+}
+func FluentSocketPath(val string) Option {
+	return func(opts *options) {
+		opts.FluentSocketPath = val
+	}
+}
+func Timeout(val time.Duration) Option {
+	return func(opts *options) {
+		opts.Timeout = val
+	}
+}
+func WriteTimeout(val time.Duration) Option {
+	return func(opts *options) {
+		opts.WriteTimeout = val
+	}
+}
+func BufferLimit(val int) Option {
+	return func(opts *options) {
+		opts.BufferLimit = val
+	}
+}
+func RetryWait(val int) Option {
+	return func(opts *options) {
+		opts.RetryWait = val
+	}
+}
+func MaxRetry(val int) Option {
+	return func(opts *options) {
+		opts.MaxRetry = val
+	}
+}
+func MaxRetryWait(val int) Option {
+	return func(opts *options) {
+		opts.MaxRetryWait = val
+	}
+}
+func TagPrefix(val string) Option {
+	return func(opts *options) {
+		opts.TagPrefix = val
+	}
+}
+func Async(val bool) Option {
+	return func(opts *options) {
+		opts.Async = val
+	}
+}
+func ForceStopAsyncSend(val bool) Option {
+	return func(opts *options) {
+		opts.ForceStopAsyncSend = val
+	}
+}
+
 type fluentdLogger struct {
 	opts options
 	log  *fluent.Fluent
@@ -73,7 +140,7 @@ func (f *fluentdLogger) Print(kvpair ...interface{}) {
 	}
 
 	tag := "" // fixme: TBD
-	data := make(map[string]string)
+	data := make(map[string]string, len(kvpair)/2)
 	for i := 0; i < len(kvpair); i += 2 {
 		data[fmt.Sprintf("%s", kvpair[i])] = fmt.Sprintf("%s", kvpair[i+1])
 	}
