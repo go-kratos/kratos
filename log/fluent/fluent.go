@@ -1,4 +1,4 @@
-package fluentd
+package fluent
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
-var _ log.Logger = (*fluentdLogger)(nil)
+var _ log.Logger = (*fluentLogger)(nil)
 
 // Option is fluentd logger option.
 type Option func(*options)
@@ -27,6 +27,7 @@ type options struct {
 	TagPrefix          string
 	Async              bool
 	ForceStopAsyncSend bool
+	Tag                string
 }
 
 func FluentPort(val int) Option {
@@ -96,7 +97,13 @@ func ForceStopAsyncSend(val bool) Option {
 	}
 }
 
-type fluentdLogger struct {
+func Tag(val string) Option {
+	return func(opts *options) {
+		opts.Tag = val
+	}
+}
+
+type fluentLogger struct {
 	opts options
 	log  *fluent.Fluent
 }
@@ -125,13 +132,13 @@ func NewLogger(opts ...Option) log.Logger {
 	if err != nil {
 		panic(err)
 	}
-	return &fluentdLogger{
+	return &fluentLogger{
 		opts: options,
 		log:  fl,
 	}
 }
 
-func (f *fluentdLogger) Print(kvpair ...interface{}) {
+func (f *fluentLogger) Print(kvpair ...interface{}) {
 	if len(kvpair) == 0 {
 		return
 	}
@@ -139,18 +146,17 @@ func (f *fluentdLogger) Print(kvpair ...interface{}) {
 		kvpair = append(kvpair, "")
 	}
 
-	tag := "" // fixme: TBD
 	data := make(map[string]string, len(kvpair)/2)
 	for i := 0; i < len(kvpair); i += 2 {
 		data[fmt.Sprintf("%s", kvpair[i])] = fmt.Sprintf("%s", kvpair[i+1])
 	}
 
-	err := f.log.Post(tag, data)
+	err := f.log.Post(f.opts.Tag, data)
 	if err != nil {
 		println(err)
 	}
 }
 
-func (f *fluentdLogger) Close() error {
+func (f *fluentLogger) Close() error {
 	return f.log.Close()
 }
