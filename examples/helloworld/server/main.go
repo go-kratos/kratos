@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"os"
 
 	"github.com/go-kratos/kratos/v2"
+	"github.com/go-kratos/kratos/v2/errors"
 	pb "github.com/go-kratos/kratos/v2/examples/helloworld/helloworld"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/log/stdlog"
 	"github.com/go-kratos/kratos/v2/middleware"
 	servergrpc "github.com/go-kratos/kratos/v2/server/grpc"
 	serverhttp "github.com/go-kratos/kratos/v2/server/http"
@@ -24,49 +27,54 @@ type server struct {
 
 // SayHello implements helloworld.GreeterServer
 func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
-	fmt.Println("SayHello:", in)
+	if in.Name == "error" {
+		return nil, errors.InvalidArgument("BadRequest", "invalid argument %s", in.Name)
+	}
 	return &pb.HelloReply{Message: fmt.Sprintf("Hello %+v", in)}, nil
 }
 
-func logger() middleware.Middleware {
+func logger1(logger log.Logger) middleware.Middleware {
+	log := log.NewHelper("logger1", logger)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 
-			fmt.Println("before")
+			log.Info("before")
 
 			return handler(ctx, req)
 		}
 	}
 }
 
-func logger2() middleware.Middleware {
+func logger2(logger log.Logger) middleware.Middleware {
+	log := log.NewHelper("logger2", logger)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 
 			resp, err := handler(ctx, req)
 
-			fmt.Println("after")
+			log.Info("after")
 
 			return resp, err
 		}
 	}
 }
 
-func logger3() middleware.Middleware {
+func logger3(logger log.Logger) middleware.Middleware {
+	log := log.NewHelper("logger2", logger)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 
 			tr, ok := transport.FromContext(ctx)
 			if ok {
-				fmt.Printf("transport: %+v\n", tr)
+				log.Infof("transport: %+v", tr)
 			}
 			h, ok := transporthttp.FromContext(ctx)
 			if ok {
-				fmt.Printf("http: [%s] %s\n", h.Request.Method, h.Request.URL.Path)
+				log.Infof("http: [%s] %s", h.Request.Method, h.Request.URL.Path)
 			}
 			g, ok := transportgrpc.FromContext(ctx)
 			if ok {
-				fmt.Printf("grpc: %s\n", g.FullMethod)
+				log.Infof("grpc: %s", g.FullMethod)
 			}
 
 			return handler(ctx, req)
@@ -75,14 +83,17 @@ func logger3() middleware.Middleware {
 }
 
 func main() {
+	logger := stdlog.NewLogger(stdlog.Writer(os.Stdout), stdlog.Skip(4))
+	log := log.NewHelper("main", logger)
+
 	s := &server{}
 	app := kratos.New()
 
-	httpTransport := transporthttp.NewServer(transporthttp.ServerMiddleware(logger(), logger2()))
-	httpTransport.Use(s, logger3())
+	httpTransport := transporthttp.NewServer(transporthttp.ServerMiddleware(logger1(logger), logger2(logger)))
+	httpTransport.Use(s, logger3(logger))
 
-	grpcTransport := transportgrpc.NewServer(transportgrpc.ServerMiddleware(logger(), logger2()))
-	grpcTransport.Use(s, logger3())
+	grpcTransport := transportgrpc.NewServer(transportgrpc.ServerMiddleware(logger1(logger), logger2(logger)))
+	grpcTransport.Use(s, logger3(logger))
 
 	httpServer := serverhttp.NewServer("tcp", ":8000", serverhttp.ServerHandler(httpTransport))
 	grpcServer := servergrpc.NewServer("tcp", ":9000", grpc.UnaryInterceptor(grpcTransport.Interceptor()))
@@ -94,6 +105,6 @@ func main() {
 	app.Append(grpcServer)
 
 	if err := app.Run(); err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 }

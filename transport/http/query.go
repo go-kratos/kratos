@@ -19,7 +19,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 )
 
-// PopulateVars sets a value in a nested Protobuf structure.
+// PopulateVars parses url parameters.
 func PopulateVars(msg proto.Message, req *http.Request) error {
 	for key, value := range Vars(req) {
 		if err := populateFieldValueFromPath(msg.ProtoReflect(), strings.Split(key, "."), []string{value}); err != nil {

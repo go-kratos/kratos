@@ -3,8 +3,6 @@ package errors
 import (
 	"errors"
 	"fmt"
-
-	"google.golang.org/protobuf/proto"
 )
 
 // Cancelled The operation was cancelled, typically by the caller.
@@ -12,10 +10,8 @@ import (
 func Cancelled(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    1,
-		Message: "Canceled",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
 
@@ -31,10 +27,8 @@ func IsCancelled(err error) bool {
 func Unknown(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    2,
-		Message: "Unknown",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
 
@@ -50,10 +44,8 @@ func IsUnknown(err error) bool {
 func InvalidArgument(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    3,
-		Message: "InvalidArgument",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
 
@@ -69,10 +61,8 @@ func IsInvalidArgument(err error) bool {
 func DeadlineExceeded(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    4,
-		Message: "DeadlineExceeded",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
 
@@ -88,10 +78,8 @@ func IsDeadlineExceeded(err error) bool {
 func NotFound(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    5,
-		Message: "NotFound",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
 
@@ -107,10 +95,8 @@ func IsNotFound(err error) bool {
 func AlreadyExists(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    6,
-		Message: "AlreadyExists",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
 
@@ -126,12 +112,11 @@ func IsAlreadyExists(err error) bool {
 func PermissionDenied(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    7,
-		Message: "PermissionDenied",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
+
 func IsPermissionDenied(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 7
@@ -145,12 +130,11 @@ func IsPermissionDenied(err error) bool {
 func ResourceExhausted(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    8,
-		Message: "ResourceExhausted",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
+
 func IsResourceExhausted(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 8
@@ -164,10 +148,8 @@ func IsResourceExhausted(err error) bool {
 func FailedPrecondition(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    9,
-		Message: "FailedPrecondition",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
 
@@ -184,12 +166,11 @@ func IsFailedPrecondition(err error) bool {
 func Aborted(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    10,
-		Message: "Aborted",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
+
 func IsAborted(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 10
@@ -203,10 +184,8 @@ func IsAborted(err error) bool {
 func OutOfRange(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    11,
-		Message: "OutOfRange",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
 
@@ -222,10 +201,8 @@ func IsOutOfRange(err error) bool {
 func Unimplemented(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    12,
-		Message: "Unimplemented",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
 
@@ -244,10 +221,8 @@ func IsUnimplemented(err error) bool {
 func Internal(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    13,
-		Message: "Internal",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
 
@@ -263,10 +238,8 @@ func IsInternal(err error) bool {
 func Unavailable(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    14,
-		Message: "Unavailable",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
 
@@ -282,10 +255,8 @@ func IsUnavailable(err error) bool {
 func DataLoss(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    15,
-		Message: "DataLoss",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
 
@@ -301,10 +272,8 @@ func IsDataLoss(err error) bool {
 func Unauthorized(reason, format string, a ...interface{}) error {
 	return &StatusError{
 		Code:    16,
-		Message: "Unauthenticated",
-		Details: []proto.Message{
-			&ErrorItem{Reason: reason, Message: fmt.Sprintf(format, a...)},
-		},
+		Reason:  reason,
+		Message: fmt.Sprintf(format, a...),
 	}
 }
 

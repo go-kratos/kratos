@@ -17,7 +17,9 @@ type Server struct {
 
 // NewServer creates a gRPC server by options.
 func NewServer(opts ...ServerOption) *Server {
-	options := serverOptions{}
+	options := serverOptions{
+		errorEncoder: DefaultErrorEncoder,
+	}
 	for _, o := range opts {
 		o(&options)
 	}
@@ -30,7 +32,7 @@ func NewServer(opts ...ServerOption) *Server {
 
 // Interceptor returns a unary server interceptor.
 func (s *Server) Interceptor() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		ctx = transport.NewContext(ctx, transport.Transport{Kind: "GRPC"})
 		ctx = NewContext(ctx, ServerInfo{Server: info.Server, FullMethod: info.FullMethod})
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -42,7 +44,11 @@ func (s *Server) Interceptor() grpc.UnaryServerInterceptor {
 		if s.opts.middleware != nil {
 			h = s.opts.middleware(h)
 		}
-		return h(ctx, req)
+		resp, err := h(ctx, req)
+		if err != nil {
+			return nil, s.opts.errorEncoder(ctx, err)
+		}
+		return resp, nil
 	}
 }
 

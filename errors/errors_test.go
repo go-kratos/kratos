@@ -20,14 +20,14 @@ func TestErrorsMatch(t *testing.T) {
 		t.Errorf("error is not match: %+v -> %+v", s, st)
 	}
 
-	s.WithDetails(&ErrorInfo{Reason: "test_reason"})
-	st.WithDetails(&ErrorInfo{Reason: "test_reason"})
+	s.Reason = "test_reason"
+	s.Reason = "test_reason"
 
 	if !errors.Is(s, st) {
 		t.Errorf("error is not match: %+v -> %+v", s, st)
 	}
 
-	if Reason(s).Reason != "test_reason" {
+	if Reason(s) != "test_reason" {
 		t.Errorf("error is not match: %+v -> %+v", s, st)
 	}
 }

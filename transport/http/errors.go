@@ -7,7 +7,7 @@ import (
 )
 
 // References: https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
-var errMapping = map[int32]int{
+var statusMapping = map[int32]int{
 	0:  http.StatusOK,
 	1:  http.StatusInternalServerError,
 	2:  http.StatusInternalServerError,
@@ -35,7 +35,7 @@ func StatusError(err error) (int, *errors.StatusError) {
 			Message: "Unknown: " + err.Error(),
 		}
 	}
-	if status, ok := errMapping[se.Code]; ok {
+	if status, ok := statusMapping[se.Code]; ok {
 		return status, se
 	}
 	return http.StatusInternalServerError, se

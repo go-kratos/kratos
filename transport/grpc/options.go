@@ -1,6 +1,8 @@
 package grpc
 
 import (
+	"context"
+
 	"github.com/go-kratos/kratos/v2/middleware"
 )
 
@@ -8,8 +10,12 @@ import (
 type ServerOption func(o *serverOptions)
 
 type serverOptions struct {
-	middleware middleware.Middleware
+	middleware   middleware.Middleware
+	errorEncoder EncodeErrorFunc
 }
+
+// EncodeErrorFunc .
+type EncodeErrorFunc func(ctx context.Context, err error) error
 
 // ServerMiddleware .
 func ServerMiddleware(m ...middleware.Middleware) ServerOption {
