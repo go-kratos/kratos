@@ -3,11 +3,6 @@ package errors
 import (
 	"errors"
 	"fmt"
-
-	"google.golang.org/genproto/googleapis/rpc/errdetails"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -41,27 +36,17 @@ func (e *StatusError) Is(target error) bool {
 	return false
 }
 
-// GRPCStatus returns the gRPC Status.
-func (e *StatusError) GRPCStatus(domain string) (*status.Status, error) {
-	return status.Newf(codes.Code(e.Code), "%s: %s", e.Reason, e.Message).
-		WithDetails(&errdetails.ErrorInfo{
-			Domain:   domain,
-			Reason:   e.Reason,
-			Metadata: map[string]string{"message": e.Message},
-		})
-}
-
 func (e *StatusError) Error() string {
 	return fmt.Sprintf("error: code = %d desc = %s details = %+v", e.Code, e.Message, e.Details)
 }
 
 // Error returns a Status representing c and msg.
-func Error(code int32, reason, message string, details ...proto.Message) error {
+func Error(code int32, reason, message string, details ...interface{}) error {
 	return &StatusError{
 		Code:    code,
 		Reason:  reason,
 		Message: message,
-		Details: []interface{}{details},
+		Details: details,
 	}
 }
 
