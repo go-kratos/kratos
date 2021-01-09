@@ -7,14 +7,14 @@ import (
 
 var errorsTemplate = `const (
 {{ range .Errors }}
-	{{.Name}}_{{.Value}} = "{{.Name}}_{{.Value}}"
+	Errors_{{.Value}} = "{{.Name}}_{{.Value}}"
 {{- end }}
 )
 
 {{ range .Errors }}
 
 func Is{{.Value}}(err error) bool {
-	return errors.Reason(err).Reason == {{.Name}}_{{.Value}}
+	return errors.Reason(err) == Errors_{{.Value}}
 }
 {{- end }}
 `
