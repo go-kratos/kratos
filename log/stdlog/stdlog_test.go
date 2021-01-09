@@ -1,15 +1,23 @@
 package stdlog
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
 
+type Discard int
+
+func (d Discard) Write(p []byte) (n int, err error) { return }
+func (d Discard) Close() (err error)                { return }
+
 func TestLogger(t *testing.T) {
-	logger := NewLogger(Writer(os.Stdout))
+	logger, err := NewLogger(Writer(os.Stdout))
+	if err != nil {
+		t.Error(err)
+	}
+	defer logger.Close()
 	logger.Print("log", "test")
 
 	log.Debug(logger).Print("log", "test")
@@ -20,16 +28,25 @@ func TestLogger(t *testing.T) {
 
 func BenchmarkLoggerPrint(b *testing.B) {
 	b.SetParallelism(100)
-	log := NewLogger(Writer(ioutil.Discard))
+	logger, err := NewLogger(Writer(Discard(0)))
+	if err != nil {
+		b.Error(err)
+	}
+	defer logger.Close()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			log.Print("log", "test")
+			logger.Print("log", "test")
 		}
 	})
 }
 func BenchmarkLoggerHelperV(b *testing.B) {
 	b.SetParallelism(100)
-	log := log.NewHelper("test", NewLogger(Writer(ioutil.Discard)))
+	logger, err := NewLogger(Writer(Discard(0)))
+	if err != nil {
+		b.Error(err)
+	}
+	defer logger.Close()
+	log := log.NewHelper("test", logger)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			log.V(10).Print("log", "test")
@@ -38,7 +55,12 @@ func BenchmarkLoggerHelperV(b *testing.B) {
 }
 func BenchmarkLoggerHelperInfo(b *testing.B) {
 	b.SetParallelism(100)
-	log := log.NewHelper("test", NewLogger(Writer(ioutil.Discard)))
+	logger, err := NewLogger(Writer(Discard(0)))
+	if err != nil {
+		b.Error(err)
+	}
+	defer logger.Close()
+	log := log.NewHelper("test", logger)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			log.Info("log", "test")
@@ -47,7 +69,12 @@ func BenchmarkLoggerHelperInfo(b *testing.B) {
 }
 func BenchmarkLoggerHelperInfof(b *testing.B) {
 	b.SetParallelism(100)
-	log := log.NewHelper("test", NewLogger(Writer(ioutil.Discard)))
+	logger, err := NewLogger(Writer(Discard(0)))
+	if err != nil {
+		b.Error(err)
+	}
+	defer logger.Close()
+	log := log.NewHelper("test", logger)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			log.Infof("log %s", "test")
@@ -56,7 +83,12 @@ func BenchmarkLoggerHelperInfof(b *testing.B) {
 }
 func BenchmarkLoggerHelperInfow(b *testing.B) {
 	b.SetParallelism(100)
-	log := log.NewHelper("test", NewLogger(Writer(ioutil.Discard)))
+	logger, err := NewLogger(Writer(Discard(0)))
+	if err != nil {
+		b.Error(err)
+	}
+	defer logger.Close()
+	log := log.NewHelper("test", logger)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			log.Infow("log", "test")

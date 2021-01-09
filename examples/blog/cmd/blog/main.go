@@ -25,8 +25,13 @@ func init() {
 
 func main() {
 	flag.Parse()
-	logger := stdlog.NewLogger(stdlog.Writer(os.Stdout), stdlog.Skip(4))
+	logger, err := stdlog.NewLogger(stdlog.Writer(os.Stdout))
+	if err != nil {
+		panic(err)
+	}
+	defer logger.Close()
 	log := log.NewHelper("main", logger)
+
 	c := config.New(config.WithSource(file.NewSource(configPath)))
 	if err := c.Load(); err != nil {
 		panic(err)

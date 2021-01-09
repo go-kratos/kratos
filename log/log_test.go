@@ -12,6 +12,10 @@ func (t *testLogger) Print(kvpiar ...interface{}) {
 	t.Log(kvpiar...)
 }
 
+func (t *testLogger) Close() error {
+	return nil
+}
+
 func TestLogger(t *testing.T) {
 	log := &testLogger{t}
 	log.Print("log", "test")

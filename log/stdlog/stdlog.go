@@ -20,9 +20,10 @@ type Option func(*options)
 
 type options struct {
 	prefix string
+	path   string
 	flag   int
 	skip   int
-	out    io.Writer
+	out    io.WriteCloser
 }
 
 // Prefix with logger prefix.
@@ -47,9 +48,16 @@ func Skip(skip int) Option {
 }
 
 // Writer with logger writer.
-func Writer(out io.Writer) Option {
+func Writer(out io.WriteCloser) Option {
 	return func(o *options) {
 		o.out = out
+	}
+}
+
+// Path with logger path.
+func Path(path string) Option {
+	return func(o *options) {
+		o.path = path
 	}
 }
 
@@ -60,14 +68,21 @@ type stdLogger struct {
 }
 
 // NewLogger new a std logger with options.
-func NewLogger(opts ...Option) log.Logger {
+func NewLogger(opts ...Option) (log.Logger, error) {
 	options := options{
 		flag: stdlog.LstdFlags,
-		skip: 2,
+		skip: 4,
 		out:  os.Stdout,
 	}
 	for _, o := range opts {
 		o(&options)
+	}
+	if options.path != "" {
+		file, err := os.OpenFile(options.path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+		if err != nil {
+			return nil, err
+		}
+		options.out = file
 	}
 	return &stdLogger{
 		opts: options,
@@ -77,7 +92,7 @@ func NewLogger(opts ...Option) log.Logger {
 				return new(bytes.Buffer)
 			},
 		},
-	}
+	}, nil
 }
 
 func stackTrace(path string) string {
@@ -112,5 +127,5 @@ func (s *stdLogger) Print(kvpair ...interface{}) {
 }
 
 func (s *stdLogger) Close() error {
-	return nil
+	return s.opts.out.Close()
 }
