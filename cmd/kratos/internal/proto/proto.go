@@ -11,8 +11,8 @@ import (
 // CmdProto represents the proto command.
 var CmdProto = &cobra.Command{
 	Use:   "proto",
-	Short: "",
-	Long:  "",
+	Short: "Generate the proto files",
+	Long:  "Generate the proto files.",
 	Run:   run,
 }
 
