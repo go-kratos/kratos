@@ -78,7 +78,7 @@ make test
 ```
 
 ## Service Layout
-* [Service Layout](https://github.com/go-kratos/service-layout)
+* [Service Layout](https://github.com/go-kratos/kratos-layout)
 
 ## Community
 * [Wechat Group](https://github.com/go-kratos/kratos/issues/682)
