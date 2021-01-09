@@ -1,65 +1,65 @@
 package main
 
 import (
-	"flag"
+	"github.com/go-kratos/kratos/v2"
 	"os"
 
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/config/source/file"
+	pb "blog/api/helloworld/v1"
+	"blog/internal/service"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/log/stdlog"
 	servergrpc "github.com/go-kratos/kratos/v2/server/grpc"
 	serverhttp "github.com/go-kratos/kratos/v2/server/http"
-	transportgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
-	transporthttp "github.com/go-kratos/kratos/v2/transport/http"
-
+	grpctransport "github.com/go-kratos/kratos/v2/transport/grpc"
+	httptransport "github.com/go-kratos/kratos/v2/transport/http"
 	"google.golang.org/grpc"
+
+	_ "github.com/go-kratos/kratos/v2/encoding/json"
+	_ "github.com/go-kratos/kratos/v2/encoding/proto"
 )
 
-var configPath string
-
-func init() {
-	flag.StringVar(&configPath, "conf", "../../configs", "config path")
-}
+// go build -ldflags "-X main.Version=x.y.z"
+var (
+	// Version is the version of the compiled software.
+	Version string
+	// Branch is current branch name the code is built off.
+	Branch string
+	// Revision is the short commit hash of source tree.
+	Revision string
+	// BuildDate is the date when the binary was built.
+	BuildDate string
+)
 
 func main() {
-	flag.Parse()
 	logger, err := stdlog.NewLogger(stdlog.Writer(os.Stdout))
 	if err != nil {
 		panic(err)
 	}
 	defer logger.Close()
+
 	log := log.NewHelper("main", logger)
+	log.Infof("version: %s", Version)
 
-	c := config.New(config.WithSource(file.NewSource(configPath)))
-	if err := c.Load(); err != nil {
-		panic(err)
-	}
-	httpAddr, err := c.Value("server.http.addr").String()
-	if err != nil {
-		panic(err)
-	}
-	grpcAddr, err := c.Value("server.grpc.addr").String()
-	if err != nil {
-		panic(err)
-	}
-	log.Infof("http listening %s", httpAddr)
-	log.Infof("grpc listening %s", grpcAddr)
+	// transport
+	httpTransport := httptransport.NewServer()
+	grpcTransport := grpctransport.NewServer()
 
-	httpTransport := transporthttp.NewServer()
-	grpcTransport := transportgrpc.NewServer()
+	// server
+	httpServer := serverhttp.NewServer("tcp", ":8000", serverhttp.ServerHandler(httpTransport))
+	grpcServer := servergrpc.NewServer("tcp", ":9000", grpc.UnaryInterceptor(grpcTransport.Interceptor()))
 
-	httpServer := serverhttp.NewServer("tcp", httpAddr, serverhttp.ServerHandler(httpTransport))
-	grpcServer := servergrpc.NewServer("tcp", grpcAddr, grpc.UnaryInterceptor(grpcTransport.Interceptor()))
+	// register service
+	gs := service.NewGreeterService()
+	pb.RegisterGreeterServer(grpcServer, gs)
+	pb.RegisterGreeterHTTPServer(httpTransport, gs)
 
+	// application lifecycle
 	app := kratos.New()
 	app.Append(httpServer)
 	app.Append(grpcServer)
 
 	// start and wait for stop signal
 	if err := app.Run(); err != nil {
-		log.Infof("app failed: %v", err)
+		log.Errorf("start failed: %v\n", err)
 	}
-
 }

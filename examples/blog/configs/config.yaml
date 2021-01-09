@@ -1,5 +1,0 @@
-server:
-  http:
-    addr: ":8000"
-  grpc:
-    addr: ":9000"

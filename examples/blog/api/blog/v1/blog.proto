@@ -1,8 +1,36 @@
 syntax = "proto3";
 
-package blog.v1;
+package api.blog.v1;
+
+option go_package = "blog/api/blog/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.blog.v1";
 
 import "google/protobuf/timestamp.proto";
+
+
+service Blog {
+    rpc CreateBlog (CreateBlogRequest) returns (CreateBlogReply);
+    rpc UpdateBlog (UpdateBlogRequest) returns (UpdateBlogReply);
+    rpc DeleteBlog (DeleteBlogRequest) returns (DeleteBlogReply);
+    rpc GetBlog (GetBlogRequest) returns (GetBlogReply);
+    rpc ListBlog (ListBlogRequest) returns (ListBlogReply);
+}
+
+message CreateBlogRequest {}
+message CreateBlogReply {}
+
+message UpdateBlogRequest {}
+message UpdateBlogReply {}
+
+message DeleteBlogRequest {}
+message DeleteBlogReply {}
+
+message GetBlogRequest {}
+message GetBlogReply {}
+
+message ListBlogRequest {}
+message ListBlogReply {}
 
 message Post {
     string title = 1;
