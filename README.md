@@ -86,4 +86,4 @@ make test
 * QQ Group: 716486124
 
 ## License
-Kratos is MIT licensed. See the LICENSE file for details.
+Kratos is MIT licensed. See the [LICENSE](./LICENSE) file for details.
