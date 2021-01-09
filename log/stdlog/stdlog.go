@@ -110,3 +110,7 @@ func (s *stdLogger) Print(kvpair ...interface{}) {
 	buf.Reset()
 	s.pool.Put(buf)
 }
+
+func (s *stdLogger) Close() error {
+	return nil
+}

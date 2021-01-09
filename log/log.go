@@ -3,6 +3,7 @@ package log
 // Logger is a logger interface.
 type Logger interface {
 	Print(kvpair ...interface{})
+	Close() error
 }
 
 type prefix struct {
@@ -12,6 +13,10 @@ type prefix struct {
 
 func (l *prefix) Print(kvpair ...interface{}) {
 	l.log.Print(append(l.kvpair, kvpair...)...)
+}
+
+func (l *prefix) Close() error {
+	return l.log.Close()
 }
 
 // With .
