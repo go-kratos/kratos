@@ -26,6 +26,10 @@ func init() {
 }
 
 func run(cmd *cobra.Command, args []string) {
+	if len(args) == 0 {
+		fmt.Println("Please specify the proto file. Example: kratos proto service api/xxx.proto")
+		return
+	}
 	reader, err := os.Open(args[0])
 	if err != nil {
 		log.Fatal(err)
