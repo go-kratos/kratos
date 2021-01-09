@@ -29,7 +29,7 @@ func run(cmd *cobra.Command, args []string) {
 		Name:        fileName,
 		Path:        path,
 		Package:     pkgName,
-		GoPackage:   goPackage(pkgName),
+		GoPackage:   goPackage(path),
 		JavaPackage: javaPackage(pkgName),
 		Service:     serviceName(fileName),
 	}
@@ -46,13 +46,14 @@ func modName() string {
 			return ""
 		}
 	}
-	return modfile.ModulePath(modBytes) + "/api/"
+	return modfile.ModulePath(modBytes)
 }
 
-func goPackage(name string) string {
-	sub := strings.Split(name, ".")
-	return modName() + strings.ReplaceAll(name, ".", "/") + ";" + sub[len(sub)-1]
+func goPackage(path string) string {
+	s := strings.Split(path, "/")
+	return modName() + "/" + path + ";" + s[len(s)-1]
 }
+
 func javaPackage(name string) string {
 	return name
 }
