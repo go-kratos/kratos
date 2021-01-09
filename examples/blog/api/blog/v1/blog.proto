@@ -1,3 +1,25 @@
 syntax = "proto3";
 
 package blog.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message Post {
+    string title = 1;
+    string content = 2;
+    google.protobuf.Timestamp ctime = 3;
+    repeated Comment comments = 4;
+    repeated Tag tags = 5;
+}
+
+message Comment {
+    string name = 1;
+    string content = 2;
+    google.protobuf.Timestamp ctime = 3;
+}
+
+message Tag {
+    string slug = 1;
+    string name = 2;
+    google.protobuf.Timestamp ctime = 3;
+}
