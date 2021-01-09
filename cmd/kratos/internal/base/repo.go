@@ -59,9 +59,13 @@ func (r *Repo) Clone(ctx context.Context) error {
 	return err
 }
 
-func (r *Repo) CopyTo(ctx context.Context, to string, replaces, ignores []string) error {
+func (r *Repo) CopyTo(ctx context.Context, to string, modPath string, ignores []string) error {
 	if err := r.Clone(ctx); err != nil {
 		return err
 	}
-	return copyDir(r.Path(), to, replaces, ignores)
+	mod, err := ModulePath(path.Join(r.Path(), "go.mod"))
+	if err != nil {
+		return err
+	}
+	return copyDir(r.Path(), to, []string{mod, modPath}, ignores)
 }

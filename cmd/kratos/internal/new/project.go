@@ -10,8 +10,7 @@ import (
 )
 
 const (
-	serviceLayoutMod = "github.com/go-kratos/service-layout"
-	serviceLayoutURL = "https://github.com/go-kratos/service-layout.git"
+	serviceLayoutURL = "https://github.com/go-kratos/kratos-layout.git"
 )
 
 // Project is a project template.
@@ -27,11 +26,8 @@ func (p *Project) Generate(ctx context.Context, dir string) error {
 	}
 	fmt.Printf("Creating service %s\n", p.Name)
 	repo := base.NewRepo(serviceLayoutURL)
-	mod, err := base.ModulePath(path.Join(repo.Path(), "go.mod"))
-	if err != nil {
-		return err
-	}
-	if err := repo.CopyTo(ctx, to, []string{mod, p.Name}, []string{".git", ".github"}); err != nil {
+
+	if err := repo.CopyTo(ctx, to, p.Name, []string{".git", ".github"}); err != nil {
 		return err
 	}
 	os.Rename(
