@@ -13,7 +13,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
-var _ log.Logger = (*stdLogger)(nil)
+var _ log.Logger = (*Logger)(nil)
 
 // Option is std logger option.
 type Option func(*options)
@@ -61,14 +61,15 @@ func Path(path string) Option {
 	}
 }
 
-type stdLogger struct {
+// Logger is std logger.
+type Logger struct {
 	opts options
 	log  *stdlog.Logger
 	pool *sync.Pool
 }
 
 // NewLogger new a std logger with options.
-func NewLogger(opts ...Option) (log.Logger, error) {
+func NewLogger(opts ...Option) (*Logger, error) {
 	options := options{
 		flag: stdlog.LstdFlags,
 		skip: 4,
@@ -84,7 +85,7 @@ func NewLogger(opts ...Option) (log.Logger, error) {
 		}
 		options.out = file
 	}
-	return &stdLogger{
+	return &Logger{
 		opts: options,
 		log:  stdlog.New(options.out, options.prefix, options.flag),
 		pool: &sync.Pool{
@@ -107,7 +108,8 @@ func stackTrace(path string) string {
 	return path[idx+1:]
 }
 
-func (s *stdLogger) Print(level log.Level, kvpair ...interface{}) {
+// Print print the kv pairs log.
+func (s *Logger) Print(level log.Level, kvpair ...interface{}) {
 	if len(kvpair) == 0 {
 		return
 	}
@@ -127,6 +129,7 @@ func (s *stdLogger) Print(level log.Level, kvpair ...interface{}) {
 	s.pool.Put(buf)
 }
 
-func (s *stdLogger) Close() error {
+// Close close the logger.
+func (s *Logger) Close() error {
 	return s.opts.out.Close()
 }

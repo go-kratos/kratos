@@ -11,7 +11,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
-var _ log.Logger = (*fluentLogger)(nil)
+var _ log.Logger = (*Logger)(nil)
 
 // Option is fluentd logger option.
 type Option func(*options)
@@ -91,7 +91,8 @@ func ForceStopAsyncSend(val bool) Option {
 	}
 }
 
-type fluentLogger struct {
+// Logger is fluent logger sdk.
+type Logger struct {
 	opts options
 	log  *fluent.Fluent
 }
@@ -100,7 +101,7 @@ type fluentLogger struct {
 // target:
 //   tcp://127.0.0.1:24224
 //   unix:///var/run/fluent/fluent.sock
-func NewLogger(target string, opts ...Option) (log.Logger, error) {
+func NewLogger(target string, opts ...Option) (*Logger, error) {
 	options := options{}
 	for _, o := range opts {
 		o(&options)
@@ -141,13 +142,14 @@ func NewLogger(target string, opts ...Option) (log.Logger, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &fluentLogger{
+	return &Logger{
 		opts: options,
 		log:  fl,
 	}, nil
 }
 
-func (f *fluentLogger) Print(level log.Level, kvpair ...interface{}) {
+// Print print the kv pairs log.
+func (f *Logger) Print(level log.Level, kvpair ...interface{}) {
 	if len(kvpair) == 0 {
 		return
 	}
@@ -166,6 +168,7 @@ func (f *fluentLogger) Print(level log.Level, kvpair ...interface{}) {
 	}
 }
 
-func (f *fluentLogger) Close() error {
+// Close close the logger.
+func (f *Logger) Close() error {
 	return f.log.Close()
 }
