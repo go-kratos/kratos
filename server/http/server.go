@@ -12,11 +12,11 @@ import (
 
 var _ server.Server = (*Server)(nil)
 
-// ServerOption is HTTP server option.
-type ServerOption func(o *serverOptions)
+// Option is HTTP server option.
+type Option func(o *options)
 
-// serverOptions is HTTP server options.
-type serverOptions struct {
+// options is HTTP server options.
+type options struct {
 	handler      http.Handler
 	tlsConfig    *tls.Config
 	readTimeout  time.Duration
@@ -24,37 +24,37 @@ type serverOptions struct {
 	idleTimeout  time.Duration
 }
 
-// ServerHandler with server handler.
-func ServerHandler(h http.Handler) ServerOption {
-	return func(o *serverOptions) {
+// Handler with server handler.
+func Handler(h http.Handler) Option {
+	return func(o *options) {
 		o.handler = h
 	}
 }
 
-// ServerTLSConfig with server tls config.
-func ServerTLSConfig(c *tls.Config) ServerOption {
-	return func(o *serverOptions) {
+// TLSConfig with server tls config.
+func TLSConfig(c *tls.Config) Option {
+	return func(o *options) {
 		o.tlsConfig = c
 	}
 }
 
-// ServerReadTimeout with read timeout.
-func ServerReadTimeout(timeout time.Duration) ServerOption {
-	return func(o *serverOptions) {
+// ReadTimeout with read timeout.
+func ReadTimeout(timeout time.Duration) Option {
+	return func(o *options) {
 		o.readTimeout = timeout
 	}
 }
 
-// ServerWriteTimeout with write timeout.
-func ServerWriteTimeout(timeout time.Duration) ServerOption {
-	return func(o *serverOptions) {
+// WriteTimeout with write timeout.
+func WriteTimeout(timeout time.Duration) Option {
+	return func(o *options) {
 		o.writeTimeout = timeout
 	}
 }
 
-// ServerIdleTimeout with read timeout.
-func ServerIdleTimeout(timeout time.Duration) ServerOption {
-	return func(o *serverOptions) {
+// IdleTimeout with read timeout.
+func IdleTimeout(timeout time.Duration) Option {
+	return func(o *options) {
 		o.idleTimeout = timeout
 	}
 }
@@ -65,12 +65,12 @@ type Server struct {
 
 	network string
 	addr    string
-	opts    serverOptions
+	opts    options
 }
 
 // NewServer creates a HTTP server by options.
-func NewServer(network, addr string, opts ...ServerOption) *Server {
-	options := serverOptions{
+func NewServer(network, addr string, opts ...Option) *Server {
+	options := options{
 		readTimeout:  time.Second,
 		writeTimeout: time.Second,
 		idleTimeout:  time.Minute,

@@ -17,7 +17,7 @@ type Source interface {
 	Watch() (Watcher, error)
 }
 
-// Watcher watches a provider for changes
+// Watcher watches a source for changes.
 type Watcher interface {
 	Next() (*KeyValue, error)
 	Close() error

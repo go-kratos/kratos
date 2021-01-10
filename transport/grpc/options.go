@@ -14,10 +14,10 @@ type serverOptions struct {
 	errorEncoder EncodeErrorFunc
 }
 
-// EncodeErrorFunc .
+// EncodeErrorFunc is encode error func.
 type EncodeErrorFunc func(ctx context.Context, err error) error
 
-// ServerMiddleware .
+// ServerMiddleware with server middleware.
 func ServerMiddleware(m ...middleware.Middleware) ServerOption {
 	return func(o *serverOptions) {
 		o.middleware = middleware.Chain(m[0], m[1:]...)

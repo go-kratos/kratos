@@ -22,7 +22,7 @@ import (
 // PopulateVars parses url parameters.
 func PopulateVars(msg proto.Message, req *http.Request) error {
 	for key, value := range Vars(req) {
-		if err := populateFieldValueFromPath(msg.ProtoReflect(), strings.Split(key, "."), []string{value}); err != nil {
+		if err := populateFieldValues(msg.ProtoReflect(), strings.Split(key, "."), []string{value}); err != nil {
 			return err
 		}
 	}
@@ -35,7 +35,7 @@ func PopulateForm(msg proto.Message, req *http.Request) error {
 		return err
 	}
 	for key, values := range req.Form {
-		if err := populateFieldValueFromPath(msg.ProtoReflect(), strings.Split(key, "."), values); err != nil {
+		if err := populateFieldValues(msg.ProtoReflect(), strings.Split(key, "."), values); err != nil {
 			return err
 		}
 	}
@@ -59,7 +59,7 @@ func PopulateBody(msg proto.Message, req *http.Request) error {
 	return nil
 }
 
-func populateFieldValueFromPath(msgValue protoreflect.Message, fieldPath []string, values []string) error {
+func populateFieldValues(msgValue protoreflect.Message, fieldPath []string, values []string) error {
 	if len(fieldPath) < 1 {
 		return errors.New("no field path")
 	}
@@ -71,33 +71,25 @@ func populateFieldValueFromPath(msgValue protoreflect.Message, fieldPath []strin
 	for i, fieldName := range fieldPath {
 		fields := msgValue.Descriptor().Fields()
 
-		// Get field by name
-		fieldDescriptor = fields.ByName(protoreflect.Name(fieldName))
-		if fieldDescriptor == nil {
+		if fieldDescriptor = fields.ByName(protoreflect.Name(fieldName)); fieldDescriptor == nil {
 			fieldDescriptor = fields.ByJSONName(fieldName)
 			if fieldDescriptor == nil {
-				// We're not returning an error here because this could just be
-				// an extra query parameter that isn't part of the request.
 				log.Printf("field not found in %q: %q\n", msgValue.Descriptor().FullName(), strings.Join(fieldPath, "."))
 				return nil
 			}
 		}
 
-		// If this is the last element, we're done
 		if i == len(fieldPath)-1 {
 			break
 		}
 
-		// Only singular message fields are allowed
 		if fieldDescriptor.Message() == nil || fieldDescriptor.Cardinality() == protoreflect.Repeated {
 			return fmt.Errorf("invalid path: %q is not a message", fieldName)
 		}
 
-		// Get the nested message
 		msgValue = msgValue.Mutable(fieldDescriptor).Message()
 	}
 
-	// Check if oneof already set
 	if of := fieldDescriptor.ContainingOneof(); of != nil {
 		if f := msgValue.WhichOneof(of); f != nil {
 			return fmt.Errorf("field already set for oneof %q", of.FullName().Name())
@@ -176,14 +168,12 @@ func parseField(fieldDescriptor protoreflect.FieldDescriptor, value string) (pro
 		case err != nil:
 			return protoreflect.Value{}, fmt.Errorf("failed to look up enum: %w", err)
 		}
-		// Look for enum by name
 		v := enum.Descriptor().Values().ByName(protoreflect.Name(value))
 		if v == nil {
 			i, err := strconv.Atoi(value)
 			if err != nil {
 				return protoreflect.Value{}, fmt.Errorf("%q is not a valid value", value)
 			}
-			// Look for enum by number
 			v = enum.Descriptor().Values().ByNumber(protoreflect.EnumNumber(i))
 			if v == nil {
 				return protoreflect.Value{}, fmt.Errorf("%q is not a valid value", value)

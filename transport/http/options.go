@@ -18,13 +18,13 @@ type serverOptions struct {
 	middleware      middleware.Middleware
 }
 
-// DecodeRequestFunc .
+// DecodeRequestFunc is decode request func.
 type DecodeRequestFunc func(ctx context.Context, in interface{}, req *http.Request) error
 
-// EncodeResponseFunc .
+// EncodeResponseFunc is encode response func.
 type EncodeResponseFunc func(ctx context.Context, out interface{}, res http.ResponseWriter, req *http.Request) error
 
-// EncodeErrorFunc .
+// EncodeErrorFunc is encode error func.
 type EncodeErrorFunc func(ctx context.Context, err error, res http.ResponseWriter, req *http.Request)
 
 // ServerDecodeRequestFunc with decode request option.
