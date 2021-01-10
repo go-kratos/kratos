@@ -36,12 +36,10 @@ func TestLogger(t *testing.T) {
 	}
 	defer logger.Close()
 
-	logger.Print("log", "test")
-
-	log.Debug(logger).Print("log", "test")
-	log.Info(logger).Print("log", "test")
-	log.Warn(logger).Print("log", "test")
-	log.Error(logger).Print("log", "test")
+	logger.Print(log.LevelDebug, "log", "test")
+	logger.Print(log.LevelInfo, "log", "test")
+	logger.Print(log.LevelWarn, "log", "test")
+	logger.Print(log.LevelError, "log", "test")
 }
 
 func BenchmarkLoggerPrint(b *testing.B) {
@@ -53,7 +51,7 @@ func BenchmarkLoggerPrint(b *testing.B) {
 	defer logger.Close()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			logger.Print("log", "test")
+			logger.Print(log.LevelInfo, "log", "test")
 		}
 	})
 }
@@ -64,10 +62,10 @@ func BenchmarkLoggerHelperV(b *testing.B) {
 	if err != nil {
 		b.Error(err)
 	}
-	log := log.NewHelper("test", logger)
+	h := log.NewHelper("test", logger)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			log.V(10).Print("log", "test")
+			h.V(10).Print(log.LevelInfo, "log", "test")
 		}
 	})
 }
@@ -79,10 +77,10 @@ func BenchmarkLoggerHelperInfo(b *testing.B) {
 		b.Error(err)
 	}
 	defer logger.Close()
-	log := log.NewHelper("test", logger)
+	h := log.NewHelper("test", logger)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			log.Info("log", "test")
+			h.Info("test")
 		}
 	})
 }
@@ -94,10 +92,10 @@ func BenchmarkLoggerHelperInfof(b *testing.B) {
 		b.Error(err)
 	}
 	defer logger.Close()
-	log := log.NewHelper("test", logger)
+	h := log.NewHelper("test", logger)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			log.Infof("log %s", "test")
+			h.Infof("log %s", "test")
 		}
 	})
 }
@@ -109,10 +107,10 @@ func BenchmarkLoggerHelperInfow(b *testing.B) {
 		b.Error(err)
 	}
 	defer logger.Close()
-	log := log.NewHelper("test", logger)
+	h := log.NewHelper("test", logger)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			log.Infow("log", "test")
+			h.Infow("log", "test")
 		}
 	})
 }

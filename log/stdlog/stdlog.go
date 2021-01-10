@@ -107,7 +107,7 @@ func stackTrace(path string) string {
 	return path[idx+1:]
 }
 
-func (s *stdLogger) Print(kvpair ...interface{}) {
+func (s *stdLogger) Print(level log.Level, kvpair ...interface{}) {
 	if len(kvpair) == 0 {
 		return
 	}
@@ -118,6 +118,7 @@ func (s *stdLogger) Print(kvpair ...interface{}) {
 	if _, file, line, ok := runtime.Caller(s.opts.skip); ok {
 		buf.WriteString(fmt.Sprintf("source=%s:%d ", stackTrace(file), line))
 	}
+	buf.WriteString(fmt.Sprintf("level=%s ", level))
 	for i := 0; i < len(kvpair); i += 2 {
 		fmt.Fprintf(buf, "%s=%s ", kvpair[i], kvpair[i+1])
 	}

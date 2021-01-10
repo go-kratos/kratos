@@ -14,11 +14,6 @@ const (
 	LevelError
 )
 
-const (
-	// LevelKey is logger level key.
-	LevelKey = "level"
-)
-
 // Enabled .
 func (l Level) Enabled(lv Level) bool {
 	return lv >= l

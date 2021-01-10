@@ -147,7 +147,7 @@ func NewLogger(target string, opts ...Option) (log.Logger, error) {
 	}, nil
 }
 
-func (f *fluentLogger) Print(kvpair ...interface{}) {
+func (f *fluentLogger) Print(level log.Level, kvpair ...interface{}) {
 	if len(kvpair) == 0 {
 		return
 	}
@@ -155,7 +155,8 @@ func (f *fluentLogger) Print(kvpair ...interface{}) {
 		kvpair = append(kvpair, "")
 	}
 
-	data := make(map[string]string, len(kvpair)/2)
+	data := make(map[string]string, len(kvpair)/2+1)
+	data["level"] = level.String()
 	for i := 0; i < len(kvpair); i += 2 {
 		data[fmt.Sprint(kvpair[i])] = fmt.Sprint(kvpair[i+1])
 	}
