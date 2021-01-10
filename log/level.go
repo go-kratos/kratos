@@ -14,7 +14,12 @@ const (
 	LevelError
 )
 
-// Enabled .
+const (
+	// LevelKey is logger level key.
+	LevelKey = "level"
+)
+
+// Enabled compare whether the logging level is enabled.
 func (l Level) Enabled(lv Level) bool {
 	return lv >= l
 }

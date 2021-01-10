@@ -96,7 +96,7 @@ func NewLogger(opts ...Option) (*Logger, error) {
 	}, nil
 }
 
-func stackTrace(path string) string {
+func (s *Logger) stackTrace(path string) string {
 	idx := strings.LastIndexByte(path, '/')
 	if idx == -1 {
 		return path
@@ -109,7 +109,7 @@ func stackTrace(path string) string {
 }
 
 // Print print the kv pairs log.
-func (s *Logger) Print(level log.Level, kvpair ...interface{}) {
+func (s *Logger) Print(kvpair ...interface{}) {
 	if len(kvpair) == 0 {
 		return
 	}
@@ -118,9 +118,8 @@ func (s *Logger) Print(level log.Level, kvpair ...interface{}) {
 	}
 	buf := s.pool.Get().(*bytes.Buffer)
 	if _, file, line, ok := runtime.Caller(s.opts.skip); ok {
-		buf.WriteString(fmt.Sprintf("source=%s:%d ", stackTrace(file), line))
+		buf.WriteString(fmt.Sprintf("source=%s:%d ", s.stackTrace(file), line))
 	}
-	buf.WriteString(fmt.Sprintf("level=%s ", level))
 	for i := 0; i < len(kvpair); i += 2 {
 		fmt.Fprintf(buf, "%s=%s ", kvpair[i], kvpair[i+1])
 	}

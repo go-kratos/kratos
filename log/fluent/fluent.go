@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"runtime"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/fluent/fluent-logger-golang/fluent"
@@ -17,77 +19,78 @@ var _ log.Logger = (*Logger)(nil)
 type Option func(*options)
 
 type options struct {
-	Timeout            time.Duration
-	WriteTimeout       time.Duration
-	BufferLimit        int
-	RetryWait          int
-	MaxRetry           int
-	MaxRetryWait       int
-	TagPrefix          string
-	Async              bool
-	ForceStopAsyncSend bool
+	timeout            time.Duration
+	writeTimeout       time.Duration
+	bufferLimit        int
+	retryWait          int
+	maxRetry           int
+	maxRetryWait       int
+	tagPrefix          string
+	async              bool
+	forceStopAsyncSend bool
+	skip               int
 }
 
 // Timeout with config Timeout.
-func Timeout(val time.Duration) Option {
+func Timeout(timeout time.Duration) Option {
 	return func(opts *options) {
-		opts.Timeout = val
+		opts.timeout = timeout
 	}
 }
 
 // WriteTimeout with config WriteTimeout.
-func WriteTimeout(val time.Duration) Option {
+func WriteTimeout(writeTimeout time.Duration) Option {
 	return func(opts *options) {
-		opts.WriteTimeout = val
+		opts.writeTimeout = writeTimeout
 	}
 }
 
 // BufferLimit with config BufferLimit.
-func BufferLimit(val int) Option {
+func BufferLimit(bufferLimit int) Option {
 	return func(opts *options) {
-		opts.BufferLimit = val
+		opts.bufferLimit = bufferLimit
 	}
 }
 
 // RetryWait with config RetryWait.
-func RetryWait(val int) Option {
+func RetryWait(retryWait int) Option {
 	return func(opts *options) {
-		opts.RetryWait = val
+		opts.retryWait = retryWait
 	}
 }
 
 // MaxRetry with config MaxRetry.
-func MaxRetry(val int) Option {
+func MaxRetry(maxRetry int) Option {
 	return func(opts *options) {
-		opts.MaxRetry = val
+		opts.maxRetry = maxRetry
 	}
 }
 
 // MaxRetryWait with config MaxRetryWait.
-func MaxRetryWait(val int) Option {
+func MaxRetryWait(maxRetryWait int) Option {
 	return func(opts *options) {
-		opts.MaxRetryWait = val
+		opts.maxRetryWait = maxRetryWait
 	}
 }
 
 // TagPrefix with config TagPrefix.
-func TagPrefix(val string) Option {
+func TagPrefix(tagPrefix string) Option {
 	return func(opts *options) {
-		opts.TagPrefix = val
+		opts.tagPrefix = tagPrefix
 	}
 }
 
 // Async with config Async.
-func Async(val bool) Option {
+func Async(async bool) Option {
 	return func(opts *options) {
-		opts.Async = val
+		opts.async = async
 	}
 }
 
 // ForceStopAsyncSend with config ForceStopAsyncSend.
-func ForceStopAsyncSend(val bool) Option {
+func ForceStopAsyncSend(forceStopAsyncSend bool) Option {
 	return func(opts *options) {
-		opts.ForceStopAsyncSend = val
+		opts.forceStopAsyncSend = forceStopAsyncSend
 	}
 }
 
@@ -101,25 +104,25 @@ type Logger struct {
 // target:
 //   tcp://127.0.0.1:24224
 //   unix:///var/run/fluent/fluent.sock
-func NewLogger(target string, opts ...Option) (*Logger, error) {
-	options := options{}
+func NewLogger(addr string, opts ...Option) (*Logger, error) {
+	options := options{skip: 4}
 	for _, o := range opts {
 		o(&options)
 	}
-	u, err := url.Parse(target)
+	u, err := url.Parse(addr)
 	if err != nil {
 		return nil, err
 	}
 	c := fluent.Config{
-		Timeout:            options.Timeout,
-		WriteTimeout:       options.WriteTimeout,
-		BufferLimit:        options.BufferLimit,
-		RetryWait:          options.RetryWait,
-		MaxRetry:           options.MaxRetry,
-		MaxRetryWait:       options.MaxRetryWait,
-		TagPrefix:          options.TagPrefix,
-		Async:              options.Async,
-		ForceStopAsyncSend: options.ForceStopAsyncSend,
+		Timeout:            options.timeout,
+		WriteTimeout:       options.writeTimeout,
+		BufferLimit:        options.bufferLimit,
+		RetryWait:          options.retryWait,
+		MaxRetry:           options.maxRetry,
+		MaxRetryWait:       options.maxRetryWait,
+		TagPrefix:          options.tagPrefix,
+		Async:              options.async,
+		ForceStopAsyncSend: options.forceStopAsyncSend,
 	}
 	switch u.Scheme {
 	case "tcp":
@@ -148,8 +151,20 @@ func NewLogger(target string, opts ...Option) (*Logger, error) {
 	}, nil
 }
 
+func (l *Logger) stackTrace(path string) string {
+	idx := strings.LastIndexByte(path, '/')
+	if idx == -1 {
+		return path
+	}
+	idx = strings.LastIndexByte(path[:idx], '/')
+	if idx == -1 {
+		return path
+	}
+	return path[idx+1:]
+}
+
 // Print print the kv pairs log.
-func (f *Logger) Print(level log.Level, kvpair ...interface{}) {
+func (l *Logger) Print(kvpair ...interface{}) {
 	if len(kvpair) == 0 {
 		return
 	}
@@ -158,17 +173,19 @@ func (f *Logger) Print(level log.Level, kvpair ...interface{}) {
 	}
 
 	data := make(map[string]string, len(kvpair)/2+1)
-	data["level"] = level.String()
+	if _, file, line, ok := runtime.Caller(l.opts.skip); ok {
+		data[l.stackTrace(file)] = strconv.Itoa(line)
+	}
 	for i := 0; i < len(kvpair); i += 2 {
 		data[fmt.Sprint(kvpair[i])] = fmt.Sprint(kvpair[i+1])
 	}
 
-	if err := f.log.Post(data["module"], data); err != nil {
+	if err := l.log.Post(data["module"], data); err != nil {
 		println(err)
 	}
 }
 
 // Close close the logger.
-func (f *Logger) Close() error {
-	return f.log.Close()
+func (l *Logger) Close() error {
+	return l.log.Close()
 }
