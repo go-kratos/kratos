@@ -7,7 +7,7 @@ type Registry interface {
 	Register(ctx context.Context, svc Service) error
 	Deregister(ctx context.Context, svc Service) error
 	Services(ctx context.Context, name string) ([]Service, error)
-	Watch(name string, o ...Observer) error
+	Watch(name string, o Observer) error
 }
 
 // Observer is watch observer.
