@@ -9,7 +9,7 @@ import (
 
 type Discard int
 
-func (d Discard) Write(p []byte) (n int, err error) { return }
+func (d Discard) Write(p []byte) (n int, err error) { return len(p), nil }
 func (d Discard) Close() (err error)                { return }
 
 func TestLogger(t *testing.T) {
