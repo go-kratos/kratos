@@ -6,7 +6,7 @@ import "context"
 type Registry interface {
 	Register(Service) error
 	Deregister(Service) error
-	GetService(string) ([]Service, error)
+	GetService(name string) ([]Service, error)
 	ListServices() ([]Service, error)
 	Watch(ctx context.Context, name string) (chan Event, error)
 }
@@ -17,7 +17,7 @@ type Service interface {
 	Name() string
 	Version() string
 	Metadata() map[string]string
-	Endpoints() []*Endpoint
+	Endpoints() []Endpoint
 }
 
 // Endpoint is endpoint interface.
