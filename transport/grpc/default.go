@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// DefaultErrorEncoder is default errors encoder.
+// DefaultErrorEncoder is default error encoder.
 func DefaultErrorEncoder(ctx context.Context, err error) error {
 	se, ok := err.(*errors.StatusError)
 	if !ok {
@@ -27,4 +27,9 @@ func DefaultErrorEncoder(ctx context.Context, err error) error {
 		return err
 	}
 	return gs.Err()
+}
+
+// DefaultErrorDecoder is default error decoder.
+func DefaultErrorDecoder(ctx context.Context, err error) error {
+	return nil
 }

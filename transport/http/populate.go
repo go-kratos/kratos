@@ -59,22 +59,21 @@ func PopulateBody(msg proto.Message, req *http.Request) error {
 	return nil
 }
 
-func populateFieldValues(msgValue protoreflect.Message, fieldPath []string, values []string) error {
+func populateFieldValues(v protoreflect.Message, fieldPath []string, values []string) error {
 	if len(fieldPath) < 1 {
 		return errors.New("no field path")
 	}
 	if len(values) < 1 {
 		return errors.New("no value provided")
 	}
-
-	var fieldDescriptor protoreflect.FieldDescriptor
+	var fd protoreflect.FieldDescriptor
 	for i, fieldName := range fieldPath {
-		fields := msgValue.Descriptor().Fields()
+		fields := v.Descriptor().Fields()
 
-		if fieldDescriptor = fields.ByName(protoreflect.Name(fieldName)); fieldDescriptor == nil {
-			fieldDescriptor = fields.ByJSONName(fieldName)
-			if fieldDescriptor == nil {
-				log.Printf("field not found in %q: %q\n", msgValue.Descriptor().FullName(), strings.Join(fieldPath, "."))
+		if fd = fields.ByName(protoreflect.Name(fieldName)); fd == nil {
+			fd = fields.ByJSONName(fieldName)
+			if fd == nil {
+				log.Printf("field not found in %q: %q\n", v.Descriptor().FullName(), strings.Join(fieldPath, "."))
 				return nil
 			}
 		}
@@ -83,77 +82,67 @@ func populateFieldValues(msgValue protoreflect.Message, fieldPath []string, valu
 			break
 		}
 
-		if fieldDescriptor.Message() == nil || fieldDescriptor.Cardinality() == protoreflect.Repeated {
+		if fd.Message() == nil || fd.Cardinality() == protoreflect.Repeated {
 			return fmt.Errorf("invalid path: %q is not a message", fieldName)
 		}
 
-		msgValue = msgValue.Mutable(fieldDescriptor).Message()
+		v = v.Mutable(fd).Message()
 	}
-
-	if of := fieldDescriptor.ContainingOneof(); of != nil {
-		if f := msgValue.WhichOneof(of); f != nil {
+	if of := fd.ContainingOneof(); of != nil {
+		if f := v.WhichOneof(of); f != nil {
 			return fmt.Errorf("field already set for oneof %q", of.FullName().Name())
 		}
 	}
-
 	switch {
-	case fieldDescriptor.IsList():
-		return populateRepeatedField(fieldDescriptor, msgValue.Mutable(fieldDescriptor).List(), values)
-	case fieldDescriptor.IsMap():
-		return populateMapField(fieldDescriptor, msgValue.Mutable(fieldDescriptor).Map(), values)
+	case fd.IsList():
+		return populateRepeatedField(fd, v.Mutable(fd).List(), values)
+	case fd.IsMap():
+		return populateMapField(fd, v.Mutable(fd).Map(), values)
 	}
-
 	if len(values) > 1 {
-		return fmt.Errorf("too many values for field %q: %s", fieldDescriptor.FullName().Name(), strings.Join(values, ", "))
+		return fmt.Errorf("too many values for field %q: %s", fd.FullName().Name(), strings.Join(values, ", "))
 	}
-
-	return populateField(fieldDescriptor, msgValue, values[0])
+	return populateField(fd, v, values[0])
 }
 
-func populateField(fieldDescriptor protoreflect.FieldDescriptor, msgValue protoreflect.Message, value string) error {
-	v, err := parseField(fieldDescriptor, value)
+func populateField(fd protoreflect.FieldDescriptor, v protoreflect.Message, value string) error {
+	val, err := parseField(fd, value)
 	if err != nil {
-		return fmt.Errorf("parsing field %q: %w", fieldDescriptor.FullName().Name(), err)
+		return fmt.Errorf("parsing field %q: %w", fd.FullName().Name(), err)
 	}
-
-	msgValue.Set(fieldDescriptor, v)
+	v.Set(fd, val)
 	return nil
 }
 
-func populateRepeatedField(fieldDescriptor protoreflect.FieldDescriptor, list protoreflect.List, values []string) error {
+func populateRepeatedField(fd protoreflect.FieldDescriptor, list protoreflect.List, values []string) error {
 	for _, value := range values {
-		v, err := parseField(fieldDescriptor, value)
+		v, err := parseField(fd, value)
 		if err != nil {
-			return fmt.Errorf("parsing list %q: %w", fieldDescriptor.FullName().Name(), err)
+			return fmt.Errorf("parsing list %q: %w", fd.FullName().Name(), err)
 		}
 		list.Append(v)
 	}
-
 	return nil
 }
 
-func populateMapField(fieldDescriptor protoreflect.FieldDescriptor, mp protoreflect.Map, values []string) error {
+func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, values []string) error {
 	if len(values) != 2 {
-		return fmt.Errorf("more than one value provided for key %q in map %q", values[0], fieldDescriptor.FullName())
+		return fmt.Errorf("more than one value provided for key %q in map %q", values[0], fd.FullName())
 	}
-
-	key, err := parseField(fieldDescriptor.MapKey(), values[0])
+	key, err := parseField(fd.MapKey(), values[0])
 	if err != nil {
-		return fmt.Errorf("parsing map key %q: %w", fieldDescriptor.FullName().Name(), err)
+		return fmt.Errorf("parsing map key %q: %w", fd.FullName().Name(), err)
 	}
-
-	value, err := parseField(fieldDescriptor.MapValue(), values[1])
+	value, err := parseField(fd.MapValue(), values[1])
 	if err != nil {
-		return fmt.Errorf("parsing map value %q: %w", fieldDescriptor.FullName().Name(), err)
+		return fmt.Errorf("parsing map value %q: %w", fd.FullName().Name(), err)
 	}
-
 	mp.Set(key.MapKey(), value)
-
 	return nil
 }
 
-func parseField(fieldDescriptor protoreflect.FieldDescriptor, value string) (protoreflect.Value, error) {
-	switch fieldDescriptor.Kind() {
+func parseField(fd protoreflect.FieldDescriptor, value string) (protoreflect.Value, error) {
+	switch fd.Kind() {
 	case protoreflect.BoolKind:
 		v, err := strconv.ParseBool(value)
 		if err != nil {
@@ -161,10 +150,10 @@ func parseField(fieldDescriptor protoreflect.FieldDescriptor, value string) (pro
 		}
 		return protoreflect.ValueOfBool(v), nil
 	case protoreflect.EnumKind:
-		enum, err := protoregistry.GlobalTypes.FindEnumByName(fieldDescriptor.Enum().FullName())
+		enum, err := protoregistry.GlobalTypes.FindEnumByName(fd.Enum().FullName())
 		switch {
 		case errors.Is(err, protoregistry.NotFound):
-			return protoreflect.Value{}, fmt.Errorf("enum %q is not registered", fieldDescriptor.Enum().FullName())
+			return protoreflect.Value{}, fmt.Errorf("enum %q is not registered", fd.Enum().FullName())
 		case err != nil:
 			return protoreflect.Value{}, fmt.Errorf("failed to look up enum: %w", err)
 		}
@@ -225,15 +214,15 @@ func parseField(fieldDescriptor protoreflect.FieldDescriptor, value string) (pro
 		}
 		return protoreflect.ValueOfBytes(v), nil
 	case protoreflect.MessageKind, protoreflect.GroupKind:
-		return parseMessage(fieldDescriptor.Message(), value)
+		return parseMessage(fd.Message(), value)
 	default:
-		panic(fmt.Sprintf("unknown field kind: %v", fieldDescriptor.Kind()))
+		panic(fmt.Sprintf("unknown field kind: %v", fd.Kind()))
 	}
 }
 
-func parseMessage(msgDescriptor protoreflect.MessageDescriptor, value string) (protoreflect.Value, error) {
+func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect.Value, error) {
 	var msg proto.Message
-	switch msgDescriptor.FullName() {
+	switch md.FullName() {
 	case "google.protobuf.Timestamp":
 		if value == "null" {
 			break
@@ -310,8 +299,7 @@ func parseMessage(msgDescriptor protoreflect.MessageDescriptor, value string) (p
 		fm.Paths = append(fm.Paths, strings.Split(value, ",")...)
 		msg = fm
 	default:
-		return protoreflect.Value{}, fmt.Errorf("unsupported message type: %q", string(msgDescriptor.FullName()))
+		return protoreflect.Value{}, fmt.Errorf("unsupported message type: %q", string(md.FullName()))
 	}
-
 	return protoreflect.ValueOfMessage(msg.ProtoReflect()), nil
 }
