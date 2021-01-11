@@ -4,9 +4,9 @@ import "context"
 
 // Registry is registry interface.
 type Registry interface {
-	Register(Service) error
-	Deregister(Service) error
-	GetService(name string) ([]Service, error)
+	Register(ctx context.Context, svc Service) error
+	Deregister(ctx context.Context, svc Service) error
+	GetService(ctx context.Context, name string) ([]Service, error)
 	Watch(ctx context.Context, name string) (chan Event, error)
 }
 
