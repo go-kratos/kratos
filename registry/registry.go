@@ -7,7 +7,6 @@ type Registry interface {
 	Register(Service) error
 	Deregister(Service) error
 	GetService(name string) ([]Service, error)
-	ListServices() ([]Service, error)
 	Watch(ctx context.Context, name string) (chan Event, error)
 }
 
