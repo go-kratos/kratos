@@ -20,7 +20,7 @@ func (l *printer) Print(kvpair ...interface{}) {
 
 // With with logger kv pairs.
 func With(log Logger, kvpair ...interface{}) Logger {
-	return newPrinter(log, kvpair)
+	return newPrinter(log, kvpair...)
 }
 
 // Debug returns a debug logger.
