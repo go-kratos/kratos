@@ -31,5 +31,22 @@ func DefaultErrorEncoder(ctx context.Context, err error) error {
 
 // DefaultErrorDecoder is default error decoder.
 func DefaultErrorDecoder(ctx context.Context, err error) error {
-	return nil
+	gs := status.Convert(err)
+	var (
+		reason  string
+		message string
+	)
+	for _, detail := range gs.Details() {
+		switch d := detail.(type) {
+		case *errdetails.ErrorInfo:
+			reason = d.Reason
+			message = d.Metadata["message"]
+		}
+	}
+	return &errors.StatusError{
+		Code:    int32(gs.Code()),
+		Reason:  reason,
+		Message: message,
+		Details: gs.Details(),
+	}
 }
