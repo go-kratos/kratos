@@ -6,7 +6,7 @@ import "context"
 type Registry interface {
 	Register(ctx context.Context, svc Service) error
 	Deregister(ctx context.Context, svc Service) error
-	Services(ctx context.Context, name string) ([]Service, error)
+	GetService(ctx context.Context, name string) ([]Service, error)
 	Watch(name string, o Observer) error
 }
 
