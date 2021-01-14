@@ -179,7 +179,6 @@ func onBreaker(breaker breaker.Breaker, err *error) {
 		if ecode.EqualError(ecode.ServerErr, *err) || ecode.EqualError(ecode.ServiceUnavailable, *err) || ecode.EqualError(ecode.Deadline, *err) || ecode.EqualError(ecode.LimitExceed, *err) {
 			breaker.MarkFailed()
 			return
-
 		}
 	}
 	breaker.MarkSuccess()

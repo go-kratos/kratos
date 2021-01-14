@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	test "github.com/go-kratos/kratos/pkg/cache/memcache/test"
 	"github.com/gogo/protobuf/proto"
+
+	test "github.com/go-kratos/kratos/pkg/cache/memcache/test"
 )
 
 func TestConnRaw(t *testing.T) {
@@ -120,7 +121,6 @@ func TestConnSerialization(t *testing.T) {
 						t.Fatalf("compare failed error, %v %v", tc.a.Object.(*TestObj), no)
 					}
 				}
-
 			}
 		})
 	}

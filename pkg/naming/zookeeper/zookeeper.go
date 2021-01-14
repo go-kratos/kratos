@@ -12,10 +12,11 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/go-zookeeper/zk"
+
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/go-kratos/kratos/pkg/naming"
 	xtime "github.com/go-kratos/kratos/pkg/time"
-	"github.com/go-zookeeper/zk"
 )
 
 // Config is zookeeper config.
@@ -80,7 +81,7 @@ func New(c *Config) (zkb *Zookeeper, err error) {
 		c.Timeout = xtime.Duration(time.Second)
 	}
 	if len(c.Endpoints) == 0 {
-		errInfo := fmt.Sprintf("zookeeper New failed, endpoints is null")
+		errInfo := "zookeeper New failed, endpoints is null"
 		log.Error(errInfo)
 		return nil, errors.New(errInfo)
 	}
@@ -90,7 +91,7 @@ func New(c *Config) (zkb *Zookeeper, err error) {
 		log.Error(fmt.Sprintf("zk Connect err:(%v)", err))
 		return
 	}
-	log.Info(fmt.Sprintf("zk Connect ok!"))
+	log.Info("zk Connect ok!")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	zkb = &Zookeeper{
@@ -255,7 +256,7 @@ func (z *Zookeeper) register(ctx context.Context, ins *naming.Instance) (err err
 		if err = z.registerPeerServer(nodePath, ins); err != nil {
 			log.Warn(fmt.Sprintf("registerServer, fail to RegisterPeerServer node:%s error:(%v)", addr, err))
 		} else {
-			log.Info(fmt.Sprintf("registerServer, succeed to RegistServer node."))
+			log.Info("registerServer, succeed to RegistServer node.")
 		}
 	}
 	return nil
@@ -336,7 +337,7 @@ func (a *appInfo) fetchstore(appID string) (err error) {
 	}
 	log.Info(fmt.Sprintf("fetchstore, ok to get Children of node:(%v), childs:(%v)", prefix, childs))
 	ins := &naming.InstancesInfo{
-		Instances: make(map[string][]*naming.Instance, 0),
+		Instances: make(map[string][]*naming.Instance),
 	}
 	for _, child := range childs {
 		nodePath := prefix + "/" + child
@@ -350,7 +351,6 @@ func (a *appInfo) fetchstore(appID string) (err error) {
 			return err
 		}
 		ins.Instances[in.Zone] = append(ins.Instances[in.Zone], in)
-
 	}
 	a.store(ins)
 	return nil

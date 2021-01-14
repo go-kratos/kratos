@@ -171,7 +171,6 @@ var scanStructTests = []struct {
 
 func TestScanStruct(t *testing.T) {
 	for _, tt := range scanStructTests {
-
 		var reply []interface{}
 		for _, v := range tt.reply {
 			reply = append(reply, []byte(v))
@@ -280,7 +279,6 @@ var scanSliceTests = []struct {
 
 func TestScanSlice(t *testing.T) {
 	for _, tt := range scanSliceTests {
-
 		typ := reflect.ValueOf(tt.dest).Type()
 		dest := reflect.New(typ)
 
@@ -417,7 +415,6 @@ func ExampleArgs() {
 	}
 
 	for _, id := range []string{"id1", "id2"} {
-
 		v, err := Values(c.Do("HGETALL", id))
 		if err != nil {
 			fmt.Println(err)

@@ -299,7 +299,7 @@ func (s *Server) RunUnix(file string) error {
 }
 
 // Start create a new goroutine run server with configured listen addr
-// will panic if any error happend
+// will panic if any error happened
 // return server itself
 func (s *Server) Start() (*Server, error) {
 	_, err := s.startWithAddr()
@@ -310,7 +310,7 @@ func (s *Server) Start() (*Server, error) {
 }
 
 // StartWithAddr create a new goroutine run server with configured listen addr
-// will panic if any error happend
+// will panic if any error happened
 // return server itself and the actually listened address (if configured listen
 // port is zero, the os will allocate an unused port)
 func (s *Server) StartWithAddr() (*Server, net.Addr, error) {

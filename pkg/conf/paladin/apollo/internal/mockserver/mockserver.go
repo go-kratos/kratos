@@ -65,8 +65,8 @@ func (s *mockServer) ConfigHandler(rw http.ResponseWriter, req *http.Request) {
 	var namespace, releaseKey = strings.Split(strs[4], "?")[0], req.FormValue("releaseKey")
 	config := s.Get(namespace)
 
-	var result = result{NamespaceName: namespace, Configurations: config, ReleaseKey: releaseKey}
-	bts, err := json.Marshal(&result)
+	ret := result{NamespaceName: namespace, Configurations: config, ReleaseKey: releaseKey}
+	bts, err := json.Marshal(&ret)
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		return

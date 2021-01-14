@@ -336,7 +336,6 @@ func testLinkTimeout(t *testing.T) {
 	if !ecode.EqualError(ecode.Deadline, err) {
 		t.Fatalf("testLinkTimeout must return error RPCDeadline,err:%v", err)
 	}
-
 }
 func testClientConfig(t *testing.T) {
 	_, err := runClient(context.Background(), &clientConfig2, t, "timeout_test2", 0)
@@ -520,7 +519,7 @@ func BenchmarkServer(b *testing.B) {
 				b.Fatalf("c.SayHello failed: %v,req: %v %v", err, "benchmark", 1)
 			}
 			if !resp.Success {
-				b.Error("repsonse not success!")
+				b.Error("response not success!")
 			}
 		}
 	})

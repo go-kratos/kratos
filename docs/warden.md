@@ -1,6 +1,6 @@
 # 背景
 
-我们需要统一的rpc服务，经过选型讨论决定直接使用成熟的跨语言的gRPC。
+我们需要统一的rpc服务，经过选型讨论决定直接使用成熟的、跨语言的gRPC。
 
 # 概览
 
@@ -33,9 +33,9 @@ gRPC暴露了两个拦截器接口，分别是：
 
 # 扩展阅读
 
-[warden快速开始](warden-quickstart.md) 
-[warden拦截器](warden-mid.md) 
-[warden负载均衡](warden-balancer.md) 
-[warden基于pb生成](warden-pb.md) 
-[warden服务发现](warden-resolver.md)
+- [warden快速开始](warden-quickstart.md) 
+- [warden拦截器](warden-mid.md) 
+- [warden负载均衡](warden-balancer.md) 
+- [warden基于pb生成](warden-pb.md) 
+- [warden服务发现](warden-resolver.md)
 

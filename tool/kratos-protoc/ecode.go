@@ -6,7 +6,12 @@ import (
 
 const (
 	_getEcodeGen = "go get -u github.com/go-kratos/kratos/tool/protobuf/protoc-gen-ecode"
-	_ecodeProtoc = "protoc --proto_path=%s --proto_path=%s --proto_path=%s --ecode_out=:."
+	_ecodeProtoc = "protoc --proto_path=%s --proto_path=%s --proto_path=%s --ecode_out=" +
+		"Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types," +
+		"Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types," +
+		"Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types," +
+		"Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types," +
+		"Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types:."
 )
 
 func installEcodeGen() error {

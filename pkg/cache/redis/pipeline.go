@@ -51,7 +51,6 @@ type cmd struct {
 
 func (p *pipeliner) Send(commandName string, args ...interface{}) {
 	p.cmds = append(p.cmds, &cmd{commandName: commandName, args: args})
-	return
 }
 
 func (p *pipeliner) Exec(ctx context.Context) (rs *Replies, err error) {
@@ -64,7 +63,7 @@ func (p *pipeliner) Exec(ctx context.Context) (rs *Replies, err error) {
 	for len(p.cmds) > 0 {
 		cmd := p.cmds[0]
 		p.cmds = p.cmds[1:]
-		if err := c.Send(cmd.commandName, cmd.args...); err != nil {
+		if err = c.Send(cmd.commandName, cmd.args...); err != nil {
 			p.cmds = p.cmds[:0]
 			return nil, err
 		}

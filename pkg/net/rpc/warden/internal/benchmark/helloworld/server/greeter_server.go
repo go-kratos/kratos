@@ -46,5 +46,4 @@ func newServer() {
 	if err != nil {
 		return
 	}
-
 }

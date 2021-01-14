@@ -18,7 +18,7 @@ func NewGroup(new func() interface{}) *Group {
 		panic("container.group: can't assign a nil to the new function")
 	}
 	return &Group{
-		new: new,
+		new:  new,
 		objs: make(map[string]interface{}),
 	}
 }

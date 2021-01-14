@@ -190,6 +190,6 @@ if err = tx.Rollback().Error; err!=nil{
 
 # 扩展阅读
 
-[tidb模块说明](database-tidb.md)
-[hbase模块说明](database-hbase.md)
+- [tidb模块说明](database-tidb.md)
+- [hbase模块说明](database-hbase.md)
 

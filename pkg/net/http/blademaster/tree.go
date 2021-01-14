@@ -236,7 +236,6 @@ func (n *node) addRoute(path string, handlers []HandlerFunc) {
 				}
 				n.insertChild(numParams, path, fullPath, handlers)
 				return
-
 			} else if i == len(path) { // Make node a (in-path) leaf
 				if n.handlers != nil {
 					panic("handlers are already registered for path '" + fullPath + "'")
@@ -316,7 +315,6 @@ func (n *node) insertChild(numParams uint8, path string, fullPath string, handle
 				n.children = []*node{child}
 				n = child
 			}
-
 		} else { // catchAll
 			if end != max || numParams > 1 {
 				panic("catch-all routes are only allowed at the end of the path in path '" + fullPath + "'")
@@ -514,7 +512,7 @@ func (n *node) findCaseInsensitivePath(path string, fixTrailingSlash bool) (ciPa
 	ciPath = make([]byte, 0, len(path)+1) // preallocate enough memory
 
 	// Outer loop for walking the tree
-	for len(path) >= len(n.path) && strings.ToLower(path[:len(n.path)]) == strings.ToLower(n.path) {
+	for len(path) >= len(n.path) && strings.EqualFold(path[:len(n.path)], n.path) {
 		path = path[len(n.path):]
 		ciPath = append(ciPath, n.path...)
 
@@ -528,8 +526,8 @@ func (n *node) findCaseInsensitivePath(path string, fixTrailingSlash bool) (ciPa
 					// must use recursive approach since both index and
 					// ToLower(index) could exist. We must check both.
 					if r == unicode.ToLower(index) {
-						out, found := n.children[i].findCaseInsensitivePath(path, fixTrailingSlash)
-						if found {
+						out, _found := n.children[i].findCaseInsensitivePath(path, fixTrailingSlash)
+						if _found {
 							return append(ciPath, out...), true
 						}
 					}
@@ -618,7 +616,7 @@ func (n *node) findCaseInsensitivePath(path string, fixTrailingSlash bool) (ciPa
 			return ciPath, true
 		}
 		if len(path)+1 == len(n.path) && n.path[len(path)] == '/' &&
-			strings.ToLower(path) == strings.ToLower(n.path[:len(path)]) &&
+			strings.EqualFold(path, n.path[:len(path)]) &&
 			n.handlers != nil {
 			return append(ciPath, n.path...), true
 		}

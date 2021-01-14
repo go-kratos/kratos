@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-// Render http reponse render.
+// Render http response render.
 type Render interface {
 	// Render render it to http response writer.
 	Render(http.ResponseWriter) error

@@ -9,9 +9,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/go-kratos/kratos/pkg/ratelimit"
 	"github.com/go-kratos/kratos/pkg/stat/metric"
-	"github.com/stretchr/testify/assert"
 )
 
 func confForTest() *Config {
