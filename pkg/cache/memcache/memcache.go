@@ -276,6 +276,10 @@ func (mc *Memcache) Get(ctx context.Context, key string) *Reply {
 
 // Item get raw Item
 func (r *Reply) Item() *Item {
+	if !r.closed {
+		r.conn.Close()
+		r.closed = true
+	}
 	return r.item
 }
 
@@ -314,6 +318,7 @@ func (rs *Replies) Close() (err error) {
 
 // Item get Item from rows
 func (rs *Replies) Item(key string) *Item {
+	rs.Close()
 	return rs.items[key]
 }
 
@@ -329,14 +334,15 @@ func (rs *Replies) Scan(key string, v interface{}) (err error) {
 	}
 	rs.usedItems[key] = struct{}{}
 	err = rs.conn.Scan(item, v)
-	if (err != nil) || (len(rs.items) == len(rs.usedItems)) {
-		rs.Close()
-	}
+	// if (err != nil) || (len(rs.items) == len(rs.usedItems)) {
+	rs.Close()
+	// }
 	return
 }
 
 // Keys keys of result
 func (rs *Replies) Keys() (keys []string) {
+	rs.Close()
 	keys = make([]string, 0, len(rs.items))
 	for key := range rs.items {
 		keys = append(keys, key)
