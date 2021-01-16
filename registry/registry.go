@@ -2,20 +2,6 @@ package registry
 
 import "context"
 
-// Action is service discovery action.
-type Action int
-
-const (
-	// ActionAll contains full service instances
-	ActionAll Action = 0
-	// ActionAdd contains service instances needs to be added
-	ActionAdd Action = 1
-	// ActionDel contains service instances needs to be deleted
-	ActionDel Action = 2
-	// ActionUpdate contains partial service instances needs to be updated
-	ActionUpdate Action = 3
-)
-
 // Registry is registry interface.
 type Registry interface {
 	Register(ctx context.Context, svc Service) error
@@ -24,12 +10,15 @@ type Registry interface {
 
 // Discovery is service discovery interface.
 type Discovery interface {
-	GetService(ctx context.Context, name string) ([]Service, error)
-	Watch(name string, o Observer) error
+	Service(ctx context.Context, name string) ([]Service, error)
+	Watch(name string) Watcher
 }
 
-// Observer is watch observer.
-type Observer func(action Action, svc []Service)
+// Watcher is service watcher.
+type Watcher interface {
+	Next(ctx context.Context) ([]Service, error)
+	Close()
+}
 
 // Service is service interface.
 type Service interface {
@@ -37,13 +26,6 @@ type Service interface {
 	Name() string
 	Version() string
 	Metadata() map[string]string
-	Endpoints() []Endpoint
-}
-
-// Endpoint is endpoint interface.
-type Endpoint interface {
-	Scheme() string
 	Host() string
-	Port() int
-	IsSecure() bool
+	Endpoints() []string
 }
