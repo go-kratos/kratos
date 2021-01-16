@@ -11,12 +11,12 @@ type Registry interface {
 // Discovery is service discovery interface.
 type Discovery interface {
 	Service(ctx context.Context, name string) ([]Service, error)
-	Watch(name string) Watcher
+	Resolve(name string) Watcher
 }
 
 // Watcher is service watcher.
 type Watcher interface {
-	Next(ctx context.Context) ([]Service, error)
+	Watch(ctx context.Context) ([]Service, error)
 	Close()
 }
 
