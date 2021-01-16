@@ -9,11 +9,11 @@ const (
 	// ActionAll contains full service instances
 	ActionAll Action = 0
 	// ActionAdd contains service instances needs to be added
-	ActionAdd Action = 0
+	ActionAdd Action = 1
 	// ActionDel contains service instances needs to be deleted
-	ActionDel Action = 0
+	ActionDel Action = 2
 	// ActionUpdate contains partial service instances needs to be updated
-	ActionUpdate Action = 0
+	ActionUpdate Action = 3
 )
 
 // Registry is registry interface.
