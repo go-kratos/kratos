@@ -86,19 +86,33 @@ func TestBBRMaxPass(t *testing.T) {
 	assert.Equal(t, int64(1), bbr.maxPASS())
 }
 
+func TestBBRMaxPassWithCache(t *testing.T) {
+	bucketDuration := time.Millisecond * 100
+	bbr := newLimiter(confForTest()).(*BBR)
+	// witch cache, value of latest bucket is not counted instently.
+	// after a bucket duration time, this bucket will be fullly counted.
+	for i := 1; i <= 11; i++ {
+		bbr.passStat.Add(int64(i * 50))
+		time.Sleep(bucketDuration / 2)
+		_ = bbr.maxPASS()
+		bbr.passStat.Add(int64(i * 50))
+		time.Sleep(bucketDuration / 2)
+	}
+	bbr.passStat.Add(int64(1))
+	assert.Equal(t, int64(1000), bbr.maxPASS())
+}
+
 func TestBBRMinRt(t *testing.T) {
 	bucketDuration := time.Millisecond * 100
 	bbr := newLimiter(confForTest()).(*BBR)
-	rtStat := metric.NewRollingCounter(metric.RollingCounterOpts{Size: 10, BucketDuration: bucketDuration})
 	for i := 0; i < 10; i++ {
 		for j := i*10 + 1; j <= i*10+10; j++ {
-			rtStat.Add(int64(j))
+			bbr.rtStat.Add(int64(j))
 		}
 		if i != 9 {
 			time.Sleep(bucketDuration)
 		}
 	}
-	bbr.rtStat = rtStat
 	assert.Equal(t, int64(6), bbr.minRT())
 
 	// default max min rt is equal to maxFloat64.
@@ -106,6 +120,27 @@ func TestBBRMinRt(t *testing.T) {
 	bbr = newLimiter(confForTest()).(*BBR)
 	bbr.rtStat = metric.NewRollingCounter(metric.RollingCounterOpts{Size: 10, BucketDuration: bucketDuration})
 	assert.Equal(t, int64(1), bbr.minRT())
+}
+
+func TestBBRMinRtWithCache(t *testing.T) {
+	bucketDuration := time.Millisecond * 100
+	bbr := newLimiter(confForTest()).(*BBR)
+	for i := 0; i < 10; i++ {
+		for j := i*10 + 1; j <= i*10+5; j++ {
+			bbr.rtStat.Add(int64(j))
+		}
+		if i != 9 {
+			time.Sleep(bucketDuration / 2)
+		}
+		_ = bbr.minRT()
+		for j := i*10 + 6; j <= i*10+10; j++ {
+			bbr.rtStat.Add(int64(j))
+		}
+		if i != 9 {
+			time.Sleep(bucketDuration / 2)
+		}
+	}
+	assert.Equal(t, int64(6), bbr.minRT())
 }
 
 func TestBBRMaxQps(t *testing.T) {
