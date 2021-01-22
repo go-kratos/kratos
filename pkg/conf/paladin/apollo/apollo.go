@@ -64,12 +64,13 @@ type Config struct {
 	CacheDir   string   `json:"cache_dir"`
 	MetaAddr   string   `json:"meta_addr"`
 	Namespaces []string `json:"namespaces"`
+	AccesskeySecret string   `json:"accesskey_secret"`
 }
 
 type apolloDriver struct{}
 
 var (
-	confAppID, confCluster, confCacheDir, confMetaAddr, confNamespaces string
+	confAppID, confCluster, confCacheDir, confMetaAddr, confNamespaces, accesskeySecret string
 )
 
 func init() {
@@ -83,6 +84,7 @@ func addApolloFlags() {
 	flag.StringVar(&confCacheDir, "apollo.cachedir", "/tmp", "apollo cache dir")
 	flag.StringVar(&confMetaAddr, "apollo.metaaddr", "", "apollo meta server addr, e.g. localhost:8080")
 	flag.StringVar(&confNamespaces, "apollo.namespaces", "", "subscribed apollo namespaces, comma separated, e.g. app.yml,mysql.yml")
+	flag.StringVar(&accesskeySecret, "apollo.accesskeysecret", "", "apollo accesskeysecret")
 }
 
 func buildConfigForApollo() (c *Config, err error) {
@@ -118,12 +120,16 @@ func buildConfigForApollo() (c *Config, err error) {
 		err = errors.New("invalid apollo namespaces, pass it via APOLLO_NAMESPACES=xxx with env or --apollo.namespaces=xxx with flag")
 		return
 	}
+	if accesskeySecretEnv := os.Getenv("APOLLO_ACCESS_KEY_SECRET"); accesskeySecretEnv != "" {
+		accesskeySecret = accesskeySecretEnv
+	}
 	c = &Config{
 		AppID:      confAppID,
 		Cluster:    confCluster,
 		CacheDir:   confCacheDir,
 		MetaAddr:   confMetaAddr,
 		Namespaces: namespaceNames,
+		AccesskeySecret: accesskeySecret,
 	}
 	return
 }
@@ -150,6 +156,7 @@ func (ad *apolloDriver) new(conf *Config) (paladin.Client, error) {
 		NameSpaceNames: conf.Namespaces, // these namespaces will be subscribed at init
 		CacheDir:       conf.CacheDir,
 		MetaAddr:       conf.MetaAddr,
+		AccesskeySecret: conf.AccesskeySecret,
 	})
 	err := client.Start()
 	if err != nil {
@@ -167,11 +174,7 @@ func (ad *apolloDriver) new(conf *Config) (paladin.Client, error) {
 	a.values.Store(raws)
 	// watch namespaces by default.
 	a.WatchEvent(context.TODO(), conf.Namespaces...)
-	a.client.OnUpdate(func(event *agollo.ChangeEvent) {
-		if err := a.reloadValue(event.Namespace); err != nil {
-			log.Printf("paladin: load key: %s error: %s, skipped", event.Namespace, err)
-		}
-	})
+	go a.watchproc(conf.Namespaces)
 	return a, nil
 }
 
@@ -226,6 +229,14 @@ func (a *apollo) reloadValue(key string) (err error) {
 	return
 }
 
+// apollo config daemon to watch remote apollo notifications
+func (a *apollo) watchproc(keys []string) {
+	a.client.OnUpdate(func(event *agollo.ChangeEvent) {
+		if err := a.reloadValue(event.Namespace); err != nil {
+			log.Printf("paladin: load key: %s error: %s, skipped", event.Namespace, err)
+		}
+	})
+}
 // Get return value by key.
 func (a *apollo) Get(key string) *paladin.Value {
 	return a.values.Get(key)
