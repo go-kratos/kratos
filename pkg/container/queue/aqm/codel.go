@@ -13,6 +13,7 @@ import (
 type Config struct {
 	Target   int64 // target queue delay (default 20 ms).
 	Internal int64 // sliding minimum time window width (default 500 ms)
+	MaxOutstanding int64 //max num of concurrent acquires
 }
 
 // Stat is the Statistics of codel.
@@ -31,6 +32,7 @@ type packet struct {
 var defaultConf = &Config{
 	Target:   50,
 	Internal: 500,
+	MaxOutstanding: 40,
 }
 
 // Queue queue is CoDel req buffer queue.
@@ -44,6 +46,7 @@ type Queue struct {
 	dropping bool  // 	Equal to 1 if in drop state
 	faTime   int64 // Time when we'll declare we're above target (0 if below)
 	dropNext int64 // Packets dropped since going into drop state
+	outstanding    int64
 }
 
 // Default new a default codel queue.
@@ -68,7 +71,7 @@ func New(conf *Config) *Queue {
 
 // Reload set queue config.
 func (q *Queue) Reload(c *Config) {
-	if c == nil || c.Internal <= 0 || c.Target <= 0 {
+	if c == nil || c.Internal <= 0 || c.Target <= 0 || c.MaxOutstanding <= 0 {
 		return
 	}
 	// TODO codel queue size
@@ -92,6 +95,13 @@ func (q *Queue) Stat() Stat {
 // Push req into CoDel request buffer queue.
 // if return error is nil,the caller must call q.Done() after finish request handling
 func (q *Queue) Push(ctx context.Context) (err error) {
+	q.mux.Lock()
+	if q.outstanding < q.conf.MaxOutstanding && len(q.packets) == 0 {
+		q.outstanding ++
+		q.mux.Unlock()
+		return
+	}
+	q.mux.Unlock()
 	r := packet{
 		ch: q.pool.Get().(chan bool),
 		ts: time.Now().UnixNano() / int64(time.Millisecond),
@@ -118,6 +128,14 @@ func (q *Queue) Push(ctx context.Context) (err error) {
 
 // Pop req from CoDel request buffer queue.
 func (q *Queue) Pop() {
+	q.mux.Lock()
+	q.outstanding --
+	if q.outstanding < 0 {
+		q.outstanding = 0
+		q.mux.Unlock()
+		return
+	}
+	defer q.mux.Unlock()
 	for {
 		select {
 		case p := <-q.packets:
@@ -145,8 +163,6 @@ func (q *Queue) controlLaw(now int64) int64 {
 func (q *Queue) judge(p packet) (drop bool) {
 	now := time.Now().UnixNano() / int64(time.Millisecond)
 	sojurn := now - p.ts
-	q.mux.Lock()
-	defer q.mux.Unlock()
 	if sojurn < q.conf.Target {
 		q.faTime = 0
 	} else if q.faTime == 0 {
@@ -161,7 +177,6 @@ func (q *Queue) judge(p packet) (drop bool) {
 		} else if now > q.dropNext {
 			q.count++
 			q.dropNext = q.controlLaw(q.dropNext)
-			drop = true
 			return
 		}
 	} else if drop && (now-q.dropNext < q.conf.Internal || now-q.faTime >= q.conf.Internal) {
@@ -178,8 +193,9 @@ func (q *Queue) judge(p packet) (drop bool) {
 			q.count = 1
 		}
 		q.dropNext = q.controlLaw(now)
-		drop = true
 		return
 	}
+	q.outstanding ++
+	drop = false
 	return
 }
