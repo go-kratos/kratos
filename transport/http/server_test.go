@@ -3,7 +3,6 @@ package http
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"testing"
@@ -38,7 +37,7 @@ func TestServer(t *testing.T) {
 		testClient(t, srv)
 	})
 
-	if err := srv.Start(); !errors.Is(err, http.ErrServerClosed) {
+	if err := srv.Start(); err != nil {
 		t.Fatal(err)
 	}
 }

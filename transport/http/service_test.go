@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"testing"
@@ -61,7 +60,7 @@ func TestService(t *testing.T) {
 		testServiceClient(t, srv)
 	})
 
-	if err := srv.Start(); !errors.Is(err, http.ErrServerClosed) {
+	if err := srv.Start(); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -152,7 +153,10 @@ func (s *Server) Start() error {
 	}
 	s.lis = lis
 	s.log.Infof("[HTTP] server listening on: %s", lis.Addr().String())
-	return s.Serve(lis)
+	if err := s.Serve(lis); !errors.Is(err, http.ErrServerClosed) {
+		return err
+	}
+	return nil
 }
 
 // Stop stop the HTTP server.
