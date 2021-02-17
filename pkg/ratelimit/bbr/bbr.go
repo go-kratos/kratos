@@ -71,11 +71,20 @@ type BBR struct {
 	rtStat          metric.RollingCounter
 	inFlight        int64
 	winBucketPerSec int64
+	bucketDuration  time.Duration
+	winSize         int
 	conf            *Config
 	prevDrop        atomic.Value
-	prevDropHit     int32
-	rawMaxPASS      int64
-	rawMinRt        int64
+	maxPASSCache    atomic.Value
+	minRtCache      atomic.Value
+}
+
+// CounterCache is used to cache maxPASS and minRt result.
+// Value of current bucket is not counted in real time.
+// Cache time is equal to a bucket duration.
+type CounterCache struct {
+	val  int64
+	time time.Time
 }
 
 // Config contains configs of bbr limiter.
@@ -89,11 +98,14 @@ type Config struct {
 }
 
 func (l *BBR) maxPASS() int64 {
-	rawMaxPass := atomic.LoadInt64(&l.rawMaxPASS)
-	if rawMaxPass > 0 && l.passStat.Timespan() < 1 {
-		return rawMaxPass
+	passCache := l.maxPASSCache.Load()
+	if passCache != nil {
+		ps := passCache.(*CounterCache)
+		if l.timespan(ps.time) < 1 {
+			return ps.val
+		}
 	}
-	rawMaxPass = int64(l.passStat.Reduce(func(iterator metric.Iterator) float64 {
+	rawMaxPass := int64(l.passStat.Reduce(func(iterator metric.Iterator) float64 {
 		var result = 1.0
 		for i := 1; iterator.Next() && i < l.conf.WinBucket; i++ {
 			bucket := iterator.Bucket()
@@ -108,16 +120,30 @@ func (l *BBR) maxPASS() int64 {
 	if rawMaxPass == 0 {
 		rawMaxPass = 1
 	}
-	atomic.StoreInt64(&l.rawMaxPASS, rawMaxPass)
+	l.maxPASSCache.Store(&CounterCache{
+		val:  rawMaxPass,
+		time: time.Now(),
+	})
 	return rawMaxPass
 }
 
-func (l *BBR) minRT() int64 {
-	rawMinRT := atomic.LoadInt64(&l.rawMinRt)
-	if rawMinRT > 0 && l.rtStat.Timespan() < 1 {
-		return rawMinRT
+func (l *BBR) timespan(lastTime time.Time) int {
+	v := int(time.Since(lastTime) / l.bucketDuration)
+	if v > -1 {
+		return v
 	}
-	rawMinRT = int64(math.Ceil(l.rtStat.Reduce(func(iterator metric.Iterator) float64 {
+	return l.winSize
+}
+
+func (l *BBR) minRT() int64 {
+	rtCache := l.minRtCache.Load()
+	if rtCache != nil {
+		rc := rtCache.(*CounterCache)
+		if l.timespan(rc.time) < 1 {
+			return rc.val
+		}
+	}
+	rawMinRT := int64(math.Ceil(l.rtStat.Reduce(func(iterator metric.Iterator) float64 {
 		var result = math.MaxFloat64
 		for i := 1; iterator.Next() && i < l.conf.WinBucket; i++ {
 			bucket := iterator.Bucket()
@@ -136,7 +162,10 @@ func (l *BBR) minRT() int64 {
 	if rawMinRT <= 0 {
 		rawMinRT = 1
 	}
-	atomic.StoreInt64(&l.rawMinRt, rawMinRT)
+	l.minRtCache.Store(&CounterCache{
+		val:  rawMinRT,
+		time: time.Now(),
+	})
 	return rawMinRT
 }
 
@@ -151,9 +180,6 @@ func (l *BBR) shouldDrop() bool {
 			return false
 		}
 		if time.Since(initTime)-prevDrop <= time.Second {
-			if atomic.LoadInt32(&l.prevDropHit) == 0 {
-				atomic.StoreInt32(&l.prevDropHit, 1)
-			}
 			inFlight := atomic.LoadInt64(&l.inFlight)
 			return inFlight > 1 && inFlight > l.maxFlight()
 		}
@@ -226,6 +252,8 @@ func newLimiter(conf *Config) limit.Limiter {
 		passStat:        passStat,
 		rtStat:          rtStat,
 		winBucketPerSec: int64(time.Second) / (int64(conf.Window) / int64(conf.WinBucket)),
+		bucketDuration:  bucketDuration,
+		winSize:         conf.WinBucket,
 	}
 	return limiter
 }
