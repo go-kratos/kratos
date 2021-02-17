@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package kratos.errors;
+
+import "google/protobuf/any.proto";
+
+option cc_enable_arenas = true;
+option go_package = "github.com/go-kratos/kratos/v2/errors;errors";
+option java_multiple_files = true;
+option java_outer_classname = "ErrorsProto";
+option java_package = "com.github.kratos.errors";
+option objc_class_prefix = "KratosErrors";
+
+message Status {
+  int32 code = 1;
+  string reason = 2;
+  string message = 3;
+  repeated google.protobuf.Any details = 4;
+}

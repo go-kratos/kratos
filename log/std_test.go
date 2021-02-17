@@ -1,0 +1,12 @@
+package log
+
+import "testing"
+
+func TestFmtLogger(t *testing.T) {
+	logger := NewStdLogger()
+
+	Debug(logger).Print("log", "test debug")
+	Info(logger).Print("log", "test info")
+	Warn(logger).Print("log", "test warn")
+	Error(logger).Print("log", "test error")
+}
