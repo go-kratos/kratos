@@ -2,8 +2,8 @@
 
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
 [![Build Status](https://github.com/go-kratos/kratos/workflows/Go/badge.svg)](https://github.com/go-kratos/kratos/actions)
-[![GoDoc](https://godoc.org/github.com/go-kratos/kratos?status.svg)](https://godoc.org/github.com/go-kratos/kratos)
-[![Go Report Card](https://goreportcard.com/badge/github.com/go-kratos/kratos)](https://goreportcard.com/report/github.com/go-kratos/kratos)
+[![GoDoc](https://pkg.go.dev/badge/github.com/go-kratos/kratos/v2)](https://pkg.go.dev/github.com/go-kratos/kratos/v2)
+[![Go Report Card](https://goreportcard.com/badge/github.com/go-kratos/kratos/v2)](https://goreportcard.com/report/github.com/go-kratos/kratos/v2)
 [![Discord](https://img.shields.io/discord/766619759214854164?label=chat&logo=discord)](https://discord.gg/BWzJsUJ)
 
 # Kratos
@@ -48,9 +48,9 @@ Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关框架及
 ### Install Kratos
 ```
 # 安装生成工具
-go get github.com/go-kratos/kratos/cmd/kratos
-go get github.com/go-kratos/kratos/cmd/protoc-gen-go-http
-go get github.com/go-kratos/kratos/cmd/protoc-gen-go-errors
+go get github.com/go-kratos/kratos/cmd/kratos/v2
+go get github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2
+go get github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2
 
 # 或者通过 Source 安装
 cd cmd/kratos && go install

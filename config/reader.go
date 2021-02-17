@@ -1,7 +1,6 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -72,16 +71,16 @@ func (r *reader) Value(path string) (Value, bool) {
 }
 
 func (r *reader) Source() ([]byte, error) {
-	return json.Marshal(r.values)
+	return codec.Marshal(r.values)
 }
 
 func cloneMap(src map[string]interface{}) (map[string]interface{}, error) {
-	data, err := json.Marshal(src)
+	data, err := codec.Marshal(src)
 	if err != nil {
 		return nil, err
 	}
 	dst := make(map[string]interface{})
-	if err = json.Unmarshal(data, &dst); err != nil {
+	if err = codec.Unmarshal(data, &dst); err != nil {
 		return nil, err
 	}
 	return dst, nil

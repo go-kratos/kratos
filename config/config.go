@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -17,6 +18,8 @@ var (
 	ErrTypeAssert = errors.New("type assert error")
 
 	_ Config = (*config)(nil)
+
+	codec = encoding.GetCodec("json")
 )
 
 // Observer is config observer.
@@ -120,7 +123,7 @@ func (c *config) Scan(v interface{}) error {
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(data, v)
+	return codec.Unmarshal(data, v)
 }
 
 func (c *config) Watch(key string, o Observer) error {
