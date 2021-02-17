@@ -69,5 +69,7 @@ func (r *rollingCounter) Value() int64 {
 }
 
 func (r *rollingCounter) Timespan() int {
+	r.policy.mu.RLock()
+	defer r.policy.mu.RUnlock()
 	return r.policy.timespan()
 }
