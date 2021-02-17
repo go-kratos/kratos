@@ -1,5 +1,9 @@
-# config
+# Config
+* [Consul](https://github.com/go-kratos/consul)
+* [Etcd](https://github.com/go-kratos/etcd)
+* [Kube](https://github.com/go-kratos/kube)
 
+### Example Usage
 可以指定多个配置源，config 会进行合并成 map[string]interface{}，然后通过 Scan 或者 Value 获取值内容；
 
 ```

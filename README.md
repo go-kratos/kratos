@@ -38,7 +38,6 @@ Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关框架及
 * Tracing：遵循 OpenTracing 规范定义，以实现微服务链路追踪；
 * Encoding：支持Accept和Content-Type进行自动选择内容编码；
 * Transport：通用的 HTTP/gRPC 传输层，实现统一的 Middleware 插件支持；
-* Server：进行基础的 Server 层封装，统一以 Options 方式配置使用；
 
 ## Getting Started
 ### Required
@@ -69,15 +68,36 @@ kratos proto add api/helloworld/helloworld.proto
 # 生成service模板
 kratos proto service api/helloworld/helloworld.proto -t internal/service
 
+# 安装生成工具
+make init
 # 生成api下所有proto文件
 make proto
-# 编码cmd下所有main文件
+# 编译cmd下所有main文件
 make build
 # 进行单元测试
 make test
 ```
 
-## Service Layout
+### Kratos Run
+```
+import "github.com/go-kratos/kratos/v2"
+import "github.com/go-kratos/kratos/v2/transport/grpc"
+import "github.com/go-kratos/kratos/v2/transport/http"
+
+httpSrv := http.NewServer(http.Address(":8000"))
+grpcSrv := grpc.NewServer(grpc.Address(":9000"))
+
+app := kratos.New(
+    kratos.Name("kratos"),
+    kratos.Version("latest"),
+    kratos.Server(httpSrv, grpcSrv),
+)
+app.Run()
+```
+
+## Example Usage
+
+* [Examples](https://github.com/go-kratos/examples)
 * [Service Layout](https://github.com/go-kratos/kratos-layout)
 
 ## Community
