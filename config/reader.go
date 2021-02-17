@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	_ "github.com/go-kratos/kratos/v2/encoding/json"
 	"github.com/imdario/mergo"
 )
 
