@@ -1,9 +1,9 @@
 package proto
 
 import (
-	"github.com/go-kratos/kratos/cmd/kratos/internal/proto/add"
-	"github.com/go-kratos/kratos/cmd/kratos/internal/proto/service"
-	"github.com/go-kratos/kratos/cmd/kratos/internal/proto/source"
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto/add"
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto/service"
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto/source"
 
 	"github.com/spf13/cobra"
 )

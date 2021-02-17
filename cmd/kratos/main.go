@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/go-kratos/kratos/cmd/kratos/internal/new"
-	"github.com/go-kratos/kratos/cmd/kratos/internal/proto"
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/new"
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto"
 	"github.com/spf13/cobra"
 )
 
