@@ -48,9 +48,9 @@ Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关框架及
 ### Install Kratos
 ```
 # 安装生成工具
-go get github.com/go-kratos/kratos/cmd/kratos
-go get github.com/go-kratos/kratos/cmd/protoc-gen-go-http
-go get github.com/go-kratos/kratos/cmd/protoc-gen-go-errors
+go get github.com/go-kratos/kratos/cmd/kratos/v2
+go get github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2
+go get github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2
 
 # 或者通过 Source 安装
 cd cmd/kratos && go install
