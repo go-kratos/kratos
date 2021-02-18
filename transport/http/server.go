@@ -30,6 +30,9 @@ type EncodeResponseFunc func(res http.ResponseWriter, req *http.Request, v inter
 // EncodeErrorFunc is encode error func.
 type EncodeErrorFunc func(res http.ResponseWriter, req *http.Request, err error)
 
+// InterceptorFunc is an HTTP handler interceptor.
+type InterceptorFunc func(next http.Handler) http.Handler
+
 // ServerOption is HTTP server option.
 type ServerOption func(*Server)
 
@@ -68,7 +71,28 @@ func Middleware(m middleware.Middleware) ServerOption {
 	}
 }
 
-// ErrorEncoder with error handler option.
+// Interceptor with server intercetpor.
+func Interceptor(in InterceptorFunc) ServerOption {
+	return func(s *Server) {
+		s.interceptor = in
+	}
+}
+
+// RequestDecoder with server request decoder.
+func RequestDecoder(dec DecodeRequestFunc) ServerOption {
+	return func(s *Server) {
+		s.requestDecoder = dec
+	}
+}
+
+// ResponseEncoder with server response encoder.
+func ResponseEncoder(enc EncodeResponseFunc) ServerOption {
+	return func(s *Server) {
+		s.responseEncoder = enc
+	}
+}
+
+// ErrorEncoder with server error encoder.
 func ErrorEncoder(fn EncodeErrorFunc) ServerOption {
 	return func(s *Server) {
 		s.errorEncoder = fn
@@ -83,6 +107,8 @@ type Server struct {
 	address         string
 	timeout         time.Duration
 	middleware      middleware.Middleware
+	handler         http.Handler
+	interceptor     InterceptorFunc
 	requestDecoder  DecodeRequestFunc
 	responseEncoder EncodeResponseFunc
 	errorEncoder    EncodeErrorFunc
@@ -106,7 +132,13 @@ func NewServer(opts ...ServerOption) *Server {
 		o(srv)
 	}
 	srv.router = mux.NewRouter()
-	srv.Server = &http.Server{Handler: srv}
+	srv.Server = &http.Server{}
+	// use a custom HTTP middlware
+	if srv.interceptor != nil {
+		srv.Handler = srv.interceptor(srv)
+	} else {
+		srv.Handler = srv
+	}
 	return srv
 }
 

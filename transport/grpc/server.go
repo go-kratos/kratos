@@ -58,6 +58,13 @@ func Middleware(m middleware.Middleware) ServerOption {
 	}
 }
 
+// UnaryServerInterceptor with server UnaryServerInterceptor.
+func UnaryServerInterceptor(in grpc.UnaryServerInterceptor) ServerOption {
+	return func(s *Server) {
+		s.unaryInt = in
+	}
+}
+
 // Options with grpc options.
 func Options(opts ...grpc.ServerOption) ServerOption {
 	return func(s *Server) {
@@ -74,6 +81,7 @@ type Server struct {
 	timeout    time.Duration
 	log        *log.Helper
 	middleware middleware.Middleware
+	unaryInt   grpc.UnaryServerInterceptor
 	grpcOpts   []grpc.ServerOption
 }
 
@@ -92,15 +100,20 @@ func NewServer(opts ...ServerOption) *Server {
 	for _, o := range opts {
 		o(srv)
 	}
-	var grpcOpts = []grpc.ServerOption{
-		grpc.ChainUnaryInterceptor(
-			UnaryServerInterceptor(srv.middleware),
-			UnaryTimeoutInterceptor(srv.timeout),
-		),
+	var (
+		grpcOpts  []grpc.ServerOption
+		unaryInts = []grpc.UnaryServerInterceptor{
+			unaryServerInterceptor(srv.middleware, srv.timeout),
+		}
+	)
+	if srv.unaryInt != nil {
+		unaryInts = append(unaryInts, srv.unaryInt)
 	}
 	if len(srv.grpcOpts) > 0 {
 		grpcOpts = append(grpcOpts, srv.grpcOpts...)
 	}
+	grpcOpts = append(grpcOpts, grpc.ChainUnaryInterceptor(unaryInts...))
+	// new a gRPC server with options
 	srv.Server = grpc.NewServer(grpcOpts...)
 	return srv
 }
@@ -134,18 +147,14 @@ func (s *Server) Stop() error {
 	return nil
 }
 
-// UnaryTimeoutInterceptor returns a unary timeout interceptor.
-func UnaryTimeoutInterceptor(timeout time.Duration) grpc.UnaryServerInterceptor {
+// unaryServerInterceptor returns a unary server interceptor.
+func unaryServerInterceptor(m middleware.Middleware, timeout time.Duration) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		ctx, cancel := context.WithTimeout(ctx, timeout)
-		defer cancel()
-		return handler(ctx, req)
-	}
-}
-
-// UnaryServerInterceptor returns a unary server interceptor.
-func UnaryServerInterceptor(m middleware.Middleware) grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		if timeout > 0 {
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, timeout)
+			defer cancel()
+		}
 		ctx = transport.NewContext(ctx, transport.Transport{Kind: "gRPC"})
 		ctx = NewServerContext(ctx, ServerInfo{Server: info.Server, FullMethod: info.FullMethod})
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {

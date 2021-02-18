@@ -45,7 +45,14 @@ func WithRegistry(r registry.Registry) ClientOption {
 	}
 }
 
-// WithOptions with gRPC options.
+// UnaryClientInterceptor with client UnaryClientInterceptor.
+func UnaryClientInterceptor(in grpc.UnaryClientInterceptor) ClientOption {
+	return func(o *clientOptions) {
+		o.unaryInt = in
+	}
+}
+
+// WithOptions with client gRPC options.
 func WithOptions(opts ...grpc.DialOption) ClientOption {
 	return func(o *clientOptions) {
 		o.grpcOpts = opts
@@ -58,6 +65,7 @@ type clientOptions struct {
 	timeout    time.Duration
 	middleware middleware.Middleware
 	registry   registry.Registry
+	unaryInt   grpc.UnaryClientInterceptor
 	grpcOpts   []grpc.DialOption
 }
 
@@ -82,24 +90,29 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	for _, o := range opts {
 		o(&options)
 	}
-	var grpcOpts = []grpc.DialOption{
-		grpc.WithTimeout(options.timeout),
-		grpc.WithUnaryInterceptor(UnaryClientInterceptor(options.middleware)),
+	var (
+		grpcOpts  = []grpc.DialOption{grpc.WithTimeout(options.timeout)}
+		unaryInts = []grpc.UnaryClientInterceptor{unaryClientInterceptor(options.middleware)}
+	)
+	if insecure {
+		grpcOpts = append(grpcOpts, grpc.WithInsecure())
 	}
 	if options.registry != nil {
 		grpc.WithResolvers(discovery.NewBuilder(options.registry))
 	}
-	if insecure {
-		grpcOpts = append(grpcOpts, grpc.WithInsecure())
+	if options.unaryInt != nil {
+		unaryInts = append(unaryInts, options.unaryInt)
 	}
 	if len(options.grpcOpts) > 0 {
 		grpcOpts = append(grpcOpts, options.grpcOpts...)
 	}
+	grpcOpts = append(grpcOpts, grpc.WithChainUnaryInterceptor(unaryInts...))
+	// creates a client connection to the given endpoint
 	return grpc.DialContext(ctx, options.endpoint, grpcOpts...)
 }
 
-// UnaryClientInterceptor retruns a unary client interceptor.
-func UnaryClientInterceptor(m middleware.Middleware) grpc.UnaryClientInterceptor {
+// unaryClientInterceptor retruns a unary client interceptor.
+func unaryClientInterceptor(m middleware.Middleware) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		ctx = transport.NewContext(ctx, transport.Transport{Kind: "gRPC"})
 		ctx = NewClientContext(ctx, ClientInfo{FullMethod: method})
