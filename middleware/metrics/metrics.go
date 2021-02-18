@@ -16,6 +16,20 @@ import (
 // Option is metrics option.
 type Option func(*options)
 
+// WithRequests with requests counter.
+func WithRequests(c metrics.Counter) Option {
+	return func(o *options) {
+		o.requests = c
+	}
+}
+
+// WithSeconds with seconds histogram.
+func WithSeconds(c metrics.Observer) Option {
+	return func(o *options) {
+		o.seconds = c
+	}
+}
+
 type options struct {
 	// counter: <kind>_<client/server>_requests_code_total{method, path, code}
 	requests metrics.Counter
