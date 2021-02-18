@@ -17,9 +17,9 @@ import (
 type Option func(*options)
 
 type options struct {
-	// counter: <kind>_server_requests_code_total{method, path, code}
+	// counter: <kind>_<client/server>_requests_code_total{method, path, code}
 	requests metrics.Counter
-	// histogram: <kind>_server_requests_seconds_bucket{method, path}
+	// histogram: <kind>_<client/server>_requests_seconds_bucket{method, path}
 	seconds metrics.Observer
 }
 
