@@ -107,7 +107,6 @@ type Server struct {
 	address         string
 	timeout         time.Duration
 	middleware      middleware.Middleware
-	handler         http.Handler
 	interceptor     InterceptorFunc
 	requestDecoder  DecodeRequestFunc
 	responseEncoder EncodeResponseFunc
