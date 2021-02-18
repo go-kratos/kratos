@@ -96,7 +96,7 @@ func (t *baseTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	defer cancel()
 
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
-		return t.base.RoundTrip(req)
+		return t.base.RoundTrip(in.(*http.Request))
 	}
 	if t.middleware != nil {
 		h = t.middleware(h)

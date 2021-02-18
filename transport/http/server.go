@@ -131,7 +131,15 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	defer cancel()
 	ctx = transport.NewContext(ctx, transport.Transport{Kind: "HTTP"})
 	ctx = NewServerContext(ctx, ServerInfo{Request: req, Response: res})
-	s.router.ServeHTTP(res, req.WithContext(ctx))
+
+	h := func(ctx context.Context, req interface{}) (interface{}, error) {
+		s.router.ServeHTTP(res, req.(*http.Request))
+		return res, nil
+	}
+	if s.middleware != nil {
+		h = s.middleware(h)
+	}
+	h(ctx, req.WithContext(ctx))
 }
 
 // Endpoint return a real address to registry endpoint.
