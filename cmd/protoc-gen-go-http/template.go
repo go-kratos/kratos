@@ -16,7 +16,7 @@ func Register{{.ServiceType}}HTTPServer(s http1.ServiceRegistrar, srv {{.Service
 	s.RegisterService(&_HTTP_{{.ServiceType}}_serviceDesc, srv)
 }
 {{range .Methods}}
-func _HTTP_{{$.ServiceType}}_{{.Name}}_{{.Num}}(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error, m middleware.Middleware) (interface{}, error) {
+func _HTTP_{{$.ServiceType}}_{{.Name}}_{{.Num}}(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error) (interface{}, error) {
 	var in {{.Request}}
 {{if ne (len .Vars) 0}}
 	if err := http1.BindVars(req, &in); err != nil {
@@ -36,10 +36,7 @@ func _HTTP_{{$.ServiceType}}_{{.Name}}_{{.Num}}(srv interface{}, ctx context.Con
 		return nil, err
 	}
 {{end}}
-	h := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.({{$.ServiceType}}Server).{{.Name}}(ctx, &in)
-	}
-	out, err := m(h)(ctx, &in)
+	out, err := srv.({{$.ServiceType}}Server).{{.Name}}(ctx, &in)
 	if err != nil {
 		return nil, err
 	}
