@@ -4,14 +4,13 @@ package testproto
 
 import (
 	context "context"
-	middleware "github.com/go-kratos/kratos/v2/middleware"
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
 	http "net/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
-// context./http./middleware.
+// context./http.
 const _ = http1.SupportPackageIsVersion1
 
 type EchoServiceHTTPServer interface {
@@ -28,7 +27,7 @@ func RegisterEchoServiceHTTPServer(s http1.ServiceRegistrar, srv EchoServiceHTTP
 	s.RegisterService(&_HTTP_EchoService_serviceDesc, srv)
 }
 
-func _HTTP_EchoService_Echo_0(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error, m middleware.Middleware) (interface{}, error) {
+func _HTTP_EchoService_Echo_0(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error) (interface{}, error) {
 	var in SimpleMessage
 
 	if err := http1.BindVars(req, &in); err != nil {
@@ -39,17 +38,14 @@ func _HTTP_EchoService_Echo_0(srv interface{}, ctx context.Context, req *http.Re
 		return nil, err
 	}
 
-	h := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EchoServiceServer).Echo(ctx, &in)
-	}
-	out, err := m(h)(ctx, &in)
+	out, err := srv.(EchoServiceServer).Echo(ctx, &in)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func _HTTP_EchoService_Echo_1(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error, m middleware.Middleware) (interface{}, error) {
+func _HTTP_EchoService_Echo_1(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error) (interface{}, error) {
 	var in SimpleMessage
 
 	if err := http1.BindVars(req, &in); err != nil {
@@ -60,17 +56,14 @@ func _HTTP_EchoService_Echo_1(srv interface{}, ctx context.Context, req *http.Re
 		return nil, err
 	}
 
-	h := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EchoServiceServer).Echo(ctx, &in)
-	}
-	out, err := m(h)(ctx, &in)
+	out, err := srv.(EchoServiceServer).Echo(ctx, &in)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func _HTTP_EchoService_Echo_2(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error, m middleware.Middleware) (interface{}, error) {
+func _HTTP_EchoService_Echo_2(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error) (interface{}, error) {
 	var in SimpleMessage
 
 	if err := http1.BindVars(req, &in); err != nil {
@@ -81,17 +74,14 @@ func _HTTP_EchoService_Echo_2(srv interface{}, ctx context.Context, req *http.Re
 		return nil, err
 	}
 
-	h := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EchoServiceServer).Echo(ctx, &in)
-	}
-	out, err := m(h)(ctx, &in)
+	out, err := srv.(EchoServiceServer).Echo(ctx, &in)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func _HTTP_EchoService_Echo_3(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error, m middleware.Middleware) (interface{}, error) {
+func _HTTP_EchoService_Echo_3(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error) (interface{}, error) {
 	var in SimpleMessage
 
 	if err := http1.BindVars(req, &in); err != nil {
@@ -102,17 +92,14 @@ func _HTTP_EchoService_Echo_3(srv interface{}, ctx context.Context, req *http.Re
 		return nil, err
 	}
 
-	h := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EchoServiceServer).Echo(ctx, &in)
-	}
-	out, err := m(h)(ctx, &in)
+	out, err := srv.(EchoServiceServer).Echo(ctx, &in)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func _HTTP_EchoService_Echo_4(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error, m middleware.Middleware) (interface{}, error) {
+func _HTTP_EchoService_Echo_4(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error) (interface{}, error) {
 	var in SimpleMessage
 
 	if err := http1.BindVars(req, &in); err != nil {
@@ -123,61 +110,49 @@ func _HTTP_EchoService_Echo_4(srv interface{}, ctx context.Context, req *http.Re
 		return nil, err
 	}
 
-	h := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EchoServiceServer).Echo(ctx, &in)
-	}
-	out, err := m(h)(ctx, &in)
+	out, err := srv.(EchoServiceServer).Echo(ctx, &in)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func _HTTP_EchoService_EchoBody_0(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error, m middleware.Middleware) (interface{}, error) {
+func _HTTP_EchoService_EchoBody_0(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error) (interface{}, error) {
 	var in SimpleMessage
 
 	if err := dec(&in); err != nil {
 		return nil, err
 	}
 
-	h := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EchoServiceServer).EchoBody(ctx, &in)
-	}
-	out, err := m(h)(ctx, &in)
+	out, err := srv.(EchoServiceServer).EchoBody(ctx, &in)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func _HTTP_EchoService_EchoDelete_0(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error, m middleware.Middleware) (interface{}, error) {
+func _HTTP_EchoService_EchoDelete_0(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error) (interface{}, error) {
 	var in SimpleMessage
 
 	if err := http1.BindForm(req, &in); err != nil {
 		return nil, err
 	}
 
-	h := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EchoServiceServer).EchoDelete(ctx, &in)
-	}
-	out, err := m(h)(ctx, &in)
+	out, err := srv.(EchoServiceServer).EchoDelete(ctx, &in)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func _HTTP_EchoService_EchoPatch_0(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error, m middleware.Middleware) (interface{}, error) {
+func _HTTP_EchoService_EchoPatch_0(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error) (interface{}, error) {
 	var in DynamicMessageUpdate
 
 	if err := dec(in.Body); err != nil {
 		return nil, err
 	}
 
-	h := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EchoServiceServer).EchoPatch(ctx, &in)
-	}
-	out, err := m(h)(ctx, &in)
+	out, err := srv.(EchoServiceServer).EchoPatch(ctx, &in)
 	if err != nil {
 		return nil, err
 	}
