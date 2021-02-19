@@ -45,17 +45,9 @@ Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关框架及
 - [protoc](https://github.com/protocolbuffers/protobuf)
 - [protoc-gen-go](https://github.com/protocolbuffers/protobuf-go)
 
-### Install Kratos
+### Installing
 ```
-# 安装生成工具
 go get github.com/go-kratos/kratos/cmd/kratos/v2
-go get github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2
-go get github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2
-
-# 或者通过 Source 安装
-cd cmd/kratos && go install
-cd cmd/protoc-gen-go-http && go install
-cd cmd/protoc-gen-go-errors && go install
 ```
 ### Create a service
 ```
@@ -78,7 +70,7 @@ make build
 make test
 ```
 
-### Kratos Run
+### Kratos Boot
 ```
 import "github.com/go-kratos/kratos/v2"
 import "github.com/go-kratos/kratos/v2/transport/grpc"
@@ -95,8 +87,9 @@ app := kratos.New(
 app.Run()
 ```
 
-## Example Usage
+## Related
 
+* [Docs](https://go-kratos.dev/)
 * [Examples](https://github.com/go-kratos/examples)
 * [Service Layout](https://github.com/go-kratos/kratos-layout)
 
