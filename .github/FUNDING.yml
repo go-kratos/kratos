@@ -1,3 +1,8 @@
 # These are supported funding model platforms
+<<<<<<< HEAD
 open_collective: go-kratos
 github: [tonybase]
+=======
+
+github: [go-kratos]
+>>>>>>> 2a3c35dfcae14605f930b39cb6ab2f96a6fb945c
