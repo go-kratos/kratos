@@ -92,17 +92,12 @@ func Client(opts ...Option) middleware.Middleware {
 				path   string
 				code   int32
 			)
-			if info, ok := grpc.FromServerContext(ctx); ok {
+			if info, ok := grpc.FromClientContext(ctx); ok {
 				method = "POST"
 				path = info.FullMethod
-			} else if info, ok := http.FromServerContext(ctx); ok {
+			} else if info, ok := http.FromClientContext(ctx); ok {
 				method = info.Request.Method
-				if route := mux.CurrentRoute(info.Request); route != nil {
-					// /path/123 -> /path/{id}
-					path, _ = route.GetPathTemplate()
-				} else {
-					path = info.Request.RequestURI
-				}
+				path = info.Request.RequestURI
 			}
 			startTime := time.Now()
 			reply, err := handler(ctx, req)
