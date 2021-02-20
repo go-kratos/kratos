@@ -36,7 +36,7 @@ Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关框架及
 * Logger：标准日志接口，可方便集成三方 log 库，并可通过 fluentd 收集日志；
 * Metrics：统一指标接口，可以实现各种指标系统，默认集成 Prometheus；
 * Tracing：遵循 OpenTracing 规范定义，以实现微服务链路追踪；
-* Encoding：支持 Accep t和 Content-Type 进行自动选择内容编码；
+* Encoding：支持 Accept 和 Content-Type 进行自动选择内容编码；
 * Transport：通用的 HTTP/gRPC 传输层，实现统一的 Middleware 插件支持；
 * Registry：实现统一注册中心接口，可插件化对接各种注册中心；
 
