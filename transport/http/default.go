@@ -25,9 +25,9 @@ func contentSubtype(contentType string) string {
 	// guaranteed since != baseContentType and has baseContentType prefix
 	switch contentType[len(baseContentType)] {
 	case '/', ';':
-		// this will return true for "application/grpc+" or "application/grpc;"
-		// which the previous validContentType function tested to be valid, so we
-		// just say that no content-subtype is specified in this case
+		if i := strings.Index(contentType, ";"); i != -1 {
+			return contentType[len(baseContentType)+1 : i]
+		}
 		return contentType[len(baseContentType)+1:]
 	default:
 		return ""

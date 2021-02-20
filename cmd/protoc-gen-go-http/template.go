@@ -18,11 +18,6 @@ func Register{{.ServiceType}}HTTPServer(s http1.ServiceRegistrar, srv {{.Service
 {{range .Methods}}
 func _HTTP_{{$.ServiceType}}_{{.Name}}_{{.Num}}(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error) (interface{}, error) {
 	var in {{.Request}}
-{{if ne (len .Vars) 0}}
-	if err := http1.BindVars(req, &in); err != nil {
-		return nil, err
-	}
-{{end}}
 {{if eq .Body ""}}
 	if err := http1.BindForm(req, &in); err != nil {
 		return nil, err
@@ -33,6 +28,11 @@ func _HTTP_{{$.ServiceType}}_{{.Name}}_{{.Num}}(srv interface{}, ctx context.Con
 	}
 {{else}}
 	if err := dec(in{{.Body}}); err != nil {
+		return nil, err
+	}
+{{end}}
+{{if ne (len .Vars) 0}}
+	if err := http1.BindVars(req, &in); err != nil {
 		return nil, err
 	}
 {{end}}
