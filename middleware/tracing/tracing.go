@@ -104,6 +104,10 @@ func Client(opts ...Option) middleware.Middleware {
 				if md, ok := metadata.FromOutgoingContext(ctx); ok {
 					carrier = opentracing.HTTPHeadersCarrier(md)
 					ctx = metadata.NewOutgoingContext(ctx, md)
+				} else {
+					md = metadata.Pairs()
+					carrier = opentracing.HTTPHeadersCarrier(md)
+					ctx = metadata.NewOutgoingContext(ctx, md)
 				}
 			}
 			span := options.tracer.StartSpan(
