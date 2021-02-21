@@ -2,6 +2,7 @@ package logging
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -36,22 +37,30 @@ func Server(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
-				path   string
-				method string
+				path      string
+				method    string
+				params    string
+				component string
 			)
 			if info, ok := http.FromServerContext(ctx); ok {
+				component = "HTTP"
 				path = info.Request.RequestURI
 				method = info.Request.Method
+				params = info.Request.Form.Encode()
 			} else if info, ok := grpc.FromServerContext(ctx); ok {
+				component = "gRPC"
 				path = info.FullMethod
 				method = "POST"
+				params = req.(fmt.Stringer).String()
 			}
 			reply, err := handler(ctx, req)
 			if err != nil {
 				log.Errorw(
 					"kind", "server",
+					"component", component,
 					"path", path,
 					"method", method,
+					"params", params,
 					"code", errors.Code(err),
 					"error", err.Error(),
 				)
@@ -59,8 +68,10 @@ func Server(opts ...Option) middleware.Middleware {
 			}
 			log.Infow(
 				"kind", "server",
+				"component", component,
 				"path", path,
 				"method", method,
+				"params", params,
 				"code", 0,
 			)
 			return reply, nil
@@ -80,18 +91,21 @@ func Client(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
-				component string
 				path      string
 				method    string
+				params    string
+				component string
 			)
 			if info, ok := http.FromClientContext(ctx); ok {
 				component = "HTTP"
 				path = info.Request.RequestURI
 				method = info.Request.Method
+				params = info.Request.Form.Encode()
 			} else if info, ok := grpc.FromClientContext(ctx); ok {
-				component = "gRPC"
 				path = info.FullMethod
 				method = "POST"
+				component = "gRPC"
+				params = req.(fmt.Stringer).String()
 			}
 			reply, err := handler(ctx, req)
 			if err != nil {
@@ -100,6 +114,7 @@ func Client(opts ...Option) middleware.Middleware {
 					"component", component,
 					"path", path,
 					"method", method,
+					"params", params,
 					"code", errors.Code(err),
 					"error", err.Error(),
 				)
@@ -110,6 +125,7 @@ func Client(opts ...Option) middleware.Middleware {
 				"component", component,
 				"path", path,
 				"method", method,
+				"params", params,
 				"code", 0,
 			)
 			return reply, nil
