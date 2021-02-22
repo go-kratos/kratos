@@ -3,8 +3,8 @@ package log
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
-	"os"
 	"sync"
 )
 
@@ -16,9 +16,9 @@ type stdLogger struct {
 }
 
 // NewStdLogger new a std logger with options.
-func NewStdLogger() Logger {
+func NewStdLogger(w io.Writer) Logger {
 	return &stdLogger{
-		log: log.New(os.Stderr, "", log.LstdFlags),
+		log: log.New(w, "", log.LstdFlags),
 		pool: &sync.Pool{
 			New: func() interface{} {
 				return new(bytes.Buffer)

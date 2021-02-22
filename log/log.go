@@ -1,8 +1,10 @@
 package log
 
+import "os"
+
 var (
 	// DefaultLogger is default logger.
-	DefaultLogger Logger = NewStdLogger()
+	DefaultLogger Logger = NewStdLogger(os.Stderr)
 )
 
 // Logger is a logger interface.
