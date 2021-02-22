@@ -5,7 +5,7 @@ import (
 )
 
 func TestLogger(t *testing.T) {
-	logger := NewStdLogger()
+	logger := DefaultLogger
 	Debug(logger).Print("log", "test debug")
 	Info(logger).Print("log", "test info")
 	Warn(logger).Print("log", "test warn")
