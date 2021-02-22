@@ -9,7 +9,7 @@ type Registry interface {
 	// Deregister the registration.
 	Deregister(ctx context.Context, service *ServiceInstance) error
 	// Service return the service instances in memory according to the service name.
-	Service(name string) ([]*ServiceInstance, error)
+	Service(ctx context.Context, name string) ([]*ServiceInstance, error)
 	// Watch creates a watcher according to the service name.
 	Watch(ctx context.Context, name string) (Watcher, error)
 }
@@ -20,7 +20,7 @@ type Watcher interface {
 	// 1.the first time to watch and the service instance list is not empty.
 	// 2.any service instance changes found.
 	// if the above two conditions are not met, it will block until context deadline exceeded or canceled
-	Next(ctx context.Context) ([]*ServiceInstance, error)
+	Next() ([]*ServiceInstance, error)
 	// Close close the watcher.
 	Close() error
 }
