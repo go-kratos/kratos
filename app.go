@@ -81,7 +81,7 @@ func (a *App) Run() error {
 		})
 	}
 	if a.opts.registry != nil {
-		if err := a.opts.registry.Register(a.instance); err != nil {
+		if err := a.opts.registry.Register(context.Background(), a.instance); err != nil {
 			return err
 		}
 	}
@@ -106,7 +106,7 @@ func (a *App) Run() error {
 // Stop gracefully stops the application.
 func (a *App) Stop() error {
 	if a.opts.registry != nil {
-		if err := a.opts.registry.Deregister(a.instance); err != nil {
+		if err := a.opts.registry.Deregister(context.Background(), a.instance); err != nil {
 			return err
 		}
 	}
