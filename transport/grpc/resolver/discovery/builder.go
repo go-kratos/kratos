@@ -1,6 +1,8 @@
 package discovery
 
 import (
+	"context"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"google.golang.org/grpc/resolver"
@@ -36,7 +38,7 @@ func NewBuilder(r registry.Registry, opts ...Option) resolver.Builder {
 }
 
 func (d *builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
-	w, err := d.registry.Watch(target.Endpoint)
+	w, err := d.registry.Watch(context.Background(), target.Endpoint)
 	if err != nil {
 		return nil, err
 	}
