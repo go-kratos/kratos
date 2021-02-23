@@ -144,7 +144,9 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	if s.middleware != nil {
 		h = s.middleware(h)
 	}
-	h(ctx, req.WithContext(ctx))
+	if _, err := h(ctx, req.WithContext(ctx)); err != nil {
+		s.errorEncoder(res, req, err)
+	}
 }
 
 // Endpoint return a real address to registry endpoint.
