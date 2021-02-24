@@ -6,6 +6,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-kratos/kratos/v2)](https://goreportcard.com/report/github.com/go-kratos/kratos/v2)
 [![Discord](https://img.shields.io/discord/766619759214854164?label=chat&logo=discord)](https://discord.gg/BWzJsUJ)
 
+Translations: [English](README.md) | [简体中文](README_zh.md)
+
 # Kratos
 
 Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关框架及工具。  
