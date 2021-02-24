@@ -16,7 +16,7 @@ func TestServer(t *testing.T) {
 	}
 
 	time.AfterFunc(time.Second, func() {
-		defer srv.Stop() // nolint:errcheck
+		defer srv.Stop()
 		testClient(t, srv)
 	})
 	// start server

@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-var nop Logger = new(nopLogger) // nolint:deadcode,varcheck,unused
+var nop Logger = new(nopLogger)
 
 // Helper is a logger helper.
 type Helper struct {

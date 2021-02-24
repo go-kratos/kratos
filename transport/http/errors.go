@@ -8,7 +8,7 @@ import (
 
 var (
 	// References: https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
-	codesMapping = map[int32]int{ // nolint:deadcode,varcheck
+	codesMapping = map[int32]int{
 		0:  http.StatusOK,
 		1:  http.StatusInternalServerError,
 		2:  http.StatusInternalServerError,
@@ -27,7 +27,7 @@ var (
 		15: http.StatusInternalServerError,
 		16: http.StatusUnauthorized,
 	}
-	statusMapping = map[int]int32{  // nolint:unused,deadcode,varcheck
+	statusMapping = map[int]int32{
 		http.StatusOK:                  0,
 		http.StatusBadRequest:          3,
 		http.StatusRequestTimeout:      4,

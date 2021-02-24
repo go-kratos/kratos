@@ -7,13 +7,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// ServerInfo is HTTP server information.
+// ServerInfo is HTTP server infomation.
 type ServerInfo struct {
 	Request  *http.Request
 	Response http.ResponseWriter
 }
 
-type serverKey struct{} // nolint:deadcode,varcheck
+type serverKey struct{}
 
 // NewServerContext returns a new Context that carries value.
 func NewServerContext(ctx context.Context, info ServerInfo) context.Context {
@@ -26,7 +26,7 @@ func FromServerContext(ctx context.Context) (info ServerInfo, ok bool) {
 	return
 }
 
-// ClientInfo is HTTP client information.
+// ClientInfo is HTTP client infomation.
 type ClientInfo struct {
 	Request *http.Request
 }

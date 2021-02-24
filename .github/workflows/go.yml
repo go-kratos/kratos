@@ -7,111 +7,19 @@ on:
     branches: [ main ]
 
 jobs:
+
   build:
-    name: Build on ${{ matrix.os }} - Go${{ matrix.go_version }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        go_version:
-          - 1.15
-          - 1.16
-        os:
-          - ubuntu-latest
-
+    runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
 
-      - name: Set up Go ${{ matrix.go_version }}
-        uses: actions/setup-go@v1
-        with:
-          go-version: ${{ matrix.go_version }}
-        id: go
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
 
-      - name: Set up Env
-        run: |
-          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-          # Cache
-          path: ~/go/pkg/mod
-          # Cache key
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          # An ordered list of keys to use for restoring the cache if no cache hit occurred for key
-          restore-keys: |
-            ${{ runner.os }}-go-
-      - name: Get dependencies
-        run: |
-          go get -v -t -d ./...
-          if [ -f Gopkg.toml ]; then
-              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-              dep ensure
-          fi
-      - name: Build
-        run: go build ./...
-      - name: Test
-        run: go test ./... -coverprofile=coverage.txt -covermode=atomic
-      - name: Coverage
-        run: bash <(curl -s https://codecov.io/bash)
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
-          version: v1.29
+    - name: Build
+      run: go build -v ./...
 
-  scaffold:
-    name: Scaffold Test on ${{ matrix.os }} - Go${{ matrix.go_version }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        go_version:
-          - 1.15
-          - 1.16
-        os:
-          - ubuntu-latest
-    steps:
-      - name: Set up Go ${{ matrix.go_version }}
-        uses: actions/setup-go@v1
-        with:
-          go-version: ${{ matrix.go_version }}
-        id: go
-      - name: Set up Env
-        run: |
-          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-          # Cache
-          path: ~/go/pkg/mod
-          # Cache key
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          # An ordered list of keys to use for restoring the cache if no cache hit occurred for key
-          restore-keys: |
-            ${{ runner.os }}-go-
-      - name: Get dependencies
-        run: |
-          go get -v -t -d ./...
-          if [ -f Gopkg.toml ]; then
-              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-              dep ensure
-          fi
-          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.15.2/protoc-3.15.2-linux-x86_64.zip
-          unzip protoc-3.15.2-linux-x86_64.zip
-          chmod +x bin/protoc
-          sudo mv bin/protoc /usr/local/bin
-          sudo mv include /usr/local/bin
-      - name: Run
-        run: |
-          cd cmd/kratos/ && go install
-          mkdir -p test_project
-          cd test_project
-          kratos new helloworld
-          cd helloworld
-          make init
-          make proto
-          mkdir -p bin/ && go build -o ./bin/ ./...
+    - name: Test
+      run: go test -v ./...

@@ -2,7 +2,7 @@ package grpc
 
 import "context"
 
-// ServerInfo is gRPC server information.
+// ServerInfo is gRPC server infomation.
 type ServerInfo struct {
 	// Server is the service implementation the user provides. This is read-only.
 	Server interface{}
@@ -23,13 +23,13 @@ func FromServerContext(ctx context.Context) (info ServerInfo, ok bool) {
 	return
 }
 
-// ClientInfo is gRPC server information.
+// ClientInfo is gRPC server infomation.
 type ClientInfo struct {
 	// FullMethod is the full RPC method string, i.e., /package.service/method.
 	FullMethod string
 }
 
-type clientKey struct{} // nolint
+type clientKey struct{}
 
 // NewClientContext returns a new Context that carries value.
 func NewClientContext(ctx context.Context, info ClientInfo) context.Context {
