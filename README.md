@@ -48,7 +48,7 @@ Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关框架及
 
 ### Installing
 ```
-go get github.com/go-kratos/kratos/cmd/kratos/v2
+go get github.com/go-kratos/kratos/cmd/kratos/v2@latest
 ```
 ### Create a service
 ```
