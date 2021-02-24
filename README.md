@@ -1,10 +1,12 @@
-![kratos](docs/images/kratos.png)
+![kratos](docs/images/kratos.png) 
 
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
 [![Build Status](https://github.com/go-kratos/kratos/workflows/Go/badge.svg)](https://github.com/go-kratos/kratos/actions)
 [![GoDoc](https://pkg.go.dev/badge/github.com/go-kratos/kratos/v2)](https://pkg.go.dev/github.com/go-kratos/kratos/v2)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-kratos/kratos/v2)](https://goreportcard.com/report/github.com/go-kratos/kratos/v2)
 [![Discord](https://img.shields.io/discord/766619759214854164?label=chat&logo=discord)](https://discord.gg/BWzJsUJ)
+
+Translations: [English](README.md) | [简体中文](README_zh.md)
 
 # Kratos
 Kratos is a microservice-oriented governance framework implements by golang, which offers convenient capabilities to help you quickly build a bulletproof application from scratch.
@@ -98,10 +100,6 @@ app.Run()
 * [Wechat Group](https://github.com/go-kratos/kratos/issues/682)
 * [Discord Group](https://discord.gg/BWzJsUJ)
 * QQ Group: 716486124
-
-## Sponsors and Backers
-
-![kratos](docs/images/alipay.png)
 
 ## License
 Kratos is MIT licensed. See the [LICENSE](./LICENSE) file for details.
