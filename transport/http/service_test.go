@@ -52,7 +52,7 @@ func TestService(t *testing.T) {
 	srv.RegisterService(sd, svc)
 
 	time.AfterFunc(time.Second, func() {
-		defer srv.Stop()
+		defer srv.Stop() // nolint:errcheck
 		testServiceClient(t, srv)
 	})
 
