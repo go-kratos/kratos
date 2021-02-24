@@ -35,7 +35,7 @@ type Config interface {
 }
 
 type config struct {
-	opts      options
+	opts      Options
 	reader    Reader
 	cached    sync.Map
 	observers sync.Map
@@ -43,9 +43,9 @@ type config struct {
 	log       *log.Helper
 }
 
-// New new a config with options.
+// New new a config with Options.
 func New(opts ...Option) Config {
-	options := options{
+	options := Options{
 		logger: log.DefaultLogger,
 		decoder: func(kv *KeyValue, v map[string]interface{}) error {
 			return json.Unmarshal(kv.Value, &v)

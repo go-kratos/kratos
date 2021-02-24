@@ -16,11 +16,11 @@ type Reader interface {
 }
 
 type reader struct {
-	opts   options
+	opts   Options
 	values map[string]interface{}
 }
 
-func newReader(opts options) Reader {
+func newReader(opts Options) Reader {
 	return &reader{
 		opts:   opts,
 		values: make(map[string]interface{}),
