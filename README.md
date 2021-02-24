@@ -21,13 +21,13 @@ Kratos boosts your productivity. With the integration of excellent resources and
 
 ### Principles
 
-* **Simple**: appropriate design, plain and simple code.
-* **General**: cover the various utilities for business development.
-* **Reliable**: higher testability and greater test coverage of base libs validated in the production environment.
-* **Robust**: base libs are designed reasonably to reduce misuse.
+* **Simple**: Appropriate design, plain and simple code.
+* **General**: Cover the various utilities for business development.
+* **Reliable**: Higher testability and greater test coverage of base libs validated in the production environment.
+* **Robust**: Base libs are designed reasonably to reduce misuse.
 * **High-performance**: We give you optimal performance without using the hack-way approach like adding the *unsafe* package and guarantee compatibility and stability at the same time.
-* **Expandable**: appropriate API design, you can expand utilities such as base libs to meet your further requirements.
-* **Fault-tolerance**: designed against failure, enhance the understanding and exercising of SRE within Kratos to achieve more robustness.
+* **Expandable**: Appropriate API design, you can expand utilities such as base libs to meet your further requirements.
+* **Fault-tolerance**: Designed against failure, enhance the understanding and exercising of SRE within Kratos to achieve more robustness.
 * **Toolchain**: Includes an extensive toolchain, such as cache code generation, lint tools, etc.
 
 ## Features
