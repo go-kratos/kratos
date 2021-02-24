@@ -106,8 +106,8 @@ jobs:
       - name: Run
         run: |
           go install ./...
-          mkdir -p /project
-          cd /project
+          mkdir -p test_project
+          cd test_project
           kratos new helloworld
           cd helloworld
           make init
