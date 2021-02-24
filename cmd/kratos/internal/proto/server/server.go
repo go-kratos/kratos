@@ -66,22 +66,23 @@ func run(cmd *cobra.Command, args []string) {
 			res = append(res, cs)
 		}),
 	)
-	fmt.Println(targetDir)
+	if _, err := os.Stat(targetDir); os.IsNotExist(err) {
+		fmt.Printf("Target directory: %s does not exsits\n", targetDir)
+		return
+	}
 	for _, s := range res {
 		to := path.Join(targetDir, strings.ToLower(s.Service)+".go")
-		_, err := os.Stat(to)
-		if !os.IsNotExist(err) {
+		if _, err := os.Stat(to); !os.IsNotExist(err) {
 			fmt.Fprintf(os.Stderr, "%s already exists: %s\n", s.Service, to)
-			continue
-		}
-		if err = os.MkdirAll(targetDir, os.ModeDir); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to create file directory: %s\n", targetDir)
 			continue
 		}
 		b, err := s.execute()
 		if err != nil {
 			log.Fatal(err)
 		}
-		ioutil.WriteFile(to, b, 0644)
+		if err := ioutil.WriteFile(to, b, 0644); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(to)
 	}
 }
