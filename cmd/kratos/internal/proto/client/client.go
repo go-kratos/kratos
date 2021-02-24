@@ -22,6 +22,10 @@ var (
 )
 
 func run(cmd *cobra.Command, args []string) {
+	if len(args) == 0 {
+		fmt.Println("Please enter the proto file or directory")
+		return
+	}
 	var (
 		err   error
 		proto = strings.TrimSpace(args[0])
