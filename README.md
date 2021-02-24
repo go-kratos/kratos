@@ -58,17 +58,16 @@ kratos new helloworld
 cd helloworld
 # 生成proto模板
 kratos proto add api/helloworld/helloworld.proto
-# 生成service模板
-kratos proto service api/helloworld/helloworld.proto -t internal/service
+# 生成proto源码
+kratos proto client api/helloworld/helloworld.proto
+# 生成server模板
+kratos proto server api/helloworld/helloworld.proto -t internal/service
 
-# 安装生成工具
-make init
-# 生成api下所有proto文件
-make proto
-# 编译cmd下所有main文件
-make build
-# 进行单元测试
-make test
+# 编译成可执行文件
+cd /cmd/helloworld
+go build
+# 运行程序
+./helloword
 ```
 
 ### Kratos Boot
