@@ -105,7 +105,7 @@ jobs:
           sudo mv include /usr/local/bin
       - name: Run
         run: |
-          go install ./...
+          cd cmd/kratos/ && go install
           mkdir -p test_project
           cd test_project
           kratos new helloworld
