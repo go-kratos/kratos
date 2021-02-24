@@ -1,13 +1,13 @@
 package client
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 	"github.com/spf13/cobra"
 )
 
@@ -26,6 +26,12 @@ func run(cmd *cobra.Command, args []string) {
 		err   error
 		proto = strings.TrimSpace(args[0])
 	)
+	if _, err = exec.LookPath("protoc-gen-go-http"); err != nil {
+		// update the kratos plugins
+		if err := exec.Command("kratos", "upgrade").Run(); err != nil {
+			fmt.Println(err)
+		}
+	}
 	if strings.HasSuffix(proto, ".proto") {
 		err = generate(proto)
 	} else {
@@ -48,18 +54,13 @@ func walk(dir string) error {
 	})
 }
 
-func kratosHome() string {
-	// $GOPATH/src/github.com/go-kratos/kratos
-	return filepath.Join(os.Getenv("GOPATH"), "src", "github.com", "go-kratos", "kratos")
-}
-
 // generate is used to execute the generate command for the specified proto file
 func generate(proto string) error {
 	path, name := filepath.Split(proto)
 	fd := exec.Command("protoc", []string{
 		"--proto_path=.",
-		"--proto_path=" + filepath.Join(kratosHome(), "api"),
-		"--proto_path=" + filepath.Join(kratosHome(), "third_party"),
+		"--proto_path=" + filepath.Join(base.KratosMod(), "api"),
+		"--proto_path=" + filepath.Join(base.KratosMod(), "third_party"),
 		"--proto_path=" + filepath.Join(os.Getenv("GOPATH"), "src"),
 		"--go_out=paths=source_relative:.",
 		"--go-grpc_out=paths=source_relative:.",
@@ -67,12 +68,11 @@ func generate(proto string) error {
 		"--go-errors_out=paths=source_relative:.",
 		name,
 	}...)
-	stderr := &bytes.Buffer{}
-	fd.Stdout = stderr
-	fd.Stderr = stderr
+	fd.Stdout = os.Stdout
+	fd.Stderr = os.Stderr
 	fd.Dir = path
 	if err := fd.Run(); err != nil {
-		return fmt.Errorf("%s: %s", proto, stderr.String())
+		return err
 	}
 	fmt.Printf("proto: %s\n", proto)
 	return nil
