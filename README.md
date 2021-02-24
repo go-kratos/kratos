@@ -63,11 +63,12 @@ kratos proto client api/helloworld/helloworld.proto
 # 生成server模板
 kratos proto server api/helloworld/helloworld.proto -t internal/service
 
+# 生成所有proto源码、wire等等
+go generate ./...
 # 编译成可执行文件
-cd /cmd/helloworld
-go build
+go build -o ./bin/ ./...
 # 运行程序
-./helloword
+./bin/helloworld -conf configs/
 ```
 
 ### Kratos Boot
