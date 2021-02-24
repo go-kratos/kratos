@@ -7,38 +7,38 @@
 [![Discord](https://img.shields.io/discord/766619759214854164?label=chat&logo=discord)](https://discord.gg/BWzJsUJ)
 
 # Kratos
+Kratos is a microservice-oriented governance framework implements by golang, which offers convenient capabilities to help you quickly build a bulletproof application from scratch.
 
-Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关框架及工具。  
 
-> 名字来源于:《战神》游戏以希腊神话为背景，讲述由凡人成为战神的奎托斯（Kratos）成为战神并展开弑神屠杀的冒险历程。
+>The name is inspired by the game God of War which is based on Greek myths, tells the Kratos from mortals to become a God of War and launches the adventure of killing god.
+
 
 ## Goals
 
-我们致力于提供完整的微服务研发体验，整合相关框架及工具后，微服务治理相关部分可对整体业务开发周期无感，从而更加聚焦于业务交付。对每位开发者而言，整套 Kratos 框架也是不错的学习仓库，可以了解和参考到微服务方面的技术积累和经验。
+Kratos boosts your productivity. With the integration of excellent resources and further support, you can get rid of most issues you might encounter in the field of distributed systems and software engineering, so that you can focus on business delivery. For each developer, Kratos is an ideal one for learning as well. You can navigate the diverse knowledge of microservice and accumulate engineering experience.
 
 ### Principles
 
-* 简单：不过度设计，代码平实简单；
-* 通用：通用业务开发所需要的基础库的功能；
-* 高效：提高业务迭代的效率；
-* 稳定：基础库可测试性高，覆盖率高，有线上实践安全可靠；
-* 健壮：通过良好的基础库设计，减少错用；
-* 高性能：性能高，但不特定为了性能做 hack 优化，引入 unsafe ；
-* 扩展性：良好的接口设计，来扩展实现，或者通过新增基础库目录来扩展功能；
-* 容错性：为失败设计，大量引入对 SRE 的理解，鲁棒性高；
-* 工具链：包含大量工具链，比如 cache 代码生成，lint 工具等等；
+* **Simple**: appropriate design, plain and simple code.
+* **General**: cover the various utilities for business development.
+* **Reliable**: higher testability and greater test coverage of base libs validated in the production environment.
+* **Robust**: base libs are designed reasonably to reduce misuse.
+* **High-performance**: We give you optimal performance without using the hack-way approach like adding the *unsafe* package and guarantee compatibility and stability at the same time.
+* **Expandable**: appropriate API design, you can expand utilities such as base libs to meet your further requirements.
+* **Fault-tolerance**: designed against failure, enhance the understanding and exercising of SRE within Kratos to achieve more robustness.
+* **Toolchain**: Includes an extensive toolchain, such as cache code generation, lint tools, etc.
 
 ## Features
-* APIs：协议通信以 HTTP/gRPC 为基础，通过 Protobuf 进行定义；
-* Errors：通过 Protobuf 的 Enum 作为错误码定义，以及工具生成判定接口；
-* Metadata：在协议通信 HTTP/gRPC 中，通过 Middleware 规范化服务元信息传递；
-* Config：支持多数据源方式，进行配置合并铺平，通过 Atomic 方式支持动态配置；
-* Logger：标准日志接口，可方便集成三方 log 库，并可通过 fluentd 收集日志；
-* Metrics：统一指标接口，可以实现各种指标系统，默认集成 Prometheus；
-* Tracing：遵循 OpenTracing 规范定义，以实现微服务链路追踪；
-* Encoding：支持 Accept 和 Content-Type 进行自动选择内容编码；
-* Transport：通用的 HTTP/gRPC 传输层，实现统一的 Middleware 插件支持；
-* Registry：实现统一注册中心接口，可插件化对接各种注册中心；
+* APIs: HTTP/gRPC based transport and Protobuf defined communication protocol.
+* Errors: We use ProtoBuf Enum to define error code and generate error handle code.
+* Metadata: Normalize the service metadata transmission by excellent middleware.
+* Config:  Multi-data source Support, well arranged, dynamic configuration via *Atomic* package.
+* Logger: Standard log API, easily integrate with third-party log lib, *Fluentd* logs collection.
+* Metrics: *Prometheus* integration by default. Furthermore, with the unified Metrics interface, you can implement your metrics system more flexible
+* Tracing: Complete micro-service link tracing followed by *OpenTracing* specification.
+* Encoding: Support *Accept* and *Content-Type* for auto content encoding.
+* Transport: Common HTTP/ GRPC transport layer offers you powerful Middleware support.
+ * Registry: One pluggable API for the different registry.
 
 ## Getting Started
 ### Required
@@ -52,22 +52,22 @@ go get github.com/go-kratos/kratos/cmd/kratos/v2@latest
 ```
 ### Create a service
 ```
-# 创建项目模板
+# create project template
 kratos new helloworld
 
 cd helloworld
-# 生成proto模板
+# generate Proto template
 kratos proto add api/helloworld/helloworld.proto
-# 生成proto源码
+# generate Proto source code
 kratos proto client api/helloworld/helloworld.proto
-# 生成server模板
+# generate server template
 kratos proto server api/helloworld/helloworld.proto -t internal/service
 
-# 生成所有proto源码、wire等等
+# Generate all proto source code, wire, etc.
 go generate ./...
-# 编译成可执行文件
+# compile
 go build -o ./bin/ ./...
-# 运行程序
+# run
 ./bin/helloworld -conf ./configs
 ```
 
