@@ -72,6 +72,7 @@ func errorEncode(err error) error {
 	if !ok {
 		se = &errors.StatusError{
 			Code: 2,
+			Message: err.Error(),
 		}
 	}
 	gs := status.Newf(codes.Code(se.Code), "%s: %s", se.Reason, se.Message)
