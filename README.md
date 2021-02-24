@@ -68,7 +68,7 @@ go generate ./...
 # 编译成可执行文件
 go build -o ./bin/ ./...
 # 运行程序
-./bin/helloworld -conf configs/
+./bin/helloworld -conf ./configs
 ```
 
 ### Kratos Boot
