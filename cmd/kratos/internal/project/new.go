@@ -1,4 +1,4 @@
-package new
+package project
 
 import (
 	"context"
@@ -18,8 +18,8 @@ type Project struct {
 	Name string
 }
 
-// Generate generate template project.
-func (p *Project) Generate(ctx context.Context, dir string) error {
+// New new a project from remote repo.
+func (p *Project) New(ctx context.Context, dir string) error {
 	to := path.Join(dir, p.Name)
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
 		return fmt.Errorf("%s already exists", p.Name)

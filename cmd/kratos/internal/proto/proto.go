@@ -2,8 +2,8 @@ package proto
 
 import (
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto/add"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto/service"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto/source"
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto/client"
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto/server"
 
 	"github.com/spf13/cobra"
 )
@@ -18,8 +18,8 @@ var CmdProto = &cobra.Command{
 
 func init() {
 	CmdProto.AddCommand(add.CmdAdd)
-	CmdProto.AddCommand(source.CmdSource)
-	CmdProto.AddCommand(service.CmdService)
+	CmdProto.AddCommand(client.CmdClient)
+	CmdProto.AddCommand(server.CmdServer)
 }
 
 func run(cmd *cobra.Command, args []string) {

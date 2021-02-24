@@ -1,4 +1,4 @@
-package new
+package project
 
 import (
 	"context"
@@ -29,7 +29,7 @@ func run(cmd *cobra.Command, args []string) {
 		return
 	}
 	p := &Project{Name: args[0]}
-	if err := p.Generate(ctx, wd); err != nil {
+	if err := p.New(ctx, wd); err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
 		return
 	}
