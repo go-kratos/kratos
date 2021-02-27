@@ -134,7 +134,7 @@ func (s *Server) PrefixHanlde(prefix string, h http.Handler) {
 func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx, cancel := context.WithTimeout(req.Context(), s.timeout)
 	defer cancel()
-	ctx = transport.NewContext(ctx, transport.Transport{Kind: "HTTP"})
+	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP})
 	ctx = NewServerContext(ctx, ServerInfo{Request: req, Response: res})
 
 	h := func(ctx context.Context, req interface{}) (interface{}, error) {

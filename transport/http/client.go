@@ -90,7 +90,7 @@ func (t *baseTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if t.userAgent != "" && req.Header.Get("User-Agent") == "" {
 		req.Header.Set("User-Agent", t.userAgent)
 	}
-	ctx := transport.NewContext(req.Context(), transport.Transport{Kind: "HTTP"})
+	ctx := transport.NewContext(req.Context(), transport.Transport{Kind: transport.KindHTTP})
 	ctx = NewClientContext(ctx, ClientInfo{Request: req})
 	ctx, cancel := context.WithTimeout(ctx, t.timeout)
 	defer cancel()
