@@ -38,10 +38,10 @@ func WithMiddleware(m middleware.Middleware) ClientOption {
 	}
 }
 
-// WithDiscovery with client registry.
-func WithDiscovery(r registry.Discoverer) ClientOption {
+// WithDiscoverer with client registry.
+func WithDiscoverer(d registry.Discoverer) ClientOption {
 	return func(o *clientOptions) {
-		o.discovery = r
+		o.discoverer = d
 	}
 }
 
@@ -57,7 +57,7 @@ type clientOptions struct {
 	endpoint   string
 	timeout    time.Duration
 	middleware middleware.Middleware
-	discovery  registry.Discoverer
+	discoverer registry.Discoverer
 	grpcOpts   []grpc.DialOption
 }
 
@@ -86,8 +86,8 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		grpc.WithTimeout(options.timeout),
 		grpc.WithUnaryInterceptor(UnaryClientInterceptor(options.middleware)),
 	}
-	if options.discovery != nil {
-		grpc.WithResolvers(discovery.NewBuilder(options.discovery))
+	if options.discoverer != nil {
+		grpc.WithResolvers(discovery.NewBuilder(options.discoverer))
 	}
 	if insecure {
 		grpcOpts = append(grpcOpts, grpc.WithInsecure())

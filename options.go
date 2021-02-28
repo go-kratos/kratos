@@ -23,8 +23,8 @@ type options struct {
 	ctx  context.Context
 	sigs []os.Signal
 
-	logger   log.Logger
-	registry registry.Registrar
+	logger    log.Logger
+	registrar registry.Registrar
 
 	servers []transport.Server
 }
@@ -69,9 +69,9 @@ func Logger(logger log.Logger) Option {
 	return func(o *options) { o.logger = logger }
 }
 
-// Registry with service registry.
-func Registry(r registry.Registrar) Option {
-	return func(o *options) { o.registry = r }
+// Registrar with service registry.
+func Registrar(r registry.Registrar) Option {
+	return func(o *options) { o.registrar = r }
 }
 
 // Server with transport servers.
