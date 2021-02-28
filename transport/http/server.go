@@ -21,7 +21,10 @@ const loggerName = "transport/http"
 
 var _ transport.Server = (*Server)(nil)
 
-// DecodeRequestFunc deocder request func.
+// HandlerFunc is handler middleware.
+type HandlerFunc func(h http.Handler) http.Handler
+
+// DecodeRequestFunc is deocder request func.
 type DecodeRequestFunc func(req *http.Request, v interface{}) error
 
 // EncodeResponseFunc is encode response func.
@@ -61,6 +64,13 @@ func Logger(logger log.Logger) ServerOption {
 	}
 }
 
+// Handler with handler func.
+func Handler(h HandlerFunc) ServerOption {
+	return func(s *Server) {
+		s.handler = h
+	}
+}
+
 // Middleware with server middleware option.
 func Middleware(m middleware.Middleware) ServerOption {
 	return func(s *Server) {
@@ -82,6 +92,7 @@ type Server struct {
 	network         string
 	address         string
 	timeout         time.Duration
+	handler         HandlerFunc
 	middleware      middleware.Middleware
 	requestDecoder  DecodeRequestFunc
 	responseEncoder EncodeResponseFunc
@@ -107,6 +118,9 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 	srv.router = mux.NewRouter()
 	srv.Server = &http.Server{Handler: srv}
+	if srv.handler != nil {
+		srv.Handler = srv.handler(srv)
+	}
 	return srv
 }
 
@@ -120,14 +134,14 @@ func (s *Server) Handle(path string, h http.Handler) {
 	s.router.Handle(path, h)
 }
 
+// HanldePrefix registers a new route with a matcher for the URL path prefix.
+func (s *Server) HanldePrefix(prefix string, h http.Handler) {
+	s.router.PathPrefix(prefix).Handler(h)
+}
+
 // HandleFunc registers a new route with a matcher for the URL path.
 func (s *Server) HandleFunc(path string, h http.HandlerFunc) {
 	s.router.HandleFunc(path, h)
-}
-
-// PrefixHanlde  registers a new route with a matcher for the URL path prefix.
-func (s *Server) PrefixHanlde(prefix string, h http.Handler) {
-	s.router.PathPrefix(prefix).Handler(h)
 }
 
 // ServeHTTP should write reply headers and data to the ResponseWriter and then return.
@@ -136,17 +150,7 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	defer cancel()
 	ctx = transport.NewContext(ctx, transport.Transport{Kind: "HTTP"})
 	ctx = NewServerContext(ctx, ServerInfo{Request: req, Response: res})
-
-	h := func(ctx context.Context, req interface{}) (interface{}, error) {
-		s.router.ServeHTTP(res, req.(*http.Request))
-		return res, nil
-	}
-	if s.middleware != nil {
-		h = s.middleware(h)
-	}
-	if _, err := h(ctx, req.WithContext(ctx)); err != nil {
-		s.errorEncoder(res, req, err)
-	}
+	s.router.ServeHTTP(res, req)
 }
 
 // Endpoint return a real address to registry endpoint.
