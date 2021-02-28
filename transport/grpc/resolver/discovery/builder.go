@@ -21,12 +21,12 @@ func WithLogger(logger log.Logger) Option {
 }
 
 type builder struct {
-	registry registry.Registry
+	registry registry.Discovery
 	logger   log.Logger
 }
 
 // NewBuilder creates a builder which is used to factory registry resolvers.
-func NewBuilder(r registry.Registry, opts ...Option) resolver.Builder {
+func NewBuilder(r registry.Discovery, opts ...Option) resolver.Builder {
 	b := &builder{
 		registry: r,
 		logger:   log.DefaultLogger,
