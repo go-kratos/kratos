@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/internal/host"
+	"github.com/go-kratos/kratos/v2/middleware"
 )
 
 type testRequest struct {
@@ -25,16 +26,15 @@ func (s *testService) SayHello(ctx context.Context, req *testRequest) (*testRepl
 }
 
 func TestService(t *testing.T) {
-	h := func(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error) (interface{}, error) {
+	h := func(srv interface{}, req *http.Request, dec func(interface{}) error, m middleware.Middleware) (interface{}, error) {
 		var in testRequest
 		if err := dec(&in); err != nil {
 			return nil, err
 		}
-		out, err := srv.(*testService).SayHello(ctx, &in)
-		if err != nil {
-			return nil, err
+		h := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.(*testService).SayHello(ctx, &in)
 		}
-		return out, nil
+		return h(req.Context(), &in)
 	}
 	sd := &ServiceDesc{
 		ServiceName: "helloworld.Greeter",

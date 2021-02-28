@@ -1,7 +1,6 @@
 package http
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -10,7 +9,7 @@ import (
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
 const SupportPackageIsVersion1 = true
 
-type methodHandler func(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error, m middleware.Middleware) (out interface{}, err error)
+type methodHandler func(srv interface{}, req *http.Request, dec func(interface{}) error, m middleware.Middleware) (out interface{}, err error)
 
 // MethodDesc represents a Proto service's method specification.
 type MethodDesc struct {
@@ -36,7 +35,7 @@ func (s *Server) RegisterService(desc *ServiceDesc, impl interface{}) {
 	for _, m := range desc.Methods {
 		h := m.Handler
 		s.router.HandleFunc(m.Path, func(res http.ResponseWriter, req *http.Request) {
-			out, err := h(impl, req.Context(), req, func(v interface{}) error {
+			out, err := h(impl, req, func(v interface{}) error {
 				return s.requestDecoder(req, v)
 			}, s.middleware)
 			if err != nil {
