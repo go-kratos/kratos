@@ -24,8 +24,9 @@ type options struct {
 	sigs []os.Signal
 
 	logger   log.Logger
-	registry registry.Registry
-	servers  []transport.Server
+	registry registry.Registrar
+
+	servers []transport.Server
 }
 
 // ID with service id.
@@ -69,7 +70,7 @@ func Logger(logger log.Logger) Option {
 }
 
 // Registry with service registry.
-func Registry(r registry.Registry) Option {
+func Registry(r registry.Registrar) Option {
 	return func(o *options) { o.registry = r }
 }
 

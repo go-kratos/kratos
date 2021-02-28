@@ -2,16 +2,20 @@ package registry
 
 import "context"
 
-// Registry is service registry.
-type Registry interface {
+// Registrar is service registrar.
+type Registrar interface {
 	// Register the registration.
 	Register(ctx context.Context, service *ServiceInstance) error
 	// Deregister the registration.
 	Deregister(ctx context.Context, service *ServiceInstance) error
+}
+
+// Discoverer is service discovery.
+type Discoverer interface {
 	// Service return the service instances in memory according to the service name.
-	Service(ctx context.Context, name string) ([]*ServiceInstance, error)
+	Fetch(ctx context.Context, serviceName string) ([]*ServiceInstance, error)
 	// Watch creates a watcher according to the service name.
-	Watch(ctx context.Context, name string) (Watcher, error)
+	Watch(ctx context.Context, serviceName string) (Watcher, error)
 }
 
 // Watcher is service watcher.
