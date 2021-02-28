@@ -34,6 +34,9 @@ func TestService(t *testing.T) {
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.(*testService).SayHello(ctx, &in)
 		}
+		if m != nil {
+			h = m(h)
+		}
 		return h(req.Context(), &in)
 	}
 	sd := &ServiceDesc{
