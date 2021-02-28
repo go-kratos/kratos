@@ -39,7 +39,7 @@ func WithMiddleware(m middleware.Middleware) ClientOption {
 }
 
 // WithDiscovery with client registry.
-func WithDiscovery(r registry.Discovery) ClientOption {
+func WithDiscovery(r registry.Discoverer) ClientOption {
 	return func(o *clientOptions) {
 		o.discovery = r
 	}
@@ -57,7 +57,7 @@ type clientOptions struct {
 	endpoint   string
 	timeout    time.Duration
 	middleware middleware.Middleware
-	discovery  registry.Discovery
+	discovery  registry.Discoverer
 	grpcOpts   []grpc.DialOption
 }
 
