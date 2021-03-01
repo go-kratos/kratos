@@ -21,9 +21,6 @@ const loggerName = "transport/http"
 
 var _ transport.Server = (*Server)(nil)
 
-// HandlerFunc is handler middleware.
-type HandlerFunc func(h http.Handler) http.Handler
-
 // DecodeRequestFunc is deocder request func.
 type DecodeRequestFunc func(req *http.Request, v interface{}) error
 
@@ -64,13 +61,6 @@ func Logger(logger log.Logger) ServerOption {
 	}
 }
 
-// Handler with handler func.
-func Handler(h HandlerFunc) ServerOption {
-	return func(s *Server) {
-		s.handler = h
-	}
-}
-
 // Middleware with server middleware option.
 func Middleware(m middleware.Middleware) ServerOption {
 	return func(s *Server) {
@@ -92,7 +82,6 @@ type Server struct {
 	network         string
 	address         string
 	timeout         time.Duration
-	handler         HandlerFunc
 	middleware      middleware.Middleware
 	requestDecoder  DecodeRequestFunc
 	responseEncoder EncodeResponseFunc
@@ -118,9 +107,6 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 	srv.router = mux.NewRouter()
 	srv.Server = &http.Server{Handler: srv}
-	if srv.handler != nil {
-		srv.Handler = srv.handler(srv)
-	}
 	return srv
 }
 
