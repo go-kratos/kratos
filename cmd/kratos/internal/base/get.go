@@ -1,6 +1,7 @@
 package base
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 )
@@ -8,6 +9,7 @@ import (
 // GoGet go get path.
 func GoGet(path ...string) error {
 	for _, p := range path {
+		fmt.Printf("go get -u %s\n", p)
 		cmd := exec.Command("go", "get", "-u", p)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
