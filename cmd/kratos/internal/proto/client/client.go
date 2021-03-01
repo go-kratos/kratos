@@ -30,10 +30,14 @@ func run(cmd *cobra.Command, args []string) {
 		err   error
 		proto = strings.TrimSpace(args[0])
 	)
-	if _, err = exec.LookPath("protoc-gen-go-http"); err != nil {
+	if err = look("protoc-gen-go", "protoc-gen-go-grpc", "protoc-gen-go-http", "protoc-gen-go-errors"); err != nil {
 		// update the kratos plugins
-		if err := exec.Command("kratos", "upgrade").Run(); err != nil {
+		cmd := exec.Command("kratos", "upgrade")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if cmd.Run(); err != nil {
 			fmt.Println(err)
+			return
 		}
 	}
 	if strings.HasSuffix(proto, ".proto") {
@@ -44,6 +48,15 @@ func run(cmd *cobra.Command, args []string) {
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+
+func look(name ...string) error {
+	for _, n := range name {
+		if _, err := exec.LookPath(n); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func walk(dir string) error {
