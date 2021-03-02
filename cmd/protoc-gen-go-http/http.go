@@ -107,8 +107,14 @@ func buildHTTPRule(m *protogen.Method, rule *annotations.HttpRule) *methodDesc {
 	body = rule.Body
 	responseBody = rule.ResponseBody
 	md := buildMethodDesc(m, method, path)
+	if body == "*" {
+		body = ""
+	}
 	if body != "" {
 		md.Body = "." + camelCaseVars(body)
+	}
+	if responseBody == "*" {
+		responseBody = ""
 	}
 	if responseBody != "" {
 		md.ResponseBody = "." + camelCaseVars(responseBody)

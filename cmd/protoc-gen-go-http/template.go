@@ -22,7 +22,7 @@ func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.Handl
 	{{range .Methods}}
 	r.HandleFunc("{{.Path}}", func(w http.ResponseWriter, req *http.Request) {
 		var in {{.Request}}
-		if err := h.Decode(req, &in); err != nil {
+		if err := h.Decode(req, &in{{.Body}}); err != nil {
 			h.Error(w, err)
 			return
 		}
