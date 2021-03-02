@@ -10,8 +10,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport"
 
 	"github.com/gorilla/mux"
@@ -20,15 +18,6 @@ import (
 const loggerName = "transport/http"
 
 var _ transport.Server = (*Server)(nil)
-
-// DecodeRequestFunc is deocder request func.
-type DecodeRequestFunc func(req *http.Request, v interface{}) error
-
-// EncodeResponseFunc is encode response func.
-type EncodeResponseFunc func(res http.ResponseWriter, req *http.Request, v interface{}) error
-
-// EncodeErrorFunc is encode error func.
-type EncodeErrorFunc func(res http.ResponseWriter, req *http.Request, err error)
 
 // ServerOption is HTTP server option.
 type ServerOption func(*Server)
@@ -61,46 +50,24 @@ func Logger(logger log.Logger) ServerOption {
 	}
 }
 
-// Middleware with server middleware option.
-func Middleware(m middleware.Middleware) ServerOption {
-	return func(s *Server) {
-		s.middleware = m
-	}
-}
-
-// ErrorEncoder with error handler option.
-func ErrorEncoder(fn EncodeErrorFunc) ServerOption {
-	return func(s *Server) {
-		s.errorEncoder = fn
-	}
-}
-
 // Server is a HTTP server wrapper.
 type Server struct {
 	*http.Server
-	lis             net.Listener
-	network         string
-	address         string
-	timeout         time.Duration
-	middleware      middleware.Middleware
-	requestDecoder  DecodeRequestFunc
-	responseEncoder EncodeResponseFunc
-	errorEncoder    EncodeErrorFunc
-	router          *mux.Router
-	log             *log.Helper
+	lis     net.Listener
+	network string
+	address string
+	timeout time.Duration
+	router  *mux.Router
+	log     *log.Helper
 }
 
 // NewServer creates a HTTP server by options.
 func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
-		network:         "tcp",
-		address:         ":0",
-		timeout:         time.Second,
-		requestDecoder:  defaultRequestDecoder,
-		responseEncoder: defaultResponseEncoder,
-		errorEncoder:    defaultErrorEncoder,
-		middleware:      recovery.Recovery(),
-		log:             log.NewHelper(loggerName, log.DefaultLogger),
+		network: "tcp",
+		address: ":0",
+		timeout: time.Second,
+		log:     log.NewHelper(loggerName, log.DefaultLogger),
 	}
 	for _, o := range opts {
 		o(srv)

@@ -2,11 +2,10 @@ package http
 
 import (
 	"context"
-	"io/ioutil"
+	"encoding/json"
 	"net/http"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -115,22 +114,13 @@ func Do(client *http.Client, req *http.Request, target interface{}) error {
 	if err != nil {
 		return err
 	}
-	data, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
 	defer res.Body.Close()
-	subtype := contentSubtype(res.Header.Get("content-type"))
-	codec := encoding.GetCodec(subtype)
-	if codec == nil {
-		codec = encoding.GetCodec("json")
-	}
 	if res.StatusCode < 200 || res.StatusCode > 299 {
 		se := &errors.StatusError{}
-		if err := codec.Unmarshal(data, se); err != nil {
+		if err := json.NewDecoder(req.Body).Decode(se); err != nil {
 			return err
 		}
 		return se
 	}
-	return codec.Unmarshal(data, target)
+	return json.NewDecoder(req.Body).Decode(target)
 }
