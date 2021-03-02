@@ -46,6 +46,11 @@ func ModuleVersion(path string) (string, error) {
 
 // KratosMod returns kratos mod.
 func KratosMod() string {
+	// GOMODCACHE is added in 1.15
+	cp := os.Getenv("GOMODCACHE")
+	if cp != "" {
+		return cp
+	}
 	gopath := os.Getenv("GOPATH")
 	if path, err := ModuleVersion("github.com/go-kratos/kratos/v2"); err == nil {
 		// $GOPATH/pkg/mod/github.com/go-kratos/kratos@v2
