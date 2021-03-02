@@ -5,12 +5,15 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
 const SupportPackageIsVersion1 = true
+
+var _ StatusCoder = (*errors.StatusError)(nil)
 
 // DecodeRequestFunc is decode request func.
 type DecodeRequestFunc func(*http.Request, interface{}) error
