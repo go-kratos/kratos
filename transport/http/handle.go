@@ -9,6 +9,9 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 )
 
+// SupportPackageIsVersion1 These constants should not be referenced from any other code.
+const SupportPackageIsVersion1 = true
+
 // DecodeRequestFunc is decode request func.
 type DecodeRequestFunc func(*http.Request, interface{}) error
 

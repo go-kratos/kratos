@@ -53,6 +53,5 @@ func newGreeterHandler(srv *GreeterService, opts ...HandleOption) http.Handler {
 
 func TestHandler(t *testing.T) {
 	s := &GreeterService{}
-	h := newGreeterHandler(s)
-	t.Log(h)
+	_ = newGreeterHandler(s)
 }
