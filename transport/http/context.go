@@ -3,8 +3,6 @@ package http
 import (
 	"context"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 // ServerInfo is HTTP server infomation.
@@ -42,9 +40,4 @@ func NewClientContext(ctx context.Context, info ClientInfo) context.Context {
 func FromClientContext(ctx context.Context) (info ClientInfo, ok bool) {
 	info, ok = ctx.Value(clientKey{}).(ClientInfo)
 	return
-}
-
-// Vars returns the route variables for the current request, if any.
-func Vars(req *http.Request) map[string]string {
-	return mux.Vars(req)
 }

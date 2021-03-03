@@ -7,54 +7,48 @@ import (
 )
 
 var httpTemplate = `
-type {{.ServiceType}}HTTPServer interface {
+type {{.ServiceType}}Handler interface {
 {{range .MethodSets}}
 	{{.Name}}(context.Context, *{{.Request}}) (*{{.Reply}}, error)
 {{end}}
 }
-func Register{{.ServiceType}}HTTPServer(s http1.ServiceRegistrar, srv {{.ServiceType}}HTTPServer) {
-	s.RegisterService(&_HTTP_{{.ServiceType}}_serviceDesc, srv)
-}
-{{range .Methods}}
-func _HTTP_{{$.ServiceType}}_{{.Name}}_{{.Num}}(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error) (interface{}, error) {
-	var in {{.Request}}
-{{if eq .Body ""}}
-	if err := http1.BindForm(req, &in); err != nil {
-		return nil, err
+
+func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.HandleOption) http.Handler {
+	h := http1.DefaultHandleOptions()
+	for _, o := range opts {
+		o(&h)
 	}
-{{else if eq .Body ".*"}}
-	if err := dec(&in); err != nil {
-		return nil, err
-	}
-{{else}}
-	if err := dec(in{{.Body}}); err != nil {
-		return nil, err
-	}
-{{end}}
-{{if ne (len .Vars) 0}}
-	if err := http1.BindVars(req, &in); err != nil {
-		return nil, err
-	}
-{{end}}
-	out, err := srv.({{$.ServiceType}}Server).{{.Name}}(ctx, &in)
-	if err != nil {
-		return nil, err
-	}
-	return out{{.ResponseBody}}, nil
-}
-{{end}}
-var _HTTP_{{.ServiceType}}_serviceDesc = http1.ServiceDesc{
-	ServiceName: "{{.ServiceName}}",
-	Methods: []http1.MethodDesc{
-{{range .Methods}}
-		{
-			Path:    "{{.Path}}",
-			Method:  "{{.Method}}",
-			Handler: _HTTP_{{$.ServiceType}}_{{.Name}}_{{.Num}},
-		},
-{{end}}
-	},
-	Metadata: "{{.Metadata}}",
+	r := mux.NewRouter()
+	{{range .Methods}}
+	r.HandleFunc("{{.Path}}", func(w http.ResponseWriter, r *http.Request) {
+		var in {{.Request}}
+		{{if ne (len .Vars) 0}}
+		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+		{{end}}
+		if err := h.Decode(r, &in{{.Body}}); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+		next := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.{{.Name}}(ctx, req.(*{{.Request}}))
+		}
+		if h.Middleware != nil {
+			next = h.Middleware(next)
+		}
+		out, err := next(r.Context(), &in)
+		if err != nil {
+			h.Error(w, r, err)
+			return
+		}
+		if err := h.Encode(w, r, out{{.ResponseBody}}); err != nil {
+			h.Error(w, r, err)
+		}
+	}).Methods("{{.Method}}")
+	{{end}}
+	return r
 }
 `
 

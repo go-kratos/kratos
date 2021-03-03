@@ -1,26 +1,26 @@
-package http
+package binding
 
 import (
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
+	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-// BindVars parses url parameters.
-func BindVars(req *http.Request, msg proto.Message) error {
-	for key, value := range Vars(req) {
+// MapProto sets a value in a nested Protobuf structure.
+func MapProto(msg proto.Message, values map[string]string) error {
+	for key, value := range values {
 		if err := populateFieldValues(msg.ProtoReflect(), strings.Split(key, "."), []string{value}); err != nil {
 			return err
 		}
@@ -28,12 +28,8 @@ func BindVars(req *http.Request, msg proto.Message) error {
 	return nil
 }
 
-// BindForm parses form parameters.
-func BindForm(req *http.Request, msg proto.Message) error {
-	if err := req.ParseForm(); err != nil {
-		return err
-	}
-	for key, values := range req.Form {
+func mapProto(msg proto.Message, values map[string][]string) error {
+	for key, values := range values {
 		if err := populateFieldValues(msg.ProtoReflect(), strings.Split(key, "."), values); err != nil {
 			return err
 		}
@@ -213,10 +209,7 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
-		msg, err = ptypes.TimestampProto(t)
-		if err != nil {
-			return protoreflect.Value{}, err
-		}
+		msg = timestamppb.New(t)
 	case "google.protobuf.Duration":
 		if value == "null" {
 			break
@@ -225,57 +218,57 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
-		msg = ptypes.DurationProto(d)
+		msg = durationpb.New(d)
 	case "google.protobuf.DoubleValue":
 		v, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
-		msg = &wrappers.DoubleValue{Value: v}
+		msg = wrapperspb.Double(v)
 	case "google.protobuf.FloatValue":
 		v, err := strconv.ParseFloat(value, 32)
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
-		msg = &wrappers.FloatValue{Value: float32(v)}
+		msg = wrapperspb.Float(float32(v))
 	case "google.protobuf.Int64Value":
 		v, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
-		msg = &wrappers.Int64Value{Value: v}
+		msg = wrapperspb.Int64(v)
 	case "google.protobuf.Int32Value":
 		v, err := strconv.ParseInt(value, 10, 32)
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
-		msg = &wrappers.Int32Value{Value: int32(v)}
+		msg = wrapperspb.Int32(int32(v))
 	case "google.protobuf.UInt64Value":
 		v, err := strconv.ParseUint(value, 10, 64)
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
-		msg = &wrappers.UInt64Value{Value: v}
+		msg = wrapperspb.UInt64(v)
 	case "google.protobuf.UInt32Value":
 		v, err := strconv.ParseUint(value, 10, 32)
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
-		msg = &wrappers.UInt32Value{Value: uint32(v)}
+		msg = wrapperspb.UInt32(uint32(v))
 	case "google.protobuf.BoolValue":
 		v, err := strconv.ParseBool(value)
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
-		msg = &wrappers.BoolValue{Value: v}
+		msg = wrapperspb.Bool(v)
 	case "google.protobuf.StringValue":
-		msg = &wrappers.StringValue{Value: value}
+		msg = wrapperspb.String(value)
 	case "google.protobuf.BytesValue":
 		v, err := base64.StdEncoding.DecodeString(value)
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
-		msg = &wrappers.BytesValue{Value: v}
+		msg = wrapperspb.Bytes(v)
 	case "google.protobuf.FieldMask":
 		fm := &field_mask.FieldMask{}
 		fm.Paths = append(fm.Paths, strings.Split(value, ",")...)
