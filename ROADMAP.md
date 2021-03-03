@@ -47,6 +47,8 @@ This document defines the roadmap for Kratos development.
     - [ ] go-redis
 - [ ] Queue
     - [ ] Broker API
+    - [ ] Kafka
+    - [ ] Nats
 - [ ] Database
     - [ ] Ent
     - [ ] Gorm
