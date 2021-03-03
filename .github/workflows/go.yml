@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ["^1.15"]
+        go-version: ["1.15.x", "1.16.x"]
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
@@ -65,7 +65,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ["^1.15"]
+        go-version: ["1.15.x", "1.16.x"]
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
@@ -94,7 +94,7 @@ jobs:
       - name: Get Linux dependencies
         if: runner.os == 'Linux'
         run: |
-          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.15.2/protoc-3.15.2-linux-x86_64.zip
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.15.3/protoc-3.15.3-linux-x86_64.zip
           unzip protoc-3.15.2-linux-x86_64.zip
           chmod +x bin/protoc
           sudo mv bin/protoc /usr/local/bin/
@@ -102,8 +102,16 @@ jobs:
       - name: Get macOS dependencies
         if: runner.os == 'macOS'
         run: |
-          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.15.2/protoc-3.15.2-osx-x86_64.zip
-          unzip protoc-3.15.2-osx-x86_64.zip
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.15.3/protoc-3.15.3-osx-x86_64.zip
+          unzip protoc-3.15.3-osx-x86_64.zip
+          chmod +x bin/protoc
+          sudo mv bin/protoc /usr/local/bin/
+          sudo mv include/* /usr/local/include/
+      - name: Get Windows dependencies
+        if: runner.os == 'Windows'
+        run: |
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.15.3/protoc-3.15.3-win64.zip
+          unzip protoc-3.15.3-win64.zip
           chmod +x bin/protoc
           sudo mv bin/protoc /usr/local/bin/
           sudo mv include/* /usr/local/include/
@@ -119,4 +127,5 @@ jobs:
           kratos proto client api/helloworld/helloworld.proto
           kratos proto server api/helloworld/helloworld.proto -t internal/service
           go generate ./...
+          go mod tidy
           mkdir -p bin/ && go build -o ./bin/ ./...
