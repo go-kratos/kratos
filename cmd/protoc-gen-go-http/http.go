@@ -43,6 +43,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("// is compatible with the kratos package it is being compiled against.")
 	g.P("// ", contextPackage.Ident(""), httpPackage.Ident(""), muxPackage.Ident(""))
 	g.P("const _ = ", transportPackage.Ident("SupportPackageIsVersion1"))
+	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
 	g.P()
 
 	for _, service := range file.Services {
@@ -62,22 +63,24 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 		Metadata:    file.Desc.Path(),
 	}
 	for _, method := range service.Methods {
+		if method.Desc.IsStreamingClient() || method.Desc.IsStreamingServer() {
+			continue
+		}
 		rule, ok := proto.GetExtension(method.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
 		if rule != nil && ok {
 			for _, bind := range rule.AdditionalBindings {
-				sd.Methods = append(sd.Methods, buildHTTPRule(method, bind))
+				sd.Methods = append(sd.Methods, buildHTTPRule(g, method, bind))
 			}
-			sd.Methods = append(sd.Methods, buildHTTPRule(method, rule))
+			sd.Methods = append(sd.Methods, buildHTTPRule(g, method, rule))
 		} else {
 			path := fmt.Sprintf("/%s/%s", service.Desc.FullName(), method.Desc.Name())
-			sd.Methods = append(sd.Methods, buildMethodDesc(method, "POST", path))
-
+			sd.Methods = append(sd.Methods, buildMethodDesc(g, method, "POST", path))
 		}
 	}
 	g.P(sd.execute())
 }
 
-func buildHTTPRule(m *protogen.Method, rule *annotations.HttpRule) *methodDesc {
+func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotations.HttpRule) *methodDesc {
 	var (
 		path         string
 		method       string
@@ -106,7 +109,7 @@ func buildHTTPRule(m *protogen.Method, rule *annotations.HttpRule) *methodDesc {
 	}
 	body = rule.Body
 	responseBody = rule.ResponseBody
-	md := buildMethodDesc(m, method, path)
+	md := buildMethodDesc(g, m, method, path)
 	if body == "*" {
 		body = ""
 	}
@@ -122,13 +125,13 @@ func buildHTTPRule(m *protogen.Method, rule *annotations.HttpRule) *methodDesc {
 	return md
 }
 
-func buildMethodDesc(m *protogen.Method, method, path string) *methodDesc {
+func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path string) *methodDesc {
 	defer func() { methodSets[m.GoName]++ }()
 	return &methodDesc{
 		Name:    m.GoName,
 		Num:     methodSets[m.GoName],
-		Request: m.Input.GoIdent.GoName,
-		Reply:   m.Output.GoIdent.GoName,
+		Request: g.QualifiedGoIdent(m.Input.GoIdent),
+		Reply:   g.QualifiedGoIdent(m.Output.GoIdent),
 		Path:    path,
 		Method:  method,
 		Vars:    buildPathVars(m, path),
