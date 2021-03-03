@@ -10,14 +10,13 @@ import (
 )
 
 var (
-	// Version is the version of the compiled software.
-	Version string = "v2.0.0-alpha4"
+	version string = "v2.0.0-alpha5"
 
 	rootCmd = &cobra.Command{
 		Use:     "kratos",
 		Short:   "Kratos: An elegant toolkit for Go microservices.",
 		Long:    `Kratos: An elegant toolkit for Go microservices.`,
-		Version: Version,
+		Version: version,
 	}
 )
 
