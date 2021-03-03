@@ -47,9 +47,9 @@ type HandleOptions struct {
 // DefaultHandleOptions returns a default handle options.
 func DefaultHandleOptions() HandleOptions {
 	return HandleOptions{
-		Decode: DecodeRequest,
-		Encode: EncodeResponse,
-		Error:  EncodeError,
+		Decode: decodeRequest,
+		Encode: encodeResponse,
+		Error:  encodeError,
 	}
 }
 
@@ -81,8 +81,8 @@ func Middleware(m middleware.Middleware) HandleOption {
 	}
 }
 
-// DecodeRequest decodes the request body to object.
-func DecodeRequest(req *http.Request, v interface{}) error {
+// decodeRequest decodes the request body to object.
+func decodeRequest(req *http.Request, v interface{}) error {
 	subtype := contentSubtype(req.Header.Get(contentTypeHeader))
 	if codec := encoding.GetCodec(subtype); codec != nil {
 		data, err := ioutil.ReadAll(req.Body)
@@ -94,8 +94,8 @@ func DecodeRequest(req *http.Request, v interface{}) error {
 	return binding.BindForm(req, v)
 }
 
-// EncodeResponse encodes the object to the HTTP response.
-func EncodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error {
+// encodeResponse encodes the object to the HTTP response.
+func encodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	for _, accept := range r.Header[acceptHeader] {
 		if codec := encoding.GetCodec(contentSubtype(accept)); codec != nil {
 			data, err := codec.Marshal(v)
@@ -110,8 +110,8 @@ func EncodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error
 	return json.NewEncoder(w).Encode(v)
 }
 
-// EncodeError encodes the erorr to the HTTP response.
-func EncodeError(w http.ResponseWriter, r *http.Request, err error) {
+// encodeError encodes the erorr to the HTTP response.
+func encodeError(w http.ResponseWriter, r *http.Request, err error) {
 	se, ok := errors.FromError(err)
 	if !ok {
 		se = &errors.StatusError{
@@ -121,7 +121,7 @@ func EncodeError(w http.ResponseWriter, r *http.Request, err error) {
 		}
 	}
 	w.WriteHeader(se.HTTPStatus())
-	EncodeResponse(w, r, se)
+	encodeResponse(w, r, se)
 }
 
 func contentType(subtype string) string {
