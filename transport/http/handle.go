@@ -33,11 +33,6 @@ type EncodeResponseFunc func(http.ResponseWriter, *http.Request, interface{}) er
 // EncodeErrorFunc is encode error func.
 type EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
 
-// StatusCoder is returns the HTTPStatus code.
-type StatusCoder interface {
-	HTTPStatus() int
-}
-
 // HandleOption is handle option.
 type HandleOption func(*HandleOptions)
 
