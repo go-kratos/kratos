@@ -1,6 +1,8 @@
 package encoding
 
-import "strings"
+import (
+	"strings"
+)
 
 // Codec defines the interface Transport uses to encode and decode messages.  Note
 // that implementations of this interface must be thread safe; a Codec's

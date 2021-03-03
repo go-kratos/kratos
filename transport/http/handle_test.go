@@ -27,10 +27,10 @@ func newGreeterHandler(srv *GreeterService, opts ...HandleOption) http.Handler {
 		o(&h)
 	}
 	r := mux.NewRouter()
-	r.HandleFunc("/helloworld", func(w http.ResponseWriter, req *http.Request) {
+	r.HandleFunc("/helloworld", func(w http.ResponseWriter, r *http.Request) {
 		var in HelloRequest
-		if err := h.Decode(req, &in); err != nil {
-			h.Error(w, err)
+		if err := h.Decode(r, &in); err != nil {
+			h.Error(w, r, err)
 			return
 		}
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -39,13 +39,13 @@ func newGreeterHandler(srv *GreeterService, opts ...HandleOption) http.Handler {
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(req.Context(), &in)
+		out, err := next(r.Context(), &in)
 		if err != nil {
-			h.Error(w, err)
+			h.Error(w, r, err)
 			return
 		}
-		if err := h.Encode(w, out); err != nil {
-			h.Error(w, err)
+		if err := h.Encode(w, r, out); err != nil {
+			h.Error(w, r, err)
 		}
 	}).Methods("POST")
 	return r

@@ -2,27 +2,36 @@ package http
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
+	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 )
 
-// SupportPackageIsVersion1 These constants should not be referenced from any other code.
-const SupportPackageIsVersion1 = true
+const (
+	// SupportPackageIsVersion1 These constants should not be referenced from any other code.
+	SupportPackageIsVersion1 = true
 
-var _ StatusCoder = (*errors.StatusError)(nil)
+	baseContentType = "application"
+)
+
+var (
+	acceptHeader      = http.CanonicalHeaderKey("Accept")
+	contentTypeHeader = http.CanonicalHeaderKey("Content-Type")
+)
 
 // DecodeRequestFunc is decode request func.
 type DecodeRequestFunc func(*http.Request, interface{}) error
 
 // EncodeResponseFunc is encode response func.
-type EncodeResponseFunc func(http.ResponseWriter, interface{}) error
+type EncodeResponseFunc func(http.ResponseWriter, *http.Request, interface{}) error
 
 // EncodeErrorFunc is encode error func.
-type EncodeErrorFunc func(http.ResponseWriter, error)
+type EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
 
 // StatusCoder is returns the HTTPStatus code.
 type StatusCoder interface {
@@ -79,32 +88,65 @@ func Middleware(m middleware.Middleware) HandleOption {
 
 // DecodeRequest decodes the request body to object.
 func DecodeRequest(req *http.Request, v interface{}) error {
-	switch stripContentType(req.Header.Get("content-type")) {
-	case "application/json":
-		return json.NewDecoder(req.Body).Decode(v)
+	subtype := contentSubtype(req.Header.Get(contentTypeHeader))
+	if codec := encoding.GetCodec(subtype); codec != nil {
+		data, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			return err
+		}
+		return codec.Unmarshal(data, v)
 	}
 	return binding.BindForm(req, v)
 }
 
 // EncodeResponse encodes the object to the HTTP response.
-func EncodeResponse(w http.ResponseWriter, v interface{}) error {
+func EncodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error {
+	for _, accept := range r.Header[acceptHeader] {
+		if codec := encoding.GetCodec(contentSubtype(accept)); codec != nil {
+			data, err := codec.Marshal(v)
+			if err != nil {
+				return err
+			}
+			w.Header().Set(contentTypeHeader, contentType(codec.Name()))
+			w.Write(data)
+			return nil
+		}
+	}
 	return json.NewEncoder(w).Encode(v)
 }
 
 // EncodeError encodes the erorr to the HTTP response.
-func EncodeError(w http.ResponseWriter, err error) {
-	if c, ok := err.(StatusCoder); ok {
-		w.WriteHeader(c.HTTPStatus())
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
+func EncodeError(w http.ResponseWriter, r *http.Request, err error) {
+	se, ok := errors.FromError(err)
+	if !ok {
+		se = &errors.StatusError{
+			Code:    2,
+			Reason:  "",
+			Message: err.Error(),
+		}
 	}
-	json.NewEncoder(w).Encode(err)
+	w.WriteHeader(se.HTTPStatus())
+	EncodeResponse(w, r, se)
 }
 
-func stripContentType(contentType string) string {
-	i := strings.Index(contentType, ";")
-	if i != -1 {
-		contentType = contentType[:i]
+func contentType(subtype string) string {
+	return strings.Join([]string{baseContentType, subtype}, "/")
+}
+
+func contentSubtype(contentType string) string {
+	if contentType == baseContentType {
+		return ""
 	}
-	return contentType
+	if !strings.HasPrefix(contentType, baseContentType) {
+		return ""
+	}
+	switch contentType[len(baseContentType)] {
+	case '/', ';':
+		if i := strings.Index(contentType, ";"); i != -1 {
+			return contentType[len(baseContentType)+1 : i]
+		}
+		return contentType[len(baseContentType)+1:]
+	default:
+		return ""
+	}
 }

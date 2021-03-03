@@ -20,10 +20,10 @@ func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.Handl
 	}
 	r := mux.NewRouter()
 	{{range .Methods}}
-	r.HandleFunc("{{.Path}}", func(w http.ResponseWriter, req *http.Request) {
+	r.HandleFunc("{{.Path}}", func(w http.ResponseWriter, r *http.Request) {
 		var in {{.Request}}
-		if err := h.Decode(req, &in{{.Body}}); err != nil {
-			h.Error(w, err)
+		if err := h.Decode(r, &in{{.Body}}); err != nil {
+			h.Error(w, r, err)
 			return
 		}
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -32,13 +32,13 @@ func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.Handl
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(req.Context(), &in)
+		out, err := next(r.Context(), &in)
 		if err != nil {
-			h.Error(w, err)
+			h.Error(w, r, err)
 			return
 		}
-		if err := h.Encode(w, out{{.ResponseBody}}); err != nil {
-			h.Error(w, err)
+		if err := h.Encode(w, r, out{{.ResponseBody}}); err != nil {
+			h.Error(w, r, err)
 		}
 	}).Methods("{{.Method}}")
 	{{end}}
