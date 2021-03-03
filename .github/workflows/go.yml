@@ -95,7 +95,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.15.3/protoc-3.15.3-linux-x86_64.zip
-          unzip protoc-3.15.2-linux-x86_64.zip
+          unzip protoc-3.15.3-linux-x86_64.zip
           chmod +x bin/protoc
           sudo mv bin/protoc /usr/local/bin/
           sudo mv include/* /usr/local/include/
