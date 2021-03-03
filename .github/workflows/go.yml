@@ -97,14 +97,16 @@ jobs:
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.15.2/protoc-3.15.2-linux-x86_64.zip
           unzip protoc-3.15.2-linux-x86_64.zip
           chmod +x bin/protoc
-          sudo mv bin/protoc /usr/local/bin
+          sudo mv bin/protoc /usr/local/bin/
+          sudo mv include/* /usr/local/include/
       - name: Get macOS dependencies
         if: runner.os == 'macOS'
         run: |
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.15.2/protoc-3.15.2-osx-x86_64.zip
           unzip protoc-3.15.2-osx-x86_64.zip
           chmod +x bin/protoc
-          sudo mv bin/protoc /usr/local/bin
+          sudo mv bin/protoc /usr/local/bin/
+          sudo mv include/* /usr/local/include/
       - name: Run
         run: |
           cd cmd/kratos/ && go install
