@@ -57,8 +57,8 @@ func (a *App) Server() []transport.Server {
 	return a.opts.servers
 }
 
-// Registrar returns registry.
-func (a *App) Registrar() registry.Registrar {
+// Registry returns registry.
+func (a *App) Registry() registry.Registrar {
 	return a.opts.registrar
 }
 

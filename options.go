@@ -69,8 +69,8 @@ func Logger(logger log.Logger) Option {
 	return func(o *options) { o.logger = logger }
 }
 
-// Registrar with service registry.
-func Registrar(r registry.Registrar) Option {
+// Registry with service registry.
+func Registry(r registry.Registrar) Option {
 	return func(o *options) { o.registrar = r }
 }
 

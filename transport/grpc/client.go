@@ -38,8 +38,8 @@ func WithMiddleware(m middleware.Middleware) ClientOption {
 	}
 }
 
-// WithDiscoverer with client registry.
-func WithDiscoverer(d registry.Discoverer) ClientOption {
+// WithRegistry with client registry.
+func WithRegistry(d registry.Discoverer) ClientOption {
 	return func(o *clientOptions) {
 		o.discoverer = d
 	}
