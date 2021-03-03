@@ -55,6 +55,7 @@ jobs:
       - name: Test
         run: go test ./... -coverprofile=coverage.txt -covermode=atomic
       - name: Coverage
+        if: runner.os == 'Linux'
         run: bash <(curl -s https://codecov.io/bash)
 
 
@@ -93,7 +94,6 @@ jobs:
       - name: Get Linux dependencies
         if: runner.os == 'Linux'
         run: |
-          go get -v -t -d ./...
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.15.2/protoc-3.15.2-linux-x86_64.zip
           unzip protoc-3.15.2-linux-x86_64.zip
           chmod +x bin/protoc
@@ -101,7 +101,6 @@ jobs:
       - name: Get macOS dependencies
         if: runner.os == 'macOS'
         run: |
-          go get -v -t -d ./...
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.15.2/protoc-3.15.2-osx-x86_64.zip
           unzip protoc-3.15.2-osx-x86_64.zip
           chmod +x bin/protoc
