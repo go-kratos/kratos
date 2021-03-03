@@ -5,16 +5,19 @@ package testproto
 import (
 	context "context"
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
+	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
 	http "net/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
-// context.http.mux.
-const _ = http1.SupportPackageIsVersion1
-
+var _ = new(http.Request)
 var _ = new(context.Context)
+var _ = binding.MapProto
+var _ = mux.NewRouter
+
+const _ = http1.SupportPackageIsVersion1
 
 type EchoServiceHandler interface {
 	Echo(context.Context, *SimpleMessage) (*SimpleMessage, error)
@@ -35,6 +38,12 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 
 	r.HandleFunc("/v1/example/echo/{id}/{num}", func(w http.ResponseWriter, r *http.Request) {
 		var in SimpleMessage
+
+		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+
 		if err := h.Decode(r, &in); err != nil {
 			h.Error(w, r, err)
 			return
@@ -57,6 +66,12 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 
 	r.HandleFunc("/v1/example/echo/{id}/{num}/{lang}", func(w http.ResponseWriter, r *http.Request) {
 		var in SimpleMessage
+
+		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+
 		if err := h.Decode(r, &in); err != nil {
 			h.Error(w, r, err)
 			return
@@ -79,6 +94,12 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 
 	r.HandleFunc("/v1/example/echo1/{id}/{line_num}/{status.note}", func(w http.ResponseWriter, r *http.Request) {
 		var in SimpleMessage
+
+		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+
 		if err := h.Decode(r, &in); err != nil {
 			h.Error(w, r, err)
 			return
@@ -101,6 +122,12 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 
 	r.HandleFunc("/v1/example/echo2/{no.note}", func(w http.ResponseWriter, r *http.Request) {
 		var in SimpleMessage
+
+		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+
 		if err := h.Decode(r, &in); err != nil {
 			h.Error(w, r, err)
 			return
@@ -123,6 +150,12 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 
 	r.HandleFunc("/v1/example/echo/{id}", func(w http.ResponseWriter, r *http.Request) {
 		var in SimpleMessage
+
+		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+
 		if err := h.Decode(r, &in); err != nil {
 			h.Error(w, r, err)
 			return
@@ -145,6 +178,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 
 	r.HandleFunc("/v1/example/echo_body", func(w http.ResponseWriter, r *http.Request) {
 		var in SimpleMessage
+
 		if err := h.Decode(r, &in); err != nil {
 			h.Error(w, r, err)
 			return
@@ -167,6 +201,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 
 	r.HandleFunc("/v1/example/echo_delete", func(w http.ResponseWriter, r *http.Request) {
 		var in SimpleMessage
+
 		if err := h.Decode(r, &in); err != nil {
 			h.Error(w, r, err)
 			return
@@ -189,6 +224,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 
 	r.HandleFunc("/v1/example/echo_patch", func(w http.ResponseWriter, r *http.Request) {
 		var in DynamicMessageUpdate
+
 		if err := h.Decode(r, &in.Body); err != nil {
 			h.Error(w, r, err)
 			return

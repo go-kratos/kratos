@@ -5,16 +5,19 @@ package testproto
 import (
 	context "context"
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
+	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
 	http "net/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
-// context.http.mux.
-const _ = http1.SupportPackageIsVersion1
-
+var _ = new(http.Request)
 var _ = new(context.Context)
+var _ = binding.MapProto
+var _ = mux.NewRouter
+
+const _ = http1.SupportPackageIsVersion1
 
 type StreamServiceHandler interface {
 }
