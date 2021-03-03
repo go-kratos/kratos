@@ -3,23 +3,117 @@ name: Go
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '**.md'
   pull_request:
     branches: [ main ]
-
+    paths-ignore:
+      - '**.md'
 jobs:
-
   build:
-    runs-on: ubuntu-latest
+    name: Build on ${{ matrix.os }} - Go${{ matrix.go_version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        go-version: ["^1.15"]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
     steps:
-    - uses: actions/checkout@v2
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - run: go version
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          # In order:
+          # * Module download cache
+          # * Build cache (Linux)
+          # * Build cache (Mac)
+          # * Build cache (Windows)
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+            ~/Library/Caches/go-build
+            %LocalAppData%\go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
+          version: v1.29
+      - name: Get dependencies
+        run: |
+          go get -v -t -d ./...
+          go get -u github.com/go-kratos/kratos/v2
+      - name: Build
+        run: go build ./...
+      - name: Test
+        run: go test ./... -coverprofile=coverage.txt -covermode=atomic
+      - name: Coverage
+        run: bash <(curl -s https://codecov.io/bash)
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.15
 
-    - name: Build
-      run: go build -v ./...
+  scaffold:
+    name: Scaffold Test on ${{ matrix.os }} - Go${{ matrix.go_version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        go-version: ["^1.15"]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
-    - name: Test
-      run: go test -v ./...
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - run: go version
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          # In order:
+          # * Module download cache
+          # * Build cache (Linux)
+          # * Build cache (Mac)
+          # * Build cache (Windows)
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+            ~/Library/Caches/go-build
+            %LocalAppData%\go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Get Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          go get -v -t -d ./...
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.15.2/protoc-3.15.2-linux-x86_64.zip
+          unzip protoc-3.15.2-linux-x86_64.zip
+          chmod +x bin/protoc
+          sudo mv bin/protoc /usr/local/bin
+      - name: Get macOS dependencies
+        if: runner.os == 'macOS'
+        run: |
+          go get -v -t -d ./...
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.15.2/protoc-3.15.2-osx-x86_64.zip
+          unzip protoc-3.15.2-osx-x86_64.zip
+          chmod +x bin/protoc
+          sudo mv bin/protoc /usr/local/bin
+      - name: Run
+        run: |
+          cd cmd/kratos/ && go install
+          mkdir -p test_project
+          cd test_project
+          kratos new helloworld
+          cd helloworld
+          make init
+          make proto
+          mkdir -p bin/ && go build -o ./bin/ ./...
