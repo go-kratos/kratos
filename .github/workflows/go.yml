@@ -11,7 +11,7 @@ on:
       - '**.md'
 jobs:
   build:
-    name: Build on ${{ matrix.os }} - Go${{ matrix.go_version }}
+    name: Build on ${{ matrix.os }} - Go ${{ matrix.go-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -39,7 +39,7 @@ jobs:
             ~/.cache/go-build
             ~/Library/Caches/go-build
             %LocalAppData%\go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
 #      - name: golangci-lint
@@ -60,7 +60,7 @@ jobs:
 
 
   scaffold:
-    name: Scaffold Test on ${{ matrix.os }} - Go${{ matrix.go_version }}
+    name: Scaffold Test on ${{ matrix.os }} - Go ${{ matrix.go-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -88,7 +88,7 @@ jobs:
             ~/.cache/go-build
             ~/Library/Caches/go-build
             %LocalAppData%\go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
       - name: Get Linux dependencies
