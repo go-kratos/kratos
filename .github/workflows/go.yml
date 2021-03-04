@@ -24,7 +24,6 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go-version }}
-      - run: export PATH="$(go env GOPATH)/bin:$PATH"
       - name: Checkout code
         uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -72,26 +71,23 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go-version }}
-      - run: |
-          export PATH="$(go env GOPATH)/bin:$PATH"
-          echo $PATH
       - name: Checkout code
         uses: actions/checkout@v2
-#      - uses: actions/cache@v2
-#        with:
-#          # In order:
-#          # * Module download cache
-#          # * Build cache (Linux)
-#          # * Build cache (Mac)
-#          # * Build cache (Windows)
-#          path: |
-#            ~/go/pkg/mod
-#            ~/.cache/go-build
-#            ~/Library/Caches/go-build
-#            %LocalAppData%\go-build
-#          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
-#          restore-keys: |
-#            ${{ runner.os }}-go-${{ matrix.go-version }}-
+      - uses: actions/cache@v2
+        with:
+          # In order:
+          # * Module download cache
+          # * Build cache (Linux)
+          # * Build cache (Mac)
+          # * Build cache (Windows)
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+            ~/Library/Caches/go-build
+            %LocalAppData%\go-build
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ matrix.go-version }}-
       - name: Get Linux dependencies
         if: runner.os == 'Linux'
         run: |
@@ -116,12 +112,9 @@ jobs:
           chmod +x bin/protoc
           sudo mv bin/protoc /usr/local/bin/
           sudo mv include/* /usr/local/include/
-      - name: Dep
-        run: |
-          echo $PATH
-          ls $(go env GOPATH)/bin
       - name: Run
         run: |
+          echo $PATH
           cd cmd/kratos/ && go install
           mkdir -p test_project
           cd test_project
