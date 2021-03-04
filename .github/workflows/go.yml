@@ -116,6 +116,10 @@ jobs:
           chmod +x bin/protoc
           sudo mv bin/protoc /usr/local/bin/
           sudo mv include/* /usr/local/include/
+      - name: Dep
+        run: |
+          echo $PATH
+          ls $(go env GOBIN)
       - name: Run
         run: |
           cd cmd/kratos/ && go install
