@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go-version }}
-      - run: export PATH="$(go env GOBIN):$PATH"
+      - run: export PATH="$(go env GOPATH)/bin:$PATH"
       - name: Checkout code
         uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -73,7 +73,7 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - run: |
-          export PATH="$(go env GOBIN):$PATH"
+          export PATH="$(go env GOPATH)/bin:$PATH"
           echo $PATH
       - name: Checkout code
         uses: actions/checkout@v2
@@ -119,7 +119,7 @@ jobs:
       - name: Dep
         run: |
           echo $PATH
-          ls $(go env GOBIN)
+          ls $(go env GOPATH)/bin
       - name: Run
         run: |
           cd cmd/kratos/ && go install
