@@ -21,16 +21,7 @@ func TestServer(t *testing.T) {
 		json.NewEncoder(w).Encode(data)
 	}
 	srv := NewServer()
-	group := srv.RouteGroup("/test")
-	{
-		group.GET("/", fn)
-		group.HEAD("/index", fn)
-		group.OPTIONS("/home", fn)
-		group.PUT("/products/{id}", fn)
-		group.POST("/products/{id}", fn)
-		group.PATCH("/products/{id}", fn)
-		group.DELETE("/products/{id}", fn)
-	}
+	srv.HandleFunc("/index", fn)
 
 	time.AfterFunc(time.Second, func() {
 		defer srv.Stop()
@@ -47,11 +38,11 @@ func testClient(t *testing.T, srv *Server) {
 		method string
 		path   string
 	}{
-		{"GET", "/test/"},
-		{"PUT", "/test/products/1"},
-		{"POST", "/test/products/2"},
-		{"PATCH", "/test/products/3"},
-		{"DELETE", "/test/products/4"},
+		{"GET", "/index"},
+		{"PUT", "/index"},
+		{"POST", "/index"},
+		{"PATCH", "/index"},
+		{"DELETE", "/index"},
 	}
 	client, err := NewClient(context.Background())
 	if err != nil {
