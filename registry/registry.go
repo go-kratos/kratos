@@ -10,8 +10,8 @@ type Registrar interface {
 	Deregister(ctx context.Context, service *ServiceInstance) error
 }
 
-// Instancer is service instancer.
-type Instancer interface {
+// Discoverer is service discovery.
+type Discoverer interface {
 	// Service return the service instances in memory according to the service name.
 	Fetch(ctx context.Context, serviceName string) ([]*ServiceInstance, error)
 	// Watch creates a watcher according to the service name.
