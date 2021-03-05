@@ -70,5 +70,5 @@ func parseAttributes(md map[string]string) *attributes.Attributes {
 	for k, v := range md {
 		pairs = append(pairs, k, v)
 	}
-	return attributes.New(pairs)
+	return attributes.New(pairs...)
 }

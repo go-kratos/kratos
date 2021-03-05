@@ -87,7 +87,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		grpc.WithUnaryInterceptor(UnaryClientInterceptor(options.middleware)),
 	}
 	if options.discoverer != nil {
-		grpc.WithResolvers(discovery.NewBuilder(options.discoverer))
+		grpcOpts = append(grpcOpts, grpc.WithResolvers(discovery.NewBuilder(options.discoverer)))
 	}
 	if insecure {
 		grpcOpts = append(grpcOpts, grpc.WithInsecure())
