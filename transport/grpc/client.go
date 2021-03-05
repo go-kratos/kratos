@@ -101,7 +101,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 // UnaryClientInterceptor retruns a unary client interceptor.
 func UnaryClientInterceptor(m middleware.Middleware) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		ctx = transport.NewContext(ctx, transport.Transport{Kind: "gRPC"})
+		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC})
 		ctx = NewClientContext(ctx, ClientInfo{FullMethod: method})
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return reply, invoker(ctx, method, req, reply, cc, opts...)

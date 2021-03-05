@@ -146,7 +146,7 @@ func UnaryTimeoutInterceptor(timeout time.Duration) grpc.UnaryServerInterceptor 
 // UnaryServerInterceptor returns a unary server interceptor.
 func UnaryServerInterceptor(m middleware.Middleware) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		ctx = transport.NewContext(ctx, transport.Transport{Kind: "gRPC"})
+		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC})
 		ctx = NewServerContext(ctx, ServerInfo{Server: info.Server, FullMethod: info.FullMethod})
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return handler(ctx, req)

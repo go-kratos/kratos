@@ -96,7 +96,7 @@ func (s *Server) HandleFunc(path string, h http.HandlerFunc) {
 func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx, cancel := context.WithTimeout(req.Context(), s.timeout)
 	defer cancel()
-	ctx = transport.NewContext(ctx, transport.Transport{Kind: "HTTP"})
+	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP})
 	ctx = NewServerContext(ctx, ServerInfo{Request: req, Response: res})
 	s.router.ServeHTTP(res, req.WithContext(ctx))
 }
