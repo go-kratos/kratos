@@ -87,8 +87,8 @@ func (s *Server) Handle(path string, h http.Handler) {
 	s.router.Handle(path, h)
 }
 
-// HanldePrefix registers a new route with a matcher for the URL path prefix.
-func (s *Server) HanldePrefix(prefix string, h http.Handler) {
+// HandlePrefix registers a new route with a matcher for the URL path prefix.
+func (s *Server) HandlePrefix(prefix string, h http.Handler) {
 	s.router.PathPrefix(prefix).Handler(h)
 }
 
