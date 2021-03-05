@@ -21,15 +21,15 @@ func WithLogger(logger log.Logger) Option {
 }
 
 type builder struct {
-	instancer registry.Instancer
-	logger    log.Logger
+	discoverer registry.Discoverer
+	logger     log.Logger
 }
 
 // NewBuilder creates a builder which is used to factory registry resolvers.
-func NewBuilder(in registry.Instancer, opts ...Option) resolver.Builder {
+func NewBuilder(d registry.Discoverer, opts ...Option) resolver.Builder {
 	b := &builder{
-		instancer: in,
-		logger:    log.DefaultLogger,
+		discoverer: d,
+		logger:     log.DefaultLogger,
 	}
 	for _, o := range opts {
 		o(b)
@@ -38,7 +38,7 @@ func NewBuilder(in registry.Instancer, opts ...Option) resolver.Builder {
 }
 
 func (d *builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
-	w, err := d.instancer.Watch(context.Background(), target.Endpoint)
+	w, err := d.discoverer.Watch(context.Background(), target.Endpoint)
 	if err != nil {
 		return nil, err
 	}
