@@ -93,7 +93,7 @@ app.Run()
 ## Related
 
 * [Docs](https://go-kratos.dev/)
-* [Examples](https://github.com/go-kratos/examples)
+* [Examples](./examples)
 * [Service Layout](https://github.com/go-kratos/kratos-layout)
 
 ## Community
