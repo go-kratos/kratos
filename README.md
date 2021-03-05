@@ -17,30 +17,30 @@ Kratos is a microservice-oriented governance framework implements by golang, whi
 
 ## Goals
 
-Kratos boosts your productivity. With the integration of excellent resources and further support, you can get rid of most issues you might encounter in the field of distributed systems and software engineering, so that you can focus on business delivery. For each developer, Kratos is an ideal one for learning as well. You can navigate the diverse knowledge of microservice and accumulate engineering experience.
-
+Kratos boosts your productivity. With the integration of excellent resources and further support, programmers can get rid of most issues might encounter in the field of distributed systems and software engineering such that they are allowed to focus on the release of businesses only. Additionally, for each programmer, Kratos is also an ideal one learning warehouse for many aspects of microservices to enrich their experiences and skills.
 ### Principles
 
-* **Simple**: Appropriate design, plain and simple code.
+* **Simple**: Appropriate design, plain and easy code.
 * **General**: Cover the various utilities for business development.
-* **Reliable**: Higher testability and greater test coverage of base libs validated in the production environment.
-* **Robust**: Base libs are designed reasonably to reduce misuse.
-* **High-performance**: We give you optimal performance without using the hack-way approach like adding the *unsafe* package and guarantee compatibility and stability at the same time.
-* **Expandable**: Appropriate API design, you can expand utilities such as base libs to meet your further requirements.
+* **Highly efficient**: Speeding up the efficiency of businesses upgrading.
+* **Stable**: The base libs validated in the production environment which have the characters of the high testability, high coverage as well as high security and reliability.
+* **Robust**: Eliminating misusing through high quality of the base libs.
+* **High-performance**: Optimal performance excluding the optimization of hacking in case of *unsafe*. 
+* **Expandability**: Properly designed interfaces, you can expand utilities such as base libs to meet your further requirements.
 * **Fault-tolerance**: Designed against failure, enhance the understanding and exercising of SRE within Kratos to achieve more robustness.
-* **Toolchain**: Includes an extensive toolchain, such as cache code generation, lint tools, etc.
+* **Toolchain**: Includes an extensive toolchain, such as the code generation of cache, the lint tool, and so forth.
 
 ## Features
-* APIs: HTTP/gRPC based transport and Protobuf defined communication protocol.
-* Errors: We use ProtoBuf Enum to define error code and generate error handle code.
-* Metadata: Normalize the service metadata transmission by excellent middleware.
-* Config:  Multi-data source Support, well arranged, dynamic configuration via *Atomic* package.
-* Logger: Standard log API, easily integrate with third-party log lib, *Fluentd* logs collection.
-* Metrics: *Prometheus* integration by default. Furthermore, with the unified Metrics interface, you can implement your metrics system more flexible
-* Tracing: Complete micro-service link tracing followed by *OpenTracing* specification.
-* Encoding: Support *Accept* and *Content-Type* for auto content encoding.
-* Transport: Common HTTP/ GRPC transport layer offers you powerful Middleware support.
- * Registry: One pluggable API for the different registry.
+* APIs: The communication protocol is based on the HTTP/gRPC through the definition of Protobuf.
+* Errors: Both the definitions of error code and the handle interfaces of code generation for tools are defined by the Enum of the Protobuf.
+* Metadata: In the protocol of HTTP/gRPC, the transmission of service atomic information are formalized by the Middleware.
+* Config: Multiple data sources are supported for configurations and integrations such that dynamic configurations are offered through the manner of *Atomic* operations.
+* Logger: The standard log interfaces ease the integration of the third-party log libs and logs are collected through the *Fluentd*.
+* Metrics: *Prometheus* integrated by default. Furthermore, with the uniform metric interfaces, you can implement your own metric system more flexible.
+* Tracing: The OpenTracing is conformed to achieve the tracing of microservices chains.
+* Encoding: The selection of the content encoding is automatically supported by Accept and Content-Type.
+* Transport: The uniform plugins for Middleware are supported by HTTP/gRPC.
+ * Registry: The interfaces of the centralized registry is able to be connected with various other centralized registries through plug-ins.
 
 ## Getting Started
 ### Required
