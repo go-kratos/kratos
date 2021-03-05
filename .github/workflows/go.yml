@@ -24,6 +24,11 @@ jobs:
     - name: Test
       run: go test -v ./...
 
+    - name: Lint
+      run: |
+        go get golang.org/x/lint/golint
+        golint ./...
+
     - name: Kratos
       run: |
         cd cmd/kratos

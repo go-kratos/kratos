@@ -5,6 +5,8 @@ import (
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
+
+	//lint:ignore SA1019 grpc
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -71,7 +73,7 @@ func errorEncode(err error) error {
 	se, ok := errors.FromError(err)
 	if !ok {
 		se = &errors.StatusError{
-			Code: 2,
+			Code:    2,
 			Message: err.Error(),
 		}
 	}

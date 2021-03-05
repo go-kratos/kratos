@@ -4,8 +4,6 @@ import (
 	"fmt"
 )
 
-var nop Logger = new(nopLogger)
-
 // Helper is a logger helper.
 type Helper struct {
 	debug Logger
