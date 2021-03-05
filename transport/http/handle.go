@@ -119,7 +119,6 @@ func encodeError(w http.ResponseWriter, r *http.Request, err error) {
 	if !ok {
 		se = &errors.StatusError{
 			Code:    2,
-			Reason:  "",
 			Message: err.Error(),
 		}
 	}

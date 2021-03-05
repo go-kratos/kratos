@@ -134,7 +134,7 @@ func (c *echoClient) EchoResponseBody(ctx context.Context, in *DynamicMessageUpd
 func TestEchoService(t *testing.T) {
 	s := &echoService{}
 	h := NewEchoServiceHandler(s)
-	srv := &http.Server{Addr: "0.0.0.0:0", Handler: h}
+	srv := &http.Server{Addr: ":0", Handler: h}
 	lis, err := net.Listen("tcp", srv.Addr)
 	if err != nil {
 		t.Fatal(err)
