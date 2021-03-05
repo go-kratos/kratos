@@ -45,7 +45,7 @@ func Recovery(opts ...Option) middleware.Middleware {
 	for _, o := range opts {
 		o(&options)
 	}
-	log := log.NewHelper("middleware/recovery", log.DefaultLogger)
+	log := log.NewHelper("middleware/recovery", options.logger)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			defer func() {
