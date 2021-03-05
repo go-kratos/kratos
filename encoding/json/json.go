@@ -22,8 +22,6 @@ var (
 	UnmarshalOptions = protojson.UnmarshalOptions{
 		DiscardUnknown: true,
 	}
-
-	typeProtoMessage = reflect.TypeOf((*proto.Message)(nil)).Elem()
 )
 
 func init() {

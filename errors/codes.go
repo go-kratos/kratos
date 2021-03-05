@@ -15,6 +15,8 @@ func Cancelled(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsCancelled determines if err is an error which indicates a cancelled error.
+// It supports wrapped errors.
 func IsCancelled(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 1
@@ -32,6 +34,8 @@ func Unknown(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsUnknown determines if err is an error which indicates a unknown error.
+// It supports wrapped errors.
 func IsUnknown(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 2
@@ -49,6 +53,8 @@ func InvalidArgument(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsInvalidArgument determines if err is an error which indicates an invalid argument error.
+// It supports wrapped errors.
 func IsInvalidArgument(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 3
@@ -66,6 +72,8 @@ func DeadlineExceeded(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsDeadlineExceeded determines if err is an error which indicates a deadline exceeded error.
+// It supports wrapped errors.
 func IsDeadlineExceeded(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 4
@@ -83,6 +91,8 @@ func NotFound(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsNotFound determines if err is an error which indicates a not found error.
+// It supports wrapped errors.
 func IsNotFound(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 5
@@ -100,6 +110,8 @@ func AlreadyExists(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsAlreadyExists determines if err is an error which indicates a already exsits error.
+// It supports wrapped errors.
 func IsAlreadyExists(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 6
@@ -117,6 +129,8 @@ func PermissionDenied(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsPermissionDenied determines if err is an error which indicates a permission denied error.
+// It supports wrapped errors.
 func IsPermissionDenied(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 7
@@ -135,6 +149,8 @@ func ResourceExhausted(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsResourceExhausted determines if err is an error which indicates a resource exhausted error.
+// It supports wrapped errors.
 func IsResourceExhausted(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 8
@@ -153,6 +169,8 @@ func FailedPrecondition(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsFailedPrecondition determines if err is an error which indicates a failed precondition error.
+// It supports wrapped errors.
 func IsFailedPrecondition(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 9
@@ -171,6 +189,8 @@ func Aborted(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsAborted determines if err is an error which indicates an aborted error.
+// It supports wrapped errors.
 func IsAborted(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 10
@@ -189,6 +209,8 @@ func OutOfRange(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsOutOfRange determines if err is an error which indicates a out of range error.
+// It supports wrapped errors.
 func IsOutOfRange(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 11
@@ -206,6 +228,8 @@ func Unimplemented(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsUnimplemented determines if err is an error which indicates a unimplemented error.
+// It supports wrapped errors.
 func IsUnimplemented(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 12
@@ -226,6 +250,8 @@ func Internal(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsInternal determines if err is an error which indicates an internal server error.
+// It supports wrapped errors.
 func IsInternal(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 13
@@ -243,6 +269,8 @@ func Unavailable(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsUnavailable determines if err is an error which indicates a unavailable error.
+// It supports wrapped errors.
 func IsUnavailable(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 14
@@ -260,6 +288,8 @@ func DataLoss(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsDataLoss determines if err is an error which indicates a data loss error.
+// It supports wrapped errors.
 func IsDataLoss(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 15
@@ -277,6 +307,8 @@ func Unauthorized(reason, format string, a ...interface{}) error {
 	}
 }
 
+// IsUnauthorized determines if err is an error which indicates a unauthorized error.
+// It supports wrapped errors.
 func IsUnauthorized(err error) bool {
 	if se := new(StatusError); errors.As(err, &se) {
 		return se.Code == 16

@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
+	// init json encoder
+	_ "github.com/go-kratos/kratos/v2/encoding/json"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
