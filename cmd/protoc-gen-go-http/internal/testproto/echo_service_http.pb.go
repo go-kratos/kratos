@@ -27,6 +27,8 @@ type EchoServiceHandler interface {
 	EchoDelete(context.Context, *SimpleMessage) (*SimpleMessage, error)
 
 	EchoPatch(context.Context, *DynamicMessageUpdate) (*DynamicMessageUpdate, error)
+
+	EchoResponseBody(context.Context, *DynamicMessageUpdate) (*DynamicMessageUpdate, error)
 }
 
 func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) http.Handler {
@@ -38,16 +40,16 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 
 	r.HandleFunc("/v1/example/echo/{id}/{num}", func(w http.ResponseWriter, r *http.Request) {
 		var in SimpleMessage
+		if err := h.Decode(r, &in); err != nil {
+			h.Error(w, r, err)
+			return
+		}
 
 		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
 			h.Error(w, r, err)
 			return
 		}
 
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
-		}
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		}
@@ -59,23 +61,24 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			h.Error(w, r, err)
 			return
 		}
-		if err := h.Encode(w, r, out); err != nil {
+		reply := out.(*SimpleMessage)
+		if err := h.Encode(w, r, reply); err != nil {
 			h.Error(w, r, err)
 		}
 	}).Methods("GET")
 
 	r.HandleFunc("/v1/example/echo/{id}/{num}/{lang}", func(w http.ResponseWriter, r *http.Request) {
 		var in SimpleMessage
+		if err := h.Decode(r, &in); err != nil {
+			h.Error(w, r, err)
+			return
+		}
 
 		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
 			h.Error(w, r, err)
 			return
 		}
 
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
-		}
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		}
@@ -87,23 +90,24 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			h.Error(w, r, err)
 			return
 		}
-		if err := h.Encode(w, r, out); err != nil {
+		reply := out.(*SimpleMessage)
+		if err := h.Encode(w, r, reply); err != nil {
 			h.Error(w, r, err)
 		}
 	}).Methods("GET")
 
 	r.HandleFunc("/v1/example/echo1/{id}/{line_num}/{status.note}", func(w http.ResponseWriter, r *http.Request) {
 		var in SimpleMessage
+		if err := h.Decode(r, &in); err != nil {
+			h.Error(w, r, err)
+			return
+		}
 
 		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
 			h.Error(w, r, err)
 			return
 		}
 
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
-		}
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		}
@@ -115,23 +119,24 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			h.Error(w, r, err)
 			return
 		}
-		if err := h.Encode(w, r, out); err != nil {
+		reply := out.(*SimpleMessage)
+		if err := h.Encode(w, r, reply); err != nil {
 			h.Error(w, r, err)
 		}
 	}).Methods("GET")
 
 	r.HandleFunc("/v1/example/echo2/{no.note}", func(w http.ResponseWriter, r *http.Request) {
 		var in SimpleMessage
+		if err := h.Decode(r, &in); err != nil {
+			h.Error(w, r, err)
+			return
+		}
 
 		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
 			h.Error(w, r, err)
 			return
 		}
 
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
-		}
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		}
@@ -143,23 +148,24 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			h.Error(w, r, err)
 			return
 		}
-		if err := h.Encode(w, r, out); err != nil {
+		reply := out.(*SimpleMessage)
+		if err := h.Encode(w, r, reply); err != nil {
 			h.Error(w, r, err)
 		}
 	}).Methods("GET")
 
 	r.HandleFunc("/v1/example/echo/{id}", func(w http.ResponseWriter, r *http.Request) {
 		var in SimpleMessage
+		if err := h.Decode(r, &in); err != nil {
+			h.Error(w, r, err)
+			return
+		}
 
 		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
 			h.Error(w, r, err)
 			return
 		}
 
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
-		}
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		}
@@ -171,18 +177,19 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			h.Error(w, r, err)
 			return
 		}
-		if err := h.Encode(w, r, out); err != nil {
+		reply := out.(*SimpleMessage)
+		if err := h.Encode(w, r, reply); err != nil {
 			h.Error(w, r, err)
 		}
 	}).Methods("POST")
 
 	r.HandleFunc("/v1/example/echo_body", func(w http.ResponseWriter, r *http.Request) {
 		var in SimpleMessage
-
 		if err := h.Decode(r, &in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
+
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.EchoBody(ctx, req.(*SimpleMessage))
 		}
@@ -194,18 +201,48 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			h.Error(w, r, err)
 			return
 		}
-		if err := h.Encode(w, r, out); err != nil {
+		reply := out.(*SimpleMessage)
+		if err := h.Encode(w, r, reply); err != nil {
 			h.Error(w, r, err)
 		}
 	}).Methods("POST")
 
-	r.HandleFunc("/v1/example/echo_delete", func(w http.ResponseWriter, r *http.Request) {
-		var in SimpleMessage
-
+	r.HandleFunc("/v1/example/echo_response_body", func(w http.ResponseWriter, r *http.Request) {
+		var in DynamicMessageUpdate
 		if err := h.Decode(r, &in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
+
+		next := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.EchoResponseBody(ctx, req.(*DynamicMessageUpdate))
+		}
+		if h.Middleware != nil {
+			next = h.Middleware(next)
+		}
+		out, err := next(r.Context(), &in)
+		if err != nil {
+			h.Error(w, r, err)
+			return
+		}
+		reply := out.(*DynamicMessageUpdate)
+		if err := h.Encode(w, r, reply.Body); err != nil {
+			h.Error(w, r, err)
+		}
+	}).Methods("POST")
+
+	r.HandleFunc("/v1/example/echo_delete/{id}/{num}", func(w http.ResponseWriter, r *http.Request) {
+		var in SimpleMessage
+		if err := h.Decode(r, &in); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+
+		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.EchoDelete(ctx, req.(*SimpleMessage))
 		}
@@ -217,18 +254,19 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			h.Error(w, r, err)
 			return
 		}
-		if err := h.Encode(w, r, out); err != nil {
+		reply := out.(*SimpleMessage)
+		if err := h.Encode(w, r, reply); err != nil {
 			h.Error(w, r, err)
 		}
 	}).Methods("DELETE")
 
 	r.HandleFunc("/v1/example/echo_patch", func(w http.ResponseWriter, r *http.Request) {
 		var in DynamicMessageUpdate
-
 		if err := h.Decode(r, &in.Body); err != nil {
 			h.Error(w, r, err)
 			return
 		}
+
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.EchoPatch(ctx, req.(*DynamicMessageUpdate))
 		}
@@ -240,7 +278,8 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			h.Error(w, r, err)
 			return
 		}
-		if err := h.Encode(w, r, out); err != nil {
+		reply := out.(*DynamicMessageUpdate)
+		if err := h.Encode(w, r, reply); err != nil {
 			h.Error(w, r, err)
 		}
 	}).Methods("PATCH")

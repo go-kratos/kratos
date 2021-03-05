@@ -85,10 +85,17 @@ service EchoService {
 			body: "*"
 		};
 	}
+	// EchoResponseBody method receives a simple message and returns it.
+	rpc EchoResponseBody(DynamicMessageUpdate) returns (DynamicMessageUpdate) {
+		option (google.api.http) = {
+			post: "/v1/example/echo_response_body"
+			response_body: "body"
+		};
+	}
 	// EchoDelete method receives a simple message and returns it.
 	rpc EchoDelete(SimpleMessage) returns (SimpleMessage) {
 		option (google.api.http) = {
-			delete: "/v1/example/echo_delete"
+			delete: "/v1/example/echo_delete/{id}/{num}"
 		};
 	}
 	// EchoPatch method receives a NonStandardUpdateRequest and returns it.
