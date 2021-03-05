@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -96,18 +95,22 @@ func decodeRequest(req *http.Request, v interface{}) error {
 
 // encodeResponse encodes the object to the HTTP response.
 func encodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error {
+	var codec encoding.Codec
 	for _, accept := range r.Header[acceptHeader] {
-		if codec := encoding.GetCodec(contentSubtype(accept)); codec != nil {
-			data, err := codec.Marshal(v)
-			if err != nil {
-				return err
-			}
-			w.Header().Set(contentTypeHeader, contentType(codec.Name()))
-			w.Write(data)
-			return nil
+		if codec = encoding.GetCodec(contentSubtype(accept)); codec != nil {
+			break
 		}
 	}
-	return json.NewEncoder(w).Encode(v)
+	if codec == nil {
+		codec = encoding.GetCodec("json")
+	}
+	data, err := codec.Marshal(v)
+	if err != nil {
+		return err
+	}
+	w.Header().Set(contentTypeHeader, contentType(codec.Name()))
+	w.Write(data)
+	return nil
 }
 
 // encodeError encodes the erorr to the HTTP response.
@@ -116,7 +119,6 @@ func encodeError(w http.ResponseWriter, r *http.Request, err error) {
 	if !ok {
 		se = &errors.StatusError{
 			Code:    2,
-			Reason:  "",
 			Message: err.Error(),
 		}
 	}

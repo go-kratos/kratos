@@ -22,16 +22,16 @@ func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.Handl
 	{{range .Methods}}
 	r.HandleFunc("{{.Path}}", func(w http.ResponseWriter, r *http.Request) {
 		var in {{.Request}}
+		if err := h.Decode(r, &in{{.Body}}); err != nil {
+			h.Error(w, r, err)
+			return
+		}
 		{{if ne (len .Vars) 0}}
 		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
 			h.Error(w, r, err)
 			return
 		}
 		{{end}}
-		if err := h.Decode(r, &in{{.Body}}); err != nil {
-			h.Error(w, r, err)
-			return
-		}
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.{{.Name}}(ctx, req.(*{{.Request}}))
 		}
@@ -43,7 +43,8 @@ func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.Handl
 			h.Error(w, r, err)
 			return
 		}
-		if err := h.Encode(w, r, out{{.ResponseBody}}); err != nil {
+		reply := out.(*{{.Reply}})
+		if err := h.Encode(w, r, reply{{.ResponseBody}}); err != nil {
 			h.Error(w, r, err)
 		}
 	}).Methods("{{.Method}}")

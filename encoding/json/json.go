@@ -2,6 +2,7 @@ package json
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 
@@ -21,6 +22,8 @@ var (
 	UnmarshalOptions = protojson.UnmarshalOptions{
 		DiscardUnknown: true,
 	}
+
+	typeProtoMessage = reflect.TypeOf((*proto.Message)(nil)).Elem()
 )
 
 func init() {
@@ -38,6 +41,15 @@ func (codec) Marshal(v interface{}) ([]byte, error) {
 }
 
 func (codec) Unmarshal(data []byte, v interface{}) error {
+	rv := reflect.ValueOf(v)
+	for rv.Kind() == reflect.Ptr {
+		if rv.IsNil() {
+			rv.Set(reflect.New(rv.Type().Elem()))
+			v = rv.Interface()
+			break
+		}
+		rv = rv.Elem()
+	}
 	if m, ok := v.(proto.Message); ok {
 		return UnmarshalOptions.Unmarshal(data, m)
 	}
