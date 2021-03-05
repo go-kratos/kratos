@@ -77,11 +77,6 @@ func NewServer(opts ...ServerOption) *Server {
 	return srv
 }
 
-// RouteGroup returns a new route group for the URL path prefix.
-func (s *Server) RouteGroup(prefix string) *RouteGroup {
-	return &RouteGroup{prefix: prefix, router: s.router}
-}
-
 // Handle registers a new route with a matcher for the URL path.
 func (s *Server) Handle(path string, h http.Handler) {
 	s.router.Handle(path, h)
@@ -103,7 +98,7 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	defer cancel()
 	ctx = transport.NewContext(ctx, transport.Transport{Kind: "HTTP"})
 	ctx = NewServerContext(ctx, ServerInfo{Request: req, Response: res})
-	s.router.ServeHTTP(res, req)
+	s.router.ServeHTTP(res, req.WithContext(ctx))
 }
 
 // Endpoint return a real address to registry endpoint.
