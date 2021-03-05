@@ -65,7 +65,7 @@ kratos proto client api/helloworld/helloworld.proto
 # generate server template
 kratos proto server api/helloworld/helloworld.proto -t internal/service
 
-# Generate all proto source code, wire, etc.
+# generate all proto source code, wire, etc.
 go generate ./...
 # compile
 go build -o ./bin/ ./...
