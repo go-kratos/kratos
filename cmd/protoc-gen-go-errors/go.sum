@@ -13,6 +13,7 @@ github.com/go-kratos/kratos/v2 v2.0.0-20210217083752-d86d233d93ce h1:LfOsLN9s8tA
 github.com/go-kratos/kratos/v2 v2.0.0-20210217083752-d86d233d93ce/go.mod h1:oLvFyDBJkkWN8TPqb+NmpvRrSy9uM/K+XQubVRc11a8=
 github.com/go-kratos/kratos/v2 v2.0.0-alpha4 h1:MKkkSZigSMg7Kx8HzrobZ93zlgmi0tAKWM9bMf6YTpU=
 github.com/go-kratos/kratos/v2 v2.0.0-alpha4/go.mod h1:oLvFyDBJkkWN8TPqb+NmpvRrSy9uM/K+XQubVRc11a8=
+github.com/go-kratos/kratos/v2 v2.0.0-alpha5/go.mod h1:oLvFyDBJkkWN8TPqb+NmpvRrSy9uM/K+XQubVRc11a8=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
