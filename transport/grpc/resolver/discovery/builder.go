@@ -42,10 +42,13 @@ func (d *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 	if err != nil {
 		return nil, err
 	}
+	ctx, cancel := context.WithCancel(context.Background())
 	r := &discoveryResolver{
-		w:   w,
-		cc:  cc,
-		log: log.NewHelper("grpc/resolver/discovery", d.logger),
+		w:      w,
+		cc:     cc,
+		log:    log.NewHelper("grpc/resolver/discovery", d.logger),
+		ctx:    ctx,
+		cancel: cancel,
 	}
 	go r.watch()
 	return r, nil
