@@ -80,6 +80,11 @@ func (a *App) Run() error {
 			return srv.Start()
 		})
 	}
+	for _, fn := range a.opts.before {
+		if err := fn(); err != nil {
+			return err
+		}
+	}
 	if a.opts.registrar != nil {
 		if err := a.opts.registrar.Register(a.opts.ctx, a.instance); err != nil {
 			return err
@@ -107,6 +112,11 @@ func (a *App) Run() error {
 func (a *App) Stop() error {
 	if a.opts.registrar != nil {
 		if err := a.opts.registrar.Deregister(a.opts.ctx, a.instance); err != nil {
+			return err
+		}
+	}
+	for _, fn := range a.opts.after {
+		if err := fn(); err != nil {
 			return err
 		}
 	}

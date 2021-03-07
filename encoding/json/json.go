@@ -44,7 +44,6 @@ func (codec) Unmarshal(data []byte, v interface{}) error {
 		if rv.IsNil() {
 			rv.Set(reflect.New(rv.Type().Elem()))
 			v = rv.Interface()
-			break
 		}
 		rv = rv.Elem()
 	}
