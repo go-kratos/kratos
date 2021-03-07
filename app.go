@@ -115,13 +115,13 @@ func (a *App) Stop() error {
 			return err
 		}
 	}
+	if a.cancel != nil {
+		a.cancel()
+	}
 	for _, fn := range a.opts.after {
 		if err := fn(); err != nil {
 			return err
 		}
-	}
-	if a.cancel != nil {
-		a.cancel()
 	}
 	return nil
 }
