@@ -1,10 +1,13 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/imdario/mergo"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 // Reader is config reader.
@@ -71,16 +74,16 @@ func (r *reader) Value(path string) (Value, bool) {
 }
 
 func (r *reader) Source() ([]byte, error) {
-	return codec.Marshal(r.values)
+	return marshalJSON(r.values)
 }
 
 func cloneMap(src map[string]interface{}) (map[string]interface{}, error) {
-	data, err := codec.Marshal(src)
+	data, err := marshalJSON(src)
 	if err != nil {
 		return nil, err
 	}
 	dst := make(map[string]interface{})
-	if err = codec.Unmarshal(data, &dst); err != nil {
+	if err = unmarshalJSON(data, &dst); err != nil {
 		return nil, err
 	}
 	return dst, nil
@@ -103,4 +106,18 @@ func convertMap(src interface{}) interface{} {
 	default:
 		return src
 	}
+}
+
+func marshalJSON(v interface{}) ([]byte, error) {
+	if m, ok := v.(proto.Message); ok {
+		return protojson.Marshal(m)
+	}
+	return json.Marshal(v)
+}
+
+func unmarshalJSON(data []byte, v interface{}) error {
+	if m, ok := v.(proto.Message); ok {
+		return protojson.Unmarshal(data, m)
+	}
+	return json.Unmarshal(data, v)
 }

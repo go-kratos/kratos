@@ -5,14 +5,13 @@ go 1.15
 require (
 	entgo.io/ent v0.6.0
 	github.com/gin-gonic/gin v1.6.3
-	github.com/go-kratos/kratos/v2 v2.0.0-alpha4
+	github.com/go-kratos/kratos/v2 v2.0.0-alpha6
 	github.com/go-redis/redis/extra/redisotel v0.2.0
 	github.com/go-redis/redis/v8 v8.6.0
 	github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae
 	github.com/golang/protobuf v1.4.3
 	github.com/google/wire v0.5.0
 	github.com/gorilla/mux v1.8.0
-	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
