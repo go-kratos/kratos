@@ -10,5 +10,5 @@ func TestWrapper(t *testing.T) {
 	err := NewStdLogger(os.Stderr)
 
 	l := Wrap(out, err)
-	l.Print("message", "test")
+	l.Print(LevelInfo, "message", "test")
 }

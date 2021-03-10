@@ -2,9 +2,9 @@ package log
 
 type wrapper []Logger
 
-func (w wrapper) Print(pairs ...interface{}) {
+func (w wrapper) Print(level Level, pairs ...interface{}) {
 	for _, p := range w {
-		p.Print(pairs...)
+		p.Print(level, pairs...)
 	}
 }
 

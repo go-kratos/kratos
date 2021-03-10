@@ -28,7 +28,7 @@ func NewStdLogger(w io.Writer) Logger {
 }
 
 // Print print the kv pairs log.
-func (s *stdLogger) Print(kvpair ...interface{}) {
+func (s *stdLogger) Print(level Level, kvpair ...interface{}) {
 	if len(kvpair) == 0 {
 		return
 	}
@@ -36,6 +36,7 @@ func (s *stdLogger) Print(kvpair ...interface{}) {
 		kvpair = append(kvpair, "")
 	}
 	buf := s.pool.Get().(*bytes.Buffer)
+	fmt.Fprintf(buf, "level=%s ", level.String())
 	for i := 0; i < len(kvpair); i += 2 {
 		fmt.Fprintf(buf, "%s=%v ", kvpair[i], kvpair[i+1])
 	}
