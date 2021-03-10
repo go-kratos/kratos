@@ -6,7 +6,7 @@ import (
 	"os"
 
 	consul "github.com/go-kratos/consul/registry"
-	pb "github.com/go-kratos/examples/helloworld/helloworld"
+	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport/grpc"

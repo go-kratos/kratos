@@ -10,9 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/go-kratos/examples/blog/internal/data/ent/article"
-	"github.com/go-kratos/examples/blog/internal/data/ent/comment"
-	"github.com/go-kratos/examples/blog/internal/data/ent/predicate"
+	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/article"
+	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/comment"
+	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/predicate"
 )
 
 // CommentUpdate is the builder for updating Comment entities.
