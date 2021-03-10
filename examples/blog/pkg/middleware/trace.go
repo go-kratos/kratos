@@ -81,13 +81,13 @@ func Server(opts ...Option) middleware.Middleware {
 				// HTTP span
 				component = "HTTP"
 				operation = info.Request.RequestURI
-				propagation.NewCompositeTextMapPropagator(options.Propagators).Extract(ctx, info.Request.Header)
+				ctx = propagation.NewCompositeTextMapPropagator(options.Propagators).Extract(ctx, info.Request.Header)
 			} else if info, ok := grpc.FromServerContext(ctx); ok {
 				// gRPC span
 				component = "gRPC"
 				operation = info.FullMethod
 				if md, ok := metadata.FromIncomingContext(ctx); ok {
-					propagation.NewCompositeTextMapPropagator(options.Propagators).Extract(ctx, MetadataCarrier{md: &md})
+					ctx = propagation.NewCompositeTextMapPropagator(options.Propagators).Extract(ctx, MetadataCarrier{md: &md})
 				}
 			}
 			ctx, span := tracer.Start(ctx,
