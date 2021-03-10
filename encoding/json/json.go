@@ -2,7 +2,6 @@ package json
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 
 	"github.com/go-kratos/kratos/v2/encoding"
@@ -41,11 +40,8 @@ func (codec) Marshal(v interface{}) ([]byte, error) {
 
 func (codec) Unmarshal(data []byte, v interface{}) error {
 	rv := reflect.ValueOf(v)
-	if rv.Kind() != reflect.Ptr {
-		return fmt.Errorf("%T is not a pointer", v)
-	}
 	for rv.Kind() == reflect.Ptr {
-		if rv.IsNil() && rv.CanSet() {
+		if rv.IsNil() {
 			rv.Set(reflect.New(rv.Type().Elem()))
 			v = rv.Interface()
 		}
