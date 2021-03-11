@@ -3,6 +3,7 @@ package errors
 import (
 	"errors"
 	"fmt"
+	"net/http"
 )
 
 const (
@@ -24,6 +25,48 @@ func (e *StatusError) Is(target error) bool {
 		return e.Code == err.Code
 	}
 	return false
+}
+
+// HTTPStatus returns the Status represented by se.
+func (e *StatusError) HTTPStatus() int {
+	switch e.Code {
+	case 0:
+		return http.StatusOK
+	case 1:
+		return http.StatusInternalServerError
+	case 2:
+		return http.StatusInternalServerError
+	case 3:
+		return http.StatusBadRequest
+	case 4:
+		return http.StatusRequestTimeout
+	case 5:
+		return http.StatusNotFound
+	case 6:
+		return http.StatusConflict
+	case 7:
+		return http.StatusForbidden
+	case 8:
+		return http.StatusTooManyRequests
+	case 9:
+		return http.StatusPreconditionFailed
+	case 10:
+		return http.StatusConflict
+	case 11:
+		return http.StatusBadRequest
+	case 12:
+		return http.StatusNotImplemented
+	case 13:
+		return http.StatusInternalServerError
+	case 14:
+		return http.StatusServiceUnavailable
+	case 15:
+		return http.StatusInternalServerError
+	case 16:
+		return http.StatusUnauthorized
+	default:
+		return http.StatusInternalServerError
+	}
 }
 
 func (e *StatusError) Error() string {

@@ -3,7 +3,7 @@ package log
 import "testing"
 
 func TestFmtLogger(t *testing.T) {
-	logger := NewStdLogger()
+	logger := DefaultLogger
 
 	Debug(logger).Print("log", "test debug")
 	Info(logger).Print("log", "test info")

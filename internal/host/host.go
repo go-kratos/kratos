@@ -1,7 +1,6 @@
 package host
 
 import (
-	"fmt"
 	"net"
 	"strconv"
 )
@@ -46,7 +45,7 @@ func Extract(hostport string, lis net.Listener) (string, error) {
 	}
 	ifaces, err := net.Interfaces()
 	if err != nil {
-		return "", fmt.Errorf("Failed to get net interfaces: %v", err)
+		return "", err
 	}
 	for _, iface := range ifaces {
 		addrs, err := iface.Addrs()

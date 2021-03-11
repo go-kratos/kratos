@@ -25,6 +25,8 @@ type EchoServiceClient interface {
 	Echo(ctx context.Context, in *SimpleMessage, opts ...grpc.CallOption) (*SimpleMessage, error)
 	// EchoBody method receives a simple message and returns it.
 	EchoBody(ctx context.Context, in *SimpleMessage, opts ...grpc.CallOption) (*SimpleMessage, error)
+	// EchoResponseBody method receives a simple message and returns it.
+	EchoResponseBody(ctx context.Context, in *DynamicMessageUpdate, opts ...grpc.CallOption) (*DynamicMessageUpdate, error)
 	// EchoDelete method receives a simple message and returns it.
 	EchoDelete(ctx context.Context, in *SimpleMessage, opts ...grpc.CallOption) (*SimpleMessage, error)
 	// EchoPatch method receives a NonStandardUpdateRequest and returns it.
@@ -51,6 +53,15 @@ func (c *echoServiceClient) Echo(ctx context.Context, in *SimpleMessage, opts ..
 func (c *echoServiceClient) EchoBody(ctx context.Context, in *SimpleMessage, opts ...grpc.CallOption) (*SimpleMessage, error) {
 	out := new(SimpleMessage)
 	err := c.cc.Invoke(ctx, "/testproto.EchoService/EchoBody", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *echoServiceClient) EchoResponseBody(ctx context.Context, in *DynamicMessageUpdate, opts ...grpc.CallOption) (*DynamicMessageUpdate, error) {
+	out := new(DynamicMessageUpdate)
+	err := c.cc.Invoke(ctx, "/testproto.EchoService/EchoResponseBody", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +97,8 @@ type EchoServiceServer interface {
 	Echo(context.Context, *SimpleMessage) (*SimpleMessage, error)
 	// EchoBody method receives a simple message and returns it.
 	EchoBody(context.Context, *SimpleMessage) (*SimpleMessage, error)
+	// EchoResponseBody method receives a simple message and returns it.
+	EchoResponseBody(context.Context, *DynamicMessageUpdate) (*DynamicMessageUpdate, error)
 	// EchoDelete method receives a simple message and returns it.
 	EchoDelete(context.Context, *SimpleMessage) (*SimpleMessage, error)
 	// EchoPatch method receives a NonStandardUpdateRequest and returns it.
@@ -102,6 +115,9 @@ func (UnimplementedEchoServiceServer) Echo(context.Context, *SimpleMessage) (*Si
 }
 func (UnimplementedEchoServiceServer) EchoBody(context.Context, *SimpleMessage) (*SimpleMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EchoBody not implemented")
+}
+func (UnimplementedEchoServiceServer) EchoResponseBody(context.Context, *DynamicMessageUpdate) (*DynamicMessageUpdate, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EchoResponseBody not implemented")
 }
 func (UnimplementedEchoServiceServer) EchoDelete(context.Context, *SimpleMessage) (*SimpleMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EchoDelete not implemented")
@@ -158,6 +174,24 @@ func _EchoService_EchoBody_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EchoService_EchoResponseBody_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DynamicMessageUpdate)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EchoServiceServer).EchoResponseBody(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/testproto.EchoService/EchoResponseBody",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EchoServiceServer).EchoResponseBody(ctx, req.(*DynamicMessageUpdate))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _EchoService_EchoDelete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SimpleMessage)
 	if err := dec(in); err != nil {
@@ -208,6 +242,10 @@ var EchoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "EchoBody",
 			Handler:    _EchoService_EchoBody_Handler,
+		},
+		{
+			MethodName: "EchoResponseBody",
+			Handler:    _EchoService_EchoResponseBody_Handler,
 		},
 		{
 			MethodName: "EchoDelete",

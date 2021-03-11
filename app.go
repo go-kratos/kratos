@@ -58,8 +58,8 @@ func (a *App) Server() []transport.Server {
 }
 
 // Registry returns registry.
-func (a *App) Registry() registry.Registry {
-	return a.opts.registry
+func (a *App) Registry() registry.Registrar {
+	return a.opts.registrar
 }
 
 // Run executes all OnStart hooks registered with the application's Lifecycle.
@@ -80,8 +80,13 @@ func (a *App) Run() error {
 			return srv.Start()
 		})
 	}
-	if a.opts.registry != nil {
-		if err := a.opts.registry.Register(a.instance); err != nil {
+	for _, fn := range a.opts.before {
+		if err := fn(); err != nil {
+			return err
+		}
+	}
+	if a.opts.registrar != nil {
+		if err := a.opts.registrar.Register(a.opts.ctx, a.instance); err != nil {
 			return err
 		}
 	}
@@ -105,13 +110,18 @@ func (a *App) Run() error {
 
 // Stop gracefully stops the application.
 func (a *App) Stop() error {
-	if a.opts.registry != nil {
-		if err := a.opts.registry.Deregister(a.instance); err != nil {
+	if a.opts.registrar != nil {
+		if err := a.opts.registrar.Deregister(a.opts.ctx, a.instance); err != nil {
 			return err
 		}
 	}
 	if a.cancel != nil {
 		a.cancel()
+	}
+	for _, fn := range a.opts.after {
+		if err := fn(); err != nil {
+			return err
+		}
 	}
 	return nil
 }

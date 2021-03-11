@@ -33,11 +33,11 @@ type clientKey struct{}
 
 // NewClientContext returns a new Context that carries value.
 func NewClientContext(ctx context.Context, info ClientInfo) context.Context {
-	return context.WithValue(ctx, serverKey{}, info)
+	return context.WithValue(ctx, clientKey{}, info)
 }
 
 // FromClientContext returns the Transport value stored in ctx, if any.
 func FromClientContext(ctx context.Context) (info ClientInfo, ok bool) {
-	info, ok = ctx.Value(serverKey{}).(ClientInfo)
+	info, ok = ctx.Value(clientKey{}).(ClientInfo)
 	return
 }

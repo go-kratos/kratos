@@ -23,9 +23,13 @@ type options struct {
 	ctx  context.Context
 	sigs []os.Signal
 
-	logger   log.Logger
-	registry registry.Registry
-	servers  []transport.Server
+	logger    log.Logger
+	registrar registry.Registrar
+
+	servers []transport.Server
+
+	before []func() error
+	after  []func() error
 }
 
 // ID with service id.
@@ -69,11 +73,21 @@ func Logger(logger log.Logger) Option {
 }
 
 // Registry with service registry.
-func Registry(r registry.Registry) Option {
-	return func(o *options) { o.registry = r }
+func Registry(r registry.Registrar) Option {
+	return func(o *options) { o.registrar = r }
 }
 
 // Server with transport servers.
 func Server(srv ...transport.Server) Option {
 	return func(o *options) { o.servers = srv }
+}
+
+// Before before service starts.
+func Before(fn func() error) Option {
+	return func(o *options) { o.before = append(o.before, fn) }
+}
+
+// After after services stops.
+func After(fn func() error) Option {
+	return func(o *options) { o.after = append(o.after, fn) }
 }

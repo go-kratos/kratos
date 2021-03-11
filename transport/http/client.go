@@ -90,7 +90,7 @@ func (t *baseTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if t.userAgent != "" && req.Header.Get("User-Agent") == "" {
 		req.Header.Set("User-Agent", t.userAgent)
 	}
-	ctx := transport.NewContext(req.Context(), transport.Transport{Kind: "HTTP"})
+	ctx := transport.NewContext(req.Context(), transport.Transport{Kind: transport.KindHTTP})
 	ctx = NewClientContext(ctx, ClientInfo{Request: req})
 	ctx, cancel := context.WithTimeout(ctx, t.timeout)
 	defer cancel()
@@ -115,22 +115,26 @@ func Do(client *http.Client, req *http.Request, target interface{}) error {
 	if err != nil {
 		return err
 	}
-	data, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
 	defer res.Body.Close()
-	subtype := contentSubtype(res.Header.Get("content-type"))
+	if res.StatusCode < 200 || res.StatusCode > 299 {
+		se := &errors.StatusError{Code: 2}
+		if err := decodeResponse(res, se); err != nil {
+			return err
+		}
+		return se
+	}
+	return decodeResponse(res, target)
+}
+
+func decodeResponse(res *http.Response, target interface{}) error {
+	subtype := contentSubtype(res.Header.Get(contentTypeHeader))
 	codec := encoding.GetCodec(subtype)
 	if codec == nil {
 		codec = encoding.GetCodec("json")
 	}
-	if res.StatusCode < 200 || res.StatusCode > 299 {
-		se := &errors.StatusError{}
-		if err := codec.Unmarshal(data, se); err != nil {
-			return err
-		}
-		return se
+	data, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
 	}
 	return codec.Unmarshal(data, target)
 }

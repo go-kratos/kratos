@@ -17,8 +17,17 @@ type Server interface {
 
 // Transport is transport context value.
 type Transport struct {
-	Kind string
+	Kind Kind
 }
+
+// Kind defines the type of Transport
+type Kind string
+
+// Defines a set of transport kind
+const (
+	KindGRPC Kind = "gRPC"
+	KindHTTP Kind = "HTTP"
+)
 
 type transportKey struct{}
 

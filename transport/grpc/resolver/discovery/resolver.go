@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"context"
 	"net/url"
 	"time"
 
@@ -14,10 +15,20 @@ type discoveryResolver struct {
 	w   registry.Watcher
 	cc  resolver.ClientConn
 	log *log.Helper
+
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 func (r *discoveryResolver) watch() {
 	for {
+		select {
+		case <-r.ctx.Done():
+			//goroutine exit
+			return
+		default:
+		}
+
 		ins, err := r.w.Next()
 		if err != nil {
 			r.log.Errorf("Failed to watch discovery endpoint: %v", err)
@@ -47,6 +58,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 }
 
 func (r *discoveryResolver) Close() {
+	r.cancel()
 	r.w.Close()
 }
 
@@ -70,5 +82,5 @@ func parseAttributes(md map[string]string) *attributes.Attributes {
 	for k, v := range md {
 		pairs = append(pairs, k, v)
 	}
-	return attributes.New(pairs)
+	return attributes.New(pairs...)
 }

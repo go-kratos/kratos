@@ -1,4 +1,4 @@
-![kratos](docs/images/kratos.png)
+![kratos](docs/images/kratos.png) 
 
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
 [![Build Status](https://github.com/go-kratos/kratos/workflows/Go/badge.svg)](https://github.com/go-kratos/kratos/actions)
@@ -6,39 +6,41 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-kratos/kratos/v2)](https://goreportcard.com/report/github.com/go-kratos/kratos/v2)
 [![Discord](https://img.shields.io/discord/766619759214854164?label=chat&logo=discord)](https://discord.gg/BWzJsUJ)
 
+Translations: [English](README.md) | [简体中文](README_zh.md)
+
 # Kratos
+Kratos is a microservice-oriented governance framework implements by golang, which offers convenient capabilities to help you quickly build a bulletproof application from scratch.
 
-Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关框架及工具。  
 
-> 名字来源于:《战神》游戏以希腊神话为背景，讲述由凡人成为战神的奎托斯（Kratos）成为战神并展开弑神屠杀的冒险历程。
+>The name is inspired by the game God of War which is based on Greek myths, tells the Kratos from mortals to become a God of War and launches the adventure of killing god.
+
 
 ## Goals
 
-我们致力于提供完整的微服务研发体验，整合相关框架及工具后，微服务治理相关部分可对整体业务开发周期无感，从而更加聚焦于业务交付。对每位开发者而言，整套 Kratos 框架也是不错的学习仓库，可以了解和参考到微服务方面的技术积累和经验。
-
+Kratos boosts your productivity. With the integration of excellent resources and further support, programmers can get rid of most issues might encounter in the field of distributed systems and software engineering such that they are allowed to focus on the release of businesses only. Additionally, for each programmer, Kratos is also an ideal one learning warehouse for many aspects of microservices to enrich their experiences and skills.
 ### Principles
 
-* 简单：不过度设计，代码平实简单；
-* 通用：通用业务开发所需要的基础库的功能；
-* 高效：提高业务迭代的效率；
-* 稳定：基础库可测试性高，覆盖率高，有线上实践安全可靠；
-* 健壮：通过良好的基础库设计，减少错用；
-* 高性能：性能高，但不特定为了性能做 hack 优化，引入 unsafe ；
-* 扩展性：良好的接口设计，来扩展实现，或者通过新增基础库目录来扩展功能；
-* 容错性：为失败设计，大量引入对 SRE 的理解，鲁棒性高；
-* 工具链：包含大量工具链，比如 cache 代码生成，lint 工具等等；
+* **Simple**: Appropriate design, plain and easy code.
+* **General**: Cover the various utilities for business development.
+* **Highly efficient**: Speeding up the efficiency of businesses upgrading.
+* **Stable**: The base libs validated in the production environment which have the characters of the high testability, high coverage as well as high security and reliability.
+* **Robust**: Eliminating misusing through high quality of the base libs.
+* **High-performance**: Optimal performance excluding the optimization of hacking in case of *unsafe*. 
+* **Expandability**: Properly designed interfaces, you can expand utilities such as base libs to meet your further requirements.
+* **Fault-tolerance**: Designed against failure, enhance the understanding and exercising of SRE within Kratos to achieve more robustness.
+* **Toolchain**: Includes an extensive toolchain, such as the code generation of cache, the lint tool, and so forth.
 
 ## Features
-* APIs：协议通信以 HTTP/gRPC 为基础，通过 Protobuf 进行定义；
-* Errors：通过 Protobuf 的 Enum 作为错误码定义，以及工具生成判定接口；
-* Metadata：在协议通信 HTTP/gRPC 中，通过 Middleware 规范化服务元信息传递；
-* Config：支持多数据源方式，进行配置合并铺平，通过 Atomic 方式支持动态配置；
-* Logger：标准日志接口，可方便集成三方 log 库，并可通过 fluentd 收集日志；
-* Metrics：统一指标接口，可以实现各种指标系统，默认集成 Prometheus；
-* Tracing：遵循 OpenTracing 规范定义，以实现微服务链路追踪；
-* Encoding：支持 Accept 和 Content-Type 进行自动选择内容编码；
-* Transport：通用的 HTTP/gRPC 传输层，实现统一的 Middleware 插件支持；
-* Registry：实现统一注册中心接口，可插件化对接各种注册中心；
+* APIs: The communication protocol is based on the HTTP/gRPC through the definition of Protobuf.
+* Errors: Both the definitions of error code and the handle interfaces of code generation for tools are defined by the Enum of the Protobuf.
+* Metadata: In the protocol of HTTP/gRPC, the transmission of service atomic information are formalized by the Middleware.
+* Config: Multiple data sources are supported for configurations and integrations such that dynamic configurations are offered through the manner of *Atomic* operations.
+* Logger: The standard log interfaces ease the integration of the third-party log libs and logs are collected through the *Fluentd*.
+* Metrics: *Prometheus* integrated by default. Furthermore, with the uniform metric interfaces, you can implement your own metric system more flexible.
+* Tracing: The OpenTracing is conformed to achieve the tracing of microservices chains.
+* Encoding: The selection of the content encoding is automatically supported by Accept and Content-Type.
+* Transport: The uniform plugins for Middleware are supported by HTTP/gRPC.
+ * Registry: The interfaces of the centralized registry is able to be connected with various other centralized registries through plug-ins.
 
 ## Getting Started
 ### Required
@@ -48,27 +50,27 @@ Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关框架及
 
 ### Installing
 ```
-go get github.com/go-kratos/kratos/cmd/kratos/v2
+go get github.com/go-kratos/kratos/cmd/kratos/v2@latest
 ```
 ### Create a service
 ```
-# 创建项目模板
+# create project template
 kratos new helloworld
 
 cd helloworld
-# 生成proto模板
+# generate Proto template
 kratos proto add api/helloworld/helloworld.proto
-# 生成service模板
-kratos proto service api/helloworld/helloworld.proto -t internal/service
+# generate Proto source code
+kratos proto client api/helloworld/helloworld.proto
+# generate server template
+kratos proto server api/helloworld/helloworld.proto -t internal/service
 
-# 安装生成工具
-make init
-# 生成api下所有proto文件
-make proto
-# 编译cmd下所有main文件
-make build
-# 进行单元测试
-make test
+# generate all proto source code, wire, etc.
+go generate ./...
+# compile
+go build -o ./bin/ ./...
+# run
+./bin/helloworld -conf ./configs
 ```
 
 ### Kratos Boot
@@ -91,17 +93,13 @@ app.Run()
 ## Related
 
 * [Docs](https://go-kratos.dev/)
-* [Examples](https://github.com/go-kratos/examples)
+* [Examples](./examples)
 * [Service Layout](https://github.com/go-kratos/kratos-layout)
 
 ## Community
 * [Wechat Group](https://github.com/go-kratos/kratos/issues/682)
 * [Discord Group](https://discord.gg/BWzJsUJ)
 * QQ Group: 716486124
-
-## Sponsors and Backers
-
-![kratos](docs/images/alipay.png)
 
 ## License
 Kratos is MIT licensed. See the [LICENSE](./LICENSE) file for details.

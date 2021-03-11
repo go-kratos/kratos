@@ -24,12 +24,14 @@ func NewRepo(url string) *Repo {
 	}
 }
 
+// Path returns the repository cache path.
 func (r *Repo) Path() string {
 	start := strings.LastIndex(r.url, "/")
 	end := strings.LastIndex(r.url, ".git")
 	return path.Join(r.home, r.url[start+1:end])
 }
 
+// Pull fetchs the repository from remote url.
 func (r *Repo) Pull(ctx context.Context, url string) error {
 	repo, err := git.PlainOpen(r.Path())
 	if err != nil {
@@ -48,6 +50,7 @@ func (r *Repo) Pull(ctx context.Context, url string) error {
 	return err
 }
 
+// Clone clones the repository to cache path.
 func (r *Repo) Clone(ctx context.Context) error {
 	if _, err := os.Stat(r.Path()); !os.IsNotExist(err) {
 		return r.Pull(ctx, r.url)
@@ -59,6 +62,7 @@ func (r *Repo) Clone(ctx context.Context) error {
 	return err
 }
 
+// CopyTo copies the repository to project path.
 func (r *Repo) CopyTo(ctx context.Context, to string, modPath string, ignores []string) error {
 	if err := r.Clone(ctx); err != nil {
 		return err
