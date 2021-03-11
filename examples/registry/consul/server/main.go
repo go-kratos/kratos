@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	consul "github.com/go-kratos/consul/registry"
+	"github.com/go-kratos/consul/registry"
 	pb "github.com/go-kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
@@ -34,7 +34,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	r := consul.New(cli)
+	r := registry.New(cli)
 	app := kratos.New(
 		kratos.Name("helloworld"),
 		kratos.Server(

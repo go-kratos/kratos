@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	consul "github.com/go-kratos/consul/registry"
+	"github.com/go-kratos/consul/registry"
 	pb "github.com/go-kratos/examples/helloworld/helloworld"
 	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/hashicorp/consul/api"
@@ -15,7 +15,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	r := consul.New(cli)
+	r := registry.New(cli)
 	conn, err := transgrpc.DialInsecure(
 		context.Background(),
 		transgrpc.WithEndpoint("discovery://d/helloworld"),
