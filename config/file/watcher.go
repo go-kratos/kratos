@@ -48,6 +48,6 @@ func (w *watcher) Next() ([]*config.KeyValue, error) {
 	}
 }
 
-func (w *watcher) Close() error {
+func (w *watcher) Stop() error {
 	return w.fw.Close()
 }

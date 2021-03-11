@@ -6,7 +6,7 @@ require (
 	entgo.io/ent v0.6.0
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-kratos/consul v0.0.0-20210228130349-387ba759cd99
-	github.com/go-kratos/kratos/v2 v2.0.0-alpha4
+	github.com/go-kratos/kratos/v2 v2.0.0-alpha6
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/go-redis/redis/extra/redisotel v0.2.0
 	github.com/go-redis/redis/v8 v8.6.0
@@ -34,5 +34,3 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
-
-replace github.com/go-kratos/kratos/v2 => ./..
