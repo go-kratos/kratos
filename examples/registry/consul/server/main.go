@@ -3,12 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
+	"log"
 
 	"github.com/go-kratos/consul/registry"
 	pb "github.com/go-kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/hashicorp/consul/api"
 )
@@ -24,10 +23,6 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 }
 
 func main() {
-	logger := log.NewStdLogger(os.Stdout)
-
-	log := log.NewHelper("main", logger)
-
 	grpcSrv := grpc.NewServer(
 		grpc.Address(":9000"),
 	)
@@ -49,6 +44,6 @@ func main() {
 	)
 
 	if err := app.Run(); err != nil {
-		log.Error(err)
+		log.Fatal(err)
 	}
 }

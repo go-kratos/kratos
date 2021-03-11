@@ -13,11 +13,11 @@ import (
 func main() {
 	conf := clientv3.Config{}
 	conf.Endpoints = []string{"127.0.0.1:2379"}
-	etcd, err := clientv3.New(conf)
+	cli, err := clientv3.New(conf)
 	if err != nil {
 		panic(err)
 	}
-	r := registry.New(etcd)
+	r := registry.New(cli)
 	conn, err := transgrpc.DialInsecure(
 		context.Background(),
 		transgrpc.WithEndpoint("discovery:///helloworld"),

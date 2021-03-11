@@ -11,11 +11,11 @@ import (
 )
 
 func main() {
-	consul, err := api.NewClient(api.DefaultConfig())
+	cli, err := api.NewClient(api.DefaultConfig())
 	if err != nil {
 		panic(err)
 	}
-	r := registry.New(consul)
+	r := registry.New(cli)
 	conn, err := transgrpc.DialInsecure(
 		context.Background(),
 		transgrpc.WithEndpoint("discovery://d/helloworld"),

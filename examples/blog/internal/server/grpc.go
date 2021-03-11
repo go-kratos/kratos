@@ -1,9 +1,9 @@
 package server
 
 import (
-	v1 "github.com/go-kratos/examples/blog/api/blog/v1"
-	"github.com/go-kratos/examples/blog/internal/conf"
-	"github.com/go-kratos/examples/blog/internal/service"
+	v1 "github.com/go-kratos/kratos/examples/blog/api/blog/v1"
+	"github.com/go-kratos/kratos/examples/blog/internal/conf"
+	"github.com/go-kratos/kratos/examples/blog/internal/service"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
