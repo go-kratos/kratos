@@ -4,21 +4,23 @@ import (
 	"context"
 	"log"
 
-	"github.com/go-kratos/consul/registry"
+	"github.com/go-kratos/etcd/registry"
 	pb "github.com/go-kratos/examples/helloworld/helloworld"
 	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/hashicorp/consul/api"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 func main() {
-	consul, err := api.NewClient(api.DefaultConfig())
+	conf := clientv3.Config{}
+	conf.Endpoints = []string{"127.0.0.1:2379"}
+	etcd, err := clientv3.New(conf)
 	if err != nil {
 		panic(err)
 	}
-	r := registry.New(consul)
+	r := registry.New(etcd)
 	conn, err := transgrpc.DialInsecure(
 		context.Background(),
-		transgrpc.WithEndpoint("discovery://d/helloworld"),
+		transgrpc.WithEndpoint("discovery:///helloworld"),
 		transgrpc.WithDiscovery(r),
 	)
 	if err != nil {
