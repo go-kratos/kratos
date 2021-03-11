@@ -11,23 +11,15 @@ import (
 )
 
 func main() {
-	callGRPC()
-}
-
-func callGRPC() {
-
 	cli, err := api.NewClient(api.DefaultConfig())
 	if err != nil {
 		panic(err)
 	}
-	d, err := consul.New(cli)
-	if err != nil {
-		panic(err)
-	}
+	r := consul.New(cli)
 	conn, err := transgrpc.DialInsecure(
 		context.Background(),
 		transgrpc.WithEndpoint("discovery://d/helloworld"),
-		transgrpc.WithRegistry(d),
+		transgrpc.WithDiscovery(r),
 	)
 	if err != nil {
 		log.Fatal(err)
