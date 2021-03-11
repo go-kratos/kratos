@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kratos/examples/blog/internal/data/ent/article"
-	"github.com/go-kratos/examples/blog/internal/data/ent/comment"
-	"github.com/go-kratos/examples/blog/internal/data/ent/predicate"
-	"github.com/go-kratos/examples/blog/internal/data/ent/tag"
+	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/article"
+	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/comment"
+	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/predicate"
+	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/tag"
 
 	"entgo.io/ent"
 )

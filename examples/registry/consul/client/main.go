@@ -5,7 +5,7 @@ import (
 	"log"
 
 	consul "github.com/go-kratos/consul/registry"
-	pb "github.com/go-kratos/examples/helloworld/helloworld"
+	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/hashicorp/consul/api"
 )
