@@ -24,7 +24,6 @@ func (r *discoveryResolver) watch() {
 	for {
 		select {
 		case <-r.ctx.Done():
-			//goroutine exit
 			return
 		default:
 		}
@@ -59,7 +58,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 
 func (r *discoveryResolver) Close() {
 	r.cancel()
-	r.w.Close()
+	r.w.Stop()
 }
 
 func (r *discoveryResolver) ResolveNow(options resolver.ResolveNowOptions) {}

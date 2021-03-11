@@ -2,11 +2,12 @@ package discovery
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"google.golang.org/grpc/resolver"
-	"testing"
-	"time"
 )
 
 type testClientConn struct {
@@ -24,7 +25,7 @@ type testWatch struct {
 func (m *testWatch) Next() ([]*registry.ServiceInstance, error) {
 	time.Sleep(time.Millisecond * 200)
 	ins := []*registry.ServiceInstance{
-		&registry.ServiceInstance{
+		{
 			ID:      "mock_ID",
 			Name:    "mock_Name",
 			Version: "mock_Version",
@@ -34,7 +35,7 @@ func (m *testWatch) Next() ([]*registry.ServiceInstance, error) {
 }
 
 // Watch creates a watcher according to the service name.
-func (m *testWatch) Close() error {
+func (m *testWatch) Stop() error {
 	return nil
 }
 

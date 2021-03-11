@@ -133,7 +133,7 @@ func (c *config) Watch(key string, o Observer) error {
 
 func (c *config) Close() error {
 	for _, w := range c.watchers {
-		if err := w.Close(); err != nil {
+		if err := w.Stop(); err != nil {
 			return err
 		}
 	}

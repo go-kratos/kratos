@@ -27,7 +27,7 @@ func callGRPC() {
 	conn, err := transgrpc.DialInsecure(
 		context.Background(),
 		transgrpc.WithEndpoint("discovery://d/helloworld"),
-		transgrpc.WithDiscovery(d),
+		transgrpc.WithRegistry(d),
 	)
 	if err != nil {
 		log.Fatal(err)
