@@ -6,7 +6,7 @@ import (
 
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
 
-	"github.com/go-kratos/examples/blog/internal/conf"
+	"github.com/go-kratos/kratos/examples/blog/internal/conf"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"

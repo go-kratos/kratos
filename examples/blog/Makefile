@@ -32,13 +32,13 @@ run:
 ent:
 	cd internal/data/ && ent generate ./ent/schema
 
+.PHONY: generate
+generate:
+	go generate ./...
+
 .PHONY: build
 build:
 	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
-
-.PHONY: wire
-wire:
-	cd cmd/blog/ && wire
 
 .PHONY: test
 test:

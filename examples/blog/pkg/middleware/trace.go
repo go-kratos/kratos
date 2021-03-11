@@ -2,75 +2,105 @@ package tracing
 
 import (
 	"context"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/propagation"
+	"google.golang.org/grpc/metadata"
 
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
-	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/ext"
-	"github.com/opentracing/opentracing-go/log"
-	"google.golang.org/grpc/metadata"
+
+	oteltrace "go.opentelemetry.io/otel/trace"
 )
+
+var _ propagation.TextMapCarrier = &MetadataCarrier{}
 
 // Option is tracing option.
 type Option func(*options)
 
 type options struct {
-	tracer opentracing.Tracer
+	TracerProvider oteltrace.TracerProvider
+	Propagators    propagation.TextMapPropagator
 }
 
-// WithTracer sets a custom tracer to be used for this middleware, otherwise the opentracing.GlobalTracer is used.
-func WithTracer(tracer opentracing.Tracer) Option {
-	return func(o *options) {
-		o.tracer = tracer
+func WithPropagators(propagators propagation.TextMapPropagator) Option {
+	return func(opts *options) {
+		opts.Propagators = propagators
 	}
 }
 
-// Server returns a new server middleware for OpenTracing.
+func WithTracerProvider(provider oteltrace.TracerProvider) Option {
+	return func(opts *options) {
+		opts.TracerProvider = provider
+	}
+}
+
+type MetadataCarrier struct {
+	md *metadata.MD
+}
+
+func (mc MetadataCarrier) Get(key string) string {
+	values := mc.md.Get(key)
+	if len(values) == 0 {
+		return ""
+	}
+	return values[0]
+}
+
+// Set stores the key-value pair.
+func (mc MetadataCarrier) Set(key string, value string) {
+	mc.md.Set(key, value)
+}
+
+// Server returns a new server middleware for OpenTelemetry.
 func Server(opts ...Option) middleware.Middleware {
-	options := options{
-		tracer: opentracing.GlobalTracer(),
-	}
+	options := options{}
 	for _, o := range opts {
 		o(&options)
+	}
+	if options.TracerProvider == nil {
+		options.TracerProvider = otel.GetTracerProvider()
+	}
+	if options.TracerProvider == nil {
+		options.TracerProvider = otel.GetTracerProvider()
+	}
+	tracer := options.TracerProvider.Tracer(
+		"default",
+	)
+	if options.Propagators == nil {
+		options.Propagators = otel.GetTextMapPropagator()
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			var (
-				component   string
-				operation   string
-				spanContext opentracing.SpanContext
+				component string
+				operation string
 			)
 			if info, ok := http.FromServerContext(ctx); ok {
 				// HTTP span
 				component = "HTTP"
 				operation = info.Request.RequestURI
-				spanContext, _ = options.tracer.Extract(
-					opentracing.HTTPHeaders,
-					opentracing.HTTPHeadersCarrier(info.Request.Header),
-				)
+				ctx = propagation.NewCompositeTextMapPropagator(options.Propagators).Extract(ctx, info.Request.Header)
 			} else if info, ok := grpc.FromServerContext(ctx); ok {
 				// gRPC span
 				component = "gRPC"
 				operation = info.FullMethod
 				if md, ok := metadata.FromIncomingContext(ctx); ok {
-					spanContext, _ = options.tracer.Extract(
-						opentracing.HTTPHeaders,
-						opentracing.HTTPHeadersCarrier(md),
-					)
+					ctx = propagation.NewCompositeTextMapPropagator(options.Propagators).Extract(ctx, MetadataCarrier{md: &md})
 				}
 			}
-			span := options.tracer.StartSpan(
+			ctx, span := tracer.Start(ctx,
 				operation,
-				ext.RPCServerOption(spanContext),
-				opentracing.Tag{Key: string(ext.Component), Value: component},
+				oteltrace.WithAttributes(label.String("component", component)),
+				oteltrace.WithSpanKind(oteltrace.SpanKindServer),
 			)
-			defer span.Finish()
+			defer span.End()
 			if reply, err = handler(ctx, req); err != nil {
-				ext.Error.Set(span, true)
-				span.LogFields(
-					log.String("event", "error"),
-					log.String("message", err.Error()),
+				span.RecordError(err)
+				span.SetAttributes(
+					label.String("event", "error"),
+					label.String("message", err.Error()),
 				)
 			}
 			return

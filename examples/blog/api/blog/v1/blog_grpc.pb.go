@@ -241,5 +241,5 @@ var BlogService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/blog/v1/blog.proto",
+	Metadata: "blog.proto",
 }

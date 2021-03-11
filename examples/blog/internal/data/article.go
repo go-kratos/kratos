@@ -2,7 +2,7 @@ package data
 
 import (
 	"context"
-	"github.com/go-kratos/examples/blog/internal/biz"
+	"github.com/go-kratos/kratos/examples/blog/internal/biz"
 	"github.com/go-kratos/kratos/v2/log"
 	"time"
 )
