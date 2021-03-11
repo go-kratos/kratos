@@ -16,5 +16,5 @@ type Source interface {
 // Watcher watches a source for changes.
 type Watcher interface {
 	Next() ([]*KeyValue, error)
-	Close() error
+	Stop() error
 }

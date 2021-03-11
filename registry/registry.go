@@ -10,10 +10,10 @@ type Registrar interface {
 	Deregister(ctx context.Context, service *ServiceInstance) error
 }
 
-// Discoverer is service discovery.
-type Discoverer interface {
+// Discovery is service discovery.
+type Discovery interface {
 	// Service return the service instances in memory according to the service name.
-	Fetch(ctx context.Context, serviceName string) ([]*ServiceInstance, error)
+	Service(ctx context.Context, serviceName string) ([]*ServiceInstance, error)
 	// Watch creates a watcher according to the service name.
 	Watch(ctx context.Context, serviceName string) (Watcher, error)
 }
@@ -26,7 +26,7 @@ type Watcher interface {
 	// if the above two conditions are not met, it will block until context deadline exceeded or canceled
 	Next() ([]*ServiceInstance, error)
 	// Close close the watcher.
-	Close() error
+	Stop() error
 }
 
 // ServiceInstance is an instance of a service in a discovery system.
