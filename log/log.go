@@ -4,7 +4,7 @@ import "os"
 
 var (
 	// DefaultLogger is default logger.
-	DefaultLogger Logger = NewStdLogger(os.Stderr)
+	DefaultLogger Logger = NewStdLogger(os.Stdout)
 )
 
 // Logger is a logger interface.
@@ -18,7 +18,7 @@ type logger struct {
 }
 
 func (l *logger) Print(pairs ...interface{}) {
-	l.log.Print(append(pairs, l.pairs...)...)
+	l.log.Print(bindValues(append(pairs, l.pairs...))...)
 }
 
 // With with logger kv pairs.

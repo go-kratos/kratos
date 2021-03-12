@@ -28,16 +28,17 @@ func NewStdLogger(w io.Writer) Logger {
 }
 
 // Print print the kv pairs log.
-func (s *stdLogger) Print(kvpair ...interface{}) {
-	if len(kvpair) == 0 {
+func (s *stdLogger) Print(pairs ...interface{}) {
+	if len(pairs) == 0 {
 		return
 	}
-	if len(kvpair)%2 != 0 {
-		kvpair = append(kvpair, "")
+	if len(pairs)%2 != 0 {
+		pairs = append(pairs, "")
 	}
 	buf := s.pool.Get().(*bytes.Buffer)
-	for i := 0; i < len(kvpair); i += 2 {
-		fmt.Fprintf(buf, "%s=%v ", kvpair[i], kvpair[i+1])
+	// reverse
+	for i := len(pairs) - 1; i >= 0; i -= 2 {
+		fmt.Fprintf(buf, "%s=%v ", pairs[i-1], pairs[i])
 	}
 	s.log.Println(buf.String())
 	buf.Reset()
