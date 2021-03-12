@@ -31,6 +31,6 @@ func NewHTTPServer(c *conf.Server, blog *service.BlogService) *http.Server {
 		),
 	)
 	srv := http.NewServer(opts...)
-	srv.HandlePrefix("/", v1.NewBlogServiceHandler(blog, m))
+	srv.HandlePrefix("/asd", v1.NewBlogServiceHandler(blog, m))
 	return srv
 }

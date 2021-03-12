@@ -8,7 +8,7 @@ server:
 data:
   database:
     driver: mysql
-    source: root:password@tcp(127.0.0.1:3306)/testdb?parseTime=True
+    source: root:123456@tcp(192.168.3.10:3306)/fz_dms?parseTime=True
   redis:
     addr: 127.0.0.1:6379
     dial_timeout: 1s
