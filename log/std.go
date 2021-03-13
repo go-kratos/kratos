@@ -39,7 +39,7 @@ func (l *stdLogger) Print(pairs ...interface{}) {
 	for i := 0; i < len(pairs); i += 2 {
 		fmt.Fprintf(buf, "%s=%v ", pairs[i], Value(pairs[i+1]))
 	}
-	l.log.Println(buf.String())
+	l.log.Output(4, buf.String())
 	buf.Reset()
 	l.pool.Put(buf)
 }
