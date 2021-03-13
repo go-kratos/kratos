@@ -15,7 +15,7 @@ type Logger interface {
 }
 
 type context struct {
-	log    Logger
+	logs   []Logger
 	prefix []interface{}
 	suffix []interface{}
 }
@@ -25,7 +25,9 @@ func (c *context) Print(a ...interface{}) {
 	kvs = append(kvs, c.prefix...)
 	kvs = append(kvs, a...)
 	kvs = append(kvs, c.suffix...)
-	c.log.Print(kvs...)
+	for _, log := range c.logs {
+		log.Print(kvs...)
+	}
 }
 
 // With with logger suffix.
@@ -35,12 +37,12 @@ func With(l Logger, a ...interface{}) Logger {
 		kvs = append(kvs, c.suffix...)
 		kvs = append(kvs, a...)
 		return &context{
-			log:    c.log,
+			logs:   c.logs,
 			prefix: c.prefix,
 			suffix: kvs,
 		}
 	}
-	return &context{log: l, suffix: a}
+	return &context{logs: []Logger{l}, suffix: a}
 }
 
 // Prefix with logger prefix.
@@ -50,12 +52,17 @@ func Prefix(l Logger, a ...interface{}) Logger {
 		kvs = append(kvs, a...)
 		kvs = append(kvs, c.prefix...)
 		return &context{
-			log:    c.log,
+			logs:   c.logs,
 			prefix: kvs,
 			suffix: c.suffix,
 		}
 	}
-	return &context{log: l, prefix: a}
+	return &context{logs: []Logger{l}, prefix: a}
+}
+
+// Wrap wraps multi logger.
+func Wrap(logs ...Logger) Logger {
+	return &context{logs: logs}
 }
 
 // Debug returns a debug logger.
