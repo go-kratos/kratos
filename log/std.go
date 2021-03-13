@@ -18,7 +18,7 @@ type stdLogger struct {
 // NewStdLogger new a std logger with options.
 func NewStdLogger(w io.Writer) Logger {
 	return &stdLogger{
-		log: log.New(w, "", log.LstdFlags),
+		log: log.New(w, log.Prefix(), log.Flags()),
 		pool: &sync.Pool{
 			New: func() interface{} {
 				return new(bytes.Buffer)
