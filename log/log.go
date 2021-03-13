@@ -1,12 +1,12 @@
 package log
 
 import (
-	"os"
+	"log"
 )
 
 var (
 	// DefaultLogger is default logger.
-	DefaultLogger Logger = NewStdLogger(os.Stdout)
+	DefaultLogger Logger = NewStdLogger(log.Writer())
 )
 
 // Logger is a logger interface.
@@ -25,7 +25,6 @@ func (c *context) Print(a ...interface{}) {
 	kvs = append(kvs, c.prefix...)
 	kvs = append(kvs, a...)
 	kvs = append(kvs, c.suffix...)
-	kvs = bindValues(kvs)
 	c.log.Print(kvs...)
 }
 
