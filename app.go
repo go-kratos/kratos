@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/transport"
 
 	"github.com/google/uuid"
 	"golang.org/x/sync/errgroup"
@@ -42,24 +41,9 @@ func New(opts ...Option) *App {
 		opts:     options,
 		ctx:      ctx,
 		cancel:   cancel,
-		instance: serviceInstance(options),
+		instance: buildInstance(options),
 		log:      log.NewHelper("app", options.logger),
 	}
-}
-
-// Logger returns logger.
-func (a *App) Logger() log.Logger {
-	return a.opts.logger
-}
-
-// Server returns transport servers.
-func (a *App) Server() []transport.Server {
-	return a.opts.servers
-}
-
-// Registry returns registry.
-func (a *App) Registry() registry.Registrar {
-	return a.opts.registrar
 }
 
 // Run executes all OnStart hooks registered with the application's Lifecycle.
@@ -79,11 +63,6 @@ func (a *App) Run() error {
 		g.Go(func() error {
 			return srv.Start()
 		})
-	}
-	for _, fn := range a.opts.before {
-		if err := fn(); err != nil {
-			return err
-		}
 	}
 	if a.opts.registrar != nil {
 		if err := a.opts.registrar.Register(a.opts.ctx, a.instance); err != nil {
@@ -118,15 +97,10 @@ func (a *App) Stop() error {
 	if a.cancel != nil {
 		a.cancel()
 	}
-	for _, fn := range a.opts.after {
-		if err := fn(); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
-func serviceInstance(o options) *registry.ServiceInstance {
+func buildInstance(o options) *registry.ServiceInstance {
 	if len(o.endpoints) == 0 {
 		for _, srv := range o.servers {
 			if e, err := srv.Endpoint(); err == nil {
