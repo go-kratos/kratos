@@ -5,11 +5,13 @@
 ### Structured logging
 
 ```
-logger := stdlog.NewLogger(stdlog.Writer(os.Stdout))
-log := log.NewHelper("module_name", logger)
+logger := log.NewLogger(os.Stdout)
+logger = With(logger, "key", "value")
+
+log := log.NewHelper("github.com/project/foo", logger)
 // Levels
-log.Info("some log")
-log.Infof("format %s", "some log")
-log.Infow("field_name", "some log")
+log.Info("hello")
+log.Infof("hello %s", "kratos")
+log.Infow("key", "value")
 ```
 

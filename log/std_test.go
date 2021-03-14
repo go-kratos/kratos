@@ -2,7 +2,7 @@ package log
 
 import "testing"
 
-func TestFmtLogger(t *testing.T) {
+func TestStdLogger(t *testing.T) {
 	logger := DefaultLogger
 
 	Debug(logger).Print("log", "test debug")
