@@ -27,9 +27,6 @@ type options struct {
 	registrar registry.Registrar
 
 	servers []transport.Server
-
-	before []func() error
-	after  []func() error
 }
 
 // ID with service id.
@@ -80,14 +77,4 @@ func Registrar(r registry.Registrar) Option {
 // Server with transport servers.
 func Server(srv ...transport.Server) Option {
 	return func(o *options) { o.servers = srv }
-}
-
-// Before before service starts.
-func Before(fn func() error) Option {
-	return func(o *options) { o.before = append(o.before, fn) }
-}
-
-// After after services stops.
-func After(fn func() error) Option {
-	return func(o *options) { o.after = append(o.after, fn) }
 }
