@@ -6,7 +6,8 @@ import (
 )
 
 func TestHelper(t *testing.T) {
-	log := NewHelper("test", DefaultLogger)
+	logger := With(DefaultLogger, "caller", Caller(5))
+	log := NewHelper("test", logger)
 
 	log.Debug("test debug")
 	log.Debugf("test %s", "debug")
