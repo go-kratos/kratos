@@ -1,7 +1,7 @@
 package log
 
 import (
-	"io"
+	"io/ioutil"
 	"testing"
 )
 
@@ -22,21 +22,21 @@ func TestHelperLevel(t *testing.T) {
 }
 
 func BenchmarkHelperPrint(b *testing.B) {
-	log := NewHelper("test", NewStdLogger(io.Discard))
+	log := NewHelper("test", NewStdLogger(ioutil.Discard))
 	for i := 0; i < b.N; i++ {
 		log.Debug("test")
 	}
 }
 
 func BenchmarkHelperPrintf(b *testing.B) {
-	log := NewHelper("test", NewStdLogger(io.Discard))
+	log := NewHelper("test", NewStdLogger(ioutil.Discard))
 	for i := 0; i < b.N; i++ {
 		log.Debugf("%s", "test")
 	}
 }
 
 func BenchmarkHelperPrintw(b *testing.B) {
-	log := NewHelper("test", NewStdLogger(io.Discard))
+	log := NewHelper("test", NewStdLogger(ioutil.Discard))
 	for i := 0; i < b.N; i++ {
 		log.Debugw("key", "value")
 	}
