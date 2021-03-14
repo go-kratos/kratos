@@ -17,7 +17,7 @@ func Value(v interface{}) interface{} {
 	return v
 }
 
-// Caller returns returns a Valuer that returns a pkg/file:line description of the caller
+// Caller returns returns a Valuer that returns a pkg/file:line description of the caller.
 func Caller(depth int) Valuer {
 	return func() interface{} {
 		_, file, line, ok := runtime.Caller(depth)
