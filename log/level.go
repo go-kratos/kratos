@@ -17,11 +17,6 @@ const (
 	LevelError
 )
 
-// Enabled compare whether the logging level is enabled.
-func (l Level) Enabled(lv Level) bool {
-	return lv >= l
-}
-
 func (l Level) String() string {
 	switch l {
 	case LevelDebug:
