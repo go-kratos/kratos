@@ -124,6 +124,8 @@ github.com/go-kratos/etcd v0.0.0-20210311152824-df5743ff1a11 h1:yN0kNvtSmSmTznbv
 github.com/go-kratos/etcd v0.0.0-20210311152824-df5743ff1a11/go.mod h1:+1nilFyiWLlYpAWliKnbFhIax79n4l0mOTJhyNw5EEw=
 github.com/go-kratos/kratos/v2 v2.0.0-20210311152607-a4409adf164e h1:x/1thr6sE8fn09HekGNBdBX6PH9T6iacfJor0sDAZ6g=
 github.com/go-kratos/kratos/v2 v2.0.0-20210311152607-a4409adf164e/go.mod h1:oLvFyDBJkkWN8TPqb+NmpvRrSy9uM/K+XQubVRc11a8=
+github.com/go-kratos/kratos/v2 v2.0.0-20210315090606-74272546caa6 h1:iaZamLO1uUf5NBWXZ1WxP12baWhXNySwW3gUDtCkl+4=
+github.com/go-kratos/kratos/v2 v2.0.0-20210315090606-74272546caa6/go.mod h1:oLvFyDBJkkWN8TPqb+NmpvRrSy9uM/K+XQubVRc11a8=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=
 github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V4qmtdjCk=
 github.com/go-openapi/inflect v0.19.0/go.mod h1:lHpZVlpIQqLyKwJ4N+YSc9hchQy/i12fJykb83CRBH4=
