@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2"
-	transhttp "github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
 	router.GET("/home", func(ctx *gin.Context) {
 		ctx.String(200, "Hello Gin!")
 	})
-	httpSrv := transhttp.NewServer(transhttp.Address(":8000"))
+	httpSrv := http.NewServer(http.Address(":8000"))
 	httpSrv.HandlePrefix("/", router)
 
 	app := kratos.New(

@@ -9,7 +9,7 @@ import (
 	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
-	clientv3 "go.etcd.io/etcd/client/v3"
+	etcd "go.etcd.io/etcd/client/v3"
 )
 
 // server is used to implement helloworld.GreeterServer.
@@ -30,11 +30,11 @@ func main() {
 	s := &server{}
 	pb.RegisterGreeterServer(grpcSrv, s)
 
-	cli, err := clientv3.New(clientv3.Config{
+	cli, err := etcd.New(etcd.Config{
 		Endpoints: []string{"127.0.0.1:2379"},
 	})
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	r := registry.New(cli)
 	app := kratos.New(

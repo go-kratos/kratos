@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/go-kratos/consul/registry"
-	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/hashicorp/consul/api"
 )
 
@@ -16,16 +16,16 @@ func main() {
 		panic(err)
 	}
 	r := registry.New(cli)
-	conn, err := transgrpc.DialInsecure(
+	conn, err := grpc.DialInsecure(
 		context.Background(),
-		transgrpc.WithEndpoint("discovery://d/helloworld"),
-		transgrpc.WithDiscovery(r),
+		grpc.WithEndpoint("discovery:///helloworld"),
+		grpc.WithDiscovery(r),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	client := pb.NewGreeterClient(conn)
-	reply, err := client.SayHello(context.Background(), &pb.HelloRequest{Name: "kratos"})
+	client := helloworld.NewGreeterClient(conn)
+	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {
 		log.Fatal(err)
 	}
