@@ -24,7 +24,7 @@ func (codec) Marshal(v interface{}) ([]byte, error) {
 func (codec) Unmarshal(data []byte, v interface{}) error {
 	rv := reflect.ValueOf(v)
 	for rv.Kind() == reflect.Ptr {
-		if rv.IsNil() && rv.CanSet() {
+		if rv.IsNil() && rv.CanInterface() {
 			rv.Set(reflect.New(rv.Type().Elem()))
 			v = rv.Interface()
 		}
