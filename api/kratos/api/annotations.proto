@@ -9,5 +9,5 @@ option objc_class_prefix = "KratosAPI";
 import "google/protobuf/descriptor.proto";
 
 extend google.protobuf.EnumOptions {
-	bool errors = 1000;
+	bool errors = 1108;
 }
