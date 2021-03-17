@@ -37,10 +37,10 @@ Kratos boosts your productivity. With the integration of excellent resources and
 * Config: Multiple data sources are supported for configurations and integrations such that dynamic configurations are offered through the manner of *Atomic* operations.
 * Logger: The standard log interfaces ease the integration of the third-party log libs and logs are collected through the *Fluentd*.
 * Metrics: *Prometheus* integrated by default. Furthermore, with the uniform metric interfaces, you can implement your own metric system more flexible.
-* Tracing: The OpenTracing is conformed to achieve the tracing of microservices chains.
+* Tracing: The OpenTelemetry is conformed to achieve the tracing of microservices chains.
 * Encoding: The selection of the content encoding is automatically supported by Accept and Content-Type.
 * Transport: The uniform plugins for Middleware are supported by HTTP/gRPC.
- * Registry: The interfaces of the centralized registry is able to be connected with various other centralized registries through plug-ins.
+* Registry: The interfaces of the centralized registry is able to be connected with various other centralized registries through plug-ins.
 
 ## Getting Started
 ### Required
