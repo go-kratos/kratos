@@ -102,8 +102,8 @@ func encodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error
 		return err
 	}
 	w.Header().Set(contentTypeHeader, contentType(codec.Name()))
-	_, err = w.Write(data)
-	return err
+	_, _ = w.Write(data)
+	return nil
 }
 
 // encodeError encodes the error to the HTTP response.
