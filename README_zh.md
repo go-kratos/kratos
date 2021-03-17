@@ -58,6 +58,9 @@ go get github.com/go-kratos/kratos/cmd/kratos/v2@latest
 kratos new helloworld
 
 cd helloworld
+# 拉取项目依赖
+go mod download
+
 # 生成proto模板
 kratos proto add api/helloworld/helloworld.proto
 # 生成proto源码

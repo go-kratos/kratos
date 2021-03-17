@@ -58,6 +58,9 @@ go get github.com/go-kratos/kratos/cmd/kratos/v2@latest
 kratos new helloworld
 
 cd helloworld
+# download modules
+go mod download
+
 # generate Proto template
 kratos proto add api/helloworld/helloworld.proto
 # generate Proto source code
