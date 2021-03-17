@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/go-kratos/kratos/v2/encoding/json"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
@@ -95,25 +96,17 @@ func decodeRequest(req *http.Request, v interface{}) error {
 
 // encodeResponse encodes the object to the HTTP response.
 func encodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error {
-	var codec encoding.Codec
-	for _, accept := range r.Header[acceptHeader] {
-		if codec = encoding.GetCodec(contentSubtype(accept)); codec != nil {
-			break
-		}
-	}
-	if codec == nil {
-		codec = encoding.GetCodec("json")
-	}
+	codec := codecForRequest(r)
 	data, err := codec.Marshal(v)
 	if err != nil {
 		return err
 	}
 	w.Header().Set(contentTypeHeader, contentType(codec.Name()))
-	w.Write(data)
+	_, _ = w.Write(data)
 	return nil
 }
 
-// encodeError encodes the erorr to the HTTP response.
+// encodeError encodes the error to the HTTP response.
 func encodeError(w http.ResponseWriter, r *http.Request, err error) {
 	se, ok := errors.FromError(err)
 	if !ok {
@@ -122,8 +115,25 @@ func encodeError(w http.ResponseWriter, r *http.Request, err error) {
 			Message: err.Error(),
 		}
 	}
+	codec := codecForRequest(r)
+	data, _ := codec.Marshal(se)
+	w.Header().Set(contentTypeHeader, contentType(codec.Name()))
 	w.WriteHeader(se.HTTPStatus())
-	encodeResponse(w, r, se)
+	_, _ = w.Write(data)
+}
+
+// codecForRequest get encoding.Codec via http.Request
+func codecForRequest(r *http.Request) encoding.Codec {
+	var codec encoding.Codec
+	for _, accept := range r.Header[acceptHeader] {
+		if codec = encoding.GetCodec(contentSubtype(accept)); codec != nil {
+			break
+		}
+	}
+	if codec == nil {
+		codec = encoding.GetCodec(json.Name)
+	}
+	return codec
 }
 
 func contentType(subtype string) string {
