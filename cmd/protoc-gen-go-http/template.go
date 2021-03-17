@@ -2,8 +2,8 @@ package main
 
 import (
 	"bytes"
-	"html/template"
 	"strings"
+	"text/template"
 )
 
 var httpTemplate = `
