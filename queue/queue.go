@@ -2,15 +2,13 @@ package queue
 
 import (
 	"context"
-	"encoding/json"
 )
 
 // Message is an absctraction for all messages that
 // are sent to quque or received from queue.
 type Message struct {
-	Header map[string]string `json:"header"`
-	Key    string            `json:"key"`
-	Value  json.RawMessage   `json:"body"`
+	Key   string
+	Value []byte
 }
 
 // Event given to a subscription handler for processing.
@@ -35,6 +33,6 @@ type Publisher interface {
 // Subscriber is an absctraction for receiving messages
 // from queue.
 type Subscriber interface {
-	Subscribe(h Handler, opts ...SubscribeOption) error
-	Unsubscribe() error
+	Subscribe(ctx context.Context, h Handler, opts ...SubscribeOption) error
+	Unsubscribe(ctx context.Context) error
 }
