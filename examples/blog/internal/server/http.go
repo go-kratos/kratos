@@ -9,11 +9,12 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/http"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // NewHTTPServer new a HTTP server.
-func NewHTTPServer(c *conf.Server, blog *service.BlogService) *http.Server {
-	var opts = []http.ServerOption{}
+func NewHTTPServer(c *conf.Server, tracer trace.TracerProvider, blog *service.BlogService) *http.Server {
+	var opts []http.ServerOption
 	if c.Http.Network != "" {
 		opts = append(opts, http.Network(c.Http.Network))
 	}
@@ -26,7 +27,7 @@ func NewHTTPServer(c *conf.Server, blog *service.BlogService) *http.Server {
 	m := http.Middleware(
 		middleware.Chain(
 			recovery.Recovery(),
-			tracing.Server(),
+			tracing.Server(tracing.WithTracerProvider(tracer)),
 			logging.Server(),
 		),
 	)
