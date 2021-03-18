@@ -12,6 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc/resolver/discovery"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/balancer/roundrobin"
 )
 
 // ClientOption is gRPC client option.
@@ -41,7 +42,7 @@ func WithMiddleware(m middleware.Middleware) ClientOption {
 // WithDiscovery with client discovery.
 func WithDiscovery(d registry.Discovery) ClientOption {
 	return func(o *clientOptions) {
-		o.discoverer = d
+		o.discovery = d
 	}
 }
 
@@ -57,7 +58,7 @@ type clientOptions struct {
 	endpoint   string
 	timeout    time.Duration
 	middleware middleware.Middleware
-	discoverer registry.Discovery
+	discovery  registry.Discovery
 	grpcOpts   []grpc.DialOption
 }
 
@@ -83,10 +84,11 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		o(&options)
 	}
 	var grpcOpts = []grpc.DialOption{
+		grpc.WithBalancerName(roundrobin.Name),
 		grpc.WithUnaryInterceptor(unaryClientInterceptor(options.middleware, options.timeout)),
 	}
-	if options.discoverer != nil {
-		grpcOpts = append(grpcOpts, grpc.WithResolvers(discovery.NewBuilder(options.discoverer)))
+	if options.discovery != nil {
+		grpcOpts = append(grpcOpts, grpc.WithResolvers(discovery.NewBuilder(options.discovery)))
 	}
 	if insecure {
 		grpcOpts = append(grpcOpts, grpc.WithInsecure())
