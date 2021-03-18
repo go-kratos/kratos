@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
-	"os"
-
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
+	"go.opentelemetry.io/otel/sdk/trace"
+	"os"
 
 	"github.com/go-kratos/kratos/examples/blog/internal/conf"
 	"github.com/go-kratos/kratos/v2"
@@ -13,8 +13,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
-	"go.opentelemetry.io/otel/label"
-	"go.opentelemetry.io/otel/sdk/trace"
 	"gopkg.in/yaml.v2"
 )
 
@@ -45,26 +43,6 @@ func newApp(logger log.Logger, hs *http.Server, gs *grpc.Server) *kratos.App {
 	)
 }
 
-// todo: move to wire DI
-func newTracer() func() {
-	// Create and install Jaeger export pipeline.
-	flush, err := jaeger.InstallNewPipeline(
-		jaeger.WithCollectorEndpoint("http://localhost:14268/api/traces"),
-		jaeger.WithProcess(jaeger.Process{
-			ServiceName: "trace-demo",
-			Tags: []label.KeyValue{
-				label.String("exporter", "jaeger"),
-				label.Float64("float", 312.23),
-			},
-		}),
-		jaeger.WithSDK(&trace.Config{DefaultSampler: trace.AlwaysSample()}),
-	)
-	if err != nil {
-		panic(err)
-	}
-	return flush
-}
-
 func main() {
 	flag.Parse()
 	logger := log.NewStdLogger(os.Stdout)
@@ -86,10 +64,18 @@ func main() {
 		panic(err)
 	}
 
-	flush := newTracer()
+	tp, flush, err := jaeger.NewExportPipeline(jaeger.WithCollectorEndpoint("http://localhost:14268/api/traces"),
+		jaeger.WithProcess(jaeger.Process{
+			ServiceName: "blog",
+		}),
+		jaeger.WithSDK(&trace.Config{DefaultSampler: trace.AlwaysSample()}),
+	)
+	if err != nil {
+		panic(err)
+	}
 	defer flush()
 
-	app, err := initApp(bc.Server, bc.Data, logger)
+	app, err := initApp(bc.Server, bc.Data, tp, logger)
 	if err != nil {
 		panic(err)
 	}
