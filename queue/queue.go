@@ -9,10 +9,10 @@ type Header map[string]string
 // are sent to quque or received from queue.
 type Message interface {
 	ID() string
-	Topic() string
 	Key() string
 	Header() Header
 	Payload() string
+	Topic() string
 	Ack() error
 	Nack() error
 }
