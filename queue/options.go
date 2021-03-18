@@ -4,22 +4,11 @@ package queue
 type PublishOption func(*PublishOptions)
 
 // PublishOptions is a publish options.
-type PublishOptions struct {
-	Header map[string]string
-}
+type PublishOptions struct{}
 
 // NewPublishOptions new a default publish options.
 func NewPublishOptions() PublishOptions {
-	return PublishOptions{
-		Header: Header{},
-	}
-}
-
-// WithHeader with a customized user header delivering to the message.
-func WithHeader(h Header) PublishOption {
-	return func(o *PublishOptions) {
-		o.Header = h
-	}
+	return PublishOptions{}
 }
 
 // SubscribeOption is a subscribe option.
