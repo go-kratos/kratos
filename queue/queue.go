@@ -32,7 +32,7 @@ type Handler func(Event) error
 // to queue.
 type Publisher interface {
 	Publish(ctx context.Context, msg *Message, opts ...PublishOption) error
-	PublishAsync(ctx context.Context, msg *Message, callback func(err error), opts ...PublishOption)
+	PublishAsync(ctx context.Context, msg *Message, callback func(err error), opts ...PublishOption) error
 }
 
 // Subscriber is an absctraction for receiving messages
