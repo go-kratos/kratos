@@ -9,7 +9,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
-	oteltrace "go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -17,7 +17,7 @@ import (
 type Option func(*options)
 
 type options struct {
-	TracerProvider oteltrace.TracerProvider
+	TracerProvider trace.TracerProvider
 	Propagators    propagation.TextMapPropagator
 }
 
@@ -27,7 +27,7 @@ func WithPropagators(propagators propagation.TextMapPropagator) Option {
 	}
 }
 
-func WithTracerProvider(provider oteltrace.TracerProvider) Option {
+func WithTracerProvider(provider trace.TracerProvider) Option {
 	return func(opts *options) {
 		opts.TracerProvider = provider
 	}
@@ -47,12 +47,10 @@ func (mc MetadataCarrier) Get(key string) string {
 	return values[0]
 }
 
-// Set stores the key-value pair.
 func (mc MetadataCarrier) Set(key string, value string) {
 	mc.md.Set(key, value)
 }
 
-// Set stores the key-value pair.
 func (mc MetadataCarrier) Keys() []string {
 	keys := make([]string, 0, mc.md.Len())
 	for key := range *mc.md {
@@ -63,14 +61,17 @@ func (mc MetadataCarrier) Keys() []string {
 
 // Server returns a new server middleware for OpenTelemetry.
 func Server(opts ...Option) middleware.Middleware {
-	options := options{
-		TracerProvider: otel.GetTracerProvider(),
-		Propagators:    otel.GetTextMapPropagator(),
-	}
+	options := options{}
 	for _, o := range opts {
 		o(&options)
 	}
-	tracer := options.TracerProvider.Tracer("server")
+	if options.TracerProvider != nil {
+		otel.SetTracerProvider(options.TracerProvider)
+	}
+	if options.Propagators != nil {
+		otel.SetTextMapPropagator(options.Propagators)
+	}
+	tracer := otel.Tracer("server")
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			var (
@@ -81,21 +82,19 @@ func Server(opts ...Option) middleware.Middleware {
 				// HTTP span
 				component = "HTTP"
 				operation = info.Request.RequestURI
-				ctx = propagation.NewCompositeTextMapPropagator(options.Propagators).
-					Extract(ctx, propagation.HeaderCarrier(info.Request.Header))
+				ctx = otel.GetTextMapPropagator().Extract(ctx, propagation.HeaderCarrier(info.Request.Header))
 			} else if info, ok := grpc.FromServerContext(ctx); ok {
 				// gRPC span
 				component = "gRPC"
 				operation = info.FullMethod
 				if md, ok := metadata.FromIncomingContext(ctx); ok {
-					ctx = propagation.NewCompositeTextMapPropagator(options.Propagators).
-						Extract(ctx, MetadataCarrier{md: &md})
+					ctx = otel.GetTextMapPropagator().Extract(ctx, MetadataCarrier{md: &md})
 				}
 			}
 			ctx, span := tracer.Start(ctx,
 				operation,
-				oteltrace.WithAttributes(attribute.String("component", component)),
-				oteltrace.WithSpanKind(oteltrace.SpanKindServer),
+				trace.WithAttributes(attribute.String("component", component)),
+				trace.WithSpanKind(trace.SpanKindServer),
 			)
 			defer span.End()
 			if reply, err = handler(ctx, req); err != nil {
@@ -112,14 +111,17 @@ func Server(opts ...Option) middleware.Middleware {
 
 // Client returns a new client middleware for OpenTelemetry.
 func Client(opts ...Option) middleware.Middleware {
-	options := options{
-		TracerProvider: otel.GetTracerProvider(),
-		Propagators:    otel.GetTextMapPropagator(),
-	}
+	options := options{}
 	for _, o := range opts {
 		o(&options)
 	}
-	tracer := options.TracerProvider.Tracer("client")
+	if options.TracerProvider != nil {
+		otel.SetTracerProvider(options.TracerProvider)
+	}
+	if options.Propagators != nil {
+		otel.SetTextMapPropagator(options.Propagators)
+	}
+	tracer := otel.Tracer("client")
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			var (
@@ -145,11 +147,11 @@ func Client(opts ...Option) middleware.Middleware {
 			}
 			ctx, span := tracer.Start(ctx,
 				operation,
-				oteltrace.WithAttributes(attribute.String("component", component)),
-				oteltrace.WithSpanKind(oteltrace.SpanKindClient),
+				trace.WithAttributes(attribute.String("component", component)),
+				trace.WithSpanKind(trace.SpanKindClient),
 			)
 			defer span.End()
-			propagation.NewCompositeTextMapPropagator(options.Propagators).Inject(ctx, carrier)
+			otel.GetTextMapPropagator().Inject(ctx, carrier)
 			if reply, err = handler(ctx, req); err != nil {
 				span.RecordError(err)
 				span.SetAttributes(
