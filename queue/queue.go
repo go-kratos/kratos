@@ -5,9 +5,6 @@ import (
 	"encoding/json"
 )
 
-// Header is a customized user header fields of the key-value pairs.
-type Header map[string]string
-
 // Message is an absctraction for all messages that
 // are sent to quque or received from queue.
 type Message struct {
@@ -19,7 +16,7 @@ type Message struct {
 // Event given to a subscription handler for processing.
 type Event interface {
 	Topic() string
-	Message() Message
+	Message() *Message
 	Ack() error
 	Nack() error
 }
