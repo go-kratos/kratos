@@ -4,30 +4,22 @@ import (
 	"context"
 )
 
-// Message is an absctraction for all messages that
-// are sent to quque or received from queue.
-type Message struct {
-	Key   string
-	Value []byte
-}
-
 // Event given to a subscription handler for processing.
 type Event interface {
-	Topic() string
-	Message() *Message
-	Ack() error
-	Nack() error
+	Key() string
+	Value() []byte
 }
 
 // Handler is a callback function that processes messages delivered
 // to asynchronous subscribers.
-type Handler func(Event) error
+type Handler func(context.Context, Event) error
 
 // Publisher is absctraction for sending messages
 // to queue.
 type Publisher interface {
-	Publish(ctx context.Context, msg *Message, opts ...PublishOption) error
-	PublishAsync(ctx context.Context, msg *Message, callback func(err error), opts ...PublishOption) error
+	Publish(ctx context.Context, key string, value []byte, opts ...PublishOption) error
+	PublishAsync(ctx context.Context, key string, value []byte, callback func(err error), opts ...PublishOption) error
+	Close() error
 }
 
 // Subscriber is an absctraction for receiving messages
