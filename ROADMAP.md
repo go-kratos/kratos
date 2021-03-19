@@ -45,9 +45,9 @@ This document defines the roadmap for Kratos development.
         - [ ] Streaming Handler
 - [ ] Cache
     - [ ] go-redis
-- [x] Queue
+- [x] Pubsub
     - [x] Absctraction
-    - [ ] Kafka
+    - [x] Kafka
     - [ ] Nats
 - [ ] Database
     - [ ] Ent
