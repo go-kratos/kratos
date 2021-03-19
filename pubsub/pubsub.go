@@ -35,5 +35,5 @@ type Publisher interface {
 // from queue.
 type Subscriber interface {
 	Subscribe(ctx context.Context, h Handler) error
-	Unsubscribe(ctx context.Context) error
+	Close() error
 }
