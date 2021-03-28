@@ -110,14 +110,14 @@ func convertMap(src interface{}) interface{} {
 
 func marshalJSON(v interface{}) ([]byte, error) {
 	if m, ok := v.(proto.Message); ok {
-		return protojson.Marshal(m)
+		return protojson.MarshalOptions{EmitUnpopulated: true}.Marshal(m)
 	}
 	return json.Marshal(v)
 }
 
 func unmarshalJSON(data []byte, v interface{}) error {
 	if m, ok := v.(proto.Message); ok {
-		return protojson.Unmarshal(data, m)
+		return protojson.UnmarshalOptions{DiscardUnknown: true}.Unmarshal(data, m)
 	}
 	return json.Unmarshal(data, v)
 }
