@@ -74,7 +74,7 @@ func (c *Context) Protobuf(data proto.Message, err error)
 
 ![handler](img/bm-handlers.png)
 
-初次接触`blademaster`的用户可能会对其`Handler`的流程处理产生不小的疑惑，实际上`bm`对`Handler`对处理非常简单：
+初次接触`blademaster`的用户可能会对其`Handler`的流程处理产生不小的疑惑，实际上`bm`对`Handler`的处理非常简单：
 
 * 将`Router`模块中预先注册的`middleware`与其他`Handler`合并，放入`Context`的`handlers`字段，并将`index`字段置`0`
 * 然后通过`Next()`方法一个个执行下去，部分`middleware`可能想要在过程中中断整个流程，此时可以使用`Abort()`方法提前结束处理
