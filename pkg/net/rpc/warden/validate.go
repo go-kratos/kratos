@@ -6,8 +6,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 var validate = validator.New()
