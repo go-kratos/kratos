@@ -6,12 +6,12 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	
+	"github.com/google/uuid"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-
-	"github.com/google/uuid"
-	"golang.org/x/sync/errgroup"
 )
 
 // App is an application components lifecycle manager
