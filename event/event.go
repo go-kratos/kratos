@@ -23,7 +23,6 @@ type Handler func(context.Context, Event) error
 // to queue.
 type Publisher interface {
 	Publish(ctx context.Context, event Event) error
-	PublishAsync(ctx context.Context, event Event, callback func(err error)) error
 	Close() error
 }
 
