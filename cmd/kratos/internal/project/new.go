@@ -9,9 +9,6 @@ import (
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 )
 
-const (
-	serviceLayoutURL = "https://github.com/go-kratos/kratos-layout.git"
-)
 
 // Project is a project template.
 type Project struct {
@@ -19,14 +16,13 @@ type Project struct {
 }
 
 // New new a project from remote repo.
-func (p *Project) New(ctx context.Context, dir string) error {
+func (p *Project) New(ctx context.Context, dir string, layout string) error {
 	to := path.Join(dir, p.Name)
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
 		return fmt.Errorf("%s already exists", p.Name)
 	}
-	fmt.Printf("Creating service %s\n", p.Name)
-	repo := base.NewRepo(serviceLayoutURL)
-
+	fmt.Printf("Creating service %s, layout repo is %s\n", p.Name,layout)
+	repo := base.NewRepo(layout)
 	if err := repo.CopyTo(ctx, to, p.Name, []string{".git", ".github"}); err != nil {
 		return err
 	}
