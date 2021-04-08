@@ -5,20 +5,24 @@ import (
 	"strconv"
 )
 
-var (
-	privateAddrs = []string{"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "100.64.0.0/10", "fd00::/8"}
-)
-
 func isPrivateIP(addr string) bool {
-	ipAddr := net.ParseIP(addr)
-	for _, privateAddr := range privateAddrs {
-		if _, priv, err := net.ParseCIDR(privateAddr); err == nil {
-			if priv.Contains(ipAddr) {
-				return true
-			}
-		}
+	ip := net.ParseIP(addr)
+	if ip4 := ip.To4(); ip4 != nil {
+		// Following RFC 4193, Section 3. Local IPv6 Unicast Addresses which says:
+		//   The Internet Assigned Numbers Authority (IANA) has reserved the
+		//   following three blocks of the IPv4 address space for private internets:
+		//     10.0.0.0        -   10.255.255.255  (10/8 prefix)
+		//     172.16.0.0      -   172.31.255.255  (172.16/12 prefix)
+		//     192.168.0.0     -   192.168.255.255 (192.168/16 prefix)
+		return ip4[0] == 10 ||
+			(ip4[0] == 172 && ip4[1]&0xf0 == 16) ||
+			(ip4[0] == 192 && ip4[1] == 168)
 	}
-	return false
+	// Following RFC 4193, Section 3. Private Address Space which says:
+	//   The Internet Assigned Numbers Authority (IANA) has reserved the
+	//   following block of the IPv6 address space for local internets:
+	//     FC00::  -  FDFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF (FC00::/7 prefix)
+	return len(ip) == net.IPv6len && ip[0]&0xfe == 0xfc
 }
 
 // Port return a real port.
@@ -30,8 +34,8 @@ func Port(lis net.Listener) (int, bool) {
 }
 
 // Extract returns a private addr and port.
-func Extract(hostport string, lis net.Listener) (string, error) {
-	addr, port, err := net.SplitHostPort(hostport)
+func Extract(hostPort string, lis net.Listener) (string, error) {
+	addr, port, err := net.SplitHostPort(hostPort)
 	if err != nil {
 		return "", err
 	}
