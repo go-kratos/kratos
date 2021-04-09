@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-// ServerInfo is HTTP server infomation.
+// ServerInfo represent HTTP server information.
 type ServerInfo struct {
 	Request  *http.Request
 	Response http.ResponseWriter
@@ -24,7 +24,7 @@ func FromServerContext(ctx context.Context) (info ServerInfo, ok bool) {
 	return
 }
 
-// ClientInfo is HTTP client infomation.
+// ClientInfo represent HTTP client information.
 type ClientInfo struct {
 	Request *http.Request
 }

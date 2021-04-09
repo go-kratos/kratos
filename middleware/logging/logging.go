@@ -33,7 +33,7 @@ func Server(opts ...Option) middleware.Middleware {
 	for _, o := range opts {
 		o(&options)
 	}
-	log := log.NewHelper("middleware/logging", options.logger)
+	logger := log.NewHelper("middleware/logging", options.logger)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
@@ -55,7 +55,7 @@ func Server(opts ...Option) middleware.Middleware {
 			}
 			reply, err := handler(ctx, req)
 			if err != nil {
-				log.Errorw(
+				logger.Errorw(
 					"kind", "server",
 					"component", component,
 					"path", path,
@@ -66,7 +66,7 @@ func Server(opts ...Option) middleware.Middleware {
 				)
 				return nil, err
 			}
-			log.Infow(
+			logger.Infow(
 				"kind", "server",
 				"component", component,
 				"path", path,
@@ -87,7 +87,7 @@ func Client(opts ...Option) middleware.Middleware {
 	for _, o := range opts {
 		o(&options)
 	}
-	log := log.NewHelper("middleware/logging", options.logger)
+	logger := log.NewHelper("middleware/logging", options.logger)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
@@ -109,7 +109,7 @@ func Client(opts ...Option) middleware.Middleware {
 			}
 			reply, err := handler(ctx, req)
 			if err != nil {
-				log.Errorw(
+				logger.Errorw(
 					"kind", "client",
 					"component", component,
 					"path", path,
@@ -120,7 +120,7 @@ func Client(opts ...Option) middleware.Middleware {
 				)
 				return nil, err
 			}
-			log.Infow(
+			logger.Infow(
 				"kind", "client",
 				"component", component,
 				"path", path,
