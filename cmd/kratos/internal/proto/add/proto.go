@@ -37,5 +37,5 @@ func (p *Proto) Generate() error {
 	if _, err := os.Stat(name); !os.IsNotExist(err) {
 		return fmt.Errorf("%s already exists", p.Name)
 	}
-	return ioutil.WriteFile(name, []byte(body), 0644)
+	return ioutil.WriteFile(name, body, 0644)
 }

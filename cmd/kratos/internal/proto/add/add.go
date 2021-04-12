@@ -59,7 +59,7 @@ func javaPackage(name string) string {
 }
 
 func serviceName(name string) string {
-	return unexport(strings.Split(name, ".")[0])
+	return export(strings.Split(name, ".")[0])
 }
 
-func unexport(s string) string { return strings.ToUpper(s[:1]) + s[1:] }
+func export(s string) string { return strings.ToUpper(s[:1]) + s[1:] }
