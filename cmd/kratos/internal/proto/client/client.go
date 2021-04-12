@@ -36,7 +36,7 @@ func run(cmd *cobra.Command, args []string) {
 		cmd := exec.Command("kratos", "upgrade")
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-		if cmd.Run(); err != nil {
+		if err = cmd.Run(); err != nil {
 			fmt.Println(err)
 			return
 		}
