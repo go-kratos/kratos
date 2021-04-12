@@ -14,10 +14,11 @@ import (
 var (
 	// CmdClient represents the source command.
 	CmdClient = &cobra.Command{
-		Use:   "client",
-		Short: "Generate the proto client code",
-		Long:  "Generate the proto client code. Example: kratos proto client helloworld.proto",
-		Run:   run,
+		Use:                "client",
+		Short:              "Generate the proto client code",
+		Long:               "Generate the proto client code. Example: kratos proto client helloworld.proto",
+		DisableFlagParsing: true,
+		Run:                run,
 	}
 )
 
@@ -41,9 +42,9 @@ func run(cmd *cobra.Command, args []string) {
 		}
 	}
 	if strings.HasSuffix(proto, ".proto") {
-		err = generate(proto)
+		err = generate(proto, args)
 	} else {
-		err = walk(proto)
+		err = walk(proto, args)
 	}
 	if err != nil {
 		fmt.Println(err)
@@ -59,7 +60,7 @@ func look(name ...string) error {
 	return nil
 }
 
-func walk(dir string) error {
+func walk(dir string, args []string) error {
 	if dir == "" {
 		dir = "."
 	}
@@ -67,14 +68,14 @@ func walk(dir string) error {
 		if ext := filepath.Ext(path); ext != ".proto" {
 			return nil
 		}
-		return generate(path)
+		return generate(path, args)
 	})
 }
 
 // generate is used to execute the generate command for the specified proto file
-func generate(proto string) error {
+func generate(proto string, args []string) error {
 	path, name := filepath.Split(proto)
-	fd := exec.Command("protoc", []string{
+	input := []string{
 		"--proto_path=.",
 		"--proto_path=" + filepath.Join(base.KratosMod(), "api"),
 		"--proto_path=" + filepath.Join(base.KratosMod(), "third_party"),
@@ -84,7 +85,13 @@ func generate(proto string) error {
 		"--go-http_out=paths=source_relative:.",
 		"--go-errors_out=paths=source_relative:.",
 		name,
-	}...)
+	}
+	for _, a := range args {
+		if strings.HasPrefix(a, "-") {
+			input = append(input, a)
+		}
+	}
+	fd := exec.Command("protoc", input...)
 	fd.Stdout = os.Stdout
 	fd.Stderr = os.Stderr
 	fd.Dir = path
