@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"embed"
 	"log"
 	"net/http"
 
@@ -10,17 +10,19 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//go:embed assets/*
+var f embed.FS
+
 func main() {
 	router := mux.NewRouter()
-	router.HandleFunc("/home", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprint(w, "Hello Gorilla Mux!")
-	}).Methods("GET")
+	// example: /assets/index.html
+	router.PathPrefix("/assets").Handler(http.FileServer(http.FS(f)))
 
 	httpSrv := transhttp.NewServer(transhttp.Address(":8000"))
 	httpSrv.HandlePrefix("/", router)
 
 	app := kratos.New(
-		kratos.Name("mux"),
+		kratos.Name("static"),
 		kratos.Server(
 			httpSrv,
 		),
