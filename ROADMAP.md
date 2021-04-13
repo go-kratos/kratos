@@ -8,12 +8,12 @@ This document defines the roadmap for Kratos development.
     - [x] K8s ConfigMap
     - [x] Consul
     - [x] Etcd
-    - [ ] Nacos
-- [ ] Registry
-    - [ ] Consul
-    - [ ] Etcd
-    - [ ] K8s
-    - [ ] Nacos
+    - [x] Nacos
+- [x] Registry
+    - [x] Consul
+    - [x] Etcd
+    - [x] K8s
+    - [x] Nacos
 - [x] Encoding
     - [x] JSON
     - [x] Protobuf
