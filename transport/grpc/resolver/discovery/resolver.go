@@ -46,6 +46,9 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 			r.log.Errorf("Failed to parse discovery endpoint: %v", err)
 			continue
 		}
+		if endpoint == "" {
+			continue
+		}
 		addr := resolver.Address{
 			ServerName: in.Name,
 			Attributes: parseAttributes(in.Metadata),
