@@ -18,32 +18,56 @@ type Checker interface {
 // Handler is an HTTP handler that reports on the success of an
 // aggregate of Checkers.  The zero value is always healthy.
 type Handler struct {
-	checkers map[string]Checker
+	checkers  map[string]Checker
+	observers map[string]Checker
 }
 
 // NewHandler new a health handler.
 func NewHandler() *Handler {
-	return &Handler{checkers: make(map[string]Checker)}
+	return &Handler{
+		checkers:  make(map[string]Checker),
+		observers: make(map[string]Checker),
+	}
 }
 
-// Add adds a new check to the handler.
-func (h *Handler) Add(name string, c Checker) {
+// AddChecker adds a new check to the handler.
+func (h *Handler) AddChecker(name string, c Checker) {
 	h.checkers[name] = c
+}
+
+// AddObserver adds a new check to the handler but it does not fail the entire status.
+func (h *Handler) AddObserver(name string, c Checker) {
+	h.observers[name] = c
 }
 
 // ServeHTTP returns 200 if it is healthy, 500 otherwise.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	code := http.StatusOK
-	res := make(map[string]string, len(h.checkers))
+	errors := make(map[string]string, len(h.checkers))
+
 	for name, c := range h.checkers {
 		if err := c.CheckHealth(r.Context()); err != nil {
 			code = http.StatusInternalServerError
-			res[name] = err.Error()
+			errors[name] = err.Error()
 		} else {
-			res[name] = "ok"
+			errors[name] = "ok"
 		}
 	}
+
+	for name, c := range h.observers {
+		if err := c.CheckHealth(r.Context()); err != nil {
+			errors[name] = err.Error()
+		} else {
+			errors[name] = "ok"
+		}
+	}
+
 	w.WriteHeader(code)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(res)
+	json.NewEncoder(w).Encode(
+		map[string]interface{}{
+			"status": code,
+			"errors": errors,
+		},
+	)
 }
