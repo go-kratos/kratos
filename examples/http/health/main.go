@@ -9,14 +9,23 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http/health"
 )
 
-type checker struct{}
+type mysqlChecker struct{}
 
-func (c *checker) CheckHealth(ctx context.Context) error {
+func (c *mysqlChecker) CheckHealth(ctx context.Context) error {
+	return nil
+}
+
+type redisChecker struct{}
+
+func (c *redisChecker) CheckHealth(ctx context.Context) error {
 	return nil
 }
 
 func main() {
-	handler := health.NewHandler(health.WithChecker(&checker{}))
+	handler := health.NewHandler()
+	handler.Add("mysql", &mysqlChecker{})
+	handler.Add("redis", &redisChecker{})
+
 	httpSrv := http.NewServer(http.Address(":8000"))
 	httpSrv.Handle("/healthz", handler)
 
