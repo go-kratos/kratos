@@ -16,10 +16,11 @@ func TestApp(t *testing.T) {
 		Version("v1.0.0"),
 		Server(hs, gs),
 	)
+	ctx, done := OnInterrupt()
 	time.AfterFunc(time.Second, func() {
-		app.Stop()
+		done()
 	})
-	if err := app.Run(); err != nil {
+	if err := app.Run(ctx); err != nil {
 		t.Fatal(err)
 	}
 }

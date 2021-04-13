@@ -17,8 +17,6 @@ import (
 // App is an application components lifecycle manager
 type App struct {
 	opts     options
-	ctx      context.Context
-	cancel   func()
 	instance *registry.ServiceInstance
 	log      *log.Helper
 }
@@ -26,9 +24,7 @@ type App struct {
 // New create an application lifecycle manager.
 func New(opts ...Option) *App {
 	options := options{
-		ctx:    context.Background(),
 		logger: log.DefaultLogger,
-		sigs:   []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 	}
 	if id, err := uuid.NewUUID(); err == nil {
 		options.id = id.String()
@@ -36,28 +32,26 @@ func New(opts ...Option) *App {
 	for _, o := range opts {
 		o(&options)
 	}
-	ctx, cancel := context.WithCancel(options.ctx)
 	return &App{
 		opts:     options,
-		ctx:      ctx,
-		cancel:   cancel,
 		instance: buildInstance(options),
 		log:      log.NewHelper("app", options.logger),
 	}
 }
 
 // Run executes all OnStart hooks registered with the application's Lifecycle.
-func (a *App) Run() error {
+func (a *App) Run(ctx context.Context) error {
 	a.log.Infow(
 		"service_id", a.opts.id,
 		"service_name", a.opts.name,
 		"version", a.opts.version,
 	)
-	g, ctx := errgroup.WithContext(a.ctx)
+	g, ctx := errgroup.WithContext(ctx)
 	for _, srv := range a.opts.servers {
 		srv := srv
 		g.Go(func() error {
 			<-ctx.Done() // wait for stop signal
+			a.Stop()
 			return srv.Stop()
 		})
 		g.Go(func() error {
@@ -65,22 +59,10 @@ func (a *App) Run() error {
 		})
 	}
 	if a.opts.registrar != nil {
-		if err := a.opts.registrar.Register(a.opts.ctx, a.instance); err != nil {
+		if err := a.opts.registrar.Register(ctx, a.instance); err != nil {
 			return err
 		}
 	}
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, a.opts.sigs...)
-	g.Go(func() error {
-		for {
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			case <-c:
-				a.Stop()
-			}
-		}
-	})
 	if err := g.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return err
 	}
@@ -90,12 +72,9 @@ func (a *App) Run() error {
 // Stop gracefully stops the application.
 func (a *App) Stop() error {
 	if a.opts.registrar != nil {
-		if err := a.opts.registrar.Deregister(a.opts.ctx, a.instance); err != nil {
+		if err := a.opts.registrar.Deregister(context.Background(), a.instance); err != nil {
 			return err
 		}
-	}
-	if a.cancel != nil {
-		a.cancel()
 	}
 	return nil
 }
@@ -115,4 +94,28 @@ func buildInstance(o options) *registry.ServiceInstance {
 		Metadata:  o.metadata,
 		Endpoints: o.endpoints,
 	}
+}
+
+// OnInterrupt returns a context that is canceled on SIGINT, SIGQUIT and SIGTERM.
+func OnInterrupt() (context.Context, func()) {
+	return Wrap(context.Background(), syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT)
+}
+
+// Wrap returns a new context wrapping the provided context and
+// canceling it on the provided signals.
+func Wrap(ctx context.Context, signals ...os.Signal) (context.Context, func()) {
+	ctx, closer := context.WithCancel(ctx)
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, signals...)
+
+	go func() {
+		select {
+		case <-c:
+			closer()
+		case <-ctx.Done():
+		}
+	}()
+
+	return ctx, closer
 }
