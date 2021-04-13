@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/go-kratos/kratos/v2"
@@ -18,13 +19,13 @@ func (c *mysqlChecker) CheckHealth(ctx context.Context) error {
 type redisChecker struct{}
 
 func (c *redisChecker) CheckHealth(ctx context.Context) error {
-	return nil
+	return errors.New("connection refused")
 }
 
 func main() {
 	handler := health.NewHandler()
-	handler.Add("mysql", &mysqlChecker{})
-	handler.Add("redis", &redisChecker{})
+	handler.AddChecker("mysql", &mysqlChecker{})
+	handler.AddObserver("redis", &redisChecker{})
 
 	httpSrv := http.NewServer(http.Address(":8000"))
 	httpSrv.Handle("/healthz", handler)
