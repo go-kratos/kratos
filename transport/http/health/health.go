@@ -23,7 +23,7 @@ type Handler struct {
 
 // NewHandler new a health handler.
 func NewHandler() *Handler {
-	return &Handler{}
+	return &Handler{checkers: make(map[string]Checker)}
 }
 
 // Add adds a new check to the handler.
