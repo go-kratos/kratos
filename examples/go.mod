@@ -7,7 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-kratos/consul v0.0.0-20210311161349-cfb0345e820d
 	github.com/go-kratos/etcd v0.0.0-20210311162832-e0fdc8177742
-	github.com/go-kratos/kratos/v2 v2.0.0-20210413151632-da361454c11d
+	github.com/go-kratos/kratos/v2 v2.0.0-20210414041928-5664cacc659f
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.7.1
