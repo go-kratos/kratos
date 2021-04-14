@@ -41,31 +41,26 @@ func (h *Handler) AddObserver(name string, c CheckerFunc) {
 // ServeHTTP returns 200 if it is healthy, 500 otherwise.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	code := http.StatusOK
-	errors := make(map[string]string, len(h.checkers))
+	results := make(map[string]string, len(h.checkers))
 
 	for name, checker := range h.checkers {
 		if err := checker(r.Context()); err != nil {
 			code = http.StatusInternalServerError
-			errors[name] = err.Error()
+			results[name] = err.Error()
 		} else {
-			errors[name] = "ok"
+			results[name] = "OK"
 		}
 	}
 
 	for name, checker := range h.observers {
 		if err := checker(r.Context()); err != nil {
-			errors[name] = err.Error()
+			results[name] = err.Error()
 		} else {
-			errors[name] = "ok"
+			results[name] = "OK"
 		}
 	}
 
 	w.WriteHeader(code)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(
-		map[string]interface{}{
-			"status": code,
-			"errors": errors,
-		},
-	)
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(w).Encode(results)
 }
