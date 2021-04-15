@@ -13,16 +13,20 @@ cd cmd/protoc-gen-go-errors && go install
 ```
 ## Create a service
 ```
-# create a template project
-kratos new helloworld
+# create project template
+kratos new blog
 
 cd helloworld
-# Add a proto template
-kratos proto add api/helloworld/helloworld.proto
-# Generate the source code of service by proto file
-kratos proto service api/helloworld/helloworld.proto -t internal/service
+# download modules
+go mod download
 
-make proto
-make build
-make test
+# generate Proto template
+kratos proto add api/blog/blog.proto
+# generate Proto source code
+kratos proto client api/blog/blog.proto
+# generate server template
+kratos proto server api/blog/blog.proto -t internal/service、
+
+# generate all proto source code, wire, etc.
+go generate ./...
 ```

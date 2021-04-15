@@ -8,6 +8,7 @@ require (
 	github.com/go-kratos/consul v0.0.0-20210311161349-cfb0345e820d
 	github.com/go-kratos/etcd v0.0.0-20210311162832-e0fdc8177742
 	github.com/go-kratos/kratos/v2 v2.0.0-20210414041928-5664cacc659f
+	github.com/go-kratos/nacos v0.0.0-20210413024302-d286fdeb5e38
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.7.1
@@ -20,6 +21,7 @@ require (
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/nacos-group/nacos-sdk-go v1.0.7
 	github.com/ugorji/go v1.2.3 // indirect
 	go.etcd.io/etcd/client/v3 v3.5.0-alpha.0
 	go.opentelemetry.io/otel v0.18.0
