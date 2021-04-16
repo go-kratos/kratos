@@ -1,32 +1,18 @@
-# Kratos Layout
-
-## Install Kratos
+# How to run this blog example server
+1. You should ensure that your mysql server is running.
+2. Ensure that the database named `testdb` has been created, 
+   otherwise you should execute the following database script:
+```mysql
+create database testdb;
 ```
-go get github.com/go-kratos/kratos/cmd/kratos
-go get github.com/go-kratos/kratos/cmd/protoc-gen-go-http
-go get github.com/go-kratos/kratos/cmd/protoc-gen-go-errors
-
-# from source
-cd cmd/kratos && go install
-cd cmd/protoc-gen-go-http && go install
-cd cmd/protoc-gen-go-errors && go install
+3. Modify the `configs/config.yaml` file and add your mysql information in the data source:
+```yaml
+data:
+  database:
+    driver: mysql
+    source: root:password@tcp(127.0.0.1:3306)/testdb?parseTime=True
 ```
-## Create a service
-```
-# create project template
-kratos new blog
-
-cd helloworld
-# download modules
-go mod download
-
-# generate Proto template
-kratos proto add api/blog/blog.proto
-# generate Proto source code
-kratos proto client api/blog/blog.proto
-# generate server template
-kratos proto server api/blog/blog.proto -t internal/service、
-
-# generate all proto source code, wire, etc.
-go generate ./...
+4. Run your blog server:
+```yaml
+make run
 ```
