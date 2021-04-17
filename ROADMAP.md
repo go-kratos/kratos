@@ -28,7 +28,7 @@ This document defines the roadmap for Kratos development.
     - [x] transport tracing
     - [x] Validator
     - [ ] Authentication
-    - [ ] Ratelimit
+    - [x] Ratelimit
     - [ ] CircuitBreaker
 - [x] Metrics
     - [x] Prometheus
