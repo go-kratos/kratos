@@ -2,9 +2,10 @@ package main
 
 import (
 	"flag"
+	"os"
+
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
 	"go.opentelemetry.io/otel/sdk/trace"
-	"os"
 
 	"github.com/go-kratos/kratos/examples/blog/internal/conf"
 	"github.com/go-kratos/kratos/v2"
@@ -75,10 +76,11 @@ func main() {
 	}
 	defer flush()
 
-	app, err := initApp(bc.Server, bc.Data, tp, logger)
+	app, cleanup, err := initApp(bc.Server, bc.Data, tp, logger)
 	if err != nil {
 		panic(err)
 	}
+	defer cleanup()
 
 	// start and wait for stop signal
 	if err := app.Run(); err != nil {

@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+
 	"github.com/go-kratos/kratos/examples/blog/internal/conf"
 	"github.com/go-kratos/kratos/examples/blog/internal/data/ent"
 	"github.com/go-kratos/kratos/v2/log"
@@ -23,7 +24,7 @@ type Data struct {
 }
 
 // NewData .
-func NewData(conf *conf.Data, logger log.Logger) (*Data, error) {
+func NewData(conf *conf.Data, logger log.Logger) (*Data, func(), error) {
 	log := log.NewHelper("data", logger)
 	client, err := ent.Open(
 		conf.Database.Driver,
@@ -31,12 +32,12 @@ func NewData(conf *conf.Data, logger log.Logger) (*Data, error) {
 	)
 	if err != nil {
 		log.Errorf("failed opening connection to sqlite: %v", err)
-		return nil, err
+		return nil, nil, err
 	}
 	// Run the auto migration tool.
 	if err := client.Schema.Create(context.Background()); err != nil {
 		log.Errorf("failed creating schema resources: %v", err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	rdb := redis.NewClient(&redis.Options{
@@ -48,8 +49,17 @@ func NewData(conf *conf.Data, logger log.Logger) (*Data, error) {
 		ReadTimeout:  conf.Redis.ReadTimeout.AsDuration(),
 	})
 	rdb.AddHook(redisotel.TracingHook{})
-	return &Data{
+	d := &Data{
 		db:  client,
 		rdb: rdb,
+	}
+	return d, func() {
+		log.Info("message", "closing the data resources")
+		if err := d.db.Close(); err != nil {
+			log.Error(err)
+		}
+		if err := d.rdb.Close(); err != nil {
+			log.Error(err)
+		}
 	}, nil
 }
