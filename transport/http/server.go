@@ -141,6 +141,7 @@ func (s *Server) Start() error {
 	if err != nil {
 		return err
 	}
+	s.lis = lis
 	s.log.Infof("[HTTP] server listening on: %s", lis.Addr().String())
 	if err = s.Serve(lis); !errors.Is(err, http.ErrServerClosed) {
 		return err
