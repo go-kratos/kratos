@@ -2,8 +2,10 @@ package http
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"time"
@@ -16,6 +18,10 @@ import (
 )
 
 const loggerName = "transport/http"
+
+var (
+	ErrInvalidCertOrKeyType = errors.New("invalid cert or key type, must be string or []byte")
+)
 
 var _ transport.Server = (*Server)(nil)
 
@@ -50,15 +56,32 @@ func Logger(logger log.Logger) ServerOption {
 	}
 }
 
+// KeyFile with server logger.
+func KeyFile(keyFile string) ServerOption {
+	return func(s *Server) {
+		s.keyFile = keyFile
+	}
+}
+
+// CertFile certFile should be the concatenation of the server's certificate,
+// any intermediates, and the CA's certificate.
+func CertFile(certFile string) ServerOption {
+	return func(s *Server) {
+		s.certFile = certFile
+	}
+}
+
 // Server is a HTTP server wrapper.
 type Server struct {
 	*http.Server
-	lis     net.Listener
-	network string
-	address string
-	timeout time.Duration
-	router  *mux.Router
-	log     *log.Helper
+	lis      net.Listener
+	network  string
+	address  string
+	timeout  time.Duration
+	router   *mux.Router
+	log      *log.Helper
+	certFile string
+	keyFile  string
 }
 
 // NewServer creates a HTTP server by options.
@@ -114,16 +137,49 @@ func (s *Server) Endpoint() (string, error) {
 
 // Start start the HTTP server.
 func (s *Server) Start() error {
-	lis, err := net.Listen(s.network, s.address)
+	lis, err := s.listen()
 	if err != nil {
 		return err
 	}
-	s.lis = lis
 	s.log.Infof("[HTTP] server listening on: %s", lis.Addr().String())
-	if err := s.Serve(lis); !errors.Is(err, http.ErrServerClosed) {
+	if err = s.Serve(lis); !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
+
 	return nil
+}
+
+func (s *Server) listen() (net.Listener, error) {
+	lis, err := net.Listen(s.network, s.address)
+	if s.keyFile != "" && s.certFile != "" {
+		var cert []byte
+		if cert, err = filepathOrContent(s.certFile); err != nil {
+			return nil, err
+		}
+		var key []byte
+		if key, err = filepathOrContent(s.keyFile); err != nil {
+			return nil, err
+		}
+		config := new(tls.Config)
+		config.Certificates = make([]tls.Certificate, 1)
+		if config.Certificates[0], err = tls.X509KeyPair(cert, key); err != nil {
+			return nil, err
+		}
+		lis = tls.NewListener(lis, config)
+	}
+
+	return lis, err
+}
+
+func filepathOrContent(fileOrContent interface{}) (content []byte, err error) {
+	switch v := fileOrContent.(type) {
+	case string:
+		return ioutil.ReadFile(v)
+	case []byte:
+		return v, nil
+	default:
+		return nil, ErrInvalidCertOrKeyType
+	}
 }
 
 // Stop stop the HTTP server.
