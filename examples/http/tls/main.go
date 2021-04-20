@@ -18,8 +18,8 @@ func main() {
 
 	httpSrv := transhttp.NewServer(
 		transhttp.Address(":8000"),
-		transhttp.CertFile("http/tls/ssl/cert.pem"),
-		transhttp.KeyFile("http/tls/ssl/key.pem"),
+//		transhttp.CertFile("http/tls/ssl/cert.pem"),
+//		transhttp.KeyFile("http/tls/ssl/key.pem"),
 	)
 	httpSrv.HandlePrefix("/", router)
 
