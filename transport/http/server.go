@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"time"
@@ -56,18 +55,10 @@ func Logger(logger log.Logger) ServerOption {
 	}
 }
 
-// KeyFile with server logger.
-func KeyFile(keyFile string) ServerOption {
+func X509KeyPair(cert,key []byte) ServerOption {
 	return func(s *Server) {
-		s.keyFile = keyFile
-	}
-}
-
-// CertFile certFile should be the concatenation of the server's certificate,
-// any intermediates, and the CA's certificate.
-func CertFile(certFile string) ServerOption {
-	return func(s *Server) {
-		s.certFile = certFile
+		s.keyPair.cert = cert
+		s.keyPair.key = key
 	}
 }
 
@@ -80,8 +71,10 @@ type Server struct {
 	timeout  time.Duration
 	router   *mux.Router
 	log      *log.Helper
-	certFile string
-	keyFile  string
+	keyPair  struct  {
+		cert 	[]byte
+		key  	[]byte
+	}
 }
 
 // NewServer creates a HTTP server by options.
@@ -152,35 +145,16 @@ func (s *Server) Start() error {
 
 func (s *Server) listen() (net.Listener, error) {
 	lis, err := net.Listen(s.network, s.address)
-	if s.keyFile != "" && s.certFile != "" {
-		var cert []byte
-		if cert, err = filepathOrContent(s.certFile); err != nil {
-			return nil, err
-		}
-		var key []byte
-		if key, err = filepathOrContent(s.keyFile); err != nil {
-			return nil, err
-		}
+	if s.keyPair.key != nil && s.keyPair.cert != nil {
 		config := new(tls.Config)
 		config.Certificates = make([]tls.Certificate, 1)
-		if config.Certificates[0], err = tls.X509KeyPair(cert, key); err != nil {
+		if config.Certificates[0], err = tls.X509KeyPair(s.keyPair.cert, s.keyPair.key); err != nil {
 			return nil, err
 		}
 		lis = tls.NewListener(lis, config)
 	}
 
 	return lis, err
-}
-
-func filepathOrContent(fileOrContent interface{}) (content []byte, err error) {
-	switch v := fileOrContent.(type) {
-	case string:
-		return ioutil.ReadFile(v)
-	case []byte:
-		return v, nil
-	default:
-		return nil, ErrInvalidCertOrKeyType
-	}
 }
 
 // Stop stop the HTTP server.

@@ -1,14 +1,20 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
-	"log"
-	"net/http"
-
 	"github.com/go-kratos/kratos/v2"
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/gorilla/mux"
+	"log"
+	"net/http"
 )
+
+//go:embed cert.pem
+var cert []byte
+
+//go:embed key.pem
+var key []byte
 
 func main() {
 	router := mux.NewRouter()
@@ -18,8 +24,7 @@ func main() {
 
 	httpSrv := transhttp.NewServer(
 		transhttp.Address(":8000"),
-		transhttp.CertFile("http/tls/ssl/cert.pem"),
-		transhttp.KeyFile("http/tls/ssl/key.pem"),
+		transhttp.X509KeyPair(cert,key),
 	)
 	httpSrv.HandlePrefix("/", router)
 
