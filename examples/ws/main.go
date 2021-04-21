@@ -1,11 +1,12 @@
 package main
 
 import (
+	"log"
+
 	"github.com/go-kratos/kratos/examples/ws/handler"
 	"github.com/go-kratos/kratos/v2"
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/gorilla/mux"
-	"log"
 )
 
 func main() {
