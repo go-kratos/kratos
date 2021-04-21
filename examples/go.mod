@@ -16,6 +16,7 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/google/wire v0.5.0
 	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/websocket v1.4.2
 	github.com/hashicorp/consul/api v1.8.1
 	github.com/hashicorp/go-sockaddr v1.0.2 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
