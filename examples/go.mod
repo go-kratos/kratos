@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/examples
 go 1.16
 
 require (
-	entgo.io/ent v0.6.0
+	entgo.io/ent v0.8.0
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-kratos/consul v0.0.0-20210311161349-cfb0345e820d
 	github.com/go-kratos/etcd v0.0.0-20210311162832-e0fdc8177742
@@ -31,7 +31,6 @@ require (
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83 // indirect
 	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20210309074719-68d13333faf2 // indirect
 	google.golang.org/genproto v0.0.0-20210309190941-1aeedc14537d
 	google.golang.org/grpc v1.36.0
 	google.golang.org/protobuf v1.25.1-0.20200805231151-a709e31e5d12
