@@ -3,7 +3,6 @@ module github.com/go-kratos/kratos/v2
 go 1.15
 
 require (
-	entgo.io/ent v0.8.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/golang/protobuf v1.4.3
 	github.com/google/uuid v1.2.0

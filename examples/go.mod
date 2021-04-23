@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/examples
 go 1.16
 
 require (
-	entgo.io/ent v0.8.0
+	entgo.io/ent v0.6.0
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-kratos/consul v0.0.0-20210311161349-cfb0345e820d
 	github.com/go-kratos/etcd v0.0.0-20210311162832-e0fdc8177742
