@@ -11,7 +11,7 @@ func TestError(t *testing.T) {
 		base *Error
 		br   *BadRequestError
 	)
-	err := NewBadRequest("domain", "reason", "message")
+	err := NewBadRequest("translate", "API_KEY_INVALID", "API key not valid. Please pass a valid API key.")
 	werr := fmt.Errorf("wrap %w", err)
 
 	if errors.Is(err, base) {
