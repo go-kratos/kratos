@@ -6,49 +6,25 @@ import (
 	"testing"
 )
 
-func TestErrorsMatch(t *testing.T) {
-	s := &StatusError{Code: 1}
-	st := &StatusError{Code: 2}
+func TestError(t *testing.T) {
+	var (
+		base *Error
+		br   *BadRequestError
+	)
+	err := NewBadRequest("domain", "reason", "message")
+	werr := fmt.Errorf("wrap %w", err)
 
-	if errors.Is(s, st) {
-		t.Errorf("error is not match: %+v -> %+v", s, st)
+	if errors.Is(err, base) {
+		t.Errorf("should not be equal: %v", err)
+	}
+	if !errors.Is(werr, err) {
+		t.Errorf("should be equal: %v", err)
 	}
 
-	s.Code = 1
-	st.Code = 1
-	if !errors.Is(s, st) {
-		t.Errorf("error is not match: %+v -> %+v", s, st)
+	if !errors.As(err, &base) {
+		t.Errorf("should be matchs: %v", err)
 	}
-
-	s.Reason = "test_reason"
-	s.Reason = "test_reason"
-
-	if !errors.Is(s, st) {
-		t.Errorf("error is not match: %+v -> %+v", s, st)
-	}
-
-	if Reason(s) != "test_reason" {
-		t.Errorf("error is not match: %+v -> %+v", s, st)
-	}
-}
-
-func TestErrorIs(t *testing.T) {
-	err1 := &StatusError{Code: 1}
-	t.Log(err1)
-	err2 := fmt.Errorf("wrap : %w", err1)
-	t.Log(err2)
-
-	if !(errors.Is(err2, err1)) {
-		t.Errorf("error is not match: a: %v b: %v ", err2, err1)
-	}
-}
-
-func TestErrorAs(t *testing.T) {
-	err1 := &StatusError{Code: 1}
-	err2 := fmt.Errorf("wrap : %w", err1)
-
-	err3 := new(StatusError)
-	if !errors.As(err2, &err3) {
-		t.Errorf("error is not match: %v", err2)
+	if !errors.As(err, &br) {
+		t.Errorf("should be matchs: %v", err)
 	}
 }
