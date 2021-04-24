@@ -87,7 +87,7 @@ func (e *NotFoundError) Error() string { return e.err.Error() }
 
 // NewNotFound new a Not Found error.
 func NewNotFound(domain, reason, message string) *NotFoundError {
-	return &NotFoundError{err: New(403, domain, reason, message)}
+	return &NotFoundError{err: New(404, domain, reason, message)}
 }
 
 // ConflictError Conflict error that is mapped to a 409 response.
@@ -113,7 +113,7 @@ func (e *InternalServerError) Error() string { return e.err.Error() }
 
 // NewInternalServer new a Internal Server error.
 func NewInternalServer(domain, reason, message string) *InternalServerError {
-	return &InternalServerError{err: New(409, domain, reason, message)}
+	return &InternalServerError{err: New(500, domain, reason, message)}
 }
 
 // ServiceUnavailableError is Service Unavailable response for the API, mapped to a HTTP 503 response.
@@ -126,5 +126,5 @@ func (e *ServiceUnavailableError) Error() string { return e.err.Error() }
 
 // NewServiceUnavailable new a Service Unavailable error.
 func NewServiceUnavailable(domain, reason, message string) *ServiceUnavailableError {
-	return &ServiceUnavailableError{err: New(409, domain, reason, message)}
+	return &ServiceUnavailableError{err: New(503, domain, reason, message)}
 }
