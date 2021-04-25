@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
+	healthpb "github.com/go-kratos/kratos/v2/transport/grpc/health/grpc_health_v1"
 	"net"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/status"
 	"github.com/go-kratos/kratos/v2/transport"
-
+	"github.com/go-kratos/kratos/v2/transport/grpc/health"
 	"google.golang.org/grpc"
 )
 
@@ -75,6 +76,7 @@ type Server struct {
 	log        *log.Helper
 	middleware middleware.Middleware
 	grpcOpts   []grpc.ServerOption
+	health     *health.Server
 }
 
 // NewServer creates a gRPC server by options.
@@ -88,6 +90,7 @@ func NewServer(opts ...ServerOption) *Server {
 			recovery.Recovery(),
 			status.Server(),
 		),
+		health: health.NewServer(),
 	}
 	for _, o := range opts {
 		o(srv)
@@ -101,6 +104,8 @@ func NewServer(opts ...ServerOption) *Server {
 		grpcOpts = append(grpcOpts, srv.grpcOpts...)
 	}
 	srv.Server = grpc.NewServer(grpcOpts...)
+	// grpc health register
+	healthpb.RegisterHealthServer(srv.Server, health.NewServer())
 	return srv
 }
 
@@ -123,12 +128,14 @@ func (s *Server) Start() error {
 	}
 	s.lis = lis
 	s.log.Infof("[gRPC] server listening on: %s", lis.Addr().String())
+	s.health.Resume()
 	return s.Serve(lis)
 }
 
 // Stop stop the gRPC server.
 func (s *Server) Stop() error {
 	s.GracefulStop()
+	s.health.Shutdown()
 	s.log.Info("[gRPC] server stopping")
 	return nil
 }
