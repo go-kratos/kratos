@@ -80,3 +80,12 @@ func Reason(err error) string {
 	}
 	return ""
 }
+
+// FromError try to convert an error to *Error.
+// It supports wrapped errors.
+func FromError(err error) *Error {
+	if target := new(Error); errors.As(err, &target) {
+		return target
+	}
+	return New(http.StatusInternalServerError, "", err.Error())
+}
