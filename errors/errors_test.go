@@ -10,8 +10,8 @@ func TestError(t *testing.T) {
 	var (
 		base *Error
 	)
-	err := New(400, "reason", "message")
-	err2 := New(400, "reason", "message")
+	err := New(400, "domain", "reason", "message")
+	err2 := New(400, "domain", "reason", "message")
 	err3 := err.WithMetadata(map[string]string{
 		"foo": "bar",
 	})

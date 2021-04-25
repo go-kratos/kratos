@@ -10,7 +10,7 @@ import (
 )
 
 func TestErrEncoder(t *testing.T) {
-	err := errors.BadRequest("InvalidArgument", "format")
+	err := errors.BadRequest("test", "invalid_argument", "format")
 	en := encodeErr(context.Background(), err)
 	if code := status.Code(en); code != codes.InvalidArgument {
 		t.Errorf("expected %d got %d", codes.InvalidArgument, code)
