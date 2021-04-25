@@ -41,9 +41,10 @@ func (e *Error) Error() string {
 }
 
 // New returns an error object for the code, message and error info.
-func New(code int, reason, message string) *Error {
+func New(code int, domain, reason, message string) *Error {
 	return &Error{
 		Code:    code,
+		Domain:  domain,
 		Reason:  reason,
 		Message: message,
 	}
@@ -85,5 +86,5 @@ func FromError(err error) *Error {
 	if target := new(Error); errors.As(err, &target) {
 		return target
 	}
-	return New(http.StatusInternalServerError, "", err.Error())
+	return New(http.StatusInternalServerError, "", "", err.Error())
 }

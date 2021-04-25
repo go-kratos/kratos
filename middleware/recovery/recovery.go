@@ -40,7 +40,7 @@ func Recovery(opts ...Option) middleware.Middleware {
 	options := options{
 		logger: log.DefaultLogger,
 		handler: func(ctx context.Context, req, err interface{}) error {
-			return errors.InternalServer("recovery", fmt.Sprintf("panic triggered: %v", err))
+			return errors.InternalServer("", "recovery", fmt.Sprintf("panic triggered: %v", err))
 		},
 	}
 	for _, o := range opts {

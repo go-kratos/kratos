@@ -17,6 +17,14 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
+// go build -ldflags "-X main.Version=x.y.z"
+var (
+	// Name is the name of the compiled software.
+	Name = "helloworld"
+	// Version is the version of the compiled software.
+	Version = "v1.0.0"
+)
+
 // server is used to implement helloworld.GreeterServer.
 type server struct {
 	pb.UnimplementedGreeterServer
@@ -25,7 +33,7 @@ type server struct {
 // SayHello implements helloworld.GreeterServer
 func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	if in.Name == "error" {
-		return nil, errors.BadRequest("custom_error", fmt.Sprintf("invalid argument %s", in.Name))
+		return nil, errors.BadRequest(Name, "custom_error", fmt.Sprintf("invalid argument %s", in.Name))
 	}
 	if in.Name == "panic" {
 		panic("grpc panic")
@@ -42,7 +50,7 @@ func main() {
 		grpc.Address(":9000"),
 		grpc.Middleware(
 			middleware.Chain(
-				status.Server("helloworld"),
+				status.Server(),
 				logging.Server(logger),
 				recovery.Recovery(),
 			),
@@ -62,7 +70,7 @@ func main() {
 	)
 
 	app := kratos.New(
-		kratos.Name("helloworld"),
+		kratos.Name(Name),
 		kratos.Server(
 			httpSrv,
 			grpcSrv,
