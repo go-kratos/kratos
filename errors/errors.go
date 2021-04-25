@@ -3,7 +3,6 @@ package errors
 import (
 	"errors"
 	"fmt"
-	"strings"
 )
 
 const (
@@ -21,28 +20,8 @@ type Error struct {
 	Metadata map[string]string `json:"metadata"`
 }
 
-// WithMetadata returns an MD formed by the mapping of key, value ...
-// WithMetadata panics if len(kv) is odd.
-//
-// Only the following ASCII characters are allowed in keys:
-//  - digits: 0-9
-//  - uppercase letters: A-Z (normalized to lower)
-//  - lowercase letters: a-z
-//  - special characters: -_.
-// Uppercase letters are automatically converted to lowercase.
-func (e *Error) WithMetadata(kv ...string) *Error {
-	if len(kv)%2 == 1 {
-		panic(fmt.Sprintf("metadata: Pairs got the odd number of input pairs for metadata: %d", len(kv)))
-	}
-	md := make(map[string]string, len(kv)/2)
-	var key string
-	for i, s := range kv {
-		if i%2 == 0 {
-			key = strings.ToLower(s)
-			continue
-		}
-		md[key] = s
-	}
+// WithMetadata with an MD formed by the mapping of key, value.
+func (e *Error) WithMetadata(md map[string]string) *Error {
 	err := *e
 	err.Metadata = md
 	return &err

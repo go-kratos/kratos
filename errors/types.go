@@ -5,7 +5,7 @@ func BadRequest(domain, reason, message string) *Error {
 	return New(400, domain, reason, message)
 }
 
-// IsBadRequest determines if err is an error which indicates an BadRequest error.
+// IsBadRequest determines if err is an error which indicates a BadRequest error.
 // It supports wrapped errors.
 func IsBadRequest(err error) bool {
 	return Code(err) == 400
@@ -16,7 +16,7 @@ func Unauthorized(domain, reason, message string) *Error {
 	return New(401, domain, reason, message)
 }
 
-// IsUnauthorized determines if err is an error which indicates an Unauthorized error.
+// IsUnauthorized determines if err is an error which indicates a Unauthorized error.
 // It supports wrapped errors.
 func IsUnauthorized(err error) bool {
 	return Code(err) == 401
@@ -27,7 +27,7 @@ func Forbidden(domain, reason, message string) *Error {
 	return New(403, domain, reason, message)
 }
 
-// IsForbidden determines if err is an error which indicates an Unauthorized error.
+// IsForbidden determines if err is an error which indicates a Forbidden error.
 // It supports wrapped errors.
 func IsForbidden(err error) bool {
 	return Code(err) == 403
@@ -38,7 +38,7 @@ func NotFound(domain, reason, message string) *Error {
 	return New(404, domain, reason, message)
 }
 
-// IsNotFound determines if err is an error which indicates an Unauthorized error.
+// IsNotFound determines if err is an error which indicates an NotFound error.
 // It supports wrapped errors.
 func IsNotFound(err error) bool {
 	return Code(err) == 404
@@ -49,7 +49,7 @@ func Conflict(domain, reason, message string) *Error {
 	return New(409, domain, reason, message)
 }
 
-// IsConflict determines if err is an error which indicates an Unauthorized error.
+// IsConflict determines if err is an error which indicates a Conflict error.
 // It supports wrapped errors.
 func IsConflict(err error) bool {
 	return Code(err) == 409
@@ -60,7 +60,7 @@ func InternalServer(domain, reason, message string) *Error {
 	return New(500, domain, reason, message)
 }
 
-// IsInternalServer determines if err is an error which indicates an Unauthorized error.
+// IsInternalServer determines if err is an error which indicates an InternalServer error.
 // It supports wrapped errors.
 func IsInternalServer(err error) bool {
 	return Code(err) == 500
@@ -71,7 +71,7 @@ func ServiceUnavailable(domain, reason, message string) *Error {
 	return New(503, domain, reason, message)
 }
 
-// IsServiceUnavailable determines if err is an error which indicates an Unauthorized error.
+// IsServiceUnavailable determines if err is an error which indicates a ServiceUnavailable error.
 // It supports wrapped errors.
 func IsServiceUnavailable(err error) bool {
 	return Code(err) == 503
