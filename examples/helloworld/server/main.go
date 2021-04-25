@@ -25,7 +25,7 @@ type server struct {
 // SayHello implements helloworld.GreeterServer
 func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	if in.Name == "error" {
-		return nil, errors.BadRequest("BadRequest", fmt.Sprintf("invalid argument %s", in.Name))
+		return nil, errors.BadRequest("custom_error", fmt.Sprintf("invalid argument %s", in.Name))
 	}
 	if in.Name == "panic" {
 		panic("grpc panic")
@@ -42,8 +42,8 @@ func main() {
 		grpc.Address(":9000"),
 		grpc.Middleware(
 			middleware.Chain(
-				logging.Server(logging.WithLogger(logger)),
 				status.Server(),
+				logging.Server(logger),
 				recovery.Recovery(),
 			),
 		))
@@ -55,7 +55,7 @@ func main() {
 	httpSrv.HandlePrefix("/", pb.NewGreeterHandler(s,
 		http.Middleware(
 			middleware.Chain(
-				logging.Server(logging.WithLogger(logger)),
+				logging.Server(logger),
 				recovery.Recovery(),
 			),
 		)),
