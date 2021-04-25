@@ -9,9 +9,8 @@ import (
 func TestError(t *testing.T) {
 	var (
 		base *Error
-		br   *BadRequestError
 	)
-	err := NewBadRequest("translate", "API_KEY_INVALID", "API key not valid. Please pass a valid API key.")
+	err := BadRequest("translate", "API_KEY_INVALID", "API key not valid. Please pass a valid API key.")
 	werr := fmt.Errorf("wrap %w", err)
 
 	if errors.Is(err, new(Error)) {
@@ -20,14 +19,14 @@ func TestError(t *testing.T) {
 	if !errors.Is(werr, err) {
 		t.Errorf("should be equal: %v", err)
 	}
-	if !errors.Is(werr, NewBadRequest("translate", "API_KEY_INVALID", "")) {
+	if !errors.Is(werr, BadRequest("translate", "API_KEY_INVALID", "")) {
 		t.Errorf("should be equal: %v", err)
 	}
 
 	if !errors.As(err, &base) {
 		t.Errorf("should be matchs: %v", err)
 	}
-	if !errors.As(err, &br) {
+	if !IsBadRequest(err) {
 		t.Errorf("should be matchs: %v", err)
 	}
 

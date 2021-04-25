@@ -1,92 +1,78 @@
 package errors
 
-// BadRequestError is Bad Request error that is mapped to a 400 response.
-type BadRequestError struct {
-	err *Error
+// BadRequest new BadRequest error that is mapped to a 400 response.
+func BadRequest(domain, reason, message string) *Error {
+	return New(400, domain, reason, message)
 }
 
-func (e *BadRequestError) Unwrap() error { return e.err }
-func (e *BadRequestError) Error() string { return e.err.Error() }
-
-// NewBadRequest new a Bad Request error.
-func NewBadRequest(domain, reason, message string) *BadRequestError {
-	return &BadRequestError{err: New(400, domain, reason, message)}
+// IsBadRequest determines if err is an error which indicates an BadRequest error.
+// It supports wrapped errors.
+func IsBadRequest(err error) bool {
+	return Code(err) == 400
 }
 
-// UnauthorizedError is Unauthorized error that is mapped to a 401 response.
-type UnauthorizedError struct {
-	err *Error
+// Unauthorized new Unauthorized error that is mapped to a 401 response.
+func Unauthorized(domain, reason, message string) *Error {
+	return New(401, domain, reason, message)
 }
 
-func (e *UnauthorizedError) Unwrap() error { return e.err }
-func (e *UnauthorizedError) Error() string { return e.err.Error() }
-
-// NewUnauthorized new a Unauthorized error.
-func NewUnauthorized(domain, reason, message string) *UnauthorizedError {
-	return &UnauthorizedError{err: New(401, domain, reason, message)}
+// IsUnauthorized determines if err is an error which indicates an Unauthorized error.
+// It supports wrapped errors.
+func IsUnauthorized(err error) bool {
+	return Code(err) == 401
 }
 
-// ForbiddenError is Forbidden error that is mapped to a 403 response.
-type ForbiddenError struct {
-	err *Error
+// Forbidden new Forbidden error that is mapped to a 403 response.
+func Forbidden(domain, reason, message string) *Error {
+	return New(403, domain, reason, message)
 }
 
-func (e *ForbiddenError) Unwrap() error { return e.err }
-func (e *ForbiddenError) Error() string { return e.err.Error() }
-
-// NewForbidden new a Forbidden error.
-func NewForbidden(domain, reason, message string) *ForbiddenError {
-	return &ForbiddenError{err: New(403, domain, reason, message)}
+// IsForbidden determines if err is an error which indicates an Unauthorized error.
+// It supports wrapped errors.
+func IsForbidden(err error) bool {
+	return Code(err) == 403
 }
 
-// NotFoundError is Not Found error that is mapped to a 404 response.
-type NotFoundError struct {
-	err *Error
+// NotFound new NotFound error that is mapped to a 404 response.
+func NotFound(domain, reason, message string) *Error {
+	return New(404, domain, reason, message)
 }
 
-func (e *NotFoundError) Unwrap() error { return e.err }
-func (e *NotFoundError) Error() string { return e.err.Error() }
-
-// NewNotFound new a Not Found error.
-func NewNotFound(domain, reason, message string) *NotFoundError {
-	return &NotFoundError{err: New(404, domain, reason, message)}
+// IsNotFound determines if err is an error which indicates an Unauthorized error.
+// It supports wrapped errors.
+func IsNotFound(err error) bool {
+	return Code(err) == 404
 }
 
-// ConflictError Conflict error that is mapped to a 409 response.
-type ConflictError struct {
-	err *Error
+// Conflict new Conflict error that is mapped to a 409 response.
+func Conflict(domain, reason, message string) *Error {
+	return New(409, domain, reason, message)
 }
 
-func (e *ConflictError) Unwrap() error { return e.err }
-func (e *ConflictError) Error() string { return e.err.Error() }
-
-// NewConflict new a Conflict error.
-func NewConflict(domain, reason, message string) *ConflictError {
-	return &ConflictError{err: New(409, domain, reason, message)}
+// IsConflict determines if err is an error which indicates an Unauthorized error.
+// It supports wrapped errors.
+func IsConflict(err error) bool {
+	return Code(err) == 409
 }
 
-// InternalServerError is Internal Server error that is mapped to a 500 response.
-type InternalServerError struct {
-	err *Error
+// InternalServer new InternalServer error that is mapped to a 500 response.
+func InternalServer(domain, reason, message string) *Error {
+	return New(500, domain, reason, message)
 }
 
-func (e *InternalServerError) Unwrap() error { return e.err }
-func (e *InternalServerError) Error() string { return e.err.Error() }
-
-// NewInternalServer new a Internal Server error.
-func NewInternalServer(domain, reason, message string) *InternalServerError {
-	return &InternalServerError{err: New(500, domain, reason, message)}
+// IsInternalServer determines if err is an error which indicates an Unauthorized error.
+// It supports wrapped errors.
+func IsInternalServer(err error) bool {
+	return Code(err) == 500
 }
 
-// ServiceUnavailableError is Service Unavailable response for the API, mapped to a HTTP 503 response.
-type ServiceUnavailableError struct {
-	err *Error
+// ServiceUnavailable new ServiceUnavailable error that is mapped to a HTTP 503 response.
+func ServiceUnavailable(domain, reason, message string) *Error {
+	return New(503, domain, reason, message)
 }
 
-func (e *ServiceUnavailableError) Unwrap() error { return e.err }
-func (e *ServiceUnavailableError) Error() string { return e.err.Error() }
-
-// NewServiceUnavailable new a Service Unavailable error.
-func NewServiceUnavailable(domain, reason, message string) *ServiceUnavailableError {
-	return &ServiceUnavailableError{err: New(503, domain, reason, message)}
+// IsServiceUnavailable determines if err is an error which indicates an Unauthorized error.
+// It supports wrapped errors.
+func IsServiceUnavailable(err error) bool {
+	return Code(err) == 503
 }
