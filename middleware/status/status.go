@@ -83,7 +83,7 @@ func Client(opts ...Option) middleware.Middleware {
 func encodeErr(ctx context.Context, err error) error {
 	se := errors.FromError(err)
 	if se.Domain == "" {
-		se.Domain = ctx.Value(domainKey{}).(string)
+		se.Domain, _ = ctx.Value(domainKey{}).(string)
 	}
 	gs := status.Newf(httpToGRPCCode(se.Code), "%s: %s", se.Reason, se.Message)
 	details := []proto.Message{
