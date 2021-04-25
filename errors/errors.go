@@ -30,7 +30,10 @@ func (e *Error) WithMetadata(md map[string]string) *Error {
 
 // Is matches each error in the chain with the target value.
 func (e *Error) Is(err error) bool {
-	return Reason(err) == e.Reason
+	if target := new(Error); errors.As(err, &target) {
+		return target.Reason == e.Reason
+	}
+	return false
 }
 
 func (e *Error) Error() string {
