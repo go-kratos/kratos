@@ -10,7 +10,11 @@ func TestError(t *testing.T) {
 	var (
 		base *Error
 	)
-	err := BadRequest("translate", "API_KEY_INVALID", "API key not valid. Please pass a valid API key.")
+	err := New(400, "domain", "reason", "message")
+	err2 := New(400, "domain", "reason", "message")
+	err3 := err.WithMetadata(map[string]string{
+		"foo": "bar",
+	})
 	werr := fmt.Errorf("wrap %w", err)
 
 	if errors.Is(err, new(Error)) {
@@ -19,7 +23,7 @@ func TestError(t *testing.T) {
 	if !errors.Is(werr, err) {
 		t.Errorf("should be equal: %v", err)
 	}
-	if !errors.Is(werr, BadRequest("translate", "API_KEY_INVALID", "")) {
+	if !errors.Is(werr, err2) {
 		t.Errorf("should be equal: %v", err)
 	}
 
@@ -30,7 +34,14 @@ func TestError(t *testing.T) {
 		t.Errorf("should be matchs: %v", err)
 	}
 
-	if reason := Reason(err); reason != "API_KEY_INVALID" {
+	if code := Code(err); code != err2.Code {
+		t.Errorf("got %d want: %s", code, err)
+	}
+	if reason := Reason(err); reason != err3.Reason {
 		t.Errorf("got %s want: %s", reason, err)
+	}
+
+	if err3.Metadata["foo"] != "bar" {
+		t.Error("not expected metadata")
 	}
 }

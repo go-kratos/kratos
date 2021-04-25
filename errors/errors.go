@@ -3,6 +3,7 @@ package errors
 import (
 	"errors"
 	"fmt"
+	"net/http"
 )
 
 const (
@@ -52,10 +53,13 @@ func New(code int, domain, reason, message string) *Error {
 // Code returns the code for a particular error.
 // It supports wrapped errors.
 func Code(err error) int {
+	if err == nil {
+		return http.StatusOK
+	}
 	if target := new(Error); errors.As(err, &target) {
 		return target.Code
 	}
-	return 500
+	return http.StatusInternalServerError
 }
 
 // Reason returns the reason for a particular error.
