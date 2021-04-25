@@ -5,7 +5,7 @@ go 1.16
 require (
 	entgo.io/ent v0.6.0
 	github.com/gin-gonic/gin v1.6.3
-	github.com/go-kratos/consul v0.0.0-20210425124918-771907915b7d
+	github.com/go-kratos/consul v0.0.0-20210425141546-e047a9f6ec87
 	github.com/go-kratos/etcd v0.0.0-20210311162832-e0fdc8177742
 	github.com/go-kratos/kratos/v2 v2.0.0-20210425121923-9806191b7f32
 	github.com/go-kratos/nacos v0.0.0-20210415082641-f1b756c16257
