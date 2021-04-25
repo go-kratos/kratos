@@ -108,17 +108,11 @@ func encodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error
 
 // encodeError encodes the error to the HTTP response.
 func encodeError(w http.ResponseWriter, r *http.Request, err error) {
-	se, ok := errors.FromError(err)
-	if !ok {
-		se = &errors.StatusError{
-			Code:    2,
-			Message: err.Error(),
-		}
-	}
+	se := errors.FromError(err)
 	codec := codecForRequest(r)
 	data, _ := codec.Marshal(se)
 	w.Header().Set(contentTypeHeader, contentType(codec.Name()))
-	w.WriteHeader(se.HTTPStatus())
+	w.WriteHeader(se.Code)
 	_, _ = w.Write(data)
 }
 

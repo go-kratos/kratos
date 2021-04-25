@@ -6,49 +6,45 @@ import (
 	"testing"
 )
 
-func TestErrorsMatch(t *testing.T) {
-	s := &StatusError{Code: 1}
-	st := &StatusError{Code: 2}
+func TestError(t *testing.T) {
+	var (
+		base *Error
+	)
+	err := New(400, "reason", "message")
+	err2 := New(400, "reason", "message")
+	err3 := err.WithMetadata(map[string]string{
+		"foo": "bar",
+	})
+	werr := fmt.Errorf("wrap %w", err)
 
-	if errors.Is(s, st) {
-		t.Errorf("error is not match: %+v -> %+v", s, st)
+	if errors.Is(err, new(Error)) {
+		t.Errorf("should not be equal: %v", err)
+	}
+	if !errors.Is(werr, err) {
+		t.Errorf("should be equal: %v", err)
+	}
+	if !errors.Is(werr, err2) {
+		t.Errorf("should be equal: %v", err)
 	}
 
-	s.Code = 1
-	st.Code = 1
-	if !errors.Is(s, st) {
-		t.Errorf("error is not match: %+v -> %+v", s, st)
+	if !errors.As(err, &base) {
+		t.Errorf("should be matchs: %v", err)
+	}
+	if !IsBadRequest(err) {
+		t.Errorf("should be matchs: %v", err)
 	}
 
-	s.Reason = "test_reason"
-	s.Reason = "test_reason"
-
-	if !errors.Is(s, st) {
-		t.Errorf("error is not match: %+v -> %+v", s, st)
+	if code := Code(err); code != err2.Code {
+		t.Errorf("got %d want: %s", code, err)
+	}
+	if domain := Domain(err); domain != err2.Domain {
+		t.Errorf("got %s want: %s", domain, err)
+	}
+	if reason := Reason(err); reason != err3.Reason {
+		t.Errorf("got %s want: %s", reason, err)
 	}
 
-	if Reason(s) != "test_reason" {
-		t.Errorf("error is not match: %+v -> %+v", s, st)
-	}
-}
-
-func TestErrorIs(t *testing.T) {
-	err1 := &StatusError{Code: 1}
-	t.Log(err1)
-	err2 := fmt.Errorf("wrap : %w", err1)
-	t.Log(err2)
-
-	if !(errors.Is(err2, err1)) {
-		t.Errorf("error is not match: a: %v b: %v ", err2, err1)
-	}
-}
-
-func TestErrorAs(t *testing.T) {
-	err1 := &StatusError{Code: 1}
-	err2 := fmt.Errorf("wrap : %w", err1)
-
-	err3 := new(StatusError)
-	if !errors.As(err2, &err3) {
-		t.Errorf("error is not match: %v", err2)
+	if err3.Metadata["foo"] != "bar" {
+		t.Error("not expected metadata")
 	}
 }

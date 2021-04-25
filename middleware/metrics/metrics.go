@@ -48,7 +48,7 @@ func Server(opts ...Option) middleware.Middleware {
 			var (
 				method string
 				path   string
-				code   int32
+				code   int
 			)
 			if info, ok := grpc.FromServerContext(ctx); ok {
 				method = "POST"
@@ -90,7 +90,7 @@ func Client(opts ...Option) middleware.Middleware {
 			var (
 				method string
 				path   string
-				code   int32
+				code   int
 			)
 			if info, ok := grpc.FromClientContext(ctx); ok {
 				method = "POST"
