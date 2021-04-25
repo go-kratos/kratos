@@ -30,21 +30,17 @@ func (e *Error) WithMetadata(md map[string]string) *Error {
 
 // Is matches each error in the chain with the target value.
 func (e *Error) Is(err error) bool {
-	if target := new(Error); errors.As(err, &target) {
-		return target.Code == e.Code && target.Reason == e.Reason
-	}
-	return false
+	return Reason(err) == e.Reason
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("error: code = %d message = %s reason = %s domain = %s", e.Code, e.Message, e.Reason, e.Domain)
+	return fmt.Sprintf("error: code = %d reason = %s message = %s", e.Code, e.Reason, e.Message)
 }
 
 // New returns an error object for the code, message and error info.
-func New(code int, domain, reason, message string) *Error {
+func New(code int, reason, message string) *Error {
 	return &Error{
 		Code:    code,
-		Domain:  domain,
 		Reason:  reason,
 		Message: message,
 	}
