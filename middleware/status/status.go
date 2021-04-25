@@ -14,8 +14,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type domainKey struct{}
-
 // HandlerFunc is middleware error handler.
 type HandlerFunc func(context.Context, error) error
 
@@ -23,15 +21,7 @@ type HandlerFunc func(context.Context, error) error
 type Option func(*options)
 
 type options struct {
-	domain  string
 	handler HandlerFunc
-}
-
-// WithDomain with service domain.
-func WithDomain(domain string) Option {
-	return func(o *options) {
-		o.domain = domain
-	}
 }
 
 // WithHandler with status handler.
@@ -53,7 +43,6 @@ func Server(opts ...Option) middleware.Middleware {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			reply, err := handler(ctx, req)
 			if err != nil {
-				ctx = context.WithValue(ctx, domainKey{}, options.domain)
 				return nil, options.handler(ctx, err)
 			}
 			return reply, nil
@@ -82,9 +71,6 @@ func Client(opts ...Option) middleware.Middleware {
 
 func encodeErr(ctx context.Context, err error) error {
 	se := errors.FromError(err)
-	if se.Domain == "" {
-		se.Domain, _ = ctx.Value(domainKey{}).(string)
-	}
 	gs := status.Newf(httpToGRPCCode(se.Code), "%s: %s", se.Reason, se.Message)
 	details := []proto.Message{
 		&errdetails.ErrorInfo{

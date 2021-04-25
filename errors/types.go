@@ -3,8 +3,8 @@ package errors
 import "net/http"
 
 // BadRequest new BadRequest error that is mapped to a 400 response.
-func BadRequest(reason, message string) *Error {
-	return New(http.StatusBadRequest, reason, message)
+func BadRequest(domain, reason, message string) *Error {
+	return New(http.StatusBadRequest, domain, reason, message)
 }
 
 // IsBadRequest determines if err is an error which indicates a BadRequest error.
@@ -14,8 +14,8 @@ func IsBadRequest(err error) bool {
 }
 
 // Unauthorized new Unauthorized error that is mapped to a 401 response.
-func Unauthorized(reason, message string) *Error {
-	return New(http.StatusUnauthorized, reason, message)
+func Unauthorized(domain, reason, message string) *Error {
+	return New(http.StatusUnauthorized, domain, reason, message)
 }
 
 // IsUnauthorized determines if err is an error which indicates a Unauthorized error.
@@ -25,8 +25,8 @@ func IsUnauthorized(err error) bool {
 }
 
 // Forbidden new Forbidden error that is mapped to a 403 response.
-func Forbidden(reason, message string) *Error {
-	return New(http.StatusForbidden, reason, message)
+func Forbidden(domain, reason, message string) *Error {
+	return New(http.StatusForbidden, domain, reason, message)
 }
 
 // IsForbidden determines if err is an error which indicates a Forbidden error.
@@ -36,8 +36,8 @@ func IsForbidden(err error) bool {
 }
 
 // NotFound new NotFound error that is mapped to a 404 response.
-func NotFound(reason, message string) *Error {
-	return New(http.StatusNotFound, reason, message)
+func NotFound(domain, reason, message string) *Error {
+	return New(http.StatusNotFound, domain, reason, message)
 }
 
 // IsNotFound determines if err is an error which indicates an NotFound error.
@@ -47,8 +47,8 @@ func IsNotFound(err error) bool {
 }
 
 // Conflict new Conflict error that is mapped to a 409 response.
-func Conflict(reason, message string) *Error {
-	return New(http.StatusConflict, reason, message)
+func Conflict(domain, reason, message string) *Error {
+	return New(http.StatusConflict, domain, reason, message)
 }
 
 // IsConflict determines if err is an error which indicates a Conflict error.
@@ -58,8 +58,8 @@ func IsConflict(err error) bool {
 }
 
 // InternalServer new InternalServer error that is mapped to a 500 response.
-func InternalServer(reason, message string) *Error {
-	return New(http.StatusInternalServerError, reason, message)
+func InternalServer(domain, reason, message string) *Error {
+	return New(http.StatusInternalServerError, domain, reason, message)
 }
 
 // IsInternalServer determines if err is an error which indicates an InternalServer error.
@@ -69,8 +69,8 @@ func IsInternalServer(err error) bool {
 }
 
 // ServiceUnavailable new ServiceUnavailable error that is mapped to a HTTP 503 response.
-func ServiceUnavailable(reason, message string) *Error {
-	return New(http.StatusServiceUnavailable, reason, message)
+func ServiceUnavailable(domain, reason, message string) *Error {
+	return New(http.StatusServiceUnavailable, domain, reason, message)
 }
 
 // IsServiceUnavailable determines if err is an error which indicates a ServiceUnavailable error.
