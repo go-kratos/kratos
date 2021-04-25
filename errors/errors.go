@@ -31,7 +31,9 @@ func (e *Error) WithMetadata(md map[string]string) *Error {
 // Is matches each error in the chain with the target value.
 func (e *Error) Is(err error) bool {
 	if target := new(Error); errors.As(err, &target) {
-		return target.Reason == e.Reason
+		return target.Code == e.Code &&
+			target.Domain == e.Domain &&
+			target.Reason == e.Reason
 	}
 	return false
 }
@@ -59,6 +61,15 @@ func Code(err error) int {
 		return target.Code
 	}
 	return http.StatusInternalServerError
+}
+
+// Domain returns the domain for a particular error.
+// It supports wrapped errors.
+func Domain(err error) string {
+	if target := new(Error); errors.As(err, &target) {
+		return target.Domain
+	}
+	return ""
 }
 
 // Reason returns the reason for a particular error.

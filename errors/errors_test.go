@@ -37,6 +37,9 @@ func TestError(t *testing.T) {
 	if code := Code(err); code != err2.Code {
 		t.Errorf("got %d want: %s", code, err)
 	}
+	if domain := Domain(err); domain != err2.Domain {
+		t.Errorf("got %s want: %s", domain, err)
+	}
 	if reason := Reason(err); reason != err3.Reason {
 		t.Errorf("got %s want: %s", reason, err)
 	}
