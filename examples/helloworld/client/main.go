@@ -20,7 +20,14 @@ func main() {
 }
 
 func callHTTP() {
-	client, err := transhttp.NewClient(context.Background())
+	client, err := transhttp.NewClient(
+		context.Background(),
+		transhttp.WithMiddleware(
+			middleware.Chain(
+				recovery.Recovery(),
+			),
+		),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -71,7 +78,7 @@ func callGRPC() {
 	if err != nil {
 		log.Printf("[grpc] SayHello error: %v\n", err)
 	}
-	if errors.IsInvalidArgument(err) {
+	if errors.IsBadRequest(err) {
 		log.Printf("[grpc] SayHello error is invalid argument: %v\n", err)
 	}
 }

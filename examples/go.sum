@@ -125,13 +125,14 @@ github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72/go.mod h1:tQ2
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-kit/kit v0.9.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
-github.com/go-kratos/consul v0.0.0-20210311161349-cfb0345e820d h1:px9mGqOsFmcXYsidSYATFoDK/R7x43WnUqiE/9Pu8x8=
-github.com/go-kratos/consul v0.0.0-20210311161349-cfb0345e820d/go.mod h1:i/8iM3Xm0YwSmiCdFFZ611y+6rk5Bi1G5UZtBG3t9rg=
+github.com/go-kratos/consul v0.0.0-20210425124918-771907915b7d h1:CqhFJ1J9WuDRFo1Pl4H2gILrXad8vsZaY43amJYtnWU=
+github.com/go-kratos/consul v0.0.0-20210425124918-771907915b7d/go.mod h1:O21CidethNnnpWtHS7XcisEKl3P+f9sTZACoIyuvq4Y=
 github.com/go-kratos/etcd v0.0.0-20210311162832-e0fdc8177742 h1:gEjXnGJ30PVLE3AMgh1z48PmHgVC4E1q8ZvkdkyJyt8=
 github.com/go-kratos/etcd v0.0.0-20210311162832-e0fdc8177742/go.mod h1:+1nilFyiWLlYpAWliKnbFhIax79n4l0mOTJhyNw5EEw=
 github.com/go-kratos/kratos/v2 v2.0.0-20210311152607-a4409adf164e/go.mod h1:oLvFyDBJkkWN8TPqb+NmpvRrSy9uM/K+XQubVRc11a8=
-github.com/go-kratos/kratos/v2 v2.0.0-20210415063033-9007abfd2888 h1:GmcG4UBf9ome4mJMltFSqxRdQssIRgGBAhIvHJA9MVU=
 github.com/go-kratos/kratos/v2 v2.0.0-20210415063033-9007abfd2888/go.mod h1:hwEYWw8GFuJ8IoNt3T/3k+7kUfYt+h2fHDcyFlR1jBA=
+github.com/go-kratos/kratos/v2 v2.0.0-20210425121923-9806191b7f32 h1:cnHW9T7qFzMpbXfDHg7g5iOfIoDQvBmXDkGDVWQALRs=
+github.com/go-kratos/kratos/v2 v2.0.0-20210425121923-9806191b7f32/go.mod h1:hwEYWw8GFuJ8IoNt3T/3k+7kUfYt+h2fHDcyFlR1jBA=
 github.com/go-kratos/nacos v0.0.0-20210415082641-f1b756c16257 h1:mJdO5lD+C1UsxJ5NC0rQ2hPx1dA0tdXLp/3UFNWRaFc=
 github.com/go-kratos/nacos v0.0.0-20210415082641-f1b756c16257/go.mod h1:GP7wV0ohYEG+x1P/qdNCJGb7K2jtbsMop+5BDaSqBlA=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=

@@ -5,9 +5,9 @@ go 1.16
 require (
 	entgo.io/ent v0.6.0
 	github.com/gin-gonic/gin v1.6.3
-	github.com/go-kratos/consul v0.0.0-20210311161349-cfb0345e820d
+	github.com/go-kratos/consul v0.0.0-20210425124918-771907915b7d
 	github.com/go-kratos/etcd v0.0.0-20210311162832-e0fdc8177742
-	github.com/go-kratos/kratos/v2 v2.0.0-20210415063033-9007abfd2888
+	github.com/go-kratos/kratos/v2 v2.0.0-20210425121923-9806191b7f32
 	github.com/go-kratos/nacos v0.0.0-20210415082641-f1b756c16257
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/go-redis/redis/extra/redisotel v0.3.0
