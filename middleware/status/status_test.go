@@ -9,13 +9,13 @@ import (
 )
 
 func TestErrEncoder(t *testing.T) {
-	err := errors.InvalidArgument("InvalidArgument", "format")
-	en := errorEncode(err)
+	err := errors.BadRequest("InvalidArgument", "format")
+	en := encodeErr(err)
 	if code := status.Code(en); code != codes.InvalidArgument {
 		t.Errorf("expected %d got %d", codes.InvalidArgument, code)
 	}
-	de := errorDecode(en)
-	if !errors.IsInvalidArgument(de) {
+	de := decodeErr(en)
+	if !errors.IsBadRequest(de) {
 		t.Errorf("expected %v got %v", err, de)
 	}
 }
