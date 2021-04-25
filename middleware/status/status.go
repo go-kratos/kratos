@@ -23,15 +23,7 @@ type HandlerFunc func(context.Context, error) error
 type Option func(*options)
 
 type options struct {
-	domain  string
 	handler HandlerFunc
-}
-
-// WithDomain with service domain.
-func WithDomain(domain string) Option {
-	return func(o *options) {
-		o.domain = domain
-	}
 }
 
 // WithHandler with status handler.
@@ -42,7 +34,7 @@ func WithHandler(h HandlerFunc) Option {
 }
 
 // Server is an error middleware.
-func Server(opts ...Option) middleware.Middleware {
+func Server(domain string, opts ...Option) middleware.Middleware {
 	options := options{
 		handler: encodeErr,
 	}
@@ -53,7 +45,7 @@ func Server(opts ...Option) middleware.Middleware {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			reply, err := handler(ctx, req)
 			if err != nil {
-				ctx = context.WithValue(ctx, domainKey{}, options.domain)
+				ctx = context.WithValue(ctx, domainKey{}, domain)
 				return nil, options.handler(ctx, err)
 			}
 			return reply, nil

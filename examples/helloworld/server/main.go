@@ -42,7 +42,7 @@ func main() {
 		grpc.Address(":9000"),
 		grpc.Middleware(
 			middleware.Chain(
-				status.Server(),
+				status.Server("helloworld"),
 				logging.Server(logger),
 				recovery.Recovery(),
 			),

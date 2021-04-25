@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/middleware/status"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/grpc/resolver/discovery"
@@ -77,7 +76,6 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		timeout: 500 * time.Millisecond,
 		middleware: middleware.Chain(
 			recovery.Recovery(),
-			status.Client(),
 		),
 	}
 	for _, o := range opts {
