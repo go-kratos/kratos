@@ -37,7 +37,7 @@ func (e *Error) Is(err error) bool {
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("error: code = %d reason = %s message = %s", e.Code, e.Reason, e.Message)
+	return fmt.Sprintf("error: code = %d domain = %s reason = %s message = %s metadata = %v", e.Code, e.Domain, e.Reason, e.Message, e.Metadata)
 }
 
 // New returns an error object for the code, message and error info.
