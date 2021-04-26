@@ -70,15 +70,16 @@ func Client(opts ...Option) middleware.Middleware {
 }
 
 func encodeErr(ctx context.Context, err error) error {
-	se := errors.FromError(err)
-	gs := status.Newf(httpToGRPCCode(se.Code), "%s: %s", se.Reason, se.Message)
-	details := []proto.Message{
-		&errdetails.ErrorInfo{
-			Domain:   se.Domain,
-			Reason:   se.Reason,
-			Metadata: se.Metadata,
-		},
+	var details []proto.Message
+	if target := new(errors.ErrorInfo); errors.As(err, &target) {
+		details = append(details, &errdetails.ErrorInfo{
+			Domain:   target.Domain,
+			Reason:   target.Reason,
+			Metadata: target.Metadata,
+		})
 	}
+	es := errors.FromError(err)
+	gs := status.New(httpToGRPCCode(es.Code), es.Message)
 	gs, err = gs.WithDetails(details...)
 	if err != nil {
 		return err
@@ -88,20 +89,20 @@ func encodeErr(ctx context.Context, err error) error {
 
 func decodeErr(ctx context.Context, err error) error {
 	gs := status.Convert(err)
-	se := &errors.Error{
-		Code:    grpcToHTTPCode(gs.Code()),
-		Message: gs.Message(),
-	}
+	code := grpcToHTTPCode(gs.Code())
+	message := gs.Message()
 	for _, detail := range gs.Details() {
 		switch d := detail.(type) {
 		case *errdetails.ErrorInfo:
-			se.Domain = d.Domain
-			se.Reason = d.Reason
-			se.Metadata = d.Metadata
-			return se
+			return errors.Errorf(
+				code,
+				d.Domain,
+				d.Reason,
+				message,
+			).WithMetadata(d.Metadata)
 		}
 	}
-	return se
+	return errors.New(code, message)
 }
 
 func httpToGRPCCode(code int) codes.Code {

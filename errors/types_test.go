@@ -4,7 +4,7 @@ import "testing"
 
 func TestTypes(t *testing.T) {
 	var (
-		input = []*Error{
+		input = []error{
 			BadRequest("domain_400", "reason_400", "message_400"),
 			Unauthorized("domain_401", "reason_401", "message_401"),
 			Forbidden("domain_403", "reason_403", "message_403"),
