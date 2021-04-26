@@ -12,9 +12,9 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/status"
 	"github.com/go-kratos/kratos/v2/transport"
-	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 const loggerName = "transport/grpc"
@@ -105,7 +105,7 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 	srv.Server = grpc.NewServer(grpcOpts...)
 	// grpc health register
-	healthpb.RegisterHealthServer(srv.Server, health.NewServer())
+	healthpb.RegisterHealthServer(srv.Server, srv.health)
 	return srv
 }
 
