@@ -19,41 +19,68 @@ func Server(l log.Logger) middleware.Middleware {
 			var (
 				path      string
 				method    string
-				params    string
+				args      string
 				component string
+				query     string
 			)
 			if info, ok := http.FromServerContext(ctx); ok {
 				component = "HTTP"
-				path = info.Request.RequestURI
+				path = info.Request.URL.Path
 				method = info.Request.Method
-				params = info.Request.Form.Encode()
+				args = req.(fmt.Stringer).String()
+				query = info.Request.URL.RawQuery
 			} else if info, ok := grpc.FromServerContext(ctx); ok {
 				component = "gRPC"
 				path = info.FullMethod
 				method = "POST"
-				params = req.(fmt.Stringer).String()
+				args = req.(fmt.Stringer).String()
 			}
 			reply, err := handler(ctx, req)
-			if err != nil {
-				logger.Errorw(
+			if component == "HTTP" {
+				if err != nil {
+					logger.Errorw(
+						"kind", "server",
+						"component", component,
+						"path", path,
+						"method", method,
+						"args", args,
+						"query", query,
+						"code", errors.Code(err),
+						"error", err.Error(),
+					)
+					return nil, err
+				}
+				logger.Infow(
 					"kind", "server",
 					"component", component,
 					"path", path,
 					"method", method,
-					"params", params,
-					"code", errors.Code(err),
-					"error", err.Error(),
+					"args", args,
+					"query", query,
+					"code", 0,
 				)
-				return nil, err
+			} else {
+				if err != nil {
+					logger.Errorw(
+						"kind", "server",
+						"component", component,
+						"path", path,
+						"method", method,
+						"args", args,
+						"code", errors.Code(err),
+						"error", err.Error(),
+					)
+					return nil, err
+				}
+				logger.Infow(
+					"kind", "server",
+					"component", component,
+					"path", path,
+					"method", method,
+					"args", args,
+					"code", 0,
+				)
 			}
-			logger.Infow(
-				"kind", "server",
-				"component", component,
-				"path", path,
-				"method", method,
-				"params", params,
-				"code", 0,
-			)
 			return reply, nil
 		}
 	}
@@ -67,41 +94,68 @@ func Client(l log.Logger) middleware.Middleware {
 			var (
 				path      string
 				method    string
-				params    string
 				component string
+				args      string
+				query     string
 			)
 			if info, ok := http.FromClientContext(ctx); ok {
 				component = "HTTP"
-				path = info.Request.RequestURI
+				path = info.Request.URL.Path
 				method = info.Request.Method
-				params = info.Request.Form.Encode()
+				args = req.(fmt.Stringer).String()
+				query = info.Request.URL.RawQuery
 			} else if info, ok := grpc.FromClientContext(ctx); ok {
 				path = info.FullMethod
 				method = "POST"
 				component = "gRPC"
-				params = req.(fmt.Stringer).String()
+				args = req.(fmt.Stringer).String()
 			}
 			reply, err := handler(ctx, req)
-			if err != nil {
-				logger.Errorw(
+			if component == "HTTP" {
+				if err != nil {
+					logger.Errorw(
+						"kind", "client",
+						"component", component,
+						"path", path,
+						"method", method,
+						"args", args,
+						"query", query,
+						"code", errors.Code(err),
+						"error", err.Error(),
+					)
+					return nil, err
+				}
+				logger.Infow(
 					"kind", "client",
 					"component", component,
 					"path", path,
 					"method", method,
-					"params", params,
-					"code", errors.Code(err),
-					"error", err.Error(),
+					"args", args,
+					"query", query,
+					"code", 0,
 				)
-				return nil, err
+			} else {
+				if err != nil {
+					logger.Errorw(
+						"kind", "client",
+						"component", component,
+						"path", path,
+						"method", method,
+						"args", args,
+						"code", errors.Code(err),
+						"error", err.Error(),
+					)
+					return nil, err
+				}
+				logger.Infow(
+					"kind", "client",
+					"component", component,
+					"path", path,
+					"method", method,
+					"args", args,
+					"code", 0,
+				)
 			}
-			logger.Infow(
-				"kind", "client",
-				"component", component,
-				"path", path,
-				"method", method,
-				"params", params,
-				"code", 0,
-			)
 			return reply, nil
 		}
 	}
