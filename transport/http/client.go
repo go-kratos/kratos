@@ -7,9 +7,13 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/go-kratos/kratos/v2/errors"
 	xhttp "github.com/go-kratos/kratos/v2/internal/http"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
+	spb "google.golang.org/genproto/googleapis/rpc/status"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // DecodeErrorFunc is decode error func.
@@ -71,7 +75,7 @@ func NewTransport(ctx context.Context, opts ...ClientOption) (http.RoundTripper,
 		ctx:          ctx,
 		timeout:      500 * time.Millisecond,
 		transport:    http.DefaultTransport,
-		errorDecoder: xhttp.CheckResponse,
+		errorDecoder: checkResponse,
 	}
 	for _, o := range opts {
 		o(options)
@@ -139,4 +143,20 @@ func Do(client *http.Client, req *http.Request, target interface{}) error {
 		return err
 	}
 	return codec.Unmarshal(data, target)
+}
+
+// checkResponse returns an error (of type *Error) if the response
+// status code is not 2xx.
+func checkResponse(ctx context.Context, res *http.Response) error {
+	if res.StatusCode >= 200 && res.StatusCode <= 299 {
+		return nil
+	}
+	defer res.Body.Close()
+	if data, err := ioutil.ReadAll(res.Body); err == nil {
+		st := new(spb.Status)
+		if err = protojson.Unmarshal(data, st); err == nil {
+			return status.ErrorProto(st)
+		}
+	}
+	return errors.New(res.StatusCode, "")
 }

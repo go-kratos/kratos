@@ -1,16 +1,10 @@
 package http
 
 import (
-	"context"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
-	"github.com/go-kratos/kratos/v2/errors"
-	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 const (
@@ -124,33 +118,4 @@ func StatusFromGRPCCode(code codes.Code) int {
 		return http.StatusInternalServerError
 	}
 	return http.StatusInternalServerError
-}
-
-// GRPCError encodes the gRPC error to the HTTP response.
-func GRPCError(w http.ResponseWriter, r *http.Request, err error) {
-	st, _ := status.FromError(err)
-	data, err := protojson.Marshal(st.Proto())
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set(HeaderContentType, "application/json; charset=utf-8")
-	w.WriteHeader(StatusFromGRPCCode(st.Code()))
-	w.Write(data)
-}
-
-// CheckResponse returns an error (of type *Error) if the response
-// status code is not 2xx.
-func CheckResponse(ctx context.Context, res *http.Response) error {
-	if res.StatusCode >= 200 && res.StatusCode <= 299 {
-		return nil
-	}
-	defer res.Body.Close()
-	if data, err := ioutil.ReadAll(res.Body); err == nil {
-		st := new(spb.Status)
-		if err = protojson.Unmarshal(data, st); err == nil {
-			return status.ErrorProto(st)
-		}
-	}
-	return errors.New(res.StatusCode, "")
 }
