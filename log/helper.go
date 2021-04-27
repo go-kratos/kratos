@@ -1,10 +1,7 @@
 package log
 
 import (
-	ctx "context"
 	"fmt"
-
-	"go.opentelemetry.io/otel/trace"
 )
 
 // Helper is a logger helper.
@@ -84,11 +81,4 @@ func (h *Helper) Errorf(format string, a ...interface{}) {
 // Errorw logs a message at error level.
 func (h *Helper) Errorw(pairs ...interface{}) {
 	h.err.Print(pairs...)
-}
-
-// TraceID print traceID by context.
-func (h *Helper) TraceID(ctx ctx.Context) {
-	span := trace.SpanContextFromContext(ctx)
-	id := span.TraceID()
-	h.info.Print("message", id.String())
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Server is an server logging middleware.
@@ -36,51 +37,32 @@ func Server(l log.Logger) middleware.Middleware {
 				args = req.(fmt.Stringer).String()
 			}
 			reply, err := handler(ctx, req)
-			if component == "HTTP" {
-				if err != nil {
-					logger.Errorw(
-						"kind", "server",
-						"component", component,
-						"path", path,
-						"method", method,
-						"args", args,
-						"query", query,
-						"code", errors.Code(err),
-						"error", err.Error(),
-					)
-					return nil, err
-				}
-				logger.Infow(
+
+			traceID := trace.SpanContextFromContext(ctx).TraceID()
+			if err != nil {
+				logger.Errorw(
 					"kind", "server",
 					"component", component,
+					"traceID", traceID,
 					"path", path,
 					"method", method,
 					"args", args,
 					"query", query,
-					"code", 0,
+					"code", errors.Code(err),
+					"error", err.Error(),
 				)
-			} else {
-				if err != nil {
-					logger.Errorw(
-						"kind", "server",
-						"component", component,
-						"path", path,
-						"method", method,
-						"args", args,
-						"code", errors.Code(err),
-						"error", err.Error(),
-					)
-					return nil, err
-				}
-				logger.Infow(
-					"kind", "server",
-					"component", component,
-					"path", path,
-					"method", method,
-					"args", args,
-					"code", 0,
-				)
+				return nil, err
 			}
+			logger.Infow(
+				"kind", "server",
+				"component", component,
+				"traceID", traceID,
+				"path", path,
+				"method", method,
+				"args", args,
+				"query", query,
+				"code", 0,
+			)
 			return reply, nil
 		}
 	}
