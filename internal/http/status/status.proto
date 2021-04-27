@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package http;
+
+import "google/rpc/code.proto";
+import "google/protobuf/any.proto";
+
+option go_package = "github.com/go-kratos/kratos/internal/http/status;status";
+
+// The error format v2 for Google JSON REST APIs.
+//
+// NOTE: This schema is not used for other wire protocols.
+// For more details see https://cloud.google.com/apis/design/errors.
+message Error {
+  // This message has the same semantics as `google.rpc.Status`. It uses HTTP
+  // status code instead of gRPC status code. It has an extra field `status`
+  // for backward compatibility with Google API Client Libraries.
+  message Status {
+    // The HTTP status code that corresponds to `google.rpc.Status.code`.
+    int32 code = 1;
+    // This corresponds to `google.rpc.Status.message`.
+    string message = 2;
+    // This is the enum version for `google.rpc.Status.code`.
+    google.rpc.Code status = 4;
+    // This corresponds to `google.rpc.Status.details`.
+    repeated google.protobuf.Any details = 5;
+  }
+  // The actual error payload. The nested message structure is for backward
+  // compatibility with Google API client libraries. It also makes the error
+  // more readable to developers.
+  Status error = 1;
+}
+
