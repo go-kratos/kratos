@@ -63,6 +63,7 @@ func main() {
 	httpSrv.HandlePrefix("/", pb.NewGreeterHandler(s,
 		http.Middleware(
 			middleware.Chain(
+				status.Server(),
 				logging.Server(logger),
 				recovery.Recovery(),
 			),

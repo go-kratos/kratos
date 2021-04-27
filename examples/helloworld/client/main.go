@@ -25,6 +25,7 @@ func callHTTP() {
 		transhttp.WithMiddleware(
 			middleware.Chain(
 				recovery.Recovery(),
+				status.Client(),
 			),
 		),
 	)

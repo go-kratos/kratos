@@ -2,15 +2,14 @@ package status
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/internal/http"
 	"github.com/go-kratos/kratos/v2/middleware"
 
 	//lint:ignore SA1019 grpc
 	"github.com/golang/protobuf/proto"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
@@ -34,7 +33,7 @@ func WithHandler(h HandlerFunc) Option {
 // Server is an error middleware.
 func Server(opts ...Option) middleware.Middleware {
 	options := options{
-		handler: encodeErr,
+		handler: encodeError,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -53,7 +52,7 @@ func Server(opts ...Option) middleware.Middleware {
 // Client is an error middleware.
 func Client(opts ...Option) middleware.Middleware {
 	options := options{
-		handler: decodeErr,
+		handler: decodeError,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -69,7 +68,7 @@ func Client(opts ...Option) middleware.Middleware {
 	}
 }
 
-func encodeErr(ctx context.Context, err error) error {
+func encodeError(ctx context.Context, err error) error {
 	var details []proto.Message
 	if target := new(errors.ErrorInfo); errors.As(err, &target) {
 		details = append(details, &errdetails.ErrorInfo{
@@ -79,7 +78,7 @@ func encodeErr(ctx context.Context, err error) error {
 		})
 	}
 	es := errors.FromError(err)
-	gs := status.New(httpToGRPCCode(es.Code), es.Message)
+	gs := status.New(http.GRPCCodeFromStatus(es.Code), es.Message)
 	gs, err = gs.WithDetails(details...)
 	if err != nil {
 		return err
@@ -87,9 +86,9 @@ func encodeErr(ctx context.Context, err error) error {
 	return gs.Err()
 }
 
-func decodeErr(ctx context.Context, err error) error {
+func decodeError(ctx context.Context, err error) error {
 	gs := status.Convert(err)
-	code := grpcToHTTPCode(gs.Code())
+	code := http.StatusFromGRPCCode(gs.Code())
 	message := gs.Message()
 	for _, detail := range gs.Details() {
 		switch d := detail.(type) {
@@ -103,44 +102,4 @@ func decodeErr(ctx context.Context, err error) error {
 		}
 	}
 	return errors.New(code, message)
-}
-
-func httpToGRPCCode(code int) codes.Code {
-	switch code {
-	case http.StatusBadRequest:
-		return codes.InvalidArgument
-	case http.StatusUnauthorized:
-		return codes.Unauthenticated
-	case http.StatusForbidden:
-		return codes.PermissionDenied
-	case http.StatusNotFound:
-		return codes.NotFound
-	case http.StatusConflict:
-		return codes.Aborted
-	case http.StatusInternalServerError:
-		return codes.Internal
-	case http.StatusServiceUnavailable:
-		return codes.Unavailable
-	}
-	return codes.Unknown
-}
-
-func grpcToHTTPCode(code codes.Code) int {
-	switch code {
-	case codes.InvalidArgument:
-		return http.StatusBadRequest
-	case codes.Unauthenticated:
-		return http.StatusUnauthorized
-	case codes.PermissionDenied:
-		return http.StatusForbidden
-	case codes.NotFound:
-		return http.StatusNotFound
-	case codes.Aborted:
-		return http.StatusConflict
-	case codes.Internal:
-		return http.StatusInternalServerError
-	case codes.Unavailable:
-		return http.StatusServiceUnavailable
-	}
-	return http.StatusInternalServerError
 }

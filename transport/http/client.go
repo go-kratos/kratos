@@ -8,9 +8,16 @@ import (
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
+	xhttp "github.com/go-kratos/kratos/v2/internal/http"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
+	spb "google.golang.org/genproto/googleapis/rpc/status"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
 )
+
+// DecodeErrorFunc is decode error func.
+type DecodeErrorFunc func(ctx context.Context, w *http.Response) error
 
 // ClientOption is HTTP client option.
 type ClientOption func(*clientOptions)
@@ -45,11 +52,12 @@ func WithMiddleware(m middleware.Middleware) ClientOption {
 
 // Client is a HTTP transport client.
 type clientOptions struct {
-	ctx        context.Context
-	timeout    time.Duration
-	userAgent  string
-	transport  http.RoundTripper
-	middleware middleware.Middleware
+	ctx          context.Context
+	timeout      time.Duration
+	userAgent    string
+	transport    http.RoundTripper
+	errorDecoder DecodeErrorFunc
+	middleware   middleware.Middleware
 }
 
 // NewClient returns an HTTP client.
@@ -64,26 +72,29 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*http.Client, error) 
 // NewTransport creates an http.RoundTripper.
 func NewTransport(ctx context.Context, opts ...ClientOption) (http.RoundTripper, error) {
 	options := &clientOptions{
-		ctx:       ctx,
-		timeout:   500 * time.Millisecond,
-		transport: http.DefaultTransport,
+		ctx:          ctx,
+		timeout:      500 * time.Millisecond,
+		transport:    http.DefaultTransport,
+		errorDecoder: checkResponse,
 	}
 	for _, o := range opts {
 		o(options)
 	}
 	return &baseTransport{
-		middleware: options.middleware,
-		userAgent:  options.userAgent,
-		timeout:    options.timeout,
-		base:       options.transport,
+		errorDecoder: options.errorDecoder,
+		middleware:   options.middleware,
+		userAgent:    options.userAgent,
+		timeout:      options.timeout,
+		base:         options.transport,
 	}, nil
 }
 
 type baseTransport struct {
-	userAgent  string
-	timeout    time.Duration
-	base       http.RoundTripper
-	middleware middleware.Middleware
+	userAgent    string
+	timeout      time.Duration
+	base         http.RoundTripper
+	errorDecoder DecodeErrorFunc
+	middleware   middleware.Middleware
 }
 
 func (t *baseTransport) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -96,7 +107,14 @@ func (t *baseTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	defer cancel()
 
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
-		return t.base.RoundTrip(in.(*http.Request))
+		res, err := t.base.RoundTrip(in.(*http.Request))
+		if err != nil {
+			return nil, err
+		}
+		if err := t.errorDecoder(ctx, res); err != nil {
+			return nil, err
+		}
+		return res, nil
 	}
 	if t.middleware != nil {
 		h = t.middleware(h)
@@ -115,19 +133,7 @@ func Do(client *http.Client, req *http.Request, target interface{}) error {
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
-	if res.StatusCode < 200 || res.StatusCode > 299 {
-		se := &errors.Error{Code: 500}
-		if err := decodeResponse(res, se); err != nil {
-			return err
-		}
-		return se
-	}
-	return decodeResponse(res, target)
-}
-
-func decodeResponse(res *http.Response, target interface{}) error {
-	subtype := contentSubtype(res.Header.Get(contentTypeHeader))
+	subtype := xhttp.ContentSubtype(res.Header.Get(xhttp.HeaderContentType))
 	codec := encoding.GetCodec(subtype)
 	if codec == nil {
 		codec = encoding.GetCodec("json")
@@ -137,4 +143,20 @@ func decodeResponse(res *http.Response, target interface{}) error {
 		return err
 	}
 	return codec.Unmarshal(data, target)
+}
+
+// checkResponse returns an error (of type *Error) if the response
+// status code is not 2xx.
+func checkResponse(ctx context.Context, res *http.Response) error {
+	if res.StatusCode >= 200 && res.StatusCode <= 299 {
+		return nil
+	}
+	defer res.Body.Close()
+	if data, err := ioutil.ReadAll(res.Body); err == nil {
+		st := new(spb.Status)
+		if err = protojson.Unmarshal(data, st); err == nil {
+			return status.ErrorProto(st)
+		}
+	}
+	return errors.New(res.StatusCode, "")
 }
