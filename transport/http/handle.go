@@ -106,7 +106,7 @@ func encodeError(w http.ResponseWriter, r *http.Request, err error) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set(xhttp.HeaderContentType, "application/json")
+	w.Header().Set(xhttp.HeaderContentType, "application/json; charset=utf-8")
 	w.WriteHeader(xhttp.StatusFromGRPCCode(st.Code()))
 	w.Write(data)
 }
