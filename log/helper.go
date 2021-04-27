@@ -89,6 +89,6 @@ func (h *Helper) Errorw(pairs ...interface{}) {
 // TraceID print traceID by context.
 func (h *Helper) TraceID(ctx ctx.Context) {
 	span := trace.SpanContextFromContext(ctx)
-	id := span.TraceID
-	h.info.Print(id)
+	id := span.TraceID()
+	h.info.Print("message", id.String())
 }
