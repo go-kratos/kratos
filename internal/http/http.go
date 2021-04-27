@@ -134,7 +134,7 @@ func GRPCError(w http.ResponseWriter, r *http.Request, err error) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set(HeaderContentType, "application/json")
+	w.Header().Set(HeaderContentType, "application/json; charset=utf-8")
 	w.WriteHeader(StatusFromGRPCCode(st.Code()))
 	w.Write(data)
 }
