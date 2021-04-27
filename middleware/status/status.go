@@ -33,7 +33,7 @@ func WithHandler(h HandlerFunc) Option {
 // Server is an error middleware.
 func Server(opts ...Option) middleware.Middleware {
 	options := options{
-		handler: encodeErr,
+		handler: encodeError,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -52,7 +52,7 @@ func Server(opts ...Option) middleware.Middleware {
 // Client is an error middleware.
 func Client(opts ...Option) middleware.Middleware {
 	options := options{
-		handler: decodeErr,
+		handler: decodeError,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -68,7 +68,7 @@ func Client(opts ...Option) middleware.Middleware {
 	}
 }
 
-func encodeErr(ctx context.Context, err error) error {
+func encodeError(ctx context.Context, err error) error {
 	var details []proto.Message
 	if target := new(errors.ErrorInfo); errors.As(err, &target) {
 		details = append(details, &errdetails.ErrorInfo{
@@ -86,7 +86,7 @@ func encodeErr(ctx context.Context, err error) error {
 	return gs.Err()
 }
 
-func decodeErr(ctx context.Context, err error) error {
+func decodeError(ctx context.Context, err error) error {
 	gs := status.Convert(err)
 	code := http.StatusFromGRPCCode(gs.Code())
 	message := gs.Message()
