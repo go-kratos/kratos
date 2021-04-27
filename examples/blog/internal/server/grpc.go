@@ -4,6 +4,7 @@ import (
 	v1 "github.com/go-kratos/kratos/examples/blog/api/blog/v1"
 	"github.com/go-kratos/kratos/examples/blog/internal/conf"
 	"github.com/go-kratos/kratos/examples/blog/internal/service"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
@@ -18,10 +19,10 @@ func NewGRPCServer(c *conf.Server, tracer trace.TracerProvider, blog *service.Bl
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			middleware.Chain(
-				recovery.Recovery(),
 				status.Server(),
 				tracing.Server(tracing.WithTracerProvider(tracer)),
-				logging.Server(),
+				logging.Server(log.DefaultLogger),
+				recovery.Recovery(),
 			),
 		),
 	}

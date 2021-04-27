@@ -10,8 +10,8 @@ func TestError(t *testing.T) {
 	var (
 		base *Error
 	)
-	err := New(400, "reason", "message")
-	err2 := New(400, "reason", "message")
+	err := Errorf(400, "domain", "reason", "message")
+	err2 := Errorf(400, "domain", "reason", "message")
 	err3 := err.WithMetadata(map[string]string{
 		"foo": "bar",
 	})
@@ -34,9 +34,6 @@ func TestError(t *testing.T) {
 		t.Errorf("should be matchs: %v", err)
 	}
 
-	if code := Code(err); code != err2.Code {
-		t.Errorf("got %d want: %s", code, err)
-	}
 	if domain := Domain(err); domain != err2.Domain {
 		t.Errorf("got %s want: %s", domain, err)
 	}

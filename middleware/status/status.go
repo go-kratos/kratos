@@ -14,8 +14,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type domainKey struct{}
-
 // HandlerFunc is middleware error handler.
 type HandlerFunc func(context.Context, error) error
 
@@ -23,15 +21,7 @@ type HandlerFunc func(context.Context, error) error
 type Option func(*options)
 
 type options struct {
-	domain  string
 	handler HandlerFunc
-}
-
-// WithDomain with service domain.
-func WithDomain(domain string) Option {
-	return func(o *options) {
-		o.domain = domain
-	}
 }
 
 // WithHandler with status handler.
@@ -53,7 +43,6 @@ func Server(opts ...Option) middleware.Middleware {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			reply, err := handler(ctx, req)
 			if err != nil {
-				ctx = context.WithValue(ctx, domainKey{}, options.domain)
 				return nil, options.handler(ctx, err)
 			}
 			return reply, nil
@@ -81,18 +70,16 @@ func Client(opts ...Option) middleware.Middleware {
 }
 
 func encodeErr(ctx context.Context, err error) error {
-	se := errors.FromError(err)
-	if se.Domain == "" {
-		se.Domain, _ = ctx.Value(domainKey{}).(string)
+	var details []proto.Message
+	if target := new(errors.ErrorInfo); errors.As(err, &target) {
+		details = append(details, &errdetails.ErrorInfo{
+			Domain:   target.Domain,
+			Reason:   target.Reason,
+			Metadata: target.Metadata,
+		})
 	}
-	gs := status.Newf(httpToGRPCCode(se.Code), "%s: %s", se.Reason, se.Message)
-	details := []proto.Message{
-		&errdetails.ErrorInfo{
-			Domain:   se.Domain,
-			Reason:   se.Reason,
-			Metadata: se.Metadata,
-		},
-	}
+	es := errors.FromError(err)
+	gs := status.New(httpToGRPCCode(es.Code), es.Message)
 	gs, err = gs.WithDetails(details...)
 	if err != nil {
 		return err
@@ -102,20 +89,20 @@ func encodeErr(ctx context.Context, err error) error {
 
 func decodeErr(ctx context.Context, err error) error {
 	gs := status.Convert(err)
-	se := &errors.Error{
-		Code:    grpcToHTTPCode(gs.Code()),
-		Message: gs.Message(),
-	}
+	code := grpcToHTTPCode(gs.Code())
+	message := gs.Message()
 	for _, detail := range gs.Details() {
 		switch d := detail.(type) {
 		case *errdetails.ErrorInfo:
-			se.Domain = d.Domain
-			se.Reason = d.Reason
-			se.Metadata = d.Metadata
-			return se
+			return errors.Errorf(
+				code,
+				d.Domain,
+				d.Reason,
+				message,
+			).WithMetadata(d.Metadata)
 		}
 	}
-	return se
+	return errors.New(code, message)
 }
 
 func httpToGRPCCode(code int) codes.Code {

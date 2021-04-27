@@ -125,13 +125,10 @@ github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72/go.mod h1:tQ2
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-kit/kit v0.9.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
-github.com/go-kratos/consul v0.0.0-20210311161349-cfb0345e820d h1:px9mGqOsFmcXYsidSYATFoDK/R7x43WnUqiE/9Pu8x8=
-github.com/go-kratos/consul v0.0.0-20210311161349-cfb0345e820d/go.mod h1:i/8iM3Xm0YwSmiCdFFZ611y+6rk5Bi1G5UZtBG3t9rg=
+github.com/go-kratos/consul v0.0.0-20210425141546-e047a9f6ec87 h1:YKG1fpsSZivsGzeD31Mb91hsmouDFCPq8LR6Uz8SjTg=
+github.com/go-kratos/consul v0.0.0-20210425141546-e047a9f6ec87/go.mod h1:O21CidethNnnpWtHS7XcisEKl3P+f9sTZACoIyuvq4Y=
 github.com/go-kratos/etcd v0.0.0-20210311162832-e0fdc8177742 h1:gEjXnGJ30PVLE3AMgh1z48PmHgVC4E1q8ZvkdkyJyt8=
 github.com/go-kratos/etcd v0.0.0-20210311162832-e0fdc8177742/go.mod h1:+1nilFyiWLlYpAWliKnbFhIax79n4l0mOTJhyNw5EEw=
-github.com/go-kratos/kratos/v2 v2.0.0-20210311152607-a4409adf164e/go.mod h1:oLvFyDBJkkWN8TPqb+NmpvRrSy9uM/K+XQubVRc11a8=
-github.com/go-kratos/kratos/v2 v2.0.0-20210415063033-9007abfd2888 h1:GmcG4UBf9ome4mJMltFSqxRdQssIRgGBAhIvHJA9MVU=
-github.com/go-kratos/kratos/v2 v2.0.0-20210415063033-9007abfd2888/go.mod h1:hwEYWw8GFuJ8IoNt3T/3k+7kUfYt+h2fHDcyFlR1jBA=
 github.com/go-kratos/nacos v0.0.0-20210415082641-f1b756c16257 h1:mJdO5lD+C1UsxJ5NC0rQ2hPx1dA0tdXLp/3UFNWRaFc=
 github.com/go-kratos/nacos v0.0.0-20210415082641-f1b756c16257/go.mod h1:GP7wV0ohYEG+x1P/qdNCJGb7K2jtbsMop+5BDaSqBlA=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=
@@ -389,7 +386,6 @@ github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1y
 github.com/onsi/gomega v1.10.3/go.mod h1:V9xEwhxec5O8UDM77eCW8vLymOMltsqPVYWrpDsH8xc=
 github.com/onsi/gomega v1.10.5 h1:7n6FEkpFmfCoo2t+YYqXH0evK+a9ICQz0xcAy9dYcaQ=
 github.com/onsi/gomega v1.10.5/go.mod h1:gza4q3jKQJijlu05nKWRCW/GavJumGt8aNRxWg7mt48=
-github.com/opentracing/opentracing-go v1.2.0/go.mod h1:GxEUsuufX4nBwe+T+Wl9TAgYrxe9dPLANfrWvHYVTgc=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pascaldekloe/goe v0.1.0 h1:cBOtyMzM9HTpWjXfbbunk26uA6nG3a8n06Wieeh0MwY=
 github.com/pascaldekloe/goe v0.1.0/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
