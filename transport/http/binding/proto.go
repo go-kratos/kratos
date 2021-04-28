@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -51,7 +50,7 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 		if fd = fields.ByName(protoreflect.Name(fieldName)); fd == nil {
 			fd = fields.ByJSONName(fieldName)
 			if fd == nil {
-				log.Printf("field not found in %q: %q\n", v.Descriptor().FullName(), strings.Join(fieldPath, "."))
+				// ignore unexpected field.
 				return nil
 			}
 		}
