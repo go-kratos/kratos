@@ -24,7 +24,6 @@ func callHTTP() {
 		transhttp.WithMiddleware(
 			middleware.Chain(
 				recovery.Recovery(),
-				//status.Client(),
 			),
 		),
 	)
@@ -58,7 +57,6 @@ func callGRPC() {
 		transgrpc.WithEndpoint("127.0.0.1:9000"),
 		transgrpc.WithMiddleware(
 			middleware.Chain(
-				//status.Client(),
 				recovery.Recovery(),
 			),
 		),
