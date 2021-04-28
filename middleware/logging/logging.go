@@ -3,6 +3,7 @@ package logging
 import (
 	"context"
 	"fmt"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -22,7 +23,9 @@ func Server(l log.Logger) middleware.Middleware {
 				args      string
 				component string
 				query     string
+				traceID   string
 			)
+			traceID = trace.SpanContextFromContext(ctx).TraceID().String()
 			if info, ok := http.FromServerContext(ctx); ok {
 				component = "HTTP"
 				path = info.Request.URL.Path
@@ -41,6 +44,7 @@ func Server(l log.Logger) middleware.Middleware {
 					logger.Errorw(
 						"kind", "server",
 						"component", component,
+						"traceID", traceID,
 						"path", path,
 						"method", method,
 						"args", args,
@@ -53,6 +57,7 @@ func Server(l log.Logger) middleware.Middleware {
 				logger.Infow(
 					"kind", "server",
 					"component", component,
+					"traceID", traceID,
 					"path", path,
 					"method", method,
 					"args", args,
@@ -64,6 +69,7 @@ func Server(l log.Logger) middleware.Middleware {
 					logger.Errorw(
 						"kind", "server",
 						"component", component,
+						"traceID", traceID,
 						"path", path,
 						"method", method,
 						"args", args,
@@ -75,6 +81,7 @@ func Server(l log.Logger) middleware.Middleware {
 				logger.Infow(
 					"kind", "server",
 					"component", component,
+					"traceID", traceID,
 					"path", path,
 					"method", method,
 					"args", args,
