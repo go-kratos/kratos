@@ -2,6 +2,10 @@ package main
 
 import (
 	"flag"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/semconv"
 	"os"
 
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
@@ -65,17 +69,23 @@ func main() {
 		panic(err)
 	}
 
-	tp, flush, err := jaeger.NewExportPipeline(jaeger.WithCollectorEndpoint("http://localhost:14268/api/traces"),
-		jaeger.WithProcess(jaeger.Process{
-			ServiceName: "blog",
-		}),
-		jaeger.WithSDK(&trace.Config{DefaultSampler: trace.AlwaysSample()}),
+	flush, err := jaeger.InstallNewPipeline(
+		jaeger.WithCollectorEndpoint("http://47.104.19.38:14268/api/traces"),
+		jaeger.WithSDKOptions(
+			trace.WithSampler(trace.AlwaysSample()),
+			trace.WithResource(resource.NewWithAttributes(
+				semconv.ServiceNameKey.String("trace-demo"),
+				attribute.String("exporter", "jaeger"),
+				attribute.Float64("float", 312.23),
+			)),
+		),
 	)
+
 	if err != nil {
 		panic(err)
 	}
 	defer flush()
-
+	tp := otel.GetTracerProvider()
 	app, cleanup, err := initApp(bc.Server, bc.Data, tp, logger)
 	if err != nil {
 		panic(err)
