@@ -51,5 +51,6 @@ jobs:
     - name: Examples
       run: |
         cd examples
+        go mod tidy
         go build ./...
         go test ./...
