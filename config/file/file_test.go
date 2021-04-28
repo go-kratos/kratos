@@ -14,20 +14,41 @@ import (
 const (
 	_testJSON = `
 {
-  "test": {
-    "settings" : {
-      "int_key": 1000,
-      "float_key": 1000.1,
-      "duration_key": 10000,
-      "string_key": "string_value"
+    "test":{
+        "settings":{
+            "int_key":1000,
+            "float_key":1000.1,
+            "duration_key":10000,
+            "string_key":"string_value"
+        },
+        "server":{
+            "addr":"127.0.0.1",
+            "port":8000
+        }
     },
-    "server": {
-      "addr": "127.0.0.1",
-      "port": 8000
-    }
-  }
+    "foo":[
+        {
+            "name":"nihao",
+            "age":18
+        },
+        {
+            "name":"nihao",
+            "age":18
+        }
+    ]
 }`
+//	_testYaml = `
+//Foo:
+//    bar :
+//        - {name: nihao,age: 1}
+//        - {name: nihao,age: 1}
+//
+//
+//`
 )
+//func TestScan(t *testing.T) {
+//
+//}
 
 func TestFile(t *testing.T) {
 	var (
@@ -68,6 +89,8 @@ func TestConfig(t *testing.T) {
 	c := config.New(config.WithSource(
 		NewSource(path),
 	))
+	testScan(t, c)
+
 	testConfig(t, c)
 }
 
@@ -139,4 +162,33 @@ func testConfig(t *testing.T, c config.Config) {
 		t.Logf("not_found_key not match: %v", err)
 	}
 
+}
+
+func testScan(t *testing.T, c config.Config) {
+	type TestJSON struct {
+		Test struct {
+			Settings struct {
+				IntKey int `json:"int_key"`
+				FloatKey float64 `json:"float_key"`
+				DurationKey int `json:"duration_key"`
+				StringKey string `json:"string_key"`
+			} `json:"settings"`
+			Server struct {
+				Addr string `json:"addr"`
+				Port int `json:"port"`
+			} `json:"server"`
+		} `json:"test"`
+		Foo []struct {
+			Name string `json:"name"`
+			Age int `json:"age"`
+		} `json:"foo"`
+	}
+	var conf TestJSON
+	if err := c.Load(); err != nil {
+		t.Error(err)
+	}
+	if err := c.Scan(&conf); err != nil {
+		t.Error(err)
+	}
+	t.Log(conf)
 }
