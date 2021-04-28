@@ -103,6 +103,12 @@ func convertMap(src interface{}) interface{} {
 			dst[fmt.Sprint(k)] = convertMap(v)
 		}
 		return dst
+	case []interface{} :
+		dst := make([]interface{},len(m))
+		for k, v := range m {
+			dst[k] = convertMap(v)
+		}
+		return dst
 	default:
 		return src
 	}

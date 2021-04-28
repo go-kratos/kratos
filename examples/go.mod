@@ -25,10 +25,10 @@ require (
 	github.com/nacos-group/nacos-sdk-go v1.0.7
 	github.com/ugorji/go v1.2.3 // indirect
 	go.etcd.io/etcd/client/v3 v3.5.0-alpha.0
-	go.opentelemetry.io/otel v0.18.0
-	go.opentelemetry.io/otel/exporters/trace/jaeger v0.18.0
-	go.opentelemetry.io/otel/sdk v0.18.0
-	go.opentelemetry.io/otel/trace v0.18.0
+	go.opentelemetry.io/otel v0.19.0
+	go.opentelemetry.io/otel/exporters/trace/jaeger v0.19.0
+	go.opentelemetry.io/otel/sdk v0.19.0
+	go.opentelemetry.io/otel/trace v0.19.0
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83 // indirect
 	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
