@@ -19,8 +19,9 @@ jobs:
         go-version: 1.16
 
     - name: Build
-      run: go build -v ./...
-
+      run: |
+        go mod tidy
+        go build -v ./...
     - name: Test
       run: go test -v ./...
 
