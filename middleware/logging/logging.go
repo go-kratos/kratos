@@ -9,6 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Server is an server logging middleware.
@@ -22,7 +23,9 @@ func Server(l log.Logger) middleware.Middleware {
 				args      string
 				component string
 				query     string
+				traceID string
 			)
+			traceID = trace.SpanContextFromContext(ctx).TraceID().String()
 			if info, ok := http.FromServerContext(ctx); ok {
 				component = "HTTP"
 				path = info.Request.URL.Path
@@ -41,6 +44,7 @@ func Server(l log.Logger) middleware.Middleware {
 					logger.Errorw(
 						"kind", "server",
 						"component", component,
+						"traceID", traceID,
 						"path", path,
 						"method", method,
 						"args", args,
@@ -53,6 +57,7 @@ func Server(l log.Logger) middleware.Middleware {
 				logger.Infow(
 					"kind", "server",
 					"component", component,
+					"traceID", traceID,
 					"path", path,
 					"method", method,
 					"args", args,
