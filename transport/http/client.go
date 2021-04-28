@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/errors"
 	xhttp "github.com/go-kratos/kratos/v2/internal/http"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -75,7 +74,7 @@ func NewTransport(ctx context.Context, opts ...ClientOption) (http.RoundTripper,
 		ctx:          ctx,
 		timeout:      500 * time.Millisecond,
 		transport:    http.DefaultTransport,
-		errorDecoder: checkResponse,
+		errorDecoder: CheckResponse,
 	}
 	for _, o := range opts {
 		o(options)
@@ -145,9 +144,9 @@ func Do(client *http.Client, req *http.Request, target interface{}) error {
 	return codec.Unmarshal(data, target)
 }
 
-// checkResponse returns an error (of type *Error) if the response
+// CheckResponse returns an error (of type *Error) if the response
 // status code is not 2xx.
-func checkResponse(ctx context.Context, res *http.Response) error {
+func CheckResponse(ctx context.Context, res *http.Response) error {
 	if res.StatusCode >= 200 && res.StatusCode <= 299 {
 		return nil
 	}
@@ -158,5 +157,5 @@ func checkResponse(ctx context.Context, res *http.Response) error {
 			return status.ErrorProto(st)
 		}
 	}
-	return errors.New(res.StatusCode, "")
+	return status.Error(xhttp.GRPCCodeFromStatus(res.StatusCode), res.Status)
 }

@@ -48,7 +48,7 @@ func Server(opts ...Option) middleware.Middleware {
 			var (
 				method string
 				path   string
-				code   int
+				code   uint32
 			)
 			if info, ok := grpc.FromServerContext(ctx); ok {
 				method = "POST"
@@ -65,7 +65,7 @@ func Server(opts ...Option) middleware.Middleware {
 			startTime := time.Now()
 			reply, err := handler(ctx, req)
 			if err != nil {
-				code = errors.Code(err)
+				code = uint32(errors.Code(err))
 			}
 			if options.requests != nil {
 				options.requests.With(method, path, strconv.Itoa(int(code))).Inc()
@@ -90,7 +90,7 @@ func Client(opts ...Option) middleware.Middleware {
 			var (
 				method string
 				path   string
-				code   int
+				code   uint32
 			)
 			if info, ok := grpc.FromClientContext(ctx); ok {
 				method = "POST"
@@ -102,7 +102,7 @@ func Client(opts ...Option) middleware.Middleware {
 			startTime := time.Now()
 			reply, err := handler(ctx, req)
 			if err != nil {
-				code = errors.Code(err)
+				code = uint32(errors.Code(err))
 			}
 			if options.requests != nil {
 				options.requests.With(method, path, strconv.Itoa(int(code))).Inc()

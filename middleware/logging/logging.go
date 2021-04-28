@@ -3,6 +3,7 @@ package logging
 import (
 	"context"
 	"fmt"
+
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -49,7 +50,7 @@ func Server(l log.Logger) middleware.Middleware {
 						"method", method,
 						"args", args,
 						"query", query,
-						"code", errors.Code(err),
+						"code", uint32(errors.Code(err)),
 						"error", err.Error(),
 					)
 					return nil, err
@@ -73,7 +74,7 @@ func Server(l log.Logger) middleware.Middleware {
 						"path", path,
 						"method", method,
 						"args", args,
-						"code", errors.Code(err),
+						"code", uint32(errors.Code(err)),
 						"error", err.Error(),
 					)
 					return nil, err
@@ -130,7 +131,7 @@ func Client(l log.Logger) middleware.Middleware {
 						"method", method,
 						"args", args,
 						"query", query,
-						"code", errors.Code(err),
+						"code", uint32(errors.Code(err)),
 						"error", err.Error(),
 					)
 					return nil, err
@@ -154,7 +155,7 @@ func Client(l log.Logger) middleware.Middleware {
 						"path", path,
 						"method", method,
 						"args", args,
-						"code", errors.Code(err),
+						"code", uint32(errors.Code(err)),
 						"error", err.Error(),
 					)
 					return nil, err
