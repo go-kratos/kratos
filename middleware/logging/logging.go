@@ -101,10 +101,12 @@ func Client(l log.Logger) middleware.Middleware {
 			var (
 				path      string
 				method    string
-				component string
 				args      string
+				component string
 				query     string
+				traceID   string
 			)
+			traceID = trace.SpanContextFromContext(ctx).TraceID().String()
 			if info, ok := http.FromClientContext(ctx); ok {
 				component = "HTTP"
 				path = info.Request.URL.Path
@@ -123,6 +125,7 @@ func Client(l log.Logger) middleware.Middleware {
 					logger.Errorw(
 						"kind", "client",
 						"component", component,
+						"traceID", traceID,
 						"path", path,
 						"method", method,
 						"args", args,
@@ -135,6 +138,7 @@ func Client(l log.Logger) middleware.Middleware {
 				logger.Infow(
 					"kind", "client",
 					"component", component,
+					"traceID", traceID,
 					"path", path,
 					"method", method,
 					"args", args,
@@ -146,6 +150,7 @@ func Client(l log.Logger) middleware.Middleware {
 					logger.Errorw(
 						"kind", "client",
 						"component", component,
+						"traceID", traceID,
 						"path", path,
 						"method", method,
 						"args", args,
@@ -157,6 +162,7 @@ func Client(l log.Logger) middleware.Middleware {
 				logger.Infow(
 					"kind", "client",
 					"component", component,
+					"traceID", traceID,
 					"path", path,
 					"method", method,
 					"args", args,
