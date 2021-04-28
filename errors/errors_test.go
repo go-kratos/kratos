@@ -4,14 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+
+	"google.golang.org/grpc/codes"
 )
 
 func TestError(t *testing.T) {
 	var (
 		base *Error
 	)
-	err := Errorf(400, "domain", "reason", "message")
-	err2 := Errorf(400, "domain", "reason", "message")
+	err := Newf(codes.InvalidArgument, "domain", "reason", "message")
+	err2 := Newf(codes.InvalidArgument, "domain", "reason", "message")
 	err3 := err.WithMetadata(map[string]string{
 		"foo": "bar",
 	})

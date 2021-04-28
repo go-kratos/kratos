@@ -9,7 +9,6 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/middleware/status"
 	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 )
@@ -25,7 +24,7 @@ func callHTTP() {
 		transhttp.WithMiddleware(
 			middleware.Chain(
 				recovery.Recovery(),
-				status.Client(),
+				//status.Client(),
 			),
 		),
 	)
@@ -59,7 +58,7 @@ func callGRPC() {
 		transgrpc.WithEndpoint("127.0.0.1:9000"),
 		transgrpc.WithMiddleware(
 			middleware.Chain(
-				status.Client(),
+				//status.Client(),
 				recovery.Recovery(),
 			),
 		),
