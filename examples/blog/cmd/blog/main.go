@@ -1,11 +1,10 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
-
-	"go.opentelemetry.io/otel/exporters/trace/jaeger"
-	"go.opentelemetry.io/otel/sdk/trace"
+	"time"
 
 	"github.com/go-kratos/kratos/examples/blog/internal/conf"
 	"github.com/go-kratos/kratos/v2"
@@ -14,13 +13,19 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/trace/jaeger"
+	"go.opentelemetry.io/otel/sdk/resource"
+	tracesdk "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/semconv"
 	"gopkg.in/yaml.v2"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
 var (
 	// Name is the name of the compiled software.
-	Name string
+	Name string = "blog"
 	// Version is the version of the compiled software.
 	Version string
 	// flagconf is the config flag.
@@ -65,16 +70,25 @@ func main() {
 		panic(err)
 	}
 
-	tp, flush, err := jaeger.NewExportPipeline(jaeger.WithCollectorEndpoint("http://localhost:14268/api/traces"),
-		jaeger.WithProcess(jaeger.Process{
-			ServiceName: "blog",
-		}),
-		jaeger.WithSDK(&trace.Config{DefaultSampler: trace.AlwaysSample()}),
-	)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	tp, err := tracerProvider("http://localhost:14268/api/traces")
 	if err != nil {
 		panic(err)
 	}
-	defer flush()
+	// Register our TracerProvider as the global so any imported
+	// instrumentation in the future will default to using it.
+	otel.SetTracerProvider(tp)
+	// Cleanly shutdown and flush telemetry when the application exits.
+	defer func(ctx context.Context) {
+		// Do not make the application hang when it is shutdown.
+		ctx, cancel = context.WithTimeout(ctx, time.Second*5)
+		defer cancel()
+		if err := tp.Shutdown(ctx); err != nil {
+			panic(err)
+		}
+	}(ctx)
 
 	app, cleanup, err := initApp(bc.Server, bc.Data, tp, logger)
 	if err != nil {
@@ -86,4 +100,27 @@ func main() {
 	if err := app.Run(); err != nil {
 		panic(err)
 	}
+}
+
+// tracerProvider returns an OpenTelemetry TracerProvider configured to use
+// the Jaeger exporter that will send spans to the provided url. The returned
+// TracerProvider will also use a Resource configured with all the information
+// about the application.
+func tracerProvider(url string) (*tracesdk.TracerProvider, error) {
+	// Create the Jaeger exporter
+	exp, err := jaeger.NewRawExporter(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
+	if err != nil {
+		return nil, err
+	}
+	tp := tracesdk.NewTracerProvider(
+		// Always be sure to batch in production.
+		tracesdk.WithBatcher(exp),
+		// Record information about this application in an Resource.
+		tracesdk.WithResource(resource.NewWithAttributes(
+			semconv.ServiceNameKey.String(Name),
+			attribute.String("version", Version),
+			//attribute.Int64("ID", 1),
+		)),
+	)
+	return tp, nil
 }
