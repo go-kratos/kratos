@@ -37,7 +37,7 @@ type config struct {
 	cached    sync.Map
 	observers sync.Map
 	watchers  []Watcher
-	log       *log.Helper
+	logger    log.Logger
 }
 
 // New new a config with options.
@@ -54,7 +54,7 @@ func New(opts ...Option) Config {
 	return &config{
 		opts:   options,
 		reader: newReader(options),
-		log:    log.NewHelper("config", options.logger),
+		logger: log.With(options.logger, "module", "config"),
 	}
 }
 
@@ -63,11 +63,11 @@ func (c *config) watch(w Watcher) {
 		kvs, err := w.Next()
 		if err != nil {
 			time.Sleep(time.Second)
-			c.log.Errorf("Failed to watch next config: %v", err)
+			log.Error(c.logger).Print("message", "Failed to watch next config: %v", err)
 			continue
 		}
 		if err := c.reader.Merge(kvs...); err != nil {
-			c.log.Errorf("Failed to merge next config: %v", err)
+			log.Error(c.logger).Print("message", "Failed to merge next config: %v", err)
 			continue
 		}
 		c.cached.Range(func(key, value interface{}) bool {
@@ -91,12 +91,12 @@ func (c *config) Load() error {
 			return err
 		}
 		if err := c.reader.Merge(kvs...); err != nil {
-			c.log.Errorf("Failed to merge config source: %v", err)
+			log.Error(c.logger).Print("message", "Failed to merge config source: %v", err)
 			return err
 		}
 		w, err := src.Watch()
 		if err != nil {
-			c.log.Errorf("Failed to watch config source: %v", err)
+			log.Error(c.logger).Print("message", "Failed to watch config source: %v", err)
 			return err
 		}
 		go c.watch(w)

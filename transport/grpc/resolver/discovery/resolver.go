@@ -12,9 +12,9 @@ import (
 )
 
 type discoveryResolver struct {
-	w   registry.Watcher
-	cc  resolver.ClientConn
-	log *log.Helper
+	w      registry.Watcher
+	cc     resolver.ClientConn
+	logger log.Logger
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -30,7 +30,7 @@ func (r *discoveryResolver) watch() {
 
 		ins, err := r.w.Next()
 		if err != nil {
-			r.log.Errorf("Failed to watch discovery endpoint: %v", err)
+			log.Error(r.logger).Print("message", "Failed to watch discovery endpoint: %v", err)
 			time.Sleep(time.Second)
 			continue
 		}
@@ -43,7 +43,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	for _, in := range ins {
 		endpoint, err := parseEndpoint(in.Endpoints)
 		if err != nil {
-			r.log.Errorf("Failed to parse discovery endpoint: %v", err)
+			log.Error(r.logger).Print("message", "Failed to parse discovery endpoint: %v", err)
 			continue
 		}
 		if endpoint == "" {

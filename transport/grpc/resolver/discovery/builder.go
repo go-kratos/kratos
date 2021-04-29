@@ -46,7 +46,7 @@ func (d *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 	r := &discoveryResolver{
 		w:      w,
 		cc:     cc,
-		log:    log.NewHelper("grpc/resolver/discovery", d.logger),
+		logger: log.With(d.logger, "module", "grpc/resolver/discovery"),
 		ctx:    ctx,
 		cancel: cancel,
 	}
