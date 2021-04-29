@@ -59,7 +59,7 @@ func (e *Error) WithMetadata(md map[string]string) *Error {
 // New returns an error object for the code, message.
 func New(code codes.Code, domain, reason, message string) *Error {
 	return &Error{
-		s:      status.New(codes.Code(code), message),
+		s:      status.New(code, message),
 		Domain: domain,
 		Reason: reason,
 	}
@@ -73,7 +73,7 @@ func Newf(code codes.Code, domain, reason, format string, a ...interface{}) *Err
 // Errorf returns an error object for the code, message and error info.
 func Errorf(code codes.Code, domain, reason, format string, a ...interface{}) error {
 	return &Error{
-		s:      status.New(codes.Code(code), fmt.Sprintf(format, a...)),
+		s:      status.New(code, fmt.Sprintf(format, a...)),
 		Domain: domain,
 		Reason: reason,
 	}
