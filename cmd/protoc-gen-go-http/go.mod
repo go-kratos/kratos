@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2
 go 1.15
 
 require (
-	github.com/go-kratos/kratos/v2 v2.0.0-beta2
+	github.com/go-kratos/kratos/v2 v2.0.0-20210429074603-98bd6c0c00c5
 	github.com/golang/protobuf v1.4.3
 	github.com/gorilla/mux v1.8.0
 	google.golang.org/genproto v0.0.0-20210202153253-cf70463f6119
