@@ -46,4 +46,10 @@ func TestError(t *testing.T) {
 	if err3.Metadata["foo"] != "bar" {
 		t.Error("not expected metadata")
 	}
+
+	gs := err.GRPCStatus()
+	se := FromError(gs.Err())
+	if se.Domain != err.Domain || se.Reason != se.Reason {
+		t.Errorf("got %+v want %+v", se, err)
+	}
 }

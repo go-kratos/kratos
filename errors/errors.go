@@ -3,7 +3,6 @@ package errors
 import (
 	"errors"
 	"fmt"
-	"net/http"
 
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
@@ -26,7 +25,7 @@ type Error struct {
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("error: domain = %s reason = %s", e.Domain, e.Reason)
+	return fmt.Sprintf("error: domain = %s reason = %s metadata = %v", e.Domain, e.Reason, e.Metadata)
 }
 
 // GRPCStatus returns the Status represented by se.
@@ -84,19 +83,19 @@ func Errorf(code codes.Code, domain, reason, format string, a ...interface{}) er
 // It supports wrapped errors.
 func Code(err error) codes.Code {
 	if err == nil {
-		return http.StatusOK
+		return codes.OK
 	}
-	if target := new(Error); errors.As(err, &target) {
-		return target.s.Code()
+	if se := FromError(err); err != nil {
+		return se.s.Code()
 	}
-	return http.StatusInternalServerError
+	return codes.Unknown
 }
 
 // Domain returns the domain for a particular error.
 // It supports wrapped errors.
 func Domain(err error) string {
-	if target := new(Error); errors.As(err, &target) {
-		return target.Domain
+	if se := FromError(err); err != nil {
+		return se.Domain
 	}
 	return ""
 }
@@ -104,8 +103,34 @@ func Domain(err error) string {
 // Reason returns the reason for a particular error.
 // It supports wrapped errors.
 func Reason(err error) string {
-	if target := new(Error); errors.As(err, &target) {
-		return target.Reason
+	if se := FromError(err); err != nil {
+		return se.Reason
 	}
 	return ""
+}
+
+// FromError try to convert an error to *Error.
+// It supports wrapped errors.
+func FromError(err error) *Error {
+	if err == nil {
+		return nil
+	}
+	if target := new(Error); errors.As(err, &target) {
+		return target
+	}
+	gs, ok := status.FromError(err)
+	if ok {
+		for _, detail := range gs.Details() {
+			switch d := detail.(type) {
+			case *errdetails.ErrorInfo:
+				return New(
+					gs.Code(),
+					d.Domain,
+					d.Reason,
+					gs.Message(),
+				).WithMetadata(d.Metadata)
+			}
+		}
+	}
+	return New(gs.Code(), "", "", err.Error())
 }
