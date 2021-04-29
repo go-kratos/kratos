@@ -9,6 +9,23 @@ import (
 // Valuer is returns a log value.
 type Valuer func() interface{}
 
+func bindValues(keyvals []interface{}) {
+	for i := 1; i < len(keyvals); i += 2 {
+		if v, ok := keyvals[i].(Valuer); ok {
+			keyvals[i] = v()
+		}
+	}
+}
+
+func containsValuer(keyvals []interface{}) bool {
+	for i := 1; i < len(keyvals); i += 2 {
+		if _, ok := keyvals[i].(Valuer); ok {
+			return true
+		}
+	}
+	return false
+}
+
 // Value return the function value.
 func Value(v interface{}) interface{} {
 	if v, ok := v.(Valuer); ok {

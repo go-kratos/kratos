@@ -37,7 +37,7 @@ func (l *stdLogger) Print(pairs ...interface{}) {
 	}
 	buf := l.pool.Get().(*bytes.Buffer)
 	for i := 0; i < len(pairs); i += 2 {
-		fmt.Fprintf(buf, "%s=%v ", pairs[i], Value(pairs[i+1]))
+		fmt.Fprintf(buf, "%s=%v ", pairs[i], pairs[i+1])
 	}
 	l.log.Output(4, buf.String())
 	buf.Reset()

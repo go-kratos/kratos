@@ -15,16 +15,20 @@ type Logger interface {
 }
 
 type context struct {
-	logs   []Logger
-	prefix []interface{}
+	logs      []Logger
+	prefix    []interface{}
+	hasValuer bool
 }
 
 func (c *context) Print(a ...interface{}) {
+	if c.hasValuer {
+		bindValues(c.prefix)
+	}
 	kvs := make([]interface{}, 0, len(c.prefix)+len(a))
 	kvs = append(kvs, c.prefix...)
 	kvs = append(kvs, a...)
-	for _, log := range c.logs {
-		log.Print(kvs...)
+	for _, l := range c.logs {
+		l.Print(kvs...)
 	}
 }
 
@@ -35,11 +39,12 @@ func With(l Logger, a ...interface{}) Logger {
 		kvs = append(kvs, a...)
 		kvs = append(kvs, c.prefix...)
 		return &context{
-			logs:   c.logs,
-			prefix: kvs,
+			logs:      c.logs,
+			prefix:    kvs,
+			hasValuer: containsValuer(kvs),
 		}
 	}
-	return &context{logs: []Logger{l}, prefix: a}
+	return &context{logs: []Logger{l}, prefix: a, hasValuer: containsValuer(a)}
 }
 
 // Wrap wraps multi logger.

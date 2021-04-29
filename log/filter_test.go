@@ -2,9 +2,8 @@ package log
 
 import "testing"
 
-func TestValue(t *testing.T) {
-	logger := With(DefaultLogger, "caller", Caller(3))
-	logger.Print("message", "helloworld")
+func TestFilter(t *testing.T) {
+	logger := NewFilter(DefaultLogger, LevelInfo)
 
 	Debug(logger).Print("message", "debug value")
 	Info(logger).Print("message", "info value")
