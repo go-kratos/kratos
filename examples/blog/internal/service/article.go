@@ -43,7 +43,7 @@ func (s *BlogService) DeleteArticle(ctx context.Context, req *pb.DeleteArticleRe
 
 func (s *BlogService) GetArticle(ctx context.Context, req *pb.GetArticleRequest) (*pb.GetArticleReply, error) {
 	tr := otel.Tracer("api")
-	_, span := tr.Start(ctx, "GetArticle")
+	ctx, span := tr.Start(ctx, "GetArticle")
 	defer span.End()
 	p, err := s.article.Get(ctx, req.Id)
 	if err != nil {
