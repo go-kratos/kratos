@@ -74,7 +74,7 @@ func (r *reader) Value(path string) (Value, bool) {
 }
 
 func (r *reader) Source() ([]byte, error) {
-	return marshalJSON(r.values)
+	return marshalJSON(convertMap(r.values))
 }
 
 func cloneMap(src map[string]interface{}) (map[string]interface{}, error) {
@@ -103,8 +103,8 @@ func convertMap(src interface{}) interface{} {
 			dst[fmt.Sprint(k)] = convertMap(v)
 		}
 		return dst
-	case []interface{} :
-		dst := make([]interface{},len(m))
+	case []interface{}:
+		dst := make([]interface{}, len(m))
 		for k, v := range m {
 			dst[k] = convertMap(v)
 		}
