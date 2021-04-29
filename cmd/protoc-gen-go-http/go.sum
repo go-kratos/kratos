@@ -9,8 +9,8 @@ github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.m
 github.com/envoyproxy/go-control-plane v0.9.9-0.20201210154907-fd9021fe5dad/go.mod h1:cXg6YxExXjJnVBQHBLXeUAgxn2UodCpnH306RInaBQk=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
-github.com/go-kratos/kratos/v2 v2.0.0-20210429070727-c76be444bf95 h1:NMC3n0iocWjr6/Ta8HyKlmlrWD/Ij2DggemegXFMLtY=
-github.com/go-kratos/kratos/v2 v2.0.0-20210429070727-c76be444bf95/go.mod h1:ABzj/OAz9XmjyeTirYBBIHqxmeV9Sbd9NXLx9CsCgbE=
+github.com/go-kratos/kratos/v2 v2.0.0-20210429074603-98bd6c0c00c5 h1:CQmftsE+xj5d+EPoicuTIBWixWci8Z5v8NEkyqNuAJ8=
+github.com/go-kratos/kratos/v2 v2.0.0-20210429074603-98bd6c0c00c5/go.mod h1:ABzj/OAz9XmjyeTirYBBIHqxmeV9Sbd9NXLx9CsCgbE=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
