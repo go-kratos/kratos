@@ -5,21 +5,21 @@
 ### Structured logging
 
 ```go
-logger := log.NewLogger(os.Stdout)
+logger := log.NewStdLogger(os.Stdout)
 logger = log.With(logger, "caller", log.DefaultCaller, "ts", log.DefaultTimestamp)
 
 // Levels
-log.Debug(logger).Print("msg", "foo bar")
-log.Info(logger).Print("msg", "foo bar")
-log.Warn(logger).Print("msg", "foo bar")
-log.Error(logger).Print("msg", "foo bar")
+log.Debug(logger).Log("msg", "foo bar")
+log.Info(logger).Log("msg", "foo bar")
+log.Warn(logger).Log("msg", "foo bar")
+log.Error(logger).Log("msg", "foo bar")
 
 errLogger := log.Error(logger)
-errLogger.Print("msg", "xxx")
-errLogger.Print("msg", "yyy")
-errLogger.Print("msg", "zzz")
+errLogger.Log("msg", "xxx")
+errLogger.Log("msg", "yyy")
+errLogger.Log("msg", "zzz")
 
-errLogger.Print(
+errLogger.Log(
     "http.scheme", "https",
     "http.host", "translate.googleapis.com",
     "http.target", "/language/translate",
@@ -28,5 +28,11 @@ errLogger.Print(
     "http.flavor", "1.1.",
     "http.user_agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36",
 )
+
+// Helper
+logger := log.NewHelper("github.com/project/foo", log.DefaultLogger)
+logger.Info("hello")
+logger.Infof("foo %s", "bar")
+logger.Infow("key", "value")
 ```
 
