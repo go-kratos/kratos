@@ -14,7 +14,7 @@ var ProviderSet = wire.NewSet(NewBlogService)
 type BlogService struct {
 	pb.UnimplementedBlogServiceServer
 
-	logger log.Logger
+	log *log.Helper
 
 	article *biz.ArticleUsecase
 }
