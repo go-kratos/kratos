@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"go.opentelemetry.io/otel"
 
 	pb "github.com/go-kratos/kratos/examples/blog/api/blog/v1"
@@ -13,12 +14,11 @@ import (
 func NewBlogService(article *biz.ArticleUsecase, logger log.Logger) *BlogService {
 	return &BlogService{
 		article: article,
-		log:     log.NewHelper("article", logger),
+		logger:  logger,
 	}
 }
 
 func (s *BlogService) CreateArticle(ctx context.Context, req *pb.CreateArticleRequest) (*pb.CreateArticleReply, error) {
-	s.log.Infof("input data %v", req)
 	err := s.article.Create(ctx, &biz.Article{
 		Title:   req.Title,
 		Content: req.Content,
@@ -27,7 +27,6 @@ func (s *BlogService) CreateArticle(ctx context.Context, req *pb.CreateArticleRe
 }
 
 func (s *BlogService) UpdateArticle(ctx context.Context, req *pb.UpdateArticleRequest) (*pb.UpdateArticleReply, error) {
-	s.log.Infof("input data %v", req)
 	err := s.article.Update(ctx, req.Id, &biz.Article{
 		Title:   req.Title,
 		Content: req.Content,
@@ -36,7 +35,6 @@ func (s *BlogService) UpdateArticle(ctx context.Context, req *pb.UpdateArticleRe
 }
 
 func (s *BlogService) DeleteArticle(ctx context.Context, req *pb.DeleteArticleRequest) (*pb.DeleteArticleReply, error) {
-	s.log.Infof("input data %v", req)
 	err := s.article.Delete(ctx, req.Id)
 	return &pb.DeleteArticleReply{}, err
 }

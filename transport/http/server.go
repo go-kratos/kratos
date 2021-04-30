@@ -119,7 +119,7 @@ func (s *Server) Start() error {
 		return err
 	}
 	s.lis = lis
-	log.Info(s.logger).Print("message", "[HTTP] server listening on: %s", lis.Addr().String())
+	log.Info(s.logger).Print("message", fmt.Sprintf("[HTTP] server listening on: %s", lis.Addr().String()))
 	if err := s.Serve(lis); !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
@@ -128,6 +128,6 @@ func (s *Server) Start() error {
 
 // Stop stop the HTTP server.
 func (s *Server) Stop() error {
-	log.Info(s.logger).Print("message", "[HTTP] server stopping")
+	log.Info(s.logger).Print("message", fmt.Sprintf("[HTTP] server stopping"))
 	return s.Shutdown(context.Background())
 }

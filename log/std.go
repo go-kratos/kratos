@@ -18,7 +18,7 @@ type stdLogger struct {
 // NewStdLogger new a std logger with options.
 func NewStdLogger(w io.Writer) Logger {
 	return &stdLogger{
-		log: log.New(w, "", log.LstdFlags),
+		log: log.New(w, "", 0),
 		pool: &sync.Pool{
 			New: func() interface{} {
 				return new(bytes.Buffer)
@@ -28,16 +28,16 @@ func NewStdLogger(w io.Writer) Logger {
 }
 
 // Print print the kv pairs log.
-func (l *stdLogger) Print(pairs ...interface{}) {
-	if len(pairs) == 0 {
+func (l *stdLogger) Print(kv ...interface{}) {
+	if len(kv) == 0 {
 		return
 	}
-	if len(pairs)%2 != 0 {
-		pairs = append(pairs, "")
+	if len(kv)%2 != 0 {
+		kv = append(kv, "")
 	}
 	buf := l.pool.Get().(*bytes.Buffer)
-	for i := 0; i < len(pairs); i += 2 {
-		fmt.Fprintf(buf, "%s=%v ", pairs[i], pairs[i+1])
+	for i := 0; i < len(kv); i += 2 {
+		fmt.Fprintf(buf, "%s=%v ", kv[i], kv[i+1])
 	}
 	l.log.Output(4, buf.String())
 	buf.Reset()

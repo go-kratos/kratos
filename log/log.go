@@ -11,7 +11,7 @@ var (
 
 // Logger is a logger interface.
 type Logger interface {
-	Print(pairs ...interface{})
+	Print(kv ...interface{})
 }
 
 type context struct {
@@ -20,23 +20,23 @@ type context struct {
 	hasValuer bool
 }
 
-func (c *context) Print(a ...interface{}) {
-	if c.hasValuer {
-		bindValues(c.prefix)
-	}
-	kvs := make([]interface{}, 0, len(c.prefix)+len(a))
+func (c *context) Print(kv ...interface{}) {
+	kvs := make([]interface{}, 0, len(c.prefix)+len(kv))
 	kvs = append(kvs, c.prefix...)
-	kvs = append(kvs, a...)
+	if c.hasValuer {
+		bindValues(kvs)
+	}
+	kvs = append(kvs, kv...)
 	for _, l := range c.logs {
 		l.Print(kvs...)
 	}
 }
 
 // With with logger fields.
-func With(l Logger, a ...interface{}) Logger {
+func With(l Logger, kv ...interface{}) Logger {
 	if c, ok := l.(*context); ok {
-		kvs := make([]interface{}, 0, len(c.prefix)+len(a))
-		kvs = append(kvs, a...)
+		kvs := make([]interface{}, 0, len(c.prefix)+len(kv))
+		kvs = append(kvs, kv...)
 		kvs = append(kvs, c.prefix...)
 		return &context{
 			logs:      c.logs,
@@ -44,7 +44,7 @@ func With(l Logger, a ...interface{}) Logger {
 			hasValuer: containsValuer(kvs),
 		}
 	}
-	return &context{logs: []Logger{l}, prefix: a, hasValuer: containsValuer(a)}
+	return &context{logs: []Logger{l}, prefix: kv, hasValuer: containsValuer(kv)}
 }
 
 // Wrap wraps multi logger.

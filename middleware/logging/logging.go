@@ -14,8 +14,9 @@ import (
 )
 
 // Server is an server logging middleware.
-func Server(l log.Logger) middleware.Middleware {
-	logger := log.NewHelper("middleware/logging", l)
+func Server(logger log.Logger) middleware.Middleware {
+	infoLogger := log.Info(logger)
+	errorLogger := log.Error(logger)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
@@ -42,7 +43,7 @@ func Server(l log.Logger) middleware.Middleware {
 			reply, err := handler(ctx, req)
 			if component == "HTTP" {
 				if err != nil {
-					logger.Errorw(
+					errorLogger.Print(
 						"kind", "server",
 						"component", component,
 						"traceID", traceID,
@@ -55,7 +56,7 @@ func Server(l log.Logger) middleware.Middleware {
 					)
 					return nil, err
 				}
-				logger.Infow(
+				infoLogger.Print(
 					"kind", "server",
 					"component", component,
 					"traceID", traceID,
@@ -67,7 +68,7 @@ func Server(l log.Logger) middleware.Middleware {
 				)
 			} else {
 				if err != nil {
-					logger.Errorw(
+					errorLogger.Print(
 						"kind", "server",
 						"component", component,
 						"traceID", traceID,
@@ -79,7 +80,7 @@ func Server(l log.Logger) middleware.Middleware {
 					)
 					return nil, err
 				}
-				logger.Infow(
+				infoLogger.Print(
 					"kind", "server",
 					"component", component,
 					"traceID", traceID,
@@ -95,8 +96,9 @@ func Server(l log.Logger) middleware.Middleware {
 }
 
 // Client is an client logging middleware.
-func Client(l log.Logger) middleware.Middleware {
-	logger := log.NewHelper("middleware/logging", l)
+func Client(logger log.Logger) middleware.Middleware {
+	infoLogger := log.Info(logger)
+	errorLogger := log.Error(logger)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
@@ -123,7 +125,7 @@ func Client(l log.Logger) middleware.Middleware {
 			reply, err := handler(ctx, req)
 			if component == "HTTP" {
 				if err != nil {
-					logger.Errorw(
+					errorLogger.Print(
 						"kind", "client",
 						"component", component,
 						"traceID", traceID,
@@ -136,7 +138,7 @@ func Client(l log.Logger) middleware.Middleware {
 					)
 					return nil, err
 				}
-				logger.Infow(
+				infoLogger.Print(
 					"kind", "client",
 					"component", component,
 					"traceID", traceID,
@@ -148,7 +150,7 @@ func Client(l log.Logger) middleware.Middleware {
 				)
 			} else {
 				if err != nil {
-					logger.Errorw(
+					errorLogger.Print(
 						"kind", "client",
 						"component", component,
 						"traceID", traceID,
@@ -160,7 +162,7 @@ func Client(l log.Logger) middleware.Middleware {
 					)
 					return nil, err
 				}
-				logger.Infow(
+				infoLogger.Print(
 					"kind", "client",
 					"component", component,
 					"traceID", traceID,

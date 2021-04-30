@@ -45,7 +45,7 @@ func TestWatch(t *testing.T) {
 	r := &discoveryResolver{
 		w:      &testWatch{},
 		cc:     &testClientConn{te: t},
-		log:    log.NewHelper("grpc/resolver/discovery", log.DefaultLogger),
+		logger: log.DefaultLogger,
 		ctx:    ctx,
 		cancel: cancel,
 	}

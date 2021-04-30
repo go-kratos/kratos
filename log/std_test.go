@@ -4,6 +4,7 @@ import "testing"
 
 func TestStdLogger(t *testing.T) {
 	logger := DefaultLogger
+	logger = With(logger, "caller", DefaultCaller, "ts", DefaultTimestamp)
 
 	Debug(logger).Print("log", "test debug")
 	Info(logger).Print("log", "test info")

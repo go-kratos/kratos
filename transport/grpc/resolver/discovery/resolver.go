@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"time"
 
@@ -30,7 +31,7 @@ func (r *discoveryResolver) watch() {
 
 		ins, err := r.w.Next()
 		if err != nil {
-			log.Error(r.logger).Print("message", "Failed to watch discovery endpoint: %v", err)
+			log.Error(r.logger).Print("msg", fmt.Sprintf("Failed to watch discovery endpoint: %v", err))
 			time.Sleep(time.Second)
 			continue
 		}
@@ -43,7 +44,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	for _, in := range ins {
 		endpoint, err := parseEndpoint(in.Endpoints)
 		if err != nil {
-			log.Error(r.logger).Print("message", "Failed to parse discovery endpoint: %v", err)
+			log.Error(r.logger).Print("msg", fmt.Sprintf("Failed to parse discovery endpoint: %v", err))
 			continue
 		}
 		if endpoint == "" {

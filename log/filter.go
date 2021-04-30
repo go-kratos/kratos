@@ -10,14 +10,14 @@ func NewFilter(l Logger, level Level) Logger {
 	return &filter{log: l, level: level}
 }
 
-func (f *filter) Print(kvs ...interface{}) {
-	for i := 1; i < len(kvs); i += 2 {
-		if v, ok := kvs[i].(Level); ok {
+func (f *filter) Print(kv ...interface{}) {
+	for i := 1; i < len(kv); i += 2 {
+		if v, ok := kv[i].(Level); ok {
 			if v < f.level {
 				return
 			}
 			break
 		}
 	}
-	f.log.Print(kvs...)
+	f.log.Print(kv...)
 }

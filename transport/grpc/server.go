@@ -48,7 +48,7 @@ func Timeout(timeout time.Duration) ServerOption {
 // Logger with server logger.
 func Logger(logger log.Logger) ServerOption {
 	return func(s *Server) {
-		s.log = log.NewHelper(loggerName, logger)
+		s.logger = log.With(logger, "module", loggerName)
 	}
 }
 
@@ -73,7 +73,7 @@ type Server struct {
 	network    string
 	address    string
 	timeout    time.Duration
-	log        *log.Helper
+	logger     log.Logger
 	middleware middleware.Middleware
 	grpcOpts   []grpc.ServerOption
 	health     *health.Server
@@ -85,7 +85,7 @@ func NewServer(opts ...ServerOption) *Server {
 		network: "tcp",
 		address: ":0",
 		timeout: time.Second,
-		log:     log.NewHelper(loggerName, log.DefaultLogger),
+		logger:  log.With(log.DefaultLogger, "module", loggerName),
 		middleware: middleware.Chain(
 			recovery.Recovery(),
 		),
@@ -128,7 +128,7 @@ func (s *Server) Start() error {
 		return err
 	}
 	s.lis = lis
-	s.log.Infof("[gRPC] server listening on: %s", lis.Addr().String())
+	log.Info(s.logger).Print("msg", fmt.Sprintf("[gRPC] server listening on: %s", lis.Addr().String()))
 	s.health.Resume()
 	return s.Serve(lis)
 }
@@ -137,7 +137,7 @@ func (s *Server) Start() error {
 func (s *Server) Stop() error {
 	s.GracefulStop()
 	s.health.Shutdown()
-	s.log.Info("[gRPC] server stopping")
+	log.Info(s.logger).Print("msg", "[gRPC] server stopping")
 	return nil
 }
 

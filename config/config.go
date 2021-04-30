@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"reflect"
 	"sync"
 	"time"
@@ -63,11 +64,11 @@ func (c *config) watch(w Watcher) {
 		kvs, err := w.Next()
 		if err != nil {
 			time.Sleep(time.Second)
-			log.Error(c.logger).Print("message", "Failed to watch next config: %v", err)
+			log.Error(c.logger).Print("msg", fmt.Sprintf("Failed to watch next config: %v", err))
 			continue
 		}
 		if err := c.reader.Merge(kvs...); err != nil {
-			log.Error(c.logger).Print("message", "Failed to merge next config: %v", err)
+			log.Error(c.logger).Print("msg", fmt.Sprintf("Failed to merge next config: %v", err))
 			continue
 		}
 		c.cached.Range(func(key, value interface{}) bool {
@@ -91,12 +92,12 @@ func (c *config) Load() error {
 			return err
 		}
 		if err := c.reader.Merge(kvs...); err != nil {
-			log.Error(c.logger).Print("message", "Failed to merge config source: %v", err)
+			log.Error(c.logger).Print("msg", fmt.Sprintf("Failed to merge config source: %v", err))
 			return err
 		}
 		w, err := src.Watch()
 		if err != nil {
-			log.Error(c.logger).Print("message", "Failed to watch config source: %v", err)
+			log.Error(c.logger).Print("msg", fmt.Sprintf("Failed to watch config source: %v", err))
 			return err
 		}
 		go c.watch(w)

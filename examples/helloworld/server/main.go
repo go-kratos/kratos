@@ -42,8 +42,7 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 
 func main() {
 	logger := log.NewStdLogger(os.Stdout)
-
-	log := log.NewHelper("main", logger)
+	logger = log.With(logger, "caller", log.DefaultCaller, "ts", log.DefaultTimestamp)
 
 	grpcSrv := grpc.NewServer(
 		grpc.Address(":9000"),
@@ -76,6 +75,6 @@ func main() {
 	)
 
 	if err := app.Run(); err != nil {
-		log.Error(err)
+		log.Error(logger).Print("msg", err)
 	}
 }
