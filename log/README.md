@@ -34,5 +34,12 @@ logger := log.NewHelper("github.com/project/foo", log.DefaultLogger)
 logger.Info("hello")
 logger.Infof("foo %s", "bar")
 logger.Infow("key", "value")
+
+// Verbose
+v := NewVerbose(log.DefaultLogger, 20)
+
+v.V(10).Log("foo", "bar1")
+v.V(20).Log("foo", "bar2")
+v.V(30).Log("foo", "bar3")
 ```
 
