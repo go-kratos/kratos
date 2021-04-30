@@ -26,6 +26,6 @@ func TestWrapper(t *testing.T) {
 	out := NewStdLogger(os.Stdout)
 	err := NewStdLogger(os.Stderr)
 
-	l := With(Wrap(out, err), "caller", DefaultCaller, "ts", DefaultTimestamp)
+	l := With(MultiLogger(out, err), "caller", DefaultCaller, "ts", DefaultTimestamp)
 	l.Print("msg", "test")
 }

@@ -47,8 +47,8 @@ func With(l Logger, kv ...interface{}) Logger {
 	return &context{logs: []Logger{l}, prefix: kv, hasValuer: containsValuer(kv)}
 }
 
-// Wrap wraps multi logger.
-func Wrap(logs ...Logger) Logger {
+// MultiLogger wraps multi logger.
+func MultiLogger(logs ...Logger) Logger {
 	return &context{logs: logs}
 }
 
