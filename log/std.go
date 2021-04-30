@@ -27,8 +27,8 @@ func NewStdLogger(w io.Writer) Logger {
 	}
 }
 
-// Print print the kv pairs log.
-func (l *stdLogger) Print(kv ...interface{}) {
+// Log print the kv pairs log.
+func (l *stdLogger) Log(kv ...interface{}) {
 	if len(kv) == 0 {
 		return
 	}

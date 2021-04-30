@@ -14,9 +14,8 @@ import (
 )
 
 // Server is an server logging middleware.
-func Server(logger log.Logger) middleware.Middleware {
-	infoLogger := log.Info(logger)
-	errorLogger := log.Error(logger)
+func Server(l log.Logger) middleware.Middleware {
+	logger := log.NewHelper("middleware/logging", l)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
@@ -43,7 +42,7 @@ func Server(logger log.Logger) middleware.Middleware {
 			reply, err := handler(ctx, req)
 			if component == "HTTP" {
 				if err != nil {
-					errorLogger.Print(
+					logger.Errorw(
 						"kind", "server",
 						"component", component,
 						"traceID", traceID,
@@ -56,7 +55,7 @@ func Server(logger log.Logger) middleware.Middleware {
 					)
 					return nil, err
 				}
-				infoLogger.Print(
+				logger.Infow(
 					"kind", "server",
 					"component", component,
 					"traceID", traceID,
@@ -68,7 +67,7 @@ func Server(logger log.Logger) middleware.Middleware {
 				)
 			} else {
 				if err != nil {
-					errorLogger.Print(
+					logger.Errorw(
 						"kind", "server",
 						"component", component,
 						"traceID", traceID,
@@ -80,7 +79,7 @@ func Server(logger log.Logger) middleware.Middleware {
 					)
 					return nil, err
 				}
-				infoLogger.Print(
+				logger.Infow(
 					"kind", "server",
 					"component", component,
 					"traceID", traceID,
@@ -96,9 +95,8 @@ func Server(logger log.Logger) middleware.Middleware {
 }
 
 // Client is an client logging middleware.
-func Client(logger log.Logger) middleware.Middleware {
-	infoLogger := log.Info(logger)
-	errorLogger := log.Error(logger)
+func Client(l log.Logger) middleware.Middleware {
+	logger := log.NewHelper("middleware/logging", l)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
@@ -125,7 +123,7 @@ func Client(logger log.Logger) middleware.Middleware {
 			reply, err := handler(ctx, req)
 			if component == "HTTP" {
 				if err != nil {
-					errorLogger.Print(
+					logger.Errorw(
 						"kind", "client",
 						"component", component,
 						"traceID", traceID,
@@ -138,7 +136,7 @@ func Client(logger log.Logger) middleware.Middleware {
 					)
 					return nil, err
 				}
-				infoLogger.Print(
+				logger.Infow(
 					"kind", "client",
 					"component", component,
 					"traceID", traceID,
@@ -150,7 +148,7 @@ func Client(logger log.Logger) middleware.Middleware {
 				)
 			} else {
 				if err != nil {
-					errorLogger.Print(
+					logger.Errorw(
 						"kind", "client",
 						"component", component,
 						"traceID", traceID,
@@ -162,7 +160,7 @@ func Client(logger log.Logger) middleware.Middleware {
 					)
 					return nil, err
 				}
-				infoLogger.Print(
+				logger.Infow(
 					"kind", "client",
 					"component", component,
 					"traceID", traceID,

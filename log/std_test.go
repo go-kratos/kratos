@@ -6,8 +6,8 @@ func TestStdLogger(t *testing.T) {
 	logger := DefaultLogger
 	logger = With(logger, "caller", DefaultCaller, "ts", DefaultTimestamp)
 
-	Debug(logger).Print("msg", "test debug")
-	Info(logger).Print("msg", "test info")
-	Warn(logger).Print("msg", "test warn")
-	Error(logger).Print("msg", "test error")
+	Debug(logger).Log("msg", "test debug")
+	Info(logger).Log("msg", "test info")
+	Warn(logger).Log("msg", "test warn")
+	Error(logger).Log("msg", "test error")
 }

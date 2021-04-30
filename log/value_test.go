@@ -5,10 +5,10 @@ import "testing"
 func TestValue(t *testing.T) {
 	logger := DefaultLogger
 	logger = With(logger, "caller", DefaultCaller, "ts", DefaultTimestamp)
-	logger.Print("msg", "helloworld")
+	logger.Log("msg", "helloworld")
 
-	Debug(logger).Print("msg", "debug value")
-	Info(logger).Print("msg", "info value")
-	Warn(logger).Print("msg", "warn value")
-	Error(logger).Print("msg", "error value")
+	Debug(logger).Log("msg", "debug value")
+	Info(logger).Log("msg", "info value")
+	Warn(logger).Log("msg", "warn value")
+	Error(logger).Log("msg", "error value")
 }

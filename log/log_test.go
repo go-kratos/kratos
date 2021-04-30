@@ -7,19 +7,19 @@ import (
 
 func TestLogger(t *testing.T) {
 	logger := DefaultLogger
-	Debug(logger).Print("msg", "test debug")
-	Info(logger).Print("msg", "test info")
-	Warn(logger).Print("msg", "test warn")
-	Error(logger).Print("msg", "test error")
+	Debug(logger).Log("msg", "test debug")
+	Info(logger).Log("msg", "test info")
+	Warn(logger).Log("msg", "test warn")
+	Error(logger).Log("msg", "test error")
 }
 
 func TestInfo(t *testing.T) {
 	logger := DefaultLogger
 	logger = With(logger, "caller", DefaultCaller, "ts", DefaultTimestamp)
 	infoLogger := Info(logger)
-	infoLogger.Print("key1", "value1")
-	infoLogger.Print("key2", "value2")
-	infoLogger.Print("key3", "value3")
+	infoLogger.Log("key1", "value1")
+	infoLogger.Log("key2", "value2")
+	infoLogger.Log("key3", "value3")
 }
 
 func TestWrapper(t *testing.T) {
@@ -27,5 +27,5 @@ func TestWrapper(t *testing.T) {
 	err := NewStdLogger(os.Stderr)
 
 	l := With(MultiLogger(out, err), "caller", DefaultCaller, "ts", DefaultTimestamp)
-	l.Print("msg", "test")
+	l.Log("msg", "test")
 }

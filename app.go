@@ -20,7 +20,7 @@ type App struct {
 	ctx      context.Context
 	cancel   func()
 	instance *registry.ServiceInstance
-	logger   log.Logger
+	log      *log.Helper
 }
 
 // New create an application lifecycle manager.
@@ -42,13 +42,13 @@ func New(opts ...Option) *App {
 		ctx:      ctx,
 		cancel:   cancel,
 		instance: buildInstance(options),
-		logger:   log.With(options.logger, "module", "app"),
+		log:      log.NewHelper("app", options.logger),
 	}
 }
 
 // Run executes all OnStart hooks registered with the application's Lifecycle.
 func (a *App) Run() error {
-	log.Info(a.logger).Print(
+	a.log.Infow(
 		"service_id", a.opts.id,
 		"service_name", a.opts.name,
 		"version", a.opts.version,
