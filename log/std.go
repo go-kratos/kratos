@@ -28,9 +28,9 @@ func NewStdLogger(w io.Writer) Logger {
 }
 
 // Log print the kv pairs log.
-func (l *stdLogger) Log(kv ...interface{}) {
+func (l *stdLogger) Log(kv ...interface{}) error {
 	if len(kv) == 0 {
-		return
+		return nil
 	}
 	if len(kv)%2 != 0 {
 		kv = append(kv, "")
@@ -42,4 +42,5 @@ func (l *stdLogger) Log(kv ...interface{}) {
 	l.log.Output(4, buf.String())
 	buf.Reset()
 	l.pool.Put(buf)
+	return nil
 }

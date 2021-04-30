@@ -11,7 +11,7 @@ var (
 
 // Logger is a logger interface.
 type Logger interface {
-	Log(kv ...interface{})
+	Log(kv ...interface{}) error
 }
 
 type context struct {
@@ -20,7 +20,7 @@ type context struct {
 	hasValuer bool
 }
 
-func (c *context) Log(kv ...interface{}) {
+func (c *context) Log(kv ...interface{}) error {
 	kvs := make([]interface{}, 0, len(c.prefix)+len(kv))
 	kvs = append(kvs, c.prefix...)
 	if c.hasValuer {
@@ -28,8 +28,11 @@ func (c *context) Log(kv ...interface{}) {
 	}
 	kvs = append(kvs, kv...)
 	for _, l := range c.logs {
-		l.Log(kvs...)
+		if err := l.Log(kvs...); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // With with logger fields.

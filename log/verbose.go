@@ -23,8 +23,9 @@ func (v Verbose) V(level Level) Verbose {
 }
 
 // Log is equivalent to the Print function, guarded by the value of v.
-func (v Verbose) Log(a ...interface{}) {
+func (v Verbose) Log(a ...interface{}) error {
 	if v.enabled {
-		v.log.Log(a...)
+		return v.log.Log(a...)
 	}
+	return nil
 }
