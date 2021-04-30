@@ -22,9 +22,10 @@ func (v Verbose) V(level Level) Verbose {
 	return Verbose{log: v.log, enabled: v.Enabled(level)}
 }
 
-// Print is equivalent to the Print function, guarded by the value of v.
-func (v Verbose) Print(a ...interface{}) {
+// Log is equivalent to the Print function, guarded by the value of v.
+func (v Verbose) Log(a ...interface{}) error {
 	if v.enabled {
-		v.log.Print(a...)
+		return v.log.Log(a...)
 	}
+	return nil
 }

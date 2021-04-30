@@ -3,9 +3,10 @@ package log
 import "testing"
 
 func TestVerbose(t *testing.T) {
-	v := NewVerbose(DefaultLogger, 20)
+	logger := With(DefaultLogger, "caller", DefaultCaller, "ts", DefaultTimestamp)
+	v := NewVerbose(logger, 20)
 
-	v.V(10).Print("foo", "bar1")
-	v.V(20).Print("foo", "bar2")
-	v.V(30).Print("foo", "bar3")
+	v.V(10).Log("foo", "bar1")
+	v.V(20).Log("foo", "bar2")
+	v.V(30).Log("foo", "bar3")
 }

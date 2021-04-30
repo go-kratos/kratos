@@ -14,71 +14,71 @@ type Helper struct {
 
 // NewHelper new a logger helper.
 func NewHelper(name string, logger Logger) *Helper {
-	log := With(logger, "module", name)
+	logger = With(logger, "module", name)
 	return &Helper{
-		debug: Debug(log),
-		info:  Info(log),
-		warn:  Warn(log),
-		err:   Error(log),
+		debug: Debug(logger),
+		info:  Info(logger),
+		warn:  Warn(logger),
+		err:   Error(logger),
 	}
 }
 
 // Debug logs a message at debug level.
 func (h *Helper) Debug(a ...interface{}) {
-	h.debug.Print("message", fmt.Sprint(a...))
+	h.debug.Log("msg", fmt.Sprint(a...))
 }
 
 // Debugf logs a message at debug level.
 func (h *Helper) Debugf(format string, a ...interface{}) {
-	h.debug.Print("message", fmt.Sprintf(format, a...))
+	h.debug.Log("msg", fmt.Sprintf(format, a...))
 }
 
 // Debugw logs a message at debug level.
-func (h *Helper) Debugw(pairs ...interface{}) {
-	h.debug.Print(pairs...)
+func (h *Helper) Debugw(kv ...interface{}) {
+	h.debug.Log(kv...)
 }
 
 // Info logs a message at info level.
 func (h *Helper) Info(a ...interface{}) {
-	h.info.Print("message", fmt.Sprint(a...))
+	h.info.Log("msg", fmt.Sprint(a...))
 }
 
 // Infof logs a message at info level.
 func (h *Helper) Infof(format string, a ...interface{}) {
-	h.info.Print("message", fmt.Sprintf(format, a...))
+	h.info.Log("msg", fmt.Sprintf(format, a...))
 }
 
 // Infow logs a message at info level.
-func (h *Helper) Infow(pairs ...interface{}) {
-	h.info.Print(pairs...)
+func (h *Helper) Infow(kv ...interface{}) {
+	h.info.Log(kv...)
 }
 
 // Warn logs a message at warn level.
 func (h *Helper) Warn(a ...interface{}) {
-	h.warn.Print("message", fmt.Sprint(a...))
+	h.warn.Log("msg", fmt.Sprint(a...))
 }
 
 // Warnf logs a message at warnf level.
 func (h *Helper) Warnf(format string, a ...interface{}) {
-	h.warn.Print("message", fmt.Sprintf(format, a...))
+	h.warn.Log("msg", fmt.Sprintf(format, a...))
 }
 
 // Warnw logs a message at warnf level.
-func (h *Helper) Warnw(pairs ...interface{}) {
-	h.warn.Print(pairs...)
+func (h *Helper) Warnw(kv ...interface{}) {
+	h.warn.Log(kv...)
 }
 
 // Error logs a message at error level.
 func (h *Helper) Error(a ...interface{}) {
-	h.err.Print("message", fmt.Sprint(a...))
+	h.err.Log("msg", fmt.Sprint(a...))
 }
 
 // Errorf logs a message at error level.
 func (h *Helper) Errorf(format string, a ...interface{}) {
-	h.err.Print("message", fmt.Sprintf(format, a...))
+	h.err.Log("msg", fmt.Sprintf(format, a...))
 }
 
 // Errorw logs a message at error level.
-func (h *Helper) Errorw(pairs ...interface{}) {
-	h.err.Print(pairs...)
+func (h *Helper) Errorw(kv ...interface{}) {
+	h.err.Log(kv...)
 }
