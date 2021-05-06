@@ -27,17 +27,20 @@ func Server(l log.Logger) middleware.Middleware {
 				traceID   string
 			)
 			traceID = trace.SpanContextFromContext(ctx).TraceID().String()
+			if stringer, ok := req.(fmt.Stringer); ok {
+				args = stringer.String()
+			} else {
+				args = fmt.Sprintf("%+v", req)
+			}
 			if info, ok := http.FromServerContext(ctx); ok {
 				component = "HTTP"
 				path = info.Request.URL.Path
 				method = info.Request.Method
-				args = req.(fmt.Stringer).String()
 				query = info.Request.URL.RawQuery
 			} else if info, ok := grpc.FromServerContext(ctx); ok {
 				component = "gRPC"
 				path = info.FullMethod
 				method = "POST"
-				args = req.(fmt.Stringer).String()
 			}
 			reply, err := handler(ctx, req)
 			if component == "HTTP" {
