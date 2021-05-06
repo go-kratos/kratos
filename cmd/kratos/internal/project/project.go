@@ -17,10 +17,13 @@ var CmdNew = &cobra.Command{
 	Run:   run,
 }
 
-var repoUrl string
+var repoURL string
 
 func init() {
-	CmdNew.Flags().StringVarP(&repoUrl, "-repo-url", "r", "https://github.com/go-kratos/kratos-layout.git", "layout repo")
+	if repoURL = os.Getenv("KRATOS_LAYOUT_REPO"); repoURL == "" {
+		repoURL = "https://github.com/go-kratos/kratos-layout.git"
+	}
+	CmdNew.Flags().StringVarP(&repoURL, "-repo-url", "r", repoURL, "layout repo")
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -35,7 +38,7 @@ func run(cmd *cobra.Command, args []string) {
 		return
 	}
 	p := &Project{Name: args[0]}
-	if err := p.New(ctx, wd, repoUrl); err != nil {
+	if err := p.New(ctx, wd, repoURL); err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
 		return
 	}
