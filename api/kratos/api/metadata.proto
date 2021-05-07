@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package kratos.api;
+
+import "google/protobuf/any.proto";
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/go-kratos/kratos/v2/api/kratos/api;api";
+option java_multiple_files = true;
+option java_package = "com.github.kratos.api";
+option objc_class_prefix = "KratosAPI";
+
+
+service Metadata {
+  // ListServices return all services
+  rpc ListServices (google.protobuf.Any) returns (ListServicesReply)  {
+  }
+
+  // GetService return service FileDescriptorSet 
+  rpc GetService (GetServiceRequest) returns (GetServiceReply)  {
+  }
+}
+
+message ListServicesReply {
+  repeated string services = 1;
+}
+
+message GetServiceRequest {
+  string name = 1;
+}
+
+message GetServiceReply {
+  google.protobuf.FileDescriptorSet protoSet =1;
+}
+

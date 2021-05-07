@@ -6,6 +6,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/api/kratos/api"
+	"github.com/go-kratos/kratos/v2/internal/apimeta"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -77,6 +79,7 @@ type Server struct {
 	middleware middleware.Middleware
 	grpcOpts   []grpc.ServerOption
 	health     *health.Server
+	metaServer *apimeta.Server
 }
 
 // NewServer creates a gRPC server by options.
@@ -103,8 +106,11 @@ func NewServer(opts ...ServerOption) *Server {
 		grpcOpts = append(grpcOpts, srv.grpcOpts...)
 	}
 	srv.Server = grpc.NewServer(grpcOpts...)
+	srv.metaServer = apimeta.NewServer(srv.Server)
 	// grpc health register
 	healthpb.RegisterHealthServer(srv.Server, srv.health)
+	// api metadata register
+	api.RegisterMetadataServer(srv.Server, srv.metaServer)
 	// reflection register
 	reflection.Register(srv.Server)
 	return srv
