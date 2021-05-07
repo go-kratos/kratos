@@ -103,6 +103,11 @@ func NewServer(opts ...ServerOption) *Server {
 		grpcOpts = append(grpcOpts, srv.grpcOpts...)
 	}
 	srv.Server = grpc.NewServer(grpcOpts...)
+	lis, err := net.Listen(srv.network, srv.address)
+	if err != nil {
+		panic(err)
+	}
+	srv.lis = lis
 	// grpc health register
 	healthpb.RegisterHealthServer(srv.Server, srv.health)
 	// reflection register
@@ -123,14 +128,9 @@ func (s *Server) Endpoint() (string, error) {
 
 // Start start the gRPC server.
 func (s *Server) Start() error {
-	lis, err := net.Listen(s.network, s.address)
-	if err != nil {
-		return err
-	}
-	s.lis = lis
-	s.log.Infof("[gRPC] server listening on: %s", lis.Addr().String())
+	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
 	s.health.Resume()
-	return s.Serve(lis)
+	return s.Serve(s.lis)
 }
 
 // Stop stop the gRPC server.

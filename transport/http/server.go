@@ -74,6 +74,11 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 	srv.router = mux.NewRouter()
 	srv.Server = &http.Server{Handler: srv}
+	lis, err := net.Listen(srv.network, srv.address)
+	if err != nil {
+		panic(err)
+	}
+	srv.lis = lis
 	return srv
 }
 
@@ -114,13 +119,8 @@ func (s *Server) Endpoint() (string, error) {
 
 // Start start the HTTP server.
 func (s *Server) Start() error {
-	lis, err := net.Listen(s.network, s.address)
-	if err != nil {
-		return err
-	}
-	s.lis = lis
-	s.log.Infof("[HTTP] server listening on: %s", lis.Addr().String())
-	if err := s.Serve(lis); !errors.Is(err, http.ErrServerClosed) {
+	s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
+	if err := s.Serve(s.lis); !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
 	return nil
