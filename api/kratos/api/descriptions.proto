@@ -11,13 +11,13 @@ option java_package = "com.github.kratos.api";
 option objc_class_prefix = "KratosAPI";
 
 
-service Metadata {
-  // ListServices return all services
+service Description {
+  // ListServices list the full name of all services
   rpc ListServices (google.protobuf.Any) returns (ListServicesReply)  {
   }
 
-  // GetService return service FileDescriptorSet 
-  rpc GetService (GetServiceRequest) returns (GetServiceReply)  {
+  // GetServiceDesc get the full fileDescriptorSet of service
+  rpc GetServiceDesc (GetServiceDescRequest) returns (GetServiceDescReply)  {
   }
 }
 
@@ -25,11 +25,11 @@ message ListServicesReply {
   repeated string services = 1;
 }
 
-message GetServiceRequest {
+message GetServiceDescRequest {
   string name = 1;
 }
 
-message GetServiceReply {
+message GetServiceDescReply {
   google.protobuf.FileDescriptorSet protoSet =1;
 }
 
