@@ -1,4 +1,4 @@
-package desc
+package metadata
 
 import (
 	"bytes"
@@ -44,8 +44,8 @@ func (s *Service) ListServices(ctx context.Context) (services []string, err erro
 	return
 }
 
-// GetServiceDesc get the full fileDescriptorSet of service
-func (s *Service) GetServiceDesc(ctx context.Context, name string) (fds *descriptorpb.FileDescriptorSet, err error) {
+// GetServiceMeta get the full fileDescriptorSet of service
+func (s *Service) GetServiceMeta(ctx context.Context, name string) (fds *descriptorpb.FileDescriptorSet, err error) {
 	fds = &descriptorpb.FileDescriptorSet{}
 	s.once.Do(func() {
 		err = s.initServices()

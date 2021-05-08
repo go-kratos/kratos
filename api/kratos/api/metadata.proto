@@ -4,6 +4,7 @@ package kratos.api;
 
 import "google/protobuf/any.proto";
 import "google/protobuf/descriptor.proto";
+import "google/api/annotations.proto";
 
 option go_package = "github.com/go-kratos/kratos/v2/api/kratos/api;api";
 option java_multiple_files = true;
@@ -11,13 +12,20 @@ option java_package = "com.github.kratos.api";
 option objc_class_prefix = "KratosAPI";
 
 
-service Description {
+// Metadata is api defintion metadata service
+service Metadata {
   // ListServices list the full name of all services
   rpc ListServices (google.protobuf.Any) returns (ListServicesReply)  {
+      option (google.api.http) = {
+        get: "/services",
+      };
   }
 
-  // GetServiceDesc get the full fileDescriptorSet of service
-  rpc GetServiceDesc (GetServiceDescRequest) returns (GetServiceDescReply)  {
+  // GetServiceMeta get the full fileDescriptorSet of service
+  rpc GetServiceMeta (GetServiceMetaRequest) returns (GetServiceMetaReply)  {
+      option (google.api.http) = {
+        get: "/service/{name}/metadata",
+      };
   }
 }
 
@@ -25,11 +33,11 @@ message ListServicesReply {
   repeated string services = 1;
 }
 
-message GetServiceDescRequest {
+message GetServiceMetaRequest {
   string name = 1;
 }
 
-message GetServiceDescReply {
-  google.protobuf.FileDescriptorSet protoSet =1;
+message GetServiceMetaReply {
+  google.protobuf.FileDescriptorSet protoSet = 1;
 }
 

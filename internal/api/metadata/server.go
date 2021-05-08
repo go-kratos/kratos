@@ -1,4 +1,4 @@
-package desc
+package metadata
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 // Server is api meta server
 type Server struct {
-	api.UnimplementedDescriptionServer
+	api.UnimplementedMetadataServer
 	s *Service
 }
 
@@ -27,10 +27,10 @@ func (s *Server) ListServices(ctx context.Context, in *anypb.Any) (*api.ListServ
 	return &reply, err
 }
 
-// GetServiceDesc return service meta by name
-func (s *Server) GetServiceDesc(ctx context.Context, in *api.GetServiceDescRequest) (*api.GetServiceDescReply, error) {
-	var reply api.GetServiceDescReply
+// GetServiceMeta return service meta by name
+func (s *Server) GetServiceMeta(ctx context.Context, in *api.GetServiceMetaRequest) (*api.GetServiceMetaReply, error) {
+	var reply api.GetServiceMetaReply
 	var err error
-	reply.ProtoSet, err = s.s.GetServiceDesc(ctx, in.Name)
+	reply.ProtoSet, err = s.s.GetServiceMeta(ctx, in.Name)
 	return &reply, err
 }
