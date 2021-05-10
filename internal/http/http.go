@@ -39,6 +39,9 @@ func ContentSubtype(contentType string) string {
 	if right == -1 {
 		right = len(contentType)
 	}
+	if right < left {
+		return ""
+	}
 	return contentType[left+1 : right]
 }
 

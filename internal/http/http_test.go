@@ -13,6 +13,8 @@ func TestContentSubtype(t *testing.T) {
 		{"application/json", "json"},
 		{"application/xml", "xml"},
 		{"text/xml", "xml"},
+		{";text/xml", ""},
+		{"application", ""},
 	}
 	for _, test := range tests {
 		t.Run(test.contentType, func(t *testing.T) {
