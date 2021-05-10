@@ -6,14 +6,14 @@ require (
 	entgo.io/ent v0.6.0
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-kratos/consul v0.0.0-20210425141546-e047a9f6ec87
-	github.com/go-kratos/etcd v0.0.0-20210311162832-e0fdc8177742
-	github.com/go-kratos/kratos/v2 v2.0.0-20210425121923-9806191b7f32
-	github.com/go-kratos/nacos v0.0.0-20210415082641-f1b756c16257
+	github.com/go-kratos/etcd v0.0.0-20210423155933-752c35c0d203
+	github.com/go-kratos/kratos/v2 v2.0.4
+	github.com/go-kratos/nacos v0.0.0-20210423031012-5dee2cc4aea1
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.7.1
 	github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae
-	github.com/golang/protobuf v1.4.3
+	github.com/golang/protobuf v1.5.0
 	github.com/google/wire v0.5.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
@@ -35,7 +35,7 @@ require (
 	golang.org/x/sys v0.0.0-20210309074719-68d13333faf2 // indirect
 	google.golang.org/genproto v0.0.0-20210309190941-1aeedc14537d
 	google.golang.org/grpc v1.36.0
-	google.golang.org/protobuf v1.25.1-0.20200805231151-a709e31e5d12
+	google.golang.org/protobuf v1.26.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
