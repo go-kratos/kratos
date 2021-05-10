@@ -128,7 +128,6 @@ func fileDescriptorProto(path string) (*dpb.FileDescriptorProto, error) {
 
 func allDependency(fd *dpb.FileDescriptorProto) ([]*dpb.FileDescriptorProto, error) {
 	var files []*dpb.FileDescriptorProto
-	files = append(files, fd)
 	for _, dep := range fd.Dependency {
 		fdDep, err := fileDescriptorProto(dep)
 		if err != nil {
@@ -140,6 +139,7 @@ func allDependency(fd *dpb.FileDescriptorProto) ([]*dpb.FileDescriptorProto, err
 		}
 		files = append(files, temp...)
 	}
+	files = append(files, fd)
 	return files, nil
 }
 
