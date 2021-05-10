@@ -10,6 +10,7 @@ require (
 	github.com/imdario/mergo v0.3.6
 	go.opentelemetry.io/otel v0.19.0
 	go.opentelemetry.io/otel/trace v0.19.0
+	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974 // indirect
 	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
 	golang.org/x/sys v0.0.0-20210119212857-b64e53b001e4 // indirect
