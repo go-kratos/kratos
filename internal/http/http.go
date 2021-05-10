@@ -28,24 +28,18 @@ func ContentType(subtype string) string {
 // ContentSubtype returns the content-subtype for the given content-type.  The
 // given content-type must be a valid content-type that starts with
 // but no content-subtype will be returned.
-//
+// according rfc7231.
 // contentType is assumed to be lowercase already.
 func ContentSubtype(contentType string) string {
-	if contentType == baseContentType {
+	left := strings.Index(contentType, "/")
+	if left == -1 {
 		return ""
 	}
-	if !strings.HasPrefix(contentType, baseContentType) {
-		return ""
+	right := strings.Index(contentType, ";")
+	if right == -1 {
+		right = len(contentType)
 	}
-	switch contentType[len(baseContentType)] {
-	case '/', ';':
-		if i := strings.Index(contentType, ";"); i != -1 {
-			return contentType[len(baseContentType)+1 : i]
-		}
-		return contentType[len(baseContentType)+1:]
-	default:
-		return ""
-	}
+	return contentType[left+1 : right]
 }
 
 // GRPCCodeFromStatus converts a HTTP error code into the corresponding gRPC response status.
