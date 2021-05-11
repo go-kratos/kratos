@@ -3,7 +3,7 @@ package metadata
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/v2/api/kratos/api"
+	"github.com/go-kratos/kratos/v2/api/proto/kratos/api"
 	"google.golang.org/grpc"
 	anypb "google.golang.org/protobuf/types/known/anypb"
 )

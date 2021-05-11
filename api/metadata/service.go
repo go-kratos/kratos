@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"strings"
 	"sync"
 
 	"github.com/golang/protobuf/proto"
@@ -112,13 +111,6 @@ func (s *Service) listServices() (map[string]*descriptorpb.FileDescriptorSet, er
 
 func fileDescriptorProto(path string) (*dpb.FileDescriptorProto, error) {
 	fdenc := proto.FileDescriptor(path)
-	// fix proto path
-	if len(fdenc) == 0 {
-		idx := strings.LastIndex(path, "/")
-		if idx > 0 && idx+1 < len(path) {
-			fdenc = proto.FileDescriptor(path[idx+1:])
-		}
-	}
 	fdDep, err := decodeFileDesc(fdenc)
 	if err != nil {
 		return nil, err

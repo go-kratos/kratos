@@ -6,8 +6,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/api/kratos/api"
-	"github.com/go-kratos/kratos/v2/internal/api/metadata"
+	"github.com/go-kratos/kratos/v2/api/metadata"
+	"github.com/go-kratos/kratos/v2/api/proto/kratos/api"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"

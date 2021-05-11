@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.1.0
 // - protoc             v3.15.8
-// source: metadata.proto
+// source: kratos/api/metadata.proto
 
 package api
 
@@ -142,5 +142,5 @@ var Metadata_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "metadata.proto",
+	Metadata: "kratos/api/metadata.proto",
 }
