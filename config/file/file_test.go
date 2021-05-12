@@ -37,6 +37,7 @@ const (
         }
     ]
 }`
+
 //	_testYaml = `
 //Foo:
 //    bar :
@@ -46,6 +47,7 @@ const (
 //
 //`
 )
+
 //func TestScan(t *testing.T) {
 //
 //}
@@ -168,19 +170,19 @@ func testScan(t *testing.T, c config.Config) {
 	type TestJSON struct {
 		Test struct {
 			Settings struct {
-				IntKey int `json:"int_key"`
-				FloatKey float64 `json:"float_key"`
-				DurationKey int `json:"duration_key"`
-				StringKey string `json:"string_key"`
+				IntKey      int     `json:"int_key"`
+				FloatKey    float64 `json:"float_key"`
+				DurationKey int     `json:"duration_key"`
+				StringKey   string  `json:"string_key"`
 			} `json:"settings"`
 			Server struct {
 				Addr string `json:"addr"`
-				Port int `json:"port"`
+				Port int    `json:"port"`
 			} `json:"server"`
 		} `json:"test"`
 		Foo []struct {
 			Name string `json:"name"`
-			Age int `json:"age"`
+			Age  int    `json:"age"`
 		} `json:"foo"`
 	}
 	var conf TestJSON

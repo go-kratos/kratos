@@ -21,8 +21,8 @@ func (p *Project) New(ctx context.Context, dir string, layout string) error {
 		return fmt.Errorf("%s already exists", p.Name)
 	}
 	fmt.Printf("Creating service %s, layout repo is %s\n", p.Name, layout)
-	repo := base.NewRepo(layout)
-	if err := repo.CopyTo(ctx, to, p.Name, []string{".git", ".github"}); err != nil {
+	err := base.Clone(layout, p.Name)
+	if err != nil {
 		return err
 	}
 	os.Rename(
