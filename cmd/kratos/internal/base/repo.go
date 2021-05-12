@@ -42,7 +42,8 @@ func (r *Repo) Path() string {
 
 // Pull fetch the repository from remote url.
 func (r *Repo) Pull(ctx context.Context) error {
-	cmd := exec.Command("cd", r.Path(), "&&", "git", "pull")
+	cmd := exec.Command("git", "pull")
+	cmd.Dir = r.Path()
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
