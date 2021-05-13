@@ -44,7 +44,6 @@ func (r *Repo) Path() string {
 func (r *Repo) Pull(ctx context.Context) error {
 	cmd := exec.Command("git", "pull")
 	cmd.Dir = r.Path()
-	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	return err
@@ -56,7 +55,6 @@ func (r *Repo) Clone(ctx context.Context) error {
 		return r.Pull(ctx)
 	}
 	cmd := exec.Command("git", "clone", r.url, r.Path())
-	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	return err
