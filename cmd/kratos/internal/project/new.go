@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 )
 
@@ -18,21 +19,19 @@ type Project struct {
 // New new a project from remote repo.
 func (p *Project) New(ctx context.Context, dir string, layout string) error {
 	to := path.Join(dir, p.Name)
-	fmt.Printf("🚀 Creating service %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
 		fmt.Printf("🚫 %s already exists\n", p.Name)
-		fmt.Printf("📂 Do you want to override the folder ? please enter \"Y\" to confirm :")
-		var input string
-		fmt.Scan(&input)
-		if input == "y" || input == "Y" {
-			err := os.RemoveAll(to)
-			if err != nil {
-				return err
-			}
-		} else {
+		override := false
+		prompt := &survey.Confirm{
+			Message: "📂 Do you want to override the folder ?",
+			Help: "Delete the existing folder and create the project",
+		}
+		survey.AskOne(prompt, &override)
+		if !override {
 			return err
 		}
 	}
+	fmt.Printf("🚀 Creating service %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
 	repo := base.NewRepo(layout)
 	if err := repo.CopyTo(ctx, to, p.Name, []string{".git", ".github"}); err != nil {
 		return err
