@@ -24,7 +24,7 @@ func (p *Project) New(ctx context.Context, dir string, layout string) error {
 		override := false
 		prompt := &survey.Confirm{
 			Message: "📂 Do you want to override the folder ?",
-			Help: "Delete the existing folder and create the project",
+			Help: "Delete the existing folder and create the project.",
 		}
 		survey.AskOne(prompt, &override)
 		if !override {

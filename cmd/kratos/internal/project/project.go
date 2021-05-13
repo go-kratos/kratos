@@ -37,7 +37,7 @@ func run(cmd *cobra.Command, args []string) {
 	name := ""
 	if len(args) == 0 {
 		prompt := &survey.Input{
-			Message: "What is project name?",
+			Message: "What is project name ?",
 			Help:    "Created project name.",
 		}
 		survey.AskOne(prompt, &name)
