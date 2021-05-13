@@ -30,6 +30,7 @@ func (p *Project) New(ctx context.Context, dir string, layout string) error {
 		if !override {
 			return err
 		}
+		os.RemoveAll(to)
 	}
 	fmt.Printf("🚀 Creating service %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
 	repo := base.NewRepo(layout)
