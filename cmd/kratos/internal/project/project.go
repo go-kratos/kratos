@@ -3,6 +3,7 @@ package project
 import (
 	"context"
 	"fmt"
+	"github.com/AlecAivazis/survey/v2"
 	"os"
 	"time"
 
@@ -33,11 +34,20 @@ func run(cmd *cobra.Command, args []string) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
+	name := ""
 	if len(args) == 0 {
-		fmt.Fprintf(os.Stderr, "\033[31mERROR: project name is required.\033[m Example: kratos new helloworld\n")
-		return
+		prompt := &survey.Input{
+			Message: "What is project name ?",
+			Help:    "Created project name.",
+		}
+		survey.AskOne(prompt, &name)
+		if name == "" {
+			return
+		}
+	} else {
+		name = args[0]
 	}
-	p := &Project{Name: args[0]}
+	p := &Project{Name: name}
 	if err := p.New(ctx, wd, repoURL); err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
 		return
