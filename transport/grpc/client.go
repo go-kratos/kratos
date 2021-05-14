@@ -12,6 +12,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"
+	"google.golang.org/grpc/metadata"
 )
 
 // ClientOption is gRPC client option.
@@ -99,7 +100,18 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 
 func unaryClientInterceptor(m middleware.Middleware, timeout time.Duration) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC})
+		md, ok := metadata.FromOutgoingContext(ctx)
+		if !ok {
+			md = metadata.Pairs()
+		}
+		trReq := transport.Request{
+			Method:      "POST",
+			FullPath:    method,
+			PathPattern: method,
+			Metadata:    MetadataCarrier(md),
+		}
+
+		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC, Request: trReq})
 		ctx = NewClientContext(ctx, ClientInfo{FullMethod: method})
 		if timeout > 0 {
 			var cancel context.CancelFunc
@@ -112,6 +124,7 @@ func unaryClientInterceptor(m middleware.Middleware, timeout time.Duration) grpc
 		if m != nil {
 			h = m(h)
 		}
+		ctx = metadata.NewOutgoingContext(ctx, md)
 		_, err := h(ctx, req)
 		return err
 	}

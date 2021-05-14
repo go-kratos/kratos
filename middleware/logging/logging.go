@@ -9,8 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/go-kratos/kratos/v2/transport"
 )
 
 // Server is an server logging middleware.
@@ -32,65 +31,30 @@ func Server(l log.Logger) middleware.Middleware {
 			} else {
 				args = fmt.Sprintf("%+v", req)
 			}
-			if info, ok := http.FromServerContext(ctx); ok {
-				component = "HTTP"
-				path = info.Request.URL.Path
-				method = info.Request.Method
-				query = info.Request.URL.RawQuery
-			} else if info, ok := grpc.FromServerContext(ctx); ok {
-				component = "gRPC"
-				path = info.FullMethod
-				method = "POST"
+			if tr, ok := transport.FromContext(ctx); ok {
+				component = string(tr.Kind)
+				path = tr.Request.FullPath
+				method = tr.Request.Method
+				query = tr.Request.Query
 			}
+
 			reply, err := handler(ctx, req)
-			if component == "HTTP" {
-				if err != nil {
-					logger.Errorw(
-						"kind", "server",
-						"component", component,
-						"traceID", traceID,
-						"path", path,
-						"method", method,
-						"args", args,
-						"query", query,
-						"code", uint32(errors.Code(err)),
-						"error", err.Error(),
-					)
-					return nil, err
-				}
-				logger.Infow(
-					"kind", "server",
-					"component", component,
-					"traceID", traceID,
-					"path", path,
-					"method", method,
-					"args", args,
-					"query", query,
-					"code", 0,
-				)
+
+			kvPairs := []interface{}{
+				"kind", "server",
+				"component", component,
+				"traceID", traceID,
+				"path", path,
+				"method", method,
+				"args", args,
+				"query", query,
+				"code", uint32(errors.Code(err)),
+			}
+			if err != nil {
+				kvPairs = append(kvPairs, "error", err.Error())
+				logger.Errorw(kvPairs...)
 			} else {
-				if err != nil {
-					logger.Errorw(
-						"kind", "server",
-						"component", component,
-						"traceID", traceID,
-						"path", path,
-						"method", method,
-						"args", args,
-						"code", uint32(errors.Code(err)),
-						"error", err.Error(),
-					)
-					return nil, err
-				}
-				logger.Infow(
-					"kind", "server",
-					"component", component,
-					"traceID", traceID,
-					"path", path,
-					"method", method,
-					"args", args,
-					"code", 0,
-				)
+				logger.Infow(kvPairs...)
 			}
 			return reply, nil
 		}
@@ -111,67 +75,35 @@ func Client(l log.Logger) middleware.Middleware {
 				traceID   string
 			)
 			traceID = trace.SpanContextFromContext(ctx).TraceID().String()
-			if info, ok := http.FromClientContext(ctx); ok {
-				component = "HTTP"
-				path = info.Request.URL.Path
-				method = info.Request.Method
-				args = req.(fmt.Stringer).String()
-				query = info.Request.URL.RawQuery
-			} else if info, ok := grpc.FromClientContext(ctx); ok {
-				path = info.FullMethod
-				method = "POST"
-				component = "gRPC"
-				args = req.(fmt.Stringer).String()
-			}
-			reply, err := handler(ctx, req)
-			if component == "HTTP" {
-				if err != nil {
-					logger.Errorw(
-						"kind", "client",
-						"component", component,
-						"traceID", traceID,
-						"path", path,
-						"method", method,
-						"args", args,
-						"query", query,
-						"code", uint32(errors.Code(err)),
-						"error", err.Error(),
-					)
-					return nil, err
-				}
-				logger.Infow(
-					"kind", "client",
-					"component", component,
-					"traceID", traceID,
-					"path", path,
-					"method", method,
-					"args", args,
-					"query", query,
-					"code", 0,
-				)
+			if stringer, ok := req.(fmt.Stringer); ok {
+				args = stringer.String()
 			} else {
-				if err != nil {
-					logger.Errorw(
-						"kind", "client",
-						"component", component,
-						"traceID", traceID,
-						"path", path,
-						"method", method,
-						"args", args,
-						"code", uint32(errors.Code(err)),
-						"error", err.Error(),
-					)
-					return nil, err
-				}
-				logger.Infow(
-					"kind", "client",
-					"component", component,
-					"traceID", traceID,
-					"path", path,
-					"method", method,
-					"args", args,
-					"code", 0,
-				)
+				args = fmt.Sprintf("%+v", req)
+			}
+			if tr, ok := transport.FromContext(ctx); ok {
+				component = string(tr.Kind)
+				path = tr.Request.FullPath
+				method = tr.Request.Method
+				query = tr.Request.Query
+			}
+
+			reply, err := handler(ctx, req)
+
+			kvPairs := []interface{}{
+				"kind", "client",
+				"component", component,
+				"traceID", traceID,
+				"path", path,
+				"method", method,
+				"args", args,
+				"query", query,
+				"code", uint32(errors.Code(err)),
+			}
+			if err != nil {
+				kvPairs = append(kvPairs, "error", err.Error())
+				logger.Errorw(kvPairs...)
+			} else {
+				logger.Infow(kvPairs...)
 			}
 			return reply, nil
 		}

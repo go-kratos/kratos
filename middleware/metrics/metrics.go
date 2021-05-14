@@ -8,9 +8,7 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/metrics"
 	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
-	"github.com/gorilla/mux"
+	"github.com/go-kratos/kratos/v2/transport"
 )
 
 // Option is metrics option.
@@ -50,17 +48,9 @@ func Server(opts ...Option) middleware.Middleware {
 				path   string
 				code   uint32
 			)
-			if info, ok := grpc.FromServerContext(ctx); ok {
-				method = "POST"
-				path = info.FullMethod
-			} else if info, ok := http.FromServerContext(ctx); ok {
-				method = info.Request.Method
-				if route := mux.CurrentRoute(info.Request); route != nil {
-					// /path/123 -> /path/{id}
-					path, _ = route.GetPathTemplate()
-				} else {
-					path = info.Request.RequestURI
-				}
+			if tr, ok := transport.FromContext(ctx); ok {
+				method = tr.Request.Method
+				path = tr.Request.PathPattern
 			}
 			startTime := time.Now()
 			reply, err := handler(ctx, req)
@@ -92,13 +82,12 @@ func Client(opts ...Option) middleware.Middleware {
 				path   string
 				code   uint32
 			)
-			if info, ok := grpc.FromClientContext(ctx); ok {
-				method = "POST"
-				path = info.FullMethod
-			} else if info, ok := http.FromClientContext(ctx); ok {
-				method = info.Request.Method
-				path = info.Request.RequestURI
+
+			if tr, ok := transport.FromContext(ctx); ok {
+				method = tr.Request.Method
+				path = tr.Request.PathPattern
 			}
+
 			startTime := time.Now()
 			reply, err := handler(ctx, req)
 			if err != nil {

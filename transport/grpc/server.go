@@ -16,6 +16,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+	gmetadata "google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -149,7 +151,20 @@ func (s *Server) Stop() error {
 
 func unaryServerInterceptor(m middleware.Middleware, timeout time.Duration) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC})
+		md, _ := gmetadata.FromIncomingContext(ctx)
+		var remoteAddr string
+		if pr, ok := peer.FromContext(ctx); ok {
+			remoteAddr = pr.Addr.String()
+		}
+		trReq := transport.Request{
+			Method:      "POST",
+			FullPath:    info.FullMethod,
+			PathPattern: info.FullMethod,
+			Metadata:    MetadataCarrier(md),
+			RemoteAddr:  remoteAddr,
+		}
+
+		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC, Request: trReq})
 		ctx = NewServerContext(ctx, ServerInfo{Server: info.Server, FullMethod: info.FullMethod})
 		if timeout > 0 {
 			var cancel context.CancelFunc

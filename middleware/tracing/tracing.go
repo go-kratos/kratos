@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/go-kratos/kratos/v2/transport"
+
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
@@ -78,18 +78,10 @@ func Server(opts ...Option) middleware.Middleware {
 				component string
 				operation string
 			)
-			if info, ok := http.FromServerContext(ctx); ok {
-				// HTTP span
-				component = "HTTP"
-				operation = info.Request.RequestURI
-				ctx = otel.GetTextMapPropagator().Extract(ctx, propagation.HeaderCarrier(info.Request.Header))
-			} else if info, ok := grpc.FromServerContext(ctx); ok {
-				// gRPC span
-				component = "gRPC"
-				operation = info.FullMethod
-				if md, ok := metadata.FromIncomingContext(ctx); ok {
-					ctx = otel.GetTextMapPropagator().Extract(ctx, MetadataCarrier{md: &md})
-				}
+			if tr, ok := transport.FromContext(ctx); ok {
+				component = string(tr.Kind)
+				operation = tr.Request.FullPath
+				ctx = otel.GetTextMapPropagator().Extract(ctx, tr.Request.Metadata)
 			}
 			ctx, span := tracer.Start(ctx,
 				operation,
@@ -129,22 +121,12 @@ func Client(opts ...Option) middleware.Middleware {
 				operation string
 				carrier   propagation.TextMapCarrier
 			)
-			if info, ok := http.FromClientContext(ctx); ok {
-				// HTTP span
-				component = "HTTP"
-				operation = info.Request.RequestURI
-				carrier = propagation.HeaderCarrier(info.Request.Header)
-			} else if info, ok := grpc.FromClientContext(ctx); ok {
-				// gRPC span
-				component = "gRPC"
-				operation = info.FullMethod
-				md, ok := metadata.FromOutgoingContext(ctx)
-				if !ok {
-					md = metadata.Pairs()
-				}
-				carrier = MetadataCarrier{md: &md}
-				ctx = metadata.NewOutgoingContext(ctx, md)
+			if tr, ok := transport.FromContext(ctx); ok {
+				component = string(tr.Kind)
+				operation = tr.Request.FullPath
+				carrier = tr.Request.Metadata
 			}
+
 			ctx, span := tracer.Start(ctx,
 				operation,
 				trace.WithAttributes(attribute.String("component", component)),

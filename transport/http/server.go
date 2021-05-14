@@ -96,8 +96,23 @@ func (s *Server) HandleFunc(path string, h http.HandlerFunc) {
 func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx, cancel := context.WithTimeout(req.Context(), s.timeout)
 	defer cancel()
-	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP})
+	var pattern = req.URL.Path
+	if route := mux.CurrentRoute(req); route != nil {
+		// /path/123 -> /path/{id}
+		pattern, _ = route.GetPathTemplate()
+	}
+	trReq := transport.Request{
+		Method:      req.Method,
+		FullPath:    req.URL.Path,
+		PathPattern: pattern,
+		Metadata:    HeaderCarrier(req.Header),
+		RemoteAddr:  req.RemoteAddr,
+		Query:       req.URL.RawQuery,
+	}
+
+	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP, Request: trReq})
 	ctx = NewServerContext(ctx, ServerInfo{Request: req, Response: res})
+
 	s.router.ServeHTTP(res, req.WithContext(ctx))
 }
 

@@ -18,7 +18,8 @@ type Server interface {
 
 // Transport is transport context value.
 type Transport struct {
-	Kind Kind
+	Kind    Kind
+	Request Request
 }
 
 // Kind defines the type of Transport
