@@ -8,6 +8,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/metadata"
@@ -103,6 +104,9 @@ func Server(opts ...Option) middleware.Middleware {
 					attribute.String("event", "error"),
 					attribute.String("message", err.Error()),
 				)
+				span.SetStatus(codes.Error, err.Error())
+			} else {
+				span.SetStatus(codes.Ok, "OK")
 			}
 			return
 		}
@@ -158,6 +162,9 @@ func Client(opts ...Option) middleware.Middleware {
 					attribute.String("event", "error"),
 					attribute.String("message", err.Error()),
 				)
+				span.SetStatus(codes.Error, err.Error())
+			} else {
+				span.SetStatus(codes.Ok, "OK")
 			}
 			return
 		}
