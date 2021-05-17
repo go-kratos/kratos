@@ -7,8 +7,6 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/metadata"
@@ -62,52 +60,34 @@ func (mc MetadataCarrier) Keys() []string {
 
 // Server returns a new server middleware for OpenTelemetry.
 func Server(opts ...Option) middleware.Middleware {
-	options := options{}
-	for _, o := range opts {
-		o(&options)
-	}
-	if options.TracerProvider != nil {
-		otel.SetTracerProvider(options.TracerProvider)
-	}
-	if options.Propagators != nil {
-		otel.SetTextMapPropagator(options.Propagators)
-	}
-	tracer := otel.Tracer("server")
+	tracer := NewTracer(trace.SpanKindServer, opts...)
+
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			var (
 				component string
 				operation string
+				carrier   propagation.TextMapCarrier
 			)
 			if info, ok := http.FromServerContext(ctx); ok {
 				// HTTP span
 				component = "HTTP"
 				operation = info.Request.RequestURI
+				carrier = propagation.HeaderCarrier(info.Request.Header)
 				ctx = otel.GetTextMapPropagator().Extract(ctx, propagation.HeaderCarrier(info.Request.Header))
 			} else if info, ok := grpc.FromServerContext(ctx); ok {
 				// gRPC span
 				component = "gRPC"
 				operation = info.FullMethod
 				if md, ok := metadata.FromIncomingContext(ctx); ok {
-					ctx = otel.GetTextMapPropagator().Extract(ctx, MetadataCarrier{md: &md})
+					carrier = MetadataCarrier{md: &md}
 				}
 			}
-			ctx, span := tracer.Start(ctx,
-				operation,
-				trace.WithAttributes(attribute.String("component", component)),
-				trace.WithSpanKind(trace.SpanKindServer),
-			)
-			defer span.End()
-			if reply, err = handler(ctx, req); err != nil {
-				span.RecordError(err)
-				span.SetAttributes(
-					attribute.String("event", "error"),
-					attribute.String("message", err.Error()),
-				)
-				span.SetStatus(codes.Error, err.Error())
-			} else {
-				span.SetStatus(codes.Ok, "OK")
-			}
+			ctx, span := tracer.Start(ctx, component, operation, carrier)
+			defer tracer.End(ctx, span, err)
+
+			reply, err = handler(ctx, req)
+
 			return
 		}
 	}
@@ -115,17 +95,8 @@ func Server(opts ...Option) middleware.Middleware {
 
 // Client returns a new client middleware for OpenTelemetry.
 func Client(opts ...Option) middleware.Middleware {
-	options := options{}
-	for _, o := range opts {
-		o(&options)
-	}
-	if options.TracerProvider != nil {
-		otel.SetTracerProvider(options.TracerProvider)
-	}
-	if options.Propagators != nil {
-		otel.SetTextMapPropagator(options.Propagators)
-	}
-	tracer := otel.Tracer("client")
+	tracer := NewTracer(trace.SpanKindClient, opts...)
+
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			var (
@@ -149,23 +120,11 @@ func Client(opts ...Option) middleware.Middleware {
 				carrier = MetadataCarrier{md: &md}
 				ctx = metadata.NewOutgoingContext(ctx, md)
 			}
-			ctx, span := tracer.Start(ctx,
-				operation,
-				trace.WithAttributes(attribute.String("component", component)),
-				trace.WithSpanKind(trace.SpanKindClient),
-			)
-			defer span.End()
-			otel.GetTextMapPropagator().Inject(ctx, carrier)
-			if reply, err = handler(ctx, req); err != nil {
-				span.RecordError(err)
-				span.SetAttributes(
-					attribute.String("event", "error"),
-					attribute.String("message", err.Error()),
-				)
-				span.SetStatus(codes.Error, err.Error())
-			} else {
-				span.SetStatus(codes.Ok, "OK")
-			}
+			ctx, span := tracer.Start(ctx, component, operation, carrier)
+			defer tracer.End(ctx, span, err)
+
+			reply, err = handler(ctx, req)
+
 			return
 		}
 	}
