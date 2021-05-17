@@ -74,7 +74,7 @@ func NewTransport(ctx context.Context, opts ...ClientOption) (http.RoundTripper,
 		ctx:          ctx,
 		timeout:      500 * time.Millisecond,
 		transport:    http.DefaultTransport,
-		errorDecoder: CheckResponse,
+		errorDecoder: checkResponse,
 	}
 	for _, o := range opts {
 		o(options)
@@ -144,9 +144,9 @@ func Do(client *http.Client, req *http.Request, target interface{}) error {
 	return codec.Unmarshal(data, target)
 }
 
-// CheckResponse returns an error (of type *Error) if the response
+// checkResponse returns an error (of type *Error) if the response
 // status code is not 2xx.
-func CheckResponse(ctx context.Context, res *http.Response) error {
+func checkResponse(ctx context.Context, res *http.Response) error {
 	if res.StatusCode >= 200 && res.StatusCode <= 299 {
 		return nil
 	}
