@@ -42,7 +42,7 @@ func New(opts ...Option) *App {
 		ctx:      ctx,
 		cancel:   cancel,
 		instance: buildInstance(options),
-		log:      log.NewHelper("app", options.logger),
+		log:      log.NewHelper(options.logger),
 	}
 }
 

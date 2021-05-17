@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"go.opentelemetry.io/otel"
 
 	pb "github.com/go-kratos/kratos/examples/blog/api/blog/v1"
@@ -13,7 +14,7 @@ import (
 func NewBlogService(article *biz.ArticleUsecase, logger log.Logger) *BlogService {
 	return &BlogService{
 		article: article,
-		log:     log.NewHelper("article", logger),
+		log:     log.NewHelper(logger),
 	}
 }
 

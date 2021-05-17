@@ -17,8 +17,6 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-const loggerName = "transport/grpc"
-
 var _ transport.Server = (*Server)(nil)
 
 // ServerOption is gRPC server option.
@@ -48,7 +46,7 @@ func Timeout(timeout time.Duration) ServerOption {
 // Logger with server logger.
 func Logger(logger log.Logger) ServerOption {
 	return func(s *Server) {
-		s.log = log.NewHelper(loggerName, logger)
+		s.log = log.NewHelper(logger)
 	}
 }
 
@@ -85,11 +83,11 @@ func NewServer(opts ...ServerOption) *Server {
 		network: "tcp",
 		address: ":0",
 		timeout: time.Second,
-		log:     log.NewHelper(loggerName, log.DefaultLogger),
 		middleware: middleware.Chain(
 			recovery.Recovery(),
 		),
 		health: health.NewServer(),
+		log:    log.NewHelper(log.DefaultLogger),
 	}
 	for _, o := range opts {
 		o(srv)

@@ -25,7 +25,7 @@ type Data struct {
 
 // NewData .
 func NewData(conf *conf.Data, logger log.Logger) (*Data, func(), error) {
-	log := log.NewHelper("data", logger)
+	log := log.NewHelper(logger)
 	client, err := ent.Open(
 		conf.Database.Driver,
 		conf.Database.Source,
