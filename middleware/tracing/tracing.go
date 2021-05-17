@@ -32,32 +32,6 @@ func WithTracerProvider(provider trace.TracerProvider) Option {
 	}
 }
 
-type MetadataCarrier struct {
-	md *metadata.MD
-}
-
-var _ propagation.TextMapCarrier = &MetadataCarrier{}
-
-func (mc MetadataCarrier) Get(key string) string {
-	values := mc.md.Get(key)
-	if len(values) == 0 {
-		return ""
-	}
-	return values[0]
-}
-
-func (mc MetadataCarrier) Set(key string, value string) {
-	mc.md.Set(key, value)
-}
-
-func (mc MetadataCarrier) Keys() []string {
-	keys := make([]string, 0, mc.md.Len())
-	for key := range *mc.md {
-		keys = append(keys, key)
-	}
-	return keys
-}
-
 // Server returns a new server middleware for OpenTelemetry.
 func Server(opts ...Option) middleware.Middleware {
 	tracer := NewTracer(trace.SpanKindServer, opts...)
@@ -80,7 +54,7 @@ func Server(opts ...Option) middleware.Middleware {
 				component = "gRPC"
 				operation = info.FullMethod
 				if md, ok := metadata.FromIncomingContext(ctx); ok {
-					carrier = MetadataCarrier{md: &md}
+					carrier = MetadataCarrier(md)
 				}
 			}
 			ctx, span := tracer.Start(ctx, component, operation, carrier)
@@ -117,7 +91,7 @@ func Client(opts ...Option) middleware.Middleware {
 				if !ok {
 					md = metadata.Pairs()
 				}
-				carrier = MetadataCarrier{md: &md}
+				carrier = MetadataCarrier(md)
 				ctx = metadata.NewOutgoingContext(ctx, md)
 			}
 			ctx, span := tracer.Start(ctx, component, operation, carrier)
