@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
@@ -64,6 +65,9 @@ func (a *App) Run() error {
 			return srv.Start()
 		})
 	}
+
+	time.Sleep(1 * time.Second)
+	a.instance = buildInstance(a.opts)
 	if a.opts.registrar != nil {
 		if err := a.opts.registrar.Register(a.opts.ctx, a.instance); err != nil {
 			return err
