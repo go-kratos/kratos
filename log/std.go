@@ -15,7 +15,7 @@ type stdLogger struct {
 	pool *sync.Pool
 }
 
-// NewStdLogger new a std logger with options.
+// NewStdLogger new a logger with writer.
 func NewStdLogger(w io.Writer) Logger {
 	return &stdLogger{
 		log: log.New(w, "", 0),
@@ -28,17 +28,17 @@ func NewStdLogger(w io.Writer) Logger {
 }
 
 // Log print the kv pairs log.
-func (l *stdLogger) Log(level Level, kv ...interface{}) error {
-	if len(kv) == 0 {
+func (l *stdLogger) Log(level Level, keyvals ...interface{}) error {
+	if len(keyvals) == 0 {
 		return nil
 	}
-	if len(kv)%2 != 0 {
-		kv = append(kv, "")
+	if len(keyvals)%2 != 0 {
+		keyvals = append(keyvals, "")
 	}
 	buf := l.pool.Get().(*bytes.Buffer)
 	buf.WriteString(level.String())
-	for i := 0; i < len(kv); i += 2 {
-		fmt.Fprintf(buf, " %s=%v", kv[i], kv[i+1])
+	for i := 0; i < len(keyvals); i += 2 {
+		fmt.Fprintf(buf, " %s=%v", keyvals[i], keyvals[i+1])
 	}
 	l.log.Output(4, buf.String())
 	buf.Reset()
