@@ -54,7 +54,7 @@ func New(opts ...Option) Config {
 	return &config{
 		opts:   options,
 		reader: newReader(options),
-		log:    log.NewHelper("config", options.logger),
+		log:    log.NewHelper(options.logger),
 	}
 }
 

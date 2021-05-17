@@ -2,9 +2,10 @@ package data
 
 import (
 	"context"
+	"time"
+
 	"github.com/go-kratos/kratos/examples/blog/internal/biz"
 	"github.com/go-kratos/kratos/v2/log"
-	"time"
 )
 
 type articleRepo struct {
@@ -16,7 +17,7 @@ type articleRepo struct {
 func NewArticleRepo(data *Data, logger log.Logger) biz.ArticleRepo {
 	return &articleRepo{
 		data: data,
-		log:  log.NewHelper("article_repo", logger),
+		log:  log.NewHelper(logger),
 	}
 }
 

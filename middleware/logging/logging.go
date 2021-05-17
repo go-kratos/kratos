@@ -15,7 +15,7 @@ import (
 
 // Server is an server logging middleware.
 func Server(l log.Logger) middleware.Middleware {
-	logger := log.NewHelper("middleware/logging", l)
+	logger := log.NewHelper(l)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
@@ -99,7 +99,7 @@ func Server(l log.Logger) middleware.Middleware {
 
 // Client is an client logging middleware.
 func Client(l log.Logger) middleware.Middleware {
-	logger := log.NewHelper("middleware/logging", l)
+	logger := log.NewHelper(l)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
