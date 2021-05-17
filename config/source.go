@@ -2,9 +2,9 @@ package config
 
 // KeyValue is config key value.
 type KeyValue struct {
-	Key      string
-	Value    []byte
-	Metadata map[string]string
+	Key    string
+	Value  []byte
+	Format string
 }
 
 // Source is config source.

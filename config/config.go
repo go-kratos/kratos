@@ -1,13 +1,20 @@
 package config
 
 import (
-	"encoding/json"
 	"errors"
+	"fmt"
 	"reflect"
 	"sync"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/log"
+
+	// init encoding
+	_ "github.com/go-kratos/kratos/v2/encoding/json"
+	_ "github.com/go-kratos/kratos/v2/encoding/proto"
+	_ "github.com/go-kratos/kratos/v2/encoding/xml"
+	_ "github.com/go-kratos/kratos/v2/encoding/yaml"
 )
 
 var (
@@ -45,7 +52,10 @@ func New(opts ...Option) Config {
 	options := options{
 		logger: log.DefaultLogger,
 		decoder: func(kv *KeyValue, v map[string]interface{}) error {
-			return json.Unmarshal(kv.Value, &v)
+			if codec := encoding.GetCodec(kv.Format); codec != nil {
+				return codec.Unmarshal(kv.Value, &v)
+			}
+			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
 	}
 	for _, o := range opts {
