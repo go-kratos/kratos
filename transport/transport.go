@@ -14,6 +14,7 @@ type Server interface {
 	Endpoint() (string, error)
 	Start() error
 	Stop() error
+	CheckEndPoint() bool
 }
 
 // Transport is transport context value.

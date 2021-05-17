@@ -3,13 +3,13 @@ package kratos
 import (
 	"context"
 	"errors"
+	"fmt"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/registry"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/registry"
 
 	"github.com/google/uuid"
 	"golang.org/x/sync/errgroup"
@@ -42,7 +42,6 @@ func New(opts ...Option) *App {
 		opts:     options,
 		ctx:      ctx,
 		cancel:   cancel,
-		instance: buildInstance(options),
 		log:      log.NewHelper(options.logger),
 	}
 }
@@ -65,8 +64,6 @@ func (a *App) Run() error {
 			return srv.Start()
 		})
 	}
-
-	time.Sleep(1 * time.Second)
 	a.instance = buildInstance(a.opts)
 	if a.opts.registrar != nil {
 		if err := a.opts.registrar.Register(a.opts.ctx, a.instance); err != nil {
@@ -107,6 +104,10 @@ func (a *App) Stop() error {
 func buildInstance(o options) *registry.ServiceInstance {
 	if len(o.endpoints) == 0 {
 		for _, srv := range o.servers {
+			fmt.Println(srv.CheckEndPoint())
+			for !srv.CheckEndPoint() {
+				time.Sleep(1 * time.Second)
+			}
 			if e, err := srv.Endpoint(); err == nil {
 				o.endpoints = append(o.endpoints, e)
 			}

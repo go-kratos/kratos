@@ -110,6 +110,16 @@ func (s *Server) Endpoint() (string, error) {
 	return fmt.Sprintf("http://%s", addr), nil
 }
 
+// CheckEndPoint Check that the Endpoint is correct
+func (s *Server) CheckEndPoint() bool {
+	addr, err := host.Extract(s.address, s.lis)
+	_, port, err := net.SplitHostPort(addr)
+	if port == "0" || err != nil {
+		return false
+	}
+	return true
+}
+
 // Start start the HTTP server.
 func (s *Server) Start() error {
 	lis, err := net.Listen(s.network, s.address)
