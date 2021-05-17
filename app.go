@@ -5,7 +5,9 @@ import (
 	"errors"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
@@ -64,6 +66,9 @@ func (a *App) Run() error {
 			return srv.Start()
 		})
 	}
+	if err := a.waitForReady(ctx); err != nil {
+		return err
+	}
 	if a.opts.registrar != nil {
 		if err := a.opts.registrar.Register(a.opts.ctx, a.instance); err != nil {
 			return err
@@ -97,6 +102,25 @@ func (a *App) Stop() error {
 	if a.cancel != nil {
 		a.cancel()
 	}
+	return nil
+}
+
+func (a *App) waitForReady(ctx context.Context) error {
+retry:
+	for _, srv := range a.opts.servers {
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		e, err := srv.Endpoint()
+		if err != nil {
+			return err
+		}
+		if strings.HasSuffix(e, ":0") {
+			time.Sleep(time.Second)
+			goto retry
+		}
+	}
+	a.instance = buildInstance(a.opts)
 	return nil
 }
 
