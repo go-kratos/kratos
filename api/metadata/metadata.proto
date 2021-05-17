@@ -30,6 +30,7 @@ service Metadata {
 message ListServicesRequest {}
 message ListServicesReply {
   repeated string services = 1;
+  repeated string methods = 2;
 }
 
 message GetServiceDescRequest {

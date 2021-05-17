@@ -21,11 +21,16 @@ type Server struct {
 	srv      *grpc.Server
 	lock     sync.Mutex
 	services map[string]*descriptorpb.FileDescriptorSet
+	methods  map[string][]string
 }
 
 // NewServer create server instance
 func NewServer(srv *grpc.Server) *Server {
-	return &Server{srv: srv, services: make(map[string]*descriptorpb.FileDescriptorSet)}
+	return &Server{
+		srv:      srv,
+		services: make(map[string]*descriptorpb.FileDescriptorSet),
+		methods:  make(map[string][]string),
+	}
 }
 
 func (s *Server) load() error {
@@ -46,6 +51,9 @@ func (s *Server) load() error {
 			return err
 		}
 		s.services[name] = &dpb.FileDescriptorSet{File: protoSet}
+		for _, method := range info.Methods {
+			s.methods[name] = append(s.methods[name], method.Name)
+		}
 	}
 	return nil
 }
@@ -60,6 +68,11 @@ func (s *Server) ListServices(ctx context.Context, in *ListServicesRequest) (*Li
 	reply := new(ListServicesReply)
 	for name := range s.services {
 		reply.Services = append(reply.Services, name)
+	}
+	for name, methods := range s.methods {
+		for _, method := range methods {
+			reply.Methods = append(reply.Methods, fmt.Sprintf("/%s/%s", name, method))
+		}
 	}
 	return reply, nil
 }
