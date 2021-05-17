@@ -26,7 +26,9 @@ func Server(l log.Logger) middleware.Middleware {
 				query     string
 				traceID   string
 			)
-			traceID = trace.SpanContextFromContext(ctx).TraceID().String()
+			if tid := trace.SpanContextFromContext(ctx).TraceID(); tid.IsValid() {
+				traceID = tid.String()
+			}
 			if stringer, ok := req.(fmt.Stringer); ok {
 				args = stringer.String()
 			} else {
@@ -110,7 +112,9 @@ func Client(l log.Logger) middleware.Middleware {
 				query     string
 				traceID   string
 			)
-			traceID = trace.SpanContextFromContext(ctx).TraceID().String()
+			if tid := trace.SpanContextFromContext(ctx).TraceID(); tid.IsValid() {
+				traceID = tid.String()
+			}
 			if info, ok := http.FromClientContext(ctx); ok {
 				component = "HTTP"
 				path = info.Request.URL.Path
