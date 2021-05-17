@@ -20,7 +20,7 @@ var _ = mux.NewRouter
 const _ = http1.SupportPackageIsVersion1
 
 type MetadataHandler interface {
-	GetServiceProto(context.Context, *GetServiceProtoRequest) (*GetServiceProtoReply, error)
+	GetServiceDesc(context.Context, *GetServiceDescRequest) (*GetServiceDescReply, error)
 
 	ListServices(context.Context, *ListServicesRequest) (*ListServicesReply, error)
 }
@@ -57,7 +57,7 @@ func NewMetadataHandler(srv MetadataHandler, opts ...http1.HandleOption) http.Ha
 	}).Methods("GET")
 
 	r.HandleFunc("/services/{name}", func(w http.ResponseWriter, r *http.Request) {
-		var in GetServiceProtoRequest
+		var in GetServiceDescRequest
 		if err := h.Decode(r, &in); err != nil {
 			h.Error(w, r, err)
 			return
@@ -69,7 +69,7 @@ func NewMetadataHandler(srv MetadataHandler, opts ...http1.HandleOption) http.Ha
 		}
 
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetServiceProto(ctx, req.(*GetServiceProtoRequest))
+			return srv.GetServiceDesc(ctx, req.(*GetServiceDescRequest))
 		}
 		if h.Middleware != nil {
 			next = h.Middleware(next)
@@ -79,7 +79,7 @@ func NewMetadataHandler(srv MetadataHandler, opts ...http1.HandleOption) http.Ha
 			h.Error(w, r, err)
 			return
 		}
-		reply := out.(*GetServiceProtoReply)
+		reply := out.(*GetServiceDescReply)
 		if err := h.Encode(w, r, reply); err != nil {
 			h.Error(w, r, err)
 		}

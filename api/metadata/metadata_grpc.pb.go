@@ -20,8 +20,8 @@ const _ = grpc.SupportPackageIsVersion7
 type MetadataClient interface {
 	// ListServices list the full name of all services.
 	ListServices(ctx context.Context, in *ListServicesRequest, opts ...grpc.CallOption) (*ListServicesReply, error)
-	// GetServiceProto get the full fileDescriptorSet of service.
-	GetServiceProto(ctx context.Context, in *GetServiceProtoRequest, opts ...grpc.CallOption) (*GetServiceProtoReply, error)
+	// GetServiceDesc get the full fileDescriptorSet of service.
+	GetServiceDesc(ctx context.Context, in *GetServiceDescRequest, opts ...grpc.CallOption) (*GetServiceDescReply, error)
 }
 
 type metadataClient struct {
@@ -41,9 +41,9 @@ func (c *metadataClient) ListServices(ctx context.Context, in *ListServicesReque
 	return out, nil
 }
 
-func (c *metadataClient) GetServiceProto(ctx context.Context, in *GetServiceProtoRequest, opts ...grpc.CallOption) (*GetServiceProtoReply, error) {
-	out := new(GetServiceProtoReply)
-	err := c.cc.Invoke(ctx, "/kratos.api.Metadata/GetServiceProto", in, out, opts...)
+func (c *metadataClient) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest, opts ...grpc.CallOption) (*GetServiceDescReply, error) {
+	out := new(GetServiceDescReply)
+	err := c.cc.Invoke(ctx, "/kratos.api.Metadata/GetServiceDesc", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +56,8 @@ func (c *metadataClient) GetServiceProto(ctx context.Context, in *GetServiceProt
 type MetadataServer interface {
 	// ListServices list the full name of all services.
 	ListServices(context.Context, *ListServicesRequest) (*ListServicesReply, error)
-	// GetServiceProto get the full fileDescriptorSet of service.
-	GetServiceProto(context.Context, *GetServiceProtoRequest) (*GetServiceProtoReply, error)
+	// GetServiceDesc get the full fileDescriptorSet of service.
+	GetServiceDesc(context.Context, *GetServiceDescRequest) (*GetServiceDescReply, error)
 	mustEmbedUnimplementedMetadataServer()
 }
 
@@ -68,8 +68,8 @@ type UnimplementedMetadataServer struct {
 func (UnimplementedMetadataServer) ListServices(context.Context, *ListServicesRequest) (*ListServicesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListServices not implemented")
 }
-func (UnimplementedMetadataServer) GetServiceProto(context.Context, *GetServiceProtoRequest) (*GetServiceProtoReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetServiceProto not implemented")
+func (UnimplementedMetadataServer) GetServiceDesc(context.Context, *GetServiceDescRequest) (*GetServiceDescReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetServiceDesc not implemented")
 }
 func (UnimplementedMetadataServer) mustEmbedUnimplementedMetadataServer() {}
 
@@ -102,20 +102,20 @@ func _Metadata_ListServices_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Metadata_GetServiceProto_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetServiceProtoRequest)
+func _Metadata_GetServiceDesc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetServiceDescRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MetadataServer).GetServiceProto(ctx, in)
+		return srv.(MetadataServer).GetServiceDesc(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/kratos.api.Metadata/GetServiceProto",
+		FullMethod: "/kratos.api.Metadata/GetServiceDesc",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MetadataServer).GetServiceProto(ctx, req.(*GetServiceProtoRequest))
+		return srv.(MetadataServer).GetServiceDesc(ctx, req.(*GetServiceDescRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -132,8 +132,8 @@ var Metadata_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Metadata_ListServices_Handler,
 		},
 		{
-			MethodName: "GetServiceProto",
-			Handler:    _Metadata_GetServiceProto_Handler,
+			MethodName: "GetServiceDesc",
+			Handler:    _Metadata_GetServiceDesc_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -19,8 +19,8 @@ service Metadata {
         get: "/services",
       };
   }
-  // GetServiceProto get the full fileDescriptorSet of service.
-  rpc GetServiceProto (GetServiceProtoRequest) returns (GetServiceProtoReply)  {
+  // GetServiceDesc get the full fileDescriptorSet of service.
+  rpc GetServiceDesc (GetServiceDescRequest) returns (GetServiceDescReply)  {
       option (google.api.http) = {
         get: "/services/{name}",
       };
@@ -32,11 +32,11 @@ message ListServicesReply {
   repeated string services = 1;
 }
 
-message GetServiceProtoRequest {
+message GetServiceDescRequest {
   string name = 1;
 }
 
-message GetServiceProtoReply {
+message GetServiceDescReply {
   google.protobuf.FileDescriptorSet file_desc_set = 1;
 }
 

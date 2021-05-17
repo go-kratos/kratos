@@ -19,13 +19,13 @@ type Server struct {
 	UnimplementedMetadataServer
 
 	srv      *grpc.Server
-	lock     *sync.Mutex
+	lock     sync.Mutex
 	services map[string]*descriptorpb.FileDescriptorSet
 }
 
 // NewServer create server instance
 func NewServer(srv *grpc.Server) *Server {
-	return &Server{srv: srv}
+	return &Server{srv: srv, services: make(map[string]*descriptorpb.FileDescriptorSet)}
 }
 
 func (s *Server) load() error {
@@ -64,14 +64,14 @@ func (s *Server) ListServices(ctx context.Context, in *ListServicesRequest) (*Li
 	return reply, nil
 }
 
-// GetServiceMeta return service meta by name
-func (s *Server) GetServiceMeta(ctx context.Context, in *GetServiceProtoRequest) (*GetServiceProtoReply, error) {
+// GetServiceDesc return service meta by name
+func (s *Server) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest) (*GetServiceDescReply, error) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	if err := s.load(); err != nil {
 		return nil, err
 	}
-	return &GetServiceProtoReply{FileDescSet: s.services[in.Name]}, nil
+	return &GetServiceDescReply{FileDescSet: s.services[in.Name]}, nil
 }
 
 // parseMetadata finds the file descriptor bytes specified meta.
