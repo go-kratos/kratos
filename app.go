@@ -116,7 +116,7 @@ retry:
 			return err
 		}
 		if strings.HasSuffix(e, ":0") {
-			time.Sleep(time.Second)
+			time.Sleep(time.Millisecond * 100)
 			goto retry
 		}
 	}

@@ -16,7 +16,7 @@ func TestApp(t *testing.T) {
 		Version("v1.0.0"),
 		Server(hs, gs),
 	)
-	time.AfterFunc(time.Second*3, func() {
+	time.AfterFunc(time.Second, func() {
 		app.Stop()
 	})
 	if err := app.Run(); err != nil {
