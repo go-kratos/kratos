@@ -58,7 +58,7 @@ func Server(opts ...Option) middleware.Middleware {
 				}
 			}
 			ctx, span := tracer.Start(ctx, component, operation, carrier)
-			defer tracer.End(ctx, span, err)
+			defer func() { tracer.End(ctx, span, err) }()
 
 			reply, err = handler(ctx, req)
 
@@ -95,7 +95,7 @@ func Client(opts ...Option) middleware.Middleware {
 				ctx = metadata.NewOutgoingContext(ctx, md)
 			}
 			ctx, span := tracer.Start(ctx, component, operation, carrier)
-			defer tracer.End(ctx, span, err)
+			defer func() { tracer.End(ctx, span, err) }()
 
 			reply, err = handler(ctx, req)
 
