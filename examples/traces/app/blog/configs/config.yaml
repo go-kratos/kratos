@@ -1,0 +1,15 @@
+server:
+  http:
+    addr: 0.0.0.0:8012
+    timeout: 100s
+  grpc:
+    addr: 0.0.0.0:9012
+    timeout: 100s
+data:
+  database:
+    driver: mysql
+    source: root:123456@tcp(127.0.0.1:3306)/parking?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+  redis:
+    addr: 127.0.0.1:6379
+    read_timeout: 0.2s
+    write_timeout: 0.2s

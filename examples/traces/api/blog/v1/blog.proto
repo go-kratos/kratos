@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package api.blog.v1;
+
+option go_package = "github.com/go-kratos/kratos/examples/traces/api/blog/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.vehicle.v1";
+
+import "google/api/annotations.proto";
+
+service Blog {
+    rpc GetBlog (GetBlogRequest) returns (GetBlogReply){
+     option (google.api.http) = {
+          get: "/v1/basic/blog/{id}"
+          body: "*"
+        };
+    }
+}
+
+
+message GetBlogRequest {
+    int64 id = 1;
+}
+message GetBlogReply {
+    string blog = 1;
+}

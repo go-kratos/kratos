@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package api.user.v1;
+
+option go_package = "github.com/go-kratos/kratos/examples/traces/api/user/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.user.v1";
+
+import "google/api/annotations.proto";
+
+service User {
+  rpc GetUser (GetUserRequest) returns (GetUserReply){
+    option (google.api.http) = {
+      get: "/v1/user/get/{id}"
+      body: "*"
+    };
+  }
+}
+
+
+message GetUserRequest {
+  int64 id = 1;
+}
+message GetUserReply {
+  string name = 1;
+}
