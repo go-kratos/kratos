@@ -11,6 +11,8 @@ import (
 	"github.com/golang/protobuf/proto"
 	dpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	descriptorpb "google.golang.org/protobuf/types/descriptorpb"
 )
 
@@ -84,7 +86,11 @@ func (s *Server) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest) 
 	if err := s.load(); err != nil {
 		return nil, err
 	}
-	return &GetServiceDescReply{FileDescSet: s.services[in.Name]}, nil
+	fds, ok := s.services[in.Name]
+	if !ok {
+		return nil, status.Errorf(codes.NotFound, "service %s not found", in.Name)
+	}
+	return &GetServiceDescReply{FileDescSet: fds}, nil
 }
 
 // parseMetadata finds the file descriptor bytes specified meta.
