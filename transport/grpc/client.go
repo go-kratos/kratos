@@ -9,6 +9,8 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/grpc/resolver/discovery"
+
+	// init resolver
 	_ "github.com/go-kratos/kratos/v2/transport/grpc/resolver/direct"
 
 	"google.golang.org/grpc"
@@ -33,9 +35,9 @@ func WithTimeout(timeout time.Duration) ClientOption {
 }
 
 // WithMiddleware with client middleware.
-func WithMiddleware(m middleware.Middleware) ClientOption {
+func WithMiddleware(m ...middleware.Middleware) ClientOption {
 	return func(o *clientOptions) {
-		o.middleware = m
+		o.middleware = middleware.Chain(m...)
 	}
 }
 
