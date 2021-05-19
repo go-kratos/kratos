@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package api.message.v1;
+
+option go_package = "github.com/go-kratos/kratos/examples/traces/api/message/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.message.v1";
+
+import "google/api/annotations.proto";
+
+service MessageService {
+    rpc GetUserMessage (GetUserMessageRequest) returns (GetUserMessageReply){
+     option (google.api.http) = {
+          get: "/v1/message/user/{id}/{count}"
+          body: "*"
+        };
+    }
+}
+
+
+message GetUserMessageRequest {
+    int64 id = 1;
+    int64 count = 2;
+}
+
+message GetUserMessageReply {
+  repeated Message messages = 1;
+}
+
+message Message {
+  string content = 1;
+}

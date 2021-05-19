@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package api.user.v1;
+
+option go_package = "github.com/go-kratos/kratos/examples/kratos-http-grpc/api/user/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.user.v1";
+
+import "google/api/annotations.proto";
+
+service User {
+  rpc GetMyMessages (GetMyMessagesRequest) returns (GetMyMessagesReply){
+    option (google.api.http) = {
+      get: "/v1/user/get/message/{count}"
+      body: "*"
+    };
+  }
+}
+
+
+message GetMyMessagesRequest {
+  int64 count = 1;
+}
+message GetMyMessagesReply {
+  repeated Message messages = 1;
+}
+
+message Message {
+  string content = 1;
+}
