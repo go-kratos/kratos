@@ -10,7 +10,7 @@ You can experience the effect by following the command
 
 ```shell
 docker-compose up -build
-curl http://localhost:8011/v1/user/get/2
+curl http://localhost:8000/v1/user/get/2
 # Open with browser http://localhost:16686
 # You can see the effect
 ```
