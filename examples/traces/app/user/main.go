@@ -2,8 +2,16 @@ package main
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/examples/traces/api/blog"
+	pb "github.com/go-kratos/kratos/examples/traces/api/user"
+	"github.com/go-kratos/kratos/v2"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
+	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v2/transport/http"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
 	"go.opentelemetry.io/otel/propagation"
@@ -13,15 +21,6 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"os"
 	"time"
-
-	blog "github.com/go-kratos/kratos/examples/traces/api/blog"
-	pb "github.com/go-kratos/kratos/examples/traces/api/user"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"

@@ -8,8 +8,8 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
-	"github.com/go-kratos/kratos/v2/transport/grpc/resolver/discovery"
 	_ "github.com/go-kratos/kratos/v2/transport/grpc/resolver/direct"
+	"github.com/go-kratos/kratos/v2/transport/grpc/resolver/discovery"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"
