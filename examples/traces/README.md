@@ -1,0 +1,18 @@
+#example traces
+
+There are two services in the sample
+
+After receiving the HTTP request, the user service calls the grpc server provided by the blog service through the grpc client
+
+The example shows how to use tracing middleware
+
+You can experience the effect by following the command
+
+```shell
+docker-compose up -build
+curl http://localhost:8011/v1/user/get/2
+# Open with browser http://localhost:16686
+# You can see the effect
+```
+
+
