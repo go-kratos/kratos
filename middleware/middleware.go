@@ -11,11 +11,11 @@ type Handler func(ctx context.Context, req interface{}) (interface{}, error)
 type Middleware func(Handler) Handler
 
 // Chain returns a Middleware that specifies the chained handler for endpoint.
-func Chain(outer Middleware, others ...Middleware) Middleware {
+func Chain(m ...Middleware) Middleware {
 	return func(next Handler) Handler {
-		for i := len(others) - 1; i >= 0; i-- {
-			next = others[i](next)
+		for i := len(m) - 1; i >= 0; i-- {
+			next = m[i](next)
 		}
-		return outer(next)
+		return next
 	}
 }

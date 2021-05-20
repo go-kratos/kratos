@@ -52,9 +52,9 @@ func Logger(logger log.Logger) ServerOption {
 }
 
 // Middleware with server middleware.
-func Middleware(m middleware.Middleware) ServerOption {
+func Middleware(m ...middleware.Middleware) ServerOption {
 	return func(s *Server) {
-		s.middleware = m
+		s.middleware = middleware.Chain(m...)
 	}
 }
 

@@ -43,9 +43,9 @@ func WithTransport(trans http.RoundTripper) ClientOption {
 }
 
 // WithMiddleware with client middleware.
-func WithMiddleware(m middleware.Middleware) ClientOption {
+func WithMiddleware(m ...middleware.Middleware) ClientOption {
 	return func(o *clientOptions) {
-		o.middleware = m
+		o.middleware = middleware.Chain(m...)
 	}
 }
 

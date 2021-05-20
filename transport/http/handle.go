@@ -67,9 +67,9 @@ func ErrorEncoder(en EncodeErrorFunc) HandleOption {
 }
 
 // Middleware with middleware option.
-func Middleware(m middleware.Middleware) HandleOption {
+func Middleware(m ...middleware.Middleware) HandleOption {
 	return func(o *HandleOptions) {
-		o.Middleware = m
+		o.Middleware = middleware.Chain(m...)
 	}
 }
 

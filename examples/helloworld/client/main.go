@@ -22,9 +22,7 @@ func callHTTP() {
 	client, err := transhttp.NewClient(
 		context.Background(),
 		transhttp.WithMiddleware(
-			middleware.Chain(
-				recovery.Recovery(),
-			),
+			recovery.Recovery(),
 		),
 	)
 	if err != nil {
