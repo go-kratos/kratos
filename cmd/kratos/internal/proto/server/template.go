@@ -18,7 +18,7 @@ type {{.Service}}Service struct {
 	pb.Unimplemented{{.Service}}Server
 }
 
-func New{{.Service}}Service() pb.{{.Service}}Server {
+func New{{.Service}}Service() *{{.Service}}Service {
 	return &{{.Service}}Service{}
 }
 {{ range .Methods }}
