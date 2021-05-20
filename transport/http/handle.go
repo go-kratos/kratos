@@ -1,13 +1,16 @@
 package http
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/encoding/json"
 	xhttp "github.com/go-kratos/kratos/v2/internal/http"
 	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -26,50 +29,91 @@ type EncodeResponseFunc func(http.ResponseWriter, *http.Request, interface{}) er
 type EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
 
 // HandleOption is handle option.
-type HandleOption func(*HandleOptions)
-
-// HandleOptions is handle options.
-type HandleOptions struct {
-	Decode     DecodeRequestFunc
-	Encode     EncodeResponseFunc
-	Error      EncodeErrorFunc
-	Middleware middleware.Middleware
-}
-
-// DefaultHandleOptions returns a default handle options.
-func DefaultHandleOptions() HandleOptions {
-	return HandleOptions{
-		Decode: decodeRequest,
-		Encode: encodeResponse,
-		Error:  encodeError,
-	}
-}
+type HandleOption func(*Handler)
 
 // RequestDecoder with request decoder.
 func RequestDecoder(dec DecodeRequestFunc) HandleOption {
-	return func(o *HandleOptions) {
-		o.Decode = dec
+	return func(o *Handler) {
+		o.dec = dec
 	}
 }
 
 // ResponseEncoder with response encoder.
 func ResponseEncoder(en EncodeResponseFunc) HandleOption {
-	return func(o *HandleOptions) {
-		o.Encode = en
+	return func(o *Handler) {
+		o.enc = en
 	}
 }
 
 // ErrorEncoder with error encoder.
 func ErrorEncoder(en EncodeErrorFunc) HandleOption {
-	return func(o *HandleOptions) {
-		o.Error = en
+	return func(o *Handler) {
+		o.err = en
 	}
 }
 
 // Middleware with middleware option.
 func Middleware(m ...middleware.Middleware) HandleOption {
-	return func(o *HandleOptions) {
-		o.Middleware = middleware.Chain(m...)
+	return func(o *Handler) {
+		o.m = middleware.Chain(m...)
+	}
+}
+
+// Handler is handle options.
+type Handler struct {
+	method reflect.Value
+	in     reflect.Type
+	out    reflect.Type
+	dec    DecodeRequestFunc
+	enc    EncodeResponseFunc
+	err    EncodeErrorFunc
+	m      middleware.Middleware
+}
+
+// NewHandler new a HTTP handler.
+func NewHandler(handler interface{}, opts ...HandleOption) *Handler {
+	typ := reflect.TypeOf(handler)
+	h := &Handler{
+		method: reflect.ValueOf(handler),
+		in:     typ.In(1),
+		out:    typ.Out(0),
+		dec:    decodeRequest,
+		enc:    encodeResponse,
+		err:    encodeError,
+		m:      recovery.Recovery(),
+	}
+	for _, o := range opts {
+		o(h)
+	}
+	return h
+}
+
+func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	in := reflect.New(h.in)
+	if err := h.dec(req, in.Interface()); err != nil {
+		h.err(w, req, err)
+		return
+	}
+	invoke := func(ctx context.Context, in interface{}) (interface{}, error) {
+		ret := h.method.Call([]reflect.Value{
+			reflect.ValueOf(req.Context()),
+			reflect.ValueOf(in)},
+		)
+		if ret[1].IsNil() {
+			return ret[0].Interface(), nil
+		}
+		return nil, ret[1].Interface().(error)
+	}
+	if h.m != nil {
+		invoke = h.m(invoke)
+	}
+	out, err := invoke(req.Context(), in.Interface())
+	if err != nil {
+		h.err(w, req, err)
+		return
+	}
+	if err := h.enc(w, req, out); err != nil {
+		h.err(w, req, err)
 	}
 }
 

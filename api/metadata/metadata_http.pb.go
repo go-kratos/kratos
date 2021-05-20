@@ -4,10 +4,11 @@ package metadata
 
 import (
 	context "context"
+	"net/http"
+
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
-	http "net/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -21,69 +22,12 @@ const _ = http1.SupportPackageIsVersion1
 
 type MetadataHandler interface {
 	GetServiceDesc(context.Context, *GetServiceDescRequest) (*GetServiceDescReply, error)
-
 	ListServices(context.Context, *ListServicesRequest) (*ListServicesReply, error)
 }
 
 func NewMetadataHandler(srv MetadataHandler, opts ...http1.HandleOption) http.Handler {
-	h := http1.DefaultHandleOptions()
-	for _, o := range opts {
-		o(&h)
-	}
 	r := mux.NewRouter()
-
-	r.HandleFunc("/services", func(w http.ResponseWriter, r *http.Request) {
-		var in ListServicesRequest
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
-		}
-
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListServices(ctx, req.(*ListServicesRequest))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		out, err := next(r.Context(), &in)
-		if err != nil {
-			h.Error(w, r, err)
-			return
-		}
-		reply := out.(*ListServicesReply)
-		if err := h.Encode(w, r, reply); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("GET")
-
-	r.HandleFunc("/services/{name}", func(w http.ResponseWriter, r *http.Request) {
-		var in GetServiceDescRequest
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
-		}
-
-		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
-			h.Error(w, r, err)
-			return
-		}
-
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetServiceDesc(ctx, req.(*GetServiceDescRequest))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		out, err := next(r.Context(), &in)
-		if err != nil {
-			h.Error(w, r, err)
-			return
-		}
-		reply := out.(*GetServiceDescReply)
-		if err := h.Encode(w, r, reply); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("GET")
-
+	r.Handle("/services", http1.NewHandler(srv.ListServices, opts...)).Methods("GET")
+	r.Handle("/services/{name}", http1.NewHandler(srv.GetServiceDesc, opts...)).Methods("GET")
 	return r
 }
