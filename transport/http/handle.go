@@ -14,6 +14,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 	"github.com/gorilla/mux"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -125,13 +126,16 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 func validateHandler(handler interface{}) error {
 	typ := reflect.TypeOf(handler)
 	if typ.NumIn() != 2 || typ.NumOut() != 2 {
-		return fmt.Errorf("invalid handler types, in: %d out: %d", typ.NumIn(), typ.NumOut())
+		return fmt.Errorf("invalid types, in: %d out: %d", typ.NumIn(), typ.NumOut())
+	}
+	if typ.In(1).Kind() != reflect.Ptr || typ.Out(0).Kind() != reflect.Ptr {
+		return fmt.Errorf("invalid types is not a pointer")
 	}
 	if !typ.In(0).Implements(reflect.TypeOf((*context.Context)(nil)).Elem()) {
-		return fmt.Errorf("input is not implements context")
+		return fmt.Errorf("input does not implement the context")
 	}
 	if !typ.Out(1).Implements(reflect.TypeOf((*error)(nil)).Elem()) {
-		return fmt.Errorf("output is not implements error")
+		return fmt.Errorf("input does not implement the error")
 	}
 	return nil
 }
@@ -142,17 +146,20 @@ func decodeRequest(req *http.Request, v interface{}) error {
 	if codec := encoding.GetCodec(subtype); codec != nil {
 		data, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return err
+			return status.Error(codes.InvalidArgument, err.Error())
 		}
 		if err := codec.Unmarshal(data, v); err != nil {
-			return err
+			return status.Error(codes.InvalidArgument, err.Error())
 		}
 	} else {
 		if err := binding.BindForm(req, v); err != nil {
-			return err
+			return status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-	return binding.BindValue(mux.Vars(req), v)
+	if err := binding.BindValue(mux.Vars(req), v); err != nil {
+		return status.Error(codes.InvalidArgument, err.Error())
+	}
+	return nil
 }
 
 // encodeResponse encodes the object to the HTTP response.
