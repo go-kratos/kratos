@@ -18,6 +18,7 @@ import (
 )
 
 // MapProto sets a value in a nested Protobuf structure.
+// Deprecated: use BindValue instead.
 func MapProto(msg proto.Message, values map[string]string) error {
 	for key, value := range values {
 		if err := populateFieldValues(msg.ProtoReflect(), strings.Split(key, "."), []string{value}); err != nil {

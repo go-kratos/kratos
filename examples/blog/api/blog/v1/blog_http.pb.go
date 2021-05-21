@@ -32,146 +32,17 @@ type BlogServiceHandler interface {
 }
 
 func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) http.Handler {
-	h := http1.DefaultHandleOptions()
-	for _, o := range opts {
-		o(&h)
-	}
 	r := mux.NewRouter()
 
-	r.HandleFunc("/v1/article/", func(w http.ResponseWriter, r *http.Request) {
-		var in CreateArticleRequest
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
-		}
+	r.Handle("/v1/article/", http1.NewHandler(srv.CreateArticle, opts...)).Methods("POST")
 
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.CreateArticle(ctx, req.(*CreateArticleRequest))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		out, err := next(r.Context(), &in)
-		if err != nil {
-			h.Error(w, r, err)
-			return
-		}
-		reply := out.(*CreateArticleReply)
-		if err := h.Encode(w, r, reply); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("POST")
+	r.Handle("/v1/article/{id}", http1.NewHandler(srv.UpdateArticle, opts...)).Methods("PUT")
 
-	r.HandleFunc("/v1/article/{id}", func(w http.ResponseWriter, r *http.Request) {
-		var in UpdateArticleRequest
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
-		}
+	r.Handle("/v1/article/{id}", http1.NewHandler(srv.DeleteArticle, opts...)).Methods("DELETE")
 
-		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
-			h.Error(w, r, err)
-			return
-		}
+	r.Handle("/v1/article/{id}", http1.NewHandler(srv.GetArticle, opts...)).Methods("GET")
 
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateArticle(ctx, req.(*UpdateArticleRequest))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		out, err := next(r.Context(), &in)
-		if err != nil {
-			h.Error(w, r, err)
-			return
-		}
-		reply := out.(*UpdateArticleReply)
-		if err := h.Encode(w, r, reply); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("PUT")
-
-	r.HandleFunc("/v1/article/{id}", func(w http.ResponseWriter, r *http.Request) {
-		var in DeleteArticleRequest
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
-		}
-
-		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
-			h.Error(w, r, err)
-			return
-		}
-
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.DeleteArticle(ctx, req.(*DeleteArticleRequest))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		out, err := next(r.Context(), &in)
-		if err != nil {
-			h.Error(w, r, err)
-			return
-		}
-		reply := out.(*DeleteArticleReply)
-		if err := h.Encode(w, r, reply); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("DELETE")
-
-	r.HandleFunc("/v1/article/{id}", func(w http.ResponseWriter, r *http.Request) {
-		var in GetArticleRequest
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
-		}
-
-		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
-			h.Error(w, r, err)
-			return
-		}
-
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetArticle(ctx, req.(*GetArticleRequest))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		out, err := next(r.Context(), &in)
-		if err != nil {
-			h.Error(w, r, err)
-			return
-		}
-		reply := out.(*GetArticleReply)
-		if err := h.Encode(w, r, reply); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("GET")
-
-	r.HandleFunc("/v1/article/", func(w http.ResponseWriter, r *http.Request) {
-		var in ListArticleRequest
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
-		}
-
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListArticle(ctx, req.(*ListArticleRequest))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		out, err := next(r.Context(), &in)
-		if err != nil {
-			h.Error(w, r, err)
-			return
-		}
-		reply := out.(*ListArticleReply)
-		if err := h.Encode(w, r, reply); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("GET")
+	r.Handle("/v1/article/", http1.NewHandler(srv.ListArticle, opts...)).Methods("GET")
 
 	return r
 }

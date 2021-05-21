@@ -4,11 +4,10 @@ package metadata
 
 import (
 	context "context"
-	"net/http"
-
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
+	http "net/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -22,12 +21,16 @@ const _ = http1.SupportPackageIsVersion1
 
 type MetadataHandler interface {
 	GetServiceDesc(context.Context, *GetServiceDescRequest) (*GetServiceDescReply, error)
+
 	ListServices(context.Context, *ListServicesRequest) (*ListServicesReply, error)
 }
 
 func NewMetadataHandler(srv MetadataHandler, opts ...http1.HandleOption) http.Handler {
 	r := mux.NewRouter()
+
 	r.Handle("/services", http1.NewHandler(srv.ListServices, opts...)).Methods("GET")
+
 	r.Handle("/services/{name}", http1.NewHandler(srv.GetServiceDesc, opts...)).Methods("GET")
+
 	return r
 }
