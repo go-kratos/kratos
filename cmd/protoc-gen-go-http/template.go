@@ -14,40 +14,9 @@ type {{.ServiceType}}Handler interface {
 }
 
 func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.HandleOption) http.Handler {
-	h := http1.DefaultHandleOptions()
-	for _, o := range opts {
-		o(&h)
-	}
 	r := mux.NewRouter()
 	{{range .Methods}}
-	r.HandleFunc("{{.Path}}", func(w http.ResponseWriter, r *http.Request) {
-		var in {{.Request}}
-		if err := h.Decode(r, &in{{.Body}}); err != nil {
-			h.Error(w, r, err)
-			return
-		}
-		{{if ne (len .Vars) 0}}
-		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
-			h.Error(w, r, err)
-			return
-		}
-		{{end}}
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.{{.Name}}(ctx, req.(*{{.Request}}))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		out, err := next(r.Context(), &in)
-		if err != nil {
-			h.Error(w, r, err)
-			return
-		}
-		reply := out.(*{{.Reply}})
-		if err := h.Encode(w, r, reply{{.ResponseBody}}); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("{{.Method}}")
+	r.Handle("{{.Path}}", http1.NewHandler(srv.{{.Name}}, opts...)).Methods("{{.Method}}")
 	{{end}}
 	return r
 }
