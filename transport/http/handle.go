@@ -102,6 +102,9 @@ func NewHandler(handler interface{}, opts ...HandleOption) http.Handler {
 		out:    typ.Out(0).Elem(),
 		opts:   DefaultHandleOptions(),
 	}
+	for _, o := range opts {
+		o(&h.opts)
+	}
 	return h
 }
 
