@@ -7,6 +7,9 @@ option java_multiple_files = true;
 option java_package = "api.v1";
 
 import "google/api/annotations.proto";
+// the validate rules:
+// https://github.com/envoyproxy/protoc-gen-validate
+import "validate/validate.proto";
 
 service BlogService {
     rpc CreateArticle (CreateArticleRequest) returns (CreateArticleReply) {
@@ -46,7 +49,7 @@ message Article {
 }
 
 message CreateArticleRequest {
-    string title = 1;
+    string title = 1 [(validate.rules).string = {min_len: 5, max_len: 50}]; // the title of string must be between 5 and 50 character
     string content = 2;
 }
 
@@ -55,8 +58,8 @@ message CreateArticleReply {
 }
 
 message UpdateArticleRequest {
-    int64 id = 1;
-    string title = 2;
+    int64 id = 1 [(validate.rules).int64 = {gt: 0}];
+    string title = 2 [(validate.rules).string = {min_len: 5, max_len: 50}]; // the title of string must be between 5 and 50 character;
     string content = 3;
 }
 

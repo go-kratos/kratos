@@ -20,6 +20,9 @@ func NewBlogService(article *biz.ArticleUsecase, logger log.Logger) *BlogService
 
 func (s *BlogService) CreateArticle(ctx context.Context, req *pb.CreateArticleRequest) (*pb.CreateArticleReply, error) {
 	s.log.Infof("input data %v", req)
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
 	err := s.article.Create(ctx, &biz.Article{
 		Title:   req.Title,
 		Content: req.Content,
@@ -29,6 +32,9 @@ func (s *BlogService) CreateArticle(ctx context.Context, req *pb.CreateArticleRe
 
 func (s *BlogService) UpdateArticle(ctx context.Context, req *pb.UpdateArticleRequest) (*pb.UpdateArticleReply, error) {
 	s.log.Infof("input data %v", req)
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
 	err := s.article.Update(ctx, req.Id, &biz.Article{
 		Title:   req.Title,
 		Content: req.Content,
