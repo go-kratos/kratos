@@ -66,7 +66,7 @@ func (s *server) GetUserMessage(ctx context.Context, request *pb.GetUserMessageR
 func main() {
 	logger := log.NewStdLogger(os.Stdout)
 
-	log := log.NewHelper("user", logger)
+	log := log.NewHelper(logger)
 
 	tp, err := tracerProvider("http://jaeger:14268/api/traces")
 	if err != nil {
