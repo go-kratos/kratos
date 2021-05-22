@@ -10,7 +10,9 @@
 
 ### run example
 ```shell
-docker-compose up -build
+# Windows start-windows.bat
+# mac/linux
+sh start.sh
 curl http://localhost:8000/v1/user/get/message/10
 # Open with browser http://localhost:16686
 # You can see the effect
