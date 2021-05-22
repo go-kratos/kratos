@@ -32,33 +32,53 @@ type EncodeResponseFunc func(http.ResponseWriter, *http.Request, interface{}) er
 type EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
 
 // HandleOption is handle option.
-type HandleOption func(*Handler)
+type HandleOption func(*HandleOptions)
+
+// HandleOptions is handle options.
+// Deprecated: use Handler instead.
+type HandleOptions struct {
+	Decode     DecodeRequestFunc
+	Encode     EncodeResponseFunc
+	Error      EncodeErrorFunc
+	Middleware middleware.Middleware
+}
+
+// DefaultHandleOptions returns a default handle options.
+// Deprecated: use NewHandler instead.
+func DefaultHandleOptions() HandleOptions {
+	return HandleOptions{
+		Decode:     decodeRequest,
+		Encode:     encodeResponse,
+		Error:      encodeError,
+		Middleware: recovery.Recovery(),
+	}
+}
 
 // RequestDecoder with request decoder.
 func RequestDecoder(dec DecodeRequestFunc) HandleOption {
-	return func(o *Handler) {
-		o.dec = dec
+	return func(o *HandleOptions) {
+		o.Decode = dec
 	}
 }
 
 // ResponseEncoder with response encoder.
 func ResponseEncoder(en EncodeResponseFunc) HandleOption {
-	return func(o *Handler) {
-		o.enc = en
+	return func(o *HandleOptions) {
+		o.Encode = en
 	}
 }
 
 // ErrorEncoder with error encoder.
 func ErrorEncoder(en EncodeErrorFunc) HandleOption {
-	return func(o *Handler) {
-		o.err = en
+	return func(o *HandleOptions) {
+		o.Error = en
 	}
 }
 
 // Middleware with middleware option.
 func Middleware(m ...middleware.Middleware) HandleOption {
-	return func(o *Handler) {
-		o.next = middleware.Chain(m...)
+	return func(o *HandleOptions) {
+		o.Middleware = middleware.Chain(m...)
 	}
 }
 
@@ -67,10 +87,7 @@ type Handler struct {
 	method reflect.Value
 	in     reflect.Type
 	out    reflect.Type
-	dec    DecodeRequestFunc
-	enc    EncodeResponseFunc
-	err    EncodeErrorFunc
-	next   middleware.Middleware
+	opts   HandleOptions
 }
 
 // NewHandler new a HTTP handler.
@@ -83,21 +100,15 @@ func NewHandler(handler interface{}, opts ...HandleOption) http.Handler {
 		method: reflect.ValueOf(handler),
 		in:     typ.In(1).Elem(),
 		out:    typ.Out(0).Elem(),
-		dec:    decodeRequest,
-		enc:    encodeResponse,
-		err:    encodeError,
-		next:   recovery.Recovery(),
-	}
-	for _, o := range opts {
-		o(h)
+		opts:   DefaultHandleOptions(),
 	}
 	return h
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	in := reflect.New(h.in).Interface()
-	if err := h.dec(req, in); err != nil {
-		h.err(w, req, err)
+	if err := h.opts.Decode(req, in); err != nil {
+		h.opts.Error(w, req, err)
 		return
 	}
 	invoke := func(ctx context.Context, in interface{}) (interface{}, error) {
@@ -110,16 +121,16 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 		return nil, ret[1].Interface().(error)
 	}
-	if h.next != nil {
-		invoke = h.next(invoke)
+	if h.opts.Middleware != nil {
+		invoke = h.opts.Middleware(invoke)
 	}
 	out, err := invoke(req.Context(), in)
 	if err != nil {
-		h.err(w, req, err)
+		h.opts.Error(w, req, err)
 		return
 	}
-	if err := h.enc(w, req, out); err != nil {
-		h.err(w, req, err)
+	if err := h.opts.Encode(w, req, out); err != nil {
+		h.opts.Error(w, req, err)
 	}
 }
 
@@ -156,7 +167,7 @@ func decodeRequest(req *http.Request, v interface{}) error {
 			return status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-	if err := binding.BindValue(mux.Vars(req), v); err != nil {
+	if err := binding.BindVars(mux.Vars(req), v); err != nil {
 		return status.Error(codes.InvalidArgument, err.Error())
 	}
 	return nil
