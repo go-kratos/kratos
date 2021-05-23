@@ -23,7 +23,7 @@ func callHTTP() {
 		transhttp.WithMiddleware(
 			recovery.Recovery(),
 		),
-		transhttp.WithAddress("127.0.0.1:8000"),
+		transhttp.WithEndpoint("127.0.0.1:8000"),
 		transhttp.WithSchema("http"),
 	)
 	if err != nil {

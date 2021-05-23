@@ -95,8 +95,8 @@ func WithSchema(schema string) ClientOption {
 	}
 }
 
-// WithAddress with client addr.
-func WithAddress(addr string) ClientOption {
+// WithEndpoint with client addr.
+func WithEndpoint(addr string) ClientOption {
 	return func(o *clientOptions) {
 		o.addr = addr
 	}

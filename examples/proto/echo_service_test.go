@@ -39,7 +39,7 @@ func (s *echoService) EchoResponseBody(ctx context.Context, m *DynamicMessageUpd
 
 type echoClient struct {
 	baseURL string
-	client  *http.Client
+	client  *tr.Client
 }
 
 // post: /v1/example/echo/{id}
@@ -160,8 +160,8 @@ func testEchoClient(t *testing.T, baseURL string) {
 			t.Errorf("expected %s got %s", in, out)
 		}
 	}
-
-	cli := &echoClient{baseURL: baseURL, client: http.DefaultClient}
+	cc, _ := tr.NewClient(context.Background())
+	cli := &echoClient{baseURL: baseURL, client: cc}
 
 	if out, err = cli.Echo(context.Background(), in); err != nil {
 		t.Fatal(err)
