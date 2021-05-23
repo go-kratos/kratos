@@ -44,7 +44,7 @@ func testClient(t *testing.T, srv *Server) {
 		{"PATCH", "/index"},
 		{"DELETE", "/index"},
 	}
-	client, err := NewClient(context.Background())
+	client, err := NewClient(context.Background(), WithAddress(""), WithSchema(""))
 	if err != nil {
 		t.Fatal(err)
 	}
