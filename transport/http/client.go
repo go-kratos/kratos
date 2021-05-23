@@ -189,12 +189,12 @@ func (t *baseTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		req.URL.Host = t.addr
 	}
 	ctx := transport.NewContext(req.Context(), transport.Transport{Kind: transport.KindHTTP})
-	info, ok := FromClientContext(ctx)
-	if ok {
-		info.Request = req
-	} else {
-		ctx = NewClientContext(ctx, &ClientInfo{Request: req})
+	pathPattern := ""
+	if info, ok := FromClientContext(ctx); ok {
+		pathPattern = info.PathPattern
 	}
+
+	ctx = NewClientContext(ctx, ClientInfo{Request: req, PathPattern: pathPattern})
 	ctx, cancel := context.WithTimeout(ctx, t.timeout)
 	defer cancel()
 

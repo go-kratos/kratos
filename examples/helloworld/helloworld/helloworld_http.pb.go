@@ -53,7 +53,7 @@ func (c *GreeterHttpClientImpl) SayHello(ctx context.Context, in *HelloRequest, 
 	if err != nil {
 		return nil, err
 	}
-	ctx = http1.NewClientContext(ctx, &http1.ClientInfo{
+	ctx = http1.NewClientContext(ctx, http1.ClientInfo{
 		PathPattern: pathPattern,
 	})
 	req = req.WithContext(ctx)
