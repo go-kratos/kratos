@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -16,6 +17,54 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
+
+// ProtoPath binds proto message to url path
+func ProtoPath(template string, msg proto.Message) string {
+	//解析正则表达式，如果成功返回解释器
+	reg1 := regexp.MustCompile(`/{[.\w]+}`)
+	if reg1 == nil {
+		fmt.Println("regexp err")
+		return template
+	}
+
+	return reg1.ReplaceAllStringFunc(template, func(in string) string {
+		if len(in) < 4 {
+			return in
+		}
+		str := in[2 : len(in)-1]
+		vars := strings.Split(str, ".")
+
+		if value, err := getValueByField(msg.ProtoReflect(), vars); err == nil {
+			return "/" + value
+		}
+		return in
+	})
+}
+
+func getValueByField(v protoreflect.Message, fieldPath []string) (string, error) {
+	var fd protoreflect.FieldDescriptor
+	for i, fieldName := range fieldPath {
+		fields := v.Descriptor().Fields()
+		if fd = fields.ByName(protoreflect.Name(fieldName)); fd == nil {
+			fd = fields.ByJSONName(fieldName)
+			if fd == nil {
+				// ignore unexpected field.
+				return "", fmt.Errorf("field path not found: %q", fieldName)
+			}
+		}
+
+		if i == len(fieldPath)-1 {
+			break
+		}
+
+		if fd.Message() == nil || fd.Cardinality() == protoreflect.Repeated {
+			return "", fmt.Errorf("invalid path: %q is not a message", fieldName)
+		}
+
+		v = v.Mutable(fd).Message()
+	}
+	return fmt.Sprintf("%v", v.Get(fd).Interface()), nil
+}
 
 // MapProto sets a value in a nested Protobuf structure.
 // Deprecated: use BindValue instead.
