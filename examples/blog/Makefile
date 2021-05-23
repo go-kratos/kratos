@@ -14,6 +14,7 @@ init:
 	go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
 
 .PHONY: proto
+# generate proto
 proto:
 	protoc --proto_path=. \
            --proto_path=$(KRATOS)/api \
@@ -23,6 +24,24 @@ proto:
            --go-grpc_out=paths=source_relative:. \
            --go-http_out=paths=source_relative:. \
            --go-errors_out=paths=source_relative:. $(PROTO_FILES)
+
+.PHONY: validate
+# generate pb validate for proto
+validate:
+	protoc --proto_path=. \
+	       --proto_path=$(KRATOS)/third_party \
+           --go_out=paths=source_relative:. \
+           --validate_out="lang=go:." \
+           $(PROTO_FILES)
+
+.PHONY: swagger
+# generate swagger file
+swagger:
+	protoc --proto_path=. \
+	       --proto_path=$(KRATOS)/third_party \
+	       --openapiv2_out . \
+	       --openapiv2_opt logtostderr=true \
+	       $(PROTO_FILES)
 
 .PHONY: run
 run:

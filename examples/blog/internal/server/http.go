@@ -8,6 +8,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
+	"github.com/go-kratos/kratos/v2/middleware/validate"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -28,6 +29,7 @@ func NewHTTPServer(c *conf.Server, tracer trace.TracerProvider, blog *service.Bl
 		tracing.Server(tracing.WithTracerProvider(tracer)),
 		logging.Server(log.DefaultLogger),
 		recovery.Recovery(),
+		validate.Validator(v1.BlogService_ServiceDesc.ServiceName+".http"),
 	)
 	srv := http.NewServer(opts...)
 	srv.HandlePrefix("/", v1.NewBlogServiceHandler(blog, m))
