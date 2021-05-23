@@ -152,7 +152,6 @@ func NewTransport(ctx context.Context, opts ...ClientOption) (http.RoundTripper,
 		timeout:      500 * time.Millisecond,
 		transport:    http.DefaultTransport,
 		errorDecoder: checkResponse,
-		addr:         "127.0.0.1:8000",
 		schema:       "http",
 	}
 	for _, o := range opts {
