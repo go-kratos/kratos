@@ -196,13 +196,13 @@ func encodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error
 
 // encodeError encodes the error to the HTTP response.
 func encodeError(w http.ResponseWriter, r *http.Request, se error) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	codec := codecForRequest(r)
 	body, err := codec.Marshal(se)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
 	if sc, ok := se.(StatusCoder); ok {
 		w.WriteHeader(sc.HTTPStatus())
 	}
