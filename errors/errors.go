@@ -48,8 +48,8 @@ func (e *Error) GRPCStatus() *status.Status {
 
 // Is matches each error in the chain with the target value.
 func (e *Error) Is(err error) bool {
-	if target := new(Error); errors.As(err, &target) {
-		return target.Domain == e.Domain && target.Reason == e.Reason
+	if se := new(Error); errors.As(err, &se) {
+		return se.Domain == e.Domain && se.Reason == e.Reason
 	}
 	return false
 }
@@ -117,8 +117,8 @@ func FromError(err error) *Error {
 	if err == nil {
 		return nil
 	}
-	if target := new(Error); errors.As(err, &target) {
-		return target
+	if se := new(Error); errors.As(err, &se) {
+		return se
 	}
 	gs, ok := status.FromError(err)
 	if ok {
