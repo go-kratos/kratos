@@ -87,14 +87,14 @@ func WithEndpoint(endpoint string) ClientOption {
 	}
 }
 
-// WithEncoder with client request encode.
+// WithEncoder with client request encoder.
 func WithEncoder(encoder RequestEncodeFunc) ClientOption {
 	return func(o *clientOptions) {
 		o.encoder = encoder
 	}
 }
 
-// WithDecoder with client response decode.
+// WithDecoder with client response decoder.
 func WithDecoder(decoder ResponseDecodeFunc) ClientOption {
 	return func(o *clientOptions) {
 		o.decoder = decoder
@@ -141,7 +141,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	}, nil
 }
 
-// Invoke makes an rpc call procedure for remote service
+// Invoke makes an rpc call procedure for remote service.
 func (client *Client) Invoke(ctx context.Context, pathPattern string, args interface{}, reply interface{}, opts ...CallOption) error {
 	var (
 		reqBody     io.Reader
