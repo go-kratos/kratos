@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
@@ -44,13 +45,13 @@ func testClient(t *testing.T, srv *Server) {
 		{"PATCH", "/index"},
 		{"DELETE", "/index"},
 	}
-	client, err := NewClient(context.Background())
-	if err != nil {
-		t.Fatal(err)
-	}
 	port, ok := host.Port(srv.lis)
 	if !ok {
 		t.Fatalf("extract port error: %v", srv.lis)
+	}
+	client, err := NewClient(context.Background(), WithEndpoint(fmt.Sprintf("127.0.0.1:%d", port)))
+	if err != nil {
+		t.Fatal(err)
 	}
 	for _, test := range tests {
 		var res testData
@@ -59,11 +60,31 @@ func testClient(t *testing.T, srv *Server) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := Do(client, req, &res); err != nil {
+		resp, err := client.Do(req)
+		if err != nil {
 			t.Fatal(err)
+		}
+		content, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Fatalf("read resp error %v", err)
+		}
+		err = json.Unmarshal(content, &res)
+		if err != nil {
+			t.Fatalf("unmarshal resp error %v", err)
 		}
 		if res.Path != test.path {
 			t.Errorf("expected %s got %s", test.path, res.Path)
 		}
 	}
+	for _, test := range tests {
+		var res testData
+		err := client.Invoke(context.Background(), test.path, nil, &res, Method(test.method))
+		if err != nil {
+			t.Fatalf("invoke  error %v", err)
+		}
+		if res.Path != test.path {
+			t.Errorf("expected %s got %s", test.path, res.Path)
+		}
+	}
+
 }

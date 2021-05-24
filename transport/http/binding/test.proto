@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package binding;
+
+option go_package = "github.com/go-kratos/kratos/transport/binding";
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+  Sub  sub = 2;
+}
+
+message Sub{
+  string name = 1;
+}

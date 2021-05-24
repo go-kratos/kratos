@@ -18,11 +18,12 @@ const (
 // Error is describes the cause of the error with structured details.
 // For more details see https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto.
 type Error struct {
-	Code     codes.Code        `json:"code"`
-	Message  string            `json:"message"`
-	Domain   string            `json:"domain"`
-	Reason   string            `json:"reason"`
-	Metadata map[string]string `json:"metadata"`
+	Code    codes.Code `json:"code"`
+	Message string     `json:"message"`
+	// error deatils
+	Domain   string            `json:"domain,omitempty"`
+	Reason   string            `json:"reason,omitempty"`
+	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
 func (e *Error) Error() string {
@@ -77,12 +78,7 @@ func Newf(code codes.Code, domain, reason, format string, a ...interface{}) *Err
 
 // Errorf returns an error object for the code, message and error info.
 func Errorf(code codes.Code, domain, reason, format string, a ...interface{}) error {
-	return &Error{
-		Code:    code,
-		Message: fmt.Sprintf(format, a...),
-		Domain:  domain,
-		Reason:  reason,
-	}
+	return New(code, domain, reason, fmt.Sprintf(format, a...))
 }
 
 // Code returns the code for a particular error.
@@ -138,5 +134,5 @@ func FromError(err error) *Error {
 			}
 		}
 	}
-	return New(gs.Code(), "kratos", "internal", err.Error())
+	return New(gs.Code(), "", "", err.Error())
 }
