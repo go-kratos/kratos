@@ -161,11 +161,9 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 
 // Invoke makes an rpc call procedure for remote service
 func (client *Client) Invoke(ctx context.Context, pathPattern string, args interface{}, reply interface{}, opts ...CallOption) error {
+	var reqBody io.Reader
 
-	var (
-		c       callInfo
-		reqBody io.Reader
-	)
+	c := defaultCallInfo()
 	for _, o := range opts {
 		if err := o.before(&c); err != nil {
 			return err
@@ -180,14 +178,10 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 	if client.schema != "" {
 		schema = client.schema
 	}
-	method := "POST"
-	if c.method != "" {
-		method = c.method
-	}
 	var contentType string
 	url := fmt.Sprintf("%s://%s%s", schema, client.endpoint, path)
 	if args != nil {
-		if c.bodyPattern == nil || (c.bodyPattern != nil && *c.bodyPattern != "") {
+		if c.bodyPattern != "" {
 			// TODO: only encode the target field of args
 			var (
 				content []byte
@@ -200,7 +194,7 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 			reqBody = bytes.NewReader(content)
 		}
 	}
-	req, err := http.NewRequest(method, url, reqBody)
+	req, err := http.NewRequest(c.method, url, reqBody)
 	if err != nil {
 		return err
 	}
@@ -217,7 +211,7 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 		Request:     req,
 	})
 
-	h := client.handler(reply)
+	h := client.handler(reply, c)
 	_, err = h(ctx, args)
 
 	return err
@@ -226,28 +220,38 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 // Do send an HTTP request and decodes the body of response into target.
 // returns an error (of type *Error) if the response status code is not 2xx.
 func (client *Client) Do(req *http.Request, opts ...CallOption) (*http.Response, error) {
-	var c callInfo
+	c := defaultCallInfo()
 	for _, o := range opts {
 		if err := o.before(&c); err != nil {
 			return nil, err
 		}
 	}
 
-	return client.cc.Do(req)
+	return client.do(req.Context(), req, c)
 }
 
-func (client *Client) handler(reply interface{}) middleware.Handler {
+func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*http.Response, error) {
+	resp, err := client.cc.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if err := client.errorDecoder(ctx, resp); err != nil {
+		resp.Body.Close()
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (client *Client) handler(reply interface{}, c callInfo) middleware.Handler {
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
 		info, _ := FromClientContext(ctx)
 
-		resp, err := client.cc.Do(info.Request)
+		resp, err := client.do(ctx, info.Request, c)
 		if err != nil {
 			return nil, err
 		}
+		defer resp.Body.Close()
 
-		if err := client.errorDecoder(ctx, resp); err != nil {
-			return nil, err
-		}
 		data, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err

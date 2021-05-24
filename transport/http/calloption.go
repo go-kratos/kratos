@@ -21,7 +21,7 @@ func (EmptyCallOption) before(*callInfo) error      { return nil }
 func (EmptyCallOption) after(*callInfo, *csAttempt) {}
 
 type callInfo struct {
-	bodyPattern *string
+	bodyPattern string
 	method      string
 }
 
@@ -29,12 +29,12 @@ type csAttempt struct{}
 
 // BodyPattern is bodyPattern
 func BodyPattern(bodyPattern string) CallOption {
-	return BodyPatternCallOption{BodyPattern: &bodyPattern}
+	return BodyPatternCallOption{BodyPattern: bodyPattern}
 }
 
 // BodyPatternCallOption is BodyPattern
 type BodyPatternCallOption struct {
-	BodyPattern *string
+	BodyPattern string
 }
 
 func (o BodyPatternCallOption) before(c *callInfo) error {
@@ -58,3 +58,10 @@ func (o MethodCallOption) before(c *callInfo) error {
 	return nil
 }
 func (o MethodCallOption) after(c *callInfo, attempt *csAttempt) {}
+
+func defaultCallInfo() callInfo {
+	return callInfo{
+		bodyPattern: "*",
+		method:      "POST",
+	}
+}
