@@ -78,7 +78,7 @@ func testClient(t *testing.T, srv *Server) {
 	}
 	for _, test := range tests {
 		var res testData
-		err := client.Invoke(context.Background(), test.method, test.path, nil, &res)
+		err := client.Invoke(context.Background(), test.path, nil, &res, Method(test.method))
 		if err != nil {
 			t.Fatalf("invoke  error %v", err)
 		}

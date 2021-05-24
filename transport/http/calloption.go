@@ -23,14 +23,17 @@ func (EmptyCallOption) after(*callInfo, *csAttempt) {}
 type callInfo struct {
 	pathPattern string
 	bodyPattern *string
+	method      string
 }
 
 type csAttempt struct{}
 
+// Path is url path pattern
 func Path(pathPattern string) CallOption {
 	return PathCallOption{PathPattern: pathPattern}
 }
 
+// PathCallOption is PathPattern
 type PathCallOption struct {
 	PathPattern string
 }
@@ -41,10 +44,12 @@ func (o PathCallOption) before(c *callInfo) error {
 }
 func (o PathCallOption) after(c *callInfo, attempt *csAttempt) {}
 
+// Body is bodyPattern
 func Body(bodyPattern string) CallOption {
 	return BodyCallOption{BodyPattern: &bodyPattern}
 }
 
+// BodyCallOption is BodyCallOption
 type BodyCallOption struct {
 	BodyPattern *string
 }
@@ -54,3 +59,19 @@ func (o BodyCallOption) before(c *callInfo) error {
 	return nil
 }
 func (o BodyCallOption) after(c *callInfo, attempt *csAttempt) {}
+
+// Method is Method
+func Method(method string) CallOption {
+	return MethodCallOption{Method: method}
+}
+
+// MethodCallOption is BodyCallOption
+type MethodCallOption struct {
+	Method string
+}
+
+func (o MethodCallOption) before(c *callInfo) error {
+	c.method = o.Method
+	return nil
+}
+func (o MethodCallOption) after(c *callInfo, attempt *csAttempt) {}

@@ -3,7 +3,6 @@ package http
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -21,27 +20,17 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// RequestEncoder is request encoder
-type RequestEncoder func(in interface{}) ([]byte, error)
-
-var defaultEncoder RequestEncoder = func(in interface{}) ([]byte, error) {
-	content, err := json.Marshal(in)
-	if err != nil {
-		return nil, err
-	}
-	return content, err
-}
-
 // Client is http client
 type Client struct {
 	cc *http.Client
 
-	encode       RequestEncoder
+	encoder      encoding.Codec
+	decoder      encoding.Codec
 	userAgent    string
 	timeout      time.Duration
 	errorDecoder DecodeErrorFunc
 	middleware   middleware.Middleware
-	addr         string
+	endpoint     string
 	schema       string
 	contentType  string
 }
@@ -81,17 +70,24 @@ func WithSchema(schema string) ClientOption {
 }
 
 // WithEndpoint with client addr.
-func WithEndpoint(addr string) ClientOption {
+func WithEndpoint(endpoint string) ClientOption {
 	return func(o *clientOptions) {
-		o.addr = addr
+		o.endpoint = endpoint
 	}
 }
 
 // WithEncoder with client request encode.
-func WithEncoder(encoder RequestEncoder, contentType string) ClientOption {
+func WithEncoder(encoder encoding.Codec, contentType string) ClientOption {
 	return func(o *clientOptions) {
 		o.requestEncoder = encoder
 		o.contentType = contentType
+	}
+}
+
+// WithDecoder with client response decode.
+func WithDecoder(decoder encoding.Codec) ClientOption {
+	return func(o *clientOptions) {
+		o.respDecoder = decoder
 	}
 }
 
@@ -103,8 +99,9 @@ type clientOptions struct {
 	errorDecoder   DecodeErrorFunc
 	middleware     middleware.Middleware
 	schema         string
-	addr           string
-	requestEncoder RequestEncoder
+	endpoint       string
+	requestEncoder encoding.Codec
+	respDecoder    encoding.Codec
 	contentType    string
 }
 
@@ -114,8 +111,9 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		ctx:            ctx,
 		timeout:        1000 * time.Millisecond,
 		errorDecoder:   checkResponse,
-		requestEncoder: defaultEncoder,
+		requestEncoder: encoding.GetCodec("json"),
 		contentType:    "application/json",
+		respDecoder:    encoding.GetCodec("json"),
 	}
 	for _, o := range opts {
 		o(options)
@@ -123,19 +121,20 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 
 	return &Client{
 		cc:           &http.Client{Timeout: options.timeout},
-		encode:       options.requestEncoder,
+		encoder:      options.requestEncoder,
+		decoder:      options.respDecoder,
 		errorDecoder: options.errorDecoder,
 		middleware:   options.middleware,
 		userAgent:    options.userAgent,
 		timeout:      options.timeout,
 		schema:       options.schema,
-		addr:         options.addr,
+		endpoint:     options.endpoint,
 		contentType:  options.contentType,
 	}, nil
 }
 
 // Invoke makes an rpc call procedure for remote service
-func (client *Client) Invoke(ctx context.Context, method string, pathPattern string, args interface{}, reply interface{}, opts ...CallOption) error {
+func (client *Client) Invoke(ctx context.Context, pathPattern string, args interface{}, reply interface{}, opts ...CallOption) error {
 	var (
 		c       callInfo
 		reqBody io.Reader
@@ -154,11 +153,15 @@ func (client *Client) Invoke(ctx context.Context, method string, pathPattern str
 	if client.schema != "" {
 		schema = client.schema
 	}
-	url := fmt.Sprintf("%s://%s%s", schema, client.addr, path)
+	method := "POST"
+	if c.method != "" {
+		method = c.method
+	}
+	url := fmt.Sprintf("%s://%s%s", schema, client.endpoint, path)
 	if args != nil {
 		if c.bodyPattern == nil || (c.bodyPattern != nil && *c.bodyPattern != "") {
 			// TODO: only encode the target field of args
-			content, err := client.encode(args)
+			content, err := client.encoder.Marshal(args)
 			if err != nil {
 				return err
 			}
@@ -181,7 +184,7 @@ func (client *Client) Invoke(ctx context.Context, method string, pathPattern str
 	subtype := xhttp.ContentSubtype(resp.Header.Get(xhttp.HeaderContentType))
 	codec := encoding.GetCodec(subtype)
 	if codec == nil {
-		codec = encoding.GetCodec("json")
+		codec = client.decoder
 	}
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -213,8 +216,8 @@ func (client *Client) do(req *http.Request, c callInfo) (*http.Response, error) 
 	if client.schema != "" {
 		req.URL.Scheme = client.schema
 	}
-	if client.addr != "" {
-		req.URL.Host = client.addr
+	if client.endpoint != "" {
+		req.URL.Host = client.endpoint
 	}
 	ctx := transport.NewContext(req.Context(), transport.Transport{Kind: transport.KindHTTP})
 	ctx = NewClientContext(ctx, ClientInfo{

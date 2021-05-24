@@ -81,7 +81,7 @@ func (c *EchoServiceHttpClientImpl) Echo(ctx context.Context, in *SimpleMessage,
 	body := ""
 
 	out = &SimpleMessage{}
-	err = c.cc.Invoke(ctx, method, path, in, out, http1.Body(body))
+	err = c.cc.Invoke(ctx, path, in, out, http1.Body(body), http1.Method(method))
 	if err != nil {
 		return
 	}
@@ -94,7 +94,7 @@ func (c *EchoServiceHttpClientImpl) EchoBody(ctx context.Context, in *SimpleMess
 	body := "*"
 
 	out = &SimpleMessage{}
-	err = c.cc.Invoke(ctx, method, path, in, out, http1.Body(body))
+	err = c.cc.Invoke(ctx, path, in, out, http1.Body(body), http1.Method(method))
 	if err != nil {
 		return
 	}
@@ -107,7 +107,7 @@ func (c *EchoServiceHttpClientImpl) EchoDelete(ctx context.Context, in *SimpleMe
 	body := ""
 
 	out = &SimpleMessage{}
-	err = c.cc.Invoke(ctx, method, path, in, out, http1.Body(body))
+	err = c.cc.Invoke(ctx, path, in, out, http1.Body(body), http1.Method(method))
 	if err != nil {
 		return
 	}
@@ -120,7 +120,7 @@ func (c *EchoServiceHttpClientImpl) EchoPatch(ctx context.Context, in *DynamicMe
 	body := ".body"
 
 	out = &DynamicMessageUpdate{}
-	err = c.cc.Invoke(ctx, method, path, in, out, http1.Body(body))
+	err = c.cc.Invoke(ctx, path, in, out, http1.Body(body), http1.Method(method))
 	if err != nil {
 		return
 	}
@@ -133,7 +133,7 @@ func (c *EchoServiceHttpClientImpl) EchoResponseBody(ctx context.Context, in *Dy
 	body := ""
 
 	out = &DynamicMessageUpdate{}
-	err = c.cc.Invoke(ctx, method, path, in, out, http1.Body(body))
+	err = c.cc.Invoke(ctx, path, in, out, http1.Body(body), http1.Method(method))
 	if err != nil {
 		return
 	}
