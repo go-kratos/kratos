@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/go-kratos/kratos/v2/internal/http"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -17,8 +18,8 @@ const (
 // Error is describes the cause of the error with structured details.
 // For more details see https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto.
 type Error struct {
-	s *status.Status
-
+	Code     codes.Code        `json:"code"`
+	Message  string            `json:"message"`
 	Domain   string            `json:"domain"`
 	Reason   string            `json:"reason"`
 	Metadata map[string]string `json:"metadata"`
@@ -28,16 +29,19 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("error: domain = %s reason = %s metadata = %v", e.Domain, e.Reason, e.Metadata)
 }
 
+// HTTPStatus return an HTTP error code.
+func (e *Error) HTTPStatus() int {
+	return http.StatusFromGRPCCode(e.Code)
+}
+
 // GRPCStatus returns the Status represented by se.
 func (e *Error) GRPCStatus() *status.Status {
-	s, err := e.s.WithDetails(&errdetails.ErrorInfo{
-		Domain:   e.Domain,
-		Reason:   e.Reason,
-		Metadata: e.Metadata,
-	})
-	if err != nil {
-		return e.s
-	}
+	s, _ := status.New(e.Code, e.Message).
+		WithDetails(&errdetails.ErrorInfo{
+			Domain:   e.Domain,
+			Reason:   e.Reason,
+			Metadata: e.Metadata,
+		})
 	return s
 }
 
@@ -59,9 +63,10 @@ func (e *Error) WithMetadata(md map[string]string) *Error {
 // New returns an error object for the code, message.
 func New(code codes.Code, domain, reason, message string) *Error {
 	return &Error{
-		s:      status.New(code, message),
-		Domain: domain,
-		Reason: reason,
+		Code:    code,
+		Message: message,
+		Domain:  domain,
+		Reason:  reason,
 	}
 }
 
@@ -73,9 +78,10 @@ func Newf(code codes.Code, domain, reason, format string, a ...interface{}) *Err
 // Errorf returns an error object for the code, message and error info.
 func Errorf(code codes.Code, domain, reason, format string, a ...interface{}) error {
 	return &Error{
-		s:      status.New(code, fmt.Sprintf(format, a...)),
-		Domain: domain,
-		Reason: reason,
+		Code:    code,
+		Message: fmt.Sprintf(format, a...),
+		Domain:  domain,
+		Reason:  reason,
 	}
 }
 
@@ -86,7 +92,7 @@ func Code(err error) codes.Code {
 		return codes.OK
 	}
 	if se := FromError(err); err != nil {
-		return se.s.Code()
+		return se.Code
 	}
 	return codes.Unknown
 }
@@ -132,5 +138,5 @@ func FromError(err error) *Error {
 			}
 		}
 	}
-	return New(gs.Code(), "", "", err.Error())
+	return New(gs.Code(), "kratos", "internal", err.Error())
 }

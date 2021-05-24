@@ -8,7 +8,6 @@ import (
 	"reflect"
 
 	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/encoding/json"
 	xhttp "github.com/go-kratos/kratos/v2/internal/http"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
@@ -16,11 +15,15 @@ import (
 	"github.com/gorilla/mux"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
 const SupportPackageIsVersion1 = true
+
+// StatusCoder is checked by DefaultErrorEncoder.
+type StatusCoder interface {
+	HTTPStatus() int
+}
 
 // DecodeRequestFunc is decode request func.
 type DecodeRequestFunc func(*http.Request, interface{}) error
@@ -184,21 +187,26 @@ func encodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error
 		return err
 	}
 	w.Header().Set(xhttp.HeaderContentType, xhttp.ContentType(codec.Name()))
+	if sc, ok := v.(StatusCoder); ok {
+		w.WriteHeader(sc.HTTPStatus())
+	}
 	_, _ = w.Write(data)
 	return nil
 }
 
 // encodeError encodes the error to the HTTP response.
 func encodeError(w http.ResponseWriter, r *http.Request, err error) {
-	st, _ := status.FromError(err)
-	data, err := protojson.Marshal(st.Proto())
+	w.Header().Set(xhttp.HeaderContentType, "application/json; charset=utf-8")
+	codec := codecForRequest(r)
+	body, err := codec.Marshal(err)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set(xhttp.HeaderContentType, "application/json; charset=utf-8")
-	w.WriteHeader(xhttp.StatusFromGRPCCode(st.Code()))
-	w.Write(data)
+	if sc, ok := err.(StatusCoder); ok {
+		w.WriteHeader(sc.HTTPStatus())
+	}
+	w.Write(body)
 }
 
 // codecForRequest get encoding.Codec via http.Request
@@ -210,7 +218,7 @@ func codecForRequest(r *http.Request) encoding.Codec {
 		}
 	}
 	if codec == nil {
-		codec = encoding.GetCodec(json.Name)
+		codec = encoding.GetCodec("json")
 	}
 	return codec
 }
