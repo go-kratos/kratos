@@ -141,6 +141,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		encodeFunc:   defaultEncoder,
 		decodeFunc:   defaultDecoder,
 		transport:    http.DefaultTransport,
+		schema:       "http",
 	}
 	for _, o := range opts {
 		o(options)
@@ -177,11 +178,7 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 	if args != nil {
 		path = binding.ProtoPath(path, args.(proto.Message))
 	}
-	schema := "http"
-	if client.schema != "" {
-		schema = client.schema
-	}
-	url := fmt.Sprintf("%s://%s%s", schema, client.endpoint, path)
+	url := fmt.Sprintf("%s://%s%s", client.schema, client.endpoint, path)
 	if args != nil && c.bodyPattern != "" {
 		// TODO: only encode the target field of args
 		var (
