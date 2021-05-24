@@ -26,19 +26,19 @@ type Client struct {
 	endpoint     string
 	userAgent    string
 	middleware   middleware.Middleware
-	encoder      RequestEncodeFunc
-	decoder      ResponseDecodeFunc
+	encoder      EncodeRequestFunc
+	decoder      DecodeResponseFunc
 	errorDecoder DecodeErrorFunc
 }
 
 // DecodeErrorFunc is decode error func.
 type DecodeErrorFunc func(ctx context.Context, res *http.Response) error
 
-// RequestEncodeFunc is request encode func.
-type RequestEncodeFunc func(ctx context.Context, in interface{}) (contentType string, body []byte, err error)
+// EncodeRequestFunc is request encode func.
+type EncodeRequestFunc func(ctx context.Context, in interface{}) (contentType string, body []byte, err error)
 
-// ResponseDecodeFunc is response decode func.
-type ResponseDecodeFunc func(ctx context.Context, res *http.Response, out interface{}) error
+// DecodeResponseFunc is response decode func.
+type DecodeResponseFunc func(ctx context.Context, res *http.Response, out interface{}) error
 
 // ClientOption is HTTP client option.
 type ClientOption func(*clientOptions)
@@ -85,17 +85,24 @@ func WithEndpoint(endpoint string) ClientOption {
 	}
 }
 
-// WithEncoder with client request encoder.
-func WithEncoder(encoder RequestEncodeFunc) ClientOption {
+// WithRequestEncoder with client request encoder.
+func WithRequestEncoder(encoder EncodeRequestFunc) ClientOption {
 	return func(o *clientOptions) {
 		o.encoder = encoder
 	}
 }
 
-// WithDecoder with client response decoder.
-func WithDecoder(decoder ResponseDecodeFunc) ClientOption {
+// WithResponseDecoder with client response decoder.
+func WithResponseDecoder(decoder DecodeResponseFunc) ClientOption {
 	return func(o *clientOptions) {
 		o.decoder = decoder
+	}
+}
+
+// WithErrorDecoder with client error decoder.
+func WithErrorDecoder(errorDecoder DecodeErrorFunc) ClientOption {
+	return func(o *clientOptions) {
+		o.errorDecoder = errorDecoder
 	}
 }
 
@@ -108,8 +115,8 @@ type clientOptions struct {
 	schema       string
 	endpoint     string
 	userAgent    string
-	encoder      RequestEncodeFunc
-	decoder      ResponseDecodeFunc
+	encoder      EncodeRequestFunc
+	decoder      DecodeResponseFunc
 	errorDecoder DecodeErrorFunc
 }
 

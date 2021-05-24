@@ -8,13 +8,12 @@ import (
 	"reflect"
 
 	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 	"github.com/gorilla/mux"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
@@ -50,9 +49,9 @@ type HandleOptions struct {
 // Deprecated: use NewHandler instead.
 func DefaultHandleOptions() HandleOptions {
 	return HandleOptions{
-		Decode:     decodeRequest,
-		Encode:     encodeResponse,
-		Error:      encodeError,
+		Decode:     defaultDecodeRequest,
+		Encode:     defaultEncodeResponse,
+		Error:      defaultEncodeError,
 		Middleware: recovery.Recovery(),
 	}
 }
@@ -157,30 +156,30 @@ func validateHandler(handler interface{}) error {
 	return nil
 }
 
-// decodeRequest decodes the request body to object.
-func decodeRequest(req *http.Request, v interface{}) error {
+// defaultDecodeRequest decodes the request body to object.
+func defaultDecodeRequest(req *http.Request, v interface{}) error {
 	subtype := httputil.ContentSubtype(req.Header.Get("Content-Type"))
 	if codec := encoding.GetCodec(subtype); codec != nil {
 		data, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return status.Error(codes.InvalidArgument, err.Error())
+			return errors.BadRequest("global", "badRequest", err.Error())
 		}
 		if err := codec.Unmarshal(data, v); err != nil {
-			return status.Error(codes.InvalidArgument, err.Error())
+			return errors.BadRequest("global", "badRequest", err.Error())
 		}
 	} else {
 		if err := binding.BindForm(req, v); err != nil {
-			return status.Error(codes.InvalidArgument, err.Error())
+			return errors.BadRequest("global", "badRequest", err.Error())
 		}
 	}
 	if err := binding.BindVars(mux.Vars(req), v); err != nil {
-		return status.Error(codes.InvalidArgument, err.Error())
+		return errors.BadRequest("global", "badRequest", err.Error())
 	}
 	return nil
 }
 
-// encodeResponse encodes the object to the HTTP response.
-func encodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error {
+// defaultEncodeResponse encodes the object to the HTTP response.
+func defaultEncodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	codec := codecForRequest(r)
 	data, err := codec.Marshal(v)
 	if err != nil {
@@ -194,8 +193,8 @@ func encodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error
 	return nil
 }
 
-// encodeError encodes the error to the HTTP response.
-func encodeError(w http.ResponseWriter, r *http.Request, se error) {
+// defaultEncodeError encodes the error to the HTTP response.
+func defaultEncodeError(w http.ResponseWriter, r *http.Request, se error) {
 	codec := codecForRequest(r)
 	body, err := codec.Marshal(se)
 	if err != nil {
