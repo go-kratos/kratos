@@ -19,11 +19,6 @@ import (
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
 const SupportPackageIsVersion1 = true
 
-// StatusCoder is checked by DefaultErrorEncoder.
-type StatusCoder interface {
-	HTTPStatus() int
-}
-
 // DecodeRequestFunc is decode request func.
 type DecodeRequestFunc func(*http.Request, interface{}) error
 
@@ -162,18 +157,18 @@ func defaultRequestDecoder(req *http.Request, v interface{}) error {
 	if codec := encoding.GetCodec(subtype); codec != nil {
 		data, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return errors.BadRequest("global", "badRequest", err.Error())
+			return errors.BadRequest("global", "codec", err.Error())
 		}
 		if err := codec.Unmarshal(data, v); err != nil {
-			return errors.BadRequest("global", "badRequest", err.Error())
+			return errors.BadRequest("global", "codec", err.Error())
 		}
 	} else {
 		if err := binding.BindForm(req, v); err != nil {
-			return errors.BadRequest("global", "badRequest", err.Error())
+			return errors.BadRequest("global", "codec", err.Error())
 		}
 	}
 	if err := binding.BindVars(mux.Vars(req), v); err != nil {
-		return errors.BadRequest("global", "badRequest", err.Error())
+		return errors.BadRequest("global", "codec", err.Error())
 	}
 	return nil
 }
@@ -186,7 +181,9 @@ func defaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{
 		return err
 	}
 	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
-	if sc, ok := v.(StatusCoder); ok {
+	if sc, ok := err.(interface {
+		HTTPStatus() int
+	}); ok {
 		w.WriteHeader(sc.HTTPStatus())
 	}
 	_, _ = w.Write(data)
@@ -202,7 +199,9 @@ func defaultErrorEncoder(w http.ResponseWriter, r *http.Request, se error) {
 		return
 	}
 	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
-	if sc, ok := se.(StatusCoder); ok {
+	if sc, ok := err.(interface {
+		HTTPStatus() int
+	}); ok {
 		w.WriteHeader(sc.HTTPStatus())
 	}
 	w.Write(body)

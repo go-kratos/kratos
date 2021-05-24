@@ -12,12 +12,12 @@ type validator interface {
 }
 
 // Validator is a validator middleware.
-func Validator(domain string) middleware.Middleware {
+func Validator() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if v, ok := req.(validator); ok {
 				if err := v.Validate(); err != nil {
-					return nil, errors.BadRequest(domain, "validator", err.Error())
+					return nil, errors.BadRequest("global", "validator", err.Error())
 				}
 			}
 			return handler(ctx, req)
