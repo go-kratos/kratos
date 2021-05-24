@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/go-kratos/kratos/v2/internal/http"
+	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -31,7 +31,7 @@ func (e *Error) Error() string {
 
 // HTTPStatus return an HTTP error code.
 func (e *Error) HTTPStatus() int {
-	return http.StatusFromGRPCCode(e.Code)
+	return httputil.StatusFromGRPCCode(e.Code)
 }
 
 // GRPCStatus returns the Status represented by se.

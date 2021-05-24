@@ -8,7 +8,7 @@ import (
 	"reflect"
 
 	"github.com/go-kratos/kratos/v2/encoding"
-	xhttp "github.com/go-kratos/kratos/v2/internal/http"
+	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
@@ -159,7 +159,7 @@ func validateHandler(handler interface{}) error {
 
 // decodeRequest decodes the request body to object.
 func decodeRequest(req *http.Request, v interface{}) error {
-	subtype := xhttp.ContentSubtype(req.Header.Get(xhttp.HeaderContentType))
+	subtype := httputil.ContentSubtype(req.Header.Get("Content-Type"))
 	if codec := encoding.GetCodec(subtype); codec != nil {
 		data, err := ioutil.ReadAll(req.Body)
 		if err != nil {
@@ -186,7 +186,7 @@ func encodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error
 	if err != nil {
 		return err
 	}
-	w.Header().Set(xhttp.HeaderContentType, xhttp.ContentType(codec.Name()))
+	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
 	if sc, ok := v.(StatusCoder); ok {
 		w.WriteHeader(sc.HTTPStatus())
 	}
@@ -196,7 +196,7 @@ func encodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error
 
 // encodeError encodes the error to the HTTP response.
 func encodeError(w http.ResponseWriter, r *http.Request, err error) {
-	w.Header().Set(xhttp.HeaderContentType, "application/json; charset=utf-8")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	codec := codecForRequest(r)
 	body, err := codec.Marshal(err)
 	if err != nil {
@@ -212,8 +212,8 @@ func encodeError(w http.ResponseWriter, r *http.Request, err error) {
 // codecForRequest get encoding.Codec via http.Request
 func codecForRequest(r *http.Request) encoding.Codec {
 	var codec encoding.Codec
-	for _, accept := range r.Header[xhttp.HeaderAccept] {
-		if codec = encoding.GetCodec(xhttp.ContentSubtype(accept)); codec != nil {
+	for _, accept := range r.Header["Accept"] {
+		if codec = encoding.GetCodec(httputil.ContentSubtype(accept)); codec != nil {
 			break
 		}
 	}

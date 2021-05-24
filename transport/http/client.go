@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
-	xhttp "github.com/go-kratos/kratos/v2/internal/http"
+	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
@@ -132,7 +132,7 @@ func Do(client *http.Client, req *http.Request, target interface{}) error {
 	if err != nil {
 		return err
 	}
-	subtype := xhttp.ContentSubtype(res.Header.Get(xhttp.HeaderContentType))
+	subtype := httputil.ContentSubtype(res.Header.Get("Content-Type"))
 	codec := encoding.GetCodec(subtype)
 	if codec == nil {
 		codec = encoding.GetCodec("json")
