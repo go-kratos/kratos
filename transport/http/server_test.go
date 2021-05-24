@@ -49,7 +49,7 @@ func testClient(t *testing.T, srv *Server) {
 	if !ok {
 		t.Fatalf("extract port error: %v", srv.lis)
 	}
-	client, err := NewClient(context.Background(), WithEndpoint(fmt.Sprintf("127.0.0.1:%d", port)), WithSchema(""))
+	client, err := NewClient(context.Background(), WithEndpoint(fmt.Sprintf("127.0.0.1:%d", port)))
 	if err != nil {
 		t.Fatal(err)
 	}
