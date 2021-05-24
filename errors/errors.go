@@ -8,23 +8,10 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 )
 
-const (
-	// SupportPackageIsVersion1 this constant should not be referenced by any other code.
-	SupportPackageIsVersion1 = true
-)
-
-// Error is describes the cause of the error with structured details.
-// For more details see https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto.
-type Error struct {
-	Code    codes.Code `json:"code"`
-	Message string     `json:"message"`
-	// error deatils
-	Domain   string            `json:"domain,omitempty"`
-	Reason   string            `json:"reason,omitempty"`
-	Metadata map[string]string `json:"metadata,omitempty"`
-}
+//go:generate protoc -I. --go_out=paths=source_relative:. errors.proto
 
 func (e *Error) Error() string {
 	return fmt.Sprintf("error: domain = %s reason = %s metadata = %v", e.Domain, e.Reason, e.Metadata)
@@ -32,12 +19,12 @@ func (e *Error) Error() string {
 
 // HTTPStatus return an HTTP error code.
 func (e *Error) HTTPStatus() int {
-	return httputil.StatusFromGRPCCode(e.Code)
+	return httputil.StatusFromGRPCCode(codes.Code(e.Code))
 }
 
 // GRPCStatus returns the Status represented by se.
 func (e *Error) GRPCStatus() *status.Status {
-	s, _ := status.New(e.Code, e.Message).
+	s, _ := status.New(codes.Code(e.Code), e.Message).
 		WithDetails(&errdetails.ErrorInfo{
 			Domain:   e.Domain,
 			Reason:   e.Reason,
@@ -56,15 +43,15 @@ func (e *Error) Is(err error) bool {
 
 // WithMetadata with an MD formed by the mapping of key, value.
 func (e *Error) WithMetadata(md map[string]string) *Error {
-	err := *e
+	err := proto.Clone(e).(*Error)
 	err.Metadata = md
-	return &err
+	return err
 }
 
 // New returns an error object for the code, message.
 func New(code codes.Code, domain, reason, message string) *Error {
 	return &Error{
-		Code:    code,
+		Code:    int32(code),
 		Message: message,
 		Domain:  domain,
 		Reason:  reason,
@@ -88,7 +75,7 @@ func Code(err error) codes.Code {
 		return codes.OK
 	}
 	if se := FromError(err); err != nil {
-		return se.Code
+		return codes.Code(se.Code)
 	}
 	return codes.Unknown
 }
