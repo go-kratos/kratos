@@ -24,13 +24,13 @@ import (
 type Client struct {
 	cc *http.Client
 
-	encode       RequestEncodeFunc
-	decode       ResponseDecodeFunc
-	errorDecoder DecodeErrorFunc
+	schema       string
+	endpoint     string
 	userAgent    string
 	middleware   middleware.Middleware
-	endpoint     string
-	schema       string
+	encoder      RequestEncodeFunc
+	decoder      ResponseDecodeFunc
+	errorDecoder DecodeErrorFunc
 }
 
 // DecodeErrorFunc is decode error func.
@@ -87,17 +87,17 @@ func WithEndpoint(endpoint string) ClientOption {
 	}
 }
 
-// WithEncodeFunc with client request encode.
-func WithEncodeFunc(encoder RequestEncodeFunc) ClientOption {
+// WithEncoder with client request encode.
+func WithEncoder(encoder RequestEncodeFunc) ClientOption {
 	return func(o *clientOptions) {
-		o.encodeFunc = encoder
+		o.encoder = encoder
 	}
 }
 
-// WithDecodeFunc with client response decode.
-func WithDecodeFunc(decoder ResponseDecodeFunc) ClientOption {
+// WithDecoder with client response decode.
+func WithDecoder(decoder ResponseDecodeFunc) ClientOption {
 	return func(o *clientOptions) {
-		o.decodeFunc = decoder
+		o.decoder = decoder
 	}
 }
 
@@ -110,8 +110,8 @@ type clientOptions struct {
 	schema       string
 	endpoint     string
 	userAgent    string
-	encodeFunc   RequestEncodeFunc
-	decodeFunc   ResponseDecodeFunc
+	encoder      RequestEncodeFunc
+	decoder      ResponseDecodeFunc
 	errorDecoder DecodeErrorFunc
 }
 
@@ -121,8 +121,8 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		ctx:          ctx,
 		schema:       "http",
 		timeout:      1 * time.Second,
-		encodeFunc:   defaultRequestEncoder,
-		decodeFunc:   defaultResponseDecoder,
+		encoder:      defaultRequestEncoder,
+		decoder:      defaultResponseDecoder,
 		errorDecoder: defaultErrorDecoder,
 		transport:    http.DefaultTransport,
 	}
@@ -131,8 +131,8 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	}
 	return &Client{
 		cc:           &http.Client{Timeout: options.timeout, Transport: options.transport},
-		encode:       options.encodeFunc,
-		decode:       options.decodeFunc,
+		encoder:      options.encoder,
+		decoder:      options.decoder,
 		errorDecoder: options.errorDecoder,
 		middleware:   options.middleware,
 		userAgent:    options.userAgent,
@@ -169,7 +169,7 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 		)
 		switch c.bodyPattern {
 		}
-		contentType, content, err = client.encode(ctx, args)
+		contentType, content, err = client.encoder(ctx, args)
 		if err != nil {
 			return err
 		}
@@ -202,7 +202,7 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			return nil, err
 		}
 		defer res.Body.Close()
-		if err := client.decode(ctx, res, reply); err != nil {
+		if err := client.decoder(ctx, res, reply); err != nil {
 			return nil, err
 		}
 		return reply, nil
