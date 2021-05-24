@@ -24,8 +24,8 @@ import (
 type Client struct {
 	cc *http.Client
 
-	encode       RequestEncode
-	decode       RespDecode
+	encode       RequestEncodeFunc
+	decode       RespDecodeFunc
 	userAgent    string
 	timeout      time.Duration
 	errorDecoder DecodeErrorFunc
@@ -82,10 +82,10 @@ func WithEndpoint(endpoint string) ClientOption {
 	}
 }
 
-// RequestEncode is request encoder
-type RequestEncode func(in interface{}) (contentType string, body []byte, err error)
+// RequestEncodeFunc is request encoder
+type RequestEncodeFunc func(in interface{}) (contentType string, body []byte, err error)
 
-var defaultEncoder RequestEncode = func(in interface{}) (contentType string, body []byte, err error) {
+var defaultEncoder RequestEncodeFunc = func(in interface{}) (contentType string, body []byte, err error) {
 	content, err := encoding.GetCodec("json").Marshal(in)
 	if err != nil {
 		return "", nil, err
@@ -93,17 +93,17 @@ var defaultEncoder RequestEncode = func(in interface{}) (contentType string, bod
 	return "application/json", content, err
 }
 
-// WithEncoder with client request encode.
-func WithEncoder(encoder RequestEncode) ClientOption {
+// WithEncodeFunc with client request encode.
+func WithEncodeFunc(encoder RequestEncodeFunc) ClientOption {
 	return func(o *clientOptions) {
-		o.requestEncoder = encoder
+		o.encodeFunc = encoder
 	}
 }
 
-// RespDecode is resp decoder
-type RespDecode func(data []byte, v interface{}, contentType string) error
+// RespDecodeFunc is resp decoder
+type RespDecodeFunc func(data []byte, v interface{}, contentType string) error
 
-var defaultDecoder RespDecode = func(data []byte, v interface{}, contentType string) error {
+var defaultDecoder RespDecodeFunc = func(data []byte, v interface{}, contentType string) error {
 	codec := encoding.GetCodec(contentType)
 	if codec == nil {
 		codec = encoding.GetCodec("json")
@@ -111,36 +111,36 @@ var defaultDecoder RespDecode = func(data []byte, v interface{}, contentType str
 	return codec.Unmarshal(data, v)
 }
 
-// WithDecoder with client response decode.
-func WithDecoder(decoder RespDecode) ClientOption {
+// WithDecodeFunc with client response decode.
+func WithDecodeFunc(decoder RespDecodeFunc) ClientOption {
 	return func(o *clientOptions) {
-		o.respDecoder = decoder
+		o.decodeFunc = decoder
 	}
 }
 
 // Client is a HTTP transport client.
 type clientOptions struct {
-	ctx            context.Context
-	transport      http.RoundTripper
-	timeout        time.Duration
-	userAgent      string
-	errorDecoder   DecodeErrorFunc
-	middleware     middleware.Middleware
-	schema         string
-	endpoint       string
-	requestEncoder RequestEncode
-	respDecoder    RespDecode
+	ctx          context.Context
+	transport    http.RoundTripper
+	timeout      time.Duration
+	userAgent    string
+	errorDecoder DecodeErrorFunc
+	middleware   middleware.Middleware
+	schema       string
+	endpoint     string
+	encodeFunc   RequestEncodeFunc
+	decodeFunc   RespDecodeFunc
 }
 
 // NewClient returns an HTTP client.
 func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	options := &clientOptions{
-		ctx:            ctx,
-		timeout:        1000 * time.Millisecond,
-		errorDecoder:   checkResponse,
-		requestEncoder: defaultEncoder,
-		respDecoder:    defaultDecoder,
-		transport:      http.DefaultTransport,
+		ctx:          ctx,
+		timeout:      1000 * time.Millisecond,
+		errorDecoder: checkResponse,
+		encodeFunc:   defaultEncoder,
+		decodeFunc:   defaultDecoder,
+		transport:    http.DefaultTransport,
 	}
 	for _, o := range opts {
 		o(options)
@@ -148,8 +148,8 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 
 	return &Client{
 		cc:           &http.Client{Timeout: options.timeout, Transport: options.transport},
-		encode:       options.requestEncoder,
-		decode:       options.respDecoder,
+		encode:       options.encodeFunc,
+		decode:       options.decodeFunc,
 		errorDecoder: options.errorDecoder,
 		middleware:   options.middleware,
 		userAgent:    options.userAgent,
