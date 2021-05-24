@@ -7,4 +7,3 @@ require (
 	google.golang.org/protobuf v1.26.0
 )
 
-replace github.com/go-kratos/kratos/v2 => ../../

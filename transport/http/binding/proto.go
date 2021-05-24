@@ -23,7 +23,6 @@ func ProtoPath(template string, msg proto.Message) string {
 	//解析正则表达式，如果成功返回解释器
 	reg1 := regexp.MustCompile(`/{[.\w]+}`)
 	if reg1 == nil {
-		fmt.Println("regexp err")
 		return template
 	}
 
