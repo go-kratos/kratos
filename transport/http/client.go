@@ -26,9 +26,9 @@ type Client struct {
 
 	encode       RequestEncodeFunc
 	decode       RespDecodeFunc
+	errorDecoder DecodeErrorFunc
 	userAgent    string
 	timeout      time.Duration
-	errorDecoder DecodeErrorFunc
 	middleware   middleware.Middleware
 	endpoint     string
 	schema       string
@@ -83,9 +83,9 @@ func WithEndpoint(endpoint string) ClientOption {
 }
 
 // RequestEncodeFunc is request encoder
-type RequestEncodeFunc func(in interface{}) (contentType string, body []byte, err error)
+type RequestEncodeFunc func(ctx context.Context, in interface{}) (contentType string, body []byte, err error)
 
-var defaultEncoder RequestEncodeFunc = func(in interface{}) (contentType string, body []byte, err error) {
+var defaultEncoder RequestEncodeFunc = func(ctx context.Context, in interface{}) (contentType string, body []byte, err error) {
 	content, err := encoding.GetCodec("json").Marshal(in)
 	if err != nil {
 		return "", nil, err
@@ -101,9 +101,9 @@ func WithEncodeFunc(encoder RequestEncodeFunc) ClientOption {
 }
 
 // RespDecodeFunc is resp decoder
-type RespDecodeFunc func(data []byte, v interface{}, contentType string) error
+type RespDecodeFunc func(ctx context.Context, data []byte, v interface{}, contentType string) error
 
-var defaultDecoder RespDecodeFunc = func(data []byte, v interface{}, contentType string) error {
+var defaultDecoder RespDecodeFunc = func(ctx context.Context, data []byte, v interface{}, contentType string) error {
 	codec := encoding.GetCodec(contentType)
 	if codec == nil {
 		codec = encoding.GetCodec("json")
@@ -124,12 +124,12 @@ type clientOptions struct {
 	transport    http.RoundTripper
 	timeout      time.Duration
 	userAgent    string
-	errorDecoder DecodeErrorFunc
 	middleware   middleware.Middleware
 	schema       string
 	endpoint     string
 	encodeFunc   RequestEncodeFunc
 	decodeFunc   RespDecodeFunc
+	errorDecoder DecodeErrorFunc
 }
 
 // NewClient returns an HTTP client.
@@ -188,7 +188,7 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 			content []byte
 			err     error
 		)
-		contentType, content, err = client.encode(args)
+		contentType, content, err = client.encode(ctx, args)
 		if err != nil {
 			return err
 		}
@@ -211,9 +211,31 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 		Request:     req,
 	})
 
-	h := client.handler(reply, c)
-	_, err = h(ctx, args)
+	return client.invoke(ctx, req, args, reply, c)
+}
 
+func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo) error {
+	h := func(ctx context.Context, in interface{}) (interface{}, error) {
+		info, _ := FromClientContext(ctx)
+
+		resp, err := client.do(ctx, info.Request, c)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		data, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		subtype := xhttp.ContentSubtype(resp.Header.Get(xhttp.HeaderContentType))
+		err = client.decode(ctx, data, reply, subtype)
+		return reply, err
+	}
+	if client.middleware != nil {
+		h = client.middleware(h)
+	}
+	_, err := h(ctx, args)
 	return err
 }
 
@@ -240,32 +262,6 @@ func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*h
 		return nil, err
 	}
 	return resp, nil
-}
-
-func (client *Client) handler(reply interface{}, c callInfo) middleware.Handler {
-	h := func(ctx context.Context, in interface{}) (interface{}, error) {
-		info, _ := FromClientContext(ctx)
-
-		resp, err := client.do(ctx, info.Request, c)
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-
-		data, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		subtype := xhttp.ContentSubtype(resp.Header.Get(xhttp.HeaderContentType))
-		err = client.decode(data, reply, subtype)
-		return reply, err
-	}
-
-	if client.middleware != nil {
-		h = client.middleware(h)
-	}
-
-	return h
 }
 
 // checkResponse returns an error (of type *Error) if the response
