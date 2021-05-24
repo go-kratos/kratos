@@ -49,9 +49,9 @@ type HandleOptions struct {
 // Deprecated: use NewHandler instead.
 func DefaultHandleOptions() HandleOptions {
 	return HandleOptions{
-		Decode:     defaultDecodeRequest,
-		Encode:     defaultEncodeResponse,
-		Error:      defaultEncodeError,
+		Decode:     defaultRequestDecoder,
+		Encode:     defaultResponseEncoder,
+		Error:      defaultErrorEncoder,
 		Middleware: recovery.Recovery(),
 	}
 }
@@ -156,8 +156,8 @@ func validateHandler(handler interface{}) error {
 	return nil
 }
 
-// defaultDecodeRequest decodes the request body to object.
-func defaultDecodeRequest(req *http.Request, v interface{}) error {
+// defaultRequestDecoder decodes the request body to object.
+func defaultRequestDecoder(req *http.Request, v interface{}) error {
 	subtype := httputil.ContentSubtype(req.Header.Get("Content-Type"))
 	if codec := encoding.GetCodec(subtype); codec != nil {
 		data, err := ioutil.ReadAll(req.Body)
@@ -178,8 +178,8 @@ func defaultDecodeRequest(req *http.Request, v interface{}) error {
 	return nil
 }
 
-// defaultEncodeResponse encodes the object to the HTTP response.
-func defaultEncodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error {
+// defaultResponseEncoder encodes the object to the HTTP response.
+func defaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	codec := codecForRequest(r)
 	data, err := codec.Marshal(v)
 	if err != nil {
@@ -193,8 +193,8 @@ func defaultEncodeResponse(w http.ResponseWriter, r *http.Request, v interface{}
 	return nil
 }
 
-// defaultEncodeError encodes the error to the HTTP response.
-func defaultEncodeError(w http.ResponseWriter, r *http.Request, se error) {
+// defaultErrorEncoder encodes the error to the HTTP response.
+func defaultErrorEncoder(w http.ResponseWriter, r *http.Request, se error) {
 	codec := codecForRequest(r)
 	body, err := codec.Marshal(se)
 	if err != nil {
