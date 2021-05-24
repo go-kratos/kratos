@@ -20,6 +20,37 @@ func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.Handl
 	{{end}}
 	return r
 }
+
+type {{.ServiceType}}HttpClient interface {
+{{range .MethodSets}}
+	{{.Name}}(ctx context.Context, req *{{.Request}}, opts ...http1.CallOption) (rsp *{{.Reply}}, err error) 
+{{end}}
+}
+	
+type {{.ServiceType}}HttpClientImpl struct{
+	cc *http1.Client
+}
+	
+func New{{.ServiceType}}HttpClient (client *http1.Client) {{.ServiceType}}HttpClient {
+	return &{{.ServiceType}}HttpClientImpl{client}
+}
+	
+{{$svrType := .ServiceType}}
+{{$svrName := .ServiceName}}
+{{range .MethodSets}}
+func (c *{{$svrType}}HttpClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http1.CallOption) (out *{{.Reply}}, err error) {
+	path := "{{.Path}}"
+	method := "{{.Method}}"
+	body := "{{.Body}}"
+	
+	out = &{{.Reply}}{}
+	err = c.cc.Invoke(ctx, path, in, out, http1.BodyPattern(body), http1.Method(method))
+	if err != nil {
+		return
+	}
+	return 
+}
+{{end}}
 `
 
 type serviceDesc struct {

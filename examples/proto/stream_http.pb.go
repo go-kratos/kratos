@@ -23,11 +23,18 @@ type StreamServiceHandler interface {
 }
 
 func NewStreamServiceHandler(srv StreamServiceHandler, opts ...http1.HandleOption) http.Handler {
-	h := http1.DefaultHandleOptions()
-	for _, o := range opts {
-		o(&h)
-	}
 	r := mux.NewRouter()
 
 	return r
+}
+
+type StreamServiceHttpClient interface {
+}
+
+type StreamServiceHttpClientImpl struct {
+	cc *http1.Client
+}
+
+func NewStreamServiceHttpClient(client *http1.Client) StreamServiceHttpClient {
+	return &StreamServiceHttpClientImpl{client}
 }
