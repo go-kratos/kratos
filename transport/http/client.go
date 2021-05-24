@@ -216,9 +216,7 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 
 func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo) error {
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
-		info, _ := FromClientContext(ctx)
-
-		resp, err := client.do(ctx, info.Request, c)
+		resp, err := client.do(ctx, req, c)
 		if err != nil {
 			return nil, err
 		}
