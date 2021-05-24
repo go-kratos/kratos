@@ -44,7 +44,7 @@ func (c *{{$svrType}}HttpClientImpl) {{.Name}}(ctx context.Context, in *{{.Reque
 	body := "{{.Body}}"
 	
 	out = &{{.Reply}}{}
-	err = c.cc.Invoke(ctx, path, in, out, http1.Body(body), http1.Method(method))
+	err = c.cc.Invoke(ctx, path, in, out, http1.BodyPattern(body), http1.Method(method))
 	if err != nil {
 		return
 	}
