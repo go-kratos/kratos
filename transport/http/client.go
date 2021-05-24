@@ -161,7 +161,10 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 
 // Invoke makes an rpc call procedure for remote service
 func (client *Client) Invoke(ctx context.Context, pathPattern string, args interface{}, reply interface{}, opts ...CallOption) error {
-	var reqBody io.Reader
+	var (
+		reqBody     io.Reader
+		contentType string
+	)
 
 	c := defaultCallInfo()
 	for _, o := range opts {
@@ -178,21 +181,18 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 	if client.schema != "" {
 		schema = client.schema
 	}
-	var contentType string
 	url := fmt.Sprintf("%s://%s%s", schema, client.endpoint, path)
-	if args != nil {
-		if c.bodyPattern != "" {
-			// TODO: only encode the target field of args
-			var (
-				content []byte
-				err     error
-			)
-			contentType, content, err = client.encode(args)
-			if err != nil {
-				return err
-			}
-			reqBody = bytes.NewReader(content)
+	if args != nil && c.bodyPattern != "" {
+		// TODO: only encode the target field of args
+		var (
+			content []byte
+			err     error
+		)
+		contentType, content, err = client.encode(args)
+		if err != nil {
+			return err
 		}
+		reqBody = bytes.NewReader(content)
 	}
 	req, err := http.NewRequest(c.method, url, reqBody)
 	if err != nil {
