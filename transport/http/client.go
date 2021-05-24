@@ -25,17 +25,22 @@ type Client struct {
 	cc *http.Client
 
 	encode       RequestEncodeFunc
-	decode       RespDecodeFunc
+	decode       ResponseDecodeFunc
 	errorDecoder DecodeErrorFunc
 	userAgent    string
-	timeout      time.Duration
 	middleware   middleware.Middleware
 	endpoint     string
 	schema       string
 }
 
 // DecodeErrorFunc is decode error func.
-type DecodeErrorFunc func(ctx context.Context, w *http.Response) error
+type DecodeErrorFunc func(ctx context.Context, res *http.Response) error
+
+// RequestEncodeFunc is request encode func.
+type RequestEncodeFunc func(ctx context.Context, in interface{}) (contentType string, body []byte, err error)
+
+// ResponseDecodeFunc is response decode func.
+type ResponseDecodeFunc func(ctx context.Context, res *http.Response, out interface{}) error
 
 // ClientOption is HTTP client option.
 type ClientOption func(*clientOptions)
@@ -82,17 +87,6 @@ func WithEndpoint(endpoint string) ClientOption {
 	}
 }
 
-// RequestEncodeFunc is request encoder
-type RequestEncodeFunc func(ctx context.Context, in interface{}) (contentType string, body []byte, err error)
-
-var defaultEncoder RequestEncodeFunc = func(ctx context.Context, in interface{}) (contentType string, body []byte, err error) {
-	content, err := encoding.GetCodec("json").Marshal(in)
-	if err != nil {
-		return "", nil, err
-	}
-	return "application/json", content, err
-}
-
 // WithEncodeFunc with client request encode.
 func WithEncodeFunc(encoder RequestEncodeFunc) ClientOption {
 	return func(o *clientOptions) {
@@ -100,19 +94,8 @@ func WithEncodeFunc(encoder RequestEncodeFunc) ClientOption {
 	}
 }
 
-// RespDecodeFunc is resp decoder
-type RespDecodeFunc func(ctx context.Context, data []byte, v interface{}, contentType string) error
-
-var defaultDecoder RespDecodeFunc = func(ctx context.Context, data []byte, v interface{}, contentType string) error {
-	codec := encoding.GetCodec(contentType)
-	if codec == nil {
-		codec = encoding.GetCodec("json")
-	}
-	return codec.Unmarshal(data, v)
-}
-
 // WithDecodeFunc with client response decode.
-func WithDecodeFunc(decoder RespDecodeFunc) ClientOption {
+func WithDecodeFunc(decoder ResponseDecodeFunc) ClientOption {
 	return func(o *clientOptions) {
 		o.decodeFunc = decoder
 	}
@@ -122,13 +105,13 @@ func WithDecodeFunc(decoder RespDecodeFunc) ClientOption {
 type clientOptions struct {
 	ctx          context.Context
 	transport    http.RoundTripper
-	timeout      time.Duration
-	userAgent    string
 	middleware   middleware.Middleware
+	timeout      time.Duration
 	schema       string
 	endpoint     string
+	userAgent    string
 	encodeFunc   RequestEncodeFunc
-	decodeFunc   RespDecodeFunc
+	decodeFunc   ResponseDecodeFunc
 	errorDecoder DecodeErrorFunc
 }
 
@@ -136,17 +119,16 @@ type clientOptions struct {
 func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	options := &clientOptions{
 		ctx:          ctx,
-		timeout:      1000 * time.Millisecond,
-		errorDecoder: checkResponse,
-		encodeFunc:   defaultEncoder,
-		decodeFunc:   defaultDecoder,
-		transport:    http.DefaultTransport,
 		schema:       "http",
+		timeout:      1 * time.Second,
+		encodeFunc:   defaultRequestEncoder,
+		decodeFunc:   defaultResponseDecoder,
+		errorDecoder: defaultErrorDecoder,
+		transport:    http.DefaultTransport,
 	}
 	for _, o := range opts {
 		o(options)
 	}
-
 	return &Client{
 		cc:           &http.Client{Timeout: options.timeout, Transport: options.transport},
 		encode:       options.encodeFunc,
@@ -154,9 +136,8 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		errorDecoder: options.errorDecoder,
 		middleware:   options.middleware,
 		userAgent:    options.userAgent,
-		timeout:      options.timeout,
-		schema:       options.schema,
 		endpoint:     options.endpoint,
+		schema:       options.schema,
 	}, nil
 }
 
@@ -176,6 +157,7 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 
 	path := pathPattern
 	if args != nil {
+		// TODO: support for struct path bindings
 		path = binding.ProtoPath(path, args.(proto.Message))
 	}
 	url := fmt.Sprintf("%s://%s%s", client.schema, client.endpoint, path)
@@ -185,6 +167,8 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 			content []byte
 			err     error
 		)
+		switch c.bodyPattern {
+		}
 		contentType, content, err = client.encode(ctx, args)
 		if err != nil {
 			return err
@@ -213,19 +197,15 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 
 func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo) error {
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
-		resp, err := client.do(ctx, req, c)
+		res, err := client.do(ctx, req, c)
 		if err != nil {
 			return nil, err
 		}
-		defer resp.Body.Close()
-
-		data, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
+		defer res.Body.Close()
+		if err := client.decode(ctx, res, reply); err != nil {
 			return nil, err
 		}
-		subtype := xhttp.ContentSubtype(resp.Header.Get(xhttp.HeaderContentType))
-		err = client.decode(ctx, data, reply, subtype)
-		return reply, err
+		return reply, nil
 	}
 	if client.middleware != nil {
 		h = client.middleware(h)
@@ -243,7 +223,6 @@ func (client *Client) Do(req *http.Request, opts ...CallOption) (*http.Response,
 			return nil, err
 		}
 	}
-
 	return client.do(req.Context(), req, c)
 }
 
@@ -259,9 +238,28 @@ func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*h
 	return resp, nil
 }
 
-// checkResponse returns an error (of type *Error) if the response
-// status code is not 2xx.
-func checkResponse(ctx context.Context, res *http.Response) error {
+func defaultRequestEncoder(ctx context.Context, in interface{}) (contentType string, body []byte, err error) {
+	content, err := encoding.GetCodec("json").Marshal(in)
+	if err != nil {
+		return "", nil, err
+	}
+	return "application/json", content, err
+}
+
+func defaultResponseDecoder(ctx context.Context, res *http.Response, v interface{}) error {
+	subtype := xhttp.ContentSubtype(res.Header.Get(xhttp.HeaderContentType))
+	codec := encoding.GetCodec(subtype)
+	if codec == nil {
+		codec = encoding.GetCodec("json")
+	}
+	data, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+	return codec.Unmarshal(data, v)
+}
+
+func defaultErrorDecoder(ctx context.Context, res *http.Response) error {
 	if res.StatusCode >= 200 && res.StatusCode <= 299 {
 		return nil
 	}
