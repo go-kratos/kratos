@@ -22,46 +22,35 @@ func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.Handl
 }
 
 type {{.ServiceType}}HttpClient interface {
-	{{range .MethodSets}}
-		{{.Name}}(ctx context.Context, req *{{.Request}}, opts ...http1.CallOption) (rsp *{{.Reply}}, err error) 
-	{{end}}
-	}
+{{range .MethodSets}}
+	{{.Name}}(ctx context.Context, req *{{.Request}}, opts ...http1.CallOption) (rsp *{{.Reply}}, err error) 
+{{end}}
+}
 	
-	type {{.ServiceType}}HttpClientImpl struct{
-		cc *http1.Client
-	}
+type {{.ServiceType}}HttpClientImpl struct{
+	cc *http1.Client
+}
 	
-	func New{{.ServiceType}}HttpClient (client *http1.Client) {{.ServiceType}}HttpClient {
-		return &{{.ServiceType}}HttpClientImpl{client}
-	}
+func New{{.ServiceType}}HttpClient (client *http1.Client) {{.ServiceType}}HttpClient {
+	return &{{.ServiceType}}HttpClientImpl{client}
+}
 	
-	{{$svrType := .ServiceType}}
-	{{$svrName := .ServiceName}}
-	{{range .MethodSets}}
-	func (c *{{$svrType}}HttpClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http1.CallOption) (out *{{.Reply}}, err error) {
-		content, err := c.cc.Encode(in,"{{.Body}}")
-		if err != nil {
-			return nil, err
-		}
-		pathPattern := "http://{{$svrName}}{{.Path}}"
-		req, err := http.NewRequest("{{.Method}}", binding.ProtoPath(pathPattern, in), content)
-		if err != nil {
-			return nil, err
-		}
-		ctx = http1.NewClientContext(ctx, http1.ClientInfo{
-			PathPattern: pathPattern,
-		})
-		req = req.WithContext(ctx)
-
-		out = &{{.Reply}}{}
-		err = http1.Do(c.cc, req, out, opts...)
-		if err != nil {
-			return nil, err
-		}
+{{$svrType := .ServiceType}}
+{{$svrName := .ServiceName}}
+{{range .MethodSets}}
+func (c *{{$svrType}}HttpClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http1.CallOption) (out *{{.Reply}}, err error) {
+	path := "{{.Path}}"
+	method := "{{.Method}}"
+	body := "{{.Body}}"
 	
-		return out, nil
+	out = &{{.Reply}}{}
+	err = c.cc.Invoke(ctx, method, path, in, out, http1.Body(body))
+	if err != nil {
+		return
 	}
-	{{end}}
+	return 
+}
+{{end}}
 `
 
 type serviceDesc struct {

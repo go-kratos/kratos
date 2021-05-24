@@ -44,25 +44,14 @@ func NewGreeterHttpClient(client *http1.Client) GreeterHttpClient {
 }
 
 func (c *GreeterHttpClientImpl) SayHello(ctx context.Context, in *HelloRequest, opts ...http1.CallOption) (out *HelloReply, err error) {
-	content, err := c.cc.Encode(in, "")
-	if err != nil {
-		return nil, err
-	}
-	pathPattern := "http://helloworld.Greeter/helloworld/{name}"
-	req, err := http.NewRequest("GET", binding.ProtoPath(pathPattern, in), content)
-	if err != nil {
-		return nil, err
-	}
-	ctx = http1.NewClientContext(ctx, http1.ClientInfo{
-		PathPattern: pathPattern,
-	})
-	req = req.WithContext(ctx)
+	path := "/helloworld/{name}"
+	method := "GET"
+	body := ""
 
 	out = &HelloReply{}
-	err = http1.Do(c.cc, req, out, opts...)
+	err = c.cc.Invoke(ctx, method, path, in, out, http1.Body(body))
 	if err != nil {
-		return nil, err
+		return
 	}
-
-	return out, nil
+	return
 }
