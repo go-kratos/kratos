@@ -181,7 +181,7 @@ func defaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{
 		return err
 	}
 	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
-	if sc, ok := err.(interface {
+	if sc, ok := v.(interface {
 		HTTPStatus() int
 	}); ok {
 		w.WriteHeader(sc.HTTPStatus())
@@ -199,7 +199,7 @@ func defaultErrorEncoder(w http.ResponseWriter, r *http.Request, se error) {
 		return
 	}
 	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
-	if sc, ok := err.(interface {
+	if sc, ok := se.(interface {
 		HTTPStatus() int
 	}); ok {
 		w.WriteHeader(sc.HTTPStatus())
