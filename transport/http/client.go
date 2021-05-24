@@ -10,13 +10,11 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
-	xhttp "github.com/go-kratos/kratos/v2/internal/http"
+	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
-	spb "google.golang.org/genproto/googleapis/rpc/status"
-	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -28,19 +26,19 @@ type Client struct {
 	endpoint     string
 	userAgent    string
 	middleware   middleware.Middleware
-	encoder      RequestEncodeFunc
-	decoder      ResponseDecodeFunc
+	encoder      EncodeRequestFunc
+	decoder      DecodeResponseFunc
 	errorDecoder DecodeErrorFunc
 }
 
 // DecodeErrorFunc is decode error func.
 type DecodeErrorFunc func(ctx context.Context, res *http.Response) error
 
-// RequestEncodeFunc is request encode func.
-type RequestEncodeFunc func(ctx context.Context, in interface{}) (contentType string, body []byte, err error)
+// EncodeRequestFunc is request encode func.
+type EncodeRequestFunc func(ctx context.Context, in interface{}) (contentType string, body []byte, err error)
 
-// ResponseDecodeFunc is response decode func.
-type ResponseDecodeFunc func(ctx context.Context, res *http.Response, out interface{}) error
+// DecodeResponseFunc is response decode func.
+type DecodeResponseFunc func(ctx context.Context, res *http.Response, out interface{}) error
 
 // ClientOption is HTTP client option.
 type ClientOption func(*clientOptions)
@@ -87,17 +85,24 @@ func WithEndpoint(endpoint string) ClientOption {
 	}
 }
 
-// WithEncoder with client request encoder.
-func WithEncoder(encoder RequestEncodeFunc) ClientOption {
+// WithRequestEncoder with client request encoder.
+func WithRequestEncoder(encoder EncodeRequestFunc) ClientOption {
 	return func(o *clientOptions) {
 		o.encoder = encoder
 	}
 }
 
-// WithDecoder with client response decoder.
-func WithDecoder(decoder ResponseDecodeFunc) ClientOption {
+// WithResponseDecoder with client response decoder.
+func WithResponseDecoder(decoder DecodeResponseFunc) ClientOption {
 	return func(o *clientOptions) {
 		o.decoder = decoder
+	}
+}
+
+// WithErrorDecoder with client error decoder.
+func WithErrorDecoder(errorDecoder DecodeErrorFunc) ClientOption {
+	return func(o *clientOptions) {
+		o.errorDecoder = errorDecoder
 	}
 }
 
@@ -110,8 +115,8 @@ type clientOptions struct {
 	schema       string
 	endpoint     string
 	userAgent    string
-	encoder      RequestEncodeFunc
-	decoder      ResponseDecodeFunc
+	encoder      EncodeRequestFunc
+	decoder      DecodeResponseFunc
 	errorDecoder DecodeErrorFunc
 }
 
@@ -164,16 +169,14 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 	if args != nil && c.bodyPattern != "" {
 		// TODO: only encode the target field of args
 		var (
-			content []byte
-			err     error
+			body []byte
+			err  error
 		)
-		switch c.bodyPattern {
-		}
-		contentType, content, err = client.encoder(ctx, args)
+		contentType, body, err = client.encoder(ctx, args)
 		if err != nil {
 			return err
 		}
-		reqBody = bytes.NewReader(content)
+		reqBody = bytes.NewReader(body)
 	}
 	req, err := http.NewRequest(c.method, url, reqBody)
 	if err != nil {
@@ -232,31 +235,26 @@ func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*h
 		return nil, err
 	}
 	if err := client.errorDecoder(ctx, resp); err != nil {
-		resp.Body.Close()
 		return nil, err
 	}
 	return resp, nil
 }
 
-func defaultRequestEncoder(ctx context.Context, in interface{}) (contentType string, body []byte, err error) {
-	content, err := encoding.GetCodec("json").Marshal(in)
+func defaultRequestEncoder(ctx context.Context, in interface{}) (string, []byte, error) {
+	body, err := encoding.GetCodec("json").Marshal(in)
 	if err != nil {
 		return "", nil, err
 	}
-	return "application/json", content, err
+	return "application/json", body, err
 }
 
 func defaultResponseDecoder(ctx context.Context, res *http.Response, v interface{}) error {
-	subtype := xhttp.ContentSubtype(res.Header.Get(xhttp.HeaderContentType))
-	codec := encoding.GetCodec(subtype)
-	if codec == nil {
-		codec = encoding.GetCodec("json")
-	}
+	defer res.Body.Close()
 	data, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
-	return codec.Unmarshal(data, v)
+	return codecForResponse(res).Unmarshal(data, v)
 }
 
 func defaultErrorDecoder(ctx context.Context, res *http.Response) error {
@@ -265,10 +263,21 @@ func defaultErrorDecoder(ctx context.Context, res *http.Response) error {
 	}
 	defer res.Body.Close()
 	if data, err := ioutil.ReadAll(res.Body); err == nil {
-		st := new(spb.Status)
-		if err = protojson.Unmarshal(data, st); err == nil {
-			return status.ErrorProto(st)
+		e := new(errors.Error)
+		if err := codecForResponse(res).Unmarshal(data, e); err == nil {
+			return e
 		}
 	}
-	return status.Error(xhttp.GRPCCodeFromStatus(res.StatusCode), res.Status)
+	return errors.Errorf(httputil.GRPCCodeFromStatus(res.StatusCode), "", "", "")
+}
+
+func codecForResponse(r *http.Response) encoding.Codec {
+	codec := encoding.GetCodec(httputil.ContentSubtype("Content-Type"))
+	if codec != nil {
+		return codec
+	}
+	if codec == nil {
+		codec = encoding.GetCodec("json")
+	}
+	return codec
 }

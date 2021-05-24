@@ -1,4 +1,4 @@
-package http
+package httputil
 
 import (
 	"net/http"
@@ -9,15 +9,6 @@ import (
 
 const (
 	baseContentType = "application"
-)
-
-var (
-	// HeaderAccept is accept header.
-	HeaderAccept = http.CanonicalHeaderKey("Accept")
-	// HeaderContentType is content-type header.
-	HeaderContentType = http.CanonicalHeaderKey("Content-Type")
-	// HeaderAcceptLanguage is accept-language header.
-	HeaderAcceptLanguage = http.CanonicalHeaderKey("Accept-Language")
 )
 
 // ContentType returns the content-type with base prefix.

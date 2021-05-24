@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package kratos.errors;
+
+option go_package = "github.com/go-kratos/kratos/v2/errors;errors";
+option java_multiple_files = true;
+option java_package = "com.github.kratos.errors";
+option objc_class_prefix = "KratosErrors";
+
+message Error {
+  int32 code = 1;
+  string message = 2;
+  // error details
+  string reason = 3;
+  string domain = 4;
+  map<string, string> metadata = 5;
+};

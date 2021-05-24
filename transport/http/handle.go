@@ -8,15 +8,12 @@ import (
 	"reflect"
 
 	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/encoding/json"
-	xhttp "github.com/go-kratos/kratos/v2/internal/http"
+	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 	"github.com/gorilla/mux"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
@@ -47,9 +44,9 @@ type HandleOptions struct {
 // Deprecated: use NewHandler instead.
 func DefaultHandleOptions() HandleOptions {
 	return HandleOptions{
-		Decode:     decodeRequest,
-		Encode:     encodeResponse,
-		Error:      encodeError,
+		Decode:     defaultRequestDecoder,
+		Encode:     defaultResponseEncoder,
+		Error:      defaultErrorEncoder,
 		Middleware: recovery.Recovery(),
 	}
 }
@@ -154,63 +151,72 @@ func validateHandler(handler interface{}) error {
 	return nil
 }
 
-// decodeRequest decodes the request body to object.
-func decodeRequest(req *http.Request, v interface{}) error {
-	subtype := xhttp.ContentSubtype(req.Header.Get(xhttp.HeaderContentType))
+// defaultRequestDecoder decodes the request body to object.
+func defaultRequestDecoder(req *http.Request, v interface{}) error {
+	subtype := httputil.ContentSubtype(req.Header.Get("Content-Type"))
 	if codec := encoding.GetCodec(subtype); codec != nil {
 		data, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return status.Error(codes.InvalidArgument, err.Error())
+			return errors.BadRequest("global", "codec", err.Error())
 		}
 		if err := codec.Unmarshal(data, v); err != nil {
-			return status.Error(codes.InvalidArgument, err.Error())
+			return errors.BadRequest("global", "codec", err.Error())
 		}
 	} else {
 		if err := binding.BindForm(req, v); err != nil {
-			return status.Error(codes.InvalidArgument, err.Error())
+			return errors.BadRequest("global", "codec", err.Error())
 		}
 	}
 	if err := binding.BindVars(mux.Vars(req), v); err != nil {
-		return status.Error(codes.InvalidArgument, err.Error())
+		return errors.BadRequest("global", "codec", err.Error())
 	}
 	return nil
 }
 
-// encodeResponse encodes the object to the HTTP response.
-func encodeResponse(w http.ResponseWriter, r *http.Request, v interface{}) error {
+// defaultResponseEncoder encodes the object to the HTTP response.
+func defaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	codec := codecForRequest(r)
 	data, err := codec.Marshal(v)
 	if err != nil {
 		return err
 	}
-	w.Header().Set(xhttp.HeaderContentType, xhttp.ContentType(codec.Name()))
+	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
+	if sc, ok := v.(interface {
+		HTTPStatus() int
+	}); ok {
+		w.WriteHeader(sc.HTTPStatus())
+	}
 	_, _ = w.Write(data)
 	return nil
 }
 
-// encodeError encodes the error to the HTTP response.
-func encodeError(w http.ResponseWriter, r *http.Request, err error) {
-	st, _ := status.FromError(err)
-	data, err := protojson.Marshal(st.Proto())
+// defaultErrorEncoder encodes the error to the HTTP response.
+func defaultErrorEncoder(w http.ResponseWriter, r *http.Request, se error) {
+	codec := codecForRequest(r)
+	body, err := codec.Marshal(se)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set(xhttp.HeaderContentType, "application/json; charset=utf-8")
-	w.WriteHeader(xhttp.StatusFromGRPCCode(st.Code()))
-	w.Write(data)
+	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
+	if sc, ok := se.(interface {
+		HTTPStatus() int
+	}); ok {
+		w.WriteHeader(sc.HTTPStatus())
+	}
+	w.Write(body)
 }
 
 // codecForRequest get encoding.Codec via http.Request
 func codecForRequest(r *http.Request) encoding.Codec {
 	var codec encoding.Codec
-	for _, accept := range r.Header[xhttp.HeaderAccept] {
-		if codec = encoding.GetCodec(xhttp.ContentSubtype(accept)); codec != nil {
+	for _, accept := range r.Header["Accept"] {
+		if codec = encoding.GetCodec(httputil.ContentSubtype(accept)); codec != nil {
 			break
 		}
 	}
 	if codec == nil {
-		codec = encoding.GetCodec(json.Name)
+		codec = encoding.GetCodec("json")
 	}
 	return codec
 }

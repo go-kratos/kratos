@@ -26,10 +26,10 @@ func NewHTTPServer(c *conf.Server, tracer trace.TracerProvider, blog *service.Bl
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
 	m := http.Middleware(
+		recovery.Recovery(),
 		tracing.Server(tracing.WithTracerProvider(tracer)),
 		logging.Server(log.DefaultLogger),
-		recovery.Recovery(),
-		validate.Validator(v1.BlogService_ServiceDesc.ServiceName+".http"),
+		validate.Validator(),
 	)
 	srv := http.NewServer(opts...)
 	srv.HandlePrefix("/", v1.NewBlogServiceHandler(blog, m))

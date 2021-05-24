@@ -17,10 +17,10 @@ import (
 func NewGRPCServer(c *conf.Server, tracer trace.TracerProvider, blog *service.BlogService) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
+			recovery.Recovery(),
 			tracing.Server(tracing.WithTracerProvider(tracer)),
 			logging.Server(log.DefaultLogger),
-			recovery.Recovery(),
-			validate.Validator(v1.BlogService_ServiceDesc.ServiceName+".grpc"),
+			validate.Validator(),
 		),
 	}
 	if c.Grpc.Network != "" {
