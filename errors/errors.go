@@ -11,22 +11,24 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+// UnknownReason is unknown reason for error info.
+const UnknownReason = ""
+
 //go:generate protoc -I. --go_out=paths=source_relative:. errors.proto
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("error: domain = %s reason = %s metadata = %v", e.Domain, e.Reason, e.Metadata)
+	return fmt.Sprintf("error: code = %d reason = %s message = %s metadata = %v", e.Code, e.Reason, e.Message, e.Metadata)
 }
 
-// HTTPStatus return an HTTP error code.
-func (e *Error) HTTPStatus() int {
-	return httputil.StatusFromGRPCCode(codes.Code(e.Code))
+// StatusCode return an HTTP error code.
+func (e *Error) StatusCode() int {
+	return int(e.Code)
 }
 
 // GRPCStatus returns the Status represented by se.
 func (e *Error) GRPCStatus() *status.Status {
-	s, _ := status.New(codes.Code(e.Code), e.Message).
+	s, _ := status.New(httputil.GRPCCodeFromStatus(e.StatusCode()), e.Message).
 		WithDetails(&errdetails.ErrorInfo{
-			Domain:   e.Domain,
 			Reason:   e.Reason,
 			Metadata: e.Metadata,
 		})
@@ -36,7 +38,7 @@ func (e *Error) GRPCStatus() *status.Status {
 // Is matches each error in the chain with the target value.
 func (e *Error) Is(err error) bool {
 	if se := new(Error); errors.As(err, &se) {
-		return se.Domain == e.Domain && se.Reason == e.Reason
+		return se.Reason == e.Reason
 	}
 	return false
 }
@@ -49,23 +51,22 @@ func (e *Error) WithMetadata(md map[string]string) *Error {
 }
 
 // New returns an error object for the code, message.
-func New(code codes.Code, domain, reason, message string) *Error {
+func New(code int, reason, message string) *Error {
 	return &Error{
 		Code:    int32(code),
 		Message: message,
-		Domain:  domain,
 		Reason:  reason,
 	}
 }
 
 // Newf New(code fmt.Sprintf(format, a...))
-func Newf(code codes.Code, domain, reason, format string, a ...interface{}) *Error {
-	return New(code, domain, reason, fmt.Sprintf(format, a...))
+func Newf(code int, reason, format string, a ...interface{}) *Error {
+	return New(code, reason, fmt.Sprintf(format, a...))
 }
 
 // Errorf returns an error object for the code, message and error info.
-func Errorf(code codes.Code, domain, reason, format string, a ...interface{}) error {
-	return New(code, domain, reason, fmt.Sprintf(format, a...))
+func Errorf(code int, reason, format string, a ...interface{}) error {
+	return New(code, reason, fmt.Sprintf(format, a...))
 }
 
 // Code returns the code for a particular error.
@@ -80,22 +81,13 @@ func Code(err error) codes.Code {
 	return codes.Unknown
 }
 
-// Domain returns the domain for a particular error.
-// It supports wrapped errors.
-func Domain(err error) string {
-	if se := FromError(err); err != nil {
-		return se.Domain
-	}
-	return ""
-}
-
 // Reason returns the reason for a particular error.
 // It supports wrapped errors.
 func Reason(err error) string {
 	if se := FromError(err); err != nil {
 		return se.Reason
 	}
-	return ""
+	return UnknownReason
 }
 
 // FromError try to convert an error to *Error.
@@ -113,13 +105,12 @@ func FromError(err error) *Error {
 			switch d := detail.(type) {
 			case *errdetails.ErrorInfo:
 				return New(
-					gs.Code(),
-					d.Domain,
+					httputil.StatusFromGRPCCode(gs.Code()),
 					d.Reason,
 					gs.Message(),
 				).WithMetadata(d.Metadata)
 			}
 		}
 	}
-	return New(gs.Code(), "", "", err.Error())
+	return New(httputil.StatusFromGRPCCode(gs.Code()), UnknownReason, err.Error())
 }

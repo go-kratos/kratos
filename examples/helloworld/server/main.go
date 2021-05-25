@@ -31,7 +31,7 @@ type server struct {
 // SayHello implements helloworld.GreeterServer
 func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	if in.Name == "error" {
-		return nil, errors.BadRequest(Name, "custom_error", fmt.Sprintf("invalid argument %s", in.Name))
+		return nil, errors.BadRequest("custom_error", fmt.Sprintf("invalid argument %s", in.Name))
 	}
 	if in.Name == "panic" {
 		panic("grpc panic")
