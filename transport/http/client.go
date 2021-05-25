@@ -269,7 +269,7 @@ func defaultErrorDecoder(ctx context.Context, res *http.Response) error {
 			return e
 		}
 	}
-	return errors.Errorf(int32(res.StatusCode), errors.UnknownReason, err.Error())
+	return errors.Errorf(res.StatusCode, errors.UnknownReason, err.Error())
 }
 
 func codecForResponse(r *http.Response) encoding.Codec {

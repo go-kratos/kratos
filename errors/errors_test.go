@@ -3,17 +3,16 @@ package errors
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"testing"
-
-	"google.golang.org/grpc/codes"
 )
 
 func TestError(t *testing.T) {
 	var (
 		base *Error
 	)
-	err := Newf(codes.InvalidArgument, "domain", "reason", "message")
-	err2 := Newf(codes.InvalidArgument, "domain", "reason", "message")
+	err := Newf(http.StatusBadRequest, "reason", "message")
+	err2 := Newf(http.StatusBadRequest, "reason", "message")
 	err3 := err.WithMetadata(map[string]string{
 		"foo": "bar",
 	})
@@ -36,9 +35,6 @@ func TestError(t *testing.T) {
 		t.Errorf("should be matchs: %v", err)
 	}
 
-	if domain := Domain(err); domain != err2.Domain {
-		t.Errorf("got %s want: %s", domain, err)
-	}
 	if reason := Reason(err); reason != err3.Reason {
 		t.Errorf("got %s want: %s", reason, err)
 	}
@@ -49,7 +45,7 @@ func TestError(t *testing.T) {
 
 	gs := err.GRPCStatus()
 	se := FromError(gs.Err())
-	if se.Domain != err.Domain || se.Reason != se.Reason {
+	if se.Reason != se.Reason {
 		t.Errorf("got %+v want %+v", se, err)
 	}
 }

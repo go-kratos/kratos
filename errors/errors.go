@@ -51,21 +51,21 @@ func (e *Error) WithMetadata(md map[string]string) *Error {
 }
 
 // New returns an error object for the code, message.
-func New(code int32, reason, message string) *Error {
+func New(code int, reason, message string) *Error {
 	return &Error{
-		Code:    code,
+		Code:    int32(code),
 		Message: message,
 		Reason:  reason,
 	}
 }
 
 // Newf New(code fmt.Sprintf(format, a...))
-func Newf(code int32, reason, format string, a ...interface{}) *Error {
+func Newf(code int, reason, format string, a ...interface{}) *Error {
 	return New(code, reason, fmt.Sprintf(format, a...))
 }
 
 // Errorf returns an error object for the code, message and error info.
-func Errorf(code int32, reason, format string, a ...interface{}) error {
+func Errorf(code int, reason, format string, a ...interface{}) error {
 	return New(code, reason, fmt.Sprintf(format, a...))
 }
 
@@ -87,7 +87,7 @@ func Reason(err error) string {
 	if se := FromError(err); err != nil {
 		return se.Reason
 	}
-	return ""
+	return UnknownReason
 }
 
 // FromError try to convert an error to *Error.
