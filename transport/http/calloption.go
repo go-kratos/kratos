@@ -12,6 +12,13 @@ type CallOption interface {
 	after(*callInfo, *csAttempt)
 }
 
+type callInfo struct {
+	pathPattern     string
+	bodyPattern     string
+	respBodyPattern string
+	method          string
+}
+
 // EmptyCallOption does not alter the Call configuration.
 // It can be embedded in another structure to carry satellite data for use
 // by interceptors.
@@ -20,12 +27,23 @@ type EmptyCallOption struct{}
 func (EmptyCallOption) before(*callInfo) error      { return nil }
 func (EmptyCallOption) after(*callInfo, *csAttempt) {}
 
-type callInfo struct {
-	bodyPattern string
-	method      string
+type csAttempt struct{}
+
+// PathPattern is pathpattern
+func PathPattern(pathPattern string) CallOption {
+	return PathPatternCallOption{PathPattern: pathPattern}
 }
 
-type csAttempt struct{}
+// PathPatternCallOption is BodyPattern
+type PathPatternCallOption struct {
+	EmptyCallOption
+	PathPattern string
+}
+
+func (o PathPatternCallOption) before(c *callInfo) error {
+	c.pathPattern = o.PathPattern
+	return nil
+}
 
 // BodyPattern is bodyPattern
 func BodyPattern(bodyPattern string) CallOption {
@@ -34,6 +52,7 @@ func BodyPattern(bodyPattern string) CallOption {
 
 // BodyPatternCallOption is BodyPattern
 type BodyPatternCallOption struct {
+	EmptyCallOption
 	BodyPattern string
 }
 
@@ -41,7 +60,22 @@ func (o BodyPatternCallOption) before(c *callInfo) error {
 	c.bodyPattern = o.BodyPattern
 	return nil
 }
-func (o BodyPatternCallOption) after(c *callInfo, attempt *csAttempt) {}
+
+// RespBodyPattern is bodyPattern
+func RespBodyPattern(respBodyPattern string) CallOption {
+	return RespBodyPatternCallOption{RespBodyPattern: respBodyPattern}
+}
+
+// RespBodyPatternCallOption is BodyPattern
+type RespBodyPatternCallOption struct {
+	EmptyCallOption
+	RespBodyPattern string
+}
+
+func (o RespBodyPatternCallOption) before(c *callInfo) error {
+	c.respBodyPattern = o.RespBodyPattern
+	return nil
+}
 
 // Method is Method
 func Method(method string) CallOption {
@@ -50,6 +84,7 @@ func Method(method string) CallOption {
 
 // MethodCallOption is BodyCallOption
 type MethodCallOption struct {
+	EmptyCallOption
 	Method string
 }
 
@@ -57,11 +92,11 @@ func (o MethodCallOption) before(c *callInfo) error {
 	c.method = o.Method
 	return nil
 }
-func (o MethodCallOption) after(c *callInfo, attempt *csAttempt) {}
 
 func defaultCallInfo() callInfo {
 	return callInfo{
-		bodyPattern: "*",
-		method:      "POST",
+		bodyPattern:     "*",
+		respBodyPattern: "*",
+		method:          "POST",
 	}
 }

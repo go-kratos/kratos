@@ -45,11 +45,12 @@ func NewGreeterHttpClient(client *http1.Client) GreeterHttpClient {
 
 func (c *GreeterHttpClientImpl) SayHello(ctx context.Context, in *HelloRequest, opts ...http1.CallOption) (out *HelloReply, err error) {
 	path := "/helloworld/{name}"
-	method := "GET"
-	body := ""
+	if in != nil {
+		path = binding.ProtoPath(path, in)
+	}
 
 	out = &HelloReply{}
-	err = c.cc.Invoke(ctx, path, in, out, http1.BodyPattern(body), http1.Method(method))
+	err = c.cc.Invoke(ctx, path, in, out, http1.Method("GET"), http1.PathPattern("/helloworld/{name}"), http1.BodyPattern(""), http1.RespBodyPattern(""))
 	if err != nil {
 		return
 	}

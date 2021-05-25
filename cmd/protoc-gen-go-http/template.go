@@ -40,11 +40,12 @@ func New{{.ServiceType}}HttpClient (client *http1.Client) {{.ServiceType}}HttpCl
 {{range .MethodSets}}
 func (c *{{$svrType}}HttpClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http1.CallOption) (out *{{.Reply}}, err error) {
 	path := "{{.Path}}"
-	method := "{{.Method}}"
-	body := "{{.Body}}"
+	if in != nil {
+		path = binding.ProtoPath(path, in)
+	}
 	
 	out = &{{.Reply}}{}
-	err = c.cc.Invoke(ctx, path, in, out, http1.BodyPattern(body), http1.Method(method))
+	err = c.cc.Invoke(ctx, path, in, out, http1.Method("{{.Method}}"), http1.PathPattern("{{.Path}}"), http1.BodyPattern("{{.Body}}"), http1.RespBodyPattern("{{.ResponseBody}}"))
 	if err != nil {
 		return
 	}

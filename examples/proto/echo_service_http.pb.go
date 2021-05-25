@@ -77,11 +77,12 @@ func NewEchoServiceHttpClient(client *http1.Client) EchoServiceHttpClient {
 
 func (c *EchoServiceHttpClientImpl) Echo(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (out *SimpleMessage, err error) {
 	path := "/v1/example/echo/{id}"
-	method := "POST"
-	body := ""
+	if in != nil {
+		path = binding.ProtoPath(path, in)
+	}
 
 	out = &SimpleMessage{}
-	err = c.cc.Invoke(ctx, path, in, out, http1.BodyPattern(body), http1.Method(method))
+	err = c.cc.Invoke(ctx, path, in, out, http1.Method("POST"), http1.PathPattern("/v1/example/echo/{id}"), http1.BodyPattern(""), http1.RespBodyPattern(""))
 	if err != nil {
 		return
 	}
@@ -90,11 +91,12 @@ func (c *EchoServiceHttpClientImpl) Echo(ctx context.Context, in *SimpleMessage,
 
 func (c *EchoServiceHttpClientImpl) EchoBody(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (out *SimpleMessage, err error) {
 	path := "/v1/example/echo_body"
-	method := "POST"
-	body := "*"
+	if in != nil {
+		path = binding.ProtoPath(path, in)
+	}
 
 	out = &SimpleMessage{}
-	err = c.cc.Invoke(ctx, path, in, out, http1.BodyPattern(body), http1.Method(method))
+	err = c.cc.Invoke(ctx, path, in, out, http1.Method("POST"), http1.PathPattern("/v1/example/echo_body"), http1.BodyPattern("*"), http1.RespBodyPattern(""))
 	if err != nil {
 		return
 	}
@@ -103,11 +105,12 @@ func (c *EchoServiceHttpClientImpl) EchoBody(ctx context.Context, in *SimpleMess
 
 func (c *EchoServiceHttpClientImpl) EchoDelete(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (out *SimpleMessage, err error) {
 	path := "/v1/example/echo_delete/{id}/{num}"
-	method := "DELETE"
-	body := ""
+	if in != nil {
+		path = binding.ProtoPath(path, in)
+	}
 
 	out = &SimpleMessage{}
-	err = c.cc.Invoke(ctx, path, in, out, http1.BodyPattern(body), http1.Method(method))
+	err = c.cc.Invoke(ctx, path, in, out, http1.Method("DELETE"), http1.PathPattern("/v1/example/echo_delete/{id}/{num}"), http1.BodyPattern(""), http1.RespBodyPattern(""))
 	if err != nil {
 		return
 	}
@@ -116,11 +119,12 @@ func (c *EchoServiceHttpClientImpl) EchoDelete(ctx context.Context, in *SimpleMe
 
 func (c *EchoServiceHttpClientImpl) EchoPatch(ctx context.Context, in *DynamicMessageUpdate, opts ...http1.CallOption) (out *DynamicMessageUpdate, err error) {
 	path := "/v1/example/echo_patch"
-	method := "PATCH"
-	body := ".body"
+	if in != nil {
+		path = binding.ProtoPath(path, in)
+	}
 
 	out = &DynamicMessageUpdate{}
-	err = c.cc.Invoke(ctx, path, in, out, http1.BodyPattern(body), http1.Method(method))
+	err = c.cc.Invoke(ctx, path, in, out, http1.Method("PATCH"), http1.PathPattern("/v1/example/echo_patch"), http1.BodyPattern(".body"), http1.RespBodyPattern(""))
 	if err != nil {
 		return
 	}
@@ -129,11 +133,12 @@ func (c *EchoServiceHttpClientImpl) EchoPatch(ctx context.Context, in *DynamicMe
 
 func (c *EchoServiceHttpClientImpl) EchoResponseBody(ctx context.Context, in *DynamicMessageUpdate, opts ...http1.CallOption) (out *DynamicMessageUpdate, err error) {
 	path := "/v1/example/echo_response_body"
-	method := "POST"
-	body := ""
+	if in != nil {
+		path = binding.ProtoPath(path, in)
+	}
 
 	out = &DynamicMessageUpdate{}
-	err = c.cc.Invoke(ctx, path, in, out, http1.BodyPattern(body), http1.Method(method))
+	err = c.cc.Invoke(ctx, path, in, out, http1.Method("POST"), http1.PathPattern("/v1/example/echo_response_body"), http1.BodyPattern(""), http1.RespBodyPattern(".body"))
 	if err != nil {
 		return
 	}
