@@ -89,6 +89,7 @@ service EchoService {
 	rpc EchoResponseBody(DynamicMessageUpdate) returns (DynamicMessageUpdate) {
 		option (google.api.http) = {
 			post: "/v1/example/echo_response_body"
+			body: "*"
 			response_body: "body"
 		};
 	}

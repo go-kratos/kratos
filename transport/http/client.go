@@ -159,7 +159,7 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 	}
 
 	url := fmt.Sprintf("%s://%s%s", client.schema, client.endpoint, path)
-	if args != nil && c.bodyPattern != "" {
+	if args != nil {
 		// TODO: only encode the target field of args
 		var (
 			body []byte

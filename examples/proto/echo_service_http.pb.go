@@ -80,9 +80,10 @@ func (c *EchoServiceHttpClientImpl) Echo(ctx context.Context, in *SimpleMessage,
 	if in != nil {
 		path = binding.ProtoPath(path, in)
 	}
-
 	out = &SimpleMessage{}
-	err = c.cc.Invoke(ctx, path, in, out, http1.Method("POST"), http1.PathPattern("/v1/example/echo/{id}"), http1.BodyPattern(""), http1.RespBodyPattern(""))
+
+	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("POST"), http1.PathPattern("/v1/example/echo/{id}"))
+
 	if err != nil {
 		return
 	}
@@ -94,9 +95,10 @@ func (c *EchoServiceHttpClientImpl) EchoBody(ctx context.Context, in *SimpleMess
 	if in != nil {
 		path = binding.ProtoPath(path, in)
 	}
-
 	out = &SimpleMessage{}
-	err = c.cc.Invoke(ctx, path, in, out, http1.Method("POST"), http1.PathPattern("/v1/example/echo_body"), http1.BodyPattern("*"), http1.RespBodyPattern(""))
+
+	err = c.cc.Invoke(ctx, path, in, &out, http1.Method("POST"), http1.PathPattern("/v1/example/echo_body"))
+
 	if err != nil {
 		return
 	}
@@ -108,9 +110,10 @@ func (c *EchoServiceHttpClientImpl) EchoDelete(ctx context.Context, in *SimpleMe
 	if in != nil {
 		path = binding.ProtoPath(path, in)
 	}
-
 	out = &SimpleMessage{}
-	err = c.cc.Invoke(ctx, path, in, out, http1.Method("DELETE"), http1.PathPattern("/v1/example/echo_delete/{id}/{num}"), http1.BodyPattern(""), http1.RespBodyPattern(""))
+
+	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("DELETE"), http1.PathPattern("/v1/example/echo_delete/{id}/{num}"))
+
 	if err != nil {
 		return
 	}
@@ -122,9 +125,10 @@ func (c *EchoServiceHttpClientImpl) EchoPatch(ctx context.Context, in *DynamicMe
 	if in != nil {
 		path = binding.ProtoPath(path, in)
 	}
-
 	out = &DynamicMessageUpdate{}
-	err = c.cc.Invoke(ctx, path, in, out, http1.Method("PATCH"), http1.PathPattern("/v1/example/echo_patch"), http1.BodyPattern(".body"), http1.RespBodyPattern(""))
+
+	err = c.cc.Invoke(ctx, path, in.Body, &out, http1.Method("PATCH"), http1.PathPattern("/v1/example/echo_patch"))
+
 	if err != nil {
 		return
 	}
@@ -136,9 +140,10 @@ func (c *EchoServiceHttpClientImpl) EchoResponseBody(ctx context.Context, in *Dy
 	if in != nil {
 		path = binding.ProtoPath(path, in)
 	}
-
 	out = &DynamicMessageUpdate{}
-	err = c.cc.Invoke(ctx, path, in, out, http1.Method("POST"), http1.PathPattern("/v1/example/echo_response_body"), http1.BodyPattern(""), http1.RespBodyPattern(".body"))
+
+	err = c.cc.Invoke(ctx, path, in, &out.Body, http1.Method("POST"), http1.PathPattern("/v1/example/echo_response_body"))
+
 	if err != nil {
 		return
 	}

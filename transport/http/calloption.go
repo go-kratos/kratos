@@ -13,10 +13,8 @@ type CallOption interface {
 }
 
 type callInfo struct {
-	pathPattern     string
-	bodyPattern     string
-	respBodyPattern string
-	method          string
+	pathPattern string
+	method      string
 }
 
 // EmptyCallOption does not alter the Call configuration.
@@ -45,38 +43,6 @@ func (o PathPatternCallOption) before(c *callInfo) error {
 	return nil
 }
 
-// BodyPattern is bodyPattern
-func BodyPattern(bodyPattern string) CallOption {
-	return BodyPatternCallOption{BodyPattern: bodyPattern}
-}
-
-// BodyPatternCallOption is BodyPattern
-type BodyPatternCallOption struct {
-	EmptyCallOption
-	BodyPattern string
-}
-
-func (o BodyPatternCallOption) before(c *callInfo) error {
-	c.bodyPattern = o.BodyPattern
-	return nil
-}
-
-// RespBodyPattern is bodyPattern
-func RespBodyPattern(respBodyPattern string) CallOption {
-	return RespBodyPatternCallOption{RespBodyPattern: respBodyPattern}
-}
-
-// RespBodyPatternCallOption is BodyPattern
-type RespBodyPatternCallOption struct {
-	EmptyCallOption
-	RespBodyPattern string
-}
-
-func (o RespBodyPatternCallOption) before(c *callInfo) error {
-	c.respBodyPattern = o.RespBodyPattern
-	return nil
-}
-
 // Method is Method
 func Method(method string) CallOption {
 	return MethodCallOption{Method: method}
@@ -95,8 +61,6 @@ func (o MethodCallOption) before(c *callInfo) error {
 
 func defaultCallInfo() callInfo {
 	return callInfo{
-		bodyPattern:     "*",
-		respBodyPattern: "*",
-		method:          "POST",
+		method: "POST",
 	}
 }

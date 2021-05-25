@@ -43,9 +43,12 @@ func (c *{{$svrType}}HttpClientImpl) {{.Name}}(ctx context.Context, in *{{.Reque
 	if in != nil {
 		path = binding.ProtoPath(path, in)
 	}
-	
 	out = &{{.Reply}}{}
-	err = c.cc.Invoke(ctx, path, in, out, http1.Method("{{.Method}}"), http1.PathPattern("{{.Path}}"), http1.BodyPattern("{{.Body}}"), http1.RespBodyPattern("{{.ResponseBody}}"))
+	{{if (eq .Body "nil")}}
+	err = c.cc.Invoke(ctx, path, nil, &out{{.ResponseBody}}, http1.Method("{{.Method}}"), http1.PathPattern("{{.Path}}"))
+	{{else}} 
+	err = c.cc.Invoke(ctx, path, in{{.Body}}, &out{{.ResponseBody}}, http1.Method("{{.Method}}"), http1.PathPattern("{{.Path}}"))
+	{{end}}
 	if err != nil {
 		return
 	}
