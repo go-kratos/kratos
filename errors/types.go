@@ -1,82 +1,82 @@
 package errors
 
 import (
-	"google.golang.org/grpc/codes"
+	"net/http"
 )
 
 // BadRequest new BadRequest error that is mapped to a 400 response.
-func BadRequest(domain, reason, message string) *Error {
-	return Newf(codes.InvalidArgument, domain, reason, message)
+func BadRequest(reason, message string) *Error {
+	return Newf(http.StatusBadRequest, reason, message)
 }
 
 // IsBadRequest determines if err is an error which indicates a BadRequest error.
 // It supports wrapped errors.
 func IsBadRequest(err error) bool {
-	return Code(err) == codes.InvalidArgument
+	return Code(err) == http.StatusBadRequest
 }
 
 // Unauthorized new Unauthorized error that is mapped to a 401 response.
-func Unauthorized(domain, reason, message string) *Error {
-	return Newf(codes.Unauthenticated, domain, reason, message)
+func Unauthorized(reason, message string) *Error {
+	return Newf(http.StatusUnauthorized, reason, message)
 }
 
 // IsUnauthorized determines if err is an error which indicates a Unauthorized error.
 // It supports wrapped errors.
 func IsUnauthorized(err error) bool {
-	return Code(err) == codes.Unauthenticated
+	return Code(err) == http.StatusUnauthorized
 }
 
 // Forbidden new Forbidden error that is mapped to a 403 response.
-func Forbidden(domain, reason, message string) *Error {
-	return Newf(codes.PermissionDenied, domain, reason, message)
+func Forbidden(reason, message string) *Error {
+	return Newf(http.StatusForbidden, reason, message)
 }
 
 // IsForbidden determines if err is an error which indicates a Forbidden error.
 // It supports wrapped errors.
 func IsForbidden(err error) bool {
-	return Code(err) == codes.PermissionDenied
+	return Code(err) == http.StatusForbidden
 }
 
 // NotFound new NotFound error that is mapped to a 404 response.
-func NotFound(domain, reason, message string) *Error {
-	return Newf(codes.NotFound, domain, reason, message)
+func NotFound(reason, message string) *Error {
+	return Newf(http.StatusNotFound, reason, message)
 }
 
 // IsNotFound determines if err is an error which indicates an NotFound error.
 // It supports wrapped errors.
 func IsNotFound(err error) bool {
-	return Code(err) == codes.NotFound
+	return Code(err) == http.StatusNotFound
 }
 
 // Conflict new Conflict error that is mapped to a 409 response.
-func Conflict(domain, reason, message string) *Error {
-	return Newf(codes.Aborted, domain, reason, message)
+func Conflict(reason, message string) *Error {
+	return Newf(http.StatusConflict, reason, message)
 }
 
 // IsConflict determines if err is an error which indicates a Conflict error.
 // It supports wrapped errors.
 func IsConflict(err error) bool {
-	return Code(err) == codes.Aborted
+	return Code(err) == http.StatusConflict
 }
 
 // InternalServer new InternalServer error that is mapped to a 500 response.
-func InternalServer(domain, reason, message string) *Error {
-	return Newf(codes.Internal, domain, reason, message)
+func InternalServer(reason, message string) *Error {
+	return Newf(http.StatusInternalServerError, reason, message)
 }
 
 // IsInternalServer determines if err is an error which indicates an Internal error.
 // It supports wrapped errors.
 func IsInternalServer(err error) bool {
-	return Code(err) == codes.Internal
+	return Code(err) == http.StatusInternalServerError
 }
 
 // ServiceUnavailable new ServiceUnavailable error that is mapped to a HTTP 503 response.
-func ServiceUnavailable(domain, reason, message string) *Error {
-	return Newf(codes.Unavailable, domain, reason, message)
+func ServiceUnavailable(reason, message string) *Error {
+	return Newf(http.StatusServiceUnavailable, reason, message)
 }
 
 // IsServiceUnavailable determines if err is an error which indicates a Unavailable error.
 // It supports wrapped errors.
 func IsServiceUnavailable(err error) bool {
-	return Code(err) == codes.Unavailable
+	return Code(err) == http.StatusServiceUnavailable
 }

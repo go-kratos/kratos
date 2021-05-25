@@ -9,9 +9,7 @@ option objc_class_prefix = "KratosErrors";
 
 message Error {
   int32 code = 1;
-  string message = 2;
-  // error details
-  string reason = 3;
-  string domain = 4;
-  map<string, string> metadata = 5;
+  string reason = 2;
+  string message = 3;
+  map<string, string> metadata = 4;
 };

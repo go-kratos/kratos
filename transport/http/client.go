@@ -262,13 +262,14 @@ func defaultErrorDecoder(ctx context.Context, res *http.Response) error {
 		return nil
 	}
 	defer res.Body.Close()
-	if data, err := ioutil.ReadAll(res.Body); err == nil {
+	data, err := ioutil.ReadAll(res.Body)
+	if err == nil {
 		e := new(errors.Error)
-		if err := codecForResponse(res).Unmarshal(data, e); err == nil {
+		if err = codecForResponse(res).Unmarshal(data, e); err == nil {
 			return e
 		}
 	}
-	return errors.Errorf(httputil.GRPCCodeFromStatus(res.StatusCode), "", "", "")
+	return errors.Errorf(int32(res.StatusCode), errors.UnknownReason, err.Error())
 }
 
 func codecForResponse(r *http.Response) encoding.Codec {

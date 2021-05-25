@@ -38,7 +38,7 @@ func ContentSubtype(contentType string) string {
 
 // GRPCCodeFromStatus converts a HTTP error code into the corresponding gRPC response status.
 // See: https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
-func GRPCCodeFromStatus(code int) codes.Code {
+func GRPCCodeFromStatus(code int32) codes.Code {
 	switch code {
 	case http.StatusOK:
 		return codes.OK
@@ -68,7 +68,7 @@ func GRPCCodeFromStatus(code int) codes.Code {
 
 // StatusFromGRPCCode converts a gRPC error code into the corresponding HTTP response status.
 // See: https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
-func StatusFromGRPCCode(code codes.Code) int {
+func StatusFromGRPCCode(code codes.Code) int32 {
 	switch code {
 	case codes.OK:
 		return http.StatusOK

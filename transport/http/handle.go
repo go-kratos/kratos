@@ -157,18 +157,18 @@ func defaultRequestDecoder(req *http.Request, v interface{}) error {
 	if codec := encoding.GetCodec(subtype); codec != nil {
 		data, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return errors.BadRequest("global", "codec", err.Error())
+			return errors.BadRequest("CODEC", err.Error())
 		}
 		if err := codec.Unmarshal(data, v); err != nil {
-			return errors.BadRequest("global", "codec", err.Error())
+			return errors.BadRequest("CODEC", err.Error())
 		}
 	} else {
 		if err := binding.BindForm(req, v); err != nil {
-			return errors.BadRequest("global", "codec", err.Error())
+			return errors.BadRequest("CODEC", err.Error())
 		}
 	}
 	if err := binding.BindVars(mux.Vars(req), v); err != nil {
-		return errors.BadRequest("global", "codec", err.Error())
+		return errors.BadRequest("CODEC", err.Error())
 	}
 	return nil
 }
@@ -182,9 +182,9 @@ func defaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{
 	}
 	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
 	if sc, ok := v.(interface {
-		HTTPStatus() int
+		StatusCode() int
 	}); ok {
-		w.WriteHeader(sc.HTTPStatus())
+		w.WriteHeader(sc.StatusCode())
 	}
 	_, _ = w.Write(data)
 	return nil
@@ -200,9 +200,11 @@ func defaultErrorEncoder(w http.ResponseWriter, r *http.Request, se error) {
 	}
 	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
 	if sc, ok := se.(interface {
-		HTTPStatus() int
+		StatusCode() int
 	}); ok {
-		w.WriteHeader(sc.HTTPStatus())
+		w.WriteHeader(sc.StatusCode())
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 	w.Write(body)
 }
