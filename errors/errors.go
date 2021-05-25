@@ -27,7 +27,7 @@ func (e *Error) StatusCode() int {
 
 // GRPCStatus returns the Status represented by se.
 func (e *Error) GRPCStatus() *status.Status {
-	s, _ := status.New(codes.Code(e.Code), e.Message).
+	s, _ := status.New(httputil.GRPCCodeFromStatus(e.StatusCode()), e.Message).
 		WithDetails(&errdetails.ErrorInfo{
 			Reason:   e.Reason,
 			Metadata: e.Metadata,
