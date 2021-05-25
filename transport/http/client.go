@@ -158,9 +158,7 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 		}
 	}
 
-	url := fmt.Sprintf("%s://%s%s", client.schema, client.endpoint, path)
 	if args != nil {
-		// TODO: only encode the target field of args
 		var (
 			body []byte
 			err  error
@@ -171,15 +169,16 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 		}
 		reqBody = bytes.NewReader(body)
 	}
+	url := fmt.Sprintf("%s://%s%s", client.schema, client.endpoint, path)
 	req, err := http.NewRequest(c.method, url, reqBody)
 	if err != nil {
 		return err
 	}
-	if client.userAgent != "" {
-		req.Header.Set("User-Agent", client.userAgent)
-	}
 	if contentType != "" {
 		req.Header.Set("Content-Type", contentType)
+	}
+	if client.userAgent != "" {
+		req.Header.Set("User-Agent", client.userAgent)
 	}
 
 	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP})
