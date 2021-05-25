@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -20,6 +21,9 @@ import (
 
 // ProtoPath binds proto message to url path
 func ProtoPath(template string, msg proto.Message) string {
+	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
+		return template
+	}
 	reg := regexp.MustCompile(`/{[.\w]+}`)
 	if reg == nil {
 		return template
