@@ -109,3 +109,18 @@ func Tree(path string, dir string) {
 		return nil
 	})
 }
+
+func ContinueWrite(filename string) bool {
+	if _, err := os.Stat(filename); !os.IsNotExist(err) {
+
+		fmt.Fprintf(os.Stderr, "%s already exists \n want to overwrite ? [Y/N](default:N)", filename)
+
+		var yOrN = "N"
+
+		fmt.Fscanf(os.Stdout, "%s", &yOrN)
+		if strings.ToUpper(yOrN) == "N" || yOrN == "" {
+			return false
+		}
+	}
+	return true
+}

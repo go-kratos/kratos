@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 	"io/ioutil"
 	"log"
 	"os"
@@ -72,10 +73,11 @@ func run(cmd *cobra.Command, args []string) {
 	}
 	for _, s := range res {
 		to := path.Join(targetDir, strings.ToLower(s.Service)+".go")
-		if _, err := os.Stat(to); !os.IsNotExist(err) {
-			fmt.Fprintf(os.Stderr, "%s already exists: %s\n", s.Service, to)
+
+		if !base.ContinueWrite(to) {
 			continue
 		}
+
 		b, err := s.execute()
 		if err != nil {
 			log.Fatal(err)
