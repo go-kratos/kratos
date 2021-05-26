@@ -9,7 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
-// Target is resovler target
+// Target is resolver target
 type Target struct {
 	Scheme    string
 	Authority string
@@ -25,7 +25,7 @@ type resolver struct {
 	logger  *log.Helper
 }
 
-func newResovler(ctx context.Context, scheme string, discovery registry.Discovery, target Target) (*resolver, error) {
+func newResolver(ctx context.Context, scheme string, discovery registry.Discovery, target Target) (*resolver, error) {
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err

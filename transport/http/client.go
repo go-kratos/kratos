@@ -171,9 +171,9 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 				Authority: u.Host,
 				Endpoint:  u.Path[1:],
 			}
-			r, err = newResovler(ctx, options.scheme, options.discovery, target)
+			r, err = newResolver(ctx, options.scheme, options.discovery, target)
 			if err != nil {
-				return nil, fmt.Errorf("[http client] new resovler failed!err: %v", options.endpoint)
+				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
 		} else {
 			return nil, fmt.Errorf("[http client] invalid endpoint format: %v", options.endpoint)

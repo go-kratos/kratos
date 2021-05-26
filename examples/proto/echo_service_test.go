@@ -134,6 +134,7 @@ func testEchoClient(t *testing.T, addr string) {
 	if din.Body.ValueField.GetStringValue() != dout.Body.ValueField.GetStringValue() {
 		t.Fatalf("EchoPatch expected %s got %s", din, dout)
 	}
+	fmt.Println("echo test success!")
 }
 
 func TestJSON(t *testing.T) {
