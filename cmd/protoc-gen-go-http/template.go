@@ -52,24 +52,24 @@ func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.Handl
 	return r
 }
 
-type {{.ServiceType}}HttpClient interface {
+type {{.ServiceType}}HTTPClient interface {
 {{range .MethodSets}}
 	{{.Name}}(ctx context.Context, req *{{.Request}}, opts ...http1.CallOption) (rsp *{{.Reply}}, err error) 
 {{end}}
 }
 	
-type {{.ServiceType}}HttpClientImpl struct{
+type {{.ServiceType}}HTTPClientImpl struct{
 	cc *http1.Client
 }
 	
-func New{{.ServiceType}}HttpClient (client *http1.Client) {{.ServiceType}}HttpClient {
-	return &{{.ServiceType}}HttpClientImpl{client}
+func New{{.ServiceType}}HTTPClient (client *http1.Client) {{.ServiceType}}HTTPClient {
+	return &{{.ServiceType}}HTTPClientImpl{client}
 }
 	
 {{$svrType := .ServiceType}}
 {{$svrName := .ServiceName}}
 {{range .MethodSets}}
-func (c *{{$svrType}}HttpClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http1.CallOption) (out *{{.Reply}}, err error) {
+func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http1.CallOption) (out *{{.Reply}}, err error) {
 	path := binding.EncodePath("{{.Method}}", "{{.Path}}", in)
 	out = &{{.Reply}}{}
 	{{if .HasBody }}

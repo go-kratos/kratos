@@ -6,13 +6,16 @@ import (
 
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 )
 
-// UnknownReason is unknown reason for error info.
-const UnknownReason = ""
+const (
+	// UnknownCode is unknown code for error info.
+	UnknownCode = 500
+	// UnknownReason is unknown reason for error info.
+	UnknownReason = ""
+)
 
 //go:generate protoc -I. --go_out=paths=source_relative:. errors.proto
 
@@ -71,14 +74,14 @@ func Errorf(code int, reason, format string, a ...interface{}) error {
 
 // Code returns the code for a particular error.
 // It supports wrapped errors.
-func Code(err error) codes.Code {
+func Code(err error) int {
 	if err == nil {
-		return codes.OK
+		return 0
 	}
 	if se := FromError(err); err != nil {
-		return codes.Code(se.Code)
+		return int(se.Code)
 	}
-	return codes.Unknown
+	return UnknownCode
 }
 
 // Reason returns the reason for a particular error.
@@ -112,5 +115,5 @@ func FromError(err error) *Error {
 			}
 		}
 	}
-	return New(httputil.StatusFromGRPCCode(gs.Code()), UnknownReason, err.Error())
+	return New(UnknownCode, UnknownReason, err.Error())
 }
