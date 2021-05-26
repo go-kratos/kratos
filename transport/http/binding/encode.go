@@ -15,6 +15,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 // EncodePath binds proto message to url path
@@ -207,9 +208,14 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 			return "", nil
 		}
 		return d.AsDuration().String(), nil
+	case "google.protobuf.BytesValue":
+		b, ok := value.Interface().(*wrapperspb.BytesValue)
+		if !ok {
+			return "", nil
+		}
+		return base64.StdEncoding.EncodeToString(b.Value), nil
 	case "google.protobuf.DoubleValue", "google.protobuf.FloatValue", "google.protobuf.Int64Value", "google.protobuf.Int32Value",
-		"google.protobuf.UInt64Value", "google.protobuf.UInt32Value", "google.protobuf.BoolValue", "google.protobuf.StringValue",
-		"google.protobuf.BytesValue":
+		"google.protobuf.UInt64Value", "google.protobuf.UInt32Value", "google.protobuf.BoolValue", "google.protobuf.StringValue":
 		fd := msgDescriptor.Fields()
 		v := value.Message().Get(fd.ByName(protoreflect.Name("value"))).Message()
 		return fmt.Sprintf("%v", v.Interface()), nil
