@@ -114,14 +114,18 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	responseBody = rule.ResponseBody
 	md := buildMethodDesc(g, m, method, path)
 	if body == "*" {
-		md.Body = "*"
+		md.HasBody = true
+		md.Body = ""
 	} else if body != "" {
-		md.Body = "." + body
+		md.HasBody = true
+		md.Body = "." + camelCaseVars(body)
+	} else {
+		md.HasBody = false
 	}
 	if responseBody == "*" {
-		md.ResponseBody = "*"
+		md.ResponseBody = ""
 	} else if responseBody != "" {
-		md.ResponseBody = "." + responseBody
+		md.ResponseBody = "." + camelCaseVars(responseBody)
 	}
 	return md
 }

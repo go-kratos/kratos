@@ -13,7 +13,6 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
-	"github.com/gorilla/mux"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
@@ -166,9 +165,6 @@ func defaultRequestDecoder(req *http.Request, v interface{}) error {
 		if err := binding.BindForm(req, v); err != nil {
 			return errors.BadRequest("CODEC", err.Error())
 		}
-	}
-	if err := binding.BindVars(mux.Vars(req), v); err != nil {
-		return errors.BadRequest("CODEC", err.Error())
 	}
 	return nil
 }

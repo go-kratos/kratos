@@ -14,8 +14,6 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
-	"github.com/go-kratos/kratos/v2/transport/http/binding"
-	"google.golang.org/protobuf/proto"
 )
 
 // Client is http client
@@ -147,7 +145,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 }
 
 // Invoke makes an rpc call procedure for remote service.
-func (client *Client) Invoke(ctx context.Context, pathPattern string, args interface{}, reply interface{}, opts ...CallOption) error {
+func (client *Client) Invoke(ctx context.Context, path string, args interface{}, reply interface{}, opts ...CallOption) error {
 	var (
 		reqBody     io.Reader
 		contentType string
@@ -160,14 +158,7 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 		}
 	}
 
-	path := pathPattern
 	if args != nil {
-		// TODO: support for struct path bindings
-		path = binding.ProtoPath(path, args.(proto.Message))
-	}
-	url := fmt.Sprintf("%s://%s%s", client.schema, client.endpoint, path)
-	if args != nil && c.bodyPattern != "" {
-		// TODO: only encode the target field of args
 		var (
 			body []byte
 			err  error
@@ -178,20 +169,21 @@ func (client *Client) Invoke(ctx context.Context, pathPattern string, args inter
 		}
 		reqBody = bytes.NewReader(body)
 	}
+	url := fmt.Sprintf("%s://%s%s", client.schema, client.endpoint, path)
 	req, err := http.NewRequest(c.method, url, reqBody)
 	if err != nil {
 		return err
 	}
-	if client.userAgent != "" {
-		req.Header.Set("User-Agent", client.userAgent)
-	}
 	if contentType != "" {
 		req.Header.Set("Content-Type", contentType)
+	}
+	if client.userAgent != "" {
+		req.Header.Set("User-Agent", client.userAgent)
 	}
 
 	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP})
 	ctx = NewClientContext(ctx, ClientInfo{
-		PathPattern: pathPattern,
+		PathPattern: c.pathPattern,
 		Request:     req,
 	})
 

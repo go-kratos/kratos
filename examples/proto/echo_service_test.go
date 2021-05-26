@@ -119,17 +119,20 @@ func testEchoClient(t *testing.T, addr string) {
 		}}
 		dout *DynamicMessageUpdate
 	)
-	if dout, err = cli.EchoPatch(context.Background(), din); err != nil {
-		t.Fatal(err)
-	}
-	if din.Body.ValueField.GetStringValue() != dout.Body.ValueField.GetStringValue() {
-		t.Errorf("EchoPatch expected %s got %s", din, dout)
-	}
 	if dout, err = cli.EchoResponseBody(context.Background(), din); err != nil {
 		t.Fatal(err)
 	}
 	if din.Body.ValueField.GetStringValue() != dout.Body.ValueField.GetStringValue() {
-		t.Errorf("EchoResponseBody expected %s got %s", din, dout)
+		t.Fatalf("EchoResponseBody expected %s got %s", din, dout)
+	}
+	if dout, err = cli.EchoPatch(context.Background(), din); err != nil {
+		t.Fatal(err)
+	}
+	if dout.Body == nil {
+		panic("dout.body is nil")
+	}
+	if din.Body.ValueField.GetStringValue() != dout.Body.ValueField.GetStringValue() {
+		t.Fatalf("EchoPatch expected %s got %s", din, dout)
 	}
 }
 

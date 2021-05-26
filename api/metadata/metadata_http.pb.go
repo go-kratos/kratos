@@ -26,11 +26,102 @@ type MetadataHandler interface {
 }
 
 func NewMetadataHandler(srv MetadataHandler, opts ...http1.HandleOption) http.Handler {
+	h := http1.DefaultHandleOptions()
+	for _, o := range opts {
+		o(&h)
+	}
 	r := mux.NewRouter()
 
-	r.Handle("/services", http1.NewHandler(srv.ListServices, opts...)).Methods("GET")
+	r.HandleFunc("/services", func(w http.ResponseWriter, r *http.Request) {
+		var in ListServicesRequest
+		if err := h.Decode(r, &in); err != nil {
+			h.Error(w, r, err)
+			return
+		}
 
-	r.Handle("/services/{name}", http1.NewHandler(srv.GetServiceDesc, opts...)).Methods("GET")
+		next := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListServices(ctx, req.(*ListServicesRequest))
+		}
+		if h.Middleware != nil {
+			next = h.Middleware(next)
+		}
+		out, err := next(r.Context(), &in)
+		if err != nil {
+			h.Error(w, r, err)
+			return
+		}
+		reply := out.(*ListServicesReply)
+		if err := h.Encode(w, r, reply); err != nil {
+			h.Error(w, r, err)
+		}
+	}).Methods("GET")
+
+	r.HandleFunc("/services/{name}", func(w http.ResponseWriter, r *http.Request) {
+		var in GetServiceDescRequest
+		if err := h.Decode(r, &in); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+
+		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+
+		next := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetServiceDesc(ctx, req.(*GetServiceDescRequest))
+		}
+		if h.Middleware != nil {
+			next = h.Middleware(next)
+		}
+		out, err := next(r.Context(), &in)
+		if err != nil {
+			h.Error(w, r, err)
+			return
+		}
+		reply := out.(*GetServiceDescReply)
+		if err := h.Encode(w, r, reply); err != nil {
+			h.Error(w, r, err)
+		}
+	}).Methods("GET")
 
 	return r
+}
+
+type MetadataHttpClient interface {
+	GetServiceDesc(ctx context.Context, req *GetServiceDescRequest, opts ...http1.CallOption) (rsp *GetServiceDescReply, err error)
+
+	ListServices(ctx context.Context, req *ListServicesRequest, opts ...http1.CallOption) (rsp *ListServicesReply, err error)
+}
+
+type MetadataHttpClientImpl struct {
+	cc *http1.Client
+}
+
+func NewMetadataHttpClient(client *http1.Client) MetadataHttpClient {
+	return &MetadataHttpClientImpl{client}
+}
+
+func (c *MetadataHttpClientImpl) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest, opts ...http1.CallOption) (out *GetServiceDescReply, err error) {
+	path := binding.EncodePath("GET", "/services/{name}", in)
+	out = &GetServiceDescReply{}
+
+	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("GET"), http1.PathPattern("/services/{name}"))
+
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *MetadataHttpClientImpl) ListServices(ctx context.Context, in *ListServicesRequest, opts ...http1.CallOption) (out *ListServicesReply, err error) {
+	path := binding.EncodePath("GET", "/services", in)
+	out = &ListServicesReply{}
+
+	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("GET"), http1.PathPattern("/services"))
+
+	if err != nil {
+		return
+	}
+	return
 }
