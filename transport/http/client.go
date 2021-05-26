@@ -38,7 +38,7 @@ type Client struct {
 
 const (
 	// ErrNodeNotFound represents service node not found
-	ErrNodeNotFound = "node_not_found"
+	errNodeNotFound = "node_not_found"
 )
 
 // DecodeErrorFunc is decode error func.
@@ -259,18 +259,18 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 		if client.r != nil {
 			nodes := client.r.fetch(ctx)
 			if len(nodes) == 0 {
-				return nil, errors.Errorf(http.StatusServiceUnavailable, ErrNodeNotFound, ErrNodeNotFound)
+				return nil, errors.ServiceUnavailable(errNodeNotFound, "fetch error")
 			}
 			var node *registry.ServiceInstance
 			var err error
 			node, done, err = client.b.Pick(ctx, c.pathPattern, nodes)
 			if err != nil {
-				return nil, errors.Errorf(http.StatusServiceUnavailable, ErrNodeNotFound, err.Error())
+				return nil, errors.ServiceUnavailable(errNodeNotFound, err.Error())
 			}
 			req = req.Clone(ctx)
 			addr, err := parseEndpoint(client.scheme, node.Endpoints)
 			if err != nil {
-				return nil, errors.Errorf(http.StatusServiceUnavailable, ErrNodeNotFound, err.Error())
+				return nil, errors.ServiceUnavailable(errNodeNotFound, err.Error())
 			}
 			req.URL.Host = addr
 		}
