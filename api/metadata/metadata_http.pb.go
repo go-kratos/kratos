@@ -88,21 +88,21 @@ func NewMetadataHandler(srv MetadataHandler, opts ...http1.HandleOption) http.Ha
 	return r
 }
 
-type MetadataHttpClient interface {
+type MetadataHTTPClient interface {
 	GetServiceDesc(ctx context.Context, req *GetServiceDescRequest, opts ...http1.CallOption) (rsp *GetServiceDescReply, err error)
 
 	ListServices(ctx context.Context, req *ListServicesRequest, opts ...http1.CallOption) (rsp *ListServicesReply, err error)
 }
 
-type MetadataHttpClientImpl struct {
+type MetadataHTTPClientImpl struct {
 	cc *http1.Client
 }
 
-func NewMetadataHttpClient(client *http1.Client) MetadataHttpClient {
-	return &MetadataHttpClientImpl{client}
+func NewMetadataHTTPClient(client *http1.Client) MetadataHTTPClient {
+	return &MetadataHTTPClientImpl{client}
 }
 
-func (c *MetadataHttpClientImpl) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest, opts ...http1.CallOption) (out *GetServiceDescReply, err error) {
+func (c *MetadataHTTPClientImpl) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest, opts ...http1.CallOption) (out *GetServiceDescReply, err error) {
 	path := binding.EncodePath("GET", "/services/{name}", in)
 	out = &GetServiceDescReply{}
 
@@ -114,7 +114,7 @@ func (c *MetadataHttpClientImpl) GetServiceDesc(ctx context.Context, in *GetServ
 	return
 }
 
-func (c *MetadataHttpClientImpl) ListServices(ctx context.Context, in *ListServicesRequest, opts ...http1.CallOption) (out *ListServicesReply, err error) {
+func (c *MetadataHTTPClientImpl) ListServices(ctx context.Context, in *ListServicesRequest, opts ...http1.CallOption) (out *ListServicesReply, err error) {
 	path := binding.EncodePath("GET", "/services", in)
 	out = &ListServicesReply{}
 

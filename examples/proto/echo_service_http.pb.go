@@ -287,7 +287,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 	return r
 }
 
-type EchoServiceHttpClient interface {
+type EchoServiceHTTPClient interface {
 	Echo(ctx context.Context, req *SimpleMessage, opts ...http1.CallOption) (rsp *SimpleMessage, err error)
 
 	EchoBody(ctx context.Context, req *SimpleMessage, opts ...http1.CallOption) (rsp *SimpleMessage, err error)
@@ -299,15 +299,15 @@ type EchoServiceHttpClient interface {
 	EchoResponseBody(ctx context.Context, req *DynamicMessageUpdate, opts ...http1.CallOption) (rsp *DynamicMessageUpdate, err error)
 }
 
-type EchoServiceHttpClientImpl struct {
+type EchoServiceHTTPClientImpl struct {
 	cc *http1.Client
 }
 
-func NewEchoServiceHttpClient(client *http1.Client) EchoServiceHttpClient {
-	return &EchoServiceHttpClientImpl{client}
+func NewEchoServiceHTTPClient(client *http1.Client) EchoServiceHTTPClient {
+	return &EchoServiceHTTPClientImpl{client}
 }
 
-func (c *EchoServiceHttpClientImpl) Echo(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (out *SimpleMessage, err error) {
+func (c *EchoServiceHTTPClientImpl) Echo(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (out *SimpleMessage, err error) {
 	path := binding.EncodePath("POST", "/v1/example/echo/{id}", in)
 	out = &SimpleMessage{}
 
@@ -319,7 +319,7 @@ func (c *EchoServiceHttpClientImpl) Echo(ctx context.Context, in *SimpleMessage,
 	return
 }
 
-func (c *EchoServiceHttpClientImpl) EchoBody(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (out *SimpleMessage, err error) {
+func (c *EchoServiceHTTPClientImpl) EchoBody(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (out *SimpleMessage, err error) {
 	path := binding.EncodePath("POST", "/v1/example/echo_body", in)
 	out = &SimpleMessage{}
 
@@ -331,7 +331,7 @@ func (c *EchoServiceHttpClientImpl) EchoBody(ctx context.Context, in *SimpleMess
 	return
 }
 
-func (c *EchoServiceHttpClientImpl) EchoDelete(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (out *SimpleMessage, err error) {
+func (c *EchoServiceHTTPClientImpl) EchoDelete(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (out *SimpleMessage, err error) {
 	path := binding.EncodePath("DELETE", "/v1/example/echo_delete/{id}/{num}", in)
 	out = &SimpleMessage{}
 
@@ -343,7 +343,7 @@ func (c *EchoServiceHttpClientImpl) EchoDelete(ctx context.Context, in *SimpleMe
 	return
 }
 
-func (c *EchoServiceHttpClientImpl) EchoPatch(ctx context.Context, in *DynamicMessageUpdate, opts ...http1.CallOption) (out *DynamicMessageUpdate, err error) {
+func (c *EchoServiceHTTPClientImpl) EchoPatch(ctx context.Context, in *DynamicMessageUpdate, opts ...http1.CallOption) (out *DynamicMessageUpdate, err error) {
 	path := binding.EncodePath("PATCH", "/v1/example/echo_patch", in)
 	out = &DynamicMessageUpdate{}
 
@@ -355,7 +355,7 @@ func (c *EchoServiceHttpClientImpl) EchoPatch(ctx context.Context, in *DynamicMe
 	return
 }
 
-func (c *EchoServiceHttpClientImpl) EchoResponseBody(ctx context.Context, in *DynamicMessageUpdate, opts ...http1.CallOption) (out *DynamicMessageUpdate, err error) {
+func (c *EchoServiceHTTPClientImpl) EchoResponseBody(ctx context.Context, in *DynamicMessageUpdate, opts ...http1.CallOption) (out *DynamicMessageUpdate, err error) {
 	path := binding.EncodePath("POST", "/v1/example/echo_response_body", in)
 	out = &DynamicMessageUpdate{}
 

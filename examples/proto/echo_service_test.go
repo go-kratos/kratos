@@ -37,7 +37,7 @@ func (s *echoService) EchoResponseBody(ctx context.Context, m *DynamicMessageUpd
 }
 
 type echoClient struct {
-	client EchoServiceHttpClient
+	client EchoServiceHTTPClient
 }
 
 // post: /v1/example/echo/{id}
@@ -96,7 +96,7 @@ func testEchoClient(t *testing.T, addr string) {
 	}
 	cc, _ := tr.NewClient(context.Background(), tr.WithEndpoint(addr))
 
-	cli := &echoClient{client: NewEchoServiceHttpClient(cc)}
+	cli := &echoClient{client: NewEchoServiceHTTPClient(cc)}
 
 	if out, err = cli.Echo(context.Background(), in); err != nil {
 		t.Fatal(err)

@@ -32,13 +32,13 @@ func NewStreamServiceHandler(srv StreamServiceHandler, opts ...http1.HandleOptio
 	return r
 }
 
-type StreamServiceHttpClient interface {
+type StreamServiceHTTPClient interface {
 }
 
-type StreamServiceHttpClientImpl struct {
+type StreamServiceHTTPClientImpl struct {
 	cc *http1.Client
 }
 
-func NewStreamServiceHttpClient(client *http1.Client) StreamServiceHttpClient {
-	return &StreamServiceHttpClientImpl{client}
+func NewStreamServiceHTTPClient(client *http1.Client) StreamServiceHTTPClient {
+	return &StreamServiceHTTPClientImpl{client}
 }

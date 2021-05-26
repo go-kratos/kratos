@@ -35,7 +35,7 @@ func NewBlogServiceClient(cc grpc.ClientConnInterface) BlogServiceClient {
 
 func (c *blogServiceClient) CreateArticle(ctx context.Context, in *CreateArticleRequest, opts ...grpc.CallOption) (*CreateArticleReply, error) {
 	out := new(CreateArticleReply)
-	err := c.cc.Invoke(ctx, "/api.v1.BlogService/CreateArticle", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/blog.api.v1.BlogService/CreateArticle", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (c *blogServiceClient) CreateArticle(ctx context.Context, in *CreateArticle
 
 func (c *blogServiceClient) UpdateArticle(ctx context.Context, in *UpdateArticleRequest, opts ...grpc.CallOption) (*UpdateArticleReply, error) {
 	out := new(UpdateArticleReply)
-	err := c.cc.Invoke(ctx, "/api.v1.BlogService/UpdateArticle", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/blog.api.v1.BlogService/UpdateArticle", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (c *blogServiceClient) UpdateArticle(ctx context.Context, in *UpdateArticle
 
 func (c *blogServiceClient) DeleteArticle(ctx context.Context, in *DeleteArticleRequest, opts ...grpc.CallOption) (*DeleteArticleReply, error) {
 	out := new(DeleteArticleReply)
-	err := c.cc.Invoke(ctx, "/api.v1.BlogService/DeleteArticle", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/blog.api.v1.BlogService/DeleteArticle", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (c *blogServiceClient) DeleteArticle(ctx context.Context, in *DeleteArticle
 
 func (c *blogServiceClient) GetArticle(ctx context.Context, in *GetArticleRequest, opts ...grpc.CallOption) (*GetArticleReply, error) {
 	out := new(GetArticleReply)
-	err := c.cc.Invoke(ctx, "/api.v1.BlogService/GetArticle", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/blog.api.v1.BlogService/GetArticle", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (c *blogServiceClient) GetArticle(ctx context.Context, in *GetArticleReques
 
 func (c *blogServiceClient) ListArticle(ctx context.Context, in *ListArticleRequest, opts ...grpc.CallOption) (*ListArticleReply, error) {
 	out := new(ListArticleReply)
-	err := c.cc.Invoke(ctx, "/api.v1.BlogService/ListArticle", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/blog.api.v1.BlogService/ListArticle", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func _BlogService_CreateArticle_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.v1.BlogService/CreateArticle",
+		FullMethod: "/blog.api.v1.BlogService/CreateArticle",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BlogServiceServer).CreateArticle(ctx, req.(*CreateArticleRequest))
@@ -150,7 +150,7 @@ func _BlogService_UpdateArticle_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.v1.BlogService/UpdateArticle",
+		FullMethod: "/blog.api.v1.BlogService/UpdateArticle",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BlogServiceServer).UpdateArticle(ctx, req.(*UpdateArticleRequest))
@@ -168,7 +168,7 @@ func _BlogService_DeleteArticle_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.v1.BlogService/DeleteArticle",
+		FullMethod: "/blog.api.v1.BlogService/DeleteArticle",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BlogServiceServer).DeleteArticle(ctx, req.(*DeleteArticleRequest))
@@ -186,7 +186,7 @@ func _BlogService_GetArticle_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.v1.BlogService/GetArticle",
+		FullMethod: "/blog.api.v1.BlogService/GetArticle",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BlogServiceServer).GetArticle(ctx, req.(*GetArticleRequest))
@@ -204,7 +204,7 @@ func _BlogService_ListArticle_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.v1.BlogService/ListArticle",
+		FullMethod: "/blog.api.v1.BlogService/ListArticle",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BlogServiceServer).ListArticle(ctx, req.(*ListArticleRequest))
@@ -216,7 +216,7 @@ func _BlogService_ListArticle_Handler(srv interface{}, ctx context.Context, dec 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var BlogService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.v1.BlogService",
+	ServiceName: "blog.api.v1.BlogService",
 	HandlerType: (*BlogServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -241,5 +241,5 @@ var BlogService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "blog.proto",
+	Metadata: "api/blog/v1/blog.proto",
 }

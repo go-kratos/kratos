@@ -62,19 +62,19 @@ func NewGreeterHandler(srv GreeterHandler, opts ...http1.HandleOption) http.Hand
 	return r
 }
 
-type GreeterHttpClient interface {
+type GreeterHTTPClient interface {
 	SayHello(ctx context.Context, req *HelloRequest, opts ...http1.CallOption) (rsp *HelloReply, err error)
 }
 
-type GreeterHttpClientImpl struct {
+type GreeterHTTPClientImpl struct {
 	cc *http1.Client
 }
 
-func NewGreeterHttpClient(client *http1.Client) GreeterHttpClient {
-	return &GreeterHttpClientImpl{client}
+func NewGreeterHTTPClient(client *http1.Client) GreeterHTTPClient {
+	return &GreeterHTTPClientImpl{client}
 }
 
-func (c *GreeterHttpClientImpl) SayHello(ctx context.Context, in *HelloRequest, opts ...http1.CallOption) (out *HelloReply, err error) {
+func (c *GreeterHTTPClientImpl) SayHello(ctx context.Context, in *HelloRequest, opts ...http1.CallOption) (out *HelloReply, err error) {
 	path := binding.EncodePath("GET", "/helloworld/{name}", in)
 	out = &HelloReply{}
 
