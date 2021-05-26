@@ -29,7 +29,7 @@ func callHTTP() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	client := pb.NewGreeterHttpClient(conn)
+	client := pb.NewGreeterHTTPClient(conn)
 	reply, err := client.SayHello(context.Background(), &pb.HelloRequest{Name: "kratos"})
 	if err != nil {
 		log.Fatal(err)
