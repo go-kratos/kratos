@@ -7,27 +7,39 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/internal/balancer"
+	"github.com/go-kratos/kratos/v2/internal/balancer/random"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
 // Client is http client
 type Client struct {
 	cc *http.Client
+	r  *resolver
+	b  balancer.Balancer
 
-	schema       string
-	endpoint     string
+	scheme       string
+	target       Target
 	userAgent    string
 	middleware   middleware.Middleware
 	encoder      EncodeRequestFunc
 	decoder      DecodeResponseFunc
 	errorDecoder DecodeErrorFunc
+	discovery    registry.Discovery
 }
+
+const (
+	// errNodeNotFound represents service node not found.
+	errNodeNotFound = "NODE_NOT_FOUND"
+)
 
 // DecodeErrorFunc is decode error func.
 type DecodeErrorFunc func(ctx context.Context, res *http.Response) error
@@ -69,10 +81,10 @@ func WithMiddleware(m ...middleware.Middleware) ClientOption {
 	}
 }
 
-// WithSchema with client schema.
-func WithSchema(schema string) ClientOption {
+// WithScheme with client schema.
+func WithScheme(scheme string) ClientOption {
 	return func(o *clientOptions) {
-		o.schema = schema
+		o.scheme = scheme
 	}
 }
 
@@ -104,43 +116,94 @@ func WithErrorDecoder(errorDecoder DecodeErrorFunc) ClientOption {
 	}
 }
 
+// WithDiscovery with client discovery.
+func WithDiscovery(d registry.Discovery) ClientOption {
+	return func(o *clientOptions) {
+		o.discovery = d
+	}
+}
+
+// WithBalancer with client balancer.
+// Experimental
+// Notice: This type is EXPERIMENTAL and may be changed or removed in a later release.
+func WithBalancer(b balancer.Balancer) ClientOption {
+	return func(o *clientOptions) {
+		o.balancer = b
+	}
+}
+
 // Client is a HTTP transport client.
 type clientOptions struct {
 	ctx          context.Context
 	transport    http.RoundTripper
 	middleware   middleware.Middleware
 	timeout      time.Duration
-	schema       string
+	scheme       string
 	endpoint     string
 	userAgent    string
 	encoder      EncodeRequestFunc
 	decoder      DecodeResponseFunc
 	errorDecoder DecodeErrorFunc
+	discovery    registry.Discovery
+	balancer     balancer.Balancer
 }
 
 // NewClient returns an HTTP client.
 func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	options := &clientOptions{
 		ctx:          ctx,
-		schema:       "http",
+		scheme:       "http",
 		timeout:      1 * time.Second,
 		encoder:      defaultRequestEncoder,
 		decoder:      defaultResponseDecoder,
 		errorDecoder: defaultErrorDecoder,
 		transport:    http.DefaultTransport,
+		discovery:    nil,
+		balancer:     random.New(),
 	}
 	for _, o := range opts {
 		o(options)
 	}
+	target := Target{
+		Scheme:   options.scheme,
+		Endpoint: options.endpoint,
+	}
+	var r *resolver
+	if options.endpoint != "" && options.discovery != nil {
+		u, err := url.Parse(options.endpoint)
+		if err != nil {
+			u, err = url.Parse("http://" + options.endpoint)
+			if err != nil {
+				return nil, fmt.Errorf("[http client] invalid endpoint format: %v", options.endpoint)
+			}
+		}
+		if u.Scheme == "discovery" && len(u.Path) > 1 {
+			target = Target{
+				Scheme:    u.Scheme,
+				Authority: u.Host,
+				Endpoint:  u.Path[1:],
+			}
+			r, err = newResolver(ctx, options.scheme, options.discovery, target)
+			if err != nil {
+				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
+			}
+		} else {
+			return nil, fmt.Errorf("[http client] invalid endpoint format: %v", options.endpoint)
+		}
+	}
+
 	return &Client{
 		cc:           &http.Client{Timeout: options.timeout, Transport: options.transport},
+		r:            r,
 		encoder:      options.encoder,
 		decoder:      options.decoder,
 		errorDecoder: options.errorDecoder,
 		middleware:   options.middleware,
 		userAgent:    options.userAgent,
-		endpoint:     options.endpoint,
-		schema:       options.schema,
+		target:       target,
+		scheme:       options.scheme,
+		discovery:    options.discovery,
+		b:            options.balancer,
 	}, nil
 }
 
@@ -169,7 +232,7 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 		}
 		reqBody = bytes.NewReader(body)
 	}
-	url := fmt.Sprintf("%s://%s%s", client.schema, client.endpoint, path)
+	url := fmt.Sprintf("%s://%s%s", client.scheme, client.target.Endpoint, path)
 	req, err := http.NewRequest(c.method, url, reqBody)
 	if err != nil {
 		return err
@@ -192,7 +255,29 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 
 func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo) error {
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
+		var done func(balancer.DoneInfo)
+		if client.r != nil {
+			nodes := client.r.fetch(ctx)
+			if len(nodes) == 0 {
+				return nil, errors.ServiceUnavailable(errNodeNotFound, "fetch error")
+			}
+			var node *registry.ServiceInstance
+			var err error
+			node, done, err = client.b.Pick(ctx, c.pathPattern, nodes)
+			if err != nil {
+				return nil, errors.ServiceUnavailable(errNodeNotFound, err.Error())
+			}
+			req = req.Clone(ctx)
+			addr, err := parseEndpoint(client.scheme, node.Endpoints)
+			if err != nil {
+				return nil, errors.ServiceUnavailable(errNodeNotFound, err.Error())
+			}
+			req.URL.Host = addr
+		}
 		res, err := client.do(ctx, req, c)
+		if done != nil {
+			done(balancer.DoneInfo{Err: err})
+		}
 		if err != nil {
 			return nil, err
 		}
