@@ -55,7 +55,7 @@ func callHTTP(cli *api.Client) {
 		log.Fatal(err)
 	}
 	time.Sleep(time.Millisecond * 250)
-	client := helloworld.NewGreeterHttpClient(conn)
+	client := helloworld.NewGreeterHTTPClient(conn)
 	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos_http"})
 	if err != nil {
 		log.Fatal(err)
