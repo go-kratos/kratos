@@ -37,8 +37,8 @@ type Client struct {
 }
 
 const (
-	// ErrNodeNotFound represents service node not found
-	errNodeNotFound = "node_not_found"
+	// errNodeNotFound represents service node not found.
+	errNodeNotFound = "NODE_NOT_FOUND"
 )
 
 // DecodeErrorFunc is decode error func.
