@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/go-kratos/kratos/v2/internal/balancer"
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/transport/http/balancer"
 )
 
 var _ balancer.Balancer = &Balancer{}

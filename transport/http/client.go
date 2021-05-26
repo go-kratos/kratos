@@ -12,12 +12,12 @@ import (
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/internal/balancer"
+	"github.com/go-kratos/kratos/v2/internal/balancer/random"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
-	"github.com/go-kratos/kratos/v2/transport/http/balancer"
-	"github.com/go-kratos/kratos/v2/transport/http/balancer/random"
 )
 
 // Client is http client
@@ -27,14 +27,13 @@ type Client struct {
 	b  balancer.Balancer
 
 	scheme       string
-	endpoint     string
+	target       Target
 	userAgent    string
 	middleware   middleware.Middleware
 	encoder      EncodeRequestFunc
 	decoder      DecodeResponseFunc
 	errorDecoder DecodeErrorFunc
 	discovery    registry.Discovery
-	balancer     balancer.Balancer
 }
 
 const (
@@ -124,6 +123,15 @@ func WithDiscovery(d registry.Discovery) ClientOption {
 	}
 }
 
+// WithBalancer with client balancer.
+// Experimental
+// Notice: This type is EXPERIMENTAL and may be changed or removed in a later release.
+func WithBalancer(b balancer.Balancer) ClientOption {
+	return func(o *clientOptions) {
+		o.balancer = b
+	}
+}
+
 // Client is a HTTP transport client.
 type clientOptions struct {
 	ctx          context.Context
@@ -156,6 +164,10 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	for _, o := range opts {
 		o(options)
 	}
+	target := Target{
+		Scheme:   options.scheme,
+		Endpoint: options.endpoint,
+	}
 	var r *resolver
 	if options.endpoint != "" && options.discovery != nil {
 		u, err := url.Parse(options.endpoint)
@@ -166,7 +178,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 			}
 		}
 		if u.Scheme == "discovery" && len(u.Path) > 1 {
-			target := Target{
+			target = Target{
 				Scheme:    u.Scheme,
 				Authority: u.Host,
 				Endpoint:  u.Path[1:],
@@ -188,10 +200,10 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		errorDecoder: options.errorDecoder,
 		middleware:   options.middleware,
 		userAgent:    options.userAgent,
-		endpoint:     options.endpoint,
+		target:       target,
 		scheme:       options.scheme,
 		discovery:    options.discovery,
-		balancer:     options.balancer,
+		b:            options.balancer,
 	}, nil
 }
 
@@ -220,7 +232,7 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 		}
 		reqBody = bytes.NewReader(body)
 	}
-	url := fmt.Sprintf("%s://%s%s", client.scheme, client.endpoint, path)
+	url := fmt.Sprintf("%s://%s%s", client.scheme, client.target.Endpoint, path)
 	req, err := http.NewRequest(c.method, url, reqBody)
 	if err != nil {
 		return err
@@ -253,10 +265,14 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			var err error
 			node, done, err = client.b.Pick(ctx, c.pathPattern, nodes)
 			if err != nil {
-				return nil, errors.Errorf(http.StatusServiceUnavailable, ErrNodeNotFound, ErrNodeNotFound)
+				return nil, errors.Errorf(http.StatusServiceUnavailable, ErrNodeNotFound, err.Error())
 			}
 			req = req.Clone(ctx)
-			req.URL.Host, _ = parseEndpoint(client.scheme, node.Endpoints)
+			addr, err := parseEndpoint(client.scheme, node.Endpoints)
+			if err != nil {
+				return nil, errors.Errorf(http.StatusServiceUnavailable, ErrNodeNotFound, err.Error())
+			}
+			req.URL.Host = addr
 		}
 		res, err := client.do(ctx, req, c)
 		if done != nil {

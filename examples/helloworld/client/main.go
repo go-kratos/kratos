@@ -24,7 +24,7 @@ func callHTTP() {
 			recovery.Recovery(),
 		),
 		transhttp.WithEndpoint("127.0.0.1:8000"),
-		transhttp.WithSchema("http"),
+		transhttp.WithScheme("http"),
 	)
 	if err != nil {
 		log.Fatal(err)
