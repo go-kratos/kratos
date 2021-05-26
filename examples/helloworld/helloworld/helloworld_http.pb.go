@@ -44,7 +44,7 @@ func NewGreeterHttpClient(client *http1.Client) GreeterHttpClient {
 }
 
 func (c *GreeterHttpClientImpl) SayHello(ctx context.Context, in *HelloRequest, opts ...http1.CallOption) (out *HelloReply, err error) {
-	path := binding.ProtoPath("/helloworld/{name}", in)
+	path := binding.EncodePath("GET", "/helloworld/{name}", in)
 	out = &HelloReply{}
 
 	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("GET"), http1.PathPattern("/helloworld/{name}"))
