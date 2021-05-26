@@ -14,9 +14,40 @@ type {{.ServiceType}}Handler interface {
 }
 
 func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.HandleOption) http.Handler {
+	h := http1.DefaultHandleOptions()
+	for _, o := range opts {
+		o(&h)
+	}
 	r := mux.NewRouter()
 	{{range .Methods}}
-	r.Handle("{{.Path}}", http1.NewHandler(srv.{{.Name}}, opts...)).Methods("{{.Method}}")
+	r.HandleFunc("{{.Path}}", func(w http.ResponseWriter, r *http.Request) {
+		var in {{.Request}}
+		if err := h.Decode(r, &in{{.Body}}); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+		{{if ne (len .Vars) 0}}
+		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+		{{end}}
+		next := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.{{.Name}}(ctx, req.(*{{.Request}}))
+		}
+		if h.Middleware != nil {
+			next = h.Middleware(next)
+		}
+		out, err := next(r.Context(), &in)
+		if err != nil {
+			h.Error(w, r, err)
+			return
+		}
+		reply := out.(*{{.Reply}})
+		if err := h.Encode(w, r, reply{{.ResponseBody}}); err != nil {
+			h.Error(w, r, err)
+		}
+	}).Methods("{{.Method}}")
 	{{end}}
 	return r
 }
@@ -41,10 +72,10 @@ func New{{.ServiceType}}HttpClient (client *http1.Client) {{.ServiceType}}HttpCl
 func (c *{{$svrType}}HttpClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http1.CallOption) (out *{{.Reply}}, err error) {
 	path := binding.EncodePath("{{.Method}}", "{{.Path}}", in)
 	out = &{{.Reply}}{}
-	{{if (eq .Body "nil")}}
-	err = c.cc.Invoke(ctx, path, nil, &out{{.ResponseBody}}, http1.Method("{{.Method}}"), http1.PathPattern("{{.Path}}"))
-	{{else}} 
+	{{if .HasBody }}
 	err = c.cc.Invoke(ctx, path, in{{.Body}}, &out{{.ResponseBody}}, http1.Method("{{.Method}}"), http1.PathPattern("{{.Path}}"))
+	{{else}} 
+	err = c.cc.Invoke(ctx, path, nil, &out{{.ResponseBody}}, http1.Method("{{.Method}}"), http1.PathPattern("{{.Path}}"))
 	{{end}}
 	if err != nil {
 		return
@@ -67,12 +98,12 @@ type methodDesc struct {
 	Name    string
 	Num     int
 	Vars    []string
-	Forms   []string
 	Request string
 	Reply   string
 	// http_rule
 	Path         string
 	Method       string
+	HasBody      bool
 	Body         string
 	ResponseBody string
 }

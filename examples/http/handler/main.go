@@ -34,8 +34,8 @@ func main() {
 		users: make(map[string]*User),
 	}
 	router := mux.NewRouter()
-	router.Handle("/users", http.NewHandler(us.Add)).Methods("POST")
-	router.Handle("/users/{id}", http.NewHandler(us.Get)).Methods("GET")
+	router.Handle("/users/add", http.NewHandler(us.Add)).Methods("POST")
+	router.Handle("/users/detail", http.NewHandler(us.Get)).Methods("GET")
 
 	httpSrv := http.NewServer(http.Address(":8000"))
 	httpSrv.HandlePrefix("/", router)
