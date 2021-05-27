@@ -171,7 +171,7 @@ func defaultRequestDecoder(req *http.Request, v interface{}) error {
 
 // defaultResponseEncoder encodes the object to the HTTP response.
 func defaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{}) error {
-	codec := codecForRequest(r)
+	codec := CodecForRequest(r)
 	data, err := codec.Marshal(v)
 	if err != nil {
 		return err
@@ -188,7 +188,7 @@ func defaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{
 
 // defaultErrorEncoder encodes the error to the HTTP response.
 func defaultErrorEncoder(w http.ResponseWriter, r *http.Request, se error) {
-	codec := codecForRequest(r)
+	codec := CodecForRequest(r)
 	body, err := codec.Marshal(se)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -205,8 +205,8 @@ func defaultErrorEncoder(w http.ResponseWriter, r *http.Request, se error) {
 	w.Write(body)
 }
 
-// codecForRequest get encoding.Codec via http.Request
-func codecForRequest(r *http.Request) encoding.Codec {
+// CodecForRequest get encoding.Codec via http.Request
+func CodecForRequest(r *http.Request) encoding.Codec {
 	var codec encoding.Codec
 	for _, accept := range r.Header["Accept"] {
 		if codec = encoding.GetCodec(httputil.ContentSubtype(accept)); codec != nil {
