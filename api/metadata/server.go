@@ -39,44 +39,40 @@ func NewServer(srv *grpc.Server) *Server {
 	}
 }
 
-func (s *Server) load() error {
-	if len(s.services) > 0 {
+func (s *Server) load() (err error) {
+	if s.srv == nil || len(s.services) > 0 {
 		return nil
 	}
-	if s.srv != nil {
-		for name, info := range s.srv.GetServiceInfo() {
-			fdenc, ok := parseMetadata(info.Metadata)
-			if !ok {
-				return fmt.Errorf("invalid service %s metadata", name)
-			}
-			fd, err := decodeFileDesc(fdenc)
-			if err != nil {
-				return err
-			}
-			protoSet, err := allDependency(fd)
-			if err != nil {
-				return err
-			}
-			s.services[name] = &dpb.FileDescriptorSet{File: protoSet}
-			for _, method := range info.Methods {
-				s.methods[name] = append(s.methods[name], method.Name)
-			}
+	for name, info := range s.srv.GetServiceInfo() {
+		fdenc, ok := parseMetadata(info.Metadata)
+		if !ok {
+			return fmt.Errorf("invalid service %s metadata", name)
 		}
-		return nil
+		fd, err := decodeFileDesc(fdenc)
+		if err != nil {
+			return err
+		}
+		protoSet, err := allDependency(fd)
+		if err != nil {
+			return err
+		}
+		s.services[name] = &dpb.FileDescriptorSet{File: protoSet}
+		for _, method := range info.Methods {
+			s.methods[name] = append(s.methods[name], method.Name)
+		}
 	}
-	var err error
 	protoregistry.GlobalFiles.RangeFiles(func(fd protoreflect.FileDescriptor) bool {
 		if fd.Services() != nil {
 			for i := 0; i < fd.Services().Len(); i++ {
 				svc := fd.Services().Get(i)
-				fdp, e := fileDescriptorProto(fd.Path())
-				if e != nil {
-					err = e
+				fdp, ferr := fileDescriptorProto(fd.Path())
+				if ferr != nil {
+					err = ferr
 					return false
 				}
-				fdps, e := allDependency(fdp)
-				if e != nil {
-					err = e
+				fdps, ferr := allDependency(fdp)
+				if ferr != nil {
+					err = ferr
 					return false
 				}
 				s.services[string(svc.FullName())] = &dpb.FileDescriptorSet{File: fdps}
@@ -90,7 +86,7 @@ func (s *Server) load() error {
 		}
 		return true
 	})
-	return err
+	return nil
 }
 
 // ListServices return all services
