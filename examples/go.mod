@@ -14,7 +14,7 @@ require (
 	github.com/go-errors/errors v1.4.0 // indirect
 	github.com/go-kratos/consul v0.0.0-20210425141546-e047a9f6ec87
 	github.com/go-kratos/etcd v0.0.0-20210423155933-752c35c0d203
-	github.com/go-kratos/kratos/v2 v2.0.0-beta4.0.20210510133946-86193a2a5ff6
+	github.com/go-kratos/kratos/v2 v2.0.0-rc1
 	github.com/go-kratos/nacos v0.0.0-20210423031012-5dee2cc4aea1
 	github.com/go-playground/validator/v10 v10.6.1 // indirect
 	github.com/go-redis/redis/extra/redisotel v0.3.0

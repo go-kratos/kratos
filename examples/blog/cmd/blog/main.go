@@ -88,7 +88,7 @@ func main() {
 	if err := config.Scan(&bc); err != nil {
 		panic(err)
 	}
-	tp, err := tracerProvider("http://47.104.19.38:14268/api/traces")
+	tp, err := tracerProvider(bc.Trace.Endpoint)
 	if err != nil {
 		panic(err)
 	}
