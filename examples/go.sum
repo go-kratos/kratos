@@ -116,8 +116,8 @@ github.com/go-kratos/consul v0.1.0 h1:37O+XsIvkFoQ2LcY8JGDfxeQPqFiwp9O5ubW4gWgtT
 github.com/go-kratos/consul v0.1.0/go.mod h1:a3PHcA48MW8Lpny3ZowvBEdlAaE3YU/RezDUpUYy/aQ=
 github.com/go-kratos/etcd v0.1.0 h1:ewAfloZcpcg2L1QB1VLXYUMdvfUU0i3kAlToHrxTv2g=
 github.com/go-kratos/etcd v0.1.0/go.mod h1:RzWYbka3LjS0v2RbCtADN7d2Ng8eH774ehHlTGgbma4=
-github.com/go-kratos/nacos v0.0.0-20210423031012-5dee2cc4aea1 h1:CZ33vPhLPiQwd+tCzJv/GISUHQkjn4hOP/MqBr7PucU=
-github.com/go-kratos/nacos v0.0.0-20210423031012-5dee2cc4aea1/go.mod h1:iIvkKJC2/SdsjAd/JyyO+nREB47fRmw6KQzHMUnbSKk=
+github.com/go-kratos/nacos v0.1.0 h1:sUvTsgZ4u88YaKF/jAi2Rdr+hzPCfQtmNjBpiyEbbJ0=
+github.com/go-kratos/nacos v0.1.0/go.mod h1:qhVsyp6RyDDEKLtT0/iTMaN3D7SheRMrYb2bV0jYqjw=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=
 github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V4qmtdjCk=
 github.com/go-openapi/inflect v0.19.0/go.mod h1:lHpZVlpIQqLyKwJ4N+YSc9hchQy/i12fJykb83CRBH4=
