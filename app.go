@@ -15,40 +15,6 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// Service is an instance of a service in a discovery system.
-type Service struct {
-	id        string
-	name      string
-	version   string
-	metadata  map[string]string
-	endpoints []string
-}
-
-// ID is service id
-func (s *Service) ID() string {
-	return s.id
-}
-
-// Name is service name
-func (s *Service) Name() string {
-	return s.name
-}
-
-// Version is service Version
-func (s *Service) Version() string {
-	return s.version
-}
-
-// Metadata is service Metadata
-func (s *Service) Metadata() map[string]string {
-	return s.metadata
-}
-
-// Endpoints is service Endpoints
-func (s *Service) Endpoints() []string {
-	return s.endpoints
-}
-
 // App is an application components lifecycle manager
 type App struct {
 	opts     options
@@ -166,10 +132,10 @@ func buildInstance(o options) *Service {
 		}
 	}
 	return &Service{
-		id:        o.id,
-		name:      o.name,
-		version:   o.version,
-		metadata:  o.metadata,
-		endpoints: o.endpoints,
+		ServiceID:        o.id,
+		Servicename:      o.name,
+		ServiceVersion:   o.version,
+		ServiceMetadata:  o.metadata,
+		ServiceEndpoints: o.endpoints,
 	}
 }
