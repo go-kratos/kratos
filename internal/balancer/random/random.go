@@ -18,12 +18,12 @@ func New() *Balancer {
 	return &Balancer{}
 }
 
-func (b *Balancer) Pick(ctx context.Context, pathPattern string, nodes []*registry.ServiceInstance) (node *registry.ServiceInstance, done func(balancer.DoneInfo), err error) {
+func (b *Balancer) Pick(ctx context.Context, pathPattern string, nodes []registry.Service) (node registry.Service, done func(context.Context, balancer.DoneInfo), err error) {
 	if len(nodes) == 0 {
 		return nil, nil, fmt.Errorf("no instances avaiable")
 	} else if len(nodes) == 1 {
-		return nodes[0], func(di balancer.DoneInfo) {}, nil
+		return nodes[0], func(context.Context, balancer.DoneInfo) {}, nil
 	}
 	idx := rand.Intn(len(nodes))
-	return nodes[idx], func(di balancer.DoneInfo) {}, nil
+	return nodes[idx], func(context.Context, balancer.DoneInfo) {}, nil
 }

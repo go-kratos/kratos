@@ -255,20 +255,20 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 
 func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo) error {
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
-		var done func(balancer.DoneInfo)
+		var done func(context.Context, balancer.DoneInfo)
 		if client.r != nil {
 			nodes := client.r.fetch(ctx)
 			if len(nodes) == 0 {
 				return nil, errors.ServiceUnavailable(errNodeNotFound, "fetch error")
 			}
-			var node *registry.ServiceInstance
+			var node registry.Service
 			var err error
 			node, done, err = client.b.Pick(ctx, c.pathPattern, nodes)
 			if err != nil {
 				return nil, errors.ServiceUnavailable(errNodeNotFound, err.Error())
 			}
 			req = req.Clone(ctx)
-			addr, err := parseEndpoint(client.scheme, node.Endpoints)
+			addr, err := parseEndpoint(client.scheme, node.Endpoints())
 			if err != nil {
 				return nil, errors.ServiceUnavailable(errNodeNotFound, err.Error())
 			}
@@ -276,7 +276,7 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 		}
 		res, err := client.do(ctx, req, c)
 		if done != nil {
-			done(balancer.DoneInfo{Err: err})
+			done(ctx, balancer.DoneInfo{Err: err})
 		}
 		if err != nil {
 			return nil, err

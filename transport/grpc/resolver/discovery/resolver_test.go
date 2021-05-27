@@ -10,6 +10,34 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
+type service struct {
+	id        string
+	name      string
+	version   string
+	metadata  map[string]string
+	endpoints []string
+}
+
+func (s *service) ID() string {
+	return s.id
+}
+
+func (s *service) Name() string {
+	return s.name
+}
+
+func (s *service) Version() string {
+	return s.version
+}
+
+func (s *service) Metadata() map[string]string {
+	return s.metadata
+}
+
+func (s *service) Endpoints() []string {
+	return s.endpoints
+}
+
 type testClientConn struct {
 	resolver.ClientConn // For unimplemented functions
 	te                  *testing.T
@@ -23,16 +51,15 @@ func (t *testClientConn) UpdateState(s resolver.State) error {
 type testWatch struct {
 }
 
-func (m *testWatch) Next() ([]*registry.ServiceInstance, error) {
+func (m *testWatch) Next() ([]registry.Service, error) {
 	time.Sleep(time.Millisecond * 200)
-	ins := []*registry.ServiceInstance{
-		{
-			ID:      "mock_ID",
-			Name:    "mock_Name",
-			Version: "mock_Version",
-		},
-	}
-	return ins, nil
+	var inss []registry.Service = []registry.Service{&service{
+		id:      "mock_ID",
+		name:    "mock_Name",
+		version: "mock_Version",
+	}}
+
+	return inss, nil
 }
 
 // Watch creates a watcher according to the service name.

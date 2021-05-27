@@ -38,10 +38,10 @@ func (r *discoveryResolver) watch() {
 	}
 }
 
-func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
+func (r *discoveryResolver) update(ins []registry.Service) {
 	var addrs []resolver.Address
 	for _, in := range ins {
-		endpoint, err := parseEndpoint(in.Endpoints)
+		endpoint, err := parseEndpoint(in.Endpoints())
 		if err != nil {
 			r.log.Errorf("Failed to parse discovery endpoint: %v", err)
 			continue
@@ -50,8 +50,8 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 			continue
 		}
 		addr := resolver.Address{
-			ServerName: in.Name,
-			Attributes: parseAttributes(in.Metadata),
+			ServerName: in.Name(),
+			Attributes: parseAttributes(in.Metadata()),
 			Addr:       endpoint,
 		}
 		addrs = append(addrs, addr)

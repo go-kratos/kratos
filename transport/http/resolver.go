@@ -18,7 +18,7 @@ type Target struct {
 
 type resolver struct {
 	lock  sync.RWMutex
-	nodes []*registry.ServiceInstance
+	nodes []registry.Service
 
 	target  Target
 	watcher registry.Watcher
@@ -42,9 +42,9 @@ func newResolver(ctx context.Context, scheme string, discovery registry.Discover
 				r.logger.Errorf("http client watch services got unexpected error:=%v", err)
 				return
 			}
-			var nodes []*registry.ServiceInstance
+			var nodes []registry.Service
 			for _, in := range services {
-				endpoint, err := parseEndpoint(scheme, in.Endpoints)
+				endpoint, err := parseEndpoint(scheme, in.Endpoints())
 				if err != nil {
 					r.logger.Errorf("Failed to parse discovery endpoint: %v error %v", in.Endpoints, err)
 					continue
@@ -64,7 +64,7 @@ func newResolver(ctx context.Context, scheme string, discovery registry.Discover
 	return r, nil
 }
 
-func (r *resolver) fetch(ctx context.Context) []*registry.ServiceInstance {
+func (r *resolver) fetch(ctx context.Context) []registry.Service {
 	r.lock.RLock()
 	nodes := r.nodes
 	r.lock.RUnlock()
