@@ -12,12 +12,12 @@ import (
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/internal/balancer"
-	"github.com/go-kratos/kratos/v2/internal/balancer/random"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v2/transport/http/balancer"
+	"github.com/go-kratos/kratos/v2/transport/http/balancer/random"
 )
 
 // Client is http client
@@ -255,7 +255,7 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 
 func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo) error {
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
-		var done func(balancer.DoneInfo)
+		var done func(context.Context, balancer.DoneInfo)
 		if client.r != nil {
 			nodes := client.r.fetch(ctx)
 			if len(nodes) == 0 {
@@ -276,7 +276,7 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 		}
 		res, err := client.do(ctx, req, c)
 		if done != nil {
-			done(balancer.DoneInfo{Err: err})
+			done(ctx, balancer.DoneInfo{Err: err})
 		}
 		if err != nil {
 			return nil, err
