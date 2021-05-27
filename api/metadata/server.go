@@ -13,6 +13,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/reflect/protoregistry"
 	descriptorpb "google.golang.org/protobuf/types/descriptorpb"
 )
 
@@ -38,28 +40,57 @@ func NewServer(srv *grpc.Server) *Server {
 }
 
 func (s *Server) load() error {
-	if len(s.services) == len(s.srv.GetServiceInfo()) {
+	if len(s.services) > 0 {
 		return nil
 	}
-	for name, info := range s.srv.GetServiceInfo() {
-		fdenc, ok := parseMetadata(info.Metadata)
-		if !ok {
-			return fmt.Errorf("invalid service %s metadata", name)
+	if s.srv != nil {
+		for name, info := range s.srv.GetServiceInfo() {
+			fdenc, ok := parseMetadata(info.Metadata)
+			if !ok {
+				return fmt.Errorf("invalid service %s metadata", name)
+			}
+			fd, err := decodeFileDesc(fdenc)
+			if err != nil {
+				return err
+			}
+			protoSet, err := allDependency(fd)
+			if err != nil {
+				return err
+			}
+			s.services[name] = &dpb.FileDescriptorSet{File: protoSet}
+			for _, method := range info.Methods {
+				s.methods[name] = append(s.methods[name], method.Name)
+			}
 		}
-		fd, err := decodeFileDesc(fdenc)
-		if err != nil {
-			return err
-		}
-		protoSet, err := allDependency(fd)
-		if err != nil {
-			return err
-		}
-		s.services[name] = &dpb.FileDescriptorSet{File: protoSet}
-		for _, method := range info.Methods {
-			s.methods[name] = append(s.methods[name], method.Name)
-		}
+		return nil
 	}
-	return nil
+	var err error
+	protoregistry.GlobalFiles.RangeFiles(func(fd protoreflect.FileDescriptor) bool {
+		if fd.Services() != nil {
+			for i := 0; i < fd.Services().Len(); i++ {
+				svc := fd.Services().Get(i)
+				fdp, e := fileDescriptorProto(fd.Path())
+				if e != nil {
+					err = e
+					return false
+				}
+				fdps, e := allDependency(fdp)
+				if e != nil {
+					err = e
+					return false
+				}
+				s.services[string(svc.FullName())] = &dpb.FileDescriptorSet{File: fdps}
+				if svc.Methods() != nil {
+					for j := 0; j < svc.Methods().Len(); j++ {
+						method := svc.Methods().Get(j)
+						s.methods[string(svc.FullName())] = append(s.methods[string(svc.FullName())], string(method.Name()))
+					}
+				}
+			}
+		}
+		return true
+	})
+	return err
 }
 
 // ListServices return all services
