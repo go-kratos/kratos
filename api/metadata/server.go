@@ -39,40 +39,44 @@ func NewServer(srv *grpc.Server) *Server {
 	}
 }
 
-func (s *Server) load() (err error) {
-	if s.srv == nil || len(s.services) > 0 {
+func (s *Server) load() error {
+	if len(s.services) > 0 {
 		return nil
 	}
-	for name, info := range s.srv.GetServiceInfo() {
-		fdenc, ok := parseMetadata(info.Metadata)
-		if !ok {
-			return fmt.Errorf("invalid service %s metadata", name)
+	if s.srv != nil {
+		for name, info := range s.srv.GetServiceInfo() {
+			fdenc, ok := parseMetadata(info.Metadata)
+			if !ok {
+				return fmt.Errorf("invalid service %s metadata", name)
+			}
+			fd, err := decodeFileDesc(fdenc)
+			if err != nil {
+				return err
+			}
+			protoSet, err := allDependency(fd)
+			if err != nil {
+				return err
+			}
+			s.services[name] = &dpb.FileDescriptorSet{File: protoSet}
+			for _, method := range info.Methods {
+				s.methods[name] = append(s.methods[name], method.Name)
+			}
 		}
-		fd, err := decodeFileDesc(fdenc)
-		if err != nil {
-			return err
-		}
-		protoSet, err := allDependency(fd)
-		if err != nil {
-			return err
-		}
-		s.services[name] = &dpb.FileDescriptorSet{File: protoSet}
-		for _, method := range info.Methods {
-			s.methods[name] = append(s.methods[name], method.Name)
-		}
+		return nil
 	}
+	var err error
 	protoregistry.GlobalFiles.RangeFiles(func(fd protoreflect.FileDescriptor) bool {
 		if fd.Services() != nil {
 			for i := 0; i < fd.Services().Len(); i++ {
 				svc := fd.Services().Get(i)
-				fdp, ferr := fileDescriptorProto(fd.Path())
-				if ferr != nil {
-					err = ferr
+				fdp, e := fileDescriptorProto(fd.Path())
+				if e != nil {
+					err = e
 					return false
 				}
-				fdps, ferr := allDependency(fdp)
-				if ferr != nil {
-					err = ferr
+				fdps, e := allDependency(fdp)
+				if e != nil {
+					err = e
 					return false
 				}
 				s.services[string(svc.FullName())] = &dpb.FileDescriptorSet{File: fdps}
@@ -86,7 +90,7 @@ func (s *Server) load() (err error) {
 		}
 		return true
 	})
-	return nil
+	return err
 }
 
 // ListServices return all services
