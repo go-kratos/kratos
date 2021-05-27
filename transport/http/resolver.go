@@ -46,7 +46,7 @@ func newResolver(ctx context.Context, scheme string, discovery registry.Discover
 			for _, in := range services {
 				endpoint, err := parseEndpoint(scheme, in.Endpoints())
 				if err != nil {
-					r.logger.Errorf("Failed to parse discovery endpoint: %v error %v", in.Endpoints, err)
+					r.logger.Errorf("Failed to parse discovery endpoint: %v error %v", in.Endpoints(), err)
 					continue
 				}
 				if endpoint == "" {
