@@ -6,8 +6,9 @@ option go_package = "github.com/go-kratos/kratos/examples/blog/internal/conf;con
 import "google/protobuf/duration.proto";
 
 message Bootstrap {
-    Server server = 1;
-    Data data = 2;
+    Trace  trace = 1;
+    Server server = 2;
+    Data data = 3;
 }
 
 message Server {
@@ -41,4 +42,8 @@ message Data {
     }
     Database database = 1;
     Redis redis = 2;
+}
+
+message Trace {
+    string endpoint = 1;
 }
