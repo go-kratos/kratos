@@ -121,6 +121,7 @@ retry:
 		}
 	}
 	a.instance = buildInstance(a.opts)
+	time.Sleep(time.Second)
 	return nil
 }
 
