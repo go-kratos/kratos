@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -59,6 +60,7 @@ type Server struct {
 	timeout time.Duration
 	router  *mux.Router
 	log     *log.Helper
+	info    kratos.AppInfo
 }
 
 // NewServer creates an HTTP server by options.
@@ -96,6 +98,7 @@ func (s *Server) HandleFunc(path string, h http.HandlerFunc) {
 func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx, cancel := context.WithTimeout(req.Context(), s.timeout)
 	defer cancel()
+	ctx = kratos.NewContext(ctx, s.info)
 	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP})
 	ctx = NewServerContext(ctx, ServerInfo{Request: req, Response: res})
 	s.router.ServeHTTP(res, req.WithContext(ctx))
@@ -120,7 +123,8 @@ func (s *Server) Endpoint() (string, error) {
 }
 
 // Start start the HTTP server.
-func (s *Server) Start() error {
+func (s *Server) Start(ctx context.Context) error {
+	s.info, _ = kratos.FromContext(ctx)
 	if s.lis == nil {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
@@ -136,7 +140,7 @@ func (s *Server) Start() error {
 }
 
 // Stop stop the HTTP server.
-func (s *Server) Stop() error {
+func (s *Server) Stop(ctx context.Context) error {
 	s.log.Info("[HTTP] server stopping")
 	return s.Shutdown(context.Background())
 }

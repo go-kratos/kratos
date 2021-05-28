@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/api/metadata"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
@@ -79,6 +80,7 @@ type Server struct {
 	grpcOpts   []grpc.ServerOption
 	health     *health.Server
 	metadata   *metadata.Server
+	info       kratos.AppInfo
 }
 
 // NewServer creates a gRPC server by options.
@@ -98,7 +100,7 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 	var grpcOpts = []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(
-			unaryServerInterceptor(srv.middleware, srv.timeout),
+			srv.unaryServerInterceptor(),
 		),
 	}
 	if len(srv.grpcOpts) > 0 {
@@ -132,7 +134,8 @@ func (s *Server) Endpoint() (string, error) {
 }
 
 // Start start the gRPC server.
-func (s *Server) Start() error {
+func (s *Server) Start(ctx context.Context) error {
+	s.info, _ = kratos.FromContext(ctx)
 	if s.lis == nil {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
@@ -146,27 +149,28 @@ func (s *Server) Start() error {
 }
 
 // Stop stop the gRPC server.
-func (s *Server) Stop() error {
+func (s *Server) Stop(ctx context.Context) error {
 	s.GracefulStop()
 	s.health.Shutdown()
 	s.log.Info("[gRPC] server stopping")
 	return nil
 }
 
-func unaryServerInterceptor(m middleware.Middleware, timeout time.Duration) grpc.UnaryServerInterceptor {
+func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		ctx = kratos.NewContext(ctx, s.info)
 		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC})
 		ctx = NewServerContext(ctx, ServerInfo{Server: info.Server, FullMethod: info.FullMethod})
-		if timeout > 0 {
+		if s.timeout > 0 {
 			var cancel context.CancelFunc
-			ctx, cancel = context.WithTimeout(ctx, timeout)
+			ctx, cancel = context.WithTimeout(ctx, s.timeout)
 			defer cancel()
 		}
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return handler(ctx, req)
 		}
-		if m != nil {
-			h = m(h)
+		if s.middleware != nil {
+			h = s.middleware(h)
 		}
 		return h(ctx, req)
 	}
