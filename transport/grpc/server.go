@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/api/metadata"
+	ic "github.com/go-kratos/kratos/v2/internal/context"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -71,6 +71,7 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
+	ctx        context.Context
 	lis        net.Listener
 	network    string
 	address    string
@@ -80,7 +81,6 @@ type Server struct {
 	grpcOpts   []grpc.ServerOption
 	health     *health.Server
 	metadata   *metadata.Server
-	info       kratos.AppInfo
 }
 
 // NewServer creates a gRPC server by options.
@@ -135,7 +135,7 @@ func (s *Server) Endpoint() (string, error) {
 
 // Start start the gRPC server.
 func (s *Server) Start(ctx context.Context) error {
-	s.info, _ = kratos.FromContext(ctx)
+	s.ctx = ctx
 	if s.lis == nil {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
@@ -158,7 +158,8 @@ func (s *Server) Stop(ctx context.Context) error {
 
 func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		ctx = kratos.NewContext(ctx, s.info)
+		ctx, cancel := ic.Merge(ctx, s.ctx)
+		defer cancel()
 		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC})
 		ctx = NewServerContext(ctx, ServerInfo{Server: info.Server, FullMethod: info.FullMethod})
 		if s.timeout > 0 {

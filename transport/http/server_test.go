@@ -12,6 +12,8 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/host"
 )
 
+type testKey struct{}
+
 type testData struct {
 	Path string `json:"path"`
 }
@@ -20,7 +22,13 @@ func TestServer(t *testing.T) {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		data := &testData{Path: r.RequestURI}
 		json.NewEncoder(w).Encode(data)
+
+		if r.Context().Value(testKey{}) != "test" {
+			w.WriteHeader(500)
+		}
 	}
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, testKey{}, "test")
 	srv := NewServer()
 	srv.HandleFunc("/index", fn)
 
@@ -29,13 +37,13 @@ func TestServer(t *testing.T) {
 	}
 
 	go func() {
-		if err := srv.Start(); err != nil {
+		if err := srv.Start(ctx); err != nil {
 			panic(err)
 		}
 	}()
 	time.Sleep(time.Second)
 	testClient(t, srv)
-	srv.Stop()
+	srv.Stop(ctx)
 }
 
 func testClient(t *testing.T, srv *Server) {
@@ -67,6 +75,9 @@ func testClient(t *testing.T, srv *Server) {
 		resp, err := client.Do(req)
 		if err != nil {
 			t.Fatal(err)
+		}
+		if resp.StatusCode != 200 {
+			t.Fatalf("http status got %d", resp.StatusCode)
 		}
 		content, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
