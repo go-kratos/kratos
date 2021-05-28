@@ -113,7 +113,7 @@ func (a *App) Stop() error {
 func buildInstance(o options) (*registry.ServiceInstance, error) {
 	if len(o.endpoints) == 0 {
 		for _, srv := range o.servers {
-			if r, ok := srv.(transport.Registry); ok {
+			if r, ok := srv.(transport.Endpointer); ok {
 				e, err := r.Endpoint()
 				if err != nil {
 					return nil, err
