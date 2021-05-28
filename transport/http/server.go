@@ -17,7 +17,7 @@ import (
 )
 
 var _ transport.Server = (*Server)(nil)
-var _ transport.Registry = (*Server)(nil)
+var _ transport.Endpointer = (*Server)(nil)
 
 // ServerOption is HTTP server option.
 type ServerOption func(*Server)
@@ -105,7 +105,7 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 // examples:
 //   http://127.0.0.1:8000?isSecure=false
 func (s *Server) Endpoint() (string, error) {
-	if strings.HasSuffix(s.address, ":0") {
+	if s.lis == nil && strings.HasSuffix(s.address, ":0") {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
 			return "", err
