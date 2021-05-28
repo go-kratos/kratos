@@ -80,7 +80,7 @@ func parseEndpoint(endpoints []string) (string, error) {
 }
 
 func parseAttributes(md map[string]string) *attributes.Attributes {
-	var pairs []interface{}
+	pairs := make([]interface{}, 0, len(md))
 	for k, v := range md {
 		pairs = append(pairs, k, v)
 	}
