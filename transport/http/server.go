@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/internal/host"
@@ -16,6 +17,7 @@ import (
 )
 
 var _ transport.Server = (*Server)(nil)
+var _ transport.Registry = (*Server)(nil)
 
 // ServerOption is HTTP server option.
 type ServerOption func(*Server)
@@ -103,6 +105,13 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 // examples:
 //   http://127.0.0.1:8000?isSecure=false
 func (s *Server) Endpoint() (string, error) {
+	if strings.HasSuffix(s.address, ":0") {
+		lis, err := net.Listen(s.network, s.address)
+		if err != nil {
+			return "", err
+		}
+		s.lis = lis
+	}
 	addr, err := host.Extract(s.address, s.lis)
 	if err != nil {
 		return "", err
@@ -112,13 +121,15 @@ func (s *Server) Endpoint() (string, error) {
 
 // Start start the HTTP server.
 func (s *Server) Start() error {
-	lis, err := net.Listen(s.network, s.address)
-	if err != nil {
-		return err
+	if s.lis == nil {
+		lis, err := net.Listen(s.network, s.address)
+		if err != nil {
+			return err
+		}
+		s.lis = lis
 	}
-	s.lis = lis
-	s.log.Infof("[HTTP] server listening on: %s", lis.Addr().String())
-	if err := s.Serve(lis); !errors.Is(err, http.ErrServerClosed) {
+	s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
+	if err := s.Serve(s.lis); !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
 	return nil
