@@ -19,7 +19,7 @@ import (
 var _ transport.Server = (*Server)(nil)
 var _ transport.Endpointer = (*Server)(nil)
 
-// ServerOption is HTTP server option.
+// ServerOption is an HTTP server option.
 type ServerOption func(*Server)
 
 // Network with server network.
@@ -50,7 +50,7 @@ func Logger(logger log.Logger) ServerOption {
 	}
 }
 
-// Server is a HTTP server wrapper.
+// Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
 	lis     net.Listener
@@ -61,7 +61,7 @@ type Server struct {
 	log     *log.Helper
 }
 
-// NewServer creates a HTTP server by options.
+// NewServer creates an HTTP server by options.
 func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
 		network: "tcp",

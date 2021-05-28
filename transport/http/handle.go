@@ -43,9 +43,9 @@ type HandleOptions struct {
 // Deprecated: use NewHandler instead.
 func DefaultHandleOptions() HandleOptions {
 	return HandleOptions{
-		Decode:     defaultRequestDecoder,
-		Encode:     defaultResponseEncoder,
-		Error:      defaultErrorEncoder,
+		Decode:     DefaultRequestDecoder,
+		Encode:     DefaultResponseEncoder,
+		Error:      DefaultErrorEncoder,
 		Middleware: recovery.Recovery(),
 	}
 }
@@ -86,7 +86,7 @@ type Handler struct {
 	opts   HandleOptions
 }
 
-// NewHandler new a HTTP handler.
+// NewHandler new an HTTP handler.
 func NewHandler(handler interface{}, opts ...HandleOption) http.Handler {
 	if err := validateHandler(handler); err != nil {
 		panic(err)
@@ -150,11 +150,11 @@ func validateHandler(handler interface{}) error {
 	return nil
 }
 
-// defaultRequestDecoder decodes the request body to object.
-func defaultRequestDecoder(req *http.Request, v interface{}) error {
-	subtype := httputil.ContentSubtype(req.Header.Get("Content-Type"))
-	if codec := encoding.GetCodec(subtype); codec != nil {
-		data, err := ioutil.ReadAll(req.Body)
+// DefaultRequestDecoder decodes the request body to object.
+func DefaultRequestDecoder(r *http.Request, v interface{}) error {
+	codec, ok := CodecForRequest(r, "Content-Type")
+	if ok {
+		data, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			return errors.BadRequest("CODEC", err.Error())
 		}
@@ -162,16 +162,16 @@ func defaultRequestDecoder(req *http.Request, v interface{}) error {
 			return errors.BadRequest("CODEC", err.Error())
 		}
 	} else {
-		if err := binding.BindForm(req, v); err != nil {
+		if err := binding.BindForm(r, v); err != nil {
 			return errors.BadRequest("CODEC", err.Error())
 		}
 	}
 	return nil
 }
 
-// defaultResponseEncoder encodes the object to the HTTP response.
-func defaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{}) error {
-	codec := CodecForRequest(r)
+// DefaultResponseEncoder encodes the object to the HTTP response.
+func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{}) error {
+	codec, _ := CodecForRequest(r, "Accept")
 	data, err := codec.Marshal(v)
 	if err != nil {
 		return err
@@ -186,9 +186,9 @@ func defaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{
 	return nil
 }
 
-// defaultErrorEncoder encodes the error to the HTTP response.
-func defaultErrorEncoder(w http.ResponseWriter, r *http.Request, se error) {
-	codec := CodecForRequest(r)
+// DefaultErrorEncoder encodes the error to the HTTP response.
+func DefaultErrorEncoder(w http.ResponseWriter, r *http.Request, se error) {
+	codec, _ := CodecForRequest(r, "Accept")
 	body, err := codec.Marshal(se)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -206,15 +206,12 @@ func defaultErrorEncoder(w http.ResponseWriter, r *http.Request, se error) {
 }
 
 // CodecForRequest get encoding.Codec via http.Request
-func CodecForRequest(r *http.Request) encoding.Codec {
-	var codec encoding.Codec
-	for _, accept := range r.Header["Accept"] {
-		if codec = encoding.GetCodec(httputil.ContentSubtype(accept)); codec != nil {
-			break
+func CodecForRequest(r *http.Request, name string) (encoding.Codec, bool) {
+	for _, accept := range r.Header[name] {
+		codec := encoding.GetCodec(httputil.ContentSubtype(accept))
+		if codec != nil {
+			return codec, true
 		}
 	}
-	if codec == nil {
-		codec = encoding.GetCodec("json")
-	}
-	return codec
+	return encoding.GetCodec("json"), false
 }
