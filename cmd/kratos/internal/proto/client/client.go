@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 	"github.com/spf13/cobra"
 )
 
@@ -77,7 +76,7 @@ func generate(proto string, args []string) error {
 	path, name := filepath.Split(proto)
 	input := []string{
 		"--proto_path=.",
-		"--proto_path=" + filepath.Join(base.KratosMod(), "third_party"),
+		"--proto_path=./third_party",
 		"--go_out=paths=source_relative:.",
 		"--go-grpc_out=paths=source_relative:.",
 		"--go-http_out=paths=source_relative:.",
