@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/api/metadata"
@@ -19,6 +20,7 @@ import (
 )
 
 var _ transport.Server = (*Server)(nil)
+var _ transport.Registry = (*Server)(nil)
 
 // ServerOption is gRPC server option.
 type ServerOption func(o *Server)
@@ -115,6 +117,13 @@ func NewServer(opts ...ServerOption) *Server {
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (string, error) {
+	if strings.HasSuffix(s.address, ":0") {
+		lis, err := net.Listen(s.network, s.address)
+		if err != nil {
+			return "", err
+		}
+		s.lis = lis
+	}
 	addr, err := host.Extract(s.address, s.lis)
 	if err != nil {
 		return "", err
@@ -124,14 +133,16 @@ func (s *Server) Endpoint() (string, error) {
 
 // Start start the gRPC server.
 func (s *Server) Start() error {
-	lis, err := net.Listen(s.network, s.address)
-	if err != nil {
-		return err
+	if s.lis == nil {
+		lis, err := net.Listen(s.network, s.address)
+		if err != nil {
+			return err
+		}
+		s.lis = lis
 	}
-	s.lis = lis
-	s.log.Infof("[gRPC] server listening on: %s", lis.Addr().String())
+	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
 	s.health.Resume()
-	return s.Serve(lis)
+	return s.Serve(s.lis)
 }
 
 // Stop stop the gRPC server.

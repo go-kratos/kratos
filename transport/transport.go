@@ -10,9 +10,13 @@ import (
 	_ "github.com/go-kratos/kratos/v2/encoding/yaml"
 )
 
+// Registry is registry endpoint.
+type Registry interface {
+	Endpoint() (string, error)
+}
+
 // Server is transport server.
 type Server interface {
-	Endpoint() (string, error)
 	Start() error
 	Stop() error
 }

@@ -11,18 +11,19 @@ import (
 
 func TestServer(t *testing.T) {
 	srv := NewServer()
-	if endpoint, err := srv.Endpoint(); err != nil || endpoint == "" {
-		t.Fatal(endpoint, err)
+	if e, err := srv.Endpoint(); err != nil || e == "" {
+		t.Fatal(e, err)
 	}
 
-	time.AfterFunc(time.Second, func() {
-		defer srv.Stop()
-		testClient(t, srv)
-	})
-	// start server
-	if err := srv.Start(); err != nil {
-		t.Fatal(err)
-	}
+	go func() {
+		// start server
+		if err := srv.Start(); err != nil {
+			panic(err)
+		}
+	}()
+	time.Sleep(time.Second)
+	testClient(t, srv)
+	srv.Stop()
 }
 
 func testClient(t *testing.T, srv *Server) {

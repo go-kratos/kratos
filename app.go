@@ -5,12 +5,12 @@ import (
 	"errors"
 	"os"
 	"os/signal"
-	"strings"
+	"sync"
 	"syscall"
-	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v2/transport"
 
 	"github.com/google/uuid"
 	"golang.org/x/sync/errgroup"
@@ -40,11 +40,10 @@ func New(opts ...Option) *App {
 	}
 	ctx, cancel := context.WithCancel(options.ctx)
 	return &App{
-		opts:     options,
-		ctx:      ctx,
-		cancel:   cancel,
-		instance: buildInstance(options),
-		log:      log.NewHelper(options.logger),
+		ctx:    ctx,
+		cancel: cancel,
+		opts:   options,
+		log:    log.NewHelper(options.logger),
 	}
 }
 
@@ -55,28 +54,34 @@ func (a *App) Run() error {
 		"service_name", a.opts.name,
 		"version", a.opts.version,
 	)
-	g, ctx := errgroup.WithContext(a.ctx)
+	instance, err := buildInstance(a.opts)
+	if err != nil {
+		return err
+	}
+	eg, ctx := errgroup.WithContext(a.ctx)
+	wg := sync.WaitGroup{}
 	for _, srv := range a.opts.servers {
 		srv := srv
-		g.Go(func() error {
+		eg.Go(func() error {
 			<-ctx.Done() // wait for stop signal
 			return srv.Stop()
 		})
-		g.Go(func() error {
+		wg.Add(1)
+		eg.Go(func() error {
+			wg.Done()
 			return srv.Start()
 		})
 	}
-	if err := a.waitForReady(ctx); err != nil {
-		return err
-	}
+	wg.Wait()
 	if a.opts.registrar != nil {
-		if err := a.opts.registrar.Register(a.opts.ctx, a.instance); err != nil {
+		if err := a.opts.registrar.Register(a.opts.ctx, instance); err != nil {
 			return err
 		}
+		a.instance = instance
 	}
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, a.opts.sigs...)
-	g.Go(func() error {
+	eg.Go(func() error {
 		for {
 			select {
 			case <-ctx.Done():
@@ -86,7 +91,7 @@ func (a *App) Run() error {
 			}
 		}
 	})
-	if err := g.Wait(); err != nil && !errors.Is(err, context.Canceled) {
+	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return err
 	}
 	return nil
@@ -94,7 +99,7 @@ func (a *App) Run() error {
 
 // Stop gracefully stops the application.
 func (a *App) Stop() error {
-	if a.opts.registrar != nil {
+	if a.opts.registrar != nil && a.instance != nil {
 		if err := a.opts.registrar.Deregister(a.opts.ctx, a.instance); err != nil {
 			return err
 		}
@@ -105,30 +110,14 @@ func (a *App) Stop() error {
 	return nil
 }
 
-func (a *App) waitForReady(ctx context.Context) error {
-retry:
-	for _, srv := range a.opts.servers {
-		if ctx.Err() != nil {
-			return ctx.Err()
-		}
-		e, err := srv.Endpoint()
-		if err != nil {
-			return err
-		}
-		if strings.HasSuffix(e, ":0") {
-			time.Sleep(time.Millisecond * 100)
-			goto retry
-		}
-	}
-	a.instance = buildInstance(a.opts)
-	time.Sleep(time.Second)
-	return nil
-}
-
-func buildInstance(o options) *registry.ServiceInstance {
+func buildInstance(o options) (*registry.ServiceInstance, error) {
 	if len(o.endpoints) == 0 {
 		for _, srv := range o.servers {
-			if e, err := srv.Endpoint(); err == nil {
+			if r, ok := srv.(transport.Registry); ok {
+				e, err := r.Endpoint()
+				if err != nil {
+					return nil, err
+				}
 				o.endpoints = append(o.endpoints, e)
 			}
 		}
@@ -139,5 +128,5 @@ func buildInstance(o options) *registry.ServiceInstance {
 		Version:   o.version,
 		Metadata:  o.metadata,
 		Endpoints: o.endpoints,
-	}
+	}, nil
 }
