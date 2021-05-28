@@ -23,7 +23,8 @@ type Endpointer interface {
 
 // Transport is transport context value.
 type Transport struct {
-	Kind Kind
+	Kind      Kind
+	LocalAddr string
 }
 
 // Kind defines the type of Transport
