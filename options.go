@@ -54,9 +54,9 @@ func Endpoint(endpoints ...string) Option {
 	return func(o *options) { o.endpoints = endpoints }
 }
 
-// Signal with exit signals.
-func Signal(sigs ...os.Signal) Option {
-	return func(o *options) { o.sigs = sigs }
+// Context with service context.
+func Context(ctx context.Context) Option {
+	return func(o *options) { o.ctx = ctx }
 }
 
 // Logger with service logger.
@@ -67,6 +67,11 @@ func Logger(logger log.Logger) Option {
 // Server with transport servers.
 func Server(srv ...transport.Server) Option {
 	return func(o *options) { o.servers = srv }
+}
+
+// Signal with exit signals.
+func Signal(sigs ...os.Signal) Option {
+	return func(o *options) { o.sigs = sigs }
 }
 
 // Registrar with service registry.
