@@ -12,8 +12,8 @@ import (
 
 // Server is transport server.
 type Server interface {
-	Start() error
-	Stop() error
+	Start(context.Context) error
+	Stop(context.Context) error
 }
 
 // Endpointer is registry endpoint.

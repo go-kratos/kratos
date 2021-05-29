@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/api/metadata"
+	ic "github.com/go-kratos/kratos/v2/internal/context"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -70,6 +71,7 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
+	ctx        context.Context
 	lis        net.Listener
 	network    string
 	address    string
@@ -86,7 +88,7 @@ func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
 		network: "tcp",
 		address: ":0",
-		timeout: time.Second,
+		timeout: 1 * time.Second,
 		middleware: middleware.Chain(
 			recovery.Recovery(),
 		),
@@ -98,7 +100,7 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 	var grpcOpts = []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(
-			unaryServerInterceptor(srv.middleware, srv.timeout),
+			srv.unaryServerInterceptor(),
 		),
 	}
 	if len(srv.grpcOpts) > 0 {
@@ -128,11 +130,13 @@ func (s *Server) Endpoint() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	s.address = addr
 	return fmt.Sprintf("grpc://%s", addr), nil
 }
 
 // Start start the gRPC server.
-func (s *Server) Start() error {
+func (s *Server) Start(ctx context.Context) error {
+	s.ctx = ctx
 	if s.lis == nil {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
@@ -146,27 +150,29 @@ func (s *Server) Start() error {
 }
 
 // Stop stop the gRPC server.
-func (s *Server) Stop() error {
+func (s *Server) Stop(ctx context.Context) error {
 	s.GracefulStop()
 	s.health.Shutdown()
 	s.log.Info("[gRPC] server stopping")
 	return nil
 }
 
-func unaryServerInterceptor(m middleware.Middleware, timeout time.Duration) grpc.UnaryServerInterceptor {
+func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		ctx, cancel := ic.Merge(ctx, s.ctx)
+		defer cancel()
 		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC})
 		ctx = NewServerContext(ctx, ServerInfo{Server: info.Server, FullMethod: info.FullMethod})
-		if timeout > 0 {
+		if s.timeout > 0 {
 			var cancel context.CancelFunc
-			ctx, cancel = context.WithTimeout(ctx, timeout)
+			ctx, cancel = context.WithTimeout(ctx, s.timeout)
 			defer cancel()
 		}
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return handler(ctx, req)
 		}
-		if m != nil {
-			h = m(h)
+		if s.middleware != nil {
+			h = s.middleware(h)
 		}
 		return h(ctx, req)
 	}

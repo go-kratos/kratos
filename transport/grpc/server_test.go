@@ -9,7 +9,11 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/host"
 )
 
+type testKey struct{}
+
 func TestServer(t *testing.T) {
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, testKey{}, "test")
 	srv := NewServer()
 	if e, err := srv.Endpoint(); err != nil || e == "" {
 		t.Fatal(e, err)
@@ -17,13 +21,13 @@ func TestServer(t *testing.T) {
 
 	go func() {
 		// start server
-		if err := srv.Start(); err != nil {
+		if err := srv.Start(ctx); err != nil {
 			panic(err)
 		}
 	}()
 	time.Sleep(time.Second)
 	testClient(t, srv)
-	srv.Stop()
+	srv.Stop(ctx)
 }
 
 func testClient(t *testing.T, srv *Server) {

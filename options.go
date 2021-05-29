@@ -59,22 +59,22 @@ func Context(ctx context.Context) Option {
 	return func(o *options) { o.ctx = ctx }
 }
 
-// Signal with exit signals.
-func Signal(sigs ...os.Signal) Option {
-	return func(o *options) { o.sigs = sigs }
-}
-
 // Logger with service logger.
 func Logger(logger log.Logger) Option {
 	return func(o *options) { o.logger = logger }
 }
 
-// Registrar with service registry.
-func Registrar(r registry.Registrar) Option {
-	return func(o *options) { o.registrar = r }
-}
-
 // Server with transport servers.
 func Server(srv ...transport.Server) Option {
 	return func(o *options) { o.servers = srv }
+}
+
+// Signal with exit signals.
+func Signal(sigs ...os.Signal) Option {
+	return func(o *options) { o.sigs = sigs }
+}
+
+// Registrar with service registry.
+func Registrar(r registry.Registrar) Option {
+	return func(o *options) { o.registrar = r }
 }
