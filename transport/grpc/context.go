@@ -27,6 +27,7 @@ func FromServerContext(ctx context.Context) (info ServerInfo, ok bool) {
 type ClientInfo struct {
 	// FullMethod is the full RPC method string, i.e., /package.service/method.
 	FullMethod string
+	Target     string
 }
 
 type clientKey struct{}

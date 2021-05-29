@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	ic "github.com/go-kratos/kratos/v2/internal/context"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -53,6 +54,7 @@ func Logger(logger log.Logger) ServerOption {
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
+	ctx     context.Context
 	lis     net.Listener
 	network string
 	address string
@@ -66,7 +68,7 @@ func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
 		network: "tcp",
 		address: ":0",
-		timeout: time.Second,
+		timeout: 1 * time.Second,
 		log:     log.NewHelper(log.DefaultLogger),
 	}
 	for _, o := range opts {
@@ -94,10 +96,14 @@ func (s *Server) HandleFunc(path string, h http.HandlerFunc) {
 
 // ServeHTTP should write reply headers and data to the ResponseWriter and then return.
 func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	ctx, cancel := context.WithTimeout(req.Context(), s.timeout)
+	ctx, cancel := ic.Merge(req.Context(), s.ctx)
 	defer cancel()
-	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP, LocalAddr: s.address})
+	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP})
 	ctx = NewServerContext(ctx, ServerInfo{Request: req, Response: res})
+	if s.timeout > 0 {
+		ctx, cancel = context.WithTimeout(req.Context(), s.timeout)
+		defer cancel()
+	}
 	s.router.ServeHTTP(res, req.WithContext(ctx))
 }
 
@@ -122,9 +128,7 @@ func (s *Server) Endpoint() (string, error) {
 
 // Start start the HTTP server.
 func (s *Server) Start(ctx context.Context) error {
-	s.BaseContext = func(net.Listener) context.Context {
-		return ctx
-	}
+	s.ctx = ctx
 	if s.lis == nil {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {

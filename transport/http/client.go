@@ -27,6 +27,7 @@ type Client struct {
 	b  balancer.Balancer
 
 	scheme       string
+	endpoint     string
 	target       Target
 	userAgent    string
 	middleware   middleware.Middleware
@@ -148,7 +149,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	options := &clientOptions{
 		ctx:          ctx,
 		scheme:       "http",
-		timeout:      1 * time.Second,
+		timeout:      500 * time.Millisecond,
 		encoder:      DefaultRequestEncoder,
 		decoder:      DefaultResponseDecoder,
 		errorDecoder: DefaultErrorDecoder,
@@ -196,6 +197,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		userAgent:    options.userAgent,
 		target:       target,
 		scheme:       options.scheme,
+		endpoint:     options.endpoint,
 		discovery:    options.discovery,
 		b:            options.balancer,
 	}, nil
@@ -240,6 +242,7 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 
 	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP})
 	ctx = NewClientContext(ctx, ClientInfo{
+		Target:      client.endpoint,
 		PathPattern: c.pathPattern,
 		Request:     req,
 	})
