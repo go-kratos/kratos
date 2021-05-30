@@ -44,13 +44,6 @@ func Timeout(timeout time.Duration) ServerOption {
 	}
 }
 
-// Logger with server logger.
-func Logger(logger log.Logger) ServerOption {
-	return func(s *Server) {
-		s.log = log.NewHelper(logger)
-	}
-}
-
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
@@ -60,7 +53,6 @@ type Server struct {
 	address string
 	timeout time.Duration
 	router  *mux.Router
-	log     *log.Helper
 }
 
 // NewServer creates an HTTP server by options.
@@ -69,7 +61,6 @@ func NewServer(opts ...ServerOption) *Server {
 		network: "tcp",
 		address: ":0",
 		timeout: 1 * time.Second,
-		log:     log.NewHelper(log.DefaultLogger),
 	}
 	for _, o := range opts {
 		o(srv)
@@ -136,7 +127,9 @@ func (s *Server) Start(ctx context.Context) error {
 		}
 		s.lis = lis
 	}
-	s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
+	if logger, ok := log.FromContext(ctx); ok {
+		logger.Log(log.LevelInfo, "msg", "[HTTP] server listening on: "+s.lis.Addr().String())
+	}
 	if err := s.Serve(s.lis); !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
@@ -145,6 +138,8 @@ func (s *Server) Start(ctx context.Context) error {
 
 // Stop stop the HTTP server.
 func (s *Server) Stop(ctx context.Context) error {
-	s.log.Info("[HTTP] server stopping")
+	if logger, ok := log.FromContext(ctx); ok {
+		logger.Log(log.LevelInfo, "msg", "[HTTP] server stopping")
+	}
 	return s.Shutdown(context.Background())
 }

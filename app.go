@@ -63,6 +63,7 @@ func (a *App) Run() error {
 		Name:    a.opts.name,
 		Version: a.opts.version,
 	})
+	ctx = log.NewContext(ctx, a.opts.logger)
 	eg, ctx := errgroup.WithContext(ctx)
 	wg := sync.WaitGroup{}
 	for _, srv := range a.opts.servers {

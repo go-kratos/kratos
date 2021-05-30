@@ -14,13 +14,13 @@ type Logger interface {
 	Log(level Level, keyvals ...interface{}) error
 }
 
-type context struct {
+type logger struct {
 	logs      []Logger
 	prefix    []interface{}
 	hasValuer bool
 }
 
-func (c *context) Log(level Level, keyvals ...interface{}) error {
+func (c *logger) Log(level Level, keyvals ...interface{}) error {
 	kvs := make([]interface{}, 0, len(c.prefix)+len(keyvals))
 	kvs = append(kvs, c.prefix...)
 	if c.hasValuer {
@@ -37,20 +37,20 @@ func (c *context) Log(level Level, keyvals ...interface{}) error {
 
 // With with logger fields.
 func With(l Logger, kv ...interface{}) Logger {
-	if c, ok := l.(*context); ok {
+	if c, ok := l.(*logger); ok {
 		kvs := make([]interface{}, 0, len(c.prefix)+len(kv))
 		kvs = append(kvs, kv...)
 		kvs = append(kvs, c.prefix...)
-		return &context{
+		return &logger{
 			logs:      c.logs,
 			prefix:    kvs,
 			hasValuer: containsValuer(kvs),
 		}
 	}
-	return &context{logs: []Logger{l}, prefix: kv, hasValuer: containsValuer(kv)}
+	return &logger{logs: []Logger{l}, prefix: kv, hasValuer: containsValuer(kv)}
 }
 
 // MultiLogger wraps multi logger.
 func MultiLogger(logs ...Logger) Logger {
-	return &context{logs: logs}
+	return &logger{logs: logs}
 }
