@@ -2,6 +2,7 @@ package kratos
 
 import (
 	"context"
+	"net/url"
 	"os"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -18,7 +19,7 @@ type options struct {
 	name      string
 	version   string
 	metadata  map[string]string
-	endpoints []string
+	endpoints []*url.URL
 
 	ctx  context.Context
 	sigs []os.Signal
@@ -50,7 +51,7 @@ func Metadata(md map[string]string) Option {
 }
 
 // Endpoint with service endpoint.
-func Endpoint(endpoints ...string) Option {
+func Endpoint(endpoints ...*url.URL) Option {
 	return func(o *options) { o.endpoints = endpoints }
 }
 

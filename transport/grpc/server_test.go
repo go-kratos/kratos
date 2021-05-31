@@ -15,7 +15,7 @@ func TestServer(t *testing.T) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, testKey{}, "test")
 	srv := NewServer()
-	if e, err := srv.Endpoint(); err != nil || e == "" {
+	if e, err := srv.Endpoint(); err != nil || e == nil {
 		t.Fatal(e, err)
 	}
 

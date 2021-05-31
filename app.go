@@ -127,11 +127,16 @@ func (a *App) buildInstance() (*registry.ServiceInstance, error) {
 			}
 		}
 	}
+	var endpoints []string
+
+	for _, e := range a.opts.endpoints {
+		endpoints = append(endpoints, e.String())
+	}
 	return &registry.ServiceInstance{
 		ID:        a.opts.id,
 		Name:      a.opts.name,
 		Version:   a.opts.version,
 		Metadata:  a.opts.metadata,
-		Endpoints: a.opts.endpoints,
+		Endpoints: endpoints,
 	}, nil
 }

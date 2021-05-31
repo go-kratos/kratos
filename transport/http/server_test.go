@@ -32,7 +32,7 @@ func TestServer(t *testing.T) {
 	srv := NewServer()
 	srv.HandleFunc("/index", fn)
 
-	if e, err := srv.Endpoint(); err != nil || e == "" {
+	if e, err := srv.Endpoint(); err != nil || e == nil {
 		t.Fatal(e, err)
 	}
 
