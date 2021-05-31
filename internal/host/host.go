@@ -7,14 +7,7 @@ import (
 
 func isValidIP(addr string) bool {
 	ip := net.ParseIP(addr)
-	if ip4 := ip.To4(); ip4 != nil {
-		return !ip4.IsLoopback()
-	}
-	// Following RFC 4193, Section 3. Private Address Space which says:
-	//   The Internet Assigned Numbers Authority (IANA) has reserved the
-	//   following block of the IPv6 address space for local internets:
-	//     FC00::  -  FDFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF (FC00::/7 prefix)
-	return len(ip) == net.IPv6len && ip[0]&0xfe == 0xfc
+	return ip.IsGlobalUnicast() && !ip.IsInterfaceLocalMulticast()
 }
 
 // Port return a real port.
