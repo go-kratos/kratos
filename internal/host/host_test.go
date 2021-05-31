@@ -38,7 +38,7 @@ func TestPrivateIP(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.addr, func(t *testing.T) {
-			res := isPrivateIP(test.addr)
+			res := isValidIP(test.addr)
 			if res != test.expect {
 				t.Fatalf("expected %t got %t", test.expect, res)
 			}
