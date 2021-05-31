@@ -54,12 +54,13 @@ func Server(opts ...Option) middleware.Middleware {
 				method = "POST"
 				path = info.FullMethod
 			} else if info, ok := http.FromServerContext(ctx); ok {
-				method = info.Request.Method
-				if route := mux.CurrentRoute(info.Request); route != nil {
+				req := info.Request.WithContext(ctx)
+				method = req.Method
+				if route := mux.CurrentRoute(req); route != nil {
 					// /path/123 -> /path/{id}
 					path, _ = route.GetPathTemplate()
 				} else {
-					path = info.Request.RequestURI
+					path = req.RequestURI
 				}
 			}
 			startTime := time.Now()
