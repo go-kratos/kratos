@@ -130,7 +130,6 @@ func (s *Server) Endpoint() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	s.address = addr
 	return fmt.Sprintf("grpc://%s", addr), nil
 }
 
