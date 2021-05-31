@@ -3,10 +3,10 @@ package project
 import (
 	"context"
 	"fmt"
-	"github.com/AlecAivazis/survey/v2"
 	"os"
 	"time"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 )
 

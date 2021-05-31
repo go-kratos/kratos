@@ -2,6 +2,7 @@ package transport
 
 import (
 	"context"
+	"net/url"
 
 	// init encoding
 	_ "github.com/go-kratos/kratos/v2/encoding/json"
@@ -18,7 +19,7 @@ type Server interface {
 
 // Endpointer is registry endpoint.
 type Endpointer interface {
-	Endpoint() (string, error)
+	Endpoint() (*url.URL, error)
 }
 
 // Transport is transport context value.

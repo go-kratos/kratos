@@ -3,12 +3,14 @@ package http
 import (
 	"context"
 	"net/http"
+	"net/url"
 )
 
 // ServerInfo represent HTTP server information.
 type ServerInfo struct {
 	Request  *http.Request
 	Response http.ResponseWriter
+	Endpoint *url.URL
 }
 
 type serverKey struct{}

@@ -3,12 +3,13 @@ package project
 import (
 	"context"
 	"fmt"
-	"github.com/fatih/color"
 	"os"
 	"path"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
+
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/fatih/color"
 )
 
 // Project is a project template.
@@ -24,7 +25,7 @@ func (p *Project) New(ctx context.Context, dir string, layout string) error {
 		override := false
 		prompt := &survey.Confirm{
 			Message: "📂 Do you want to override the folder ?",
-			Help: "Delete the existing folder and create the project.",
+			Help:    "Delete the existing folder and create the project.",
 		}
 		survey.AskOne(prompt, &override)
 		if !override {

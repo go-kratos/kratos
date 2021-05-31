@@ -2,8 +2,8 @@ package grpc
 
 import (
 	"context"
-	"fmt"
 	"net"
+	"net/url"
 	"strings"
 	"time"
 
@@ -75,6 +75,7 @@ type Server struct {
 	lis        net.Listener
 	network    string
 	address    string
+	endpoint   *url.URL
 	timeout    time.Duration
 	log        *log.Helper
 	middleware middleware.Middleware
@@ -118,20 +119,24 @@ func NewServer(opts ...ServerOption) *Server {
 // Endpoint return a real address to registry endpoint.
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
-func (s *Server) Endpoint() (string, error) {
+func (s *Server) Endpoint() (*url.URL, error) {
 	if s.lis == nil && strings.HasSuffix(s.address, ":0") {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		s.lis = lis
 	}
 	addr, err := host.Extract(s.address, s.lis)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	s.address = addr
-	return fmt.Sprintf("grpc://%s", addr), nil
+	u := &url.URL{
+		Scheme: "grpc",
+		Host:   addr,
+	}
+	s.endpoint = u
+	return u, nil
 }
 
 // Start start the gRPC server.
@@ -162,7 +167,7 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		ctx, cancel := ic.Merge(ctx, s.ctx)
 		defer cancel()
 		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC})
-		ctx = NewServerContext(ctx, ServerInfo{Server: info.Server, FullMethod: info.FullMethod})
+		ctx = NewServerContext(ctx, ServerInfo{Server: info.Server, FullMethod: info.FullMethod, Endpoint: s.endpoint})
 		if s.timeout > 0 {
 			var cancel context.CancelFunc
 			ctx, cancel = context.WithTimeout(ctx, s.timeout)
