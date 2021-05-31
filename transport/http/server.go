@@ -3,9 +3,9 @@ package http
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -54,13 +54,14 @@ func Logger(logger log.Logger) ServerOption {
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
-	ctx     context.Context
-	lis     net.Listener
-	network string
-	address string
-	timeout time.Duration
-	router  *mux.Router
-	log     *log.Helper
+	ctx      context.Context
+	lis      net.Listener
+	network  string
+	address  string
+	endpoint *url.URL
+	timeout  time.Duration
+	router   *mux.Router
+	log      *log.Helper
 }
 
 // NewServer creates an HTTP server by options.
@@ -99,7 +100,7 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx, cancel := ic.Merge(req.Context(), s.ctx)
 	defer cancel()
 	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP})
-	ctx = NewServerContext(ctx, ServerInfo{Request: req, Response: res})
+	ctx = NewServerContext(ctx, ServerInfo{Request: req, Response: res, Endpoint: s.endpoint})
 	if s.timeout > 0 {
 		ctx, cancel = context.WithTimeout(ctx, s.timeout)
 		defer cancel()
@@ -110,19 +111,24 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 // Endpoint return a real address to registry endpoint.
 // examples:
 //   http://127.0.0.1:8000?isSecure=false
-func (s *Server) Endpoint() (string, error) {
+func (s *Server) Endpoint() (*url.URL, error) {
 	if s.lis == nil && strings.HasSuffix(s.address, ":0") {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		s.lis = lis
 	}
 	addr, err := host.Extract(s.address, s.lis)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return fmt.Sprintf("http://%s", addr), nil
+	u := &url.URL{
+		Scheme: "http",
+		Host:   addr,
+	}
+	s.endpoint = u
+	return u, nil
 }
 
 // Start start the HTTP server.
