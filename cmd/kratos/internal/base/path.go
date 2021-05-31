@@ -3,13 +3,14 @@ package base
 import (
 	"bytes"
 	"fmt"
-	"github.com/fatih/color"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 func kratosHome() string {
