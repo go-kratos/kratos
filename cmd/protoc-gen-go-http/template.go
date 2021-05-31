@@ -77,9 +77,6 @@ func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Reque
 	{{else}} 
 	err = c.cc.Invoke(ctx, path, nil, &out{{.ResponseBody}}, http1.Method("{{.Method}}"), http1.PathPattern("{{.Path}}"))
 	{{end}}
-	if err != nil {
-		return
-	}
 	return 
 }
 {{end}}
