@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	ic "github.com/go-kratos/kratos/v2/internal/context"
@@ -55,6 +56,8 @@ type Server struct {
 	*http.Server
 	ctx      context.Context
 	lis      net.Listener
+	once     sync.Once
+	err      error
 	network  string
 	address  string
 	endpoint *url.URL
@@ -111,18 +114,24 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 // examples:
 //   http://127.0.0.1:8000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
-	if s.lis == nil {
+	if s.err != nil {
+		return nil, s.err
+	}
+	s.once.Do(func() {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
-			return nil, err
+			s.err = err
+			return
+		}
+		addr, err := host.Extract(s.address, s.lis)
+		if err != nil {
+			lis.Close()
+			s.err = err
+			return
 		}
 		s.lis = lis
-	}
-	addr, err := host.Extract(s.address, s.lis)
-	if err != nil {
-		return nil, err
-	}
-	s.endpoint = &url.URL{Scheme: "http", Host: addr}
+		s.endpoint = &url.URL{Scheme: "http", Host: addr}
+	})
 	return s.endpoint, nil
 }
 

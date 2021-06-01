@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/api/metadata"
@@ -72,6 +73,8 @@ type Server struct {
 	*grpc.Server
 	ctx        context.Context
 	lis        net.Listener
+	once       sync.Once
+	err        error
 	network    string
 	address    string
 	endpoint   *url.URL
@@ -119,18 +122,24 @@ func NewServer(opts ...ServerOption) *Server {
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
-	if s.lis == nil {
+	if s.err != nil {
+		return nil, s.err
+	}
+	s.once.Do(func() {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
-			return nil, err
+			s.err = err
+			return
+		}
+		addr, err := host.Extract(s.address, s.lis)
+		if err != nil {
+			lis.Close()
+			s.err = err
+			return
 		}
 		s.lis = lis
-	}
-	addr, err := host.Extract(s.address, s.lis)
-	if err != nil {
-		return nil, err
-	}
-	s.endpoint = &url.URL{Scheme: "grpc", Host: addr}
+		s.endpoint = &url.URL{Scheme: "grpc", Host: addr}
+	})
 	return s.endpoint, nil
 }
 
