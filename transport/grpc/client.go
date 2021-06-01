@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/grpc/resolver/discovery"
@@ -85,9 +84,6 @@ func DialInsecure(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, 
 func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.ClientConn, error) {
 	options := clientOptions{
 		timeout: 500 * time.Millisecond,
-		middleware: middleware.Chain(
-			recovery.Recovery(),
-		),
 	}
 	for _, o := range opts {
 		o(&options)
