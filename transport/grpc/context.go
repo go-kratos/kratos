@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"net/url"
 )
 
 // ServerInfo represent gRPC server information.
@@ -11,8 +10,6 @@ type ServerInfo struct {
 	Server interface{}
 	// FullMethod is the full RPC method string, i.e., /package.service/method.
 	FullMethod string
-	// Endpoint is a real address to registry endpoint.
-	Endpoint *url.URL
 }
 
 type serverKey struct{}
@@ -32,7 +29,6 @@ func FromServerContext(ctx context.Context) (info ServerInfo, ok bool) {
 type ClientInfo struct {
 	// FullMethod is the full RPC method string, i.e., /package.service/method.
 	FullMethod string
-	Target     string
 }
 
 type clientKey struct{}

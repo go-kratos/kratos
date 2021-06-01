@@ -3,14 +3,12 @@ package http
 import (
 	"context"
 	"net/http"
-	"net/url"
 )
 
 // ServerInfo represent HTTP server information.
 type ServerInfo struct {
 	Request  *http.Request
 	Response http.ResponseWriter
-	Endpoint *url.URL
 }
 
 type serverKey struct{}
@@ -30,7 +28,6 @@ func FromServerContext(ctx context.Context) (info ServerInfo, ok bool) {
 type ClientInfo struct {
 	Request     *http.Request
 	PathPattern string
-	Target      string
 }
 
 type clientKey struct{}
