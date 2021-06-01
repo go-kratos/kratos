@@ -48,6 +48,13 @@ func WithDiscovery(d registry.Discovery) ClientOption {
 	}
 }
 
+// WithUnaryInterceptor returns a DialOption that specifies the interceptor for unary RPCs.
+func WithUnaryInterceptor(in ...grpc.UnaryClientInterceptor) ClientOption {
+	return func(o *clientOptions) {
+		o.ints = in
+	}
+}
+
 // WithOptions with gRPC options.
 func WithOptions(opts ...grpc.DialOption) ClientOption {
 	return func(o *clientOptions) {
@@ -61,6 +68,7 @@ type clientOptions struct {
 	timeout    time.Duration
 	middleware middleware.Middleware
 	discovery  registry.Discovery
+	ints       []grpc.UnaryClientInterceptor
 	grpcOpts   []grpc.DialOption
 }
 
@@ -84,9 +92,15 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	for _, o := range opts {
 		o(&options)
 	}
+	var ints = []grpc.UnaryClientInterceptor{
+		unaryClientInterceptor(options.middleware, options.timeout),
+	}
+	if len(options.ints) > 0 {
+		ints = append(ints, options.ints...)
+	}
 	var grpcOpts = []grpc.DialOption{
 		grpc.WithBalancerName(roundrobin.Name),
-		grpc.WithUnaryInterceptor(unaryClientInterceptor(options.middleware, options.timeout)),
+		grpc.WithChainUnaryInterceptor(ints...),
 	}
 	if options.discovery != nil {
 		grpcOpts = append(grpcOpts, grpc.WithResolvers(discovery.NewBuilder(options.discovery)))
