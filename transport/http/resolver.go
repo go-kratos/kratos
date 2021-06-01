@@ -16,16 +16,30 @@ type Target struct {
 	Endpoint  string
 }
 
+func parseTarget(endpoint string) (*Target, error) {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		if u, err = url.Parse("http://" + endpoint); err != nil {
+			return nil, err
+		}
+	}
+	target := &Target{Scheme: u.Scheme, Authority: u.Host}
+	if len(u.Path) > 1 {
+		target.Endpoint = u.Path[1:]
+	}
+	return target, nil
+}
+
 type resolver struct {
 	lock  sync.RWMutex
 	nodes []*registry.ServiceInstance
 
-	target  Target
+	target  *Target
 	watcher registry.Watcher
 	logger  *log.Helper
 }
 
-func newResolver(ctx context.Context, scheme string, discovery registry.Discovery, target Target) (*resolver, error) {
+func newResolver(ctx context.Context, discovery registry.Discovery, target *Target) (*resolver, error) {
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
@@ -44,7 +58,7 @@ func newResolver(ctx context.Context, scheme string, discovery registry.Discover
 			}
 			var nodes []*registry.ServiceInstance
 			for _, in := range services {
-				endpoint, err := parseEndpoint(scheme, in.Endpoints)
+				_, endpoint, err := parseEndpoint(in.Endpoints)
 				if err != nil {
 					r.logger.Errorf("Failed to parse discovery endpoint: %v error %v", in.Endpoints, err)
 					continue
@@ -68,19 +82,18 @@ func (r *resolver) fetch(ctx context.Context) []*registry.ServiceInstance {
 	r.lock.RLock()
 	nodes := r.nodes
 	r.lock.RUnlock()
-
 	return nodes
 }
 
-func parseEndpoint(schema string, endpoints []string) (string, error) {
+func parseEndpoint(endpoints []string) (string, string, error) {
 	for _, e := range endpoints {
 		u, err := url.Parse(e)
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
-		if u.Scheme == schema {
-			return u.Host, nil
+		if u.Scheme == "http" {
+			return u.Scheme, u.Host, nil
 		}
 	}
-	return "", nil
+	return "", "", nil
 }

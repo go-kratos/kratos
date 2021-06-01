@@ -47,7 +47,6 @@ func callHTTP(cli *api.Client) {
 		transhttp.WithMiddleware(
 			recovery.Recovery(),
 		),
-		transhttp.WithScheme("http"),
 		transhttp.WithEndpoint("discovery:///helloworld"),
 		transhttp.WithDiscovery(r),
 	)

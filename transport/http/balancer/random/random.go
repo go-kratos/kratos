@@ -21,7 +21,8 @@ func New() *Balancer {
 func (b *Balancer) Pick(ctx context.Context, pathPattern string, nodes []*registry.ServiceInstance) (node *registry.ServiceInstance, done func(context.Context, balancer.DoneInfo), err error) {
 	if len(nodes) == 0 {
 		return nil, nil, fmt.Errorf("no instances avaiable")
-	} else if len(nodes) == 1 {
+	}
+	if len(nodes) == 1 {
 		return nodes[0], func(context.Context, balancer.DoneInfo) {}, nil
 	}
 	idx := rand.Intn(len(nodes))
