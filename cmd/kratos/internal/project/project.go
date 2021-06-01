@@ -26,8 +26,10 @@ func init() {
 		branch = version.Version
 	}
 	CmdNew.Flags().StringVarP(&repoURL, "-repo-url", "r", repoURL, "layout repo")
+	if repoURL != ""{
+		branch = ""
+	}
 	CmdNew.Flags().StringVarP(&branch, "-branch", "b", branch, "repo branch")
-
 }
 
 func run(cmd *cobra.Command, args []string) {
