@@ -3,11 +3,11 @@ package project
 import (
 	"context"
 	"fmt"
-	"github.com/AlecAivazis/survey/v2"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/version"
-	"github.com/spf13/cobra"
 	"os"
 	"time"
+
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/spf13/cobra"
 )
 
 // CmdNew represents the new command.
@@ -23,12 +23,8 @@ var branch string
 func init() {
 	if repoURL = os.Getenv("KRATOS_LAYOUT_REPO"); repoURL == "" {
 		repoURL = "https://github.com/go-kratos/kratos-layout.git"
-		branch = version.Version
 	}
 	CmdNew.Flags().StringVarP(&repoURL, "-repo-url", "r", repoURL, "layout repo")
-	if repoURL != ""{
-		branch = ""
-	}
 	CmdNew.Flags().StringVarP(&branch, "-branch", "b", branch, "repo branch")
 }
 

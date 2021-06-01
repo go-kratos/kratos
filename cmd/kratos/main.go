@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/go-kratos/kratos/cmd/kratos/v2/version"
 	"log"
 
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/project"
@@ -12,12 +11,13 @@ import (
 )
 
 var (
+	version string = "v2.0.0-rc1"
 
 	rootCmd = &cobra.Command{
 		Use:     "kratos",
 		Short:   "Kratos: An elegant toolkit for Go microservices.",
 		Long:    `Kratos: An elegant toolkit for Go microservices.`,
-		Version: version.Version,
+		Version: version,
 	}
 )
 

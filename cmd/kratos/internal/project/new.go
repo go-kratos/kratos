@@ -3,11 +3,13 @@ package project
 import (
 	"context"
 	"fmt"
-	"github.com/AlecAivazis/survey/v2"
-	"github.com/fatih/color"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 	"os"
 	"path"
+
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
+
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/fatih/color"
 )
 
 // Project is a project template.
