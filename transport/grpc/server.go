@@ -61,8 +61,7 @@ func Middleware(m ...middleware.Middleware) ServerOption {
 	}
 }
 
-// UnaryInterceptor returns a ServerOption that sets the UnaryServerInterceptor for the
-// server.
+// UnaryInterceptor returns a ServerOption that sets the UnaryServerInterceptor for the server.
 func UnaryInterceptor(in ...grpc.UnaryServerInterceptor) ServerOption {
 	return func(s *Server) {
 		s.ints = in

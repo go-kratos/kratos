@@ -145,7 +145,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		return nil, err
 	}
 	var r *resolver
-	if target.Endpoint != "" && options.discovery != nil {
+	if options.discovery != nil {
 		if target.Scheme == "discovery" {
 			if r, err = newResolver(ctx, options.discovery, target); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
