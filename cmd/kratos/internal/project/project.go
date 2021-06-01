@@ -19,12 +19,14 @@ var CmdNew = &cobra.Command{
 }
 
 var repoURL string
+var branch string
 
 func init() {
 	if repoURL = os.Getenv("KRATOS_LAYOUT_REPO"); repoURL == "" {
 		repoURL = "https://github.com/go-kratos/kratos-layout.git"
 	}
 	CmdNew.Flags().StringVarP(&repoURL, "-repo-url", "r", repoURL, "layout repo")
+	CmdNew.Flags().StringVarP(&branch, "-branch", "b", branch, "repo branch")
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -48,7 +50,7 @@ func run(cmd *cobra.Command, args []string) {
 		name = args[0]
 	}
 	p := &Project{Name: name}
-	if err := p.New(ctx, wd, repoURL); err != nil {
+	if err := p.New(ctx, wd, repoURL, branch); err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
 		return
 	}
