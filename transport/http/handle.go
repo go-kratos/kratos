@@ -11,7 +11,6 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 )
 
@@ -43,10 +42,9 @@ type HandleOptions struct {
 // Deprecated: use NewHandler instead.
 func DefaultHandleOptions() HandleOptions {
 	return HandleOptions{
-		Decode:     DefaultRequestDecoder,
-		Encode:     DefaultResponseEncoder,
-		Error:      DefaultErrorEncoder,
-		Middleware: recovery.Recovery(),
+		Decode: DefaultRequestDecoder,
+		Encode: DefaultResponseEncoder,
+		Error:  DefaultErrorEncoder,
 	}
 }
 
