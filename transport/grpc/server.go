@@ -61,6 +61,14 @@ func Middleware(m ...middleware.Middleware) ServerOption {
 	}
 }
 
+// UnaryInterceptor returns a ServerOption that sets the UnaryServerInterceptor for the
+// server.
+func UnaryInterceptor(in ...grpc.UnaryServerInterceptor) ServerOption {
+	return func(s *Server) {
+		s.ints = in
+	}
+}
+
 // Options with grpc options.
 func Options(opts ...grpc.ServerOption) ServerOption {
 	return func(s *Server) {
@@ -79,6 +87,7 @@ type Server struct {
 	timeout    time.Duration
 	log        *log.Helper
 	middleware middleware.Middleware
+	ints       []grpc.UnaryServerInterceptor
 	grpcOpts   []grpc.ServerOption
 	health     *health.Server
 	metadata   *metadata.Server
@@ -99,10 +108,14 @@ func NewServer(opts ...ServerOption) *Server {
 	for _, o := range opts {
 		o(srv)
 	}
+	var ints = []grpc.UnaryServerInterceptor{
+		srv.unaryServerInterceptor(),
+	}
+	if len(srv.ints) > 0 {
+		ints = append(ints, srv.ints...)
+	}
 	var grpcOpts = []grpc.ServerOption{
-		grpc.ChainUnaryInterceptor(
-			srv.unaryServerInterceptor(),
-		),
+		grpc.ChainUnaryInterceptor(ints...),
 	}
 	if len(srv.grpcOpts) > 0 {
 		grpcOpts = append(grpcOpts, srv.grpcOpts...)
