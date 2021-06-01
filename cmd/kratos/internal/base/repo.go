@@ -1,6 +1,7 @@
 package base
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"os/exec"
@@ -10,12 +11,13 @@ import (
 
 // Repo is git repository manager.
 type Repo struct {
-	url  string
-	home string
+	url    string
+	home   string
+	branch string
 }
 
 // NewRepo new a repository manager.
-func NewRepo(url string) *Repo {
+func NewRepo(url string, branch string) *Repo {
 	var start int
 	start = strings.Index(url, "//")
 	if start == -1 {
@@ -25,8 +27,9 @@ func NewRepo(url string) *Repo {
 	}
 	end := strings.LastIndex(url, "/")
 	return &Repo{
-		url:  url,
-		home: kratosHomeWithDir("repo/" + url[start:end]),
+		url:    url,
+		home:   kratosHomeWithDir("repo/" + url[start:end]),
+		branch: branch,
 	}
 }
 
@@ -37,15 +40,26 @@ func (r *Repo) Path() string {
 	if end == -1 {
 		end = len(r.url)
 	}
-	return path.Join(r.home, r.url[start+1:end])
+	branch := ""
+	if r.branch == "" {
+		branch = "@main"
+	} else {
+		branch = "@" + r.branch
+	}
+	return path.Join(r.home, r.url[start+1:end]+branch)
 }
 
 // Pull fetch the repository from remote url.
 func (r *Repo) Pull(ctx context.Context) error {
 	cmd := exec.Command("git", "pull")
 	cmd.Dir = r.Path()
-	cmd.Stderr = os.Stderr
+	var out bytes.Buffer
+	cmd.Stderr = &out
+	cmd.Stdout = os.Stdout
 	err := cmd.Run()
+	if strings.Contains(out.String(), "You are not currently on a branch.") {
+		return nil
+	}
 	return err
 }
 
@@ -54,8 +68,14 @@ func (r *Repo) Clone(ctx context.Context) error {
 	if _, err := os.Stat(r.Path()); !os.IsNotExist(err) {
 		return r.Pull(ctx)
 	}
-	cmd := exec.Command("git", "clone", r.url, r.Path())
+	cmd := &exec.Cmd{}
+	if r.branch == "" {
+		cmd = exec.Command("git", "clone", r.url, r.Path())
+	} else {
+		cmd = exec.Command("git", "clone", "-b", r.branch, r.url, r.Path())
+	}
 	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
 	err := cmd.Run()
 	return err
 }
