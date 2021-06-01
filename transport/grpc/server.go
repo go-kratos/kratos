@@ -12,7 +12,6 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -100,11 +99,8 @@ func NewServer(opts ...ServerOption) *Server {
 		network: "tcp",
 		address: ":0",
 		timeout: 1 * time.Second,
-		middleware: middleware.Chain(
-			recovery.Recovery(),
-		),
-		health: health.NewServer(),
-		log:    log.NewHelper(log.DefaultLogger),
+		health:  health.NewServer(),
+		log:     log.NewHelper(log.DefaultLogger),
 	}
 	for _, o := range opts {
 		o(srv)
