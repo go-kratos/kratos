@@ -128,9 +128,10 @@ func WithBalancer(b balancer.Balancer) ClientOption {
 
 // Client is an HTTP client.
 type Client struct {
-	opts clientOptions
-	r    *resolver
-	cc   *http.Client
+	opts   clientOptions
+	target *Target
+	r      *resolver
+	cc     *http.Client
 }
 
 // NewClient returns an HTTP client.
@@ -148,15 +149,17 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	for _, o := range opts {
 		o(&options)
 	}
-	var r *resolver
+	var (
+		err error
+		r   *resolver
+	)
+	target := &Target{Scheme: options.scheme, Endpoint: options.endpoint}
 	if options.endpoint != "" && options.discovery != nil {
-		target, err := parseTarget(options.endpoint)
-		if err != nil {
+		if target, err = parseTarget(options.endpoint); err != nil {
 			return nil, err
 		}
 		if target.Scheme == "discovery" {
-			r, err = newResolver(ctx, options.scheme, options.discovery, target)
-			if err != nil {
+			if r, err = newResolver(ctx, options.scheme, options.discovery, target); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
 		} else {
@@ -164,8 +167,9 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		}
 	}
 	return &Client{
-		opts: options,
-		r:    r,
+		opts:   options,
+		target: target,
+		r:      r,
 		cc: &http.Client{
 			Timeout:   options.timeout,
 			Transport: options.transport,
@@ -196,7 +200,7 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 		}
 		reqBody = bytes.NewReader(body)
 	}
-	url := fmt.Sprintf("%s://%s%s", client.opts.scheme, client.opts.endpoint, path)
+	url := fmt.Sprintf("%s://%s%s", client.opts.scheme, client.target.Endpoint, path)
 	req, err := http.NewRequest(c.method, url, reqBody)
 	if err != nil {
 		return err
