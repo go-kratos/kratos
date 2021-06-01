@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	ic "github.com/go-kratos/kratos/v2/internal/context"
@@ -112,7 +111,7 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 // examples:
 //   http://127.0.0.1:8000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
-	if s.lis == nil && strings.HasSuffix(s.address, ":0") {
+	if s.lis == nil {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
 			return nil, err
@@ -123,24 +122,16 @@ func (s *Server) Endpoint() (*url.URL, error) {
 	if err != nil {
 		return nil, err
 	}
-	u := &url.URL{
-		Scheme: "http",
-		Host:   addr,
-	}
-	s.endpoint = u
-	return u, nil
+	s.endpoint = &url.URL{Scheme: "http", Host: addr}
+	return s.endpoint, nil
 }
 
 // Start start the HTTP server.
 func (s *Server) Start(ctx context.Context) error {
-	s.ctx = ctx
-	if s.lis == nil {
-		lis, err := net.Listen(s.network, s.address)
-		if err != nil {
-			return err
-		}
-		s.lis = lis
+	if _, err := s.Endpoint(); err != nil {
+		return err
 	}
+	s.ctx = ctx
 	s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
 	if err := s.Serve(s.lis); !errors.Is(err, http.ErrServerClosed) {
 		return err
