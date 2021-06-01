@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"sync"
 
@@ -20,16 +19,15 @@ type Target struct {
 func parseTarget(endpoint string) (*Target, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, err
+		if u, err = url.Parse("http://" + endpoint); err != nil {
+			return nil, err
+		}
 	}
+	target := &Target{Scheme: u.Scheme, Authority: u.Host}
 	if len(u.Path) > 1 {
-		return &Target{
-			Scheme:    u.Scheme,
-			Authority: u.Host,
-			Endpoint:  u.Path[1:],
-		}, nil
+		target.Endpoint = u.Path[1:]
 	}
-	return nil, fmt.Errorf("invalid endpoint format: %s", endpoint)
+	return target, nil
 }
 
 type resolver struct {
@@ -41,7 +39,7 @@ type resolver struct {
 	logger  *log.Helper
 }
 
-func newResolver(ctx context.Context, scheme string, discovery registry.Discovery, target *Target) (*resolver, error) {
+func newResolver(ctx context.Context, discovery registry.Discovery, target *Target) (*resolver, error) {
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
@@ -60,7 +58,7 @@ func newResolver(ctx context.Context, scheme string, discovery registry.Discover
 			}
 			var nodes []*registry.ServiceInstance
 			for _, in := range services {
-				endpoint, err := parseEndpoint(scheme, in.Endpoints)
+				_, endpoint, err := parseEndpoint(in.Endpoints)
 				if err != nil {
 					r.logger.Errorf("Failed to parse discovery endpoint: %v error %v", in.Endpoints, err)
 					continue
@@ -87,15 +85,15 @@ func (r *resolver) fetch(ctx context.Context) []*registry.ServiceInstance {
 	return nodes
 }
 
-func parseEndpoint(schema string, endpoints []string) (string, error) {
+func parseEndpoint(endpoints []string) (string, string, error) {
 	for _, e := range endpoints {
 		u, err := url.Parse(e)
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
-		if u.Scheme == schema {
-			return u.Host, nil
+		if u.Scheme == "http" {
+			return u.Scheme, u.Host, nil
 		}
 	}
-	return "", nil
+	return "", "", nil
 }

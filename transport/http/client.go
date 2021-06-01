@@ -35,7 +35,6 @@ type ClientOption func(*clientOptions)
 type clientOptions struct {
 	ctx          context.Context
 	timeout      time.Duration
-	scheme       string
 	endpoint     string
 	userAgent    string
 	encoder      EncodeRequestFunc
@@ -72,13 +71,6 @@ func WithUserAgent(ua string) ClientOption {
 func WithMiddleware(m ...middleware.Middleware) ClientOption {
 	return func(o *clientOptions) {
 		o.middleware = middleware.Chain(m...)
-	}
-}
-
-// WithScheme with client schema.
-func WithScheme(scheme string) ClientOption {
-	return func(o *clientOptions) {
-		o.scheme = scheme
 	}
 }
 
@@ -138,7 +130,6 @@ type Client struct {
 func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	options := clientOptions{
 		ctx:          ctx,
-		scheme:       "http",
 		timeout:      500 * time.Millisecond,
 		encoder:      DefaultRequestEncoder,
 		decoder:      DefaultResponseDecoder,
@@ -149,17 +140,14 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	for _, o := range opts {
 		o(&options)
 	}
-	var (
-		err error
-		r   *resolver
-	)
-	target := &Target{Scheme: options.scheme, Endpoint: options.endpoint}
-	if options.endpoint != "" && options.discovery != nil {
-		if target, err = parseTarget(options.endpoint); err != nil {
-			return nil, err
-		}
+	target, err := parseTarget(options.endpoint)
+	if err != nil {
+		return nil, err
+	}
+	var r *resolver
+	if target.Endpoint != "" && options.discovery != nil {
 		if target.Scheme == "discovery" {
-			if r, err = newResolver(ctx, options.scheme, options.discovery, target); err != nil {
+			if r, err = newResolver(ctx, options.discovery, target); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
 		} else {
@@ -200,7 +188,7 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 		}
 		reqBody = bytes.NewReader(body)
 	}
-	url := fmt.Sprintf("%s://%s%s", client.opts.scheme, client.target.Endpoint, path)
+	url := fmt.Sprintf("%s://%s%s", client.target.Scheme, client.target.Authority, path)
 	req, err := http.NewRequest(c.method, url, reqBody)
 	if err != nil {
 		return err
@@ -228,11 +216,12 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			if node, done, err = client.opts.balancer.Pick(ctx, c.pathPattern, nodes); err != nil {
 				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 			}
-			addr, err := parseEndpoint(client.opts.scheme, node.Endpoints)
+			scheme, addr, err := parseEndpoint(node.Endpoints)
 			if err != nil {
 				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 			}
 			req = req.Clone(ctx)
+			req.URL.Scheme = scheme
 			req.URL.Host = addr
 		}
 		res, err := client.do(ctx, req, c)
