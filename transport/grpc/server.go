@@ -122,9 +122,6 @@ func NewServer(opts ...ServerOption) *Server {
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
-	if s.err != nil {
-		return nil, s.err
-	}
 	s.once.Do(func() {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
@@ -140,6 +137,9 @@ func (s *Server) Endpoint() (*url.URL, error) {
 		s.lis = lis
 		s.endpoint = &url.URL{Scheme: "grpc", Host: addr}
 	})
+	if s.err != nil {
+		return nil, s.err
+	}
 	return s.endpoint, nil
 }
 
