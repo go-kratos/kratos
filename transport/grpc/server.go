@@ -4,7 +4,7 @@ import (
 	"context"
 	"net"
 	"net/url"
-	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/api/metadata"
@@ -73,6 +73,8 @@ type Server struct {
 	*grpc.Server
 	ctx        context.Context
 	lis        net.Listener
+	once       sync.Once
+	err        error
 	network    string
 	address    string
 	endpoint   *url.URL
@@ -120,35 +122,33 @@ func NewServer(opts ...ServerOption) *Server {
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
-	if s.lis == nil && strings.HasSuffix(s.address, ":0") {
+	s.once.Do(func() {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
-			return nil, err
+			s.err = err
+			return
+		}
+		addr, err := host.Extract(s.address, s.lis)
+		if err != nil {
+			lis.Close()
+			s.err = err
+			return
 		}
 		s.lis = lis
+		s.endpoint = &url.URL{Scheme: "grpc", Host: addr}
+	})
+	if s.err != nil {
+		return nil, s.err
 	}
-	addr, err := host.Extract(s.address, s.lis)
-	if err != nil {
-		return nil, err
-	}
-	u := &url.URL{
-		Scheme: "grpc",
-		Host:   addr,
-	}
-	s.endpoint = u
-	return u, nil
+	return s.endpoint, nil
 }
 
 // Start start the gRPC server.
 func (s *Server) Start(ctx context.Context) error {
-	s.ctx = ctx
-	if s.lis == nil {
-		lis, err := net.Listen(s.network, s.address)
-		if err != nil {
-			return err
-		}
-		s.lis = lis
+	if _, err := s.Endpoint(); err != nil {
+		return err
 	}
+	s.ctx = ctx
 	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
 	s.health.Resume()
 	return s.Serve(s.lis)
