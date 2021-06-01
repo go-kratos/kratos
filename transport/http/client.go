@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
@@ -20,23 +19,6 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http/balancer/random"
 )
 
-// Client is an HTTP client.
-type Client struct {
-	cc *http.Client
-	r  *resolver
-	b  balancer.Balancer
-
-	scheme       string
-	endpoint     string
-	target       Target
-	userAgent    string
-	middleware   middleware.Middleware
-	encoder      EncodeRequestFunc
-	decoder      DecodeResponseFunc
-	errorDecoder DecodeErrorFunc
-	discovery    registry.Discovery
-}
-
 // DecodeErrorFunc is decode error func.
 type DecodeErrorFunc func(ctx context.Context, res *http.Response) error
 
@@ -48,6 +30,22 @@ type DecodeResponseFunc func(ctx context.Context, res *http.Response, out interf
 
 // ClientOption is HTTP client option.
 type ClientOption func(*clientOptions)
+
+// Client is an HTTP transport client.
+type clientOptions struct {
+	ctx          context.Context
+	timeout      time.Duration
+	scheme       string
+	endpoint     string
+	userAgent    string
+	encoder      EncodeRequestFunc
+	decoder      DecodeResponseFunc
+	errorDecoder DecodeErrorFunc
+	transport    http.RoundTripper
+	balancer     balancer.Balancer
+	discovery    registry.Discovery
+	middleware   middleware.Middleware
+}
 
 // WithTransport with client transport.
 func WithTransport(trans http.RoundTripper) ClientOption {
@@ -128,25 +126,16 @@ func WithBalancer(b balancer.Balancer) ClientOption {
 	}
 }
 
-// Client is an HTTP transport client.
-type clientOptions struct {
-	ctx          context.Context
-	transport    http.RoundTripper
-	middleware   middleware.Middleware
-	timeout      time.Duration
-	scheme       string
-	endpoint     string
-	userAgent    string
-	encoder      EncodeRequestFunc
-	decoder      DecodeResponseFunc
-	errorDecoder DecodeErrorFunc
-	discovery    registry.Discovery
-	balancer     balancer.Balancer
+// Client is an HTTP client.
+type Client struct {
+	opts clientOptions
+	r    *resolver
+	cc   *http.Client
 }
 
 // NewClient returns an HTTP client.
 func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
-	options := &clientOptions{
+	options := clientOptions{
 		ctx:          ctx,
 		scheme:       "http",
 		timeout:      500 * time.Millisecond,
@@ -157,27 +146,15 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		balancer:     random.New(),
 	}
 	for _, o := range opts {
-		o(options)
-	}
-	target := Target{
-		Scheme:   options.scheme,
-		Endpoint: options.endpoint,
+		o(&options)
 	}
 	var r *resolver
 	if options.endpoint != "" && options.discovery != nil {
-		u, err := url.Parse(options.endpoint)
+		target, err := parseTarget(options.endpoint)
 		if err != nil {
-			u, err = url.Parse("http://" + options.endpoint)
-			if err != nil {
-				return nil, fmt.Errorf("[http client] invalid endpoint format: %v", options.endpoint)
-			}
+			return nil, err
 		}
-		if u.Scheme == "discovery" && len(u.Path) > 1 {
-			target = Target{
-				Scheme:    u.Scheme,
-				Authority: u.Host,
-				Endpoint:  u.Path[1:],
-			}
+		if target.Scheme == "discovery" {
 			r, err = newResolver(ctx, options.scheme, options.discovery, target)
 			if err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
@@ -186,20 +163,13 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 			return nil, fmt.Errorf("[http client] invalid endpoint format: %v", options.endpoint)
 		}
 	}
-
 	return &Client{
-		cc:           &http.Client{Timeout: options.timeout, Transport: options.transport},
-		r:            r,
-		encoder:      options.encoder,
-		decoder:      options.decoder,
-		errorDecoder: options.errorDecoder,
-		middleware:   options.middleware,
-		userAgent:    options.userAgent,
-		target:       target,
-		scheme:       options.scheme,
-		endpoint:     options.endpoint,
-		discovery:    options.discovery,
-		b:            options.balancer,
+		opts: options,
+		r:    r,
+		cc: &http.Client{
+			Timeout:   options.timeout,
+			Transport: options.transport,
+		},
 	}, nil
 }
 
@@ -220,13 +190,13 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 			body []byte
 			err  error
 		)
-		contentType, body, err = client.encoder(ctx, args)
+		contentType, body, err = client.opts.encoder(ctx, args)
 		if err != nil {
 			return err
 		}
 		reqBody = bytes.NewReader(body)
 	}
-	url := fmt.Sprintf("%s://%s%s", client.scheme, client.target.Endpoint, path)
+	url := fmt.Sprintf("%s://%s%s", client.opts.scheme, client.opts.endpoint, path)
 	req, err := http.NewRequest(c.method, url, reqBody)
 	if err != nil {
 		return err
@@ -234,10 +204,10 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 	if contentType != "" {
 		req.Header.Set("Content-Type", contentType)
 	}
-	if client.userAgent != "" {
-		req.Header.Set("User-Agent", client.userAgent)
+	if client.opts.userAgent != "" {
+		req.Header.Set("User-Agent", client.opts.userAgent)
 	}
-	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP, Endpoint: client.endpoint})
+	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP, Endpoint: client.opts.endpoint})
 	ctx = NewClientContext(ctx, ClientInfo{PathPattern: c.pathPattern, Request: req})
 	return client.invoke(ctx, req, args, reply, c)
 }
@@ -246,21 +216,19 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
 		var done func(context.Context, balancer.DoneInfo)
 		if client.r != nil {
-			nodes := client.r.fetch(ctx)
-			if len(nodes) == 0 {
-				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", "fetch error")
+			var (
+				err   error
+				node  *registry.ServiceInstance
+				nodes = client.r.fetch(ctx)
+			)
+			if node, done, err = client.opts.balancer.Pick(ctx, c.pathPattern, nodes); err != nil {
+				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 			}
-			var node *registry.ServiceInstance
-			var err error
-			node, done, err = client.b.Pick(ctx, c.pathPattern, nodes)
+			addr, err := parseEndpoint(client.opts.scheme, node.Endpoints)
 			if err != nil {
 				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 			}
 			req = req.Clone(ctx)
-			addr, err := parseEndpoint(client.scheme, node.Endpoints)
-			if err != nil {
-				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
-			}
 			req.URL.Host = addr
 		}
 		res, err := client.do(ctx, req, c)
@@ -271,13 +239,13 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			return nil, err
 		}
 		defer res.Body.Close()
-		if err := client.decoder(ctx, res, reply); err != nil {
+		if err := client.opts.decoder(ctx, res, reply); err != nil {
 			return nil, err
 		}
 		return reply, nil
 	}
-	if client.middleware != nil {
-		h = client.middleware(h)
+	if client.opts.middleware != nil {
+		h = client.opts.middleware(h)
 	}
 	_, err := h(ctx, args)
 	return err
@@ -300,7 +268,7 @@ func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*h
 	if err != nil {
 		return nil, err
 	}
-	if err := client.errorDecoder(ctx, resp); err != nil {
+	if err := client.opts.errorDecoder(ctx, resp); err != nil {
 		return nil, err
 	}
 	return resp, nil

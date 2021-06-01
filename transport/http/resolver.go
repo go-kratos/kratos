@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"sync"
 
@@ -16,16 +17,31 @@ type Target struct {
 	Endpoint  string
 }
 
+func parseTarget(endpoint string) (*Target, error) {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
+	if len(u.Path) > 1 {
+		return &Target{
+			Scheme:    u.Scheme,
+			Authority: u.Host,
+			Endpoint:  u.Path[1:],
+		}, nil
+	}
+	return nil, fmt.Errorf("invalid endpoint format: %s", endpoint)
+}
+
 type resolver struct {
 	lock  sync.RWMutex
 	nodes []*registry.ServiceInstance
 
-	target  Target
+	target  *Target
 	watcher registry.Watcher
 	logger  *log.Helper
 }
 
-func newResolver(ctx context.Context, scheme string, discovery registry.Discovery, target Target) (*resolver, error) {
+func newResolver(ctx context.Context, scheme string, discovery registry.Discovery, target *Target) (*resolver, error) {
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
@@ -68,7 +84,6 @@ func (r *resolver) fetch(ctx context.Context) []*registry.ServiceInstance {
 	r.lock.RLock()
 	nodes := r.nodes
 	r.lock.RUnlock()
-
 	return nodes
 }
 
