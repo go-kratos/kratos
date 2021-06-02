@@ -62,6 +62,8 @@ func GRPCCodeFromStatus(code int) codes.Code {
 		return codes.Unavailable
 	case http.StatusGatewayTimeout:
 		return codes.DeadlineExceeded
+	case 499:
+		return codes.Canceled
 	}
 	return codes.Unknown
 }
@@ -73,7 +75,7 @@ func StatusFromGRPCCode(code codes.Code) int {
 	case codes.OK:
 		return http.StatusOK
 	case codes.Canceled:
-		return http.StatusRequestTimeout
+		return 499
 	case codes.Unknown:
 		return http.StatusInternalServerError
 	case codes.InvalidArgument:
