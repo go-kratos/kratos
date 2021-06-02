@@ -76,3 +76,14 @@ func ServiceUnavailable(reason, message string) *Error {
 func IsServiceUnavailable(err error) bool {
 	return Code(err) == 503
 }
+
+// GatewayTimeout new ServiceUnavailable error that is mapped to a HTTP 504 response.
+func GatewayTimeout(reason, message string) *Error {
+	return Newf(504, reason, message)
+}
+
+// IsGatewayTimeout determines if err is an error which indicates a GatewayTimeout error.
+// It supports wrapped errors.
+func IsGatewayTimeout(err error) bool {
+	return Code(err) == 504
+}
