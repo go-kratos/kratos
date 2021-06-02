@@ -10,10 +10,10 @@ import (
 const (
 	baseContentType = "application"
 
-	// SatusClientClosed is non-standard http status code,
+	// StatusClientClosed is non-standard http status code,
 	// which defined by nginx.
 	// https://httpstatus.in/499/
-	SatusClientClosed = 499
+	StatusClientClosed = 499
 )
 
 // ContentType returns the content-type with base prefix.
@@ -67,7 +67,7 @@ func GRPCCodeFromStatus(code int) codes.Code {
 		return codes.Unavailable
 	case http.StatusGatewayTimeout:
 		return codes.DeadlineExceeded
-	case SatusClientClosed:
+	case StatusClientClosed:
 		return codes.Canceled
 	}
 	return codes.Unknown
@@ -80,7 +80,7 @@ func StatusFromGRPCCode(code codes.Code) int {
 	case codes.OK:
 		return http.StatusOK
 	case codes.Canceled:
-		return SatusClientClosed
+		return StatusClientClosed
 	case codes.Unknown:
 		return http.StatusInternalServerError
 	case codes.InvalidArgument:
