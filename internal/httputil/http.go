@@ -9,6 +9,11 @@ import (
 
 const (
 	baseContentType = "application"
+
+	// StatusClientClosed is non-standard http status code,
+	// which defined by nginx.
+	// https://httpstatus.in/499/
+	StatusClientClosed = 499
 )
 
 // ContentType returns the content-type with base prefix.
@@ -62,6 +67,8 @@ func GRPCCodeFromStatus(code int) codes.Code {
 		return codes.Unavailable
 	case http.StatusGatewayTimeout:
 		return codes.DeadlineExceeded
+	case StatusClientClosed:
+		return codes.Canceled
 	}
 	return codes.Unknown
 }
@@ -73,7 +80,7 @@ func StatusFromGRPCCode(code codes.Code) int {
 	case codes.OK:
 		return http.StatusOK
 	case codes.Canceled:
-		return http.StatusRequestTimeout
+		return StatusClientClosed
 	case codes.Unknown:
 		return http.StatusInternalServerError
 	case codes.InvalidArgument:
