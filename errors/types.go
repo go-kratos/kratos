@@ -77,7 +77,7 @@ func IsServiceUnavailable(err error) bool {
 	return Code(err) == 503
 }
 
-// GatewayTimeout new ServiceUnavailable error that is mapped to a HTTP 504 response.
+// GatewayTimeout new GatewayTimeout error that is mapped to a HTTP 504 response.
 func GatewayTimeout(reason, message string) *Error {
 	return Newf(504, reason, message)
 }
@@ -86,4 +86,15 @@ func GatewayTimeout(reason, message string) *Error {
 // It supports wrapped errors.
 func IsGatewayTimeout(err error) bool {
 	return Code(err) == 504
+}
+
+// ClientClosed new ClientClosed error that is mapped to a HTTP 499 response.
+func ClientClosed(reason, message string) *Error {
+	return Newf(499, reason, message)
+}
+
+// IsClientClosed determines if err is an error which indicates a IsClientClosed error.
+// It supports wrapped errors.
+func IsClientClosed(err error) bool {
+	return Code(err) == 499
 }
