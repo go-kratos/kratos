@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"go.opentelemetry.io/otel/trace"
 )
 
 var (
@@ -43,6 +45,18 @@ func Caller(depth int) Valuer {
 func Timestamp(layout string) Valuer {
 	return func(context.Context) interface{} {
 		return time.Now().Format(layout)
+	}
+}
+
+// TraceID returns a traceid valuer.
+func TraceID() Valuer {
+	return func(ctx context.Context) interface{} {
+		span := trace.SpanContextFromContext(ctx)
+		var traceID string
+		if span.HasTraceID() {
+			traceID = span.TraceID().String()
+		}
+		return traceID
 	}
 }
 
