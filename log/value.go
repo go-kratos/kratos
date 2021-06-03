@@ -51,8 +51,7 @@ func Timestamp(layout string) Valuer {
 // TraceID returns a traceid valuer.
 func TraceID() Valuer {
 	return func(ctx context.Context) interface{} {
-		span := trace.SpanContextFromContext(ctx)
-		if span.HasTraceID() {
+		if span := trace.SpanContextFromContext(ctx); span.HasTraceID() {
 			return span.TraceID().String()
 		}
 		return ""
@@ -62,8 +61,7 @@ func TraceID() Valuer {
 // SpanID returns a spanid valuer.
 func SpanID() Valuer {
 	return func(ctx context.Context) interface{} {
-		span := trace.SpanContextFromContext(ctx)
-		if span.HasSpanID() {
+		if span := trace.SpanContextFromContext(ctx); span.HasSpanID() {
 			return span.SpanID().String()
 		}
 		return ""
