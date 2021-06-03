@@ -52,11 +52,21 @@ func Timestamp(layout string) Valuer {
 func TraceID() Valuer {
 	return func(ctx context.Context) interface{} {
 		span := trace.SpanContextFromContext(ctx)
-		var traceID string
 		if span.HasTraceID() {
-			traceID = span.TraceID().String()
+			return span.TraceID().String()
 		}
-		return traceID
+		return ""
+	}
+}
+
+// SpanID returns a spanid valuer.
+func SpanID() Valuer {
+	return func(ctx context.Context) interface{} {
+		span := trace.SpanContextFromContext(ctx)
+		if span.HasSpanID() {
+			return span.SpanID().String()
+		}
+		return ""
 	}
 }
 
