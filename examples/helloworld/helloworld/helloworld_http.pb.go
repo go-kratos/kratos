@@ -8,6 +8,7 @@ import (
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
 	http "net/http"
+	reflect "reflect"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -18,8 +19,11 @@ var _ = binding.MapProto
 var _ = mux.NewRouter
 
 const _ = http1.SupportPackageIsVersion1
+const _ = reflect.Invalid
 
 type GreeterHandler interface {
+	SayBye(context.Context, *ByeRequest) (*ByeReply, error)
+
 	SayHello(context.Context, *HelloRequest) (*HelloReply, error)
 }
 
@@ -31,13 +35,14 @@ func NewGreeterHandler(srv GreeterHandler, opts ...http1.HandleOption) http.Hand
 	r := mux.NewRouter()
 
 	r.HandleFunc("/helloworld/{name}", func(w http.ResponseWriter, r *http.Request) {
-		var in HelloRequest
-		if err := h.Decode(r, &in); err != nil {
+		in := &HelloRequest{}
+
+		if err := h.Decode(r, in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
 
-		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
+		if err := binding.BindVars(mux.Vars(r), in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
@@ -48,7 +53,7 @@ func NewGreeterHandler(srv GreeterHandler, opts ...http1.HandleOption) http.Hand
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		out, err := next(r.Context(), in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -59,10 +64,42 @@ func NewGreeterHandler(srv GreeterHandler, opts ...http1.HandleOption) http.Hand
 		}
 	}).Methods("GET")
 
+	r.HandleFunc("/saybye/{name}", func(w http.ResponseWriter, r *http.Request) {
+		in := &ByeRequest{}
+
+		if err := h.Decode(r, in); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+
+		if err := binding.BindVars(mux.Vars(r), in); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+
+		next := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SayBye(ctx, req.(*ByeRequest))
+		}
+		if h.Middleware != nil {
+			next = h.Middleware(next)
+		}
+		out, err := next(r.Context(), in)
+		if err != nil {
+			h.Error(w, r, err)
+			return
+		}
+		reply := out.(*ByeReply)
+		if err := h.Encode(w, r, reply.Body); err != nil {
+			h.Error(w, r, err)
+		}
+	}).Methods("GET")
+
 	return r
 }
 
 type GreeterHTTPClient interface {
+	SayBye(ctx context.Context, req *ByeRequest, opts ...http1.CallOption) (rsp *ByeReply, err error)
+
 	SayHello(ctx context.Context, req *HelloRequest, opts ...http1.CallOption) (rsp *HelloReply, err error)
 }
 
@@ -74,14 +111,21 @@ func NewGreeterHTTPClient(client *http1.Client) GreeterHTTPClient {
 	return &GreeterHTTPClientImpl{client}
 }
 
+func (c *GreeterHTTPClientImpl) SayBye(ctx context.Context, in *ByeRequest, opts ...http1.CallOption) (out *ByeReply, err error) {
+	path := binding.EncodePath("GET", "/saybye/{name}", in)
+	out = &ByeReply{}
+
+	rv := reflect.ValueOf(&out.Body)
+	rv.Elem().Set(reflect.New(rv.Type().Elem().Elem()))
+
+	err = c.cc.Invoke(ctx, path, nil, out.Body, http1.Method("GET"), http1.PathPattern("/saybye/{name}"))
+	return
+}
+
 func (c *GreeterHTTPClientImpl) SayHello(ctx context.Context, in *HelloRequest, opts ...http1.CallOption) (out *HelloReply, err error) {
 	path := binding.EncodePath("GET", "/helloworld/{name}", in)
 	out = &HelloReply{}
 
-	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("GET"), http1.PathPattern("/helloworld/{name}"))
-
-	if err != nil {
-		return
-	}
+	err = c.cc.Invoke(ctx, path, nil, out, http1.Method("GET"), http1.PathPattern("/helloworld/{name}"))
 	return
 }

@@ -8,6 +8,7 @@ import (
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
 	http "net/http"
+	reflect "reflect"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -18,6 +19,7 @@ var _ = binding.MapProto
 var _ = mux.NewRouter
 
 const _ = http1.SupportPackageIsVersion1
+const _ = reflect.Invalid
 
 type EchoServiceHandler interface {
 	Echo(context.Context, *SimpleMessage) (*SimpleMessage, error)
@@ -39,13 +41,14 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 	r := mux.NewRouter()
 
 	r.HandleFunc("/v1/example/echo/{id}/{num}", func(w http.ResponseWriter, r *http.Request) {
-		var in SimpleMessage
-		if err := h.Decode(r, &in); err != nil {
+		in := &SimpleMessage{}
+
+		if err := h.Decode(r, in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
 
-		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
+		if err := binding.BindVars(mux.Vars(r), in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
@@ -56,7 +59,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		out, err := next(r.Context(), in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -68,13 +71,14 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 	}).Methods("GET")
 
 	r.HandleFunc("/v1/example/echo/{id}/{num}/{lang}", func(w http.ResponseWriter, r *http.Request) {
-		var in SimpleMessage
-		if err := h.Decode(r, &in); err != nil {
+		in := &SimpleMessage{}
+
+		if err := h.Decode(r, in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
 
-		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
+		if err := binding.BindVars(mux.Vars(r), in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
@@ -85,7 +89,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		out, err := next(r.Context(), in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -97,13 +101,14 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 	}).Methods("GET")
 
 	r.HandleFunc("/v1/example/echo1/{id}/{line_num}/{status.note}", func(w http.ResponseWriter, r *http.Request) {
-		var in SimpleMessage
-		if err := h.Decode(r, &in); err != nil {
+		in := &SimpleMessage{}
+
+		if err := h.Decode(r, in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
 
-		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
+		if err := binding.BindVars(mux.Vars(r), in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
@@ -114,7 +119,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		out, err := next(r.Context(), in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -126,13 +131,14 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 	}).Methods("GET")
 
 	r.HandleFunc("/v1/example/echo2/{no.note}", func(w http.ResponseWriter, r *http.Request) {
-		var in SimpleMessage
-		if err := h.Decode(r, &in); err != nil {
+		in := &SimpleMessage{}
+
+		if err := h.Decode(r, in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
 
-		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
+		if err := binding.BindVars(mux.Vars(r), in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
@@ -143,7 +149,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		out, err := next(r.Context(), in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -155,13 +161,14 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 	}).Methods("GET")
 
 	r.HandleFunc("/v1/example/echo/{id}", func(w http.ResponseWriter, r *http.Request) {
-		var in SimpleMessage
-		if err := h.Decode(r, &in); err != nil {
+		in := &SimpleMessage{}
+
+		if err := h.Decode(r, in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
 
-		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
+		if err := binding.BindVars(mux.Vars(r), in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
@@ -172,7 +179,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		out, err := next(r.Context(), in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -184,8 +191,9 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 	}).Methods("POST")
 
 	r.HandleFunc("/v1/example/echo_body", func(w http.ResponseWriter, r *http.Request) {
-		var in SimpleMessage
-		if err := h.Decode(r, &in); err != nil {
+		in := &SimpleMessage{}
+
+		if err := h.Decode(r, in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
@@ -196,7 +204,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		out, err := next(r.Context(), in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -208,8 +216,9 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 	}).Methods("POST")
 
 	r.HandleFunc("/v1/example/echo_response_body", func(w http.ResponseWriter, r *http.Request) {
-		var in DynamicMessageUpdate
-		if err := h.Decode(r, &in); err != nil {
+		in := &DynamicMessageUpdate{}
+
+		if err := h.Decode(r, in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
@@ -220,7 +229,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		out, err := next(r.Context(), in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -232,13 +241,14 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 	}).Methods("POST")
 
 	r.HandleFunc("/v1/example/echo_delete/{id}/{num}", func(w http.ResponseWriter, r *http.Request) {
-		var in SimpleMessage
-		if err := h.Decode(r, &in); err != nil {
+		in := &SimpleMessage{}
+
+		if err := h.Decode(r, in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
 
-		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
+		if err := binding.BindVars(mux.Vars(r), in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
@@ -249,7 +259,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		out, err := next(r.Context(), in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -261,8 +271,12 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 	}).Methods("DELETE")
 
 	r.HandleFunc("/v1/example/echo_patch", func(w http.ResponseWriter, r *http.Request) {
-		var in DynamicMessageUpdate
-		if err := h.Decode(r, &in.Body); err != nil {
+		in := &DynamicMessageUpdate{}
+
+		rv := reflect.ValueOf(&in.Body)
+		rv.Elem().Set(reflect.New(rv.Type().Elem().Elem()))
+
+		if err := h.Decode(r, in.Body); err != nil {
 			h.Error(w, r, err)
 			return
 		}
@@ -273,7 +287,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		out, err := next(r.Context(), in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -311,11 +325,7 @@ func (c *EchoServiceHTTPClientImpl) Echo(ctx context.Context, in *SimpleMessage,
 	path := binding.EncodePath("POST", "/v1/example/echo/{id}", in)
 	out = &SimpleMessage{}
 
-	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("POST"), http1.PathPattern("/v1/example/echo/{id}"))
-
-	if err != nil {
-		return
-	}
+	err = c.cc.Invoke(ctx, path, nil, out, http1.Method("POST"), http1.PathPattern("/v1/example/echo/{id}"))
 	return
 }
 
@@ -323,11 +333,7 @@ func (c *EchoServiceHTTPClientImpl) EchoBody(ctx context.Context, in *SimpleMess
 	path := binding.EncodePath("POST", "/v1/example/echo_body", in)
 	out = &SimpleMessage{}
 
-	err = c.cc.Invoke(ctx, path, in, &out, http1.Method("POST"), http1.PathPattern("/v1/example/echo_body"))
-
-	if err != nil {
-		return
-	}
+	err = c.cc.Invoke(ctx, path, in, out, http1.Method("POST"), http1.PathPattern("/v1/example/echo_body"))
 	return
 }
 
@@ -335,11 +341,7 @@ func (c *EchoServiceHTTPClientImpl) EchoDelete(ctx context.Context, in *SimpleMe
 	path := binding.EncodePath("DELETE", "/v1/example/echo_delete/{id}/{num}", in)
 	out = &SimpleMessage{}
 
-	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("DELETE"), http1.PathPattern("/v1/example/echo_delete/{id}/{num}"))
-
-	if err != nil {
-		return
-	}
+	err = c.cc.Invoke(ctx, path, nil, out, http1.Method("DELETE"), http1.PathPattern("/v1/example/echo_delete/{id}/{num}"))
 	return
 }
 
@@ -347,11 +349,7 @@ func (c *EchoServiceHTTPClientImpl) EchoPatch(ctx context.Context, in *DynamicMe
 	path := binding.EncodePath("PATCH", "/v1/example/echo_patch", in)
 	out = &DynamicMessageUpdate{}
 
-	err = c.cc.Invoke(ctx, path, in.Body, &out, http1.Method("PATCH"), http1.PathPattern("/v1/example/echo_patch"))
-
-	if err != nil {
-		return
-	}
+	err = c.cc.Invoke(ctx, path, in.Body, out, http1.Method("PATCH"), http1.PathPattern("/v1/example/echo_patch"))
 	return
 }
 
@@ -359,10 +357,9 @@ func (c *EchoServiceHTTPClientImpl) EchoResponseBody(ctx context.Context, in *Dy
 	path := binding.EncodePath("POST", "/v1/example/echo_response_body", in)
 	out = &DynamicMessageUpdate{}
 
-	err = c.cc.Invoke(ctx, path, in, &out.Body, http1.Method("POST"), http1.PathPattern("/v1/example/echo_response_body"))
+	rv := reflect.ValueOf(&out.Body)
+	rv.Elem().Set(reflect.New(rv.Type().Elem().Elem()))
 
-	if err != nil {
-		return
-	}
+	err = c.cc.Invoke(ctx, path, in, out.Body, http1.Method("POST"), http1.PathPattern("/v1/example/echo_response_body"))
 	return
 }

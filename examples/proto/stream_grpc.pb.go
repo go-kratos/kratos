@@ -4,11 +4,11 @@ package testproto
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	httpbody "google.golang.org/genproto/googleapis/api/httpbody"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -20,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StreamServiceClient interface {
-	Download(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (StreamService_DownloadClient, error)
+	Download(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (StreamService_DownloadClient, error)
 }
 
 type streamServiceClient struct {
@@ -31,7 +31,7 @@ func NewStreamServiceClient(cc grpc.ClientConnInterface) StreamServiceClient {
 	return &streamServiceClient{cc}
 }
 
-func (c *streamServiceClient) Download(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (StreamService_DownloadClient, error) {
+func (c *streamServiceClient) Download(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (StreamService_DownloadClient, error) {
 	stream, err := c.cc.NewStream(ctx, &StreamService_ServiceDesc.Streams[0], "/testproto.StreamService/Download", opts...)
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (x *streamServiceDownloadClient) Recv() (*httpbody.HttpBody, error) {
 // All implementations must embed UnimplementedStreamServiceServer
 // for forward compatibility
 type StreamServiceServer interface {
-	Download(*emptypb.Empty, StreamService_DownloadServer) error
+	Download(*empty.Empty, StreamService_DownloadServer) error
 	mustEmbedUnimplementedStreamServiceServer()
 }
 
@@ -75,7 +75,7 @@ type StreamServiceServer interface {
 type UnimplementedStreamServiceServer struct {
 }
 
-func (UnimplementedStreamServiceServer) Download(*emptypb.Empty, StreamService_DownloadServer) error {
+func (UnimplementedStreamServiceServer) Download(*empty.Empty, StreamService_DownloadServer) error {
 	return status.Errorf(codes.Unimplemented, "method Download not implemented")
 }
 func (UnimplementedStreamServiceServer) mustEmbedUnimplementedStreamServiceServer() {}
@@ -92,7 +92,7 @@ func RegisterStreamServiceServer(s grpc.ServiceRegistrar, srv StreamServiceServe
 }
 
 func _StreamService_Download_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(emptypb.Empty)
+	m := new(empty.Empty)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}

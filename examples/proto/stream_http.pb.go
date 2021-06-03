@@ -8,6 +8,7 @@ import (
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
 	http "net/http"
+	reflect "reflect"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -18,6 +19,7 @@ var _ = binding.MapProto
 var _ = mux.NewRouter
 
 const _ = http1.SupportPackageIsVersion1
+const _ = reflect.Invalid
 
 type StreamServiceHandler interface {
 }

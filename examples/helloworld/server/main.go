@@ -28,7 +28,7 @@ type server struct {
 	pb.UnimplementedGreeterServer
 }
 
-// SayHello implements helloworld.GreeterServer
+// SayHello say hello from client
 func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	if in.Name == "error" {
 		return nil, errors.BadRequest("custom_error", fmt.Sprintf("invalid argument %s", in.Name))
@@ -39,13 +39,27 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 	return &pb.HelloReply{Message: fmt.Sprintf("Hello %+v", in.Name)}, nil
 }
 
+// SayBye say bye from client
+func (s *server) SayBye(ctx context.Context, in *pb.ByeRequest) (*pb.ByeReply, error) {
+	if in.Name == "error" {
+		return nil, errors.BadRequest("custom_error", fmt.Sprintf("invalid argument %s", in.Name))
+	}
+	if in.Name == "panic" {
+		panic("grpc panic")
+	}
+	body := &pb.ByeReply_Body{
+		Message: fmt.Sprintf("Bye %+v", in.Name),
+	}
+	return &pb.ByeReply{Body:body}, nil
+}
+
 func main() {
 	logger := log.NewStdLogger(os.Stdout)
 
 	log := log.NewHelper(logger)
 
 	grpcSrv := grpc.NewServer(
-		grpc.Address(":9000"),
+		grpc.Address("127.0.0.1:9000"),
 		grpc.Middleware(
 			recovery.Recovery(),
 			logging.Server(logger),
@@ -54,7 +68,7 @@ func main() {
 	s := &server{}
 	pb.RegisterGreeterServer(grpcSrv, s)
 
-	httpSrv := http.NewServer(http.Address(":8000"))
+	httpSrv := http.NewServer(http.Address("127.0.0.1:8000"))
 	httpSrv.HandlePrefix("/", pb.NewGreeterHandler(s,
 		http.Middleware(
 			recovery.Recovery(),

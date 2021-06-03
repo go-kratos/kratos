@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	reflectPackage = protogen.GoImportPath("reflect")
 	contextPackage   = protogen.GoImportPath("context")
 	httpPackage      = protogen.GoImportPath("net/http")
 	muxPackage       = protogen.GoImportPath("github.com/gorilla/mux")
@@ -47,6 +48,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("var _ = ", bindingPackage.Ident("MapProto"))
 	g.P("var _ = ", muxPackage.Ident("NewRouter"))
 	g.P("const _ = ", transportPackage.Ident("SupportPackageIsVersion1"))
+	g.P("const _ = ", reflectPackage.Ident("Invalid"))
 	g.P()
 
 	for _, service := range file.Services {
