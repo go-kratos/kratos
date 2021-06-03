@@ -1,6 +1,7 @@
 package log
 
 import (
+	c "context"
 	"fmt"
 )
 
@@ -13,6 +14,12 @@ type Helper struct {
 func NewHelper(logger Logger) *Helper {
 	return &Helper{
 		logger: logger,
+	}
+}
+
+func (h *Helper) Ctx(ctx c.Context) *Helper {
+	return &Helper{
+		logger: WithContext(h.logger, ctx),
 	}
 }
 

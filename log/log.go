@@ -1,6 +1,7 @@
 package log
 
 import (
+	c "context"
 	"log"
 )
 
@@ -18,13 +19,14 @@ type context struct {
 	logs      []Logger
 	prefix    []interface{}
 	hasValuer bool
+	ctx       c.Context
 }
 
 func (c *context) Log(level Level, keyvals ...interface{}) error {
 	kvs := make([]interface{}, 0, len(c.prefix)+len(keyvals))
 	kvs = append(kvs, c.prefix...)
 	if c.hasValuer {
-		bindValues(kvs)
+		bindValues(c.ctx, kvs)
 	}
 	kvs = append(kvs, keyvals...)
 	for _, l := range c.logs {
@@ -48,6 +50,18 @@ func With(l Logger, kv ...interface{}) Logger {
 		}
 	}
 	return &context{logs: []Logger{l}, prefix: kv, hasValuer: containsValuer(kv)}
+}
+
+func WithContext(l Logger, ctx c.Context) Logger {
+	if c, ok := l.(*context); ok {
+		return &context{
+			logs:      c.logs,
+			prefix:    c.prefix,
+			hasValuer: c.hasValuer,
+			ctx:       ctx,
+		}
+	}
+	return &context{logs: []Logger{l}, ctx: ctx}
 }
 
 // MultiLogger wraps multi logger.
