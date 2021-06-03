@@ -27,10 +27,13 @@ func TestZapLogger(t *testing.T) {
 		zap.NewAtomicLevelAt(zapcore.DebugLevel),
 		zap.AddStacktrace(
 			zap.NewAtomicLevelAt(zapcore.ErrorLevel)),
+		zap.AddCaller(),
 		zap.AddCallerSkip(2),
 		zap.Development(),
 	)
 	zlog := log.NewHelper(logger)
-	zlog.Infow("name","kratos","from","bilibili")
+	zlog.Infow("name", "kratos", "from", "opensource")
+	zlog.Infow("name", "kratos", "from")
+
 	defer logger.Sync()
 }
