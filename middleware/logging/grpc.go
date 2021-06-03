@@ -12,17 +12,14 @@ func grpcServerLog(logger log.Logger, ctx context.Context, args string, err erro
 	if !ok {
 		return
 	}
-	traceID, spanID := extractTrace(ctx)
 	code, errMsg := extractError(err)
 	level := log.LevelInfo
 	if err != nil {
 		level = log.LevelError
 	}
-	logger.Log(level,
+	log.WithContext(ctx, logger).Log(level,
 		"kind", "server",
 		"component", "grpc",
-		"trace_id", traceID,
-		"span_id", spanID,
 		"grpc.target", info.FullMethod,
 		"grpc.args", args,
 		"grpc.code", code,
@@ -35,17 +32,14 @@ func grpcClientLog(logger log.Logger, ctx context.Context, args string, err erro
 	if !ok {
 		return
 	}
-	traceID, spanID := extractTrace(ctx)
 	code, errMsg := extractError(err)
 	level := log.LevelInfo
 	if err != nil {
 		level = log.LevelError
 	}
-	logger.Log(level,
+	log.WithContext(ctx, logger).Log(level,
 		"kind", "client",
 		"component", "grpc",
-		"trace_id", traceID,
-		"span_id", spanID,
 		"grpc.target", info.FullMethod,
 		"grpc.args", args,
 		"grpc.code", code,
