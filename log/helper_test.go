@@ -1,7 +1,9 @@
 package log
 
 import (
+	"context"
 	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -41,5 +43,21 @@ func BenchmarkHelperPrintw(b *testing.B) {
 	log := NewHelper(NewStdLogger(ioutil.Discard))
 	for i := 0; i < b.N; i++ {
 		log.Debugw("key", "value")
+	}
+}
+
+func TestContext(t *testing.T) {
+	logger := With(NewStdLogger(os.Stdout),
+		"trace", Trace(),
+	)
+	log := NewHelper(logger)
+	ctx := context.WithValue(context.Background(), "trace_id", "2233")
+	log.WithContext(ctx).Info("got trace!")
+}
+
+func Trace() Valuer {
+	return func(ctx context.Context) interface{} {
+		s := ctx.Value("trace_id").(string)
+		return s
 	}
 }

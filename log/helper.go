@@ -1,7 +1,7 @@
 package log
 
 import (
-	c "context"
+	"context"
 	"fmt"
 )
 
@@ -17,9 +17,11 @@ func NewHelper(logger Logger) *Helper {
 	}
 }
 
-func (h *Helper) Ctx(ctx c.Context) *Helper {
+// WithContext returns a shallow copy of h with its context changed
+// to ctx. The provided ctx must be non-nil.
+func (h *Helper) WithContext(ctx context.Context) *Helper {
 	return &Helper{
-		logger: WithContext(h.logger, ctx),
+		logger: WithContext(ctx, h.logger),
 	}
 }
 
