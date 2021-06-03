@@ -2,11 +2,12 @@ package log
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"os"
 )
 
 var _ log.Logger = (*ZapLogger)(nil)

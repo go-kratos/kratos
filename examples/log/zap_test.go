@@ -1,10 +1,11 @@
 package log
 
 import (
+	"testing"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"testing"
 )
 
 func TestZapLogger(t *testing.T) {
