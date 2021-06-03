@@ -12,17 +12,14 @@ func httpServerLog(logger log.Logger, ctx context.Context, args string, err erro
 	if !ok {
 		return
 	}
-	traceID, spanID := extractTrace(ctx)
 	code, errMsg := extractError(err)
 	level := log.LevelInfo
 	if err != nil {
 		level = log.LevelError
 	}
-	logger.Log(level,
+	log.WithContext(ctx, logger).Log(level,
 		"kind", "server",
 		"component", "http",
-		"trace_id", traceID,
-		"span_id", spanID,
 		"http.target", info.Request.RequestURI,
 		"http.method", info.Request.Method,
 		"http.args", args,
@@ -36,17 +33,14 @@ func httpClientLog(logger log.Logger, ctx context.Context, args string, err erro
 	if !ok {
 		return
 	}
-	traceID, spanID := extractTrace(ctx)
 	code, errMsg := extractError(err)
 	level := log.LevelInfo
 	if err != nil {
 		level = log.LevelError
 	}
-	logger.Log(level,
+	log.WithContext(ctx, logger).Log(level,
 		"kind", "client",
 		"component", "http",
-		"trace_id", traceID,
-		"span_id", spanID,
 		"http.target", info.Request.RequestURI,
 		"http.method", info.Request.Method,
 		"http.args", args,

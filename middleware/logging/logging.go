@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"go.opentelemetry.io/otel/trace"
-
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -14,6 +12,8 @@ import (
 
 // Server is an server logging middleware.
 func Server(logger log.Logger) middleware.Middleware {
+	logger = log.With(logger, "trace_id", log.TraceID(), "span_id", log.SpanID())
+
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			reply, err = handler(ctx, req)
@@ -32,6 +32,8 @@ func Server(logger log.Logger) middleware.Middleware {
 
 // Client is an client logging middleware.
 func Client(logger log.Logger) middleware.Middleware {
+	logger = log.With(logger, "trace_id", log.TraceID(), "span_id", log.SpanID())
+
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			reply, err = handler(ctx, req)
@@ -53,17 +55,6 @@ func extractArgs(req interface{}) string {
 		return stringer.String()
 	}
 	return fmt.Sprintf("%+v", req)
-}
-
-func extractTrace(ctx context.Context) (traceID, spanID string) {
-	span := trace.SpanContextFromContext(ctx)
-	if span.HasTraceID() {
-		traceID = span.TraceID().String()
-	}
-	if span.HasSpanID() {
-		spanID = span.SpanID().String()
-	}
-	return
 }
 
 func extractError(err error) (code int, errMsg string) {
