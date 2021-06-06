@@ -16,7 +16,6 @@ var (
 	// MarshalOptions is a configurable JSON format marshaler.
 	MarshalOptions = protojson.MarshalOptions{
 		EmitUnpopulated: true,
-		UseProtoNames:   true,
 	}
 	// UnmarshalOptions is a configurable JSON format parser.
 	UnmarshalOptions = protojson.UnmarshalOptions{
