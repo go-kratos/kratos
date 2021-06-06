@@ -2,7 +2,6 @@ package xml
 
 import (
 	"encoding/xml"
-	"reflect"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 )
@@ -22,13 +21,6 @@ func (codec) Marshal(v interface{}) ([]byte, error) {
 }
 
 func (codec) Unmarshal(data []byte, v interface{}) error {
-	rv := reflect.ValueOf(v)
-	for rv.Kind() == reflect.Ptr {
-		if rv.IsNil() {
-			rv.Set(reflect.New(rv.Type().Elem()))
-		}
-		rv = rv.Elem()
-	}
 	return xml.Unmarshal(data, v)
 }
 
