@@ -76,7 +76,7 @@ func Errorf(code int, reason, format string, a ...interface{}) error {
 // It supports wrapped errors.
 func Code(err error) int {
 	if err == nil {
-		return 0
+		return 200
 	}
 	if se := FromError(err); err != nil {
 		return int(se.Code)
