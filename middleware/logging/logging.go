@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -53,9 +52,8 @@ func extractArgs(req interface{}) string {
 	return fmt.Sprintf("%+v", req)
 }
 
-func extractError(err error) (code int, errMsg string) {
+func extractError(err error) (errMsg string) {
 	if err != nil {
-		code = errors.Code(err)
 		errMsg = fmt.Sprintf("%+v", err)
 	}
 	return
