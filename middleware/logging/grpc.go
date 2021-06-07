@@ -9,6 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 )
 
+// grpcServerLog is a server handler when transport is KindGRPC
 func grpcServerLog(logger log.Logger, ctx context.Context, args string, err error) {
 	info, ok := grpc.FromServerContext(ctx)
 	if !ok {
@@ -30,6 +31,7 @@ func grpcServerLog(logger log.Logger, ctx context.Context, args string, err erro
 	)
 }
 
+// grpcClientLog is a client handler when transport is KindGRPC
 func grpcClientLog(logger log.Logger, ctx context.Context, args string, err error) {
 	info, ok := grpc.FromClientContext(ctx)
 	if !ok {

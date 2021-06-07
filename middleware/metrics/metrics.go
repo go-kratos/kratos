@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/metrics"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
@@ -50,9 +51,13 @@ func Server(opts ...Option) middleware.Middleware {
 				path   string
 				code   uint32
 			)
+			startTime := time.Now()
+			reply, err := handler(ctx, req)
+
 			if info, ok := grpc.FromServerContext(ctx); ok {
 				method = "POST"
 				path = info.FullMethod
+				code = uint32(httputil.GRPCCodeFromStatus(errors.Code(err)))
 			} else if info, ok := http.FromServerContext(ctx); ok {
 				req := info.Request.WithContext(ctx)
 				method = req.Method
@@ -62,14 +67,11 @@ func Server(opts ...Option) middleware.Middleware {
 				} else {
 					path = req.RequestURI
 				}
-			}
-			startTime := time.Now()
-			reply, err := handler(ctx, req)
-			if err != nil {
 				code = uint32(errors.Code(err))
 			}
+
 			if options.requests != nil {
-				options.requests.With(method, path, strconv.Itoa(int(code))).Inc()
+				options.requests.With(method, path, strconv.Itoa(int(code)), errors.Reason(err)).Inc()
 			}
 			if options.seconds != nil {
 				options.seconds.With(method, path).Observe(time.Since(startTime).Seconds())
@@ -93,20 +95,21 @@ func Client(opts ...Option) middleware.Middleware {
 				path   string
 				code   uint32
 			)
+			startTime := time.Now()
+			reply, err := handler(ctx, req)
+
 			if info, ok := grpc.FromClientContext(ctx); ok {
 				method = "POST"
 				path = info.FullMethod
+				code = uint32(httputil.GRPCCodeFromStatus(errors.Code(err)))
 			} else if info, ok := http.FromClientContext(ctx); ok {
 				method = info.Request.Method
 				path = info.Request.RequestURI
-			}
-			startTime := time.Now()
-			reply, err := handler(ctx, req)
-			if err != nil {
 				code = uint32(errors.Code(err))
 			}
+
 			if options.requests != nil {
-				options.requests.With(method, path, strconv.Itoa(int(code))).Inc()
+				options.requests.With(method, path, strconv.Itoa(int(code)), errors.Reason(err)).Inc()
 			}
 			if options.seconds != nil {
 				options.seconds.With(method, path).Observe(time.Since(startTime).Seconds())
