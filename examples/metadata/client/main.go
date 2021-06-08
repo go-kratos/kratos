@@ -8,6 +8,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
+	meta "github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
@@ -24,6 +25,7 @@ func callHTTP() {
 		context.Background(),
 		transhttp.WithMiddleware(
 			recovery.Recovery(),
+			meta.Client(),
 		),
 		transhttp.WithEndpoint("127.0.0.1:8000"),
 	)
@@ -32,7 +34,7 @@ func callHTTP() {
 	}
 	client := pb.NewGreeterHTTPClient(conn)
 
-	ctx := metadata.NewOutgoingContext(context.Background(), metadata.New("kratos-extra", "2233"))
+	ctx := metadata.NewContext(context.Background(), metadata.New("kratos-extra", "2233"))
 	reply, err := client.SayHello(ctx, &pb.HelloRequest{Name: "kratos"})
 	if err != nil {
 		panic(err)
@@ -48,6 +50,7 @@ func callGRPC() {
 		transgrpc.WithMiddleware(
 			middleware.Chain(
 				recovery.Recovery(),
+				meta.Client(),
 			),
 		),
 	)
@@ -55,7 +58,8 @@ func callGRPC() {
 		panic(err)
 	}
 	client := pb.NewGreeterClient(conn)
-	ctx := metadata.NewOutgoingContext(context.Background(), metadata.New("kratos-extra", "2233"))
+
+	ctx := metadata.NewContext(context.Background(), metadata.New("kratos-extra", "2233"))
 	reply, err := client.SayHello(ctx, &pb.HelloRequest{Name: "kratos"})
 	if err != nil {
 		panic(err)

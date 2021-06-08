@@ -12,7 +12,6 @@ import (
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
-	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -258,11 +257,6 @@ func (client *Client) Do(req *http.Request, opts ...CallOption) (*http.Response,
 }
 
 func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*http.Response, error) {
-	md, _ := metadata.FromOutgoingContext(ctx)
-	md.Range(func(k, v string) bool {
-		req.Header.Set(k, v)
-		return true
-	})
 	resp, err := client.cc.Do(req)
 	if err != nil {
 		return nil, err

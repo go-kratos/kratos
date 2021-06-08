@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -15,7 +14,6 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"
-	gmetadata "google.golang.org/grpc/metadata"
 )
 
 // ClientOption is gRPC client option.
@@ -122,17 +120,6 @@ func unaryClientInterceptor(m middleware.Middleware, timeout time.Duration) grpc
 			defer cancel()
 		}
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
-			md, _ := metadata.FromOutgoingContext(ctx)
-			gmd, _ := gmetadata.FromOutgoingContext(ctx)
-			// copy md to avoid datarace
-			gmd = gmd.Copy()
-			md.Range(func(k, v string) bool {
-				gmd.Set(k, v)
-				return true
-			})
-			if len(gmd) > 0 {
-				ctx = gmetadata.NewOutgoingContext(ctx, gmd)
-			}
 			return reply, invoker(ctx, method, req, reply, cc, opts...)
 		}
 		if m != nil {

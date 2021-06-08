@@ -7,7 +7,6 @@ import (
 )
 
 type metadataKey struct{}
-type mdOutgoingKey struct{}
 
 // Metadata is our way of representing request headers internally.
 // They're used at the RPC level and translate back and forth
@@ -117,31 +116,4 @@ func MergeContext(ctx context.Context, patchMd Metadata) context.Context {
 	md, _ := FromContext(ctx)
 	cmd := md.Merge(patchMd)
 	return NewContext(ctx, cmd)
-}
-
-// FromOutgoingContext returns metadata from the given context.
-func FromOutgoingContext(ctx context.Context) (Metadata, bool) {
-	md, ok := ctx.Value(mdOutgoingKey{}).(Metadata)
-	if !ok {
-		return Metadata{md: map[string]string{}}, ok
-	}
-	return md, ok
-}
-
-// NewOutgoingContext creates a new context with outgoing md attached. If used
-// in conjunction with AppendToOutgoingContext, NewOutgoingContext will
-// overwrite any previously-appended metadata.
-func NewOutgoingContext(ctx context.Context, md Metadata) context.Context {
-	return context.WithValue(ctx, mdOutgoingKey{}, md)
-}
-
-// MergeContext merges metadata to existing metadata, overwriting if specified
-func MergeOutgoingContext(ctx context.Context, patchMd Metadata) context.Context {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
-	md, _ := FromOutgoingContext(ctx)
-	cmd := md.Merge(patchMd)
-	return NewOutgoingContext(ctx, cmd)
 }

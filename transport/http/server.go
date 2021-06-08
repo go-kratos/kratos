@@ -12,7 +12,6 @@ import (
 	ic "github.com/go-kratos/kratos/v2/internal/context"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/transport"
 
 	"github.com/gorilla/mux"
@@ -104,13 +103,6 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	defer cancel()
 	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP, Endpoint: s.endpoint.String()})
 	ctx = NewServerContext(ctx, ServerInfo{Request: req, Response: res})
-	md := metadata.New()
-	for key, values := range req.Header {
-		if len(values) == 1 {
-			md.Set(key, values[0])
-		}
-	}
-	ctx = metadata.NewContext(ctx, md)
 
 	if s.timeout > 0 {
 		ctx, cancel = context.WithTimeout(ctx, s.timeout)

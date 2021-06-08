@@ -10,6 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
+	meta "github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
@@ -44,6 +45,7 @@ func main() {
 		grpc.Address(":9000"),
 		grpc.Middleware(
 			recovery.Recovery(),
+			meta.Server(),
 			logging.Server(logger),
 		))
 
@@ -54,6 +56,7 @@ func main() {
 	httpSrv.HandlePrefix("/", pb.NewGreeterHandler(s,
 		http.Middleware(
 			recovery.Recovery(),
+			meta.Server(),
 			logging.Server(logger),
 		)),
 	)
