@@ -10,10 +10,7 @@ var errorsTemplate = `
 
 func Is{{.CamelValue}}(err error) bool {
 	e := errors.FromError(err)
-	if e.Reason == {{.Name}}_{{.Value}}.String() && e.Code == {{.HttpCode}} {
-		return true
-	}
-	return false
+	return e.Reason == {{.Name}}_{{.Value}}.String() && e.Code == {{.HttpCode}} 
 }
 
 func Error{{.CamelValue}}(format string, args ...interface{}) *errors.Error {
