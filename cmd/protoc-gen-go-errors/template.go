@@ -24,9 +24,9 @@ func Error{{.CamelValue}}(format string, args ...interface{}) *errors.Error {
 `
 
 type errorInfo struct {
-	Name     string
-	Value    string
-	HttpCode int
+	Name       string
+	Value      string
+	HttpCode   int
 	CamelValue string
 }
 type errorWrapper struct {
