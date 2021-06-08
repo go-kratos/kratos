@@ -47,8 +47,7 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	code := 0
 	if ok := defaultCode.(int32);ok != 0 && ok <= 600 && ok >= 400 {
 		code = int(ok)
-	}
-	if code == 0{
+	} else {
 		return
 	}
 	var ew errorWrapper
