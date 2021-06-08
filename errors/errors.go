@@ -15,6 +15,8 @@ const (
 	UnknownCode = 500
 	// UnknownReason is unknown reason for error info.
 	UnknownReason = ""
+	// SupportPackageIsVersion1 this constant should not be referenced by any other code.
+	SupportPackageIsVersion1 = true
 )
 
 //go:generate protoc -I. --go_out=paths=source_relative:. errors.proto
