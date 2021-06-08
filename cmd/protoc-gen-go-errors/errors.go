@@ -4,6 +4,7 @@ import (
 	pb "github.com/go-kratos/kratos/v2/errors"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
+	"strings"
 )
 
 const (
@@ -63,9 +64,20 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 		err := &errorInfo{
 			Name:     string(enum.Desc.Name()),
 			Value:    string(v.Desc.Name()),
+			CamelValue: Case2Camel(string(v.Desc.Name())),
 			HttpCode: enumCode,
 		}
 		ew.Errors = append(ew.Errors, err)
 	}
 	g.P(ew.execute())
+}
+
+func Case2Camel(name string) string {
+	if !strings.Contains(name,"_") {
+		return name
+	}
+	name = strings.ToLower(name)
+	name = strings.Replace(name, "_", " ", -1)
+	name = strings.Title(name)
+	return strings.Replace(name, " ", "", -1)
 }

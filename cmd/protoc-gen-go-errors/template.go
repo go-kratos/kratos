@@ -8,7 +8,7 @@ import (
 var errorsTemplate = `
 {{ range .Errors }}
 
-func Is{{.Value}}(err error) bool {
+func Is{{.CamelValue}}(err error) bool {
 	e := errors.FromError(err)
 	if e.Reason == {{.Name}}_{{.Value}}.String() && e.Code == {{.HttpCode}} {
 		return true
@@ -16,7 +16,7 @@ func Is{{.Value}}(err error) bool {
 	return false
 }
 
-func Error{{.Value}}(format string, args ...interface{}) *errors.Error {
+func Error{{.CamelValue}}(format string, args ...interface{}) *errors.Error {
 	 return errors.New({{.HttpCode}}, {{.Name}}_{{.Value}}.String(), fmt.Sprintf(format, args...))
 }
 
@@ -24,9 +24,10 @@ func Error{{.Value}}(format string, args ...interface{}) *errors.Error {
 `
 
 type errorInfo struct {
-	Name  string
-	Value string
+	Name     string
+	Value    string
 	HttpCode int
+	CamelValue string
 }
 type errorWrapper struct {
 	Errors []*errorInfo
