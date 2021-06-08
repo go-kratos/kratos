@@ -45,7 +45,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, enum *protogen.Enum) {
 	defaultCode := proto.GetExtension(enum.Desc.Options(), pb.E_DefaultCode)
 	code := 0
-	if ok := defaultCode.(int32);ok != 0 && ok <= 600 && ok >= 400 {
+	if ok := defaultCode.(int32); ok != 0 && ok <= 600 && ok >= 200 {
 		code = int(ok)
 	} else {
 		return
@@ -57,10 +57,10 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 		if enumCode == 0 {
 			enumCode = code
 		}
-		if enumCode >600 || enumCode < 400 {
+		if enumCode > 600 || enumCode < 200 {
 			return
 		}
-			err := &errorInfo{
+		err := &errorInfo{
 			Name:     string(enum.Desc.Name()),
 			Value:    string(v.Desc.Name()),
 			HttpCode: enumCode,
