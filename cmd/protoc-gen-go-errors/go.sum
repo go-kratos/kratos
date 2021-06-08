@@ -12,6 +12,8 @@ github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
 github.com/go-kratos/kratos/v2 v2.0.0-20210608032802-c551448bbd64 h1:+x/Zgv46tYhyhdWgoASZRWQpwuaEoHtNz0PMfwT9svM=
 github.com/go-kratos/kratos/v2 v2.0.0-20210608032802-c551448bbd64/go.mod h1:puDEhRv+dqKa4ZdlInEAbO8ibGxqNhAXFjGleIRh9V4=
+github.com/go-kratos/kratos/v2 v2.0.0-20210608085308-7585257f9ea1 h1:t6O9azVp+Go2H1B5X9xEFgMj5jogpaL0obRz14ek+B0=
+github.com/go-kratos/kratos/v2 v2.0.0-20210608085308-7585257f9ea1/go.mod h1:puDEhRv+dqKa4ZdlInEAbO8ibGxqNhAXFjGleIRh9V4=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=

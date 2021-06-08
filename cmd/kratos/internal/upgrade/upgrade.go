@@ -21,6 +21,7 @@ func Run(cmd *cobra.Command, args []string) {
 	err := base.GoGet(
 		"github.com/go-kratos/kratos/cmd/kratos/v2",
 		"github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2",
+		"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2",
 		"google.golang.org/protobuf/cmd/protoc-gen-go",
 		"google.golang.org/grpc/cmd/protoc-gen-go-grpc",
 	)

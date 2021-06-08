@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
-const version = "v2.0.0-beta2"
+const version = "v2.0.0-rc1"
 
 func main() {
 	showVersion := flag.Bool("version", false, "print the version and exit")
@@ -17,7 +17,6 @@ func main() {
 		fmt.Printf("protoc-gen-go-errors %v\n", version)
 		return
 	}
-	//fmt.Println(os.Args, "123123")
 	var flags flag.FlagSet
 	protogen.Options{
 		ParamFunc: flags.Set,
