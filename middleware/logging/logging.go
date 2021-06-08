@@ -45,6 +45,7 @@ func Client(logger log.Logger) middleware.Middleware {
 	}
 }
 
+// extractArgs returns the string of the req
 func extractArgs(req interface{}) string {
 	if stringer, ok := req.(fmt.Stringer); ok {
 		return stringer.String()
@@ -52,6 +53,7 @@ func extractArgs(req interface{}) string {
 	return fmt.Sprintf("%+v", req)
 }
 
+// extractError returns the string of the error
 func extractError(err error) (errMsg string) {
 	if err != nil {
 		errMsg = fmt.Sprintf("%+v", err)

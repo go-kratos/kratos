@@ -8,6 +8,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
+// httpServerLog is a middleware server handler when transport is KindHTTP
 func httpServerLog(logger log.Logger, ctx context.Context, args string, err error) {
 	info, ok := http.FromServerContext(ctx)
 	if !ok {
@@ -30,6 +31,7 @@ func httpServerLog(logger log.Logger, ctx context.Context, args string, err erro
 	)
 }
 
+// httpClientLog is a middleware client handler when transport is KindHTTP
 func httpClientLog(logger log.Logger, ctx context.Context, args string, err error) {
 	info, ok := http.FromClientContext(ctx)
 	if !ok {
