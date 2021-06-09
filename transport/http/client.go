@@ -12,6 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
+	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -222,6 +223,11 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			req = req.Clone(ctx)
 			req.URL.Scheme = scheme
 			req.URL.Host = addr
+		}
+		if md, ok := metadata.FromOutgoingContext(ctx); ok {
+			for _, key := range md.Keys() {
+				req.Header.Set(key, md.Get(key))
+			}
 		}
 		res, err := client.do(ctx, req, c)
 		if done != nil {

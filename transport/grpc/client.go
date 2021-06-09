@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -14,6 +15,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"
+	grpcmd "google.golang.org/grpc/metadata"
 )
 
 // ClientOption is gRPC client option.
@@ -113,11 +115,14 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 func unaryClientInterceptor(m middleware.Middleware, timeout time.Duration) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC, Endpoint: cc.Target()})
-		ctx = middleware.WithServiceMethod(ctx, method)
+		ctx = middleware.WithMethod(ctx, method)
 		if timeout > 0 {
 			var cancel context.CancelFunc
 			ctx, cancel = context.WithTimeout(ctx, timeout)
 			defer cancel()
+		}
+		if md, ok := metadata.FromOutgoingContext(ctx); ok {
+			ctx = grpcmd.NewOutgoingContext(ctx, grpcmd.MD(md))
 		}
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return reply, invoker(ctx, method, req, reply, cc, opts...)

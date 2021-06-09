@@ -11,11 +11,14 @@ import (
 	ic "github.com/go-kratos/kratos/v2/internal/context"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
+	kmd "github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	grpcmd "google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -175,7 +178,10 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		ctx, cancel := ic.Merge(ctx, s.ctx)
 		defer cancel()
 		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC, Endpoint: s.endpoint.String()})
-		ctx = middleware.WithServiceMethod(ctx, info.FullMethod)
+		ctx = middleware.WithMethod(ctx, info.FullMethod)
+		if md, ok := grpcmd.FromIncomingContext(ctx); ok {
+			ctx = kmd.NewIncomingContext(ctx, kmd.Metadata(md))
+		}
 		if s.timeout > 0 {
 			var cancel context.CancelFunc
 			ctx, cancel = context.WithTimeout(ctx, s.timeout)

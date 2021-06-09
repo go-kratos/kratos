@@ -51,7 +51,7 @@ func Server(opts ...Option) middleware.Middleware {
 			if info, ok := transport.FromContext(ctx); ok {
 				kind = string(info.Kind)
 			}
-			method := middleware.ServiceMethod(ctx)
+			method := middleware.Method(ctx)
 			reply, err := handler(ctx, req)
 			if options.requests != nil {
 				options.requests.With(kind, method, strconv.Itoa(int(code)), errors.Reason(err)).Inc()
@@ -79,7 +79,7 @@ func Client(opts ...Option) middleware.Middleware {
 			if info, ok := transport.FromContext(ctx); ok {
 				kind = string(info.Kind)
 			}
-			method := middleware.ServiceMethod(ctx)
+			method := middleware.Method(ctx)
 			reply, err := handler(ctx, req)
 			if options.requests != nil {
 				options.requests.With(kind, method, strconv.Itoa(errors.Code(err)), errors.Reason(err)).Inc()

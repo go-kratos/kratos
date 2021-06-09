@@ -19,7 +19,7 @@ func Server(logger log.Logger) middleware.Middleware {
 			reply, err = handler(ctx, req)
 			level, errMsg := extractError(err)
 			tr, _ := transport.FromContext(ctx)
-			method := middleware.ServiceMethod(ctx)
+			method := middleware.Method(ctx)
 			log.WithContext(ctx, logger).Log(level,
 				"kind", "server",
 				"component", tr.Kind,
@@ -42,7 +42,7 @@ func Client(logger log.Logger) middleware.Middleware {
 			reply, err = handler(ctx, req)
 			level, errMsg := extractError(err)
 			tr, _ := transport.FromContext(ctx)
-			method := middleware.ServiceMethod(ctx)
+			method := middleware.Method(ctx)
 			log.WithContext(ctx, logger).Log(level,
 				"kind", "client",
 				"component", tr.Kind,

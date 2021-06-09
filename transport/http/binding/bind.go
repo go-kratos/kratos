@@ -28,9 +28,3 @@ func BindVars(vars map[string]string, target interface{}) error {
 	}
 	return mapForm(target, values)
 }
-
-// BindValue bind map parameters to target.
-// Deprecated: use BindVars instead.
-func BindValue(vars map[string]string, target interface{}) error {
-	return BindVars(vars, target)
-}

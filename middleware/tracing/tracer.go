@@ -31,16 +31,14 @@ func NewTracer(kind trace.SpanKind, opts ...Option) *Tracer {
 	} else {
 		otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{}))
 	}
-	var name string
-	if kind == trace.SpanKindServer {
-		name = "server"
-	} else if kind == trace.SpanKindClient {
-		name = "client"
-	} else {
+	switch kind {
+	case trace.SpanKindClient:
+		return &Tracer{tracer: otel.Tracer("client"), kind: kind}
+	case trace.SpanKindServer:
+		return &Tracer{tracer: otel.Tracer("server"), kind: kind}
+	default:
 		panic(fmt.Sprintf("unsupported span kind: %v", kind))
 	}
-	tracer := otel.Tracer(name)
-	return &Tracer{tracer: tracer, kind: kind}
 }
 
 // Start start tracing span
