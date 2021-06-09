@@ -78,8 +78,8 @@ func generate(proto string, args []string) error {
 	path, name := filepath.Split(proto)
 	input := []string{
 		"--proto_path=.",
+		"--proto_path=" + base.KratosMod(),
 		"--proto_path=" + filepath.Join(base.KratosMod(), "third_party"),
-		"--proto_path=" + filepath.Join(base.KratosMod(), "errors"),
 		"--go_out=paths=source_relative:.",
 		"--go-grpc_out=paths=source_relative:.",
 		"--go-http_out=paths=source_relative:.",
