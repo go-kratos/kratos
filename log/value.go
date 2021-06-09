@@ -33,7 +33,7 @@ func Value(ctx context.Context, v interface{}) interface{} {
 func Caller(depth int) Valuer {
 	return func(context.Context) interface{} {
 		_, file, line, _ := runtime.Caller(depth)
-		if strings.LastIndex(file, "github.com/go-kratos/kratos/log") > 0 {
+		if strings.LastIndex(file, "/log/helper.go") > 0 {
 			_, file, line, _ = runtime.Caller(depth + 1)
 		}
 		idx := strings.LastIndexByte(file, '/')
