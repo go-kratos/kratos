@@ -28,6 +28,12 @@ type Transport struct {
 	Endpoint string
 }
 
+// Defines a set of transport kind
+const (
+	KindGRPC = "grpc"
+	KindHTTP = "http"
+)
+
 type transportKey struct{}
 
 // NewContext returns a new Context that carries value.

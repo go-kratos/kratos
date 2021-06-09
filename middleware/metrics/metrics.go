@@ -29,9 +29,9 @@ func WithSeconds(c metrics.Observer) Option {
 }
 
 type options struct {
-	// counter: <client/server>_requests_code_total{kind, full_method, code, reason}
+	// counter: <client/server>_requests_code_total{kind, method, code, reason}
 	requests metrics.Counter
-	// histogram: <client/server>_requests_seconds_bucket{kind, full_method}
+	// histogram: <client/server>_requests_seconds_bucket{kind, method}
 	seconds metrics.Observer
 }
 
