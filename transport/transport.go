@@ -33,8 +33,8 @@ type Kind string
 
 // Defines a set of transport kind
 const (
-	KindGRPC Kind = "gRPC"
-	KindHTTP Kind = "HTTP"
+	KindGRPC Kind = "grpc"
+	KindHTTP Kind = "http"
 )
 
 type transportKey struct{}

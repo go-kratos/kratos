@@ -4,17 +4,14 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
-	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
 func TestHTTP(t *testing.T) {
-	var req = httptest.NewRequest("GET", "http://example.com/foo", nil)
 	var err = errors.New("reply.error")
 	var bf = bytes.NewBuffer(nil)
 	var logger = log.NewStdLogger(bf)
@@ -29,18 +26,16 @@ func TestHTTP(t *testing.T) {
 			Server,
 			err,
 			func() context.Context {
-				res := httptest.NewRecorder()
 				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: transport.KindHTTP, Endpoint: "endpoint"})
-				return http.NewServerContext(ctx, http.ServerInfo{Request: req, Response: res})
+				return middleware.NewContext(ctx, middleware.ServiceInfo{FullMethod: "/package.service/method"})
 			}(),
 		},
 		{"http-server@succ",
 			Server,
 			nil,
 			func() context.Context {
-				res := httptest.NewRecorder()
 				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: transport.KindHTTP, Endpoint: "endpoint"})
-				return http.NewServerContext(ctx, http.ServerInfo{Request: req, Response: res})
+				return middleware.NewContext(ctx, middleware.ServiceInfo{FullMethod: "/package.service/method"})
 			}(),
 		},
 		{"http-client@succ",
@@ -48,7 +43,7 @@ func TestHTTP(t *testing.T) {
 			nil,
 			func() context.Context {
 				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: transport.KindHTTP, Endpoint: "endpoint"})
-				return http.NewClientContext(ctx, http.ClientInfo{Request: req, PathPattern: "{name}"})
+				return middleware.NewContext(ctx, middleware.ServiceInfo{FullMethod: "/package.service/method"})
 			}(),
 		},
 		{"http-client@fail",
@@ -56,7 +51,7 @@ func TestHTTP(t *testing.T) {
 			err,
 			func() context.Context {
 				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: transport.KindHTTP, Endpoint: "endpoint"})
-				return http.NewClientContext(ctx, http.ClientInfo{Request: req, PathPattern: "{name}"})
+				return middleware.NewContext(ctx, middleware.ServiceInfo{FullMethod: "/package.service/method"})
 			}(),
 		},
 	}
@@ -70,7 +65,7 @@ func TestHTTP(t *testing.T) {
 			next = test.kind(logger)(next)
 			v, e := next(test.ctx, "req.args")
 			t.Logf("[%s]reply: %v, error: %v", test.name, v, e)
-			t.Logf("[%s]buffer:%s", test.name, bf.String())
+			t.Logf("[%s]log:%s", test.name, bf.String())
 		})
 	}
 }

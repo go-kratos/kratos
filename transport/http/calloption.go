@@ -27,20 +27,9 @@ func (EmptyCallOption) after(*callInfo, *csAttempt) {}
 
 type csAttempt struct{}
 
-// PathPattern is pathpattern
-func PathPattern(pathPattern string) CallOption {
-	return PathPatternCallOption{PathPattern: pathPattern}
-}
-
 // PathPatternCallOption is BodyPattern
 type PathPatternCallOption struct {
 	EmptyCallOption
-	PathPattern string
-}
-
-func (o PathPatternCallOption) before(c *callInfo) error {
-	c.pathPattern = o.PathPattern
-	return nil
 }
 
 // Method is Method

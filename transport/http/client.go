@@ -200,7 +200,6 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 		req.Header.Set("User-Agent", client.opts.userAgent)
 	}
 	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP, Endpoint: client.opts.endpoint})
-	ctx = NewClientContext(ctx, ClientInfo{PathPattern: c.pathPattern, Request: req})
 	return client.invoke(ctx, req, args, reply, c)
 }
 

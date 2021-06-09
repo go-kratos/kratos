@@ -6,12 +6,9 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/metrics"
 	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
-	"github.com/gorilla/mux"
+	"github.com/go-kratos/kratos/v2/transport"
 )
 
 // Option is metrics option.
@@ -32,9 +29,9 @@ func WithSeconds(c metrics.Observer) Option {
 }
 
 type options struct {
-	// counter: <kind>_<client/server>_requests_code_total{method, path, code, reason}
+	// counter: <client/server>_requests_code_total{kind, full_method, code, reason}
 	requests metrics.Counter
-	// histogram: <kind>_<client/server>_requests_seconds_bucket{method, path}
+	// histogram: <client/server>_requests_seconds_bucket{kind, full_method}
 	seconds metrics.Observer
 }
 
@@ -47,37 +44,25 @@ func Server(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
-				method string
-				path   string
-				code   uint32
+				kind      string
+				method    string
+				code      uint32
+				startTime = time.Now()
 			)
-			startTime := time.Now()
-			reply, err := handler(ctx, req)
-
-			if info, ok := grpc.FromServerContext(ctx); ok {
-				method = "POST"
-				path = info.FullMethod
-				code = uint32(httputil.GRPCCodeFromStatus(errors.Code(err)))
-			} else if info, ok := http.FromServerContext(ctx); ok {
-				req := info.Request.WithContext(ctx)
-				method = req.Method
-				if route := mux.CurrentRoute(req); route != nil {
-					// /path/123 -> /path/{id}
-					path, _ = route.GetPathTemplate()
-				} else {
-					path = req.RequestURI
-				}
-				code = uint32(errors.Code(err))
+			if info, ok := transport.FromContext(ctx); ok {
+				kind = string(info.Kind)
 			}
-
+			if info, ok := middleware.FromContext(ctx); ok {
+				method = info.FullMethod
+			}
+			reply, err := handler(ctx, req)
 			if options.requests != nil {
-				options.requests.With(method, path, strconv.Itoa(int(code)), errors.Reason(err)).Inc()
+				options.requests.With(kind, method, strconv.Itoa(int(code)), errors.Reason(err)).Inc()
 			}
 			if options.seconds != nil {
-				options.seconds.With(method, path).Observe(time.Since(startTime).Seconds())
+				options.seconds.With(kind, method).Observe(time.Since(startTime).Seconds())
 			}
 			return reply, err
-
 		}
 	}
 }
@@ -91,28 +76,22 @@ func Client(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
-				method string
-				path   string
-				code   uint32
+				kind      string
+				method    string
+				startTime = time.Now()
 			)
-			startTime := time.Now()
-			reply, err := handler(ctx, req)
-
-			if info, ok := grpc.FromClientContext(ctx); ok {
-				method = "POST"
-				path = info.FullMethod
-				code = uint32(httputil.GRPCCodeFromStatus(errors.Code(err)))
-			} else if info, ok := http.FromClientContext(ctx); ok {
-				method = info.Request.Method
-				path = info.Request.RequestURI
-				code = uint32(errors.Code(err))
+			if info, ok := transport.FromContext(ctx); ok {
+				kind = string(info.Kind)
 			}
-
+			if info, ok := middleware.FromContext(ctx); ok {
+				method = info.FullMethod
+			}
+			reply, err := handler(ctx, req)
 			if options.requests != nil {
-				options.requests.With(method, path, strconv.Itoa(int(code)), errors.Reason(err)).Inc()
+				options.requests.With(kind, method, strconv.Itoa(errors.Code(err)), errors.Reason(err)).Inc()
 			}
 			if options.seconds != nil {
-				options.seconds.With(method, path).Observe(time.Since(startTime).Seconds())
+				options.seconds.With(kind, method).Observe(time.Since(startTime).Seconds())
 			}
 			return reply, err
 		}
