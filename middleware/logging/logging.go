@@ -26,6 +26,7 @@ func Server(logger log.Logger) middleware.Middleware {
 				"method", method,
 				"args", extractArgs(req),
 				"code", errors.Code(err),
+				"reason", errors.Reason(err),
 				"error", errMsg,
 				"latency", time.Since(startTime).Seconds(),
 			)
@@ -49,6 +50,7 @@ func Client(logger log.Logger) middleware.Middleware {
 				"method", method,
 				"args", extractArgs(req),
 				"code", errors.Code(err),
+				"reason", errors.Reason(err),
 				"error", errMsg,
 				"latency", time.Since(startTime).Seconds(),
 			)
