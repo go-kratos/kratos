@@ -2,6 +2,7 @@ package metadata
 
 import (
 	"context"
+	"strings"
 
 	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -22,8 +23,9 @@ func Server() middleware.Middleware {
 					info, _ := http.FromServerContext(ctx)
 					if info.Request != nil {
 						for key, values := range info.Request.Header {
-							if len(values) == 1 {
-								md.Set(key, values[0])
+							key = strings.ToLower(key)
+							if len(values) == 1 && strings.HasPrefix(key, "x-md-") {
+								md.Set(strings.TrimLeft(key, "x-md-"), values[0])
 							}
 						}
 					}
@@ -56,7 +58,7 @@ func Client() middleware.Middleware {
 					info, _ := http.FromClientContext(ctx)
 					if info.Request != nil {
 						md.Range(func(k, v string) bool {
-							info.Request.Header.Set(k, v)
+							info.Request.Header.Set("x-md-"+k, v)
 							return true
 						})
 					}
