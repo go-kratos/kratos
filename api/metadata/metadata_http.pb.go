@@ -4,10 +4,11 @@ package metadata
 
 import (
 	context "context"
+	http "net/http"
+
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
-	http "net/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -106,7 +107,7 @@ func (c *MetadataHTTPClientImpl) GetServiceDesc(ctx context.Context, in *GetServ
 	path := binding.EncodePath("GET", "/services/{name}", in)
 	out = &GetServiceDescReply{}
 
-	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("GET"), http1.PathPattern("/services/{name}"))
+	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("GET"))
 
 	if err != nil {
 		return
@@ -118,7 +119,7 @@ func (c *MetadataHTTPClientImpl) ListServices(ctx context.Context, in *ListServi
 	path := binding.EncodePath("GET", "/services", in)
 	out = &ListServicesReply{}
 
-	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("GET"), http1.PathPattern("/services"))
+	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("GET"))
 
 	if err != nil {
 		return

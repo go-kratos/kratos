@@ -17,13 +17,13 @@ func Server(logger log.Logger) middleware.Middleware {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			startTime := time.Now()
 			reply, err = handler(ctx, req)
-			tr, _ := transport.FromContext(ctx)
-			info, _ := middleware.FromContext(ctx)
 			level, errMsg := extractError(err)
+			tr, _ := transport.FromContext(ctx)
+			method := middleware.ServiceMethod(ctx)
 			log.WithContext(ctx, logger).Log(level,
 				"kind", "server",
 				"component", tr.Kind,
-				"method", info.FullMethod,
+				"method", method,
 				"args", extractArgs(req),
 				"code", errors.Code(err),
 				"error", errMsg,
@@ -40,13 +40,13 @@ func Client(logger log.Logger) middleware.Middleware {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			startTime := time.Now()
 			reply, err = handler(ctx, req)
-			tr, _ := transport.FromContext(ctx)
-			info, _ := middleware.FromContext(ctx)
 			level, errMsg := extractError(err)
+			tr, _ := transport.FromContext(ctx)
+			method := middleware.ServiceMethod(ctx)
 			log.WithContext(ctx, logger).Log(level,
 				"kind", "client",
 				"component", tr.Kind,
-				"method", info.FullMethod,
+				"method", method,
 				"args", extractArgs(req),
 				"code", errors.Code(err),
 				"error", errMsg,

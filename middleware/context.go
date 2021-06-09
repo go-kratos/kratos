@@ -2,21 +2,15 @@ package middleware
 
 import "context"
 
-// ServiceInfo represent service information.
-type ServiceInfo struct {
-	// FullMethod is the full RPC method string, i.e., /package.service/method.
-	FullMethod string
+type serviceMethodKey struct{}
+
+// WithServiceMethod with service full method, i.e. /package.service/method.
+func WithServiceMethod(ctx context.Context, method string) context.Context {
+	return context.WithValue(ctx, serviceMethodKey{}, method)
 }
 
-type serviceKey struct{}
-
-// NewContext returns a new Context that carries value.
-func NewContext(ctx context.Context, info ServiceInfo) context.Context {
-	return context.WithValue(ctx, serviceKey{}, info)
-}
-
-// FromContext returns the Service value stored in ctx, if any.
-func FromContext(ctx context.Context) (info ServiceInfo, ok bool) {
-	info, ok = ctx.Value(serviceKey{}).(ServiceInfo)
-	return
+// ServiceMethod returns the service full method, i.e. /package.service/method.
+func ServiceMethod(ctx context.Context) string {
+	method, _ := ctx.Value(serviceMethodKey{}).(string)
+	return method
 }

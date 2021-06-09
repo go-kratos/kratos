@@ -42,9 +42,8 @@ func Server(opts ...Option) middleware.Middleware {
 				carrier   propagation.TextMapCarrier
 			)
 			tr, _ := transport.FromContext(ctx)
-			info, _ := middleware.FromContext(ctx)
-			operation = info.FullMethod
 			component = string(tr.Kind)
+			operation = middleware.ServiceMethod(ctx)
 			// TODO md carrier
 			ctx, span := tracer.Start(ctx, component, operation, carrier)
 			defer func() { tracer.End(ctx, span, err) }()
@@ -64,9 +63,8 @@ func Client(opts ...Option) middleware.Middleware {
 				carrier   propagation.TextMapCarrier
 			)
 			tr, _ := transport.FromContext(ctx)
-			info, _ := middleware.FromContext(ctx)
 			component = string(tr.Kind)
-			operation = info.FullMethod
+			operation = middleware.ServiceMethod(ctx)
 			// TODO md carrier
 			ctx, span := tracer.Start(ctx, component, operation, carrier)
 			defer func() { tracer.End(ctx, span, err) }()

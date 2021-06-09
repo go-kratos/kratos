@@ -45,16 +45,13 @@ func Server(opts ...Option) middleware.Middleware {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
 				kind      string
-				method    string
 				code      uint32
 				startTime = time.Now()
 			)
 			if info, ok := transport.FromContext(ctx); ok {
 				kind = string(info.Kind)
 			}
-			if info, ok := middleware.FromContext(ctx); ok {
-				method = info.FullMethod
-			}
+			method := middleware.ServiceMethod(ctx)
 			reply, err := handler(ctx, req)
 			if options.requests != nil {
 				options.requests.With(kind, method, strconv.Itoa(int(code)), errors.Reason(err)).Inc()
@@ -77,15 +74,12 @@ func Client(opts ...Option) middleware.Middleware {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
 				kind      string
-				method    string
 				startTime = time.Now()
 			)
 			if info, ok := transport.FromContext(ctx); ok {
 				kind = string(info.Kind)
 			}
-			if info, ok := middleware.FromContext(ctx); ok {
-				method = info.FullMethod
-			}
+			method := middleware.ServiceMethod(ctx)
 			reply, err := handler(ctx, req)
 			if options.requests != nil {
 				options.requests.With(kind, method, strconv.Itoa(errors.Code(err)), errors.Reason(err)).Inc()
