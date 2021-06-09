@@ -13,8 +13,7 @@ type CallOption interface {
 }
 
 type callInfo struct {
-	pathPattern string
-	method      string
+	method string
 }
 
 // EmptyCallOption does not alter the Call configuration.

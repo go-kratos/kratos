@@ -44,20 +44,22 @@ func Server(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
-				kind      string
-				code      uint32
-				startTime = time.Now()
+				code   int
+				reason string
 			)
-			if info, ok := transport.FromContext(ctx); ok {
-				kind = string(info.Kind)
-			}
-			method := middleware.Method(ctx)
+			startTime := time.Now()
+			info, _ := transport.FromContext(ctx)
+			method, _ := middleware.Method(ctx)
 			reply, err := handler(ctx, req)
+			if se := errors.FromError(err); se != nil {
+				code = int(se.Code)
+				reason = se.Reason
+			}
 			if options.requests != nil {
-				options.requests.With(kind, method, strconv.Itoa(int(code)), errors.Reason(err)).Inc()
+				options.requests.With(info.Kind, method, strconv.Itoa(code), reason).Inc()
 			}
 			if options.seconds != nil {
-				options.seconds.With(kind, method).Observe(time.Since(startTime).Seconds())
+				options.seconds.With(info.Kind, method).Observe(time.Since(startTime).Seconds())
 			}
 			return reply, err
 		}
@@ -73,19 +75,22 @@ func Client(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
-				kind      string
-				startTime = time.Now()
+				code   int
+				reason string
 			)
-			if info, ok := transport.FromContext(ctx); ok {
-				kind = string(info.Kind)
-			}
-			method := middleware.Method(ctx)
+			startTime := time.Now()
+			info, _ := transport.FromContext(ctx)
+			method, _ := middleware.Method(ctx)
 			reply, err := handler(ctx, req)
+			if se := errors.FromError(err); se != nil {
+				code = int(se.Code)
+				reason = se.Reason
+			}
 			if options.requests != nil {
-				options.requests.With(kind, method, strconv.Itoa(errors.Code(err)), errors.Reason(err)).Inc()
+				options.requests.With(info.Kind, method, strconv.Itoa(code), reason).Inc()
 			}
 			if options.seconds != nil {
-				options.seconds.With(kind, method).Observe(time.Since(startTime).Seconds())
+				options.seconds.With(info.Kind, method).Observe(time.Since(startTime).Seconds())
 			}
 			return reply, err
 		}

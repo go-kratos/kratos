@@ -200,7 +200,7 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 	if client.opts.userAgent != "" {
 		req.Header.Set("User-Agent", client.opts.userAgent)
 	}
-	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP, Endpoint: client.opts.endpoint})
+	ctx = transport.NewContext(ctx, transport.Transport{Kind: "http", Endpoint: client.opts.endpoint})
 	return client.invoke(ctx, req, args, reply, c)
 }
 
@@ -213,7 +213,7 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 				node  *registry.ServiceInstance
 				nodes = client.r.fetch(ctx)
 			)
-			if node, done, err = client.opts.balancer.Pick(ctx, c.pathPattern, nodes); err != nil {
+			if node, done, err = client.opts.balancer.Pick(ctx, nodes); err != nil {
 				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 			}
 			scheme, addr, err := parseEndpoint(node.Endpoints)

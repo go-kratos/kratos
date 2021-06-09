@@ -24,18 +24,9 @@ type Endpointer interface {
 
 // Transport is transport context value.
 type Transport struct {
-	Kind     Kind
+	Kind     string
 	Endpoint string
 }
-
-// Kind defines the type of Transport
-type Kind string
-
-// Defines a set of transport kind
-const (
-	KindGRPC Kind = "grpc"
-	KindHTTP Kind = "http"
-)
 
 type transportKey struct{}
 

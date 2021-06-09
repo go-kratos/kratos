@@ -15,19 +15,27 @@ import (
 func Server(logger log.Logger) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+			var (
+				code   int32
+				reason string
+			)
 			startTime := time.Now()
 			reply, err = handler(ctx, req)
-			level, errMsg := extractError(err)
+			if se := errors.FromError(err); se != nil {
+				code = se.Code
+				reason = se.Reason
+			}
+			level, stack := extractError(err)
 			tr, _ := transport.FromContext(ctx)
-			method := middleware.Method(ctx)
+			method, _ := middleware.Method(ctx)
 			log.WithContext(ctx, logger).Log(level,
 				"kind", "server",
 				"component", tr.Kind,
 				"method", method,
 				"args", extractArgs(req),
-				"code", errors.Code(err),
-				"reason", errors.Reason(err),
-				"error", errMsg,
+				"code", code,
+				"reason", reason,
+				"stack", stack,
 				"latency", time.Since(startTime).Seconds(),
 			)
 			return
@@ -39,19 +47,27 @@ func Server(logger log.Logger) middleware.Middleware {
 func Client(logger log.Logger) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+			var (
+				code   int32
+				reason string
+			)
 			startTime := time.Now()
 			reply, err = handler(ctx, req)
-			level, errMsg := extractError(err)
+			if se := errors.FromError(err); se != nil {
+				code = se.Code
+				reason = se.Reason
+			}
+			level, stack := extractError(err)
 			tr, _ := transport.FromContext(ctx)
-			method := middleware.Method(ctx)
+			method, _ := middleware.Method(ctx)
 			log.WithContext(ctx, logger).Log(level,
 				"kind", "client",
 				"component", tr.Kind,
 				"method", method,
 				"args", extractArgs(req),
-				"code", errors.Code(err),
-				"reason", errors.Reason(err),
-				"error", errMsg,
+				"code", code,
+				"reason", reason,
+				"stack", stack,
 				"latency", time.Since(startTime).Seconds(),
 			)
 			return

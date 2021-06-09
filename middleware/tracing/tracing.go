@@ -37,16 +37,11 @@ func Server(opts ...Option) middleware.Middleware {
 	tracer := NewTracer(trace.SpanKindServer, opts...)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			var (
-				component string
-				operation string
-			)
-			tr, _ := transport.FromContext(ctx)
-			component = string(tr.Kind)
-			operation = middleware.Method(ctx)
-			carrier, ok := metadata.FromIncomingContext(ctx)
+			info, _ := transport.FromContext(ctx)
+			operation, _ := middleware.Method(ctx)
+			md, ok := metadata.FromIncomingContext(ctx)
 			if ok {
-				ctx, span := tracer.Start(ctx, component, operation, carrier)
+				ctx, span := tracer.Start(ctx, info.Kind, operation, md)
 				defer func() { tracer.End(ctx, span, err) }()
 			}
 			return handler(ctx, req)
@@ -59,18 +54,15 @@ func Client(opts ...Option) middleware.Middleware {
 	tracer := NewTracer(trace.SpanKindClient, opts...)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			var (
-				component string
-				operation string
-			)
-			tr, _ := transport.FromContext(ctx)
-			component = string(tr.Kind)
-			operation = middleware.Method(ctx)
-			carrier, ok := metadata.FromOutgoingContext(ctx)
-			if ok {
-				ctx, span := tracer.Start(ctx, component, operation, carrier)
-				defer func() { tracer.End(ctx, span, err) }()
+			info, _ := transport.FromContext(ctx)
+			operation, _ := middleware.Method(ctx)
+			md, ok := metadata.FromOutgoingContext(ctx)
+			if !ok {
+				md = metadata.Metadata{}
+				ctx = metadata.NewOutgoingContext(ctx, md)
 			}
+			ctx, span := tracer.Start(ctx, info.Kind, operation, md)
+			defer func() { tracer.End(ctx, span, err) }()
 			return handler(ctx, req)
 		}
 	}

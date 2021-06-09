@@ -11,7 +11,7 @@ func WithMethod(ctx context.Context, method string) context.Context {
 
 // Method returns the method string for the server context.
 // The returned string is in the format of "/package.service/method".
-func Method(ctx context.Context) string {
-	method, _ := ctx.Value(methodKey{}).(string)
-	return method
+func Method(ctx context.Context) (string, bool) {
+	method, ok := ctx.Value(methodKey{}).(string)
+	return method, ok
 }
