@@ -2,7 +2,7 @@ package metadata
 
 import (
 	"context"
-	"net/http"
+	"strings"
 )
 
 // Metadata is our way of representing request headers internally.
@@ -10,14 +10,30 @@ import (
 // from Transport headers.
 type Metadata map[string][]string
 
+// New creates an MD from a given key-values map.
+func New(m map[string][]string) Metadata {
+	md := Metadata{}
+	for key, vals := range m {
+		key = strings.ToLower(key)
+		md[key] = vals
+	}
+	return md
+}
+
 // Get returns the value associated with the passed key.
 func (m Metadata) Get(key string) string {
-	return http.Header(m).Get(key)
+	key = strings.ToLower(key)
+	vals := m[key]
+	if len(vals) == 0 {
+		return ""
+	}
+	return vals[0]
 }
 
 // Set stores the key-value pair.
 func (m Metadata) Set(key string, value string) {
-	http.Header(m).Set(key, value)
+	key = strings.ToLower(key)
+	m[key] = []string{value}
 }
 
 // Keys lists the keys stored in this carrier.

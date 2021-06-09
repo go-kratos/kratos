@@ -26,11 +26,11 @@ func Server(logger log.Logger) middleware.Middleware {
 				reason = se.Reason
 			}
 			level, stack := extractError(err)
-			tr, _ := transport.FromContext(ctx)
+			info, _ := transport.FromContext(ctx)
 			method, _ := middleware.Method(ctx)
 			log.WithContext(ctx, logger).Log(level,
 				"kind", "server",
-				"component", tr.Kind,
+				"component", info.Kind,
 				"method", method,
 				"args", extractArgs(req),
 				"code", code,
@@ -58,11 +58,11 @@ func Client(logger log.Logger) middleware.Middleware {
 				reason = se.Reason
 			}
 			level, stack := extractError(err)
-			tr, _ := transport.FromContext(ctx)
+			info, _ := transport.FromContext(ctx)
 			method, _ := middleware.Method(ctx)
 			log.WithContext(ctx, logger).Log(level,
 				"kind", "client",
-				"component", tr.Kind,
+				"component", info.Kind,
 				"method", method,
 				"args", extractArgs(req),
 				"code", code,

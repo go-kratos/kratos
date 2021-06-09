@@ -26,32 +26,32 @@ func TestHTTP(t *testing.T) {
 			Server,
 			err,
 			func() context.Context {
-				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: transport.KindHTTP, Endpoint: "endpoint"})
-				return middleware.NewContext(ctx, middleware.ServiceInfo{FullMethod: "/package.service/method"})
+				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: "http", Endpoint: "endpoint"})
+				return middleware.WithMethod(ctx, "/package.service/method")
 			}(),
 		},
 		{"http-server@succ",
 			Server,
 			nil,
 			func() context.Context {
-				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: transport.KindHTTP, Endpoint: "endpoint"})
-				return middleware.NewContext(ctx, middleware.ServiceInfo{FullMethod: "/package.service/method"})
+				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: "http", Endpoint: "endpoint"})
+				return middleware.WithMethod(ctx, "/package.service/method")
 			}(),
 		},
 		{"http-client@succ",
 			Client,
 			nil,
 			func() context.Context {
-				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: transport.KindHTTP, Endpoint: "endpoint"})
-				return middleware.NewContext(ctx, middleware.ServiceInfo{FullMethod: "/package.service/method"})
+				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: "http", Endpoint: "endpoint"})
+				return middleware.WithMethod(ctx, "/package.service/method")
 			}(),
 		},
 		{"http-client@fail",
 			Client,
 			err,
 			func() context.Context {
-				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: transport.KindHTTP, Endpoint: "endpoint"})
-				return middleware.NewContext(ctx, middleware.ServiceInfo{FullMethod: "/package.service/method"})
+				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: "http", Endpoint: "endpoint"})
+				return middleware.WithMethod(ctx, "/package.service/method")
 			}(),
 		},
 	}

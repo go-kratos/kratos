@@ -103,7 +103,7 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx, cancel := ic.Merge(req.Context(), s.ctx)
 	defer cancel()
 	ctx = transport.NewContext(ctx, transport.Transport{Kind: "http", Endpoint: s.endpoint.String()})
-	ctx = metadata.NewIncomingContext(ctx, metadata.Metadata(req.Header))
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(req.Header))
 	if s.timeout > 0 {
 		ctx, cancel = context.WithTimeout(ctx, s.timeout)
 		defer cancel()

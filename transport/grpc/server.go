@@ -180,7 +180,7 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		ctx = transport.NewContext(ctx, transport.Transport{Kind: "grpc", Endpoint: s.endpoint.String()})
 		ctx = middleware.WithMethod(ctx, info.FullMethod)
 		if md, ok := grpcmd.FromIncomingContext(ctx); ok {
-			ctx = kmd.NewIncomingContext(ctx, kmd.Metadata(md))
+			ctx = kmd.NewIncomingContext(ctx, kmd.New(md))
 		}
 		if s.timeout > 0 {
 			var cancel context.CancelFunc
