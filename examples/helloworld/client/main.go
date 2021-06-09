@@ -37,15 +37,15 @@ func callHTTP() {
 	if err != nil {
 		panic(err)
 	}
-	logger.Log(log.LevelInfo, fmt.Sprintf("[http] SayHello %s\n", reply.Message))
+	logger.Log(log.LevelInfo, "msg", fmt.Sprintf("[http] SayHello %s\n", reply.Message))
 
 	// returns error
 	reply, err = client.SayHello(context.Background(), &pb.HelloRequest{Name: "error"})
 	if err != nil {
-		logger.Log(log.LevelInfo, fmt.Sprintf("[http] SayHello error: %v\n", err))
+		logger.Log(log.LevelInfo, "msg", fmt.Sprintf("[http] SayHello error: %v\n", err))
 	}
 	if errors.IsBadRequest(err) {
-		logger.Log(log.LevelInfo, fmt.Sprintf("[http] SayHello error is invalid argument: %v\n", err))
+		logger.Log(log.LevelInfo, "msg", fmt.Sprintf("[http] SayHello error is invalid argument: %v\n", err))
 	}
 }
 
@@ -69,14 +69,14 @@ func callGRPC() {
 	if err != nil {
 		panic(err)
 	}
-	logger.Log(log.LevelInfo, fmt.Sprintf("[grpc] SayHello %+v", reply))
+	logger.Log(log.LevelInfo, "msg", fmt.Sprintf("[grpc] SayHello %+v", reply))
 
 	// returns error
 	_, err = client.SayHello(context.Background(), &pb.HelloRequest{Name: "error"})
 	if err != nil {
-		logger.Log(log.LevelInfo, fmt.Sprintf("[grpc] SayHello error: %v", err))
+		logger.Log(log.LevelInfo, "msg", fmt.Sprintf("[grpc] SayHello error: %v", err))
 	}
 	if errors.IsBadRequest(err) {
-		logger.Log(log.LevelInfo, fmt.Sprintf("[grpc] SayHello error is invalid argument: %v", err))
+		logger.Log(log.LevelInfo, "msg", fmt.Sprintf("[grpc] SayHello error is invalid argument: %v", err))
 	}
 }
