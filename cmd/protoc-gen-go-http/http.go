@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"google.golang.org/genproto/googleapis/api/annotations"
@@ -22,7 +21,7 @@ var methodSets = make(map[string]int)
 
 // generateFile generates a _http.pb.go file containing kratos errors definitions.
 func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.GeneratedFile {
-	if len(file.Services) == 0 {
+	if !hasHTTPRule(file.Services) {
 		return nil
 	}
 	filename := file.GeneratedFilenamePrefix + "_http.pb.go"
@@ -75,12 +74,24 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 				sd.Methods = append(sd.Methods, buildHTTPRule(g, method, bind))
 			}
 			sd.Methods = append(sd.Methods, buildHTTPRule(g, method, rule))
-		} else {
-			path := fmt.Sprintf("/%s/%s", service.Desc.FullName(), method.Desc.Name())
-			sd.Methods = append(sd.Methods, buildMethodDesc(g, method, "POST", path))
 		}
 	}
 	g.P(sd.execute())
+}
+
+func hasHTTPRule(services []*protogen.Service) bool {
+	for _, service := range services {
+		for _, method := range service.Methods {
+			if method.Desc.IsStreamingClient() || method.Desc.IsStreamingServer() {
+				continue
+			}
+			rule, ok := proto.GetExtension(method.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
+			if rule != nil && ok {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotations.HttpRule) *methodDesc {
