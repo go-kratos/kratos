@@ -12,12 +12,14 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/metadata"
+	"github.com/go-kratos/kratos/v2/metadata/builtin"
 	"github.com/go-kratos/kratos/v2/middleware"
 
 	"github.com/go-kratos/kratos/v2/transport"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	gmd "google.golang.org/grpc/metadata"
 	gmetadata "google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 )
@@ -63,6 +65,20 @@ func Middleware(m ...middleware.Middleware) ServerOption {
 	}
 }
 
+func MetadataExtractor(mdExtrator ExtractMetadataFunc) ServerOption {
+	return func(o *Server) {
+		o.mdExtractor = mdExtrator
+	}
+}
+
+type ExtractMetadataFunc func(metadata.Metadata, gmd.MD)
+
+func MetadataBuilder(builder metadata.Builder) ServerOption {
+	return func(o *Server) {
+		o.mdBuilder = builder
+	}
+}
+
 // UnaryInterceptor returns a ServerOption that sets the UnaryServerInterceptor for the server.
 func UnaryInterceptor(in ...grpc.UnaryServerInterceptor) ServerOption {
 	return func(s *Server) {
@@ -80,20 +96,22 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
-	ctx        context.Context
-	lis        net.Listener
-	once       sync.Once
-	err        error
-	network    string
-	address    string
-	endpoint   *url.URL
-	timeout    time.Duration
-	log        *log.Helper
-	middleware middleware.Middleware
-	ints       []grpc.UnaryServerInterceptor
-	grpcOpts   []grpc.ServerOption
-	health     *health.Server
-	metadata   *apimetadata.Server
+	ctx         context.Context
+	lis         net.Listener
+	once        sync.Once
+	err         error
+	network     string
+	address     string
+	endpoint    *url.URL
+	timeout     time.Duration
+	log         *log.Helper
+	middleware  middleware.Middleware
+	ints        []grpc.UnaryServerInterceptor
+	grpcOpts    []grpc.ServerOption
+	health      *health.Server
+	metadata    *apimetadata.Server
+	mdExtractor ExtractMetadataFunc
+	mdBuilder   metadata.Builder
 }
 
 // NewServer creates a gRPC server by options.
@@ -104,6 +122,14 @@ func NewServer(opts ...ServerOption) *Server {
 		timeout: 1 * time.Second,
 		health:  health.NewServer(),
 		log:     log.NewHelper(log.DefaultLogger),
+		mdExtractor: func(md metadata.Metadata, gmd gmd.MD) {
+			for key, values := range gmd {
+				if len(values) == 1 {
+					md.Set(key, values[0])
+				}
+			}
+		},
+		mdBuilder: &builtin.Builder{},
 	}
 	for _, o := range opts {
 		o(srv)
@@ -179,13 +205,9 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		defer cancel()
 		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC, Endpoint: s.endpoint.String()})
 		ctx = NewServerContext(ctx, ServerInfo{Server: info.Server, FullMethod: info.FullMethod})
-		md := metadata.New()
 		gmd, _ := gmetadata.FromIncomingContext(ctx)
-		for key, values := range gmd {
-			if len(values) == 1 {
-				md.Set(key, values[0])
-			}
-		}
+		md := s.mdBuilder.Build()
+		s.mdExtractor(md, gmd)
 		ctx = metadata.NewContext(ctx, md)
 
 		if s.timeout > 0 {

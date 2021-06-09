@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/metadata"
+	"github.com/go-kratos/kratos/v2/metadata/builtin"
 	"github.com/go-kratos/kratos/v2/transport"
 
 	"github.com/gorilla/mux"
@@ -52,28 +54,54 @@ func Logger(logger log.Logger) ServerOption {
 	}
 }
 
+func MetadataExtractor(mdExtrator ExtractMetadataFunc) ServerOption {
+	return func(o *Server) {
+		o.mdExtractor = mdExtrator
+	}
+}
+
+type ExtractMetadataFunc func(metadata.Metadata, http.Header)
+
+func MetadataBuilder(builder metadata.Builder) ServerOption {
+	return func(o *Server) {
+		o.mdBuilder = builder
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
-	ctx      context.Context
-	lis      net.Listener
-	once     sync.Once
-	err      error
-	network  string
-	address  string
-	endpoint *url.URL
-	timeout  time.Duration
-	router   *mux.Router
-	log      *log.Helper
+	ctx         context.Context
+	lis         net.Listener
+	once        sync.Once
+	err         error
+	network     string
+	address     string
+	endpoint    *url.URL
+	timeout     time.Duration
+	router      *mux.Router
+	log         *log.Helper
+	mdExtractor ExtractMetadataFunc
+	mdBuilder   metadata.Builder
 }
 
 // NewServer creates an HTTP server by options.
 func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
-		network: "tcp",
-		address: ":0",
-		timeout: 1 * time.Second,
-		log:     log.NewHelper(log.DefaultLogger),
+		network:   "tcp",
+		address:   ":0",
+		timeout:   1 * time.Second,
+		log:       log.NewHelper(log.DefaultLogger),
+		mdBuilder: &builtin.Builder{},
+		mdExtractor: func(md metadata.Metadata, header http.Header) {
+			for key, values := range header {
+				key = strings.ToLower(key)
+				if len(values) == 1 && strings.HasPrefix(key, "x-md-") {
+					key = strings.TrimLeft(key, "x-md-")
+					md.Set(key, values[0])
+				}
+			}
+		},
 	}
 	for _, o := range opts {
 		o(srv)
@@ -104,12 +132,8 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	defer cancel()
 	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP, Endpoint: s.endpoint.String()})
 	ctx = NewServerContext(ctx, ServerInfo{Request: req, Response: res})
-	md := metadata.New()
-	for key, values := range req.Header {
-		if len(values) == 1 {
-			md.Set(key, values[0])
-		}
-	}
+	md := s.mdBuilder.Build()
+	s.mdExtractor(md, req.Header)
 	ctx = metadata.NewContext(ctx, md)
 
 	if s.timeout > 0 {

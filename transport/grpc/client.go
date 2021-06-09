@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/metadata"
@@ -15,6 +16,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"
+	gmd "google.golang.org/grpc/metadata"
 	gmetadata "google.golang.org/grpc/metadata"
 )
 
@@ -63,6 +65,15 @@ func WithOptions(opts ...grpc.DialOption) ClientOption {
 	}
 }
 
+func WithMetadataInjector(mdInjector InjectMetadataFunc) ClientOption {
+	return func(o *clientOptions) {
+		o.mdInjector = mdInjector
+	}
+}
+
+// InjectMetadataFunc inject context metadata into grpc metadata
+type InjectMetadataFunc func(gmd.MD, metadata.Metadata)
+
 // clientOptions is gRPC Client
 type clientOptions struct {
 	endpoint   string
@@ -71,6 +82,7 @@ type clientOptions struct {
 	discovery  registry.Discovery
 	ints       []grpc.UnaryClientInterceptor
 	grpcOpts   []grpc.DialOption
+	mdInjector InjectMetadataFunc
 }
 
 // Dial returns a GRPC connection.
@@ -86,12 +98,19 @@ func DialInsecure(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, 
 func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.ClientConn, error) {
 	options := clientOptions{
 		timeout: 500 * time.Millisecond,
+		mdInjector: func(gmd gmd.MD, md metadata.Metadata) {
+			md.Range(func(k, v string) bool {
+				k = strings.ToLower(k)
+				gmd.Set(k, v)
+				return true
+			})
+		},
 	}
 	for _, o := range opts {
 		o(&options)
 	}
 	var ints = []grpc.UnaryClientInterceptor{
-		unaryClientInterceptor(options.middleware, options.timeout),
+		unaryClientInterceptor(options.middleware, options.timeout, options.mdInjector),
 	}
 	if len(options.ints) > 0 {
 		ints = append(ints, options.ints...)
@@ -112,7 +131,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	return grpc.DialContext(ctx, options.endpoint, grpcOpts...)
 }
 
-func unaryClientInterceptor(m middleware.Middleware, timeout time.Duration) grpc.UnaryClientInterceptor {
+func unaryClientInterceptor(m middleware.Middleware, timeout time.Duration, mdInjector InjectMetadataFunc) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC, Endpoint: cc.Target()})
 		ctx = NewClientContext(ctx, ClientInfo{FullMethod: method})
@@ -122,14 +141,11 @@ func unaryClientInterceptor(m middleware.Middleware, timeout time.Duration) grpc
 			defer cancel()
 		}
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
-			md, _ := metadata.FromOutgoingContext(ctx)
+			md, _ := metadata.FromContext(ctx)
 			gmd, _ := gmetadata.FromOutgoingContext(ctx)
 			// copy md to avoid datarace
 			gmd = gmd.Copy()
-			md.Range(func(k, v string) bool {
-				gmd.Set(k, v)
-				return true
-			})
+			mdInjector(gmd, md)
 			if len(gmd) > 0 {
 				ctx = gmetadata.NewOutgoingContext(ctx, gmd)
 			}

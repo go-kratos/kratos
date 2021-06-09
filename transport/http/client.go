@@ -45,6 +45,7 @@ type clientOptions struct {
 	balancer     balancer.Balancer
 	discovery    registry.Discovery
 	middleware   middleware.Middleware
+	mdInjector   InjectMetadataFunc
 }
 
 // WithTransport with client transport.
@@ -119,12 +120,22 @@ func WithBalancer(b balancer.Balancer) ClientOption {
 	}
 }
 
+func WithMetadataInjector(mdInjector InjectMetadataFunc) ClientOption {
+	return func(o *clientOptions) {
+		o.mdInjector = mdInjector
+	}
+}
+
+// InjectMetadataFunc inject context metadata into grpc metadata
+type InjectMetadataFunc func(http.Header, metadata.Metadata)
+
 // Client is an HTTP client.
 type Client struct {
-	opts   clientOptions
-	target *Target
-	r      *resolver
-	cc     *http.Client
+	opts       clientOptions
+	target     *Target
+	r          *resolver
+	cc         *http.Client
+	mdInjector InjectMetadataFunc
 }
 
 // NewClient returns an HTTP client.
@@ -137,6 +148,13 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		errorDecoder: DefaultErrorDecoder,
 		transport:    http.DefaultTransport,
 		balancer:     random.New(),
+		mdInjector: func(header http.Header, md metadata.Metadata) {
+			md.Range(func(k, v string) bool {
+				k = "x-md-" + k
+				header.Set(k, v)
+				return true
+			})
+		},
 	}
 	for _, o := range opts {
 		o(&options)
@@ -156,9 +174,10 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		}
 	}
 	return &Client{
-		opts:   options,
-		target: target,
-		r:      r,
+		mdInjector: options.mdInjector,
+		opts:       options,
+		target:     target,
+		r:          r,
 		cc: &http.Client{
 			Timeout:   options.timeout,
 			Transport: options.transport,
@@ -258,11 +277,8 @@ func (client *Client) Do(req *http.Request, opts ...CallOption) (*http.Response,
 }
 
 func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*http.Response, error) {
-	md, _ := metadata.FromOutgoingContext(ctx)
-	md.Range(func(k, v string) bool {
-		req.Header.Set(k, v)
-		return true
-	})
+	md, _ := metadata.FromContext(ctx)
+	client.mdInjector(req.Header, md)
 	resp, err := client.cc.Do(req)
 	if err != nil {
 		return nil, err
