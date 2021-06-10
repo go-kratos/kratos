@@ -5,6 +5,7 @@ package metadata
 import (
 	context "context"
 	middleware "github.com/go-kratos/kratos/v2/middleware"
+	transport "github.com/go-kratos/kratos/v2/transport"
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
@@ -16,6 +17,7 @@ import (
 var _ = new(http.Request)
 var _ = new(context.Context)
 var _ = new(middleware.Middleware)
+var _ = new(transport.Transporter)
 var _ = binding.BindVars
 var _ = mux.NewRouter
 
@@ -47,7 +49,8 @@ func NewMetadataHandler(srv MetadataHandler, opts ...http1.HandleOption) http.Ha
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		ctx := middleware.WithMethod(r.Context(), "/kratos.api.Metadata/ListServices")
+		ctx := r.Context()
+		transport.SetServerServiceMethod(ctx, "/kratos.api.Metadata/ListServices")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -77,7 +80,8 @@ func NewMetadataHandler(srv MetadataHandler, opts ...http1.HandleOption) http.Ha
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		ctx := middleware.WithMethod(r.Context(), "/kratos.api.Metadata/GetServiceDesc")
+		ctx := r.Context()
+		transport.SetServerServiceMethod(ctx, "/kratos.api.Metadata/GetServiceDesc")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -109,9 +113,8 @@ func NewMetadataHTTPClient(client *http1.Client) MetadataHTTPClient {
 func (c *MetadataHTTPClientImpl) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest, opts ...http1.CallOption) (*GetServiceDescReply, error) {
 	var out GetServiceDescReply
 	path := binding.EncodePath("GET", "/services/{name}", in)
-	ctx = middleware.WithMethod(ctx, "/kratos.api.Metadata/GetServiceDesc")
 
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, http1.ServiceMethod("/kratos.api.Metadata/GetServiceDesc"))
 
 	return &out, err
 }
@@ -119,9 +122,8 @@ func (c *MetadataHTTPClientImpl) GetServiceDesc(ctx context.Context, in *GetServ
 func (c *MetadataHTTPClientImpl) ListServices(ctx context.Context, in *ListServicesRequest, opts ...http1.CallOption) (*ListServicesReply, error) {
 	var out ListServicesReply
 	path := binding.EncodePath("GET", "/services", in)
-	ctx = middleware.WithMethod(ctx, "/kratos.api.Metadata/ListServices")
 
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, http1.ServiceMethod("/kratos.api.Metadata/ListServices"))
 
 	return &out, err
 }

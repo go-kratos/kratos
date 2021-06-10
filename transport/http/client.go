@@ -172,7 +172,7 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 		contentType string
 		body        io.Reader
 	)
-	c := defaultCallInfo()
+	c := defaultCallInfo(path)
 	for _, o := range opts {
 		if err := o.before(&c); err != nil {
 			return err
@@ -197,7 +197,15 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 	if client.opts.userAgent != "" {
 		req.Header.Set("User-Agent", client.opts.userAgent)
 	}
-	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP, Endpoint: client.opts.endpoint})
+	if c.metatada == nil {
+		c.metatada = metadata.New(nil)
+	}
+	tr := &Transport{
+		endpoint:      client.opts.endpoint,
+		metadata:      c.metatada,
+		serviceMethod: c.serviceMethod,
+	}
+	ctx = transport.NewClientContext(ctx, tr)
 	return client.invoke(ctx, req, args, reply, c)
 }
 
@@ -221,9 +229,9 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			req.URL.Scheme = scheme
 			req.URL.Host = addr
 		}
-		if md, ok := metadata.FromOutgoingContext(ctx); ok {
-			for _, key := range md.Keys() {
-				req.Header.Set(key, md.Get(key))
+		if tr, ok := transport.FromClientContext(ctx); ok {
+			for _, key := range tr.Metadata().Keys() {
+				req.Header.Set(key, tr.Metadata().Get(key))
 			}
 		}
 		res, err := client.do(ctx, req, c)
@@ -249,7 +257,7 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 // Do send an HTTP request and decodes the body of response into target.
 // returns an error (of type *Error) if the response status code is not 2xx.
 func (client *Client) Do(req *http.Request, opts ...CallOption) (*http.Response, error) {
-	c := defaultCallInfo()
+	c := defaultCallInfo(req.URL.Path)
 	for _, o := range opts {
 		if err := o.before(&c); err != nil {
 			return nil, err

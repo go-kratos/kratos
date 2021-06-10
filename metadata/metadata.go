@@ -1,7 +1,6 @@
 package metadata
 
 import (
-	"context"
 	"strings"
 )
 
@@ -52,27 +51,11 @@ func (m Metadata) Pairs() []string {
 	return kvs
 }
 
-type mdIncomingKey struct{}
-type mdOutgoingKey struct{}
-
-// NewIncomingContext creates a new context with incoming md attached.
-func NewIncomingContext(ctx context.Context, md Metadata) context.Context {
-	return context.WithValue(ctx, mdIncomingKey{}, md)
-}
-
-// NewOutgoingContext creates a new context with outgoing md attached.
-func NewOutgoingContext(ctx context.Context, md Metadata) context.Context {
-	return context.WithValue(ctx, mdOutgoingKey{}, md)
-}
-
-// FromIncomingContext returns the incoming metadata in ctx if it exists.
-func FromIncomingContext(ctx context.Context) (Metadata, bool) {
-	md, ok := ctx.Value(mdIncomingKey{}).(Metadata)
-	return md, ok
-}
-
-// FromOutgoingContext returns the outgoing metadata in ctx if it exists.
-func FromOutgoingContext(ctx context.Context) (Metadata, bool) {
-	md, ok := ctx.Value(mdOutgoingKey{}).(Metadata)
-	return md, ok
+// Clone returns a deep copy of Metadata
+func (m Metadata) Clone() Metadata {
+	md := Metadata{}
+	for k, v := range m {
+		md[k] = v
+	}
+	return md
 }

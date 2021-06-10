@@ -46,20 +46,24 @@ func Server(opts ...Option) middleware.Middleware {
 			var (
 				code   int
 				reason string
+				kind   string
+				method string
 			)
 			startTime := time.Now()
-			info, _ := transport.FromContext(ctx)
-			method, _ := middleware.Method(ctx)
+			if info, ok := transport.FromServerContext(ctx); ok {
+				kind = info.Kind()
+				method = info.ServiceMethod()
+			}
 			reply, err := handler(ctx, req)
 			if se := errors.FromError(err); se != nil {
 				code = int(se.Code)
 				reason = se.Reason
 			}
 			if options.requests != nil {
-				options.requests.With(info.Kind, method, strconv.Itoa(code), reason).Inc()
+				options.requests.With(kind, method, strconv.Itoa(code), reason).Inc()
 			}
 			if options.seconds != nil {
-				options.seconds.With(info.Kind, method).Observe(time.Since(startTime).Seconds())
+				options.seconds.With(kind, method).Observe(time.Since(startTime).Seconds())
 			}
 			return reply, err
 		}
@@ -77,20 +81,24 @@ func Client(opts ...Option) middleware.Middleware {
 			var (
 				code   int
 				reason string
+				kind   string
+				method string
 			)
 			startTime := time.Now()
-			info, _ := transport.FromContext(ctx)
-			method, _ := middleware.Method(ctx)
+			if info, ok := transport.FromClientContext(ctx); ok {
+				kind = info.Kind()
+				method = info.ServiceMethod()
+			}
 			reply, err := handler(ctx, req)
 			if se := errors.FromError(err); se != nil {
 				code = int(se.Code)
 				reason = se.Reason
 			}
 			if options.requests != nil {
-				options.requests.With(info.Kind, method, strconv.Itoa(code), reason).Inc()
+				options.requests.With(kind, method, strconv.Itoa(code), reason).Inc()
 			}
 			if options.seconds != nil {
-				options.seconds.With(info.Kind, method).Observe(time.Since(startTime).Seconds())
+				options.seconds.With(kind, method).Observe(time.Since(startTime).Seconds())
 			}
 			return reply, err
 		}

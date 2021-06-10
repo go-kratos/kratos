@@ -1,5 +1,7 @@
 package http
 
+import "github.com/go-kratos/kratos/v2/metadata"
+
 // CallOption configures a Call before it starts or extracts information from
 // a Call after it completes.
 type CallOption interface {
@@ -13,7 +15,9 @@ type CallOption interface {
 }
 
 type callInfo struct {
-	contentType string
+	contentType   string
+	serviceMethod string
+	metatada      metadata.Metadata
 }
 
 // EmptyCallOption does not alter the Call configuration.
@@ -42,8 +46,42 @@ func (o ContentTypeCallOption) before(c *callInfo) error {
 	return nil
 }
 
-func defaultCallInfo() callInfo {
+func defaultCallInfo(serviceMethod string) callInfo {
 	return callInfo{
-		contentType: "application/json",
+		contentType:   "application/json",
+		serviceMethod: serviceMethod,
+		metatada:      metadata.New(nil),
 	}
+}
+
+// ServiceMethod is serviceMethod call option
+func ServiceMethod(serviceMethod string) CallOption {
+	return ServiceMethodCallOption{ServiceMethod: serviceMethod}
+}
+
+// ServiceMethodCallOption is set ServiceMethod for client call
+type ServiceMethodCallOption struct {
+	EmptyCallOption
+	ServiceMethod string
+}
+
+func (o ServiceMethodCallOption) before(c *callInfo) error {
+	c.serviceMethod = o.ServiceMethod
+	return nil
+}
+
+// Metadata is Metadata call option
+func Metadata(metatada metadata.Metadata) CallOption {
+	return MetadataCallOption{Metatada: metatada}
+}
+
+// MetadataCallOption is set Metadata for client call
+type MetadataCallOption struct {
+	EmptyCallOption
+	Metatada metadata.Metadata
+}
+
+func (o MetadataCallOption) before(c *callInfo) error {
+	c.metatada = o.Metatada
+	return nil
 }

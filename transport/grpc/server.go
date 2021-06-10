@@ -177,11 +177,14 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		ctx, cancel := ic.Merge(ctx, s.ctx)
 		defer cancel()
-		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC, Endpoint: s.endpoint.String()})
-		ctx = middleware.WithMethod(ctx, info.FullMethod)
-		if md, ok := grpcmd.FromIncomingContext(ctx); ok {
-			ctx = metadata.NewIncomingContext(ctx, metadata.New(md))
+		md, _ := grpcmd.FromIncomingContext(ctx)
+
+		tr := &Transport{
+			endpoint:      s.endpoint.String(),
+			metadata:      metadata.New(md),
+			serviceMethod: info.FullMethod,
 		}
+		ctx = transport.NewServerContext(ctx, tr)
 		if s.timeout > 0 {
 			var cancel context.CancelFunc
 			ctx, cancel = context.WithTimeout(ctx, s.timeout)

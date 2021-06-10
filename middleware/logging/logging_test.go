@@ -7,9 +7,51 @@ import (
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 )
+
+var (
+	_ transport.Transporter = &Transport{}
+)
+
+type Transport struct {
+	kind          string
+	endpoint      string
+	serviceMethod string
+}
+
+func (tr *Transport) Kind() string {
+	return tr.kind
+}
+
+func (tr *Transport) Endpoint() string {
+	return tr.endpoint
+}
+
+func (tr *Transport) ServiceMethod() string {
+	return tr.serviceMethod
+}
+
+func (tr *Transport) SetServiceMethod(serviceMethod string) {
+	tr.serviceMethod = serviceMethod
+}
+
+func (tr *Transport) Metadata() metadata.Metadata {
+	return nil
+}
+
+func (tr *Transport) WithMetadata(md metadata.Metadata) {
+
+}
+
+func (tr *Transport) Clone() transport.Transporter {
+	return &Transport{
+		endpoint:      tr.endpoint,
+		serviceMethod: tr.serviceMethod,
+	}
+}
 
 func TestHTTP(t *testing.T) {
 	var err = errors.New("reply.error")
@@ -26,32 +68,29 @@ func TestHTTP(t *testing.T) {
 			Server,
 			err,
 			func() context.Context {
-				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: "http", Endpoint: "endpoint"})
-				return middleware.WithMethod(ctx, "/package.service/method")
+				return transport.NewServerContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", serviceMethod: "/package.service/method"})
 			}(),
 		},
 		{"http-server@succ",
 			Server,
 			nil,
 			func() context.Context {
-				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: "http", Endpoint: "endpoint"})
-				return middleware.WithMethod(ctx, "/package.service/method")
+				return transport.NewServerContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", serviceMethod: "/package.service/method"})
 			}(),
 		},
 		{"http-client@succ",
 			Client,
 			nil,
 			func() context.Context {
-				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: "http", Endpoint: "endpoint"})
-				return middleware.WithMethod(ctx, "/package.service/method")
+				return transport.NewClientContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", serviceMethod: "/package.service/method"})
+
 			}(),
 		},
 		{"http-client@fail",
 			Client,
 			err,
 			func() context.Context {
-				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: "http", Endpoint: "endpoint"})
-				return middleware.WithMethod(ctx, "/package.service/method")
+				return transport.NewClientContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", serviceMethod: "/package.service/method"})
 			}(),
 		},
 	}

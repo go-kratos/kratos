@@ -5,6 +5,7 @@ package v1
 import (
 	context "context"
 	middleware "github.com/go-kratos/kratos/v2/middleware"
+	transport "github.com/go-kratos/kratos/v2/transport"
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
@@ -16,6 +17,7 @@ import (
 var _ = new(http.Request)
 var _ = new(context.Context)
 var _ = new(middleware.Middleware)
+var _ = new(transport.Transporter)
 var _ = binding.BindVars
 var _ = mux.NewRouter
 
@@ -53,7 +55,8 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		ctx := middleware.WithMethod(r.Context(), "/blog.api.v1.BlogService/CreateArticle")
+		ctx := r.Context()
+		transport.SetServerServiceMethod(ctx, "/blog.api.v1.BlogService/CreateArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -83,7 +86,8 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		ctx := middleware.WithMethod(r.Context(), "/blog.api.v1.BlogService/UpdateArticle")
+		ctx := r.Context()
+		transport.SetServerServiceMethod(ctx, "/blog.api.v1.BlogService/UpdateArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -113,7 +117,8 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		ctx := middleware.WithMethod(r.Context(), "/blog.api.v1.BlogService/DeleteArticle")
+		ctx := r.Context()
+		transport.SetServerServiceMethod(ctx, "/blog.api.v1.BlogService/DeleteArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -143,7 +148,8 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		ctx := middleware.WithMethod(r.Context(), "/blog.api.v1.BlogService/GetArticle")
+		ctx := r.Context()
+		transport.SetServerServiceMethod(ctx, "/blog.api.v1.BlogService/GetArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -168,7 +174,8 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		ctx := middleware.WithMethod(r.Context(), "/blog.api.v1.BlogService/ListArticle")
+		ctx := r.Context()
+		transport.SetServerServiceMethod(ctx, "/blog.api.v1.BlogService/ListArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -206,9 +213,8 @@ func NewBlogServiceHTTPClient(client *http1.Client) BlogServiceHTTPClient {
 func (c *BlogServiceHTTPClientImpl) CreateArticle(ctx context.Context, in *CreateArticleRequest, opts ...http1.CallOption) (*CreateArticleReply, error) {
 	var out CreateArticleReply
 	path := binding.EncodePath("POST", "/v1/article/", in)
-	ctx = middleware.WithMethod(ctx, "/blog.api.v1.BlogService/CreateArticle")
 
-	err := c.cc.Invoke(ctx, "POST", path, in, &out)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, http1.ServiceMethod("/blog.api.v1.BlogService/CreateArticle"))
 
 	return &out, err
 }
@@ -216,9 +222,8 @@ func (c *BlogServiceHTTPClientImpl) CreateArticle(ctx context.Context, in *Creat
 func (c *BlogServiceHTTPClientImpl) DeleteArticle(ctx context.Context, in *DeleteArticleRequest, opts ...http1.CallOption) (*DeleteArticleReply, error) {
 	var out DeleteArticleReply
 	path := binding.EncodePath("DELETE", "/v1/article/{id}", in)
-	ctx = middleware.WithMethod(ctx, "/blog.api.v1.BlogService/DeleteArticle")
 
-	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out)
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, http1.ServiceMethod("/blog.api.v1.BlogService/DeleteArticle"))
 
 	return &out, err
 }
@@ -226,9 +231,8 @@ func (c *BlogServiceHTTPClientImpl) DeleteArticle(ctx context.Context, in *Delet
 func (c *BlogServiceHTTPClientImpl) GetArticle(ctx context.Context, in *GetArticleRequest, opts ...http1.CallOption) (*GetArticleReply, error) {
 	var out GetArticleReply
 	path := binding.EncodePath("GET", "/v1/article/{id}", in)
-	ctx = middleware.WithMethod(ctx, "/blog.api.v1.BlogService/GetArticle")
 
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, http1.ServiceMethod("/blog.api.v1.BlogService/GetArticle"))
 
 	return &out, err
 }
@@ -236,9 +240,8 @@ func (c *BlogServiceHTTPClientImpl) GetArticle(ctx context.Context, in *GetArtic
 func (c *BlogServiceHTTPClientImpl) ListArticle(ctx context.Context, in *ListArticleRequest, opts ...http1.CallOption) (*ListArticleReply, error) {
 	var out ListArticleReply
 	path := binding.EncodePath("GET", "/v1/article/", in)
-	ctx = middleware.WithMethod(ctx, "/blog.api.v1.BlogService/ListArticle")
 
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, http1.ServiceMethod("/blog.api.v1.BlogService/ListArticle"))
 
 	return &out, err
 }
@@ -246,9 +249,8 @@ func (c *BlogServiceHTTPClientImpl) ListArticle(ctx context.Context, in *ListArt
 func (c *BlogServiceHTTPClientImpl) UpdateArticle(ctx context.Context, in *UpdateArticleRequest, opts ...http1.CallOption) (*UpdateArticleReply, error) {
 	var out UpdateArticleReply
 	path := binding.EncodePath("PUT", "/v1/article/{id}", in)
-	ctx = middleware.WithMethod(ctx, "/blog.api.v1.BlogService/UpdateArticle")
 
-	err := c.cc.Invoke(ctx, "PUT", path, in, &out)
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, http1.ServiceMethod("/blog.api.v1.BlogService/UpdateArticle"))
 
 	return &out, err
 }
