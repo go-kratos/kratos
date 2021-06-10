@@ -178,13 +178,11 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		ctx, cancel := ic.Merge(ctx, s.ctx)
 		defer cancel()
 		md, _ := grpcmd.FromIncomingContext(ctx)
-
-		tr := &Transport{
-			endpoint:      s.endpoint.String(),
-			metadata:      metadata.New(md),
-			serviceMethod: info.FullMethod,
-		}
-		ctx = transport.NewServerContext(ctx, tr)
+		ctx = transport.NewServerContext(ctx, &Transport{
+			endpoint: s.endpoint.String(),
+			method:   info.FullMethod,
+			metadata: metadata.New(md),
+		})
 		if s.timeout > 0 {
 			var cancel context.CancelFunc
 			ctx, cancel = context.WithTimeout(ctx, s.timeout)

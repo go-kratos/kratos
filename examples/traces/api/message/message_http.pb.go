@@ -5,6 +5,7 @@ package v1
 import (
 	context "context"
 	middleware "github.com/go-kratos/kratos/v2/middleware"
+	transport "github.com/go-kratos/kratos/v2/transport"
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
@@ -16,6 +17,7 @@ import (
 var _ = new(http.Request)
 var _ = new(context.Context)
 var _ = new(middleware.Middleware)
+var _ = new(transport.Transporter)
 var _ = binding.BindVars
 var _ = mux.NewRouter
 
@@ -50,7 +52,8 @@ func NewMessageServiceHandler(srv MessageServiceHandler, opts ...http1.HandleOpt
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		ctx := middleware.WithMethod(r.Context(), "/api.message.v1.MessageService/GetUserMessage")
+		ctx := r.Context()
+		transport.SetServerMethod(ctx, "/api.message.v1.MessageService/GetUserMessage")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -80,9 +83,8 @@ func NewMessageServiceHTTPClient(client *http1.Client) MessageServiceHTTPClient 
 func (c *MessageServiceHTTPClientImpl) GetUserMessage(ctx context.Context, in *GetUserMessageRequest, opts ...http1.CallOption) (*GetUserMessageReply, error) {
 	var out GetUserMessageReply
 	path := binding.EncodePath("GET", "/v1/message/user/{id}/{count}", in)
-	ctx = middleware.WithMethod(ctx, "/api.message.v1.MessageService/GetUserMessage")
 
-	err := c.cc.Invoke(ctx, "GET", path, in, &out)
+	err := c.cc.Invoke(ctx, "GET", path, in, &out, http1.Method("/api.message.v1.MessageService/GetUserMessage"))
 
 	return &out, err
 }

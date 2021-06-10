@@ -27,11 +27,9 @@ type Endpointer interface {
 type Transporter interface {
 	Kind() string
 	Endpoint() string
-	// Clone returns a deep copy of Transporter
-	Clone() Transporter
 
-	ServiceMethod() string
-	SetServiceMethod(string)
+	Method() string
+	SetMethod(string)
 
 	Metadata() metadata.Metadata
 	// WithMetadata merge new metadata into transport,
@@ -70,10 +68,31 @@ func FromClientContext(ctx context.Context) (tr Transporter, ok bool) {
 	return
 }
 
-// SetServerServiceMethod set serviceMethod into context transport
-func SetServerServiceMethod(ctx context.Context, serviceMethod string) {
-	tr, ok := FromServerContext(ctx)
-	if ok {
-		tr.SetServiceMethod(serviceMethod)
+// SetServerMethod set serviceMethod into context transport.
+func SetServerMethod(ctx context.Context, method string) {
+	if tr, ok := FromServerContext(ctx); ok {
+		tr.SetMethod(method)
+	}
+}
+
+// SetClientMethod set serviceMethod into context transport.
+func SetClientMethod(ctx context.Context, method string) {
+	if tr, ok := FromClientContext(ctx); ok {
+		tr.SetMethod(method)
+	}
+}
+
+// Metadata returns incoming metadata from server transport.
+func Metadata(ctx context.Context) metadata.Metadata {
+	if tr, ok := FromServerContext(ctx); ok {
+		return tr.Metadata()
+	}
+	return metadata.Metadata{}
+}
+
+// SetMetadata sets outgoing metadata into client transport.
+func SetMetadata(ctx context.Context, md metadata.Metadata) {
+	if tr, ok := FromClientContext(ctx); ok {
+		tr.WithMetadata(md)
 	}
 }

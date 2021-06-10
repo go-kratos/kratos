@@ -56,7 +56,7 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx, "/blog.api.v1.BlogService/CreateArticle")
+		transport.SetServerMethod(ctx, "/blog.api.v1.BlogService/CreateArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -87,7 +87,7 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx, "/blog.api.v1.BlogService/UpdateArticle")
+		transport.SetServerMethod(ctx, "/blog.api.v1.BlogService/UpdateArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -118,7 +118,7 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx, "/blog.api.v1.BlogService/DeleteArticle")
+		transport.SetServerMethod(ctx, "/blog.api.v1.BlogService/DeleteArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -149,7 +149,7 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx, "/blog.api.v1.BlogService/GetArticle")
+		transport.SetServerMethod(ctx, "/blog.api.v1.BlogService/GetArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -175,7 +175,7 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx, "/blog.api.v1.BlogService/ListArticle")
+		transport.SetServerMethod(ctx, "/blog.api.v1.BlogService/ListArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -214,7 +214,7 @@ func (c *BlogServiceHTTPClientImpl) CreateArticle(ctx context.Context, in *Creat
 	var out CreateArticleReply
 	path := binding.EncodePath("POST", "/v1/article/", in)
 
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, http1.ServiceMethod("/blog.api.v1.BlogService/CreateArticle"))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, http1.Method("/blog.api.v1.BlogService/CreateArticle"))
 
 	return &out, err
 }
@@ -223,7 +223,7 @@ func (c *BlogServiceHTTPClientImpl) DeleteArticle(ctx context.Context, in *Delet
 	var out DeleteArticleReply
 	path := binding.EncodePath("DELETE", "/v1/article/{id}", in)
 
-	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, http1.ServiceMethod("/blog.api.v1.BlogService/DeleteArticle"))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, http1.Method("/blog.api.v1.BlogService/DeleteArticle"))
 
 	return &out, err
 }
@@ -232,7 +232,7 @@ func (c *BlogServiceHTTPClientImpl) GetArticle(ctx context.Context, in *GetArtic
 	var out GetArticleReply
 	path := binding.EncodePath("GET", "/v1/article/{id}", in)
 
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out, http1.ServiceMethod("/blog.api.v1.BlogService/GetArticle"))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, http1.Method("/blog.api.v1.BlogService/GetArticle"))
 
 	return &out, err
 }
@@ -241,7 +241,7 @@ func (c *BlogServiceHTTPClientImpl) ListArticle(ctx context.Context, in *ListArt
 	var out ListArticleReply
 	path := binding.EncodePath("GET", "/v1/article/", in)
 
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out, http1.ServiceMethod("/blog.api.v1.BlogService/ListArticle"))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, http1.Method("/blog.api.v1.BlogService/ListArticle"))
 
 	return &out, err
 }
@@ -250,7 +250,7 @@ func (c *BlogServiceHTTPClientImpl) UpdateArticle(ctx context.Context, in *Updat
 	var out UpdateArticleReply
 	path := binding.EncodePath("PUT", "/v1/article/{id}", in)
 
-	err := c.cc.Invoke(ctx, "PUT", path, in, &out, http1.ServiceMethod("/blog.api.v1.BlogService/UpdateArticle"))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, http1.Method("/blog.api.v1.BlogService/UpdateArticle"))
 
 	return &out, err
 }

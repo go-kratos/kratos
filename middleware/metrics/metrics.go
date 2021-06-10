@@ -52,7 +52,7 @@ func Server(opts ...Option) middleware.Middleware {
 			startTime := time.Now()
 			if info, ok := transport.FromServerContext(ctx); ok {
 				kind = info.Kind()
-				method = info.ServiceMethod()
+				method = info.Method()
 			}
 			reply, err := handler(ctx, req)
 			if se := errors.FromError(err); se != nil {
@@ -87,7 +87,7 @@ func Client(opts ...Option) middleware.Middleware {
 			startTime := time.Now()
 			if info, ok := transport.FromClientContext(ctx); ok {
 				kind = info.Kind()
-				method = info.ServiceMethod()
+				method = info.Method()
 			}
 			reply, err := handler(ctx, req)
 			if se := errors.FromError(err); se != nil {

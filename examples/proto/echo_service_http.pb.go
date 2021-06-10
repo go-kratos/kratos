@@ -61,7 +61,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx, "/testproto.EchoService/Echo")
+		transport.SetServerMethod(ctx, "/testproto.EchoService/Echo")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -92,7 +92,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx, "/testproto.EchoService/Echo")
+		transport.SetServerMethod(ctx, "/testproto.EchoService/Echo")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -123,7 +123,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx, "/testproto.EchoService/Echo")
+		transport.SetServerMethod(ctx, "/testproto.EchoService/Echo")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -154,7 +154,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx, "/testproto.EchoService/Echo")
+		transport.SetServerMethod(ctx, "/testproto.EchoService/Echo")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -185,7 +185,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx, "/testproto.EchoService/Echo")
+		transport.SetServerMethod(ctx, "/testproto.EchoService/Echo")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -211,7 +211,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx, "/testproto.EchoService/EchoBody")
+		transport.SetServerMethod(ctx, "/testproto.EchoService/EchoBody")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -237,7 +237,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx, "/testproto.EchoService/EchoResponseBody")
+		transport.SetServerMethod(ctx, "/testproto.EchoService/EchoResponseBody")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -268,7 +268,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx, "/testproto.EchoService/EchoDelete")
+		transport.SetServerMethod(ctx, "/testproto.EchoService/EchoDelete")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -294,7 +294,7 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx, "/testproto.EchoService/EchoPatch")
+		transport.SetServerMethod(ctx, "/testproto.EchoService/EchoPatch")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -333,7 +333,7 @@ func (c *EchoServiceHTTPClientImpl) Echo(ctx context.Context, in *SimpleMessage,
 	var out SimpleMessage
 	path := binding.EncodePath("POST", "/v1/example/echo/{id}", in)
 
-	err := c.cc.Invoke(ctx, "POST", path, nil, &out, http1.ServiceMethod("/testproto.EchoService/Echo"))
+	err := c.cc.Invoke(ctx, "POST", path, nil, &out, http1.Method("/testproto.EchoService/Echo"))
 
 	return &out, err
 }
@@ -342,7 +342,7 @@ func (c *EchoServiceHTTPClientImpl) EchoBody(ctx context.Context, in *SimpleMess
 	var out SimpleMessage
 	path := binding.EncodePath("POST", "/v1/example/echo_body", in)
 
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, http1.ServiceMethod("/testproto.EchoService/EchoBody"))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, http1.Method("/testproto.EchoService/EchoBody"))
 
 	return &out, err
 }
@@ -351,7 +351,7 @@ func (c *EchoServiceHTTPClientImpl) EchoDelete(ctx context.Context, in *SimpleMe
 	var out SimpleMessage
 	path := binding.EncodePath("DELETE", "/v1/example/echo_delete/{id}/{num}", in)
 
-	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, http1.ServiceMethod("/testproto.EchoService/EchoDelete"))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, http1.Method("/testproto.EchoService/EchoDelete"))
 
 	return &out, err
 }
@@ -360,7 +360,7 @@ func (c *EchoServiceHTTPClientImpl) EchoPatch(ctx context.Context, in *DynamicMe
 	var out DynamicMessageUpdate
 	path := binding.EncodePath("PATCH", "/v1/example/echo_patch", in)
 
-	err := c.cc.Invoke(ctx, "PATCH", path, in.Body, &out, http1.ServiceMethod("/testproto.EchoService/EchoPatch"))
+	err := c.cc.Invoke(ctx, "PATCH", path, in.Body, &out, http1.Method("/testproto.EchoService/EchoPatch"))
 
 	return &out, err
 }
@@ -369,7 +369,7 @@ func (c *EchoServiceHTTPClientImpl) EchoResponseBody(ctx context.Context, in *Dy
 	var out DynamicMessageUpdate
 	path := binding.EncodePath("POST", "/v1/example/echo_response_body", in)
 
-	err := c.cc.Invoke(ctx, "POST", path, in, &out.Body, http1.ServiceMethod("/testproto.EchoService/EchoResponseBody"))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out.Body, http1.Method("/testproto.EchoService/EchoResponseBody"))
 
 	return &out, err
 }

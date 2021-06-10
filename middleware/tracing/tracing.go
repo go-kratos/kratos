@@ -3,7 +3,6 @@ package tracing
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 	"go.opentelemetry.io/otel/propagation"
@@ -38,7 +37,7 @@ func Server(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromServerContext(ctx); ok {
-				ctx, span := tracer.Start(ctx, tr.Kind(), tr.ServiceMethod(), tr.Metadata())
+				ctx, span := tracer.Start(ctx, tr.Kind(), tr.Method(), tr.Metadata())
 				defer func() { tracer.End(ctx, span, err) }()
 			}
 			return handler(ctx, req)
@@ -52,10 +51,7 @@ func Client(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromClientContext(ctx); ok {
-				if tr.Metadata() == nil {
-					tr.WithMetadata(metadata.Metadata{})
-				}
-				ctx, span := tracer.Start(ctx, tr.Kind(), tr.ServiceMethod(), tr.Metadata())
+				ctx, span := tracer.Start(ctx, tr.Kind(), tr.Method(), tr.Metadata())
 				defer func() { tracer.End(ctx, span, err) }()
 			}
 			return handler(ctx, req)

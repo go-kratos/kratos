@@ -41,7 +41,7 @@ func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.Handl
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerServiceMethod(ctx,"/{{$svrName}}/{{.Name}}")
+		transport.SetServerMethod(ctx,"/{{$svrName}}/{{.Name}}")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -75,9 +75,9 @@ func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Reque
 	var out {{.Reply}}
 	path := binding.EncodePath("{{.Method}}", "{{.Path}}", in)
 	{{if .HasBody }}
-	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, http1.ServiceMethod("/{{$svrName}}/{{.Name}}"))
+	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, http1.Method("/{{$svrName}}/{{.Name}}"))
 	{{else}} 
-	err := c.cc.Invoke(ctx, "{{.Method}}", path, nil, &out{{.ResponseBody}}, http1.ServiceMethod("/{{$svrName}}/{{.Name}}"))
+	err := c.cc.Invoke(ctx, "{{.Method}}", path, nil, &out{{.ResponseBody}}, http1.Method("/{{$svrName}}/{{.Name}}"))
 	{{end}}
 	return &out, err
 }

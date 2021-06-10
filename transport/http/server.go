@@ -102,11 +102,11 @@ func (s *Server) HandleFunc(path string, h http.HandlerFunc) {
 func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx, cancel := ic.Merge(req.Context(), s.ctx)
 	defer cancel()
-	tr := &Transport{
+	ctx = transport.NewServerContext(ctx, &Transport{
 		endpoint: s.endpoint.String(),
+		method:   req.RequestURI,
 		metadata: metadata.New(req.Header),
-	}
-	ctx = transport.NewServerContext(ctx, tr)
+	})
 	if s.timeout > 0 {
 		ctx, cancel = context.WithTimeout(ctx, s.timeout)
 		defer cancel()

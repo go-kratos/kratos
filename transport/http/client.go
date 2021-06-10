@@ -198,14 +198,13 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 		req.Header.Set("User-Agent", client.opts.userAgent)
 	}
 	if c.metatada == nil {
-		c.metatada = metadata.New(nil)
+		c.metatada = metadata.Metadata{}
 	}
-	tr := &Transport{
-		endpoint:      client.opts.endpoint,
-		metadata:      c.metatada,
-		serviceMethod: c.serviceMethod,
-	}
-	ctx = transport.NewClientContext(ctx, tr)
+	ctx = transport.NewClientContext(ctx, &Transport{
+		endpoint: client.opts.endpoint,
+		metadata: c.metatada,
+		method:   c.method,
+	})
 	return client.invoke(ctx, req, args, reply, c)
 }
 

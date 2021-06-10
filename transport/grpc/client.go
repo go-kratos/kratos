@@ -114,20 +114,18 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 
 func unaryClientInterceptor(m middleware.Middleware, timeout time.Duration) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		tr := &Transport{
-			endpoint:      cc.Target(),
-			metadata:      metadata.New(nil),
-			serviceMethod: method,
-		}
-		ctx = transport.NewClientContext(ctx, tr)
+		ctx = transport.NewClientContext(ctx, &Transport{
+			endpoint: cc.Target(),
+			method:   method,
+			metadata: metadata.Metadata{},
+		})
 		if timeout > 0 {
 			var cancel context.CancelFunc
 			ctx, cancel = context.WithTimeout(ctx, timeout)
 			defer cancel()
 		}
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
-			tr, ok := transport.FromClientContext(ctx)
-			if ok {
+			if tr, ok := transport.FromClientContext(ctx); ok {
 				ctx = grpcmd.AppendToOutgoingContext(ctx, tr.Metadata().Pairs()...)
 			}
 			return reply, invoker(ctx, method, req, reply, cc, opts...)
