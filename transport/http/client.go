@@ -24,7 +24,7 @@ import (
 type DecodeErrorFunc func(ctx context.Context, res *http.Response) error
 
 // EncodeRequestFunc is request encode func.
-type EncodeRequestFunc func(ctx context.Context, in interface{}) (contentType string, body []byte, err error)
+type EncodeRequestFunc func(ctx context.Context, contentType string, in interface{}) (body []byte, err error)
 
 // DecodeResponseFunc is response decode func.
 type DecodeResponseFunc func(ctx context.Context, res *http.Response, out interface{}) error
@@ -167,10 +167,10 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 }
 
 // Invoke makes an rpc call procedure for remote service.
-func (client *Client) Invoke(ctx context.Context, path string, args interface{}, reply interface{}, opts ...CallOption) error {
+func (client *Client) Invoke(ctx context.Context, method, path string, args interface{}, reply interface{}, opts ...CallOption) error {
 	var (
-		reqBody     io.Reader
 		contentType string
+		body        io.Reader
 	)
 	c := defaultCallInfo()
 	for _, o := range opts {
@@ -179,23 +179,20 @@ func (client *Client) Invoke(ctx context.Context, path string, args interface{},
 		}
 	}
 	if args != nil {
-		var (
-			body []byte
-			err  error
-		)
-		contentType, body, err = client.opts.encoder(ctx, args)
+		data, err := client.opts.encoder(ctx, c.contentType, args)
 		if err != nil {
 			return err
 		}
-		reqBody = bytes.NewReader(body)
+		contentType = c.contentType
+		body = bytes.NewReader(data)
 	}
 	url := fmt.Sprintf("%s://%s%s", client.target.Scheme, client.target.Authority, path)
-	req, err := http.NewRequest(c.method, url, reqBody)
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return err
 	}
 	if contentType != "" {
-		req.Header.Set("Content-Type", contentType)
+		req.Header.Set("Content-Type", c.contentType)
 	}
 	if client.opts.userAgent != "" {
 		req.Header.Set("User-Agent", client.opts.userAgent)
@@ -273,12 +270,13 @@ func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*h
 }
 
 // DefaultRequestEncoder is an HTTP request encoder.
-func DefaultRequestEncoder(ctx context.Context, in interface{}) (string, []byte, error) {
-	body, err := encoding.GetCodec("json").Marshal(in)
+func DefaultRequestEncoder(ctx context.Context, contentType string, in interface{}) ([]byte, error) {
+	name := httputil.ContentSubtype(contentType)
+	body, err := encoding.GetCodec(name).Marshal(in)
 	if err != nil {
-		return "", nil, err
+		return nil, err
 	}
-	return "application/json", body, err
+	return body, err
 }
 
 // DefaultResponseDecoder is an HTTP response decoder.

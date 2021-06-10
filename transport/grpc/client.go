@@ -123,7 +123,7 @@ func unaryClientInterceptor(m middleware.Middleware, timeout time.Duration) grpc
 		}
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			if md, ok := metadata.FromOutgoingContext(ctx); ok {
-				ctx = grpcmd.NewOutgoingContext(ctx, grpcmd.MD(md))
+				ctx = grpcmd.AppendToOutgoingContext(ctx, md.Pairs()...)
 			}
 			return reply, invoker(ctx, method, req, reply, cc, opts...)
 		}

@@ -13,7 +13,7 @@ type CallOption interface {
 }
 
 type callInfo struct {
-	method string
+	contentType string
 }
 
 // EmptyCallOption does not alter the Call configuration.
@@ -26,29 +26,24 @@ func (EmptyCallOption) after(*callInfo, *csAttempt) {}
 
 type csAttempt struct{}
 
-// PathPatternCallOption is BodyPattern
-type PathPatternCallOption struct {
+// ContentType with request content type.
+func ContentType(contentType string) CallOption {
+	return ContentTypeCallOption{ContentType: contentType}
+}
+
+// ContentTypeCallOption is BodyCallOption
+type ContentTypeCallOption struct {
 	EmptyCallOption
+	ContentType string
 }
 
-// Method is Method
-func Method(method string) CallOption {
-	return MethodCallOption{Method: method}
-}
-
-// MethodCallOption is BodyCallOption
-type MethodCallOption struct {
-	EmptyCallOption
-	Method string
-}
-
-func (o MethodCallOption) before(c *callInfo) error {
-	c.method = o.Method
+func (o ContentTypeCallOption) before(c *callInfo) error {
+	c.contentType = o.ContentType
 	return nil
 }
 
 func defaultCallInfo() callInfo {
 	return callInfo{
-		method: "POST",
+		contentType: "application/json",
 	}
 }

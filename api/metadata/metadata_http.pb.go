@@ -111,7 +111,7 @@ func (c *MetadataHTTPClientImpl) GetServiceDesc(ctx context.Context, in *GetServ
 	out = &GetServiceDescReply{}
 
 	ctx = middleware.WithMethod(ctx, "/kratos.api.Metadata/GetServiceDesc")
-	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("GET"))
+	err = c.cc.Invoke(ctx, "GET", path, nil, &out)
 
 	if err != nil {
 		return
@@ -124,7 +124,7 @@ func (c *MetadataHTTPClientImpl) ListServices(ctx context.Context, in *ListServi
 	out = &ListServicesReply{}
 
 	ctx = middleware.WithMethod(ctx, "/kratos.api.Metadata/ListServices")
-	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("GET"))
+	err = c.cc.Invoke(ctx, "GET", path, nil, &out)
 
 	if err != nil {
 		return

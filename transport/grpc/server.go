@@ -7,11 +7,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/api/metadata"
+	apimd "github.com/go-kratos/kratos/v2/api/metadata"
 	ic "github.com/go-kratos/kratos/v2/internal/context"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
-	kmd "github.com/go-kratos/kratos/v2/metadata"
+	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 
@@ -93,7 +93,7 @@ type Server struct {
 	ints       []grpc.UnaryServerInterceptor
 	grpcOpts   []grpc.ServerOption
 	health     *health.Server
-	metadata   *metadata.Server
+	metadata   *apimd.Server
 }
 
 // NewServer creates a gRPC server by options.
@@ -121,10 +121,10 @@ func NewServer(opts ...ServerOption) *Server {
 		grpcOpts = append(grpcOpts, srv.grpcOpts...)
 	}
 	srv.Server = grpc.NewServer(grpcOpts...)
-	srv.metadata = metadata.NewServer(srv.Server)
+	srv.metadata = apimd.NewServer(srv.Server)
 	// internal register
 	grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
-	metadata.RegisterMetadataServer(srv.Server, srv.metadata)
+	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
 	reflection.Register(srv.Server)
 	return srv
 }
@@ -180,7 +180,7 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC, Endpoint: s.endpoint.String()})
 		ctx = middleware.WithMethod(ctx, info.FullMethod)
 		if md, ok := grpcmd.FromIncomingContext(ctx); ok {
-			ctx = kmd.NewIncomingContext(ctx, kmd.New(md))
+			ctx = metadata.NewIncomingContext(ctx, metadata.New(md))
 		}
 		if s.timeout > 0 {
 			var cancel context.CancelFunc
