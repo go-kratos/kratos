@@ -33,6 +33,15 @@ http:
            --go-http_out=paths=source_relative:. \
            $(API_PROTO_FILES)
 
+.PHONY: errors
+# generate errors code
+errors:
+	protoc --proto_path=. \
+           --proto_path=./third_party \
+           --go_out=paths=source_relative:. \
+           --go-errors_out=paths=source_relative:. \
+           $(API_PROTO_FILES)
+
 .PHONY: proto
 # generate internal proto
 proto:
@@ -72,6 +81,7 @@ all:
 	make grpc;
 	make http;
 	make proto;
+	make errors;
 	make swagger;
 	make build;
 	make test;

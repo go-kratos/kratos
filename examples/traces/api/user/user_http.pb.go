@@ -4,6 +4,7 @@ package v1
 
 import (
 	context "context"
+	middleware "github.com/go-kratos/kratos/v2/middleware"
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
@@ -14,7 +15,8 @@ import (
 // is compatible with the kratos package it is being compiled against.
 var _ = new(http.Request)
 var _ = new(context.Context)
-var _ = binding.MapProto
+var _ = new(middleware.Middleware)
+var _ = binding.BindVars
 var _ = mux.NewRouter
 
 const _ = http1.SupportPackageIsVersion1
@@ -37,7 +39,7 @@ func NewUserHandler(srv UserHandler, opts ...http1.HandleOption) http.Handler {
 			return
 		}
 
-		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
+		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
@@ -48,7 +50,8 @@ func NewUserHandler(srv UserHandler, opts ...http1.HandleOption) http.Handler {
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		ctx := middleware.WithMethod(r.Context(), "/api.user.v1.User/GetMyMessages")
+		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -60,4 +63,26 @@ func NewUserHandler(srv UserHandler, opts ...http1.HandleOption) http.Handler {
 	}).Methods("GET")
 
 	return r
+}
+
+type UserHTTPClient interface {
+	GetMyMessages(ctx context.Context, req *GetMyMessagesRequest, opts ...http1.CallOption) (rsp *GetMyMessagesReply, err error)
+}
+
+type UserHTTPClientImpl struct {
+	cc *http1.Client
+}
+
+func NewUserHTTPClient(client *http1.Client) UserHTTPClient {
+	return &UserHTTPClientImpl{client}
+}
+
+func (c *UserHTTPClientImpl) GetMyMessages(ctx context.Context, in *GetMyMessagesRequest, opts ...http1.CallOption) (*GetMyMessagesReply, error) {
+	var out GetMyMessagesReply
+	path := binding.EncodePath("GET", "/v1/user/get/message/{count}", in)
+	ctx = middleware.WithMethod(ctx, "/api.user.v1.User/GetMyMessages")
+
+	err := c.cc.Invoke(ctx, "GET", path, in, &out)
+
+	return &out, err
 }

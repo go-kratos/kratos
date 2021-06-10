@@ -4,18 +4,18 @@ package metadata
 
 import (
 	context "context"
-	http "net/http"
-
-	"github.com/go-kratos/kratos/v2/middleware"
+	middleware "github.com/go-kratos/kratos/v2/middleware"
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
+	http "net/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
 var _ = new(http.Request)
 var _ = new(context.Context)
+var _ = new(middleware.Middleware)
 var _ = binding.BindVars
 var _ = mux.NewRouter
 
@@ -106,28 +106,22 @@ func NewMetadataHTTPClient(client *http1.Client) MetadataHTTPClient {
 	return &MetadataHTTPClientImpl{client}
 }
 
-func (c *MetadataHTTPClientImpl) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest, opts ...http1.CallOption) (out *GetServiceDescReply, err error) {
+func (c *MetadataHTTPClientImpl) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest, opts ...http1.CallOption) (*GetServiceDescReply, error) {
+	var out GetServiceDescReply
 	path := binding.EncodePath("GET", "/services/{name}", in)
-	out = &GetServiceDescReply{}
-
 	ctx = middleware.WithMethod(ctx, "/kratos.api.Metadata/GetServiceDesc")
-	err = c.cc.Invoke(ctx, "GET", path, nil, &out)
 
-	if err != nil {
-		return
-	}
-	return
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out)
+
+	return &out, err
 }
 
-func (c *MetadataHTTPClientImpl) ListServices(ctx context.Context, in *ListServicesRequest, opts ...http1.CallOption) (out *ListServicesReply, err error) {
+func (c *MetadataHTTPClientImpl) ListServices(ctx context.Context, in *ListServicesRequest, opts ...http1.CallOption) (*ListServicesReply, error) {
+	var out ListServicesReply
 	path := binding.EncodePath("GET", "/services", in)
-	out = &ListServicesReply{}
-
 	ctx = middleware.WithMethod(ctx, "/kratos.api.Metadata/ListServices")
-	err = c.cc.Invoke(ctx, "GET", path, nil, &out)
 
-	if err != nil {
-		return
-	}
-	return
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out)
+
+	return &out, err
 }

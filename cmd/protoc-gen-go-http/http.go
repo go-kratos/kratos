@@ -10,11 +10,12 @@ import (
 )
 
 const (
-	contextPackage   = protogen.GoImportPath("context")
-	httpPackage      = protogen.GoImportPath("net/http")
-	muxPackage       = protogen.GoImportPath("github.com/gorilla/mux")
-	transportPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
-	bindingPackage   = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http/binding")
+	contextPackage    = protogen.GoImportPath("context")
+	httpPackage       = protogen.GoImportPath("net/http")
+	muxPackage        = protogen.GoImportPath("github.com/gorilla/mux")
+	middlewarePackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/middleware")
+	transportPackage  = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
+	bindingPackage    = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http/binding")
 )
 
 var methodSets = make(map[string]int)
@@ -43,7 +44,8 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("// is compatible with the kratos package it is being compiled against.")
 	g.P("var _ = new(", httpPackage.Ident("Request"), ")")
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
-	g.P("var _ = ", bindingPackage.Ident("MapProto"))
+	g.P("var _ = new(", middlewarePackage.Ident("Middleware"), ")")
+	g.P("var _ = ", bindingPackage.Ident("BindVars"))
 	g.P("var _ = ", muxPackage.Ident("NewRouter"))
 	g.P("const _ = ", transportPackage.Ident("SupportPackageIsVersion1"))
 	g.P()

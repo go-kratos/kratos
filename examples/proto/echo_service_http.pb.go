@@ -4,6 +4,7 @@ package testproto
 
 import (
 	context "context"
+	middleware "github.com/go-kratos/kratos/v2/middleware"
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
@@ -14,7 +15,8 @@ import (
 // is compatible with the kratos package it is being compiled against.
 var _ = new(http.Request)
 var _ = new(context.Context)
-var _ = binding.MapProto
+var _ = new(middleware.Middleware)
+var _ = binding.BindVars
 var _ = mux.NewRouter
 
 const _ = http1.SupportPackageIsVersion1
@@ -56,7 +58,8 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		ctx := middleware.WithMethod(r.Context(), "/testproto.EchoService/Echo")
+		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -85,7 +88,8 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		ctx := middleware.WithMethod(r.Context(), "/testproto.EchoService/Echo")
+		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -114,7 +118,8 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		ctx := middleware.WithMethod(r.Context(), "/testproto.EchoService/Echo")
+		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -143,7 +148,8 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		ctx := middleware.WithMethod(r.Context(), "/testproto.EchoService/Echo")
+		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -172,7 +178,8 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		ctx := middleware.WithMethod(r.Context(), "/testproto.EchoService/Echo")
+		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -196,7 +203,8 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		ctx := middleware.WithMethod(r.Context(), "/testproto.EchoService/EchoBody")
+		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -220,7 +228,8 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		ctx := middleware.WithMethod(r.Context(), "/testproto.EchoService/EchoResponseBody")
+		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -249,7 +258,8 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		ctx := middleware.WithMethod(r.Context(), "/testproto.EchoService/EchoDelete")
+		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -273,7 +283,8 @@ func NewEchoServiceHandler(srv EchoServiceHandler, opts ...http1.HandleOption) h
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		ctx := middleware.WithMethod(r.Context(), "/testproto.EchoService/EchoPatch")
+		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -307,62 +318,52 @@ func NewEchoServiceHTTPClient(client *http1.Client) EchoServiceHTTPClient {
 	return &EchoServiceHTTPClientImpl{client}
 }
 
-func (c *EchoServiceHTTPClientImpl) Echo(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (out *SimpleMessage, err error) {
+func (c *EchoServiceHTTPClientImpl) Echo(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (*SimpleMessage, error) {
+	var out SimpleMessage
 	path := binding.EncodePath("POST", "/v1/example/echo/{id}", in)
-	out = &SimpleMessage{}
+	ctx = middleware.WithMethod(ctx, "/testproto.EchoService/Echo")
 
-	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("POST"), http1.PathPattern("/v1/example/echo/{id}"))
+	err := c.cc.Invoke(ctx, "POST", path, nil, &out)
 
-	if err != nil {
-		return
-	}
-	return
+	return &out, err
 }
 
-func (c *EchoServiceHTTPClientImpl) EchoBody(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (out *SimpleMessage, err error) {
+func (c *EchoServiceHTTPClientImpl) EchoBody(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (*SimpleMessage, error) {
+	var out SimpleMessage
 	path := binding.EncodePath("POST", "/v1/example/echo_body", in)
-	out = &SimpleMessage{}
+	ctx = middleware.WithMethod(ctx, "/testproto.EchoService/EchoBody")
 
-	err = c.cc.Invoke(ctx, path, in, &out, http1.Method("POST"), http1.PathPattern("/v1/example/echo_body"))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out)
 
-	if err != nil {
-		return
-	}
-	return
+	return &out, err
 }
 
-func (c *EchoServiceHTTPClientImpl) EchoDelete(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (out *SimpleMessage, err error) {
+func (c *EchoServiceHTTPClientImpl) EchoDelete(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (*SimpleMessage, error) {
+	var out SimpleMessage
 	path := binding.EncodePath("DELETE", "/v1/example/echo_delete/{id}/{num}", in)
-	out = &SimpleMessage{}
+	ctx = middleware.WithMethod(ctx, "/testproto.EchoService/EchoDelete")
 
-	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("DELETE"), http1.PathPattern("/v1/example/echo_delete/{id}/{num}"))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out)
 
-	if err != nil {
-		return
-	}
-	return
+	return &out, err
 }
 
-func (c *EchoServiceHTTPClientImpl) EchoPatch(ctx context.Context, in *DynamicMessageUpdate, opts ...http1.CallOption) (out *DynamicMessageUpdate, err error) {
+func (c *EchoServiceHTTPClientImpl) EchoPatch(ctx context.Context, in *DynamicMessageUpdate, opts ...http1.CallOption) (*DynamicMessageUpdate, error) {
+	var out DynamicMessageUpdate
 	path := binding.EncodePath("PATCH", "/v1/example/echo_patch", in)
-	out = &DynamicMessageUpdate{}
+	ctx = middleware.WithMethod(ctx, "/testproto.EchoService/EchoPatch")
 
-	err = c.cc.Invoke(ctx, path, in.Body, &out, http1.Method("PATCH"), http1.PathPattern("/v1/example/echo_patch"))
+	err := c.cc.Invoke(ctx, "PATCH", path, in.Body, &out)
 
-	if err != nil {
-		return
-	}
-	return
+	return &out, err
 }
 
-func (c *EchoServiceHTTPClientImpl) EchoResponseBody(ctx context.Context, in *DynamicMessageUpdate, opts ...http1.CallOption) (out *DynamicMessageUpdate, err error) {
+func (c *EchoServiceHTTPClientImpl) EchoResponseBody(ctx context.Context, in *DynamicMessageUpdate, opts ...http1.CallOption) (*DynamicMessageUpdate, error) {
+	var out DynamicMessageUpdate
 	path := binding.EncodePath("POST", "/v1/example/echo_response_body", in)
-	out = &DynamicMessageUpdate{}
+	ctx = middleware.WithMethod(ctx, "/testproto.EchoService/EchoResponseBody")
 
-	err = c.cc.Invoke(ctx, path, in, &out.Body, http1.Method("POST"), http1.PathPattern("/v1/example/echo_response_body"))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out.Body)
 
-	if err != nil {
-		return
-	}
-	return
+	return &out, err
 }
