@@ -20,7 +20,7 @@ type User struct {
 func authFilter(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Do stuff here
-		log.Println("auth:", r.RequestURI)
+		log.Println("auth:", r.Method, r.RequestURI)
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
 		next.ServeHTTP(w, r)
 	}
@@ -28,7 +28,7 @@ func authFilter(next http.HandlerFunc) http.HandlerFunc {
 func loggingFilter(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Do stuff here
-		log.Println("logging:", r.RequestURI)
+		log.Println("logging:", r.Method, r.RequestURI)
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
 		next.ServeHTTP(w, r)
 	}
@@ -102,6 +102,24 @@ func testRoute(t *testing.T, srv *Server) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 201 {
+		t.Fatalf("code: %d", resp.StatusCode)
+	}
+	u = new(User)
+	if err = json.NewDecoder(resp.Body).Decode(u); err != nil {
+		t.Fatal(err)
+	}
+	if u.Name != "bar" {
+		t.Fatalf("got %s want bar", u.Name)
+	}
+	// PUT
+	req, _ := http.NewRequest("PUT", base+"/users", strings.NewReader(`{"name":"bar"}`))
+	req.Header.Set("Content-Type", "application/json")
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
 		t.Fatalf("code: %d", resp.StatusCode)
 	}
 	u = new(User)
