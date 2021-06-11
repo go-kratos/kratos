@@ -9,7 +9,6 @@ import (
 	pb "github.com/go-kratos/kratos/examples/traces/api/user"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
@@ -63,14 +62,15 @@ func (s *server) GetMyMessages(ctx context.Context, in *pb.GetMyMessagesRequest)
 	// create grpc conn
 	conn, err := grpc.DialInsecure(ctx,
 		grpc.WithEndpoint("127.0.0.1:9000"),
-		grpc.WithMiddleware(middleware.Chain(
+		grpc.WithMiddleware(
+			recovery.Recovery(),
 			tracing.Client(
 				tracing.WithTracerProvider(s.tracer),
 				tracing.WithPropagators(
 					propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{}),
 				),
 			),
-			recovery.Recovery())),
+		),
 		grpc.WithTimeout(2*time.Second),
 	)
 	if err != nil {
@@ -100,24 +100,22 @@ func main() {
 		log.Error(err)
 	}
 
-	s := &server{tracer: tp}
-
-	httpSrv := http.NewServer(http.Address(":8000"))
-	httpSrv.HandlePrefix("/", pb.NewUserHandler(s,
+	httpSrv := http.NewServer(
+		http.Address(":8000"),
 		http.Middleware(
-			middleware.Chain(
-				recovery.Recovery(),
-				// Configuring tracing middleware
-				tracing.Server(
-					tracing.WithTracerProvider(tp),
-					tracing.WithPropagators(
-						propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{}),
-					),
+			recovery.Recovery(),
+			// Configuring tracing middleware
+			tracing.Server(
+				tracing.WithTracerProvider(tp),
+				tracing.WithPropagators(
+					propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{}),
 				),
-				logging.Server(logger),
 			),
-		)),
+			logging.Server(logger),
+		),
 	)
+	s := &server{tracer: tp}
+	pb.RegisterUserHTTPServer(httpSrv, s)
 
 	app := kratos.New(
 		kratos.Name(Name),

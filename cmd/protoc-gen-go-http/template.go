@@ -15,66 +15,52 @@ type {{.ServiceType}}Handler interface {
 {{end}}
 }
 
-func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.HandleOption) http.Handler {
-	h := http1.DefaultHandleOptions()
-	for _, o := range opts {
-		o(&h)
-	}
-	r := mux.NewRouter()
+func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}Handler) {
+	r := s.Route("/")
 	{{range .Methods}}
-	r.HandleFunc("{{.Path}}", func(w http.ResponseWriter, r *http.Request) {
+	r.{{.Method}}("{{.Path}}", func(ctx http.Context) error {
 		var in {{.Request}}
-		if err := h.Decode(r, &in{{.Body}}); err != nil {
-			h.Error(w, r, err)
-			return
+		if err := ctx.Bind(&in{{.Body}}); err != nil {
+			return err
 		}
 		{{if ne (len .Vars) 0}}
-		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
-			h.Error(w, r, err)
-			return
+		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+			return err
 		}
 		{{end}}
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.{{.Name}}(ctx, req.(*{{.Request}}))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		ctx := r.Context()
 		transport.SetMethod(ctx,"/{{$svrName}}/{{.Name}}")
-		out, err := next(ctx, &in)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.{{.Name}}(ctx, req.(*{{.Request}}))
+		})
+		out, err := h(ctx, &in)
 		if err != nil {
-			h.Error(w, r, err)
-			return
+			return err
 		}
 		reply := out.(*{{.Reply}})
-		if err := h.Encode(w, r, reply{{.ResponseBody}}); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("{{.Method}}")
+		return ctx.Result(200, reply{{.ResponseBody}})
+	})
 	{{end}}
-	return r
 }
 
 type {{.ServiceType}}HTTPClient interface {
 {{range .MethodSets}}
-	{{.Name}}(ctx context.Context, req *{{.Request}}, opts ...http1.CallOption) (rsp *{{.Reply}}, err error) 
+	{{.Name}}(ctx context.Context, req *{{.Request}}, opts ...http.CallOption) (rsp *{{.Reply}}, err error) 
 {{end}}
 }
 	
 type {{.ServiceType}}HTTPClientImpl struct{
-	cc *http1.Client
+	cc *http.Client
 }
 	
-func New{{.ServiceType}}HTTPClient (client *http1.Client) {{.ServiceType}}HTTPClient {
+func New{{.ServiceType}}HTTPClient (client *http.Client) {{.ServiceType}}HTTPClient {
 	return &{{.ServiceType}}HTTPClientImpl{client}
 }
 
 {{range .MethodSets}}
-func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http1.CallOption) (*{{.Reply}}, error) {
+func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
 	path := binding.EncodePath("{{.Method}}", "{{.Path}}", in)
-	opts = append(opts, http1.Method("/{{$svrName}}/{{.Name}}"))
+	opts = append(opts, http.Method("/{{$svrName}}/{{.Name}}"))
 	{{if .HasBody }}
 	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, opts...)
 	{{else}} 

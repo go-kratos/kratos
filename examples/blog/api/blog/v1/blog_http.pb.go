@@ -6,22 +6,20 @@ import (
 	context "context"
 	middleware "github.com/go-kratos/kratos/v2/middleware"
 	transport "github.com/go-kratos/kratos/v2/transport"
-	http1 "github.com/go-kratos/kratos/v2/transport/http"
+	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
-	http "net/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
-var _ = new(http.Request)
 var _ = new(context.Context)
 var _ = new(middleware.Middleware)
 var _ = new(transport.Transporter)
 var _ = binding.BindVars
 var _ = mux.NewRouter
 
-const _ = http1.SupportPackageIsVersion1
+const _ = http.SupportPackageIsVersion1
 
 type BlogServiceHandler interface {
 	CreateArticle(context.Context, *CreateArticleRequest) (*CreateArticleReply, error)
@@ -35,225 +33,177 @@ type BlogServiceHandler interface {
 	UpdateArticle(context.Context, *UpdateArticleRequest) (*UpdateArticleReply, error)
 }
 
-func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) http.Handler {
-	h := http1.DefaultHandleOptions()
-	for _, o := range opts {
-		o(&h)
-	}
-	r := mux.NewRouter()
+func RegisterBlogServiceHTTPServer(s *http.Server, srv BlogServiceHandler) {
+	r := s.Route("/")
 
-	r.HandleFunc("/v1/article/", func(w http.ResponseWriter, r *http.Request) {
+	r.POST("/v1/article/", func(ctx http.Context) error {
 		var in CreateArticleRequest
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
+		if err := ctx.Bind(&in); err != nil {
+			return err
 		}
 
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.CreateArticle(ctx, req.(*CreateArticleRequest))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		ctx := r.Context()
 		transport.SetMethod(ctx, "/blog.api.v1.BlogService/CreateArticle")
-		out, err := next(ctx, &in)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateArticle(ctx, req.(*CreateArticleRequest))
+		})
+		out, err := h(ctx, &in)
 		if err != nil {
-			h.Error(w, r, err)
-			return
+			return err
 		}
 		reply := out.(*CreateArticleReply)
-		if err := h.Encode(w, r, reply); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("POST")
+		return ctx.Result(200, reply)
+	})
 
-	r.HandleFunc("/v1/article/{id}", func(w http.ResponseWriter, r *http.Request) {
+	r.PUT("/v1/article/{id}", func(ctx http.Context) error {
 		var in UpdateArticleRequest
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
+		if err := ctx.Bind(&in); err != nil {
+			return err
 		}
 
-		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
-			h.Error(w, r, err)
-			return
+		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+			return err
 		}
 
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateArticle(ctx, req.(*UpdateArticleRequest))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		ctx := r.Context()
 		transport.SetMethod(ctx, "/blog.api.v1.BlogService/UpdateArticle")
-		out, err := next(ctx, &in)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateArticle(ctx, req.(*UpdateArticleRequest))
+		})
+		out, err := h(ctx, &in)
 		if err != nil {
-			h.Error(w, r, err)
-			return
+			return err
 		}
 		reply := out.(*UpdateArticleReply)
-		if err := h.Encode(w, r, reply); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("PUT")
+		return ctx.Result(200, reply)
+	})
 
-	r.HandleFunc("/v1/article/{id}", func(w http.ResponseWriter, r *http.Request) {
+	r.DELETE("/v1/article/{id}", func(ctx http.Context) error {
 		var in DeleteArticleRequest
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
+		if err := ctx.Bind(&in); err != nil {
+			return err
 		}
 
-		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
-			h.Error(w, r, err)
-			return
+		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+			return err
 		}
 
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.DeleteArticle(ctx, req.(*DeleteArticleRequest))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		ctx := r.Context()
 		transport.SetMethod(ctx, "/blog.api.v1.BlogService/DeleteArticle")
-		out, err := next(ctx, &in)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteArticle(ctx, req.(*DeleteArticleRequest))
+		})
+		out, err := h(ctx, &in)
 		if err != nil {
-			h.Error(w, r, err)
-			return
+			return err
 		}
 		reply := out.(*DeleteArticleReply)
-		if err := h.Encode(w, r, reply); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("DELETE")
+		return ctx.Result(200, reply)
+	})
 
-	r.HandleFunc("/v1/article/{id}", func(w http.ResponseWriter, r *http.Request) {
+	r.GET("/v1/article/{id}", func(ctx http.Context) error {
 		var in GetArticleRequest
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
+		if err := ctx.Bind(&in); err != nil {
+			return err
 		}
 
-		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
-			h.Error(w, r, err)
-			return
+		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+			return err
 		}
 
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetArticle(ctx, req.(*GetArticleRequest))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		ctx := r.Context()
 		transport.SetMethod(ctx, "/blog.api.v1.BlogService/GetArticle")
-		out, err := next(ctx, &in)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetArticle(ctx, req.(*GetArticleRequest))
+		})
+		out, err := h(ctx, &in)
 		if err != nil {
-			h.Error(w, r, err)
-			return
+			return err
 		}
 		reply := out.(*GetArticleReply)
-		if err := h.Encode(w, r, reply); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("GET")
+		return ctx.Result(200, reply)
+	})
 
-	r.HandleFunc("/v1/article/", func(w http.ResponseWriter, r *http.Request) {
+	r.GET("/v1/article/", func(ctx http.Context) error {
 		var in ListArticleRequest
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
+		if err := ctx.Bind(&in); err != nil {
+			return err
 		}
 
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListArticle(ctx, req.(*ListArticleRequest))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		ctx := r.Context()
 		transport.SetMethod(ctx, "/blog.api.v1.BlogService/ListArticle")
-		out, err := next(ctx, &in)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListArticle(ctx, req.(*ListArticleRequest))
+		})
+		out, err := h(ctx, &in)
 		if err != nil {
-			h.Error(w, r, err)
-			return
+			return err
 		}
 		reply := out.(*ListArticleReply)
-		if err := h.Encode(w, r, reply); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("GET")
+		return ctx.Result(200, reply)
+	})
 
-	return r
 }
 
 type BlogServiceHTTPClient interface {
-	CreateArticle(ctx context.Context, req *CreateArticleRequest, opts ...http1.CallOption) (rsp *CreateArticleReply, err error)
+	CreateArticle(ctx context.Context, req *CreateArticleRequest, opts ...http.CallOption) (rsp *CreateArticleReply, err error)
 
-	DeleteArticle(ctx context.Context, req *DeleteArticleRequest, opts ...http1.CallOption) (rsp *DeleteArticleReply, err error)
+	DeleteArticle(ctx context.Context, req *DeleteArticleRequest, opts ...http.CallOption) (rsp *DeleteArticleReply, err error)
 
-	GetArticle(ctx context.Context, req *GetArticleRequest, opts ...http1.CallOption) (rsp *GetArticleReply, err error)
+	GetArticle(ctx context.Context, req *GetArticleRequest, opts ...http.CallOption) (rsp *GetArticleReply, err error)
 
-	ListArticle(ctx context.Context, req *ListArticleRequest, opts ...http1.CallOption) (rsp *ListArticleReply, err error)
+	ListArticle(ctx context.Context, req *ListArticleRequest, opts ...http.CallOption) (rsp *ListArticleReply, err error)
 
-	UpdateArticle(ctx context.Context, req *UpdateArticleRequest, opts ...http1.CallOption) (rsp *UpdateArticleReply, err error)
+	UpdateArticle(ctx context.Context, req *UpdateArticleRequest, opts ...http.CallOption) (rsp *UpdateArticleReply, err error)
 }
 
 type BlogServiceHTTPClientImpl struct {
-	cc *http1.Client
+	cc *http.Client
 }
 
-func NewBlogServiceHTTPClient(client *http1.Client) BlogServiceHTTPClient {
+func NewBlogServiceHTTPClient(client *http.Client) BlogServiceHTTPClient {
 	return &BlogServiceHTTPClientImpl{client}
 }
 
-func (c *BlogServiceHTTPClientImpl) CreateArticle(ctx context.Context, in *CreateArticleRequest, opts ...http1.CallOption) (*CreateArticleReply, error) {
+func (c *BlogServiceHTTPClientImpl) CreateArticle(ctx context.Context, in *CreateArticleRequest, opts ...http.CallOption) (*CreateArticleReply, error) {
 	var out CreateArticleReply
 	path := binding.EncodePath("POST", "/v1/article/", in)
-	opts = append(opts, http1.Method("/blog.api.v1.BlogService/CreateArticle"))
+	opts = append(opts, http.Method("/blog.api.v1.BlogService/CreateArticle"))
 
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 
 	return &out, err
 }
 
-func (c *BlogServiceHTTPClientImpl) DeleteArticle(ctx context.Context, in *DeleteArticleRequest, opts ...http1.CallOption) (*DeleteArticleReply, error) {
+func (c *BlogServiceHTTPClientImpl) DeleteArticle(ctx context.Context, in *DeleteArticleRequest, opts ...http.CallOption) (*DeleteArticleReply, error) {
 	var out DeleteArticleReply
 	path := binding.EncodePath("DELETE", "/v1/article/{id}", in)
-	opts = append(opts, http1.Method("/blog.api.v1.BlogService/DeleteArticle"))
+	opts = append(opts, http.Method("/blog.api.v1.BlogService/DeleteArticle"))
 
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
 
 	return &out, err
 }
 
-func (c *BlogServiceHTTPClientImpl) GetArticle(ctx context.Context, in *GetArticleRequest, opts ...http1.CallOption) (*GetArticleReply, error) {
+func (c *BlogServiceHTTPClientImpl) GetArticle(ctx context.Context, in *GetArticleRequest, opts ...http.CallOption) (*GetArticleReply, error) {
 	var out GetArticleReply
 	path := binding.EncodePath("GET", "/v1/article/{id}", in)
-	opts = append(opts, http1.Method("/blog.api.v1.BlogService/GetArticle"))
+	opts = append(opts, http.Method("/blog.api.v1.BlogService/GetArticle"))
 
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 
 	return &out, err
 }
 
-func (c *BlogServiceHTTPClientImpl) ListArticle(ctx context.Context, in *ListArticleRequest, opts ...http1.CallOption) (*ListArticleReply, error) {
+func (c *BlogServiceHTTPClientImpl) ListArticle(ctx context.Context, in *ListArticleRequest, opts ...http.CallOption) (*ListArticleReply, error) {
 	var out ListArticleReply
 	path := binding.EncodePath("GET", "/v1/article/", in)
-	opts = append(opts, http1.Method("/blog.api.v1.BlogService/ListArticle"))
+	opts = append(opts, http.Method("/blog.api.v1.BlogService/ListArticle"))
 
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 
 	return &out, err
 }
 
-func (c *BlogServiceHTTPClientImpl) UpdateArticle(ctx context.Context, in *UpdateArticleRequest, opts ...http1.CallOption) (*UpdateArticleReply, error) {
+func (c *BlogServiceHTTPClientImpl) UpdateArticle(ctx context.Context, in *UpdateArticleRequest, opts ...http.CallOption) (*UpdateArticleReply, error) {
 	var out UpdateArticleReply
 	path := binding.EncodePath("PUT", "/v1/article/{id}", in)
-	opts = append(opts, http1.Method("/blog.api.v1.BlogService/UpdateArticle"))
+	opts = append(opts, http.Method("/blog.api.v1.BlogService/UpdateArticle"))
 
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 

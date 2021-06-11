@@ -6,84 +6,68 @@ import (
 	context "context"
 	middleware "github.com/go-kratos/kratos/v2/middleware"
 	transport "github.com/go-kratos/kratos/v2/transport"
-	http1 "github.com/go-kratos/kratos/v2/transport/http"
+	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
-	http "net/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
-var _ = new(http.Request)
 var _ = new(context.Context)
 var _ = new(middleware.Middleware)
 var _ = new(transport.Transporter)
 var _ = binding.BindVars
 var _ = mux.NewRouter
 
-const _ = http1.SupportPackageIsVersion1
+const _ = http.SupportPackageIsVersion1
 
 type UserHandler interface {
 	GetMyMessages(context.Context, *GetMyMessagesRequest) (*GetMyMessagesReply, error)
 }
 
-func NewUserHandler(srv UserHandler, opts ...http1.HandleOption) http.Handler {
-	h := http1.DefaultHandleOptions()
-	for _, o := range opts {
-		o(&h)
-	}
-	r := mux.NewRouter()
+func RegisterUserHTTPServer(s *http.Server, srv UserHandler) {
+	r := s.Route("/")
 
-	r.HandleFunc("/v1/user/get/message/{count}", func(w http.ResponseWriter, r *http.Request) {
+	r.GET("/v1/user/get/message/{count}", func(ctx http.Context) error {
 		var in GetMyMessagesRequest
-		if err := h.Decode(r, &in); err != nil {
-			h.Error(w, r, err)
-			return
+		if err := ctx.Bind(&in); err != nil {
+			return err
 		}
 
-		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
-			h.Error(w, r, err)
-			return
+		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+			return err
 		}
 
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMyMessages(ctx, req.(*GetMyMessagesRequest))
-		}
-		if h.Middleware != nil {
-			next = h.Middleware(next)
-		}
-		ctx := r.Context()
 		transport.SetMethod(ctx, "/api.user.v1.User/GetMyMessages")
-		out, err := next(ctx, &in)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMyMessages(ctx, req.(*GetMyMessagesRequest))
+		})
+		out, err := h(ctx, &in)
 		if err != nil {
-			h.Error(w, r, err)
-			return
+			return err
 		}
 		reply := out.(*GetMyMessagesReply)
-		if err := h.Encode(w, r, reply); err != nil {
-			h.Error(w, r, err)
-		}
-	}).Methods("GET")
+		return ctx.Result(200, reply)
+	})
 
-	return r
 }
 
 type UserHTTPClient interface {
-	GetMyMessages(ctx context.Context, req *GetMyMessagesRequest, opts ...http1.CallOption) (rsp *GetMyMessagesReply, err error)
+	GetMyMessages(ctx context.Context, req *GetMyMessagesRequest, opts ...http.CallOption) (rsp *GetMyMessagesReply, err error)
 }
 
 type UserHTTPClientImpl struct {
-	cc *http1.Client
+	cc *http.Client
 }
 
-func NewUserHTTPClient(client *http1.Client) UserHTTPClient {
+func NewUserHTTPClient(client *http.Client) UserHTTPClient {
 	return &UserHTTPClientImpl{client}
 }
 
-func (c *UserHTTPClientImpl) GetMyMessages(ctx context.Context, in *GetMyMessagesRequest, opts ...http1.CallOption) (*GetMyMessagesReply, error) {
+func (c *UserHTTPClientImpl) GetMyMessages(ctx context.Context, in *GetMyMessagesRequest, opts ...http.CallOption) (*GetMyMessagesReply, error) {
 	var out GetMyMessagesReply
 	path := binding.EncodePath("GET", "/v1/user/get/message/{count}", in)
-	opts = append(opts, http1.Method("/api.user.v1.User/GetMyMessages"))
+	opts = append(opts, http.Method("/api.user.v1.User/GetMyMessages"))
 
 	err := c.cc.Invoke(ctx, "GET", path, in, &out, opts...)
 

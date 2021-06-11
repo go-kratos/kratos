@@ -14,8 +14,15 @@ import (
 )
 
 // NewHTTPServer new a HTTP server.
-func NewHTTPServer(c *conf.Server, tracer trace.TracerProvider, blog *service.BlogService) *http.Server {
-	var opts []http.ServerOption
+func NewHTTPServer(c *conf.Server, logger log.Logger, tracer trace.TracerProvider, blog *service.BlogService) *http.Server {
+	var opts = []http.ServerOption{
+		http.Middleware(
+			recovery.Recovery(),
+			tracing.Server(tracing.WithTracerProvider(tracer)),
+			logging.Server(logger),
+			validate.Validator(),
+		),
+	}
 	if c.Http.Network != "" {
 		opts = append(opts, http.Network(c.Http.Network))
 	}
@@ -25,13 +32,7 @@ func NewHTTPServer(c *conf.Server, tracer trace.TracerProvider, blog *service.Bl
 	if c.Http.Timeout != nil {
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
-	m := http.Middleware(
-		recovery.Recovery(),
-		tracing.Server(tracing.WithTracerProvider(tracer)),
-		logging.Server(log.DefaultLogger),
-		validate.Validator(),
-	)
 	srv := http.NewServer(opts...)
-	srv.HandlePrefix("/", v1.NewBlogServiceHandler(blog, m))
+	v1.RegisterBlogServiceHTTPServer(srv, blog)
 	return srv
 }

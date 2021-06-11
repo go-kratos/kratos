@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-kratos/kratos/examples/blog/api/blog/v1"
+	v1 "github.com/go-kratos/kratos/examples/blog/api/blog/v1"
 	"github.com/go-kratos/kratos/examples/blog/internal/conf"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"
@@ -19,7 +19,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/semconv"
-	"gopkg.in/yaml.v2"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
@@ -76,9 +75,6 @@ func main() {
 		config.WithSource(
 			file.NewSource(flagconf),
 		),
-		config.WithDecoder(func(kv *config.KeyValue, v map[string]interface{}) error {
-			return yaml.Unmarshal(kv.Value, v)
-		}),
 	)
 	if err := config.Load(); err != nil {
 		panic(err)
