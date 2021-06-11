@@ -66,7 +66,7 @@ func (c *echoClient) EchoResponseBody(ctx context.Context, in *DynamicMessageUpd
 func TestEchoService(t *testing.T) {
 	echo := &echoService{}
 	ctx := context.Background()
-	srv := tr.NewServer(tr.Address(":8888"))
+	srv := tr.NewServer(tr.Address(":2333"))
 	RegisterEchoServiceHTTPServer(srv, echo)
 	go func() {
 		if err := srv.Start(ctx); err != nil {
@@ -74,7 +74,7 @@ func TestEchoService(t *testing.T) {
 		}
 	}()
 	time.Sleep(time.Second)
-	testEchoClient(t, fmt.Sprintf("127.0.0.1:8888"))
+	testEchoClient(t, fmt.Sprintf("127.0.0.1:2333"))
 	srv.Stop(ctx)
 }
 
