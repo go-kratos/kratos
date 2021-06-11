@@ -37,12 +37,6 @@ type Transporter interface {
 	WithMetadata(metadata.Metadata)
 }
 
-// Defines a set of transport kind
-const (
-	KindGRPC = "grpc"
-	KindHTTP = "http"
-)
-
 type serverTransportKey struct{}
 type clientTransportKey struct{}
 

@@ -18,7 +18,7 @@ type Transport struct {
 
 // Kind returns the transport kind.
 func (tr *Transport) Kind() string {
-	return transport.KindGRPC
+	return "grpc"
 }
 
 // Endpoint returns the transport endpoint.
