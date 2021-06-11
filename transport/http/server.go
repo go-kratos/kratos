@@ -13,6 +13,7 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/metadata"
+	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 
 	"github.com/gorilla/mux"
@@ -21,48 +22,21 @@ import (
 var _ transport.Server = (*Server)(nil)
 var _ transport.Endpointer = (*Server)(nil)
 
-// ServerOption is an HTTP server option.
-type ServerOption func(*Server)
-
-// Network with server network.
-func Network(network string) ServerOption {
-	return func(s *Server) {
-		s.network = network
-	}
-}
-
-// Address with server address.
-func Address(addr string) ServerOption {
-	return func(s *Server) {
-		s.address = addr
-	}
-}
-
-// Timeout with server timeout.
-func Timeout(timeout time.Duration) ServerOption {
-	return func(s *Server) {
-		s.timeout = timeout
-	}
-}
-
-// Logger with server logger.
-func Logger(logger log.Logger) ServerOption {
-	return func(s *Server) {
-		s.log = log.NewHelper(logger)
-	}
-}
-
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
 	ctx      context.Context
 	lis      net.Listener
 	once     sync.Once
+	endpoint *url.URL
 	err      error
 	network  string
 	address  string
-	endpoint *url.URL
 	timeout  time.Duration
+	m        middleware.Middleware
+	dec      DecodeRequestFunc
+	enc      EncodeResponseFunc
+	ene      EncodeErrorFunc
 	router   *mux.Router
 	log      *log.Helper
 }
@@ -73,6 +47,9 @@ func NewServer(opts ...ServerOption) *Server {
 		network: "tcp",
 		address: ":0",
 		timeout: 1 * time.Second,
+		dec:     DefaultRequestDecoder,
+		enc:     DefaultResponseEncoder,
+		ene:     DefaultErrorEncoder,
 		log:     log.NewHelper(log.DefaultLogger),
 	}
 	for _, o := range opts {
@@ -85,9 +62,7 @@ func NewServer(opts ...ServerOption) *Server {
 
 // Route registers an HTTP route.
 func (s *Server) Route(prefix string) *Route {
-	r := &Route{r: s.router}
-	s.HandlePrefix(prefix, r)
-	return r
+	return newRoute(prefix, s)
 }
 
 // Handle registers a new route with a matcher for the URL path.

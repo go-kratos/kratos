@@ -2,69 +2,63 @@ package http
 
 import (
 	"net/http"
-
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/gorilla/mux"
+	"path"
+	"sync"
 )
-
-// HandlerFunc defines a function to serve HTTP requests.
-type HandlerFunc func(Context) error
-
-// Context is an HTTP Context.
-type Context interface {
-	Request() *http.Request
-	Response() http.ResponseWriter
-	Middleware() middleware.Middleware
-	Bind(interface{}) error
-	Result(int, interface{}) error
-	ServeHTTP(http.ResponseWriter, *http.Request)
-}
-
-type ctx struct {
-	route *Route
-	req   *http.Request
-	res   http.ResponseWriter
-	h     HandlerFunc
-}
-
-func (c *ctx) Middleware() middleware.Middleware    { return c.route.m }
-func (c *ctx) Bind(v interface{}) error             { return c.route.dec(c.req, v) }
-func (c *ctx) Result(code int, v interface{}) error { return c.route.enc(c.res, c.req, v) }
-func (c *ctx) Request() *http.Request               { return c.req }
-func (c *ctx) Response() http.ResponseWriter        { return c.res }
-
-func (c *ctx) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	c.res = w
-	c.req = r
-	if err := c.h(c); err != nil {
-		c.route.err(w, r, err)
-	}
-}
 
 // Route is an HTTP route.
 type Route struct {
-	r   *mux.Router
-	m   middleware.Middleware
-	dec DecodeRequestFunc
-	enc EncodeResponseFunc
-	err EncodeErrorFunc
+	prefix string
+	srv    *Server
+	pool   sync.Pool
 }
 
-func (r *Route) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	r.r.ServeHTTP(res, req)
+func newRoute(prefix string, srv *Server) *Route {
+	r := &Route{
+		prefix: prefix,
+		srv:    srv,
+	}
+	r.pool.New = func() interface{} {
+		return new(wrapper)
+	}
+	return r
 }
 
-func (r *Route) newHandler(h HandlerFunc) Context {
-	return &ctx{route: r, h: h}
+// Handle registers a new route with a matcher for the URL path and method.
+func (r *Route) Handle(method, relativePath string, h HandlerFunc) {
+	r.srv.router.HandleFunc(path.Join(r.prefix, relativePath), func(res http.ResponseWriter, req *http.Request) {
+		ctx := r.pool.Get().(Context)
+		ctx.Reset(r, res, req)
+		if err := h(ctx); err != nil {
+			r.srv.ene(res, req, err)
+		}
+		r.pool.Put(ctx)
+	}).Methods(method)
 }
 
-// Handle .
-func (r *Route) Handle(method, path string, h HandlerFunc) {
-	r.r.Handle(path, r.newHandler(h)).Methods(method)
-}
-
-// GET .
+// GET registers a new GET route for a path with matching handler in the router.
 func (r *Route) GET(path string, h HandlerFunc) { r.Handle(http.MethodGet, path, h) }
 
-// POST .
+// HEAD registers a new HEAD route for a path with matching handler in the router.
+func (r *Route) HEAD(path string, h HandlerFunc) { r.Handle(http.MethodHead, path, h) }
+
+// POST registers a new POST route for a path with matching handler in the router.
 func (r *Route) POST(path string, h HandlerFunc) { r.Handle(http.MethodPost, path, h) }
+
+// PUT registers a new PUT route for a path with matching handler in the router.
+func (r *Route) PUT(path string, h HandlerFunc) { r.Handle(http.MethodPut, path, h) }
+
+// PATCH registers a new PATCH route for a path with matching handler in the router.
+func (r *Route) PATCH(path string, h HandlerFunc) { r.Handle(http.MethodPatch, path, h) }
+
+// DELETE registers a new DELETE route for a path with matching handler in the router.
+func (r *Route) DELETE(path string, h HandlerFunc) { r.Handle(http.MethodDelete, path, h) }
+
+// CONNECT registers a new CONNECT route for a path with matching handler in the router.
+func (r *Route) CONNECT(path string, h HandlerFunc) { r.Handle(http.MethodConnect, path, h) }
+
+// OPTIONS registers a new OPTIONS route for a path with matching handler in the router.
+func (r *Route) OPTIONS(path string, h HandlerFunc) { r.Handle(http.MethodOptions, path, h) }
+
+// TRACE registers a new TRACE route for a path with matching handler in the router.
+func (r *Route) TRACE(path string, h HandlerFunc) { r.Handle(http.MethodTrace, path, h) }

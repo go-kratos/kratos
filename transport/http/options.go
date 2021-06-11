@@ -3,16 +3,21 @@ package http
 import (
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
 const SupportPackageIsVersion1 = true
+
+// ServerOption is an HTTP server option.
+type ServerOption func(*Server)
 
 // DecodeRequestFunc is decode request func.
 type DecodeRequestFunc func(*http.Request, interface{}) error
@@ -23,53 +28,59 @@ type EncodeResponseFunc func(http.ResponseWriter, *http.Request, interface{}) er
 // EncodeErrorFunc is encode error func.
 type EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
 
-// HandleOption is handle option.
-type HandleOption func(*HandleOptions)
-
-// HandleOptions is handle options.
-// Deprecated: use Handler instead.
-type HandleOptions struct {
-	Decode     DecodeRequestFunc
-	Encode     EncodeResponseFunc
-	Error      EncodeErrorFunc
-	Middleware middleware.Middleware
+// Network with server network.
+func Network(network string) ServerOption {
+	return func(s *Server) {
+		s.network = network
+	}
 }
 
-// DefaultHandleOptions returns a default handle options.
-// Deprecated: use NewHandler instead.
-func DefaultHandleOptions() HandleOptions {
-	return HandleOptions{
-		Decode: DefaultRequestDecoder,
-		Encode: DefaultResponseEncoder,
-		Error:  DefaultErrorEncoder,
+// Address with server address.
+func Address(addr string) ServerOption {
+	return func(s *Server) {
+		s.address = addr
+	}
+}
+
+// Timeout with server timeout.
+func Timeout(timeout time.Duration) ServerOption {
+	return func(s *Server) {
+		s.timeout = timeout
+	}
+}
+
+// Logger with server logger.
+func Logger(logger log.Logger) ServerOption {
+	return func(s *Server) {
+		s.log = log.NewHelper(logger)
 	}
 }
 
 // RequestDecoder with request decoder.
-func RequestDecoder(dec DecodeRequestFunc) HandleOption {
-	return func(o *HandleOptions) {
-		o.Decode = dec
+func RequestDecoder(dec DecodeRequestFunc) ServerOption {
+	return func(o *Server) {
+		o.dec = dec
 	}
 }
 
 // ResponseEncoder with response encoder.
-func ResponseEncoder(en EncodeResponseFunc) HandleOption {
-	return func(o *HandleOptions) {
-		o.Encode = en
+func ResponseEncoder(en EncodeResponseFunc) ServerOption {
+	return func(o *Server) {
+		o.enc = en
 	}
 }
 
 // ErrorEncoder with error encoder.
-func ErrorEncoder(en EncodeErrorFunc) HandleOption {
-	return func(o *HandleOptions) {
-		o.Error = en
+func ErrorEncoder(en EncodeErrorFunc) ServerOption {
+	return func(o *Server) {
+		o.ene = en
 	}
 }
 
 // Middleware with middleware option.
-func Middleware(m ...middleware.Middleware) HandleOption {
-	return func(o *HandleOptions) {
-		o.Middleware = middleware.Chain(m...)
+func Middleware(m ...middleware.Middleware) ServerOption {
+	return func(o *Server) {
+		o.m = middleware.Chain(m...)
 	}
 }
 
