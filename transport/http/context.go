@@ -2,6 +2,8 @@ package http
 
 import (
 	"context"
+	"encoding/json"
+	"encoding/xml"
 	"io"
 	"net/http"
 	"net/url"
@@ -26,8 +28,10 @@ type Context interface {
 	Response() http.ResponseWriter
 	Middleware(middleware.Handler) middleware.Handler
 	Bind(interface{}) error
-	Result(int, interface{}) error
 	Returns(interface{}, error) error
+	Result(int, interface{}) error
+	JSON(int, interface{}) error
+	XML(int, interface{}) error
 	String(int, string) error
 	Blob(int, string, []byte) error
 	Stream(int, string, io.Reader) error
@@ -64,13 +68,6 @@ func (c *wrapper) Middleware(h middleware.Handler) middleware.Handler {
 	return middleware.Chain(c.route.srv.ms...)(h)
 }
 func (c *wrapper) Bind(v interface{}) error { return c.route.srv.dec(c.req, v) }
-func (c *wrapper) Result(code int, v interface{}) error {
-	c.res.WriteHeader(code)
-	if err := c.route.srv.enc(c.res, c.req, v); err != nil {
-		return err
-	}
-	return nil
-}
 func (c *wrapper) Returns(v interface{}, err error) error {
 	if err != nil {
 		return err
@@ -79,6 +76,23 @@ func (c *wrapper) Returns(v interface{}, err error) error {
 		return err
 	}
 	return nil
+}
+func (c *wrapper) Result(code int, v interface{}) error {
+	c.res.WriteHeader(code)
+	if err := c.route.srv.enc(c.res, c.req, v); err != nil {
+		return err
+	}
+	return nil
+}
+func (c *wrapper) JSON(code int, v interface{}) error {
+	c.res.WriteHeader(code)
+	c.res.Header().Set("Content-Type", "application/json")
+	return json.NewEncoder(c.res).Encode(v)
+}
+func (c *wrapper) XML(code int, v interface{}) error {
+	c.res.WriteHeader(code)
+	c.res.Header().Set("Content-Type", "application/xml")
+	return xml.NewEncoder(c.res).Encode(v)
 }
 func (c *wrapper) String(code int, text string) error {
 	c.res.WriteHeader(code)
