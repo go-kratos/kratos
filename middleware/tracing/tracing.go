@@ -37,7 +37,8 @@ func Server(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromServerContext(ctx); ok {
-				ctx, span := tracer.Start(ctx, tr.Kind(), tr.Method(), tr.Metadata())
+				var span trace.Span
+				ctx, span = tracer.Start(ctx, tr.Kind(), tr.Method(), tr.Metadata())
 				defer func() { tracer.End(ctx, span, err) }()
 			}
 			return handler(ctx, req)
@@ -51,7 +52,8 @@ func Client(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromClientContext(ctx); ok {
-				ctx, span := tracer.Start(ctx, tr.Kind(), tr.Method(), tr.Metadata())
+				var span trace.Span
+				ctx, span = tracer.Start(ctx, tr.Kind(), tr.Method(), tr.Metadata())
 				defer func() { tracer.End(ctx, span, err) }()
 			}
 			return handler(ctx, req)

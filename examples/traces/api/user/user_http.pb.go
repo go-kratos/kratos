@@ -83,8 +83,9 @@ func NewUserHTTPClient(client *http1.Client) UserHTTPClient {
 func (c *UserHTTPClientImpl) GetMyMessages(ctx context.Context, in *GetMyMessagesRequest, opts ...http1.CallOption) (*GetMyMessagesReply, error) {
 	var out GetMyMessagesReply
 	path := binding.EncodePath("GET", "/v1/user/get/message/{count}", in)
+	opts = append(opts, http1.Method("/api.user.v1.User/GetMyMessages"))
 
-	err := c.cc.Invoke(ctx, "GET", path, in, &out, http1.Method("/api.user.v1.User/GetMyMessages"))
+	err := c.cc.Invoke(ctx, "GET", path, in, &out, opts...)
 
 	return &out, err
 }

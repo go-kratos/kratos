@@ -13,8 +13,11 @@ type Metadata map[string]string
 func New(m map[string][]string) Metadata {
 	md := Metadata{}
 	for k, v := range m {
+		if k == "" {
+			continue
+		}
 		key := strings.ToLower(k)
-		if len(v) > 0 {
+		if len(v) > 0 && v[0] != "" {
 			md[key] = v[0]
 		}
 	}
@@ -29,6 +32,9 @@ func (m Metadata) Get(key string) string {
 
 // Set stores the key-value pair.
 func (m Metadata) Set(key string, value string) {
+	if key == "" || value == "" {
+		return
+	}
 	k := strings.ToLower(key)
 	m[k] = value
 }
@@ -44,7 +50,7 @@ func (m Metadata) Keys() []string {
 
 // Pairs returns all metadata to key/value pairs.
 func (m Metadata) Pairs() []string {
-	var kvs = make([]string, len(m)*2)
+	var kvs = make([]string, 0, len(m)*2)
 	for k, v := range m {
 		kvs = append(kvs, k, v)
 	}
