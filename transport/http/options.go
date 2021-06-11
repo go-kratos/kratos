@@ -84,8 +84,8 @@ func Middleware(m ...middleware.Middleware) ServerOption {
 	}
 }
 
-// RouteMiddleware with HTTP middleware option.
-func RouteMiddleware(m ...MiddlewareFunc) ServerOption {
+// Filter with HTTP middleware option.
+func Filter(m ...MiddlewareFunc) ServerOption {
 	return func(o *Server) {
 		o.routeM = m
 	}

@@ -37,7 +37,7 @@ func loggingMiddleware(next http.HandlerFunc) http.HandlerFunc {
 func TestRoute(t *testing.T) {
 	ctx := context.Background()
 	srv := NewServer(
-		RouteMiddleware(loggingMiddleware),
+		Filter(loggingMiddleware),
 	)
 	route := srv.Route("/")
 	route.GET("/users/{name}", func(ctx Context) error {
