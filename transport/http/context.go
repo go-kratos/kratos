@@ -40,7 +40,12 @@ func (c *wrapper) Vars() url.Values {
 	}
 	return vars
 }
-func (c *wrapper) Form() url.Values                  { return c.req.Form }
+func (c *wrapper) Form() url.Values {
+	if err := c.req.ParseForm(); err != nil {
+		return url.Values{}
+	}
+	return c.req.Form
+}
 func (c *wrapper) Request() *http.Request            { return c.req }
 func (c *wrapper) Response() http.ResponseWriter     { return c.res }
 func (c *wrapper) Middleware() middleware.Middleware { return c.route.srv.m }
