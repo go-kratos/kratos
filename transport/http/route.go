@@ -28,20 +28,20 @@ func newRoute(prefix string, srv *Server) *Route {
 }
 
 // Handle registers a new route with a matcher for the URL path and method.
-func (r *Route) Handle(method, relativePath string, call HandlerFunc, m ...FilterFunc) {
-	h := func(res http.ResponseWriter, req *http.Request) {
+func (r *Route) Handle(method, relativePath string, h HandlerFunc, m ...FilterFunc) {
+	next := func(res http.ResponseWriter, req *http.Request) {
 		ctx := r.pool.Get().(Context)
 		ctx.Reset(res, req)
-		if err := call(ctx); err != nil {
+		if err := h(ctx); err != nil {
 			r.srv.ene(res, req, err)
 		}
 		ctx.Reset(nil, nil)
 		r.pool.Put(ctx)
 	}
 	for _, m := range m {
-		h = m(h)
+		next = m(next)
 	}
-	r.srv.router.HandleFunc(path.Join(r.prefix, relativePath), h).Methods(method)
+	r.srv.router.HandleFunc(path.Join(r.prefix, relativePath), next).Methods(method)
 }
 
 // GET registers a new GET route for a path with matching handler in the router.
