@@ -83,24 +83,31 @@ func (s *Server) HandleFunc(path string, h http.HandlerFunc) {
 
 // ServeHTTP should write reply headers and data to the ResponseWriter and then return.
 func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	h := func(res http.ResponseWriter, req *http.Request) {
-		ctx, cancel := ic.Merge(req.Context(), s.ctx)
+	ctx, cancel := ic.Merge(req.Context(), s.ctx)
+	defer cancel()
+	if s.timeout > 0 {
+		ctx, cancel = context.WithTimeout(ctx, s.timeout)
 		defer cancel()
-		ctx = transport.NewServerContext(ctx, &Transport{
-			endpoint: s.endpoint.String(),
-			method:   req.RequestURI,
-			metadata: metadata.New(req.Header),
-		})
-		if s.timeout > 0 {
-			ctx, cancel = context.WithTimeout(ctx, s.timeout)
-			defer cancel()
+	}
+	tr := &Transport{
+		endpoint: s.endpoint.String(),
+		method:   req.RequestURI,
+		metadata: metadata.New(req.Header),
+	}
+	if r := mux.CurrentRoute(req); r != nil {
+		if path, err := r.GetPathTemplate(); err == nil {
+			tr.method = path
 		}
-		s.router.ServeHTTP(res, req.WithContext(ctx))
+	}
+	ctx = transport.NewServerContext(ctx, tr)
+
+	h := func(res http.ResponseWriter, req *http.Request) {
+		s.router.ServeHTTP(res, req)
 	}
 	for _, m := range s.filters {
 		h = m(h)
 	}
-	h(res, req)
+	h(res, req.WithContext(ctx))
 }
 
 // Endpoint return a real address to registry endpoint.
