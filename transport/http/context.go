@@ -17,6 +17,7 @@ type HandlerFunc func(Context) error
 type Context interface {
 	Vars() url.Values
 	Form() url.Values
+	Header() http.Header
 	Request() *http.Request
 	Response() http.ResponseWriter
 	Middleware() middleware.Middleware
@@ -30,6 +31,10 @@ type wrapper struct {
 	res   http.ResponseWriter
 	req   *http.Request
 	route *Route
+}
+
+func (c *wrapper) Header() http.Header {
+	return c.req.Header
 }
 
 func (c *wrapper) Vars() url.Values {
