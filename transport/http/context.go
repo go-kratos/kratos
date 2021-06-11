@@ -35,8 +35,8 @@ type wrapper struct {
 func (c *wrapper) Vars() url.Values {
 	raws := mux.Vars(c.req)
 	vars := make(url.Values, len(raws))
-	for k, v := range vars {
-		vars[k] = v
+	for k, v := range raws {
+		vars[k] = []string{v}
 	}
 	return vars
 }
@@ -51,20 +51,20 @@ func (c *wrapper) Response() http.ResponseWriter     { return c.res }
 func (c *wrapper) Middleware() middleware.Middleware { return c.route.srv.m }
 func (c *wrapper) Bind(v interface{}) error          { return c.route.srv.dec(c.req, v) }
 func (c *wrapper) Result(code int, v interface{}) error {
+	c.res.WriteHeader(code)
 	if err := c.route.srv.enc(c.res, c.req, v); err != nil {
 		return err
 	}
-	c.res.WriteHeader(code)
 	return nil
 }
 func (c *wrapper) Returns(code int, v interface{}, err error) error {
 	if err != nil {
 		return err
 	}
+	c.res.WriteHeader(code)
 	if err := c.route.srv.enc(c.res, c.req, v); err != nil {
 		return err
 	}
-	c.res.WriteHeader(code)
 	return nil
 }
 func (c *wrapper) Reset(r *Route, res http.ResponseWriter, req *http.Request) {

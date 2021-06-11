@@ -2,12 +2,18 @@ package http
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/internal/host"
 )
 
 type User struct {
-	Name string
+	Name string `json:"name"`
 }
 
 func TestRoute(t *testing.T) {
@@ -24,7 +30,7 @@ func TestRoute(t *testing.T) {
 		if err := ctx.Bind(u); err != nil {
 			return err
 		}
-		return ctx.Result(200, u)
+		return ctx.Result(201, u)
 	})
 
 	go func() {
@@ -33,5 +39,46 @@ func TestRoute(t *testing.T) {
 		}
 	}()
 	time.Sleep(time.Second)
+	testRoute(t, srv)
 	srv.Stop(ctx)
+}
+
+func testRoute(t *testing.T, srv *Server) {
+	port, ok := host.Port(srv.lis)
+	if !ok {
+		t.Fatalf("extract port error: %v", srv.lis)
+	}
+	base := fmt.Sprintf("http://127.0.0.1:%d", port)
+	// GET
+	resp, err := http.Get(base + "/users/foo")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		t.Fatalf("code: %d", resp.StatusCode)
+	}
+	u := new(User)
+	if err := json.NewDecoder(resp.Body).Decode(u); err != nil {
+		t.Fatal(err)
+	}
+	if u.Name != "foo" {
+		t.Fatalf("got %s want foo", u.Name)
+	}
+	// POST
+	resp, err = http.Post(base+"/users", "application/json", strings.NewReader(`{"name":"bar"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 201 {
+		t.Fatalf("code: %d", resp.StatusCode)
+	}
+	u = new(User)
+	if err = json.NewDecoder(resp.Body).Decode(u); err != nil {
+		t.Fatal(err)
+	}
+	if u.Name != "bar" {
+		t.Fatalf("got %s want bar", u.Name)
+	}
 }

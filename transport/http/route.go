@@ -9,8 +9,8 @@ import (
 // Route is an HTTP route.
 type Route struct {
 	prefix string
-	srv    *Server
 	pool   sync.Pool
+	srv    *Server
 }
 
 func newRoute(prefix string, srv *Server) *Route {
