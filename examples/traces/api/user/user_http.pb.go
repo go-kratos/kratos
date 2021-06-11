@@ -53,7 +53,7 @@ func NewUserHandler(srv UserHandler, opts ...http1.HandleOption) http.Handler {
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerMethod(ctx, "/api.user.v1.User/GetMyMessages")
+		transport.SetMethod(ctx, "/api.user.v1.User/GetMyMessages")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)

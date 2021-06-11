@@ -41,7 +41,7 @@ func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.Handl
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerMethod(ctx,"/{{$svrName}}/{{.Name}}")
+		transport.SetMethod(ctx,"/{{$svrName}}/{{.Name}}")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)

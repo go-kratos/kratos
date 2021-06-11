@@ -50,7 +50,7 @@ func NewMetadataHandler(srv MetadataHandler, opts ...http1.HandleOption) http.Ha
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerMethod(ctx, "/kratos.api.Metadata/ListServices")
+		transport.SetMethod(ctx, "/kratos.api.Metadata/ListServices")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -81,7 +81,7 @@ func NewMetadataHandler(srv MetadataHandler, opts ...http1.HandleOption) http.Ha
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerMethod(ctx, "/kratos.api.Metadata/GetServiceDesc")
+		transport.SetMethod(ctx, "/kratos.api.Metadata/GetServiceDesc")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)

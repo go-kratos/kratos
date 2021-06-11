@@ -56,7 +56,7 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerMethod(ctx, "/blog.api.v1.BlogService/CreateArticle")
+		transport.SetMethod(ctx, "/blog.api.v1.BlogService/CreateArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -87,7 +87,7 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerMethod(ctx, "/blog.api.v1.BlogService/UpdateArticle")
+		transport.SetMethod(ctx, "/blog.api.v1.BlogService/UpdateArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -118,7 +118,7 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerMethod(ctx, "/blog.api.v1.BlogService/DeleteArticle")
+		transport.SetMethod(ctx, "/blog.api.v1.BlogService/DeleteArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -149,7 +149,7 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerMethod(ctx, "/blog.api.v1.BlogService/GetArticle")
+		transport.SetMethod(ctx, "/blog.api.v1.BlogService/GetArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
@@ -175,7 +175,7 @@ func NewBlogServiceHandler(srv BlogServiceHandler, opts ...http1.HandleOption) h
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerMethod(ctx, "/blog.api.v1.BlogService/ListArticle")
+		transport.SetMethod(ctx, "/blog.api.v1.BlogService/ListArticle")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)

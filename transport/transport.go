@@ -62,16 +62,17 @@ func FromClientContext(ctx context.Context) (tr Transporter, ok bool) {
 	return
 }
 
-// SetServerMethod set serviceMethod into context transport.
-func SetServerMethod(ctx context.Context, method string) {
+// Method returns the Transport method from server context.
+func Method(ctx context.Context) string {
 	if tr, ok := FromServerContext(ctx); ok {
-		tr.SetMethod(method)
+		return tr.Method()
 	}
+	return ""
 }
 
-// SetClientMethod set serviceMethod into context transport.
-func SetClientMethod(ctx context.Context, method string) {
-	if tr, ok := FromClientContext(ctx); ok {
+// SetMethod set serviceMethod into context transport.
+func SetMethod(ctx context.Context, method string) {
+	if tr, ok := FromServerContext(ctx); ok {
 		tr.SetMethod(method)
 	}
 }

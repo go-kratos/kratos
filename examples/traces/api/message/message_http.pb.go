@@ -53,7 +53,7 @@ func NewMessageServiceHandler(srv MessageServiceHandler, opts ...http1.HandleOpt
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerMethod(ctx, "/api.message.v1.MessageService/GetUserMessage")
+		transport.SetMethod(ctx, "/api.message.v1.MessageService/GetUserMessage")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)

@@ -53,7 +53,7 @@ func NewGreeterHandler(srv GreeterHandler, opts ...http1.HandleOption) http.Hand
 			next = h.Middleware(next)
 		}
 		ctx := r.Context()
-		transport.SetServerMethod(ctx, "/helloworld.Greeter/SayHello")
+		transport.SetMethod(ctx, "/helloworld.Greeter/SayHello")
 		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
