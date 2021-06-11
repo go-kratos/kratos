@@ -3,7 +3,7 @@ package main
 import (
 	"strings"
 
-	pb "github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2/errors"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 )
@@ -51,7 +51,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 }
 
 func defaultErrorCode(enum *protogen.Enum) int {
-	defaultCode := proto.GetExtension(enum.Desc.Options(), pb.E_DefaultCode)
+	defaultCode := proto.GetExtension(enum.Desc.Options(), errors.E_DefaultCode)
 	if code, ok := defaultCode.(int32); ok && code > 0 {
 		return int(code)
 	}
@@ -62,7 +62,7 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	var ew errorWrapper
 	defCode := defaultErrorCode(enum)
 	for _, v := range enum.Values {
-		code := int(proto.GetExtension(v.Desc.Options(), pb.E_Code).(int32))
+		code := int(proto.GetExtension(v.Desc.Options(), errors.E_Code).(int32))
 		if code == 0 {
 			code = defCode
 		}
