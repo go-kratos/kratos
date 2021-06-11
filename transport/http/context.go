@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -27,6 +28,9 @@ type Context interface {
 	Bind(interface{}) error
 	Result(int, interface{}) error
 	Returns(interface{}, error) error
+	String(int, string) error
+	Blob(int, string, []byte) error
+	Stream(int, string, io.Reader) error
 	Reset(http.ResponseWriter, *http.Request)
 }
 
@@ -75,6 +79,24 @@ func (c *wrapper) Returns(v interface{}, err error) error {
 		return err
 	}
 	return nil
+}
+func (c *wrapper) String(code int, text string) error {
+	c.res.WriteHeader(code)
+	c.res.Header().Set("Content-Type", "text/plain")
+	c.res.Write([]byte(text))
+	return nil
+}
+func (c *wrapper) Blob(code int, contentType string, data []byte) error {
+	c.res.WriteHeader(code)
+	c.res.Header().Set("Content-Type", contentType)
+	c.res.Write(data)
+	return nil
+}
+func (c *wrapper) Stream(code int, contentType string, rd io.Reader) error {
+	c.res.WriteHeader(code)
+	c.res.Header().Set("Content-Type", contentType)
+	_, err := io.Copy(c.res, rd)
+	return err
 }
 func (c *wrapper) Reset(res http.ResponseWriter, req *http.Request) {
 	c.res = res
