@@ -53,6 +53,20 @@ func Logger(logger log.Logger) ServerOption {
 	}
 }
 
+// Middleware with service middleware option.
+func Middleware(m ...middleware.Middleware) ServerOption {
+	return func(o *Server) {
+		o.ms = m
+	}
+}
+
+// Filter with HTTP middleware option.
+func Filter(f ...FilterFunc) ServerOption {
+	return func(o *Server) {
+		o.filters = f
+	}
+}
+
 // RequestDecoder with request decoder.
 func RequestDecoder(dec DecodeRequestFunc) ServerOption {
 	return func(o *Server) {
@@ -71,20 +85,6 @@ func ResponseEncoder(en EncodeResponseFunc) ServerOption {
 func ErrorEncoder(en EncodeErrorFunc) ServerOption {
 	return func(o *Server) {
 		o.ene = en
-	}
-}
-
-// Middleware with service middleware option.
-func Middleware(m ...middleware.Middleware) ServerOption {
-	return func(o *Server) {
-		o.ms = m
-	}
-}
-
-// Filter with HTTP middleware option.
-func Filter(f ...FilterFunc) ServerOption {
-	return func(o *Server) {
-		o.filters = f
 	}
 }
 
