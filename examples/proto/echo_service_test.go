@@ -3,8 +3,6 @@ package testproto
 import (
 	context "context"
 	"fmt"
-	"net"
-	http "net/http"
 	"testing"
 	"time"
 
@@ -66,21 +64,18 @@ func (c *echoClient) EchoResponseBody(ctx context.Context, in *DynamicMessageUpd
 }
 
 func TestEchoService(t *testing.T) {
-	s := &echoService{}
-	h := NewEchoServiceHandler(s)
-	srv := &http.Server{Addr: ":0", Handler: h}
-	lis, err := net.Listen("tcp", srv.Addr)
-	if err != nil {
-		t.Fatal(err)
-	}
-	addr := lis.Addr().(*net.TCPAddr)
-	time.AfterFunc(time.Second, func() {
-		defer srv.Shutdown(context.Background())
-		testEchoClient(t, fmt.Sprintf("127.0.0.1:%d", addr.Port))
-	})
-	if err := srv.Serve(lis); err != nil && err != http.ErrServerClosed {
-		t.Fatal(err)
-	}
+	echo := &echoService{}
+	ctx := context.Background()
+	srv := tr.NewServer(tr.Address(":8888"))
+	RegisterEchoServiceHTTPServer(srv, echo)
+	go func() {
+		if err := srv.Start(ctx); err != nil {
+			panic(err)
+		}
+	}()
+	time.Sleep(time.Second)
+	testEchoClient(t, fmt.Sprintf("127.0.0.1:8888"))
+	srv.Stop(ctx)
 }
 
 func testEchoClient(t *testing.T, addr string) {
