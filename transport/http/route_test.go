@@ -17,10 +17,18 @@ type User struct {
 	Name string `json:"name"`
 }
 
+func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Do stuff here
+		log.Println("auth:", r.RequestURI)
+		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		next.ServeHTTP(w, r)
+	}
+}
 func loggingMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Do stuff here
-		log.Println(r.RequestURI)
+		log.Println("logging:", r.RequestURI)
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
 		next.ServeHTTP(w, r)
 	}
@@ -28,13 +36,15 @@ func loggingMiddleware(next http.HandlerFunc) http.HandlerFunc {
 
 func TestRoute(t *testing.T) {
 	ctx := context.Background()
-	srv := NewServer()
+	srv := NewServer(
+		RouteMiddleware(loggingMiddleware),
+	)
 	route := srv.Route("/")
 	route.GET("/users/{name}", func(ctx Context) error {
 		u := new(User)
 		u.Name = ctx.Vars().Get("name")
 		return ctx.Result(200, u)
-	}, loggingMiddleware)
+	}, authMiddleware)
 	route.POST("/users", func(ctx Context) error {
 		u := new(User)
 		if err := ctx.Bind(u); err != nil {
