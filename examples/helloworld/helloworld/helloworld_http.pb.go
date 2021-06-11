@@ -4,6 +4,8 @@ package helloworld
 
 import (
 	context "context"
+	middleware "github.com/go-kratos/kratos/v2/middleware"
+	transport "github.com/go-kratos/kratos/v2/transport"
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
@@ -14,7 +16,9 @@ import (
 // is compatible with the kratos package it is being compiled against.
 var _ = new(http.Request)
 var _ = new(context.Context)
-var _ = binding.MapProto
+var _ = new(middleware.Middleware)
+var _ = new(transport.Transporter)
+var _ = binding.BindVars
 var _ = mux.NewRouter
 
 const _ = http1.SupportPackageIsVersion1
@@ -48,7 +52,9 @@ func NewGreeterHandler(srv GreeterHandler, opts ...http1.HandleOption) http.Hand
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		ctx := r.Context()
+		transport.SetMethod(ctx, "/helloworld.Greeter/SayHello")
+		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -74,14 +80,12 @@ func NewGreeterHTTPClient(client *http1.Client) GreeterHTTPClient {
 	return &GreeterHTTPClientImpl{client}
 }
 
-func (c *GreeterHTTPClientImpl) SayHello(ctx context.Context, in *HelloRequest, opts ...http1.CallOption) (out *HelloReply, err error) {
+func (c *GreeterHTTPClientImpl) SayHello(ctx context.Context, in *HelloRequest, opts ...http1.CallOption) (*HelloReply, error) {
+	var out HelloReply
 	path := binding.EncodePath("GET", "/helloworld/{name}", in)
-	out = &HelloReply{}
+	opts = append(opts, http1.Method("/helloworld.Greeter/SayHello"))
 
-	err = c.cc.Invoke(ctx, path, nil, &out, http1.Method("GET"), http1.PathPattern("/helloworld/{name}"))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 
-	if err != nil {
-		return
-	}
-	return
+	return &out, err
 }

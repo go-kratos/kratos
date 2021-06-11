@@ -14,5 +14,5 @@ type DoneInfo struct {
 
 // Balancer is node pick balancer
 type Balancer interface {
-	Pick(ctx context.Context, pathPattern string, nodes []*registry.ServiceInstance) (node *registry.ServiceInstance, done func(context.Context, DoneInfo), err error)
+	Pick(ctx context.Context, nodes []*registry.ServiceInstance) (node *registry.ServiceInstance, done func(context.Context, DoneInfo), err error)
 }

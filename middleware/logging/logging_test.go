@@ -4,17 +4,49 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
-	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
+var (
+	_ transport.Transporter = &Transport{}
+)
+
+type Transport struct {
+	kind     string
+	endpoint string
+	method   string
+}
+
+func (tr *Transport) Kind() string {
+	return tr.kind
+}
+
+func (tr *Transport) Endpoint() string {
+	return tr.endpoint
+}
+
+func (tr *Transport) Method() string {
+	return tr.method
+}
+
+func (tr *Transport) SetMethod(method string) {
+	tr.method = method
+}
+
+func (tr *Transport) Metadata() metadata.Metadata {
+	return nil
+}
+
+func (tr *Transport) WithMetadata(md metadata.Metadata) {
+
+}
+
 func TestHTTP(t *testing.T) {
-	var req = httptest.NewRequest("GET", "http://example.com/foo", nil)
 	var err = errors.New("reply.error")
 	var bf = bytes.NewBuffer(nil)
 	var logger = log.NewStdLogger(bf)
@@ -29,34 +61,29 @@ func TestHTTP(t *testing.T) {
 			Server,
 			err,
 			func() context.Context {
-				res := httptest.NewRecorder()
-				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: transport.KindHTTP, Endpoint: "endpoint"})
-				return http.NewServerContext(ctx, http.ServerInfo{Request: req, Response: res})
+				return transport.NewServerContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", method: "/package.service/method"})
 			}(),
 		},
 		{"http-server@succ",
 			Server,
 			nil,
 			func() context.Context {
-				res := httptest.NewRecorder()
-				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: transport.KindHTTP, Endpoint: "endpoint"})
-				return http.NewServerContext(ctx, http.ServerInfo{Request: req, Response: res})
+				return transport.NewServerContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", method: "/package.service/method"})
 			}(),
 		},
 		{"http-client@succ",
 			Client,
 			nil,
 			func() context.Context {
-				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: transport.KindHTTP, Endpoint: "endpoint"})
-				return http.NewClientContext(ctx, http.ClientInfo{Request: req, PathPattern: "{name}"})
+				return transport.NewClientContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", method: "/package.service/method"})
+
 			}(),
 		},
 		{"http-client@fail",
 			Client,
 			err,
 			func() context.Context {
-				ctx := transport.NewContext(context.Background(), transport.Transport{Kind: transport.KindHTTP, Endpoint: "endpoint"})
-				return http.NewClientContext(ctx, http.ClientInfo{Request: req, PathPattern: "{name}"})
+				return transport.NewClientContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", method: "/package.service/method"})
 			}(),
 		},
 	}
@@ -70,7 +97,7 @@ func TestHTTP(t *testing.T) {
 			next = test.kind(logger)(next)
 			v, e := next(test.ctx, "req.args")
 			t.Logf("[%s]reply: %v, error: %v", test.name, v, e)
-			t.Logf("[%s]buffer:%s", test.name, bf.String())
+			t.Logf("[%s]log:%s", test.name, bf.String())
 		})
 	}
 }

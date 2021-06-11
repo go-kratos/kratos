@@ -1,5 +1,7 @@
 package http
 
+import "github.com/go-kratos/kratos/v2/metadata"
+
 // CallOption configures a Call before it starts or extracts information from
 // a Call after it completes.
 type CallOption interface {
@@ -13,8 +15,9 @@ type CallOption interface {
 }
 
 type callInfo struct {
-	pathPattern string
+	contentType string
 	method      string
+	metatada    metadata.Metadata
 }
 
 // EmptyCallOption does not alter the Call configuration.
@@ -27,28 +30,36 @@ func (EmptyCallOption) after(*callInfo, *csAttempt) {}
 
 type csAttempt struct{}
 
-// PathPattern is pathpattern
-func PathPattern(pathPattern string) CallOption {
-	return PathPatternCallOption{PathPattern: pathPattern}
+// ContentType with request content type.
+func ContentType(contentType string) CallOption {
+	return ContentTypeCallOption{ContentType: contentType}
 }
 
-// PathPatternCallOption is BodyPattern
-type PathPatternCallOption struct {
+// ContentTypeCallOption is BodyCallOption
+type ContentTypeCallOption struct {
 	EmptyCallOption
-	PathPattern string
+	ContentType string
 }
 
-func (o PathPatternCallOption) before(c *callInfo) error {
-	c.pathPattern = o.PathPattern
+func (o ContentTypeCallOption) before(c *callInfo) error {
+	c.contentType = o.ContentType
 	return nil
 }
 
-// Method is Method
+func defaultCallInfo(path string) callInfo {
+	return callInfo{
+		contentType: "application/json",
+		method:      path,
+		metatada:    metadata.Metadata{},
+	}
+}
+
+// Method is serviceMethod call option
 func Method(method string) CallOption {
 	return MethodCallOption{Method: method}
 }
 
-// MethodCallOption is BodyCallOption
+// MethodCallOption is set ServiceMethod for client call
 type MethodCallOption struct {
 	EmptyCallOption
 	Method string
@@ -59,8 +70,18 @@ func (o MethodCallOption) before(c *callInfo) error {
 	return nil
 }
 
-func defaultCallInfo() callInfo {
-	return callInfo{
-		method: "POST",
-	}
+// Metadata is Metadata call option
+func Metadata(metatada metadata.Metadata) CallOption {
+	return MetadataCallOption{Metatada: metatada}
+}
+
+// MetadataCallOption is set Metadata for client call
+type MetadataCallOption struct {
+	EmptyCallOption
+	Metatada metadata.Metadata
+}
+
+func (o MetadataCallOption) before(c *callInfo) error {
+	c.metatada = o.Metatada
+	return nil
 }

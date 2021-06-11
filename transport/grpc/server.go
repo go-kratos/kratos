@@ -7,15 +7,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/api/metadata"
+	apimd "github.com/go-kratos/kratos/v2/api/metadata"
 	ic "github.com/go-kratos/kratos/v2/internal/context"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	grpcmd "google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -90,7 +93,7 @@ type Server struct {
 	ints       []grpc.UnaryServerInterceptor
 	grpcOpts   []grpc.ServerOption
 	health     *health.Server
-	metadata   *metadata.Server
+	metadata   *apimd.Server
 }
 
 // NewServer creates a gRPC server by options.
@@ -118,10 +121,10 @@ func NewServer(opts ...ServerOption) *Server {
 		grpcOpts = append(grpcOpts, srv.grpcOpts...)
 	}
 	srv.Server = grpc.NewServer(grpcOpts...)
-	srv.metadata = metadata.NewServer(srv.Server)
+	srv.metadata = apimd.NewServer(srv.Server)
 	// internal register
 	grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
-	metadata.RegisterMetadataServer(srv.Server, srv.metadata)
+	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
 	reflection.Register(srv.Server)
 	return srv
 }
@@ -174,8 +177,12 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		ctx, cancel := ic.Merge(ctx, s.ctx)
 		defer cancel()
-		ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindGRPC, Endpoint: s.endpoint.String()})
-		ctx = NewServerContext(ctx, ServerInfo{Server: info.Server, FullMethod: info.FullMethod})
+		md, _ := grpcmd.FromIncomingContext(ctx)
+		ctx = transport.NewServerContext(ctx, &Transport{
+			endpoint: s.endpoint.String(),
+			method:   info.FullMethod,
+			metadata: metadata.New(md),
+		})
 		if s.timeout > 0 {
 			var cancel context.CancelFunc
 			ctx, cancel = context.WithTimeout(ctx, s.timeout)

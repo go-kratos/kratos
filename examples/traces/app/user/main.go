@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"os"
+	"time"
+
 	message "github.com/go-kratos/kratos/examples/traces/api/message"
 	pb "github.com/go-kratos/kratos/examples/traces/api/user"
 	"github.com/go-kratos/kratos/v2"
@@ -19,8 +22,6 @@ import (
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/semconv"
 	"go.opentelemetry.io/otel/trace"
-	"os"
-	"time"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
@@ -83,14 +84,15 @@ func (s *server) GetMyMessages(ctx context.Context, in *pb.GetMyMessagesRequest)
 	}
 	res := &pb.GetMyMessagesReply{}
 	for _, v := range reply.Messages {
-		res.Messages = append(res.Messages,&pb.Message{Content: v.Content})
+		res.Messages = append(res.Messages, &pb.Message{Content: v.Content})
 	}
 	return res, nil
 }
 
 func main() {
 	logger := log.NewStdLogger(os.Stdout)
-
+	logger = log.With(logger, "trace_id", log.TraceID())
+	logger = log.With(logger, "span_id", log.SpanID())
 	log := log.NewHelper(logger)
 
 	tp, err := tracerProvider("http://jaeger:14268/api/traces")

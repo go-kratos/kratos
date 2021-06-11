@@ -4,6 +4,8 @@ package v1
 
 import (
 	context "context"
+	middleware "github.com/go-kratos/kratos/v2/middleware"
+	transport "github.com/go-kratos/kratos/v2/transport"
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 	mux "github.com/gorilla/mux"
@@ -14,7 +16,9 @@ import (
 // is compatible with the kratos package it is being compiled against.
 var _ = new(http.Request)
 var _ = new(context.Context)
-var _ = binding.MapProto
+var _ = new(middleware.Middleware)
+var _ = new(transport.Transporter)
+var _ = binding.BindVars
 var _ = mux.NewRouter
 
 const _ = http1.SupportPackageIsVersion1
@@ -37,7 +41,7 @@ func NewMessageServiceHandler(srv MessageServiceHandler, opts ...http1.HandleOpt
 			return
 		}
 
-		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
+		if err := binding.BindVars(mux.Vars(r), &in); err != nil {
 			h.Error(w, r, err)
 			return
 		}
@@ -48,7 +52,9 @@ func NewMessageServiceHandler(srv MessageServiceHandler, opts ...http1.HandleOpt
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		ctx := r.Context()
+		transport.SetMethod(ctx, "/api.message.v1.MessageService/GetUserMessage")
+		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -60,4 +66,26 @@ func NewMessageServiceHandler(srv MessageServiceHandler, opts ...http1.HandleOpt
 	}).Methods("GET")
 
 	return r
+}
+
+type MessageServiceHTTPClient interface {
+	GetUserMessage(ctx context.Context, req *GetUserMessageRequest, opts ...http1.CallOption) (rsp *GetUserMessageReply, err error)
+}
+
+type MessageServiceHTTPClientImpl struct {
+	cc *http1.Client
+}
+
+func NewMessageServiceHTTPClient(client *http1.Client) MessageServiceHTTPClient {
+	return &MessageServiceHTTPClientImpl{client}
+}
+
+func (c *MessageServiceHTTPClientImpl) GetUserMessage(ctx context.Context, in *GetUserMessageRequest, opts ...http1.CallOption) (*GetUserMessageReply, error) {
+	var out GetUserMessageReply
+	path := binding.EncodePath("GET", "/v1/message/user/{id}/{count}", in)
+	opts = append(opts, http1.Method("/api.message.v1.MessageService/GetUserMessage"))
+
+	err := c.cc.Invoke(ctx, "GET", path, in, &out, opts...)
+
+	return &out, err
 }

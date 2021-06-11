@@ -9,6 +9,7 @@ import (
 	_ "github.com/go-kratos/kratos/v2/encoding/proto"
 	_ "github.com/go-kratos/kratos/v2/encoding/xml"
 	_ "github.com/go-kratos/kratos/v2/encoding/yaml"
+	"github.com/go-kratos/kratos/v2/metadata"
 )
 
 // Server is transport server.
@@ -22,30 +23,71 @@ type Endpointer interface {
 	Endpoint() (*url.URL, error)
 }
 
-// Transport is transport context value.
-type Transport struct {
-	Kind     Kind
-	Endpoint string
+// Transporter is transport context value interface.
+type Transporter interface {
+	Kind() string
+	Endpoint() string
+
+	Method() string
+	SetMethod(string)
+
+	Metadata() metadata.Metadata
+	// WithMetadata merge new metadata into transport,
+	// it will override old metadata key value if key exists
+	WithMetadata(metadata.Metadata)
 }
 
-// Kind defines the type of Transport
-type Kind string
+type serverTransportKey struct{}
+type clientTransportKey struct{}
 
-// Defines a set of transport kind
-const (
-	KindGRPC Kind = "gRPC"
-	KindHTTP Kind = "HTTP"
-)
-
-type transportKey struct{}
-
-// NewContext returns a new Context that carries value.
-func NewContext(ctx context.Context, tr Transport) context.Context {
-	return context.WithValue(ctx, transportKey{}, tr)
+// NewServerContext returns a new Context that carries value.
+func NewServerContext(ctx context.Context, tr Transporter) context.Context {
+	return context.WithValue(ctx, serverTransportKey{}, tr)
 }
 
-// FromContext returns the Transport value stored in ctx, if any.
-func FromContext(ctx context.Context) (tr Transport, ok bool) {
-	tr, ok = ctx.Value(transportKey{}).(Transport)
+// FromServerContext returns the Transport value stored in ctx, if any.
+func FromServerContext(ctx context.Context) (tr Transporter, ok bool) {
+	tr, ok = ctx.Value(serverTransportKey{}).(Transporter)
 	return
+}
+
+// NewClientContext returns a new Context that carries value.
+func NewClientContext(ctx context.Context, tr Transporter) context.Context {
+	return context.WithValue(ctx, clientTransportKey{}, tr)
+}
+
+// FromClientContext returns the Transport value stored in ctx, if any.
+func FromClientContext(ctx context.Context) (tr Transporter, ok bool) {
+	tr, ok = ctx.Value(clientTransportKey{}).(Transporter)
+	return
+}
+
+// Method returns the Transport method from server context.
+func Method(ctx context.Context) string {
+	if tr, ok := FromServerContext(ctx); ok {
+		return tr.Method()
+	}
+	return ""
+}
+
+// SetMethod set serviceMethod into context transport.
+func SetMethod(ctx context.Context, method string) {
+	if tr, ok := FromServerContext(ctx); ok {
+		tr.SetMethod(method)
+	}
+}
+
+// Metadata returns incoming metadata from server transport.
+func Metadata(ctx context.Context) metadata.Metadata {
+	if tr, ok := FromServerContext(ctx); ok {
+		return tr.Metadata()
+	}
+	return metadata.Metadata{}
+}
+
+// SetMetadata sets outgoing metadata into client transport.
+func SetMetadata(ctx context.Context, md metadata.Metadata) {
+	if tr, ok := FromClientContext(ctx); ok {
+		tr.WithMetadata(md)
+	}
 }

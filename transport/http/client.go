@@ -12,6 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
+	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -23,7 +24,7 @@ import (
 type DecodeErrorFunc func(ctx context.Context, res *http.Response) error
 
 // EncodeRequestFunc is request encode func.
-type EncodeRequestFunc func(ctx context.Context, in interface{}) (contentType string, body []byte, err error)
+type EncodeRequestFunc func(ctx context.Context, contentType string, in interface{}) (body []byte, err error)
 
 // DecodeResponseFunc is response decode func.
 type DecodeResponseFunc func(ctx context.Context, res *http.Response, out interface{}) error
@@ -166,41 +167,44 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 }
 
 // Invoke makes an rpc call procedure for remote service.
-func (client *Client) Invoke(ctx context.Context, path string, args interface{}, reply interface{}, opts ...CallOption) error {
+func (client *Client) Invoke(ctx context.Context, method, path string, args interface{}, reply interface{}, opts ...CallOption) error {
 	var (
-		reqBody     io.Reader
 		contentType string
+		body        io.Reader
 	)
-	c := defaultCallInfo()
+	c := defaultCallInfo(path)
 	for _, o := range opts {
 		if err := o.before(&c); err != nil {
 			return err
 		}
 	}
 	if args != nil {
-		var (
-			body []byte
-			err  error
-		)
-		contentType, body, err = client.opts.encoder(ctx, args)
+		data, err := client.opts.encoder(ctx, c.contentType, args)
 		if err != nil {
 			return err
 		}
-		reqBody = bytes.NewReader(body)
+		contentType = c.contentType
+		body = bytes.NewReader(data)
 	}
 	url := fmt.Sprintf("%s://%s%s", client.target.Scheme, client.target.Authority, path)
-	req, err := http.NewRequest(c.method, url, reqBody)
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return err
 	}
 	if contentType != "" {
-		req.Header.Set("Content-Type", contentType)
+		req.Header.Set("Content-Type", c.contentType)
 	}
 	if client.opts.userAgent != "" {
 		req.Header.Set("User-Agent", client.opts.userAgent)
 	}
-	ctx = transport.NewContext(ctx, transport.Transport{Kind: transport.KindHTTP, Endpoint: client.opts.endpoint})
-	ctx = NewClientContext(ctx, ClientInfo{PathPattern: c.pathPattern, Request: req})
+	if c.metatada == nil {
+		c.metatada = metadata.Metadata{}
+	}
+	ctx = transport.NewClientContext(ctx, &Transport{
+		endpoint: client.opts.endpoint,
+		metadata: c.metatada,
+		method:   c.method,
+	})
 	return client.invoke(ctx, req, args, reply, c)
 }
 
@@ -213,7 +217,7 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 				node  *registry.ServiceInstance
 				nodes = client.r.fetch(ctx)
 			)
-			if node, done, err = client.opts.balancer.Pick(ctx, c.pathPattern, nodes); err != nil {
+			if node, done, err = client.opts.balancer.Pick(ctx, nodes); err != nil {
 				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 			}
 			scheme, addr, err := parseEndpoint(node.Endpoints)
@@ -223,6 +227,11 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			req = req.Clone(ctx)
 			req.URL.Scheme = scheme
 			req.URL.Host = addr
+		}
+		if tr, ok := transport.FromClientContext(ctx); ok {
+			for _, key := range tr.Metadata().Keys() {
+				req.Header.Set(key, tr.Metadata().Get(key))
+			}
 		}
 		res, err := client.do(ctx, req, c)
 		if done != nil {
@@ -247,7 +256,7 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 // Do send an HTTP request and decodes the body of response into target.
 // returns an error (of type *Error) if the response status code is not 2xx.
 func (client *Client) Do(req *http.Request, opts ...CallOption) (*http.Response, error) {
-	c := defaultCallInfo()
+	c := defaultCallInfo(req.URL.Path)
 	for _, o := range opts {
 		if err := o.before(&c); err != nil {
 			return nil, err
@@ -268,12 +277,13 @@ func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*h
 }
 
 // DefaultRequestEncoder is an HTTP request encoder.
-func DefaultRequestEncoder(ctx context.Context, in interface{}) (string, []byte, error) {
-	body, err := encoding.GetCodec("json").Marshal(in)
+func DefaultRequestEncoder(ctx context.Context, contentType string, in interface{}) ([]byte, error) {
+	name := httputil.ContentSubtype(contentType)
+	body, err := encoding.GetCodec(name).Marshal(in)
 	if err != nil {
-		return "", nil, err
+		return nil, err
 	}
-	return "application/json", body, err
+	return body, err
 }
 
 // DefaultResponseDecoder is an HTTP response decoder.

@@ -7,6 +7,8 @@ import (
 )
 
 var httpTemplate = `
+{{$svrType := .ServiceType}}
+{{$svrName := .ServiceName}}
 type {{.ServiceType}}Handler interface {
 {{range .MethodSets}}
 	{{.Name}}(context.Context, *{{.Request}}) (*{{.Reply}}, error)
@@ -38,7 +40,9 @@ func New{{.ServiceType}}Handler(srv {{.ServiceType}}Handler, opts ...http1.Handl
 		if h.Middleware != nil {
 			next = h.Middleware(next)
 		}
-		out, err := next(r.Context(), &in)
+		ctx := r.Context()
+		transport.SetMethod(ctx,"/{{$svrName}}/{{.Name}}")
+		out, err := next(ctx, &in)
 		if err != nil {
 			h.Error(w, r, err)
 			return
@@ -65,19 +69,18 @@ type {{.ServiceType}}HTTPClientImpl struct{
 func New{{.ServiceType}}HTTPClient (client *http1.Client) {{.ServiceType}}HTTPClient {
 	return &{{.ServiceType}}HTTPClientImpl{client}
 }
-	
-{{$svrType := .ServiceType}}
-{{$svrName := .ServiceName}}
+
 {{range .MethodSets}}
-func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http1.CallOption) (out *{{.Reply}}, err error) {
+func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http1.CallOption) (*{{.Reply}}, error) {
+	var out {{.Reply}}
 	path := binding.EncodePath("{{.Method}}", "{{.Path}}", in)
-	out = &{{.Reply}}{}
+	opts = append(opts, http1.Method("/{{$svrName}}/{{.Name}}"))
 	{{if .HasBody }}
-	err = c.cc.Invoke(ctx, path, in{{.Body}}, &out{{.ResponseBody}}, http1.Method("{{.Method}}"), http1.PathPattern("{{.Path}}"))
+	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, opts...)
 	{{else}} 
-	err = c.cc.Invoke(ctx, path, nil, &out{{.ResponseBody}}, http1.Method("{{.Method}}"), http1.PathPattern("{{.Path}}"))
+	err := c.cc.Invoke(ctx, "{{.Method}}", path, nil, &out{{.ResponseBody}}, opts...)
 	{{end}}
-	return 
+	return &out, err
 }
 {{end}}
 `

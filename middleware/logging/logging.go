@@ -3,7 +3,9 @@ package logging
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -13,15 +15,33 @@ import (
 func Server(logger log.Logger) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			reply, err = handler(ctx, req)
-			if tr, ok := transport.FromContext(ctx); ok {
-				switch tr.Kind {
-				case transport.KindHTTP:
-					httpServerLog(logger, ctx, extractArgs(req), err)
-				case transport.KindGRPC:
-					grpcServerLog(logger, ctx, extractArgs(req), err)
-				}
+			var (
+				code   int32
+				reason string
+				kind   string
+				method string
+			)
+			startTime := time.Now()
+			if info, ok := transport.FromServerContext(ctx); ok {
+				kind = info.Kind()
+				method = info.Method()
 			}
+			reply, err = handler(ctx, req)
+			if se := errors.FromError(err); se != nil {
+				code = se.Code
+				reason = se.Reason
+			}
+			level, stack := extractError(err)
+			log.WithContext(ctx, logger).Log(level,
+				"kind", "server",
+				"component", kind,
+				"method", method,
+				"args", extractArgs(req),
+				"code", code,
+				"reason", reason,
+				"stack", stack,
+				"latency", time.Since(startTime).Seconds(),
+			)
 			return
 		}
 	}
@@ -31,15 +51,33 @@ func Server(logger log.Logger) middleware.Middleware {
 func Client(logger log.Logger) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			reply, err = handler(ctx, req)
-			if tr, ok := transport.FromContext(ctx); ok {
-				switch tr.Kind {
-				case transport.KindHTTP:
-					httpClientLog(logger, ctx, extractArgs(req), err)
-				case transport.KindGRPC:
-					grpcClientLog(logger, ctx, extractArgs(req), err)
-				}
+			var (
+				code   int32
+				reason string
+				kind   string
+				method string
+			)
+			startTime := time.Now()
+			if info, ok := transport.FromClientContext(ctx); ok {
+				kind = info.Kind()
+				method = info.Method()
 			}
+			reply, err = handler(ctx, req)
+			if se := errors.FromError(err); se != nil {
+				code = se.Code
+				reason = se.Reason
+			}
+			level, stack := extractError(err)
+			log.WithContext(ctx, logger).Log(level,
+				"kind", "client",
+				"component", kind,
+				"method", method,
+				"args", extractArgs(req),
+				"code", code,
+				"reason", reason,
+				"stack", stack,
+				"latency", time.Since(startTime).Seconds(),
+			)
 			return
 		}
 	}
@@ -54,9 +92,9 @@ func extractArgs(req interface{}) string {
 }
 
 // extractError returns the string of the error
-func extractError(err error) (errMsg string) {
+func extractError(err error) (log.Level, string) {
 	if err != nil {
-		errMsg = fmt.Sprintf("%+v", err)
+		return log.LevelError, fmt.Sprintf("%+v", err)
 	}
-	return
+	return log.LevelInfo, ""
 }
