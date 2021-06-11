@@ -1,11 +1,8 @@
 package http
 
 import (
-	"context"
-	"fmt"
 	"io/ioutil"
 	"net/http"
-	"reflect"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
@@ -74,78 +71,6 @@ func Middleware(m ...middleware.Middleware) HandleOption {
 	return func(o *HandleOptions) {
 		o.Middleware = middleware.Chain(m...)
 	}
-}
-
-// Handler is handle options.
-type Handler struct {
-	method reflect.Value
-	in     reflect.Type
-	out    reflect.Type
-	opts   HandleOptions
-}
-
-// NewHandler new an HTTP handler.
-func NewHandler(handler interface{}, opts ...HandleOption) http.Handler {
-	if err := validateHandler(handler); err != nil {
-		panic(err)
-	}
-	typ := reflect.TypeOf(handler)
-	h := &Handler{
-		method: reflect.ValueOf(handler),
-		in:     typ.In(1).Elem(),
-		out:    typ.Out(0).Elem(),
-		opts:   DefaultHandleOptions(),
-	}
-	for _, o := range opts {
-		o(&h.opts)
-	}
-	return h
-}
-
-func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	in := reflect.New(h.in).Interface()
-	if err := h.opts.Decode(req, in); err != nil {
-		h.opts.Error(w, req, err)
-		return
-	}
-	invoke := func(ctx context.Context, in interface{}) (interface{}, error) {
-		ret := h.method.Call([]reflect.Value{
-			reflect.ValueOf(ctx),
-			reflect.ValueOf(in),
-		})
-		if ret[1].IsNil() {
-			return ret[0].Interface(), nil
-		}
-		return nil, ret[1].Interface().(error)
-	}
-	if h.opts.Middleware != nil {
-		invoke = h.opts.Middleware(invoke)
-	}
-	out, err := invoke(req.Context(), in)
-	if err != nil {
-		h.opts.Error(w, req, err)
-		return
-	}
-	if err := h.opts.Encode(w, req, out); err != nil {
-		h.opts.Error(w, req, err)
-	}
-}
-
-func validateHandler(handler interface{}) error {
-	typ := reflect.TypeOf(handler)
-	if typ.NumIn() != 2 || typ.NumOut() != 2 {
-		return fmt.Errorf("invalid types, in: %d out: %d", typ.NumIn(), typ.NumOut())
-	}
-	if typ.In(1).Kind() != reflect.Ptr || typ.Out(0).Kind() != reflect.Ptr {
-		return fmt.Errorf("invalid types is not a pointer")
-	}
-	if !typ.In(0).Implements(reflect.TypeOf((*context.Context)(nil)).Elem()) {
-		return fmt.Errorf("input does not implement the context")
-	}
-	if !typ.Out(1).Implements(reflect.TypeOf((*error)(nil)).Elem()) {
-		return fmt.Errorf("input does not implement the error")
-	}
-	return nil
 }
 
 // DefaultRequestDecoder decodes the request body to object.

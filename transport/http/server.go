@@ -83,6 +83,13 @@ func NewServer(opts ...ServerOption) *Server {
 	return srv
 }
 
+// Route registers an HTTP route.
+func (s *Server) Route(prefix string) *Route {
+	r := &Route{r: s.router}
+	s.HandlePrefix(prefix, r)
+	return r
+}
+
 // Handle registers a new route with a matcher for the URL path.
 func (s *Server) Handle(path string, h http.Handler) {
 	s.router.Handle(path, h)
