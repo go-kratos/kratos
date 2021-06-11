@@ -24,13 +24,13 @@ type Context interface {
 	Bind(interface{}) error
 	Result(int, interface{}) error
 	Returns(int, interface{}, error) error
-	Reset(*Route, http.ResponseWriter, *http.Request)
+	Reset(http.ResponseWriter, *http.Request)
 }
 
 type wrapper struct {
-	res   http.ResponseWriter
-	req   *http.Request
 	route *Route
+	req   *http.Request
+	res   http.ResponseWriter
 }
 
 func (c *wrapper) Header() http.Header {
@@ -72,8 +72,7 @@ func (c *wrapper) Returns(code int, v interface{}, err error) error {
 	}
 	return nil
 }
-func (c *wrapper) Reset(r *Route, res http.ResponseWriter, req *http.Request) {
-	c.route = r
+func (c *wrapper) Reset(res http.ResponseWriter, req *http.Request) {
 	c.res = res
 	c.req = req
 }

@@ -19,7 +19,7 @@ func newRoute(prefix string, srv *Server) *Route {
 		srv:    srv,
 	}
 	r.pool.New = func() interface{} {
-		return new(wrapper)
+		return &wrapper{route: r}
 	}
 	return r
 }
@@ -28,10 +28,11 @@ func newRoute(prefix string, srv *Server) *Route {
 func (r *Route) Handle(method, relativePath string, h HandlerFunc) {
 	r.srv.router.HandleFunc(path.Join(r.prefix, relativePath), func(res http.ResponseWriter, req *http.Request) {
 		ctx := r.pool.Get().(Context)
-		ctx.Reset(r, res, req)
+		ctx.Reset(res, req)
 		if err := h(ctx); err != nil {
 			r.srv.ene(res, req, err)
 		}
+		ctx.Reset(nil, nil)
 		r.pool.Put(ctx)
 	}).Methods(method)
 }
