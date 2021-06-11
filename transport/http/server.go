@@ -33,7 +33,8 @@ type Server struct {
 	network  string
 	address  string
 	timeout  time.Duration
-	m        middleware.Middleware
+	routeM   []MiddlewareFunc
+	serviceM []middleware.Middleware
 	dec      DecodeRequestFunc
 	enc      EncodeResponseFunc
 	ene      EncodeErrorFunc
@@ -82,18 +83,24 @@ func (s *Server) HandleFunc(path string, h http.HandlerFunc) {
 
 // ServeHTTP should write reply headers and data to the ResponseWriter and then return.
 func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	ctx, cancel := ic.Merge(req.Context(), s.ctx)
-	defer cancel()
-	ctx = transport.NewServerContext(ctx, &Transport{
-		endpoint: s.endpoint.String(),
-		method:   req.RequestURI,
-		metadata: metadata.New(req.Header),
-	})
-	if s.timeout > 0 {
-		ctx, cancel = context.WithTimeout(ctx, s.timeout)
+	h := func(res http.ResponseWriter, req *http.Request) {
+		ctx, cancel := ic.Merge(req.Context(), s.ctx)
 		defer cancel()
+		ctx = transport.NewServerContext(ctx, &Transport{
+			endpoint: s.endpoint.String(),
+			method:   req.RequestURI,
+			metadata: metadata.New(req.Header),
+		})
+		if s.timeout > 0 {
+			ctx, cancel = context.WithTimeout(ctx, s.timeout)
+			defer cancel()
+		}
+		s.router.ServeHTTP(res, req.WithContext(ctx))
 	}
-	s.router.ServeHTTP(res, req.WithContext(ctx))
+	for _, m := range s.routeM {
+		h = m(h)
+	}
+	h(res, req)
 }
 
 // Endpoint return a real address to registry endpoint.

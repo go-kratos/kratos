@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"testing"
@@ -16,6 +17,15 @@ type User struct {
 	Name string `json:"name"`
 }
 
+func loggingMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Do stuff here
+		log.Println(r.RequestURI)
+		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		next.ServeHTTP(w, r)
+	}
+}
+
 func TestRoute(t *testing.T) {
 	ctx := context.Background()
 	srv := NewServer()
@@ -24,7 +34,7 @@ func TestRoute(t *testing.T) {
 		u := new(User)
 		u.Name = ctx.Vars().Get("name")
 		return ctx.Result(200, u)
-	})
+	}, loggingMiddleware)
 	route.POST("/users", func(ctx Context) error {
 		u := new(User)
 		if err := ctx.Bind(u); err != nil {

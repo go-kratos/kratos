@@ -77,10 +77,17 @@ func ErrorEncoder(en EncodeErrorFunc) ServerOption {
 	}
 }
 
-// Middleware with middleware option.
+// Middleware with service middleware option.
 func Middleware(m ...middleware.Middleware) ServerOption {
 	return func(o *Server) {
-		o.m = middleware.Chain(m...)
+		o.serviceM = m
+	}
+}
+
+// RouteMiddleware with HTTP middleware option.
+func RouteMiddleware(m ...MiddlewareFunc) ServerOption {
+	return func(o *Server) {
+		o.routeM = m
 	}
 }
 
