@@ -1,8 +1,10 @@
 package http
 
 import (
+	"context"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/gorilla/mux"
@@ -15,15 +17,16 @@ type HandlerFunc func(Context) error
 
 // Context is an HTTP Context.
 type Context interface {
+	context.Context
 	Vars() url.Values
 	Form() url.Values
 	Header() http.Header
 	Request() *http.Request
 	Response() http.ResponseWriter
-	Middleware() middleware.Middleware
+	Middleware(middleware.Handler) middleware.Handler
 	Bind(interface{}) error
 	Result(int, interface{}) error
-	Returns(int, interface{}, error) error
+	Returns(interface{}, error) error
 	Reset(http.ResponseWriter, *http.Request)
 }
 
@@ -53,8 +56,8 @@ func (c *wrapper) Form() url.Values {
 }
 func (c *wrapper) Request() *http.Request        { return c.req }
 func (c *wrapper) Response() http.ResponseWriter { return c.res }
-func (c *wrapper) Middleware() middleware.Middleware {
-	return middleware.Chain(c.route.srv.serviceM...)
+func (c *wrapper) Middleware(h middleware.Handler) middleware.Handler {
+	return middleware.Chain(c.route.srv.serviceM...)(h)
 }
 func (c *wrapper) Bind(v interface{}) error { return c.route.srv.dec(c.req, v) }
 func (c *wrapper) Result(code int, v interface{}) error {
@@ -64,11 +67,10 @@ func (c *wrapper) Result(code int, v interface{}) error {
 	}
 	return nil
 }
-func (c *wrapper) Returns(code int, v interface{}, err error) error {
+func (c *wrapper) Returns(v interface{}, err error) error {
 	if err != nil {
 		return err
 	}
-	c.res.WriteHeader(code)
 	if err := c.route.srv.enc(c.res, c.req, v); err != nil {
 		return err
 	}
@@ -77,4 +79,20 @@ func (c *wrapper) Returns(code int, v interface{}, err error) error {
 func (c *wrapper) Reset(res http.ResponseWriter, req *http.Request) {
 	c.res = res
 	c.req = req
+}
+
+func (c *wrapper) Deadline() (deadline time.Time, ok bool) {
+	return
+}
+
+func (c *wrapper) Done() <-chan struct{} {
+	return c.req.Context().Done()
+}
+
+func (c *wrapper) Err() error {
+	return c.req.Context().Err()
+}
+
+func (c *wrapper) Value(key interface{}) interface{} {
+	return c.req.Context().Value(key)
 }
