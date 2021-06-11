@@ -44,7 +44,7 @@ type clientOptions struct {
 	transport    http.RoundTripper
 	balancer     balancer.Balancer
 	discovery    registry.Discovery
-	middleware   middleware.Middleware
+	middleware   []middleware.Middleware
 }
 
 // WithTransport with client transport.
@@ -71,7 +71,7 @@ func WithUserAgent(ua string) ClientOption {
 // WithMiddleware with client middleware.
 func WithMiddleware(m ...middleware.Middleware) ClientOption {
 	return func(o *clientOptions) {
-		o.middleware = middleware.Chain(m...)
+		o.middleware = m
 	}
 }
 
@@ -246,8 +246,8 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 		}
 		return reply, nil
 	}
-	if client.opts.middleware != nil {
-		h = client.opts.middleware(h)
+	if len(client.opts.middleware) > 0 {
+		h = middleware.Chain(client.opts.middleware...)(h)
 	}
 	_, err := h(ctx, args)
 	return err

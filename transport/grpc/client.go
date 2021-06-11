@@ -38,7 +38,7 @@ func WithTimeout(timeout time.Duration) ClientOption {
 // WithMiddleware with client middleware.
 func WithMiddleware(m ...middleware.Middleware) ClientOption {
 	return func(o *clientOptions) {
-		o.middleware = middleware.Chain(m...)
+		o.middleware = m
 	}
 }
 
@@ -67,8 +67,8 @@ func WithOptions(opts ...grpc.DialOption) ClientOption {
 type clientOptions struct {
 	endpoint   string
 	timeout    time.Duration
-	middleware middleware.Middleware
 	discovery  registry.Discovery
+	middleware []middleware.Middleware
 	ints       []grpc.UnaryClientInterceptor
 	grpcOpts   []grpc.DialOption
 }
@@ -112,7 +112,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	return grpc.DialContext(ctx, options.endpoint, grpcOpts...)
 }
 
-func unaryClientInterceptor(m middleware.Middleware, timeout time.Duration) grpc.UnaryClientInterceptor {
+func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		ctx = transport.NewClientContext(ctx, &Transport{
 			endpoint: cc.Target(),
@@ -130,8 +130,8 @@ func unaryClientInterceptor(m middleware.Middleware, timeout time.Duration) grpc
 			}
 			return reply, invoker(ctx, method, req, reply, cc, opts...)
 		}
-		if m != nil {
-			h = m(h)
+		if len(ms) > 0 {
+			h = middleware.Chain(ms...)(h)
 		}
 		_, err := h(ctx, req)
 		return err

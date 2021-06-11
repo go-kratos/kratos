@@ -59,7 +59,7 @@ func Logger(logger log.Logger) ServerOption {
 // Middleware with server middleware.
 func Middleware(m ...middleware.Middleware) ServerOption {
 	return func(s *Server) {
-		s.middleware = middleware.Chain(m...)
+		s.middleware = m
 	}
 }
 
@@ -89,7 +89,7 @@ type Server struct {
 	endpoint   *url.URL
 	timeout    time.Duration
 	log        *log.Helper
-	middleware middleware.Middleware
+	middleware []middleware.Middleware
 	ints       []grpc.UnaryServerInterceptor
 	grpcOpts   []grpc.ServerOption
 	health     *health.Server
@@ -191,8 +191,8 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return handler(ctx, req)
 		}
-		if s.middleware != nil {
-			h = s.middleware(h)
+		if len(s.middleware) > 0 {
+			h = middleware.Chain(s.middleware...)(h)
 		}
 		return h(ctx, req)
 	}
