@@ -57,7 +57,7 @@ func (c *wrapper) Form() url.Values {
 func (c *wrapper) Request() *http.Request        { return c.req }
 func (c *wrapper) Response() http.ResponseWriter { return c.res }
 func (c *wrapper) Middleware(h middleware.Handler) middleware.Handler {
-	return middleware.Chain(c.route.srv.serviceM...)(h)
+	return middleware.Chain(c.route.srv.ms...)(h)
 }
 func (c *wrapper) Bind(v interface{}) error { return c.route.srv.dec(c.req, v) }
 func (c *wrapper) Result(code int, v interface{}) error {

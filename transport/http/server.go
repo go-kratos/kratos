@@ -33,8 +33,8 @@ type Server struct {
 	network  string
 	address  string
 	timeout  time.Duration
-	routeM   []MiddlewareFunc
-	serviceM []middleware.Middleware
+	filters  []FilterFunc
+	ms       []middleware.Middleware
 	dec      DecodeRequestFunc
 	enc      EncodeResponseFunc
 	ene      EncodeErrorFunc
@@ -97,7 +97,7 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		}
 		s.router.ServeHTTP(res, req.WithContext(ctx))
 	}
-	for _, m := range s.routeM {
+	for _, m := range s.filters {
 		h = m(h)
 	}
 	h(res, req)

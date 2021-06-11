@@ -80,14 +80,14 @@ func ErrorEncoder(en EncodeErrorFunc) ServerOption {
 // Middleware with service middleware option.
 func Middleware(m ...middleware.Middleware) ServerOption {
 	return func(o *Server) {
-		o.serviceM = m
+		o.ms = m
 	}
 }
 
 // Filter with HTTP middleware option.
-func Filter(m ...MiddlewareFunc) ServerOption {
+func Filter(f ...FilterFunc) ServerOption {
 	return func(o *Server) {
-		o.routeM = m
+		o.filters = f
 	}
 }
 
