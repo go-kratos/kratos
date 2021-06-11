@@ -21,18 +21,15 @@ type Context interface {
 }
 
 type ctx struct {
-	req *http.Request
-	res http.ResponseWriter
-	m   middleware.Middleware
-	dec DecodeRequestFunc
-	enc EncodeResponseFunc
-	err EncodeErrorFunc
-	h   HandlerFunc
+	route *Route
+	req   *http.Request
+	res   http.ResponseWriter
+	h     HandlerFunc
 }
 
-func (c *ctx) Middleware() middleware.Middleware    { return c.m }
-func (c *ctx) Bind(v interface{}) error             { return c.dec(c.req, v) }
-func (c *ctx) Result(code int, v interface{}) error { return c.enc(c.res, c.req, v) }
+func (c *ctx) Middleware() middleware.Middleware    { return c.route.m }
+func (c *ctx) Bind(v interface{}) error             { return c.route.dec(c.req, v) }
+func (c *ctx) Result(code int, v interface{}) error { return c.route.enc(c.res, c.req, v) }
 func (c *ctx) Request() *http.Request               { return c.req }
 func (c *ctx) Response() http.ResponseWriter        { return c.res }
 
@@ -40,7 +37,7 @@ func (c *ctx) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c.res = w
 	c.req = r
 	if err := c.h(c); err != nil {
-		c.err(w, r, err)
+		c.route.err(w, r, err)
 	}
 }
 
@@ -58,7 +55,7 @@ func (r *Route) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Route) newHandler(h HandlerFunc) Context {
-	return &ctx{h: h, m: r.m, dec: r.dec, enc: r.enc, err: r.err}
+	return &ctx{route: r, h: h}
 }
 
 // Handle .
