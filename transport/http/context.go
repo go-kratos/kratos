@@ -81,8 +81,8 @@ func (c *wrapper) Reset(res http.ResponseWriter, req *http.Request) {
 	c.req = req
 }
 
-func (c *wrapper) Deadline() (deadline time.Time, ok bool) {
-	return
+func (c *wrapper) Deadline() (time.Time, bool) {
+	return c.req.Context().Deadline()
 }
 
 func (c *wrapper) Done() <-chan struct{} {
