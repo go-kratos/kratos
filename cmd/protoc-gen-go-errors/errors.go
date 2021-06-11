@@ -1,10 +1,11 @@
 package main
 
 import (
-	pb "github.com/go-kratos/kratos/v2/errors"
+	"strings"
+
+	"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2/errors"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
-	"strings"
 )
 
 const (
@@ -44,7 +45,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 }
 
 func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, enum *protogen.Enum) {
-	defaultCode := proto.GetExtension(enum.Desc.Options(), pb.E_DefaultCode)
+	defaultCode := proto.GetExtension(enum.Desc.Options(), errors.E_DefaultCode)
 	code := 0
 	if ok := defaultCode.(int32); ok != 0 && ok <= 600 && ok >= 200 {
 		code = int(ok)
@@ -53,7 +54,7 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	}
 	var ew errorWrapper
 	for _, v := range enum.Values {
-		eCode := proto.GetExtension(v.Desc.Options(), pb.E_Code)
+		eCode := proto.GetExtension(v.Desc.Options(), errors.E_Code)
 		enumCode := int(eCode.(int32))
 		if enumCode == 0 {
 			enumCode = code
@@ -62,10 +63,10 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 			return
 		}
 		err := &errorInfo{
-			Name:     string(enum.Desc.Name()),
-			Value:    string(v.Desc.Name()),
+			Name:       string(enum.Desc.Name()),
+			Value:      string(v.Desc.Name()),
 			CamelValue: Case2Camel(string(v.Desc.Name())),
-			HttpCode: enumCode,
+			HttpCode:   enumCode,
 		}
 		ew.Errors = append(ew.Errors, err)
 	}
@@ -73,7 +74,7 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 }
 
 func Case2Camel(name string) string {
-	if !strings.Contains(name,"_") {
+	if !strings.Contains(name, "_") {
 		return name
 	}
 	name = strings.ToLower(name)
