@@ -332,8 +332,9 @@ func NewEchoServiceHTTPClient(client *http1.Client) EchoServiceHTTPClient {
 func (c *EchoServiceHTTPClientImpl) Echo(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (*SimpleMessage, error) {
 	var out SimpleMessage
 	path := binding.EncodePath("POST", "/v1/example/echo/{id}", in)
+	opts = append(opts, http1.Method("/testproto.EchoService/Echo"))
 
-	err := c.cc.Invoke(ctx, "POST", path, nil, &out, http1.Method("/testproto.EchoService/Echo"))
+	err := c.cc.Invoke(ctx, "POST", path, nil, &out, opts...)
 
 	return &out, err
 }
@@ -341,8 +342,9 @@ func (c *EchoServiceHTTPClientImpl) Echo(ctx context.Context, in *SimpleMessage,
 func (c *EchoServiceHTTPClientImpl) EchoBody(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (*SimpleMessage, error) {
 	var out SimpleMessage
 	path := binding.EncodePath("POST", "/v1/example/echo_body", in)
+	opts = append(opts, http1.Method("/testproto.EchoService/EchoBody"))
 
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, http1.Method("/testproto.EchoService/EchoBody"))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 
 	return &out, err
 }
@@ -350,8 +352,9 @@ func (c *EchoServiceHTTPClientImpl) EchoBody(ctx context.Context, in *SimpleMess
 func (c *EchoServiceHTTPClientImpl) EchoDelete(ctx context.Context, in *SimpleMessage, opts ...http1.CallOption) (*SimpleMessage, error) {
 	var out SimpleMessage
 	path := binding.EncodePath("DELETE", "/v1/example/echo_delete/{id}/{num}", in)
+	opts = append(opts, http1.Method("/testproto.EchoService/EchoDelete"))
 
-	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, http1.Method("/testproto.EchoService/EchoDelete"))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
 
 	return &out, err
 }
@@ -359,8 +362,9 @@ func (c *EchoServiceHTTPClientImpl) EchoDelete(ctx context.Context, in *SimpleMe
 func (c *EchoServiceHTTPClientImpl) EchoPatch(ctx context.Context, in *DynamicMessageUpdate, opts ...http1.CallOption) (*DynamicMessageUpdate, error) {
 	var out DynamicMessageUpdate
 	path := binding.EncodePath("PATCH", "/v1/example/echo_patch", in)
+	opts = append(opts, http1.Method("/testproto.EchoService/EchoPatch"))
 
-	err := c.cc.Invoke(ctx, "PATCH", path, in.Body, &out, http1.Method("/testproto.EchoService/EchoPatch"))
+	err := c.cc.Invoke(ctx, "PATCH", path, in.Body, &out, opts...)
 
 	return &out, err
 }
@@ -368,8 +372,9 @@ func (c *EchoServiceHTTPClientImpl) EchoPatch(ctx context.Context, in *DynamicMe
 func (c *EchoServiceHTTPClientImpl) EchoResponseBody(ctx context.Context, in *DynamicMessageUpdate, opts ...http1.CallOption) (*DynamicMessageUpdate, error) {
 	var out DynamicMessageUpdate
 	path := binding.EncodePath("POST", "/v1/example/echo_response_body", in)
+	opts = append(opts, http1.Method("/testproto.EchoService/EchoResponseBody"))
 
-	err := c.cc.Invoke(ctx, "POST", path, in, &out.Body, http1.Method("/testproto.EchoService/EchoResponseBody"))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out.Body, opts...)
 
 	return &out, err
 }

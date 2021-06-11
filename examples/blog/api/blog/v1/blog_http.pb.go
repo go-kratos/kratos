@@ -213,8 +213,9 @@ func NewBlogServiceHTTPClient(client *http1.Client) BlogServiceHTTPClient {
 func (c *BlogServiceHTTPClientImpl) CreateArticle(ctx context.Context, in *CreateArticleRequest, opts ...http1.CallOption) (*CreateArticleReply, error) {
 	var out CreateArticleReply
 	path := binding.EncodePath("POST", "/v1/article/", in)
+	opts = append(opts, http1.Method("/blog.api.v1.BlogService/CreateArticle"))
 
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, http1.Method("/blog.api.v1.BlogService/CreateArticle"))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 
 	return &out, err
 }
@@ -222,8 +223,9 @@ func (c *BlogServiceHTTPClientImpl) CreateArticle(ctx context.Context, in *Creat
 func (c *BlogServiceHTTPClientImpl) DeleteArticle(ctx context.Context, in *DeleteArticleRequest, opts ...http1.CallOption) (*DeleteArticleReply, error) {
 	var out DeleteArticleReply
 	path := binding.EncodePath("DELETE", "/v1/article/{id}", in)
+	opts = append(opts, http1.Method("/blog.api.v1.BlogService/DeleteArticle"))
 
-	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, http1.Method("/blog.api.v1.BlogService/DeleteArticle"))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
 
 	return &out, err
 }
@@ -231,8 +233,9 @@ func (c *BlogServiceHTTPClientImpl) DeleteArticle(ctx context.Context, in *Delet
 func (c *BlogServiceHTTPClientImpl) GetArticle(ctx context.Context, in *GetArticleRequest, opts ...http1.CallOption) (*GetArticleReply, error) {
 	var out GetArticleReply
 	path := binding.EncodePath("GET", "/v1/article/{id}", in)
+	opts = append(opts, http1.Method("/blog.api.v1.BlogService/GetArticle"))
 
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out, http1.Method("/blog.api.v1.BlogService/GetArticle"))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 
 	return &out, err
 }
@@ -240,8 +243,9 @@ func (c *BlogServiceHTTPClientImpl) GetArticle(ctx context.Context, in *GetArtic
 func (c *BlogServiceHTTPClientImpl) ListArticle(ctx context.Context, in *ListArticleRequest, opts ...http1.CallOption) (*ListArticleReply, error) {
 	var out ListArticleReply
 	path := binding.EncodePath("GET", "/v1/article/", in)
+	opts = append(opts, http1.Method("/blog.api.v1.BlogService/ListArticle"))
 
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out, http1.Method("/blog.api.v1.BlogService/ListArticle"))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 
 	return &out, err
 }
@@ -249,8 +253,9 @@ func (c *BlogServiceHTTPClientImpl) ListArticle(ctx context.Context, in *ListArt
 func (c *BlogServiceHTTPClientImpl) UpdateArticle(ctx context.Context, in *UpdateArticleRequest, opts ...http1.CallOption) (*UpdateArticleReply, error) {
 	var out UpdateArticleReply
 	path := binding.EncodePath("PUT", "/v1/article/{id}", in)
+	opts = append(opts, http1.Method("/blog.api.v1.BlogService/UpdateArticle"))
 
-	err := c.cc.Invoke(ctx, "PUT", path, in, &out, http1.Method("/blog.api.v1.BlogService/UpdateArticle"))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 
 	return &out, err
 }
