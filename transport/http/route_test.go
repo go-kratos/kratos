@@ -39,7 +39,7 @@ func TestRoute(t *testing.T) {
 	srv := NewServer(
 		Filter(loggingFilter),
 	)
-	route := srv.Route("/")
+	route := srv.Route("/v1")
 	route.GET("/users/{name}", func(ctx Context) error {
 		u := new(User)
 		u.Name = ctx.Vars().Get("name")
@@ -78,7 +78,7 @@ func testRoute(t *testing.T, srv *Server) {
 	if !ok {
 		t.Fatalf("extract port error: %v", srv.lis)
 	}
-	base := fmt.Sprintf("http://127.0.0.1:%d", port)
+	base := fmt.Sprintf("http://127.0.0.1:%d/v1", port)
 	// GET
 	resp, err := http.Get(base + "/users/foo")
 	if err != nil {
