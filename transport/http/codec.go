@@ -3,21 +3,15 @@ package http
 import (
 	"io/ioutil"
 	"net/http"
-	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
 const SupportPackageIsVersion1 = true
-
-// ServerOption is an HTTP server option.
-type ServerOption func(*Server)
 
 // DecodeRequestFunc is decode request func.
 type DecodeRequestFunc func(*http.Request, interface{}) error
@@ -27,69 +21,6 @@ type EncodeResponseFunc func(http.ResponseWriter, *http.Request, interface{}) er
 
 // EncodeErrorFunc is encode error func.
 type EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
-
-// Network with server network.
-func Network(network string) ServerOption {
-	return func(s *Server) {
-		s.network = network
-	}
-}
-
-// Address with server address.
-func Address(addr string) ServerOption {
-	return func(s *Server) {
-		s.address = addr
-	}
-}
-
-// Timeout with server timeout.
-func Timeout(timeout time.Duration) ServerOption {
-	return func(s *Server) {
-		s.timeout = timeout
-	}
-}
-
-// Logger with server logger.
-func Logger(logger log.Logger) ServerOption {
-	return func(s *Server) {
-		s.log = log.NewHelper(logger)
-	}
-}
-
-// RequestDecoder with request decoder.
-func RequestDecoder(dec DecodeRequestFunc) ServerOption {
-	return func(o *Server) {
-		o.dec = dec
-	}
-}
-
-// ResponseEncoder with response encoder.
-func ResponseEncoder(en EncodeResponseFunc) ServerOption {
-	return func(o *Server) {
-		o.enc = en
-	}
-}
-
-// ErrorEncoder with error encoder.
-func ErrorEncoder(en EncodeErrorFunc) ServerOption {
-	return func(o *Server) {
-		o.ene = en
-	}
-}
-
-// Middleware with service middleware option.
-func Middleware(m ...middleware.Middleware) ServerOption {
-	return func(o *Server) {
-		o.ms = m
-	}
-}
-
-// Filter with HTTP middleware option.
-func Filter(f ...FilterFunc) ServerOption {
-	return func(o *Server) {
-		o.filters = f
-	}
-}
 
 // DefaultRequestDecoder decodes the request body to object.
 func DefaultRequestDecoder(r *http.Request, v interface{}) error {
