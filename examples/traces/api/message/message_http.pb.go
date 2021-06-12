@@ -36,7 +36,7 @@ func _MessageService_GetUserMessage0_HTTP_Handler(srv MessageServiceHTTPServer) 
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/api.message.v1.MessageService/GetUserMessage")

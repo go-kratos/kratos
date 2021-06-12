@@ -63,7 +63,7 @@ func _BlogService_UpdateArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ct
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/blog.api.v1.BlogService/UpdateArticle")
@@ -85,7 +85,7 @@ func _BlogService_DeleteArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ct
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/blog.api.v1.BlogService/DeleteArticle")
@@ -107,7 +107,7 @@ func _BlogService_GetArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx h
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/blog.api.v1.BlogService/GetArticle")

@@ -57,7 +57,7 @@ func _Metadata_GetServiceDesc0_HTTP_Handler(srv MetadataHTTPServer) func(ctx htt
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/kratos.api.Metadata/GetServiceDesc")

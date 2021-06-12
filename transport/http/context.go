@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport/http/binding"
 	"github.com/gorilla/mux"
 )
 
@@ -28,6 +29,8 @@ type Context interface {
 	Response() http.ResponseWriter
 	Middleware(middleware.Handler) middleware.Handler
 	Bind(interface{}) error
+	BindVars(interface{}) error
+	BindForm(interface{}) error
 	Returns(interface{}, error) error
 	Result(int, interface{}) error
 	JSON(int, interface{}) error
@@ -67,7 +70,9 @@ func (c *wrapper) Response() http.ResponseWriter { return c.res }
 func (c *wrapper) Middleware(h middleware.Handler) middleware.Handler {
 	return middleware.Chain(c.route.srv.ms...)(h)
 }
-func (c *wrapper) Bind(v interface{}) error { return c.route.srv.dec(c.req, v) }
+func (c *wrapper) Bind(v interface{}) error     { return c.route.srv.dec(c.req, v) }
+func (c *wrapper) BindVars(v interface{}) error { return binding.BindVars(c.Vars(), v) }
+func (c *wrapper) BindForm(v interface{}) error { return binding.BindForm(c.req, v) }
 func (c *wrapper) Returns(v interface{}, err error) error {
 	if err != nil {
 		return err

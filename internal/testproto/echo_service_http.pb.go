@@ -48,7 +48,7 @@ func _EchoService_Echo0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
@@ -70,7 +70,7 @@ func _EchoService_Echo1_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
@@ -92,7 +92,7 @@ func _EchoService_Echo2_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
@@ -114,7 +114,7 @@ func _EchoService_Echo3_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
@@ -136,7 +136,7 @@ func _EchoService_Echo4_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
@@ -196,7 +196,7 @@ func _EchoService_EchoDelete0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx h
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/testproto.EchoService/EchoDelete")
