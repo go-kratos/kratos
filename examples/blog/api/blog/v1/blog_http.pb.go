@@ -160,7 +160,7 @@ func NewBlogServiceHTTPClient(client *http.Client) BlogServiceHTTPClient {
 
 func (c *BlogServiceHTTPClientImpl) CreateArticle(ctx context.Context, in *CreateArticleRequest, opts ...http.CallOption) (*CreateArticleReply, error) {
 	var out CreateArticleReply
-	path := binding.EncodeVars("/v1/article/", in, false)
+	path := binding.EncodeURL("/v1/article/", in, false)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/CreateArticle"))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
@@ -171,7 +171,7 @@ func (c *BlogServiceHTTPClientImpl) CreateArticle(ctx context.Context, in *Creat
 
 func (c *BlogServiceHTTPClientImpl) DeleteArticle(ctx context.Context, in *DeleteArticleRequest, opts ...http.CallOption) (*DeleteArticleReply, error) {
 	var out DeleteArticleReply
-	path := binding.EncodeVars("/v1/article/{id}", in, false)
+	path := binding.EncodeURL("/v1/article/{id}", in, false)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/DeleteArticle"))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
 	if err != nil {
@@ -182,7 +182,7 @@ func (c *BlogServiceHTTPClientImpl) DeleteArticle(ctx context.Context, in *Delet
 
 func (c *BlogServiceHTTPClientImpl) GetArticle(ctx context.Context, in *GetArticleRequest, opts ...http.CallOption) (*GetArticleReply, error) {
 	var out GetArticleReply
-	path := binding.EncodeVars("/v1/article/{id}", in, true)
+	path := binding.EncodeURL("/v1/article/{id}", in, true)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/GetArticle"))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -193,7 +193,7 @@ func (c *BlogServiceHTTPClientImpl) GetArticle(ctx context.Context, in *GetArtic
 
 func (c *BlogServiceHTTPClientImpl) ListArticle(ctx context.Context, in *ListArticleRequest, opts ...http.CallOption) (*ListArticleReply, error) {
 	var out ListArticleReply
-	path := binding.EncodeVars("/v1/article/", in, true)
+	path := binding.EncodeURL("/v1/article/", in, true)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/ListArticle"))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -204,7 +204,7 @@ func (c *BlogServiceHTTPClientImpl) ListArticle(ctx context.Context, in *ListArt
 
 func (c *BlogServiceHTTPClientImpl) UpdateArticle(ctx context.Context, in *UpdateArticleRequest, opts ...http.CallOption) (*UpdateArticleReply, error) {
 	var out UpdateArticleReply
-	path := binding.EncodeVars("/v1/article/{id}", in, false)
+	path := binding.EncodeURL("/v1/article/{id}", in, false)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/UpdateArticle"))
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {

@@ -88,7 +88,7 @@ func NewMetadataHTTPClient(client *http.Client) MetadataHTTPClient {
 
 func (c *MetadataHTTPClientImpl) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest, opts ...http.CallOption) (*GetServiceDescReply, error) {
 	var out GetServiceDescReply
-	path := binding.EncodeVars("/services/{name}", in, true)
+	path := binding.EncodeURL("/services/{name}", in, true)
 	opts = append(opts, http.Operation("/kratos.api.Metadata/GetServiceDesc"))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -99,7 +99,7 @@ func (c *MetadataHTTPClientImpl) GetServiceDesc(ctx context.Context, in *GetServ
 
 func (c *MetadataHTTPClientImpl) ListServices(ctx context.Context, in *ListServicesRequest, opts ...http.CallOption) (*ListServicesReply, error) {
 	var out ListServicesReply
-	path := binding.EncodeVars("/services", in, true)
+	path := binding.EncodeURL("/services", in, true)
 	opts = append(opts, http.Operation("/kratos.api.Metadata/ListServices"))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
