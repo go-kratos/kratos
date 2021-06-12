@@ -47,7 +47,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
 	g.P("var _ = new(", middlewarePackage.Ident("Middleware"), ")")
 	g.P("var _ = new(", transportPackage.Ident("Transporter"), ")")
-	g.P("var _ = ", bindingPackage.Ident("BindVars"))
+	g.P("var _ = ", bindingPackage.Ident("EncodeURL"))
 	g.P("const _ = ", transportHTTPPackage.Ident("SupportPackageIsVersion1"))
 	g.P()
 
