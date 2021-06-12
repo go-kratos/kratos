@@ -97,5 +97,5 @@ var MessageService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/message/message.proto",
+	Metadata: "traces/api/message/message.proto",
 }

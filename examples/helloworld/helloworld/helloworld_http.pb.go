@@ -10,7 +10,6 @@ import (
 	transport "github.com/go-kratos/kratos/v2/transport"
 	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
-	mux "github.com/gorilla/mux"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,7 +18,6 @@ var _ = new(context.Context)
 var _ = new(middleware.Middleware)
 var _ = new(transport.Transporter)
 var _ = binding.BindVars
-var _ = mux.NewRouter
 
 const _ = http.SupportPackageIsVersion1
 
