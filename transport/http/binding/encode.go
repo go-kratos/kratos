@@ -55,6 +55,19 @@ func EncodeURL(pathPattern string, msg proto.Message, needQuery bool) string {
 	return path
 }
 
+// EncodeQuery encode proto message to url query.
+func EncodeQuery(msg proto.Message) (url.Values, error) {
+	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
+		return url.Values{}, nil
+	}
+	u := make(url.Values)
+	err := encodeByField(u, "", msg.ProtoReflect())
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
+}
+
 func getValueByField(v protoreflect.Message, fieldPath []string) (string, error) {
 	var fd protoreflect.FieldDescriptor
 	for i, fieldName := range fieldPath {
@@ -74,19 +87,6 @@ func getValueByField(v protoreflect.Message, fieldPath []string) (string, error)
 		v = v.Get(fd).Message()
 	}
 	return encodeField(fd, v.Get(fd))
-}
-
-// EncodeQuery encode proto message to url query.
-func EncodeQuery(msg proto.Message) (url.Values, error) {
-	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
-		return url.Values{}, nil
-	}
-	u := make(url.Values)
-	err := encodeByField(u, "", msg.ProtoReflect())
-	if err != nil {
-		return nil, err
-	}
-	return u, nil
 }
 
 func encodeByField(u url.Values, path string, v protoreflect.Message) error {
