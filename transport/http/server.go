@@ -61,9 +61,9 @@ func Middleware(m ...middleware.Middleware) ServerOption {
 }
 
 // Filter with HTTP middleware option.
-func Filter(f ...FilterFunc) ServerOption {
+func Filter(filters ...FilterFunc) ServerOption {
 	return func(o *Server) {
-		o.filters = f
+		o.filters = filters
 	}
 }
 
@@ -175,8 +175,11 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				}
 			}
 			ctx = transport.NewServerContext(ctx, tr)
-			for _, f := range s.filters {
-				next = f(next)
+			if len(s.filters) > 0 {
+				for i := len(s.filters) - 1; i >= 0; i-- {
+					f := s.filters[i]
+					next = f(next)
+				}
 			}
 			next.ServeHTTP(w, req.WithContext(ctx))
 		})

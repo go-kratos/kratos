@@ -40,11 +40,17 @@ func (r *Route) Handle(method, relativePath string, h HandlerFunc, filters ...Fi
 		ctx.Reset(nil, nil)
 		r.pool.Put(ctx)
 	}))
-	for _, f := range r.filters {
-		next = f(next)
+	if len(filters) > 0 {
+		for i := len(filters) - 1; i >= 0; i-- {
+			f := filters[i]
+			next = f(next)
+		}
 	}
-	for _, f := range filters {
-		next = f(next)
+	if len(r.filters) > 0 {
+		for i := len(r.filters) - 1; i >= 0; i-- {
+			f := r.filters[i]
+			next = f(next)
+		}
 	}
 	r.srv.router.Handle(path.Join(r.prefix, relativePath), next).Methods(method)
 }
