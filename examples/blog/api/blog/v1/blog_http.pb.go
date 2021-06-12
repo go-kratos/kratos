@@ -23,27 +23,18 @@ const _ = http.SupportPackageIsVersion1
 
 type BlogServiceHTTPServer interface {
 	CreateArticle(context.Context, *CreateArticleRequest) (*CreateArticleReply, error)
-
 	DeleteArticle(context.Context, *DeleteArticleRequest) (*DeleteArticleReply, error)
-
 	GetArticle(context.Context, *GetArticleRequest) (*GetArticleReply, error)
-
 	ListArticle(context.Context, *ListArticleRequest) (*ListArticleReply, error)
-
 	UpdateArticle(context.Context, *UpdateArticleRequest) (*UpdateArticleReply, error)
 }
 
 func RegisterBlogServiceHTTPServer(s *http.Server, srv BlogServiceHTTPServer) {
 	r := s.Route("/")
-
 	r.POST("/v1/article/", _BlogService_CreateArticle0_HTTP_Handler(srv))
-
 	r.PUT("/v1/article/{id}", _BlogService_UpdateArticle0_HTTP_Handler(srv))
-
 	r.DELETE("/v1/article/{id}", _BlogService_DeleteArticle0_HTTP_Handler(srv))
-
 	r.GET("/v1/article/{id}", _BlogService_GetArticle0_HTTP_Handler(srv))
-
 	r.GET("/v1/article/", _BlogService_ListArticle0_HTTP_Handler(srv))
 }
 
@@ -53,7 +44,6 @@ func _BlogService_CreateArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ct
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-
 		transport.SetOperation(ctx, "/blog.api.v1.BlogService/CreateArticle")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.CreateArticle(ctx, req.(*CreateArticleRequest))
@@ -73,11 +63,9 @@ func _BlogService_UpdateArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ct
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-
 		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
 			return err
 		}
-
 		transport.SetOperation(ctx, "/blog.api.v1.BlogService/UpdateArticle")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.UpdateArticle(ctx, req.(*UpdateArticleRequest))
@@ -97,11 +85,9 @@ func _BlogService_DeleteArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ct
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-
 		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
 			return err
 		}
-
 		transport.SetOperation(ctx, "/blog.api.v1.BlogService/DeleteArticle")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.DeleteArticle(ctx, req.(*DeleteArticleRequest))
@@ -121,11 +107,9 @@ func _BlogService_GetArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx h
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-
 		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
 			return err
 		}
-
 		transport.SetOperation(ctx, "/blog.api.v1.BlogService/GetArticle")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.GetArticle(ctx, req.(*GetArticleRequest))
@@ -145,7 +129,6 @@ func _BlogService_ListArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx 
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-
 		transport.SetOperation(ctx, "/blog.api.v1.BlogService/ListArticle")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.ListArticle(ctx, req.(*ListArticleRequest))
@@ -161,13 +144,9 @@ func _BlogService_ListArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx 
 
 type BlogServiceHTTPClient interface {
 	CreateArticle(ctx context.Context, req *CreateArticleRequest, opts ...http.CallOption) (rsp *CreateArticleReply, err error)
-
 	DeleteArticle(ctx context.Context, req *DeleteArticleRequest, opts ...http.CallOption) (rsp *DeleteArticleReply, err error)
-
 	GetArticle(ctx context.Context, req *GetArticleRequest, opts ...http.CallOption) (rsp *GetArticleReply, err error)
-
 	ListArticle(ctx context.Context, req *ListArticleRequest, opts ...http.CallOption) (rsp *ListArticleReply, err error)
-
 	UpdateArticle(ctx context.Context, req *UpdateArticleRequest, opts ...http.CallOption) (rsp *UpdateArticleReply, err error)
 }
 
@@ -183,8 +162,10 @@ func (c *BlogServiceHTTPClientImpl) CreateArticle(ctx context.Context, in *Creat
 	var out CreateArticleReply
 	path := binding.EncodeVars("/v1/article/", in, false)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/CreateArticle"))
-
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
 	return &out, err
 }
 
@@ -192,8 +173,10 @@ func (c *BlogServiceHTTPClientImpl) DeleteArticle(ctx context.Context, in *Delet
 	var out DeleteArticleReply
 	path := binding.EncodeVars("/v1/article/{id}", in, false)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/DeleteArticle"))
-
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
 	return &out, err
 }
 
@@ -201,8 +184,10 @@ func (c *BlogServiceHTTPClientImpl) GetArticle(ctx context.Context, in *GetArtic
 	var out GetArticleReply
 	path := binding.EncodeVars("/v1/article/{id}", in, true)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/GetArticle"))
-
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
 	return &out, err
 }
 
@@ -210,8 +195,10 @@ func (c *BlogServiceHTTPClientImpl) ListArticle(ctx context.Context, in *ListArt
 	var out ListArticleReply
 	path := binding.EncodeVars("/v1/article/", in, true)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/ListArticle"))
-
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
 	return &out, err
 }
 
@@ -219,7 +206,9 @@ func (c *BlogServiceHTTPClientImpl) UpdateArticle(ctx context.Context, in *Updat
 	var out UpdateArticleReply
 	path := binding.EncodeVars("/v1/article/{id}", in, false)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/UpdateArticle"))
-
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
 	return &out, err
 }

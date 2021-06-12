@@ -27,7 +27,6 @@ type MessageServiceHTTPServer interface {
 
 func RegisterMessageServiceHTTPServer(s *http.Server, srv MessageServiceHTTPServer) {
 	r := s.Route("/")
-
 	r.GET("/v1/message/user/{id}/{count}", _MessageService_GetUserMessage0_HTTP_Handler(srv))
 }
 
@@ -37,11 +36,9 @@ func _MessageService_GetUserMessage0_HTTP_Handler(srv MessageServiceHTTPServer) 
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-
 		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
 			return err
 		}
-
 		transport.SetOperation(ctx, "/api.message.v1.MessageService/GetUserMessage")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.GetUserMessage(ctx, req.(*GetUserMessageRequest))
@@ -71,7 +68,9 @@ func (c *MessageServiceHTTPClientImpl) GetUserMessage(ctx context.Context, in *G
 	var out GetUserMessageReply
 	path := binding.EncodeVars("/v1/message/user/{id}/{count}", in, true)
 	opts = append(opts, http.Operation("/api.message.v1.MessageService/GetUserMessage"))
-
 	err := c.cc.Invoke(ctx, "GET", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
 	return &out, err
 }

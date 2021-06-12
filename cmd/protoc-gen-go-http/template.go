@@ -10,16 +10,16 @@ var httpTemplate = `
 {{$svrType := .ServiceType}}
 {{$svrName := .ServiceName}}
 type {{.ServiceType}}HTTPServer interface {
-{{range .MethodSets}}
+{{- range .MethodSets}}
 	{{.Name}}(context.Context, *{{.Request}}) (*{{.Reply}}, error)
-{{end}}
+{{- end}}
 }
 
 func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}HTTPServer) {
 	r := s.Route("/")
-	{{range .Methods}}
+	{{- range .Methods}}
 	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv))
-	{{ end -}}
+	{{- end}}
 }
 
 {{range .Methods}}
@@ -29,11 +29,11 @@ func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) fu
 		if err := ctx.Bind(&in{{.Body}}); err != nil {
 			return err
 		}
-		{{if ne (len .Vars) 0}}
+		{{- if ne (len .Vars) 0}}
 		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
 			return err
 		}
-		{{end}}
+		{{- end}}
 		transport.SetOperation(ctx,"/{{$svrName}}/{{.Name}}")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.{{.Name}}(ctx, req.(*{{.Request}}))
@@ -49,9 +49,9 @@ func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) fu
 {{end}}
 
 type {{.ServiceType}}HTTPClient interface {
-{{range .MethodSets}}
+{{- range .MethodSets}}
 	{{.Name}}(ctx context.Context, req *{{.Request}}, opts ...http.CallOption) (rsp *{{.Reply}}, err error) 
-{{end}}
+{{- end}}
 }
 	
 type {{.ServiceType}}HTTPClientImpl struct{
@@ -67,11 +67,14 @@ func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Reque
 	var out {{.Reply}}
 	path := binding.EncodeVars("{{.Path}}", in, {{.IsQuery}})
 	opts = append(opts, http.Operation("/{{$svrName}}/{{.Name}}"))
-	{{if .HasBody}}
+	{{if .HasBody -}}
 	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, opts...)
-	{{else}} 
+	{{else -}} 
 	err := c.cc.Invoke(ctx, "{{.Method}}", path, nil, &out{{.ResponseBody}}, opts...)
 	{{end -}}
+	if err != nil {
+		return nil, err
+	}
 	return &out, err
 }
 {{end}}
@@ -114,5 +117,5 @@ func (s *serviceDesc) execute() string {
 	if err := tmpl.Execute(buf, s); err != nil {
 		panic(err)
 	}
-	return string(buf.Bytes())
+	return strings.Trim(string(buf.Bytes()), "\r\n")
 }

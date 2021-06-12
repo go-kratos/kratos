@@ -23,15 +23,12 @@ const _ = http.SupportPackageIsVersion1
 
 type MetadataHTTPServer interface {
 	GetServiceDesc(context.Context, *GetServiceDescRequest) (*GetServiceDescReply, error)
-
 	ListServices(context.Context, *ListServicesRequest) (*ListServicesReply, error)
 }
 
 func RegisterMetadataHTTPServer(s *http.Server, srv MetadataHTTPServer) {
 	r := s.Route("/")
-
 	r.GET("/services", _Metadata_ListServices0_HTTP_Handler(srv))
-
 	r.GET("/services/{name}", _Metadata_GetServiceDesc0_HTTP_Handler(srv))
 }
 
@@ -41,7 +38,6 @@ func _Metadata_ListServices0_HTTP_Handler(srv MetadataHTTPServer) func(ctx http.
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-
 		transport.SetOperation(ctx, "/kratos.api.Metadata/ListServices")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.ListServices(ctx, req.(*ListServicesRequest))
@@ -61,11 +57,9 @@ func _Metadata_GetServiceDesc0_HTTP_Handler(srv MetadataHTTPServer) func(ctx htt
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-
 		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
 			return err
 		}
-
 		transport.SetOperation(ctx, "/kratos.api.Metadata/GetServiceDesc")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.GetServiceDesc(ctx, req.(*GetServiceDescRequest))
@@ -81,7 +75,6 @@ func _Metadata_GetServiceDesc0_HTTP_Handler(srv MetadataHTTPServer) func(ctx htt
 
 type MetadataHTTPClient interface {
 	GetServiceDesc(ctx context.Context, req *GetServiceDescRequest, opts ...http.CallOption) (rsp *GetServiceDescReply, err error)
-
 	ListServices(ctx context.Context, req *ListServicesRequest, opts ...http.CallOption) (rsp *ListServicesReply, err error)
 }
 
@@ -97,8 +90,10 @@ func (c *MetadataHTTPClientImpl) GetServiceDesc(ctx context.Context, in *GetServ
 	var out GetServiceDescReply
 	path := binding.EncodeVars("/services/{name}", in, true)
 	opts = append(opts, http.Operation("/kratos.api.Metadata/GetServiceDesc"))
-
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
 	return &out, err
 }
 
@@ -106,7 +101,9 @@ func (c *MetadataHTTPClientImpl) ListServices(ctx context.Context, in *ListServi
 	var out ListServicesReply
 	path := binding.EncodeVars("/services", in, true)
 	opts = append(opts, http.Operation("/kratos.api.Metadata/ListServices"))
-
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
 	return &out, err
 }
