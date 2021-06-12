@@ -8,12 +8,14 @@ import (
 	context "context"
 	transport "github.com/go-kratos/kratos/v2/transport"
 	http "github.com/go-kratos/kratos/v2/transport/http"
+	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
 var _ = new(context.Context)
 var _ = new(transport.Transporter)
+var _ = binding.EncodeVars
 
 const _ = http.SupportPackageIsVersion1
 
