@@ -18,12 +18,12 @@ type {{.ServiceType}}HTTPServer interface {
 func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}HTTPServer) {
 	r := s.Route("/")
 	{{range .Methods}}
-	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}_HTTP_Handler(srv))
+	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv))
 	{{ end -}}
 }
 
 {{range .Methods}}
-func _{{$svrType}}_{{.Name}}_HTTP_Handler(srv {{$svrType}}HTTPServer) func(ctx http.Context) error {
+func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in {{.Request}}
 		if err := ctx.Bind(&in{{.Body}}); err != nil {

@@ -28,10 +28,10 @@ type UserHTTPServer interface {
 func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r := s.Route("/")
 
-	r.GET("/v1/user/get/message/{count}", _User_GetMyMessages_HTTP_Handler(srv))
+	r.GET("/v1/user/get/message/{count}", _User_GetMyMessages0_HTTP_Handler(srv))
 }
 
-func _User_GetMyMessages_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+func _User_GetMyMessages0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GetMyMessagesRequest
 		if err := ctx.Bind(&in); err != nil {

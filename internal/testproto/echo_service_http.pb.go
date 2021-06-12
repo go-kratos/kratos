@@ -36,26 +36,26 @@ type EchoServiceHTTPServer interface {
 func RegisterEchoServiceHTTPServer(s *http.Server, srv EchoServiceHTTPServer) {
 	r := s.Route("/")
 
-	r.GET("/v1/example/echo/{id}/{num}", _EchoService_Echo_HTTP_Handler(srv))
+	r.GET("/v1/example/echo/{id}/{num}", _EchoService_Echo0_HTTP_Handler(srv))
 
-	r.GET("/v1/example/echo/{id}/{num}/{lang}", _EchoService_Echo_HTTP_Handler(srv))
+	r.GET("/v1/example/echo/{id}/{num}/{lang}", _EchoService_Echo1_HTTP_Handler(srv))
 
-	r.GET("/v1/example/echo1/{id}/{line_num}/{status.note}", _EchoService_Echo_HTTP_Handler(srv))
+	r.GET("/v1/example/echo1/{id}/{line_num}/{status.note}", _EchoService_Echo2_HTTP_Handler(srv))
 
-	r.GET("/v1/example/echo2/{no.note}", _EchoService_Echo_HTTP_Handler(srv))
+	r.GET("/v1/example/echo2/{no.note}", _EchoService_Echo3_HTTP_Handler(srv))
 
-	r.POST("/v1/example/echo/{id}", _EchoService_Echo_HTTP_Handler(srv))
+	r.POST("/v1/example/echo/{id}", _EchoService_Echo4_HTTP_Handler(srv))
 
-	r.POST("/v1/example/echo_body", _EchoService_EchoBody_HTTP_Handler(srv))
+	r.POST("/v1/example/echo_body", _EchoService_EchoBody0_HTTP_Handler(srv))
 
-	r.POST("/v1/example/echo_response_body", _EchoService_EchoResponseBody_HTTP_Handler(srv))
+	r.POST("/v1/example/echo_response_body", _EchoService_EchoResponseBody0_HTTP_Handler(srv))
 
-	r.DELETE("/v1/example/echo_delete/{id}/{num}", _EchoService_EchoDelete_HTTP_Handler(srv))
+	r.DELETE("/v1/example/echo_delete/{id}/{num}", _EchoService_EchoDelete0_HTTP_Handler(srv))
 
-	r.PATCH("/v1/example/echo_patch", _EchoService_EchoPatch_HTTP_Handler(srv))
+	r.PATCH("/v1/example/echo_patch", _EchoService_EchoPatch0_HTTP_Handler(srv))
 }
 
-func _EchoService_Echo_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
+func _EchoService_Echo0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in SimpleMessage
 		if err := ctx.Bind(&in); err != nil {
@@ -79,7 +79,7 @@ func _EchoService_Echo_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Con
 	}
 }
 
-func _EchoService_Echo_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
+func _EchoService_Echo1_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in SimpleMessage
 		if err := ctx.Bind(&in); err != nil {
@@ -103,7 +103,7 @@ func _EchoService_Echo_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Con
 	}
 }
 
-func _EchoService_Echo_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
+func _EchoService_Echo2_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in SimpleMessage
 		if err := ctx.Bind(&in); err != nil {
@@ -127,7 +127,7 @@ func _EchoService_Echo_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Con
 	}
 }
 
-func _EchoService_Echo_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
+func _EchoService_Echo3_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in SimpleMessage
 		if err := ctx.Bind(&in); err != nil {
@@ -151,7 +151,7 @@ func _EchoService_Echo_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Con
 	}
 }
 
-func _EchoService_Echo_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
+func _EchoService_Echo4_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in SimpleMessage
 		if err := ctx.Bind(&in); err != nil {
@@ -175,7 +175,7 @@ func _EchoService_Echo_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Con
 	}
 }
 
-func _EchoService_EchoBody_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
+func _EchoService_EchoBody0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in SimpleMessage
 		if err := ctx.Bind(&in); err != nil {
@@ -195,7 +195,7 @@ func _EchoService_EchoBody_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http
 	}
 }
 
-func _EchoService_EchoResponseBody_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
+func _EchoService_EchoResponseBody0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in DynamicMessageUpdate
 		if err := ctx.Bind(&in); err != nil {
@@ -215,7 +215,7 @@ func _EchoService_EchoResponseBody_HTTP_Handler(srv EchoServiceHTTPServer) func(
 	}
 }
 
-func _EchoService_EchoDelete_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
+func _EchoService_EchoDelete0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in SimpleMessage
 		if err := ctx.Bind(&in); err != nil {
@@ -239,7 +239,7 @@ func _EchoService_EchoDelete_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx ht
 	}
 }
 
-func _EchoService_EchoPatch_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
+func _EchoService_EchoPatch0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in DynamicMessageUpdate
 		if err := ctx.Bind(&in.Body); err != nil {

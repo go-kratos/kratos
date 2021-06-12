@@ -36,18 +36,18 @@ type BlogServiceHTTPServer interface {
 func RegisterBlogServiceHTTPServer(s *http.Server, srv BlogServiceHTTPServer) {
 	r := s.Route("/")
 
-	r.POST("/v1/article/", _BlogService_CreateArticle_HTTP_Handler(srv))
+	r.POST("/v1/article/", _BlogService_CreateArticle0_HTTP_Handler(srv))
 
-	r.PUT("/v1/article/{id}", _BlogService_UpdateArticle_HTTP_Handler(srv))
+	r.PUT("/v1/article/{id}", _BlogService_UpdateArticle0_HTTP_Handler(srv))
 
-	r.DELETE("/v1/article/{id}", _BlogService_DeleteArticle_HTTP_Handler(srv))
+	r.DELETE("/v1/article/{id}", _BlogService_DeleteArticle0_HTTP_Handler(srv))
 
-	r.GET("/v1/article/{id}", _BlogService_GetArticle_HTTP_Handler(srv))
+	r.GET("/v1/article/{id}", _BlogService_GetArticle0_HTTP_Handler(srv))
 
-	r.GET("/v1/article/", _BlogService_ListArticle_HTTP_Handler(srv))
+	r.GET("/v1/article/", _BlogService_ListArticle0_HTTP_Handler(srv))
 }
 
-func _BlogService_CreateArticle_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx http.Context) error {
+func _BlogService_CreateArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in CreateArticleRequest
 		if err := ctx.Bind(&in); err != nil {
@@ -67,7 +67,7 @@ func _BlogService_CreateArticle_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx
 	}
 }
 
-func _BlogService_UpdateArticle_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx http.Context) error {
+func _BlogService_UpdateArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in UpdateArticleRequest
 		if err := ctx.Bind(&in); err != nil {
@@ -91,7 +91,7 @@ func _BlogService_UpdateArticle_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx
 	}
 }
 
-func _BlogService_DeleteArticle_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx http.Context) error {
+func _BlogService_DeleteArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in DeleteArticleRequest
 		if err := ctx.Bind(&in); err != nil {
@@ -115,7 +115,7 @@ func _BlogService_DeleteArticle_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx
 	}
 }
 
-func _BlogService_GetArticle_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx http.Context) error {
+func _BlogService_GetArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GetArticleRequest
 		if err := ctx.Bind(&in); err != nil {
@@ -139,7 +139,7 @@ func _BlogService_GetArticle_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx ht
 	}
 }
 
-func _BlogService_ListArticle_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx http.Context) error {
+func _BlogService_ListArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in ListArticleRequest
 		if err := ctx.Bind(&in); err != nil {

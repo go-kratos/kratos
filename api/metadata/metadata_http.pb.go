@@ -30,12 +30,12 @@ type MetadataHTTPServer interface {
 func RegisterMetadataHTTPServer(s *http.Server, srv MetadataHTTPServer) {
 	r := s.Route("/")
 
-	r.GET("/services", _Metadata_ListServices_HTTP_Handler(srv))
+	r.GET("/services", _Metadata_ListServices0_HTTP_Handler(srv))
 
-	r.GET("/services/{name}", _Metadata_GetServiceDesc_HTTP_Handler(srv))
+	r.GET("/services/{name}", _Metadata_GetServiceDesc0_HTTP_Handler(srv))
 }
 
-func _Metadata_ListServices_HTTP_Handler(srv MetadataHTTPServer) func(ctx http.Context) error {
+func _Metadata_ListServices0_HTTP_Handler(srv MetadataHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in ListServicesRequest
 		if err := ctx.Bind(&in); err != nil {
@@ -55,7 +55,7 @@ func _Metadata_ListServices_HTTP_Handler(srv MetadataHTTPServer) func(ctx http.C
 	}
 }
 
-func _Metadata_GetServiceDesc_HTTP_Handler(srv MetadataHTTPServer) func(ctx http.Context) error {
+func _Metadata_GetServiceDesc0_HTTP_Handler(srv MetadataHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GetServiceDescRequest
 		if err := ctx.Bind(&in); err != nil {

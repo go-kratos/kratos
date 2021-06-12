@@ -28,10 +28,10 @@ type GreeterHTTPServer interface {
 func RegisterGreeterHTTPServer(s *http.Server, srv GreeterHTTPServer) {
 	r := s.Route("/")
 
-	r.GET("/helloworld/{name}", _Greeter_SayHello_HTTP_Handler(srv))
+	r.GET("/helloworld/{name}", _Greeter_SayHello0_HTTP_Handler(srv))
 }
 
-func _Greeter_SayHello_HTTP_Handler(srv GreeterHTTPServer) func(ctx http.Context) error {
+func _Greeter_SayHello0_HTTP_Handler(srv GreeterHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in HelloRequest
 		if err := ctx.Bind(&in); err != nil {
