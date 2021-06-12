@@ -1,12 +1,16 @@
 package kratos
 
-import "context"
+import (
+	"context"
+)
 
 // AppInfo is application context value.
 type AppInfo struct {
-	ID      string
-	Name    string
-	Version string
+	ID        string
+	Name      string
+	Version   string
+	Metadata  map[string]string
+	Endpoints []string
 }
 
 type appKey struct{}
