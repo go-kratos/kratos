@@ -17,9 +17,9 @@ var (
 )
 
 type Transport struct {
-	kind     string
-	endpoint string
-	method   string
+	kind      string
+	endpoint  string
+	operation string
 }
 
 func (tr *Transport) Kind() string {
@@ -30,12 +30,12 @@ func (tr *Transport) Endpoint() string {
 	return tr.endpoint
 }
 
-func (tr *Transport) Method() string {
-	return tr.method
+func (tr *Transport) Operation() string {
+	return tr.operation
 }
 
-func (tr *Transport) SetMethod(method string) {
-	tr.method = method
+func (tr *Transport) SetOperation(operation string) {
+	tr.operation = operation
 }
 
 func (tr *Transport) Metadata() metadata.Metadata {
@@ -61,21 +61,21 @@ func TestHTTP(t *testing.T) {
 			Server,
 			err,
 			func() context.Context {
-				return transport.NewServerContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", method: "/package.service/method"})
+				return transport.NewServerContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", operation: "/package.service/method"})
 			}(),
 		},
 		{"http-server@succ",
 			Server,
 			nil,
 			func() context.Context {
-				return transport.NewServerContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", method: "/package.service/method"})
+				return transport.NewServerContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", operation: "/package.service/method"})
 			}(),
 		},
 		{"http-client@succ",
 			Client,
 			nil,
 			func() context.Context {
-				return transport.NewClientContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", method: "/package.service/method"})
+				return transport.NewClientContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", operation: "/package.service/method"})
 
 			}(),
 		},
@@ -83,7 +83,7 @@ func TestHTTP(t *testing.T) {
 			Client,
 			err,
 			func() context.Context {
-				return transport.NewClientContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", method: "/package.service/method"})
+				return transport.NewClientContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", operation: "/package.service/method"})
 			}(),
 		},
 	}

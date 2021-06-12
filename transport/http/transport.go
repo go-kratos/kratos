@@ -1,6 +1,8 @@
 package http
 
 import (
+	"context"
+
 	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/transport"
 )
@@ -11,9 +13,11 @@ var (
 
 // Transport is an HTTP transport.
 type Transport struct {
-	endpoint string
-	method   string
-	metadata metadata.Metadata
+	endpoint  string
+	path      string
+	method    string
+	operation string
+	metadata  metadata.Metadata
 }
 
 // Kind returns the transport kind.
@@ -26,14 +30,14 @@ func (tr *Transport) Endpoint() string {
 	return tr.endpoint
 }
 
-// Method returns the transport method.
-func (tr *Transport) Method() string {
-	return tr.method
+// Operation returns the transport operation.
+func (tr *Transport) Operation() string {
+	return tr.operation
 }
 
-// SetMethod sets the transport method.
-func (tr *Transport) SetMethod(method string) {
-	tr.method = method
+// SetOperation sets the transport operation.
+func (tr *Transport) SetOperation(operation string) {
+	tr.operation = operation
 }
 
 // Metadata returns the transport metadata.
@@ -43,11 +47,27 @@ func (tr *Transport) Metadata() metadata.Metadata {
 
 // WithMetadata with a metadata into transport md.
 func (tr *Transport) WithMetadata(md metadata.Metadata) {
-	if tr.metadata == nil {
-		tr.metadata = md
-		return
-	}
 	for k, v := range md {
 		tr.metadata.Set(k, v)
 	}
+}
+
+// Path returns the Transport path from server context.
+func Path(ctx context.Context) string {
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		if tr, ok := tr.(*Transport); ok {
+			return tr.path
+		}
+	}
+	return ""
+}
+
+// Method returns the Transport method from server context.
+func Method(ctx context.Context) string {
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		if tr, ok := tr.(*Transport); ok {
+			return tr.method
+		}
+	}
+	return ""
 }

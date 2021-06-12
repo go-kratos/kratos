@@ -1,42 +1,37 @@
 package main
 
 import (
-	"fmt"
 	"io"
-	"log"
-	"net/http"
 	"os"
 
 	"github.com/go-kratos/kratos/v2"
-	transhttp "github.com/go-kratos/kratos/v2/transport/http"
-	"github.com/gorilla/mux"
+	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
-func uploadFile(w http.ResponseWriter, r *http.Request) {
-	fileName := r.FormValue("name")
-	file, handler, err := r.FormFile("file")
+func uploadFile(ctx http.Context) error {
+	req := ctx.Request()
+
+	fileName := req.FormValue("name")
+	file, handler, err := req.FormFile("file")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return err
 	}
 	defer file.Close()
 
 	f, err := os.OpenFile(handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return err
 	}
 	defer f.Close()
 	_, _ = io.Copy(f, file)
-	fmt.Fprint(w, "File "+fileName+" Uploaded successfully")
+
+	return ctx.String(200, "File "+fileName+" Uploaded successfully")
 }
 
 func main() {
-	router := mux.NewRouter()
-	router.HandleFunc("/upload", uploadFile).Methods("POST")
-
-	httpSrv := transhttp.NewServer(transhttp.Address(":8000"))
-	httpSrv.HandlePrefix("/", router)
+	httpSrv := http.NewServer(http.Address(":8000"))
+	route := httpSrv.Route("/")
+	route.POST("/upload", uploadFile)
 
 	app := kratos.New(
 		kratos.Name("upload"),
@@ -45,6 +40,6 @@ func main() {
 		),
 	)
 	if err := app.Run(); err != nil {
-		log.Println(err)
+		panic(err)
 	}
 }

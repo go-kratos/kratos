@@ -28,12 +28,14 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 
 func main() {
 	logger := log.NewStdLogger(os.Stdout)
-	log := log.NewHelper(logger)
+
 	consulClient, err := api.NewClient(api.DefaultConfig())
 	if err != nil {
 		panic(err)
 	}
+	r := registry.New(consulClient)
 
+	s := &server{}
 	grpcSrv := grpc.NewServer(
 		grpc.Address(":9000"),
 		grpc.Middleware(
@@ -41,17 +43,15 @@ func main() {
 			logging.Server(logger),
 		),
 	)
-	s := &server{}
-	pb.RegisterGreeterServer(grpcSrv, s)
-
-	httpSrv := http.NewServer(http.Address(":8000"))
-	httpSrv.HandlePrefix("/", pb.NewGreeterHandler(s,
+	httpSrv := http.NewServer(
+		http.Address(":8000"),
 		http.Middleware(
 			recovery.Recovery(),
-		)),
+		),
 	)
+	pb.RegisterGreeterServer(grpcSrv, s)
+	pb.RegisterGreeterHTTPServer(httpSrv, s)
 
-	r := registry.New(consulClient)
 	app := kratos.New(
 		kratos.Name("helloworld"),
 		kratos.Server(
@@ -62,6 +62,6 @@ func main() {
 	)
 
 	if err := app.Run(); err != nil {
-		log.Errorf("app run failed:%v", err)
+		panic(err)
 	}
 }

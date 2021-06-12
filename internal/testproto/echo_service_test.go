@@ -2,21 +2,32 @@ package testproto
 
 import (
 	context "context"
+	"errors"
 	"fmt"
-	"net"
-	http "net/http"
 	"testing"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
-	tr "github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/go-kratos/kratos/v2/metadata"
+	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v2/transport/http"
+
 	_struct "github.com/golang/protobuf/ptypes/struct"
+	grpcmd "google.golang.org/grpc/metadata"
 )
 
+var md = metadata.Metadata{"test_key": "test_value"}
+
 type echoService struct {
+	UnimplementedEchoServiceServer
 }
 
 func (s *echoService) Echo(ctx context.Context, m *SimpleMessage) (*SimpleMessage, error) {
+	md := transport.Metadata(ctx)
+	if v := md.Get("test_key"); v != "test_value" {
+		return nil, errors.New("md not match" + v)
+	}
 	return m, nil
 }
 
@@ -42,7 +53,7 @@ type echoClient struct {
 
 // post: /v1/example/echo/{id}
 func (c *echoClient) Echo(ctx context.Context, in *SimpleMessage) (out *SimpleMessage, err error) {
-	return c.client.Echo(ctx, in)
+	return c.client.Echo(ctx, in, http.Metadata(md))
 }
 
 // post: /v1/example/echo_body
@@ -65,25 +76,47 @@ func (c *echoClient) EchoResponseBody(ctx context.Context, in *DynamicMessageUpd
 	return c.client.EchoResponseBody(ctx, in)
 }
 
-func TestEchoService(t *testing.T) {
-	s := &echoService{}
-	h := NewEchoServiceHandler(s)
-	srv := &http.Server{Addr: ":0", Handler: h}
-	lis, err := net.Listen("tcp", srv.Addr)
+func TestJSON(t *testing.T) {
+	in := &SimpleMessage{Id: "test_id", Num: 100}
+	out := &SimpleMessage{}
+	codec := encoding.GetCodec("json")
+	data, err := codec.Marshal(in)
 	if err != nil {
 		t.Fatal(err)
 	}
-	addr := lis.Addr().(*net.TCPAddr)
-	time.AfterFunc(time.Second, func() {
-		defer srv.Shutdown(context.Background())
-		testEchoClient(t, fmt.Sprintf("127.0.0.1:%d", addr.Port))
-	})
-	if err := srv.Serve(lis); err != nil && err != http.ErrServerClosed {
+	if err := codec.Unmarshal(data, out); err != nil {
+		t.Fatal(err)
+	}
+	// body
+	in2 := &DynamicMessageUpdate{Body: &DynamicMessage{
+		ValueField: &_struct.Value{Kind: &_struct.Value_StringValue{StringValue: "test"}},
+	}}
+	out2 := &DynamicMessageUpdate{}
+	data, err = codec.Marshal(&in2.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := codec.Unmarshal(data, &out2.Body); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testEchoClient(t *testing.T, addr string) {
+func TestEchoHTTPServer(t *testing.T) {
+	echo := &echoService{}
+	ctx := context.Background()
+	srv := http.NewServer(http.Address(":2333"))
+	RegisterEchoServiceHTTPServer(srv, echo)
+	go func() {
+		if err := srv.Start(ctx); err != nil {
+			panic(err)
+		}
+	}()
+	time.Sleep(time.Second)
+	testEchoHTTPClient(t, fmt.Sprintf("127.0.0.1:2333"))
+	srv.Stop(ctx)
+}
+
+func testEchoHTTPClient(t *testing.T, addr string) {
 	var (
 		err error
 		in  = &SimpleMessage{Id: "test_id", Num: 100}
@@ -94,7 +127,7 @@ func testEchoClient(t *testing.T, addr string) {
 			t.Errorf("[%s] expected %v got %v", name, in, out)
 		}
 	}
-	cc, _ := tr.NewClient(context.Background(), tr.WithEndpoint(addr))
+	cc, _ := http.NewClient(context.Background(), http.WithEndpoint(addr))
 
 	cli := &echoClient{client: NewEchoServiceHTTPClient(cc)}
 
@@ -137,15 +170,37 @@ func testEchoClient(t *testing.T, addr string) {
 	fmt.Println("echo test success!")
 }
 
-func TestJSON(t *testing.T) {
-	in := &SimpleMessage{Id: "test_id", Num: 100}
-	out := &SimpleMessage{}
-	codec := encoding.GetCodec("json")
-	data, err := codec.Marshal(in)
+func TestEchoGRPCServer(t *testing.T) {
+	echo := &echoService{}
+	ctx := context.Background()
+	srv := grpc.NewServer(grpc.Address(":2233"))
+	RegisterEchoServiceServer(srv, echo)
+	go func() {
+		if err := srv.Start(ctx); err != nil {
+			panic(err)
+		}
+	}()
+	time.Sleep(time.Second)
+	testEchoGRPCClient(t, fmt.Sprintf("127.0.0.1:2233"))
+	srv.Stop(ctx)
+}
+
+func testEchoGRPCClient(t *testing.T, addr string) {
+	ctx := context.Background()
+	cc, err := grpc.DialInsecure(ctx, grpc.WithEndpoint(addr))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := codec.Unmarshal(data, out); err != nil {
+	var (
+		in  = &SimpleMessage{Id: "test_id", Num: 100}
+		out = &SimpleMessage{}
+	)
+	client := NewEchoServiceClient(cc)
+	ctx = grpcmd.NewOutgoingContext(ctx, grpcmd.New(md))
+	if out, err = client.Echo(ctx, in); err != nil {
 		t.Fatal(err)
+	}
+	if in.Id != out.Id || in.Num != out.Num {
+		t.Errorf("expected %v got %v", in, out)
 	}
 }

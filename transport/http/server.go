@@ -13,6 +13,7 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/metadata"
+	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 
 	"github.com/gorilla/mux"
@@ -52,17 +53,57 @@ func Logger(logger log.Logger) ServerOption {
 	}
 }
 
+// Middleware with service middleware option.
+func Middleware(m ...middleware.Middleware) ServerOption {
+	return func(o *Server) {
+		o.ms = m
+	}
+}
+
+// Filter with HTTP middleware option.
+func Filter(filters ...FilterFunc) ServerOption {
+	return func(o *Server) {
+		o.filters = filters
+	}
+}
+
+// RequestDecoder with request decoder.
+func RequestDecoder(dec DecodeRequestFunc) ServerOption {
+	return func(o *Server) {
+		o.dec = dec
+	}
+}
+
+// ResponseEncoder with response encoder.
+func ResponseEncoder(en EncodeResponseFunc) ServerOption {
+	return func(o *Server) {
+		o.enc = en
+	}
+}
+
+// ErrorEncoder with error encoder.
+func ErrorEncoder(en EncodeErrorFunc) ServerOption {
+	return func(o *Server) {
+		o.ene = en
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
 	ctx      context.Context
 	lis      net.Listener
 	once     sync.Once
+	endpoint *url.URL
 	err      error
 	network  string
 	address  string
-	endpoint *url.URL
 	timeout  time.Duration
+	filters  []FilterFunc
+	ms       []middleware.Middleware
+	dec      DecodeRequestFunc
+	enc      EncodeResponseFunc
+	ene      EncodeErrorFunc
 	router   *mux.Router
 	log      *log.Helper
 }
@@ -73,14 +114,23 @@ func NewServer(opts ...ServerOption) *Server {
 		network: "tcp",
 		address: ":0",
 		timeout: 1 * time.Second,
+		dec:     DefaultRequestDecoder,
+		enc:     DefaultResponseEncoder,
+		ene:     DefaultErrorEncoder,
 		log:     log.NewHelper(log.DefaultLogger),
 	}
 	for _, o := range opts {
 		o(srv)
 	}
-	srv.router = mux.NewRouter()
 	srv.Server = &http.Server{Handler: srv}
+	srv.router = mux.NewRouter()
+	srv.router.Use(srv.filter())
 	return srv
+}
+
+// Route registers an HTTP route.
+func (s *Server) Route(prefix string, filters ...FilterFunc) *Route {
+	return newRoute(prefix, s, filters...)
 }
 
 // Handle registers a new route with a matcher for the URL path.
@@ -100,18 +150,35 @@ func (s *Server) HandleFunc(path string, h http.HandlerFunc) {
 
 // ServeHTTP should write reply headers and data to the ResponseWriter and then return.
 func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	ctx, cancel := ic.Merge(req.Context(), s.ctx)
-	defer cancel()
-	ctx = transport.NewServerContext(ctx, &Transport{
-		endpoint: s.endpoint.String(),
-		method:   req.RequestURI,
-		metadata: metadata.New(req.Header),
-	})
-	if s.timeout > 0 {
-		ctx, cancel = context.WithTimeout(ctx, s.timeout)
-		defer cancel()
+	s.router.ServeHTTP(res, req)
+}
+
+func (s *Server) filter() mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		next = FilterChain(s.filters...)(next)
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			ctx, cancel := ic.Merge(req.Context(), s.ctx)
+			defer cancel()
+			if s.timeout > 0 {
+				ctx, cancel = context.WithTimeout(ctx, s.timeout)
+				defer cancel()
+			}
+			tr := &Transport{
+				endpoint:  s.endpoint.String(),
+				path:      req.RequestURI,
+				method:    req.Method,
+				operation: req.RequestURI,
+				metadata:  metadata.New(req.Header),
+			}
+			if r := mux.CurrentRoute(req); r != nil {
+				if path, err := r.GetPathTemplate(); err == nil {
+					tr.operation = path
+				}
+			}
+			ctx = transport.NewServerContext(ctx, tr)
+			next.ServeHTTP(w, req.WithContext(ctx))
+		})
 	}
-	s.router.ServeHTTP(res, req.WithContext(ctx))
 }
 
 // Endpoint return a real address to registry endpoint.

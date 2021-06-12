@@ -14,12 +14,12 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, tracer trace.TracerProvider, blog *service.BlogService) *grpc.Server {
+func NewGRPCServer(c *conf.Server, logger log.Logger, tracer trace.TracerProvider, blog *service.BlogService) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
 			tracing.Server(tracing.WithTracerProvider(tracer)),
-			logging.Server(log.DefaultLogger),
+			logging.Server(logger),
 			validate.Validator(),
 		),
 	}
