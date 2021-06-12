@@ -116,19 +116,27 @@ func (c *wrapper) Reset(res http.ResponseWriter, req *http.Request) {
 	c.res = res
 	c.req = req
 }
-
 func (c *wrapper) Deadline() (time.Time, bool) {
+	if c.req == nil {
+		return time.Time{}, false
+	}
 	return c.req.Context().Deadline()
 }
-
 func (c *wrapper) Done() <-chan struct{} {
+	if c.req == nil {
+		return nil
+	}
 	return c.req.Context().Done()
 }
-
 func (c *wrapper) Err() error {
+	if c.req == nil {
+		return context.Canceled
+	}
 	return c.req.Context().Err()
 }
-
 func (c *wrapper) Value(key interface{}) interface{} {
+	if c.req == nil {
+		return nil
+	}
 	return c.req.Context().Value(key)
 }
