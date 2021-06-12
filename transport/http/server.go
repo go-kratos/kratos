@@ -124,7 +124,7 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 	srv.Server = &http.Server{Handler: srv}
 	srv.router = mux.NewRouter()
-	srv.router.Use(srv.mux())
+	srv.router.Use(srv.filter())
 	return srv
 }
 
@@ -153,7 +153,7 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	s.router.ServeHTTP(res, req)
 }
 
-func (s *Server) mux() mux.MiddlewareFunc {
+func (s *Server) filter() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			ctx, cancel := ic.Merge(req.Context(), s.ctx)
