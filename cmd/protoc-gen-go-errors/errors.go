@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2/errors"
@@ -55,19 +56,25 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, enum *protogen.Enum) bool {
 	defaultCode := proto.GetExtension(enum.Desc.Options(), errors.E_DefaultCode)
 	code := 0
-	if ok := defaultCode.(int32); ok != 0 && ok <= 600 && ok >= 200 {
-		code = int(ok)
+	if v, ok := defaultCode.(int32); ok {
+		code = int(v)
+	}
+	if code > 600 || code < 0 && code != 0 {
+		panic(fmt.Sprintf("The range must be greater than 0 and less than or equal to 600"))
 	}
 	var ew errorWrapper
 	for _, v := range enum.Values {
 		enumCode := code
 		eCode := proto.GetExtension(v.Desc.Options(), errors.E_Code)
-		if ok := eCode.(int32); ok != 0 {
-			code = int(ok)
+		if v, ok := eCode.(int32); ok {
+			enumCode = int(v)
 		}
 		// If the current enumeration does not contain 'errors.code'
 		//or the code value exceeds the range, the current enum will be skipped
-		if enumCode == 0 || enumCode > 600 || enumCode < 200 {
+		if enumCode > 600 || enumCode < 0 {
+			panic("The range must be greater than 0 and less than or equal to 600")
+		}
+		if enumCode == 0 {
 			continue
 		}
 		err := &errorInfo{
