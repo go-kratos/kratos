@@ -66,7 +66,7 @@ func NewGreeterHTTPClient(client *http.Client) GreeterHTTPClient {
 
 func (c *GreeterHTTPClientImpl) SayHello(ctx context.Context, in *HelloRequest, opts ...http.CallOption) (*HelloReply, error) {
 	var out HelloReply
-	path := binding.EncodePath("GET", "/helloworld/{name}", in)
+	path := binding.EncodeVars("/helloworld/{name}", in, true)
 	opts = append(opts, http.Operation("/helloworld.Greeter/SayHello"))
 
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)

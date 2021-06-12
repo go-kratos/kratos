@@ -102,11 +102,13 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 		method       string
 		body         string
 		responseBody string
+		isQuery      bool
 	)
 	switch pattern := rule.Pattern.(type) {
 	case *annotations.HttpRule_Get:
 		path = pattern.Get
 		method = "GET"
+		isQuery = true
 	case *annotations.HttpRule_Put:
 		path = pattern.Put
 		method = "PUT"
@@ -140,6 +142,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	} else if responseBody != "" {
 		md.ResponseBody = "." + camelCaseVars(responseBody)
 	}
+	md.IsQuery = isQuery
 	return md
 }
 

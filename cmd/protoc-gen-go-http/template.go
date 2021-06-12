@@ -59,7 +59,7 @@ func New{{.ServiceType}}HTTPClient (client *http.Client) {{.ServiceType}}HTTPCli
 {{range .MethodSets}}
 func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
-	path := binding.EncodePath("{{.Method}}", "{{.Path}}", in)
+	path := binding.EncodeVars("{{.Path}}", in, {{.IsQuery}})
 	opts = append(opts, http.Operation("/{{$svrName}}/{{.Name}}"))
 	{{if .HasBody }}
 	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, opts...)
@@ -92,6 +92,7 @@ type methodDesc struct {
 	HasBody      bool
 	Body         string
 	ResponseBody string
+	IsQuery      bool
 }
 
 func (s *serviceDesc) execute() string {
