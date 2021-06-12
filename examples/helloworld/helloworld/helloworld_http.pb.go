@@ -15,7 +15,7 @@ import (
 // is compatible with the kratos package it is being compiled against.
 var _ = new(context.Context)
 var _ = new(transport.Transporter)
-var _ = binding.EncodeVars
+var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
@@ -64,7 +64,7 @@ func NewGreeterHTTPClient(client *http.Client) GreeterHTTPClient {
 
 func (c *GreeterHTTPClientImpl) SayHello(ctx context.Context, in *HelloRequest, opts ...http.CallOption) (*HelloReply, error) {
 	var out HelloReply
-	path := binding.EncodeVars("/helloworld/{name}", in, true)
+	path := binding.EncodeURL("/helloworld/{name}", in, true)
 	opts = append(opts, http.Operation("/helloworld.Greeter/SayHello"))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

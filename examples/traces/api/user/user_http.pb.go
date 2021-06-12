@@ -15,7 +15,7 @@ import (
 // is compatible with the kratos package it is being compiled against.
 var _ = new(context.Context)
 var _ = new(transport.Transporter)
-var _ = binding.EncodeVars
+var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
@@ -64,7 +64,7 @@ func NewUserHTTPClient(client *http.Client) UserHTTPClient {
 
 func (c *UserHTTPClientImpl) GetMyMessages(ctx context.Context, in *GetMyMessagesRequest, opts ...http.CallOption) (*GetMyMessagesReply, error) {
 	var out GetMyMessagesReply
-	path := binding.EncodeVars("/v1/user/get/message/{count}", in, true)
+	path := binding.EncodeURL("/v1/user/get/message/{count}", in, true)
 	opts = append(opts, http.Operation("/api.user.v1.User/GetMyMessages"))
 	err := c.cc.Invoke(ctx, "GET", path, in, &out, opts...)
 	if err != nil {
