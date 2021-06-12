@@ -24,8 +24,7 @@ type EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
 
 // DefaultRequestDecoder decodes the request body to object.
 func DefaultRequestDecoder(r *http.Request, v interface{}) error {
-	codec, ok := CodecForRequest(r, "Content-Type")
-	if ok {
+	if codec, ok := CodecForRequest(r, "Content-Type"); ok {
 		data, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			return errors.BadRequest("CODEC", err.Error())
@@ -33,10 +32,10 @@ func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 		if err := codec.Unmarshal(data, v); err != nil {
 			return errors.BadRequest("CODEC", err.Error())
 		}
-	} else {
-		if err := binding.BindForm(r, v); err != nil {
-			return errors.BadRequest("CODEC", err.Error())
-		}
+		return nil
+	}
+	if err := binding.BindForm(r, v); err != nil {
+		return errors.BadRequest("CODEC", err.Error())
 	}
 	return nil
 }
