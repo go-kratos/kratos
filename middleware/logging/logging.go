@@ -16,15 +16,15 @@ func Server(logger log.Logger) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			var (
-				code   int32
-				reason string
-				kind   string
-				method string
+				code      int32
+				reason    string
+				kind      string
+				operation string
 			)
 			startTime := time.Now()
 			if info, ok := transport.FromServerContext(ctx); ok {
 				kind = info.Kind()
-				method = info.Method()
+				operation = info.Operation()
 			}
 			reply, err = handler(ctx, req)
 			if se := errors.FromError(err); se != nil {
@@ -35,7 +35,7 @@ func Server(logger log.Logger) middleware.Middleware {
 			log.WithContext(ctx, logger).Log(level,
 				"kind", "server",
 				"component", kind,
-				"method", method,
+				"operation", operation,
 				"args", extractArgs(req),
 				"code", code,
 				"reason", reason,
@@ -52,15 +52,15 @@ func Client(logger log.Logger) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			var (
-				code   int32
-				reason string
-				kind   string
-				method string
+				code      int32
+				reason    string
+				kind      string
+				operation string
 			)
 			startTime := time.Now()
 			if info, ok := transport.FromClientContext(ctx); ok {
 				kind = info.Kind()
-				method = info.Method()
+				operation = info.Operation()
 			}
 			reply, err = handler(ctx, req)
 			if se := errors.FromError(err); se != nil {
@@ -71,7 +71,7 @@ func Client(logger log.Logger) middleware.Middleware {
 			log.WithContext(ctx, logger).Log(level,
 				"kind", "client",
 				"component", kind,
-				"method", method,
+				"operation", operation,
 				"args", extractArgs(req),
 				"code", code,
 				"reason", reason,

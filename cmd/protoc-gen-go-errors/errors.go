@@ -15,7 +15,13 @@ const (
 
 // generateFile generates a _http.pb.go file containing kratos errors definitions.
 func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.GeneratedFile {
-	if len(file.Enums) == 0 {
+	var hasCode bool
+	for _, enum := range file.Enums {
+		if code := defaultErrorCode(enum); code > 0 {
+			hasCode = true
+		}
+	}
+	if len(file.Enums) == 0 || !hasCode {
 		return nil
 	}
 	filename := file.GeneratedFilenamePrefix + "_errors.pb.go"
@@ -44,36 +50,37 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	}
 }
 
-func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, enum *protogen.Enum) {
+func defaultErrorCode(enum *protogen.Enum) int {
 	defaultCode := proto.GetExtension(enum.Desc.Options(), errors.E_DefaultCode)
-	code := 0
-	if ok := defaultCode.(int32); ok != 0 && ok <= 600 && ok >= 200 {
-		code = int(ok)
-	} else {
-		return
+	if code, ok := defaultCode.(int32); ok && code > 0 {
+		return int(code)
 	}
+	return 0
+}
+
+func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, enum *protogen.Enum) {
 	var ew errorWrapper
+	defCode := defaultErrorCode(enum)
 	for _, v := range enum.Values {
-		eCode := proto.GetExtension(v.Desc.Options(), errors.E_Code)
-		enumCode := int(eCode.(int32))
-		if enumCode == 0 {
-			enumCode = code
+		code := int(proto.GetExtension(v.Desc.Options(), errors.E_Code).(int32))
+		if code == 0 {
+			code = defCode
 		}
-		if enumCode > 600 || enumCode < 200 {
-			return
+		if code > 600 || code < 200 {
+			panic("httpstatus code must be greater than or equal to 200 and less than 600")
 		}
 		err := &errorInfo{
 			Name:       string(enum.Desc.Name()),
 			Value:      string(v.Desc.Name()),
-			CamelValue: Case2Camel(string(v.Desc.Name())),
-			HttpCode:   enumCode,
+			CamelValue: case2Camel(string(v.Desc.Name())),
+			HttpCode:   code,
 		}
 		ew.Errors = append(ew.Errors, err)
 	}
 	g.P(ew.execute())
 }
 
-func Case2Camel(name string) string {
+func case2Camel(name string) string {
 	if !strings.Contains(name, "_") {
 		return name
 	}

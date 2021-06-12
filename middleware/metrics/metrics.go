@@ -29,9 +29,9 @@ func WithSeconds(c metrics.Observer) Option {
 }
 
 type options struct {
-	// counter: <client/server>_requests_code_total{kind, method, code, reason}
+	// counter: <client/server>_requests_code_total{kind, operation, code, reason}
 	requests metrics.Counter
-	// histogram: <client/server>_requests_seconds_bucket{kind, method}
+	// histogram: <client/server>_requests_seconds_bucket{kind, operation}
 	seconds metrics.Observer
 }
 
@@ -44,15 +44,15 @@ func Server(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
-				code   int
-				reason string
-				kind   string
-				method string
+				code      int
+				reason    string
+				kind      string
+				operation string
 			)
 			startTime := time.Now()
 			if info, ok := transport.FromServerContext(ctx); ok {
 				kind = info.Kind()
-				method = info.Method()
+				operation = info.Operation()
 			}
 			reply, err := handler(ctx, req)
 			if se := errors.FromError(err); se != nil {
@@ -60,10 +60,10 @@ func Server(opts ...Option) middleware.Middleware {
 				reason = se.Reason
 			}
 			if options.requests != nil {
-				options.requests.With(kind, method, strconv.Itoa(code), reason).Inc()
+				options.requests.With(kind, operation, strconv.Itoa(code), reason).Inc()
 			}
 			if options.seconds != nil {
-				options.seconds.With(kind, method).Observe(time.Since(startTime).Seconds())
+				options.seconds.With(kind, operation).Observe(time.Since(startTime).Seconds())
 			}
 			return reply, err
 		}
@@ -79,15 +79,15 @@ func Client(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
-				code   int
-				reason string
-				kind   string
-				method string
+				code      int
+				reason    string
+				kind      string
+				operation string
 			)
 			startTime := time.Now()
 			if info, ok := transport.FromClientContext(ctx); ok {
 				kind = info.Kind()
-				method = info.Method()
+				operation = info.Operation()
 			}
 			reply, err := handler(ctx, req)
 			if se := errors.FromError(err); se != nil {
@@ -95,10 +95,10 @@ func Client(opts ...Option) middleware.Middleware {
 				reason = se.Reason
 			}
 			if options.requests != nil {
-				options.requests.With(kind, method, strconv.Itoa(code), reason).Inc()
+				options.requests.With(kind, operation, strconv.Itoa(code), reason).Inc()
 			}
 			if options.seconds != nil {
-				options.seconds.With(kind, method).Observe(time.Since(startTime).Seconds())
+				options.seconds.With(kind, operation).Observe(time.Since(startTime).Seconds())
 			}
 			return reply, err
 		}

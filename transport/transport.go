@@ -28,8 +28,8 @@ type Transporter interface {
 	Kind() string
 	Endpoint() string
 
-	Method() string
-	SetMethod(string)
+	Operation() string
+	SetOperation(string)
 
 	Metadata() metadata.Metadata
 	// WithMetadata merge new metadata into transport,
@@ -62,19 +62,19 @@ func FromClientContext(ctx context.Context) (tr Transporter, ok bool) {
 	return
 }
 
-// Method returns the Transport method from server context.
-func Method(ctx context.Context) string {
+// SetOperation set operation into context transport.
+func SetOperation(ctx context.Context, method string) {
 	if tr, ok := FromServerContext(ctx); ok {
-		return tr.Method()
+		tr.SetOperation(method)
 	}
-	return ""
 }
 
-// SetMethod set serviceMethod into context transport.
-func SetMethod(ctx context.Context, method string) {
+// Operation returns the Transport operation from server context.
+func Operation(ctx context.Context) string {
 	if tr, ok := FromServerContext(ctx); ok {
-		tr.SetMethod(method)
+		return tr.Operation()
 	}
+	return ""
 }
 
 // Metadata returns incoming metadata from server transport.
@@ -83,11 +83,4 @@ func Metadata(ctx context.Context) metadata.Metadata {
 		return tr.Metadata()
 	}
 	return metadata.Metadata{}
-}
-
-// SetMetadata sets outgoing metadata into client transport.
-func SetMetadata(ctx context.Context, md metadata.Metadata) {
-	if tr, ok := FromClientContext(ctx); ok {
-		tr.WithMetadata(md)
-	}
 }

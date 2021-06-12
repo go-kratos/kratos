@@ -38,7 +38,7 @@ func Server(opts ...Option) middleware.Middleware {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromServerContext(ctx); ok {
 				var span trace.Span
-				ctx, span = tracer.Start(ctx, tr.Kind(), tr.Method(), tr.Metadata())
+				ctx, span = tracer.Start(ctx, tr.Kind(), tr.Operation(), tr.Metadata())
 				defer func() { tracer.End(ctx, span, err) }()
 			}
 			return handler(ctx, req)
@@ -53,7 +53,7 @@ func Client(opts ...Option) middleware.Middleware {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromClientContext(ctx); ok {
 				var span trace.Span
-				ctx, span = tracer.Start(ctx, tr.Kind(), tr.Method(), tr.Metadata())
+				ctx, span = tracer.Start(ctx, tr.Kind(), tr.Operation(), tr.Metadata())
 				defer func() { tracer.End(ctx, span, err) }()
 			}
 			return handler(ctx, req)
