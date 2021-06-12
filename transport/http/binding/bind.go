@@ -2,9 +2,18 @@ package binding
 
 import (
 	"net/http"
+	"net/url"
 
 	"google.golang.org/protobuf/proto"
 )
+
+// BindQuery bind vars parameters to target.
+func BindQuery(vars url.Values, target interface{}) error {
+	if msg, ok := target.(proto.Message); ok {
+		return mapProto(msg, vars)
+	}
+	return mapForm(target, vars)
+}
 
 // BindForm bind form parameters to target.
 func BindForm(req *http.Request, target interface{}) error {
@@ -15,12 +24,4 @@ func BindForm(req *http.Request, target interface{}) error {
 		return mapProto(msg, req.Form)
 	}
 	return mapForm(target, req.Form)
-}
-
-// BindVars bind map parameters to target.
-func BindVars(values map[string][]string, target interface{}) error {
-	if msg, ok := target.(proto.Message); ok {
-		return mapProto(msg, values)
-	}
-	return mapForm(target, values)
 }

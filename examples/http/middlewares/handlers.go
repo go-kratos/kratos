@@ -6,7 +6,6 @@ import (
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/http"
-	"github.com/go-kratos/kratos/v2/transport/http/binding"
 )
 
 func sayHelloHandler(ctx http.Context) error {
@@ -16,7 +15,7 @@ func sayHelloHandler(ctx http.Context) error {
 	}
 
 	// binding /hello/{name} to in.Name
-	if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+	if err := ctx.BindVars(&in); err != nil {
 		return err
 	}
 

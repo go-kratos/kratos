@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport/http/binding"
 	"github.com/gorilla/mux"
 )
 
@@ -22,12 +23,16 @@ type HandlerFunc func(Context) error
 type Context interface {
 	context.Context
 	Vars() url.Values
+	Query() url.Values
 	Form() url.Values
 	Header() http.Header
 	Request() *http.Request
 	Response() http.ResponseWriter
 	Middleware(middleware.Handler) middleware.Handler
 	Bind(interface{}) error
+	BindVars(interface{}) error
+	BindQuery(interface{}) error
+	BindForm(interface{}) error
 	Returns(interface{}, error) error
 	Result(int, interface{}) error
 	JSON(int, interface{}) error
@@ -62,12 +67,18 @@ func (c *wrapper) Form() url.Values {
 	}
 	return c.req.Form
 }
+func (c *wrapper) Query() url.Values {
+	return c.req.URL.Query()
+}
 func (c *wrapper) Request() *http.Request        { return c.req }
 func (c *wrapper) Response() http.ResponseWriter { return c.res }
 func (c *wrapper) Middleware(h middleware.Handler) middleware.Handler {
 	return middleware.Chain(c.route.srv.ms...)(h)
 }
-func (c *wrapper) Bind(v interface{}) error { return c.route.srv.dec(c.req, v) }
+func (c *wrapper) Bind(v interface{}) error      { return c.route.srv.dec(c.req, v) }
+func (c *wrapper) BindVars(v interface{}) error  { return binding.BindQuery(c.Vars(), v) }
+func (c *wrapper) BindQuery(v interface{}) error { return binding.BindQuery(c.Query(), v) }
+func (c *wrapper) BindForm(v interface{}) error  { return binding.BindForm(c.req, v) }
 func (c *wrapper) Returns(v interface{}, err error) error {
 	if err != nil {
 		return err
