@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	http "net/http"
+	"net/http"
 
 	"github.com/go-kratos/kratos/v2/middleware"
 )
