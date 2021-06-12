@@ -6,18 +6,14 @@ package testproto
 
 import (
 	context "context"
-	middleware "github.com/go-kratos/kratos/v2/middleware"
 	transport "github.com/go-kratos/kratos/v2/transport"
 	http "github.com/go-kratos/kratos/v2/transport/http"
-	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
 var _ = new(context.Context)
-var _ = new(middleware.Middleware)
 var _ = new(transport.Transporter)
-var _ = binding.BindVars
 
 const _ = http.SupportPackageIsVersion1
 
