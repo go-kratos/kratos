@@ -2,7 +2,7 @@ package yaml
 
 import (
 	"github.com/go-kratos/kratos/v2/encoding"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // Name is the name registered for the json codec.
