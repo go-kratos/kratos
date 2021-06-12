@@ -39,28 +39,36 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("// is compatible with the kratos package it is being compiled against.")
 	g.P("const _ = ", errorsPackage.Ident("SupportPackageIsVersion1"))
 	g.P()
+	index := 0
 	for _, enum := range file.Enums {
-		genErrorsReason(gen, file, g, enum)
+		skip := genErrorsReason(gen, file, g, enum)
+		if skip == false {
+			index++
+		}
+	}
+	// If all enums do not contain 'errors.code', the current file is skipped
+	if index == 0 {
+		g.Skip()
 	}
 }
 
-func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, enum *protogen.Enum) {
+func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, enum *protogen.Enum) bool {
 	defaultCode := proto.GetExtension(enum.Desc.Options(), errors.E_DefaultCode)
 	code := 0
 	if ok := defaultCode.(int32); ok != 0 && ok <= 600 && ok >= 200 {
 		code = int(ok)
-	} else {
-		return
 	}
 	var ew errorWrapper
 	for _, v := range enum.Values {
+		enumCode := code
 		eCode := proto.GetExtension(v.Desc.Options(), errors.E_Code)
-		enumCode := int(eCode.(int32))
-		if enumCode == 0 {
-			enumCode = code
+		if ok := eCode.(int32); ok != 0 {
+			code = int(ok)
 		}
-		if enumCode > 600 || enumCode < 200 {
-			return
+		// If the current enumeration does not contain 'errors.code'
+		//or the code value exceeds the range, the current enum will be skipped
+		if enumCode == 0 || enumCode > 600 || enumCode < 200 {
+			continue
 		}
 		err := &errorInfo{
 			Name:       string(enum.Desc.Name()),
@@ -70,7 +78,11 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 		}
 		ew.Errors = append(ew.Errors, err)
 	}
+	if len(ew.Errors) == 0 {
+		return true
+	}
 	g.P(ew.execute())
+	return false
 }
 
 func Case2Camel(name string) string {
