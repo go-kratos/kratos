@@ -17,7 +17,7 @@ import (
 var _ = new(context.Context)
 var _ = new(middleware.Middleware)
 var _ = new(transport.Transporter)
-var _ = binding.BindVars
+var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
