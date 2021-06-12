@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2/errors"
@@ -60,7 +59,7 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 		code = int(v)
 	}
 	if code > 600 || code < 0 && code != 0 {
-		panic(fmt.Sprintf("The range must be greater than 0 and less than or equal to 600"))
+		panic("The range must be greater than 0 and less than or equal to 600")
 	}
 	var ew errorWrapper
 	for _, v := range enum.Values {
