@@ -13,69 +13,67 @@ import (
 
 func globalFilter(next http1.Handler) http1.Handler {
 	return http1.HandlerFunc(func(w http1.ResponseWriter, r *http1.Request) {
-		// Do stuff here
-		fmt.Println("global filter")
-		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		fmt.Println("global filter in")
 		next.ServeHTTP(w, r)
+		fmt.Println("global filter out")
 	})
 }
 
 func globalFilter2(next http1.Handler) http1.Handler {
 	return http1.HandlerFunc(func(w http1.ResponseWriter, r *http1.Request) {
-		// Do stuff here
-		fmt.Println("global filter 2")
-		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		fmt.Println("global filter 2 in")
 		next.ServeHTTP(w, r)
+		fmt.Println("global filter 2 out")
 	})
 }
 
 func routeFilter(next http1.Handler) http1.Handler {
 	return http1.HandlerFunc(func(w http1.ResponseWriter, r *http1.Request) {
-		// Do stuff here
-		fmt.Println("route filter")
-		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		fmt.Println("route filter in")
 		next.ServeHTTP(w, r)
+		fmt.Println("route filter out")
 	})
 }
 
 func routeFilter2(next http1.Handler) http1.Handler {
 	return http1.HandlerFunc(func(w http1.ResponseWriter, r *http1.Request) {
-		// Do stuff here
-		fmt.Println("route filter 2")
-		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		fmt.Println("route filter 2 in")
 		next.ServeHTTP(w, r)
+		fmt.Println("route filter 2 out")
 	})
 }
 
 func pathFilter(next http1.Handler) http1.Handler {
 	return http1.HandlerFunc(func(w http1.ResponseWriter, r *http1.Request) {
-		// Do stuff here
-		fmt.Println("path filter")
-		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		fmt.Println("path filter in")
 		next.ServeHTTP(w, r)
+		fmt.Println("path filter out")
 	})
 }
 
 func pathFilter2(next http1.Handler) http1.Handler {
 	return http1.HandlerFunc(func(w http1.ResponseWriter, r *http1.Request) {
-		// Do stuff here
-		fmt.Println("path filter 2")
-		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		fmt.Println("path filter 2 in")
 		next.ServeHTTP(w, r)
+		fmt.Println("path filter 2 out")
 	})
 }
 
 func serviceMiddleware(handler middleware.Handler) middleware.Handler {
 	return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-		fmt.Println("service middleware")
-		return handler(ctx, req)
+		fmt.Println("service middleware in")
+		reply, err = handler(ctx, req)
+		fmt.Println("service middleware out")
+		return
 	}
 }
 
 func serviceMiddleware2(handler middleware.Handler) middleware.Handler {
 	return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-		fmt.Println("service middleware 2")
-		return handler(ctx, req)
+		fmt.Println("service middleware 2 in")
+		reply, err = handler(ctx, req)
+		fmt.Println("service middleware 2 out")
+		return
 	}
 }
 

@@ -9,6 +9,16 @@ import (
 // FilterFunc is a function which receives an http.Handler and returns another http.Handler.
 type FilterFunc func(http.Handler) http.Handler
 
+// FilterChain returns a FilterFunc that specifies the chained handler for HTTP Router.
+func FilterChain(filters ...FilterFunc) FilterFunc {
+	return func(next http.Handler) http.Handler {
+		for i := len(filters) - 1; i >= 0; i-- {
+			next = filters[i](next)
+		}
+		return next
+	}
+}
+
 // Route is an HTTP route.
 type Route struct {
 	prefix  string
@@ -40,18 +50,8 @@ func (r *Route) Handle(method, relativePath string, h HandlerFunc, filters ...Fi
 		ctx.Reset(nil, nil)
 		r.pool.Put(ctx)
 	}))
-	if len(filters) > 0 {
-		for i := len(filters) - 1; i >= 0; i-- {
-			f := filters[i]
-			next = f(next)
-		}
-	}
-	if len(r.filters) > 0 {
-		for i := len(r.filters) - 1; i >= 0; i-- {
-			f := r.filters[i]
-			next = f(next)
-		}
-	}
+	next = FilterChain(filters...)(next)
+	next = FilterChain(r.filters...)(next)
 	r.srv.router.Handle(path.Join(r.prefix, relativePath), next).Methods(method)
 }
 

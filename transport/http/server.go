@@ -155,6 +155,7 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 func (s *Server) filter() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
+		next = FilterChain(s.filters...)(next)
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			ctx, cancel := ic.Merge(req.Context(), s.ctx)
 			defer cancel()
@@ -175,12 +176,6 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				}
 			}
 			ctx = transport.NewServerContext(ctx, tr)
-			if len(s.filters) > 0 {
-				for i := len(s.filters) - 1; i >= 0; i-- {
-					f := s.filters[i]
-					next = f(next)
-				}
-			}
 			next.ServeHTTP(w, req.WithContext(ctx))
 		})
 	}
