@@ -28,7 +28,7 @@ func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}Hand
 			return err
 		}
 		{{end}}
-		transport.SetMethod(ctx,"/{{$svrName}}/{{.Name}}")
+		transport.SetOperation(ctx,"/{{$svrName}}/{{.Name}}")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.{{.Name}}(ctx, req.(*{{.Request}}))
 		})
@@ -60,7 +60,7 @@ func New{{.ServiceType}}HTTPClient (client *http.Client) {{.ServiceType}}HTTPCli
 func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
 	path := binding.EncodePath("{{.Method}}", "{{.Path}}", in)
-	opts = append(opts, http.Method("/{{$svrName}}/{{.Name}}"))
+	opts = append(opts, http.Operation("/{{$svrName}}/{{.Name}}"))
 	{{if .HasBody }}
 	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, opts...)
 	{{else}} 

@@ -38,7 +38,7 @@ func RegisterGreeterHTTPServer(s *http.Server, srv GreeterHandler) {
 			return err
 		}
 
-		transport.SetMethod(ctx, "/helloworld.Greeter/SayHello")
+		transport.SetOperation(ctx, "/helloworld.Greeter/SayHello")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.SayHello(ctx, req.(*HelloRequest))
 		})
@@ -67,7 +67,7 @@ func NewGreeterHTTPClient(client *http.Client) GreeterHTTPClient {
 func (c *GreeterHTTPClientImpl) SayHello(ctx context.Context, in *HelloRequest, opts ...http.CallOption) (*HelloReply, error) {
 	var out HelloReply
 	path := binding.EncodePath("GET", "/helloworld/{name}", in)
-	opts = append(opts, http.Method("/helloworld.Greeter/SayHello"))
+	opts = append(opts, http.Operation("/helloworld.Greeter/SayHello"))
 
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 

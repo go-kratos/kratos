@@ -179,9 +179,9 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		defer cancel()
 		md, _ := grpcmd.FromIncomingContext(ctx)
 		ctx = transport.NewServerContext(ctx, &Transport{
-			endpoint: s.endpoint.String(),
-			method:   info.FullMethod,
-			metadata: metadata.New(md),
+			endpoint:  s.endpoint.String(),
+			operation: info.FullMethod,
+			metadata:  metadata.New(md),
 		})
 		if s.timeout > 0 {
 			var cancel context.CancelFunc

@@ -201,9 +201,11 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 		c.metatada = metadata.Metadata{}
 	}
 	ctx = transport.NewClientContext(ctx, &Transport{
-		endpoint: client.opts.endpoint,
-		metadata: c.metatada,
-		method:   c.method,
+		endpoint:  client.opts.endpoint,
+		metadata:  c.metatada,
+		path:      path,
+		method:    method,
+		operation: c.operation,
 	})
 	return client.invoke(ctx, req, args, reply, c)
 }

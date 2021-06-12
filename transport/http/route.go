@@ -7,7 +7,7 @@ import (
 )
 
 // FilterFunc is a function which receives an http.Handler and returns another http.Handler.
-type FilterFunc func(http.HandlerFunc) http.HandlerFunc
+type FilterFunc func(http.Handler) http.Handler
 
 // Route is an HTTP route.
 type Route struct {
@@ -28,8 +28,8 @@ func newRoute(prefix string, srv *Server) *Route {
 }
 
 // Handle registers a new route with a matcher for the URL path and method.
-func (r *Route) Handle(method, relativePath string, h HandlerFunc, m ...FilterFunc) {
-	next := func(res http.ResponseWriter, req *http.Request) {
+func (r *Route) Handle(method, relativePath string, h HandlerFunc, filters ...FilterFunc) {
+	next := http.Handler(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		ctx := r.pool.Get().(Context)
 		ctx.Reset(res, req)
 		if err := h(ctx); err != nil {
@@ -37,11 +37,11 @@ func (r *Route) Handle(method, relativePath string, h HandlerFunc, m ...FilterFu
 		}
 		ctx.Reset(nil, nil)
 		r.pool.Put(ctx)
+	}))
+	for _, f := range filters {
+		next = f(next)
 	}
-	for _, m := range m {
-		next = m(next)
-	}
-	r.srv.router.HandleFunc(path.Join(r.prefix, relativePath), next).Methods(method)
+	r.srv.router.Handle(path.Join(r.prefix, relativePath), next).Methods(method)
 }
 
 // GET registers a new GET route for a path with matching handler in the router.

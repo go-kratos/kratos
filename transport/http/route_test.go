@@ -17,21 +17,21 @@ type User struct {
 	Name string `json:"name"`
 }
 
-func authFilter(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func authFilter(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Do stuff here
 		log.Println("auth:", r.Method, r.RequestURI)
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
 		next.ServeHTTP(w, r)
-	}
+	})
 }
-func loggingFilter(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func loggingFilter(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Do stuff here
 		log.Println("logging:", r.Method, r.RequestURI)
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
 		next.ServeHTTP(w, r)
-	}
+	})
 }
 
 func TestRoute(t *testing.T) {

@@ -16,7 +16,7 @@ type CallOption interface {
 
 type callInfo struct {
 	contentType string
-	method      string
+	operation   string
 	metatada    metadata.Metadata
 }
 
@@ -49,24 +49,24 @@ func (o ContentTypeCallOption) before(c *callInfo) error {
 func defaultCallInfo(path string) callInfo {
 	return callInfo{
 		contentType: "application/json",
-		method:      path,
+		operation:   path,
 		metatada:    metadata.Metadata{},
 	}
 }
 
-// Method is serviceMethod call option
-func Method(method string) CallOption {
-	return MethodCallOption{Method: method}
+// Operation is serviceMethod call option
+func Operation(operation string) CallOption {
+	return OperationCallOption{Operation: operation}
 }
 
-// MethodCallOption is set ServiceMethod for client call
-type MethodCallOption struct {
+// OperationCallOption is set ServiceMethod for client call
+type OperationCallOption struct {
 	EmptyCallOption
-	Method string
+	Operation string
 }
 
-func (o MethodCallOption) before(c *callInfo) error {
-	c.method = o.Method
+func (o OperationCallOption) before(c *callInfo) error {
+	c.operation = o.Operation
 	return nil
 }
 

@@ -38,7 +38,7 @@ func RegisterUserHTTPServer(s *http.Server, srv UserHandler) {
 			return err
 		}
 
-		transport.SetMethod(ctx, "/api.user.v1.User/GetMyMessages")
+		transport.SetOperation(ctx, "/api.user.v1.User/GetMyMessages")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.GetMyMessages(ctx, req.(*GetMyMessagesRequest))
 		})
@@ -67,7 +67,7 @@ func NewUserHTTPClient(client *http.Client) UserHTTPClient {
 func (c *UserHTTPClientImpl) GetMyMessages(ctx context.Context, in *GetMyMessagesRequest, opts ...http.CallOption) (*GetMyMessagesReply, error) {
 	var out GetMyMessagesReply
 	path := binding.EncodePath("GET", "/v1/user/get/message/{count}", in)
-	opts = append(opts, http.Method("/api.user.v1.User/GetMyMessages"))
+	opts = append(opts, http.Operation("/api.user.v1.User/GetMyMessages"))
 
 	err := c.cc.Invoke(ctx, "GET", path, in, &out, opts...)
 

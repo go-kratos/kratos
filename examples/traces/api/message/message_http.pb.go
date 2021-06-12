@@ -38,7 +38,7 @@ func RegisterMessageServiceHTTPServer(s *http.Server, srv MessageServiceHandler)
 			return err
 		}
 
-		transport.SetMethod(ctx, "/api.message.v1.MessageService/GetUserMessage")
+		transport.SetOperation(ctx, "/api.message.v1.MessageService/GetUserMessage")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.GetUserMessage(ctx, req.(*GetUserMessageRequest))
 		})
@@ -67,7 +67,7 @@ func NewMessageServiceHTTPClient(client *http.Client) MessageServiceHTTPClient {
 func (c *MessageServiceHTTPClientImpl) GetUserMessage(ctx context.Context, in *GetUserMessageRequest, opts ...http.CallOption) (*GetUserMessageReply, error) {
 	var out GetUserMessageReply
 	path := binding.EncodePath("GET", "/v1/message/user/{id}/{count}", in)
-	opts = append(opts, http.Method("/api.message.v1.MessageService/GetUserMessage"))
+	opts = append(opts, http.Operation("/api.message.v1.MessageService/GetUserMessage"))
 
 	err := c.cc.Invoke(ctx, "GET", path, in, &out, opts...)
 

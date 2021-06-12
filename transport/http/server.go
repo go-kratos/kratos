@@ -122,8 +122,9 @@ func NewServer(opts ...ServerOption) *Server {
 	for _, o := range opts {
 		o(srv)
 	}
-	srv.router = mux.NewRouter()
 	srv.Server = &http.Server{Handler: srv}
+	srv.router = mux.NewRouter()
+	srv.router.Use(srv.mux())
 	return srv
 }
 
@@ -149,31 +150,37 @@ func (s *Server) HandleFunc(path string, h http.HandlerFunc) {
 
 // ServeHTTP should write reply headers and data to the ResponseWriter and then return.
 func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	ctx, cancel := ic.Merge(req.Context(), s.ctx)
-	defer cancel()
-	if s.timeout > 0 {
-		ctx, cancel = context.WithTimeout(ctx, s.timeout)
-		defer cancel()
-	}
-	tr := &Transport{
-		endpoint: s.endpoint.String(),
-		method:   req.RequestURI,
-		metadata: metadata.New(req.Header),
-	}
-	if r := mux.CurrentRoute(req); r != nil {
-		if path, err := r.GetPathTemplate(); err == nil {
-			tr.method = path
-		}
-	}
-	ctx = transport.NewServerContext(ctx, tr)
+	s.router.ServeHTTP(res, req)
+}
 
-	h := func(res http.ResponseWriter, req *http.Request) {
-		s.router.ServeHTTP(res, req)
+func (s *Server) mux() mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			ctx, cancel := ic.Merge(req.Context(), s.ctx)
+			defer cancel()
+			if s.timeout > 0 {
+				ctx, cancel = context.WithTimeout(ctx, s.timeout)
+				defer cancel()
+			}
+			tr := &Transport{
+				endpoint:  s.endpoint.String(),
+				path:      req.RequestURI,
+				method:    req.Method,
+				operation: req.RequestURI,
+				metadata:  metadata.New(req.Header),
+			}
+			if r := mux.CurrentRoute(req); r != nil {
+				if path, err := r.GetPathTemplate(); err == nil {
+					tr.operation = path
+				}
+			}
+			ctx = transport.NewServerContext(ctx, tr)
+			for _, f := range s.filters {
+				next = f(next)
+			}
+			next.ServeHTTP(w, req.WithContext(ctx))
+		})
 	}
-	for _, m := range s.filters {
-		h = m(h)
-	}
-	h(res, req.WithContext(ctx))
 }
 
 // Endpoint return a real address to registry endpoint.

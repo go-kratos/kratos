@@ -36,7 +36,7 @@ func RegisterMetadataHTTPServer(s *http.Server, srv MetadataHandler) {
 			return err
 		}
 
-		transport.SetMethod(ctx, "/kratos.api.Metadata/ListServices")
+		transport.SetOperation(ctx, "/kratos.api.Metadata/ListServices")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.ListServices(ctx, req.(*ListServicesRequest))
 		})
@@ -58,7 +58,7 @@ func RegisterMetadataHTTPServer(s *http.Server, srv MetadataHandler) {
 			return err
 		}
 
-		transport.SetMethod(ctx, "/kratos.api.Metadata/GetServiceDesc")
+		transport.SetOperation(ctx, "/kratos.api.Metadata/GetServiceDesc")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.GetServiceDesc(ctx, req.(*GetServiceDescRequest))
 		})
@@ -89,7 +89,7 @@ func NewMetadataHTTPClient(client *http.Client) MetadataHTTPClient {
 func (c *MetadataHTTPClientImpl) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest, opts ...http.CallOption) (*GetServiceDescReply, error) {
 	var out GetServiceDescReply
 	path := binding.EncodePath("GET", "/services/{name}", in)
-	opts = append(opts, http.Method("/kratos.api.Metadata/GetServiceDesc"))
+	opts = append(opts, http.Operation("/kratos.api.Metadata/GetServiceDesc"))
 
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 
@@ -99,7 +99,7 @@ func (c *MetadataHTTPClientImpl) GetServiceDesc(ctx context.Context, in *GetServ
 func (c *MetadataHTTPClientImpl) ListServices(ctx context.Context, in *ListServicesRequest, opts ...http.CallOption) (*ListServicesReply, error) {
 	var out ListServicesReply
 	path := binding.EncodePath("GET", "/services", in)
-	opts = append(opts, http.Method("/kratos.api.Metadata/ListServices"))
+	opts = append(opts, http.Operation("/kratos.api.Metadata/ListServices"))
 
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 
