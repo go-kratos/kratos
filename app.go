@@ -59,9 +59,11 @@ func (a *App) Run() error {
 		return err
 	}
 	ctx := NewContext(a.ctx, AppInfo{
-		ID:      a.opts.id,
-		Name:    a.opts.name,
-		Version: a.opts.version,
+		ID:        instance.ID,
+		Name:      instance.Name,
+		Version:   instance.Version,
+		Metadata:  instance.Metadata,
+		Endpoints: instance.Endpoints,
 	})
 	eg, ctx := errgroup.WithContext(ctx)
 	wg := sync.WaitGroup{}

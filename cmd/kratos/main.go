@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	version string = "v2.0.0-rc1"
+	version string = "v2.0.0-rc3"
 
 	rootCmd = &cobra.Command{
 		Use:     "kratos",
