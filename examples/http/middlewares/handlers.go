@@ -15,6 +15,7 @@ func sayHelloHandler(ctx http.Context) error {
 		return err
 	}
 
+	// binding /hello/{name} to in.Name
 	if err := binding.BindVars(ctx.Vars(), &in); err != nil {
 		return err
 	}
@@ -23,10 +24,5 @@ func sayHelloHandler(ctx http.Context) error {
 	h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 		return &helloworld.HelloReply{Message: "test:" + req.(*helloworld.HelloRequest).Name}, nil
 	})
-	out, err := h(ctx, &in)
-	if err != nil {
-		return err
-	}
-	reply := out.(*helloworld.HelloReply)
-	return ctx.Result(200, reply)
+	return ctx.Returns(h(ctx, &in))
 }
