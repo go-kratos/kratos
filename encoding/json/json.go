@@ -39,15 +39,14 @@ func (codec) Marshal(v interface{}) ([]byte, error) {
 
 func (codec) Unmarshal(data []byte, v interface{}) error {
 	rv := reflect.ValueOf(v)
-	for rv.Kind() == reflect.Ptr {
+	if rv.Kind() == reflect.Ptr {
 		if rv.IsNil() {
 			rv.Set(reflect.New(rv.Type().Elem()))
 		}
-		rv = rv.Elem()
 	}
 	if m, ok := v.(proto.Message); ok {
 		return UnmarshalOptions.Unmarshal(data, m)
-	} else if m, ok := reflect.Indirect(reflect.ValueOf(v)).Interface().(proto.Message); ok {
+	} else if m, ok := reflect.Indirect(rv).Interface().(proto.Message); ok {
 		return UnmarshalOptions.Unmarshal(data, m)
 	}
 	return json.Unmarshal(data, v)
