@@ -62,6 +62,13 @@ func FromClientContext(ctx context.Context) (tr Transporter, ok bool) {
 	return
 }
 
+// SetOperation set operation into context transport.
+func SetOperation(ctx context.Context, method string) {
+	if tr, ok := FromServerContext(ctx); ok {
+		tr.SetOperation(method)
+	}
+}
+
 // Operation returns the Transport operation from server context.
 func Operation(ctx context.Context) string {
 	if tr, ok := FromServerContext(ctx); ok {
@@ -70,24 +77,10 @@ func Operation(ctx context.Context) string {
 	return ""
 }
 
-// SetOperation set operation into context transport.
-func SetOperation(ctx context.Context, method string) {
-	if tr, ok := FromServerContext(ctx); ok {
-		tr.SetOperation(method)
-	}
-}
-
 // Metadata returns incoming metadata from server transport.
 func Metadata(ctx context.Context) metadata.Metadata {
 	if tr, ok := FromServerContext(ctx); ok {
 		return tr.Metadata()
 	}
 	return metadata.Metadata{}
-}
-
-// SetMetadata sets outgoing metadata into client transport.
-func SetMetadata(ctx context.Context, md metadata.Metadata) {
-	if tr, ok := FromClientContext(ctx); ok {
-		tr.WithMetadata(md)
-	}
 }

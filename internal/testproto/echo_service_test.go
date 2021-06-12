@@ -2,21 +2,32 @@ package testproto
 
 import (
 	context "context"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/go-kratos/kratos/v2/metadata"
+	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
+
 	_struct "github.com/golang/protobuf/ptypes/struct"
+	grpcmd "google.golang.org/grpc/metadata"
 )
+
+var md = metadata.Metadata{"test_key": "test_value"}
 
 type echoService struct {
 	UnimplementedEchoServiceServer
 }
 
 func (s *echoService) Echo(ctx context.Context, m *SimpleMessage) (*SimpleMessage, error) {
+	md := transport.Metadata(ctx)
+	if v := md.Get("test_key"); v != "test_value" {
+		return nil, errors.New("md not match" + v)
+	}
 	return m, nil
 }
 
@@ -42,7 +53,7 @@ type echoClient struct {
 
 // post: /v1/example/echo/{id}
 func (c *echoClient) Echo(ctx context.Context, in *SimpleMessage) (out *SimpleMessage, err error) {
-	return c.client.Echo(ctx, in)
+	return c.client.Echo(ctx, in, http.Metadata(md))
 }
 
 // post: /v1/example/echo_body
@@ -184,14 +195,12 @@ func testEchoGRPCClient(t *testing.T, addr string) {
 		in  = &SimpleMessage{Id: "test_id", Num: 100}
 		out = &SimpleMessage{}
 	)
-	check := func(name string, in, out *SimpleMessage) {
-		if in.Id != out.Id || in.Num != out.Num {
-			t.Errorf("[%s] expected %v got %v", name, in, out)
-		}
-	}
 	client := NewEchoServiceClient(cc)
-	if out, err = client.Echo(context.Background(), in); err != nil {
+	ctx = grpcmd.NewOutgoingContext(ctx, grpcmd.New(md))
+	if out, err = client.Echo(ctx, in); err != nil {
 		t.Fatal(err)
 	}
-	check("echo", in, out)
+	if in.Id != out.Id || in.Num != out.Num {
+		t.Errorf("expected %v got %v", in, out)
+	}
 }
