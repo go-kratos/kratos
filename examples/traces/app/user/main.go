@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	message "github.com/go-kratos/kratos/examples/traces/api/message"
-	pb "github.com/go-kratos/kratos/examples/traces/api/user"
+	messagev1 "github.com/go-kratos/kratos/examples/traces/api/message"
+	v1 "github.com/go-kratos/kratos/examples/traces/api/user"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
@@ -33,7 +33,7 @@ var (
 
 // server is used to implement helloworld.GreeterServer.
 type server struct {
-	pb.UnimplementedUserServer
+	v1.UnimplementedUserServer
 	tracer trace.TracerProvider
 }
 
@@ -50,7 +50,7 @@ func tracerProvider(url string) (*tracesdk.TracerProvider, error) {
 		tracesdk.WithBatcher(exp),
 		// Record information about this application in an Resource.
 		tracesdk.WithResource(resource.NewWithAttributes(
-			semconv.ServiceNameKey.String(pb.User_ServiceDesc.ServiceName),
+			semconv.ServiceNameKey.String(v1.User_ServiceDesc.ServiceName),
 			attribute.String("environment", "development"),
 			attribute.Int64("ID", 1),
 		)),
@@ -58,7 +58,7 @@ func tracerProvider(url string) (*tracesdk.TracerProvider, error) {
 	return tp, nil
 }
 
-func (s *server) GetMyMessages(ctx context.Context, in *pb.GetMyMessagesRequest) (*pb.GetMyMessagesReply, error) {
+func (s *server) GetMyMessages(ctx context.Context, in *v1.GetMyMessagesRequest) (*v1.GetMyMessagesReply, error) {
 	// create grpc conn
 	conn, err := grpc.DialInsecure(ctx,
 		grpc.WithEndpoint("127.0.0.1:9000"),
@@ -76,15 +76,15 @@ func (s *server) GetMyMessages(ctx context.Context, in *pb.GetMyMessagesRequest)
 	if err != nil {
 		return nil, err
 	}
-	msg := message.NewMessageServiceClient(conn)
+	msg := messagev1.NewMessageServiceClient(conn)
 	// Method of calling blog service
-	reply, err := msg.GetUserMessage(ctx, &message.GetUserMessageRequest{Id: 123, Count: in.Count})
+	reply, err := msg.GetUserMessage(ctx, &messagev1.GetUserMessageRequest{Id: 123, Count: in.Count})
 	if err != nil {
 		return nil, err
 	}
-	res := &pb.GetMyMessagesReply{}
+	res := &v1.GetMyMessagesReply{}
 	for _, v := range reply.Messages {
-		res.Messages = append(res.Messages, &pb.Message{Content: v.Content})
+		res.Messages = append(res.Messages, &v1.Message{Content: v.Content})
 	}
 	return res, nil
 }
@@ -115,7 +115,7 @@ func main() {
 		),
 	)
 	s := &server{tracer: tp}
-	pb.RegisterUserHTTPServer(httpSrv, s)
+	v1.RegisterUserHTTPServer(httpSrv, s)
 
 	app := kratos.New(
 		kratos.Name(Name),

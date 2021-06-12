@@ -9,17 +9,17 @@ import (
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
-	transhttp "github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/hashicorp/consul/api"
 )
 
 func main() {
-	cli, err := api.NewClient(api.DefaultConfig())
+	client, err := api.NewClient(api.DefaultConfig())
 	if err != nil {
 		panic(err)
 	}
-	callHTTP(cli)
-	callGRPC(cli)
+	callHTTP(client)
+	callGRPC(client)
 }
 
 func callGRPC(cli *api.Client) {
@@ -42,13 +42,13 @@ func callGRPC(cli *api.Client) {
 
 func callHTTP(cli *api.Client) {
 	r := registry.New(cli)
-	conn, err := transhttp.NewClient(
+	conn, err := http.NewClient(
 		context.Background(),
-		transhttp.WithMiddleware(
+		http.WithMiddleware(
 			recovery.Recovery(),
 		),
-		transhttp.WithEndpoint("discovery:///helloworld"),
-		transhttp.WithDiscovery(r),
+		http.WithEndpoint("discovery:///helloworld"),
+		http.WithDiscovery(r),
 	)
 	if err != nil {
 		log.Fatal(err)

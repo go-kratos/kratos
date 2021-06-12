@@ -23,20 +23,20 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 }
 
 func main() {
-	grpcSrv := grpc.NewServer(
-		grpc.Address(":9000"),
-	)
-
-	s := &server{}
-	pb.RegisterGreeterServer(grpcSrv, s)
-
-	cli, err := etcd.New(etcd.Config{
+	client, err := etcd.New(etcd.Config{
 		Endpoints: []string{"127.0.0.1:2379"},
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	r := registry.New(cli)
+	r := registry.New(client)
+
+	grpcSrv := grpc.NewServer(
+		grpc.Address(":9000"),
+	)
+	s := &server{}
+	pb.RegisterGreeterServer(grpcSrv, s)
+
 	app := kratos.New(
 		kratos.Name("helloworld"),
 		kratos.Server(
@@ -44,7 +44,6 @@ func main() {
 		),
 		kratos.Registrar(r),
 	)
-
 	if err := app.Run(); err != nil {
 		log.Fatal(err)
 	}

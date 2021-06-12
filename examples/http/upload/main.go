@@ -2,6 +2,7 @@ package main
 
 import (
 	"io"
+	"log"
 	"os"
 
 	"github.com/go-kratos/kratos/v2"
@@ -29,7 +30,9 @@ func uploadFile(ctx http.Context) error {
 }
 
 func main() {
-	httpSrv := http.NewServer(http.Address(":8000"))
+	httpSrv := http.NewServer(
+		http.Address(":8000"),
+	)
 	route := httpSrv.Route("/")
 	route.POST("/upload", uploadFile)
 
@@ -40,6 +43,6 @@ func main() {
 		),
 	)
 	if err := app.Run(); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
