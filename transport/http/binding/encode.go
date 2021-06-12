@@ -18,7 +18,7 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-// EncodeURL binds proto message to url path
+// EncodeURL binds proto message to url path.
 func EncodeURL(pathPattern string, msg proto.Message, needQuery bool) string {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return pathPattern
@@ -41,7 +41,7 @@ func EncodeURL(pathPattern string, msg proto.Message, needQuery bool) string {
 		return in
 	})
 	if needQuery {
-		u, err := encodeQuery(msg)
+		u, err := EncodeQuery(msg)
 		if err == nil && len(u) > 0 {
 			for key := range pathParams {
 				delete(u, key)
@@ -76,7 +76,8 @@ func getValueByField(v protoreflect.Message, fieldPath []string) (string, error)
 	return encodeField(fd, v.Get(fd))
 }
 
-func encodeQuery(msg proto.Message) (url.Values, error) {
+// EncodeQuery binds proto message to url query.
+func EncodeQuery(msg proto.Message) (url.Values, error) {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return url.Values{}, nil
 	}
