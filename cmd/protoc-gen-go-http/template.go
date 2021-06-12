@@ -9,16 +9,22 @@ import (
 var httpTemplate = `
 {{$svrType := .ServiceType}}
 {{$svrName := .ServiceName}}
-type {{.ServiceType}}Handler interface {
+type {{.ServiceType}}HTTPServer interface {
 {{range .MethodSets}}
 	{{.Name}}(context.Context, *{{.Request}}) (*{{.Reply}}, error)
 {{end}}
 }
 
-func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}Handler) {
+func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}HTTPServer) {
 	r := s.Route("/")
 	{{range .Methods}}
-	r.{{.Method}}("{{.Path}}", func(ctx http.Context) error {
+	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}_HTTP_Handler(srv))
+	{{ end -}}
+}
+
+{{range .Methods}}
+func _{{$svrType}}_{{.Name}}_HTTP_Handler(srv {{$svrType}}HTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
 		var in {{.Request}}
 		if err := ctx.Bind(&in{{.Body}}); err != nil {
 			return err
@@ -38,9 +44,9 @@ func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}Hand
 		}
 		reply := out.(*{{.Reply}})
 		return ctx.Result(200, reply{{.ResponseBody}})
-	})
-	{{end}}
+	}
 }
+{{end}}
 
 type {{.ServiceType}}HTTPClient interface {
 {{range .MethodSets}}
@@ -61,11 +67,11 @@ func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Reque
 	var out {{.Reply}}
 	path := binding.EncodeVars("{{.Path}}", in, {{.IsQuery}})
 	opts = append(opts, http.Operation("/{{$svrName}}/{{.Name}}"))
-	{{if .HasBody }}
+	{{if .HasBody}}
 	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, opts...)
 	{{else}} 
 	err := c.cc.Invoke(ctx, "{{.Method}}", path, nil, &out{{.ResponseBody}}, opts...)
-	{{end}}
+	{{end -}}
 	return &out, err
 }
 {{end}}

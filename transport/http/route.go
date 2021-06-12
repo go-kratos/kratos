@@ -17,10 +17,11 @@ type Route struct {
 	filters []FilterFunc
 }
 
-func newRoute(prefix string, srv *Server) *Route {
+func newRoute(prefix string, srv *Server, filters ...FilterFunc) *Route {
 	r := &Route{
-		prefix: prefix,
-		srv:    srv,
+		prefix:  prefix,
+		srv:     srv,
+		filters: filters,
 	}
 	r.pool.New = func() interface{} {
 		return &wrapper{route: r}
@@ -46,11 +47,6 @@ func (r *Route) Handle(method, relativePath string, h HandlerFunc, filters ...Fi
 		next = f(next)
 	}
 	r.srv.router.Handle(path.Join(r.prefix, relativePath), next).Methods(method)
-}
-
-// Use registers http middlewares in the router.
-func (r *Route) Use(m ...FilterFunc) {
-	r.filters = append(r.filters, m...)
 }
 
 // GET registers a new GET route for a path with matching handler in the router.
