@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/transport/http"
@@ -35,6 +37,6 @@ func main() {
 		),
 	)
 	if err := app.Run(); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }

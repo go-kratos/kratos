@@ -27,6 +27,7 @@ func main() {
 		MaxAge:              3,
 		LogLevel:            "debug",
 	}
+
 	// a more graceful way to create naming client
 	cli, err := clients.NewNamingClient(
 		vo.NacosClientParam{
@@ -37,15 +38,16 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	r := registry.New(cli)
+
 	conn, err := grpc.DialInsecure(
 		context.Background(),
 		grpc.WithEndpoint("discovery:///helloworld"),
-		grpc.WithDiscovery(r),
+		grpc.WithDiscovery(registry.New(cli)),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	client := helloworld.NewGreeterClient(conn)
 	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {

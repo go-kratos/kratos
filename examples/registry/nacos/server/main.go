@@ -25,13 +25,6 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 }
 
 func main() {
-	grpcSrv := grpc.NewServer(
-		grpc.Address(":9109"),
-	)
-
-	s := &server{}
-	pb.RegisterGreeterServer(grpcSrv, s)
-
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig("127.0.0.1", 8848),
 	}
@@ -46,6 +39,7 @@ func main() {
 		MaxAge:              3,
 		LogLevel:            "debug",
 	}
+
 	// a more graceful way to create naming client
 	client, err := clients.NewNamingClient(
 		vo.NacosClientParam{
@@ -56,13 +50,19 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	r := registry.New(client)
+
+	grpcSrv := grpc.NewServer(
+		grpc.Address(":9109"),
+	)
+
+	s := &server{}
+	pb.RegisterGreeterServer(grpcSrv, s)
+
 	app := kratos.New(
 		kratos.Name("helloworld"),
 		kratos.Server(grpcSrv),
-		kratos.Registrar(r),
+		kratos.Registrar(registry.New(client)),
 	)
-
 	if err := app.Run(); err != nil {
 		log.Fatal(err)
 	}

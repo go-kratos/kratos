@@ -26,6 +26,6 @@ func main() {
 		),
 	)
 	if err := app.Run(); err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 }
