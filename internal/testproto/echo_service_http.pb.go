@@ -6,7 +6,6 @@ package testproto
 
 import (
 	context "context"
-	middleware "github.com/go-kratos/kratos/v2/middleware"
 	transport "github.com/go-kratos/kratos/v2/transport"
 	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
@@ -15,7 +14,6 @@ import (
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
 var _ = new(context.Context)
-var _ = new(middleware.Middleware)
 var _ = new(transport.Transporter)
 var _ = binding.EncodeURL
 
@@ -48,7 +46,7 @@ func _EchoService_Echo0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
@@ -70,7 +68,7 @@ func _EchoService_Echo1_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
@@ -92,7 +90,7 @@ func _EchoService_Echo2_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
@@ -114,7 +112,7 @@ func _EchoService_Echo3_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
@@ -136,7 +134,7 @@ func _EchoService_Echo4_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
@@ -196,7 +194,7 @@ func _EchoService_EchoDelete0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx h
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		if err := binding.BindVars(ctx.Vars(), &in); err != nil {
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		transport.SetOperation(ctx, "/testproto.EchoService/EchoDelete")
