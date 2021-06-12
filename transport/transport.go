@@ -62,7 +62,7 @@ func FromClientContext(ctx context.Context) (tr Transporter, ok bool) {
 	return
 }
 
-// Operation returns the Transport method from server context.
+// Operation returns the Transport operation from server context.
 func Operation(ctx context.Context) string {
 	if tr, ok := FromServerContext(ctx); ok {
 		return tr.Operation()
@@ -70,7 +70,7 @@ func Operation(ctx context.Context) string {
 	return ""
 }
 
-// SetOperation set serviceMethod into context transport.
+// SetOperation set operation into context transport.
 func SetOperation(ctx context.Context, method string) {
 	if tr, ok := FromServerContext(ctx); ok {
 		tr.SetOperation(method)
