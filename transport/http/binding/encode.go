@@ -18,8 +18,8 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-// EncodePath binds proto message to url path
-func EncodePath(method string, pathPattern string, msg proto.Message) string {
+// EncodeVars binds proto message to url path
+func EncodeVars(pathPattern string, msg proto.Message, isQuery bool) string {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return pathPattern
 	}
@@ -40,7 +40,7 @@ func EncodePath(method string, pathPattern string, msg proto.Message) string {
 		}
 		return in
 	})
-	if method == "GET" {
+	if isQuery {
 		u, err := encodeQuery(msg)
 		if err == nil && len(u) > 0 {
 			for key := range pathParams {

@@ -11,9 +11,10 @@ type FilterFunc func(http.Handler) http.Handler
 
 // Route is an HTTP route.
 type Route struct {
-	prefix string
-	pool   sync.Pool
-	srv    *Server
+	prefix  string
+	pool    sync.Pool
+	srv     *Server
+	filters []FilterFunc
 }
 
 func newRoute(prefix string, srv *Server) *Route {
@@ -38,10 +39,18 @@ func (r *Route) Handle(method, relativePath string, h HandlerFunc, filters ...Fi
 		ctx.Reset(nil, nil)
 		r.pool.Put(ctx)
 	}))
+	for _, f := range r.filters {
+		next = f(next)
+	}
 	for _, f := range filters {
 		next = f(next)
 	}
 	r.srv.router.Handle(path.Join(r.prefix, relativePath), next).Methods(method)
+}
+
+// Use registers http middlewares in the router.
+func (r *Route) Use(m ...FilterFunc) {
+	r.filters = append(r.filters, m...)
 }
 
 // GET registers a new GET route for a path with matching handler in the router.
