@@ -3,11 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
-const version = "v2.0.0-rc1"
+const version = "v2.0.0-rc3"
 
 func main() {
 	showVersion := flag.Bool("version", false, "print the version and exit")
