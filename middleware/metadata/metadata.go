@@ -73,6 +73,11 @@ func Client(opts ...Option) middleware.Middleware {
 				for k, v := range options.md {
 					tr.Header().Set(k, v)
 				}
+				if md, ok := metadata.FromClientContext(ctx); ok {
+					for k, v := range md {
+						tr.Header().Set(k, v)
+					}
+				}
 				if md, ok := metadata.FromServerContext(ctx); ok {
 					for k, v := range md {
 						for _, prefix := range options.prefix {
@@ -81,11 +86,6 @@ func Client(opts ...Option) middleware.Middleware {
 								break
 							}
 						}
-					}
-				}
-				if md, ok := metadata.FromClientContext(ctx); ok {
-					for k, v := range md {
-						tr.Header().Set(k, v)
 					}
 				}
 			}
