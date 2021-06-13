@@ -1,7 +1,6 @@
 package log
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -9,9 +8,9 @@ func TestFilterAll(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(NewFilter(logger,
 		FilterLevel(LevelDebug),
-		FilterKey("username"),
-		FilterValue("hello"),
-		FilterFunc(testFilterFunc),
+		FilterKeys("username"),
+		FilterValues("hello"),
+		FilterHook(testFilterFunc),
 	))
 	log.Log(LevelDebug, "msg", "test debug")
 	log.Info("hello")
@@ -29,21 +28,29 @@ func TestFilterLevel(t *testing.T) {
 	log.Warn("warn log")
 }
 
+func TestFilterCaller(t *testing.T) {
+	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
+	log := NewFilter(NewFilter(logger))
+	log.Log(LevelDebug, "msg1", "te1st debug")
+	logHelper := NewHelper(NewFilter(NewFilter(logger)))
+	logHelper.Log(LevelDebug, "msg1", "te1st debug")
+}
+
 func TestFilterKey(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-	log := NewHelper(NewFilter(logger, FilterKey("password")))
+	log := NewHelper(NewFilter(logger, FilterKeys("password")))
 	log.Debugw("password", "123456")
 }
 
 func TestFilterValue(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-	log := NewHelper(NewFilter(logger, FilterValue("debug")))
+	log := NewHelper(NewFilter(logger, FilterValues("debug")))
 	log.Debugf("test %s", "debug")
 }
 
 func TestFilterFunc(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-	log := NewHelper(NewFilter(logger, FilterFunc(testFilterFunc)))
+	log := NewHelper(NewFilter(logger, FilterHook(testFilterFunc)))
 	log.Debug("debug level")
 	log.Infow("password", "123456")
 }
@@ -58,10 +65,4 @@ func testFilterFunc(level Level, keyvals ...interface{}) bool {
 		}
 	}
 	return false
-}
-
-func TestDY(t *testing.T) {
-	kvs := []interface{}{}
-	//s := kvs[0].(string)
-	fmt.Println(fmt.Sprint(kvs[0]))
 }

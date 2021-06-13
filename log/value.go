@@ -36,9 +36,9 @@ func Caller(depth int) Valuer {
 		h := strings.LastIndex(file, "/log/helper.go")
 		f := strings.LastIndex(file, "/log/filter.go")
 		if f > 0 {
-			_, file, line, _ = runtime.Caller(depth + 1)
+			_, file, line, _ = runtime.Caller(depth + 2)
 			if strings.LastIndex(file, "/log/helper.go") > 0 {
-				_, file, line, _ = runtime.Caller(depth + 2)
+				_, file, line, _ = runtime.Caller(depth + 3)
 			}
 		}
 		if h > 0 {
