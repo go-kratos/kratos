@@ -7,15 +7,9 @@ import (
 func TestFilterAll(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewFilter(logger,
-		FilterLevel(map[Level]struct{}{
-			LevelDebug: {},
-		}),
-		FilterKey(map[string]struct{}{
-			"username": {},
-		}),
-		FilterValue(map[string]struct{}{
-			"hello": {},
-		}),
+		FilterLevel(LevelDebug),
+		FilterKey("username"),
+		FilterValue("hello"),
 		FilterFunc(testFilterFunc),
 	)
 
@@ -27,28 +21,23 @@ func TestFilterAll(t *testing.T) {
 }
 func TestFilterLevel(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-	log := NewFilter(logger, FilterLevel(map[Level]struct{}{
-		LevelDebug: {},
-	}))
+	log := NewFilter(logger, FilterLevel(LevelWarn))
 	log.Log(LevelDebug, "msg1", "te1st debug")
 	log.Debug("test debug")
 	log.Debugf("test %s", "debug")
 	log.Debugw("log", "test debug")
+	log.Warn("warn log")
 }
 
 func TestFilterKey(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-	log := NewFilter(logger, FilterKey(map[string]struct{}{
-		"password": {},
-	}))
+	log := NewFilter(logger, FilterKey("password"))
 	log.Debugw("password", "123456")
 }
 
 func TestFilterValue(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-	log := NewFilter(logger, FilterValue(map[string]struct{}{
-		"test debug": {},
-	}))
+	log := NewFilter(logger, FilterValue("debug"))
 	log.Debugf("test %s", "debug")
 }
 
