@@ -316,7 +316,7 @@ func DefaultErrorDecoder(ctx context.Context, res *http.Response) error {
 
 // CodecForResponse get encoding.Codec via http.Response
 func CodecForResponse(r *http.Response) encoding.Codec {
-	codec := encoding.GetCodec(httputil.ContentSubtype("Content-Type"))
+	codec := encoding.GetCodec(httputil.ContentSubtype(r.Header.Get("Content-Type")))
 	if codec != nil {
 		return codec
 	}
