@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -15,7 +16,7 @@ func TestFilterAll(t *testing.T) {
 	log.Log(LevelDebug, "msg", "test debug")
 	log.Info("hello")
 	log.Infow("password", "123456")
-	log.Infow("username", "test debug")
+	log.Infow("username", "kratos")
 	log.Warn("warn log")
 }
 func TestFilterLevel(t *testing.T) {
@@ -57,4 +58,10 @@ func testFilterFunc(level Level, keyvals ...interface{}) bool {
 		}
 	}
 	return false
+}
+
+func TestDY(t *testing.T) {
+	kvs := []interface{}{}
+	//s := kvs[0].(string)
+	fmt.Println(fmt.Sprint(kvs[0]))
 }

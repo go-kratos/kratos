@@ -72,23 +72,24 @@ func (h *Filter) filter(level Level, keyvals []interface{}) bool {
 	if len(keyvals)%2 == 0 {
 		for i := 0; i < len(keyvals); i += 2 {
 			if h.filterKey != nil {
-				if _, ok := h.filterKey[keyvals[i].(string)]; ok {
-					keyvals[i+1] = "***"
+				if v, ok := keyvals[i].(string); ok {
+					if _, ok := h.filterKey[v]; ok {
+						keyvals[i+1] = "***"
+					}
 				}
 			}
 			if h.filterValue != nil {
-				if _, ok := h.filterValue[keyvals[i].(string)]; ok {
-					keyvals[i] = "***"
-				}
-				if _, ok := h.filterValue[keyvals[i+1].(string)]; ok {
-					keyvals[i+1] = "***"
+				if v, ok := keyvals[i+1].(string); ok {
+					if _, ok := h.filterValue[v]; ok {
+						keyvals[i+1] = "***"
+					}
 				}
 			}
 		}
 	} else {
 		for i := 0; i < len(keyvals); i++ {
-			if h.filterValue != nil {
-				if _, ok := h.filterValue[keyvals[i].(string)]; ok {
+			if v, ok := keyvals[i].(string); ok {
+				if _, ok := h.filterValue[v]; ok {
 					keyvals[i] = "***"
 				}
 			}
