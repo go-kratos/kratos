@@ -16,11 +16,13 @@ require (
 	github.com/go-kratos/etcd v0.1.0
 	github.com/go-kratos/kratos/v2 v2.0.0-rc1
 	github.com/go-kratos/nacos v0.1.0
+	github.com/go-kratos/prometheus v0.0.0-20210522055322-137e29e7cf47
 	github.com/go-playground/validator/v10 v10.6.1 // indirect
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.9.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/google/wire v0.5.0
+	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/hashicorp/consul/api v1.8.1
@@ -32,6 +34,7 @@ require (
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/nacos-group/nacos-sdk-go v1.0.7
+	github.com/prometheus/client_golang v1.9.0
 	github.com/ugorji/go v1.2.6 // indirect
 	go.etcd.io/etcd/client/v3 v3.5.0-beta.4
 	go.opentelemetry.io/otel v0.20.0

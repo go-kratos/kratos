@@ -56,8 +56,8 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, enum *protogen.Enum) bool {
 	defaultCode := proto.GetExtension(enum.Desc.Options(), errors.E_DefaultCode)
 	code := 0
-	if v, ok := defaultCode.(int32); ok {
-		code = int(v)
+	if ok := defaultCode.(int32); ok != 0 {
+		code = int(ok)
 	}
 	if code > 600 || code < 0 {
 		panic(fmt.Sprintf("Enum '%s' range must be greater than 0 and less than or equal to 600", string(enum.Desc.Name())))
@@ -66,8 +66,8 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	for _, v := range enum.Values {
 		enumCode := code
 		eCode := proto.GetExtension(v.Desc.Options(), errors.E_Code)
-		if v, ok := eCode.(int32); ok {
-			enumCode = int(v)
+		if ok := eCode.(int32); ok != 0 {
+			enumCode = int(ok)
 		}
 		// If the current enumeration does not contain 'errors.code'
 		//or the code value exceeds the range, the current enum will be skipped
