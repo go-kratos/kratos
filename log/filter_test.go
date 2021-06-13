@@ -30,7 +30,7 @@ func TestFilterLevel(t *testing.T) {
 
 func TestFilterCaller(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-	log := NewFilter(NewFilter(logger))
+	log := NewFilter(logger)
 	log.Log(LevelDebug, "msg1", "te1st debug")
 	logHelper := NewHelper(NewFilter(NewFilter(logger)))
 	logHelper.Log(LevelDebug, "msg1", "te1st debug")
