@@ -13,27 +13,57 @@ import (
 type Option func(*options)
 
 type options struct {
-	globalPrefix []string
-	md           metadata.Metadata
+	prefix []string
+	md     metadata.Metadata
 }
 
-// WithConstants is option with constant metadata key value.
-func WithConstants(md metadata.Metadata) Option {
+// WithPrefix is option with global propagated key prefix.
+func WithPrefix(prefix ...string) Option {
+	return func(o *options) {
+		o.prefix = prefix
+	}
+}
+
+// WithMetadata is option with constant metadata key value.
+func WithMetadata(md metadata.Metadata) Option {
 	return func(o *options) {
 		o.md = md
 	}
 }
 
-// GlobalPropagation is option with global propagated key prefix.
-func GlobalPropagatedPrefix(prefix []string) Option {
-	return func(o *options) {
-		o.globalPrefix = append(prefix, prefix...)
+// Server is middleware client-side metadata.
+func Server(opts ...Option) middleware.Middleware {
+	options := options{
+		prefix: []string{"x-md-global-", "x-md-local-"},
+	}
+	for _, o := range opts {
+		o(&options)
+	}
+	return func(handler middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+			if tr, ok := transport.FromServerContext(ctx); ok {
+				md := metadata.Metadata{}
+				for _, k := range tr.Header().Keys() {
+					key := strings.ToLower(k)
+					for _, prefix := range options.prefix {
+						if strings.HasPrefix(key, prefix) {
+							md.Set(k, tr.Header().Get(k))
+							break
+						}
+					}
+				}
+				ctx = metadata.NewServerContext(ctx, md)
+			}
+			return handler(ctx, req)
+		}
 	}
 }
 
 // Client is middleware client-side metadata.
 func Client(opts ...Option) middleware.Middleware {
-	options := options{}
+	options := options{
+		prefix: []string{"x-md-global-"},
+	}
 	for _, o := range opts {
 		o(&options)
 	}
@@ -43,51 +73,20 @@ func Client(opts ...Option) middleware.Middleware {
 				for k, v := range options.md {
 					tr.Header().Set(k, v)
 				}
-				// passing through the client outgoing metadata
-				if cmd, ok := metadata.FromClientContext(ctx); ok {
-					for k, v := range cmd {
-						tr.Header().Set(k, v)
-					}
-				}
-			}
-			return handler(ctx, req)
-		}
-	}
-}
-
-// Server is middleware client-side metadata.
-func Server(opts ...Option) middleware.Middleware {
-	options := options{
-		globalPrefix: []string{"x-md-g-"},
-	}
-	for _, o := range opts {
-		o(&options)
-	}
-	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			if tr, ok := transport.FromServerContext(ctx); ok {
-				var smd metadata.Metadata
-				var cmd metadata.Metadata
-				for _, k := range tr.Header().Keys() {
-					if smd == nil {
-						smd = metadata.New()
-					}
-					val := tr.Header().Get(k)
-					smd.Set(k, val)
-					for _, prefix := range options.globalPrefix {
-						if strings.HasPrefix(strings.ToLower(k), prefix) {
-							if cmd == nil {
-								cmd = metadata.New()
+				if md, ok := metadata.FromServerContext(ctx); ok {
+					for k, v := range md {
+						for _, prefix := range options.prefix {
+							if strings.HasPrefix(k, prefix) {
+								tr.Header().Set(k, v)
+								break
 							}
-							cmd.Set(k, val)
 						}
 					}
 				}
-				if smd != nil {
-					ctx = metadata.NewServerContext(ctx, smd)
-				}
-				if cmd != nil {
-					ctx = metadata.NewClientContext(ctx, cmd)
+				if md, ok := metadata.FromClientContext(ctx); ok {
+					for k, v := range md {
+						tr.Header().Set(k, v)
+					}
 				}
 			}
 			return handler(ctx, req)

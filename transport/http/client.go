@@ -198,7 +198,7 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 	}
 	ctx = transport.NewClientContext(ctx, &Transport{
 		endpoint:  client.opts.endpoint,
-		header:    HeaderCarrier(req.Header),
+		header:    headerCarrier(req.Header),
 		path:      path,
 		method:    method,
 		operation: c.operation,

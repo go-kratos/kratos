@@ -11,13 +11,6 @@ import (
 	_ "github.com/go-kratos/kratos/v2/encoding/yaml"
 )
 
-// Header is the storage medium used by a Header.
-type Header interface {
-	Get(key string) string
-	Set(key string, value string)
-	Keys() []string
-}
-
 // Server is transport server.
 type Server interface {
 	Start(context.Context) error
@@ -27,6 +20,13 @@ type Server interface {
 // Endpointer is registry endpoint.
 type Endpointer interface {
 	Endpoint() (*url.URL, error)
+}
+
+// Header is the storage medium used by a Header.
+type Header interface {
+	Get(key string) string
+	Set(key string, value string)
+	Keys() []string
 }
 
 // Transporter is transport context value interface.
