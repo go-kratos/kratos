@@ -180,7 +180,7 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		ctx = transport.NewServerContext(ctx, &Transport{
 			endpoint:  s.endpoint.String(),
 			operation: info.FullMethod,
-			header:    transport.HeaderCarrier(md),
+			header:    transport.NewHeaderCarrier(md),
 		})
 		if s.timeout > 0 {
 			var cancel context.CancelFunc

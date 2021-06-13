@@ -22,13 +22,6 @@ type Endpointer interface {
 	Endpoint() (*url.URL, error)
 }
 
-// Header is the storage medium used by a Header.
-type Header interface {
-	Get(key string) string
-	Set(key string, value string)
-	Keys() []string
-}
-
 // Transporter is transport context value interface.
 type Transporter interface {
 	Kind() string
