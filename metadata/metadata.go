@@ -10,15 +10,17 @@ import (
 type Metadata map[string]string
 
 // New creates an MD from a given key-values map.
-func New(m map[string][]string) Metadata {
+func New(mds ...map[string][]string) Metadata {
 	md := Metadata{}
-	for k, v := range m {
-		if k == "" {
-			continue
-		}
-		key := strings.ToLower(k)
-		if len(v) > 0 && v[0] != "" {
-			md[key] = v[0]
+	for _, m := range mds {
+		for k, v := range m {
+			if k == "" {
+				continue
+			}
+			key := strings.ToLower(k)
+			if len(v) > 0 && v[0] != "" {
+				md[key] = v[0]
+			}
 		}
 	}
 	return md
