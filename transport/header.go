@@ -16,7 +16,7 @@ type HeaderCarrier map[string]string
 
 // NewHeaderCarrier new a header carrier.
 func NewHeaderCarrier(m map[string][]string) Header {
-	hc := HeaderCarrier{}
+	hc := make(HeaderCarrier, len(m))
 	for k, v := range m {
 		if k == "" || len(v) == 0 {
 			continue
