@@ -202,7 +202,7 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 	}
 	ctx = transport.NewClientContext(ctx, &Transport{
 		endpoint:  client.opts.endpoint,
-		metadata:  c.metatada,
+		header:    transport.HeaderCarrier(req.Header),
 		path:      path,
 		method:    method,
 		operation: c.operation,
@@ -231,8 +231,8 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			req.URL.Host = addr
 		}
 		if tr, ok := transport.FromClientContext(ctx); ok {
-			for _, key := range tr.Metadata().Keys() {
-				req.Header.Set(key, tr.Metadata().Get(key))
+			for _, key := range tr.Header().Keys() {
+				req.Header.Set(key, tr.Header().Get(key))
 			}
 		}
 		res, err := client.do(ctx, req, c)

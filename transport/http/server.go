@@ -12,7 +12,6 @@ import (
 	ic "github.com/go-kratos/kratos/v2/internal/context"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 
@@ -168,7 +167,7 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				path:      req.RequestURI,
 				method:    req.Method,
 				operation: req.RequestURI,
-				metadata:  metadata.New(req.Header),
+				header:    transport.HeaderCarrier(req.Header),
 			}
 			if r := mux.CurrentRoute(req); r != nil {
 				if path, err := r.GetPathTemplate(); err == nil {

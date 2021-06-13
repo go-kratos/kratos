@@ -41,24 +41,6 @@ func (m Metadata) Set(key string, value string) {
 	m[k] = value
 }
 
-// Keys lists the keys stored in this carrier.
-func (m Metadata) Keys() []string {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	return keys
-}
-
-// Pairs returns all metadata to key/value pairs.
-func (m Metadata) Pairs() []string {
-	var kvs = make([]string, 0, len(m)*2)
-	for k, v := range m {
-		kvs = append(kvs, k, v)
-	}
-	return kvs
-}
-
 // Clone returns a deep copy of Metadata
 func (m Metadata) Clone() Metadata {
 	md := Metadata{}

@@ -9,7 +9,6 @@ import (
 	_ "github.com/go-kratos/kratos/v2/encoding/proto"
 	_ "github.com/go-kratos/kratos/v2/encoding/xml"
 	_ "github.com/go-kratos/kratos/v2/encoding/yaml"
-	"github.com/go-kratos/kratos/v2/metadata"
 )
 
 // Server is transport server.
@@ -23,18 +22,19 @@ type Endpointer interface {
 	Endpoint() (*url.URL, error)
 }
 
+// Header is the storage medium used by a Header.
+type Header interface {
+	Get(key string) string
+	Set(key string, value string)
+	Keys() []string
+}
+
 // Transporter is transport context value interface.
 type Transporter interface {
 	Kind() string
 	Endpoint() string
-
 	Operation() string
-	SetOperation(string)
-
-	Metadata() metadata.Metadata
-	// WithMetadata merge new metadata into transport,
-	// it will override old metadata key value if key exists
-	WithMetadata(metadata.Metadata)
+	Header() Header
 }
 
 type serverTransportKey struct{}
@@ -60,19 +60,4 @@ func NewClientContext(ctx context.Context, tr Transporter) context.Context {
 func FromClientContext(ctx context.Context) (tr Transporter, ok bool) {
 	tr, ok = ctx.Value(clientTransportKey{}).(Transporter)
 	return
-}
-
-// SetOperation set operation into context transport.
-func SetOperation(ctx context.Context, method string) {
-	if tr, ok := FromServerContext(ctx); ok {
-		tr.SetOperation(method)
-	}
-}
-
-// Operation returns the Transport operation from server context.
-func Operation(ctx context.Context) string {
-	if tr, ok := FromServerContext(ctx); ok {
-		return tr.Operation()
-	}
-	return ""
 }

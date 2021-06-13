@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -117,7 +116,7 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration) g
 		ctx = transport.NewClientContext(ctx, &Transport{
 			endpoint:  cc.Target(),
 			operation: method,
-			metadata:  metadata.Metadata{},
+			header:    transport.HeaderCarrier{},
 		})
 		if timeout > 0 {
 			var cancel context.CancelFunc
@@ -126,7 +125,12 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration) g
 		}
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			if tr, ok := transport.FromClientContext(ctx); ok {
-				ctx = grpcmd.AppendToOutgoingContext(ctx, tr.Metadata().Pairs()...)
+				keys := tr.Header().Keys()
+				pairs := make([]string, 0, len(keys))
+				for _, k := range keys {
+					pairs = append(pairs, k, tr.Header().Get(k))
+				}
+				ctx = grpcmd.AppendToOutgoingContext(ctx, pairs...)
 			}
 			return reply, invoker(ctx, method, req, reply, cc, opts...)
 		}
