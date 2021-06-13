@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 )
@@ -34,16 +33,8 @@ func (tr *Transport) Operation() string {
 	return tr.operation
 }
 
-func (tr *Transport) SetOperation(operation string) {
-	tr.operation = operation
-}
-
-func (tr *Transport) Metadata() metadata.Metadata {
+func (tr *Transport) Header() transport.Header {
 	return nil
-}
-
-func (tr *Transport) WithMetadata(md metadata.Metadata) {
-
 }
 
 func TestHTTP(t *testing.T) {

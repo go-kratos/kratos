@@ -9,23 +9,12 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-type clientMetadataKey struct{}
-
-func NewClientContext(ctx context.Context, md metadata.Metadata) context.Context {
-	return context.WithValue(ctx, clientMetadataKey{}, md)
-}
-
-func FromClientContext(ctx context.Context) (metadata.Metadata, bool) {
-	md, ok := ctx.Value(clientMetadataKey{}).(metadata.Metadata)
-	return md, ok
-}
-
 // Option is metadata option.
 type Option func(*options)
 
 type options struct {
-	prefix string
-	md     metadata.Metadata
+	globalPrefix []string
+	md           metadata.Metadata
 }
 
 // WithConstants is option with constant metadata key value.
@@ -35,40 +24,71 @@ func WithConstants(md metadata.Metadata) Option {
 	}
 }
 
-// WithGlobalPropagation is option with global propagated key prefix.
-func WithGlobalPropagation(prefix string) Option {
+// GlobalPropagation is option with global propagated key prefix.
+func GlobalPropagatedPrefix(prefix []string) Option {
 	return func(o *options) {
-		o.prefix = prefix
+		o.globalPrefix = append(prefix, prefix...)
 	}
 }
 
 // Client is middleware client-side metadata.
 func Client(opts ...Option) middleware.Middleware {
+	options := options{}
+	for _, o := range opts {
+		o(&options)
+	}
+	return func(handler middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+			if tr, ok := transport.FromClientContext(ctx); ok {
+				for k, v := range options.md {
+					tr.Header().Set(k, v)
+				}
+				// passing through the client outgoing metadata
+				if cmd, ok := metadata.FromClientContext(ctx); ok {
+					for k, v := range cmd {
+						tr.Header().Set(k, v)
+					}
+				}
+			}
+			return handler(ctx, req)
+		}
+	}
+}
+
+// Server is middleware client-side metadata.
+func Server(opts ...Option) middleware.Middleware {
 	options := options{
-		prefix: "x-md-global-",
+		globalPrefix: []string{"x-md-g-"},
 	}
 	for _, o := range opts {
 		o(&options)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			md := options.md.Clone()
-			// passing through the global propagated metadata
 			if tr, ok := transport.FromServerContext(ctx); ok {
-				for k, v := range tr.Metadata() {
-					if strings.HasPrefix(k, options.prefix) {
-						md.Set(k, v)
+				var smd metadata.Metadata
+				var cmd metadata.Metadata
+				for _, k := range tr.Header().Keys() {
+					if smd == nil {
+						smd = metadata.New()
+					}
+					val := tr.Header().Get(k)
+					smd.Set(k, val)
+					for _, prefix := range options.globalPrefix {
+						if strings.HasPrefix(strings.ToLower(k), prefix) {
+							if cmd == nil {
+								cmd = metadata.New()
+							}
+							cmd.Set(k, val)
+						}
 					}
 				}
-			}
-			// passing through the client outgoing metadata
-			if cmd, ok := FromClientContext(ctx); ok {
-				for k, v := range cmd {
-					md.Set(k, v)
+				if smd != nil {
+					ctx = metadata.NewServerContext(ctx, smd)
 				}
-			}
-			if tr, ok := transport.FromClientContext(ctx); ok {
-				tr.WithMetadata(md)
+				if cmd != nil {
+					ctx = metadata.NewClientContext(ctx, cmd)
+				}
 			}
 			return handler(ctx, req)
 		}

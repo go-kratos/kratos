@@ -37,7 +37,7 @@ func _MessageService_GetUserMessage0_HTTP_Handler(srv MessageServiceHTTPServer) 
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/api.message.v1.MessageService/GetUserMessage")
+		http.SetOperation(ctx, "/api.message.v1.MessageService/GetUserMessage")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.GetUserMessage(ctx, req.(*GetUserMessageRequest))
 		})
