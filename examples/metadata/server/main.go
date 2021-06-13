@@ -8,7 +8,7 @@ import (
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/metadata"
-	metadatax "github.com/go-kratos/kratos/v2/middleware/metadata"
+	mmd "github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 )
@@ -39,12 +39,12 @@ func main() {
 	grpcSrv := grpc.NewServer(
 		grpc.Address(":9000"),
 		grpc.Middleware(
-			metadatax.Server(),
+			mmd.Server(),
 		))
 	httpSrv := http.NewServer(
 		http.Address(":8000"),
 		http.Middleware(
-			metadatax.Server(),
+			mmd.Server(),
 		),
 	)
 

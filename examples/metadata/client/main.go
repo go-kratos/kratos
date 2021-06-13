@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2/metadata"
-	metadatax "github.com/go-kratos/kratos/v2/middleware/metadata"
+	mmd "github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 )
@@ -20,7 +20,7 @@ func callHTTP() {
 	conn, err := http.NewClient(
 		context.Background(),
 		http.WithMiddleware(
-			metadatax.Client(),
+			mmd.Client(),
 		),
 		http.WithEndpoint("127.0.0.1:8000"),
 	)
@@ -42,7 +42,7 @@ func callGRPC() {
 		context.Background(),
 		grpc.WithEndpoint("127.0.0.1:9000"),
 		grpc.WithMiddleware(
-			metadatax.Client(),
+			mmd.Client(),
 		),
 	)
 	if err != nil {
