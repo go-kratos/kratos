@@ -16,13 +16,13 @@ service Metadata {
   // ListServices list the full name of all services.
   rpc ListServices (ListServicesRequest) returns (ListServicesReply)  {
       option (google.api.http) = {
-        get: "/services",
+        get: "/services"
       };
   }
   // GetServiceDesc get the full fileDescriptorSet of service.
   rpc GetServiceDesc (GetServiceDescRequest) returns (GetServiceDescReply)  {
       option (google.api.http) = {
-        get: "/services/{name}",
+        get: "/services/{name}"
       };
   }
 }
