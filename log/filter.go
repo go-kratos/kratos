@@ -1,9 +1,5 @@
 package log
 
-import (
-	"fmt"
-)
-
 // Filter is a logger filter.
 type Filter struct {
 	logger      Logger
@@ -62,107 +58,11 @@ func NewFilter(logger Logger, opts ...FilterOption) *Filter {
 }
 
 // Log .
-func (h *Filter) Log(level Level, keyvals ...interface{}) {
+func (h *Filter) Log(level Level, keyvals ...interface{}) error {
 	if f := h.filter(level, keyvals); f {
-		return
+		return nil
 	}
-	h.logger.Log(level, keyvals...)
-}
-
-// Debug logs a message at debug level.
-func (h *Filter) Debug(a ...interface{}) {
-	if f := h.filter(LevelDebug, a); f {
-		return
-	}
-	h.logger.Log(LevelDebug, "msg", fmt.Sprint(a...))
-}
-
-// Debugf logs a message at debug level.
-func (h *Filter) Debugf(format string, a ...interface{}) {
-	if f := h.filter(LevelDebug, a); f {
-		return
-	}
-	h.logger.Log(LevelDebug, "msg", fmt.Sprintf(format, a...))
-}
-
-// Debugw logs a message at debug level.
-func (h *Filter) Debugw(keyvals ...interface{}) {
-	if f := h.filter(LevelDebug, keyvals); f {
-		return
-	}
-	h.logger.Log(LevelDebug, keyvals...)
-}
-
-// Info logs a message at info level.
-func (h *Filter) Info(a ...interface{}) {
-	if f := h.filter(LevelInfo, a); f {
-		return
-	}
-	h.logger.Log(LevelInfo, "msg", fmt.Sprint(a...))
-}
-
-// Infof logs a message at info level.
-func (h *Filter) Infof(format string, a ...interface{}) {
-	if f := h.filter(LevelInfo, a); f {
-		return
-	}
-	h.logger.Log(LevelInfo, "msg", fmt.Sprintf(format, a...))
-}
-
-// Infow logs a message at info level.
-func (h *Filter) Infow(keyvals ...interface{}) {
-	if f := h.filter(LevelInfo, keyvals); f {
-		return
-	}
-	h.logger.Log(LevelInfo, keyvals...)
-}
-
-// Warn logs a message at warn level.
-func (h *Filter) Warn(a ...interface{}) {
-	if f := h.filter(LevelWarn, a); f {
-		return
-	}
-	h.logger.Log(LevelWarn, "msg", fmt.Sprint(a...))
-}
-
-// Warnf logs a message at warnf level.
-func (h *Filter) Warnf(format string, a ...interface{}) {
-	if f := h.filter(LevelWarn, a); f {
-		return
-	}
-	h.logger.Log(LevelWarn, "msg", fmt.Sprintf(format, a...))
-}
-
-// Warnw logs a message at warnf level.
-func (h *Filter) Warnw(keyvals ...interface{}) {
-	if f := h.filter(LevelWarn, keyvals); f {
-		return
-	}
-	h.logger.Log(LevelWarn, keyvals...)
-}
-
-// Error logs a message at error level.
-func (h *Filter) Error(a ...interface{}) {
-	if f := h.filter(LevelError, a); f {
-		return
-	}
-	h.logger.Log(LevelError, "msg", fmt.Sprint(a...))
-}
-
-// Errorf logs a message at error level.
-func (h *Filter) Errorf(format string, a ...interface{}) {
-	if f := h.filter(LevelError, a); f {
-		return
-	}
-	h.logger.Log(LevelError, "msg", fmt.Sprintf(format, a...))
-}
-
-// Errorw logs a message at error level.
-func (h *Filter) Errorw(keyvals ...interface{}) {
-	if f := h.filter(LevelError, keyvals); f {
-		return
-	}
-	h.logger.Log(LevelError, keyvals...)
+	return h.logger.Log(level, keyvals...)
 }
 
 func (h *Filter) filter(level Level, keyvals []interface{}) bool {
