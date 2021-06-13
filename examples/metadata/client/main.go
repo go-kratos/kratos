@@ -30,8 +30,12 @@ func callHTTP() {
 		panic(err)
 	}
 	client := helloworld.NewGreeterHTTPClient(conn)
-	md := metadata.New(map[string][]string{"kratos-extra": {"2233"}})
-	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"}, http.Metadata(md))
+	md := metadata.Metadata{"kratos-extra": "2233"}
+	reply, err := client.SayHello(context.Background(),
+		&helloworld.HelloRequest{Name: "kratos"},
+		// call options
+		http.Metadata(md),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

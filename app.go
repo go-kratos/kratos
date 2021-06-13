@@ -49,11 +49,6 @@ func New(opts ...Option) *App {
 
 // Run executes all OnStart hooks registered with the application's Lifecycle.
 func (a *App) Run() error {
-	a.log.Infow(
-		"service_id", a.opts.id,
-		"service_name", a.opts.name,
-		"service_version", a.opts.version,
-	)
 	instance, err := a.buildInstance()
 	if err != nil {
 		return err
