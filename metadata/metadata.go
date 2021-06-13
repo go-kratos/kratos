@@ -10,15 +10,17 @@ import (
 type Metadata map[string]string
 
 // New creates an MD from a given key-values map.
-func New(m map[string][]string) Metadata {
+func New(mds ...map[string]string) Metadata {
 	md := Metadata{}
-	for k, v := range m {
-		if k == "" {
-			continue
-		}
-		key := strings.ToLower(k)
-		if len(v) > 0 && v[0] != "" {
-			md[key] = v[0]
+	for _, m := range mds {
+		for k, v := range m {
+			if k == "" {
+				continue
+			}
+			key := strings.ToLower(k)
+			if len(v) > 0 && v != "" {
+				md[key] = v
+			}
 		}
 	}
 	return md
@@ -37,24 +39,6 @@ func (m Metadata) Set(key string, value string) {
 	}
 	k := strings.ToLower(key)
 	m[k] = value
-}
-
-// Keys lists the keys stored in this carrier.
-func (m Metadata) Keys() []string {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	return keys
-}
-
-// Pairs returns all metadata to key/value pairs.
-func (m Metadata) Pairs() []string {
-	var kvs = make([]string, 0, len(m)*2)
-	for k, v := range m {
-		kvs = append(kvs, k, v)
-	}
-	return kvs
 }
 
 // Clone returns a deep copy of Metadata

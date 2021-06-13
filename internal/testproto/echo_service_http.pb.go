@@ -6,7 +6,6 @@ package testproto
 
 import (
 	context "context"
-	transport "github.com/go-kratos/kratos/v2/transport"
 	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 )
@@ -14,7 +13,6 @@ import (
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
 var _ = new(context.Context)
-var _ = new(transport.Transporter)
 var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
@@ -49,7 +47,7 @@ func _EchoService_Echo0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
+		http.SetOperation(ctx, "/testproto.EchoService/Echo")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		})
@@ -71,7 +69,7 @@ func _EchoService_Echo1_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
+		http.SetOperation(ctx, "/testproto.EchoService/Echo")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		})
@@ -93,7 +91,7 @@ func _EchoService_Echo2_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
+		http.SetOperation(ctx, "/testproto.EchoService/Echo")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		})
@@ -115,7 +113,7 @@ func _EchoService_Echo3_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
+		http.SetOperation(ctx, "/testproto.EchoService/Echo")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		})
@@ -137,7 +135,7 @@ func _EchoService_Echo4_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/testproto.EchoService/Echo")
+		http.SetOperation(ctx, "/testproto.EchoService/Echo")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		})
@@ -156,7 +154,7 @@ func _EchoService_EchoBody0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx htt
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/testproto.EchoService/EchoBody")
+		http.SetOperation(ctx, "/testproto.EchoService/EchoBody")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.EchoBody(ctx, req.(*SimpleMessage))
 		})
@@ -175,7 +173,7 @@ func _EchoService_EchoResponseBody0_HTTP_Handler(srv EchoServiceHTTPServer) func
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/testproto.EchoService/EchoResponseBody")
+		http.SetOperation(ctx, "/testproto.EchoService/EchoResponseBody")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.EchoResponseBody(ctx, req.(*DynamicMessageUpdate))
 		})
@@ -197,7 +195,7 @@ func _EchoService_EchoDelete0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx h
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/testproto.EchoService/EchoDelete")
+		http.SetOperation(ctx, "/testproto.EchoService/EchoDelete")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.EchoDelete(ctx, req.(*SimpleMessage))
 		})
@@ -216,7 +214,7 @@ func _EchoService_EchoPatch0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx ht
 		if err := ctx.Bind(&in.Body); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/testproto.EchoService/EchoPatch")
+		http.SetOperation(ctx, "/testproto.EchoService/EchoPatch")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.EchoPatch(ctx, req.(*DynamicMessageUpdate))
 		})

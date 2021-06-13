@@ -6,7 +6,6 @@ package v1
 
 import (
 	context "context"
-	transport "github.com/go-kratos/kratos/v2/transport"
 	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 )
@@ -14,7 +13,6 @@ import (
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
 var _ = new(context.Context)
-var _ = new(transport.Transporter)
 var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
@@ -37,7 +35,7 @@ func _User_GetMyMessages0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/api.user.v1.User/GetMyMessages")
+		http.SetOperation(ctx, "/api.user.v1.User/GetMyMessages")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.GetMyMessages(ctx, req.(*GetMyMessagesRequest))
 		})

@@ -9,23 +9,22 @@ import (
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/metadata"
-	"github.com/go-kratos/kratos/v2/transport"
+	mmd "github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 
 	_struct "github.com/golang/protobuf/ptypes/struct"
-	grpcmd "google.golang.org/grpc/metadata"
 )
 
-var md = metadata.Metadata{"test_key": "test_value"}
+var md = metadata.Metadata{"x-md-global-test": "test_value"}
 
 type echoService struct {
 	UnimplementedEchoServiceServer
 }
 
 func (s *echoService) Echo(ctx context.Context, m *SimpleMessage) (*SimpleMessage, error) {
-	md := transport.Metadata(ctx)
-	if v := md.Get("test_key"); v != "test_value" {
+	md, _ := metadata.FromServerContext(ctx)
+	if v := md.Get("x-md-global-test"); v != "test_value" {
 		return nil, errors.New("md not match" + v)
 	}
 	return m, nil
@@ -53,7 +52,7 @@ type echoClient struct {
 
 // post: /v1/example/echo/{id}
 func (c *echoClient) Echo(ctx context.Context, in *SimpleMessage) (out *SimpleMessage, err error) {
-	return c.client.Echo(ctx, in, http.Metadata(md))
+	return c.client.Echo(ctx, in)
 }
 
 // post: /v1/example/echo_body
@@ -104,7 +103,10 @@ func TestJSON(t *testing.T) {
 func TestEchoHTTPServer(t *testing.T) {
 	echo := &echoService{}
 	ctx := context.Background()
-	srv := http.NewServer(http.Address(":2333"))
+	srv := http.NewServer(
+		http.Address(":2333"),
+		http.Middleware(mmd.Server()),
+	)
 	RegisterEchoServiceHTTPServer(srv, echo)
 	go func() {
 		if err := srv.Start(ctx); err != nil {
@@ -127,11 +129,16 @@ func testEchoHTTPClient(t *testing.T, addr string) {
 			t.Errorf("[%s] expected %v got %v", name, in, out)
 		}
 	}
-	cc, _ := http.NewClient(context.Background(), http.WithEndpoint(addr))
+	cc, _ := http.NewClient(context.Background(),
+		http.WithEndpoint(addr),
+		http.WithMiddleware(mmd.Client()),
+	)
 
 	cli := &echoClient{client: NewEchoServiceHTTPClient(cc)}
 
-	if out, err = cli.Echo(context.Background(), in); err != nil {
+	ctx := context.Background()
+	ctx = metadata.NewClientContext(ctx, md)
+	if out, err = cli.Echo(ctx, in); err != nil {
 		t.Fatal(err)
 	}
 	check("echo", &SimpleMessage{Id: "test_id"}, out)
@@ -173,7 +180,10 @@ func testEchoHTTPClient(t *testing.T, addr string) {
 func TestEchoGRPCServer(t *testing.T) {
 	echo := &echoService{}
 	ctx := context.Background()
-	srv := grpc.NewServer(grpc.Address(":2233"))
+	srv := grpc.NewServer(
+		grpc.Address(":2233"),
+		grpc.Middleware(mmd.Server()),
+	)
 	RegisterEchoServiceServer(srv, echo)
 	go func() {
 		if err := srv.Start(ctx); err != nil {
@@ -186,8 +196,11 @@ func TestEchoGRPCServer(t *testing.T) {
 }
 
 func testEchoGRPCClient(t *testing.T, addr string) {
-	ctx := context.Background()
-	cc, err := grpc.DialInsecure(ctx, grpc.WithEndpoint(addr))
+	cc, err := grpc.DialInsecure(
+		context.Background(),
+		grpc.WithEndpoint(addr),
+		grpc.WithMiddleware(mmd.Client()),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,7 +209,8 @@ func testEchoGRPCClient(t *testing.T, addr string) {
 		out = &SimpleMessage{}
 	)
 	client := NewEchoServiceClient(cc)
-	ctx = grpcmd.NewOutgoingContext(ctx, grpcmd.New(md))
+	ctx := context.Background()
+	ctx = metadata.NewClientContext(ctx, md)
 	if out, err = client.Echo(ctx, in); err != nil {
 		t.Fatal(err)
 	}

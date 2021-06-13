@@ -6,7 +6,6 @@ package helloworld
 
 import (
 	context "context"
-	transport "github.com/go-kratos/kratos/v2/transport"
 	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 )
@@ -14,7 +13,6 @@ import (
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
 var _ = new(context.Context)
-var _ = new(transport.Transporter)
 var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
@@ -37,7 +35,7 @@ func _Greeter_SayHello0_HTTP_Handler(srv GreeterHTTPServer) func(ctx http.Contex
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/helloworld.Greeter/SayHello")
+		http.SetOperation(ctx, "/helloworld.Greeter/SayHello")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.SayHello(ctx, req.(*HelloRequest))
 		})

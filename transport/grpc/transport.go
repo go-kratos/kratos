@@ -1,8 +1,8 @@
 package grpc
 
 import (
-	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/transport"
+	"google.golang.org/grpc/metadata"
 )
 
 var (
@@ -13,7 +13,7 @@ var (
 type Transport struct {
 	endpoint  string
 	operation string
-	metadata  metadata.Metadata
+	header    headerCarrier
 }
 
 // Kind returns the transport kind.
@@ -31,19 +31,32 @@ func (tr *Transport) Operation() string {
 	return tr.operation
 }
 
-// SetOperation sets the transport operation.
-func (tr *Transport) SetOperation(operation string) {
-	tr.operation = operation
+// Header returns the transport header.
+func (tr *Transport) Header() transport.Header {
+	return tr.header
 }
 
-// Metadata returns the transport metadata.
-func (tr *Transport) Metadata() metadata.Metadata {
-	return tr.metadata
-}
+type headerCarrier metadata.MD
 
-// WithMetadata with a metadata into transport md.
-func (tr *Transport) WithMetadata(md metadata.Metadata) {
-	for k, v := range md {
-		tr.metadata.Set(k, v)
+// Get returns the value associated with the passed key.
+func (mc headerCarrier) Get(key string) string {
+	vals := metadata.MD(mc).Get(key)
+	if len(vals) > 0 {
+		return vals[0]
 	}
+	return ""
+}
+
+// Set stores the key-value pair.
+func (mc headerCarrier) Set(key string, value string) {
+	metadata.MD(mc).Set(key, value)
+}
+
+// Keys lists the keys stored in this carrier.
+func (mc headerCarrier) Keys() []string {
+	keys := make([]string, 0, len(mc))
+	for k := range metadata.MD(mc) {
+		keys = append(keys, k)
+	}
+	return keys
 }

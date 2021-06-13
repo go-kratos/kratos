@@ -12,7 +12,6 @@ import (
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
-	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -197,12 +196,9 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 	if client.opts.userAgent != "" {
 		req.Header.Set("User-Agent", client.opts.userAgent)
 	}
-	if c.metatada == nil {
-		c.metatada = metadata.Metadata{}
-	}
 	ctx = transport.NewClientContext(ctx, &Transport{
 		endpoint:  client.opts.endpoint,
-		metadata:  c.metatada,
+		header:    headerCarrier(req.Header),
 		path:      path,
 		method:    method,
 		operation: c.operation,
@@ -229,11 +225,6 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			req = req.Clone(ctx)
 			req.URL.Scheme = scheme
 			req.URL.Host = addr
-		}
-		if tr, ok := transport.FromClientContext(ctx); ok {
-			for _, key := range tr.Metadata().Keys() {
-				req.Header.Set(key, tr.Metadata().Get(key))
-			}
 		}
 		res, err := client.do(ctx, req, c)
 		if done != nil {

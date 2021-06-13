@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
@@ -19,7 +18,7 @@ func sayHelloHandler(ctx http.Context) error {
 		return err
 	}
 
-	transport.SetOperation(ctx, "/helloworld.Greeter/SayHello")
+	http.SetOperation(ctx, "/helloworld.Greeter/SayHello")
 	h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 		return &helloworld.HelloReply{Message: "test:" + req.(*helloworld.HelloRequest).Name}, nil
 	})

@@ -6,7 +6,6 @@ package v1
 
 import (
 	context "context"
-	transport "github.com/go-kratos/kratos/v2/transport"
 	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
 )
@@ -14,7 +13,6 @@ import (
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
 var _ = new(context.Context)
-var _ = new(transport.Transporter)
 var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
@@ -42,7 +40,7 @@ func _BlogService_CreateArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ct
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/blog.api.v1.BlogService/CreateArticle")
+		http.SetOperation(ctx, "/blog.api.v1.BlogService/CreateArticle")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.CreateArticle(ctx, req.(*CreateArticleRequest))
 		})
@@ -64,7 +62,7 @@ func _BlogService_UpdateArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ct
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/blog.api.v1.BlogService/UpdateArticle")
+		http.SetOperation(ctx, "/blog.api.v1.BlogService/UpdateArticle")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.UpdateArticle(ctx, req.(*UpdateArticleRequest))
 		})
@@ -86,7 +84,7 @@ func _BlogService_DeleteArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ct
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/blog.api.v1.BlogService/DeleteArticle")
+		http.SetOperation(ctx, "/blog.api.v1.BlogService/DeleteArticle")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.DeleteArticle(ctx, req.(*DeleteArticleRequest))
 		})
@@ -108,7 +106,7 @@ func _BlogService_GetArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx h
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/blog.api.v1.BlogService/GetArticle")
+		http.SetOperation(ctx, "/blog.api.v1.BlogService/GetArticle")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.GetArticle(ctx, req.(*GetArticleRequest))
 		})
@@ -127,7 +125,7 @@ func _BlogService_ListArticle0_HTTP_Handler(srv BlogServiceHTTPServer) func(ctx 
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		transport.SetOperation(ctx, "/blog.api.v1.BlogService/ListArticle")
+		http.SetOperation(ctx, "/blog.api.v1.BlogService/ListArticle")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.ListArticle(ctx, req.(*ListArticleRequest))
 		})
