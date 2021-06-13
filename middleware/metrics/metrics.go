@@ -7,8 +7,10 @@ import (
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/metrics"
+	prom "github.com/go-kratos/kratos/v2/metrics/prometheus"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 // Option is metrics option.
@@ -40,6 +42,9 @@ func Server(opts ...Option) middleware.Middleware {
 	options := options{}
 	for _, o := range opts {
 		o(&options)
+	}
+	if options.seconds == nil && options.requests == nil {
+		options.seconds, options.requests = defaultPrometheusServer()
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -76,6 +81,9 @@ func Client(opts ...Option) middleware.Middleware {
 	for _, o := range opts {
 		o(&options)
 	}
+	if options.seconds == nil && options.requests == nil {
+		options.seconds, options.requests = defaultPrometheusClient()
+	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			var (
@@ -98,9 +106,51 @@ func Client(opts ...Option) middleware.Middleware {
 				options.requests.With(kind, operation, strconv.Itoa(code), reason).Inc()
 			}
 			if options.seconds != nil {
-				options.seconds.With(kind, operation).Observe(time.Since(startTime).Seconds())
+				options.seconds.With(kind, operation).Observe(float64(time.Since(startTime).Milliseconds()))
 			}
 			return reply, err
 		}
 	}
+}
+
+func defaultPrometheusServer() (metrics.Observer, metrics.Counter) {
+	histogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: "kratos_server",
+		Name:      "request_duration_millisecond",
+		Help:      "server requests duration(ms).",
+		Buckets:   []float64{5, 10, 25, 50, 100, 250, 500, 1000},
+	},
+		[]string{"kind", "operation"},
+	)
+	counter := prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "kratos_server",
+			Name:      "api_requests_total",
+			Help:      "The total number of processed requests",
+		},
+		[]string{"kind", "operation", "code", "reason"},
+	)
+	prometheus.MustRegister(histogram, counter)
+	return prom.NewHistogram(histogram), prom.NewCounter(counter)
+}
+
+func defaultPrometheusClient() (metrics.Observer, metrics.Counter) {
+	histogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: "kratos_client",
+		Name:      "request_duration_millisecond",
+		Help:      "client requests duration(ms).",
+		Buckets:   []float64{5, 10, 25, 50, 100, 250, 500, 1000},
+	},
+		[]string{"kind", "operation"},
+	)
+	counter := prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "kratos_client",
+			Name:      "api_requests_total",
+			Help:      "The total number of processed requests",
+		},
+		[]string{"kind", "operation", "code", "reason"},
+	)
+	prometheus.MustRegister(histogram, counter)
+	return prom.NewHistogram(histogram), prom.NewCounter(counter)
 }
