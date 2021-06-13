@@ -17,17 +17,17 @@ type options struct {
 	md     metadata.Metadata
 }
 
-// WithPrefix is option with global propagated key prefix.
-func WithPrefix(prefix ...string) Option {
+// WithConstants is option with constant metadata key value.
+func WithConstants(md metadata.Metadata) Option {
 	return func(o *options) {
-		o.prefix = prefix
+		o.md = md
 	}
 }
 
-// WithMetadata is option with constant metadata key value.
-func WithMetadata(md metadata.Metadata) Option {
+// WithPropagatedPrefix is option with global propagated key prefix.
+func WithPropagatedPrefix(prefix ...string) Option {
 	return func(o *options) {
-		o.md = md
+		o.prefix = prefix
 	}
 }
 
