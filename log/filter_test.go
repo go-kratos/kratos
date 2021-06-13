@@ -1,6 +1,7 @@
 package log
 
 import (
+	"io/ioutil"
 	"testing"
 )
 
@@ -32,7 +33,7 @@ func TestFilterCaller(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewFilter(logger)
 	log.Log(LevelDebug, "msg1", "te1st debug")
-	logHelper := NewHelper(NewFilter(NewFilter(logger)))
+	logHelper := NewHelper(NewFilter(logger))
 	logHelper.Log(LevelDebug, "msg1", "te1st debug")
 }
 
@@ -53,6 +54,27 @@ func TestFilterFunc(t *testing.T) {
 	log := NewHelper(NewFilter(logger, FilterHook(testFilterFunc)))
 	log.Debug("debug level")
 	log.Infow("password", "123456")
+}
+
+func BenchmarkFilterKeys(b *testing.B) {
+	log := NewHelper(NewFilter(NewStdLogger(ioutil.Discard), FilterKeys("password")))
+	for i := 0; i < b.N; i++ {
+		log.Infow("password", "123456")
+	}
+}
+
+func BenchmarkFilterValues(b *testing.B) {
+	log := NewHelper(NewFilter(NewStdLogger(ioutil.Discard), FilterValues("password")))
+	for i := 0; i < b.N; i++ {
+		log.Infow("password")
+	}
+}
+
+func BenchmarkFilterHook(b *testing.B) {
+	log := NewHelper(NewFilter(NewStdLogger(ioutil.Discard), FilterHook(testFilterFunc)))
+	for i := 0; i < b.N; i++ {
+		log.Info("password","123456")
+	}
 }
 
 func testFilterFunc(level Level, keyvals ...interface{}) bool {
