@@ -25,7 +25,7 @@ func main() {
 	route.GET("/helloworld/{name}", hello)
 
 	app := kratos.New(
-		kratos.Name("upload"),
+		kratos.Name("cors"),
 		kratos.Server(
 			httpSrv,
 		),
