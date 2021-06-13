@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
@@ -49,11 +50,6 @@ func New(opts ...Option) *App {
 
 // Run executes all OnStart hooks registered with the application's Lifecycle.
 func (a *App) Run() error {
-	a.log.Infow(
-		"service_id", a.opts.id,
-		"service_name", a.opts.name,
-		"service_version", a.opts.version,
-	)
 	instance, err := a.buildInstance()
 	if err != nil {
 		return err
@@ -78,6 +74,7 @@ func (a *App) Run() error {
 		})
 	}
 	wg.Wait()
+	time.Sleep(time.Second)
 	if a.opts.registrar != nil {
 		if err := a.opts.registrar.Register(a.opts.ctx, instance); err != nil {
 			return err
