@@ -76,11 +76,3 @@ func Operation(ctx context.Context) string {
 	}
 	return ""
 }
-
-// Metadata returns incoming metadata from server transport.
-func Metadata(ctx context.Context) metadata.Metadata {
-	if tr, ok := FromServerContext(ctx); ok {
-		return tr.Metadata()
-	}
-	return metadata.Metadata{}
-}
