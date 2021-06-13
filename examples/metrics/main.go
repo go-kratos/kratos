@@ -23,6 +23,19 @@ var (
 	Name = "metrics"
 	// Version is the version of the compiled software.
 	Version = "v1.0.0"
+
+	_metricSeconds = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: "server",
+		Name:      "request_duration_millisecond",
+		Help:      "server requests duration(ms).",
+		Buckets:   []float64{5, 10, 25, 50, 100, 250, 500, 1000},
+	}, []string{"kind", "operation"})
+
+	_metricRequests = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "client",
+		Name:      "api_requests_total",
+		Help:      "The total number of processed requests",
+	}, []string{"kind", "operation", "code", "reason"})
 )
 
 // server is used to implement helloworld.GreeterServer.
@@ -41,45 +54,22 @@ func (s *server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*he
 	return &helloworld.HelloReply{Message: fmt.Sprintf("Hello %+v", in.Name)}, nil
 }
 
+func init() {
+	prometheus.MustRegister(_metricSeconds, _metricRequests)
+}
+
 func main() {
 	s := &server{}
 
-	grpcHistogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "grpc_server",
-		Name:      "request_duration_millisecond",
-		Help:      "server requests duration(ms).",
-		Buckets:   []float64{5, 10, 25, 50, 100, 250, 500, 1000},
-	}, []string{"kind", "operation"})
-
-	grpcCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "kratos_client",
-		Name:      "api_requests_total",
-		Help:      "The total number of processed requests",
-	}, []string{"kind", "operation", "code", "reason"})
-
-	httpHistogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "http_server",
-		Name:      "request_duration_millisecond",
-		Help:      "server requests duration(ms).",
-		Buckets:   []float64{5, 10, 25, 50, 100, 250, 500, 1000},
-	}, []string{"kind", "operation"})
-
-	httpCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "http_server",
-		Name:      "api_requests_total",
-		Help:      "The total number of processed requests",
-	}, []string{"kind", "operation", "code", "reason"})
-
-	prometheus.MustRegister(grpcCounter, grpcHistogram, httpCounter, httpHistogram)
 	grpcSrv := grpc.NewServer(
 		grpc.Address(":9000"),
 		grpc.Middleware(
 			recovery.Recovery(),
 			metrics.Server(
 				metrics.WithSeconds(
-					prom.NewHistogram(grpcHistogram),
+					prom.NewHistogram(_metricSeconds),
 				),
-				metrics.WithRequests(prom.NewCounter(grpcCounter)),
+				metrics.WithRequests(prom.NewCounter(_metricRequests)),
 			),
 		),
 	)
@@ -89,9 +79,9 @@ func main() {
 			recovery.Recovery(),
 			metrics.Server(
 				metrics.WithSeconds(
-					prom.NewHistogram(httpHistogram),
+					prom.NewHistogram(_metricSeconds),
 				),
-				metrics.WithRequests(prom.NewCounter(httpCounter)),
+				metrics.WithRequests(prom.NewCounter(_metricRequests)),
 			),
 		),
 	)
