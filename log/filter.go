@@ -66,15 +66,15 @@ func (f *Filter) Log(level Level, keyvals ...interface{}) error {
 		return nil
 	}
 	for i := 0; i < len(keyvals); i += 2 {
-		iv := i + 1
-		if iv >= len(keyvals) {
-			continue
-		}
 		k := keyvals[i]
-		v := keyvals[iv]
 		if _, ok := f.key[k]; ok {
 			keyvals[i+1] = "***"
 		}
+		vi := i + 1
+		if vi >= len(keyvals) {
+			continue
+		}
+		v := keyvals[vi]
 		if _, ok := f.value[v]; ok {
 			keyvals[i+1] = "***"
 		}
