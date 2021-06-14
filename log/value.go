@@ -33,15 +33,13 @@ func Value(ctx context.Context, v interface{}) interface{} {
 func Caller(depth int) Valuer {
 	return func(context.Context) interface{} {
 		_, file, line, _ := runtime.Caller(depth)
-		for true {
-			h := strings.LastIndex(file, "/log/helper.go")
-			f := strings.LastIndex(file, "/log/filter.go")
-			if h > 0 || f > 0 {
-				depth++
-				_, file, line, _ = runtime.Caller(depth)
-			} else {
-				break
-			}
+		if strings.LastIndex(file, "/log/helper.go") > 0 {
+			depth++
+			_, file, line, _ = runtime.Caller(depth)
+		}
+		if strings.LastIndex(file, "/log/filter.go") > 0 {
+			depth++
+			_, file, line, _ = runtime.Caller(depth)
 		}
 		idx := strings.LastIndexByte(file, '/')
 		return file[idx+1:] + ":" + strconv.Itoa(line)
