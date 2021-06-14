@@ -29,7 +29,7 @@ func callHTTP() {
 	}
 	client := helloworld.NewGreeterHTTPClient(conn)
 	ctx := context.Background()
-	ctx = metadata.AppendToClientContext(ctx, "x-md-global-extra", "2233")
+	ctx = metadata.AppendClientContext(ctx, "x-md-global-extra", "2233")
 	reply, err := client.SayHello(ctx, &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {
 		log.Fatal(err)
@@ -50,7 +50,7 @@ func callGRPC() {
 	}
 	client := helloworld.NewGreeterClient(conn)
 	ctx := context.Background()
-	ctx = metadata.AppendToClientContext(ctx, "x-md-global-extra", "2233")
+	ctx = metadata.AppendClientContext(ctx, "x-md-global-extra", "2233")
 	reply, err := client.SayHello(ctx, &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {
 		log.Fatal(err)

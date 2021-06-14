@@ -41,6 +41,16 @@ func (m Metadata) Set(key string, value string) {
 	m[k] = value
 }
 
+// Range iterate over element in metadata.
+func (m Metadata) Range(f func(k, v string) bool) {
+	for k, v := range m {
+		ret := f(k, v)
+		if ret == false {
+			break
+		}
+	}
+}
+
 // Clone returns a deep copy of Metadata
 func (m Metadata) Clone() Metadata {
 	md := Metadata{}
