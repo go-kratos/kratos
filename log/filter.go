@@ -1,56 +1,56 @@
 package log
 
-// Filter is a logger filter.
-type Filter struct {
-	logger     Logger
-	level      Level
-	key        map[string]struct{}
-	value      map[string]struct{}
-	filterHook func(level Level, keyvals ...interface{}) bool
-}
-
 // FilterOption is filter option.
 type FilterOption func(*Filter)
 
-// FilterLevel with filter level
+// FilterLevel with filter level.
 func FilterLevel(level Level) FilterOption {
 	return func(opts *Filter) {
 		opts.level = level
 	}
 }
 
-// FilterKeys with filter key
-func FilterKeys(key ...string) FilterOption {
-	return func(opts *Filter) {
-		filterKey := make(map[string]struct{})
+// FilterKey with filter key.
+func FilterKey(key ...string) FilterOption {
+	return func(o *Filter) {
 		for _, v := range key {
-			filterKey[v] = struct{}{}
+			o.key[v] = struct{}{}
 		}
-		opts.key = filterKey
 	}
 }
 
-// FilterValues with filter value
-func FilterValues(value ...string) FilterOption {
-	return func(opts *Filter) {
-		filterValue := make(map[string]struct{})
+// FilterValue with filter value.
+func FilterValue(value ...string) FilterOption {
+	return func(o *Filter) {
 		for _, v := range value {
-			filterValue[v] = struct{}{}
+			o.value[v] = struct{}{}
 		}
-		opts.value = filterValue
 	}
 }
 
-// FilterHook with filter func
-func FilterHook(f func(level Level, keyvals ...interface{}) bool) FilterOption {
-	return func(opts *Filter) {
-		opts.filterHook = f
+// FilterFunc with filter func.
+func FilterFunc(f func(level Level, keyvals ...interface{}) bool) FilterOption {
+	return func(o *Filter) {
+		o.filter = f
 	}
+}
+
+// Filter is a logger filter.
+type Filter struct {
+	logger Logger
+	level  Level
+	key    map[string]struct{}
+	value  map[string]struct{}
+	filter func(level Level, keyvals ...interface{}) bool
 }
 
 // NewFilter new a logger filter.
 func NewFilter(logger Logger, opts ...FilterOption) *Filter {
-	options := Filter{logger: logger}
+	options := Filter{
+		logger: logger,
+		key:    make(map[string]struct{}),
+		value:  make(map[string]struct{}),
+	}
 	for _, o := range opts {
 		o(&options)
 	}
@@ -58,45 +58,27 @@ func NewFilter(logger Logger, opts ...FilterOption) *Filter {
 }
 
 // Log .
-func (h *Filter) Log(level Level, keyvals ...interface{}) error {
-	if f := h.filter(level, keyvals); f {
+func (f *Filter) Log(level Level, keyvals ...interface{}) error {
+	if f.level > level {
 		return nil
 	}
-	return h.logger.Log(level, keyvals...)
-}
-
-func (h *Filter) filter(level Level, keyvals []interface{}) bool {
-	if h.level > level {
-		return true
+	if f.filter != nil && f.filter(level, keyvals...) {
+		return nil
 	}
-	if len(keyvals)%2 == 0 {
-		for i := 0; i < len(keyvals); i += 2 {
-			if h.key != nil {
-				if v, ok := keyvals[i].(string); ok {
-					if _, ok := h.key[v]; ok {
-						keyvals[i+1] = "***"
-					}
-				}
-			}
-			if h.value != nil {
-				if v, ok := keyvals[i+1].(string); ok {
-					if _, ok := h.value[v]; ok {
-						keyvals[i+1] = "***"
-					}
-				}
+	for i := 0; i < len(keyvals); i += 2 {
+		if i >= len(keyvals) {
+			continue
+		}
+		if v, ok := keyvals[i].(string); ok {
+			if _, ok := f.key[v]; ok {
+				keyvals[i+1] = "***"
 			}
 		}
-	} else {
-		for i := 0; i < len(keyvals); i++ {
-			if v, ok := keyvals[i].(string); ok {
-				if _, ok := h.value[v]; ok {
-					keyvals[i] = "***"
-				}
+		if v, ok := keyvals[i+1].(string); ok {
+			if _, ok := f.value[v]; ok {
+				keyvals[i+1] = "***"
 			}
 		}
 	}
-	if h.filterHook != nil {
-		return h.filterHook(level, keyvals...)
-	}
-	return false
+	return f.logger.Log(level, keyvals...)
 }
