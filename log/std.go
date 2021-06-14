@@ -33,7 +33,7 @@ func (l *stdLogger) Log(level Level, keyvals ...interface{}) error {
 		return nil
 	}
 	if len(keyvals)%2 != 0 {
-		keyvals = append(keyvals, "")
+		keyvals = append(keyvals, "KEYVALS UNPAIRED")
 	}
 	buf := l.pool.Get().(*bytes.Buffer)
 	buf.WriteString(level.String())
