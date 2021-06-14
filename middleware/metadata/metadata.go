@@ -17,24 +17,24 @@ type options struct {
 	md     metadata.Metadata
 }
 
-// WithConstants is option with constant metadata key value.
+// WithConstants with constant metadata key value.
 func WithConstants(md metadata.Metadata) Option {
 	return func(o *options) {
 		o.md = md
 	}
 }
 
-// WithPropagatedPrefix is option with global propagated key prefix.
+// WithPropagatedPrefix with propagated key prefix.
 func WithPropagatedPrefix(prefix ...string) Option {
 	return func(o *options) {
 		o.prefix = prefix
 	}
 }
 
-// Server is middleware client-side metadata.
+// Server is middleware server-side metadata.
 func Server(opts ...Option) middleware.Middleware {
 	options := options{
-		prefix: []string{"x-md-global-", "x-md-local-"},
+		prefix: []string{"x-md-"}, // x-md-global-, x-md-local
 	}
 	for _, o := range opts {
 		o(&options)
@@ -42,11 +42,10 @@ func Server(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromServerContext(ctx); ok {
-				md := metadata.Metadata{}
+				md := metadata.New()
 				for _, k := range tr.Header().Keys() {
-					key := strings.ToLower(k)
 					for _, prefix := range options.prefix {
-						if strings.HasPrefix(key, prefix) {
+						if strings.HasPrefix(strings.ToLower(k), prefix) {
 							md.Set(k, tr.Header().Get(k))
 							break
 						}
@@ -70,6 +69,7 @@ func Client(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromClientContext(ctx); ok {
+				// x-md-local-
 				for k, v := range options.md {
 					tr.Header().Set(k, v)
 				}
@@ -78,6 +78,7 @@ func Client(opts ...Option) middleware.Middleware {
 						tr.Header().Set(k, v)
 					}
 				}
+				// x-md-global-
 				if md, ok := metadata.FromServerContext(ctx); ok {
 					for k, v := range md {
 						for _, prefix := range options.prefix {
