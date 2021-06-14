@@ -32,10 +32,12 @@ func (l *stdLogger) Log(level Level, keyvals ...interface{}) error {
 	if len(keyvals) == 0 {
 		return nil
 	}
-	if len(keyvals)%2 != 0 {
-		keyvals = append(keyvals, "")
-	}
 	buf := l.pool.Get().(*bytes.Buffer)
+	if len(keyvals)%2 != 0 {
+		fmt.Fprintf(buf, fmt.Sprint("Keyvalues must appear in pairs: ", keyvals))
+		l.log.Output(4, buf.String())
+		return nil
+	}
 	buf.WriteString(level.String())
 	for i := 0; i < len(keyvals); i += 2 {
 		fmt.Fprintf(buf, " %s=%v", keyvals[i], keyvals[i+1])
