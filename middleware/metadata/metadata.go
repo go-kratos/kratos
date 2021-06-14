@@ -13,8 +13,9 @@ import (
 type Option func(*options)
 
 type options struct {
-	prefix []string
-	md     metadata.Metadata
+	prefix       []string
+	globalPrefix []string
+	md           metadata.Metadata
 }
 
 // WithConstants is option with constant metadata key value.
@@ -24,8 +25,15 @@ func WithConstants(md metadata.Metadata) Option {
 	}
 }
 
-// WithPropagatedPrefix is option with global propagated key prefix.
-func WithPropagatedPrefix(prefix ...string) Option {
+// WithGlobalPropagatedPrefix is option with global propagated key prefix.
+func WithGlobalPropagatedPrefix(prefix ...string) Option {
+	return func(o *options) {
+		o.prefix = prefix
+	}
+}
+
+// PropagatedPrefix is option with global propagated key prefix.
+func PropagatedPrefix(prefix ...string) Option {
 	return func(o *options) {
 		o.prefix = prefix
 	}
@@ -34,7 +42,7 @@ func WithPropagatedPrefix(prefix ...string) Option {
 // Server is middleware client-side metadata.
 func Server(opts ...Option) middleware.Middleware {
 	options := options{
-		prefix: []string{"x-md-global-", "x-md-local-"},
+		prefix: []string{"x-md-"},
 	}
 	for _, o := range opts {
 		o(&options)
@@ -42,7 +50,7 @@ func Server(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromServerContext(ctx); ok {
-				md := metadata.Metadata{}
+				md := metadata.New()
 				for _, k := range tr.Header().Keys() {
 					key := strings.ToLower(k)
 					for _, prefix := range options.prefix {
@@ -62,7 +70,7 @@ func Server(opts ...Option) middleware.Middleware {
 // Client is middleware client-side metadata.
 func Client(opts ...Option) middleware.Middleware {
 	options := options{
-		prefix: []string{"x-md-global-"},
+		globalPrefix: []string{"x-md-global-"},
 	}
 	for _, o := range opts {
 		o(&options)
@@ -80,7 +88,7 @@ func Client(opts ...Option) middleware.Middleware {
 				}
 				if md, ok := metadata.FromServerContext(ctx); ok {
 					for k, v := range md {
-						for _, prefix := range options.prefix {
+						for _, prefix := range options.globalPrefix {
 							if strings.HasPrefix(k, prefix) {
 								tr.Header().Set(k, v)
 								break

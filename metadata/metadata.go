@@ -102,8 +102,8 @@ func AppendToClientContext(ctx context.Context, kv ...string) context.Context {
 	return NewClientContext(ctx, md)
 }
 
-// MergetoClientContext merge new metadata into ctx.
-func MergetoClientContext(ctx context.Context, cmd Metadata) context.Context {
+// MergeToClientContext merge new metadata into ctx.
+func MergeToClientContext(ctx context.Context, cmd Metadata) context.Context {
 	md, _ := FromClientContext(ctx)
 	md = md.Clone()
 	for k, v := range cmd {
