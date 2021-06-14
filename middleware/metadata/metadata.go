@@ -28,14 +28,14 @@ func WithConstants(md metadata.Metadata) Option {
 // WithGlobalPropagatedPrefix is option with global propagated key prefix.
 func WithGlobalPropagatedPrefix(prefix ...string) Option {
 	return func(o *options) {
-		o.prefix = prefix
+		o.globalPrefix = append(o.globalPrefix, prefix...)
 	}
 }
 
 // PropagatedPrefix is option with global propagated key prefix.
 func PropagatedPrefix(prefix ...string) Option {
 	return func(o *options) {
-		o.prefix = prefix
+		o.prefix = append(o.prefix, prefix...)
 	}
 }
 
