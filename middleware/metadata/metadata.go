@@ -9,8 +9,11 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-// Option is metadata option.
-type Option func(*options)
+// ClientOption is metadata option.
+type ClientOption func(*options)
+
+// ServerOption is metadata option.
+type ServerOption func(*options)
 
 type options struct {
 	prefix       []string
@@ -18,29 +21,29 @@ type options struct {
 	md           metadata.Metadata
 }
 
-// WithConstants is option with constant metadata key value.
-func WithConstants(md metadata.Metadata) Option {
+// WithConstants is client option with constant metadata key value.
+func WithConstants(md metadata.Metadata) ClientOption {
 	return func(o *options) {
 		o.md = md
 	}
 }
 
-// WithGlobalPropagatedPrefix is option with global propagated key prefix.
-func WithGlobalPropagatedPrefix(prefix ...string) Option {
+// WithGlobalPropagatedPrefix is client option with global propagated key prefix.
+func WithGlobalPropagatedPrefix(prefix ...string) ClientOption {
 	return func(o *options) {
 		o.globalPrefix = append(o.globalPrefix, prefix...)
 	}
 }
 
-// PropagatedPrefix is option with global propagated key prefix.
-func PropagatedPrefix(prefix ...string) Option {
+// PropagatedPrefix is server option with global propagated key prefix.
+func PropagatedPrefix(prefix ...string) ServerOption {
 	return func(o *options) {
 		o.prefix = append(o.prefix, prefix...)
 	}
 }
 
 // Server is middleware client-side metadata.
-func Server(opts ...Option) middleware.Middleware {
+func Server(opts ...ServerOption) middleware.Middleware {
 	options := options{
 		prefix: []string{"x-md-"},
 	}
@@ -68,7 +71,7 @@ func Server(opts ...Option) middleware.Middleware {
 }
 
 // Client is middleware client-side metadata.
-func Client(opts ...Option) middleware.Middleware {
+func Client(opts ...ClientOption) middleware.Middleware {
 	options := options{
 		globalPrefix: []string{"x-md-global-"},
 	}
