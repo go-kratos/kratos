@@ -25,7 +25,7 @@ func (h *Helper) WithContext(ctx context.Context) *Helper {
 	}
 }
 
-// Log .
+// Log Print log by level and keyvals
 func (h *Helper) Log(level Level, keyvals ...interface{}) {
 	h.logger.Log(level, keyvals...)
 }
