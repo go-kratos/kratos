@@ -20,22 +20,15 @@ type options struct {
 	md     metadata.Metadata
 }
 
-// WithConstants is client option with constant metadata key value.
+// WithConstants with constant metadata key value.
 func WithConstants(md metadata.Metadata) ClientOption {
 	return func(o *options) {
 		o.md = md
 	}
 }
 
-// WithGlobalPropagatedPrefix is client option with global propagated key prefix.
-func WithGlobalPropagatedPrefix(prefix ...string) ClientOption {
-	return func(o *options) {
-		o.prefix = prefix
-	}
-}
-
-// PropagatedPrefix is server option with global propagated key prefix.
-func PropagatedPrefix(prefix ...string) ServerOption {
+// WithPropagatedPrefix with propagated key prefix.
+func WithPropagatedPrefix(prefix ...string) ServerOption {
 	return func(o *options) {
 		o.prefix = prefix
 	}
@@ -44,7 +37,7 @@ func PropagatedPrefix(prefix ...string) ServerOption {
 // Server is middleware client-side metadata.
 func Server(opts ...ServerOption) middleware.Middleware {
 	options := options{
-		prefix: []string{"x-md-"},
+		prefix: []string{"x-md-"}, // x-md-global-, x-md-local
 	}
 	for _, o := range opts {
 		o(&options)
@@ -54,9 +47,8 @@ func Server(opts ...ServerOption) middleware.Middleware {
 			if tr, ok := transport.FromServerContext(ctx); ok {
 				md := metadata.New()
 				for _, k := range tr.Header().Keys() {
-					key := strings.ToLower(k)
 					for _, prefix := range options.prefix {
-						if strings.HasPrefix(key, prefix) {
+						if strings.HasPrefix(strings.ToLower(k), prefix) {
 							md.Set(k, tr.Header().Get(k))
 							break
 						}
@@ -80,6 +72,7 @@ func Client(opts ...ClientOption) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromClientContext(ctx); ok {
+				// x-md-local-
 				for k, v := range options.md {
 					tr.Header().Set(k, v)
 				}
@@ -88,6 +81,7 @@ func Client(opts ...ClientOption) middleware.Middleware {
 						tr.Header().Set(k, v)
 					}
 				}
+				// x-md-global-
 				if md, ok := metadata.FromServerContext(ctx); ok {
 					for k, v := range md {
 						for _, prefix := range options.prefix {
