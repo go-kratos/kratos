@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/internal/host"
+	"github.com/stretchr/testify/assert"
 )
 
 type testKey struct{}
@@ -102,4 +103,36 @@ func testClient(t *testing.T, srv *Server) {
 		}
 	}
 
+}
+
+func BenchmarkServer(b *testing.B) {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		data := &testData{Path: r.RequestURI}
+		json.NewEncoder(w).Encode(data)
+		if r.Context().Value(testKey{}) != "test" {
+			w.WriteHeader(500)
+		}
+	}
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, testKey{}, "test")
+	srv := NewServer()
+	srv.HandleFunc("/index", fn)
+	go func() {
+		if err := srv.Start(ctx); err != nil {
+			panic(err)
+		}
+	}()
+	time.Sleep(time.Second)
+	port, ok := host.Port(srv.lis)
+	assert.True(b, ok)
+	client, err := NewClient(context.Background(), WithEndpoint(fmt.Sprintf("127.0.0.1:%d", port)))
+	assert.NoError(b, err)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		var res testData
+		err := client.Invoke(context.Background(), "POST", "/index", nil, &res)
+		assert.NoError(b, err)
+	}
+	srv.Stop(ctx)
 }
