@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	nethttp "net/http"
@@ -27,8 +28,8 @@ func TestDefaultRequestDecoder(t *testing.T) {
 
 type mockResponseWriter struct {
 	StatusCode int
-	Data []byte
-	header nethttp.Header
+	Data       []byte
+	header     nethttp.Header
 }
 
 func (w *mockResponseWriter) Header() nethttp.Header {
@@ -46,8 +47,8 @@ func (w *mockResponseWriter) WriteHeader(statusCode int) {
 
 type dataWithStatusCode struct {
 	statusCode int
-	A string `json:"a"`
-	B int64  `json:"b"`
+	A          string `json:"a"`
+	B          int64  `json:"b"`
 }
 
 func (d *dataWithStatusCode) StatusCode() int {
@@ -55,17 +56,33 @@ func (d *dataWithStatusCode) StatusCode() int {
 }
 
 func TestDefaultResponseEncoder(t *testing.T) {
-	w := &mockResponseWriter{header:make(nethttp.Header)}
+	w := &mockResponseWriter{header: make(nethttp.Header)}
 	req1 := &nethttp.Request{
 		Header: make(nethttp.Header),
 	}
 	req1.Header.Set("Content-Type", "application/json")
 
-	v1 := &dataWithStatusCode{statusCode:201, A: "1", B: 2}
-	err := DefaultResponseEncoder(w, req1, &v1)
+	v1 := &dataWithStatusCode{statusCode: 201, A: "1", B: 2}
+	err := DefaultResponseEncoder(w, req1, v1)
 	assert.Nil(t, err)
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
 	assert.Equal(t, 201, w.StatusCode)
+	assert.NotNil(t, w.Data)
+}
+
+
+func TestDefaultResponseEncoderWithError(t *testing.T) {
+	w := &mockResponseWriter{header: make(nethttp.Header)}
+	req1 := &nethttp.Request{
+		Header: make(nethttp.Header),
+	}
+	req1.Header.Set("Content-Type", "application/json")
+
+	v1 := &errors.Error{Code: 511}
+	err := DefaultResponseEncoder(w, req1, v1)
+	assert.Nil(t, err)
+	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
+	assert.Equal(t, 511, w.StatusCode)
 	assert.NotNil(t, w.Data)
 }
 
@@ -76,7 +93,7 @@ func TestCodecForRequest(t *testing.T) {
 	}
 	req1.Header.Set("Content-Type", "application/xml")
 
-	c, ok := CodecForRequest(req1,"Content-Type")
+	c, ok := CodecForRequest(req1, "Content-Type")
 	assert.True(t, ok)
 	assert.Equal(t, "xml", c.Name())
 
@@ -86,8 +103,7 @@ func TestCodecForRequest(t *testing.T) {
 	}
 	req2.Header.Set("Content-Type", "blablablabla")
 
-	c, ok = CodecForRequest(req2,"Content-Type")
+	c, ok = CodecForRequest(req2, "Content-Type")
 	assert.False(t, ok)
 	assert.Equal(t, "json", c.Name())
 }
-
