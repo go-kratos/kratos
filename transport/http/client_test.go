@@ -162,8 +162,8 @@ func TestDefaultErrorDecoder(t *testing.T) {
 	err2 := DefaultErrorDecoder(context.TODO(), resp2)
 	assert.Error(t, err2)
 	assert.Equal(t, int32(54321), err2.(*errors.Error).GetCode())
-	assert.Equal(t, "hi", err2.(*errors.Error).GetMessage(), )
-	assert.Equal(t, "FOO", err2.(*errors.Error).GetReason(), )
+	assert.Equal(t, "hi", err2.(*errors.Error).GetMessage())
+	assert.Equal(t, "FOO", err2.(*errors.Error).GetReason())
 }
 
 func TestCodecForResponse(t *testing.T) {

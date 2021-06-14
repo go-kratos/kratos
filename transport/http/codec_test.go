@@ -70,7 +70,6 @@ func TestDefaultResponseEncoder(t *testing.T) {
 	assert.NotNil(t, w.Data)
 }
 
-
 func TestDefaultResponseEncoderWithError(t *testing.T) {
 	w := &mockResponseWriter{header: make(nethttp.Header)}
 	req1 := &nethttp.Request{
