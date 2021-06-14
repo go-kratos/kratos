@@ -39,8 +39,8 @@ func FilterFunc(f func(level Level, keyvals ...interface{}) bool) FilterOption {
 type Filter struct {
 	logger Logger
 	level  Level
-	key    map[string]struct{}
-	value  map[string]struct{}
+	key    map[interface{}]struct{}
+	value  map[interface{}]struct{}
 	filter func(level Level, keyvals ...interface{}) bool
 }
 
@@ -48,8 +48,8 @@ type Filter struct {
 func NewFilter(logger Logger, opts ...FilterOption) *Filter {
 	options := Filter{
 		logger: logger,
-		key:    make(map[string]struct{}),
-		value:  make(map[string]struct{}),
+		key:    make(map[interface{}]struct{}),
+		value:  make(map[interface{}]struct{}),
 	}
 	for _, o := range opts {
 		o(&options)
@@ -66,18 +66,16 @@ func (f *Filter) Log(level Level, keyvals ...interface{}) error {
 		return nil
 	}
 	for i := 0; i < len(keyvals); i += 2 {
-		if i >= len(keyvals) {
+		if i > len(keyvals) {
 			continue
 		}
-		if v, ok := keyvals[i].(string); ok {
-			if _, ok := f.key[v]; ok {
-				keyvals[i+1] = "***"
-			}
+		k := keyvals[i]
+		v := keyvals[i+1]
+		if _, ok := f.key[k]; ok {
+			keyvals[i+1] = "***"
 		}
-		if v, ok := keyvals[i+1].(string); ok {
-			if _, ok := f.value[v]; ok {
-				keyvals[i+1] = "***"
-			}
+		if _, ok := f.value[v]; ok {
+			keyvals[i+1] = "***"
 		}
 	}
 	return f.logger.Log(level, keyvals...)
