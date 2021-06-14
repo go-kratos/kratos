@@ -19,8 +19,8 @@ const (
 var methodSets = make(map[string]int)
 
 // generateFile generates a _http.pb.go file containing kratos errors definitions.
-func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.GeneratedFile {
-	if !hasHTTPRule(file.Services) {
+func generateFile(gen *protogen.Plugin, file *protogen.File, omitempty bool) *protogen.GeneratedFile {
+	if len(file.Services) == 0 || (omitempty && !hasHTTPRule(file.Services)) {
 		return nil
 	}
 	filename := file.GeneratedFilenamePrefix + "_http.pb.go"
@@ -31,12 +31,12 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.Generated
 	g.P()
 	g.P("package ", file.GoPackageName)
 	g.P()
-	generateFileContent(gen, file, g)
+	generateFileContent(gen, file, g, omitempty)
 	return g
 }
 
 // generateFileContent generates the kratos errors definitions, excluding the package statement.
-func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile) {
+func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, omitempty bool) {
 	if len(file.Services) == 0 {
 		return
 	}
@@ -48,11 +48,11 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P()
 
 	for _, service := range file.Services {
-		genService(gen, file, g, service)
+		genService(gen, file, g, service, omitempty)
 	}
 }
 
-func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, service *protogen.Service) {
+func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, service *protogen.Service, omitempty bool) {
 	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() {
 		g.P("//")
 		g.P(deprecationComment)
@@ -73,6 +73,9 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 				sd.Methods = append(sd.Methods, buildHTTPRule(g, method, bind))
 			}
 			sd.Methods = append(sd.Methods, buildHTTPRule(g, method, rule))
+		} else if !omitempty {
+			path := fmt.Sprintf("/%s/%s", service.Desc.FullName(), method.Desc.Name())
+			sd.Methods = append(sd.Methods, buildMethodDesc(g, method, "POST", path))
 		}
 	}
 	g.P(sd.execute())
