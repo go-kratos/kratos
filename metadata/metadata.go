@@ -88,9 +88,9 @@ func FromClientContext(ctx context.Context) (Metadata, bool) {
 	return md, ok
 }
 
-// AppendClientContext returns a new context with the provided kv merged
+// AppendToClientContext returns a new context with the provided kv merged
 // with any existing metadata in the context.
-func AppendClientContext(ctx context.Context, kv ...string) context.Context {
+func AppendToClientContext(ctx context.Context, kv ...string) context.Context {
 	if len(kv)%2 == 1 {
 		panic(fmt.Sprintf("metadata: AppendToOutgoingContext got an odd number of input pairs for metadata: %d", len(kv)))
 	}
@@ -102,8 +102,8 @@ func AppendClientContext(ctx context.Context, kv ...string) context.Context {
 	return NewClientContext(ctx, md)
 }
 
-// MergeClientContext merge new metadata into ctx.
-func MergeClientContext(ctx context.Context, cmd Metadata) context.Context {
+// MergetoClientContext merge new metadata into ctx.
+func MergetoClientContext(ctx context.Context, cmd Metadata) context.Context {
 	md, _ := FromClientContext(ctx)
 	md = md.Clone()
 	for k, v := range cmd {
