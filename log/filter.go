@@ -57,24 +57,27 @@ func NewFilter(logger Logger, opts ...FilterOption) *Filter {
 	return &options
 }
 
-// Log Print log by level and keyvals.
+// Log Print log by level and keyvals
 func (f *Filter) Log(level Level, keyvals ...interface{}) error {
-	if f.level > level {
+	if level < f.level {
 		return nil
 	}
 	if f.filter != nil && f.filter(level, keyvals...) {
 		return nil
 	}
-	for i := 0; i < len(keyvals); i += 2 {
-		if _, ok := f.key[keyvals[i]]; ok {
-			keyvals[i+1] = "***"
-		}
-		vi := i + 1
-		if vi >= len(keyvals) {
-			continue
-		}
-		if _, ok := f.value[keyvals[vi]]; ok {
-			keyvals[i+1] = "***"
+	if (len(f.key) > 0 || len(f.value) > 0) && len(keyvals)%2 == 0 {
+		for i := 0; i < len(keyvals); i += 2 {
+			if i > len(keyvals) {
+				continue
+			}
+			k := keyvals[i]
+			v := keyvals[i+1]
+			if _, ok := f.key[k]; ok {
+				keyvals[i+1] = "***"
+			}
+			if _, ok := f.value[v]; ok {
+				keyvals[i+1] = "***"
+			}
 		}
 	}
 	return f.logger.Log(level, keyvals...)

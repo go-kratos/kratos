@@ -27,6 +27,7 @@ func TestFilterLevel(t *testing.T) {
 	log.Debugf("test %s", "debug")
 	log.Debugw("log", "test debug")
 	log.Warn("warn log")
+	log.Error("error log")
 }
 
 func TestFilterCaller(t *testing.T) {
@@ -78,7 +79,7 @@ func BenchmarkFilterFunc(b *testing.B) {
 }
 
 func testFilterFunc(level Level, keyvals ...interface{}) bool {
-	if level == LevelWarn {
+	if level == LevelDebug {
 		return true
 	}
 	for i := 0; i < len(keyvals); i++ {
