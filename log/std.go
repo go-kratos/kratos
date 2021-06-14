@@ -9,7 +9,6 @@ import (
 )
 
 var _ Logger = (*stdLogger)(nil)
-
 type stdLogger struct {
 	log  *log.Logger
 	pool *sync.Pool
@@ -32,12 +31,10 @@ func (l *stdLogger) Log(level Level, keyvals ...interface{}) error {
 	if len(keyvals) == 0 {
 		return nil
 	}
-	buf := l.pool.Get().(*bytes.Buffer)
 	if len(keyvals)%2 != 0 {
-		fmt.Fprintf(buf, fmt.Sprint("Keyvalues must appear in pairs: ", keyvals))
-		l.log.Output(4, buf.String())
-		return nil
+		keyvals = append(keyvals, "KEYVALS UNPAIRED")
 	}
+	buf := l.pool.Get().(*bytes.Buffer)
 	buf.WriteString(level.String())
 	for i := 0; i < len(keyvals); i += 2 {
 		fmt.Fprintf(buf, " %s=%v", keyvals[i], keyvals[i+1])
