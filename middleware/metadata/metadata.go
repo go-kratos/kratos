@@ -9,7 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-// Option is client side metadata option.
+// Option is metadata option.
 type Option func(*options)
 
 type options struct {
@@ -31,7 +31,7 @@ func WithPropagatedPrefix(prefix ...string) Option {
 	}
 }
 
-// Server is middleware client-side metadata.
+// Server is middleware server-side metadata.
 func Server(opts ...Option) middleware.Middleware {
 	options := options{
 		prefix: []string{"x-md-"}, // x-md-global-, x-md-local
