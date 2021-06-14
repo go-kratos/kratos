@@ -57,7 +57,7 @@ func NewFilter(logger Logger, opts ...FilterOption) *Filter {
 	return &options
 }
 
-// Log Print log by level and keyvals
+// Log Print log by level and keyvals.
 func (f *Filter) Log(level Level, keyvals ...interface{}) error {
 	if level < f.level {
 		return nil
