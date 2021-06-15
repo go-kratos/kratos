@@ -40,6 +40,10 @@ type Transporter interface {
 // Kind defines the type of Transport
 type Kind string
 
+func (k Kind) String() string {
+	return string(k)
+}
+
 // Defines a set of transport kind
 const (
 	KindGRPC Kind = "grpc"
