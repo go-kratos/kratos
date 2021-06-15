@@ -202,6 +202,7 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 		path:      path,
 		method:    method,
 		operation: c.operation,
+		request:   req,
 	})
 	return client.invoke(ctx, req, args, reply, c)
 }

@@ -18,6 +18,7 @@ type Transport struct {
 	method    string
 	operation string
 	header    headerCarrier
+	request   *http.Request
 }
 
 // Kind returns the transport kind.
@@ -38,6 +39,16 @@ func (tr *Transport) Operation() string {
 // Header returns the transport header.
 func (tr *Transport) Header() transport.Header {
 	return tr.header
+}
+
+// Request returns http request from transport
+func Request(ctx context.Context) *http.Request {
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		if tr, ok := tr.(*Transport); ok {
+			return tr.request
+		}
+	}
+	return nil
 }
 
 // Path returns the Transport path from server context.
