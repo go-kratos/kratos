@@ -17,7 +17,7 @@ type options struct {
 	md     metadata.Metadata
 }
 
-func (o options) hasPrefix(key string) bool {
+func (o *options) hasPrefix(key string) bool {
 	k := strings.ToLower(key)
 	for _, prefix := range o.prefix {
 		if strings.HasPrefix(k, prefix) {
@@ -43,18 +43,18 @@ func WithPropagatedPrefix(prefix ...string) Option {
 
 // Server is middleware server-side metadata.
 func Server(opts ...Option) middleware.Middleware {
-	options := options{
+	options := &options{
 		prefix: []string{"x-md-"}, // x-md-global-, x-md-local
 	}
 	for _, o := range opts {
-		o(&options)
+		o(options)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromServerContext(ctx); ok {
 				md := options.md.Clone()
 				for _, k := range tr.Header().Keys() {
-					if len(options.prefix) == 0 || options.hasPrefix(k) {
+					if options.hasPrefix(k) {
 						md.Set(k, tr.Header().Get(k))
 					}
 				}
@@ -67,11 +67,11 @@ func Server(opts ...Option) middleware.Middleware {
 
 // Client is middleware client-side metadata.
 func Client(opts ...Option) middleware.Middleware {
-	options := options{
+	options := &options{
 		prefix: []string{"x-md-global-"},
 	}
 	for _, o := range opts {
-		o(&options)
+		o(options)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
@@ -88,7 +88,7 @@ func Client(opts ...Option) middleware.Middleware {
 				// x-md-global-
 				if md, ok := metadata.FromServerContext(ctx); ok {
 					for k, v := range md {
-						if len(options.prefix) == 0 || options.hasPrefix(k) {
+						if options.hasPrefix(k) {
 							tr.Header().Set(k, v)
 						}
 					}
