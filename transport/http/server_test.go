@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -33,7 +34,7 @@ func TestServer(t *testing.T) {
 	srv := NewServer()
 	srv.HandleFunc("/index", fn)
 
-	if e, err := srv.Endpoint(); err != nil || e == nil {
+	if e, err := srv.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
 		t.Fatal(e, err)
 	}
 
@@ -58,17 +59,17 @@ func testClient(t *testing.T, srv *Server) {
 		{"PATCH", "/index"},
 		{"DELETE", "/index"},
 	}
-	port, ok := host.Port(srv.lis)
-	if !ok {
-		t.Fatalf("extract port error: %v", srv.lis)
+	e, err := srv.Endpoint()
+	if err != nil {
+		t.Fatal(err)
 	}
-	client, err := NewClient(context.Background(), WithEndpoint(fmt.Sprintf("127.0.0.1:%d", port)))
+	client, err := NewClient(context.Background(), WithEndpoint(e.Host))
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, test := range tests {
 		var res testData
-		url := fmt.Sprintf("http://127.0.0.1:%d%s", port, test.path)
+		url := fmt.Sprintf(e.String() + test.path)
 		req, err := http.NewRequest(test.method, url, nil)
 		if err != nil {
 			t.Fatal(err)

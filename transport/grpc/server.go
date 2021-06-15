@@ -138,7 +138,7 @@ func (s *Server) Endpoint() (*url.URL, error) {
 			s.err = err
 			return
 		}
-		addr, err := host.Extract(s.address, s.lis)
+		addr, err := host.Extract(s.address, lis)
 		if err != nil {
 			lis.Close()
 			s.err = err
