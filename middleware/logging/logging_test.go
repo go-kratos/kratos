@@ -16,12 +16,12 @@ var (
 )
 
 type Transport struct {
-	kind      string
+	kind      transport.Kind
 	endpoint  string
 	operation string
 }
 
-func (tr *Transport) Kind() string {
+func (tr *Transport) Kind() transport.Kind {
 	return tr.kind
 }
 
@@ -52,21 +52,21 @@ func TestHTTP(t *testing.T) {
 			Server,
 			err,
 			func() context.Context {
-				return transport.NewServerContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", operation: "/package.service/method"})
+				return transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
 			}(),
 		},
 		{"http-server@succ",
 			Server,
 			nil,
 			func() context.Context {
-				return transport.NewServerContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", operation: "/package.service/method"})
+				return transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
 			}(),
 		},
 		{"http-client@succ",
 			Client,
 			nil,
 			func() context.Context {
-				return transport.NewClientContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", operation: "/package.service/method"})
+				return transport.NewClientContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
 
 			}(),
 		},
@@ -74,7 +74,7 @@ func TestHTTP(t *testing.T) {
 			Client,
 			err,
 			func() context.Context {
-				return transport.NewClientContext(context.Background(), &Transport{kind: "http", endpoint: "endpoint", operation: "/package.service/method"})
+				return transport.NewClientContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
 			}(),
 		},
 	}
