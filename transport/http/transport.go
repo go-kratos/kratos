@@ -14,8 +14,6 @@ var (
 // Transport is an HTTP transport.
 type Transport struct {
 	endpoint  string
-	path      string
-	method    string
 	operation string
 	header    headerCarrier
 	request   *http.Request
@@ -44,26 +42,6 @@ func (tr *Transport) Header() transport.Header {
 // Request returns the transport request.
 func (tr *Transport) Request() *http.Request {
 	return tr.request
-}
-
-// Path returns the Transport path from server context.
-func Path(ctx context.Context) string {
-	if tr, ok := transport.FromServerContext(ctx); ok {
-		if tr, ok := tr.(*Transport); ok {
-			return tr.path
-		}
-	}
-	return ""
-}
-
-// Method returns the Transport method from server context.
-func Method(ctx context.Context) string {
-	if tr, ok := transport.FromServerContext(ctx); ok {
-		if tr, ok := tr.(*Transport); ok {
-			return tr.method
-		}
-	}
-	return ""
 }
 
 // SetOperation sets the transport operation.
