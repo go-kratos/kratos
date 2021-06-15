@@ -21,8 +21,8 @@ type Transport struct {
 }
 
 // Kind returns the transport kind.
-func (tr *Transport) Kind() string {
-	return "http"
+func (tr *Transport) Kind() transport.Kind {
+	return transport.KindHTTP
 }
 
 // Endpoint returns the transport endpoint.

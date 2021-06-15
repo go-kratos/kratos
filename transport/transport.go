@@ -31,11 +31,20 @@ type Header interface {
 
 // Transporter is transport context value interface.
 type Transporter interface {
-	Kind() string
+	Kind() Kind
 	Endpoint() string
 	Operation() string
 	Header() Header
 }
+
+// Kind defines the type of Transport
+type Kind string
+
+// Defines a set of transport kind
+const (
+	KindGRPC Kind = "grpc"
+	KindHTTP Kind = "http"
+)
 
 type serverTransportKey struct{}
 type clientTransportKey struct{}

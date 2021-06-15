@@ -23,7 +23,7 @@ func Server(logger log.Logger) middleware.Middleware {
 			)
 			startTime := time.Now()
 			if info, ok := transport.FromServerContext(ctx); ok {
-				kind = info.Kind()
+				kind = string(info.Kind())
 				operation = info.Operation()
 			}
 			reply, err = handler(ctx, req)
@@ -59,7 +59,7 @@ func Client(logger log.Logger) middleware.Middleware {
 			)
 			startTime := time.Now()
 			if info, ok := transport.FromClientContext(ctx); ok {
-				kind = info.Kind()
+				kind = string(info.Kind())
 				operation = info.Operation()
 			}
 			reply, err = handler(ctx, req)
