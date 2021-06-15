@@ -1,6 +1,7 @@
 package host
 
 import (
+	"fmt"
 	"net"
 	"strconv"
 )
@@ -27,6 +28,8 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 	if lis != nil {
 		if p, ok := Port(lis); ok {
 			port = strconv.Itoa(p)
+		} else {
+			return "", fmt.Errorf("failed to extract port: %v", lis.Addr())
 		}
 	}
 	if len(addr) > 0 && (addr != "0.0.0.0" && addr != "[::]" && addr != "::") {
