@@ -298,6 +298,7 @@ func DefaultErrorDecoder(ctx context.Context, res *http.Response) error {
 	if err == nil {
 		e := new(errors.Error)
 		if err = CodecForResponse(res).Unmarshal(data, e); err == nil {
+			e.Code = int32(res.StatusCode)
 			return e
 		}
 	}

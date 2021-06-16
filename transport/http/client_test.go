@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/go-kratos/kratos/v2/errors"
 	"io/ioutil"
 	nethttp "net/http"
 	"testing"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/errors"
 
 	"github.com/stretchr/testify/assert"
 
@@ -161,7 +162,7 @@ func TestDefaultErrorDecoder(t *testing.T) {
 	}
 	err2 := DefaultErrorDecoder(context.TODO(), resp2)
 	assert.Error(t, err2)
-	assert.Equal(t, int32(54321), err2.(*errors.Error).GetCode())
+	assert.Equal(t, int32(500), err2.(*errors.Error).GetCode())
 	assert.Equal(t, "hi", err2.(*errors.Error).GetMessage())
 	assert.Equal(t, "FOO", err2.(*errors.Error).GetReason())
 }
