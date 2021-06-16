@@ -91,6 +91,9 @@ func testRoute(t *testing.T, srv *Server) {
 	if resp.StatusCode != 200 {
 		t.Fatalf("code: %d", resp.StatusCode)
 	}
+	if v := resp.Header.Get("Content-Type"); v != "application/json" {
+		t.Fatalf("contentType: %s", v)
+	}
 	u := new(User)
 	if err := json.NewDecoder(resp.Body).Decode(u); err != nil {
 		t.Fatal(err)
@@ -106,6 +109,9 @@ func testRoute(t *testing.T, srv *Server) {
 	defer resp.Body.Close()
 	if resp.StatusCode != 201 {
 		t.Fatalf("code: %d", resp.StatusCode)
+	}
+	if v := resp.Header.Get("Content-Type"); v != "application/json" {
+		t.Fatalf("contentType: %s", v)
 	}
 	u = new(User)
 	if err = json.NewDecoder(resp.Body).Decode(u); err != nil {
@@ -124,6 +130,9 @@ func testRoute(t *testing.T, srv *Server) {
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
 		t.Fatalf("code: %d", resp.StatusCode)
+	}
+	if v := resp.Header.Get("Content-Type"); v != "application/json" {
+		t.Fatalf("contentType: %s", v)
 	}
 	u = new(User)
 	if err = json.NewDecoder(resp.Body).Decode(u); err != nil {

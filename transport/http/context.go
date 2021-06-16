@@ -43,6 +43,30 @@ type Context interface {
 	Reset(http.ResponseWriter, *http.Request)
 }
 
+type responseWriter struct {
+	statusCode  int
+	wroteHeader bool
+	w           http.ResponseWriter
+}
+
+func newResponseWriter(code int, w http.ResponseWriter) http.ResponseWriter {
+	return &responseWriter{statusCode: code, w: w}
+}
+
+func (w *responseWriter) Header() http.Header { return w.w.Header() }
+func (w *responseWriter) WriteHeader(statusCode int) {
+	if !w.wroteHeader {
+		w.w.WriteHeader(statusCode)
+	}
+	w.wroteHeader = true
+}
+func (w *responseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(w.statusCode)
+	}
+	return w.w.Write(data)
+}
+
 type wrapper struct {
 	route *Route
 	req   *http.Request
@@ -89,8 +113,7 @@ func (c *wrapper) Returns(v interface{}, err error) error {
 	return nil
 }
 func (c *wrapper) Result(code int, v interface{}) error {
-	c.res.WriteHeader(code)
-	if err := c.route.srv.enc(c.res, c.req, v); err != nil {
+	if err := c.route.srv.enc(newResponseWriter(code, c.res), c.req, v); err != nil {
 		return err
 	}
 	return nil
