@@ -30,7 +30,7 @@ func WithDecoder(d Decoder) Option {
 	}
 }
 
-// WithLogger with config loogger.
+// WithLogger with config logger.
 func WithLogger(l log.Logger) Option {
 	return func(o *options) {
 		o.logger = l

@@ -13,7 +13,7 @@ import (
 const Name = "json"
 
 var (
-	// MarshalOptions is a configurable JSON format marshaler.
+	// MarshalOptions is a configurable JSON format marshaller.
 	MarshalOptions = protojson.MarshalOptions{
 		EmitUnpopulated: true,
 	}
