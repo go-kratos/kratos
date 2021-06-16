@@ -297,11 +297,12 @@ func DefaultErrorDecoder(ctx context.Context, res *http.Response) error {
 	data, err := ioutil.ReadAll(res.Body)
 	if err == nil {
 		e := new(errors.Error)
-		if err = CodecForResponse(res).Unmarshal(data, e); err == nil && e.Code != 0 {
+		if err = CodecForResponse(res).Unmarshal(data, e); err == nil {
+			e.Code = int32(res.StatusCode)
 			return e
 		}
 	}
-	return errors.Errorf(res.StatusCode, errors.UnknownReason, "")
+	return errors.Errorf(res.StatusCode, errors.UnknownReason, err.Error())
 }
 
 // CodecForResponse get encoding.Codec via http.Response
