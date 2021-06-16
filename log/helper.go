@@ -3,6 +3,7 @@ package log
 import (
 	"context"
 	"fmt"
+	"os"
 )
 
 // Helper is a logger helper.
@@ -88,4 +89,22 @@ func (h *Helper) Errorf(format string, a ...interface{}) {
 // Errorw logs a message at error level.
 func (h *Helper) Errorw(keyvals ...interface{}) {
 	h.logger.Log(LevelError, keyvals...)
+}
+
+// Fatal logs a message at fatal level.
+func (h *Helper) Fatal(a ...interface{}) {
+	h.logger.Log(LevelFatal, "msg", fmt.Sprint(a...))
+	os.Exit(1)
+}
+
+// Fatalf logs a message at fatal level.
+func (h *Helper) Fatalf(format string, a ...interface{}) {
+	h.logger.Log(LevelFatal, "msg", fmt.Sprintf(format, a...))
+	os.Exit(1)
+}
+
+// Fatalw logs a message at fatal level.
+func (h *Helper) Fatalw(keyvals ...interface{}) {
+	h.logger.Log(LevelFatal, keyvals...)
+	os.Exit(1)
 }
