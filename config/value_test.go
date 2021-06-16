@@ -96,16 +96,15 @@ func Test_atomicValue_String(t *testing.T) {
 
 func Test_atomicValue_Duration(t *testing.T) {
 	var vlist []interface{}
-	vlist = []interface{}{5*time.Second}
+	vlist = []interface{}{int64(5)}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
 		b, err := v.Duration()
 		assert.NoError(t, err)
-		assert.Equal(t, 5*time.Second, b)
+		assert.Equal(t, time.Duration(5), b)
 	}
 }
-
 
 func Test_atomicValue_Scan(t *testing.T) {
 	var err error
@@ -120,5 +119,3 @@ func Test_atomicValue_Scan(t *testing.T) {
 	}{"a"})
 	assert.NoError(t, err)
 }
-
-
