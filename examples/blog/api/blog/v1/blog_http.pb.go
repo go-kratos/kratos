@@ -159,7 +159,7 @@ func (c *BlogServiceHTTPClientImpl) CreateArticle(ctx context.Context, in *Creat
 	pattern := "/v1/article/"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/CreateArticle"))
-	opts = append(opts, http.PathPattern(pattern))
+	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
@@ -172,7 +172,7 @@ func (c *BlogServiceHTTPClientImpl) DeleteArticle(ctx context.Context, in *Delet
 	pattern := "/v1/article/{id}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/DeleteArticle"))
-	opts = append(opts, http.PathPattern(pattern))
+	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
@@ -185,7 +185,7 @@ func (c *BlogServiceHTTPClientImpl) GetArticle(ctx context.Context, in *GetArtic
 	pattern := "/v1/article/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/GetArticle"))
-	opts = append(opts, http.PathPattern(pattern))
+	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
@@ -198,7 +198,7 @@ func (c *BlogServiceHTTPClientImpl) ListArticle(ctx context.Context, in *ListArt
 	pattern := "/v1/article/"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/ListArticle"))
-	opts = append(opts, http.PathPattern(pattern))
+	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
@@ -211,7 +211,7 @@ func (c *BlogServiceHTTPClientImpl) UpdateArticle(ctx context.Context, in *Updat
 	pattern := "/v1/article/{id}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation("/blog.api.v1.BlogService/UpdateArticle"))
-	opts = append(opts, http.PathPattern(pattern))
+	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err

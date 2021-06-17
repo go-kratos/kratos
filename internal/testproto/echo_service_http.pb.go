@@ -248,7 +248,7 @@ func (c *EchoServiceHTTPClientImpl) Echo(ctx context.Context, in *SimpleMessage,
 	pattern := "/v1/example/echo/{id}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation("/testproto.EchoService/Echo"))
-	opts = append(opts, http.PathPattern(pattern))
+	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
@@ -261,7 +261,7 @@ func (c *EchoServiceHTTPClientImpl) EchoBody(ctx context.Context, in *SimpleMess
 	pattern := "/v1/example/echo_body"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation("/testproto.EchoService/EchoBody"))
-	opts = append(opts, http.PathPattern(pattern))
+	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
@@ -274,7 +274,7 @@ func (c *EchoServiceHTTPClientImpl) EchoDelete(ctx context.Context, in *SimpleMe
 	pattern := "/v1/example/echo_delete/{id}/{num}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation("/testproto.EchoService/EchoDelete"))
-	opts = append(opts, http.PathPattern(pattern))
+	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
@@ -287,7 +287,7 @@ func (c *EchoServiceHTTPClientImpl) EchoPatch(ctx context.Context, in *DynamicMe
 	pattern := "/v1/example/echo_patch"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation("/testproto.EchoService/EchoPatch"))
-	opts = append(opts, http.PathPattern(pattern))
+	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PATCH", path, in.Body, &out, opts...)
 	if err != nil {
 		return nil, err
@@ -300,7 +300,7 @@ func (c *EchoServiceHTTPClientImpl) EchoResponseBody(ctx context.Context, in *Dy
 	pattern := "/v1/example/echo_response_body"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation("/testproto.EchoService/EchoResponseBody"))
-	opts = append(opts, http.PathPattern(pattern))
+	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out.Body, opts...)
 	if err != nil {
 		return nil, err

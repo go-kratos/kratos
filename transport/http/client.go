@@ -197,11 +197,11 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 		req.Header.Set("User-Agent", client.opts.userAgent)
 	}
 	ctx = transport.NewClientContext(ctx, &Transport{
-		endpoint:    client.opts.endpoint,
-		header:      headerCarrier(req.Header),
-		operation:   c.operation,
-		request:     req,
-		pathPattern: c.pathPattern,
+		endpoint:     client.opts.endpoint,
+		header:       headerCarrier(req.Header),
+		operation:    c.operation,
+		request:      req,
+		pathTemplate: c.pathTemplate,
 	})
 	return client.invoke(ctx, req, args, reply, c)
 }

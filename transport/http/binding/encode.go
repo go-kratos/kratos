@@ -19,16 +19,16 @@ import (
 )
 
 // EncodeURL encode proto message to url path.
-func EncodeURL(pathPattern string, msg proto.Message, needQuery bool) string {
+func EncodeURL(pathTemplate string, msg proto.Message, needQuery bool) string {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
-		return pathPattern
+		return pathTemplate
 	}
 	reg := regexp.MustCompile(`/{[.\w]+}`)
 	if reg == nil {
-		return pathPattern
+		return pathTemplate
 	}
 	pathParams := make(map[string]struct{}, 0)
-	path := reg.ReplaceAllStringFunc(pathPattern, func(in string) string {
+	path := reg.ReplaceAllStringFunc(pathTemplate, func(in string) string {
 		if len(in) < 4 {
 			return in
 		}

@@ -65,7 +65,7 @@ func (c *MessageServiceHTTPClientImpl) GetUserMessage(ctx context.Context, in *G
 	pattern := "/v1/message/user/{id}/{count}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation("/api.message.v1.MessageService/GetUserMessage"))
-	opts = append(opts, http.PathPattern(pattern))
+	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, in, &out, opts...)
 	if err != nil {
 		return nil, err

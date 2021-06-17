@@ -68,7 +68,7 @@ func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Reque
 	pattern := "{{.Path}}"
 	path := binding.EncodeURL(pattern, in, {{.IsQuery}})
 	opts = append(opts, http.Operation("/{{$svrName}}/{{.Name}}"))
-	opts = append(opts, http.PathPattern(pattern))
+	opts = append(opts, http.PathTemplate(pattern))
 	{{if .HasBody -}}
 	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, opts...)
 	{{else -}} 

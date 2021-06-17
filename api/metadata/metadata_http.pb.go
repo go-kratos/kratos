@@ -87,7 +87,7 @@ func (c *MetadataHTTPClientImpl) GetServiceDesc(ctx context.Context, in *GetServ
 	pattern := "/services/{name}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation("/kratos.api.Metadata/GetServiceDesc"))
-	opts = append(opts, http.PathPattern(pattern))
+	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func (c *MetadataHTTPClientImpl) ListServices(ctx context.Context, in *ListServi
 	pattern := "/services"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation("/kratos.api.Metadata/ListServices"))
-	opts = append(opts, http.PathPattern(pattern))
+	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
