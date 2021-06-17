@@ -162,11 +162,17 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				ctx, cancel = context.WithTimeout(ctx, s.timeout)
 				defer cancel()
 			}
+			pathTemplate := req.URL.Path
+			if route := mux.CurrentRoute(req); route != nil {
+				// /path/123 -> /path/{id}
+				pathTemplate, _ = route.GetPathTemplate()
+			}
 			tr := &Transport{
-				endpoint:  s.endpoint.String(),
-				operation: req.RequestURI,
-				header:    headerCarrier(req.Header),
-				request:   req,
+				endpoint:     s.endpoint.String(),
+				operation:    pathTemplate,
+				header:       headerCarrier(req.Header),
+				request:      req,
+				pathTemplate: pathTemplate,
 			}
 			if r := mux.CurrentRoute(req); r != nil {
 				if path, err := r.GetPathTemplate(); err == nil {

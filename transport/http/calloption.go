@@ -13,8 +13,9 @@ type CallOption interface {
 }
 
 type callInfo struct {
-	contentType string
-	operation   string
+	contentType  string
+	operation    string
+	pathTemplate string
 }
 
 // EmptyCallOption does not alter the Call configuration.
@@ -45,8 +46,9 @@ func (o ContentTypeCallOption) before(c *callInfo) error {
 
 func defaultCallInfo(path string) callInfo {
 	return callInfo{
-		contentType: "application/json",
-		operation:   path,
+		contentType:  "application/json",
+		operation:    path,
+		pathTemplate: path,
 	}
 }
 
@@ -63,5 +65,21 @@ type OperationCallOption struct {
 
 func (o OperationCallOption) before(c *callInfo) error {
 	c.operation = o.Operation
+	return nil
+}
+
+// PathTemplate is http path template
+func PathTemplate(pattern string) CallOption {
+	return PathTemplateCallOption{Pattern: pattern}
+}
+
+// PathTemplateCallOption is set path template for client call
+type PathTemplateCallOption struct {
+	EmptyCallOption
+	Pattern string
+}
+
+func (o PathTemplateCallOption) before(c *callInfo) error {
+	c.pathTemplate = o.Pattern
 	return nil
 }
