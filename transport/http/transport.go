@@ -13,10 +13,11 @@ var (
 
 // Transport is an HTTP transport.
 type Transport struct {
-	endpoint  string
-	operation string
-	header    headerCarrier
-	request   *http.Request
+	endpoint    string
+	operation   string
+	header      headerCarrier
+	request     *http.Request
+	pathPattern string
 }
 
 // Kind returns the transport kind.
@@ -42,6 +43,11 @@ func (tr *Transport) Header() transport.Header {
 // Request returns the transport request.
 func (tr *Transport) Request() *http.Request {
 	return tr.request
+}
+
+// PathPattern returns the http path template.
+func (tr *Transport) PathPattern() string {
+	return tr.pathPattern
 }
 
 // SetOperation sets the transport operation.
