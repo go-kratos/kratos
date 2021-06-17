@@ -105,6 +105,7 @@ func (c *wrapper) Returns(v interface{}, err error) error {
 	}
 	return nil
 }
+
 func (c *wrapper) Result(code int, v interface{}) error {
 	c.w.WriteHeader(code)
 	if err := c.route.srv.enc(&c.w, c.req, v); err != nil {
@@ -112,57 +113,67 @@ func (c *wrapper) Result(code int, v interface{}) error {
 	}
 	return nil
 }
+
 func (c *wrapper) JSON(code int, v interface{}) error {
-	c.res.WriteHeader(code)
 	c.res.Header().Set("Content-Type", "application/json")
+	c.res.WriteHeader(code)
 	return json.NewEncoder(c.res).Encode(v)
 }
+
 func (c *wrapper) XML(code int, v interface{}) error {
-	c.res.WriteHeader(code)
 	c.res.Header().Set("Content-Type", "application/xml")
+	c.res.WriteHeader(code)
 	return xml.NewEncoder(c.res).Encode(v)
 }
+
 func (c *wrapper) String(code int, text string) error {
-	c.res.WriteHeader(code)
 	c.res.Header().Set("Content-Type", "text/plain")
+	c.res.WriteHeader(code)
 	c.res.Write([]byte(text))
 	return nil
 }
+
 func (c *wrapper) Blob(code int, contentType string, data []byte) error {
-	c.res.WriteHeader(code)
 	c.res.Header().Set("Content-Type", contentType)
+	c.res.WriteHeader(code)
 	c.res.Write(data)
 	return nil
 }
+
 func (c *wrapper) Stream(code int, contentType string, rd io.Reader) error {
-	c.res.WriteHeader(code)
 	c.res.Header().Set("Content-Type", contentType)
+	c.res.WriteHeader(code)
 	_, err := io.Copy(c.res, rd)
 	return err
 }
+
 func (c *wrapper) Reset(res http.ResponseWriter, req *http.Request) {
 	c.w.rest(res)
 	c.res = res
 	c.req = req
 }
+
 func (c *wrapper) Deadline() (time.Time, bool) {
 	if c.req == nil {
 		return time.Time{}, false
 	}
 	return c.req.Context().Deadline()
 }
+
 func (c *wrapper) Done() <-chan struct{} {
 	if c.req == nil {
 		return nil
 	}
 	return c.req.Context().Done()
 }
+
 func (c *wrapper) Err() error {
 	if c.req == nil {
 		return context.Canceled
 	}
 	return c.req.Context().Err()
 }
+
 func (c *wrapper) Value(key interface{}) interface{} {
 	if c.req == nil {
 		return nil
