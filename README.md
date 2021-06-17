@@ -103,6 +103,7 @@ app.Run()
 ## Community
 * [Wechat Group](https://github.com/go-kratos/kratos/issues/682)
 * [Discord Group](https://discord.gg/BWzJsUJ)
+* Website:  [go-kratos.dev](https://go-kratos.dev)
 * QQ Group: 716486124
 
 ## License
