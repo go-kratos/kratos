@@ -31,7 +31,7 @@ func callHTTP() {
 			log.Println(err)
 		}
 		if api.IsUserNotFound(err) {
-			log.Println("[grpc] USER_NOT_FOUND_ERROR", err)
+			log.Println("[http] USER_NOT_FOUND_ERROR", err)
 		}
 	} else {
 		log.Printf("[http] SayHello %s\n", reply.Message)
