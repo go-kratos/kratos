@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-kratos/kratos/examples/errors/api"
 	"github.com/go-kratos/kratos/v2/errors"
 	"log"
@@ -32,9 +31,8 @@ func callHTTP() {
 			log.Println(err)
 		}
 		if api.IsUserNotFound(err) {
-			log.Println("USER_NOT_FOUND_ERROR", err)
+			log.Println("[grpc] USER_NOT_FOUND_ERROR", err)
 		}
-		fmt.Println(errors.Is(err, errors.BadRequest("USER_NAME_EMPTY", "")))
 	} else {
 		log.Printf("[http] SayHello %s\n", reply.Message)
 	}
