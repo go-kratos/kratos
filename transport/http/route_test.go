@@ -17,6 +17,17 @@ type User struct {
 	Name string `json:"name"`
 }
 
+func corsFilter(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			log.Println("cors:", r.Method, r.RequestURI)
+			w.Header().Set("Access-Control-Allow-Methods", r.Method)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func authFilter(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Do stuff here
@@ -37,7 +48,7 @@ func loggingFilter(next http.Handler) http.Handler {
 func TestRoute(t *testing.T) {
 	ctx := context.Background()
 	srv := NewServer(
-		Filter(loggingFilter),
+		Filter(corsFilter, loggingFilter),
 	)
 	route := srv.Route("/v1")
 	route.GET("/users/{name}", func(ctx Context) error {
@@ -140,5 +151,18 @@ func testRoute(t *testing.T, srv *Server) {
 	}
 	if u.Name != "bar" {
 		t.Fatalf("got %s want bar", u.Name)
+	}
+	// OPTIONS
+	req, _ = http.NewRequest("OPTIONS", base+"/users", nil)
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		t.Fatalf("code: %d", resp.StatusCode)
+	}
+	if resp.Header.Get("Access-Control-Allow-Methods") != "OPTIONS" {
+		t.Fatal("cors failed")
 	}
 }
