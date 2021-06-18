@@ -78,7 +78,9 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 			sd.Methods = append(sd.Methods, buildMethodDesc(g, method, "POST", path))
 		}
 	}
-	g.P(sd.execute())
+	if len(sd.Methods) != 0 {
+		g.P(sd.execute())
+	}
 }
 
 func hasHTTPRule(services []*protogen.Service) bool {
