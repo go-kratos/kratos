@@ -9,7 +9,6 @@ import (
 	"sync"
 	"time"
 
-	ic "github.com/go-kratos/kratos/v2/internal/context"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -90,7 +89,6 @@ func ErrorEncoder(en EncodeErrorFunc) ServerOption {
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
-	ctx      context.Context
 	lis      net.Listener
 	once     sync.Once
 	endpoint *url.URL
@@ -157,7 +155,7 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 func (s *Server) filter() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			ctx, cancel := ic.Merge(req.Context(), s.ctx)
+			ctx, cancel := context.WithCancel(req.Context())
 			defer cancel()
 			if s.timeout > 0 {
 				ctx, cancel = context.WithTimeout(ctx, s.timeout)
@@ -216,7 +214,6 @@ func (s *Server) Start(ctx context.Context) error {
 	if _, err := s.Endpoint(); err != nil {
 		return err
 	}
-	s.ctx = ctx
 	s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
 	if err := s.Serve(s.lis); !errors.Is(err, http.ErrServerClosed) {
 		return err

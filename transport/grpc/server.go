@@ -8,7 +8,6 @@ import (
 	"time"
 
 	apimd "github.com/go-kratos/kratos/v2/api/metadata"
-	ic "github.com/go-kratos/kratos/v2/internal/context"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -79,7 +78,6 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
-	ctx        context.Context
 	lis        net.Listener
 	once       sync.Once
 	err        error
@@ -158,7 +156,6 @@ func (s *Server) Start(ctx context.Context) error {
 	if _, err := s.Endpoint(); err != nil {
 		return err
 	}
-	s.ctx = ctx
 	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
 	s.health.Resume()
 	return s.Serve(s.lis)
@@ -174,7 +171,7 @@ func (s *Server) Stop(ctx context.Context) error {
 
 func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		ctx, cancel := ic.Merge(ctx, s.ctx)
+		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 		md, _ := grpcmd.FromIncomingContext(ctx)
 		ctx = transport.NewServerContext(ctx, &Transport{
