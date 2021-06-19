@@ -127,9 +127,9 @@ func NewServer(opts ...ServerOption) *Server {
 	return srv
 }
 
-// Route registers an HTTP route.
-func (s *Server) Route(prefix string, filters ...FilterFunc) *Route {
-	return newRoute(prefix, s, filters...)
+// Route registers an HTTP router.
+func (s *Server) Route(prefix string, filters ...FilterFunc) *Router {
+	return newRouter(prefix, s, filters...)
 }
 
 // Handle registers a new route with a matcher for the URL path.
