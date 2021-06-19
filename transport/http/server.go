@@ -127,7 +127,7 @@ func NewServer(opts ...ServerOption) *Server {
 	return srv
 }
 
-// Route registers an HTTP route.
+// Route registers an HTTP router.
 func (s *Server) Route(prefix string, filters ...FilterFunc) *Router {
 	return newRouter(prefix, s, filters...)
 }
