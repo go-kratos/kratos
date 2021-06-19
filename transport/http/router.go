@@ -9,7 +9,7 @@ import (
 // HandlerFunc defines a function to serve HTTP requests.
 type HandlerFunc func(Context) error
 
-// Router is an HTTP route.
+// Router is an HTTP router.
 type Router struct {
 	prefix  string
 	pool    sync.Pool
