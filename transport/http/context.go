@@ -16,9 +16,6 @@ import (
 
 var _ Context = (*wrapper)(nil)
 
-// HandlerFunc defines a function to serve HTTP requests.
-type HandlerFunc func(Context) error
-
 // Context is an HTTP Context.
 type Context interface {
 	context.Context
@@ -60,10 +57,10 @@ func (w *responseWriter) Write(data []byte) (int, error) {
 }
 
 type wrapper struct {
-	route *Route
-	req   *http.Request
-	res   http.ResponseWriter
-	w     responseWriter
+	router *Router
+	req    *http.Request
+	res    http.ResponseWriter
+	w      responseWriter
 }
 
 func (c *wrapper) Header() http.Header {
@@ -90,9 +87,9 @@ func (c *wrapper) Query() url.Values {
 func (c *wrapper) Request() *http.Request        { return c.req }
 func (c *wrapper) Response() http.ResponseWriter { return c.res }
 func (c *wrapper) Middleware(h middleware.Handler) middleware.Handler {
-	return middleware.Chain(c.route.srv.ms...)(h)
+	return middleware.Chain(c.router.srv.ms...)(h)
 }
-func (c *wrapper) Bind(v interface{}) error      { return c.route.srv.dec(c.req, v) }
+func (c *wrapper) Bind(v interface{}) error      { return c.router.srv.dec(c.req, v) }
 func (c *wrapper) BindVars(v interface{}) error  { return binding.BindQuery(c.Vars(), v) }
 func (c *wrapper) BindQuery(v interface{}) error { return binding.BindQuery(c.Query(), v) }
 func (c *wrapper) BindForm(v interface{}) error  { return binding.BindForm(c.req, v) }
@@ -100,7 +97,7 @@ func (c *wrapper) Returns(v interface{}, err error) error {
 	if err != nil {
 		return err
 	}
-	if err := c.route.srv.enc(&c.w, c.req, v); err != nil {
+	if err := c.router.srv.enc(&c.w, c.req, v); err != nil {
 		return err
 	}
 	return nil
@@ -108,7 +105,7 @@ func (c *wrapper) Returns(v interface{}, err error) error {
 
 func (c *wrapper) Result(code int, v interface{}) error {
 	c.w.WriteHeader(code)
-	if err := c.route.srv.enc(&c.w, c.req, v); err != nil {
+	if err := c.router.srv.enc(&c.w, c.req, v); err != nil {
 		return err
 	}
 	return nil

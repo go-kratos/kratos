@@ -22,15 +22,9 @@ type testData struct {
 
 func TestServer(t *testing.T) {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		data := &testData{Path: r.RequestURI}
-		json.NewEncoder(w).Encode(data)
-
-		if r.Context().Value(testKey{}) != "test" {
-			w.WriteHeader(500)
-		}
+		json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	}
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, testKey{}, "test")
 	srv := NewServer()
 	srv.HandleFunc("/index", fn)
 
