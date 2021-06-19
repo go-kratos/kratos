@@ -15,7 +15,6 @@ func TestOnce(t *testing.T) {
 	next := func(ctx context.Context, req interface{}) (interface{}, error) {
 		panic("panic reason")
 	}
-	next = Recovery()(next)
-	_, e := next(context.Background(), "panic")
+	_, e := Recovery()(next)(context.Background(), "panic")
 	t.Logf("succ and reason is %v", e)
 }

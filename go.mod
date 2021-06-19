@@ -10,6 +10,7 @@ require (
 	github.com/imdario/mergo v0.3.12
 	github.com/stretchr/testify v1.7.0
 	go.opentelemetry.io/otel v0.20.0
+	go.opentelemetry.io/otel/sdk v0.20.0
 	go.opentelemetry.io/otel/trace v0.20.0
 	golang.org/x/net v0.0.0-20210525063256-abc453219eb5 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
