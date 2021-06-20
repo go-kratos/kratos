@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
 
@@ -53,7 +54,12 @@ func (a *App) Run() error {
 	if err != nil {
 		return err
 	}
-	eg, ctx := errgroup.WithContext(a.ctx)
+	ctx := metadata.NewServerContext(a.ctx, metadata.Metadata{
+		"service-id":      instance.ID,
+		"service-name":    instance.Name,
+		"service-version": instance.Version,
+	})
+	eg, ctx := errgroup.WithContext(ctx)
 	wg := sync.WaitGroup{}
 	for _, srv := range a.opts.servers {
 		srv := srv

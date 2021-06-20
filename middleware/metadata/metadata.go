@@ -52,13 +52,21 @@ func Server(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromServerContext(ctx); ok {
-				md := options.md.Clone()
+				var md metadata.Metadata
+				var ok bool
+				if md, ok = metadata.FromServerContext(ctx); !ok {
+					md = options.md.Clone()
+					ctx = metadata.NewServerContext(ctx, md)
+				} else {
+					for k, v := range options.md {
+						md.Set(k, v)
+					}
+				}
 				for _, k := range tr.Header().Keys() {
 					if options.hasPrefix(k) {
 						md.Set(k, tr.Header().Get(k))
 					}
 				}
-				ctx = metadata.NewServerContext(ctx, md)
 			}
 			return handler(ctx, req)
 		}

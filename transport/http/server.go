@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 
@@ -89,6 +90,7 @@ func ErrorEncoder(en EncodeErrorFunc) ServerOption {
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
+	ctx      context.Context
 	lis      net.Listener
 	once     sync.Once
 	endpoint *url.URL
@@ -179,6 +181,9 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				}
 			}
 			ctx = transport.NewServerContext(ctx, tr)
+			if ctxMd, ok := metadata.FromServerContext(s.ctx); ok {
+				ctx = metadata.NewServerContext(ctx, ctxMd.Clone())
+			}
 			next.ServeHTTP(w, req.WithContext(ctx))
 		})
 	}
@@ -214,6 +219,7 @@ func (s *Server) Start(ctx context.Context) error {
 	if _, err := s.Endpoint(); err != nil {
 		return err
 	}
+	s.ctx = ctx
 	s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
 	if err := s.Serve(s.lis); !errors.Is(err, http.ErrServerClosed) {
 		return err
