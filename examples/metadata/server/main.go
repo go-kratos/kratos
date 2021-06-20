@@ -32,7 +32,8 @@ func (s *server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*he
 	if md, ok := metadata.FromServerContext(ctx); ok {
 		extra = md.Get("x-md-global-extra")
 	}
-	return &helloworld.HelloReply{Message: fmt.Sprintf("Hello %s and %s", in.Name, extra)}, nil
+	info, _ := kratos.FromContext(ctx)
+	return &helloworld.HelloReply{Message: fmt.Sprintf("Hello %s extra: %s name: %s", in.Name, extra, info.Name())}, nil
 }
 
 func main() {

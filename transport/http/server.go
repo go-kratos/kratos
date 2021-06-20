@@ -214,6 +214,9 @@ func (s *Server) Start(ctx context.Context) error {
 	if _, err := s.Endpoint(); err != nil {
 		return err
 	}
+	s.BaseContext = func(net.Listener) context.Context {
+		return ctx
+	}
 	s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
 	if err := s.Serve(s.lis); !errors.Is(err, http.ErrServerClosed) {
 		return err
