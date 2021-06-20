@@ -156,12 +156,15 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 func (s *Server) filter() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			var cancel context.CancelFunc
 			ctx := req.Context()
 			if s.timeout > 0 {
-				var cancel context.CancelFunc
 				ctx, cancel = context.WithTimeout(ctx, s.timeout)
-				defer cancel()
+			} else {
+				ctx, cancel = context.WithCancel(ctx)
 			}
+			defer cancel()
+
 			pathTemplate := req.URL.Path
 			if route := mux.CurrentRoute(req); route != nil {
 				// /path/123 -> /path/{id}
