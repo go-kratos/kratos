@@ -183,7 +183,6 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 			header:    headerCarrier(md),
 		})
 		if s.timeout > 0 {
-			var cancel context.CancelFunc
 			ctx, cancel = context.WithTimeout(ctx, s.timeout)
 			defer cancel()
 		}

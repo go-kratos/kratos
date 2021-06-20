@@ -17,16 +17,25 @@ import (
 )
 
 // App is an application components lifecycle manager
-type App struct {
+type App interface {
+	ID() string
+	Name() string
+	Version() string
+	Metadata() map[string]string
+	Endpoint() []string
+	Run() error
+	Stop() error
+}
+
+type app struct {
 	opts     options
 	ctx      context.Context
 	cancel   func()
 	instance *registry.ServiceInstance
-	log      *log.Helper
 }
 
 // New create an application lifecycle manager.
-func New(opts ...Option) *App {
+func New(opts ...Option) App {
 	options := options{
 		ctx:    context.Background(),
 		logger: log.DefaultLogger,
@@ -39,27 +48,26 @@ func New(opts ...Option) *App {
 		o(&options)
 	}
 	ctx, cancel := context.WithCancel(options.ctx)
-	return &App{
+	return &app{
 		ctx:    ctx,
 		cancel: cancel,
 		opts:   options,
-		log:    log.NewHelper(options.logger),
 	}
 }
 
+func (a *app) ID() string                  { return a.opts.id }
+func (a *app) Name() string                { return a.opts.name }
+func (a *app) Version() string             { return a.opts.version }
+func (a *app) Metadata() map[string]string { return a.opts.metadata }
+func (a *app) Endpoint() []string          { return a.instance.Endpoints }
+
 // Run executes all OnStart hooks registered with the application's Lifecycle.
-func (a *App) Run() error {
+func (a *app) Run() error {
 	instance, err := a.buildInstance()
 	if err != nil {
 		return err
 	}
-	ctx := NewContext(a.ctx, AppInfo{
-		ID:        instance.ID,
-		Name:      instance.Name,
-		Version:   instance.Version,
-		Metadata:  instance.Metadata,
-		Endpoints: instance.Endpoints,
-	})
+	ctx := NewContext(a.ctx, a)
 	eg, ctx := errgroup.WithContext(ctx)
 	wg := sync.WaitGroup{}
 	for _, srv := range a.opts.servers {
@@ -100,7 +108,7 @@ func (a *App) Run() error {
 }
 
 // Stop gracefully stops the application.
-func (a *App) Stop() error {
+func (a *app) Stop() error {
 	if a.opts.registrar != nil && a.instance != nil {
 		if err := a.opts.registrar.Deregister(a.opts.ctx, a.instance); err != nil {
 			return err
@@ -112,7 +120,7 @@ func (a *App) Stop() error {
 	return nil
 }
 
-func (a *App) buildInstance() (*registry.ServiceInstance, error) {
+func (a *app) buildInstance() (*registry.ServiceInstance, error) {
 	var endpoints []string
 	for _, e := range a.opts.endpoints {
 		endpoints = append(endpoints, e.String())
@@ -128,7 +136,6 @@ func (a *App) buildInstance() (*registry.ServiceInstance, error) {
 			}
 		}
 	}
-
 	return &registry.ServiceInstance{
 		ID:        a.opts.id,
 		Name:      a.opts.name,
@@ -136,4 +143,17 @@ func (a *App) buildInstance() (*registry.ServiceInstance, error) {
 		Metadata:  a.opts.metadata,
 		Endpoints: endpoints,
 	}, nil
+}
+
+type appKey struct{}
+
+// NewContext returns a new Context that carries value.
+func NewContext(ctx context.Context, s App) context.Context {
+	return context.WithValue(ctx, appKey{}, s)
+}
+
+// FromContext returns the Transport value stored in ctx, if any.
+func FromContext(ctx context.Context) (s App, ok bool) {
+	s, ok = ctx.Value(appKey{}).(App)
+	return
 }
