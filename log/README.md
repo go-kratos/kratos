@@ -6,7 +6,7 @@
 
 ```go
 
-var logger Logger = log.MultiLogger(log.NewStdLogger(os.Stdout), syslog.NewLogger())
+var logger log.Logger = log.MultiLogger(log.NewStdLogger(os.Stdout), syslog.NewLogger())
 
 logger = log.With(logger,
     "service.name", "hellworld",
@@ -18,7 +18,7 @@ logger = log.With(logger,
 logger.Log(log.LevelInfo, "key", "value")
 
 
-var helper Helper = log.NewHelper(logger)
+var helper log.Helper = log.NewHelper(logger)
 helper.Log(log.LevelInfo, "key", "value")
 helper.Info("info message")
 helper.Infof("info %s", "message")
