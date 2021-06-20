@@ -16,18 +16,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// App is an application components lifecycle manager
-type App interface {
-	ID() string
-	Name() string
-	Version() string
-	Metadata() map[string]string
-	Endpoint() []string
-	Run() error
-	Stop() error
-}
-
-type app struct {
+type App struct {
 	opts     options
 	ctx      context.Context
 	cancel   func()
@@ -35,7 +24,7 @@ type app struct {
 }
 
 // New create an application lifecycle manager.
-func New(opts ...Option) App {
+func New(opts ...Option) *App {
 	options := options{
 		ctx:    context.Background(),
 		logger: log.DefaultLogger,
@@ -48,26 +37,35 @@ func New(opts ...Option) App {
 		o(&options)
 	}
 	ctx, cancel := context.WithCancel(options.ctx)
-	return &app{
+	return &App{
 		ctx:    ctx,
 		cancel: cancel,
 		opts:   options,
 	}
 }
 
-func (a *app) ID() string                  { return a.opts.id }
-func (a *app) Name() string                { return a.opts.name }
-func (a *app) Version() string             { return a.opts.version }
-func (a *app) Metadata() map[string]string { return a.opts.metadata }
-func (a *app) Endpoint() []string          { return a.instance.Endpoints }
+// ID returns app instance id
+func (a *App) ID() string { return a.opts.id }
+
+// Name returns service name
+func (a *App) Name() string { return a.opts.name }
+
+// Version returns app version
+func (a *App) Version() string { return a.opts.version }
+
+// Metadata returns service metadata
+func (a *App) Metadata() map[string]string { return a.opts.metadata }
+
+// Endpoint returns endpoints
+func (a *App) Endpoint() []string { return a.instance.Endpoints }
 
 // Run executes all OnStart hooks registered with the application's Lifecycle.
-func (a *app) Run() error {
+func (a *App) Run() error {
 	instance, err := a.buildInstance()
 	if err != nil {
 		return err
 	}
-	ctx := NewContext(a.ctx, a)
+	ctx := NewContext(a.ctx, *a)
 	eg, ctx := errgroup.WithContext(ctx)
 	wg := sync.WaitGroup{}
 	for _, srv := range a.opts.servers {
@@ -108,7 +106,7 @@ func (a *app) Run() error {
 }
 
 // Stop gracefully stops the application.
-func (a *app) Stop() error {
+func (a *App) Stop() error {
 	if a.opts.registrar != nil && a.instance != nil {
 		if err := a.opts.registrar.Deregister(a.opts.ctx, a.instance); err != nil {
 			return err
@@ -120,7 +118,7 @@ func (a *app) Stop() error {
 	return nil
 }
 
-func (a *app) buildInstance() (*registry.ServiceInstance, error) {
+func (a *App) buildInstance() (*registry.ServiceInstance, error) {
 	var endpoints []string
 	for _, e := range a.opts.endpoints {
 		endpoints = append(endpoints, e.String())
