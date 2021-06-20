@@ -53,7 +53,14 @@ func (a *App) Run() error {
 	if err != nil {
 		return err
 	}
-	eg, ctx := errgroup.WithContext(a.ctx)
+	ctx := NewContext(a.ctx, AppInfo{
+		ID:        instance.ID,
+		Name:      instance.Name,
+		Version:   instance.Version,
+		Metadata:  instance.Metadata,
+		Endpoints: instance.Endpoints,
+	})
+	eg, ctx := errgroup.WithContext(ctx)
 	wg := sync.WaitGroup{}
 	for _, srv := range a.opts.servers {
 		srv := srv
