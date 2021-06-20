@@ -5,7 +5,8 @@
 ### Structured logging
 
 ```go
-Logger logger = log.MultiLogger(log.NewStdLogger(os.Stdout), syslog.NewLogger())
+
+var logger Logger = log.MultiLogger(log.NewStdLogger(os.Stdout), syslog.NewLogger())
 
 logger = log.With(logger,
     "service.name", "hellworld",
@@ -16,9 +17,11 @@ logger = log.With(logger,
 
 logger.Log(log.LevelInfo, "key", "value")
 
-Helper helper = log.NewHelper(logger)
+
+var helper Helper = log.NewHelper(logger)
 helper.Log(log.LevelInfo, "key", "value")
 helper.Info("info message")
 helper.Infof("info %s", "message")
 helper.Infow("key", "value")
+
 ```
