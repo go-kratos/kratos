@@ -89,7 +89,6 @@ func ErrorEncoder(en EncodeErrorFunc) ServerOption {
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
-	ctx      context.Context
 	lis      net.Listener
 	once     sync.Once
 	endpoint *url.URL
