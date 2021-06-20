@@ -222,9 +222,9 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			if err != nil {
 				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 			}
-			req = req.Clone(ctx)
 			req.URL.Scheme = scheme
 			req.URL.Host = addr
+			req.Host = addr
 		}
 		res, err := client.do(ctx, req, c)
 		if done != nil {
