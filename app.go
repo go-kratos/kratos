@@ -16,6 +16,16 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// AppInfo is application context value.
+type AppInfo interface {
+	ID() string
+	Name() string
+	Version() string
+	Metadata() map[string]string
+	Endpoint() []string
+}
+
+// App is an application components lifecycle manager.
 type App struct {
 	opts     options
 	ctx      context.Context
@@ -44,19 +54,19 @@ func New(opts ...Option) *App {
 	}
 }
 
-// ID returns app instance id
+// ID returns app instance id.
 func (a *App) ID() string { return a.opts.id }
 
-// Name returns service name
+// Name returns service name.
 func (a *App) Name() string { return a.opts.name }
 
-// Version returns app version
+// Version returns app version.
 func (a *App) Version() string { return a.opts.version }
 
-// Metadata returns service metadata
+// Metadata returns service metadata.
 func (a *App) Metadata() map[string]string { return a.opts.metadata }
 
-// Endpoint returns endpoints
+// Endpoint returns endpoints.
 func (a *App) Endpoint() []string { return a.instance.Endpoints }
 
 // Run executes all OnStart hooks registered with the application's Lifecycle.
@@ -65,7 +75,7 @@ func (a *App) Run() error {
 	if err != nil {
 		return err
 	}
-	ctx := NewContext(a.ctx, *a)
+	ctx := NewContext(a.ctx, a)
 	eg, ctx := errgroup.WithContext(ctx)
 	wg := sync.WaitGroup{}
 	for _, srv := range a.opts.servers {
@@ -146,12 +156,12 @@ func (a *App) buildInstance() (*registry.ServiceInstance, error) {
 type appKey struct{}
 
 // NewContext returns a new Context that carries value.
-func NewContext(ctx context.Context, s App) context.Context {
+func NewContext(ctx context.Context, s AppInfo) context.Context {
 	return context.WithValue(ctx, appKey{}, s)
 }
 
 // FromContext returns the Transport value stored in ctx, if any.
-func FromContext(ctx context.Context) (s App, ok bool) {
-	s, ok = ctx.Value(appKey{}).(App)
+func FromContext(ctx context.Context) (s AppInfo, ok bool) {
+	s, ok = ctx.Value(appKey{}).(AppInfo)
 	return
 }
