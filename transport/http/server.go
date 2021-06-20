@@ -9,7 +9,6 @@ import (
 	"sync"
 	"time"
 
-	ic "github.com/go-kratos/kratos/v2/internal/context"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -157,9 +156,9 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 func (s *Server) filter() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			ctx, cancel := ic.Merge(req.Context(), s.ctx)
-			defer cancel()
+			ctx := req.Context()
 			if s.timeout > 0 {
+				var cancel context.CancelFunc
 				ctx, cancel = context.WithTimeout(ctx, s.timeout)
 				defer cancel()
 			}
@@ -216,7 +215,9 @@ func (s *Server) Start(ctx context.Context) error {
 	if _, err := s.Endpoint(); err != nil {
 		return err
 	}
-	s.ctx = ctx
+	s.BaseContext = func(net.Listener) context.Context {
+		return ctx
+	}
 	s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
 	if err := s.Serve(s.lis); !errors.Is(err, http.ErrServerClosed) {
 		return err
