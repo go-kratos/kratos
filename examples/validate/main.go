@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/middleware/validate"
-	"github.com/go-kratos/kratos/v2/transport/http"
 	"log"
 
 	"github.com/go-kratos/kratos/examples/validate/api"
 	"github.com/go-kratos/kratos/v2"
+	"github.com/go-kratos/kratos/v2/middleware/validate"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
@@ -35,19 +34,15 @@ func main() {
 	grpcSrv := grpc.NewServer(
 		grpc.Address(":9000"),
 		grpc.Middleware(
-			middleware.Chain(
-				validate.Validator(),
-			),
+			validate.Validator(),
 		))
 	httpSrv := http.NewServer(
 		http.Address(":8000"),
 		http.Middleware(
-			middleware.Chain(
-				validate.Validator(),
-			),
+			validate.Validator(),
 		))
 	v1.RegisterExampleServiceServer(grpcSrv, s)
-	v1.RegisterExampleServiceHTTPServer(httpSrv,s)
+	v1.RegisterExampleServiceHTTPServer(httpSrv, s)
 	app := kratos.New(
 		kratos.Name(Name),
 		kratos.Server(

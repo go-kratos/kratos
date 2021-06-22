@@ -264,6 +264,46 @@ func (m *Request) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	if m.GetInfo() == nil {
+		err := RequestValidationError{
+			field:  "Info",
+			reason: "value is required",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if all {
+		switch v := interface{}(m.GetInfo()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, RequestValidationError{
+					field:  "Info",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, RequestValidationError{
+					field:  "Info",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetInfo()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return RequestValidationError{
+				field:  "Info",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	if len(errors) > 0 {
 		return RequestMultiError(errors)
 	}
@@ -352,3 +392,102 @@ var _Request_Score_NotInLookup = map[float32]struct{}{
 }
 
 var _Request_Card_Pattern = regexp.MustCompile("(?i)^[0-9a-f]+$")
+
+// Validate checks the field values on Info with the rules defined in the proto
+// definition for this message. If any rules are violated, the first error
+// encountered is returned, or nil if there are no violations.
+func (m *Info) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Info with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in InfoMultiError, or nil if none found.
+func (m *Info) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Info) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Address
+
+	if len(errors) > 0 {
+		return InfoMultiError(errors)
+	}
+	return nil
+}
+
+// InfoMultiError is an error wrapping multiple validation errors returned by
+// Info.ValidateAll() if the designated constraints aren't met.
+type InfoMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m InfoMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m InfoMultiError) AllErrors() []error { return m }
+
+// InfoValidationError is the validation error returned by Info.Validate if the
+// designated constraints aren't met.
+type InfoValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e InfoValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e InfoValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e InfoValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e InfoValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e InfoValidationError) ErrorName() string { return "InfoValidationError" }
+
+// Error satisfies the builtin error interface
+func (e InfoValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sInfo.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = InfoValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = InfoValidationError{}

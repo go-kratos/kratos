@@ -35,4 +35,9 @@ message Request {
     string explain = 8 [(validate.rules).string.min_len = 3];
     string name = 9 [(validate.rules).string = {min_len: 1, max_len: 10}];
     string card = 10 [(validate.rules).string.pattern = "(?i)^[0-9a-f]+$"];
+    Info info = 11 [(validate.rules).message.required = true];
+}
+
+message Info {
+    string address = 1;
 }
