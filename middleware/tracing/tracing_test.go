@@ -53,14 +53,14 @@ func TestTracing(t *testing.T) {
 	tp := tracesdk.NewTracerProvider(tracesdk.WithSampler(tracesdk.TraceIDRatioBased(0)))
 
 	// caller use Inject
-	tracer := NewTracer(trace.SpanKindClient, WithTracerProvider(tp), WithPropagators(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})))
+	tracer := NewTracer(trace.SpanKindClient, WithTracerProvider(tp), WithPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})))
 	ts := &Transport{kind: transport.KindHTTP, header: carrier}
 
 	ctx, aboveSpan := tracer.Start(transport.NewClientContext(context.Background(), ts), ts.Kind().String(), ts.Operation(), ts.Header())
 	defer tracer.End(ctx, aboveSpan, nil)
 
 	// server use Extract fetch traceInfo from carrier
-	tracer = NewTracer(trace.SpanKindServer, WithPropagators(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})))
+	tracer = NewTracer(trace.SpanKindServer, WithPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})))
 	ts = &Transport{kind: transport.KindHTTP, header: carrier}
 
 	ctx, span := tracer.Start(transport.NewServerContext(ctx, ts), ts.Kind().String(), ts.Operation(), ts.Header())

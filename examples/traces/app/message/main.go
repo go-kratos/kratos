@@ -14,7 +14,6 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
-	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/semconv"
@@ -85,9 +84,6 @@ func main() {
 				// Configuring tracing Middleware
 				tracing.Server(
 					tracing.WithTracerProvider(tp),
-					tracing.WithPropagators(
-						propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{}),
-					),
 				),
 				logging.Server(logger),
 			),

@@ -26,8 +26,8 @@ func NewTracer(kind trace.SpanKind, opts ...Option) *Tracer {
 	if options.TracerProvider != nil {
 		otel.SetTracerProvider(options.TracerProvider)
 	}
-	if options.Propagators != nil {
-		otel.SetTextMapPropagator(options.Propagators)
+	if options.Propagator != nil {
+		otel.SetTextMapPropagator(options.Propagator)
 	} else {
 		otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{}))
 	}

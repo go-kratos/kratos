@@ -16,7 +16,6 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/trace/jaeger"
-	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/semconv"
@@ -66,9 +65,6 @@ func (s *server) GetMyMessages(ctx context.Context, in *v1.GetMyMessagesRequest)
 			recovery.Recovery(),
 			tracing.Client(
 				tracing.WithTracerProvider(s.tracer),
-				tracing.WithPropagators(
-					propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{}),
-				),
 			),
 		),
 		grpc.WithTimeout(2*time.Second),
@@ -107,9 +103,6 @@ func main() {
 			// Configuring tracing middleware
 			tracing.Server(
 				tracing.WithTracerProvider(tp),
-				tracing.WithPropagators(
-					propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{}),
-				),
 			),
 			logging.Server(logger),
 		),
