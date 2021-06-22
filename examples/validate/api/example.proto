@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package api.example;
+
+option go_package = "github.com/go-kratos/kratos/examples/validate/api/v1;v1";
+option java_multiple_files = true;
+option java_package = "validate.api.v1";
+
+import "google/api/annotations.proto";
+// the validate rules:
+// https://github.com/envoyproxy/protoc-gen-validate
+import "validate/validate.proto";
+
+service ExampleService {
+    rpc TestValidate (Request) returns (Reply) {
+        option (google.api.http) = {
+            post: "/v1/validate"
+            body: "*"
+        };
+    }
+}
+
+message Reply {
+    string message = 1;
+}
+
+message Request {
+    int64 id = 1 [(validate.rules).int64 = {gt: 0}];
+    int32 age = 2 [(validate.rules).int32 = {gt:0, lt: 120}];
+    uint32 code = 3 [(validate.rules).uint32 = {in: [1,2,3]}];
+    float score = 4 [(validate.rules).float = {not_in: [0, 99.99]}];
+    bool state = 5 [(validate.rules).bool.const = true];
+    string path = 6 [(validate.rules).string.const = "/hello"];
+    string phone = 7 [(validate.rules).string.len = 11];
+    string explain = 8 [(validate.rules).string.min_len = 3];
+    string name = 9 [(validate.rules).string = {min_len: 1, max_len: 10}];
+    string card = 10 [(validate.rules).string.pattern = "(?i)^[0-9a-f]+$"];
+    Info info = 11 [(validate.rules).message.required = true];
+}
+
+message Info {
+    string address = 1;
+}
