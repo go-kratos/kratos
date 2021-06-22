@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -84,8 +85,14 @@ func generate(proto string, args []string) error {
 		"--go-grpc_out=paths=source_relative:.",
 		"--go-http_out=paths=source_relative:.",
 		"--go-errors_out=paths=source_relative:.",
-		name,
 	}
+	protoBytes, err := ioutil.ReadFile(proto)
+	if err == nil && len(protoBytes) > 0 {
+		if strings.Contains(string(protoBytes), "validate/validate.proto") {
+			input = append(input, "--validate_out=lang=go,paths=source_relative:.")
+		}
+	}
+	input = append(input, name)
 	for _, a := range args {
 		if strings.HasPrefix(a, "-") {
 			input = append(input, a)
