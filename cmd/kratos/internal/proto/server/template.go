@@ -29,7 +29,7 @@ func New{{ .Service }}Service() *{{ .Service }}Service {
 {{- $s1 := "google.protobuf.Empty" }}
 {{ range .Methods }}
 func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Reply }}{{ end }}, error) {
-	return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&pb.{{.Reply}}{}{{ end }}, nil
+	return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&pb.{{ .Reply }}{}{{ end }}, nil
 }
 {{- end }}
 `
