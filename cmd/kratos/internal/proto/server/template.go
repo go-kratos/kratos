@@ -10,10 +10,10 @@ var serviceTemplate = `
 package service
 
 import (
-	"context"
+    "context"
 
-	pb "{{ .Package }}"
-	{{- if .GoogleEmpty }}
+    pb "{{ .Package }}"
+    {{- if .GoogleEmpty }}
     "google.golang.org/protobuf/types/known/emptypb"
     {{- end }}
 )
