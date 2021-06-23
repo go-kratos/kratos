@@ -12,23 +12,23 @@ package service
 import (
 	"context"
 
-	pb "{{.Package }}"
+	pb "{{ .Package }}"
 	{{- if .GoogleEmpty }}
     "google.golang.org/protobuf/types/known/emptypb"
-    {{- end}}
+    {{- end }}
 )
 
-type {{.Service}}Service struct {
-	pb.Unimplemented{{.Service}}Server
+type {{ .Service }}Service struct {
+	pb.Unimplemented{{ .Service }}Server
 }
 
-func New{{.Service}}Service() *{{.Service}}Service {
-	return &{{.Service}}Service{}
+func New{{ .Service }}Service() *{{ .Service }}Service {
+	return &{{ .Service }}Service{}
 }
 
 {{- $s1 := "google.protobuf.Empty" }}
 {{ range .Methods }}
-func (s *{{.Service}}Service) {{.Name}}(ctx context.Context, req {{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{.Request}}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{.Reply}}{{ end }}, error) {
+func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Reply }}{{ end }}, error) {
 	return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&pb.{{.Reply}}{}{{ end }}, nil
 }
 {{- end }}
