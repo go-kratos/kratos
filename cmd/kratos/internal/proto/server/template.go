@@ -6,12 +6,16 @@ import (
 )
 
 var serviceTemplate = `
+{{- /* delete empty line */ -}}
 package service
 
-import(
+import (
 	"context"
 
-	pb "{{.Package}}"
+	pb "{{.Package }}"
+	{{- if .GoogleEmpty }}
+    "google.golang.org/protobuf/types/known/emptypb"
+    {{- end}}
 )
 
 type {{.Service}}Service struct {
@@ -21,18 +25,21 @@ type {{.Service}}Service struct {
 func New{{.Service}}Service() *{{.Service}}Service {
 	return &{{.Service}}Service{}
 }
+
+{{- $s1 := "google.protobuf.Empty" }}
 {{ range .Methods }}
-func (s *{{.Service}}Service) {{.Name}}(ctx context.Context, req *pb.{{.Request}}) (*pb.{{.Reply}}, error) {
-	return &pb.{{.Reply}}{}, nil
+func (s *{{.Service}}Service) {{.Name}}(ctx context.Context, req {{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{.Request}}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{.Reply}}{{ end }}, error) {
+	return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&pb.{{.Reply}}{}{{ end }}, nil
 }
 {{- end }}
 `
 
 // Service is a proto service.
 type Service struct {
-	Package string
-	Service string
-	Methods []*Method
+	Package     string
+	Service     string
+	Methods     []*Method
+	GoogleEmpty bool
 }
 
 // Method is a proto method.
@@ -45,6 +52,11 @@ type Method struct {
 
 func (s *Service) execute() ([]byte, error) {
 	buf := new(bytes.Buffer)
+	for _, method := range s.Methods {
+		if method.Request == "google.protobuf.Empty" {
+			s.GoogleEmpty = true
+		}
+	}
 	tmpl, err := template.New("service").Parse(serviceTemplate)
 	if err != nil {
 		return nil, err
