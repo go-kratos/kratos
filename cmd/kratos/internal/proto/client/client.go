@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
@@ -88,7 +89,7 @@ func generate(proto string, args []string) error {
 	}
 	protoBytes, err := ioutil.ReadFile(proto)
 	if err == nil && len(protoBytes) > 0 {
-		if strings.Contains(string(protoBytes), "validate/validate.proto") {
+		if ok, _ := regexp.Match(`\n[^/]*(import)\s+"validate/validate.proto"`, protoBytes); ok {
 			input = append(input, "--validate_out=lang=go,paths=source_relative:.")
 		}
 	}
