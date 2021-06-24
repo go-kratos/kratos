@@ -77,7 +77,6 @@ func walk(dir string, args []string) error {
 
 // generate is used to execute the generate command for the specified proto file
 func generate(proto string, args []string) error {
-	path, name := filepath.Split(proto)
 	input := []string{
 		"--proto_path=.",
 		"--proto_path=" + base.KratosMod(),
@@ -93,7 +92,7 @@ func generate(proto string, args []string) error {
 			input = append(input, "--validate_out=lang=go,paths=source_relative:.")
 		}
 	}
-	input = append(input, name)
+	input = append(input, proto)
 	for _, a := range args {
 		if strings.HasPrefix(a, "-") {
 			input = append(input, a)
@@ -102,7 +101,7 @@ func generate(proto string, args []string) error {
 	fd := exec.Command("protoc", input...)
 	fd.Stdout = os.Stdout
 	fd.Stderr = os.Stderr
-	fd.Dir = path
+	fd.Dir = "."
 	if err := fd.Run(); err != nil {
 		return err
 	}
