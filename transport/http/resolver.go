@@ -9,6 +9,11 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
+// Updater is resolver nodes updater
+type Updater interface {
+	Update(nodes []*registry.ServiceInstance)
+}
+
 // Target is resolver target
 type Target struct {
 	Scheme    string
@@ -39,7 +44,7 @@ type resolver struct {
 	logger  *log.Helper
 }
 
-func newResolver(ctx context.Context, discovery registry.Discovery, target *Target) (*resolver, error) {
+func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, updater Updater) (*resolver, error) {
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
@@ -69,6 +74,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 				nodes = append(nodes, in)
 			}
 			if len(nodes) != 0 {
+				updater.Update(nodes)
 				r.lock.Lock()
 				r.nodes = nodes
 				r.lock.Unlock()
