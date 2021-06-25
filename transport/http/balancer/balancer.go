@@ -14,5 +14,8 @@ type DoneInfo struct {
 
 // Balancer is node pick balancer
 type Balancer interface {
-	Pick(ctx context.Context, nodes []*registry.ServiceInstance) (node *registry.ServiceInstance, done func(context.Context, DoneInfo), err error)
+	// Pick one node
+	Pick(ctx context.Context) (node *registry.ServiceInstance, done func(context.Context, DoneInfo), err error)
+	// Update nodes when nodes removed or added
+	Update(nodes []*registry.ServiceInstance)
 }
