@@ -49,9 +49,18 @@ Kratos boosts your productivity. With the integration of excellent resources and
 - [protoc-gen-go](https://github.com/protocolbuffers/protobuf-go)
 
 ### Installing
+##### install from go get:
 ```
 go get github.com/go-kratos/kratos/cmd/kratos/v2@latest
+kratos upgrade
 ```
+##### install from source code：
+```
+git clone https://github.com/go-kratos/kratos
+cd kratos
+make install
+```
+
 ### Create a service
 ```
 # create project template
