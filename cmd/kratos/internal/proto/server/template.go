@@ -28,7 +28,7 @@ func New{{ .Service }}Service() *{{ .Service }}Service {
 
 {{- $s1 := "google.protobuf.Empty" }}
 {{ range .Methods }}
-func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Reply }}{{ end }}, error) {
+func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Reply }}{{ end }}, error) {
 	return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&pb.{{ .Reply }}{}{{ end }}, nil
 }
 {{- end }}
@@ -53,7 +53,7 @@ type Method struct {
 func (s *Service) execute() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	for _, method := range s.Methods {
-		if method.Request == "google.protobuf.Empty" {
+		if method.Request == "google.protobuf.Empty" || method.Reply == "google.protobuf.Empty" {
 			s.GoogleEmpty = true
 		}
 	}
