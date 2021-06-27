@@ -86,3 +86,22 @@ func TestPort(t *testing.T) {
 		t.Fatalf("expected: %s got %d", lis.Addr().String(), port)
 	}
 }
+
+func TestExtractHostPort(t *testing.T) {
+	host, port, err := ExtractHostPort("127.0.0.1:8000")
+	if err != nil {
+		t.Fatalf("expected: %v got %v", nil, err)
+	}
+	t.Logf("host port: %s,  %d", host, port)
+
+	host, port, err = ExtractHostPort("www.bilibili.com:80")
+	if err != nil {
+		t.Fatalf("expected: %v got %v", nil, err)
+	}
+	t.Logf("host port: %s,  %d", host, port)
+
+	host, port, err = ExtractHostPort("consul://2/33")
+	if err == nil {
+		t.Fatalf("expected: not nil got %v", nil)
+	}
+}

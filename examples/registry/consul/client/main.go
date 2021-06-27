@@ -26,7 +26,7 @@ func callGRPC(cli *api.Client) {
 	r := registry.New(cli)
 	conn, err := grpc.DialInsecure(
 		context.Background(),
-		grpc.WithEndpoint("discovery:///helloworld"),
+		grpc.WithEndpoint("127.0.0.1:9000"),
 		grpc.WithDiscovery(r),
 	)
 	if err != nil {
@@ -47,7 +47,7 @@ func callHTTP(cli *api.Client) {
 		http.WithMiddleware(
 			recovery.Recovery(),
 		),
-		http.WithEndpoint("discovery:///helloworld"),
+		http.WithEndpoint("127.0.0.1:8000"),
 		http.WithDiscovery(r),
 	)
 	if err != nil {

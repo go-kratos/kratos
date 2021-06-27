@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
@@ -150,7 +151,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 			if r, err = newResolver(ctx, options.discovery, target, options.balancer); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
-		} else {
+		} else if _, _, err := host.ExtractHostPort(options.endpoint); err != nil {
 			return nil, fmt.Errorf("[http client] invalid endpoint format: %v", options.endpoint)
 		}
 	}
