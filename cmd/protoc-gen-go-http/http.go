@@ -104,13 +104,11 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 		method       string
 		body         string
 		responseBody string
-		isQuery      bool
 	)
 	switch pattern := rule.Pattern.(type) {
 	case *annotations.HttpRule_Get:
 		path = pattern.Get
 		method = "GET"
-		isQuery = true
 	case *annotations.HttpRule_Put:
 		path = pattern.Put
 		method = "PUT"
@@ -144,7 +142,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	} else if responseBody != "" {
 		md.ResponseBody = "." + camelCaseVars(responseBody)
 	}
-	md.IsQuery = isQuery
+	md.HasQuery = HasQueryParam(md, m, body)
 	return md
 }
 
@@ -180,6 +178,25 @@ func camelCaseVars(s string) string {
 		vars = append(vars, camelCase(sub))
 	}
 	return strings.Join(vars, ".")
+}
+
+// HasQueryParam determines if the binding needs parameters in query string.
+//
+// It sometimes returns true even though actually the binding does not need.
+// But it is not serious because it just results in a small amount of extra codes generated.
+func HasQueryParam(md *methodDesc, method *protogen.Method, body string) bool {
+	if body == "*" {
+		return false
+	}
+	fields := make(map[string]bool)
+	for _, f := range method.Input.Fields {
+		fields[string(f.Desc.Name())] = true
+	}
+	delete(fields, body)
+	for _, p := range md.Vars {
+		delete(fields, p)
+	}
+	return len(fields) > 0
 }
 
 // camelCase returns the CamelCased name.
