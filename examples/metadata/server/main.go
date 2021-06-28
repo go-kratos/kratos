@@ -38,7 +38,7 @@ func (s *server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*he
 	info, _ := kratos.FromContext(ctx)
 	// set server side response header
 	if tr, ok := transport.FromServerContext(ctx); ok {
-		tr.SetReplyHeader("app_name", info.Name())
+		tr.ReplyHeader().Set("app_name", info.Name())
 	}
 	return &helloworld.HelloReply{Message: fmt.Sprintf("Hello %s extra: %s name: %s", in.Name, extra, info.Name())}, nil
 }

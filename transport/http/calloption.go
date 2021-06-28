@@ -29,8 +29,7 @@ func (EmptyCallOption) before(*callInfo) error      { return nil }
 func (EmptyCallOption) after(*callInfo, *csAttempt) {}
 
 type csAttempt struct {
-	response *http.Response
-	err      error
+	res *http.Response
 }
 
 // ContentType with request content type.
@@ -102,7 +101,7 @@ type HeaderCallOption struct {
 }
 
 func (o HeaderCallOption) after(c *callInfo, cs *csAttempt) {
-	if cs.response != nil && cs.response.Header != nil {
-		*o.header = cs.response.Header
+	if cs.res != nil && cs.res.Header != nil {
+		*o.header = cs.res.Header
 	}
 }

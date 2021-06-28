@@ -15,10 +15,10 @@ var (
 type Transport struct {
 	endpoint     string
 	operation    string
-	header       headerCarrier
+	reqHeader    headerCarrier
+	replyHeader  headerCarrier
 	request      *http.Request
 	pathTemplate string
-	w            http.ResponseWriter
 }
 
 // Kind returns the transport kind.
@@ -36,19 +36,19 @@ func (tr *Transport) Operation() string {
 	return tr.operation
 }
 
-// Header returns the transport header.
-func (tr *Transport) Header() transport.Header {
-	return tr.header
-}
-
 // Request returns the transport request.
 func (tr *Transport) Request() *http.Request {
 	return tr.request
 }
 
-// SetReplyHeader set http response header
-func (tr *Transport) SetReplyHeader(key, value string) {
-	tr.w.Header().Set(key, value)
+// RequestHeader returns the transport header.
+func (tr *Transport) RequestHeader() transport.Header {
+	return tr.reqHeader
+}
+
+// ReplyHeader set http reply header.
+func (tr *Transport) ReplyHeader() transport.Header {
+	return tr.replyHeader
 }
 
 // PathTemplate returns the http path template.

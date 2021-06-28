@@ -32,14 +32,14 @@ func (tr *Transport) Operation() string {
 	return tr.operation
 }
 
-// Header returns the transport header.
-func (tr *Transport) Header() transport.Header {
+// RequestHeader returns the transport header.
+func (tr *Transport) RequestHeader() transport.Header {
 	return tr.header
 }
 
-// SetReplyHeader set grpc server header.
-func (tr *Transport) SetReplyHeader(key, value string) {
-	tr.replyHeader.Set(key, value)
+// ReplyHeader set grpc reply header.
+func (tr *Transport) ReplyHeader() transport.Header {
+	return tr.replyHeader
 }
 
 type headerCarrier metadata.MD

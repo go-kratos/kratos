@@ -3,16 +3,12 @@ package main
 import (
 	"context"
 	"log"
-	httpx "net/http"
 
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2/metadata"
 	mmd "github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
-
-	grpcx "google.golang.org/grpc"
-	grpcmd "google.golang.org/grpc/metadata"
 )
 
 func main() {
@@ -34,12 +30,11 @@ func callHTTP() {
 	client := helloworld.NewGreeterHTTPClient(conn)
 	ctx := context.Background()
 	ctx = metadata.AppendToClientContext(ctx, "x-md-global-extra", "2233")
-	var header httpx.Header
-	reply, err := client.SayHello(ctx, &helloworld.HelloRequest{Name: "kratos"}, http.Header(&header))
+	reply, err := client.SayHello(ctx, &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("[http] SayHello replyBody:%v, responseHeader:%v \n", reply, header)
+	log.Printf("[http] SayHello reply:%v \n", reply)
 }
 
 func callGRPC() {
@@ -56,10 +51,9 @@ func callGRPC() {
 	client := helloworld.NewGreeterClient(conn)
 	ctx := context.Background()
 	ctx = metadata.AppendToClientContext(ctx, "x-md-global-extra", "2233")
-	var header grpcmd.MD
-	reply, err := client.SayHello(ctx, &helloworld.HelloRequest{Name: "kratos"}, grpcx.Header(&header))
+	reply, err := client.SayHello(ctx, &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("[grpc] SayHello replyBody:%v, responseHeader:%v \n ", reply, header)
+	log.Printf("[grpc] SayHello reply:%v \n", reply)
 }

@@ -43,20 +43,18 @@ type Transporter interface {
 	// request header
 	// http: http.Header
 	// grpc: metadata.MD
-	Header() Header
-	// set server response header
+	RequestHeader() Header
+	// set server reply header
 	// only valid for server transport
 	// http: http.Header
 	// grpc: metadata.MD
-	SetReplyHeader(key, value string)
+	ReplyHeader() Header
 }
 
 // Kind defines the type of Transport
 type Kind string
 
-func (k Kind) String() string {
-	return string(k)
-}
+func (k Kind) String() string { return string(k) }
 
 // Defines a set of transport kind
 const (

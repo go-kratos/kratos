@@ -177,12 +177,12 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		ctx, cancel := ic.Merge(ctx, s.ctx)
 		defer cancel()
 		md, _ := grpcmd.FromIncomingContext(ctx)
-		serverHeader := grpcmd.New(nil)
+		replyHeader := grpcmd.MD{}
 		ctx = transport.NewServerContext(ctx, &Transport{
 			endpoint:    s.endpoint.String(),
 			operation:   info.FullMethod,
 			header:      headerCarrier(md),
-			replyHeader: headerCarrier(serverHeader),
+			replyHeader: headerCarrier(replyHeader),
 		})
 		if s.timeout > 0 {
 			ctx, cancel = context.WithTimeout(ctx, s.timeout)
@@ -194,10 +194,9 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		if len(s.middleware) > 0 {
 			h = middleware.Chain(s.middleware...)(h)
 		}
-		reply, err := h(ctx, req)
-		if len(serverHeader) > 0 {
-			grpc.SetHeader(ctx, serverHeader)
+		if len(replyHeader) > 0 {
+			grpc.SetHeader(ctx, replyHeader)
 		}
-		return reply, err
+		return h(ctx, req)
 	}
 }
