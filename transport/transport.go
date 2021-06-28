@@ -44,7 +44,7 @@ type Transporter interface {
 	// http: http.Header
 	// grpc: metadata.MD
 	RequestHeader() Header
-	// set server reply header
+	// reply header
 	// only valid for server transport
 	// http: http.Header
 	// grpc: metadata.MD

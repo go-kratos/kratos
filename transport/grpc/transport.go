@@ -32,12 +32,12 @@ func (tr *Transport) Operation() string {
 	return tr.operation
 }
 
-// RequestHeader returns the transport header.
+// RequestHeader returns the request header.
 func (tr *Transport) RequestHeader() transport.Header {
 	return tr.header
 }
 
-// ReplyHeader set grpc reply header.
+// ReplyHeader returns the reply header.
 func (tr *Transport) ReplyHeader() transport.Header {
 	return tr.replyHeader
 }

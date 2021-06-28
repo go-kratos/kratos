@@ -36,17 +36,17 @@ func (tr *Transport) Operation() string {
 	return tr.operation
 }
 
-// Request returns the transport request.
+// Request returns the HTTP request.
 func (tr *Transport) Request() *http.Request {
 	return tr.request
 }
 
-// RequestHeader returns the transport header.
+// RequestHeader returns the request header.
 func (tr *Transport) RequestHeader() transport.Header {
 	return tr.reqHeader
 }
 
-// ReplyHeader set http reply header.
+// ReplyHeader returns the reply header.
 func (tr *Transport) ReplyHeader() transport.Header {
 	return tr.replyHeader
 }
