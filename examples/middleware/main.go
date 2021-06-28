@@ -60,6 +60,7 @@ func main() {
 		kratos.Name("helloworld"),
 		kratos.Server(
 			httpSrv,
+			grpcSrv,
 		),
 	)
 	if err := app.Run(); err != nil {
