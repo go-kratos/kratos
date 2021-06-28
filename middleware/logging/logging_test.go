@@ -37,6 +37,8 @@ func (tr *Transport) Header() transport.Header {
 	return nil
 }
 
+func (tr *Transport) SetReplyHeader(string, string) {}
+
 func TestHTTP(t *testing.T) {
 	var err = errors.New("reply.error")
 	var bf = bytes.NewBuffer(nil)

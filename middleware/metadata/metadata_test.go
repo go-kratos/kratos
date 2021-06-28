@@ -27,10 +27,11 @@ func (hc headerCarrier) Keys() []string {
 
 type testTransport struct{ header headerCarrier }
 
-func (tr *testTransport) Kind() transport.Kind     { return transport.KindHTTP }
-func (tr *testTransport) Endpoint() string         { return "" }
-func (tr *testTransport) Operation() string        { return "" }
-func (tr *testTransport) Header() transport.Header { return tr.header }
+func (tr *testTransport) Kind() transport.Kind          { return transport.KindHTTP }
+func (tr *testTransport) Endpoint() string              { return "" }
+func (tr *testTransport) Operation() string             { return "" }
+func (tr *testTransport) Header() transport.Header      { return tr.header }
+func (tr *testTransport) SetReplyHeader(string, string) {}
 
 func TestSever(t *testing.T) {
 	var (

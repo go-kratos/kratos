@@ -43,10 +43,11 @@ type Transport struct {
 	header    headerCarrier
 }
 
-func (tr *Transport) Kind() transport.Kind     { return tr.kind }
-func (tr *Transport) Endpoint() string         { return tr.endpoint }
-func (tr *Transport) Operation() string        { return tr.operation }
-func (tr *Transport) Header() transport.Header { return tr.header }
+func (tr *Transport) Kind() transport.Kind          { return tr.kind }
+func (tr *Transport) Endpoint() string              { return tr.endpoint }
+func (tr *Transport) Operation() string             { return tr.operation }
+func (tr *Transport) Header() transport.Header      { return tr.header }
+func (tr *Transport) SetReplyHeader(string, string) {}
 
 func TestTracing(t *testing.T) {
 	var carrier = headerCarrier{}
