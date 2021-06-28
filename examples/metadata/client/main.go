@@ -34,7 +34,7 @@ func callHTTP() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("[http] SayHello reply:%v \n", reply)
+	log.Printf("[http] SayHello %s\n", reply.Message)
 }
 
 func callGRPC() {
@@ -55,5 +55,5 @@ func callGRPC() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("[grpc] SayHello reply:%v \n", reply)
+	log.Printf("[grpc] SayHello %+v\n", reply)
 }
