@@ -11,9 +11,10 @@ var (
 
 // Transport is a gRPC transport.
 type Transport struct {
-	endpoint  string
-	operation string
-	header    headerCarrier
+	endpoint    string
+	operation   string
+	header      headerCarrier
+	replyHeader headerCarrier
 }
 
 // Kind returns the transport kind.
@@ -34,6 +35,11 @@ func (tr *Transport) Operation() string {
 // Header returns the transport header.
 func (tr *Transport) Header() transport.Header {
 	return tr.header
+}
+
+// SetReplyHeader set grpc server header.
+func (tr *Transport) SetReplyHeader(key, value string) {
+	tr.replyHeader.Set(key, value)
 }
 
 type headerCarrier metadata.MD

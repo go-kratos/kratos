@@ -172,6 +172,7 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				header:       headerCarrier(req.Header),
 				request:      req,
 				pathTemplate: pathTemplate,
+				w:            w,
 			}
 			if r := mux.CurrentRoute(req); r != nil {
 				if path, err := r.GetPathTemplate(); err == nil {

@@ -18,6 +18,7 @@ type Transport struct {
 	header       headerCarrier
 	request      *http.Request
 	pathTemplate string
+	w            http.ResponseWriter
 }
 
 // Kind returns the transport kind.
@@ -43,6 +44,11 @@ func (tr *Transport) Header() transport.Header {
 // Request returns the transport request.
 func (tr *Transport) Request() *http.Request {
 	return tr.request
+}
+
+// SetReplyHeader set http response header
+func (tr *Transport) SetReplyHeader(key, value string) {
+	tr.w.Header().Set(key, value)
 }
 
 // PathTemplate returns the http path template.
