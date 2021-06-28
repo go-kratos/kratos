@@ -181,7 +181,7 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		ctx = transport.NewServerContext(ctx, &Transport{
 			endpoint:    s.endpoint.String(),
 			operation:   info.FullMethod,
-			header:      headerCarrier(md),
+			reqHeader:   headerCarrier(md),
 			replyHeader: headerCarrier(replyHeader),
 		})
 		if s.timeout > 0 {

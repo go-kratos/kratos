@@ -116,7 +116,7 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration) g
 		ctx = transport.NewClientContext(ctx, &Transport{
 			endpoint:  cc.Target(),
 			operation: method,
-			header:    headerCarrier{},
+			reqHeader: headerCarrier{},
 		})
 		if timeout > 0 {
 			var cancel context.CancelFunc

@@ -13,7 +13,7 @@ var (
 type Transport struct {
 	endpoint    string
 	operation   string
-	header      headerCarrier
+	reqHeader   headerCarrier
 	replyHeader headerCarrier
 }
 
@@ -34,7 +34,7 @@ func (tr *Transport) Operation() string {
 
 // RequestHeader returns the request header.
 func (tr *Transport) RequestHeader() transport.Header {
-	return tr.header
+	return tr.reqHeader
 }
 
 // ReplyHeader returns the reply header.

@@ -197,18 +197,17 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 	if client.opts.userAgent != "" {
 		req.Header.Set("User-Agent", client.opts.userAgent)
 	}
-	return client.invoke(ctx, req, args, reply, c, opts...)
-}
-
-func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo, opts ...CallOption) error {
-	tr := &Transport{
+	ctx = transport.NewClientContext(ctx, &Transport{
 		endpoint:     client.opts.endpoint,
 		reqHeader:    headerCarrier(req.Header),
 		operation:    c.operation,
 		request:      req,
 		pathTemplate: c.pathTemplate,
-	}
-	ctx = transport.NewClientContext(ctx, tr)
+	})
+	return client.invoke(ctx, req, args, reply, c, opts...)
+}
+
+func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo, opts ...CallOption) error {
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
 		var done func(context.Context, balancer.DoneInfo)
 		if client.r != nil {
@@ -236,7 +235,6 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			for _, o := range opts {
 				o.after(&c, &cs)
 			}
-			tr.replyHeader = headerCarrier(res.Header)
 		}
 		if err != nil {
 			return nil, err
