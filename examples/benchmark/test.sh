@@ -20,7 +20,7 @@ test_web_framework()
   ./$server_bin_name $2 $3 &
   sleep 2
 
-  throughput=`wrk -t$cpu_cores -c$4 -d30s http://127.0.0.1:8080/helloworld/benchmark | grep Requests/sec | awk '{print $2}'`
+  throughput=`wrk -t$cpu_cores -c$4 -d30s http://127.0.0.1:8080/ | grep Requests/sec | awk '{print $2}'`
   echo "throughput: $throughput requests/second"
   test_result[$1]=$throughput
 
