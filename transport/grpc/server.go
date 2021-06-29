@@ -194,9 +194,10 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		if len(s.middleware) > 0 {
 			h = middleware.Chain(s.middleware...)(h)
 		}
+		reply, err := h(ctx, req)
 		if len(replyHeader) > 0 {
 			grpc.SetHeader(ctx, replyHeader)
 		}
-		return h(ctx, req)
+		return reply, err
 	}
 }
