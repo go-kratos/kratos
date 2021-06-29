@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/metadata"
 	mmd "github.com/go-kratos/kratos/v2/middleware/metadata"
+	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 )
@@ -28,11 +28,11 @@ type server struct {
 
 // SayHello implements helloworld.GreeterServer
 func (s *server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*helloworld.HelloReply, error) {
-	var extra string
-	if md, ok := metadata.FromServerContext(ctx); ok {
-		extra = md.Get("x-md-global-extra")
+	info, _ := kratos.FromContext(ctx)
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		tr.ReplyHeader().Set("app_name", info.Name())
 	}
-	return &helloworld.HelloReply{Message: fmt.Sprintf("Hello %s extra_meta: %s", in.Name, extra)}, nil
+	return &helloworld.HelloReply{Message: fmt.Sprintf("Hello %s", in.Name)}, nil
 }
 
 func main() {
