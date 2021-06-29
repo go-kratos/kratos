@@ -43,10 +43,11 @@ type Transport struct {
 	header    headerCarrier
 }
 
-func (tr *Transport) Kind() transport.Kind     { return tr.kind }
-func (tr *Transport) Endpoint() string         { return tr.endpoint }
-func (tr *Transport) Operation() string        { return tr.operation }
-func (tr *Transport) Header() transport.Header { return tr.header }
+func (tr *Transport) Kind() transport.Kind            { return tr.kind }
+func (tr *Transport) Endpoint() string                { return tr.endpoint }
+func (tr *Transport) Operation() string               { return tr.operation }
+func (tr *Transport) RequestHeader() transport.Header { return tr.header }
+func (tr *Transport) ReplyHeader() transport.Header   { return tr.header }
 
 func TestTracing(t *testing.T) {
 	var carrier = headerCarrier{}
@@ -56,21 +57,21 @@ func TestTracing(t *testing.T) {
 	tracer := NewTracer(trace.SpanKindClient, WithTracerProvider(tp), WithPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})))
 	ts := &Transport{kind: transport.KindHTTP, header: carrier}
 
-	ctx, aboveSpan := tracer.Start(transport.NewClientContext(context.Background(), ts), ts.Kind().String(), ts.Operation(), ts.Header())
+	ctx, aboveSpan := tracer.Start(transport.NewClientContext(context.Background(), ts), ts.Kind().String(), ts.Operation(), ts.RequestHeader())
 	defer tracer.End(ctx, aboveSpan, nil)
 
 	// server use Extract fetch traceInfo from carrier
 	tracer = NewTracer(trace.SpanKindServer, WithPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})))
 	ts = &Transport{kind: transport.KindHTTP, header: carrier}
 
-	ctx, span := tracer.Start(transport.NewServerContext(ctx, ts), ts.Kind().String(), ts.Operation(), ts.Header())
+	ctx, span := tracer.Start(transport.NewServerContext(ctx, ts), ts.Kind().String(), ts.Operation(), ts.RequestHeader())
 	defer tracer.End(ctx, span, nil)
 
 	if aboveSpan.SpanContext().TraceID() != span.SpanContext().TraceID() {
 		t.Fatalf("TraceID failed to deliver")
 	}
 
-	if v, ok := transport.FromClientContext(ctx); !ok || len(v.Header().Keys()) == 0 {
+	if v, ok := transport.FromClientContext(ctx); !ok || len(v.RequestHeader().Keys()) == 0 {
 		t.Fatalf("traceHeader failed to deliver")
 	}
 }

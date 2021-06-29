@@ -4,16 +4,20 @@ import (
 	context "context"
 	"errors"
 	"fmt"
+	stdhttp "net/http"
 	"testing"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/metadata"
 	mmd "github.com/go-kratos/kratos/v2/middleware/metadata"
+	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 
 	_struct "github.com/golang/protobuf/ptypes/struct"
+	stdgrpc "google.golang.org/grpc"
+	grpcmd "google.golang.org/grpc/metadata"
 )
 
 var md = metadata.Metadata{"x-md-global-test": "test_value"}
@@ -26,6 +30,10 @@ func (s *echoService) Echo(ctx context.Context, m *SimpleMessage) (*SimpleMessag
 	md, _ := metadata.FromServerContext(ctx)
 	if v := md.Get("x-md-global-test"); v != "test_value" {
 		return nil, errors.New("md not match" + v)
+	}
+
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		tr.ReplyHeader().Set("2233", "niang")
 	}
 	return m, nil
 }
@@ -51,8 +59,8 @@ type echoClient struct {
 }
 
 // post: /v1/example/echo/{id}
-func (c *echoClient) Echo(ctx context.Context, in *SimpleMessage) (out *SimpleMessage, err error) {
-	return c.client.Echo(ctx, in)
+func (c *echoClient) Echo(ctx context.Context, in *SimpleMessage, opts ...http.CallOption) (out *SimpleMessage, err error) {
+	return c.client.Echo(ctx, in, opts...)
 }
 
 // post: /v1/example/echo_body
@@ -138,8 +146,12 @@ func testEchoHTTPClient(t *testing.T, addr string) {
 
 	ctx := context.Background()
 	ctx = metadata.NewClientContext(ctx, md)
-	if out, err = cli.Echo(ctx, in); err != nil {
+	var header stdhttp.Header
+	if out, err = cli.Echo(ctx, in, http.Header(&header)); err != nil {
 		t.Fatal(err)
+	}
+	if header.Get("2233") != "niang" {
+		t.Errorf("[echo] header key 2233 expected niang got %v", header.Get("2233"))
 	}
 	check("echo", &SimpleMessage{Id: "test_id"}, out)
 
@@ -211,8 +223,12 @@ func testEchoGRPCClient(t *testing.T, addr string) {
 	client := NewEchoServiceClient(cc)
 	ctx := context.Background()
 	ctx = metadata.NewClientContext(ctx, md)
-	if out, err = client.Echo(ctx, in); err != nil {
+	var md grpcmd.MD
+	if out, err = client.Echo(ctx, in, stdgrpc.Header(&md)); err != nil {
 		t.Fatal(err)
+	}
+	if len(md.Get("2233")) != 1 || md.Get("2233")[0] != "niang" {
+		t.Errorf("[echo] header key 2233 expected niang got %v", md.Get("2233"))
 	}
 	if in.Id != out.Id || in.Num != out.Num {
 		t.Errorf("expected %v got %v", in, out)

@@ -169,7 +169,8 @@ func (s *Server) filter() mux.MiddlewareFunc {
 			tr := &Transport{
 				endpoint:     s.endpoint.String(),
 				operation:    pathTemplate,
-				header:       headerCarrier(req.Header),
+				reqHeader:    headerCarrier(req.Header),
+				replyHeader:  headerCarrier(w.Header()),
 				request:      req,
 				pathTemplate: pathTemplate,
 			}

@@ -15,7 +15,8 @@ var (
 type Transport struct {
 	endpoint     string
 	operation    string
-	header       headerCarrier
+	reqHeader    headerCarrier
+	replyHeader  headerCarrier
 	request      *http.Request
 	pathTemplate string
 }
@@ -35,14 +36,19 @@ func (tr *Transport) Operation() string {
 	return tr.operation
 }
 
-// Header returns the transport header.
-func (tr *Transport) Header() transport.Header {
-	return tr.header
-}
-
-// Request returns the transport request.
+// Request returns the HTTP request.
 func (tr *Transport) Request() *http.Request {
 	return tr.request
+}
+
+// RequestHeader returns the request header.
+func (tr *Transport) RequestHeader() transport.Header {
+	return tr.reqHeader
+}
+
+// ReplyHeader returns the reply header.
+func (tr *Transport) ReplyHeader() transport.Header {
+	return tr.replyHeader
 }
 
 // PathTemplate returns the http path template.

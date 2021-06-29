@@ -1,5 +1,7 @@
 package http
 
+import "net/http"
+
 // CallOption configures a Call before it starts or extracts information from
 // a Call after it completes.
 type CallOption interface {
@@ -26,7 +28,9 @@ type EmptyCallOption struct{}
 func (EmptyCallOption) before(*callInfo) error      { return nil }
 func (EmptyCallOption) after(*callInfo, *csAttempt) {}
 
-type csAttempt struct{}
+type csAttempt struct {
+	res *http.Response
+}
 
 // ContentType with request content type.
 func ContentType(contentType string) CallOption {
@@ -82,4 +86,22 @@ type PathTemplateCallOption struct {
 func (o PathTemplateCallOption) before(c *callInfo) error {
 	c.pathTemplate = o.Pattern
 	return nil
+}
+
+// Header returns a CallOptions that retrieves the http response header
+// from server reply.
+func Header(header *http.Header) CallOption {
+	return HeaderCallOption{header: header}
+}
+
+// HeaderCallOption is retrive response header for client call
+type HeaderCallOption struct {
+	EmptyCallOption
+	header *http.Header
+}
+
+func (o HeaderCallOption) after(c *callInfo, cs *csAttempt) {
+	if cs.res != nil && cs.res.Header != nil {
+		*o.header = cs.res.Header
+	}
 }

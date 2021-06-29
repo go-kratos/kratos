@@ -27,10 +27,11 @@ func (hc headerCarrier) Keys() []string {
 
 type testTransport struct{ header headerCarrier }
 
-func (tr *testTransport) Kind() transport.Kind     { return transport.KindHTTP }
-func (tr *testTransport) Endpoint() string         { return "" }
-func (tr *testTransport) Operation() string        { return "" }
-func (tr *testTransport) Header() transport.Header { return tr.header }
+func (tr *testTransport) Kind() transport.Kind            { return transport.KindHTTP }
+func (tr *testTransport) Endpoint() string                { return "" }
+func (tr *testTransport) Operation() string               { return "" }
+func (tr *testTransport) RequestHeader() transport.Header { return tr.header }
+func (tr *testTransport) ReplyHeader() transport.Header   { return tr.header }
 
 func TestSever(t *testing.T) {
 	var (
@@ -89,16 +90,16 @@ func TestClient(t *testing.T) {
 		if !ok {
 			return nil, errors.New("no md")
 		}
-		if tr.Header().Get(constKey) != constValue {
+		if tr.RequestHeader().Get(constKey) != constValue {
 			return nil, errors.New("const not equal")
 		}
-		if tr.Header().Get(customKey) != customValue {
+		if tr.RequestHeader().Get(customKey) != customValue {
 			return nil, errors.New("custom not equal")
 		}
-		if tr.Header().Get(globalKey) != globalValue {
+		if tr.RequestHeader().Get(globalKey) != globalValue {
 			return nil, errors.New("global not equal")
 		}
-		if tr.Header().Get(localKey) != "" {
+		if tr.RequestHeader().Get(localKey) != "" {
 			return nil, errors.New("local must empty")
 		}
 		return in, nil

@@ -116,7 +116,7 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration) g
 		ctx = transport.NewClientContext(ctx, &Transport{
 			endpoint:  cc.Target(),
 			operation: method,
-			header:    headerCarrier{},
+			reqHeader: headerCarrier{},
 		})
 		if timeout > 0 {
 			var cancel context.CancelFunc
@@ -125,10 +125,11 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration) g
 		}
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			if tr, ok := transport.FromClientContext(ctx); ok {
-				keys := tr.Header().Keys()
+				header := tr.RequestHeader()
+				keys := header.Keys()
 				keyvals := make([]string, 0, len(keys))
 				for _, k := range keys {
-					keyvals = append(keyvals, k, tr.Header().Get(k))
+					keyvals = append(keyvals, k, header.Get(k))
 				}
 				ctx = grpcmd.AppendToOutgoingContext(ctx, keyvals...)
 			}
