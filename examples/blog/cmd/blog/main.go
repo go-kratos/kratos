@@ -71,17 +71,17 @@ func main() {
 	flag.Parse()
 	logger := log.NewStdLogger(os.Stdout)
 
-	config := config.New(
+	cfg := config.New(
 		config.WithSource(
 			file.NewSource(flagconf),
 		),
 	)
-	if err := config.Load(); err != nil {
+	if err := cfg.Load(); err != nil {
 		panic(err)
 	}
 
 	var bc conf.Bootstrap
-	if err := config.Scan(&bc); err != nil {
+	if err := cfg.Scan(&bc); err != nil {
 		panic(err)
 	}
 	tp, err := tracerProvider(bc.Trace.Endpoint)
