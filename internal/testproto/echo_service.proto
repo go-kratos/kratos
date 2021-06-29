@@ -65,7 +65,7 @@ service EchoService {
 		option (google.api.http) = {
 			post: "/v1/example/echo/{id}"
 			additional_bindings {
-				get: "/v1/example/echo/{id}/{num}",
+				get: "/v1/example/echo/{id}/{num}"
 			}
 			additional_bindings {
 				get: "/v1/example/echo/{id}/{num}/{lang}"
