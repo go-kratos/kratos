@@ -4,7 +4,7 @@ import (
 	context "context"
 	"errors"
 	"fmt"
-	httpx "net/http"
+	stdhttp "net/http"
 	"testing"
 	"time"
 
@@ -16,7 +16,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 
 	_struct "github.com/golang/protobuf/ptypes/struct"
-	grpcx "google.golang.org/grpc"
+	stdgrpc "google.golang.org/grpc"
 	grpcmd "google.golang.org/grpc/metadata"
 )
 
@@ -146,7 +146,7 @@ func testEchoHTTPClient(t *testing.T, addr string) {
 
 	ctx := context.Background()
 	ctx = metadata.NewClientContext(ctx, md)
-	var header httpx.Header
+	var header stdhttp.Header
 	if out, err = cli.Echo(ctx, in, http.Header(&header)); err != nil {
 		t.Fatal(err)
 	}
@@ -224,7 +224,7 @@ func testEchoGRPCClient(t *testing.T, addr string) {
 	ctx := context.Background()
 	ctx = metadata.NewClientContext(ctx, md)
 	var md grpcmd.MD
-	if out, err = client.Echo(ctx, in, grpcx.Header(&md)); err != nil {
+	if out, err = client.Echo(ctx, in, stdgrpc.Header(&md)); err != nil {
 		t.Fatal(err)
 	}
 	if len(md.Get("2233")) != 1 || md.Get("2233")[0] != "niang" {

@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2"
-	mmd "github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
@@ -38,14 +37,9 @@ func (s *server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*he
 func main() {
 	grpcSrv := grpc.NewServer(
 		grpc.Address(":9000"),
-		grpc.Middleware(
-			mmd.Server(),
-		))
+	)
 	httpSrv := http.NewServer(
 		http.Address(":8000"),
-		http.Middleware(
-			mmd.Server(),
-		),
 	)
 
 	s := &server{}
