@@ -79,6 +79,7 @@ func walk(dir string, args []string) error {
 func generate(proto string, args []string) error {
 	input := []string{
 		"--proto_path=.",
+		"--proto_path=./third_party",
 		"--proto_path=" + base.KratosMod(),
 		"--proto_path=" + filepath.Join(base.KratosMod(), "third_party"),
 		"--go_out=paths=source_relative:.",
