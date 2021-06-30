@@ -110,9 +110,8 @@ func encodeByField(u url.Values, path string, v protoreflect.Message) error {
 				if f != fd {
 					continue
 				}
-			} else {
-				continue
 			}
+			continue
 		}
 		switch {
 		case fd.IsList():
