@@ -14,7 +14,7 @@ require (
 	github.com/go-errors/errors v1.4.0 // indirect
 	github.com/go-kratos/consul v0.1.0
 	github.com/go-kratos/etcd v0.1.0
-	github.com/go-kratos/kratos/v2 v2.0.0-rc7
+	github.com/go-kratos/kratos/v2 v2.0.0-rc6
 	github.com/go-kratos/nacos v0.1.0
 	github.com/go-kratos/prometheus v0.0.0-20210522055322-137e29e7cf47
 	github.com/go-playground/validator/v10 v10.6.1 // indirect
@@ -46,9 +46,9 @@ require (
 	go.uber.org/multierr v1.7.0 // indirect
 	go.uber.org/zap v1.18.1
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect
-	google.golang.org/genproto v0.0.0-20210524171403-669157292da3
-	google.golang.org/grpc v1.38.0
-	google.golang.org/protobuf v1.26.0
+	google.golang.org/genproto v0.0.0-20210629200056-84d6f6074151
+	google.golang.org/grpc v1.39.0
+	google.golang.org/protobuf v1.27.1
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 )
