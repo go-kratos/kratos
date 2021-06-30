@@ -52,7 +52,6 @@ func EncodeURL(pathTemplate string, msg proto.Message, needQuery bool) string {
 			}
 		}
 	}
-	fmt.Println("path:", path)
 	return path
 }
 
