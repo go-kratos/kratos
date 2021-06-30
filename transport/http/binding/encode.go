@@ -52,6 +52,7 @@ func EncodeURL(pathTemplate string, msg proto.Message, needQuery bool) string {
 			}
 		}
 	}
+	fmt.Println("path:", path)
 	return path
 }
 
@@ -92,30 +93,46 @@ func getValueByField(v protoreflect.Message, fieldPath []string) (string, error)
 func encodeByField(u url.Values, path string, v protoreflect.Message) error {
 	for i := 0; i < v.Descriptor().Fields().Len(); i++ {
 		fd := v.Descriptor().Fields().Get(i)
-		var key string = fd.TextName()
+		var key string
 		var newPath string
+		if fd.HasJSONName() {
+			key = fd.JSONName()
+		} else {
+			key = fd.TextName()
+		}
 		if path == "" {
 			newPath = key
 		} else {
 			newPath = path + "." + key
 		}
-		if fd.HasJSONName() {
-			key = fd.JSONName()
+
+		if of := fd.ContainingOneof(); of != nil {
+			if f := v.WhichOneof(of); f != nil {
+				if f != fd {
+					continue
+				}
+			} else {
+				continue
+			}
 		}
 		switch {
 		case fd.IsList():
-			list, err := encodeRepeatedField(fd, v.Get(fd).List())
-			if err != nil {
-				return err
+			if v.Get(fd).List().Len() > 0 {
+				list, err := encodeRepeatedField(fd, v.Get(fd).List())
+				if err != nil {
+					return err
+				}
+				u[newPath] = list
 			}
-			u[newPath] = list
 		case fd.IsMap():
-			m, err := encodeMapField(fd, v.Get(fd).Map())
-			if err != nil {
-				return err
-			}
-			for k, value := range m {
-				u[fmt.Sprintf("%s[%s]", newPath, k)] = []string{value}
+			if v.Get(fd).Map().Len() > 0 {
+				m, err := encodeMapField(fd, v.Get(fd).Map())
+				if err != nil {
+					return err
+				}
+				for k, value := range m {
+					u[fmt.Sprintf("%s[%s]", newPath, k)] = []string{value}
+				}
 			}
 		case (fd.Kind() == protoreflect.MessageKind) || (fd.Kind() == protoreflect.GroupKind):
 			value, err := encodeMessage(fd.Message(), v.Get(fd))
@@ -123,7 +140,7 @@ func encodeByField(u url.Values, path string, v protoreflect.Message) error {
 				u[newPath] = []string{value}
 				return nil
 			}
-			return encodeByField(u, newPath, v.Get(fd).Message())
+			encodeByField(u, newPath, v.Get(fd).Message())
 		default:
 			value, err := encodeField(fd, v.Get(fd))
 			if err != nil {

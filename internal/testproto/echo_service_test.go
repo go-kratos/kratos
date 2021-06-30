@@ -129,7 +129,9 @@ func TestEchoHTTPServer(t *testing.T) {
 func testEchoHTTPClient(t *testing.T, addr string) {
 	var (
 		err error
-		in  = &SimpleMessage{Id: "test_id", Num: 100}
+		in  = &SimpleMessage{Id: "test_id", Num: 100, Ext: &SimpleMessage_No{
+			No: &Embedded{Mark: &Embedded_Note{Note: "2233"}},
+		}}
 		out = &SimpleMessage{}
 	)
 	check := func(name string, in, out *SimpleMessage) {
@@ -153,7 +155,7 @@ func testEchoHTTPClient(t *testing.T, addr string) {
 	if header.Get("2233") != "niang" {
 		t.Errorf("[echo] header key 2233 expected niang got %v", header.Get("2233"))
 	}
-	check("echo", &SimpleMessage{Id: "test_id"}, out)
+	check("echo", &SimpleMessage{Id: "test_id", Num: 100, Ext: &SimpleMessage_No{No: &Embedded{Mark: &Embedded_Note{Note: "2233"}}}}, out)
 
 	if out, err = cli.EchoBody(context.Background(), in); err != nil {
 		t.Fatal(err)
