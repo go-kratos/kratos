@@ -15,9 +15,9 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 
-	_struct "github.com/golang/protobuf/ptypes/struct"
 	stdgrpc "google.golang.org/grpc"
 	grpcmd "google.golang.org/grpc/metadata"
+	_struct "google.golang.org/protobuf/types/known/structpb"
 )
 
 var md = metadata.Metadata{"x-md-global-test": "test_value"}
