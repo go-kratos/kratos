@@ -136,7 +136,7 @@ func encodeByField(u url.Values, path string, v protoreflect.Message) error {
 			value, err := encodeMessage(fd.Message(), v.Get(fd))
 			if err == nil {
 				u[newPath] = []string{value}
-				return nil
+				continue
 			}
 			encodeByField(u, newPath, v.Get(fd).Message())
 		default:
