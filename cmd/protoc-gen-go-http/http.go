@@ -128,7 +128,9 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	body = rule.Body
 	responseBody = rule.ResponseBody
 	md := buildMethodDesc(g, m, method, path)
-	if body == "*" {
+	if method == "GET" {
+		md.HasBody = false
+	} else if body == "*" {
 		md.HasBody = true
 		md.Body = ""
 	} else if body != "" {

@@ -14,7 +14,7 @@ require (
 	github.com/go-errors/errors v1.4.0 // indirect
 	github.com/go-kratos/consul v0.1.0
 	github.com/go-kratos/etcd v0.1.0
-	github.com/go-kratos/kratos/v2 v2.0.0-rc1
+	github.com/go-kratos/kratos/v2 v2.0.0-rc7
 	github.com/go-kratos/nacos v0.1.0
 	github.com/go-kratos/prometheus v0.0.0-20210522055322-137e29e7cf47
 	github.com/go-playground/validator/v10 v10.6.1 // indirect
