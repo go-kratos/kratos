@@ -55,10 +55,6 @@ func TestReader_Merge(t *testing.T) {
 }
 
 func TestReader_Value(t *testing.T) {
-	var (
-		err error
-		ok  bool
-	)
 	opts := options{
 		decoder: func(kv *KeyValue, v map[string]interface{}) error {
 			if codec := encoding.GetCodec(kv.Format); codec != nil {
@@ -67,41 +63,71 @@ func TestReader_Value(t *testing.T) {
 			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
 	}
-	r := newReader(opts)
-	err = r.Merge(&KeyValue{
-		Key:    "b",
-		Value:  []byte(`{"a": {"b": {"X": 1, "Y": "lol", "z": true}}}`),
-		Format: "json",
-	})
-	assert.NoError(t, err)
-	vv, ok := r.Value("a.b.X")
-	assert.True(t, ok)
-	vvv, err := vv.Int()
-	assert.NoError(t, err)
-	assert.Equal(t, int64(1), vvv)
 
-	assert.NoError(t, err)
-	vv, ok = r.Value("a.b.Y")
-	assert.True(t, ok)
-	vvy, err := vv.String()
-	assert.NoError(t, err)
-	assert.Equal(t, "lol", vvy)
+	ymlval := `
+a: 
+  b: 
+    X: 1
+    Y: "lol"
+    z: true
+`
+	tests := []struct {
+		name string
+		kv   KeyValue
+	}{
+		{
+			name: "json value",
+			kv: KeyValue{
+				Key:    "config",
+				Value:  []byte(`{"a": {"b": {"X": 1, "Y": "lol", "z": true}}}`),
+				Format: "json",
+			},
+		},
+		{
+			name: "yaml value",
+			kv: KeyValue{
+				Key:    "config",
+				Value:  []byte(ymlval),
+				Format: "yaml",
+			},
+		},
+	}
 
-	assert.NoError(t, err)
-	vv, ok = r.Value("a.b.z")
-	assert.True(t, ok)
-	vvz, err := vv.Bool()
-	assert.NoError(t, err)
-	assert.Equal(t, true, vvz)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			r := newReader(opts)
+			err := r.Merge(&test.kv)
+			assert.NoError(t, err)
+			vv, ok := r.Value("a.b.X")
+			assert.True(t, ok)
+			vvv, err := vv.Int()
+			assert.NoError(t, err)
+			assert.Equal(t, int64(1), vvv)
 
-	vv, ok = r.Value("aasasdg=234l.asdfk,")
-	assert.False(t, ok)
+			assert.NoError(t, err)
+			vv, ok = r.Value("a.b.Y")
+			assert.True(t, ok)
+			vvy, err := vv.String()
+			assert.NoError(t, err)
+			assert.Equal(t, "lol", vvy)
 
-	vv, ok = r.Value("aas......asdg=234l.asdfk,")
-	assert.False(t, ok)
+			assert.NoError(t, err)
+			vv, ok = r.Value("a.b.z")
+			assert.True(t, ok)
+			vvz, err := vv.Bool()
+			assert.NoError(t, err)
+			assert.Equal(t, true, vvz)
 
-	vv, ok = r.Value("a.b.Y.")
-	assert.False(t, ok)
+			vv, ok = r.Value("aasasdg=234l.asdfk,")
+			assert.False(t, ok)
+
+			vv, ok = r.Value("aas......asdg=234l.asdfk,")
+			assert.False(t, ok)
+
+			vv, ok = r.Value("a.b.Y.")
+			assert.False(t, ok)
+		})
+	}
 }
 
 func TestReader_Source(t *testing.T) {
