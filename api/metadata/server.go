@@ -8,14 +8,14 @@ import (
 	"io/ioutil"
 	"sync"
 
-	"github.com/golang/protobuf/proto"
-	dpb "github.com/golang/protobuf/protoc-gen-go/descriptor"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protodesc"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
-	descriptorpb "google.golang.org/protobuf/types/descriptorpb"
+	dpb "google.golang.org/protobuf/types/descriptorpb"
 )
 
 //go:generate protoc --proto_path=. --proto_path=../../third_party --go_out=paths=source_relative:. --go-grpc_out=paths=source_relative:. --go-http_out=paths=source_relative:. metadata.proto
@@ -26,7 +26,7 @@ type Server struct {
 
 	srv      *grpc.Server
 	lock     sync.Mutex
-	services map[string]*descriptorpb.FileDescriptorSet
+	services map[string]*dpb.FileDescriptorSet
 	methods  map[string][]string
 }
 
@@ -34,7 +34,7 @@ type Server struct {
 func NewServer(srv *grpc.Server) *Server {
 	return &Server{
 		srv:      srv,
-		services: make(map[string]*descriptorpb.FileDescriptorSet),
+		services: make(map[string]*dpb.FileDescriptorSet),
 		methods:  make(map[string][]string),
 	}
 }
@@ -45,13 +45,9 @@ func (s *Server) load() error {
 	}
 	if s.srv != nil {
 		for name, info := range s.srv.GetServiceInfo() {
-			fdenc, ok := parseMetadata(info.Metadata)
-			if !ok {
-				return fmt.Errorf("invalid service %s metadata", name)
-			}
-			fd, err := decodeFileDesc(fdenc)
+			fd, err := parseMetadata(info.Metadata)
 			if err != nil {
-				return err
+				return fmt.Errorf("invalid service %s metadata err:%v", name, err)
 			}
 			protoSet, err := allDependency(fd)
 			if err != nil {
@@ -130,16 +126,20 @@ func (s *Server) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest) 
 // For SupportPackageIsVersion4, m is the name of the proto file, we
 // call proto.FileDescriptor to get the byte slice.
 // For SupportPackageIsVersion3, m is a byte slice itself.
-func parseMetadata(meta interface{}) ([]byte, bool) {
+func parseMetadata(meta interface{}) (*dpb.FileDescriptorProto, error) {
 	// Check if meta is the file name.
 	if fileNameForMeta, ok := meta.(string); ok {
-		return proto.FileDescriptor(fileNameForMeta), true
+		return fileDescriptorProto(fileNameForMeta)
 	}
 	// Check if meta is the byte slice.
 	if enc, ok := meta.([]byte); ok {
-		return enc, true
+		fd, err := decodeFileDesc(enc)
+		if err != nil {
+			return nil, err
+		}
+		return fd, nil
 	}
-	return nil, false
+	return nil, fmt.Errorf("proto not sumpport metadata: %v", meta)
 }
 
 // decodeFileDesc does decompression and unmarshalling on the given
@@ -187,10 +187,10 @@ func decompress(b []byte) ([]byte, error) {
 }
 
 func fileDescriptorProto(path string) (*dpb.FileDescriptorProto, error) {
-	fdenc := proto.FileDescriptor(path)
-	fdDep, err := decodeFileDesc(fdenc)
+	fd, err := protoregistry.GlobalFiles.FindFileByPath(path)
 	if err != nil {
 		return nil, err
 	}
-	return fdDep, nil
+	fdpb := protodesc.ToFileDescriptorProto(fd)
+	return fdpb, nil
 }
