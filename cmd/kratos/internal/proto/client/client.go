@@ -23,7 +23,6 @@ var (
 		DisableFlagParsing: true,
 		Run:                run,
 	}
-	printed bool
 )
 
 func run(cmd *cobra.Command, args []string) {
@@ -94,19 +93,12 @@ func generate(proto string, args []string) error {
 			input = append(input, "--validate_out=lang=go,paths=source_relative:.")
 		}
 	}
+	input = append(input, proto)
 	for _, a := range args {
 		if strings.HasPrefix(a, "-") {
 			input = append(input, a)
 		}
 	}
-	if !printed {
-		fmt.Print("protoc")
-		for _, value := range input {
-			fmt.Printf("\t%s \\\n", value)
-		}
-		printed = true
-	}
-	input = append(input, proto)
 	fd := exec.Command("protoc", input...)
 	fd.Stdout = os.Stdout
 	fd.Stderr = os.Stderr
