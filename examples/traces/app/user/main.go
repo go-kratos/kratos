@@ -15,10 +15,10 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/exporters/trace/jaeger"
+	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/sdk/resource"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/semconv"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -39,7 +39,7 @@ type server struct {
 // Get trace provider
 func tracerProvider(url string) (*tracesdk.TracerProvider, error) {
 	// Create the Jaeger exporter
-	exp, err := jaeger.NewRawExporter(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
+	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func tracerProvider(url string) (*tracesdk.TracerProvider, error) {
 		// Always be sure to batch in production.
 		tracesdk.WithBatcher(exp),
 		// Record information about this application in an Resource.
-		tracesdk.WithResource(resource.NewWithAttributes(
+		tracesdk.WithResource(resource.NewSchemaless(
 			semconv.ServiceNameKey.String(v1.User_ServiceDesc.ServiceName),
 			attribute.String("environment", "development"),
 			attribute.Int64("ID", 1),
