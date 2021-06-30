@@ -23,6 +23,7 @@ var (
 		DisableFlagParsing: true,
 		Run:                run,
 	}
+	printed bool
 )
 
 func run(cmd *cobra.Command, args []string) {
@@ -34,7 +35,7 @@ func run(cmd *cobra.Command, args []string) {
 		err   error
 		proto = strings.TrimSpace(args[0])
 	)
-	if err = look("protoc-gen-go", "protoc-gen-go-grpc", "protoc-gen-go-http", "protoc-gen-go-errors"); err != nil {
+	if err = look("protoc-gen-go", "protoc-gen-go-grpc", "protoc-gen-go-http", "protoc-gen-go-errors", "protoc-gen-validate"); err != nil {
 		// update the kratos plugins
 		cmd := exec.Command("kratos", "upgrade")
 		cmd.Stdout = os.Stdout
@@ -93,12 +94,19 @@ func generate(proto string, args []string) error {
 			input = append(input, "--validate_out=lang=go,paths=source_relative:.")
 		}
 	}
-	input = append(input, proto)
 	for _, a := range args {
 		if strings.HasPrefix(a, "-") {
 			input = append(input, a)
 		}
 	}
+	if !printed {
+		fmt.Print("protoc")
+		for _, value := range input {
+			fmt.Printf("\t%s \\\n", value)
+		}
+		printed = true
+	}
+	input = append(input, proto)
 	fd := exec.Command("protoc", input...)
 	fd.Stdout = os.Stdout
 	fd.Stderr = os.Stderr
