@@ -35,7 +35,7 @@ func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) fu
 		}
 		{{- end}}
 		{{- if .HasQuery}}
-		if err := ctx.BindQuery(&in); err != nil {
+		if err := ctx.BindForm(&in); err != nil {
 			return err
 		}
 		{{- end}}
