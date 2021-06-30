@@ -228,5 +228,5 @@ func (s *Server) Start(ctx context.Context) error {
 // Stop stop the HTTP server.
 func (s *Server) Stop(ctx context.Context) error {
 	s.log.Info("[HTTP] server stopping")
-	return s.Shutdown(context.Background())
+	return s.Shutdown(ctx)
 }
