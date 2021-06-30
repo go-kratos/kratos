@@ -69,7 +69,7 @@ func walk(dir string, args []string) error {
 		dir = "."
 	}
 	return filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if ext := filepath.Ext(path); ext != ".proto" {
+		if ext := filepath.Ext(path); ext != ".proto" || strings.HasPrefix(path, "third_party") {
 			return nil
 		}
 		return generate(path, args)
