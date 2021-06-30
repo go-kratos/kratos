@@ -5,14 +5,14 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Name is the name registered for the json codec.
+// Name is the name registered for the yaml codec.
 const Name = "yaml"
 
 func init() {
 	encoding.RegisterCodec(codec{})
 }
 
-// codec is a Codec implementation with json.
+// codec is a Codec implementation with yaml.
 type codec struct{}
 
 func (codec) Marshal(v interface{}) ([]byte, error) {
