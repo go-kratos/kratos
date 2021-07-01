@@ -26,10 +26,16 @@ func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}HTTP
 func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in {{.Request}}
+		{{- if .HasBody}}
 		if err := ctx.Bind(&in{{.Body}}); err != nil {
 			return err
 		}
-		{{- if ne (len .Vars) 0}}
+		{{- else}}
+		if err := ctx.BindQuery(&in{{.Body}}); err != nil {
+			return err
+		}
+		{{- end}}
+		{{- if .HasVars}}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
@@ -66,7 +72,7 @@ func New{{.ServiceType}}HTTPClient (client *http.Client) {{.ServiceType}}HTTPCli
 func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
 	pattern := "{{.Path}}"
-	path := binding.EncodeURL(pattern, in, {{.IsQuery}})
+	path := binding.EncodeURL(pattern, in, {{not .HasBody}})
 	opts = append(opts, http.Operation("/{{$svrName}}/{{.Name}}"))
 	opts = append(opts, http.PathTemplate(pattern))
 	{{if .HasBody -}}
@@ -94,16 +100,15 @@ type methodDesc struct {
 	// method
 	Name    string
 	Num     int
-	Vars    []string
 	Request string
 	Reply   string
 	// http_rule
 	Path         string
 	Method       string
+	HasVars      bool
 	HasBody      bool
 	Body         string
 	ResponseBody string
-	IsQuery      bool
 }
 
 func (s *serviceDesc) execute() string {

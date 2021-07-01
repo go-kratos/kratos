@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
@@ -150,7 +151,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 			if r, err = newResolver(ctx, options.discovery, target, options.balancer); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
-		} else {
+		} else if _, _, err := host.ExtractHostPort(options.endpoint); err != nil {
 			return nil, fmt.Errorf("[http client] invalid endpoint format: %v", options.endpoint)
 		}
 	}
@@ -198,15 +199,15 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 	}
 	ctx = transport.NewClientContext(ctx, &Transport{
 		endpoint:     client.opts.endpoint,
-		header:       headerCarrier(req.Header),
+		reqHeader:    headerCarrier(req.Header),
 		operation:    c.operation,
 		request:      req,
 		pathTemplate: c.pathTemplate,
 	})
-	return client.invoke(ctx, req, args, reply, c)
+	return client.invoke(ctx, req, args, reply, c, opts...)
 }
 
-func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo) error {
+func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo, opts ...CallOption) error {
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
 		var done func(context.Context, balancer.DoneInfo)
 		if client.r != nil {
@@ -228,6 +229,12 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 		res, err := client.do(ctx, req, c)
 		if done != nil {
 			done(ctx, balancer.DoneInfo{Err: err})
+		}
+		if res != nil {
+			cs := csAttempt{res: res}
+			for _, o := range opts {
+				o.after(&c, &cs)
+			}
 		}
 		if err != nil {
 			return nil, err

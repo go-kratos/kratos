@@ -34,7 +34,7 @@ func run(cmd *cobra.Command, args []string) {
 		err   error
 		proto = strings.TrimSpace(args[0])
 	)
-	if err = look("protoc-gen-go", "protoc-gen-go-grpc", "protoc-gen-go-http", "protoc-gen-go-errors"); err != nil {
+	if err = look("protoc-gen-go", "protoc-gen-go-grpc", "protoc-gen-go-http", "protoc-gen-go-errors", "protoc-gen-validate"); err != nil {
 		// update the kratos plugins
 		cmd := exec.Command("kratos", "upgrade")
 		cmd.Stdout = os.Stdout
@@ -68,7 +68,7 @@ func walk(dir string, args []string) error {
 		dir = "."
 	}
 	return filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if ext := filepath.Ext(path); ext != ".proto" {
+		if ext := filepath.Ext(path); ext != ".proto" || strings.HasPrefix(path, "third_party") {
 			return nil
 		}
 		return generate(path, args)
@@ -79,6 +79,7 @@ func walk(dir string, args []string) error {
 func generate(proto string, args []string) error {
 	input := []string{
 		"--proto_path=.",
+		"--proto_path=./third_party",
 		"--proto_path=" + base.KratosMod(),
 		"--proto_path=" + filepath.Join(base.KratosMod(), "third_party"),
 		"--go_out=paths=source_relative:.",

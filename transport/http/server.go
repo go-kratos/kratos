@@ -169,7 +169,8 @@ func (s *Server) filter() mux.MiddlewareFunc {
 			tr := &Transport{
 				endpoint:     s.endpoint.String(),
 				operation:    pathTemplate,
-				header:       headerCarrier(req.Header),
+				reqHeader:    headerCarrier(req.Header),
+				replyHeader:  headerCarrier(w.Header()),
 				request:      req,
 				pathTemplate: pathTemplate,
 			}
@@ -227,5 +228,5 @@ func (s *Server) Start(ctx context.Context) error {
 // Stop stop the HTTP server.
 func (s *Server) Stop(ctx context.Context) error {
 	s.log.Info("[HTTP] server stopping")
-	return s.Shutdown(context.Background())
+	return s.Shutdown(ctx)
 }

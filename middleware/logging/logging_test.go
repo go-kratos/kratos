@@ -24,16 +24,16 @@ type Transport struct {
 func (tr *Transport) Kind() transport.Kind {
 	return tr.kind
 }
-
 func (tr *Transport) Endpoint() string {
 	return tr.endpoint
 }
-
 func (tr *Transport) Operation() string {
 	return tr.operation
 }
-
-func (tr *Transport) Header() transport.Header {
+func (tr *Transport) RequestHeader() transport.Header {
+	return nil
+}
+func (tr *Transport) ReplyHeader() transport.Header {
 	return nil
 }
 

@@ -37,13 +37,17 @@ func (v *atomicValue) Bool() (bool, error) {
 	switch val := v.Load().(type) {
 	case bool:
 		return val, nil
-	case int64, float64, string:
+	case int, int32, int64, float64, string:
 		return strconv.ParseBool(fmt.Sprint(val))
 	}
 	return false, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
 }
 func (v *atomicValue) Int() (int64, error) {
 	switch val := v.Load().(type) {
+	case int:
+		return int64(val), nil
+	case int32:
+		return int64(val), nil
 	case int64:
 		return int64(val), nil
 	case float64:
@@ -57,6 +61,10 @@ func (v *atomicValue) Float() (float64, error) {
 	switch val := v.Load().(type) {
 	case float64:
 		return float64(val), nil
+	case int:
+		return float64(val), nil
+	case int32:
+		return float64(val), nil
 	case int64:
 		return float64(val), nil
 	case string:
@@ -68,8 +76,12 @@ func (v *atomicValue) String() (string, error) {
 	switch val := v.Load().(type) {
 	case string:
 		return val, nil
-	case bool, int64, float64:
+	case bool, int, int32, int64, float64:
 		return fmt.Sprint(val), nil
+	default:
+		if s, ok := val.(fmt.Stringer); ok {
+			return s.String(), nil
+		}
 	}
 	return "", fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
 }
