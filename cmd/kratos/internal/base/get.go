@@ -54,27 +54,19 @@ type ErrorInfo struct {
 
 // GetReleaseInfo for getting kratos release info
 func GetReleaseInfo(version string) (*ReleaseInfo, error) {
-	cli := http.Client{Timeout: 60 * time.Second}
 	api := "https://api.github.com/repos/go-kratos/kratos/releases/latest"
 	if version != "latest" {
 		api = fmt.Sprintf("https://api.github.com/repos/go-kratos/kratos/releases/tags/%s", version)
 	}
-	resp, err := cli.Get(api)
+	resp, code, err := requestGithubAPI(api)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if resp.StatusCode != 200 {
-		errorInfo := &ErrorInfo{}
-		err = json.Unmarshal(body, errorInfo)
-		if err != nil {
-			return nil, err
-		}
-		return nil, errors.New(errorInfo.Message)
+	if code != 200 {
+		return nil, getGithubErrorInfo(resp)
 	}
 	releaseInfo := &ReleaseInfo{}
-	err = json.Unmarshal(body, releaseInfo)
+	err = json.Unmarshal(resp, releaseInfo)
 	return releaseInfo, err
 }
 
@@ -85,22 +77,34 @@ func GetCommitsInfo() ([]CommitInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	cli := &http.Client{Timeout: 60 * time.Second}
-	resp, err := cli.Get(fmt.Sprintf("https://api.github.com/repos/go-kratos/kratos/commits?per_page=5&since=%s", info.PublishedAt))
+	resp, code, err := requestGithubAPI("https://api.github.com/repos/go-kratos/kratos/commits?per_page=5&since=%s", info.PublishedAt)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if resp.StatusCode != 200 {
-		errorInfo := &ErrorInfo{}
-		err = json.Unmarshal(body, errorInfo)
-		if err != nil {
-			return nil, err
-		}
-		return nil, errors.New(errorInfo.Message)
+	if code != 200 {
+		return nil, getGithubErrorInfo(resp)
 	}
 	var res []CommitInfo
-	err = json.Unmarshal(body, &res)
+	err = json.Unmarshal(resp, &res)
 	return res, err
+}
+
+func getGithubErrorInfo(body []byte) error {
+	errorInfo := &ErrorInfo{}
+	err := json.Unmarshal(body, errorInfo)
+	if err != nil {
+		return err
+	}
+	return errors.New(errorInfo.Message)
+}
+
+func requestGithubAPI(url string,query ...interface{}) ([]byte, int, error) {
+	cli := &http.Client{Timeout: 60 * time.Second}
+	resp, err := cli.Get(fmt.Sprintf(url, query...))
+	if err != nil {
+		return nil, 0, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	return body, resp.StatusCode, err
 }
