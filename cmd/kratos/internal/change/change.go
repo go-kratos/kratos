@@ -3,7 +3,6 @@ package change
 import (
 	"fmt"
 	"os"
-	"regexp"
 
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 	"github.com/spf13/cobra"
@@ -16,47 +15,29 @@ var CmdNew = &cobra.Command{
 	Long:  "Get a kratos release or commits info. Example: kratos changelog dev or kratos changelog {version}",
 	Run:   run,
 }
+var token string
+var repoURL string
+
+func init() {
+	if repoURL = os.Getenv("KRATOS_REPO"); repoURL == "" {
+		repoURL = "https://github.com/go-kratos/kratos.git"
+	}
+	CmdNew.Flags().StringVarP(&repoURL, "repo-url", "r", repoURL, "layout repo")
+	token = os.Getenv("GITHUB_TOKEN")
+}
 
 func run(cmd *cobra.Command, args []string) {
+	owner, repo := base.ParseGithubUrl(repoURL)
+	api := base.GithubApi{Owner: owner, Repo: repo, Token: token}
 	version := "latest"
 	if len(args) > 0 {
 		version = args[0]
 	}
 	if version == "dev" {
-		info, err := base.GetCommitsInfo()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
-			return
-		}
-		for _, value := range info {
-			fmt.Printf(
-				"\033[36mcommit: %s \033[0m\nAuthor: %s\nDate: %s\nUrl: %s\n\n%s\n\n",
-				value.Sha, value.Author.Login,
-				value.Commit.Author.Date,
-				value.HtmlUrl,
-				value.Commit.Message,
-			)
-		}
+		info := api.GetCommitsInfo()
+		fmt.Print(base.ParseCommitsInfo(info))
 	} else {
-		info, err := base.GetReleaseInfo(version)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
-			return
-		}
-		reg := regexp.MustCompile(`(?m)^\s*$[\r\n]*|[\r\n]+\s+\z|<[\S\s]+?>`)
-		body := reg.ReplaceAll([]byte(info.Body), []byte(""))
-		if string(body) == "" {
-			body = []byte("no release info")
-		}
-		splitters := "--------------------------------------------"
-		fmt.Printf(
-			"Author: %s\nDate: %s\nUrl: %s\n\n%s\n\n%s\n\n%s\n",
-			info.Author.Login,
-			info.PublishedAt,
-			info.HtmlUrl,
-			splitters,
-			body,
-			splitters,
-		)
+		info := api.GetReleaseInfo(version)
+		fmt.Print(base.ParseReleaseInfo(info))
 	}
 }
