@@ -88,7 +88,7 @@ func (g *GithubApi) GetCommitsInfo() []CommitInfo {
 			fatal(err)
 		}
 		list = append(list, res...)
-		if len(res) < 30 {
+		if len(res) < 30 && len(res) == 0 {
 			break
 		}
 		page++
