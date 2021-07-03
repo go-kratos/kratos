@@ -123,6 +123,7 @@ app.Run()
 
 [optional footer(s)]
 ```
+
 提交信息应按照下面的格式:
 - fix: simply describe the problem that has been fixed
 - feat(log): simple describe of new features
