@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CmdNew represents the new command.
-var CmdNew = &cobra.Command{
+// CmdChange is kratos change log tool
+var CmdChange = &cobra.Command{
 	Use:   "changelog",
 	Short: "Get a kratos change log",
 	Long:  "Get a kratos release or commits info. Example: kratos changelog dev or kratos changelog {version}",
@@ -22,7 +22,7 @@ func init() {
 	if repoURL = os.Getenv("KRATOS_REPO"); repoURL == "" {
 		repoURL = "https://github.com/go-kratos/kratos.git"
 	}
-	CmdNew.Flags().StringVarP(&repoURL, "repo-url", "r", repoURL, "github repo")
+	CmdChange.Flags().StringVarP(&repoURL, "repo-url", "r", repoURL, "github repo")
 	token = os.Getenv("GITHUB_TOKEN")
 }
 
