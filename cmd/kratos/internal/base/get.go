@@ -77,7 +77,7 @@ func (g *GithubApi) GetCommitsInfo() []CommitInfo {
 	page := 1
 	var list []CommitInfo
 	for {
-		url := fmt.Sprintf("https://api.github.com/repos/%s/%s/commits?page=%d&since=%s", g.Owner, g.Repo, page, info.PublishedAt)
+		url := fmt.Sprintf("https://api.github.com/repos/%s/%s/commits?pre_page=100page=%d&since=%s", g.Owner, g.Repo, page, info.PublishedAt)
 		resp, code := requestGithubAPI(url, "GET", nil, g.Token)
 		if code != 200 {
 			printGithubErrorInfo(resp)
@@ -88,7 +88,7 @@ func (g *GithubApi) GetCommitsInfo() []CommitInfo {
 			fatal(err)
 		}
 		list = append(list, res...)
-		if len(res) < 30 || len(res) == 0 {
+		if len(res) < 100 {
 			break
 		}
 		page++
