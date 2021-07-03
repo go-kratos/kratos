@@ -2,12 +2,14 @@ package run
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 )
 
@@ -31,13 +33,25 @@ func Run(cmd *cobra.Command, args []string) {
 		return
 	}
 	if dir == "" {
-		// find the directory containing the cmd/*/main.go
-		mainDir, err := searchMain()
+		// find the directory containing the cmd/*
+		cmdDir, err := findCMD()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
 			return
 		}
-		dir = path.Join(base, mainDir)
+		if len(cmdDir) == 0 {
+			fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", "The cmd directory cannot be found in the current directory")
+			return
+		} else if len(cmdDir) == 1 {
+			dir = path.Join(base, cmdDir[0])
+		} else {
+			prompt := &survey.Select{
+				Message: "Which directory do you want to run?",
+				Options: cmdDir,
+			}
+			survey.AskOne(prompt, &dir)
+			dir = path.Join(base, dir)
+		}
 	}
 	fd := exec.Command("go", "run", ".")
 	fd.Stdout = os.Stdout
@@ -50,21 +64,26 @@ func Run(cmd *cobra.Command, args []string) {
 	return
 }
 
-func searchMain() (string, error) {
-	var mainPath string
+func findCMD() ([]string, error) {
+	var hasCMDPaths []string
 	err := filepath.Walk(".", func(walkPath string, info os.FileInfo, err error) error {
-		if strings.HasPrefix(walkPath, "cmd") && info.Name() == "main.go" {
-			mainPath = walkPath
-			_ = filepath.SkipDir
+		// multi level directory is not allowed under the cmd directory, so it is judged that the path ends with cmd.
+		if strings.HasSuffix(walkPath, "cmd") {
+			paths, err := ioutil.ReadDir(walkPath)
+			if err != nil {
+				return err
+			}
+			for _, fileInfo := range paths {
+				if fileInfo.IsDir() {
+					hasCMDPaths = append(hasCMDPaths, path.Join(walkPath, fileInfo.Name()))
+				}
+			}
+			return nil
 		}
 		return nil
 	})
 	if err != nil {
-		return "", err
+		return []string{}, err
 	}
-	index := strings.LastIndex(mainPath, "main.go")
-	if index != -1 {
-		mainPath = mainPath[:index]
-	}
-	return mainPath, err
+	return hasCMDPaths, err
 }
