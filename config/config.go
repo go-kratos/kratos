@@ -51,11 +51,15 @@ type config struct {
 func New(opts ...Option) Config {
 	options := options{
 		logger: log.DefaultLogger,
-		decoder: func(kv *KeyValue, v map[string]interface{}) error {
-			if codec := encoding.GetCodec(kv.Format); codec != nil {
-				return codec.Unmarshal(kv.Value, &v)
+		decoder: func(src *KeyValue, target map[string]interface{}) error {
+			if src.Format == "" {
+				target[src.Key] = src.Value
+				return nil
 			}
-			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
+			if codec := encoding.GetCodec(src.Format); codec != nil {
+				return codec.Unmarshal(src.Value, &target)
+			}
+			return fmt.Errorf("unsupported key: %s format: %s", src.Key, src.Format)
 		},
 	}
 	for _, o := range opts {
