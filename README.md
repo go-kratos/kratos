@@ -115,6 +115,22 @@ app.Run()
 * Website:  [go-kratos.dev](https://go-kratos.dev)
 * QQ Group: 716486124
 
+## Conventional commits
+The structure of the commit message should look like the following
+```text
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+The information should be commit in the following format:
+- fix: simply describe the problem that has been fixed
+- feat(log): simple describe of new features
+- deps(examples): simple describe the change of the dependency
+- break(http): simple describe the reasons for breaking change
+
 ## License
 Kratos is MIT licensed. See the [LICENSE](./LICENSE) file for details.
 
