@@ -10,7 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
-// HTTPError is an HTTP erorr.
+// HTTPError is an HTTP error.
 type HTTPError struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`

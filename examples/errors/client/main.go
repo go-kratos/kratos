@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/examples/errors/api"
-	"github.com/go-kratos/kratos/v2/errors"
 	"log"
 
+	"github.com/go-kratos/kratos/examples/errors/api"
 	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
-	transhttp "github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
 func main() {
@@ -17,9 +17,9 @@ func main() {
 }
 
 func callHTTP() {
-	conn, err := transhttp.NewClient(
+	conn, err := http.NewClient(
 		context.Background(),
-		transhttp.WithEndpoint("127.0.0.1:8000"),
+		http.WithEndpoint("127.0.0.1:8000"),
 	)
 	if err != nil {
 		panic(err)
@@ -39,9 +39,9 @@ func callHTTP() {
 }
 
 func callGRPC() {
-	conn, err := transgrpc.DialInsecure(
+	conn, err := grpc.DialInsecure(
 		context.Background(),
-		transgrpc.WithEndpoint("127.0.0.1:9000"),
+		grpc.WithEndpoint("127.0.0.1:9000"),
 	)
 	if err != nil {
 		panic(err)
