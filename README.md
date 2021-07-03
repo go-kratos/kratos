@@ -79,10 +79,9 @@ kratos proto server api/helloworld/helloworld.proto -t internal/service
 
 # generate all proto source code, wire, etc.
 go generate ./...
-# compile
-go build -o ./bin/ ./...
+
 # run
-./bin/helloworld -conf ./configs
+kratos run
 ```
 
 ### Kratos Boot
