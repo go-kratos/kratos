@@ -116,7 +116,7 @@ app.Run()
 * QQ Group: 716486124
 
 ## Conventional commits
-The structure of the submit message should look like the following
+The structure of the commit message should look like the following
 ```text
 <type>[optional scope]: <description>
 
@@ -125,7 +125,7 @@ The structure of the submit message should look like the following
 [optional footer(s)]
 ```
 
-The information should be submitted in the following format:
+The information should be commit in the following format:
 - fix: simply describe the problem that has been fixed
 - feat(log): simple describe of new features
 - deps(examples): simple describe the change of the dependency
