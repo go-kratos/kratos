@@ -115,6 +115,43 @@ app.Run()
 * Website:  [go-kratos.dev](https://go-kratos.dev)
 * QQ Group: 716486124
 
+## Conventional commits
+The structure of the submit message should look like the following
+```text
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+### Type
+The types of submission are as follows
+
+#### Main types
+- break: breaking change
+- fix: bug fix
+- deps: dependencies change 
+- feat: new feature
+
+#### Other types
+- docs: document modification
+- test: unit test
+- style: code style
+- ...
+
+### scope
+- log
+- examples
+- transport
+- config
+- cmd
+- etc.
+
+### examples
+- fix: simply describe the problem that has been fixed
+- feat(log): simple describe of new features
+- deps(examples): simple describe the change of the dependency
+
 ## License
 Kratos is MIT licensed. See the [LICENSE](./LICENSE) file for details.
 

@@ -113,6 +113,44 @@ app.Run()
 * [Discord Group](https://discord.gg/BWzJsUJ)
 * Website:  [go-kratos.dev](https://go-kratos.dev)
 * QQ Group: 716486124
+
+## Conventional commits
+提交信息的结构应该如下所示:
+```text
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+### 类型
+提交信息的类型如下:
+
+#### 主要类型
+- break: 不兼容修改
+- fix: 问题修复
+- deps: 依赖变更
+- feat: 新功能
+
+#### 其他类型
+- docs: 文档修改
+- test: 测试用例
+- style: 代码风格
+- ...
+
+### 范围
+- log
+- examples
+- transport
+- config
+- cmd
+- etc.
+
+### 示例
+- fix: simply describe the problem that has been fixed
+- feat(log): simple describe of new features
+- deps(examples): simple describe the change of the dependency
+
 ## Sponsors and Backers
 
 ![kratos](docs/images/alipay.png)
