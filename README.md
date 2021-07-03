@@ -124,33 +124,12 @@ The structure of the submit message should look like the following
 
 [optional footer(s)]
 ```
-### Type
-The types of submission are as follows
 
-#### Main types
-- break: breaking change
-- fix: bug fix
-- deps: dependencies change 
-- feat: new feature
-
-#### Other types
-- docs: document modification
-- test: unit test
-- style: code style
-- ...
-
-### scope
-- log
-- examples
-- transport
-- config
-- cmd
-- etc.
-
-### examples
+The information should be submitted in the following format:
 - fix: simply describe the problem that has been fixed
 - feat(log): simple describe of new features
 - deps(examples): simple describe the change of the dependency
+- break(http): simple describe the reasons for breaking change
 
 ## License
 Kratos is MIT licensed. See the [LICENSE](./LICENSE) file for details.
