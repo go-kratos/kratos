@@ -1,7 +1,8 @@
 syntax = "proto3";
 
 package errors;
-import "errors.proto";
+
+import "errors/errors.proto";
 
 // 多语言特定包名，用于源代码引用
 option go_package = "github.com/go-kratos/kratos/examples/blog/api/v1;v1";

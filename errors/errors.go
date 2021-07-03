@@ -25,14 +25,9 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("error: code = %d reason = %s message = %s metadata = %v", e.Code, e.Reason, e.Message, e.Metadata)
 }
 
-// StatusCode return an HTTP error code.
-func (e *Error) StatusCode() int {
-	return int(e.Code)
-}
-
 // GRPCStatus returns the Status represented by se.
 func (e *Error) GRPCStatus() *status.Status {
-	s, _ := status.New(httputil.GRPCCodeFromStatus(e.StatusCode()), e.Message).
+	s, _ := status.New(httputil.GRPCCodeFromStatus(int(e.Code)), e.Message).
 		WithDetails(&errdetails.ErrorInfo{
 			Reason:   e.Reason,
 			Metadata: e.Metadata,
