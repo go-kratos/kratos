@@ -75,7 +75,7 @@ If you need more, please visit the kratos [documentation](https://go-kratos.dev/
 
 ## Security Vulnerabilities
 
-If you discover a security vulnerability within Kratos, please send an e-mail to tonybase Otwell via go-kratos@googlegroups.com. All security vulnerabilities will be promptly addressed.
+If you discover a security vulnerability within Kratos, please send an e-mail to tonybase via go-kratos@googlegroups.com. All security vulnerabilities will be promptly addressed.
 
 ## Community
 
