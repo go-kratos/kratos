@@ -6,111 +6,83 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFillTemplate(t *testing.T) {
+func TestDefaultResolver(t *testing.T) {
 	var (
 		envString = "8080"
 		envInt    = 10
 		envBool   = true
 		envFloat  = 0.9
 	)
+	var err error
+	err = os.Setenv("PORT", envString)
+	assert.NoError(t, err)
+	err = os.Setenv("COUNT", strconv.Itoa(envInt))
+	assert.NoError(t, err)
+	err = os.Setenv("ENABLE", strconv.FormatBool(envBool))
+	assert.NoError(t, err)
+	err = os.Setenv("RATE", fmt.Sprintf("%v", envFloat))
+	assert.NoError(t, err)
+	err = os.Setenv("EMPTY", "")
+	assert.NoError(t, err)
 
-	if err := os.Setenv("PORT", envString); err != nil {
-		t.Fatal("set env failed")
-	}
-	if err := os.Setenv("COUNT", strconv.Itoa(envInt)); err != nil {
-		t.Fatal("set env failed")
-	}
-	if err := os.Setenv("ENABLE", strconv.FormatBool(envBool)); err != nil {
-		t.Fatal("set env failed")
-	}
-	if err := os.Setenv("RATE", fmt.Sprintf("%v", envFloat)); err != nil {
-		t.Fatal("set env failed")
+	data := map[string]interface{}{
+		"foo": map[string]interface{}{
+			"bar": map[string]interface{}{
+				"notexist": "${NOTEXIST:100}",
+				"port":     "${PORT:8081}",
+				"count":    "${COUNT:0}",
+				"enable":   "${ENABLE:false}",
+				"rate":     "${RATE}",
+				"empty":    "${EMPTY:foobar}",
+				"array":    []interface{}{"${PORT}", "${NOTEXIST:8081}"},
+			},
+		},
 	}
 
 	tests := []struct {
 		name   string
-		format string
-		data   string
 		path   string
 		expect interface{}
 	}{
 		{
-			name:   "json string",
-			format: "json",
-			data:   `{"http": {"server": {"port": {{ env "PORT" }}}}}`,
-			path:   "http.server.port",
+			name:   "test not exist int env with default",
+			path:   "foo.bar.notexist",
+			expect: 100,
+		},
+		{
+			name:   "test string with default",
+			path:   "foo.bar.port",
 			expect: envString,
 		},
 		{
-			name:   "yaml string",
-			format: "yaml",
-			data: `
-http:
-  server:
-    port: {{ env "PORT" }}`,
-			path:   "http.server.port",
-			expect: envString,
-		},
-		{
-			name:   "json int",
-			format: "json",
-			data:   `{"a": {"b": {"c": {{ env "COUNT" }}}}}`,
-			path:   "a.b.c",
+			name:   "test int with default",
+			path:   "foo.bar.count",
 			expect: envInt,
 		},
 		{
-			name:   "yaml int",
-			format: "yaml",
-			data: `
-a:
-  b:
-    c: {{ env "COUNT" }}`,
-			path:   "a.b.c",
-			expect: envInt,
-		},
-		{
-			name:   "json bool",
-			format: "json",
-			data:   `{"a": {"b": {"c": {{ env "ENABLE" }}}}}`,
-			path:   "a.b.c",
+			name:   "test bool with default",
+			path:   "foo.bar.enable",
 			expect: envBool,
 		},
 		{
-			name:   "yaml bool",
-			format: "yaml",
-			data: `
-a:
-  b:
-    c: {{ env "ENABLE" }}`,
-			path:   "a.b.c",
-			expect: envBool,
-		},
-		{
-			name:   "json float",
-			format: "json",
-			data:   `{"a": {"b": {"c": {{ env "RATE" }}}}}`,
-			path:   "a.b.c",
+			name:   "test float with default",
+			path:   "foo.bar.rate",
 			expect: envFloat,
 		},
 		{
-			name:   "yaml float",
-			format: "yaml",
-			data: `
-a:
-  b:
-    c: {{ env "RATE" }}`,
-			path:   "a.b.c",
-			expect: envFloat,
+			name:   "test empty value with default",
+			path:   "foo.bar.empty",
+			expect: "",
 		},
-		// can not support xml config template because we can not unmarshal xml to map[string]interface{}
+		//TODO: add array test case
+
+		// // can not support xml config template because
+		// // we can not decode xml to map[string]interface{}
 		//{
 		//	name: "xml",
-		//	format: "xml",
-		//	data: `<http><server><port>{{ env "PORT" }}</port></server></http>`,
 		//	path: "http.server.port",
 		//	expect: envString,
 		//},
@@ -118,22 +90,10 @@ a:
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			d, err := fillTemplate([]byte(test.data))
-			if err != nil {
-				t.Fatal(err)
-			}
-			v := make(map[string]interface{})
-			codec := encoding.GetCodec(test.format)
-			if codec == nil {
-				t.Fatalf("unsupported format: %s", test.format)
-			}
-			t.Log(string(d))
-			if err := codec.Unmarshal(d, &v); err != nil {
-				t.Fatalf("unmarshal error: %v", err)
-			}
-
+			err := defaultResolver(data)
+			assert.NoError(t, err)
 			rd := reader{
-				values: v,
+				values: data,
 			}
 			if v, ok := rd.Value(test.path); ok {
 				var actual interface{}

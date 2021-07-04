@@ -7,13 +7,17 @@ import (
 // Decoder is config decoder.
 type Decoder func(*KeyValue, map[string]interface{}) error
 
+// Resolver resolve placeholder in config.
+type Resolver func(map[string]interface{}) error
+
 // Option is config option.
 type Option func(*options)
 
 type options struct {
-	sources []Source
-	decoder Decoder
-	logger  log.Logger
+	sources  []Source
+	decoder  Decoder
+	resolver Resolver
+	logger   log.Logger
 }
 
 // WithSource with config source.
@@ -27,6 +31,13 @@ func WithSource(s ...Source) Option {
 func WithDecoder(d Decoder) Option {
 	return func(o *options) {
 		o.decoder = d
+	}
+}
+
+// WithResolver with config resolver.
+func WithResolver(r Resolver) Option {
+	return func(o *options) {
+		o.resolver = r
 	}
 }
 

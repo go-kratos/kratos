@@ -3,7 +3,10 @@ package config
 import (
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
+	"regexp"
+	"strings"
 	"sync"
 	"time"
 
@@ -61,6 +64,7 @@ func New(opts ...Option) Config {
 			}
 			return fmt.Errorf("unsupported key: %s format: %s", src.Key, src.Format)
 		},
+		resolver: defaultResolver,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -70,6 +74,38 @@ func New(opts ...Option) Config {
 		reader: newReader(options),
 		log:    log.NewHelper(options.logger),
 	}
+}
+
+// defaultResolver resolve placeholder in map value
+func defaultResolver(input map[string]interface{}) error {
+	re := regexp.MustCompile(`\${.+?}`)
+	for k, v := range input {
+		switch value := v.(type) {
+		case string:
+			rset := re.FindAllString(value, -1)
+			for _, s := range rset {
+				args := strings.Split(strings.TrimSpace(s[2:len(s)-1]), ":")
+				if envValue, ok := os.LookupEnv(args[0]); ok {
+					input[k] = envValue
+				} else if len(args) > 1 {
+					// default value
+					input[k] = args[1]
+				} else {
+					input[k] = ""
+				}
+			}
+			//if err != nil {
+			//	return fmt.Errorf("parse template of { %v - %v } error: %w", k, v, err)
+			//}
+			// TODO: get key value
+		case map[string]interface{}:
+			if err := defaultResolver(value); err != nil {
+				return err
+			}
+			// TODO: case []interface{}:
+		}
+	}
+	return nil
 }
 
 func (c *config) watch(w Watcher) {
