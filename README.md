@@ -31,16 +31,18 @@ Kratos boosts your productivity. With the integration of excellent resources and
 * **Toolchain**: Includes an extensive toolchain, such as the code generation of cache, the lint tool, and so forth.
 
 ## Features
-* APIs: The communication protocol is based on the HTTP/gRPC through the definition of Protobuf.
-* Errors: Both the definitions of error code and the handle interfaces of code generation for tools are defined by the Enum of the Protobuf.
-* Metadata: In the protocol of HTTP/gRPC, the transmission of service atomic information are formalized by the Middleware.
-* Config: Multiple data sources are supported for configurations and integrations such that dynamic configurations are offered through the manner of *Atomic* operations.
-* Logger: The standard log interfaces ease the integration of the third-party log libs and logs are collected through the *Fluentd*.
-* Metrics: *Prometheus* integrated by default. Furthermore, with the uniform metric interfaces, you can implement your own metric system more flexible.
-* Tracing: The OpenTelemetry is conformed to achieve the tracing of microservices chains.
-* Encoding: The selection of the content encoding is automatically supported by Accept and Content-Type.
-* Transport: The uniform plugins for Middleware are supported by HTTP/gRPC.
-* Registry: The interfaces of the centralized registry is able to be connected with various other centralized registries through plug-ins.
+* [APIs](examples/helloworld/helloworld): The communication protocol is based on the HTTP/gRPC through the definition of Protobuf.
+* [Errors](examples/errors/api): Both the definitions of error code and the handle interfaces of code generation for tools are defined by the Enum of the Protobuf.
+* [Metadata](examples/metadata): In the protocol of HTTP/gRPC, the transmission of service atomic information are formalized by the Middleware.
+* [Config](examples/config): Multiple data sources are supported for configurations and integrations such that dynamic configurations are offered through the manner of *Atomic* operations.
+* [Logger](examples/log): The standard log interfaces ease the integration of the third-party log libs and logs are collected through the *Fluentd*.
+* [Metrics](examples/metrics): *Prometheus* integrated by default. Furthermore, with the uniform metric interfaces, you can implement your own metric system more flexible.
+* [Tracing](examples/traces): The OpenTelemetry is conformed to achieve the tracing of microservices chains.
+* [Encoding](encoding): The selection of the content encoding is automatically supported by Accept and Content-Type.
+* [Transport](transport/transport.go): The uniform plugins for [Middleware](middleware) are supported by [HTTP](examples/http/middlewares)/[gRPC](examples/middleware/main.go).
+* [Registry](examples/registry): The interfaces of the centralized registry is able to be connected with various other centralized registries through plug-ins.
+* [Validation](examples/validate): Verification rules defined in Protobuf can be supported by HTTP/gRPC service.
+* [SwaggerAPI](https://github.com/go-kratos/swagger-api/blob/main/examples/helloworld/server/main.go): Swagger API generated Automatically and embed Swagger UI endpoint can be started by adding [Swagger plugin](https://github.com/go-kratos/swagger-api).
 
 ## Getting Started
 ### Required
