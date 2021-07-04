@@ -63,6 +63,7 @@ func TestReader_Value(t *testing.T) {
 			}
 			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
+		resolver: defaultResolver,
 	}
 
 	ymlval := `
@@ -142,6 +143,7 @@ func TestReader_Source(t *testing.T) {
 			}
 			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
+		resolver: defaultResolver,
 	}
 	r := newReader(opts)
 	err = r.Merge(&KeyValue{
