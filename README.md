@@ -24,6 +24,7 @@ Kratos is a microservice-oriented governance framework implements by golang, whi
 - In the protocol of HTTP/gRPC, use uniform [metadata](https://go-kratos.dev/en/docs/component/metadata) transfer method.
 - You can define [errors](https://go-kratos.dev/en/docs/component/errors/) in protos and generate enums with protoc-gen-go.
 
+Kratos is accessible, powerful, and provides tools required for large, robust applications.
 
 ## Learning Kratos
 
@@ -46,6 +47,10 @@ Kratos boosts your productivity. With the integration of excellent resources and
 * **Expandability**: Properly designed interfaces, you can expand utilities such as base libs to meet your further requirements.
 * **Fault-tolerance**: Designed against failure, enhance the understanding and exercising of SRE within Kratos to achieve more robustness.
 * **Toolchain**: Includes an extensive toolchain, such as the code generation of cache, the lint tool, and so forth.
+
+## Security Vulnerabilities
+
+If you discover a security vulnerability within Kratos, please send an e-mail to tonybase Otwell via go-kratos@googlegroups.com. All security vulnerabilities will be promptly addressed.
 
 ## Community
 
