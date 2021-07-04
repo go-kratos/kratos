@@ -1,4 +1,4 @@
-<p align="center"><a href="https://go-kratos.dev/" target="_blank"><img src="https://github.com/go-kratos/kratos/blob/main/docs/images/kratos.png?raw=true"></a></p>
+<p align="center"><a href="https://go-kratos.dev/" target="_blank"><img src="https://github.com/go-kratos/kratos/blob/main/docs/images/kratos-large.png?raw=true"></a></p>
 
 <p align="center">
 <a href="https://github.com/go-kratos/kratos/actions"><img src="https://github.com/go-kratos/kratos/workflows/Go/badge.svg" alt="Build Status"></a>
@@ -36,7 +36,7 @@ We also provide a [moderm template](https://github.com/go-kratos/kratos-layout),
 
 Kratos boosts your productivity. With the integration of excellent resources and further support, programmers can get rid of most issues might encounter in the field of distributed systems and software engineering such that they are allowed to focus on the release of businesses only. Additionally, for each programmer, Kratos is also an ideal one learning warehouse for many aspects of microservices to enrich their experiences and skills.
 
-#### Principles
+### Principles
 
 * **Simple**: Appropriate design, plain and easy code.
 * **General**: Cover the various utilities for business development.
@@ -47,6 +47,30 @@ Kratos boosts your productivity. With the integration of excellent resources and
 * **Expandability**: Properly designed interfaces, you can expand utilities such as base libs to meet your further requirements.
 * **Fault-tolerance**: Designed against failure, enhance the understanding and exercising of SRE within Kratos to achieve more robustness.
 * **Toolchain**: Includes an extensive toolchain, such as the code generation of cache, the lint tool, and so forth.
+
+## Getting Started
+
+Create a kratos playground through [docker](https://www.docker.com/products/docker-desktop):
+  
+```shell
+docker run -it --rm -p 8000:8000 --workdir /workspace golang
+```
+  
+```shell
+apt-get update && apt-get -y install protobuf-compiler
+export GOPROXY=https://goproxy.io,direct
+go get github.com/go-kratos/kratos/cmd/kratos/v2@latest && kratos upgrade
+```
+  
+```shell
+kratos new helloworld
+cd helloworld && go generate ./...
+kratos run cmd/helloworld
+```
+  
+Use a browser to open and visit: `http://localhost:8000/helloworld/kratos`, The kratos program is running!
+
+If you need more, please visit the kratos [documentation](https://go-kratos.dev/docs/getting-started/start).
 
 ## Security Vulnerabilities
 
