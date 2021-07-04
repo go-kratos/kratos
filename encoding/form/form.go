@@ -69,6 +69,10 @@ func init() {
 		r := v.Interface().(*wrapperspb.StringValue)
 		return r.Value
 	})
+	encoder.RegisterEncoder(&field_mask.FieldMask{}, func(v reflect.Value) string {
+		r := v.Interface().(*field_mask.FieldMask)
+		return strings.Join(r.Paths, ",")
+	})
 	// decoder
 	decoder := schema.NewDecoder()
 	decoder.SetAliasTag("json")
@@ -105,6 +109,13 @@ func init() {
 		if err != nil {
 			return invalidValue
 		}
+		return reflect.ValueOf(wrapperspb.Int64(r))
+	})
+	decoder.RegisterConverter(&wrapperspb.Int32Value{}, func(v string) reflect.Value {
+		r, err := strconv.ParseInt(v, 10, 32)
+		if err != nil {
+			return invalidValue
+		}
 		return reflect.ValueOf(wrapperspb.Int32(int32(r)))
 	})
 	decoder.RegisterConverter(&wrapperspb.UInt64Value{}, func(v string) reflect.Value {
@@ -131,7 +142,7 @@ func init() {
 	decoder.RegisterConverter(&wrapperspb.StringValue{}, func(v string) reflect.Value {
 		return reflect.ValueOf(wrapperspb.String(v))
 	})
-	decoder.RegisterConverter(&wrapperspb.StringValue{}, func(v string) reflect.Value {
+	decoder.RegisterConverter(&wrapperspb.BytesValue{}, func(v string) reflect.Value {
 		r, err := base64.StdEncoding.DecodeString(v)
 		if err != nil {
 			return invalidValue
@@ -140,7 +151,7 @@ func init() {
 	})
 	decoder.RegisterConverter(&field_mask.FieldMask{}, func(v string) reflect.Value {
 		fm := &field_mask.FieldMask{}
-		fm.Paths = append(fm.Paths, strings.Split(v, ",")...)
+		fm.Paths = strings.Split(v, ",")
 		return reflect.ValueOf(fm)
 	})
 	encoding.RegisterCodec(codec{encoder: encoder, decoder: decoder})

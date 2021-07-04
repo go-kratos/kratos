@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package grpc.gateway.runtime.internal.examplepb;
+
+option go_package = "github.com/go-kratos/kratos/v2/internal/testproto;testproto";
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+message Proto3Message {
+  // Next number: 46
+  Proto3Message nested = 41;
+  float float_value = 42;
+  double double_value = 43;
+  int64 int64_value = 3;
+  int32 int32_value = 4;
+  uint64 uint64_value = 5;
+  uint32 uint32_value = 6;
+  bool bool_value = 7;
+  string string_value = 8;
+  bytes bytes_value = 9;
+  repeated string repeated_value = 10;
+  repeated google.protobuf.UInt64Value repeated_message = 44;
+  EnumValue enum_value = 11;
+  repeated EnumValue repeated_enum = 12;
+  google.protobuf.Timestamp timestamp_value = 13;
+  google.protobuf.Duration duration_value = 14;
+  google.protobuf.FieldMask fieldmask_value = 15;
+  google.protobuf.DoubleValue wrapper_double_value = 17;
+  google.protobuf.FloatValue wrapper_float_value = 18;
+  google.protobuf.Int64Value wrapper_int64_value = 19;
+  google.protobuf.Int32Value wrapper_int32_value = 20;
+  google.protobuf.UInt64Value wrapper_u_int64_value = 21;
+  google.protobuf.UInt32Value wrapper_u_int32_value = 22;
+  google.protobuf.BoolValue wrapper_bool_value = 23;
+  google.protobuf.StringValue wrapper_string_value = 24;
+  google.protobuf.BytesValue wrapper_bytes_value = 25;
+}
+
+enum EnumValue {
+  X = 0;
+  Y = 1;
+  Z = 2;
+}
