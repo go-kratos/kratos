@@ -144,7 +144,6 @@ func ParseCommitsInfo(info []CommitInfo) string {
 		prefix := []string{"fix", "feat", "deps", "break"}
 		var matched bool
 		for _, v := range prefix {
-			fmt.Println(strings.HasPrefix(msg, v),msg,v)
 			if strings.HasPrefix(msg, v) {
 				group[v] = append(group[v], msg)
 				matched = true
