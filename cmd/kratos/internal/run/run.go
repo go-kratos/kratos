@@ -39,10 +39,10 @@ func Run(cmd *cobra.Command, args []string) {
 			fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
 			return
 		}
-		if len(cmdDir) == 0 {
+		if len(cmdPath) == 0 {
 			fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", "The cmd directory cannot be found in the current directory")
 			return
-		} else if len(cmdDir) == 1 {
+		} else if len(cmdPath) == 1 {
 			dir = path.Join(cmdDir, cmdPath[0])
 		} else {
 			prompt := &survey.Select{
