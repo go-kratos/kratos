@@ -134,29 +134,27 @@ func ParseCommitsInfo(info []CommitInfo) string {
 		"break": {},
 		"other": {},
 	}
-	for i, commitInfo := range info {
+
+	for _, commitInfo := range info {
 		msg := commitInfo.Commit.Message
 		index := strings.Index(fmt.Sprintf("%q", msg), `\n`)
 		if index != -1 {
-			msg = commitInfo.Commit.Message[:index-1]
+			msg = msg[:index-1]
 		}
 		prefix := []string{"fix", "feat", "deps", "break"}
+		var matched bool
 		for _, v := range prefix {
+			fmt.Println(strings.HasPrefix(msg, v),msg,v)
 			if strings.HasPrefix(msg, v) {
 				group[v] = append(group[v], msg)
-				info = append(info[:i], info[i+1:]...)
+				matched = true
 			}
 		}
-	}
-	// other
-	for _, value := range info {
-		msg := value.Commit.Message
-		index := strings.Index(fmt.Sprintf("%q", msg), `\n`)
-		if index != -1 {
-			msg = value.Commit.Message[:index-1]
+		if !matched {
+			group["other"] = append(group["other"], msg)
 		}
-		group["other"] = append(group["other"], msg)
 	}
+
 	md := make(map[string]string)
 	for key, value := range group {
 		var text string
