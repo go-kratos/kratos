@@ -16,7 +16,7 @@ Kratos is a microservice-oriented governance framework implements by golang, whi
 
 - The [communication protocol](https://go-kratos.dev/docs/component/api) is based on the HTTP/gRPC through the definition of Protobuf.
 - Abstract [transport](https://go-kratos.dev/en/docs/component/transport/overview) layer are support: [HTTP](https://go-kratos.dev/docs/component/transport/http) / [gRPC](https://go-kratos.dev/docs/component/transport/grpc).
-- Powerful [middleware](https://go-kratos.dev/en/docs/component/middleware/overview) design, support: [Tracing (OpenTelemetry)](https://go-kratos.dev/docs/component/middleware/tracing)、[Metrics (Prometheus is default)](https://go-kratos.dev/docs/component/middleware/metrics)、[Recovery](https://go-kratos.dev/en/docs/component/middleware/recovery)
+- Powerful [middleware](https://go-kratos.dev/en/docs/component/middleware/overview) design, support: [Tracing (OpenTelemetry)](https://go-kratos.dev/docs/component/middleware/tracing)、[Metrics (Prometheus is default)](https://go-kratos.dev/docs/component/middleware/metrics)、[Recovery](https://go-kratos.dev/en/docs/component/middleware/recovery) and more.
 - [Registry](https://go-kratos.dev/en/docs/component/registry) interface able to be connected with various other centralized registries through plug-ins.
 - The [standard log interfaces](https://go-kratos.dev/en/docs/component/log) ease the integration of the third-party log libs and logs are collected through the *Fluentd*.
 - The selection of the content [encoding](https://go-kratos.dev/en/docs/component/encoding) is automatically supported by Accept and Content-Type.
@@ -51,7 +51,7 @@ Kratos boosts your productivity. With the integration of excellent resources and
 
 - [Wechat Group](https://github.com/go-kratos/kratos/issues/682)
 - [Discord Group](https://discord.gg/BWzJsUJ)
-- Website:  [go-kratos.dev](https://go-kratos.dev)
+- [go-kratos.dev](https://go-kratos.dev)
 - QQ Group: 716486124
 
 ## Contributors
