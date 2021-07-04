@@ -66,8 +66,7 @@ go get github.com/go-kratos/kratos/cmd/kratos/v2@latest && kratos upgrade
   
 ```shell
 kratos new helloworld
-cd helloworld && go generate ./...
-kratos run cmd/helloworld
+kratos run
 ```
   
 Use a browser to open and visit: `http://localhost:8000/helloworld/kratos`, The kratos program is running!
