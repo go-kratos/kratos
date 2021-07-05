@@ -34,7 +34,7 @@ func Run(cmd *cobra.Command, args []string) {
 	}
 	if dir == "" {
 		// find the directory containing the cmd/*
-		cmdDir, cmdPath, err := findCMD(base)
+		cmdPath, err := findCMD(base)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
 			return
@@ -43,14 +43,13 @@ func Run(cmd *cobra.Command, args []string) {
 			fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", "The cmd directory cannot be found in the current directory")
 			return
 		} else if len(cmdPath) == 1 {
-			dir = path.Join(cmdDir, cmdPath[0])
+			dir = cmdPath[0]
 		} else {
 			prompt := &survey.Select{
 				Message: "Which directory do you want to run?",
 				Options: cmdPath,
 			}
 			survey.AskOne(prompt, &dir)
-			dir = path.Join(cmdDir, dir)
 		}
 	}
 	fd := exec.Command("go", "run", ".")
@@ -64,12 +63,9 @@ func Run(cmd *cobra.Command, args []string) {
 	return
 }
 
-func findCMD(base string) (string, []string, error) {
-	next := func(dir string) (string, []string, error) {
-		var (
-			cmdDir  string
-			cmdPath []string
-		)
+func findCMD(base string) ([]string, error) {
+	next := func(dir string) ([]string, error) {
+		var cmdPath []string
 		err := filepath.Walk(dir, func(walkPath string, info os.FileInfo, err error) error {
 			// multi level directory is not allowed under the cmd directory, so it is judged that the path ends with cmd.
 			if strings.HasSuffix(walkPath, "cmd") {
@@ -79,26 +75,25 @@ func findCMD(base string) (string, []string, error) {
 				}
 				for _, fileInfo := range paths {
 					if fileInfo.IsDir() {
-						cmdPath = append(cmdPath, path.Join("cmd", fileInfo.Name()))
+						cmdPath = append(cmdPath, path.Join(walkPath, fileInfo.Name()))
 					}
 				}
-				cmdDir, _ = path.Split(walkPath)
 				return nil
 			}
 			return nil
 		})
-		return cmdDir, cmdPath, err
+		return cmdPath, err
 	}
 	for i := 0; i < 5; i++ {
 		base = path.Clean(base)
-		cmdDir, res, err := next(base)
+		res, err := next(base)
 		if err != nil {
-			return "", nil, err
+			return nil, err
 		}
 		if len(res) > 0 {
-			return cmdDir, res, nil
+			return res, nil
 		}
-		base, _ = path.Split(base)
+		base = path.Join(base, "..")
 	}
-	return "", []string{base}, nil
+	return []string{base}, nil
 }
