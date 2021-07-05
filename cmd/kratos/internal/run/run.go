@@ -50,6 +50,9 @@ func Run(cmd *cobra.Command, args []string) {
 				Options: cmdPath,
 			}
 			survey.AskOne(prompt, &dir)
+			if dir == "" {
+				return
+			}
 			dir = path.Join(cmdDir, dir)
 		}
 	}
@@ -82,7 +85,7 @@ func findCMD(base string) (string, []string, error) {
 						cmdPath = append(cmdPath, path.Join("cmd", fileInfo.Name()))
 					}
 				}
-				cmdDir, _ = path.Split(walkPath)
+				cmdDir = filepath.Join(walkPath, "..")
 				return nil
 			}
 			return nil
@@ -90,7 +93,6 @@ func findCMD(base string) (string, []string, error) {
 		return cmdDir, cmdPath, err
 	}
 	for i := 0; i < 5; i++ {
-		base = path.Clean(base)
 		cmdDir, res, err := next(base)
 		if err != nil {
 			return "", nil, err
@@ -98,7 +100,7 @@ func findCMD(base string) (string, []string, error) {
 		if len(res) > 0 {
 			return cmdDir, res, nil
 		}
-		base, _ = path.Split(base)
+		base = filepath.Join(base, "..")
 	}
 	return "", []string{base}, nil
 }
