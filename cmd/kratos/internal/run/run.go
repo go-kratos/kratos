@@ -53,7 +53,7 @@ func Run(cmd *cobra.Command, args []string) {
 			if dir == "" {
 				return
 			}
-			dir = path.Join(cmdDir,dir)
+			dir = path.Join(cmdDir, dir)
 		}
 	}
 	fd := exec.Command("go", "run", ".")
@@ -85,7 +85,7 @@ func findCMD(base string) (string, []string, error) {
 						cmdPath = append(cmdPath, path.Join("cmd", fileInfo.Name()))
 					}
 				}
-				cmdDir = filepath.Join(walkPath,"..")
+				cmdDir = filepath.Join(walkPath, "..")
 				return nil
 			}
 			return nil
@@ -100,7 +100,7 @@ func findCMD(base string) (string, []string, error) {
 		if len(res) > 0 {
 			return cmdDir, res, nil
 		}
-		base = filepath.Join(base,"..")
+		base = filepath.Join(base, "..")
 	}
 	return "", []string{}, nil
 }
