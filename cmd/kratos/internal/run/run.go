@@ -102,5 +102,5 @@ func findCMD(base string) (string, []string, error) {
 		}
 		base = filepath.Join(base, "..")
 	}
-	return "", []string{}, nil
+	return "", []string{base}, nil
 }
