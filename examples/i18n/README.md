@@ -2,6 +2,7 @@
 This project is an demo for i18n usage.
 We integrated [go-i18n](https://github.com/nicksnyder/go-i18n) into our project for localization.
 
+We start with the project generate with `kratos-layout`, you could use `kratos new` to generate it.
 
 The following steps are applied.
 ## Step 1: install 
