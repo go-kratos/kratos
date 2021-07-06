@@ -9,20 +9,20 @@ var errorsTemplate = `
 {{ range .Errors }}
 
 func Is{{.CamelValue}}(err error) bool {
-	e := errors.FromError(err)
-	return e.Reason == {{.Name}}_{{.Value}}.String() && e.Code == {{.HttpCode}} 
+	e, b := errors.FromError(err)
+	return b && e.Reason == {{.Name}}_{{.Value}}.String() && e.Code == {{.HttpCode}} 
 }
 
-func Error{{.CamelValue}}(format string, args ...interface{}) *errors.Error {
-	 return errors.New({{.HttpCode}}, {{.Name}}_{{.Value}}.String(), fmt.Sprintf(format, args...))
+func Error{{.CamelValue}}(format string, args ...interface{}) error {
+	 return errors.Errorf({{.HttpCode}}, {{.Name}}_{{.Value}}.String(), fmt.Sprintf(format, args...))
 }
 
-func Error{{.CamelValue}}WithMessage(format string, args ...interface{}) *errors.Error {
+func {{.CamelValue}}(format string, args ...interface{}) error {
 	var message string = "{{.Message}}"
 	if format != "" {
 		message = fmt.Sprintf(format, args...)
 	}
-	return errors.New({{.HttpCode}}, {{.Name}}_{{.Value}}.String(), message)
+	return errors.Errorf({{.HttpCode}}, {{.Name}}_{{.Value}}.String(), message)
 }
 
 {{- end }}
