@@ -1,4 +1,4 @@
-package binding
+package form
 
 import (
 	"encoding/base64"
@@ -17,7 +17,7 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-func mapProto(msg proto.Message, values map[string][]string) error {
+func MapProto(msg proto.Message, values map[string][]string) error {
 	for key, values := range values {
 		if err := populateFieldValues(msg.ProtoReflect(), strings.Split(key, "."), values); err != nil {
 			return err
