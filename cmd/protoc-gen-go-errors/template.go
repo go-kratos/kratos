@@ -17,11 +17,20 @@ func Error{{.CamelValue}}(format string, args ...interface{}) *errors.Error {
 	 return errors.New({{.HttpCode}}, {{.Name}}_{{.Value}}.String(), fmt.Sprintf(format, args...))
 }
 
+func Error{{.CamelValue}}WithMessage(format string, args ...interface{}) *errors.Error {
+	var message string = "{{.Message}}"
+	if format != "" {
+		message = fmt.Sprintf(format, args...)
+	}
+	return errors.New({{.HttpCode}}, {{.Name}}_{{.Value}}.String(), message)
+}
+
 {{- end }}
 `
 
 type errorInfo struct {
 	Name       string
+	Message    string
 	Value      string
 	HttpCode   int
 	CamelValue string

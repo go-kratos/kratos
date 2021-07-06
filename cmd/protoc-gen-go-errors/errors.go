@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2/errors"
@@ -59,11 +58,16 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	if ok := defaultCode.(int32); ok != 0 {
 		code = int(ok)
 	}
-	if code > 600 || code < 0 {
-		panic(fmt.Sprintf("Enum '%s' range must be greater than 0 and less than or equal to 600", string(enum.Desc.Name())))
-	}
+	// if code > 600 || code < 0 {
+	// 	panic(fmt.Sprintf("Enum '%s' range must be greater than 0 and less than or equal to 600", string(enum.Desc.Name())))
+	// }
 	var ew errorWrapper
 	for _, v := range enum.Values {
+		message := ""
+		msg := proto.GetExtension(v.Desc.Options(), errors.E_Msg)
+		if ok := msg.(string); ok != "" {
+			message = string(ok)
+		}
 		enumCode := code
 		eCode := proto.GetExtension(v.Desc.Options(), errors.E_Code)
 		if ok := eCode.(int32); ok != 0 {
@@ -71,14 +75,15 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 		}
 		// If the current enumeration does not contain 'errors.code'
 		//or the code value exceeds the range, the current enum will be skipped
-		if enumCode > 600 || enumCode < 0 {
-			panic(fmt.Sprintf("Enum '%s' range must be greater than 0 and less than or equal to 600", string(v.Desc.Name())))
-		}
+		// if enumCode > 600 || enumCode < 0 {
+		// 	panic(fmt.Sprintf("Enum '%s' range must be greater than 0 and less than or equal to 600", string(v.Desc.Name())))
+		// }
 		if enumCode == 0 {
 			continue
 		}
 		err := &errorInfo{
 			Name:       string(enum.Desc.Name()),
+			Message:    message,
 			Value:      string(v.Desc.Name()),
 			CamelValue: Case2Camel(string(v.Desc.Name())),
 			HttpCode:   enumCode,
