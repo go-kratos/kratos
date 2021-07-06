@@ -3,6 +3,7 @@ package wrr
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc/balancer/base"
 	"testing"
 	"time"
 
@@ -33,45 +34,25 @@ func (s *testSubConn) Connect() {
 }
 
 func TestBalancerPick(t *testing.T) {
-	scs := map[resolver.Address]balancer.SubConn{}
-	sc1 := &testSubConn{
-		addr: resolver.Address{
-			Addr: "test1",
-			Metadata: wmeta.MD{
-				Weight: 8,
-			},
+	addr1 := resolver.Address{Addr: "test1", Metadata: wmeta.MD{Weight: 8}}
+	addr2 := resolver.Address{Addr: "test2", Metadata: wmeta.MD{Weight: 4, Color: "red"}}
+	addr3 := resolver.Address{Addr: "test3", Metadata: wmeta.MD{Weight: 2, Color: "red"}}
+	bi := base.PickerBuildInfo{
+		ReadySCs: map[balancer.SubConn]base.SubConnInfo{
+			&testSubConn{addr: addr1}: {Address: addr1},
+			&testSubConn{addr: addr2}: {Address: addr2},
+			&testSubConn{addr: addr3}: {Address: addr3},
 		},
 	}
-	sc2 := &testSubConn{
-		addr: resolver.Address{
-			Addr: "test2",
-			Metadata: wmeta.MD{
-				Weight: 4,
-				Color:  "red",
-			},
-		},
-	}
-	sc3 := &testSubConn{
-		addr: resolver.Address{
-			Addr: "test3",
-			Metadata: wmeta.MD{
-				Weight: 2,
-				Color:  "red",
-			},
-		},
-	}
-	scs[sc1.addr] = sc1
-	scs[sc2.addr] = sc2
-	scs[sc3.addr] = sc3
 	b := &wrrPickerBuilder{}
-	picker := b.Build(scs)
+	picker := b.Build(bi)
 	res := []string{"test1", "test1", "test1", "test1"}
 	for i := 0; i < 3; i++ {
-		conn, _, err := picker.Pick(context.Background(), balancer.PickInfo{})
+		pr, err := picker.Pick(balancer.PickInfo{Ctx: context.Background()})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
-		sc := conn.(*testSubConn)
+		sc := pr.SubConn.(*testSubConn)
 		if sc.addr.Addr != res[i] {
 			t.Fatalf("the subconn picked(%s),but expected(%s)", sc.addr.Addr, res[i])
 		}
@@ -79,22 +60,22 @@ func TestBalancerPick(t *testing.T) {
 	res2 := []string{"test2", "test3", "test2", "test2", "test3", "test2"}
 	ctx := nmd.NewContext(context.Background(), nmd.New(map[string]interface{}{"color": "red"}))
 	for i := 0; i < 6; i++ {
-		conn, _, err := picker.Pick(ctx, balancer.PickInfo{})
+		pr, err := picker.Pick(balancer.PickInfo{Ctx: ctx})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
-		sc := conn.(*testSubConn)
+		sc := pr.SubConn.(*testSubConn)
 		if sc.addr.Addr != res2[i] {
 			t.Fatalf("the (%d) subconn picked(%s),but expected(%s)", i, sc.addr.Addr, res2[i])
 		}
 	}
 	ctx = nmd.NewContext(context.Background(), nmd.New(map[string]interface{}{"color": "black"}))
 	for i := 0; i < 4; i++ {
-		conn, _, err := picker.Pick(ctx, balancer.PickInfo{})
+		pr, err := picker.Pick(balancer.PickInfo{Ctx: ctx})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
-		sc := conn.(*testSubConn)
+		sc := pr.SubConn.(*testSubConn)
 		if sc.addr.Addr != res[i] {
 			t.Fatalf("the (%d) subconn picked(%s),but expected(%s)", i, sc.addr.Addr, res[i])
 		}
@@ -104,11 +85,11 @@ func TestBalancerPick(t *testing.T) {
 	ctx = context.Background()
 	env.Color = "red"
 	for i := 0; i < 6; i++ {
-		conn, _, err := picker.Pick(ctx, balancer.PickInfo{})
+		pr, err := picker.Pick(balancer.PickInfo{Ctx: ctx})
 		if err != nil {
 			t.Fatalf("picker.Pick failed!idx:=%d", i)
 		}
-		sc := conn.(*testSubConn)
+		sc := pr.SubConn.(*testSubConn)
 		if sc.addr.Addr != res2[i] {
 			t.Fatalf("the (%d) subconn picked(%s),but expected(%s)", i, sc.addr.Addr, res2[i])
 		}
@@ -116,22 +97,18 @@ func TestBalancerPick(t *testing.T) {
 }
 
 func TestBalancerDone(t *testing.T) {
-	scs := map[resolver.Address]balancer.SubConn{}
-	sc1 := &testSubConn{
-		addr: resolver.Address{
-			Addr: "test1",
-			Metadata: wmeta.MD{
-				Weight: 8,
-			},
+	addr := resolver.Address{Addr: "test1", Metadata: wmeta.MD{Weight: 8}}
+	b := &wrrPickerBuilder{}
+	bi := base.PickerBuildInfo{
+		ReadySCs: map[balancer.SubConn]base.SubConnInfo{
+			&testSubConn{addr: addr}: {Address: addr},
 		},
 	}
-	scs[sc1.addr] = sc1
-	b := &wrrPickerBuilder{}
-	picker := b.Build(scs)
+	picker := b.Build(bi)
 
-	_, done, _ := picker.Pick(context.Background(), balancer.PickInfo{})
+	pr, _ := picker.Pick(balancer.PickInfo{Ctx: context.Background()})
 	time.Sleep(100 * time.Millisecond)
-	done(balancer.DoneInfo{Err: status.Errorf(codes.Unknown, "test")})
+	pr.Done(balancer.DoneInfo{Err: status.Errorf(codes.Unknown, "test")})
 	err, req := picker.(*wrrPicker).subConns[0].errSummary()
 	assert.Equal(t, int64(0), err)
 	assert.Equal(t, int64(1), req)
@@ -143,8 +120,8 @@ func TestBalancerDone(t *testing.T) {
 	}
 	assert.Equal(t, int64(1), count)
 
-	_, done, _ = picker.Pick(context.Background(), balancer.PickInfo{})
-	done(balancer.DoneInfo{Err: status.Errorf(codes.Aborted, "test")})
+	pr, _ = picker.Pick(balancer.PickInfo{Ctx: context.Background()})
+	pr.Done(balancer.DoneInfo{Err: status.Errorf(codes.Aborted, "test")})
 	err, req = picker.(*wrrPicker).subConns[0].errSummary()
 	assert.Equal(t, int64(1), err)
 	assert.Equal(t, int64(2), req)
