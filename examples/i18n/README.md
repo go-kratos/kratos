@@ -114,6 +114,7 @@ goi18n merge active.en.toml translate.zh.toml
 You should edit the `translate.zh.toml` to finish the translation work. We translate `Hello` to `你好` in Chinese.
 After that, you should rename this file to `active.zh.toml`
 And this file is the translation file that we load in the Step 2.
+You could also embed these translation files into your binaries for easier deployment.
 
 ## Step 4: Run
 Go to `cmd/i18n/`, and run `go run .` to start the service.
