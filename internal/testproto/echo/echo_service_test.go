@@ -1,4 +1,4 @@
-package testproto
+package echo
 
 import (
 	context "context"

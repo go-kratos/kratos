@@ -34,10 +34,11 @@ func (c codec) Marshal(v interface{}) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-	}
-	vs, err = c.encoder.Encode(v)
-	if err != nil {
-		return nil, err
+	} else {
+		vs, err = c.encoder.Encode(v)
+		if err != nil {
+			return nil, err
+		}
 	}
 	for k, v := range vs {
 		if len(v) == 0 {

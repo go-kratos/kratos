@@ -2,7 +2,7 @@
 // versions:
 // protoc-gen-go-http v2.0.0-rc7
 
-package testproto
+package echo
 
 import (
 	context "context"
@@ -47,7 +47,7 @@ func _EchoService_Echo0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, "/testproto.EchoService/Echo")
+		http.SetOperation(ctx, "/echo.EchoService/Echo")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		})
@@ -69,7 +69,7 @@ func _EchoService_Echo1_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, "/testproto.EchoService/Echo")
+		http.SetOperation(ctx, "/echo.EchoService/Echo")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		})
@@ -91,7 +91,7 @@ func _EchoService_Echo2_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, "/testproto.EchoService/Echo")
+		http.SetOperation(ctx, "/echo.EchoService/Echo")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		})
@@ -113,7 +113,7 @@ func _EchoService_Echo3_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, "/testproto.EchoService/Echo")
+		http.SetOperation(ctx, "/echo.EchoService/Echo")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		})
@@ -135,7 +135,7 @@ func _EchoService_Echo4_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx http.Co
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, "/testproto.EchoService/Echo")
+		http.SetOperation(ctx, "/echo.EchoService/Echo")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Echo(ctx, req.(*SimpleMessage))
 		})
@@ -154,7 +154,7 @@ func _EchoService_EchoBody0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx htt
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, "/testproto.EchoService/EchoBody")
+		http.SetOperation(ctx, "/echo.EchoService/EchoBody")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.EchoBody(ctx, req.(*SimpleMessage))
 		})
@@ -173,7 +173,7 @@ func _EchoService_EchoResponseBody0_HTTP_Handler(srv EchoServiceHTTPServer) func
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, "/testproto.EchoService/EchoResponseBody")
+		http.SetOperation(ctx, "/echo.EchoService/EchoResponseBody")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.EchoResponseBody(ctx, req.(*DynamicMessageUpdate))
 		})
@@ -195,7 +195,7 @@ func _EchoService_EchoDelete0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx h
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, "/testproto.EchoService/EchoDelete")
+		http.SetOperation(ctx, "/echo.EchoService/EchoDelete")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.EchoDelete(ctx, req.(*SimpleMessage))
 		})
@@ -214,7 +214,7 @@ func _EchoService_EchoPatch0_HTTP_Handler(srv EchoServiceHTTPServer) func(ctx ht
 		if err := ctx.Bind(&in.Body); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, "/testproto.EchoService/EchoPatch")
+		http.SetOperation(ctx, "/echo.EchoService/EchoPatch")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.EchoPatch(ctx, req.(*DynamicMessageUpdate))
 		})
@@ -247,7 +247,7 @@ func (c *EchoServiceHTTPClientImpl) Echo(ctx context.Context, in *SimpleMessage,
 	var out SimpleMessage
 	pattern := "/v1/example/echo/{id}"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation("/testproto.EchoService/Echo"))
+	opts = append(opts, http.Operation("/echo.EchoService/Echo"))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, nil, &out, opts...)
 	if err != nil {
@@ -260,7 +260,7 @@ func (c *EchoServiceHTTPClientImpl) EchoBody(ctx context.Context, in *SimpleMess
 	var out SimpleMessage
 	pattern := "/v1/example/echo_body"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation("/testproto.EchoService/EchoBody"))
+	opts = append(opts, http.Operation("/echo.EchoService/EchoBody"))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
@@ -273,7 +273,7 @@ func (c *EchoServiceHTTPClientImpl) EchoDelete(ctx context.Context, in *SimpleMe
 	var out SimpleMessage
 	pattern := "/v1/example/echo_delete/{id}/{num}"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation("/testproto.EchoService/EchoDelete"))
+	opts = append(opts, http.Operation("/echo.EchoService/EchoDelete"))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
 	if err != nil {
@@ -286,7 +286,7 @@ func (c *EchoServiceHTTPClientImpl) EchoPatch(ctx context.Context, in *DynamicMe
 	var out DynamicMessageUpdate
 	pattern := "/v1/example/echo_patch"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation("/testproto.EchoService/EchoPatch"))
+	opts = append(opts, http.Operation("/echo.EchoService/EchoPatch"))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PATCH", path, in.Body, &out, opts...)
 	if err != nil {
@@ -299,7 +299,7 @@ func (c *EchoServiceHTTPClientImpl) EchoResponseBody(ctx context.Context, in *Dy
 	var out DynamicMessageUpdate
 	pattern := "/v1/example/echo_response_body"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation("/testproto.EchoService/EchoResponseBody"))
+	opts = append(opts, http.Operation("/echo.EchoService/EchoResponseBody"))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out.Body, opts...)
 	if err != nil {

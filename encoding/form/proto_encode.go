@@ -30,27 +30,6 @@ func EncodeMap(msg proto.Message) (url.Values, error) {
 	return u, nil
 }
 
-func getValueByField(v protoreflect.Message, fieldPath []string) (string, error) {
-	var fd protoreflect.FieldDescriptor
-	for i, fieldName := range fieldPath {
-		fields := v.Descriptor().Fields()
-		if fd = fields.ByName(protoreflect.Name(fieldName)); fd == nil {
-			fd = fields.ByJSONName(fieldName)
-			if fd == nil {
-				return "", fmt.Errorf("field path not found: %q", fieldName)
-			}
-		}
-		if i == len(fieldPath)-1 {
-			break
-		}
-		if fd.Message() == nil || fd.Cardinality() == protoreflect.Repeated {
-			return "", fmt.Errorf("invalid path: %q is not a message", fieldName)
-		}
-		v = v.Get(fd).Message()
-	}
-	return encodeField(fd, v.Get(fd))
-}
-
 func encodeByField(u url.Values, path string, v protoreflect.Message) error {
 	for i := 0; i < v.Descriptor().Fields().Len(); i++ {
 		fd := v.Descriptor().Fields().Get(i)
@@ -112,11 +91,8 @@ func encodeByField(u url.Values, path string, v protoreflect.Message) error {
 			u[newPath] = []string{value}
 		}
 	}
-	return nil
-}
 
-func encodeMessageField(fieldDescriptor protoreflect.FieldDescriptor, msgValue protoreflect.Message) (string, error) {
-	return encodeField(fieldDescriptor, msgValue.Get(fieldDescriptor))
+	return nil
 }
 
 func encodeRepeatedField(fieldDescriptor protoreflect.FieldDescriptor, list protoreflect.List) ([]string, error) {

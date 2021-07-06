@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package = "github.com/go-kratos/kratos/cmd/protoc-gen-go-http/internal/testproto;testproto";
+package echo;
 
-package testproto;
+option go_package = "github.com/go-kratos/kratos/cmd/protoc-gen-go-http/internal/testproto/echo;echo";
 
 import "google/api/annotations.proto";
 import "google/protobuf/field_mask.proto";
@@ -30,7 +30,7 @@ message Embedded {
 message SimpleMessage {
 	// Id represents the message identifier.
 	string id = 1;
-	int64 num = 2;
+	int64 num = 2 [json_name="number"];
 	oneof code {
 		int64 line_num = 3;
 		string lang = 4;

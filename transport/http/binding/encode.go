@@ -60,8 +60,8 @@ func getValueByField(v protoreflect.Message, fieldPath []string) (string, error)
 	var fd protoreflect.FieldDescriptor
 	for i, fieldName := range fieldPath {
 		fields := v.Descriptor().Fields()
-		if fd = fields.ByName(protoreflect.Name(fieldName)); fd == nil {
-			fd = fields.ByJSONName(fieldName)
+		if fd = fields.ByJSONName(fieldName); fd == nil {
+			fd = fields.ByName(protoreflect.Name(fieldName))
 			if fd == nil {
 				return "", fmt.Errorf("field path not found: %q", fieldName)
 			}
