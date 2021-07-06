@@ -111,7 +111,7 @@ Then fill the translate file:
 goi18n merge active.en.toml translate.zh.toml
 ```
 
-You should edit the `translate.zh.toml`, finish the translation work. We translate `Hello` to `你好` in Chinese.
+You should edit the `translate.zh.toml` to finish the translation work. We translate `Hello` to `你好` in Chinese.
 After that, you should rename this file to `active.zh.toml`
 And this file is the translation file that we load in the Step 2.
 
@@ -132,4 +132,4 @@ curl "http://localhost:8000/helloworld/eric"
 Will get the default English result `{"message":"Hello eric"}`
 
 ## Reference
-* [go-i18n](https://github.com/nicksnyder/go-i18n) You could refer to this package for more detailed document.
+* [go-i18n](https://github.com/nicksnyder/go-i18n) You could refer to this repository for more detailed document.
