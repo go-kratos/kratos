@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package api.blog.v1;
+import "errors/errors.proto";
+
+// 多语言特定包名，用于源代码引用
+option go_package = "github.com/go-kratos/kratos/examples/blog/api/v1;v1";
+option java_multiple_files = true;
+option java_package = "blog.v1.errors";
+option objc_class_prefix = "APIBlogErrors";
+
+enum ErrorReason {
+  option (errors.default_code) = 500;
+
+  USER_NOT_FOUND = 0 [(errors.code) = 404];
+  CONTENT_MISSING = 1 [(errors.code) = 400];;
+}
