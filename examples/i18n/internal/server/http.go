@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/go-kratos/kratos/examples/i18n/api/helloworld/v1"
 	"github.com/go-kratos/kratos/examples/i18n/internal/conf"
+	"github.com/go-kratos/kratos/examples/i18n/internal/pkg/middleware/localize"
 	"github.com/go-kratos/kratos/examples/i18n/internal/service"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
@@ -21,7 +22,7 @@ func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, logger log.L
 			tracing.Server(),
 			logging.Server(logger),
 			metrics.Server(),
-			//localize.I18N(),
+			localize.I18N(),
 			validate.Validator(),
 		),
 	}
