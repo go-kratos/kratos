@@ -37,7 +37,7 @@ http:
 # generate errors code
 errors:
 	protoc --proto_path=. \
-           --proto_path=./third_party \
+           --proto_path=$(KRATOS)/third_party \
            --go_out=paths=source_relative:. \
            --go-errors_out=paths=source_relative:. \
            $(API_PROTO_FILES)
@@ -68,6 +68,13 @@ generate:
 # build
 build:
 	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+
+.PHONY: clean
+#clean
+clean:
+	find . -regex ".*/*.pb[.validate]*.go" | xargs rm -rf
+	find api -name "*.swagger.json" | xargs rm -rf
+	rm -rf ./bin
 
 .PHONY: test
 # test
