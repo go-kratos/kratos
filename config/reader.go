@@ -48,29 +48,7 @@ func (r *reader) Merge(kvs ...*KeyValue) error {
 }
 
 func (r *reader) Value(path string) (Value, bool) {
-	var (
-		next = r.values
-		keys = strings.Split(path, ".")
-		last = len(keys) - 1
-	)
-	for idx, key := range keys {
-		value, ok := next[key]
-		if !ok {
-			return nil, false
-		}
-		if idx == last {
-			av := &atomicValue{}
-			av.Store(value)
-			return av, true
-		}
-		switch vm := value.(type) {
-		case map[string]interface{}:
-			next = vm
-		default:
-			return nil, false
-		}
-	}
-	return nil, false
+	return readValue(r.values, path)
 }
 
 func (r *reader) Source() ([]byte, error) {
@@ -112,6 +90,34 @@ func convertMap(src interface{}) interface{} {
 	default:
 		return src
 	}
+}
+
+// readValue read Value in given map[string]interface{}
+// by the given path, will return false if not found.
+func readValue(values map[string]interface{}, path string) (Value, bool) {
+	var (
+		next = values
+		keys = strings.Split(path, ".")
+		last = len(keys) - 1
+	)
+	for idx, key := range keys {
+		value, ok := next[key]
+		if !ok {
+			return nil, false
+		}
+		if idx == last {
+			av := &atomicValue{}
+			av.Store(value)
+			return av, true
+		}
+		switch vm := value.(type) {
+		case map[string]interface{}:
+			next = vm
+		default:
+			return nil, false
+		}
+	}
+	return nil, false
 }
 
 func marshalJSON(v interface{}) ([]byte, error) {
