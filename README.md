@@ -25,6 +25,8 @@ Kratos is a microservice-oriented governance framework implements by golang, whi
 - Multiple data sources are supported for [configurations](https://go-kratos.dev/en/docs/component/config) and dynamic configurations (use atomic operations).
 - In the protocol of HTTP/gRPC, use uniform [metadata](https://go-kratos.dev/en/docs/component/metadata) transfer method.
 - You can define [errors](https://go-kratos.dev/en/docs/component/errors/) in protos and generate enums with protoc-gen-go.
+- You can define [verification rules]([examples/validate](https://go-kratos.dev/docs/component/middleware/validate)) in Protobuf which is supported by HTTP/gRPC service.
+- [Swagger API](https://go-kratos.dev/docs/guide/openapi) generated Automatically and embed Swagger UI endpoint can be started by adding [Swagger plugin](https://github.com/go-kratos/swagger-api).
 
 Kratos is accessible, powerful, and provides tools required for large, robust applications.
 

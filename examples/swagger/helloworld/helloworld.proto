@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package helloworld;
+
+import "google/api/annotations.proto";
+import "reply/reply.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/go-kratos/kratos/examples/swagger/helloworld;helloworld";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+	info: {
+		title: "Helloworld examples";
+		version: "1.0";
+		contact: {
+			name: "gRPC-Gateway project";
+			url: "https://github.com/grpc-ecosystem/grpc-gateway";
+			email: "none@example.com";
+		};
+		license: {
+			name: "BSD 3-Clause License";
+			url: "https://github.com/grpc-ecosystem/grpc-gateway/blob/master/LICENSE.txt";
+		};
+		extensions: {
+			key: "x-something-something";
+			value {
+				string_value: "yadda";
+			}
+		}
+  };
+};
+
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  rpc SayHello (HelloRequest) returns (HelloReply)  {
+        option (google.api.http) = {
+            get: "/helloworld/{name}",
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+          external_docs: {
+            url: "https://github.com/grpc-ecosystem/grpc-gateway";
+            description: "SayHello Query";
+          }
+        };
+  }
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message HelloReply {
+  reply.Reply reply = 1;
+}
