@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "github.com/go-kratos/kratos/cmd/protoc-gen-go-http/internal/testproto/complex/;complex";
+
+package testproto;
+
+
+// SimpleMessage represents a simple message sent to the Echo service.
+message Complex {
+	// Id represents the message identifier.
+	int64 id = 1;
+    string no_one = 2 [json_name="numberOne"];
+    Simple simple = 3 [json_name="very_simple"];
+    repeated string simples = 4;
+}
+
+message Simple {
+    string component = 1;
+}
