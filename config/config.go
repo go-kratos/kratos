@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"reflect"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -76,36 +75,41 @@ func New(opts ...Option) Config {
 	}
 }
 
-// defaultResolver resolve placeholder in map value
+// defaultResolver resolve placeholder (${key:value} or $key) in map value
 func defaultResolver(input map[string]interface{}) error {
-	re := regexp.MustCompile(`\${.+?}`)
-	for k, v := range input {
-		switch value := v.(type) {
-		case string:
-			rset := re.FindAllString(value, -1)
-			for _, s := range rset {
-				args := strings.Split(strings.TrimSpace(s[2:len(s)-1]), ":")
-				if envValue, ok := os.LookupEnv(args[0]); ok {
-					input[k] = envValue
-				} else if len(args) > 1 {
-					// default value
-					input[k] = args[1]
-				} else {
-					input[k] = ""
-				}
-			}
-			//if err != nil {
-			//	return fmt.Errorf("parse template of { %v - %v } error: %w", k, v, err)
-			//}
-			// TODO: get key value
-		case map[string]interface{}:
-			if err := defaultResolver(value); err != nil {
-				return err
-			}
-			// TODO: case []interface{}:
+	mapper := func(name string) string {
+		args := strings.Split(strings.TrimSpace(name), ":")
+		if v, has := readValue(input, args[0]); has {
+			s, _ := v.String()
+			return s
+		} else if len(args) > 1 { // default value
+			return args[1]
 		}
+		return ""
 	}
-	return nil
+
+	var resolve func(map[string]interface{}) error
+	resolve = func(sub map[string]interface{}) error {
+		for k, v := range sub {
+			switch vt := v.(type) {
+			case string:
+				sub[k] = os.Expand(vt, mapper)
+			case map[string]interface{}:
+				if err := resolve(vt); err != nil {
+					return err
+				}
+			case []interface{}:
+				for i, iface := range vt {
+					if s, ok := iface.(string); ok {
+						vt[i] = os.Expand(s, mapper)
+					}
+				}
+				sub[k] = vt
+			}
+		}
+		return nil
+	}
+	return resolve(input)
 }
 
 func (c *config) watch(w Watcher) {

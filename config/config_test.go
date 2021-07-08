@@ -1,9 +1,7 @@
 package config
 
 import (
-	"fmt"
-	"os"
-	"strconv"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,22 +9,11 @@ import (
 
 func TestDefaultResolver(t *testing.T) {
 	var (
-		envString = "8080"
-		envInt    = 10
-		envBool   = true
-		envFloat  = 0.9
+		portString = "8080"
+		countInt   = 10
+		enableBool = true
+		rateFloat  = 0.9
 	)
-	var err error
-	err = os.Setenv("PORT", envString)
-	assert.NoError(t, err)
-	err = os.Setenv("COUNT", strconv.Itoa(envInt))
-	assert.NoError(t, err)
-	err = os.Setenv("ENABLE", strconv.FormatBool(envBool))
-	assert.NoError(t, err)
-	err = os.Setenv("RATE", fmt.Sprintf("%v", envFloat))
-	assert.NoError(t, err)
-	err = os.Setenv("EMPTY", "")
-	assert.NoError(t, err)
 
 	data := map[string]interface{}{
 		"foo": map[string]interface{}{
@@ -40,6 +27,11 @@ func TestDefaultResolver(t *testing.T) {
 				"array":    []interface{}{"${PORT}", "${NOTEXIST:8081}"},
 			},
 		},
+		"PORT":   "8080",
+		"COUNT":  "10",
+		"ENABLE": "true",
+		"RATE":   "0.9",
+		"EMPTY":  "",
 	}
 
 	tests := []struct {
@@ -55,37 +47,33 @@ func TestDefaultResolver(t *testing.T) {
 		{
 			name:   "test string with default",
 			path:   "foo.bar.port",
-			expect: envString,
+			expect: portString,
 		},
 		{
 			name:   "test int with default",
 			path:   "foo.bar.count",
-			expect: envInt,
+			expect: countInt,
 		},
 		{
 			name:   "test bool with default",
 			path:   "foo.bar.enable",
-			expect: envBool,
+			expect: enableBool,
 		},
 		{
-			name:   "test float with default",
+			name:   "test float without default",
 			path:   "foo.bar.rate",
-			expect: envFloat,
+			expect: rateFloat,
 		},
 		{
 			name:   "test empty value with default",
 			path:   "foo.bar.empty",
 			expect: "",
 		},
-		//TODO: add array test case
-
-		// // can not support xml config template because
-		// // we can not decode xml to map[string]interface{}
-		//{
-		//	name: "xml",
-		//	path: "http.server.port",
-		//	expect: envString,
-		//},
+		{
+			name:   "test array",
+			path:   "foo.bar.array",
+			expect: []interface{}{portString, "8081"},
+		},
 	}
 
 	for _, test := range tests {
@@ -116,7 +104,10 @@ func TestDefaultResolver(t *testing.T) {
 					}
 				default:
 					actual = v.Load()
-					assert.Equal(t, test.expect, actual, "interface{} value should be equal")
+					if !reflect.DeepEqual(test.expect, actual) {
+						t.Logf("expect: %#v, actural: %#v", test.expect, actual)
+						t.Fail()
+					}
 				}
 				if err != nil {
 					t.Error(err)
