@@ -25,6 +25,11 @@ func TestDefaultRequestDecoder(t *testing.T) {
 	assert.Nil(t, err1)
 	assert.Equal(t, "1", v1.A)
 	assert.Equal(t, int64(2), v1.B)
+
+	v2 := &struct {
+	}{}
+	err2 := DefaultRequestDecoder(req1, &v2)
+	assert.Nil(t, err2)
 }
 
 type mockResponseWriter struct {
