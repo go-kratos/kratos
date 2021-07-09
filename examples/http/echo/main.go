@@ -9,11 +9,11 @@ import (
 
 func main() {
 	router := echo.New()
-	router.GET("/home", func(context echo.Context) error {
-		return context.JSON(200,"Hello echo")
+	router.GET("/home", func(ctx echo.Context) error {
+		return ctx.JSON(200,"Hello echo")
 	})
 
-	httpSrv := http.NewServer(http.Address(":9527"))
+	httpSrv := http.NewServer(http.Address(":8000"))
 	httpSrv.HandlePrefix("/", router)
 
 	app := kratos.New(
