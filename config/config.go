@@ -2,12 +2,10 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"sync"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/log"
 
 	// init encoding
@@ -50,17 +48,9 @@ type config struct {
 // New new a config with options.
 func New(opts ...Option) Config {
 	options := options{
-		logger: log.DefaultLogger,
-		decoder: func(src *KeyValue, target map[string]interface{}) error {
-			if src.Format == "" {
-				target[src.Key] = src.Value
-				return nil
-			}
-			if codec := encoding.GetCodec(src.Format); codec != nil {
-				return codec.Unmarshal(src.Value, &target)
-			}
-			return fmt.Errorf("unsupported key: %s format: %s", src.Key, src.Format)
-		},
+		logger:   log.DefaultLogger,
+		decoder:  defaultDecoder,
+		resolver: defaultResolver,
 	}
 	for _, o := range opts {
 		o(&options)

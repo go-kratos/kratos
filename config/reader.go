@@ -43,6 +43,9 @@ func (r *reader) Merge(kvs ...*KeyValue) error {
 			return err
 		}
 	}
+	if err := r.opts.resolver(merged); err != nil {
+		return err
+	}
 	r.values = merged
 	return nil
 }
