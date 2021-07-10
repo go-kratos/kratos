@@ -2,14 +2,10 @@ package config
 
 import (
 	"errors"
-	"fmt"
-	"os"
 	"reflect"
-	"strings"
 	"sync"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/log"
 
 	// init encoding
@@ -52,17 +48,8 @@ type config struct {
 // New new a config with options.
 func New(opts ...Option) Config {
 	options := options{
-		logger: log.DefaultLogger,
-		decoder: func(src *KeyValue, target map[string]interface{}) error {
-			if src.Format == "" {
-				target[src.Key] = src.Value
-				return nil
-			}
-			if codec := encoding.GetCodec(src.Format); codec != nil {
-				return codec.Unmarshal(src.Value, &target)
-			}
-			return fmt.Errorf("unsupported key: %s format: %s", src.Key, src.Format)
-		},
+		logger:   log.DefaultLogger,
+		decoder:  defaultDecoder,
 		resolver: defaultResolver,
 	}
 	for _, o := range opts {
@@ -73,43 +60,6 @@ func New(opts ...Option) Config {
 		reader: newReader(options),
 		log:    log.NewHelper(options.logger),
 	}
-}
-
-// defaultResolver resolve placeholder (${key:value} or $key) in map value
-func defaultResolver(input map[string]interface{}) error {
-	mapper := func(name string) string {
-		args := strings.Split(strings.TrimSpace(name), ":")
-		if v, has := readValue(input, args[0]); has {
-			s, _ := v.String()
-			return s
-		} else if len(args) > 1 { // default value
-			return args[1]
-		}
-		return ""
-	}
-
-	var resolve func(map[string]interface{}) error
-	resolve = func(sub map[string]interface{}) error {
-		for k, v := range sub {
-			switch vt := v.(type) {
-			case string:
-				sub[k] = os.Expand(vt, mapper)
-			case map[string]interface{}:
-				if err := resolve(vt); err != nil {
-					return err
-				}
-			case []interface{}:
-				for i, iface := range vt {
-					if s, ok := iface.(string); ok {
-						vt[i] = os.Expand(s, mapper)
-					}
-				}
-				sub[k] = vt
-			}
-		}
-		return nil
-	}
-	return resolve(input)
 }
 
 func (c *config) watch(w Watcher) {
