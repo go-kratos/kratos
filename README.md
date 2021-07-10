@@ -93,6 +93,10 @@ Thank you for considering contributing to the Kratos framework! The contribution
 <a href="https://github.com/go-kratos/kratos/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=go-kratos/kratos" />
 </a>
+
+## License
+
+The Kratos framework is open-sourced software licensed under the [MIT license](./LICENSE).
   
 ## Acknowledgments
   
@@ -103,7 +107,3 @@ The following project had particular influence on kratos's design.
 - [google/go-cloud](https://github.com/google/go-cloud) is go cloud development kit.
 - [tal-tech/go-zero](https://github.com/tal-tech/go-zero) is a web and rpc framework with lots of builtin engineering practices.
 - [beego/beego](https://github.com/beego/beego) is a web framework including RESTful APIs, web apps and backend services.
-
-## License
-
-The Kratos framework is open-sourced software licensed under the [MIT license](./LICENSE).
