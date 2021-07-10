@@ -97,3 +97,13 @@ Thank you for considering contributing to the Kratos framework! The contribution
 ## License
 
 The Kratos framework is open-sourced software licensed under the [MIT license](./LICENSE).
+  
+## Acknowledgments
+  
+The following project had particular influence on kratos's design.
+  
+- [go-kit/kit](https://github.com/go-kit/kit) is a programming toolkit for building microservices in go.
+- [asim/go-micro](https://github.com/asim/go-micro) a distributed systems development framework.
+- [google/go-cloud](https://github.com/google/go-cloud) is go cloud development kit.
+- [tal-tech/go-zero](https://github.com/tal-tech/go-zero) is a web and rpc framework with lots of builtin engineering practices.
+- [beego/beego](https://github.com/beego/beego) is a web framework including RESTful APIs, web apps and backend services.
