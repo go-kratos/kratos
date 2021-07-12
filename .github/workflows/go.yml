@@ -43,6 +43,7 @@ jobs:
         go test ./...
 
     - name: Lint
-      run: |
-        go get golang.org/x/lint/golint
-        golint ./...
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: v1.29
+        args: --disable-all
