@@ -47,6 +47,7 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Lint
         uses: golangci/golangci-lint-action@v2
         with:
