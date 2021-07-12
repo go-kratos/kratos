@@ -22,9 +22,10 @@ require (
 	github.com/go-kratos/kratos/cmd/kratos/v2 v2.0.0-20210705034112-e9969bc65553 // indirect
 	github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2 v2.0.0-20210705034112-e9969bc65553 // indirect
 	github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2 v2.0.0-20210705034112-e9969bc65553 // indirect
-	github.com/go-kratos/kratos/v2 v2.0.0-rc6
+	github.com/go-kratos/kratos/v2 v2.0.0-rc7
 	github.com/go-kratos/nacos v0.1.0
 	github.com/go-kratos/prometheus v0.0.0-20210522055322-137e29e7cf47
+	github.com/go-kratos/swagger-api v0.1.8
 	github.com/go-playground/validator/v10 v10.6.1 // indirect
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.9.0
@@ -34,7 +35,6 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/gorilla/websocket v1.4.2
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.5.0 // indirect
 	github.com/hashicorp/consul/api v1.8.1
 	github.com/hashicorp/go-hclog v0.16.1 // indirect
 	github.com/hashicorp/go-sockaddr v1.0.2 // indirect
@@ -44,6 +44,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/labstack/echo/v4 v4.3.0
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/longXboy/grpc-gateway/v2 v2.0.0-20210707031540-bd2d73d86cee
 	github.com/lyft/protoc-gen-star v0.5.3 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
