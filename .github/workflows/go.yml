@@ -43,10 +43,14 @@ jobs:
         go build ./...
         go test ./...
 
-    - name: Lint
-      uses: golangci/golangci-lint-action@v2
-      with:
-        version: v1.41
-        args: --disable-all --new-from-rev=HEAD~
-        skip-go-installation: true
-        skip-pkg-cache: true
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.41
+          args: --disable-all --new-from-rev=HEAD~
+          skip-go-installation: true
+          skip-pkg-cache: true
