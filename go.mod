@@ -8,7 +8,6 @@ require (
 	github.com/go-playground/form/v4 v4.1.3
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/mux v1.8.0
-	github.com/gorilla/schema v1.2.0
 	github.com/imdario/mergo v0.3.12
 	github.com/stretchr/testify v1.7.0
 	go.opentelemetry.io/otel v1.0.0-RC1
