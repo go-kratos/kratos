@@ -96,7 +96,8 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		ints = append(ints, options.ints...)
 	}
 	var grpcOpts = []grpc.DialOption{
-		grpc.WithBalancerName(roundrobin.Name),
+		//todo: grpc.WithBalancerName is deprecated.
+		grpc.WithBalancerName(roundrobin.Name), //nolint:staticcheck
 		grpc.WithChainUnaryInterceptor(ints...),
 	}
 	if options.discovery != nil {

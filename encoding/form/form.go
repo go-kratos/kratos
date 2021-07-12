@@ -67,10 +67,7 @@ func (c codec) Unmarshal(data []byte, v interface{}) error {
 		return MapProto(m, vs)
 	}
 
-	if err := c.decoder.Decode(v, vs); err != nil {
-		return err
-	}
-	return nil
+	return c.decoder.Decode(v, vs)
 }
 
 func (codec) Name() string {
