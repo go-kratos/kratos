@@ -68,7 +68,7 @@ func (v *atomicValue) Float() (float64, error) {
 	case int64:
 		return float64(val), nil
 	case string:
-		// todo: SA1030: 'bitSize' argument is invalid, must be either 32 or 64
+		//todo: SA1030: 'bitSize' argument is invalid, must be either 32 or 64
 		return strconv.ParseFloat(val, 10) //nolint: staticcheck
 	}
 	return 0.0, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
