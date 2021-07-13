@@ -24,10 +24,13 @@ func TestDefaultResolver(t *testing.T) {
 				"enable":   "${ENABLE:false}",
 				"rate":     "${RATE}",
 				"empty":    "${EMPTY:foobar}",
-				"array":    []interface{}{"${PORT}", "${NOTEXIST:8081}"},
-				"value1":   "${test.value}",
-				"value2":   "$PORT",
-				"value3":   "$PORT:default",
+				"array": []interface{}{
+					"${PORT}",
+					map[string]interface{}{"foobar": "${NOTEXIST:8081}"},
+				},
+				"value1": "${test.value}",
+				"value2": "$PORT",
+				"value3": "$PORT:default",
 			},
 		},
 		"test": map[string]interface{}{
@@ -78,7 +81,7 @@ func TestDefaultResolver(t *testing.T) {
 		{
 			name:   "test array",
 			path:   "foo.bar.array",
-			expect: []interface{}{portString, "8081"},
+			expect: []interface{}{portString, map[string]interface{}{"foobar": "8081"}},
 		},
 		{
 			name:   "test ${test.value}",
