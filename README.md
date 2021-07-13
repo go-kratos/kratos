@@ -8,7 +8,7 @@
 <a href="https://discord.gg/BWzJsUJ"><img src="https://img.shields.io/discord/766619759214854164?label=chat&logo=discord" alt="Discord"></a>
 </p>
   
-###### Translate to: [简体中文](README_zh.md)
+##### Translate to: [简体中文](README_zh.md)
 
 ## About Kratos
   
@@ -16,23 +16,23 @@
 
 Kratos is a microservice-oriented governance framework implements by golang, which offers convenient capabilities to help you quickly build a bulletproof application from scratch, such as:
 
-- The [communication protocol](https://go-kratos.dev/docs/component/api) is based on the HTTP/gRPC through the definition of Protobuf.
-- Abstract [transport](https://go-kratos.dev/en/docs/component/transport/overview) layer are support: [HTTP](https://go-kratos.dev/docs/component/transport/http) / [gRPC](https://go-kratos.dev/docs/component/transport/grpc).
-- Powerful [middleware](https://go-kratos.dev/en/docs/component/middleware/overview) design, support: [Tracing (OpenTelemetry)](https://go-kratos.dev/docs/component/middleware/tracing)、[Metrics (Prometheus is default)](https://go-kratos.dev/docs/component/middleware/metrics)、[Recovery](https://go-kratos.dev/en/docs/component/middleware/recovery) and more.
+- The [communication protocol](https://go-kratos.dev/en/docs/component/api) is based on the HTTP/gRPC through the definition of Protobuf.
+- Abstract [transport](https://go-kratos.dev/en/docs/component/transport/overview) layer are support: [HTTP](https://go-kratos.dev/en/docs/component/transport/http) / [gRPC](https://go-kratos.dev/en/docs/component/transport/grpc).
+- Powerful [middleware](https://go-kratos.dev/en/docs/component/middleware/overview) design, support: [Tracing (OpenTelemetry)](https://go-kratos.dev/en/docs/component/middleware/tracing)、[Metrics (Prometheus is default)](https://go-kratos.dev/en/docs/component/middleware/metrics)、[Recovery](https://go-kratos.dev/en/docs/component/middleware/recovery) and more.
 - [Registry](https://go-kratos.dev/en/docs/component/registry) interface able to be connected with various other centralized registries through plug-ins.
 - The [standard log interfaces](https://go-kratos.dev/en/docs/component/log) ease the integration of the third-party log libs and logs are collected through the *Fluentd*.
 - The selection of the content [encoding](https://go-kratos.dev/en/docs/component/encoding) is automatically supported by Accept and Content-Type.
 - Multiple data sources are supported for [configurations](https://go-kratos.dev/en/docs/component/config) and dynamic configurations (use atomic operations).
 - In the protocol of HTTP/gRPC, use uniform [metadata](https://go-kratos.dev/en/docs/component/metadata) transfer method.
 - You can define [errors](https://go-kratos.dev/en/docs/component/errors/) in protos and generate enums with protoc-gen-go.
-- You can define [verification rules]([examples/validate](https://go-kratos.dev/docs/component/middleware/validate)) in Protobuf which is supported by HTTP/gRPC service.
-- [Swagger API](https://go-kratos.dev/docs/guide/openapi) generated Automatically and embed Swagger UI endpoint can be started by adding [Swagger plugin](https://github.com/go-kratos/swagger-api).
+- You can define [verification rules](https://go-kratos.dev/en/docs/component/middleware/validate) in Protobuf which is supported by HTTP/gRPC service.
+- [Swagger API](https://go-kratos.dev/en/docs/guide/openapi) generated Automatically and embed Swagger UI endpoint can be started by adding [Swagger plugin](https://github.com/go-kratos/swagger-api).
 
 Kratos is accessible, powerful, and provides tools required for large, robust applications.
 
 ## Learning Kratos
 
-Kratos has the most extensive and thorough [documentation](https://go-kratos.dev/docs/getting-started/start) and [example](./examples) library of all modern web application frameworks, making it a breeze to get started with the framework.
+Kratos has the most extensive and thorough [documentation](https://go-kratos.dev/en/docs/getting-started/start) and [example](./examples) library of all modern web application frameworks, making it a breeze to get started with the framework.
 
 We also provide a [moderm template](https://github.com/go-kratos/kratos-layout), This template should help reduce the work required to setup up a modern project.
 
@@ -73,7 +73,7 @@ kratos run
   
 Use a browser to open and visit: `http://localhost:8000/helloworld/kratos`, The kratos program is running!
 
-If you need more, please visit the kratos [documentation](https://go-kratos.dev/docs/getting-started/start).
+If you need more, please visit the kratos [documentation](https://go-kratos.dev/en/docs/getting-started/start).
 
 ## Security Vulnerabilities
 
@@ -83,12 +83,12 @@ If you discover a security vulnerability within Kratos, please send an e-mail to
 
 - [Wechat Group](https://github.com/go-kratos/kratos/issues/682)
 - [Discord Group](https://discord.gg/BWzJsUJ)
-- [go-kratos.dev](https://go-kratos.dev)
+- [go-kratos.dev](https://go-kratos.dev/en)
 - QQ Group: 716486124
 
 ## Contributors
 
-Thank you for considering contributing to the Kratos framework! The contribution guide can be found in the [Kratos documention](https://go-kratos.dev/docs/community/contribution).
+Thank you for considering contributing to the Kratos framework! The contribution guide can be found in the [Kratos documention](https://go-kratos.dev/en/docs/community/contribution).
 
 <a href="https://github.com/go-kratos/kratos/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=go-kratos/kratos" />
