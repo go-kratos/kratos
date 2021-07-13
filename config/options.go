@@ -57,7 +57,7 @@ func WithLogger(l log.Logger) Option {
 // to target map[string]interface{} using src.Format codec.
 func defaultDecoder(src *KeyValue, target map[string]interface{}) error {
 	if src.Format == "" {
-		target[src.Key] = src.Value
+		target[src.Key] = string(src.Value)
 		return nil
 	}
 	if codec := encoding.GetCodec(src.Format); codec != nil {

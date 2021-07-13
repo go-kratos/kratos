@@ -45,8 +45,11 @@ func (e *env) Load() (kv []*config.KeyValue, err error) {
 }
 
 func (e *env) Watch() (config.Watcher, error) {
-	panic("watch env var not support")
-	return nil, nil
+	w, err := NewWatcher()
+	if err != nil {
+		return nil, err
+	}
+	return w, nil
 }
 
 func matchPrefix(prefixs []string, s string) (string, bool) {
