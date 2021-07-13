@@ -1,8 +1,6 @@
 package env
 
 import (
-	"fmt"
-
 	"github.com/go-kratos/kratos/v2/config"
 )
 
@@ -17,8 +15,7 @@ func NewWatcher() (config.Watcher, error) {
 // Next will be blocked until the Stop method is called
 func (w *watcher) Next() ([]*config.KeyValue, error) {
 	<-w.exit
-
-	return nil, fmt.Errorf("watcher stoped")
+	return nil, nil
 }
 
 func (w *watcher) Stop() error {
