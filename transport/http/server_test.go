@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -27,6 +28,7 @@ func TestServer(t *testing.T) {
 	ctx := context.Background()
 	srv := NewServer()
 	srv.HandleFunc("/index", fn)
+	srv.HandleFunc("/index/{id:[0-9]+}", fn)
 
 	if e, err := srv.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
 		t.Fatal(e, err)
@@ -52,6 +54,14 @@ func testClient(t *testing.T, srv *Server) {
 		{"POST", "/index"},
 		{"PATCH", "/index"},
 		{"DELETE", "/index"},
+
+		{"GET", "/index/1"},
+		{"PUT", "/index/1"},
+		{"POST", "/index/1"},
+		{"PATCH", "/index/1"},
+		{"DELETE", "/index/1"},
+
+		{"GET", "/index/notfound"},
 	}
 	e, err := srv.Endpoint()
 	if err != nil {
@@ -69,6 +79,13 @@ func testClient(t *testing.T, srv *Server) {
 			t.Fatal(err)
 		}
 		resp, err := client.Do(req)
+
+		if test.path == "/index/notfound" && err != nil {
+			if e, ok := err.(*errors.Error); ok && e.Code == http.StatusNotFound {
+				continue
+			}
+		}
+
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -90,6 +107,11 @@ func testClient(t *testing.T, srv *Server) {
 	for _, test := range tests {
 		var res testData
 		err := client.Invoke(context.Background(), test.method, test.path, nil, &res)
+		if test.path == "/index/notfound" && err != nil {
+			if e, ok := err.(*errors.Error); ok && e.Code == http.StatusNotFound {
+				continue
+			}
+		}
 		if err != nil {
 			t.Fatalf("invoke  error %v", err)
 		}
