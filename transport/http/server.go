@@ -174,11 +174,6 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				request:      req,
 				pathTemplate: pathTemplate,
 			}
-			if r := mux.CurrentRoute(req); r != nil {
-				if path, err := r.GetPathTemplate(); err == nil {
-					tr.operation = path
-				}
-			}
 			ctx = transport.NewServerContext(ctx, tr)
 			next.ServeHTTP(w, req.WithContext(ctx))
 		})
