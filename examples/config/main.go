@@ -27,7 +27,7 @@ func main() {
 
 	// Defines the config JSON Field
 	var v struct {
-		Serivce struct {
+		Service struct {
 			Name    string `json:"name"`
 			Version string `json:"version"`
 		} `json:"service"`
