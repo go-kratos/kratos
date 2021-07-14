@@ -115,6 +115,9 @@ app.Run()
 * Website:  [go-kratos.dev](https://go-kratos.dev)
 * QQ Group: 716486124
 
+## WeChat Official Account
+![kratos](docs/images/wechat.png)
+
 ## Conventional commits
 提交信息的结构应该如下所示:
 ```text
