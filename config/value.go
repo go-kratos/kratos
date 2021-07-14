@@ -78,6 +78,8 @@ func (v *atomicValue) String() (string, error) {
 		return val, nil
 	case bool, int, int32, int64, float64:
 		return fmt.Sprint(val), nil
+	case []byte:
+		return string(val), nil
 	default:
 		if s, ok := val.(fmt.Stringer); ok {
 			return s.String(), nil

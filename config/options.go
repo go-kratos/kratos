@@ -92,8 +92,13 @@ func defaultResolver(input map[string]interface{}) error {
 				}
 			case []interface{}:
 				for i, iface := range vt {
-					if s, ok := iface.(string); ok {
-						vt[i] = os.Expand(s, mapper)
+					switch it := iface.(type) {
+					case string:
+						vt[i] = os.Expand(it, mapper)
+					case map[string]interface{}:
+						if err := resolve(it); err != nil {
+							return err
+						}
 					}
 				}
 				sub[k] = vt
