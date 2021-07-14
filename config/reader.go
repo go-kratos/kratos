@@ -1,6 +1,8 @@
 package config
 
 import (
+	"bytes"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -59,15 +61,20 @@ func (r *reader) Source() ([]byte, error) {
 }
 
 func cloneMap(src map[string]interface{}) (map[string]interface{}, error) {
-	data, err := marshalJSON(src)
+	// https://gist.github.com/soroushjp/0ec92102641ddfc3ad5515ca76405f4d
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	dec := gob.NewDecoder(&buf)
+	err := enc.Encode(src)
 	if err != nil {
 		return nil, err
 	}
-	dst := make(map[string]interface{})
-	if err = unmarshalJSON(data, &dst); err != nil {
+	var copy map[string]interface{}
+	err = dec.Decode(&copy)
+	if err != nil {
 		return nil, err
 	}
-	return dst, nil
+	return copy, nil
 }
 
 func convertMap(src interface{}) interface{} {
