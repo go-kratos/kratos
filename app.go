@@ -162,6 +162,7 @@ func NewContext(ctx context.Context, s AppInfo) context.Context {
 
 // FromContext returns the Transport value stored in ctx, if any.
 func FromContext(ctx context.Context) (s AppInfo, ok bool) {
-	s, ok = ctx.Value(appKey{}).(AppInfo)
+	 s, ok = ctx.Value(appKey{}).(AppInfo)
 	return
 }
+
