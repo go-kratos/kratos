@@ -150,7 +150,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 
 	middlewareRule, ok := proto.GetExtension(m.Desc.Options(), middleware.E_Middlewares).(*middleware.MiddleRule)
 	if ok {
-		if len(middlewareRule.Middlewares) == 0 {
+		if middlewareRule == nil || middlewareRule.Middlewares == nil || len(middlewareRule.Middlewares) == 0 {
 			return md
 		}
 		var middlewares = make([]string, 0, len(middlewareRule.Middlewares))
