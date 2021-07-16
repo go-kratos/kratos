@@ -15,4 +15,4 @@ data:
     write_timeout: 0.2s
   kafka:
     addr:
-      - 39.106.218.150:9092
+      - localhost:9092
