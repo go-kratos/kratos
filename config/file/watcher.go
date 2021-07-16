@@ -18,7 +18,9 @@ func newWatcher(f *file) (config.Watcher, error) {
 	if err != nil {
 		return nil, err
 	}
-	fw.Add(f.path)
+	if err := fw.Add(f.path); err != nil {
+		return nil, err
+	}
 	return &watcher{f: f, fw: fw}, nil
 }
 
@@ -26,8 +28,10 @@ func (w *watcher) Next() ([]*config.KeyValue, error) {
 	select {
 	case event := <-w.fw.Events:
 		if event.Op == fsnotify.Rename {
-			if _, err := os.Stat(event.Name); err == nil || os.IsExist(err) {
-				w.fw.Add(event.Name)
+			if _, err := os.Stat(event.Name); err == nil && os.IsExist(err) {
+				if err := w.fw.Add(event.Name); err != nil {
+					return nil, err
+				}
 			}
 		}
 		fi, err := os.Stat(w.f.path)
@@ -36,7 +40,7 @@ func (w *watcher) Next() ([]*config.KeyValue, error) {
 		}
 		path := w.f.path
 		if fi.IsDir() {
-			path = filepath.Join(w.f.path, event.Name)
+			path = filepath.Join(w.f.path, filepath.Base(event.Name))
 		}
 		kv, err := w.f.loadFile(path)
 		if err != nil {
