@@ -29,7 +29,7 @@ func NewGreeterService(uc *biz.GreeterUsecase, logger log.Logger, d *data.Data) 
 		service.log.Infow("type", "subscribe", "topic", msg.Topic, "value", string(msg.Value))
 	})
 	if err != nil {
-		return nil
+		panic(err)
 	}
 	// kafka Subscribe topic channel
 	go service.kafkaQueue()
