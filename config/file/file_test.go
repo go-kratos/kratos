@@ -110,14 +110,23 @@ func testWatchFile(t *testing.T, path string) {
 		t.Error(err)
 	}
 
-	err = ioutil.WriteFile(path, []byte(_testJSONUpdate), 0666)
+	f, err := os.OpenFile(path, os.O_RDWR, 0)
 	if err != nil {
 		t.Error(err)
 	}
+	defer f.Close()
+	_, err = f.WriteString(_testJSONUpdate)
+	if err != nil {
+		t.Error(err)
+	}
+	//err = ioutil.WriteFile(path, []byte(_testJSONUpdate), 0666)
+	//if err != nil {
+	//	t.Error(err)
+	//}
 	kvs, err := watch.Next()
 	assert.Nil(t, err)
 	assert.Equal(t, string(kvs[0].Value), _testJSONUpdate)
-	_, _ = watch.Next()
+	//_, _ = watch.Next()
 
 	newFilepath := filepath.Join(filepath.Dir(path), "test1.json")
 	if err := os.Rename(path, newFilepath); err != nil {
@@ -145,14 +154,23 @@ func testWatchDir(t *testing.T, path, file string) {
 		t.Error(err)
 	}
 
-	err = ioutil.WriteFile(file, []byte(_testJSONUpdate), 0666)
+	f, err := os.OpenFile(file, os.O_RDWR, 0)
 	if err != nil {
 		t.Error(err)
 	}
+	defer f.Close()
+	_, err = f.WriteString(_testJSONUpdate)
+	if err != nil {
+		t.Error(err)
+	}
+	//err = ioutil.WriteFile(file, []byte(_testJSONUpdate), 0666)
+	//if err != nil {
+	//	t.Error(err)
+	//}
 	kvs, err := watch.Next()
 	assert.Nil(t, err)
 	assert.Equal(t, string(kvs[0].Value), _testJSONUpdate)
-	_, _ = watch.Next()
+	//_, _ = watch.Next()
 
 	newFilepath := filepath.Join(path, "test1.json")
 	if err := os.Rename(file, newFilepath); err != nil {
