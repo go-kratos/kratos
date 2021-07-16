@@ -119,14 +119,9 @@ func testWatchFile(t *testing.T, path string) {
 	if err != nil {
 		t.Error(err)
 	}
-	//err = ioutil.WriteFile(path, []byte(_testJSONUpdate), 0666)
-	//if err != nil {
-	//	t.Error(err)
-	//}
 	kvs, err := watch.Next()
 	assert.Nil(t, err)
 	assert.Equal(t, string(kvs[0].Value), _testJSONUpdate)
-	//_, _ = watch.Next()
 
 	newFilepath := filepath.Join(filepath.Dir(path), "test1.json")
 	if err := os.Rename(path, newFilepath); err != nil {
@@ -163,30 +158,10 @@ func testWatchDir(t *testing.T, path, file string) {
 	if err != nil {
 		t.Error(err)
 	}
-	//err = ioutil.WriteFile(file, []byte(_testJSONUpdate), 0666)
-	//if err != nil {
-	//	t.Error(err)
-	//}
+
 	kvs, err := watch.Next()
 	assert.Nil(t, err)
 	assert.Equal(t, string(kvs[0].Value), _testJSONUpdate)
-	//_, _ = watch.Next()
-
-	//newFilepath := filepath.Join(path, "test1.json")
-	//if err := os.Rename(file, newFilepath); err != nil {
-	//	t.Error(err)
-	//}
-	//kvs, err = watch.Next()
-	//assert.Nil(t, err)
-	//assert.Equal(t, string(kvs[0].Value), _testJSONUpdate)
-	//_, _ = watch.Next()
-	//
-	//err = watch.Stop()
-	//assert.Nil(t, err)
-	//
-	//if err := os.Rename(newFilepath, file); err != nil {
-	//	t.Error(err)
-	//}
 }
 
 func testSource(t *testing.T, path string, data []byte) {
