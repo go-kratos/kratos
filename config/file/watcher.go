@@ -28,7 +28,7 @@ func (w *watcher) Next() ([]*config.KeyValue, error) {
 	select {
 	case event := <-w.fw.Events:
 		if event.Op == fsnotify.Rename {
-			if _, err := os.Stat(event.Name); err == nil && os.IsExist(err) {
+			if _, err := os.Stat(event.Name); err == nil || os.IsExist(err) {
 				if err := w.fw.Add(event.Name); err != nil {
 					return nil, err
 				}
