@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/config"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -36,6 +37,35 @@ const (
             "age":18
         }
     ]
+}`
+
+	_testJSONUpdate = `
+{
+    "test":{
+        "settings":{
+            "int_key":1000,
+            "float_key":1000.1,
+            "duration_key":10000,
+            "string_key":"string_value"
+        },
+        "server":{
+            "addr":"127.0.0.1",
+            "port":8000
+        }
+    },
+    "foo":[
+        {
+            "name":"nihao",
+            "age":18
+        },
+        {
+            "name":"nihao",
+            "age":18
+        }
+    ],
+	"bar":{
+		"event":"update"
+	}
 }`
 
 //	_testYaml = `
@@ -67,6 +97,71 @@ func TestFile(t *testing.T) {
 	}
 	testSource(t, file, data)
 	testSource(t, path, data)
+	testWatchFile(t, file)
+	testWatchDir(t, path, file)
+}
+
+func testWatchFile(t *testing.T, path string) {
+	t.Log(path)
+
+	s := NewSource(path)
+	watch, err := s.Watch()
+	if err != nil {
+		t.Error(err)
+	}
+
+	f, err := os.OpenFile(path, os.O_RDWR, 0)
+	if err != nil {
+		t.Error(err)
+	}
+	defer f.Close()
+	_, err = f.WriteString(_testJSONUpdate)
+	if err != nil {
+		t.Error(err)
+	}
+	kvs, err := watch.Next()
+	assert.Nil(t, err)
+	assert.Equal(t, string(kvs[0].Value), _testJSONUpdate)
+
+	newFilepath := filepath.Join(filepath.Dir(path), "test1.json")
+	if err := os.Rename(path, newFilepath); err != nil {
+		t.Error(err)
+	}
+	kvs, err = watch.Next()
+	assert.NotNil(t, err)
+	assert.Nil(t, kvs)
+
+	err = watch.Stop()
+	assert.Nil(t, err)
+
+	if err := os.Rename(newFilepath, path); err != nil {
+		t.Error(err)
+	}
+}
+
+func testWatchDir(t *testing.T, path, file string) {
+	t.Log(path)
+	t.Log(file)
+
+	s := NewSource(path)
+	watch, err := s.Watch()
+	if err != nil {
+		t.Error(err)
+	}
+
+	f, err := os.OpenFile(file, os.O_RDWR, 0)
+	if err != nil {
+		t.Error(err)
+	}
+	defer f.Close()
+	_, err = f.WriteString(_testJSONUpdate)
+	if err != nil {
+		t.Error(err)
+	}
+
+	kvs, err := watch.Next()
+	assert.Nil(t, err)
+	assert.Equal(t, string(kvs[0].Value), _testJSONUpdate)
 }
 
 func testSource(t *testing.T, path string, data []byte) {
