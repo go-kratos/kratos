@@ -96,7 +96,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 		select {
 		case e := <-done:
 			if e != nil {
-				return r, nil
+				return nil, e
 			}
 			return r, nil
 		case <-ctx.Done():
