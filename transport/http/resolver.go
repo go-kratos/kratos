@@ -60,9 +60,12 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 			var executed bool
 			services, err := watcher.Next()
 			if err != nil {
-				r.logger.Errorf("http client watch services got unexpected error:=%v", err)
+				r.logger.Errorf("http client watch service %v got unexpected error:=%v", target, err)
 				if block {
-					done <- err
+					select {
+					case done <- err:
+					default:
+					}
 				}
 				return
 			}
@@ -70,7 +73,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 			for _, in := range services {
 				_, endpoint, err := parseEndpoint(in.Endpoints)
 				if err != nil {
-					r.logger.Errorf("Failed to parse discovery endpoint: %v error %v", in.Endpoints, err)
+					r.logger.Errorf("Failed to parse (%v) discovery endpoint: %v error %v", target, in.Endpoints, err)
 					continue
 				}
 				if endpoint == "" {
@@ -94,10 +97,12 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 		select {
 		case e := <-done:
 			if e != nil {
-				return nil, e
+				watcher.Stop()
 			}
-			return r, nil
+			return r, e
 		case <-ctx.Done():
+			r.logger.Errorf("http client watch service %v reaching context deadline!", target)
+			watcher.Stop()
 			return nil, ctx.Err()
 		}
 	}
