@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-
 	"log"
 
 	"github.com/go-kratos/etcd/registry"
