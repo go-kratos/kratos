@@ -45,6 +45,7 @@ func callHTTP(r *registry.Registry) {
 		context.Background(),
 		http.WithEndpoint("discovery:///helloworld"),
 		http.WithDiscovery(r),
+		http.WithBlock(),
 	)
 	if err != nil {
 		log.Fatal(err)

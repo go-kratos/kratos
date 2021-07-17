@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 	"sync"
-
+	
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -44,7 +44,7 @@ type resolver struct {
 	logger  *log.Helper
 }
 
-func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, updater Updater) (*resolver, error) {
+func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, updater Updater, block bool) (*resolver, error) {
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 		watcher: watcher,
 		logger:  log.NewHelper(log.DefaultLogger),
 	}
-	done := make(chan bool, 1)
+	done := make(chan struct{}, 1)
 	go func() {
 		var executed bool
 		for {
@@ -81,13 +81,22 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 				r.nodes = nodes
 				r.lock.Unlock()
 			}
-			if !executed {
-				executed = true
-				done <- true
+			if block {
+				if !executed {
+					executed = true
+					done <- struct{}{}
+				}
 			}
 		}
 	}()
-	<-done
+	if block {
+		select {
+		case <-done:
+			return r, nil
+		case <-ctx.Done():
+			return r, nil
+		}
+	}
 	return r, nil
 }
 
