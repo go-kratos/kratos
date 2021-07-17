@@ -44,7 +44,7 @@ func main() {
 	)
 	s := &server{}
 	pb.RegisterGreeterServer(grpcSrv, s)
-	pb.RegisterGreeterHTTPServer(httpSrv,s)
+	pb.RegisterGreeterHTTPServer(httpSrv, s)
 	app := kratos.New(
 		kratos.Name("helloworld"),
 		kratos.Server(
