@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package api.helloworld.v1;
+import "errors/errors.proto";
+
+option go_package = "event/api/helloworld/v1;v1";
+option java_multiple_files = true;
+option java_package = "helloworld.v1.errors";
+option objc_class_prefix = "APIHelloworldErrors";
+
+enum ErrorReason {
+  option (errors.default_code) = 500;
+
+  USER_NOT_FOUND = 0 [(errors.code) = 404];
+  CONTENT_MISSING = 1 [(errors.code) = 400];
+}
