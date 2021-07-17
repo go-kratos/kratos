@@ -44,7 +44,7 @@ type resolver struct {
 	logger  *log.Helper
 }
 
-func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, updater Updater) (*resolver, error) {
+func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, updater Updater, block bool) (*resolver, error) {
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
@@ -54,11 +54,16 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 		watcher: watcher,
 		logger:  log.NewHelper(log.DefaultLogger),
 	}
+	done := make(chan error, 1)
 	go func() {
 		for {
+			var executed bool
 			services, err := watcher.Next()
 			if err != nil {
 				r.logger.Errorf("http client watch services got unexpected error:=%v", err)
+				if block {
+					done <- err
+				}
 				return
 			}
 			var nodes []*registry.ServiceInstance
@@ -79,8 +84,23 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 				r.nodes = nodes
 				r.lock.Unlock()
 			}
+			if block && !executed {
+				executed = true
+				done <- nil
+			}
 		}
 	}()
+	if block {
+		select {
+		case e := <-done:
+			if e != nil {
+				return nil, e
+			}
+			return r, nil
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
 	return r, nil
 }
 
