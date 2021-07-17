@@ -7,6 +7,7 @@ import (
 	"github.com/go-kratos/etcd/registry"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v2/transport/http"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -18,6 +19,11 @@ func main() {
 		panic(err)
 	}
 	r := registry.New(cli)
+	callGRPC(r)
+	callHTTP(r)
+}
+
+func callGRPC(r *registry.Registry) {
 	conn, err := grpc.DialInsecure(
 		context.Background(),
 		grpc.WithEndpoint("discovery:///helloworld"),
@@ -32,4 +38,21 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Printf("[grpc] SayHello %+v\n", reply)
+}
+
+func callHTTP(r *registry.Registry) {
+	conn, err := http.NewClient(
+		context.Background(),
+		http.WithEndpoint("discovery:///helloworld"),
+		http.WithDiscovery(r),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	client := helloworld.NewGreeterHTTPClient(conn)
+	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("[http] SayHello %+v\n", reply)
 }

@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/middleware/recovery"
+	"github.com/go-kratos/kratos/v2/transport/http"
 	"log"
 
 	"github.com/go-kratos/etcd/registry"
@@ -34,13 +36,20 @@ func main() {
 	grpcSrv := grpc.NewServer(
 		grpc.Address(":9000"),
 	)
+	httpSrv := http.NewServer(
+		http.Address(":8000"),
+		http.Middleware(
+			recovery.Recovery(),
+		),
+	)
 	s := &server{}
 	pb.RegisterGreeterServer(grpcSrv, s)
-
+	pb.RegisterGreeterHTTPServer(httpSrv,s)
 	app := kratos.New(
 		kratos.Name("helloworld"),
 		kratos.Server(
 			grpcSrv,
+			httpSrv,
 		),
 		kratos.Registrar(r),
 	)

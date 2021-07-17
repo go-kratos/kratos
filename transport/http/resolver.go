@@ -54,7 +54,9 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 		watcher: watcher,
 		logger:  log.NewHelper(log.DefaultLogger),
 	}
+	done := make(chan bool, 1)
 	go func() {
+		var executed bool
 		for {
 			services, err := watcher.Next()
 			if err != nil {
@@ -79,8 +81,13 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 				r.nodes = nodes
 				r.lock.Unlock()
 			}
+			if !executed {
+				executed = true
+				done <- true
+			}
 		}
 	}()
+	<-done
 	return r, nil
 }
 
