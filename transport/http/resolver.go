@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 	"sync"
-	
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -54,13 +54,16 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 		watcher: watcher,
 		logger:  log.NewHelper(log.DefaultLogger),
 	}
-	done := make(chan struct{}, 1)
+	done := make(chan error, 1)
 	go func() {
-		var executed bool
 		for {
+			var executed bool
 			services, err := watcher.Next()
 			if err != nil {
 				r.logger.Errorf("http client watch services got unexpected error:=%v", err)
+				if block {
+					done <- err
+				}
 				return
 			}
 			var nodes []*registry.ServiceInstance
@@ -84,17 +87,20 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 			if block {
 				if !executed {
 					executed = true
-					done <- struct{}{}
+					done <- nil
 				}
 			}
 		}
 	}()
 	if block {
 		select {
-		case <-done:
+		case e := <-done:
+			if e != nil {
+				return r, nil
+			}
 			return r, nil
 		case <-ctx.Done():
-			return r, nil
+			return nil, ctx.Err()
 		}
 	}
 	return r, nil
