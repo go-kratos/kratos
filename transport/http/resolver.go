@@ -84,11 +84,9 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 				r.nodes = nodes
 				r.lock.Unlock()
 			}
-			if block {
-				if !executed {
-					executed = true
-					done <- nil
-				}
+			if block && !executed {
+				executed = true
+				done <- nil
 			}
 		}
 	}()
