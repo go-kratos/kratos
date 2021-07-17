@@ -45,6 +45,7 @@ type clientOptions struct {
 	balancer     balancer.Balancer
 	discovery    registry.Discovery
 	middleware   []middleware.Middleware
+	block        bool
 }
 
 // WithTransport with client transport.
@@ -119,6 +120,13 @@ func WithBalancer(b balancer.Balancer) ClientOption {
 	}
 }
 
+// WithBlock with client block.
+func WithBlock() ClientOption {
+	return func(o *clientOptions) {
+		o.block = true
+	}
+}
+
 // Client is an HTTP client.
 type Client struct {
 	opts   clientOptions
@@ -148,7 +156,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	var r *resolver
 	if options.discovery != nil {
 		if target.Scheme == "discovery" {
-			if r, err = newResolver(ctx, options.discovery, target, options.balancer); err != nil {
+			if r, err = newResolver(ctx, options.discovery, target, options.balancer, options.block); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
 		} else if _, _, err := host.ExtractHostPort(options.endpoint); err != nil {
