@@ -172,6 +172,10 @@ github.com/go-kratos/consul v0.1.2 h1:vryYF2o3wWQzFyzqKKKc1+GX/FY9T7DSkM3nc/Hy6/
 github.com/go-kratos/consul v0.1.2/go.mod h1:FhxdCfkqaqIYfgpGbzGb8ywM/zV3jk+EBS+WSy1FzQQ=
 github.com/go-kratos/etcd v0.1.0 h1:ewAfloZcpcg2L1QB1VLXYUMdvfUU0i3kAlToHrxTv2g=
 github.com/go-kratos/etcd v0.1.0/go.mod h1:RzWYbka3LjS0v2RbCtADN7d2Ng8eH774ehHlTGgbma4=
+github.com/go-kratos/gin v0.0.0-20210718022314-0365ef99696f h1:BrWyGMOTPEgu1lpecOCOiNClggXehjK6ox00Yb/GhyY=
+github.com/go-kratos/gin v0.0.0-20210718022314-0365ef99696f/go.mod h1:KzE88+mV1QJdmiT+sU2D560ucOXnWZx+4m0OnVcSyzQ=
+github.com/go-kratos/gin v0.1.0 h1:yq5GfZnSNo8cOIqxqPE0FVNQ8fm++oKQBd3/rTTp4oI=
+github.com/go-kratos/gin v0.1.0/go.mod h1:KzE88+mV1QJdmiT+sU2D560ucOXnWZx+4m0OnVcSyzQ=
 github.com/go-kratos/nacos v0.1.0 h1:sUvTsgZ4u88YaKF/jAi2Rdr+hzPCfQtmNjBpiyEbbJ0=
 github.com/go-kratos/nacos v0.1.0/go.mod h1:qhVsyp6RyDDEKLtT0/iTMaN3D7SheRMrYb2bV0jYqjw=
 github.com/go-kratos/prometheus v0.0.0-20210522055322-137e29e7cf47 h1:uJennLdg0rwhrIl0bjsObwub+I3U0vJGAhpK6CYASrM=
