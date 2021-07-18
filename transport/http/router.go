@@ -29,8 +29,8 @@ func newRouter(prefix string, srv *Server, filters ...FilterFunc) *Router {
 	return r
 }
 
-// NewSubRouter returns a new sub router
-func (r *Router) NewSubRouter(prefix string, filters ...FilterFunc) *Router {
+// Group returns a new router group.
+func (r *Router) Group(prefix string, filters ...FilterFunc) *Router {
 	var newFilters []FilterFunc
 	newFilters = append(newFilters, r.filters...)
 	newFilters = append(newFilters, filters...)
