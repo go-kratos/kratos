@@ -16,8 +16,8 @@ import (
 // CmdRun run project command.
 var CmdRun = &cobra.Command{
 	Use:   "run",
-	Short: "run project",
-	Long:  "run project. Example: kratos run",
+	Short: "Run project",
+	Long:  "Run project. Example: kratos run",
 	Run:   Run,
 }
 
