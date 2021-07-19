@@ -22,6 +22,16 @@ func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}HTTP
 	{{- end}}
 }
 
+func New{{.ServiceType}}HTTPServerHandler(s *http.Server, srv {{.ServiceType}}HTTPServer) stdhttp.Handler{
+	muxRouter := mux.NewRouter()
+	r := s.Route("/")
+	{{- range .Methods}}
+
+	muxRouter.Handle("{{.Path}}",r.BuildHandler(_{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv))).Methods("{{.Method}}")
+	{{- end}}
+	return muxRouter
+}
+
 {{range .Methods}}
 func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
