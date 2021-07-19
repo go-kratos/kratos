@@ -8,6 +8,7 @@ import (
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto"
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/run"
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/upgrade"
+	
 	"github.com/spf13/cobra"
 )
 
