@@ -11,6 +11,10 @@ import (
 	"github.com/go-kratos/kratos/v2/metadata"
 )
 
+var _ event.Sender = (*kafkaSender)(nil)
+var _ event.Receiver = (*kafkaReceiver)(nil)
+var _ event.Message = (*Message)(nil)
+
 type Option func(*options)
 
 type options struct {
