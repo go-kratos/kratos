@@ -29,6 +29,14 @@ func newRouter(prefix string, srv *Server, filters ...FilterFunc) *Router {
 	return r
 }
 
+// Group returns a new router group.
+func (r *Router) Group(prefix string, filters ...FilterFunc) *Router {
+	var newFilters []FilterFunc
+	newFilters = append(newFilters, r.filters...)
+	newFilters = append(newFilters, filters...)
+	return newRouter(path.Join(r.prefix, prefix), r.srv, newFilters...)
+}
+
 // Handle registers a new route with a matcher for the URL path and method.
 func (r *Router) Handle(method, relativePath string, h HandlerFunc, filters ...FilterFunc) {
 	next := http.Handler(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {

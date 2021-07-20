@@ -84,7 +84,7 @@ func DialInsecure(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, 
 
 func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.ClientConn, error) {
 	options := clientOptions{
-		timeout: 500 * time.Millisecond,
+		timeout: 2000 * time.Millisecond,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -96,7 +96,8 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		ints = append(ints, options.ints...)
 	}
 	var grpcOpts = []grpc.DialOption{
-		grpc.WithBalancerName(roundrobin.Name),
+		//todo: grpc.WithBalancerName is deprecated.
+		grpc.WithBalancerName(roundrobin.Name), //nolint:staticcheck
 		grpc.WithChainUnaryInterceptor(ints...),
 	}
 	if options.discovery != nil {

@@ -86,6 +86,13 @@ func ErrorEncoder(en EncodeErrorFunc) ServerOption {
 	}
 }
 
+// Endpoint with server endpoint.
+func Endpoint(endpoint *url.URL) ServerOption {
+	return func(o *Server) {
+		o.endpoint = endpoint
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
@@ -174,11 +181,6 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				request:      req,
 				pathTemplate: pathTemplate,
 			}
-			if r := mux.CurrentRoute(req); r != nil {
-				if path, err := r.GetPathTemplate(); err == nil {
-					tr.operation = path
-				}
-			}
 			ctx = transport.NewServerContext(ctx, tr)
 			next.ServeHTTP(w, req.WithContext(ctx))
 		})
@@ -190,6 +192,9 @@ func (s *Server) filter() mux.MiddlewareFunc {
 //   http://127.0.0.1:8000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
 	s.once.Do(func() {
+		if s.endpoint != nil {
+			return
+		}
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
 			s.err = err

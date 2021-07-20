@@ -13,7 +13,7 @@ const (
 	fmtPackage    = protogen.GoImportPath("fmt")
 )
 
-// generateFile generates a _http.pb.go file containing kratos errors definitions.
+// generateFile generates a _errors.pb.go file containing kratos errors definitions.
 func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.GeneratedFile {
 	if len(file.Enums) == 0 {
 		return nil

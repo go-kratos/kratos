@@ -16,8 +16,8 @@ import (
 // CmdRun run project command.
 var CmdRun = &cobra.Command{
 	Use:   "run",
-	Short: "run project",
-	Long:  "run project. Example: kratos run",
+	Short: "Run project",
+	Long:  "Run project. Example: kratos run",
 	Run:   Run,
 }
 
@@ -68,6 +68,7 @@ func Run(cmd *cobra.Command, args []string) {
 }
 
 func findCMD(base string) (string, []string, error) {
+	var root bool
 	next := func(dir string) (string, []string, error) {
 		var (
 			cmdDir  string
@@ -88,6 +89,9 @@ func findCMD(base string) (string, []string, error) {
 				cmdDir = filepath.Join(walkPath, "..")
 				return nil
 			}
+			if info.Name() == "go.mod" {
+				root = true
+			}
 			return nil
 		})
 		return cmdDir, cmdPath, err
@@ -99,6 +103,9 @@ func findCMD(base string) (string, []string, error) {
 		}
 		if len(res) > 0 {
 			return cmdDir, res, nil
+		}
+		if root {
+			break
 		}
 		base = filepath.Join(base, "..")
 	}

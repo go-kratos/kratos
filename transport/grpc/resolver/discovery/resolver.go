@@ -56,6 +56,10 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		}
 		addrs = append(addrs, addr)
 	}
+	if len(addrs) == 0 {
+		r.log.Warnf("[resovler]Zero endpoint found,refused to write, ins: %v", ins)
+		return
+	}
 	r.cc.UpdateState(resolver.State{Addresses: addrs})
 }
 

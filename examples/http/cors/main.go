@@ -18,7 +18,7 @@ func main() {
 		http.Address(":8000"),
 		http.Filter(handlers.CORS(
 			handlers.AllowedOrigins([]string{"*"}),
-			handlers.AllowedHeaders([]string{"GET", "POST"}),
+			handlers.AllowedMethods([]string{"GET", "POST"}),
 		)),
 	)
 	route := httpSrv.Route("/")

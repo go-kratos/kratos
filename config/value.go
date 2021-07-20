@@ -68,7 +68,7 @@ func (v *atomicValue) Float() (float64, error) {
 	case int64:
 		return float64(val), nil
 	case string:
-		return strconv.ParseFloat(val, 10)
+		return strconv.ParseFloat(val, 64)
 	}
 	return 0.0, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
 }
@@ -78,6 +78,8 @@ func (v *atomicValue) String() (string, error) {
 		return val, nil
 	case bool, int, int32, int64, float64:
 		return fmt.Sprint(val), nil
+	case []byte:
+		return string(val), nil
 	default:
 		if s, ok := val.(fmt.Stringer); ok {
 			return s.String(), nil

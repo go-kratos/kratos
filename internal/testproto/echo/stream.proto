@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package echo;
+
+option go_package = "github.com/go-kratos/kratos/cmd/protoc-gen-go-http/internal/testproto/echo;echo";
+
+import "google/api/annotations.proto";
+import "google/api/httpbody.proto";
+import "google/protobuf/empty.proto";
+
+service StreamService {
+	rpc Download(google.protobuf.Empty) returns (stream google.api.HttpBody) {
+		option (google.api.http) = {
+		  get : "/v1/example/download"
+		};
+	}
+}

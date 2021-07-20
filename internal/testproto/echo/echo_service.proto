@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+package echo;
+
+option go_package = "github.com/go-kratos/kratos/cmd/protoc-gen-go-http/internal/testproto/echo;echo";
+
+import "google/api/annotations.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/struct.proto";
+
+enum Corpus {
+    UNIVERSAL = 0;
+    WEB = 1;
+    IMAGES = 2;
+    LOCAL = 3;
+    NEWS = 4;
+    PRODUCTS = 5;
+    VIDEO = 6;
+}
+
+// Embedded represents a message embedded in SimpleMessage.
+message Embedded {
+	oneof mark {
+		int64 progress = 1;
+		string note = 2;
+	}
+}
+
+// SimpleMessage represents a simple message sent to the Echo service.
+message SimpleMessage {
+	// Id represents the message identifier.
+	string id = 1;
+	int64 num = 2 [json_name="number"];
+	oneof code {
+		int64 line_num = 3;
+		string lang = 4;
+	}
+	Embedded status = 5;
+	oneof ext {
+		int64 en = 6;
+		Embedded no = 7;
+	}
+    Corpus corpus = 8;
+}
+
+// DynamicMessage represents a message which can have its structure
+// built dynamically using Struct and Values.
+message DynamicMessage {
+	google.protobuf.Struct struct_field = 1;
+	google.protobuf.Value value_field = 2;
+}
+
+message DynamicMessageUpdate {
+	DynamicMessage body = 1;
+	google.protobuf.FieldMask update_mask = 2;
+}
+
+// Echo service responds to incoming echo requests.
+service EchoService {
+	// Echo method receives a simple message and returns it.
+	//
+	// The message posted as the id parameter will also be
+	// returned.
+	rpc Echo(SimpleMessage) returns (SimpleMessage) {
+		option (google.api.http) = {
+			post: "/v1/example/echo/{id}"
+			additional_bindings {
+				get: "/v1/example/echo/{id}/{num}"
+			}
+			additional_bindings {
+				get: "/v1/example/echo/{id}/{num}/{lang}"
+			}
+			additional_bindings {
+				get: "/v1/example/echo1/{id}/{line_num}/{status.note}"
+			}
+			additional_bindings {
+				get: "/v1/example/echo2/{no.note}"
+			}
+		};
+	}
+	// EchoBody method receives a simple message and returns it.
+	rpc EchoBody(SimpleMessage) returns (SimpleMessage) {
+		option (google.api.http) = {
+			post: "/v1/example/echo_body"
+			body: "*"
+		};
+	}
+	// EchoResponseBody method receives a simple message and returns it.
+	rpc EchoResponseBody(DynamicMessageUpdate) returns (DynamicMessageUpdate) {
+		option (google.api.http) = {
+			post: "/v1/example/echo_response_body"
+			body: "*"
+			response_body: "body"
+		};
+	}
+	// EchoDelete method receives a simple message and returns it.
+	rpc EchoDelete(SimpleMessage) returns (SimpleMessage) {
+		option (google.api.http) = {
+			delete: "/v1/example/echo_delete/{id}/{num}"
+		};
+	}
+	// EchoPatch method receives a NonStandardUpdateRequest and returns it.
+	rpc EchoPatch(DynamicMessageUpdate) returns (DynamicMessageUpdate) {
+		option (google.api.http) = {
+			patch: "/v1/example/echo_patch"
+			body: "body"
+		};
+	}
+}

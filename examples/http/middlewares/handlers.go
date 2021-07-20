@@ -9,7 +9,7 @@ import (
 
 func sayHelloHandler(ctx http.Context) error {
 	var in helloworld.HelloRequest
-	if err := ctx.Bind(&in); err != nil {
+	if err := ctx.BindQuery(&in); err != nil {
 		return err
 	}
 

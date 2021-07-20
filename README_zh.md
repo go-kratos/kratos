@@ -10,7 +10,7 @@ Translations: [English](README.md) | [简体中文](README_zh.md)
 
 # Kratos
 
-Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关框架及工具。  
+Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关功能及工具。  
 
 > 名字来源于:《战神》游戏以希腊神话为背景，讲述由凡人成为战神的奎托斯（Kratos）成为战神并展开弑神屠杀的冒险历程。
 
@@ -114,6 +114,9 @@ app.Run()
 * [Discord Group](https://discord.gg/BWzJsUJ)
 * Website:  [go-kratos.dev](https://go-kratos.dev)
 * QQ Group: 716486124
+
+## WeChat Official Account
+![kratos](docs/images/wechat.png)
 
 ## Conventional commits
 提交信息的结构应该如下所示:

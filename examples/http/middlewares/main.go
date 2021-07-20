@@ -30,6 +30,10 @@ func main() {
 	// add path filter to custom route
 	r.GET("/hello/{name}", sayHelloHandler, pathFilter, pathFilter2)
 
+	// add path filter to router group
+	r2 := r.Group("/v2", pathFilter, pathFilter2)
+	r2.GET("/say/{name}", sayHelloHandler)
+
 	app := kratos.New(
 		kratos.Name("helloworld"),
 		kratos.Server(
