@@ -9,6 +9,7 @@ import (
 var httpTemplate = `
 {{$svrType := .ServiceType}}
 {{$svrName := .ServiceName}}
+{{$chain := .MiddlewareChain}}
 type {{.ServiceType}}HTTPServer interface {
 {{- range .MethodSets}}
 	{{.Name}}(context.Context, *{{.Request}}) (*{{.Reply}}, error)
@@ -41,9 +42,9 @@ func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) fu
 		}
 		{{- end}}
 		http.SetOperation(ctx,"/{{$svrName}}/{{.Name}}")
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.{{.Name}}(ctx, req.(*{{.Request}}))
-		})
+		h := ctx.Middleware({{$chain}}({{.Middleware}})(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SayHello(ctx, req.(*HelloRequest))
+		}))
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
@@ -89,11 +90,12 @@ func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Reque
 `
 
 type serviceDesc struct {
-	ServiceType string // Greeter
-	ServiceName string // helloworld.Greeter
-	Metadata    string // api/helloworld/helloworld.proto
-	Methods     []*methodDesc
-	MethodSets  map[string]*methodDesc
+	ServiceType     string // Greeter
+	ServiceName     string // helloworld.Greeter
+	Metadata        string // api/helloworld/helloworld.proto
+	Methods         []*methodDesc
+	MethodSets      map[string]*methodDesc
+	MiddlewareChain string
 }
 
 type methodDesc struct {
@@ -109,6 +111,7 @@ type methodDesc struct {
 	HasBody      bool
 	Body         string
 	ResponseBody string
+	Middleware   string
 }
 
 func (s *serviceDesc) execute() string {

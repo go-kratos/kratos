@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2/middleware"
 	"strings"
 
 	"google.golang.org/genproto/googleapis/api/annotations"
@@ -14,6 +15,7 @@ const (
 	contextPackage       = protogen.GoImportPath("context")
 	transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
 	bindingPackage       = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http/binding")
+	middlewarePackage    = protogen.GoImportPath("github.com/go-kratos/kratos/v2/middleware")
 )
 
 var methodSets = make(map[string]int)
@@ -59,9 +61,10 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	}
 	// HTTP Server.
 	sd := &serviceDesc{
-		ServiceType: service.GoName,
-		ServiceName: string(service.Desc.FullName()),
-		Metadata:    file.Desc.Path(),
+		ServiceType:     service.GoName,
+		ServiceName:     string(service.Desc.FullName()),
+		Metadata:        file.Desc.Path(),
+		MiddlewareChain: g.QualifiedGoIdent(middlewarePackage.Ident("Chain")),
 	}
 	for _, method := range service.Methods {
 		if method.Desc.IsStreamingClient() || method.Desc.IsStreamingServer() {
@@ -144,6 +147,26 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	} else if responseBody != "" {
 		md.ResponseBody = "." + camelCaseVars(responseBody)
 	}
+
+	middlewareRule, ok := proto.GetExtension(m.Desc.Options(), middleware.E_Middlewares).(*middleware.MiddleRule)
+	if ok {
+		if middlewareRule == nil || middlewareRule.Middlewares == nil || len(middlewareRule.Middlewares) == 0 {
+			return md
+		}
+		var middlewares = make([]string, 0, len(middlewareRule.Middlewares))
+		for _, s := range middlewareRule.Middlewares {
+			index := strings.LastIndex(s, ".")
+			if index == -1 {
+				continue
+			}
+			tmpImport := protogen.GoImportPath(s[:index])
+			middlewares = append(middlewares, g.QualifiedGoIdent(tmpImport.Ident(s[index+1:])))
+		}
+		if len(middlewares) > 0 {
+			md.Middleware = strings.Join(middlewares, ", ")
+		}
+	}
+
 	return md
 }
 

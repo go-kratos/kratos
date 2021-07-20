@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package middleware;
+
+option go_package = "github.com/go-kratos/kratos/v2/cmd/protoc-gen-go-http/internal/middleware;middleware";
+option java_multiple_files = true;
+option java_package = "cmd.protoc-gen-go-http.internal.middleware";
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.MethodOptions {
+  MiddleRule middlewares = 72295729;
+}
+
+message MiddleRule {
+  repeated string middlewares = 1;
+}
