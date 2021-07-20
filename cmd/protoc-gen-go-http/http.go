@@ -15,6 +15,7 @@ const (
 	stdhttpPackage = protogen.GoImportPath("net/http")
 	transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
 	bindingPackage       = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http/binding")
+	middlewarePackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/middleware")
 	muxPackage = protogen.GoImportPath("github.com/gorilla/mux")
 )
 
@@ -47,6 +48,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("// is compatible with the kratos package it is being compiled against.")
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
 	g.P("var _ = ", bindingPackage.Ident("EncodeURL"))
+	g.P("var _ = ", middlewarePackage.Ident("Chain"))
 	g.P("var _ = new(", muxPackage.Ident("Router"),")")
 	g.P("const _ = ", transportHTTPPackage.Ident("SupportPackageIsVersion1"))
 	g.P()

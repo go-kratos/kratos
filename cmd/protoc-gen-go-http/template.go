@@ -22,18 +22,18 @@ func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}HTTP
 	{{- end}}
 }
 
-func New{{.ServiceType}}HTTPServerHandler(s *http.Server, srv {{.ServiceType}}HTTPServer) stdhttp.Handler{
+func New{{.ServiceType}}HTTPServerHandler(s *http.Server, srv {{.ServiceType}}HTTPServer,mds ...middleware.Middleware) stdhttp.Handler{
 	muxRouter := mux.NewRouter()
 	r := s.Route("/")
 	{{- range .Methods}}
 
-	muxRouter.Handle("{{.Path}}",r.BuildHandler(_{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv))).Methods("{{.Method}}")
+	muxRouter.Handle("{{.Path}}",r.BuildHandler(_{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv,mds...))).Methods("{{.Method}}")
 	{{- end}}
 	return muxRouter
 }
 
 {{range .Methods}}
-func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) func(ctx http.Context) error {
+func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer,mds ...middleware.Middleware) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in {{.Request}}
 		{{- if .HasBody}}
@@ -54,6 +54,7 @@ func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) fu
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.{{.Name}}(ctx, req.(*{{.Request}}))
 		})
+		h = middleware.Chain(mds...)(h)
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
