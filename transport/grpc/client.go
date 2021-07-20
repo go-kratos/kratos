@@ -62,24 +62,14 @@ func WithOptions(opts ...grpc.DialOption) ClientOption {
 	}
 }
 
-// WithZeroProtect with zero endpoint protection.
-// When it is found that the number of backend nodes pushed is 0,
-// the grpc Resovler is not updated
-func WithZeroProtect(enable bool) ClientOption {
-	return func(b *clientOptions) {
-		b.zeroProtect = enable
-	}
-}
-
 // clientOptions is gRPC Client
 type clientOptions struct {
-	endpoint    string
-	timeout     time.Duration
-	discovery   registry.Discovery
-	middleware  []middleware.Middleware
-	ints        []grpc.UnaryClientInterceptor
-	grpcOpts    []grpc.DialOption
-	zeroProtect bool
+	endpoint   string
+	timeout    time.Duration
+	discovery  registry.Discovery
+	middleware []middleware.Middleware
+	ints       []grpc.UnaryClientInterceptor
+	grpcOpts   []grpc.DialOption
 }
 
 // Dial returns a GRPC connection.
@@ -111,7 +101,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		grpc.WithChainUnaryInterceptor(ints...),
 	}
 	if options.discovery != nil {
-		grpcOpts = append(grpcOpts, grpc.WithResolvers(discovery.NewBuilder(options.discovery, discovery.WithZeroProtect(options.zeroProtect))))
+		grpcOpts = append(grpcOpts, grpc.WithResolvers(discovery.NewBuilder(options.discovery)))
 	}
 	if insecure {
 		grpcOpts = append(grpcOpts, grpc.WithInsecure())

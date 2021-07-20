@@ -44,7 +44,7 @@ type resolver struct {
 	logger  *log.Helper
 }
 
-func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, updater Updater, block bool, zeroProtect bool) (*resolver, error) {
+func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, updater Updater, block bool) (*resolver, error) {
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 				}
 				nodes = append(nodes, in)
 			}
-			if len(nodes) != 0 || !zeroProtect {
+			if len(nodes) != 0 {
 				updater.Update(nodes)
 				r.lock.Lock()
 				r.nodes = nodes
@@ -90,6 +90,8 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 					executed = true
 					done <- nil
 				}
+			} else {
+				r.logger.Warnf("[http resovler]Zero endpoint found,refused to write,ser: %s ins: %v", target.Endpoint, nodes)
 			}
 		}
 	}()

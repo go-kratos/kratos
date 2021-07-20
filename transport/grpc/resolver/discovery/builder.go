@@ -28,20 +28,10 @@ func WithTimeout(timeout time.Duration) Option {
 	}
 }
 
-// WithZeroProtect with zero endpoint protection.
-// When it is found that the number of backend nodes pushed is 0,
-// the grpc Resovler is not updated
-func WithZeroProtect(enable bool) Option {
-	return func(b *builder) {
-		b.zeroProtect = enable
-	}
-}
-
 type builder struct {
-	discoverer  registry.Discovery
-	logger      log.Logger
-	zeroProtect bool
-	timeout     time.Duration
+	discoverer registry.Discovery
+	logger     log.Logger
+	timeout    time.Duration
 }
 
 // NewBuilder creates a builder which is used to factory registry resolvers.
@@ -66,12 +56,11 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 	}
 
 	r := &discoveryResolver{
-		w:           w,
-		cc:          cc,
-		ctx:         ctx,
-		cancel:      cancel,
-		log:         log.NewHelper(b.logger),
-		zeroProtect: b.zeroProtect,
+		w:      w,
+		cc:     cc,
+		ctx:    ctx,
+		cancel: cancel,
+		log:    log.NewHelper(b.logger),
 	}
 	r.ctx, r.cancel = context.WithCancel(context.Background())
 	go r.watch()
