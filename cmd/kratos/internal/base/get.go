@@ -142,7 +142,7 @@ func ParseCommitsInfo(info []CommitInfo) string {
 		if index != -1 {
 			msg = msg[:index-1]
 		}
-		prefix := []string{"fix", "feat", "deps", "break","chore"}
+		prefix := []string{"fix", "feat", "deps", "break", "chore"}
 		var matched bool
 		for _, v := range prefix {
 			if strings.HasPrefix(msg, v) {
@@ -179,7 +179,7 @@ func ParseCommitsInfo(info []CommitInfo) string {
 			}
 		}
 	}
-	return fmt.Sprint(md["break"], md["deps"], md["feat"], md["fix"],md["chore"], md["other"])
+	return fmt.Sprint(md["break"], md["deps"], md["feat"], md["fix"], md["chore"], md["other"])
 }
 
 func ParseReleaseInfo(info ReleaseInfo) string {
