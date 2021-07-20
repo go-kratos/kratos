@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	client, err := kafka.NewKafkaClient([]string{"39.106.218.150:9092"})
+	client, err := kafka.NewKafkaClient([]string{"localhost:9092"})
 	if err != nil {
 		panic(err)
 	}
