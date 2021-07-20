@@ -86,10 +86,12 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 				r.lock.Lock()
 				r.nodes = nodes
 				r.lock.Unlock()
-			}
-			if block && !executed {
-				executed = true
-				done <- nil
+				if block && !executed {
+					executed = true
+					done <- nil
+				}
+			} else {
+				r.logger.Warnf("[http resovler]Zero endpoint found,refused to write,ser: %s ins: %v", target.Endpoint, nodes)
 			}
 		}
 	}()
