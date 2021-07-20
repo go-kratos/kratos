@@ -66,6 +66,19 @@ func (m *Message) Value() []byte {
 func (m *Message) Header() map[string]string {
 	return m.header
 }
+func NewKafkaClient(address []string) (sarama.Client, error) {
+	config := sarama.NewConfig()
+	config.Producer.RequiredAcks = sarama.WaitForLocal
+	config.Producer.Partitioner = sarama.NewRandomPartitioner
+	config.Producer.Return.Successes = true
+	config.Producer.Return.Errors = true
+	config.Version = sarama.DefaultVersion
+	client, err := sarama.NewClient(address, config)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
 
 func NewMessage(key string, value []byte, header map[string]string) event.Message {
 	return &Message{
@@ -124,19 +137,6 @@ func (s *kafkaSender) Close() error {
 	return err
 }
 
-func NewKafkaClient(address []string) (sarama.Client, error) {
-	config := sarama.NewConfig()
-	config.Producer.RequiredAcks = sarama.WaitForLocal
-	config.Producer.Partitioner = sarama.NewRandomPartitioner
-	config.Producer.Return.Successes = true
-	config.Producer.Return.Errors = true
-	config.Version = sarama.DefaultVersion
-	client, err := sarama.NewClient(address, config)
-	if err != nil {
-		return nil, err
-	}
-	return client, nil
-}
 func NewKafkaSender(client sarama.Client, topic string, opts ...Option) (event.Sender, error) {
 	options := &options{
 		prefix: []string{"x-md-"}, // x-md-global-, x-md-local
