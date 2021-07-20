@@ -12,9 +12,10 @@ import (
 )
 
 type discoveryResolver struct {
-	w   registry.Watcher
-	cc  resolver.ClientConn
-	log *log.Helper
+	w           registry.Watcher
+	cc          resolver.ClientConn
+	log         *log.Helper
+	zeroProtect bool
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -55,6 +56,10 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 			Addr:       endpoint,
 		}
 		addrs = append(addrs, addr)
+	}
+	if r.zeroProtect && len(addrs) == 0 {
+		r.log.Warnf("[resovler]Zero endpoint found,refused to write, ins: %v", ins)
+		return
 	}
 	r.cc.UpdateState(resolver.State{Addresses: addrs})
 }

@@ -44,7 +44,7 @@ type resolver struct {
 	logger  *log.Helper
 }
 
-func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, updater Updater, block bool) (*resolver, error) {
+func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, updater Updater, block bool, zeroProtect bool) (*resolver, error) {
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
@@ -81,15 +81,15 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 				}
 				nodes = append(nodes, in)
 			}
-			if len(nodes) != 0 {
+			if len(nodes) != 0 || !zeroProtect {
 				updater.Update(nodes)
 				r.lock.Lock()
 				r.nodes = nodes
 				r.lock.Unlock()
-			}
-			if block && !executed {
-				executed = true
-				done <- nil
+				if block && !executed {
+					executed = true
+					done <- nil
+				}
 			}
 		}
 	}()

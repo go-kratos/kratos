@@ -46,6 +46,7 @@ type clientOptions struct {
 	discovery    registry.Discovery
 	middleware   []middleware.Middleware
 	block        bool
+	zeroProtect  bool
 }
 
 // WithTransport with client transport.
@@ -127,6 +128,15 @@ func WithBlock() ClientOption {
 	}
 }
 
+// WithZeroProtect with zero endpoint protection.
+// When it is found that the number of backend nodes pushed is 0,
+// the grpc Resovler is not updated
+func WithZeroProtect() ClientOption {
+	return func(b *clientOptions) {
+		b.zeroProtect = true
+	}
+}
+
 // Client is an HTTP client.
 type Client struct {
 	opts   clientOptions
@@ -139,7 +149,7 @@ type Client struct {
 func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	options := clientOptions{
 		ctx:          ctx,
-		timeout:      500 * time.Millisecond,
+		timeout:      2000 * time.Millisecond,
 		encoder:      DefaultRequestEncoder,
 		decoder:      DefaultResponseDecoder,
 		errorDecoder: DefaultErrorDecoder,
@@ -156,7 +166,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	var r *resolver
 	if options.discovery != nil {
 		if target.Scheme == "discovery" {
-			if r, err = newResolver(ctx, options.discovery, target, options.balancer, options.block); err != nil {
+			if r, err = newResolver(ctx, options.discovery, target, options.balancer, options.block, options.zeroProtect); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
 		} else if _, _, err := host.ExtractHostPort(options.endpoint); err != nil {
