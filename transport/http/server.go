@@ -235,3 +235,4 @@ func (s *Server) Stop(ctx context.Context) error {
 	s.log.Info("[HTTP] server stopping")
 	return s.Shutdown(ctx)
 }
+
