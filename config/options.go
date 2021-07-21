@@ -65,9 +65,7 @@ func defaultDecoder(src *KeyValue, target map[string]interface{}) error {
 		keys := strings.Split(src.Key, ".")
 		for i, k := range keys {
 			if i == len(keys)-1 {
-				// all kv data without format should be treated as string,
-				// otherwise there will be problems with json parsing
-				target[k] = string(src.Value)
+				target[k] = src.Value
 			} else {
 				sub := make(map[string]interface{})
 				target[k] = sub

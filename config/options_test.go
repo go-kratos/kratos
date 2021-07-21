@@ -16,7 +16,7 @@ func TestDefaultDecoder(t *testing.T) {
 	err := defaultDecoder(src, target)
 	assert.Nil(t, err)
 	assert.Equal(t, map[string]interface{}{
-		"service": "config",
+		"service": []byte("config"),
 	}, target)
 
 	src = &KeyValue{
@@ -30,7 +30,7 @@ func TestDefaultDecoder(t *testing.T) {
 	assert.Equal(t, map[string]interface{}{
 		"service": map[string]interface{}{
 			"name": map[string]interface{}{
-				"alias": "2233",
+				"alias": []byte("2233"),
 			},
 		},
 	}, target)
