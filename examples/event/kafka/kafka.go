@@ -2,13 +2,10 @@ package kafka
 
 import (
 	"context"
-	"strings"
-
 	"github.com/go-kratos/kratos/examples/event/event"
 
 	"github.com/Shopify/sarama"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/metadata"
 )
 
 var _ event.Sender = (*kafkaSender)(nil)
@@ -18,34 +15,7 @@ var _ event.Message = (*Message)(nil)
 type Option func(*options)
 
 type options struct {
-	address []string
-	prefix  []string
-	md      metadata.Metadata
-	logger  *log.Helper
-}
-
-func (o *options) hasPrefix(key string) bool {
-	k := strings.ToLower(key)
-	for _, prefix := range o.prefix {
-		if strings.HasPrefix(k, prefix) {
-			return true
-		}
-	}
-	return false
-}
-
-// WithConstants with constant metadata key value.
-func WithConstants(md metadata.Metadata) Option {
-	return func(o *options) {
-		o.md = md
-	}
-}
-
-// WithPropagatedPrefix with propagated key prefix.
-func WithPropagatedPrefix(prefix ...string) Option {
-	return func(o *options) {
-		o.prefix = prefix
-	}
+	logger *log.Helper
 }
 
 // WithLogger with logger.
@@ -104,26 +74,8 @@ func (s *kafkaSender) Send(ctx context.Context, message event.Message) error {
 		Key:   sarama.StringEncoder(message.Key()),
 		Value: sarama.ByteEncoder(message.Value()),
 	}
-	h := message.Header()
-	// x-md-local-
-	for k, v := range s.options.md {
-		h[k] = v
-	}
-	if md, ok := metadata.FromClientContext(ctx); ok {
-		for k, v := range md {
-			h[k] = v
-		}
-	}
-	// x-md-global-
-	if md, ok := metadata.FromServerContext(ctx); ok {
-		for k, v := range md {
-			if s.options.hasPrefix(k) {
-				h[k] = v
-			}
-		}
-	}
-	if len(h) > 0 {
-		msg.Headers = header2RecordHeader(h)
+	if len(message.Header()) > 0 {
+		msg.Headers = header2RecordHeader(message.Header())
 	}
 	_, _, err := s.producer.SendMessage(msg)
 	if err != nil {
@@ -143,7 +95,6 @@ func (s *kafkaSender) Close() error {
 
 func NewKafkaSender(client sarama.Client, topic string, opts ...Option) (event.Sender, error) {
 	options := &options{
-		prefix: []string{"x-md-"}, // x-md-global-, x-md-local
 		logger: log.NewHelper(log.DefaultLogger),
 	}
 	for _, o := range opts {
@@ -175,14 +126,7 @@ func (k *kafkaReceiver) Receive(ctx context.Context, handler event.Handler) erro
 		}
 		go func() {
 			for msg := range pc.Messages() {
-				md := k.options.md.Clone()
-				for _, v := range msg.Headers {
-					if k.options.hasPrefix(string(v.Key)) {
-						md.Set(string(v.Key), string(v.Value))
-					}
-				}
-				c := metadata.NewServerContext(context.Background(), md)
-				err := handler(c, &Message{
+				err := handler(context.Background(), &Message{
 					key:    string(msg.Key),
 					value:  msg.Value,
 					header: recordHeader2Header(msg.Headers),
@@ -208,7 +152,6 @@ func (k *kafkaReceiver) Close() error {
 
 func NewKafkaReceiver(client sarama.Client, topic string, opts ...Option) (event.Receiver, error) {
 	options := &options{
-		prefix: []string{"x-md-"}, // x-md-global-, x-md-local
 		logger: log.NewHelper(log.DefaultLogger),
 	}
 	for _, o := range opts {
