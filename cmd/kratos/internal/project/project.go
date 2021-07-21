@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -49,7 +50,7 @@ func run(cmd *cobra.Command, args []string) {
 	} else {
 		name = args[0]
 	}
-	p := &Project{Name: name}
+	p := &Project{Name: path.Base(name), Path: name}
 	if err := p.New(ctx, wd, repoURL, branch); err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
 		return
