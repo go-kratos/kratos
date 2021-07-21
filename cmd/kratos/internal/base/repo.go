@@ -3,6 +3,7 @@ package base
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"path"
@@ -57,8 +58,11 @@ func (r *Repo) Pull(ctx context.Context) error {
 	cmd.Stderr = &out
 	cmd.Stdout = os.Stdout
 	err := cmd.Run()
-	if strings.Contains(out.String(), "You are not currently on a branch.") {
-		return nil
+	if err != nil {
+		if strings.Contains(out.String(), "You are not currently on a branch.") {
+			return nil
+		}
+		_, _ = fmt.Fprint(os.Stderr, out.String())
 	}
 	return err
 }
