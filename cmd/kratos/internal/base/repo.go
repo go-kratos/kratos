@@ -1,7 +1,6 @@
 package base
 
 import (
-	"bytes"
 	"context"
 	"os"
 	"os/exec"
@@ -51,15 +50,17 @@ func (r *Repo) Path() string {
 
 // Pull fetch the repository from remote url.
 func (r *Repo) Pull(ctx context.Context) error {
-	cmd := exec.Command("git", "pull")
+	cmd := exec.Command("git", "symbolic-ref", "HEAD")
 	cmd.Dir = r.Path()
-	var out bytes.Buffer
-	cmd.Stderr = &out
-	cmd.Stdout = os.Stdout
 	err := cmd.Run()
-	if strings.Contains(out.String(), "You are not currently on a branch.") {
+	if err != nil {
 		return nil
 	}
+	cmd = exec.Command("git", "pull")
+	cmd.Dir = r.Path()
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	err = cmd.Run()
 	return err
 }
 
