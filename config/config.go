@@ -67,11 +67,15 @@ func (c *config) watch(w Watcher) {
 		kvs, err := w.Next()
 		if err != nil {
 			time.Sleep(time.Second)
-			c.log.Errorf("Failed to watch next config: %v", err)
+			c.log.Errorf("failed to watch next config: %v", err)
 			continue
 		}
 		if err := c.reader.Merge(kvs...); err != nil {
-			c.log.Errorf("Failed to merge next config: %v", err)
+			c.log.Errorf("failed to merge next config: %v", err)
+			continue
+		}
+		if err := c.reader.Resolve(); err != nil {
+			c.log.Errorf("failed to resolve next config: %v", err)
 			continue
 		}
 		c.cached.Range(func(key, value interface{}) bool {

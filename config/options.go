@@ -81,7 +81,7 @@ func defaultResolver(input map[string]interface{}) error {
 		} else if len(args) > 1 { // default value
 			return args[1]
 		}
-		return ""
+		return args[0]
 	}
 
 	var resolve func(map[string]interface{}) error
