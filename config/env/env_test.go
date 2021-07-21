@@ -58,8 +58,8 @@ func TestEnvWithPrefix(t *testing.T) {
 	}
 
 	c := config.New(config.WithSource(
-		NewSource(prefix1, prefix2),
 		file.NewSource(path),
+		NewSource(prefix1, prefix2),
 	))
 
 	if err := c.Load(); err != nil {

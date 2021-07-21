@@ -17,6 +17,7 @@ type Reader interface {
 	Merge(...*KeyValue) error
 	Value(string) (Value, bool)
 	Source() ([]byte, error)
+	Resolve() error
 }
 
 type reader struct {
@@ -45,9 +46,6 @@ func (r *reader) Merge(kvs ...*KeyValue) error {
 			return err
 		}
 	}
-	if err := r.opts.resolver(merged); err != nil {
-		return err
-	}
 	r.values = merged
 	return nil
 }
@@ -58,6 +56,10 @@ func (r *reader) Value(path string) (Value, bool) {
 
 func (r *reader) Source() ([]byte, error) {
 	return marshalJSON(convertMap(r.values))
+}
+
+func (r *reader) Resolve() error {
+	return r.opts.resolver(r.values)
 }
 
 func cloneMap(src map[string]interface{}) (map[string]interface{}, error) {
