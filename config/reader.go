@@ -101,6 +101,9 @@ func convertMap(src interface{}) interface{} {
 			dst[k] = convertMap(v)
 		}
 		return dst
+	case []byte:
+		// there will be no binary data in the config data
+		return string(m)
 	default:
 		return src
 	}
