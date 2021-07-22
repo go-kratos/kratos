@@ -36,6 +36,7 @@ func (e *env) Load() (kv []*config.KeyValue, err error) {
 			}
 		}
 
+		strings.Replace(k, "_", ".", -1)
 		kv = append(kv, &config.KeyValue{
 			Key:   k,
 			Value: []byte(v),
