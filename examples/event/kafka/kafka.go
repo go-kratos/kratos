@@ -5,6 +5,7 @@ import (
 	"github.com/go-kratos/kratos/examples/event/event"
 	"github.com/segmentio/kafka-go"
 	"github.com/segmentio/kafka-go/protocol"
+	"log"
 )
 
 var _ event.Sender = (*kafkaSender)(nil)
@@ -87,7 +88,7 @@ type kafkaReceiver struct {
 func (k *kafkaReceiver) Receive(ctx context.Context, handler event.Handler) error {
 	go func() {
 		for {
-			m, err := k.reader.ReadMessage(context.Background())
+			m, err := k.reader.FetchMessage(context.Background())
 			if err != nil {
 				break
 			}
@@ -102,10 +103,9 @@ func (k *kafkaReceiver) Receive(ctx context.Context, handler event.Handler) erro
 				value:  m.Value,
 				header: h,
 			})
-			if err != nil {
-				// do nack
+			if err := k.reader.CommitMessages(ctx, m); err != nil {
+				log.Fatal("failed to commit messages:", err)
 			}
-			// do ack
 		}
 	}()
 	return nil
