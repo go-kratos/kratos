@@ -84,7 +84,7 @@ func DialInsecure(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, 
 
 func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.ClientConn, error) {
 	options := clientOptions{
-		timeout: 500 * time.Millisecond,
+		timeout: 2000 * time.Millisecond,
 	}
 	for _, o := range opts {
 		o(&options)
