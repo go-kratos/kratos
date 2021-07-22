@@ -28,6 +28,7 @@ require (
 	github.com/nacos-group/nacos-sdk-go v1.0.7
 	github.com/nicksnyder/go-i18n/v2 v2.1.2
 	github.com/prometheus/client_golang v1.9.0
+	github.com/segmentio/kafka-go v0.4.17
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/etcd/client/v3 v3.5.0-beta.4
