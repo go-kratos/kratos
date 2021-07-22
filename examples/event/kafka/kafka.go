@@ -103,6 +103,9 @@ func (k *kafkaReceiver) Receive(ctx context.Context, handler event.Handler) erro
 				value:  m.Value,
 				header: h,
 			})
+			if err != nil {
+				log.Fatal("message handling exception:", err)
+			}
 			if err := k.reader.CommitMessages(ctx, m); err != nil {
 				log.Fatal("failed to commit messages:", err)
 			}
