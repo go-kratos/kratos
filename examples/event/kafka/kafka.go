@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-kratos/kratos/examples/event/event"
 	"github.com/segmentio/kafka-go"
 	"github.com/segmentio/kafka-go/protocol"
@@ -65,7 +64,6 @@ func (s *kafkaSender) Send(ctx context.Context, message event.Message) error {
 func (s *kafkaSender) Close() error {
 	err := s.writer.Close()
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	return nil
