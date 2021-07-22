@@ -2,10 +2,11 @@ package kafka
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/examples/event/event"
-
-	"github.com/Shopify/sarama"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/segmentio/kafka-go"
+	"github.com/segmentio/kafka-go/protocol"
 )
 
 var _ event.Sender = (*kafkaSender)(nil)
@@ -40,19 +41,6 @@ func (m *Message) Value() []byte {
 func (m *Message) Header() map[string]string {
 	return m.header
 }
-func NewKafkaClient(address []string) (sarama.Client, error) {
-	config := sarama.NewConfig()
-	config.Producer.RequiredAcks = sarama.WaitForLocal
-	config.Producer.Partitioner = sarama.NewRandomPartitioner
-	config.Producer.Return.Successes = true
-	config.Producer.Return.Errors = true
-	config.Version = sarama.DefaultVersion
-	client, err := sarama.NewClient(address, config)
-	if err != nil {
-		return nil, err
-	}
-	return client, nil
-}
 
 func NewMessage(key string, value []byte, header map[string]string) event.Message {
 	return &Message{
@@ -63,122 +51,110 @@ func NewMessage(key string, value []byte, header map[string]string) event.Messag
 }
 
 type kafkaSender struct {
-	producer sarama.SyncProducer
-	topic    string
-	options  *options
+	writer  *kafka.Writer
+	topic   string
+	options *options
 }
 
 func (s *kafkaSender) Send(ctx context.Context, message event.Message) error {
-	msg := &sarama.ProducerMessage{
-		Topic: s.topic,
-		Key:   sarama.StringEncoder(message.Key()),
-		Value: sarama.ByteEncoder(message.Value()),
-	}
+	var h []kafka.Header
 	if len(message.Header()) > 0 {
-		msg.Headers = header2RecordHeader(message.Header())
+		for k, v := range message.Header() {
+			h = append(h, protocol.Header{
+				Key:   k,
+				Value: []byte(v),
+			})
+		}
 	}
-	_, _, err := s.producer.SendMessage(msg)
+	err := s.writer.WriteMessages(ctx, kafka.Message{
+		Key:     []byte(message.Key()),
+		Value:   message.Value(),
+		Headers: h,
+	})
 	if err != nil {
-		s.options.logger.Errorw(err.Error())
 		return err
 	}
 	return nil
 }
 
 func (s *kafkaSender) Close() error {
-	err := s.producer.Close()
+	err := s.writer.Close()
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
-	return err
+	return nil
 }
 
-func NewKafkaSender(client sarama.Client, topic string, opts ...Option) (event.Sender, error) {
+func NewKafkaSender(address []string, topic string, opts ...Option) (event.Sender, error) {
 	options := &options{
 		logger: log.NewHelper(log.DefaultLogger),
 	}
 	for _, o := range opts {
 		o(options)
 	}
-	producer, err := sarama.NewSyncProducerFromClient(client)
-	if err != nil {
-		return nil, err
+	w := &kafka.Writer{
+		Topic:    topic,
+		Addr:     kafka.TCP(address...),
+		Balancer: &kafka.LeastBytes{},
 	}
-	return &kafkaSender{options: options, producer: producer, topic: topic}, nil
+	return &kafkaSender{options: options, writer: w, topic: topic}, nil
 }
 
 type kafkaReceiver struct {
-	consumer sarama.Consumer
-	topic    string
-	options  *options
+	reader  *kafka.Reader
+	topic   string
+	options *options
 }
 
 func (k *kafkaReceiver) Receive(ctx context.Context, handler event.Handler) error {
-	partitionList, err := k.consumer.Partitions(k.topic)
-	if err != nil {
-		k.options.logger.Errorw("err", err.Error())
-		return err
-	}
-	for partition := range partitionList {
-		pc, err := k.consumer.ConsumePartition(k.topic, int32(partition), sarama.OffsetNewest)
-		if err != nil {
-			k.options.logger.Errorw("err", err.Error())
-		}
-		go func() {
-			for msg := range pc.Messages() {
-				err := handler(context.Background(), &Message{
-					key:    string(msg.Key),
-					value:  msg.Value,
-					header: recordHeader2Header(msg.Headers),
-				})
-				if err != nil {
-					k.options.logger.Errorw("err", err.Error())
-					// do msg nack
-				}
-				// do msg ack
+	go func() {
+		for {
+			m, err := k.reader.ReadMessage(context.Background())
+			if err != nil {
+				break
 			}
-		}()
-	}
+			h := make(map[string]string)
+			if len(m.Headers) > 0 {
+				for _, header := range m.Headers {
+					h[header.Key] = string(header.Value)
+				}
+			}
+			err = handler(context.Background(), &Message{
+				key:    string(m.Key),
+				value:  m.Value,
+				header: h,
+			})
+			if err != nil {
+				// do nack
+			}
+			// do ack
+		}
+	}()
 	return nil
 }
 
 func (k *kafkaReceiver) Close() error {
-	err := k.consumer.Close()
+	err := k.reader.Close()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func NewKafkaReceiver(client sarama.Client, topic string, opts ...Option) (event.Receiver, error) {
+func NewKafkaReceiver(address []string, topic string, opts ...Option) (event.Receiver, error) {
 	options := &options{
 		logger: log.NewHelper(log.DefaultLogger),
 	}
 	for _, o := range opts {
 		o(options)
 	}
-	consumer, err := sarama.NewConsumerFromClient(client)
-	if err != nil {
-		return nil, err
-	}
-	return &kafkaReceiver{options: options, consumer: consumer, topic: topic}, nil
-}
-
-func header2RecordHeader(kvs map[string]string) []sarama.RecordHeader {
-	var h []sarama.RecordHeader
-	for key, value := range kvs {
-		h = append(h, sarama.RecordHeader{
-			Key:   []byte(key),
-			Value: []byte(value),
-		})
-	}
-	return h
-}
-
-func recordHeader2Header(kvs []*sarama.RecordHeader) map[string]string {
-	h := make(map[string]string)
-	for _, value := range kvs {
-		h[string(value.Key)] = string(value.Value)
-	}
-	return h
+	r := kafka.NewReader(kafka.ReaderConfig{
+		Brokers:  address,
+		GroupID:  "group-a",
+		Topic:    topic,
+		MinBytes: 10e3, // 10KB
+		MaxBytes: 10e6, // 10MB
+	})
+	return &kafkaReceiver{options: options, reader: r, topic: topic}, nil
 }
