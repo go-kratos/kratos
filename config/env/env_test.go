@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -241,6 +242,73 @@ func TestEnvWithoutPrefix(t *testing.T) {
 				}
 			} else {
 				t.Error("value path not found")
+			}
+		})
+	}
+}
+
+func Test_env_load(t *testing.T) {
+	type fields struct {
+		prefixs []string
+	}
+	type args struct {
+		envStrings []string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantKv  []*config.KeyValue
+		wantErr bool
+	}{
+		{
+			name: "without prefixes",
+			fields: fields{
+				prefixs: nil,
+			},
+			args: args{
+				envStrings: []string{
+					"SERVICE_NAME=kratos_app",
+					"ADDR=192.168.0.1",
+					"AGE=20",
+				},
+			},
+			wantKv: []*config.KeyValue{
+				{Key: "SERVICE_NAME", Value: []byte("kratos_app"), Format: ""},
+				{Key: "ADDR", Value: []byte("192.168.0.1"), Format: ""},
+				{Key: "AGE", Value: []byte("20"), Format: ""},
+			},
+			wantErr: false,
+		},
+
+		{
+			name: "with prefixes",
+			fields: fields{
+				prefixs: []string{"KRATOS_", "FOO"},
+			},
+			args: args{
+				envStrings: []string{
+					"KRATOS_SERVICE_NAME=kratos_app",
+					"KRATOS_ADDR=192.168.0.1",
+					"FOO_AGE=20",
+				},
+			},
+			wantKv: []*config.KeyValue{
+				{Key: "SERVICE_NAME", Value: []byte("kratos_app"), Format: ""},
+				{Key: "ADDR", Value: []byte("192.168.0.1"), Format: ""},
+				{Key: "AGE", Value: []byte("20"), Format: ""},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := &env{
+				prefixs: tt.fields.prefixs,
+			}
+			gotKv := e.load(tt.args.envStrings)
+			if diff := cmp.Diff(tt.wantKv, gotKv); diff != "" {
+				t.Errorf("env.load() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
