@@ -124,13 +124,6 @@ func (r *resolver) update(services []*registry.ServiceInstance) {
 	}
 }
 
-func (r *resolver) fetch(ctx context.Context) []*registry.ServiceInstance {
-	r.lock.RLock()
-	nodes := r.nodes
-	r.lock.RUnlock()
-	return nodes
-}
-
 func parseEndpoint(endpoints []string) (string, string, error) {
 	for _, e := range endpoints {
 		u, err := url.Parse(e)
