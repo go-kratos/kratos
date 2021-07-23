@@ -16,7 +16,12 @@ func NewSource(prefixs ...string) config.Source {
 }
 
 func (e *env) Load() (kv []*config.KeyValue, err error) {
-	for _, envstr := range os.Environ() {
+	return e.load(os.Environ()), nil
+}
+
+func (e *env) load(envStrings []string) []*config.KeyValue {
+	var kv []*config.KeyValue
+	for _, envstr := range envStrings {
 		var k, v string
 		subs := strings.SplitN(envstr, "=", 2)
 		k = subs[0]
@@ -41,7 +46,7 @@ func (e *env) Load() (kv []*config.KeyValue, err error) {
 			Value: []byte(v),
 		})
 	}
-	return
+	return kv
 }
 
 func (e *env) Watch() (config.Watcher, error) {

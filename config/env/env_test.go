@@ -245,3 +245,67 @@ func TestEnvWithoutPrefix(t *testing.T) {
 		})
 	}
 }
+
+func Test_env_load(t *testing.T) {
+	type fields struct {
+		prefixs []string
+	}
+	type args struct {
+		envStrings []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   []*config.KeyValue
+	}{
+		{
+			name: "without prefixes",
+			fields: fields{
+				prefixs: nil,
+			},
+			args: args{
+				envStrings: []string{
+					"SERVICE_NAME=kratos_app",
+					"ADDR=192.168.0.1",
+					"AGE=20",
+				},
+			},
+			want: []*config.KeyValue{
+				{Key: "SERVICE_NAME", Value: []byte("kratos_app"), Format: ""},
+				{Key: "ADDR", Value: []byte("192.168.0.1"), Format: ""},
+				{Key: "AGE", Value: []byte("20"), Format: ""},
+			},
+		},
+
+		{
+			name: "with prefixes",
+			fields: fields{
+				prefixs: []string{"KRATOS_", "FOO"},
+			},
+			args: args{
+				envStrings: []string{
+					"KRATOS_SERVICE_NAME=kratos_app",
+					"KRATOS_ADDR=192.168.0.1",
+					"FOO_AGE=20",
+				},
+			},
+			want: []*config.KeyValue{
+				{Key: "SERVICE_NAME", Value: []byte("kratos_app"), Format: ""},
+				{Key: "ADDR", Value: []byte("192.168.0.1"), Format: ""},
+				{Key: "AGE", Value: []byte("20"), Format: ""},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := &env{
+				prefixs: tt.fields.prefixs,
+			}
+			got := e.load(tt.args.envStrings)
+			if !reflect.DeepEqual(tt.want, got) {
+				t.Errorf("env.load() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
