@@ -255,11 +255,10 @@ func Test_env_load(t *testing.T) {
 		envStrings []string
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantKv  []*config.KeyValue
-		wantErr bool
+		name   string
+		fields fields
+		args   args
+		wantKv []*config.KeyValue
 	}{
 		{
 			name: "without prefixes",
@@ -278,7 +277,6 @@ func Test_env_load(t *testing.T) {
 				{Key: "ADDR", Value: []byte("192.168.0.1"), Format: ""},
 				{Key: "AGE", Value: []byte("20"), Format: ""},
 			},
-			wantErr: false,
 		},
 
 		{
@@ -298,7 +296,6 @@ func Test_env_load(t *testing.T) {
 				{Key: "ADDR", Value: []byte("192.168.0.1"), Format: ""},
 				{Key: "AGE", Value: []byte("20"), Format: ""},
 			},
-			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
