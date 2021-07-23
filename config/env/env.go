@@ -40,12 +40,7 @@ func (e *env) load(envStrings []string) []*config.KeyValue {
 				k = k[1:]
 			}
 		}
-		if strings.Contains(k, "_") {
-			kv = append(kv, &config.KeyValue{
-				Key:   strings.Replace(k, "_", ".", -1),
-				Value: []byte(v),
-			})
-		}
+
 		kv = append(kv, &config.KeyValue{
 			Key:   k,
 			Value: []byte(v),
