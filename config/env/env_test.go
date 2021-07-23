@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"
-	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -258,7 +257,7 @@ func Test_env_load(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		wantKv []*config.KeyValue
+		want   []*config.KeyValue
 	}{
 		{
 			name: "without prefixes",
@@ -272,7 +271,7 @@ func Test_env_load(t *testing.T) {
 					"AGE=20",
 				},
 			},
-			wantKv: []*config.KeyValue{
+			want: []*config.KeyValue{
 				{Key: "SERVICE_NAME", Value: []byte("kratos_app"), Format: ""},
 				{Key: "ADDR", Value: []byte("192.168.0.1"), Format: ""},
 				{Key: "AGE", Value: []byte("20"), Format: ""},
@@ -291,7 +290,7 @@ func Test_env_load(t *testing.T) {
 					"FOO_AGE=20",
 				},
 			},
-			wantKv: []*config.KeyValue{
+			want: []*config.KeyValue{
 				{Key: "SERVICE_NAME", Value: []byte("kratos_app"), Format: ""},
 				{Key: "ADDR", Value: []byte("192.168.0.1"), Format: ""},
 				{Key: "AGE", Value: []byte("20"), Format: ""},
@@ -303,9 +302,9 @@ func Test_env_load(t *testing.T) {
 			e := &env{
 				prefixs: tt.fields.prefixs,
 			}
-			gotKv := e.load(tt.args.envStrings)
-			if diff := cmp.Diff(tt.wantKv, gotKv); diff != "" {
-				t.Errorf("env.load() mismatch (-want +got):\n%s", diff)
+			got := e.load(tt.args.envStrings)
+			if !reflect.DeepEqual(tt.want, got) {
+				t.Errorf("env.load() = %v, want %v", got, tt.want)
 			}
 		})
 	}
