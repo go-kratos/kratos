@@ -4,18 +4,17 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/go-kratos/kratos/v2"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
-const version = "v2.0.1"
+var showVersion = flag.Bool("version", false, "print the version and exit")
 
 func main() {
-	showVersion := flag.Bool("version", false, "print the version and exit")
-
 	flag.Parse()
 	if *showVersion {
-		fmt.Printf("protoc-gen-go-errors %v\n", version)
+		fmt.Printf("protoc-gen-go-errors %v\n", kratos.Release)
 		return
 	}
 	var flags flag.FlagSet
