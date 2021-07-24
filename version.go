@@ -1,4 +1,4 @@
 package kratos
 
-// Version is the current kratos version.
-const Version = "v2.0.1-dev"
+// Release is the current kratos version.
+const Release = "v2.0.1-dev"
