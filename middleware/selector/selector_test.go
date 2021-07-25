@@ -36,7 +36,7 @@ func (tr *Transport) ReplyHeader() transport.Header {
 
 func TestMatchFull(t *testing.T) {
 	type args struct {
-		route string
+		route interface{}
 		ms    []middleware.Middleware
 	}
 	tests := []struct {
@@ -61,6 +61,14 @@ func TestMatchFull(t *testing.T) {
 			},
 			ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/hello"}),
 		},
+		{
+			name: "/hello/array",
+			args: args{
+				route: []string{"/hello", "world", "hello/world"},
+				ms:    []middleware.Middleware{testMiddleware},
+			},
+			ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "hello/world"}),
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -68,7 +76,7 @@ func TestMatchFull(t *testing.T) {
 				t.Log(req)
 				return "reply", nil
 			}
-			next = MatchFull(test.args.route, test.args.ms...)(next)
+			next = ServerMatchFull(test.args.route, test.args.ms...)(next)
 			next(test.ctx, test.name)
 		})
 	}
@@ -76,7 +84,7 @@ func TestMatchFull(t *testing.T) {
 
 func TestMatchPrefix(t *testing.T) {
 	type args struct {
-		prefix string
+		prefix interface{}
 		ms     []middleware.Middleware
 	}
 	tests := []struct {
@@ -101,6 +109,14 @@ func TestMatchPrefix(t *testing.T) {
 			},
 			ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/hi/world"}),
 		},
+		{
+			name: "/hi/array",
+			args: args{
+				prefix: []string{"/hello", "/hi"},
+				ms:     []middleware.Middleware{testMiddleware},
+			},
+			ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/hi/world"}),
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -108,7 +124,7 @@ func TestMatchPrefix(t *testing.T) {
 				t.Log(req)
 				return "reply", nil
 			}
-			next = MatchPrefix(test.args.prefix, test.args.ms...)(next)
+			next = ServerMatchPrefix(test.args.prefix, test.args.ms...)(next)
 			next(test.ctx, test.name)
 		})
 	}
@@ -148,7 +164,7 @@ func TestMatchRegex(t *testing.T) {
 				t.Log(req)
 				return "reply", nil
 			}
-			next = MatchRegex(test.args.pattern, test.args.ms...)(next)
+			next = ServerMatchRegex(test.args.pattern, test.args.ms...)(next)
 			next(test.ctx, test.name)
 		})
 	}
