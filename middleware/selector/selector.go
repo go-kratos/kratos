@@ -79,29 +79,26 @@ func (b *Builder) Build() middleware.Middleware {
 	} else {
 		transporter = serverTransporter
 	}
-	return selector(transporter, b.match, b.ms...)
+
+	var match match
+	notMatchLen := len(b.notPrefix) + len(b.notRegex) + len(b.notPath)
+	matchLen := len(b.prefix) + len(b.regex) + len(b.path)
+
+	if matchLen > 0 && notMatchLen > 0 {
+		panic("middleware match and not match cannot exist at the same time")
+	} else if notMatchLen > 0 && matchLen == 0 {
+		match = b.notMatch
+	} else if notMatchLen == 0 && matchLen > 0 {
+		match = b.match
+	} else {
+		match = func(operation string) bool {
+			return false
+		}
+	}
+	return selector(transporter, match, b.ms...)
 }
 
 func (b *Builder) match(operation string) bool {
-	if len(b.notPrefix)+len(b.notRegex)+len(b.notPath) > 0 {
-		for _, prefix := range b.notPrefix {
-			if prefixMatch(prefix, operation) {
-				return false
-			}
-		}
-		for _, regex := range b.notRegex {
-			if regexMatch(regex, operation) {
-				return false
-			}
-		}
-		for _, path := range b.notPath {
-			if pathMatch(path, operation) {
-				return false
-			}
-		}
-		return true
-	}
-
 	for _, prefix := range b.prefix {
 		if prefixMatch(prefix, operation) {
 			return true
@@ -118,6 +115,25 @@ func (b *Builder) match(operation string) bool {
 		}
 	}
 	return false
+}
+
+func (b *Builder) notMatch(operation string) bool {
+	for _, prefix := range b.notPrefix {
+		if prefixMatch(prefix, operation) {
+			return false
+		}
+	}
+	for _, regex := range b.notRegex {
+		if regexMatch(regex, operation) {
+			return false
+		}
+	}
+	for _, path := range b.notPath {
+		if pathMatch(path, operation) {
+			return false
+		}
+	}
+	return true
 }
 
 func selector(transporter transporter, match match, ms ...middleware.Middleware) middleware.Middleware {
