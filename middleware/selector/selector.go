@@ -2,10 +2,11 @@ package selector
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
 	"regexp"
 	"strings"
+
+	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
 )
 
 type (
@@ -61,7 +62,6 @@ func (b *Builder) Build() middleware.Middleware {
 	} else {
 		transporter = serverTransporter
 	}
-
 	return selector(transporter, b.match, b.ms...)
 }
 
@@ -87,7 +87,6 @@ func (b *Builder) match(operation string) bool {
 func selector(transporter transporter, match match, ms ...middleware.Middleware) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-
 			info, ok := transporter(ctx)
 			if !ok {
 				return handler(ctx, req)
