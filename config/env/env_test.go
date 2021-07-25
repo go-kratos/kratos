@@ -49,6 +49,9 @@ func TestEnvWithPrefix(t *testing.T) {
 		prefix1 + "SERVICE_NAME": "kratos_app",
 		prefix2 + "ADDR":         "192.168.0.1",
 		prefix1 + "AGE":          "20",
+		// only prefix
+		prefix2:       "foo",
+		prefix2 + "_": "foo_",
 	}
 
 	for k, v := range envs {
