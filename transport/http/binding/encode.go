@@ -28,7 +28,7 @@ func EncodeURL(pathTemplate string, msg proto.Message, needQuery bool) string {
 	if reg == nil {
 		return pathTemplate
 	}
-	pathParams := make(map[string]struct{}, 0)
+	pathParams := make(map[string]struct{})
 	path := reg.ReplaceAllStringFunc(pathTemplate, func(in string) string {
 		if len(in) < 4 {
 			return in

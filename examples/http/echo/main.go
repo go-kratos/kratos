@@ -10,7 +10,7 @@ import (
 func main() {
 	router := echo.New()
 	router.GET("/home", func(ctx echo.Context) error {
-		return ctx.JSON(200,"Hello echo")
+		return ctx.JSON(200, "Hello echo")
 	})
 
 	httpSrv := http.NewServer(http.Address(":8000"))
