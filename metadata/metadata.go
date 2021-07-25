@@ -47,7 +47,7 @@ func (m Metadata) Set(key string, value string) {
 func (m Metadata) Range(f func(k, v string) bool) {
 	for k, v := range m {
 		ret := f(k, v)
-		if ret == false {
+		if !ret {
 			break
 		}
 	}
