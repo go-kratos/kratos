@@ -11,7 +11,7 @@ var ProviderSet = wire.NewSet(NewData, NewGreeterRepo)
 
 // Data .
 type Data struct {
-	// TODO warpped database client
+	// TODO wrapped database client
 }
 
 // NewData .
