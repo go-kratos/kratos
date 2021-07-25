@@ -74,7 +74,7 @@ func (b *Builder) NotPath(path ...string) *Builder {
 
 func (b *Builder) Build() middleware.Middleware {
 	var transporter func(ctx context.Context) (transport.Transporter, bool)
-	if b.client == true {
+	if b.client {
 		transporter = clientTransporter
 	} else {
 		transporter = serverTransporter
