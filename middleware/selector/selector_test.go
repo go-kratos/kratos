@@ -34,89 +34,29 @@ func (tr *Transport) ReplyHeader() transport.Header {
 	return nil
 }
 
-func TestMatchFull(t *testing.T) {
-	type args struct {
-		route string
-		ms    []middleware.Middleware
-	}
-	tests := []struct {
-		name string
-		args args
-		ctx  context.Context
-	}{
-		// TODO: Add test cases.
-		{
-			name: "/hello/world",
-			args: args{
-				route: "/hello/world",
-				ms:    []middleware.Middleware{testMiddleware},
-			},
-			ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/hello/world"}),
-		},
-		{
-			name: "/hello/world/test",
-			args: args{
-				route: "/hello/world",
-				ms:    []middleware.Middleware{testMiddleware},
-			},
-			ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/hello"}),
-		},
-		//{
-		//	name: "/hello/array",
-		//	args: args{
-		//		route: []string{"/hello", "world", "hello/world"},
-		//		ms:    []middleware.Middleware{testMiddleware},
-		//	},
-		//	ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "hello/world"}),
-		//},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			next := func(ctx context.Context, req interface{}) (interface{}, error) {
-				t.Log(req)
-				return "reply", nil
-			}
-			next = ServerMatchFull(test.args.route, test.args.ms...)(next)
-			next(test.ctx, test.name)
-		})
-	}
-}
+func TestMatch(t *testing.T) {
 
-func TestMatchPrefix(t *testing.T) {
-	type args struct {
-		prefix string
-		ms     []middleware.Middleware
-	}
 	tests := []struct {
 		name string
-		args args
 		ctx  context.Context
 	}{
 		// TODO: Add test cases.
 		{
 			name: "/hello/world",
-			args: args{
-				prefix: "/hello/",
-				ms:     []middleware.Middleware{testMiddleware},
-			},
-			ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/hello/world"}),
+			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/hello/world"}),
 		},
 		{
 			name: "/hi/world",
-			args: args{
-				prefix: "/hello/",
-				ms:     []middleware.Middleware{testMiddleware},
-			},
-			ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/hi/world"}),
+			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/hi/world"}),
 		},
-		//{
-		//	name: "/hi/array",
-		//	args: args{
-		//		prefix: []string{"/hello", "/hi"},
-		//		ms:     []middleware.Middleware{testMiddleware},
-		//	},
-		//	ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/hi/world"}),
-		//},
+		{
+			name: "/test/1234",
+			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/test/1234"}),
+		},
+		{
+			name: "/example/kratos",
+			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/example/kratos"}),
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -124,38 +64,35 @@ func TestMatchPrefix(t *testing.T) {
 				t.Log(req)
 				return "reply", nil
 			}
-			next = ServerMatchPrefix(test.args.prefix, test.args.ms...)(next)
+			next = Server(testMiddleware).Prefix("/hello/").Regex(`/test/[0-9]+`).
+				Path("/example/kratos").Build()(next)
 			next(test.ctx, test.name)
 		})
 	}
 }
 
-func TestMatchRegex(t *testing.T) {
-	type args struct {
-		pattern string
-		ms      []middleware.Middleware
-	}
+func TestNotMatch(t *testing.T) {
+
 	tests := []struct {
 		name string
-		args args
 		ctx  context.Context
 	}{
 		// TODO: Add test cases.
 		{
-			name: "/hello/1234",
-			args: args{
-				pattern: `/hello/[0-9]+`,
-				ms:      []middleware.Middleware{testMiddleware},
-			},
-			ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/hello/1234"}),
+			name: "/hello/world",
+			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/hello/world"}),
 		},
 		{
-			name: "/hello/test",
-			args: args{
-				pattern: `/hello/[0-9]+`,
-				ms:      []middleware.Middleware{testMiddleware},
-			},
-			ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/hello/test"}),
+			name: "/hi/world",
+			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/hi/world"}),
+		},
+		{
+			name: "/test/1234",
+			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/test/1234"}),
+		},
+		{
+			name: "/example/kratos",
+			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/example/kratos"}),
 		},
 	}
 	for _, test := range tests {
@@ -164,7 +101,8 @@ func TestMatchRegex(t *testing.T) {
 				t.Log(req)
 				return "reply", nil
 			}
-			next = ServerMatchRegex(test.args.pattern, test.args.ms...)(next)
+			next = Server(testMiddleware).NotPrefix("/hello/").NotRegex(`/test/[0-9]+`).
+				NotPath("/example/kratos").Build()(next)
 			next(test.ctx, test.name)
 		})
 	}
