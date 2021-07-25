@@ -36,7 +36,7 @@ func (tr *Transport) ReplyHeader() transport.Header {
 
 func TestMatchFull(t *testing.T) {
 	type args struct {
-		route interface{}
+		route string
 		ms    []middleware.Middleware
 	}
 	tests := []struct {
@@ -61,14 +61,14 @@ func TestMatchFull(t *testing.T) {
 			},
 			ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/hello"}),
 		},
-		{
-			name: "/hello/array",
-			args: args{
-				route: []string{"/hello", "world", "hello/world"},
-				ms:    []middleware.Middleware{testMiddleware},
-			},
-			ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "hello/world"}),
-		},
+		//{
+		//	name: "/hello/array",
+		//	args: args{
+		//		route: []string{"/hello", "world", "hello/world"},
+		//		ms:    []middleware.Middleware{testMiddleware},
+		//	},
+		//	ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "hello/world"}),
+		//},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -84,7 +84,7 @@ func TestMatchFull(t *testing.T) {
 
 func TestMatchPrefix(t *testing.T) {
 	type args struct {
-		prefix interface{}
+		prefix string
 		ms     []middleware.Middleware
 	}
 	tests := []struct {
@@ -109,14 +109,14 @@ func TestMatchPrefix(t *testing.T) {
 			},
 			ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/hi/world"}),
 		},
-		{
-			name: "/hi/array",
-			args: args{
-				prefix: []string{"/hello", "/hi"},
-				ms:     []middleware.Middleware{testMiddleware},
-			},
-			ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/hi/world"}),
-		},
+		//{
+		//	name: "/hi/array",
+		//	args: args{
+		//		prefix: []string{"/hello", "/hi"},
+		//		ms:     []middleware.Middleware{testMiddleware},
+		//	},
+		//	ctx: transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/hi/world"}),
+		//},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
