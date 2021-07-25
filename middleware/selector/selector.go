@@ -29,10 +29,6 @@ type Builder struct {
 	regex  []string
 	path   []string
 
-	notPrefix []string
-	notRegex  []string
-	notPath   []string
-
 	ms []middleware.Middleware
 }
 
@@ -58,20 +54,6 @@ func (b *Builder) Path(path ...string) *Builder {
 	return b
 }
 
-func (b *Builder) NotPrefix(prefix ...string) *Builder {
-	b.notPrefix = prefix
-	return b
-}
-
-func (b *Builder) NotRegex(regex ...string) *Builder {
-	b.notRegex = regex
-	return b
-}
-func (b *Builder) NotPath(path ...string) *Builder {
-	b.notPath = path
-	return b
-}
-
 func (b *Builder) Build() middleware.Middleware {
 	var transporter func(ctx context.Context) (transport.Transporter, bool)
 	if b.client {
@@ -80,22 +62,7 @@ func (b *Builder) Build() middleware.Middleware {
 		transporter = serverTransporter
 	}
 
-	var match match
-	notMatchLen := len(b.notPrefix) + len(b.notRegex) + len(b.notPath)
-	matchLen := len(b.prefix) + len(b.regex) + len(b.path)
-
-	if matchLen > 0 && notMatchLen > 0 {
-		panic("middleware match and not match cannot exist at the same time")
-	} else if notMatchLen > 0 && matchLen == 0 {
-		match = b.notMatch
-	} else if notMatchLen == 0 && matchLen > 0 {
-		match = b.match
-	} else {
-		match = func(operation string) bool {
-			return false
-		}
-	}
-	return selector(transporter, match, b.ms...)
+	return selector(transporter, b.match, b.ms...)
 }
 
 func (b *Builder) match(operation string) bool {
@@ -115,25 +82,6 @@ func (b *Builder) match(operation string) bool {
 		}
 	}
 	return false
-}
-
-func (b *Builder) notMatch(operation string) bool {
-	for _, prefix := range b.notPrefix {
-		if prefixMatch(prefix, operation) {
-			return false
-		}
-	}
-	for _, regex := range b.notRegex {
-		if regexMatch(regex, operation) {
-			return false
-		}
-	}
-	for _, path := range b.notPath {
-		if pathMatch(path, operation) {
-			return false
-		}
-	}
-	return true
 }
 
 func selector(transporter transporter, match match, ms ...middleware.Middleware) middleware.Middleware {
@@ -162,11 +110,7 @@ func prefixMatch(prefix string, operation string) bool {
 }
 
 func regexMatch(regex string, operation string) bool {
-	return regexMatchByString(regex, operation)
-}
-
-func regexMatchByString(pattern string, operation string) bool {
-	r, err := regexp.Compile(pattern)
+	r, err := regexp.Compile(regex)
 	if err != nil {
 		return false
 	}

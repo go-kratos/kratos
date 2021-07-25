@@ -71,7 +71,7 @@ func TestMatch(t *testing.T) {
 	}
 }
 
-func TestNotMatch(t *testing.T) {
+func TestMatchClient(t *testing.T) {
 
 	tests := []struct {
 		name string
@@ -80,19 +80,19 @@ func TestNotMatch(t *testing.T) {
 		// TODO: Add test cases.
 		{
 			name: "/hello/world",
-			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/hello/world"}),
+			ctx:  transport.NewClientContext(context.Background(), &Transport{operation: "/hello/world"}),
 		},
 		{
 			name: "/hi/world",
-			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/hi/world"}),
+			ctx:  transport.NewClientContext(context.Background(), &Transport{operation: "/hi/world"}),
 		},
 		{
 			name: "/test/1234",
-			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/test/1234"}),
+			ctx:  transport.NewClientContext(context.Background(), &Transport{operation: "/test/1234"}),
 		},
 		{
 			name: "/example/kratos",
-			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/example/kratos"}),
+			ctx:  transport.NewClientContext(context.Background(), &Transport{operation: "/example/kratos"}),
 		},
 	}
 	for _, test := range tests {
@@ -101,8 +101,8 @@ func TestNotMatch(t *testing.T) {
 				t.Log(req)
 				return "reply", nil
 			}
-			next = Server(testMiddleware).NotPrefix("/hello/").NotRegex(`/test/[0-9]+`).
-				NotPath("/example/kratos").Build()(next)
+			next = Client(testMiddleware).Prefix("/hello/").Regex(`/test/[0-9]+`).
+				Path("/example/kratos").Build()(next)
 			next(test.ctx, test.name)
 		})
 	}
