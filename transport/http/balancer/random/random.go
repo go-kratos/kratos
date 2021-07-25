@@ -27,7 +27,7 @@ func (b *Balancer) Pick(ctx context.Context) (node *registry.ServiceInstance, do
 	b.lock.RUnlock()
 
 	if len(nodes) == 0 {
-		return nil, nil, fmt.Errorf("no instances avaiable")
+		return nil, nil, fmt.Errorf("no instances available")
 	}
 	if len(nodes) == 1 {
 		return nodes[0], func(context.Context, balancer.DoneInfo) {}, nil
