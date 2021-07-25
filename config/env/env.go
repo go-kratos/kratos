@@ -31,7 +31,7 @@ func (e *env) load(envStrings []string) []*config.KeyValue {
 
 		if len(e.prefixs) > 0 {
 			p, ok := matchPrefix(e.prefixs, envstr)
-			if !ok {
+			if !ok || len(p) == len(k) {
 				continue
 			}
 			// trim prefix
@@ -41,10 +41,12 @@ func (e *env) load(envStrings []string) []*config.KeyValue {
 			}
 		}
 
-		kv = append(kv, &config.KeyValue{
-			Key:   k,
-			Value: []byte(v),
-		})
+		if len(k) != 0 {
+			kv = append(kv, &config.KeyValue{
+				Key:   k,
+				Value: []byte(v),
+			})
+		}
 	}
 	return kv
 }
