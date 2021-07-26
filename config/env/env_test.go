@@ -282,6 +282,44 @@ func Test_env_load(t *testing.T) {
 		},
 
 		{
+			name: "empty prefix",
+			fields: fields{
+				prefixs: []string{""},
+			},
+			args: args{
+				envStrings: []string{
+					"__SERVICE_NAME=kratos_app",
+					"__ADDR=192.168.0.1",
+					"__AGE=20",
+				},
+			},
+			want: []*config.KeyValue{
+				{Key: "_SERVICE_NAME", Value: []byte("kratos_app"), Format: ""},
+				{Key: "_ADDR", Value: []byte("192.168.0.1"), Format: ""},
+				{Key: "_AGE", Value: []byte("20"), Format: ""},
+			},
+		},
+
+		{
+			name: "underscore prefix",
+			fields: fields{
+				prefixs: []string{"_"},
+			},
+			args: args{
+				envStrings: []string{
+					"__SERVICE_NAME=kratos_app",
+					"__ADDR=192.168.0.1",
+					"__AGE=20",
+				},
+			},
+			want: []*config.KeyValue{
+				{Key: "SERVICE_NAME", Value: []byte("kratos_app"), Format: ""},
+				{Key: "ADDR", Value: []byte("192.168.0.1"), Format: ""},
+				{Key: "AGE", Value: []byte("20"), Format: ""},
+			},
+		},
+
+		{
 			name: "with prefixes",
 			fields: fields{
 				prefixs: []string{"KRATOS_", "FOO"},
@@ -299,6 +337,32 @@ func Test_env_load(t *testing.T) {
 				{Key: "AGE", Value: []byte("20"), Format: ""},
 			},
 		},
+
+		{
+			name: "should not panic #1",
+			fields: fields{
+				prefixs: []string{"FOO"},
+			},
+			args: args{
+				envStrings: []string{
+					"FOO=123",
+				},
+			},
+			want: nil,
+		},
+
+		{
+			name: "should not panic #2",
+			fields: fields{
+				prefixs: []string{"FOO=1"},
+			},
+			args: args{
+				envStrings: []string{
+					"FOO=123",
+				},
+			},
+			want: nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -308,6 +372,37 @@ func Test_env_load(t *testing.T) {
 			got := e.load(tt.args.envStrings)
 			if !reflect.DeepEqual(tt.want, got) {
 				t.Errorf("env.load() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_matchPrefix(t *testing.T) {
+	type args struct {
+		prefixes []string
+		s        string
+	}
+	tests := []struct {
+		name   string
+		args   args
+		want   string
+		wantOk bool
+	}{
+		{args: args{prefixes: nil, s: "foo=123"}, want: "", wantOk: false},
+		{args: args{prefixes: []string{""}, s: "foo=123"}, want: "", wantOk: true},
+		{args: args{prefixes: []string{"foo"}, s: "foo=123"}, want: "foo", wantOk: true},
+		{args: args{prefixes: []string{"foo=1"}, s: "foo=123"}, want: "foo=1", wantOk: true},
+		{args: args{prefixes: []string{"foo=1234"}, s: "foo=123"}, want: "", wantOk: false},
+		{args: args{prefixes: []string{"bar"}, s: "foo=123"}, want: "", wantOk: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, gotOk := matchPrefix(tt.args.prefixes, tt.args.s)
+			if got != tt.want {
+				t.Errorf("matchPrefix() got = %v, want %v", got, tt.want)
+			}
+			if gotOk != tt.wantOk {
+				t.Errorf("matchPrefix() gotOk = %v, wantOk %v", gotOk, tt.wantOk)
 			}
 		})
 	}
