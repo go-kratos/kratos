@@ -338,3 +338,34 @@ func Test_env_load(t *testing.T) {
 		})
 	}
 }
+
+func Test_matchPrefix(t *testing.T) {
+	type args struct {
+		prefixes []string
+		s        string
+	}
+	tests := []struct {
+		name   string
+		args   args
+		want   string
+		wantOk bool
+	}{
+		{args: args{prefixes: nil, s: "foo=123"}, want: "", wantOk: false},
+		{args: args{prefixes: []string{""}, s: "foo=123"}, want: "", wantOk: true},
+		{args: args{prefixes: []string{"foo"}, s: "foo=123"}, want: "foo", wantOk: true},
+		{args: args{prefixes: []string{"foo=1"}, s: "foo=123"}, want: "foo=1", wantOk: true},
+		{args: args{prefixes: []string{"foo=1234"}, s: "foo=123"}, want: "", wantOk: false},
+		{args: args{prefixes: []string{"bar"}, s: "foo=123"}, want: "", wantOk: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, gotOk := matchPrefix(tt.args.prefixes, tt.args.s)
+			if got != tt.want {
+				t.Errorf("matchPrefix() got = %v, want %v", got, tt.want)
+			}
+			if gotOk != tt.wantOk {
+				t.Errorf("matchPrefix() gotOk = %v, wantOk %v", gotOk, tt.wantOk)
+			}
+		})
+	}
+}

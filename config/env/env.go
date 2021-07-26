@@ -57,8 +57,8 @@ func (e *env) Watch() (config.Watcher, error) {
 	return w, nil
 }
 
-func matchPrefix(prefixs []string, s string) (string, bool) {
-	for _, p := range prefixs {
+func matchPrefix(prefixes []string, s string) (string, bool) {
+	for _, p := range prefixes {
 		if strings.HasPrefix(s, p) {
 			return p, true
 		}
