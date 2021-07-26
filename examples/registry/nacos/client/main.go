@@ -18,7 +18,7 @@ func main() {
 	}
 
 	cc := &constant.ClientConfig{
-		NamespaceId:         "public", //namespace id
+		NamespaceId:         "public",
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
@@ -28,7 +28,6 @@ func main() {
 		LogLevel:            "debug",
 	}
 
-	// a more graceful way to create naming client
 	cli, err := clients.NewNamingClient(
 		vo.NacosClientParam{
 			ClientConfig:  cc,

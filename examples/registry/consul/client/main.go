@@ -37,7 +37,7 @@ func callGRPC(cli *api.Client) {
 	}
 	defer conn.Close()
 	client := helloworld.NewGreeterClient(conn)
-	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos_grpc"})
+	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,7 +60,7 @@ func callHTTP(cli *api.Client) {
 	defer conn.Close()
 	time.Sleep(time.Millisecond * 250)
 	client := helloworld.NewGreeterHTTPClient(conn)
-	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos_http"})
+	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -34,7 +34,7 @@ func callGRPC(r *registry.Registry) {
 	}
 	defer conn.Close()
 	client := helloworld.NewGreeterClient(conn)
-	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos_grpc"})
+	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func callHTTP(r *registry.Registry) {
 	}
 	defer conn.Close()
 	client := helloworld.NewGreeterHTTPClient(conn)
-	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos_http"})
+	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {
 		log.Fatal(err)
 	}
