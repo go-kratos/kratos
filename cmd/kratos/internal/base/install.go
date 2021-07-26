@@ -9,8 +9,8 @@ import (
 	"os/exec"
 )
 
-// GoGet go get path.
-func GoGet(path ...string) error {
+// GoInstall go get path.
+func GoInstall(path ...string) error {
 	for _, p := range path {
 		fmt.Printf("go install %s@latest\n", p)
 		cmd := exec.Command("go", "install", fmt.Sprintf("%s@latest", p))
