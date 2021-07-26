@@ -31,6 +31,7 @@ func (r *discoveryResolver) watch() {
 		ins, err := r.w.Next()
 		if err != nil {
 			r.log.Errorf("Failed to watch discovery endpoint: %v", err)
+
 			time.Sleep(time.Second)
 			continue
 		}

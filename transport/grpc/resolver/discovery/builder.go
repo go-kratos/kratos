@@ -48,9 +48,9 @@ func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 }
 
 func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), b.timeout)
-	defer cancel()
-	w, err := b.discoverer.Watch(ctx, target.Endpoint)
+	//ctx, cancel := context.WithTimeout(context.Background(), b.timeout)
+	//defer cancel()
+	w, err := b.discoverer.Watch(context.Background(), target.Endpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -58,8 +58,6 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 	r := &discoveryResolver{
 		w:      w,
 		cc:     cc,
-		ctx:    ctx,
-		cancel: cancel,
 		log:    log.NewHelper(b.logger),
 	}
 	r.ctx, r.cancel = context.WithCancel(context.Background())
