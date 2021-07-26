@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 	"github.com/spf13/cobra"
 )
 
@@ -27,17 +26,17 @@ func init() {
 }
 
 func run(cmd *cobra.Command, args []string) {
-	owner, repo := base.ParseGithubUrl(repoURL)
-	api := base.GithubApi{Owner: owner, Repo: repo, Token: token}
+	owner, repo := ParseGithubUrl(repoURL)
+	api := GithubApi{Owner: owner, Repo: repo, Token: token}
 	version := "latest"
 	if len(args) > 0 {
 		version = args[0]
 	}
 	if version == "dev" {
 		info := api.GetCommitsInfo()
-		fmt.Print(base.ParseCommitsInfo(info))
+		fmt.Print(ParseCommitsInfo(info))
 	} else {
 		info := api.GetReleaseInfo(version)
-		fmt.Print(base.ParseReleaseInfo(info))
+		fmt.Print(ParseReleaseInfo(info))
 	}
 }
