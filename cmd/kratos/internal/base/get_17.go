@@ -1,5 +1,5 @@
-//go:build !go1.17
-// +build !go1.17
+//go:build go1.17
+// +build go1.17
 
 package base
 
@@ -12,8 +12,8 @@ import (
 // GoGet go get path.
 func GoGet(path ...string) error {
 	for _, p := range path {
-		fmt.Printf("go get -u %s\n", p)
-		cmd := exec.Command("go", "get", "-u", p)
+		fmt.Printf("go install %s@latest\n", p)
+		cmd := exec.Command("go", "install", fmt.Sprintf("%s@latest", p))
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {
