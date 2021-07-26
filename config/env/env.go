@@ -30,15 +30,13 @@ func (e *env) load(envStrings []string) []*config.KeyValue {
 		}
 
 		if len(e.prefixs) > 0 {
-			p, ok := matchPrefix(e.prefixs, envstr)
+			p, ok := matchPrefix(e.prefixs, k)
 			if !ok || len(p) == len(k) {
 				continue
 			}
 			// trim prefix
-			k = k[len(p):]
-			if k[0] == '_' {
-				k = k[1:]
-			}
+			k = strings.TrimPrefix(k, p)
+			k = strings.TrimPrefix(k, "_")
 		}
 
 		if len(k) != 0 {
