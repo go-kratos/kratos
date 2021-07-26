@@ -21,8 +21,8 @@ func main() {
 	}
 	r := registry.New(cli)
 	for {
-		callGRPC(r)
 		callHTTP(r)
+		callGRPC(r)
 		time.Sleep(time.Second)
 	}
 }

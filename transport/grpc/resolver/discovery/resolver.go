@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/url"
 	"time"
@@ -64,6 +65,8 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		return
 	}
 	r.cc.UpdateState(resolver.State{Addresses: addrs})
+	b, _ := json.Marshal(ins)
+	r.log.Infof("[resolver] update instances: %s", b)
 }
 
 func (r *discoveryResolver) Close() {

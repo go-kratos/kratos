@@ -18,8 +18,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	callHTTP(client)
-	callGRPC(client)
+	for {
+		callHTTP(client)
+		callGRPC(client)
+		time.Sleep(time.Second)
+	}
 }
 
 func callGRPC(cli *api.Client) {
@@ -32,6 +35,7 @@ func callGRPC(cli *api.Client) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer conn.Close()
 	client := helloworld.NewGreeterClient(conn)
 	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos_grpc"})
 	if err != nil {
