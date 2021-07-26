@@ -28,6 +28,20 @@ func GoGet(path ...string) error {
 	return nil
 }
 
+// GoGet go install path.
+func GoInstall(path ...string) error {
+	for _, p := range path {
+		fmt.Printf("go install %s\n", p)
+		cmd := exec.Command("go", "install", p)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 type ReleaseInfo struct {
 	Author struct {
 		Login string `json:"login"`

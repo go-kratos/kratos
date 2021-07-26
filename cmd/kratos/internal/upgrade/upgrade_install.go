@@ -1,5 +1,5 @@
-//go:build !go1.17
-// +build !go1.17
+//go:build go1.17
+// +build go1.17
 
 package upgrade
 
@@ -21,13 +21,13 @@ var CmdUpgrade = &cobra.Command{
 
 // Run upgrade the kratos tools.
 func Run(cmd *cobra.Command, args []string) {
-	err := base.GoGet(
-		"github.com/go-kratos/kratos/cmd/kratos/v2",
-		"github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2",
-		"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2",
-		"google.golang.org/protobuf/cmd/protoc-gen-go",
-		"google.golang.org/grpc/cmd/protoc-gen-go-grpc",
-		"github.com/envoyproxy/protoc-gen-validate",
+	err := base.GoInstall(
+		"github.com/go-kratos/kratos/cmd/kratos/v2@latest",
+		"github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest",
+		"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2@latest",
+		"google.golang.org/protobuf/cmd/protoc-gen-go@latest",
+		"google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest",
+		"github.com/envoyproxy/protoc-gen-validate@latest",
 	)
 	if err != nil {
 		fmt.Println(err)
