@@ -299,6 +299,32 @@ func Test_env_load(t *testing.T) {
 				{Key: "AGE", Value: []byte("20"), Format: ""},
 			},
 		},
+
+		{
+			name: "should not panic #1",
+			fields: fields{
+				prefixs: []string{"FOO"},
+			},
+			args: args{
+				envStrings: []string{
+					"FOO=123",
+				},
+			},
+			want: nil,
+		},
+
+		{
+			name: "should not panic #2",
+			fields: fields{
+				prefixs: []string{"FOO=1"},
+			},
+			args: args{
+				envStrings: []string{
+					"FOO=123",
+				},
+			},
+			want: nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
