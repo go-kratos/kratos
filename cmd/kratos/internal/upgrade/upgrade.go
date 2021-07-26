@@ -31,7 +31,7 @@ func Run(cmd *cobra.Command, args []string) {
 		fmt.Println(err)
 		return
 	}
-	if goVersion > "1.16" {
+	if goVersion > "1.17" {
 		err = base.GoInstall(paths...)
 	} else {
 		err = base.GoGet(paths...)
