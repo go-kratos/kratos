@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/go-kratos/zookeeper/registry"
@@ -16,8 +16,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	callHTTP(r)
-	callGRPC(r)
+	for {
+		callHTTP(r)
+		callGRPC(r)
+		time.Sleep(time.Second)
+	}
 }
 
 func callGRPC(r *registry.Registry) {
@@ -29,8 +32,9 @@ func callGRPC(r *registry.Registry) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer conn.Close()
 	client := helloworld.NewGreeterClient(conn)
-	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos_grpc"})
+	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,9 +44,6 @@ func callGRPC(r *registry.Registry) {
 func callHTTP(r *registry.Registry) {
 	conn, err := http.NewClient(
 		context.Background(),
-		http.WithMiddleware(
-			recovery.Recovery(),
-		),
 		http.WithEndpoint("discovery:///helloworld"),
 		http.WithDiscovery(r),
 		http.WithBlock(),
@@ -50,8 +51,9 @@ func callHTTP(r *registry.Registry) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer conn.Close()
 	client := helloworld.NewGreeterHTTPClient(conn)
-	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos_http"})
+	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {
 		log.Fatal(err)
 	}

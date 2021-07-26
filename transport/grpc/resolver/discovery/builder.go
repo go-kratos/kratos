@@ -48,13 +48,24 @@ func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 }
 
 func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), b.timeout)
-	defer cancel()
-	w, err := b.discoverer.Watch(ctx, target.Endpoint)
+	var (
+		err error
+		w   registry.Watcher
+	)
+	done := make(chan bool, 1)
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		w, err = b.discoverer.Watch(ctx, target.Endpoint)
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(b.timeout):
+	}
 	if err != nil {
+		cancel()
 		return nil, err
 	}
-
 	r := &discoveryResolver{
 		w:      w,
 		cc:     cc,
@@ -62,9 +73,7 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		cancel: cancel,
 		log:    log.NewHelper(b.logger),
 	}
-	r.ctx, r.cancel = context.WithCancel(context.Background())
 	go r.watch()
-
 	return r, nil
 }
 

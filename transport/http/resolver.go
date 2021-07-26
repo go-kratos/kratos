@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"errors"
 	"net/url"
 	"sync"
 	"time"
@@ -90,6 +91,9 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 		for {
 			services, err := watcher.Next()
 			if err != nil {
+				if errors.Is(err, context.Canceled) {
+					return
+				}
 				r.logger.Errorf("http client watch service %v got unexpected error:=%v", target, err)
 				time.Sleep(time.Second)
 				continue
@@ -122,6 +126,10 @@ func (r *resolver) update(services []*registry.ServiceInstance) {
 	} else {
 		r.logger.Warnf("[http resovler]Zero endpoint found,refused to write,ser: %s ins: %v", r.target.Endpoint, nodes)
 	}
+}
+
+func (r *resolver) Close() error {
+	return r.watcher.Stop()
 }
 
 func parseEndpoint(endpoints []string) (string, string, error) {

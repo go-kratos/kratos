@@ -2,6 +2,8 @@ package discovery
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"net/url"
 	"time"
 
@@ -27,10 +29,12 @@ func (r *discoveryResolver) watch() {
 			return
 		default:
 		}
-
 		ins, err := r.w.Next()
 		if err != nil {
-			r.log.Errorf("Failed to watch discovery endpoint: %v", err)
+			if errors.Is(err, context.Canceled) {
+				return
+			}
+			r.log.Errorf("[resovler] Failed to watch discovery endpoint: %v", err)
 			time.Sleep(time.Second)
 			continue
 		}
@@ -43,7 +47,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	for _, in := range ins {
 		endpoint, err := parseEndpoint(in.Endpoints)
 		if err != nil {
-			r.log.Errorf("Failed to parse discovery endpoint: %v", err)
+			r.log.Errorf("[resovler] Failed to parse discovery endpoint: %v", err)
 			continue
 		}
 		if endpoint == "" {
@@ -57,10 +61,12 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		addrs = append(addrs, addr)
 	}
 	if len(addrs) == 0 {
-		r.log.Warnf("[resovler]Zero endpoint found,refused to write, ins: %v", ins)
+		r.log.Warnf("[resovler] Zero endpoint found,refused to write, instances: %v", ins)
 		return
 	}
 	r.cc.UpdateState(resolver.State{Addresses: addrs})
+	b, _ := json.Marshal(ins)
+	r.log.Infof("[resolver] update instances: %s", b)
 }
 
 func (r *discoveryResolver) Close() {

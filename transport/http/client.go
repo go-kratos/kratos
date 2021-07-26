@@ -283,6 +283,11 @@ func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*h
 	return resp, nil
 }
 
+// Close tears down the Transport and all underlying connections.
+func (client *Client) Close() error {
+	return client.r.Close()
+}
+
 // DefaultRequestEncoder is an HTTP request encoder.
 func DefaultRequestEncoder(ctx context.Context, contentType string, in interface{}) ([]byte, error) {
 	name := httputil.ContentSubtype(contentType)
