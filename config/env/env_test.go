@@ -282,6 +282,44 @@ func Test_env_load(t *testing.T) {
 		},
 
 		{
+			name: "empty prefix",
+			fields: fields{
+				prefixs: []string{""},
+			},
+			args: args{
+				envStrings: []string{
+					"__SERVICE_NAME=kratos_app",
+					"__ADDR=192.168.0.1",
+					"__AGE=20",
+				},
+			},
+			want: []*config.KeyValue{
+				{Key: "_SERVICE_NAME", Value: []byte("kratos_app"), Format: ""},
+				{Key: "_ADDR", Value: []byte("192.168.0.1"), Format: ""},
+				{Key: "_AGE", Value: []byte("20"), Format: ""},
+			},
+		},
+
+		{
+			name: "underscore prefix",
+			fields: fields{
+				prefixs: []string{"_"},
+			},
+			args: args{
+				envStrings: []string{
+					"__SERVICE_NAME=kratos_app",
+					"__ADDR=192.168.0.1",
+					"__AGE=20",
+				},
+			},
+			want: []*config.KeyValue{
+				{Key: "SERVICE_NAME", Value: []byte("kratos_app"), Format: ""},
+				{Key: "ADDR", Value: []byte("192.168.0.1"), Format: ""},
+				{Key: "AGE", Value: []byte("20"), Format: ""},
+			},
+		},
+
+		{
 			name: "with prefixes",
 			fields: fields{
 				prefixs: []string{"KRATOS_", "FOO"},
