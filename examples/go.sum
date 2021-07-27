@@ -174,6 +174,8 @@ github.com/go-kit/kit v0.10.0/go.mod h1:xUsJbQ/Fp4kEt7AFgCuvyX4a71u8h9jB8tj/ORgO
 github.com/go-kit/log v0.1.0/go.mod h1:zbhenjAZHb184qTLMA9ZjW7ThYL0H2mk7Q6pNt4vbaY=
 github.com/go-kratos/consul v0.1.2 h1:vryYF2o3wWQzFyzqKKKc1+GX/FY9T7DSkM3nc/Hy6/s=
 github.com/go-kratos/consul v0.1.2/go.mod h1:FhxdCfkqaqIYfgpGbzGb8ywM/zV3jk+EBS+WSy1FzQQ=
+github.com/go-kratos/consul v0.1.4 h1:qOOQE/FYpbWLV4cipC+jPrrc/gQY1DdfnX0IJvQleXE=
+github.com/go-kratos/consul v0.1.4/go.mod h1:egsB9apqg+4BMYVnY/VuQCeC3aAmd7mpYfIMhs4ga4U=
 github.com/go-kratos/etcd v0.1.0 h1:ewAfloZcpcg2L1QB1VLXYUMdvfUU0i3kAlToHrxTv2g=
 github.com/go-kratos/etcd v0.1.0/go.mod h1:RzWYbka3LjS0v2RbCtADN7d2Ng8eH774ehHlTGgbma4=
 github.com/go-kratos/gin v0.1.0 h1:yq5GfZnSNo8cOIqxqPE0FVNQ8fm++oKQBd3/rTTp4oI=
@@ -788,6 +790,7 @@ golang.org/x/mod v0.1.1-0.20191105210325-c90efee705ee/go.mod h1:QqPTAvyqsEbceGzB
 golang.org/x/mod v0.1.1-0.20191107180719-034126e5016b/go.mod h1:QqPTAvyqsEbceGzBzNggFXnrqF1CaUcvgkdR5Ot7KZg=
 golang.org/x/mod v0.2.0/go.mod h1:s0Qsj1ACt9ePp/hMypM3fl4fZqREWJwdYDEqhRiZZUA=
 golang.org/x/mod v0.3.0/go.mod h1:s0Qsj1ACt9ePp/hMypM3fl4fZqREWJwdYDEqhRiZZUA=
+golang.org/x/mod v0.4.2 h1:Gz96sIWK3OalVv/I/qNygP42zyoKp3xptRVCWRFEBvo=
 golang.org/x/mod v0.4.2/go.mod h1:s0Qsj1ACt9ePp/hMypM3fl4fZqREWJwdYDEqhRiZZUA=
 golang.org/x/net v0.0.0-20180724234803-3673e40ba225/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/net v0.0.0-20180826012351-8a410e7b638d/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
