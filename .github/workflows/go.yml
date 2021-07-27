@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     services:
       etcd:
-        image: gcr.io/etcd-development/etcd:v3.5.0
+        image: quay.io/coreos/etcd:latest
         ports:
           - 2379
       consul:
-        image: consul:1.10
+        image: consul:latest
         ports:
           - 8500
 
