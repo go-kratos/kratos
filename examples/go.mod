@@ -1,13 +1,13 @@
 module github.com/go-kratos/kratos/examples
 
-go 1.16
+go 1.15
 
 require (
 	entgo.io/ent v0.8.0
 	github.com/BurntSushi/toml v0.3.1
 	github.com/envoyproxy/protoc-gen-validate v0.6.1
 	github.com/gin-gonic/gin v1.7.2
-	github.com/go-kratos/consul v0.1.2
+	github.com/go-kratos/consul v0.1.4
 	github.com/go-kratos/etcd v0.1.0
 	github.com/go-kratos/gin v0.1.0
 	github.com/go-kratos/kratos/v2 v2.0.1
