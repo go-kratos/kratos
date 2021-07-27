@@ -97,7 +97,7 @@ func (a *App) Run() error {
 			a.opts.ctx, cancel = context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 			defer cancel()
 		}
-		done := make(chan struct{}, 0)
+		done := make(chan struct{})
 		go func() {
 			select {
 			case <-a.opts.ctx.Done():
