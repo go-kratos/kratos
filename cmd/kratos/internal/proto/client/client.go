@@ -17,13 +17,18 @@ import (
 var (
 	// CmdClient represents the source command.
 	CmdClient = &cobra.Command{
-		Use:                "client",
-		Short:              "Generate the proto client code",
-		Long:               "Generate the proto client code. Example: kratos proto client helloworld.proto",
-		DisableFlagParsing: true,
-		Run:                run,
+		Use:   "client",
+		Short: "Generate the proto client code",
+		Long:  "Generate the proto client code. Example: kratos proto client helloworld.proto",
+		Run:   run,
 	}
 )
+
+var thirdPartyPath string
+
+func init() {
+	CmdClient.Flags().StringVarP(&thirdPartyPath, "third", "p", thirdPartyPath, "third party path")
+}
 
 func run(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
@@ -77,9 +82,18 @@ func walk(dir string, args []string) error {
 
 // generate is used to execute the generate command for the specified proto file
 func generate(proto string, args []string) error {
+	if thirdPartyPath == "" {
+		thirdPartyPath = "./"
+	}
 	input := []string{
 		"--proto_path=.",
-		"--proto_path=./third_party",
+	}
+	thirdPath := filepath.Join(thirdPartyPath, "third_party")
+	if fileExists(thirdPath) {
+		input = append(input, "--proto_path="+thirdPath)
+	}
+	inputExt := []string{
+		"--proto_path=.",
 		"--proto_path=" + base.KratosMod(),
 		"--proto_path=" + filepath.Join(base.KratosMod(), "third_party"),
 		"--go_out=paths=source_relative:.",
@@ -87,6 +101,7 @@ func generate(proto string, args []string) error {
 		"--go-http_out=paths=source_relative:.",
 		"--go-errors_out=paths=source_relative:.",
 	}
+	input = append(input, inputExt...)
 	protoBytes, err := ioutil.ReadFile(proto)
 	if err == nil && len(protoBytes) > 0 {
 		if ok, _ := regexp.Match(`\n[^/]*(import)\s+"validate/validate.proto"`, protoBytes); ok {
@@ -108,4 +123,15 @@ func generate(proto string, args []string) error {
 	}
 	fmt.Printf("proto: %s\n", proto)
 	return nil
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	if err != nil {
+		if os.IsExist(err) {
+			return true
+		}
+		return false
+	}
+	return true
 }
