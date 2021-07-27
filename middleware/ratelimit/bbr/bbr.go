@@ -11,17 +11,20 @@ import (
 )
 
 var (
-	cpu         int64
+	gCPU        int64
 	decay       = 0.95
 	initTime    = time.Now()
-	defaultConf = &Config{
-		Window:       time.Second * 10,
-		WinBucket:    100,
+	defaultOpts = &options{
+		WindowSize:   time.Second * 10,
+		BucketNum:    100,
 		CPUThreshold: 800,
 	}
 )
 
-type cpuGetter func() int64
+type (
+	cpuGetter func() int64
+	Option    func(*options)
+)
 
 func init() {
 	go cpuproc()
@@ -41,9 +44,9 @@ func cpuproc() {
 	for range ticker.C {
 		stat := &cpustat.Stat{}
 		cpustat.ReadStat(stat)
-		prevCpu := atomic.LoadInt64(&cpu)
+		prevCpu := atomic.LoadInt64(&gCPU)
 		curCpu := int64(float64(prevCpu)*decay + float64(stat.Usage)*(1.0-decay))
-		atomic.StoreInt64(&cpu, curCpu)
+		atomic.StoreInt64(&gCPU, curCpu)
 	}
 }
 
@@ -56,23 +59,6 @@ type Stat struct {
 	MaxPass     int64
 }
 
-// BBR implements bbr-like limiter.
-// It is inspired by sentinel.
-// https://github.com/alibaba/Sentinel/wiki/%E7%B3%BB%E7%BB%9F%E8%87%AA%E9%80%82%E5%BA%94%E9%99%90%E6%B5%81
-type BBR struct {
-	cpu             cpuGetter
-	passStat        RollingCounter
-	rtStat          RollingCounter
-	inFlight        int64
-	winBucketPerSec int64
-	bucketDuration  time.Duration
-	winSize         int
-	conf            *Config
-	prevDrop        atomic.Value
-	maxPASSCache    atomic.Value
-	minRtCache      atomic.Value
-}
-
 // CounterCache is used to cache maxPASS and minRt result.
 // Value of current bucket is not counted in real time.
 // Cache time is equal to a bucket duration.
@@ -81,27 +67,85 @@ type CounterCache struct {
 	time time.Time
 }
 
-// Config contains configs of bbr limiter.
-type Config struct {
-	Enabled      bool
-	Window       time.Duration
-	WinBucket    int
-	Rule         string
-	Debug        bool
+// options of bbr limiter.
+type options struct {
+	// WindowSize defines time duration per window
+	WindowSize time.Duration
+	// BucketNum defines bucket number for each window
+	BucketNum int
+	// CPUThreshold
 	CPUThreshold int64
+}
+
+func WithWindowSize(size time.Duration) Option {
+	return func(o *options) {
+		o.WindowSize = size
+	}
+}
+
+func WithBucketNum(num int) Option {
+	return func(o *options) {
+		o.BucketNum = num
+	}
+}
+
+func WithCPUThreshold(threshold int64) Option {
+	return func(o *options) {
+		o.CPUThreshold = threshold
+	}
+}
+
+// BBR implements bbr-like limiter.
+// It is inspired by sentinel.
+// https://github.com/alibaba/Sentinel/wiki/%E7%B3%BB%E7%BB%9F%E8%87%AA%E9%80%82%E5%BA%94%E9%99%90%E6%B5%81
+type BBR struct {
+	cpu             cpuGetter
+	passStat        RollingCounter
+	rtStat          RollingCounter
+	inFlight        int64
+	bucketPerSecond int64
+	bucketSize      time.Duration
+
+	prevDrop     atomic.Value
+	maxPASSCache atomic.Value
+	minRtCache   atomic.Value
+
+	opts *options
+}
+
+func NewLimiter(opts ...Option) limit.Limiter {
+	options := defaultOpts
+	for _, o := range opts {
+		o(options)
+	}
+
+	size := options.BucketNum
+	bucketSize := options.WindowSize / time.Duration(options.BucketNum)
+	passStat := NewRollingCounter(RollingCounterOpts{Size: size, BucketDuration: bucketSize})
+	rtStat := NewRollingCounter(RollingCounterOpts{Size: size, BucketDuration: bucketSize})
+
+	limiter := &BBR{
+		cpu:             func() int64 { return atomic.LoadInt64(&gCPU) },
+		opts:            options,
+		passStat:        passStat,
+		rtStat:          rtStat,
+		bucketPerSecond: int64(time.Second / bucketSize),
+		bucketSize:      bucketSize,
+	}
+	return limiter
 }
 
 func (l *BBR) maxPASS() int64 {
 	passCache := l.maxPASSCache.Load()
 	if passCache != nil {
 		ps := passCache.(*CounterCache)
-		if l.timespan(ps.time) < 1 {
+		if l.bucketCountSince(ps.time) < 1 {
 			return ps.val
 		}
 	}
 	rawMaxPass := int64(l.passStat.Reduce(func(iterator Iterator) float64 {
 		var result = 1.0
-		for i := 1; iterator.Next() && i < l.conf.WinBucket; i++ {
+		for i := 1; iterator.Next() && i < l.opts.BucketNum; i++ {
 			bucket := iterator.Bucket()
 			count := 0.0
 			for _, p := range bucket.Points {
@@ -121,25 +165,28 @@ func (l *BBR) maxPASS() int64 {
 	return rawMaxPass
 }
 
-func (l *BBR) timespan(lastTime time.Time) int {
-	v := int(time.Since(lastTime) / l.bucketDuration)
+// bucketCountSince returns the passed bucket count
+// since lastTime, if it is one bucket size earlier than
+// the last recorded time, it will return the BucketNum
+func (l *BBR) bucketCountSince(lastTime time.Time) int {
+	v := int(time.Since(lastTime) / l.bucketSize)
 	if v > -1 {
 		return v
 	}
-	return l.winSize
+	return l.opts.BucketNum
 }
 
 func (l *BBR) minRT() int64 {
 	rtCache := l.minRtCache.Load()
 	if rtCache != nil {
 		rc := rtCache.(*CounterCache)
-		if l.timespan(rc.time) < 1 {
+		if l.bucketCountSince(rc.time) < 1 {
 			return rc.val
 		}
 	}
 	rawMinRT := int64(math.Ceil(l.rtStat.Reduce(func(iterator Iterator) float64 {
 		var result = math.MaxFloat64
-		for i := 1; iterator.Next() && i < l.conf.WinBucket; i++ {
+		for i := 1; iterator.Next() && i < l.opts.BucketNum; i++ {
 			bucket := iterator.Bucket()
 			if len(bucket.Points) == 0 {
 				continue
@@ -163,25 +210,25 @@ func (l *BBR) minRT() int64 {
 	return rawMinRT
 }
 
-func (l *BBR) maxFlight() int64 {
-	return int64(math.Floor(float64(l.maxPASS()*l.minRT()*l.winBucketPerSec)/1000.0 + 0.5))
+func (l *BBR) maxInFlight() int64 {
+	return int64(math.Ceil(float64(l.maxPASS()*l.minRT()*l.bucketPerSecond) / 1000.0))
 }
 
 func (l *BBR) shouldDrop() bool {
-	if l.cpu() < l.conf.CPUThreshold {
+	if l.cpu() < l.opts.CPUThreshold {
 		prevDrop, _ := l.prevDrop.Load().(time.Duration)
 		if prevDrop == 0 {
 			return false
 		}
 		if time.Since(initTime)-prevDrop <= time.Second {
 			inFlight := atomic.LoadInt64(&l.inFlight)
-			return inFlight > 1 && inFlight > l.maxFlight()
+			return inFlight > 1 && inFlight > l.maxInFlight()
 		}
 		l.prevDrop.Store(time.Duration(0))
 		return false
 	}
 	inFlight := atomic.LoadInt64(&l.inFlight)
-	drop := inFlight > 1 && inFlight > l.maxFlight()
+	drop := inFlight > 1 && inFlight > l.maxInFlight()
 	if drop {
 		prevDrop, _ := l.prevDrop.Load().(time.Duration)
 		if prevDrop != 0 {
@@ -199,7 +246,7 @@ func (l *BBR) Stat() Stat {
 		InFlight:    atomic.LoadInt64(&l.inFlight),
 		MinRt:       l.minRT(),
 		MaxPass:     l.maxPASS(),
-		MaxInFlight: l.maxFlight(),
+		MaxInFlight: l.maxInFlight(),
 	}
 }
 
@@ -217,27 +264,4 @@ func (l *BBR) Allow(ctx context.Context) (func(), error) {
 		atomic.AddInt64(&l.inFlight, -1)
 		l.passStat.Add(1)
 	}, nil
-}
-
-func newLimiter(conf *Config) limit.Limiter {
-	if conf == nil {
-		conf = defaultConf
-	}
-	size := conf.WinBucket
-	bucketDuration := conf.Window / time.Duration(conf.WinBucket)
-	passStat := NewRollingCounter(RollingCounterOpts{Size: size, BucketDuration: bucketDuration})
-	rtStat := NewRollingCounter(RollingCounterOpts{Size: size, BucketDuration: bucketDuration})
-	cpu := func() int64 {
-		return atomic.LoadInt64(&cpu)
-	}
-	limiter := &BBR{
-		cpu:             cpu,
-		conf:            conf,
-		passStat:        passStat,
-		rtStat:          rtStat,
-		winBucketPerSec: int64(time.Second) / (int64(conf.Window) / int64(conf.WinBucket)),
-		bucketDuration:  bucketDuration,
-		winSize:         conf.WinBucket,
-	}
-	return limiter
 }

@@ -10,7 +10,8 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/imdario/mergo v0.3.12
-	github.com/shirou/gopsutil v3.21.6+incompatible // indirect
+	github.com/pkg/errors v0.9.1
+	github.com/shirou/gopsutil v3.21.6+incompatible
 	github.com/stretchr/testify v1.7.0
 	go.opentelemetry.io/otel v1.0.0-RC2
 	go.opentelemetry.io/otel/sdk v1.0.0-RC2
