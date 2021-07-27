@@ -8,9 +8,18 @@ on:
   workflow_dispatch:
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
+    services:
+      etcd:
+        image: gcr.io/etcd-development/etcd:v3.5.0
+        ports:
+          - 2379
+      consul:
+        image: consul:1.10
+        ports:
+          - 8500
+
     steps:
     - uses: actions/checkout@v2
 
