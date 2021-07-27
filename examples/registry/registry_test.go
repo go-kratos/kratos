@@ -15,7 +15,6 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
-	"github.com/hashicorp/consul/api"
 	consul "github.com/hashicorp/consul/api"
 	etcd "go.etcd.io/etcd/client/v3"
 )
@@ -108,7 +107,7 @@ func TestETCD(t *testing.T) {
 }
 
 func TestConsul(t *testing.T) {
-	client, err := consul.NewClient(api.DefaultConfig())
+	client, err := consul.NewClient(consul.DefaultConfig())
 	if err != nil {
 		log.Fatal(err)
 	}
