@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -61,6 +62,7 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 	select {
 	case <-done:
 	case <-time.After(b.timeout):
+		err = errors.New("discovery create watcher overtime")
 	}
 	if err != nil {
 		cancel()
