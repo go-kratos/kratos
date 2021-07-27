@@ -25,11 +25,10 @@ type options struct {
 	ctx  context.Context
 	sigs []os.Signal
 
-	logger            log.Logger
-	registrar         registry.Registrar
-	registrarTimeout  time.Duration
-	deregisterTimeout time.Duration
-	servers           []transport.Server
+	logger           log.Logger
+	registrar        registry.Registrar
+	registrarTimeout time.Duration
+	servers          []transport.Server
 }
 
 // ID with service id.
@@ -85,9 +84,4 @@ func Registrar(r registry.Registrar) Option {
 // RegistrarTimeout with registrar timeout.
 func RegistrarTimeout(t time.Duration) Option {
 	return func(o *options) { o.registrarTimeout = t }
-}
-
-// DeregisterTimeout with deregister timeout.
-func DeregisterTimeout(t time.Duration) Option {
-	return func(o *options) { o.deregisterTimeout = t }
 }
