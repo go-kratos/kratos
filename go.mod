@@ -3,11 +3,14 @@ module github.com/go-kratos/kratos/v2
 go 1.15
 
 require (
+	github.com/StackExchange/wmi v1.2.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
+	github.com/go-ole/go-ole v1.2.5 // indirect
 	github.com/go-playground/form/v4 v4.2.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/imdario/mergo v0.3.12
+	github.com/shirou/gopsutil v3.21.6+incompatible // indirect
 	github.com/stretchr/testify v1.7.0
 	go.opentelemetry.io/otel v1.0.0-RC2
 	go.opentelemetry.io/otel/sdk v1.0.0-RC2
