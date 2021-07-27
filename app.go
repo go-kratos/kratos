@@ -92,9 +92,24 @@ func (a *App) Run() error {
 	}
 	wg.Wait()
 	if a.opts.registrar != nil {
+		if a.opts.registrarTimeout > 0 {
+			var cancel context.CancelFunc
+			a.opts.ctx, cancel = context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
+			defer cancel()
+		}
+		done := make(chan struct{}, 0)
+		go func() {
+			select {
+			case <-a.opts.ctx.Done():
+				panic(a.opts.ctx.Err())
+			case <-done:
+				return
+			}
+		}()
 		if err := a.opts.registrar.Register(a.opts.ctx, instance); err != nil {
 			return err
 		}
+		done <- struct{}{}
 		a.instance = instance
 	}
 	c := make(chan os.Signal, 1)

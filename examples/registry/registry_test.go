@@ -7,10 +7,11 @@ import (
 	"testing"
 	"time"
 
-	consulregistry "github.com/go-kratos/consul/registry"
-	etcdregistry "github.com/go-kratos/etcd/registry"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
+
+	consulregistry "github.com/go-kratos/consul/registry"
+	etcdregistry "github.com/go-kratos/etcd/registry"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
@@ -44,6 +45,7 @@ func startServer(r registry.Registrar) (app *kratos.App, err error) {
 			grpcSrv,
 		),
 		kratos.Registrar(r),
+		kratos.RegistrarTimeout(5*time.Second),
 	)
 	go func() {
 		err = app.Run()

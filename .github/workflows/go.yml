@@ -12,9 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     services:
       etcd:
-        image: quay.io/coreos/etcd:latest
+        image: gcr.io/etcd-development/etcd:v3.5.0
         ports:
-          - 2379
+          - 2379:2379
+        env:
+          ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+          ETCD_ADVERTISE_CLIENT_URLS: http://0.0.0.0:2379
       consul:
         image: consul:latest
         ports:
