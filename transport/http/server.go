@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"net"
 	"net/http"
@@ -93,10 +94,18 @@ func Endpoint(endpoint *url.URL) ServerOption {
 	}
 }
 
+// TLSConfig with TLS config.
+func TLSConfig(c *tls.Config) ServerOption {
+	return func(o *Server) {
+		o.tlsConf = c
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
 	lis      net.Listener
+	tlsConf  *tls.Config
 	once     sync.Once
 	endpoint *url.URL
 	err      error
@@ -127,7 +136,8 @@ func NewServer(opts ...ServerOption) *Server {
 		o(srv)
 	}
 	srv.Server = &http.Server{
-		Handler: FilterChain(srv.filters...)(srv),
+		TLSConfig: srv.tlsConf,
+		Handler:   FilterChain(srv.filters...)(srv),
 	}
 	srv.router = mux.NewRouter()
 	srv.router.Use(srv.filter())
