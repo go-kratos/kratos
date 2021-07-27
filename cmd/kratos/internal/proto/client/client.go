@@ -93,7 +93,6 @@ func generate(proto string, args []string) error {
 		input = append(input, "--proto_path="+thirdPath)
 	}
 	inputExt := []string{
-		"--proto_path=.",
 		"--proto_path=" + base.KratosMod(),
 		"--proto_path=" + filepath.Join(base.KratosMod(), "third_party"),
 		"--go_out=paths=source_relative:.",
