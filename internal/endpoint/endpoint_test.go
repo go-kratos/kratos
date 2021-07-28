@@ -1,10 +1,15 @@
-package host
+package endpoint
 
 import (
 	"net/url"
 	"reflect"
 	"testing"
 )
+
+func TestNewEndpoint(t *testing.T) {
+	u := NewEndpoint("grpc", "127.0.0.1", false)
+	t.Log(u)
+}
 
 func TestGetQuery(t *testing.T) {
 	type args struct {
@@ -18,24 +23,24 @@ func TestGetQuery(t *testing.T) {
 		// TODO: Add test cases.
 		{
 			name: "grpc://127.0.0.1?isSecure=false",
-			args: args{&url.URL{Scheme: "grpc", Host: "127.0.0.1", RawQuery: "isSecure=false"}},
+			args: args{NewEndpoint("grpc", "127.0.0.1", false)},
 			want: false,
 		},
 		{
 			name: "grpc://127.0.0.1?isSecure=true",
-			args: args{&url.URL{Scheme: "grpc", Host: "127.0.0.1", RawQuery: "isSecure=true"}},
+			args: args{NewEndpoint("http", "127.0.0.1", true)},
 			want: true,
 		},
 		{
 			name: "grpc://127.0.0.1",
-			args: args{&url.URL{Scheme: "grpc", Host: "127.0.0.1"}},
+			args: args{NewEndpoint("grpc", "localhost", false)},
 			want: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetQuery(tt.args.url); !reflect.DeepEqual(got.IsSecure, tt.want) {
-				t.Errorf("GetQuery() = %v, want %v", got.IsSecure, tt.want)
+			if got := EndpointIsSecure(tt.args.url); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetQuery() = %v, want %v", got, tt.want)
 			}
 		})
 	}

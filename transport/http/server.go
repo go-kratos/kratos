@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"net"
 	"net/http"
 	"net/url"
@@ -217,11 +218,8 @@ func (s *Server) Endpoint() (*url.URL, error) {
 			return
 		}
 		s.lis = lis
-		var query string
-		if s.tlsConf != nil {
-			query = "isSecure=true"
-		}
-		s.endpoint = &url.URL{Scheme: "http", Host: addr, RawQuery: query}
+
+		s.endpoint = endpoint.NewEndpoint("http", addr, s.tlsConf != nil)
 	})
 	if s.err != nil {
 		return nil, s.err
