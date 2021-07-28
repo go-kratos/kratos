@@ -27,6 +27,9 @@ var (
 var thirdPartyPath string
 
 func init() {
+	if thirdPartyPath = os.Getenv("THIRD_PARTY_PATH"); thirdPartyPath == "" {
+		thirdPartyPath = "./third_party"
+	}
 	CmdClient.Flags().StringVarP(&thirdPartyPath, "third", "p", thirdPartyPath, "third party path")
 }
 
@@ -82,15 +85,11 @@ func walk(dir string, args []string) error {
 
 // generate is used to execute the generate command for the specified proto file
 func generate(proto string, args []string) error {
-	if thirdPartyPath == "" {
-		thirdPartyPath = "./"
-	}
 	input := []string{
 		"--proto_path=.",
 	}
-	thirdPath := filepath.Join(thirdPartyPath, "third_party")
-	if fileExists(thirdPath) {
-		input = append(input, "--proto_path="+thirdPath)
+	if fileExists(thirdPartyPath) {
+		input = append(input, "--proto_path="+thirdPartyPath)
 	}
 	inputExt := []string{
 		"--proto_path=" + base.KratosMod(),
