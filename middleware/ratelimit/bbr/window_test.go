@@ -36,7 +36,7 @@ func TestWindowResetBuckets(t *testing.T) {
 	for i := 0; i < opts.Size; i++ {
 		window.Append(i, 1.0)
 	}
-	window.ResetBuckets([]int{0, 1, 2})
+	window.ResetBuckets(0, 3)
 	for i := 0; i < opts.Size; i++ {
 		assert.Equal(t, len(window.Bucket(i).Points), 0)
 	}

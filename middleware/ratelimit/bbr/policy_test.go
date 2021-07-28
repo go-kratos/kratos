@@ -26,12 +26,12 @@ func TestRollingPolicy_Add(t *testing.T) {
 			points:    []int{1, 1},
 		},
 		{
-			timeSleep: []int{94, 350},
+			timeSleep: []int{94, 250},
 			offset:    []int{0, 0},
 			points:    []int{1, 1},
 		},
 		{
-			timeSleep: []int{150, 450, 750},
+			timeSleep: []int{150, 300, 600},
 			offset:    []int{1, 1, 1},
 			points:    []int{1, 1, 1},
 		},
@@ -56,26 +56,51 @@ func TestRollingPolicy_Add(t *testing.T) {
 	}
 }
 
-func TestRollingPolicy_Add2(t *testing.T) {
-	policy := GetRollingPolicy()
+func TestRollingPolicy_AddWithTimespan(t *testing.T) {
+	t.Run("timespan < bucket number", func(t *testing.T) {
+		policy := GetRollingPolicy()
+		// bucket 0
+		policy.Add(0)
+		// bucket 1
+		time.Sleep(101 * time.Millisecond)
+		policy.Add(1)
+		// bucket 2
+		time.Sleep(101 * time.Millisecond)
+		policy.Add(2)
+		// bucket 1
+		time.Sleep(201 * time.Millisecond)
+		policy.Add(4)
 
-	// bucket 0
-	policy.Add(0)
-	// bucket 1
-	time.Sleep(101 * time.Millisecond)
-	policy.Add(1)
-	// bucket 2
-	time.Sleep(101 * time.Millisecond)
-	policy.Add(2)
-	// bucket 1
-	time.Sleep(201 * time.Millisecond)
-	policy.Add(4)
+		for _, bkt := range policy.window.buckets {
+			t.Logf("%+v", bkt)
+		}
 
-	for _, bkt := range policy.window.buckets {
-		t.Logf("%+v", bkt)
-	}
+		assert.Equal(t, 0, len(policy.window.buckets[0].Points))
+		assert.Equal(t, 4, int(policy.window.buckets[1].Points[0]))
+		assert.Equal(t, 2, int(policy.window.buckets[2].Points[0]))
+	})
 
-	assert.Equal(t, 0, len(policy.window.buckets[0].Points))
-	assert.Equal(t, 4, int(policy.window.buckets[1].Points[0]))
-	assert.Equal(t, 2, int(policy.window.buckets[2].Points[0]))
+	t.Run("timespan > bucket number", func(t *testing.T) {
+		policy := GetRollingPolicy()
+
+		// bucket 0
+		policy.Add(0)
+		// bucket 1
+		time.Sleep(101 * time.Millisecond)
+		policy.Add(1)
+		// bucket 2
+		time.Sleep(101 * time.Millisecond)
+		policy.Add(2)
+		// bucket 1
+		time.Sleep(501 * time.Millisecond)
+		policy.Add(4)
+
+		for _, bkt := range policy.window.buckets {
+			t.Logf("%+v", bkt)
+		}
+
+		assert.Equal(t, 0, len(policy.window.buckets[0].Points))
+		assert.Equal(t, 4, int(policy.window.buckets[1].Points[0]))
+		assert.Equal(t, 0, len(policy.window.buckets[2].Points))
+	})
 }

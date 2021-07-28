@@ -64,23 +64,24 @@ func (w *Window) ResetWindow() {
 
 // ResetBucket empties the bucket based on the given offset.
 func (w *Window) ResetBucket(offset int) {
-	w.buckets[offset].Reset()
+	w.buckets[offset%w.size].Reset()
 }
 
 // ResetBuckets empties the buckets based on the given offsets.
-func (w *Window) ResetBuckets(offsets []int) {
-	for _, offset := range offsets {
-		w.ResetBucket(offset)
+func (w *Window) ResetBuckets(offset int, count int) {
+	for i := 0; i < count; i++ {
+		w.ResetBucket(offset + i)
 	}
 }
 
 // Append appends the given value to the bucket where index equals the given offset.
 func (w *Window) Append(offset int, val float64) {
-	w.buckets[offset].Append(val)
+	w.buckets[offset%w.size].Append(val)
 }
 
 // Add adds the given value to the latest point within bucket where index equals the given offset.
 func (w *Window) Add(offset int, val float64) {
+	offset %= w.size
 	if w.buckets[offset].Count == 0 {
 		w.buckets[offset].Append(val)
 		return
@@ -90,7 +91,7 @@ func (w *Window) Add(offset int, val float64) {
 
 // Bucket returns the bucket where index equals the given offset.
 func (w *Window) Bucket(offset int) Bucket {
-	return w.buckets[offset]
+	return w.buckets[offset%w.size]
 }
 
 // Size returns the size of the window.
@@ -102,6 +103,6 @@ func (w *Window) Size() int {
 func (w *Window) Iterator(offset int, count int) Iterator {
 	return Iterator{
 		count: count,
-		cur:   &w.buckets[offset],
+		cur:   &w.buckets[offset%w.size],
 	}
 }

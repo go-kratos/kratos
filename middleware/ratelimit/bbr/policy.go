@@ -56,27 +56,15 @@ func (r *RollingPolicy) apply(f func(offset int, val float64), val float64) {
 	// calculate current offset
 	timespan := r.timespan()
 	if timespan > 0 {
-		r.lastAppendTime = r.lastAppendTime.Add(time.Duration(timespan * int(r.bucketDuration)))
-		offset := r.offset
-		// reset the expired buckets
+		start := (r.offset + 1) % r.size
+		end := (r.offset + timespan) % r.size
 		if timespan > r.size {
 			timespan = r.size
 		}
-		start := offset + 1
-		e0, e1 := start+timespan, 0 // e0: reset offset must start from offset+1
-		if e0 > r.size {
-			e1 = e0 - r.size
-			e0 = r.size
-		}
-		for i := start; i < e0; i++ {
-			r.window.ResetBucket(i)
-			offset = i
-		}
-		for i := 0; i < e1; i++ {
-			r.window.ResetBucket(i)
-			offset = i
-		}
-		r.offset = offset
+		// reset the expired buckets
+		r.window.ResetBuckets(start, timespan)
+		r.offset = end
+		r.lastAppendTime = r.lastAppendTime.Add(time.Duration(timespan * int(r.bucketDuration)))
 	}
 	f(r.offset, val)
 }
