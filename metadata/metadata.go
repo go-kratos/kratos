@@ -16,13 +16,7 @@ func New(mds ...map[string]string) Metadata {
 	md := Metadata{}
 	for _, m := range mds {
 		for k, v := range m {
-			if k == "" {
-				continue
-			}
-			key := strings.ToLower(k)
-			if v != "" {
-				md[key] = v
-			}
+			md.Set(k, v)
 		}
 	}
 	return md
