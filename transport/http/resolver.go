@@ -34,9 +34,7 @@ func parseTarget(endpoint string, isSecure bool) (*Target, error) {
 	}
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		if u, err = url.Parse(endpoint); err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 	target := &Target{Scheme: u.Scheme, Authority: u.Host}
 	if len(u.Path) > 1 {
