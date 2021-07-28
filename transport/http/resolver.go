@@ -27,10 +27,9 @@ type Target struct {
 
 func parseTarget(endpoint string, isSecure bool) (*Target, error) {
 	if !strings.Contains(endpoint, "://") {
+		endpoint = "http://" + endpoint
 		if isSecure {
 			endpoint = "https://" + endpoint
-		} else {
-			endpoint = "http://" + endpoint
 		}
 	}
 	u, err := url.Parse(endpoint)
