@@ -80,16 +80,18 @@ func (r *discoveryResolver) Close() {
 func (r *discoveryResolver) ResolveNow(options resolver.ResolveNowOptions) {}
 
 func parseEndpoint(endpoints []string, isSecure bool) (string, error) {
+	var query = new(host.Query)
 	for _, e := range endpoints {
 		u, err := url.Parse(e)
 		if err != nil {
 			return "", err
 		}
 
-		query := host.GetQuery(u)
-
-		if u.Scheme == "grpc" && query.IsSecure == isSecure {
-			return u.Host, nil
+		if u.Scheme == "grpc" {
+			query = host.GetQuery(u)
+			if query.IsSecure == isSecure {
+				return u.Host, nil
+			}
 		}
 	}
 	return "", nil
