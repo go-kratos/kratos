@@ -158,7 +158,11 @@ func (s *Server) Endpoint() (*url.URL, error) {
 			return
 		}
 		s.lis = lis
-		s.endpoint = &url.URL{Scheme: "grpc", Host: addr}
+		var query string
+		if s.tlsConf != nil {
+			query = "isSecure=true"
+		}
+		s.endpoint = &url.URL{Scheme: "grpc", Host: addr, RawQuery: query}
 	})
 	if s.err != nil {
 		return nil, s.err
