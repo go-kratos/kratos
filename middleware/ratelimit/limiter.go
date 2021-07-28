@@ -13,11 +13,11 @@ var ErrLimitExceed = errors.New("rate limit exceeded")
 
 // Limiter limit interface.
 type Limiter interface {
-	Allow(ctx context.Context) (func(), error)
+	Allow(ctx context.Context) (done func(), err error)
 }
 
 // RateLimiter middleware
-func ReteLimiter(limiter Limiter) middleware.Middleware {
+func RateLimiter(limiter Limiter) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if done, e := limiter.Allow(ctx); e != nil {

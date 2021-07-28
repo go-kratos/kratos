@@ -45,7 +45,7 @@ type WindowOpts struct {
 func NewWindow(opts WindowOpts) *Window {
 	buckets := make([]Bucket, opts.Size)
 	for offset := range buckets {
-		buckets[offset] = Bucket{Points: make([]float64, 0)}
+		buckets[offset].Points = make([]float64, 0)
 		nextOffset := offset + 1
 		if nextOffset == opts.Size {
 			nextOffset = 0
@@ -98,7 +98,7 @@ func (w *Window) Size() int {
 	return w.size
 }
 
-// Iterator returns the bucket iterator.
+// Iterator returns the count number buckets iterator from offset.
 func (w *Window) Iterator(offset int, count int) Iterator {
 	return Iterator{
 		count: count,

@@ -50,7 +50,7 @@ func cpuproc() {
 	}
 }
 
-// Stats contains the metrics's snapshot of bbr.
+// Stat contains the metrics snapshot of bbr.
 type Stat struct {
 	Cpu         int64
 	InFlight    int64
@@ -106,7 +106,8 @@ type BBR struct {
 	bucketPerSecond int64
 	bucketSize      time.Duration
 
-	prevDrop     atomic.Value
+	// prevDropTime defines previous start drop since initTime
+	prevDropTime atomic.Value
 	maxPASSCache atomic.Value
 	minRtCache   atomic.Value
 
@@ -139,7 +140,7 @@ func (l *BBR) maxPASS() int64 {
 	passCache := l.maxPASSCache.Load()
 	if passCache != nil {
 		ps := passCache.(*CounterCache)
-		if l.bucketCountSince(ps.time) < 1 {
+		if l.timespan(ps.time) < 1 {
 			return ps.val
 		}
 	}
@@ -165,10 +166,10 @@ func (l *BBR) maxPASS() int64 {
 	return rawMaxPass
 }
 
-// bucketCountSince returns the passed bucket count
-// since lastTime, if it is one bucket size earlier than
-// the last recorded time, it will return the BucketNum
-func (l *BBR) bucketCountSince(lastTime time.Time) int {
+// timespan returns the passed bucket count
+// since lastTime, if it is one bucket duration earlier than
+// the last recorded time, it will return the BucketNum.
+func (l *BBR) timespan(lastTime time.Time) int {
 	v := int(time.Since(lastTime) / l.bucketSize)
 	if v > -1 {
 		return v
@@ -180,7 +181,7 @@ func (l *BBR) minRT() int64 {
 	rtCache := l.minRtCache.Load()
 	if rtCache != nil {
 		rc := rtCache.(*CounterCache)
-		if l.bucketCountSince(rc.time) < 1 {
+		if l.timespan(rc.time) < 1 {
 			return rc.val
 		}
 	}
@@ -211,30 +212,41 @@ func (l *BBR) minRT() int64 {
 }
 
 func (l *BBR) maxInFlight() int64 {
-	return int64(math.Ceil(float64(l.maxPASS()*l.minRT()*l.bucketPerSecond) / 1000.0))
+	return int64(math.Floor(float64(l.maxPASS()*l.minRT()*l.bucketPerSecond)/1000.0) + 0.5)
 }
 
 func (l *BBR) shouldDrop() bool {
+	curTime := time.Since(initTime)
+
 	if l.cpu() < l.opts.CPUThreshold {
-		prevDrop, _ := l.prevDrop.Load().(time.Duration)
-		if prevDrop == 0 {
+		// current cpu payload below the threshold
+		prevDropTime := l.prevDropTime.Load().(time.Duration)
+		if prevDropTime == 0 {
+			// haven't start drop,
+			// accept current request
 			return false
 		}
-		if time.Since(initTime)-prevDrop <= time.Second {
+		if curTime-prevDropTime <= time.Second {
+			// just start drop one second ago,
+			// check current inflight count
 			inFlight := atomic.LoadInt64(&l.inFlight)
 			return inFlight > 1 && inFlight > l.maxInFlight()
 		}
-		l.prevDrop.Store(time.Duration(0))
+		l.prevDropTime.Store(time.Duration(0))
 		return false
 	}
+
+	// current cpu payload exceeds the threshold
 	inFlight := atomic.LoadInt64(&l.inFlight)
 	drop := inFlight > 1 && inFlight > l.maxInFlight()
 	if drop {
-		prevDrop, _ := l.prevDrop.Load().(time.Duration)
+		prevDrop := l.prevDropTime.Load().(time.Duration)
 		if prevDrop != 0 {
+			// already started drop, return directly
 			return drop
 		}
-		l.prevDrop.Store(time.Since(initTime))
+		// store start drop time
+		l.prevDropTime.Store(curTime)
 	}
 	return drop
 }
@@ -251,7 +263,7 @@ func (l *BBR) Stat() Stat {
 }
 
 // Allow checks all inbound traffic.
-// Once overload is detected, it raises ecode.LimitExceed error.
+// Once overload is detected, it raises limit.ErrLimitExceed error.
 func (l *BBR) Allow(ctx context.Context) (func(), error) {
 	if l.shouldDrop() {
 		return nil, limit.ErrLimitExceed
