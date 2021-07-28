@@ -174,7 +174,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	var r *resolver
 	if options.discovery != nil {
 		if target.Scheme == "discovery" {
-			if r, err = newResolver(ctx, options.discovery, target, options.balancer, options.block); err != nil {
+			if r, err = newResolver(ctx, options.discovery, target, options.balancer, options.block, !isSecure); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
 		} else if _, _, err := host.ExtractHostPort(options.endpoint); err != nil {
@@ -244,7 +244,7 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			if node, done, err = client.opts.balancer.Pick(ctx); err != nil {
 				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 			}
-			scheme, addr, err := parseEndpoint(node.Endpoints)
+			scheme, addr, err := parseEndpoint(node.Endpoints, client.opts.tlsConf == nil)
 			if err != nil {
 				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 			}

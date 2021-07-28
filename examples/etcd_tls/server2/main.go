@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/transport/http"
 	"log"
 
 	"github.com/go-kratos/etcd/registry"
@@ -38,14 +39,23 @@ func main() {
 		),
 	)
 
+	httpSrv := http.NewServer(
+		http.Address(":8001"),
+		http.Middleware(
+			recovery.Recovery(),
+		),
+	)
+
 	s := &server{}
 	pb.RegisterGreeterServer(grpcSrv, s)
+	pb.RegisterGreeterHTTPServer(httpSrv, s)
 
 	r := registry.New(client)
 	app := kratos.New(
 		kratos.Name("helloworld"),
 		kratos.Server(
 			grpcSrv,
+			httpSrv,
 		),
 		kratos.Registrar(r),
 	)

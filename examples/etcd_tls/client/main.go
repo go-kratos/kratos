@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"github.com/go-kratos/kratos/v2/transport/http"
 	"io/ioutil"
 	"log"
 	"time"
@@ -35,6 +36,7 @@ func main() {
 	r := registry.New(cli)
 	for {
 		callGRPC(r, tlsConf)
+		callHTTP(r, tlsConf)
 		time.Sleep(time.Second)
 	}
 }
@@ -56,4 +58,24 @@ func callGRPC(r *registry.Registry, tlsConf *tls.Config) {
 		log.Fatal(err)
 	}
 	log.Printf("[grpc] SayHello %+v\n", reply)
+}
+
+func callHTTP(r *registry.Registry, tlsConf *tls.Config) {
+	conn, err := http.NewClient(
+		context.Background(),
+		http.WithEndpoint("discovery:///helloworld"),
+		http.WithDiscovery(r),
+		http.WithBlock(),
+		http.WithTLSConfig(tlsConf),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+	client := helloworld.NewGreeterHTTPClient(conn)
+	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("[http] SayHello %+v\n", reply)
 }
