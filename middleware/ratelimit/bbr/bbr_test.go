@@ -11,11 +11,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var optsForTest = []Option{
-	WithWindowSize(time.Second),
-	WithBucketNum(10),
-	WithCPUThreshold(800),
-}
+var (
+	windowSizeTest   = time.Second
+	bucketNumTest    = 10
+	cpuThresholdTest = int64(800)
+
+	optsForTest = []Option{
+		WithWindowSize(windowSizeTest),
+		WithBucketNum(bucketNumTest),
+		WithCPUThreshold(cpuThresholdTest),
+	}
+)
 
 func warmup(bbr *BBR, count int) {
 	for i := 0; i < count; i++ {
@@ -65,7 +71,7 @@ func TestBBR(t *testing.T) {
 }
 
 func TestBBRMaxPass(t *testing.T) {
-	bucketDuration := time.Millisecond * 100
+	bucketDuration := windowSizeTest / time.Duration(bucketNumTest)
 	bbr := NewLimiter(optsForTest...).(*BBR)
 	for i := 1; i <= 10; i++ {
 		bbr.passStat.Add(int64(i * 100))
@@ -79,23 +85,25 @@ func TestBBRMaxPass(t *testing.T) {
 }
 
 func TestBBRMaxPassWithCache(t *testing.T) {
-	bucketDuration := time.Millisecond * 100
+	bucketDuration := windowSizeTest / time.Duration(bucketNumTest)
 	bbr := NewLimiter(optsForTest...).(*BBR)
-	// witch cache, value of latest bucket is not counted instently.
-	// after a bucket duration time, this bucket will be fullly counted.
-	for i := 1; i <= 11; i++ {
-		bbr.passStat.Add(int64(i * 50))
-		time.Sleep(bucketDuration / 2)
-		_ = bbr.maxPASS()
-		bbr.passStat.Add(int64(i * 50))
-		time.Sleep(bucketDuration / 2)
-	}
+	// witch cache, value of latest bucket is not counted instantly.
+	// after a bucket duration time, this bucket will be fully counted.
+	bbr.passStat.Add(int64(50))
+	time.Sleep(bucketDuration / 2)
+	assert.Equal(t, int64(1), bbr.maxPASS())
+
+	bbr.passStat.Add(int64(50))
+	time.Sleep(bucketDuration / 2)
+	assert.Equal(t, int64(1), bbr.maxPASS())
+
 	bbr.passStat.Add(int64(1))
-	assert.Equal(t, int64(1000), bbr.maxPASS())
+	time.Sleep(bucketDuration)
+	assert.Equal(t, int64(100), bbr.maxPASS())
 }
 
 func TestBBRMinRt(t *testing.T) {
-	bucketDuration := time.Millisecond * 100
+	bucketDuration := windowSizeTest / time.Duration(bucketNumTest)
 	bbr := NewLimiter(optsForTest...).(*BBR)
 	for i := 0; i < 10; i++ {
 		for j := i*10 + 1; j <= i*10+10; j++ {
@@ -108,14 +116,13 @@ func TestBBRMinRt(t *testing.T) {
 	assert.Equal(t, int64(6), bbr.minRT())
 
 	// default max min rt is equal to maxFloat64.
-	bucketDuration = time.Millisecond * 100
 	bbr = NewLimiter(optsForTest...).(*BBR)
 	bbr.rtStat = NewRollingCounter(RollingCounterOpts{Size: 10, BucketDuration: bucketDuration})
 	assert.Equal(t, int64(1), bbr.minRT())
 }
 
 func TestBBRMinRtWithCache(t *testing.T) {
-	bucketDuration := time.Millisecond * 100
+	bucketDuration := windowSizeTest / time.Duration(bucketNumTest)
 	bbr := NewLimiter(optsForTest...).(*BBR)
 	for i := 0; i < 10; i++ {
 		for j := i*10 + 1; j <= i*10+5; j++ {
@@ -137,7 +144,7 @@ func TestBBRMinRtWithCache(t *testing.T) {
 
 func TestBBRMaxQps(t *testing.T) {
 	bbr := NewLimiter(optsForTest...).(*BBR)
-	bucketDuration := time.Millisecond * 100
+	bucketDuration := windowSizeTest / time.Duration(bucketNumTest)
 	passStat := NewRollingCounter(RollingCounterOpts{Size: 10, BucketDuration: bucketDuration})
 	rtStat := NewRollingCounter(RollingCounterOpts{Size: 10, BucketDuration: bucketDuration})
 	for i := 0; i < 10; i++ {
@@ -160,7 +167,7 @@ func TestBBRShouldDrop(t *testing.T) {
 	bbr.cpu = func() int64 {
 		return cpu
 	}
-	bucketDuration := time.Millisecond * 100
+	bucketDuration := windowSizeTest / time.Duration(bucketNumTest)
 	passStat := NewRollingCounter(RollingCounterOpts{Size: 10, BucketDuration: bucketDuration})
 	rtStat := NewRollingCounter(RollingCounterOpts{Size: 10, BucketDuration: bucketDuration})
 	for i := 0; i < 10; i++ {
