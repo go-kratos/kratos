@@ -2,8 +2,10 @@ package http
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -23,10 +25,21 @@ type Target struct {
 	Endpoint  string
 }
 
-func parseTarget(endpoint string) (*Target, error) {
+func parseTarget(endpoint string, tls *tls.Config) (*Target, error) {
+	if strings.HasPrefix(endpoint, "localhost") {
+		if tls != nil {
+			endpoint = "https://" + endpoint
+		}
+		endpoint = "http://" + endpoint
+	}
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		if u, err = url.Parse("http://" + endpoint); err != nil {
+		if tls != nil {
+			endpoint = "https://" + endpoint
+		} else {
+			endpoint = "http://" + endpoint
+		}
+		if u, err = url.Parse(endpoint); err != nil {
 			return nil, err
 		}
 	}
