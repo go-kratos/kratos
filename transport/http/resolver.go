@@ -3,8 +3,8 @@ package http
 import (
 	"context"
 	"errors"
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"net/url"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -52,18 +52,21 @@ type resolver struct {
 	target  *Target
 	watcher registry.Watcher
 	logger  *log.Helper
+
+	insecure bool
 }
 
-func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, updater Updater, block bool) (*resolver, error) {
+func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, updater Updater, block, insecure bool) (*resolver, error) {
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
 	}
 	r := &resolver{
-		target:  target,
-		watcher: watcher,
-		logger:  log.NewHelper(log.DefaultLogger),
-		updater: updater,
+		target:   target,
+		watcher:  watcher,
+		logger:   log.NewHelper(log.DefaultLogger),
+		updater:  updater,
+		insecure: insecure,
 	}
 	if block {
 		done := make(chan error, 1)
@@ -115,7 +118,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 func (r *resolver) update(services []*registry.ServiceInstance) {
 	var nodes []*registry.ServiceInstance
 	for _, in := range services {
-		_, endpoint, err := parseEndpoint(in.Endpoints)
+		_, endpoint, err := parseEndpoint(in.Endpoints, r.insecure)
 		if err != nil {
 			r.logger.Errorf("Failed to parse (%v) discovery endpoint: %v error %v", r.target, in.Endpoints, err)
 			continue
@@ -139,19 +142,21 @@ func (r *resolver) Close() error {
 	return r.watcher.Stop()
 }
 
-func parseEndpoint(endpoints []string) (string, string, error) {
+func parseEndpoint(endpoints []string, insecure bool) (string, string, error) {
 	for _, e := range endpoints {
 		u, err := url.Parse(e)
 		if err != nil {
 			return "", "", err
 		}
 		if u.Scheme == "http" {
-			isSecure, _ := strconv.ParseBool(u.Query().Get("isSecure"))
+			isSecure := endpoint.IsSecure(u)
 			scheme := "http"
 			if isSecure {
 				scheme = "https"
 			}
-			return scheme, u.Host, nil
+			if isSecure != insecure {
+				return scheme, u.Host, nil
+			}
 		}
 	}
 	return "", "", nil
