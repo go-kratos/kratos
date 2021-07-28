@@ -163,8 +163,11 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 			tr.TLSClientConfig = options.tlsConf
 		}
 	}
-
-	target, err := parseTarget(options.endpoint, options.tlsConf)
+	var isSecure bool
+	if options.tlsConf != nil {
+		isSecure = true
+	}
+	target, err := parseTarget(options.endpoint, isSecure)
 	if err != nil {
 		return nil, err
 	}
