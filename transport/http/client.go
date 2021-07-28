@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -35,6 +36,7 @@ type ClientOption func(*clientOptions)
 // Client is an HTTP transport client.
 type clientOptions struct {
 	ctx          context.Context
+	tlsConf      *tls.Config
 	timeout      time.Duration
 	endpoint     string
 	userAgent    string
@@ -127,6 +129,13 @@ func WithBlock() ClientOption {
 	}
 }
 
+// WithTLSConfig with tls config.
+func WithTLSConfig(c *tls.Config) ClientOption {
+	return func(o *clientOptions) {
+		o.tlsConf = c
+	}
+}
+
 // Client is an HTTP client.
 type Client struct {
 	opts   clientOptions
@@ -149,7 +158,16 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	for _, o := range opts {
 		o(&options)
 	}
-	target, err := parseTarget(options.endpoint)
+	if options.tlsConf != nil {
+		if tr, ok := options.transport.(*http.Transport); ok {
+			tr.TLSClientConfig = options.tlsConf
+		}
+	}
+	var isSecure bool
+	if options.tlsConf != nil {
+		isSecure = true
+	}
+	target, err := parseTarget(options.endpoint, isSecure)
 	if err != nil {
 		return nil, err
 	}
@@ -285,7 +303,10 @@ func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*h
 
 // Close tears down the Transport and all underlying connections.
 func (client *Client) Close() error {
-	return client.r.Close()
+	if client.r != nil {
+		return client.r.Close()
+	}
+	return nil
 }
 
 // DefaultRequestEncoder is an HTTP request encoder.
