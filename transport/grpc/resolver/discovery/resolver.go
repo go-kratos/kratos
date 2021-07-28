@@ -4,10 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
-	"net/url"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"google.golang.org/grpc/attributes"
@@ -48,7 +47,7 @@ func (r *discoveryResolver) watch() {
 func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	var addrs []resolver.Address
 	for _, in := range ins {
-		endpoint, err := parseEndpoint(in.Endpoints, r.insecure)
+		endpoint, err := endpoint.ParseEndpoint(in.Endpoints, "grpc", !r.insecure)
 		if err != nil {
 			r.log.Errorf("[resovler] Failed to parse discovery endpoint: %v", err)
 			continue
@@ -78,23 +77,6 @@ func (r *discoveryResolver) Close() {
 }
 
 func (r *discoveryResolver) ResolveNow(options resolver.ResolveNowOptions) {}
-
-func parseEndpoint(endpoints []string, insecure bool) (string, error) {
-
-	for _, e := range endpoints {
-		u, err := url.Parse(e)
-		if err != nil {
-			return "", err
-		}
-
-		if u.Scheme == "grpc" {
-			if endpoint.IsSecure(u) != insecure {
-				return u.Host, nil
-			}
-		}
-	}
-	return "", nil
-}
 
 func parseAttributes(md map[string]string) *attributes.Attributes {
 	pairs := make([]interface{}, 0, len(md))

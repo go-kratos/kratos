@@ -3,12 +3,12 @@ package http
 import (
 	"context"
 	"errors"
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"net/url"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -25,12 +25,12 @@ type Target struct {
 	Endpoint  string
 }
 
-func parseTarget(endpoint string, isSecure bool) (*Target, error) {
+func parseTarget(endpoint string, insecure bool) (*Target, error) {
 	if !strings.Contains(endpoint, "://") {
-		if isSecure {
-			endpoint = "https://" + endpoint
-		} else {
+		if insecure {
 			endpoint = "http://" + endpoint
+		} else {
+			endpoint = "https://" + endpoint
 		}
 	}
 	u, err := url.Parse(endpoint)
@@ -96,7 +96,6 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 			return nil, ctx.Err()
 		}
 	}
-
 	go func() {
 		for {
 			services, err := watcher.Next()
@@ -111,14 +110,13 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 			r.update(services)
 		}
 	}()
-
 	return r, nil
 }
 
 func (r *resolver) update(services []*registry.ServiceInstance) {
 	var nodes []*registry.ServiceInstance
 	for _, in := range services {
-		_, endpoint, err := parseEndpoint(in.Endpoints, r.insecure)
+		endpoint, err := endpoint.ParseEndpoint(in.Endpoints, "http", !r.insecure)
 		if err != nil {
 			r.logger.Errorf("Failed to parse (%v) discovery endpoint: %v error %v", r.target, in.Endpoints, err)
 			continue
@@ -140,24 +138,4 @@ func (r *resolver) update(services []*registry.ServiceInstance) {
 
 func (r *resolver) Close() error {
 	return r.watcher.Stop()
-}
-
-func parseEndpoint(endpoints []string, insecure bool) (string, string, error) {
-	for _, e := range endpoints {
-		u, err := url.Parse(e)
-		if err != nil {
-			return "", "", err
-		}
-		if u.Scheme == "http" {
-			isSecure := endpoint.IsSecure(u)
-			scheme := "http"
-			if isSecure {
-				scheme = "https"
-			}
-			if isSecure != insecure {
-				return scheme, u.Host, nil
-			}
-		}
-	}
-	return "", "", nil
 }
