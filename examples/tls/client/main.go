@@ -8,7 +8,6 @@ import (
 	"log"
 
 	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 )
@@ -30,15 +29,13 @@ func main() {
 func callHTTP(tlsConf *tls.Config) {
 	conn, err := http.NewClient(
 		context.Background(),
-		http.WithMiddleware(
-			recovery.Recovery(),
-		),
 		http.WithEndpoint("https://127.0.0.1:8000"),
 		http.WithTLSConfig(tlsConf),
 	)
 	if err != nil {
 		panic(err)
 	}
+	defer conn.Close()
 	client := pb.NewGreeterHTTPClient(conn)
 	reply, err := client.SayHello(context.Background(), &pb.HelloRequest{Name: "kratos"})
 	if err != nil {
@@ -51,14 +48,12 @@ func callGRPC(tlsConf *tls.Config) {
 	conn, err := grpc.Dial(
 		context.Background(),
 		grpc.WithEndpoint("127.0.0.1:9000"),
-		grpc.WithMiddleware(
-			recovery.Recovery(),
-		),
 		grpc.WithTLSConfig(tlsConf),
 	)
 	if err != nil {
 		panic(err)
 	}
+	defer conn.Close()
 	client := pb.NewGreeterClient(conn)
 	reply, err := client.SayHello(context.Background(), &pb.HelloRequest{Name: "kratos"})
 	if err != nil {
