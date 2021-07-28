@@ -98,7 +98,7 @@ func encodeField(fieldDescriptor protoreflect.FieldDescriptor, value protoreflec
 	}
 }
 
-// marshalMessage marshals the fields in the given protoreflect.Message.
+// encodeMessage marshals the fields in the given protoreflect.Message.
 // If the typeURL is non-empty, then a synthetic "@type" field is injected
 // containing the URL as the value.
 func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protoreflect.Value) (string, error) {
