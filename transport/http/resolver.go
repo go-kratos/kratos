@@ -144,7 +144,7 @@ func parseEndpoint(endpoints []string) (string, string, error) {
 		if err != nil {
 			return "", "", err
 		}
-		if u.Scheme == "http" {
+		if u.Scheme == "http" || u.Scheme == "https" {
 			return u.Scheme, u.Host, nil
 		}
 	}

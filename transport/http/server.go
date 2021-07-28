@@ -217,7 +217,11 @@ func (s *Server) Endpoint() (*url.URL, error) {
 			return
 		}
 		s.lis = lis
-		s.endpoint = &url.URL{Scheme: "http", Host: addr}
+		scheme := "http"
+		if s.tlsConf != nil {
+			scheme = "https"
+		}
+		s.endpoint = &url.URL{Scheme: scheme, Host: addr}
 	})
 	if s.err != nil {
 		return nil, s.err
