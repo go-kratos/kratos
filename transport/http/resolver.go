@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -144,8 +145,13 @@ func parseEndpoint(endpoints []string) (string, string, error) {
 		if err != nil {
 			return "", "", err
 		}
-		if u.Scheme == "http" || u.Scheme == "https" {
-			return u.Scheme, u.Host, nil
+		if u.Scheme == "http" {
+			isSecure, _ := strconv.ParseBool(u.Query().Get("isSecure"))
+			scheme := "http"
+			if isSecure {
+				scheme = "https"
+			}
+			return scheme, u.Host, nil
 		}
 	}
 	return "", "", nil

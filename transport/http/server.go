@@ -217,11 +217,11 @@ func (s *Server) Endpoint() (*url.URL, error) {
 			return
 		}
 		s.lis = lis
-		scheme := "http"
+		var query string
 		if s.tlsConf != nil {
-			scheme = "https"
+			query = "isSecure=true"
 		}
-		s.endpoint = &url.URL{Scheme: scheme, Host: addr}
+		s.endpoint = &url.URL{Scheme: "http", Host: addr, RawQuery: query}
 	})
 	if s.err != nil {
 		return nil, s.err
