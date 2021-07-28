@@ -10,12 +10,12 @@ import (
 	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
-	transhttp "github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
 func main() {
-	b, err := ioutil.ReadFile("./server.crt")
+	b, err := ioutil.ReadFile("../cert/server.crt")
 	if err != nil {
 		panic(err)
 	}
@@ -29,13 +29,13 @@ func main() {
 }
 
 func callHTTP(tlsConf *tls.Config) {
-	conn, err := transhttp.NewClient(
+	conn, err := http.NewClient(
 		context.Background(),
-		transhttp.WithMiddleware(
+		http.WithMiddleware(
 			recovery.Recovery(),
 		),
-		transhttp.WithEndpoint("https://127.0.0.1:8000"),
-		transhttp.WithTLSConfig(tlsConf),
+		http.WithEndpoint("https://127.0.0.1:8000"),
+		http.WithTLSConfig(tlsConf),
 	)
 	if err != nil {
 		panic(err)
@@ -58,14 +58,13 @@ func callHTTP(tlsConf *tls.Config) {
 }
 
 func callGRPC(tlsConf *tls.Config) {
-
-	conn, err := transgrpc.Dial(
+	conn, err := grpc.Dial(
 		context.Background(),
-		transgrpc.WithEndpoint("127.0.0.1:9000"),
-		transgrpc.WithMiddleware(
+		grpc.WithEndpoint("127.0.0.1:9000"),
+		grpc.WithMiddleware(
 			recovery.Recovery(),
 		),
-		transgrpc.WithTLSConfig(tlsConf),
+		grpc.WithTLSConfig(tlsConf),
 	)
 	if err != nil {
 		panic(err)

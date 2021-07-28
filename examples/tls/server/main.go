@@ -39,7 +39,7 @@ func (s *server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*he
 }
 
 func main() {
-	cert, err := tls.LoadX509KeyPair("./server.crt", "./server.key")
+	cert, err := tls.LoadX509KeyPair("../cert/server.crt", "../cert/server.key")
 	if err != nil {
 		panic(err)
 	}
@@ -58,7 +58,7 @@ func main() {
 		http.Middleware(
 			recovery.Recovery(),
 		),
-		http.TLSConfig("./server.crt", "./server.key"),
+		http.TLSConfig(tlsConf),
 	)
 	helloworld.RegisterGreeterServer(grpcSrv, s)
 	helloworld.RegisterGreeterHTTPServer(httpSrv, s)

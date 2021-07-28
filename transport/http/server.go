@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"net"
 	"net/http"
@@ -94,10 +95,9 @@ func Endpoint(endpoint *url.URL) ServerOption {
 }
 
 // TLSConfig with TLS config.
-func TLSConfig(certFile, keyFile string) ServerOption {
+func TLSConfig(c *tls.Config) ServerOption {
 	return func(o *Server) {
-		o.certFile = certFile
-		o.keyFile = keyFile
+		o.tlsConf = c
 	}
 }
 
@@ -105,8 +105,7 @@ func TLSConfig(certFile, keyFile string) ServerOption {
 type Server struct {
 	*http.Server
 	lis      net.Listener
-	certFile string
-	keyFile  string
+	tlsConf  *tls.Config
 	once     sync.Once
 	endpoint *url.URL
 	err      error
@@ -137,7 +136,8 @@ func NewServer(opts ...ServerOption) *Server {
 		o(srv)
 	}
 	srv.Server = &http.Server{
-		Handler: FilterChain(srv.filters...)(srv),
+		Handler:   FilterChain(srv.filters...)(srv),
+		TLSConfig: srv.tlsConf,
 	}
 	srv.router = mux.NewRouter()
 	srv.router.Use(srv.filter())
@@ -235,8 +235,8 @@ func (s *Server) Start(ctx context.Context) error {
 	}
 	s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
 	var err error
-	if s.certFile != "" && s.keyFile != "" {
-		err = s.ServeTLS(s.lis, s.certFile, s.keyFile)
+	if s.tlsConf != nil {
+		err = s.ServeTLS(s.lis, "", "")
 	} else {
 		err = s.Serve(s.lis)
 	}
