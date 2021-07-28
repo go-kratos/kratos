@@ -3,7 +3,7 @@ package http
 import (
 	"context"
 	"errors"
-	internalEndpoint "github.com/go-kratos/kratos/v2/internal/endpoint"
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"net/url"
 	"strings"
 	"sync"
@@ -149,7 +149,7 @@ func parseEndpoint(endpoints []string, insecure bool) (string, string, error) {
 			return "", "", err
 		}
 		if u.Scheme == "http" {
-			isSecure := internalEndpoint.IsSecure(u)
+			isSecure := endpoint.IsSecure(u)
 			scheme := "http"
 			if isSecure {
 				scheme = "https"

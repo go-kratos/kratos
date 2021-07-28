@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	internalEndpoint "github.com/go-kratos/kratos/v2/internal/endpoint"
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"net/url"
 	"time"
 
@@ -88,7 +88,7 @@ func parseEndpoint(endpoints []string, insecure bool) (string, error) {
 		}
 
 		if u.Scheme == "grpc" {
-			if internalEndpoint.IsSecure(u) != insecure {
+			if endpoint.IsSecure(u) != insecure {
 				return u.Host, nil
 			}
 		}
