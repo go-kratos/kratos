@@ -220,7 +220,7 @@ func (l *BBR) shouldDrop() bool {
 
 	if l.cpu() < l.opts.CPUThreshold {
 		// current cpu payload below the threshold
-		prevDropTime := l.prevDropTime.Load().(time.Duration)
+		prevDropTime, _ := l.prevDropTime.Load().(time.Duration)
 		if prevDropTime == 0 {
 			// haven't start drop,
 			// accept current request
@@ -240,7 +240,7 @@ func (l *BBR) shouldDrop() bool {
 	inFlight := atomic.LoadInt64(&l.inFlight)
 	drop := inFlight > 1 && inFlight > l.maxInFlight()
 	if drop {
-		prevDrop := l.prevDropTime.Load().(time.Duration)
+		prevDrop, _ := l.prevDropTime.Load().(time.Duration)
 		if prevDrop != 0 {
 			// already started drop, return directly
 			return drop
