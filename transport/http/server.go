@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
+	internalEndpoint "github.com/go-kratos/kratos/v2/internal/endpoint"
 	"net"
 	"net/http"
 	"net/url"
@@ -219,7 +219,7 @@ func (s *Server) Endpoint() (*url.URL, error) {
 		}
 		s.lis = lis
 
-		s.endpoint = endpoint.NewEndpoint("http", addr, s.tlsConf != nil)
+		s.endpoint = internalEndpoint.NewEndpoint("http", addr, s.tlsConf != nil)
 	})
 	if s.err != nil {
 		return nil, s.err

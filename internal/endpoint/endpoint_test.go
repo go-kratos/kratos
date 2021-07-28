@@ -6,12 +6,7 @@ import (
 	"testing"
 )
 
-func TestNewEndpoint(t *testing.T) {
-	u := NewEndpoint("grpc", "127.0.0.1", false)
-	t.Log(u)
-}
-
-func TestGetQuery(t *testing.T) {
+func TestEndPoint(t *testing.T) {
 	type args struct {
 		url *url.URL
 	}
@@ -39,7 +34,7 @@ func TestGetQuery(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := EndpointIsSecure(tt.args.url); !reflect.DeepEqual(got, tt.want) {
+			if got := IsSecure(tt.args.url); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetQuery() = %v, want %v", got, tt.want)
 			}
 		})
