@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"net/url"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -23,12 +25,17 @@ type Target struct {
 	Endpoint  string
 }
 
-func parseTarget(endpoint string) (*Target, error) {
+func parseTarget(endpoint string, isSecure bool) (*Target, error) {
+	if !strings.Contains(endpoint, "://") {
+		if isSecure {
+			endpoint = "https://" + endpoint
+		} else {
+			endpoint = "http://" + endpoint
+		}
+	}
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		if u, err = url.Parse("http://" + endpoint); err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 	target := &Target{Scheme: u.Scheme, Authority: u.Host}
 	if len(u.Path) > 1 {
@@ -139,7 +146,12 @@ func parseEndpoint(endpoints []string) (string, string, error) {
 			return "", "", err
 		}
 		if u.Scheme == "http" {
-			return u.Scheme, u.Host, nil
+			isSecure, _ := strconv.ParseBool(u.Query().Get("isSecure"))
+			scheme := "http"
+			if isSecure {
+				scheme = "https"
+			}
+			return scheme, u.Host, nil
 		}
 	}
 	return "", "", nil

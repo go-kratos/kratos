@@ -27,6 +27,7 @@ func callHTTP() {
 	if err != nil {
 		panic(err)
 	}
+	defer conn.Close()
 	client := pb.NewGreeterHTTPClient(conn)
 	reply, err := client.SayHello(context.Background(), &pb.HelloRequest{Name: "kratos"})
 	if err != nil {
@@ -55,6 +56,7 @@ func callGRPC() {
 	if err != nil {
 		panic(err)
 	}
+	defer conn.Close()
 	client := pb.NewGreeterClient(conn)
 	reply, err := client.SayHello(context.Background(), &pb.HelloRequest{Name: "kratos"})
 	if err != nil {
