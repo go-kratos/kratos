@@ -20,7 +20,7 @@ func New(mds ...map[string]string) Metadata {
 				continue
 			}
 			key := strings.ToLower(k)
-			if len(v) > 0 && v != "" {
+			if v != "" {
 				md[key] = v
 			}
 		}
