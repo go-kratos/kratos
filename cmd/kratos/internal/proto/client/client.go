@@ -24,13 +24,13 @@ var (
 	}
 )
 
-var thirdPartyPath string
+var protoPath string
 
 func init() {
-	if thirdPartyPath = os.Getenv("THIRD_PARTY_PATH"); thirdPartyPath == "" {
-		thirdPartyPath = "./third_party"
+	if protoPath = os.Getenv("KRATOS_PROTO_PATH"); protoPath == "" {
+		protoPath = "./third_party"
 	}
-	CmdClient.Flags().StringVarP(&thirdPartyPath, "third", "p", thirdPartyPath, "third party path")
+	CmdClient.Flags().StringVarP(&protoPath, "proto_path", "p", protoPath, "proto path")
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -88,8 +88,8 @@ func generate(proto string, args []string) error {
 	input := []string{
 		"--proto_path=.",
 	}
-	if fileExists(thirdPartyPath) {
-		input = append(input, "--proto_path="+thirdPartyPath)
+	if pathExists(protoPath) {
+		input = append(input, "--proto_path="+protoPath)
 	}
 	inputExt := []string{
 		"--proto_path=" + base.KratosMod(),
@@ -123,13 +123,10 @@ func generate(proto string, args []string) error {
 	return nil
 }
 
-func fileExists(path string) bool {
+func pathExists(path string) bool {
 	_, err := os.Stat(path)
 	if err != nil {
-		if os.IsExist(err) {
-			return true
-		}
-		return false
+		return os.IsExist(err)
 	}
 	return true
 }
