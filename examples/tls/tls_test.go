@@ -101,7 +101,7 @@ func TestETCD(t *testing.T) {
 	}
 	b, err := ioutil.ReadFile("./cert/server.crt")
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 	cp := x509.NewCertPool()
 	if !cp.AppendCertsFromPEM(b) {
@@ -109,7 +109,7 @@ func TestETCD(t *testing.T) {
 	}
 	cert, err := tls.LoadX509KeyPair("./cert/server.crt", "./cert/server.key")
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 	tlsConf := &tls.Config{
 		ServerName:   "www.kratos.com",
@@ -117,11 +117,16 @@ func TestETCD(t *testing.T) {
 		Certificates: []tls.Certificate{cert},
 	}
 	r := etcdregistry.New(client)
-	srv, err := startServer(r, tlsConf)
+	srv, err := startServer(r, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	srvTLS, err := startServer(r, tlsConf)
 	if err != nil {
 		t.Fatal(err)
 	}
 	callHTTP(t, r, tlsConf)
 	callGRPC(t, r, tlsConf)
 	srv.Stop()
+	srvTLS.Stop()
 }
