@@ -53,7 +53,7 @@ func (tr *Transport) ReplyHeader() transport.Header {
 	return nil
 }
 
-func TestJwtToken(t *testing.T) {
+func TestServer(t *testing.T) {
 	var testKey = "testKey"
 	mapClaims := jwt.MapClaims{}
 	mapClaims["name"] = "xiaoli"
@@ -89,5 +89,36 @@ func TestJwtToken(t *testing.T) {
 			assert.NotNil(t, testToken)
 		})
 	}
+}
 
+type tokeBuilder struct {
+	token string
+}
+
+func (t tokeBuilder) GetToken() string {
+	return t.token
+}
+
+func TestClient(t *testing.T) {
+	var testKey = "testKey"
+	mapClaims := jwt.MapClaims{}
+	mapClaims["name"] = "xiaoli"
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
+	token, err := claims.SignedString([]byte(testKey))
+	if err != nil {
+		panic(err)
+	}
+	tProvider := tokeBuilder{
+		token: token,
+	}
+	t.Run("normal", func(t *testing.T) {
+		next := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return "reply", nil
+		}
+		handler := Client(tProvider)(next)
+		header := &headerCarrier{}
+		_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
+		assert.Nil(t, err2)
+		assert.Equal(t, token, header.Get(JWTHeaderKey))
+	})
 }

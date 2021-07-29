@@ -28,6 +28,8 @@ var (
 	ErrMissingAccessSecret    = errors.New("AccessSecret is missing")
 	ErrTokenInvalid           = errors.New("Token is invalid")
 	ErrUnSupportSigningMethod = errors.New("Wrong signing method")
+	ErrNeedTokenProvider      = errors.New("Miss token provider")
+	ErrWrongContext           = errors.New("Wrong context for middelware")
 )
 
 //Option is jwt option.
@@ -86,6 +88,32 @@ func Server(accessSecret string, opts ...Option) middleware.Middleware {
 	}
 }
 
+//Client is an client jwt middleware
+func Client(provider TokenProvider) middleware.Middleware {
+	return func(handler middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req interface{}) (interface{}, error) {
+			i, err := handler(ctx, req)
+			if err != nil {
+				return i, err
+			}
+			if provider == nil {
+				return nil, ErrNeedTokenProvider
+			}
+			err = toHeader(ctx, provider.GetToken())
+			if err != nil {
+				return nil, err
+			}
+			return i, err
+		}
+	}
+}
+
+//TokenProvider provider jwt token
+type TokenProvider interface {
+	GetToken() string
+}
+
+//initOptions init jwt option. And set the default option
 func initOptions(accessSecret string, opts ...Option) *options {
 	o := &options{
 		AccessSecret: accessSecret,
@@ -106,4 +134,14 @@ func fromHeader(ctx context.Context) string {
 		jwtToken = serverContext.RequestHeader().Get(JWTHeaderKey)
 	}
 	return jwtToken
+}
+
+//toHeader add token to header
+func toHeader(ctx context.Context, token string) error {
+	if clientContext, ok := transport.FromClientContext(ctx); ok {
+		clientContext.RequestHeader().Set(JWTHeaderKey, token)
+	} else {
+		return ErrWrongContext
+	}
+	return nil
 }
