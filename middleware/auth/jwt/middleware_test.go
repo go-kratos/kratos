@@ -83,7 +83,7 @@ func TestJwtToken(t *testing.T) {
 				testToken = ctx.Value(JWTClaimsContextKey)
 				return "reply", nil
 			}
-			server := Server(testKey, test.signingMethod)(next)
+			server := Server(testKey, WithSigningMethod(test.signingMethod))(next)
 			_, err2 := server(test.ctx, test.name)
 			assert.Nil(t, err2)
 			assert.NotNil(t, testToken)

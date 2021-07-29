@@ -6,6 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/golang-jwt/jwt"
+	"time"
 )
 
 type jwtKey string
@@ -25,7 +26,6 @@ const (
 var (
 	ErrMissingJwtToken        = errors.New("JWT is missing")
 	ErrMissingAccessSecret    = errors.New("AccessSecret is missing")
-	ErrMissionSigningMethod   = errors.New("SigningMethod is missing")
 	ErrTokenInvalid           = errors.New("Token is invalid")
 	ErrUnSupportSigningMethod = errors.New("Wrong signing method")
 )
@@ -35,12 +35,12 @@ type Option func(*options)
 
 type options struct {
 	AccessSecret         string
-	AccessExpireInSecond uint32
+	AccessExpireInSecond time.Duration
 	SigningMethod        jwt.SigningMethod
 }
 
 //WithAccessExpire with access expire option.
-func WithAccessExpire(second uint32) Option {
+func WithAccessExpire(second time.Duration) Option {
 	return func(o *options) {
 		o.AccessExpireInSecond = second
 	}
@@ -54,12 +54,19 @@ func WithSigningMethod(method jwt.SigningMethod) Option {
 }
 
 //Server is an server jwt middleware
-func Server(accessSecret string, signingMethod jwt.SigningMethod, opts ...Option) middleware.Middleware {
-	checkParam(accessSecret, signingMethod)
-	o := initOptions(opts...)
-	o.AccessSecret = accessSecret
-	o.SigningMethod = signingMethod
-	parser := NewParser(o)
+func Server(accessSecret string, opts ...Option) middleware.Middleware {
+	o := initOptions(accessSecret, opts...)
+	parser := func(token string) (*jwt.Token, error) {
+		return jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+			if token.Method != o.SigningMethod {
+				return nil, ErrUnSupportSigningMethod
+			}
+			if o.AccessSecret == "" {
+				return nil, ErrMissingAccessSecret
+			}
+			return []byte(o.AccessSecret), nil
+		})
+	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			jwtToken := fromHeader(ctx)
@@ -79,19 +86,15 @@ func Server(accessSecret string, signingMethod jwt.SigningMethod, opts ...Option
 	}
 }
 
-func checkParam(accessSecret string, signingMethod jwt.SigningMethod) {
-	if accessSecret == "" {
-		panic(ErrMissingAccessSecret)
+func initOptions(accessSecret string, opts ...Option) *options {
+	o := &options{
+		AccessSecret: accessSecret,
 	}
-	if signingMethod == nil {
-		panic(ErrMissionSigningMethod)
-	}
-}
-
-func initOptions(opts ...Option) options {
-	o := options{}
 	for _, opt := range opts {
-		opt(&o)
+		opt(o)
+	}
+	if o.SigningMethod == nil {
+		o.SigningMethod = jwt.SigningMethodHS256
 	}
 	return o
 }
