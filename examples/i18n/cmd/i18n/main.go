@@ -1,16 +1,16 @@
 package main
 
 import (
-	"flag"
-	"os"
+    "flag"
+    "os"
 
-	"github.com/go-kratos/kratos/examples/i18n/internal/conf"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/config/file"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
+    "github.com/go-kratos/kratos/examples/i18n/internal/conf"
+    "github.com/go-kratos/kratos/v2"
+    "github.com/go-kratos/kratos/v2/config"
+    "github.com/go-kratos/kratos/v2/config/file"
+    "github.com/go-kratos/kratos/v2/log"
+    "github.com/go-kratos/kratos/v2/transport/grpc"
+    "github.com/go-kratos/kratos/v2/transport/http"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
@@ -51,8 +51,6 @@ func main() {
 		"service.id", id,
 		"service.name", Name,
 		"service.version", Version,
-		"trace_id", log.TraceID(),
-		"span_id", log.SpanID(),
 	)
 	c := config.New(
 		config.WithSource(

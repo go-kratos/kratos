@@ -1,6 +1,8 @@
 package log
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestValue(t *testing.T) {
 	logger := DefaultLogger

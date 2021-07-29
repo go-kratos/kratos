@@ -10,7 +10,13 @@ require (
 	github.com/go-kratos/consul v0.1.4
 	github.com/go-kratos/etcd v0.1.0
 	github.com/go-kratos/gin v0.1.0
-	github.com/go-kratos/kratos/v2 v2.0.1
+	github.com/go-kratos/kratos/v2 v2.0.3
+	github.com/go-kratos/kratos/v2/middleware/logging v0.0.0
+	github.com/go-kratos/kratos/v2/middleware/metadata v0.0.0
+	github.com/go-kratos/kratos/v2/middleware/metrics v0.0.0
+	github.com/go-kratos/kratos/v2/middleware/recovery v0.0.0
+	github.com/go-kratos/kratos/v2/middleware/tracing v0.0.0
+	github.com/go-kratos/kratos/v2/middleware/validate v0.0.0
 	github.com/go-kratos/nacos v0.1.0
 	github.com/go-kratos/prometheus v0.0.0-20210522055322-137e29e7cf47
 	github.com/go-kratos/swagger-api v0.1.8
@@ -41,6 +47,16 @@ require (
 	google.golang.org/genproto v0.0.0-20210701191553-46259e63a0a9
 	google.golang.org/grpc v1.39.0
 	google.golang.org/protobuf v1.27.1
+
 )
 
-replace github.com/go-kratos/kratos/v2 => ../
+replace (
+	github.com/go-kratos/kratos/v2 => ../
+	github.com/go-kratos/kratos/v2/middleware/logging => ../middleware/logging
+	github.com/go-kratos/kratos/v2/middleware/metadata => ../middleware/metadata
+	github.com/go-kratos/kratos/v2/middleware/metrics => ../middleware/metrics
+	github.com/go-kratos/kratos/v2/middleware/recovery => ../middleware/recovery
+	github.com/go-kratos/kratos/v2/middleware/selector => ../middleware/selector
+	github.com/go-kratos/kratos/v2/middleware/tracing => ../middleware/tracing
+	github.com/go-kratos/kratos/v2/middleware/validate => ../middleware/validate
+)
