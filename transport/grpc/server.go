@@ -2,10 +2,13 @@ package grpc
 
 import (
 	"context"
+	"crypto/tls"
 	"net"
 	"net/url"
 	"sync"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
 
 	apimd "github.com/go-kratos/kratos/v2/api/metadata"
 	ic "github.com/go-kratos/kratos/v2/internal/context"
@@ -15,6 +18,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	grpcmd "google.golang.org/grpc/metadata"
@@ -62,6 +66,13 @@ func Middleware(m ...middleware.Middleware) ServerOption {
 	}
 }
 
+// TLSConfig with TLS config.
+func TLSConfig(c *tls.Config) ServerOption {
+	return func(s *Server) {
+		s.tlsConf = c
+	}
+}
+
 // UnaryInterceptor returns a ServerOption that sets the UnaryServerInterceptor for the server.
 func UnaryInterceptor(in ...grpc.UnaryServerInterceptor) ServerOption {
 	return func(s *Server) {
@@ -80,6 +91,7 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 type Server struct {
 	*grpc.Server
 	ctx        context.Context
+	tlsConf    *tls.Config
 	lis        net.Listener
 	once       sync.Once
 	err        error
@@ -116,6 +128,9 @@ func NewServer(opts ...ServerOption) *Server {
 	var grpcOpts = []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(ints...),
 	}
+	if srv.tlsConf != nil {
+		grpcOpts = append(grpcOpts, grpc.Creds(credentials.NewTLS(srv.tlsConf)))
+	}
 	if len(srv.grpcOpts) > 0 {
 		grpcOpts = append(grpcOpts, srv.grpcOpts...)
 	}
@@ -145,7 +160,7 @@ func (s *Server) Endpoint() (*url.URL, error) {
 			return
 		}
 		s.lis = lis
-		s.endpoint = &url.URL{Scheme: "grpc", Host: addr}
+		s.endpoint = endpoint.NewEndpoint("grpc", addr, s.tlsConf != nil)
 	})
 	if s.err != nil {
 		return nil, s.err

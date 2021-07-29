@@ -31,25 +31,30 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	r := registry.New(client)
 
-	grpcSrv := grpc.NewServer(
-		grpc.Address(":9000"),
-	)
 	httpSrv := http.NewServer(
 		http.Address(":8000"),
 		http.Middleware(
 			recovery.Recovery(),
 		),
 	)
+	grpcSrv := grpc.NewServer(
+		grpc.Address(":9000"),
+		grpc.Middleware(
+			recovery.Recovery(),
+		),
+	)
+
 	s := &server{}
 	pb.RegisterGreeterServer(grpcSrv, s)
 	pb.RegisterGreeterHTTPServer(httpSrv, s)
+
+	r := registry.New(client)
 	app := kratos.New(
 		kratos.Name("helloworld"),
 		kratos.Server(
-			grpcSrv,
 			httpSrv,
+			grpcSrv,
 		),
 		kratos.Registrar(r),
 	)

@@ -2,9 +2,11 @@ package discovery
 
 import (
 	"context"
-	"net/url"
+	"encoding/json"
+	"errors"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"google.golang.org/grpc/attributes"
@@ -18,6 +20,8 @@ type discoveryResolver struct {
 
 	ctx    context.Context
 	cancel context.CancelFunc
+
+	insecure bool
 }
 
 func (r *discoveryResolver) watch() {
@@ -27,10 +31,12 @@ func (r *discoveryResolver) watch() {
 			return
 		default:
 		}
-
 		ins, err := r.w.Next()
 		if err != nil {
-			r.log.Errorf("Failed to watch discovery endpoint: %v", err)
+			if errors.Is(err, context.Canceled) {
+				return
+			}
+			r.log.Errorf("[resovler] Failed to watch discovery endpoint: %v", err)
 			time.Sleep(time.Second)
 			continue
 		}
@@ -41,9 +47,9 @@ func (r *discoveryResolver) watch() {
 func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	var addrs []resolver.Address
 	for _, in := range ins {
-		endpoint, err := parseEndpoint(in.Endpoints)
+		endpoint, err := endpoint.ParseEndpoint(in.Endpoints, "grpc", !r.insecure)
 		if err != nil {
-			r.log.Errorf("Failed to parse discovery endpoint: %v", err)
+			r.log.Errorf("[resovler] Failed to parse discovery endpoint: %v", err)
 			continue
 		}
 		if endpoint == "" {
@@ -57,10 +63,12 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		addrs = append(addrs, addr)
 	}
 	if len(addrs) == 0 {
-		r.log.Warnf("[resovler]Zero endpoint found,refused to write, ins: %v", ins)
+		r.log.Warnf("[resovler] Zero endpoint found,refused to write, instances: %v", ins)
 		return
 	}
 	r.cc.UpdateState(resolver.State{Addresses: addrs})
+	b, _ := json.Marshal(ins)
+	r.log.Infof("[resolver] update instances: %s", b)
 }
 
 func (r *discoveryResolver) Close() {
@@ -69,19 +77,6 @@ func (r *discoveryResolver) Close() {
 }
 
 func (r *discoveryResolver) ResolveNow(options resolver.ResolveNowOptions) {}
-
-func parseEndpoint(endpoints []string) (string, error) {
-	for _, e := range endpoints {
-		u, err := url.Parse(e)
-		if err != nil {
-			return "", err
-		}
-		if u.Scheme == "grpc" {
-			return u.Host, nil
-		}
-	}
-	return "", nil
-}
 
 func parseAttributes(md map[string]string) *attributes.Attributes {
 	pairs := make([]interface{}, 0, len(md))

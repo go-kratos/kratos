@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -28,10 +29,18 @@ func WithTimeout(timeout time.Duration) Option {
 	}
 }
 
+// WithInsecure with isSecure option.
+func WithInsecure(insecure bool) Option {
+	return func(b *builder) {
+		b.insecure = insecure
+	}
+}
+
 type builder struct {
 	discoverer registry.Discovery
 	logger     log.Logger
 	timeout    time.Duration
+	insecure   bool
 }
 
 // NewBuilder creates a builder which is used to factory registry resolvers.
@@ -40,6 +49,7 @@ func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 		discoverer: d,
 		logger:     log.DefaultLogger,
 		timeout:    time.Second * 10,
+		insecure:   false,
 	}
 	for _, o := range opts {
 		o(b)
@@ -48,23 +58,34 @@ func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 }
 
 func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), b.timeout)
-	defer cancel()
-	w, err := b.discoverer.Watch(ctx, target.Endpoint)
+	var (
+		err error
+		w   registry.Watcher
+	)
+	done := make(chan bool, 1)
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		w, err = b.discoverer.Watch(ctx, target.Endpoint)
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(b.timeout):
+		err = errors.New("discovery create watcher overtime")
+	}
 	if err != nil {
+		cancel()
 		return nil, err
 	}
-
 	r := &discoveryResolver{
-		w:      w,
-		cc:     cc,
-		ctx:    ctx,
-		cancel: cancel,
-		log:    log.NewHelper(b.logger),
+		w:        w,
+		cc:       cc,
+		ctx:      ctx,
+		cancel:   cancel,
+		log:      log.NewHelper(b.logger),
+		insecure: b.insecure,
 	}
-	r.ctx, r.cancel = context.WithCancel(context.Background())
 	go r.watch()
-
 	return r, nil
 }
 

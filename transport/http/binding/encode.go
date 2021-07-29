@@ -28,7 +28,7 @@ func EncodeURL(pathTemplate string, msg proto.Message, needQuery bool) string {
 	if reg == nil {
 		return pathTemplate
 	}
-	pathParams := make(map[string]struct{}, 0)
+	pathParams := make(map[string]struct{})
 	path := reg.ReplaceAllStringFunc(pathTemplate, func(in string) string {
 		if len(in) < 4 {
 			return in
@@ -98,7 +98,7 @@ func encodeField(fieldDescriptor protoreflect.FieldDescriptor, value protoreflec
 	}
 }
 
-// marshalMessage marshals the fields in the given protoreflect.Message.
+// encodeMessage marshals the fields in the given protoreflect.Message.
 // If the typeURL is non-empty, then a synthetic "@type" field is injected
 // containing the URL as the value.
 func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protoreflect.Value) (string, error) {

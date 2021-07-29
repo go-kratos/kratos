@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/go-kratos/etcd/registry"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
@@ -19,8 +20,11 @@ func main() {
 		panic(err)
 	}
 	r := registry.New(cli)
-	callGRPC(r)
-	callHTTP(r)
+	for {
+		callHTTP(r)
+		callGRPC(r)
+		time.Sleep(time.Second)
+	}
 }
 
 func callGRPC(r *registry.Registry) {
@@ -32,6 +36,7 @@ func callGRPC(r *registry.Registry) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer conn.Close()
 	client := helloworld.NewGreeterClient(conn)
 	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {
@@ -50,6 +55,7 @@ func callHTTP(r *registry.Registry) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer conn.Close()
 	client := helloworld.NewGreeterHTTPClient(conn)
 	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {

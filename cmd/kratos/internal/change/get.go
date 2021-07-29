@@ -1,4 +1,4 @@
-package base
+package change
 
 import (
 	"encoding/json"
@@ -8,25 +8,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"os/exec"
 	"regexp"
 	"strings"
 	"time"
 )
-
-// GoGet go get path.
-func GoGet(path ...string) error {
-	for _, p := range path {
-		fmt.Printf("go get -u %s\n", p)
-		cmd := exec.Command("go", "get", "-u", p)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		if err := cmd.Run(); err != nil {
-			return err
-		}
-	}
-	return nil
-}
 
 type ReleaseInfo struct {
 	Author struct {
@@ -132,6 +117,7 @@ func ParseCommitsInfo(info []CommitInfo) string {
 		"feat":  {},
 		"deps":  {},
 		"break": {},
+		"chore": {},
 		"other": {},
 	}
 
@@ -141,9 +127,10 @@ func ParseCommitsInfo(info []CommitInfo) string {
 		if index != -1 {
 			msg = msg[:index-1]
 		}
-		prefix := []string{"fix", "feat", "deps", "break"}
+		prefix := []string{"fix", "feat", "deps", "break", "chore"}
 		var matched bool
 		for _, v := range prefix {
+			msg = strings.TrimPrefix(msg, " ")
 			if strings.HasPrefix(msg, v) {
 				group[v] = append(group[v], msg)
 				matched = true
@@ -166,6 +153,8 @@ func ParseCommitsInfo(info []CommitInfo) string {
 			text = "### New Features\n"
 		case "fix":
 			text = "### Bug Fixes\n"
+		case "chore":
+			text = "### Chores\n"
 		case "other":
 			text = "### Others\n"
 		}
@@ -176,7 +165,7 @@ func ParseCommitsInfo(info []CommitInfo) string {
 			}
 		}
 	}
-	return fmt.Sprint(md["break"], md["deps"], md["feat"], md["fix"], md["other"])
+	return fmt.Sprint(md["break"], md["deps"], md["feat"], md["fix"], md["chore"], md["other"])
 }
 
 func ParseReleaseInfo(info ReleaseInfo) string {

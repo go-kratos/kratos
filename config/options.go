@@ -33,6 +33,10 @@ func WithSource(s ...Source) Option {
 }
 
 // WithDecoder with config decoder.
+// DefaultDecoder behavior:
+// If KeyValue.Format is non-empty, then KeyValue.Value will be deserialized into map[string]interface{}
+// and stored in the config cache(map[string]interface{})
+// if KeyValue.Format is empty,{KeyValue.Key : KeyValue.Value} will be stored in config cache(map[string]interface{})
 func WithDecoder(d Decoder) Option {
 	return func(o *options) {
 		o.decoder = d
@@ -57,7 +61,17 @@ func WithLogger(l log.Logger) Option {
 // to target map[string]interface{} using src.Format codec.
 func defaultDecoder(src *KeyValue, target map[string]interface{}) error {
 	if src.Format == "" {
-		target[src.Key] = src.Value
+		// expand key "aaa.bbb" into map[aaa]map[bbb]interface{}
+		keys := strings.Split(src.Key, ".")
+		for i, k := range keys {
+			if i == len(keys)-1 {
+				target[k] = src.Value
+			} else {
+				sub := make(map[string]interface{})
+				target[k] = sub
+				target = sub
+			}
+		}
 		return nil
 	}
 	if codec := encoding.GetCodec(src.Format); codec != nil {

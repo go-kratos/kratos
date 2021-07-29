@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
@@ -36,9 +37,10 @@ type App struct {
 // New create an application lifecycle manager.
 func New(opts ...Option) *App {
 	options := options{
-		ctx:    context.Background(),
-		logger: log.DefaultLogger,
-		sigs:   []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
+		ctx:              context.Background(),
+		logger:           log.DefaultLogger,
+		sigs:             []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
+		registrarTimeout: 10 * time.Second,
 	}
 	if id, err := uuid.NewUUID(); err == nil {
 		options.id = id.String()
@@ -92,7 +94,9 @@ func (a *App) Run() error {
 	}
 	wg.Wait()
 	if a.opts.registrar != nil {
-		if err := a.opts.registrar.Register(a.opts.ctx, instance); err != nil {
+		ctx, cancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
+		defer cancel()
+		if err := a.opts.registrar.Register(ctx, instance); err != nil {
 			return err
 		}
 		a.instance = instance
@@ -118,7 +122,9 @@ func (a *App) Run() error {
 // Stop gracefully stops the application.
 func (a *App) Stop() error {
 	if a.opts.registrar != nil && a.instance != nil {
-		if err := a.opts.registrar.Deregister(a.opts.ctx, a.instance); err != nil {
+		ctx, cancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
+		defer cancel()
+		if err := a.opts.registrar.Deregister(ctx, a.instance); err != nil {
 			return err
 		}
 	}

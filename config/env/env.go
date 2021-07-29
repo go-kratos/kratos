@@ -16,7 +16,12 @@ func NewSource(prefixs ...string) config.Source {
 }
 
 func (e *env) Load() (kv []*config.KeyValue, err error) {
-	for _, envstr := range os.Environ() {
+	return e.load(os.Environ()), nil
+}
+
+func (e *env) load(envStrings []string) []*config.KeyValue {
+	var kv []*config.KeyValue
+	for _, envstr := range envStrings {
 		var k, v string
 		subs := strings.SplitN(envstr, "=", 2)
 		k = subs[0]
@@ -25,23 +30,23 @@ func (e *env) Load() (kv []*config.KeyValue, err error) {
 		}
 
 		if len(e.prefixs) > 0 {
-			p, ok := matchPrefix(e.prefixs, envstr)
-			if !ok {
+			p, ok := matchPrefix(e.prefixs, k)
+			if !ok || len(p) == len(k) {
 				continue
 			}
 			// trim prefix
-			k = k[len(p):]
-			if k[0] == '_' {
-				k = k[1:]
-			}
+			k = strings.TrimPrefix(k, p)
+			k = strings.TrimPrefix(k, "_")
 		}
 
-		kv = append(kv, &config.KeyValue{
-			Key:   k,
-			Value: []byte(v),
-		})
+		if len(k) != 0 {
+			kv = append(kv, &config.KeyValue{
+				Key:   k,
+				Value: []byte(v),
+			})
+		}
 	}
-	return
+	return kv
 }
 
 func (e *env) Watch() (config.Watcher, error) {
@@ -52,8 +57,8 @@ func (e *env) Watch() (config.Watcher, error) {
 	return w, nil
 }
 
-func matchPrefix(prefixs []string, s string) (string, bool) {
-	for _, p := range prefixs {
+func matchPrefix(prefixes []string, s string) (string, bool) {
+	for _, p := range prefixes {
 		if strings.HasPrefix(s, p) {
 			return p, true
 		}

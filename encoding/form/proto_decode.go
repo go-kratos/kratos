@@ -36,9 +36,10 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 	var fd protoreflect.FieldDescriptor
 	for i, fieldName := range fieldPath {
 		fields := v.Descriptor().Fields()
-
-		if fd = fields.ByName(protoreflect.Name(fieldName)); fd == nil {
-			fd = fields.ByJSONName(fieldName)
+		if fd = getDescriptorByFieldAndName(fields, fieldName); fd == nil {
+			if len(fieldName) > 2 && strings.HasSuffix(fieldName, "[]") {
+				fd = getDescriptorByFieldAndName(fields, strings.TrimSuffix(fieldName, "[]"))
+			}
 			if fd == nil {
 				// ignore unexpected field.
 				return nil
@@ -70,6 +71,17 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 		return fmt.Errorf("too many values for field %q: %s", fd.FullName().Name(), strings.Join(values, ", "))
 	}
 	return populateField(fd, v, values[0])
+}
+
+func getDescriptorByFieldAndName(fields protoreflect.FieldDescriptors, fieldName string) protoreflect.FieldDescriptor {
+	var fd protoreflect.FieldDescriptor
+	if fd = fields.ByName(protoreflect.Name(fieldName)); fd == nil {
+		fd = fields.ByJSONName(fieldName)
+		if fd == nil {
+			return nil
+		}
+	}
+	return fd
 }
 
 func populateField(fd protoreflect.FieldDescriptor, v protoreflect.Message, value string) error {
