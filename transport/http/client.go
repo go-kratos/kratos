@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -138,10 +139,11 @@ func WithTLSConfig(c *tls.Config) ClientOption {
 
 // Client is an HTTP client.
 type Client struct {
-	opts   clientOptions
-	target *Target
-	r      *resolver
-	cc     *http.Client
+	opts     clientOptions
+	target   *Target
+	r        *resolver
+	cc       *http.Client
+	insecure bool
 }
 
 // NewClient returns an HTTP client.
@@ -163,18 +165,15 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 			tr.TLSClientConfig = options.tlsConf
 		}
 	}
-	var isSecure bool
-	if options.tlsConf != nil {
-		isSecure = true
-	}
-	target, err := parseTarget(options.endpoint, isSecure)
+	insecure := options.tlsConf == nil
+	target, err := parseTarget(options.endpoint, insecure)
 	if err != nil {
 		return nil, err
 	}
 	var r *resolver
 	if options.discovery != nil {
 		if target.Scheme == "discovery" {
-			if r, err = newResolver(ctx, options.discovery, target, options.balancer, options.block, !isSecure); err != nil {
+			if r, err = newResolver(ctx, options.discovery, target, options.balancer, options.block, insecure); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
 		} else if _, _, err := host.ExtractHostPort(options.endpoint); err != nil {
@@ -182,9 +181,10 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		}
 	}
 	return &Client{
-		opts:   options,
-		target: target,
-		r:      r,
+		opts:     options,
+		target:   target,
+		insecure: insecure,
+		r:        r,
 		cc: &http.Client{
 			Timeout:   options.timeout,
 			Transport: options.transport,
@@ -244,13 +244,17 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			if node, done, err = client.opts.balancer.Pick(ctx); err != nil {
 				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 			}
-			scheme, addr, err := parseEndpoint(node.Endpoints, client.opts.tlsConf == nil)
+			endpoint, err := endpoint.ParseEndpoint(node.Endpoints, "http", !client.insecure)
 			if err != nil {
 				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 			}
-			req.URL.Scheme = scheme
-			req.URL.Host = addr
-			req.Host = addr
+			if client.insecure {
+				req.URL.Scheme = "http"
+			} else {
+				req.URL.Scheme = "https"
+			}
+			req.URL.Host = endpoint
+			req.Host = endpoint
 		}
 		res, err := client.do(ctx, req, c)
 		if done != nil {

@@ -3,11 +3,12 @@ package grpc
 import (
 	"context"
 	"crypto/tls"
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"net"
 	"net/url"
 	"sync"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
 
 	apimd "github.com/go-kratos/kratos/v2/api/metadata"
 	ic "github.com/go-kratos/kratos/v2/internal/context"
@@ -159,7 +160,6 @@ func (s *Server) Endpoint() (*url.URL, error) {
 			return
 		}
 		s.lis = lis
-
 		s.endpoint = endpoint.NewEndpoint("grpc", addr, s.tlsConf != nil)
 	})
 	if s.err != nil {
