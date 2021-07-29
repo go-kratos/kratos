@@ -20,14 +20,14 @@ type Limiter interface {
 func RateLimiter(limiter Limiter) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			if done, e := limiter.Allow(ctx); e != nil {
+			done, e := limiter.Allow(ctx)
+			if e != nil {
 				// blocked
 				return nil, ErrLimitExceed
-			} else {
-				// passed
-				reply, err = handler(ctx, req)
-				done()
 			}
+			// passed
+			reply, err = handler(ctx, req)
+			done()
 			return
 		}
 	}
