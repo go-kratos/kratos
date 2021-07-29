@@ -6,8 +6,9 @@ import (
 	"sync/atomic"
 	"time"
 
+	"bbr/cpu"
+
 	limit "github.com/go-kratos/kratos/v2/middleware/ratelimit"
-	cpustat "github.com/go-kratos/kratos/v2/middleware/ratelimit/cpu"
 )
 
 var (
@@ -42,8 +43,8 @@ func cpuproc() {
 
 	// EMA algorithm: https://blog.csdn.net/m0_38106113/article/details/81542863
 	for range ticker.C {
-		stat := &cpustat.Stat{}
-		cpustat.ReadStat(stat)
+		stat := &cpu.Stat{}
+		cpu.ReadStat(stat)
 		prevCpu := atomic.LoadInt64(&gCPU)
 		curCpu := int64(float64(prevCpu)*decay + float64(stat.Usage)*(1.0-decay))
 		atomic.StoreInt64(&gCPU, curCpu)
