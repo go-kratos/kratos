@@ -4,9 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/golang-jwt/jwt"
-	"google.golang.org/grpc/metadata"
-	"net/http"
 )
 
 type jwtKey string
@@ -18,6 +17,9 @@ const (
 
 	// JWTClaimsContextKey holds the key used to store the JWT Claims in the context.
 	JWTClaimsContextKey jwtKey = "JWTClaims"
+
+	//JWTHeaderKey holds the key used to store the JWT Token in the request header.
+	JWTHeaderKey string = "Authorization"
 )
 
 var (
@@ -37,13 +39,6 @@ type options struct {
 	SigningMethod        jwt.SigningMethod
 }
 
-//WithAccessSecret with access secret option.
-func WithAccessSecret(accessSecret string) Option {
-	return func(o *options) {
-		o.AccessSecret = accessSecret
-	}
-}
-
 //WithAccessExpire with access expire option.
 func WithAccessExpire(second uint32) Option {
 	return func(o *options) {
@@ -59,12 +54,15 @@ func WithSigningMethod(method jwt.SigningMethod) Option {
 }
 
 //Server is an server jwt middleware
-func Server(opts ...Option) middleware.Middleware {
+func Server(accessSecret string, signingMethod jwt.SigningMethod, opts ...Option) middleware.Middleware {
+	checkParam(accessSecret, signingMethod)
 	o := initOptions(opts...)
+	o.AccessSecret = accessSecret
+	o.SigningMethod = signingMethod
 	parser := NewParser(o)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
-			jwtToken := fromHeader(ctx, req)
+			jwtToken := fromHeader(ctx)
 			if jwtToken == "" {
 				return nil, ErrMissingJwtToken
 			}
@@ -81,27 +79,28 @@ func Server(opts ...Option) middleware.Middleware {
 	}
 }
 
+func checkParam(accessSecret string, signingMethod jwt.SigningMethod) {
+	if accessSecret == "" {
+		panic(ErrMissingAccessSecret)
+	}
+	if signingMethod == nil {
+		panic(ErrMissionSigningMethod)
+	}
+}
+
 func initOptions(opts ...Option) options {
 	o := options{}
 	for _, opt := range opts {
 		opt(&o)
 	}
-	if o.AccessSecret == "" {
-		panic(ErrMissingAccessSecret)
-	}
-	if o.SigningMethod == nil {
-		panic(ErrMissionSigningMethod)
-	}
 	return o
 }
 
 //fromHeader get token from header
-func fromHeader(ctx context.Context, req interface{}) string {
+func fromHeader(ctx context.Context) string {
 	var jwtToken string
-	if request, ok := req.(http.Request); ok {
-		jwtToken = request.Header.Get("Authorization")
-	} else if md, ok := metadata.FromIncomingContext(ctx); ok {
-		jwtToken = md.Get("Authorization")[0]
+	if serverContext, ok := transport.FromServerContext(ctx); ok {
+		jwtToken = serverContext.RequestHeader().Get(JWTHeaderKey)
 	}
 	return jwtToken
 }

@@ -17,7 +17,7 @@ func NewParser(config options) func(token string) (*jwt.Token, error) {
 			if token.Method != config.SigningMethod {
 				return nil, ErrUnSupportSigningMethod
 			}
-			return config.AccessSecret, nil
+			return []byte(config.AccessSecret), nil
 		})
 	}
 }
