@@ -92,18 +92,14 @@ func Server(accessSecret string, opts ...Option) middleware.Middleware {
 func Client(provider TokenProvider) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
-			i, err := handler(ctx, req)
-			if err != nil {
-				return i, err
-			}
 			if provider == nil {
 				return nil, ErrNeedTokenProvider
 			}
-			err = toHeader(ctx, provider.GetToken())
+			err := toHeader(ctx, provider.GetToken())
 			if err != nil {
 				return nil, err
 			}
-			return i, err
+			return handler(ctx, req)
 		}
 	}
 }
