@@ -1,9 +1,10 @@
 <!--
-🎉 Thanks for sending a pull request to Kratos!  Here are some tips for you:
+🎉 Thanks for sending a pull request to Kratos! Here are some tips for you:
 
-1. Ensure you have added or ran the appropriate tests for your PR, such as using `go test ./...`
-2. If the PR is unfinished, you may need mark it as a WIP(Work In Progress) PR
-3. Please using a conventional commits format title: `<type>[optional scope]: <description>`
+1. If this is your first time contributing to Kratos, please read our contribution guide: https://go-kratos.dev/en/docs/community/contribution/
+2. Ensure you have added or ran the appropriate tests for your PR, such as using `go test ./...`
+3. If the PR is unfinished, you may need mark it as a WIP(Work In Progress) PR or draft PR
+4. Please using a conventional commits format title: `<type>[optional scope]: <description>`
     
     Some suggestion on <type>:
 
