@@ -157,6 +157,8 @@ func newParser(o *options) func(tokenStr string) (*jwt.Token, error) {
 			}
 		} else if !token.Valid {
 			return nil, ErrTokenInvalid
+		} else if token.Method != o.SigningMethod {
+			return nil, ErrUnSupportSigningMethod
 		}
 		return token, err
 	}

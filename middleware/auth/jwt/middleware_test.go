@@ -90,13 +90,13 @@ func TestServer(t *testing.T) {
 			exceptErr:     ErrTokenInvalid,
 			key:           testKey,
 		},
-		//{
-		//	name:          "method invalid",
-		//	ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(token)}),
-		//	signingMethod: jwt.SigningMethodES384,
-		//	exceptErr:     ErrUnSupportSigningMethod,
-		//	key:           testKey,
-		//},
+		{
+			name:          "method invalid",
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(token)}),
+			signingMethod: jwt.SigningMethodES384,
+			exceptErr:     ErrUnSupportSigningMethod,
+			key:           testKey,
+		},
 		{
 			name:          "miss key",
 			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(token)}),
