@@ -2,7 +2,7 @@ package jwt
 
 import (
 	"context"
-	"errors"
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/golang-jwt/jwt"
@@ -24,15 +24,15 @@ const (
 )
 
 var (
-	ErrMissingJwtToken        = errors.New("JWT is missing")
-	ErrTokenParseFail         = errors.New("Fail to parse JWT token ")
-	ErrMissingAccessSecret    = errors.New("AccessSecret is missing")
-	ErrTokenInvalid           = errors.New("Token is invalid")
-	ErrUnSupportSigningMethod = errors.New("Wrong signing method")
-	ErrNeedTokenProvider      = errors.New("Miss token provider")
-	ErrWrongContext           = errors.New("Wrong context for middelware")
-	ErrTokenExpired           = errors.New("JWT token has expired")
-	ErrTokenFormat            = errors.New("JWT token format error")
+	ErrMissingJwtToken        = errors.Unauthorized("Missing info", "JWT token is missing")
+	ErrMissingAccessSecret    = errors.Unauthorized("Missing info", "AccessSecret is missing")
+	ErrNeedTokenProvider      = errors.Unauthorized("Missing info", "Token provider is missing")
+	ErrTokenInvalid           = errors.Unauthorized("Token invalid", "Token is invalid")
+	ErrTokenExpired           = errors.Unauthorized("Token invalid", "JWT token has expired")
+	ErrTokenFormat            = errors.Unauthorized("Token invalid", "JWT token format error")
+	ErrTokenParseFail         = errors.Unauthorized("Something wrong", "Fail to parse JWT token ")
+	ErrUnSupportSigningMethod = errors.Unauthorized("Something wrong", "Wrong signing method")
+	ErrWrongContext           = errors.Unauthorized("Something wrong", "Wrong context for middelware")
 )
 
 //Option is jwt option.
