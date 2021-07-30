@@ -144,14 +144,30 @@ func TestClient(t *testing.T) {
 	tProvider := tokeBuilder{
 		token: token,
 	}
-	t.Run("normal", func(t *testing.T) {
-		next := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return "reply", nil
-		}
-		handler := Client(tProvider)(next)
-		header := &headerCarrier{}
-		_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
-		assert.Nil(t, err2)
-		assert.Equal(t, token, header.Get(JWTHeaderKey))
-	})
+
+	tests := []struct {
+		name          string
+		expectError   error
+		tokenProvider TokenProvider
+	}{
+		{
+			name:          "normal",
+			expectError:   nil,
+			tokenProvider: tProvider,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			next := func(ctx context.Context, req interface{}) (interface{}, error) {
+				return "reply", nil
+			}
+			handler := Client(test.tokenProvider)(next)
+			header := &headerCarrier{}
+			_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
+			assert.Nil(t, test.expectError)
+			if err2 == nil {
+				assert.Equal(t, test.tokenProvider.GetToken(), header.Get(JWTHeaderKey))
+			}
+		})
+	}
 }
