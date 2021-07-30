@@ -62,16 +62,47 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	// todo add test case
 	tests := []struct {
 		name          string
 		ctx           context.Context
 		signingMethod jwt.SigningMethod
+		exceptErr     error
+		key           string
 	}{
 		{
 			name:          "normal",
 			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(token)}),
 			signingMethod: jwt.SigningMethodHS256,
+			exceptErr:     nil,
+			key:           testKey,
+		},
+		{
+			name:          "miss token",
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: headerCarrier{}}),
+			signingMethod: jwt.SigningMethodHS256,
+			exceptErr:     ErrMissingJwtToken,
+			key:           testKey,
+		},
+		{
+			name:          "token invalid",
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader("123123123")}),
+			signingMethod: jwt.SigningMethodHS256,
+			exceptErr:     ErrTokenInvalid,
+			key:           testKey,
+		},
+		//{
+		//	name:          "method invalid",
+		//	ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(token)}),
+		//	signingMethod: jwt.SigningMethodES384,
+		//	exceptErr:     ErrUnSupportSigningMethod,
+		//	key:           testKey,
+		//},
+		{
+			name:          "miss key",
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(token)}),
+			signingMethod: jwt.SigningMethodHS256,
+			exceptErr:     ErrMissingAccessSecret,
+			key:           "",
 		},
 	}
 
@@ -83,10 +114,12 @@ func TestServer(t *testing.T) {
 				testToken = ctx.Value(JWTClaimsContextKey)
 				return "reply", nil
 			}
-			server := Server(testKey, WithSigningMethod(test.signingMethod))(next)
+			server := Server(test.key, WithSigningMethod(test.signingMethod))(next)
 			_, err2 := server(test.ctx, test.name)
-			assert.Nil(t, err2)
-			assert.NotNil(t, testToken)
+			assert.Equal(t, test.exceptErr, err2)
+			if test.exceptErr == nil {
+				assert.NotNil(t, testToken)
+			}
 		})
 	}
 }

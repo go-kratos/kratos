@@ -25,11 +25,14 @@ const (
 
 var (
 	ErrMissingJwtToken        = errors.New("JWT is missing")
+	ErrTokenParseFail         = errors.New("Fail to parse JWT token ")
 	ErrMissingAccessSecret    = errors.New("AccessSecret is missing")
 	ErrTokenInvalid           = errors.New("Token is invalid")
 	ErrUnSupportSigningMethod = errors.New("Wrong signing method")
 	ErrNeedTokenProvider      = errors.New("Miss token provider")
 	ErrWrongContext           = errors.New("Wrong context for middelware")
+	ErrTokenExpired           = errors.New("JWT token has expired")
+	ErrTokenFormat            = errors.New("JWT token format error")
 )
 
 //Option is jwt option.
@@ -58,17 +61,7 @@ func WithSigningMethod(method jwt.SigningMethod) Option {
 //Server is an server jwt middleware
 func Server(accessSecret string, opts ...Option) middleware.Middleware {
 	o := initOptions(accessSecret, opts...)
-	parser := func(token string) (*jwt.Token, error) {
-		return jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-			if token.Method != o.SigningMethod {
-				return nil, ErrUnSupportSigningMethod
-			}
-			if o.AccessSecret == "" {
-				return nil, ErrMissingAccessSecret
-			}
-			return []byte(o.AccessSecret), nil
-		})
-	}
+	parser := newParser(o)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			jwtToken := fromHeader(ctx)
@@ -78,9 +71,6 @@ func Server(accessSecret string, opts ...Option) middleware.Middleware {
 			token, err := parser(jwtToken)
 			if err != nil {
 				return nil, err
-			}
-			if !token.Valid {
-				return nil, ErrTokenInvalid
 			}
 			ctx = context.WithValue(ctx, JWTClaimsContextKey, token.Claims)
 			return handler(ctx, req)
@@ -140,4 +130,34 @@ func toHeader(ctx context.Context, token string) error {
 		return ErrWrongContext
 	}
 	return nil
+}
+
+//newParser create a jwt token parser.
+func newParser(o *options) func(tokenStr string) (*jwt.Token, error) {
+	return func(tokenStr string) (*jwt.Token, error) {
+		/*check the access secret*/
+		if o.AccessSecret == "" {
+			return nil, ErrMissingAccessSecret
+		}
+		/*parse token*/
+		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+			return []byte(o.AccessSecret), nil
+		})
+		if err != nil {
+			if ve, ok := err.(*jwt.ValidationError); ok {
+				if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+					/*token format error*/
+					return nil, ErrTokenInvalid
+				} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+					/*Token is either expired or not active yet*/
+					return nil, ErrTokenExpired
+				} else {
+					return nil, ErrTokenParseFail
+				}
+			}
+		} else if !token.Valid {
+			return nil, ErrTokenInvalid
+		}
+		return token, err
+	}
 }
