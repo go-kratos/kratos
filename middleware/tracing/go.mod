@@ -9,4 +9,4 @@ require (
 	go.opentelemetry.io/otel/trace v1.0.0-RC1
 )
 
-replace github.com/go-kratos/kratos/v2 => ../../
+replace github.com/go-kratos/kratos/v2 => ../../../kratos
