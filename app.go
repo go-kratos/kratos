@@ -94,12 +94,27 @@ func (a *App) Run() error {
 	}
 	wg.Wait()
 	if a.opts.registrar != nil {
-		ctx, cancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
+		ctx, cancel := context.WithCancel(a.opts.ctx)
 		defer cancel()
-		if err := a.opts.registrar.Register(ctx, instance); err != nil {
+		done := make(chan struct{}, 1)
+		var err error
+		go func() {
+			defer close(done)
+			if e := a.opts.registrar.Register(ctx, instance); e != nil {
+				err = e
+				return
+			}
+			a.instance = instance
+		}()
+
+		select {
+		case <-done:
+		case <-time.After(a.opts.registrarTimeout):
+			err = errors.New("discovery create watcher overtime")
+		}
+		if err != nil {
 			return err
 		}
-		a.instance = instance
 	}
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, a.opts.sigs...)
