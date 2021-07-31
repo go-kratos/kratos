@@ -110,7 +110,7 @@ func (a *App) Run() error {
 		select {
 		case <-done:
 		case <-time.After(a.opts.registrarTimeout):
-			err = errors.New("discovery create watcher overtime")
+			err = errors.New("registrar the registration overtime")
 		}
 		if err != nil {
 			return err
