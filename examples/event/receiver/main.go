@@ -27,8 +27,8 @@ func main() {
 
 func receive(receiver event.Receiver) {
 	fmt.Println("start receiver")
-	err := receiver.Receive(context.Background(), func(ctx context.Context, message event.Message) error {
-		fmt.Printf("key:%s, value:%s, header:%s\n", message.Key(), message.Value(), message.Header())
+	err := receiver.Receive(context.Background(), func(ctx context.Context, msg event.Event) error {
+		fmt.Printf("key:%s, value:%s, header:%s\n", msg.Key(), msg.Value())
 		return nil
 	})
 	if err != nil {
