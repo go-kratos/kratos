@@ -7,6 +7,10 @@ import (
 	"sync"
 )
 
+var _ event.Sender = (*memorySender)(nil)
+var _ event.Receiver = (*memoryReceiver)(nil)
+var _ event.Event = (*Message)(nil)
+
 var (
 	chanMap = struct {
 		sync.RWMutex
