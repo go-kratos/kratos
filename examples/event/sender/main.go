@@ -26,5 +26,5 @@ func send(sender event.Sender) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("key:%s, value:%s, header:%s\n", msg.Key(), msg.Value())
+	fmt.Printf("key:%s, value:%s\n", msg.Key(), msg.Value())
 }
