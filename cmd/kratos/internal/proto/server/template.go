@@ -86,10 +86,10 @@ func (s *{{ .Service }}Service) {{ .Name }}(req {{ if eq .Request $s1 }}*emptypb
 type MethodType uint8
 
 const (
-	UnaryType          MethodType = 1
-	TwoWayStreamsType  MethodType = 2
-	RequestStreamsType MethodType = 3
-	ReturnsStreamsType MethodType = 4
+	unaryType          MethodType = 1
+	twoWayStreamsType  MethodType = 2
+	requestStreamsType MethodType = 3
+	returnsStreamsType MethodType = 4
 )
 
 // Service is a proto service.
@@ -117,14 +117,14 @@ type Method struct {
 func (s *Service) execute() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	for _, method := range s.Methods {
-		if (method.Type == UnaryType && (method.Request == "google.protobuf.Empty" || method.Reply == "google.protobuf.Empty")) ||
-			(method.Type == ReturnsStreamsType && method.Request == "google.protobuf.Empty") {
+		if (method.Type == unaryType && (method.Request == "google.protobuf.Empty" || method.Reply == "google.protobuf.Empty")) ||
+			(method.Type == returnsStreamsType && method.Request == "google.protobuf.Empty") {
 			s.GoogleEmpty = true
 		}
-		if method.Type == TwoWayStreamsType || method.Type == RequestStreamsType {
+		if method.Type == twoWayStreamsType || method.Type == returnsStreamsType {
 			s.UseIO = true
 		}
-		if method.Type == UnaryType {
+		if method.Type == unaryType {
 			s.UseContext = true
 		}
 	}
