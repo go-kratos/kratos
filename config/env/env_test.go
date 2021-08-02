@@ -31,7 +31,7 @@ const _testJSON = `
 
 func TestEnvWithPrefix(t *testing.T) {
 	var (
-		path     = filepath.Join(os.TempDir(), "test_config")
+		path     = filepath.Join(t.TempDir(), "test_config")
 		filename = filepath.Join(path, "test.json")
 		data     = []byte(_testJSON)
 	)
@@ -143,7 +143,7 @@ func TestEnvWithPrefix(t *testing.T) {
 
 func TestEnvWithoutPrefix(t *testing.T) {
 	var (
-		path     = filepath.Join(os.TempDir(), "test_config")
+		path     = filepath.Join(t.TempDir(), "test_config")
 		filename = filepath.Join(path, "test.json")
 		data     = []byte(_testJSON)
 	)
