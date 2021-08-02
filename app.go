@@ -114,7 +114,10 @@ func (a *App) Run() error {
 			case <-ctx.Done():
 				return ctx.Err()
 			case <-c:
-				a.Stop(ctx)
+				if a.opts.finishExecution != nil {
+					a.opts.finishExecution(ctx)
+				}
+				a.Stop()
 			}
 		}
 	})
@@ -125,16 +128,13 @@ func (a *App) Run() error {
 }
 
 // Stop gracefully stops the application.
-func (a *App) Stop(ctx context.Context) error {
+func (a *App) Stop() error {
 	if a.opts.registrar != nil && a.instance != nil {
 		ctx, cancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 		defer cancel()
 		if err := a.opts.registrar.Deregister(ctx, a.instance); err != nil {
 			return err
 		}
-	}
-	if a.opts.finishExecution != nil {
-		a.opts.finishExecution(ctx)
 	}
 	if a.cancel != nil {
 		a.cancel()
