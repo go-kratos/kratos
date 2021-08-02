@@ -69,7 +69,12 @@ func (a *App) Version() string { return a.opts.version }
 func (a *App) Metadata() map[string]string { return a.opts.metadata }
 
 // Endpoint returns endpoints.
-func (a *App) Endpoint() []string { return a.instance.Endpoints }
+func (a *App) Endpoint() []string {
+	if a.instance == nil {
+		return []string{}
+	}
+	return a.instance.Endpoints
+}
 
 // Run executes all OnStart hooks registered with the application's Lifecycle.
 func (a *App) Run() error {
