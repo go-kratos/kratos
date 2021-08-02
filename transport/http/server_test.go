@@ -2,9 +2,11 @@ package http
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/middleware"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -152,4 +154,66 @@ func BenchmarkServer(b *testing.B) {
 		assert.NoError(b, err)
 	}
 	srv.Stop(ctx)
+}
+
+func TestNetwork(t *testing.T) {
+	o := &Server{}
+	v := "abc"
+	Network(v)(o)
+	assert.Equal(t, v, o.network)
+}
+
+func TestAddress(t *testing.T) {
+	o := &Server{}
+	v := "abc"
+	Address(v)(o)
+	assert.Equal(t, v, o.address)
+}
+
+func TestTimeout(t *testing.T) {
+	o := &Server{}
+	v := time.Duration(123)
+	Timeout(v)(o)
+	assert.Equal(t, v, o.timeout)
+}
+
+func TestLogger(t *testing.T) {
+	//todo
+}
+
+func TestMiddleware(t *testing.T) {
+	o := &clientOptions{}
+	v := []middleware.Middleware{
+		func(middleware.Handler) middleware.Handler { return nil },
+	}
+	WithMiddleware(v...)(o)
+	assert.Equal(t, v, o.middleware)
+}
+
+func TestRequestDecoder(t *testing.T) {
+	o := &Server{}
+	v := func(*http.Request, interface{}) error { return nil }
+	RequestDecoder(v)(o)
+	assert.NotNil(t, o.dec)
+}
+
+func TestResponseEncoder(t *testing.T) {
+	o := &Server{}
+	v := func(http.ResponseWriter, *http.Request, interface{}) error { return nil }
+	ResponseEncoder(v)(o)
+	assert.NotNil(t, o.enc)
+}
+
+func TestErrorEncoder(t *testing.T) {
+	o := &Server{}
+	v := func(http.ResponseWriter, *http.Request, error) {}
+	ErrorEncoder(v)(o)
+	assert.NotNil(t, o.ene)
+}
+
+func TestTLSConfig(t *testing.T) {
+	o := &Server{}
+	v := &tls.Config{}
+	TLSConfig(v)(o)
+	assert.Equal(t, v, o.tlsConf)
 }
