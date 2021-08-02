@@ -69,7 +69,12 @@ func (a *App) Version() string { return a.opts.version }
 func (a *App) Metadata() map[string]string { return a.opts.metadata }
 
 // Endpoint returns endpoints.
-func (a *App) Endpoint() []string { return a.instance.Endpoints }
+func (a *App) Endpoint() []string {
+	if a.instance == nil {
+		return []string{}
+	}
+	return a.instance.Endpoints
+}
 
 // Run executes all OnStart hooks registered with the application's Lifecycle.
 func (a *App) Run() error {
@@ -109,7 +114,7 @@ func (a *App) Run() error {
 			case <-ctx.Done():
 				return ctx.Err()
 			case <-c:
-				a.Stop()
+				a.Stop(ctx)
 			}
 		}
 	})
@@ -120,13 +125,16 @@ func (a *App) Run() error {
 }
 
 // Stop gracefully stops the application.
-func (a *App) Stop() error {
+func (a *App) Stop(ctx context.Context) error {
 	if a.opts.registrar != nil && a.instance != nil {
 		ctx, cancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 		defer cancel()
 		if err := a.opts.registrar.Deregister(ctx, a.instance); err != nil {
 			return err
 		}
+	}
+	if a.opts.finishExecution != nil {
+		a.opts.finishExecution(ctx)
 	}
 	if a.cancel != nil {
 		a.cancel()

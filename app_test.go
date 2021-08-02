@@ -1,6 +1,7 @@
 package kratos
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -17,7 +18,7 @@ func TestApp(t *testing.T) {
 		Server(hs, gs),
 	)
 	time.AfterFunc(time.Second, func() {
-		app.Stop()
+		app.Stop(context.Background())
 	})
 	if err := app.Run(); err != nil {
 		t.Fatal(err)

@@ -29,6 +29,8 @@ type options struct {
 	registrar        registry.Registrar
 	registrarTimeout time.Duration
 	servers          []transport.Server
+
+	finishExecution func(ctx context.Context)
 }
 
 // ID with service id.
@@ -84,4 +86,9 @@ func Registrar(r registry.Registrar) Option {
 // RegistrarTimeout with registrar timeout.
 func RegistrarTimeout(t time.Duration) Option {
 	return func(o *options) { o.registrarTimeout = t }
+}
+
+// FinishExecution with execution function when program finish
+func FinishExecution(f func(ctx context.Context)) Option {
+	return func(o *options) { o.finishExecution = f }
 }
