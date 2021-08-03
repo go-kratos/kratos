@@ -2,11 +2,11 @@ package kratos
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/registry"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/stretchr/testify/assert"
