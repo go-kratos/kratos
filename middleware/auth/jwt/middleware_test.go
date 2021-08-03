@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/golang-jwt/jwt"
 	"github.com/stretchr/testify/assert"
@@ -62,6 +63,7 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	token = fmt.Sprintf(bearerFormat, token)
 	tests := []struct {
 		name          string
 		ctx           context.Context
@@ -85,7 +87,7 @@ func TestServer(t *testing.T) {
 		},
 		{
 			name:          "token invalid",
-			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader("123123123")}),
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(fmt.Sprintf(bearerFormat, "12313123"))}),
 			signingMethod: jwt.SigningMethodHS256,
 			exceptErr:     ErrTokenInvalid,
 			key:           testKey,
@@ -171,7 +173,7 @@ func TestClient(t *testing.T) {
 			_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
 			assert.Equal(t, test.expectError, err2)
 			if err2 == nil {
-				assert.Equal(t, test.tokenProvider.GetToken(), header.Get(JWTHeaderKey))
+				assert.Equal(t, fmt.Sprintf(bearerFormat, test.tokenProvider.GetToken()), header.Get(JWTHeaderKey))
 			}
 		})
 	}

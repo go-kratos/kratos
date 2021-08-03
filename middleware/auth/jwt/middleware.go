@@ -130,6 +130,7 @@ func fromHeader(ctx context.Context) string {
 		if len(auths) != 2 || !strings.EqualFold(auths[0], bearerWord) {
 			return ""
 		}
+		jwtToken = auths[1]
 	}
 	return jwtToken
 }
