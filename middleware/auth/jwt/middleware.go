@@ -2,10 +2,12 @@ package jwt
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/golang-jwt/jwt"
+	"strings"
 	"time"
 )
 
@@ -21,6 +23,12 @@ const (
 
 	//JWTHeaderKey holds the key used to store the JWT Token in the request header.
 	JWTHeaderKey string = "Authorization"
+
+	//bearerWord the bearer key word for authorization
+	bearerWord string = "Bearer"
+
+	//bearerFormat authorization token format
+	bearerFormat string = "Bearer %s"
 )
 
 var (
@@ -118,6 +126,10 @@ func fromHeader(ctx context.Context) string {
 	var jwtToken string
 	if serverContext, ok := transport.FromServerContext(ctx); ok {
 		jwtToken = serverContext.RequestHeader().Get(JWTHeaderKey)
+		auths := strings.Split(jwtToken, " ")
+		if len(auths) != 2 || !strings.EqualFold(auths[0], bearerWord) {
+			return ""
+		}
 	}
 	return jwtToken
 }
@@ -125,7 +137,7 @@ func fromHeader(ctx context.Context) string {
 //toHeader add token to header
 func toHeader(ctx context.Context, token string) error {
 	if clientContext, ok := transport.FromClientContext(ctx); ok {
-		clientContext.RequestHeader().Set(JWTHeaderKey, token)
+		clientContext.RequestHeader().Set(JWTHeaderKey, fmt.Sprintf(bearerFormat, token))
 	} else {
 		return ErrWrongContext
 	}
