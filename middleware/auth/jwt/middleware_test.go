@@ -155,6 +155,11 @@ func TestClient(t *testing.T) {
 			expectError:   nil,
 			tokenProvider: tProvider,
 		},
+		{
+			name:          "miss token provider",
+			expectError:   ErrNeedTokenProvider,
+			tokenProvider: nil,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -164,7 +169,7 @@ func TestClient(t *testing.T) {
 			handler := Client(test.tokenProvider)(next)
 			header := &headerCarrier{}
 			_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
-			assert.Nil(t, test.expectError)
+			assert.Equal(t, test.expectError, err2)
 			if err2 == nil {
 				assert.Equal(t, test.tokenProvider.GetToken(), header.Get(JWTHeaderKey))
 			}
