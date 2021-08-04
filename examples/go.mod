@@ -10,10 +10,10 @@ require (
 	github.com/go-kratos/consul v0.1.4
 	github.com/go-kratos/etcd v0.1.0
 	github.com/go-kratos/gin v0.1.0
-	github.com/go-kratos/kratos/v2 v2.0.1
+	github.com/go-kratos/kratos/v2 v2.0.3
 	github.com/go-kratos/nacos v0.1.0
 	github.com/go-kratos/prometheus v0.0.0-20210522055322-137e29e7cf47
-	github.com/go-kratos/swagger-api v0.1.8
+	github.com/go-kratos/swagger-api v1.0.0
 	github.com/go-kratos/zookeeper v0.0.0-20210721021028-9e7498619b89
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.9.0
@@ -22,9 +22,9 @@ require (
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.5.0
 	github.com/hashicorp/consul/api v1.9.1
 	github.com/labstack/echo/v4 v4.3.0
-	github.com/longXboy/grpc-gateway/v2 v2.0.0-20210707031540-bd2d73d86cee
 	github.com/nacos-group/nacos-sdk-go v1.0.7
 	github.com/nicksnyder/go-i18n/v2 v2.1.2
 	github.com/prometheus/client_golang v1.11.0
