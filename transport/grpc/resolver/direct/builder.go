@@ -24,9 +24,12 @@ func (d *directBuilder) Build(target resolver.Target, cc resolver.ClientConn, op
 	for _, addr := range strings.Split(target.Endpoint, ",") {
 		addrs = append(addrs, resolver.Address{Addr: addr})
 	}
-	cc.UpdateState(resolver.State{
+	err := cc.UpdateState(resolver.State{
 		Addresses: addrs,
 	})
+	if err != nil {
+		return nil, err
+	}
 	return newDirectResolver(), nil
 }
 
