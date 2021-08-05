@@ -50,7 +50,6 @@ func setClientSpan(ctx context.Context, span trace.Span, m interface{}) {
 	}
 
 	span.SetAttributes(attrs...)
-	return
 }
 
 func setServerSpan(ctx context.Context, span trace.Span, m interface{}) {
@@ -89,7 +88,6 @@ func setServerSpan(ctx context.Context, span trace.Span, m interface{}) {
 	}
 
 	span.SetAttributes(attrs...)
-	return
 }
 
 // parseFullMethod returns a span name following the OpenTelemetry semantic
