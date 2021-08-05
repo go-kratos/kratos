@@ -37,7 +37,7 @@ http:
 # generate errors code
 errors:
 	protoc --proto_path=. \
-           --proto_path=./third_party \
+           --proto_path=$(KRATOS)/third_party \
            --go_out=paths=source_relative:. \
            --go-errors_out=paths=source_relative:. \
            $(API_PROTO_FILES)
