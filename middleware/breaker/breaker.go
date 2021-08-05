@@ -19,7 +19,9 @@ type Breaker interface {
 	Allow(ctx context.Context) error
 	// Check breaker use Check(error) to check whether
 	// the request succeeded of failed,
-	Check(err error)
+	Check(err error) bool
+	// Mark wheather the current request is success
+	Mark(isSuccess bool)
 }
 
 func CircuitBreaker(breaker Breaker) middleware.Middleware {
@@ -31,7 +33,7 @@ func CircuitBreaker(breaker Breaker) middleware.Middleware {
 			}
 			// allow request
 			reply, err := handler(ctx, req)
-			breaker.Check(err)
+			breaker.Mark(breaker.Check(err))
 			return reply, err
 		}
 	}
