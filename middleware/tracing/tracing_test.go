@@ -57,15 +57,15 @@ func TestTracing(t *testing.T) {
 	tracer := NewTracer(trace.SpanKindClient, WithTracerProvider(tp), WithPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})))
 	ts := &Transport{kind: transport.KindHTTP, header: carrier}
 
-	ctx, aboveSpan := tracer.Start(transport.NewClientContext(context.Background(), ts), ts.Kind().String(), ts.Operation(), ts.RequestHeader())
-	defer tracer.End(ctx, aboveSpan, nil)
+	ctx, aboveSpan := tracer.Start(transport.NewClientContext(context.Background(), ts), ts.Operation(), ts.RequestHeader())
+	defer tracer.End(ctx, aboveSpan, nil, nil)
 
 	// server use Extract fetch traceInfo from carrier
 	tracer = NewTracer(trace.SpanKindServer, WithPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})))
 	ts = &Transport{kind: transport.KindHTTP, header: carrier}
 
-	ctx, span := tracer.Start(transport.NewServerContext(ctx, ts), ts.Kind().String(), ts.Operation(), ts.RequestHeader())
-	defer tracer.End(ctx, span, nil)
+	ctx, span := tracer.Start(transport.NewServerContext(ctx, ts), ts.Operation(), ts.RequestHeader())
+	defer tracer.End(ctx, span, nil, nil)
 
 	if aboveSpan.SpanContext().TraceID() != span.SpanContext().TraceID() {
 		t.Fatalf("TraceID failed to deliver")
