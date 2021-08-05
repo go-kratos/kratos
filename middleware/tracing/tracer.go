@@ -4,70 +4,77 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/protobuf/proto"
 )
 
 // Tracer is otel span tracer
 type Tracer struct {
 	tracer trace.Tracer
 	kind   trace.SpanKind
+	opt    *options
 }
 
 // NewTracer create tracer instance
 func NewTracer(kind trace.SpanKind, opts ...Option) *Tracer {
-	options := options{}
+	options := options{
+		propagator: propagation.NewCompositeTextMapPropagator(Metadata{}, propagation.Baggage{}, propagation.TraceContext{}),
+	}
 	for _, o := range opts {
 		o(&options)
 	}
-	if options.TracerProvider != nil {
-		otel.SetTracerProvider(options.TracerProvider)
+	if options.tracerProvider != nil {
+		otel.SetTracerProvider(options.tracerProvider)
 	}
-	if options.Propagator != nil {
-		otel.SetTextMapPropagator(options.Propagator)
-	} else {
-		otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{}))
-	}
+
 	switch kind {
 	case trace.SpanKindClient:
-		return &Tracer{tracer: otel.Tracer("client"), kind: kind}
+		return &Tracer{tracer: otel.Tracer("kartos"), kind: kind, opt: &options}
 	case trace.SpanKindServer:
-		return &Tracer{tracer: otel.Tracer("server"), kind: kind}
+		return &Tracer{tracer: otel.Tracer("kartos"), kind: kind, opt: &options}
 	default:
 		panic(fmt.Sprintf("unsupported span kind: %v", kind))
 	}
 }
 
 // Start start tracing span
-func (t *Tracer) Start(ctx context.Context, component string, operation string, carrier propagation.TextMapCarrier) (context.Context, trace.Span) {
+func (t *Tracer) Start(ctx context.Context, operation string, carrier propagation.TextMapCarrier) (context.Context, trace.Span) {
 	if t.kind == trace.SpanKindServer {
-		ctx = otel.GetTextMapPropagator().Extract(ctx, carrier)
+		ctx = t.opt.propagator.Extract(ctx, carrier)
 	}
 	ctx, span := t.tracer.Start(ctx,
 		operation,
-		trace.WithAttributes(attribute.String("component", component)),
 		trace.WithSpanKind(t.kind),
 	)
 	if t.kind == trace.SpanKindClient {
-		otel.GetTextMapPropagator().Inject(ctx, carrier)
+		t.opt.propagator.Inject(ctx, carrier)
 	}
 	return ctx, span
 }
 
 // End finish tracing span
-func (t *Tracer) End(ctx context.Context, span trace.Span, err error) {
+func (t *Tracer) End(ctx context.Context, span trace.Span, m interface{}, err error) {
 	if err != nil {
 		span.RecordError(err)
-		span.SetAttributes(
-			attribute.String("event", "error"),
-			attribute.String("message", err.Error()),
-		)
+		if e := errors.FromError(err); e != nil {
+			span.SetAttributes(attribute.Key("rpc.status_code").Int64(int64(e.Code)))
+		}
 		span.SetStatus(codes.Error, err.Error())
 	} else {
 		span.SetStatus(codes.Ok, "OK")
+	}
+
+	if p, ok := m.(proto.Message); ok {
+		if t.kind == trace.SpanKindServer {
+			span.SetAttributes(attribute.Key("send_msg.size").Int(proto.Size(p)))
+		} else {
+			span.SetAttributes(attribute.Key("recv_msg.size").Int(proto.Size(p)))
+		}
 	}
 	span.End()
 }
