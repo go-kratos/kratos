@@ -8,7 +8,7 @@ require (
 	github.com/envoyproxy/protoc-gen-validate v0.6.1
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-kratos/consul v0.1.4
-	github.com/go-kratos/etcd v0.1.0
+	github.com/go-kratos/etcd v0.1.2
 	github.com/go-kratos/gin v0.1.0
 	github.com/go-kratos/kratos/v2 v2.0.3
 	github.com/go-kratos/nacos v0.1.0
