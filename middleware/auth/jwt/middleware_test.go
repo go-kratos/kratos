@@ -28,7 +28,7 @@ func (hc headerCarrier) Keys() []string {
 
 func newTokenHeader(token string) *headerCarrier {
 	header := &headerCarrier{}
-	header.Set(auth.HeaderKey, token)
+	header.Set(string(auth.HeaderKey), token)
 	return header
 }
 
@@ -175,7 +175,7 @@ func TestClient(t *testing.T) {
 			_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
 			assert.Equal(t, test.expectError, err2)
 			if err2 == nil {
-				assert.Equal(t, test.tokenProvider.GetToken(), header.Get(auth.HeaderKey))
+				assert.Equal(t, test.tokenProvider.GetToken(), header.Get(string(auth.HeaderKey)))
 			}
 		})
 	}

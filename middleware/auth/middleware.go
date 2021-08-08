@@ -7,12 +7,14 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
+type authkey string
+
 const (
 	//HeaderKey holds the key used to store the JWT Token in the request header.
-	HeaderKey string = "Authorization"
+	HeaderKey authkey = "Authorization"
 
 	//InfoKey holds the key used to store the auth info in the context
-	InfoKey string = "AuthInfo"
+	InfoKey authkey = "AuthInfo"
 )
 
 var (
@@ -35,15 +37,14 @@ func Server(parser TokenParser) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			if header, ok := transport.FromServerContext(ctx); ok {
-				tokenInfo, err := parser.ParseToken(header.RequestHeader().Get(HeaderKey))
+				tokenInfo, err := parser.ParseToken(header.RequestHeader().Get(string(HeaderKey)))
 				if err != nil {
 					return nil, err
 				}
 				ctx = context.WithValue(ctx, InfoKey, tokenInfo)
 				return handler(ctx, req)
-			} else {
-				return nil, ErrWrongContext
 			}
+			return nil, ErrWrongContext
 		}
 	}
 }
@@ -56,11 +57,10 @@ func Client(provider TokenProvider) middleware.Middleware {
 				return nil, ErrNeedTokenProvider
 			}
 			if clientContext, ok := transport.FromClientContext(ctx); ok {
-				clientContext.RequestHeader().Set(HeaderKey, provider.GetToken())
+				clientContext.RequestHeader().Set(string(HeaderKey), provider.GetToken())
 				return handler(ctx, req)
-			} else {
-				return nil, ErrWrongContext
 			}
+			return nil, ErrWrongContext
 		}
 	}
 }

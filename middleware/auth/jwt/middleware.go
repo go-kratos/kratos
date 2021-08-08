@@ -27,9 +27,9 @@ var (
 )
 
 //Option is jwt option.
-type Option func(*JwtMethod)
+type Option func(*Parser)
 
-type JwtMethod struct {
+type Parser struct {
 	AccessSecret         string
 	AccessExpireInSecond time.Duration
 	SigningMethod        jwt.SigningMethod
@@ -37,19 +37,19 @@ type JwtMethod struct {
 
 //WithAccessExpire with access expire option.
 func WithAccessExpire(second time.Duration) Option {
-	return func(o *JwtMethod) {
+	return func(o *Parser) {
 		o.AccessExpireInSecond = second
 	}
 }
 
 //WithSigningMethod with signing method option.
 func WithSigningMethod(method jwt.SigningMethod) Option {
-	return func(o *JwtMethod) {
+	return func(o *Parser) {
 		o.SigningMethod = method
 	}
 }
 
-func (j JwtMethod) ParseToken(jwtToken string) (interface{}, error) {
+func (j Parser) ParseToken(jwtToken string) (interface{}, error) {
 	/*check the access secret*/
 	if j.AccessSecret == "" {
 		return nil, ErrMissingAccessSecret
@@ -84,8 +84,8 @@ func (j JwtMethod) ParseToken(jwtToken string) (interface{}, error) {
 }
 
 //NewJWTParser create a jwt token parser.
-func NewJWTParser(accessSecret string, opts ...Option) *JwtMethod {
-	method := &JwtMethod{
+func NewJWTParser(accessSecret string, opts ...Option) *Parser {
+	method := &Parser{
 		AccessSecret: accessSecret,
 	}
 	for _, opt := range opts {
