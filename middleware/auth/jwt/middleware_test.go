@@ -3,6 +3,7 @@ package jwt
 import (
 	"context"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/middleware/auth"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/golang-jwt/jwt"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +28,7 @@ func (hc headerCarrier) Keys() []string {
 
 func newTokenHeader(token string) *headerCarrier {
 	header := &headerCarrier{}
-	header.Set(JWTHeaderKey, token)
+	header.Set(auth.HeaderKey, token)
 	return header
 }
 
@@ -113,10 +114,11 @@ func TestServer(t *testing.T) {
 			var testToken interface{}
 			next := func(ctx context.Context, req interface{}) (interface{}, error) {
 				t.Log(req)
-				testToken = ctx.Value(JWTClaimsContextKey)
+				testToken = ctx.Value(auth.InfoKey)
 				return "reply", nil
 			}
-			server := Server(test.key, WithSigningMethod(test.signingMethod))(next)
+			parser := NewJWTParser(test.key, WithSigningMethod(test.signingMethod))
+			server := auth.Server(parser)(next)
 			_, err2 := server(test.ctx, test.name)
 			assert.Equal(t, test.exceptErr, err2)
 			if test.exceptErr == nil {
@@ -131,7 +133,7 @@ type tokeBuilder struct {
 }
 
 func (t tokeBuilder) GetToken() string {
-	return t.token
+	return fmt.Sprintf(bearerFormat, t.token)
 }
 
 func TestClient(t *testing.T) {
@@ -150,7 +152,7 @@ func TestClient(t *testing.T) {
 	tests := []struct {
 		name          string
 		expectError   error
-		tokenProvider TokenProvider
+		tokenProvider auth.TokenProvider
 	}{
 		{
 			name:          "normal",
@@ -159,7 +161,7 @@ func TestClient(t *testing.T) {
 		},
 		{
 			name:          "miss token provider",
-			expectError:   ErrNeedTokenProvider,
+			expectError:   auth.ErrNeedTokenProvider,
 			tokenProvider: nil,
 		},
 	}
@@ -168,12 +170,12 @@ func TestClient(t *testing.T) {
 			next := func(ctx context.Context, req interface{}) (interface{}, error) {
 				return "reply", nil
 			}
-			handler := Client(test.tokenProvider)(next)
+			handler := auth.Client(test.tokenProvider)(next)
 			header := &headerCarrier{}
 			_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
 			assert.Equal(t, test.expectError, err2)
 			if err2 == nil {
-				assert.Equal(t, fmt.Sprintf(bearerFormat, test.tokenProvider.GetToken()), header.Get(JWTHeaderKey))
+				assert.Equal(t, test.tokenProvider.GetToken(), header.Get(auth.HeaderKey))
 			}
 		})
 	}
