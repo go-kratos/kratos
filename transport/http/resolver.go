@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -23,12 +25,17 @@ type Target struct {
 	Endpoint  string
 }
 
-func parseTarget(endpoint string) (*Target, error) {
+func parseTarget(endpoint string, insecure bool) (*Target, error) {
+	if !strings.Contains(endpoint, "://") {
+		if insecure {
+			endpoint = "http://" + endpoint
+		} else {
+			endpoint = "https://" + endpoint
+		}
+	}
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		if u, err = url.Parse("http://" + endpoint); err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 	target := &Target{Scheme: u.Scheme, Authority: u.Host}
 	if len(u.Path) > 1 {
@@ -45,18 +52,21 @@ type resolver struct {
 	target  *Target
 	watcher registry.Watcher
 	logger  *log.Helper
+
+	insecure bool
 }
 
-func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, updater Updater, block bool) (*resolver, error) {
+func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, updater Updater, block, insecure bool) (*resolver, error) {
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
 	}
 	r := &resolver{
-		target:  target,
-		watcher: watcher,
-		logger:  log.NewHelper(log.DefaultLogger),
-		updater: updater,
+		target:   target,
+		watcher:  watcher,
+		logger:   log.NewHelper(log.DefaultLogger),
+		updater:  updater,
+		insecure: insecure,
 	}
 	if block {
 		done := make(chan error, 1)
@@ -86,7 +96,6 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 			return nil, ctx.Err()
 		}
 	}
-
 	go func() {
 		for {
 			services, err := watcher.Next()
@@ -101,14 +110,13 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 			r.update(services)
 		}
 	}()
-
 	return r, nil
 }
 
 func (r *resolver) update(services []*registry.ServiceInstance) {
 	var nodes []*registry.ServiceInstance
 	for _, in := range services {
-		_, endpoint, err := parseEndpoint(in.Endpoints)
+		endpoint, err := endpoint.ParseEndpoint(in.Endpoints, "http", !r.insecure)
 		if err != nil {
 			r.logger.Errorf("Failed to parse (%v) discovery endpoint: %v error %v", r.target, in.Endpoints, err)
 			continue
@@ -130,17 +138,4 @@ func (r *resolver) update(services []*registry.ServiceInstance) {
 
 func (r *resolver) Close() error {
 	return r.watcher.Stop()
-}
-
-func parseEndpoint(endpoints []string) (string, string, error) {
-	for _, e := range endpoints {
-		u, err := url.Parse(e)
-		if err != nil {
-			return "", "", err
-		}
-		if u.Scheme == "http" {
-			return u.Scheme, u.Host, nil
-		}
-	}
-	return "", "", nil
 }

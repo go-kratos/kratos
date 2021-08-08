@@ -29,10 +29,18 @@ func WithTimeout(timeout time.Duration) Option {
 	}
 }
 
+// WithInsecure with isSecure option.
+func WithInsecure(insecure bool) Option {
+	return func(b *builder) {
+		b.insecure = insecure
+	}
+}
+
 type builder struct {
 	discoverer registry.Discovery
 	logger     log.Logger
 	timeout    time.Duration
+	insecure   bool
 }
 
 // NewBuilder creates a builder which is used to factory registry resolvers.
@@ -41,6 +49,7 @@ func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 		discoverer: d,
 		logger:     log.DefaultLogger,
 		timeout:    time.Second * 10,
+		insecure:   false,
 	}
 	for _, o := range opts {
 		o(b)
@@ -69,11 +78,12 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		return nil, err
 	}
 	r := &discoveryResolver{
-		w:      w,
-		cc:     cc,
-		ctx:    ctx,
-		cancel: cancel,
-		log:    log.NewHelper(b.logger),
+		w:        w,
+		cc:       cc,
+		ctx:      ctx,
+		cancel:   cancel,
+		log:      log.NewHelper(b.logger),
+		insecure: b.insecure,
 	}
 	go r.watch()
 	return r, nil

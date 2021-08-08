@@ -2,7 +2,9 @@ package http
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"net"
 	"net/http"
 	"net/url"
@@ -93,10 +95,18 @@ func Endpoint(endpoint *url.URL) ServerOption {
 	}
 }
 
+// TLSConfig with TLS config.
+func TLSConfig(c *tls.Config) ServerOption {
+	return func(o *Server) {
+		o.tlsConf = c
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
 	lis      net.Listener
+	tlsConf  *tls.Config
 	once     sync.Once
 	endpoint *url.URL
 	err      error
@@ -127,7 +137,8 @@ func NewServer(opts ...ServerOption) *Server {
 		o(srv)
 	}
 	srv.Server = &http.Server{
-		Handler: FilterChain(srv.filters...)(srv),
+		Handler:   FilterChain(srv.filters...)(srv),
+		TLSConfig: srv.tlsConf,
 	}
 	srv.router = mux.NewRouter()
 	srv.router.Use(srv.filter())
@@ -207,7 +218,8 @@ func (s *Server) Endpoint() (*url.URL, error) {
 			return
 		}
 		s.lis = lis
-		s.endpoint = &url.URL{Scheme: "http", Host: addr}
+
+		s.endpoint = endpoint.NewEndpoint("http", addr, s.tlsConf != nil)
 	})
 	if s.err != nil {
 		return nil, s.err
@@ -224,7 +236,13 @@ func (s *Server) Start(ctx context.Context) error {
 		return ctx
 	}
 	s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
-	if err := s.Serve(s.lis); !errors.Is(err, http.ErrServerClosed) {
+	var err error
+	if s.tlsConf != nil {
+		err = s.ServeTLS(s.lis, "", "")
+	} else {
+		err = s.Serve(s.lis)
+	}
+	if !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
 	return nil

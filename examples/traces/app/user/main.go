@@ -14,12 +14,14 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
+
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/sdk/resource"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
-	"go.opentelemetry.io/otel/trace"
+	grpcx "google.golang.org/grpc"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
@@ -33,41 +35,42 @@ var (
 // server is used to implement helloworld.GreeterServer.
 type server struct {
 	v1.UnimplementedUserServer
-	tracer trace.TracerProvider
 }
 
-// Get trace provider
-func tracerProvider(url string) (*tracesdk.TracerProvider, error) {
+// Set global trace provider
+func setTracerProvider(url string) error {
 	// Create the Jaeger exporter
 	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	tp := tracesdk.NewTracerProvider(
-		tracesdk.WithSampler(tracesdk.AlwaysSample()),
+		// Set the sampling rate based on the parent span to 100%
+		tracesdk.WithSampler(tracesdk.ParentBased(tracesdk.TraceIDRatioBased(1.0))),
 		// Always be sure to batch in production.
 		tracesdk.WithBatcher(exp),
 		// Record information about this application in an Resource.
 		tracesdk.WithResource(resource.NewSchemaless(
-			semconv.ServiceNameKey.String(v1.User_ServiceDesc.ServiceName),
-			attribute.String("environment", "development"),
-			attribute.Int64("ID", 1),
+			semconv.ServiceNameKey.String(Name),
+			attribute.String("env", "dev"),
 		)),
 	)
-	return tp, nil
+	otel.SetTracerProvider(tp)
+	return nil
 }
 
 func (s *server) GetMyMessages(ctx context.Context, in *v1.GetMyMessagesRequest) (*v1.GetMyMessagesReply, error) {
 	// create grpc conn
+	// only for demo, use single instance in production env
 	conn, err := grpc.DialInsecure(ctx,
 		grpc.WithEndpoint("127.0.0.1:9000"),
 		grpc.WithMiddleware(
 			recovery.Recovery(),
-			tracing.Client(
-				tracing.WithTracerProvider(s.tracer),
-			),
+			tracing.Client(),
 		),
 		grpc.WithTimeout(2*time.Second),
+		// for tracing remote ip recording
+		grpc.WithOptions(grpcx.WithStatsHandler(&tracing.ClientHandler{})),
 	)
 	if err != nil {
 		return nil, err
@@ -91,7 +94,11 @@ func main() {
 	logger = log.With(logger, "span_id", log.SpanID())
 	log := log.NewHelper(logger)
 
-	tp, err := tracerProvider("http://jaeger:14268/api/traces")
+	url := "http://jaeger:14268/api/traces"
+	if os.Getenv("jaeger_url") != "" {
+		url = os.Getenv("jaeger_url")
+	}
+	err := setTracerProvider(url)
 	if err != nil {
 		log.Error(err)
 	}
@@ -101,13 +108,11 @@ func main() {
 		http.Middleware(
 			recovery.Recovery(),
 			// Configuring tracing middleware
-			tracing.Server(
-				tracing.WithTracerProvider(tp),
-			),
+			tracing.Server(),
 			logging.Server(logger),
 		),
 	)
-	s := &server{tracer: tp}
+	s := &server{}
 	v1.RegisterUserHTTPServer(httpSrv, s)
 
 	app := kratos.New(
