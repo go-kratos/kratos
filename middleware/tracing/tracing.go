@@ -13,21 +13,22 @@ import (
 type Option func(*options)
 
 type options struct {
-	TracerProvider trace.TracerProvider
-	Propagator     propagation.TextMapPropagator
+	tracerProvider trace.TracerProvider
+	propagator     propagation.TextMapPropagator
 }
 
 // WithPropagator with tracer propagator.
 func WithPropagator(propagator propagation.TextMapPropagator) Option {
 	return func(opts *options) {
-		opts.Propagator = propagator
+		opts.propagator = propagator
 	}
 }
 
 // WithTracerProvider with tracer provider.
+// Deprecated: use otel.SetTracerProvider(provider) instead.
 func WithTracerProvider(provider trace.TracerProvider) Option {
 	return func(opts *options) {
-		opts.TracerProvider = provider
+		opts.tracerProvider = provider
 	}
 }
 
@@ -38,8 +39,9 @@ func Server(opts ...Option) middleware.Middleware {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromServerContext(ctx); ok {
 				var span trace.Span
-				ctx, span = tracer.Start(ctx, tr.Kind().String(), tr.Operation(), tr.RequestHeader())
-				defer func() { tracer.End(ctx, span, err) }()
+				ctx, span = tracer.Start(ctx, tr.Operation(), tr.RequestHeader())
+				setServerSpan(ctx, span, req)
+				defer func() { tracer.End(ctx, span, reply, err) }()
 			}
 			return handler(ctx, req)
 		}
@@ -53,8 +55,9 @@ func Client(opts ...Option) middleware.Middleware {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromClientContext(ctx); ok {
 				var span trace.Span
-				ctx, span = tracer.Start(ctx, tr.Kind().String(), tr.Operation(), tr.RequestHeader())
-				defer func() { tracer.End(ctx, span, err) }()
+				ctx, span = tracer.Start(ctx, tr.Operation(), tr.RequestHeader())
+				setClientSpan(ctx, span, req)
+				defer func() { tracer.End(ctx, span, reply, err) }()
 			}
 			return handler(ctx, req)
 		}

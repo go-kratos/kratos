@@ -60,7 +60,8 @@ func run(cmd *cobra.Command, args []string) {
 			for _, e := range s.Elements {
 				r, ok := e.(*proto.RPC)
 				if ok {
-					cs.Methods = append(cs.Methods, &Method{Service: s.Name, Name: r.Name, Request: r.RequestType, Reply: r.ReturnsType})
+					cs.Methods = append(cs.Methods, &Method{Service: s.Name, Name: r.Name, Request: r.RequestType,
+						Reply: r.ReturnsType, Type: getMethodType(r.StreamsRequest, r.StreamsReturns)})
 				}
 			}
 			res = append(res, cs)
@@ -85,4 +86,17 @@ func run(cmd *cobra.Command, args []string) {
 		}
 		fmt.Println(to)
 	}
+}
+
+func getMethodType(streamsRequest, streamsReturns bool) MethodType {
+	if !streamsRequest && !streamsReturns {
+		return unaryType
+	} else if streamsRequest && streamsReturns {
+		return twoWayStreamsType
+	} else if streamsRequest {
+		return requestStreamsType
+	} else if streamsReturns {
+		return returnsStreamsType
+	}
+	return unaryType
 }

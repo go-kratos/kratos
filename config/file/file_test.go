@@ -84,7 +84,7 @@ const (
 
 func TestFile(t *testing.T) {
 	var (
-		path = filepath.Join(os.TempDir(), "test_config")
+		path = filepath.Join(t.TempDir(), "test_config")
 		file = filepath.Join(path, "test.json")
 		data = []byte(_testJSON)
 	)
@@ -178,7 +178,7 @@ func testSource(t *testing.T, path string, data []byte) {
 }
 
 func TestConfig(t *testing.T) {
-	path := filepath.Join(os.TempDir(), "test_config.json")
+	path := filepath.Join(t.TempDir(), "test_config.json")
 	defer os.Remove(path)
 	if err := ioutil.WriteFile(path, []byte(_testJSON), 0666); err != nil {
 		t.Error(err)
@@ -192,7 +192,7 @@ func TestConfig(t *testing.T) {
 }
 
 func testConfig(t *testing.T, c config.Config) {
-	var expected = map[string]interface{}{
+	expected := map[string]interface{}{
 		"test.settings.int_key":      int64(1000),
 		"test.settings.float_key":    float64(1000.1),
 		"test.settings.string_key":   "string_value",
@@ -258,7 +258,6 @@ func testConfig(t *testing.T, c config.Config) {
 	if _, err := c.Value("not_found_key").Bool(); errors.Is(err, config.ErrNotFound) {
 		t.Logf("not_found_key not match: %v", err)
 	}
-
 }
 
 func testScan(t *testing.T, c config.Config) {

@@ -10,10 +10,9 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
-
-	"github.com/stretchr/testify/assert"
-
+	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/stretchr/testify/assert"
 )
 
 type mockRoundTripper struct {
@@ -52,6 +51,12 @@ func TestWithUserAgent(t *testing.T) {
 }
 
 func TestWithMiddleware(t *testing.T) {
+	o := &clientOptions{}
+	v := []middleware.Middleware{
+		func(middleware.Handler) middleware.Handler { return nil },
+	}
+	WithMiddleware(v...)(o)
+	assert.Equal(t, v, o.middleware)
 }
 
 func TestWithEndpoint(t *testing.T) {
@@ -63,14 +68,26 @@ func TestWithEndpoint(t *testing.T) {
 }
 
 func TestWithRequestEncoder(t *testing.T) {
-
+	o := &clientOptions{}
+	v := func(ctx context.Context, contentType string, in interface{}) (body []byte, err error) {
+		return nil, nil
+	}
+	WithRequestEncoder(v)(o)
+	assert.NotNil(t, o.encoder)
 }
 
 func TestWithResponseDecoder(t *testing.T) {
-
+	o := &clientOptions{}
+	v := func(ctx context.Context, res *nethttp.Response, out interface{}) error { return nil }
+	WithResponseDecoder(v)(o)
+	assert.NotNil(t, o.decoder)
 }
 
 func TestWithErrorDecoder(t *testing.T) {
+	o := &clientOptions{}
+	v := func(ctx context.Context, res *nethttp.Response) error { return nil }
+	WithErrorDecoder(v)(o)
+	assert.NotNil(t, o.errorDecoder)
 }
 
 type mockDiscovery struct {

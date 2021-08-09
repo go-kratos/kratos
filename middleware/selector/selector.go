@@ -15,14 +15,17 @@ type (
 )
 
 var (
+	// serverTransporter is get server transport.Transporter from ctx
 	serverTransporter transporter = func(ctx context.Context) (transport.Transporter, bool) {
 		return transport.FromServerContext(ctx)
 	}
+	// clientTransporter is get client transport.Transporter from ctx
 	clientTransporter transporter = func(ctx context.Context) (transport.Transporter, bool) {
 		return transport.FromClientContext(ctx)
 	}
 )
 
+// Builder is a selector builder
 type Builder struct {
 	client bool
 
@@ -33,28 +36,35 @@ type Builder struct {
 	ms []middleware.Middleware
 }
 
+// Server selector middleware
 func Server(ms ...middleware.Middleware) *Builder {
 	return &Builder{ms: ms}
 }
 
+// Client selector middleware
 func Client(ms ...middleware.Middleware) *Builder {
 	return &Builder{client: true, ms: ms}
 }
 
+// Prefix is with Builder's prefix
 func (b *Builder) Prefix(prefix ...string) *Builder {
 	b.prefix = prefix
 	return b
 }
 
+// Regex is with Builder's regex
 func (b *Builder) Regex(regex ...string) *Builder {
 	b.regex = regex
 	return b
 }
+
+// Path is with Builder's path
 func (b *Builder) Path(path ...string) *Builder {
 	b.path = path
 	return b
 }
 
+// Build is Builder's Build, for example: Server().Path(m1,m2).Build()
 func (b *Builder) Build() middleware.Middleware {
 	var transporter func(ctx context.Context) (transport.Transporter, bool)
 	if b.client {
@@ -65,6 +75,7 @@ func (b *Builder) Build() middleware.Middleware {
 	return selector(transporter, b.match, b.ms...)
 }
 
+// match is match operation compliance Builder
 func (b *Builder) match(operation string) bool {
 	for _, prefix := range b.prefix {
 		if prefixMatch(prefix, operation) {
@@ -84,6 +95,7 @@ func (b *Builder) match(operation string) bool {
 	return false
 }
 
+// selector middleware
 func selector(transporter transporter, match match, ms ...middleware.Middleware) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
