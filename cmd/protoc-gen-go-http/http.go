@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2"
@@ -129,7 +130,10 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	body = rule.Body
 	responseBody = rule.ResponseBody
 	md := buildMethodDesc(g, m, method, path)
-	if method == "GET" {
+	if method == "GET" || method == "DELETE" {
+		if body != "" {
+			_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s body should not be declared.\n", method, path)
+		}
 		md.HasBody = false
 	} else if body == "*" {
 		md.HasBody = true
@@ -139,6 +143,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 		md.Body = "." + camelCaseVars(body)
 	} else {
 		md.HasBody = false
+		_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s is does not declare a body.\n", method, path)
 	}
 	if responseBody == "*" {
 		md.ResponseBody = ""
