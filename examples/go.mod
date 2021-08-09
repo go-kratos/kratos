@@ -38,8 +38,8 @@ require (
 	go.opentelemetry.io/otel/trace v1.0.0-RC2
 	go.uber.org/zap v1.18.1
 	golang.org/x/text v0.3.6
-	google.golang.org/genproto v0.0.0-20210701191553-46259e63a0a9
-	google.golang.org/grpc v1.39.0
+	google.golang.org/genproto v0.0.0-20210805201207-89edb61ffb67
+	google.golang.org/grpc v1.39.1
 	google.golang.org/protobuf v1.27.1
 )
 
