@@ -107,6 +107,13 @@ func TestServer(t *testing.T) {
 			exceptErr:     ErrMissingAccessSecret,
 			key:           "",
 		},
+		{
+			name:          "miss signing method",
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(token)}),
+			signingMethod: nil,
+			exceptErr:     ErrMissingAccessSecret,
+			key:           "",
+		},
 	}
 
 	for _, test := range tests {

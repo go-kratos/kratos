@@ -29,6 +29,7 @@ var (
 //Option is jwt option.
 type Option func(*Parser)
 
+//Parser is a jwt parser
 type Parser struct {
 	AccessSecret         string
 	AccessExpireInSecond time.Duration
@@ -49,6 +50,7 @@ func WithSigningMethod(method jwt.SigningMethod) Option {
 	}
 }
 
+//ParseToken implement the method
 func (j Parser) ParseToken(jwtToken string) (interface{}, error) {
 	/*check the access secret*/
 	if j.AccessSecret == "" {
