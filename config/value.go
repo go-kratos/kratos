@@ -49,7 +49,7 @@ func (v *atomicValue) Int() (int64, error) {
 	case int32:
 		return int64(val), nil
 	case int64:
-		return int64(val), nil
+		return val, nil
 	case float64:
 		return int64(val), nil
 	case string:
@@ -60,7 +60,7 @@ func (v *atomicValue) Int() (int64, error) {
 func (v *atomicValue) Float() (float64, error) {
 	switch val := v.Load().(type) {
 	case float64:
-		return float64(val), nil
+		return val, nil
 	case int:
 		return float64(val), nil
 	case int32:
