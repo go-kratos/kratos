@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -287,4 +288,38 @@ func testScan(t *testing.T, c config.Config) {
 		t.Error(err)
 	}
 	t.Log(conf)
+}
+
+func TestMergeDataRace(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "test_config.json")
+	defer os.Remove(path)
+	if err := ioutil.WriteFile(path, []byte(_testJSON), 0666); err != nil {
+		t.Error(err)
+	}
+	c := config.New(config.WithSource(
+		NewSource(path),
+	))
+	wg := &sync.WaitGroup{}
+	go func() {
+		wg.Add(1)
+		for i := 0; i < 100; i++ {
+			var conf struct{}
+			if err := c.Scan(&conf); err != nil {
+				t.Error(err)
+			}
+		}
+		wg.Done()
+	}()
+
+	go func() {
+		wg.Add(1)
+		for i := 0; i < 100; i++ {
+			if err := c.Load(); err != nil {
+				t.Error(err)
+			}
+		}
+		wg.Done()
+	}()
+	wg.Wait()
+
 }
