@@ -21,7 +21,6 @@ var (
 	ErrMissingAccessSecret    = errors.Unauthorized("Missing info", "AccessSecret is missing")
 	ErrTokenInvalid           = errors.Unauthorized("Token invalid", "Token is invalid")
 	ErrTokenExpired           = errors.Unauthorized("Token invalid", "JWT token has expired")
-	ErrTokenFormat            = errors.Unauthorized("Token invalid", "JWT token format error")
 	ErrTokenParseFail         = errors.Unauthorized("Something wrong", "Fail to parse JWT token ")
 	ErrUnSupportSigningMethod = errors.Unauthorized("Something wrong", "Wrong signing method")
 )
@@ -34,13 +33,6 @@ type Parser struct {
 	AccessSecret         string
 	AccessExpireInSecond time.Duration
 	SigningMethod        jwt.SigningMethod
-}
-
-//WithAccessExpire with access expire option.
-func WithAccessExpire(second time.Duration) Option {
-	return func(o *Parser) {
-		o.AccessExpireInSecond = second
-	}
 }
 
 //WithSigningMethod with signing method option.
