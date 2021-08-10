@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -68,14 +69,14 @@ const (
 	}
 }`
 
-//	_testYaml = `
-//Foo:
-//    bar :
-//        - {name: nihao,age: 1}
-//        - {name: nihao,age: 1}
-//
-//
-//`
+	//	_testYaml = `
+	//Foo:
+	//    bar :
+	//        - {name: nihao,age: 1}
+	//        - {name: nihao,age: 1}
+	//
+	//
+	//`
 )
 
 //func TestScan(t *testing.T) {
@@ -287,4 +288,36 @@ func testScan(t *testing.T, c config.Config) {
 		t.Error(err)
 	}
 	t.Log(conf)
+}
+
+func TestMergeDataRace(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "test_config.json")
+	defer os.Remove(path)
+	if err := ioutil.WriteFile(path, []byte(_testJSON), 0666); err != nil {
+		t.Error(err)
+	}
+	c := config.New(config.WithSource(
+		NewSource(path),
+	))
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 100; i++ {
+			var conf struct{}
+			if err := c.Scan(&conf); err != nil {
+				t.Error(err)
+			}
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 100; i++ {
+			if err := c.Load(); err != nil {
+				t.Error(err)
+			}
+		}
+	}()
+	wg.Wait()
 }
