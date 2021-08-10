@@ -4,7 +4,6 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/golang-jwt/jwt"
 	"strings"
-	"time"
 )
 
 const (
@@ -30,9 +29,8 @@ type Option func(*Parser)
 
 //Parser is a jwt parser
 type Parser struct {
-	AccessSecret         string
-	AccessExpireInSecond time.Duration
-	SigningMethod        jwt.SigningMethod
+	AccessSecret  string
+	SigningMethod jwt.SigningMethod
 }
 
 //WithSigningMethod with signing method option.
