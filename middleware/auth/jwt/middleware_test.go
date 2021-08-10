@@ -111,8 +111,8 @@ func TestServer(t *testing.T) {
 			name:          "miss signing method",
 			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(token)}),
 			signingMethod: nil,
-			exceptErr:     ErrMissingAccessSecret,
-			key:           "",
+			exceptErr:     nil,
+			key:           testKey,
 		},
 	}
 
