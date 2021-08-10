@@ -10,7 +10,7 @@ import (
 type Option func(*options)
 
 // WithErrorCode set error code when limiter triggered,
-// default error code 503
+// default error code 429
 func WithErrorCode(code int) Option {
 	return func(o *options) {
 		o.errCode = code
@@ -43,7 +43,7 @@ type Limiter interface {
 // RateLimiter middleware
 func RateLimiter(limiter Limiter, opts ...Option) middleware.Middleware {
 	options := &options{
-		errCode:    503,
+		errCode:    429,
 		errReason:  "rate limit exceeded",
 		errMessage: "service unavailable due to rate limit exceeded",
 	}
