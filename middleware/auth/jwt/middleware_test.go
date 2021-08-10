@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+	"time"
 )
 
 type headerCarrier http.Header
@@ -186,4 +187,26 @@ func TestClient(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestTokenExpire(t *testing.T) {
+	var testKey = "testKey"
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		ExpiresAt: time.Now().Add(time.Millisecond).Unix(),
+	})
+	token, err := claims.SignedString([]byte(testKey))
+	if err != nil {
+		panic(err)
+	}
+	token = fmt.Sprintf(bearerFormat, token)
+	time.Sleep(time.Second)
+	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+		t.Log(req)
+		return "reply", nil
+	}
+	ctx := transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(token)})
+	parser := NewJWTParser(testKey, WithSigningMethod(jwt.SigningMethodHS256))
+	server := auth.Server(parser)(next)
+	_, err2 := server(ctx, "test expire token")
+	assert.Equal(t, ErrTokenExpired, err2)
 }
