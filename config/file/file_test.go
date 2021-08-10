@@ -300,26 +300,24 @@ func TestMergeDataRace(t *testing.T) {
 		NewSource(path),
 	))
 	wg := &sync.WaitGroup{}
+	wg.Add(2)
 	go func() {
-		wg.Add(1)
+		defer wg.Done()
 		for i := 0; i < 100; i++ {
 			var conf struct{}
 			if err := c.Scan(&conf); err != nil {
 				t.Error(err)
 			}
 		}
-		wg.Done()
 	}()
 
 	go func() {
-		wg.Add(1)
+		defer wg.Done()
 		for i := 0; i < 100; i++ {
 			if err := c.Load(); err != nil {
 				t.Error(err)
 			}
 		}
-		wg.Done()
 	}()
 	wg.Wait()
-
 }
