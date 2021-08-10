@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"sync/atomic"
+	"sync"
 
 	"github.com/imdario/mergo"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -23,28 +23,22 @@ type Reader interface {
 
 type reader struct {
 	opts   options
-	_values atomic.Value
+	values map[string]interface{}
+	lock   sync.Mutex
 }
 
 func newReader(opts options) Reader {
-	v := atomic.Value{}
-	v.Store(make(map[string]interface{}))
 	return &reader{
 		opts:   opts,
-		_values: v,
+		values: make(map[string]interface{}),
+		lock:   sync.Mutex{},
 	}
 }
 
-func (r *reader) getValues() map[string]interface{} {
-	return r._values.Load().(map[string]interface{})
-}
-
-func (r *reader) setValues(v map[string]interface{}) {
-	r._values.Store(v)
-}
-
 func (r *reader) Merge(kvs ...*KeyValue) error {
-	merged, err := cloneMap(r.getValues())
+	r.lock.Lock()
+	merged, err := cloneMap(r.values)
+	r.lock.Unlock()
 	if err != nil {
 		return err
 	}
@@ -57,20 +51,28 @@ func (r *reader) Merge(kvs ...*KeyValue) error {
 			return err
 		}
 	}
-	r.setValues(merged)
+	r.lock.Lock()
+	r.values = merged
+	r.lock.Unlock()
 	return nil
 }
 
 func (r *reader) Value(path string) (Value, bool) {
-	return readValue(r.getValues(), path)
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	return readValue(r.values, path)
 }
 
 func (r *reader) Source() ([]byte, error) {
-	return marshalJSON(convertMap(r.getValues()))
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	return marshalJSON(convertMap(r.values))
 }
 
 func (r *reader) Resolve() error {
-	return r.opts.resolver(r.getValues())
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	return r.opts.resolver(r.values)
 }
 
 func cloneMap(src map[string]interface{}) (map[string]interface{}, error) {

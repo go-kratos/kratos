@@ -69,14 +69,14 @@ const (
 	}
 }`
 
-//	_testYaml = `
-//Foo:
-//    bar :
-//        - {name: nihao,age: 1}
-//        - {name: nihao,age: 1}
-//
-//
-//`
+	//	_testYaml = `
+	//Foo:
+	//    bar :
+	//        - {name: nihao,age: 1}
+	//        - {name: nihao,age: 1}
+	//
+	//
+	//`
 )
 
 //func TestScan(t *testing.T) {
