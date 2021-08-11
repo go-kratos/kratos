@@ -178,8 +178,8 @@ github.com/go-kratos/consul v0.1.2/go.mod h1:FhxdCfkqaqIYfgpGbzGb8ywM/zV3jk+EBS+
 github.com/go-kratos/consul v0.1.4 h1:qOOQE/FYpbWLV4cipC+jPrrc/gQY1DdfnX0IJvQleXE=
 github.com/go-kratos/consul v0.1.4/go.mod h1:egsB9apqg+4BMYVnY/VuQCeC3aAmd7mpYfIMhs4ga4U=
 github.com/go-kratos/etcd v0.1.0/go.mod h1:RzWYbka3LjS0v2RbCtADN7d2Ng8eH774ehHlTGgbma4=
-github.com/go-kratos/etcd v0.1.2 h1:/thmpcEUleRro1bbRN3NfJHFwYzjVvbojvQv1QKGljg=
-github.com/go-kratos/etcd v0.1.2/go.mod h1:+MGVcBnNfpiZ2kw05P/m0ijKNLhRz1p0HXWJhO85AJI=
+github.com/go-kratos/etcd v0.1.3 h1:ARz1j4nZGgpeSw8WYau5y8LiKbsty/tMASQCaiOGZnM=
+github.com/go-kratos/etcd v0.1.3/go.mod h1:4UAwbmm/PIjUS9KwhqmfsBi9pksuvwc3ae+xaKF0Lwk=
 github.com/go-kratos/gin v0.1.0 h1:yq5GfZnSNo8cOIqxqPE0FVNQ8fm++oKQBd3/rTTp4oI=
 github.com/go-kratos/gin v0.1.0/go.mod h1:KzE88+mV1QJdmiT+sU2D560ucOXnWZx+4m0OnVcSyzQ=
 github.com/go-kratos/grpc-gateway/v2 v2.0.0-20210804092615-bdc92eb5ce83 h1:YN1KsqX3mB8hkSrOLZv3xZaZh+lZ/L7QC00RATFLJSg=
