@@ -9,6 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -181,13 +182,23 @@ func TestLogger(t *testing.T) {
 	//todo
 }
 
+func TestEndpoint(t *testing.T) {
+	u, err := url.Parse("http://hello/world")
+	assert.NoError(t, err)
+	o := &Server{}
+	Endpoint(u)(o)
+	assert.Equal(t, "hello", o.endpoint.Host)
+	assert.Equal(t, "http", o.endpoint.Scheme)
+
+}
+
 func TestMiddleware(t *testing.T) {
-	o := &clientOptions{}
+	o := &Server{}
 	v := []middleware.Middleware{
 		func(middleware.Handler) middleware.Handler { return nil },
 	}
-	WithMiddleware(v...)(o)
-	assert.Equal(t, v, o.middleware)
+	Middleware(v...)(o)
+	assert.Equal(t, v, o.ms)
 }
 
 func TestRequestDecoder(t *testing.T) {

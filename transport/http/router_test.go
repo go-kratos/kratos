@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"log"
 	"net/http"
 	"strings"
@@ -165,4 +166,18 @@ func testRoute(t *testing.T, srv *Server) {
 	if resp.Header.Get("Access-Control-Allow-Methods") != "OPTIONS" {
 		t.Fatal("cors failed")
 	}
+}
+
+func TestRouter_Group(t *testing.T) {
+	r := &Router{}
+	rr := r.Group("a", func(http.Handler) http.Handler { return nil })
+	assert.Equal(t, "a", rr.prefix)
+}
+
+func TestHandle(t *testing.T) {
+	r := newRouter("/", NewServer())
+	h := func(i Context) error {
+		return nil
+	}
+	r.GET("/get", h)
 }
