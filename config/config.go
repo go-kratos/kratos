@@ -107,6 +107,7 @@ func (c *config) Load() error {
 			c.log.Errorf("failed to watch config source: %v", err)
 			return err
 		}
+		c.watchers = append(c.watchers, w)
 		go c.watch(w)
 	}
 	if err := c.reader.Resolve(); err != nil {
