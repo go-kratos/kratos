@@ -134,14 +134,18 @@ func TestOptions(t *testing.T) {
 	assert.Equal(t, v, o.grpcOpts)
 }
 
+type testResp struct {
+	Data string
+}
+
 func TestServer_unaryServerInterceptor(t *testing.T) {
 	u, err := url.Parse("grpc://hello/world")
 	assert.NoError(t, err)
 	srv := &Server{ctx: context.Background(), endpoint: u}
 	req := &struct{}{}
-	_, err = srv.unaryServerInterceptor()(context.TODO(), req, &grpc.UnaryServerInfo{}, func(ctx context.Context, req interface{}) (i interface{}, e error) {
-		return nil, nil
+	rv, err := srv.unaryServerInterceptor()(context.TODO(), req, &grpc.UnaryServerInfo{}, func(ctx context.Context, req interface{}) (i interface{}, e error) {
+		return &testResp{Data: "hi"}, nil
 	})
-
 	assert.NoError(t, err)
+	assert.Equal(t, "hi", rv.(*testResp).Data)
 }
