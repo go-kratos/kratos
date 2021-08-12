@@ -6,6 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"google.golang.org/grpc"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -122,7 +123,7 @@ func TestUnaryInterceptor(t *testing.T) {
 	}
 	UnaryInterceptor(v...)(o)
 	assert.Equal(t, v, o.ints)
-	}
+}
 
 func TestOptions(t *testing.T) {
 	o := &Server{}
@@ -131,4 +132,16 @@ func TestOptions(t *testing.T) {
 	}
 	Options(v...)(o)
 	assert.Equal(t, v, o.grpcOpts)
+}
+
+func TestServer_unaryServerInterceptor(t *testing.T) {
+	u, err := url.Parse("grpc://hello/world")
+	assert.NoError(t, err)
+	srv := &Server{ctx: context.Background(), endpoint: u}
+	req := &struct{}{}
+	_, err = srv.unaryServerInterceptor()(context.TODO(), req, &grpc.UnaryServerInfo{}, func(ctx context.Context, req interface{}) (i interface{}, e error) {
+		return nil, nil
+	})
+
+	assert.NoError(t, err)
 }

@@ -58,6 +58,25 @@ func TestWithTLSConfig(t *testing.T) {
 	assert.Equal(t, v, o.tlsConf)
 }
 
+func EmptyMiddleware() middleware.Middleware {
+	return func(handler middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+			return handler(ctx, req)
+		}
+	}
+}
+
+func TestUnaryClientInterceptor(t *testing.T) {
+	f := unaryClientInterceptor([]middleware.Middleware{EmptyMiddleware()}, time.Duration(100))
+	req := &struct{}{}
+	resp := &struct{}{}
+
+	err := f(context.TODO(), "hello", req, resp, &grpc.ClientConn{}, func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
+		return nil
+	})
+	assert.NoError(t, err)
+}
+
 func TestWithUnaryInterceptor(t *testing.T) {
 	o := &clientOptions{}
 	v := []grpc.UnaryClientInterceptor{
