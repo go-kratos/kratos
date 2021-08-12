@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"io/ioutil"
 	nethttp "net/http"
@@ -38,8 +39,23 @@ func TestWithTimeout(t *testing.T) {
 	assert.Equal(t, co.timeout, ov)
 }
 
+func TestWithBlock(t *testing.T) {
+	o := WithBlock()
+	co := &clientOptions{}
+	o(co)
+	assert.True(t, co.block)
+}
+
 func TestWithBalancer(t *testing.T) {
 
+}
+
+func TestWithTLSConfig(t *testing.T) {
+	ov := &tls.Config{}
+	o := WithTLSConfig(ov)
+	co := &clientOptions{}
+	o(co)
+	assert.Same(t, ov, co.tlsConf)
 }
 
 func TestWithUserAgent(t *testing.T) {

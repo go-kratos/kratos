@@ -29,6 +29,8 @@ func TestTransport_RequestHeader(t *testing.T) {
 	v.Set("a", "1")
 	o := &Transport{reqHeader: v}
 	assert.Equal(t, "1", o.RequestHeader().Get("a"))
+	assert.Equal(t, "", o.RequestHeader().Get("notfound"))
+
 }
 
 func TestTransport_ReplyHeader(t *testing.T) {
