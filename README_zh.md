@@ -31,7 +31,7 @@ Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关功能及
 * 工具链：包含大量工具链，比如 cache 代码生成，lint 工具等等；
 
 ## Features
-* [APIs]((examples/helloworld/helloworld))：协议通信以 HTTP/gRPC 为基础，通过 Protobuf 进行定义；
+* [APIs](examples/helloworld/helloworld)：协议通信以 HTTP/gRPC 为基础，通过 Protobuf 进行定义；
 * [Errors](examples/errors/api)：通过 Protobuf 的 Enum 作为错误码定义，以及工具生成判定接口；
 * [Metadata](examples/metadata)：在协议通信 HTTP/gRPC 中，通过 Middleware 规范化服务元信息传递；
 * [Config](examples/config)：支持多数据源方式，进行配置合并铺平，通过 Atomic 方式支持动态配置；
