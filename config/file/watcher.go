@@ -17,6 +17,8 @@ type watcher struct {
 	cancel context.CancelFunc
 }
 
+var _ config.Watcher = (*watcher)(nil)
+
 func newWatcher(f *file) (config.Watcher, error) {
 	fw, err := fsnotify.NewWatcher()
 	if err != nil {

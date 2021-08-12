@@ -13,6 +13,8 @@ type watcher struct {
 	cancel context.CancelFunc
 }
 
+var _ config.Watcher = (*watcher)(nil)
+
 func NewWatcher() (config.Watcher, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &watcher{exit: make(chan struct{}), ctx: ctx, cancel: cancel}, nil
