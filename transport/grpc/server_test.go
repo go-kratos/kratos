@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"crypto/tls"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"google.golang.org/grpc"
 	"strings"
@@ -17,7 +18,9 @@ type testKey struct{}
 func TestServer(t *testing.T) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, testKey{}, "test")
-	srv := NewServer()
+	srv := NewServer(Middleware([]middleware.Middleware{
+		func(middleware.Handler) middleware.Handler { return nil },
+	}...))
 
 	if e, err := srv.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
 		t.Fatal(e, err)
@@ -69,16 +72,35 @@ func TestTimeout(t *testing.T) {
 }
 
 func TestMiddleware(t *testing.T) {
-	o := &clientOptions{}
+	o := &Server{}
 	v := []middleware.Middleware{
 		func(middleware.Handler) middleware.Handler { return nil },
 	}
-	WithMiddleware(v...)(o)
+	Middleware(v...)(o)
 	assert.Equal(t, v, o.middleware)
 }
 
+type mockLogger struct {
+	level log.Level
+	key   string
+	val   string
+}
+
+func (l *mockLogger) Log(level log.Level, keyvals ...interface{}) error {
+	l.level = level
+	l.key = keyvals[0].(string)
+	l.val = keyvals[1].(string)
+	return nil
+}
+
 func TestLogger(t *testing.T) {
-	//todo
+	o := &Server{}
+	v := &mockLogger{}
+	Logger(v)(o)
+	o.log.Log(log.LevelWarn, "foo", "bar")
+	assert.Equal(t, "foo", v.key)
+	assert.Equal(t, "bar", v.val)
+	assert.Equal(t, log.LevelWarn, v.level)
 }
 
 func TestTLSConfig(t *testing.T) {
@@ -100,7 +122,7 @@ func TestUnaryInterceptor(t *testing.T) {
 	}
 	UnaryInterceptor(v...)(o)
 	assert.Equal(t, v, o.ints)
-}
+	}
 
 func TestOptions(t *testing.T) {
 	o := &Server{}

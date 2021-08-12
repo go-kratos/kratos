@@ -36,7 +36,7 @@ func (r *discoveryResolver) watch() {
 			if errors.Is(err, context.Canceled) {
 				return
 			}
-			r.log.Errorf("[resovler] Failed to watch discovery endpoint: %v", err)
+			r.log.Errorf("[resolver] Failed to watch discovery endpoint: %v", err)
 			time.Sleep(time.Second)
 			continue
 		}
@@ -49,7 +49,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	for _, in := range ins {
 		endpoint, err := endpoint.ParseEndpoint(in.Endpoints, "grpc", !r.insecure)
 		if err != nil {
-			r.log.Errorf("[resovler] Failed to parse discovery endpoint: %v", err)
+			r.log.Errorf("[resolver] Failed to parse discovery endpoint: %v", err)
 			continue
 		}
 		if endpoint == "" {
@@ -63,7 +63,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		addrs = append(addrs, addr)
 	}
 	if len(addrs) == 0 {
-		r.log.Warnf("[resovler] Zero endpoint found,refused to write, instances: %v", ins)
+		r.log.Warnf("[resolver] Zero endpoint found,refused to write, instances: %v", ins)
 		return
 	}
 	r.cc.UpdateState(resolver.State{Addresses: addrs})

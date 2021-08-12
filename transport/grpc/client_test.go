@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"testing"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
@@ -16,6 +17,13 @@ func TestWithEndpoint(t *testing.T) {
 	v := "abc"
 	WithEndpoint(v)(o)
 	assert.Equal(t, v, o.endpoint)
+}
+
+func TestWithTimeout(t *testing.T) {
+	o := &clientOptions{}
+	v := time.Duration(123)
+	WithTimeout(v)(o)
+	assert.Equal(t, v, o.timeout)
 }
 
 func TestWithMiddleware(t *testing.T) {
@@ -67,6 +75,15 @@ func TestWithUnaryInterceptor(t *testing.T) {
 }
 
 func TestWithOptions(t *testing.T) {
+	o := &clientOptions{}
+	v := []grpc.DialOption{
+		grpc.EmptyDialOption{},
+	}
+	WithOptions(v...)(o)
+	assert.Equal(t, v, o.grpcOpts)
+}
+
+func TestDial(t *testing.T) {
 	o := &clientOptions{}
 	v := []grpc.DialOption{
 		grpc.EmptyDialOption{},
