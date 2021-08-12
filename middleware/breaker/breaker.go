@@ -7,34 +7,6 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 )
 
-type Option func(*options)
-
-// WithErrorCode set error code when breaker is triggered,
-// default error code 503
-func WithErrorCode(code int) Option {
-	return func(o *options) {
-		o.errCode = code
-	}
-}
-
-func WithErrorReason(reason string) Option {
-	return func(o *options) {
-		o.errReason = reason
-	}
-}
-
-func WithErrorMessage(message string) Option {
-	return func(o *options) {
-		o.errMessage = message
-	}
-}
-
-type options struct {
-	errCode    int
-	errReason  string
-	errMessage string
-}
-
 // Breaker interface defines a circuit breaker for Handler
 type Breaker interface {
 	// Allow check whether current request is allowed to execute.
@@ -47,28 +19,36 @@ type Breaker interface {
 	Mark(isSuccess bool)
 }
 
+type Option func(*options)
+
+// WithBreaker set circuit breaker implentation
+func WithBreaker(breaker Breaker) Option {
+	return func(o *options) {
+		o.breaker = breaker
+	}
+}
+
+type options struct {
+	breaker Breaker
+}
+
 // CircuitBreaker middleware will return errBreakerTriggered when the circuit
 // breaker is triggered and the request is rejected directly.
-func CircuitBreaker(breaker Breaker, opts ...Option) middleware.Middleware {
-	options := &options{
-		errCode:    503,
-		errReason:  "circuit breaker triggered",
-		errMessage: "request failed due to circuit breaker triggered",
-	}
+func CircuitBreaker(opts ...Option) middleware.Middleware {
+	options := &options{}
 	for _, o := range opts {
 		o(options)
 	}
 
-	errBreakerTriggered := errors.New(options.errCode, options.errReason, options.errMessage)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
-			if err := breaker.Allow(ctx); err != nil {
-				// reject request
-				return nil, errBreakerTriggered
+			if err := options.breaker.Allow(ctx); err != nil {
+				// rejected
+				return nil, errors.New(503, "BREAKER", "request failed due to circuit breaker triggered")
 			}
-			// allow request
+			// allowed
 			reply, err := handler(ctx, req)
-			breaker.Mark(breaker.Check(err))
+			options.breaker.Mark(options.breaker.Check(err))
 			return reply, err
 		}
 	}
