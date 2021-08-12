@@ -141,7 +141,11 @@ type testResp struct {
 func TestServer_unaryServerInterceptor(t *testing.T) {
 	u, err := url.Parse("grpc://hello/world")
 	assert.NoError(t, err)
-	srv := &Server{ctx: context.Background(), endpoint: u}
+	srv := &Server{ctx: context.Background(),
+		endpoint:   u,
+		middleware: []middleware.Middleware{EmptyMiddleware()},
+		timeout:    time.Duration(10),
+	}
 	req := &struct{}{}
 	rv, err := srv.unaryServerInterceptor()(context.TODO(), req, &grpc.UnaryServerInfo{}, func(ctx context.Context, req interface{}) (i interface{}, e error) {
 		return &testResp{Data: "hi"}, nil
