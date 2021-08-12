@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"errors"
 	"reflect"
 	"sync"
@@ -65,6 +66,10 @@ func New(opts ...Option) Config {
 func (c *config) watch(w Watcher) {
 	for {
 		kvs, err := w.Next()
+		if err == context.Canceled {
+			c.log.Infof("watcher's ctx cancel : %v", err)
+			return
+		}
 		if err != nil {
 			time.Sleep(time.Second)
 			c.log.Errorf("failed to watch next config: %v", err)
