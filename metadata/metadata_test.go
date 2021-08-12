@@ -238,3 +238,46 @@ func TestMergeToClientContext(t *testing.T) {
 		})
 	}
 }
+
+func TestMetadata_Range(t *testing.T) {
+	md := Metadata{"kratos": "kratos", "https://go-kratos.dev/": "https://go-kratos.dev/", "go-kratos": "go-kratos"}
+	var tmp = Metadata{}
+	md.Range(func(k, v string) bool {
+		tmp[k] = v
+		return false
+	})
+	if !reflect.DeepEqual(tmp, Metadata{"kratos": "kratos"}) {
+		t.Errorf("metadata = %v, want %v", tmp, Metadata{"kratos": "kratos"})
+	}
+}
+
+func TestMetadata_Clone(t *testing.T) {
+	tests := []struct {
+		name string
+		m    Metadata
+		want Metadata
+	}{
+		{
+			name: "kratos",
+			m:    Metadata{"kratos": "kratos", "https://go-kratos.dev/": "https://go-kratos.dev/", "go-kratos": "go-kratos"},
+			want: Metadata{"kratos": "kratos", "https://go-kratos.dev/": "https://go-kratos.dev/", "go-kratos": "go-kratos"},
+		},
+		{
+			name: "go",
+			m:    Metadata{"language": "golang"},
+			want: Metadata{"language": "golang"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.m.Clone()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Clone() = %v, want %v", got, tt.want)
+			}
+			got["kratos"] = "go"
+			if reflect.DeepEqual(got, tt.want) {
+				t.Errorf("want got != want got %v want %v", got, tt.want)
+			}
+		})
+	}
+}
