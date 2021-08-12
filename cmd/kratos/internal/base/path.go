@@ -54,6 +54,11 @@ func copyFile(src, dst string, replaces []string) error {
 			continue
 		}
 		buf = bytes.ReplaceAll(buf, []byte(old), []byte(next))
+		buf = bytes.ReplaceAll(buf, []byte("Greeter"), []byte(strings.Title(path.Base(next))))
+		buf = bytes.ReplaceAll(buf, []byte("greeter"), []byte(strings.ToLower(path.Base(next))))
+	}
+	if len(replaces) == 2 {
+		dst = strings.ReplaceAll(dst, "greeter", path.Base(replaces[1]))
 	}
 	return ioutil.WriteFile(dst, buf, srcinfo.Mode())
 }
