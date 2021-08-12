@@ -88,10 +88,11 @@ type testWatcher struct {
 	sig  chan struct{}
 	err  chan struct{}
 	exit chan struct{}
+	done chan struct{}
 }
 
 func newTestWatcher(sig, err chan struct{}) Watcher {
-	return &testWatcher{sig: sig, err: err, exit: make(chan struct{})}
+	return &testWatcher{sig: sig, err: err, exit: make(chan struct{}), done: make(chan struct{})}
 }
 
 func (w *testWatcher) Next() ([]*KeyValue, error) {
@@ -107,7 +108,12 @@ func (w *testWatcher) Next() ([]*KeyValue, error) {
 
 func (w *testWatcher) Stop() error {
 	close(w.exit)
+	close(w.done)
 	return nil
+}
+
+func (w *testWatcher) Done() <-chan struct{} {
+	return w.done
 }
 
 func TestConfig(t *testing.T) {
