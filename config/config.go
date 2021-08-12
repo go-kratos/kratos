@@ -2,11 +2,10 @@ package config
 
 import (
 	"errors"
+	"github.com/go-kratos/kratos/v2/log"
 	"reflect"
 	"sync"
 	"time"
-
-	"github.com/go-kratos/kratos/v2/log"
 
 	// init encoding
 	_ "github.com/go-kratos/kratos/v2/encoding/json"
@@ -64,31 +63,36 @@ func New(opts ...Option) Config {
 
 func (c *config) watch(w Watcher) {
 	for {
-		kvs, err := w.Next()
-		if err != nil {
-			time.Sleep(time.Second)
-			c.log.Errorf("failed to watch next config: %v", err)
-			continue
-		}
-		if err := c.reader.Merge(kvs...); err != nil {
-			c.log.Errorf("failed to merge next config: %v", err)
-			continue
-		}
-		if err := c.reader.Resolve(); err != nil {
-			c.log.Errorf("failed to resolve next config: %v", err)
-			continue
-		}
-		c.cached.Range(func(key, value interface{}) bool {
-			k := key.(string)
-			v := value.(Value)
-			if n, ok := c.reader.Value(k); ok && !reflect.DeepEqual(n.Load(), v.Load()) {
-				v.Store(n.Load())
-				if o, ok := c.observers.Load(k); ok {
-					o.(Observer)(k, v)
-				}
+		select {
+		case <-w.Done():
+			return
+		default:
+			kvs, err := w.Next()
+			if err != nil {
+				time.Sleep(time.Second)
+				c.log.Errorf("failed to watch next config: %v", err)
+				continue
 			}
-			return true
-		})
+			if err := c.reader.Merge(kvs...); err != nil {
+				c.log.Errorf("failed to merge next config: %v", err)
+				continue
+			}
+			if err := c.reader.Resolve(); err != nil {
+				c.log.Errorf("failed to resolve next config: %v", err)
+				continue
+			}
+			c.cached.Range(func(key, value interface{}) bool {
+				k := key.(string)
+				v := value.(Value)
+				if n, ok := c.reader.Value(k); ok && !reflect.DeepEqual(n.Load(), v.Load()) {
+					v.Store(n.Load())
+					if o, ok := c.observers.Load(k); ok {
+						o.(Observer)(k, v)
+					}
+				}
+				return true
+			})
+		}
 	}
 }
 
@@ -108,6 +112,8 @@ func (c *config) Load() error {
 			return err
 		}
 		go c.watch(w)
+
+		c.watchers = append(c.watchers, w)
 	}
 	if err := c.reader.Resolve(); err != nil {
 		c.log.Errorf("failed to resolve config source: %v", err)

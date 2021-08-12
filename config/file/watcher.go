@@ -8,9 +8,12 @@ import (
 	"github.com/go-kratos/kratos/v2/config"
 )
 
+var _ config.Watcher = (*watcher)(nil)
+
 type watcher struct {
-	f  *file
-	fw *fsnotify.Watcher
+	f    *file
+	fw   *fsnotify.Watcher
+	done chan struct{}
 }
 
 func newWatcher(f *file) (config.Watcher, error) {
@@ -21,7 +24,7 @@ func newWatcher(f *file) (config.Watcher, error) {
 	if err := fw.Add(f.path); err != nil {
 		return nil, err
 	}
-	return &watcher{f: f, fw: fw}, nil
+	return &watcher{f: f, fw: fw, done: make(chan struct{})}, nil
 }
 
 func (w *watcher) Next() ([]*config.KeyValue, error) {
@@ -53,5 +56,10 @@ func (w *watcher) Next() ([]*config.KeyValue, error) {
 }
 
 func (w *watcher) Stop() error {
+	close(w.done)
 	return w.fw.Close()
+}
+
+func (w *watcher) Done() <-chan struct{} {
+	return w.done
 }

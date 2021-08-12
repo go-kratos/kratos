@@ -17,4 +17,5 @@ type Source interface {
 type Watcher interface {
 	Next() ([]*KeyValue, error)
 	Stop() error
+	Done() <-chan struct{}
 }
