@@ -66,7 +66,7 @@ func New(opts ...Option) Config {
 func (c *config) watch(w Watcher) {
 	for {
 		kvs, err := w.Next()
-		if err == context.Canceled {
+		if errors.Is(err, context.Canceled) {
 			c.log.Infof("watcher's ctx cancel : %v", err)
 			return
 		}
