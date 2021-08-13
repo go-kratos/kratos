@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
+	"strings"
 	"testing"
 )
 
@@ -103,6 +104,45 @@ func TestMatchClient(t *testing.T) {
 			}
 			next = Client(testMiddleware).Prefix("/hello/").Regex(`/test/[0-9]+`).
 				Path("/example/kratos").Build()(next)
+			next(test.ctx, test.name)
+		})
+	}
+}
+
+func TestFunc(t *testing.T) {
+	tests := []struct {
+		name string
+		ctx  context.Context
+	}{
+		{
+			name: "/hello.Update/world",
+			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/hello.Update/world"}),
+		},
+		{
+			name: "/hi.Create/world",
+			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/hi.Create/world"}),
+		},
+		{
+			name: "/test.Name/1234",
+			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/test.Name/1234"}),
+		},
+		{
+			name: "/go-kratos.dev/kratos",
+			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/go-kratos.dev/kratos"}),
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			next := func(ctx context.Context, req interface{}) (interface{}, error) {
+				t.Log(req)
+				return "reply", nil
+			}
+			next = Server(testMiddleware).Func(func(operation string) bool {
+				if strings.HasPrefix(operation,"/go-kratos.dev") || strings.HasSuffix(operation,"world") {
+					return true
+				}
+				return false
+			}).Build()(next)
 			next(test.ctx, test.name)
 		})
 	}

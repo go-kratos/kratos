@@ -29,9 +29,10 @@ var (
 type Builder struct {
 	client bool
 
-	prefix []string
-	regex  []string
-	path   []string
+	prefix   []string
+	regex    []string
+	path     []string
+	function match
 
 	ms []middleware.Middleware
 }
@@ -64,6 +65,12 @@ func (b *Builder) Path(path ...string) *Builder {
 	return b
 }
 
+// Func is with Builder's function
+func (b *Builder) Func(f match) *Builder {
+	b.function = f
+	return b
+}
+
 // Build is Builder's Build, for example: Server().Path(m1,m2).Build()
 func (b *Builder) Build() middleware.Middleware {
 	var transporter func(ctx context.Context) (transport.Transporter, bool)
@@ -92,7 +99,7 @@ func (b *Builder) match(operation string) bool {
 			return true
 		}
 	}
-	return false
+	return b.function(operation)
 }
 
 // selector middleware
