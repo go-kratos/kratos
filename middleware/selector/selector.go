@@ -3,7 +3,6 @@ package selector
 import (
 	"context"
 	"regexp"
-	"strings"
 
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -11,7 +10,6 @@ import (
 
 type (
 	transporter func(ctx context.Context) (transport.Transporter, bool)
-	match       func(operation string) bool
 )
 
 var (
@@ -29,9 +27,7 @@ var (
 type Builder struct {
 	client bool
 
-	prefix []string
-	regex  []string
-	path   []string
+	rootOpMatcherBuilder orMatcherBuilder
 
 	ms []middleware.Middleware
 }
@@ -48,19 +44,32 @@ func Client(ms ...middleware.Middleware) *Builder {
 
 // Prefix is with Builder's prefix
 func (b *Builder) Prefix(prefix ...string) *Builder {
-	b.prefix = prefix
+	for _, s := range prefix {
+		b.rootOpMatcherBuilder.push(prefixMather(s))
+	}
 	return b
 }
 
 // Regex is with Builder's regex
+// panics if any expression cannot be parsed.
 func (b *Builder) Regex(regex ...string) *Builder {
-	b.regex = regex
+	for _, s := range regex {
+		re := regexp.MustCompile(s)
+		b.rootOpMatcherBuilder.push(regexMatcher{re: re})
+	}
 	return b
 }
 
 // Path is with Builder's path
 func (b *Builder) Path(path ...string) *Builder {
-	b.path = path
+	for _, s := range path {
+		b.rootOpMatcherBuilder.push(pathMather(s))
+	}
+	return b
+}
+
+func (b *Builder) OperationMatcher(matcher ...OperationMatcher) *Builder {
+	b.rootOpMatcherBuilder.push(matcher...)
 	return b
 }
 
@@ -72,31 +81,11 @@ func (b *Builder) Build() middleware.Middleware {
 	} else {
 		transporter = serverTransporter
 	}
-	return selector(transporter, b.match, b.ms...)
-}
-
-// match is match operation compliance Builder
-func (b *Builder) match(operation string) bool {
-	for _, prefix := range b.prefix {
-		if prefixMatch(prefix, operation) {
-			return true
-		}
-	}
-	for _, regex := range b.regex {
-		if regexMatch(regex, operation) {
-			return true
-		}
-	}
-	for _, path := range b.path {
-		if pathMatch(path, operation) {
-			return true
-		}
-	}
-	return false
+	return selector(transporter, b.rootOpMatcherBuilder.build(), b.ms...)
 }
 
 // selector middleware
-func selector(transporter transporter, match match, ms ...middleware.Middleware) middleware.Middleware {
+func selector(transporter transporter, opMatcher OperationMatcher, ms ...middleware.Middleware) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			info, ok := transporter(ctx)
@@ -104,26 +93,10 @@ func selector(transporter transporter, match match, ms ...middleware.Middleware)
 				return handler(ctx, req)
 			}
 
-			if !match(info.Operation()) {
+			if !opMatcher.Match(info.Operation()) {
 				return handler(ctx, req)
 			}
 			return middleware.Chain(ms...)(handler)(ctx, req)
 		}
 	}
-}
-
-func pathMatch(path string, operation string) bool {
-	return path == operation
-}
-
-func prefixMatch(prefix string, operation string) bool {
-	return strings.HasPrefix(operation, prefix)
-}
-
-func regexMatch(regex string, operation string) bool {
-	r, err := regexp.Compile(regex)
-	if err != nil {
-		return false
-	}
-	return r.FindString(operation) == operation
 }
