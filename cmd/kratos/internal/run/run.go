@@ -44,7 +44,7 @@ func Run(cmd *cobra.Command, args []string) {
 			return
 		} else if len(cmdPath) == 1 {
 			for k, v := range cmdPath {
-				dir = path.Join(k, v)
+				dir = path.Join(v, k)
 			}
 		} else {
 			var cmdPaths []string
