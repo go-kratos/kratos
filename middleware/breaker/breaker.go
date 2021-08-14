@@ -44,6 +44,9 @@ func CircuitBreaker(opts ...Option) middleware.Middleware {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			if err := options.breaker.Allow(ctx); err != nil {
 				// rejected
+				// NOTE: when client reject requets locally,
+				// continue add counter let the drop ratio higher.
+				options.breaker.Mark(false)
 				return nil, errors.New(503, "BREAKER", "request failed due to circuit breaker triggered")
 			}
 			// allowed
