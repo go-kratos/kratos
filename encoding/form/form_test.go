@@ -1,6 +1,7 @@
 package form
 
 import (
+	"github.com/go-kratos/kratos/v2/encoding/proto/test"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/encoding"
@@ -31,6 +32,14 @@ func TestFormCodecMarshal(t *testing.T) {
 	content, err = encoding.GetCodec(contentType).Marshal(req)
 	require.NoError(t, err)
 	require.Equal(t, []byte("username=kratos"), content)
+
+	m := test.TestModel{
+		Id:    1,
+		Name:  "kratos",
+	}
+	content, err = encoding.GetCodec(contentType).Marshal(m)
+	require.NoError(t, err)
+	require.Equal(t, []byte("id=1&name=kratos"), content)
 }
 
 func TestFormCodecUnmarshal(t *testing.T) {
