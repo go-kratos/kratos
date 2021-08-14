@@ -84,7 +84,7 @@ func defaultDecoder(src *KeyValue, target map[string]interface{}) error {
 // placeholder format in ${key:default} or $key.
 func defaultResolver(input map[string]interface{}) error {
 	mapper := func(name string) string {
-		args := strings.Split(strings.TrimSpace(name), ":")
+		args := strings.SplitN(strings.TrimSpace(name), ":", 2)
 		if v, has := readValue(input, args[0]); has {
 			s, _ := v.String()
 			return s

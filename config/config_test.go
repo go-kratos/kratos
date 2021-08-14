@@ -183,6 +183,7 @@ func TestDefaultResolver(t *testing.T) {
 				"enable":   "${ENABLE:false}",
 				"rate":     "${RATE}",
 				"empty":    "${EMPTY:foobar}",
+				"url":      "${URL:http://example.com}",
 				"array": []interface{}{
 					"${PORT}",
 					map[string]interface{}{"foobar": "${NOTEXIST:8081}"},
@@ -236,6 +237,11 @@ func TestDefaultResolver(t *testing.T) {
 			name:   "test empty value with default",
 			path:   "foo.bar.empty",
 			expect: "",
+		},
+		{
+			name:   "test url with default",
+			path:   "foo.bar.url",
+			expect: "http://example.com",
 		},
 		{
 			name:   "test array",
