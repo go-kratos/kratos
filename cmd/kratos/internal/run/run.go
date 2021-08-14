@@ -79,7 +79,7 @@ func findCMD(base string) (map[string]string, error) {
 		cmdPath := make(map[string]string)
 		err := filepath.Walk(dir, func(walkPath string, info os.FileInfo, err error) error {
 			// multi level directory is not allowed under the cmdPath directory, so it is judged that the path ends with cmdPath.
-			if strings.HasSuffix(walkPath, "cmdPath") {
+			if strings.HasSuffix(walkPath, "cmd") {
 				paths, err := ioutil.ReadDir(walkPath)
 				if err != nil {
 					return err
