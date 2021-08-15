@@ -1,4 +1,4 @@
-module ratelimit
+module github.com/go-kratos/kratos/ratelimit/v2
 
 go 1.16
 
