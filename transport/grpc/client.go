@@ -12,9 +12,10 @@ import (
 
 	// init resolver
 	_ "github.com/go-kratos/kratos/v2/transport/grpc/resolver/direct"
+	// init balancer
+	_ "github.com/go-kratos/kratos/v2/transport/grpc/balancer"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/balancer/roundrobin"
 	"google.golang.org/grpc/credentials"
 	grpcmd "google.golang.org/grpc/metadata"
 )
@@ -107,7 +108,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	}
 	var grpcOpts = []grpc.DialOption{
 		//todo: grpc.WithBalancerName is deprecated.
-		grpc.WithBalancerName(roundrobin.Name), //nolint:staticcheck
+		grpc.WithBalancerName("random"), //nolint:staticcheck
 		grpc.WithChainUnaryInterceptor(ints...),
 	}
 	if options.discovery != nil {
