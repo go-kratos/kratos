@@ -1,7 +1,7 @@
 package proto
 
 import (
-	"github.com/go-kratos/kratos/v2/encoding/proto/test"
+	"github.com/go-kratos/kratos/v2/internal/test"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

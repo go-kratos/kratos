@@ -2,7 +2,7 @@ package json
 
 import (
 	"bytes"
-	"github.com/go-kratos/kratos/v2/encoding/proto/test"
+	"github.com/go-kratos/kratos/v2/internal/test"
 	"strings"
 	"testing"
 )

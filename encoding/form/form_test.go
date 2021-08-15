@@ -1,7 +1,7 @@
 package form
 
 import (
-	"github.com/go-kratos/kratos/v2/encoding/proto/test"
+	"github.com/go-kratos/kratos/v2/internal/test"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/encoding"
