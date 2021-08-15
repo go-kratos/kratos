@@ -17,8 +17,10 @@ var _ propagation.TextMapPropagator = Metadata{}
 
 // Inject sets metadata key-values from ctx into the carrier.
 func (b Metadata) Inject(ctx context.Context, carrier propagation.TextMapCarrier) {
-	app, _ := kratos.FromContext(ctx)
-	carrier.Set(serviceHeader, app.Name())
+	app, ok := kratos.FromContext(ctx)
+	if ok {
+		carrier.Set(serviceHeader, app.Name())
+	}
 }
 
 // Extract returns a copy of parent with the metadata from the carrier added.
