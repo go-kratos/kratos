@@ -66,7 +66,7 @@ func TestLogger(t *testing.T) {
 	o := &options{}
 	v := xlog.NewStdLogger(log.Writer())
 	Logger(v)(o)
-	assert.Equal(t, v, o.logger)
+	assert.Equal(t, xlog.NewHelper(v), o.logger)
 }
 
 type mockServer struct{}

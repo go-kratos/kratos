@@ -45,7 +45,10 @@ func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{
 		return err
 	}
 	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
-	w.Write(data)
+	_, err = w.Write(data)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -60,7 +63,7 @@ func DefaultErrorEncoder(w http.ResponseWriter, r *http.Request, err error) {
 	}
 	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
 	w.WriteHeader(int(se.Code))
-	w.Write(body)
+	_, _ = w.Write(body)
 }
 
 // CodecForRequest get encoding.Codec via http.Request

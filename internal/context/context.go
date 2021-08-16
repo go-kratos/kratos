@@ -29,9 +29,9 @@ func Merge(parent1, parent2 context.Context) (context.Context, context.CancelFun
 	}
 	select {
 	case <-parent1.Done():
-		mc.finish(parent1.Err())
+		_ = mc.finish(parent1.Err())
 	case <-parent2.Done():
-		mc.finish(parent2.Err())
+		_ = mc.finish(parent2.Err())
 	default:
 		go mc.wait()
 	}
@@ -57,7 +57,7 @@ func (mc *mergeCtx) wait() {
 	case <-mc.cancelCh:
 		err = context.Canceled
 	}
-	mc.finish(err)
+	_ = mc.finish(err)
 }
 
 func (mc *mergeCtx) cancel() {
