@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package examples.http.query_array;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/go-kratos/kratos/v2/examples/http/query_array/hello;hello";
+
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  rpc SayHello (HelloRequest) returns (HelloReply)  {
+    option (google.api.http) = {
+      get: "/hello/",
+    };
+  }
+}
+
+
+
+// The request message containing the user's name.
+message HelloRequest {
+  repeated string names = 1;
+}
+
+// The response message containing the greetings
+message HelloReply {
+  string message = 1;
+}

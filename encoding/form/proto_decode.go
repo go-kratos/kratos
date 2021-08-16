@@ -63,7 +63,11 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 	}
 	switch {
 	case fd.IsList():
-		return populateRepeatedField(fd, v.Mutable(fd).List(), values)
+		var lists = make([]string, 0, len(values))
+		for _, v := range values {
+			lists = append(lists, strings.Split(v, ",")...)
+		}
+		return populateRepeatedField(fd, v.Mutable(fd).List(), lists)
 	case fd.IsMap():
 		return populateMapField(fd, v.Mutable(fd).Map(), values)
 	}
