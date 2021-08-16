@@ -3,13 +3,14 @@ package grpc
 import (
 	"context"
 	"crypto/tls"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"google.golang.org/grpc"
 	"net/url"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/middleware"
+	"google.golang.org/grpc"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -144,7 +145,7 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 	srv := &Server{ctx: context.Background(),
 		endpoint:   u,
 		middleware: []middleware.Middleware{EmptyMiddleware()},
-		timeout:    time.Duration(10),
+		timeout:    time.Second,
 	}
 	req := &struct{}{}
 	rv, err := srv.unaryServerInterceptor()(context.TODO(), req, &grpc.UnaryServerInfo{}, func(ctx context.Context, req interface{}) (i interface{}, e error) {
@@ -152,4 +153,11 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.Equal(t, "hi", rv.(*testResp).Data)
+
+	rv, err = srv.unaryServerInterceptor()(context.TODO(), req, &grpc.UnaryServerInfo{}, func(ctx context.Context, req interface{}) (i interface{}, e error) {
+		time.Sleep(2 * time.Second)
+		return &testResp{Data: "hi"}, nil
+	})
+	assert.Error(t, err)
+	assert.Nil(t, rv)
 }
