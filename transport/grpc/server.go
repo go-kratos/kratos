@@ -155,7 +155,7 @@ func (s *Server) Endpoint() (*url.URL, error) {
 		}
 		addr, err := host.Extract(s.address, lis)
 		if err != nil {
-			lis.Close()
+			_ = lis.Close()
 			s.err = err
 			return
 		}
@@ -211,7 +211,7 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		}
 		reply, err := h(ctx, req)
 		if len(replyHeader) > 0 {
-			grpc.SetHeader(ctx, replyHeader)
+			_ = grpc.SetHeader(ctx, replyHeader)
 		}
 		return reply, err
 	}

@@ -38,9 +38,9 @@ func (l *stdLogger) Log(level Level, keyvals ...interface{}) error {
 	buf := l.pool.Get().(*bytes.Buffer)
 	buf.WriteString(level.String())
 	for i := 0; i < len(keyvals); i += 2 {
-		fmt.Fprintf(buf, " %s=%v", keyvals[i], keyvals[i+1])
+		_, _ = fmt.Fprintf(buf, " %s=%v", keyvals[i], keyvals[i+1])
 	}
-	l.log.Output(4, buf.String())
+	_ = l.log.Output(4, buf.String())
 	buf.Reset()
 	l.pool.Put(buf)
 	return nil
