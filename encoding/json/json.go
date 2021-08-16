@@ -2,6 +2,7 @@ package json
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
 
 	"github.com/go-kratos/kratos/v2/encoding"
@@ -21,6 +22,7 @@ var (
 	UnmarshalOptions = protojson.UnmarshalOptions{
 		DiscardUnknown: true,
 	}
+	invalidDataErr = errors.New("invalid json data")
 )
 
 func init() {
@@ -46,7 +48,7 @@ func (codec) Marshal(v interface{}) ([]byte, error) {
 
 func (codec) Unmarshal(data []byte, v interface{}) error {
 	if len(data) < 5 {
-		return nil
+		return invalidDataErr
 	}
 	switch m := v.(type) {
 	case json.Unmarshaler:
