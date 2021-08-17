@@ -3,7 +3,7 @@ package jwt
 import (
 	"context"
 	"fmt"
-	"github.com/go-kratos/kratos/v2/middleware/auth"
+	"github.com/go-kratos/kratos/auth/v2"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/golang-jwt/jwt"
 	"github.com/stretchr/testify/assert"
