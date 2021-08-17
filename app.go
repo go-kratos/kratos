@@ -38,7 +38,7 @@ type App struct {
 func New(opts ...Option) *App {
 	options := options{
 		ctx:              context.Background(),
-		logger:           log.DefaultLogger,
+		logger:           log.NewHelper(log.DefaultLogger),
 		sigs:             []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		registrarTimeout: 10 * time.Second,
 	}
@@ -114,7 +114,10 @@ func (a *App) Run() error {
 			case <-ctx.Done():
 				return ctx.Err()
 			case <-c:
-				a.Stop()
+				err := a.Stop()
+				if err != nil {
+					a.opts.logger.Errorf("failed to app stop: %v", err)
+				}
 			}
 		}
 	})

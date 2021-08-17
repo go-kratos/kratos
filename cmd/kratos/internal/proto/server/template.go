@@ -11,16 +11,16 @@ package service
 
 import (
 	{{- if .UseContext }}
-    "context"
+	"context"
 	{{- end }}
 	{{- if .UseIO }}
 	"io"
 	{{- end }}
 
-    pb "{{ .Package }}"
-    {{- if .GoogleEmpty }}
-    "google.golang.org/protobuf/types/known/emptypb"
-    {{- end }}
+	pb "{{ .Package }}"
+	{{- if .GoogleEmpty }}
+	"google.golang.org/protobuf/types/known/emptypb"
+	{{- end }}
 )
 
 type {{ .Service }}Service struct {
