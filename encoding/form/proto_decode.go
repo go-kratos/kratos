@@ -39,8 +39,16 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 		if fd = getDescriptorByFieldAndName(fields, fieldName); fd == nil {
 			if len(fieldName) > 2 && strings.HasSuffix(fieldName, "[]") {
 				fd = getDescriptorByFieldAndName(fields, strings.TrimSuffix(fieldName, "[]"))
-			}
-			if fd == nil {
+				if fd == nil || !fd.IsList() {
+					// ignore unexpected field.
+					return nil
+				}
+				var lists = make([]string, 0, len(values))
+				for _, v := range values {
+					lists = append(lists, strings.Split(v, ",")...)
+				}
+				values = lists
+			} else {
 				// ignore unexpected field.
 				return nil
 			}
@@ -63,11 +71,7 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 	}
 	switch {
 	case fd.IsList():
-		var lists = make([]string, 0, len(values))
-		for _, v := range values {
-			lists = append(lists, strings.Split(v, ",")...)
-		}
-		return populateRepeatedField(fd, v.Mutable(fd).List(), lists)
+		return populateRepeatedField(fd, v.Mutable(fd).List(), values)
 	case fd.IsMap():
 		return populateMapField(fd, v.Mutable(fd).Map(), values)
 	}
