@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 
 	apimd "github.com/go-kratos/kratos/v2/api/metadata"
@@ -188,7 +189,7 @@ func (s *Server) Stop(ctx context.Context) error {
 }
 
 func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (reply interface{}, err error) {
 		ctx, cancel := ic.Merge(ctx, s.ctx)
 		defer cancel()
 		md, _ := grpcmd.FromIncomingContext(ctx)
@@ -209,7 +210,17 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		if len(s.middleware) > 0 {
 			h = middleware.Chain(s.middleware...)(h)
 		}
-		reply, err := h(ctx, req)
+		ch := make(chan error, 1)
+		go func() {
+			reply, err = h(ctx, req)
+			ch <- err
+		}()
+
+		select {
+		case <-ch:
+		case <-ctx.Done():
+			return nil, errors.New(500, "gateway timeout", "超时")
+		}
 		if len(replyHeader) > 0 {
 			_ = grpc.SetHeader(ctx, replyHeader)
 		}
