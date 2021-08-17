@@ -1,10 +1,9 @@
 ---
-name: Feature Request
-about: Description of new features.
-title: "[Feature]"
-labels: feature
+name: Proposal Request
+about: Suggest an idea for Kratos.
+title: "[Proposal]"
+labels: proposal
 assignees: ''
-
 ---
 
 Please see the FAQ in our main README.md before submitting your issue.
@@ -19,8 +18,8 @@ After the function is implemented, a merge request will be initiated to associat
 After the merge is completed, Close all issues.
 >
 
-### Feature description
+### What problem is the proposal used to solve?
 
-### Implementation mode
+### Requirements description of the proposal
 
-### Usage demonstration
+### References
