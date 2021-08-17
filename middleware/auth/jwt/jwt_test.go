@@ -3,7 +3,6 @@ package jwt
 import (
 	"context"
 	"fmt"
-	"github.com/go-kratos/kratos/auth/v2"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/golang-jwt/jwt"
 	"github.com/stretchr/testify/assert"
@@ -27,9 +26,9 @@ func (hc headerCarrier) Keys() []string {
 	return keys
 }
 
-func newTokenHeader(token string) *headerCarrier {
+func newTokenHeader(headerKey string, token string) *headerCarrier {
 	header := &headerCarrier{}
-	header.Set(string(auth.HeaderKey), token)
+	header.Set(headerKey, token)
 	return header
 }
 
@@ -75,7 +74,7 @@ func TestServer(t *testing.T) {
 	}{
 		{
 			name:          "normal",
-			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(token)}),
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, token)}),
 			signingMethod: jwt.SigningMethodHS256,
 			exceptErr:     nil,
 			key:           testKey,
@@ -89,28 +88,28 @@ func TestServer(t *testing.T) {
 		},
 		{
 			name:          "token invalid",
-			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(fmt.Sprintf(bearerFormat, "12313123"))}),
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, fmt.Sprintf(bearerFormat, "12313123"))}),
 			signingMethod: jwt.SigningMethodHS256,
 			exceptErr:     ErrTokenInvalid,
 			key:           testKey,
 		},
 		{
 			name:          "method invalid",
-			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(token)}),
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, token)}),
 			signingMethod: jwt.SigningMethodES384,
 			exceptErr:     ErrUnSupportSigningMethod,
 			key:           testKey,
 		},
 		{
 			name:          "miss key",
-			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(token)}),
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, token)}),
 			signingMethod: jwt.SigningMethodHS256,
 			exceptErr:     ErrMissingAccessSecret,
 			key:           "",
 		},
 		{
 			name:          "miss signing method",
-			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(token)}),
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, token)}),
 			signingMethod: nil,
 			exceptErr:     nil,
 			key:           testKey,
@@ -122,11 +121,10 @@ func TestServer(t *testing.T) {
 			var testToken interface{}
 			next := func(ctx context.Context, req interface{}) (interface{}, error) {
 				t.Log(req)
-				testToken = ctx.Value(auth.InfoKey)
+				testToken = ctx.Value(InfoKey)
 				return "reply", nil
 			}
-			parser := NewJWTParser(test.key, WithSigningMethod(test.signingMethod))
-			server := auth.Server(parser)(next)
+			server := Server(test.key, WithSigningMethod(test.signingMethod))(next)
 			_, err2 := server(test.ctx, test.name)
 			assert.Equal(t, test.exceptErr, err2)
 			if test.exceptErr == nil {
@@ -160,7 +158,7 @@ func TestClient(t *testing.T) {
 	tests := []struct {
 		name          string
 		expectError   error
-		tokenProvider auth.TokenProvider
+		tokenProvider TokenProvider
 	}{
 		{
 			name:          "normal",
@@ -169,7 +167,7 @@ func TestClient(t *testing.T) {
 		},
 		{
 			name:          "miss token provider",
-			expectError:   auth.ErrNeedTokenProvider,
+			expectError:   ErrNeedTokenProvider,
 			tokenProvider: nil,
 		},
 	}
@@ -178,12 +176,12 @@ func TestClient(t *testing.T) {
 			next := func(ctx context.Context, req interface{}) (interface{}, error) {
 				return "reply", nil
 			}
-			handler := auth.Client(test.tokenProvider)(next)
+			handler := Client(test.tokenProvider, testKey)(next)
 			header := &headerCarrier{}
 			_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
 			assert.Equal(t, test.expectError, err2)
 			if err2 == nil {
-				assert.Equal(t, test.tokenProvider.GetToken(), header.Get(string(auth.HeaderKey)))
+				assert.Equal(t, test.tokenProvider.GetToken(), header.Get(HeaderKey))
 			}
 		})
 	}
@@ -204,9 +202,48 @@ func TestTokenExpire(t *testing.T) {
 		t.Log(req)
 		return "reply", nil
 	}
-	ctx := transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(token)})
-	parser := NewJWTParser(testKey, WithSigningMethod(jwt.SigningMethodHS256))
-	server := auth.Server(parser)(next)
+	ctx := transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, token)})
+	server := Server(testKey, WithSigningMethod(jwt.SigningMethodHS256))(next)
 	_, err2 := server(ctx, "test expire token")
 	assert.Equal(t, ErrTokenExpired, err2)
+}
+
+func TestDefaultAuthHeaderKey(t *testing.T) {
+	var testKey = "testKey"
+	mapClaims := jwt.MapClaims{}
+	mapClaims["name"] = "xiaoli"
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
+	token, err := claims.SignedString([]byte(testKey))
+	if err != nil {
+		panic(err)
+	}
+	token = fmt.Sprintf(bearerFormat, token)
+	tests := []struct {
+		name      string
+		ctx       context.Context
+		headerKey string
+	}{
+		{
+			name:      "with headerKey",
+			ctx:       transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader("token", token)}),
+			headerKey: "token",
+		},
+		{
+			name:      "without headerKey",
+			ctx:       transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader("Authorization", token)}),
+			headerKey: "",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			next := func(ctx context.Context, req interface{}) (interface{}, error) {
+				t.Log(req)
+				return "reply", nil
+			}
+			server := Server("testKey", WithAuthHeaderKey(test.headerKey))(next)
+			_, err := server(test.ctx, "hhhh")
+			assert.Nil(t, err)
+		})
+	}
 }
