@@ -1,5 +1,5 @@
 ---
-name: Feature Request
+name: "\U0001F4A1 Feature Request"
 about: Suggest an idea for Kratos.
 title: "[Feature]"
 labels: feature
