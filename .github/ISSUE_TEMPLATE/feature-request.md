@@ -1,6 +1,6 @@
 ---
-name: Feature Request
-about: Suggest an idea for Kratos.
+name: "\U0001F4A1 Feature Request"
+about: For ideas or feature requests, start a new discussion.
 title: "[Feature]"
 labels: feature
 assignees: ''
