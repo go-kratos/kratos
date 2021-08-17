@@ -1,6 +1,6 @@
 ---
 name: "\U0001F41B Bug Report"
-about: Create a report to help us improve.
+about: Report something that's broken. Please ensure your kratos version is still supported.
 title: ''
 labels: bug
 assignees: ''
