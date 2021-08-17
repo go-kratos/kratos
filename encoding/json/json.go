@@ -31,26 +31,35 @@ func init() {
 type codec struct{}
 
 func (codec) Marshal(v interface{}) ([]byte, error) {
-	if m, ok := v.(proto.Message); ok {
+	switch m := v.(type) {
+	case json.Marshaler:
+		return m.MarshalJSON()
+	case proto.Message:
 		return MarshalOptions.Marshal(m)
+	default:
+		return json.Marshal(m)
 	}
-	return json.Marshal(v)
 }
 
 func (codec) Unmarshal(data []byte, v interface{}) error {
-	rv := reflect.ValueOf(v)
-	for rv := rv; rv.Kind() == reflect.Ptr; {
-		if rv.IsNil() {
-			rv.Set(reflect.New(rv.Type().Elem()))
+	switch m := v.(type) {
+	case json.Unmarshaler:
+		return m.UnmarshalJSON(data)
+	case proto.Message:
+		return UnmarshalOptions.Unmarshal(data, m)
+	default:
+		rv := reflect.ValueOf(v)
+		for rv := rv; rv.Kind() == reflect.Ptr; {
+			if rv.IsNil() {
+				rv.Set(reflect.New(rv.Type().Elem()))
+			}
+			rv = rv.Elem()
 		}
-		rv = rv.Elem()
+		if m, ok := reflect.Indirect(rv).Interface().(proto.Message); ok {
+			return UnmarshalOptions.Unmarshal(data, m)
+		}
+		return json.Unmarshal(data, m)
 	}
-	if m, ok := v.(proto.Message); ok {
-		return UnmarshalOptions.Unmarshal(data, m)
-	} else if m, ok := reflect.Indirect(rv).Interface().(proto.Message); ok {
-		return UnmarshalOptions.Unmarshal(data, m)
-	}
-	return json.Unmarshal(data, v)
 }
 
 func (codec) Name() string {
