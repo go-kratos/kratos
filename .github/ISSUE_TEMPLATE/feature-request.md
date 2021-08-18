@@ -19,11 +19,13 @@ After the function is implemented, a merge request will be initiated to associat
 
 ### Feature description
 <!--
+example:
 Add event interface for accessing message oriented middleware
 -->
 ### Implementation mode
 <!--
 ```go
+example:
 type Message interface {
     Key() string
     Value() []byte
@@ -43,6 +45,7 @@ type Event interface {
 -->
 ### Usage demonstration
 <!-- 
+example:
 ```go
 msg := kafka.NewMessage("kratos", []byte("hello world"), map[string]string{
 		"user":  "kratos",
