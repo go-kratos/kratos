@@ -28,7 +28,7 @@ type options struct {
 // WithSource with config source.
 func WithSource(s ...Source) Option {
 	return func(o *options) {
-		o.sources = s
+		o.sources = append(o.sources, s...)
 	}
 }
 

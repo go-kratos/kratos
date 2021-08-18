@@ -40,13 +40,13 @@ const (
 
 type testConfigStruct struct {
 	Server struct {
-		Http struct {
+		HTTP struct {
 			Addr      string  `json:"addr"`
 			Port      int     `json:"port"`
 			Timeout   float64 `json:"timeout"`
 			EnableSSL bool    `json:"enable_ssl"`
 		} `json:"http"`
-		GRpc struct {
+		GRPC struct {
 			Addr    string  `json:"addr"`
 			Port    int     `json:"port"`
 			Timeout float64 `json:"timeout"`
@@ -158,10 +158,10 @@ func TestConfig(t *testing.T) {
 	var testConf testConfigStruct
 	err = cf.Scan(&testConf)
 	assert.Nil(t, err)
-	assert.Equal(t, httpAddr, testConf.Server.Http.Addr)
-	assert.Equal(t, httpTimeout, testConf.Server.Http.Timeout)
-	assert.Equal(t, enableSSL, testConf.Server.Http.EnableSSL)
-	assert.Equal(t, grpcPort, testConf.Server.GRpc.Port)
+	assert.Equal(t, httpAddr, testConf.Server.HTTP.Addr)
+	assert.Equal(t, httpTimeout, testConf.Server.HTTP.Timeout)
+	assert.Equal(t, enableSSL, testConf.Server.HTTP.EnableSSL)
+	assert.Equal(t, grpcPort, testConf.Server.GRPC.Port)
 	assert.Equal(t, endpoint1, testConf.Endpoints[0])
 	assert.Equal(t, 2, len(testConf.Endpoints))
 }

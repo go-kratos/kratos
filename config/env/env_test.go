@@ -251,7 +251,7 @@ func TestEnvWithoutPrefix(t *testing.T) {
 
 func Test_env_load(t *testing.T) {
 	type fields struct {
-		prefixs []string
+		prefixes []string
 	}
 	type args struct {
 		envStrings []string
@@ -265,7 +265,7 @@ func Test_env_load(t *testing.T) {
 		{
 			name: "without prefixes",
 			fields: fields{
-				prefixs: nil,
+				prefixes: nil,
 			},
 			args: args{
 				envStrings: []string{
@@ -284,7 +284,7 @@ func Test_env_load(t *testing.T) {
 		{
 			name: "empty prefix",
 			fields: fields{
-				prefixs: []string{""},
+				prefixes: []string{""},
 			},
 			args: args{
 				envStrings: []string{
@@ -303,7 +303,7 @@ func Test_env_load(t *testing.T) {
 		{
 			name: "underscore prefix",
 			fields: fields{
-				prefixs: []string{"_"},
+				prefixes: []string{"_"},
 			},
 			args: args{
 				envStrings: []string{
@@ -322,7 +322,7 @@ func Test_env_load(t *testing.T) {
 		{
 			name: "with prefixes",
 			fields: fields{
-				prefixs: []string{"KRATOS_", "FOO"},
+				prefixes: []string{"KRATOS_", "FOO"},
 			},
 			args: args{
 				envStrings: []string{
@@ -341,7 +341,7 @@ func Test_env_load(t *testing.T) {
 		{
 			name: "should not panic #1",
 			fields: fields{
-				prefixs: []string{"FOO"},
+				prefixes: []string{"FOO"},
 			},
 			args: args{
 				envStrings: []string{
@@ -354,7 +354,7 @@ func Test_env_load(t *testing.T) {
 		{
 			name: "should not panic #2",
 			fields: fields{
-				prefixs: []string{"FOO=1"},
+				prefixes: []string{"FOO=1"},
 			},
 			args: args{
 				envStrings: []string{
@@ -367,7 +367,7 @@ func Test_env_load(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := &env{
-				prefixs: tt.fields.prefixs,
+				prefixes: tt.fields.prefixes,
 			}
 			got := e.load(tt.args.envStrings)
 			if !reflect.DeepEqual(tt.want, got) {

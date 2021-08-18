@@ -105,7 +105,7 @@ func TestFile(t *testing.T) {
 func testWatchFile(t *testing.T, path string) {
 	t.Log(path)
 
-	s := NewSource(path)
+	s := NewSource(path).(config.Watchable)
 	watch, err := s.Watch()
 	if err != nil {
 		t.Error(err)
@@ -144,12 +144,12 @@ func testWatchDir(t *testing.T, path, file string) {
 	t.Log(path)
 	t.Log(file)
 
-	s := NewSource(path)
+	s := NewSource(path).(config.Watchable)
 	watch, err := s.Watch()
 	if err != nil {
 		t.Error(err)
 	}
-
+	defer watch.Stop()
 	f, err := os.OpenFile(file, os.O_RDWR, 0)
 	if err != nil {
 		t.Error(err)
@@ -190,6 +190,7 @@ func TestConfig(t *testing.T) {
 	testScan(t, c)
 
 	testConfig(t, c)
+	c.Close()
 }
 
 func testConfig(t *testing.T, c config.Config) {

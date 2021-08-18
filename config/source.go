@@ -10,6 +10,10 @@ type KeyValue struct {
 // Source is config source.
 type Source interface {
 	Load() ([]*KeyValue, error)
+}
+
+// Watchable is watchable config source.
+type Watchable interface {
 	Watch() (Watcher, error)
 }
 

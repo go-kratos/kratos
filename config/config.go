@@ -107,13 +107,15 @@ func (c *config) Load() error {
 			c.log.Errorf("failed to merge config source: %v", err)
 			return err
 		}
-		w, err := src.Watch()
-		if err != nil {
-			c.log.Errorf("failed to watch config source: %v", err)
-			return err
+		if s, ok := src.(Watchable); ok {
+			w, err := s.Watch()
+			if err != nil {
+				c.log.Errorf("failed to watch config source: %v", err)
+				return err
+			}
+			c.watchers = append(c.watchers, w)
+			go c.watch(w)
 		}
-		c.watchers = append(c.watchers, w)
-		go c.watch(w)
 	}
 	if err := c.reader.Resolve(); err != nil {
 		c.log.Errorf("failed to resolve config source: %v", err)
