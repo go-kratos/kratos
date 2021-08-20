@@ -42,15 +42,15 @@ type Option func(*options)
 
 //Parser is a jwt parser
 type options struct {
-	AccessSecret  string
-	SigningMethod jwt.SigningMethod
+	accessSecret  string
+	signingMethod jwt.SigningMethod
 	authHeaderKey string
 }
 
 //WithSigningMethod with signing method option.
 func WithSigningMethod(method jwt.SigningMethod) Option {
 	return func(o *options) {
-		o.SigningMethod = method
+		o.signingMethod = method
 	}
 }
 
@@ -100,16 +100,12 @@ func Client(provider TokenProvider, accessSecret string, opts ...Option) middlew
 //initOptions init the option
 func initOptions(accessSecret string, opts ...Option) *options {
 	o := &options{
-		AccessSecret: accessSecret,
+		accessSecret:  accessSecret,
+		authHeaderKey: HeaderKey,
+		signingMethod: jwt.SigningMethodHS256,
 	}
 	for _, opt := range opts {
 		opt(o)
-	}
-	if o.authHeaderKey == "" {
-		o.authHeaderKey = HeaderKey
-	}
-	if o.SigningMethod == nil {
-		o.SigningMethod = jwt.SigningMethodHS256
 	}
 	return o
 }
@@ -118,7 +114,7 @@ func initOptions(accessSecret string, opts ...Option) *options {
 func newParser(o *options) func(jwtToken string) (*jwt.Token, error) {
 	return func(jwtToken string) (*jwt.Token, error) {
 		/*check the access secret*/
-		if o.AccessSecret == "" {
+		if o.accessSecret == "" {
 			return nil, ErrMissingAccessSecret
 		}
 		auths := strings.Split(jwtToken, " ")
@@ -128,7 +124,7 @@ func newParser(o *options) func(jwtToken string) (*jwt.Token, error) {
 		jwtToken = auths[1]
 		/*parse token*/
 		token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
-			return []byte(o.AccessSecret), nil
+			return []byte(o.accessSecret), nil
 		})
 		if err != nil {
 			if ve, ok := err.(*jwt.ValidationError); ok {
@@ -144,7 +140,7 @@ func newParser(o *options) func(jwtToken string) (*jwt.Token, error) {
 			}
 		} else if !token.Valid {
 			return nil, ErrTokenInvalid
-		} else if token.Method != o.SigningMethod {
+		} else if token.Method != o.signingMethod {
 			return nil, ErrUnSupportSigningMethod
 		}
 		return token, err

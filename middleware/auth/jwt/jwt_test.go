@@ -3,6 +3,7 @@ package jwt
 import (
 	"context"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/golang-jwt/jwt"
 	"github.com/stretchr/testify/assert"
@@ -124,7 +125,12 @@ func TestServer(t *testing.T) {
 				testToken = ctx.Value(InfoKey)
 				return "reply", nil
 			}
-			server := Server(test.key, WithSigningMethod(test.signingMethod))(next)
+			var server middleware.Handler
+			if test.signingMethod != nil {
+				server = Server(test.key, WithSigningMethod(test.signingMethod))(next)
+			} else {
+				server = Server(test.key)(next)
+			}
 			_, err2 := server(test.ctx, test.name)
 			assert.Equal(t, test.exceptErr, err2)
 			if test.exceptErr == nil {
@@ -241,7 +247,12 @@ func TestDefaultAuthHeaderKey(t *testing.T) {
 				t.Log(req)
 				return "reply", nil
 			}
-			server := Server("testKey", WithAuthHeaderKey(test.headerKey))(next)
+			var server middleware.Handler
+			if test.headerKey == "" {
+				server = Server("testKey")(next)
+			} else {
+				server = Server("testKey", WithAuthHeaderKey(test.headerKey))(next)
+			}
 			_, err := server(test.ctx, "hhhh")
 			assert.Nil(t, err)
 		})
