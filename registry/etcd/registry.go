@@ -30,7 +30,7 @@ func Context(ctx context.Context) Option {
 	return func(o *options) { o.ctx = ctx }
 }
 
-// Namespace with registry namespance.
+// Namespace with registry namespace.
 func Namespace(ns string) Option {
 	return func(o *options) { o.namespace = ns }
 }
@@ -155,8 +155,6 @@ func (r *Registry) heartBeat(ctx context.Context, leaseID clientv3.LeaseID, key 
 				if ctx.Err() != nil {
 					return
 				}
-				//log.Printf("retry: %d", retryCnt)
-
 				// prevent infinite blocking
 				idChan := make(chan clientv3.LeaseID, 1)
 				errChan := make(chan error, 1)

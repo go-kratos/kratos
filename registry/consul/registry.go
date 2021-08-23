@@ -126,11 +126,11 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	set.lock.Unlock()
 	ss, _ := set.services.Load().([]*registry.ServiceInstance)
 	if len(ss) > 0 {
-		// 如果services有值需要推送给watcher，否则watch的时候可能会永远阻塞拿不到初始的数据
+		// If the service has a value, it needs to be pushed to the watcher,
+		// otherwise the initial data may be blocked forever during the watch.
 		w.event <- struct{}{}
 	}
 
-	// 放在最后是为了防止漏推送
 	if !ok {
 		go r.resolve(set)
 	}

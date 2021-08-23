@@ -18,8 +18,6 @@ type watcher struct {
 	watchChan clientv3.WatchChan
 	watcher   clientv3.Watcher
 	kv        clientv3.KV
-
-	// is first use Next() ?
 	first bool
 }
 
