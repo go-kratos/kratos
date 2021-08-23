@@ -107,13 +107,13 @@ func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 		err := d.cli.Agent().ServiceRegister(asr)
 		ch <- err
 	}()
-	var err error
 	select {
 	case <-ctx.Done():
-		err = ctx.Err()
-	case err = <-ch:
-	}
-	if err == nil {
+		return ctx.Err()
+	case err := <-ch:
+		if err != nil {
+			return err
+		}
 		go func() {
 			ticker := time.NewTicker(time.Second * 20)
 			defer ticker.Stop()
@@ -127,7 +127,7 @@ func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 			}
 		}()
 	}
-	return err
+	return nil
 }
 
 // Deregister deregister service by service ID
