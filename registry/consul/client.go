@@ -101,32 +101,22 @@ func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 			Status:   "passing",
 		})
 	}
-
-	ch := make(chan error, 1)
-	go func() {
-		err := d.cli.Agent().ServiceRegister(asr)
-		ch <- err
-	}()
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case err := <-ch:
-		if err != nil {
-			return err
-		}
-		go func() {
-			ticker := time.NewTicker(time.Second * 20)
-			defer ticker.Stop()
-			for {
-				select {
-				case <-ticker.C:
-					d.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
-				case <-d.ctx.Done():
-					return
-				}
-			}
-		}()
+	err := d.cli.Agent().ServiceRegister(asr)
+	if err != nil {
+		return err
 	}
+	go func() {
+		ticker := time.NewTicker(time.Second * 20)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				d.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+			case <-d.ctx.Done():
+				return
+			}
+		}
+	}()
 	return nil
 }
 
