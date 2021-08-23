@@ -8,6 +8,5 @@ require (
 	github.com/stretchr/testify v1.7.0
 )
 
-replace (
-	github.com/go-kratos/kratos/v2 v2.0.5 => ../../../kratos
-)
+replace github.com/go-kratos/kratos/v2 v2.0.5 => ../../../kratos
+
