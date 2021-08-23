@@ -6,11 +6,11 @@ import (
 	"log"
 
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
+	"github.com/go-kratos/kratos/registry/zookeeper/v2"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
-	"github.com/go-kratos/zookeeper/registry"
 )
 
 // server is used to implement helloworld.GreeterServer.

@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/go-kratos/etcd/registry"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
+	"github.com/go-kratos/kratos/registry/etcd/v2"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	clientv3 "go.etcd.io/etcd/client/v3"

@@ -8,4 +8,4 @@ require (
 	google.golang.org/grpc v1.40.0
 )
 
-replace github.com/go-kratos/kratos/v2 v2.0.5 => ../../../kratos
+replace github.com/go-kratos/kratos/v2 => ../../../kratos

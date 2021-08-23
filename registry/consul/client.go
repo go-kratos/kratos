@@ -133,16 +133,5 @@ func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 // Deregister deregister service by service ID
 func (d *Client) Deregister(ctx context.Context, serviceID string) error {
 	d.cancel()
-	ch := make(chan error, 1)
-	go func() {
-		err := d.cli.Agent().ServiceDeregister(serviceID)
-		ch <- err
-	}()
-	var err error
-	select {
-	case <-ctx.Done():
-		err = ctx.Err()
-	case err = <-ch:
-	}
-	return err
+	return d.cli.Agent().ServiceDeregister(serviceID)
 }
