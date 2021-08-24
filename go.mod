@@ -3,7 +3,6 @@ module github.com/go-kratos/kratos/v2
 go 1.15
 
 require (
-	github.com/apolloconfig/agollo/v4 v4.0.8
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/go-playground/form/v4 v4.2.0
 	github.com/google/uuid v1.3.0
