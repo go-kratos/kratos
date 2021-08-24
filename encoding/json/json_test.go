@@ -2,9 +2,10 @@ package json
 
 import (
 	"bytes"
-	"github.com/go-kratos/kratos/v2/internal/test"
 	"strings"
 	"testing"
+
+	"github.com/go-kratos/kratos/v2/internal/test/testproto"
 )
 
 type testEmbed struct {
@@ -34,7 +35,7 @@ func TestJSON_Marshal(t *testing.T) {
 			expect: `{"a":"a","b":"b","c":"c"}`,
 		},
 		{
-			input:  &test.TestModel{Id: 1, Name: "go-kratos", Hobby: []string{"1", "2"}},
+			input:  &testproto.TestModel{Id: 1, Name: "go-kratos", Hobby: []string{"1", "2"}},
 			expect: `{"id":"1","name":"go-kratos","hobby":["1","2"],"attrs":{}}`,
 		},
 	}
@@ -55,7 +56,7 @@ func TestJSON_Marshal(t *testing.T) {
 
 func TestJSON_Unmarshal(t *testing.T) {
 	p := &testMessage{}
-	p2 := &test.TestModel{}
+	p2 := &testproto.TestModel{}
 	tests := []struct {
 		input  string
 		expect interface{}
