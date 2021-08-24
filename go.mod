@@ -32,11 +32,12 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.14.3 // indirect
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/montanaflynn/stats v0.5.0
+	github.com/nacos-group/nacos-sdk-go v1.0.0
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/openzipkin/zipkin-go v0.2.1
 	github.com/otokaze/mock v0.0.0-20190125081256-8282b7a7c7c3
 	github.com/philchia/agollo/v4 v4.1.1
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.5.1
 	github.com/prometheus/procfs v0.0.11 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20190728182440-6a916e37a237 // indirect
