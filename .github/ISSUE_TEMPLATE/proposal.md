@@ -1,8 +1,8 @@
 ---
-name: "\U0001F4A1 Feature Request"
-about: For ideas or feature requests, start a new discussion.
-title: "[Feature]"
-labels: feature
+name: "\U0001F9F1 Proposal Request"
+about: Implementation draft of feature.
+title: "[Proposal]"
+labels: proposal
 assignees: ''
 ---
 
@@ -34,21 +34,40 @@ When more than five maintainer members agree to implement the feature, a proposa
 If the maintainer team members have major differences on a requirement, the final decision is made by @Terry Mao.
 -->
 
-### What problem is the feature used to solve?
+### Proposal description
 <!--
 example:
-    We hope to add event interface to Kratos framework to access middleware such as Kafka and rabbitmq
+Add event interface for accessing message oriented middleware
 -->
+### Implementation mode
+<!--
+```go
+example:
+type Message interface {
+    Key() string
+    Value() []byte
+    Header() map[string]string
+    Ack() error
+    Nack() error
+}
 
-### Requirements description of the feature
-<!--
-example:
-    The event interface should be added to Kratos. The interface should contain subscribers and publishers, and the message body should contain key value heade
+type Handler func(context.Context, Message) error
+
+type Event interface {
+    Send(ctx context.Context, key string, value []byte]) error
+    Receive(ctx context.Context, handler Handler) error
+    Close() error
+}
+````
 -->
-### References
-<!--
+### Usage demonstration
+<!-- 
 example:
-    - [nats](http://xxxxx)
-    - [kafka](http://xxxxx)
-    - [rabbitmq](http://xxxxx)
+```go
+msg := kafka.NewMessage("kratos", []byte("hello world"), map[string]string{
+		"user":  "kratos",
+		"phone": "123456",
+	})
+err := sender.Send(context.Background(), msg)
+```
 -->
