@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package test;
 
-option go_package = "../test";
+option go_package = "../testproto";
 
 message test_model {
   int64 id = 1;
