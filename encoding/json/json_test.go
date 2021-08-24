@@ -36,7 +36,7 @@ func TestJSON_Marshal(t *testing.T) {
 		},
 		{
 			input:  &testproto.TestModel{Id: 1, Name: "go-kratos", Hobby: []string{"1", "2"}},
-			expect: `{"id":"1","name":"go-kratos","hobby":["1","2"],"attrs":{}}`,
+			expect: `{"id":"1", "name":"go-kratos", "hobby":["1", "2"], "attrs":{}}`,
 		},
 	}
 	for _, v := range tests {
