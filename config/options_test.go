@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDefaultDecoder(t *testing.T) {
+func Test_defaultDecoder(t *testing.T) {
 	src := &KeyValue{
 		Key:    "service",
 		Value:  []byte("config"),
@@ -34,4 +34,24 @@ func TestDefaultDecoder(t *testing.T) {
 			},
 		},
 	}, target)
+}
+
+func Test_defaultResolver(t *testing.T) {
+	type args struct {
+		input map[string]interface{}
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := defaultResolver(tt.args.input); (err != nil) != tt.wantErr {
+				t.Errorf("defaultResolver() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
 }
