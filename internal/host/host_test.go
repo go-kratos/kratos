@@ -1,6 +1,7 @@
 package host
 
 import (
+	"github.com/stretchr/testify/assert"
 	"net"
 	"testing"
 )
@@ -74,6 +75,19 @@ func TestExtract(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestExtract2(t *testing.T) {
+	addr := "localhost:9001"
+	lis, err := net.Listen("tcp", addr)
+	if err == nil {
+		assert.Nil(t, err)
+	}
+	res, err := Extract(addr, lis)
+	if err == nil {
+		assert.Nil(t, err)
+	}
+	assert.Equal(t, res, "localhost:9001")
 }
 
 func TestPort(t *testing.T) {
