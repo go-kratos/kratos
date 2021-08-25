@@ -97,12 +97,12 @@ func TestStatusFromGRPCCode(t *testing.T) {
 func TestContentType(t *testing.T) {
 
 	tests := []struct {
-		name string
+		name    string
 		subtype string
-		want string
+		want    string
 	}{
-		{"kratos","kratos","application/kratos"},
-		{"json","json","application/json"},
+		{"kratos", "kratos", "application/kratos"},
+		{"json", "json", "application/json"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

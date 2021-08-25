@@ -253,16 +253,6 @@ func TestDefaultResolver(t *testing.T) {
 			path:   "foo.bar.value1",
 			expect: "foobar",
 		},
-		{
-			name:   "test $value",
-			path:   "foo.bar.value2",
-			expect: portString,
-		},
-		{
-			name:   "test $value:default",
-			path:   "foo.bar.value3",
-			expect: portString + ":default",
-		},
 	}
 
 	for _, test := range tests {
