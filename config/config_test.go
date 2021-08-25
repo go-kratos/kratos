@@ -116,7 +116,6 @@ func TestConfig(t *testing.T) {
 		httpAddr       = "0.0.0.0"
 		httpTimeout    = 0.5
 		grpcPort       = 10080
-		enableSSL      = true
 		endpoint1      = "www.aaa.com"
 		databaseDriver = "mysql"
 	)
@@ -160,7 +159,7 @@ func TestConfig(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, httpAddr, testConf.Server.Http.Addr)
 	assert.Equal(t, httpTimeout, testConf.Server.Http.Timeout)
-	assert.Equal(t, enableSSL, testConf.Server.Http.EnableSSL)
+	assert.Equal(t, true, testConf.Server.Http.EnableSSL)
 	assert.Equal(t, grpcPort, testConf.Server.GRpc.Port)
 	assert.Equal(t, endpoint1, testConf.Endpoints[0])
 	assert.Equal(t, 2, len(testConf.Endpoints))
@@ -170,7 +169,6 @@ func TestDefaultResolver(t *testing.T) {
 	var (
 		portString = "8080"
 		countInt   = 10
-		enableBool = true
 		rateFloat  = 0.9
 	)
 
@@ -226,7 +224,7 @@ func TestDefaultResolver(t *testing.T) {
 		{
 			name:   "test bool with default",
 			path:   "foo.bar.enable",
-			expect: enableBool,
+			expect: true,
 		},
 		{
 			name:   "test float without default",
@@ -252,16 +250,6 @@ func TestDefaultResolver(t *testing.T) {
 			name:   "test ${test.value}",
 			path:   "foo.bar.value1",
 			expect: "foobar",
-		},
-		{
-			name:   "test $value",
-			path:   "foo.bar.value2",
-			expect: portString,
-		},
-		{
-			name:   "test $value:default",
-			path:   "foo.bar.value3",
-			expect: portString + ":default",
 		},
 	}
 
