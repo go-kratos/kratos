@@ -5,6 +5,6 @@ require (
 	github.com/go-kratos/kratos/v2 v2.0.4
 )
 
-replace github.com/go-kratos/kratos/v2 => ../../
+replace github.com/go-kratos/kratos/v2 => ../../../kratos
 
 go 1.13
