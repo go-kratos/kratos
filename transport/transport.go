@@ -62,6 +62,7 @@ func (k Kind) String() string { return string(k) }
 // Defines a set of transport kind
 const (
 	KindGRPC Kind = "grpc"
+	KindRPCX Kind = "rpcx"
 	KindHTTP Kind = "http"
 )
 
