@@ -7,4 +7,4 @@ require (
 
 replace github.com/go-kratos/kratos/v2 => ../../../kratos
 
-go 1.13
+go 1.15
