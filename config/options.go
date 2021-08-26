@@ -124,10 +124,7 @@ func defaultResolver(input map[string]interface{}) error {
 }
 
 func expand(s string, mapping func(string) string) string {
-	r, err := regexp.Compile(`\${(.*?)}`)
-	if err != nil {
-		return s
-	}
+	r := regexp.MustCompile(`\${(.*?)}`)
 	re := r.FindAllStringSubmatch(s, -1)
 	for _, i := range re {
 		if len(i) == 2 {
