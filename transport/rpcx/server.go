@@ -6,7 +6,6 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
-	"google.golang.org/grpc/health"
 	"net"
 	"net/url"
 	"sync"
@@ -87,16 +86,14 @@ type Server struct {
 	log        *log.Helper
 	rpcxOpts   []rpcx.OptionFn
 	middleware []middleware.Middleware
-	health     *health.Server
 }
 
 // NewServer creates a gRPC server by options.
 func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
 		network: "tcp",
-		address: ":8008",
+		address: ":0",
 		timeout: 1 * time.Second,
-		health:  health.NewServer(),
 		log:     log.NewHelper(log.DefaultLogger),
 	}
 	for _, o := range opts {
@@ -123,7 +120,7 @@ func (s *Server) Endpoint() (*url.URL, error) {
 			return
 		}
 		s.lis = lis
-		s.endpoint = endpoint.NewEndpoint("grpc", addr, s.tlsConf != nil)
+		s.endpoint = endpoint.NewEndpoint("rpcx", addr, s.tlsConf != nil)
 	})
 	if s.err != nil {
 		return nil, s.err
@@ -137,15 +134,14 @@ func (s *Server) Start(ctx context.Context) error {
 		return err
 	}
 	s.ctx = ctx
-	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
-	s.health.Resume()
-	return s.Serve(s.network, s.address)
+	s.log.Infof("[rpcx] server listening on: %s", s.lis.Addr().String())
+	s.log.Infof("%s,%s", s.network, s.address)
+	return s.Server.Serve(s.network, s.address)
 }
 
 // Stop stop the gRPC server.
 func (s *Server) Stop(ctx context.Context) error {
-	s.Stop(ctx)
-	s.health.Shutdown()
-	s.log.Info("[gRPC] server stopping")
+	s.Close()
+	s.log.Info("[rpcx] server stopping")
 	return nil
 }

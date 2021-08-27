@@ -94,10 +94,11 @@ func generate(proto string, args []string) error {
 	inputExt := []string{
 		"--proto_path=" + base.KratosMod(),
 		"--proto_path=" + filepath.Join(base.KratosMod(), "third_party"),
-		"--go_out=paths=source_relative:.",
-		"--go-grpc_out=paths=source_relative:.",
-		"--go-http_out=paths=source_relative:.",
-		"--go-errors_out=paths=source_relative:.",
+		//"--go_out=paths=source_relative:.",
+		//"--go-grpc_out=paths=source_relative:.",
+		//"--go-http_out=paths=source_relative:.",
+		//"--go-errors_out=paths=source_relative:.",
+		"--gogofaster_out=plugins=rpcx:.",
 	}
 	input = append(input, inputExt...)
 	protoBytes, err := ioutil.ReadFile(proto)
