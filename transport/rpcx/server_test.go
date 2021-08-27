@@ -3,8 +3,11 @@ package rpcx
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/smallnest/rpcx/client"
+	"github.com/smallnest/rpcx/protocol"
 	rpcx "github.com/smallnest/rpcx/server"
 	"strings"
 	"testing"
@@ -29,12 +32,15 @@ func TestServer(t *testing.T) {
 	go func() {
 		// start server
 		if err := srv.Start(ctx); err != nil {
-			panic(err)
+			if err.Error() != "mux: server closed" {
+				panic(err)
+			}
 		}
 	}()
-	time.Sleep(3 * time.Second)
-	//testClient(t, srv)
-	srv.Stop(ctx)
+	time.Sleep(1 * time.Second)
+	testClient(t, srv)
+	time.Sleep(2 * time.Second)
+	_ = srv.Stop(ctx)
 }
 
 func testClient(t *testing.T, srv *Server) {
@@ -42,12 +48,16 @@ func testClient(t *testing.T, srv *Server) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// new a gRPC client
-	conn, err := DialInsecure(context.Background(), WithEndpoint(u.Host))
-	if err != nil {
-		t.Fatal(err)
+	fmt.Println(u)
+	d, err := client.NewPeer2PeerDiscovery("tcp@"+srv.address, "")
+	opt := client.DefaultOption
+	opt.SerializeType = protocol.ProtoBuffer
+	xclient := client.NewXClient("", client.Failtry, client.RoundRobin, d, opt)
+	if xclient == nil {
+		t.Fatal("client is nil")
+		return
 	}
-	conn.Close()
+	_ = xclient.Close()
 }
 
 func TestNetwork(t *testing.T) {
@@ -118,23 +128,3 @@ func TestOptions(t *testing.T) {
 	Options(v...)(o)
 	assert.Equal(t, v, o.rpcxOpts)
 }
-
-type testResp struct {
-	Data string
-}
-
-//func TestServer_unaryServerInterceptor(t *testing.T) {
-//	u, err := url.Parse("grpc://hello/world")
-//	assert.NoError(t, err)
-//	srv := &Server{ctx: context.Background(),
-//		endpoint:   u,
-//		middleware: []middleware.Middleware{EmptyMiddleware()},
-//		timeout:    time.Duration(10),
-//	}
-//	req := &struct{}{}
-//	rv, err := srv.unaryServerInterceptor()(context.TODO(), req, &grpc.UnaryServerInfo{}, func(ctx context.Context, req interface{}) (i interface{}, e error) {
-//		return &testResp{Data: "hi"}, nil
-//	})
-//	assert.NoError(t, err)
-//	assert.Equal(t, "hi", rv.(*testResp).Data)
-//}

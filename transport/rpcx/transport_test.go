@@ -9,7 +9,7 @@ import (
 
 func TestTransport_Kind(t *testing.T) {
 	o := &Transport{}
-	assert.Equal(t, transport.KindGRPC, o.Kind())
+	assert.Equal(t, transport.KindRPCX, o.Kind())
 }
 
 func TestTransport_Endpoint(t *testing.T) {

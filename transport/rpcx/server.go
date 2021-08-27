@@ -65,7 +65,7 @@ func TLSConfig(c *tls.Config) ServerOption {
 	}
 }
 
-// Options with rpcx options.
+// Options with RPCx options.
 func Options(opts ...rpcx.OptionFn) ServerOption {
 	return func(s *Server) {
 		s.rpcxOpts = opts
@@ -88,7 +88,7 @@ type Server struct {
 	middleware []middleware.Middleware
 }
 
-// NewServer creates a gRPC server by options.
+// NewServer creates a RPCx server by options.
 func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
 		network: "tcp",
@@ -105,7 +105,7 @@ func NewServer(opts ...ServerOption) *Server {
 
 // Endpoint return a real address to registry endpoint.
 // examples:
-//   grpc://127.0.0.1:9000?isSecure=false
+//   rpcx://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
 	s.once.Do(func() {
 		lis, err := net.Listen(s.network, s.address)
@@ -114,12 +114,11 @@ func (s *Server) Endpoint() (*url.URL, error) {
 			return
 		}
 		addr, err := host.Extract(s.address, lis)
+		_ = lis.Close()
 		if err != nil {
-			_ = lis.Close()
 			s.err = err
 			return
 		}
-		s.lis = lis
 		s.endpoint = endpoint.NewEndpoint("rpcx", addr, s.tlsConf != nil)
 	})
 	if s.err != nil {
@@ -128,20 +127,19 @@ func (s *Server) Endpoint() (*url.URL, error) {
 	return s.endpoint, nil
 }
 
-// Start start the gRPC server.
+// Start the RPCx server.
 func (s *Server) Start(ctx context.Context) error {
 	if _, err := s.Endpoint(); err != nil {
 		return err
 	}
 	s.ctx = ctx
-	s.log.Infof("[rpcx] server listening on: %s", s.lis.Addr().String())
-	s.log.Infof("%s,%s", s.network, s.address)
-	return s.Server.Serve(s.network, s.address)
+	s.log.Infof("[RPCx] server listening on: %s", s.address)
+	return s.Serve(s.network, s.address)
 }
 
-// Stop stop the gRPC server.
+// Stop the RPCx server.
 func (s *Server) Stop(ctx context.Context) error {
-	s.Close()
-	s.log.Info("[rpcx] server stopping")
+	_ = s.Close()
+	s.log.Info("[RPCx] server stopping")
 	return nil
 }
