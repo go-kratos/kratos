@@ -1,2 +1,6 @@
 # Metrics
-* [Prometheus](https://github.com/go-kratos/prometheus)
+
+## prometheus
+```
+go get -u github.com/go-kratos/kratos/metrics/prometheus/v2
+```
