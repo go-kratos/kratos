@@ -4,8 +4,8 @@ import (
 	"log"
 	"path/filepath"
 
+	kubeconf "github.com/go-kratos/kratos/config/kube/v2/config"
 	"github.com/go-kratos/kratos/v2/config"
-	kubeconf "github.com/go-kratos/kratos/registry/kube/v2/config"
 	"k8s.io/client-go/util/homedir"
 )
 
