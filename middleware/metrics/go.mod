@@ -1,6 +1,6 @@
 module github.com/go-kratos/kratos/middleware/metrics/v2
 
-go 1.16
+go 1.15
 
 require (
 	github.com/go-kratos/kratos/v2 v2.0.5
@@ -8,4 +8,3 @@ require (
 )
 
 replace github.com/go-kratos/kratos/v2 => ../../../kratos
-
