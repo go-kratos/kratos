@@ -6,27 +6,50 @@ linters:
   disable-all: true
   fast: false
   enable:
+    - bodyclose
     - deadcode
+    - dogsled
+    - durationcheck
     - errcheck
+    - exportloopref
     - govet
     - gosimple
     - gofmt
+    - gofumpt
     - goconst
     - goimports
+    - gomnd
     - ineffassign
     - lll
     - prealloc
     - revive
     - staticcheck
-    - stylecheck
+    - structcheck
+    - typecheck
     - unused
+    - unconvert
+    - varcheck
     - whitespace
+    - wastedassign
+
+  # don't enable:
+  # - asciicheck
+  # - scopelint
+  # - gochecknoglobals
+  # - gocognit
+  # - godot
+  # - godox
+  # - goerr113
+  # - interfacer
+  # - maligned
+  # - nestif
+  # - prealloc
+  # - testpackage
+  # - stylrcheck
+  # - wsl
 
 linters-settings:
   govet:
     check-shadowing: true
-  stylecheck:
-    # Select the Go version to target. The default is '1.13'.
-    go: "1.15"
   whitespace:
     multi-func: true
