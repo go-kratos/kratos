@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/examples/stream/hello"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
+	"github.com/go-kratos/kratos/middleware/recovery/v2"
 	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 )
 

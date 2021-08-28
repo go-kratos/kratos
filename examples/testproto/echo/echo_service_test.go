@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
+	mmd "github.com/go-kratos/kratos/middleware/metadata/v2"
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/metadata"
-	mmd "github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
@@ -23,7 +23,7 @@ import (
 var md = metadata.Metadata{"x-md-global-test": "test_value"}
 
 type echoService struct {
-	UnimplementedEchoServiceServer
+    UnimplementedEchoServiceServer
 }
 
 func (s *echoService) Echo(ctx context.Context, m *SimpleMessage) (*SimpleMessage, error) {
