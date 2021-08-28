@@ -1,14 +1,32 @@
 run:
   timeout: 5m
   modules-download-mode: readonly
-  skip-files:
-    - ".*_test\\.go$"
 
 linters:
+  disable-all: true
+  fast: false
   enable:
-    - revive
-    - staticcheck
+    - deadcode
+    - errcheck
     - govet
     - gosimple
     - gofmt
-    - errcheck
+    - goconst
+    - goimports
+    - ineffassign
+    - lll
+    - prealloc
+    - revive
+    - staticcheck
+    - stylecheck
+    - unused
+    - whitespace
+
+linters-settings:
+  govet:
+    check-shadowing: true
+  stylecheck:
+    # Select the Go version to target. The default is '1.13'.
+    go: "1.15"
+  whitespace:
+    multi-func: true

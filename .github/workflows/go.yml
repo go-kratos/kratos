@@ -2,9 +2,11 @@ name: Go
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -24,38 +26,38 @@ jobs:
           - 8500:8500
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.16
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
 
-    - name: Build
-      run: go build ./...
+      - name: Build
+        run: go build ./...
 
-    - name: Test
-      run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
-    - name: Upload coverage to Codecov
-      run: bash <(curl -s https://codecov.io/bash)
+      - name: Test
+        run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+      - name: Upload coverage to Codecov
+        run: bash <(curl -s https://codecov.io/bash)
 
-    - name: Kratos
-      run: |
-        cd cmd/kratos
-        go build ./...
-        go test ./...
+      - name: Kratos
+        run: |
+          cd cmd/kratos
+          go build ./...
+          go test ./...
 
-    - name: HTTP
-      run: |
-        cd cmd/protoc-gen-go-http
-        go build ./...
-        go test ./...
+      - name: HTTP
+        run: |
+          cd cmd/protoc-gen-go-http
+          go build ./...
+          go test ./...
 
-    - name: Examples
-      run: |
-        cd examples
-        go build ./...
-        go test ./...
+      - name: Examples
+        run: |
+          cd examples
+          go build ./...
+          go test ./...
 
   lint:
     name: lint
@@ -65,8 +67,7 @@ jobs:
       - name: Lint
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.41
-          args: --disable-all
+          version: v1.42
           skip-go-installation: true
           skip-pkg-cache: true
           only-new-issues: true
