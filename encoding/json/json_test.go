@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	testproto "github.com/go-kratos/kratos/v2/internal/testproto/encoding"
+	testproto "github.com/go-kratos/kratos/v2/internal/encoding"
 )
 
 type testEmbed struct {
