@@ -21,9 +21,6 @@ go get -u github.com/go-kratos/kratos/registry/nacos/v2
 ```
 
 ## kube
-```shell
-go get -u github.com/go-kratos/kratos/registry/kubernetes/v2
-```
 
 ```shell
 go get -u github.com/go-kratos/kratos/config/kubernetes/v2

@@ -30,6 +30,6 @@ subjects:
     config.NewSource(SourceOption{
 		Namespace:     "mesh",
 		LabelSelector: "",
-		KubeConfig:    filepath.Join(homedir.HomeDir(), ".kubernetes", "config"),
+		KubeConfig:    filepath.Join(homedir.HomeDir(), ".kube", "config"),
 	})
 ```
