@@ -14,7 +14,7 @@ type LoginRequest struct {
 }
 
 type TestModel struct {
-	Id int32 `json:"id"`
+	Id   int32  `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -38,8 +38,8 @@ func TestFormCodecMarshal(t *testing.T) {
 	require.Equal(t, []byte("username=kratos"), content)
 
 	m := TestModel{
-		Id:    1,
-		Name:  "kratos",
+		Id:   1,
+		Name: "kratos",
 	}
 	content, err = encoding.GetCodec(contentType).Marshal(m)
 	t.Log(string(content))
