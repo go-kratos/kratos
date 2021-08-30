@@ -1,9 +1,10 @@
 package host
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidIP(t *testing.T) {
@@ -118,4 +119,5 @@ func TestExtractHostPort(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected: not nil got %v", nil)
 	}
+	t.Logf("host port: %s,  %d", host, port)
 }

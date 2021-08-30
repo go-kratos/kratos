@@ -241,7 +241,7 @@ func TestMergeToClientContext(t *testing.T) {
 
 func TestMetadata_Range(t *testing.T) {
 	md := Metadata{"kratos": "kratos", "https://go-kratos.dev/": "https://go-kratos.dev/", "go-kratos": "go-kratos"}
-	var tmp = Metadata{}
+	tmp := Metadata{}
 	md.Range(func(k, v string) bool {
 		if k == "https://go-kratos.dev/" || k == "kratos" {
 			tmp[k] = v

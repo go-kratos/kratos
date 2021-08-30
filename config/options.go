@@ -127,7 +127,7 @@ func expand(s string, mapping func(string) string) string {
 	r := regexp.MustCompile(`\${(.*?)}`)
 	re := r.FindAllStringSubmatch(s, -1)
 	for _, i := range re {
-		if len(i) == 2 {
+		if len(i) == 2 { //nolint:gomnd
 			s = strings.ReplaceAll(s, i[0], mapping(i[1]))
 		}
 	}

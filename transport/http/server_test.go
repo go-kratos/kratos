@@ -5,14 +5,15 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/middleware"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/middleware"
 
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/stretchr/testify/assert"
@@ -26,7 +27,7 @@ type testData struct {
 
 func TestServer(t *testing.T) {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
+		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	}
 	ctx := context.Background()
 	srv := NewServer()
@@ -44,7 +45,7 @@ func TestServer(t *testing.T) {
 	}()
 	time.Sleep(time.Second)
 	testClient(t, srv)
-	srv.Stop(ctx)
+	_ = srv.Stop(ctx)
 }
 
 func testClient(t *testing.T, srv *Server) {
@@ -74,6 +75,7 @@ func testClient(t *testing.T, srv *Server) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer client.Close()
 	for _, test := range tests {
 		var res testData
 		url := fmt.Sprintf(e.String() + test.path)
@@ -82,12 +84,12 @@ func testClient(t *testing.T, srv *Server) {
 			t.Fatal(err)
 		}
 		resp, err := client.Do(req)
-
 		if test.path == "/index/notfound" && err != nil {
 			if e, ok := err.(*errors.Error); ok && e.Code == http.StatusNotFound {
 				continue
 			}
 		}
+		defer resp.Body.Close()
 
 		if err != nil {
 			t.Fatal(err)
@@ -122,13 +124,12 @@ func testClient(t *testing.T, srv *Server) {
 			t.Errorf("expected %s got %s", test.path, res.Path)
 		}
 	}
-
 }
 
 func BenchmarkServer(b *testing.B) {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		data := &testData{Path: r.RequestURI}
-		json.NewEncoder(w).Encode(data)
+		_ = json.NewEncoder(w).Encode(data)
 		if r.Context().Value(testKey{}) != "test" {
 			w.WriteHeader(500)
 		}
@@ -154,7 +155,7 @@ func BenchmarkServer(b *testing.B) {
 		err := client.Invoke(context.Background(), "POST", "/index", nil, &res)
 		assert.NoError(b, err)
 	}
-	srv.Stop(ctx)
+	_ = srv.Stop(ctx)
 }
 
 func TestNetwork(t *testing.T) {
@@ -179,7 +180,7 @@ func TestTimeout(t *testing.T) {
 }
 
 func TestLogger(t *testing.T) {
-	//todo
+	// todo
 }
 
 func TestEndpoint(t *testing.T) {
@@ -189,7 +190,6 @@ func TestEndpoint(t *testing.T) {
 	Endpoint(u)(o)
 	assert.Equal(t, "hello", o.endpoint.Host)
 	assert.Equal(t, "http", o.endpoint.Scheme)
-
 }
 
 func TestMiddleware(t *testing.T) {

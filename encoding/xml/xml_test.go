@@ -65,7 +65,8 @@ func TestCodec_Unmarshal(t *testing.T) {
 				`<b>B</b>` +
 				`<a>A</a>` +
 				`</parent>` +
-				`</result>`},
+				`</result>`,
+		},
 	}
 
 	for _, tt := range tests {
@@ -84,7 +85,6 @@ func TestCodec_Unmarshal(t *testing.T) {
 }
 
 func TestCodec_NilUnmarshal(t *testing.T) {
-
 	tests := []struct {
 		want     interface{}
 		InputXML string
@@ -97,7 +97,8 @@ func TestCodec_NilUnmarshal(t *testing.T) {
 				`<b>B</b>` +
 				`<a>A</a>` +
 				`</parent>` +
-				`</result>`},
+				`</result>`,
+		},
 	}
 
 	for _, tt := range tests {

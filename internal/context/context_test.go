@@ -10,18 +10,20 @@ import (
 )
 
 func TestContext(t *testing.T) {
-	ctx1 := context.WithValue(context.Background(), "go-kratos", "https://github.com/go-kratos/")
-	ctx2 := context.WithValue(context.Background(), "kratos", "https://go-kratos.dev/")
+	type ctxKey1 struct{}
+	type ctxKey2 struct{}
+	ctx1 := context.WithValue(context.Background(), ctxKey1{}, "https://github.com/go-kratos/")
+	ctx2 := context.WithValue(context.Background(), ctxKey2{}, "https://go-kratos.dev/")
 
 	ctx, cancel := Merge(ctx1, ctx2)
 	defer cancel()
 
-	got := ctx.Value("go-kratos")
+	got := ctx.Value(ctxKey1{})
 	value1, ok := got.(string)
 	assert.Equal(t, ok, true)
 	assert.Equal(t, value1, "https://github.com/go-kratos/")
-	//
-	got2 := ctx.Value("kratos")
+
+	got2 := ctx.Value(ctxKey2{})
 	value2, ok := got2.(string)
 	assert.Equal(t, ok, true)
 	assert.Equal(t, value2, "https://go-kratos.dev/")
@@ -30,14 +32,26 @@ func TestContext(t *testing.T) {
 	t.Log(value2)
 }
 
-func TestMerge2(t *testing.T) {
+func TestMerge(t *testing.T) {
+	type ctxKey1 struct{}
+	type ctxKey2 struct{}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	ctx1 := context.WithValue(context.Background(), "go-kratos", "https://github.com/go-kratos/")
-	ctx2 := context.WithValue(ctx, "kratos", "https://go-kratos.dev/")
+	ctx1 := context.WithValue(context.Background(), ctxKey1{}, "https://github.com/go-kratos/")
+	ctx2 := context.WithValue(ctx, ctxKey2{}, "https://go-kratos.dev/")
 
 	ctx, cancel = Merge(ctx1, ctx2)
 	defer cancel()
+
+	got := ctx.Value(ctxKey1{})
+	value1, ok := got.(string)
+	assert.Equal(t, ok, true)
+	assert.Equal(t, value1, "https://github.com/go-kratos/")
+
+	got2 := ctx.Value(ctxKey2{})
+	value2, ok := got2.(string)
+	assert.Equal(t, ok, true)
+	assert.Equal(t, value2, "https://go-kratos.dev/")
 
 	t.Log(ctx)
 }
@@ -165,7 +179,6 @@ func Test_mergeCtx_Deadline(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			var parent1, parent2 context.Context
 			var cancel1, cancel2 context.CancelFunc
 			if reflect.DeepEqual(tt.fields.parent1Timeout, time.Time{}) {

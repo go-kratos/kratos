@@ -105,7 +105,7 @@ func populateRepeatedField(fd protoreflect.FieldDescriptor, list protoreflect.Li
 }
 
 func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, values []string) error {
-	if len(values) != 2 {
+	if len(values) != 2 { //nolint:gomnd
 		return fmt.Errorf("more than one value provided for key %q in map %q", values[0], fd.FullName())
 	}
 	key, err := parseField(fd.MapKey(), values[0])
@@ -203,7 +203,7 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 	var msg proto.Message
 	switch md.FullName() {
 	case "google.protobuf.Timestamp":
-		if value == "null" {
+		if value == nullStr {
 			break
 		}
 		t, err := time.Parse(time.RFC3339Nano, value)
@@ -212,7 +212,7 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		}
 		msg = timestamppb.New(t)
 	case "google.protobuf.Duration":
-		if value == "null" {
+		if value == nullStr {
 			break
 		}
 		d, err := time.ParseDuration(value)

@@ -143,7 +143,7 @@ func (a *App) Stop() error {
 }
 
 func (a *App) buildInstance() (*registry.ServiceInstance, error) {
-	var endpoints []string
+	endpoints := make([]string, 0, 3)
 	for _, e := range a.opts.endpoints {
 		endpoints = append(endpoints, e.String())
 	}

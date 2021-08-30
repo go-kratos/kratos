@@ -7,7 +7,6 @@ import (
 )
 
 func TestCodec_Unmarshal(t *testing.T) {
-
 	tests := []struct {
 		data  string
 		value interface{}
@@ -18,45 +17,59 @@ func TestCodec_Unmarshal(t *testing.T) {
 		},
 		{
 			"{}", &struct{}{},
-		}, {
+		},
+		{
 			"v: hi",
 			map[string]string{"v": "hi"},
-		}, {
+		},
+		{
 			"v: hi", map[string]interface{}{"v": "hi"},
-		}, {
+		},
+		{
 			"v: true",
 			map[string]string{"v": "true"},
-		}, {
+		},
+		{
 			"v: true",
 			map[string]interface{}{"v": true},
-		}, {
+		},
+		{
 			"v: 10",
 			map[string]interface{}{"v": 10},
-		}, {
+		},
+		{
 			"v: 0b10",
 			map[string]interface{}{"v": 2},
-		}, {
+		},
+		{
 			"v: 0xA",
 			map[string]interface{}{"v": 10},
-		}, {
+		},
+		{
 			"v: 4294967296",
 			map[string]int64{"v": 4294967296},
-		}, {
+		},
+		{
 			"v: 0.1",
 			map[string]interface{}{"v": 0.1},
-		}, {
+		},
+		{
 			"v: .1",
 			map[string]interface{}{"v": 0.1},
-		}, {
+		},
+		{
 			"v: .Inf",
 			map[string]interface{}{"v": math.Inf(+1)},
-		}, {
+		},
+		{
 			"v: -.Inf",
 			map[string]interface{}{"v": math.Inf(-1)},
-		}, {
+		},
+		{
 			"v: -10",
 			map[string]interface{}{"v": -10},
-		}, {
+		},
+		{
 			"v: -.1",
 			map[string]interface{}{"v": -0.1},
 		},
@@ -77,7 +90,6 @@ func TestCodec_Unmarshal(t *testing.T) {
 	if err != nil {
 		t.Fatalf("(codec{}).Unmarshal should not return err")
 	}
-
 }
 
 func TestCodec_Marshal(t *testing.T) {

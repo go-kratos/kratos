@@ -19,6 +19,7 @@ func TestFilterAll(t *testing.T) {
 	log.Infow("username", "kratos")
 	log.Warn("warn log")
 }
+
 func TestFilterLevel(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(NewFilter(NewFilter(logger, FilterLevel(LevelWarn))))
@@ -32,7 +33,7 @@ func TestFilterLevel(t *testing.T) {
 func TestFilterCaller(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewFilter(logger)
-	log.Log(LevelDebug, "msg1", "te1st debug")
+	_ = log.Log(LevelDebug, "msg1", "te1st debug")
 	logHelper := NewHelper(NewFilter(logger))
 	logHelper.Log(LevelDebug, "msg1", "te1st debug")
 }
@@ -83,7 +84,7 @@ func testFilterFunc(level Level, keyvals ...interface{}) bool {
 	}
 	for i := 0; i < len(keyvals); i++ {
 		if keyvals[i] == "password" {
-			keyvals[i+1] = "***"
+			keyvals[i+1] = fuzzyStr
 		}
 	}
 	return false

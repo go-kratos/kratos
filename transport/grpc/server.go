@@ -25,8 +25,10 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var _ transport.Server = (*Server)(nil)
-var _ transport.Endpointer = (*Server)(nil)
+var (
+	_ transport.Server     = (*Server)(nil)
+	_ transport.Endpointer = (*Server)(nil)
+)
 
 // ServerOption is gRPC server option.
 type ServerOption func(o *Server)
@@ -119,13 +121,13 @@ func NewServer(opts ...ServerOption) *Server {
 	for _, o := range opts {
 		o(srv)
 	}
-	var ints = []grpc.UnaryServerInterceptor{
+	ints := []grpc.UnaryServerInterceptor{
 		srv.unaryServerInterceptor(),
 	}
 	if len(srv.ints) > 0 {
 		ints = append(ints, srv.ints...)
 	}
-	var grpcOpts = []grpc.ServerOption{
+	grpcOpts := []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(ints...),
 	}
 	if srv.tlsConf != nil {
