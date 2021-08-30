@@ -25,6 +25,7 @@ all:
 .PHONY: uninstall
 .PHONY: clean
 .PHONY: fmt
+.PHONY: lint
 
 install: all
 ifeq ($(user),root)
@@ -55,3 +56,10 @@ clean:
 
 fmt:
 	@gofmt -s -w .
+
+# golangci-lint
+LINTER := bin/golangci-lint
+$(LINTER): 
+	curl -L https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v1.42.0
+lint: $(LINTER)
+	eval '${LINTER} run --timeout=5m'

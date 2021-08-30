@@ -2,8 +2,6 @@ name: Go
 
 on:
   push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -11,6 +9,7 @@ on:
 
 jobs:
   build:
+    name: build & test
     runs-on: ubuntu-latest
     services:
       etcd:

@@ -45,7 +45,7 @@ func (r *discoveryResolver) watch() {
 }
 
 func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
-	addrs := make([]resolver.Address, 0, 3)
+	addrs := make([]resolver.Address, 0)
 	for _, in := range ins {
 		endpoint, err := endpoint.ParseEndpoint(in.Endpoints, "grpc", !r.insecure)
 		if err != nil {

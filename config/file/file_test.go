@@ -90,10 +90,10 @@ func TestFile(t *testing.T) {
 		data = []byte(_testJSON)
 	)
 	defer os.Remove(path)
-	if err := os.MkdirAll(path, 0700); err != nil {
+	if err := os.MkdirAll(path, 0o700); err != nil {
 		t.Error(err)
 	}
-	if err := ioutil.WriteFile(file, data, 0666); err != nil {
+	if err := ioutil.WriteFile(file, data, 0o666); err != nil {
 		t.Error(err)
 	}
 	testSource(t, file, data)
@@ -181,7 +181,7 @@ func testSource(t *testing.T, path string, data []byte) {
 func TestConfig(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "test_config.json")
 	defer os.Remove(path)
-	if err := ioutil.WriteFile(path, []byte(_testJSON), 0666); err != nil {
+	if err := ioutil.WriteFile(path, []byte(_testJSON), 0o666); err != nil {
 		t.Error(err)
 	}
 	c := config.New(config.WithSource(
@@ -293,7 +293,7 @@ func testScan(t *testing.T, c config.Config) {
 func TestMergeDataRace(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "test_config.json")
 	defer os.Remove(path)
-	if err := ioutil.WriteFile(path, []byte(_testJSON), 0666); err != nil {
+	if err := ioutil.WriteFile(path, []byte(_testJSON), 0o666); err != nil {
 		t.Error(err)
 	}
 	c := config.New(config.WithSource(

@@ -54,7 +54,7 @@ func (v *atomicValue) Int() (int64, error) {
 	case float64:
 		return int64(val), nil
 	case string:
-		return strconv.ParseInt(val, 10, 64)
+		return strconv.ParseInt(val, 10, 64) //nolint:gomnd
 	}
 	return 0, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
 }
@@ -70,7 +70,7 @@ func (v *atomicValue) Float() (float64, error) {
 	case int64:
 		return float64(val), nil
 	case string:
-		return strconv.ParseFloat(val, 64)
+		return strconv.ParseFloat(val, 64) //nolint:gomnd
 	}
 	return 0.0, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
 }

@@ -120,7 +120,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 }
 
 func (r *resolver) update(services []*registry.ServiceInstance) {
-	nodes := make([]*registry.ServiceInstance, 0, 3)
+	nodes := make([]*registry.ServiceInstance, 0)
 	for _, in := range services {
 		ept, err := endpoint.ParseEndpoint(in.Endpoints, "http", !r.insecure)
 		if err != nil {
