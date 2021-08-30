@@ -1,10 +1,12 @@
-package middleware
+package selector
 
 import (
 	"context"
 	"fmt"
-	"github.com/go-kratos/kratos/v2/transport"
 	"testing"
+
+	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
 )
 
 var (
@@ -107,7 +109,7 @@ func TestMatchClient(t *testing.T) {
 	}
 }
 
-func testMiddleware(handler Handler) Handler {
+func testMiddleware(handler middleware.Handler) middleware.Handler {
 	return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 		fmt.Println("before")
 		reply, err = handler(ctx, req)
