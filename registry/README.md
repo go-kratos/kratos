@@ -15,11 +15,6 @@ go get -u github.com/go-kratos/kratos/registry/etcd/v2
 go get -u github.com/go-kratos/kratos/registry/zookeeper/v2
 ```
 
-## Kube
-```shell
-go get -u github.com/go-kratos/kratos/registry/kube/v2
-```
-
 ## Nacos
 ```shell
 go get -u github.com/go-kratos/kratos/registry/nacos/v2
