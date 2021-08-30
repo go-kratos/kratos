@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/go-kratos/kratos/v2/transport"

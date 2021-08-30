@@ -2,6 +2,7 @@ package proto
 
 import (
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 
 	testData "github.com/go-kratos/kratos/v2/internal/testdata/encoding"

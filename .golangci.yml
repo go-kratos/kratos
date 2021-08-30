@@ -64,4 +64,5 @@ linters-settings:
   goconst:
     ignore-tests: true
   gocyclo:
-    min-complexity: 20
+    # recommend 10-20
+    min-complexity: 30
