@@ -4,7 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 
-	testproto "github.com/go-kratos/kratos/v2/internal/testproto/encoding"
+	testData "github.com/go-kratos/kratos/v2/internal/testdata/encoding"
 )
 
 func TestName(t *testing.T) {
@@ -15,7 +15,7 @@ func TestName(t *testing.T) {
 func TestCodec(t *testing.T) {
 	c := new(codec)
 
-	model := testproto.TestModel{
+	model := testData.TestModel{
 		Id:    1,
 		Name:  "kratos",
 		Hobby: []string{"study", "eat", "play"},
@@ -24,7 +24,7 @@ func TestCodec(t *testing.T) {
 	m, err := c.Marshal(&model)
 	assert.Nil(t, err)
 
-	var res testproto.TestModel
+	var res testData.TestModel
 
 	err = c.Unmarshal(m, &res)
 	assert.Nil(t, err)
