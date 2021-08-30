@@ -6,11 +6,11 @@ import (
 	"github.com/go-kratos/kratos/examples/i18n/internal/pkg/middleware/localize"
 	"github.com/go-kratos/kratos/examples/i18n/internal/service"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware/logging"
-	"github.com/go-kratos/kratos/v2/middleware/metrics"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/middleware/tracing"
-	"github.com/go-kratos/kratos/v2/middleware/validate"
+	"github.com/go-kratos/kratos/middleware/logging/v2"
+	"github.com/go-kratos/kratos/middleware/metrics/v2"
+	"github.com/go-kratos/kratos/middleware/recovery/v2"
+	"github.com/go-kratos/kratos/middleware/tracing/v2"
+	"github.com/go-kratos/kratos/middleware/validate/v2"
 	"github.com/go-kratos/kratos/v2/transport/http"
 )
 

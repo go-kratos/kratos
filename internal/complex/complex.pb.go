@@ -178,11 +178,11 @@ func file_complex_proto_rawDescGZIP() []byte {
 
 var file_complex_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_complex_proto_goTypes = []interface{}{
-	(*Complex)(nil), // 0: testproto.Complex
-	(*Simple)(nil),  // 1: testproto.Simple
+	(*Complex)(nil), // 0: encoding.Complex
+	(*Simple)(nil),  // 1: encoding.Simple
 }
 var file_complex_proto_depIdxs = []int32{
-	1, // 0: testproto.Complex.simple:type_name -> testproto.Simple
+	1, // 0: encoding.Complex.simple:type_name -> encoding.Simple
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

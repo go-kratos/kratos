@@ -13,6 +13,12 @@ require (
 	github.com/go-kratos/consul v0.1.4
 	github.com/go-kratos/etcd v0.1.3
 	github.com/go-kratos/gin v0.1.0
+	github.com/go-kratos/kratos/middleware/logging/v2 v2.0.0-00010101000000-000000000000
+	github.com/go-kratos/kratos/middleware/metadata/v2 v2.0.0-00010101000000-000000000000
+	github.com/go-kratos/kratos/middleware/metrics/v2 v2.0.0-00010101000000-000000000000
+	github.com/go-kratos/kratos/middleware/recovery/v2 v2.0.0-00010101000000-000000000000
+	github.com/go-kratos/kratos/middleware/tracing/v2 v2.0.0-00010101000000-000000000000
+	github.com/go-kratos/kratos/middleware/validate/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/registry/consul/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/registry/etcd/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/registry/nacos/v2 v2.0.0-00010101000000-000000000000
@@ -58,6 +64,12 @@ require (
 )
 
 replace (
+	github.com/go-kratos/kratos/middleware/logging/v2 => ../middleware/logging
+	github.com/go-kratos/kratos/middleware/metadata/v2 => ../middleware/metadata
+	github.com/go-kratos/kratos/middleware/metrics/v2 => ../middleware/metrics
+	github.com/go-kratos/kratos/middleware/recovery/v2 => ../middleware/recovery
+	github.com/go-kratos/kratos/middleware/tracing/v2 => ../middleware/tracing
+	github.com/go-kratos/kratos/middleware/validate/v2 => ../middleware/validate
 	github.com/go-kratos/kratos/registry/consul/v2 => ../registry/consul
 	github.com/go-kratos/kratos/registry/etcd/v2 => ../registry/etcd
 	github.com/go-kratos/kratos/registry/nacos/v2 => ../registry/nacos

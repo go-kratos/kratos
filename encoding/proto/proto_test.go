@@ -1,9 +1,10 @@
 package proto
 
 import (
-	"github.com/go-kratos/kratos/v2/internal/test/testproto"
 	"github.com/stretchr/testify/assert"
 	"testing"
+
+	testData "github.com/go-kratos/kratos/v2/internal/testdata/encoding"
 )
 
 func TestName(t *testing.T) {
@@ -14,7 +15,7 @@ func TestName(t *testing.T) {
 func TestCodec(t *testing.T) {
 	c := new(codec)
 
-	model := testproto.TestModel{
+	model := testData.TestModel{
 		Id:    1,
 		Name:  "kratos",
 		Hobby: []string{"study", "eat", "play"},
@@ -23,12 +24,12 @@ func TestCodec(t *testing.T) {
 	m, err := c.Marshal(&model)
 	assert.Nil(t, err)
 
-	var res testproto.TestModel
+	var res testData.TestModel
 
 	err = c.Unmarshal(m, &res)
 	assert.Nil(t, err)
 
-	assert.Equal(t, res.Id,model.Id)
-	assert.Equal(t, res.Name,model.Name)
-	assert.Equal(t, res.Hobby,model.Hobby)
+	assert.Equal(t, res.Id, model.Id)
+	assert.Equal(t, res.Name, model.Name)
+	assert.Equal(t, res.Hobby, model.Hobby)
 }
