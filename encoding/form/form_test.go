@@ -1,17 +1,21 @@
 package form
 
 import (
-    complex2 "github.com/go-kratos/kratos/v2/internal/complex"
-    "github.com/go-kratos/kratos/v2/internal/test/testproto"
-    "testing"
+	complex2 "github.com/go-kratos/kratos/v2/internal/complex"
+	"testing"
 
-    "github.com/go-kratos/kratos/v2/encoding"
-    "github.com/stretchr/testify/require"
+	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/stretchr/testify/require"
 )
 
 type LoginRequest struct {
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
+}
+
+type TestModel struct {
+	Id int32 `json:"id"`
+	Name string `json:"name"`
 }
 
 const contentType = "x-www-form-urlencoded"
@@ -33,11 +37,12 @@ func TestFormCodecMarshal(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, []byte("username=kratos"), content)
 
-	m := testproto.TestModel{
+	m := TestModel{
 		Id:    1,
 		Name:  "kratos",
 	}
 	content, err = encoding.GetCodec(contentType).Marshal(m)
+	t.Log(string(content))
 	require.NoError(t, err)
 	require.Equal(t, []byte("id=1&name=kratos"), content)
 }
