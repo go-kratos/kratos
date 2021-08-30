@@ -251,6 +251,8 @@ github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/pty v1.1.3/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
+github.com/kykira/rpcx v1.6.11-0.20210830071441-995e0c5e79ab h1:6nEuOBDN99Jdbjnv1lF9GuwKr3c4YHnOUxDWp13F8JI=
+github.com/kykira/rpcx v1.6.11-0.20210830071441-995e0c5e79ab/go.mod h1:4QgHpvGAr/Ou3ULjxbeqX9B4p4ncamlcvqRoYrxXXwU=
 github.com/leodido/go-urn v1.1.0/go.mod h1:+cyI34gQWZcE1eQU7NVgKkkzdXDQHr1dBMtdAPozLkw=
 github.com/lucas-clemente/quic-go v0.15.5/go.mod h1:Myi1OyS0FOjL3not4BxT7KN29bRkcMUV5JVVFLKtDp8=
 github.com/lucas-clemente/quic-go v0.20.1/go.mod h1:fZq/HUDIM+mW6X6wtzORjC0E/WDBMKe5Hf9bgjISwLk=
@@ -400,8 +402,6 @@ github.com/sirupsen/logrus v1.4.2/go.mod h1:tLMulIdttU9McNUspp0xgXVQah82FyeX6Mwd
 github.com/smallnest/quick v0.0.0-20200505103731-c8c83f9c76d3/go.mod h1:pCMr9YKzcruQNKA1483At0JJkkB2oTiw1wSXCcXgDCI=
 github.com/smallnest/quick v0.0.0-20210406061658-4bf95e372fbd h1:SnhpGlwgzC5p3cOlcVpNM6QnLroI+XLM+HQQe4ecl6s=
 github.com/smallnest/quick v0.0.0-20210406061658-4bf95e372fbd/go.mod h1:nUkRxowjORg0eBaYynfKmm9xGoE93aV/vpFYtDpoPqU=
-github.com/smallnest/rpcx v1.6.10 h1:Tq/0ybU/OMKOQ/t4HIlrok5M6tJ2J6xoUaqKlICydSk=
-github.com/smallnest/rpcx v1.6.10/go.mod h1:4QgHpvGAr/Ou3ULjxbeqX9B4p4ncamlcvqRoYrxXXwU=
 github.com/soheilhy/cmux v0.1.4/go.mod h1:IM3LyeVVIOuxMH7sFAkER9+bJ4dT7Ms6E4xg4kGIyLM=
 github.com/soheilhy/cmux v0.1.5 h1:jjzc5WVemNEDTLwv9tlmemhC73tI08BNOIGwBOo10Js=
 github.com/soheilhy/cmux v0.1.5/go.mod h1:T7TcVDs9LWfQgPlPsdngu6I6QIoyIFZDDC6sNE1GqG0=

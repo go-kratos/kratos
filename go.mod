@@ -2,6 +2,8 @@ module github.com/go-kratos/kratos/v2
 
 go 1.15
 
+replace github.com/smallnest/rpcx v1.6.10 => github.com/kykira/rpcx v1.6.11-0.20210830071441-995e0c5e79ab
+
 require (
 	github.com/apache/thrift v0.14.2 // indirect
 	github.com/armon/go-metrics v0.3.9 // indirect

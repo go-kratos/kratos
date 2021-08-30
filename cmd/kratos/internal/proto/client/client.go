@@ -97,7 +97,7 @@ func generate(proto string, args []string) error {
 		//"--go_out=paths=source_relative:.",
 		//"--go-grpc_out=paths=source_relative:.",
 		//"--go-http_out=paths=source_relative:.",
-		//"--go-errors_out=paths=source_relative:.",
+		"--go-errors_out=paths=source_relative:.",
 		"--gogofaster_out=plugins=rpcx:.",
 	}
 	input = append(input, inputExt...)
