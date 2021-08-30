@@ -4,7 +4,6 @@ import (
 	"log"
 	"path/filepath"
 
-	kubeconf "github.com/go-kratos/kratos/config/kube/v2/config"
 	"github.com/go-kratos/kratos/v2/config"
 	"k8s.io/client-go/util/homedir"
 )
@@ -27,10 +26,10 @@ const yamlApp = `application:
 func main() {
 	conf := config.New(
 		config.WithSource(
-			kubeconf.NewSource(
-				kubeconf.Namespace("mesh"),
-				kubeconf.LabelSelector("app=test"),
-				kubeconf.KubeConfig(filepath.Join(homedir.HomeDir(), ".kube", "config")),
+			NewSource(
+				Namespace("mesh"),
+				LabelSelector("app=test"),
+				KubeConfig(filepath.Join(homedir.HomeDir(), ".kube", "config")),
 			),
 		),
 	)

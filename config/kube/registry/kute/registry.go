@@ -1,5 +1,5 @@
 // The package registry simply implements the Kubernetes-based Registry
-package registry
+package kute
 
 import (
 	"context"
