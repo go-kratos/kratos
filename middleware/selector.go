@@ -1,11 +1,10 @@
-package selector
+package middleware
 
 import (
 	"context"
 	"regexp"
 	"strings"
 
-	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
@@ -33,16 +32,16 @@ type Builder struct {
 	regex  []string
 	path   []string
 
-	ms []middleware.Middleware
+	ms []Middleware
 }
 
 // Server selector middleware
-func Server(ms ...middleware.Middleware) *Builder {
+func Server(ms ...Middleware) *Builder {
 	return &Builder{ms: ms}
 }
 
 // Client selector middleware
-func Client(ms ...middleware.Middleware) *Builder {
+func Client(ms ...Middleware) *Builder {
 	return &Builder{client: true, ms: ms}
 }
 
@@ -65,7 +64,7 @@ func (b *Builder) Path(path ...string) *Builder {
 }
 
 // Build is Builder's Build, for example: Server().Path(m1,m2).Build()
-func (b *Builder) Build() middleware.Middleware {
+func (b *Builder) Build() Middleware {
 	var transporter func(ctx context.Context) (transport.Transporter, bool)
 	if b.client {
 		transporter = clientTransporter
@@ -96,8 +95,8 @@ func (b *Builder) match(operation string) bool {
 }
 
 // selector middleware
-func selector(transporter transporter, match match, ms ...middleware.Middleware) middleware.Middleware {
-	return func(handler middleware.Handler) middleware.Handler {
+func selector(transporter transporter, match match, ms ...Middleware) Middleware {
+	return func(handler Handler) Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			info, ok := transporter(ctx)
 			if !ok {
@@ -107,7 +106,7 @@ func selector(transporter transporter, match match, ms ...middleware.Middleware)
 			if !match(info.Operation()) {
 				return handler(ctx, req)
 			}
-			return middleware.Chain(ms...)(handler)(ctx, req)
+			return Chain(ms...)(handler)(ctx, req)
 		}
 	}
 }
