@@ -1,4 +1,4 @@
-package main
+package kubernetes
 
 import (
 	"path/filepath"
@@ -12,7 +12,7 @@ func TestSource(t *testing.T) {
 	s := NewSource(
 		Namespace("mesh"),
 		LabelSelector(""),
-		KubeConfig(filepath.Join(home, ".kube", "config")),
+		KubeConfig(filepath.Join(home, ".kubernetes", "config")),
 	)
 	kvs, err := s.Load()
 	if err != nil {

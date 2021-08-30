@@ -1,4 +1,4 @@
-package main
+package kubernetes
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 
 func TestKube(t *testing.T) {
 	home := homedir.HomeDir()
-	config, err := clientcmd.BuildConfigFromFlags("", filepath.Join(home, ".kube", "config"))
+	config, err := clientcmd.BuildConfigFromFlags("", filepath.Join(home, ".kubernetes", "config"))
 	if err != nil {
 		t.Error(err)
 	}

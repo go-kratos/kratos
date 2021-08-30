@@ -13,7 +13,7 @@ kubectl create clusterrolebinding go-kratos:kube --clusterrole=view --serviceacc
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: go-kratos:kube
+  name: go-kratos:kubernetes
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -30,6 +30,6 @@ subjects:
     config.NewSource(SourceOption{
 		Namespace:     "mesh",
 		LabelSelector: "",
-		KubeConfig:    filepath.Join(homedir.HomeDir(), ".kube", "config"),
+		KubeConfig:    filepath.Join(homedir.HomeDir(), ".kubernetes", "config"),
 	})
 ```

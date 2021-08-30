@@ -1,4 +1,4 @@
-package main
+package kubernetes
 
 import (
 	"log"
@@ -29,7 +29,7 @@ func main() {
 			NewSource(
 				Namespace("mesh"),
 				LabelSelector("app=test"),
-				KubeConfig(filepath.Join(homedir.HomeDir(), ".kube", "config")),
+				KubeConfig(filepath.Join(homedir.HomeDir(), ".kubernetes", "config")),
 			),
 		),
 	)

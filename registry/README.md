@@ -20,7 +20,7 @@ go get -u github.com/go-kratos/kratos/registry/zookeeper/v2
 go get -u github.com/go-kratos/kratos/registry/nacos/v2
 ```
 
-## kube
+## kubernetes
 ```shell
-go get -u github.com/go-kratos/kratos/registry/kube/v2
+go get -u github.com/go-kratos/kratos/registry/kubernetes/v2
 ```

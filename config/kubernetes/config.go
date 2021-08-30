@@ -1,4 +1,4 @@
-package main
+package kubernetes
 
 import (
 	"context"
@@ -13,15 +13,15 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// Option is kube option.
+// Option is kubernetes option.
 type Option func(*options)
 
 type options struct {
-	// kube namespace
+	// kubernetes namespace
 	Namespace string
-	// kube labelSelector example `app=test`
+	// kubernetes labelSelector example `app=test`
 	LabelSelector string
-	// kube fieldSelector example `app=test`
+	// kubernetes fieldSelector example `app=test`
 	FieldSelector string
 	// set KubeConfig out-of-cluster Use outside cluster
 	KubeConfig string
@@ -29,35 +29,35 @@ type options struct {
 	Master string
 }
 
-// Namespace with kube namespace.
+// Namespace with kubernetes namespace.
 func Namespace(ns string) Option {
 	return func(o *options) {
 		o.Namespace = ns
 	}
 }
 
-// LabelSelector with kube label selector.
+// LabelSelector with kubernetes label selector.
 func LabelSelector(label string) Option {
 	return func(o *options) {
 		o.LabelSelector = label
 	}
 }
 
-// FieldSelector with kube field selector.
+// FieldSelector with kubernetes field selector.
 func FieldSelector(field string) Option {
 	return func(o *options) {
 		o.FieldSelector = field
 	}
 }
 
-// KubeConfig with kube config.
+// KubeConfig with kubernetes config.
 func KubeConfig(config string) Option {
 	return func(o *options) {
 		o.KubeConfig = config
 	}
 }
 
-// Master with kube master.
+// Master with kubernetes master.
 func Master(master string) Option {
 	return func(o *options) {
 		o.Master = master
@@ -69,7 +69,7 @@ type kube struct {
 	client *kubernetes.Clientset
 }
 
-// NewSource new a kube config source.
+// NewSource new a kubernetes config source.
 func NewSource(opts ...Option) config.Source {
 	options := options{}
 	for _, o := range opts {
