@@ -46,8 +46,9 @@ func BenchmarkHelperPrintw(b *testing.B) {
 	}
 }
 
+type traceKey struct{}
+
 func TestContext(t *testing.T) {
-	type traceKey struct{}
 	logger := With(NewStdLogger(os.Stdout),
 		"trace", Trace(),
 	)
@@ -58,7 +59,7 @@ func TestContext(t *testing.T) {
 
 func Trace() Valuer {
 	return func(ctx context.Context) interface{} {
-		s := ctx.Value("trace_id").(string)
+		s := ctx.Value(traceKey{}).(string)
 		return s
 	}
 }
