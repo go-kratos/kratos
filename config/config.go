@@ -48,18 +48,18 @@ type config struct {
 
 // New new a config with options.
 func New(opts ...Option) Config {
-	options := options{
+	o := options{
 		logger:   log.DefaultLogger,
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
 	}
-	for _, o := range opts {
-		o(&options)
+	for _, opt := range opts {
+		opt(&o)
 	}
 	return &config{
-		opts:   options,
-		reader: newReader(options),
-		log:    log.NewHelper(options.logger),
+		opts:   o,
+		reader: newReader(o),
+		log:    log.NewHelper(o.logger),
 	}
 }
 
@@ -103,7 +103,7 @@ func (c *config) Load() error {
 		if err != nil {
 			return err
 		}
-		if err := c.reader.Merge(kvs...); err != nil {
+		if err = c.reader.Merge(kvs...); err != nil {
 			c.log.Errorf("failed to merge config source: %v", err)
 			return err
 		}

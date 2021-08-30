@@ -111,7 +111,7 @@ func testRoute(t *testing.T, srv *Server) {
 		t.Fatalf("contentType: %s", v)
 	}
 	u := new(User)
-	if err := json.NewDecoder(resp.Body).Decode(u); err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(u); err != nil {
 		t.Fatal(err)
 	}
 	if u.Name != "foo" {

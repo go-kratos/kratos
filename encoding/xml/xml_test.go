@@ -73,8 +73,7 @@ func TestCodec_Unmarshal(t *testing.T) {
 		vt := reflect.TypeOf(tt.want)
 		dest := reflect.New(vt.Elem()).Interface()
 		data := []byte(tt.InputXML)
-		codec := codec{}
-		err := codec.Unmarshal(data, dest)
+		err := (codec{}).Unmarshal(data, dest)
 		if err != nil {
 			t.Errorf("unmarshal(%#v, %#v): %s", tt.InputXML, dest, err)
 		}

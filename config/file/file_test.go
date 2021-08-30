@@ -125,7 +125,7 @@ func testWatchFile(t *testing.T, path string) {
 	assert.Equal(t, string(kvs[0].Value), _testJSONUpdate)
 
 	newFilepath := filepath.Join(filepath.Dir(path), "test1.json")
-	if err := os.Rename(path, newFilepath); err != nil {
+	if err = os.Rename(path, newFilepath); err != nil {
 		t.Error(err)
 	}
 	kvs, err = watch.Next()
