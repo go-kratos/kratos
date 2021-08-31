@@ -3,13 +3,14 @@ package jwt
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"testing"
+	"time"
+
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/golang-jwt/jwt"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"testing"
-	"time"
 )
 
 type headerCarrier http.Header
@@ -43,21 +44,25 @@ type Transport struct {
 func (tr *Transport) Kind() transport.Kind {
 	return tr.kind
 }
+
 func (tr *Transport) Endpoint() string {
 	return tr.endpoint
 }
+
 func (tr *Transport) Operation() string {
 	return tr.operation
 }
+
 func (tr *Transport) RequestHeader() transport.Header {
 	return tr.reqHeader
 }
+
 func (tr *Transport) ReplyHeader() transport.Header {
 	return nil
 }
 
 func TestServer(t *testing.T) {
-	var testKey = "testKey"
+	testKey := "testKey"
 	mapClaims := jwt.MapClaims{}
 	mapClaims["name"] = "xiaoli"
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
@@ -149,7 +154,7 @@ func (t tokeBuilder) GetToken() string {
 }
 
 func TestClient(t *testing.T) {
-	var testKey = "testKey"
+	testKey := "testKey"
 	mapClaims := jwt.MapClaims{}
 	mapClaims["name"] = "xiaoli"
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
@@ -194,7 +199,7 @@ func TestClient(t *testing.T) {
 }
 
 func TestTokenExpire(t *testing.T) {
-	var testKey = "testKey"
+	testKey := "testKey"
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(time.Millisecond).Unix(),
 	})
@@ -215,7 +220,7 @@ func TestTokenExpire(t *testing.T) {
 }
 
 func TestDefaultAuthHeaderKey(t *testing.T) {
-	var testKey = "testKey"
+	testKey := "testKey"
 	mapClaims := jwt.MapClaims{}
 	mapClaims["name"] = "xiaoli"
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)

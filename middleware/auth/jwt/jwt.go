@@ -2,27 +2,28 @@ package jwt
 
 import (
 	"context"
+	"strings"
+
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/golang-jwt/jwt"
-	"strings"
 )
 
 type authkey string
 
 const (
 
-	//bearerWord the bearer key word for authorization
+	// bearerWord the bearer key word for authorization
 	bearerWord string = "Bearer"
 
-	//bearerFormat authorization token format
+	// bearerFormat authorization token format
 	bearerFormat string = "Bearer %s"
 
-	//HeaderKey holds the key used to store the JWT Token in the request header.
+	// HeaderKey holds the key used to store the JWT Token in the request header.
 	HeaderKey string = "Authorization"
 
-	//InfoKey holds the key used to store the auth info in the context
+	// InfoKey holds the key used to store the auth info in the context
 	InfoKey authkey = "AuthInfo"
 )
 
@@ -37,31 +38,31 @@ var (
 	ErrNeedTokenProvider      = errors.Unauthorized("Missing info", "Token provider is missing")
 )
 
-//Option is jwt option.
+// Option is jwt option.
 type Option func(*options)
 
-//Parser is a jwt parser
+// Parser is a jwt parser
 type options struct {
 	accessSecret  string
 	signingMethod jwt.SigningMethod
 	authHeaderKey string
 }
 
-//WithSigningMethod with signing method option.
+// WithSigningMethod with signing method option.
 func WithSigningMethod(method jwt.SigningMethod) Option {
 	return func(o *options) {
 		o.signingMethod = method
 	}
 }
 
-//WithAuthHeaderKey set key that hold auth token in header
+// WithAuthHeaderKey set key that hold auth token in header
 func WithAuthHeaderKey(headerKey string) Option {
 	return func(options *options) {
 		options.authHeaderKey = headerKey
 	}
 }
 
-//Server is a server auth middleware
+// Server is a server auth middleware
 func Server(accessSecret string, opts ...Option) middleware.Middleware {
 	o := initOptions(accessSecret, opts...)
 	parser := newParser(o)
@@ -80,7 +81,7 @@ func Server(accessSecret string, opts ...Option) middleware.Middleware {
 	}
 }
 
-//Client is a client jwt middleware
+// Client is a client jwt middleware
 func Client(provider TokenProvider, accessSecret string, opts ...Option) middleware.Middleware {
 	o := initOptions(accessSecret, opts...)
 	return func(handler middleware.Handler) middleware.Handler {
@@ -97,7 +98,7 @@ func Client(provider TokenProvider, accessSecret string, opts ...Option) middlew
 	}
 }
 
-//initOptions init the option
+// initOptions init the option
 func initOptions(accessSecret string, opts ...Option) *options {
 	o := &options{
 		accessSecret:  accessSecret,
@@ -110,7 +111,7 @@ func initOptions(accessSecret string, opts ...Option) *options {
 	return o
 }
 
-//newParser create a jwt token parser.
+// newParser create a jwt token parser.
 func newParser(o *options) func(jwtToken string) (*jwt.Token, error) {
 	return func(jwtToken string) (*jwt.Token, error) {
 		/*check the access secret*/
