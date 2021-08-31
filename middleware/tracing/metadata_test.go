@@ -36,7 +36,7 @@ func TestMetadata_Inject(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			a := kratos.New(kratos.Name(tt.args.appName))
 			ctx := kratos.NewContext(context.Background(), a)
-			var m = new(Metadata)
+			m := new(Metadata)
 			m.Inject(ctx, tt.args.carrier)
 			if res := tt.args.carrier.Get(serviceHeader); tt.want != res {
 				t.Errorf("Get(serviceHeader) :%s want: %s", res, tt.want)

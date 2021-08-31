@@ -13,7 +13,7 @@ func TestDefaultDecoder(t *testing.T) {
 		Value:  []byte("config"),
 		Format: "",
 	}
-	target := make(map[string]interface{}, 0)
+	target := make(map[string]interface{})
 	err := defaultDecoder(src, target)
 	assert.Nil(t, err)
 	assert.Equal(t, map[string]interface{}{
@@ -25,7 +25,7 @@ func TestDefaultDecoder(t *testing.T) {
 		Value:  []byte("2233"),
 		Format: "",
 	}
-	target = make(map[string]interface{}, 0)
+	target = make(map[string]interface{})
 	err = defaultDecoder(src, target)
 	assert.Nil(t, err)
 	assert.Equal(t, map[string]interface{}{

@@ -30,7 +30,7 @@ func EncodeURL(pathTemplate string, msg proto.Message, needQuery bool) string {
 	}
 	pathParams := make(map[string]struct{})
 	path := reg.ReplaceAllStringFunc(pathTemplate, func(in string) string {
-		if len(in) < 4 {
+		if len(in) < 4 { //nolint:gomnd // **  explain the 4 number here :-) **
 			return in
 		}
 		key := in[2 : len(in)-1]

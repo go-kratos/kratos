@@ -65,8 +65,10 @@ const (
 	KindHTTP Kind = "http"
 )
 
-type serverTransportKey struct{}
-type clientTransportKey struct{}
+type (
+	serverTransportKey struct{}
+	clientTransportKey struct{}
+)
 
 // NewServerContext returns a new Context that carries value.
 func NewServerContext(ctx context.Context, tr Transporter) context.Context {

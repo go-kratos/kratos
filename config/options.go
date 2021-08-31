@@ -84,7 +84,7 @@ func defaultDecoder(src *KeyValue, target map[string]interface{}) error {
 // placeholder format in ${key:default}.
 func defaultResolver(input map[string]interface{}) error {
 	mapper := func(name string) string {
-		args := strings.SplitN(strings.TrimSpace(name), ":", 2)
+		args := strings.SplitN(strings.TrimSpace(name), ":", 2) //nolint:gomnd
 		if v, has := readValue(input, args[0]); has {
 			s, _ := v.String()
 			return s
@@ -127,7 +127,7 @@ func expand(s string, mapping func(string) string) string {
 	r := regexp.MustCompile(`\${(.*?)}`)
 	re := r.FindAllStringSubmatch(s, -1)
 	for _, i := range re {
-		if len(i) == 2 {
+		if len(i) == 2 { //nolint:gomnd
 			s = strings.ReplaceAll(s, i[0], mapping(i[1]))
 		}
 	}

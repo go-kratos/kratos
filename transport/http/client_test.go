@@ -16,8 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type mockRoundTripper struct {
-}
+type mockRoundTripper struct{}
 
 func (rt *mockRoundTripper) RoundTrip(req *nethttp.Request) (resp *nethttp.Response, err error) {
 	return
@@ -47,7 +46,6 @@ func TestWithBlock(t *testing.T) {
 }
 
 func TestWithBalancer(t *testing.T) {
-
 }
 
 func TestWithTLSConfig(t *testing.T) {
@@ -106,8 +104,7 @@ func TestWithErrorDecoder(t *testing.T) {
 	assert.NotNil(t, o.errorDecoder)
 }
 
-type mockDiscovery struct {
-}
+type mockDiscovery struct{}
 
 func (*mockDiscovery) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
 	return nil, nil

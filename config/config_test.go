@@ -39,13 +39,13 @@ const (
 
 type testConfigStruct struct {
 	Server struct {
-		Http struct {
+		HTTP struct {
 			Addr      string  `json:"addr"`
 			Port      int     `json:"port"`
 			Timeout   float64 `json:"timeout"`
 			EnableSSL bool    `json:"enable_ssl"`
 		} `json:"http"`
-		GRpc struct {
+		GRPC struct {
 			Addr    string  `json:"addr"`
 			Port    int     `json:"port"`
 			Timeout float64 `json:"timeout"`
@@ -60,17 +60,17 @@ type testConfigStruct struct {
 	Endpoints []string `json:"endpoints"`
 }
 
-type testJsonSource struct {
+type testJSONSource struct {
 	data string
 	sig  chan struct{}
 	err  chan struct{}
 }
 
-func newTestJsonSource(data string) *testJsonSource {
-	return &testJsonSource{data: data, sig: make(chan struct{}), err: make(chan struct{})}
+func newTestJSONSource(data string) *testJSONSource {
+	return &testJSONSource{data: data, sig: make(chan struct{}), err: make(chan struct{})}
 }
 
-func (p *testJsonSource) Load() ([]*KeyValue, error) {
+func (p *testJSONSource) Load() ([]*KeyValue, error) {
 	kv := &KeyValue{
 		Key:    "json",
 		Value:  []byte(p.data),
@@ -79,7 +79,7 @@ func (p *testJsonSource) Load() ([]*KeyValue, error) {
 	return []*KeyValue{kv}, nil
 }
 
-func (p *testJsonSource) Watch() (Watcher, error) {
+func (p *testJSONSource) Watch() (Watcher, error) {
 	return newTestWatcher(p.sig, p.err), nil
 }
 
@@ -120,7 +120,7 @@ func TestConfig(t *testing.T) {
 	)
 
 	c := New(
-		WithSource(newTestJsonSource(_testJSON)),
+		WithSource(newTestJSONSource(_testJSON)),
 		WithDecoder(defaultDecoder),
 		WithResolver(defaultResolver),
 		WithLogger(log.DefaultLogger),
@@ -128,7 +128,7 @@ func TestConfig(t *testing.T) {
 	err = c.Close()
 	assert.Nil(t, err)
 
-	jSource := newTestJsonSource(_testJSON)
+	jSource := newTestJSONSource(_testJSON)
 	opts := options{
 		sources:  []Source{jSource},
 		decoder:  defaultDecoder,
@@ -156,10 +156,10 @@ func TestConfig(t *testing.T) {
 	var testConf testConfigStruct
 	err = cf.Scan(&testConf)
 	assert.Nil(t, err)
-	assert.Equal(t, httpAddr, testConf.Server.Http.Addr)
-	assert.Equal(t, httpTimeout, testConf.Server.Http.Timeout)
-	assert.Equal(t, true, testConf.Server.Http.EnableSSL)
-	assert.Equal(t, grpcPort, testConf.Server.GRpc.Port)
+	assert.Equal(t, httpAddr, testConf.Server.HTTP.Addr)
+	assert.Equal(t, httpTimeout, testConf.Server.HTTP.Timeout)
+	assert.Equal(t, true, testConf.Server.HTTP.EnableSSL)
+	assert.Equal(t, grpcPort, testConf.Server.GRPC.Port)
 	assert.Equal(t, endpoint1, testConf.Endpoints[0])
 	assert.Equal(t, 2, len(testConf.Endpoints))
 }

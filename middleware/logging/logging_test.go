@@ -11,9 +11,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-var (
-	_ transport.Transporter = &Transport{}
-)
+var _ transport.Transporter = &Transport{}
 
 type Transport struct {
 	kind      transport.Kind
@@ -24,23 +22,27 @@ type Transport struct {
 func (tr *Transport) Kind() transport.Kind {
 	return tr.kind
 }
+
 func (tr *Transport) Endpoint() string {
 	return tr.endpoint
 }
+
 func (tr *Transport) Operation() string {
 	return tr.operation
 }
+
 func (tr *Transport) RequestHeader() transport.Header {
 	return nil
 }
+
 func (tr *Transport) ReplyHeader() transport.Header {
 	return nil
 }
 
 func TestHTTP(t *testing.T) {
-	var err = errors.New("reply.error")
-	var bf = bytes.NewBuffer(nil)
-	var logger = log.NewStdLogger(bf)
+	err := errors.New("reply.error")
+	bf := bytes.NewBuffer(nil)
+	logger := log.NewStdLogger(bf)
 
 	tests := []struct {
 		name string
@@ -48,29 +50,32 @@ func TestHTTP(t *testing.T) {
 		err  error
 		ctx  context.Context
 	}{
-		{"http-server@fail",
+		{
+			"http-server@fail",
 			Server,
 			err,
 			func() context.Context {
 				return transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
 			}(),
 		},
-		{"http-server@succ",
+		{
+			"http-server@succ",
 			Server,
 			nil,
 			func() context.Context {
 				return transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
 			}(),
 		},
-		{"http-client@succ",
+		{
+			"http-client@succ",
 			Client,
 			nil,
 			func() context.Context {
 				return transport.NewClientContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
-
 			}(),
 		},
-		{"http-client@fail",
+		{
+			"http-client@fail",
 			Client,
 			err,
 			func() context.Context {

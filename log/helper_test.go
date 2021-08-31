@@ -46,18 +46,20 @@ func BenchmarkHelperPrintw(b *testing.B) {
 	}
 }
 
+type traceKey struct{}
+
 func TestContext(t *testing.T) {
 	logger := With(NewStdLogger(os.Stdout),
 		"trace", Trace(),
 	)
 	log := NewHelper(logger)
-	ctx := context.WithValue(context.Background(), "trace_id", "2233")
+	ctx := context.WithValue(context.Background(), traceKey{}, "2233")
 	log.WithContext(ctx).Info("got trace!")
 }
 
 func Trace() Valuer {
 	return func(ctx context.Context) interface{} {
-		s := ctx.Value("trace_id").(string)
+		s := ctx.Value(traceKey{}).(string)
 		return s
 	}
 }

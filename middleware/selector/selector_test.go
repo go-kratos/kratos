@@ -9,9 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-var (
-	_ transport.Transporter = &Transport{}
-)
+var _ transport.Transporter = &Transport{}
 
 type Transport struct {
 	kind      transport.Kind
@@ -22,21 +20,24 @@ type Transport struct {
 func (tr *Transport) Kind() transport.Kind {
 	return tr.kind
 }
+
 func (tr *Transport) Endpoint() string {
 	return tr.endpoint
 }
+
 func (tr *Transport) Operation() string {
 	return tr.operation
 }
+
 func (tr *Transport) RequestHeader() transport.Header {
 	return nil
 }
+
 func (tr *Transport) ReplyHeader() transport.Header {
 	return nil
 }
 
 func TestMatch(t *testing.T) {
-
 	tests := []struct {
 		name string
 		ctx  context.Context
@@ -67,13 +68,12 @@ func TestMatch(t *testing.T) {
 			}
 			next = Server(testMiddleware).Prefix("/hello/").Regex(`/test/[0-9]+`).
 				Path("/example/kratos").Build()(next)
-			next(test.ctx, test.name)
+			_, _ = next(test.ctx, test.name)
 		})
 	}
 }
 
 func TestMatchClient(t *testing.T) {
-
 	tests := []struct {
 		name string
 		ctx  context.Context
@@ -104,7 +104,7 @@ func TestMatchClient(t *testing.T) {
 			}
 			next = Client(testMiddleware).Prefix("/hello/").Regex(`/test/[0-9]+`).
 				Path("/example/kratos").Build()(next)
-			next(test.ctx, test.name)
+			_, _ = next(test.ctx, test.name)
 		})
 	}
 }

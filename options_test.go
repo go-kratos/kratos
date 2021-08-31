@@ -56,8 +56,9 @@ func TestEndpoint(t *testing.T) {
 }
 
 func TestContext(t *testing.T) {
+	type ctxKey = struct{}
 	o := &options{}
-	v := context.WithValue(context.TODO(), "a", "b")
+	v := context.WithValue(context.TODO(), ctxKey{}, "b")
 	Context(v)(o)
 	assert.Equal(t, v, o.ctx)
 }
@@ -102,6 +103,7 @@ type mockRegistrar struct{}
 func (m *mockRegistrar) Register(ctx context.Context, service *registry.ServiceInstance) error {
 	return nil
 }
+
 func (m *mockRegistrar) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
 	return nil
 }

@@ -69,12 +69,10 @@ type PanicTestFunc func()
 
 // didPanic returns true if the function passed to it panics. Otherwise, it returns false.
 func didPanic(f PanicTestFunc) (bool, interface{}, string) {
-
 	didPanic := false
 	var message interface{}
 	var stack string
 	func() {
-
 		defer func() {
 			if message = recover(); message != nil {
 				didPanic = true
@@ -84,9 +82,7 @@ func didPanic(f PanicTestFunc) (bool, interface{}, string) {
 
 		// call the target function
 		f()
-
 	}()
 
 	return didPanic, message, stack
-
 }

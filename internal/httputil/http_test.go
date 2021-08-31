@@ -1,9 +1,10 @@
 package httputil
 
 import (
-	"google.golang.org/grpc/codes"
 	"net/http"
 	"testing"
+
+	"google.golang.org/grpc/codes"
 )
 
 func TestContentSubtype(t *testing.T) {
@@ -31,7 +32,6 @@ func TestContentSubtype(t *testing.T) {
 }
 
 func TestGRPCCodeFromStatus(t *testing.T) {
-
 	tests := []struct {
 		name string
 		code int
@@ -95,7 +95,6 @@ func TestStatusFromGRPCCode(t *testing.T) {
 }
 
 func TestContentType(t *testing.T) {
-
 	tests := []struct {
 		name    string
 		subtype string

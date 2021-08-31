@@ -76,9 +76,7 @@ func (r *Registry) GetService(ctx context.Context, name string) (services []*reg
 	if ss == nil {
 		return nil, fmt.Errorf("service %s not found in registry", name)
 	}
-	for _, s := range ss {
-		services = append(services, s)
-	}
+	services = append(services, ss...)
 	return
 }
 
@@ -93,9 +91,7 @@ func (r *Registry) ListServices() (allServices map[string][]*registry.ServiceIns
 		if ss == nil {
 			continue
 		}
-		for _, s := range ss {
-			services = append(services, s)
-		}
+		services = append(services, ss...)
 		allServices[name] = services
 	}
 	return

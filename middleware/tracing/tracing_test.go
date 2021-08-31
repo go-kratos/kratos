@@ -11,9 +11,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-var (
-	_ transport.Transporter = &Transport{}
-)
+var _ transport.Transporter = &Transport{}
 
 type headerCarrier http.Header
 
@@ -50,11 +48,18 @@ func (tr *Transport) RequestHeader() transport.Header { return tr.header }
 func (tr *Transport) ReplyHeader() transport.Header   { return tr.header }
 
 func TestTracing(t *testing.T) {
-	var carrier = headerCarrier{}
+	carrier := headerCarrier{}
 	tp := tracesdk.NewTracerProvider(tracesdk.WithSampler(tracesdk.TraceIDRatioBased(0)))
 
 	// caller use Inject
-	tracer := NewTracer(trace.SpanKindClient, WithTracerProvider(tp), WithPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})))
+	tracer := NewTracer(
+		trace.SpanKindClient,
+		WithTracerProvider(tp),
+		WithPropagator(
+			propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{}),
+		),
+	)
+
 	ts := &Transport{kind: transport.KindHTTP, header: carrier}
 
 	ctx, aboveSpan := tracer.Start(transport.NewClientContext(context.Background(), ts), ts.Operation(), ts.RequestHeader())
