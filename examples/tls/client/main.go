@@ -13,7 +13,8 @@ import (
 )
 
 func main() {
-	b, err := ioutil.ReadFile("../cert/server.crt")
+	// Load CA certificate pem file.
+	b, err := ioutil.ReadFile("../cert/ca.crt")
 	if err != nil {
 		panic(err)
 	}

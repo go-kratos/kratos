@@ -4,12 +4,13 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"net"
 	"net/http"
 	"net/url"
 	"sync"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
 
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
@@ -19,8 +20,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var _ transport.Server = (*Server)(nil)
-var _ transport.Endpointer = (*Server)(nil)
+var (
+	_ transport.Server     = (*Server)(nil)
+	_ transport.Endpointer = (*Server)(nil)
+)
 
 // ServerOption is an HTTP server option.
 type ServerOption func(*Server)

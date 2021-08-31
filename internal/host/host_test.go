@@ -3,6 +3,8 @@ package host
 import (
 	"net"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidIP(t *testing.T) {
@@ -76,6 +78,19 @@ func TestExtract(t *testing.T) {
 	}
 }
 
+func TestExtract2(t *testing.T) {
+	addr := "localhost:9001"
+	lis, err := net.Listen("tcp", addr)
+	if err == nil {
+		assert.Nil(t, err)
+	}
+	res, err := Extract(addr, lis)
+	if err == nil {
+		assert.Nil(t, err)
+	}
+	assert.Equal(t, res, "localhost:9001")
+}
+
 func TestPort(t *testing.T) {
 	lis, err := net.Listen("tcp", ":0")
 	if err != nil {
@@ -104,4 +119,5 @@ func TestExtractHostPort(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected: not nil got %v", nil)
 	}
+	t.Logf("host port: %s,  %d", host, port)
 }

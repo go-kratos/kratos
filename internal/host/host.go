@@ -8,14 +8,12 @@ import (
 
 // ExtractHostPort from address
 func ExtractHostPort(addr string) (host string, port uint64, err error) {
-	var (
-		ports string
-	)
+	var ports string
 	host, ports, err = net.SplitHostPort(addr)
 	if err != nil {
 		return
 	}
-	port, err = strconv.ParseUint(ports, 10, 16)
+	port, err = strconv.ParseUint(ports, 10, 16) //nolint:gomnd
 	if err != nil {
 		return
 	}

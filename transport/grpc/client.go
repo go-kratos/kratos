@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -99,15 +100,14 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	for _, o := range opts {
 		o(&options)
 	}
-	var ints = []grpc.UnaryClientInterceptor{
+	ints := []grpc.UnaryClientInterceptor{
 		unaryClientInterceptor(options.middleware, options.timeout),
 	}
 	if len(options.ints) > 0 {
 		ints = append(ints, options.ints...)
 	}
-	var grpcOpts = []grpc.DialOption{
-		//todo: grpc.WithBalancerName is deprecated.
-		grpc.WithBalancerName(roundrobin.Name), //nolint:staticcheck
+	grpcOpts := []grpc.DialOption{
+		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, roundrobin.Name)),
 		grpc.WithChainUnaryInterceptor(ints...),
 	}
 	if options.discovery != nil {

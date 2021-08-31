@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+
+	testData "github.com/go-kratos/kratos/v2/internal/testdata/encoding"
 )
 
 type testEmbed struct {
@@ -32,13 +34,17 @@ func TestJSON_Marshal(t *testing.T) {
 			input:  &testMessage{Field1: "a", Field2: "b", Field3: "c"},
 			expect: `{"a":"a","b":"b","c":"c"}`,
 		},
+		{
+			input:  &testData.TestModel{Id: 1, Name: "go-kratos", Hobby: []string{"1", "2"}},
+			expect: `{"id":"1","name":"go-kratos","hobby":["1","2"],"attrs":{}}`,
+		},
 	}
 	for _, v := range tests {
 		data, err := (codec{}).Marshal(v.input)
 		if err != nil {
 			t.Errorf("marshal(%#v): %s", v.input, err)
 		}
-		if got, want := string(data), v.expect; got != want {
+		if got, want := string(data), v.expect; strings.ReplaceAll(got, " ", "") != want {
 			if strings.Contains(want, "\n") {
 				t.Errorf("marshal(%#v):\nHAVE:\n%s\nWANT:\n%s", v.input, got, want)
 			} else {
@@ -50,6 +56,7 @@ func TestJSON_Marshal(t *testing.T) {
 
 func TestJSON_Unmarshal(t *testing.T) {
 	p := &testMessage{}
+	p2 := &testData.TestModel{}
 	tests := []struct {
 		input  string
 		expect interface{}
@@ -61,6 +68,10 @@ func TestJSON_Unmarshal(t *testing.T) {
 		{
 			input:  `{"a":"a","b":"b","c":"c"}`,
 			expect: &p,
+		},
+		{
+			input:  `{"id":1,"name":"kratos"}`,
+			expect: &p2,
 		},
 	}
 	for _, v := range tests {

@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"io/ioutil"
 	nethttp "net/http"
@@ -15,8 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type mockRoundTripper struct {
-}
+type mockRoundTripper struct{}
 
 func (rt *mockRoundTripper) RoundTrip(req *nethttp.Request) (resp *nethttp.Response, err error) {
 	return
@@ -38,8 +38,22 @@ func TestWithTimeout(t *testing.T) {
 	assert.Equal(t, co.timeout, ov)
 }
 
-func TestWithBalancer(t *testing.T) {
+func TestWithBlock(t *testing.T) {
+	o := WithBlock()
+	co := &clientOptions{}
+	o(co)
+	assert.True(t, co.block)
+}
 
+func TestWithBalancer(t *testing.T) {
+}
+
+func TestWithTLSConfig(t *testing.T) {
+	ov := &tls.Config{}
+	o := WithTLSConfig(ov)
+	co := &clientOptions{}
+	o(co)
+	assert.Same(t, ov, co.tlsConf)
 }
 
 func TestWithUserAgent(t *testing.T) {
@@ -90,8 +104,7 @@ func TestWithErrorDecoder(t *testing.T) {
 	assert.NotNil(t, o.errorDecoder)
 }
 
-type mockDiscovery struct {
-}
+type mockDiscovery struct{}
 
 func (*mockDiscovery) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
 	return nil, nil

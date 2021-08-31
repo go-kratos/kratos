@@ -9,8 +9,7 @@ import (
 )
 
 func Test_atomicValue_Bool(t *testing.T) {
-	var vlist []interface{}
-	vlist = []interface{}{"1", "t", "T", "true", "TRUE", "True", true, 1, int32(1)}
+	vlist := []interface{}{"1", "t", "T", "true", "TRUE", "True", true, 1, int32(1)}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
@@ -38,8 +37,7 @@ func Test_atomicValue_Bool(t *testing.T) {
 }
 
 func Test_atomicValue_Int(t *testing.T) {
-	var vlist []interface{}
-	vlist = []interface{}{"123123", float64(123123), int64(123123), int32(123123), 123123}
+	vlist := []interface{}{"123123", float64(123123), int64(123123), int32(123123), 123123}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
@@ -58,8 +56,7 @@ func Test_atomicValue_Int(t *testing.T) {
 }
 
 func Test_atomicValue_Float(t *testing.T) {
-	var vlist []interface{}
-	vlist = []interface{}{"123123.1", float64(123123.1)}
+	vlist := []interface{}{"123123.1", float64(123123.1)}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
@@ -87,8 +84,7 @@ func (t ts) String() string {
 }
 
 func Test_atomicValue_String(t *testing.T) {
-	var vlist []interface{}
-	vlist = []interface{}{"1", float64(1), int64(1), 1, int64(1)}
+	vlist := []interface{}{"1", float64(1), int64(1), 1, int64(1)}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
@@ -114,8 +110,7 @@ func Test_atomicValue_String(t *testing.T) {
 }
 
 func Test_atomicValue_Duration(t *testing.T) {
-	var vlist []interface{}
-	vlist = []interface{}{int64(5)}
+	vlist := []interface{}{int64(5)}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)

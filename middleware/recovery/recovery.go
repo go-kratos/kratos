@@ -51,7 +51,7 @@ func Recovery(opts ...Option) middleware.Middleware {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			defer func() {
 				if rerr := recover(); rerr != nil {
-					buf := make([]byte, 64<<10)
+					buf := make([]byte, 64<<10) //nolint:gomnd
 					n := runtime.Stack(buf, false)
 					buf = buf[:n]
 					logger.Errorf("%v: %+v\n%s\n", rerr, req, buf)
