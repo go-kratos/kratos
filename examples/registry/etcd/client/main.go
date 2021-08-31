@@ -59,7 +59,7 @@ func callGRPC(r *registry.Registry, conn *srcgrpc.ClientConn) {
 	log.Printf("[grpc] SayHello %+v\n", reply)
 }
 
-func callHTTP(r *registry.Registry,conn *http.Client) {
+func callHTTP(r *registry.Registry, conn *http.Client) {
 	client := helloworld.NewGreeterHTTPClient(conn)
 	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {
