@@ -29,7 +29,7 @@ func (c *customChangeListener) OnNewestChange(changeEvent *storage.FullChangeEve
 }
 
 func NewWatcher(a *apollo) (config.Watcher, error) {
-	e:=make(chan []*config.KeyValue)
+	e := make(chan []*config.KeyValue)
 	a.client.AddChangeListener(&customChangeListener{})
 	return &watcher{event: e}, nil
 }
