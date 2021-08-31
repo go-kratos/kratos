@@ -1,4 +1,4 @@
-package main
+package kubernetes
 
 import (
 	"context"
@@ -46,10 +46,10 @@ ResultChan:
 	}
 	cm, ok := ch.Object.(*v1.ConfigMap)
 	if !ok {
-		return nil, fmt.Errorf("kube Object not ConfigMap")
+		return nil, fmt.Errorf("kubernetes Object not ConfigMap")
 	}
 	if ch.Type == "DELETED" {
-		return nil, fmt.Errorf("kube configmap delete %s", cm.Name)
+		return nil, fmt.Errorf("kubernetes configmap delete %s", cm.Name)
 	}
 	return w.k.configMap(*cm), nil
 }

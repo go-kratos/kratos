@@ -1,4 +1,4 @@
-module github.com/go-kratos/kratos/config/kube/v2
+module github.com/go-kratos/kratos/config/kubernetes/v2
 
 go 1.15
 
