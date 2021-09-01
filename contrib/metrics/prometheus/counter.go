@@ -1,4 +1,4 @@
-package metrics
+package prometheus
 
 import (
 	"github.com/go-kratos/kratos/v2/metrics"

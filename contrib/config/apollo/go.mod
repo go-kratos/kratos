@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/apolloconfig/agollo/v4 v4.0.8
-	github.com/go-kratos/kratos/v2 v2.0.4
+	github.com/go-kratos/kratos/v2 v2.0.0
 )
 
-replace github.com/go-kratos/kratos/v2 => ../../../../kratos
+replace github.com/go-kratos/kratos/v2 => ../../../
