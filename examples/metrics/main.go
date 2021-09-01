@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/go-kratos/kratos/middleware/metrics/v2"
-	prom "github.com/go-kratos/prometheus/metrics"
+	prom "github.com/go-kratos/kratos/contrib/metrics/prometheus/v2"
+	"github.com/go-kratos/kratos/v2/middleware/metrics"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"

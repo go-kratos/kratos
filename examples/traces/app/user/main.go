@@ -7,11 +7,11 @@ import (
 
 	messagev1 "github.com/go-kratos/kratos/examples/traces/api/message"
 	v1 "github.com/go-kratos/kratos/examples/traces/api/user"
-	"github.com/go-kratos/kratos/middleware/logging/v2"
-	"github.com/go-kratos/kratos/middleware/recovery/v2"
-	"github.com/go-kratos/kratos/middleware/tracing/v2"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/middleware/logging"
+	"github.com/go-kratos/kratos/v2/middleware/recovery"
+	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 
@@ -107,7 +107,6 @@ func main() {
 		http.Address(":8000"),
 		http.Middleware(
 			recovery.Recovery(),
-			// Configuring tracing middleware
 			tracing.Server(),
 			logging.Server(logger),
 		),

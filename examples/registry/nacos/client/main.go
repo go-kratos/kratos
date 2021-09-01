@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
+	"github.com/go-kratos/kratos/contrib/registry/nacos/v2"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/registry/nacos/v2"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
@@ -41,7 +41,7 @@ func main() {
 	conn, err := grpc.DialInsecure(
 		context.Background(),
 		grpc.WithEndpoint("discovery:///helloworld"),
-		grpc.WithDiscovery(registry.New(cli)),
+		grpc.WithDiscovery(nacos.New(cli)),
 	)
 	if err != nil {
 		log.Fatal(err)

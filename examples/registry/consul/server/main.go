@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/go-kratos/kratos/contrib/registry/consul/v2"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/registry/consul/v2"
 	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/middleware/recovery/v2"
+	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/hashicorp/consul/api"
@@ -47,7 +47,7 @@ func main() {
 	helloworld.RegisterGreeterServer(grpcSrv, s)
 	helloworld.RegisterGreeterHTTPServer(httpSrv, s)
 
-	r := registry.New(consulClient)
+	r := consul.New(consulClient)
 	app := kratos.New(
 		kratos.Name("helloworld"),
 		kratos.Server(

@@ -6,7 +6,7 @@ import (
 	"github.com/go-kratos/kratos/examples/stream/hello"
 	"github.com/go-kratos/kratos/examples/stream/service"
 	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/middleware/recovery/v2"
+	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 )
 

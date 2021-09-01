@@ -37,9 +37,9 @@ type options struct {
 
 // Server is middleware server-side metrics.
 func Server(opts ...Option) middleware.Middleware {
-	options := options{}
+	op := options{}
 	for _, o := range opts {
-		o(&options)
+		o(&op)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -59,11 +59,11 @@ func Server(opts ...Option) middleware.Middleware {
 				code = int(se.Code)
 				reason = se.Reason
 			}
-			if options.requests != nil {
-				options.requests.With(kind, operation, strconv.Itoa(code), reason).Inc()
+			if op.requests != nil {
+				op.requests.With(kind, operation, strconv.Itoa(code), reason).Inc()
 			}
-			if options.seconds != nil {
-				options.seconds.With(kind, operation).Observe(time.Since(startTime).Seconds())
+			if op.seconds != nil {
+				op.seconds.With(kind, operation).Observe(time.Since(startTime).Seconds())
 			}
 			return reply, err
 		}
@@ -72,9 +72,9 @@ func Server(opts ...Option) middleware.Middleware {
 
 // Client is middleware client-side metrics.
 func Client(opts ...Option) middleware.Middleware {
-	options := options{}
+	op := options{}
 	for _, o := range opts {
-		o(&options)
+		o(&op)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -94,11 +94,11 @@ func Client(opts ...Option) middleware.Middleware {
 				code = int(se.Code)
 				reason = se.Reason
 			}
-			if options.requests != nil {
-				options.requests.With(kind, operation, strconv.Itoa(code), reason).Inc()
+			if op.requests != nil {
+				op.requests.With(kind, operation, strconv.Itoa(code), reason).Inc()
 			}
-			if options.seconds != nil {
-				options.seconds.With(kind, operation).Observe(time.Since(startTime).Seconds())
+			if op.seconds != nil {
+				op.seconds.With(kind, operation).Observe(time.Since(startTime).Seconds())
 			}
 			return reply, err
 		}
