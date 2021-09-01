@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
 	"go.opentelemetry.io/otel/trace"
 )
 

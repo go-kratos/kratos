@@ -63,4 +63,3 @@ func Client(opts ...Option) middleware.Middleware {
 		}
 	}
 }
-
