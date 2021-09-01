@@ -89,11 +89,10 @@ func testClient(t *testing.T, srv *Server) {
 				continue
 			}
 		}
-		defer resp.Body.Close()
-
 		if err != nil {
 			t.Fatal(err)
 		}
+		defer resp.Body.Close()
 		if resp.StatusCode != 200 {
 			t.Fatalf("http status got %d", resp.StatusCode)
 		}
