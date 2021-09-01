@@ -72,20 +72,28 @@ func Options(opts ...rpcx.OptionFn) ServerOption {
 	}
 }
 
+// Plugin with RPCx Plugin.
+func Plugin(plugin ...rpcx.Plugin) ServerOption {
+	return func(s *Server) {
+		s.rpcxPlugins = plugin
+	}
+}
+
 type Server struct {
 	*rpcx.Server
-	ctx        context.Context
-	tlsConf    *tls.Config
-	lis        net.Listener
-	once       sync.Once
-	err        error
-	network    string
-	address    string
-	endpoint   *url.URL
-	timeout    time.Duration
-	log        *log.Helper
-	rpcxOpts   []rpcx.OptionFn
-	middleware []middleware.Middleware
+	ctx         context.Context
+	tlsConf     *tls.Config
+	lis         net.Listener
+	once        sync.Once
+	err         error
+	network     string
+	address     string
+	endpoint    *url.URL
+	timeout     time.Duration
+	log         *log.Helper
+	rpcxOpts    []rpcx.OptionFn
+	middleware  []middleware.Middleware
+	rpcxPlugins []rpcx.Plugin
 }
 
 // NewServer creates a RPCx server by options.
@@ -100,6 +108,11 @@ func NewServer(opts ...ServerOption) *Server {
 		o(srv)
 	}
 	srv.Server = rpcx.NewServer(srv.rpcxOpts...)
+	if len(srv.rpcxPlugins) > 0 {
+		for _, plugin := range srv.rpcxPlugins {
+			srv.Server.Plugins.Add(plugin)
+		}
+	}
 	return srv
 }
 

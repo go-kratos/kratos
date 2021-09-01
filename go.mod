@@ -2,8 +2,6 @@ module github.com/go-kratos/kratos/v2
 
 go 1.15
 
-replace github.com/smallnest/rpcx v1.6.10 => github.com/kykira/rpcx v1.6.11-0.20210830071441-995e0c5e79ab
-
 require (
 	github.com/apache/thrift v0.14.2 // indirect
 	github.com/armon/go-metrics v0.3.9 // indirect
@@ -33,7 +31,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/rs/cors v1.8.0 // indirect
 	github.com/smallnest/quick v0.0.0-20210406061658-4bf95e372fbd // indirect
-	github.com/smallnest/rpcx v1.6.10
+	github.com/smallnest/rpcx v1.6.11-0.20210830093913-f90884b7c620
 	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/tjfoc/gmsm v1.4.1 // indirect

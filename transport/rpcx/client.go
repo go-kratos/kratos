@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
+	"github.com/go-kratos/kratos/v2/transport/rpcx/resolver/discovery"
 	"github.com/smallnest/rpcx/client"
 	"time"
 
@@ -107,6 +108,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (client.XCli
 	if options.tlsConf != nil {
 		options.rpcXOpts.TLSConfig = options.tlsConf
 	}
+
 	var d client.ServiceDiscovery
 	if options.discovery != nil {
 		var KVPair []*client.KVPair
@@ -132,10 +134,14 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (client.XCli
 			}
 		}
 		fmt.Println(&KVPair[0])
-		d, _ = client.NewMultipleServersDiscovery(KVPair)
+		md, _ := client.NewMultipleServersDiscovery(KVPair)
+		b := discovery.NewBuilder(options.discovery)
+		b.Build(options.endpoint, *md)
+		d = md
 	} else {
 		d, _ = client.NewPeer2PeerDiscovery(options.endpoint, "")
 	}
+
 	xclient := client.NewXClient("Greeter", options.failMode, options.selectMode, d, options.rpcXOpts)
 	return xclient, nil
 }
