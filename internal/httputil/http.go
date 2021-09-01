@@ -41,9 +41,21 @@ func ContentSubtype(contentType string) string {
 	return contentType[left+1 : right]
 }
 
+type StatusConverter interface {
+	// GRPCCodeFromStatus converts a HTTP error code into the corresponding gRPC response status.
+	GRPCCodeFromStatus(code int) codes.Code
+
+	// StatusFromGRPCCode converts a gRPC error code into the corresponding HTTP response status.
+	StatusFromGRPCCode(code codes.Code) int
+}
+
+type statusConverter struct {}
+
+var DefaultStatusConverter StatusConverter = statusConverter{}
+
 // GRPCCodeFromStatus converts a HTTP error code into the corresponding gRPC response status.
 // See: https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
-func GRPCCodeFromStatus(code int) codes.Code {
+func (c statusConverter)GRPCCodeFromStatus(code int) codes.Code {
 	switch code {
 	case http.StatusOK:
 		return codes.OK
@@ -75,7 +87,7 @@ func GRPCCodeFromStatus(code int) codes.Code {
 
 // StatusFromGRPCCode converts a gRPC error code into the corresponding HTTP response status.
 // See: https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
-func StatusFromGRPCCode(code codes.Code) int {
+func (c statusConverter)StatusFromGRPCCode(code codes.Code) int {
 	switch code {
 	case codes.OK:
 		return http.StatusOK
@@ -113,4 +125,15 @@ func StatusFromGRPCCode(code codes.Code) int {
 		return http.StatusInternalServerError
 	}
 	return http.StatusInternalServerError
+}
+
+
+// GRPCCodeFromStatus converts a HTTP error code into the corresponding gRPC response status.
+func GRPCCodeFromStatus(code int) codes.Code{
+	return DefaultStatusConverter.GRPCCodeFromStatus(code)
+}
+
+// StatusFromGRPCCode converts a gRPC error code into the corresponding HTTP response status.
+func StatusFromGRPCCode(code codes.Code) int{
+	return DefaultStatusConverter.StatusFromGRPCCode(code)
 }
