@@ -146,7 +146,12 @@ func TestServer(t *testing.T) {
 }
 
 type tokeBuilder struct {
-	token string
+	token        string
+	refreshToken string
+}
+
+func (t tokeBuilder) GetRefreshToken() string {
+	return fmt.Sprintf(bearerFormat, t.refreshToken)
 }
 
 func (t tokeBuilder) GetToken() string {
@@ -163,7 +168,8 @@ func TestClient(t *testing.T) {
 		panic(err)
 	}
 	tProvider := tokeBuilder{
-		token: token,
+		token:        token,
+		refreshToken: token,
 	}
 
 	tests := []struct {
@@ -187,12 +193,13 @@ func TestClient(t *testing.T) {
 			next := func(ctx context.Context, req interface{}) (interface{}, error) {
 				return "reply", nil
 			}
-			handler := Client(test.tokenProvider, testKey)(next)
+			handler := Client(test.tokenProvider)(next)
 			header := &headerCarrier{}
 			_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
 			assert.Equal(t, test.expectError, err2)
 			if err2 == nil {
 				assert.Equal(t, test.tokenProvider.GetToken(), header.Get(HeaderKey))
+				assert.Equal(t, test.tokenProvider.GetRefreshToken(), header.Get(RefreshTokenHeaderKey))
 			}
 		})
 	}

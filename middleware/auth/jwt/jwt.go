@@ -23,6 +23,9 @@ const (
 	// HeaderKey holds the key used to store the JWT Token in the request header.
 	HeaderKey string = "Authorization"
 
+	// RefreshTokenHeaderKey holds the key used to store the JWT Refresh Token in the request header
+	RefreshTokenHeaderKey string = "RefreshToken"
+
 	// InfoKey holds the key used to store the auth info in the context
 	InfoKey authkey = "AuthInfo"
 )
@@ -43,9 +46,10 @@ type Option func(*options)
 
 // Parser is a jwt parser
 type options struct {
-	accessSecret  string
-	signingMethod jwt.SigningMethod
-	authHeaderKey string
+	accessSecret          string
+	signingMethod         jwt.SigningMethod
+	authHeaderKey         string
+	refreshTokenHeaderKey string
 }
 
 // WithSigningMethod with signing method option.
@@ -59,6 +63,13 @@ func WithSigningMethod(method jwt.SigningMethod) Option {
 func WithAuthHeaderKey(headerKey string) Option {
 	return func(options *options) {
 		options.authHeaderKey = headerKey
+	}
+}
+
+// WithRefreshTokenHeaderKey set key that hold refresh token in header
+func WithRefreshTokenHeaderKey(headerKey string) Option {
+	return func(o *options) {
+		o.refreshTokenHeaderKey = headerKey
 	}
 }
 
@@ -82,8 +93,8 @@ func Server(accessSecret string, opts ...Option) middleware.Middleware {
 }
 
 // Client is a client jwt middleware
-func Client(provider TokenProvider, accessSecret string, opts ...Option) middleware.Middleware {
-	o := initOptions(accessSecret, opts...)
+func Client(provider TokenProvider, opts ...Option) middleware.Middleware {
+	o := initOptions("", opts...)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			if provider == nil {
@@ -91,6 +102,7 @@ func Client(provider TokenProvider, accessSecret string, opts ...Option) middlew
 			}
 			if clientContext, ok := transport.FromClientContext(ctx); ok {
 				clientContext.RequestHeader().Set(o.authHeaderKey, provider.GetToken())
+				clientContext.RequestHeader().Set(o.refreshTokenHeaderKey, provider.GetRefreshToken())
 				return handler(ctx, req)
 			}
 			return nil, ErrWrongContext
@@ -101,9 +113,10 @@ func Client(provider TokenProvider, accessSecret string, opts ...Option) middlew
 // initOptions init the option
 func initOptions(accessSecret string, opts ...Option) *options {
 	o := &options{
-		accessSecret:  accessSecret,
-		authHeaderKey: HeaderKey,
-		signingMethod: jwt.SigningMethodHS256,
+		accessSecret:          accessSecret,
+		authHeaderKey:         HeaderKey,
+		signingMethod:         jwt.SigningMethodHS256,
+		refreshTokenHeaderKey: RefreshTokenHeaderKey,
 	}
 	for _, opt := range opts {
 		opt(o)
