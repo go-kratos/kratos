@@ -14,66 +14,61 @@ type apollo struct {
 type Option func(*options)
 
 type options struct {
-	ip             string
 	appid          string
-	cluster        string
 	secret         string
-	namespaceName  string
+	cluster        string
+	endpoint       string
+	namespace      string
 	isBackupConfig bool
 }
 
-// AppID with apollo config app id
-func AppID(appID string) Option {
+// WithAppID with apollo config app id
+func WithAppID(appID string) Option {
 	return func(o *options) {
 		o.appid = appID
 	}
 }
 
-// Cluster with apollo config cluster
-func Cluster(cluster string) Option {
+// WithCluster with apollo config cluster
+func WithCluster(cluster string) Option {
 	return func(o *options) {
 		o.cluster = cluster
 	}
 }
 
-// IP with apollo config conf server ip
-func IP(ip string) Option {
+// WithEndpoint with apollo config conf server ip
+func WithEndpoint(endpoint string) Option {
 	return func(o *options) {
-		o.ip = ip
+		o.endpoint = endpoint
 	}
 }
 
-// IsBackupConfig with apollo config isBackupConfig
-func IsBackupConfig(isBackupConfig bool) Option {
+// WithEnableBackup with apollo config enable backup config
+func WithEnableBackup() Option {
 	return func(o *options) {
-		o.isBackupConfig = isBackupConfig
+		o.isBackupConfig = true
 	}
 }
 
-// Secret with apollo config app secret
-func Secret(secret string) Option {
+// WithDisableBackup with apollo config enable backup config
+func WithDisableBackup() Option {
+	return func(o *options) {
+		o.isBackupConfig = false
+	}
+}
+
+// WithSecret with apollo config app secret
+func WithSecret(secret string) Option {
 	return func(o *options) {
 		o.secret = secret
 	}
 }
 
-// NamespaceName with apollo config namespace name
-func NamespaceName(name string) Option {
+// WithNamespace with apollo config namespace name
+func WithNamespace(name string) Option {
 	return func(o *options) {
-		o.namespaceName = name
+		o.namespace = name
 	}
-}
-
-// NewSource start with config file in ENV
-// Linux/Mac export AGOLLO_CONF=/a/conf.properties
-// Windows set AGOLLO_CONF=c:/a/conf.properties
-// more detail:https://github.com/apolloconfig/agollo/wiki/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97#1312%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E6%8C%87%E5%AE%9A%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6
-func NewSource() config.Source {
-	client, err := agollo.Start()
-	if err != nil {
-		panic(err)
-	}
-	return &apollo{client}
 }
 
 func NewSourceWithConfig(opts ...Option) config.Source {
@@ -85,8 +80,8 @@ func NewSourceWithConfig(opts ...Option) config.Source {
 		return &apolloConfig.AppConfig{
 			AppID:          op.appid,
 			Cluster:        op.cluster,
-			NamespaceName:  op.namespaceName,
-			IP:             op.ip,
+			NamespaceName:  op.namespace,
+			IP:             op.endpoint,
 			IsBackupConfig: op.isBackupConfig,
 			Secret:         op.secret,
 		}, nil

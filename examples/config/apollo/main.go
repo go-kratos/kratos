@@ -11,12 +11,12 @@ func main() {
 	c := config.New(
 		config.WithSource(
 			apollo.NewSourceWithConfig(
-				apollo.AppID("kratos"),
-				apollo.Cluster("dev"),
-				apollo.IP("http://localhost:8080"),
-				apollo.NamespaceName("application"),
-				apollo.IsBackupConfig(true),
-				apollo.Secret("895da1a174934ababb1b1223f5620a45"),
+				apollo.WithAppID("kratos"),
+				apollo.WithCluster("dev"),
+				apollo.WithEndpoint("http://localhost:8080"),
+				apollo.WithNamespace("application"),
+				apollo.WithEnableBackup(),
+				apollo.WithSecret("895da1a174934ababb1b1223f5620a45"),
 			),
 		),
 	)
