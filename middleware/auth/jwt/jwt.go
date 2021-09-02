@@ -73,9 +73,16 @@ func WithRefreshTokenHeaderKey(headerKey string) Option {
 	}
 }
 
+// withAccessSecret set access secret
+func withAccessSecret(accessSecret string) Option {
+	return func(o *options) {
+		o.accessSecret = accessSecret
+	}
+}
+
 // Server is a server auth middleware
 func Server(accessSecret string, opts ...Option) middleware.Middleware {
-	o := initOptions(accessSecret, opts...)
+	o := initOptions(append(opts, withAccessSecret(accessSecret)))
 	parser := newParser(o)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -94,7 +101,7 @@ func Server(accessSecret string, opts ...Option) middleware.Middleware {
 
 // Client is a client jwt middleware
 func Client(provider TokenProvider, opts ...Option) middleware.Middleware {
-	o := initOptions("", opts...)
+	o := initOptions(opts)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			if provider == nil {
@@ -111,9 +118,9 @@ func Client(provider TokenProvider, opts ...Option) middleware.Middleware {
 }
 
 // initOptions init the option
-func initOptions(accessSecret string, opts ...Option) *options {
+func initOptions(opts []Option) *options {
 	o := &options{
-		accessSecret:          accessSecret,
+		accessSecret:          "",
 		authHeaderKey:         HeaderKey,
 		signingMethod:         jwt.SigningMethodHS256,
 		refreshTokenHeaderKey: RefreshTokenHeaderKey,
