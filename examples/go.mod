@@ -5,7 +5,6 @@ go 1.16
 require (
 	entgo.io/ent v0.9.0
 	github.com/BurntSushi/toml v0.3.1
-	github.com/apolloconfig/agollo/v4 v4.0.8 // indirect
 	github.com/envoyproxy/protoc-gen-validate v0.6.1
 	github.com/gin-gonic/gin v1.7.3
 	github.com/go-kratos/gin v0.1.0
