@@ -44,8 +44,7 @@ func NewWatcher(a *apollo) (config.Watcher, error) {
 
 // Next will be blocked until the Stop method is called
 func (w *watcher) Next() ([]*config.KeyValue, error) {
-	event := <-w.event
-	return event, nil
+	return <-w.event, nil
 }
 
 func (w *watcher) Stop() error {
