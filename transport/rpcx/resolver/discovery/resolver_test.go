@@ -3,13 +3,13 @@ package discovery
 import (
 	"context"
 	"errors"
+	"github.com/smallnest/rpcx/client"
+	"google.golang.org/grpc/resolver"
 	"testing"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/stretchr/testify/assert"
-	"google.golang.org/grpc/resolver"
 )
 
 type testClientConn struct {
@@ -52,10 +52,11 @@ func (m *testWatch) Stop() error {
 
 func TestWatch(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
+	cc, _ := client.NewMultipleServersDiscovery([]*client.KVPair{})
 
 	r := &discoveryResolver{
 		w:        &testWatch{},
-		cc:       &testClientConn{te: t},
+		cc:       cc,
 		log:      log.NewHelper(log.DefaultLogger),
 		ctx:      ctx,
 		cancel:   cancel,
@@ -71,10 +72,10 @@ func TestWatch(t *testing.T) {
 
 func TestWatchError(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
-
+	cc, _ := client.NewMultipleServersDiscovery([]*client.KVPair{})
 	r := &discoveryResolver{
 		w:      &testWatch{err: errors.New("bad")},
-		cc:     &testClientConn{te: t},
+		cc:     cc,
 		log:    log.NewHelper(log.DefaultLogger),
 		ctx:    ctx,
 		cancel: cancel,
@@ -89,10 +90,10 @@ func TestWatchError(t *testing.T) {
 
 func TestWatchContextCancel(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
-
+	cc, _ := client.NewMultipleServersDiscovery([]*client.KVPair{})
 	r := &discoveryResolver{
 		w:      &testWatch{err: context.Canceled},
-		cc:     &testClientConn{te: t},
+		cc:     cc,
 		log:    log.NewHelper(log.DefaultLogger),
 		ctx:    ctx,
 		cancel: cancel,
@@ -103,12 +104,4 @@ func TestWatchContextCancel(t *testing.T) {
 	}()
 	r.watch()
 	t.Log("watch goroutine exited after 2 second")
-}
-
-func TestParseAttributes(t *testing.T) {
-	a := parseAttributes(map[string]string{"a": "b"})
-	assert.Equal(t, "b", a.Value("a").(string))
-	x := a.WithValues("qq", "ww")
-	assert.Equal(t, "ww", x.Value("qq").(string))
-	assert.Nil(t, x.Value("notfound"))
 }

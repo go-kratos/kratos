@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/smallnest/rpcx/client"
 	"github.com/stretchr/testify/assert"
-	"google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/serviceconfig"
 	"testing"
 	"time"
@@ -60,13 +60,7 @@ func TestBuilder_Scheme(t *testing.T) {
 type mockConn struct {
 }
 
-func (m *mockConn) UpdateState(resolver.State) error {
-	return nil
-}
-
 func (m *mockConn) ReportError(error) {}
-
-func (m *mockConn) NewAddress(addresses []resolver.Address) {}
 
 func (m *mockConn) NewServiceConfig(serviceConfig string) {}
 
@@ -76,6 +70,7 @@ func (m *mockConn) ParseServiceConfig(serviceConfigJSON string) *serviceconfig.P
 
 func TestBuilder_Build(t *testing.T) {
 	b := NewBuilder(&mockDiscovery{})
-	_, err := b.Build(resolver.Target{Scheme: resolver.GetDefaultScheme(), Endpoint: "gprc://authority/endpoint"}, &mockConn{}, resolver.BuildOptions{})
+	d, _ := client.NewMultipleServersDiscovery([]*client.KVPair{})
+	err := b.Build("", d)
 	assert.NoError(t, err)
 }

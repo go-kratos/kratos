@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-	"google.golang.org/grpc/resolver"
 )
 
 const name = "discovery"
@@ -58,7 +57,7 @@ func NewBuilder(d registry.Discovery, opts ...Option) *builder {
 	return b
 }
 
-func (b *builder) Build(endpoint string, cc client.MultipleServersDiscovery) (resolver.Resolver, error) {
+func (b *builder) Build(endpoint string, cc *client.MultipleServersDiscovery) error {
 	var (
 		err error
 		w   registry.Watcher
@@ -76,7 +75,7 @@ func (b *builder) Build(endpoint string, cc client.MultipleServersDiscovery) (re
 	}
 	if err != nil {
 		cancel()
-		return nil, err
+		return err
 	}
 	r := &discoveryResolver{
 		w:        w,
@@ -87,7 +86,7 @@ func (b *builder) Build(endpoint string, cc client.MultipleServersDiscovery) (re
 		insecure: b.insecure,
 	}
 	go r.watch()
-	return r, nil
+	return nil
 }
 
 // Scheme return scheme of discovery

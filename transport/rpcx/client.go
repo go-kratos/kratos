@@ -1,11 +1,7 @@
 package rpcx
 
 import (
-	"context"
 	"crypto/tls"
-	"encoding/json"
-	"fmt"
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/transport/rpcx/resolver/discovery"
 	"github.com/smallnest/rpcx/client"
 	"time"
@@ -73,29 +69,37 @@ func WithFailMode(f client.FailMode) ClientOption {
 	}
 }
 
+// WithServerPath with RPCx serverPath.
+func WithServerPath(servicePath string) ClientOption {
+	return func(o *clientOptions) {
+		o.servicePath = servicePath
+	}
+}
+
 // clientOptions is RPCx Client
 type clientOptions struct {
-	endpoint   string
-	tlsConf    *tls.Config
-	timeout    time.Duration
-	discovery  registry.Discovery
-	middleware []middleware.Middleware
-	rpcXOpts   client.Option
-	selectMode client.SelectMode
-	failMode   client.FailMode
+	endpoint    string
+	tlsConf     *tls.Config
+	timeout     time.Duration
+	discovery   registry.Discovery
+	middleware  []middleware.Middleware
+	rpcXOpts    client.Option
+	selectMode  client.SelectMode
+	failMode    client.FailMode
+	servicePath string
 }
 
 // Dial returns a RPCx connection.
-func Dial(ctx context.Context, opts ...ClientOption) (client.XClient, error) {
-	return dial(ctx, false, opts...)
+func Dial(opts ...ClientOption) (client.XClient, error) {
+	return dial(false, opts...)
 }
 
 // DialInsecure returns an insecure RPCx connection.
-func DialInsecure(ctx context.Context, opts ...ClientOption) (client.XClient, error) {
-	return dial(ctx, true, opts...)
+func DialInsecure(opts ...ClientOption) (client.XClient, error) {
+	return dial(true, opts...)
 }
 
-func dial(ctx context.Context, insecure bool, opts ...ClientOption) (client.XClient, error) {
+func dial(insecure bool, opts ...ClientOption) (client.XClient, error) {
 	options := clientOptions{
 		timeout:    2000 * time.Millisecond,
 		rpcXOpts:   client.DefaultOption,
@@ -108,40 +112,22 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (client.XCli
 	if options.tlsConf != nil {
 		options.rpcXOpts.TLSConfig = options.tlsConf
 	}
-
-	var d client.ServiceDiscovery
+	var xClient client.XClient
 	if options.discovery != nil {
-		var KVPair []*client.KVPair
-		if options.discovery != nil {
-			service, err := options.discovery.GetService(ctx, options.endpoint)
-			if err != nil {
-				panic(err)
-			}
-			for _, instance := range service {
-				endpoint, err := endpoint.ParseEndpoint(instance.Endpoints, "rpcx", !insecure)
-				if err != nil {
-					//r.log.Errorf("[resolver] Failed to parse discovery endpoint: %v", err)
-					continue
-				}
-				if endpoint == "" {
-					continue
-				}
-				meta, _ := json.Marshal(instance.Metadata)
-				KVPair = append(KVPair, &client.KVPair{
-					Key:   endpoint,
-					Value: string(meta),
-				})
-			}
+		cc, _ := client.NewMultipleServersDiscovery([]*client.KVPair{})
+		b := discovery.NewBuilder(options.discovery, discovery.WithInsecure(insecure))
+		err := b.Build(options.endpoint, cc)
+		if err != nil {
+			return nil, err
 		}
-		fmt.Println(&KVPair[0])
-		md, _ := client.NewMultipleServersDiscovery(KVPair)
-		b := discovery.NewBuilder(options.discovery)
-		b.Build(options.endpoint, *md)
-		d = md
-	} else {
-		d, _ = client.NewPeer2PeerDiscovery(options.endpoint, "")
+		xClient = buildXClient(cc, options)
+		return xClient, nil
 	}
+	cc, _ := client.NewPeer2PeerDiscovery(options.endpoint, "")
+	xClient = buildXClient(cc, options)
+	return xClient, nil
+}
 
-	xclient := client.NewXClient("Greeter", options.failMode, options.selectMode, d, options.rpcXOpts)
-	return xclient, nil
+func buildXClient(cc client.ServiceDiscovery, options clientOptions) client.XClient {
+	return client.NewXClient(options.servicePath, options.failMode, options.selectMode, cc, options.rpcXOpts)
 }

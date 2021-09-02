@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/smallnest/rpcx/client"
-	"google.golang.org/grpc/attributes"
-	"google.golang.org/grpc/resolver"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
@@ -16,7 +14,7 @@ import (
 
 type discoveryResolver struct {
 	w   registry.Watcher
-	cc  client.MultipleServersDiscovery
+	cc  *client.MultipleServersDiscovery
 	log *log.Helper
 
 	ctx    context.Context
@@ -48,7 +46,7 @@ func (r *discoveryResolver) watch() {
 func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	var addrs []*client.KVPair
 	for _, in := range ins {
-		endpoint, err := endpoint.ParseEndpoint(in.Endpoints, "rpcx", !r.insecure)
+		endpoint, err := endpoint.ParseEndpoint(in.Endpoints, "rpcx", r.insecure)
 		if err != nil {
 			r.log.Errorf("[resolver] Failed to parse discovery endpoint: %v", err)
 			continue
@@ -56,9 +54,10 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		if endpoint == "" {
 			continue
 		}
+		value, _ := json.Marshal(in.Metadata)
 		addr := &client.KVPair{
 			Key:   endpoint,
-			Value: endpoint,
+			Value: string(value),
 		}
 		addrs = append(addrs, addr)
 	}
@@ -77,14 +76,4 @@ func (r *discoveryResolver) Close() {
 	if err != nil {
 		r.log.Errorf("[resolver] failed to watch top: %s", err)
 	}
-}
-
-func (r *discoveryResolver) ResolveNow(options resolver.ResolveNowOptions) {}
-
-func parseAttributes(md map[string]string) *attributes.Attributes {
-	pairs := make([]interface{}, 0, len(md))
-	for k, v := range md {
-		pairs = append(pairs, k, v)
-	}
-	return attributes.New(pairs...)
 }
