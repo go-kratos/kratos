@@ -4,26 +4,96 @@ import (
 	"github.com/go-kratos/kratos/v2/config"
 
 	"github.com/apolloconfig/agollo/v4"
+	apolloConfig "github.com/apolloconfig/agollo/v4/env/config"
 )
 
 type apollo struct {
 	client *agollo.Client
 }
 
-// NewSource start with config file in ENV
-// Linux/Mac export AGOLLO_CONF=/a/conf.properties
-// Windows set AGOLLO_CONF=c:/a/conf.properties
-// more detail:https://github.com/apolloconfig/agollo/wiki/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97#1312%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E6%8C%87%E5%AE%9A%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6
-func NewSource() config.Source {
-	client, err := agollo.Start()
+type Option func(*options)
+
+type options struct {
+	appid          string
+	secret         string
+	cluster        string
+	endpoint       string
+	namespace      string
+	isBackupConfig bool
+}
+
+// WithAppID with apollo config app id
+func WithAppID(appID string) Option {
+	return func(o *options) {
+		o.appid = appID
+	}
+}
+
+// WithCluster with apollo config cluster
+func WithCluster(cluster string) Option {
+	return func(o *options) {
+		o.cluster = cluster
+	}
+}
+
+// WithEndpoint with apollo config conf server ip
+func WithEndpoint(endpoint string) Option {
+	return func(o *options) {
+		o.endpoint = endpoint
+	}
+}
+
+// WithEnableBackup with apollo config enable backup config
+func WithEnableBackup() Option {
+	return func(o *options) {
+		o.isBackupConfig = true
+	}
+}
+
+// WithDisableBackup with apollo config enable backup config
+func WithDisableBackup() Option {
+	return func(o *options) {
+		o.isBackupConfig = false
+	}
+}
+
+// WithSecret with apollo config app secret
+func WithSecret(secret string) Option {
+	return func(o *options) {
+		o.secret = secret
+	}
+}
+
+// WithNamespace with apollo config namespace name
+func WithNamespace(name string) Option {
+	return func(o *options) {
+		o.namespace = name
+	}
+}
+
+func NewSourceWithConfig(opts ...Option) config.Source {
+	op := options{}
+	for _, o := range opts {
+		o(&op)
+	}
+	client, err := agollo.StartWithConfig(func() (*apolloConfig.AppConfig, error) {
+		return &apolloConfig.AppConfig{
+			AppID:          op.appid,
+			Cluster:        op.cluster,
+			NamespaceName:  op.namespace,
+			IP:             op.endpoint,
+			IsBackupConfig: op.isBackupConfig,
+			Secret:         op.secret,
+		}, nil
+	})
 	if err != nil {
-		return nil
+		panic(err)
 	}
 	return &apollo{client}
 }
 
 func (e *apollo) load() []*config.KeyValue {
-	kv := make([]*config.KeyValue, e.client.GetDefaultConfigCache().EntryCount())
+	kv := make([]*config.KeyValue, 0)
 	e.client.GetDefaultConfigCache().Range(func(key, value interface{}) bool {
 		kv = append(kv, &config.KeyValue{
 			Key:   key.(string),
