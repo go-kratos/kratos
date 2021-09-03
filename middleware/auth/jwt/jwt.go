@@ -31,14 +31,14 @@ const (
 )
 
 var (
-	ErrMissingJwtToken        = errors.Unauthorized("Missing info", "JWT token is missing")
-	ErrMissingAccessSecret    = errors.Unauthorized("Missing info", "AccessSecret is missing")
-	ErrTokenInvalid           = errors.Unauthorized("Token invalid", "Token is invalid")
-	ErrTokenExpired           = errors.Unauthorized("Token invalid", "JWT token has expired")
-	ErrTokenParseFail         = errors.Unauthorized("Something wrong", "Fail to parse JWT token ")
-	ErrUnSupportSigningMethod = errors.Unauthorized("Something wrong", "Wrong signing method")
-	ErrWrongContext           = errors.Unauthorized("Something wrong", "Wrong context for middelware")
-	ErrNeedTokenProvider      = errors.Unauthorized("Missing info", "Token provider is missing")
+	ErrMissingJwtToken        = errors.Unauthorized("UNAUTHORIZED", "JWT token is missing")
+	ErrMissingAccessSecret    = errors.Unauthorized("UNAUTHORIZED", "AccessSecret is missing")
+	ErrTokenInvalid           = errors.Unauthorized("UNAUTHORIZED", "Token is invalid")
+	ErrTokenExpired           = errors.Unauthorized("UNAUTHORIZED", "JWT token has expired")
+	ErrTokenParseFail         = errors.Unauthorized("UNAUTHORIZED", "Fail to parse JWT token ")
+	ErrUnSupportSigningMethod = errors.Unauthorized("UNAUTHORIZED", "Wrong signing method")
+	ErrWrongContext           = errors.Unauthorized("UNAUTHORIZED", "Wrong context for middelware")
+	ErrNeedTokenProvider      = errors.Unauthorized("UNAUTHORIZED", "Token provider is missing")
 )
 
 // Option is jwt option.
@@ -59,30 +59,16 @@ func WithSigningMethod(method jwt.SigningMethod) Option {
 	}
 }
 
-// WithAuthHeaderKey set key that hold auth token in header
-func WithAuthHeaderKey(headerKey string) Option {
-	return func(options *options) {
-		options.authHeaderKey = headerKey
-	}
-}
-
-// WithRefreshTokenHeaderKey set key that hold refresh token in header
-func WithRefreshTokenHeaderKey(headerKey string) Option {
-	return func(o *options) {
-		o.refreshTokenHeaderKey = headerKey
-	}
-}
-
-// withAccessSecret set access secret
-func withAccessSecret(accessSecret string) Option {
-	return func(o *options) {
-		o.accessSecret = accessSecret
-	}
-}
-
 // Server is a server auth middleware
 func Server(accessSecret string, opts ...Option) middleware.Middleware {
-	o := initOptions(append(opts, withAccessSecret(accessSecret)))
+	o := &options{
+		accessSecret:  accessSecret,
+		authHeaderKey: HeaderKey,
+		signingMethod: jwt.SigningMethodHS256,
+	}
+	for _, opt := range opts {
+		opt(o)
+	}
 	parser := newParser(o)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -101,7 +87,14 @@ func Server(accessSecret string, opts ...Option) middleware.Middleware {
 
 // Client is a client jwt middleware
 func Client(provider TokenProvider, opts ...Option) middleware.Middleware {
-	o := initOptions(opts)
+	o := &options{
+		authHeaderKey:         HeaderKey,
+		signingMethod:         jwt.SigningMethodHS256,
+		refreshTokenHeaderKey: RefreshTokenHeaderKey,
+	}
+	for _, opt := range opts {
+		opt(o)
+	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			if provider == nil {
@@ -115,20 +108,6 @@ func Client(provider TokenProvider, opts ...Option) middleware.Middleware {
 			return nil, ErrWrongContext
 		}
 	}
-}
-
-// initOptions init the option
-func initOptions(opts []Option) *options {
-	o := &options{
-		accessSecret:          "",
-		authHeaderKey:         HeaderKey,
-		signingMethod:         jwt.SigningMethodHS256,
-		refreshTokenHeaderKey: RefreshTokenHeaderKey,
-	}
-	for _, opt := range opts {
-		opt(o)
-	}
-	return o
 }
 
 // newParser create a jwt token parser.
