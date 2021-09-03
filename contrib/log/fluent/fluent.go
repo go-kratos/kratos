@@ -28,64 +28,64 @@ type options struct {
 	forceStopAsyncSend bool
 }
 
-// Timeout with config Timeout.
-func Timeout(timeout time.Duration) Option {
+// WithTimeout with config Timeout.
+func WithTimeout(timeout time.Duration) Option {
 	return func(opts *options) {
 		opts.timeout = timeout
 	}
 }
 
-// WriteTimeout with config WriteTimeout.
-func WriteTimeout(writeTimeout time.Duration) Option {
+// WithWriteTimeout with config WriteTimeout.
+func WithWriteTimeout(writeTimeout time.Duration) Option {
 	return func(opts *options) {
 		opts.writeTimeout = writeTimeout
 	}
 }
 
-// BufferLimit with config BufferLimit.
-func BufferLimit(bufferLimit int) Option {
+// WithBufferLimit with config BufferLimit.
+func WithBufferLimit(bufferLimit int) Option {
 	return func(opts *options) {
 		opts.bufferLimit = bufferLimit
 	}
 }
 
-// RetryWait with config RetryWait.
-func RetryWait(retryWait int) Option {
+// WithRetryWait with config RetryWait.
+func WithRetryWait(retryWait int) Option {
 	return func(opts *options) {
 		opts.retryWait = retryWait
 	}
 }
 
-// MaxRetry with config MaxRetry.
-func MaxRetry(maxRetry int) Option {
+// WithMaxRetry with config MaxRetry.
+func WithMaxRetry(maxRetry int) Option {
 	return func(opts *options) {
 		opts.maxRetry = maxRetry
 	}
 }
 
-// MaxRetryWait with config MaxRetryWait.
-func MaxRetryWait(maxRetryWait int) Option {
+// WithMaxRetryWait with config MaxRetryWait.
+func WithMaxRetryWait(maxRetryWait int) Option {
 	return func(opts *options) {
 		opts.maxRetryWait = maxRetryWait
 	}
 }
 
-// TagPrefix with config TagPrefix.
-func TagPrefix(tagPrefix string) Option {
+// WithTagPrefix with config TagPrefix.
+func WithTagPrefix(tagPrefix string) Option {
 	return func(opts *options) {
 		opts.tagPrefix = tagPrefix
 	}
 }
 
-// Async with config Async.
-func Async(async bool) Option {
+// WithAsync with config Async.
+func WithAsync(async bool) Option {
 	return func(opts *options) {
 		opts.async = async
 	}
 }
 
-// ForceStopAsyncSend with config ForceStopAsyncSend.
-func ForceStopAsyncSend(forceStopAsyncSend bool) Option {
+// WithForceStopAsyncSend with config ForceStopAsyncSend.
+func WithForceStopAsyncSend(forceStopAsyncSend bool) Option {
 	return func(opts *options) {
 		opts.forceStopAsyncSend = forceStopAsyncSend
 	}
