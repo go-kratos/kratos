@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/imdario/mergo"
+
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -19,10 +21,11 @@ type Resolver func(map[string]interface{}) error
 type Option func(*options)
 
 type options struct {
-	sources  []Source
-	decoder  Decoder
-	resolver Resolver
-	logger   log.Logger
+	sources     []Source
+	decoder     Decoder
+	mergeOption []func(*mergo.Config)
+	resolver    Resolver
+	logger      log.Logger
 }
 
 // WithSource with config source.
@@ -56,6 +59,16 @@ func WithLogger(l log.Logger) Option {
 		o.logger = l
 	}
 }
+
+// WithMergeOption with config merge option.
+func WithMergeOption(m ...func(*mergo.Config)) Option {
+	return func(o *options) {
+		o.mergeOption = m
+	}
+}
+
+// defaultMergeOption is mergo.WithOverride.
+var defaultMergeOption = []func(*mergo.Config){mergo.WithOverride}
 
 // defaultDecoder decode config from source KeyValue
 // to target map[string]interface{} using src.Format codec.

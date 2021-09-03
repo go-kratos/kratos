@@ -124,6 +124,7 @@ func TestConfig(t *testing.T) {
 		WithDecoder(defaultDecoder),
 		WithResolver(defaultResolver),
 		WithLogger(log.DefaultLogger),
+		WithMergeOption(defaultMergeOption...),
 	)
 	err = c.Close()
 	assert.Nil(t, err)

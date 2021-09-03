@@ -47,7 +47,7 @@ func (r *reader) Merge(kvs ...*KeyValue) error {
 		if err := r.opts.decoder(kv, next); err != nil {
 			return err
 		}
-		if err := mergo.Map(&merged, convertMap(next), mergo.WithOverride); err != nil {
+		if err := mergo.Map(&merged, convertMap(next), r.opts.mergeOption...); err != nil {
 			return err
 		}
 	}

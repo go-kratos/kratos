@@ -49,9 +49,10 @@ type config struct {
 // New new a config with options.
 func New(opts ...Option) Config {
 	o := options{
-		logger:   log.DefaultLogger,
-		decoder:  defaultDecoder,
-		resolver: defaultResolver,
+		logger:      log.DefaultLogger,
+		decoder:     defaultDecoder,
+		resolver:    defaultResolver,
+		mergeOption: defaultMergeOption,
 	}
 	for _, opt := range opts {
 		opt(&o)
