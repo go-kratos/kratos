@@ -75,12 +75,14 @@ func (c *wrapper) Vars() url.Values {
 	}
 	return vars
 }
+
 func (c *wrapper) Form() url.Values {
 	if err := c.req.ParseForm(); err != nil {
 		return url.Values{}
 	}
 	return c.req.Form
 }
+
 func (c *wrapper) Query() url.Values {
 	return c.req.URL.Query()
 }
@@ -120,14 +122,20 @@ func (c *wrapper) XML(code int, v interface{}) error {
 func (c *wrapper) String(code int, text string) error {
 	c.res.Header().Set("Content-Type", "text/plain")
 	c.res.WriteHeader(code)
-	c.res.Write([]byte(text))
+	_, err := c.res.Write([]byte(text))
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (c *wrapper) Blob(code int, contentType string, data []byte) error {
 	c.res.Header().Set("Content-Type", contentType)
 	c.res.WriteHeader(code)
-	c.res.Write(data)
+	_, err := c.res.Write(data)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

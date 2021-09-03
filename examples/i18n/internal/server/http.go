@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/go-kratos/kratos/examples/i18n/api/helloworld/v1"
+	v1 "github.com/go-kratos/kratos/examples/i18n/api/helloworld/v1"
 	"github.com/go-kratos/kratos/examples/i18n/internal/conf"
 	"github.com/go-kratos/kratos/examples/i18n/internal/pkg/middleware/localize"
 	"github.com/go-kratos/kratos/examples/i18n/internal/service"

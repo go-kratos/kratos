@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package test;
+
+option go_package = "../encoding";
+
+message test_model {
+  int64 id = 1;
+  string name = 2;
+  repeated string hobby = 3;
+  map<string, string> attrs = 4;
+}

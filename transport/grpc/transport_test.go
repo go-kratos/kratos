@@ -1,8 +1,9 @@
 package grpc
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/go-kratos/kratos/v2/transport"
 )
@@ -29,6 +30,7 @@ func TestTransport_RequestHeader(t *testing.T) {
 	v.Set("a", "1")
 	o := &Transport{reqHeader: v}
 	assert.Equal(t, "1", o.RequestHeader().Get("a"))
+	assert.Equal(t, "", o.RequestHeader().Get("notfound"))
 }
 
 func TestTransport_ReplyHeader(t *testing.T) {

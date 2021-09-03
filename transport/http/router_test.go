@@ -10,8 +10,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/go-kratos/kratos/v2/internal/host"
 )
+
+const appJSONStr = "application/json"
 
 type User struct {
 	Name string `json:"name"`
@@ -36,6 +40,7 @@ func authFilter(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
 func loggingFilter(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Do stuff here
@@ -84,7 +89,7 @@ func TestRoute(t *testing.T) {
 	}()
 	time.Sleep(time.Second)
 	testRoute(t, srv)
-	srv.Stop(ctx)
+	_ = srv.Stop(ctx)
 }
 
 func testRoute(t *testing.T, srv *Server) {
@@ -102,18 +107,18 @@ func testRoute(t *testing.T, srv *Server) {
 	if resp.StatusCode != 200 {
 		t.Fatalf("code: %d", resp.StatusCode)
 	}
-	if v := resp.Header.Get("Content-Type"); v != "application/json" {
+	if v := resp.Header.Get("Content-Type"); v != appJSONStr {
 		t.Fatalf("contentType: %s", v)
 	}
 	u := new(User)
-	if err := json.NewDecoder(resp.Body).Decode(u); err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(u); err != nil {
 		t.Fatal(err)
 	}
 	if u.Name != "foo" {
 		t.Fatalf("got %s want foo", u.Name)
 	}
 	// POST
-	resp, err = http.Post(base+"/users", "application/json", strings.NewReader(`{"name":"bar"}`))
+	resp, err = http.Post(base+"/users", appJSONStr, strings.NewReader(`{"name":"bar"}`))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +126,7 @@ func testRoute(t *testing.T, srv *Server) {
 	if resp.StatusCode != 201 {
 		t.Fatalf("code: %d", resp.StatusCode)
 	}
-	if v := resp.Header.Get("Content-Type"); v != "application/json" {
+	if v := resp.Header.Get("Content-Type"); v != appJSONStr {
 		t.Fatalf("contentType: %s", v)
 	}
 	u = new(User)
@@ -133,7 +138,7 @@ func testRoute(t *testing.T, srv *Server) {
 	}
 	// PUT
 	req, _ := http.NewRequest("PUT", base+"/users", strings.NewReader(`{"name":"bar"}`))
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", appJSONStr)
 	resp, err = http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatal(err)
@@ -142,7 +147,7 @@ func testRoute(t *testing.T, srv *Server) {
 	if resp.StatusCode != 200 {
 		t.Fatalf("code: %d", resp.StatusCode)
 	}
-	if v := resp.Header.Get("Content-Type"); v != "application/json" {
+	if v := resp.Header.Get("Content-Type"); v != appJSONStr {
 		t.Fatalf("contentType: %s", v)
 	}
 	u = new(User)
@@ -165,4 +170,18 @@ func testRoute(t *testing.T, srv *Server) {
 	if resp.Header.Get("Access-Control-Allow-Methods") != "OPTIONS" {
 		t.Fatal("cors failed")
 	}
+}
+
+func TestRouter_Group(t *testing.T) {
+	r := &Router{}
+	rr := r.Group("a", func(http.Handler) http.Handler { return nil })
+	assert.Equal(t, "a", rr.prefix)
+}
+
+func TestHandle(t *testing.T) {
+	r := newRouter("/", NewServer())
+	h := func(i Context) error {
+		return nil
+	}
+	r.GET("/get", h)
 }

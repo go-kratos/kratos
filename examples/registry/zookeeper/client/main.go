@@ -5,14 +5,14 @@ import (
 	"log"
 	"time"
 
+	"github.com/go-kratos/kratos/contrib/registry/zookeeper/v2"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
-	"github.com/go-kratos/zookeeper/registry"
 )
 
 func main() {
-	r, err := registry.New([]string{"127.0.0.1:2181"})
+	r, err := zookeeper.New([]string{"127.0.0.1:2181"})
 	if err != nil {
 		panic(err)
 	}
@@ -23,7 +23,7 @@ func main() {
 	}
 }
 
-func callGRPC(r *registry.Registry) {
+func callGRPC(r *zookeeper.Registry) {
 	conn, err := grpc.DialInsecure(
 		context.Background(),
 		grpc.WithEndpoint("discovery:///helloworld"),
@@ -41,7 +41,7 @@ func callGRPC(r *registry.Registry) {
 	log.Printf("[grpc] SayHello %+v\n", reply)
 }
 
-func callHTTP(r *registry.Registry) {
+func callHTTP(r *zookeeper.Registry) {
 	conn, err := http.NewClient(
 		context.Background(),
 		http.WithEndpoint("discovery:///helloworld"),

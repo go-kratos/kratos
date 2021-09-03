@@ -20,13 +20,16 @@ func NewBuilder() resolver.Builder {
 }
 
 func (d *directBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
-	var addrs []resolver.Address
+	addrs := make([]resolver.Address, 0)
 	for _, addr := range strings.Split(target.Endpoint, ",") {
 		addrs = append(addrs, resolver.Address{Addr: addr})
 	}
-	cc.UpdateState(resolver.State{
+	err := cc.UpdateState(resolver.State{
 		Addresses: addrs,
 	})
+	if err != nil {
+		return nil, err
+	}
 	return newDirectResolver(), nil
 }
 

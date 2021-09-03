@@ -36,23 +36,23 @@ type App struct {
 
 // New create an application lifecycle manager.
 func New(opts ...Option) *App {
-	options := options{
+	o := options{
 		ctx:              context.Background(),
-		logger:           log.DefaultLogger,
+		logger:           log.NewHelper(log.DefaultLogger),
 		sigs:             []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		registrarTimeout: 10 * time.Second,
 	}
 	if id, err := uuid.NewUUID(); err == nil {
-		options.id = id.String()
+		o.id = id.String()
 	}
-	for _, o := range opts {
-		o(&options)
+	for _, opt := range opts {
+		opt(&o)
 	}
-	ctx, cancel := context.WithCancel(options.ctx)
+	ctx, cancel := context.WithCancel(o.ctx)
 	return &App{
 		ctx:    ctx,
 		cancel: cancel,
-		opts:   options,
+		opts:   o,
 	}
 }
 
@@ -99,7 +99,8 @@ func (a *App) Run() error {
 	}
 	wg.Wait()
 	if a.opts.registrar != nil {
-		ctx, cancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 		defer cancel()
 		if err := a.opts.registrar.Register(ctx, instance); err != nil {
 			return err
@@ -114,7 +115,10 @@ func (a *App) Run() error {
 			case <-ctx.Done():
 				return ctx.Err()
 			case <-c:
-				a.Stop()
+				err := a.Stop()
+				if err != nil {
+					a.opts.logger.Errorf("failed to app stop: %v", err)
+				}
 			}
 		}
 	})
@@ -140,7 +144,7 @@ func (a *App) Stop() error {
 }
 
 func (a *App) buildInstance() (*registry.ServiceInstance, error) {
-	var endpoints []string
+	endpoints := make([]string, 0) //nolint:gomnd
 	for _, e := range a.opts.endpoints {
 		endpoints = append(endpoints, e.String())
 	}

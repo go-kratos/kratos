@@ -4,13 +4,18 @@ import (
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/internal/testproto/complex"
+	"github.com/go-kratos/kratos/v2/internal/complex"
 	"github.com/stretchr/testify/require"
 )
 
 type LoginRequest struct {
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
+}
+
+type TestModel struct {
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
 }
 
 const contentType = "x-www-form-urlencoded"
@@ -31,6 +36,15 @@ func TestFormCodecMarshal(t *testing.T) {
 	content, err = encoding.GetCodec(contentType).Marshal(req)
 	require.NoError(t, err)
 	require.Equal(t, []byte("username=kratos"), content)
+
+	m := &TestModel{
+		ID:   1,
+		Name: "kratos",
+	}
+	content, err = encoding.GetCodec(contentType).Marshal(m)
+	t.Log(string(content))
+	require.NoError(t, err)
+	require.Equal(t, []byte("id=1&name=kratos"), content)
 }
 
 func TestFormCodecUnmarshal(t *testing.T) {
@@ -41,7 +55,7 @@ func TestFormCodecUnmarshal(t *testing.T) {
 	content, err := encoding.GetCodec(contentType).Marshal(req)
 	require.NoError(t, err)
 
-	var bindReq = new(LoginRequest)
+	bindReq := new(LoginRequest)
 	err = encoding.GetCodec(contentType).Unmarshal(content, bindReq)
 	require.NoError(t, err)
 	require.Equal(t, "kratos", bindReq.Username)
@@ -58,7 +72,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 	content, err := encoding.GetCodec(contentType).Marshal(in)
 	require.NoError(t, err)
 	require.Equal(t, "id=2233&numberOne=2233&simples=3344&simples=5566&very_simple.component=5566", string(content))
-	var in2 = &complex.Complex{}
+	in2 := &complex.Complex{}
 	err = encoding.GetCodec(contentType).Unmarshal(content, in2)
 	require.NoError(t, err)
 	require.Equal(t, int64(2233), in2.Id)

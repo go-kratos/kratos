@@ -16,7 +16,7 @@ const _testJSON = `
 {
     "test":{
         "server":{
-			"name":"$SERVICE_NAME",
+			"name":"${SERVICE_NAME}",
             "addr":"${ADDR:127.0.0.1}",
             "port":"${PORT:8080}"
         }
@@ -36,10 +36,10 @@ func TestEnvWithPrefix(t *testing.T) {
 		data     = []byte(_testJSON)
 	)
 	defer os.Remove(path)
-	if err := os.MkdirAll(path, 0700); err != nil {
+	if err := os.MkdirAll(path, 0o700); err != nil {
 		t.Error(err)
 	}
-	if err := ioutil.WriteFile(filename, data, 0666); err != nil {
+	if err := ioutil.WriteFile(filename, data, 0o666); err != nil {
 		t.Error(err)
 	}
 
@@ -148,10 +148,10 @@ func TestEnvWithoutPrefix(t *testing.T) {
 		data     = []byte(_testJSON)
 	)
 	defer os.Remove(path)
-	if err := os.MkdirAll(path, 0700); err != nil {
+	if err := os.MkdirAll(path, 0o700); err != nil {
 		t.Error(err)
 	}
-	if err := ioutil.WriteFile(filename, data, 0666); err != nil {
+	if err := ioutil.WriteFile(filename, data, 0o666); err != nil {
 		t.Error(err)
 	}
 
