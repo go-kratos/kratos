@@ -1,4 +1,4 @@
-package metrics
+package datadog
 
 import "github.com/DataDog/datadog-go/statsd"
 

@@ -1,4 +1,4 @@
-package metrics
+package datadog
 
 import (
 	"github.com/go-kratos/kratos/v2/metrics"
