@@ -54,19 +54,20 @@ uninstall:
 
 .PHONY: clean
 clean:
-	@go mod tidy
+	@${TOOLS_SHELL} tidy
 	@echo "clean finished"
 
 .PHONY: fix
 fix: $(LINTER)
-	@${TOOLS_SHELL} tidy
 	@${TOOLS_SHELL} fix
+	@echo "lint fix finished"
 
 .PHONY: test
 test:
 	@${TOOLS_SHELL} test
-
+	@echo "go test finished"
 
 .PHONY: lint
 lint: $(LINTER)
 	@${TOOLS_SHELL} lint
+	@echo "lint check finished"
