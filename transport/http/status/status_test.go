@@ -1,9 +1,10 @@
 package status
 
 import (
-	"google.golang.org/grpc/codes"
 	"net/http"
 	"testing"
+
+	"google.golang.org/grpc/codes"
 )
 
 func TestToGRPCCode(t *testing.T) {
