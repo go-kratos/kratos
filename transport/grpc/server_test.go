@@ -24,7 +24,7 @@ func TestServer(t *testing.T) {
 		func(middleware.Handler) middleware.Handler { return nil },
 	}...))
 
-	if e, err := srv.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
+	if e, err := srv.Endpoints(); err != nil || len(e) == 0 || strings.HasSuffix(e[0].Host, ":0") {
 		t.Fatal(e, err)
 	}
 
@@ -40,12 +40,12 @@ func TestServer(t *testing.T) {
 }
 
 func testClient(t *testing.T, srv *Server) {
-	u, err := srv.Endpoint()
-	if err != nil {
+	ul, err := srv.Endpoints()
+	if err != nil || len(ul) == 0 {
 		t.Fatal(err)
 	}
 	// new a gRPC client
-	conn, err := DialInsecure(context.Background(), WithEndpoint(u.Host))
+	conn, err := DialInsecure(context.Background(), WithEndpoint(ul[0].Host))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -20,7 +20,7 @@ type Server interface {
 
 // Endpointer is registry endpoint.
 type Endpointer interface {
-	Endpoint() (*url.URL, error)
+	Endpoints() ([]*url.URL, error)
 }
 
 // Header is the storage medium used by a Header.
@@ -36,7 +36,7 @@ type Transporter interface {
 	// grpc
 	// http
 	Kind() Kind
-	// Endpoint return server or client endpoint
+	// Endpoint return server or client endpoints
 	// Server Transport: grpc://127.0.0.1:9000
 	// Client Transport: discovery:///provider-demo
 	Endpoint() string

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -30,12 +31,14 @@ func TestServer(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	}
 	ctx := context.Background()
-	srv := NewServer()
+	lis, err := net.Listen("tcp", ":12345")
+	assert.NoError(t, err)
+	srv := NewServer(Listener(lis))
 	srv.HandleFunc("/index", fn)
 	srv.HandleFunc("/index/{id:[0-9]+}", fn)
 
-	if e, err := srv.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
-		t.Fatal(e, err)
+	if el, err := srv.Endpoints(); err != nil || len(el) == 0 || strings.HasSuffix(el[0].Host, ":0") {
+		t.Fatal(el, err)
 	}
 
 	go func() {
@@ -67,18 +70,18 @@ func testClient(t *testing.T, srv *Server) {
 
 		{"GET", "/index/notfound"},
 	}
-	e, err := srv.Endpoint()
-	if err != nil {
+	e, err := srv.Endpoints()
+	if err != nil || len(e) == 0 {
 		t.Fatal(err)
 	}
-	client, err := NewClient(context.Background(), WithEndpoint(e.Host))
+	client, err := NewClient(context.Background(), WithEndpoint(e[0].Host))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer client.Close()
 	for _, test := range tests {
 		var res testData
-		url := fmt.Sprintf(e.String() + test.path)
+		url := fmt.Sprintf(e[0].String() + test.path)
 		req, err := http.NewRequest(test.method, url, nil)
 		if err != nil {
 			t.Fatal(err)

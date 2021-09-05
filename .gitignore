@@ -34,3 +34,7 @@ bin/
 .vscode/
 .idea/
 *.swp
+
+cmd/kratos/kratos
+cmd/protoc-gen-go-errors/protoc-gen-go-errors
+cmd/protoc-gen-go-http/protoc-gen-go-http

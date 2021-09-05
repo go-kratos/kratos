@@ -31,7 +31,28 @@ var (
 )
 
 // ServerOption is gRPC server option.
-type ServerOption func(o *Server)
+type ServerOption func(srv *Server)
+
+// ServiceRegister is gRPC service register
+// examples:
+//   func(srv *Server) {
+//       v1.RegisterGreeterServer(srv, greeter)
+//   }
+type ServiceRegister func(o *Server)
+
+// ServiceRegisters with service registers.
+func ServiceRegisters(registers ...ServiceRegister) ServerOption {
+	return func(s *Server) {
+		s.registers = registers
+	}
+}
+
+// Context with context.
+func Context(ctx context.Context) ServerOption {
+	return func(s *Server) {
+		s.ctx = ctx
+	}
+}
 
 // Network with server network.
 func Network(network string) ServerOption {
@@ -75,6 +96,13 @@ func TLSConfig(c *tls.Config) ServerOption {
 	}
 }
 
+// Listener with listener.
+func Listener(lis net.Listener) ServerOption {
+	return func(s *Server) {
+		s.lis = lis
+	}
+}
+
 // UnaryInterceptor returns a ServerOption that sets the UnaryServerInterceptor for the server.
 func UnaryInterceptor(in ...grpc.UnaryServerInterceptor) ServerOption {
 	return func(s *Server) {
@@ -92,7 +120,8 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
-	ctx        context.Context
+	ctx context.Context
+
 	tlsConf    *tls.Config
 	lis        net.Listener
 	once       sync.Once
@@ -107,6 +136,7 @@ type Server struct {
 	grpcOpts   []grpc.ServerOption
 	health     *health.Server
 	metadata   *apimd.Server
+	registers  []ServiceRegister
 }
 
 // NewServer creates a gRPC server by options.
@@ -117,7 +147,9 @@ func NewServer(opts ...ServerOption) *Server {
 		timeout: 1 * time.Second,
 		health:  health.NewServer(),
 		log:     log.NewHelper(log.DefaultLogger),
+		ctx:     context.Background(),
 	}
+
 	for _, o := range opts {
 		o(srv)
 	}
@@ -142,37 +174,42 @@ func NewServer(opts ...ServerOption) *Server {
 	grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
 	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
 	reflection.Register(srv.Server)
+	for _, r := range srv.registers {
+		r(srv)
+	}
 	return srv
 }
 
-// Endpoint return a real address to registry endpoint.
+// Endpoints return a real address list to registry endpoint.
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
-func (s *Server) Endpoint() (*url.URL, error) {
+func (s *Server) Endpoints() ([]*url.URL, error) {
 	s.once.Do(func() {
-		lis, err := net.Listen(s.network, s.address)
+		if s.lis == nil {
+			lis, err := net.Listen(s.network, s.address)
+			if err != nil {
+				s.err = err
+				return
+			}
+			s.lis = lis
+		}
+		addr, err := host.Extract(s.address, s.lis)
 		if err != nil {
+			_ = s.lis.Close()
 			s.err = err
 			return
 		}
-		addr, err := host.Extract(s.address, lis)
-		if err != nil {
-			_ = lis.Close()
-			s.err = err
-			return
-		}
-		s.lis = lis
 		s.endpoint = endpoint.NewEndpoint("grpc", addr, s.tlsConf != nil)
 	})
 	if s.err != nil {
 		return nil, s.err
 	}
-	return s.endpoint, nil
+	return []*url.URL{s.endpoint}, nil
 }
 
 // Start start the gRPC server.
 func (s *Server) Start(ctx context.Context) error {
-	if _, err := s.Endpoint(); err != nil {
+	if _, err := s.Endpoints(); err != nil {
 		return err
 	}
 	s.ctx = ctx

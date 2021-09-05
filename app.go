@@ -151,11 +151,13 @@ func (a *App) buildInstance() (*registry.ServiceInstance, error) {
 	if len(endpoints) == 0 {
 		for _, srv := range a.opts.servers {
 			if r, ok := srv.(transport.Endpointer); ok {
-				e, err := r.Endpoint()
+				el, err := r.Endpoints()
 				if err != nil {
 					return nil, err
 				}
-				endpoints = append(endpoints, e.String())
+				for _, e := range el {
+					endpoints = append(endpoints, e.String())
+				}
 			}
 		}
 	}

@@ -61,6 +61,9 @@ fmt:
 test:
 	@go test ./...
 
+cover:
+	@go test -cover ./...
+
 # golangci-lint
 LINTER := bin/golangci-lint
 $(LINTER): 
