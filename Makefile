@@ -6,7 +6,7 @@ GOBIN	:=	$(shell echo ${GOBIN} | cut -d':' -f1)
 GOPATH	:=	$(shell echo $(GOPATH) | cut -d':' -f1)
 BIN		:= 	""
 
-TOOLS_SHELL="./scripts/tools.sh"
+TOOLS_SHELL="./hack/tools.sh"
 # golangci-lint
 LINTER := bin/golangci-lint
 $(LINTER): 
