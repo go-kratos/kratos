@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/fsnotify/fsnotify v1.4.9
+	github.com/go-kratos/sra v0.0.0-20210905065551-b690f7ef1d3e
 	github.com/go-playground/form/v4 v4.2.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
@@ -13,7 +14,6 @@ require (
 	go.opentelemetry.io/otel/sdk v1.0.0-RC2
 	go.opentelemetry.io/otel/trace v1.0.0-RC2
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20210903071746-97244b99971b // indirect
 	google.golang.org/genproto v0.0.0-20210805201207-89edb61ffb67
 	google.golang.org/grpc v1.39.1
 	google.golang.org/protobuf v1.27.1

@@ -31,7 +31,6 @@ func Client(opts ...Option) middleware.Middleware {
 	for _, o := range opts {
 		o(options)
 	}
-
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			if err := options.breaker.Allow(); err != nil {
@@ -39,7 +38,7 @@ func Client(opts ...Option) middleware.Middleware {
 				// NOTE: when client reject requets locally,
 				// continue add counter let the drop ratio higher.
 				options.breaker.MarkFailed()
-				return nil, errors.New(503, "BREAKER", "request failed due to circuit breaker triggered")
+				return nil, errors.New(503, "CIRCUITBREAKER", "request failed due to circuit breaker triggered")
 			}
 			// allowed
 			reply, err := handler(ctx, req)
