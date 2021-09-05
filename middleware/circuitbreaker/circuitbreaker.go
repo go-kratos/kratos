@@ -3,12 +3,13 @@ package circuitbreaker
 import (
 	"context"
 
+	"github.com/go-kratos/aegis/circuitbreaker"
+	"github.com/go-kratos/aegis/circuitbreaker/sre"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/sra/circuitbreaker"
-	"github.com/go-kratos/sra/circuitbreaker/sre"
 )
 
+// Option is circuit breaker option.
 type Option func(*options)
 
 // WithBreaker set circuit breaker implentation
