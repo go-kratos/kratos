@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/go-kratos/sra v0.0.0-20210905131750-b5f23c31b44c
+	github.com/go-kratos/aegis v0.1.0
 	github.com/go-playground/form/v4 v4.2.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0

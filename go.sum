@@ -20,8 +20,8 @@ github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7
 github.com/fsnotify/fsnotify v1.4.9 h1:hsms1Qyu0jgnwNXIxa+/V/PDsU6CfLf6CNO8H7IWoS4=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
-github.com/go-kratos/sra v0.0.0-20210905131750-b5f23c31b44c h1:vLjfP5Or+owmNTeZBkDjHIXBj2yPgH0fyiy888ytfLc=
-github.com/go-kratos/sra v0.0.0-20210905131750-b5f23c31b44c/go.mod h1:AyUnb2L926UF9iG+ytoICDK8Ou9QOEhLu/J36P0WYu4=
+github.com/go-kratos/aegis v0.1.0 h1:Ip1qlSOw/b4o3JOWXQrSgwkjQjuCsirShk6gmzCg+44=
+github.com/go-kratos/aegis v0.1.0/go.mod h1:jYeSQ3Gesba478zEnujOiG5QdsyF3Xk/8owFUeKcHxw=
 github.com/go-ole/go-ole v1.2.5 h1:t4MGB5xEDZvXI+0rMjjsfBsD7yAgp/s9ZDkL1JndXwY=
 github.com/go-ole/go-ole v1.2.5/go.mod h1:pprOEPIfldk/42T2oK7lQ4v4JSDwmV0As9GaiUsvbm0=
 github.com/go-playground/assert/v2 v2.0.1 h1:MsBgLAaY856+nPRTKrp3/OZK38U/wa0CcBYNjji3q3A=
