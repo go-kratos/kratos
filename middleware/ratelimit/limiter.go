@@ -40,7 +40,7 @@ func Server(opts ...Option) middleware.Middleware {
 			}
 			// allowed
 			reply, err = handler(ctx, req)
-			done(ratelimit.DoneInfo{})
+			done(ratelimit.DoneInfo{Err: err})
 			return
 		}
 	}

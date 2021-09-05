@@ -3,9 +3,8 @@ module github.com/go-kratos/kratos/v2
 go 1.15
 
 require (
-	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/go-kratos/sra v0.0.0-20210905065551-b690f7ef1d3e
+	github.com/go-kratos/sra v0.0.0-20210905131750-b5f23c31b44c
 	github.com/go-playground/form/v4 v4.2.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
