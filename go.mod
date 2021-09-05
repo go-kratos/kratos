@@ -9,8 +9,6 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/imdario/mergo v0.3.12
-	github.com/improbable-eng/grpc-web v0.14.1
-	github.com/soheilhy/cmux v0.1.5
 	github.com/stretchr/testify v1.7.0
 	go.opentelemetry.io/otel v1.0.0-RC2
 	go.opentelemetry.io/otel/sdk v1.0.0-RC2
