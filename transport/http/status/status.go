@@ -1,8 +1,9 @@
 package status
 
 import (
-	"google.golang.org/grpc/codes"
 	"net/http"
+
+	"google.golang.org/grpc/codes"
 )
 
 const (
