@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/go-kratos/kratos/contrib/registry/zookeeper/v2"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/registry/zookeeper/v2"
 	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/middleware/recovery/v2"
+	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 )
@@ -24,7 +24,7 @@ func (s *server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*he
 }
 
 func main() {
-	r, err := registry.New([]string{"127.0.0.1:2181"})
+	r, err := zookeeper.New([]string{"127.0.0.1:2181"})
 	if err != nil {
 		log.Fatal(err)
 	}

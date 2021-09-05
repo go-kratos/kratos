@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/go-kratos/kratos/contrib/registry/consul/v2"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/registry/consul/v2"
-	"github.com/go-kratos/kratos/middleware/recovery/v2"
+	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/hashicorp/consul/api"
@@ -26,7 +26,7 @@ func main() {
 }
 
 func callGRPC(cli *api.Client) {
-	r := registry.New(cli)
+	r := consul.New(cli)
 	conn, err := grpc.DialInsecure(
 		context.Background(),
 		grpc.WithEndpoint("discovery:///helloworld"),
@@ -45,7 +45,7 @@ func callGRPC(cli *api.Client) {
 }
 
 func callHTTP(cli *api.Client) {
-	r := registry.New(cli)
+	r := consul.New(cli)
 	conn, err := http.NewClient(
 		context.Background(),
 		http.WithMiddleware(

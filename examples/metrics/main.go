@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/go-kratos/kratos/middleware/metrics/v2"
-	prom "github.com/go-kratos/prometheus/metrics"
+	prom "github.com/go-kratos/kratos/contrib/metrics/prometheus/v2"
+	"github.com/go-kratos/kratos/v2/middleware/metrics"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
@@ -26,9 +26,9 @@ var (
 	_metricSeconds = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "server",
 		Subsystem: "requests",
-		Name:      "duration_ms",
-		Help:      "server requests duration(ms).",
-		Buckets:   []float64{5, 10, 25, 50, 100, 250, 500, 1000},
+		Name:      "duration_sec",
+		Help:      "server requests duration(sec).",
+		Buckets:   []float64{0.005, 0.01, 0.025, 0.05, 0.1, 0.250, 0.5, 1},
 	}, []string{"kind", "operation"})
 
 	_metricRequests = prometheus.NewCounterVec(prometheus.CounterOpts{

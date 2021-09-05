@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	etcdregistry "github.com/go-kratos/etcd/registry"
+	etcdregistry "github.com/go-kratos/kratos/contrib/registry/etcd/v2"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2"
