@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This is used by the linter action.
 # Recursively finds all directories with a go.mod file and creates

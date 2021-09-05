@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # tools shell script
 
@@ -13,14 +13,30 @@ KRAOTS_HOME=$(
 		pwd
 )
 
-GOMOD_HOME_DIRS=$(find . -not -path "*/vendor/*" -not -path "*/examples/*" -type f -name go.mod -print0 | xargs -0 -I {} dirname {})
+all_package=$(find . -not -path "*/vendor/*" -not -path "*/examples/*" -type f -name go.mod -print0 | xargs -0 -I {} dirname {})
 
 LINTER=${KRAOTS_HOME}/bin/golangci-lint
 LINTER_CONFIG=${KRAOTS_HOME}/.golangci.yml
 
+failure_file=${KRAOTS_HOME}/script/.check_failures
+
+find_files() {
+	find . -not \( \
+		\( \
+		-wholename './output' \
+		-o -wholename './.git' \
+		-o -wholename '*/third_party/*' \
+		-o -wholename '*/vendor/*' \
+		\) -prune \
+		\) -name 'go.mod'
+}
+
+failing_packages=()
+while IFS='' read -r line; do failing_packages+=("$line"); done < <(cat "$failure_file")
+
 # lint all mod
 function lint() {
-	for dir in $GOMOD_HOME_DIRS; do
+	for dir in $all_package; do
 		pushd "$dir" >/dev/null &&
 			echo "golangci lint $(sed -n 1p go.mod | cut -d ' ' -f2)" &&
 			eval "${LINTER} run --timeout=5m --config=${LINTER_CONFIG}"
@@ -30,7 +46,7 @@ function lint() {
 
 # test all mod
 function test() {
-	for dir in $GOMOD_HOME_DIRS; do
+	for dir in $all_package; do
 		pushd "$dir" >/dev/null &&
 			echo "go test $(sed -n 1p go.mod | cut -d ' ' -f2)" &&
 			go test ./...
@@ -40,7 +56,7 @@ function test() {
 
 # try to fix all mod with golangci-lint
 function fix() {
-	for dir in $GOMOD_HOME_DIRS; do
+	for dir in $all_package; do
 		pushd "$dir" >/dev/null &&
 			echo "golangci fix $(sed -n 1p go.mod | cut -d ' ' -f2)" &&
 			eval "${LINTER} run -v --fix --timeout=5m --config=${LINTER_CONFIG}"
@@ -49,7 +65,7 @@ function fix() {
 }
 
 function tidy() {
-	for dir in $GOMOD_HOME_DIRS; do
+	for dir in $all_package; do
 		pushd "$dir" >/dev/null &&
 			echo "go mod tidy $(sed -n 1p go.mod | cut -d ' ' -f2)" &&
 			go mod tidy
