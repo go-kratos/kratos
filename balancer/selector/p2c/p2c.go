@@ -11,44 +11,27 @@ import (
 
 const (
 	forcePick = time.Second * 3
+	// Name is balancer name
+	Name = "p2c"
 )
 
 var (
 	_ balancer.Selector = &Selector{}
 )
 
-// statistics is info for log
-type statistic struct {
-	addr     string
-	score    float64
-	cs       uint64
-	lantency time.Duration
-	load     uint64
-	inflight int64
-	reqs     int64
-	predict  time.Duration
-}
-
 // New p2c
-func New(errHandler func(error) bool) balancer.Selector {
+func New() balancer.Selector {
 	p := &Selector{
-		r:          rand.New(rand.NewSource(time.Now().UnixNano())),
-		subConns:   make(map[string]balancer.Node),
-		errHandler: errHandler,
+		r: rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 	return p
 }
 
 // Selector is p2c selector
 type Selector struct {
-	// subConns is the snapshot of the weighted-roundrobin balancer when this picker was
-	// created. The slice is immutable. Each Get() will do a round robin
-	// selection from it and return the selected SubConn.
-	subConns   map[string]balancer.Node
-	logTs      int64
-	r          *rand.Rand
-	lk         sync.Mutex
-	errHandler func(err error) (isErr bool)
+	logTs int64
+	r     *rand.Rand
+	lk    sync.Mutex
 }
 
 // choose two distinct nodes
@@ -62,31 +45,37 @@ func (s *Selector) prePick(nodes []balancer.Node) (nodeA balancer.Node, nodeB ba
 	return
 }
 
-func (s *Selector) Select(ctx context.Context, nodes []balancer.Node) (balancer.Node, error) {
-	var pc, upc balancer.Node
-	start := time.Now()
-
+func (s *Selector) Select(ctx context.Context, nodes []balancer.Node) (balancer.Node, func(ctx context.Context, di balancer.DoneInfo), error) {
 	if len(nodes) == 0 {
-		return nil, balancer.ErrNoAvaliable
+		return nil, nil, balancer.ErrNoAvaliable
 	} else if len(nodes) == 1 {
-		return nodes[0], nil
-	} else {
-		nodeA, nodeB := s.prePick(nodes)
-		// meta.Weight为服务发布者在disocvery中设置的权重
-		if nodeB.Weight() > nodeA.Weight() {
-			pc, upc = nodeB, nodeA
-		} else {
-			pc, upc = nodeA, nodeB
-		}
-		// 如果选中的节点，在forceGap期间内从来没有被选中一次，则强制选一次
-		// 利用强制的机会，来触发成功率、延迟的更新
-		// TODO: 并发问题导致瞬间多次选择upc
-		if start.Sub(upc.LastPick()) > forcePick {
-			pc = upc
-		}
+		done := nodes[0].Pick()
+		return nodes[0], done, nil
 	}
 
-	return pc, nil
+	var pc, upc balancer.Node
+	var done func(ctx context.Context, di balancer.DoneInfo)
+	nodeA, nodeB := s.prePick(nodes)
+	// meta.Weight为服务发布者在disocvery中设置的权重
+	if nodeB.Weight() > nodeA.Weight() {
+		pc, upc = nodeB, nodeA
+	} else {
+		pc, upc = nodeA, nodeB
+	}
+	// 如果选中的节点，在forceGap期间内从来没有被选中一次，则强制选一次
+	// 利用强制的机会，来触发成功率、延迟的更新
+	if upc.PickElapsed() > forcePick {
+		s.lk.Lock()
+		if upc.PickElapsed() > forcePick {
+			pc = upc
+			done = pc.Pick()
+		}
+		s.lk.Unlock()
+	} else {
+		done = pc.Pick()
+	}
+
+	return pc, done, nil
 }
 
 /*
@@ -117,5 +106,17 @@ func (p *P2cPicker) PrintStats() {
 	if reqs > 10 {
 		//log.DefaultLog.Debugf("p2c %s : %+v", serverName, stats)
 	}
+}
+
+// statistics is info for log
+type statistic struct {
+	addr     string
+	score    float64
+	cs       uint64
+	lantency time.Duration
+	load     uint64
+	inflight int64
+	reqs     int64
+	predict  time.Duration
 }
 */

@@ -9,8 +9,8 @@ import (
 type DoneInfo struct {
 	// Response Error
 	Err error
-	// Response Header
-	ReplyHeader Metadata
+	// Response Metadata
+	ReplyMeta Metadata
 
 	// BytesSent indicates if any bytes have been sent to the server.
 	BytesSent bool
@@ -28,16 +28,20 @@ type Done func(ctx context.Context, di DoneInfo)
 
 // Node is node interface
 type Node interface {
+	// address is unique under the same service
 	Address() string
-	// Metadata is the kv pair metadata associated with the service instance.
-	Metadata() Metadata
+
+	// pick a node
+	Pick() Done
 
 	// runtime calcuated weight
 	Weight() float64
-	// last pick time
-	LastPick() time.Time
-	// pick and return done func
-	Pick() Done
+
+	// time elapsed since the latest pick
+	PickElapsed() time.Duration
+
+	// Metadata is the kv pair metadata associated with the service instance.
+	Metadata() Metadata
 }
 
 // NodeBuilder is node builder

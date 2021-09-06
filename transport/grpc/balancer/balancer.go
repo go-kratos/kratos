@@ -1,10 +1,12 @@
-package multi
+package balancer
 
 import (
 	"sync"
 
 	"github.com/go-kratos/kratos/v2/balancer"
 	"github.com/go-kratos/kratos/v2/balancer/node/direct"
+	"github.com/go-kratos/kratos/v2/balancer/node/ewma"
+	"github.com/go-kratos/kratos/v2/balancer/selector/p2c"
 	"github.com/go-kratos/kratos/v2/balancer/selector/random"
 
 	"google.golang.org/grpc/attributes"
@@ -20,13 +22,9 @@ var (
 	mu sync.Mutex
 )
 
-type node struct {
-	balancer.Node
-	gBalancer.SubConn
-}
-
 func init() {
-	SetGlobalBalancer("random", random.New(), &direct.Builder{})
+	SetGlobalBalancer(random.Name, random.New(), &direct.Builder{})
+	SetGlobalBalancer(p2c.Name, p2c.New(), &ewma.Builder{})
 }
 
 // SetGlobalBalancer set grpc balancer with scheme
@@ -50,39 +48,48 @@ type Builder struct {
 func (b *Builder) Build(info base.PickerBuildInfo) gBalancer.Picker {
 	p := &Picker{
 		selector: b.selector,
+		subConns: make(map[string]gBalancer.SubConn),
 	}
 	for conn, info := range info.ReadySCs {
 		attr := info.Address.Attributes
 		if attr == nil {
 			attr = attributes.New()
 		}
-		p.nodes = append(p.nodes, node{b.nodeBuilder.Build(info.Address.Addr, 100, Attributes(*attr)), conn})
+		if _, ok := p.subConns[info.Address.Addr]; !ok {
+			n := b.nodeBuilder.Build(info.Address.Addr, 100, Attributes(*attr))
+			p.subConns[info.Address.Addr] = conn
+			p.nodes = append(p.nodes, n)
+
+		}
 	}
 	return p
 }
 
 type Picker struct {
+	subConns map[string]gBalancer.SubConn
 	nodes    []balancer.Node
 	selector balancer.Selector
 }
 
 // Pick pick instances
 func (p *Picker) Pick(info gBalancer.PickInfo) (gBalancer.PickResult, error) {
-	n, err := p.selector.Select(info.Ctx, p.nodes)
+	n, done, err := p.selector.Select(info.Ctx, p.nodes)
 	if err != nil {
 		return gBalancer.PickResult{}, err
 	}
-	done := n.Pick()
-	sub := n.(node).SubConn
+	sub := p.subConns[n.Address()]
 
-	return gBalancer.PickResult{SubConn: sub, Done: func(di gBalancer.DoneInfo) {
-		done(info.Ctx, balancer.DoneInfo{
-			Err:           di.Err,
-			BytesSent:     di.BytesSent,
-			BytesReceived: di.BytesReceived,
-			ReplyHeader:   Trailer(di.Trailer),
-		})
-	}}, nil
+	return gBalancer.PickResult{
+		SubConn: sub,
+		Done: func(di gBalancer.DoneInfo) {
+			done(info.Ctx, balancer.DoneInfo{
+				Err:           di.Err,
+				BytesSent:     di.BytesSent,
+				BytesReceived: di.BytesReceived,
+				ReplyMeta:     Trailer(di.Trailer),
+			})
+		},
+	}, nil
 }
 
 type Attributes attributes.Attributes

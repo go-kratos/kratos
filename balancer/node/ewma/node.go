@@ -49,17 +49,19 @@ type node struct {
 
 // Builder is ewma node builder
 type Builder struct {
+	ErrHandler func(err error) (isErr bool)
 }
 
 // Build create node
-func (*Builder) Build(addr string, initWeight float64, metadata balancer.Metadata) balancer.Node {
+func (b *Builder) Build(addr string, initWeight float64, metadata balancer.Metadata) balancer.Node {
 	s := &node{
-		addr:      addr,
-		metadata:  metadata,
-		lag:       0,
-		success:   1000,
-		inflight:  1,
-		inflights: list.New(),
+		addr:       addr,
+		metadata:   metadata,
+		lag:        0,
+		success:    1000,
+		inflight:   1,
+		inflights:  list.New(),
+		errHandler: b.ErrHandler,
 	}
 	return s
 }
@@ -180,8 +182,8 @@ func (n *node) Weight() (weight float64) {
 	return
 }
 
-func (n *node) LastPick() time.Time {
-	return time.Unix(0, atomic.LoadInt64(&n.lastPick))
+func (n *node) PickElapsed() time.Duration {
+	return time.Duration(time.Now().UnixNano() - atomic.LoadInt64(&n.lastPick))
 }
 
 func (n *node) Address() string {

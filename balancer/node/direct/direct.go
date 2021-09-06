@@ -46,12 +46,12 @@ func (n *node) Weight() (weight float64) {
 	return n.weight
 }
 
-func (n *node) LastPick() time.Time {
-	return time.Unix(0, atomic.LoadInt64(&n.lastPick))
+func (n *node) PickElapsed() time.Duration {
+	return time.Duration(time.Now().UnixNano() - atomic.LoadInt64(&n.lastPick))
 }
 
 func (n *node) Address() string {
-	return n.Address()
+	return n.addr
 }
 
 func (n *node) Metadata() balancer.Metadata {
