@@ -7,9 +7,7 @@ import (
 )
 
 func TestLogger(t *testing.T) {
-	logger, err := NewLogger(
-		WithFormat("json"),
-	)
+	logger, err := NewLogger()
 	if err != nil {
 		t.Error(err)
 	}

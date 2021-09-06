@@ -1,38 +1,24 @@
 package zap
 
 import (
-	"github.com/go-kratos/kratos/v2/log"
+	"go.uber.org/zap"
 )
 
 type options struct {
-	output string
-	level  log.Level
-	skip   int
-	format string
+	zapConfig  zap.Config
+	zapOptions []zap.Option
 }
 
 type Option func(*options)
 
-func WithOutput(output string) Option {
+func WithConfig(config zap.Config) Option {
 	return func(o *options) {
-		o.output = output
+		o.zapConfig = config
 	}
 }
 
-func WithLevel(level log.Level) Option {
+func WithOptions(opts ...zap.Option) Option {
 	return func(o *options) {
-		o.level = level
-	}
-}
-
-func WithSkip(skip int) Option {
-	return func(o *options) {
-		o.skip = skip
-	}
-}
-
-func WithFormat(format string) Option {
-	return func(o *options) {
-		o.format = format
+		o.zapOptions = opts
 	}
 }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 var _ log.Logger = (*Logger)(nil)
@@ -16,45 +15,17 @@ type Logger struct {
 
 func NewLogger(opts ...Option) (*Logger, error) {
 	options := options{
-		output: "stdout",
-		level:  log.LevelInfo,
-		skip:   3,
-		format: "console",
+		zapConfig: zap.NewProductionConfig(),
+		zapOptions: []zap.Option{
+			zap.AddCallerSkip(3),
+		},
 	}
 
 	for _, o := range opts {
 		o(&options)
 	}
 
-	zc := zap.Config{
-		Level:             zap.NewAtomicLevelAt(log2zapLevel(options.level)),
-		Development:       false,
-		DisableCaller:     false,
-		DisableStacktrace: false,
-		Sampling: &zap.SamplingConfig{
-			Initial:    100,
-			Thereafter: 100,
-		},
-		Encoding: options.format,
-		EncoderConfig: zapcore.EncoderConfig{
-			MessageKey:     "msg",
-			LevelKey:       "level",
-			TimeKey:        "ts",
-			NameKey:        "logger",
-			CallerKey:      "caller",
-			StacktraceKey:  "stack",
-			LineEnding:     zapcore.DefaultLineEnding,
-			EncodeLevel:    zapcore.LowercaseLevelEncoder,
-			EncodeTime:     zapcore.ISO8601TimeEncoder,
-			EncodeDuration: zapcore.SecondsDurationEncoder,
-			EncodeCaller:   zapcore.ShortCallerEncoder,
-		},
-		OutputPaths:      []string{options.output},
-		ErrorOutputPaths: []string{options.output},
-		InitialFields:    nil,
-	}
-
-	zlog, err := zc.Build(zap.AddCallerSkip(options.skip))
+	zlog, err := options.zapConfig.Build(options.zapOptions...)
 	if err != nil {
 		return nil, err
 	}
@@ -92,21 +63,4 @@ func (l *Logger) Log(level log.Level, keyvals ...interface{}) error {
 
 func (l *Logger) Sync() error {
 	return l.log.Sync()
-}
-
-func log2zapLevel(level log.Level) zapcore.Level {
-	switch level {
-	case log.LevelDebug:
-		return zapcore.DebugLevel
-	case log.LevelInfo:
-		return zapcore.InfoLevel
-	case log.LevelWarn:
-		return zapcore.WarnLevel
-	case log.LevelError:
-		return zapcore.ErrorLevel
-	case log.LevelFatal:
-		return zapcore.FatalLevel
-	default:
-		return zapcore.InfoLevel
-	}
 }
