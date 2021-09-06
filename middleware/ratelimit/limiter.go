@@ -3,12 +3,13 @@ package ratelimit
 import (
 	"context"
 
+	"github.com/go-kratos/aegis/ratelimit"
+	"github.com/go-kratos/aegis/ratelimit/bbr"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/sra/ratelimit"
-	"github.com/go-kratos/sra/ratelimit/bbr"
 )
 
+// Option is ratelimit option.
 type Option func(*options)
 
 // WithLimiter set Limiter implementation,
