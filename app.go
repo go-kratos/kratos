@@ -99,8 +99,7 @@ func (a *App) Run() error {
 	}
 	wg.Wait()
 	if a.opts.registrar != nil {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
+		ctx, cancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 		defer cancel()
 		if err := a.opts.registrar.Register(ctx, instance); err != nil {
 			return err
