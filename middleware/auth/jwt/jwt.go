@@ -57,7 +57,7 @@ func WithSigningMethod(method jwt.SigningMethod) Option {
 	}
 }
 
-//WithTokenRefreshDuration with the duration that refresh token periodically
+// WithTokenRefreshDuration with the duration that refresh token periodically
 func WithTokenRefreshDuration(duration time.Duration) Option {
 	return func(o *options) {
 		o.tokenRefreshDuration = duration
@@ -102,7 +102,7 @@ func Client(tokenManager TokenManager, opts ...Option) middleware.Middleware {
 	}
 	var tokenObj *token
 	if tokenManager != nil {
-		tokenObj = NewToken(tokenManager, o.tokenRefreshDuration)
+		tokenObj = newToken(tokenManager, o.tokenRefreshDuration)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {

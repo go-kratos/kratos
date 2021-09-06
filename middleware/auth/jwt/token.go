@@ -7,7 +7,7 @@ type TokenManager interface {
 	Token() string
 }
 
-//token store jwt token and manager that manage the token
+// token store jwt token and manager that manage the token
 type token struct {
 	jwtToken string
 	manager  TokenManager
@@ -33,7 +33,7 @@ func (receiver *token) refreshToken() {
 }
 
 // NewToken create token object,tokenManager must not be nil
-func NewToken(tokenManager TokenManager, refreshDuration time.Duration) *token {
+func newToken(tokenManager TokenManager, refreshDuration time.Duration) *token {
 	target := &token{
 		manager: tokenManager,
 	}
