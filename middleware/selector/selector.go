@@ -12,6 +12,7 @@ import (
 type (
 	transporter func(ctx context.Context) (transport.Transporter, bool)
 	match       func(operation string) bool
+	MatchFunc   match
 )
 
 var (
@@ -29,10 +30,10 @@ var (
 type Builder struct {
 	client bool
 
-	prefix   []string
-	regex    []string
-	path     []string
-	function match
+	prefix    []string
+	regex     []string
+	path      []string
+	matchFunc MatchFunc
 
 	ms []middleware.Middleware
 }
@@ -65,9 +66,9 @@ func (b *Builder) Path(path ...string) *Builder {
 	return b
 }
 
-// Func is with Builder's function
-func (b *Builder) Func(f match) *Builder {
-	b.function = f
+// Match is with Builder's matchFunc
+func (b *Builder) Match(fn MatchFunc) *Builder {
+	b.matchFunc = fn
 	return b
 }
 
@@ -100,8 +101,8 @@ func (b *Builder) match(operation string) bool {
 		}
 	}
 
-	if b.function != nil {
-		return b.function(operation)
+	if b.matchFunc != nil {
+		return b.matchFunc(operation)
 	}
 	return false
 }
