@@ -10,7 +10,7 @@ import (
 func main() {
 	c := config.New(
 		config.WithSource(
-			apollo.NewSourceWithConfig(
+			apollo.NewSource(
 				apollo.WithAppID("kratos"),
 				apollo.WithCluster("dev"),
 				apollo.WithEndpoint("http://localhost:8080"),
