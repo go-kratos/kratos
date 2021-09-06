@@ -11,7 +11,7 @@ import (
 
 type (
 	transporter func(ctx context.Context) (transport.Transporter, bool)
-	MatchFunc   func(operation string) bool
+	matchFunc   func(operation string) bool
 )
 
 var (
@@ -32,7 +32,7 @@ type Builder struct {
 	prefix []string
 	regex  []string
 	path   []string
-	match  MatchFunc
+	match  matchFunc
 
 	ms []middleware.Middleware
 }
@@ -66,7 +66,7 @@ func (b *Builder) Path(path ...string) *Builder {
 }
 
 // Match is with Builder's match
-func (b *Builder) Match(fn MatchFunc) *Builder {
+func (b *Builder) Match(fn matchFunc) *Builder {
 	b.match = fn
 	return b
 }
@@ -107,7 +107,7 @@ func (b *Builder) matchs(operation string) bool {
 }
 
 // selector middleware
-func selector(transporter transporter, match MatchFunc, ms ...middleware.Middleware) middleware.Middleware {
+func selector(transporter transporter, match matchFunc, ms ...middleware.Middleware) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			info, ok := transporter(ctx)
