@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-#
-# This is a utils shell script
-#
+# This is a common util functions shell script
 
 # arguments: target, item1, item2, item3, ...
 # returns 0 if target is in the given items, 1 otherwise.
@@ -18,6 +16,8 @@ function util::array_contains() {
 	return 1
 }
 
+# find all go mod path
+# returns an array contains mod path
 function util::find_modules() {
 	find . -not \( \
 		\( \

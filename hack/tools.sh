@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
-#
 # This is a tools shell script
-#
+# used by Makefile commands
 
-# set -o errexit
+set -o errexit
 set -o nounset
 set -o pipefail
 
@@ -20,10 +19,13 @@ source "${KRAOTS_HOME}/hack/util.sh"
 LINTER=${KRAOTS_HOME}/bin/golangci-lint
 LINTER_CONFIG=${KRAOTS_HOME}/.golangci.yml
 FAILURE_FILE=${KRAOTS_HOME}/hack/.lintcheck_failures
+IGNORED_FILE=${KRAOTS_HOME}/hack/.test_ignored_files
 
 all_modules=$(util::find_modules)
 failing_modules=()
 while IFS='' read -r line; do failing_modules+=("$line"); done < <(cat "$FAILURE_FILE")
+ignored_modules=()
+while IFS='' read -r line; do ignored_modules+=("$line"); done < <(cat "$IGNORED_FILE")
 
 # functions
 # lint all mod
@@ -44,11 +46,31 @@ function lint() {
 function test() {
 	for mod in $all_modules; do
 		local in_failing
-		util::array_contains "$mod" "${failing_modules[*]}" && in_failing=$? || in_failing=$?
+		util::array_contains "$mod" "${ignored_modules[*]}" && in_failing=$? || in_failing=$?
 		if [[ "$in_failing" -ne "0" ]]; then
 			pushd "$mod" >/dev/null &&
 				echo "go test $(sed -n 1p go.mod | cut -d ' ' -f2)" &&
-				go test ./...
+				go test -race ./...
+			popd >/dev/null || exit
+		fi
+	done
+}
+
+function test_coverage() {
+	echo "" >coverage.out
+	local base
+	base=$(pwd)
+	for mod in $all_modules; do
+		local in_failing
+		util::array_contains "$mod" "${ignored_modules[*]}" && in_failing=$? || in_failing=$?
+		if [[ "$in_failing" -ne "0" ]]; then
+			pushd "$mod" >/dev/null &&
+				echo "go test $(sed -n 1p go.mod | cut -d ' ' -f2)" &&
+				go test -race -coverprofile=profile.out -covermode=atomic ./...
+			if [ -f profile.out ]; then
+				cat profile.out >>"${base}/coverage.out"
+				rm profile.out
+			fi
 			popd >/dev/null || exit
 		fi
 	done
@@ -70,14 +92,10 @@ function fix() {
 
 function tidy() {
 	for mod in $all_modules; do
-		local in_failing
-		util::array_contains "$mod" "${failing_modules[*]}" && in_failing=$? || in_failing=$?
-		if [[ "$in_failing" -ne "0" ]]; then
-			pushd "$mod" >/dev/null &&
-				echo "go mod tidy $(sed -n 1p go.mod | cut -d ' ' -f2)" &&
-				go mod tidy
-			popd >/dev/null || exit
-		fi
+		pushd "$mod" >/dev/null &&
+			echo "go mod tidy $(sed -n 1p go.mod | cut -d ' ' -f2)" &&
+			go mod tidy
+		popd >/dev/null || exit
 	done
 }
 
@@ -87,20 +105,19 @@ function help() {
 
 case $1 in
 lint)
-	shift
-	lint "$@"
+	lint
 	;;
 test)
-	shift
-	test "$@"
+	test
+	;;
+test_coverage)
+	test_coverage
 	;;
 tidy)
-	shift
-	tidy "$@"
+	tidy
 	;;
 fix)
-	shift
-	fix "$@"
+	fix
 	;;
 *)
 	help
