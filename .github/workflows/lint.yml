@@ -21,7 +21,7 @@ jobs:
         run: ./hack/resolve-modules.sh
 
   lint:
-    name: lint
+    name: lint module
     runs-on: ubuntu-latest
     needs: resolve-modules
     strategy:
@@ -35,4 +35,3 @@ jobs:
           working-directory: ${{ matrix.workdir }}
           skip-go-installation: true
           skip-pkg-cache: true
-          only-new-issues: true
