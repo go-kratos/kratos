@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/stretchr/testify/assert"
 )
 
 var _ transport.Transporter = &Transport{}
@@ -144,7 +145,9 @@ func TestFunc(t *testing.T) {
 				}
 				return false
 			}).Build()(next)
-			next(test.ctx, test.name)
+			reply, err := next(test.ctx, test.name)
+			assert.Equal(t, reply, "reply")
+			assert.Nil(t, err)
 		})
 	}
 }
