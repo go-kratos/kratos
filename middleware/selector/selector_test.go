@@ -139,7 +139,7 @@ func TestFunc(t *testing.T) {
 				t.Log(req)
 				return "reply", nil
 			}
-			next = Server(testMiddleware).Func(func(operation string) bool {
+			next = Server(testMiddleware).Match(func(operation string) bool {
 				if strings.HasPrefix(operation, "/go-kratos.dev") || strings.HasSuffix(operation, "world") {
 					return true
 				}
