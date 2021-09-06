@@ -23,9 +23,6 @@ const (
 	// HeaderKey holds the key used to store the JWT Token in the request header.
 	HeaderKey string = "Authorization"
 
-	// RefreshTokenHeaderKey holds the key used to store the JWT Refresh Token in the request header
-	RefreshTokenHeaderKey string = "RefreshToken"
-
 	// InfoKey holds the key used to store the auth info in the context
 	InfoKey authkey = "AuthInfo"
 )
@@ -46,10 +43,9 @@ type Option func(*options)
 
 // Parser is a jwt parser
 type options struct {
-	accessSecret          string
-	signingMethod         jwt.SigningMethod
-	authHeaderKey         string
-	refreshTokenHeaderKey string
+	accessSecret  string
+	signingMethod jwt.SigningMethod
+	authHeaderKey string
 }
 
 // WithSigningMethod with signing method option.
@@ -88,9 +84,8 @@ func Server(accessSecret string, opts ...Option) middleware.Middleware {
 // Client is a client jwt middleware
 func Client(provider TokenProvider, opts ...Option) middleware.Middleware {
 	o := &options{
-		authHeaderKey:         HeaderKey,
-		signingMethod:         jwt.SigningMethodHS256,
-		refreshTokenHeaderKey: RefreshTokenHeaderKey,
+		authHeaderKey: HeaderKey,
+		signingMethod: jwt.SigningMethodHS256,
 	}
 	for _, opt := range opts {
 		opt(o)
@@ -102,7 +97,6 @@ func Client(provider TokenProvider, opts ...Option) middleware.Middleware {
 			}
 			if clientContext, ok := transport.FromClientContext(ctx); ok {
 				clientContext.RequestHeader().Set(o.authHeaderKey, provider.GetToken())
-				clientContext.RequestHeader().Set(o.refreshTokenHeaderKey, provider.GetRefreshToken())
 				return handler(ctx, req)
 			}
 			return nil, ErrWrongContext

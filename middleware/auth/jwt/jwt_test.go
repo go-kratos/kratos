@@ -199,7 +199,6 @@ func TestClient(t *testing.T) {
 			assert.Equal(t, test.expectError, err2)
 			if err2 == nil {
 				assert.Equal(t, test.tokenProvider.GetToken(), header.Get(HeaderKey))
-				assert.Equal(t, test.tokenProvider.GetRefreshToken(), header.Get(RefreshTokenHeaderKey))
 			}
 		})
 	}
