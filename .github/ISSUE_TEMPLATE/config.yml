@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation issue
+    url: https://go-kratos.dev/en/docs/
+    about: For documentation issues, open a pull request at the go-kratos/go-kratos.dev repository

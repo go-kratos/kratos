@@ -7,14 +7,15 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/envoyproxy/protoc-gen-validate v0.6.1
 	github.com/gin-gonic/gin v1.7.3
-	github.com/go-kratos/consul v0.1.4
-	github.com/go-kratos/etcd v0.1.3
 	github.com/go-kratos/gin v0.1.0
-	github.com/go-kratos/kratos/v2 v2.0.3
-	github.com/go-kratos/nacos v0.1.1
-	github.com/go-kratos/prometheus v0.0.0-20210522055322-137e29e7cf47
+	github.com/go-kratos/kratos/contrib/config/apollo/v2 v2.0.0-20210901080230-515b71ec9061
+	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 v2.0.0-00010101000000-000000000000
+	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-00010101000000-000000000000
+	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-00010101000000-000000000000
+	github.com/go-kratos/kratos/contrib/registry/nacos/v2 v2.0.0-00010101000000-000000000000
+	github.com/go-kratos/kratos/contrib/registry/zookeeper/v2 v2.0.0-00010101000000-000000000000
+	github.com/go-kratos/kratos/v2 v2.0.5
 	github.com/go-kratos/swagger-api v1.0.0
-	github.com/go-kratos/zookeeper v0.0.0-20210721021028-9e7498619b89
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.11.2
 	github.com/go-sql-driver/mysql v1.6.0
@@ -37,10 +38,18 @@ require (
 	go.opentelemetry.io/otel/sdk v1.0.0-RC2
 	go.opentelemetry.io/otel/trace v1.0.0-RC2
 	go.uber.org/zap v1.19.0
-	golang.org/x/text v0.3.6
-	google.golang.org/genproto v0.0.0-20210805201207-89edb61ffb67
-	google.golang.org/grpc v1.39.1
+	golang.org/x/text v0.3.7
+	google.golang.org/genproto v0.0.0-20210831024726-fe130286e0e2
+	google.golang.org/grpc v1.40.0
 	google.golang.org/protobuf v1.27.1
 )
 
-replace github.com/go-kratos/kratos/v2 => ../
+replace (
+	github.com/go-kratos/kratos/contrib/config/apollo/v2 => ../contrib/config/apollo
+	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 => ../contrib/metrics/prometheus
+	github.com/go-kratos/kratos/contrib/registry/consul/v2 => ../contrib/registry/consul
+	github.com/go-kratos/kratos/contrib/registry/etcd/v2 => ../contrib/registry/etcd
+	github.com/go-kratos/kratos/contrib/registry/nacos/v2 => ../contrib/registry/nacos
+	github.com/go-kratos/kratos/contrib/registry/zookeeper/v2 => ../contrib/registry/zookeeper
+	github.com/go-kratos/kratos/v2 => ../
+)

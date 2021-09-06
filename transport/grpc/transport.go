@@ -5,9 +5,7 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-var (
-	_ transport.Transporter = &Transport{}
-)
+var _ transport.Transporter = &Transport{}
 
 // Transport is a gRPC transport.
 type Transport struct {

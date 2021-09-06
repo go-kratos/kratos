@@ -42,6 +42,7 @@ func (v *atomicValue) Bool() (bool, error) {
 	}
 	return false, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
 }
+
 func (v *atomicValue) Int() (int64, error) {
 	switch val := v.Load().(type) {
 	case int:
@@ -53,10 +54,11 @@ func (v *atomicValue) Int() (int64, error) {
 	case float64:
 		return int64(val), nil
 	case string:
-		return strconv.ParseInt(val, 10, 64)
+		return strconv.ParseInt(val, 10, 64) //nolint:gomnd
 	}
 	return 0, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
 }
+
 func (v *atomicValue) Float() (float64, error) {
 	switch val := v.Load().(type) {
 	case float64:
@@ -68,10 +70,11 @@ func (v *atomicValue) Float() (float64, error) {
 	case int64:
 		return float64(val), nil
 	case string:
-		return strconv.ParseFloat(val, 64)
+		return strconv.ParseFloat(val, 64) //nolint:gomnd
 	}
 	return 0.0, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
 }
+
 func (v *atomicValue) String() (string, error) {
 	switch val := v.Load().(type) {
 	case string:
@@ -87,6 +90,7 @@ func (v *atomicValue) String() (string, error) {
 	}
 	return "", fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
 }
+
 func (v *atomicValue) Duration() (time.Duration, error) {
 	val, err := v.Int()
 	if err != nil {
@@ -94,6 +98,7 @@ func (v *atomicValue) Duration() (time.Duration, error) {
 	}
 	return time.Duration(val), nil
 }
+
 func (v *atomicValue) Scan(obj interface{}) error {
 	data, err := json.Marshal(v.Load())
 	if err != nil {

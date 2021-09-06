@@ -65,8 +65,8 @@ func (s *server) GetUserMessage(ctx context.Context, request *v1.GetUserMessageR
 
 func main() {
 	logger := log.NewStdLogger(os.Stdout)
-	logger = log.With(logger, "trace_id", log.TraceID())
-	logger = log.With(logger, "span_id", log.SpanID())
+	logger = log.With(logger, "trace_id", tracing.TraceID())
+	logger = log.With(logger, "span_id", tracing.SpanID())
 	log := log.NewHelper(logger)
 
 	url := "http://jaeger:14268/api/traces"
@@ -85,7 +85,6 @@ func main() {
 		grpc.Middleware(
 			middleware.Chain(
 				recovery.Recovery(),
-				// Configuring tracing Middleware
 				tracing.Server(),
 				logging.Server(logger),
 			),

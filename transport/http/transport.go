@@ -7,9 +7,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-var (
-	_ transport.Transporter = &Transport{}
-)
+var _ transport.Transporter = &Transport{}
 
 // Transport is an HTTP transport.
 type Transport struct {

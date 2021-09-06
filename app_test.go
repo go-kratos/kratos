@@ -21,7 +21,7 @@ func TestApp(t *testing.T) {
 		Server(hs, gs),
 	)
 	time.AfterFunc(time.Second, func() {
-		app.Stop()
+		_ = app.Stop()
 	})
 	if err := app.Run(); err != nil {
 		t.Fatal(err)
@@ -83,8 +83,10 @@ func TestApp_Endpoint(t *testing.T) {
 				name     string
 				endpoint []string
 				metadata map[string]string
-			}{id: "1", version: "v1", name: "kratos-v1", endpoint: []string{"https://go-kratos.dev", "localhost"},
-				metadata: map[string]string{}},
+			}{
+				id: "1", version: "v1", name: "kratos-v1", endpoint: []string{"https://go-kratos.dev", "localhost"},
+				metadata: map[string]string{},
+			},
 		},
 		{
 			id:       "2",
@@ -98,8 +100,10 @@ func TestApp_Endpoint(t *testing.T) {
 				name     string
 				endpoint []string
 				metadata map[string]string
-			}{id: "2", version: "v2", name: "kratos-v2", endpoint: []string{"test"},
-				metadata: map[string]string{"kratos": "https://github.com/go-kratos/kratos"}},
+			}{
+				id: "2", version: "v2", name: "kratos-v2", endpoint: []string{"test"},
+				metadata: map[string]string{"kratos": "https://github.com/go-kratos/kratos"},
+			},
 		},
 		{
 			id:       "3",
@@ -113,8 +117,10 @@ func TestApp_Endpoint(t *testing.T) {
 				name     string
 				endpoint []string
 				metadata map[string]string
-			}{id: "3", version: "v3", name: "kratos-v3", endpoint: []string{},
-				metadata: map[string]string{}},
+			}{
+				id: "3", version: "v3", name: "kratos-v3", endpoint: []string{},
+				metadata: map[string]string{},
+			},
 		},
 	}
 	for _, tt := range tests {

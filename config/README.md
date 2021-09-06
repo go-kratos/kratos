@@ -1,5 +1,12 @@
 # Config
-* [Consul](https://github.com/go-kratos/consul)
-* [Etcd](https://github.com/go-kratos/etcd)
-* [Kube](https://github.com/go-kratos/kube)
 
+## kube
+
+```shell
+go get -u github.com/go-kratos/kratos/config/kubernetes/v2
+```
+
+##apollo
+```shell
+go get -u github.com/go-kratos/kratos/config/apollo/v2
+```
