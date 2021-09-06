@@ -31,7 +31,7 @@ PATHS=""
 for mod in $all_modules; do
 	util::array_contains "$mod" "${failing_modules[*]}" && in_failing=$? || in_failing=$?
 	if [[ "$in_failing" -ne "0" ]]; then
-		PATHS+=$(printf '{"workdir":"%s"}, ' ${mod})
+		PATHS+=$(printf '{"workdir":"%s"},' ${mod})
 	fi
 done
 
