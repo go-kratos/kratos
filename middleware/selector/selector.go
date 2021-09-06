@@ -99,7 +99,11 @@ func (b *Builder) match(operation string) bool {
 			return true
 		}
 	}
-	return b.function(operation)
+
+	if b.function != nil {
+		return b.function(operation)
+	}
+	return false
 }
 
 // selector middleware
