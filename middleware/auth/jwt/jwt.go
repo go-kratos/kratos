@@ -3,6 +3,7 @@ package jwt
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -43,15 +44,23 @@ type Option func(*options)
 
 // Parser is a jwt parser
 type options struct {
-	accessSecret  string
-	signingMethod jwt.SigningMethod
-	authHeaderKey string
+	accessSecret         string
+	signingMethod        jwt.SigningMethod
+	authHeaderKey        string
+	tokenRefreshDuration time.Duration
 }
 
 // WithSigningMethod with signing method option.
 func WithSigningMethod(method jwt.SigningMethod) Option {
 	return func(o *options) {
 		o.signingMethod = method
+	}
+}
+
+//WithTokenRefreshDuration with the duration that refresh token periodically
+func WithTokenRefreshDuration(duration time.Duration) Option {
+	return func(o *options) {
+		o.tokenRefreshDuration = duration
 	}
 }
 
@@ -84,11 +93,16 @@ func Server(accessSecret string, opts ...Option) middleware.Middleware {
 // Client is a client jwt middleware.
 func Client(tokenManager TokenManager, opts ...Option) middleware.Middleware {
 	o := &options{
-		authHeaderKey: HeaderKey,
-		signingMethod: jwt.SigningMethodHS256,
+		authHeaderKey:        HeaderKey,
+		signingMethod:        jwt.SigningMethodHS256,
+		tokenRefreshDuration: time.Hour,
 	}
 	for _, opt := range opts {
 		opt(o)
+	}
+	var tokenObj *token
+	if tokenManager != nil {
+		tokenObj = NewToken(tokenManager, o.tokenRefreshDuration)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -96,7 +110,7 @@ func Client(tokenManager TokenManager, opts ...Option) middleware.Middleware {
 				return nil, ErrNeedTokenManager
 			}
 			if clientContext, ok := transport.FromClientContext(ctx); ok {
-				clientContext.RequestHeader().Set(o.authHeaderKey, tokenManager.Token())
+				clientContext.RequestHeader().Set(o.authHeaderKey, tokenObj.jwtToken)
 				return handler(ctx, req)
 			}
 			return nil, ErrWrongContext
