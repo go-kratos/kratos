@@ -30,10 +30,10 @@ var (
 type Builder struct {
 	client bool
 
-	prefix    []string
-	regex     []string
-	path      []string
-	matchFunc MatchFunc
+	prefix []string
+	regex  []string
+	path   []string
+	match  MatchFunc
 
 	ms []middleware.Middleware
 }
@@ -66,9 +66,9 @@ func (b *Builder) Path(path ...string) *Builder {
 	return b
 }
 
-// Match is with Builder's matchFunc
+// Match is with Builder's match
 func (b *Builder) Match(fn MatchFunc) *Builder {
-	b.matchFunc = fn
+	b.match = fn
 	return b
 }
 
@@ -80,11 +80,11 @@ func (b *Builder) Build() middleware.Middleware {
 	} else {
 		transporter = serverTransporter
 	}
-	return selector(transporter, b.match, b.ms...)
+	return selector(transporter, b.matchs, b.ms...)
 }
 
 // match is match operation compliance Builder
-func (b *Builder) match(operation string) bool {
+func (b *Builder) matchs(operation string) bool {
 	for _, prefix := range b.prefix {
 		if prefixMatch(prefix, operation) {
 			return true
@@ -101,8 +101,8 @@ func (b *Builder) match(operation string) bool {
 		}
 	}
 
-	if b.matchFunc != nil {
-		return b.matchFunc(operation)
+	if b.match != nil {
+		return b.match(operation)
 	}
 	return false
 }
