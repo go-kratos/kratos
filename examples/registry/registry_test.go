@@ -10,8 +10,8 @@ import (
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
 
-	consulregistry "github.com/go-kratos/consul/registry"
-	etcdregistry "github.com/go-kratos/etcd/registry"
+	consulregistry "github.com/go-kratos/kratos/contrib/registry/consul/v2"
+	etcdregistry "github.com/go-kratos/kratos/contrib/registry/etcd/v2"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"

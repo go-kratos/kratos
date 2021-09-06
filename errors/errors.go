@@ -4,7 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/go-kratos/kratos/v2/internal/httputil"
+	httpstatus "github.com/go-kratos/kratos/v2/transport/http/status"
+
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
@@ -27,7 +28,7 @@ func (e *Error) Error() string {
 
 // GRPCStatus returns the Status represented by se.
 func (e *Error) GRPCStatus() *status.Status {
-	s, _ := status.New(httputil.GRPCCodeFromStatus(int(e.Code)), e.Message).
+	s, _ := status.New(httpstatus.ToGRPCCode(int(e.Code)), e.Message).
 		WithDetails(&errdetails.ErrorInfo{
 			Reason:   e.Reason,
 			Metadata: e.Metadata,
@@ -73,9 +74,9 @@ func Errorf(code int, reason, format string, a ...interface{}) error {
 // It supports wrapped errors.
 func Code(err error) int {
 	if err == nil {
-		return 200
+		return 200 //nolint:gomnd
 	}
-	if se := FromError(err); err != nil {
+	if se := FromError(err); se != nil {
 		return int(se.Code)
 	}
 	return UnknownCode
@@ -84,7 +85,7 @@ func Code(err error) int {
 // Reason returns the reason for a particular error.
 // It supports wrapped errors.
 func Reason(err error) string {
-	if se := FromError(err); err != nil {
+	if se := FromError(err); se != nil {
 		return se.Reason
 	}
 	return UnknownReason
@@ -105,7 +106,7 @@ func FromError(err error) *Error {
 			switch d := detail.(type) {
 			case *errdetails.ErrorInfo:
 				return New(
-					httputil.StatusFromGRPCCode(gs.Code()),
+					httpstatus.FromGRPCCode(gs.Code()),
 					d.Reason,
 					gs.Message(),
 				).WithMetadata(d.Metadata)

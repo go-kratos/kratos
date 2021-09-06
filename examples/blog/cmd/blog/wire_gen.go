@@ -13,13 +13,12 @@ import (
 	"github.com/go-kratos/kratos/examples/blog/internal/service"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"go.opentelemetry.io/otel/trace"
 )
 
 // Injectors from wire.go:
 
 // initApp init kratos application.
-func initApp(confServer *conf.Server, confData *conf.Data, traceTracerProvider trace.TracerProvider, logger log.Logger) (*kratos.App, func(), error) {
+func initApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
 	dataData, cleanup, err := data.NewData(confData, logger)
 	if err != nil {
 		return nil, nil, err
@@ -27,8 +26,8 @@ func initApp(confServer *conf.Server, confData *conf.Data, traceTracerProvider t
 	articleRepo := data.NewArticleRepo(dataData, logger)
 	articleUsecase := biz.NewArticleUsecase(articleRepo, logger)
 	blogService := service.NewBlogService(articleUsecase, logger)
-	httpServer := server.NewHTTPServer(confServer, logger, traceTracerProvider, blogService)
-	grpcServer := server.NewGRPCServer(confServer, logger, traceTracerProvider, blogService)
+	httpServer := server.NewHTTPServer(confServer, logger, blogService)
+	grpcServer := server.NewGRPCServer(confServer, logger, blogService)
 	app := newApp(logger, httpServer, grpcServer)
 	return app, func() {
 		cleanup()

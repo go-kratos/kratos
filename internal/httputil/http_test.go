@@ -1,6 +1,8 @@
 package httputil
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestContentSubtype(t *testing.T) {
 	tests := []struct {
@@ -21,6 +23,24 @@ func TestContentSubtype(t *testing.T) {
 			got := ContentSubtype(test.contentType)
 			if got != test.want {
 				t.Fatalf("want %v got %v", test.want, got)
+			}
+		})
+	}
+}
+
+func TestContentType(t *testing.T) {
+	tests := []struct {
+		name    string
+		subtype string
+		want    string
+	}{
+		{"kratos", "kratos", "application/kratos"},
+		{"json", "json", "application/json"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ContentType(tt.subtype); got != tt.want {
+				t.Errorf("ContentType() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -2,16 +2,15 @@ package event
 
 import "context"
 
-type Message interface {
+type Event interface {
 	Key() string
 	Value() []byte
-	Header() map[string]string
 }
 
-type Handler func(context.Context, Message) error
+type Handler func(context.Context, Event) error
 
 type Sender interface {
-	Send(ctx context.Context, msg Message) error
+	Send(ctx context.Context, msg Event) error
 	Close() error
 }
 

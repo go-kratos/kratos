@@ -16,11 +16,11 @@ option java_multiple_files = true;
 option java_package = "{{.JavaPackage}}";
 
 service {{.Service}} {
-    rpc Create{{.Service}} (Create{{.Service}}Request) returns (Create{{.Service}}Reply);
-    rpc Update{{.Service}} (Update{{.Service}}Request) returns (Update{{.Service}}Reply);
-    rpc Delete{{.Service}} (Delete{{.Service}}Request) returns (Delete{{.Service}}Reply);
-    rpc Get{{.Service}} (Get{{.Service}}Request) returns (Get{{.Service}}Reply);
-    rpc List{{.Service}} (List{{.Service}}Request) returns (List{{.Service}}Reply);
+	rpc Create{{.Service}} (Create{{.Service}}Request) returns (Create{{.Service}}Reply);
+	rpc Update{{.Service}} (Update{{.Service}}Request) returns (Update{{.Service}}Reply);
+	rpc Delete{{.Service}} (Delete{{.Service}}Request) returns (Delete{{.Service}}Reply);
+	rpc Get{{.Service}} (Get{{.Service}}Request) returns (Get{{.Service}}Reply);
+	rpc List{{.Service}} (List{{.Service}}Request) returns (List{{.Service}}Reply);
 }
 
 message Create{{.Service}}Request {}

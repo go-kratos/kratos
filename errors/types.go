@@ -1,3 +1,4 @@
+// nolint:gomnd
 package errors
 
 // BadRequest new BadRequest error that is mapped to a 400 response.

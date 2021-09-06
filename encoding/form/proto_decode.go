@@ -105,7 +105,7 @@ func populateRepeatedField(fd protoreflect.FieldDescriptor, list protoreflect.Li
 }
 
 func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, values []string) error {
-	if len(values) != 2 {
+	if len(values) != 2 { //nolint:gomnd
 		return fmt.Errorf("more than one value provided for key %q in map %q", values[0], fd.FullName())
 	}
 	key, err := parseField(fd.MapKey(), values[0])
@@ -138,7 +138,7 @@ func parseField(fd protoreflect.FieldDescriptor, value string) (protoreflect.Val
 		}
 		v := enum.Descriptor().Values().ByName(protoreflect.Name(value))
 		if v == nil {
-			i, err := strconv.ParseInt(value, 10, 32)
+			i, err := strconv.ParseInt(value, 10, 32) //nolint:gomnd
 			if err != nil {
 				return protoreflect.Value{}, fmt.Errorf("%q is not a valid value", value)
 			}
@@ -149,37 +149,37 @@ func parseField(fd protoreflect.FieldDescriptor, value string) (protoreflect.Val
 		}
 		return protoreflect.ValueOfEnum(v.Number()), nil
 	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind:
-		v, err := strconv.ParseInt(value, 10, 32)
+		v, err := strconv.ParseInt(value, 10, 32) //nolint:gomnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		return protoreflect.ValueOfInt32(int32(v)), nil
 	case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
-		v, err := strconv.ParseInt(value, 10, 64)
+		v, err := strconv.ParseInt(value, 10, 64) //nolint:gomnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		return protoreflect.ValueOfInt64(v), nil
 	case protoreflect.Uint32Kind, protoreflect.Fixed32Kind:
-		v, err := strconv.ParseUint(value, 10, 32)
+		v, err := strconv.ParseUint(value, 10, 32) //nolint:gomnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		return protoreflect.ValueOfUint32(uint32(v)), nil
 	case protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
-		v, err := strconv.ParseUint(value, 10, 64)
+		v, err := strconv.ParseUint(value, 10, 64) //nolint:gomnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		return protoreflect.ValueOfUint64(v), nil
 	case protoreflect.FloatKind:
-		v, err := strconv.ParseFloat(value, 32)
+		v, err := strconv.ParseFloat(value, 32) //nolint:gomnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		return protoreflect.ValueOfFloat32(float32(v)), nil
 	case protoreflect.DoubleKind:
-		v, err := strconv.ParseFloat(value, 64)
+		v, err := strconv.ParseFloat(value, 64) //nolint:gomnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
@@ -203,7 +203,7 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 	var msg proto.Message
 	switch md.FullName() {
 	case "google.protobuf.Timestamp":
-		if value == "null" {
+		if value == nullStr {
 			break
 		}
 		t, err := time.Parse(time.RFC3339Nano, value)
@@ -212,7 +212,7 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		}
 		msg = timestamppb.New(t)
 	case "google.protobuf.Duration":
-		if value == "null" {
+		if value == nullStr {
 			break
 		}
 		d, err := time.ParseDuration(value)
@@ -221,37 +221,37 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		}
 		msg = durationpb.New(d)
 	case "google.protobuf.DoubleValue":
-		v, err := strconv.ParseFloat(value, 64)
+		v, err := strconv.ParseFloat(value, 64) //nolint:gomnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		msg = wrapperspb.Double(v)
 	case "google.protobuf.FloatValue":
-		v, err := strconv.ParseFloat(value, 32)
+		v, err := strconv.ParseFloat(value, 32) //nolint:gomnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		msg = wrapperspb.Float(float32(v))
 	case "google.protobuf.Int64Value":
-		v, err := strconv.ParseInt(value, 10, 64)
+		v, err := strconv.ParseInt(value, 10, 64) //nolint:gomnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		msg = wrapperspb.Int64(v)
 	case "google.protobuf.Int32Value":
-		v, err := strconv.ParseInt(value, 10, 32)
+		v, err := strconv.ParseInt(value, 10, 32) //nolint:gomnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		msg = wrapperspb.Int32(int32(v))
 	case "google.protobuf.UInt64Value":
-		v, err := strconv.ParseUint(value, 10, 64)
+		v, err := strconv.ParseUint(value, 10, 64) //nolint:gomnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		msg = wrapperspb.UInt64(v)
 	case "google.protobuf.UInt32Value":
-		v, err := strconv.ParseUint(value, 10, 32)
+		v, err := strconv.ParseUint(value, 10, 32) //nolint:gomnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}

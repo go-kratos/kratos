@@ -87,12 +87,18 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 		select {
 		case err := <-done:
 			if err != nil {
-				watcher.Stop()
+				err := watcher.Stop()
+				if err != nil {
+					r.logger.Errorf("failed to http client watch stop: %v", target)
+				}
 				return nil, err
 			}
 		case <-ctx.Done():
 			r.logger.Errorf("http client watch service %v reaching context deadline!", target)
-			watcher.Stop()
+			err := watcher.Stop()
+			if err != nil {
+				r.logger.Errorf("failed to http client watch stop: %v", target)
+			}
 			return nil, ctx.Err()
 		}
 	}
@@ -114,14 +120,14 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 }
 
 func (r *resolver) update(services []*registry.ServiceInstance) {
-	var nodes []*registry.ServiceInstance
+	nodes := make([]*registry.ServiceInstance, 0)
 	for _, in := range services {
-		endpoint, err := endpoint.ParseEndpoint(in.Endpoints, "http", !r.insecure)
+		ept, err := endpoint.ParseEndpoint(in.Endpoints, "http", !r.insecure)
 		if err != nil {
 			r.logger.Errorf("Failed to parse (%v) discovery endpoint: %v error %v", r.target, in.Endpoints, err)
 			continue
 		}
-		if endpoint == "" {
+		if ept == "" {
 			continue
 		}
 		nodes = append(nodes, in)

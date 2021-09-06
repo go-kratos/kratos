@@ -1,6 +1,7 @@
 package file
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 
@@ -11,7 +12,12 @@ import (
 type watcher struct {
 	f  *file
 	fw *fsnotify.Watcher
+
+	ctx    context.Context
+	cancel context.CancelFunc
 }
+
+var _ config.Watcher = (*watcher)(nil)
 
 func newWatcher(f *file) (config.Watcher, error) {
 	fw, err := fsnotify.NewWatcher()
@@ -21,11 +27,14 @@ func newWatcher(f *file) (config.Watcher, error) {
 	if err := fw.Add(f.path); err != nil {
 		return nil, err
 	}
-	return &watcher{f: f, fw: fw}, nil
+	ctx, cancel := context.WithCancel(context.Background())
+	return &watcher{f: f, fw: fw, ctx: ctx, cancel: cancel}, nil
 }
 
 func (w *watcher) Next() ([]*config.KeyValue, error) {
 	select {
+	case <-w.ctx.Done():
+		return nil, w.ctx.Err()
 	case event := <-w.fw.Events:
 		if event.Op == fsnotify.Rename {
 			if _, err := os.Stat(event.Name); err == nil || os.IsExist(err) {
@@ -53,5 +62,6 @@ func (w *watcher) Next() ([]*config.KeyValue, error) {
 }
 
 func (w *watcher) Stop() error {
+	w.cancel()
 	return w.fw.Close()
 }

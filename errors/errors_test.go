@@ -8,9 +8,7 @@ import (
 )
 
 func TestError(t *testing.T) {
-	var (
-		base *Error
-	)
+	var base *Error
 	err := Newf(http.StatusBadRequest, "reason", "message")
 	err2 := Newf(http.StatusBadRequest, "reason", "message")
 	err3 := err.WithMetadata(map[string]string{
@@ -45,7 +43,7 @@ func TestError(t *testing.T) {
 
 	gs := err.GRPCStatus()
 	se := FromError(gs.Err())
-	if se.Reason != se.Reason {
+	if se.Reason != "reason" {
 		t.Errorf("got %+v want %+v", se, err)
 	}
 }

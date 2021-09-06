@@ -1,10 +1,11 @@
 package direct
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/serviceconfig"
-	"testing"
 )
 
 func TestDirectBuilder_Scheme(t *testing.T) {
@@ -12,8 +13,7 @@ func TestDirectBuilder_Scheme(t *testing.T) {
 	assert.Equal(t, "direct", b.Scheme())
 }
 
-type mockConn struct {
-}
+type mockConn struct{}
 
 func (m *mockConn) UpdateState(resolver.State) error {
 	return nil

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"errors"
 	"reflect"
 	"sync"
@@ -47,24 +48,28 @@ type config struct {
 
 // New new a config with options.
 func New(opts ...Option) Config {
-	options := options{
+	o := options{
 		logger:   log.DefaultLogger,
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
 	}
-	for _, o := range opts {
-		o(&options)
+	for _, opt := range opts {
+		opt(&o)
 	}
 	return &config{
-		opts:   options,
-		reader: newReader(options),
-		log:    log.NewHelper(options.logger),
+		opts:   o,
+		reader: newReader(o),
+		log:    log.NewHelper(o.logger),
 	}
 }
 
 func (c *config) watch(w Watcher) {
 	for {
 		kvs, err := w.Next()
+		if errors.Is(err, context.Canceled) {
+			c.log.Infof("watcher's ctx cancel : %v", err)
+			return
+		}
 		if err != nil {
 			time.Sleep(time.Second)
 			c.log.Errorf("failed to watch next config: %v", err)
@@ -98,7 +103,7 @@ func (c *config) Load() error {
 		if err != nil {
 			return err
 		}
-		if err := c.reader.Merge(kvs...); err != nil {
+		if err = c.reader.Merge(kvs...); err != nil {
 			c.log.Errorf("failed to merge config source: %v", err)
 			return err
 		}

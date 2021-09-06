@@ -3,13 +3,14 @@ package grpc
 import (
 	"context"
 	"crypto/tls"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"google.golang.org/grpc"
 	"net/url"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/middleware"
+	"google.golang.org/grpc"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -35,7 +36,7 @@ func TestServer(t *testing.T) {
 	}()
 	time.Sleep(time.Second)
 	testClient(t, srv)
-	srv.Stop(ctx)
+	_ = srv.Stop(ctx)
 }
 
 func testClient(t *testing.T, srv *Server) {
@@ -48,7 +49,7 @@ func testClient(t *testing.T, srv *Server) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	conn.Close()
+	_ = conn.Close()
 }
 
 func TestNetwork(t *testing.T) {
@@ -141,7 +142,8 @@ type testResp struct {
 func TestServer_unaryServerInterceptor(t *testing.T) {
 	u, err := url.Parse("grpc://hello/world")
 	assert.NoError(t, err)
-	srv := &Server{ctx: context.Background(),
+	srv := &Server{
+		ctx:        context.Background(),
 		endpoint:   u,
 		middleware: []middleware.Middleware{EmptyMiddleware()},
 		timeout:    time.Duration(10),

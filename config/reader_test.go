@@ -120,22 +120,20 @@ a:
 			assert.NoError(t, err)
 			assert.Equal(t, true, vvz)
 
-			vv, ok = r.Value("aasasdg=234l.asdfk,")
+			_, ok = r.Value("aasasdg=234l.asdfk,")
 			assert.False(t, ok)
 
-			vv, ok = r.Value("aas......asdg=234l.asdfk,")
+			_, ok = r.Value("aas......asdg=234l.asdfk,")
 			assert.False(t, ok)
 
-			vv, ok = r.Value("a.b.Y.")
+			_, ok = r.Value("a.b.Y.")
 			assert.False(t, ok)
 		})
 	}
 }
 
 func TestReader_Source(t *testing.T) {
-	var (
-		err error
-	)
+	var err error
 	opts := options{
 		decoder: func(kv *KeyValue, v map[string]interface{}) error {
 			if codec := encoding.GetCodec(kv.Format); codec != nil {
@@ -151,6 +149,7 @@ func TestReader_Source(t *testing.T) {
 		Value:  []byte(`{"a": {"b": {"X": 1}}}`),
 		Format: "json",
 	})
+	assert.NoError(t, err)
 	b, err := r.Source()
 	assert.NoError(t, err)
 	assert.Equal(t, []byte(`{"a":{"b":{"X":1}}}`), b)
