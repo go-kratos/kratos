@@ -35,7 +35,7 @@ var (
 	ErrTokenParseFail         = errors.Unauthorized("UNAUTHORIZED", "Fail to parse JWT token ")
 	ErrUnSupportSigningMethod = errors.Unauthorized("UNAUTHORIZED", "Wrong signing method")
 	ErrWrongContext           = errors.Unauthorized("UNAUTHORIZED", "Wrong context for middelware")
-	ErrNeedTokenProvider      = errors.Unauthorized("UNAUTHORIZED", "Token provider is missing")
+	ErrNeedTokenManager       = errors.Unauthorized("UNAUTHORIZED", "Token manager is missing")
 )
 
 // Option is jwt option.
@@ -55,7 +55,7 @@ func WithSigningMethod(method jwt.SigningMethod) Option {
 	}
 }
 
-// Server is a server auth middleware
+// Server is a server auth middleware. Check the token and extract the info from token.
 func Server(accessSecret string, opts ...Option) middleware.Middleware {
 	o := &options{
 		accessSecret:  accessSecret,
@@ -81,8 +81,8 @@ func Server(accessSecret string, opts ...Option) middleware.Middleware {
 	}
 }
 
-// Client is a client jwt middleware
-func Client(provider TokenProvider, opts ...Option) middleware.Middleware {
+// Client is a client jwt middleware.
+func Client(tokenManager TokenManager, opts ...Option) middleware.Middleware {
 	o := &options{
 		authHeaderKey: HeaderKey,
 		signingMethod: jwt.SigningMethodHS256,
@@ -92,11 +92,11 @@ func Client(provider TokenProvider, opts ...Option) middleware.Middleware {
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
-			if provider == nil {
-				return nil, ErrNeedTokenProvider
+			if tokenManager == nil {
+				return nil, ErrNeedTokenManager
 			}
 			if clientContext, ok := transport.FromClientContext(ctx); ok {
-				clientContext.RequestHeader().Set(o.authHeaderKey, provider.GetToken())
+				clientContext.RequestHeader().Set(o.authHeaderKey, tokenManager.Token())
 				return handler(ctx, req)
 			}
 			return nil, ErrWrongContext
