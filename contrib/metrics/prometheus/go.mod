@@ -1,4 +1,4 @@
-module github.com/go-kratos/kratos/contrib/prometheus/prometric/v2
+module github.com/go-kratos/kratos/contrib/metrics/prometheus/v2
 
 go 1.15
 

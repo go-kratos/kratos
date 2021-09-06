@@ -8,6 +8,7 @@ require (
 	github.com/envoyproxy/protoc-gen-validate v0.6.1
 	github.com/gin-gonic/gin v1.7.3
 	github.com/go-kratos/gin v0.1.0
+	github.com/go-kratos/kratos/contrib/config/apollo/v2 v2.0.0-20210901080230-515b71ec9061
 	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-00010101000000-000000000000
@@ -37,13 +38,14 @@ require (
 	go.opentelemetry.io/otel/sdk v1.0.0-RC2
 	go.opentelemetry.io/otel/trace v1.0.0-RC2
 	go.uber.org/zap v1.19.0
-	golang.org/x/text v0.3.6
-	google.golang.org/genproto v0.0.0-20210805201207-89edb61ffb67
+	golang.org/x/text v0.3.7
+	google.golang.org/genproto v0.0.0-20210831024726-fe130286e0e2
 	google.golang.org/grpc v1.40.0
 	google.golang.org/protobuf v1.27.1
 )
 
 replace (
+	github.com/go-kratos/kratos/contrib/config/apollo/v2 => ../contrib/config/apollo
 	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 => ../contrib/metrics/prometheus
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 => ../contrib/registry/consul
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 => ../contrib/registry/etcd

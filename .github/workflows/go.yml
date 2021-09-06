@@ -2,6 +2,8 @@ name: Go
 
 on:
   push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -36,7 +38,8 @@ jobs:
         run: go build ./...
 
       - name: Test
-        run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+        run: make test-coverage
+
       - name: Upload coverage to Codecov
         run: bash <(curl -s https://codecov.io/bash)
 
@@ -57,16 +60,3 @@ jobs:
           cd examples
           go build ./...
           go test ./...
-
-  lint:
-    name: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.42
-          skip-go-installation: true
-          skip-pkg-cache: true
-          only-new-issues: true
