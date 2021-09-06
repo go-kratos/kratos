@@ -71,7 +71,7 @@ func WithNamespace(name string) Option {
 	}
 }
 
-func NewSourceWithConfig(opts ...Option) config.Source {
+func NewSource(opts ...Option) config.Source {
 	op := options{}
 	for _, o := range opts {
 		o(&op)
