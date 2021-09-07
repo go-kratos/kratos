@@ -53,7 +53,7 @@ func (s *Selector) Select(ctx context.Context, nodes []balancer.Node) (balancer.
 	var pc, upc balancer.Node
 	var done func(ctx context.Context, di balancer.DoneInfo)
 	nodeA, nodeB := s.prePick(nodes)
-	// meta.Weight为服务发布者在disocvery中设置的权重
+	// meta.Weight为服务发布者在discovery中设置的权重
 	if nodeB.Weight() > nodeA.Weight() {
 		pc, upc = nodeB, nodeA
 	} else {
