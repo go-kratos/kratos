@@ -36,14 +36,14 @@ func main() {
 	}
 
 	httpSrv := http.NewServer(
-		http.Address(":8002"),
+		http.Address(":8000"),
 		http.Middleware(
 			recovery.Recovery(),
 			logging.Server(logger),
 		),
 	)
 	grpcSrv := grpc.NewServer(
-		grpc.Address(":9002"),
+		grpc.Address(":9000"),
 		grpc.Middleware(
 			recovery.Recovery(),
 			logging.Server(logger),
