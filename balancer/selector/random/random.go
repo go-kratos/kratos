@@ -14,20 +14,22 @@ var (
 	Name = "random"
 )
 
-type Selector struct {
-}
+type Selector struct{}
 
 func New() *Selector {
 	return &Selector{}
 }
 
-func (p *Selector) Select(ctx context.Context, nodes []balancer.Node) (selected balancer.Node, done func(ctx context.Context, di balancer.DoneInfo), err error) {
+func (p *Selector) Select(_ context.Context, nodes []balancer.Node) (balancer.Node, func(context.Context, balancer.DoneInfo), error) {
 	if len(nodes) == 0 {
-		err = balancer.ErrNoAvaliable
-		return
+		err := balancer.ErrNoAvaliable
+		return nil, nil, err
 	}
 	cur := rand.Intn(len(nodes))
-	selected = nodes[cur]
-	done = func(context.Context, balancer.DoneInfo) {}
-	return
+	selected := nodes[cur]
+	d := selected.Pick()
+	done := func(ctx context.Context, info balancer.DoneInfo) {
+		d(ctx, info)
+	}
+	return selected, done, nil
 }

@@ -59,7 +59,6 @@ func (b *Builder) Build(info base.PickerBuildInfo) gBalancer.Picker {
 			n := b.nodeBuilder.Build(info.Address.Addr, 100, Attributes(*attr))
 			p.subConns[info.Address.Addr] = conn
 			p.nodes = append(p.nodes, n)
-
 		}
 	}
 	return p

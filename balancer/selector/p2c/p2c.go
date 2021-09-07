@@ -15,9 +15,7 @@ const (
 	Name = "p2c"
 )
 
-var (
-	_ balancer.Selector = &Selector{}
-)
+var _ balancer.Selector = &Selector{}
 
 // New p2c
 func New() balancer.Selector {
@@ -29,9 +27,8 @@ func New() balancer.Selector {
 
 // Selector is p2c selector
 type Selector struct {
-	logTs int64
-	r     *rand.Rand
-	lk    sync.Mutex
+	r  *rand.Rand
+	lk sync.Mutex
 }
 
 // choose two distinct nodes

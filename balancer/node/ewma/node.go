@@ -20,8 +20,10 @@ const (
 	penalty = uint64(time.Second * 10)
 )
 
-var _ balancer.Node = &node{}
-var _ balancer.NodeBuilder = &Builder{}
+var (
+	_ balancer.Node        = &node{}
+	_ balancer.NodeBuilder = &Builder{}
+)
 
 // node is endpoint instance
 type node struct {
@@ -29,18 +31,18 @@ type node struct {
 	version  string
 	metadata balancer.Metadata
 
-	//client statistic data
+	// client statistic data
 	lag       int64
 	success   uint64
 	inflight  int64
 	inflights *list.List
-	//last collected timestamp
+	// last collected timestamp
 	stamp     int64
 	predictTs int64
 	predict   int64
 	// request number in a period time
 	reqs int64
-	//last lastPick timestamp
+	// last lastPick timestamp
 	lastPick int64
 
 	errHandler func(err error) (isErr bool)
@@ -157,7 +159,7 @@ func (n *node) Pick() balancer.Done {
 			w = 0.0
 		}
 		lag = int64(float64(oldLag)*w + float64(lag)*(1.0-w))
-		atomic.StoreInt64(&n.lag, int64(lag))
+		atomic.StoreInt64(&n.lag, lag)
 
 		success := uint64(1000) // error value ,if error set 1
 		if di.Err != nil {
@@ -173,7 +175,6 @@ func (n *node) Pick() balancer.Done {
 		success = uint64(float64(oldSuc)*w + float64(success)*(1.0-w))
 		atomic.StoreUint64(&n.success, success)
 	}
-
 }
 
 // Weight is node effective weight

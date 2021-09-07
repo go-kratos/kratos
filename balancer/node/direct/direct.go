@@ -8,8 +8,10 @@ import (
 	"github.com/go-kratos/kratos/v2/balancer"
 )
 
-var _ balancer.Node = &node{}
-var _ balancer.NodeBuilder = &Builder{}
+var (
+	_ balancer.Node        = &node{}
+	_ balancer.NodeBuilder = &Builder{}
+)
 
 // node is endpoint instance
 type node struct {
@@ -17,13 +19,12 @@ type node struct {
 	metadata balancer.Metadata
 	weight   float64
 
-	//last lastPick timestamp
+	// last lastPick timestamp
 	lastPick int64
 }
 
 // Builder is direct node builder
-type Builder struct {
-}
+type Builder struct{}
 
 // Build create node
 func (*Builder) Build(addr string, initWeight float64, metadata balancer.Metadata) balancer.Node {
