@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
@@ -13,9 +12,14 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
+type node struct {
+	addr     string
+	metadata map[string]string
+}
+
 // Updater is resolver nodes updater
 type Updater interface {
-	Update(nodes []*registry.ServiceInstance)
+	Update(readys []node)
 }
 
 // Target is resolver target
@@ -45,8 +49,6 @@ func parseTarget(endpoint string, insecure bool) (*Target, error) {
 }
 
 type resolver struct {
-	lock    sync.RWMutex
-	nodes   []*registry.ServiceInstance
 	updater Updater
 
 	target  *Target
@@ -77,8 +79,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 					done <- err
 					return
 				}
-				r.update(services)
-				if len(r.nodes) > 0 {
+				if r.update(services) {
 					done <- nil
 					return
 				}
@@ -119,8 +120,8 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 	return r, nil
 }
 
-func (r *resolver) update(services []*registry.ServiceInstance) {
-	nodes := make([]*registry.ServiceInstance, 0)
+func (r *resolver) update(services []*registry.ServiceInstance) bool {
+	nodes := make([]node, 0)
 	for _, in := range services {
 		ept, err := endpoint.ParseEndpoint(in.Endpoints, "http", !r.insecure)
 		if err != nil {
@@ -130,16 +131,14 @@ func (r *resolver) update(services []*registry.ServiceInstance) {
 		if ept == "" {
 			continue
 		}
-		nodes = append(nodes, in)
+		nodes = append(nodes, node{addr: ept, metadata: in.Metadata})
 	}
-	if len(nodes) != 0 {
-		r.updater.Update(nodes)
-		r.lock.Lock()
-		r.nodes = nodes
-		r.lock.Unlock()
-	} else {
+	if len(nodes) == 0 {
 		r.logger.Warnf("[http resovler]Zero endpoint found,refused to write,ser: %s ins: %v", r.target.Endpoint, nodes)
+		return false
 	}
+	r.updater.Update(nodes)
+	return true
 }
 
 func (r *resolver) Close() error {

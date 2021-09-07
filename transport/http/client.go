@@ -10,16 +10,16 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/balancer"
+	"github.com/go-kratos/kratos/v2/balancer/node/direct"
+	"github.com/go-kratos/kratos/v2/balancer/selector/random"
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
-	"github.com/go-kratos/kratos/v2/transport/http/balancer"
-	"github.com/go-kratos/kratos/v2/transport/http/balancer/random"
 )
 
 // DecodeErrorFunc is decode error func.
@@ -45,7 +45,8 @@ type clientOptions struct {
 	decoder      DecodeResponseFunc
 	errorDecoder DecodeErrorFunc
 	transport    http.RoundTripper
-	balancer     balancer.Balancer
+	selector     balancer.Selector
+	nodeBuilder  balancer.NodeBuilder
 	discovery    registry.Discovery
 	middleware   []middleware.Middleware
 	block        bool
@@ -115,11 +116,10 @@ func WithDiscovery(d registry.Discovery) ClientOption {
 }
 
 // WithBalancer with client balancer.
-// Experimental
-// Notice: This type is EXPERIMENTAL and may be changed or removed in a later release.
-func WithBalancer(b balancer.Balancer) ClientOption {
+func WithBalancer(selector balancer.Selector, nodeBuilder balancer.NodeBuilder) ClientOption {
 	return func(o *clientOptions) {
-		o.balancer = b
+		o.selector = selector
+		o.nodeBuilder = nodeBuilder
 	}
 }
 
@@ -143,6 +143,7 @@ type Client struct {
 	target   *Target
 	r        *resolver
 	cc       *http.Client
+	picker   *picker
 	insecure bool
 }
 
@@ -155,7 +156,8 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		decoder:      DefaultResponseDecoder,
 		errorDecoder: DefaultErrorDecoder,
 		transport:    http.DefaultTransport,
-		balancer:     random.New(),
+		selector:     random.New(),
+		nodeBuilder:  &direct.Builder{},
 	}
 	for _, o := range opts {
 		o(&options)
@@ -170,10 +172,11 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	p := newPicker(options.selector, options.nodeBuilder)
 	var r *resolver
 	if options.discovery != nil {
 		if target.Scheme == "discovery" {
-			if r, err = newResolver(ctx, options.discovery, target, options.balancer, options.block, insecure); err != nil {
+			if r, err = newResolver(ctx, options.discovery, target, p, options.block, insecure); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
 		} else if _, _, err := host.ExtractHostPort(options.endpoint); err != nil {
@@ -189,6 +192,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 			Timeout:   options.timeout,
 			Transport: options.transport,
 		},
+		picker: p,
 	}, nil
 }
 
@@ -239,13 +243,9 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 		if client.r != nil {
 			var (
 				err  error
-				node *registry.ServiceInstance
+				addr string
 			)
-			if node, done, err = client.opts.balancer.Pick(ctx); err != nil {
-				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
-			}
-			endpoint, err := endpoint.ParseEndpoint(node.Endpoints, "http", !client.insecure)
-			if err != nil {
+			if addr, done, err = client.picker.Pick(ctx); err != nil {
 				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 			}
 			if client.insecure {
@@ -253,8 +253,8 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 			} else {
 				req.URL.Scheme = "https"
 			}
-			req.URL.Host = endpoint
-			req.Host = endpoint
+			req.URL.Host = addr
+			req.Host = addr
 		}
 		res, err := client.do(ctx, req, c)
 		if done != nil {
