@@ -34,7 +34,7 @@ type Node interface {
 	// Pick a node
 	Pick() Done
 
-	// Weight is runtime calcuated weight
+	// Weight is runtime calculated weight
 	Weight() float64
 
 	// PickElapsed is time elapsed since the latest pick
