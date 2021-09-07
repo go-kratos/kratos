@@ -21,13 +21,10 @@ func main() {
 }
 
 func send(sender event.Sender) {
-	msg := kafka.NewMessage("kratos", []byte("hello world"), map[string]string{
-		"user":  "kratos",
-		"phone": "123456",
-	})
+	msg := kafka.NewMessage("kratos", []byte("hello world"))
 	err := sender.Send(context.Background(), msg)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("key:%s, value:%s, header:%s\n", msg.Key(), msg.Value(), msg.Header())
+	fmt.Printf("key:%s, value:%s\n", msg.Key(), msg.Value())
 }

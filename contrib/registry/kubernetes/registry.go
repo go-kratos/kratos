@@ -108,7 +108,7 @@ func NewRegistry(clientSet *kubernetes.Clientset) *Registry {
 // Register is used to register services
 // Note that on Kubernetes, it can only be used to update the id/name/version/metadata/protocols of the current service,
 // but it cannot be used to update node.
-func (s *Registry) Register(service *registry.ServiceInstance) error {
+func (s *Registry) Register(ctx context.Context, service *registry.ServiceInstance) error {
 	// GetMetadata
 	metadataVal, err := marshal(service.Metadata)
 	if err != nil {
@@ -145,15 +145,15 @@ func (s *Registry) Register(service *registry.ServiceInstance) error {
 	if _, err = s.clientSet.
 		CoreV1().
 		Pods(GetNamespace()).
-		Patch(context.TODO(), GetPodName(), types.StrategicMergePatchType, patchBytes, metav1.PatchOptions{}); err != nil {
+		Patch(ctx, GetPodName(), types.StrategicMergePatchType, patchBytes, metav1.PatchOptions{}); err != nil {
 		return err
 	}
 	return nil
 }
 
 // Deregister the registration.
-func (s *Registry) Deregister(service *registry.ServiceInstance) error {
-	return s.Register(&registry.ServiceInstance{
+func (s *Registry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
+	return s.Register(ctx, &registry.ServiceInstance{
 		Metadata: map[string]string{},
 	})
 }
