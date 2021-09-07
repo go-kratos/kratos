@@ -13,26 +13,8 @@ type Logger struct {
 	log *zap.Logger
 }
 
-func NewLogger(opts ...Option) (*Logger, error) {
-	_options := options{
-		zapConfig: zap.NewProductionConfig(),
-		zapOptions: []zap.Option{
-			zap.AddCallerSkip(3),
-		},
-	}
-
-	for _, o := range opts {
-		o(&_options)
-	}
-
-	zlog, err := _options.zapConfig.Build(_options.zapOptions...)
-	if err != nil {
-		return nil, err
-	}
-
-	l := &Logger{zlog}
-
-	return l, nil
+func NewLogger(zlog *zap.Logger) *Logger {
+	return &Logger{zlog}
 }
 
 func (l *Logger) Log(level log.Level, keyvals ...interface{}) error {

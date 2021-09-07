@@ -3,14 +3,14 @@ package zap
 import (
 	"testing"
 
+	"go.uber.org/zap"
+
 	"github.com/go-kratos/kratos/v2/log"
 )
 
 func TestLogger(t *testing.T) {
-	logger, err := NewLogger()
-	if err != nil {
-		t.Error(err)
-	}
+	logger := NewLogger(zap.NewExample())
+
 	defer func() { _ = logger.Sync() }()
 
 	zlog := log.NewHelper(logger)
