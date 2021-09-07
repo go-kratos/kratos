@@ -1,5 +1,4 @@
 ./examples
-./cmd/protoc-gen-go-http
 ./cmd/kratos
 ./contrib/metrics/datadog
 ./contrib/config/nacos
