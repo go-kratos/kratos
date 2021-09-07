@@ -14,7 +14,7 @@ type Logger struct {
 }
 
 func NewLogger(opts ...Option) (*Logger, error) {
-	options := options{
+	_options := options{
 		zapConfig: zap.NewProductionConfig(),
 		zapOptions: []zap.Option{
 			zap.AddCallerSkip(3),
@@ -22,10 +22,10 @@ func NewLogger(opts ...Option) (*Logger, error) {
 	}
 
 	for _, o := range opts {
-		o(&options)
+		o(&_options)
 	}
 
-	zlog, err := options.zapConfig.Build(options.zapOptions...)
+	zlog, err := _options.zapConfig.Build(_options.zapOptions...)
 	if err != nil {
 		return nil, err
 	}
