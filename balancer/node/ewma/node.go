@@ -176,7 +176,7 @@ func (n *node) Pick() balancer.Done {
 
 }
 
-// Weight is node effective weigth
+// Weight is node effective weight
 func (n *node) Weight() (weight float64) {
 	weight = float64(n.health()*uint64(time.Second)) / float64(n.load())
 	return
@@ -187,7 +187,7 @@ func (n *node) PickElapsed() time.Duration {
 }
 
 func (n *node) Address() string {
-	return n.Address()
+	return n.addr
 }
 
 func (n *node) Version() string {

@@ -14,19 +14,13 @@ import (
 )
 
 func main() {
-	client, err := api.NewClient(api.DefaultConfig())
+	consulCli, err := api.NewClient(api.DefaultConfig())
 	if err != nil {
 		panic(err)
 	}
-	for {
-		callHTTP(client)
-		callGRPC(client)
-		time.Sleep(time.Second)
-	}
-}
+	r := consul.New(consulCli)
 
-func callGRPC(cli *api.Client) {
-	r := consul.New(cli)
+	// new grpc client
 	conn, err := grpc.DialInsecure(
 		context.Background(),
 		grpc.WithEndpoint("discovery:///helloworld"),
@@ -36,17 +30,10 @@ func callGRPC(cli *api.Client) {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-	client := helloworld.NewGreeterClient(conn)
-	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("[grpc] SayHello %+v\n", reply)
-}
+	gClient := helloworld.NewGreeterClient(conn)
 
-func callHTTP(cli *api.Client) {
-	r := consul.New(cli)
-	conn, err := http.NewClient(
+	// new http client
+	hConn, err := http.NewClient(
 		context.Background(),
 		http.WithMiddleware(
 			recovery.Recovery(),
@@ -57,9 +44,25 @@ func callHTTP(cli *api.Client) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer conn.Close()
-	time.Sleep(time.Millisecond * 250)
-	client := helloworld.NewGreeterHTTPClient(conn)
+	defer hConn.Close()
+	hClient := helloworld.NewGreeterHTTPClient(hConn)
+
+	for {
+		time.Sleep(time.Second)
+		callGRPC(gClient)
+		callHTTP(hClient)
+	}
+}
+
+func callGRPC(client helloworld.GreeterClient) {
+	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("[grpc] SayHello %+v\n", reply)
+}
+
+func callHTTP(client helloworld.GreeterHTTPClient) {
 	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
 	if err != nil {
 		log.Fatal(err)

@@ -41,7 +41,7 @@ func (n *node) Pick() balancer.Done {
 	return func(ctx context.Context, di balancer.DoneInfo) {}
 }
 
-// Weight is node effective weigth
+// Weight is node effective weight
 func (n *node) Weight() (weight float64) {
 	return n.weight
 }
