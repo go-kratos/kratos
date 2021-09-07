@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2/errors"
@@ -42,7 +43,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	index := 0
 	for _, enum := range file.Enums {
 		skip := genErrorsReason(gen, file, g, enum)
-		if skip == false {
+		if !skip {
 			index++
 		}
 	}
@@ -74,10 +75,10 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 			enumCode = int(ok)
 		}
 		// If the current enumeration does not contain 'errors.code'
-		//or the code value exceeds the range, the current enum will be skipped
-		// if enumCode > 600 || enumCode < 0 {
-		// 	panic(fmt.Sprintf("Enum '%s' range must be greater than 0 and less than or equal to 600", string(v.Desc.Name())))
-		// }
+		// or the code value exceeds the range, the current enum will be skipped
+		if enumCode > 600 || enumCode < 0 {
+			panic(fmt.Sprintf("Enum '%s' range must be greater than 0 and less than or equal to 600", string(v.Desc.Name())))
+		}
 		if enumCode == 0 {
 			continue
 		}

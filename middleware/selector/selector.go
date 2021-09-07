@@ -11,7 +11,7 @@ import (
 
 type (
 	transporter func(ctx context.Context) (transport.Transporter, bool)
-	match       func(operation string) bool
+	MatchFunc   func(operation string) bool
 )
 
 var (
@@ -32,6 +32,7 @@ type Builder struct {
 	prefix []string
 	regex  []string
 	path   []string
+	match  MatchFunc
 
 	ms []middleware.Middleware
 }
@@ -64,6 +65,12 @@ func (b *Builder) Path(path ...string) *Builder {
 	return b
 }
 
+// Match is with Builder's match
+func (b *Builder) Match(fn MatchFunc) *Builder {
+	b.match = fn
+	return b
+}
+
 // Build is Builder's Build, for example: Server().Path(m1,m2).Build()
 func (b *Builder) Build() middleware.Middleware {
 	var transporter func(ctx context.Context) (transport.Transporter, bool)
@@ -72,11 +79,11 @@ func (b *Builder) Build() middleware.Middleware {
 	} else {
 		transporter = serverTransporter
 	}
-	return selector(transporter, b.match, b.ms...)
+	return selector(transporter, b.matchs, b.ms...)
 }
 
-// match is match operation compliance Builder
-func (b *Builder) match(operation string) bool {
+// matchs is match operation compliance Builder
+func (b *Builder) matchs(operation string) bool {
 	for _, prefix := range b.prefix {
 		if prefixMatch(prefix, operation) {
 			return true
@@ -92,11 +99,15 @@ func (b *Builder) match(operation string) bool {
 			return true
 		}
 	}
+
+	if b.match != nil {
+		return b.match(operation)
+	}
 	return false
 }
 
 // selector middleware
-func selector(transporter transporter, match match, ms ...middleware.Middleware) middleware.Middleware {
+func selector(transporter transporter, match MatchFunc, ms ...middleware.Middleware) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			info, ok := transporter(ctx)
