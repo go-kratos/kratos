@@ -7,9 +7,7 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
-var (
-	_ registry.Watcher = &watcher{}
-)
+var _ registry.Watcher = &watcher{}
 
 type watcher struct {
 	key       string
@@ -21,7 +19,7 @@ type watcher struct {
 	first     bool
 }
 
-func newWatcher(ctx context.Context, key string, client *clientv3.Client) *watcher {
+func newWatcher(ctx context.Context, key string, client *clientv3.Client) (*watcher, error) {
 	w := &watcher{
 		key:     key,
 		watcher: clientv3.NewWatcher(client),
@@ -30,8 +28,11 @@ func newWatcher(ctx context.Context, key string, client *clientv3.Client) *watch
 	}
 	w.ctx, w.cancel = context.WithCancel(ctx)
 	w.watchChan = w.watcher.Watch(w.ctx, key, clientv3.WithPrefix(), clientv3.WithRev(0))
-	w.watcher.RequestProgress(context.Background())
-	return w
+	err := w.watcher.RequestProgress(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return w, nil
 }
 
 func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
@@ -47,7 +48,6 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 	case <-w.watchChan:
 		return w.getInstance()
 	}
-
 }
 
 func (w *watcher) Stop() error {
@@ -60,13 +60,13 @@ func (w *watcher) getInstance() ([]*registry.ServiceInstance, error) {
 	if err != nil {
 		return nil, err
 	}
-	var items []*registry.ServiceInstance
-	for _, kv := range resp.Kvs {
+	items := make([]*registry.ServiceInstance, len(resp.Kvs))
+	for i, kv := range resp.Kvs {
 		si, err := unmarshal(kv.Value)
 		if err != nil {
 			return nil, err
 		}
-		items = append(items, si)
+		items[i] = si
 	}
 	return items, nil
 }

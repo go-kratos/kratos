@@ -9,4 +9,3 @@
 ./contrib/registry/consul
 ./contrib/registry/kubernetes
 ./contrib/registry/zookeeper
-./contrib/registry/etcd
