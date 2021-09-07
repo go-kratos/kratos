@@ -177,10 +177,8 @@ func buildPathVars(method *protogen.Method, path string) (res []string) {
 }
 
 func camelCaseVars(s string) string {
-	var (
-		vars []string
-		subs = strings.Split(s, ".")
-	)
+	vars := make([]string, 0)
+	subs := strings.Split(s, ".")
 	for _, sub := range subs {
 		vars = append(vars, camelCase(sub))
 	}
