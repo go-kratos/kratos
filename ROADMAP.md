@@ -28,19 +28,19 @@ This document defines the roadmap for Kratos development.
     - [x] transport tracing
     - [x] Validator
     - [ ] Authentication
-    - [ ] Ratelimit
-    - [ ] CircuitBreaker
+    - [x] Ratelimit
+    - [x] CircuitBreaker
 - [x] Metrics
     - [x] Prometheus
     - [x] DataDog
 - [x] Tracing
     - [x] HTTP
-        - [ ] TLS
+        - [x] TLS
         - [x] Client
         - [x] Service Registrar
         - [ ] javascript/typescript clients
     - [x] gRPC
-        - [ ] TLS
+        - [x] TLS
         - [x] Uarry Handler
         - [ ] Streaming Handler
 - [ ] Cache
