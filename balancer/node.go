@@ -18,7 +18,7 @@ type DoneInfo struct {
 	BytesReceived bool
 }
 
-// Metadata is Node Meatadata
+// Metadata is Node Metadata
 type Metadata interface {
 	Get(key string) string
 }
@@ -28,16 +28,16 @@ type Done func(ctx context.Context, di DoneInfo)
 
 // Node is node interface
 type Node interface {
-	// address is unique under the same service
+	// Address is unique under the same service
 	Address() string
 
-	// pick a node
+	// Pick a node
 	Pick() Done
 
-	// runtime calcuated weight
+	// Weight is runtime calculated weight
 	Weight() float64
 
-	// time elapsed since the latest pick
+	// PickElapsed is time elapsed since the latest pick
 	PickElapsed() time.Duration
 
 	// Metadata is the kv pair metadata associated with the service instance.

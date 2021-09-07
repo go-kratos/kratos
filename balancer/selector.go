@@ -6,12 +6,12 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 )
 
-// ErrNoAvaliable is no avaliable node
-var ErrNoAvaliable = errors.ServiceUnavailable("no_avaliable_node", "")
+// ErrNoAvailable is no available node
+var ErrNoAvailable = errors.ServiceUnavailable("no_available_node", "")
 
 // Selector is node pick balancer
 type Selector interface {
 	// Select nodes
 	// if err == nil, selected and done must not be empty.
-	Select(ctx context.Context, nodes []Node) (selected Node, done func(ctx context.Context, di DoneInfo), err error)
+	Select(ctx context.Context, nodes []Node) (selected Node, done Done, err error)
 }
