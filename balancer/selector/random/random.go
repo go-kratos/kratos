@@ -20,9 +20,9 @@ func New() *Selector {
 	return &Selector{}
 }
 
-func (p *Selector) Select(_ context.Context, nodes []balancer.Node) (balancer.Node, func(context.Context, balancer.DoneInfo), error) {
+func (p *Selector) Select(_ context.Context, nodes []balancer.Node) (balancer.Node, balancer.Done, error) {
 	if len(nodes) == 0 {
-		err := balancer.ErrNoAvaliable
+		err := balancer.ErrNoAvailable
 		return nil, nil, err
 	}
 	cur := rand.Intn(len(nodes))

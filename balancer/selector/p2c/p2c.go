@@ -42,9 +42,9 @@ func (s *Selector) prePick(nodes []balancer.Node) (nodeA balancer.Node, nodeB ba
 	return
 }
 
-func (s *Selector) Select(ctx context.Context, nodes []balancer.Node) (balancer.Node, func(ctx context.Context, di balancer.DoneInfo), error) {
+func (s *Selector) Select(ctx context.Context, nodes []balancer.Node) (balancer.Node, balancer.Done, error) {
 	if len(nodes) == 0 {
-		return nil, nil, balancer.ErrNoAvaliable
+		return nil, nil, balancer.ErrNoAvailable
 	} else if len(nodes) == 1 {
 		done := nodes[0].Pick()
 		return nodes[0], done, nil

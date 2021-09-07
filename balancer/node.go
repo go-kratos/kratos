@@ -28,16 +28,16 @@ type Done func(ctx context.Context, di DoneInfo)
 
 // Node is node interface
 type Node interface {
-	// address is unique under the same service
+	// Address is unique under the same service
 	Address() string
 
-	// pick a node
+	// Pick a node
 	Pick() Done
 
-	// runtime calcuated weight
+	// Weight is runtime calcuated weight
 	Weight() float64
 
-	// time elapsed since the latest pick
+	// PickElapsed elapsed since the latest pick
 	PickElapsed() time.Duration
 
 	// Metadata is the kv pair metadata associated with the service instance.
