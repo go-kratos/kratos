@@ -37,7 +37,7 @@ type Node interface {
 	// Weight is runtime calcuated weight
 	Weight() float64
 
-	// PickElapsed elapsed since the latest pick
+	// PickElapsed is time elapsed since the latest pick
 	PickElapsed() time.Duration
 
 	// Metadata is the kv pair metadata associated with the service instance.
