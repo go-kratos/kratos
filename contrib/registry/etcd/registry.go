@@ -109,13 +109,13 @@ func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.Ser
 	if err != nil {
 		return nil, err
 	}
-	var items []*registry.ServiceInstance
-	for _, kv := range resp.Kvs {
+	items := make([]*registry.ServiceInstance, len(resp.Kvs))
+	for i, kv := range resp.Kvs {
 		si, err := unmarshal(kv.Value)
 		if err != nil {
 			return nil, err
 		}
-		items = append(items, si)
+		items[i] = si
 	}
 	return items, nil
 }
@@ -123,7 +123,7 @@ func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.Ser
 // Watch creates a watcher according to the service name.
 func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, error) {
 	key := fmt.Sprintf("%s/%s", r.opts.namespace, name)
-	return newWatcher(ctx, key, r.client), nil
+	return newWatcher(ctx, key, r.client)
 }
 
 // registerWithKV create a new lease, return current leaseID
@@ -161,9 +161,9 @@ func (r *Registry) heartBeat(ctx context.Context, leaseID clientv3.LeaseID, key 
 				cancelCtx, cancel := context.WithCancel(ctx)
 				go func() {
 					defer cancel()
-					id, err := r.registerWithKV(cancelCtx, key, value)
-					if err != nil {
-						errChan <- err
+					id, registerErr := r.registerWithKV(cancelCtx, key, value)
+					if registerErr != nil {
+						errChan <- registerErr
 					} else {
 						idChan <- id
 					}

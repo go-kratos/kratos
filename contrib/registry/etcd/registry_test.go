@@ -3,17 +3,20 @@ package etcd
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc"
 	"testing"
 	"time"
+
+	"google.golang.org/grpc"
 
 	"github.com/go-kratos/kratos/v2/registry"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 func TestRegistry(t *testing.T) {
-	client, err := clientv3.New(clientv3.Config{Endpoints: []string{"127.0.0.1:2379"},
-		DialTimeout: time.Second, DialOptions: []grpc.DialOption{grpc.WithBlock()}})
+	client, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"127.0.0.1:2379"},
+		DialTimeout: time.Second, DialOptions: []grpc.DialOption{grpc.WithBlock()},
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,11 +33,13 @@ func TestRegistry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer w.Stop()
+	defer func() {
+		_ = w.Stop()
+	}()
 	go func() {
 		for {
-			res, err := w.Next()
-			if err != nil {
+			res, err1 := w.Next()
+			if err1 != nil {
 				return
 			}
 			t.Logf("watch: %d", len(res))
@@ -45,8 +50,8 @@ func TestRegistry(t *testing.T) {
 	}()
 	time.Sleep(time.Second)
 
-	if err := r.Register(ctx, s); err != nil {
-		t.Fatal(err)
+	if err1 := r.Register(ctx, s); err1 != nil {
+		t.Fatal(err1)
 	}
 	time.Sleep(time.Second)
 
@@ -58,8 +63,8 @@ func TestRegistry(t *testing.T) {
 		t.Errorf("not expected: %+v", res)
 	}
 
-	if err := r.Deregister(ctx, s); err != nil {
-		t.Fatal(err)
+	if err1 := r.Deregister(ctx, s); err1 != nil {
+		t.Fatal(err1)
 	}
 	time.Sleep(time.Second)
 
@@ -73,8 +78,10 @@ func TestRegistry(t *testing.T) {
 }
 
 func TestHeartBeat(t *testing.T) {
-	client, err := clientv3.New(clientv3.Config{Endpoints: []string{"127.0.0.1:2379"},
-		DialTimeout: time.Second, DialOptions: []grpc.DialOption{grpc.WithBlock()}})
+	client, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"127.0.0.1:2379"},
+		DialTimeout: time.Second, DialOptions: []grpc.DialOption{grpc.WithBlock()},
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,14 +95,16 @@ func TestHeartBeat(t *testing.T) {
 
 	go func() {
 		r := New(client)
-		w, err := r.Watch(ctx, s.Name)
-		if err != nil {
+		w, err1 := r.Watch(ctx, s.Name)
+		if err1 != nil {
 			return
 		}
-		defer w.Stop()
+		defer func() {
+			_ = w.Stop()
+		}()
 		for {
-			res, err := w.Next()
-			if err != nil {
+			res, err2 := w.Next()
+			if err2 != nil {
 				return
 			}
 			t.Logf("watch: %d", len(res))
@@ -141,5 +150,4 @@ func TestHeartBeat(t *testing.T) {
 	if len(res) == 0 {
 		t.Errorf("reconnect failed")
 	}
-
 }

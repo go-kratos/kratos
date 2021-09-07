@@ -1,6 +1,4 @@
 ./examples
-./cmd/protoc-gen-go-errors
-./cmd/protoc-gen-go-http
 ./contrib/metrics/datadog
 ./contrib/config/nacos
 ./contrib/config/apollo
@@ -9,5 +7,3 @@
 ./contrib/registry/consul
 ./contrib/registry/kubernetes
 ./contrib/registry/zookeeper
-./contrib/registry/etcd
-./contrib/log/fluent
