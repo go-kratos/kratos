@@ -18,7 +18,7 @@ type DoneInfo struct {
 	BytesReceived bool
 }
 
-// Metadata is Node Meatadata
+// Metadata is Node Metadata
 type Metadata interface {
 	Get(key string) string
 }
