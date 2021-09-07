@@ -1,5 +1,4 @@
 ./examples
-./cmd/kratos
 ./contrib/metrics/datadog
 ./contrib/config/nacos
 ./contrib/config/apollo

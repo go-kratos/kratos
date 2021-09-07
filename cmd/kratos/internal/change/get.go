@@ -19,7 +19,7 @@ type ReleaseInfo struct {
 	} `json:"author"`
 	PublishedAt string `json:"published_at"`
 	Body        string `json:"body"`
-	HtmlUrl     string `json:"html_url"`
+	HTMLURL     string `json:"html_url"`
 }
 
 type CommitInfo struct {
@@ -32,20 +32,20 @@ type ErrorInfo struct {
 	Message string
 }
 
-type GithubApi struct {
+type GithubAPI struct {
 	Owner string
 	Repo  string
 	Token string
 }
 
 // GetReleaseInfo for getting kratos release info.
-func (g *GithubApi) GetReleaseInfo(version string) ReleaseInfo {
+func (g *GithubAPI) GetReleaseInfo(version string) ReleaseInfo {
 	api := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", g.Owner, g.Repo)
 	if version != "latest" {
 		api = fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/tags/%s", g.Owner, g.Repo, version)
 	}
 	resp, code := requestGithubAPI(api, "GET", nil, g.Token)
-	if code != 200 {
+	if code != http.StatusOK {
 		printGithubErrorInfo(resp)
 	}
 	releaseInfo := ReleaseInfo{}
@@ -57,14 +57,14 @@ func (g *GithubApi) GetReleaseInfo(version string) ReleaseInfo {
 }
 
 // GetCommitsInfo for getting kratos commits info.
-func (g *GithubApi) GetCommitsInfo() []CommitInfo {
+func (g *GithubAPI) GetCommitsInfo() []CommitInfo {
 	info := g.GetReleaseInfo("latest")
 	page := 1
 	var list []CommitInfo
 	for {
 		url := fmt.Sprintf("https://api.github.com/repos/%s/%s/commits?pre_page=100&page=%d&since=%s", g.Owner, g.Repo, page, info.PublishedAt)
 		resp, code := requestGithubAPI(url, "GET", nil, g.Token)
-		if code != 200 {
+		if code != http.StatusOK {
 			printGithubErrorInfo(resp)
 		}
 		var res []CommitInfo
@@ -73,7 +73,7 @@ func (g *GithubApi) GetCommitsInfo() []CommitInfo {
 			fatal(err)
 		}
 		list = append(list, res...)
-		if len(res) < 100 {
+		if len(res) < http.StatusContinue {
 			break
 		}
 		page++
@@ -179,14 +179,14 @@ func ParseReleaseInfo(info ReleaseInfo) string {
 		"Author: %s\nDate: %s\nUrl: %s\n\n%s\n\n%s\n\n%s\n",
 		info.Author.Login,
 		info.PublishedAt,
-		info.HtmlUrl,
+		info.HTMLURL,
 		splitters,
 		body,
 		splitters,
 	)
 }
 
-func ParseGithubUrl(url string) (owner string, repo string) {
+func ParseGithubURL(url string) (owner string, repo string) {
 	var start int
 	start = strings.Index(url, "//")
 	if start == -1 {

@@ -39,7 +39,7 @@ func (r *Repo) Path() string {
 	if end == -1 {
 		end = len(r.url)
 	}
-	branch := ""
+	var branch string
 	if r.branch == "" {
 		branch = "@main"
 	} else {
@@ -69,7 +69,7 @@ func (r *Repo) Clone(ctx context.Context) error {
 	if _, err := os.Stat(r.Path()); !os.IsNotExist(err) {
 		return r.Pull(ctx)
 	}
-	cmd := &exec.Cmd{}
+	var cmd *exec.Cmd
 	if r.branch == "" {
 		cmd = exec.Command("git", "clone", r.url, r.Path())
 	} else {
