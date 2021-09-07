@@ -63,7 +63,7 @@ docker run -it --rm -p 8000:8000 --workdir /workspace golang
 ```shell
 apt-get update && apt-get -y install protobuf-compiler
 export GOPROXY=https://goproxy.io,direct
-go get github.com/go-kratos/kratos/cmd/kratos/v2@latest && kratos upgrade
+go install github.com/go-kratos/kratos/cmd/kratos/v2@latest && kratos upgrade
 ```
   
 ```shell
