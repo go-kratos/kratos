@@ -33,6 +33,13 @@ var (
 // ServerOption is gRPC server option.
 type ServerOption func(o *Server)
 
+// Context with context.
+func Context(ctx context.Context) ServerOption {
+	return func(s *Server) {
+		s.ctx = ctx
+	}
+}
+
 // Network with server network.
 func Network(network string) ServerOption {
 	return func(s *Server) {
@@ -117,6 +124,7 @@ func NewServer(opts ...ServerOption) *Server {
 		timeout: 1 * time.Second,
 		health:  health.NewServer(),
 		log:     log.NewHelper(log.DefaultLogger),
+		ctx:     context.Background(),
 	}
 	for _, o := range opts {
 		o(srv)

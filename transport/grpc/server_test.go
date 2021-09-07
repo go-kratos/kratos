@@ -20,7 +20,7 @@ type testKey struct{}
 func TestServer(t *testing.T) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, testKey{}, "test")
-	srv := NewServer(Middleware([]middleware.Middleware{
+	srv := NewServer(Context(context.Background()), Middleware([]middleware.Middleware{
 		func(middleware.Handler) middleware.Handler { return nil },
 	}...))
 
