@@ -14,7 +14,7 @@ import (
 // Option is circuit breaker option.
 type Option func(*options)
 
-// WithGroup set circuit breaker group.
+// WithGroup with circuit breaker group.
 // NOTE: implements generics circuitbreaker.CircuitBreaker
 func WithGroup(g *group.Group) Option {
 	return func(o *options) {
