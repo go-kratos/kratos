@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/go-kratos/kratos/contrib/registry/nacos/v2"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
@@ -16,13 +19,28 @@ func main() {
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig("127.0.0.1", 8848),
 	}
-
+	//获取当前路径
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		panic(err)
+	}
+	logDir := fmt.Sprintf(
+		"%s%snacos%slog",
+		dir,
+		string(os.PathSeparator),
+		string(os.PathSeparator),
+	)
+	cacheDir := fmt.Sprintf("%s%snacos%scache",
+		dir,
+		string(os.PathSeparator),
+		string(os.PathSeparator),
+	)
 	cc := &constant.ClientConfig{
 		NamespaceId:         "public",
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
-		LogDir:              "/tmp/nacos/log",
-		CacheDir:            "/tmp/nacos/cache",
+		LogDir:              logDir,
+		CacheDir:            cacheDir,
 		RotateTime:          "1h",
 		MaxAge:              3,
 		LogLevel:            "debug",

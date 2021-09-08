@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2"
@@ -31,7 +32,17 @@ func (s *server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*he
 }
 
 func main() {
-	cert, err := tls.LoadX509KeyPair("../cert/server.crt", "../cert/server.key")
+	serverCert := fmt.Sprintf(
+		"..%scert%sserver.crt",
+		string(os.PathSeparator),
+		string(os.PathSeparator),
+	)
+	serverKey := fmt.Sprintf(
+		"..%scert%sserver.key",
+		string(os.PathSeparator),
+		string(os.PathSeparator),
+	)
+	cert, err := tls.LoadX509KeyPair(serverCert, serverKey)
 	if err != nil {
 		panic(err)
 	}
