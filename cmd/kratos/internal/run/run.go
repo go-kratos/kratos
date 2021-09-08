@@ -48,15 +48,15 @@ func Run(cmd *cobra.Command, args []string) {
 			}
 		} else {
 			var cmdPaths []string
-			for k, _ := range cmdPath {
+			for k := range cmdPath {
 				cmdPaths = append(cmdPaths, k)
 			}
 			prompt := &survey.Select{
 				Message: "Which directory do you want to run?",
 				Options: cmdPaths,
 			}
-			survey.AskOne(prompt, &dir)
-			if dir == "" {
+			e := survey.AskOne(prompt, &dir)
+			if e != nil || dir == "" {
 				return
 			}
 			dir = path.Join(cmdPath[dir], dir)
@@ -70,7 +70,6 @@ func Run(cmd *cobra.Command, args []string) {
 		fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err.Error())
 		return
 	}
-	return
 }
 
 func findCMD(base string) (map[string]string, error) {
@@ -110,7 +109,7 @@ func findCMD(base string) (map[string]string, error) {
 		if root {
 			break
 		}
-		tmp = filepath.Join(base, "..")
+		_ = filepath.Join(base, "..")
 	}
 	return map[string]string{"": base}, nil
 }
