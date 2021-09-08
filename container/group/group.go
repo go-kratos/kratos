@@ -33,7 +33,7 @@ func (g *Group) Get(key string) interface{} {
 	}
 	g.RUnlock()
 
-	// double check
+	// slowpath for group don`t have specified key value
 	g.Lock()
 	defer g.Unlock()
 	v, ok = g.vals[key]
