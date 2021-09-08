@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	httpstatus "github.com/go-kratos/kratos/v2/transport/http/status"
-
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
@@ -102,16 +101,19 @@ func FromError(err error) *Error {
 	}
 	gs, ok := status.FromError(err)
 	if ok {
+		ret := New(
+			httpstatus.FromGRPCCode(gs.Code()),
+			UnknownReason,
+			gs.Message(),
+		)
 		for _, detail := range gs.Details() {
 			switch d := detail.(type) {
 			case *errdetails.ErrorInfo:
-				return New(
-					httpstatus.FromGRPCCode(gs.Code()),
-					d.Reason,
-					gs.Message(),
-				).WithMetadata(d.Metadata)
+				ret.Reason = d.Reason
+				return ret.WithMetadata(d.Metadata)
 			}
 		}
+		return ret
 	}
 	return New(UnknownCode, UnknownReason, err.Error())
 }

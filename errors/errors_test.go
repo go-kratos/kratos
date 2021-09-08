@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/test/grpc_testing"
 )
 
 func TestError(t *testing.T) {
@@ -45,5 +49,12 @@ func TestError(t *testing.T) {
 	se := FromError(gs.Err())
 	if se.Reason != "reason" {
 		t.Errorf("got %+v want %+v", se, err)
+	}
+
+	gs2, _ := status.New(codes.InvalidArgument, "bad request").WithDetails(&grpc_testing.Empty{})
+	se2 := FromError(gs2.Err())
+	// codes.InvalidArgument should convert to http.StatusBadRequest
+	if se2.Code != http.StatusBadRequest {
+		t.Errorf("convert code err, got %d want %d", UnknownCode, http.StatusBadRequest)
 	}
 }
