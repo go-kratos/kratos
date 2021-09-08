@@ -5,48 +5,55 @@ import (
 
 	"github.com/go-kratos/aegis/circuitbreaker"
 	"github.com/go-kratos/aegis/circuitbreaker/sre"
+	"github.com/go-kratos/kratos/v2/container/group"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
 )
 
 // Option is circuit breaker option.
 type Option func(*options)
 
-// WithBreaker set circuit breaker implentation
-func WithBreaker(breaker circuitbreaker.CircuitBreaker) Option {
+// WithGroup set circuit breaker group.
+// NOTE: implements generics circuitbreaker.CircuitBreaker
+func WithGroup(g *group.Group) Option {
 	return func(o *options) {
-		o.breaker = breaker
+		o.group = g
 	}
 }
 
 type options struct {
-	breaker circuitbreaker.CircuitBreaker
+	group *group.Group
 }
 
 // Client circuitbreaker middleware will return errBreakerTriggered when the circuit
 // breaker is triggered and the request is rejected directly.
 func Client(opts ...Option) middleware.Middleware {
-	options := &options{
-		breaker: sre.NewBreaker(),
+	opt := &options{
+		group: group.NewGroup(func() interface{} {
+			return sre.NewBreaker()
+		}),
 	}
 	for _, o := range opts {
-		o(options)
+		o(opt)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
-			if err := options.breaker.Allow(); err != nil {
+			info, _ := transport.FromServerContext(ctx)
+			breaker := opt.group.Get(info.Operation()).(circuitbreaker.CircuitBreaker)
+			if err := breaker.Allow(); err != nil {
 				// rejected
 				// NOTE: when client reject requets locally,
 				// continue add counter let the drop ratio higher.
-				options.breaker.MarkFailed()
+				breaker.MarkFailed()
 				return nil, errors.New(503, "CIRCUITBREAKER", "request failed due to circuit breaker triggered")
 			}
 			// allowed
 			reply, err := handler(ctx, req)
-			if err != nil {
-				options.breaker.MarkFailed()
+			if err != nil && (errors.IsInternalServer(err) || errors.IsServiceUnavailable(err) || errors.IsGatewayTimeout(err)) {
+				breaker.MarkFailed()
 			} else {
-				options.breaker.MarkSuccess()
+				breaker.MarkSuccess()
 			}
 			return reply, err
 		}
