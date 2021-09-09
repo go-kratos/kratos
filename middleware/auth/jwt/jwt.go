@@ -108,8 +108,6 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	}
 }
 
-type KeyFunc func() []byte
-
 // Client is a client jwt middleware.
 func Client(tokenProvider TokenProvider, opts ...Option) middleware.Middleware {
 	o := &options{
