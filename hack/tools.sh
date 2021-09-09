@@ -100,7 +100,7 @@ function tidy() {
 }
 
 function help() {
-	echo "use: lint, test, fix, tidy"
+	echo "use: lint, test, test_coverage, fix, tidy"
 }
 
 case $1 in

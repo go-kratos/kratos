@@ -35,5 +35,6 @@ func TestZapLogger(t *testing.T) {
 	zlog.Infow("name", "kratos", "from", "opensource")
 	zlog.Infow("name", "kratos", "from")
 
-	defer logger.Sync()
+	// zap stdout/stderr Sync bugs in OSX, see https://github.com/uber-go/zap/issues/370
+	_ = logger.Sync()
 }

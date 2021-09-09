@@ -65,5 +65,4 @@ func callHTTP(cli *api.Client) {
 		log.Fatal(err)
 	}
 	log.Printf("[http] SayHello %s\n", reply.Message)
-
 }
