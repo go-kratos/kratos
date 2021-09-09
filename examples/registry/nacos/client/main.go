@@ -3,35 +3,38 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
-	"path/filepath"
-
 	"github.com/go-kratos/kratos/contrib/registry/nacos/v2"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
+	"io/ioutil"
+	"log"
+	"os"
 )
 
 func main() {
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig("127.0.0.1", 8848),
 	}
-	//获取当前路径
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	//获取临时路径
+	tempLogDir, err := ioutil.TempDir("", "log")
 	if err != nil {
 		panic(err)
 	}
+	defer os.RemoveAll(tempLogDir)
 	logDir := fmt.Sprintf(
 		"%s%snacos%slog",
-		dir,
+		tempLogDir,
 		string(os.PathSeparator),
 		string(os.PathSeparator),
 	)
+	//临时cache路径
+	tempCacheDir, err := ioutil.TempDir("", "log")
+	defer os.RemoveAll(tempCacheDir)
 	cacheDir := fmt.Sprintf("%s%snacos%scache",
-		dir,
+		tempCacheDir,
 		string(os.PathSeparator),
 		string(os.PathSeparator),
 	)
