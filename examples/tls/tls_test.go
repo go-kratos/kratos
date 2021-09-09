@@ -16,6 +16,7 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/stretchr/testify/assert"
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
@@ -127,6 +128,6 @@ func TestETCD(t *testing.T) {
 	}
 	callHTTP(t, r, tlsConf)
 	callGRPC(t, r, tlsConf)
-	srv.Stop()
-	srvTLS.Stop()
+	assert.NoError(t, srv.Stop())
+	assert.NoError(t, srvTLS.Stop())
 }

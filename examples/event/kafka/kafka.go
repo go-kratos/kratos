@@ -2,14 +2,17 @@ package kafka
 
 import (
 	"context"
+	"log"
+
 	"github.com/go-kratos/kratos/examples/event/event"
 	"github.com/segmentio/kafka-go"
-	"log"
 )
 
-var _ event.Sender = (*kafkaSender)(nil)
-var _ event.Receiver = (*kafkaReceiver)(nil)
-var _ event.Event = (*Message)(nil)
+var (
+	_ event.Sender   = (*kafkaSender)(nil)
+	_ event.Receiver = (*kafkaReceiver)(nil)
+	_ event.Event    = (*Message)(nil)
+)
 
 type Message struct {
 	key   string

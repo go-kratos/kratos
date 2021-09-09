@@ -2,12 +2,13 @@ package biz
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/log"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 type Article struct {
-	Id        int64
+	ID        int64
 	Title     string
 	Content   string
 	CreatedAt time.Time

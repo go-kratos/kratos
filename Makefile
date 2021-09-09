@@ -9,8 +9,6 @@ BIN		:= 	""
 TOOLS_SHELL="./hack/tools.sh"
 # golangci-lint
 LINTER := bin/golangci-lint
-$(LINTER): 
-	curl -L https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v1.42.0
 
 # check GOBIN
 ifneq ($(GOBIN),)
@@ -21,6 +19,9 @@ else
 		BIN=$(GOPATH)/bin
 	endif
 endif
+
+$(LINTER): 
+	curl -SL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s latest
 
 all:
 	@cd cmd/kratos && go build && cd - &> /dev/null

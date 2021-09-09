@@ -50,7 +50,7 @@ func (s *BlogService) GetArticle(ctx context.Context, req *pb.GetArticleRequest)
 	if err != nil {
 		return nil, err
 	}
-	return &pb.GetArticleReply{Article: &pb.Article{Id: p.Id, Title: p.Title, Content: p.Content, Like: p.Like}}, nil
+	return &pb.GetArticleReply{Article: &pb.Article{Id: p.ID, Title: p.Title, Content: p.Content, Like: p.Like}}, nil
 }
 
 func (s *BlogService) ListArticle(ctx context.Context, req *pb.ListArticleRequest) (*pb.ListArticleReply, error) {
@@ -58,7 +58,7 @@ func (s *BlogService) ListArticle(ctx context.Context, req *pb.ListArticleReques
 	reply := &pb.ListArticleReply{}
 	for _, p := range ps {
 		reply.Results = append(reply.Results, &pb.Article{
-			Id:      p.Id,
+			Id:      p.ID,
 			Title:   p.Title,
 			Content: p.Content,
 		})

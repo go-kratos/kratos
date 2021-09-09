@@ -25,7 +25,7 @@ var (
 	// Name is the name of the compiled software.
 	Name = "message"
 	// Version is the version of the compiled software.
-	Version = "v1.0.0"
+	// Version = "v1.0.0"
 )
 
 // server is used to implement helloworld.GreeterServer.

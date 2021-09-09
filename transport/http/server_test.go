@@ -45,7 +45,7 @@ func TestServer(t *testing.T) {
 	}()
 	time.Sleep(time.Second)
 	testClient(t, srv)
-	_ = srv.Stop(ctx)
+	assert.NoError(t, srv.Stop(ctx))
 }
 
 func testClient(t *testing.T, srv *Server) {

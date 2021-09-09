@@ -29,7 +29,7 @@ func (ar *articleRepo) ListArticle(ctx context.Context) ([]*biz.Article, error) 
 	rv := make([]*biz.Article, 0)
 	for _, p := range ps {
 		rv = append(rv, &biz.Article{
-			Id:        p.ID,
+			ID:        p.ID,
 			Title:     p.Title,
 			Content:   p.Content,
 			CreatedAt: p.CreatedAt,
@@ -45,7 +45,7 @@ func (ar *articleRepo) GetArticle(ctx context.Context, id int64) (*biz.Article, 
 		return nil, err
 	}
 	return &biz.Article{
-		Id:        p.ID,
+		ID:        p.ID,
 		Title:     p.Title,
 		Content:   p.Content,
 		CreatedAt: p.CreatedAt,

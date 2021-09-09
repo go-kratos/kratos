@@ -28,6 +28,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	log.Printf("service: %s", name)
+
 	// Defines the config JSON Field
 	var v struct {
 		Name    string `json:"name"`
@@ -35,7 +37,7 @@ func main() {
 	}
 
 	// Unmarshal the config to struct
-	if err := c.Scan(&v); err != nil {
+	if err = c.Scan(&v); err != nil {
 		panic(err)
 	}
 	log.Printf("config: %+v", v)
@@ -48,12 +50,12 @@ func main() {
 	log.Printf("service: %s", name)
 
 	// watch key
-	if err := c.Watch("name", func(key string, value config.Value) {
-		name, err := value.String()
-		if err != nil {
-			panic(err)
+	if err = c.Watch("name", func(key string, value config.Value) {
+		n, e := value.String()
+		if e != nil {
+			panic(e)
 		}
-		log.Printf("config changed: %s = %s\n", key, name)
+		log.Printf("config changed: %s = %s\n", key, n)
 	}); err != nil {
 		panic(err)
 	}
