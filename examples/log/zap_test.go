@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -36,5 +35,6 @@ func TestZapLogger(t *testing.T) {
 	zlog.Infow("name", "kratos", "from", "opensource")
 	zlog.Infow("name", "kratos", "from")
 
-	assert.NoError(t, logger.Sync())
+	// zap stdout/stderr Sync bugs in OSX, see https://github.com/uber-go/zap/issues/370
+	_ = logger.Sync()
 }
