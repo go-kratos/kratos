@@ -107,11 +107,11 @@ func TestServer(t *testing.T) {
 			key:           testKey,
 		},
 		{
-			name:          "miss key",
+			name:          "miss signing method",
 			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, token)}),
-			signingMethod: jwt.SigningMethodHS256,
-			exceptErr:     ErrMissingAccessSecret,
-			key:           "",
+			signingMethod: nil,
+			exceptErr:     nil,
+			key:           testKey,
 		},
 		{
 			name:          "miss signing method",
@@ -132,9 +132,13 @@ func TestServer(t *testing.T) {
 			}
 			var server middleware.Handler
 			if test.signingMethod != nil {
-				server = Server(test.key, WithSigningMethod(test.signingMethod))(next)
+				server = Server(func(token *jwt.Token) (interface{}, error) {
+					return []byte(test.key), nil
+				}, WithSigningMethod(test.signingMethod))(next)
 			} else {
-				server = Server(test.key)(next)
+				server = Server(func(token *jwt.Token) (interface{}, error) {
+					return []byte(test.key), nil
+				})(next)
 			}
 			_, err2 := server(test.ctx, test.name)
 			assert.Equal(t, test.exceptErr, err2)
@@ -150,7 +154,7 @@ type tokeBuilder struct {
 }
 
 func (t tokeBuilder) Token() string {
-	return fmt.Sprintf(bearerFormat, t.token)
+	return t.token
 }
 
 func TestClient(t *testing.T) {
@@ -192,7 +196,7 @@ func TestClient(t *testing.T) {
 			_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
 			assert.Equal(t, test.expectError, err2)
 			if err2 == nil {
-				assert.Equal(t, test.tokenProvider.Token(), header.Get(HeaderKey))
+				assert.Equal(t, fmt.Sprintf(bearerFormat, test.tokenProvider.Token()), header.Get(HeaderKey))
 			}
 		})
 	}
@@ -214,7 +218,47 @@ func TestTokenExpire(t *testing.T) {
 		return "reply", nil
 	}
 	ctx := transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, token)})
-	server := Server(testKey, WithSigningMethod(jwt.SigningMethodHS256))(next)
+	server := Server(func(token *jwt.Token) (interface{}, error) {
+		return []byte(testKey), nil
+	}, WithSigningMethod(jwt.SigningMethodHS256))(next)
 	_, err2 := server(ctx, "test expire token")
 	assert.Equal(t, ErrTokenExpired, err2)
+}
+
+func TestMissingKeyFunc(t *testing.T) {
+	testKey := "testKey"
+	mapClaims := jwt.MapClaims{}
+	mapClaims["name"] = "xiaoli"
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
+	token, err := claims.SignedString([]byte(testKey))
+	if err != nil {
+		panic(err)
+	}
+	token = fmt.Sprintf(bearerFormat, token)
+	test := struct {
+		name          string
+		ctx           context.Context
+		signingMethod jwt.SigningMethod
+		exceptErr     error
+		key           string
+	}{
+		name:          "miss key",
+		ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, token)}),
+		signingMethod: jwt.SigningMethodHS256,
+		exceptErr:     ErrMissingKeyFunc,
+		key:           "",
+	}
+
+	var testToken interface{}
+	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+		t.Log(req)
+		testToken = ctx.Value(InfoKey)
+		return "reply", nil
+	}
+	server := Server(nil)(next)
+	_, err2 := server(test.ctx, test.name)
+	assert.Equal(t, test.exceptErr, err2)
+	if test.exceptErr == nil {
+		assert.NotNil(t, testToken)
+	}
 }
