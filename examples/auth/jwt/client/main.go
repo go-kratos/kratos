@@ -23,14 +23,6 @@ func (s *server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*he
 	return s.pc.SayHello(ctx, in)
 }
 
-type tokenProvider struct {
-	accessSecretKey string
-}
-
-func (t tokenProvider) Key() []byte {
-	return []byte(t.accessSecretKey)
-}
-
 func main() {
 	testKey := "testKey"
 	httpSrv := http.NewServer(
@@ -54,8 +46,8 @@ func main() {
 		context.Background(),
 		grpc.WithEndpoint("dns:///127.0.0.1:9001"),
 		grpc.WithMiddleware(
-			jwt.Client(tokenProvider{
-				accessSecretKey: serviceTestKey,
+			jwt.Client(func() []byte {
+				return []byte(serviceTestKey)
 			}),
 		),
 	)
