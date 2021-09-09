@@ -3,6 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+
 	"github.com/go-kratos/kratos/contrib/registry/nacos/v2"
 	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2"
@@ -12,9 +16,6 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
-	"io/ioutil"
-	"log"
-	"os"
 )
 
 // server is used to implement helloworld.GreeterServer.
