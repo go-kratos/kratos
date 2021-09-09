@@ -152,14 +152,6 @@ func TestServer(t *testing.T) {
 	}
 }
 
-type tokeBuilder struct {
-	accessSecretKey string
-}
-
-func (t tokeBuilder) Key() []byte {
-	return []byte(t.accessSecretKey)
-}
-
 func TestClient(t *testing.T) {
 	testKey := "testKey"
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{})
@@ -167,13 +159,13 @@ func TestClient(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	tProvider := tokeBuilder{
-		accessSecretKey: testKey,
+	tProvider := func() []byte {
+		return []byte(testKey)
 	}
 	tests := []struct {
 		name          string
 		expectError   error
-		tokenProvider KeyProvider
+		tokenProvider NewKey
 	}{
 		{
 			name:          "normal",
@@ -272,13 +264,13 @@ func TestClientWithClaims(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	tProvider := tokeBuilder{
-		accessSecretKey: testKey,
+	tProvider := func() []byte {
+		return []byte(testKey)
 	}
 	test := struct {
 		name          string
 		expectError   error
-		tokenProvider KeyProvider
+		tokenProvider NewKey
 	}{
 		name:          "normal",
 		expectError:   nil,

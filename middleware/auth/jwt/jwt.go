@@ -106,7 +106,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 }
 
 // Client is a client jwt middleware.
-func Client(keyProvider KeyProvider, opts ...Option) middleware.Middleware {
+func Client(keyProvider NewKey, opts ...Option) middleware.Middleware {
 	o := &options{
 		signingMethod: jwt.SigningMethodHS256,
 		claims:        jwt.StandardClaims{},
@@ -120,7 +120,7 @@ func Client(keyProvider KeyProvider, opts ...Option) middleware.Middleware {
 				return nil, ErrNeedTokenProvider
 			}
 			token := jwt.NewWithClaims(o.signingMethod, o.claims)
-			tokenStr, err := token.SignedString(keyProvider.Key())
+			tokenStr, err := token.SignedString(keyProvider())
 			if err != nil {
 				return nil, ErrSignToken
 			}
