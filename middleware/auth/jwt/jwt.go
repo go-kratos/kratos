@@ -3,8 +3,9 @@ package jwt
 import (
 	"context"
 	"fmt"
-	"github.com/golang-jwt/jwt/v4"
 	"strings"
+
+	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -137,12 +138,12 @@ func Client(tokenProvider TokenProvider, opts ...Option) middleware.Middleware {
 	}
 }
 
-//NewContext put auth info into context
+// NewContext put auth info into context
 func NewContext(ctx context.Context, info *jwt.Token) context.Context {
 	return context.WithValue(ctx, InfoKey, info)
 }
 
-//FromContext extract auth info from context
+// FromContext extract auth info from context
 func FromContext(ctx context.Context) (token *jwt.Token, ok bool) {
 	token, ok = ctx.Value(InfoKey).(*jwt.Token)
 	return
