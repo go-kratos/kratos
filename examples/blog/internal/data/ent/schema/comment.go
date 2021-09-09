@@ -1,11 +1,12 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"time"
 )
 
 // Comment holds the schema definition for the Comment entity.

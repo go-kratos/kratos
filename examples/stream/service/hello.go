@@ -28,6 +28,7 @@ func (s *HelloService) GetNumber(req *pb.GetNumberRequest, conn pb.Hello_GetNumb
 		time.Sleep(time.Second)
 	}
 }
+
 func (s *HelloService) UploadLog(conn pb.Hello_UploadLogServer) error {
 	for {
 		req, err := conn.Recv()
@@ -40,6 +41,7 @@ func (s *HelloService) UploadLog(conn pb.Hello_UploadLogServer) error {
 		fmt.Println(req.Log)
 	}
 }
+
 func (s *HelloService) Chat(conn pb.Hello_ChatServer) error {
 	for {
 		req, err := conn.Recv()

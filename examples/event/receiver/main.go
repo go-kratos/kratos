@@ -19,10 +19,9 @@ func main() {
 		panic(err)
 	}
 	receive(receiver)
-	select {
-	case <-sigs:
-		_ = receiver.Close()
-	}
+
+	<-sigs
+	_ = receiver.Close()
 }
 
 func receive(receiver event.Receiver) {
