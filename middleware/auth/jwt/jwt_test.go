@@ -81,7 +81,7 @@ func TestServer(t *testing.T) {
 	}{
 		{
 			name:          "normal",
-			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, token)}),
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(authorizationKey, token)}),
 			signingMethod: jwt.SigningMethodHS256,
 			exceptErr:     nil,
 			key:           testKey,
@@ -94,29 +94,31 @@ func TestServer(t *testing.T) {
 			key:           testKey,
 		},
 		{
-			name:          "token invalid",
-			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, fmt.Sprintf(bearerFormat, "12313123"))}),
+			name: "token invalid",
+			ctx: transport.NewServerContext(context.Background(), &Transport{
+				reqHeader: newTokenHeader(authorizationKey, fmt.Sprintf(bearerFormat, "12313123")),
+			}),
 			signingMethod: jwt.SigningMethodHS256,
 			exceptErr:     ErrTokenInvalid,
 			key:           testKey,
 		},
 		{
 			name:          "method invalid",
-			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, token)}),
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(authorizationKey, token)}),
 			signingMethod: jwt.SigningMethodES384,
 			exceptErr:     ErrUnSupportSigningMethod,
 			key:           testKey,
 		},
 		{
 			name:          "miss signing method",
-			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, token)}),
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(authorizationKey, token)}),
 			signingMethod: nil,
 			exceptErr:     nil,
 			key:           testKey,
 		},
 		{
 			name:          "miss signing method",
-			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, token)}),
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(authorizationKey, token)}),
 			signingMethod: nil,
 			exceptErr:     nil,
 			key:           testKey,
@@ -154,7 +156,7 @@ type tokeBuilder struct {
 	accessSecretKey string
 }
 
-func (t tokeBuilder) AccessSecretKey() []byte {
+func (t tokeBuilder) Key() []byte {
 	return []byte(t.accessSecretKey)
 }
 
@@ -171,7 +173,7 @@ func TestClient(t *testing.T) {
 	tests := []struct {
 		name          string
 		expectError   error
-		tokenProvider TokenProvider
+		tokenProvider KeyProvider
 	}{
 		{
 			name:          "normal",
@@ -194,7 +196,7 @@ func TestClient(t *testing.T) {
 			_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
 			assert.Equal(t, test.expectError, err2)
 			if err2 == nil {
-				assert.Equal(t, fmt.Sprintf(bearerFormat, token), header.Get(HeaderKey))
+				assert.Equal(t, fmt.Sprintf(bearerFormat, token), header.Get(authorizationKey))
 			}
 		})
 	}
@@ -215,7 +217,7 @@ func TestTokenExpire(t *testing.T) {
 		t.Log(req)
 		return "reply", nil
 	}
-	ctx := transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, token)})
+	ctx := transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(authorizationKey, token)})
 	server := Server(func(token *jwt.Token) (interface{}, error) {
 		return []byte(testKey), nil
 	}, WithSigningMethod(jwt.SigningMethodHS256))(next)
@@ -241,16 +243,16 @@ func TestMissingKeyFunc(t *testing.T) {
 		key           string
 	}{
 		name:          "miss key",
-		ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(HeaderKey, token)}),
+		ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(authorizationKey, token)}),
 		signingMethod: jwt.SigningMethodHS256,
 		exceptErr:     ErrMissingKeyFunc,
 		key:           "",
 	}
 
-	var testToken interface{}
+	var testToken *jwt.Token
 	next := func(ctx context.Context, req interface{}) (interface{}, error) {
 		t.Log(req)
-		testToken = ctx.Value(InfoKey)
+		testToken, _ = FromContext(ctx)
 		return "reply", nil
 	}
 	server := Server(nil)(next)
@@ -276,7 +278,7 @@ func TestClientWithClaims(t *testing.T) {
 	test := struct {
 		name          string
 		expectError   error
-		tokenProvider TokenProvider
+		tokenProvider KeyProvider
 	}{
 		name:          "normal",
 		expectError:   nil,
@@ -292,7 +294,7 @@ func TestClientWithClaims(t *testing.T) {
 		_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
 		assert.Equal(t, test.expectError, err2)
 		if err2 == nil {
-			assert.Equal(t, fmt.Sprintf(bearerFormat, token), header.Get(HeaderKey))
+			assert.Equal(t, fmt.Sprintf(bearerFormat, token), header.Get(authorizationKey))
 		}
 	})
 }

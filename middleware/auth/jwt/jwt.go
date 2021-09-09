@@ -12,7 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-type authkey string
+type authKey struct{}
 
 const (
 
@@ -22,11 +22,8 @@ const (
 	// bearerFormat authorization token format
 	bearerFormat string = "Bearer %s"
 
-	// HeaderKey holds the key used to store the JWT Token in the request header.
-	HeaderKey string = "Authorization"
-
-	// InfoKey holds the key used to store the auth info in the context
-	InfoKey authkey = "AuthInfo"
+	// authorizationKey holds the key used to store the JWT Token in the request header.
+	authorizationKey string = "Authorization"
 )
 
 var (
@@ -79,7 +76,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 				if keyFunc == nil {
 					return nil, ErrMissingKeyFunc
 				}
-				auths := strings.SplitN(header.RequestHeader().Get(HeaderKey), " ", 2)
+				auths := strings.SplitN(header.RequestHeader().Get(authorizationKey), " ", 2)
 				if len(auths) != 2 || !strings.EqualFold(auths[0], bearerWord) {
 					return nil, ErrMissingJwtToken
 				}
@@ -109,7 +106,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 }
 
 // Client is a client jwt middleware.
-func Client(tokenProvider TokenProvider, opts ...Option) middleware.Middleware {
+func Client(keyProvider KeyProvider, opts ...Option) middleware.Middleware {
 	o := &options{
 		signingMethod: jwt.SigningMethodHS256,
 		claims:        jwt.StandardClaims{},
@@ -119,16 +116,16 @@ func Client(tokenProvider TokenProvider, opts ...Option) middleware.Middleware {
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
-			if tokenProvider == nil {
+			if keyProvider == nil {
 				return nil, ErrNeedTokenProvider
 			}
 			token := jwt.NewWithClaims(o.signingMethod, o.claims)
-			tokenStr, err := token.SignedString(tokenProvider.AccessSecretKey())
+			tokenStr, err := token.SignedString(keyProvider.Key())
 			if err != nil {
 				return nil, ErrSignToken
 			}
 			if clientContext, ok := transport.FromClientContext(ctx); ok {
-				clientContext.RequestHeader().Set(HeaderKey, fmt.Sprintf(bearerFormat, tokenStr))
+				clientContext.RequestHeader().Set(authorizationKey, fmt.Sprintf(bearerFormat, tokenStr))
 				return handler(ctx, req)
 			}
 			return nil, ErrWrongContext
@@ -138,11 +135,11 @@ func Client(tokenProvider TokenProvider, opts ...Option) middleware.Middleware {
 
 // NewContext put auth info into context
 func NewContext(ctx context.Context, info *jwt.Token) context.Context {
-	return context.WithValue(ctx, InfoKey, info)
+	return context.WithValue(ctx, authKey{}, info)
 }
 
 // FromContext extract auth info from context
 func FromContext(ctx context.Context) (token *jwt.Token, ok bool) {
-	token, ok = ctx.Value(InfoKey).(*jwt.Token)
+	token, ok = ctx.Value(authKey{}).(*jwt.Token)
 	return
 }

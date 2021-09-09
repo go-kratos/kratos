@@ -1,6 +1,6 @@
 package jwt
 
-// TokenProvider provide all info that would be used to sign jwt token
-type TokenProvider interface {
-	AccessSecretKey() []byte
+// KeyProvider provider the key that sign jwt token
+type KeyProvider interface {
+	Key() []byte
 }
