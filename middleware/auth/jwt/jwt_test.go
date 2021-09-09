@@ -3,13 +3,13 @@ package jwt
 import (
 	"context"
 	"fmt"
+	"github.com/golang-jwt/jwt/v4"
 	"net/http"
 	"testing"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
-	"github.com/golang-jwt/jwt"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -124,10 +124,10 @@ func TestServer(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			var testToken interface{}
+			var testToken *jwt.Token
 			next := func(ctx context.Context, req interface{}) (interface{}, error) {
 				t.Log(req)
-				testToken = ctx.Value(InfoKey)
+				testToken, _ = FromContext(ctx)
 				return "reply", nil
 			}
 			var server middleware.Handler
@@ -150,30 +150,27 @@ func TestServer(t *testing.T) {
 }
 
 type tokeBuilder struct {
-	token string
+	accessSecretKey string
 }
 
-func (t tokeBuilder) Token() string {
-	return t.token
+func (t tokeBuilder) AccessSecretKey() []byte {
+	return []byte(t.accessSecretKey)
 }
 
 func TestClient(t *testing.T) {
 	testKey := "testKey"
-	mapClaims := jwt.MapClaims{}
-	mapClaims["name"] = "xiaoli"
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{})
 	token, err := claims.SignedString([]byte(testKey))
 	if err != nil {
 		panic(err)
 	}
 	tProvider := tokeBuilder{
-		token: token,
+		accessSecretKey: testKey,
 	}
-
 	tests := []struct {
 		name          string
 		expectError   error
-		tokenProvider TokenManager
+		tokenProvider TokenProvider
 	}{
 		{
 			name:          "normal",
@@ -182,7 +179,7 @@ func TestClient(t *testing.T) {
 		},
 		{
 			name:          "miss token provider",
-			expectError:   ErrNeedTokenManager,
+			expectError:   ErrNeedTokenProvider,
 			tokenProvider: nil,
 		},
 	}
@@ -196,7 +193,7 @@ func TestClient(t *testing.T) {
 			_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
 			assert.Equal(t, test.expectError, err2)
 			if err2 == nil {
-				assert.Equal(t, fmt.Sprintf(bearerFormat, test.tokenProvider.Token()), header.Get(HeaderKey))
+				assert.Equal(t, fmt.Sprintf(bearerFormat, token), header.Get(HeaderKey))
 			}
 		})
 	}
@@ -261,4 +258,40 @@ func TestMissingKeyFunc(t *testing.T) {
 	if test.exceptErr == nil {
 		assert.NotNil(t, testToken)
 	}
+}
+
+func TestClientWithClaims(t *testing.T) {
+	testKey := "testKey"
+	mapClaims := jwt.MapClaims{}
+	mapClaims["name"] = "xiaoli"
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
+	token, err := claims.SignedString([]byte(testKey))
+	if err != nil {
+		panic(err)
+	}
+	tProvider := tokeBuilder{
+		accessSecretKey: testKey,
+	}
+	test := struct {
+		name          string
+		expectError   error
+		tokenProvider TokenProvider
+	}{
+		name:          "normal",
+		expectError:   nil,
+		tokenProvider: tProvider,
+	}
+
+	t.Run(test.name, func(t *testing.T) {
+		next := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return "reply", nil
+		}
+		handler := Client(test.tokenProvider, WithClaims(mapClaims))(next)
+		header := &headerCarrier{}
+		_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
+		assert.Equal(t, test.expectError, err2)
+		if err2 == nil {
+			assert.Equal(t, fmt.Sprintf(bearerFormat, token), header.Get(HeaderKey))
+		}
+	})
 }

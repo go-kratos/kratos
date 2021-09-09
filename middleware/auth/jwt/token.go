@@ -1,6 +1,6 @@
 package jwt
 
-// TokenManager manager the jwt token.
-type TokenManager interface {
-	Token() string
+//TokenProvider provide all info that would be used to sign jwt token
+type TokenProvider interface {
+	AccessSecretKey() []byte
 }
