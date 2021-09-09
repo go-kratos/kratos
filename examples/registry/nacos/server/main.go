@@ -32,7 +32,6 @@ func main() {
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig("127.0.0.1", 8848),
 	}
-	//获取临时路径
 	tempLogDir, err := ioutil.TempDir("", "log")
 	if err != nil {
 		panic(err)
@@ -45,8 +44,7 @@ func main() {
 		string(os.PathSeparator),
 		string(os.PathSeparator),
 	)
-	//临时cache路径
-	tempCacheDir, err := ioutil.TempDir("", "log")
+	tempCacheDir, err := ioutil.TempDir("", "cache")
 	defer os.RemoveAll(tempCacheDir)
 	cacheDir := fmt.Sprintf("%s%snacos%scache",
 		tempCacheDir,
