@@ -36,6 +36,7 @@ var (
 	ErrWrongContext           = errors.Unauthorized("UNAUTHORIZED", "Wrong context for middelware")
 	ErrNeedTokenProvider      = errors.Unauthorized("UNAUTHORIZED", "Token provider is missing")
 	ErrSignToken              = errors.Unauthorized("UNAUTHORIZED", "Can not sign token.Is the key correct?")
+	ErrGetKey                 = errors.Unauthorized("UNAUTHORIZED", "Can not get key while signing token")
 )
 
 // Option is jwt option.
@@ -122,7 +123,7 @@ func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 			token := jwt.NewWithClaims(o.signingMethod, o.claims)
 			key, err := keyProvider(token)
 			if err != nil {
-				return nil, ErrSignToken
+				return nil, ErrGetKey
 			}
 			tokenStr, err := token.SignedString(key)
 			if err != nil {

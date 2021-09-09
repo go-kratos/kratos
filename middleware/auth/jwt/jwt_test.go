@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"testing"
@@ -274,6 +275,42 @@ func TestClientWithClaims(t *testing.T) {
 	}{
 		name:          "normal",
 		expectError:   nil,
+		tokenProvider: tProvider,
+	}
+
+	t.Run(test.name, func(t *testing.T) {
+		next := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return "reply", nil
+		}
+		handler := Client(test.tokenProvider, WithClaims(mapClaims))(next)
+		header := &headerCarrier{}
+		_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
+		assert.Equal(t, test.expectError, err2)
+		if err2 == nil {
+			assert.Equal(t, fmt.Sprintf(bearerFormat, token), header.Get(authorizationKey))
+		}
+	})
+}
+
+func TestClientMissKey(t *testing.T) {
+	testKey := "testKey"
+	mapClaims := jwt.MapClaims{}
+	mapClaims["name"] = "xiaoli"
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
+	token, err := claims.SignedString([]byte(testKey))
+	if err != nil {
+		panic(err)
+	}
+	tProvider := func(*jwt.Token) (interface{}, error) {
+		return nil, errors.New("some error")
+	}
+	test := struct {
+		name          string
+		expectError   error
+		tokenProvider jwt.Keyfunc
+	}{
+		name:          "normal",
+		expectError:   ErrGetKey,
 		tokenProvider: tProvider,
 	}
 
