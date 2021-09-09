@@ -159,13 +159,13 @@ func TestClient(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	tProvider := func() []byte {
-		return []byte(testKey)
+	tProvider := func(*jwt.Token) (interface{}, error) {
+		return []byte(testKey), nil
 	}
 	tests := []struct {
 		name          string
 		expectError   error
-		tokenProvider NewKey
+		tokenProvider jwt.Keyfunc
 	}{
 		{
 			name:          "normal",
@@ -264,13 +264,13 @@ func TestClientWithClaims(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	tProvider := func() []byte {
-		return []byte(testKey)
+	tProvider := func(*jwt.Token) (interface{}, error) {
+		return []byte(testKey), nil
 	}
 	test := struct {
 		name          string
 		expectError   error
-		tokenProvider NewKey
+		tokenProvider jwt.Keyfunc
 	}{
 		name:          "normal",
 		expectError:   nil,

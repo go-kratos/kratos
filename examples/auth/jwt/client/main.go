@@ -46,8 +46,8 @@ func main() {
 		context.Background(),
 		grpc.WithEndpoint("dns:///127.0.0.1:9001"),
 		grpc.WithMiddleware(
-			jwt.Client(func() []byte {
-				return []byte(serviceTestKey)
+			jwt.Client(func(token *jwtv4.Token) (interface{}, error) {
+				return []byte(serviceTestKey), nil
 			}),
 		),
 	)
