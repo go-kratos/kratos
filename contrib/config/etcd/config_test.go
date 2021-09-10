@@ -2,11 +2,11 @@ package etcd
 
 import (
 	"context"
-	"google.golang.org/grpc"
 	"testing"
 	"time"
 
-	clientv3 "go.etcd.io/etcd/client/v3"
+	"go.etcd.io/etcd/client/v3"
+	"google.golang.org/grpc"
 )
 
 const testKey = "/kratos/test/config"
@@ -58,5 +58,7 @@ func TestConfig(t *testing.T) {
 		t.Fatal("config error")
 	}
 
-	client.Delete(context.Background(), testKey)
+	if _, err := client.Delete(context.Background(), testKey); err != nil {
+		t.Error(err)
+	}
 }

@@ -43,7 +43,7 @@ type source struct {
 	options *options
 }
 
-func New(client *clientv3.Client, opts ...Option) (*source, error) {
+func New(client *clientv3.Client, opts ...Option) (config.Source, error) {
 	options := &options{
 		ctx:    context.Background(),
 		path:   "",
@@ -76,7 +76,7 @@ func (s *source) Load() ([]*config.KeyValue, error) {
 		return nil, err
 	}
 
-	var kvs []*config.KeyValue
+	kvs := make([]*config.KeyValue, 0)
 	for _, item := range rsp.Kvs {
 		kvs = append(kvs, &config.KeyValue{
 			Key:   string(item.Key),
