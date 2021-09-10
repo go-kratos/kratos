@@ -186,7 +186,7 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				ctx, cancel = context.WithCancel(req.Context())
 			}
 			defer cancel()
-			
+
 			pathTemplate := req.URL.Path
 			if route := mux.CurrentRoute(req); route != nil {
 				// /path/123 -> /path/{id}
