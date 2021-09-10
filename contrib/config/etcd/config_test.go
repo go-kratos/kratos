@@ -26,7 +26,7 @@ func TestConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	source, err := New(client, Path(testKey))
+	source, err := New(client, WithPath(testKey))
 	if err != nil {
 		t.Fatal(err)
 	}

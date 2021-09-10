@@ -17,22 +17,22 @@ type options struct {
 	prefix bool
 }
 
-//  Context with registry context.
-func Context(ctx context.Context) Option {
+//  WithContext with registry context.
+func WithContext(ctx context.Context) Option {
 	return Option(func(o *options) {
 		o.ctx = ctx
 	})
 }
 
-// Path is config path
-func Path(p string) Option {
+// WithPath is config path
+func WithPath(p string) Option {
 	return Option(func(o *options) {
 		o.path = p
 	})
 }
 
-// Prefix is config prefix
-func Prefix(prefix bool) Option {
+// WithPrefix is config prefix
+func WithPrefix(prefix bool) Option {
 	return Option(func(o *options) {
 		o.prefix = prefix
 	})
