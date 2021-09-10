@@ -18,10 +18,6 @@ const (
 
 var _ selector.Balancer = &Balancer{}
 
-var options struct {
-	nodeBuilder selector.WeightedNodeBuilder
-}
-
 // New p2c Selector
 func New(filters []selector.Filter) selector.Selector {
 	return &selector.Default{

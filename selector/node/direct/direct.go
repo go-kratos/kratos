@@ -8,6 +8,10 @@ import (
 	"github.com/go-kratos/kratos/v2/selector"
 )
 
+const (
+	defaultWeight = 100
+)
+
 var (
 	_ selector.WeightedNode        = &node{}
 	_ selector.WeightedNodeBuilder = &Builder{}
@@ -41,7 +45,7 @@ func (n *node) Weight() float64 {
 	if n.InitialWeight() != nil {
 		return float64(*n.InitialWeight())
 	}
-	return 100
+	return defaultWeight
 }
 
 func (n *node) PickElapsed() time.Duration {

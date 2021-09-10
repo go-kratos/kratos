@@ -56,7 +56,7 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 	for _, f := range options.Filters {
 		weightedNodes = f(ctx, weightedNodes)
 	}
-	var candidates []WeightedNode
+	candidates := make([]WeightedNode, 0)
 	for _, n := range weightedNodes {
 		candidates = append(candidates, n.(WeightedNode))
 	}
@@ -68,7 +68,7 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 
 // Apply update nodes info
 func (d *Default) Apply(nodes []Node) {
-	var weightedNodes []Node
+	weightedNodes := make([]Node, 0)
 	for _, n := range nodes {
 		weightedNodes = append(weightedNodes, d.NodeBuilder.Build(n))
 	}

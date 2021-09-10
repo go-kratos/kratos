@@ -140,7 +140,6 @@ type Client struct {
 	target   *Target
 	r        *resolver
 	cc       *http.Client
-	selector selector.Selector
 	insecure bool
 }
 
@@ -239,7 +238,7 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 				err  error
 				node selector.Node
 			)
-			if node, done, err = client.opts.selector.Select(ctx); err != nil {
+			if node, done, err = client.opts.selector.Select(ctx, selector.WithFilters(c.filters...)); err != nil {
 				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 			}
 			if client.insecure {

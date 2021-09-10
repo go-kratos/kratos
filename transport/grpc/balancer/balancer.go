@@ -47,7 +47,7 @@ type Builder struct {
 
 // Build grpc picker
 func (b *Builder) Build(info base.PickerBuildInfo) gBalancer.Picker {
-	var nodes []selector.Node
+	nodes := make([]selector.Node, 0)
 	subConns := make(map[string]gBalancer.SubConn)
 	for conn, info := range info.ReadySCs {
 		if _, ok := subConns[info.Address.Addr]; ok {

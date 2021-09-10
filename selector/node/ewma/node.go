@@ -160,7 +160,8 @@ func (n *node) Pick() selector.Done {
 				if n.errHandler(di.Err) {
 					success = 0
 				}
-			} else if errors.Is(context.DeadlineExceeded, di.Err) || errors.Is(context.Canceled, di.Err) || errors.IsServiceUnavailable(di.Err) || errors.IsGatewayTimeout(di.Err) {
+			} else if errors.Is(context.DeadlineExceeded, di.Err) || errors.Is(context.Canceled, di.Err) ||
+				errors.IsServiceUnavailable(di.Err) || errors.IsGatewayTimeout(di.Err) {
 				success = 0
 			}
 		}
