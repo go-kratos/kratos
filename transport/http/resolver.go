@@ -10,17 +10,9 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v2/selector"
+	"github.com/go-kratos/kratos/v2/selector/node"
 )
-
-type node struct {
-	addr     string
-	metadata map[string]string
-}
-
-// Updater is resolver nodes updater
-type Updater interface {
-	Update(readys []node)
-}
 
 // Target is resolver target
 type Target struct {
@@ -49,7 +41,7 @@ func parseTarget(endpoint string, insecure bool) (*Target, error) {
 }
 
 type resolver struct {
-	updater Updater
+	rebalancer selector.Rebalancer
 
 	target  *Target
 	watcher registry.Watcher
@@ -58,17 +50,17 @@ type resolver struct {
 	insecure bool
 }
 
-func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, updater Updater, block, insecure bool) (*resolver, error) {
+func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, rebalancer selector.Rebalancer, block, insecure bool) (*resolver, error) {
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
 	}
 	r := &resolver{
-		target:   target,
-		watcher:  watcher,
-		logger:   log.NewHelper(log.DefaultLogger),
-		updater:  updater,
-		insecure: insecure,
+		target:     target,
+		watcher:    watcher,
+		logger:     log.NewHelper(log.DefaultLogger),
+		rebalancer: rebalancer,
+		insecure:   insecure,
 	}
 	if block {
 		done := make(chan error, 1)
@@ -121,23 +113,23 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 }
 
 func (r *resolver) update(services []*registry.ServiceInstance) bool {
-	nodes := make([]node, 0)
-	for _, in := range services {
-		ept, err := endpoint.ParseEndpoint(in.Endpoints, "http", !r.insecure)
+	var nodes []selector.Node
+	for _, ins := range services {
+		ept, err := endpoint.ParseEndpoint(ins.Endpoints, "http", !r.insecure)
 		if err != nil {
-			r.logger.Errorf("Failed to parse (%v) discovery endpoint: %v error %v", r.target, in.Endpoints, err)
+			r.logger.Errorf("Failed to parse (%v) discovery endpoint: %v error %v", r.target, ins.Endpoints, err)
 			continue
 		}
 		if ept == "" {
 			continue
 		}
-		nodes = append(nodes, node{addr: ept, metadata: in.Metadata})
+		nodes = append(nodes, node.New(ept, ins))
 	}
 	if len(nodes) == 0 {
 		r.logger.Warnf("[http resovler]Zero endpoint found,refused to write,ser: %s ins: %v", r.target.Endpoint, nodes)
 		return false
 	}
-	r.updater.Update(nodes)
+	r.rebalancer.Apply(nodes)
 	return true
 }
 

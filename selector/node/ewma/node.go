@@ -8,12 +8,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/balancer"
 	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/selector"
 )
 
 const (
-
 	// The mean lifetime of `cost`, it reaches its half-life after Tau*ln(2).
 	tau = int64(time.Millisecond * 600)
 	// if statistic not collected,we add a big lag penalty to endpoint
@@ -21,15 +20,13 @@ const (
 )
 
 var (
-	_ balancer.Node        = &node{}
-	_ balancer.NodeBuilder = &Builder{}
+	_ selector.WeightedNode        = &node{}
+	_ selector.WeightedNodeBuilder = &Builder{}
 )
 
 // node is endpoint instance
 type node struct {
-	addr     string
-	version  string
-	metadata balancer.Metadata
+	selector.Node
 
 	// client statistic data
 	lag       int64
@@ -55,10 +52,9 @@ type Builder struct {
 }
 
 // Build create node
-func (b *Builder) Build(addr string, initWeight float64, metadata balancer.Metadata) balancer.Node {
+func (b *Builder) Build(n selector.Node) selector.WeightedNode {
 	s := &node{
-		addr:       addr,
-		metadata:   metadata,
+		Node:       n,
 		lag:        0,
 		success:    1000,
 		inflight:   1,
@@ -92,10 +88,7 @@ func (n *node) load() (load uint64) {
 			)
 			n.lk.RLock()
 			first := n.inflights.Front()
-			for {
-				if first == nil {
-					break
-				}
+			for first != nil {
 				lag := now - first.Value.(int64)
 				if lag > avgLag {
 					count++
@@ -125,7 +118,7 @@ func (n *node) load() (load uint64) {
 }
 
 // Pick choose node
-func (n *node) Pick() balancer.Done {
+func (n *node) Pick() selector.Done {
 	now := time.Now().UnixNano()
 	atomic.StoreInt64(&n.lastPick, now)
 	atomic.AddInt64(&n.inflight, 1)
@@ -134,7 +127,7 @@ func (n *node) Pick() balancer.Done {
 	e := n.inflights.PushBack(now)
 	n.lk.Unlock()
 
-	return func(ctx context.Context, di balancer.DoneInfo) {
+	return func(ctx context.Context, di selector.DoneInfo) {
 		n.lk.Lock()
 		n.inflights.Remove(e)
 		n.lk.Unlock()
@@ -167,7 +160,7 @@ func (n *node) Pick() balancer.Done {
 				if n.errHandler(di.Err) {
 					success = 0
 				}
-			} else if errors.Is(context.DeadlineExceeded, di.Err) || errors.Is(context.Canceled, di.Err) || errors.FromError(di.Err).Code >= 500 {
+			} else if errors.Is(context.DeadlineExceeded, di.Err) || errors.Is(context.Canceled, di.Err) || errors.IsServiceUnavailable(di.Err) || errors.IsGatewayTimeout(di.Err) {
 				success = 0
 			}
 		}
@@ -185,16 +178,4 @@ func (n *node) Weight() (weight float64) {
 
 func (n *node) PickElapsed() time.Duration {
 	return time.Duration(time.Now().UnixNano() - atomic.LoadInt64(&n.lastPick))
-}
-
-func (n *node) Address() string {
-	return n.addr
-}
-
-func (n *node) Version() string {
-	return n.version
-}
-
-func (n *node) Metadata() balancer.Metadata {
-	return n.metadata
 }

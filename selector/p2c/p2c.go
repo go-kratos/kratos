@@ -6,7 +6,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/balancer"
+	"github.com/go-kratos/kratos/v2/selector"
+	"github.com/go-kratos/kratos/v2/selector/node/ewma"
 )
 
 const (
@@ -15,24 +16,31 @@ const (
 	Name = "p2c"
 )
 
-var _ balancer.Selector = &Selector{}
+var _ selector.Balancer = &Balancer{}
 
-// New p2c
-func New() balancer.Selector {
-	p := &Selector{
-		r: rand.New(rand.NewSource(time.Now().UnixNano())),
-	}
-	return p
+var options struct {
+	nodeBuilder selector.WeightedNodeBuilder
 }
 
-// Selector is p2c selector
-type Selector struct {
+// New p2c Selector
+func New(filters []selector.Filter) selector.Selector {
+	return &selector.Default{
+		Balancer: &Balancer{
+			r: rand.New(rand.NewSource(time.Now().UnixNano())),
+		},
+		NodeBuilder: &ewma.Builder{},
+		Filters:     filters,
+	}
+}
+
+// Balancer is p2c selector
+type Balancer struct {
 	r  *rand.Rand
 	lk int64
 }
 
 // choose two distinct nodes
-func (s *Selector) prePick(nodes []balancer.Node) (nodeA balancer.Node, nodeB balancer.Node) {
+func (s *Balancer) prePick(nodes []selector.WeightedNode) (nodeA selector.WeightedNode, nodeB selector.WeightedNode) {
 	a := s.r.Intn(len(nodes))
 	b := s.r.Intn(len(nodes) - 1)
 	if b >= a {
@@ -42,16 +50,16 @@ func (s *Selector) prePick(nodes []balancer.Node) (nodeA balancer.Node, nodeB ba
 	return
 }
 
-func (s *Selector) Select(ctx context.Context, nodes []balancer.Node) (balancer.Node, balancer.Done, error) {
+// Pick node
+func (s *Balancer) Pick(ctx context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.Done, error) {
 	if len(nodes) == 0 {
-		return nil, nil, balancer.ErrNoAvailable
+		return nil, nil, selector.ErrNoAvailable
 	} else if len(nodes) == 1 {
 		done := nodes[0].Pick()
 		return nodes[0], done, nil
 	}
 
-	var pc, upc balancer.Node
-	var done func(ctx context.Context, di balancer.DoneInfo)
+	var pc, upc selector.WeightedNode
 	nodeA, nodeB := s.prePick(nodes)
 	// meta.Weight为服务发布者在discovery中设置的权重
 	if nodeB.Weight() > nodeA.Weight() {
@@ -64,14 +72,10 @@ func (s *Selector) Select(ctx context.Context, nodes []balancer.Node) (balancer.
 	if upc.PickElapsed() > forcePick {
 		if atomic.CompareAndSwapInt64(&s.lk, 0, 1) {
 			pc = upc
-			done = pc.Pick()
 			atomic.StoreInt64(&s.lk, 0)
-		} else {
-			done = pc.Pick()
 		}
-	} else {
-		done = pc.Pick()
 	}
+	done := pc.Pick()
 
 	return pc, done, nil
 }
