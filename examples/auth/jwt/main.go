@@ -14,16 +14,18 @@ import (
 
 type server struct {
 	helloworld.UnimplementedGreeterServer
+
+	hc helloworld.GreeterClient
 }
 
 func (s *server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*helloworld.HelloReply, error) {
-	return &helloworld.HelloReply{Message: "hello from service 2"}, nil
+	return &helloworld.HelloReply{Message: "hello from service"}, nil
 }
 
 func main() {
-	testKey := "serviceTestKey"
+	testKey := "testKey"
 	httpSrv := http.NewServer(
-		http.Address(":8001"),
+		http.Address(":8000"),
 		http.Middleware(
 			jwt.Server(func(token *jwtv4.Token) (interface{}, error) {
 				return []byte(testKey), nil
@@ -31,18 +33,30 @@ func main() {
 		),
 	)
 	grpcSrv := grpc.NewServer(
-		grpc.Address(":9001"),
+		grpc.Address(":9000"),
 		grpc.Middleware(
 			jwt.Server(func(token *jwtv4.Token) (interface{}, error) {
 				return []byte(testKey), nil
 			}),
 		),
 	)
-	s := &server{}
+	serviceTestKey := "serviceTestKey"
+	con, _ := grpc.DialInsecure(
+		context.Background(),
+		grpc.WithEndpoint("dns:///127.0.0.1:9001"),
+		grpc.WithMiddleware(
+			jwt.Client(func(token *jwtv4.Token) (interface{}, error) {
+				return []byte(serviceTestKey), nil
+			}),
+		),
+	)
+	s := &server{
+		hc: helloworld.NewGreeterClient(con),
+	}
 	helloworld.RegisterGreeterServer(grpcSrv, s)
 	helloworld.RegisterGreeterHTTPServer(httpSrv, s)
 	app := kratos.New(
-		kratos.Name("helloworld2"),
+		kratos.Name("helloworld"),
 		kratos.Server(
 			httpSrv,
 			grpcSrv,
