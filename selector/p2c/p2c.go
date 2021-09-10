@@ -63,13 +63,11 @@ func (s *Balancer) Pick(ctx context.Context, nodes []selector.WeightedNode) (sel
 	} else {
 		pc, upc = nodeA, nodeB
 	}
-	// 如果选中的节点，在forceGap期间内从来没有被选中一次，则强制选一次
+	// 如果落选节点在forceGap期间内从来没有被选中一次，则强制选一次
 	// 利用强制的机会，来触发成功率、延迟的更新
-	if upc.PickElapsed() > forcePick {
-		if atomic.CompareAndSwapInt64(&s.lk, 0, 1) {
-			pc = upc
-			atomic.StoreInt64(&s.lk, 0)
-		}
+	if upc.PickElapsed() > forcePick && atomic.CompareAndSwapInt64(&s.lk, 0, 1) {
+		pc = upc
+		atomic.StoreInt64(&s.lk, 0)
 	}
 	done := pc.Pick()
 
