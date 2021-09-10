@@ -3,7 +3,7 @@ package p2c
 import (
 	"context"
 	"math/rand"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/balancer"
@@ -28,7 +28,7 @@ func New() balancer.Selector {
 // Selector is p2c selector
 type Selector struct {
 	r  *rand.Rand
-	lk sync.Mutex
+	lk int64
 }
 
 // choose two distinct nodes
@@ -62,12 +62,13 @@ func (s *Selector) Select(ctx context.Context, nodes []balancer.Node) (balancer.
 	// 如果选中的节点，在forceGap期间内从来没有被选中一次，则强制选一次
 	// 利用强制的机会，来触发成功率、延迟的更新
 	if upc.PickElapsed() > forcePick {
-		s.lk.Lock()
-		if upc.PickElapsed() > forcePick {
+		if atomic.CompareAndSwapInt64(&s.lk, 0, 1) {
 			pc = upc
 			done = pc.Pick()
+			atomic.StoreInt64(&s.lk, 0)
+		} else {
+			done = pc.Pick()
 		}
-		s.lk.Unlock()
 	} else {
 		done = pc.Pick()
 	}
