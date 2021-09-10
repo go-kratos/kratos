@@ -17,8 +17,9 @@ func TestConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer client.Close()
-
+	defer func() {
+		_ = client.Close()
+	}()
 	if _, err = client.Put(context.Background(), testKey, "test config"); err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +42,9 @@ func TestConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer w.Stop()
+	defer func() {
+		_ = w.Stop()
+	}()
 
 	go func() {
 		time.Sleep(time.Millisecond * 10)
