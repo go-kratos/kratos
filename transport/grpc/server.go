@@ -192,6 +192,7 @@ func (s *Server) Stop(ctx context.Context) error {
 func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		ctx, cancel := ic.Merge(ctx, s.ctx)
+		defer cancel()
 		md, _ := grpcmd.FromIncomingContext(ctx)
 		replyHeader := grpcmd.MD{}
 		ctx = transport.NewServerContext(ctx, &Transport{
@@ -202,8 +203,8 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		})
 		if s.timeout > 0 {
 			ctx, cancel = context.WithTimeout(ctx, s.timeout)
+			defer cancel()
 		}
-		defer cancel()
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return handler(ctx, req)
 		}
