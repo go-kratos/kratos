@@ -48,12 +48,9 @@ func TestConfig(t *testing.T) {
 		_ = w.Stop()
 	}()
 
-	go func() {
-		time.Sleep(time.Millisecond * 10)
-		if _, err = client.Put(context.Background(), testKey, "new config"); err != nil {
-			t.Error(err)
-		}
-	}()
+	if _, err = client.Put(context.Background(), testKey, "new config"); err != nil {
+		t.Error(err)
+	}
 
 	if kvs, err = w.Next(); err != nil {
 		t.Fatal(err)
