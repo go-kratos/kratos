@@ -98,7 +98,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 				} else if tokenInfo.Method != o.signingMethod {
 					return nil, ErrUnSupportSigningMethod
 				}
-				ctx = NewContext(ctx, tokenInfo)
+				ctx = NewContext(ctx, tokenInfo.Claims)
 				return handler(ctx, req)
 			}
 			return nil, ErrWrongContext
@@ -139,12 +139,12 @@ func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 }
 
 // NewContext put auth info into context
-func NewContext(ctx context.Context, info *jwt.Token) context.Context {
+func NewContext(ctx context.Context, info jwt.Claims) context.Context {
 	return context.WithValue(ctx, authKey{}, info)
 }
 
 // FromContext extract auth info from context
-func FromContext(ctx context.Context) (token *jwt.Token, ok bool) {
-	token, ok = ctx.Value(authKey{}).(*jwt.Token)
+func FromContext(ctx context.Context) (token jwt.Claims, ok bool) {
+	token, ok = ctx.Value(authKey{}).(jwt.Claims)
 	return
 }

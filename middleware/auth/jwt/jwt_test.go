@@ -128,7 +128,7 @@ func TestServer(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			var testToken *jwt.Token
+			var testToken jwt.Claims
 			next := func(ctx context.Context, req interface{}) (interface{}, error) {
 				t.Log(req)
 				testToken, _ = FromContext(ctx)
@@ -148,6 +148,8 @@ func TestServer(t *testing.T) {
 			assert.Equal(t, test.exceptErr, err2)
 			if test.exceptErr == nil {
 				assert.NotNil(t, testToken)
+				_, ok := testToken.(jwt.MapClaims)
+				assert.True(t, ok)
 			}
 		})
 	}
@@ -242,7 +244,7 @@ func TestMissingKeyFunc(t *testing.T) {
 		key:           "",
 	}
 
-	var testToken *jwt.Token
+	var testToken jwt.Claims
 	next := func(ctx context.Context, req interface{}) (interface{}, error) {
 		t.Log(req)
 		testToken, _ = FromContext(ctx)
