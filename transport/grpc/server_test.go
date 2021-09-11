@@ -143,7 +143,7 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 	u, err := url.Parse("grpc://hello/world")
 	assert.NoError(t, err)
 	srv := &Server{
-		ctx:        context.Background(),
+		baseCtx:    context.Background(),
 		endpoint:   u,
 		middleware: []middleware.Middleware{EmptyMiddleware()},
 		timeout:    time.Duration(10),
