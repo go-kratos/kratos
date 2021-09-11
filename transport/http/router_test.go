@@ -185,3 +185,47 @@ func TestHandle(t *testing.T) {
 	}
 	r.GET("/get", h)
 }
+
+func TestJoinPaths(t *testing.T) {
+	type args struct {
+		paths []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "",
+			args: args{paths: []string{}},
+			want: "",
+		},
+		{
+			name: "/test/",
+			args: args{paths: []string{"/test/"}},
+			want: "/test/",
+		},
+		{
+			name: "/test/,/kratos/",
+			args: args{paths: []string{"/test/", "/kratos/"}},
+			want: "/test/kratos/",
+		},
+		{
+			name: "/test/,/kratos",
+			args: args{paths: []string{"/test/", "/kratos"}},
+			want: "/test/kratos",
+		},
+		{
+			name: "/test/,kratos",
+			args: args{paths: []string{"/test/", "kratos"}},
+			want: "/test/kratos",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := joinPaths(tt.args.paths...); got != tt.want {
+				t.Errorf("joinPaths() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
