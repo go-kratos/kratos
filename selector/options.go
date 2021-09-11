@@ -13,9 +13,9 @@ type SelectOption func(*SelectOptions)
 // Filter is node filter function.
 type Filter func(context.Context, []Node) []Node
 
-// WithFilters with filter options
-func WithFilters(filters ...Filter) SelectOption {
+// WithFilter with filter options
+func WithFilter(fn ...Filter) SelectOption {
 	return func(opts *SelectOptions) {
-		opts.Filters = filters
+		opts.Filters = fn
 	}
 }

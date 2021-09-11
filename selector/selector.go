@@ -15,7 +15,7 @@ type Selector interface {
 
 	// Select nodes
 	// if err == nil, selected and done must not be empty.
-	Select(ctx context.Context, opts ...SelectOption) (selected Node, done Done, err error)
+	Select(ctx context.Context, opts ...SelectOption) (selected Node, done DoneFunc, err error)
 }
 
 // Rebalancer is nodes rebalancer
@@ -62,5 +62,5 @@ type ReplyMeta interface {
 	Get(key string) string
 }
 
-// Done is callback function when RPC invoke done
-type Done func(ctx context.Context, di DoneInfo)
+// DoneFunc is callback function when RPC invoke done
+type DoneFunc func(ctx context.Context, di DoneInfo)

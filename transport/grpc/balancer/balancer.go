@@ -23,8 +23,8 @@ var (
 
 func init() {
 	// inject global grpc balancer
-	SetGlobalBalancer(random.Name, random.New(nil))
-	SetGlobalBalancer(p2c.Name, p2c.New(nil))
+	SetGlobalBalancer(random.Name, random.New())
+	SetGlobalBalancer(p2c.Name, p2c.New())
 }
 
 // SetGlobalBalancer set grpc balancer with scheme

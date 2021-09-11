@@ -33,7 +33,7 @@ func (*Builder) Build(n selector.Node) selector.WeightedNode {
 	return &node{Node: n, lastPick: 0}
 }
 
-func (n *node) Pick() selector.Done {
+func (n *node) Pick() selector.DoneFunc {
 	now := time.Now().UnixNano()
 	atomic.StoreInt64(&n.lastPick, now)
 

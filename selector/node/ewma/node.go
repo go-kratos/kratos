@@ -118,7 +118,7 @@ func (n *node) load() (load uint64) {
 }
 
 // Pick choose node
-func (n *node) Pick() selector.Done {
+func (n *node) Pick() selector.DoneFunc {
 	now := time.Now().UnixNano()
 	atomic.StoreInt64(&n.lastPick, now)
 	atomic.AddInt64(&n.inflight, 1)

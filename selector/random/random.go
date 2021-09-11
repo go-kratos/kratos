@@ -19,16 +19,15 @@ var (
 type Balancer struct{}
 
 // New random selector
-func New(filters []selector.Filter) selector.Selector {
+func New() selector.Selector {
 	return &selector.Default{
 		Balancer:    &Balancer{},
 		NodeBuilder: &direct.Builder{},
-		Filters:     filters,
 	}
 }
 
 // Pick one node
-func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.Done, error) {
+func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.DoneFunc, error) {
 	if len(nodes) == 0 {
 		err := selector.ErrNoAvailable
 		return nil, nil, err

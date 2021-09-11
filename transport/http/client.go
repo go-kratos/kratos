@@ -152,7 +152,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		decoder:      DefaultResponseDecoder,
 		errorDecoder: DefaultErrorDecoder,
 		transport:    http.DefaultTransport,
-		selector:     random.New(nil),
+		selector:     random.New(),
 	}
 	for _, o := range opts {
 		o(&options)
@@ -238,7 +238,7 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 				err  error
 				node selector.Node
 			)
-			if node, done, err = client.opts.selector.Select(ctx, selector.WithFilters(c.filters...)); err != nil {
+			if node, done, err = client.opts.selector.Select(ctx, selector.WithFilter(c.filters...)); err != nil {
 				return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 			}
 			if client.insecure {

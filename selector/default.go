@@ -3,32 +3,7 @@ package selector
 import (
 	"context"
 	"sync"
-	"time"
 )
-
-// Balancer is balancer interface
-type Balancer interface {
-	Pick(ctx context.Context, nodes []WeightedNode) (selected WeightedNode, done Done, err error)
-}
-
-// WeightedNode calculates scheduling weight in real time
-type WeightedNode interface {
-	Node
-
-	// Weight is the runtime calculated weight
-	Weight() float64
-
-	// Pick the node
-	Pick() Done
-
-	// PickElapsed is time elapsed since the latest pick
-	PickElapsed() time.Duration
-}
-
-// WeightedNodeBuilder is WeightedNode Builder
-type WeightedNodeBuilder interface {
-	Build(Node) WeightedNode
-}
 
 // Default is composite selector
 type Default struct {
@@ -41,7 +16,7 @@ type Default struct {
 }
 
 // Select select one node
-func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected Node, done Done, err error) {
+func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected Node, done DoneFunc, err error) {
 	d.lk.RLock()
 	weightedNodes := d.weightedNodes
 	d.lk.RUnlock()
