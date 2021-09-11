@@ -9,7 +9,6 @@ import (
 type Default struct {
 	NodeBuilder WeightedNodeBuilder
 	Balancer    Balancer
-	Filters     []Filter
 
 	lk            sync.RWMutex
 	weightedNodes []Node
@@ -20,10 +19,6 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 	d.lk.RLock()
 	weightedNodes := d.weightedNodes
 	d.lk.RUnlock()
-	// filter nodes
-	for _, f := range d.Filters {
-		weightedNodes = f(ctx, weightedNodes)
-	}
 	var options SelectOptions
 	for _, o := range opts {
 		o(&options)
