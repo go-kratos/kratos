@@ -27,7 +27,7 @@ func init() {
 	SetGlobalBalancer(p2c.Name, p2c.New())
 }
 
-// SetGlobalBalancer set grpc balancer with scheme
+// SetGlobalBalancer set grpc balancer with scheme.
 func SetGlobalBalancer(scheme string, selector selector.Selector) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -40,12 +40,12 @@ func SetGlobalBalancer(scheme string, selector selector.Selector) {
 	gBalancer.Register(b)
 }
 
-// Builder is grpc Balancer builder
+// Builder is grpc balancer builder.
 type Builder struct {
 	selector selector.Selector
 }
 
-// Build grpc picker
+// Build creates a grpc Picker.
 func (b *Builder) Build(info base.PickerBuildInfo) gBalancer.Picker {
 	nodes := make([]selector.Node, 0)
 	subConns := make(map[string]gBalancer.SubConn)
@@ -58,7 +58,6 @@ func (b *Builder) Build(info base.PickerBuildInfo) gBalancer.Picker {
 		ins, _ := info.Address.Attributes.Value("rawServiceInstance").(*registry.ServiceInstance)
 		nodes = append(nodes, node.New(info.Address.Addr, ins))
 	}
-
 	p := &Picker{
 		selector: b.selector,
 		subConns: subConns,
@@ -67,13 +66,13 @@ func (b *Builder) Build(info base.PickerBuildInfo) gBalancer.Picker {
 	return p
 }
 
-// Picker is grpc picker
+// Picker is a grpc picker.
 type Picker struct {
 	subConns map[string]gBalancer.SubConn
 	selector selector.Selector
 }
 
-// Pick pick instances
+// Pick pick instances.
 func (p *Picker) Pick(info gBalancer.PickInfo) (gBalancer.PickResult, error) {
 	n, done, err := p.selector.Select(info.Ctx)
 	if err != nil {
@@ -94,8 +93,10 @@ func (p *Picker) Pick(info gBalancer.PickInfo) (gBalancer.PickResult, error) {
 	}, nil
 }
 
+// Trailer is a grpc trailder MD.
 type Trailer metadata.MD
 
+// Get get a grpc trailer value.
 func (t Trailer) Get(k string) string {
 	v := metadata.MD(t).Get(k)
 	if len(v) > 0 {

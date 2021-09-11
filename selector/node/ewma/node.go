@@ -46,12 +46,12 @@ type node struct {
 	lk         sync.RWMutex
 }
 
-// Builder is ewma node builder
+// Builder is ewma node builder.
 type Builder struct {
 	ErrHandler func(err error) (isErr bool)
 }
 
-// Build create node
+// Build create a weighted node.
 func (b *Builder) Build(n selector.Node) selector.WeightedNode {
 	s := &node{
 		Node:       n,
@@ -71,7 +71,6 @@ func (n *node) health() uint64 {
 func (n *node) load() (load uint64) {
 	now := time.Now().UnixNano()
 	avgLag := atomic.LoadInt64(&n.lag)
-
 	lastPredictTs := atomic.LoadInt64(&n.predictTs)
 	predicInterval := avgLag / 5
 	if predicInterval < int64(time.Millisecond*5) {
@@ -117,7 +116,7 @@ func (n *node) load() (load uint64) {
 	return
 }
 
-// Pick choose node
+// Pick pick a node.
 func (n *node) Pick() selector.DoneFunc {
 	now := time.Now().UnixNano()
 	atomic.StoreInt64(&n.lastPick, now)
@@ -126,7 +125,6 @@ func (n *node) Pick() selector.DoneFunc {
 	n.lk.Lock()
 	e := n.inflights.PushBack(now)
 	n.lk.Unlock()
-
 	return func(ctx context.Context, di selector.DoneInfo) {
 		n.lk.Lock()
 		n.inflights.Remove(e)
@@ -171,7 +169,7 @@ func (n *node) Pick() selector.DoneFunc {
 	}
 }
 
-// Weight is node effective weight
+// Weight is node effective weight.
 func (n *node) Weight() (weight float64) {
 	weight = float64(n.health()*uint64(time.Second)) / float64(n.load())
 	return

@@ -36,7 +36,6 @@ func (*Builder) Build(n selector.Node) selector.WeightedNode {
 func (n *node) Pick() selector.DoneFunc {
 	now := time.Now().UnixNano()
 	atomic.StoreInt64(&n.lastPick, now)
-
 	return func(ctx context.Context, di selector.DoneInfo) {}
 }
 

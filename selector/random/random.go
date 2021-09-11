@@ -15,10 +15,10 @@ var (
 	Name = "random"
 )
 
-// Balancer is random balancer
+// Balancer is a random balancer.
 type Balancer struct{}
 
-// New random selector
+// New random a selector.
 func New() selector.Selector {
 	return &selector.Default{
 		Balancer:    &Balancer{},
@@ -26,7 +26,7 @@ func New() selector.Selector {
 	}
 }
 
-// Pick one node
+// Pick pick a weighted node.
 func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.DoneFunc, error) {
 	if len(nodes) == 0 {
 		err := selector.ErrNoAvailable

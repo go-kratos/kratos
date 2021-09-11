@@ -6,10 +6,10 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 )
 
-// ErrNoAvailable is no available node
+// ErrNoAvailable is no available node.
 var ErrNoAvailable = errors.ServiceUnavailable("no_available_node", "")
 
-// Selector is node pick balancer
+// Selector is node pick balancer.
 type Selector interface {
 	Rebalancer
 
@@ -18,13 +18,13 @@ type Selector interface {
 	Select(ctx context.Context, opts ...SelectOption) (selected Node, done DoneFunc, err error)
 }
 
-// Rebalancer is nodes rebalancer
+// Rebalancer is nodes rebalancer.
 type Rebalancer interface {
 	// apply all nodes when any changes happen
 	Apply(nodes []Node)
 }
 
-// Node is node interface
+// Node is node interface.
 type Node interface {
 	// Address is the unique address under the same service
 	Address() string
@@ -44,7 +44,7 @@ type Node interface {
 	Metadata() map[string]string
 }
 
-// DoneInfo is callback info when RPC invoke done
+// DoneInfo is callback info when RPC invoke done.
 type DoneInfo struct {
 	// Response Error
 	Err error
@@ -57,10 +57,10 @@ type DoneInfo struct {
 	BytesReceived bool
 }
 
-// ReplyMeta is Reply Metadata
+// ReplyMeta is Reply Metadata.
 type ReplyMeta interface {
 	Get(key string) string
 }
 
-// DoneFunc is callback function when RPC invoke done
+// DoneFunc is callback function when RPC invoke done.
 type DoneFunc func(ctx context.Context, di DoneInfo)
