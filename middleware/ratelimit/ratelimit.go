@@ -9,6 +9,9 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 )
 
+// ErrLimitExceed is service unavailable due to rate limit exceeded.
+var ErrLimitExceed = errors.New(429, "RATELIMIT", "service unavailable due to rate limit exceeded")
+
 // Option is ratelimit option.
 type Option func(*options)
 
@@ -37,7 +40,7 @@ func Server(opts ...Option) middleware.Middleware {
 			done, e := options.limiter.Allow()
 			if e != nil {
 				// rejected
-				return nil, errors.New(429, "RATELIMIT", "service unavailable due to rate limit exceeded")
+				return nil, ErrLimitExceed
 			}
 			// allowed
 			reply, err = handler(ctx, req)

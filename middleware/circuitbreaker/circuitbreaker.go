@@ -11,6 +11,9 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
+// ErrNotAllowed is request failed due to circuit breaker triggered.
+var ErrNotAllowed = errors.New(503, "CIRCUITBREAKER", "request failed due to circuit breaker triggered")
+
 // Option is circuit breaker option.
 type Option func(*options)
 
@@ -46,7 +49,7 @@ func Client(opts ...Option) middleware.Middleware {
 				// NOTE: when client reject requets locally,
 				// continue add counter let the drop ratio higher.
 				breaker.MarkFailed()
-				return nil, errors.New(503, "CIRCUITBREAKER", "request failed due to circuit breaker triggered")
+				return nil, ErrNotAllowed
 			}
 			// allowed
 			reply, err := handler(ctx, req)
