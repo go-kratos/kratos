@@ -105,41 +105,52 @@ func TLSConfig(c *tls.Config) ServerOption {
 	}
 }
 
+// StrictSlash is with mux's StrictSlash
+// If true, when the path pattern is "/path/", accessing "/path" will
+// redirect to the former and vice versa.
+func StrictSlash(strictSlash bool) ServerOption {
+	return func(o *Server) {
+		o.strictSlash = strictSlash
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
-	lis      net.Listener
-	tlsConf  *tls.Config
-	once     sync.Once
-	endpoint *url.URL
-	err      error
-	network  string
-	address  string
-	timeout  time.Duration
-	filters  []FilterFunc
-	ms       []middleware.Middleware
-	dec      DecodeRequestFunc
-	enc      EncodeResponseFunc
-	ene      EncodeErrorFunc
-	router   *mux.Router
-	log      *log.Helper
+	lis         net.Listener
+	tlsConf     *tls.Config
+	once        sync.Once
+	endpoint    *url.URL
+	err         error
+	network     string
+	address     string
+	timeout     time.Duration
+	filters     []FilterFunc
+	ms          []middleware.Middleware
+	dec         DecodeRequestFunc
+	enc         EncodeResponseFunc
+	ene         EncodeErrorFunc
+	strictSlash bool
+	router      *mux.Router
+	log         *log.Helper
 }
 
 // NewServer creates an HTTP server by options.
 func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
-		network: "tcp",
-		address: ":0",
-		timeout: 1 * time.Second,
-		dec:     DefaultRequestDecoder,
-		enc:     DefaultResponseEncoder,
-		ene:     DefaultErrorEncoder,
-		log:     log.NewHelper(log.DefaultLogger),
+		network:     "tcp",
+		address:     ":0",
+		timeout:     1 * time.Second,
+		dec:         DefaultRequestDecoder,
+		enc:         DefaultResponseEncoder,
+		ene:         DefaultErrorEncoder,
+		strictSlash: true,
+		log:         log.NewHelper(log.DefaultLogger),
 	}
 	for _, o := range opts {
 		o(srv)
 	}
-	srv.router = mux.NewRouter()
+	srv.router = mux.NewRouter().StrictSlash(srv.strictSlash)
 	srv.router.Use(srv.filter())
 	srv.Server = &http.Server{
 		Handler:   FilterChain(srv.filters...)(srv.router),

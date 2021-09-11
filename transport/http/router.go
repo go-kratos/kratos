@@ -50,7 +50,7 @@ func (r *Router) Handle(method, relativePath string, h HandlerFunc, filters ...F
 	}))
 	next = FilterChain(filters...)(next)
 	next = FilterChain(r.filters...)(next)
-	r.srv.router.Handle(joinPaths(r.prefix, relativePath), next).Methods(method)
+	r.srv.router.Handle(path.Join(r.prefix, relativePath), next).Methods(method)
 }
 
 // GET registers a new GET route for a path with matching handler in the router.
@@ -96,27 +96,4 @@ func (r *Router) OPTIONS(path string, h HandlerFunc, m ...FilterFunc) {
 // TRACE registers a new TRACE route for a path with matching handler in the router.
 func (r *Router) TRACE(path string, h HandlerFunc, m ...FilterFunc) {
 	r.Handle(http.MethodTrace, path, h, m...)
-}
-
-// joinPaths is multiple urls are spliced together
-func joinPaths(paths ...string) string {
-	n := len(paths)
-	if n == 0 {
-		return ""
-	} else if n == 1 {
-		return paths[0]
-	}
-
-	finalPath := path.Join(paths...)
-	if lastChar(paths[n-1]) == '/' && lastChar(finalPath) != '/' {
-		return finalPath + "/"
-	}
-	return finalPath
-}
-
-func lastChar(str string) uint8 {
-	if str == "" {
-		panic("The length of the string can't be 0")
-	}
-	return str[len(str)-1]
 }
