@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-// Default is composite selector
+// Default is composite selector.
 type Default struct {
 	NodeBuilder WeightedNodeBuilder
 	Balancer    Balancer
@@ -14,7 +14,7 @@ type Default struct {
 	weightedNodes []Node
 }
 
-// Select select one node
+// Select select one node.
 func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected Node, done DoneFunc, err error) {
 	d.lk.RLock()
 	weightedNodes := d.weightedNodes
@@ -26,7 +26,7 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 	for _, f := range options.Filters {
 		weightedNodes = f(ctx, weightedNodes)
 	}
-	candidates := make([]WeightedNode, 0)
+	candidates := make([]WeightedNode, 0, len(weightedNodes))
 	for _, n := range weightedNodes {
 		candidates = append(candidates, n.(WeightedNode))
 	}
@@ -36,9 +36,9 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 	return d.Balancer.Pick(ctx, candidates)
 }
 
-// Apply update nodes info
+// Apply update nodes info.
 func (d *Default) Apply(nodes []Node) {
-	weightedNodes := make([]Node, 0)
+	weightedNodes := make([]Node, 0, len(nodes))
 	for _, n := range nodes {
 		weightedNodes = append(weightedNodes, d.NodeBuilder.Build(n))
 	}
