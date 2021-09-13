@@ -79,6 +79,6 @@ func TestResolver(t *testing.T) {
 	}
 	_, err := newResolver(context.Background(), &mockDiscoverys{}, ta, &mockRebalancer{}, false, false)
 	assert.Nil(t, err)
-	_, err = newResolver(context.Background(), &mockDiscoverys{}, ta, &mockRebalancer{}, false, false)
+	_, err = newResolver(context.Background(), &mockDiscoverys{}, ta, &mockRebalancer{}, true, false)
 	assert.Nil(t, err)
 }
