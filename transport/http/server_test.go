@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -30,7 +31,9 @@ func TestServer(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	}
 	ctx := context.Background()
-	srv := NewServer()
+	lis, err := net.Listen("tcp", ":12345")
+	assert.NoError(t, err)
+	srv := NewServer(Listener(lis))
 	srv.HandleFunc("/index", fn)
 	srv.HandleFunc("/index/{id:[0-9]+}", fn)
 	srv.HandleHeader("content-type", "application/grpc-web+json", func(w http.ResponseWriter, r *http.Request) {

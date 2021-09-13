@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"crypto/tls"
+	"net"
 	"net/url"
 	"strings"
 	"testing"
@@ -20,9 +21,13 @@ type testKey struct{}
 func TestServer(t *testing.T) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, testKey{}, "test")
-	srv := NewServer(Middleware([]middleware.Middleware{
+	mdws := Middleware([]middleware.Middleware{
 		func(middleware.Handler) middleware.Handler { return nil },
-	}...))
+	}...)
+	lis, err := net.Listen("tcp", ":12345")
+	assert.NoError(t, err)
+	opts := []ServerOption{mdws, Listener(lis)}
+	srv := NewServer(opts...)
 
 	if e, err := srv.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
 		t.Fatal(e, err)

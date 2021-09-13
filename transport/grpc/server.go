@@ -75,6 +75,13 @@ func TLSConfig(c *tls.Config) ServerOption {
 	}
 }
 
+// Listener with listener.
+func Listener(lis net.Listener) ServerOption {
+	return func(s *Server) {
+		s.lis = lis
+	}
+}
+
 // UnaryInterceptor returns a ServerOption that sets the UnaryServerInterceptor for the server.
 func UnaryInterceptor(in ...grpc.UnaryServerInterceptor) ServerOption {
 	return func(s *Server) {
@@ -151,18 +158,20 @@ func NewServer(opts ...ServerOption) *Server {
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
 	s.once.Do(func() {
-		lis, err := net.Listen(s.network, s.address)
+		if s.lis == nil {
+			lis, err := net.Listen(s.network, s.address)
+			if err != nil {
+				s.err = err
+				return
+			}
+			s.lis = lis
+		}
+		addr, err := host.Extract(s.address, s.lis)
 		if err != nil {
+			_ = s.lis.Close()
 			s.err = err
 			return
 		}
-		addr, err := host.Extract(s.address, lis)
-		if err != nil {
-			_ = lis.Close()
-			s.err = err
-			return
-		}
-		s.lis = lis
 		s.endpoint = endpoint.NewEndpoint("grpc", addr, s.tlsConf != nil)
 	})
 	if s.err != nil {
