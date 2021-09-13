@@ -33,6 +33,9 @@ func TestServer(t *testing.T) {
 	srv := NewServer()
 	srv.HandleFunc("/index", fn)
 	srv.HandleFunc("/index/{id:[0-9]+}", fn)
+	srv.HandleHeader("content-type", "application/grpc-web+json", func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
+	})
 
 	if e, err := srv.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
 		t.Fatal(e, err)
@@ -44,8 +47,23 @@ func TestServer(t *testing.T) {
 		}
 	}()
 	time.Sleep(time.Second)
+	testHeader(t, srv)
 	testClient(t, srv)
 	assert.NoError(t, srv.Stop(ctx))
+}
+
+func testHeader(t *testing.T, srv *Server) {
+	e, err := srv.Endpoint()
+	assert.NoError(t, err)
+	client, err := NewClient(context.Background(), WithEndpoint(e.Host))
+	assert.NoError(t, err)
+	reqURL := fmt.Sprintf(e.String() + "/index")
+	req, err := http.NewRequest("GET", reqURL, nil)
+	assert.NoError(t, err)
+	req.Header.Set("content-type", "application/grpc-web+json")
+	resp, err := client.Do(req)
+	assert.NoError(t, err)
+	resp.Body.Close()
 }
 
 func testClient(t *testing.T, srv *Server) {
