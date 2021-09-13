@@ -34,9 +34,7 @@ func TestParseTarget(t *testing.T) {
 
 type mockRebalancer struct{}
 
-func (m *mockRebalancer) Apply(nodes []selector.Node) {
-	return
-}
+func (m *mockRebalancer) Apply(nodes []selector.Node) {}
 
 type mockDiscoverys struct{}
 
