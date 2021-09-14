@@ -108,26 +108,14 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 
 // Client is a client jwt middleware.
 func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
-	o := &options{
-		signingMethod: jwt.SigningMethodHS256,
-		claims:        jwt.StandardClaims{},
-	}
-	for _, opt := range opts {
-		opt(o)
-	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			if keyProvider == nil {
 				return nil, ErrNeedTokenProvider
 			}
-			token := jwt.NewWithClaims(o.signingMethod, o.claims)
-			key, err := keyProvider(token)
+			tokenStr,err := SignToken(keyProvider, opts...)
 			if err != nil {
-				return nil, ErrGetKey
-			}
-			tokenStr, err := token.SignedString(key)
-			if err != nil {
-				return nil, ErrSignToken
+				return nil, err
 			}
 			if clientContext, ok := transport.FromClientContext(ctx); ok {
 				clientContext.RequestHeader().Set(authorizationKey, fmt.Sprintf(bearerFormat, tokenStr))
@@ -136,6 +124,27 @@ func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 			return nil, ErrWrongContext
 		}
 	}
+}
+
+// SignToken is used to issue JWT token.
+func SignToken(keyProvider jwt.Keyfunc, opts ...Option) (string, error) {
+	o := &options{
+		signingMethod: jwt.SigningMethodHS256,
+		claims:        jwt.StandardClaims{},
+	}
+	for _, opt := range opts {
+		opt(o)
+	}
+	token := jwt.NewWithClaims(o.signingMethod, o.claims)
+	key, err := keyProvider(token)
+	if err != nil {
+		return "",ErrGetKey
+	}
+	tokenStr, err := token.SignedString(key)
+	if err != nil {
+		return "", ErrSignToken
+	}
+	return tokenStr, nil
 }
 
 // NewContext put auth info into context
