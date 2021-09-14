@@ -113,7 +113,7 @@ func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 			if keyProvider == nil {
 				return nil, ErrNeedTokenProvider
 			}
-			tokenStr,err := SignToken(keyProvider, opts...)
+			tokenStr, err := SignToken(keyProvider, opts...)
 			if err != nil {
 				return nil, err
 			}
@@ -138,7 +138,7 @@ func SignToken(keyProvider jwt.Keyfunc, opts ...Option) (string, error) {
 	token := jwt.NewWithClaims(o.signingMethod, o.claims)
 	key, err := keyProvider(token)
 	if err != nil {
-		return "",ErrGetKey
+		return "", ErrGetKey
 	}
 	tokenStr, err := token.SignedString(key)
 	if err != nil {
