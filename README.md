@@ -88,7 +88,7 @@ If you discover a security vulnerability within Kratos, please send an e-mail to
 
 ## Contributors
 
-Thank you for considering contributing to the Kratos framework! The contribution guide can be found in the [Kratos documention](https://go-kratos.dev/en/docs/community/contribution).
+Thank you for considering contributing to the Kratos framework! The contribution guide can be found in the [Kratos documentation](https://go-kratos.dev/en/docs/community/contribution).
 
 <a href="https://github.com/go-kratos/kratos/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=go-kratos/kratos" />
