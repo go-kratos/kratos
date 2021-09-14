@@ -13,6 +13,7 @@ data:
     source: root:password@tcp(127.0.0.1:3306)/testdb?parseTime=True
 ```
 4. Run your blog server:
-```yaml
-make run
+```bash
+$ go generate ./...
+$ kratos run
 ```
