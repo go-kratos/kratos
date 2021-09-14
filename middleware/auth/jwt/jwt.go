@@ -126,7 +126,7 @@ func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	}
 }
 
-// SignToken is used to issue JWT token.
+// SignToken is used to sign JWT token.
 func SignToken(keyProvider jwt.Keyfunc, opts ...Option) (string, error) {
 	o := &options{
 		signingMethod: jwt.SigningMethodHS256,
