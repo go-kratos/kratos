@@ -96,8 +96,8 @@ func testClient(t *testing.T, srv *Server) {
 	defer client.Close()
 	for _, test := range tests {
 		var res testData
-		url := fmt.Sprintf(e.String() + test.path)
-		req, err := http.NewRequest(test.method, url, nil)
+		reqURL := fmt.Sprintf(e.String() + test.path)
+		req, err := http.NewRequest(test.method, reqURL, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -110,11 +110,12 @@ func testClient(t *testing.T, srv *Server) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer resp.Body.Close()
 		if resp.StatusCode != 200 {
+			_ = resp.Body.Close()
 			t.Fatalf("http status got %d", resp.StatusCode)
 		}
 		content, err := ioutil.ReadAll(resp.Body)
+		_ = resp.Body.Close()
 		if err != nil {
 			t.Fatalf("read resp error %v", err)
 		}
