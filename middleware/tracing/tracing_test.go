@@ -14,7 +14,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-var _ transport.Transporter = &Transport{}
+var _ transport.Transporter = &mockTransport{}
 
 type headerCarrier http.Header
 
@@ -37,18 +37,18 @@ func (hc headerCarrier) Keys() []string {
 	return keys
 }
 
-type Transport struct {
+type mockTransport struct {
 	kind      transport.Kind
 	endpoint  string
 	operation string
 	header    headerCarrier
 }
 
-func (tr *Transport) Kind() transport.Kind            { return tr.kind }
-func (tr *Transport) Endpoint() string                { return tr.endpoint }
-func (tr *Transport) Operation() string               { return tr.operation }
-func (tr *Transport) RequestHeader() transport.Header { return tr.header }
-func (tr *Transport) ReplyHeader() transport.Header   { return tr.header }
+func (tr *mockTransport) Kind() transport.Kind            { return tr.kind }
+func (tr *mockTransport) Endpoint() string                { return tr.endpoint }
+func (tr *mockTransport) Operation() string               { return tr.operation }
+func (tr *mockTransport) RequestHeader() transport.Header { return tr.header }
+func (tr *mockTransport) ReplyHeader() transport.Header   { return tr.header }
 
 func TestTracer(t *testing.T) {
 	carrier := headerCarrier{}
@@ -63,14 +63,14 @@ func TestTracer(t *testing.T) {
 		),
 	)
 
-	ts := &Transport{kind: transport.KindHTTP, header: carrier}
+	ts := &mockTransport{kind: transport.KindHTTP, header: carrier}
 
 	ctx, aboveSpan := cliTracer.Start(transport.NewClientContext(context.Background(), ts), ts.Operation(), ts.RequestHeader())
 	defer cliTracer.End(ctx, aboveSpan, nil, nil)
 
 	// server use Extract fetch traceInfo from carrier
 	svrTracer := NewTracer(trace.SpanKindServer, WithPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})))
-	ts = &Transport{kind: transport.KindHTTP, header: carrier}
+	ts = &mockTransport{kind: transport.KindHTTP, header: carrier}
 
 	ctx, span := svrTracer.Start(transport.NewServerContext(ctx, ts), ts.Operation(), ts.RequestHeader())
 	defer svrTracer.End(ctx, span, nil, nil)
@@ -85,7 +85,7 @@ func TestTracer(t *testing.T) {
 }
 
 func TestServer(t *testing.T) {
-	tr := &Transport{
+	tr := &mockTransport{
 		kind:      transport.KindHTTP,
 		endpoint:  "server:2233",
 		operation: "/test.server/hello",
@@ -143,7 +143,7 @@ func TestServer(t *testing.T) {
 }
 
 func TestClient(t *testing.T) {
-	tr := &Transport{
+	tr := &mockTransport{
 		kind:      transport.KindHTTP,
 		endpoint:  "server:2233",
 		operation: "/test.server/hello",
