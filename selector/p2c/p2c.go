@@ -35,16 +35,16 @@ type options struct {
 
 // New creates a p2c selector.
 func New(opts ...Option) selector.Selector {
-	var options options
-	for _, o := range opts {
-		o(&options)
+	var option options
+	for _, opt := range opts {
+		opt(&option)
 	}
 	return &selector.Default{
 		NodeBuilder: &ewma.Builder{},
 		Balancer: &Balancer{
 			r: rand.New(rand.NewSource(time.Now().UnixNano())),
 		},
-		Filters: options.filters,
+		Filters: option.filters,
 	}
 }
 

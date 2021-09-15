@@ -35,15 +35,15 @@ type Balancer struct{}
 
 // New random a selector.
 func New(opts ...Option) selector.Selector {
-	var options options
-	for _, o := range opts {
-		o(&options)
+	var option options
+	for _, opt := range opts {
+		opt(&option)
 	}
 
 	return &selector.Default{
 		Balancer:    &Balancer{},
 		NodeBuilder: &direct.Builder{},
-		Filters:     options.filters,
+		Filters:     option.filters,
 	}
 }
 
