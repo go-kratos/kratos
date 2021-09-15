@@ -61,6 +61,7 @@ func main() {
 			httpSrv,
 			grpcSrv,
 		),
+		kratos.Metadata(map[string]string{"color": "gray"}),
 		kratos.Registrar(r),
 	)
 	if err := app.Run(); err != nil {

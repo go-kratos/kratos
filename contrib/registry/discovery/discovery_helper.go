@@ -79,51 +79,28 @@ type discoveryInstance struct {
 }
 
 // fromServerInstance convert registry.ServiceInstance into discoveryInstance
-func fromServerInstance(ins *registry.ServiceInstance) *discoveryInstance {
+func fromServerInstance(ins *registry.ServiceInstance, config *Config) *discoveryInstance {
 	if ins == nil {
 		return nil
 	}
-
-	var (
-		region   string
-		zone     string
-		env      string
-		hostname string
-		lastTs   int64
-	)
 
 	metadata := ins.Metadata
 	if ins.Metadata == nil {
 		metadata = make(map[string]string, 8)
 	}
-	if v := metadata["region"]; v != "" {
-		region = v
-	}
-	if v := metadata["zone"]; v != "" {
-		zone = v
-	}
-	if v := metadata["env"]; v != "" {
-		env = v
-	}
-	if v := metadata["hostname"]; v != "" {
-		hostname = v
-	}
-	if v := metadata["lastTs"]; v != "" {
-		lastTs, _ = strconv.ParseInt(v, 10, 64)
-	}
 	metadata["reserved.id"] = ins.ID
 
 	return &discoveryInstance{
-		Region:   region,
-		Zone:     zone,
-		Env:      env,
+		Region:   config.Region,
+		Zone:     config.Zone,
+		Env:      config.Env,
 		AppID:    ins.Name,
-		Hostname: hostname,
+		Hostname: config.Host,
 		Addrs:    ins.Endpoints,
 		Version:  ins.Version,
-		LastTs:   lastTs,
+		LastTs:   time.Now().Unix(),
 		Metadata: metadata,
-		Status:   0, // TODO(@yeqown)
+		Status:   1,
 	}
 }
 

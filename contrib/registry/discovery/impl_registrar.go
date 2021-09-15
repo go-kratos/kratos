@@ -13,7 +13,7 @@ import (
 )
 
 func (d *Discovery) Register(ctx context.Context, service *registry.ServiceInstance) (err error) {
-	ins := fromServerInstance(service)
+	ins := fromServerInstance(service, d.config)
 
 	d.mutex.Lock()
 	if _, ok := d.registry[ins.AppID]; ok {
@@ -122,6 +122,6 @@ func (d *Discovery) register(ctx context.Context, ins *discoveryInstance) (err e
 }
 
 func (d *Discovery) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
-	ins := fromServerInstance(service)
+	ins := fromServerInstance(service, d.config)
 	return d.cancel(ins)
 }
