@@ -57,7 +57,7 @@ function test() {
 }
 
 function test_coverage() {
-	echo "mode: atomic" >coverage.out
+	echo "" >coverage.out
 	local base
 	base=$(pwd)
 	for mod in $all_modules; do
@@ -68,7 +68,7 @@ function test_coverage() {
 				echo "go test $(sed -n 1p go.mod | cut -d ' ' -f2)" &&
 				go test -race -coverprofile=profile.out -covermode=atomic ./...
 			if [ -f profile.out ]; then
-				grep <profile.out -v "mode: atomic" >>"${base}/coverage.out"
+				cat profile.out >>"${base}/coverage.out"
 				rm profile.out
 			fi
 			popd >/dev/null || exit
