@@ -106,7 +106,7 @@ func TestServer(t *testing.T) {
 		childTraceID string
 	)
 	next := func(ctx context.Context, req interface{}) (interface{}, error) {
-		log.WithContext(ctx, logger).Log(log.LevelInfo,
+		_ = log.WithContext(ctx, logger).Log(log.LevelInfo,
 			"kind", "server",
 		)
 		childSpanID = SpanID()(ctx).(string)
@@ -164,7 +164,7 @@ func TestClient(t *testing.T) {
 		childTraceID string
 	)
 	next := func(ctx context.Context, req interface{}) (interface{}, error) {
-		log.WithContext(ctx, logger).Log(log.LevelInfo,
+		_ = log.WithContext(ctx, logger).Log(log.LevelInfo,
 			"kind", "client",
 		)
 		childSpanID = SpanID()(ctx).(string)
