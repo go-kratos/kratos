@@ -118,6 +118,8 @@ func StrictSlash(strictSlash bool) ServerOption {
 func Listener(lis net.Listener) ServerOption {
 	return func(o *Server) {
 		o.lis = lis
+		o.address = lis.Addr().String()
+		o.network = "tcp"
 	}
 }
 

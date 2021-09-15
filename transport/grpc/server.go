@@ -79,6 +79,8 @@ func TLSConfig(c *tls.Config) ServerOption {
 func Listener(lis net.Listener) ServerOption {
 	return func(s *Server) {
 		s.lis = lis
+		s.address = lis.Addr().String()
+		s.network = "tcp"
 	}
 }
 
