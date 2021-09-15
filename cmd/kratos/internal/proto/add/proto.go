@@ -29,7 +29,7 @@ func (p *Proto) Generate() error {
 	}
 	to := path.Join(wd, p.Path)
 	if _, err := os.Stat(to); os.IsNotExist(err) {
-		if err := os.MkdirAll(to, 0700); err != nil {
+		if err := os.MkdirAll(to, 0o700); err != nil {
 			return err
 		}
 	}
@@ -37,5 +37,5 @@ func (p *Proto) Generate() error {
 	if _, err := os.Stat(name); !os.IsNotExist(err) {
 		return fmt.Errorf("%s already exists", p.Name)
 	}
-	return ioutil.WriteFile(name, body, 0644)
+	return ioutil.WriteFile(name, body, 0o644)
 }

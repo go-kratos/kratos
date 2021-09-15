@@ -76,6 +76,13 @@ func TestExtract(t *testing.T) {
 			}
 		})
 	}
+	lis, err := net.Listen("tcp", ":12345")
+	assert.NoError(t, err)
+	res, err := Extract("", lis)
+	assert.NoError(t, err)
+	expect, err := Extract(lis.Addr().String(), nil)
+	assert.NoError(t, err)
+	assert.Equal(t, expect, res)
 }
 
 func TestExtract2(t *testing.T) {

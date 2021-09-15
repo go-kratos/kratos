@@ -60,8 +60,10 @@ func run(cmd *cobra.Command, args []string) {
 			for _, e := range s.Elements {
 				r, ok := e.(*proto.RPC)
 				if ok {
-					cs.Methods = append(cs.Methods, &Method{Service: s.Name, Name: r.Name, Request: r.RequestType,
-						Reply: r.ReturnsType, Type: getMethodType(r.StreamsRequest, r.StreamsReturns)})
+					cs.Methods = append(cs.Methods, &Method{
+						Service: s.Name, Name: r.Name, Request: r.RequestType,
+						Reply: r.ReturnsType, Type: getMethodType(r.StreamsRequest, r.StreamsReturns),
+					})
 				}
 			}
 			res = append(res, cs)
@@ -81,7 +83,7 @@ func run(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		if err := ioutil.WriteFile(to, b, 0644); err != nil {
+		if err := ioutil.WriteFile(to, b, 0o644); err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println(to)

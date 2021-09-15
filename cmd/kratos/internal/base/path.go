@@ -20,7 +20,7 @@ func kratosHome() string {
 	}
 	home := path.Join(dir, ".kratos")
 	if _, err := os.Stat(home); os.IsNotExist(err) {
-		if err := os.MkdirAll(home, 0700); err != nil {
+		if err := os.MkdirAll(home, 0o700); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -30,7 +30,7 @@ func kratosHome() string {
 func kratosHomeWithDir(dir string) string {
 	home := path.Join(kratosHome(), dir)
 	if _, err := os.Stat(home); os.IsNotExist(err) {
-		if err := os.MkdirAll(home, 0700); err != nil {
+		if err := os.MkdirAll(home, 0o700); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -103,7 +103,7 @@ func hasSets(name string, sets []string) bool {
 }
 
 func Tree(path string, dir string) {
-	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+	_ = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
 			fmt.Printf("%s %s (%v bytes)\n", color.GreenString("CREATED"), strings.Replace(path, dir+"/", "", -1), info.Size())
 		}

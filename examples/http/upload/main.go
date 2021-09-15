@@ -19,7 +19,7 @@ func uploadFile(ctx http.Context) error {
 	}
 	defer file.Close()
 
-	f, err := os.OpenFile(handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	f, err := os.OpenFile(handler.Filename, os.O_WRONLY|os.O_CREATE, 0o666)
 	if err != nil {
 		return err
 	}

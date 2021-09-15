@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/go-kratos/kratos/examples/validate/api"
+	v1 "github.com/go-kratos/kratos/examples/validate/api"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/middleware/validate"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
@@ -16,7 +16,7 @@ var (
 	// Name is the name of the compiled software.
 	Name = "errors"
 	// Version is the version of the compiled software.
-	Version = "v1.0.0"
+	// Version = "v1.0.0"
 )
 
 type server struct {

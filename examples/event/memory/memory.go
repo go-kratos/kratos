@@ -2,14 +2,17 @@ package memory
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/examples/event/event"
 	"log"
 	"sync"
+
+	"github.com/go-kratos/kratos/examples/event/event"
 )
 
-var _ event.Sender = (*memorySender)(nil)
-var _ event.Receiver = (*memoryReceiver)(nil)
-var _ event.Event = (*Message)(nil)
+var (
+	_ event.Sender   = (*memorySender)(nil)
+	_ event.Receiver = (*memoryReceiver)(nil)
+	_ event.Event    = (*Message)(nil)
+)
 
 var (
 	chanMap = struct {
@@ -47,6 +50,7 @@ func (m *memorySender) Send(ctx context.Context, msg event.Event) error {
 	}
 	return nil
 }
+
 func (m *memorySender) Close() error {
 	return nil
 }
@@ -74,9 +78,9 @@ func (m *memoryReceiver) Close() error {
 func NewMemory(topic string) (event.Sender, event.Receiver) {
 	chanMap.RLock()
 	if _, ok := chanMap.cm[topic]; !ok {
-		//chanMap.Lock()
+		// chanMap.Lock()
 		chanMap.cm[topic] = make(chan *Message, ChanSize)
-		//chanMap.Unlock()
+		// chanMap.Unlock()
 	}
 	defer chanMap.RUnlock()
 

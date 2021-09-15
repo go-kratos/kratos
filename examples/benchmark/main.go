@@ -36,17 +36,17 @@ func main() {
 	if argsLen > 1 {
 		webFramework = args[1]
 	}
-	if argsLen > 2 {
+	if argsLen > 2 { //nolint:gomnd
 		sleepTime, _ = strconv.Atoi(args[2])
 		if sleepTime == -1 {
 			cpuBound = true
 			sleepTime = 0
 		}
 	}
-	if argsLen > 3 {
+	if argsLen > 3 { //nolint:gomnd
 		port, _ = strconv.Atoi(args[3])
 	}
-	if argsLen > 4 {
+	if argsLen > 4 { //nolint:gomnd
 		samplingPoint, _ = strconv.Atoi(args[4])
 	}
 	sleepTimeDuration = time.Duration(sleepTime) * time.Millisecond
@@ -108,14 +108,14 @@ func kratosHandle(w http2.ResponseWriter, q *http2.Request) {
 			runtime.Gosched()
 		}
 	}
-	w.Write(message)
+	_, _ = w.Write(message)
 }
 
 func GinServer() {
 	gin.SetMode(gin.ReleaseMode)
 	mux := gin.New()
 	mux.GET("/", ginHandler)
-	mux.Run(":" + strconv.Itoa(port))
+	_ = mux.Run(":" + strconv.Itoa(port))
 }
 
 func ginHandler(c *gin.Context) {
@@ -128,13 +128,13 @@ func ginHandler(c *gin.Context) {
 			runtime.Gosched()
 		}
 	}
-	c.Writer.Write(message)
+	_, _ = c.Writer.Write(message)
 }
 
 func EchoServer() {
 	e := echo.New()
 	e.GET("/", echoHandler)
-	e.Start(":" + strconv.Itoa(port))
+	_ = e.Start(":" + strconv.Itoa(port))
 }
 
 func echoHandler(c echo.Context) error {
@@ -147,7 +147,7 @@ func echoHandler(c echo.Context) error {
 			runtime.Gosched()
 		}
 	}
-	c.Response().Write(message)
+	_, _ = c.Response().Write(message)
 	return nil
 }
 
@@ -155,7 +155,7 @@ func MuxServer() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", muxHandle)
 	http2.Handle("/", r)
-	http2.ListenAndServe(":"+strconv.Itoa(port), r)
+	_ = http2.ListenAndServe(":"+strconv.Itoa(port), r)
 }
 
 func muxHandle(w http2.ResponseWriter, q *http2.Request) {
@@ -168,7 +168,7 @@ func muxHandle(w http2.ResponseWriter, q *http2.Request) {
 			runtime.Gosched()
 		}
 	}
-	w.Write(message)
+	_, _ = w.Write(message)
 }
 
 func pow(targetBits int) {

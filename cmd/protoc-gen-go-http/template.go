@@ -124,5 +124,5 @@ func (s *serviceDesc) execute() string {
 	if err := tmpl.Execute(buf, s); err != nil {
 		panic(err)
 	}
-	return strings.Trim(string(buf.Bytes()), "\r\n")
+	return strings.Trim(buf.String(), "\r\n")
 }

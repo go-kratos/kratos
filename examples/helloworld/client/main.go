@@ -36,7 +36,7 @@ func callHTTP() {
 	log.Printf("[http] SayHello %s\n", reply.Message)
 
 	// returns error
-	reply, err = client.SayHello(context.Background(), &pb.HelloRequest{Name: "error"})
+	_, err = client.SayHello(context.Background(), &pb.HelloRequest{Name: "error"})
 	if err != nil {
 		log.Printf("[http] SayHello error: %v\n", err)
 	}

@@ -1,6 +1,10 @@
 package http
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/go-kratos/kratos/v2/selector"
+)
 
 // CallOption configures a Call before it starts or extracts information from
 // a Call after it completes.
@@ -18,6 +22,7 @@ type callInfo struct {
 	contentType  string
 	operation    string
 	pathTemplate string
+	filters      []selector.Filter
 }
 
 // EmptyCallOption does not alter the Call configuration.
@@ -85,6 +90,22 @@ type PathTemplateCallOption struct {
 
 func (o PathTemplateCallOption) before(c *callInfo) error {
 	c.pathTemplate = o.Pattern
+	return nil
+}
+
+// SelectFilter is http select filter
+func SelectFilter(filters ...selector.Filter) CallOption {
+	return SelectFilterCallOption{filters: filters}
+}
+
+// SelectFilterCallOption is set call select filters
+type SelectFilterCallOption struct {
+	EmptyCallOption
+	filters []selector.Filter
+}
+
+func (o SelectFilterCallOption) before(c *callInfo) error {
+	c.filters = o.filters
 	return nil
 }
 

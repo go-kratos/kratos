@@ -3,9 +3,10 @@ package memory
 import (
 	"context"
 	"fmt"
-	"github.com/go-kratos/kratos/examples/event/event"
 	"testing"
 	"time"
+
+	"github.com/go-kratos/kratos/examples/event/event"
 )
 
 func TestSendAndReceive(t *testing.T) {
@@ -14,7 +15,6 @@ func TestSendAndReceive(t *testing.T) {
 		t.Log(fmt.Sprintf("key:%s, value:%s\n", event.Key(), event.Value()))
 		return nil
 	})
-
 	if err != nil {
 		t.Error(err)
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-kratos/kratos/examples/event/event"
 	"github.com/go-kratos/kratos/examples/event/kafka"
 )

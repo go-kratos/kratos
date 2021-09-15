@@ -21,7 +21,7 @@ var (
 	// Name is the name of the compiled software.
 	Name = "metrics"
 	// Version is the version of the compiled software.
-	Version = "v1.0.0"
+	// Version = "v1.0.0"
 
 	_metricSeconds = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "server",

@@ -33,6 +33,9 @@ func TestServer(t *testing.T) {
 	srv := NewServer()
 	srv.HandleFunc("/index", fn)
 	srv.HandleFunc("/index/{id:[0-9]+}", fn)
+	srv.HandleHeader("content-type", "application/grpc-web+json", func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
+	})
 
 	if e, err := srv.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
 		t.Fatal(e, err)
@@ -44,8 +47,23 @@ func TestServer(t *testing.T) {
 		}
 	}()
 	time.Sleep(time.Second)
+	testHeader(t, srv)
 	testClient(t, srv)
-	_ = srv.Stop(ctx)
+	assert.NoError(t, srv.Stop(ctx))
+}
+
+func testHeader(t *testing.T, srv *Server) {
+	e, err := srv.Endpoint()
+	assert.NoError(t, err)
+	client, err := NewClient(context.Background(), WithEndpoint(e.Host))
+	assert.NoError(t, err)
+	reqURL := fmt.Sprintf(e.String() + "/index")
+	req, err := http.NewRequest("GET", reqURL, nil)
+	assert.NoError(t, err)
+	req.Header.Set("content-type", "application/grpc-web+json")
+	resp, err := client.Do(req)
+	assert.NoError(t, err)
+	resp.Body.Close()
 }
 
 func testClient(t *testing.T, srv *Server) {
@@ -78,8 +96,8 @@ func testClient(t *testing.T, srv *Server) {
 	defer client.Close()
 	for _, test := range tests {
 		var res testData
-		url := fmt.Sprintf(e.String() + test.path)
-		req, err := http.NewRequest(test.method, url, nil)
+		reqURL := fmt.Sprintf(e.String() + test.path)
+		req, err := http.NewRequest(test.method, reqURL, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -92,11 +110,12 @@ func testClient(t *testing.T, srv *Server) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer resp.Body.Close()
 		if resp.StatusCode != 200 {
+			_ = resp.Body.Close()
 			t.Fatalf("http status got %d", resp.StatusCode)
 		}
 		content, err := ioutil.ReadAll(resp.Body)
+		_ = resp.Body.Close()
 		if err != nil {
 			t.Fatalf("read resp error %v", err)
 		}

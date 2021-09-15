@@ -1,10 +1,11 @@
 package main
 
 import (
+	"log"
+
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/labstack/echo/v4"
-	"log"
 )
 
 func main() {

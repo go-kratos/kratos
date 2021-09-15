@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 
+	stdhttp "net/http"
+
 	"github.com/go-kratos/kratos/examples/errors/api"
 	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2/errors"
@@ -27,7 +29,7 @@ func callHTTP() {
 	client := pb.NewGreeterHTTPClient(conn)
 	reply, err := client.SayHello(context.Background(), &pb.HelloRequest{Name: "empty"})
 	if err != nil {
-		if errors.Code(err) == 500 {
+		if errors.Code(err) == stdhttp.StatusInternalServerError {
 			log.Println(err)
 		}
 		if api.IsUserNotFound(err) {
