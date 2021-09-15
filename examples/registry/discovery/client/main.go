@@ -15,7 +15,7 @@ import (
 func main() {
 	r := discovery.New(&discovery.Config{
 		Nodes:  []string{"0.0.0.0:7171"},
-		Env:    discovery.DeployEnvDev,
+		Env:    "dev",
 		Region: "sh1",
 		Zone:   "zone1",
 		Host:   "localhost",

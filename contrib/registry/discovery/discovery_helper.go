@@ -1,12 +1,10 @@
 package discovery
 
 import (
-	"flag"
 	"fmt"
 	"net/url"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -20,18 +18,18 @@ var (
 )
 
 const (
-	// discovery server resource uri
+	// Discovery server resource uri
 	_registerURL = "http://%s/discovery/register"
-	_setURL      = "http://%s/discovery/set"
-	_cancelURL   = "http://%s/discovery/cancel"
-	_renewURL    = "http://%s/discovery/renew"
-	_pollURL     = "http://%s/discovery/polls"
+	//_setURL      = "http://%s/discovery/set"
+	_cancelURL = "http://%s/discovery/cancel"
+	_renewURL  = "http://%s/discovery/renew"
+	_pollURL   = "http://%s/discovery/polls"
 
 	// Discovery server error codes
-	_OK           = 0
-	_NOT_FOUND    = -404
-	_NOT_MODIFIED = -304
-	_SERVER_ERROR = -500
+	_codeOK       = 0
+	_codeNotFound = -404
+	//_NOT_MODIFIED = -304
+	//_SERVER_ERROR = -500
 
 	// _registerGap is the gap to renew instance registration.
 	_registerGap    = 30 * time.Second
@@ -39,73 +37,7 @@ const (
 	_discoveryAppID = "infra.discovery"
 )
 
-// deploy env.
-const (
-	DeployEnvDev  = "dev"
-	DeployEnvFat  = "fat"
-	DeployEnvUat  = "uat"
-	DeployEnvPre  = "pre"
-	DeployEnvProd = "prod"
-)
-
-// env default value.
-const (
-	// env
-	_region    = "region01"
-	_zone      = "zone01"
-	_deployEnv = "dev"
-)
-
-// env configuration.
-var (
-	// EnvRegion available region where app at.
-	EnvRegion string
-	// EnvZone available zone where app at.
-	EnvZone string
-	// EnvHostname machine hostname.
-	EnvHostname string
-	// EnvDeployEnv deploy env where app at.
-	EnvDeployEnv string
-	// EnvAppID is global unique application id, register by service tree.
-	// such as main.arch.disocvery.
-	EnvAppID string
-	// EnvColor is the identification of different experimental group in one caster cluster.
-	EnvColor string
-	// EnvDiscoveryNodes is seed nodes.
-	EnvDiscoveryNodes string
-)
-
-func init() {
-	var err error
-	EnvHostname = os.Getenv("HOSTNAME")
-	if EnvHostname == "" {
-		EnvHostname, err = os.Hostname()
-		if err != nil {
-			EnvHostname = strconv.Itoa(int(time.Now().UnixNano()))
-		}
-	}
-	addFlag(flag.CommandLine)
-}
-
-func addFlag(fs *flag.FlagSet) {
-	// env
-	fs.StringVar(&EnvRegion, "region", defaultString("REGION", _region), "available region. or use REGION env variable, value: sh etc.")
-	fs.StringVar(&EnvZone, "zone", defaultString("ZONE", _zone), "available zone. or use ZONE env variable, value: sh001/sh002 etc.")
-	fs.StringVar(&EnvAppID, "appid", os.Getenv("APP_ID"), "appid is global unique application id, register by service tree. or use APP_ID env variable.")
-	fs.StringVar(&EnvDeployEnv, "deploy.env", defaultString("DEPLOY_ENV", _deployEnv), "deploy env. or use DEPLOY_ENV env variable, value: dev/fat1/uat/pre/prod etc.")
-	fs.StringVar(&EnvColor, "deploy.color", os.Getenv("DEPLOY_COLOR"), "deploy.color is the identification of different experimental group.")
-	fs.StringVar(&EnvDiscoveryNodes, "discovery.nodes", os.Getenv("DISCOVERY_NODES"), "discovery.nodes is seed nodes. value: 127.0.0.1:7171,127.0.0.2:7171 etc.")
-}
-
-func defaultString(env, value string) string {
-	v := os.Getenv(env)
-	if v == "" {
-		return value
-	}
-	return v
-}
-
-// Config discovery configures.
+// Config Discovery configures.
 type Config struct {
 	Nodes  []string
 	Region string
@@ -115,24 +47,12 @@ type Config struct {
 }
 
 func fixConfig(c *Config) error {
-	if len(c.Nodes) == 0 && EnvDiscoveryNodes != "" {
-		c.Nodes = strings.Split(EnvDiscoveryNodes, ",")
-	}
-	if c.Region == "" {
-		c.Region = EnvRegion
-	}
-	if c.Zone == "" {
-		c.Zone = EnvZone
-	}
-	if c.Env == "" {
-		c.Env = EnvDeployEnv
-	}
 	if c.Host == "" {
-		c.Host = EnvHostname
+		c.Host, _ = os.Hostname()
 	}
 	if len(c.Nodes) == 0 || c.Region == "" || c.Zone == "" || c.Env == "" || c.Host == "" {
 		return fmt.Errorf(
-			"invalid discovery config nodes:%+v region:%s zone:%s deployEnv:%s host:%s",
+			"invalid Discovery config nodes:%+v region:%s zone:%s deployEnv:%s host:%s",
 			c.Nodes,
 			c.Region,
 			c.Zone,
@@ -158,6 +78,7 @@ type discoveryInstance struct {
 	Status   int64             `json:"status"` // Status instance status, eg: 1UP 2Waiting
 }
 
+// fromServerInstance convert registry.ServiceInstance into discoveryInstance
 func fromServerInstance(ins *registry.ServiceInstance) *discoveryInstance {
 	if ins == nil {
 		return nil
@@ -171,7 +92,7 @@ func fromServerInstance(ins *registry.ServiceInstance) *discoveryInstance {
 		lastTs   int64
 	)
 
-	var metadata = ins.Metadata
+	metadata := ins.Metadata
 	if ins.Metadata == nil {
 		metadata = make(map[string]string, 8)
 	}
@@ -206,6 +127,7 @@ func fromServerInstance(ins *registry.ServiceInstance) *discoveryInstance {
 	}
 }
 
+// toServiceInstance convert discoveryInstance into registry.ServiceInstance
 func toServiceInstance(ins *discoveryInstance) *registry.ServiceInstance {
 	if ins == nil {
 		return nil
@@ -259,4 +181,9 @@ func newParams(c *Config) url.Values {
 	p.Set("env", c.Env)
 	p.Set("hostname", c.Host)
 	return p
+}
+
+type discoveryCommonResp struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }

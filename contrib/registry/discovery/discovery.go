@@ -17,7 +17,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
-type discovery struct {
+type Discovery struct {
 	config     *Config
 	once       sync.Once
 	ctx        context.Context
@@ -42,17 +42,16 @@ type appInfo struct {
 	lastTs   int64 // latest timestamp
 }
 
-// New construct a discovery instance which implements registry.Registrar,
+// New construct a Discovery instance which implements registry.Registrar,
 // registry.Discovery and registry.Watcher.
-func New(c *Config, logger log.Logger) *discovery {
+func New(c *Config, logger log.Logger) *Discovery {
 	if logger == nil {
 		logger = log.NewStdLogger(os.Stdout)
 		logger = log.With(logger,
-			"registry.pluginName", "discovery",
+			"registry.pluginName", "Discovery",
 			"ts", log.DefaultTimestamp,
 			"caller", log.DefaultCaller,
 		)
-
 	}
 	if c == nil {
 		c = new(Config)
@@ -61,7 +60,7 @@ func New(c *Config, logger log.Logger) *discovery {
 		panic(err)
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	d := &discovery{
+	d := &Discovery{
 		config:     c,
 		ctx:        ctx,
 		cancelFunc: cancel,
@@ -73,12 +72,12 @@ func New(c *Config, logger log.Logger) *discovery {
 	d.httpClient = resty.New().
 		SetTimeout(40 * time.Second)
 
-	// discovery self found and watch
+	// Discovery self found and watch
 	r := d.resolveBuild(_discoveryAppID)
 	event := r.Watch()
 	_, ok := <-event
 	if !ok {
-		panic("discovery watch self failed")
+		panic("Discovery watch self failed")
 	}
 	discoveryIns, ok := r.Fetch(context.Background())
 	if ok {
@@ -89,18 +88,18 @@ func New(c *Config, logger log.Logger) *discovery {
 	return d
 }
 
-// Close stop all running process including discovery and register
-func (d *discovery) Close() error {
+// Close stop all running process including Discovery and register
+func (d *Discovery) Close() error {
 	d.cancelFunc()
 	return nil
 }
 
-func (d *discovery) Logger() *log.Helper {
+func (d *Discovery) Logger() *log.Helper {
 	return log.NewHelper(d.logger)
 }
 
-// selfProc start a goroutine to refresh discovery self registration information.
-func (d *discovery) selfProc(resolver *Resolve, event <-chan struct{}) {
+// selfProc start a goroutine to refresh Discovery self registration information.
+func (d *Discovery) selfProc(resolver *Resolve, event <-chan struct{}) {
 	for {
 		_, ok := <-event
 		if !ok {
@@ -114,7 +113,7 @@ func (d *discovery) selfProc(resolver *Resolve, event <-chan struct{}) {
 }
 
 // newSelf
-func (d *discovery) newSelf(zones map[string][]*discoveryInstance) {
+func (d *Discovery) newSelf(zones map[string][]*discoveryInstance) {
 	ins, ok := zones[d.config.Zone]
 	if !ok {
 		return
@@ -150,21 +149,21 @@ func (d *discovery) newSelf(zones map[string][]*discoveryInstance) {
 	d.node.Store(nodes)
 }
 
-// resolveBuild discovery resolver builder.
-func (d *discovery) resolveBuild(appId string) *Resolve {
+// resolveBuild Discovery resolver builder.
+func (d *Discovery) resolveBuild(appID string) *Resolve {
 	r := &Resolve{
-		id:    appId,
+		id:    appID,
 		d:     d,
 		event: make(chan struct{}, 1),
 	}
 
 	d.mutex.Lock()
-	app, ok := d.apps[appId]
+	app, ok := d.apps[appID]
 	if !ok {
 		app = &appInfo{
 			resolver: make(map[*Resolve]struct{}),
 		}
-		d.apps[appId] = app
+		d.apps[appID] = app
 		cancel := d.cancelPolls
 		if cancel != nil {
 			cancel()
@@ -179,15 +178,15 @@ func (d *discovery) resolveBuild(appId string) *Resolve {
 		}
 	}
 
-	d.Logger().Debugf("disocvery: AddWatch(%s) already watch(%v)", appId, ok)
+	d.Logger().Debugf("disocvery: AddWatch(%s) already watch(%v)", appID, ok)
 	d.once.Do(func() {
 		go d.serverProc()
 	})
 	return r
 }
 
-func (d *discovery) serverProc() {
-	defer d.Logger().Debug("discovery serverProc quit")
+func (d *Discovery) serverProc() {
+	defer d.Logger().Debug("Discovery serverProc quit")
 
 	var (
 		retry  int
@@ -229,7 +228,7 @@ func (d *discovery) serverProc() {
 	}
 }
 
-func (d *discovery) pickNode() string {
+func (d *Discovery) pickNode() string {
 	nodes, ok := d.node.Load().([]string)
 	if !ok || len(nodes) == 0 {
 		return d.config.Nodes[rand.Intn(len(d.config.Nodes))]
@@ -237,52 +236,48 @@ func (d *discovery) pickNode() string {
 	return nodes[atomic.LoadUint64(&d.nodeIdx)%uint64(len(nodes))]
 }
 
-func (d *discovery) switchNode() {
+func (d *Discovery) switchNode() {
 	atomic.AddUint64(&d.nodeIdx, 1)
 }
 
-// renew an instance with discovery
-func (d *discovery) renew(ctx context.Context, ins *discoveryInstance) (err error) {
-	// d.Logger().Debugf("discovery:renew renew calling")
+// renew an instance with Discovery
+func (d *Discovery) renew(ctx context.Context, ins *discoveryInstance) (err error) {
+	// d.Logger().Debugf("Discovery:renew renew calling")
 
 	d.mutex.RLock()
 	c := d.config
 	d.mutex.RUnlock()
 
-	res := new(struct {
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-	})
+	res := new(discoveryCommonResp)
 	uri := fmt.Sprintf(_renewURL, d.pickNode())
 
 	// construct parameters to renew
 	p := newParams(d.config)
 	p.Set("appid", ins.AppID)
 
-	// send request to discovery server.
+	// send request to Discovery server.
 	if _, err = d.httpClient.R().
 		SetContext(ctx).
 		SetQueryParamsFromValues(p).
 		SetResult(&res).
 		Post(uri); err != nil {
-
 		d.switchNode()
-		d.Logger().Errorf("discovery: renew client.Get(%v)  env(%s) appid(%s) hostname(%s) error(%v)",
+		d.Logger().Errorf("Discovery: renew client.Get(%v)  env(%s) appid(%s) hostname(%s) error(%v)",
 			uri, c.Env, ins.AppID, c.Host, err)
 		return
 	}
 
-	if res.Code != _OK {
+	if res.Code != _codeOK {
 		err = fmt.Errorf("ErrorCode: %d", res.Code)
-		if res.Code == _NOT_FOUND {
+		if res.Code == _codeNotFound {
 			if err = d.register(ctx, ins); err != nil {
-				err = errors.Wrap(err, "discovery.renew instance, and failed to register ins")
+				err = errors.Wrap(err, "Discovery.renew instance, and failed to register ins")
 			}
 			return
 		}
 
 		d.Logger().Errorf(
-			"discovery: renew client.Get(%v) env(%s) appid(%s) hostname(%s) code(%v)",
+			"Discovery: renew client.Get(%v) env(%s) appid(%s) hostname(%s) code(%v)",
 			uri, c.Env, ins.AppID, c.Host, res.Code,
 		)
 	}
@@ -290,42 +285,38 @@ func (d *discovery) renew(ctx context.Context, ins *discoveryInstance) (err erro
 	return
 }
 
-// cancel Remove the registered instance from discovery
-func (d *discovery) cancel(ins *discoveryInstance) (err error) {
+// cancel Remove the registered instance from Discovery
+func (d *Discovery) cancel(ins *discoveryInstance) (err error) {
 	d.mutex.RLock()
-	c := d.config
+	config := d.config
 	d.mutex.RUnlock()
 
-	res := new(struct {
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-	})
+	res := new(discoveryCommonResp)
 	uri := fmt.Sprintf(_cancelURL, d.pickNode())
-
 	p := newParams(d.config)
 	p.Set("appid", ins.AppID)
 
 	// request
-	// send request to discovery server.
+	// send request to Discovery server.
 	if _, err = d.httpClient.R().
 		SetContext(context.TODO()).
 		SetQueryParamsFromValues(p).
 		SetResult(&res).
 		Post(uri); err != nil {
-
 		d.switchNode()
-		d.Logger().Errorf("discovery cancel client.Get(%v) env(%s) appid(%s) hostname(%s) error(%v)",
-			uri, c.Env, ins.AppID, c.Host, err)
+		d.Logger().Errorf("Discovery cancel client.Get(%v) env(%s) appid(%s) hostname(%s) error(%v)",
+			uri, config.Env, ins.AppID, config.Host, err)
 		return
 	}
 
+	// handle response error
 	if res.Code != 0 {
 		if res.Code == -404 {
 			return nil
 		}
 
-		d.Logger().Warnf("discovery cancel client.Get(%v)  env(%s) appid(%s) hostname(%s) code(%v)",
-			uri, c.Env, ins.AppID, c.Host, res.Code)
+		d.Logger().Warnf("Discovery cancel client.Get(%v)  env(%s) appid(%s) hostname(%s) code(%v)",
+			uri, config.Env, ins.AppID, config.Host, res.Code)
 		err = fmt.Errorf("ErrorCode: %d", res.Code)
 		return
 	}
@@ -333,10 +324,10 @@ func (d *discovery) cancel(ins *discoveryInstance) (err error) {
 	return
 }
 
-func (d *discovery) broadcast(apps map[string]*disInstancesInfo) {
+func (d *Discovery) broadcast(apps map[string]*disInstancesInfo) {
 	for appID, v := range apps {
 		var count int
-		// v maybe nil in old version(less than v1.1) discovery,check incase of panic
+		// v maybe nil in old version(less than v1.1) Discovery,check incase of panic
 		if v == nil {
 			continue
 		}
@@ -367,10 +358,10 @@ func (d *discovery) broadcast(apps map[string]*disInstancesInfo) {
 	}
 }
 
-func (d *discovery) polls(ctx context.Context) (apps map[string]*disInstancesInfo, err error) {
+func (d *Discovery) polls(ctx context.Context) (apps map[string]*disInstancesInfo, err error) {
 	var (
-		lastTss []int64
-		appIDs  []string
+		lastTss = make([]int64, 0, 4)
+		appIDs  = make([]string, 0, 16)
 		host    = d.pickNode()
 		changed bool
 	)
@@ -378,8 +369,9 @@ func (d *discovery) polls(ctx context.Context) (apps map[string]*disInstancesInf
 		d.lastHost = host
 		changed = true
 	}
+
 	d.mutex.RLock()
-	c := d.config
+	config := d.config
 	for k, v := range d.apps {
 		if changed {
 			v.lastTs = 0
@@ -388,9 +380,12 @@ func (d *discovery) polls(ctx context.Context) (apps map[string]*disInstancesInf
 		lastTss = append(lastTss, v.lastTs)
 	}
 	d.mutex.RUnlock()
+
+	// if there is no app, polls just return.
 	if len(appIDs) == 0 {
 		return
 	}
+
 	uri := fmt.Sprintf(_pollURL, host)
 	res := new(struct {
 		Code int                          `json:"code"`
@@ -399,8 +394,8 @@ func (d *discovery) polls(ctx context.Context) (apps map[string]*disInstancesInf
 
 	// params
 	p := newParams(nil)
-	p.Set("env", c.Env)
-	p.Set("hostname", c.Host)
+	p.Set("env", config.Env)
+	p.Set("hostname", config.Host)
 	for _, appid := range appIDs {
 		p.Add("appid", appid)
 	}
@@ -415,13 +410,13 @@ func (d *discovery) polls(ctx context.Context) (apps map[string]*disInstancesInf
 		SetQueryParamsFromValues(p).
 		SetResult(res).Get(uri); err != nil {
 		d.switchNode()
-		d.Logger().Errorf("discovery: client.Get(%s) error(%+v)", reqURI, err)
+		d.Logger().Errorf("Discovery: client.Get(%s) error(%+v)", reqURI, err)
 		return nil, err
 	}
 
 	if res.Code != 0 {
 		if res.Code != -304 {
-			d.Logger().Errorf("discovery: client.Get(%s) get error code(%d)", reqURI, res.Code)
+			d.Logger().Errorf("Discovery: client.Get(%s) get error code(%d)", reqURI, res.Code)
 		}
 		err = fmt.Errorf("ErrCode: %d", res.Code)
 		return
@@ -430,21 +425,21 @@ func (d *discovery) polls(ctx context.Context) (apps map[string]*disInstancesInf
 	for _, app := range res.Data {
 		if app.LastTs == 0 {
 			err = ErrServerError
-			d.Logger().Errorf("discovery: client.Get(%s) latest_timestamp is 0, instances:(%+v)", reqURI, res.Data)
+			d.Logger().Errorf("Discovery: client.Get(%s) latest_timestamp is 0, instances:(%+v)", reqURI, res.Data)
 			return
 		}
 	}
 
-	d.Logger().Debugf("discovery: successfully polls(%s) instances (%+v)", reqURI, res.Data)
+	d.Logger().Debugf("Discovery: successfully polls(%s) instances (%+v)", reqURI, res.Data)
 	apps = res.Data
 	return
 }
 
-// Resolve discovery resolver.
+// Resolve Discovery resolver.
 type Resolve struct {
 	id    string
 	event chan struct{}
-	d     *discovery
+	d     *Discovery
 }
 
 // Watch instance.

@@ -12,7 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
-func (d *discovery) Register(ctx context.Context, service *registry.ServiceInstance) (err error) {
+func (d *Discovery) Register(ctx context.Context, service *registry.ServiceInstance) (err error) {
 	ins := fromServerInstance(service)
 
 	d.mutex.Lock()
@@ -34,7 +34,7 @@ func (d *discovery) Register(ctx context.Context, service *registry.ServiceInsta
 		cancel()
 		return
 	}
-	//cancel()
+
 	ch := make(chan struct{}, 1)
 	d.cancelFunc = func() {
 		cancel()
@@ -43,7 +43,7 @@ func (d *discovery) Register(ctx context.Context, service *registry.ServiceInsta
 
 	// renew the current register_service
 	go func() {
-		defer d.Logger().Warn("discovery:register_service goroutine quit")
+		defer d.Logger().Warn("Discovery:register_service goroutine quit")
 		ticker := time.NewTicker(_registerGap)
 		defer ticker.Stop()
 		for {
@@ -61,8 +61,8 @@ func (d *discovery) Register(ctx context.Context, service *registry.ServiceInsta
 	return
 }
 
-//  register an instance with discovery
-func (d *discovery) register(ctx context.Context, ins *discoveryInstance) (err error) {
+//  register an instance with Discovery
+func (d *Discovery) register(ctx context.Context, ins *discoveryInstance) (err error) {
 	d.mutex.RLock()
 	c := d.config
 	d.mutex.RUnlock()
@@ -71,7 +71,7 @@ func (d *discovery) register(ctx context.Context, ins *discoveryInstance) (err e
 	if ins.Metadata != nil {
 		if metadata, err = json.Marshal(ins.Metadata); err != nil {
 			d.Logger().Errorf(
-				"discovery:register instance Marshal metadata(%v) failed!error(%v)", ins.Metadata, err,
+				"Discovery:register instance Marshal metadata(%v) failed!error(%v)", ins.Metadata, err,
 			)
 		}
 	}
@@ -95,34 +95,33 @@ func (d *discovery) register(ctx context.Context, ins *discoveryInstance) (err e
 	}
 	p.Set("metadata", string(metadata))
 
-	// send request to discovery server.
+	// send request to Discovery server.
 	if _, err = d.httpClient.R().
 		SetContext(ctx).
 		SetQueryParamsFromValues(p).
 		SetResult(&res).
 		Post(uri); err != nil {
-
 		d.switchNode()
-		d.Logger().Errorf("discovery: register client.Get(%s)  zone(%s) env(%s) appid(%s) addrs(%v) error(%v)",
+		d.Logger().Errorf("Discovery: register client.Get(%s)  zone(%s) env(%s) appid(%s) addrs(%v) error(%v)",
 			uri+"?"+p.Encode(), c.Zone, c.Env, ins.AppID, ins.Addrs, err)
 		return
 	}
 
 	if res.Code != 0 {
 		err = fmt.Errorf("ErrorCode: %d", res.Code)
-		d.Logger().Errorf("discovery: register client.Get(%v)  env(%s) appid(%s) addrs(%v) code(%v)",
+		d.Logger().Errorf("Discovery: register client.Get(%v)  env(%s) appid(%s) addrs(%v) code(%v)",
 			uri, c.Env, ins.AppID, ins.Addrs, res.Code)
 	}
 
 	d.Logger().Infof(
-		"discovery: register client.Get(%v) env(%s) appid(%s) addrs(%s) success\n",
+		"Discovery: register client.Get(%v) env(%s) appid(%s) addrs(%s) success\n",
 		uri, c.Env, ins.AppID, ins.Addrs,
 	)
 
 	return
 }
 
-func (d *discovery) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
+func (d *Discovery) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
 	ins := fromServerInstance(service)
 	return d.cancel(ins)
 }

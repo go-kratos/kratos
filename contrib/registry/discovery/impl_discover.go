@@ -3,6 +3,7 @@ package discovery
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -26,22 +27,22 @@ func filterInstancesByZone(ins *disInstancesInfo, zone string) []*registry.Servi
 	return out
 }
 
-func (d *discovery) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+func (d *Discovery) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
 	r := d.resolveBuild(serviceName)
 	ins, ok := r.Fetch(ctx)
 	if !ok {
-		return nil, errors.New("discovery.GetService fetch failed")
+		return nil, errors.New("Discovery.GetService fetch failed")
 	}
 
 	out := filterInstancesByZone(ins, d.config.Zone)
 	if len(out) == 0 {
-		return nil, fmt.Errorf("discovery.GetService(%s) not found", serviceName)
+		return nil, fmt.Errorf("Discovery.GetService(%s) not found", serviceName)
 	}
 
 	return out, nil
 }
 
-func (d *discovery) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
+func (d *Discovery) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
 	return &watcher{
 		Resolve:     d.resolveBuild(serviceName),
 		serviceName: serviceName,
@@ -57,19 +58,19 @@ type watcher struct {
 func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 	event := w.Resolve.Watch()
 	// change event come
-	_, ok := <-event
+	<-event
 
-	//ctx, cancel := context.WithTimeout()
-	//defer cancel()
+	ctx, cancel := context.WithTimeout(context.TODO(), 15*time.Second)
+	defer cancel()
 
-	ins, ok := w.Resolve.Fetch(context.TODO())
+	ins, ok := w.Resolve.Fetch(ctx)
 	if !ok {
-		return nil, errors.New("discovery.GetService fetch failed")
+		return nil, errors.New("Discovery.GetService fetch failed")
 	}
 
 	out := filterInstancesByZone(ins, w.Resolve.d.config.Zone)
 	if len(out) == 0 {
-		return nil, fmt.Errorf("discovery.GetService(%s) not found", w.serviceName)
+		return nil, fmt.Errorf("Discovery.GetService(%s) not found", w.serviceName)
 	}
 
 	return out, nil
