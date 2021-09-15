@@ -36,7 +36,7 @@ func Port(lis net.Listener) (int, bool) {
 // Extract returns a private addr and port.
 func Extract(hostPort string, lis net.Listener) (string, error) {
 	addr, port, err := net.SplitHostPort(hostPort)
-	if err != nil {
+	if err != nil && lis == nil {
 		return "", err
 	}
 	if lis != nil {
