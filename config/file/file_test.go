@@ -299,11 +299,14 @@ func TestMergeDataRace(t *testing.T) {
 	c := config.New(config.WithSource(
 		NewSource(path),
 	))
+	const count = 80
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
+	startCh := make(chan struct{})
 	go func() {
 		defer wg.Done()
-		for i := 0; i < 100; i++ {
+		<-startCh
+		for i := 0; i < count; i++ {
 			var conf struct{}
 			if err := c.Scan(&conf); err != nil {
 				t.Error(err)
@@ -313,11 +316,13 @@ func TestMergeDataRace(t *testing.T) {
 
 	go func() {
 		defer wg.Done()
-		for i := 0; i < 100; i++ {
+		<-startCh
+		for i := 0; i < count; i++ {
 			if err := c.Load(); err != nil {
 				t.Error(err)
 			}
 		}
 	}()
+	close(startCh)
 	wg.Wait()
 }
