@@ -1,16 +1,16 @@
-package random
+package wrr
 
 import (
 	"context"
-	"math/rand"
+	"sync"
 
 	"github.com/go-kratos/kratos/v2/selector"
 	"github.com/go-kratos/kratos/v2/selector/node/direct"
 )
 
 const (
-	// Name is random balancer name
-	Name = "random"
+	// Name is wrr balancer name
+	Name = "wrr"
 )
 
 var _ selector.Balancer = &Balancer{} // Name is balancer name
@@ -31,7 +31,10 @@ type options struct {
 }
 
 // Balancer is a random balancer.
-type Balancer struct{}
+type Balancer struct {
+	mu            sync.Mutex
+	currentWeight map[string]float64
+}
 
 // New random a selector.
 func New(opts ...Option) selector.Selector {
@@ -41,7 +44,9 @@ func New(opts ...Option) selector.Selector {
 	}
 
 	return &selector.Default{
-		Balancer:    &Balancer{},
+		Balancer: &Balancer{
+			currentWeight: make(map[string]float64),
+		},
 		NodeBuilder: &direct.Builder{},
 		Filters:     options.filters,
 	}
@@ -52,8 +57,26 @@ func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selec
 	if len(nodes) == 0 {
 		return nil, nil, selector.ErrNoAvailable
 	}
-	cur := rand.Intn(len(nodes))
-	selected := nodes[cur]
+	var totalWeight float64
+	var selected selector.WeightedNode
+	var selectWeight float64
+
+	// nginx wrr load balancing algorithm: http://blog.csdn.net/zhangskd/article/details/50194069
+	p.mu.Lock()
+	for _, node := range nodes {
+		totalWeight += node.Weight()
+		cwt := p.currentWeight[node.Address()]
+		// current += effectiveWeight
+		cwt += node.Weight()
+		p.currentWeight[node.Address()] = cwt
+		if selected == nil || selectWeight < cwt {
+			selectWeight = cwt
+			selected = node
+		}
+	}
+	p.currentWeight[selected.Address()] = selectWeight - totalWeight
+	p.mu.Unlock()
+
 	d := selected.Pick()
 	return selected, d, nil
 }
