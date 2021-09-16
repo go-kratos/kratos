@@ -21,8 +21,7 @@ func NewSource(path string) config.Source {
 }
 
 func (f *file) loadFile(path string) (*config.KeyValue, error) {
-	f.path = path
-	file, err := os.Open(f.path)
+	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +42,7 @@ func (f *file) loadFile(path string) (*config.KeyValue, error) {
 }
 
 func (f *file) loadDir(path string) (kvs []*config.KeyValue, err error) {
-	f.path = path
-	files, err := ioutil.ReadDir(f.path)
+	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return nil, err
 	}
