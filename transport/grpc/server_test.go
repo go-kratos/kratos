@@ -82,6 +82,15 @@ func TestMiddleware(t *testing.T) {
 	assert.Equal(t, v, o.middleware)
 }
 
+func TestEndpoint(t *testing.T) {
+	u, err := url.Parse("grpc://hello/world")
+	assert.NoError(t, err)
+	o := &Server{}
+	Endpoint(u)(o)
+	assert.Equal(t, "hello", o.endpoint.Host)
+	assert.Equal(t, "grpc", o.endpoint.Scheme)
+}
+
 type mockLogger struct {
 	level log.Level
 	key   string
