@@ -26,9 +26,9 @@ const (
 	_pollURL   = "http://%s/discovery/polls"
 
 	// Discovery server error codes
-	_codeOK       = 0
-	_codeNotFound = -404
-	//_NOT_MODIFIED = -304
+	_codeOK          = 0
+	_codeNotFound    = -404
+	_codeNotModified = -304
 	//_SERVER_ERROR = -500
 
 	// _registerGap is the gap to renew instance registration.
@@ -78,6 +78,8 @@ type discoveryInstance struct {
 	Status   int64             `json:"status"` // Status instance status, eg: 1UP 2Waiting
 }
 
+const _reservedInstanceIDKey = "kratos.v2.serviceinstance.id"
+
 // fromServerInstance convert registry.ServiceInstance into discoveryInstance
 func fromServerInstance(ins *registry.ServiceInstance, config *Config) *discoveryInstance {
 	if ins == nil {
@@ -88,7 +90,7 @@ func fromServerInstance(ins *registry.ServiceInstance, config *Config) *discover
 	if ins.Metadata == nil {
 		metadata = make(map[string]string, 8)
 	}
-	metadata["reserved.id"] = ins.ID
+	metadata[_reservedInstanceIDKey] = ins.ID
 
 	return &discoveryInstance{
 		Region:   config.Region,
@@ -111,7 +113,7 @@ func toServiceInstance(ins *discoveryInstance) *registry.ServiceInstance {
 	}
 
 	return &registry.ServiceInstance{
-		ID:      ins.Metadata["reserved.id"],
+		ID:      ins.Metadata[_reservedInstanceIDKey],
 		Name:    ins.AppID,
 		Version: ins.Version,
 		Metadata: map[string]string{
@@ -147,20 +149,37 @@ type strategy struct {
 	Weight int64 `json:"weight"`
 }
 
+const (
+	_paramKeyRegion   = "region"
+	_paramKeyZone     = "zone"
+	_paramKeyEnv      = "env"
+	_paramKeyHostname = "hostname"
+	_paramKeyAppID    = "appid"
+	_paramKeyAddrs    = "addrs"
+	_paramKeyVersion  = "version"
+	_paramKeyStatus   = "status"
+	_paramKeyMetadata = "metadata"
+)
+
 func newParams(c *Config) url.Values {
 	p := make(url.Values, 8)
 	if c == nil {
 		return p
 	}
 
-	p.Set("region", c.Region)
-	p.Set("zone", c.Zone)
-	p.Set("env", c.Env)
-	p.Set("hostname", c.Host)
+	p.Set(_paramKeyRegion, c.Region)
+	p.Set(_paramKeyZone, c.Zone)
+	p.Set(_paramKeyEnv, c.Env)
+	p.Set(_paramKeyHostname, c.Host)
 	return p
 }
 
 type discoveryCommonResp struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
+}
+
+type discoveryPollsResp struct {
+	Code int                          `json:"code"`
+	Data map[string]*disInstancesInfo `json:"data"`
 }

@@ -83,17 +83,17 @@ func (d *Discovery) register(ctx context.Context, ins *discoveryInstance) (err e
 
 	// params
 	p := newParams(d.config)
-	p.Set("appid", ins.AppID)
+	p.Set(_paramKeyAppID, ins.AppID)
 	for _, addr := range ins.Addrs {
-		p.Add("addrs", addr)
+		p.Add(_paramKeyAddrs, addr)
 	}
-	p.Set("version", ins.Version)
+	p.Set(_paramKeyVersion, ins.Version)
 	if ins.Status == 0 {
-		p.Set("status", _statusUP)
+		p.Set(_paramKeyStatus, _statusUP)
 	} else {
-		p.Set("status", strconv.FormatInt(ins.Status, 10))
+		p.Set(_paramKeyStatus, strconv.FormatInt(ins.Status, 10))
 	}
-	p.Set("metadata", string(metadata))
+	p.Set(_paramKeyMetadata, string(metadata))
 
 	// send request to Discovery server.
 	if _, err = d.httpClient.R().

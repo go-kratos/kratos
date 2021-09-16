@@ -178,7 +178,7 @@ func (d *Discovery) resolveBuild(appID string) *Resolve {
 		}
 	}
 
-	d.Logger().Debugf("disocvery: AddWatch(%s) already watch(%v)", appID, ok)
+	d.Logger().Debugf("Discovery: AddWatch(%s) already watch(%v)", appID, ok)
 	d.once.Do(func() {
 		go d.serverProc()
 	})
@@ -242,7 +242,7 @@ func (d *Discovery) switchNode() {
 
 // renew an instance with Discovery
 func (d *Discovery) renew(ctx context.Context, ins *discoveryInstance) (err error) {
-	// d.Logger().Debugf("Discovery:renew renew calling")
+	// d.Logger().Debug("Discovery:renew renew calling")
 
 	d.mutex.RLock()
 	c := d.config
@@ -253,7 +253,7 @@ func (d *Discovery) renew(ctx context.Context, ins *discoveryInstance) (err erro
 
 	// construct parameters to renew
 	p := newParams(d.config)
-	p.Set("appid", ins.AppID)
+	p.Set(_paramKeyAppID, ins.AppID)
 
 	// send request to Discovery server.
 	if _, err = d.httpClient.R().
@@ -262,13 +262,13 @@ func (d *Discovery) renew(ctx context.Context, ins *discoveryInstance) (err erro
 		SetResult(&res).
 		Post(uri); err != nil {
 		d.switchNode()
-		d.Logger().Errorf("Discovery: renew client.Get(%v)  env(%s) appid(%s) hostname(%s) error(%v)",
+		d.Logger().Errorf("Discovery: renew client.Get(%v) env(%s) appid(%s) hostname(%s) error(%v)",
 			uri, c.Env, ins.AppID, c.Host, err)
 		return
 	}
 
 	if res.Code != _codeOK {
-		err = fmt.Errorf("ErrorCode: %d", res.Code)
+		err = fmt.Errorf("discovery.renew failed ErrorCode: %d", res.Code)
 		if res.Code == _codeNotFound {
 			if err = d.register(ctx, ins); err != nil {
 				err = errors.Wrap(err, "Discovery.renew instance, and failed to register ins")
@@ -294,7 +294,7 @@ func (d *Discovery) cancel(ins *discoveryInstance) (err error) {
 	res := new(discoveryCommonResp)
 	uri := fmt.Sprintf(_cancelURL, d.pickNode())
 	p := newParams(d.config)
-	p.Set("appid", ins.AppID)
+	p.Set(_paramKeyAppID, ins.AppID)
 
 	// request
 	// send request to Discovery server.
@@ -310,8 +310,8 @@ func (d *Discovery) cancel(ins *discoveryInstance) (err error) {
 	}
 
 	// handle response error
-	if res.Code != 0 {
-		if res.Code == -404 {
+	if res.Code != _codeOK {
+		if res.Code == _codeNotFound {
 			return nil
 		}
 
@@ -387,17 +387,14 @@ func (d *Discovery) polls(ctx context.Context) (apps map[string]*disInstancesInf
 	}
 
 	uri := fmt.Sprintf(_pollURL, host)
-	res := new(struct {
-		Code int                          `json:"code"`
-		Data map[string]*disInstancesInfo `json:"data"`
-	})
+	res := new(discoveryPollsResp)
 
 	// params
 	p := newParams(nil)
-	p.Set("env", config.Env)
-	p.Set("hostname", config.Host)
-	for _, appid := range appIDs {
-		p.Add("appid", appid)
+	p.Set(_paramKeyEnv, config.Env)
+	p.Set(_paramKeyHostname, config.Host)
+	for _, appID := range appIDs {
+		p.Add(_paramKeyAppID, appID)
 	}
 	for _, ts := range lastTss {
 		p.Add("latest_timestamp", strconv.FormatInt(ts, 10))
@@ -414,11 +411,11 @@ func (d *Discovery) polls(ctx context.Context) (apps map[string]*disInstancesInf
 		return nil, err
 	}
 
-	if res.Code != 0 {
-		if res.Code != -304 {
+	if res.Code != _codeOK {
+		if res.Code != _codeNotModified {
 			d.Logger().Errorf("Discovery: client.Get(%s) get error code(%d)", reqURI, res.Code)
 		}
-		err = fmt.Errorf("ErrCode: %d", res.Code)
+		err = fmt.Errorf("discovery.polls failed ErrCode: %d", res.Code)
 		return
 	}
 
