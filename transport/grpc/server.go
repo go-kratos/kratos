@@ -89,6 +89,13 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 	}
 }
 
+// Endpoint with server endpoint.
+func Endpoint(endpoint *url.URL) ServerOption {
+	return func(o *Server) {
+		o.endpoint = endpoint
+	}
+}
+
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
@@ -151,6 +158,9 @@ func NewServer(opts ...ServerOption) *Server {
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
 	s.once.Do(func() {
+		if s.endpoint != nil {
+			return
+		}
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
 			s.err = err
