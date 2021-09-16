@@ -23,3 +23,7 @@ extend google.protobuf.EnumOptions {
 extend google.protobuf.EnumValueOptions {
   int32 code = 1109;
 }
+
+extend google.protobuf.EnumValueOptions {
+  int32 msg = 1110;
+}
