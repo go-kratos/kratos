@@ -89,8 +89,6 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 	}
 }
 
-
-
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
