@@ -49,7 +49,7 @@ func main() {
 		http.WithDiscovery(r),
 		// 这里使用p2c算法的balancer+静态version=2.0.0的Filter组成一个selector
 		http.WithSelector(
-			p2c.New(p2c.WithFilters(filter.Version("2.0.0"))),
+			p2c.New(p2c.WithFilter(filter.Version("2.0.0"))),
 		),
 	)
 	if err != nil {

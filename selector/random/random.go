@@ -15,8 +15,8 @@ const (
 
 var _ selector.Balancer = &Balancer{} // Name is balancer name
 
-// WithFilters with select filters
-func WithFilters(filters ...selector.Filter) Option {
+// WithFilter with select filters
+func WithFilter(filters ...selector.Filter) Option {
 	return func(o *options) {
 		o.filters = filters
 	}
