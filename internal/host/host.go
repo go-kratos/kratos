@@ -34,17 +34,17 @@ func Port(lis net.Listener) (int, bool) {
 }
 
 // Extract returns a private addr and port.
-func Extract(hostPort string, lis net.Listener) (string, error) {
+func Extract(hostPort string) (string, error) {
 	addr, port, err := net.SplitHostPort(hostPort)
-	if err != nil && lis == nil {
+	if err != nil {
 		return "", err
 	}
-	if lis != nil {
-		if p, ok := Port(lis); ok {
-			port = strconv.Itoa(p)
-		} else {
-			return "", fmt.Errorf("failed to extract port: %v", lis.Addr())
+	// Check if the port is valid
+	if p, err := strconv.ParseUint(port, 10, 16); err != nil || p == 0 {
+		if p == 0 {
+			return "", fmt.Errorf("invalid port: %s", port)
 		}
+		return "", err
 	}
 	if len(addr) > 0 && (addr != "0.0.0.0" && addr != "[::]" && addr != "::") {
 		return net.JoinHostPort(addr, port), nil
@@ -73,5 +73,5 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 			}
 		}
 	}
-	return "", nil
+	return "", fmt.Errorf("invalid address: %s", hostPort)
 }

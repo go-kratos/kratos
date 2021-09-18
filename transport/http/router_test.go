@@ -53,6 +53,7 @@ func loggingFilter(next http.Handler) http.Handler {
 func TestRoute(t *testing.T) {
 	ctx := context.Background()
 	srv := NewServer(
+		RandomAddress(),
 		Filter(corsFilter, loggingFilter),
 	)
 	route := srv.Route("/v1")
@@ -179,7 +180,7 @@ func TestRouter_Group(t *testing.T) {
 }
 
 func TestHandle(t *testing.T) {
-	r := newRouter("/", NewServer())
+	r := newRouter("/", NewServer(RandomAddress()))
 	h := func(i Context) error {
 		return nil
 	}

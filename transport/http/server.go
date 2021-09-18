@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
+	"math/rand"
 	"net"
 	"net/http"
 	"net/url"
@@ -39,6 +41,13 @@ func Network(network string) ServerOption {
 func Address(addr string) ServerOption {
 	return func(s *Server) {
 		s.address = addr
+	}
+}
+
+// RandomAddress with random address.
+func RandomAddress() ServerOption {
+	return func(s *Server) {
+		s.address = fmt.Sprintf("0.0.0.0:%d", 49152+rand.Intn(65535-49152))
 	}
 }
 
@@ -107,6 +116,13 @@ func StrictSlash(strictSlash bool) ServerOption {
 	}
 }
 
+// Listener with net.Listener interface.
+func Listener(lis net.Listener) ServerOption {
+	return func(o *Server) {
+		o.lis = lis
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
@@ -132,7 +148,6 @@ type Server struct {
 func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
 		network:     "tcp",
-		address:     ":0",
 		timeout:     1 * time.Second,
 		dec:         DefaultRequestDecoder,
 		enc:         DefaultResponseEncoder,
@@ -143,6 +158,18 @@ func NewServer(opts ...ServerOption) *Server {
 	for _, o := range opts {
 		o(srv)
 	}
+	var addr string
+	if srv.lis == nil {
+		var err error
+		addr, err = host.Extract(srv.address)
+		if err != nil {
+			panic(fmt.Errorf("server address(%s) is invalid!err:=%v", srv.address, err))
+		}
+	} else {
+		addr = srv.lis.Addr().String()
+	}
+	srv.endpoint = endpoint.NewEndpoint("http", addr, srv.tlsConf != nil)
+
 	srv.router = mux.NewRouter().StrictSlash(srv.strictSlash)
 	srv.router.Use(srv.filter())
 	srv.Server = &http.Server{
@@ -219,38 +246,22 @@ func (s *Server) filter() mux.MiddlewareFunc {
 // examples:
 //   http://127.0.0.1:8000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
-	s.once.Do(func() {
-		lis, err := net.Listen(s.network, s.address)
-		if err != nil {
-			s.err = err
-			return
-		}
-		addr, err := host.Extract(s.address, lis)
-		if err != nil {
-			lis.Close()
-			s.err = err
-			return
-		}
-		s.lis = lis
-
-		s.endpoint = endpoint.NewEndpoint("http", addr, s.tlsConf != nil)
-	})
-	if s.err != nil {
-		return nil, s.err
-	}
 	return s.endpoint, nil
 }
 
 // Start start the HTTP server.
 func (s *Server) Start(ctx context.Context) error {
-	if _, err := s.Endpoint(); err != nil {
-		return err
+	var err error
+	if s.lis == nil {
+		s.lis, err = net.Listen(s.network, s.address)
+		if err != nil {
+			return err
+		}
 	}
 	s.BaseContext = func(net.Listener) context.Context {
 		return ctx
 	}
 	s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
-	var err error
 	if s.tlsConf != nil {
 		err = s.ServeTLS(s.lis, "", "")
 	} else {
