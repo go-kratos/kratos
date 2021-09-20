@@ -13,8 +13,8 @@ import (
 )
 
 func TestApp(t *testing.T) {
-	hs := http.NewServer()
-	gs := grpc.NewServer()
+	hs := http.NewServer(http.Address(":8080"))
+	gs := grpc.NewServer(grpc.Address(":9090"))
 	app := New(
 		Name("kratos"),
 		Version("v1.0.0"),
