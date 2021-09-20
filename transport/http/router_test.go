@@ -94,8 +94,12 @@ func TestRoute(t *testing.T) {
 }
 
 func testRoute(t *testing.T, srv *Server) {
-	port, ok := host.Port(srv.lis)
-	if !ok {
+	url, err := srv.Endpoint()
+	if err != nil {
+		t.Fatalf("srv endpoint error: %v", err)
+	}
+	_, port, err := host.ExtractHostPort(url.Host)
+	if err != nil {
 		t.Fatalf("extract port error: %v", srv.lis)
 	}
 	base := fmt.Sprintf("http://127.0.0.1:%d/v1", port)
