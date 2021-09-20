@@ -3,7 +3,10 @@ package http
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
@@ -36,23 +39,26 @@ type mockRebalancer struct{}
 
 func (m *mockRebalancer) Apply(nodes []selector.Node) {}
 
-type mockDiscoverys struct{}
+type mockDiscoverys struct {
+	isSecure bool
+}
 
-func (*mockDiscoverys) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+func (d *mockDiscoverys) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
 	return nil, nil
 }
 
-func (*mockDiscoverys) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
-	return &mockWatch{}, nil
+func (d *mockDiscoverys) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
+	return &mockWatch{isSecure: d.isSecure}, nil
 }
 
 type mockWatch struct {
-	count int
+	isSecure bool
+	count    int
 }
 
 func (m *mockWatch) Next() ([]*registry.ServiceInstance, error) {
-	if m.count == 0 {
-		m.count++
+	m.count++
+	if m.count == 1 {
 		return nil, errors.New("mock test error")
 	}
 	instance := &registry.ServiceInstance{
@@ -60,7 +66,10 @@ func (m *mockWatch) Next() ([]*registry.ServiceInstance, error) {
 		Name:      "kratos",
 		Version:   "v1",
 		Metadata:  map[string]string{},
-		Endpoints: []string{},
+		Endpoints: []string{fmt.Sprintf("http://127.0.0.1:9001?isSecure=%s", strconv.FormatBool(m.isSecure))},
+	}
+	if m.count > 3 {
+		time.Sleep(time.Millisecond * 500)
 	}
 	return []*registry.ServiceInstance{instance}, nil
 }
@@ -73,10 +82,10 @@ func TestResolver(t *testing.T) {
 	ta := &Target{
 		Scheme:    "http",
 		Authority: "",
-		Endpoint:  "http://127.0.0.1:9001",
+		Endpoint:  "discovery://helloworld",
 	}
-	_, err := newResolver(context.Background(), &mockDiscoverys{}, ta, &mockRebalancer{}, false, false)
+	_, err := newResolver(context.Background(), &mockDiscoverys{true}, ta, &mockRebalancer{}, false, false)
 	assert.Nil(t, err)
-	_, err = newResolver(context.Background(), &mockDiscoverys{}, ta, &mockRebalancer{}, true, false)
+	_, err = newResolver(context.Background(), &mockDiscoverys{false}, ta, &mockRebalancer{}, true, true)
 	assert.Nil(t, err)
 }
