@@ -127,17 +127,17 @@ func NewServer(opts ...ServerOption) *Server {
 		o(srv)
 	}
 	if srv.address == "" && srv.lis == nil {
-		panic("[http server] address and listener cannot be empty at the same time.")
+		panic("[grpc server] address and listener cannot be empty at the same time.")
 	} else if srv.address != "" && srv.lis != nil {
-		panic("[http server] address and listener cannot be non-empty at the same time.")
+		panic("[grpc server] address and listener cannot be non-empty at the same time.")
 	} else if srv.lis != nil {
 		srv.address = srv.lis.Addr().String()
 	}
 	hostPort, err := host.Extract(srv.address)
 	if err != nil {
-		panic(fmt.Errorf("[http server] address(%s) is invalid,err:=%v", srv.address, err))
+		panic(fmt.Errorf("[grpc server] address(%s) is invalid,err:=%v", srv.address, err))
 	}
-	srv.endpoint = endpoint.NewEndpoint("http", hostPort, srv.tlsConf != nil)
+	srv.endpoint = endpoint.NewEndpoint("grpc", hostPort, srv.tlsConf != nil)
 
 	ints := []grpc.UnaryServerInterceptor{
 		srv.unaryServerInterceptor(),
