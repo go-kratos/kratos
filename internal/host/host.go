@@ -40,8 +40,8 @@ func Extract(hostPort string) (string, error) {
 		return "", err
 	}
 	// Check if the port is valid
-	if _, err := strconv.ParseUint(port, 10, 16); err != nil {
-		return "", err
+	if _, e := strconv.ParseUint(port, 10, 16); e != nil {
+		return "", e
 	}
 	if len(addr) > 0 && (addr != "0.0.0.0" && addr != "[::]" && addr != "::") {
 		return net.JoinHostPort(addr, port), nil

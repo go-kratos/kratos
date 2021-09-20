@@ -140,7 +140,9 @@ func (a *App) Stop() error {
 		a.cancel()
 	}
 	for _, srv := range a.opts.servers {
-		srv.Stop(context.Background())
+		if err := srv.Stop(context.Background()); err != nil {
+			return err
+		}
 	}
 	return nil
 }
