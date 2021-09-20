@@ -3,6 +3,9 @@ package grpc
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
+	"math/rand"
+	"net"
 	"net/url"
 	"strings"
 	"testing"
@@ -17,12 +20,18 @@ import (
 
 type testKey struct{}
 
+func randAddr() ServerOption {
+	return Address(fmt.Sprintf("0.0.0.0:%d", 49152+rand.Intn(65535-49152)))
+}
+
 func TestServer(t *testing.T) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, testKey{}, "test")
-	srv := NewServer(Middleware([]middleware.Middleware{
-		func(middleware.Handler) middleware.Handler { return nil },
-	}...))
+	srv := NewServer(
+		randAddr(),
+		Middleware([]middleware.Middleware{
+			func(middleware.Handler) middleware.Handler { return nil },
+		}...))
 
 	if e, err := srv.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
 		t.Fatal(e, err)
@@ -154,4 +163,15 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.Equal(t, "hi", rv.(*testResp).Data)
+}
+
+func TestServerAddress(t *testing.T) {
+	s := NewServer(Address("0.0.0.0:8000"))
+	e, err := s.Endpoint()
+	assert.Nil(t, err)
+	host, port, err := net.SplitHostPort(e.Host)
+	assert.Nil(t, err)
+	assert.Equal(t, "8000", port)
+	ip := net.ParseIP(host)
+	assert.NotNil(t, ip)
 }

@@ -3,6 +3,8 @@ package grpc
 import (
 	"context"
 	"crypto/tls"
+	"errors"
+	"fmt"
 	"net"
 	"net/url"
 	"sync"
@@ -75,6 +77,13 @@ func TLSConfig(c *tls.Config) ServerOption {
 	}
 }
 
+// Listener with net.Listener interface.
+func Listener(lis net.Listener) ServerOption {
+	return func(s *Server) {
+		s.lis = lis
+	}
+}
+
 // UnaryInterceptor returns a ServerOption that sets the UnaryServerInterceptor for the server.
 func UnaryInterceptor(in ...grpc.UnaryServerInterceptor) ServerOption {
 	return func(s *Server) {
@@ -114,7 +123,6 @@ func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
 		baseCtx: context.Background(),
 		network: "tcp",
-		address: ":0",
 		timeout: 1 * time.Second,
 		health:  health.NewServer(),
 		log:     log.NewHelper(log.DefaultLogger),
@@ -122,6 +130,21 @@ func NewServer(opts ...ServerOption) *Server {
 	for _, o := range opts {
 		o(srv)
 	}
+	var addr string
+	if srv.lis == nil {
+		if srv.address == "" {
+			panic(errors.New("Server address cannot be empty"))
+		}
+		var err error
+		addr, err = host.Extract(srv.address)
+		if err != nil {
+			panic(fmt.Errorf("server address(%s) is invalid,err:=%v", srv.address, err))
+		}
+	} else {
+		addr = srv.lis.Addr().String()
+	}
+	srv.endpoint = endpoint.NewEndpoint("http", addr, srv.tlsConf != nil)
+
 	ints := []grpc.UnaryServerInterceptor{
 		srv.unaryServerInterceptor(),
 	}
@@ -150,31 +173,17 @@ func NewServer(opts ...ServerOption) *Server {
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
-	s.once.Do(func() {
-		lis, err := net.Listen(s.network, s.address)
-		if err != nil {
-			s.err = err
-			return
-		}
-		addr, err := host.Extract(s.address, lis)
-		if err != nil {
-			_ = lis.Close()
-			s.err = err
-			return
-		}
-		s.lis = lis
-		s.endpoint = endpoint.NewEndpoint("grpc", addr, s.tlsConf != nil)
-	})
-	if s.err != nil {
-		return nil, s.err
-	}
 	return s.endpoint, nil
 }
 
 // Start start the gRPC server.
 func (s *Server) Start(ctx context.Context) error {
-	if _, err := s.Endpoint(); err != nil {
-		return err
+	var err error
+	if s.lis == nil {
+		s.lis, err = net.Listen(s.network, s.address)
+		if err != nil {
+			return err
+		}
 	}
 	s.baseCtx = ctx
 	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
