@@ -147,20 +147,18 @@ func NewServer(opts ...ServerOption) *Server {
 	for _, o := range opts {
 		o(srv)
 	}
-	var addr string
-	if srv.lis == nil {
-		if srv.address == "" {
-			panic(errors.New("Server address cannot be empty"))
-		}
-		var err error
-		addr, err = host.Extract(srv.address)
-		if err != nil {
-			panic(fmt.Errorf("server address(%s) is invalid,err:=%v", srv.address, err))
-		}
-	} else {
-		addr = srv.lis.Addr().String()
+	if srv.address == "" && srv.lis == nil {
+		panic("[http server] address and listener cannot be empty at the same time.")
+	} else if srv.address != "" && srv.lis != nil {
+		panic("[http server] address and listener cannot be non-empty at the same time.")
+	} else if srv.lis != nil {
+		srv.address = srv.lis.Addr().String()
 	}
-	srv.endpoint = endpoint.NewEndpoint("http", addr, srv.tlsConf != nil)
+	hostPort, err := host.Extract(srv.address)
+	if err != nil {
+		panic(fmt.Errorf("[http server] address(%s) is invalid,err:=%v", srv.address, err))
+	}
+	srv.endpoint = endpoint.NewEndpoint("http", hostPort, srv.tlsConf != nil)
 
 	srv.router = mux.NewRouter().StrictSlash(srv.strictSlash)
 	srv.router.Use(srv.filter())

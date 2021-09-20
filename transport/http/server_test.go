@@ -283,7 +283,7 @@ func (l *mockListener) Addr() net.Addr {
 }
 
 func TestServerListener(t *testing.T) {
-	s := NewServer(Listener(&mockListener{"192.168.254.1:8090"}))
+	s := NewServer(Listener(&mockListener{":8090"}))
 	e, err := s.Endpoint()
 	assert.Nil(t, err)
 	host, port, err := net.SplitHostPort(e.Host)

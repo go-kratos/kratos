@@ -175,3 +175,42 @@ func TestServerAddress(t *testing.T) {
 	ip := net.ParseIP(host)
 	assert.NotNil(t, ip)
 }
+
+type mockAddr struct {
+	addr string
+}
+
+func (a mockAddr) Network() string {
+	return "tcp"
+}
+
+func (a mockAddr) String() string {
+	return a.addr
+}
+
+type mockListener struct {
+	addr string
+}
+
+func (l *mockListener) Accept() (c net.Conn, err error) {
+	return
+}
+
+func (l *mockListener) Close() (err error) {
+	return
+}
+
+func (l *mockListener) Addr() net.Addr {
+	return mockAddr{addr: l.addr}
+}
+
+func TestServerListener(t *testing.T) {
+	s := NewServer(Listener(&mockListener{":8090"}))
+	e, err := s.Endpoint()
+	assert.Nil(t, err)
+	host, port, err := net.SplitHostPort(e.Host)
+	assert.Nil(t, err)
+	assert.Equal(t, "8090", port)
+	ip := net.ParseIP(host)
+	assert.NotNil(t, ip)
+}

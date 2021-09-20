@@ -67,7 +67,7 @@ func TestExtract(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.addr, func(t *testing.T) {
-			res, err := Extract(test.addr, nil)
+			res, err := Extract(test.addr)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -78,20 +78,17 @@ func TestExtract(t *testing.T) {
 	}
 	lis, err := net.Listen("tcp", ":12345")
 	assert.NoError(t, err)
-	res, err := Extract("", lis)
+	res, err := Extract(":12345")
 	assert.NoError(t, err)
-	expect, err := Extract(lis.Addr().String(), nil)
+	expect, err := Extract(lis.Addr().String())
 	assert.NoError(t, err)
 	assert.Equal(t, expect, res)
 }
 
 func TestExtract2(t *testing.T) {
 	addr := "localhost:9001"
-	lis, err := net.Listen("tcp", addr)
-	if err == nil {
-		assert.Nil(t, err)
-	}
-	res, err := Extract(addr, lis)
+
+	res, err := Extract(addr)
 	if err == nil {
 		assert.Nil(t, err)
 	}
