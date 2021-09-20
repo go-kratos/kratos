@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net"
 	"net/url"
-	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
@@ -104,8 +103,6 @@ type Server struct {
 	baseCtx    context.Context
 	tlsConf    *tls.Config
 	lis        net.Listener
-	once       sync.Once
-	err        error
 	network    string
 	address    string
 	endpoint   *url.URL

@@ -8,7 +8,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
@@ -120,9 +119,7 @@ type Server struct {
 	*http.Server
 	lis         net.Listener
 	tlsConf     *tls.Config
-	once        sync.Once
 	endpoint    *url.URL
-	err         error
 	network     string
 	address     string
 	timeout     time.Duration
