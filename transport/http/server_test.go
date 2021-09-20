@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
+	"net"
 	"net/http"
 	"strings"
 	"testing"
@@ -24,12 +26,16 @@ type testData struct {
 	Path string `json:"path"`
 }
 
+func randAddr() ServerOption {
+	return Address(fmt.Sprintf("0.0.0.0:%d", 49152+rand.Intn(65535-49152)))
+}
+
 func TestServer(t *testing.T) {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	}
 	ctx := context.Background()
-	srv := NewServer(RandomAddress())
+	srv := NewServer(randAddr())
 	srv.HandleFunc("/index", fn)
 	srv.HandleFunc("/index/{id:[0-9]+}", fn)
 	srv.HandleHeader("content-type", "application/grpc-web+json", func(w http.ResponseWriter, r *http.Request) {
@@ -235,4 +241,54 @@ func TestTLSConfig(t *testing.T) {
 	v := &tls.Config{}
 	TLSConfig(v)(o)
 	assert.Equal(t, v, o.tlsConf)
+}
+
+func TestServerAddress(t *testing.T) {
+	s := NewServer(Address("0.0.0.0:8000"))
+	e, err := s.Endpoint()
+	assert.Nil(t, err)
+	host, port, err := net.SplitHostPort(e.Host)
+	assert.Nil(t, err)
+	assert.Equal(t, "8000", port)
+	ip := net.ParseIP(host)
+	assert.NotNil(t, ip)
+}
+
+type mockAddr struct {
+	addr string
+}
+
+func (a mockAddr) Network() string {
+	return "tcp"
+}
+
+func (a mockAddr) String() string {
+	return a.addr
+}
+
+type mockListener struct {
+	addr string
+}
+
+func (l *mockListener) Accept() (c net.Conn, err error) {
+	return
+}
+
+func (l *mockListener) Close() (err error) {
+	return
+}
+
+func (l *mockListener) Addr() net.Addr {
+	return mockAddr{addr: l.addr}
+}
+
+func TestServerListener(t *testing.T) {
+	s := NewServer(Listener(&mockListener{"192.168.254.1:8090"}))
+	e, err := s.Endpoint()
+	assert.Nil(t, err)
+	host, port, err := net.SplitHostPort(e.Host)
+	assert.Nil(t, err)
+	assert.Equal(t, "8090", port)
+	ip := net.ParseIP(host)
+	assert.NotNil(t, ip)
 }

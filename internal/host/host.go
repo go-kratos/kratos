@@ -40,10 +40,7 @@ func Extract(hostPort string) (string, error) {
 		return "", err
 	}
 	// Check if the port is valid
-	if p, err := strconv.ParseUint(port, 10, 16); err != nil || p == 0 {
-		if p == 0 {
-			return "", fmt.Errorf("invalid port: %s", port)
-		}
+	if _, err := strconv.ParseUint(port, 10, 16); err != nil {
 		return "", err
 	}
 	if len(addr) > 0 && (addr != "0.0.0.0" && addr != "[::]" && addr != "::") {

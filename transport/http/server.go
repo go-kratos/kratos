@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"math/rand"
 	"net"
 	"net/http"
 	"net/url"
@@ -41,13 +40,6 @@ func Network(network string) ServerOption {
 func Address(addr string) ServerOption {
 	return func(s *Server) {
 		s.address = addr
-	}
-}
-
-// RandomAddress with random address.
-func RandomAddress() ServerOption {
-	return func(s *Server) {
-		s.address = fmt.Sprintf("0.0.0.0:%d", 49152+rand.Intn(65535-49152))
 	}
 }
 
@@ -160,10 +152,13 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 	var addr string
 	if srv.lis == nil {
+		if srv.address == "" {
+			panic(errors.New("Server address cannot be empty"))
+		}
 		var err error
 		addr, err = host.Extract(srv.address)
 		if err != nil {
-			panic(fmt.Errorf("server address(%s) is invalid!err:=%v", srv.address, err))
+			panic(fmt.Errorf("server address(%s) is invalid,err:=%v", srv.address, err))
 		}
 	} else {
 		addr = srv.lis.Addr().String()
