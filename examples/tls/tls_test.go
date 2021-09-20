@@ -31,8 +31,8 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 }
 
 func startServer(r registry.Registrar, c *tls.Config) (app *kratos.App, err error) {
-	httpSrv := http.NewServer(http.Address(":8000"), http.TLSConfig(c))
-	grpcSrv := grpc.NewServer(grpc.Address(":9000"), grpc.TLSConfig(c))
+	httpSrv := http.NewServer(http.Address(":8002"), http.TLSConfig(c))
+	grpcSrv := grpc.NewServer(grpc.Address(":9002"), grpc.TLSConfig(c))
 
 	s := &server{}
 	pb.RegisterGreeterServer(grpcSrv, s)
