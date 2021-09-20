@@ -139,6 +139,9 @@ func (a *App) Stop() error {
 	if a.cancel != nil {
 		a.cancel()
 	}
+	for _, srv := range a.opts.servers {
+		srv.Stop(context.Background())
+	}
 	return nil
 }
 
