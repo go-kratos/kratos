@@ -75,6 +75,15 @@ func TestRegistry(t *testing.T) {
 	if len(res) != 0 {
 		t.Errorf("not expected empty")
 	}
+
+	s = &registry.ServiceInstance{
+		ID:   "0",
+		Name: "hello/",
+	}
+	_, err = r.Watch(ctx, s.Name)
+	if err != ErrServiceName {
+		t.Fatal("err failed")
+	}
 }
 
 func TestHeartBeat(t *testing.T) {

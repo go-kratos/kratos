@@ -2,8 +2,10 @@ package etcd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
@@ -13,6 +15,8 @@ import (
 var (
 	_ registry.Registrar = &Registry{}
 	_ registry.Discovery = &Registry{}
+
+	ErrServiceName = errors.New(`service name cannot contain "/"`)
 )
 
 // Option is etcd registry option.
@@ -122,6 +126,9 @@ func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.Ser
 
 // Watch creates a watcher according to the service name.
 func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, error) {
+	if strings.Contains(name, "/") {
+		return nil, ErrServiceName
+	}
 	key := fmt.Sprintf("%s/%s/", r.opts.namespace, name)
 	return newWatcher(ctx, key, r.client)
 }
