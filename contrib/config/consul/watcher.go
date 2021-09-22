@@ -1,4 +1,4 @@
-package etcd
+package consul
 
 import (
 	"github.com/go-kratos/kratos/v2/config"

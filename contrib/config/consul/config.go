@@ -1,4 +1,4 @@
-package etcd
+package consul
 
 import (
 	"context"
