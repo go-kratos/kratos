@@ -12,9 +12,7 @@ const testKey = "kratos/test/config/key"
 
 func TestConfig(t *testing.T) {
 	client, err := api.NewClient(&api.Config{
-		// Address: "127.0.0.1:8500",
-		Address: "10.70.2.173:8500",
-		Token:   "75d7f219-163b-ff19-6730-b5b5b3872e5e",
+		Address: "127.0.0.1:8500",
 	})
 	if err != nil {
 		t.Fatal(err)
