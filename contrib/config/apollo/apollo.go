@@ -2,6 +2,7 @@ package apollo
 
 import (
 	"github.com/go-kratos/kratos/v2/config"
+	"strings"
 
 	"github.com/apolloconfig/agollo/v4"
 	apolloConfig "github.com/apolloconfig/agollo/v4/env/config"
@@ -9,6 +10,7 @@ import (
 
 type apollo struct {
 	client *agollo.Client
+	opts   options
 }
 
 type Option func(*options)
@@ -65,7 +67,11 @@ func WithSecret(secret string) Option {
 }
 
 // WithNamespace with apollo config namespace name
+// Because of the load func parameters, There can only be one namespace here
 func WithNamespace(name string) Option {
+	if strings.Contains(name, ",") {
+		panic("There can only be one namespace here")
+	}
 	return func(o *options) {
 		o.namespace = name
 	}
@@ -89,12 +95,15 @@ func NewSource(opts ...Option) config.Source {
 	if err != nil {
 		panic(err)
 	}
-	return &apollo{client}
+	return &apollo{
+		opts:   op,
+		client: client,
+	}
 }
 
 func (e *apollo) load() []*config.KeyValue {
 	kv := make([]*config.KeyValue, 0)
-	e.client.GetDefaultConfigCache().Range(func(key, value interface{}) bool {
+	e.client.GetConfigCache(e.opts.namespace).Range(func(key, value interface{}) bool {
 		kv = append(kv, &config.KeyValue{
 			Key:   key.(string),
 			Value: []byte(value.(string)),
