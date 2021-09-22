@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"net"
 	"net/http"
 	"strings"
@@ -26,16 +25,12 @@ type testData struct {
 	Path string `json:"path"`
 }
 
-func randAddr() ServerOption {
-	return Address(fmt.Sprintf("0.0.0.0:%d", 49152+rand.Intn(65535-49152)))
-}
-
 func TestServer(t *testing.T) {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	}
 	ctx := context.Background()
-	srv := NewServer(randAddr())
+	srv := NewServer(RandomPort())
 	srv.HandleFunc("/index", fn)
 	srv.HandleFunc("/index/{id:[0-9]+}", fn)
 	srv.HandleHeader("content-type", "application/grpc-web+json", func(w http.ResponseWriter, r *http.Request) {

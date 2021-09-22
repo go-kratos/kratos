@@ -33,8 +33,8 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 }
 
 func startServer(r registry.Registrar) (app *kratos.App, err error) {
-	httpSrv := http.NewServer(http.Address(fmt.Sprintf(":%d", 49152+rand.Intn(65535-49152))))
-	grpcSrv := grpc.NewServer(grpc.Address(fmt.Sprintf(":%d", 49152+rand.Intn(65535-49152))))
+	httpSrv := http.NewServer(http.RandomPort())
+	grpcSrv := grpc.NewServer(grpc.RandomPort())
 
 	s := &server{}
 	pb.RegisterGreeterServer(grpcSrv, s)

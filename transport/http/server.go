@@ -114,6 +114,18 @@ func Listener(lis net.Listener) ServerOption {
 	}
 }
 
+// RandomPort with random port listener.
+// If the listener initialization fails, panic immediately.
+func RandomPort() ServerOption {
+	lis, err := net.Listen("tcp", ":0")
+	if err != nil {
+		panic(fmt.Errorf("[http server]listen random port failed,err:=%v", err))
+	}
+	return func(o *Server) {
+		o.lis = lis
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server

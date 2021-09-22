@@ -3,8 +3,6 @@ package grpc
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
-	"math/rand"
 	"net"
 	"net/url"
 	"strings"
@@ -20,15 +18,11 @@ import (
 
 type testKey struct{}
 
-func randAddr() ServerOption {
-	return Address(fmt.Sprintf("0.0.0.0:%d", 49152+rand.Intn(65535-49152)))
-}
-
 func TestServer(t *testing.T) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, testKey{}, "test")
 	srv := NewServer(
-		randAddr(),
+		RandomPort(),
 		Middleware([]middleware.Middleware{
 			func(middleware.Handler) middleware.Handler { return nil },
 		}...))

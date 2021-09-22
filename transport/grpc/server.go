@@ -82,6 +82,18 @@ func Listener(lis net.Listener) ServerOption {
 	}
 }
 
+// RandomPort with random port listener.
+// If the listener initialization fails, panic immediately.
+func RandomPort() ServerOption {
+	lis, err := net.Listen("tcp", ":0")
+	if err != nil {
+		panic(fmt.Errorf("[grpc server]listen random port failed,err:=%v", err))
+	}
+	return func(o *Server) {
+		o.lis = lis
+	}
+}
+
 // UnaryInterceptor returns a ServerOption that sets the UnaryServerInterceptor for the server.
 func UnaryInterceptor(in ...grpc.UnaryServerInterceptor) ServerOption {
 	return func(s *Server) {
