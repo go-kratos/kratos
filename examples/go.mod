@@ -34,10 +34,10 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/etcd/client/v3 v3.5.0
-	go.opentelemetry.io/otel v1.0.0-RC3
-	go.opentelemetry.io/otel/exporters/jaeger v1.0.0-RC3
-	go.opentelemetry.io/otel/sdk v1.0.0-RC3
-	go.opentelemetry.io/otel/trace v1.0.0-RC3
+	go.opentelemetry.io/otel v1.0.0
+	go.opentelemetry.io/otel/exporters/jaeger v1.0.0
+	go.opentelemetry.io/otel/sdk v1.0.0
+	go.opentelemetry.io/otel/trace v1.0.0
 	go.uber.org/zap v1.19.0
 	golang.org/x/text v0.3.7
 	google.golang.org/genproto v0.0.0-20210831024726-fe130286e0e2
