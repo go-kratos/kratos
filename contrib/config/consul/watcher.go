@@ -33,7 +33,6 @@ func newWatcher(s *source) (*watcher, error) {
 	}
 
 	wp, err := watch.Parse(map[string]interface{}{"type": "keyprefix", "prefix": s.options.path})
-
 	if err != nil {
 		return nil, err
 	}
@@ -41,24 +40,29 @@ func newWatcher(s *source) (*watcher, error) {
 	wp.Handler = w.handle
 
 	// wp.Run is a blocking call and will prevent newWatcher from returning
-	go wp.RunWithClientAndHclog(s.client, nil)
+	go func() {
+		err := wp.RunWithClientAndHclog(s.client, nil)
+		if err != nil {
+			panic(err)
+		}
+	}()
 
 	return w, nil
 }
 
-func (s *watcher) Next() ([]*config.KeyValue, error) {
+func (w *watcher) Next() ([]*config.KeyValue, error) {
 	select {
-	case _, ok := <-s.ch:
+	case _, ok := <-w.ch:
 		if !ok {
 			return nil, nil
 		}
-		return s.source.Load()
-	case <-s.closeChan:
+		return w.source.Load()
+	case <-w.closeChan:
 		return nil, nil
 	}
 }
 
-func (s *watcher) Stop() error {
-	close(s.closeChan)
+func (w *watcher) Stop() error {
+	close(w.closeChan)
 	return nil
 }

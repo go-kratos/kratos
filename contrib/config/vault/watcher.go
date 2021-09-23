@@ -18,12 +18,12 @@ func newWatcher(s *source) (*watcher, error) {
 	return w, nil
 }
 
-func (s *watcher) Next() ([]*config.KeyValue, error) {
-	<-s.closeChan
+func (w *watcher) Next() ([]*config.KeyValue, error) {
+	<-w.closeChan
 	return nil, nil
 }
 
-func (s *watcher) Stop() error {
-	close(s.closeChan)
+func (w *watcher) Stop() error {
+	close(w.closeChan)
 	return nil
 }
