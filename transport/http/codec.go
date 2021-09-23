@@ -1,8 +1,10 @@
 package http
 
 import (
+	"compress/gzip"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
@@ -23,6 +25,12 @@ type EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
 
 // DefaultRequestDecoder decodes the request body to object.
 func DefaultRequestDecoder(r *http.Request, v interface{}) error {
+	if strings.EqualFold(r.Header.Get("Content-Encoding"), "gzip") {
+		var err error
+		if r.Body, err = gzip.NewReader(r.Body); err != nil {
+			return errors.BadRequest("CODEC", err.Error())
+		}
+	}
 	codec, ok := CodecForRequest(r, "Content-Type")
 	if !ok {
 		return errors.BadRequest("CODEC", r.Header.Get("Content-Type"))
