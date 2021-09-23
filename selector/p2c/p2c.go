@@ -18,13 +18,33 @@ const (
 
 var _ selector.Balancer = &Balancer{}
 
+// WithFilter with select filters
+func WithFilter(filters ...selector.Filter) Option {
+	return func(o *options) {
+		o.filters = filters
+	}
+}
+
+// Option is random builder option.
+type Option func(o *options)
+
+// options is random builder options
+type options struct {
+	filters []selector.Filter
+}
+
 // New creates a p2c selector.
-func New() selector.Selector {
+func New(opts ...Option) selector.Selector {
+	var option options
+	for _, opt := range opts {
+		opt(&option)
+	}
 	return &selector.Default{
 		NodeBuilder: &ewma.Builder{},
 		Balancer: &Balancer{
 			r: rand.New(rand.NewSource(time.Now().UnixNano())),
 		},
+		Filters: option.filters,
 	}
 }
 

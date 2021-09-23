@@ -1,4 +1,4 @@
-package balancer
+package grpc
 
 import (
 	"sync"
@@ -8,6 +8,8 @@ import (
 	"github.com/go-kratos/kratos/v2/selector/node"
 	"github.com/go-kratos/kratos/v2/selector/p2c"
 	"github.com/go-kratos/kratos/v2/selector/random"
+	"github.com/go-kratos/kratos/v2/selector/wrr"
+	"github.com/go-kratos/kratos/v2/transport"
 
 	gBalancer "google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
@@ -24,6 +26,7 @@ var (
 func init() {
 	// inject global grpc balancer
 	SetGlobalBalancer(random.Name, random.New())
+	SetGlobalBalancer(wrr.Name, wrr.New())
 	SetGlobalBalancer(p2c.Name, p2c.New())
 }
 
@@ -74,7 +77,14 @@ type Picker struct {
 
 // Pick pick instances.
 func (p *Picker) Pick(info gBalancer.PickInfo) (gBalancer.PickResult, error) {
-	n, done, err := p.selector.Select(info.Ctx)
+	var filters []selector.Filter
+	if tr, ok := transport.FromClientContext(info.Ctx); ok {
+		if gtr, ok := tr.(*Transport); ok {
+			filters = gtr.Filters()
+		}
+	}
+
+	n, done, err := p.selector.Select(info.Ctx, selector.WithFilter(filters...))
 	if err != nil {
 		return gBalancer.PickResult{}, err
 	}
