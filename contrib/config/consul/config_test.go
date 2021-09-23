@@ -32,7 +32,7 @@ func TestConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(kvs) != 1 || kvs[0].Key != testKey || string(kvs[0].Value) != "test config" {
+	if len(kvs) != 1 || kvs[0].Key != "key" || string(kvs[0].Value) != "test config" {
 		t.Fatal("config error")
 	}
 
@@ -52,7 +52,7 @@ func TestConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(kvs) != 1 || kvs[0].Key != testKey || string(kvs[0].Value) != "new config" {
+	if len(kvs) != 1 || kvs[0].Key != "key" || string(kvs[0].Value) != "new config" {
 		t.Fatal("config error")
 	}
 

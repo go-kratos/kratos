@@ -15,7 +15,7 @@ func TestVaultRead(t *testing.T) {
 	vaultValue := map[string]interface{}{"user": "myuser", "password": "mypassword2"}
 
 	client, err := api.NewClient(&api.Config{
-		Address: "http://10.70.2.173:8200",
+		Address: "http://127.0.0.1:8200",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -54,13 +54,11 @@ func TestVaultRead(t *testing.T) {
 
 func TestConfigWithVault(t *testing.T) {
 	client, err := api.NewClient(&api.Config{
-		Address: "http://10.70.2.173:8200",
+		Address: "http://127.0.0.1:8200",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	client.SetToken("12ff741b-4438-6cb5-63f0-0b6a11a3f4cc")
 
 	vaultSrc, err := New(client, WithPath(testPath))
 	if err != nil {

@@ -3,6 +3,7 @@ package consul
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/hashicorp/consul/api"
@@ -62,10 +63,15 @@ func (s *source) Load() ([]*config.KeyValue, error) {
 		return nil, err
 	}
 
+	pathPrefix := s.options.path
+	if !strings.HasSuffix(s.options.path, "/") {
+		pathPrefix = pathPrefix + "/"
+	}
+
 	kvs := make([]*config.KeyValue, 0)
 	for _, item := range kv {
 		kvs = append(kvs, &config.KeyValue{
-			Key:   string(item.Key),
+			Key:   string(item.Key[len(pathPrefix):]),
 			Value: item.Value,
 		})
 	}
