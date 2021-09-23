@@ -35,11 +35,13 @@ func Network(network string) ServerOption {
 	}
 }
 
-// Address with server address.
+// Address with server address listener.
 func Address(addr string) ServerOption {
-	return func(s *Server) {
-		s.address = addr
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		panic(fmt.Errorf("[http server]listen address(%s) failed,err:=%v", addr, err))
 	}
+	return Listener(lis)
 }
 
 // Timeout with server timeout.
@@ -114,18 +116,6 @@ func Listener(lis net.Listener) ServerOption {
 	}
 }
 
-// RandomPort with random port listener.
-// If the listener initialization fails, panic immediately.
-func RandomPort() ServerOption {
-	lis, err := net.Listen("tcp", ":0")
-	if err != nil {
-		panic(fmt.Errorf("[http server]listen random port failed,err:=%v", err))
-	}
-	return func(o *Server) {
-		o.lis = lis
-	}
-}
-
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
@@ -133,7 +123,6 @@ type Server struct {
 	tlsConf     *tls.Config
 	endpoint    *url.URL
 	network     string
-	address     string
 	timeout     time.Duration
 	filters     []FilterFunc
 	ms          []middleware.Middleware
@@ -159,16 +148,16 @@ func NewServer(opts ...ServerOption) *Server {
 	for _, o := range opts {
 		o(srv)
 	}
-	if srv.address == "" && srv.lis == nil {
-		panic("[http server] address and listener cannot be empty at the same time.")
-	} else if srv.address != "" && srv.lis != nil {
-		panic("[http server] address and listener cannot be non-empty at the same time.")
-	} else if srv.lis != nil {
-		srv.address = srv.lis.Addr().String()
+	if srv.lis == nil {
+		lis, err := net.Listen("tcp", ":0")
+		if err != nil {
+			panic(fmt.Errorf("[http server]listen random port failed,err:=%v", err))
+		}
+		srv.lis = lis
 	}
-	hostPort, err := host.Extract(srv.address)
+	hostPort, err := host.Extract(srv.lis.Addr().String())
 	if err != nil {
-		panic(fmt.Errorf("[http server] address(%s) is invalid,err:=%v", srv.address, err))
+		panic(fmt.Errorf("[http server] address(%s) is invalid,err:=%v", srv.lis.Addr().String(), err))
 	}
 	srv.endpoint = endpoint.NewEndpoint("http", hostPort, srv.tlsConf != nil)
 
@@ -254,12 +243,6 @@ func (s *Server) Endpoint() (*url.URL, error) {
 // Start start the HTTP server.
 func (s *Server) Start(ctx context.Context) error {
 	var err error
-	if s.lis == nil {
-		s.lis, err = net.Listen(s.network, s.address)
-		if err != nil {
-			return err
-		}
-	}
 	s.BaseContext = func(net.Listener) context.Context {
 		return ctx
 	}

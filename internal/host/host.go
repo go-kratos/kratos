@@ -1,7 +1,6 @@
 package host
 
 import (
-	"fmt"
 	"net"
 	"strconv"
 )
@@ -70,5 +69,5 @@ func Extract(hostPort string) (string, error) {
 			}
 		}
 	}
-	return "", fmt.Errorf("invalid address: %s", hostPort)
+	return "", nil
 }

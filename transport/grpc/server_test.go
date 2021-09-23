@@ -22,7 +22,6 @@ func TestServer(t *testing.T) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, testKey{}, "test")
 	srv := NewServer(
-		RandomPort(),
 		Middleware([]middleware.Middleware{
 			func(middleware.Handler) middleware.Handler { return nil },
 		}...))
@@ -60,13 +59,6 @@ func TestNetwork(t *testing.T) {
 	v := "abc"
 	Network(v)(o)
 	assert.Equal(t, v, o.network)
-}
-
-func TestAddress(t *testing.T) {
-	o := &Server{}
-	v := "abc"
-	Address(v)(o)
-	assert.Equal(t, v, o.address)
 }
 
 func TestTimeout(t *testing.T) {
@@ -160,12 +152,24 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 }
 
 func TestServerAddress(t *testing.T) {
-	s := NewServer(Address("0.0.0.0:8000"))
+	s := NewServer(Address("0.0.0.0:9000"))
 	e, err := s.Endpoint()
 	assert.Nil(t, err)
 	host, port, err := net.SplitHostPort(e.Host)
 	assert.Nil(t, err)
-	assert.Equal(t, "8000", port)
+	assert.Equal(t, "9000", port)
+	ip := net.ParseIP(host)
+	assert.NotNil(t, ip)
+}
+
+func TestServerSepcificAddress(t *testing.T) {
+	s := NewServer(Address("127.0.0.1:9001"))
+	e, err := s.Endpoint()
+	assert.Nil(t, err)
+	host, port, err := net.SplitHostPort(e.Host)
+	assert.Nil(t, err)
+	assert.Equal(t, "9001", port)
+	assert.Equal(t, "127.0.0.1", host)
 	ip := net.ParseIP(host)
 	assert.NotNil(t, ip)
 }

@@ -30,7 +30,7 @@ func TestServer(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	}
 	ctx := context.Background()
-	srv := NewServer(RandomPort())
+	srv := NewServer()
 	srv.HandleFunc("/index", fn)
 	srv.HandleFunc("/index/{id:[0-9]+}", fn)
 	srv.HandleHeader("content-type", "application/grpc-web+json", func(w http.ResponseWriter, r *http.Request) {
@@ -183,13 +183,6 @@ func TestNetwork(t *testing.T) {
 	assert.Equal(t, v, o.network)
 }
 
-func TestAddress(t *testing.T) {
-	o := &Server{}
-	v := "abc"
-	Address(v)(o)
-	assert.Equal(t, v, o.address)
-}
-
 func TestTimeout(t *testing.T) {
 	o := &Server{}
 	v := time.Duration(123)
@@ -245,6 +238,18 @@ func TestServerAddress(t *testing.T) {
 	host, port, err := net.SplitHostPort(e.Host)
 	assert.Nil(t, err)
 	assert.Equal(t, "8000", port)
+	ip := net.ParseIP(host)
+	assert.NotNil(t, ip)
+}
+
+func TestServerSepcificAddress(t *testing.T) {
+	s := NewServer(Address("127.0.0.1:8001"))
+	e, err := s.Endpoint()
+	assert.Nil(t, err)
+	host, port, err := net.SplitHostPort(e.Host)
+	assert.Nil(t, err)
+	assert.Equal(t, "8001", port)
+	assert.Equal(t, "127.0.0.1", host)
 	ip := net.ParseIP(host)
 	assert.NotNil(t, ip)
 }
