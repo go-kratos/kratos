@@ -98,7 +98,7 @@ func populateValues(s string) []string {
 
 	a := make([]string, n)
 	na := 0
-	fieldStart := 0
+	var fieldStart int
 	i := 0
 	// Skip seps in the front of the input.
 	for i < len(s) && separator[s[i]] != 0 {
