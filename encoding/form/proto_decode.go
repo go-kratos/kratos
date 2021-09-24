@@ -84,6 +84,47 @@ func getDescriptorByFieldAndName(fields protoreflect.FieldDescriptors, fieldName
 	return fd
 }
 
+var separator = [256]uint8{',': 1, '|': 1, '\t': 1, ' ': 1}
+
+func populateValues(s string) []string {
+	n := 0
+	wasSep := 1
+	for i := 0; i < len(s); i++ {
+		r := s[i]
+		isSep := int(separator[r])
+		n += wasSep & ^isSep
+		wasSep = isSep
+	}
+
+	a := make([]string, n)
+	na := 0
+	fieldStart := 0
+	i := 0
+	// Skip seps in the front of the input.
+	for i < len(s) && separator[s[i]] != 0 {
+		i++
+	}
+	fieldStart = i
+	for i < len(s) {
+		if separator[s[i]] == 0 {
+			i++
+			continue
+		}
+		a[na] = s[fieldStart:i]
+		na++
+		i++
+		// Skip sep in between fields.
+		for i < len(s) && separator[s[i]] != 0 {
+			i++
+		}
+		fieldStart = i
+	}
+	if fieldStart < len(s) { // Last field might end at EOF.
+		a[na] = s[fieldStart:]
+	}
+	return a
+}
+
 func populateField(fd protoreflect.FieldDescriptor, v protoreflect.Message, value string) error {
 	val, err := parseField(fd, value)
 	if err != nil {
@@ -94,6 +135,11 @@ func populateField(fd protoreflect.FieldDescriptor, v protoreflect.Message, valu
 }
 
 func populateRepeatedField(fd protoreflect.FieldDescriptor, list protoreflect.List, values []string) error {
+	// single value, and split with ' ', ',', '|', '\t'
+	// split value to []string.
+	if len(values) == 1 {
+		values = populateValues(values[0])
+	}
 	for _, value := range values {
 		v, err := parseField(fd, value)
 		if err != nil {

@@ -3,9 +3,10 @@ package form
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/internal/complex"
-	"github.com/stretchr/testify/require"
 )
 
 type LoginRequest struct {

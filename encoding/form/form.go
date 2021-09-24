@@ -67,7 +67,7 @@ func (c codec) Unmarshal(data []byte, v interface{}) error {
 	}
 	if m, ok := v.(proto.Message); ok {
 		return MapProto(m, vs)
-	} else if m, ok := reflect.Indirect(reflect.ValueOf(v)).Interface().(proto.Message); ok {
+	} else if m, ok = reflect.Indirect(reflect.ValueOf(v)).Interface().(proto.Message); ok {
 		return MapProto(m, vs)
 	}
 
