@@ -5,7 +5,6 @@ import (
 	"errors"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
 
@@ -14,7 +13,6 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 
 	"github.com/google/uuid"
-	"golang.org/x/sync/errgroup"
 )
 
 // AppInfo is application context value.
@@ -32,6 +30,8 @@ type App struct {
 	ctx      context.Context
 	cancel   func()
 	instance *registry.ServiceInstance
+
+	started []transport.Server
 }
 
 // New create an application lifecycle manager.
@@ -78,26 +78,35 @@ func (a *App) Endpoint() []string {
 
 // Run executes all OnStart hooks registered with the application's Lifecycle.
 func (a *App) Run() error {
-	instance, err := a.buildInstance()
+	defer func() {
+		e := a.Stop()
+		if e != nil {
+			a.opts.logger.Errorf("[kratos]failed to stop app: %v", e)
+		}
+	}()
+
+	var endpoints []string
+	ctx := NewContext(a.ctx, a)
+	for _, srv := range a.opts.servers {
+		e, err := srv.Start(ctx)
+		if err != nil {
+			return err
+		}
+		endpoints = append(endpoints, e.String())
+		a.started = append(a.started, srv)
+	}
+	if len(a.opts.endpoints) > 0 {
+		// reset endpoints
+		endpoints = make([]string, 0)
+		for _, e := range a.opts.endpoints {
+			endpoints = append(endpoints, e.String())
+		}
+	}
+
+	instance, err := a.buildInstance(endpoints)
 	if err != nil {
 		return err
 	}
-	ctx := NewContext(a.ctx, a)
-	eg, ctx := errgroup.WithContext(ctx)
-	wg := sync.WaitGroup{}
-	for _, srv := range a.opts.servers {
-		srv := srv
-		eg.Go(func() error {
-			<-ctx.Done() // wait for stop signal
-			return srv.Stop(ctx)
-		})
-		wg.Add(1)
-		eg.Go(func() error {
-			wg.Done()
-			return srv.Start(ctx)
-		})
-	}
-	wg.Wait()
 	if a.opts.registrar != nil {
 		rctx, rcancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 		defer rcancel()
@@ -108,21 +117,12 @@ func (a *App) Run() error {
 	}
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, a.opts.sigs...)
-	eg.Go(func() error {
-		for {
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			case <-c:
-				err := a.Stop()
-				if err != nil {
-					a.opts.logger.Errorf("failed to stop app: %v", err)
-				}
-			}
+	select {
+	case <-ctx.Done():
+		if !errors.Is(ctx.Err(), context.Canceled) {
+			return ctx.Err()
 		}
-	})
-	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
-		return err
+	case <-c:
 	}
 	return nil
 }
@@ -136,10 +136,8 @@ func (a *App) Stop() error {
 			return err
 		}
 	}
-	if a.cancel != nil {
-		a.cancel()
-	}
-	for _, srv := range a.opts.servers {
+	a.cancel()
+	for _, srv := range a.started {
 		if err := srv.Stop(context.Background()); err != nil {
 			return err
 		}
@@ -147,22 +145,7 @@ func (a *App) Stop() error {
 	return nil
 }
 
-func (a *App) buildInstance() (*registry.ServiceInstance, error) {
-	endpoints := make([]string, 0) //nolint:gomnd
-	for _, e := range a.opts.endpoints {
-		endpoints = append(endpoints, e.String())
-	}
-	if len(endpoints) == 0 {
-		for _, srv := range a.opts.servers {
-			if r, ok := srv.(transport.Endpointer); ok {
-				e, err := r.Endpoint()
-				if err != nil {
-					return nil, err
-				}
-				endpoints = append(endpoints, e.String())
-			}
-		}
-	}
+func (a *App) buildInstance(endpoints []string) (*registry.ServiceInstance, error) {
 	return &registry.ServiceInstance{
 		ID:        a.opts.id,
 		Name:      a.opts.name,

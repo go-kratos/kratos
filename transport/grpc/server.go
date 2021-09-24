@@ -25,10 +25,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var (
-	_ transport.Server     = (*Server)(nil)
-	_ transport.Endpointer = (*Server)(nil)
-)
+var _ transport.Server = (*Server)(nil)
 
 // ServerOption is gRPC server option.
 type ServerOption func(o *Server)
@@ -105,6 +102,7 @@ type Server struct {
 	tlsConf    *tls.Config
 	lis        net.Listener
 	network    string
+	address    string
 	endpoint   *url.URL
 	timeout    time.Duration
 	log        *log.Helper
@@ -120,6 +118,7 @@ func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
 		baseCtx: context.Background(),
 		network: "tcp",
+		address: ":0",
 		timeout: 1 * time.Second,
 		health:  health.NewServer(),
 		log:     log.NewHelper(log.DefaultLogger),
@@ -127,18 +126,6 @@ func NewServer(opts ...ServerOption) *Server {
 	for _, o := range opts {
 		o(srv)
 	}
-	if srv.lis == nil {
-		lis, err := net.Listen("tcp", ":0")
-		if err != nil {
-			panic(fmt.Errorf("[grpc server]listen random port failed,err:=%v", err))
-		}
-		srv.lis = lis
-	}
-	hostPort, err := host.Extract(srv.lis.Addr().String())
-	if err != nil {
-		panic(fmt.Errorf("[grpc server] address(%s) is invalid,err:=%v", srv.lis.Addr().String(), err))
-	}
-	srv.endpoint = endpoint.NewEndpoint("grpc", hostPort, srv.tlsConf != nil)
 
 	ints := []grpc.UnaryServerInterceptor{
 		srv.unaryServerInterceptor(),
@@ -172,11 +159,32 @@ func (s *Server) Endpoint() (*url.URL, error) {
 }
 
 // Start start the gRPC server.
-func (s *Server) Start(ctx context.Context) error {
+func (s *Server) Start(ctx context.Context) (*url.URL, error) {
+	var err error
+	if s.lis == nil {
+		s.lis, err = net.Listen(s.network, s.address)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if s.endpoint == nil {
+		hostPort, err := host.Extract(s.lis.Addr().String())
+		if err != nil {
+			return nil, err
+		}
+		s.endpoint = endpoint.NewEndpoint("grpc", hostPort, s.tlsConf != nil)
+	}
+
 	s.baseCtx = ctx
-	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
-	s.health.Resume()
-	return s.Serve(s.lis)
+	go func() {
+		s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
+		s.health.Resume()
+		err = s.Serve(s.lis)
+		if err != nil {
+			s.log.Infof("[gRPC] server serve error: %v", err)
+		}
+	}()
+	return s.endpoint, nil
 }
 
 // Stop stop the gRPC server.

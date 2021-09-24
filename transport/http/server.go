@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
-	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -20,10 +19,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var (
-	_ transport.Server     = (*Server)(nil)
-	_ transport.Endpointer = (*Server)(nil)
-)
+var _ transport.Server = (*Server)(nil)
 
 // ServerOption is an HTTP server option.
 type ServerOption func(*Server)
@@ -37,11 +33,9 @@ func Network(network string) ServerOption {
 
 // Address with server address listener.
 func Address(addr string) ServerOption {
-	lis, err := net.Listen("tcp", addr)
-	if err != nil {
-		panic(fmt.Errorf("[http server]listen address(%s) failed,err:=%v", addr, err))
+	return func(s *Server) {
+		s.address = addr
 	}
-	return Listener(lis)
 }
 
 // Timeout with server timeout.
@@ -119,6 +113,7 @@ func Listener(lis net.Listener) ServerOption {
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
+	address     string
 	lis         net.Listener
 	tlsConf     *tls.Config
 	endpoint    *url.URL
@@ -138,6 +133,7 @@ type Server struct {
 func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
 		network:     "tcp",
+		address:     ":0",
 		timeout:     1 * time.Second,
 		dec:         DefaultRequestDecoder,
 		enc:         DefaultResponseEncoder,
@@ -148,18 +144,6 @@ func NewServer(opts ...ServerOption) *Server {
 	for _, o := range opts {
 		o(srv)
 	}
-	if srv.lis == nil {
-		lis, err := net.Listen("tcp", ":0")
-		if err != nil {
-			panic(fmt.Errorf("[http server]listen random port failed,err:=%v", err))
-		}
-		srv.lis = lis
-	}
-	hostPort, err := host.Extract(srv.lis.Addr().String())
-	if err != nil {
-		panic(fmt.Errorf("[http server] address(%s) is invalid,err:=%v", srv.lis.Addr().String(), err))
-	}
-	srv.endpoint = endpoint.NewEndpoint("http", hostPort, srv.tlsConf != nil)
 
 	srv.router = mux.NewRouter().StrictSlash(srv.strictSlash)
 	srv.router.Use(srv.filter())
@@ -241,21 +225,37 @@ func (s *Server) Endpoint() (*url.URL, error) {
 }
 
 // Start start the HTTP server.
-func (s *Server) Start(ctx context.Context) error {
+func (s *Server) Start(ctx context.Context) (*url.URL, error) {
 	var err error
+	if s.lis == nil {
+		s.lis, err = net.Listen(s.network, s.address)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if s.endpoint == nil {
+		hostPort, err := host.Extract(s.lis.Addr().String())
+		if err != nil {
+			return nil, err
+		}
+		s.endpoint = endpoint.NewEndpoint("http", hostPort, s.tlsConf != nil)
+	}
+
 	s.BaseContext = func(net.Listener) context.Context {
 		return ctx
 	}
-	s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
-	if s.tlsConf != nil {
-		err = s.ServeTLS(s.lis, "", "")
-	} else {
-		err = s.Serve(s.lis)
-	}
-	if !errors.Is(err, http.ErrServerClosed) {
-		return err
-	}
-	return nil
+	go func() {
+		s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
+		if s.tlsConf != nil {
+			err = s.ServeTLS(s.lis, "", "")
+		} else {
+			err = s.Serve(s.lis)
+		}
+		if !errors.Is(err, http.ErrServerClosed) {
+			s.log.Infof("[HTTP] server serve error: %v", err)
+		}
+	}()
+	return s.endpoint, nil
 }
 
 // Stop stop the HTTP server.

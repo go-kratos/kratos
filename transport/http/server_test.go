@@ -37,15 +37,9 @@ func TestServer(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	})
 
-	if e, err := srv.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
+	if e, err := srv.Start(ctx); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
 		t.Fatal(e, err)
 	}
-
-	go func() {
-		if err := srv.Start(ctx); err != nil {
-			panic(err)
-		}
-	}()
 	time.Sleep(time.Second)
 	testHeader(t, srv)
 	testClient(t, srv)
@@ -156,11 +150,9 @@ func BenchmarkServer(b *testing.B) {
 	ctx = context.WithValue(ctx, testKey{}, "test")
 	srv := NewServer()
 	srv.HandleFunc("/index", fn)
-	go func() {
-		if err := srv.Start(ctx); err != nil {
-			panic(err)
-		}
-	}()
+	if _, err := srv.Start(ctx); err != nil {
+		panic(err)
+	}
 	time.Sleep(time.Second)
 	port, ok := host.Port(srv.lis)
 	assert.True(b, ok)
@@ -235,6 +227,11 @@ func TestServerAddress(t *testing.T) {
 	s := NewServer(Address("0.0.0.0:8000"))
 	e, err := s.Endpoint()
 	assert.Nil(t, err)
+	assert.Nil(t, e)
+	e, err = s.Start(context.Background())
+	assert.Nil(t, err)
+	defer s.Stop(context.Background())
+	assert.NotNil(t, e)
 	host, port, err := net.SplitHostPort(e.Host)
 	assert.Nil(t, err)
 	assert.Equal(t, "8000", port)
@@ -246,6 +243,11 @@ func TestServerSepcificAddress(t *testing.T) {
 	s := NewServer(Address("127.0.0.1:8001"))
 	e, err := s.Endpoint()
 	assert.Nil(t, err)
+	assert.Nil(t, e)
+	e, err = s.Start(context.Background())
+	assert.Nil(t, err)
+	defer s.Stop(context.Background())
+	assert.NotNil(t, e)
 	host, port, err := net.SplitHostPort(e.Host)
 	assert.Nil(t, err)
 	assert.Equal(t, "8001", port)
@@ -286,6 +288,11 @@ func TestServerListener(t *testing.T) {
 	s := NewServer(Listener(&mockListener{":8090"}))
 	e, err := s.Endpoint()
 	assert.Nil(t, err)
+	assert.Nil(t, e)
+	e, err = s.Start(context.Background())
+	assert.Nil(t, err)
+	defer s.Stop(context.Background())
+	assert.NotNil(t, e)
 	host, port, err := net.SplitHostPort(e.Host)
 	assert.Nil(t, err)
 	assert.Equal(t, "8090", port)
