@@ -230,13 +230,14 @@ func TestServerAddress(t *testing.T) {
 	assert.Nil(t, e)
 	e, err = s.Start(context.Background())
 	assert.Nil(t, err)
-	defer s.Stop(context.Background())
 	assert.NotNil(t, e)
 	host, port, err := net.SplitHostPort(e.Host)
 	assert.Nil(t, err)
 	assert.Equal(t, "8000", port)
 	ip := net.ParseIP(host)
 	assert.NotNil(t, ip)
+	err = s.Stop(context.Background())
+	assert.Nil(t, err)
 }
 
 func TestServerSepcificAddress(t *testing.T) {
@@ -246,7 +247,6 @@ func TestServerSepcificAddress(t *testing.T) {
 	assert.Nil(t, e)
 	e, err = s.Start(context.Background())
 	assert.Nil(t, err)
-	defer s.Stop(context.Background())
 	assert.NotNil(t, e)
 	host, port, err := net.SplitHostPort(e.Host)
 	assert.Nil(t, err)
@@ -254,6 +254,8 @@ func TestServerSepcificAddress(t *testing.T) {
 	assert.Equal(t, "127.0.0.1", host)
 	ip := net.ParseIP(host)
 	assert.NotNil(t, ip)
+	err = s.Stop(context.Background())
+	assert.Nil(t, err)
 }
 
 type mockAddr struct {
@@ -291,11 +293,12 @@ func TestServerListener(t *testing.T) {
 	assert.Nil(t, e)
 	e, err = s.Start(context.Background())
 	assert.Nil(t, err)
-	defer s.Stop(context.Background())
 	assert.NotNil(t, e)
 	host, port, err := net.SplitHostPort(e.Host)
 	assert.Nil(t, err)
 	assert.Equal(t, "8090", port)
 	ip := net.ParseIP(host)
 	assert.NotNil(t, ip)
+	err = s.Stop(context.Background())
+	assert.Nil(t, err)
 }

@@ -85,7 +85,7 @@ func (a *App) Run() error {
 		}
 	}()
 
-	var endpoints []string
+	endpoints := make([]string, 0)
 	ctx := NewContext(a.ctx, a)
 	for _, srv := range a.opts.servers {
 		e, err := srv.Start(ctx)
@@ -96,7 +96,7 @@ func (a *App) Run() error {
 		a.started = append(a.started, srv)
 	}
 	if len(a.opts.endpoints) > 0 {
-		// reset endpoints
+		// reset endpoints,use opt endpoints instead
 		endpoints = make([]string, 0)
 		for _, e := range a.opts.endpoints {
 			endpoints = append(endpoints, e.String())

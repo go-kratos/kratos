@@ -160,8 +160,8 @@ func (s *Server) Endpoint() (*url.URL, error) {
 
 // Start start the gRPC server.
 func (s *Server) Start(ctx context.Context) (*url.URL, error) {
-	var err error
 	if s.lis == nil {
+		var err error
 		s.lis, err = net.Listen(s.network, s.address)
 		if err != nil {
 			return nil, err
@@ -179,7 +179,7 @@ func (s *Server) Start(ctx context.Context) (*url.URL, error) {
 	go func() {
 		s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
 		s.health.Resume()
-		err = s.Serve(s.lis)
+		err := s.Serve(s.lis)
 		if err != nil {
 			s.log.Infof("[gRPC] server serve error: %v", err)
 		}
