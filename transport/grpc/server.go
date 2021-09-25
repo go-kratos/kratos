@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
 	"net/url"
@@ -25,7 +26,10 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var _ transport.Server = (*Server)(nil)
+var (
+	_ transport.Server     = (*Server)(nil)
+	_ transport.Endpointer = (*Server)(nil)
+)
 
 // ServerOption is gRPC server option.
 type ServerOption func(o *Server)
@@ -155,22 +159,25 @@ func NewServer(opts ...ServerOption) *Server {
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
+	if s.endpoint == nil {
+		return nil, errors.New("grpc server not started")
+	}
 	return s.endpoint, nil
 }
 
 // Start start the gRPC server.
-func (s *Server) Start(ctx context.Context) (*url.URL, error) {
+func (s *Server) Start(ctx context.Context) error {
 	if s.lis == nil {
 		var err error
 		s.lis, err = net.Listen(s.network, s.address)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 	if s.endpoint == nil {
 		hostPort, err := host.Extract(s.lis.Addr().String())
 		if err != nil {
-			return nil, err
+			return err
 		}
 		s.endpoint = endpoint.NewEndpoint("grpc", hostPort, s.tlsConf != nil)
 	}
@@ -184,7 +191,7 @@ func (s *Server) Start(ctx context.Context) (*url.URL, error) {
 			s.log.Infof("[gRPC] server serve error: %v", err)
 		}
 	}()
-	return s.endpoint, nil
+	return nil
 }
 
 // Stop stop the gRPC server.

@@ -85,22 +85,24 @@ func (a *App) Run() error {
 		}
 	}()
 
-	endpoints := make([]string, 0)
 	ctx := NewContext(a.ctx, a)
+	endpoints := []string{}
+	for _, e := range a.opts.endpoints {
+		endpoints = append(endpoints, e.String())
+	}
 	for _, srv := range a.opts.servers {
-		e, err := srv.Start(ctx)
+		err := srv.Start(ctx)
 		if err != nil {
 			return err
 		}
-		endpoints = append(endpoints, e.String())
-		a.started = append(a.started, srv)
-	}
-	if len(a.opts.endpoints) > 0 {
-		// reset endpoints,use opt endpoints instead
-		endpoints = make([]string, 0)
-		for _, e := range a.opts.endpoints {
+		if r, ok := srv.(transport.Endpointer); ok && len(a.opts.endpoints) == 0 {
+			e, err := r.Endpoint()
+			if err != nil {
+				return err
+			}
 			endpoints = append(endpoints, e.String())
 		}
+		a.started = append(a.started, srv)
 	}
 
 	instance, err := a.buildInstance(endpoints)

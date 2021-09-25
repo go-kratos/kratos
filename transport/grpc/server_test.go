@@ -27,9 +27,13 @@ func TestServer(t *testing.T) {
 		}...))
 
 	// start server
-	if e, err := srv.Start(ctx); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
-		t.Fatal(e, err)
+	if err := srv.Start(ctx); err != nil {
+		t.Fatal(err)
 	}
+	e, err := srv.Endpoint()
+	assert.Nil(t, err)
+	assert.NotNil(t, e)
+	assert.True(t, !strings.HasSuffix(e.Host, ":0"))
 	time.Sleep(time.Second)
 	testClient(t, srv)
 	_ = srv.Stop(ctx)
@@ -147,10 +151,10 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 
 func TestServerAddress(t *testing.T) {
 	s := NewServer(Address("0.0.0.0:9000"))
-	e, err := s.Endpoint()
+
+	err := s.Start(context.Background())
 	assert.Nil(t, err)
-	assert.Nil(t, e)
-	e, err = s.Start(context.Background())
+	e, err := s.Endpoint()
 	assert.Nil(t, err)
 	assert.NotNil(t, e)
 	host, port, err := net.SplitHostPort(e.Host)
@@ -164,10 +168,9 @@ func TestServerAddress(t *testing.T) {
 
 func TestServerSepcificAddress(t *testing.T) {
 	s := NewServer(Address("127.0.0.1:9001"))
-	e, err := s.Endpoint()
+	err := s.Start(context.Background())
 	assert.Nil(t, err)
-	assert.Nil(t, e)
-	e, err = s.Start(context.Background())
+	e, err := s.Endpoint()
 	assert.Nil(t, err)
 	assert.NotNil(t, e)
 	host, port, err := net.SplitHostPort(e.Host)
@@ -210,10 +213,10 @@ func (l *mockListener) Addr() net.Addr {
 
 func TestServerListener(t *testing.T) {
 	s := NewServer(Listener(&mockListener{":8091"}))
-	e, err := s.Endpoint()
+
+	err := s.Start(context.Background())
 	assert.Nil(t, err)
-	assert.Nil(t, e)
-	e, err = s.Start(context.Background())
+	e, err := s.Endpoint()
 	assert.Nil(t, err)
 	assert.NotNil(t, e)
 	host, port, err := net.SplitHostPort(e.Host)

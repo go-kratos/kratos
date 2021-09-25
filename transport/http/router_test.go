@@ -79,9 +79,12 @@ func TestRoute(t *testing.T) {
 		return ctx.Returns(h(ctx, u))
 	})
 
-	if e, err := srv.Start(ctx); err != nil || e == nil {
-		t.Fatal(e, err)
+	if err := srv.Start(ctx); err != nil {
+		t.Fatal(err)
 	}
+	e, err := srv.Endpoint()
+	assert.Nil(t, err)
+	assert.NotNil(t, e)
 	time.Sleep(time.Second)
 	testRoute(t, srv)
 	_ = srv.Stop(ctx)

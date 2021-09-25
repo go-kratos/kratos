@@ -72,8 +72,8 @@ func TestLogger(t *testing.T) {
 
 type mockServer struct{}
 
-func (m *mockServer) Start(ctx context.Context) (*url.URL, error) { return &url.URL{}, nil }
-func (m *mockServer) Stop(ctx context.Context) error              { return nil }
+func (m *mockServer) Start(ctx context.Context) error { return nil }
+func (m *mockServer) Stop(ctx context.Context) error  { return nil }
 
 func TestServer(t *testing.T) {
 	o := &options{}

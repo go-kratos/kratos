@@ -15,8 +15,13 @@ import (
 // Server is transport server.
 type Server interface {
 	// Start is non-blocking and will return the endpoint url
-	Start(context.Context) (endpoint *url.URL, err error)
+	Start(context.Context) (err error)
 	Stop(context.Context) error
+}
+
+// Endpointer is registry endpoint.
+type Endpointer interface {
+	Endpoint() (*url.URL, error)
 }
 
 // Header is the storage medium used by a Header.
