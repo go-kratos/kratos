@@ -94,6 +94,7 @@ func NewSource(opts ...Option) config.Source {
 	if err != nil {
 		panic(err)
 	}
+
 	return &apollo{client: client, opt: &op}
 }
 
@@ -103,6 +104,10 @@ func genKey(ns, sub string) string {
 	arr := strings.Split(ns, ".")
 	if len(arr) < 1 {
 		return sub
+	}
+
+	if len(arr) == 1 {
+		return ns + "." + sub
 	}
 
 	return strings.Join(arr[:len(arr)-1], ".") + "." + sub
