@@ -1,7 +1,10 @@
 package apollo
 
 import (
+	"fmt"
+
 	"github.com/go-kratos/kratos/v2/config"
+	"github.com/go-kratos/kratos/v2/encoding"
 
 	"github.com/apolloconfig/agollo/v4/storage"
 )
@@ -14,26 +17,37 @@ type customChangeListener struct {
 	event chan []*config.KeyValue
 }
 
-func (c *customChangeListener) OnChange(changeEvent *storage.ChangeEvent) {
-	kv := make([]*config.KeyValue, 0)
-	for key, value := range changeEvent.Changes {
-		kv = append(kv, &config.KeyValue{
-			Key:   key,
-			Value: []byte(value.NewValue.(string)),
-		})
+func (c *customChangeListener) onChange(
+	namespace string, changes map[string]*storage.ConfigChange) []*config.KeyValue {
+	kv := make([]*config.KeyValue, 0, 2)
+	next := make(map[string]interface{})
+
+	for key, change := range changes {
+		convertProperties(genKey(namespace, key), change.NewValue, next)
 	}
-	c.event <- kv
+
+	f := format(namespace)
+	codec := encoding.GetCodec(f)
+	val, err := codec.Marshal(next)
+	if err != nil {
+		fmt.Printf("Warn: apollo could not handle namespace %s: %v\n", namespace, err)
+		return nil
+	}
+	kv = append(kv, &config.KeyValue{
+		Key:    namespace,
+		Value:  val,
+		Format: f,
+	})
+
+	return kv
+}
+
+func (c *customChangeListener) OnChange(changeEvent *storage.ChangeEvent) {
+	c.event <- c.onChange(changeEvent.Namespace, changeEvent.Changes)
 }
 
 func (c *customChangeListener) OnNewestChange(changeEvent *storage.FullChangeEvent) {
-	kv := make([]*config.KeyValue, 0)
-	for key, value := range changeEvent.Changes {
-		kv = append(kv, &config.KeyValue{
-			Key:   key,
-			Value: []byte(value.(string)),
-		})
-	}
-	c.event <- kv
+	// TODO(@yeqown): finish this callback method. but it's not necessarily now.
 }
 
 func NewWatcher(a *apollo) (config.Watcher, error) {

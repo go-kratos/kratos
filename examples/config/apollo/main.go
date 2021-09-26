@@ -25,7 +25,7 @@ type bootstrap struct {
 	Demo struct {
 		Deep struct {
 			Key   string `json:"key"`
-			Value int    `json:"value"`
+			Value string `json:"value"`
 		} `json:"deep"`
 	} `json:"demo"`
 }
