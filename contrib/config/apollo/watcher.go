@@ -1,10 +1,11 @@
 package apollo
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/go-kratos/kratos/v2/log"
 
 	"github.com/apolloconfig/agollo/v4/storage"
 )
@@ -30,7 +31,10 @@ func (c *customChangeListener) onChange(
 	codec := encoding.GetCodec(f)
 	val, err := codec.Marshal(next)
 	if err != nil {
-		log.Printf("Warn: apollo could not handle namespace %s: %v\n", namespace, err)
+		_ = builtinLogger.Log(log.LevelWarn,
+			"msg",
+			fmt.Sprintf("apollo could not handle namespace %s: %v", namespace, err),
+		)
 		return nil
 	}
 	kv = append(kv, &config.KeyValue{

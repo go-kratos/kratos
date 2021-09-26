@@ -1,11 +1,12 @@
 package apollo
 
 import (
-	"log"
+	"fmt"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/go-kratos/kratos/v2/log"
 
 	"github.com/apolloconfig/agollo/v4"
 	apolloConfig "github.com/apolloconfig/agollo/v4/env/config"
@@ -76,6 +77,17 @@ func WithNamespace(name string) Option {
 	}
 }
 
+var builtinLogger = log.DefaultLogger
+
+// WithLogger use custom logger to replace default logger.
+func WithLogger(logger log.Logger) Option {
+	return func(o *options) {
+		if logger != nil {
+			builtinLogger = logger
+		}
+	}
+}
+
 func NewSource(opts ...Option) config.Source {
 	op := options{}
 	for _, o := range opts {
@@ -140,7 +152,10 @@ func convertProperties(key string, value interface{}, target map[string]interfac
 		// current exists, then check existing value type, if it's not map
 		// that means duplicate keys, and at least one is not map instance.
 		if cursor, ok = v.(map[string]interface{}); !ok {
-			log.Printf("WARN: duplicate key: %v\n", strings.Join(keys[:i], "."))
+			_ = builtinLogger.Log(log.LevelWarn,
+				"msg",
+				fmt.Sprintf("duplicate key: %v\n", strings.Join(keys[:i], ".")),
+			)
 			break
 		}
 	}
@@ -172,7 +187,10 @@ func (e *apollo) load() []*config.KeyValue {
 		codec := encoding.GetCodec(f)
 		val, err := codec.Marshal(next)
 		if err != nil {
-			log.Printf("Warn: apollo could not handle namespace %s: %v\n", ns, err)
+			_ = builtinLogger.Log(log.LevelWarn,
+				"msg",
+				fmt.Sprintf("apollo could not handle namespace %s: %v", ns, err),
+			)
 			continue
 		}
 
