@@ -1,7 +1,7 @@
 package apollo
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/encoding"
@@ -30,7 +30,7 @@ func (c *customChangeListener) onChange(
 	codec := encoding.GetCodec(f)
 	val, err := codec.Marshal(next)
 	if err != nil {
-		fmt.Printf("Warn: apollo could not handle namespace %s: %v\n", namespace, err)
+		log.Printf("Warn: apollo could not handle namespace %s: %v\n", namespace, err)
 		return nil
 	}
 	kv = append(kv, &config.KeyValue{
@@ -47,7 +47,7 @@ func (c *customChangeListener) OnChange(changeEvent *storage.ChangeEvent) {
 }
 
 func (c *customChangeListener) OnNewestChange(changeEvent *storage.FullChangeEvent) {
-	// TODO(@yeqown): finish this callback method. but it's not necessarily now.
+	// TODO: finish this callback method. but it's not necessarily now.
 }
 
 func NewWatcher(a *apollo) (config.Watcher, error) {

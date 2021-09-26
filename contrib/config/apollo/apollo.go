@@ -1,14 +1,14 @@
 package apollo
 
 import (
-	"fmt"
+	"log"
 	"strings"
-
-	"github.com/apolloconfig/agollo/v4"
-	apolloConfig "github.com/apolloconfig/agollo/v4/env/config"
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/encoding"
+
+	"github.com/apolloconfig/agollo/v4"
+	apolloConfig "github.com/apolloconfig/agollo/v4/env/config"
 )
 
 type apollo struct {
@@ -140,7 +140,7 @@ func convertProperties(key string, value interface{}, target map[string]interfac
 		// current exists, then check existing value type, if it's not map
 		// that means duplicate keys, and at least one is not map instance.
 		if cursor, ok = v.(map[string]interface{}); !ok {
-			fmt.Printf("WARN: duplicate key: %v\n", strings.Join(keys[:i], "."))
+			log.Printf("WARN: duplicate key: %v\n", strings.Join(keys[:i], "."))
 			break
 		}
 	}
@@ -172,7 +172,7 @@ func (e *apollo) load() []*config.KeyValue {
 		codec := encoding.GetCodec(f)
 		val, err := codec.Marshal(next)
 		if err != nil {
-			fmt.Printf("Warn: apollo could not handle namespace %s: %v\n", ns, err)
+			log.Printf("Warn: apollo could not handle namespace %s: %v\n", ns, err)
 			continue
 		}
 
