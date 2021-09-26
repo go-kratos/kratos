@@ -14,7 +14,7 @@ import (
 
 // Server is transport server.
 type Server interface {
-	// Start is non-blocking and will return the endpoint url
+	// Start is non-blocking and will init the endpoint url
 	Start(context.Context) (err error)
 	Stop(context.Context) error
 }
