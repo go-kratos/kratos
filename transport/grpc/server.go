@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
-	"fmt"
 	"net"
 	"net/url"
 	"time"
@@ -41,13 +40,11 @@ func Network(network string) ServerOption {
 	}
 }
 
-// Address with server address listener.
+// Address with server address.
 func Address(addr string) ServerOption {
-	lis, err := net.Listen("tcp", addr)
-	if err != nil {
-		panic(fmt.Errorf("[http server]listen address(%s) failed,err:=%v", addr, err))
+	return func(s *Server) {
+		s.address = addr
 	}
-	return Listener(lis)
 }
 
 // Timeout with server timeout.

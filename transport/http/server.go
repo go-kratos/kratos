@@ -34,7 +34,7 @@ func Network(network string) ServerOption {
 	}
 }
 
-// Address with server address listener.
+// Address with server address.
 func Address(addr string) ServerOption {
 	return func(s *Server) {
 		s.address = addr
