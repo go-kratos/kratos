@@ -16,16 +16,16 @@ type timing struct {
 
 // NewTiming new a DataDog timer and returns Observer.
 func NewTiming(name string, opts ...Option) metrics.Observer {
-	options := options{
+	timingOpts := options{
 		sampleRate: 1,
 		client:     defaultClient,
 	}
 	for _, o := range opts {
-		o(&options)
+		o(&timingOpts)
 	}
 	return &timing{
 		name: name,
-		opts: options,
+		opts: timingOpts,
 	}
 }
 
@@ -39,5 +39,5 @@ func (d *timing) With(values ...string) metrics.Observer {
 }
 
 func (d *timing) Observe(value float64) {
-	d.opts.client.TimeInMilliseconds(d.name, value*float64(time.Second/time.Millisecond), d.lvs, d.opts.sampleRate)
+	_ = d.opts.client.TimeInMilliseconds(d.name, value*float64(time.Second/time.Millisecond), d.lvs, d.opts.sampleRate)
 }
