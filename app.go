@@ -50,9 +50,10 @@ func New(opts ...Option) *App {
 	}
 	ctx, cancel := context.WithCancel(o.ctx)
 	return &App{
-		ctx:    ctx,
-		cancel: cancel,
-		opts:   o,
+		ctx:     ctx,
+		cancel:  cancel,
+		opts:    o,
+		started: make([]transport.Server, 0, len(o.servers)),
 	}
 }
 
@@ -86,7 +87,7 @@ func (a *App) Run() error {
 	}()
 
 	ctx := NewContext(a.ctx, a)
-	endpoints := []string{}
+	endpoints := make([]string, 0, len(a.opts.servers)+len(a.opts.endpoints))
 	for _, e := range a.opts.endpoints {
 		endpoints = append(endpoints, e.String())
 	}
