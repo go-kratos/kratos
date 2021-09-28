@@ -26,6 +26,8 @@ type options struct {
 	endpoint       string
 	namespace      string
 	isBackupConfig bool
+
+	logger log.Logger
 }
 
 // WithAppID with apollo config app id
@@ -77,19 +79,19 @@ func WithNamespace(name string) Option {
 	}
 }
 
-var builtinLogger = log.DefaultLogger
-
 // WithLogger use custom logger to replace default logger.
 func WithLogger(logger log.Logger) Option {
 	return func(o *options) {
 		if logger != nil {
-			builtinLogger = logger
+			o.logger = logger
 		}
 	}
 }
 
 func NewSource(opts ...Option) config.Source {
-	op := options{}
+	op := options{
+		logger: log.DefaultLogger,
+	}
 	for _, o := range opts {
 		o(&op)
 	}
@@ -119,6 +121,9 @@ func genKey(ns, sub string) string {
 	}
 
 	if len(arr) == 1 {
+		if ns == "" {
+			return sub
+		}
 		return ns + "." + sub
 	}
 
@@ -152,9 +157,9 @@ func convertProperties(key string, value interface{}, target map[string]interfac
 		// current exists, then check existing value type, if it's not map
 		// that means duplicate keys, and at least one is not map instance.
 		if cursor, ok = v.(map[string]interface{}); !ok {
-			_ = builtinLogger.Log(log.LevelWarn,
+			_ = log.DefaultLogger.Log(log.LevelWarn,
 				"msg",
-				fmt.Sprintf("duplicate key: %v\n", strings.Join(keys[:i], ".")),
+				fmt.Sprintf("duplicate key: %v\n", strings.Join(keys[:i+1], ".")),
 			)
 			break
 		}
@@ -177,7 +182,7 @@ func (e *apollo) load() []*config.KeyValue {
 	for _, ns := range namespaces {
 		next := map[string]interface{}{}
 		e.client.GetConfigCache(ns).Range(func(key, value interface{}) bool {
-			// all values are in properties format
+			// all values are out properties format
 			convertProperties(genKey(ns, key.(string)), value, next)
 			return true
 		})
@@ -187,7 +192,7 @@ func (e *apollo) load() []*config.KeyValue {
 		codec := encoding.GetCodec(f)
 		val, err := codec.Marshal(next)
 		if err != nil {
-			_ = builtinLogger.Log(log.LevelWarn,
+			_ = e.opt.logger.Log(log.LevelWarn,
 				"msg",
 				fmt.Sprintf("apollo could not handle namespace %s: %v", ns, err),
 			)
@@ -209,7 +214,7 @@ func (e *apollo) Load() (kv []*config.KeyValue, err error) {
 }
 
 func (e *apollo) Watch() (config.Watcher, error) {
-	w, err := NewWatcher(e)
+	w, err := newWatcher(e, e.opt.logger)
 	if err != nil {
 		return nil, err
 	}
