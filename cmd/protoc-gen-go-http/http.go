@@ -161,8 +161,11 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 	fields := m.Input.Desc.Fields()
 	for _, v := range vars {
 		fd := fields.ByName(protoreflect.Name(v))
-		if fd.IsMap() || fd.IsList() {
-			fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: The field in path:'%s' shouldn't be a map or list.\n", v)
+		if fd.IsMap() {
+			fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: The field in path:'%s' shouldn't be a map.\n", v)
+		}
+		if fd.IsList() {
+			fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: The field in path:'%s' shouldn't be a list.\n", v)
 		}
 	}
 	return &methodDesc{
