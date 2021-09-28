@@ -1,4 +1,3 @@
-./contrib/config/nacos
 ./contrib/config/apollo
 ./contrib/config/kubernetes
 ./contrib/registry/nacos
