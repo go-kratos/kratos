@@ -8,8 +8,8 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
-// 部署在mesh namespace 下configmap
-const yamlData = `database:
+// YamlData 部署在mesh namespace 下configmap
+const YamlData = `database:
   mysql:
     dsn: "root:Test@tcp(mysql.database.svc.cluster.local:3306)/test?timeout=1s&readTimeout=1s&writeTimeout=1s&parseTime=true&loc=Local&charset=utf8mb4,utf8"
     active: 20
@@ -20,10 +20,10 @@ const yamlData = `database:
     password: ""
     db: 4`
 
-const yamlApp = `application:
+const YamlApp = `application:
   expire: 3600`
 
-func main() {
+func ExampleMain() {
 	conf := config.New(
 		config.WithSource(
 			NewSource(
