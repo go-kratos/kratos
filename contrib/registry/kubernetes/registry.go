@@ -166,7 +166,8 @@ func (s *Registry) Service(name string) ([]*registry.ServiceInstance, error) {
 	if err != nil {
 		return nil, err
 	}
-	var ret []*registry.ServiceInstance
+
+	ret := make([]*registry.ServiceInstance, len(pods))
 	for _, pod := range pods {
 		if pod.Status.Phase != corev1.PodRunning {
 			continue
@@ -342,14 +343,14 @@ func getProtocolMapByEndpoints(endpoints []string) (protocolMap, error) {
 }
 
 func getProtocolMapFromPod(pod *corev1.Pod) (protocolMap, error) {
-	protocolMap := protocolMap{}
+	pm := protocolMap{}
 	if s := pod.Annotations[AnnotationsKeyProtocolMap]; !isEmptyObjectString(s) {
-		err := unmarshal(s, &protocolMap)
+		err := unmarshal(s, &pm)
 		if err != nil {
 			return nil, &ErrorHandleResource{Namespace: pod.Namespace, Name: pod.Name, Reason: err}
 		}
 	}
-	return protocolMap, nil
+	return pm, nil
 }
 
 func getMetadataFromPod(pod *corev1.Pod) (map[string]string, error) {

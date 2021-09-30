@@ -2,5 +2,4 @@
 ./contrib/config/kubernetes
 ./contrib/registry/nacos
 ./contrib/registry/consul
-./contrib/registry/kubernetes
 ./contrib/registry/zookeeper
