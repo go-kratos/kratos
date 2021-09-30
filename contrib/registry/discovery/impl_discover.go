@@ -46,19 +46,26 @@ func (d *Discovery) Watch(ctx context.Context, serviceName string) (registry.Wat
 	return &watcher{
 		Resolve:     d.resolveBuild(serviceName),
 		serviceName: serviceName,
+		cancelCtx:   ctx,
 	}, nil
 }
 
 type watcher struct {
 	*Resolve
 
+	cancelCtx   context.Context
 	serviceName string
 }
 
 func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 	event := w.Resolve.Watch()
+
+	select {
+	case <-event:
 	// change event come
-	<-event
+	case <-w.cancelCtx.Done():
+		return nil, fmt.Errorf("watch context cancelled: %v", w.cancelCtx.Err())
+	}
 
 	ctx, cancel := context.WithTimeout(context.TODO(), 15*time.Second)
 	defer cancel()
