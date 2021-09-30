@@ -38,7 +38,7 @@ func (d *Client) Service(ctx context.Context, service string, index uint64, pass
 		return nil, 0, err
 	}
 
-	services := make([]*registry.ServiceInstance, len(entries))
+	services := make([]*registry.ServiceInstance, 0)
 
 	for _, entry := range entries {
 		var version string

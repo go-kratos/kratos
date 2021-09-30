@@ -35,9 +35,8 @@ type Config struct {
 type Registry struct {
 	cli               *Client
 	enableHealthCheck bool
-
-	registry map[string]*serviceSet
-	lock     sync.RWMutex
+	registry          map[string]*serviceSet
+	lock              sync.RWMutex
 }
 
 // New creates consul registry
