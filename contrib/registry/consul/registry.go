@@ -33,7 +33,6 @@ type Config struct {
 
 // Registry is consul registry
 type Registry struct {
-	cfg               *Config
 	cli               *Client
 	enableHealthCheck bool
 
@@ -104,7 +103,7 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	set, ok := r.registry[name]
 	if !ok {
 		set = &serviceSet{
-			watcher:     make(map[*watcher]struct{}, 0),
+			watcher:     make(map[*watcher]struct{}),
 			services:    &atomic.Value{},
 			serviceName: name,
 		}
