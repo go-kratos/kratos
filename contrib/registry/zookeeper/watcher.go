@@ -6,9 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
-var (
-	_ registry.Watcher = &watcher{}
-)
+var _ registry.Watcher = &watcher{}
 
 type watcher struct {
 	ctx    context.Context
@@ -25,9 +23,7 @@ func (w watcher) Next() (services []*registry.ServiceInstance, err error) {
 	}
 	ss, ok := w.set.services.Load().([]*registry.ServiceInstance)
 	if ok {
-		for _, s := range ss {
-			services = append(services, s)
-		}
+		services = append(services, ss...)
 	}
 	return
 }
