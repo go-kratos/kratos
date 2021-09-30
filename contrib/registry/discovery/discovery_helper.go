@@ -112,17 +112,25 @@ func toServiceInstance(ins *discoveryInstance) *registry.ServiceInstance {
 		return nil
 	}
 
+	md := map[string]string{
+		"region":   ins.Region,
+		"zone":     ins.Zone,
+		"lastTs":   strconv.Itoa(int(ins.LastTs)),
+		"env":      ins.Env,
+		"hostname": ins.Hostname,
+	}
+
+	if len(ins.Metadata) != 0 {
+		for k, v := range ins.Metadata {
+			md[k] = v
+		}
+	}
+
 	return &registry.ServiceInstance{
-		ID:      ins.Metadata[_reservedInstanceIDKey],
-		Name:    ins.AppID,
-		Version: ins.Version,
-		Metadata: map[string]string{
-			"region":   ins.Region,
-			"zone":     ins.Region,
-			"lastTs":   strconv.Itoa(int(ins.LastTs)),
-			"env":      ins.Env,
-			"hostname": ins.Hostname,
-		},
+		ID:        ins.Metadata[_reservedInstanceIDKey],
+		Name:      ins.AppID,
+		Version:   ins.Version,
+		Metadata:  md,
 		Endpoints: ins.Addrs,
 	}
 }
