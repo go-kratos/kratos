@@ -20,6 +20,7 @@ type options struct {
 	endpoint       string
 	namespace      string
 	isBackupConfig bool
+	backupPath string
 }
 
 // WithAppID with apollo config app id
@@ -71,6 +72,14 @@ func WithNamespace(name string) Option {
 	}
 }
 
+
+// WithBackupPath with apollo config backupPath
+func WithBackupPath(backupPath string) Option {
+	return func(o *options) {
+		o.backupPath = backupPath
+	}
+}
+
 func NewSource(opts ...Option) config.Source {
 	op := options{}
 	for _, o := range opts {
@@ -84,6 +93,7 @@ func NewSource(opts ...Option) config.Source {
 			IP:             op.endpoint,
 			IsBackupConfig: op.isBackupConfig,
 			Secret:         op.secret,
+			BackupConfigPath: op.backupPath,
 		}, nil
 	})
 	if err != nil {
