@@ -93,6 +93,7 @@ func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 				CheckID: "service:" + svc.ID,
 				TTL:     "50s",
 				Status:  "passing",
+				DeregisterCriticalServiceAfter: "1m5s",
 			},
 		},
 	}
@@ -101,6 +102,7 @@ func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 			TCP:      fmt.Sprintf("%s:%d", addr, port),
 			Interval: "20s",
 			Status:   "passing",
+			DeregisterCriticalServiceAfter: "1m5s",
 		})
 	}
 	err := d.cli.Agent().ServiceRegister(asr)
