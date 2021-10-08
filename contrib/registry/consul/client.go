@@ -90,18 +90,18 @@ func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 		Port:            int(port),
 		Checks: []*api.AgentServiceCheck{
 			{
-				CheckID: "service:" + svc.ID,
-				TTL:     "50s",
-				Status:  "passing",
+				CheckID:                        "service:" + svc.ID,
+				TTL:                            "50s",
+				Status:                         "passing",
 				DeregisterCriticalServiceAfter: "1m5s",
 			},
 		},
 	}
 	if enableHealthCheck {
 		asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
-			TCP:      fmt.Sprintf("%s:%d", addr, port),
-			Interval: "20s",
-			Status:   "passing",
+			TCP:                            fmt.Sprintf("%s:%d", addr, port),
+			Interval:                       "20s",
+			Status:                         "passing",
 			DeregisterCriticalServiceAfter: "1m5s",
 		})
 	}
