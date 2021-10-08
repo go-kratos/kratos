@@ -1,8 +1,3 @@
-./contrib/metrics/datadog
-./contrib/config/nacos
-./contrib/config/apollo
-./contrib/config/kubernetes
 ./contrib/registry/nacos
-./contrib/registry/consul
 ./contrib/registry/kubernetes
 ./contrib/registry/zookeeper

@@ -10,21 +10,23 @@ import (
 var _ registry.Watcher = &watcher{}
 
 type watcher struct {
-	key       string
-	ctx       context.Context
-	cancel    context.CancelFunc
-	watchChan clientv3.WatchChan
-	watcher   clientv3.Watcher
-	kv        clientv3.KV
-	first     bool
+	key         string
+	ctx         context.Context
+	cancel      context.CancelFunc
+	watchChan   clientv3.WatchChan
+	watcher     clientv3.Watcher
+	kv          clientv3.KV
+	first       bool
+	serviceName string
 }
 
-func newWatcher(ctx context.Context, key string, client *clientv3.Client) (*watcher, error) {
+func newWatcher(ctx context.Context, key, name string, client *clientv3.Client) (*watcher, error) {
 	w := &watcher{
-		key:     key,
-		watcher: clientv3.NewWatcher(client),
-		kv:      clientv3.NewKV(client),
-		first:   true,
+		key:         key,
+		watcher:     clientv3.NewWatcher(client),
+		kv:          clientv3.NewKV(client),
+		first:       true,
+		serviceName: name,
 	}
 	w.ctx, w.cancel = context.WithCancel(ctx)
 	w.watchChan = w.watcher.Watch(w.ctx, key, clientv3.WithPrefix(), clientv3.WithRev(0))
@@ -60,13 +62,16 @@ func (w *watcher) getInstance() ([]*registry.ServiceInstance, error) {
 	if err != nil {
 		return nil, err
 	}
-	items := make([]*registry.ServiceInstance, len(resp.Kvs))
-	for i, kv := range resp.Kvs {
+	items := make([]*registry.ServiceInstance, 0, len(resp.Kvs))
+	for _, kv := range resp.Kvs {
 		si, err := unmarshal(kv.Value)
 		if err != nil {
 			return nil, err
 		}
-		items[i] = si
+		if si.Name != w.serviceName {
+			continue
+		}
+		items = append(items, si)
 	}
 	return items, nil
 }

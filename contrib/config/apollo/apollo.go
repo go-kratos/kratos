@@ -26,6 +26,7 @@ type options struct {
 	endpoint       string
 	namespace      string
 	isBackupConfig bool
+	backupPath     string
 
 	logger log.Logger
 }
@@ -79,6 +80,13 @@ func WithNamespace(name string) Option {
 	}
 }
 
+// WithBackupPath with apollo config backupPath
+func WithBackupPath(backupPath string) Option {
+	return func(o *options) {
+		o.backupPath = backupPath
+	}
+}
+
 // WithLogger use custom logger to replace default logger.
 func WithLogger(logger log.Logger) Option {
 	return func(o *options) {
@@ -97,12 +105,13 @@ func NewSource(opts ...Option) config.Source {
 	}
 	client, err := agollo.StartWithConfig(func() (*apolloConfig.AppConfig, error) {
 		return &apolloConfig.AppConfig{
-			AppID:          op.appid,
-			Cluster:        op.cluster,
-			NamespaceName:  op.namespace,
-			IP:             op.endpoint,
-			IsBackupConfig: op.isBackupConfig,
-			Secret:         op.secret,
+			AppID:            op.appid,
+			Cluster:          op.cluster,
+			NamespaceName:    op.namespace,
+			IP:               op.endpoint,
+			IsBackupConfig:   op.isBackupConfig,
+			Secret:           op.secret,
+			BackupConfigPath: op.backupPath,
 		}, nil
 	})
 	if err != nil {

@@ -12,9 +12,9 @@ import (
 type Option func(*options)
 
 type options struct {
-	endpoint string
+	endpoint string // nolint:structcheck,unused
 
-	namespaceID string
+	namespaceID string // nolint:structcheck,unused
 
 	group  string
 	dataID string
@@ -80,12 +80,12 @@ func NewConfigSource(client config_client.IConfigClient, opts ...Option) config.
 	}
 	return &Config{client: client, opts: _options}
 }
+
 func (c *Config) Load() ([]*config.KeyValue, error) {
 	content, err := c.client.GetConfig(vo.ConfigParam{
 		DataId: c.opts.dataID,
 		Group:  c.opts.group,
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,6 @@ func (c *Config) Watch() (config.Watcher, error) {
 			if dataId == watcher.dataID && group == watcher.group {
 				watcher.content <- data
 			}
-			return
 		},
 	})
 	if err != nil {

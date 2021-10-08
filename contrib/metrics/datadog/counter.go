@@ -14,16 +14,16 @@ type counter struct {
 
 // NewCounter new a DataDog counter and returns Counter.
 func NewCounter(name string, opts ...Option) metrics.Counter {
-	options := options{
+	counterOpts := options{
 		sampleRate: 1,
 		client:     defaultClient,
 	}
 	for _, o := range opts {
-		o(&options)
+		o(&counterOpts)
 	}
 	return &counter{
 		name: name,
-		opts: options,
+		opts: counterOpts,
 	}
 }
 
@@ -37,9 +37,9 @@ func (d *counter) With(values ...string) metrics.Counter {
 }
 
 func (d *counter) Inc() {
-	d.opts.client.Incr(d.name, d.lvs, d.opts.sampleRate)
+	_ = d.opts.client.Incr(d.name, d.lvs, d.opts.sampleRate)
 }
 
 func (d *counter) Add(delta float64) {
-	d.opts.client.Count(d.name, int64(delta), d.lvs, d.opts.sampleRate)
+	_ = d.opts.client.Count(d.name, int64(delta), d.lvs, d.opts.sampleRate)
 }

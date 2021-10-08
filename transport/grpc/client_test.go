@@ -68,7 +68,7 @@ func EmptyMiddleware() middleware.Middleware {
 }
 
 func TestUnaryClientInterceptor(t *testing.T) {
-	f := unaryClientInterceptor([]middleware.Middleware{EmptyMiddleware()}, time.Duration(100))
+	f := unaryClientInterceptor([]middleware.Middleware{EmptyMiddleware()}, time.Duration(100), nil)
 	req := &struct{}{}
 	resp := &struct{}{}
 
