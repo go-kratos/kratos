@@ -36,10 +36,10 @@ func TestEnvWithPrefix(t *testing.T) {
 		data     = []byte(_testJSON)
 	)
 	defer os.Remove(path)
-	if err := os.MkdirAll(path, 0o700); err != nil {
+	if err := os.MkdirAll(path, 0700); err != nil {
 		t.Error(err)
 	}
-	if err := ioutil.WriteFile(filename, data, 0o666); err != nil {
+	if err := ioutil.WriteFile(filename, data, 0666); err != nil {
 		t.Error(err)
 	}
 
@@ -55,7 +55,7 @@ func TestEnvWithPrefix(t *testing.T) {
 	}
 
 	for k, v := range envs {
-		t.Setenv(k, v)
+		os.Setenv(k, v)
 	}
 
 	c := config.New(config.WithSource(
@@ -146,10 +146,10 @@ func TestEnvWithoutPrefix(t *testing.T) {
 		data     = []byte(_testJSON)
 	)
 	defer os.Remove(path)
-	if err := os.MkdirAll(path, 0o700); err != nil {
+	if err := os.MkdirAll(path, 0700); err != nil {
 		t.Error(err)
 	}
-	if err := ioutil.WriteFile(filename, data, 0o666); err != nil {
+	if err := ioutil.WriteFile(filename, data, 0666); err != nil {
 		t.Error(err)
 	}
 
@@ -161,7 +161,7 @@ func TestEnvWithoutPrefix(t *testing.T) {
 	}
 
 	for k, v := range envs {
-		t.Setenv(k, v)
+		os.Setenv(k, v)
 	}
 
 	c := config.New(config.WithSource(
