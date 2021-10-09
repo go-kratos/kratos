@@ -26,7 +26,7 @@ func setClientSpan(ctx context.Context, span trace.Span, m interface{}) {
 		operation = tr.Operation()
 		rpcKind = tr.Kind().String()
 		if tr.Kind() == transport.KindHTTP {
-			if ht, ok := tr.(*http.Transport); ok {
+			if ht, ok := tr.(http.Transporter); ok {
 				method := ht.Request().Method
 				route := ht.PathTemplate()
 				path := ht.Request().URL.Path
@@ -61,7 +61,7 @@ func setServerSpan(ctx context.Context, span trace.Span, m interface{}) {
 		operation = tr.Operation()
 		rpcKind = tr.Kind().String()
 		if tr.Kind() == transport.KindHTTP {
-			if ht, ok := tr.(*http.Transport); ok {
+			if ht, ok := tr.(http.Transporter); ok {
 				method := ht.Request().Method
 				route := ht.PathTemplate()
 				path := ht.Request().URL.Path

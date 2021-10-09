@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -199,15 +198,6 @@ func TestTimeout(t *testing.T) {
 
 func TestLogger(t *testing.T) {
 	// todo
-}
-
-func TestEndpoint(t *testing.T) {
-	u, err := url.Parse("http://hello/world")
-	assert.NoError(t, err)
-	o := &Server{}
-	Endpoint(u)(o)
-	assert.Equal(t, "hello", o.endpoint.Host)
-	assert.Equal(t, "http", o.endpoint.Scheme)
 }
 
 func TestMiddleware(t *testing.T) {

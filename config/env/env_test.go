@@ -55,9 +55,7 @@ func TestEnvWithPrefix(t *testing.T) {
 	}
 
 	for k, v := range envs {
-		if err := os.Setenv(k, v); err != nil {
-			t.Fatal(err)
-		}
+		os.Setenv(k, v)
 	}
 
 	c := config.New(config.WithSource(
@@ -163,9 +161,7 @@ func TestEnvWithoutPrefix(t *testing.T) {
 	}
 
 	for k, v := range envs {
-		if err := os.Setenv(k, v); err != nil {
-			t.Fatal(err)
-		}
+		os.Setenv(k, v)
 	}
 
 	c := config.New(config.WithSource(

@@ -116,7 +116,7 @@ func (a *App) Run() error {
 			case <-c:
 				err := a.Stop()
 				if err != nil {
-					a.opts.logger.Errorf("failed to app stop: %v", err)
+					a.opts.logger.Errorf("failed to stop app: %v", err)
 				}
 			}
 		}

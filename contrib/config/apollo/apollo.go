@@ -11,6 +11,7 @@ type apollo struct {
 	client *agollo.Client
 }
 
+// Option is apollo option
 type Option func(*options)
 
 type options struct {
@@ -20,6 +21,7 @@ type options struct {
 	endpoint       string
 	namespace      string
 	isBackupConfig bool
+	backupPath     string
 }
 
 // WithAppID with apollo config app id
@@ -71,6 +73,13 @@ func WithNamespace(name string) Option {
 	}
 }
 
+// WithBackupPath with apollo config backupPath
+func WithBackupPath(backupPath string) Option {
+	return func(o *options) {
+		o.backupPath = backupPath
+	}
+}
+
 func NewSource(opts ...Option) config.Source {
 	op := options{}
 	for _, o := range opts {
@@ -78,12 +87,13 @@ func NewSource(opts ...Option) config.Source {
 	}
 	client, err := agollo.StartWithConfig(func() (*apolloConfig.AppConfig, error) {
 		return &apolloConfig.AppConfig{
-			AppID:          op.appid,
-			Cluster:        op.cluster,
-			NamespaceName:  op.namespace,
-			IP:             op.endpoint,
-			IsBackupConfig: op.isBackupConfig,
-			Secret:         op.secret,
+			AppID:            op.appid,
+			Cluster:          op.cluster,
+			NamespaceName:    op.namespace,
+			IP:               op.endpoint,
+			IsBackupConfig:   op.isBackupConfig,
+			Secret:           op.secret,
+			BackupConfigPath: op.backupPath,
 		}, nil
 	})
 	if err != nil {

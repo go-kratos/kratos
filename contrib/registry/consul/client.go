@@ -37,7 +37,9 @@ func (d *Client) Service(ctx context.Context, service string, index uint64, pass
 	if err != nil {
 		return nil, 0, err
 	}
-	var services []*registry.ServiceInstance
+
+	services := make([]*registry.ServiceInstance, 0)
+
 	for _, entry := range entries {
 		var version string
 		for _, tag := range entry.Service.Tags {
@@ -111,7 +113,7 @@ func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 		for {
 			select {
 			case <-ticker.C:
-				d.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+				_ = d.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 			case <-d.ctx.Done():
 				return
 			}

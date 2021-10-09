@@ -11,6 +11,7 @@ require (
 	github.com/go-kratos/kratos/contrib/config/apollo/v2 v2.0.0-20210901080230-515b71ec9061
 	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-00010101000000-000000000000
+	github.com/go-kratos/kratos/contrib/registry/discovery/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/nacos/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/zookeeper/v2 v2.0.0-00010101000000-000000000000
@@ -34,10 +35,10 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/etcd/client/v3 v3.5.0
-	go.opentelemetry.io/otel v1.0.0-RC3
-	go.opentelemetry.io/otel/exporters/jaeger v1.0.0-RC3
-	go.opentelemetry.io/otel/sdk v1.0.0-RC3
-	go.opentelemetry.io/otel/trace v1.0.0-RC3
+	go.opentelemetry.io/otel v1.0.0
+	go.opentelemetry.io/otel/exporters/jaeger v1.0.0
+	go.opentelemetry.io/otel/sdk v1.0.0
+	go.opentelemetry.io/otel/trace v1.0.0
 	go.uber.org/zap v1.19.0
 	golang.org/x/text v0.3.7
 	google.golang.org/genproto v0.0.0-20210831024726-fe130286e0e2
@@ -49,6 +50,7 @@ replace (
 	github.com/go-kratos/kratos/contrib/config/apollo/v2 => ../contrib/config/apollo
 	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 => ../contrib/metrics/prometheus
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 => ../contrib/registry/consul
+	github.com/go-kratos/kratos/contrib/registry/discovery/v2 => ../contrib/registry/discovery
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 => ../contrib/registry/etcd
 	github.com/go-kratos/kratos/contrib/registry/nacos/v2 => ../contrib/registry/nacos
 	github.com/go-kratos/kratos/contrib/registry/zookeeper/v2 => ../contrib/registry/zookeeper
