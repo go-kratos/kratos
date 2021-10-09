@@ -17,6 +17,7 @@ type apollo struct {
 	opt    *options
 }
 
+// Option is apollo option
 type Option func(*options)
 
 type options struct {
