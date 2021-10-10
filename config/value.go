@@ -24,6 +24,8 @@ type Value interface {
 	Float() (float64, error)
 	String() (string, error)
 	Duration() (time.Duration, error)
+	Slice() ([]Value, error)
+	Map() (map[string]Value, error)
 	Scan(interface{}) error
 	Load() interface{}
 	Store(interface{})
@@ -57,6 +59,32 @@ func (v *atomicValue) Int() (int64, error) {
 		return strconv.ParseInt(val, 10, 64) //nolint:gomnd
 	}
 	return 0, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
+}
+
+func (v *atomicValue) Slice() ([]Value, error) {
+	if vals, ok := v.Load().([]interface{}); ok {
+		var slices []Value
+		for _, val := range vals {
+			a := &atomicValue{}
+			a.Store(val)
+			slices = append(slices, a)
+		}
+		return slices, nil
+	}
+	return nil, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
+}
+
+func (v *atomicValue) Map() (map[string]Value, error) {
+	if vals, ok := v.Load().(map[string]interface{}); ok {
+		m := make(map[string]Value)
+		for key, val := range vals {
+			a := &atomicValue{}
+			a.Store(val)
+			m[key] = a
+		}
+		return m, nil
+	}
+	return nil, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
 }
 
 func (v *atomicValue) Float() (float64, error) {
@@ -122,3 +150,5 @@ func (v errValue) String() (string, error)          { return "", v.err }
 func (v errValue) Scan(interface{}) error           { return v.err }
 func (v errValue) Load() interface{}                { return nil }
 func (v errValue) Store(interface{})                {}
+func (v errValue) Slice() ([]Value, error)          { return nil, v.err }
+func (v errValue) Map() (map[string]Value, error)   { return nil, v.err }
