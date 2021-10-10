@@ -27,7 +27,7 @@ func (c *customChangeListener) onChange(
 	next := make(map[string]interface{})
 
 	for key, change := range changes {
-		convertProperties(genKey(namespace, key), change.NewValue, next)
+		resolve(genKey(namespace, key), change.NewValue, next)
 	}
 
 	f := format(namespace)

@@ -151,7 +151,7 @@ func Test_convertProperties(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			convertProperties(tt.args.key, tt.args.value, tt.args.target)
+			resolve(tt.args.key, tt.args.value, tt.args.target)
 			assert.Equal(t, tt.want, tt.args.target)
 		})
 	}
@@ -159,13 +159,13 @@ func Test_convertProperties(t *testing.T) {
 
 func Test_convertProperties_duplicate(t *testing.T) {
 	target := map[string]interface{}{}
-	convertProperties("application.name", "name", target)
+	resolve("application.name", "name", target)
 	assert.Contains(t, target, "application")
 	assert.Contains(t, target["application"], "name")
 	assert.Equal(t, "name", target["application"].(map[string]interface{})["name"])
 
 	// cause duplicate, the oldest value will be kept
-	convertProperties("application.name.first", "first name", target)
+	resolve("application.name.first", "first name", target)
 	assert.Contains(t, target, "application")
 	assert.Contains(t, target["application"], "name")
 	assert.Equal(t, "name", target["application"].(map[string]interface{})["name"])

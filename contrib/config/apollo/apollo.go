@@ -140,9 +140,9 @@ func genKey(ns, sub string) string {
 	return strings.Join(arr[:len(arr)-1], ".") + "." + sub
 }
 
-// convertProperties convert properties into one map[string]interface{} by split key into different
+// resolve convert kv pair into one map[string]interface{} by split key into different
 // map level. such as: app.name = "application" => map[app][name] = "application"
-func convertProperties(key string, value interface{}, target map[string]interface{}) {
+func resolve(key string, value interface{}, target map[string]interface{}) {
 	// expand key "aaa.bbb" into map[aaa]map[bbb]interface{}
 	keys := strings.Split(key, ".")
 	last := len(keys) - 1
@@ -193,7 +193,7 @@ func (e *apollo) load() []*config.KeyValue {
 		next := map[string]interface{}{}
 		e.client.GetConfigCache(ns).Range(func(key, value interface{}) bool {
 			// all values are out properties format
-			convertProperties(genKey(ns, key.(string)), value, next)
+			resolve(genKey(ns, key.(string)), value, next)
 			return true
 		})
 
