@@ -120,6 +120,40 @@ func Test_atomicValue_Duration(t *testing.T) {
 	}
 }
 
+func Test_atomicValue_Slice(t *testing.T) {
+	vlist := []interface{}{int64(5)}
+	v := atomicValue{}
+	v.Store(vlist)
+	slices, err := v.Slice()
+	assert.NoError(t, err)
+	for _, v := range slices {
+		b, err := v.Duration()
+		assert.NoError(t, err)
+		assert.Equal(t, time.Duration(5), b)
+	}
+}
+
+func Test_atomicValue_Map(t *testing.T) {
+	vlist := make(map[string]interface{})
+	vlist["5"] = int64(5)
+	vlist["text"] = "text"
+	v := atomicValue{}
+	v.Store(vlist)
+	m, err := v.Map()
+	assert.NoError(t, err)
+	for k, v := range m {
+		if k == "5" {
+			b, err := v.Duration()
+			assert.NoError(t, err)
+			assert.Equal(t, time.Duration(5), b)
+		} else {
+			b, err := v.String()
+			assert.NoError(t, err)
+			assert.Equal(t, "text", b)
+		}
+	}
+}
+
 func Test_atomicValue_Scan(t *testing.T) {
 	var err error
 	v := atomicValue{}
