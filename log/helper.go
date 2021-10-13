@@ -17,20 +17,11 @@ type Helper struct {
 	msgKey string
 }
 
-func WithMessageKey(k string) Option {
-	return func(opts *Helper) {
-		opts.msgKey = k
-	}
-}
-
 // NewHelper new a logger helper.
-func NewHelper(logger Logger, opts ...Option) *Helper {
+func NewHelper(logger Logger) *Helper {
 	options := &Helper{
 		msgKey: DefaultMessageKey, // default message key
 		logger: logger,
-	}
-	for _, o := range opts {
-		o(options)
 	}
 	return options
 }
