@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+var DefaultMessageKey = "msg"
+
 // Option is Helper option.
 type Option func(*Helper)
 
@@ -24,7 +26,7 @@ func WithMessageKey(k string) Option {
 // NewHelper new a logger helper.
 func NewHelper(logger Logger, opts ...Option) *Helper {
 	options := &Helper{
-		msgKey: "msg", // default message key
+		msgKey: DefaultMessageKey, // default message key
 		logger: logger,
 	}
 	for _, o := range opts {
