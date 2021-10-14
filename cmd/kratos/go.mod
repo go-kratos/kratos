@@ -1,6 +1,6 @@
 module github.com/go-kratos/kratos/cmd/kratos/v2
 
-go 1.15
+go 1.16
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.2.15

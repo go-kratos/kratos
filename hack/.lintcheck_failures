@@ -1,3 +1,2 @@
-./contrib/registry/consul
 ./contrib/registry/kubernetes
 ./contrib/registry/zookeeper
