@@ -80,7 +80,7 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 		err := &errorInfo{
 			Name:       string(enum.Desc.Name()),
 			Value:      string(v.Desc.Name()),
-			CamelValue: Case2Camel(string(v.Desc.Name())),
+			CamelValue: case2Camel(string(v.Desc.Name())),
 			HTTPCode:   enumCode,
 		}
 		ew.Errors = append(ew.Errors, err)
@@ -92,9 +92,9 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	return false
 }
 
-func Case2Camel(name string) string {
+func case2Camel(name string) string {
 	if !strings.Contains(name, "_") {
-		return strings.Title(strings.ToLower(name))
+		return name
 	}
 	name = strings.ToLower(name)
 	name = strings.Replace(name, "_", " ", -1)
