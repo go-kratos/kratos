@@ -117,6 +117,7 @@ func (a *App) Run() error {
 				err := a.Stop()
 				if err != nil {
 					a.opts.logger.Errorf("failed to stop app: %v", err)
+					return err
 				}
 			}
 		}

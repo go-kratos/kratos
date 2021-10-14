@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 
+	"google.golang.org/protobuf/reflect/protoreflect"
+
 	"github.com/go-kratos/kratos/v2"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
@@ -155,6 +157,17 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 
 func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path string) *methodDesc {
 	defer func() { methodSets[m.GoName]++ }()
+	vars := buildPathVars(m, path)
+	fields := m.Input.Desc.Fields()
+	for _, v := range vars {
+		fd := fields.ByName(protoreflect.Name(v))
+		if fd.IsMap() {
+			fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: The field in path:'%s' shouldn't be a map.\n", v)
+		}
+		if fd.IsList() {
+			fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: The field in path:'%s' shouldn't be a list.\n", v)
+		}
+	}
 	return &methodDesc{
 		Name:    m.GoName,
 		Num:     methodSets[m.GoName],
@@ -162,7 +175,7 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 		Reply:   g.QualifiedGoIdent(m.Output.GoIdent),
 		Path:    path,
 		Method:  method,
-		HasVars: len(buildPathVars(m, path)) > 0,
+		HasVars: len(vars) > 0,
 	}
 }
 

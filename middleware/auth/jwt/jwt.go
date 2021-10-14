@@ -93,6 +93,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 							return nil, ErrTokenParseFail
 						}
 					}
+					return nil, errors.Unauthorized("UNAUTHORIZED", err.Error())
 				} else if !tokenInfo.Valid {
 					return nil, ErrTokenInvalid
 				} else if tokenInfo.Method != o.signingMethod {
