@@ -48,6 +48,7 @@ type resolver struct {
 	logger  *log.Helper
 
 	insecure bool
+	first    bool
 }
 
 func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, rebalancer selector.Rebalancer, block, insecure bool) (*resolver, error) {
@@ -61,6 +62,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 		logger:     log.NewHelper(log.DefaultLogger),
 		rebalancer: rebalancer,
 		insecure:   insecure,
+		first:      true,
 	}
 	if block {
 		done := make(chan error, 1)
@@ -95,6 +97,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 			return nil, ctx.Err()
 		}
 	}
+	done := make(chan struct{})
 	go func() {
 		for {
 			services, err := watcher.Next()
@@ -107,8 +110,12 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 				continue
 			}
 			r.update(services)
+			if r.first {
+				close(done)
+			}
 		}
 	}()
+	<-done
 	return r, nil
 }
 
