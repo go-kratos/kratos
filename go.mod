@@ -11,7 +11,6 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/imdario/mergo v0.3.12
 	github.com/stretchr/testify v1.7.0
-	github.com/vmihailenco/msgpack/v5 v5.3.4
 	go.opentelemetry.io/otel v1.0.0
 	go.opentelemetry.io/otel/sdk v1.0.0
 	go.opentelemetry.io/otel/trace v1.0.0
