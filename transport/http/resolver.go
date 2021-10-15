@@ -112,6 +112,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 			r.update(services)
 			if r.first {
 				close(done)
+				r.first = false
 			}
 		}
 	}()
