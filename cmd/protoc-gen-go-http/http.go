@@ -161,6 +161,10 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 	fields := m.Input.Desc.Fields()
 	for _, v := range vars {
 		fd := fields.ByName(protoreflect.Name(v))
+		if fd == nil {
+			fmt.Fprintf(os.Stderr, "\u001B[31mERROR\u001B[m: The corresponding field '%s' declaration in message could not be found in '%s'\n", v, path)
+			os.Exit(2)
+		}
 		if fd.IsMap() {
 			fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: The field in path:'%s' shouldn't be a map.\n", v)
 		}
