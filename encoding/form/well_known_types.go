@@ -21,7 +21,6 @@ const (
 	// duration
 	durationMessageFullname    protoreflect.FullName    = "google.protobuf.Duration"
 	secondsInNanos                                      = 999999999
-	maxSecondsInDuration                                = 315576000000
 	durationSecondsFieldNumber protoreflect.FieldNumber = 1
 	durationNanosFieldNumber   protoreflect.FieldNumber = 2
 
