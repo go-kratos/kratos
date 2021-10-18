@@ -52,3 +52,19 @@ func (d *Default) Apply(nodes []Node) {
 	d.weightedNodes = weightedNodes
 	d.lk.Unlock()
 }
+
+// DefaultBuilder is de
+type DefaultBuilder struct {
+	Node     WeightedNodeBuilder
+	Balancer BalancerBuilder
+	Filters  []Filter
+}
+
+// Build create builder
+func (db *DefaultBuilder) Build() Selector {
+	return &Default{
+		NodeBuilder: db.Node,
+		Balancer:    db.Balancer.Build(),
+		Filters:     db.Filters,
+	}
+}
