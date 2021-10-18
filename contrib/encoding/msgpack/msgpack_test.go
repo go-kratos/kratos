@@ -43,5 +43,4 @@ func TestCodec(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, req.Password, request.Password)
 	assert.Equal(t, req.UserName, request.UserName)
-
 }
