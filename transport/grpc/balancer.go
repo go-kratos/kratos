@@ -25,19 +25,19 @@ var (
 
 func init() {
 	// inject global grpc balancer
-	SetGlobalBalancer(random.Name, random.New())
-	SetGlobalBalancer(wrr.Name, wrr.New())
-	SetGlobalBalancer(p2c.Name, p2c.New())
+	SetGlobalBalancer(random.Name, random.NewBuilder())
+	SetGlobalBalancer(wrr.Name, wrr.NewBuilder())
+	SetGlobalBalancer(p2c.Name, p2c.NewBuilder())
 }
 
 // SetGlobalBalancer set grpc balancer with scheme.
-func SetGlobalBalancer(scheme string, selector selector.Selector) {
+func SetGlobalBalancer(scheme string, builder selector.Builder) {
 	mu.Lock()
 	defer mu.Unlock()
 
 	b := base.NewBalancerBuilder(
 		scheme,
-		&Builder{selector},
+		&Builder{builder: builder},
 		base.Config{HealthCheck: true},
 	)
 	gBalancer.Register(b)
@@ -45,7 +45,7 @@ func SetGlobalBalancer(scheme string, selector selector.Selector) {
 
 // Builder is grpc balancer builder.
 type Builder struct {
-	selector selector.Selector
+	builder selector.Builder
 }
 
 // Build creates a grpc Picker.
@@ -62,7 +62,7 @@ func (b *Builder) Build(info base.PickerBuildInfo) gBalancer.Picker {
 		nodes = append(nodes, node.New(info.Address.Addr, ins))
 	}
 	p := &Picker{
-		selector: b.selector,
+		selector: b.builder.Build(),
 		subConns: subConns,
 	}
 	p.selector.Apply(nodes)

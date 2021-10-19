@@ -35,17 +35,7 @@ type options struct {
 
 // New creates a p2c selector.
 func New(opts ...Option) selector.Selector {
-	var option options
-	for _, opt := range opts {
-		opt(&option)
-	}
-	return &selector.Default{
-		NodeBuilder: &ewma.Builder{},
-		Balancer: &Balancer{
-			r: rand.New(rand.NewSource(time.Now().UnixNano())),
-		},
-		Filters: option.filters,
-	}
+	return NewBuilder(opts...).Build()
 }
 
 // Balancer is p2c selector.
@@ -91,4 +81,25 @@ func (s *Balancer) Pick(ctx context.Context, nodes []selector.WeightedNode) (sel
 	}
 	done := pc.Pick()
 	return pc, done, nil
+}
+
+// NewBuilder returns a selector builder with p2c balancer
+func NewBuilder(opts ...Option) selector.Builder {
+	var option options
+	for _, opt := range opts {
+		opt(&option)
+	}
+	return &selector.DefaultBuilder{
+		Filters:  option.filters,
+		Balancer: &Builder{},
+		Node:     &ewma.Builder{},
+	}
+}
+
+// Builder is p2c builder
+type Builder struct{}
+
+// Build creates Balancer
+func (b *Builder) Build() selector.Balancer {
+	return &Balancer{r: rand.New(rand.NewSource(time.Now().UnixNano()))}
 }
