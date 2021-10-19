@@ -1,22 +1,15 @@
 package binding
 
 import (
-	"encoding/base64"
 	"fmt"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding/form"
 
-	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/protobuf/proto"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	"google.golang.org/protobuf/types/known/durationpb"
-	"google.golang.org/protobuf/types/known/timestamppb"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 // EncodeURL encode proto message to url path.
@@ -74,65 +67,5 @@ func getValueByField(v protoreflect.Message, fieldPath []string) (string, error)
 		}
 		v = v.Get(fd).Message()
 	}
-	return encodeField(fd, v.Get(fd))
-}
-
-func encodeField(fieldDescriptor protoreflect.FieldDescriptor, value protoreflect.Value) (string, error) {
-	switch fieldDescriptor.Kind() {
-	case protoreflect.BoolKind:
-		return strconv.FormatBool(value.Bool()), nil
-	case protoreflect.EnumKind:
-		if fieldDescriptor.Enum().FullName() == "google.protobuf.NullValue" {
-			return "null", nil
-		}
-		desc := fieldDescriptor.Enum().Values().ByNumber(value.Enum())
-		return string(desc.Name()), nil
-	case protoreflect.StringKind:
-		return value.String(), nil
-	case protoreflect.BytesKind:
-		return base64.URLEncoding.EncodeToString(value.Bytes()), nil
-	case protoreflect.MessageKind, protoreflect.GroupKind:
-		return encodeMessage(fieldDescriptor.Message(), value)
-	default:
-		return fmt.Sprintf("%v", value.Interface()), nil
-	}
-}
-
-// encodeMessage marshals the fields in the given protoreflect.Message.
-// If the typeURL is non-empty, then a synthetic "@type" field is injected
-// containing the URL as the value.
-func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protoreflect.Value) (string, error) {
-	switch msgDescriptor.FullName() {
-	case "google.protobuf.Timestamp":
-		t, ok := value.Interface().(*timestamppb.Timestamp)
-		if !ok {
-			return "", nil
-		}
-		return t.AsTime().Format(time.RFC3339Nano), nil
-	case "google.protobuf.Duration":
-		d, ok := value.Interface().(*durationpb.Duration)
-		if !ok {
-			return "", nil
-		}
-		return d.AsDuration().String(), nil
-	case "google.protobuf.BytesValue":
-		b, ok := value.Interface().(*wrapperspb.BytesValue)
-		if !ok {
-			return "", nil
-		}
-		return base64.StdEncoding.EncodeToString(b.Value), nil
-	case "google.protobuf.DoubleValue", "google.protobuf.FloatValue", "google.protobuf.Int64Value", "google.protobuf.Int32Value",
-		"google.protobuf.UInt64Value", "google.protobuf.UInt32Value", "google.protobuf.BoolValue", "google.protobuf.StringValue":
-		fd := msgDescriptor.Fields()
-		v := value.Message().Get(fd.ByName(protoreflect.Name("value"))).Message()
-		return fmt.Sprintf("%v", v.Interface()), nil
-	case "google.protobuf.FieldMask":
-		m, ok := value.Interface().(*field_mask.FieldMask)
-		if !ok {
-			return "", nil
-		}
-		return strings.Join(m.Paths, ","), nil
-	default:
-		return "", fmt.Errorf("unsupported message type: %q", string(msgDescriptor.FullName()))
-	}
+	return form.EncodeField(fd, v.Get(fd))
 }

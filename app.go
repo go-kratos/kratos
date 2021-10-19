@@ -139,7 +139,9 @@ func (a *App) Stop() error {
 			return err
 		}
 	}
-	a.cancel()
+	if a.cancel != nil {
+		a.cancel()
+	}
 	for _, srv := range a.started {
 		if err := srv.Stop(context.Background()); err != nil {
 			return err

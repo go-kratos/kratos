@@ -11,10 +11,11 @@ require (
 	github.com/go-kratos/kratos/contrib/config/apollo/v2 v2.0.0-20210901080230-515b71ec9061
 	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-00010101000000-000000000000
+	github.com/go-kratos/kratos/contrib/registry/discovery/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/nacos/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/zookeeper/v2 v2.0.0-00010101000000-000000000000
-	github.com/go-kratos/kratos/v2 v2.0.5
+	github.com/go-kratos/kratos/v2 v2.1.0
 	github.com/go-kratos/swagger-api v1.0.0
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.11.2
@@ -49,6 +50,7 @@ replace (
 	github.com/go-kratos/kratos/contrib/config/apollo/v2 => ../contrib/config/apollo
 	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 => ../contrib/metrics/prometheus
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 => ../contrib/registry/consul
+	github.com/go-kratos/kratos/contrib/registry/discovery/v2 => ../contrib/registry/discovery
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 => ../contrib/registry/etcd
 	github.com/go-kratos/kratos/contrib/registry/nacos/v2 => ../contrib/registry/nacos
 	github.com/go-kratos/kratos/contrib/registry/zookeeper/v2 => ../contrib/registry/zookeeper
