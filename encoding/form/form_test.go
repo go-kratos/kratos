@@ -1,7 +1,7 @@
 package form
 
 import (
-	complex2 "github.com/go-kratos/kratos/v2/internal/testdata/complex"
+	"github.com/go-kratos/kratos/v2/internal/testdata/complex"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/encoding"
@@ -63,17 +63,17 @@ func TestFormCodecUnmarshal(t *testing.T) {
 }
 
 func TestProtoEncodeDecode(t *testing.T) {
-	in := &complex2.Complex{
+	in := &complex.Complex{
 		Id:      2233,
 		NoOne:   "2233",
-		Simple:  &complex2.Simple{Component: "5566"},
+		Simple:  &complex.Simple{Component: "5566"},
 		Simples: []string{"3344", "5566"},
 		M:       map[string]int32{"kratos": 1},
 	}
 	content, err := encoding.GetCodec(contentType).Marshal(in)
 	require.NoError(t, err)
 	require.Equal(t, "id=2233&m%5Bkratos%5D=1&numberOne=2233&simples=3344&simples=5566&very_simple.component=5566", string(content))
-	in2 := &complex2.Complex{}
+	in2 := &complex.Complex{}
 	err = encoding.GetCodec(contentType).Unmarshal(content, in2)
 	require.NoError(t, err)
 	require.Equal(t, int64(2233), in2.Id)
