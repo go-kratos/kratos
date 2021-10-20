@@ -18,14 +18,24 @@ const (
 
 var _ selector.Balancer = &Balancer{}
 
-// New creates a p2c selector.
-func New() selector.Selector {
-	return &selector.Default{
-		NodeBuilder: &ewma.Builder{},
-		Balancer: &Balancer{
-			r: rand.New(rand.NewSource(time.Now().UnixNano())),
-		},
+// WithFilter with select filters
+func WithFilter(filters ...selector.Filter) Option {
+	return func(o *options) {
+		o.filters = filters
 	}
+}
+
+// Option is random builder option.
+type Option func(o *options)
+
+// options is random builder options
+type options struct {
+	filters []selector.Filter
+}
+
+// New creates a p2c selector.
+func New(opts ...Option) selector.Selector {
+	return NewBuilder(opts...).Build()
 }
 
 // Balancer is p2c selector.
@@ -71,4 +81,25 @@ func (s *Balancer) Pick(ctx context.Context, nodes []selector.WeightedNode) (sel
 	}
 	done := pc.Pick()
 	return pc, done, nil
+}
+
+// NewBuilder returns a selector builder with p2c balancer
+func NewBuilder(opts ...Option) selector.Builder {
+	var option options
+	for _, opt := range opts {
+		opt(&option)
+	}
+	return &selector.DefaultBuilder{
+		Filters:  option.filters,
+		Balancer: &Builder{},
+		Node:     &ewma.Builder{},
+	}
+}
+
+// Builder is p2c builder
+type Builder struct{}
+
+// Build creates Balancer
+func (b *Builder) Build() selector.Balancer {
+	return &Balancer{r: rand.New(rand.NewSource(time.Now().UnixNano()))}
 }

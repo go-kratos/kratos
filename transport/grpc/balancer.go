@@ -1,4 +1,4 @@
-package balancer
+package grpc
 
 import (
 	"sync"
@@ -8,6 +8,8 @@ import (
 	"github.com/go-kratos/kratos/v2/selector/node"
 	"github.com/go-kratos/kratos/v2/selector/p2c"
 	"github.com/go-kratos/kratos/v2/selector/random"
+	"github.com/go-kratos/kratos/v2/selector/wrr"
+	"github.com/go-kratos/kratos/v2/transport"
 
 	gBalancer "google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
@@ -23,18 +25,19 @@ var (
 
 func init() {
 	// inject global grpc balancer
-	SetGlobalBalancer(random.Name, random.New())
-	SetGlobalBalancer(p2c.Name, p2c.New())
+	SetGlobalBalancer(random.Name, random.NewBuilder())
+	SetGlobalBalancer(wrr.Name, wrr.NewBuilder())
+	SetGlobalBalancer(p2c.Name, p2c.NewBuilder())
 }
 
 // SetGlobalBalancer set grpc balancer with scheme.
-func SetGlobalBalancer(scheme string, selector selector.Selector) {
+func SetGlobalBalancer(scheme string, builder selector.Builder) {
 	mu.Lock()
 	defer mu.Unlock()
 
 	b := base.NewBalancerBuilder(
 		scheme,
-		&Builder{selector},
+		&Builder{builder: builder},
 		base.Config{HealthCheck: true},
 	)
 	gBalancer.Register(b)
@@ -42,7 +45,7 @@ func SetGlobalBalancer(scheme string, selector selector.Selector) {
 
 // Builder is grpc balancer builder.
 type Builder struct {
-	selector selector.Selector
+	builder selector.Builder
 }
 
 // Build creates a grpc Picker.
@@ -59,7 +62,7 @@ func (b *Builder) Build(info base.PickerBuildInfo) gBalancer.Picker {
 		nodes = append(nodes, node.New(info.Address.Addr, ins))
 	}
 	p := &Picker{
-		selector: b.selector,
+		selector: b.builder.Build(),
 		subConns: subConns,
 	}
 	p.selector.Apply(nodes)
@@ -74,7 +77,14 @@ type Picker struct {
 
 // Pick pick instances.
 func (p *Picker) Pick(info gBalancer.PickInfo) (gBalancer.PickResult, error) {
-	n, done, err := p.selector.Select(info.Ctx)
+	var filters []selector.Filter
+	if tr, ok := transport.FromClientContext(info.Ctx); ok {
+		if gtr, ok := tr.(*Transport); ok {
+			filters = gtr.Filters()
+		}
+	}
+
+	n, done, err := p.selector.Select(info.Ctx, selector.WithFilter(filters...))
 	if err != nil {
 		return gBalancer.PickResult{}, err
 	}

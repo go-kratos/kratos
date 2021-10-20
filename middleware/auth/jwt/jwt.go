@@ -33,7 +33,7 @@ var (
 	ErrTokenExpired           = errors.Unauthorized("UNAUTHORIZED", "JWT token has expired")
 	ErrTokenParseFail         = errors.Unauthorized("UNAUTHORIZED", "Fail to parse JWT token ")
 	ErrUnSupportSigningMethod = errors.Unauthorized("UNAUTHORIZED", "Wrong signing method")
-	ErrWrongContext           = errors.Unauthorized("UNAUTHORIZED", "Wrong context for middelware")
+	ErrWrongContext           = errors.Unauthorized("UNAUTHORIZED", "Wrong context for middleware")
 	ErrNeedTokenProvider      = errors.Unauthorized("UNAUTHORIZED", "Token provider is missing")
 	ErrSignToken              = errors.Unauthorized("UNAUTHORIZED", "Can not sign token.Is the key correct?")
 	ErrGetKey                 = errors.Unauthorized("UNAUTHORIZED", "Can not get key while signing token")
@@ -93,6 +93,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 							return nil, ErrTokenParseFail
 						}
 					}
+					return nil, errors.Unauthorized("UNAUTHORIZED", err.Error())
 				} else if !tokenInfo.Valid {
 					return nil, ErrTokenInvalid
 				} else if tokenInfo.Method != o.signingMethod {

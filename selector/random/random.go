@@ -8,22 +8,34 @@ import (
 	"github.com/go-kratos/kratos/v2/selector/node/direct"
 )
 
-var (
-	_ selector.Balancer = &Balancer{}
-
-	// Name is balancer name
+const (
+	// Name is random balancer name
 	Name = "random"
 )
+
+var _ selector.Balancer = &Balancer{} // Name is balancer name
+
+// WithFilter with select filters
+func WithFilter(filters ...selector.Filter) Option {
+	return func(o *options) {
+		o.filters = filters
+	}
+}
+
+// Option is random builder option.
+type Option func(o *options)
+
+// options is random builder options
+type options struct {
+	filters []selector.Filter
+}
 
 // Balancer is a random balancer.
 type Balancer struct{}
 
-// New random a selector.
-func New() selector.Selector {
-	return &selector.Default{
-		Balancer:    &Balancer{},
-		NodeBuilder: &direct.Builder{},
-	}
+// New an random selector.
+func New(opts ...Option) selector.Selector {
+	return NewBuilder(opts...).Build()
 }
 
 // Pick pick a weighted node.
@@ -35,4 +47,25 @@ func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selec
 	selected := nodes[cur]
 	d := selected.Pick()
 	return selected, d, nil
+}
+
+// NewBuilder returns a selector builder with random balancer
+func NewBuilder(opts ...Option) selector.Builder {
+	var option options
+	for _, opt := range opts {
+		opt(&option)
+	}
+	return &selector.DefaultBuilder{
+		Filters:  option.filters,
+		Balancer: &Builder{},
+		Node:     &direct.Builder{},
+	}
+}
+
+// Builder is random builder
+type Builder struct{}
+
+// Build creates Balancer
+func (b *Builder) Build() selector.Balancer {
+	return &Balancer{}
 }

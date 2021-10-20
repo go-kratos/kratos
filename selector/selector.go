@@ -24,6 +24,11 @@ type Rebalancer interface {
 	Apply(nodes []Node)
 }
 
+// Builder build selector
+type Builder interface {
+	Build() Selector
+}
+
 // Node is node interface.
 type Node interface {
 	// Address is the unique address under the same service
