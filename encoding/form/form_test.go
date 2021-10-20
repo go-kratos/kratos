@@ -1,10 +1,10 @@
 package form
 
 import (
-	"github.com/go-kratos/kratos/v2/internal/testdata/complex"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/go-kratos/kratos/v2/internal/testdata/complex"
 	"github.com/stretchr/testify/require"
 )
 
