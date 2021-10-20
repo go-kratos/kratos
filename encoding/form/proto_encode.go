@@ -161,9 +161,6 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 		v := value.Message().Get(fd.ByName(protoreflect.Name("value")))
 		return fmt.Sprintf("%v", v.Interface()), nil
 	case "google.protobuf.FieldMask":
-		a := value.Message().Interface()
-		_ = a
-
 		m, ok := value.Message().Interface().(*field_mask.FieldMask)
 		if !ok {
 			return "", nil
