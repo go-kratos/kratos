@@ -80,6 +80,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 		Price:   11.23,
 		D:       22.22,
 		Byte:    []byte("123"),
+		Map:     map[string]string{"kratos": "https://go-kratos.dev/"},
 
 		Timestamp: &timestamppb.Timestamp{Seconds: 20, Nanos: 2},
 		Duration:  &durationpb.Duration{Seconds: 120, Nanos: 22},
@@ -96,7 +97,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 	}
 	content, err := encoding.GetCodec(contentType).Marshal(in)
 	require.NoError(t, err)
-	require.Equal(t, "a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=22.22&double=12.33&duration=2m0.000000022s&field=&float=12.34&id=2233&int32=32&int64=64&numberOne=2233&price=11.23&sex=woman&simples=3344&simples=5566&string=go-kratos&timestamp=1970-01-01T00%3A00%3A20.000000002Z&uint32=32&uint64=64&very_simple.component=5566", string(content))
+	require.Equal(t, "a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=22.22&double=12.33&duration=2m0.000000022s&field=1%2C2&float=12.34&id=2233&int32=32&int64=64&map%5Bkratos%5D=https%3A%2F%2Fgo-kratos.dev%2F&numberOne=2233&price=11.23&sex=woman&simples=3344&simples=5566&string=go-kratos&timestamp=1970-01-01T00%3A00%3A20.000000002Z&uint32=32&uint64=64&very_simple.component=5566", string(content))
 	in2 := &complex.Complex{}
 	err = encoding.GetCodec(contentType).Unmarshal(content, in2)
 	require.NoError(t, err)
