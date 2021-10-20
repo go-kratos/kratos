@@ -31,6 +31,7 @@ type App struct {
 	opts     options
 	ctx      context.Context
 	cancel   func()
+	lk       sync.Mutex
 	instance *registry.ServiceInstance
 }
 
@@ -104,7 +105,9 @@ func (a *App) Run() error {
 		if err := a.opts.registrar.Register(rctx, instance); err != nil {
 			return err
 		}
+		a.lk.Lock()
 		a.instance = instance
+		a.lk.Unlock()
 	}
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, a.opts.sigs...)
@@ -130,10 +133,13 @@ func (a *App) Run() error {
 
 // Stop gracefully stops the application.
 func (a *App) Stop() error {
-	if a.opts.registrar != nil && a.instance != nil {
+	a.lk.Lock()
+	instance := a.instance
+	a.lk.Unlock()
+	if a.opts.registrar != nil && instance != nil {
 		ctx, cancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 		defer cancel()
-		if err := a.opts.registrar.Deregister(ctx, a.instance); err != nil {
+		if err := a.opts.registrar.Deregister(ctx, instance); err != nil {
 			return err
 		}
 	}
