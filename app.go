@@ -139,7 +139,7 @@ func (a *App) Stop() error {
 	if a.opts.registrar != nil && instance != nil {
 		ctx, cancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 		defer cancel()
-		if err := a.opts.registrar.Deregister(ctx, a.instance); err != nil {
+		if err := a.opts.registrar.Deregister(ctx, instance); err != nil {
 			return err
 		}
 	}
