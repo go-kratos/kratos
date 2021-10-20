@@ -10,6 +10,11 @@ type Balancer interface {
 	Pick(ctx context.Context, nodes []WeightedNode) (selected WeightedNode, done DoneFunc, err error)
 }
 
+// BalancerBuilder build balancer
+type BalancerBuilder interface {
+	Build() Balancer
+}
+
 // WeightedNode calculates scheduling weight in real time
 type WeightedNode interface {
 	Node
