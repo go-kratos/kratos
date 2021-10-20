@@ -39,6 +39,7 @@ message Complex {
   google.protobuf.StringValue string = 23;
   google.protobuf.BytesValue bytes = 24;
 
+  map<string,string> map = 25;
 }
 
 message Simple {
