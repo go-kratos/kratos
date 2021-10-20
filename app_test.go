@@ -2,6 +2,7 @@ package kratos
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -12,6 +13,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type mockRegistry struct {
+	service *registry.ServiceInstance
+}
+
+func (r *mockRegistry) Register(ctx context.Context, service *registry.ServiceInstance) error {
+	if service == nil || service.ID == "" {
+		return fmt.Errorf("no service id")
+	}
+	r.service = service
+	return nil
+}
+
+// Deregister the registration.
+func (r *mockRegistry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
+	if r.service == nil {
+		return fmt.Errorf("deregister service not found")
+	}
+	return nil
+}
+
 func TestApp(t *testing.T) {
 	hs := http.NewServer()
 	gs := grpc.NewServer()
@@ -19,6 +40,7 @@ func TestApp(t *testing.T) {
 		Name("kratos"),
 		Version("v1.0.0"),
 		Server(hs, gs),
+		Registrar(&mockRegistry{}),
 	)
 	time.AfterFunc(time.Second, func() {
 		_ = app.Stop()
