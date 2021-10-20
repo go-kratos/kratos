@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -14,22 +15,28 @@ import (
 )
 
 type mockRegistry struct {
-	service *registry.ServiceInstance
+	lk      sync.Mutex
+	service map[string]*registry.ServiceInstance
 }
 
 func (r *mockRegistry) Register(ctx context.Context, service *registry.ServiceInstance) error {
 	if service == nil || service.ID == "" {
 		return fmt.Errorf("no service id")
 	}
-	r.service = service
+	r.lk.Lock()
+	defer r.lk.Unlock()
+	r.service[service.ID] = service
 	return nil
 }
 
 // Deregister the registration.
 func (r *mockRegistry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
-	if r.service == nil {
+	r.lk.Lock()
+	defer r.lk.Unlock()
+	if r.service[service.ID] == nil {
 		return fmt.Errorf("deregister service not found")
 	}
+	delete(r.service, service.ID)
 	return nil
 }
 
@@ -40,7 +47,7 @@ func TestApp(t *testing.T) {
 		Name("kratos"),
 		Version("v1.0.0"),
 		Server(hs, gs),
-		Registrar(&mockRegistry{}),
+		Registrar(&mockRegistry{service: make(map[string]*registry.ServiceInstance)}),
 	)
 	time.AfterFunc(time.Second, func() {
 		_ = app.Stop()
