@@ -49,7 +49,6 @@ func TestLevel_String(t *testing.T) {
 }
 
 func TestParseLevel(t *testing.T) {
-
 	tests := []struct {
 		name string
 		s    string

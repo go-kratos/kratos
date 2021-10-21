@@ -21,5 +21,5 @@ func TestWrapper(t *testing.T) {
 }
 
 func TestWithContext(t *testing.T) {
-	WithContext(context.Background(),nil)
+	WithContext(context.Background(), nil)
 }
