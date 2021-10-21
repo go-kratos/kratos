@@ -2,6 +2,7 @@ package form
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -45,12 +47,15 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 				return nil
 			}
 		}
-
 		if i == len(fieldPath)-1 {
 			break
 		}
 
 		if fd.Message() == nil || fd.Cardinality() == protoreflect.Repeated {
+			if fd.IsMap() && len(fieldPath) > 1 {
+				//post sub field
+				return populateMapField(fd, v.Mutable(fd).Map(), []string{fieldPath[1]}, values)
+			}
 			return fmt.Errorf("invalid path: %q is not a message", fieldName)
 		}
 
@@ -61,11 +66,28 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 			return fmt.Errorf("field already set for oneof %q", of.FullName().Name())
 		}
 	}
+
 	switch {
 	case fd.IsList():
 		return populateRepeatedField(fd, v.Mutable(fd).List(), values)
 	case fd.IsMap():
-		return populateMapField(fd, v.Mutable(fd).Map(), values)
+		if fd.MapValue().Kind() == protoreflect.StringKind {
+			//post json map
+			valuemap := make(map[string]string)
+			err := json.Unmarshal([]byte(values[0]), &valuemap)
+			if err != nil {
+				return err
+			}
+			mp := v.Mutable(fd).Map()
+			for s, i := range valuemap {
+				err = populateMapField(fd, mp, []string{s}, []string{i})
+				if err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+		return populateMapField(fd, v.Mutable(fd).Map(), fieldPath, values)
 	}
 	if len(values) > 1 {
 		return fmt.Errorf("too many values for field %q: %s", fd.FullName().Name(), strings.Join(values, ", "))
@@ -76,9 +98,10 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 func getDescriptorByFieldAndName(fields protoreflect.FieldDescriptors, fieldName string) protoreflect.FieldDescriptor {
 	var fd protoreflect.FieldDescriptor
 	if fd = fields.ByName(protoreflect.Name(fieldName)); fd == nil {
-		fd = fields.ByJSONName(fieldName)
-		if fd == nil {
-			return nil
+		if fd = fields.ByJSONName(fieldName); fd == nil {
+			if fd = fields.ByName("fields"); fd == nil {
+				return nil
+			}
 		}
 	}
 	return fd
@@ -104,15 +127,17 @@ func populateRepeatedField(fd protoreflect.FieldDescriptor, list protoreflect.Li
 	return nil
 }
 
-func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, values []string) error {
-	if len(values) != 2 { //nolint:gomnd
-		return fmt.Errorf("more than one value provided for key %q in map %q", values[0], fd.FullName())
-	}
-	key, err := parseField(fd.MapKey(), values[0])
+func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, fieldPath []string, values []string) error {
+	flen := len(fieldPath)
+	vlen := len(values)
+	//post sub key
+	nkey := flen - 1
+	key, err := parseField(fd.MapKey(), fieldPath[nkey])
 	if err != nil {
 		return fmt.Errorf("parsing map key %q: %w", fd.FullName().Name(), err)
 	}
-	value, err := parseField(fd.MapValue(), values[1])
+	vkey := vlen - 1
+	value, err := parseField(fd.MapValue(), values[vkey])
 	if err != nil {
 		return fmt.Errorf("parsing map value %q: %w", fd.FullName().Name(), err)
 	}
@@ -273,6 +298,23 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 	case "google.protobuf.FieldMask":
 		fm := &field_mask.FieldMask{}
 		fm.Paths = append(fm.Paths, strings.Split(value, ",")...)
+		msg = fm
+	case "google.protobuf.Value":
+		fm, err := structpb.NewValue(value)
+		if err != nil {
+			return protoreflect.Value{}, err
+		}
+		msg = fm
+	case "google.protobuf.Struct":
+		valuemap := make(map[string]interface{})
+		err := json.Unmarshal([]byte(value), &valuemap)
+		if err != nil {
+			return protoreflect.Value{}, err
+		}
+		fm, err := structpb.NewStruct(valuemap)
+		if err != nil {
+			return protoreflect.Value{}, err
+		}
 		msg = fm
 	default:
 		return protoreflect.Value{}, fmt.Errorf("unsupported message type: %q", string(md.FullName()))

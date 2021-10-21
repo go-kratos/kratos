@@ -69,6 +69,13 @@ func (c codec) Unmarshal(data []byte, v interface{}) error {
 		return MapProto(m, vs)
 	} else if m, ok := reflect.Indirect(reflect.ValueOf(v)).Interface().(proto.Message); ok {
 		return MapProto(m, vs)
+	} else if _, ok := v.(*map[string]string); ok {
+		vd := make(map[string]string)
+		for key, values := range vs {
+			vd[key] = values[0]
+		}
+		rv.Set(reflect.ValueOf(vd))
+		return nil
 	}
 
 	return c.decoder.Decode(v, vs)
