@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/node"
 	"github.com/go-kratos/kratos/v2/selector/p2c"
 	"github.com/go-kratos/kratos/v2/selector/random"
 	"github.com/go-kratos/kratos/v2/selector/wrr"
@@ -59,7 +58,7 @@ func (b *Builder) Build(info base.PickerBuildInfo) gBalancer.Picker {
 		subConns[info.Address.Addr] = conn
 
 		ins, _ := info.Address.Attributes.Value("rawServiceInstance").(*registry.ServiceInstance)
-		nodes = append(nodes, node.New(info.Address.Addr, ins))
+		nodes = append(nodes, selector.NewNode(info.Address.Addr, ins))
 	}
 	p := &Picker{
 		selector: b.builder.Build(),

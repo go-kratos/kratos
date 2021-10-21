@@ -11,7 +11,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/node"
 )
 
 // Target is resolver target
@@ -123,7 +122,7 @@ func (r *resolver) update(services []*registry.ServiceInstance) bool {
 		if ept == "" {
 			continue
 		}
-		nodes = append(nodes, node.New(ept, ins))
+		nodes = append(nodes, selector.NewNode(ept, ins))
 	}
 	if len(nodes) == 0 {
 		r.logger.Warnf("[http resovler]Zero endpoint found,refused to write,ser: %s ins: %v", r.target.Endpoint, nodes)
