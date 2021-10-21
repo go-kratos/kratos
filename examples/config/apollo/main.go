@@ -1,11 +1,34 @@
 package main
 
 import (
+	"fmt"
 	"log"
+
+	_ "github.com/go-kratos/kratos/v2/encoding/json"
+	_ "github.com/go-kratos/kratos/v2/encoding/yaml"
 
 	"github.com/go-kratos/kratos/contrib/config/apollo/v2"
 	"github.com/go-kratos/kratos/v2/config"
 )
+
+type bootstrap struct {
+	Application struct {
+		Name    string `json:"name"`
+		Version string `json:"version"`
+	} `json:"application"`
+
+	Event struct {
+		Key   string   `json:"key"`
+		Array []string `json:"array"`
+	} `json:"event"`
+
+	Demo struct {
+		Deep struct {
+			Key   string `json:"key"`
+			Value string `json:"value"`
+		} `json:"deep"`
+	} `json:"demo"`
+}
 
 func main() {
 	c := config.New(
@@ -14,51 +37,45 @@ func main() {
 				apollo.WithAppID("kratos"),
 				apollo.WithCluster("dev"),
 				apollo.WithEndpoint("http://localhost:8080"),
-				apollo.WithNamespace("application"),
+				apollo.WithNamespace("application,event.yaml,demo.json"),
 				apollo.WithEnableBackup(),
-				apollo.WithSecret("895da1a174934ababb1b1223f5620a45"),
+				apollo.WithSecret("ad75b33c77ae4b9c9626d969c44f41ee"),
 			),
 		),
 	)
+	var bc bootstrap
 	if err := c.Load(); err != nil {
 		panic(err)
 	}
-	// Get a value associated with the key
-	name, err := c.Value("name").String()
-	if err != nil {
-		panic(err)
-	}
-	log.Printf("service: %s", name)
 
-	// Defines the config JSON Field
-	var v struct {
-		Name    string `json:"name"`
-		Version string `json:"version"`
-	}
+	scan(c, &bc)
 
-	// Unmarshal the config to struct
-	if err = c.Scan(&v); err != nil {
-		panic(err)
-	}
-	log.Printf("config: %+v", v)
+	value(c, "application")
+	value(c, "application.name")
+	value(c, "event.array")
+	value(c, "demo.deep")
 
-	// Get a value associated with the key
-	name, err = c.Value("name").String()
-	if err != nil {
-		panic(err)
-	}
-	log.Printf("service: %s", name)
+	watch(c, "application")
+	<-make(chan struct{})
+}
 
-	// watch key
-	if err = c.Watch("name", func(key string, value config.Value) {
-		n, e := value.String()
-		if e != nil {
-			panic(e)
-		}
-		log.Printf("config changed: %s = %s\n", key, n)
+func scan(c config.Config, bc *bootstrap) {
+	err := c.Scan(bc)
+	fmt.Printf("=========== scan result =============\n")
+	fmt.Printf("err: %v\n", err)
+	fmt.Printf("cfg: %+v\n\n", bc)
+}
+
+func value(c config.Config, key string) {
+	fmt.Printf("=========== value result =============\n")
+	v := c.Value(key).Load()
+	fmt.Printf("key=%s, load: %+v\n\n", key, v)
+}
+
+func watch(c config.Config, key string) {
+	if err := c.Watch(key, func(key string, value config.Value) {
+		log.Printf("config(key=%s) changed: %s\n", key, value.Load())
 	}); err != nil {
 		panic(err)
 	}
-
-	<-make(chan struct{})
 }
