@@ -52,12 +52,12 @@ func TestWrr3(t *testing.T) {
 		}()
 	}
 	group.Wait()
-	assert.Greater(t, count1, int64(2800))
-	assert.Less(t, count1, int64(3200))
-	assert.Greater(t, count2, int64(2800))
-	assert.Less(t, count2, int64(3200))
-	assert.Greater(t, count3, int64(2800))
-	assert.Less(t, count3, int64(3200))
+	assert.Greater(t, count1, int64(2500))
+	assert.Less(t, count1, int64(3500))
+	assert.Greater(t, count2, int64(2500))
+	assert.Less(t, count2, int64(3500))
+	assert.Greater(t, count3, int64(2500))
+	assert.Less(t, count3, int64(3500))
 }
 
 func TestEmpty(t *testing.T) {
