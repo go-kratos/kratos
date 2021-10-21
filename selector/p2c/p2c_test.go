@@ -31,11 +31,14 @@ func TestWrr3(t *testing.T) {
 	p2c.Apply(nodes)
 	var count1, count2, count3 int64
 	group := &sync.WaitGroup{}
+	var lk sync.Mutex
 	for i := 0; i < 9000; i++ {
 		group.Add(1)
 		go func() {
 			defer group.Done()
+			lk.Lock()
 			time.Sleep(time.Duration(rand.Intn(500)) * time.Millisecond)
+			lk.Unlock()
 			n, done, err := p2c.Select(context.Background())
 			assert.Nil(t, err)
 			assert.NotNil(t, done)
