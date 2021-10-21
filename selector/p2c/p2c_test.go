@@ -37,8 +37,9 @@ func TestWrr3(t *testing.T) {
 		go func() {
 			defer group.Done()
 			lk.Lock()
-			time.Sleep(time.Duration(rand.Intn(500)) * time.Millisecond)
+			d := time.Duration(rand.Intn(500)) * time.Millisecond
 			lk.Unlock()
+			time.Sleep(d)
 			n, done, err := p2c.Select(context.Background())
 			assert.Nil(t, err)
 			assert.NotNil(t, done)
