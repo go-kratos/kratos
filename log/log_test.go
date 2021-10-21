@@ -1,6 +1,7 @@
 package log
 
 import (
+	"context"
 	"os"
 	"testing"
 )
@@ -17,4 +18,8 @@ func TestWrapper(t *testing.T) {
 
 	l := With(MultiLogger(out, err), "ts", DefaultTimestamp, "caller", DefaultCaller)
 	_ = l.Log(LevelInfo, "msg", "test")
+}
+
+func TestWithContext(t *testing.T) {
+	WithContext(context.Background(), nil)
 }

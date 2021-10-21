@@ -15,6 +15,10 @@ func TestHelper(t *testing.T) {
 	log.Debug("test debug")
 	log.Debugf("test %s", "debug")
 	log.Debugw("log", "test debug")
+
+	log.Warn("test warn")
+	log.Warnf("test %s", "warn")
+	log.Warnw("log", "test warn")
 }
 
 func TestHelperWithMsgKey(t *testing.T) {
@@ -28,8 +32,11 @@ func TestHelperLevel(t *testing.T) {
 	log := NewHelper(DefaultLogger)
 	log.Debug("test debug")
 	log.Info("test info")
+	log.Infof("test %s", "info")
 	log.Warn("test warn")
 	log.Error("test error")
+	log.Errorf("test %s", "error")
+	log.Errorw("log", "test error")
 }
 
 func BenchmarkHelperPrint(b *testing.B) {
