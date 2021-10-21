@@ -10,6 +10,7 @@ type watcher struct {
 	source    *source
 	ch        chan interface{}
 	closeChan chan struct{}
+	wp        *watch.Plan
 }
 
 func (w *watcher) handle(idx uint64, data interface{}) {
@@ -38,6 +39,7 @@ func newWatcher(s *source) (*watcher, error) {
 	}
 
 	wp.Handler = w.handle
+	w.wp = wp
 
 	// wp.Run is a blocking call and will prevent newWatcher from returning
 	go func() {
@@ -63,6 +65,7 @@ func (w *watcher) Next() ([]*config.KeyValue, error) {
 }
 
 func (w *watcher) Stop() error {
+	w.wp.Stop()
 	close(w.closeChan)
 	return nil
 }
