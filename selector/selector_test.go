@@ -107,11 +107,19 @@ func TestDefault(t *testing.T) {
 	assert.NotNil(t, done)
 	assert.Equal(t, "v2.0.0", n.Version())
 	assert.NotNil(t, n.Address())
-	assert.NotNil(t, n.InitialWeight())
+	assert.Equal(t, int64(10), *n.InitialWeight())
 	assert.NotNil(t, n.Metadata())
 	assert.Equal(t, "helloworld", n.ServiceName())
+	done(context.Background(), DoneInfo{})
 
+	// no v3.0.0 instance
+	n, done, err = selector.Select(context.Background(), WithFilter(mockFilter("v3.0.0")))
+	assert.Equal(t, ErrNoAvailable, err)
+	assert.Nil(t, done)
+
+	// apply zero instance
 	selector.Apply([]Node{})
 	n, done, err = selector.Select(context.Background(), WithFilter(mockFilter("v2.0.0")))
-	assert.NotNil(t, err)
+	assert.Equal(t, ErrNoAvailable, err)
+	assert.Nil(t, done)
 }
