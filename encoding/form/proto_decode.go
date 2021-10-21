@@ -53,7 +53,7 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 
 		if fd.Message() == nil || fd.Cardinality() == protoreflect.Repeated {
 			if fd.IsMap() && len(fieldPath) > 1 {
-				//post sub field
+				// post sub field
 				return populateMapField(fd, v.Mutable(fd).Map(), []string{fieldPath[1]}, values)
 			}
 			return fmt.Errorf("invalid path: %q is not a message", fieldName)
@@ -72,7 +72,7 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 		return populateRepeatedField(fd, v.Mutable(fd).List(), values)
 	case fd.IsMap():
 		if fd.MapValue().Kind() == protoreflect.StringKind {
-			//post json map
+			// post json map
 			valuemap := make(map[string]string)
 			err := json.Unmarshal([]byte(values[0]), &valuemap)
 			if err != nil {
@@ -130,7 +130,7 @@ func populateRepeatedField(fd protoreflect.FieldDescriptor, list protoreflect.Li
 func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, fieldPath []string, values []string) error {
 	flen := len(fieldPath)
 	vlen := len(values)
-	//post sub key
+	// post sub key
 	nkey := flen - 1
 	key, err := parseField(fd.MapKey(), fieldPath[nkey])
 	if err != nil {
