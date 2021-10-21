@@ -116,10 +116,12 @@ func TestDefault(t *testing.T) {
 	n, done, err = selector.Select(context.Background(), WithFilter(mockFilter("v3.0.0")))
 	assert.Equal(t, ErrNoAvailable, err)
 	assert.Nil(t, done)
+	assert.Nil(t, n)
 
 	// apply zero instance
 	selector.Apply([]Node{})
 	n, done, err = selector.Select(context.Background(), WithFilter(mockFilter("v2.0.0")))
 	assert.Equal(t, ErrNoAvailable, err)
 	assert.Nil(t, done)
+	assert.Nil(t, n)
 }
