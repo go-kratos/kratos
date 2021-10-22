@@ -46,8 +46,9 @@ type Balancer struct {
 
 // choose two distinct nodes.
 func (s *Balancer) prePick(nodes []selector.WeightedNode) (nodeA selector.WeightedNode, nodeB selector.WeightedNode) {
-	a := s.r.Intn(len(nodes))
-	b := s.r.Intn(len(nodes) - 1)
+	source := rand.NewSource(time.Now().UnixNano())
+	a := rand.New(source).Intn(len(nodes))
+	b := rand.New(source).Intn(len(nodes) - 1)
 	if b >= a {
 		b = b + 1
 	}
