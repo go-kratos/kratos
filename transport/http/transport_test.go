@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
@@ -56,4 +57,11 @@ func TestHeaderCarrier_Keys(t *testing.T) {
 	v.Set("abb", "1")
 	v.Set("bcc", "2")
 	assert.ElementsMatch(t, []string{"Abb", "Bcc"}, v.Keys())
+}
+
+func TestSetOperation(t *testing.T) {
+	tr := &Transport{}
+	ctx := transport.NewServerContext(context.Background(), tr)
+	SetOperation(ctx, "kratos")
+	assert.Equal(t, tr.operation, "kratos")
 }

@@ -184,4 +184,10 @@ func TestHandle(t *testing.T) {
 		return nil
 	}
 	r.GET("/get", h)
+	r.HEAD("/head", h)
+	r.PATCH("/patch", h)
+	r.DELETE("/delete", h)
+	r.CONNECT("/connect", h)
+	r.OPTIONS("/options", h)
+	r.TRACE("/trace", h)
 }
