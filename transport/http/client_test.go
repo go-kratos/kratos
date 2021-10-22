@@ -111,7 +111,17 @@ func (*mockDiscovery) GetService(ctx context.Context, serviceName string) ([]*re
 }
 
 func (*mockDiscovery) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
+	return &mockWatcher{}, nil
+}
+
+type mockWatcher struct{}
+
+func (*mockWatcher) Next() ([]*registry.ServiceInstance, error) {
 	return nil, nil
+}
+
+func (*mockWatcher) Stop() error {
+	return nil
 }
 
 func TestWithDiscovery(t *testing.T) {
@@ -202,4 +212,36 @@ func TestCodecForResponse(t *testing.T) {
 	resp.Header.Set("Content-Type", "application/xml")
 	c := CodecForResponse(resp)
 	assert.Equal(t, "xml", c.Name())
+}
+
+func TestNewClient(t *testing.T) {
+	_, err := NewClient(context.Background(), WithEndpoint("127.0.0.1:8888"))
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = NewClient(context.Background(), WithEndpoint("127.0.0.1:9999"), WithTLSConfig(&tls.Config{ServerName: "www.kratos.com", RootCAs: nil}))
+	if err != nil {
+		t.Error(err)
+	}
+	client, err := NewClient(context.Background(), WithDiscovery(&mockDiscovery{}), WithEndpoint("discovery:///go-kratos"))
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = NewClient(context.Background(), WithDiscovery(&mockDiscovery{}), WithEndpoint("discovery:///go-kratos"))
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = NewClient(context.Background(), WithDiscovery(&mockDiscovery{}), WithEndpoint("127.0.0.1:8888"))
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = NewClient(context.Background(), WithDiscovery(&mockDiscovery{}), WithEndpoint("https://go-kratos.dev/"))
+	if err == nil {
+		t.Error("err should not be equal to nil")
+	}
+
+	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{})
+	if err == nil {
+		t.Error("err should not be equal to nil")
+	}
 }
