@@ -37,4 +37,11 @@ func TestProtoPath(t *testing.T) {
 	if url != `http://helloworld.Greeter/helloworld/test/sub/{sub.name33}` {
 		t.Fatalf("proto path not expected!actual: %s ", url)
 	}
+
+	url = EncodeURL("http://helloworld.Greeter/helloworld/{name}/sub", &binding.HelloRequest{Name: "go",
+		Sub: &binding.Sub{Name: "kratos"}}, true)
+	fmt.Println(url)
+	if url != `http://helloworld.Greeter/helloworld/go/sub?sub.naming=kratos` {
+		t.Fatalf("proto path not expected!actual: %s ", url)
+	}
 }
