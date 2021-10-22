@@ -12,7 +12,7 @@ func TestBindQuery(t *testing.T) {
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	}
-	var p1 = TestBind{}
+	p1 := TestBind{}
 	type args struct {
 		vars   url.Values
 		target interface{}
@@ -50,7 +50,7 @@ func TestBindForm(t *testing.T) {
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	}
-	var p1 = TestBind{}
+	p1 := TestBind{}
 	type args struct {
 		req    *http.Request
 		target interface{}
@@ -89,7 +89,6 @@ func TestBindForm(t *testing.T) {
 			if err != nil && reflect.DeepEqual(tt.args.target, tt.want) {
 				t.Errorf("BindQuery() target = %v, want %v", tt.args.target, tt.want)
 			}
-
 		})
 	}
 }
