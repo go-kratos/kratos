@@ -72,7 +72,7 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 		return populateRepeatedField(fd, v.Mutable(fd).List(), values)
 	case fd.IsMap():
 		if fd.MapValue().Kind() == protoreflect.StringKind {
-			// post json map
+			// post json map.
 			valuemap := make(map[string]string)
 			err := json.Unmarshal([]byte(values[0]), &valuemap)
 			if err != nil {
@@ -99,6 +99,7 @@ func getDescriptorByFieldAndName(fields protoreflect.FieldDescriptors, fieldName
 	var fd protoreflect.FieldDescriptor
 	if fd = fields.ByName(protoreflect.Name(fieldName)); fd == nil {
 		if fd = fields.ByJSONName(fieldName); fd == nil {
+			// form body bind protobif.struct
 			if fd = fields.ByName("fields"); fd == nil {
 				return nil
 			}
@@ -130,7 +131,7 @@ func populateRepeatedField(fd protoreflect.FieldDescriptor, list protoreflect.Li
 func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, fieldPath []string, values []string) error {
 	flen := len(fieldPath)
 	vlen := len(values)
-	// post sub key
+	// post sub key.
 	nkey := flen - 1
 	key, err := parseField(fd.MapKey(), fieldPath[nkey])
 	if err != nil {
