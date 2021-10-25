@@ -4,6 +4,8 @@ import (
 	"net/url"
 	"reflect"
 
+	"google.golang.org/protobuf/types/known/structpb"
+
 	"github.com/go-kratos/kratos/v2/encoding"
 
 	"github.com/go-playground/form/v4"
@@ -70,10 +72,22 @@ func (c codec) Unmarshal(data []byte, v interface{}) error {
 	} else if m, ok := reflect.Indirect(reflect.ValueOf(v)).Interface().(proto.Message); ok {
 		return MapProto(m, vs)
 	} else if _, ok := v.(*map[string]string); ok {
-		// form body bind map.
+		// form body bind map<string,string>.
 		vd := make(map[string]string)
 		for key, values := range vs {
 			vd[key] = values[0]
+		}
+		rv.Set(reflect.ValueOf(vd))
+		return nil
+	} else if _, ok := v.(*map[string]*structpb.Value); ok {
+		// form body bind map<string, google.protobuf.Value>
+		vd := make(map[string]*structpb.Value)
+		for key, values := range vs {
+			value, err := structpb.NewValue(values[0])
+			if err != nil {
+				return err
+			}
+			vd[key] = value
 		}
 		rv.Set(reflect.ValueOf(vd))
 		return nil

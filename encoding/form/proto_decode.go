@@ -36,8 +36,8 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 		return errors.New("no value provided")
 	}
 	var fd protoreflect.FieldDescriptor
+	fields := v.Descriptor().Fields()
 	for i, fieldName := range fieldPath {
-		fields := v.Descriptor().Fields()
 		if fd = getDescriptorByFieldAndName(fields, fieldName); fd == nil {
 			if len(fieldName) > 2 && strings.HasSuffix(fieldName, "[]") {
 				fd = getDescriptorByFieldAndName(fields, strings.TrimSuffix(fieldName, "[]"))
