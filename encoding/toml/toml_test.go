@@ -59,7 +59,6 @@ IP = "ip"
 			t.Fatalf("(codec{}).Marshal return not match want, input:%v\n", testCase.input)
 		}
 	}
-
 }
 
 func TestCodec_Unmarshal(t *testing.T) {
