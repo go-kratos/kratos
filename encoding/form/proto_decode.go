@@ -39,13 +39,8 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 	for i, fieldName := range fieldPath {
 		fields := v.Descriptor().Fields()
 		if fd = getDescriptorByFieldAndName(fields, fieldName); fd == nil {
-			if len(fieldName) > 2 && strings.HasSuffix(fieldName, "[]") {
-				fd = getDescriptorByFieldAndName(fields, strings.TrimSuffix(fieldName, "[]"))
-			}
-			if fd == nil {
-				// ignore unexpected field.
-				return nil
-			}
+			// ignore unexpected field.
+			return nil
 		}
 		if i == len(fieldPath)-1 {
 			break
@@ -100,8 +95,9 @@ func getDescriptorByFieldAndName(fields protoreflect.FieldDescriptors, fieldName
 	if fd = fields.ByName(protoreflect.Name(fieldName)); fd == nil {
 		if fd = fields.ByJSONName(fieldName); fd == nil {
 			// form body bind protobif.struct
-			if fd = fields.ByName("fields"); fd == nil {
-				return nil
+			fd = fields.ByName("fields")
+			if fd == nil && len(fieldName) > 2 && strings.HasSuffix(fieldName, "[]") {
+				fd = getDescriptorByFieldAndName(fields, strings.TrimSuffix(fieldName, "[]"))
 			}
 		}
 	}
