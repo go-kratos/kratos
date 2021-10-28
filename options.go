@@ -28,6 +28,7 @@ type options struct {
 	logger           *log.Helper
 	registrar        registry.Registrar
 	registrarTimeout time.Duration
+	stopTimeout      time.Duration
 	servers          []transport.Server
 }
 
@@ -86,4 +87,9 @@ func Registrar(r registry.Registrar) Option {
 // RegistrarTimeout with registrar timeout.
 func RegistrarTimeout(t time.Duration) Option {
 	return func(o *options) { o.registrarTimeout = t }
+}
+
+// StopTimeout with app stop timeout.
+func StopTimeout(t time.Duration) Option {
+	return func(o *options) { o.stopTimeout = t }
 }
