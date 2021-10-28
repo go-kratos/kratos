@@ -42,6 +42,7 @@ func New(opts ...Option) *App {
 		logger:           log.NewHelper(log.DefaultLogger),
 		sigs:             []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		registrarTimeout: 10 * time.Second,
+		stopTimeout:      10 * time.Second,
 	}
 	if id, err := uuid.NewUUID(); err == nil {
 		o.id = id.String()
@@ -90,7 +91,9 @@ func (a *App) Run() error {
 		srv := srv
 		eg.Go(func() error {
 			<-ctx.Done() // wait for stop signal
-			return srv.Stop(ctx)
+			sctx, cancel := context.WithTimeout(context.Background(), a.opts.stopTimeout)
+			defer cancel()
+			return srv.Stop(sctx)
 		})
 		wg.Add(1)
 		eg.Go(func() error {
