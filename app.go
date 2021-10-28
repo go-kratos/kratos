@@ -91,9 +91,9 @@ func (a *App) Run() error {
 		srv := srv
 		eg.Go(func() error {
 			<-ctx.Done() // wait for stop signal
-			ctx, cancel := context.WithTimeout(context.Background(), a.opts.stopTimeout)
+			sctx, cancel := context.WithTimeout(context.Background(), a.opts.stopTimeout)
 			defer cancel()
-			return srv.Stop(ctx)
+			return srv.Stop(sctx)
 		})
 		wg.Add(1)
 		eg.Go(func() error {
