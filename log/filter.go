@@ -1,5 +1,7 @@
 package log
 
+import "context"
+
 // FilterOption is filter option.
 type FilterOption func(*Filter)
 
@@ -48,15 +50,39 @@ type Filter struct {
 
 // NewFilter new a logger filter.
 func NewFilter(logger Logger, opts ...FilterOption) *Filter {
-	options := Filter{
+	options := &Filter{
 		logger: logger,
 		key:    make(map[interface{}]struct{}),
 		value:  make(map[interface{}]struct{}),
 	}
+	options = options.WithContext(context.Background())
+
 	for _, o := range opts {
-		o(&options)
+		o(options)
 	}
-	return &options
+
+	addSkipDepth(options, 1)
+	return options
+}
+
+// WithContext returns a shallow copy of h with its context changed
+// to ctx. The provided ctx must be non-nil.
+func (f *Filter) WithContext(ctx context.Context) *Filter {
+	switch lgr := f.logger.(type) {
+	case *logger:
+		return &Filter{
+			logger: WithContext(ctx, lgr),
+			key:    f.key,
+			value:  f.value,
+		}
+	case *Filter:
+		return &Filter{
+			logger: lgr.WithContext(ctx),
+			key:    f.key,
+			value:  f.value,
+		}
+	}
+	panic("f.logger must be *logger and *Filter")
 }
 
 // Log Print log by level and keyvals.

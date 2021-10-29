@@ -11,11 +11,13 @@ import (
 var (
 	defaultDepth = 3
 	// DefaultCaller is a Valuer that returns the file and line.
-	DefaultCaller = Caller(defaultDepth)
+	DefaultCaller = Caller(0)
 
 	// DefaultTimestamp is a Valuer that returns the current wallclock time.
 	DefaultTimestamp = Timestamp(time.RFC3339)
 )
+
+type skipDepthKey struct{}
 
 // Valuer is returns a log value.
 type Valuer func(ctx context.Context) interface{}
@@ -28,21 +30,50 @@ func Value(ctx context.Context, v interface{}) interface{} {
 	return v
 }
 
-// Caller returns returns a Valuer that returns a pkg/file:line description of the caller.
+// Caller returns a Valuer that returns a pkg/file:line description of the caller.
 func Caller(depth int) Valuer {
-	return func(context.Context) interface{} {
-		_, file, line, _ := runtime.Caller(depth)
-		if strings.LastIndex(file, "/log/filter.go") > 0 {
-			depth++
-			_, file, line, _ = runtime.Caller(depth)
-		}
-		if strings.LastIndex(file, "/log/helper.go") > 0 {
-			depth++
-			_, file, line, _ = runtime.Caller(depth)
-		}
+	return func(ctx context.Context) interface{} {
+		curDepth := getSkipDepth(ctx)
+		_, file, line, _ := runtime.Caller(depth + curDepth)
 		idx := strings.LastIndexByte(file, '/')
 		return file[idx+1:] + ":" + strconv.Itoa(line)
 	}
+}
+
+// Set the skip depth for the ctx of the current logger
+func setSkipDepth(ctx context.Context, depth int) context.Context {
+	return context.WithValue(ctx, skipDepthKey{}, depth)
+}
+
+// Add skip depth to the ctx of the current logger
+func addSkipDepth(l interface{}, depth int) {
+	switch lgr := l.(type) {
+	case *logger:
+		if lgr.ctx == nil {
+			lgr.ctx = context.Background()
+		}
+
+		curDepth := getSkipDepth(lgr.ctx)
+		lgr.ctx = setSkipDepth(lgr.ctx, curDepth+depth)
+
+		for _, lg := range lgr.logs {
+			addSkipDepth(lg, depth)
+		}
+	case *Helper:
+		addSkipDepth(lgr.logger, depth)
+	case *Filter:
+		addSkipDepth(lgr.logger, depth)
+	}
+}
+
+// Get the skipped depth from ctx
+func getSkipDepth(ctx context.Context) int {
+	if ctx != nil {
+		if depth := ctx.Value(skipDepthKey{}); depth != nil {
+			return depth.(int)
+		}
+	}
+	return 0
 }
 
 // Timestamp returns a timestamp Valuer with a custom time format.

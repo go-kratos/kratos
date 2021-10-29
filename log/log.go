@@ -37,35 +37,77 @@ func (c *logger) Log(level Level, keyvals ...interface{}) error {
 
 // With with logger fields.
 func With(l Logger, kv ...interface{}) Logger {
-	if c, ok := l.(*logger); ok {
-		kvs := make([]interface{}, 0, len(c.prefix)+len(kv))
+	switch lgr := l.(type) {
+	case *logger:
+		kvs := make([]interface{}, 0, len(lgr.prefix)+len(kv))
 		kvs = append(kvs, kv...)
-		kvs = append(kvs, c.prefix...)
+		kvs = append(kvs, lgr.prefix...)
 		return &logger{
-			logs:      c.logs,
+			logs:      lgr.logs,
 			prefix:    kvs,
 			hasValuer: containsValuer(kvs),
-			ctx:       c.ctx,
+			ctx:       lgr.ctx,
 		}
+	case *Filter:
+		l = lgr.WithContext(context.Background())
 	}
-	return &logger{logs: []Logger{l}, prefix: kv, hasValuer: containsValuer(kv)}
+
+	lgr := &logger{
+		logs:      []Logger{l},
+		prefix:    kv,
+		hasValuer: containsValuer(kv),
+		ctx:       context.Background(),
+	}
+	addSkipDepth(lgr, defaultDepth)
+	return lgr
 }
 
 // WithContext returns a shallow copy of l with its context changed
 // to ctx. The provided ctx must be non-nil.
 func WithContext(ctx context.Context, l Logger) Logger {
-	if c, ok := l.(*logger); ok {
-		return &logger{
-			logs:      c.logs,
-			prefix:    c.prefix,
-			hasValuer: c.hasValuer,
-			ctx:       ctx,
+	switch lgr := l.(type) {
+	case *logger:
+		if ctx == nil {
+			return l
 		}
+
+		curDepth := getSkipDepth(lgr.ctx)
+		return &logger{
+			logs:      lgr.logs,
+			prefix:    lgr.prefix,
+			hasValuer: lgr.hasValuer,
+			ctx:       setSkipDepth(ctx, curDepth),
+		}
+	case *Filter:
+		l = lgr.WithContext(context.Background())
 	}
-	return &logger{logs: []Logger{l}, ctx: ctx}
+
+	lgr := &logger{
+		logs: []Logger{l},
+		ctx:  ctx,
+	}
+	addSkipDepth(lgr, defaultDepth)
+	return lgr
 }
 
 // MultiLogger wraps multi logger.
 func MultiLogger(logs ...Logger) Logger {
-	return &logger{logs: logs}
+	lgs := make([]Logger, 0, len(logs))
+	for _, lgr := range logs {
+		switch lg := lgr.(type) {
+		case *logger:
+			lgs = append(lgs, WithContext(context.Background(), lg))
+		case *Filter:
+			lgs = append(lgs, lg.WithContext(context.Background()))
+		default:
+			lgs = append(lgs, lg)
+		}
+	}
+
+	mlg := WithContext(context.Background(), &logger{})
+	addSkipDepth(mlg, 2)
+	mLog := mlg.(*logger)
+	mLog.logs = lgs
+	addSkipDepth(mlg, 1)
+	return mlg
 }
