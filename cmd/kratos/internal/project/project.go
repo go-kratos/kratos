@@ -46,7 +46,7 @@ func run(cmd *cobra.Command, args []string) {
 	if err != nil {
 		t = 60
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(t) * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(t)*time.Second)
 	defer cancel()
 	name := ""
 	if len(args) == 0 {
@@ -64,10 +64,8 @@ func run(cmd *cobra.Command, args []string) {
 	p := &Project{Name: path.Base(name), Path: name}
 	done := make(chan error, 1)
 	go func() {
-		if err := p.New(ctx, wd, repoURL, branch); err != nil {
-			fmt.Fprintf(os.Stderr, "\033[31mERROR: failed to create project(%s)\033[m\n", ctx.Err())
-		}
-		done <- nil
+	    e := p.New(ctx, wd, repoURL, branch);
+		done <- e
 	}()
 	select {
 	case <-ctx.Done():

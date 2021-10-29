@@ -53,13 +53,13 @@ func (r *Repo) Path() string {
 func (r *Repo) Pull(ctx context.Context) error {
 	cmd := exec.CommandContext(ctx, "git", "symbolic-ref", "HEAD")
 	cmd.Dir = r.Path()
-	out, err := cmd.CombinedOutput()
+	_, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil
 	}
 	cmd = exec.CommandContext(ctx, "git", "pull")
 	cmd.Dir = r.Path()
-	out, err = cmd.CombinedOutput()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return err
 	}
