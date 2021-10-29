@@ -64,8 +64,7 @@ func run(cmd *cobra.Command, args []string) {
 	p := &Project{Name: path.Base(name), Path: name}
 	done := make(chan error, 1)
 	go func() {
-	    e := p.New(ctx, wd, repoURL, branch);
-		done <- e
+		done <- p.New(ctx, wd, repoURL, branch)
 	}()
 	select {
 	case <-ctx.Done():
