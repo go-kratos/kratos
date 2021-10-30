@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+	"sync"
 	"testing"
 )
 
@@ -29,35 +30,70 @@ func TestValue(t *testing.T) {
 	}
 }
 
-func TestCaller(t *testing.T) {
+func TestCallerDepth(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-
 	filter := NewFilter(logger, FilterLevel(LevelDebug))
+	helper := NewHelper(logger)
+	mLog := MultiLogger(logger, filter, helper)
+	logs := []Logger{logger, filter, helper, mLog}
+	for i := 0; i < 2; i++ {
+		for _, lgr := range logs {
+			logs = append(logs, With(lgr))
+			logs = append(logs, NewFilter(lgr, FilterLevel(LevelDebug)))
+			logs = append(logs, NewHelper(lgr))
+		}
+	}
+	logs = append(logs, MultiLogger(logs...))
+	filter = NewFilter(DefaultLogger, FilterLevel(LevelDebug))
+	helper = NewHelper(DefaultLogger)
+	logs = append(logs, filter, helper)
+	for _, lgr := range logs {
+		_ = lgr.Log(LevelDebug, "msg", "50")
+		if h, ok := lgr.(*Helper); ok {
+			h.Debug("52")
+		}
+	}
+}
 
-	helper := NewHelper(filter)
+func TestCancel(t *testing.T) {
+	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
+	filter := NewFilter(logger, FilterLevel(LevelDebug))
+	helper := NewHelper(logger)
+	mLog := MultiLogger(logger, filter, helper)
+	logs := []Logger{logger, filter, helper, mLog}
+	for i := 0; i < 2; i++ {
+		for _, lgr := range logs {
+			logs = append(logs, With(lgr))
+			logs = append(logs, NewFilter(lgr, FilterLevel(LevelDebug)))
+			logs = append(logs, NewHelper(lgr))
+		}
+	}
+	logs = append(logs, MultiLogger(logs...))
+	filter = NewFilter(DefaultLogger, FilterLevel(LevelDebug))
+	helper = NewHelper(DefaultLogger)
+	logs = append(logs, filter, helper)
 
-	logger2 := With(filter)
-
-	logger3 := With(logger2)
-
-	mLog := MultiLogger(logger, filter)
-
-	logger4 := With(mLog)
-
-	_ = logger.Log(LevelDebug, "msg", "value_test.go:47")
-	_ = WithContext(context.Background(), logger).Log(LevelDebug, "msg", "value_test.go:48")
-	_ = filter.Log(LevelDebug, "msg", "value_test.go:49")
-	helper.Log(LevelDebug, "msg", "value_test.go:50")
-	_ = logger2.Log(LevelDebug, "msg", "value_test.go:51")
-	_ = logger3.Log(LevelDebug, "msg", "value_test.go:52")
-	_ = mLog.Log(LevelDebug, "msg", "value_test.go:53")
-	_ = logger4.Log(LevelDebug, "msg", "value_test.go:54")
-
-	_ = mLog.Log(LevelDebug, "msg", "value_test.go:56")
-	_ = logger3.Log(LevelDebug, "msg", "value_test.go:57")
-	_ = logger2.Log(LevelDebug, "msg", "value_test.go:58")
-	helper.Log(LevelDebug, "msg", "value_test.go:59")
-	_ = filter.Log(LevelDebug, "msg", "value_test.go:60")
-	_ = WithContext(context.Background(), logger).Log(LevelDebug, "msg", "value_test.go:61")
-	_ = logger.Log(LevelDebug, "msg", "value_test.go:62")
+	var wg sync.WaitGroup
+	for _, lgr := range logs {
+		lgr := lgr
+		wg.Add(1)
+		go func() {
+			ctx, cancel := context.WithCancel(context.Background())
+			lg := WithContext(ctx, lgr)
+			_ = lg.Log(LevelDebug, "msg", "83")
+			select {
+			case <-ctx.Done():
+				t.Error("Canceled")
+			default:
+			}
+			cancel()
+			select {
+			case <-ctx.Done():
+			default:
+				t.Error("Not cancelled")
+			}
+			wg.Done()
+		}()
+	}
+	wg.Wait()
 }

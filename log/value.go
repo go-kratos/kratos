@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	defaultDepth = 3
+	defaultDepth = 2
 	// DefaultCaller is a Valuer that returns the file and line.
 	DefaultCaller = Caller(0)
 
@@ -34,7 +34,7 @@ func Value(ctx context.Context, v interface{}) interface{} {
 func Caller(depth int) Valuer {
 	return func(ctx context.Context) interface{} {
 		curDepth := getSkipDepth(ctx)
-		_, file, line, _ := runtime.Caller(depth + curDepth)
+		_, file, line, _ := runtime.Caller(depth + curDepth + defaultDepth)
 		idx := strings.LastIndexByte(file, '/')
 		return file[idx+1:] + ":" + strconv.Itoa(line)
 	}
@@ -43,27 +43,6 @@ func Caller(depth int) Valuer {
 // Set the skip depth for the ctx of the current logger
 func setSkipDepth(ctx context.Context, depth int) context.Context {
 	return context.WithValue(ctx, skipDepthKey{}, depth)
-}
-
-// Add skip depth to the ctx of the current logger
-func addSkipDepth(l interface{}, depth int) {
-	switch lgr := l.(type) {
-	case *logger:
-		if lgr.ctx == nil {
-			lgr.ctx = context.Background()
-		}
-
-		curDepth := getSkipDepth(lgr.ctx)
-		lgr.ctx = setSkipDepth(lgr.ctx, curDepth+depth)
-
-		for _, lg := range lgr.logs {
-			addSkipDepth(lg, depth)
-		}
-	case *Helper:
-		addSkipDepth(lgr.logger, depth)
-	case *Filter:
-		addSkipDepth(lgr.logger, depth)
-	}
 }
 
 // Get the skipped depth from ctx

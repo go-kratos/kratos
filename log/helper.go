@@ -27,39 +27,28 @@ func WithMessageKey(k string) Option {
 func NewHelper(logger Logger, opts ...Option) *Helper {
 	options := &Helper{
 		msgKey: DefaultMessageKey, // default message key
-		logger: logger,
+		logger: withContext(context.Background(), logger, 2),
 	}
-	options = options.WithContext(context.Background())
 
 	for _, o := range opts {
 		o(options)
 	}
 
-	addSkipDepth(options, 1)
 	return options
 }
 
 // WithContext returns a shallow copy of h with its context changed
 // to ctx. The provided ctx must be non-nil.
 func (h *Helper) WithContext(ctx context.Context) *Helper {
-	switch lgr := h.logger.(type) {
-	case *logger:
-		return &Helper{
-			msgKey: h.msgKey,
-			logger: WithContext(ctx, lgr),
-		}
-	case *Filter:
-		return &Helper{
-			msgKey: h.msgKey,
-			logger: lgr.WithContext(ctx),
-		}
+	return &Helper{
+		msgKey: h.msgKey,
+		logger: withContext(ctx, h.logger, 2),
 	}
-	panic("h.logger must be *logger and *Filter")
 }
 
 // Log Print log by level and keyvals.
-func (h *Helper) Log(level Level, keyvals ...interface{}) {
-	_ = h.logger.Log(level, keyvals...)
+func (h *Helper) Log(level Level, keyvals ...interface{}) error {
+	return h.logger.Log(level, keyvals...)
 }
 
 // Debug logs a message at debug level.

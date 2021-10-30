@@ -13,7 +13,7 @@ func TestFilterAll(t *testing.T) {
 		FilterValue("hello"),
 		FilterFunc(testFilterFunc),
 	))
-	log.Log(LevelDebug, "msg", "test debug")
+	_ = log.Log(LevelDebug, "msg", "test debug")
 	log.Info("hello")
 	log.Infow("password", "123456")
 	log.Infow("username", "kratos")
@@ -23,7 +23,7 @@ func TestFilterAll(t *testing.T) {
 func TestFilterLevel(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(NewFilter(NewFilter(logger, FilterLevel(LevelWarn))))
-	log.Log(LevelDebug, "msg1", "te1st debug")
+	_ = log.Log(LevelDebug, "msg1", "te1st debug")
 	log.Debug("test debug")
 	log.Debugf("test %s", "debug")
 	log.Debugw("log", "test debug")
@@ -35,7 +35,7 @@ func TestFilterCaller(t *testing.T) {
 	log := NewFilter(logger)
 	_ = log.Log(LevelDebug, "msg1", "te1st debug")
 	logHelper := NewHelper(NewFilter(logger))
-	logHelper.Log(LevelDebug, "msg1", "te1st debug")
+	_ = logHelper.Log(LevelDebug, "msg1", "te1st debug")
 }
 
 func TestFilterKey(t *testing.T) {
