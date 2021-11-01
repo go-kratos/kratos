@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strconv"
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -31,7 +30,7 @@ func init() {
 	if repoURL = os.Getenv("KRATOS_LAYOUT_REPO"); repoURL == "" {
 		repoURL = "https://github.com/go-kratos/kratos-layout.git"
 	}
-	timeout = "60"
+	timeout = "60s"
 	CmdNew.Flags().StringVarP(&repoURL, "repo-url", "r", repoURL, "layout repo")
 	CmdNew.Flags().StringVarP(&branch, "branch", "b", branch, "repo branch")
 	CmdNew.Flags().StringVarP(&timeout, "timeout", "t", timeout, "time out")
@@ -42,11 +41,11 @@ func run(cmd *cobra.Command, args []string) {
 	if err != nil {
 		panic(err)
 	}
-	t, err := strconv.Atoi(timeout)
+	t, err := time.ParseDuration(timeout)
 	if err != nil {
-		t = 60
+		panic(err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(t)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), t)
 	defer cancel()
 	name := ""
 	if len(args) == 0 {
