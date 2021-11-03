@@ -8,8 +8,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-zookeeper/zk"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 var (
@@ -70,9 +71,11 @@ func New(zkServers []string, opts ...Option) (*Registry, error) {
 }
 
 func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstance) error {
-	var data []byte
-	var err error
-	if err := r.ensureName(r.opts.rootPath, []byte("")); err != nil {
+	var (
+		data []byte
+		err  error
+	)
+	if err = r.ensureName(r.opts.rootPath, []byte("")); err != nil {
 		return err
 	}
 	serviceNamePath := path.Join(r.opts.rootPath, service.Name)
@@ -113,9 +116,9 @@ func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*regis
 	if err != nil {
 		return nil, err
 	}
-	var items []*registry.ServiceInstance
+	items := make([]*registry.ServiceInstance, 0, len(servicesID))
 	for _, service := range servicesID {
-		var item = &registry.ServiceInstance{}
+		item := &registry.ServiceInstance{}
 		servicePath := path.Join(serviceNamePath, service)
 		serviceInstanceByte, _, err := r.conn.Get(servicePath)
 		if err != nil {
@@ -135,7 +138,7 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 	set, ok := r.registry[serviceName]
 	if !ok {
 		set = &serviceSet{
-			watcher:     make(map[*watcher]struct{}, 0),
+			watcher:     make(map[*watcher]struct{}),
 			services:    &atomic.Value{},
 			serviceName: serviceName,
 		}
