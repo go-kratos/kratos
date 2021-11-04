@@ -7,8 +7,8 @@ $ go run gin/main.go
 ```
 2、From a different terminal, access the api to see the output:
 ```shell
-$ curl http://127.0.0.1:8000/home
-Hello Gin!
+$ curl http://127.0.0.1:8000/helloworld/gin
+{"welcome":"gin"}
 ```
 
 ## mux
