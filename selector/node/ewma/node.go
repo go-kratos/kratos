@@ -20,12 +20,12 @@ const (
 )
 
 var (
-	_ selector.WeightedNode        = &node{}
+	_ selector.WeightedNode        = &Node{}
 	_ selector.WeightedNodeBuilder = &Builder{}
 )
 
-// node is endpoint instance
-type node struct {
+// Node is endpoint instance
+type Node struct {
 	selector.Node
 
 	// client statistic data
@@ -53,7 +53,7 @@ type Builder struct {
 
 // Build create a weighted node.
 func (b *Builder) Build(n selector.Node) selector.WeightedNode {
-	s := &node{
+	s := &Node{
 		Node:       n,
 		lag:        0,
 		success:    1000,
@@ -64,11 +64,11 @@ func (b *Builder) Build(n selector.Node) selector.WeightedNode {
 	return s
 }
 
-func (n *node) health() uint64 {
+func (n *Node) health() uint64 {
 	return atomic.LoadUint64(&n.success)
 }
 
-func (n *node) load() (load uint64) {
+func (n *Node) load() (load uint64) {
 	now := time.Now().UnixNano()
 	avgLag := atomic.LoadInt64(&n.lag)
 	lastPredictTs := atomic.LoadInt64(&n.predictTs)
@@ -117,7 +117,7 @@ func (n *node) load() (load uint64) {
 }
 
 // Pick pick a node.
-func (n *node) Pick() selector.DoneFunc {
+func (n *Node) Pick() selector.DoneFunc {
 	now := time.Now().UnixNano()
 	atomic.StoreInt64(&n.lastPick, now)
 	atomic.AddInt64(&n.inflight, 1)
@@ -170,11 +170,11 @@ func (n *node) Pick() selector.DoneFunc {
 }
 
 // Weight is node effective weight.
-func (n *node) Weight() (weight float64) {
+func (n *Node) Weight() (weight float64) {
 	weight = float64(n.health()*uint64(time.Second)) / float64(n.load())
 	return
 }
 
-func (n *node) PickElapsed() time.Duration {
+func (n *Node) PickElapsed() time.Duration {
 	return time.Duration(time.Now().UnixNano() - atomic.LoadInt64(&n.lastPick))
 }
