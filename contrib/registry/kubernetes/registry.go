@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
 	jsoniter "github.com/json-iterator/go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,6 +21,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	listerv1 "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 // Defines the key name of specific fields
@@ -166,7 +167,7 @@ func (s *Registry) Service(name string) ([]*registry.ServiceInstance, error) {
 	if err != nil {
 		return nil, err
 	}
-	var ret []*registry.ServiceInstance
+	ret := make([]*registry.ServiceInstance, 0, len(pods))
 	for _, pod := range pods {
 		if pod.Status.Phase != corev1.PodRunning {
 			continue
@@ -342,14 +343,14 @@ func getProtocolMapByEndpoints(endpoints []string) (protocolMap, error) {
 }
 
 func getProtocolMapFromPod(pod *corev1.Pod) (protocolMap, error) {
-	protocolMap := protocolMap{}
+	protoMap := protocolMap{}
 	if s := pod.Annotations[AnnotationsKeyProtocolMap]; !isEmptyObjectString(s) {
-		err := unmarshal(s, &protocolMap)
+		err := unmarshal(s, &protoMap)
 		if err != nil {
 			return nil, &ErrorHandleResource{Namespace: pod.Namespace, Name: pod.Name, Reason: err}
 		}
 	}
-	return protocolMap, nil
+	return protoMap, nil
 }
 
 func getMetadataFromPod(pod *corev1.Pod) (map[string]string, error) {
