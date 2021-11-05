@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
@@ -59,7 +60,7 @@ func TestRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, e := client.RegisterInstance(vo.RegisterInstanceParam{
+	_, err = client.RegisterInstance(vo.RegisterInstanceParam{
 		Ip:          "f",
 		Port:        8840,
 		ServiceName: serviceName,
@@ -69,25 +70,32 @@ func TestRegistry(t *testing.T) {
 		Ephemeral:   true,
 		Metadata:    map[string]string{"idc": "shanghai-xs"},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	time.Sleep(time.Second)
 
-	is, e := client.GetService(vo.GetServiceParam{
+	is, err := client.GetService(vo.GetServiceParam{
 		ServiceName: serviceName,
 	})
-
-	t.Logf("%#v, %v", is, e)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("is %#v", is)
 
 	time.Sleep(time.Second)
 	r := New(client)
 
 	go func() {
-		w, e := r.Watch(ctx, "golang-sms@grpc")
-		if e != nil {
-			log.Fatal(e)
+		var w registry.Watcher
+		w, err = r.Watch(ctx, "golang-sms@grpc")
+		if err != nil {
+			log.Fatal(err)
 		}
 		for {
-			res, err := w.Next()
+			var res []*registry.ServiceInstance
+			res, err = w.Next()
 			if err != nil {
 				return
 			}
@@ -100,8 +108,10 @@ func TestRegistry(t *testing.T) {
 
 	time.Sleep(time.Second)
 
-	ins, e := r.GetService(ctx, serviceName)
-	t.Logf("e:%v", e)
+	ins, err := r.GetService(ctx, serviceName)
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, in := range ins {
 		t.Logf("ins: %#v", in)
 	}
@@ -140,7 +150,7 @@ func TestRegistryMany(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, e := client.RegisterInstance(vo.RegisterInstanceParam{
+	_, err = client.RegisterInstance(vo.RegisterInstanceParam{
 		Ip:          "f1",
 		Port:        8840,
 		ServiceName: serviceName,
@@ -150,8 +160,11 @@ func TestRegistryMany(t *testing.T) {
 		Ephemeral:   true,
 		Metadata:    map[string]string{"idc": "shanghai-xs"},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	_, e = client.RegisterInstance(vo.RegisterInstanceParam{
+	_, err = client.RegisterInstance(vo.RegisterInstanceParam{
 		Ip:          "f2",
 		Port:        8840,
 		ServiceName: serviceName,
@@ -161,8 +174,11 @@ func TestRegistryMany(t *testing.T) {
 		Ephemeral:   true,
 		Metadata:    map[string]string{"idc": "shanghai-xs"},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	_, e = client.RegisterInstance(vo.RegisterInstanceParam{
+	_, err = client.RegisterInstance(vo.RegisterInstanceParam{
 		Ip:          "f3",
 		Port:        8840,
 		ServiceName: serviceName,
@@ -172,15 +188,21 @@ func TestRegistryMany(t *testing.T) {
 		Ephemeral:   true,
 		Metadata:    map[string]string{"idc": "shanghai-xs"},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	time.Sleep(time.Second)
 
-	is, e := client.GetService(vo.GetServiceParam{
+	is, err := client.GetService(vo.GetServiceParam{
 		ServiceName: serviceName,
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	for _, host := range is.Hosts {
-		t.Logf("host: %#v,e: %v", host, e)
+		t.Logf("host: %#v,e: %v", host, err)
 	}
 
 	time.Sleep(time.Second)
