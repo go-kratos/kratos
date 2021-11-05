@@ -164,7 +164,7 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 			if strings.TrimSpace(field) == "" {
 				continue
 			}
-			if strings.Index(field, ":") != -1 {
+			if strings.Contains(field, ":") {
 				field = strings.Split(field, ":")[0]
 			}
 			fd := fields.ByName(protoreflect.Name(field))
