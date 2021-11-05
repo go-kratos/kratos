@@ -19,6 +19,9 @@ type BalancerBuilder interface {
 type WeightedNode interface {
 	Node
 
+	// Raw returns the original node
+	Raw() Node
+
 	// Weight is the runtime calculated weight
 	Weight() float64
 

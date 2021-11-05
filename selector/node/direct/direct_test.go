@@ -48,6 +48,6 @@ func TestDirectDefaultWeight(t *testing.T) {
 	time.Sleep(time.Millisecond * 10)
 	done(context.Background(), selector.DoneInfo{})
 	assert.Equal(t, float64(100), wn.Weight())
-	assert.Greater(t, time.Millisecond*15, wn.PickElapsed())
+	assert.Greater(t, time.Millisecond*20, wn.PickElapsed())
 	assert.Less(t, time.Millisecond*5, wn.PickElapsed())
 }

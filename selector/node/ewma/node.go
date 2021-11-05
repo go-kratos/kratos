@@ -178,3 +178,7 @@ func (n *Node) Weight() (weight float64) {
 func (n *Node) PickElapsed() time.Duration {
 	return time.Duration(time.Now().UnixNano() - atomic.LoadInt64(&n.lastPick))
 }
+
+func (n *Node) Raw() selector.Node {
+	return n.Node
+}
