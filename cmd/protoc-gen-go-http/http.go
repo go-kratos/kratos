@@ -164,6 +164,9 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 			if strings.TrimSpace(field) == "" {
 				continue
 			}
+			if strings.Index(field, ":") != -1 {
+				field = strings.Split(field, ":")[0]
+			}
 			fd := fields.ByName(protoreflect.Name(field))
 			if fd == nil {
 				fmt.Fprintf(os.Stderr, "\u001B[31mERROR\u001B[m: The corresponding field '%s' declaration in message could not be found in '%s'\n", v, path)
