@@ -2,13 +2,14 @@ package config
 
 import (
 	"fmt"
+	"net"
+	"testing"
+
 	kconfig "github.com/go-kratos/kratos/v2/config"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 	"gopkg.in/yaml.v3"
-	"net"
-	"testing"
 )
 
 func getIntranetIP() string {
@@ -29,14 +30,14 @@ func getIntranetIP() string {
 
 func TestGetConfig(t *testing.T) {
 	ip := getIntranetIP()
-	//ctx := context.Background()
+	// ctx := context.Background()
 
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig(ip, 8848),
 	}
 
 	cc := constant.ClientConfig{
-		NamespaceId:         "5c7d1f8b-6782-46bf-b36a-dfd9cfc14b89", //namespace id
+		NamespaceId:         "5c7d1f8b-6782-46bf-b36a-dfd9cfc14b89", // namespace id
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
@@ -53,12 +54,19 @@ func TestGetConfig(t *testing.T) {
 			ServerConfigs: sc,
 		},
 	)
-	dataId := "go-rpc-executor"
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dataID := "go-rpc-executor"
 	group := "private"
-	client.PublishConfig(vo.ConfigParam{DataId: dataId, Group: group, Content: `
+	_, err = client.PublishConfig(vo.ConfigParam{DataId: dataID, Group: group, Content: `
 logger:
   level: info
 `})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if err != nil {
 		t.Fatal(err)
@@ -66,14 +74,14 @@ logger:
 
 	c := kconfig.New(
 		kconfig.WithSource(
-			NewConfigSource(client, WithGroup(group), WithDataID(dataId)),
+			NewConfigSource(client, WithGroup(group), WithDataID(dataID)),
 		),
 		kconfig.WithDecoder(func(kv *kconfig.KeyValue, v map[string]interface{}) error {
 			return yaml.Unmarshal(kv.Value, v)
 		}),
 	)
 
-	if err := c.Load(); err != nil {
+	if err = c.Load(); err != nil {
 		panic(err)
 	}
 
@@ -84,15 +92,21 @@ logger:
 	fmt.Println("get value", name)
 
 	done := make(chan bool)
-	c.Watch("logger.level", func(key string, value kconfig.Value) {
+	err = c.Watch("logger.level", func(key string, value kconfig.Value) {
 		fmt.Println(key, " value change", value)
 		done <- true
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	client.PublishConfig(vo.ConfigParam{DataId: dataId, Group: group, Content: `
+	_, err = client.PublishConfig(vo.ConfigParam{DataId: dataID, Group: group, Content: `
 logger:
   level: debug
 `})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	<-done
 }
