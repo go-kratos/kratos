@@ -7,11 +7,28 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 	"gopkg.in/yaml.v3"
+	"net"
 	"testing"
 )
 
+func getIntranetIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "127.0.0.1"
+	}
+
+	for _, address := range addrs {
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return "127.0.0.1"
+}
+
 func TestGetConfig(t *testing.T) {
-	ip := ""
+	ip := getIntranetIP()
 	//ctx := context.Background()
 
 	sc := []constant.ServerConfig{
@@ -36,6 +53,12 @@ func TestGetConfig(t *testing.T) {
 			ServerConfigs: sc,
 		},
 	)
+	dataId := "go-rpc-executor"
+	group := "private"
+	client.PublishConfig(vo.ConfigParam{DataId: dataId, Group: group, Content: `
+logger:
+  level: info
+`})
 
 	if err != nil {
 		t.Fatal(err)
@@ -43,7 +66,7 @@ func TestGetConfig(t *testing.T) {
 
 	c := kconfig.New(
 		kconfig.WithSource(
-			NewConfigSource(client, WithGroup("private"), WithDataID("go-rpc-executor")),
+			NewConfigSource(client, WithGroup(group), WithDataID(dataId)),
 		),
 		kconfig.WithDecoder(func(kv *kconfig.KeyValue, v map[string]interface{}) error {
 			return yaml.Unmarshal(kv.Value, v)
@@ -58,12 +81,18 @@ func TestGetConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("get value",name)
-	// 监听值内容变更
+	fmt.Println("get value", name)
+
 	done := make(chan bool)
 	c.Watch("logger.level", func(key string, value kconfig.Value) {
-		fmt.Println(key ," value change", value)
+		fmt.Println(key, " value change", value)
 		done <- true
 	})
+
+	client.PublishConfig(vo.ConfigParam{DataId: dataId, Group: group, Content: `
+logger:
+  level: debug
+`})
+
 	<-done
 }
