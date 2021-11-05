@@ -25,10 +25,15 @@ jobs:
         image: consul:latest
         ports:
           - 8500:8500
-
+      nacos:
+        image: nacos/nacos-server:latest
+        env:
+          MODE: standalone
+        ports:
+          - "8848:8848"
+          - "9848:9848"
     steps:
       - uses: actions/checkout@v2
-
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
