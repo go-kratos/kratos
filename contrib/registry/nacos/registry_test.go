@@ -28,7 +28,6 @@ func getIntranetIP() string {
 	return "127.0.0.1"
 }
 
-
 func TestRegistry(t *testing.T) {
 	ip := getIntranetIP()
 	serviceName := "golang-sms@grpc"
@@ -39,7 +38,7 @@ func TestRegistry(t *testing.T) {
 	}
 
 	cc := constant.ClientConfig{
-		NamespaceId:         "public", //namespace id
+		NamespaceId:         "public", // namespace id
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
@@ -56,7 +55,6 @@ func TestRegistry(t *testing.T) {
 			ServerConfigs: sc,
 		},
 	)
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,14 +112,14 @@ func TestRegistry(t *testing.T) {
 func TestRegistryMany(t *testing.T) {
 	ip := getIntranetIP()
 	serviceName := "golang-sms@grpc"
-	//ctx := context.Background()
+	// ctx := context.Background()
 
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig(ip, 8848),
 	}
 
 	cc := constant.ClientConfig{
-		NamespaceId:         "public", //namespace id
+		NamespaceId:         "public", // namespace id
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
@@ -138,7 +136,6 @@ func TestRegistryMany(t *testing.T) {
 			ServerConfigs: sc,
 		},
 	)
-
 	if err != nil {
 		t.Fatal(err)
 	}

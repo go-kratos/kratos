@@ -10,9 +10,7 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/vo"
 )
 
-var (
-	_ registry.Watcher = (*watcher)(nil)
-)
+var _ registry.Watcher = (*watcher)(nil)
 
 type watcher struct {
 	serviceName string
@@ -76,6 +74,6 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 
 func (w *watcher) Stop() error {
 	w.cancel()
-	//close
+	// close
 	return nil
 }
