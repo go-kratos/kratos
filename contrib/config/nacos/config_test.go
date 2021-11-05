@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"testing"
+	"time"
 
 	kconfig "github.com/go-kratos/kratos/v2/config"
 	"github.com/nacos-group/nacos-sdk-go/clients"
@@ -37,7 +38,6 @@ func TestGetConfig(t *testing.T) {
 	}
 
 	cc := constant.ClientConfig{
-		NamespaceId:         "5c7d1f8b-6782-46bf-b36a-dfd9cfc14b89", // namespace id
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
@@ -58,8 +58,8 @@ func TestGetConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dataID := "go-rpc-executor"
-	group := "private"
+	dataID := "test.yaml"
+	group := "test"
 	_, err = client.PublishConfig(vo.ConfigParam{DataId: dataID, Group: group, Content: `
 logger:
   level: info
@@ -67,11 +67,7 @@ logger:
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	time.Sleep(1 * time.Second)
 	c := kconfig.New(
 		kconfig.WithSource(
 			NewConfigSource(client, WithGroup(group), WithDataID(dataID)),
@@ -82,7 +78,7 @@ logger:
 	)
 
 	if err = c.Load(); err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 
 	name, err := c.Value("logger.level").String()
