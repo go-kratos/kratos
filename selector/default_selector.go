@@ -38,7 +38,11 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 	if len(candidates) == 0 {
 		return nil, nil, ErrNoAvailable
 	}
-	return d.Balancer.Pick(ctx, candidates)
+	wn, done, err := d.Balancer.Pick(ctx, candidates)
+	if err != nil {
+		return nil, nil, err
+	}
+	return wn.Raw(), done, nil
 }
 
 // Apply update nodes info.

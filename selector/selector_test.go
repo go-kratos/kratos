@@ -17,6 +17,11 @@ type mockWeightedNode struct {
 	lastPick int64
 }
 
+// Raw returns the original node
+func (n *mockWeightedNode) Raw() Node {
+	return n.Node
+}
+
 // Weight is the runtime calculated weight
 func (n *mockWeightedNode) Weight() float64 {
 	if n.InitialWeight() != nil {
