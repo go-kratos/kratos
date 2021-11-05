@@ -28,7 +28,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.5.0
 	github.com/hashicorp/consul/api v1.9.1
 	github.com/labstack/echo/v4 v4.5.0
-	github.com/nacos-group/nacos-sdk-go v1.0.8
+	github.com/nacos-group/nacos-sdk-go v1.0.9
 	github.com/nicksnyder/go-i18n/v2 v2.1.2
 	github.com/prometheus/client_golang v1.11.0
 	github.com/segmentio/kafka-go v0.4.17

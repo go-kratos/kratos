@@ -12,7 +12,7 @@ import (
 )
 
 func TestRegistry(t *testing.T) {
-	ip := ""
+	ip := "127.0.0.1"
 	serviceName := "golang-sms@grpc"
 	ctx := context.Background()
 
@@ -91,12 +91,10 @@ func TestRegistry(t *testing.T) {
 	}
 
 	time.Sleep(time.Second)
-
-	select {}
 }
 
 func TestRegistryMany(t *testing.T) {
-	ip := ""
+	ip := "127.0.0.1"
 	serviceName := "golang-sms@grpc"
 	//ctx := context.Background()
 
@@ -170,5 +168,5 @@ func TestRegistryMany(t *testing.T) {
 		t.Logf("host: %#v,e: %v", host, e)
 	}
 
-	select {}
+	time.Sleep(time.Second)
 }
