@@ -2,7 +2,6 @@ package form
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -66,22 +65,6 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 	case fd.IsList():
 		return populateRepeatedField(fd, v.Mutable(fd).List(), values)
 	case fd.IsMap():
-		if fd.MapValue().Kind() == protoreflect.StringKind {
-			// post json map.
-			valuemap := make(map[string]string)
-			err := json.Unmarshal([]byte(values[0]), &valuemap)
-			if err != nil {
-				return err
-			}
-			mp := v.Mutable(fd).Map()
-			for s, i := range valuemap {
-				err = populateMapField(fd, mp, []string{s}, []string{i})
-				if err != nil {
-					return err
-				}
-			}
-			return nil
-		}
 		return populateMapField(fd, v.Mutable(fd).Map(), fieldPath, values)
 	}
 	if len(values) > 1 {
@@ -94,7 +77,7 @@ func getDescriptorByFieldAndName(fields protoreflect.FieldDescriptors, fieldName
 	var fd protoreflect.FieldDescriptor
 	if fd = fields.ByName(protoreflect.Name(fieldName)); fd == nil {
 		if fd = fields.ByJSONName(fieldName); fd == nil {
-			// form body bind protobif.struct
+			// form body bind protobuf.struct
 			fd = fields.ByName("fields")
 			if fd == nil && len(fieldName) > 2 && strings.HasSuffix(fieldName, "[]") {
 				fd = getDescriptorByFieldAndName(fields, strings.TrimSuffix(fieldName, "[]"))
@@ -298,17 +281,6 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		msg = fm
 	case "google.protobuf.Value":
 		fm, err := structpb.NewValue(value)
-		if err != nil {
-			return protoreflect.Value{}, err
-		}
-		msg = fm
-	case "google.protobuf.Struct":
-		valuemap := make(map[string]interface{})
-		err := json.Unmarshal([]byte(value), &valuemap)
-		if err != nil {
-			return protoreflect.Value{}, err
-		}
-		fm, err := structpb.NewStruct(valuemap)
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
