@@ -59,7 +59,7 @@ func (r *Registry) Register(ctx context.Context, svc *registry.ServiceInstance) 
 
 // Deregister deregister service
 func (r *Registry) Deregister(ctx context.Context, svc *registry.ServiceInstance) error {
-	return r.cli.Deregister(ctx, svc.ID)
+	return r.cli.Deregister(ctx, svc)
 }
 
 // GetService return service by name

@@ -68,47 +68,53 @@ func (d *Client) Service(ctx context.Context, service string, index uint64, pass
 
 // Register register service instacen to consul
 func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, enableHealthCheck bool) error {
-	addresses := make(map[string]api.ServiceAddress)
 	var addr string
 	var port uint64
+
 	for _, endpoint := range svc.Endpoints {
 		raw, err := url.Parse(endpoint)
 		if err != nil {
 			return err
 		}
+		serviceID := fmt.Sprintf("%v-%v", svc.ID, raw.Scheme)
+		serviceName := fmt.Sprintf("%v-%v", svc.Name, raw.Scheme)
 		addr = raw.Hostname()
 		port, _ = strconv.ParseUint(raw.Port(), 10, 16)
-		addresses[raw.Scheme] = api.ServiceAddress{Address: endpoint, Port: int(port)}
-	}
-	asr := &api.AgentServiceRegistration{
-		ID:              svc.ID,
-		Name:            svc.Name,
-		Meta:            svc.Metadata,
-		Tags:            []string{fmt.Sprintf("version=%s", svc.Version)},
-		TaggedAddresses: addresses,
-		Address:         addr,
-		Port:            int(port),
-		Checks: []*api.AgentServiceCheck{
-			{
-				CheckID:                        "service:" + svc.ID,
-				TTL:                            "30s",
+
+		asr := &api.AgentServiceRegistration{
+			ID:   serviceID,
+			Name: serviceName,
+			Meta: svc.Metadata,
+			Tags: []string{
+				fmt.Sprintf("version=%s", svc.Version),
+				fmt.Sprintf("schema=%s", raw.Scheme),
+			},
+			Address: addr,
+			Port:    int(port),
+			Checks: []*api.AgentServiceCheck{
+				{
+					CheckID:                        "service:" + svc.ID,
+					TTL:                            "30s",
+					Status:                         "passing",
+					DeregisterCriticalServiceAfter: "90s",
+				},
+			},
+		}
+		if enableHealthCheck {
+			asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
+				TCP:                            fmt.Sprintf("%s:%d", addr, port),
+				Interval:                       "20s",
 				Status:                         "passing",
 				DeregisterCriticalServiceAfter: "90s",
-			},
-		},
+			})
+		}
+
+		err = d.cli.Agent().ServiceRegister(asr)
+		if err != nil {
+			return err
+		}
 	}
-	if enableHealthCheck {
-		asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
-			TCP:                            fmt.Sprintf("%s:%d", addr, port),
-			Interval:                       "20s",
-			Status:                         "passing",
-			DeregisterCriticalServiceAfter: "90s",
-		})
-	}
-	err := d.cli.Agent().ServiceRegister(asr)
-	if err != nil {
-		return err
-	}
+
 	go func() {
 		ticker := time.NewTicker(time.Second * 20)
 		defer ticker.Stop()
@@ -125,7 +131,20 @@ func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 }
 
 // Deregister deregister service by service ID
-func (d *Client) Deregister(ctx context.Context, serviceID string) error {
+func (d *Client) Deregister(ctx context.Context, svc *registry.ServiceInstance) error {
 	d.cancel()
-	return d.cli.Agent().ServiceDeregister(serviceID)
+
+	for _, endpoint := range svc.Endpoints {
+		raw, err := url.Parse(endpoint)
+		if err != nil {
+			return err
+		}
+		id := fmt.Sprintf("%v-%v", svc.ID, raw.Scheme)
+		err = d.cli.Agent().ServiceDeregister(id)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
