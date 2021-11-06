@@ -6,11 +6,12 @@ import (
 	"testing"
 	"time"
 
-	kconfig "github.com/go-kratos/kratos/v2/config"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 	"gopkg.in/yaml.v3"
+
+	kconfig "github.com/go-kratos/kratos/v2/config"
 )
 
 func getIntranetIP() string {
