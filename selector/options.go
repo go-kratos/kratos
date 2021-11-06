@@ -11,7 +11,7 @@ type SelectOptions struct {
 type SelectOption func(*SelectOptions)
 
 // Filter is node filter function.
-type Filter func(context.Context, []Node) []Node
+type Filter func(context.Context, *[]Node)
 
 // WithFilter with filter options
 func WithFilter(fn ...Filter) SelectOption {

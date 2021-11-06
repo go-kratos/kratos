@@ -2,7 +2,7 @@ package selector
 
 import (
 	"context"
-	"sync"
+	"sync/atomic"
 )
 
 // Default is composite selector.
@@ -11,32 +11,35 @@ type Default struct {
 	Balancer    Balancer
 	Filters     []Filter
 
-	lk            sync.RWMutex
-	weightedNodes []Node
+	nodes atomic.Value
 }
 
 // Select select one node.
 func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected Node, done DoneFunc, err error) {
-	d.lk.RLock()
-	weightedNodes := d.weightedNodes
-	d.lk.RUnlock()
-
-	for _, f := range d.Filters {
-		weightedNodes = f(ctx, weightedNodes)
-	}
+	nodes, _ := d.nodes.Load().([]Node)
 	var options SelectOptions
 	for _, o := range opts {
 		o(&options)
 	}
-	for _, f := range options.Filters {
-		weightedNodes = f(ctx, weightedNodes)
+	if len(d.Filters) > 0 || len(options.Filters) > 0 {
+		// TODO: get from pool
+		newNodes := make([]Node, len(nodes))
+		copy(newNodes, nodes)
+		for _, f := range d.Filters {
+			f(ctx, &newNodes)
+		}
+		for _, f := range options.Filters {
+			f(ctx, &newNodes)
+		}
+		nodes = newNodes
 	}
-	candidates := make([]WeightedNode, 0, len(weightedNodes))
-	for _, n := range weightedNodes {
-		candidates = append(candidates, n.(WeightedNode))
-	}
-	if len(candidates) == 0 {
+	if len(nodes) == 0 {
 		return nil, nil, ErrNoAvailable
+	}
+	// TODO: get from pool
+	candidates := make([]WeightedNode, 0, len(nodes))
+	for _, n := range nodes {
+		candidates = append(candidates, n.(WeightedNode))
 	}
 	wn, done, err := d.Balancer.Pick(ctx, candidates)
 	if err != nil {
@@ -51,10 +54,8 @@ func (d *Default) Apply(nodes []Node) {
 	for _, n := range nodes {
 		weightedNodes = append(weightedNodes, d.NodeBuilder.Build(n))
 	}
-	d.lk.Lock()
 	// TODO: Do not delete unchanged nodes
-	d.weightedNodes = weightedNodes
-	d.lk.Unlock()
+	d.nodes.Store(weightedNodes)
 }
 
 // DefaultBuilder is de

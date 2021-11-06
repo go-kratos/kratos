@@ -49,14 +49,14 @@ func (b *mockWeightedNodeBuilder) Build(n Node) WeightedNode {
 }
 
 func mockFilter(version string) Filter {
-	return func(_ context.Context, nodes []Node) []Node {
-		filters := make([]Node, 0, len(nodes))
-		for _, n := range nodes {
+	return func(_ context.Context, nodes *[]Node) {
+		filters := make([]Node, 0, len(*nodes))
+		for _, n := range *nodes {
 			if n.Version() == version {
 				filters = append(filters, n)
 			}
 		}
-		return filters
+		*nodes = filters
 	}
 }
 
