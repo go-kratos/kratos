@@ -7,10 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 func getIntranetIP() string {
@@ -88,15 +89,18 @@ func TestRegistry(t *testing.T) {
 	r := New(client)
 
 	go func() {
-		var w registry.Watcher
-		w, err = r.Watch(ctx, "golang-sms@grpc")
-		if err != nil {
-			log.Fatal(err)
+		var (
+			w        registry.Watcher
+			watchErr error
+		)
+		w, watchErr = r.Watch(ctx, "golang-sms@grpc")
+		if watchErr != nil {
+			log.Fatal(watchErr)
 		}
 		for {
 			var res []*registry.ServiceInstance
-			res, err = w.Next()
-			if err != nil {
+			res, watchErr = w.Next()
+			if watchErr != nil {
 				return
 			}
 			log.Printf("watch: %d", len(res))
