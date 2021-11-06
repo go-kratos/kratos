@@ -16,30 +16,39 @@ type Default struct {
 
 // Select select one node.
 func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected Node, done DoneFunc, err error) {
-	nodes, _ := d.nodes.Load().([]Node)
+	nodes, _ := d.nodes.Load().([]WeightedNode)
+	if nodes == nil {
+		return nil, nil, ErrNoAvailable
+	}
 	var options SelectOptions
 	for _, o := range opts {
 		o(&options)
 	}
-	if len(d.Filters) > 0 || len(options.Filters) > 0 {
-		// TODO: get from pool
+
+	var candidates []WeightedNode
+	if len(d.Filters) > 0 {
 		newNodes := make([]Node, len(nodes))
-		copy(newNodes, nodes)
+		for i, wc := range nodes {
+			newNodes[i] = wc
+		}
 		for _, f := range d.Filters {
-			f(ctx, &newNodes)
+			newNodes = f(ctx, newNodes)
 		}
-		for _, f := range options.Filters {
-			f(ctx, &newNodes)
+		// TODO: get from pool
+		candidates = make([]WeightedNode, len(newNodes))
+		for i, n := range newNodes {
+			candidates[i] = n.(WeightedNode)
 		}
-		nodes = newNodes
+	} else {
+		// TODO: get from pool
+		candidates = make([]WeightedNode, len(nodes))
+		copy(candidates, nodes)
 	}
-	if len(nodes) == 0 {
+	for _, f := range options.Filters {
+		d.nodeFilter(f, &candidates)
+	}
+	if len(candidates) == 0 {
 		return nil, nil, ErrNoAvailable
-	}
-	// TODO: get from pool
-	candidates := make([]WeightedNode, 0, len(nodes))
-	for _, n := range nodes {
-		candidates = append(candidates, n.(WeightedNode))
 	}
 	wn, done, err := d.Balancer.Pick(ctx, candidates)
 	if err != nil {
@@ -48,9 +57,29 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 	return wn.Raw(), done, nil
 }
 
+func (d *Default) nodeFilter(filter NodeFilter, nodes *[]WeightedNode) {
+	length := len(*nodes)
+	for i := 0; i < length; i++ {
+		if filter((*nodes)[i]) {
+			if i == length-1 {
+				length--
+				break
+			}
+			for ; length > i; length-- {
+				if !filter((*nodes)[length-1]) {
+					(*nodes)[i] = (*nodes)[length-1]
+					length--
+					break
+				}
+			}
+		}
+	}
+	*nodes = (*nodes)[:length]
+}
+
 // Apply update nodes info.
 func (d *Default) Apply(nodes []Node) {
-	weightedNodes := make([]Node, 0, len(nodes))
+	weightedNodes := make([]WeightedNode, 0, len(nodes))
 	for _, n := range nodes {
 		weightedNodes = append(weightedNodes, d.NodeBuilder.Build(n))
 	}

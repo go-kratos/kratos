@@ -49,14 +49,14 @@ func (b *mockWeightedNodeBuilder) Build(n Node) WeightedNode {
 }
 
 func mockFilter(version string) Filter {
-	return func(_ context.Context, nodes *[]Node) {
-		filters := make([]Node, 0, len(*nodes))
-		for _, n := range *nodes {
+	return func(_ context.Context, nodes []Node) []Node {
+		filters := make([]Node, 0, len(nodes))
+		for _, n := range nodes {
 			if n.Version() == version {
 				filters = append(filters, n)
 			}
 		}
-		*nodes = filters
+		return filters
 	}
 }
 
@@ -106,7 +106,9 @@ func TestDefault(t *testing.T) {
 			Metadata:  map[string]string{"weight": "10"},
 		}))
 	selector.Apply(nodes)
-	n, done, err := selector.Select(context.Background(), WithFilter(mockFilter("v2.0.0")))
+	n, done, err := selector.Select(context.Background(), WithFilter(func(node Node) bool {
+		return !(node.Version() == "v2.0.0")
+	}))
 	assert.Nil(t, err)
 	assert.NotNil(t, n)
 	assert.NotNil(t, done)
@@ -118,14 +120,27 @@ func TestDefault(t *testing.T) {
 	done(context.Background(), DoneInfo{})
 
 	// no v3.0.0 instance
-	n, done, err = selector.Select(context.Background(), WithFilter(mockFilter("v3.0.0")))
+	n, done, err = selector.Select(context.Background(), WithFilter(func(node Node) bool {
+		return !(node.Version() == "v3.0.0")
+	}))
 	assert.Equal(t, ErrNoAvailable, err)
 	assert.Nil(t, done)
 	assert.Nil(t, n)
 
 	// apply zero instance
 	selector.Apply([]Node{})
-	n, done, err = selector.Select(context.Background(), WithFilter(mockFilter("v2.0.0")))
+	n, done, err = selector.Select(context.Background(), WithFilter(func(node Node) bool {
+		return !(node.Version() == "v2.0.0")
+	}))
+	assert.Equal(t, ErrNoAvailable, err)
+	assert.Nil(t, done)
+	assert.Nil(t, n)
+
+	// apply zero instance
+	selector.Apply(nil)
+	n, done, err = selector.Select(context.Background(), WithFilter(func(node Node) bool {
+		return !(node.Version() == "v2.0.0")
+	}))
 	assert.Equal(t, ErrNoAvailable, err)
 	assert.Nil(t, done)
 	assert.Nil(t, n)

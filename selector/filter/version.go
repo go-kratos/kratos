@@ -6,12 +6,15 @@ import (
 	"github.com/go-kratos/kratos/v2/selector"
 )
 
-// Version is node verion filter.
+// Version is verion filter.
 func Version(version string) selector.Filter {
-	kf := func(ctx context.Context) Keep {
-		return func(node selector.Node) bool {
-			return node.Version() == version
+	return func(_ context.Context, nodes []selector.Node) []selector.Node {
+		filters := make([]selector.Node, 0, len(nodes))
+		for _, n := range nodes {
+			if n.Version() == version {
+				filters = append(filters, n)
+			}
 		}
+		return filters
 	}
-	return BaseFilter(kf)
 }
