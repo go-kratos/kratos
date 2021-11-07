@@ -78,7 +78,7 @@ func (p *Picker) Pick(info gBalancer.PickInfo) (gBalancer.PickResult, error) {
 		}
 	}
 
-	n, done, err := p.selector.Select(info.Ctx, selector.WithFilter(filters...))
+	n, done, err := p.selector.Select(info.Ctx, selector.WithNodeFilter(filters...))
 	if err != nil {
 		return gBalancer.PickResult{}, err
 	}
