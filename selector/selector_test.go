@@ -185,7 +185,7 @@ func testBaseFilter(t *testing.T, length int, reservedRatio int) {
 		return false
 	}
 	d := Default{}
-	raw = d.nodeFilter(f, raw)
+	raw = d.nodeFilter([]NodeFilter{f}, raw)
 	assert.Equal(t, len(targets), len(raw))
 	for _, n := range raw {
 		_, ok := targets[n.Address()]

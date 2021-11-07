@@ -16,16 +16,17 @@ type Default struct {
 
 // Select select one node.
 func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected Node, done DoneFunc, err error) {
-	nodes, _ := d.nodes.Load().([]WeightedNode)
-	if nodes == nil {
+	var (
+		options    SelectOptions
+		candidates []WeightedNode
+	)
+	nodes, ok := d.nodes.Load().([]WeightedNode)
+	if !ok {
 		return nil, nil, ErrNoAvailable
 	}
-	var options SelectOptions
 	for _, o := range opts {
 		o(&options)
 	}
-
-	var candidates []WeightedNode
 	if len(d.Filters) > 0 {
 		newNodes := make([]Node, len(nodes))
 		for i, wc := range nodes {
@@ -34,7 +35,6 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 		for _, f := range d.Filters {
 			newNodes = f(ctx, newNodes)
 		}
-		// TODO: get from pool
 		candidates = make([]WeightedNode, len(newNodes))
 		for i, n := range newNodes {
 			candidates[i] = n.(WeightedNode)
@@ -54,11 +54,9 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 }
 
 func (d *Default) nodeFilter(filters []NodeFilter, nodes []WeightedNode) []WeightedNode {
-	// TODO: get from pool
 	newNodes := make([]WeightedNode, 0, len(nodes))
-
 	for _, n := range nodes {
-		remove := false
+		var remove bool
 		for _, f := range filters {
 			if !f(n) {
 				remove = true
@@ -68,7 +66,6 @@ func (d *Default) nodeFilter(filters []NodeFilter, nodes []WeightedNode) []Weigh
 		if !remove {
 			newNodes = append(newNodes, n)
 		}
-
 	}
 	return newNodes
 }
