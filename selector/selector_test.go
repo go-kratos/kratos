@@ -107,7 +107,7 @@ func TestDefault(t *testing.T) {
 			Metadata:  map[string]string{"weight": "10"},
 		}))
 	selector.Apply(nodes)
-	n, done, err := selector.Select(context.Background(), WithFilter(func(node Node) bool {
+	n, done, err := selector.Select(context.Background(), WithNodeFilter(func(node Node) bool {
 		return (node.Version() == "v2.0.0")
 	}))
 	assert.Nil(t, err)
@@ -121,7 +121,7 @@ func TestDefault(t *testing.T) {
 	done(context.Background(), DoneInfo{})
 
 	// no v3.0.0 instance
-	n, done, err = selector.Select(context.Background(), WithFilter(func(node Node) bool {
+	n, done, err = selector.Select(context.Background(), WithNodeFilter(func(node Node) bool {
 		return (node.Version() == "v3.0.0")
 	}))
 	assert.Equal(t, ErrNoAvailable, err)
@@ -130,7 +130,7 @@ func TestDefault(t *testing.T) {
 
 	// apply zero instance
 	selector.Apply([]Node{})
-	n, done, err = selector.Select(context.Background(), WithFilter(func(node Node) bool {
+	n, done, err = selector.Select(context.Background(), WithNodeFilter(func(node Node) bool {
 		return (node.Version() == "v2.0.0")
 	}))
 	assert.Equal(t, ErrNoAvailable, err)
@@ -139,7 +139,7 @@ func TestDefault(t *testing.T) {
 
 	// apply zero instance
 	selector.Apply(nil)
-	n, done, err = selector.Select(context.Background(), WithFilter(func(node Node) bool {
+	n, done, err = selector.Select(context.Background(), WithNodeFilter(func(node Node) bool {
 		return (node.Version() == "v2.0.0")
 	}))
 	assert.Equal(t, ErrNoAvailable, err)

@@ -8,8 +8,8 @@ type SelectOptions struct {
 // SelectOption is Selector option.
 type SelectOption func(*SelectOptions)
 
-// WithFilter with filter options
-func WithFilter(fn ...NodeFilter) SelectOption {
+// WithNodeFilter with filter options
+func WithNodeFilter(fn ...NodeFilter) SelectOption {
 	return func(opts *SelectOptions) {
 		opts.Filters = fn
 	}
