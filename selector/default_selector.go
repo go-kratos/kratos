@@ -45,7 +45,7 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 		copy(candidates, nodes)
 	}
 	for _, f := range options.Filters {
-		d.nodeFilter(f, &candidates)
+		candidates = d.nodeFilter(f, candidates)
 	}
 	if len(candidates) == 0 {
 		return nil, nil, ErrNoAvailable
@@ -57,24 +57,25 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 	return wn.Raw(), done, nil
 }
 
-func (d *Default) nodeFilter(filter NodeFilter, nodes *[]WeightedNode) {
-	length := len(*nodes)
+func (d *Default) nodeFilter(filter NodeFilter, nodes []WeightedNode) []WeightedNode {
+	length := len(nodes)
 	for i := 0; i < length; i++ {
-		if filter((*nodes)[i]) {
+		if !filter((nodes)[i]) {
 			if i == length-1 {
 				length--
 				break
 			}
 			for ; length > i; length-- {
-				if !filter((*nodes)[length-1]) {
-					(*nodes)[i] = (*nodes)[length-1]
+				if filter((nodes)[length-1]) {
+					(nodes)[i] = (nodes)[length-1]
 					length--
 					break
 				}
 			}
 		}
 	}
-	*nodes = (*nodes)[:length]
+	nodes = (nodes)[:length]
+	return nodes
 }
 
 // Apply update nodes info.

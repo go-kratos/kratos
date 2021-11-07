@@ -6,5 +6,5 @@ import "context"
 type Filter func(context.Context, []Node) []Node
 
 // NodeFilter is node filter.
-// If it returns true, the node will be removed out from the balancer pick list
+// If it returns false, the node will be removed out from the balancer pick list
 type NodeFilter func(node Node) bool
