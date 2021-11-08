@@ -2,7 +2,7 @@ package selector
 
 import (
 	"context"
-	"sync"
+	"sync/atomic"
 )
 
 // Default is composite selector.
@@ -11,29 +11,40 @@ type Default struct {
 	Balancer    Balancer
 	Filters     []Filter
 
-	lk            sync.RWMutex
-	weightedNodes []Node
+	nodes atomic.Value
 }
 
 // Select select one node.
 func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected Node, done DoneFunc, err error) {
-	d.lk.RLock()
-	weightedNodes := d.weightedNodes
-	d.lk.RUnlock()
-
-	for _, f := range d.Filters {
-		weightedNodes = f(ctx, weightedNodes)
+	var (
+		options    SelectOptions
+		candidates []WeightedNode
+	)
+	nodes, ok := d.nodes.Load().([]WeightedNode)
+	if !ok {
+		return nil, nil, ErrNoAvailable
 	}
-	var options SelectOptions
 	for _, o := range opts {
 		o(&options)
 	}
-	for _, f := range options.Filters {
-		weightedNodes = f(ctx, weightedNodes)
+	if len(d.Filters) > 0 {
+		newNodes := make([]Node, len(nodes))
+		for i, wc := range nodes {
+			newNodes[i] = wc
+		}
+		for _, f := range d.Filters {
+			newNodes = f(ctx, newNodes)
+		}
+		candidates = make([]WeightedNode, len(newNodes))
+		for i, n := range newNodes {
+			candidates[i] = n.(WeightedNode)
+		}
+	} else {
+		candidates = nodes
 	}
-	candidates := make([]WeightedNode, 0, len(weightedNodes))
-	for _, n := range weightedNodes {
-		candidates = append(candidates, n.(WeightedNode))
+
+	if len(options.Filters) > 0 {
+		candidates = d.nodeFilter(options.Filters, candidates)
 	}
 	if len(candidates) == 0 {
 		return nil, nil, ErrNoAvailable
@@ -45,16 +56,31 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 	return wn.Raw(), done, nil
 }
 
+func (d *Default) nodeFilter(filters []NodeFilter, nodes []WeightedNode) []WeightedNode {
+	newNodes := make([]WeightedNode, 0, len(nodes))
+	for _, n := range nodes {
+		var remove bool
+		for _, f := range filters {
+			if !f(n) {
+				remove = true
+				break
+			}
+		}
+		if !remove {
+			newNodes = append(newNodes, n)
+		}
+	}
+	return newNodes
+}
+
 // Apply update nodes info.
 func (d *Default) Apply(nodes []Node) {
-	weightedNodes := make([]Node, 0, len(nodes))
+	weightedNodes := make([]WeightedNode, 0, len(nodes))
 	for _, n := range nodes {
 		weightedNodes = append(weightedNodes, d.NodeBuilder.Build(n))
 	}
-	d.lk.Lock()
 	// TODO: Do not delete unchanged nodes
-	d.weightedNodes = weightedNodes
-	d.lk.Unlock()
+	d.nodes.Store(weightedNodes)
 }
 
 // DefaultBuilder is de

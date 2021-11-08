@@ -71,14 +71,14 @@ type Picker struct {
 
 // Pick pick instances.
 func (p *Picker) Pick(info gBalancer.PickInfo) (gBalancer.PickResult, error) {
-	var filters []selector.Filter
+	var filters []selector.NodeFilter
 	if tr, ok := transport.FromClientContext(info.Ctx); ok {
 		if gtr, ok := tr.(*Transport); ok {
-			filters = gtr.Filters()
+			filters = gtr.NodeFilters()
 		}
 	}
 
-	n, done, err := p.selector.Select(info.Ctx, selector.WithFilter(filters...))
+	n, done, err := p.selector.Select(info.Ctx, selector.WithNodeFilter(filters...))
 	if err != nil {
 		return gBalancer.PickResult{}, err
 	}

@@ -30,7 +30,7 @@ func TestVersion(t *testing.T) {
 			Endpoints: []string{"http://127.0.0.2:9090"},
 		}))
 
-	n := f(context.Background(), nodes)
-	assert.Equal(t, 1, len(n))
-	assert.Equal(t, "127.0.0.2:9090", n[0].Address())
+	nodes = f(context.Background(), nodes)
+	assert.Equal(t, 1, len(nodes))
+	assert.Equal(t, "127.0.0.2:9090", nodes[0].Address())
 }

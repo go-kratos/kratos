@@ -3,7 +3,7 @@ package grpc
 import (
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/selector/filter"
+	"github.com/go-kratos/kratos/v2/selector"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/metadata"
 )
@@ -24,6 +24,8 @@ func TestBalancerName(t *testing.T) {
 func TestFilters(t *testing.T) {
 	o := &clientOptions{}
 
-	WithSelectFilter(filter.Version("2"))(o)
+	WithNodeFilter(func(selector.Node) bool {
+		return true
+	})(o)
 	assert.Equal(t, 1, len(o.filters))
 }

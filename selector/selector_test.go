@@ -3,6 +3,7 @@ package selector
 import (
 	"context"
 	"math/rand"
+	"strconv"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -106,7 +107,9 @@ func TestDefault(t *testing.T) {
 			Metadata:  map[string]string{"weight": "10"},
 		}))
 	selector.Apply(nodes)
-	n, done, err := selector.Select(context.Background(), WithFilter(mockFilter("v2.0.0")))
+	n, done, err := selector.Select(context.Background(), WithNodeFilter(func(node Node) bool {
+		return (node.Version() == "v2.0.0")
+	}))
 	assert.Nil(t, err)
 	assert.NotNil(t, n)
 	assert.NotNil(t, done)
@@ -118,15 +121,74 @@ func TestDefault(t *testing.T) {
 	done(context.Background(), DoneInfo{})
 
 	// no v3.0.0 instance
-	n, done, err = selector.Select(context.Background(), WithFilter(mockFilter("v3.0.0")))
+	n, done, err = selector.Select(context.Background(), WithNodeFilter(func(node Node) bool {
+		return (node.Version() == "v3.0.0")
+	}))
 	assert.Equal(t, ErrNoAvailable, err)
 	assert.Nil(t, done)
 	assert.Nil(t, n)
 
 	// apply zero instance
 	selector.Apply([]Node{})
-	n, done, err = selector.Select(context.Background(), WithFilter(mockFilter("v2.0.0")))
+	n, done, err = selector.Select(context.Background(), WithNodeFilter(func(node Node) bool {
+		return (node.Version() == "v2.0.0")
+	}))
 	assert.Equal(t, ErrNoAvailable, err)
 	assert.Nil(t, done)
 	assert.Nil(t, n)
+
+	// apply zero instance
+	selector.Apply(nil)
+	n, done, err = selector.Select(context.Background(), WithNodeFilter(func(node Node) bool {
+		return (node.Version() == "v2.0.0")
+	}))
+	assert.Equal(t, ErrNoAvailable, err)
+	assert.Nil(t, done)
+	assert.Nil(t, n)
+}
+
+func TestNodeFilterWithRandom(t *testing.T) {
+	for i := 0; i < 100; i++ {
+		testBaseFilter(t, 1000, rand.Intn(1000))
+	}
+
+	testBaseFilter(t, 0, rand.Intn(1000))
+	testBaseFilter(t, 1, 1000)
+	testBaseFilter(t, 2, 1000)
+	testBaseFilter(t, 3, 1000)
+	testBaseFilter(t, 1, 0)
+	testBaseFilter(t, 2, 0)
+	testBaseFilter(t, 3, 0)
+}
+
+func testBaseFilter(t *testing.T, length int, reservedRatio int) {
+	var raw []WeightedNode
+	var targets map[string]WeightedNode = make(map[string]WeightedNode)
+	for i := 0; i < length; i++ {
+		addr := strconv.FormatInt(int64(i), 10)
+		raw = append(raw, &mockWeightedNode{Node: NewNode(
+			addr,
+			&registry.ServiceInstance{
+				ID:        addr,
+				Name:      "helloworld",
+				Endpoints: []string{addr},
+			})})
+		if reservedRatio > rand.Intn(length) {
+			targets[addr] = raw[i]
+		}
+	}
+
+	f := func(node Node) bool {
+		if _, ok := targets[node.Address()]; ok {
+			return true
+		}
+		return false
+	}
+	d := Default{}
+	raw = d.nodeFilter([]NodeFilter{f}, raw)
+	assert.Equal(t, len(targets), len(raw))
+	for _, n := range raw {
+		_, ok := targets[n.Address()]
+		assert.True(t, ok)
+	}
 }
