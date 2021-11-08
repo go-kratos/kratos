@@ -38,7 +38,7 @@ func New(opts ...Option) selector.Selector {
 	return NewBuilder(opts...).Build()
 }
 
-// Pick pick a weighted node.
+// Pick is pick a weighted node.
 func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.DoneFunc, error) {
 	if len(nodes) == 0 {
 		return nil, nil, selector.ErrNoAvailable

@@ -6,7 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/selector"
 )
 
-// Version is verion filter.
+// Version is version filter.
 func Version(version string) selector.Filter {
 	return func(_ context.Context, nodes []selector.Node) []selector.Node {
 		filters := make([]selector.Node, 0, len(nodes))

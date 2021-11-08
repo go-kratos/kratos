@@ -14,7 +14,7 @@ type Default struct {
 	nodes atomic.Value
 }
 
-// Select select one node.
+// Select is select one node.
 func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected Node, done DoneFunc, err error) {
 	var (
 		options    SelectOptions

@@ -67,15 +67,15 @@ func (s *Balancer) Pick(ctx context.Context, nodes []selector.WeightedNode) (sel
 
 	var pc, upc selector.WeightedNode
 	nodeA, nodeB := s.prePick(nodes)
-	// meta.Weight为服务发布者在discovery中设置的权重
+	// meta.Weight is the weight set by the service publisher in discovery
 	if nodeB.Weight() > nodeA.Weight() {
 		pc, upc = nodeB, nodeA
 	} else {
 		pc, upc = nodeA, nodeB
 	}
 
-	// 如果落选节点在forceGap期间内从来没有被选中一次，则强制选一次
-	// 利用强制的机会，来触发成功率、延迟的更新
+	// If the failed node has never been selected once during forceGap, it is forced to be selected once
+	// Take advantage of forced opportunities to trigger updates of success rate and delay
 	if upc.PickElapsed() > forcePick && atomic.CompareAndSwapInt64(&s.lk, 0, 1) {
 		pc = upc
 		atomic.StoreInt64(&s.lk, 0)

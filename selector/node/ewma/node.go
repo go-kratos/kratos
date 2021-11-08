@@ -72,13 +72,13 @@ func (n *Node) load() (load uint64) {
 	now := time.Now().UnixNano()
 	avgLag := atomic.LoadInt64(&n.lag)
 	lastPredictTs := atomic.LoadInt64(&n.predictTs)
-	predicInterval := avgLag / 5
-	if predicInterval < int64(time.Millisecond*5) {
-		predicInterval = int64(time.Millisecond * 5)
-	} else if predicInterval > int64(time.Millisecond*200) {
-		predicInterval = int64(time.Millisecond * 200)
+	predictInterval := avgLag / 5
+	if predictInterval < int64(time.Millisecond*5) {
+		predictInterval = int64(time.Millisecond * 5)
+	} else if predictInterval > int64(time.Millisecond*200) {
+		predictInterval = int64(time.Millisecond * 200)
 	}
-	if now-lastPredictTs > predicInterval {
+	if now-lastPredictTs > predictInterval {
 		if atomic.CompareAndSwapInt64(&n.predictTs, lastPredictTs, now) {
 			var (
 				total   int64
@@ -104,7 +104,8 @@ func (n *Node) load() (load uint64) {
 	}
 
 	if avgLag == 0 {
-		// penalty是node刚启动时没有数据时的惩罚值，默认为1e9 * 10
+		// penalty is the penalty value when there is no data when the node is just started.
+		// The default value is 1e9 * 10
 		load = penalty * uint64(atomic.LoadInt64(&n.inflight))
 	} else {
 		predict := atomic.LoadInt64(&n.predict)
