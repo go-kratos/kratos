@@ -67,7 +67,7 @@ func (s *Balancer) Pick(ctx context.Context, nodes []selector.WeightedNode) (sel
 
 	var pc, upc selector.WeightedNode
 	nodeA, nodeB := s.prePick(nodes)
-	// meta.weight is the weight set by the service publisher in discovery
+	// meta.Weight is the weight set by the service publisher in discovery
 	if nodeB.Weight() > nodeA.Weight() {
 		pc, upc = nodeB, nodeA
 	} else {
