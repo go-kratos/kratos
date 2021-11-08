@@ -39,7 +39,10 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 		for i, n := range newNodes {
 			candidates[i] = n.(WeightedNode)
 		}
+	} else {
+		candidates = nodes
 	}
+
 	if len(options.Filters) > 0 {
 		candidates = d.nodeFilter(options.Filters, candidates)
 	}
