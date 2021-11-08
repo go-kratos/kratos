@@ -20,7 +20,7 @@ type Selector interface {
 
 // Rebalancer is nodes rebalancer.
 type Rebalancer interface {
-	// apply all nodes when any changes happen
+	// Apply is apply all nodes when any changes happen
 	Apply(nodes []Node)
 }
 

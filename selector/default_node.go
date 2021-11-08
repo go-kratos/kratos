@@ -6,7 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
-// DefaultNode is slector node
+// DefaultNode is selector node
 type DefaultNode struct {
 	addr     string
 	weight   *int64
