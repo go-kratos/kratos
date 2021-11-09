@@ -160,7 +160,7 @@ func TestLogger(t *testing.T) {
 	o := &Server{}
 	v := &mockLogger{}
 	Logger(v)(o)
-	o.log.Log(log.LevelWarn, "foo", "bar")
+	_ = o.log.Log(log.LevelWarn, "foo", "bar")
 	assert.Equal(t, "foo", v.key)
 	assert.Equal(t, "bar", v.val)
 	assert.Equal(t, log.LevelWarn, v.level)
