@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"google.golang.org/protobuf/types/known/structpb"
+
 	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -33,17 +35,12 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 	if len(values) < 1 {
 		return errors.New("no value provided")
 	}
+
 	var fd protoreflect.FieldDescriptor
 	for i, fieldName := range fieldPath {
-		fields := v.Descriptor().Fields()
-		if fd = getDescriptorByFieldAndName(fields, fieldName); fd == nil {
-			if len(fieldName) > 2 && strings.HasSuffix(fieldName, "[]") {
-				fd = getDescriptorByFieldAndName(fields, strings.TrimSuffix(fieldName, "[]"))
-			}
-			if fd == nil {
-				// ignore unexpected field.
-				return nil
-			}
+		if fd = getFieldDescriptor(v, fieldName); fd == nil {
+			// ignore unexpected field.
+			return nil
 		}
 
 		if i == len(fieldPath)-1 {
@@ -51,6 +48,10 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 		}
 
 		if fd.Message() == nil || fd.Cardinality() == protoreflect.Repeated {
+			if fd.IsMap() && len(fieldPath) > 1 {
+				// post sub field
+				return populateMapField(fd, v.Mutable(fd).Map(), []string{fieldPath[1]}, values)
+			}
 			return fmt.Errorf("invalid path: %q is not a message", fieldName)
 		}
 
@@ -65,7 +66,7 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 	case fd.IsList():
 		return populateRepeatedField(fd, v.Mutable(fd).List(), values)
 	case fd.IsMap():
-		return populateMapField(fd, v.Mutable(fd).Map(), values)
+		return populateMapField(fd, v.Mutable(fd).Map(), fieldPath, values)
 	}
 	if len(values) > 1 {
 		return fmt.Errorf("too many values for field %q: %s", fd.FullName().Name(), strings.Join(values, ", "))
@@ -73,13 +74,23 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 	return populateField(fd, v, values[0])
 }
 
+func getFieldDescriptor(v protoreflect.Message, fieldName string) protoreflect.FieldDescriptor {
+	fields := v.Descriptor().Fields()
+	var fd protoreflect.FieldDescriptor
+	if fd = getDescriptorByFieldAndName(fields, fieldName); fd == nil {
+		if v.Descriptor().FullName() == structMessageFullname {
+			fd = fields.ByNumber(structFieldsFieldNumber)
+		} else if len(fieldName) > 2 && strings.HasSuffix(fieldName, "[]") {
+			fd = getDescriptorByFieldAndName(fields, strings.TrimSuffix(fieldName, "[]"))
+		}
+	}
+	return fd
+}
+
 func getDescriptorByFieldAndName(fields protoreflect.FieldDescriptors, fieldName string) protoreflect.FieldDescriptor {
 	var fd protoreflect.FieldDescriptor
 	if fd = fields.ByName(protoreflect.Name(fieldName)); fd == nil {
 		fd = fields.ByJSONName(fieldName)
-		if fd == nil {
-			return nil
-		}
 	}
 	return fd
 }
@@ -104,15 +115,17 @@ func populateRepeatedField(fd protoreflect.FieldDescriptor, list protoreflect.Li
 	return nil
 }
 
-func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, values []string) error {
-	if len(values) != 2 { //nolint:gomnd
-		return fmt.Errorf("more than one value provided for key %q in map %q", values[0], fd.FullName())
-	}
-	key, err := parseField(fd.MapKey(), values[0])
+func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, fieldPath []string, values []string) error {
+	flen := len(fieldPath)
+	vlen := len(values)
+	// post sub key.
+	nkey := flen - 1
+	key, err := parseField(fd.MapKey(), fieldPath[nkey])
 	if err != nil {
 		return fmt.Errorf("parsing map key %q: %w", fd.FullName().Name(), err)
 	}
-	value, err := parseField(fd.MapValue(), values[1])
+	vkey := vlen - 1
+	value, err := parseField(fd.MapValue(), values[vkey])
 	if err != nil {
 		return fmt.Errorf("parsing map value %q: %w", fd.FullName().Name(), err)
 	}
@@ -273,6 +286,12 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 	case "google.protobuf.FieldMask":
 		fm := &field_mask.FieldMask{}
 		fm.Paths = append(fm.Paths, strings.Split(value, ",")...)
+		msg = fm
+	case "google.protobuf.Value":
+		fm, err := structpb.NewValue(value)
+		if err != nil {
+			return protoreflect.Value{}, err
+		}
 		msg = fm
 	default:
 		return protoreflect.Value{}, fmt.Errorf("unsupported message type: %q", string(md.FullName()))
