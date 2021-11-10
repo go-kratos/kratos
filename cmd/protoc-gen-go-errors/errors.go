@@ -94,7 +94,7 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 
 func case2Camel(name string) string {
 	if !strings.Contains(name, "_") {
-		return name
+		return strings.Title(strings.ToLower(name))
 	}
 	name = strings.ToLower(name)
 	name = strings.Replace(name, "_", " ", -1)
