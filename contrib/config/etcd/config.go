@@ -3,6 +3,8 @@ package etcd
 import (
 	"context"
 	"errors"
+	"path/filepath"
+	"strings"
 
 	"github.com/go-kratos/kratos/v2/config"
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -78,9 +80,11 @@ func (s *source) Load() ([]*config.KeyValue, error) {
 
 	kvs := make([]*config.KeyValue, 0)
 	for _, item := range rsp.Kvs {
+		k := string(item.Key)
 		kvs = append(kvs, &config.KeyValue{
-			Key:   string(item.Key),
+			Key:   k,
 			Value: item.Value,
+			Format: strings.TrimPrefix(filepath.Ext(k), "."),
 		})
 	}
 	return kvs, nil

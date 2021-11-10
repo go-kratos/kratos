@@ -2,6 +2,8 @@ package etcd
 
 import (
 	"context"
+	"github.com/hashicorp/consul/api"
+	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 
@@ -63,4 +65,40 @@ func TestConfig(t *testing.T) {
 	if _, err := client.Delete(context.Background(), testKey); err != nil {
 		t.Error(err)
 	}
+}
+
+
+func TestExtToFormat(t *testing.T) {
+	client, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"127.0.0.1:2379"},
+		DialTimeout: time.Second, DialOptions: []grpc.DialOption{grpc.WithBlock()},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		_ = client.Close()
+	}()
+
+	tp := "kratos/test/ext"
+	tn := "a.bird.json"
+	tk := tp+ "/"+ tn
+	tc := `{"a":1}`
+	if _, err = client.Put(context.Background(), testKey, "test config"); err != nil {
+		t.Fatal(err)
+	}
+	source, err := New(client, WithPath(tp))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	kvs, err := source.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, 1, len(kvs))
+	assert.Equal(t, tn, kvs[0].Key)
+	assert.Equal(t, tc, string(kvs[0].Value))
+	assert.Equal(t, "json", kvs[0].Format)
 }
