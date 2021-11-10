@@ -70,7 +70,7 @@ func (s *source) Load() ([]*config.KeyValue, error) {
 	}
 	kvs := make([]*config.KeyValue, 0)
 	for _, item := range kv {
-		k := item.Key[len(pathPrefix):]
+		k := strings.TrimPrefix(item.Key, pathPrefix)
 		kvs = append(kvs, &config.KeyValue{
 			Key:    k,
 			Value:  item.Value,

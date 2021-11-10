@@ -77,7 +77,6 @@ func (s *source) Load() ([]*config.KeyValue, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	kvs := make([]*config.KeyValue, 0)
 	for _, item := range rsp.Kvs {
 		k := string(item.Key)

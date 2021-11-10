@@ -78,14 +78,15 @@ func TestExtToFormat(t *testing.T) {
 		_ = client.Close()
 	}()
 
-	tp := "kratos/test/ext"
+	tp := "/kratos/test/ext"
 	tn := "a.bird.json"
 	tk := tp + "/" + tn
 	tc := `{"a":1}`
-	if _, err = client.Put(context.Background(), tk, "test config"); err != nil {
+	if _, err = client.Put(context.Background(), tk, tc); err != nil {
 		t.Fatal(err)
 	}
-	source, err := New(client, WithPath(tp))
+
+	source, err := New(client, WithPath(tp), WithPrefix(true))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +97,7 @@ func TestExtToFormat(t *testing.T) {
 	}
 
 	assert.Equal(t, 1, len(kvs))
-	assert.Equal(t, tn, kvs[0].Key)
+	assert.Equal(t, tk, kvs[0].Key)
 	assert.Equal(t, tc, string(kvs[0].Value))
 	assert.Equal(t, "json", kvs[0].Format)
 }
