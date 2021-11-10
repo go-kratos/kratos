@@ -138,6 +138,7 @@ func TestConfig(t *testing.T) {
 	cf := &config{}
 	cf.opts = opts
 	cf.reader = newReader(opts)
+	cf.log = log.NewHelper(opts.logger)
 
 	err = cf.Load()
 	assert.Nil(t, err)
