@@ -82,8 +82,8 @@ func (s *source) Load() ([]*config.KeyValue, error) {
 	for _, item := range rsp.Kvs {
 		k := string(item.Key)
 		kvs = append(kvs, &config.KeyValue{
-			Key:   k,
-			Value: item.Value,
+			Key:    k,
+			Value:  item.Value,
 			Format: strings.TrimPrefix(filepath.Ext(k), "."),
 		})
 	}
