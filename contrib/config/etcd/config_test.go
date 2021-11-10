@@ -2,12 +2,11 @@ package etcd
 
 import (
 	"context"
-	"github.com/hashicorp/consul/api"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 
-	clientv3 "go.etcd.io/etcd/client/v3"
+	"github.com/stretchr/testify/assert"
+	"go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 )
 
@@ -67,7 +66,6 @@ func TestConfig(t *testing.T) {
 	}
 }
 
-
 func TestExtToFormat(t *testing.T) {
 	client, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"127.0.0.1:2379"},
@@ -82,9 +80,9 @@ func TestExtToFormat(t *testing.T) {
 
 	tp := "kratos/test/ext"
 	tn := "a.bird.json"
-	tk := tp+ "/"+ tn
+	tk := tp + "/" + tn
 	tc := `{"a":1}`
-	if _, err = client.Put(context.Background(), testKey, "test config"); err != nil {
+	if _, err = client.Put(context.Background(), tk, "test config"); err != nil {
 		t.Fatal(err)
 	}
 	source, err := New(client, WithPath(tp))
