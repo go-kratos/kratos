@@ -59,7 +59,7 @@ func main() {
 		kratos.Name("helloworld"),
 		kratos.Server(
 			grpcSrv,
-			// httpSrv,
+			httpSrv,
 		),
 		kratos.Registrar(r),
 	)
