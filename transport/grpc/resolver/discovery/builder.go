@@ -3,6 +3,7 @@ package discovery
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -65,7 +66,7 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 	done := make(chan bool, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		w, err = b.discoverer.Watch(ctx, target.Endpoint)
+		w, err = b.discoverer.Watch(ctx, strings.TrimLeft(target.URL.Path, "/"))
 		close(done)
 	}()
 	select {
