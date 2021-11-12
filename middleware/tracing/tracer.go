@@ -34,9 +34,9 @@ func NewTracer(kind trace.SpanKind, opts ...Option) *Tracer {
 
 	switch kind {
 	case trace.SpanKindClient:
-		return &Tracer{tracer: otel.Tracer("kartos"), kind: kind, opt: &op}
+		return &Tracer{tracer: otel.Tracer("kratos"), kind: kind, opt: &op}
 	case trace.SpanKindServer:
-		return &Tracer{tracer: otel.Tracer("kartos"), kind: kind, opt: &op}
+		return &Tracer{tracer: otel.Tracer("kratos"), kind: kind, opt: &op}
 	default:
 		panic(fmt.Sprintf("unsupported span kind: %v", kind))
 	}
