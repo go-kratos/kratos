@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
@@ -66,7 +67,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 			Attributes: parseAttributes(in.Metadata),
 			Addr:       endpoint,
 		}
-		addr.Attributes = addr.Attributes.WithValues("rawServiceInstance", in)
+		addr.Attributes = addr.Attributes.WithValue("rawServiceInstance", in)
 		addrs = append(addrs, addr)
 	}
 	if len(addrs) == 0 {
@@ -96,5 +97,18 @@ func parseAttributes(md map[string]string) *attributes.Attributes {
 	for k, v := range md {
 		pairs = append(pairs, k, v)
 	}
-	return attributes.New(pairs...)
+	if len(pairs)%2 != 0 {
+		panic(fmt.Sprintf("parseAttributes called with unexpected input: len(pairs) = %v", len(pairs)))
+	}
+
+	var a *attributes.Attributes
+	for i := 0; i < len(pairs)/2; i++ {
+		if a == nil {
+			a = attributes.New(pairs[i*2], pairs[i*2+1])
+		} else {
+			a.WithValue(pairs[i*2], pairs[i*2+1])
+		}
+	}
+
+	return a
 }
