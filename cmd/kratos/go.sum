@@ -84,8 +84,8 @@ github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1/go.mod h1:vR7hzQXu2zJy9
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-kratos/aegis v0.1.1/go.mod h1:jYeSQ3Gesba478zEnujOiG5QdsyF3Xk/8owFUeKcHxw=
-github.com/go-kratos/kratos/v2 v2.1.0 h1:mVA98n5zyAvOORts3NOFRMP5VMNB1Hff8kVTybgawgw=
-github.com/go-kratos/kratos/v2 v2.1.0/go.mod h1:aJv7++0gDtfncp+2e3Ae32ElyFd77WS+pdXCRTSFll0=
+github.com/go-kratos/kratos/v2 v2.1.1 h1:1LDk5giwnlnxr7Jy8oJZyhgFlLlB1VtuoZxc+rs01tI=
+github.com/go-kratos/kratos/v2 v2.1.1/go.mod h1:aJv7++0gDtfncp+2e3Ae32ElyFd77WS+pdXCRTSFll0=
 github.com/go-ole/go-ole v1.2.5/go.mod h1:pprOEPIfldk/42T2oK7lQ4v4JSDwmV0As9GaiUsvbm0=
 github.com/go-playground/assert/v2 v2.0.1 h1:MsBgLAaY856+nPRTKrp3/OZK38U/wa0CcBYNjji3q3A=
 github.com/go-playground/assert/v2 v2.0.1/go.mod h1:VDjEfimB/XKnb+ZQfWdccd7VUvScMdVu0Titje2rxJ4=
