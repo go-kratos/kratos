@@ -37,6 +37,34 @@ func main() {
 }
 ```
 
+### Options list
+
+> You get what you see.
+
+```go
+// specify the app id
+func WithAppID(appID string) Option
+// specify the cluster of application
+func WithCluster(cluster string) Option
+
+// enable backup or not, and where to back up them.
+func WithBackupPath(backupPath string) Option
+func WithDisableBackup() Option
+func WithEnableBackup() Option
+
+// specify apollo endpoint, such as http://localhost:8080
+func WithEndpoint(endpoint string) Option
+
+// inject a logger to debug
+func WithLogger(logger log.Logger) Option
+
+// namespaces to load, comma to separate. 
+func WithNamespace(name string) Option
+
+// secret is the apollo secret key to access application config.
+func WithSecret(secret string) Option
+```
+
 ### Notice
 
 apollo config center use `Namespace` to be part of the key. For example:
