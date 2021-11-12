@@ -30,6 +30,12 @@ func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) fu
 		if err := ctx.Bind(&in{{.Body}}); err != nil {
 			return err
 		}
+		
+		{{- if not (eq .Body "")}}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		{{- end}}
 		{{- else}}
 		if err := ctx.BindQuery(&in{{.Body}}); err != nil {
 			return err
