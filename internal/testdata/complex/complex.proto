@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+option go_package = "github.com/go-kratos/kratos/cmd/protoc-gen-go-http/internal/encoding/complex/;complex";
+
+package testproto;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/wrappers.proto";
+
+// SimpleMessage represents a simple message sent to the Echo service.
+message Complex {
+  // Id represents the message identifier.
+  int64 id = 1;
+  string no_one = 2 [json_name = "numberOne"];
+  Simple simple = 3 [json_name = "very_simple"];
+  repeated string simples = 4;
+  bool b = 5;
+  sex sex = 6;
+  int32 age = 7;
+  uint32 a = 8;
+  uint64 count = 9;
+  float price = 10;
+  double d = 11;
+  bytes byte = 12;
+
+  google.protobuf.Timestamp timestamp = 13;
+  google.protobuf.Duration duration = 14;
+  google.protobuf.FieldMask field = 15;
+
+  google.protobuf.DoubleValue double = 16;
+  google.protobuf.FloatValue float = 17;
+  google.protobuf.Int64Value int64 = 18;
+  google.protobuf.Int32Value int32 = 19;
+  google.protobuf.UInt64Value uint64 = 20;
+  google.protobuf.UInt32Value uint32 = 21;
+  google.protobuf.BoolValue bool = 22;
+  google.protobuf.StringValue string = 23;
+  google.protobuf.BytesValue bytes = 24;
+
+  map<string,string> map = 25;
+}
+
+message Simple {
+  string component = 1;
+}
+
+enum sex {
+  man = 0;
+  woman = 1;
+}

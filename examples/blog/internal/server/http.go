@@ -10,15 +10,14 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/middleware/validate"
 	"github.com/go-kratos/kratos/v2/transport/http"
-	"go.opentelemetry.io/otel/trace"
 )
 
 // NewHTTPServer new a HTTP server.
-func NewHTTPServer(c *conf.Server, logger log.Logger, tracer trace.TracerProvider, blog *service.BlogService) *http.Server {
-	var opts = []http.ServerOption{
+func NewHTTPServer(c *conf.Server, logger log.Logger, blog *service.BlogService) *http.Server {
+	opts := []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
-			tracing.Server(tracing.WithTracerProvider(tracer)),
+			tracing.Server(),
 			logging.Server(logger),
 			validate.Validator(),
 		),

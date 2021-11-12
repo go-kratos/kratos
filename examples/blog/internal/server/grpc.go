@@ -10,15 +10,14 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/middleware/validate"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"go.opentelemetry.io/otel/trace"
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, logger log.Logger, tracer trace.TracerProvider, blog *service.BlogService) *grpc.Server {
-	var opts = []grpc.ServerOption{
+func NewGRPCServer(c *conf.Server, logger log.Logger, blog *service.BlogService) *grpc.Server {
+	opts := []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
-			tracing.Server(tracing.WithTracerProvider(tracer)),
+			tracing.Server(),
 			logging.Server(logger),
 			validate.Validator(),
 		),

@@ -2,7 +2,9 @@ package kratos
 
 import (
 	"context"
+	"fmt"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -12,6 +14,32 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type mockRegistry struct {
+	lk      sync.Mutex
+	service map[string]*registry.ServiceInstance
+}
+
+func (r *mockRegistry) Register(ctx context.Context, service *registry.ServiceInstance) error {
+	if service == nil || service.ID == "" {
+		return fmt.Errorf("no service id")
+	}
+	r.lk.Lock()
+	defer r.lk.Unlock()
+	r.service[service.ID] = service
+	return nil
+}
+
+// Deregister the registration.
+func (r *mockRegistry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
+	r.lk.Lock()
+	defer r.lk.Unlock()
+	if r.service[service.ID] == nil {
+		return fmt.Errorf("deregister service not found")
+	}
+	delete(r.service, service.ID)
+	return nil
+}
+
 func TestApp(t *testing.T) {
 	hs := http.NewServer()
 	gs := grpc.NewServer()
@@ -19,9 +47,10 @@ func TestApp(t *testing.T) {
 		Name("kratos"),
 		Version("v1.0.0"),
 		Server(hs, gs),
+		Registrar(&mockRegistry{service: make(map[string]*registry.ServiceInstance)}),
 	)
 	time.AfterFunc(time.Second, func() {
-		app.Stop()
+		_ = app.Stop()
 	})
 	if err := app.Run(); err != nil {
 		t.Fatal(err)
@@ -83,8 +112,10 @@ func TestApp_Endpoint(t *testing.T) {
 				name     string
 				endpoint []string
 				metadata map[string]string
-			}{id: "1", version: "v1", name: "kratos-v1", endpoint: []string{"https://go-kratos.dev", "localhost"},
-				metadata: map[string]string{}},
+			}{
+				id: "1", version: "v1", name: "kratos-v1", endpoint: []string{"https://go-kratos.dev", "localhost"},
+				metadata: map[string]string{},
+			},
 		},
 		{
 			id:       "2",
@@ -98,8 +129,10 @@ func TestApp_Endpoint(t *testing.T) {
 				name     string
 				endpoint []string
 				metadata map[string]string
-			}{id: "2", version: "v2", name: "kratos-v2", endpoint: []string{"test"},
-				metadata: map[string]string{"kratos": "https://github.com/go-kratos/kratos"}},
+			}{
+				id: "2", version: "v2", name: "kratos-v2", endpoint: []string{"test"},
+				metadata: map[string]string{"kratos": "https://github.com/go-kratos/kratos"},
+			},
 		},
 		{
 			id:       "3",
@@ -113,8 +146,10 @@ func TestApp_Endpoint(t *testing.T) {
 				name     string
 				endpoint []string
 				metadata map[string]string
-			}{id: "3", version: "v3", name: "kratos-v3", endpoint: []string{},
-				metadata: map[string]string{}},
+			}{
+				id: "3", version: "v3", name: "kratos-v3", endpoint: []string{},
+				metadata: map[string]string{},
+			},
 		},
 	}
 	for _, tt := range tests {

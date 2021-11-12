@@ -3,6 +3,8 @@ package log
 // FilterOption is filter option.
 type FilterOption func(*Filter)
 
+const fuzzyStr = "***"
+
 // FilterLevel with filter level.
 func FilterLevel(level Level) FilterOption {
 	return func(opts *Filter) {
@@ -72,10 +74,10 @@ func (f *Filter) Log(level Level, keyvals ...interface{}) error {
 				continue
 			}
 			if _, ok := f.key[keyvals[i]]; ok {
-				keyvals[v] = "***"
+				keyvals[v] = fuzzyStr
 			}
 			if _, ok := f.value[keyvals[v]]; ok {
-				keyvals[v] = "***"
+				keyvals[v] = fuzzyStr
 			}
 		}
 	}

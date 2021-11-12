@@ -9,9 +9,10 @@ import (
 
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
+	"github.com/stretchr/testify/assert"
 
-	consulregistry "github.com/go-kratos/consul/registry"
-	etcdregistry "github.com/go-kratos/etcd/registry"
+	consulregistry "github.com/go-kratos/kratos/contrib/registry/consul/v2"
+	etcdregistry "github.com/go-kratos/kratos/contrib/registry/etcd/v2"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
@@ -105,7 +106,7 @@ func TestETCD(t *testing.T) {
 	}
 	callHTTP(t, r)
 	callGRPC(t, r)
-	srv.Stop()
+	assert.NoError(t, srv.Stop())
 }
 
 func TestConsul(t *testing.T) {
@@ -120,5 +121,5 @@ func TestConsul(t *testing.T) {
 	}
 	callHTTP(t, r)
 	callGRPC(t, r)
-	srv.Stop()
+	assert.NoError(t, srv.Stop())
 }

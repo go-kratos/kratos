@@ -3,9 +3,14 @@
 <p align="center">
 <a href="https://github.com/go-kratos/kratos/actions"><img src="https://github.com/go-kratos/kratos/workflows/Go/badge.svg" alt="Build Status"></a>
 <a href="https://pkg.go.dev/github.com/go-kratos/kratos/v2"><img src="https://pkg.go.dev/badge/github.com/go-kratos/kratos/v2" alt="GoDoc"></a>
+<a href="https://codecov.io/gh/go-kratos/kratos"><img src="https://codecov.io/gh/go-kratos/kratos/master/graph/badge.svg" alt="codeCov"></a>
 <a href="https://goreportcard.com/report/github.com/go-kratos/kratos"><img src="https://goreportcard.com/badge/github.com/go-kratos/kratos" alt="Go Report Card" /a>
 <a href="https://github.com/go-kratos/kratos/blob/main/LICENSE"><img src="https://img.shields.io/github/license/go-kratos/kratos" alt="License"></a>
+<a href="https://github.com/avelino/awesome-go"><img src="https://awesome.re/mentioned-badge.svg" alt="Awesome Go"></a>
 <a href="https://discord.gg/BWzJsUJ"><img src="https://img.shields.io/discord/766619759214854164?label=chat&logo=discord" alt="Discord"></a>
+</p>
+<p align="center">
+<a href="https://www.producthunt.com/posts/go-kratos?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-go-kratos" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=306565&theme=light" alt="Go Kratos - A Go framework for microservices. | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 </p>
   
 ##### Translate to: [简体中文](README_zh.md)
@@ -14,7 +19,7 @@
   
 > The name is inspired by the game God of War which is based on Greek myths, tells the Kratos from mortals to become a God of War and launches the adventure of killing god.
 
-Kratos is a microservice-oriented governance framework implements by golang, which offers convenient capabilities to help you quickly build a bulletproof application from scratch, such as:
+Kratos is a microservice-oriented governance framework implemented by golang, which offers convenient capabilities to help you quickly build a bulletproof application from scratch, such as:
 
 - The [communication protocol](https://go-kratos.dev/en/docs/component/api) is based on the HTTP/gRPC through the definition of Protobuf.
 - Abstract [transport](https://go-kratos.dev/en/docs/component/transport/overview) layer are support: [HTTP](https://go-kratos.dev/en/docs/component/transport/http) / [gRPC](https://go-kratos.dev/en/docs/component/transport/grpc).
@@ -63,7 +68,7 @@ docker run -it --rm -p 8000:8000 --workdir /workspace golang
 ```shell
 apt-get update && apt-get -y install protobuf-compiler
 export GOPROXY=https://goproxy.io,direct
-go get github.com/go-kratos/kratos/cmd/kratos/v2@latest && kratos upgrade
+go install github.com/go-kratos/kratos/cmd/kratos/v2@latest && kratos upgrade
 ```
   
 ```shell
@@ -88,7 +93,7 @@ If you discover a security vulnerability within Kratos, please send an e-mail to
 
 ## Contributors
 
-Thank you for considering contributing to the Kratos framework! The contribution guide can be found in the [Kratos documention](https://go-kratos.dev/en/docs/community/contribution).
+Thank you for considering contributing to the Kratos framework! The contribution guide can be found in the [Kratos documentation](https://go-kratos.dev/en/docs/community/contribution).
 
 <a href="https://github.com/go-kratos/kratos/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=go-kratos/kratos" />

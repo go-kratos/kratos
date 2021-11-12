@@ -75,12 +75,14 @@ func (c *wrapper) Vars() url.Values {
 	}
 	return vars
 }
+
 func (c *wrapper) Form() url.Values {
 	if err := c.req.ParseForm(); err != nil {
 		return url.Values{}
 	}
 	return c.req.Form
 }
+
 func (c *wrapper) Query() url.Values {
 	return c.req.URL.Query()
 }

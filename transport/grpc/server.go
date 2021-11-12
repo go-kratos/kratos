@@ -25,8 +25,10 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var _ transport.Server = (*Server)(nil)
-var _ transport.Endpointer = (*Server)(nil)
+var (
+	_ transport.Server     = (*Server)(nil)
+	_ transport.Endpointer = (*Server)(nil)
+)
 
 // ServerOption is gRPC server option.
 type ServerOption func(o *Server)
@@ -90,7 +92,7 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
-	ctx        context.Context
+	baseCtx    context.Context
 	tlsConf    *tls.Config
 	lis        net.Listener
 	once       sync.Once
@@ -110,6 +112,7 @@ type Server struct {
 // NewServer creates a gRPC server by options.
 func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
+		baseCtx: context.Background(),
 		network: "tcp",
 		address: ":0",
 		timeout: 1 * time.Second,
@@ -119,13 +122,13 @@ func NewServer(opts ...ServerOption) *Server {
 	for _, o := range opts {
 		o(srv)
 	}
-	var ints = []grpc.UnaryServerInterceptor{
+	ints := []grpc.UnaryServerInterceptor{
 		srv.unaryServerInterceptor(),
 	}
 	if len(srv.ints) > 0 {
 		ints = append(ints, srv.ints...)
 	}
-	var grpcOpts = []grpc.ServerOption{
+	grpcOpts := []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(ints...),
 	}
 	if srv.tlsConf != nil {
@@ -173,7 +176,7 @@ func (s *Server) Start(ctx context.Context) error {
 	if _, err := s.Endpoint(); err != nil {
 		return err
 	}
-	s.ctx = ctx
+	s.baseCtx = ctx
 	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
 	s.health.Resume()
 	return s.Serve(s.lis)
@@ -189,7 +192,7 @@ func (s *Server) Stop(ctx context.Context) error {
 
 func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		ctx, cancel := ic.Merge(ctx, s.ctx)
+		ctx, cancel := ic.Merge(ctx, s.baseCtx)
 		defer cancel()
 		md, _ := grpcmd.FromIncomingContext(ctx)
 		replyHeader := grpcmd.MD{}

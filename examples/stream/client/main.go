@@ -74,7 +74,6 @@ func uploadLog(client hello.HelloClient) {
 		time.Sleep(time.Millisecond * 50)
 		number++
 	}
-	return
 }
 
 func chat(client hello.HelloClient) {

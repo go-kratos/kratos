@@ -31,28 +31,30 @@ type App struct {
 	opts     options
 	ctx      context.Context
 	cancel   func()
+	lk       sync.Mutex
 	instance *registry.ServiceInstance
 }
 
 // New create an application lifecycle manager.
 func New(opts ...Option) *App {
-	options := options{
+	o := options{
 		ctx:              context.Background(),
 		logger:           log.NewHelper(log.DefaultLogger),
 		sigs:             []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		registrarTimeout: 10 * time.Second,
+		stopTimeout:      10 * time.Second,
 	}
 	if id, err := uuid.NewUUID(); err == nil {
-		options.id = id.String()
+		o.id = id.String()
 	}
-	for _, o := range opts {
-		o(&options)
+	for _, opt := range opts {
+		opt(&o)
 	}
-	ctx, cancel := context.WithCancel(options.ctx)
+	ctx, cancel := context.WithCancel(o.ctx)
 	return &App{
 		ctx:    ctx,
 		cancel: cancel,
-		opts:   options,
+		opts:   o,
 	}
 }
 
@@ -89,7 +91,9 @@ func (a *App) Run() error {
 		srv := srv
 		eg.Go(func() error {
 			<-ctx.Done() // wait for stop signal
-			return srv.Stop(ctx)
+			sctx, cancel := context.WithTimeout(context.Background(), a.opts.stopTimeout)
+			defer cancel()
+			return srv.Stop(sctx)
 		})
 		wg.Add(1)
 		eg.Go(func() error {
@@ -99,12 +103,14 @@ func (a *App) Run() error {
 	}
 	wg.Wait()
 	if a.opts.registrar != nil {
-		ctx, cancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
-		defer cancel()
-		if err := a.opts.registrar.Register(ctx, instance); err != nil {
+		rctx, rcancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
+		defer rcancel()
+		if err := a.opts.registrar.Register(rctx, instance); err != nil {
 			return err
 		}
+		a.lk.Lock()
 		a.instance = instance
+		a.lk.Unlock()
 	}
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, a.opts.sigs...)
@@ -116,7 +122,8 @@ func (a *App) Run() error {
 			case <-c:
 				err := a.Stop()
 				if err != nil {
-					a.opts.logger.Errorf("failed to app stop: %v", err)
+					a.opts.logger.Errorf("failed to stop app: %v", err)
+					return err
 				}
 			}
 		}
@@ -129,10 +136,13 @@ func (a *App) Run() error {
 
 // Stop gracefully stops the application.
 func (a *App) Stop() error {
-	if a.opts.registrar != nil && a.instance != nil {
+	a.lk.Lock()
+	instance := a.instance
+	a.lk.Unlock()
+	if a.opts.registrar != nil && instance != nil {
 		ctx, cancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 		defer cancel()
-		if err := a.opts.registrar.Deregister(ctx, a.instance); err != nil {
+		if err := a.opts.registrar.Deregister(ctx, instance); err != nil {
 			return err
 		}
 	}
@@ -143,7 +153,7 @@ func (a *App) Stop() error {
 }
 
 func (a *App) buildInstance() (*registry.ServiceInstance, error) {
-	var endpoints []string
+	endpoints := make([]string, 0) //nolint:gomnd
 	for _, e := range a.opts.endpoints {
 		endpoints = append(endpoints, e.String())
 	}

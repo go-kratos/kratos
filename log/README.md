@@ -24,7 +24,7 @@ helper.Infow("key", "value")
 
 // filter
 log := log.NewHelper(log.NewFilter(logger,
-	log.FilterLevel(LevelInfo),
+	log.FilterLevel(log.LevelInfo),
 	log.FilterKey("foo"),
 	log.FilterValue("bar"),
 	log.FilterFunc(customFilter),

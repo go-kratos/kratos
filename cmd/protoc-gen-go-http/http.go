@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 
+	"google.golang.org/protobuf/reflect/protoreflect"
+
 	"github.com/go-kratos/kratos/v2"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
@@ -155,6 +157,30 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 
 func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path string) *methodDesc {
 	defer func() { methodSets[m.GoName]++ }()
+	vars := buildPathVars(m, path)
+	fields := m.Input.Desc.Fields()
+	for _, v := range vars {
+		for _, field := range strings.Split(v, ".") {
+			if strings.TrimSpace(field) == "" {
+				continue
+			}
+			if strings.Contains(field, ":") {
+				field = strings.Split(field, ":")[0]
+			}
+			fd := fields.ByName(protoreflect.Name(field))
+			if fd == nil {
+				fmt.Fprintf(os.Stderr, "\u001B[31mERROR\u001B[m: The corresponding field '%s' declaration in message could not be found in '%s'\n", v, path)
+				os.Exit(2)
+			}
+			if fd.IsMap() {
+				fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: The field in path:'%s' shouldn't be a map.\n", v)
+			} else if fd.IsList() {
+				fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: The field in path:'%s' shouldn't be a list.\n", v)
+			} else if fd.Kind() == protoreflect.MessageKind || fd.Kind() == protoreflect.GroupKind {
+				fields = fd.Message().Fields()
+			}
+		}
+	}
 	return &methodDesc{
 		Name:    m.GoName,
 		Num:     methodSets[m.GoName],
@@ -162,7 +188,7 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 		Reply:   g.QualifiedGoIdent(m.Output.GoIdent),
 		Path:    path,
 		Method:  method,
-		HasVars: len(buildPathVars(m, path)) > 0,
+		HasVars: len(vars) > 0,
 	}
 }
 
@@ -177,10 +203,8 @@ func buildPathVars(method *protogen.Method, path string) (res []string) {
 }
 
 func camelCaseVars(s string) string {
-	var (
-		vars []string
-		subs = strings.Split(s, ".")
-	)
+	vars := make([]string, 0)
+	subs := strings.Split(s, ".")
 	for _, sub := range subs {
 		vars = append(vars, camelCase(sub))
 	}

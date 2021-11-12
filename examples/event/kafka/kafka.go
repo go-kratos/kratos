@@ -2,37 +2,35 @@ package kafka
 
 import (
 	"context"
+	"log"
+
 	"github.com/go-kratos/kratos/examples/event/event"
 	"github.com/segmentio/kafka-go"
-	"github.com/segmentio/kafka-go/protocol"
-	"log"
 )
 
-var _ event.Sender = (*kafkaSender)(nil)
-var _ event.Receiver = (*kafkaReceiver)(nil)
-var _ event.Message = (*Message)(nil)
+var (
+	_ event.Sender   = (*kafkaSender)(nil)
+	_ event.Receiver = (*kafkaReceiver)(nil)
+	_ event.Event    = (*Message)(nil)
+)
 
 type Message struct {
-	key    string
-	value  []byte
-	header map[string]string
+	key   string
+	value []byte
 }
 
 func (m *Message) Key() string {
 	return m.key
 }
+
 func (m *Message) Value() []byte {
 	return m.value
 }
-func (m *Message) Header() map[string]string {
-	return m.header
-}
 
-func NewMessage(key string, value []byte, header map[string]string) event.Message {
+func NewMessage(key string, value []byte) event.Event {
 	return &Message{
-		key:    key,
-		value:  value,
-		header: header,
+		key:   key,
+		value: value,
 	}
 }
 
@@ -41,20 +39,10 @@ type kafkaSender struct {
 	topic  string
 }
 
-func (s *kafkaSender) Send(ctx context.Context, message event.Message) error {
-	var h []kafka.Header
-	if len(message.Header()) > 0 {
-		for k, v := range message.Header() {
-			h = append(h, protocol.Header{
-				Key:   k,
-				Value: []byte(v),
-			})
-		}
-	}
+func (s *kafkaSender) Send(ctx context.Context, message event.Event) error {
 	err := s.writer.WriteMessages(ctx, kafka.Message{
-		Key:     []byte(message.Key()),
-		Value:   message.Value(),
-		Headers: h,
+		Key:   []byte(message.Key()),
+		Value: message.Value(),
 	})
 	if err != nil {
 		return err
@@ -71,7 +59,6 @@ func (s *kafkaSender) Close() error {
 }
 
 func NewKafkaSender(address []string, topic string) (event.Sender, error) {
-
 	w := &kafka.Writer{
 		Topic:    topic,
 		Addr:     kafka.TCP(address...),
@@ -92,16 +79,9 @@ func (k *kafkaReceiver) Receive(ctx context.Context, handler event.Handler) erro
 			if err != nil {
 				break
 			}
-			h := make(map[string]string)
-			if len(m.Headers) > 0 {
-				for _, header := range m.Headers {
-					h[header.Key] = string(header.Value)
-				}
-			}
 			err = handler(context.Background(), &Message{
-				key:    string(m.Key),
-				value:  m.Value,
-				header: h,
+				key:   string(m.Key),
+				value: m.Value,
 			})
 			if err != nil {
 				log.Fatal("message handling exception:", err)

@@ -40,6 +40,7 @@ type mockRegistry struct{}
 func (m *mockRegistry) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
 	return nil, nil
 }
+
 func (m *mockRegistry) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
 	return nil, nil
 }
@@ -67,13 +68,14 @@ func EmptyMiddleware() middleware.Middleware {
 }
 
 func TestUnaryClientInterceptor(t *testing.T) {
-	f := unaryClientInterceptor([]middleware.Middleware{EmptyMiddleware()}, time.Duration(100))
+	f := unaryClientInterceptor([]middleware.Middleware{EmptyMiddleware()}, time.Duration(100), nil)
 	req := &struct{}{}
 	resp := &struct{}{}
 
-	err := f(context.TODO(), "hello", req, resp, &grpc.ClientConn{}, func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
-		return nil
-	})
+	err := f(context.TODO(), "hello", req, resp, &grpc.ClientConn{},
+		func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
+			return nil
+		})
 	assert.NoError(t, err)
 }
 

@@ -1,0 +1,36 @@
+name: Lint
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  resolve-modules:
+    name: resolve module
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - id: set-matrix
+        run: ./hack/resolve-modules.sh
+
+  lint:
+    name: lint module
+    runs-on: ubuntu-latest
+    needs: resolve-modules
+    strategy:
+      matrix: ${{ fromJson(needs.resolve-modules.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
+          working-directory: ${{ matrix.workdir }}
+          skip-pkg-cache: true

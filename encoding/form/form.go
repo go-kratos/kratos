@@ -10,8 +10,12 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// Name is form codec name
-const Name = "x-www-form-urlencoded"
+const (
+	// Name is form codec name
+	Name = "x-www-form-urlencoded"
+	// Null value string
+	nullStr = "null"
+)
 
 func init() {
 	decoder := form.NewDecoder()

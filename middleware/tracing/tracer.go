@@ -22,21 +22,21 @@ type Tracer struct {
 
 // NewTracer create tracer instance
 func NewTracer(kind trace.SpanKind, opts ...Option) *Tracer {
-	options := options{
+	op := options{
 		propagator: propagation.NewCompositeTextMapPropagator(Metadata{}, propagation.Baggage{}, propagation.TraceContext{}),
 	}
 	for _, o := range opts {
-		o(&options)
+		o(&op)
 	}
-	if options.tracerProvider != nil {
-		otel.SetTracerProvider(options.tracerProvider)
+	if op.tracerProvider != nil {
+		otel.SetTracerProvider(op.tracerProvider)
 	}
 
 	switch kind {
 	case trace.SpanKindClient:
-		return &Tracer{tracer: otel.Tracer("kartos"), kind: kind, opt: &options}
+		return &Tracer{tracer: otel.Tracer("kratos"), kind: kind, opt: &op}
 	case trace.SpanKindServer:
-		return &Tracer{tracer: otel.Tracer("kartos"), kind: kind, opt: &options}
+		return &Tracer{tracer: otel.Tracer("kratos"), kind: kind, opt: &op}
 	default:
 		panic(fmt.Sprintf("unsupported span kind: %v", kind))
 	}

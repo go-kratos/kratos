@@ -9,8 +9,7 @@ import (
 )
 
 func Test_atomicValue_Bool(t *testing.T) {
-	var vlist []interface{}
-	vlist = []interface{}{"1", "t", "T", "true", "TRUE", "True", true, 1, int32(1)}
+	vlist := []interface{}{"1", "t", "T", "true", "TRUE", "True", true, 1, int32(1)}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
@@ -38,8 +37,7 @@ func Test_atomicValue_Bool(t *testing.T) {
 }
 
 func Test_atomicValue_Int(t *testing.T) {
-	var vlist []interface{}
-	vlist = []interface{}{"123123", float64(123123), int64(123123), int32(123123), 123123}
+	vlist := []interface{}{"123123", float64(123123), int64(123123), int32(123123), 123123}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
@@ -58,8 +56,7 @@ func Test_atomicValue_Int(t *testing.T) {
 }
 
 func Test_atomicValue_Float(t *testing.T) {
-	var vlist []interface{}
-	vlist = []interface{}{"123123.1", float64(123123.1)}
+	vlist := []interface{}{"123123.1", float64(123123.1)}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
@@ -87,8 +84,7 @@ func (t ts) String() string {
 }
 
 func Test_atomicValue_String(t *testing.T) {
-	var vlist []interface{}
-	vlist = []interface{}{"1", float64(1), int64(1), 1, int64(1)}
+	vlist := []interface{}{"1", float64(1), int64(1), 1, int64(1)}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
@@ -114,14 +110,47 @@ func Test_atomicValue_String(t *testing.T) {
 }
 
 func Test_atomicValue_Duration(t *testing.T) {
-	var vlist []interface{}
-	vlist = []interface{}{int64(5)}
+	vlist := []interface{}{int64(5)}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
 		b, err := v.Duration()
 		assert.NoError(t, err)
 		assert.Equal(t, time.Duration(5), b)
+	}
+}
+
+func Test_atomicValue_Slice(t *testing.T) {
+	vlist := []interface{}{int64(5)}
+	v := atomicValue{}
+	v.Store(vlist)
+	slices, err := v.Slice()
+	assert.NoError(t, err)
+	for _, v := range slices {
+		b, err := v.Duration()
+		assert.NoError(t, err)
+		assert.Equal(t, time.Duration(5), b)
+	}
+}
+
+func Test_atomicValue_Map(t *testing.T) {
+	vlist := make(map[string]interface{})
+	vlist["5"] = int64(5)
+	vlist["text"] = "text"
+	v := atomicValue{}
+	v.Store(vlist)
+	m, err := v.Map()
+	assert.NoError(t, err)
+	for k, v := range m {
+		if k == "5" {
+			b, err := v.Duration()
+			assert.NoError(t, err)
+			assert.Equal(t, time.Duration(5), b)
+		} else {
+			b, err := v.String()
+			assert.NoError(t, err)
+			assert.Equal(t, "text", b)
+		}
 	}
 }
 

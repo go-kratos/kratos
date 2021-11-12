@@ -1,14 +1,68 @@
 run:
   timeout: 5m
   modules-download-mode: readonly
-  skip-files:
-    - ".*_test\\.go$"
 
 linters:
+  disable-all: true
+  fast: false
   enable:
-    - revive
-    - staticcheck
+    - bodyclose
+    - deadcode
+    - dogsled
+    - durationcheck
+    - errcheck
+    - exportloopref
     - govet
     - gosimple
     - gofmt
-    - errcheck
+    - gofumpt
+    - goconst
+    - goimports
+    - gomnd
+    - gocyclo
+    - ineffassign
+    - lll
+    - prealloc
+    - revive
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unused
+    - unconvert
+    - varcheck
+    - whitespace
+    - wastedassign
+
+  # don't enable:
+  # - asciicheck
+  # - scopelint
+  # - gochecknoglobals
+  # - gocognit
+  # - godot
+  # - godox
+  # - goerr113
+  # - interfacer
+  # - maligned
+  # - nestif
+  # - prealloc
+  # - testpackage
+  # - stylrcheck
+  # - wsl
+
+linters-settings:
+  govet:
+    check-shadowing: true
+  whitespace:
+    multi-func: true
+  lll:
+    line-length: 160
+  gomnd:
+    settings:
+      mnd:
+        # don't include the "operation", "argument" and "assign"
+        checks: case,condition,return
+  goconst:
+    ignore-tests: true
+  gocyclo:
+    # recommend 10-20
+    min-complexity: 30

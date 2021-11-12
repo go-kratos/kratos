@@ -90,10 +90,10 @@ func TestFile(t *testing.T) {
 		data = []byte(_testJSON)
 	)
 	defer os.Remove(path)
-	if err := os.MkdirAll(path, 0700); err != nil {
+	if err := os.MkdirAll(path, 0o700); err != nil {
 		t.Error(err)
 	}
-	if err := ioutil.WriteFile(file, data, 0666); err != nil {
+	if err := ioutil.WriteFile(file, data, 0o666); err != nil {
 		t.Error(err)
 	}
 	testSource(t, file, data)
@@ -125,7 +125,7 @@ func testWatchFile(t *testing.T, path string) {
 	assert.Equal(t, string(kvs[0].Value), _testJSONUpdate)
 
 	newFilepath := filepath.Join(filepath.Dir(path), "test1.json")
-	if err := os.Rename(path, newFilepath); err != nil {
+	if err = os.Rename(path, newFilepath); err != nil {
 		t.Error(err)
 	}
 	kvs, err = watch.Next()
@@ -181,7 +181,7 @@ func testSource(t *testing.T, path string, data []byte) {
 func TestConfig(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "test_config.json")
 	defer os.Remove(path)
-	if err := ioutil.WriteFile(path, []byte(_testJSON), 0666); err != nil {
+	if err := ioutil.WriteFile(path, []byte(_testJSON), 0o666); err != nil {
 		t.Error(err)
 	}
 	c := config.New(config.WithSource(
@@ -293,17 +293,20 @@ func testScan(t *testing.T, c config.Config) {
 func TestMergeDataRace(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "test_config.json")
 	defer os.Remove(path)
-	if err := ioutil.WriteFile(path, []byte(_testJSON), 0666); err != nil {
+	if err := ioutil.WriteFile(path, []byte(_testJSON), 0o666); err != nil {
 		t.Error(err)
 	}
 	c := config.New(config.WithSource(
 		NewSource(path),
 	))
+	const count = 80
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
+	startCh := make(chan struct{})
 	go func() {
 		defer wg.Done()
-		for i := 0; i < 100; i++ {
+		<-startCh
+		for i := 0; i < count; i++ {
 			var conf struct{}
 			if err := c.Scan(&conf); err != nil {
 				t.Error(err)
@@ -313,11 +316,13 @@ func TestMergeDataRace(t *testing.T) {
 
 	go func() {
 		defer wg.Done()
-		for i := 0; i < 100; i++ {
+		<-startCh
+		for i := 0; i < count; i++ {
 			if err := c.Load(); err != nil {
 				t.Error(err)
 			}
 		}
 	}()
+	close(startCh)
 	wg.Wait()
 }

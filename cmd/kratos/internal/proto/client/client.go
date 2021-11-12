@@ -14,15 +14,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	// CmdClient represents the source command.
-	CmdClient = &cobra.Command{
-		Use:   "client",
-		Short: "Generate the proto client code",
-		Long:  "Generate the proto client code. Example: kratos proto client helloworld.proto",
-		Run:   run,
-	}
-)
+// CmdClient represents the source command.
+var CmdClient = &cobra.Command{
+	Use:   "client",
+	Short: "Generate the proto client code",
+	Long:  "Generate the proto client code. Example: kratos proto client helloworld.proto",
+	Run:   run,
+}
 
 var protoPath string
 

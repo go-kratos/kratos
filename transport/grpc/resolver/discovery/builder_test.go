@@ -2,13 +2,14 @@ package discovery
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/serviceconfig"
-	"testing"
-	"time"
 )
 
 type mockLogger struct {
@@ -42,12 +43,12 @@ func TestWithTimeout(t *testing.T) {
 	assert.Equal(t, v, o.timeout)
 }
 
-type mockDiscovery struct {
-}
+type mockDiscovery struct{}
 
 func (m *mockDiscovery) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
 	return nil, nil
 }
+
 func (m *mockDiscovery) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
 	return &testWatch{}, nil
 }
@@ -57,8 +58,7 @@ func TestBuilder_Scheme(t *testing.T) {
 	assert.Equal(t, "discovery", b.Scheme())
 }
 
-type mockConn struct {
-}
+type mockConn struct{}
 
 func (m *mockConn) UpdateState(resolver.State) error {
 	return nil

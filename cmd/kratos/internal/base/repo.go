@@ -2,6 +2,7 @@ package base
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"path"
@@ -39,7 +40,7 @@ func (r *Repo) Path() string {
 	if end == -1 {
 		end = len(r.url)
 	}
-	branch := ""
+	var branch string
 	if r.branch == "" {
 		branch = "@main"
 	} else {
@@ -50,17 +51,19 @@ func (r *Repo) Path() string {
 
 // Pull fetch the repository from remote url.
 func (r *Repo) Pull(ctx context.Context) error {
-	cmd := exec.Command("git", "symbolic-ref", "HEAD")
+	cmd := exec.CommandContext(ctx, "git", "symbolic-ref", "HEAD")
 	cmd.Dir = r.Path()
-	err := cmd.Run()
+	_, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil
 	}
-	cmd = exec.Command("git", "pull")
+	cmd = exec.CommandContext(ctx, "git", "pull")
 	cmd.Dir = r.Path()
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	err = cmd.Run()
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(out))
 	return err
 }
 
@@ -69,16 +72,18 @@ func (r *Repo) Clone(ctx context.Context) error {
 	if _, err := os.Stat(r.Path()); !os.IsNotExist(err) {
 		return r.Pull(ctx)
 	}
-	cmd := &exec.Cmd{}
+	var cmd *exec.Cmd
 	if r.branch == "" {
-		cmd = exec.Command("git", "clone", r.url, r.Path())
+		cmd = exec.CommandContext(ctx, "git", "clone", r.url, r.Path())
 	} else {
-		cmd = exec.Command("git", "clone", "-b", r.branch, r.url, r.Path())
+		cmd = exec.CommandContext(ctx, "git", "clone", "-b", r.branch, r.url, r.Path())
 	}
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	err := cmd.Run()
-	return err
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(out))
+	return nil
 }
 
 // CopyTo copies the repository to project path.

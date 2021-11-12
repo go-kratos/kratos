@@ -1,6 +1,8 @@
 package http
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // CallOption configures a Call before it starts or extracts information from
 // a Call after it completes.

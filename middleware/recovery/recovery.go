@@ -2,13 +2,15 @@ package recovery
 
 import (
 	"context"
-	"fmt"
 	"runtime"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 )
+
+// ErrUnknownRequest is unknown request error.
+var ErrUnknownRequest = errors.InternalServer("UNKNOWN", "unknown request error")
 
 // HandlerFunc is recovery handler func.
 type HandlerFunc func(ctx context.Context, req, err interface{}) error
@@ -37,26 +39,26 @@ func WithLogger(logger log.Logger) Option {
 
 // Recovery is a server middleware that recovers from any panics.
 func Recovery(opts ...Option) middleware.Middleware {
-	options := options{
+	op := options{
 		logger: log.DefaultLogger,
 		handler: func(ctx context.Context, req, err interface{}) error {
-			return errors.InternalServer("RECOVERY", fmt.Sprintf("panic triggered: %v", err))
+			return ErrUnknownRequest
 		},
 	}
 	for _, o := range opts {
-		o(&options)
+		o(&op)
 	}
-	logger := log.NewHelper(options.logger)
+	logger := log.NewHelper(op.logger)
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			defer func() {
 				if rerr := recover(); rerr != nil {
-					buf := make([]byte, 64<<10)
+					buf := make([]byte, 64<<10) //nolint:gomnd
 					n := runtime.Stack(buf, false)
 					buf = buf[:n]
-					logger.Errorf("%v: %+v\n%s\n", rerr, req, buf)
+					logger.WithContext(ctx).Errorf("%v: %+v\n%s\n", rerr, req, buf)
 
-					err = options.handler(ctx, req, rerr)
+					err = op.handler(ctx, req, rerr)
 				}
 			}()
 			return handler(ctx, req)

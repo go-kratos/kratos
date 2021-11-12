@@ -1,8 +1,15 @@
 package http
 
 import (
+	"context"
+	"errors"
+	"fmt"
+	"strconv"
 	"testing"
+	"time"
 
+	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v2/selector"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,4 +33,59 @@ func TestParseTarget(t *testing.T) {
 	target, err = parseTarget("127.0.0.1:8000", false)
 	assert.Nil(t, err)
 	assert.Equal(t, &Target{Scheme: "https", Authority: "127.0.0.1:8000"}, target)
+}
+
+type mockRebalancer struct{}
+
+func (m *mockRebalancer) Apply(nodes []selector.Node) {}
+
+type mockDiscoverys struct {
+	isSecure bool
+}
+
+func (d *mockDiscoverys) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+	return nil, nil
+}
+
+func (d *mockDiscoverys) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
+	return &mockWatch{isSecure: d.isSecure}, nil
+}
+
+type mockWatch struct {
+	isSecure bool
+	count    int
+}
+
+func (m *mockWatch) Next() ([]*registry.ServiceInstance, error) {
+	m.count++
+	if m.count == 1 {
+		return nil, errors.New("mock test error")
+	}
+	instance := &registry.ServiceInstance{
+		ID:        "1",
+		Name:      "kratos",
+		Version:   "v1",
+		Metadata:  map[string]string{},
+		Endpoints: []string{fmt.Sprintf("http://127.0.0.1:9001?isSecure=%s", strconv.FormatBool(m.isSecure))},
+	}
+	if m.count > 3 {
+		time.Sleep(time.Millisecond * 500)
+	}
+	return []*registry.ServiceInstance{instance}, nil
+}
+
+func (m *mockWatch) Stop() error {
+	return nil
+}
+
+func TestResolver(t *testing.T) {
+	ta := &Target{
+		Scheme:    "http",
+		Authority: "",
+		Endpoint:  "discovery://helloworld",
+	}
+	_, err := newResolver(context.Background(), &mockDiscoverys{true}, ta, &mockRebalancer{}, false, false)
+	assert.Nil(t, err)
+	_, err = newResolver(context.Background(), &mockDiscoverys{false}, ta, &mockRebalancer{}, true, true)
+	assert.Nil(t, err)
 }
