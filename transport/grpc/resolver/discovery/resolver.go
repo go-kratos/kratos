@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
@@ -93,22 +92,14 @@ func (r *discoveryResolver) Close() {
 func (r *discoveryResolver) ResolveNow(options resolver.ResolveNowOptions) {}
 
 func parseAttributes(md map[string]string) *attributes.Attributes {
-	pairs := make([]interface{}, 0, len(md))
-	for k, v := range md {
-		pairs = append(pairs, k, v)
-	}
-	if len(pairs)%2 != 0 {
-		panic(fmt.Sprintf("parseAttributes called with unexpected input: len(pairs) = %v", len(pairs)))
-	}
-
 	var a *attributes.Attributes
-	for i := 0; i < len(pairs)/2; i++ {
+	for k, v := range md {
 		if a == nil {
-			a = attributes.New(pairs[i*2], pairs[i*2+1])
+			a = attributes.New(k, v)
 		} else {
-			a.WithValue(pairs[i*2], pairs[i*2+1])
+			a.WithValue(k, v)
 		}
-	}
 
+	}
 	return a
 }
