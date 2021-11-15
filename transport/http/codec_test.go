@@ -2,7 +2,7 @@ package http
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	nethttp "net/http"
 	"testing"
 
@@ -13,7 +13,7 @@ import (
 func TestDefaultRequestDecoder(t *testing.T) {
 	req1 := &nethttp.Request{
 		Header: make(nethttp.Header),
-		Body:   ioutil.NopCloser(bytes.NewBufferString("{\"a\":\"1\", \"b\": 2}")),
+		Body:   io.NopCloser(bytes.NewBufferString("{\"a\":\"1\", \"b\": 2}")),
 	}
 	req1.Header.Set("Content-Type", "application/json")
 
@@ -83,7 +83,7 @@ func TestDefaultResponseEncoderWithError(t *testing.T) {
 func TestCodecForRequest(t *testing.T) {
 	req1 := &nethttp.Request{
 		Header: make(nethttp.Header),
-		Body:   ioutil.NopCloser(bytes.NewBufferString("<xml></xml>")),
+		Body:   io.NopCloser(bytes.NewBufferString("<xml></xml>")),
 	}
 	req1.Header.Set("Content-Type", "application/xml")
 
@@ -93,7 +93,7 @@ func TestCodecForRequest(t *testing.T) {
 
 	req2 := &nethttp.Request{
 		Header: make(nethttp.Header),
-		Body:   ioutil.NopCloser(bytes.NewBufferString("{\"a\":\"1\", \"b\": 2}")),
+		Body:   io.NopCloser(bytes.NewBufferString("{\"a\":\"1\", \"b\": 2}")),
 	}
 	req2.Header.Set("Content-Type", "blablablabla")
 

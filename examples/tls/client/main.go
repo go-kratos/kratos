@@ -4,8 +4,8 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"io/ioutil"
 	"log"
+	"os"
 
 	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
@@ -14,7 +14,7 @@ import (
 
 func main() {
 	// Load CA certificate pem file.
-	b, err := ioutil.ReadFile("../cert/ca.crt")
+	b, err := os.ReadFile("../cert/ca.crt")
 	if err != nil {
 		panic(err)
 	}

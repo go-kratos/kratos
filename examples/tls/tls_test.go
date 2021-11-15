@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 
@@ -100,7 +100,7 @@ func TestETCD(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	b, err := ioutil.ReadFile("./cert/server.crt")
+	b, err := os.ReadFile("./cert/server.crt")
 	if err != nil {
 		t.Fatal(err)
 	}

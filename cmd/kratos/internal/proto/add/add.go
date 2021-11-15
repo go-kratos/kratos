@@ -2,7 +2,7 @@ package add
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -44,9 +44,9 @@ func run(cmd *cobra.Command, args []string) {
 }
 
 func modName() string {
-	modBytes, err := ioutil.ReadFile("go.mod")
+	modBytes, err := os.ReadFile("go.mod")
 	if err != nil {
-		if modBytes, err = ioutil.ReadFile("../go.mod"); err != nil {
+		if modBytes, err = os.ReadFile("../go.mod"); err != nil {
 			return ""
 		}
 	}
