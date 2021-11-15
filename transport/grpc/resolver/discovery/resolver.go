@@ -99,7 +99,6 @@ func parseAttributes(md map[string]string) *attributes.Attributes {
 		} else {
 			a.WithValue(k, v)
 		}
-
 	}
 	return a
 }
