@@ -98,8 +98,8 @@ func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 		for _, address := range checkAddresses {
 			asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
 				TCP:                            address,
-				Interval:                       "30s",
-				DeregisterCriticalServiceAfter: "90s",
+				Interval:                       "20s",
+				DeregisterCriticalServiceAfter: "70s",
 			})
 		}
 	}
