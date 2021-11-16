@@ -63,10 +63,10 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		endpoints[endpoint] = struct{}{}
 		addr := resolver.Address{
 			ServerName: in.Name,
-			Attributes: parseAttributes(in.Metadata),
-			Addr:       endpoint,
+			// Attributes: parseAttributes(in.Metadata),
+			Addr: endpoint,
 		}
-		addr.Attributes = addr.Attributes.WithValue("rawServiceInstance", in)
+		// addr.Attributes = addr.Attributes.WithValue("rawServiceInstance", in)
 		addrs = append(addrs, addr)
 	}
 	if len(addrs) == 0 {
