@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -113,7 +113,7 @@ func testClient(t *testing.T, srv *Server) {
 			_ = resp.Body.Close()
 			t.Fatalf("http status got %d", resp.StatusCode)
 		}
-		content, err := ioutil.ReadAll(resp.Body)
+		content, err := io.ReadAll(resp.Body)
 		_ = resp.Body.Close()
 		if err != nil {
 			t.Fatalf("read resp error %v", err)
