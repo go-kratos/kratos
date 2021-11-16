@@ -3,7 +3,6 @@ package base
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -43,7 +42,7 @@ func copyFile(src, dst string, replaces []string) error {
 	if err != nil {
 		return err
 	}
-	buf, err := ioutil.ReadFile(src)
+	buf, err := os.ReadFile(src)
 	if err != nil {
 		return err
 	}
@@ -55,12 +54,12 @@ func copyFile(src, dst string, replaces []string) error {
 		}
 		buf = bytes.ReplaceAll(buf, []byte(old), []byte(next))
 	}
-	return ioutil.WriteFile(dst, buf, srcinfo.Mode())
+	return os.WriteFile(dst, buf, srcinfo.Mode())
 }
 
 func copyDir(src, dst string, replaces, ignores []string) error {
 	var err error
-	var fds []os.FileInfo
+	var fds []os.DirEntry
 	var srcinfo os.FileInfo
 
 	if srcinfo, err = os.Stat(src); err != nil {
@@ -71,7 +70,7 @@ func copyDir(src, dst string, replaces, ignores []string) error {
 		return err
 	}
 
-	if fds, err = ioutil.ReadDir(src); err != nil {
+	if fds, err = os.ReadDir(src); err != nil {
 		return err
 	}
 	for _, fd := range fds {

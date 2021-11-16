@@ -1,7 +1,7 @@
 package http
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/go-kratos/kratos/v2/encoding"
@@ -27,7 +27,7 @@ func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 	if !ok {
 		return errors.BadRequest("CODEC", r.Header.Get("Content-Type"))
 	}
-	data, err := ioutil.ReadAll(r.Body)
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
 		return errors.BadRequest("CODEC", err.Error())
 	}

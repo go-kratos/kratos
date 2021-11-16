@@ -5,7 +5,7 @@ import (
 	"compress/gzip"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"sync"
 
 	"google.golang.org/grpc"
@@ -180,7 +180,7 @@ func decompress(b []byte) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("bad gzipped descriptor: %v", err)
 	}
-	out, err := ioutil.ReadAll(r)
+	out, err := io.ReadAll(r)
 	if err != nil {
 		return nil, fmt.Errorf("bad gzipped descriptor: %v", err)
 	}

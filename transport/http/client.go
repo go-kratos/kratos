@@ -6,7 +6,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -322,7 +321,7 @@ func DefaultRequestEncoder(ctx context.Context, contentType string, in interface
 // DefaultResponseDecoder is an HTTP response decoder.
 func DefaultResponseDecoder(ctx context.Context, res *http.Response, v interface{}) error {
 	defer res.Body.Close()
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
@@ -335,7 +334,7 @@ func DefaultErrorDecoder(ctx context.Context, res *http.Response) error {
 		return nil
 	}
 	defer res.Body.Close()
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	if err == nil {
 		e := new(errors.Error)
 		if err = CodecForResponse(res).Unmarshal(data, e); err == nil {

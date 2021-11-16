@@ -1,7 +1,7 @@
 package log
 
 import (
-	"io/ioutil"
+	"io"
 	"testing"
 )
 
@@ -58,21 +58,21 @@ func TestFilterFunc(t *testing.T) {
 }
 
 func BenchmarkFilterKey(b *testing.B) {
-	log := NewHelper(NewFilter(NewStdLogger(ioutil.Discard), FilterKey("password")))
+	log := NewHelper(NewFilter(NewStdLogger(io.Discard), FilterKey("password")))
 	for i := 0; i < b.N; i++ {
 		log.Infow("password", "123456")
 	}
 }
 
 func BenchmarkFilterValue(b *testing.B) {
-	log := NewHelper(NewFilter(NewStdLogger(ioutil.Discard), FilterValue("password")))
+	log := NewHelper(NewFilter(NewStdLogger(io.Discard), FilterValue("password")))
 	for i := 0; i < b.N; i++ {
 		log.Infow("password")
 	}
 }
 
 func BenchmarkFilterFunc(b *testing.B) {
-	log := NewHelper(NewFilter(NewStdLogger(ioutil.Discard), FilterFunc(testFilterFunc)))
+	log := NewHelper(NewFilter(NewStdLogger(io.Discard), FilterFunc(testFilterFunc)))
 	for i := 0; i < b.N; i++ {
 		log.Info("password", "123456")
 	}
