@@ -3,6 +3,7 @@ package consul
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/url"
 	"strconv"
 	"strings"
@@ -68,8 +69,6 @@ func (d *Client) Service(ctx context.Context, service string, index uint64, pass
 
 // Register register service instacen to consul
 func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, enableHealthCheck bool) error {
-	var addr string
-	var port uint64
 	addresses := make(map[string]api.ServiceAddress)
 	checkAddresses := make([]string, 0, len(svc.Endpoints))
 	for _, endpoint := range svc.Endpoints {
@@ -77,8 +76,8 @@ func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 		if err != nil {
 			return err
 		}
-		addr = raw.Hostname()
-		port, _ = strconv.ParseUint(raw.Port(), 10, 16)
+		addr := raw.Hostname()
+		port, _ := strconv.ParseUint(raw.Port(), 10, 16)
 		checkAddresses = append(checkAddresses, fmt.Sprintf("%s:%d", addr, port))
 		addresses[raw.Scheme] = api.ServiceAddress{Address: endpoint, Port: int(port)}
 	}
@@ -88,25 +87,18 @@ func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 		Meta:            svc.Metadata,
 		Tags:            []string{fmt.Sprintf("version=%s", svc.Version)},
 		TaggedAddresses: addresses,
-		Checks: []*api.AgentServiceCheck{
-			{
-				CheckID:                        "service:" + svc.ID,
-				TTL:                            "30s",
-				Status:                         "passing",
-				DeregisterCriticalServiceAfter: "90s",
-			},
-		},
 	}
-	if len(addresses) == 1 {
-		asr.Address = addr
+	if len(checkAddresses) > 0 {
+		host, portRaw, _ := net.SplitHostPort(checkAddresses[0])
+		port, _ := strconv.ParseInt(portRaw, 10, 32)
+		asr.Address = host
 		asr.Port = int(port)
 	}
 	if enableHealthCheck {
 		for _, address := range checkAddresses {
 			asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
 				TCP:                            address,
-				Interval:                       "20s",
-				Status:                         "passing",
+				Interval:                       "30s",
 				DeregisterCriticalServiceAfter: "90s",
 			})
 		}
