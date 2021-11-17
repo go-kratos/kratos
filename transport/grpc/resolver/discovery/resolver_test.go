@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/d5/tengo/assert"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/resolver"
 )
 
