@@ -9,7 +9,6 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -91,6 +90,7 @@ func (r *discoveryResolver) Close() {
 
 func (r *discoveryResolver) ResolveNow(options resolver.ResolveNowOptions) {}
 
+/*
 func parseAttributes(md map[string]string) *attributes.Attributes {
 	var a *attributes.Attributes
 	for k, v := range md {
@@ -102,3 +102,4 @@ func parseAttributes(md map[string]string) *attributes.Attributes {
 	}
 	return a
 }
+*/
