@@ -3,6 +3,7 @@ module github.com/go-kratos/kratos/v2
 go 1.16
 
 require (
+	github.com/d5/tengo v1.24.8
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/go-kratos/aegis v0.1.1
 	github.com/go-playground/form/v4 v4.2.0

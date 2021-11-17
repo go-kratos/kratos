@@ -9,6 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
+	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -62,10 +63,10 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		endpoints[endpoint] = struct{}{}
 		addr := resolver.Address{
 			ServerName: in.Name,
-			// Attributes: parseAttributes(in.Metadata),
-			Addr: endpoint,
+			Attributes: parseAttributes(in.Metadata),
+			Addr:       endpoint,
 		}
-		// addr.Attributes = addr.Attributes.WithValue("rawServiceInstance", in)
+		addr.Attributes = addr.Attributes.WithValue("rawServiceInstance", in)
 		addrs = append(addrs, addr)
 	}
 	if len(addrs) == 0 {
@@ -90,16 +91,14 @@ func (r *discoveryResolver) Close() {
 
 func (r *discoveryResolver) ResolveNow(options resolver.ResolveNowOptions) {}
 
-/*
 func parseAttributes(md map[string]string) *attributes.Attributes {
 	var a *attributes.Attributes
 	for k, v := range md {
 		if a == nil {
 			a = attributes.New(k, v)
 		} else {
-			a.WithValue(k, v)
+			a = a.WithValue(k, v)
 		}
 	}
 	return a
 }
-*/
