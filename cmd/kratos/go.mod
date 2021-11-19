@@ -11,4 +11,3 @@ require (
 	golang.org/x/mod v0.4.2
 )
 
-replace github.com/go-kratos/kratos/v2 => ../../
