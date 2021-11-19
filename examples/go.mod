@@ -47,6 +47,7 @@ require (
 )
 
 replace (
+	github.com/buger/jsonparser => github.com/buger/jsonparser v1.1.1
 	github.com/go-kratos/kratos/contrib/config/apollo/v2 => ../contrib/config/apollo
 	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 => ../contrib/metrics/prometheus
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 => ../contrib/registry/consul
