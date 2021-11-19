@@ -8,4 +8,4 @@ require (
 	github.com/pkg/errors v0.9.1
 )
 
-replace github.com/go-kratos/kratos/v2  => ../../../
+replace github.com/go-kratos/kratos/v2 => ../../../
