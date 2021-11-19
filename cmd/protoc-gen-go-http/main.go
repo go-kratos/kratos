@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/go-kratos/kratos/v2"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/types/pluginpb"
 )
@@ -17,7 +16,7 @@ var (
 func main() {
 	flag.Parse()
 	if *showVersion {
-		fmt.Printf("protoc-gen-go-http %v\n", kratos.Release)
+		fmt.Printf("protoc-gen-go-http %v\n", release)
 		return
 	}
 	protogen.Options{
