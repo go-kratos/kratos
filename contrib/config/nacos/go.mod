@@ -10,4 +10,4 @@ require (
 
 replace github.com/go-kratos/kratos/v2 => ../../../
 
-replace github.com/buger/jsonparser => github.com/buger/jsonparser v1.0.0
+replace github.com/buger/jsonparser => github.com/buger/jsonparser v1.1.1
