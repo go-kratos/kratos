@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/health"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -33,6 +34,7 @@ type App struct {
 	cancel   func()
 	lk       sync.Mutex
 	instance *registry.ServiceInstance
+	health   *health.Health
 }
 
 // New create an application lifecycle manager.
@@ -55,6 +57,7 @@ func New(opts ...Option) *App {
 		ctx:    ctx,
 		cancel: cancel,
 		opts:   o,
+		health: health.New(),
 	}
 }
 
@@ -102,6 +105,7 @@ func (a *App) Run() error {
 		})
 	}
 	wg.Wait()
+	a.health.SetStatus(health.StatusServing)
 	if a.opts.registrar != nil {
 		rctx, rcancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 		defer rcancel()
@@ -118,6 +122,7 @@ func (a *App) Run() error {
 		for {
 			select {
 			case <-ctx.Done():
+				a.health.SetStatus(health.StatusNotServing)
 				return ctx.Err()
 			case <-c:
 				err := a.Stop()
@@ -136,6 +141,7 @@ func (a *App) Run() error {
 
 // Stop gracefully stops the application.
 func (a *App) Stop() error {
+	a.health.SetStatus(health.StatusNotServing)
 	a.lk.Lock()
 	instance := a.instance
 	a.lk.Unlock()
