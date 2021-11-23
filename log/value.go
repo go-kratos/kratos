@@ -9,15 +9,19 @@ import (
 )
 
 var (
-	defaultDepth = 2
-	// DefaultCaller is a Valuer that returns the file and line.
-	DefaultCaller = Caller(0)
+	defaultDepth = 0
+	// DefaultCaller is a Valuer that returns the external caller's file and line.
+	DefaultCaller = Caller(defaultDepth)
+
+	// baseDepth is the depth from logger.Log to Caller
+	baseDepth = 2
 
 	// DefaultTimestamp is a Valuer that returns the current wallclock time.
 	DefaultTimestamp = Timestamp(time.RFC3339)
 )
 
-type skipDepthKey struct{}
+// relativeDepthKey is the key of depth from caller to logger.Log
+type relativeDepthKey struct{}
 
 // Valuer is returns a log value.
 type Valuer func(ctx context.Context) interface{}
@@ -33,22 +37,22 @@ func Value(ctx context.Context, v interface{}) interface{} {
 // Caller returns a Valuer that returns a pkg/file:line description of the caller.
 func Caller(depth int) Valuer {
 	return func(ctx context.Context) interface{} {
-		curDepth := getSkipDepth(ctx)
-		_, file, line, _ := runtime.Caller(depth + curDepth + defaultDepth)
+		relativeDepth := getRelativeDepth(ctx)
+		_, file, line, _ := runtime.Caller(depth + relativeDepth + baseDepth)
 		idx := strings.LastIndexByte(file, '/')
 		return file[idx+1:] + ":" + strconv.Itoa(line)
 	}
 }
 
-// Set the skip depth for the ctx of the current logger
-func setSkipDepth(ctx context.Context, depth int) context.Context {
-	return context.WithValue(ctx, skipDepthKey{}, depth)
+// Set the relative depth of caller to logger.Log in ctx
+func setRelativeDepth(ctx context.Context, relativeDepth int) context.Context {
+	return context.WithValue(ctx, relativeDepthKey{}, relativeDepth)
 }
 
-// Get the skipped depth from ctx
-func getSkipDepth(ctx context.Context) int {
+// Get the relative depth of caller to logger.Log from ctx
+func getRelativeDepth(ctx context.Context) int {
 	if ctx != nil {
-		if depth := ctx.Value(skipDepthKey{}); depth != nil {
+		if depth := ctx.Value(relativeDepthKey{}); depth != nil {
 			return depth.(int)
 		}
 	}

@@ -48,9 +48,9 @@ func TestCallerDepth(t *testing.T) {
 	helper = NewHelper(DefaultLogger)
 	logs = append(logs, filter, helper)
 	for _, lgr := range logs {
-		_ = lgr.Log(LevelDebug, "msg", "50")
+		_ = lgr.Log(LevelDebug, "msg", "51")
 		if h, ok := lgr.(*Helper); ok {
-			h.Debug("52")
+			h.Debug("53")
 		}
 	}
 }

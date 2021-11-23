@@ -79,29 +79,29 @@ func WithContext(ctx context.Context, l Logger) Logger {
 	return withContext(ctx, l, 1)
 }
 
-func withContext(ctx context.Context, l Logger, depth int) Logger {
+func withContext(ctx context.Context, l Logger, relativeDepth int) Logger {
 	switch lgr := l.(type) {
 	case *logger:
 		lgs := make([]Logger, 0, len(lgr.logs))
 		for _, subLog := range lgr.logs {
-			lgs = append(lgs, withContext(ctx, subLog, depth+1))
+			lgs = append(lgs, withContext(ctx, subLog, relativeDepth+1))
 		}
 		return &logger{
 			logs:      lgs,
 			prefix:    lgr.prefix,
 			hasValuer: lgr.hasValuer,
-			ctx:       setSkipDepth(ctx, depth),
+			ctx:       setRelativeDepth(ctx, relativeDepth),
 		}
 	case *Filter:
 		return &Filter{
-			logger: withContext(ctx, lgr.logger, depth+1),
+			logger: withContext(ctx, lgr.logger, relativeDepth+1),
 			level:  lgr.level,
 			key:    lgr.key,
 			filter: lgr.filter,
 		}
 	case *Helper:
 		return &Helper{
-			logger: withContext(ctx, lgr.logger, depth+1),
+			logger: withContext(ctx, lgr.logger, relativeDepth+1),
 			msgKey: lgr.msgKey,
 		}
 	default:
