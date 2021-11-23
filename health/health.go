@@ -4,15 +4,6 @@ import (
 	"sync"
 )
 
-type Status int8
-
-const (
-	StatusUnknown Status = iota
-	StatusServing
-	StatusNotServing
-	StatusServiceUnknown
-)
-
 type Health struct {
 	status Status
 	mutex  sync.RWMutex
@@ -26,7 +17,7 @@ type options struct {
 
 func New(opts ...Option) *Health {
 	h := &Health{
-		status: StatusUnknown,
+		status: Status_UNKNOWN,
 		mutex:  sync.RWMutex{},
 	}
 	option := options{}

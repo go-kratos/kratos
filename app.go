@@ -25,6 +25,7 @@ type AppInfo interface {
 	Version() string
 	Metadata() map[string]string
 	Endpoint() []string
+	Health() *health.Health
 }
 
 // App is an application components lifecycle manager.
@@ -81,6 +82,10 @@ func (a *App) Endpoint() []string {
 	return a.instance.Endpoints
 }
 
+func (a *App) Health() *health.Health {
+	return a.health
+}
+
 // Run executes all OnStart hooks registered with the application's Lifecycle.
 func (a *App) Run() error {
 	instance, err := a.buildInstance()
@@ -105,7 +110,7 @@ func (a *App) Run() error {
 		})
 	}
 	wg.Wait()
-	a.health.SetStatus(health.StatusServing)
+	a.health.SetStatus(health.Status_SERVING)
 	if a.opts.registrar != nil {
 		rctx, rcancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 		defer rcancel()
@@ -122,7 +127,7 @@ func (a *App) Run() error {
 		for {
 			select {
 			case <-ctx.Done():
-				a.health.SetStatus(health.StatusNotServing)
+				a.health.SetStatus(health.Status_NOT_SERVING)
 				return ctx.Err()
 			case <-c:
 				err := a.Stop()
@@ -141,7 +146,7 @@ func (a *App) Run() error {
 
 // Stop gracefully stops the application.
 func (a *App) Stop() error {
-	a.health.SetStatus(health.StatusNotServing)
+	a.health.SetStatus(health.Status_NOT_SERVING)
 	a.lk.Lock()
 	instance := a.instance
 	a.lk.Unlock()
