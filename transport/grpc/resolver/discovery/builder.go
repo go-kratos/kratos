@@ -63,7 +63,7 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		err error
 		w   registry.Watcher
 	)
-	done := make(chan bool, 1)
+	done := make(chan struct{}, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		w, err = b.discoverer.Watch(ctx, strings.TrimPrefix(target.URL.Path, "/"))

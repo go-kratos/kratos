@@ -18,7 +18,7 @@ type watcher struct {
 	groupName   string
 	ctx         context.Context
 	cancel      context.CancelFunc
-	watchChan   chan bool
+	watchChan   chan struct{}
 	cli         naming_client.INamingClient
 	kind        string
 }
@@ -39,7 +39,7 @@ func newWatcher(ctx context.Context, cli naming_client.INamingClient, serviceNam
 		Clusters:    clusters,
 		GroupName:   groupName,
 		SubscribeCallback: func(services []model.SubscribeService, err error) {
-			w.watchChan <- true
+			w.watchChan <- struct{}{}
 		},
 	})
 	return w, e
