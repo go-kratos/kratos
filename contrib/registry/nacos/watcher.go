@@ -30,7 +30,7 @@ func newWatcher(ctx context.Context, cli naming_client.INamingClient, serviceNam
 		groupName:   groupName,
 		cli:         cli,
 		kind:        kind,
-		watchChan:   make(chan bool, 1),
+		watchChan:   make(chan struct{}, 1),
 	}
 	w.ctx, w.cancel = context.WithCancel(ctx)
 
