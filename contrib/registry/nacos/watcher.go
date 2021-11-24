@@ -20,14 +20,16 @@ type watcher struct {
 	cancel      context.CancelFunc
 	watchChan   chan bool
 	cli         naming_client.INamingClient
+	kind        string
 }
 
-func newWatcher(ctx context.Context, cli naming_client.INamingClient, serviceName string, groupName string, clusters []string) (*watcher, error) {
+func newWatcher(ctx context.Context, cli naming_client.INamingClient, serviceName, groupName, kind string, clusters []string) (*watcher, error) {
 	w := &watcher{
 		serviceName: serviceName,
 		clusters:    clusters,
 		groupName:   groupName,
 		cli:         cli,
+		kind:        kind,
 		watchChan:   make(chan bool, 1),
 	}
 	w.ctx, w.cancel = context.WithCancel(ctx)
@@ -60,6 +62,9 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 	items := make([]*registry.ServiceInstance, 0, len(res.Hosts))
 	for _, in := range res.Hosts {
 		kind := in.Metadata["kind"]
+		if w.kind != "" {
+			kind = w.kind
+		}
 		items = append(items, &registry.ServiceInstance{
 			ID:        in.InstanceId,
 			Name:      res.Name,

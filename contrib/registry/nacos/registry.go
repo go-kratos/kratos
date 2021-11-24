@@ -150,7 +150,7 @@ func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInst
 
 // Watch creates a watcher according to the service name.
 func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
-	return newWatcher(ctx, r.cli, serviceName, r.opts.group, []string{r.opts.cluster})
+	return newWatcher(ctx, r.cli, serviceName, r.opts.group, r.opts.kind, []string{r.opts.cluster})
 }
 
 // GetService return the service instances in memory according to the service name.
