@@ -23,6 +23,7 @@ type options struct {
 	weight  float64
 	cluster string
 	group   string
+	kind    string
 }
 
 // Option is nacos option.
@@ -46,6 +47,11 @@ func WithCluster(cluster string) Option {
 // WithGroup with group option.
 func WithGroup(group string) Option {
 	return func(o *options) { o.group = group }
+}
+
+// WithDefaultKind with default kind option.
+func WithDefaultKind(kind string) Option {
+	return func(o *options) { o.kind = kind }
 }
 
 // Registry is nacos registry.
@@ -158,12 +164,16 @@ func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*regis
 	}
 	items := make([]*registry.ServiceInstance, 0, len(res))
 	for _, in := range res {
+		kind := in.Metadata["kind"]
+		if r.opts.kind != "" {
+			kind = r.opts.kind
+		}
 		items = append(items, &registry.ServiceInstance{
 			ID:        in.InstanceId,
 			Name:      in.ServiceName,
 			Version:   in.Metadata["version"],
 			Metadata:  in.Metadata,
-			Endpoints: []string{fmt.Sprintf("%s://%s:%d", in.Metadata["kind"], in.Ip, in.Port)},
+			Endpoints: []string{fmt.Sprintf("%s://%s:%d", kind, in.Ip, in.Port)},
 		})
 	}
 	return items, nil
