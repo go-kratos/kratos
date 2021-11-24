@@ -88,10 +88,10 @@ logger:
 	}
 	fmt.Println("get value", name)
 
-	done := make(chan bool)
+	done := make(chan struct{})
 	err = c.Watch("logger.level", func(key string, value kconfig.Value) {
 		fmt.Println(key, " value change", value)
-		done <- true
+		done <- struct{}{}
 	})
 	if err != nil {
 		t.Fatal(err)
