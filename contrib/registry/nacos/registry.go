@@ -165,7 +165,7 @@ func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*regis
 	items := make([]*registry.ServiceInstance, 0, len(res))
 	for _, in := range res {
 		kind := in.Metadata["kind"]
-		if r.opts.kind != "" {
+		if kind == "" {
 			kind = r.opts.kind
 		}
 		items = append(items, &registry.ServiceInstance{
