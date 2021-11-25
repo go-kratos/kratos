@@ -61,8 +61,10 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 	}
 	items := make([]*registry.ServiceInstance, 0, len(res.Hosts))
 	for _, in := range res.Hosts {
-		kind := in.Metadata["kind"]
-		if kind == "" {
+		var kind string
+		if k, ok := in.Metadata["kind"]; ok {
+			kind = k
+		} else {
 			kind = w.kind
 		}
 		items = append(items, &registry.ServiceInstance{
