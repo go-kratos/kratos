@@ -64,6 +64,9 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 		var kind string
 		if k, ok := in.Metadata["kind"]; ok {
 			kind = k
+		} else if w.kind == "" {
+			// user did not call WithDefaultKind()
+			kind = defaultKind
 		} else {
 			kind = w.kind
 		}

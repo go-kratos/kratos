@@ -18,6 +18,8 @@ var (
 	_ registry.Discovery = (*Registry)(nil)
 )
 
+const defaultKind = "grpc"
+
 type options struct {
 	prefix  string
 	weight  float64
@@ -163,10 +165,14 @@ func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*regis
 		return nil, err
 	}
 	items := make([]*registry.ServiceInstance, 0, len(res))
+	var kind string
+
 	for _, in := range res {
-		var kind string
 		if k, ok := in.Metadata["kind"]; ok {
 			kind = k
+		} else if r.opts.kind == "" {
+			// user did not call WithDefaultKind()
+			kind = defaultKind
 		} else {
 			kind = r.opts.kind
 		}
