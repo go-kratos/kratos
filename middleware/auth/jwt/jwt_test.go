@@ -74,11 +74,12 @@ func TestServer(t *testing.T) {
 	}
 	token = fmt.Sprintf(bearerFormat, token)
 	tests := []struct {
-		name          string
-		ctx           context.Context
-		signingMethod jwt.SigningMethod
-		exceptErr     error
-		key           string
+		name           string
+		ctx            context.Context
+		signingMethod  jwt.SigningMethod
+		exceptErr      error
+		key            string
+		skipOperations []string
 	}{
 		{
 			name:          "normal",
@@ -124,21 +125,31 @@ func TestServer(t *testing.T) {
 			exceptErr:     nil,
 			key:           testKey,
 		},
+		{
+			name:           "skip operations",
+			ctx:            transport.NewServerContext(context.Background(), &Transport{operation: "/login"}),
+			signingMethod:  jwt.SigningMethodHS256,
+			exceptErr:      nil,
+			key:            testKey,
+			skipOperations: []string{"/login"},
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			var testToken jwt.Claims
+			var inOperation string
 			next := func(ctx context.Context, req interface{}) (interface{}, error) {
 				t.Log(req)
 				testToken, _ = FromContext(ctx)
+				inOperation = test.name
 				return "reply", nil
 			}
 			var server middleware.Handler
 			if test.signingMethod != nil {
 				server = Server(func(token *jwt.Token) (interface{}, error) {
 					return []byte(test.key), nil
-				}, WithSigningMethod(test.signingMethod))(next)
+				}, WithSigningMethod(test.signingMethod), WithSkipOperations(test.skipOperations...))(next)
 			} else {
 				server = Server(func(token *jwt.Token) (interface{}, error) {
 					return []byte(test.key), nil
@@ -147,9 +158,12 @@ func TestServer(t *testing.T) {
 			_, err2 := server(test.ctx, test.name)
 			assert.Equal(t, test.exceptErr, err2)
 			if test.exceptErr == nil {
-				assert.NotNil(t, testToken)
-				_, ok := testToken.(jwt.MapClaims)
-				assert.True(t, ok)
+				if test.skipOperations == nil {
+					assert.NotNil(t, testToken)
+					_, ok := testToken.(jwt.MapClaims)
+					assert.True(t, ok)
+				}
+				assert.Equal(t, test.name, inOperation)
 			}
 		})
 	}

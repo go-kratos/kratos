@@ -44,8 +44,9 @@ type Option func(*options)
 
 // Parser is a jwt parser
 type options struct {
-	signingMethod jwt.SigningMethod
-	claims        jwt.Claims
+	signingMethod  jwt.SigningMethod
+	claims         jwt.Claims
+	skipOperations map[string]struct{}
 }
 
 // WithSigningMethod with signing method option.
@@ -62,11 +63,21 @@ func WithClaims(claims jwt.Claims) Option {
 	}
 }
 
+// WithSkipOperations with skip operations
+func WithSkipOperations(operations ...string) Option {
+	return func(o *options) {
+		for _, operation := range operations {
+			o.skipOperations[operation] = struct{}{}
+		}
+	}
+}
+
 // Server is a server auth middleware. Check the token and extract the info from token.
 func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	o := &options{
-		signingMethod: jwt.SigningMethodHS256,
-		claims:        jwt.StandardClaims{},
+		signingMethod:  jwt.SigningMethodHS256,
+		claims:         jwt.StandardClaims{},
+		skipOperations: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
 		opt(o)
@@ -76,6 +87,9 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 			if header, ok := transport.FromServerContext(ctx); ok {
 				if keyFunc == nil {
 					return nil, ErrMissingKeyFunc
+				}
+				if _, ok := o.skipOperations[header.Operation()]; ok {
+					return handler(ctx, req)
 				}
 				auths := strings.SplitN(header.RequestHeader().Get(authorizationKey), " ", 2)
 				if len(auths) != 2 || !strings.EqualFold(auths[0], bearerWord) {
