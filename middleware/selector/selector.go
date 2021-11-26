@@ -73,6 +73,7 @@ func (b *Builder) Match(fn MatchFunc) *Builder {
 	return b
 }
 
+// MatchHeader is with Builder's matchHeader
 func (b *Builder) MatchHeader(fn MatchHeaderFunc) *Builder {
 	b.matchHeader = fn
 	return b
