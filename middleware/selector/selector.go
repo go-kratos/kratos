@@ -10,8 +10,9 @@ import (
 )
 
 type (
-	transporter func(ctx context.Context) (transport.Transporter, bool)
-	MatchFunc   func(operation string) bool
+	transporter     func(ctx context.Context) (transport.Transporter, bool)
+	MatchFunc       func(operation string) bool
+	MatchHeaderFunc func(headers map[string]string) bool
 )
 
 var (
@@ -29,10 +30,11 @@ var (
 type Builder struct {
 	client bool
 
-	prefix []string
-	regex  []string
-	path   []string
-	match  MatchFunc
+	prefix      []string
+	regex       []string
+	path        []string
+	match       MatchFunc
+	matchHeader MatchHeaderFunc
 
 	ms []middleware.Middleware
 }
@@ -71,6 +73,11 @@ func (b *Builder) Match(fn MatchFunc) *Builder {
 	return b
 }
 
+func (b *Builder) MatchHeader(fn MatchHeaderFunc) *Builder {
+	b.matchHeader = fn
+	return b
+}
+
 // Build is Builder's Build, for example: Server().Path(m1,m2).Build()
 func (b *Builder) Build() middleware.Middleware {
 	var transporter func(ctx context.Context) (transport.Transporter, bool)
@@ -83,7 +90,8 @@ func (b *Builder) Build() middleware.Middleware {
 }
 
 // matchs is match operation compliance Builder
-func (b *Builder) matchs(operation string) bool {
+func (b *Builder) matchs(tr transport.Transporter) bool {
+	operation := tr.Operation()
 	for _, prefix := range b.prefix {
 		if prefixMatch(prefix, operation) {
 			return true
@@ -101,13 +109,25 @@ func (b *Builder) matchs(operation string) bool {
 	}
 
 	if b.match != nil {
-		return b.match(operation)
+		if b.match(operation) {
+			return true
+		}
 	}
+	if b.matchHeader != nil {
+		headers := make(map[string]string, len(tr.RequestHeader().Keys()))
+		for _, k := range tr.RequestHeader().Keys() {
+			headers[k] = tr.RequestHeader().Get(k)
+		}
+		if b.matchHeader(headers) {
+			return true
+		}
+	}
+
 	return false
 }
 
 // selector middleware
-func selector(transporter transporter, match MatchFunc, ms ...middleware.Middleware) middleware.Middleware {
+func selector(transporter transporter, match func(transport.Transporter) bool, ms ...middleware.Middleware) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			info, ok := transporter(ctx)
@@ -115,7 +135,7 @@ func selector(transporter transporter, match MatchFunc, ms ...middleware.Middlew
 				return handler(ctx, req)
 			}
 
-			if !match(info.Operation()) {
+			if !match(info) {
 				return handler(ctx, req)
 			}
 			return middleware.Chain(ms...)(handler)(ctx, req)
