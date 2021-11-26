@@ -180,19 +180,31 @@ func TestHeaderFunc(t *testing.T) {
 	}{
 		{
 			name: "/hello.Update/world",
-			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/hello.Update/world", headers: &mockHeader{map[string]string{"X-Test": "test"}}}),
+			ctx: transport.NewServerContext(context.Background(), &Transport{
+				operation: "/hello.Update/world",
+				headers:   &mockHeader{map[string]string{"X-Test": "test"}},
+			}),
 		},
 		{
 			name: "/hi.Create/world",
-			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/hi.Create/world", headers: &mockHeader{map[string]string{"X-Test": "test2", "go-kratos": "kratos"}}}),
+			ctx: transport.NewServerContext(context.Background(), &Transport{
+				operation: "/hi.Create/world",
+				headers:   &mockHeader{map[string]string{"X-Test": "test2", "go-kratos": "kratos"}},
+			}),
 		},
 		{
 			name: "/test.Name/1234",
-			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/test.Name/1234", headers: &mockHeader{map[string]string{"X-Test": "test3"}}}),
+			ctx: transport.NewServerContext(context.Background(), &Transport{
+				operation: "/test.Name/1234",
+				headers:   &mockHeader{map[string]string{"X-Test": "test3"}},
+			}),
 		},
 		{
 			name: "/go-kratos.dev/kratos",
-			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/go-kratos.dev/kratos", headers: &mockHeader{map[string]string{"X-Test": "test"}}}),
+			ctx: transport.NewServerContext(context.Background(), &Transport{
+				operation: "/go-kratos.dev/kratos",
+				headers:   &mockHeader{map[string]string{"X-Test": "test"}},
+			}),
 		},
 	}
 	for _, test := range tests {
