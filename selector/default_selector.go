@@ -27,12 +27,15 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 	for _, o := range opts {
 		o(&options)
 	}
-	if len(d.Filters) > 0 {
+	if len(d.Filters) > 0 || len(options.Filters) > 0 {
 		newNodes := make([]Node, len(nodes))
 		for i, wc := range nodes {
 			newNodes[i] = wc
 		}
 		for _, f := range d.Filters {
+			newNodes = f(ctx, newNodes)
+		}
+		for _, f := range options.Filters {
 			newNodes = f(ctx, newNodes)
 		}
 		candidates = make([]WeightedNode, len(newNodes))
@@ -43,9 +46,6 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 		candidates = nodes
 	}
 
-	if len(options.Filters) > 0 {
-		candidates = d.nodeFilter(options.Filters, candidates)
-	}
 	if len(candidates) == 0 {
 		return nil, nil, ErrNoAvailable
 	}
@@ -54,23 +54,6 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 		return nil, nil, err
 	}
 	return wn.Raw(), done, nil
-}
-
-func (d *Default) nodeFilter(filters []NodeFilter, nodes []WeightedNode) []WeightedNode {
-	newNodes := make([]WeightedNode, 0, len(nodes))
-	for _, n := range nodes {
-		var remove bool
-		for _, f := range filters {
-			if !f(n) {
-				remove = true
-				break
-			}
-		}
-		if !remove {
-			newNodes = append(newNodes, n)
-		}
-	}
-	return newNodes
 }
 
 // Apply update nodes info.

@@ -9,12 +9,12 @@ import (
 // Version is version filter.
 func Version(version string) selector.Filter {
 	return func(_ context.Context, nodes []selector.Node) []selector.Node {
-		filters := make([]selector.Node, 0, len(nodes))
+		newNodes := nodes[:0]
 		for _, n := range nodes {
 			if n.Version() == version {
-				filters = append(filters, n)
+				newNodes = append(newNodes, n)
 			}
 		}
-		return filters
+		return newNodes
 	}
 }
