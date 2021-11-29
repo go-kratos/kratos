@@ -5,20 +5,19 @@ import (
 )
 
 type Health struct {
-	status Status
-	mutex  sync.RWMutex
-	opts   options
-	watchers []func(status Status)
+	statusMap map[string]Status
+	mutex     sync.RWMutex
+	opts      options
+	watchers  []func(service string, status Status)
 }
 type Option func(*options)
 
-type options struct {
-}
+type options struct{}
 
 func New(opts ...Option) *Health {
 	h := &Health{
-		status: Status_UNKNOWN,
-		mutex:  sync.RWMutex{},
+		statusMap: make(map[string]Status),
+		mutex:     sync.RWMutex{},
 	}
 	option := options{}
 	for _, o := range opts {
@@ -27,23 +26,24 @@ func New(opts ...Option) *Health {
 	return h
 }
 
-func (h *Health) SetStatus(status Status) {
+func (h *Health) SetStatus(service string, status Status) {
 	h.mutex.Lock()
-	h.status = status
+	h.statusMap[service] = status
 	h.mutex.Unlock()
 	go func() {
 		for _, w := range h.watchers {
-			w(status)
+			w(service, status)
 		}
 	}()
 }
 
-func (h *Health) GetStatus() Status {
+func (h *Health) GetStatus(service string) (status Status, ok bool) {
 	h.mutex.RLock()
 	defer h.mutex.RUnlock()
-	return h.status
+	status, ok = h.statusMap[service]
+	return status, ok
 }
 
-func (h *Health) Watch(f func(status Status)) {
+func (h *Health) Watch(f func(service string, status Status)) {
 	h.watchers = append(h.watchers, f)
 }

@@ -1,8 +1,9 @@
-package http
+package health
 
 import (
 	"encoding/json"
 	"github.com/go-kratos/kratos/v2"
+	"github.com/go-kratos/kratos/v2/health"
 	"net/http"
 )
 
@@ -22,9 +23,26 @@ func NewHandler() *Handler {
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	code := http.StatusOK
 	info, _ := kratos.FromContext(r.Context())
+	status, ok := info.Health().GetStatus(r.URL.Query().Get("service"))
+	if !ok {
+		w.WriteHeader(http.StatusNotImplemented)
+		return
+	}
+
+	switch status {
+	case health.Status_SERVING:
+		w.WriteHeader(http.StatusOK)
+	case health.Status_NOT_SERVING:
+		w.WriteHeader(http.StatusServiceUnavailable)
+	case health.Status_SERVICE_UNKNOWN:
+		w.WriteHeader(http.StatusNotImplemented)
+	default:
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}
+
 	w.WriteHeader(code)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	json.NewEncoder(w).Encode(healthResponse{
-		Status: info.Health().GetStatus().String(),
+		Status: status.String(),
 	})
 }

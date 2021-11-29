@@ -16,18 +16,23 @@ type HealthCheckServer struct {
 
 func (s *HealthCheckServer) Check(ctx context.Context, req *HealthCheckRequest) (resp *HealthCheckResponse, err error) {
 	info, _ := kratos.FromContext(ctx)
-	status := info.Health().GetStatus()
-	var v HealthCheckResponse_ServingStatus
+	status, ok := info.Health().GetStatus(req.Service)
+	var sv HealthCheckResponse_ServingStatus
+	if !ok {
+		sv = HealthCheckResponse_SERVICE_UNKNOWN
+	}
 	switch status {
-	case health.Status_UNKNOWN:
-		v = HealthCheckResponse_UNKNOWN
 	case health.Status_SERVING:
-		v = HealthCheckResponse_SERVING
+		sv = HealthCheckResponse_SERVING
 	case health.Status_NOT_SERVING:
-		v = HealthCheckResponse_NOT_SERVING
+		sv = HealthCheckResponse_NOT_SERVING
+	case health.Status_SERVICE_UNKNOWN:
+		sv = HealthCheckResponse_SERVICE_UNKNOWN
+	default:
+		sv = HealthCheckResponse_NOT_SERVING
 	}
 	resp = &HealthCheckResponse{
-		Status: v,
+		Status: sv,
 	}
 	return
 }
