@@ -18,8 +18,6 @@ var (
 	_ registry.Discovery = (*Registry)(nil)
 )
 
-const defaultKind = "grpc"
-
 type options struct {
 	prefix  string
 	weight  float64
@@ -69,7 +67,7 @@ func New(cli naming_client.INamingClient, opts ...Option) (r *Registry) {
 		cluster: "DEFAULT",
 		group:   "DEFAULT_GROUP",
 		weight:  100,
-		kind:    defaultKind,
+		kind:    "grpc",
 	}
 	for _, option := range opts {
 		option(&op)
@@ -166,12 +164,10 @@ func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*regis
 		return nil, err
 	}
 	items := make([]*registry.ServiceInstance, 0, len(res))
-	var kind string
 	for _, in := range res {
+		kind := r.opts.kind
 		if k, ok := in.Metadata["kind"]; ok {
 			kind = k
-		} else {
-			kind = r.opts.kind
 		}
 		items = append(items, &registry.ServiceInstance{
 			ID:        in.InstanceId,
