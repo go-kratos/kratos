@@ -6,8 +6,6 @@ import (
 	"context"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/health"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type HealthCheckServer struct {
@@ -37,5 +35,25 @@ func (s *HealthCheckServer) Check(ctx context.Context, req *HealthCheckRequest) 
 	return
 }
 func (s *HealthCheckServer) Watch(req *HealthCheckRequest, server Health_WatchServer) (err error) {
-	return status.Errorf(codes.Unimplemented, "method Watch not implemented")
+	info, _ := kratos.FromContext(ctx)
+	info.Health().Watch(req.Service, func(status health.Status) {
+		status, ok := info.Health().GetStatus(req.Service)
+		var sv HealthCheckResponse_ServingStatus
+		if !ok {
+			sv = HealthCheckResponse_SERVICE_UNKNOWN
+		}
+		switch status {
+		case health.Status_SERVING:
+			sv = HealthCheckResponse_SERVING
+		case health.Status_NOT_SERVING:
+			sv = HealthCheckResponse_NOT_SERVING
+		case health.Status_SERVICE_UNKNOWN:
+			sv = HealthCheckResponse_SERVICE_UNKNOWN
+		default:
+			sv = HealthCheckResponse_NOT_SERVING
+		}
+		server.Send(&HealthCheckResponse{Status: sv})
+	})
+
+	return
 }

@@ -8,7 +8,7 @@ type Health struct {
 	statusMap map[string]Status
 	mutex     sync.RWMutex
 	opts      options
-	watchers  []func(service string, status Status)
+	watchers  []func(status Status)
 }
 type Option func(*options)
 
@@ -44,6 +44,8 @@ func (h *Health) GetStatus(service string) (status Status, ok bool) {
 	return status, ok
 }
 
-func (h *Health) Watch(f func(service string, status Status)) {
+func (h *Health) Watch(service string, f func(status Status)) {
+	h.mutex.RLock()
+	defer h.mutex.RUnlock()
 	h.watchers = append(h.watchers, f)
 }
