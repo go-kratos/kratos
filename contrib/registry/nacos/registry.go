@@ -69,12 +69,10 @@ func New(cli naming_client.INamingClient, opts ...Option) (r *Registry) {
 		cluster: "DEFAULT",
 		group:   "DEFAULT_GROUP",
 		weight:  100,
+		kind:    defaultKind,
 	}
 	for _, option := range opts {
 		option(&op)
-	}
-	if op.kind == "" {
-		op.kind = defaultKind
 	}
 	return &Registry{
 		opts: op,
