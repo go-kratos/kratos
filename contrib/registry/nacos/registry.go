@@ -73,6 +73,9 @@ func New(cli naming_client.INamingClient, opts ...Option) (r *Registry) {
 	for _, option := range opts {
 		option(&op)
 	}
+	if op.kind == "" {
+		op.kind = defaultKind
+	}
 	return &Registry{
 		opts: op,
 		cli:  cli,
@@ -166,13 +169,9 @@ func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*regis
 	}
 	items := make([]*registry.ServiceInstance, 0, len(res))
 	var kind string
-
 	for _, in := range res {
 		if k, ok := in.Metadata["kind"]; ok {
 			kind = k
-		} else if r.opts.kind == "" {
-			// user did not call WithDefaultKind()
-			kind = defaultKind
 		} else {
 			kind = r.opts.kind
 		}
