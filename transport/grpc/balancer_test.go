@@ -1,6 +1,7 @@
 package grpc
 
 import (
+	"context"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/selector"
@@ -24,8 +25,8 @@ func TestBalancerName(t *testing.T) {
 func TestFilters(t *testing.T) {
 	o := &clientOptions{}
 
-	WithNodeFilter(func(selector.Node) bool {
-		return true
+	WithFilter(func(_ context.Context, nodes []selector.Node) []selector.Node {
+		return nodes
 	})(o)
 	assert.Equal(t, 1, len(o.filters))
 }

@@ -2,14 +2,14 @@ package selector
 
 // SelectOptions is Select Options.
 type SelectOptions struct {
-	Filters []NodeFilter
+	Filters []Filter
 }
 
 // SelectOption is Selector option.
 type SelectOption func(*SelectOptions)
 
-// WithNodeFilter with filter options
-func WithNodeFilter(fn ...NodeFilter) SelectOption {
+// WithFilter with filter options
+func WithFilter(fn ...Filter) SelectOption {
 	return func(opts *SelectOptions) {
 		opts.Filters = fn
 	}

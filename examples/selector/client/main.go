@@ -8,7 +8,6 @@ import (
 	"github.com/go-kratos/kratos/contrib/registry/consul/v2"
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/selector"
 	"github.com/go-kratos/kratos/v2/selector/filter"
 	"github.com/go-kratos/kratos/v2/selector/p2c"
 	"github.com/go-kratos/kratos/v2/selector/wrr"
@@ -32,10 +31,8 @@ func main() {
 		// 由于gRPC框架的限制只能使用全局balancer+filter的方式来实现selector
 		// 这里使用weighted round robin算法的balancer+静态version=1.0.0的Filter
 		grpc.WithBalancerName(wrr.Name),
-		grpc.WithNodeFilter(
-			func(node selector.Node) bool {
-				return node.Version() == "1.0.0"
-			},
+		grpc.WithFilter(
+			filter.Version("1.0.0"),
 		),
 	)
 	if err != nil {
