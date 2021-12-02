@@ -49,9 +49,8 @@ type Builder struct {
 
 // Build creates a grpc Picker.
 func (b *Builder) Build(info base.PickerBuildInfo) gBalancer.Picker {
-
 	if len(info.ReadySCs) == 0 {
-		//Block the RPC until a new picker is available via UpdateState().
+		// Block the RPC until a new picker is available via UpdateState().
 		return base.NewErrPicker(gBalancer.ErrNoSubConnAvailable)
 	}
 
