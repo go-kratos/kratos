@@ -70,11 +70,11 @@ func run(cmd *cobra.Command, args []string) {
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			fmt.Fprint(os.Stderr, "\033[31mERROR: project creation timed out\033[m\n")
 		} else {
-			fmt.Fprintf(os.Stderr, "\033[31mERROR: failed to create project(%s)\033[m\n", ctx.Err())
+			fmt.Fprintf(os.Stderr, "\033[31mERROR: failed to create project(%s)\033[m\n", ctx.Err().Error())
 		}
 	case err = <-done:
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "\033[31mERROR: Failed to create project(%s)\033[m\n", ctx.Err())
+			fmt.Fprintf(os.Stderr, "\033[31mERROR: Failed to create project(%s)\033[m\n", err.Error())
 		}
 	}
 }

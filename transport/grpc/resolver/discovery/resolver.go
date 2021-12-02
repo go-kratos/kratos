@@ -66,7 +66,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 			Attributes: parseAttributes(in.Metadata),
 			Addr:       endpoint,
 		}
-		addr.Attributes = addr.Attributes.WithValues("rawServiceInstance", in)
+		addr.Attributes = addr.Attributes.WithValue("rawServiceInstance", in)
 		addrs = append(addrs, addr)
 	}
 	if len(addrs) == 0 {
@@ -92,9 +92,13 @@ func (r *discoveryResolver) Close() {
 func (r *discoveryResolver) ResolveNow(options resolver.ResolveNowOptions) {}
 
 func parseAttributes(md map[string]string) *attributes.Attributes {
-	pairs := make([]interface{}, 0, len(md))
+	var a *attributes.Attributes
 	for k, v := range md {
-		pairs = append(pairs, k, v)
+		if a == nil {
+			a = attributes.New(k, v)
+		} else {
+			a = a.WithValue(k, v)
+		}
 	}
-	return attributes.New(pairs...)
+	return a
 }

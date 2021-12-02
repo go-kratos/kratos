@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"strconv"
@@ -249,7 +248,7 @@ var currentNamespace = LoadNamespace()
 
 // LoadNamespace is used to get the current namespace from the file
 func LoadNamespace() string {
-	data, err := ioutil.ReadFile(ServiceAccountNamespacePath)
+	data, err := os.ReadFile(ServiceAccountNamespacePath)
 	if err != nil {
 		return ""
 	}

@@ -1,7 +1,6 @@
 package env
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -39,7 +38,7 @@ func TestEnvWithPrefix(t *testing.T) {
 	if err := os.MkdirAll(path, 0o700); err != nil {
 		t.Error(err)
 	}
-	if err := ioutil.WriteFile(filename, data, 0o666); err != nil {
+	if err := os.WriteFile(filename, data, 0o666); err != nil {
 		t.Error(err)
 	}
 
@@ -149,7 +148,7 @@ func TestEnvWithoutPrefix(t *testing.T) {
 	if err := os.MkdirAll(path, 0o700); err != nil {
 		t.Error(err)
 	}
-	if err := ioutil.WriteFile(filename, data, 0o666); err != nil {
+	if err := os.WriteFile(filename, data, 0o666); err != nil {
 		t.Error(err)
 	}
 
