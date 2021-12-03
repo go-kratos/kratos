@@ -56,6 +56,12 @@ func (d *Client) Service(ctx context.Context, service string, index uint64, pass
 			}
 			endpoints = append(endpoints, addr.Address)
 		}
+		if len(endpoints) == 0 {
+			endpoints = append(endpoints,
+				fmt.Sprintf("http://%s:%d?isSecure=false", entry.Service.Address, entry.Service.Port),
+				fmt.Sprintf("grpc://%s:%d?isSecure=false", entry.Service.Address, entry.Service.Port),
+			)
+		}
 		services = append(services, &registry.ServiceInstance{
 			ID:        entry.Service.ID,
 			Name:      entry.Service.Service,
