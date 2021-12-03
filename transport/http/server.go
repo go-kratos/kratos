@@ -107,6 +107,14 @@ func StrictSlash(strictSlash bool) ServerOption {
 	}
 }
 
+// Alias set server alias.
+// If alias is set, it will show in the stdout like "[HTTP] ${alias} server listening on: 8080"
+func Alias(alias string) ServerOption {
+	return func(o *Server) {
+		o.alias = alias
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
@@ -126,6 +134,7 @@ type Server struct {
 	strictSlash bool
 	router      *mux.Router
 	log         *log.Helper
+	alias       string
 }
 
 // NewServer creates an HTTP server by options.
@@ -249,7 +258,7 @@ func (s *Server) Start(ctx context.Context) error {
 	s.BaseContext = func(net.Listener) context.Context {
 		return ctx
 	}
-	s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
+	s.log.Infof("[HTTP] %s server listening on: %s", s.alias, s.lis.Addr().String())
 	var err error
 	if s.tlsConf != nil {
 		err = s.ServeTLS(s.lis, "", "")
@@ -264,6 +273,6 @@ func (s *Server) Start(ctx context.Context) error {
 
 // Stop stop the HTTP server.
 func (s *Server) Stop(ctx context.Context) error {
-	s.log.Info("[HTTP] server stopping")
+	s.log.Infof("[HTTP] %s server stopping", s.alias)
 	return s.Shutdown(ctx)
 }

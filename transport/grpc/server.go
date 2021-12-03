@@ -89,6 +89,14 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 	}
 }
 
+// Alias set server alias.
+// If alias is set, it will show in the stdout like "[gRPC] ${alias} server listening on: 8080"
+func Alias(alias string) ServerOption {
+	return func(o *Server) {
+		o.alias = alias
+	}
+}
+
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
@@ -107,6 +115,7 @@ type Server struct {
 	grpcOpts   []grpc.ServerOption
 	health     *health.Server
 	metadata   *apimd.Server
+	alias      string
 }
 
 // NewServer creates a gRPC server by options.
@@ -177,7 +186,7 @@ func (s *Server) Start(ctx context.Context) error {
 		return err
 	}
 	s.baseCtx = ctx
-	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
+	s.log.Infof("[gRPC] %s server listening on: %s", s.alias, s.lis.Addr().String())
 	s.health.Resume()
 	return s.Serve(s.lis)
 }
@@ -186,7 +195,7 @@ func (s *Server) Start(ctx context.Context) error {
 func (s *Server) Stop(ctx context.Context) error {
 	s.GracefulStop()
 	s.health.Shutdown()
-	s.log.Info("[gRPC] server stopping")
+	s.log.Infof("[gRPC] %s server stopping", s.alias)
 	return nil
 }
 
