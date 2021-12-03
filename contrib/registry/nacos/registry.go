@@ -101,6 +101,10 @@ func (r *Registry) Register(ctx context.Context, si *registry.ServiceInstance) e
 		}
 		si.Metadata["kind"] = u.Scheme
 		si.Metadata["version"] = si.Version
+		rmd := make(map[string]string, 0)
+		for k, v := range si.Metadata {
+			rmd[k] = v
+		}
 		_, e := r.cli.RegisterInstance(vo.RegisterInstanceParam{
 			Ip:          host,
 			Port:        uint64(p),
@@ -109,7 +113,7 @@ func (r *Registry) Register(ctx context.Context, si *registry.ServiceInstance) e
 			Enable:      true,
 			Healthy:     true,
 			Ephemeral:   true,
-			Metadata:    si.Metadata,
+			Metadata:    rmd,
 			ClusterName: r.opts.cluster,
 			GroupName:   r.opts.group,
 		})
