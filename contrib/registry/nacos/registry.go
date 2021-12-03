@@ -101,7 +101,7 @@ func (r *Registry) Register(ctx context.Context, si *registry.ServiceInstance) e
 		}
 		si.Metadata["kind"] = u.Scheme
 		si.Metadata["version"] = si.Version
-		rmd := make(map[string]string, 0)
+		rmd := make(map[string]string)
 		for k, v := range si.Metadata {
 			rmd[k] = v
 		}
