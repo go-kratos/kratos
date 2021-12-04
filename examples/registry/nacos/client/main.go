@@ -40,7 +40,7 @@ func main() {
 
 	conn, err := grpc.DialInsecure(
 		context.Background(),
-		grpc.WithEndpoint("discovery:///helloworld"),
+		grpc.WithEndpoint("discovery:///helloworld.grpc"),
 		grpc.WithDiscovery(nacos.New(cli)),
 	)
 	if err != nil {

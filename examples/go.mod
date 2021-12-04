@@ -15,7 +15,7 @@ require (
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/nacos/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/zookeeper/v2 v2.0.0-00010101000000-000000000000
-	github.com/go-kratos/kratos/v2 v2.1.0
+	github.com/go-kratos/kratos/v2 v2.1.2
 	github.com/go-kratos/swagger-api v1.0.0
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.11.2
@@ -42,11 +42,12 @@ require (
 	go.uber.org/zap v1.19.0
 	golang.org/x/text v0.3.7
 	google.golang.org/genproto v0.0.0-20210831024726-fe130286e0e2
-	google.golang.org/grpc v1.40.0
+	google.golang.org/grpc v1.42.0
 	google.golang.org/protobuf v1.27.1
 )
 
 replace (
+	github.com/buger/jsonparser => github.com/buger/jsonparser v1.1.1
 	github.com/go-kratos/kratos/contrib/config/apollo/v2 => ../contrib/config/apollo
 	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 => ../contrib/metrics/prometheus
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 => ../contrib/registry/consul

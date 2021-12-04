@@ -23,6 +23,7 @@ type options struct {
 	weight  float64
 	cluster string
 	group   string
+	kind    string
 }
 
 // Option is nacos option.
@@ -48,6 +49,11 @@ func WithGroup(group string) Option {
 	return func(o *options) { o.group = group }
 }
 
+// WithDefaultKind with default kind option.
+func WithDefaultKind(kind string) Option {
+	return func(o *options) { o.kind = kind }
+}
+
 // Registry is nacos registry.
 type Registry struct {
 	opts options
@@ -61,6 +67,7 @@ func New(cli naming_client.INamingClient, opts ...Option) (r *Registry) {
 		cluster: "DEFAULT",
 		group:   "DEFAULT_GROUP",
 		weight:  100,
+		kind:    "grpc",
 	}
 	for _, option := range opts {
 		option(&op)
@@ -144,7 +151,7 @@ func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInst
 
 // Watch creates a watcher according to the service name.
 func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
-	return newWatcher(ctx, r.cli, serviceName, r.opts.group, []string{r.opts.cluster})
+	return newWatcher(ctx, r.cli, serviceName, r.opts.group, r.opts.kind, []string{r.opts.cluster})
 }
 
 // GetService return the service instances in memory according to the service name.
@@ -158,12 +165,16 @@ func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*regis
 	}
 	items := make([]*registry.ServiceInstance, 0, len(res))
 	for _, in := range res {
+		kind := r.opts.kind
+		if k, ok := in.Metadata["kind"]; ok {
+			kind = k
+		}
 		items = append(items, &registry.ServiceInstance{
 			ID:        in.InstanceId,
 			Name:      in.ServiceName,
 			Version:   in.Metadata["version"],
 			Metadata:  in.Metadata,
-			Endpoints: []string{fmt.Sprintf("%s://%s:%d", in.Metadata["kind"], in.Ip, in.Port)},
+			Endpoints: []string{fmt.Sprintf("%s://%s:%d", kind, in.Ip, in.Port)},
 		})
 	}
 	return items, nil

@@ -24,7 +24,7 @@ cc := &constant.ClientConfig{
 }
 
 // a more graceful way to create naming client
-client, err := clients.NewNamingClient(
+client, err := clients.NewConfigClient(
 	vo.NacosClientParam{
 		ClientConfig:  cc,
 		ServerConfigs: sc,

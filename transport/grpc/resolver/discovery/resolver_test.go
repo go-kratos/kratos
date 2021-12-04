@@ -108,7 +108,7 @@ func TestWatchContextCancel(t *testing.T) {
 func TestParseAttributes(t *testing.T) {
 	a := parseAttributes(map[string]string{"a": "b"})
 	assert.Equal(t, "b", a.Value("a").(string))
-	x := a.WithValues("qq", "ww")
+	x := a.WithValue("qq", "ww")
 	assert.Equal(t, "ww", x.Value("qq").(string))
 	assert.Nil(t, x.Value("notfound"))
 }

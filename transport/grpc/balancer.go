@@ -49,6 +49,11 @@ type Builder struct {
 
 // Build creates a grpc Picker.
 func (b *Builder) Build(info base.PickerBuildInfo) gBalancer.Picker {
+	if len(info.ReadySCs) == 0 {
+		// Block the RPC until a new picker is available via UpdateState().
+		return base.NewErrPicker(gBalancer.ErrNoSubConnAvailable)
+	}
+
 	nodes := make([]selector.Node, 0)
 	for conn, info := range info.ReadySCs {
 		ins, _ := info.Address.Attributes.Value("rawServiceInstance").(*registry.ServiceInstance)
@@ -71,14 +76,14 @@ type Picker struct {
 
 // Pick pick instances.
 func (p *Picker) Pick(info gBalancer.PickInfo) (gBalancer.PickResult, error) {
-	var filters []selector.NodeFilter
+	var filters []selector.Filter
 	if tr, ok := transport.FromClientContext(info.Ctx); ok {
 		if gtr, ok := tr.(*Transport); ok {
-			filters = gtr.NodeFilters()
+			filters = gtr.SelectFilters()
 		}
 	}
 
-	n, done, err := p.selector.Select(info.Ctx, selector.WithNodeFilter(filters...))
+	n, done, err := p.selector.Select(info.Ctx, selector.WithFilter(filters...))
 	if err != nil {
 		return gBalancer.PickResult{}, err
 	}
