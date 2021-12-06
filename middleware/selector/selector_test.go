@@ -213,8 +213,15 @@ func TestHeaderFunc(t *testing.T) {
 				t.Log(req)
 				return "reply", nil
 			}
-			next = Server(testMiddleware).MatchHeader(func(headers map[string]string) bool {
-				if headers["X-Test"] == "test" || headers["go-kratos"] == "kratos" {
+			next = Server(testMiddleware).MatchContext(func(ctx context.Context) bool {
+				tr, ok := transport.FromServerContext(ctx)
+				if !ok {
+					return false
+				}
+				if tr.RequestHeader().Get("X-Test") == "test" {
+					return true
+				}
+				if tr.RequestHeader().Get("go-kratos") == "kratos" {
 					return true
 				}
 				return false
