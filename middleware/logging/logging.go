@@ -11,6 +11,9 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
+// Half of req what needs to be displayed
+var halfReqLength = 4 * 1024
+
 // Server is an server logging middleware.
 func Server(logger log.Logger) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
@@ -85,10 +88,16 @@ func Client(logger log.Logger) middleware.Middleware {
 
 // extractArgs returns the string of the req
 func extractArgs(req interface{}) string {
+	var s string
 	if stringer, ok := req.(fmt.Stringer); ok {
-		return stringer.String()
+		s = stringer.String()
+	} else {
+		s = fmt.Sprintf("%+v", req)
 	}
-	return fmt.Sprintf("%+v", req)
+	if len(s) > halfReqLength*2 {
+		s = s[:halfReqLength] + " ... " + s[len(s)-halfReqLength:]
+	}
+	return s
 }
 
 // extractError returns the string of the error

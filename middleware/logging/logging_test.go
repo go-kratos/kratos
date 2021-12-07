@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -94,6 +95,39 @@ func TestHTTP(t *testing.T) {
 			v, e := next(test.ctx, "req.args")
 			t.Logf("[%s]reply: %v, error: %v", test.name, v, e)
 			t.Logf("[%s]log:%s", test.name, bf.String())
+		})
+	}
+}
+
+func Test_extractArgs(t *testing.T) {
+	tests := []struct {
+		name    string
+		reqLen  int
+		wantLen int
+	}{
+		{
+			name:    "length@double",
+			reqLen:  halfReqLength * 2,
+			wantLen: halfReqLength * 2,
+		},
+		{
+			name:    "length@without",
+			reqLen:  halfReqLength*2 + 1,
+			wantLen: halfReqLength*2 + len(" ... "),
+		},
+		{
+			name:    "length@within",
+			reqLen:  halfReqLength*2 - 1,
+			wantLen: halfReqLength*2 - 1,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			req := strings.Repeat("-", test.reqLen)
+			res := extractArgs(req)
+			if len(res) != test.wantLen {
+				t.Errorf("want length %d got %d res is (%s)", test.wantLen, len(res), res)
+			}
 		})
 	}
 }
