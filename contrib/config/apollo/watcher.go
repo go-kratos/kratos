@@ -22,6 +22,7 @@ type customChangeListener struct {
 
 func (c *customChangeListener) onChange(
 	namespace string, changes map[string]*storage.ConfigChange) []*config.KeyValue {
+
 	kv := make([]*config.KeyValue, 0, 2)
 	next := make(map[string]interface{})
 
