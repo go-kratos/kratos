@@ -97,11 +97,11 @@ func (r *Registry) Register(ctx context.Context, si *registry.ServiceInstance) e
 			return err
 		}
 		if si.Metadata == nil {
-			si.Metadata = make(map[string]string)
+			si.Metadata = make(map[string]string, 2)
 		}
 		si.Metadata["kind"] = u.Scheme
 		si.Metadata["version"] = si.Version
-		rmd := make(map[string]string)
+		rmd := make(map[string]string, len(si.Metadata))
 		for k, v := range si.Metadata {
 			rmd[k] = v
 		}
