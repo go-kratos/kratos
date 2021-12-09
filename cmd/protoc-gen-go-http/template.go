@@ -9,14 +9,37 @@ import (
 var httpTemplate = `
 {{$svrType := .ServiceType}}
 {{$svrName := .ServiceName}}
+
+// Option is an http option.
+type Option func(o *options)
+
+type options struct {
+	prefix string
+}
+
+// prefix sets the prefix for the service.
+func Prefix(prefix string) Option {
+	return func(o *options) {
+		o.prefix = prefix
+	}
+}
+
 type {{.ServiceType}}HTTPServer interface {
 {{- range .MethodSets}}
 	{{.Name}}(context.Context, *{{.Request}}) (*{{.Reply}}, error)
 {{- end}}
 }
 
-func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}HTTPServer) {
-	r := s.Route("/")
+func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}HTTPServer, opts ...Option) {
+	o := options{
+		prefix: "/",
+	}
+
+	for _, opt := range opts {
+		opt(&o)
+	}
+
+	r := s.Route(o.prefix)
 	{{- range .Methods}}
 	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv))
 	{{- end}}
