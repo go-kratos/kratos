@@ -1,50 +1,90 @@
 # Nacos Registry
 
+## example
+### server
 ```go
+package main
+
 import (
-		"github.com/go-kratos/kratos/v2"
-		"github.com/go-kratos/kratos/v2/transport/grpc"
-		
-		"github.com/nacos-group/nacos-sdk-go/clients"
-		"github.com/nacos-group/nacos-sdk-go/common/constant"
-    	"github.com/nacos-group/nacos-sdk-go/vo"
+	"log"
+
+	"github.com/nacos-group/nacos-sdk-go/clients"
+	"github.com/nacos-group/nacos-sdk-go/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/vo"
+
+	"github.com/go-kratos/kratos/contrib/registry/nacos/v2"
+	"github.com/go-kratos/kratos/v2"
 )
 
-sc := []constant.ServerConfig{
-	*constant.NewServerConfig("127.0.0.1", 8848),
-}
+func main() {
+	sc := []constant.ServerConfig{
+		*constant.NewServerConfig("127.0.0.1", 8848),
+	}
+	
 
-cc := constant.ClientConfig{
-	NamespaceId:         "public",
-	TimeoutMs:           5000,
-}
+	client, err := clients.NewNamingClient(
+		vo.NacosClientParam{
+			ServerConfigs: sc,
+		},
+	)
 
-client, err := clients.NewNamingClient(
-	vo.NacosClientParam{
-		ClientConfig:  &cc,
-		ServerConfigs: sc,
-	},
+	if err != nil {
+		log.Panic(err)
+	}
+
+	r := nacos.New(client)
+
+	// server
+	app := kratos.New(
+		kratos.Name("helloworld"),
+		kratos.Registrar(r),
+	)
+	if err := app.Run(); err != nil {
+		log.Fatal(err)
+	}
+}
+```
+### client
+```go
+package main
+
+import (
+	"context"
+	"log"
+
+	"github.com/nacos-group/nacos-sdk-go/clients"
+	"github.com/nacos-group/nacos-sdk-go/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/vo"
+
+	"github.com/go-kratos/kratos/contrib/registry/nacos/v2"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
 )
 
-if err != nil {
-	log.Panic(err)
+func main() {
+
+	cc := constant.ClientConfig{
+		NamespaceId: "public",
+		TimeoutMs:   5000,
+	}
+
+	client, err := clients.NewNamingClient(
+		vo.NacosClientParam{
+			ClientConfig: &cc,
+		},
+	)
+
+	if err != nil {
+		log.Panic(err)
+	}
+
+	r := nacos.New(client)
+
+	// client
+	conn, err := grpc.DialInsecure(
+		context.Background(),
+		grpc.WithEndpoint("discovery:///helloworld"),
+		grpc.WithDiscovery(r),
+	)
+	defer conn.Close()
 }
-
-r := nacos.New(client)
-
-// server
-app := kratos.New(
-	kratos.Name("helloworld"),
-	kratos.Registrar(r),
-)
-if err := app.Run(); err != nil {
-	log.Fatal(err)
-}
-
-// client
-conn, err := grpc.DialInsecure(
-	context.Background(),
-	grpc.WithEndpoint("discovery:///helloworld"),
-	grpc.WithDiscovery(r),
-)
 ```
