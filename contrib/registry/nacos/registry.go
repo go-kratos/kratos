@@ -79,7 +79,7 @@ func New(cli naming_client.INamingClient, opts ...Option) (r *Registry) {
 }
 
 // Register the registration.
-func (r *Registry) Register(ctx context.Context, si *registry.ServiceInstance) error {
+func (r *Registry) Register(_ context.Context, si *registry.ServiceInstance) error {
 	if si.Name == "" {
 		return fmt.Errorf("kratos/nacos: serviceInstance.name cannot is empty")
 	}
@@ -96,14 +96,19 @@ func (r *Registry) Register(ctx context.Context, si *registry.ServiceInstance) e
 		if err != nil {
 			return err
 		}
+		var rmd map[string]string
 		if si.Metadata == nil {
-			si.Metadata = make(map[string]string, 2)
-		}
-		si.Metadata["kind"] = u.Scheme
-		si.Metadata["version"] = si.Version
-		rmd := make(map[string]string, len(si.Metadata))
-		for k, v := range si.Metadata {
-			rmd[k] = v
+			rmd = map[string]string{
+				"kind":    u.Scheme,
+				"version": si.Version,
+			}
+		} else {
+			rmd = make(map[string]string, len(si.Metadata)+2)
+			for k, v := range si.Metadata {
+				rmd[k] = v
+			}
+			rmd["kind"] = u.Scheme
+			rmd["version"] = si.Version
 		}
 		_, e := r.cli.RegisterInstance(vo.RegisterInstanceParam{
 			Ip:          host,
@@ -125,7 +130,7 @@ func (r *Registry) Register(ctx context.Context, si *registry.ServiceInstance) e
 }
 
 // Deregister the registration.
-func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
+func (r *Registry) Deregister(_ context.Context, service *registry.ServiceInstance) error {
 	for _, endpoint := range service.Endpoints {
 		u, err := url.Parse(endpoint)
 		if err != nil {
@@ -159,7 +164,7 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 }
 
 // GetService return the service instances in memory according to the service name.
-func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
 	res, err := r.cli.SelectInstances(vo.SelectInstancesParam{
 		ServiceName: serviceName,
 		HealthyOnly: true,
