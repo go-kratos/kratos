@@ -3,6 +3,8 @@ package kratos
 import (
 	"context"
 	"errors"
+	"net"
+	"net/url"
 	"os"
 	"os/signal"
 	"sync"
@@ -105,6 +107,20 @@ func (a *App) Run() error {
 	if a.opts.registrar != nil {
 		rctx, rcancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 		defer rcancel()
+		// check whether the port can be connected
+		for index, endpoint := range instance.Endpoints {
+			raw, err := url.Parse(endpoint)
+			if err != nil {
+				instance.Endpoints = append(instance.Endpoints[:index], instance.Endpoints[index+1:]...)
+			}
+			address := net.JoinHostPort(raw.Hostname(), raw.Port())
+			conn, err := net.DialTimeout("tcp", address, a.opts.registrarTimeout)
+			if err != nil {
+				instance.Endpoints = append(instance.Endpoints[:index], instance.Endpoints[index+1:]...)
+			} else {
+				_ = conn.Close()
+			}
+		}
 		if err := a.opts.registrar.Register(rctx, instance); err != nil {
 			return err
 		}
