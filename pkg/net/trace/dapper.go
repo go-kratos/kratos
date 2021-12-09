@@ -14,8 +14,8 @@ const (
 )
 
 // NewTracer new a tracer.
-func NewTracer(serviceName string, report reporter, disableSample bool) Tracer {
-	sampler := newSampler(_probability)
+func NewTracer(serviceName string, report reporter, disableSample bool, probability float32) Tracer {
+	sampler := newSampler(probability)
 
 	// default internal tags
 	tags := extendTag()

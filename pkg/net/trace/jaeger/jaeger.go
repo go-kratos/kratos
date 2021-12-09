@@ -6,8 +6,10 @@ import (
 )
 
 type Config struct {
-	Endpoint  string
-	BatchSize int
+	AppID       string
+	Endpoint    string
+	BatchSize   int
+	Probability float32
 }
 
 type JaegerReporter struct {
