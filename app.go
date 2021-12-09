@@ -114,7 +114,8 @@ func (a *App) Run() error {
 				instance.Endpoints = append(instance.Endpoints[:index], instance.Endpoints[index+1:]...)
 			}
 			address := net.JoinHostPort(raw.Hostname(), raw.Port())
-			conn, err := net.DialTimeout("tcp", address, a.opts.registrarTimeout)
+			n := net.Dialer{}
+			conn, err := n.DialContext(rctx, "tcp", address)
 			if err != nil {
 				instance.Endpoints = append(instance.Endpoints[:index], instance.Endpoints[index+1:]...)
 			} else {
