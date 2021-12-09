@@ -18,7 +18,7 @@ var CmdAdd = &cobra.Command{
 }
 
 func run(cmd *cobra.Command, args []string) {
-	// kratos add helloworld/v1/helloworld.proto
+	// kratos proto add helloworld/v1/helloworld.proto
 	input := args[0]
 	n := strings.LastIndex(input, "/")
 	if n == -1 {
