@@ -17,13 +17,13 @@ type Router struct {
 	filters []FilterFunc
 }
 
-type route struct {
+type Route struct {
 	method       string
 	prefix       string
 	relativePath string
 }
 
-var routeList []route
+var routeList []Route
 
 func newRouter(prefix string, srv *Server, filters ...FilterFunc) *Router {
 	r := &Router{
@@ -47,7 +47,7 @@ func (r *Router) Group(prefix string, filters ...FilterFunc) *Router {
 
 // Handle registers a new route with a matcher for the URL path and method.
 func (r *Router) Handle(method, relativePath string, h HandlerFunc, filters ...FilterFunc) {
-	routeList = append(routeList, route{method, r.prefix, relativePath})
+	routeList = append(routeList, Route{method, r.prefix, relativePath})
 	next := http.Handler(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		ctx := r.pool.Get().(Context)
 		ctx.Reset(res, req)
@@ -108,6 +108,6 @@ func (r *Router) TRACE(path string, h HandlerFunc, m ...FilterFunc) {
 }
 
 // RouteList returns all routes registered to the server.
-func RouteList() []route {
+func RouteList() []Route {
 	return routeList
 }
