@@ -10,9 +10,8 @@ import (
 )
 
 type (
-	transporter      func(ctx context.Context) (transport.Transporter, bool)
-	MatchFunc        func(operation string) bool
-	MatchContextFunc func(ctx context.Context) bool
+	transporter func(ctx context.Context) (transport.Transporter, bool)
+	MatchFunc   func(ctx context.Context) bool
 )
 
 var (
@@ -30,11 +29,10 @@ var (
 type Builder struct {
 	client bool
 
-	prefix       []string
-	regex        []string
-	path         []string
-	match        MatchFunc
-	matchContext MatchContextFunc
+	prefix []string
+	regex  []string
+	path   []string
+	match  MatchFunc
 
 	ms []middleware.Middleware
 }
@@ -70,12 +68,6 @@ func (b *Builder) Path(path ...string) *Builder {
 // Match is with Builder's match
 func (b *Builder) Match(fn MatchFunc) *Builder {
 	b.match = fn
-	return b
-}
-
-// MatchContext is with Builder's matchContext
-func (b *Builder) MatchContext(fn MatchContextFunc) *Builder {
-	b.matchContext = fn
 	return b
 }
 
@@ -115,12 +107,7 @@ func (b *Builder) matchs(ctx context.Context, transporter transporter) bool {
 	}
 
 	if b.match != nil {
-		if b.match(operation) {
-			return true
-		}
-	}
-	if b.matchContext != nil {
-		if b.matchContext(ctx) {
+		if b.match(ctx) {
 			return true
 		}
 	}
