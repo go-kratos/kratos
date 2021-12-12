@@ -209,7 +209,7 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 		body = bytes.NewReader(data)
 	}
 	url := fmt.Sprintf("%s://%s%s", client.target.Scheme, client.target.Authority, path)
-	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return err
 	}
@@ -286,7 +286,7 @@ func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*h
 		req.URL.Host = node.Address()
 		req.Host = node.Address()
 	}
-	resp, err := client.cc.Do(req)
+	resp, err := client.cc.Do(req.WithContext(ctx))
 	if err == nil {
 		err = client.opts.errorDecoder(ctx, resp)
 	}
