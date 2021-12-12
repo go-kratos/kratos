@@ -231,7 +231,7 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 
 func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo, opts ...CallOption) error {
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
-		res, err := client.do(ctx, req, c)
+		res, err := client.do(ctx, req)
 		if res != nil {
 			cs := csAttempt{res: res}
 			for _, o := range opts {
@@ -265,10 +265,10 @@ func (client *Client) Do(req *http.Request, opts ...CallOption) (*http.Response,
 	}
 	ctx := req.Context()
 
-	return client.do(ctx, req, c)
+	return client.do(ctx, req)
 }
 
-func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*http.Response, error) {
+func (client *Client) do(ctx context.Context, req *http.Request) (*http.Response, error) {
 	var done func(context.Context, selector.DoneInfo)
 	if client.r != nil {
 		var (
