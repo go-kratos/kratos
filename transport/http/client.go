@@ -209,7 +209,7 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 		body = bytes.NewReader(data)
 	}
 	url := fmt.Sprintf("%s://%s%s", client.target.Scheme, client.target.Authority, path)
-	req, err := http.NewRequest(method, url, body)
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
 	if err != nil {
 		return err
 	}
