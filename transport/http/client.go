@@ -231,7 +231,7 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 
 func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo, opts ...CallOption) error {
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
-		res, err := client.do(ctx, req)
+		res, err := client.do(ctx, req.WithContext(ctx))
 		if res != nil {
 			cs := csAttempt{res: res}
 			for _, o := range opts {
@@ -286,7 +286,7 @@ func (client *Client) do(ctx context.Context, req *http.Request) (*http.Response
 		req.URL.Host = node.Address()
 		req.Host = node.Address()
 	}
-	resp, err := client.cc.Do(req.WithContext(ctx))
+	resp, err := client.cc.Do(req)
 	if err == nil {
 		err = client.opts.errorDecoder(ctx, resp)
 	}
