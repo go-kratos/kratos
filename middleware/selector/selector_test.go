@@ -160,12 +160,7 @@ func TestFunc(t *testing.T) {
 				t.Log(req)
 				return "reply", nil
 			}
-			next = Server(testMiddleware).Match(func(ctx context.Context) bool {
-				info, ok := transport.FromServerContext(ctx)
-				if !ok {
-					return false
-				}
-				operation := info.Operation()
+			next = Server(testMiddleware).Match(func(ctx context.Context, operation string) bool {
 				if strings.HasPrefix(operation, "/go-kratos.dev") || strings.HasSuffix(operation, "world") {
 					return true
 				}
@@ -218,7 +213,7 @@ func TestHeaderFunc(t *testing.T) {
 				t.Log(req)
 				return "reply", nil
 			}
-			next = Server(testMiddleware).Match(func(ctx context.Context) bool {
+			next = Server(testMiddleware).Match(func(ctx context.Context, operation string) bool {
 				tr, ok := transport.FromServerContext(ctx)
 				if !ok {
 					return false

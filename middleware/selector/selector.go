@@ -11,7 +11,7 @@ import (
 
 type (
 	transporter func(ctx context.Context) (transport.Transporter, bool)
-	MatchFunc   func(ctx context.Context) bool
+	MatchFunc   func(ctx context.Context, operation string) bool
 )
 
 var (
@@ -107,7 +107,7 @@ func (b *Builder) matchs(ctx context.Context, transporter transporter) bool {
 	}
 
 	if b.match != nil {
-		if b.match(ctx) {
+		if b.match(ctx, operation) {
 			return true
 		}
 	}
