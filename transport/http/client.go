@@ -231,7 +231,7 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 
 func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo, opts ...CallOption) error {
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
-		res, err := client.do(ctx, req, c)
+		res, err := client.do(req.WithContext(ctx))
 		if res != nil {
 			cs := csAttempt{res: res}
 			for _, o := range opts {
@@ -263,19 +263,18 @@ func (client *Client) Do(req *http.Request, opts ...CallOption) (*http.Response,
 			return nil, err
 		}
 	}
-	ctx := req.Context()
 
-	return client.do(ctx, req, c)
+	return client.do(req)
 }
 
-func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*http.Response, error) {
+func (client *Client) do(req *http.Request) (*http.Response, error) {
 	var done func(context.Context, selector.DoneInfo)
 	if client.r != nil {
 		var (
 			err  error
 			node selector.Node
 		)
-		if node, done, err = client.opts.selector.Select(ctx); err != nil {
+		if node, done, err = client.opts.selector.Select(req.Context()); err != nil {
 			return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 		}
 		if client.insecure {
@@ -288,14 +287,14 @@ func (client *Client) do(ctx context.Context, req *http.Request, c callInfo) (*h
 	}
 	resp, err := client.cc.Do(req)
 	if err == nil {
-		err = client.opts.errorDecoder(ctx, resp)
+		err = client.opts.errorDecoder(req.Context(), resp)
 	}
 
 	if err != nil {
 		return nil, err
 	}
 	if done != nil {
-		done(ctx, selector.DoneInfo{Err: err})
+		done(req.Context(), selector.DoneInfo{Err: err})
 	}
 	return resp, nil
 }
