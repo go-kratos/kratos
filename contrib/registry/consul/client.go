@@ -18,14 +18,31 @@ type Client struct {
 	cli    *api.Client
 	ctx    context.Context
 	cancel context.CancelFunc
+
+	// resolve service entry endpoints
+	resolver Resolver
 }
 
 // NewClient creates consul client
 func NewClient(cli *api.Client) *Client {
-	c := &Client{cli: cli}
+	c := &Client{cli: cli, resolver: defaultResolver}
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 	return c
 }
+
+func defaultResolver(_ context.Context, entry *api.ServiceEntry) []string {
+	var endpoints []string
+	for scheme, addr := range entry.Service.TaggedAddresses {
+		if scheme == "lan_ipv4" || scheme == "wan_ipv4" || scheme == "lan_ipv6" || scheme == "wan_ipv6" {
+			continue
+		}
+		endpoints = append(endpoints, addr.Address)
+	}
+	return endpoints
+}
+
+// Resolver is a wrapper for endpoints
+type Resolver func(ctx context.Context, entry *api.ServiceEntry) []string
 
 // Service get services from consul
 func (d *Client) Service(ctx context.Context, service string, index uint64, passingOnly bool) ([]*registry.ServiceInstance, uint64, error) {
@@ -44,31 +61,24 @@ func (d *Client) Service(ctx context.Context, service string, index uint64, pass
 	for _, entry := range entries {
 		var version string
 		for _, tag := range entry.Service.Tags {
-			strs := strings.SplitN(tag, "=", 2)
-			if len(strs) == 2 && strs[0] == "version" {
-				version = strs[1]
+			ss := strings.SplitN(tag, "=", 2)
+			if len(ss) == 2 && ss[0] == "version" {
+				version = ss[1]
 			}
-		}
-		var endpoints []string
-		for scheme, addr := range entry.Service.TaggedAddresses {
-			if scheme == "lan_ipv4" || scheme == "wan_ipv4" || scheme == "lan_ipv6" || scheme == "wan_ipv6" {
-				continue
-			}
-			endpoints = append(endpoints, addr.Address)
 		}
 		services = append(services, &registry.ServiceInstance{
 			ID:        entry.Service.ID,
 			Name:      entry.Service.Service,
 			Metadata:  entry.Service.Meta,
 			Version:   version,
-			Endpoints: endpoints,
+			Endpoints: d.resolver(ctx, entry),
 		})
 	}
 	return services, meta.LastIndex, nil
 }
 
-// Register register service instacen to consul
-func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, enableHealthCheck bool) error {
+// Register register service instance to consul
+func (d *Client) Register(_ context.Context, svc *registry.ServiceInstance, enableHealthCheck bool) error {
 	addresses := make(map[string]api.ServiceAddress)
 	checkAddresses := make([]string, 0, len(svc.Endpoints))
 	for _, endpoint := range svc.Endpoints {
