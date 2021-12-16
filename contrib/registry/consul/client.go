@@ -20,7 +20,7 @@ type Client struct {
 	cancel context.CancelFunc
 
 	// resolve service entry endpoints
-	resolver Resolver
+	resolver ServiceResolver
 }
 
 // NewClient creates consul client
@@ -59,8 +59,8 @@ func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry
 	return services
 }
 
-// Resolver is used to resolve service endpoints
-type Resolver func(ctx context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance
+// ServiceResolver is used to resolve service endpoints
+type ServiceResolver func(ctx context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance
 
 // Service get services from consul
 func (c *Client) Service(ctx context.Context, service string, index uint64, passingOnly bool) ([]*registry.ServiceInstance, uint64, error) {
