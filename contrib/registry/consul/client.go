@@ -3,7 +3,6 @@ package consul
 import (
 	"context"
 	"fmt"
-	"net"
 	"net/url"
 	"strconv"
 	"strings"
@@ -43,25 +42,24 @@ func (d *Client) Service(ctx context.Context, service string, index uint64, pass
 
 	for _, entry := range entries {
 		var version string
+		var scheme string
 		for _, tag := range entry.Service.Tags {
 			strs := strings.SplitN(tag, "=", 2)
 			if len(strs) == 2 && strs[0] == "version" {
 				version = strs[1]
 			}
-		}
-		var endpoints []string
-		for scheme, addr := range entry.Service.TaggedAddresses {
-			if scheme == "lan_ipv4" || scheme == "wan_ipv4" || scheme == "lan_ipv6" || scheme == "wan_ipv6" {
-				continue
+			if len(strs) == 2 && strs[0] == "scheme" {
+				scheme = strs[1]
 			}
-			endpoints = append(endpoints, addr.Address)
 		}
+		endpoint := fmt.Sprintf("%s://%s:%d", scheme, entry.Service.Address, entry.Service.Port)
+
 		services = append(services, &registry.ServiceInstance{
 			ID:        entry.Service.ID,
 			Name:      entry.Service.Service,
 			Metadata:  entry.Service.Meta,
 			Version:   version,
-			Endpoints: endpoints,
+			Endpoints: []string{endpoint},
 		})
 	}
 	return services, meta.LastIndex, nil
@@ -69,56 +67,52 @@ func (d *Client) Service(ctx context.Context, service string, index uint64, pass
 
 // Register register service instacen to consul
 func (d *Client) Register(ctx context.Context, svc *registry.ServiceInstance, enableHealthCheck bool) error {
-	addresses := make(map[string]api.ServiceAddress)
-	checkAddresses := make([]string, 0, len(svc.Endpoints))
+	// register grpc or http service with different srvId
+	// and save scheme in tag.
 	for _, endpoint := range svc.Endpoints {
+
 		raw, err := url.Parse(endpoint)
 		if err != nil {
 			return err
 		}
 		addr := raw.Hostname()
 		port, _ := strconv.ParseUint(raw.Port(), 10, 16)
-		checkAddresses = append(checkAddresses, fmt.Sprintf("%s:%d", addr, port))
-		addresses[raw.Scheme] = api.ServiceAddress{Address: endpoint, Port: int(port)}
-	}
-	asr := &api.AgentServiceRegistration{
-		ID:              svc.ID,
-		Name:            svc.Name,
-		Meta:            svc.Metadata,
-		Tags:            []string{fmt.Sprintf("version=%s", svc.Version)},
-		TaggedAddresses: addresses,
-	}
-	if len(checkAddresses) > 0 {
-		host, portRaw, _ := net.SplitHostPort(checkAddresses[0])
-		port, _ := strconv.ParseInt(portRaw, 10, 32)
-		asr.Address = host
-		asr.Port = int(port)
-	}
-	if enableHealthCheck {
-		for _, address := range checkAddresses {
+
+		srvId := svc.ID + "-" + raw.Scheme
+		asr := &api.AgentServiceRegistration{
+			ID:      srvId,
+			Name:    svc.Name,
+			Meta:    svc.Metadata,
+			Tags:    []string{fmt.Sprintf("version=%s", svc.Version), fmt.Sprintf("scheme=%s", raw.Scheme)},
+			Address: addr,
+			Port:    int(port),
+		}
+
+		if enableHealthCheck {
 			asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
-				TCP:                            address,
+				TCP:                            fmt.Sprintf("%s:%d", addr, port),
 				Interval:                       "20s",
 				DeregisterCriticalServiceAfter: "70s",
 			})
 		}
-	}
-	err := d.cli.Agent().ServiceRegister(asr)
-	if err != nil {
-		return err
-	}
-	go func() {
-		ticker := time.NewTicker(time.Second * 20)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ticker.C:
-				_ = d.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
-			case <-d.ctx.Done():
-				return
-			}
+
+		err = d.cli.Agent().ServiceRegister(asr)
+		if err != nil {
+			return err
 		}
-	}()
+		go func() {
+			ticker := time.NewTicker(time.Second * 20)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ticker.C:
+					_ = d.cli.Agent().UpdateTTL("service:"+srvId, "pass", "pass")
+				case <-d.ctx.Done():
+					return
+				}
+			}
+		}()
+	}
 	return nil
 }
 
