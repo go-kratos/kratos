@@ -31,7 +31,7 @@ func NewClient(cli *api.Client) *Client {
 }
 
 func defaultResolver(_ context.Context, entry *api.ServiceEntry) []string {
-	var endpoints []string //nolint:gomnd
+	var endpoints []string //nolint:prealloc
 	for scheme, addr := range entry.Service.TaggedAddresses {
 		if scheme == "lan_ipv4" || scheme == "wan_ipv4" || scheme == "lan_ipv6" || scheme == "wan_ipv6" {
 			continue
