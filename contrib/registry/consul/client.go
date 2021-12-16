@@ -87,7 +87,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		}
 		addr := raw.Hostname()
 		port, _ := strconv.ParseUint(raw.Port(), 10, 16)
-		checkAddresses = append(checkAddresses, fmt.Sprintf("%s:%c", addr, port))
+		checkAddresses = append(checkAddresses, fmt.Sprintf("%s:%d", addr, port))
 		addresses[raw.Scheme] = api.ServiceAddress{Address: endpoint, Port: int(port)}
 	}
 	asr := &api.AgentServiceRegistration{
