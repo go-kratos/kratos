@@ -30,34 +30,8 @@ func NewClient(cli *api.Client) *Client {
 	return c
 }
 
-func defaultResolver(_ context.Context, entry *api.ServiceEntry) []string {
-	var endpoints []string //nolint:prealloc
-	for scheme, addr := range entry.Service.TaggedAddresses {
-		if scheme == "lan_ipv4" || scheme == "wan_ipv4" || scheme == "lan_ipv6" || scheme == "wan_ipv6" {
-			continue
-		}
-		endpoints = append(endpoints, addr.Address)
-	}
-	return endpoints
-}
-
-// Resolver is a wrapper for endpoints
-type Resolver func(ctx context.Context, entry *api.ServiceEntry) []string
-
-// Service get services from consul
-func (d *Client) Service(ctx context.Context, service string, index uint64, passingOnly bool) ([]*registry.ServiceInstance, uint64, error) {
-	opts := &api.QueryOptions{
-		WaitIndex: index,
-		WaitTime:  time.Second * 55,
-	}
-	opts = opts.WithContext(ctx)
-	entries, meta, err := d.cli.Health().Service(service, "", passingOnly, opts)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	services := make([]*registry.ServiceInstance, 0)
-
+func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance {
+	services := make([]*registry.ServiceInstance, 0, len(entries))
 	for _, entry := range entries {
 		var version string
 		for _, tag := range entry.Service.Tags {
@@ -66,19 +40,44 @@ func (d *Client) Service(ctx context.Context, service string, index uint64, pass
 				version = ss[1]
 			}
 		}
+		var endpoints []string //nolint:prealloc
+		for scheme, addr := range entry.Service.TaggedAddresses {
+			if scheme == "lan_ipv4" || scheme == "wan_ipv4" || scheme == "lan_ipv6" || scheme == "wan_ipv6" {
+				continue
+			}
+			endpoints = append(endpoints, addr.Address)
+		}
 		services = append(services, &registry.ServiceInstance{
 			ID:        entry.Service.ID,
 			Name:      entry.Service.Service,
 			Metadata:  entry.Service.Meta,
 			Version:   version,
-			Endpoints: d.resolver(ctx, entry),
+			Endpoints: endpoints,
 		})
 	}
-	return services, meta.LastIndex, nil
+
+	return services
+}
+
+// Resolver is used to resolve service endpoints
+type Resolver func(ctx context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance
+
+// Service get services from consul
+func (c *Client) Service(ctx context.Context, service string, index uint64, passingOnly bool) ([]*registry.ServiceInstance, uint64, error) {
+	opts := &api.QueryOptions{
+		WaitIndex: index,
+		WaitTime:  time.Second * 55,
+	}
+	opts = opts.WithContext(ctx)
+	entries, meta, err := c.cli.Health().Service(service, "", passingOnly, opts)
+	if err != nil {
+		return nil, 0, err
+	}
+	return c.resolver(ctx, entries), meta.LastIndex, nil
 }
 
 // Register register service instance to consul
-func (d *Client) Register(_ context.Context, svc *registry.ServiceInstance, enableHealthCheck bool) error {
+func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enableHealthCheck bool) error {
 	addresses := make(map[string]api.ServiceAddress)
 	checkAddresses := make([]string, 0, len(svc.Endpoints))
 	for _, endpoint := range svc.Endpoints {
@@ -88,7 +87,7 @@ func (d *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		}
 		addr := raw.Hostname()
 		port, _ := strconv.ParseUint(raw.Port(), 10, 16)
-		checkAddresses = append(checkAddresses, fmt.Sprintf("%s:%d", addr, port))
+		checkAddresses = append(checkAddresses, fmt.Sprintf("%s:%c", addr, port))
 		addresses[raw.Scheme] = api.ServiceAddress{Address: endpoint, Port: int(port)}
 	}
 	asr := &api.AgentServiceRegistration{
@@ -113,7 +112,7 @@ func (d *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			})
 		}
 	}
-	err := d.cli.Agent().ServiceRegister(asr)
+	err := c.cli.Agent().ServiceRegister(asr)
 	if err != nil {
 		return err
 	}
@@ -123,8 +122,8 @@ func (d *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		for {
 			select {
 			case <-ticker.C:
-				_ = d.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
-			case <-d.ctx.Done():
+				_ = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+			case <-c.ctx.Done():
 				return
 			}
 		}
@@ -133,7 +132,7 @@ func (d *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 }
 
 // Deregister deregister service by service ID
-func (d *Client) Deregister(ctx context.Context, serviceID string) error {
-	d.cancel()
-	return d.cli.Agent().ServiceDeregister(serviceID)
+func (c *Client) Deregister(_ context.Context, serviceID string) error {
+	c.cancel()
+	return c.cli.Agent().ServiceDeregister(serviceID)
 }

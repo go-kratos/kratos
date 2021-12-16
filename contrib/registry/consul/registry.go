@@ -26,8 +26,8 @@ func WithHealthCheck(enable bool) Option {
 	}
 }
 
-// WithEndpointsResolver with endpoint function option.
-func WithEndpointsResolver(fn Resolver) Option {
+// WithServiceResolver with endpoint function option.
+func WithServiceResolver(fn Resolver) Option {
 	return func(o *Registry) {
 		if o.cli != nil {
 			o.cli.resolver = fn
