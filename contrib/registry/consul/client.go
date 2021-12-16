@@ -15,16 +15,26 @@ import (
 
 // Client is consul client config
 type Client struct {
-	cli    *api.Client
-	ctx    context.Context
-	cancel context.CancelFunc
+	cli          *api.Client
+	ctx          context.Context
+	cancel       context.CancelFunc
+	endpointFunc EndpointFunc
 }
+
+type EndpointFunc func(srv *api.AgentService, endpoints []string) []string
 
 // NewClient creates consul client
 func NewClient(cli *api.Client) *Client {
-	c := &Client{cli: cli}
+	c := &Client{
+		cli: cli,
+	}
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 	return c
+}
+
+// WithEndpointFunc set endpoint function
+func (d *Client) WithEndpointFunc(f EndpointFunc) {
+	d.endpointFunc = f
 }
 
 // Service get services from consul
@@ -56,11 +66,8 @@ func (d *Client) Service(ctx context.Context, service string, index uint64, pass
 			}
 			endpoints = append(endpoints, addr.Address)
 		}
-		if len(endpoints) == 0 {
-			endpoints = append(endpoints,
-				fmt.Sprintf("http://%s:%d?isSecure=false", entry.Service.Address, entry.Service.Port),
-				fmt.Sprintf("grpc://%s:%d?isSecure=false", entry.Service.Address, entry.Service.Port),
-			)
+		if d.endpointFunc != nil {
+			endpoints = d.endpointFunc(entry.Service, endpoints)
 		}
 		services = append(services, &registry.ServiceInstance{
 			ID:        entry.Service.ID,

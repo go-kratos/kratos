@@ -26,6 +26,12 @@ func WithHealthCheck(enable bool) Option {
 	}
 }
 
+func WithEndpointFunc(f EndpointFunc) Option {
+	return func(r *Registry) {
+		r.cli.WithEndpointFunc(f)
+	}
+}
+
 // Config is consul registry config
 type Config struct {
 	*api.Config

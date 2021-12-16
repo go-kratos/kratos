@@ -24,6 +24,13 @@ func tcpServer(t *testing.T, lis net.Listener) {
 	}
 }
 
+func defaultEndpointFunc(srv *api.AgentService, endpoints []string) []string {
+	return []string{
+		fmt.Sprintf("http://%s:%d?isSecure=false", srv.Address, srv.Port),
+		fmt.Sprintf("grpc://%s:%d?isSecure=false", srv.Address, srv.Port),
+	}
+}
+
 func TestRegister(t *testing.T) {
 	addr := fmt.Sprintf("%s:8081", getIntranetIP())
 	lis, err := net.Listen("tcp", addr)
@@ -38,7 +45,7 @@ func TestRegister(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create consul client failed: %v", err)
 	}
-	r := New(cli)
+	r := New(cli, WithEndpointFunc(defaultEndpointFunc))
 	assert.Nil(t, err)
 	version := strconv.FormatInt(time.Now().Unix(), 10)
 	svc := &registry.ServiceInstance{
