@@ -147,3 +147,8 @@ app.Run()
 
 ## License
 Kratos is MIT licensed. See the [LICENSE](./LICENSE) file for details.
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/go-kratos/kratos.svg)](https://starchart.cc/go-kratos/kratos)
+

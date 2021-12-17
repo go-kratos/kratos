@@ -112,3 +112,8 @@ The following project had particular influence on kratos's design.
 - [google/go-cloud](https://github.com/google/go-cloud) is go cloud development kit.
 - [tal-tech/go-zero](https://github.com/tal-tech/go-zero) is a web and rpc framework with lots of builtin engineering practices.
 - [beego/beego](https://github.com/beego/beego) is a web framework including RESTful APIs, web apps and backend services.
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/go-kratos/kratos.svg)](https://starchart.cc/go-kratos/kratos)
+
