@@ -78,13 +78,9 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 
 func (w *watcher) Stop() error {
 	w.cancel()
-	err := w.cli.Unsubscribe(&vo.SubscribeParam{
+	return w.cli.Unsubscribe(&vo.SubscribeParam{
 		ServiceName: w.serviceName,
 		GroupName:   w.groupName,
 		Clusters:    w.clusters,
 	})
-	if err != nil {
-		return err
-	}
-	return nil
 }
