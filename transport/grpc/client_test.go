@@ -120,3 +120,18 @@ func TestDial(t *testing.T) {
 	WithOptions(v...)(o)
 	assert.Equal(t, v, o.grpcOpts)
 }
+
+func TestDialConn(t *testing.T) {
+	_, err := dial(
+		context.Background(),
+		true,
+		WithDiscovery(&mockRegistry{}),
+		WithTimeout(10*time.Second),
+		WithLogger(log.DefaultLogger),
+		WithEndpoint("abc"),
+		WithMiddleware(EmptyMiddleware()),
+	)
+	if err != nil {
+		t.Error(err)
+	}
+}
