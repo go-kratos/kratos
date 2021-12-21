@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/stretchr/testify/assert"
@@ -57,6 +58,13 @@ func TestWithTLSConfig(t *testing.T) {
 	v := &tls.Config{}
 	WithTLSConfig(v)(o)
 	assert.Equal(t, v, o.tlsConf)
+}
+
+func TestWithLogger(t *testing.T) {
+	o := &clientOptions{}
+	v := log.DefaultLogger
+	WithLogger(v)(o)
+	assert.Equal(t, v,o.logger)
 }
 
 func EmptyMiddleware() middleware.Middleware {
