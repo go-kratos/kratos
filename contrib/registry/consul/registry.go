@@ -26,6 +26,15 @@ func WithHealthCheck(enable bool) Option {
 	}
 }
 
+// WithServiceResolver with endpoint function option.
+func WithServiceResolver(fn ServiceResolver) Option {
+	return func(o *Registry) {
+		if o.cli != nil {
+			o.cli.resolver = fn
+		}
+	}
+}
+
 // Config is consul registry config
 type Config struct {
 	*api.Config

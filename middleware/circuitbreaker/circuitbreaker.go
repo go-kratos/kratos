@@ -42,7 +42,7 @@ func Client(opts ...Option) middleware.Middleware {
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
-			info, _ := transport.FromServerContext(ctx)
+			info, _ := transport.FromClientContext(ctx)
 			breaker := opt.group.Get(info.Operation()).(circuitbreaker.CircuitBreaker)
 			if err := breaker.Allow(); err != nil {
 				// rejected

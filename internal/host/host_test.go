@@ -128,3 +128,13 @@ func TestExtractHostPort(t *testing.T) {
 	}
 	t.Logf("host port: %s,  %d", host, port)
 }
+
+func TestIpIsUp(t *testing.T) {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		t.Fail()
+	}
+	for i := range interfaces {
+		println(interfaces[i].Name, interfaces[i].Flags&net.FlagUp)
+	}
+}

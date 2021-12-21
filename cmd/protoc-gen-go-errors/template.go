@@ -9,6 +9,9 @@ var errorsTemplate = `
 {{ range .Errors }}
 
 func Is{{.CamelValue}}(err error) bool {
+	if err == nil {
+		return false
+	}
 	e := errors.FromError(err)
 	return e.Reason == {{.Name}}_{{.Value}}.String() && e.Code == {{.HTTPCode}} 
 }
