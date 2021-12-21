@@ -123,6 +123,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	options := clientOptions{
 		timeout:      2000 * time.Millisecond,
 		balancerName: wrr.Name,
+		logger: log.DefaultLogger,
 	}
 	for _, o := range opts {
 		o(&options)
