@@ -64,7 +64,7 @@ func TestWithLogger(t *testing.T) {
 	o := &clientOptions{}
 	v := log.DefaultLogger
 	WithLogger(v)(o)
-	assert.Equal(t, v,o.logger)
+	assert.Equal(t, v, o.logger)
 }
 
 func EmptyMiddleware() middleware.Middleware {
