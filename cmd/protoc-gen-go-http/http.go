@@ -232,11 +232,17 @@ func buildPathVars(method *protogen.Method, path string) (res map[string]*string
 	return
 }
 
-func replacePath(name string, _ string, path string) string {
+func replacePath(name string, value string, path string) string {
 	pattern := regexp.MustCompile(fmt.Sprintf(`(?i){(%s[\s]*)=`, name))
 	i := pattern.FindStringIndex(path)
 	if len(i) > 0 {
-		path = fmt.Sprintf("%s{%s}", path[:i[0]], name)
+		values := strings.Split(value, "/")
+		tv := len(values)
+		if tv > 1 && values[tv-1] == "*" {
+			path = fmt.Sprintf("%s%s/{%s}", path[:i[0]], strings.Join(values[:tv-1], "/"), name)
+		} else {
+			path = fmt.Sprintf("%s{%s}", path[:i[0]], name)
+		}
 	}
 	return path
 }
