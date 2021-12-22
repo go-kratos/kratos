@@ -20,9 +20,6 @@ func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}HTTP
 	{{- range .Methods}}
 	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv))
 	{{- end}}
-	{{- range .MappedMethods}}
-	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv))
-	{{- end}}
 }
 
 {{range .Methods}}
@@ -98,12 +95,11 @@ func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Reque
 `
 
 type serviceDesc struct {
-	ServiceType   string // Greeter
-	ServiceName   string // helloworld.Greeter
-	Metadata      string // api/helloworld/helloworld.proto
-	Methods       []*methodDesc
-	MethodSets    map[string]*methodDesc
-	MappedMethods []*methodDesc
+	ServiceType string // Greeter
+	ServiceName string // helloworld.Greeter
+	Metadata    string // api/helloworld/helloworld.proto
+	Methods     []*methodDesc
+	MethodSets  map[string]*methodDesc
 }
 
 type methodDesc struct {

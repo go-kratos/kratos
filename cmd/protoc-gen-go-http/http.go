@@ -75,21 +75,12 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 		rule, ok := proto.GetExtension(method.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
 		if rule != nil && ok {
 			for _, bind := range rule.AdditionalBindings {
-				sd.Methods = append(sd.Methods, buildHTTPRule(g, method, bind, false))
-				if m := buildHTTPRule(g, method, bind, true); m != nil {
-					sd.MappedMethods = append(sd.MappedMethods, m)
-				}
+				sd.Methods = append(sd.Methods, buildHTTPRule(g, method, bind))
 			}
-			sd.Methods = append(sd.Methods, buildHTTPRule(g, method, rule, false))
-			if m := buildHTTPRule(g, method, rule, true); m != nil {
-				sd.MappedMethods = append(sd.MappedMethods, m)
-			}
+			sd.Methods = append(sd.Methods, buildHTTPRule(g, method, rule))
 		} else if !omitempty {
 			path := fmt.Sprintf("/%s/%s", service.Desc.FullName(), method.Desc.Name())
-			sd.Methods = append(sd.Methods, buildMethodDesc(g, method, "POST", path, false))
-			if m := buildMethodDesc(g, method, "POST", path, true); m != nil {
-				sd.MappedMethods = append(sd.MappedMethods, m)
-			}
+			sd.Methods = append(sd.Methods, buildMethodDesc(g, method, "POST", path))
 		}
 	}
 	if len(sd.Methods) != 0 {
@@ -112,7 +103,7 @@ func hasHTTPRule(services []*protogen.Service) bool {
 	return false
 }
 
-func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotations.HttpRule, mapVariable bool) *methodDesc {
+func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotations.HttpRule) *methodDesc {
 	var (
 		path         string
 		method       string
@@ -141,10 +132,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	}
 	body = rule.Body
 	responseBody = rule.ResponseBody
-	md := buildMethodDesc(g, m, method, path, mapVariable)
-	if md == nil {
-		return nil
-	}
+	md := buildMethodDesc(g, m, method, path)
 	if method == "GET" || method == "DELETE" {
 		if body != "" {
 			_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s body should not be declared.\n", method, path)
@@ -168,19 +156,15 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	return md
 }
 
-func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path string, mapVariable bool) *methodDesc {
-	if mapVariable {
-		// Assumes it's invoked twice one with mapVariable in false and then in true.
-		defer func() { methodSets[m.GoName]++ }()
-	}
+func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path string) *methodDesc {
+	defer func() { methodSets[m.GoName]++ }()
+
 	vars := buildPathVars(m, path)
 	fields := m.Input.Desc.Fields()
-	found := false
 
 	for v, s := range vars {
-		if mapVariable && s != nil {
+		if s != nil {
 			path = replacePath(v, *s, path)
-			found = true
 		}
 		for _, field := range strings.Split(v, ".") {
 			if strings.TrimSpace(field) == "" {
@@ -202,9 +186,6 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 				fields = fd.Message().Fields()
 			}
 		}
-	}
-	if mapVariable && !found {
-		return nil
 	}
 	return &methodDesc{
 		Name:    m.GoName,
@@ -234,15 +215,12 @@ func buildPathVars(method *protogen.Method, path string) (res map[string]*string
 
 func replacePath(name string, value string, path string) string {
 	pattern := regexp.MustCompile(fmt.Sprintf(`(?i){(%s[\s]*)=`, name))
-	i := pattern.FindStringIndex(path)
-	if len(i) > 0 {
-		values := strings.Split(value, "/")
-		tv := len(values)
-		if tv > 1 && values[tv-1] == "*" {
-			path = fmt.Sprintf("%s%s/{%s}", path[:i[0]], strings.Join(values[:tv-1], "/"), name)
-		} else {
-			path = fmt.Sprintf("%s{%s}", path[:i[0]], name)
-		}
+	idx := pattern.FindAllStringSubmatchIndex(path, -1)
+	if len(idx) > 0 {
+		path = fmt.Sprintf("%s{%s:%s}",
+			path[:idx[0][0]],          // The start of the match
+			path[idx[0][2]:idx[0][3]], // The variable name
+			strings.ReplaceAll(value, "*", ".*"))
 	}
 	return path
 }
