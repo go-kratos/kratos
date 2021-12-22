@@ -10,6 +10,7 @@ import (
 // MIME
 const (
 	MIMEJSON              = "application/json"
+	MIMEJSON2             = "text/json"
 	MIMEHTML              = "text/html"
 	MIMEXML               = "application/xml"
 	MIMEXML2              = "text/xml"
@@ -63,7 +64,7 @@ func Default(method, contentType string) Binding {
 
 	contentType = stripContentTypeParam(contentType)
 	switch contentType {
-	case MIMEJSON:
+	case MIMEJSON, MIMEJSON2:
 		return JSON
 	case MIMEXML, MIMEXML2:
 		return XML
