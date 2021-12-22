@@ -7,5 +7,3 @@ require (
 	google.golang.org/genproto v0.0.0-20210805201207-89edb61ffb67
 	google.golang.org/protobuf v1.27.1
 )
-
-replace github.com/go-kratos/kratos/v2 => ../../
