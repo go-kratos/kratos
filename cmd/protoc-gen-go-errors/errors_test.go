@@ -46,6 +46,11 @@ func Test_case2Camel(t *testing.T) {
 			args: args{"systemError"},
 			want: "SystemError",
 		},
+		{
+			name: "lower1",
+			args: args{"system"},
+			want: "System",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
