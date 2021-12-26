@@ -159,7 +159,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path string) *methodDesc {
 	defer func() { methodSets[m.GoName]++ }()
 
-	vars := buildPathVars(m, path)
+	vars := buildPathVars(path)
 	fields := m.Input.Desc.Fields()
 
 	for v, s := range vars {
@@ -198,13 +198,13 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 	}
 }
 
-func buildPathVars(method *protogen.Method, path string) (res map[string]*string) {
+func buildPathVars(path string) (res map[string]*string) {
 	res = make(map[string]*string)
 	pattern := regexp.MustCompile(`(?i){([a-z\.0-9_\s]*)=?([^{}]*)}`)
 	matches := pattern.FindAllStringSubmatch(path, -1)
 	for _, m := range matches {
 		name := strings.TrimSpace(m[1])
-		if len(name) > 1 {
+		if len(name) > 1 && len(m[2]) > 0 {
 			res[name] = &m[2]
 		} else {
 			res[name] = nil
