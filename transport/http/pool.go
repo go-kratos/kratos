@@ -1,6 +1,8 @@
 package http
 
-import "sync"
+import (
+	"sync"
+)
 
 type pools struct {
 	// Transport's pool
