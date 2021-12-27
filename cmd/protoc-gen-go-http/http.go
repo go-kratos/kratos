@@ -146,7 +146,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 		md.Body = "." + camelCaseVars(body)
 	} else {
 		md.HasBody = false
-		_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s is does not declare a body.\n", method, path)
+		_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s does not declare a body.\n", method, path)
 	}
 	if responseBody == "*" {
 		md.ResponseBody = ""
