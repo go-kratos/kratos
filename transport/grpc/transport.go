@@ -47,6 +47,15 @@ func (tr *Transport) SelectFilters() []selector.Filter {
 	return tr.filters
 }
 
+// reset clear the Transport.
+func (tr *Transport) reset() {
+	tr.endpoint = ""
+	tr.operation = ""
+	tr.reqHeader = nil
+	tr.replyHeader = nil
+	tr.filters = nil
+}
+
 type headerCarrier metadata.MD
 
 // Get returns the value associated with the passed key.

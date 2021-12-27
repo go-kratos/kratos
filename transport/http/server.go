@@ -201,14 +201,15 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				// /path/123 -> /path/{id}
 				pathTemplate, _ = route.GetPathTemplate()
 			}
-			tr := &Transport{
-				endpoint:     s.endpoint.String(),
-				operation:    pathTemplate,
-				reqHeader:    headerCarrier(req.Header),
-				replyHeader:  headerCarrier(w.Header()),
-				request:      req,
-				pathTemplate: pathTemplate,
-			}
+			tr := pool.tr.Get().(*Transport)
+			tr.reset()
+			tr.endpoint = s.endpoint.String()
+			tr.operation = pathTemplate
+			tr.reqHeader = headerCarrier(req.Header)
+			tr.replyHeader = headerCarrier(w.Header())
+			tr.request = req
+			tr.pathTemplate = pathTemplate
+			defer pool.tr.Put(tr)
 			ctx = transport.NewServerContext(ctx, tr)
 			next.ServeHTTP(w, req.WithContext(ctx))
 		})

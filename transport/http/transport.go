@@ -61,6 +61,16 @@ func (tr *Transport) PathTemplate() string {
 	return tr.pathTemplate
 }
 
+// reset clear the Transport.
+func (tr *Transport) reset() {
+	tr.endpoint = ""
+	tr.operation = ""
+	tr.reqHeader = nil
+	tr.replyHeader = nil
+	tr.request = nil
+	tr.pathTemplate = ""
+}
+
 // SetOperation sets the transport operation.
 func SetOperation(ctx context.Context, op string) {
 	if tr, ok := transport.FromServerContext(ctx); ok {

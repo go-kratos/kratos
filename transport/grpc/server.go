@@ -196,12 +196,14 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		defer cancel()
 		md, _ := grpcmd.FromIncomingContext(ctx)
 		replyHeader := grpcmd.MD{}
-		ctx = transport.NewServerContext(ctx, &Transport{
-			endpoint:    s.endpoint.String(),
-			operation:   info.FullMethod,
-			reqHeader:   headerCarrier(md),
-			replyHeader: headerCarrier(replyHeader),
-		})
+		tr := pool.tr.Get().(*Transport)
+		tr.reset()
+		tr.endpoint = s.endpoint.String()
+		tr.operation = info.FullMethod
+		tr.reqHeader = headerCarrier(md)
+		tr.replyHeader = headerCarrier(replyHeader)
+		defer pool.tr.Put(tr)
+		ctx = transport.NewServerContext(ctx, tr)
 		if s.timeout > 0 {
 			ctx, cancel = context.WithTimeout(ctx, s.timeout)
 			defer cancel()

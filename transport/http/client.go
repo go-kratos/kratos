@@ -219,13 +219,15 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 	if client.opts.userAgent != "" {
 		req.Header.Set("User-Agent", client.opts.userAgent)
 	}
-	ctx = transport.NewClientContext(ctx, &Transport{
-		endpoint:     client.opts.endpoint,
-		reqHeader:    headerCarrier(req.Header),
-		operation:    c.operation,
-		request:      req,
-		pathTemplate: c.pathTemplate,
-	})
+	tr := pool.tr.Get().(*Transport)
+	tr.reset()
+	tr.endpoint = client.opts.endpoint
+	tr.reqHeader = headerCarrier(req.Header)
+	tr.operation = c.operation
+	tr.request = req
+	tr.pathTemplate = c.pathTemplate
+	defer pool.tr.Put(tr)
+	ctx = transport.NewClientContext(ctx, tr)
 	return client.invoke(ctx, req, args, reply, c, opts...)
 }
 
