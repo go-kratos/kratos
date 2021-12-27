@@ -66,7 +66,7 @@ func WithClaims(claims jwt.Claims) Option {
 func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	o := &options{
 		signingMethod: jwt.SigningMethodHS256,
-		claims:        jwt.StandardClaims{},
+		claims:        jwt.MapClaims{},
 	}
 	for _, opt := range opts {
 		opt(o)
@@ -82,7 +82,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 					return nil, ErrMissingJwtToken
 				}
 				jwtToken := auths[1]
-				tokenInfo, err := jwt.Parse(jwtToken, keyFunc)
+				tokenInfo, err := jwt.ParseWithClaims(jwtToken, o.claims, keyFunc)
 				if err != nil {
 					if ve, ok := err.(*jwt.ValidationError); ok {
 						if ve.Errors&jwt.ValidationErrorMalformed != 0 {

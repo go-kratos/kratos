@@ -63,6 +63,11 @@ func (tr *Transport) ReplyHeader() transport.Header {
 	return nil
 }
 
+type CustomerClaims struct {
+	Name string `json:"name"`
+	jwt.StandardClaims
+}
+
 func TestServer(t *testing.T) {
 	testKey := "testKey"
 	mapClaims := jwt.MapClaims{}
@@ -79,6 +84,7 @@ func TestServer(t *testing.T) {
 		signingMethod jwt.SigningMethod
 		exceptErr     error
 		key           string
+		claims        jwt.Claims
 	}{
 		{
 			name:          "normal",
@@ -86,6 +92,7 @@ func TestServer(t *testing.T) {
 			signingMethod: jwt.SigningMethodHS256,
 			exceptErr:     nil,
 			key:           testKey,
+			claims:        nil,
 		},
 		{
 			name:          "miss token",
@@ -93,6 +100,7 @@ func TestServer(t *testing.T) {
 			signingMethod: jwt.SigningMethodHS256,
 			exceptErr:     ErrMissingJwtToken,
 			key:           testKey,
+			claims:        nil,
 		},
 		{
 			name: "token invalid",
@@ -102,6 +110,7 @@ func TestServer(t *testing.T) {
 			signingMethod: jwt.SigningMethodHS256,
 			exceptErr:     ErrTokenInvalid,
 			key:           testKey,
+			claims:        nil,
 		},
 		{
 			name:          "method invalid",
@@ -109,6 +118,7 @@ func TestServer(t *testing.T) {
 			signingMethod: jwt.SigningMethodES384,
 			exceptErr:     ErrUnSupportSigningMethod,
 			key:           testKey,
+			claims:        nil,
 		},
 		{
 			name:          "miss signing method",
@@ -116,6 +126,7 @@ func TestServer(t *testing.T) {
 			signingMethod: nil,
 			exceptErr:     nil,
 			key:           testKey,
+			claims:        nil,
 		},
 		{
 			name:          "miss signing method",
@@ -123,6 +134,15 @@ func TestServer(t *testing.T) {
 			signingMethod: nil,
 			exceptErr:     nil,
 			key:           testKey,
+			claims:        nil,
+		},
+		{
+			name:          "customize claims",
+			ctx:           transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(authorizationKey, token)}),
+			signingMethod: nil,
+			exceptErr:     nil,
+			key:           testKey,
+			claims:        &CustomerClaims{},
 		},
 	}
 
@@ -135,7 +155,11 @@ func TestServer(t *testing.T) {
 				return "reply", nil
 			}
 			var server middleware.Handler
-			if test.signingMethod != nil {
+			if test.claims != nil {
+				server = Server(func(token *jwt.Token) (interface{}, error) {
+					return []byte(test.key), nil
+				}, WithClaims(test.claims))(next)
+			} else if test.signingMethod != nil {
 				server = Server(func(token *jwt.Token) (interface{}, error) {
 					return []byte(test.key), nil
 				}, WithSigningMethod(test.signingMethod))(next)
@@ -148,7 +172,12 @@ func TestServer(t *testing.T) {
 			assert.Equal(t, test.exceptErr, err2)
 			if test.exceptErr == nil {
 				assert.NotNil(t, testToken)
-				_, ok := testToken.(jwt.MapClaims)
+				var ok bool
+				if test.claims != nil {
+					_, ok = testToken.(*CustomerClaims)
+				} else {
+					_, ok = testToken.(jwt.MapClaims)
+				}
 				assert.True(t, ok)
 			}
 		})
