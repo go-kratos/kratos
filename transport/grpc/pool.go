@@ -1,6 +1,8 @@
 package grpc
 
-import "sync"
+import (
+	"sync"
+)
 
 type pools struct {
 	// Transport's pool

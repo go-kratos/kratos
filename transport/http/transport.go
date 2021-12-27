@@ -65,8 +65,8 @@ func (tr *Transport) PathTemplate() string {
 func (tr *Transport) reset() {
 	tr.endpoint = ""
 	tr.operation = ""
-	tr.reqHeader = nil
-	tr.replyHeader = nil
+	tr.reqHeader = headerCarrier{}
+	tr.replyHeader = headerCarrier{}
 	tr.request = nil
 	tr.pathTemplate = ""
 }

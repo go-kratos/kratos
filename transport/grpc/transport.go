@@ -51,9 +51,9 @@ func (tr *Transport) SelectFilters() []selector.Filter {
 func (tr *Transport) reset() {
 	tr.endpoint = ""
 	tr.operation = ""
-	tr.reqHeader = nil
-	tr.replyHeader = nil
-	tr.filters = nil
+	tr.reqHeader = headerCarrier{}
+	tr.replyHeader = headerCarrier{}
+	tr.filters = tr.filters[:0]
 }
 
 type headerCarrier metadata.MD
