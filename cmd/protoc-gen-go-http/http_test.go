@@ -29,11 +29,11 @@ func TestTwoParametersReplacement(t *testing.T) {
 }
 
 func TestNoReplacePath(t *testing.T) {
-	path := "/test/{message.id}"
-	assert.Equal(t, path, replacePath("message.id", "", path))
-
-	path = "/test/{message.id=test}"
+	path := "/test/{message.id=test}"
 	assert.Equal(t, "/test/{message.id:test}", replacePath("message.id", "test", path))
+
+	path = "/test/{message.id=test/*}"
+	assert.Equal(t, "/test/{message.id:test/.*}", replacePath("message.id", "test/*", path))
 }
 
 func TestReplacePath(t *testing.T) {
@@ -51,4 +51,15 @@ func TestIteration(t *testing.T) {
 		}
 	}
 	assert.Equal(t, "/test/{message.id}/{message.name:messages/.*}", path)
+}
+
+func TestIterationMiddle(t *testing.T) {
+	path := "/test/{message.name=messages/*}/books"
+	vars := buildPathVars(path)
+	for v, s := range vars {
+		if s != nil {
+			path = replacePath(v, *s, path)
+		}
+	}
+	assert.Equal(t, "/test/{message.name:messages/.*}/books", path)
 }

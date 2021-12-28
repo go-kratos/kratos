@@ -214,13 +214,15 @@ func buildPathVars(path string) (res map[string]*string) {
 }
 
 func replacePath(name string, value string, path string) string {
-	pattern := regexp.MustCompile(fmt.Sprintf(`(?i){([\s]*%s[\s]*)=`, name))
+	pattern := regexp.MustCompile(fmt.Sprintf(`(?i){([\s]*%s[\s]*)=?([^{}]*)}`, name))
 	idx := pattern.FindStringIndex(path)
 	if len(idx) > 0 {
-		path = fmt.Sprintf("%s{%s:%s}",
+		path = fmt.Sprintf("%s{%s:%s}%s",
 			path[:idx[0]], // The start of the match
 			name,
-			strings.ReplaceAll(value, "*", ".*"))
+			strings.ReplaceAll(value, "*", ".*"),
+			path[idx[1]:],
+		)
 	}
 	return path
 }
