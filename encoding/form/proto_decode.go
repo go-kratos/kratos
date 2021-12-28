@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -19,7 +20,8 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-func MapProto(msg proto.Message, values map[string][]string) error {
+// DecodeValues decode url value into proto message.
+func DecodeValues(msg proto.Message, values url.Values) error {
 	for key, values := range values {
 		if err := populateFieldValues(msg.ProtoReflect(), strings.Split(key, "."), values); err != nil {
 			return err
@@ -285,7 +287,9 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		msg = wrapperspb.Bytes(v)
 	case "google.protobuf.FieldMask":
 		fm := &field_mask.FieldMask{}
-		fm.Paths = append(fm.Paths, strings.Split(value, ",")...)
+		for _, fv := range strings.Split(value, ",") {
+			fm.Paths = append(fm.Paths, jsonSnakeCase(fv))
+		}
 		msg = fm
 	case "google.protobuf.Value":
 		fm, err := structpb.NewValue(value)
@@ -297,4 +301,24 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		return protoreflect.Value{}, fmt.Errorf("unsupported message type: %q", string(md.FullName()))
 	}
 	return protoreflect.ValueOfMessage(msg.ProtoReflect()), nil
+}
+
+// jsonSnakeCase converts a camelCase identifier to a snake_case identifier,
+// according to the protobuf JSON specification.
+// references: https://github.com/protocolbuffers/protobuf-go/blob/master/encoding/protojson/well_known_types.go#L864
+func jsonSnakeCase(s string) string {
+	var b []byte
+	for i := 0; i < len(s); i++ { // proto identifiers are always ASCII
+		c := s[i]
+		if isASCIIUpper(c) {
+			b = append(b, '_')
+			c += 'a' - 'A' // convert to lowercase
+		}
+		b = append(b, c)
+	}
+	return string(b)
+}
+
+func isASCIIUpper(c byte) bool {
+	return 'A' <= c && c <= 'Z'
 }
