@@ -217,19 +217,12 @@ func replacePath(name string, value string, path string) string {
 	pattern := regexp.MustCompile(fmt.Sprintf(`(?i){([\s]*%s[\s]*)=?([^{}]*)}`, name))
 	idx := pattern.FindStringIndex(path)
 	if len(idx) > 0 {
-		if len(idx) > 1 && idx[1]+1 < len(path) {
-			path = fmt.Sprintf("%s{%s:%s}%s",
-				path[:idx[0]], // The start of the match
-				name,
-				strings.ReplaceAll(value, "*", ".*"),
-				path[idx[1]:],
-			)
-		} else {
-			path = fmt.Sprintf("%s{%s:%s}",
-				path[:idx[0]], // The start of the match
-				name,
-				strings.ReplaceAll(value, "*", ".*"))
-		}
+		path = fmt.Sprintf("%s{%s:%s}%s",
+			path[:idx[0]], // The start of the match
+			name,
+			strings.ReplaceAll(value, "*", ".*"),
+			path[idx[1]:],
+		)
 	}
 	return path
 }
