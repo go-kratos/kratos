@@ -232,8 +232,8 @@ func (s *Server) Endpoint() (*url.URL, error) {
 
 // Start start the HTTP server.
 func (s *Server) Start(ctx context.Context) error {
-	if _, err := s.Endpoint(); err != nil {
-		return err
+	if s.err != nil {
+		return s.err
 	}
 	s.BaseContext = func(net.Listener) context.Context {
 		return ctx

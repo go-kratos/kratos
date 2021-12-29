@@ -164,8 +164,8 @@ func (s *Server) Endpoint() (*url.URL, error) {
 
 // Start start the gRPC server.
 func (s *Server) Start(ctx context.Context) error {
-	if _, err := s.Endpoint(); err != nil {
-		return err
+	if s.err != nil {
+		return s.err
 	}
 	s.baseCtx = ctx
 	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
