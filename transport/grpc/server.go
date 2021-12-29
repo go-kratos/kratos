@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"net"
 	"net/url"
-	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
@@ -75,6 +74,12 @@ func TLSConfig(c *tls.Config) ServerOption {
 	}
 }
 
+func Listen(lis net.Listener) ServerOption {
+	return func(s *Server) {
+		s.lis = lis
+	}
+}
+
 // UnaryInterceptor returns a ServerOption that sets the UnaryServerInterceptor for the server.
 func UnaryInterceptor(in ...grpc.UnaryServerInterceptor) ServerOption {
 	return func(s *Server) {
@@ -95,7 +100,6 @@ type Server struct {
 	baseCtx    context.Context
 	tlsConf    *tls.Config
 	lis        net.Listener
-	once       sync.Once
 	err        error
 	network    string
 	address    string
@@ -139,6 +143,8 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 	srv.Server = grpc.NewServer(grpcOpts...)
 	srv.metadata = apimd.NewServer(srv.Server)
+	// listen and endpoint
+	srv.err = srv.listenAndEndpoint()
 	// internal register
 	grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
 	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
@@ -150,31 +156,13 @@ func NewServer(opts ...ServerOption) *Server {
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
-	s.once.Do(func() {
-		lis, err := net.Listen(s.network, s.address)
-		if err != nil {
-			s.err = err
-			return
-		}
-		addr, err := host.Extract(s.address, lis)
-		if err != nil {
-			_ = lis.Close()
-			s.err = err
-			return
-		}
-		s.lis = lis
-		s.endpoint = endpoint.NewEndpoint("grpc", addr, s.tlsConf != nil)
-	})
-	if s.err != nil {
-		return nil, s.err
-	}
 	return s.endpoint, nil
 }
 
 // Start start the gRPC server.
 func (s *Server) Start(ctx context.Context) error {
-	if _, err := s.Endpoint(); err != nil {
-		return err
+	if s.err != nil {
+		return s.err
 	}
 	s.baseCtx = ctx
 	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
@@ -187,6 +175,23 @@ func (s *Server) Stop(ctx context.Context) error {
 	s.GracefulStop()
 	s.health.Shutdown()
 	s.log.Info("[gRPC] server stopping")
+	return nil
+}
+
+func (s *Server) listenAndEndpoint() error {
+	if s.lis == nil {
+		lis, err := net.Listen(s.network, s.address)
+		if err != nil {
+			return err
+		}
+		s.lis = lis
+	}
+	addr, err := host.Extract(s.address, s.lis)
+	if err != nil {
+		_ = s.lis.Close()
+		return err
+	}
+	s.endpoint = endpoint.NewEndpoint("grpc", addr, s.tlsConf != nil)
 	return nil
 }
 
