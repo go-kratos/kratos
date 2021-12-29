@@ -21,11 +21,17 @@ type Client struct {
 
 	// resolve service entry endpoints
 	resolver ServiceResolver
+	// healthcheck time interval in seconds
+	healthcheckInterval int
 }
 
 // NewClient creates consul client
 func NewClient(cli *api.Client) *Client {
-	c := &Client{cli: cli, resolver: defaultResolver}
+	c := &Client{
+		cli:                 cli,
+		resolver:            defaultResolver,
+		healthcheckInterval: 10,
+	}
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 	return c
 }
@@ -107,7 +113,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		for _, address := range checkAddresses {
 			asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
 				TCP:                            address,
-				Interval:                       "20s",
+				Interval:                       fmt.Sprintf("%ds", c.healthcheckInterval),
 				DeregisterCriticalServiceAfter: "70s",
 			})
 		}
@@ -117,7 +123,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		return err
 	}
 	go func() {
-		ticker := time.NewTicker(time.Second * 20)
+		ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
 		defer ticker.Stop()
 		for {
 			select {
