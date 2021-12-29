@@ -156,13 +156,16 @@ func NewServer(opts ...ServerOption) *Server {
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
+	if s.err != nil {
+		return nil, s.err
+	}
 	return s.endpoint, nil
 }
 
 // Start start the gRPC server.
 func (s *Server) Start(ctx context.Context) error {
-	if s.err != nil {
-		return s.err
+	if _, err := s.Endpoint(); err != nil {
+		return err
 	}
 	s.baseCtx = ctx
 	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())

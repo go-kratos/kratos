@@ -224,13 +224,16 @@ func (s *Server) filter() mux.MiddlewareFunc {
 // examples:
 //   http://127.0.0.1:8000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
+	if s.err != nil {
+		return nil, s.err
+	}
 	return s.endpoint, nil
 }
 
 // Start start the HTTP server.
 func (s *Server) Start(ctx context.Context) error {
-	if s.err != nil {
-		return s.err
+	if _, err := s.Endpoint(); err != nil {
+		return err
 	}
 	s.BaseContext = func(net.Listener) context.Context {
 		return ctx

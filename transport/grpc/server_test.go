@@ -117,11 +117,9 @@ func TestNetwork(t *testing.T) {
 }
 
 func TestAddress(t *testing.T) {
-	o := &Server{}
 	v := "abc"
-	Address(v)(o)
+	o := NewServer(Address(v))
 	assert.Equal(t, v, o.address)
-
 	u, err := o.Endpoint()
 	assert.NotNil(t, err)
 	assert.Nil(t, u)
