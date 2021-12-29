@@ -122,6 +122,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 	if err != nil {
 		return err
 	}
+	_ = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 	go func() {
 		ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
 		defer ticker.Stop()
