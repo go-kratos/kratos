@@ -145,7 +145,6 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 					options.discovery,
 					discovery.WithInsecure(insecure),
 					discovery.WithLogger(options.logger),
-					discovery.WithTimeout(options.timeout),
 				)))
 	}
 	if insecure {
