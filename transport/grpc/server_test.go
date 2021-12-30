@@ -217,8 +217,8 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 }
 
 func TestListener(t *testing.T) {
-	lis, err := net.Listen("tcp", "127.0.0.1:9091")
-	assert.NotNil(t, err)
-	s := NewServer(Listener(lis))
-	assert.NotNil(t, s.lis)
+	lis := &net.TCPListener{}
+	s := &Server{}
+	Listener(lis)(s)
+	assert.Equal(t, s.lis, lis)
 }
