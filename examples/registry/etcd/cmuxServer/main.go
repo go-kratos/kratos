@@ -33,7 +33,7 @@ func main() {
 		log.Panic(err)
 	}
 	m := cmux.New(l)
-	
+
 	client, err := etcdclient.New(etcdclient.Config{
 		Endpoints: []string{"127.0.0.1:2379"},
 	})
@@ -48,7 +48,7 @@ func main() {
 		),
 	)
 	httpSrv := http.NewServer(
-		http.Listener(m.Match(cmux.HTTP1Fast())),
+		http.Listener(m.Match(cmux.HTTP1(), cmux.HTTP2())),
 		http.Middleware(
 			recovery.Recovery(),
 		),
