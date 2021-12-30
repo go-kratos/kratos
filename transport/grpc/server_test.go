@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"net"
 	"net/url"
 	"strings"
 	"testing"
@@ -213,4 +214,11 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.Equal(t, "hi", rv.(*testResp).Data)
+}
+
+func TestListener(t *testing.T) {
+	lis, err := net.Listen("tcp", "127.0.0.1:9090")
+	assert.NotNil(t, err)
+	s := NewServer(Listener(lis))
+	assert.NotNil(t, s.lis)
 }
