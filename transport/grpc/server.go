@@ -74,7 +74,8 @@ func TLSConfig(c *tls.Config) ServerOption {
 	}
 }
 
-func Listen(lis net.Listener) ServerOption {
+// Listener with server lis
+func Listener(lis net.Listener) ServerOption {
 	return func(s *Server) {
 		s.lis = lis
 	}
