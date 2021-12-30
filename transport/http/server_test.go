@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"strings"
 	"testing"
@@ -235,4 +236,11 @@ func TestTLSConfig(t *testing.T) {
 	v := &tls.Config{}
 	TLSConfig(v)(o)
 	assert.Equal(t, v, o.tlsConf)
+}
+
+func TestListener(t *testing.T) {
+	lis, err := net.Listen("tcp", "127.0.0.1:9090")
+	assert.NotNil(t, err)
+	s := NewServer(Listener(lis))
+	assert.NotNil(t, s.lis)
 }
