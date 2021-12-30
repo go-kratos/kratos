@@ -33,6 +33,7 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/segmentio/kafka-go v0.4.17
 	github.com/sirupsen/logrus v1.8.1
+	github.com/soheilhy/cmux v0.1.4
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/etcd/client/v3 v3.5.0
 	go.opentelemetry.io/otel v1.0.0
@@ -43,6 +44,7 @@ require (
 	golang.org/x/text v0.3.7
 	google.golang.org/genproto v0.0.0-20210831024726-fe130286e0e2
 	google.golang.org/grpc v1.42.0
+	google.golang.org/grpc/examples v0.0.0-20211228230712-fbaf7c558210 // indirect
 	google.golang.org/protobuf v1.27.1
 )
 
