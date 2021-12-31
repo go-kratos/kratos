@@ -35,6 +35,15 @@ func WithServiceResolver(fn ServiceResolver) Option {
 	}
 }
 
+// WithHealthCheckInterval with healthcheck interval in seconds.
+func WithHealthCheckInterval(interval int) Option {
+	return func(o *Registry) {
+		if o.cli != nil {
+			o.cli.healthcheckInterval = interval
+		}
+	}
+}
+
 // Config is consul registry config
 type Config struct {
 	*api.Config
