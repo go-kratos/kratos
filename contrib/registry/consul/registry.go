@@ -35,8 +35,8 @@ func WithServiceResolver(fn ServiceResolver) Option {
 	}
 }
 
-// WithHealthcheckInterval with healthcheck interval in seconds.
-func WithHealthcheckInterval(interval int) Option {
+// WithHealthCheckInterval with healthcheck interval in seconds.
+func WithHealthCheckInterval(interval int) Option {
 	return func(o *Registry) {
 		if o.cli != nil {
 			o.cli.healthcheckInterval = interval
