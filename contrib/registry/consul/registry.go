@@ -135,16 +135,21 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	}
 
 	if !ok {
-		r.resolve(set)
+		err := r.resolve(set)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return w, nil
 }
 
-func (r *Registry) resolve(ss *serviceSet) {
+func (r *Registry) resolve(ss *serviceSet) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	services, idx, err := r.cli.Service(ctx, ss.serviceName, 0, true)
 	cancel()
-	if err == nil && len(services) > 0 {
+	if err != nil {
+		return err
+	} else if len(services) > 0 {
 		ss.broadcast(services)
 	}
 	go func() {
@@ -166,4 +171,6 @@ func (r *Registry) resolve(ss *serviceSet) {
 			idx = tmpIdx
 		}
 	}()
+
+	return nil
 }
