@@ -75,7 +75,7 @@ func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry
 type ServiceResolver func(ctx context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance
 
 // ServiceFilter is used to filter service registration
-type ServiceFilter func(asrList *api.AgentServiceRegistration)
+type ServiceFilter func(asr *api.AgentServiceRegistration)
 
 // Service get services from consul
 func (c *Client) Service(ctx context.Context, service string, index uint64, passingOnly bool) ([]*registry.ServiceInstance, uint64, error) {
