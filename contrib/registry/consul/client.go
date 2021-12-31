@@ -25,6 +25,8 @@ type Client struct {
 	healthcheckInterval int
 	// heartbeat enable heartbeat
 	heartbeat bool
+	// filter service registration
+	filter ServiceFilter
 }
 
 // NewClient creates consul client
@@ -34,6 +36,7 @@ func NewClient(cli *api.Client) *Client {
 		resolver:            defaultResolver,
 		healthcheckInterval: 10,
 		heartbeat:           true,
+		filter:              func(*api.AgentServiceRegistration) {},
 	}
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 	return c
@@ -70,6 +73,9 @@ func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry
 
 // ServiceResolver is used to resolve service endpoints
 type ServiceResolver func(ctx context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance
+
+// ServiceFilter is used to filter service registration
+type ServiceFilter func(asrList *api.AgentServiceRegistration)
 
 // Service get services from consul
 func (c *Client) Service(ctx context.Context, service string, index uint64, passingOnly bool) ([]*registry.ServiceInstance, uint64, error) {
@@ -112,10 +118,18 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		asr.Address = host
 		asr.Port = int(port)
 	}
+	c.filter(asr)
 	if enableHealthCheck {
 		for _, address := range checkAddresses {
 			asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
 				TCP:                            address,
+				Interval:                       fmt.Sprintf("%ds", c.healthcheckInterval),
+				DeregisterCriticalServiceAfter: "70s",
+			})
+		}
+		if len(asr.Checks) == 0 && asr.Address != "" {
+			asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
+				TCP:                            fmt.Sprintf("%s:%d", asr.Address, asr.Port),
 				Interval:                       fmt.Sprintf("%ds", c.healthcheckInterval),
 				DeregisterCriticalServiceAfter: "70s",
 			})

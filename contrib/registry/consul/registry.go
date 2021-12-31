@@ -53,6 +53,15 @@ func WithHealthCheckInterval(interval int) Option {
 	}
 }
 
+// WithServiceFilter with service register filter function option.
+func WithServiceFilter(fn ServiceFilter) Option {
+	return func(o *Registry) {
+		if o.cli != nil {
+			o.cli.filter = fn
+		}
+	}
+}
+
 // Config is consul registry config
 type Config struct {
 	*api.Config
