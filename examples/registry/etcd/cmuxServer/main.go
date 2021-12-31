@@ -48,7 +48,7 @@ func main() {
 		),
 	)
 	httpSrv := http.NewServer(
-		http.Listener(m.Match(cmux.HTTP1(), cmux.HTTP2())),
+		http.Listener(m.Match(cmux.Any())),
 		http.Middleware(
 			recovery.Recovery(),
 		),
