@@ -99,8 +99,9 @@ func (r *Registry) Register(_ context.Context, si *registry.ServiceInstance) err
 		var rmd map[string]string
 		if si.Metadata == nil {
 			rmd = map[string]string{
-				"kind":    u.Scheme,
-				"version": si.Version,
+				"kind":     u.Scheme,
+				"version":  si.Version,
+				"endpoint": u.Path,
 			}
 		} else {
 			rmd = make(map[string]string, len(si.Metadata)+2)
@@ -109,6 +110,7 @@ func (r *Registry) Register(_ context.Context, si *registry.ServiceInstance) err
 			}
 			rmd["kind"] = u.Scheme
 			rmd["version"] = si.Version
+			rmd["endpoint"] = u.Path
 		}
 		_, e := r.cli.RegisterInstance(vo.RegisterInstanceParam{
 			Ip:          host,
