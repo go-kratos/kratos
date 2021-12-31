@@ -5,12 +5,14 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io"
 	nethttp "net/http"
+	"strconv"
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/errors"
+	kratosErrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/stretchr/testify/assert"
@@ -116,8 +118,16 @@ func (*mockDiscovery) Watch(ctx context.Context, serviceName string) (registry.W
 
 type mockWatcher struct{}
 
-func (*mockWatcher) Next() ([]*registry.ServiceInstance, error) {
-	return nil, nil
+func (m *mockWatcher) Next() ([]*registry.ServiceInstance, error) {
+	instance := &registry.ServiceInstance{
+		ID:        "1",
+		Name:      "kratos",
+		Version:   "v1",
+		Metadata:  map[string]string{},
+		Endpoints: []string{fmt.Sprintf("http://127.0.0.1:9001?isSecure=%s", strconv.FormatBool(false))},
+	}
+	time.Sleep(time.Millisecond * 500)
+	return []*registry.ServiceInstance{instance}, nil
 }
 
 func (*mockWatcher) Stop() error {
@@ -202,9 +212,9 @@ func TestDefaultErrorDecoder(t *testing.T) {
 	}
 	err2 := DefaultErrorDecoder(context.TODO(), resp2)
 	assert.Error(t, err2)
-	assert.Equal(t, int32(500), err2.(*errors.Error).GetCode())
-	assert.Equal(t, "hi", err2.(*errors.Error).GetMessage())
-	assert.Equal(t, "FOO", err2.(*errors.Error).GetReason())
+	assert.Equal(t, int32(500), err2.(*kratosErrors.Error).GetCode())
+	assert.Equal(t, "hi", err2.(*kratosErrors.Error).GetMessage())
+	assert.Equal(t, "FOO", err2.(*kratosErrors.Error).GetReason())
 }
 
 func TestCodecForResponse(t *testing.T) {
