@@ -25,7 +25,7 @@ func tcpServer(t *testing.T, lis net.Listener) {
 }
 
 func TestRegister(t *testing.T) {
-	addr := fmt.Sprintf("%s:8081", getIntranetIP())
+	addr := fmt.Sprintf("%s:9091", getIntranetIP())
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		t.Errorf("listen tcp %s failed!", addr)
@@ -38,7 +38,12 @@ func TestRegister(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create consul client failed: %v", err)
 	}
-	r := New(cli)
+	opts := []Option{
+		WithHeartbeat(true),
+		WithHealthCheck(true),
+		WithHealthCheckInterval(5),
+	}
+	r := New(cli, opts...)
 	assert.Nil(t, err)
 	version := strconv.FormatInt(time.Now().Unix(), 10)
 	svc := &registry.ServiceInstance{
