@@ -26,6 +26,15 @@ func WithHealthCheck(enable bool) Option {
 	}
 }
 
+// WithHeartbeat enable or disable heartbeat
+func WithHeartbeat(enable bool) Option {
+	return func(o *Registry) {
+		if o.cli != nil {
+			o.cli.heartbeat = enable
+		}
+	}
+}
+
 // WithServiceResolver with endpoint function option.
 func WithServiceResolver(fn ServiceResolver) Option {
 	return func(o *Registry) {

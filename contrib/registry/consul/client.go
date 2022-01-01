@@ -23,6 +23,8 @@ type Client struct {
 	resolver ServiceResolver
 	// healthcheck time interval in seconds
 	healthcheckInterval int
+	// heartbeat enable heartbeat
+	heartbeat bool
 }
 
 // NewClient creates consul client
@@ -31,6 +33,7 @@ func NewClient(cli *api.Client) *Client {
 		cli:                 cli,
 		resolver:            defaultResolver,
 		healthcheckInterval: 10,
+		heartbeat:           true,
 	}
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 	return c
@@ -123,18 +126,20 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		return err
 	}
 	_ = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
-	go func() {
-		ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ticker.C:
-				_ = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
-			case <-c.ctx.Done():
-				return
+	if c.heartbeat {
+		go func() {
+			ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ticker.C:
+					_ = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+				case <-c.ctx.Done():
+					return
+				}
 			}
-		}
-	}()
+		}()
+	}
 	return nil
 }
 
