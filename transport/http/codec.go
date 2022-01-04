@@ -1,6 +1,7 @@
 package http
 
 import (
+	"google.golang.org/protobuf/types/known/emptypb"
 	"io"
 	"net/http"
 
@@ -23,6 +24,9 @@ type EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
 
 // DefaultRequestDecoder decodes the request body to object.
 func DefaultRequestDecoder(r *http.Request, v interface{}) error {
+	if _, ok := v.(*emptypb.Empty); ok {
+		return nil
+	}
 	codec, ok := CodecForRequest(r, "Content-Type")
 	if !ok {
 		return errors.BadRequest("CODEC", r.Header.Get("Content-Type"))
