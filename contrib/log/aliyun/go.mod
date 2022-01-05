@@ -10,16 +10,15 @@ require (
 
 require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
-	github.com/go-kit/kit v0.10.0 // indirect
-	github.com/go-logfmt/logfmt v0.5.0 // indirect
-	github.com/gogo/protobuf v1.3.1 // indirect
+	github.com/go-kit/kit v0.12.0 // indirect
+	github.com/go-kit/log v0.2.0 // indirect
+	github.com/go-logfmt/logfmt v0.5.1 // indirect
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/pierrec/lz4 v2.6.0+incompatible // indirect
+	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	go.uber.org/atomic v1.5.0 // indirect
-	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
-	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4 // indirect
-	golang.org/x/tools v0.1.5 // indirect
+	go.uber.org/atomic v1.9.0 // indirect
+	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 )
 
