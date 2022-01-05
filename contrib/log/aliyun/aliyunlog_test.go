@@ -15,7 +15,7 @@ func TestAliyunLogger(t *testing.T) {
 		WithProject(""),
 	)
 
-	if aliLogger, ok := tmpLogger.(AliyunLog); ok {
+	if aliLogger, ok := tmpLogger.(Log); ok {
 		aliLogger.GetProducer().Start()
 		defer aliLogger.GetProducer().Close(6000)
 

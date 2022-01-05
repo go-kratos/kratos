@@ -11,22 +11,22 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// AliyunLog see more detail https://github.com/aliyun/aliyun-log-go-sdk
-type AliyunLog interface {
+// Log see more detail https://github.com/aliyun/aliyun-log-go-sdk
+type Log interface {
 	klog.Logger
 	GetProducer() *producer.Producer
 }
 
 type aliyunLog struct {
 	producer *producer.Producer
-	config   *AliyunLogConfig
+	config   *LogConfig
 }
 
 func (a *aliyunLog) GetProducer() *producer.Producer {
 	return a.producer
 }
 
-type AliyunLogConfig struct {
+type LogConfig struct {
 	AccessKey    string
 	AccessSecret string
 	Endpoint     string
@@ -34,44 +34,44 @@ type AliyunLogConfig struct {
 	Logstore     string
 }
 
-func DefaultConfig() *AliyunLogConfig {
-	return &AliyunLogConfig{
+func DefaultConfig() *LogConfig {
+	return &LogConfig{
 		Project:  "projectName",
 		Logstore: "app",
 	}
 }
 
-func WithEndpoint(endpoint string) AliyunOption {
-	return func(alc *AliyunLogConfig) {
+func WithEndpoint(endpoint string) Option {
+	return func(alc *LogConfig) {
 		alc.Endpoint = endpoint
 	}
 }
 
-func WithProject(project string) AliyunOption {
-	return func(alc *AliyunLogConfig) {
+func WithProject(project string) Option {
+	return func(alc *LogConfig) {
 		alc.Project = project
 	}
 }
 
-func WithLogstore(logstore string) AliyunOption {
-	return func(alc *AliyunLogConfig) {
+func WithLogstore(logstore string) Option {
+	return func(alc *LogConfig) {
 		alc.Logstore = logstore
 	}
 }
 
-func WithAccessKey(ak string) AliyunOption {
-	return func(alc *AliyunLogConfig) {
+func WithAccessKey(ak string) Option {
+	return func(alc *LogConfig) {
 		alc.AccessKey = ak
 	}
 }
 
-func WithAccessSecret(as string) AliyunOption {
-	return func(alc *AliyunLogConfig) {
+func WithAccessSecret(as string) Option {
+	return func(alc *LogConfig) {
 		alc.AccessSecret = as
 	}
 }
 
-type AliyunOption func(alc *AliyunLogConfig)
+type Option func(alc *LogConfig)
 
 func (a *aliyunLog) Log(level klog.Level, keyvals ...interface{}) error {
 	buf := level.String()
@@ -102,11 +102,8 @@ func (a *aliyunLog) Log(level klog.Level, keyvals ...interface{}) error {
 	return err
 }
 
-// NewAliyunLog
-// accessKeyID your ak id
-// ac your ak secret
-// endpoint your endpoint
-func NewAliyunLog(options ...AliyunOption) AliyunLog {
+// NewAliyunLog new a aliyun logger with options.
+func NewAliyunLog(options ...Option) Log {
 	aliyunConfig := DefaultConfig()
 	for _, o := range options {
 		o(aliyunConfig)
