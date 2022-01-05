@@ -19,14 +19,14 @@ type Log interface {
 
 type aliyunLog struct {
 	producer *producer.Producer
-	config   *LogConfig
+	opts     *options
 }
 
 func (a *aliyunLog) GetProducer() *producer.Producer {
 	return a.producer
 }
 
-type LogConfig struct {
+type options struct {
 	AccessKey    string
 	AccessSecret string
 	Endpoint     string
@@ -34,44 +34,44 @@ type LogConfig struct {
 	Logstore     string
 }
 
-func DefaultConfig() *LogConfig {
-	return &LogConfig{
+func DefaultOptions() *options {
+	return &options{
 		Project:  "projectName",
 		Logstore: "app",
 	}
 }
 
 func WithEndpoint(endpoint string) Option {
-	return func(alc *LogConfig) {
+	return func(alc *options) {
 		alc.Endpoint = endpoint
 	}
 }
 
 func WithProject(project string) Option {
-	return func(alc *LogConfig) {
+	return func(alc *options) {
 		alc.Project = project
 	}
 }
 
 func WithLogstore(logstore string) Option {
-	return func(alc *LogConfig) {
+	return func(alc *options) {
 		alc.Logstore = logstore
 	}
 }
 
 func WithAccessKey(ak string) Option {
-	return func(alc *LogConfig) {
+	return func(alc *options) {
 		alc.AccessKey = ak
 	}
 }
 
 func WithAccessSecret(as string) Option {
-	return func(alc *LogConfig) {
+	return func(alc *options) {
 		alc.AccessSecret = as
 	}
 }
 
-type Option func(alc *LogConfig)
+type Option func(alc *options)
 
 func (a *aliyunLog) Log(level klog.Level, keyvals ...interface{}) error {
 	buf := level.String()
@@ -98,25 +98,25 @@ func (a *aliyunLog) Log(level klog.Level, keyvals ...interface{}) error {
 		Contents: contents,
 	}
 
-	err := a.producer.SendLog(a.config.Project, a.config.Logstore, "", "", logInst)
+	err := a.producer.SendLog(a.opts.Project, a.opts.Logstore, "", "", logInst)
 	return err
 }
 
 // NewAliyunLog new a aliyun logger with options.
 func NewAliyunLog(options ...Option) Log {
-	aliyunConfig := DefaultConfig()
+	opts := DefaultOptions()
 	for _, o := range options {
-		o(aliyunConfig)
+		o(opts)
 	}
 
 	producerConfig := producer.GetDefaultProducerConfig()
-	producerConfig.Endpoint = aliyunConfig.Endpoint
-	producerConfig.AccessKeyID = aliyunConfig.AccessKey
-	producerConfig.AccessKeySecret = aliyunConfig.AccessSecret
+	producerConfig.Endpoint = opts.Endpoint
+	producerConfig.AccessKeyID = opts.AccessKey
+	producerConfig.AccessKeySecret = opts.AccessSecret
 	producerInst := producer.InitProducer(producerConfig)
 
 	return &aliyunLog{
-		config:   aliyunConfig,
+		opts:     opts,
 		producer: producerInst,
 	}
 }
