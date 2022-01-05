@@ -9,8 +9,8 @@ import (
 func TestAliyunLogger(t *testing.T) {
 	tmpLogger := NewAliyunLog(
 		WithEndpoint(""),
-		WithAccessKeyID(""),
-		WithAc(""),
+		WithAccessKey(""),
+		WithAccessSecret(""),
 		WithLogstore(""),
 		WithProject(""),
 	)

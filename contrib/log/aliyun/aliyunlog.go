@@ -7,13 +7,13 @@ import (
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/aliyun-log-go-sdk/producer"
-	log2 "github.com/go-kratos/kratos/v2/log"
+	klog "github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/proto"
 )
 
 // AliyunLog see more detail https://github.com/aliyun/aliyun-log-go-sdk
 type AliyunLog interface {
-	log2.Logger
+	klog.Logger
 	GetProducer() *producer.Producer
 }
 
@@ -27,11 +27,11 @@ func (a *aliyunLog) GetProducer() *producer.Producer {
 }
 
 type AliyunLogConfig struct {
-	AccessKeyID string
-	AcSecret    string
-	Endpoint    string
-	Project     string
-	Logstore    string
+	AccessKey    string
+	AccessSecret string
+	Endpoint     string
+	Project      string
+	Logstore     string
 }
 
 func DefaultConfig() *AliyunLogConfig {
@@ -59,21 +59,21 @@ func WithLogstore(logstore string) AliyunOption {
 	}
 }
 
-func WithAccessKeyID(id string) AliyunOption {
+func WithAccessKey(ak string) AliyunOption {
 	return func(alc *AliyunLogConfig) {
-		alc.AccessKeyID = id
+		alc.AccessKey = ak
 	}
 }
 
-func WithAc(ac string) AliyunOption {
+func WithAccessSecret(as string) AliyunOption {
 	return func(alc *AliyunLogConfig) {
-		alc.AcSecret = ac
+		alc.AccessSecret = as
 	}
 }
 
 type AliyunOption func(alc *AliyunLogConfig)
 
-func (a *aliyunLog) Log(level log2.Level, keyvals ...interface{}) error {
+func (a *aliyunLog) Log(level klog.Level, keyvals ...interface{}) error {
 	buf := level.String()
 	levelTitle := "level"
 
@@ -114,8 +114,8 @@ func NewAliyunLog(options ...AliyunOption) AliyunLog {
 
 	producerConfig := producer.GetDefaultProducerConfig()
 	producerConfig.Endpoint = aliyunConfig.Endpoint
-	producerConfig.AccessKeyID = aliyunConfig.AccessKeyID
-	producerConfig.AccessKeySecret = aliyunConfig.AcSecret
+	producerConfig.AccessKeyID = aliyunConfig.AccessKey
+	producerConfig.AccessKeySecret = aliyunConfig.AccessSecret
 	producerInst := producer.InitProducer(producerConfig)
 
 	return &aliyunLog{
