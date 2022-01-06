@@ -37,7 +37,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/etcd/client/v3 v3.5.0
 	go.opentelemetry.io/otel v1.3.0
-	go.opentelemetry.io/otel/exporters/jaeger v1.0.0
+	go.opentelemetry.io/otel/exporters/jaeger v1.3.0
 	go.opentelemetry.io/otel/sdk v1.3.0
 	go.opentelemetry.io/otel/trace v1.3.0
 	go.uber.org/zap v1.19.0
