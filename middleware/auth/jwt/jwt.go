@@ -66,7 +66,7 @@ func WithClaims(claims jwt.Claims) Option {
 	}
 }
 
-//WithHeader withe customer header for client side
+// WithHeader withe customer header for client side
 func WithHeader(header map[string]interface{}) Option {
 	return func(o *options) {
 		o.header = header
