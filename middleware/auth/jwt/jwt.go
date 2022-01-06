@@ -24,19 +24,22 @@ const (
 
 	// authorizationKey holds the key used to store the JWT Token in the request header.
 	authorizationKey string = "Authorization"
+
+	// reason holds the error reason.
+	reason string = "UNAUTHORIZED"
 )
 
 var (
-	ErrMissingJwtToken        = errors.Unauthorized("UNAUTHORIZED", "JWT token is missing")
-	ErrMissingKeyFunc         = errors.Unauthorized("UNAUTHORIZED", "keyFunc is missing")
-	ErrTokenInvalid           = errors.Unauthorized("UNAUTHORIZED", "Token is invalid")
-	ErrTokenExpired           = errors.Unauthorized("UNAUTHORIZED", "JWT token has expired")
-	ErrTokenParseFail         = errors.Unauthorized("UNAUTHORIZED", "Fail to parse JWT token ")
-	ErrUnSupportSigningMethod = errors.Unauthorized("UNAUTHORIZED", "Wrong signing method")
-	ErrWrongContext           = errors.Unauthorized("UNAUTHORIZED", "Wrong context for middleware")
-	ErrNeedTokenProvider      = errors.Unauthorized("UNAUTHORIZED", "Token provider is missing")
-	ErrSignToken              = errors.Unauthorized("UNAUTHORIZED", "Can not sign token.Is the key correct?")
-	ErrGetKey                 = errors.Unauthorized("UNAUTHORIZED", "Can not get key while signing token")
+	ErrMissingJwtToken        = errors.Unauthorized(reason, "JWT token is missing")
+	ErrMissingKeyFunc         = errors.Unauthorized(reason, "keyFunc is missing")
+	ErrTokenInvalid           = errors.Unauthorized(reason, "Token is invalid")
+	ErrTokenExpired           = errors.Unauthorized(reason, "JWT token has expired")
+	ErrTokenParseFail         = errors.Unauthorized(reason, "Fail to parse JWT token ")
+	ErrUnSupportSigningMethod = errors.Unauthorized(reason, "Wrong signing method")
+	ErrWrongContext           = errors.Unauthorized(reason, "Wrong context for middleware")
+	ErrNeedTokenProvider      = errors.Unauthorized(reason, "Token provider is missing")
+	ErrSignToken              = errors.Unauthorized(reason, "Can not sign token.Is the key correct?")
+	ErrGetKey                 = errors.Unauthorized(reason, "Can not get key while signing token")
 )
 
 // Option is jwt option.
@@ -93,7 +96,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 							return nil, ErrTokenParseFail
 						}
 					}
-					return nil, errors.Unauthorized("UNAUTHORIZED", err.Error())
+					return nil, errors.Unauthorized(reason, err.Error())
 				} else if !tokenInfo.Valid {
 					return nil, ErrTokenInvalid
 				} else if tokenInfo.Method != o.signingMethod {
