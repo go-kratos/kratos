@@ -36,15 +36,15 @@ require (
 	github.com/soheilhy/cmux v0.1.4
 	github.com/stretchr/testify v1.7.0
 	go.etcd.io/etcd/client/v3 v3.5.0
-	go.opentelemetry.io/otel v1.0.0
+	go.opentelemetry.io/otel v1.3.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.0.0
-	go.opentelemetry.io/otel/sdk v1.0.0
-	go.opentelemetry.io/otel/trace v1.0.0
+	go.opentelemetry.io/otel/sdk v1.3.0
+	go.opentelemetry.io/otel/trace v1.3.0
 	go.uber.org/zap v1.19.0
 	golang.org/x/text v0.3.7
-	google.golang.org/genproto v0.0.0-20210831024726-fe130286e0e2
-	google.golang.org/grpc v1.42.0
-	google.golang.org/grpc/examples v0.0.0-20211228230712-fbaf7c558210 // indirect
+	google.golang.org/genproto v0.0.0-20211223182754-3ac035c7e7cb
+	google.golang.org/grpc v1.43.0
+	google.golang.org/grpc/examples v0.0.0-20220105183818-2fb1ac854b20 // indirect
 	google.golang.org/protobuf v1.27.1
 )
 
