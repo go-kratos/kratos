@@ -294,6 +294,34 @@ func TestClientWithClaims(t *testing.T) {
 	})
 }
 
+func TestClientWithHeader(t *testing.T) {
+	testKey := "testKey"
+	mapClaims := jwt.MapClaims{}
+	mapClaims["name"] = "xiaoli"
+	tokenHeader := map[string]interface{}{
+		"test": "test",
+	}
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
+	for k, v := range tokenHeader {
+		claims.Header[k] = v
+	}
+	token, err := claims.SignedString([]byte(testKey))
+	if err != nil {
+		panic(err)
+	}
+	tProvider := func(*jwt.Token) (interface{}, error) {
+		return []byte(testKey), nil
+	}
+	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return "reply", nil
+	}
+	handler := Client(tProvider, WithClaims(mapClaims), WithHeader(tokenHeader))(next)
+	header := &headerCarrier{}
+	_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
+	assert.Equal(t, nil, err2)
+	assert.Equal(t, fmt.Sprintf(bearerFormat, token), header.Get(authorizationKey))
+}
+
 func TestClientMissKey(t *testing.T) {
 	testKey := "testKey"
 	mapClaims := jwt.MapClaims{}

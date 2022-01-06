@@ -49,6 +49,7 @@ type Option func(*options)
 type options struct {
 	signingMethod jwt.SigningMethod
 	claims        jwt.Claims
+	header        map[string]interface{}
 }
 
 // WithSigningMethod with signing method option.
@@ -62,6 +63,13 @@ func WithSigningMethod(method jwt.SigningMethod) Option {
 func WithClaims(claims jwt.Claims) Option {
 	return func(o *options) {
 		o.claims = claims
+	}
+}
+
+//WithHeader withe customer header for client side
+func WithHeader(header map[string]interface{}) Option {
+	return func(o *options) {
+		o.header = header
 	}
 }
 
@@ -125,6 +133,11 @@ func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 				return nil, ErrNeedTokenProvider
 			}
 			token := jwt.NewWithClaims(o.signingMethod, o.claims)
+			if o.header != nil {
+				for k, v := range o.header {
+					token.Header[k] = v
+				}
+			}
 			key, err := keyProvider(token)
 			if err != nil {
 				return nil, ErrGetKey
