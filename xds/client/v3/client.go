@@ -35,7 +35,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/anypb"
+)
+
+const (
+	reasonSendError = "send_error"
 )
 
 // BuildOptions contains options to be passed to client builders.
@@ -179,7 +182,7 @@ func (c *Client) sendRequest(stream adsStream, resourceNames []string, rType res
 		}
 	}
 	if err := stream.Send(req); err != nil {
-		return fmt.Errorf("xds: stream.Send(%+v) failed: %v", req, err)
+		return errors.ServiceUnavailable(reasonSendError, fmt.Sprintf("xds: stream.Send(%+v) failed: %v", req, err))
 	}
 	c.logger.Debugf("ADS request sent: %v", (req))
 	return nil
@@ -195,34 +198,6 @@ func (c *Client) RecvResponse(stream adsStream) (proto.Message, error) {
 	c.logger.Infof("ADS response received, type: %v", resp.GetTypeUrl())
 	c.logger.Debugf("ADS response received: %+v", (resp))
 	return resp, nil
-}
-
-func (c *Client) ParseResponse(r proto.Message) (resource.ResourceType, []*anypb.Any, string, string, error) {
-	rType := resource.UnknownResource
-	resp, ok := r.(*v3discoverypb.DiscoveryResponse)
-	if !ok {
-		return rType, nil, "", "", fmt.Errorf("xds: unsupported message type: %T", resp)
-	}
-
-	// Note that the xDS transport protocol is versioned independently of
-	// the resource types, and it is supported to transfer older versions
-	// of resource types using new versions of the transport protocol, or
-	// vice-versa. Hence we need to handle v3 type_urls as well here.
-	var err error
-	url := resp.GetTypeUrl()
-	switch {
-	case resource.IsListenerResource(url):
-		rType = resource.ListenerResource
-	case resource.IsRouteConfigResource(url):
-		rType = resource.RouteConfigResource
-	case resource.IsClusterResource(url):
-		rType = resource.ClusterResource
-	case resource.IsEndpointsResource(url):
-		rType = resource.EndpointsResource
-	default:
-		return rType, nil, "", "", errors.BadRequest("ResourceTypeUnsupported", fmt.Sprintf("Resource type %v unknown in response from server", resp.GetTypeUrl()))
-	}
-	return rType, resp.GetResources(), resp.GetVersionInfo(), resp.GetNonce(), err
 }
 
 func mapToSlice(m map[string]bool) []string {
