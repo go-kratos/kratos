@@ -22,7 +22,7 @@ const (
 	// bearerFormat authorization token format
 	bearerFormat string = "Bearer %s"
 
-	// authorizationKey holds the key used to store the JWT Token in the request header.
+	// authorizationKey holds the key used to store the JWT Token in the request tokenHeader.
 	authorizationKey string = "Authorization"
 
 	// reason holds the error reason.
@@ -49,7 +49,7 @@ type Option func(*options)
 type options struct {
 	signingMethod jwt.SigningMethod
 	claims        jwt.Claims
-	header        map[string]interface{}
+	tokenHeader   map[string]interface{}
 }
 
 // WithSigningMethod with signing method option.
@@ -66,10 +66,10 @@ func WithClaims(claims jwt.Claims) Option {
 	}
 }
 
-// WithHeader withe customer header for client side
-func WithHeader(header map[string]interface{}) Option {
+// WithTokenHeader withe customer tokenHeader for client side
+func WithTokenHeader(header map[string]interface{}) Option {
 	return func(o *options) {
-		o.header = header
+		o.tokenHeader = header
 	}
 }
 
@@ -133,8 +133,8 @@ func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 				return nil, ErrNeedTokenProvider
 			}
 			token := jwt.NewWithClaims(o.signingMethod, o.claims)
-			if o.header != nil {
-				for k, v := range o.header {
+			if o.tokenHeader != nil {
+				for k, v := range o.tokenHeader {
 					token.Header[k] = v
 				}
 			}

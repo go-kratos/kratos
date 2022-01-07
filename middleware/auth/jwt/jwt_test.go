@@ -315,7 +315,7 @@ func TestClientWithHeader(t *testing.T) {
 	next := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return "reply", nil
 	}
-	handler := Client(tProvider, WithClaims(mapClaims), WithHeader(tokenHeader))(next)
+	handler := Client(tProvider, WithClaims(mapClaims), WithTokenHeader(tokenHeader))(next)
 	header := &headerCarrier{}
 	_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
 	assert.Equal(t, nil, err2)
