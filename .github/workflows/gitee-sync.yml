@@ -2,6 +2,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - "*"
 
 name: Sync to Gitee
 jobs:
@@ -12,7 +14,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v1
       - name: Mirror Github to Gitee
-        uses: Yikun/hub-mirror-action@v1.0
+        uses: Yikun/hub-mirror-action@v1.2
         with:
           src: github/go-kratos
           dst: gitee/go-kratos
