@@ -7,14 +7,13 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"regexp"
+	"strings"
 )
 
 // GoInstall go get path.
 func GoInstall(path ...string) error {
-	reg := regexp.MustCompile(`.*@v\d+[\.\d+]+$`)
 	for _, p := range path {
-		if !reg.MatchString(p) {
+		if !strings.Contains(p, "@") {
 			p += "@latest"
 		}
 		fmt.Printf("go install %s\n", p)
