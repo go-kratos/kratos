@@ -58,7 +58,7 @@ func TracerFromEnvFlag() (Tracer, error) {
 		return nil, err
 	}
 	report := newReport(cfg.Network, cfg.Addr, time.Duration(cfg.Timeout), cfg.ProtocolVersion)
-	return NewTracer(env.AppID, report, cfg.DisableSample), nil
+	return NewTracer(env.AppID, report, cfg.DisableSample, _probability), nil
 }
 
 // Init init trace report.
@@ -71,5 +71,5 @@ func Init(cfg *Config) {
 		}
 	}
 	report := newReport(cfg.Network, cfg.Addr, time.Duration(cfg.Timeout), cfg.ProtocolVersion)
-	SetGlobalTracer(NewTracer(env.AppID, report, cfg.DisableSample))
+	SetGlobalTracer(NewTracer(env.AppID, report, cfg.DisableSample, _probability))
 }

@@ -11,6 +11,7 @@ import (
 var (
 	_jaegerAppID    = env.AppID
 	_jaegerEndpoint = "http://127.0.0.1:9191"
+	_probability    = 0.00025
 )
 
 func init() {
@@ -27,7 +28,10 @@ func init() {
 }
 
 // Init Init
-func Init() {
-	c := &Config{Endpoint: _jaegerEndpoint, BatchSize: 120}
-	trace.SetGlobalTracer(trace.NewTracer(_jaegerAppID, newReport(c), true))
+func Init(cfg *Config) {
+	c := cfg
+	if c == nil {
+		c = &Config{AppID: _jaegerAppID, Endpoint: _jaegerEndpoint, BatchSize: 120, Probability: float32(_probability)}
+	}
+	trace.SetGlobalTracer(trace.NewTracer(c.AppID, newReport(c), true, c.Probability))
 }
