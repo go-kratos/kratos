@@ -122,7 +122,7 @@ func NewServer(opts ...ServerOption) *Server {
 		address: ":0",
 		timeout: 1 * time.Second,
 		health:  health.NewServer(),
-		log:     log.NewHelper(log.DefaultLogger),
+		log:     log.NewHelper(log.GetLogger()),
 	}
 	for _, o := range opts {
 		o(srv)
