@@ -4,6 +4,7 @@ package health
 
 import (
 	"context"
+
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/health"
 )
@@ -35,6 +36,7 @@ func (s *HealthCheckServer) Check(ctx context.Context, req *HealthCheckRequest) 
 	return
 }
 func (s *HealthCheckServer) Watch(req *HealthCheckRequest, server Health_WatchServer) (err error) {
+	ctx := server.Context()
 	info, _ := kratos.FromContext(ctx)
 	info.Health().Watch(req.Service, func(status health.Status) {
 		status, ok := info.Health().GetStatus(req.Service)
