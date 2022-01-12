@@ -123,7 +123,7 @@ func TestConfig(t *testing.T) {
 		WithSource(newTestJSONSource(_testJSON)),
 		WithDecoder(defaultDecoder),
 		WithResolver(defaultResolver),
-		WithLogger(log.DefaultLogger),
+		WithLogger(log.GetLogger()),
 	)
 	err = c.Close()
 	assert.Nil(t, err)
@@ -133,7 +133,7 @@ func TestConfig(t *testing.T) {
 		sources:  []Source{jSource},
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
-		logger:   log.DefaultLogger,
+		logger:   log.GetLogger(),
 	}
 	cf := &config{}
 	cf.opts = opts

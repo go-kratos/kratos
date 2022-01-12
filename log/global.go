@@ -18,7 +18,7 @@ type loggerAppliance struct {
 }
 
 func init() {
-	global.SetLogger(NewStdLogger(os.Stderr))
+	global.SetLogger(DefaultLogger)
 }
 
 func (a *loggerAppliance) SetLogger(in Logger) {
@@ -32,13 +32,13 @@ func (a *loggerAppliance) GetLogger() Logger {
 	return a.logger
 }
 
-// SetGlobalLogger should be called before any other log call.
-// And it is not THREAD SAFE.
-func SetGlobalLogger(logger Logger) {
+// SetLogger should be called before any other log call.
+// And it is NOT THREAD SAFE.
+func SetLogger(logger Logger) {
 	global.SetLogger(logger)
 }
 
-func GetGlobalLogger() Logger {
+func GetLogger() Logger {
 	return global.GetLogger()
 }
 

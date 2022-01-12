@@ -9,7 +9,7 @@ import (
 
 func TestGlobalLog(t *testing.T) {
 	buffer := &bytes.Buffer{}
-	SetGlobalLogger(NewStdLogger(buffer))
+	SetLogger(NewStdLogger(buffer))
 
 	testCases := []struct {
 		level   Level
