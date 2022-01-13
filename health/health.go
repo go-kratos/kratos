@@ -4,7 +4,7 @@ import (
 	"sync"
 )
 
-type watch func(status Status)
+type watch func()
 type Health struct {
 	statusMap map[string]Status
 	mutex     sync.RWMutex
@@ -33,7 +33,7 @@ func (h *Health) SetStatus(service string, status Status) {
 	h.mutex.Unlock()
 	go func() {
 		for _, w := range h.watchers {
-			w(status)
+			w()
 		}
 	}()
 }

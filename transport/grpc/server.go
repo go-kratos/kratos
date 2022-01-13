@@ -19,8 +19,6 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/health"
-	"google.golang.org/grpc/health/grpc_health_v1"
 	grpcmd "google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 )
@@ -105,8 +103,9 @@ type Server struct {
 	middleware []middleware.Middleware
 	ints       []grpc.UnaryServerInterceptor
 	grpcOpts   []grpc.ServerOption
-	health     *health.Server
-	metadata   *apimd.Server
+	streamInts []grpc.StreamServerInterceptor
+
+	metadata *apimd.Server
 }
 
 // NewServer creates a gRPC server by options.
@@ -116,8 +115,8 @@ func NewServer(opts ...ServerOption) *Server {
 		network: "tcp",
 		address: ":0",
 		timeout: 1 * time.Second,
-		health:  health.NewServer(),
-		log:     log.NewHelper(log.DefaultLogger),
+		// health:  health.NewServer(),
+		log: log.NewHelper(log.DefaultLogger),
 	}
 	for _, o := range opts {
 		o(srv)
@@ -128,8 +127,15 @@ func NewServer(opts ...ServerOption) *Server {
 	if len(srv.ints) > 0 {
 		ints = append(ints, srv.ints...)
 	}
+	streamInts := []grpc.StreamServerInterceptor{
+		srv.stramServerInterceptor(),
+	}
+	if len(srv.streamInts) > 0 {
+		streamInts = append(streamInts, srv.streamInts...)
+	}
 	grpcOpts := []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(ints...),
+		grpc.ChainStreamInterceptor(streamInts...),
 	}
 	if srv.tlsConf != nil {
 		grpcOpts = append(grpcOpts, grpc.Creds(credentials.NewTLS(srv.tlsConf)))
@@ -140,7 +146,7 @@ func NewServer(opts ...ServerOption) *Server {
 	srv.Server = grpc.NewServer(grpcOpts...)
 	srv.metadata = apimd.NewServer(srv.Server)
 	// internal register
-	grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
+	// grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
 	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
 	reflection.Register(srv.Server)
 	return srv
@@ -178,14 +184,14 @@ func (s *Server) Start(ctx context.Context) error {
 	}
 	s.baseCtx = ctx
 	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
-	s.health.Resume()
+	// s.health.Resume()
 	return s.Serve(s.lis)
 }
 
 // Stop stop the gRPC server.
 func (s *Server) Stop(ctx context.Context) error {
 	s.GracefulStop()
-	s.health.Shutdown()
+	// s.health.Shutdown()
 	s.log.Info("[gRPC] server stopping")
 	return nil
 }
@@ -217,5 +223,42 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 			_ = grpc.SetHeader(ctx, replyHeader)
 		}
 		return reply, err
+	}
+}
+
+// wrappedStream wraps around the embedded grpc.ServerStream, and intercepts the RecvMsg and
+// SendMsg method call.
+type wrappedStream struct {
+	grpc.ServerStream
+	ctx context.Context
+}
+
+func (w *wrappedStream) Context() context.Context {
+	return w.ctx
+}
+
+func NewWrappedStream(ctx context.Context, stream grpc.ServerStream) *wrappedStream {
+	return &wrappedStream{
+		ServerStream: stream,
+		ctx:          ctx,
+	}
+}
+
+func (s *Server) stramServerInterceptor() grpc.StreamServerInterceptor {
+	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		ctx, cancel := ic.Merge(ss.Context(), s.baseCtx)
+		defer cancel()
+		md, _ := grpcmd.FromIncomingContext(ctx)
+		replyHeader := grpcmd.MD{}
+		ctx = transport.NewServerContext(ctx, &Transport{
+			endpoint:    s.endpoint.String(),
+			operation:   info.FullMethod,
+			reqHeader:   headerCarrier(md),
+			replyHeader: headerCarrier(replyHeader),
+		})
+
+		ws := NewWrappedStream(ctx, ss)
+
+		return handler(srv, ws)
 	}
 }

@@ -13,6 +13,10 @@ type HealthCheckServer struct {
 	UnimplementedHealthServer
 }
 
+func NewHealthCheckServer() *HealthCheckServer {
+	return &HealthCheckServer{}
+}
+
 func (s *HealthCheckServer) Check(ctx context.Context, req *HealthCheckRequest) (resp *HealthCheckResponse, err error) {
 	info, _ := kratos.FromContext(ctx)
 	status, ok := info.Health().GetStatus(req.Service)
@@ -35,10 +39,13 @@ func (s *HealthCheckServer) Check(ctx context.Context, req *HealthCheckRequest) 
 	}
 	return
 }
-func (s *HealthCheckServer) Watch(req *HealthCheckRequest, server Health_WatchServer) (err error) {
-	ctx := server.Context()
-	info, _ := kratos.FromContext(ctx)
-	info.Health().Watch(req.Service, func(status health.Status) {
+func (s *HealthCheckServer) Watch(req *HealthCheckRequest, ss Health_WatchServer) (err error) {
+	ctx := ss.Context()
+	info, ok := kratos.FromContext(ctx)
+	if !ok {
+		return
+	}
+	info.Health().Watch(req.Service, func() {
 		status, ok := info.Health().GetStatus(req.Service)
 		var sv HealthCheckResponse_ServingStatus
 		if !ok {
@@ -54,8 +61,7 @@ func (s *HealthCheckServer) Watch(req *HealthCheckRequest, server Health_WatchSe
 		default:
 			sv = HealthCheckResponse_NOT_SERVING
 		}
-		server.Send(&HealthCheckResponse{Status: sv})
+		ss.Send(&HealthCheckResponse{Status: sv})
 	})
-
 	return
 }
