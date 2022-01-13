@@ -12,7 +12,6 @@ func Test_atomicValue_Bool(t *testing.T) {
 		v := atomicValue{}
 		v.Store(x)
 		b, err := v.Bool()
-
 		if err != nil {
 			t.Fatal(`err is not nil`)
 		}

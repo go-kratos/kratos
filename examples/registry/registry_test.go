@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/stretchr/testify/assert"
 
 	consulregistry "github.com/go-kratos/kratos/contrib/registry/consul/v2"
 	etcdregistry "github.com/go-kratos/kratos/contrib/registry/etcd/v2"
@@ -106,7 +105,9 @@ func TestETCD(t *testing.T) {
 	}
 	callHTTP(t, r)
 	callGRPC(t, r)
-	assert.NoError(t, srv.Stop())
+	if srv.Stop() != nil {
+		t.Errorf("srv.Stop() got error: %v", err)
+	}
 }
 
 func TestConsul(t *testing.T) {
@@ -121,5 +122,8 @@ func TestConsul(t *testing.T) {
 	}
 	callHTTP(t, r)
 	callGRPC(t, r)
-	assert.NoError(t, srv.Stop())
+
+	if srv.Stop() != nil {
+		t.Errorf("srv.Stop() got error: %v", err)
+	}
 }

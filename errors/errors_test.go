@@ -65,7 +65,6 @@ func TestError(t *testing.T) {
 	if !reflect.DeepEqual(e.Code, int32(UnknownCode)) {
 		t.Errorf("no expect value: %v, but got: %v", e.Code, int32(UnknownCode))
 	}
-
 }
 
 func TestIs(t *testing.T) {

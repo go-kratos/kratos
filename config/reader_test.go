@@ -157,7 +157,6 @@ a:
 			vvz, err := vv.Bool()
 			if err != nil {
 				t.Fatal(`err is not nil`)
-
 			}
 			if !vvz {
 				t.Fatal(`vvz is not equal to true`)

@@ -22,7 +22,6 @@ func TestSingleParam(t *testing.T) {
 	if m["message.id"] != nil {
 		t.Fatalf(`m["message.id"] should be empty`)
 	}
-
 }
 
 func TestTwoParametersReplacement(t *testing.T) {

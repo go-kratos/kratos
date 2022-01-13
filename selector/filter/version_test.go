@@ -2,11 +2,11 @@ package filter
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestVersion(t *testing.T) {
@@ -31,6 +31,10 @@ func TestVersion(t *testing.T) {
 		}))
 
 	nodes = f(context.Background(), nodes)
-	assert.Equal(t, 1, len(nodes))
-	assert.Equal(t, "127.0.0.2:9090", nodes[0].Address())
+	if !reflect.DeepEqual(len(nodes), 1) {
+		t.Errorf("expect %v, got %v", 1, len(nodes))
+	}
+	if !reflect.DeepEqual(nodes[0].Address(), "127.0.0.2:9090") {
+		t.Errorf("expect %v, got %v", nodes[0].Address(), "127.0.0.2:9090")
+	}
 }
