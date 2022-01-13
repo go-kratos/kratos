@@ -21,11 +21,8 @@ func NewHealthCheckServer() *HealthCheckServer {
 
 func (s *HealthCheckServer) Check(ctx context.Context, req *HealthCheckRequest) (resp *HealthCheckResponse, err error) {
 	info, _ := kratos.FromContext(ctx)
-	status, ok := info.Health().GetStatus(req.Service)
+	status, _ := info.Health().GetStatus(req.Service)
 	var sv HealthCheckResponse_ServingStatus
-	if !ok {
-		sv = HealthCheckResponse_SERVICE_UNKNOWN
-	}
 	switch status {
 	case health.Status_SERVING:
 		sv = HealthCheckResponse_SERVING
@@ -41,6 +38,7 @@ func (s *HealthCheckServer) Check(ctx context.Context, req *HealthCheckRequest) 
 	}
 	return
 }
+
 func (s *HealthCheckServer) Watch(req *HealthCheckRequest, ss Health_WatchServer) (err error) {
 	ctx := ss.Context()
 	info, ok := kratos.FromContext(ctx)

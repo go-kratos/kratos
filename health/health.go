@@ -1,16 +1,20 @@
 package health
 
 import (
+	"context"
 	"sync"
+	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
-type watch func()
 type Health struct {
 	statusMap map[string]Status
 	mutex     sync.RWMutex
 	opts      options
 	watchers  map[string]map[string]chan Status
 }
+
 type Option func(*options)
 
 type options struct{}
@@ -25,16 +29,30 @@ func New(opts ...Option) *Health {
 	for _, o := range opts {
 		o(&option)
 	}
+	_ = h.opts
 	return h
 }
 
 func (h *Health) SetStatus(service string, status Status) {
 	h.mutex.Lock()
 	h.statusMap[service] = status
-	for _, w := range h.watchers[service] {
-		w <- status
-	}
 	h.mutex.Unlock()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*100)
+	defer cancel()
+	eg, ctx := errgroup.WithContext(ctx)
+	h.mutex.RLock()
+	for _, w := range h.watchers[service] {
+		ch := w
+		eg.Go(func() error {
+			select {
+			case ch <- status:
+			case <-ctx.Done():
+			}
+			return nil
+		})
+	}
+	h.mutex.RUnlock()
+	_ = eg.Wait()
 }
 
 func (h *Health) GetStatus(service string) (status Status, ok bool) {

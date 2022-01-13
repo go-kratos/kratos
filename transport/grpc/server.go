@@ -240,7 +240,7 @@ func (w *wrappedStream) Context() context.Context {
 	return w.ctx
 }
 
-func NewWrappedStream(ctx context.Context, stream grpc.ServerStream) *wrappedStream {
+func NewWrappedStream(ctx context.Context, stream grpc.ServerStream) grpc.ServerStream {
 	return &wrappedStream{
 		ServerStream: stream,
 		ctx:          ctx,

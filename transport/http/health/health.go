@@ -2,13 +2,13 @@ package health
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/health"
-	"net/http"
 )
 
-type Handler struct {
-}
+type Handler struct{}
 
 type healthResponse struct {
 	Status string `json:"status"`
