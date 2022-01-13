@@ -238,7 +238,7 @@ func TestRequestDecoder(t *testing.T) {
 	o := &Server{}
 	v := func(*http.Request, interface{}) error { return nil }
 	RequestDecoder(v)(o)
-	if o.dec != nil {
+	if o.dec == nil {
 		t.Errorf("expected nil got %v", o.dec)
 	}
 }
@@ -247,7 +247,7 @@ func TestResponseEncoder(t *testing.T) {
 	o := &Server{}
 	v := func(http.ResponseWriter, *http.Request, interface{}) error { return nil }
 	ResponseEncoder(v)(o)
-	if o.enc != nil {
+	if o.enc == nil {
 		t.Errorf("expected nil got %v", o.enc)
 	}
 }
@@ -256,7 +256,7 @@ func TestErrorEncoder(t *testing.T) {
 	o := &Server{}
 	v := func(http.ResponseWriter, *http.Request, error) {}
 	ErrorEncoder(v)(o)
-	if o.ene != nil {
+	if o.ene == nil {
 		t.Errorf("expected nil got %v", o.ene)
 	}
 }
@@ -265,8 +265,8 @@ func TestTLSConfig(t *testing.T) {
 	o := &Server{}
 	v := &tls.Config{}
 	TLSConfig(v)(o)
-	if o.tlsConf != nil {
-		t.Errorf("expected nil got %v", o.tlsConf)
+	if !reflect.DeepEqual(v, o.tlsConf) {
+		t.Errorf("expected %v got %v", v, o.tlsConf)
 	}
 }
 
