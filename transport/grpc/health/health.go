@@ -11,15 +11,15 @@ import (
 	"github.com/google/uuid"
 )
 
-type HealthCheckServer struct {
+type GrpcHealthCheckServer struct {
 	UnimplementedHealthServer
 }
 
-func NewHealthCheckServer() *HealthCheckServer {
-	return &HealthCheckServer{}
+func NewHealthCheckServer() *GrpcHealthCheckServer {
+	return &GrpcHealthCheckServer{}
 }
 
-func (s *HealthCheckServer) Check(ctx context.Context, req *HealthCheckRequest) (resp *HealthCheckResponse, err error) {
+func (s *GrpcHealthCheckServer) Check(ctx context.Context, req *HealthCheckRequest) (resp *HealthCheckResponse, err error) {
 	info, _ := kratos.FromContext(ctx)
 	status, _ := info.Health().GetStatus(req.Service)
 	var sv HealthCheckResponse_ServingStatus
@@ -39,7 +39,7 @@ func (s *HealthCheckServer) Check(ctx context.Context, req *HealthCheckRequest) 
 	return
 }
 
-func (s *HealthCheckServer) Watch(req *HealthCheckRequest, ss Health_WatchServer) (err error) {
+func (s *GrpcHealthCheckServer) Watch(req *HealthCheckRequest, ss Health_WatchServer) (err error) {
 	ctx := ss.Context()
 	info, ok := kratos.FromContext(ctx)
 	if !ok {

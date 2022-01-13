@@ -53,7 +53,6 @@ func main() {
 		kratos.Server(
 			grpcSrv,
 		),
-		
 	)
 
 	if err := app.Run(); err != nil {
