@@ -3,7 +3,6 @@ package env
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,7 +13,9 @@ func Test_watcher_next(t *testing.T) {
 
 		_ = w.Stop()
 		_, err = w.Next()
-		assert.Error(t, err)
+		if err == nil {
+			t.Error("expect error, actual nil")
+		}
 	})
 }
 

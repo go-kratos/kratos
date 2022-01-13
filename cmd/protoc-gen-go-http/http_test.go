@@ -1,45 +1,64 @@
 package main
 
 import (
+	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNoParameters(t *testing.T) {
 	path := "/test/noparams"
 	m := buildPathVars(path)
-	assert.Emptyf(t, m, "Map should be empty")
+	if !reflect.DeepEqual(m, map[string]*string{}) {
+		t.Fatalf("Map should be empty")
+	}
 }
 
 func TestSingleParam(t *testing.T) {
 	path := "/test/{message.id}"
 	m := buildPathVars(path)
-	assert.Len(t, m, 1)
-	assert.Empty(t, m["message.id"])
+	if !reflect.DeepEqual(len(m), 1) {
+		t.Fatalf("len(m) not is 1")
+	}
+	if m["message.id"] != nil {
+		t.Fatalf(`m["message.id"] should be empty`)
+	}
+
 }
 
 func TestTwoParametersReplacement(t *testing.T) {
 	path := "/test/{message.id}/{message.name=messages/*}"
 	m := buildPathVars(path)
-	assert.Len(t, m, 2)
-	assert.Empty(t, m["message.id"])
-	assert.NotEmpty(t, m["message.name"])
-	assert.Equal(t, *m["message.name"], "messages/*")
+	if len(m) != 2 {
+		t.Fatal("len(m) should be 2")
+	}
+	if m["message.id"] != nil {
+		t.Fatal(`m["message.id"] should be nil`)
+	}
+	if m["message.name"] == nil {
+		t.Fatal(`m["message.name"] should not be nil`)
+	}
+	if *m["message.name"] != "messages/*" {
+		t.Fatal(`m["message.name"] should be "messages/*"`)
+	}
 }
 
 func TestNoReplacePath(t *testing.T) {
 	path := "/test/{message.id=test}"
-	assert.Equal(t, "/test/{message.id:test}", replacePath("message.id", "test", path))
-
+	if !reflect.DeepEqual(replacePath("message.id", "test", path), "/test/{message.id:test}") {
+		t.Fatal(`replacePath("message.id", "test", path) should be "/test/{message.id:test}"`)
+	}
 	path = "/test/{message.id=test/*}"
-	assert.Equal(t, "/test/{message.id:test/.*}", replacePath("message.id", "test/*", path))
+	if !reflect.DeepEqual(replacePath("message.id", "test/*", path), "/test/{message.id:test/.*}") {
+		t.Fatal(`replacePath("message.id", "test/*", path) should be "/test/{message.id:test/.*}"`)
+	}
 }
 
 func TestReplacePath(t *testing.T) {
 	path := "/test/{message.id}/{message.name=messages/*}"
 	newPath := replacePath("message.name", "messages/*", path)
-	assert.Equal(t, "/test/{message.id}/{message.name:messages/.*}", newPath)
+	if !reflect.DeepEqual("/test/{message.id}/{message.name:messages/.*}", newPath) {
+		t.Fatal(`replacePath("message.name", "messages/*", path) should be "/test/{message.id}/{message.name:messages/.*}"`)
+	}
 }
 
 func TestIteration(t *testing.T) {
@@ -50,7 +69,9 @@ func TestIteration(t *testing.T) {
 			path = replacePath(v, *s, path)
 		}
 	}
-	assert.Equal(t, "/test/{message.id}/{message.name:messages/.*}", path)
+	if !reflect.DeepEqual("/test/{message.id}/{message.name:messages/.*}", path) {
+		t.Fatal(`replacePath("message.name", "messages/*", path) should be "/test/{message.id}/{message.name:messages/.*}"`)
+	}
 }
 
 func TestIterationMiddle(t *testing.T) {
@@ -61,5 +82,7 @@ func TestIterationMiddle(t *testing.T) {
 			path = replacePath(v, *s, path)
 		}
 	}
-	assert.Equal(t, "/test/{message.name:messages/.*}/books", path)
+	if !reflect.DeepEqual("/test/{message.name:messages/.*}/books", path) {
+		t.Fatal(`replacePath("message.name", "messages/*", path) should be "/test/{message.name:messages/.*}/books"`)
+	}
 }
