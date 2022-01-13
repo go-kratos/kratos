@@ -19,6 +19,8 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	grpcmd "google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 )
@@ -105,6 +107,7 @@ type Server struct {
 	grpcOpts   []grpc.ServerOption
 	streamInts []grpc.StreamServerInterceptor
 
+	health   *health.Server
 	metadata *apimd.Server
 }
 
@@ -115,8 +118,8 @@ func NewServer(opts ...ServerOption) *Server {
 		network: "tcp",
 		address: ":0",
 		timeout: 1 * time.Second,
-		// health:  health.NewServer(),
-		log: log.NewHelper(log.DefaultLogger),
+		health:  health.NewServer(),
+		log:     log.NewHelper(log.DefaultLogger),
 	}
 	for _, o := range opts {
 		o(srv)
@@ -146,7 +149,7 @@ func NewServer(opts ...ServerOption) *Server {
 	srv.Server = grpc.NewServer(grpcOpts...)
 	srv.metadata = apimd.NewServer(srv.Server)
 	// internal register
-	// grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
+	grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
 	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
 	reflection.Register(srv.Server)
 	return srv
@@ -184,14 +187,14 @@ func (s *Server) Start(ctx context.Context) error {
 	}
 	s.baseCtx = ctx
 	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
-	// s.health.Resume()
+	s.health.Resume()
 	return s.Serve(s.lis)
 }
 
 // Stop stop the gRPC server.
 func (s *Server) Stop(ctx context.Context) error {
 	s.GracefulStop()
-	// s.health.Shutdown()
+	s.health.Shutdown()
 	s.log.Info("[gRPC] server stopping")
 	return nil
 }

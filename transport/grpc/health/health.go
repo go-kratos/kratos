@@ -6,7 +6,9 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2"
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/health"
+	"github.com/google/uuid"
 )
 
 type HealthCheckServer struct {
@@ -43,25 +45,47 @@ func (s *HealthCheckServer) Watch(req *HealthCheckRequest, ss Health_WatchServer
 	ctx := ss.Context()
 	info, ok := kratos.FromContext(ctx)
 	if !ok {
-		return
+		return errors.InternalServer("get info failed", "")
 	}
-	info.Health().Watch(req.Service, func() {
-		status, ok := info.Health().GetStatus(req.Service)
-		var sv HealthCheckResponse_ServingStatus
-		if !ok {
-			sv = HealthCheckResponse_SERVICE_UNKNOWN
+	uid, err := uuid.NewUUID()
+	if err != nil {
+		return errors.InternalServer("new uuid failed", err.Error())
+	}
+	update := info.Health().Watch(req.Service, uid.String())
+	status, ok := info.Health().GetStatus(req.Service)
+	if !ok {
+		update <- health.Status_SERVICE_UNKNOWN
+	} else {
+		update <- status
+	}
+
+	var lastStatus health.Status = -1
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case status := <-update:
+			if lastStatus == status {
+				continue
+			}
+			lastStatus = status
+			var sv HealthCheckResponse_ServingStatus
+			switch status {
+			case health.Status_SERVING:
+				sv = HealthCheckResponse_SERVING
+			case health.Status_NOT_SERVING:
+				sv = HealthCheckResponse_NOT_SERVING
+			case health.Status_SERVICE_UNKNOWN:
+				sv = HealthCheckResponse_SERVICE_UNKNOWN
+			default:
+				sv = HealthCheckResponse_NOT_SERVING
+			}
+			resp := &HealthCheckResponse{
+				Status: sv,
+			}
+			if err := ss.Send(resp); err != nil {
+				return err
+			}
 		}
-		switch status {
-		case health.Status_SERVING:
-			sv = HealthCheckResponse_SERVING
-		case health.Status_NOT_SERVING:
-			sv = HealthCheckResponse_NOT_SERVING
-		case health.Status_SERVICE_UNKNOWN:
-			sv = HealthCheckResponse_SERVICE_UNKNOWN
-		default:
-			sv = HealthCheckResponse_NOT_SERVING
-		}
-		ss.Send(&HealthCheckResponse{Status: sv})
-	})
-	return
+	}
 }

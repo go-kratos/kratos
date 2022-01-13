@@ -25,10 +25,11 @@ func main() {
 	defer conn.Close()
 
 	client := health.NewHealthClient(conn)
-	stream, err := client.Watch(context.Background(), &health.HealthCheckRequest{Service: "test"})
+	stream, err := client.Watch(context.Background(), &health.HealthCheckRequest{Service: "helloworld"})
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("---")
 	for {
 		res, err := stream.Recv()
 		if err == io.EOF {
