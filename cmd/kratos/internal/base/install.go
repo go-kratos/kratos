@@ -7,13 +7,17 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 // GoInstall go get path.
 func GoInstall(path ...string) error {
 	for _, p := range path {
-		fmt.Printf("go install %s@latest\n", p)
-		cmd := exec.Command("go", "install", fmt.Sprintf("%s@latest", p))
+		if !strings.Contains(p, "@") {
+			p += "@latest"
+		}
+		fmt.Printf("go install %s\n", p)
+		cmd := exec.Command("go", "install", p)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {

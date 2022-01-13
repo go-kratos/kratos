@@ -19,6 +19,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	grpcinsecure "google.golang.org/grpc/credentials/insecure"
 	grpcmd "google.golang.org/grpc/metadata"
 )
 
@@ -123,7 +124,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	options := clientOptions{
 		timeout:      2000 * time.Millisecond,
 		balancerName: wrr.Name,
-		logger:       log.DefaultLogger,
+		logger:       log.GetLogger(),
 	}
 	for _, o := range opts {
 		o(&options)
@@ -145,11 +146,10 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 					options.discovery,
 					discovery.WithInsecure(insecure),
 					discovery.WithLogger(options.logger),
-					discovery.WithTimeout(options.timeout),
 				)))
 	}
 	if insecure {
-		grpcOpts = append(grpcOpts, grpc.WithInsecure())
+		grpcOpts = append(grpcOpts, grpc.WithTransportCredentials(grpcinsecure.NewCredentials()))
 	}
 	if options.tlsConf != nil {
 		grpcOpts = append(grpcOpts, grpc.WithTransportCredentials(credentials.NewTLS(options.tlsConf)))

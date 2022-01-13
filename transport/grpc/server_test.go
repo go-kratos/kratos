@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"net"
 	"net/url"
 	"strings"
 	"testing"
@@ -117,11 +118,9 @@ func TestNetwork(t *testing.T) {
 }
 
 func TestAddress(t *testing.T) {
-	o := &Server{}
 	v := "abc"
-	Address(v)(o)
+	o := NewServer(Address(v))
 	assert.Equal(t, v, o.address)
-
 	u, err := o.Endpoint()
 	assert.NotNil(t, err)
 	assert.Nil(t, u)
@@ -215,4 +214,11 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.Equal(t, "hi", rv.(*testResp).Data)
+}
+
+func TestListener(t *testing.T) {
+	lis := &net.TCPListener{}
+	s := &Server{}
+	Listener(lis)(s)
+	assert.Equal(t, s.lis, lis)
 }

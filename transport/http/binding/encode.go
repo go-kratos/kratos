@@ -35,7 +35,7 @@ func EncodeURL(pathTemplate string, msg proto.Message, needQuery bool) string {
 		return in
 	})
 	if needQuery {
-		u, err := form.EncodeMap(msg)
+		u, err := form.EncodeValues(msg)
 		if err == nil && len(u) > 0 {
 			for key := range pathParams {
 				delete(u, key)
