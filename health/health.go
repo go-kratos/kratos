@@ -73,3 +73,11 @@ func (h *Health) Watch(service string, id string) (ch chan Status) {
 	}
 	return h.watchers[service][id]
 }
+
+func (h *Health) DelWatch(service string, id string) {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+	if _, ok := h.watchers[service]; ok {
+		delete(h.watchers[service], id)
+	}
+}

@@ -50,6 +50,7 @@ func (s *GrpcHealthCheckServer) Watch(req *HealthCheckRequest, ss Health_WatchSe
 		return errors.InternalServer("new uuid failed", err.Error())
 	}
 	update := info.Health().Watch(req.Service, uid.String())
+	defer info.Health().DelWatch(req.Service, uid.String())
 	status, ok := info.Health().GetStatus(req.Service)
 	if !ok {
 		update <- health.Status_SERVICE_UNKNOWN
