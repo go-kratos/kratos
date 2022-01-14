@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package health;
+
+option go_package = "github.com/go-kratos/kratos/v2/health;health";
+option java_multiple_files = true;
+option java_package = "health";
+
+enum Status {
+	UNKNOWN = 0;
+	SERVING = 1;
+	NOT_SERVING = 2;
+	SERVICE_UNKNOWN = 3;
+}
