@@ -75,7 +75,7 @@ func (h *Health) Update(service string, id string) (ch chan Status) {
 	return h.updates[service][id]
 }
 
-func (h *Health) Delupdates(service string, id string) {
+func (h *Health) Delupdate(service string, id string) {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 	if _, ok := h.updates[service]; ok {

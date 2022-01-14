@@ -207,8 +207,8 @@ func TestUnaryInterceptor(t *testing.T) {
 		},
 	}
 	UnaryInterceptor(v...)(o)
-	if !reflect.DeepEqual(v, o.ints) {
-		t.Errorf("expect %v, got %v", v, o.ints)
+	if !reflect.DeepEqual(v, o.unaryInts) {
+		t.Errorf("expect %v, got %v", v, o.unaryInts)
 	}
 }
 

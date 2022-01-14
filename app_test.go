@@ -9,8 +9,6 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
 type mockRegistry struct {
@@ -40,12 +38,12 @@ func (r *mockRegistry) Deregister(ctx context.Context, service *registry.Service
 }
 
 func TestApp(t *testing.T) {
-	hs := http.NewServer()
-	gs := grpc.NewServer()
+	// hs := http.NewServer()
+	// gs := grpc.NewServer()
 	app := New(
 		Name("kratos"),
 		Version("v1.0.0"),
-		Server(hs, gs),
+		// Server(hs, gs),
 		Registrar(&mockRegistry{service: make(map[string]*registry.ServiceInstance)}),
 	)
 	time.AfterFunc(time.Second, func() {
