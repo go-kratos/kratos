@@ -1,16 +1,17 @@
 package proto
 
 import (
+	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 
 	testData "github.com/go-kratos/kratos/v2/internal/testdata/encoding"
 )
 
 func TestName(t *testing.T) {
 	c := new(codec)
-	assert.Equal(t, c.Name(), "proto")
+	if !reflect.DeepEqual(c.Name(), "proto") {
+		t.Errorf("no expect float_key value: %v, but got: %v", c.Name(), "proto")
+	}
 }
 
 func TestCodec(t *testing.T) {
@@ -23,14 +24,23 @@ func TestCodec(t *testing.T) {
 	}
 
 	m, err := c.Marshal(&model)
-	assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("Marshal() should be nil, but got %s", err)
+	}
 
 	var res testData.TestModel
 
 	err = c.Unmarshal(m, &res)
-	assert.Nil(t, err)
-
-	assert.Equal(t, res.Id, model.Id)
-	assert.Equal(t, res.Name, model.Name)
-	assert.Equal(t, res.Hobby, model.Hobby)
+	if err != nil {
+		t.Errorf("Unmarshal() should be nil, but got %s", err)
+	}
+	if !reflect.DeepEqual(res.Id, model.Id) {
+		t.Errorf("ID should be %d, but got %d", res.Id, model.Id)
+	}
+	if !reflect.DeepEqual(res.Name, model.Name) {
+		t.Errorf("Name should be %s, but got %s", res.Name, model.Name)
+	}
+	if !reflect.DeepEqual(res.Hobby, model.Hobby) {
+		t.Errorf("Hobby should be %s, but got %s", res.Hobby, model.Hobby)
+	}
 }

@@ -34,7 +34,6 @@ require (
 	github.com/segmentio/kafka-go v0.4.17
 	github.com/sirupsen/logrus v1.8.1
 	github.com/soheilhy/cmux v0.1.4
-	github.com/stretchr/testify v1.7.0
 	go.etcd.io/etcd/client/v3 v3.5.0
 	go.opentelemetry.io/otel v1.3.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.3.0

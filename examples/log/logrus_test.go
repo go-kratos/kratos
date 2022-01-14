@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestLoggerLog(t *testing.T) {
@@ -46,8 +45,9 @@ func TestLoggerLog(t *testing.T) {
 			output := new(bytes.Buffer)
 			logger := NewLogrusLogger(Level(test.level), Formatter(test.formatter), Output(output))
 			_ = logger.Log(test.logLevel, test.kvs...)
-
-			assert.True(t, strings.HasPrefix(output.String(), test.want))
+			if !strings.HasPrefix(output.String(), test.want) {
+				t.Errorf("strings.HasPrefix(output.String(), test.want) got %v want: %v", strings.HasPrefix(output.String(), test.want), true)
+			}
 		})
 	}
 }

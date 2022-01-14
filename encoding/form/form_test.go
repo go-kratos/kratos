@@ -1,6 +1,7 @@
 package form
 
 import (
+	"reflect"
 	"testing"
 
 	"google.golang.org/protobuf/types/known/durationpb"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/internal/testdata/complex"
-	"github.com/stretchr/testify/require"
 )
 
 type LoginRequest struct {
@@ -31,16 +31,24 @@ func TestFormCodecMarshal(t *testing.T) {
 		Password: "kratos_pwd",
 	}
 	content, err := encoding.GetCodec(contentType).Marshal(req)
-	require.NoError(t, err)
-	require.Equal(t, []byte("password=kratos_pwd&username=kratos"), content)
+	if err != nil {
+		t.Errorf("marshal error: %v", err)
+	}
+	if !reflect.DeepEqual([]byte("password=kratos_pwd&username=kratos"), content) {
+		t.Errorf("expect %v, got %v", []byte("password=kratos_pwd&username=kratos"), content)
+	}
 
 	req = &LoginRequest{
 		Username: "kratos",
 		Password: "",
 	}
 	content, err = encoding.GetCodec(contentType).Marshal(req)
-	require.NoError(t, err)
-	require.Equal(t, []byte("username=kratos"), content)
+	if err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
+	if !reflect.DeepEqual([]byte("username=kratos"), content) {
+		t.Errorf("expect %v, got %v", []byte("username=kratos"), content)
+	}
 
 	m := &TestModel{
 		ID:   1,
@@ -48,8 +56,12 @@ func TestFormCodecMarshal(t *testing.T) {
 	}
 	content, err = encoding.GetCodec(contentType).Marshal(m)
 	t.Log(string(content))
-	require.NoError(t, err)
-	require.Equal(t, []byte("id=1&name=kratos"), content)
+	if err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
+	if !reflect.DeepEqual([]byte("id=1&name=kratos"), content) {
+		t.Errorf("expect %v, got %v", []byte("id=1&name=kratos"), content)
+	}
 }
 
 func TestFormCodecUnmarshal(t *testing.T) {
@@ -58,13 +70,21 @@ func TestFormCodecUnmarshal(t *testing.T) {
 		Password: "kratos_pwd",
 	}
 	content, err := encoding.GetCodec(contentType).Marshal(req)
-	require.NoError(t, err)
+	if err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
 
 	bindReq := new(LoginRequest)
 	err = encoding.GetCodec(contentType).Unmarshal(content, bindReq)
-	require.NoError(t, err)
-	require.Equal(t, "kratos", bindReq.Username)
-	require.Equal(t, "kratos_pwd", bindReq.Password)
+	if err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
+	if !reflect.DeepEqual("kratos", bindReq.Username) {
+		t.Errorf("expect %v, got %v", "kratos", bindReq.Username)
+	}
+	if !reflect.DeepEqual("kratos_pwd", bindReq.Password) {
+		t.Errorf("expect %v, got %v", "kratos_pwd", bindReq.Password)
+	}
 }
 
 func TestProtoEncodeDecode(t *testing.T) {
@@ -97,20 +117,42 @@ func TestProtoEncodeDecode(t *testing.T) {
 		Bytes:     &wrapperspb.BytesValue{Value: []byte("123")},
 	}
 	content, err := encoding.GetCodec(contentType).Marshal(in)
-	require.NoError(t, err)
-	require.Equal(t, "a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=22.22&double=12.33&duration="+
+	if err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
+	if !reflect.DeepEqual("a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=22.22&double=12.33&duration="+
 		"2m0.000000022s&field=1%2C2&float=12.34&id=2233&int32=32&int64=64&map%5Bkratos%5D=https%3A%2F%2Fgo-kratos.dev%2F&"+
 		"numberOne=2233&price=11.23&sex=woman&simples=3344&simples=5566&string=go-kratos"+
-		"&timestamp=1970-01-01T00%3A00%3A20.000000002Z&uint32=32&uint64=64&very_simple.component=5566", string(content))
+		"&timestamp=1970-01-01T00%3A00%3A20.000000002Z&uint32=32&uint64=64&very_simple.component=5566", string(content)) {
+		t.Errorf("rawpath is not equal to %v", string(content))
+	}
 	in2 := &complex.Complex{}
 	err = encoding.GetCodec(contentType).Unmarshal(content, in2)
-	require.NoError(t, err)
-	require.Equal(t, int64(2233), in2.Id)
-	require.Equal(t, "2233", in2.NoOne)
-	require.NotEmpty(t, in2.Simple)
-	require.Equal(t, "5566", in2.Simple.Component)
-	require.NotEmpty(t, in2.Simples)
-	require.Len(t, in2.Simples, 2)
-	require.Equal(t, "3344", in2.Simples[0])
-	require.Equal(t, "5566", in2.Simples[1])
+	if err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
+	if !reflect.DeepEqual(int64(2233), in2.Id) {
+		t.Errorf("expect %v, got %v", int64(2233), in2.Id)
+	}
+	if !reflect.DeepEqual("2233", in2.NoOne) {
+		t.Errorf("expect %v, got %v", "2233", in2.NoOne)
+	}
+	if reflect.DeepEqual(in2.Simple, nil) {
+		t.Errorf("expect %v, got %v", nil, in2.Simple)
+	}
+	if !reflect.DeepEqual("5566", in2.Simple.Component) {
+		t.Errorf("expect %v, got %v", "5566", in2.Simple.Component)
+	}
+	if reflect.DeepEqual(in2.Simples, nil) {
+		t.Errorf("expect %v, got %v", nil, in2.Simples)
+	}
+	if !reflect.DeepEqual(len(in2.Simples), 2) {
+		t.Errorf("expect %v, got %v", 2, len(in2.Simples))
+	}
+	if !reflect.DeepEqual("3344", in2.Simples[0]) {
+		t.Errorf("expect %v, got %v", "3344", in2.Simples[0])
+	}
+	if !reflect.DeepEqual("5566", in2.Simples[1]) {
+		t.Errorf("expect %v, got %v", "5566", in2.Simples[1])
+	}
 }

@@ -1,9 +1,8 @@
 package group
 
 import (
+	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestGroupGet(t *testing.T) {
@@ -13,14 +12,22 @@ func TestGroupGet(t *testing.T) {
 		return count
 	})
 	v := g.Get("key_0")
-	assert.Equal(t, 1, v.(int))
+	if !reflect.DeepEqual(v.(int), 1) {
+		t.Errorf("expect 1, actual %v", v)
+	}
 
 	v = g.Get("key_1")
-	assert.Equal(t, 2, v.(int))
+	if !reflect.DeepEqual(v.(int), 2) {
+		t.Errorf("expect 2, actual %v", v)
+	}
 
 	v = g.Get("key_0")
-	assert.Equal(t, 1, v.(int))
-	assert.Equal(t, 2, count)
+	if !reflect.DeepEqual(v.(int), 1) {
+		t.Errorf("expect 1, actual %v", v)
+	}
+	if !reflect.DeepEqual(count, 2) {
+		t.Errorf("expect count 2, actual %v", count)
+	}
 }
 
 func TestGroupReset(t *testing.T) {
@@ -38,11 +45,14 @@ func TestGroupReset(t *testing.T) {
 	for range g.vals {
 		length++
 	}
-
-	assert.Equal(t, 0, length)
+	if !reflect.DeepEqual(length, 0) {
+		t.Errorf("expect length 0, actual %v", length)
+	}
 
 	g.Get("key")
-	assert.Equal(t, true, call)
+	if !reflect.DeepEqual(call, true) {
+		t.Errorf("expect call true, actual %v", call)
+	}
 }
 
 func TestGroupClear(t *testing.T) {
@@ -54,12 +64,16 @@ func TestGroupClear(t *testing.T) {
 	for range g.vals {
 		length++
 	}
-	assert.Equal(t, 1, length)
+	if !reflect.DeepEqual(length, 1) {
+		t.Errorf("expect length 1, actual %v", length)
+	}
 
 	g.Clear()
 	length = 0
 	for range g.vals {
 		length++
 	}
-	assert.Equal(t, 0, length)
+	if !reflect.DeepEqual(length, 0) {
+		t.Errorf("expect length 0, actual %v", length)
+	}
 }

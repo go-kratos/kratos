@@ -6,10 +6,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"reflect"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestContextHeader(t *testing.T) {
@@ -20,7 +19,9 @@ func TestContextHeader(t *testing.T) {
 		w:      responseWriter{},
 	}
 	h := w.Header()
-	assert.Equal(t, h, http.Header{"name": {"kratos"}})
+	if !reflect.DeepEqual(h, http.Header{"name": {"kratos"}}) {
+		t.Errorf("expected %v, got %v", http.Header{"name": {"kratos"}}, h)
+	}
 }
 
 func TestContextForm(t *testing.T) {
@@ -31,7 +32,9 @@ func TestContextForm(t *testing.T) {
 		w:      responseWriter{},
 	}
 	form := w.Form()
-	assert.Equal(t, form, url.Values{})
+	if !reflect.DeepEqual(form, url.Values{}) {
+		t.Errorf("expected %v, got %v", url.Values{}, form)
+	}
 
 	w = wrapper{
 		router: nil,
@@ -40,7 +43,9 @@ func TestContextForm(t *testing.T) {
 		w:      responseWriter{},
 	}
 	form = w.Form()
-	assert.Equal(t, form, url.Values{"name": []string{"kratos"}})
+	if !reflect.DeepEqual(form, url.Values{"name": {"kratos"}}) {
+		t.Errorf("expected %v, got %v", url.Values{"name": {"kratos"}}, form)
+	}
 }
 
 func TestContextQuery(t *testing.T) {
@@ -51,7 +56,9 @@ func TestContextQuery(t *testing.T) {
 		w:      responseWriter{},
 	}
 	q := w.Query()
-	assert.Equal(t, q, url.Values{"page": []string{"1"}})
+	if !reflect.DeepEqual(q, url.Values{"page": {"1"}}) {
+		t.Errorf("expected %v, got %v", url.Values{"page": {"1"}}, q)
+	}
 }
 
 func TestContextRequest(t *testing.T) {
@@ -63,7 +70,9 @@ func TestContextRequest(t *testing.T) {
 		w:      responseWriter{},
 	}
 	res := w.Request()
-	assert.Equal(t, res, req)
+	if !reflect.DeepEqual(res, req) {
+		t.Errorf("expected %v, got %v", req, res)
+	}
 }
 
 func TestContextResponse(t *testing.T) {
@@ -74,9 +83,13 @@ func TestContextResponse(t *testing.T) {
 		res:    res,
 		w:      responseWriter{200, res},
 	}
-	assert.Equal(t, w.Response(), res)
+	if !reflect.DeepEqual(w.Response(), res) {
+		t.Errorf("expected %v, got %v", res, w.Response())
+	}
 	err := w.Returns(map[string]string{}, nil)
-	assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("expected %v, got %v", nil, err)
+	}
 }
 
 func TestContextBindQuery(t *testing.T) {
@@ -91,8 +104,12 @@ func TestContextBindQuery(t *testing.T) {
 	}
 	b := BindQuery{}
 	err := w.BindQuery(&b)
-	assert.Nil(t, err)
-	assert.Equal(t, b, BindQuery{Page: 2})
+	if err != nil {
+		t.Errorf("expected %v, got %v", nil, err)
+	}
+	if !reflect.DeepEqual(b, BindQuery{Page: 2}) {
+		t.Errorf("expected %v, got %v", BindQuery{Page: 2}, b)
+	}
 }
 
 func TestContextBindForm(t *testing.T) {
@@ -107,8 +124,12 @@ func TestContextBindForm(t *testing.T) {
 	}
 	b := BindForm{}
 	err := w.BindForm(&b)
-	assert.Nil(t, err)
-	assert.Equal(t, b, BindForm{Page: 2})
+	if err != nil {
+		t.Errorf("expected %v, got %v", nil, err)
+	}
+	if !reflect.DeepEqual(b, BindForm{Page: 2}) {
+		t.Errorf("expected %v, got %v", BindForm{Page: 2}, b)
+	}
 }
 
 func TestContextResponseReturn(t *testing.T) {
@@ -120,15 +141,25 @@ func TestContextResponseReturn(t *testing.T) {
 		w:      responseWriter{},
 	}
 	err := w.JSON(200, "success")
-	assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("expected %v, got %v", nil, err)
+	}
 	err = w.XML(200, "success")
-	assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("expected %v, got %v", nil, err)
+	}
 	err = w.String(200, "success")
-	assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("expected %v, got %v", nil, err)
+	}
 	err = w.Blob(200, "blob", []byte("success"))
-	assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("expected %v, got %v", nil, err)
+	}
 	err = w.Stream(200, "stream", bytes.NewBuffer([]byte("success")))
-	assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("expected %v, got %v", nil, err)
+	}
 }
 
 func TestContextCtx(t *testing.T) {
@@ -143,13 +174,21 @@ func TestContextCtx(t *testing.T) {
 		w:      responseWriter{},
 	}
 	_, ok := w.Deadline()
-	assert.Equal(t, ok, true)
+	if !ok {
+		t.Errorf("expected %v, got %v", true, ok)
+	}
 	done := w.Done()
-	assert.NotNil(t, done)
+	if done == nil {
+		t.Errorf("expected %v, got %v", true, ok)
+	}
 	err := w.Err()
-	assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("expected %v, got %v", nil, err)
+	}
 	v := w.Value("test")
-	assert.Nil(t, v)
+	if v != nil {
+		t.Errorf("expected %v, got %v", nil, v)
+	}
 
 	w = wrapper{
 		router: &Router{srv: &Server{enc: DefaultResponseEncoder}},
@@ -158,11 +197,19 @@ func TestContextCtx(t *testing.T) {
 		w:      responseWriter{},
 	}
 	_, ok = w.Deadline()
-	assert.Equal(t, ok, false)
+	if ok {
+		t.Errorf("expected %v, got %v", false, ok)
+	}
 	done = w.Done()
-	assert.Nil(t, done)
+	if done != nil {
+		t.Errorf("expected not nil, got %v", done)
+	}
 	err = w.Err()
-	assert.NotNil(t, err)
+	if err == nil {
+		t.Errorf("expected not %v, got %v", nil, err)
+	}
 	v = w.Value("test")
-	assert.Nil(t, v)
+	if v != nil {
+		t.Errorf("expected %v, got %v", nil, v)
+	}
 }
