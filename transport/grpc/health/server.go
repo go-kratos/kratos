@@ -54,7 +54,7 @@ func (s *Server) Watch(req *pb.HealthCheckRequest, ss pb.Health_WatchServer) (er
 		return errors.InternalServer("new uuid failed", err.Error())
 	}
 	update := info.Health().Update(req.Service, uid.String())
-	defer info.Health().Delupdate(req.Service, uid.String())
+	defer info.Health().DelUpdate(req.Service, uid.String())
 	status, ok := info.Health().GetStatus(req.Service)
 	if !ok {
 		update <- health.Status_SERVICE_UNKNOWN
