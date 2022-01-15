@@ -11,25 +11,32 @@ import (
 type Health struct {
 	statusMap map[string]Status
 	mutex     sync.RWMutex
-	opts      options
 	updates   map[string]map[string]chan Status
+	ticker    *time.Ticker
+
+	opts options
 }
 
 type Option func(*options)
 
-type options struct{}
+type options struct {
+	watchTime time.Duration
+}
 
 func New(opts ...Option) *Health {
+	option := options{
+		watchTime: time.Second * 5,
+	}
+	for _, o := range opts {
+		o(&option)
+	}
 	h := &Health{
 		statusMap: make(map[string]Status),
 		mutex:     sync.RWMutex{},
 		updates:   make(map[string]map[string]chan Status),
+		ticker:    time.NewTicker(option.watchTime),
+		opts:      option,
 	}
-	option := options{}
-	for _, o := range opts {
-		o(&option)
-	}
-	_ = h.opts
 	return h
 }
 
@@ -80,5 +87,15 @@ func (h *Health) DelUpdate(service string, id string) {
 	defer h.mutex.Unlock()
 	if _, ok := h.updates[service]; ok {
 		delete(h.updates[service], id)
+	}
+}
+
+func (h *Health) Ticker() *time.Ticker {
+	return h.ticker
+}
+
+func WithWatchTime(t time.Duration) Option {
+	return func(o *options) {
+		o.watchTime = t
 	}
 }

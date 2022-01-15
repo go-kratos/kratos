@@ -61,34 +61,39 @@ func (s *Server) Watch(req *pb.HealthCheckRequest, ss pb.Health_WatchServer) (er
 	} else {
 		update <- status
 	}
-
-	var lastStatus health.Status = -1
+	ticker := info.Health().Ticker()
 	for {
 		select {
 		case <-ctx.Done():
 			return nil
 		case status := <-update:
-			if lastStatus == status {
-				continue
+			err := send(ss, status)
+			if err != nil {
+				return err
 			}
-			lastStatus = status
-			var sv pb.HealthCheckResponse_ServingStatus
-			switch status {
-			case health.Status_SERVING:
-				sv = pb.HealthCheckResponse_SERVING
-			case health.Status_NOT_SERVING:
-				sv = pb.HealthCheckResponse_NOT_SERVING
-			case health.Status_SERVICE_UNKNOWN:
-				sv = pb.HealthCheckResponse_SERVICE_UNKNOWN
-			default:
-				sv = pb.HealthCheckResponse_NOT_SERVING
-			}
-			reply := &pb.HealthCheckResponse{
-				Status: sv,
-			}
-			if err := ss.Send(reply); err != nil {
+		case <-ticker.C:
+			err := send(ss, status)
+			if err != nil {
 				return err
 			}
 		}
 	}
+}
+
+func send(ss pb.Health_WatchServer, status health.Status) error {
+	var sv pb.HealthCheckResponse_ServingStatus
+	switch status {
+	case health.Status_SERVING:
+		sv = pb.HealthCheckResponse_SERVING
+	case health.Status_NOT_SERVING:
+		sv = pb.HealthCheckResponse_NOT_SERVING
+	case health.Status_SERVICE_UNKNOWN:
+		sv = pb.HealthCheckResponse_SERVICE_UNKNOWN
+	default:
+		sv = pb.HealthCheckResponse_NOT_SERVING
+	}
+	reply := &pb.HealthCheckResponse{
+		Status: sv,
+	}
+	return ss.Send(reply)
 }
