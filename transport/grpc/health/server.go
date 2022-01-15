@@ -66,7 +66,7 @@ func (s *Server) Watch(req *pb.HealthCheckRequest, ss pb.Health_WatchServer) (er
 		select {
 		case <-ctx.Done():
 			return nil
-		case status := <-update:
+		case status = <-update:
 			err := send(ss, status)
 			if err != nil {
 				return err
