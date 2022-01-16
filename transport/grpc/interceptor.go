@@ -74,6 +74,10 @@ func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
 
 		ws := NewWrappedStream(ctx, ss)
 
-		return handler(srv, ws)
+		err := handler(srv, ws)
+		if len(replyHeader) > 0 {
+			_ = grpc.SetHeader(ctx, replyHeader)
+		}
+		return err
 	}
 }
