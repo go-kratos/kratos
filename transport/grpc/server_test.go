@@ -207,8 +207,24 @@ func TestUnaryInterceptor(t *testing.T) {
 		},
 	}
 	UnaryInterceptor(v...)(o)
-	if !reflect.DeepEqual(v, o.ints) {
-		t.Errorf("expect %v, got %v", v, o.ints)
+	if !reflect.DeepEqual(v, o.unaryInts) {
+		t.Errorf("expect %v, got %v", v, o.unaryInts)
+	}
+}
+
+func TestStramInterceptor(t *testing.T) {
+	o := &Server{}
+	v := []grpc.StreamServerInterceptor{
+		func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+			return nil
+		},
+		func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+			return nil
+		},
+	}
+	StreamInterceptor(v...)(o)
+	if !reflect.DeepEqual(v, o.streamInts) {
+		t.Errorf("expect %v, got %v", v, o.streamInts)
 	}
 }
 
