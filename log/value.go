@@ -2,8 +2,6 @@ package log
 
 import (
 	"context"
-	"fmt"
-	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -17,9 +15,6 @@ var (
 
 	// DefaultTimestamp is a Valuer that returns the current wallclock time.
 	DefaultTimestamp = Timestamp(time.RFC3339)
-
-	// filenames is file name of the log folder
-	filenames = "filter|global|helper|level|log|std|value"
 )
 
 // Valuer is returns a log value.
@@ -35,18 +30,16 @@ func Value(ctx context.Context, v interface{}) interface{} {
 
 // Caller returns returns a Valuer that returns a pkg/file:line description of the caller.
 func Caller(depth int) Valuer {
-	reg := regexp.MustCompile(fmt.Sprintf(`^(.*)/log/(%s)\.go$`, filenames))
 	return func(context.Context) interface{} {
 		d := depth
-		var file string
-		var line int
-		for {
+		_, file, line, _ := runtime.Caller(d)
+		if strings.LastIndex(file, "/log/filter.go") > 0 {
+			d++
 			_, file, line, _ = runtime.Caller(d)
-			if reg.MatchString(file) {
-				d++
-			} else {
-				break
-			}
+		}
+		if strings.LastIndex(file, "/log/helper.go") > 0 {
+			d++
+			_, file, line, _ = runtime.Caller(d)
 		}
 		idx := strings.LastIndexByte(file, '/')
 		return file[idx+1:] + ":" + strconv.Itoa(line)
