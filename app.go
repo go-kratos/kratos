@@ -116,7 +116,7 @@ func (a *App) Run() error {
 	if a.opts.registrar != nil {
 		rctx, rcancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 		defer rcancel()
-		if err := a.opts.registrar.Register(rctx, instance); err != nil {
+		if err = a.opts.registrar.Register(rctx, instance); err != nil {
 			return err
 		}
 		a.lk.Lock()

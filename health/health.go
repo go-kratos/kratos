@@ -9,14 +9,12 @@ import (
 )
 
 type Health struct {
+	mutex sync.RWMutex
 	// key: service name, type is string
 	// value: service Status type is Status
 	statusMap sync.Map
-	// key: service name, type is string
-	// value: update, type is sync.Map
-	// update: key is id, type is string, value: chan Status
-	updates sync.Map
-	ticker  *time.Ticker
+	updates   map[string]map[string]chan Status
+	ticker    *time.Ticker
 }
 
 func New(opts ...Option) *Health {
@@ -27,7 +25,8 @@ func New(opts ...Option) *Health {
 		o(&option)
 	}
 	h := &Health{
-		ticker: time.NewTicker(option.watchTime),
+		ticker:  time.NewTicker(option.watchTime),
+		updates: map[string]map[string]chan Status{},
 	}
 	return h
 }
@@ -45,11 +44,9 @@ func (h *Health) SetStatus(service string, status Status) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*100)
 	defer cancel()
 	eg, ctx := errgroup.WithContext(ctx)
-	u, _ := h.updates.LoadOrStore(service, sync.Map{})
-	update := u.(sync.Map)
-
-	update.Range(func(key, value interface{}) bool {
-		ch := value.(chan Status)
+	h.mutex.RLock()
+	for _, w := range h.updates[service] {
+		ch := w
 		eg.Go(func() error {
 			select {
 			case ch <- status:
@@ -58,23 +55,29 @@ func (h *Health) SetStatus(service string, status Status) error {
 			}
 			return nil
 		})
-		return true
-	})
+	}
+	h.mutex.RUnlock()
 
 	return eg.Wait()
 }
 
 func (h *Health) Update(service string, id string) chan Status {
-	u, _ := h.updates.LoadOrStore(service, sync.Map{})
-	update := u.(sync.Map)
-	ch, _ := update.LoadOrStore(id, make(chan Status, 1))
-	return ch.(chan Status)
+	h.mutex.RLock()
+	defer h.mutex.RUnlock()
+	if _, ok := h.updates[service]; !ok {
+		h.updates[service] = make(map[string]chan Status)
+	}
+	if _, ok := h.updates[service][id]; !ok {
+		h.updates[service][id] = make(chan Status, 1)
+	}
+	return h.updates[service][id]
 }
 
 func (h *Health) DelUpdate(service string, id string) {
-	if u, ok := h.updates.Load(service); ok {
-		update := u.(sync.Map)
-		update.Delete(id)
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+	if _, ok := h.updates[service]; ok {
+		delete(h.updates[service], id)
 	}
 }
 
