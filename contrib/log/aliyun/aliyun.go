@@ -27,47 +27,47 @@ func (a *aliyunLog) GetProducer() *producer.Producer {
 }
 
 type options struct {
-	AccessKey    string
-	AccessSecret string
-	Endpoint     string
-	Project      string
-	Logstore     string
+	accessKey    string
+	accessSecret string
+	endpoint     string
+	project      string
+	logstore     string
 }
 
-func DefaultOptions() *options {
+func defaultOptions() *options {
 	return &options{
-		Project:  "projectName",
-		Logstore: "app",
+		project:  "projectName",
+		logstore: "app",
 	}
 }
 
 func WithEndpoint(endpoint string) Option {
 	return func(alc *options) {
-		alc.Endpoint = endpoint
+		alc.endpoint = endpoint
 	}
 }
 
 func WithProject(project string) Option {
 	return func(alc *options) {
-		alc.Project = project
+		alc.project = project
 	}
 }
 
 func WithLogstore(logstore string) Option {
 	return func(alc *options) {
-		alc.Logstore = logstore
+		alc.logstore = logstore
 	}
 }
 
 func WithAccessKey(ak string) Option {
 	return func(alc *options) {
-		alc.AccessKey = ak
+		alc.accessKey = ak
 	}
 }
 
 func WithAccessSecret(as string) Option {
 	return func(alc *options) {
-		alc.AccessSecret = as
+		alc.accessSecret = as
 	}
 }
 
@@ -98,21 +98,21 @@ func (a *aliyunLog) Log(level klog.Level, keyvals ...interface{}) error {
 		Contents: contents,
 	}
 
-	err := a.producer.SendLog(a.opts.Project, a.opts.Logstore, "", "", logInst)
+	err := a.producer.SendLog(a.opts.project, a.opts.logstore, "", "", logInst)
 	return err
 }
 
 // NewAliyunLog new a aliyun logger with options.
 func NewAliyunLog(options ...Option) Log {
-	opts := DefaultOptions()
+	opts := defaultOptions()
 	for _, o := range options {
 		o(opts)
 	}
 
 	producerConfig := producer.GetDefaultProducerConfig()
-	producerConfig.Endpoint = opts.Endpoint
-	producerConfig.AccessKeyID = opts.AccessKey
-	producerConfig.AccessKeySecret = opts.AccessSecret
+	producerConfig.Endpoint = opts.endpoint
+	producerConfig.AccessKeyID = opts.accessKey
+	producerConfig.AccessKeySecret = opts.accessSecret
 	producerInst := producer.InitProducer(producerConfig)
 
 	return &aliyunLog{
@@ -122,54 +122,42 @@ func NewAliyunLog(options ...Option) Log {
 }
 
 // toString 任意类型转string
-func toString(value interface{}) string {
+func toString(v interface{}) string {
 	var key string
-	if value == nil {
+	if v == nil {
 		return key
 	}
-	switch value.(type) {
+	switch v := v.(type) {
 	case float64:
-		ft := value.(float64)
-		key = strconv.FormatFloat(ft, 'f', -1, 64)
+		key = strconv.FormatFloat(v, 'f', -1, 64)
 	case float32:
-		ft := value.(float32)
-		key = strconv.FormatFloat(float64(ft), 'f', -1, 64)
+		key = strconv.FormatFloat(float64(v), 'f', -1, 64)
 	case int:
-		it := value.(int)
-		key = strconv.Itoa(it)
+		key = strconv.Itoa(v)
 	case uint:
-		it := value.(uint)
-		key = strconv.Itoa(int(it))
+		key = strconv.Itoa(int(v))
 	case int8:
-		it := value.(int8)
-		key = strconv.Itoa(int(it))
+		key = strconv.Itoa(int(v))
 	case uint8:
-		it := value.(uint8)
-		key = strconv.Itoa(int(it))
+		key = strconv.Itoa(int(v))
 	case int16:
-		it := value.(int16)
-		key = strconv.Itoa(int(it))
+		key = strconv.Itoa(int(v))
 	case uint16:
-		it := value.(uint16)
-		key = strconv.Itoa(int(it))
+		key = strconv.Itoa(int(v))
 	case int32:
-		it := value.(int32)
-		key = strconv.Itoa(int(it))
+		key = strconv.Itoa(int(v))
 	case uint32:
-		it := value.(uint32)
-		key = strconv.Itoa(int(it))
+		key = strconv.Itoa(int(v))
 	case int64:
-		it := value.(int64)
-		key = strconv.FormatInt(it, 10)
+		key = strconv.FormatInt(v, 10)
 	case uint64:
-		it := value.(uint64)
-		key = strconv.FormatUint(it, 10)
+		key = strconv.FormatUint(v, 10)
 	case string:
-		key = value.(string)
+		key = v
 	case []byte:
-		key = string(value.([]byte))
+		key = string(v)
 	default:
-		newValue, _ := json.Marshal(value)
+		newValue, _ := json.Marshal(v)
 		key = string(newValue)
 	}
 	return key
