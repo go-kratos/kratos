@@ -49,7 +49,7 @@ type config struct {
 // New new a config with options.
 func New(opts ...Option) Config {
 	o := options{
-		logger:   log.DefaultLogger,
+		logger:   log.GetLogger(),
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
 	}

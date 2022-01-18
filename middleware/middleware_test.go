@@ -3,9 +3,8 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 var i int
@@ -18,9 +17,15 @@ func TestChain(t *testing.T) {
 	}
 
 	got, err := Chain(test1Middleware, test2Middleware, test3Middleware)(next)(context.Background(), "hello kratos!")
-	assert.Nil(t, err)
-	assert.Equal(t, got, "reply")
-	assert.Equal(t, i, 16)
+	if err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
+	if !reflect.DeepEqual(got, "reply") {
+		t.Errorf("expect %v, got %v", "reply", got)
+	}
+	if !reflect.DeepEqual(i, 16) {
+		t.Errorf("expect %v, got %v", 16, i)
+	}
 }
 
 func test1Middleware(handler Handler) Handler {

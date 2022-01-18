@@ -10,13 +10,11 @@ import (
 	"time"
 
 	etcdregistry "github.com/go-kratos/kratos/contrib/registry/etcd/v2"
-	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
-	"github.com/stretchr/testify/assert"
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
@@ -65,8 +63,8 @@ func callGRPC(t *testing.T, r registry.Discovery, c *tls.Config) {
 		t.Fatal(err)
 	}
 	defer conn.Close()
-	client := helloworld.NewGreeterClient(conn)
-	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
+	client := pb.NewGreeterClient(conn)
+	reply, err := client.SayHello(context.Background(), &pb.HelloRequest{Name: "kratos"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,8 +83,8 @@ func callHTTP(t *testing.T, r registry.Discovery, c *tls.Config) {
 		t.Fatal(err)
 	}
 	defer conn.Close()
-	client := helloworld.NewGreeterHTTPClient(conn)
-	reply, err := client.SayHello(context.Background(), &helloworld.HelloRequest{Name: "kratos"})
+	client := pb.NewGreeterHTTPClient(conn)
+	reply, err := client.SayHello(context.Background(), &pb.HelloRequest{Name: "kratos"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,6 +126,10 @@ func TestETCD(t *testing.T) {
 	}
 	callHTTP(t, r, tlsConf)
 	callGRPC(t, r, tlsConf)
-	assert.NoError(t, srv.Stop())
-	assert.NoError(t, srvTLS.Stop())
+	if srv.Stop() != nil {
+		t.Errorf("srv.Stop() got error: %v", err)
+	}
+	if srvTLS.Stop() != nil {
+		t.Errorf("srv.Stop() got error: %v", err)
+	}
 }

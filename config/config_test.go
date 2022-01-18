@@ -2,10 +2,10 @@ package config
 
 import (
 	"errors"
+	"reflect"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -123,17 +123,19 @@ func TestConfig(t *testing.T) {
 		WithSource(newTestJSONSource(_testJSON)),
 		WithDecoder(defaultDecoder),
 		WithResolver(defaultResolver),
-		WithLogger(log.DefaultLogger),
+		WithLogger(log.GetLogger()),
 	)
 	err = c.Close()
-	assert.Nil(t, err)
+	if err != nil {
+		t.Fatal("t is not nil")
+	}
 
 	jSource := newTestJSONSource(_testJSON)
 	opts := options{
 		sources:  []Source{jSource},
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
-		logger:   log.DefaultLogger,
+		logger:   log.GetLogger(),
 	}
 	cf := &config{}
 	cf.opts = opts
@@ -141,26 +143,48 @@ func TestConfig(t *testing.T) {
 	cf.log = log.NewHelper(opts.logger)
 
 	err = cf.Load()
-	assert.Nil(t, err)
+	if err != nil {
+		t.Fatal("t is not nil")
+	}
 
 	val, err := cf.Value("data.database.driver").String()
-	assert.Nil(t, err)
-	assert.Equal(t, databaseDriver, val)
+	if err != nil {
+		t.Fatal("t is not nil")
+	}
+	if !reflect.DeepEqual(databaseDriver, val) {
+		t.Fatal(`databaseDriver is not equal to val`)
+	}
 
 	err = cf.Watch("endpoints", func(key string, value Value) {
 	})
-	assert.Nil(t, err)
+	if err != nil {
+		t.Fatal("t is not nil")
+	}
 
 	jSource.sig <- struct{}{}
 	jSource.err <- struct{}{}
 
 	var testConf testConfigStruct
 	err = cf.Scan(&testConf)
-	assert.Nil(t, err)
-	assert.Equal(t, httpAddr, testConf.Server.HTTP.Addr)
-	assert.Equal(t, httpTimeout, testConf.Server.HTTP.Timeout)
-	assert.Equal(t, true, testConf.Server.HTTP.EnableSSL)
-	assert.Equal(t, grpcPort, testConf.Server.GRPC.Port)
-	assert.Equal(t, endpoint1, testConf.Endpoints[0])
-	assert.Equal(t, 2, len(testConf.Endpoints))
+	if err != nil {
+		t.Fatal("t is not nil")
+	}
+	if !reflect.DeepEqual(httpAddr, testConf.Server.HTTP.Addr) {
+		t.Fatal(`httpAddr is not equal to testConf.Server.HTTP.Addr`)
+	}
+	if !reflect.DeepEqual(httpTimeout, testConf.Server.HTTP.Timeout) {
+		t.Fatal(`httpTimeout is not equal to testConf.Server.HTTP.Timeout`)
+	}
+	if !reflect.DeepEqual(true, testConf.Server.HTTP.EnableSSL) {
+		t.Fatal(`testConf.Server.HTTP.EnableSSL is not equal to true`)
+	}
+	if !reflect.DeepEqual(grpcPort, testConf.Server.GRPC.Port) {
+		t.Fatal(`grpcPort is not equal to testConf.Server.GRPC.Port`)
+	}
+	if !reflect.DeepEqual(endpoint1, testConf.Endpoints[0]) {
+		t.Fatal(`endpoint1 is not equal to testConf.Endpoints[0]`)
+	}
+	if !reflect.DeepEqual(len(testConf.Endpoints), 2) {
+		t.Fatal(`len(testConf.Endpoints) is not equal to 2`)
+	}
 }

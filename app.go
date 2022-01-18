@@ -39,7 +39,7 @@ type App struct {
 func New(opts ...Option) *App {
 	o := options{
 		ctx:              context.Background(),
-		logger:           log.NewHelper(log.DefaultLogger),
+		logger:           log.NewHelper(log.GetLogger()),
 		sigs:             []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		registrarTimeout: 10 * time.Second,
 		stopTimeout:      10 * time.Second,

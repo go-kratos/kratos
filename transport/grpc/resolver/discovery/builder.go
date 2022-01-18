@@ -48,7 +48,7 @@ type builder struct {
 func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 	b := &builder{
 		discoverer: d,
-		logger:     log.DefaultLogger,
+		logger:     log.GetLogger(),
 		timeout:    time.Second * 10,
 		insecure:   false,
 	}

@@ -1,9 +1,8 @@
 package msgpack
 
 import (
+	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 type loginRequest struct {
@@ -18,29 +17,47 @@ type testModel struct {
 
 func TestName(t *testing.T) {
 	c := new(codec)
-	assert.Equal(t, c.Name(), "msgpack")
+	if !reflect.DeepEqual("msgpack", c.Name()) {
+		t.Errorf("Name() should be msgpack, but got %s", c.Name())
+	}
 }
 
 func TestCodec(t *testing.T) {
 	c := new(codec)
 	t2 := testModel{ID: 1, Name: "name"}
 	m, err := c.Marshal(&t2)
-	assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("Marshal() should be nil, but got %s", err)
+	}
 	var t3 testModel
 	err = c.Unmarshal(m, &t3)
-	assert.Nil(t, err)
-	assert.Equal(t, t3.ID, t2.ID)
-	assert.Equal(t, t3.Name, t2.Name)
+	if err != nil {
+		t.Errorf("Unmarshal() should be nil, but got %s", err)
+	}
+	if !reflect.DeepEqual(t2.ID, t3.ID) {
+		t.Errorf("ID should be %d, but got %d", t2.ID, t3.ID)
+	}
+	if !reflect.DeepEqual(t3.Name, t2.Name) {
+		t.Errorf("Name should be %s, but got %s", t2.Name, t3.Name)
+	}
 
 	request := loginRequest{
 		UserName: "username",
 		Password: "password",
 	}
 	m, err = c.Marshal(&request)
-	assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("Marshal() should be nil, but got %s", err)
+	}
 	var req loginRequest
 	err = c.Unmarshal(m, &req)
-	assert.Nil(t, err)
-	assert.Equal(t, req.Password, request.Password)
-	assert.Equal(t, req.UserName, request.UserName)
+	if err != nil {
+		t.Errorf("Unmarshal() should be nil, but got %s", err)
+	}
+	if !reflect.DeepEqual(req.Password, request.Password) {
+		t.Errorf("ID should be %s, but got %s", req.Password, request.Password)
+	}
+	if !reflect.DeepEqual(req.UserName, request.UserName) {
+		t.Errorf("Name should be %s, but got %s", req.UserName, request.UserName)
+	}
 }

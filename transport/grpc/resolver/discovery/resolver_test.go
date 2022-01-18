@@ -3,12 +3,12 @@ package discovery
 import (
 	"context"
 	"errors"
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -56,7 +56,7 @@ func TestWatch(t *testing.T) {
 	r := &discoveryResolver{
 		w:        &testWatch{},
 		cc:       &testClientConn{te: t},
-		log:      log.NewHelper(log.DefaultLogger),
+		log:      log.NewHelper(log.GetLogger()),
 		ctx:      ctx,
 		cancel:   cancel,
 		insecure: false,
@@ -75,7 +75,7 @@ func TestWatchError(t *testing.T) {
 	r := &discoveryResolver{
 		w:      &testWatch{err: errors.New("bad")},
 		cc:     &testClientConn{te: t},
-		log:    log.NewHelper(log.DefaultLogger),
+		log:    log.NewHelper(log.GetLogger()),
 		ctx:    ctx,
 		cancel: cancel,
 	}
@@ -93,7 +93,7 @@ func TestWatchContextCancel(t *testing.T) {
 	r := &discoveryResolver{
 		w:      &testWatch{err: context.Canceled},
 		cc:     &testClientConn{te: t},
-		log:    log.NewHelper(log.DefaultLogger),
+		log:    log.NewHelper(log.GetLogger()),
 		ctx:    ctx,
 		cancel: cancel,
 	}
@@ -107,8 +107,14 @@ func TestWatchContextCancel(t *testing.T) {
 
 func TestParseAttributes(t *testing.T) {
 	a := parseAttributes(map[string]string{"a": "b"})
-	assert.Equal(t, "b", a.Value("a").(string))
+	if !reflect.DeepEqual("b", a.Value("a").(string)) {
+		t.Errorf("expect b, got %v", a.Value("a"))
+	}
 	x := a.WithValue("qq", "ww")
-	assert.Equal(t, "ww", x.Value("qq").(string))
-	assert.Nil(t, x.Value("notfound"))
+	if !reflect.DeepEqual("ww", x.Value("qq").(string)) {
+		t.Errorf("expect ww, got %v", x.Value("qq"))
+	}
+	if x.Value("notfound") != nil {
+		t.Errorf("expect nil, got %v", x.Value("notfound"))
+	}
 }

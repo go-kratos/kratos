@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/grpc_testing"
@@ -58,9 +58,13 @@ func TestError(t *testing.T) {
 	if se2.Code != http.StatusBadRequest {
 		t.Errorf("convert code err, got %d want %d", UnknownCode, http.StatusBadRequest)
 	}
-	assert.Nil(t, FromError(nil))
+	if FromError(nil) != nil {
+		t.Errorf("FromError(nil) should be nil")
+	}
 	e := FromError(errors.New("test"))
-	assert.Equal(t, e.Code, int32(UnknownCode))
+	if !reflect.DeepEqual(e.Code, int32(UnknownCode)) {
+		t.Errorf("no expect value: %v, but got: %v", e.Code, int32(UnknownCode))
+	}
 }
 
 func TestIs(t *testing.T) {
@@ -93,10 +97,20 @@ func TestIs(t *testing.T) {
 }
 
 func TestOther(t *testing.T) {
-	assert.Equal(t, Code(nil), 200)
-	assert.Equal(t, Code(errors.New("test")), UnknownCode)
-	assert.Equal(t, Reason(errors.New("test")), UnknownReason)
+	if !reflect.DeepEqual(Code(nil), 200) {
+		t.Errorf("Code(nil) = %v, want %v", Code(nil), 200)
+	}
+	if !reflect.DeepEqual(Code(errors.New("test")), UnknownCode) {
+		t.Errorf(`Code(errors.New("test")) = %v, want %v`, Code(nil), 200)
+	}
+	if !reflect.DeepEqual(Reason(errors.New("test")), UnknownReason) {
+		t.Errorf(`Reason(errors.New("test")) = %v, want %v`, Reason(nil), UnknownReason)
+	}
 	err := Errorf(10001, "test code 10001", "message")
-	assert.Equal(t, Code(err), 10001)
-	assert.Equal(t, Reason(err), "test code 10001")
+	if !reflect.DeepEqual(Code(err), 10001) {
+		t.Errorf(`Code(err) = %v, want %v`, Code(err), 10001)
+	}
+	if !reflect.DeepEqual(Reason(err), "test code 10001") {
+		t.Errorf(`Reason(err) = %v, want %v`, Reason(err), "test code 10001")
+	}
 }

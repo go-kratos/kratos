@@ -11,7 +11,6 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
-	"github.com/stretchr/testify/assert"
 )
 
 type mockRegistry struct {
@@ -60,19 +59,25 @@ func TestApp(t *testing.T) {
 func TestApp_ID(t *testing.T) {
 	v := "123"
 	o := New(ID(v))
-	assert.Equal(t, v, o.ID())
+	if !reflect.DeepEqual(v, o.ID()) {
+		t.Fatalf("o.ID():%s is not equal to v:%s", o.ID(), v)
+	}
 }
 
 func TestApp_Name(t *testing.T) {
 	v := "123"
 	o := New(Name(v))
-	assert.Equal(t, v, o.Name())
+	if !reflect.DeepEqual(v, o.Name()) {
+		t.Fatalf("o.Name():%s is not equal to v:%s", o.Name(), v)
+	}
 }
 
 func TestApp_Version(t *testing.T) {
 	v := "123"
 	o := New(Version(v))
-	assert.Equal(t, v, o.Version())
+	if !reflect.DeepEqual(v, o.Version()) {
+		t.Fatalf("o.Version():%s is not equal to v:%s", o.Version(), v)
+	}
 }
 
 func TestApp_Metadata(t *testing.T) {
@@ -81,7 +86,9 @@ func TestApp_Metadata(t *testing.T) {
 		"b": "2",
 	}
 	o := New(Metadata(v))
-	assert.Equal(t, v, o.Metadata())
+	if !reflect.DeepEqual(v, o.Metadata()) {
+		t.Fatalf("o.Metadata():%s is not equal to v:%s", o.Metadata(), v)
+	}
 }
 
 func TestApp_Endpoint(t *testing.T) {

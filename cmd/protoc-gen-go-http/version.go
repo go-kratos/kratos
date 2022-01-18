@@ -1,4 +1,4 @@
 package main
 
 // release is the current protoc-gen-go-http version.
-const release = "v2.1.3"
+const release = "v2.1.4"

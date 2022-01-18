@@ -2,12 +2,12 @@ package ewma
 
 import (
 	"context"
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestDirect(t *testing.T) {
@@ -22,19 +22,32 @@ func TestDirect(t *testing.T) {
 			Metadata:  map[string]string{"weight": "10"},
 		}))
 
-	assert.Equal(t, float64(100), wn.Weight())
+	if !reflect.DeepEqual(float64(100), wn.Weight()) {
+		t.Errorf("expect %v, got %v", 100, wn.Weight())
+	}
 	done := wn.Pick()
-	assert.NotNil(t, done)
+	if done == nil {
+		t.Errorf("done is equal to nil")
+	}
 	done2 := wn.Pick()
-	assert.NotNil(t, done2)
+	if done2 == nil {
+		t.Errorf("done2 is equal to nil")
+	}
 
 	time.Sleep(time.Millisecond * 10)
 	done(context.Background(), selector.DoneInfo{})
-	assert.Less(t, float64(30000), wn.Weight())
-	assert.Greater(t, float64(60000), wn.Weight())
-
-	assert.Greater(t, time.Millisecond*15, wn.PickElapsed())
-	assert.Less(t, time.Millisecond*5, wn.PickElapsed())
+	if float64(30000) >= wn.Weight() {
+		t.Errorf("float64(30000) >= wn.Weight()(%v)", wn.Weight())
+	}
+	if float64(60000) <= wn.Weight() {
+		t.Errorf("float64(60000) <= wn.Weight()(%v)", wn.Weight())
+	}
+	if time.Millisecond*15 <= wn.PickElapsed() {
+		t.Errorf("time.Millisecond*15 <= wn.PickElapsed()(%v)", wn.PickElapsed())
+	}
+	if time.Millisecond*5 >= wn.PickElapsed() {
+		t.Errorf("time.Millisecond*5 >= wn.PickElapsed()(%v)", wn.PickElapsed())
+	}
 }
 
 func TestDirectError(t *testing.T) {
@@ -55,13 +68,18 @@ func TestDirectError(t *testing.T) {
 			err = context.DeadlineExceeded
 		}
 		done := wn.Pick()
-		assert.NotNil(t, done)
+		if done == nil {
+			t.Errorf("expect not nil, got nil")
+		}
 		time.Sleep(time.Millisecond * 20)
 		done(context.Background(), selector.DoneInfo{Err: err})
 	}
-
-	assert.Less(t, float64(30000), wn.Weight())
-	assert.Greater(t, float64(60000), wn.Weight())
+	if float64(30000) >= wn.Weight() {
+		t.Errorf("float64(30000) >= wn.Weight()(%v)", wn.Weight())
+	}
+	if float64(60000) <= wn.Weight() {
+		t.Errorf("float64(60000) <= wn.Weight()(%v)", wn.Weight())
+	}
 }
 
 func TestDirectErrorHandler(t *testing.T) {
@@ -86,11 +104,16 @@ func TestDirectErrorHandler(t *testing.T) {
 			err = context.DeadlineExceeded
 		}
 		done := wn.Pick()
-		assert.NotNil(t, done)
+		if done == nil {
+			t.Errorf("expect not nil, got nil")
+		}
 		time.Sleep(time.Millisecond * 20)
 		done(context.Background(), selector.DoneInfo{Err: err})
 	}
-
-	assert.Less(t, float64(30000), wn.Weight())
-	assert.Greater(t, float64(60000), wn.Weight())
+	if float64(30000) >= wn.Weight() {
+		t.Errorf("float64(30000) >= wn.Weight()(%v)", wn.Weight())
+	}
+	if float64(60000) <= wn.Weight() {
+		t.Errorf("float64(60000) <= wn.Weight()(%v)", wn.Weight())
+	}
 }

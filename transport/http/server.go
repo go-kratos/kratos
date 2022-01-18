@@ -143,7 +143,7 @@ func NewServer(opts ...ServerOption) *Server {
 		enc:         DefaultResponseEncoder,
 		ene:         DefaultErrorEncoder,
 		strictSlash: true,
-		log:         log.NewHelper(log.DefaultLogger),
+		log:         log.NewHelper(log.GetLogger()),
 	}
 	for _, o := range opts {
 		o(srv)
