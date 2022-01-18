@@ -191,8 +191,8 @@ func (s *Server) Start(ctx context.Context) error {
 
 // Stop stop the gRPC server.
 func (s *Server) Stop(ctx context.Context) error {
-	s.GracefulStop()
 	s.health.Shutdown()
+	s.GracefulStop()
 	s.log.Info("[gRPC] server stopping")
 	return nil
 }
