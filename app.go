@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/health"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -24,6 +25,7 @@ type AppInfo interface {
 	Version() string
 	Metadata() map[string]string
 	Endpoint() []string
+	Health() *health.Health
 }
 
 // App is an application components lifecycle manager.
@@ -33,6 +35,7 @@ type App struct {
 	cancel   func()
 	lk       sync.Mutex
 	instance *registry.ServiceInstance
+	health   *health.Health
 }
 
 // New create an application lifecycle manager.
@@ -55,6 +58,7 @@ func New(opts ...Option) *App {
 		ctx:    ctx,
 		cancel: cancel,
 		opts:   o,
+		health: health.New(),
 	}
 }
 
@@ -77,6 +81,9 @@ func (a *App) Endpoint() []string {
 	}
 	return a.instance.Endpoints
 }
+
+// Health returns health
+func (a *App) Health() *health.Health { return a.health }
 
 // Run executes all OnStart hooks registered with the application's Lifecycle.
 func (a *App) Run() error {
@@ -102,6 +109,10 @@ func (a *App) Run() error {
 		})
 	}
 	wg.Wait()
+	err = a.health.SetStatus(a.Name(), health.Status_SERVING)
+	if err != nil {
+		log.Errorf("set health status error: %v", err)
+	}
 	if a.opts.registrar != nil {
 		rctx, rcancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 		defer rcancel()
@@ -118,6 +129,10 @@ func (a *App) Run() error {
 		for {
 			select {
 			case <-ctx.Done():
+				err = a.health.SetStatus(a.Name(), health.Status_NOT_SERVING)
+				if err != nil {
+					log.Errorf("set health status error: %v", err)
+				}
 				return ctx.Err()
 			case <-c:
 				err := a.Stop()
@@ -136,6 +151,10 @@ func (a *App) Run() error {
 
 // Stop gracefully stops the application.
 func (a *App) Stop() error {
+	err := a.health.SetStatus(a.Name(), health.Status_NOT_SERVING)
+	if err != nil {
+		log.Errorf("set health status error: %v", err)
+	}
 	a.lk.Lock()
 	instance := a.instance
 	a.lk.Unlock()

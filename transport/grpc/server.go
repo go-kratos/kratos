@@ -16,9 +16,9 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 
+	"github.com/go-kratos/kratos/v2/transport/grpc/health"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 
 	"google.golang.org/grpc/reflection"
@@ -185,14 +185,14 @@ func (s *Server) Start(ctx context.Context) error {
 	}
 	s.baseCtx = ctx
 	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
-	s.health.Resume()
+	// s.health.Resume()
 	return s.Serve(s.lis)
 }
 
 // Stop stop the gRPC server.
 func (s *Server) Stop(ctx context.Context) error {
 	s.GracefulStop()
-	s.health.Shutdown()
+	// s.health.Shutdown()
 	s.log.Info("[gRPC] server stopping")
 	return nil
 }
