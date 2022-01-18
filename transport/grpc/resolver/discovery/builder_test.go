@@ -2,12 +2,12 @@ package discovery
 
 import (
 	"context"
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/serviceconfig"
 )
@@ -33,14 +33,18 @@ func TestWithLogger(t *testing.T) {
 func TestWithInsecure(t *testing.T) {
 	b := &builder{}
 	WithInsecure(true)(b)
-	assert.True(t, b.insecure)
+	if !b.insecure {
+		t.Errorf("expected insecure to be true")
+	}
 }
 
 func TestWithTimeout(t *testing.T) {
 	o := &builder{}
 	v := time.Duration(123)
 	WithTimeout(v)(o)
-	assert.Equal(t, v, o.timeout)
+	if !reflect.DeepEqual(v, o.timeout) {
+		t.Errorf("expected %v, got %v", v, o.timeout)
+	}
 }
 
 type mockDiscovery struct{}
@@ -55,7 +59,9 @@ func (m *mockDiscovery) Watch(ctx context.Context, serviceName string) (registry
 
 func TestBuilder_Scheme(t *testing.T) {
 	b := NewBuilder(&mockDiscovery{})
-	assert.Equal(t, "discovery", b.Scheme())
+	if !reflect.DeepEqual("discovery", b.Scheme()) {
+		t.Errorf("expected %v, got %v", "discovery", b.Scheme())
+	}
 }
 
 type mockConn struct{}
@@ -77,5 +83,7 @@ func (m *mockConn) ParseServiceConfig(serviceConfigJSON string) *serviceconfig.P
 func TestBuilder_Build(t *testing.T) {
 	b := NewBuilder(&mockDiscovery{})
 	_, err := b.Build(resolver.Target{Scheme: resolver.GetDefaultScheme(), Endpoint: "gprc://authority/endpoint"}, &mockConn{}, resolver.BuildOptions{})
-	assert.NoError(t, err)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
 }

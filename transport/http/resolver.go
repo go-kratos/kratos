@@ -57,7 +57,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 	r := &resolver{
 		target:     target,
 		watcher:    watcher,
-		logger:     log.NewHelper(log.DefaultLogger),
+		logger:     log.NewHelper(log.GetLogger()),
 		rebalancer: rebalancer,
 		insecure:   insecure,
 	}

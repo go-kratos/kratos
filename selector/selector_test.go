@@ -2,13 +2,14 @@ package selector
 
 import (
 	"context"
+	"errors"
 	"math/rand"
+	"reflect"
 	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/stretchr/testify/assert"
 )
 
 type mockWeightedNode struct {
@@ -107,33 +108,67 @@ func TestDefault(t *testing.T) {
 		}))
 	selector.Apply(nodes)
 	n, done, err := selector.Select(context.Background(), WithFilter(mockFilter("v2.0.0")))
-	assert.Nil(t, err)
-	assert.NotNil(t, n)
-	assert.NotNil(t, done)
-	assert.Equal(t, "v2.0.0", n.Version())
-	assert.NotNil(t, n.Address())
-	assert.Equal(t, int64(10), *n.InitialWeight())
-	assert.NotNil(t, n.Metadata())
-	assert.Equal(t, "helloworld", n.ServiceName())
+	if err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
+	if n == nil {
+		t.Errorf("expect %v, got %v", nil, n)
+	}
+	if done == nil {
+		t.Errorf("expect %v, got %v", nil, done)
+	}
+	if !reflect.DeepEqual("v2.0.0", n.Version()) {
+		t.Errorf("expect %v, got %v", "v2.0.0", n.Version())
+	}
+	if n.Address() == "" {
+		t.Errorf("expect %v, got %v", "", n.Address())
+	}
+	if !reflect.DeepEqual(int64(10), *n.InitialWeight()) {
+		t.Errorf("expect %v, got %v", 10, *n.InitialWeight())
+	}
+	if n.Metadata() == nil {
+		t.Errorf("expect %v, got %v", nil, n.Metadata())
+	}
+	if !reflect.DeepEqual("helloworld", n.ServiceName()) {
+		t.Errorf("expect %v, got %v", "helloworld", n.ServiceName())
+	}
 	done(context.Background(), DoneInfo{})
 
 	// no v3.0.0 instance
 	n, done, err = selector.Select(context.Background(), WithFilter(mockFilter("v3.0.0")))
-	assert.Equal(t, ErrNoAvailable, err)
-	assert.Nil(t, done)
-	assert.Nil(t, n)
+	if !errors.Is(ErrNoAvailable, err) {
+		t.Errorf("expect %v, got %v", ErrNoAvailable, err)
+	}
+	if done != nil {
+		t.Errorf("expect %v, got %v", nil, done)
+	}
+	if n != nil {
+		t.Errorf("expect %v, got %v", nil, n)
+	}
 
 	// apply zero instance
 	selector.Apply([]Node{})
 	n, done, err = selector.Select(context.Background(), WithFilter(mockFilter("v2.0.0")))
-	assert.Equal(t, ErrNoAvailable, err)
-	assert.Nil(t, done)
-	assert.Nil(t, n)
+	if !errors.Is(ErrNoAvailable, err) {
+		t.Errorf("expect %v, got %v", ErrNoAvailable, err)
+	}
+	if done != nil {
+		t.Errorf("expect %v, got %v", nil, done)
+	}
+	if n != nil {
+		t.Errorf("expect %v, got %v", nil, n)
+	}
 
 	// apply zero instance
 	selector.Apply(nil)
 	n, done, err = selector.Select(context.Background(), WithFilter(mockFilter("v2.0.0")))
-	assert.Equal(t, ErrNoAvailable, err)
-	assert.Nil(t, done)
-	assert.Nil(t, n)
+	if !errors.Is(ErrNoAvailable, err) {
+		t.Errorf("expect %v, got %v", ErrNoAvailable, err)
+	}
+	if done != nil {
+		t.Errorf("expect %v, got %v", nil, done)
+	}
+	if n != nil {
+		t.Errorf("expect %v, got %v", nil, n)
+	}
 }

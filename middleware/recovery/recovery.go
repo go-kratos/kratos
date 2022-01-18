@@ -40,7 +40,7 @@ func WithLogger(logger log.Logger) Option {
 // Recovery is a server middleware that recovers from any panics.
 func Recovery(opts ...Option) middleware.Middleware {
 	op := options{
-		logger: log.DefaultLogger,
+		logger: log.GetLogger(),
 		handler: func(ctx context.Context, req, err interface{}) error {
 			return ErrUnknownRequest
 		},

@@ -31,14 +31,15 @@ func Value(ctx context.Context, v interface{}) interface{} {
 // Caller returns returns a Valuer that returns a pkg/file:line description of the caller.
 func Caller(depth int) Valuer {
 	return func(context.Context) interface{} {
-		_, file, line, _ := runtime.Caller(depth)
+		d := depth
+		_, file, line, _ := runtime.Caller(d)
 		if strings.LastIndex(file, "/log/filter.go") > 0 {
-			depth++
-			_, file, line, _ = runtime.Caller(depth)
+			d++
+			_, file, line, _ = runtime.Caller(d)
 		}
 		if strings.LastIndex(file, "/log/helper.go") > 0 {
-			depth++
-			_, file, line, _ = runtime.Caller(depth)
+			d++
+			_, file, line, _ = runtime.Caller(d)
 		}
 		idx := strings.LastIndexByte(file, '/')
 		return file[idx+1:] + ":" + strconv.Itoa(line)

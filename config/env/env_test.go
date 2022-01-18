@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"
-	"github.com/stretchr/testify/assert"
 )
 
 const _testJSON = `
@@ -107,19 +106,27 @@ func TestEnvWithPrefix(t *testing.T) {
 				switch test.expect.(type) {
 				case int:
 					if actual, err = v.Int(); err == nil {
-						assert.Equal(t, test.expect, int(actual.(int64)), "int value should be equal")
+						if !reflect.DeepEqual(test.expect.(int), int(actual.(int64))) {
+							t.Errorf("expect %v, actual %v", test.expect, actual)
+						}
 					}
 				case string:
 					if actual, err = v.String(); err == nil {
-						assert.Equal(t, test.expect, actual, "string value should be equal")
+						if !reflect.DeepEqual(test.expect.(string), actual.(string)) {
+							t.Errorf(`expect %v, actual %v`, test.expect, actual)
+						}
 					}
 				case bool:
 					if actual, err = v.Bool(); err == nil {
-						assert.Equal(t, test.expect, actual, "bool value should be equal")
+						if !reflect.DeepEqual(test.expect.(bool), actual.(bool)) {
+							t.Errorf(`expect %v, actual %v`, test.expect, actual)
+						}
 					}
 				case float64:
 					if actual, err = v.Float(); err == nil {
-						assert.Equal(t, test.expect, actual, "float64 value should be equal")
+						if !reflect.DeepEqual(test.expect.(float64), actual.(float64)) {
+							t.Errorf(`expect %v, actual %v`, test.expect, actual)
+						}
 					}
 				default:
 					actual = v.Load()
@@ -213,19 +220,27 @@ func TestEnvWithoutPrefix(t *testing.T) {
 				switch test.expect.(type) {
 				case int:
 					if actual, err = v.Int(); err == nil {
-						assert.Equal(t, test.expect, int(actual.(int64)), "int value should be equal")
+						if !reflect.DeepEqual(test.expect.(int), int(actual.(int64))) {
+							t.Errorf("expect %v, actual %v", test.expect, actual)
+						}
 					}
 				case string:
 					if actual, err = v.String(); err == nil {
-						assert.Equal(t, test.expect, actual, "string value should be equal")
+						if !reflect.DeepEqual(test.expect.(string), actual.(string)) {
+							t.Errorf(`expect %v, actual %v`, test.expect, actual)
+						}
 					}
 				case bool:
 					if actual, err = v.Bool(); err == nil {
-						assert.Equal(t, test.expect, actual, "bool value should be equal")
+						if !reflect.DeepEqual(test.expect.(bool), actual.(bool)) {
+							t.Errorf(`expect %v, actual %v`, test.expect, actual)
+						}
 					}
 				case float64:
 					if actual, err = v.Float(); err == nil {
-						assert.Equal(t, test.expect, actual, "float64 value should be equal")
+						if !reflect.DeepEqual(test.expect.(float64), actual.(float64)) {
+							t.Errorf(`expect %v, actual %v`, test.expect, actual)
+						}
 					}
 				default:
 					actual = v.Load()

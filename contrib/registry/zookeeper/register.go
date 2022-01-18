@@ -75,18 +75,18 @@ func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 		data []byte
 		err  error
 	)
-	if err = r.ensureName(r.opts.rootPath, []byte("")); err != nil {
+	if err = r.ensureName(r.opts.rootPath, []byte(""), 0); err != nil {
 		return err
 	}
 	serviceNamePath := path.Join(r.opts.rootPath, service.Name)
-	if err = r.ensureName(serviceNamePath, []byte("")); err != nil {
+	if err = r.ensureName(serviceNamePath, []byte(""), 0); err != nil {
 		return err
 	}
 	if data, err = json.Marshal(service); err != nil {
 		return err
 	}
 	servicePath := path.Join(serviceNamePath, service.ID)
-	if err = r.ensureName(servicePath, data); err != nil {
+	if err = r.ensureName(servicePath, data, zk.FlagEphemeral); err != nil {
 		return err
 	}
 	return nil
@@ -176,13 +176,13 @@ func (r *Registry) resolve(ss *serviceSet) {
 }
 
 // ensureName ensure node exists, if not exist, create and set data
-func (r *Registry) ensureName(path string, data []byte) error {
+func (r *Registry) ensureName(path string, data []byte, flags int32) error {
 	exists, _, err := r.conn.Exists(path)
 	if err != nil {
 		return err
 	}
 	if !exists {
-		_, err := r.conn.Create(path, data, 0, zk.WorldACL(zk.PermAll))
+		_, err := r.conn.Create(path, data, flags, zk.WorldACL(zk.PermAll))
 		if err != nil {
 			return err
 		}

@@ -63,7 +63,7 @@ func (c *customChangeListener) OnNewestChange(changeEvent *storage.FullChangeEve
 
 func newWatcher(a *apollo, logger log.Logger) (config.Watcher, error) {
 	if logger == nil {
-		logger = log.DefaultLogger
+		logger = log.GetLogger()
 	}
 
 	changeCh := make(chan []*config.KeyValue)
