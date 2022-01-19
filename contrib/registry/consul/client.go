@@ -23,8 +23,6 @@ type Client struct {
 	resolver ServiceResolver
 	// healthcheck time interval in seconds
 	healthcheckInterval int
-	// heartbeat enable heartbeat
-	heartbeat bool
 }
 
 // NewClient creates consul client
@@ -33,7 +31,6 @@ func NewClient(cli *api.Client) *Client {
 		cli:                 cli,
 		resolver:            defaultResolver,
 		healthcheckInterval: 10,
-		heartbeat:           true,
 	}
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 	return c

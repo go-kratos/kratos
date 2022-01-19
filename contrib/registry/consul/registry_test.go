@@ -39,7 +39,6 @@ func TestRegister(t *testing.T) {
 		t.Fatalf("create consul client failed: %v", err)
 	}
 	opts := []Option{
-		WithHeartbeat(true),
 		WithHealthCheck(true),
 		WithHealthCheckInterval(5),
 	}
