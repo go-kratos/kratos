@@ -117,16 +117,27 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
 				TCP:                            address,
 				Interval:                       fmt.Sprintf("%ds", c.healthcheckInterval),
-				DeregisterCriticalServiceAfter: "70s",
+				DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.healthcheckInterval*60),
 			})
 		}
 	}
+	if c.heartbeat {
+		asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
+			CheckID:                        "service:" + svc.ID,
+			TTL:                            fmt.Sprintf("%ds", c.healthcheckInterval*2),
+			DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.healthcheckInterval*60),
+		})
+	}
+
 	err := c.cli.Agent().ServiceRegister(asr)
 	if err != nil {
 		return err
 	}
-	_ = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 	if c.heartbeat {
+		err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+		if err != nil {
+			return err
+		}
 		go func() {
 			ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
 			defer ticker.Stop()
