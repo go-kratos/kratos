@@ -9,7 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
+
 	"github.com/hashicorp/consul/api"
 )
 
@@ -144,7 +146,10 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			for {
 				select {
 				case <-ticker.C:
-					_ = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+					err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+					if err != nil {
+						log.Errorf("[Consul]update ttl heartbeat to consul failed!err:=%v", err)
+					}
 				case <-c.ctx.Done():
 					return
 				}

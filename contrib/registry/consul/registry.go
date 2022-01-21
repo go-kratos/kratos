@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
+
 	"github.com/hashicorp/consul/api"
 )
 
