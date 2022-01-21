@@ -120,6 +120,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 				TCP:                            address,
 				Interval:                       fmt.Sprintf("%ds", c.healthcheckInterval),
 				DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.healthcheckInterval*60),
+				Timeout:                        "5s",
 			})
 		}
 	}
@@ -136,11 +137,12 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		return err
 	}
 	if c.heartbeat {
-		err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
-		if err != nil {
-			return err
-		}
 		go func() {
+			time.Sleep(time.Second)
+			err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+			if err != nil {
+				log.Errorf("[Consul]update ttl heartbeat to consul failed!err:=%v", err)
+			}
 			ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
 			defer ticker.Stop()
 			for {
