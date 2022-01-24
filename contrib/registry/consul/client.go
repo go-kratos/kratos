@@ -9,7 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
+
 	"github.com/hashicorp/consul/api"
 )
 
@@ -117,23 +119,39 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
 				TCP:                            address,
 				Interval:                       fmt.Sprintf("%ds", c.healthcheckInterval),
-				DeregisterCriticalServiceAfter: "70s",
+				DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.healthcheckInterval*60),
+				Timeout:                        "5s",
 			})
 		}
 	}
+	if c.heartbeat {
+		asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
+			CheckID:                        "service:" + svc.ID,
+			TTL:                            fmt.Sprintf("%ds", c.healthcheckInterval*2),
+			DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.healthcheckInterval*60),
+		})
+	}
+
 	err := c.cli.Agent().ServiceRegister(asr)
 	if err != nil {
 		return err
 	}
-	_ = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 	if c.heartbeat {
 		go func() {
+			time.Sleep(time.Second)
+			err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+			if err != nil {
+				log.Errorf("[Consul]update ttl heartbeat to consul failed!err:=%v", err)
+			}
 			ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
 			defer ticker.Stop()
 			for {
 				select {
 				case <-ticker.C:
-					_ = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+					err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+					if err != nil {
+						log.Errorf("[Consul]update ttl heartbeat to consul failed!err:=%v", err)
+					}
 				case <-c.ctx.Done():
 					return
 				}

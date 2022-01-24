@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"reflect"
 	"strconv"
 	"testing"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/hashicorp/consul/api"
-	"github.com/stretchr/testify/assert"
 )
 
 func tcpServer(t *testing.T, lis net.Listener) {
@@ -44,7 +44,9 @@ func TestRegister(t *testing.T) {
 		WithHealthCheckInterval(5),
 	}
 	r := New(cli, opts...)
-	assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("new consul registry failed: %v", err)
+	}
 	version := strconv.FormatInt(time.Now().Unix(), 10)
 	svc := &registry.ServiceInstance{
 		ID:        "test2233",
@@ -56,18 +58,34 @@ func TestRegister(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	err = r.Deregister(ctx, svc)
-	assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("Deregister failed: %v", err)
+	}
 	err = r.Register(ctx, svc)
-	assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("Register failed: %v", err)
+	}
 	w, err := r.Watch(ctx, "test-provider")
-	assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("Watchfailed: %v", err)
+	}
 
 	services, err := w.Next()
-	assert.Nil(t, err)
-	assert.Equal(t, 1, len(services))
-	assert.EqualValues(t, "test2233", services[0].ID)
-	assert.EqualValues(t, "test-provider", services[0].Name)
-	assert.EqualValues(t, version, services[0].Version)
+	if err != nil {
+		t.Errorf("Next failed: %v", err)
+	}
+	if !reflect.DeepEqual(1, len(services)) {
+		t.Errorf("no expect float_key value: %v, but got: %v", len(services), 1)
+	}
+	if !reflect.DeepEqual("test2233", services[0].ID) {
+		t.Errorf("no expect float_key value: %v, but got: %v", services[0].ID, "test2233")
+	}
+	if !reflect.DeepEqual("test-provider", services[0].Name) {
+		t.Errorf("no expect float_key value: %v, but got: %v", services[0].Name, "test-provider")
+	}
+	if !reflect.DeepEqual(version, services[0].Version) {
+		t.Errorf("no expect float_key value: %v, but got: %v", services[0].Version, version)
+	}
 }
 
 func getIntranetIP() string {

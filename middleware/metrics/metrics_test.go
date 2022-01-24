@@ -3,8 +3,6 @@ package metrics
 import (
 	"context"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestMetrics(t *testing.T) {
@@ -12,8 +10,12 @@ func TestMetrics(t *testing.T) {
 		return req.(string) + "https://go-kratos.dev", nil
 	}
 	_, err := Server()(next)(context.Background(), "test:")
-	assert.Equal(t, err, nil)
+	if err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
 
 	_, err = Client()(next)(context.Background(), "test:")
-	assert.Equal(t, err, nil)
+	if err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
 }

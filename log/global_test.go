@@ -3,6 +3,7 @@ package log
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 )
@@ -64,5 +65,21 @@ func TestGlobalLog(t *testing.T) {
 	t.Logf("Content: %s", buffer.String())
 	if buffer.String() != strings.Join(expected, "\n") {
 		t.Errorf("Expected: %s, got: %s", strings.Join(expected, "\n"), buffer.String())
+	}
+}
+
+func TestGlobalLogUpdate(t *testing.T) {
+	l := &loggerAppliance{}
+	l.SetLogger(NewStdLogger(os.Stdout))
+	LOG := NewHelper(l)
+	LOG.Info("Log to stdout")
+
+	buffer := &bytes.Buffer{}
+	l.SetLogger(NewStdLogger(buffer))
+	LOG.Info("Log to buffer")
+
+	expected := "INFO msg=Log to buffer\n"
+	if buffer.String() != expected {
+		t.Errorf("Expected: %s, got: %s", expected, buffer.String())
 	}
 }
