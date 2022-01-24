@@ -15,7 +15,7 @@ require (
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/nacos/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/zookeeper/v2 v2.0.0-00010101000000-000000000000
-	github.com/go-kratos/kratos/v2 v2.1.4
+	github.com/go-kratos/kratos/v2 v2.1.5
 	github.com/go-kratos/swagger-api v1.0.0
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.11.2
