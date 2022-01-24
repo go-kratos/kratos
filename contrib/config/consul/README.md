@@ -2,35 +2,23 @@
 
 ```go
 import (
-	kconfig "github.com/go-kratos/kratos/v2/config"
-	"github.com/nacos-group/nacos-sdk-go/clients"
-	"github.com/nacos-group/nacos-sdk-go/common/constant"
+    "github.com/go-kratos/kratos/contrib/config/consul/v2"
+    "github.com/hashicorp/consul/api"
 )
+func main() {
 
-
-sc := []constant.ServerConfig{
-	*constant.NewServerConfig("127.0.0.1", 8848),
-}
-
-cc := &constant.ClientConfig{
-	NamespaceId:         "public", //namespace id
-	TimeoutMs:           5000,
-	NotLoadCacheAtStart: true,
-	LogDir:              "/tmp/nacos/log",
-	CacheDir:            "/tmp/nacos/cache",
-	RotateTime:          "1h",
-	MaxAge:              3,
-	LogLevel:            "debug",
-}
-
-// a more graceful way to create naming client
-client, err := clients.NewNamingClient(
-	vo.NacosClientParam{
-		ClientConfig:  cc,
-		ServerConfigs: sc,
-	},
-)
-if err != nil {
-	log.Panic(err)
+    consulClient, err := api.NewClient(&api.Config{
+    Address: "127.0.0.1:8500",
+    })
+    if err != nil {
+        panic(err)
+    }
+    cs, err := consul.New(consulClient, consul.WithPath("app/cart/configs/"))
+    //consul中需要标注文件后缀，kratos读取配置需要适配文件后缀
+    //The file suffix needs to be marked, and kratos needs to adapt the file suffix to read the configuration.
+    if err != nil {
+        panic(err)
+    }
+    c := config.New(config.WithSource(cs))
 }
 ```
