@@ -137,8 +137,8 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 		if body != "" {
 			_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s body should not be declared.\n", method, path)
 		}
-		md.HasBody = false
-	} else if body == "*" {
+	}
+	if body == "*" {
 		md.HasBody = true
 		md.Body = ""
 	} else if body != "" {
