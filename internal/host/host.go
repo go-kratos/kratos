@@ -33,25 +33,12 @@ func Port(lis net.Listener) (int, bool) {
 	return 0, false
 }
 
-// Extract returns a private addr and port.
-func Extract(hostPort string, lis net.Listener) (string, error) {
-	addr, port, err := net.SplitHostPort(hostPort)
-	if err != nil && lis == nil {
-		return "", err
-	}
-	if lis != nil {
-		if p, ok := Port(lis); ok {
-			port = strconv.Itoa(p)
-		} else {
-			return "", fmt.Errorf("failed to extract port: %v", lis.Addr())
-		}
-	}
-	if len(addr) > 0 && (addr != "0.0.0.0" && addr != "[::]" && addr != "::") {
-		return net.JoinHostPort(addr, port), nil
-	}
+type IPExtractFunc func() (net.IP, error)
+
+func DefaultIPExtractFunc() (net.IP, error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	lowest := int(^uint(0) >> 1)
 	var result net.IP
@@ -82,6 +69,32 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 				result = ip
 			}
 		}
+	}
+	return result, nil
+}
+
+// Extract returns a private addr and port.
+func Extract(hostPort string, lis net.Listener, ipExtractFunc IPExtractFunc) (string, error) {
+	addr, port, err := net.SplitHostPort(hostPort)
+	if err != nil && lis == nil {
+		return "", err
+	}
+	if lis != nil {
+		if p, ok := Port(lis); ok {
+			port = strconv.Itoa(p)
+		} else {
+			return "", fmt.Errorf("failed to extract port: %v", lis.Addr())
+		}
+	}
+	if len(addr) > 0 && (addr != "0.0.0.0" && addr != "[::]" && addr != "::") {
+		return net.JoinHostPort(addr, port), nil
+	}
+	if ipExtractFunc == nil {
+		ipExtractFunc = DefaultIPExtractFunc
+	}
+	result, err := ipExtractFunc()
+	if err != nil {
+		return "", err
 	}
 	if result != nil {
 		return net.JoinHostPort(result.String(), port), nil

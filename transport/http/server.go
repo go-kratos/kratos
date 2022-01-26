@@ -113,24 +113,32 @@ func Listener(lis net.Listener) ServerOption {
 	}
 }
 
+// IPExtractFunc extracts ip address
+func IPExtractFunc(i host.IPExtractFunc) ServerOption {
+	return func(s *Server) {
+		s.ipExtractFunc = i
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
-	lis         net.Listener
-	tlsConf     *tls.Config
-	endpoint    *url.URL
-	err         error
-	network     string
-	address     string
-	timeout     time.Duration
-	filters     []FilterFunc
-	ms          []middleware.Middleware
-	dec         DecodeRequestFunc
-	enc         EncodeResponseFunc
-	ene         EncodeErrorFunc
-	strictSlash bool
-	router      *mux.Router
-	log         *log.Helper
+	lis           net.Listener
+	tlsConf       *tls.Config
+	endpoint      *url.URL
+	err           error
+	network       string
+	address       string
+	timeout       time.Duration
+	filters       []FilterFunc
+	ms            []middleware.Middleware
+	dec           DecodeRequestFunc
+	enc           EncodeResponseFunc
+	ene           EncodeErrorFunc
+	strictSlash   bool
+	router        *mux.Router
+	log           *log.Helper
+	ipExtractFunc host.IPExtractFunc
 }
 
 // NewServer creates an HTTP server by options.
@@ -266,7 +274,7 @@ func (s *Server) listenAndEndpoint() error {
 		}
 		s.lis = lis
 	}
-	addr, err := host.Extract(s.address, s.lis)
+	addr, err := host.Extract(s.address, s.lis, s.ipExtractFunc)
 	if err != nil {
 		_ = s.lis.Close()
 		return err

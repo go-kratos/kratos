@@ -66,7 +66,7 @@ func TestExtract(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.addr, func(t *testing.T) {
-			res, err := Extract(test.addr, nil)
+			res, err := Extract(test.addr, nil, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -79,11 +79,11 @@ func TestExtract(t *testing.T) {
 	if err != nil {
 		t.Errorf("expected: %v got %v", nil, err)
 	}
-	res, err := Extract("", lis)
+	res, err := Extract("", lis, nil)
 	if err != nil {
 		t.Errorf("expected: %v got %v", nil, err)
 	}
-	expect, err := Extract(lis.Addr().String(), nil)
+	expect, err := Extract(lis.Addr().String(), nil, nil)
 	if err != nil {
 		t.Errorf("expected: %v got %v", nil, err)
 	}
@@ -98,7 +98,7 @@ func TestExtract2(t *testing.T) {
 	if err != nil {
 		t.Errorf("expected: %v got %v", nil, err)
 	}
-	res, err := Extract(addr, lis)
+	res, err := Extract(addr, lis, nil)
 	if err != nil {
 		t.Errorf("expected: %v got %v", nil, err)
 	}

@@ -102,24 +102,32 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 	}
 }
 
+// IPExtractFunc extracts ip address
+func IPExtractFunc(i host.IPExtractFunc) ServerOption {
+	return func(s *Server) {
+		s.ipExtractFunc = i
+	}
+}
+
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
-	baseCtx    context.Context
-	tlsConf    *tls.Config
-	lis        net.Listener
-	err        error
-	network    string
-	address    string
-	endpoint   *url.URL
-	timeout    time.Duration
-	log        *log.Helper
-	middleware []middleware.Middleware
-	unaryInts  []grpc.UnaryServerInterceptor
-	streamInts []grpc.StreamServerInterceptor
-	grpcOpts   []grpc.ServerOption
-	health     *health.Server
-	metadata   *apimd.Server
+	baseCtx       context.Context
+	tlsConf       *tls.Config
+	lis           net.Listener
+	err           error
+	network       string
+	address       string
+	endpoint      *url.URL
+	timeout       time.Duration
+	log           *log.Helper
+	middleware    []middleware.Middleware
+	unaryInts     []grpc.UnaryServerInterceptor
+	streamInts    []grpc.StreamServerInterceptor
+	grpcOpts      []grpc.ServerOption
+	health        *health.Server
+	metadata      *apimd.Server
+	ipExtractFunc host.IPExtractFunc
 }
 
 // NewServer creates a gRPC server by options.
@@ -205,7 +213,7 @@ func (s *Server) listenAndEndpoint() error {
 		}
 		s.lis = lis
 	}
-	addr, err := host.Extract(s.address, s.lis)
+	addr, err := host.Extract(s.address, s.lis, s.ipExtractFunc)
 	if err != nil {
 		_ = s.lis.Close()
 		return err
