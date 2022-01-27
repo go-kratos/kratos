@@ -6,6 +6,7 @@ require (
 	entgo.io/ent v0.9.0
 	github.com/BurntSushi/toml v0.3.1
 	github.com/envoyproxy/protoc-gen-validate v0.6.1
+	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-kratos/gin v0.1.0
 	github.com/go-kratos/kratos/contrib/config/apollo/v2 v2.0.0-20210901080230-515b71ec9061
@@ -13,6 +14,7 @@ require (
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/discovery/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-00010101000000-000000000000
+	github.com/go-kratos/kratos/contrib/registry/eureka/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/nacos/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/contrib/registry/zookeeper/v2 v2.0.0-00010101000000-000000000000
 	github.com/go-kratos/kratos/v2 v2.1.5
@@ -20,7 +22,7 @@ require (
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.11.2
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/golang-jwt/jwt/v4 v4.0.0
+	github.com/golang-jwt/jwt/v4 v4.2.0
 	github.com/google/wire v0.5.0
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
@@ -54,6 +56,7 @@ replace (
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 => ../contrib/registry/consul
 	github.com/go-kratos/kratos/contrib/registry/discovery/v2 => ../contrib/registry/discovery
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 => ../contrib/registry/etcd
+	github.com/go-kratos/kratos/contrib/registry/eureka/v2 => ../contrib/registry/eureka
 	github.com/go-kratos/kratos/contrib/registry/nacos/v2 => ../contrib/registry/nacos
 	github.com/go-kratos/kratos/contrib/registry/zookeeper/v2 => ../contrib/registry/zookeeper
 	github.com/go-kratos/kratos/v2 => ../
