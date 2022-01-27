@@ -25,7 +25,7 @@ func TestRegistry(t *testing.T) {
 		Endpoints: []string{"http://127.0.0.1:222"},
 	}
 
-	r, _ := New([]string{"http://eureka1.base.test.bj1:18761"}, WithContext(ctx), WithHeartbeat("1s"), WithRefresh("1s"))
+	r, _ := New([]string{"http://127.0.0.1:18761"}, WithContext(ctx), WithHeartbeat("1s"), WithRefresh("1s"))
 
 	go do(r, s1)
 	go do(r, s2)
