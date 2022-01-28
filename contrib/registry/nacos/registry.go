@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/nacos-group/nacos-sdk-go/clients/naming_client"
-	"github.com/nacos-group/nacos-sdk-go/vo"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/vo"
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -19,6 +19,9 @@ var (
 	_ registry.Registrar = (*Registry)(nil)
 	_ registry.Discovery = (*Registry)(nil)
 )
+
+// The number is elements count of the serviceName slice
+const splitServiceNameNum = 2
 
 type options struct {
 	prefix  string
@@ -167,15 +170,15 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 
 // GetService return the service instances in memory according to the service name.
 func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
-	names := strings.SplitN(serviceName, "@@", 2)
+	names := strings.SplitN(serviceName, "@@", splitServiceNameNum)
 	groupName := constant.DEFAULT_GROUP
-	if len(names) == 2 {
+	if len(names) == splitServiceNameNum {
 		groupName = names[0]
 		serviceName = names[1]
 	}
 	res, err := r.cli.SelectInstances(vo.SelectInstancesParam{
 		ServiceName: serviceName,
-		GroupName: groupName,
+		GroupName:   groupName,
 		HealthyOnly: true,
 	})
 	if err != nil {
