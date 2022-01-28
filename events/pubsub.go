@@ -10,8 +10,9 @@ type Handler interface {
 }
 
 type Message struct {
-	Topic string
-	Data  []byte
+	Topic    string
+	Data     []byte
+	Metadata map[string]interface{}
 }
 
 type PublishMetadata struct {
