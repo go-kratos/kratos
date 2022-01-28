@@ -167,11 +167,11 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 
 // GetService return the service instances in memory according to the service name.
 func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
-	countSplit := strings.Split(serviceName, "@@")
+	names := strings.SplitN(serviceName, "@@", 2)
 	groupName := constant.DEFAULT_GROUP
-	if len(countSplit) == 2 {
-		groupName = countSplit[0]
-		serviceName = countSplit[1]
+	if len(names) == 2 {
+		groupName = names[0]
+		serviceName = names[1]
 	}
 	res, err := r.cli.SelectInstances(vo.SelectInstancesParam{
 		ServiceName: serviceName,
