@@ -61,9 +61,9 @@ linters-settings:
       mnd:
         # don't include the "operation", "argument" and "assign"
         checks: 
-        - case
-        - condition
-        - return
+          - case
+          - condition
+          - return
   goconst:
     ignore-tests: true
   gocyclo:
