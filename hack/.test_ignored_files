@@ -2,7 +2,6 @@
 ./cmd/protoc-gen-go-errors
 ./cmd/protoc-gen-go-http
 ./cmd/kratos
-./contrib/config/apollo
 ./contrib/config/kubernetes
 ./contrib/registry/kubernetes
 ./contrib/registry/zookeeper
