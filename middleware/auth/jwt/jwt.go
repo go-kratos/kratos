@@ -77,7 +77,7 @@ func WithTokenHeader(header map[string]interface{}) Option {
 func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	o := &options{
 		signingMethod: jwt.SigningMethodHS256,
-		claims:        jwt.StandardClaims{},
+		claims:        jwt.RegisteredClaims{},
 	}
 	for _, opt := range opts {
 		opt(o)
@@ -122,7 +122,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	o := &options{
 		signingMethod: jwt.SigningMethodHS256,
-		claims:        jwt.StandardClaims{},
+		claims:        jwt.RegisteredClaims{},
 	}
 	for _, opt := range opts {
 		opt(o)
