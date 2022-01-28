@@ -13,7 +13,7 @@ import (
 )
 
 type apollo struct {
-	client *agollo.Client
+	client agollo.Client
 	opt    *options
 }
 

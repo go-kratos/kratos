@@ -4,9 +4,9 @@ go 1.16
 
 require (
 	github.com/go-kratos/kratos/v2 v2.1.5
-	k8s.io/api v0.23.1
-	k8s.io/apimachinery v0.23.1
-	k8s.io/client-go v0.23.1
+	k8s.io/api v0.23.3
+	k8s.io/apimachinery v0.23.3
+	k8s.io/client-go v0.23.3
 )
 
 replace github.com/go-kratos/kratos/v2 => ../../../
