@@ -19,8 +19,8 @@ github.com/StackExchange/wmi v1.2.1/go.mod h1:rcmrprowKIVzvc+NUiLncP2uuArMWLCbu9
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
-github.com/apolloconfig/agollo/v4 v4.0.8 h1:SY23bGjLJX58OMVnussD9MKwg/XE9zZgzrTg3WrjFdU=
-github.com/apolloconfig/agollo/v4 v4.0.8/go.mod h1:SuvTjtg0p4UlSzSbik+ibLRr6oR1xRsfy65QzP3GEAs=
+github.com/apolloconfig/agollo/v4 v4.1.0 h1:aZmrnSr/l0/CD5+txdgF1bIiKP1I5m0EH0WkHqAVhHk=
+github.com/apolloconfig/agollo/v4 v4.1.0/go.mod h1:SuvTjtg0p4UlSzSbik+ibLRr6oR1xRsfy65QzP3GEAs=
 github.com/armon/circbuf v0.0.0-20150827004946-bbbad097214e/go.mod h1:3U/XgcO3hCbHZ8TKRvWD2dDTCfh9M9ya+I9JpbB7O8o=
 github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da/go.mod h1:Q73ZrmVTwzkszR9V5SSuryQ31EELlFMUz1kKyl939pY=
 github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
