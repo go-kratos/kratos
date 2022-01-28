@@ -6,9 +6,11 @@ import (
 	"net"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/nacos-group/nacos-sdk-go/clients/naming_client"
 	"github.com/nacos-group/nacos-sdk-go/vo"
+	"github.com/nacos-group/nacos-sdk-go/common/constant"
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -165,8 +167,15 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 
 // GetService return the service instances in memory according to the service name.
 func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+	countSplit := strings.Split(serviceName, "@@")
+	groupName := constant.DEFAULT_GROUP
+	if len(countSplit) == 2 {
+		groupName = countSplit[0]
+		serviceName = countSplit[1]
+	}
 	res, err := r.cli.SelectInstances(vo.SelectInstancesParam{
 		ServiceName: serviceName,
+		GroupName: groupName,
 		HealthyOnly: true,
 	})
 	if err != nil {
