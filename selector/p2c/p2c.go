@@ -3,6 +3,7 @@ package p2c
 import (
 	"context"
 	"math/rand"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -40,15 +41,17 @@ func New(opts ...Option) selector.Selector {
 
 // Balancer is p2c selector.
 type Balancer struct {
-	r  *rand.Rand
-	lk int64
+	mu     sync.Mutex
+	r      *rand.Rand
+	picked int64
 }
 
 // choose two distinct nodes.
 func (s *Balancer) prePick(nodes []selector.WeightedNode) (nodeA selector.WeightedNode, nodeB selector.WeightedNode) {
-	source := rand.NewSource(time.Now().UnixNano())
-	a := rand.New(source).Intn(len(nodes))
-	b := rand.New(source).Intn(len(nodes) - 1)
+	s.mu.Lock()
+	a := s.r.Intn(len(nodes))
+	b := s.r.Intn(len(nodes) - 1)
+	s.mu.Unlock()
 	if b >= a {
 		b = b + 1
 	}
@@ -60,7 +63,8 @@ func (s *Balancer) prePick(nodes []selector.WeightedNode) (nodeA selector.Weight
 func (s *Balancer) Pick(ctx context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.DoneFunc, error) {
 	if len(nodes) == 0 {
 		return nil, nil, selector.ErrNoAvailable
-	} else if len(nodes) == 1 {
+	}
+	if len(nodes) == 1 {
 		done := nodes[0].Pick()
 		return nodes[0], done, nil
 	}
@@ -76,9 +80,9 @@ func (s *Balancer) Pick(ctx context.Context, nodes []selector.WeightedNode) (sel
 
 	// If the failed node has never been selected once during forceGap, it is forced to be selected once
 	// Take advantage of forced opportunities to trigger updates of success rate and delay
-	if upc.PickElapsed() > forcePick && atomic.CompareAndSwapInt64(&s.lk, 0, 1) {
+	if upc.PickElapsed() > forcePick && atomic.CompareAndSwapInt64(&s.picked, 0, 1) {
 		pc = upc
-		atomic.StoreInt64(&s.lk, 0)
+		atomic.StoreInt64(&s.picked, 0)
 	}
 	done := pc.Pick()
 	return pc, done, nil
