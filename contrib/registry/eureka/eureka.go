@@ -12,7 +12,7 @@ type subscriber struct {
 	callBack func()
 }
 
-type eurekaApi struct {
+type EurekaAPI struct {
 	cli             *EurekaClient
 	allInstances    map[string][]Instance
 	subscribers     map[string]*subscriber
@@ -20,13 +20,13 @@ type eurekaApi struct {
 	lock            sync.Mutex
 }
 
-func NewEurekaApi(client *EurekaClient, refreshInterval string) *eurekaApi {
+func NewEurekaAPI(ctx context.Context, client *EurekaClient, refreshInterval string) *EurekaAPI {
 	duration, err := time.ParseDuration(refreshInterval)
 	if err != nil {
 		duration = time.Second * 30
 	}
 
-	e := &eurekaApi{
+	e := &EurekaAPI{
 		cli:             client,
 		allInstances:    make(map[string][]Instance),
 		subscribers:     make(map[string]*subscriber),
@@ -36,23 +36,25 @@ func NewEurekaApi(client *EurekaClient, refreshInterval string) *eurekaApi {
 	// 首次广播一次
 	e.broadcast()
 
-	go e.refresh()
+	go e.refresh(ctx)
 
 	return e
 }
 
-func (e *eurekaApi) refresh() {
+func (e *EurekaAPI) refresh(ctx context.Context) {
 	ticker := time.NewTicker(e.refreshInterval)
 	defer ticker.Stop()
 	for {
 		select {
+		case <-ctx.Done():
+			return
 		case <-ticker.C:
 			e.broadcast()
 		}
 	}
 }
 
-func (e *eurekaApi) broadcast() {
+func (e *EurekaAPI) broadcast() {
 	instances := e.cacheAllInstances()
 	if instances == nil {
 		return
@@ -66,8 +68,8 @@ func (e *eurekaApi) broadcast() {
 	e.allInstances = instances
 }
 
-func (e *eurekaApi) cacheAllInstances() map[string][]Instance {
-	var items = make(map[string][]Instance)
+func (e *EurekaAPI) cacheAllInstances() map[string][]Instance {
+	items := make(map[string][]Instance)
 	instances := e.cli.FetchAllUpInstances(context.Background())
 	for _, instance := range instances {
 		items[e.ToAppID(instance.App)] = append(items[instance.App], instance)
@@ -76,12 +78,12 @@ func (e *eurekaApi) cacheAllInstances() map[string][]Instance {
 	return items
 }
 
-func (e *eurekaApi) Register(ctx context.Context, serviceName string, endpoints ...Endpoint) error {
+func (e *EurekaAPI) Register(ctx context.Context, serviceName string, endpoints ...Endpoint) error {
 	appID := e.ToAppID(serviceName)
-	var upInstances = map[string]struct{}{}
+	upInstances := make(map[string]struct{})
 
 	for _, ins := range e.GetService(ctx, appID) {
-		upInstances[ins.InstanceId] = struct{}{}
+		upInstances[ins.InstanceID] = struct{}{}
 	}
 
 	for _, ep := range endpoints {
@@ -97,7 +99,7 @@ func (e *eurekaApi) Register(ctx context.Context, serviceName string, endpoints 
 }
 
 // Deregister 中的ctx 和 register ctx 是同一个
-func (e *eurekaApi) Deregister(ctx context.Context, endpoints []Endpoint) error {
+func (e *EurekaAPI) Deregister(ctx context.Context, endpoints []Endpoint) error {
 	for _, ep := range endpoints {
 		if err := e.cli.Deregister(ctx, ep.AppID, ep.InstanceID); err != nil {
 			return err
@@ -107,7 +109,7 @@ func (e *eurekaApi) Deregister(ctx context.Context, endpoints []Endpoint) error 
 	return nil
 }
 
-func (e *eurekaApi) Subscribe(serverName string, fn func()) error {
+func (e *EurekaAPI) Subscribe(serverName string, fn func()) error {
 	e.lock.Lock()
 	defer e.lock.Unlock()
 	appID := e.ToAppID(serverName)
@@ -118,7 +120,7 @@ func (e *eurekaApi) Subscribe(serverName string, fn func()) error {
 	return nil
 }
 
-func (e *eurekaApi) GetService(ctx context.Context, serverName string) []Instance {
+func (e *EurekaAPI) GetService(ctx context.Context, serverName string) []Instance {
 	appID := e.ToAppID(serverName)
 	if ins, ok := e.allInstances[appID]; ok {
 		return ins
@@ -128,12 +130,12 @@ func (e *eurekaApi) GetService(ctx context.Context, serverName string) []Instanc
 	return e.cli.FetchAppUpInstances(ctx, appID)
 }
 
-func (e *eurekaApi) Unsubscribe(serverName string) {
+func (e *EurekaAPI) Unsubscribe(serverName string) {
 	e.lock.Lock()
 	defer e.lock.Unlock()
 	delete(e.subscribers, e.ToAppID(serverName))
 }
 
-func (e *eurekaApi) ToAppID(serverName string) string {
+func (e *EurekaAPI) ToAppID(serverName string) string {
 	return strings.ToUpper(serverName)
 }

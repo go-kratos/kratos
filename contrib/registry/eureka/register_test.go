@@ -33,11 +33,9 @@ func TestRegistry(t *testing.T) {
 	time.Sleep(time.Second * 20)
 	cancel()
 	time.Sleep(time.Second * 1)
-
 }
 
 func do(r *Registry, s *registry.ServiceInstance) {
-
 	w, err := r.Watch(context.Background(), s.Name)
 	if err != nil {
 		log.Fatal(err)

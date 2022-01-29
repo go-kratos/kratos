@@ -29,7 +29,7 @@ func WithRefresh(interval string) Option {
 
 type Registry struct {
 	ctx               context.Context
-	api               *eurekaApi
+	api               *EurekaAPI
 	heartbeatInterval string
 	refreshInterval   string
 }
@@ -46,25 +46,8 @@ func New(eurekaUrls []string, opts ...Option) (*Registry, error) {
 	}
 
 	client := NewEurekaClient(eurekaUrls, WithHeartbeatInterval(r.heartbeatInterval), WithCtx(r.ctx))
-	r.api = NewEurekaApi(client, r.refreshInterval)
+	r.api = NewEurekaAPI(r.ctx, client, r.refreshInterval)
 	return r, nil
-}
-
-func (r *Registry) buildInstance(list []Instance) map[string][]*registry.ServiceInstance {
-	items := make(map[string][]*registry.ServiceInstance)
-
-	for _, instance := range list {
-		item := &registry.ServiceInstance{
-			ID:        instance.Metadata["ID"],
-			Name:      instance.Metadata["Name"],
-			Version:   instance.Metadata["Version"],
-			Metadata:  instance.Metadata,
-			Endpoints: []string{instance.Metadata["Endpoints"]},
-		}
-		items[instance.App] = append(items[instance.App], item)
-	}
-
-	return items
 }
 
 // 这里的Context是每个注册器独享的
@@ -100,19 +83,21 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 }
 
 func (r *Registry) Endpoints(service *registry.ServiceInstance) []Endpoint {
-	var res = []Endpoint{}
+	var (
+		res   = []Endpoint{}
+		start int
+	)
 	for _, ep := range service.Endpoints {
-		var start int
 		start = strings.Index(ep, "//")
 		end := strings.LastIndex(ep, ":")
 		appID := strings.ToUpper(service.Name)
 		ip := ep[start+2 : end]
 		port := ep[end+1:]
 		securePort := "443"
-		homePageUrl := "/"
-		statusPageUrl := "/info"
-		healthCheckUrl := "/health"
-		instanceId := strings.Join([]string{ip, appID, port}, ":")
+		homePageURL := "/"
+		statusPageURL := "/info"
+		healthCheckURL := "/health"
+		instanceID := strings.Join([]string{ip, appID, port}, ":")
 		metadata := make(map[string]string)
 		if service.Metadata != nil {
 			metadata = service.Metadata
@@ -120,14 +105,14 @@ func (r *Registry) Endpoints(service *registry.ServiceInstance) []Endpoint {
 		if s, ok := service.Metadata["securePort"]; ok {
 			securePort = s
 		}
-		if s, ok := service.Metadata["homePageUrl"]; ok {
-			homePageUrl = s
+		if s, ok := service.Metadata["homePageURL"]; ok {
+			homePageURL = s
 		}
-		if s, ok := service.Metadata["statusPageUrl"]; ok {
-			statusPageUrl = s
+		if s, ok := service.Metadata["statusPageURL"]; ok {
+			statusPageURL = s
 		}
-		if s, ok := service.Metadata["healthCheckUrl"]; ok {
-			healthCheckUrl = s
+		if s, ok := service.Metadata["healthCheckURL"]; ok {
+			healthCheckURL = s
 		}
 		metadata["ID"] = service.ID
 		metadata["Name"] = service.Name
@@ -138,10 +123,10 @@ func (r *Registry) Endpoints(service *registry.ServiceInstance) []Endpoint {
 			IP:             ip,
 			Port:           port,
 			SecurePort:     securePort,
-			HomePageUrl:    homePageUrl,
-			StatusPageUrl:  statusPageUrl,
-			HealthCheckUrl: healthCheckUrl,
-			InstanceID:     instanceId,
+			HomePageURL:    homePageURL,
+			StatusPageURL:  statusPageURL,
+			HealthCheckURL: healthCheckURL,
+			InstanceID:     instanceID,
 			MetaData:       metadata,
 		})
 	}

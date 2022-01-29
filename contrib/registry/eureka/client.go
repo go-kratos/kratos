@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -16,10 +15,13 @@ import (
 	"time"
 )
 
-const STATUS_UP = "UP"
-const STATUS_DOWN = "DOWN"
-const STATUS_OUT_OF_SERVICE = "OUT_OF_SERVICE"
-const EUREKA_PATH = "eureka"
+const (
+	statusUp            = "UP"
+	statusDown          = "DOWN"
+	statusOutOfServeice = "OUT_OF_SERVICE"
+	eurekaPath          = "eureka"
+	heartbeatRetry      = 3
+)
 
 const tpl = `{
   "instance": {
@@ -38,9 +40,9 @@ const tpl = `{
       "$":{{ .SecurePort }},
       "@enabled": false
     },
-    "homePageUrl" : "http://{{ .IP }}:{{ .Port }}{{ .HomePageUrl }}",
-    "statusPageUrl": "http://{{ .IP }}:{{ .Port }}{{ .StatusPageUrl }}",
-    "healthCheckUrl": "http://{{ .IP }}:{{ .Port }}{{ .HealthCheckUrl }}",
+    "homePageUrl" : "http://{{ .IP }}:{{ .Port }}{{ .HomePageURL }}",
+    "statusPageUrl": "http://{{ .IP }}:{{ .Port }}{{ .StatusPageURL }}",
+    "healthCheckUrl": "http://{{ .IP }}:{{ .Port }}{{ .HealthCheckURL }}",
     "dataCenterInfo" : {
       "@class":"com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo",
       "name": "MyOwn"
@@ -60,9 +62,9 @@ type Endpoint struct {
 	AppID          string
 	Port           string
 	SecurePort     string
-	HomePageUrl    string
-	StatusPageUrl  string
-	HealthCheckUrl string
+	HomePageURL    string
+	StatusPageURL  string
+	HealthCheckURL string
 	MetaData       map[string]string
 }
 
@@ -83,11 +85,11 @@ type Application struct {
 }
 
 type Instance struct {
-	InstanceId         string            `json:"instanceId"`
+	InstanceID         string            `json:"instanceId"`
 	HostName           string            `json:"hostName"`
 	Port               Port              `json:"port"`
 	App                string            `json:"app"`
-	IpAddr             string            `json:"ipAddr"`
+	IPAddr             string            `json:"ipAddr"`
 	Status             string            `json:"status"`
 	SecurePort         SecurePort        `json:"securePort"`
 	LastDirtyTimestamp string            `json:"lastDirtyTimestamp"`
@@ -102,9 +104,9 @@ type SecurePort struct {
 	SecurePort int `json:"$"`
 }
 
-var _ EurekaApi = new(EurekaClient)
+var _ EurekaAPIInterface = new(EurekaClient)
 
-type EurekaApi interface {
+type EurekaAPIInterface interface {
 	Register(ctx context.Context, ep Endpoint) error
 	Deregister(ctx context.Context, appID, instanceID string) error
 	Heartbeat(ep Endpoint)
@@ -120,8 +122,8 @@ type EurekaApi interface {
 
 type EurekaOption func(e *EurekaClient)
 
-func WithMaxRetry(max_retry int) EurekaOption {
-	return func(e *EurekaClient) { e.max_retry = max_retry }
+func WithMaxRetry(maxRetry int) EurekaOption {
+	return func(e *EurekaClient) { e.maxRetry = maxRetry }
 }
 
 func WithHeartbeatInterval(interval string) EurekaOption {
@@ -139,7 +141,7 @@ func WithCtx(ctx context.Context) EurekaOption {
 type EurekaClient struct {
 	ctx               context.Context
 	urls              []string
-	max_retry         int
+	maxRetry          int
 	heartbeatInterval time.Duration
 	client            *http.Client
 	keepalive         map[string]chan struct{}
@@ -154,7 +156,7 @@ func NewEurekaClient(urls []string, opts ...EurekaOption) *EurekaClient {
 	e := &EurekaClient{
 		ctx:               context.Background(),
 		urls:              urls,
-		max_retry:         len(urls),
+		maxRetry:          len(urls),
 		heartbeatInterval: time.Second * 10,
 		client:            &http.Client{Transport: tr, Timeout: time.Second * 3},
 		keepalive:         make(map[string]chan struct{}),
@@ -190,21 +192,21 @@ func (e *EurekaClient) FetchAppUpInstances(ctx context.Context, appID string) []
 }
 
 func (e *EurekaClient) FetchAppInstance(ctx context.Context, appID string, instanceID string) (m Instance, err error) {
-	e.do(ctx, "GET", []string{"apps", appID, instanceID}, nil, &m)
+	err = e.do(ctx, "GET", []string{"apps", appID, instanceID}, nil, &m)
 	return
 }
 
 func (e *EurekaClient) FetchInstance(ctx context.Context, instanceID string) (m Instance, err error) {
-	e.do(ctx, "GET", []string{"instances", instanceID}, nil, &m)
+	err = e.do(ctx, "GET", []string{"instances", instanceID}, nil, &m)
 	return
 }
 
 func (e *EurekaClient) Out(ctx context.Context, appID, instanceID string) error {
-	return e.do(ctx, "PUT", []string{"apps", appID, instanceID, fmt.Sprintf("status?value=%s", STATUS_OUT_OF_SERVICE)}, nil, nil)
+	return e.do(ctx, "PUT", []string{"apps", appID, instanceID, fmt.Sprintf("status?value=%s", statusOutOfServeice)}, nil, nil)
 }
 
 func (e *EurekaClient) Down(ctx context.Context, appID, instanceID string) error {
-	return e.do(ctx, "PUT", []string{"apps", appID, instanceID, fmt.Sprintf("status?value=%s", STATUS_DOWN)}, nil, nil)
+	return e.do(ctx, "PUT", []string{"apps", appID, instanceID, fmt.Sprintf("status?value=%s", statusDown)}, nil, nil)
 }
 
 func (e *EurekaClient) FetchAllUpInstances(ctx context.Context) []Instance {
@@ -246,8 +248,8 @@ func (e *EurekaClient) Heartbeat(ep Endpoint) {
 			return
 		case <-ticker.C:
 			if err := e.do(e.ctx, "PUT", []string{"apps", ep.AppID, ep.InstanceID}, nil, nil); err != nil {
-				if retryCount++; retryCount > 3 {
-					e.registerEndpoint(e.ctx, ep)
+				if retryCount++; retryCount > heartbeatRetry {
+					_ = e.registerEndpoint(e.ctx, ep)
 					retryCount = 0
 				}
 			}
@@ -266,7 +268,7 @@ func (e *EurekaClient) cancelHeartbeat(appID string) {
 func (e *EurekaClient) filterUp(apps ...Application) (res []Instance) {
 	for _, app := range apps {
 		for _, ins := range app.Instance {
-			if ins.Status == STATUS_UP {
+			if ins.Status == statusUp {
 				res = append(res, ins)
 			}
 		}
@@ -276,7 +278,7 @@ func (e *EurekaClient) filterUp(apps ...Application) (res []Instance) {
 }
 
 func (e *EurekaClient) pickServer(currentTimes int) string {
-	return e.urls[currentTimes%e.max_retry]
+	return e.urls[currentTimes%e.maxRetry]
 }
 
 func (e *EurekaClient) shuffle() {
@@ -286,12 +288,12 @@ func (e *EurekaClient) shuffle() {
 	})
 }
 
-func (e *EurekaClient) buildApi(currentTimes int, params ...string) string {
+func (e *EurekaClient) buildAPI(currentTimes int, params ...string) string {
 	if currentTimes == 0 {
 		e.shuffle()
 	}
 	server := e.pickServer(currentTimes)
-	params = append([]string{server, EUREKA_PATH}, params...)
+	params = append([]string{server, eurekaPath}, params...)
 	return strings.Join(params, "/")
 }
 
@@ -308,10 +310,6 @@ func (e *EurekaClient) parseTpl(endpoint Endpoint) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (e *EurekaClient) toAppID(serverName string) string {
-	return strings.ToUpper(serverName)
-}
-
 func (e *EurekaClient) toDuration(interval string) time.Duration {
 	duration, err := time.ParseDuration(interval)
 	if err != nil {
@@ -321,8 +319,8 @@ func (e *EurekaClient) toDuration(interval string) time.Duration {
 }
 
 func (e *EurekaClient) do(ctx context.Context, method string, params []string, input io.Reader, output interface{}) error {
-	for i := 0; i < e.max_retry; i++ {
-		request, err := http.NewRequest(method, e.buildApi(i, params...), input)
+	for i := 0; i < e.maxRetry; i++ {
+		request, err := http.NewRequest(method, e.buildAPI(i, params...), input)
 		if err != nil {
 			return err
 		}
@@ -335,7 +333,7 @@ func (e *EurekaClient) do(ctx context.Context, method string, params []string, i
 			continue
 		}
 		defer func() {
-			io.Copy(ioutil.Discard, resp.Body)
+			_, _ = io.Copy(ioutil.Discard, resp.Body)
 			resp.Body.Close()
 		}()
 
@@ -349,12 +347,11 @@ func (e *EurekaClient) do(ctx context.Context, method string, params []string, i
 			}
 		}
 
-		if resp.StatusCode > 299 {
-			return errors.New(fmt.Sprintf("Response Error %d", resp.StatusCode))
+		if resp.StatusCode >= http.StatusBadRequest {
+			return fmt.Errorf("response Error %d", resp.StatusCode)
 		}
 
 		return nil
 	}
-
-	return errors.New(fmt.Sprintf("Retry after %d times.", e.max_retry))
+	return fmt.Errorf("retry after %d times", e.maxRetry)
 }

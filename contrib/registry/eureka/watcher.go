@@ -11,12 +11,12 @@ var _ registry.Watcher = &watcher{}
 type watcher struct {
 	ctx        context.Context
 	cancel     context.CancelFunc
-	cli        *eurekaApi
+	cli        *EurekaAPI
 	watchChan  chan struct{}
 	serverName string
 }
 
-func newWatch(ctx context.Context, cli *eurekaApi, serverName string) (*watcher, error) {
+func newWatch(ctx context.Context, cli *EurekaAPI, serverName string) (*watcher, error) {
 	w := &watcher{
 		ctx:        ctx,
 		cli:        cli,
