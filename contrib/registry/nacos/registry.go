@@ -20,6 +20,9 @@ var (
 	_ registry.Discovery = (*Registry)(nil)
 )
 
+// The separator that cuts the serviceName
+const splitServiceNameSep = "@@"
+
 // The number is elements count of the serviceName slice
 const splitServiceNameNum = 2
 
@@ -170,7 +173,7 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 
 // GetService return the service instances in memory according to the service name.
 func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
-	names := strings.SplitN(serviceName, "@@", splitServiceNameNum)
+	names := strings.SplitN(serviceName, splitServiceNameSep, splitServiceNameNum)
 	groupName := constant.DEFAULT_GROUP
 	if len(names) == splitServiceNameNum {
 		groupName = names[0]
