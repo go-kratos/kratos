@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
 	"github.com/go-kratos/kratos/v2"
@@ -30,7 +29,7 @@ func (s *server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*he
 
 func redirectFilter(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, "/helloworld/") {
+		if r.URL.Path == "/helloworld/kratos" {
 			http.Redirect(w, r, "https://go-kratos.dev/", http.StatusMovedPermanently)
 			return
 		}
@@ -57,4 +56,5 @@ func main() {
 	}
 }
 
-// get http://127.0.0.1:9000/helloworld/kratos
+// get http://127.0.0.1:8000/helloworld/kratos
+// get http://127.0.0.1:8000/helloworld/go-kratos.dev
