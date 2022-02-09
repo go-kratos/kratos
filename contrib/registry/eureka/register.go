@@ -34,7 +34,7 @@ func WithEurekaPath(path string) Option {
 
 type Registry struct {
 	ctx               context.Context
-	api               *EurekaAPI
+	api               *API
 	heartbeatInterval string
 	refreshInterval   string
 	eurekaPath        string
@@ -52,8 +52,8 @@ func New(eurekaUrls []string, opts ...Option) (*Registry, error) {
 		o(r)
 	}
 
-	client := NewEurekaClient(eurekaUrls, WithHeartbeatInterval(r.heartbeatInterval), WithCtx(r.ctx), WithPath(r.eurekaPath))
-	r.api = NewEurekaAPI(r.ctx, client, r.refreshInterval)
+	client := NewClient(eurekaUrls, WithHeartbeatInterval(r.heartbeatInterval), WithCtx(r.ctx), WithPath(r.eurekaPath))
+	r.api = NewAPI(r.ctx, client, r.refreshInterval)
 	return r, nil
 }
 

@@ -103,9 +103,9 @@ type SecurePort struct {
 	SecurePort int `json:"$"`
 }
 
-var _ EurekaAPIInterface = new(EurekaClient)
+var _ APIInterface = new(Client)
 
-type EurekaAPIInterface interface {
+type APIInterface interface {
 	Register(ctx context.Context, ep Endpoint) error
 	Deregister(ctx context.Context, appID, instanceID string) error
 	Heartbeat(ep Endpoint)
@@ -119,29 +119,29 @@ type EurekaAPIInterface interface {
 	Down(ctx context.Context, appID, instanceID string) error
 }
 
-type EurekaOption func(e *EurekaClient)
+type Opt func(e *Client)
 
-func WithMaxRetry(maxRetry int) EurekaOption {
-	return func(e *EurekaClient) { e.maxRetry = maxRetry }
+func WithMaxRetry(maxRetry int) Opt {
+	return func(e *Client) { e.maxRetry = maxRetry }
 }
 
-func WithHeartbeatInterval(interval string) EurekaOption {
-	return func(e *EurekaClient) {
+func WithHeartbeatInterval(interval string) Opt {
+	return func(e *Client) {
 		if duration := e.toDuration(interval); duration > 0 {
 			e.heartbeatInterval = duration
 		}
 	}
 }
 
-func WithCtx(ctx context.Context) EurekaOption {
-	return func(e *EurekaClient) { e.ctx = ctx }
+func WithCtx(ctx context.Context) Opt {
+	return func(e *Client) { e.ctx = ctx }
 }
 
-func WithPath(path string) EurekaOption {
-	return func(e *EurekaClient) { e.eurekaPath = path }
+func WithPath(path string) Opt {
+	return func(e *Client) { e.eurekaPath = path }
 }
 
-type EurekaClient struct {
+type Client struct {
 	ctx               context.Context
 	urls              []string
 	eurekaPath        string
@@ -152,12 +152,12 @@ type EurekaClient struct {
 	lock              sync.Mutex
 }
 
-func NewEurekaClient(urls []string, opts ...EurekaOption) *EurekaClient {
+func NewClient(urls []string, opts ...Opt) *Client {
 	tr := &http.Transport{
 		MaxIdleConns: 100,
 	}
 
-	e := &EurekaClient{
+	e := &Client{
 		ctx:               context.Background(),
 		urls:              urls,
 		eurekaPath:        "eureka/v2",
@@ -174,7 +174,7 @@ func NewEurekaClient(urls []string, opts ...EurekaOption) *EurekaClient {
 	return e
 }
 
-func (e *EurekaClient) FetchApps(ctx context.Context) []Application {
+func (e *Client) FetchApps(ctx context.Context) []Application {
 	var m ApplicationsRootResponse
 	if err := e.do(ctx, "GET", []string{"apps"}, nil, &m); err != nil {
 		return nil
@@ -183,12 +183,12 @@ func (e *EurekaClient) FetchApps(ctx context.Context) []Application {
 	return m.Applications
 }
 
-func (e *EurekaClient) FetchAppInstances(ctx context.Context, appID string) (m Application, err error) {
+func (e *Client) FetchAppInstances(ctx context.Context, appID string) (m Application, err error) {
 	err = e.do(ctx, "GET", []string{"apps", appID}, nil, &m)
 	return
 }
 
-func (e *EurekaClient) FetchAppUpInstances(ctx context.Context, appID string) []Instance {
+func (e *Client) FetchAppUpInstances(ctx context.Context, appID string) []Instance {
 	app, err := e.FetchAppInstances(ctx, appID)
 	if err != nil {
 		return nil
@@ -196,33 +196,33 @@ func (e *EurekaClient) FetchAppUpInstances(ctx context.Context, appID string) []
 	return e.filterUp(app)
 }
 
-func (e *EurekaClient) FetchAppInstance(ctx context.Context, appID string, instanceID string) (m Instance, err error) {
+func (e *Client) FetchAppInstance(ctx context.Context, appID string, instanceID string) (m Instance, err error) {
 	err = e.do(ctx, "GET", []string{"apps", appID, instanceID}, nil, &m)
 	return
 }
 
-func (e *EurekaClient) FetchInstance(ctx context.Context, instanceID string) (m Instance, err error) {
+func (e *Client) FetchInstance(ctx context.Context, instanceID string) (m Instance, err error) {
 	err = e.do(ctx, "GET", []string{"instances", instanceID}, nil, &m)
 	return
 }
 
-func (e *EurekaClient) Out(ctx context.Context, appID, instanceID string) error {
+func (e *Client) Out(ctx context.Context, appID, instanceID string) error {
 	return e.do(ctx, "PUT", []string{"apps", appID, instanceID, fmt.Sprintf("status?value=%s", statusOutOfServeice)}, nil, nil)
 }
 
-func (e *EurekaClient) Down(ctx context.Context, appID, instanceID string) error {
+func (e *Client) Down(ctx context.Context, appID, instanceID string) error {
 	return e.do(ctx, "PUT", []string{"apps", appID, instanceID, fmt.Sprintf("status?value=%s", statusDown)}, nil, nil)
 }
 
-func (e *EurekaClient) FetchAllUpInstances(ctx context.Context) []Instance {
+func (e *Client) FetchAllUpInstances(ctx context.Context) []Instance {
 	return e.filterUp(e.FetchApps(ctx)...)
 }
 
-func (e *EurekaClient) Register(ctx context.Context, ep Endpoint) error {
+func (e *Client) Register(ctx context.Context, ep Endpoint) error {
 	return e.registerEndpoint(ctx, ep)
 }
 
-func (e *EurekaClient) Deregister(ctx context.Context, appID, instanceID string) error {
+func (e *Client) Deregister(ctx context.Context, appID, instanceID string) error {
 	if err := e.do(ctx, "DELETE", []string{"apps", appID, instanceID}, nil, nil); err != nil {
 		return err
 	}
@@ -230,7 +230,7 @@ func (e *EurekaClient) Deregister(ctx context.Context, appID, instanceID string)
 	return nil
 }
 
-func (e *EurekaClient) registerEndpoint(ctx context.Context, ep Endpoint) error {
+func (e *Client) registerEndpoint(ctx context.Context, ep Endpoint) error {
 	body, err := e.parseTpl(ep)
 	if err != nil {
 		return err
@@ -238,7 +238,7 @@ func (e *EurekaClient) registerEndpoint(ctx context.Context, ep Endpoint) error 
 	return e.do(ctx, "POST", []string{"apps", ep.AppID}, bytes.NewReader(body), nil)
 }
 
-func (e *EurekaClient) Heartbeat(ep Endpoint) {
+func (e *Client) Heartbeat(ep Endpoint) {
 	e.lock.Lock()
 	e.keepalive[ep.AppID] = make(chan struct{})
 	e.lock.Unlock()
@@ -263,7 +263,7 @@ func (e *EurekaClient) Heartbeat(ep Endpoint) {
 	}
 }
 
-func (e *EurekaClient) cancelHeartbeat(appID string) {
+func (e *Client) cancelHeartbeat(appID string) {
 	defer e.lock.Unlock()
 	e.lock.Lock()
 	if ch, ok := e.keepalive[appID]; ok {
@@ -271,7 +271,7 @@ func (e *EurekaClient) cancelHeartbeat(appID string) {
 	}
 }
 
-func (e *EurekaClient) filterUp(apps ...Application) (res []Instance) {
+func (e *Client) filterUp(apps ...Application) (res []Instance) {
 	for _, app := range apps {
 		for _, ins := range app.Instance {
 			if ins.Status == statusUp {
@@ -283,18 +283,18 @@ func (e *EurekaClient) filterUp(apps ...Application) (res []Instance) {
 	return
 }
 
-func (e *EurekaClient) pickServer(currentTimes int) string {
+func (e *Client) pickServer(currentTimes int) string {
 	return e.urls[currentTimes%e.maxRetry]
 }
 
-func (e *EurekaClient) shuffle() {
+func (e *Client) shuffle() {
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(e.urls), func(i, j int) {
 		e.urls[i], e.urls[j] = e.urls[j], e.urls[i]
 	})
 }
 
-func (e *EurekaClient) buildAPI(currentTimes int, params ...string) string {
+func (e *Client) buildAPI(currentTimes int, params ...string) string {
 	if currentTimes == 0 {
 		e.shuffle()
 	}
@@ -303,7 +303,7 @@ func (e *EurekaClient) buildAPI(currentTimes int, params ...string) string {
 	return strings.Join(params, "/")
 }
 
-func (e *EurekaClient) parseTpl(endpoint Endpoint) ([]byte, error) {
+func (e *Client) parseTpl(endpoint Endpoint) ([]byte, error) {
 	buf := new(bytes.Buffer)
 
 	tmpl, err := template.New("eureka").Parse(tpl)
@@ -316,7 +316,7 @@ func (e *EurekaClient) parseTpl(endpoint Endpoint) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (e *EurekaClient) toDuration(interval string) time.Duration {
+func (e *Client) toDuration(interval string) time.Duration {
 	duration, err := time.ParseDuration(interval)
 	if err != nil {
 		return 0
@@ -324,7 +324,7 @@ func (e *EurekaClient) toDuration(interval string) time.Duration {
 	return duration
 }
 
-func (e *EurekaClient) do(ctx context.Context, method string, params []string, input io.Reader, output interface{}) error {
+func (e *Client) do(ctx context.Context, method string, params []string, input io.Reader, output interface{}) error {
 	for i := 0; i < e.maxRetry; i++ {
 		request, err := http.NewRequest(method, e.buildAPI(i, params...), input)
 		if err != nil {
