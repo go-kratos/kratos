@@ -249,6 +249,7 @@ func (e *EurekaClient) Heartbeat(ep Endpoint) {
 	for {
 		select {
 		case <-e.ctx.Done():
+			return
 		case <-e.keepalive[ep.AppID]:
 			return
 		case <-ticker.C:
