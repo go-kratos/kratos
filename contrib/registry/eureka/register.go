@@ -2,6 +2,7 @@ package eureka
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/registry"
@@ -27,11 +28,16 @@ func WithRefresh(interval string) Option {
 	return func(o *Registry) { o.refreshInterval = interval }
 }
 
+func WithEurekaPath(path string) Option {
+	return func(o *Registry) { o.eurekaPath = path }
+}
+
 type Registry struct {
 	ctx               context.Context
 	api               *EurekaAPI
 	heartbeatInterval string
 	refreshInterval   string
+	eurekaPath        string
 }
 
 func New(eurekaUrls []string, opts ...Option) (*Registry, error) {
@@ -39,13 +45,14 @@ func New(eurekaUrls []string, opts ...Option) (*Registry, error) {
 		ctx:               context.Background(),
 		heartbeatInterval: "10s",
 		refreshInterval:   "30s",
+		eurekaPath:        "eureka/v2",
 	}
 
 	for _, o := range opts {
 		o(r)
 	}
 
-	client := NewEurekaClient(eurekaUrls, WithHeartbeatInterval(r.heartbeatInterval), WithCtx(r.ctx))
+	client := NewEurekaClient(eurekaUrls, WithHeartbeatInterval(r.heartbeatInterval), WithCtx(r.ctx), WithPath(r.eurekaPath))
 	r.api = NewEurekaAPI(r.ctx, client, r.refreshInterval)
 	return r, nil
 }
@@ -94,12 +101,12 @@ func (r *Registry) Endpoints(service *registry.ServiceInstance) []Endpoint {
 		ip := ep[start+2 : end]
 		port := ep[end+1:]
 		securePort := "443"
-		homePageURL := "/"
-		statusPageURL := "/info"
-		healthCheckURL := "/health"
+		homePageURL := fmt.Sprintf("%s/", ep)
+		statusPageURL := fmt.Sprintf("%s/info", ep)
+		healthCheckURL := fmt.Sprintf("%s/health", ep)
 		instanceID := strings.Join([]string{ip, appID, port}, ":")
 		metadata := make(map[string]string)
-		if service.Metadata != nil {
+		if len(service.Metadata) > 0 {
 			metadata = service.Metadata
 		}
 		if s, ok := service.Metadata["securePort"]; ok {

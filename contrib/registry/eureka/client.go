@@ -19,7 +19,6 @@ const (
 	statusUp            = "UP"
 	statusDown          = "DOWN"
 	statusOutOfServeice = "OUT_OF_SERVICE"
-	eurekaPath          = "eureka"
 	heartbeatRetry      = 3
 )
 
@@ -40,9 +39,9 @@ const tpl = `{
       "$":{{ .SecurePort }},
       "@enabled": false
     },
-    "homePageUrl" : "http://{{ .IP }}:{{ .Port }}{{ .HomePageURL }}",
-    "statusPageUrl": "http://{{ .IP }}:{{ .Port }}{{ .StatusPageURL }}",
-    "healthCheckUrl": "http://{{ .IP }}:{{ .Port }}{{ .HealthCheckURL }}",
+    "homePageUrl" : "{{ .HomePageURL }}",
+    "statusPageUrl": "{{ .StatusPageURL }}",
+    "healthCheckUrl": "{{ .HealthCheckURL }}",
     "dataCenterInfo" : {
       "@class":"com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo",
       "name": "MyOwn"
@@ -138,9 +137,14 @@ func WithCtx(ctx context.Context) EurekaOption {
 	return func(e *EurekaClient) { e.ctx = ctx }
 }
 
+func WithPath(path string) EurekaOption {
+	return func(e *EurekaClient) { e.eurekaPath = path }
+}
+
 type EurekaClient struct {
 	ctx               context.Context
 	urls              []string
+	eurekaPath        string
 	maxRetry          int
 	heartbeatInterval time.Duration
 	client            *http.Client
@@ -156,6 +160,7 @@ func NewEurekaClient(urls []string, opts ...EurekaOption) *EurekaClient {
 	e := &EurekaClient{
 		ctx:               context.Background(),
 		urls:              urls,
+		eurekaPath:        "eureka/v2",
 		maxRetry:          len(urls),
 		heartbeatInterval: time.Second * 10,
 		client:            &http.Client{Transport: tr, Timeout: time.Second * 3},
@@ -293,7 +298,7 @@ func (e *EurekaClient) buildAPI(currentTimes int, params ...string) string {
 		e.shuffle()
 	}
 	server := e.pickServer(currentTimes)
-	params = append([]string{server, eurekaPath}, params...)
+	params = append([]string{server, e.eurekaPath}, params...)
 	return strings.Join(params, "/")
 }
 
