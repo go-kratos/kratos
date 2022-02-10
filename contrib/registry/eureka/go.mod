@@ -1,4 +1,4 @@
-module git.haodf.net/go/rocky/contrib/registry/eureka/v2
+module github.com/go-kratos/kratos/contrib/registry/eureka/v2
 
 go 1.16
 
