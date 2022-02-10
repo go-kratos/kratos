@@ -42,8 +42,8 @@ func (tr *Transport) ReplyHeader() transport.Header {
 	return tr.replyHeader
 }
 
-// Filters returns the client select filters.
-func (tr *Transport) Filters() []selector.Filter {
+// SelectFilters returns the client select filters.
+func (tr *Transport) SelectFilters() []selector.Filter {
 	return tr.filters
 }
 

@@ -31,6 +31,7 @@ type App struct {
 	opts     options
 	ctx      context.Context
 	cancel   func()
+	lk       sync.Mutex
 	instance *registry.ServiceInstance
 }
 
@@ -38,9 +39,10 @@ type App struct {
 func New(opts ...Option) *App {
 	o := options{
 		ctx:              context.Background(),
-		logger:           log.NewHelper(log.DefaultLogger),
+		logger:           log.NewHelper(log.GetLogger()),
 		sigs:             []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		registrarTimeout: 10 * time.Second,
+		stopTimeout:      10 * time.Second,
 	}
 	if id, err := uuid.NewUUID(); err == nil {
 		o.id = id.String()
@@ -89,7 +91,9 @@ func (a *App) Run() error {
 		srv := srv
 		eg.Go(func() error {
 			<-ctx.Done() // wait for stop signal
-			return srv.Stop(ctx)
+			sctx, cancel := context.WithTimeout(NewContext(context.Background(), a), a.opts.stopTimeout)
+			defer cancel()
+			return srv.Stop(sctx)
 		})
 		wg.Add(1)
 		eg.Go(func() error {
@@ -104,7 +108,9 @@ func (a *App) Run() error {
 		if err := a.opts.registrar.Register(rctx, instance); err != nil {
 			return err
 		}
+		a.lk.Lock()
 		a.instance = instance
+		a.lk.Unlock()
 	}
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, a.opts.sigs...)
@@ -117,6 +123,7 @@ func (a *App) Run() error {
 				err := a.Stop()
 				if err != nil {
 					a.opts.logger.Errorf("failed to stop app: %v", err)
+					return err
 				}
 			}
 		}
@@ -129,10 +136,13 @@ func (a *App) Run() error {
 
 // Stop gracefully stops the application.
 func (a *App) Stop() error {
-	if a.opts.registrar != nil && a.instance != nil {
+	a.lk.Lock()
+	instance := a.instance
+	a.lk.Unlock()
+	if a.opts.registrar != nil && instance != nil {
 		ctx, cancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
 		defer cancel()
-		if err := a.opts.registrar.Deregister(ctx, a.instance); err != nil {
+		if err := a.opts.registrar.Deregister(ctx, instance); err != nil {
 			return err
 		}
 	}

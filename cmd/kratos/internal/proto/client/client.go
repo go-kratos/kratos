@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -40,7 +39,7 @@ func run(cmd *cobra.Command, args []string) {
 		err   error
 		proto = strings.TrimSpace(args[0])
 	)
-	if err = look("protoc-gen-go", "protoc-gen-go-grpc", "protoc-gen-go-http", "protoc-gen-go-errors", "protoc-gen-validate"); err != nil {
+	if err = look("protoc-gen-go", "protoc-gen-go-grpc", "protoc-gen-go-http", "protoc-gen-go-errors", "protoc-gen-validate", "protoc-gen-openapi"); err != nil {
 		// update the kratos plugins
 		cmd := exec.Command("kratos", "upgrade")
 		cmd.Stdout = os.Stdout
@@ -96,9 +95,10 @@ func generate(proto string, args []string) error {
 		"--go-grpc_out=paths=source_relative:.",
 		"--go-http_out=paths=source_relative:.",
 		"--go-errors_out=paths=source_relative:.",
+		"--openapi_out=paths=source_relative:.",
 	}
 	input = append(input, inputExt...)
-	protoBytes, err := ioutil.ReadFile(proto)
+	protoBytes, err := os.ReadFile(proto)
 	if err == nil && len(protoBytes) > 0 {
 		if ok, _ := regexp.Match(`\n[^/]*(import)\s+"validate/validate.proto"`, protoBytes); ok {
 			input = append(input, "--validate_out=lang=go,paths=source_relative:.")

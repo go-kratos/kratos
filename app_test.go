@@ -2,15 +2,42 @@ package kratos
 
 import (
 	"context"
+	"fmt"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
-	"github.com/stretchr/testify/assert"
 )
+
+type mockRegistry struct {
+	lk      sync.Mutex
+	service map[string]*registry.ServiceInstance
+}
+
+func (r *mockRegistry) Register(ctx context.Context, service *registry.ServiceInstance) error {
+	if service == nil || service.ID == "" {
+		return fmt.Errorf("no service id")
+	}
+	r.lk.Lock()
+	defer r.lk.Unlock()
+	r.service[service.ID] = service
+	return nil
+}
+
+// Deregister the registration.
+func (r *mockRegistry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
+	r.lk.Lock()
+	defer r.lk.Unlock()
+	if r.service[service.ID] == nil {
+		return fmt.Errorf("deregister service not found")
+	}
+	delete(r.service, service.ID)
+	return nil
+}
 
 func TestApp(t *testing.T) {
 	hs := http.NewServer()
@@ -19,6 +46,7 @@ func TestApp(t *testing.T) {
 		Name("kratos"),
 		Version("v1.0.0"),
 		Server(hs, gs),
+		Registrar(&mockRegistry{service: make(map[string]*registry.ServiceInstance)}),
 	)
 	time.AfterFunc(time.Second, func() {
 		_ = app.Stop()
@@ -31,19 +59,25 @@ func TestApp(t *testing.T) {
 func TestApp_ID(t *testing.T) {
 	v := "123"
 	o := New(ID(v))
-	assert.Equal(t, v, o.ID())
+	if !reflect.DeepEqual(v, o.ID()) {
+		t.Fatalf("o.ID():%s is not equal to v:%s", o.ID(), v)
+	}
 }
 
 func TestApp_Name(t *testing.T) {
 	v := "123"
 	o := New(Name(v))
-	assert.Equal(t, v, o.Name())
+	if !reflect.DeepEqual(v, o.Name()) {
+		t.Fatalf("o.Name():%s is not equal to v:%s", o.Name(), v)
+	}
 }
 
 func TestApp_Version(t *testing.T) {
 	v := "123"
 	o := New(Version(v))
-	assert.Equal(t, v, o.Version())
+	if !reflect.DeepEqual(v, o.Version()) {
+		t.Fatalf("o.Version():%s is not equal to v:%s", o.Version(), v)
+	}
 }
 
 func TestApp_Metadata(t *testing.T) {
@@ -52,7 +86,9 @@ func TestApp_Metadata(t *testing.T) {
 		"b": "2",
 	}
 	o := New(Metadata(v))
-	assert.Equal(t, v, o.Metadata())
+	if !reflect.DeepEqual(v, o.Metadata()) {
+		t.Fatalf("o.Metadata():%s is not equal to v:%s", o.Metadata(), v)
+	}
 }
 
 func TestApp_Endpoint(t *testing.T) {

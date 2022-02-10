@@ -1,14 +1,13 @@
-# kube
-Kubernetes is a service discovery.
+# Kubernetes Config
 
-### kube集群内部署
-集群内部署需要权限
-kubectl执行
-> serviceaccount 请调整为实际环境account。在未指定spec.serviceAccount情况下默认为namespace::default
+### Usage in the Kubernates Cluster
+It is required to 
+> serviceaccount should be set to the actual account of your environment, the default account will be `namespace::default` if the `spec.serviceAccount` is unset. 
+execute this command:
 ```
 kubectl create clusterrolebinding go-kratos:kube --clusterrole=view --serviceaccount=mesh:default
 ```
-或者 kubect apply -f bind-role.yaml
+or use `kubect apply -f bind-role.yaml`
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -24,8 +23,8 @@ subjects:
   namespace: mesh
 ```
 
-### 集群外运行
-> 指定 .kube 文件访问
+### Usage outside the Kubernates Cluster
+Set the path `~/.kube/config` to KubeConfig
 ```go
     config.NewSource(SourceOption{
 		Namespace:     "mesh",

@@ -34,3 +34,17 @@ log.Info("info log")
 log.Warn("warn log")
 log.Error("warn log")
 ```
+
+## Third party log library
+
+### zap
+
+```shell
+go get -u github.com/go-kratos/kratos/contrib/log/zap/v2
+```
+
+### fluent
+
+```shell
+go get -u github.com/go-kratos/kratos/contrib/log/fluent/v2
+```

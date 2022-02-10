@@ -20,12 +20,12 @@ const (
 )
 
 var (
-	_ selector.WeightedNode        = &node{}
+	_ selector.WeightedNode        = &Node{}
 	_ selector.WeightedNodeBuilder = &Builder{}
 )
 
-// node is endpoint instance
-type node struct {
+// Node is endpoint instance
+type Node struct {
 	selector.Node
 
 	// client statistic data
@@ -53,7 +53,7 @@ type Builder struct {
 
 // Build create a weighted node.
 func (b *Builder) Build(n selector.Node) selector.WeightedNode {
-	s := &node{
+	s := &Node{
 		Node:       n,
 		lag:        0,
 		success:    1000,
@@ -64,21 +64,21 @@ func (b *Builder) Build(n selector.Node) selector.WeightedNode {
 	return s
 }
 
-func (n *node) health() uint64 {
+func (n *Node) health() uint64 {
 	return atomic.LoadUint64(&n.success)
 }
 
-func (n *node) load() (load uint64) {
+func (n *Node) load() (load uint64) {
 	now := time.Now().UnixNano()
 	avgLag := atomic.LoadInt64(&n.lag)
 	lastPredictTs := atomic.LoadInt64(&n.predictTs)
-	predicInterval := avgLag / 5
-	if predicInterval < int64(time.Millisecond*5) {
-		predicInterval = int64(time.Millisecond * 5)
-	} else if predicInterval > int64(time.Millisecond*200) {
-		predicInterval = int64(time.Millisecond * 200)
+	predictInterval := avgLag / 5
+	if predictInterval < int64(time.Millisecond*5) {
+		predictInterval = int64(time.Millisecond * 5)
+	} else if predictInterval > int64(time.Millisecond*200) {
+		predictInterval = int64(time.Millisecond * 200)
 	}
-	if now-lastPredictTs > predicInterval {
+	if now-lastPredictTs > predictInterval {
 		if atomic.CompareAndSwapInt64(&n.predictTs, lastPredictTs, now) {
 			var (
 				total   int64
@@ -104,7 +104,8 @@ func (n *node) load() (load uint64) {
 	}
 
 	if avgLag == 0 {
-		// penalty是node刚启动时没有数据时的惩罚值，默认为1e9 * 10
+		// penalty is the penalty value when there is no data when the node is just started.
+		// The default value is 1e9 * 10
 		load = penalty * uint64(atomic.LoadInt64(&n.inflight))
 	} else {
 		predict := atomic.LoadInt64(&n.predict)
@@ -117,7 +118,7 @@ func (n *node) load() (load uint64) {
 }
 
 // Pick pick a node.
-func (n *node) Pick() selector.DoneFunc {
+func (n *Node) Pick() selector.DoneFunc {
 	now := time.Now().UnixNano()
 	atomic.StoreInt64(&n.lastPick, now)
 	atomic.AddInt64(&n.inflight, 1)
@@ -170,11 +171,15 @@ func (n *node) Pick() selector.DoneFunc {
 }
 
 // Weight is node effective weight.
-func (n *node) Weight() (weight float64) {
+func (n *Node) Weight() (weight float64) {
 	weight = float64(n.health()*uint64(time.Second)) / float64(n.load())
 	return
 }
 
-func (n *node) PickElapsed() time.Duration {
+func (n *Node) PickElapsed() time.Duration {
 	return time.Duration(time.Now().UnixNano() - atomic.LoadInt64(&n.lastPick))
+}
+
+func (n *Node) Raw() selector.Node {
+	return n.Node
 }

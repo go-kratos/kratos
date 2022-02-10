@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"testing"
 
 	"google.golang.org/grpc/codes"
@@ -56,5 +57,60 @@ func TestError(t *testing.T) {
 	// codes.InvalidArgument should convert to http.StatusBadRequest
 	if se2.Code != http.StatusBadRequest {
 		t.Errorf("convert code err, got %d want %d", UnknownCode, http.StatusBadRequest)
+	}
+	if FromError(nil) != nil {
+		t.Errorf("FromError(nil) should be nil")
+	}
+	e := FromError(errors.New("test"))
+	if !reflect.DeepEqual(e.Code, int32(UnknownCode)) {
+		t.Errorf("no expect value: %v, but got: %v", e.Code, int32(UnknownCode))
+	}
+}
+
+func TestIs(t *testing.T) {
+	tests := []struct {
+		name string
+		e    *Error
+		err  error
+		want bool
+	}{
+		{
+			name: "true",
+			e:    &Error{Reason: "test"},
+			err:  New(http.StatusNotFound, "test", ""),
+			want: true,
+		},
+		{
+			name: "false",
+			e:    &Error{Reason: "test"},
+			err:  errors.New("test"),
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if ok := tt.e.Is(tt.err); ok != tt.want {
+				t.Errorf("Error.Error() = %v, want %v", ok, tt.want)
+			}
+		})
+	}
+}
+
+func TestOther(t *testing.T) {
+	if !reflect.DeepEqual(Code(nil), 200) {
+		t.Errorf("Code(nil) = %v, want %v", Code(nil), 200)
+	}
+	if !reflect.DeepEqual(Code(errors.New("test")), UnknownCode) {
+		t.Errorf(`Code(errors.New("test")) = %v, want %v`, Code(nil), 200)
+	}
+	if !reflect.DeepEqual(Reason(errors.New("test")), UnknownReason) {
+		t.Errorf(`Reason(errors.New("test")) = %v, want %v`, Reason(nil), UnknownReason)
+	}
+	err := Errorf(10001, "test code 10001", "message")
+	if !reflect.DeepEqual(Code(err), 10001) {
+		t.Errorf(`Code(err) = %v, want %v`, Code(err), 10001)
+	}
+	if !reflect.DeepEqual(Reason(err), "test code 10001") {
+		t.Errorf(`Reason(err) = %v, want %v`, Reason(err), "test code 10001")
 	}
 }

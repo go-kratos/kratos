@@ -1,14 +1,13 @@
-package node
+package selector
 
 import (
 	"strconv"
 
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/selector"
 )
 
-// Node is slector node
-type Node struct {
+// DefaultNode is selector node
+type DefaultNode struct {
 	addr     string
 	weight   *int64
 	version  string
@@ -17,33 +16,33 @@ type Node struct {
 }
 
 // Address is node address
-func (n *Node) Address() string {
+func (n *DefaultNode) Address() string {
 	return n.addr
 }
 
 // ServiceName is node serviceName
-func (n *Node) ServiceName() string {
+func (n *DefaultNode) ServiceName() string {
 	return n.name
 }
 
 // InitialWeight is node initialWeight
-func (n *Node) InitialWeight() *int64 {
+func (n *DefaultNode) InitialWeight() *int64 {
 	return n.weight
 }
 
 // Version is node version
-func (n *Node) Version() string {
+func (n *DefaultNode) Version() string {
 	return n.version
 }
 
 // Metadata is node metadata
-func (n *Node) Metadata() map[string]string {
+func (n *DefaultNode) Metadata() map[string]string {
 	return n.metadata
 }
 
-// New node
-func New(addr string, ins *registry.ServiceInstance) selector.Node {
-	n := &Node{
+// NewNode new node
+func NewNode(addr string, ins *registry.ServiceInstance) Node {
+	n := &DefaultNode{
 		addr: addr,
 	}
 	if ins != nil {

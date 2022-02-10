@@ -20,8 +20,13 @@ type Selector interface {
 
 // Rebalancer is nodes rebalancer.
 type Rebalancer interface {
-	// apply all nodes when any changes happen
+	// Apply is apply all nodes when any changes happen
 	Apply(nodes []Node)
+}
+
+// Builder build selector
+type Builder interface {
+	Build() Selector
 }
 
 // Node is node interface.

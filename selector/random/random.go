@@ -33,21 +33,12 @@ type options struct {
 // Balancer is a random balancer.
 type Balancer struct{}
 
-// New random a selector.
+// New an random selector.
 func New(opts ...Option) selector.Selector {
-	var option options
-	for _, opt := range opts {
-		opt(&option)
-	}
-
-	return &selector.Default{
-		Balancer:    &Balancer{},
-		NodeBuilder: &direct.Builder{},
-		Filters:     option.filters,
-	}
+	return NewBuilder(opts...).Build()
 }
 
-// Pick pick a weighted node.
+// Pick is pick a weighted node.
 func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.DoneFunc, error) {
 	if len(nodes) == 0 {
 		return nil, nil, selector.ErrNoAvailable
@@ -56,4 +47,25 @@ func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selec
 	selected := nodes[cur]
 	d := selected.Pick()
 	return selected, d, nil
+}
+
+// NewBuilder returns a selector builder with random balancer
+func NewBuilder(opts ...Option) selector.Builder {
+	var option options
+	for _, opt := range opts {
+		opt(&option)
+	}
+	return &selector.DefaultBuilder{
+		Filters:  option.filters,
+		Balancer: &Builder{},
+		Node:     &direct.Builder{},
+	}
+}
+
+// Builder is random builder
+type Builder struct{}
+
+// Build creates Balancer
+func (b *Builder) Build() selector.Balancer {
+	return &Balancer{}
 }

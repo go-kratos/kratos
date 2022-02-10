@@ -1,5 +1,0 @@
-./contrib/config/apollo
-./contrib/config/kubernetes
-./contrib/registry/nacos
-./contrib/registry/consul
-./contrib/registry/zookeeper

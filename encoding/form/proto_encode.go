@@ -7,18 +7,14 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-	"time"
 
 	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
-	"google.golang.org/protobuf/types/known/durationpb"
-	"google.golang.org/protobuf/types/known/timestamppb"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-// EncodeMap encode proto message to url query.
-func EncodeMap(msg proto.Message) (url.Values, error) {
+// EncodeValues encode a message into url values.
+func EncodeValues(msg proto.Message) (url.Values, error) {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return url.Values{}, nil
 	}
@@ -84,7 +80,7 @@ func encodeByField(u url.Values, path string, v protoreflect.Message) error {
 				return err
 			}
 		default:
-			value, err := encodeField(fd, v.Get(fd))
+			value, err := EncodeField(fd, v.Get(fd))
 			if err != nil {
 				return err
 			}
@@ -98,7 +94,7 @@ func encodeByField(u url.Values, path string, v protoreflect.Message) error {
 func encodeRepeatedField(fieldDescriptor protoreflect.FieldDescriptor, list protoreflect.List) ([]string, error) {
 	var values []string
 	for i := 0; i < list.Len(); i++ {
-		value, err := encodeField(fieldDescriptor, list.Get(i))
+		value, err := EncodeField(fieldDescriptor, list.Get(i))
 		if err != nil {
 			return nil, err
 		}
@@ -111,11 +107,11 @@ func encodeRepeatedField(fieldDescriptor protoreflect.FieldDescriptor, list prot
 func encodeMapField(fieldDescriptor protoreflect.FieldDescriptor, mp protoreflect.Map) (map[string]string, error) {
 	m := make(map[string]string)
 	mp.Range(func(k protoreflect.MapKey, v protoreflect.Value) bool {
-		key, err := encodeField(fieldDescriptor.MapValue(), k.Value())
+		key, err := EncodeField(fieldDescriptor.MapValue(), k.Value())
 		if err != nil {
 			return false
 		}
-		value, err := encodeField(fieldDescriptor.MapValue(), v)
+		value, err := EncodeField(fieldDescriptor.MapValue(), v)
 		if err != nil {
 			return false
 		}
@@ -126,7 +122,8 @@ func encodeMapField(fieldDescriptor protoreflect.FieldDescriptor, mp protoreflec
 	return m, nil
 }
 
-func encodeField(fieldDescriptor protoreflect.FieldDescriptor, value protoreflect.Value) (string, error) {
+// EncodeField encode proto message filed
+func EncodeField(fieldDescriptor protoreflect.FieldDescriptor, value protoreflect.Value) (string, error) {
 	switch fieldDescriptor.Kind() {
 	case protoreflect.BoolKind:
 		return strconv.FormatBool(value.Bool()), nil
@@ -147,41 +144,55 @@ func encodeField(fieldDescriptor protoreflect.FieldDescriptor, value protoreflec
 	}
 }
 
-// marshalMessage marshals the fields in the given protoreflect.Message.
+// encodeMessage marshals the fields in the given protoreflect.Message.
 // If the typeURL is non-empty, then a synthetic "@type" field is injected
 // containing the URL as the value.
 func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protoreflect.Value) (string, error) {
 	switch msgDescriptor.FullName() {
-	case "google.protobuf.Timestamp":
-		t, ok := value.Interface().(*timestamppb.Timestamp)
-		if !ok {
-			return "", nil
-		}
-		return t.AsTime().Format(time.RFC3339Nano), nil
-	case "google.protobuf.Duration":
-		d, ok := value.Interface().(*durationpb.Duration)
-		if !ok {
-			return "", nil
-		}
-		return d.AsDuration().String(), nil
-	case "google.protobuf.BytesValue":
-		b, ok := value.Interface().(*wrapperspb.BytesValue)
-		if !ok {
-			return "", nil
-		}
-		return base64.StdEncoding.EncodeToString(b.Value), nil
+	case timestampMessageFullname:
+		return marshalTimestamp(value.Message())
+	case durationMessageFullname:
+		return marshalDuration(value.Message())
+	case bytesMessageFullname:
+		return marshalBytes(value.Message())
 	case "google.protobuf.DoubleValue", "google.protobuf.FloatValue", "google.protobuf.Int64Value", "google.protobuf.Int32Value",
 		"google.protobuf.UInt64Value", "google.protobuf.UInt32Value", "google.protobuf.BoolValue", "google.protobuf.StringValue":
 		fd := msgDescriptor.Fields()
-		v := value.Message().Get(fd.ByName(protoreflect.Name("value"))).Message()
+		v := value.Message().Get(fd.ByName(protoreflect.Name("value")))
 		return fmt.Sprintf("%v", v.Interface()), nil
 	case "google.protobuf.FieldMask":
-		m, ok := value.Interface().(*field_mask.FieldMask)
+		m, ok := value.Message().Interface().(*field_mask.FieldMask)
 		if !ok {
 			return "", nil
+		}
+		for i, v := range m.Paths {
+			m.Paths[i] = jsonCamelCase(v)
 		}
 		return strings.Join(m.Paths, ","), nil
 	default:
 		return "", fmt.Errorf("unsupported message type: %q", string(msgDescriptor.FullName()))
 	}
+}
+
+// JSONCamelCase converts a snake_case identifier to a camelCase identifier,
+// according to the protobuf JSON specification.
+// references: https://github.com/protocolbuffers/protobuf-go/blob/master/encoding/protojson/well_known_types.go#L842
+func jsonCamelCase(s string) string {
+	var b []byte
+	var wasUnderscore bool
+	for i := 0; i < len(s); i++ { // proto identifiers are always ASCII
+		c := s[i]
+		if c != '_' {
+			if wasUnderscore && isASCIILower(c) {
+				c -= 'a' - 'A' // convert to uppercase
+			}
+			b = append(b, c)
+		}
+		wasUnderscore = c == '_'
+	}
+	return string(b)
+}
+
+func isASCIILower(c byte) bool {
+	return 'a' <= c && c <= 'z'
 }

@@ -2,6 +2,8 @@ package config
 
 import (
 	"context"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/config"
@@ -89,11 +91,12 @@ func (c *Config) Load() ([]*config.KeyValue, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	k := c.opts.dataID
 	return []*config.KeyValue{
 		{
-			Key:   c.opts.dataID,
-			Value: []byte(content),
+			Key:    k,
+			Value:  []byte(content),
+			Format: strings.TrimPrefix(filepath.Ext(k), "."),
 		},
 	}, nil
 }
@@ -144,10 +147,12 @@ func (w *Watcher) Next() ([]*config.KeyValue, error) {
 	case <-w.Context.Done():
 		return nil, nil
 	case content := <-w.content:
+		k := w.dataID
 		return []*config.KeyValue{
 			{
-				Key:   w.dataID,
-				Value: []byte(content),
+				Key:    k,
+				Value:  []byte(content),
+				Format: strings.TrimPrefix(filepath.Ext(k), "."),
 			},
 		}, nil
 	}
