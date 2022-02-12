@@ -62,7 +62,11 @@ func DefaultErrorEncoder(w http.ResponseWriter, r *http.Request, err error) {
 		return
 	}
 	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
-	w.WriteHeader(int(se.Code))
+	code := int(se.Code)
+	if http.StatusText(code) == "" {
+		code = http.StatusInternalServerError
+	}
+	w.WriteHeader(code)
 	_, _ = w.Write(body)
 }
 
