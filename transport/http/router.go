@@ -50,7 +50,7 @@ func (r *Router) Handle(method, relativePath string, h HandlerFunc, filters ...F
 	}))
 	next = FilterChain(filters...)(next)
 	next = FilterChain(r.filters...)(next)
-	r.srv.router.Handle(path.Join(r.prefix, relativePath), next).Methods(method)
+	r.srv.router.Handle(joinPaths(r.prefix, relativePath), next).Methods(method)
 }
 
 // GET registers a new GET route for a path with matching handler in the router.
@@ -96,4 +96,16 @@ func (r *Router) OPTIONS(path string, h HandlerFunc, m ...FilterFunc) {
 // TRACE registers a new TRACE route for a path with matching handler in the router.
 func (r *Router) TRACE(path string, h HandlerFunc, m ...FilterFunc) {
 	r.Handle(http.MethodTrace, path, h, m...)
+}
+
+func joinPaths(absolutePath, relativePath string) string {
+	if relativePath == "" {
+		return absolutePath
+	}
+
+	finalPath := path.Join(absolutePath, relativePath)
+	if relativePath[len(relativePath)-1] == '/' && finalPath[len(finalPath)-1] != '/' {
+		return finalPath + "/"
+	}
+	return finalPath
 }
