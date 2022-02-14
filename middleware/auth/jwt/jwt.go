@@ -49,7 +49,7 @@ type Option func(*options)
 type options struct {
 	signingMethod jwt.SigningMethod
 	claims        jwt.Claims
-	serverClaims  func() jwt.Claims
+	serverClaims  jwt.Claims
 	tokenHeader   map[string]interface{}
 }
 
@@ -67,10 +67,17 @@ func WithClaims(claims jwt.Claims) Option {
 	}
 }
 
+// ClaimsFactory produce a new jwt.Claims
+type ClaimsFactory interface {
+	Produce() jwt.Claims
+}
+
 // WithServerClaims with server claim
-func WithServerClaims(f func() jwt.Claims) Option {
+func WithServerClaims(f ClaimsFactory) Option {
 	return func(o *options) {
-		o.serverClaims = f
+		if f != nil {
+			o.serverClaims = f.Produce()
+		}
 	}
 }
 
@@ -106,7 +113,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 					err       error
 				)
 				if o.serverClaims != nil {
-					tokenInfo, err = jwt.ParseWithClaims(jwtToken, o.serverClaims(), keyFunc)
+					tokenInfo, err = jwt.ParseWithClaims(jwtToken, o.serverClaims, keyFunc)
 				} else {
 					tokenInfo, err = jwt.Parse(jwtToken, keyFunc)
 				}
