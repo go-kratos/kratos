@@ -63,6 +63,43 @@ func (tr *Transport) ReplyHeader() transport.Header {
 	return nil
 }
 
+type CustomerClaims struct {
+	Name string `json:"name"`
+	jwt.RegisteredClaims
+}
+
+func TestJWTServerParse(t *testing.T) {
+	var (
+		testKey = "testKey"
+		token   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoieGlhb21pbmciLCJleHAiOjE2NzIxNDM4NTMsImlhdCI6MTY0MDYwNzg1M30.4HfUyr28Yv-ZO7Lf4gH19M_qiFXk12ayNEmyTqQmts4"
+		ctx     = transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader("Authorization", fmt.Sprintf("Bearer %s", token))})
+	)
+
+	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+		testToken, _ := FromContext(ctx)
+		t.Log("testToken: ", testToken)
+		if _, ok := testToken.(*CustomerClaims); ok {
+			t.Log("good result, token claims is CustomerClaims") // 期望打印
+		} else {
+			if _, ok := testToken.(jwt.MapClaims); ok {
+				t.Log("bad result, token claims is MapClaims") // 实际打印
+			}
+			t.Fatal("fail")
+		}
+		return "reply", nil
+	}
+
+	var server middleware.Handler
+	server = Server(func(token *jwt.Token) (interface{}, error) {
+		return []byte(testKey), nil
+	}, WithServerClaims(func() jwt.Claims { return &CustomerClaims{} }))(next)
+
+	_, err2 := server(ctx, "customer claim")
+	if err2 != nil {
+		t.Fatal("fail", err2)
+	}
+}
+
 func TestServer(t *testing.T) {
 	testKey := "testKey"
 	mapClaims := jwt.MapClaims{}

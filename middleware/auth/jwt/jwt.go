@@ -49,6 +49,7 @@ type Option func(*options)
 type options struct {
 	signingMethod jwt.SigningMethod
 	claims        jwt.Claims
+	serverClaims  func() jwt.Claims
 	tokenHeader   map[string]interface{}
 }
 
@@ -66,6 +67,13 @@ func WithClaims(claims jwt.Claims) Option {
 	}
 }
 
+// WithServerClaims with server claim
+func WithServerClaims(f func() jwt.Claims) Option {
+	return func(o *options) {
+		o.serverClaims = f
+	}
+}
+
 // WithTokenHeader withe customer tokenHeader for client side
 func WithTokenHeader(header map[string]interface{}) Option {
 	return func(o *options) {
@@ -77,7 +85,7 @@ func WithTokenHeader(header map[string]interface{}) Option {
 func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	o := &options{
 		signingMethod: jwt.SigningMethodHS256,
-		claims:        jwt.RegisteredClaims{},
+		// claims:        jwt.RegisteredClaims{},
 	}
 	for _, opt := range opts {
 		opt(o)
@@ -93,7 +101,15 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 					return nil, ErrMissingJwtToken
 				}
 				jwtToken := auths[1]
-				tokenInfo, err := jwt.Parse(jwtToken, keyFunc)
+				var (
+					tokenInfo *jwt.Token
+					err       error
+				)
+				if o.serverClaims != nil {
+					tokenInfo, err = jwt.ParseWithClaims(jwtToken, o.serverClaims(), keyFunc)
+				} else {
+					tokenInfo, err = jwt.Parse(jwtToken, keyFunc)
+				}
 				if err != nil {
 					if ve, ok := err.(*jwt.ValidationError); ok {
 						if ve.Errors&jwt.ValidationErrorMalformed != 0 {
