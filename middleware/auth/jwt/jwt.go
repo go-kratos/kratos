@@ -73,10 +73,10 @@ type ClaimsFactory interface {
 }
 
 // WithServerClaims with server claim
-func WithServerClaims(f ClaimsFactory) Option {
+func WithServerClaims(factory ClaimsFactory) Option {
 	return func(o *options) {
-		if f != nil {
-			o.serverClaims = f.Produce()
+		if factory != nil {
+			o.serverClaims = factory.Produce()
 		}
 	}
 }

@@ -68,6 +68,10 @@ type CustomerClaims struct {
 	jwt.RegisteredClaims
 }
 
+func (c CustomerClaims) Produce() jwt.Claims {
+	return &CustomerClaims{}
+}
+
 func TestJWTServerParse(t *testing.T) {
 	var (
 		testKey = "testKey"
@@ -92,7 +96,7 @@ func TestJWTServerParse(t *testing.T) {
 	var server middleware.Handler
 	server = Server(func(token *jwt.Token) (interface{}, error) {
 		return []byte(testKey), nil
-	}, WithServerClaims(func() jwt.Claims { return &CustomerClaims{} }))(next)
+	}, WithServerClaims(&CustomerClaims{}))(next)
 
 	_, err2 := server(ctx, "customer claim")
 	if err2 != nil {
