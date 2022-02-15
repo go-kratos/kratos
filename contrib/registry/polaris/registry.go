@@ -3,51 +3,53 @@ package polaris
 import (
 	"context"
 	"fmt"
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/polarismesh/polaris-go/api"
-	"github.com/polarismesh/polaris-go/pkg/model"
 	"net"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/polarismesh/polaris-go/api"
+	"github.com/polarismesh/polaris-go/pkg/model"
 )
 
-var (
-	_ registry.Registrar = (*Registry)(nil)
-	// _ registry.Discovery = (*Registry)(nil)
-)
+var _ registry.Registrar = (*Registry)(nil)
+
+// InstanceIDSeparator . Instance Id Separator.
+const InstanceIDSeparator = "-"
 
 type options struct {
-	//必选，服务名
+	// 必选，服务名
 	NameSpace string
 
-	//必选，服务访问Token
+	// 必选，服务访问Token
 	ServiceToken string
 
-	//以下字段可选，默认nil表示客户端不配置，使用服务端配置
-	//服务协议
+	// 以下字段可选，默认nil表示客户端不配置，使用服务端配置
+	// 服务协议
 	Protocol *string
 
-	//服务权重，默认100，范围0-10000
+	// 服务权重，默认100，范围0-10000
 	Weight int
 
-	//实例优先级，默认为0，数值越小，优先级越高
+	// 实例优先级，默认为0，数值越小，优先级越高
 	Priority int
 
-	//该服务实例是否健康，默认健康
+	// 该服务实例是否健康，默认健康
 	Healthy bool
 
-	//该服务实例是否隔离，默认不隔离
+	// 该服务实例是否隔离，默认不隔离
 	Isolate bool
 
-	//ttl超时时间，如果节点要调用heartbeat上报，则必须填写，否则会400141错误码，单位：秒
+	// ttl超时时间，如果节点要调用heartbeat上报，则必须填写，否则会400141错误码，单位：秒
 	TTL int
 
-	//可选，单次查询超时时间，默认直接获取全局的超时配置
-	//用户总最大超时时间为(1+RetryCount) * Timeout
+	// 可选，单次查询超时时间，默认直接获取全局的超时配置
+	// 用户总最大超时时间为(1+RetryCount) * Timeout
 	Timeout time.Duration
 
-	//可选，重试次数，默认直接获取全局的超时配置
+	// 可选，重试次数，默认直接获取全局的超时配置
 	RetryCount int
 }
 
@@ -129,6 +131,7 @@ func New(provider api.ProviderAPI, opts ...Option) (r *Registry) {
 
 // Register the registration.
 func (r *Registry) Register(_ context.Context, serviceInstance *registry.ServiceInstance) error {
+	ids := make([]string, 0, len(serviceInstance.Endpoints))
 	for _, endpoint := range serviceInstance.Endpoints {
 		// get url
 		u, err := url.Parse(endpoint)
@@ -188,16 +191,17 @@ func (r *Registry) Register(_ context.Context, serviceInstance *registry.Service
 		if err != nil {
 			return err
 		}
-		// need to set InstanceID for Deregister
-		serviceInstance.ID = service.InstanceID
+		ids = append(ids, service.InstanceID)
 	}
-
+	// need to set InstanceID for Deregister
+	serviceInstance.ID = strings.Join(ids, InstanceIDSeparator)
 	return nil
 }
 
 // Deregister the registration.
 func (r *Registry) Deregister(ctx context.Context, serviceInstance *registry.ServiceInstance) error {
-	for _, endpoint := range serviceInstance.Endpoints {
+	split := strings.Split(serviceInstance.ID, InstanceIDSeparator)
+	for i, endpoint := range serviceInstance.Endpoints {
 		// get url
 		u, err := url.Parse(endpoint)
 		if err != nil {
@@ -222,7 +226,7 @@ func (r *Registry) Deregister(ctx context.Context, serviceInstance *registry.Ser
 					Service:      serviceInstance.Name + u.Scheme,
 					ServiceToken: r.opt.ServiceToken,
 					Namespace:    r.opt.NameSpace,
-					InstanceID:   serviceInstance.ID,
+					InstanceID:   split[i],
 					Host:         host,
 					Port:         portNum,
 					Timeout:      &r.opt.Timeout,
