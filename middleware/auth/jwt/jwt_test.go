@@ -163,7 +163,8 @@ func TestServer(t *testing.T) {
 
 func TestClient(t *testing.T) {
 	testKey := "testKey"
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{})
+
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{})
 	token, err := claims.SignedString([]byte(testKey))
 	if err != nil {
 		panic(err)
@@ -209,8 +210,8 @@ func TestClient(t *testing.T) {
 
 func TestTokenExpire(t *testing.T) {
 	testKey := "testKey"
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Millisecond).Unix(),
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Millisecond)),
 	})
 	token, err := claims.SignedString([]byte(testKey))
 	if err != nil {
