@@ -110,22 +110,31 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 		body         string
 		responseBody string
 	)
+
+	var (
+		GET = "GET"
+		PUT = "PUT"
+		POST = "POST"
+		DELETE = "DELETE"
+		PATCH = "PATCH"
+	)
+
 	switch pattern := rule.Pattern.(type) {
 	case *annotations.HttpRule_Get:
 		path = pattern.Get
-		method = "GET"
+		method = GET
 	case *annotations.HttpRule_Put:
 		path = pattern.Put
-		method = "PUT"
+		method = PUT
 	case *annotations.HttpRule_Post:
 		path = pattern.Post
-		method = "POST"
+		method = POST
 	case *annotations.HttpRule_Delete:
 		path = pattern.Delete
-		method = "DELETE"
+		method = DELETE
 	case *annotations.HttpRule_Patch:
 		path = pattern.Patch
-		method = "PATCH"
+		method = PATCH
 	case *annotations.HttpRule_Custom:
 		path = pattern.Custom.Path
 		method = pattern.Custom.Kind
@@ -133,7 +142,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	body = rule.Body
 	responseBody = rule.ResponseBody
 	md := buildMethodDesc(g, m, method, path)
-	if method == "GET" || method == "DELETE" {
+	if method == GET || method == DELETE {
 		if body != "" {
 			_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s body should not be declared.\n", method, path)
 		}
@@ -144,7 +153,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	} else if body != "" {
 		md.HasBody = true
 		md.Body = "." + camelCaseVars(body)
-	} else if method != "GET" && method != "DELETE" {
+	} else if method != GET && method != DELETE {
 		md.HasBody = false
 		_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s does not declare a body.\n", method, path)
 	}
