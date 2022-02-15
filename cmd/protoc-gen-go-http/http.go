@@ -138,7 +138,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 		if body != "" {
 			_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s body should not be declared.\n", method, path)
 		}
-	} else  {
+	} else {
 		if body == "" {
 			_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s does not declare a body.\n", method, path)
 		}
@@ -203,7 +203,7 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 }
 
 func buildPathVars(path string) (res map[string]*string) {
-	if strings.HasSuffix(path,"/") {
+	if strings.HasSuffix(path, "/") {
 		fmt.Fprintf(os.Stderr, "\u001B[31mERROR\u001B[m: Path %s should not end with \"/\" \n", path)
 		os.Exit(2)
 	}
