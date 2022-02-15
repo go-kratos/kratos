@@ -2,10 +2,11 @@ package polaris
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/polarismesh/polaris-go/api"
 	"testing"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/polarismesh/polaris-go/api"
 )
 
 // TestRegistry . TestRegistryManyService
@@ -19,9 +20,9 @@ func TestRegistry(t *testing.T) {
 	r := New(provider, WithDefaultTimeout(1*time.Second))
 	ctx := context.Background()
 
-	schema := "tcp://127.0.0.1?isSecure=false"
+	schema := "tcp://127.0.0.1:9000?isSecure=false"
 	svc := &registry.ServiceInstance{
-		Name:      "kratos-provider-",
+		Name:      "kratos-provider-0-",
 		Version:   "test",
 		Metadata:  map[string]string{"app": "kratos"},
 		Endpoints: []string{schema},
@@ -47,56 +48,56 @@ func TestRegistryMany(t *testing.T) {
 	}
 
 	r := New(provider, WithDefaultTimeout(1*time.Second))
-	ctx := context.Background()
 
-	schema := "tcp://127.0.0.1:9000?isSecure=false"
+	// schema := "tcp://127.0.0.1:9000?isSecure=false"
 	svc := &registry.ServiceInstance{
-		Name:      "kratos-provider-",
+		Name:      "kratos-provider-0-",
 		Version:   "test",
 		Metadata:  map[string]string{"app": "kratos"},
-		Endpoints: []string{schema},
+		Endpoints: []string{"tcp://127.0.0.1:9000?isSecure=false"},
 	}
 	svc1 := &registry.ServiceInstance{
 		Name:      "kratos-provider-1-",
 		Version:   "test",
 		Metadata:  map[string]string{"app": "kratos"},
-		Endpoints: []string{schema},
+		Endpoints: []string{"tcp://127.0.0.1:9001?isSecure=false"},
 	}
 	svc2 := &registry.ServiceInstance{
 		Name:      "kratos-provider-2-",
 		Version:   "test",
 		Metadata:  map[string]string{"app": "kratos"},
-		Endpoints: []string{schema},
+		Endpoints: []string{"tcp://127.0.0.1:9002?isSecure=false"},
 	}
 
-	err = r.Register(ctx, svc)
+	err = r.Register(context.Background(), svc)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = r.Register(ctx, svc1)
+
+	err = r.Register(context.Background(), svc1)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = r.Register(ctx, svc2)
+
+	err = r.Register(context.Background(), svc2)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// 暂停20秒后Deregister
 	time.Sleep(20 * time.Second)
-	err = r.Deregister(ctx, svc)
+	err = r.Deregister(context.Background(), svc)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = r.Deregister(ctx, svc1)
+	err = r.Deregister(context.Background(), svc1)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = r.Deregister(ctx, svc2)
+	err = r.Deregister(context.Background(), svc2)
 	if err != nil {
 		t.Fatal(err)
 	}
-
 }
