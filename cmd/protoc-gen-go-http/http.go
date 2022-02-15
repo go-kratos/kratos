@@ -144,7 +144,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	} else if body != "" {
 		md.HasBody = true
 		md.Body = "." + camelCaseVars(body)
-	} else {
+	} else if method != "GET" && method != "DELETE" {
 		md.HasBody = false
 		_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s does not declare a body.\n", method, path)
 	}
