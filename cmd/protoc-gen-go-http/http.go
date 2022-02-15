@@ -112,11 +112,11 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	)
 
 	var (
-		GET = "GET"
-		PUT = "PUT"
-		POST = "POST"
+		GET    = "GET"
+		PUT    = "PUT"
+		POST   = "POST"
 		DELETE = "DELETE"
-		PATCH = "PATCH"
+		PATCH  = "PATCH"
 	)
 
 	switch pattern := rule.Pattern.(type) {
