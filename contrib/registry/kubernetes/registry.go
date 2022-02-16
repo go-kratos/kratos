@@ -89,9 +89,18 @@ type Registry struct {
 	stopCh chan struct{}
 }
 
-// NewRegistry is used to initialize the Registry
+// NewRegistry initialize the k8s registry with global namespace.
 func NewRegistry(clientSet *kubernetes.Clientset) *Registry {
-	informerFactory := informers.NewSharedInformerFactory(clientSet, time.Minute*10)
+	return NewRegistryWithNamespace(clientSet, corev1.NamespaceAll)
+}
+
+// NewRegistry initialize the k8s registry with specific namespace.
+func NewRegistryWithNamespace(clientSet *kubernetes.Clientset, namespace string) *Registry {
+	informerFactory := informers.NewSharedInformerFactoryWithOptions(
+		clientSet,
+		time.Minute*10,
+		informers.WithNamespace(namespace),
+	)
 	podInformer := informerFactory.Core().V1().Pods().Informer()
 	podLister := informerFactory.Core().V1().Pods().Lister()
 	return &Registry{
