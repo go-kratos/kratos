@@ -31,8 +31,6 @@ func TestRegistry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// 暂停20秒后Deregister
-	time.Sleep(20 * time.Second)
 	err = r.Deregister(ctx, svc)
 	if err != nil {
 		t.Fatal(err)
@@ -84,8 +82,6 @@ func TestRegistryMany(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// 暂停20秒后Deregister
-	time.Sleep(20 * time.Second)
 	err = r.Deregister(context.Background(), svc)
 	if err != nil {
 		t.Fatal(err)
