@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
@@ -107,12 +106,18 @@ func StrictSlash(strictSlash bool) ServerOption {
 	}
 }
 
+// Listener with server lis
+func Listener(lis net.Listener) ServerOption {
+	return func(s *Server) {
+		s.lis = lis
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
 	lis         net.Listener
 	tlsConf     *tls.Config
-	once        sync.Once
 	endpoint    *url.URL
 	err         error
 	network     string
@@ -138,7 +143,7 @@ func NewServer(opts ...ServerOption) *Server {
 		enc:         DefaultResponseEncoder,
 		ene:         DefaultErrorEncoder,
 		strictSlash: true,
-		log:         log.NewHelper(log.DefaultLogger),
+		log:         log.NewHelper(log.GetLogger()),
 	}
 	for _, o := range opts {
 		o(srv)
@@ -149,6 +154,7 @@ func NewServer(opts ...ServerOption) *Server {
 		Handler:   FilterChain(srv.filters...)(srv.router),
 		TLSConfig: srv.tlsConf,
 	}
+	srv.err = srv.listenAndEndpoint()
 	return srv
 }
 
@@ -219,22 +225,6 @@ func (s *Server) filter() mux.MiddlewareFunc {
 // examples:
 //   http://127.0.0.1:8000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
-	s.once.Do(func() {
-		lis, err := net.Listen(s.network, s.address)
-		if err != nil {
-			s.err = err
-			return
-		}
-		addr, err := host.Extract(s.address, lis)
-		if err != nil {
-			lis.Close()
-			s.err = err
-			return
-		}
-		s.lis = lis
-
-		s.endpoint = endpoint.NewEndpoint("http", addr, s.tlsConf != nil)
-	})
 	if s.err != nil {
 		return nil, s.err
 	}
@@ -243,8 +233,8 @@ func (s *Server) Endpoint() (*url.URL, error) {
 
 // Start start the HTTP server.
 func (s *Server) Start(ctx context.Context) error {
-	if _, err := s.Endpoint(); err != nil {
-		return err
+	if s.err != nil {
+		return s.err
 	}
 	s.BaseContext = func(net.Listener) context.Context {
 		return ctx
@@ -266,4 +256,21 @@ func (s *Server) Start(ctx context.Context) error {
 func (s *Server) Stop(ctx context.Context) error {
 	s.log.Info("[HTTP] server stopping")
 	return s.Shutdown(ctx)
+}
+
+func (s *Server) listenAndEndpoint() error {
+	if s.lis == nil {
+		lis, err := net.Listen(s.network, s.address)
+		if err != nil {
+			return err
+		}
+		s.lis = lis
+	}
+	addr, err := host.Extract(s.address, s.lis)
+	if err != nil {
+		_ = s.lis.Close()
+		return err
+	}
+	s.endpoint = endpoint.NewEndpoint("http", addr, s.tlsConf != nil)
+	return nil
 }

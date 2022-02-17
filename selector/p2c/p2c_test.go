@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"reflect"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -12,7 +13,6 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
 	"github.com/go-kratos/kratos/v2/selector/filter"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestWrr3(t *testing.T) {
@@ -41,9 +41,15 @@ func TestWrr3(t *testing.T) {
 			lk.Unlock()
 			time.Sleep(d)
 			n, done, err := p2c.Select(context.Background())
-			assert.Nil(t, err)
-			assert.NotNil(t, done)
-			assert.NotNil(t, n)
+			if err != nil {
+				t.Errorf("expect %v, got %v", nil, err)
+			}
+			if n == nil {
+				t.Errorf("expect %v, got %v", nil, n)
+			}
+			if done == nil {
+				t.Errorf("expect %v, got %v", nil, done)
+			}
 			time.Sleep(time.Millisecond * 10)
 			done(context.Background(), selector.DoneInfo{})
 			if n.Address() == "127.0.0.0:8080" {
@@ -56,18 +62,32 @@ func TestWrr3(t *testing.T) {
 		}()
 	}
 	group.Wait()
-	assert.Greater(t, count1, int64(1500))
-	assert.Less(t, count1, int64(4500))
-	assert.Greater(t, count2, int64(1500))
-	assert.Less(t, count2, int64(4500))
-	assert.Greater(t, count3, int64(1500))
-	assert.Less(t, count3, int64(4500))
+	if count1 <= int64(1500) {
+		t.Errorf("count1(%v) <= int64(1500)", count1)
+	}
+	if count1 >= int64(4500) {
+		t.Errorf("count1(%v) >= int64(4500),", count1)
+	}
+	if count2 <= int64(1500) {
+		t.Errorf("count2(%v) <= int64(1500)", count1)
+	}
+	if count2 >= int64(4500) {
+		t.Errorf("count2(%v) >= int64(4500),", count2)
+	}
+	if count3 <= int64(1500) {
+		t.Errorf("count3(%v) <= int64(1500)", count3)
+	}
+	if count3 >= int64(4500) {
+		t.Errorf("count3(%v) >= int64(4500),", count3)
+	}
 }
 
 func TestEmpty(t *testing.T) {
 	b := &Balancer{}
 	_, _, err := b.Pick(context.Background(), []selector.WeightedNode{})
-	assert.NotNil(t, err)
+	if err == nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
 }
 
 func TestOne(t *testing.T) {
@@ -85,8 +105,16 @@ func TestOne(t *testing.T) {
 	}
 	p2c.Apply(nodes)
 	n, done, err := p2c.Select(context.Background())
-	assert.Nil(t, err)
-	assert.NotNil(t, done)
-	assert.NotNil(t, n)
-	assert.Equal(t, "127.0.0.0:8080", n.Address())
+	if err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
+	if n == nil {
+		t.Errorf("expect %v, got %v", nil, n)
+	}
+	if done == nil {
+		t.Errorf("expect %v, got %v", nil, done)
+	}
+	if !reflect.DeepEqual("127.0.0.0:8080", n.Address()) {
+		t.Errorf("expect %v, got %v", "127.0.0.0:8080", n.Address())
+	}
 }

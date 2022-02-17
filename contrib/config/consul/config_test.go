@@ -1,10 +1,10 @@
 package consul
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/hashicorp/consul/api"
-	"github.com/stretchr/testify/assert"
 )
 
 const testPath = "kratos/test/config"
@@ -86,9 +86,16 @@ func TestExtToFormat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	assert.Equal(t, 1, len(kvs))
-	assert.Equal(t, tn, kvs[0].Key)
-	assert.Equal(t, tc, string(kvs[0].Value))
-	assert.Equal(t, "json", kvs[0].Format)
+	if !reflect.DeepEqual(len(kvs), 1) {
+		t.Errorf("len(kvs) is %d", len(kvs))
+	}
+	if !reflect.DeepEqual(tn, kvs[0].Key) {
+		t.Errorf("kvs[0].Key is %s", kvs[0].Key)
+	}
+	if !reflect.DeepEqual(tc, string(kvs[0].Value)) {
+		t.Errorf("kvs[0].Value is %s", kvs[0].Value)
+	}
+	if !reflect.DeepEqual("json", kvs[0].Format) {
+		t.Errorf("kvs[0].Format is %s", kvs[0].Format)
+	}
 }

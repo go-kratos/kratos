@@ -1,9 +1,8 @@
 package apollo
 
 import (
+	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func Test_genKey(t *testing.T) {
@@ -152,7 +151,9 @@ func Test_convertProperties(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			resolve(tt.args.key, tt.args.value, tt.args.target)
-			assert.Equal(t, tt.want, tt.args.target)
+			if !reflect.DeepEqual(tt.args.target, tt.want) {
+				t.Errorf("convertProperties() = %v, want %v", tt.args.target, tt.want)
+			}
 		})
 	}
 }
@@ -160,13 +161,29 @@ func Test_convertProperties(t *testing.T) {
 func Test_convertProperties_duplicate(t *testing.T) {
 	target := map[string]interface{}{}
 	resolve("application.name", "name", target)
-	assert.Contains(t, target, "application")
-	assert.Contains(t, target["application"], "name")
-	assert.Equal(t, "name", target["application"].(map[string]interface{})["name"])
+	_, ok := target["application"]
+	if !reflect.DeepEqual(ok, true) {
+		t.Errorf("ok = %v, want %v", ok, true)
+	}
+	_, ok = target["application"].(map[string]interface{})["name"]
+	if !reflect.DeepEqual(ok, true) {
+		t.Errorf("ok = %v, want %v", ok, true)
+	}
+	if !reflect.DeepEqual(target["application"].(map[string]interface{})["name"], "name") {
+		t.Errorf("target[\"application\"][\"name\"] = %v, want %v", target["application"].(map[string]interface{})["name"], "name")
+	}
 
 	// cause duplicate, the oldest value will be kept
 	resolve("application.name.first", "first name", target)
-	assert.Contains(t, target, "application")
-	assert.Contains(t, target["application"], "name")
-	assert.Equal(t, "name", target["application"].(map[string]interface{})["name"])
+	_, ok = target["application"]
+	if !reflect.DeepEqual(ok, true) {
+		t.Errorf("ok = %v, want %v", ok, true)
+	}
+	_, ok = target["application"].(map[string]interface{})["name"]
+	if !reflect.DeepEqual(ok, true) {
+		t.Errorf("ok = %v, want %v", ok, true)
+	}
+	if !reflect.DeepEqual(target["application"].(map[string]interface{})["name"], "name") {
+		t.Errorf("target[\"application\"][\"name\"] = %v, want %v", target["application"].(map[string]interface{})["name"], "name")
+	}
 }

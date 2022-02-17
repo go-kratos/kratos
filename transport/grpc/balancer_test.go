@@ -2,24 +2,30 @@ package grpc
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/metadata"
 )
 
 func TestTrailer(t *testing.T) {
 	trailer := Trailer(metadata.New(map[string]string{"a": "b"}))
-	assert.Equal(t, "b", trailer.Get("a"))
-	assert.Equal(t, "", trailer.Get("3"))
+	if !reflect.DeepEqual("b", trailer.Get("a")) {
+		t.Errorf("expect %v, got %v", "b", trailer.Get("a"))
+	}
+	if !reflect.DeepEqual("", trailer.Get("notfound")) {
+		t.Errorf("expect %v, got %v", "", trailer.Get("notfound"))
+	}
 }
 
 func TestBalancerName(t *testing.T) {
 	o := &clientOptions{}
 
 	WithBalancerName("p2c")(o)
-	assert.Equal(t, "p2c", o.balancerName)
+	if !reflect.DeepEqual("p2c", o.balancerName) {
+		t.Errorf("expect %v, got %v", "p2c", o.balancerName)
+	}
 }
 
 func TestFilters(t *testing.T) {
@@ -28,5 +34,7 @@ func TestFilters(t *testing.T) {
 	WithFilter(func(_ context.Context, nodes []selector.Node) []selector.Node {
 		return nodes
 	})(o)
-	assert.Equal(t, 1, len(o.filters))
+	if !reflect.DeepEqual(1, len(o.filters)) {
+		t.Errorf("expect %v, got %v", 1, len(o.filters))
+	}
 }

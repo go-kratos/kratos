@@ -2,9 +2,8 @@ package host
 
 import (
 	"net"
+	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestValidIP(t *testing.T) {
@@ -77,25 +76,35 @@ func TestExtract(t *testing.T) {
 		})
 	}
 	lis, err := net.Listen("tcp", ":12345")
-	assert.NoError(t, err)
+	if err != nil {
+		t.Errorf("expected: %v got %v", nil, err)
+	}
 	res, err := Extract("", lis)
-	assert.NoError(t, err)
+	if err != nil {
+		t.Errorf("expected: %v got %v", nil, err)
+	}
 	expect, err := Extract(lis.Addr().String(), nil)
-	assert.NoError(t, err)
-	assert.Equal(t, expect, res)
+	if err != nil {
+		t.Errorf("expected: %v got %v", nil, err)
+	}
+	if !reflect.DeepEqual(res, expect) {
+		t.Errorf("expected %s got %s", expect, res)
+	}
 }
 
 func TestExtract2(t *testing.T) {
 	addr := "localhost:9001"
 	lis, err := net.Listen("tcp", addr)
-	if err == nil {
-		assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("expected: %v got %v", nil, err)
 	}
 	res, err := Extract(addr, lis)
-	if err == nil {
-		assert.Nil(t, err)
+	if err != nil {
+		t.Errorf("expected: %v got %v", nil, err)
 	}
-	assert.Equal(t, res, "localhost:9001")
+	if !reflect.DeepEqual(res, "localhost:9001") {
+		t.Errorf("expected %s got %s", "localhost:9001", res)
+	}
 }
 
 func TestPort(t *testing.T) {
@@ -127,4 +136,14 @@ func TestExtractHostPort(t *testing.T) {
 		t.Fatalf("expected: not nil got %v", nil)
 	}
 	t.Logf("host port: %s,  %d", host, port)
+}
+
+func TestIpIsUp(t *testing.T) {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		t.Fail()
+	}
+	for i := range interfaces {
+		println(interfaces[i].Name, interfaces[i].Flags&net.FlagUp)
+	}
 }

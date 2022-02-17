@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
+
 	"github.com/hashicorp/consul/api"
 )
 
@@ -23,6 +24,33 @@ type Option func(*Registry)
 func WithHealthCheck(enable bool) Option {
 	return func(o *Registry) {
 		o.enableHealthCheck = enable
+	}
+}
+
+// WithHeartbeat enable or disable heartbeat
+func WithHeartbeat(enable bool) Option {
+	return func(o *Registry) {
+		if o.cli != nil {
+			o.cli.heartbeat = enable
+		}
+	}
+}
+
+// WithServiceResolver with endpoint function option.
+func WithServiceResolver(fn ServiceResolver) Option {
+	return func(o *Registry) {
+		if o.cli != nil {
+			o.cli.resolver = fn
+		}
+	}
+}
+
+// WithHealthCheckInterval with healthcheck interval in seconds.
+func WithHealthCheckInterval(interval int) Option {
+	return func(o *Registry) {
+		if o.cli != nil {
+			o.cli.healthcheckInterval = interval
+		}
 	}
 }
 
@@ -126,33 +154,42 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	}
 
 	if !ok {
-		go r.resolve(set)
+		err := r.resolve(set)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return w, nil
 }
 
-func (r *Registry) resolve(ss *serviceSet) {
+func (r *Registry) resolve(ss *serviceSet) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	services, idx, err := r.cli.Service(ctx, ss.serviceName, 0, true)
 	cancel()
-	if err == nil && len(services) > 0 {
+	if err != nil {
+		return err
+	} else if len(services) > 0 {
 		ss.broadcast(services)
 	}
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
-	for {
-		<-ticker.C
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*120)
-		tmpService, tmpIdx, err := r.cli.Service(ctx, ss.serviceName, idx, true)
-		cancel()
-		if err != nil {
-			time.Sleep(time.Second)
-			continue
+	go func() {
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+		for {
+			<-ticker.C
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*120)
+			tmpService, tmpIdx, err := r.cli.Service(ctx, ss.serviceName, idx, true)
+			cancel()
+			if err != nil {
+				time.Sleep(time.Second)
+				continue
+			}
+			if len(tmpService) != 0 && tmpIdx != idx {
+				services = tmpService
+				ss.broadcast(services)
+			}
+			idx = tmpIdx
 		}
-		if len(tmpService) != 0 && tmpIdx != idx {
-			services = tmpService
-			ss.broadcast(services)
-		}
-		idx = tmpIdx
-	}
+	}()
+
+	return nil
 }

@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -15,7 +17,6 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 
 	"github.com/go-kratos/kratos/v2/internal/host"
-	"github.com/stretchr/testify/assert"
 )
 
 type testKey struct{}
@@ -48,20 +49,30 @@ func TestServer(t *testing.T) {
 	time.Sleep(time.Second)
 	testHeader(t, srv)
 	testClient(t, srv)
-	assert.NoError(t, srv.Stop(ctx))
+	if srv.Stop(ctx) != nil {
+		t.Errorf("expected nil got %v", srv.Stop(ctx))
+	}
 }
 
 func testHeader(t *testing.T, srv *Server) {
 	e, err := srv.Endpoint()
-	assert.NoError(t, err)
+	if err != nil {
+		t.Errorf("expected nil got %v", err)
+	}
 	client, err := NewClient(context.Background(), WithEndpoint(e.Host))
-	assert.NoError(t, err)
+	if err != nil {
+		t.Errorf("expected nil got %v", err)
+	}
 	reqURL := fmt.Sprintf(e.String() + "/index")
 	req, err := http.NewRequest("GET", reqURL, nil)
-	assert.NoError(t, err)
+	if err != nil {
+		t.Errorf("expected nil got %v", err)
+	}
 	req.Header.Set("content-type", "application/grpc-web+json")
 	resp, err := client.Do(req)
-	assert.NoError(t, err)
+	if err != nil {
+		t.Errorf("expected nil got %v", err)
+	}
 	resp.Body.Close()
 }
 
@@ -162,15 +173,21 @@ func BenchmarkServer(b *testing.B) {
 	}()
 	time.Sleep(time.Second)
 	port, ok := host.Port(srv.lis)
-	assert.True(b, ok)
+	if !ok {
+		b.Errorf("expected port got %v", srv.lis)
+	}
 	client, err := NewClient(context.Background(), WithEndpoint(fmt.Sprintf("127.0.0.1:%d", port)))
-	assert.NoError(b, err)
+	if err != nil {
+		b.Errorf("expected nil got %v", err)
+	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		var res testData
 		err := client.Invoke(context.Background(), "POST", "/index", nil, &res)
-		assert.NoError(b, err)
+		if err != nil {
+			b.Errorf("expected nil got %v", err)
+		}
 	}
 	_ = srv.Stop(ctx)
 }
@@ -179,21 +196,27 @@ func TestNetwork(t *testing.T) {
 	o := &Server{}
 	v := "abc"
 	Network(v)(o)
-	assert.Equal(t, v, o.network)
+	if !reflect.DeepEqual(v, o.network) {
+		t.Errorf("expected %v got %v", v, o.network)
+	}
 }
 
 func TestAddress(t *testing.T) {
 	o := &Server{}
 	v := "abc"
 	Address(v)(o)
-	assert.Equal(t, v, o.address)
+	if !reflect.DeepEqual(v, o.address) {
+		t.Errorf("expected %v got %v", v, o.address)
+	}
 }
 
 func TestTimeout(t *testing.T) {
 	o := &Server{}
 	v := time.Duration(123)
 	Timeout(v)(o)
-	assert.Equal(t, v, o.timeout)
+	if !reflect.DeepEqual(v, o.timeout) {
+		t.Errorf("expected %v got %v", v, o.timeout)
+	}
 }
 
 func TestLogger(t *testing.T) {
@@ -206,33 +229,52 @@ func TestMiddleware(t *testing.T) {
 		func(middleware.Handler) middleware.Handler { return nil },
 	}
 	Middleware(v...)(o)
-	assert.Equal(t, v, o.ms)
+	if !reflect.DeepEqual(v, o.ms) {
+		t.Errorf("expected %v got %v", v, o.ms)
+	}
 }
 
 func TestRequestDecoder(t *testing.T) {
 	o := &Server{}
 	v := func(*http.Request, interface{}) error { return nil }
 	RequestDecoder(v)(o)
-	assert.NotNil(t, o.dec)
+	if o.dec == nil {
+		t.Errorf("expected nil got %v", o.dec)
+	}
 }
 
 func TestResponseEncoder(t *testing.T) {
 	o := &Server{}
 	v := func(http.ResponseWriter, *http.Request, interface{}) error { return nil }
 	ResponseEncoder(v)(o)
-	assert.NotNil(t, o.enc)
+	if o.enc == nil {
+		t.Errorf("expected nil got %v", o.enc)
+	}
 }
 
 func TestErrorEncoder(t *testing.T) {
 	o := &Server{}
 	v := func(http.ResponseWriter, *http.Request, error) {}
 	ErrorEncoder(v)(o)
-	assert.NotNil(t, o.ene)
+	if o.ene == nil {
+		t.Errorf("expected nil got %v", o.ene)
+	}
 }
 
 func TestTLSConfig(t *testing.T) {
 	o := &Server{}
 	v := &tls.Config{}
 	TLSConfig(v)(o)
-	assert.Equal(t, v, o.tlsConf)
+	if !reflect.DeepEqual(v, o.tlsConf) {
+		t.Errorf("expected %v got %v", v, o.tlsConf)
+	}
+}
+
+func TestListener(t *testing.T) {
+	lis := &net.TCPListener{}
+	s := &Server{}
+	Listener(lis)(s)
+	if !reflect.DeepEqual(s.lis, lis) {
+		t.Errorf("expected %v got %v", lis, s.lis)
+	}
 }

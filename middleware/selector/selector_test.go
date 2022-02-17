@@ -3,12 +3,12 @@ package selector
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
-	"github.com/stretchr/testify/assert"
 )
 
 var _ transport.Transporter = &Transport{}
@@ -167,8 +167,12 @@ func TestFunc(t *testing.T) {
 				return false
 			}).Build()(next)
 			reply, err := next(test.ctx, test.name)
-			assert.Equal(t, reply, "reply")
-			assert.Nil(t, err)
+			if err != nil {
+				t.Errorf("expect error is nil, but got %v", err)
+			}
+			if !reflect.DeepEqual(reply, "reply") {
+				t.Errorf("expect reply is reply,but got %v", reply)
+			}
 		})
 	}
 }
@@ -227,8 +231,12 @@ func TestHeaderFunc(t *testing.T) {
 				return false
 			}).Build()(next)
 			reply, err := next(test.ctx, test.name)
-			assert.Equal(t, reply, "reply")
-			assert.Nil(t, err)
+			if err != nil {
+				t.Errorf("expect error is nil, but got %v", err)
+			}
+			if !reflect.DeepEqual(reply, "reply") {
+				t.Errorf("expect reply is reply,but got %v", reply)
+			}
 		})
 	}
 }

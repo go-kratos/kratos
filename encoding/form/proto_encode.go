@@ -13,8 +13,8 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-// EncodeMap encode proto message to url query.
-func EncodeMap(msg proto.Message) (url.Values, error) {
+// EncodeValues encode a message into url values.
+func EncodeValues(msg proto.Message) (url.Values, error) {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return url.Values{}, nil
 	}
@@ -165,8 +165,34 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 		if !ok {
 			return "", nil
 		}
+		for i, v := range m.Paths {
+			m.Paths[i] = jsonCamelCase(v)
+		}
 		return strings.Join(m.Paths, ","), nil
 	default:
 		return "", fmt.Errorf("unsupported message type: %q", string(msgDescriptor.FullName()))
 	}
+}
+
+// JSONCamelCase converts a snake_case identifier to a camelCase identifier,
+// according to the protobuf JSON specification.
+// references: https://github.com/protocolbuffers/protobuf-go/blob/master/encoding/protojson/well_known_types.go#L842
+func jsonCamelCase(s string) string {
+	var b []byte
+	var wasUnderscore bool
+	for i := 0; i < len(s); i++ { // proto identifiers are always ASCII
+		c := s[i]
+		if c != '_' {
+			if wasUnderscore && isASCIILower(c) {
+				c -= 'a' - 'A' // convert to uppercase
+			}
+			b = append(b, c)
+		}
+		wasUnderscore = c == '_'
+	}
+	return string(b)
+}
+
+func isASCIILower(c byte) bool {
+	return 'a' <= c && c <= 'z'
 }

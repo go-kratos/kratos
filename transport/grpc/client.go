@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
@@ -18,6 +19,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	grpcinsecure "google.golang.org/grpc/credentials/insecure"
 	grpcmd "google.golang.org/grpc/metadata"
 )
 
@@ -87,6 +89,13 @@ func WithFilter(filters ...selector.Filter) ClientOption {
 	}
 }
 
+// WithLogger with logger
+func WithLogger(log log.Logger) ClientOption {
+	return func(o *clientOptions) {
+		o.logger = log
+	}
+}
+
 // clientOptions is gRPC Client
 type clientOptions struct {
 	endpoint     string
@@ -98,6 +107,7 @@ type clientOptions struct {
 	grpcOpts     []grpc.DialOption
 	balancerName string
 	filters      []selector.Filter
+	logger       log.Logger
 }
 
 // Dial returns a GRPC connection.
@@ -114,6 +124,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	options := clientOptions{
 		timeout:      2000 * time.Millisecond,
 		balancerName: wrr.Name,
+		logger:       log.GetLogger(),
 	}
 	for _, o := range opts {
 		o(&options)
@@ -129,10 +140,16 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		grpc.WithChainUnaryInterceptor(ints...),
 	}
 	if options.discovery != nil {
-		grpcOpts = append(grpcOpts, grpc.WithResolvers(discovery.NewBuilder(options.discovery, discovery.WithInsecure(insecure))))
+		grpcOpts = append(grpcOpts,
+			grpc.WithResolvers(
+				discovery.NewBuilder(
+					options.discovery,
+					discovery.WithInsecure(insecure),
+					discovery.WithLogger(options.logger),
+				)))
 	}
 	if insecure {
-		grpcOpts = append(grpcOpts, grpc.WithInsecure())
+		grpcOpts = append(grpcOpts, grpc.WithTransportCredentials(grpcinsecure.NewCredentials()))
 	}
 	if options.tlsConf != nil {
 		grpcOpts = append(grpcOpts, grpc.WithTransportCredentials(credentials.NewTLS(options.tlsConf)))

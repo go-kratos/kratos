@@ -75,19 +75,16 @@ func Code(err error) int {
 	if err == nil {
 		return 200 //nolint:gomnd
 	}
-	if se := FromError(err); se != nil {
-		return int(se.Code)
-	}
-	return UnknownCode
+	return int(FromError(err).Code)
 }
 
 // Reason returns the reason for a particular error.
 // It supports wrapped errors.
 func Reason(err error) string {
-	if se := FromError(err); se != nil {
-		return se.Reason
+	if err == nil {
+		return UnknownReason
 	}
-	return UnknownReason
+	return FromError(err).Reason
 }
 
 // FromError try to convert an error to *Error.

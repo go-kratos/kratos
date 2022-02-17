@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -145,7 +146,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 		md.Body = "." + camelCaseVars(body)
 	} else {
 		md.HasBody = false
-		_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s is does not declare a body.\n", method, path)
+		_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s does not declare a body.\n", method, path)
 	}
 	if responseBody == "*" {
 		md.ResponseBody = ""
@@ -157,9 +158,14 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 
 func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path string) *methodDesc {
 	defer func() { methodSets[m.GoName]++ }()
-	vars := buildPathVars(m, path)
+
+	vars := buildPathVars(path)
 	fields := m.Input.Desc.Fields()
-	for _, v := range vars {
+
+	for v, s := range vars {
+		if s != nil {
+			path = replacePath(v, *s, path)
+		}
 		for _, field := range strings.Split(v, ".") {
 			if strings.TrimSpace(field) == "" {
 				continue
@@ -192,14 +198,33 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 	}
 }
 
-func buildPathVars(method *protogen.Method, path string) (res []string) {
-	for _, v := range strings.Split(path, "/") {
-		if strings.HasPrefix(v, "{") && strings.HasSuffix(v, "}") {
-			name := strings.TrimRight(strings.TrimLeft(v, "{"), "}")
-			res = append(res, name)
+func buildPathVars(path string) (res map[string]*string) {
+	res = make(map[string]*string)
+	pattern := regexp.MustCompile(`(?i){([a-z\.0-9_\s]*)=?([^{}]*)}`)
+	matches := pattern.FindAllStringSubmatch(path, -1)
+	for _, m := range matches {
+		name := strings.TrimSpace(m[1])
+		if len(name) > 1 && len(m[2]) > 0 {
+			res[name] = &m[2]
+		} else {
+			res[name] = nil
 		}
 	}
 	return
+}
+
+func replacePath(name string, value string, path string) string {
+	pattern := regexp.MustCompile(fmt.Sprintf(`(?i){([\s]*%s[\s]*)=?([^{}]*)}`, name))
+	idx := pattern.FindStringIndex(path)
+	if len(idx) > 0 {
+		path = fmt.Sprintf("%s{%s:%s}%s",
+			path[:idx[0]], // The start of the match
+			name,
+			strings.ReplaceAll(value, "*", ".*"),
+			path[idx[1]:],
+		)
+	}
+	return path
 }
 
 func camelCaseVars(s string) string {

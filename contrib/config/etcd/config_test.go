@@ -2,10 +2,10 @@ package etcd
 
 import (
 	"context"
+	"reflect"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 )
@@ -95,9 +95,16 @@ func TestExtToFormat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	assert.Equal(t, 1, len(kvs))
-	assert.Equal(t, tk, kvs[0].Key)
-	assert.Equal(t, tc, string(kvs[0].Value))
-	assert.Equal(t, "json", kvs[0].Format)
+	if !reflect.DeepEqual(len(kvs), 1) {
+		t.Errorf("len(kvs) = %d", len(kvs))
+	}
+	if !reflect.DeepEqual(tk, kvs[0].Key) {
+		t.Errorf("kvs[0].Key is %s", kvs[0].Key)
+	}
+	if !reflect.DeepEqual(tc, string(kvs[0].Value)) {
+		t.Errorf("kvs[0].Value is %s", kvs[0].Value)
+	}
+	if !reflect.DeepEqual("json", kvs[0].Format) {
+		t.Errorf("kvs[0].Format is %s", kvs[0].Format)
+	}
 }

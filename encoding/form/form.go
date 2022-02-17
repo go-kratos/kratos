@@ -34,7 +34,7 @@ func (c codec) Marshal(v interface{}) ([]byte, error) {
 	var vs url.Values
 	var err error
 	if m, ok := v.(proto.Message); ok {
-		vs, err = EncodeMap(m)
+		vs, err = EncodeValues(m)
 		if err != nil {
 			return nil, err
 		}
@@ -66,9 +66,9 @@ func (c codec) Unmarshal(data []byte, v interface{}) error {
 		rv = rv.Elem()
 	}
 	if m, ok := v.(proto.Message); ok {
-		return MapProto(m, vs)
+		return DecodeValues(m, vs)
 	} else if m, ok := reflect.Indirect(reflect.ValueOf(v)).Interface().(proto.Message); ok {
-		return MapProto(m, vs)
+		return DecodeValues(m, vs)
 	}
 
 	return c.decoder.Decode(v, vs)

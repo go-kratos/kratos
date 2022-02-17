@@ -21,9 +21,7 @@ type customChangeListener struct {
 	logger log.Logger
 }
 
-func (c *customChangeListener) onChange(
-	namespace string, changes map[string]*storage.ConfigChange) []*config.KeyValue {
-
+func (c *customChangeListener) onChange(namespace string, changes map[string]*storage.ConfigChange) []*config.KeyValue {
 	kv := make([]*config.KeyValue, 0, 2)
 	next := make(map[string]interface{})
 
@@ -63,7 +61,7 @@ func (c *customChangeListener) OnNewestChange(changeEvent *storage.FullChangeEve
 
 func newWatcher(a *apollo, logger log.Logger) (config.Watcher, error) {
 	if logger == nil {
-		logger = log.DefaultLogger
+		logger = log.GetLogger()
 	}
 
 	changeCh := make(chan []*config.KeyValue)
