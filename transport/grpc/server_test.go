@@ -53,9 +53,7 @@ func TestServer(t *testing.T) {
 					return handler(ctx, req)
 				}
 			}),
-		UnaryInterceptor(func(ctx context.Context, req interface{},
-			info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-
+		UnaryInterceptor(func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 			return handler(ctx, req)
 		}),
 		Options(grpc.InitialConnWindowSize(0)),
@@ -86,11 +84,10 @@ func testClient(t *testing.T, srv *Server) {
 	conn, err := DialInsecure(context.Background(),
 		WithEndpoint(u.Host),
 		WithOptions(grpc.WithBlock()),
-		WithUnaryInterceptor(func(ctx context.Context, method string, req, reply interface{},
-			cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-
-			return invoker(ctx, method, req, reply, cc, opts...)
-		}),
+		WithUnaryInterceptor(
+			func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+				return invoker(ctx, method, req, reply, cc, opts...)
+			}),
 		WithMiddleware(func(handler middleware.Handler) middleware.Handler {
 			return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 				if tr, ok := transport.FromClientContext(ctx); ok {
