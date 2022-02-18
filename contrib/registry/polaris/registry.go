@@ -63,8 +63,8 @@ type Registry struct {
 }
 
 // WithNamespace with default Namespace option.
-func WithNamespace(nameSpace string) Option {
-	return func(o *options) { o.Namespace = nameSpace }
+func WithNamespace(namespace string) Option {
+	return func(o *options) { o.Namespace = namespace }
 }
 
 // WithServiceToken with default ServiceToken option.
