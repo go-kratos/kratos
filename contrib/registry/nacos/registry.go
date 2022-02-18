@@ -3,12 +3,13 @@ package nacos
 import (
 	"context"
 	"fmt"
-	"github.com/nacos-group/nacos-sdk-go/clients/naming_client"
-	"github.com/nacos-group/nacos-sdk-go/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/vo"
 	"net"
 	"net/url"
 	"strconv"
+
+	"github.com/nacos-group/nacos-sdk-go/clients/naming_client"
+	"github.com/nacos-group/nacos-sdk-go/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/vo"
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
