@@ -71,6 +71,9 @@ func (s *source) Load() ([]*config.KeyValue, error) {
 	kvs := make([]*config.KeyValue, 0)
 	for _, item := range kv {
 		k := strings.TrimPrefix(item.Key, pathPrefix)
+		if k == "" {
+			continue
+		}
 		kvs = append(kvs, &config.KeyValue{
 			Key:    k,
 			Value:  item.Value,
