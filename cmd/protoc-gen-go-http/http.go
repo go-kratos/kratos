@@ -110,6 +110,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 		body         string
 		responseBody string
 	)
+
 	switch pattern := rule.Pattern.(type) {
 	case *annotations.HttpRule_Get:
 		path = pattern.Get
@@ -137,8 +138,12 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 		if body != "" {
 			_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s body should not be declared.\n", method, path)
 		}
-		md.HasBody = false
-	} else if body == "*" {
+	} else {
+		if body == "" {
+			_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s does not declare a body.\n", method, path)
+		}
+	}
+	if body == "*" {
 		md.HasBody = true
 		md.Body = ""
 	} else if body != "" {
@@ -146,7 +151,6 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 		md.Body = "." + camelCaseVars(body)
 	} else {
 		md.HasBody = false
-		_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s does not declare a body.\n", method, path)
 	}
 	if responseBody == "*" {
 		md.ResponseBody = ""
@@ -199,6 +203,10 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 }
 
 func buildPathVars(path string) (res map[string]*string) {
+	if strings.HasSuffix(path, "/") {
+		fmt.Fprintf(os.Stderr, "\u001B[31mERROR\u001B[m: Path %s should not end with \"/\" \n", path)
+		os.Exit(2)
+	}
 	res = make(map[string]*string)
 	pattern := regexp.MustCompile(`(?i){([a-z\.0-9_\s]*)=?([^{}]*)}`)
 	matches := pattern.FindAllStringSubmatch(path, -1)
