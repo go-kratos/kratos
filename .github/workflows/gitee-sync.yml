@@ -1,0 +1,27 @@
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+
+name: Sync to Gitee
+jobs:
+  run:
+    name: Run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v1
+      - name: Mirror Github to Gitee
+        uses: Yikun/hub-mirror-action@v1.2
+        with:
+          src: github/go-kratos
+          dst: gitee/go-kratos
+          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
+          dst_token: ${{ secrets.GITEE_TOKEN }}
+          account_type: org
+          timeout: 600
+          debug: true
+          force_update: true
+          static_list: "kratos"

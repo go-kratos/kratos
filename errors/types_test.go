@@ -1,6 +1,8 @@
 package errors
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestTypes(t *testing.T) {
 	var (
@@ -12,6 +14,8 @@ func TestTypes(t *testing.T) {
 			Conflict("reason_409", "message_409"),
 			InternalServer("reason_500", "message_500"),
 			ServiceUnavailable("reason_503", "message_503"),
+			GatewayTimeout("reason_504", "message_504"),
+			ClientClosed("reason_499", "message_499"),
 		}
 		output = []func(error) bool{
 			IsBadRequest,
@@ -21,6 +25,8 @@ func TestTypes(t *testing.T) {
 			IsConflict,
 			IsInternalServer,
 			IsServiceUnavailable,
+			IsGatewayTimeout,
+			IsClientClosed,
 		}
 	)
 

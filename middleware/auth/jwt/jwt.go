@@ -22,21 +22,24 @@ const (
 	// bearerFormat authorization token format
 	bearerFormat string = "Bearer %s"
 
-	// authorizationKey holds the key used to store the JWT Token in the request header.
+	// authorizationKey holds the key used to store the JWT Token in the request tokenHeader.
 	authorizationKey string = "Authorization"
+
+	// reason holds the error reason.
+	reason string = "UNAUTHORIZED"
 )
 
 var (
-	ErrMissingJwtToken        = errors.Unauthorized("UNAUTHORIZED", "JWT token is missing")
-	ErrMissingKeyFunc         = errors.Unauthorized("UNAUTHORIZED", "keyFunc is missing")
-	ErrTokenInvalid           = errors.Unauthorized("UNAUTHORIZED", "Token is invalid")
-	ErrTokenExpired           = errors.Unauthorized("UNAUTHORIZED", "JWT token has expired")
-	ErrTokenParseFail         = errors.Unauthorized("UNAUTHORIZED", "Fail to parse JWT token ")
-	ErrUnSupportSigningMethod = errors.Unauthorized("UNAUTHORIZED", "Wrong signing method")
-	ErrWrongContext           = errors.Unauthorized("UNAUTHORIZED", "Wrong context for middleware")
-	ErrNeedTokenProvider      = errors.Unauthorized("UNAUTHORIZED", "Token provider is missing")
-	ErrSignToken              = errors.Unauthorized("UNAUTHORIZED", "Can not sign token.Is the key correct?")
-	ErrGetKey                 = errors.Unauthorized("UNAUTHORIZED", "Can not get key while signing token")
+	ErrMissingJwtToken        = errors.Unauthorized(reason, "JWT token is missing")
+	ErrMissingKeyFunc         = errors.Unauthorized(reason, "keyFunc is missing")
+	ErrTokenInvalid           = errors.Unauthorized(reason, "Token is invalid")
+	ErrTokenExpired           = errors.Unauthorized(reason, "JWT token has expired")
+	ErrTokenParseFail         = errors.Unauthorized(reason, "Fail to parse JWT token ")
+	ErrUnSupportSigningMethod = errors.Unauthorized(reason, "Wrong signing method")
+	ErrWrongContext           = errors.Unauthorized(reason, "Wrong context for middleware")
+	ErrNeedTokenProvider      = errors.Unauthorized(reason, "Token provider is missing")
+	ErrSignToken              = errors.Unauthorized(reason, "Can not sign token.Is the key correct?")
+	ErrGetKey                 = errors.Unauthorized(reason, "Can not get key while signing token")
 )
 
 // Option is jwt option.
@@ -46,6 +49,7 @@ type Option func(*options)
 type options struct {
 	signingMethod jwt.SigningMethod
 	claims        jwt.Claims
+	tokenHeader   map[string]interface{}
 }
 
 // WithSigningMethod with signing method option.
@@ -62,11 +66,18 @@ func WithClaims(claims jwt.Claims) Option {
 	}
 }
 
+// WithTokenHeader withe customer tokenHeader for client side
+func WithTokenHeader(header map[string]interface{}) Option {
+	return func(o *options) {
+		o.tokenHeader = header
+	}
+}
+
 // Server is a server auth middleware. Check the token and extract the info from token.
 func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	o := &options{
 		signingMethod: jwt.SigningMethodHS256,
-		claims:        jwt.StandardClaims{},
+		claims:        jwt.RegisteredClaims{},
 	}
 	for _, opt := range opts {
 		opt(o)
@@ -93,7 +104,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 							return nil, ErrTokenParseFail
 						}
 					}
-					return nil, errors.Unauthorized("UNAUTHORIZED", err.Error())
+					return nil, errors.Unauthorized(reason, err.Error())
 				} else if !tokenInfo.Valid {
 					return nil, ErrTokenInvalid
 				} else if tokenInfo.Method != o.signingMethod {
@@ -111,7 +122,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	o := &options{
 		signingMethod: jwt.SigningMethodHS256,
-		claims:        jwt.StandardClaims{},
+		claims:        jwt.RegisteredClaims{},
 	}
 	for _, opt := range opts {
 		opt(o)
@@ -122,6 +133,11 @@ func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 				return nil, ErrNeedTokenProvider
 			}
 			token := jwt.NewWithClaims(o.signingMethod, o.claims)
+			if o.tokenHeader != nil {
+				for k, v := range o.tokenHeader {
+					token.Header[k] = v
+				}
+			}
 			key, err := keyProvider(token)
 			if err != nil {
 				return nil, ErrGetKey

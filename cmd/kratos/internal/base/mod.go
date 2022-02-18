@@ -3,7 +3,7 @@ package base
 import (
 	"bufio"
 	"bytes"
-	"io/ioutil"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -13,7 +13,7 @@ import (
 
 // ModulePath returns go module path.
 func ModulePath(filename string) (string, error) {
-	modBytes, err := ioutil.ReadFile(filename)
+	modBytes, err := os.ReadFile(filename)
 	if err != nil {
 		return "", err
 	}

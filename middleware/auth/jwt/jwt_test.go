@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"testing"
 	"time"
 
@@ -12,7 +13,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
-	"github.com/stretchr/testify/assert"
 )
 
 type headerCarrier http.Header
@@ -145,11 +145,17 @@ func TestServer(t *testing.T) {
 				})(next)
 			}
 			_, err2 := server(test.ctx, test.name)
-			assert.Equal(t, test.exceptErr, err2)
+			if !errors.Is(test.exceptErr, err2) {
+				t.Errorf("except error %v, but got %v", test.exceptErr, err2)
+			}
 			if test.exceptErr == nil {
-				assert.NotNil(t, testToken)
+				if testToken == nil {
+					t.Errorf("except testToken not nil, but got nil")
+				}
 				_, ok := testToken.(jwt.MapClaims)
-				assert.True(t, ok)
+				if !ok {
+					t.Errorf("except testToken is jwt.MapClaims, but got %T", testToken)
+				}
 			}
 		})
 	}
@@ -157,7 +163,8 @@ func TestServer(t *testing.T) {
 
 func TestClient(t *testing.T) {
 	testKey := "testKey"
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{})
+
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{})
 	token, err := claims.SignedString([]byte(testKey))
 	if err != nil {
 		panic(err)
@@ -189,9 +196,13 @@ func TestClient(t *testing.T) {
 			handler := Client(test.tokenProvider)(next)
 			header := &headerCarrier{}
 			_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
-			assert.Equal(t, test.expectError, err2)
+			if !errors.Is(test.expectError, err2) {
+				t.Errorf("except error %v, but got %v", test.expectError, err2)
+			}
 			if err2 == nil {
-				assert.Equal(t, fmt.Sprintf(bearerFormat, token), header.Get(authorizationKey))
+				if !reflect.DeepEqual(header.Get(authorizationKey), fmt.Sprintf(bearerFormat, token)) {
+					t.Errorf("except header %s, but got %s", fmt.Sprintf(bearerFormat, token), header.Get(authorizationKey))
+				}
 			}
 		})
 	}
@@ -199,8 +210,8 @@ func TestClient(t *testing.T) {
 
 func TestTokenExpire(t *testing.T) {
 	testKey := "testKey"
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Millisecond).Unix(),
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Millisecond)),
 	})
 	token, err := claims.SignedString([]byte(testKey))
 	if err != nil {
@@ -217,7 +228,9 @@ func TestTokenExpire(t *testing.T) {
 		return []byte(testKey), nil
 	}, WithSigningMethod(jwt.SigningMethodHS256))(next)
 	_, err2 := server(ctx, "test expire token")
-	assert.Equal(t, ErrTokenExpired, err2)
+	if !errors.Is(ErrTokenExpired, err2) {
+		t.Errorf("except error %v, but got %v", ErrTokenExpired, err2)
+	}
 }
 
 func TestMissingKeyFunc(t *testing.T) {
@@ -252,9 +265,13 @@ func TestMissingKeyFunc(t *testing.T) {
 	}
 	server := Server(nil)(next)
 	_, err2 := server(test.ctx, test.name)
-	assert.Equal(t, test.exceptErr, err2)
+	if !errors.Is(test.exceptErr, err2) {
+		t.Errorf("except error %v, but got %v", test.exceptErr, err2)
+	}
 	if test.exceptErr == nil {
-		assert.NotNil(t, testToken)
+		if testToken == nil {
+			t.Errorf("except testToken not nil, but got nil")
+		}
 	}
 }
 
@@ -287,11 +304,47 @@ func TestClientWithClaims(t *testing.T) {
 		handler := Client(test.tokenProvider, WithClaims(mapClaims))(next)
 		header := &headerCarrier{}
 		_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
-		assert.Equal(t, test.expectError, err2)
+		if !errors.Is(test.expectError, err2) {
+			t.Errorf("except error %v, but got %v", test.expectError, err2)
+		}
 		if err2 == nil {
-			assert.Equal(t, fmt.Sprintf(bearerFormat, token), header.Get(authorizationKey))
+			if !reflect.DeepEqual(header.Get(authorizationKey), fmt.Sprintf(bearerFormat, token)) {
+				t.Errorf("except header %s, but got %s", fmt.Sprintf(bearerFormat, token), header.Get(authorizationKey))
+			}
 		}
 	})
+}
+
+func TestClientWithHeader(t *testing.T) {
+	testKey := "testKey"
+	mapClaims := jwt.MapClaims{}
+	mapClaims["name"] = "xiaoli"
+	tokenHeader := map[string]interface{}{
+		"test": "test",
+	}
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
+	for k, v := range tokenHeader {
+		claims.Header[k] = v
+	}
+	token, err := claims.SignedString([]byte(testKey))
+	if err != nil {
+		panic(err)
+	}
+	tProvider := func(*jwt.Token) (interface{}, error) {
+		return []byte(testKey), nil
+	}
+	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return "reply", nil
+	}
+	handler := Client(tProvider, WithClaims(mapClaims), WithTokenHeader(tokenHeader))(next)
+	header := &headerCarrier{}
+	_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
+	if err2 != nil {
+		t.Errorf("except error nil, but got %v", err2)
+	}
+	if !reflect.DeepEqual(header.Get(authorizationKey), fmt.Sprintf(bearerFormat, token)) {
+		t.Errorf("except header %s, but got %s", fmt.Sprintf(bearerFormat, token), header.Get(authorizationKey))
+	}
 }
 
 func TestClientMissKey(t *testing.T) {
@@ -323,9 +376,13 @@ func TestClientMissKey(t *testing.T) {
 		handler := Client(test.tokenProvider, WithClaims(mapClaims))(next)
 		header := &headerCarrier{}
 		_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
-		assert.Equal(t, test.expectError, err2)
+		if !errors.Is(test.expectError, err2) {
+			t.Errorf("except error %v, but got %v", test.expectError, err2)
+		}
 		if err2 == nil {
-			assert.Equal(t, fmt.Sprintf(bearerFormat, token), header.Get(authorizationKey))
+			if !reflect.DeepEqual(header.Get(authorizationKey), fmt.Sprintf(bearerFormat, token)) {
+				t.Errorf("except header %s, but got %s", fmt.Sprintf(bearerFormat, token), header.Get(authorizationKey))
+			}
 		}
 	})
 }

@@ -1,7 +1,7 @@
 package fluent
 
 import (
-	"io/ioutil"
+	"io"
 	"net"
 	"os"
 	"testing"
@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 					return
 				}
 				defer conn.Close()
-				if _, err = ioutil.ReadAll(conn); err != nil {
+				if _, err = io.ReadAll(conn); err != nil {
 					continue
 				}
 			}

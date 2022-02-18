@@ -4,11 +4,11 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport"
-	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/propagation"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
@@ -127,19 +127,33 @@ func TestServer(t *testing.T) {
 	)(next)(ctx, "test server: ")
 
 	span.End()
-	assert.NoError(t, err)
-	assert.NotEmpty(t, childSpanID)
-	assert.NotEqual(t, span.SpanContext().SpanID().String(), childSpanID)
-	assert.Equal(t, span.SpanContext().TraceID().String(), childTraceID)
+	if err != nil {
+		t.Errorf("expected nil, got %v", err)
+	}
+	if childSpanID == "" {
+		t.Errorf("expected empty, got %v", childSpanID)
+	}
+	if reflect.DeepEqual(span.SpanContext().SpanID().String(), childSpanID) {
+		t.Errorf("span.SpanContext().SpanID().String()(%v)  is not equal to childSpanID(%v)", span.SpanContext().SpanID().String(), childSpanID)
+	}
+	if !reflect.DeepEqual(span.SpanContext().TraceID().String(), childTraceID) {
+		t.Errorf("expected %v, got %v", childTraceID, span.SpanContext().TraceID().String())
+	}
 
 	_, err = Server(
 		WithTracerProvider(tracesdk.NewTracerProvider()),
 		WithPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})),
 	)(next)(context.Background(), "test server: ")
 
-	assert.NoError(t, err)
-	assert.Empty(t, childSpanID)
-	assert.Empty(t, childTraceID)
+	if err != nil {
+		t.Errorf("expected error, got nil")
+	}
+	if childSpanID != "" {
+		t.Errorf("expected empty, got %v", childSpanID)
+	}
+	if childTraceID != "" {
+		t.Errorf("expected empty, got %v", childTraceID)
+	}
 }
 
 func TestClient(t *testing.T) {
@@ -185,8 +199,16 @@ func TestClient(t *testing.T) {
 	)(next)(ctx, "test client: ")
 
 	span.End()
-	assert.NoError(t, err)
-	assert.NotEmpty(t, childSpanID)
-	assert.NotEqual(t, span.SpanContext().SpanID().String(), childSpanID)
-	assert.Equal(t, span.SpanContext().TraceID().String(), childTraceID)
+	if err != nil {
+		t.Errorf("expected nil, got %v", err)
+	}
+	if childSpanID == "" {
+		t.Errorf("expected empty, got %v", childSpanID)
+	}
+	if reflect.DeepEqual(span.SpanContext().SpanID().String(), childSpanID) {
+		t.Errorf("span.SpanContext().SpanID().String()(%v)  is not equal to childSpanID(%v)", span.SpanContext().SpanID().String(), childSpanID)
+	}
+	if !reflect.DeepEqual(span.SpanContext().TraceID().String(), childTraceID) {
+		t.Errorf("expected %v, got %v", childTraceID, span.SpanContext().TraceID().String())
+	}
 }

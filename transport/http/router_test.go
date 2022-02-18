@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
 
 	"github.com/go-kratos/kratos/v2/internal/host"
 )
@@ -175,7 +174,9 @@ func testRoute(t *testing.T, srv *Server) {
 func TestRouter_Group(t *testing.T) {
 	r := &Router{}
 	rr := r.Group("a", func(http.Handler) http.Handler { return nil })
-	assert.Equal(t, "a", rr.prefix)
+	if !reflect.DeepEqual("a", rr.prefix) {
+		t.Errorf("expected %q, got %q", "a", rr.prefix)
+	}
 }
 
 func TestHandle(t *testing.T) {

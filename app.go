@@ -39,7 +39,7 @@ type App struct {
 func New(opts ...Option) *App {
 	o := options{
 		ctx:              context.Background(),
-		logger:           log.NewHelper(log.DefaultLogger),
+		logger:           log.NewHelper(log.GetLogger()),
 		sigs:             []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		registrarTimeout: 10 * time.Second,
 		stopTimeout:      10 * time.Second,
@@ -91,7 +91,7 @@ func (a *App) Run() error {
 		srv := srv
 		eg.Go(func() error {
 			<-ctx.Done() // wait for stop signal
-			sctx, cancel := context.WithTimeout(context.Background(), a.opts.stopTimeout)
+			sctx, cancel := context.WithTimeout(NewContext(context.Background(), a), a.opts.stopTimeout)
 			defer cancel()
 			return srv.Stop(sctx)
 		})

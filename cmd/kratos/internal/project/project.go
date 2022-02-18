@@ -2,6 +2,7 @@ package project
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -22,14 +23,17 @@ var CmdNew = &cobra.Command{
 var (
 	repoURL string
 	branch  string
+	timeout string
 )
 
 func init() {
 	if repoURL = os.Getenv("KRATOS_LAYOUT_REPO"); repoURL == "" {
 		repoURL = "https://github.com/go-kratos/kratos-layout.git"
 	}
+	timeout = "60s"
 	CmdNew.Flags().StringVarP(&repoURL, "repo-url", "r", repoURL, "layout repo")
 	CmdNew.Flags().StringVarP(&branch, "branch", "b", branch, "repo branch")
+	CmdNew.Flags().StringVarP(&timeout, "timeout", "t", timeout, "time out")
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -37,7 +41,11 @@ func run(cmd *cobra.Command, args []string) {
 	if err != nil {
 		panic(err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	t, err := time.ParseDuration(timeout)
+	if err != nil {
+		panic(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), t)
 	defer cancel()
 	name := ""
 	if len(args) == 0 {
@@ -53,8 +61,20 @@ func run(cmd *cobra.Command, args []string) {
 		name = args[0]
 	}
 	p := &Project{Name: path.Base(name), Path: name}
-	if err := p.New(ctx, wd, repoURL, branch); err != nil {
-		fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
-		return
+	done := make(chan error, 1)
+	go func() {
+		done <- p.New(ctx, wd, repoURL, branch)
+	}()
+	select {
+	case <-ctx.Done():
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			fmt.Fprint(os.Stderr, "\033[31mERROR: project creation timed out\033[m\n")
+		} else {
+			fmt.Fprintf(os.Stderr, "\033[31mERROR: failed to create project(%s)\033[m\n", ctx.Err().Error())
+		}
+	case err = <-done:
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\033[31mERROR: Failed to create project(%s)\033[m\n", err.Error())
+		}
 	}
 }

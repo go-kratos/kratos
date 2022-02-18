@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
@@ -104,7 +103,7 @@ func requestGithubAPI(url string, method string, body io.Reader, token string) (
 		fatal(err)
 	}
 	defer resp.Body.Close()
-	resBody, err := ioutil.ReadAll(resp.Body)
+	resBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fatal(err)
 	}

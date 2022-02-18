@@ -31,7 +31,9 @@ func main() {
 		// 由于gRPC框架的限制只能使用全局balancer+filter的方式来实现selector
 		// 这里使用weighted round robin算法的balancer+静态version=1.0.0的Filter
 		grpc.WithBalancerName(wrr.Name),
-		grpc.WithSelectFilter(filter.Version("1.0.0")),
+		grpc.WithFilter(
+			filter.Version("1.0.0"),
+		),
 	)
 	if err != nil {
 		log.Fatal(err)

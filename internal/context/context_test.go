@@ -2,11 +2,10 @@ package context
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestContext(t *testing.T) {
@@ -20,13 +19,21 @@ func TestContext(t *testing.T) {
 
 	got := ctx.Value(ctxKey1{})
 	value1, ok := got.(string)
-	assert.Equal(t, ok, true)
-	assert.Equal(t, value1, "https://github.com/go-kratos/")
+	if !ok {
+		t.Errorf("expect %v, got %v", true, ok)
+	}
+	if !reflect.DeepEqual(value1, "https://github.com/go-kratos/") {
+		t.Errorf("expect %v, got %v", "https://github.com/go-kratos/", value1)
+	}
 
 	got2 := ctx.Value(ctxKey2{})
 	value2, ok := got2.(string)
-	assert.Equal(t, ok, true)
-	assert.Equal(t, value2, "https://go-kratos.dev/")
+	if !ok {
+		t.Errorf("expect %v, got %v", true, ok)
+	}
+	if !reflect.DeepEqual("https://go-kratos.dev/", value2) {
+		t.Errorf("expect %v, got %v", "https://go-kratos.dev/", value2)
+	}
 
 	t.Log(value1)
 	t.Log(value2)
@@ -45,13 +52,21 @@ func TestMerge(t *testing.T) {
 
 	got := ctx.Value(ctxKey1{})
 	value1, ok := got.(string)
-	assert.Equal(t, ok, true)
-	assert.Equal(t, value1, "https://github.com/go-kratos/")
+	if !ok {
+		t.Errorf("expect %v, got %v", true, ok)
+	}
+	if !reflect.DeepEqual(value1, "https://github.com/go-kratos/") {
+		t.Errorf("expect %v, got %v", "https://github.com/go-kratos/", value1)
+	}
 
 	got2 := ctx.Value(ctxKey2{})
 	value2, ok := got2.(string)
-	assert.Equal(t, ok, true)
-	assert.Equal(t, value2, "https://go-kratos.dev/")
+	if !ok {
+		t.Errorf("expect %v, got %v", true, ok)
+	}
+	if !reflect.DeepEqual(value2, "https://go-kratos.dev/") {
+		t.Errorf("expect %v, got %v", " https://go-kratos.dev/", value2)
+	}
 
 	t.Log(ctx)
 }
@@ -63,8 +78,9 @@ func TestErr(t *testing.T) {
 
 	ctx, cancel := Merge(ctx1, context.Background())
 	defer cancel()
-
-	assert.Equal(t, ctx.Err(), context.DeadlineExceeded)
+	if !errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		t.Errorf("expect %v, got %v", context.DeadlineExceeded, ctx.Err())
+	}
 }
 
 func TestDone(t *testing.T) {
@@ -77,7 +93,9 @@ func TestDone(t *testing.T) {
 		cancel()
 	}()
 
-	assert.Equal(t, <-ctx.Done(), struct{}{})
+	if <-ctx.Done() != struct{}{} {
+		t.Errorf("expect %v, got %v", struct{}{}, <-ctx.Done())
+	}
 }
 
 func TestFinish(t *testing.T) {
@@ -88,9 +106,15 @@ func TestFinish(t *testing.T) {
 		cancelCh: make(chan struct{}),
 	}
 	err := mc.finish(context.DeadlineExceeded)
-	assert.Equal(t, err, context.DeadlineExceeded)
-	assert.Equal(t, mc.doneMark, uint32(1))
-	assert.Equal(t, <-mc.done, struct{}{})
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Errorf("expect %v, got %v", context.DeadlineExceeded, err)
+	}
+	if !reflect.DeepEqual(mc.doneMark, uint32(1)) {
+		t.Errorf("expect %v, got %v", 1, mc.doneMark)
+	}
+	if <-mc.done != struct{}{} {
+		t.Errorf("expect %v, got %v", struct{}{}, <-mc.done)
+	}
 }
 
 func TestWait(t *testing.T) {
@@ -109,7 +133,9 @@ func TestWait(t *testing.T) {
 
 	mc.wait()
 	t.Log(mc.doneErr)
-	assert.Equal(t, mc.doneErr, context.Canceled)
+	if !errors.Is(mc.doneErr, context.Canceled) {
+		t.Errorf("expect %v, got %v", context.Canceled, mc.doneErr)
+	}
 
 	ctx2, cancel2 := context.WithCancel(context.Background())
 
@@ -126,7 +152,9 @@ func TestWait(t *testing.T) {
 
 	mc.wait()
 	t.Log(mc.doneErr)
-	assert.Equal(t, mc.doneErr, context.Canceled)
+	if !errors.Is(mc.doneErr, context.Canceled) {
+		t.Errorf("expect %v, got %v", context.Canceled, mc.doneErr)
+	}
 }
 
 func TestCancel(t *testing.T) {
@@ -137,8 +165,9 @@ func TestCancel(t *testing.T) {
 		cancelCh: make(chan struct{}),
 	}
 	mc.cancel()
-
-	assert.Equal(t, <-mc.cancelCh, struct{}{})
+	if <-mc.cancelCh != struct{}{} {
+		t.Errorf("expect %v, got %v", struct{}{}, <-mc.cancelCh)
+	}
 }
 
 func Test_mergeCtx_Deadline(t *testing.T) {
@@ -215,7 +244,9 @@ func Test_Err2(t *testing.T) {
 	ctx, cancel := Merge(ctx1, context.Background())
 	defer cancel()
 
-	assert.Equal(t, ctx.Err(), nil)
+	if ctx.Err() != nil {
+		t.Errorf("expect %v, got %v", nil, ctx.Err())
+	}
 
 	ctx1, cancel1 := context.WithCancel(context.Background())
 	time.Sleep(time.Millisecond)
@@ -225,7 +256,9 @@ func Test_Err2(t *testing.T) {
 
 	cancel1()
 
-	assert.Equal(t, ctx.Err(), context.Canceled)
+	if !errors.Is(ctx.Err(), context.Canceled) {
+		t.Errorf("expect %v, got %v", context.Canceled, ctx.Err())
+	}
 
 	ctx1, cancel1 = context.WithCancel(context.Background())
 	time.Sleep(time.Millisecond)
@@ -235,9 +268,13 @@ func Test_Err2(t *testing.T) {
 
 	cancel1()
 
-	assert.Equal(t, ctx.Err(), context.Canceled)
+	if !errors.Is(ctx.Err(), context.Canceled) {
+		t.Errorf("expect %v, got %v", context.Canceled, ctx.Err())
+	}
 
 	ctx, cancel = Merge(context.Background(), context.Background())
 	cancel()
-	assert.Equal(t, ctx.Err(), context.Canceled)
+	if !errors.Is(ctx.Err(), context.Canceled) {
+		t.Errorf("expect %v, got %v", context.Canceled, ctx.Err())
+	}
 }

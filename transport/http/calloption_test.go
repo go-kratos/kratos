@@ -2,60 +2,88 @@ package http
 
 import (
 	"net/http"
+	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestEmptyCallOptions(t *testing.T) {
-	assert.NoError(t, EmptyCallOption{}.before(&callInfo{}))
-	EmptyCallOption{}.after(&callInfo{}, &csAttempt{})
+	e := EmptyCallOption{}
+	if e.before(&callInfo{}) != nil {
+		t.Error("EmptyCallOption should be ignored")
+	}
+	e.after(&callInfo{}, &csAttempt{})
 }
 
 func TestContentType(t *testing.T) {
-	assert.Equal(t, "aaa", ContentType("aaa").(ContentTypeCallOption).ContentType)
+	if !reflect.DeepEqual(ContentType("aaa").(ContentTypeCallOption).ContentType, "aaa") {
+		t.Errorf("want: %v,got: %v", "aaa", ContentType("aaa").(ContentTypeCallOption).ContentType)
+	}
 }
 
 func TestContentTypeCallOption_before(t *testing.T) {
 	c := &callInfo{}
 	err := ContentType("aaa").before(c)
-	assert.NoError(t, err)
-	assert.Equal(t, "aaa", c.contentType)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if !reflect.DeepEqual("aaa", c.contentType) {
+		t.Errorf("want: %v, got: %v", "aaa", c.contentType)
+	}
 }
 
 func TestDefaultCallInfo(t *testing.T) {
 	path := "hi"
 	rv := defaultCallInfo(path)
-	assert.Equal(t, path, rv.pathTemplate)
-	assert.Equal(t, path, rv.operation)
-	assert.Equal(t, "application/json", rv.contentType)
+	if !reflect.DeepEqual(path, rv.pathTemplate) {
+		t.Errorf("expect %v, got %v", path, rv.pathTemplate)
+	}
+	if !reflect.DeepEqual(path, rv.operation) {
+		t.Errorf("expect %v, got %v", path, rv.operation)
+	}
+	if !reflect.DeepEqual("application/json", rv.contentType) {
+		t.Errorf("expect %v, got %v", "application/json", rv.contentType)
+	}
 }
 
 func TestOperation(t *testing.T) {
-	assert.Equal(t, "aaa", Operation("aaa").(OperationCallOption).Operation)
+	if !reflect.DeepEqual("aaa", Operation("aaa").(OperationCallOption).Operation) {
+		t.Errorf("want: %v,got: %v", "aaa", Operation("aaa").(OperationCallOption).Operation)
+	}
 }
 
 func TestOperationCallOption_before(t *testing.T) {
 	c := &callInfo{}
 	err := Operation("aaa").before(c)
-	assert.NoError(t, err)
-	assert.Equal(t, "aaa", c.operation)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if !reflect.DeepEqual("aaa", c.operation) {
+		t.Errorf("want: %v, got: %v", "aaa", c.operation)
+	}
 }
 
 func TestPathTemplate(t *testing.T) {
-	assert.Equal(t, "aaa", PathTemplate("aaa").(PathTemplateCallOption).Pattern)
+	if !reflect.DeepEqual("aaa", PathTemplate("aaa").(PathTemplateCallOption).Pattern) {
+		t.Errorf("want: %v,got: %v", "aaa", PathTemplate("aaa").(PathTemplateCallOption).Pattern)
+	}
 }
 
 func TestPathTemplateCallOption_before(t *testing.T) {
 	c := &callInfo{}
 	err := PathTemplate("aaa").before(c)
-	assert.NoError(t, err)
-	assert.Equal(t, "aaa", c.pathTemplate)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if !reflect.DeepEqual("aaa", c.pathTemplate) {
+		t.Errorf("want: %v, got: %v", "aaa", c.pathTemplate)
+	}
 }
 
 func TestHeader(t *testing.T) {
 	h := http.Header{"A": []string{"123"}}
-	assert.Equal(t, "123", Header(&h).(HeaderCallOption).header.Get("A"))
+	if !reflect.DeepEqual(Header(&h).(HeaderCallOption).header.Get("A"), "123") {
+		t.Errorf("want: %v,got: %v", "123", Header(&h).(HeaderCallOption).header.Get("A"))
+	}
 }
 
 func TestHeaderCallOption_after(t *testing.T) {
@@ -64,5 +92,7 @@ func TestHeaderCallOption_after(t *testing.T) {
 	cs := &csAttempt{res: &http.Response{Header: h}}
 	o := Header(&h)
 	o.after(c, cs)
-	assert.Equal(t, &h, o.(HeaderCallOption).header)
+	if !reflect.DeepEqual(&h, o.(HeaderCallOption).header) {
+		t.Errorf("want: %v,got: %v", &h, o.(HeaderCallOption).header)
+	}
 }

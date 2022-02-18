@@ -49,7 +49,7 @@ type config struct {
 // New new a config with options.
 func New(opts ...Option) Config {
 	o := options{
-		logger:   log.DefaultLogger,
+		logger:   log.GetLogger(),
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
 	}
@@ -102,6 +102,9 @@ func (c *config) Load() error {
 		kvs, err := src.Load()
 		if err != nil {
 			return err
+		}
+		for _, v := range kvs {
+			c.log.Infof("config loaded: %s format: %s", v.Key, v.Format)
 		}
 		if err = c.reader.Merge(kvs...); err != nil {
 			c.log.Errorf("failed to merge config source: %v", err)

@@ -3,6 +3,7 @@ package discovery
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -47,7 +48,7 @@ type builder struct {
 func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 	b := &builder{
 		discoverer: d,
-		logger:     log.DefaultLogger,
+		logger:     log.GetLogger(),
 		timeout:    time.Second * 10,
 		insecure:   false,
 	}
@@ -62,10 +63,10 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		err error
 		w   registry.Watcher
 	)
-	done := make(chan bool, 1)
+	done := make(chan struct{}, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		w, err = b.discoverer.Watch(ctx, target.Endpoint)
+		w, err = b.discoverer.Watch(ctx, strings.TrimPrefix(target.URL.Path, "/"))
 		close(done)
 	}()
 	select {

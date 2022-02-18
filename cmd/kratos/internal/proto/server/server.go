@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -83,7 +82,7 @@ func run(cmd *cobra.Command, args []string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		if err := ioutil.WriteFile(to, b, 0o644); err != nil {
+		if err := os.WriteFile(to, b, 0o644); err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println(to)

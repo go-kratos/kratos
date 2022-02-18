@@ -3,6 +3,7 @@ package p2c
 import (
 	"context"
 	"math/rand"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -40,15 +41,17 @@ func New(opts ...Option) selector.Selector {
 
 // Balancer is p2c selector.
 type Balancer struct {
-	r  *rand.Rand
-	lk int64
+	mu     sync.Mutex
+	r      *rand.Rand
+	picked int64
 }
 
 // choose two distinct nodes.
 func (s *Balancer) prePick(nodes []selector.WeightedNode) (nodeA selector.WeightedNode, nodeB selector.WeightedNode) {
-	source := rand.NewSource(time.Now().UnixNano())
-	a := rand.New(source).Intn(len(nodes))
-	b := rand.New(source).Intn(len(nodes) - 1)
+	s.mu.Lock()
+	a := s.r.Intn(len(nodes))
+	b := s.r.Intn(len(nodes) - 1)
+	s.mu.Unlock()
 	if b >= a {
 		b = b + 1
 	}
@@ -60,25 +63,26 @@ func (s *Balancer) prePick(nodes []selector.WeightedNode) (nodeA selector.Weight
 func (s *Balancer) Pick(ctx context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.DoneFunc, error) {
 	if len(nodes) == 0 {
 		return nil, nil, selector.ErrNoAvailable
-	} else if len(nodes) == 1 {
+	}
+	if len(nodes) == 1 {
 		done := nodes[0].Pick()
 		return nodes[0], done, nil
 	}
 
 	var pc, upc selector.WeightedNode
 	nodeA, nodeB := s.prePick(nodes)
-	// meta.Weight为服务发布者在discovery中设置的权重
+	// meta.Weight is the weight set by the service publisher in discovery
 	if nodeB.Weight() > nodeA.Weight() {
 		pc, upc = nodeB, nodeA
 	} else {
 		pc, upc = nodeA, nodeB
 	}
 
-	// 如果落选节点在forceGap期间内从来没有被选中一次，则强制选一次
-	// 利用强制的机会，来触发成功率、延迟的更新
-	if upc.PickElapsed() > forcePick && atomic.CompareAndSwapInt64(&s.lk, 0, 1) {
+	// If the failed node has never been selected once during forceGap, it is forced to be selected once
+	// Take advantage of forced opportunities to trigger updates of success rate and delay
+	if upc.PickElapsed() > forcePick && atomic.CompareAndSwapInt64(&s.picked, 0, 1) {
 		pc = upc
-		atomic.StoreInt64(&s.lk, 0)
+		atomic.StoreInt64(&s.picked, 0)
 	}
 	done := pc.Pick()
 	return pc, done, nil

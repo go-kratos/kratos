@@ -13,7 +13,7 @@ import (
 )
 
 type apollo struct {
-	client *agollo.Client
+	client agollo.Client
 	opt    *options
 }
 
@@ -99,7 +99,7 @@ func WithLogger(logger log.Logger) Option {
 
 func NewSource(opts ...Option) config.Source {
 	op := options{
-		logger: log.DefaultLogger,
+		logger: log.GetLogger(),
 	}
 	for _, o := range opts {
 		o(&op)
@@ -167,7 +167,7 @@ func resolve(key string, value interface{}, target map[string]interface{}) {
 		// current exists, then check existing value type, if it's not map
 		// that means duplicate keys, and at least one is not map instance.
 		if cursor, ok = v.(map[string]interface{}); !ok {
-			_ = log.DefaultLogger.Log(log.LevelWarn,
+			_ = log.GetLogger().Log(log.LevelWarn,
 				"msg",
 				fmt.Sprintf("duplicate key: %v\n", strings.Join(keys[:i+1], ".")),
 			)

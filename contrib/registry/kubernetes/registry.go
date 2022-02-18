@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"strconv"
@@ -63,7 +62,6 @@ import (
 //          image: nginx:1.7.9
 //          ports:
 //            - containerPort: 80
-//
 //
 const (
 	// LabelsKeyServiceID is used to define the ID of the service
@@ -159,14 +157,14 @@ func (s *Registry) Deregister(ctx context.Context, service *registry.ServiceInst
 }
 
 // Service return the service instances in memory according to the service name.
-func (s *Registry) Service(name string) ([]*registry.ServiceInstance, error) {
+func (s *Registry) GetService(ctx context.Context, name string) ([]*registry.ServiceInstance, error) {
 	pods, err := s.podLister.List(labels.SelectorFromSet(map[string]string{
 		LabelsKeyServiceName: name,
 	}))
 	if err != nil {
 		return nil, err
 	}
-	var ret []*registry.ServiceInstance
+	ret := make([]*registry.ServiceInstance, 0, len(pods))
 	for _, pod := range pods {
 		if pod.Status.Phase != corev1.PodRunning {
 			continue
@@ -180,8 +178,8 @@ func (s *Registry) Service(name string) ([]*registry.ServiceInstance, error) {
 	return ret, nil
 }
 
-func (s *Registry) sendLatestInstances(name string, announcement chan []*registry.ServiceInstance) {
-	instances, err := s.Service(name)
+func (s *Registry) sendLatestInstances(ctx context.Context, name string, announcement chan []*registry.ServiceInstance) {
+	instances, err := s.GetService(ctx, name)
 	if err != nil {
 		panic(err)
 	}
@@ -189,7 +187,7 @@ func (s *Registry) sendLatestInstances(name string, announcement chan []*registr
 }
 
 // Watch creates a watcher according to the service name.
-func (s *Registry) Watch(name string) (registry.Watcher, error) {
+func (s *Registry) Watch(ctx context.Context, name string) (registry.Watcher, error) {
 	stopCh := make(chan struct{}, 1)
 	announcement := make(chan []*registry.ServiceInstance, 1)
 	s.podInformer.AddEventHandler(cache.FilteringResourceEventHandler{
@@ -207,13 +205,13 @@ func (s *Registry) Watch(name string) (registry.Watcher, error) {
 		},
 		Handler: cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
-				s.sendLatestInstances(name, announcement)
+				s.sendLatestInstances(ctx, name, announcement)
 			},
 			UpdateFunc: func(oldObj, newObj interface{}) {
-				s.sendLatestInstances(name, announcement)
+				s.sendLatestInstances(ctx, name, announcement)
 			},
 			DeleteFunc: func(obj interface{}) {
-				s.sendLatestInstances(name, announcement)
+				s.sendLatestInstances(ctx, name, announcement)
 			},
 		},
 	})
@@ -248,7 +246,7 @@ var currentNamespace = LoadNamespace()
 
 // LoadNamespace is used to get the current namespace from the file
 func LoadNamespace() string {
-	data, err := ioutil.ReadFile(ServiceAccountNamespacePath)
+	data, err := os.ReadFile(ServiceAccountNamespacePath)
 	if err != nil {
 		return ""
 	}
@@ -342,14 +340,14 @@ func getProtocolMapByEndpoints(endpoints []string) (protocolMap, error) {
 }
 
 func getProtocolMapFromPod(pod *corev1.Pod) (protocolMap, error) {
-	protocolMap := protocolMap{}
+	protoMap := protocolMap{}
 	if s := pod.Annotations[AnnotationsKeyProtocolMap]; !isEmptyObjectString(s) {
-		err := unmarshal(s, &protocolMap)
+		err := unmarshal(s, &protoMap)
 		if err != nil {
 			return nil, &ErrorHandleResource{Namespace: pod.Namespace, Name: pod.Name, Reason: err}
 		}
 	}
-	return protocolMap, nil
+	return protoMap, nil
 }
 
 func getMetadataFromPod(pod *corev1.Pod) (map[string]string, error) {

@@ -2,7 +2,6 @@ package run
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -79,7 +78,7 @@ func findCMD(base string) (map[string]string, error) {
 		err := filepath.Walk(dir, func(walkPath string, info os.FileInfo, err error) error {
 			// multi level directory is not allowed under the cmdPath directory, so it is judged that the path ends with cmdPath.
 			if strings.HasSuffix(walkPath, "cmd") {
-				paths, err := ioutil.ReadDir(walkPath)
+				paths, err := os.ReadDir(walkPath)
 				if err != nil {
 					return err
 				}

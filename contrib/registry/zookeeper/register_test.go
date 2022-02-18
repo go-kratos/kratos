@@ -22,11 +22,13 @@ func TestRegistry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer w.Stop()
+	defer func() {
+		_ = w.Stop()
+	}()
 	go func() {
 		for {
-			res, err := w.Next()
-			if err != nil {
+			res, nextErr := w.Next()
+			if nextErr != nil {
 				return
 			}
 			t.Logf("watch: %d", len(res))
@@ -37,7 +39,7 @@ func TestRegistry(t *testing.T) {
 	}()
 	time.Sleep(time.Second)
 
-	if err := r.Register(ctx, s); err != nil {
+	if err = r.Register(ctx, s); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Second)
@@ -53,7 +55,7 @@ func TestRegistry(t *testing.T) {
 		t.Errorf("not expected: %+v", res)
 	}
 
-	if err := r.Deregister(ctx, s); err != nil {
+	if err = r.Deregister(ctx, s); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Second)
