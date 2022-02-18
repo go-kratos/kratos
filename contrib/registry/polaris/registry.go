@@ -16,40 +16,40 @@ import (
 
 var _ registry.Registrar = (*Registry)(nil)
 
-// InstanceIDSeparator . Instance Id Separator.
-const InstanceIDSeparator = "-"
+// _instanceIDSeparator . Instance id Separator.
+const _instanceIDSeparator = "-"
 
 type options struct {
-	// 必选，服务名
-	NameSpace string
 
-	// 必选，服务访问Token
+	// required, namespace in polaris
+	Namespace string
+
+	// required, service access token
 	ServiceToken string
 
-	// 以下字段可选，默认nil表示客户端不配置，使用服务端配置
-	// 服务协议
+	// optional, protocol in polaris. Default value is nil, it means use protocol config in service
 	Protocol *string
 
-	// 服务权重，默认100，范围0-10000
+	// service weight in polaris. Default value is 100, 0 <= weight <= 10000
 	Weight int
 
-	// 实例优先级，默认为0，数值越小，优先级越高
+	// service priority. Default value is 0. The smaller the value, the lower the priority
 	Priority int
 
-	// 该服务实例是否健康，默认健康
+	// To show service is healthy or not. Default value is True .
 	Healthy bool
 
-	// 该服务实例是否隔离，默认不隔离
+	// To show service is isolate or not. Default value is False .
 	Isolate bool
 
-	// ttl超时时间，如果节点要调用heartbeat上报，则必须填写，否则会400141错误码，单位：秒
+	// TTL timeout. if node needs to use heartbeat to report,required. If not set,server will throw ErrorCode-400141
 	TTL int
 
-	// 可选，单次查询超时时间，默认直接获取全局的超时配置
-	// 用户总最大超时时间为(1+RetryCount) * Timeout
+	// optional, Timeout for single query. Default value is global config
+	// Total is (1+RetryCount) * Timeout
 	Timeout time.Duration
 
-	// 可选，重试次数，默认直接获取全局的超时配置
+	// optional, retry count. Default value is global config
 	RetryCount int
 }
 
@@ -62,18 +62,18 @@ type Registry struct {
 	provider api.ProviderAPI
 }
 
-// WithDefaultNamespace with default NameSpace option.
-func WithDefaultNamespace(nameSpace string) Option {
-	return func(o *options) { o.NameSpace = nameSpace }
+// WithNamespace with default Namespace option.
+func WithNamespace(nameSpace string) Option {
+	return func(o *options) { o.Namespace = nameSpace }
 }
 
-// WithDefaultServiceToken with default ServiceToken option.
-func WithDefaultServiceToken(serviceToken string) Option {
+// WithServiceToken with default ServiceToken option.
+func WithServiceToken(serviceToken string) Option {
 	return func(o *options) { o.ServiceToken = serviceToken }
 }
 
-// WithDefaultProtocol with default Protocol option.
-func WithDefaultProtocol(protocol string) Option {
+// WithProtocol with default Protocol option.
+func WithProtocol(protocol string) Option {
 	return func(o *options) { o.Protocol = &protocol }
 }
 
@@ -82,13 +82,13 @@ func WithDefaultWeight(weight int) Option {
 	return func(o *options) { o.Weight = weight }
 }
 
-// WithDefaultHealthy with default Healthy option.
-func WithDefaultHealthy(healthy bool) Option {
+// WithHealthy with default Healthy option.
+func WithHealthy(healthy bool) Option {
 	return func(o *options) { o.Healthy = healthy }
 }
 
-// WithDefaultIsolate with default Isolate option.
-func WithDefaultIsolate(isolate bool) Option {
+// WithIsolate with default Isolate option.
+func WithIsolate(isolate bool) Option {
 	return func(o *options) { o.Isolate = isolate }
 }
 
@@ -97,19 +97,19 @@ func WithDefaultTTL(TTL int) Option {
 	return func(o *options) { o.TTL = TTL }
 }
 
-// WithDefaultTimeout with default Timeout option.
-func WithDefaultTimeout(timeout time.Duration) Option {
+// WithTimeout with default Timeout option.
+func WithTimeout(timeout time.Duration) Option {
 	return func(o *options) { o.Timeout = timeout }
 }
 
-// WithDefaultRetryCount with default RetryCount option.
-func WithDefaultRetryCount(retryCount int) Option {
+// WithRetryCount with default RetryCount option.
+func WithRetryCount(retryCount int) Option {
 	return func(o *options) { o.RetryCount = retryCount }
 }
 
-func New(provider api.ProviderAPI, opts ...Option) (r *Registry) {
+func NewRegistry(provider api.ProviderAPI, opts ...Option) (r *Registry) {
 	op := options{
-		NameSpace:    "default",
+		Namespace:    "default",
 		ServiceToken: "",
 		Protocol:     nil,
 		Weight:       0,
@@ -173,7 +173,7 @@ func (r *Registry) Register(_ context.Context, serviceInstance *registry.Service
 				InstanceRegisterRequest: model.InstanceRegisterRequest{
 					Service:      serviceInstance.Name + u.Scheme,
 					ServiceToken: r.opt.ServiceToken,
-					Namespace:    r.opt.NameSpace,
+					Namespace:    r.opt.Namespace,
 					Host:         host,
 					Port:         portNum,
 					Protocol:     r.opt.Protocol,
@@ -194,13 +194,13 @@ func (r *Registry) Register(_ context.Context, serviceInstance *registry.Service
 		ids = append(ids, service.InstanceID)
 	}
 	// need to set InstanceID for Deregister
-	serviceInstance.ID = strings.Join(ids, InstanceIDSeparator)
+	serviceInstance.ID = strings.Join(ids, _instanceIDSeparator)
 	return nil
 }
 
 // Deregister the registration.
 func (r *Registry) Deregister(ctx context.Context, serviceInstance *registry.ServiceInstance) error {
-	split := strings.Split(serviceInstance.ID, InstanceIDSeparator)
+	split := strings.Split(serviceInstance.ID, _instanceIDSeparator)
 	for i, endpoint := range serviceInstance.Endpoints {
 		// get url
 		u, err := url.Parse(endpoint)
@@ -225,7 +225,7 @@ func (r *Registry) Deregister(ctx context.Context, serviceInstance *registry.Ser
 				InstanceDeRegisterRequest: model.InstanceDeRegisterRequest{
 					Service:      serviceInstance.Name + u.Scheme,
 					ServiceToken: r.opt.ServiceToken,
-					Namespace:    r.opt.NameSpace,
+					Namespace:    r.opt.Namespace,
 					InstanceID:   split[i],
 					Host:         host,
 					Port:         portNum,

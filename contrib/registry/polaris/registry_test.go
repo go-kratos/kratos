@@ -17,7 +17,7 @@ func TestRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	r := New(provider, WithDefaultTimeout(1*time.Second))
+	r := NewRegistry(provider, WithTimeout(1*time.Second))
 	ctx := context.Background()
 
 	schema := "tcp://127.0.0.1:9000?isSecure=false"
@@ -45,7 +45,7 @@ func TestRegistryMany(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	r := New(provider, WithDefaultTimeout(1*time.Second))
+	r := NewRegistry(provider, WithTimeout(1*time.Second))
 
 	// schema := "tcp://127.0.0.1:9000?isSecure=false"
 	svc := &registry.ServiceInstance{
