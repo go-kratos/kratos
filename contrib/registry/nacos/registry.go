@@ -3,14 +3,12 @@ package nacos
 import (
 	"context"
 	"fmt"
-	"net"
-	"net/url"
-	"strconv"
-	"strings"
-
 	"github.com/nacos-group/nacos-sdk-go/clients/naming_client"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
+	"net"
+	"net/url"
+	"strconv"
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -19,12 +17,6 @@ var (
 	_ registry.Registrar = (*Registry)(nil)
 	_ registry.Discovery = (*Registry)(nil)
 )
-
-// The separator that cuts the serviceName
-const splitServiceNameSep = "@@"
-
-// The number is elements count of the serviceName slice
-const splitServiceNameNum = 2
 
 type options struct {
 	prefix  string
@@ -173,11 +165,9 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 
 // GetService return the service instances in memory according to the service name.
 func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
-	names := strings.SplitN(serviceName, splitServiceNameSep, splitServiceNameNum)
 	groupName := constant.DEFAULT_GROUP
-	if len(names) == splitServiceNameNum {
-		groupName = names[0]
-		serviceName = names[1]
+	if len(r.opts.group) > 0 {
+		groupName = r.opts.group
 	}
 	res, err := r.cli.SelectInstances(vo.SelectInstancesParam{
 		ServiceName: serviceName,
