@@ -26,7 +26,6 @@ func Run(cmd *cobra.Command, args []string) {
 		"google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest",
 		"github.com/envoyproxy/protoc-gen-validate@latest",
 		"github.com/google/gnostic/cmd/protoc-gen-openapi@latest",
-		"github.com/envoyproxy/protoc-gen-validate@latest",
 	)
 	if err != nil {
 		fmt.Println(err)
