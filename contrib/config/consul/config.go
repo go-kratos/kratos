@@ -18,7 +18,7 @@ type options struct {
 	path string
 }
 
-//  WithContext with registry context.
+// WithContext with registry context.
 func WithContext(ctx context.Context) Option {
 	return Option(func(o *options) {
 		o.ctx = ctx
