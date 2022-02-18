@@ -43,7 +43,7 @@ func GetLogger() Logger {
 
 // Log Print log by level and keyvals.
 func Log(level Level, keyvals ...interface{}) {
-	global.helper.Log(level, keyvals...)
+	_ = global.helper.Log(level, keyvals...)
 }
 
 // Debug logs a message at debug level.
