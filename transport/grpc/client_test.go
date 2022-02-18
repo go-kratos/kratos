@@ -106,10 +106,12 @@ func TestWithUnaryInterceptor(t *testing.T) {
 	v := []grpc.UnaryClientInterceptor{
 		func(ctx context.Context, method string, req, reply interface{},
 			cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+
 			return nil
 		},
 		func(ctx context.Context, method string, req, reply interface{},
 			cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+
 			return nil
 		},
 	}
