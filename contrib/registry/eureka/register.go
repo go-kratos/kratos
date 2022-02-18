@@ -3,6 +3,7 @@ package eureka
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/registry"
@@ -99,18 +100,19 @@ func (r *Registry) Endpoints(service *registry.ServiceInstance) []Endpoint {
 		end := strings.LastIndex(ep, ":")
 		appID := strings.ToUpper(service.Name)
 		ip := ep[start+2 : end]
-		port := ep[end+1:]
-		securePort := "443"
+		sport := ep[end+1:]
+		port, _ := strconv.Atoi(sport)
+		securePort := 443
 		homePageURL := fmt.Sprintf("%s/", ep)
 		statusPageURL := fmt.Sprintf("%s/info", ep)
 		healthCheckURL := fmt.Sprintf("%s/health", ep)
-		instanceID := strings.Join([]string{ip, appID, port}, ":")
+		instanceID := strings.Join([]string{ip, appID, sport}, ":")
 		metadata := make(map[string]string)
 		if len(service.Metadata) > 0 {
 			metadata = service.Metadata
 		}
 		if s, ok := service.Metadata["securePort"]; ok {
-			securePort = s
+			securePort, _ = strconv.Atoi(s)
 		}
 		if s, ok := service.Metadata["homePageURL"]; ok {
 			homePageURL = s
@@ -125,6 +127,7 @@ func (r *Registry) Endpoints(service *registry.ServiceInstance) []Endpoint {
 		metadata["Name"] = service.Name
 		metadata["Version"] = service.Version
 		metadata["Endpoints"] = ep
+		metadata["agent"] = "go-eureka-client"
 		res = append(res, Endpoint{
 			AppID:          appID,
 			IP:             ip,

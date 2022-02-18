@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+const refreshTime = 30
+
 type subscriber struct {
 	appID    string
 	callBack func()
@@ -23,7 +25,7 @@ type API struct {
 func NewAPI(ctx context.Context, client *Client, refreshInterval string) *API {
 	duration, err := time.ParseDuration(refreshInterval)
 	if err != nil {
-		duration = time.Second * 30
+		duration = time.Second * refreshTime
 	}
 
 	e := &API{

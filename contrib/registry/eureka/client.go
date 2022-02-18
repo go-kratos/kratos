@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"strings"
 	"sync"
-	"text/template"
 	"time"
 )
 
@@ -20,47 +19,17 @@ const (
 	statusDown          = "DOWN"
 	statusOutOfServeice = "OUT_OF_SERVICE"
 	heartbeatRetry      = 3
+	maxIdleConns        = 100
+	heartbeatTime       = 10
+	httpTimeout         = 3
 )
-
-const tpl = `{
-  "instance": {
-	"instanceId": "{{ .InstanceID }}",
-    "hostName": "{{ .IP }}",
-    "app": "{{ .AppID }}",
-    "ipAddr": "{{ .IP }}",
-    "vipAddress": "{{ .AppID }}",
-	"overriddenstatus": "UNKNOWN",
-    "status":"UP",
-    "port": {
-      "$":{{ .Port }},
-      "@enabled": true
-    },
-    "securePort": {
-      "$":{{ .SecurePort }},
-      "@enabled": false
-    },
-    "homePageUrl" : "{{ .HomePageURL }}",
-    "statusPageUrl": "{{ .StatusPageURL }}",
-    "healthCheckUrl": "{{ .HealthCheckURL }}",
-    "dataCenterInfo" : {
-      "@class":"com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo",
-      "name": "MyOwn"
-    },
-    "metadata": {
-			{{- range $key, $value := .MetaData }}
-			"{{ $key }}": "{{ $value }}",
-	 		{{- end }}
-			"agent" : "go-eureka-client"
-    }
-  }
-}`
 
 type Endpoint struct {
 	InstanceID     string
 	IP             string
 	AppID          string
-	Port           string
-	SecurePort     string
+	Port           int
+	SecurePort     int
 	HomePageURL    string
 	StatusPageURL  string
 	HealthCheckURL string
@@ -83,24 +52,34 @@ type Application struct {
 	Instance []Instance `json:"instance"`
 }
 
+type RequestInstance struct {
+	Instance Instance `json:"instance"`
+}
+
 type Instance struct {
-	InstanceID         string            `json:"instanceId"`
-	HostName           string            `json:"hostName"`
-	Port               Port              `json:"port"`
-	App                string            `json:"app"`
-	IPAddr             string            `json:"ipAddr"`
-	Status             string            `json:"status"`
-	SecurePort         SecurePort        `json:"securePort"`
-	LastDirtyTimestamp string            `json:"lastDirtyTimestamp"`
-	Metadata           map[string]string `json:"metadata"`
+	InstanceID     string            `json:"instanceId"`
+	HostName       string            `json:"hostName"`
+	Port           Port              `json:"port"`
+	App            string            `json:"app"`
+	IPAddr         string            `json:"ipAddr"`
+	VipAddress     string            `json:"vipAddress"`
+	Status         string            `json:"status"`
+	SecurePort     Port              `json:"securePort"`
+	HomePageURL    string            `json:"homePageUrl"`
+	StatusPageURL  string            `json:"statusPageUrl"`
+	HealthCheckURL string            `json:"healthCheckUrl"`
+	DataCenterInfo DataCenterInfo    `json:"dataCenterInfo"`
+	Metadata       map[string]string `json:"metadata"`
 }
 
 type Port struct {
-	Port int `json:"$"`
+	Port    int    `json:"$"`
+	Enabled string `json:"@enabled"`
 }
 
-type SecurePort struct {
-	SecurePort int `json:"$"`
+type DataCenterInfo struct {
+	Name  string `json:"name"`
+	Class string `json:"@class"`
 }
 
 var _ APIInterface = new(Client)
@@ -119,13 +98,13 @@ type APIInterface interface {
 	Down(ctx context.Context, appID, instanceID string) error
 }
 
-type Opt func(e *Client)
+type ClientOption func(e *Client)
 
-func WithMaxRetry(maxRetry int) Opt {
+func WithMaxRetry(maxRetry int) ClientOption {
 	return func(e *Client) { e.maxRetry = maxRetry }
 }
 
-func WithHeartbeatInterval(interval string) Opt {
+func WithHeartbeatInterval(interval string) ClientOption {
 	return func(e *Client) {
 		if duration := e.toDuration(interval); duration > 0 {
 			e.heartbeatInterval = duration
@@ -133,11 +112,11 @@ func WithHeartbeatInterval(interval string) Opt {
 	}
 }
 
-func WithCtx(ctx context.Context) Opt {
+func WithCtx(ctx context.Context) ClientOption {
 	return func(e *Client) { e.ctx = ctx }
 }
 
-func WithPath(path string) Opt {
+func WithPath(path string) ClientOption {
 	return func(e *Client) { e.eurekaPath = path }
 }
 
@@ -152,9 +131,9 @@ type Client struct {
 	lock              sync.Mutex
 }
 
-func NewClient(urls []string, opts ...Opt) *Client {
+func NewClient(urls []string, opts ...ClientOption) *Client {
 	tr := &http.Transport{
-		MaxIdleConns: 100,
+		MaxIdleConns: maxIdleConns,
 	}
 
 	e := &Client{
@@ -162,8 +141,8 @@ func NewClient(urls []string, opts ...Opt) *Client {
 		urls:              urls,
 		eurekaPath:        "eureka/v2",
 		maxRetry:          len(urls),
-		heartbeatInterval: time.Second * 10,
-		client:            &http.Client{Transport: tr, Timeout: time.Second * 3},
+		heartbeatInterval: time.Second * heartbeatTime,
+		client:            &http.Client{Transport: tr, Timeout: time.Second * httpTimeout},
 		keepalive:         make(map[string]chan struct{}),
 	}
 
@@ -231,7 +210,34 @@ func (e *Client) Deregister(ctx context.Context, appID, instanceID string) error
 }
 
 func (e *Client) registerEndpoint(ctx context.Context, ep Endpoint) error {
-	body, err := e.parseTpl(ep)
+	instance := RequestInstance{
+		Instance: Instance{
+			InstanceID: ep.InstanceID,
+			HostName:   ep.AppID,
+			Port: Port{
+				Port:    ep.Port,
+				Enabled: "true",
+			},
+			App:        ep.AppID,
+			IPAddr:     ep.IP,
+			VipAddress: ep.AppID,
+			Status:     statusUp,
+			SecurePort: Port{
+				Port:    ep.SecurePort,
+				Enabled: "false",
+			},
+			HomePageURL:    ep.HomePageURL,
+			StatusPageURL:  ep.StatusPageURL,
+			HealthCheckURL: ep.HealthCheckURL,
+			DataCenterInfo: DataCenterInfo{
+				Name:  "MyOwn",
+				Class: "com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo",
+			},
+			Metadata: ep.MetaData,
+		},
+	}
+
+	body, err := json.Marshal(instance)
 	if err != nil {
 		return err
 	}
@@ -301,19 +307,6 @@ func (e *Client) buildAPI(currentTimes int, params ...string) string {
 	server := e.pickServer(currentTimes)
 	params = append([]string{server, e.eurekaPath}, params...)
 	return strings.Join(params, "/")
-}
-
-func (e *Client) parseTpl(endpoint Endpoint) ([]byte, error) {
-	buf := new(bytes.Buffer)
-
-	tmpl, err := template.New("eureka").Parse(tpl)
-	if err != nil {
-		return nil, err
-	}
-	if err := tmpl.Execute(buf, endpoint); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
 }
 
 func (e *Client) toDuration(interval string) time.Duration {
