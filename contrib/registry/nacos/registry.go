@@ -166,13 +166,9 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 
 // GetService return the service instances in memory according to the service name.
 func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
-	groupName := constant.DEFAULT_GROUP
-	if len(r.opts.group) > 0 && r.opts.group != constant.DEFAULT_GROUP {
-		groupName = r.opts.group
-	}
 	res, err := r.cli.SelectInstances(vo.SelectInstancesParam{
 		ServiceName: serviceName,
-		GroupName:   groupName,
+		GroupName:   r.opts.group,
 		HealthyOnly: true,
 	})
 	if err != nil {
