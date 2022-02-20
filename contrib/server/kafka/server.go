@@ -92,9 +92,7 @@ func (s *Server) Start(ctx context.Context) error {
 	for _, consumer := range s.consumers {
 		consumer := consumer
 		eg.Go(func() error {
-			for {
-				return consumer.Consume(ctx)
-			}
+			return consumer.Consume(ctx)
 		})
 	}
 
