@@ -136,8 +136,8 @@ func TestJWTServerConcurrentWrite(t *testing.T) {
 	)
 
 	counter := 1
-	ch1 := make(chan struct{}, 0)
-	ch2 := make(chan struct{}, 0)
+	ch1 := make(chan struct{})
+	ch2 := make(chan struct{})
 	next := func(ctx context.Context, req interface{}) (interface{}, error) {
 		if counter == 1 {
 			var name string
@@ -172,8 +172,8 @@ func TestJWTServerConcurrentWrite(t *testing.T) {
 	)(next)
 
 	go func() {
-		_, err := server(ctx1, "first request")
-		if err != nil {
+		_, err2 := server(ctx1, "first request")
+		if err2 != nil {
 			t.Error("fail", err)
 			return
 		}
