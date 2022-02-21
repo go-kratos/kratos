@@ -1,5 +1,0 @@
-# polaris config for test
-global:
-  serverConnector:
-    addresses:
-      - 127.0.0.1:8091
