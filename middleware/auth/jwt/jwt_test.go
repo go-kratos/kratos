@@ -101,8 +101,7 @@ func TestJWTServerParse(t *testing.T) {
 		return "reply", nil
 	}
 
-	var server middleware.Handler
-	server = Server(func(token *jwt.Token) (interface{}, error) {
+	server := Server(func(token *jwt.Token) (interface{}, error) {
 		return []byte(testKey), nil
 	}, WithServerClaims(&CustomerClaimsFactory{}))(next)
 
