@@ -75,15 +75,21 @@ func (c *CustomerClaimsFactory) Produce() jwt.Claims {
 }
 
 func TestJWTServerParse(t *testing.T) {
-	var (
-		testKey = "testKey"
-		token   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoieGlhb21pbmciLCJleHAiOjE2NzIxNDM4NTMsImlhdCI6MTY0MDYwNzg1M30.4HfUyr28Yv-ZO7Lf4gH19M_qiFXk12ayNEmyTqQmts4"
-		ctx     = transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader("Authorization", fmt.Sprintf("Bearer %s", token))})
+	testKey := "testKey"
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, &CustomerClaims{})
+	token, err := claims.SignedString([]byte(testKey))
+	if err != nil {
+		panic(err)
+	}
+	ctx := transport.NewServerContext(
+		context.Background(),
+		&Transport{
+			reqHeader: newTokenHeader("Authorization", fmt.Sprintf("Bearer %s", token)),
+		},
 	)
 
 	next := func(ctx context.Context, req interface{}) (interface{}, error) {
 		testToken, _ := FromContext(ctx)
-		t.Log("testToken: ", testToken)
 		if _, ok := testToken.(*CustomerClaims); ok {
 			t.Log("good result, token claims is CustomerClaims") // 期望打印
 		} else {
