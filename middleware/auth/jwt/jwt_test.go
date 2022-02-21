@@ -4,8 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"reflect"
+	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -69,117 +72,102 @@ type CustomerClaims struct {
 }
 
 func TestJWTServerParse(t *testing.T) {
-	testKey := "testKey"
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, &CustomerClaims{})
-	token, err := claims.SignedString([]byte(testKey))
-	if err != nil {
-		panic(err)
-	}
-	ctx := transport.NewServerContext(
-		context.Background(),
-		&Transport{
-			reqHeader: newTokenHeader(authorizationKey, fmt.Sprintf(bearerFormat, token)),
-		},
+	var (
+		errConcurrentWrite = errors.New("concurrent write claims")
+		errParseClaims     = errors.New("bad result, token claims is not CustomerClaims")
 	)
+
+	testKey := "testKey"
+	singleClaims := &CustomerClaims{}
+	tests := []struct {
+		name          string
+		signingMethod jwt.SigningMethod
+		token         func() string
+		claims        func() jwt.Claims
+		exceptErr     error
+		key           string
+	}{
+		{
+			name:          "normal",
+			signingMethod: jwt.SigningMethodHS256,
+			token: func() string {
+				token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, &CustomerClaims{}).SignedString([]byte(testKey))
+				if err != nil {
+					panic(err)
+				}
+				return fmt.Sprintf(bearerFormat, token)
+			},
+			claims: func() jwt.Claims {
+				return &CustomerClaims{}
+			},
+			exceptErr: nil,
+			key:       testKey,
+		},
+		{
+			name:          "single claims",
+			signingMethod: jwt.SigningMethodHS256,
+			token: func() string {
+				token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, &CustomerClaims{
+					Name: strconv.Itoa(rand.Int()),
+				}).SignedString([]byte(testKey))
+				if err != nil {
+					panic(err)
+				}
+				return fmt.Sprintf(bearerFormat, token)
+			},
+			claims: func() jwt.Claims {
+				return singleClaims
+			},
+			exceptErr: errConcurrentWrite,
+			key:       testKey,
+		},
+	}
 
 	next := func(ctx context.Context, req interface{}) (interface{}, error) {
 		testToken, _ := FromContext(ctx)
-		if _, ok := testToken.(*CustomerClaims); ok {
-			t.Log("good result, token claims is CustomerClaims") // 期望打印
+		var name string
+		if customerClaims, ok := testToken.(*CustomerClaims); ok {
+			name = customerClaims.Name
 		} else {
-			if _, ok := testToken.(jwt.MapClaims); ok {
-				t.Log("bad result, token claims is MapClaims") // 实际打印
+			return nil, errParseClaims
+		}
+
+		// mock biz
+		time.Sleep(100 * time.Millisecond)
+
+		if customerClaims, ok := testToken.(*CustomerClaims); ok {
+			if name != customerClaims.Name {
+				return nil, errConcurrentWrite
 			}
-			t.Fatal("fail")
+		} else {
+			return nil, errParseClaims
 		}
 		return "reply", nil
 	}
 
-	server := Server(
-		func(token *jwt.Token) (interface{}, error) { return []byte(testKey), nil },
-		WithServerClaims(func() jwt.Claims { return &CustomerClaims{} }),
-	)(next)
-
-	_, err2 := server(ctx, "customer claim")
-	if err2 != nil {
-		t.Fatal("fail", err2)
-	}
-}
-
-func TestJWTServerConcurrentWrite(t *testing.T) {
-	testKey := "testKey"
-	claims1 := jwt.NewWithClaims(jwt.SigningMethodHS256, &CustomerClaims{
-		Name: "1",
-	})
-	claims2 := jwt.NewWithClaims(jwt.SigningMethodHS256, &CustomerClaims{
-		Name: "2",
-	})
-	token1, err := claims1.SignedString([]byte(testKey))
-	if err != nil {
-		panic(err)
-	}
-	token2, err := claims2.SignedString([]byte(testKey))
-	if err != nil {
-		panic(err)
-	}
-	ctx1 := transport.NewServerContext(
-		context.Background(),
-		&Transport{
-			reqHeader: newTokenHeader(authorizationKey, fmt.Sprintf(bearerFormat, token1)),
-		},
-	)
-	ctx2 := transport.NewServerContext(
-		context.Background(),
-		&Transport{
-			reqHeader: newTokenHeader(authorizationKey, fmt.Sprintf(bearerFormat, token2)),
-		},
-	)
-
-	counter := 1
-	ch1 := make(chan struct{})
-	ch2 := make(chan struct{})
-	next := func(ctx context.Context, req interface{}) (interface{}, error) {
-		if counter == 1 {
-			var name string
-			testToken1, _ := FromContext(ctx)
-			if customerClaims, ok := testToken1.(*CustomerClaims); !ok {
-				t.Fatal("claims is not *CustomerClaims")
-			} else {
-				name = customerClaims.Name
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			server := Server(
+				func(token *jwt.Token) (interface{}, error) { return []byte(testKey), nil },
+				WithServerClaims(test.claims),
+			)(next)
+			wg := sync.WaitGroup{}
+			for i := 0; i < 100000; i++ {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					ctx := transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(authorizationKey, test.token())})
+					_, err2 := server(ctx, test.name)
+					if err2 == nil {
+						return
+					}
+					if !errors.Is(test.exceptErr, err2) {
+						t.Errorf("except error %v, but got %v", test.exceptErr, err2)
+					}
+				}()
 			}
-
-			counter++
-			ch1 <- struct{}{}
-			<-ch2
-			testToken2, _ := FromContext(ctx)
-			if customerClaims, ok := testToken2.(*CustomerClaims); !ok {
-				t.Fatal("claims is not *CustomerClaims")
-			} else {
-				if customerClaims.Name != name {
-					t.Fatal("claims were modified concurrently")
-				}
-			}
-			return nil, nil
-		}
-		ch2 <- struct{}{}
-		return "reply", nil
-	}
-
-	server := Server(
-		func(token *jwt.Token) (interface{}, error) { return []byte(testKey), nil },
-		WithServerClaims(func() jwt.Claims { return &CustomerClaims{} }),
-	)(next)
-
-	go func() {
-		_, err2 := server(ctx1, "first request")
-		if err2 != nil {
-			t.Error("fail", err)
-		}
-	}()
-	<-ch1
-	_, err = server(ctx2, "second request")
-	if err != nil {
-		t.Fatal("fail", err)
+			wg.Wait()
+		})
 	}
 }
 
