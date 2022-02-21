@@ -160,9 +160,8 @@ func TestJWTServerConcurrentWrite(t *testing.T) {
 				}
 			}
 			return nil, nil
-		} else {
-			ch2 <- struct{}{}
 		}
+		ch2 <- struct{}{}
 		return "reply", nil
 	}
 
@@ -175,7 +174,6 @@ func TestJWTServerConcurrentWrite(t *testing.T) {
 		_, err2 := server(ctx1, "first request")
 		if err2 != nil {
 			t.Error("fail", err)
-			return
 		}
 	}()
 	<-ch1
