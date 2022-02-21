@@ -48,3 +48,9 @@ go get -u github.com/go-kratos/kratos/contrib/log/zap/v2
 ```shell
 go get -u github.com/go-kratos/kratos/contrib/log/fluent/v2
 ```
+
+### aliyun
+
+```shell
+go get -u github.com/go-kratos/kratos/contrib/log/aliyun/v2
+```
