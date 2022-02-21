@@ -48,8 +48,7 @@ type Option func(*options)
 // Parser is a jwt parser
 type options struct {
 	signingMethod jwt.SigningMethod
-	claims        jwt.Claims
-	serverClaims  jwt.Claims
+	claims        func() jwt.Claims
 	tokenHeader   map[string]interface{}
 }
 
@@ -63,21 +62,17 @@ func WithSigningMethod(method jwt.SigningMethod) Option {
 // WithClaims with customer claim
 func WithClaims(claims jwt.Claims) Option {
 	return func(o *options) {
-		o.claims = claims
+		o.claims = func() jwt.Claims {
+			return claims
+		}
 	}
 }
 
-// ClaimsFactory produce a new jwt.Claims
-type ClaimsFactory interface {
-	Produce() jwt.Claims
-}
-
-// WithServerClaims with server claim
-func WithServerClaims(factory ClaimsFactory) Option {
+// WithServerClaims with server claim.
+// Note that the parameter f needs to return a new jwt.Claims to avoid concurrent write problems
+func WithServerClaims(f func() jwt.Claims) Option {
 	return func(o *options) {
-		if factory != nil {
-			o.serverClaims = factory.Produce()
-		}
+		o.claims = f
 	}
 }
 
@@ -92,7 +87,6 @@ func WithTokenHeader(header map[string]interface{}) Option {
 func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	o := &options{
 		signingMethod: jwt.SigningMethodHS256,
-		// claims:        jwt.RegisteredClaims{},
 	}
 	for _, opt := range opts {
 		opt(o)
@@ -112,8 +106,8 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 					tokenInfo *jwt.Token
 					err       error
 				)
-				if o.serverClaims != nil {
-					tokenInfo, err = jwt.ParseWithClaims(jwtToken, o.serverClaims, keyFunc)
+				if o.claims != nil {
+					tokenInfo, err = jwt.ParseWithClaims(jwtToken, o.claims(), keyFunc)
 				} else {
 					tokenInfo, err = jwt.Parse(jwtToken, keyFunc)
 				}
@@ -145,7 +139,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	o := &options{
 		signingMethod: jwt.SigningMethodHS256,
-		claims:        jwt.RegisteredClaims{},
+		claims:        func() jwt.Claims { return jwt.RegisteredClaims{} },
 	}
 	for _, opt := range opts {
 		opt(o)
@@ -155,7 +149,7 @@ func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 			if keyProvider == nil {
 				return nil, ErrNeedTokenProvider
 			}
-			token := jwt.NewWithClaims(o.signingMethod, o.claims)
+			token := jwt.NewWithClaims(o.signingMethod, o.claims())
 			if o.tokenHeader != nil {
 				for k, v := range o.tokenHeader {
 					token.Header[k] = v

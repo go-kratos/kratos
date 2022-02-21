@@ -68,12 +68,6 @@ type CustomerClaims struct {
 	jwt.RegisteredClaims
 }
 
-type CustomerClaimsFactory struct{}
-
-func (c *CustomerClaimsFactory) Produce() jwt.Claims {
-	return &CustomerClaims{}
-}
-
 func TestJWTServerParse(t *testing.T) {
 	testKey := "testKey"
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, &CustomerClaims{})
@@ -103,7 +97,9 @@ func TestJWTServerParse(t *testing.T) {
 
 	server := Server(func(token *jwt.Token) (interface{}, error) {
 		return []byte(testKey), nil
-	}, WithServerClaims(&CustomerClaimsFactory{}))(next)
+	}, WithServerClaims(func() jwt.Claims {
+		return &CustomerClaims{}
+	}))(next)
 
 	_, err2 := server(ctx, "customer claim")
 	if err2 != nil {
