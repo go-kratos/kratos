@@ -78,19 +78,11 @@ func NewServer(consumers []Consumer, handlers []Handler) (transport.Server, erro
 	}
 
 	for _, consumer := range server.consumers {
-		for _, handler := range server.handlers {
-			if consumer.Topic() != handler.Topic() {
-				continue
-			}
-			consumer.RegisterHandler(handler)
-		}
-	}
-
-	// check if a consumer has no handler
-	for _, consumer := range server.consumers {
-		if !consumer.HasHandler() {
+		handler, ok := server.handlers[consumer.Topic()]
+		if !ok {
 			return nil, fmt.Errorf("consumer for topic %s has no handler", consumer.Topic())
 		}
+		consumer.RegisterHandler(handler)
 	}
 
 	return server, nil
