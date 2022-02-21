@@ -5,32 +5,41 @@ import (
 	"testing"
 	"time"
 
+	"github.com/polarismesh/polaris-go/pkg/config"
+
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/polarismesh/polaris-go/api"
 )
 
 // TestRegistry . TestRegistryManyService
 func TestRegistry(t *testing.T) {
-	provider, err := api.NewProviderAPI()
+	conf := config.NewDefaultConfiguration([]string{"127.0.0.1:8091"})
+	provider, err := api.NewProviderAPIByConfig(conf)
 	defer provider.Destroy()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	r := NewRegistry(provider, WithTimeout(1*time.Second))
+	r := NewRegistry(
+		provider,
+		WithTimeout(1*time.Second),
+		WithTTL(5),
+	)
+
 	ctx := context.Background()
 
-	schema := "tcp://127.0.0.1:9000?isSecure=false"
 	svc := &registry.ServiceInstance{
 		Name:      "kratos-provider-0-",
 		Version:   "test",
 		Metadata:  map[string]string{"app": "kratos"},
-		Endpoints: []string{schema},
+		Endpoints: []string{"tcp://127.0.0.1:9000?isSecure=false"},
 	}
+
 	err = r.Register(ctx, svc)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	err = r.Deregister(ctx, svc)
 	if err != nil {
 		t.Fatal(err)
@@ -39,15 +48,19 @@ func TestRegistry(t *testing.T) {
 
 // TestRegistryMany . TestRegistryManyService
 func TestRegistryMany(t *testing.T) {
-	provider, err := api.NewProviderAPI()
+	conf := config.NewDefaultConfiguration([]string{"127.0.0.1:8091"})
+	provider, err := api.NewProviderAPIByConfig(conf)
 	defer provider.Destroy()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	r := NewRegistry(provider, WithTimeout(1*time.Second))
+	r := NewRegistry(
+		provider,
+		WithTimeout(1*time.Second),
+		WithTTL(10),
+	)
 
-	// schema := "tcp://127.0.0.1:9000?isSecure=false"
 	svc := &registry.ServiceInstance{
 		Name:      "kratos-provider-0-",
 		Version:   "test",
