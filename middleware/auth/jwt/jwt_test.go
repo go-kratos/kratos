@@ -78,7 +78,7 @@ func TestJWTServerParse(t *testing.T) {
 	ctx := transport.NewServerContext(
 		context.Background(),
 		&Transport{
-			reqHeader: newTokenHeader("Authorization", fmt.Sprintf("Bearer %s", token)),
+			reqHeader: newTokenHeader(authorizationKey, fmt.Sprintf(bearerFormat, token)),
 		},
 	)
 
@@ -95,15 +95,93 @@ func TestJWTServerParse(t *testing.T) {
 		return "reply", nil
 	}
 
-	server := Server(func(token *jwt.Token) (interface{}, error) {
-		return []byte(testKey), nil
-	}, WithServerClaims(func() jwt.Claims {
-		return &CustomerClaims{}
-	}))(next)
+	server := Server(
+		func(token *jwt.Token) (interface{}, error) { return []byte(testKey), nil },
+		WithServerClaims(func() jwt.Claims { return &CustomerClaims{} }),
+	)(next)
 
 	_, err2 := server(ctx, "customer claim")
 	if err2 != nil {
 		t.Fatal("fail", err2)
+	}
+}
+
+func TestJWTServerConcurrentWrite(t *testing.T) {
+	testKey := "testKey"
+	claims1 := jwt.NewWithClaims(jwt.SigningMethodHS256, &CustomerClaims{
+		Name: "1",
+	})
+	claims2 := jwt.NewWithClaims(jwt.SigningMethodHS256, &CustomerClaims{
+		Name: "2",
+	})
+	token1, err := claims1.SignedString([]byte(testKey))
+	if err != nil {
+		panic(err)
+	}
+	token2, err := claims2.SignedString([]byte(testKey))
+	if err != nil {
+		panic(err)
+	}
+	ctx1 := transport.NewServerContext(
+		context.Background(),
+		&Transport{
+			reqHeader: newTokenHeader(authorizationKey, fmt.Sprintf(bearerFormat, token1)),
+		},
+	)
+	ctx2 := transport.NewServerContext(
+		context.Background(),
+		&Transport{
+			reqHeader: newTokenHeader(authorizationKey, fmt.Sprintf(bearerFormat, token2)),
+		},
+	)
+
+	counter := 1
+	ch1 := make(chan struct{}, 0)
+	ch2 := make(chan struct{}, 0)
+	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+		if counter == 1 {
+			var name string
+			testToken1, _ := FromContext(ctx)
+			if customerClaims, ok := testToken1.(*CustomerClaims); !ok {
+				t.Fatal("claims is not *CustomerClaims")
+			} else {
+				name = customerClaims.Name
+			}
+
+			counter++
+			ch1 <- struct{}{}
+			<-ch2
+			testToken2, _ := FromContext(ctx)
+			if customerClaims, ok := testToken2.(*CustomerClaims); !ok {
+				t.Fatal("claims is not *CustomerClaims")
+			} else {
+				if customerClaims.Name != name {
+					t.Fatal("claims were modified concurrently")
+				}
+			}
+			return nil, nil
+		} else {
+			ch2 <- struct{}{}
+		}
+		return "reply", nil
+	}
+
+	server := Server(
+		func(token *jwt.Token) (interface{}, error) { return []byte(testKey), nil },
+		WithServerClaims(func() jwt.Claims { return &CustomerClaims{} }),
+	)(next)
+
+	go func() {
+		_, err := server(ctx1, "first request")
+		if err != nil {
+			t.Error("fail", err)
+			return
+		}
+	}()
+	<-ch1
+	_, err = server(ctx2, "second request")
+	if err != nil {
+		t.Fatal("fail", err)
 	}
 }
 
