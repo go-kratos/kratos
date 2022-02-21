@@ -141,7 +141,7 @@ func (c *Consumer) RegisterHandler(handler kafka.Handler) {
 }
 
 // RegisterHandler checks whether this consumer has a handler for the specific topic
-func (c *Consumer) HasHandler(topic string) bool {
+func (c *Consumer) HasHandler() bool {
 	return c.handler != nil
 }
 

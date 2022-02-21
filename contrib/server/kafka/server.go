@@ -28,7 +28,7 @@ type Handler interface {
 type Consumer interface {
 	Topic() string
 	RegisterHandler(handler Handler)
-	HasHandler(topic string) bool
+	HasHandler() bool
 	Consume(ctx context.Context) error
 	Close() error
 }
@@ -60,18 +60,21 @@ func Handlers(handlers []Handler) ServerOption {
 }
 
 // NewServer creates a Kafka server by options.
-func NewServer(opts ...ServerOption) (transport.Server, error) {
-	server := &Server{handlers: make(map[string]Handler)}
-
-	for _, o := range opts {
-		o(server)
-	}
-
-	if len(server.consumers) == 0 {
+func NewServer(consumers []Consumer, handlers []Handler) (transport.Server, error) {
+	if len(consumers) == 0 {
 		return nil, fmt.Errorf("no consumers")
 	}
-	if len(server.handlers) == 0 {
+	if len(handlers) == 0 {
 		return nil, fmt.Errorf("no handlers")
+	}
+
+	server := &Server{
+		consumers: consumers,
+		handlers:  make(map[string]Handler),
+	}
+
+	for _, handler := range handlers {
+		server.handlers[handler.Topic()] = handler
 	}
 
 	for _, consumer := range server.consumers {
@@ -82,6 +85,14 @@ func NewServer(opts ...ServerOption) (transport.Server, error) {
 			consumer.RegisterHandler(handler)
 		}
 	}
+
+	// check if a consumer has no handler
+	for _, consumer := range server.consumers {
+		if !consumer.HasHandler() {
+			return nil, fmt.Errorf("consumer for topic %s has no handler", consumer.Topic())
+		}
+	}
+
 	return server, nil
 }
 
