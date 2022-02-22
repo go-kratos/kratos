@@ -28,39 +28,33 @@ type Handler interface {
 type Consumer interface {
 	Topic() string
 	RegisterHandler(handler Handler)
-	HasHandler() bool
+	RegisterErrorHandler(handler Handler)
 	Consume(ctx context.Context) error
 	Close() error
 }
 
 // Server is a Kafka server wrapper
 type Server struct {
-	consumers []Consumer
-	handlers  map[string]Handler
-	logger    log.Helper
+	consumers     []Consumer
+	handlers      map[string]Handler
+	errorHandlers map[string]Handler
+	logger        log.Helper
 }
 
 // ServerOption is a Kafka server option.
 type ServerOption func(server *Server)
 
-// Consumers registers a set of consumers to the Server.
-func Consumers(consumers []Consumer) ServerOption {
+// ErrorHandlers registers a set of errorHandlers to the Server.
+func ErrorHandlers(errorHandlers []Handler) ServerOption {
 	return func(server *Server) {
-		server.consumers = consumers
-	}
-}
-
-// Handlers registers a set of handlers to the Server.
-func Handlers(handlers []Handler) ServerOption {
-	return func(server *Server) {
-		for _, handler := range handlers {
-			server.handlers[handler.Topic()] = handler
+		for _, handler := range errorHandlers {
+			server.errorHandlers[handler.Topic()] = handler
 		}
 	}
 }
 
 // NewServer creates a Kafka server by options.
-func NewServer(consumers []Consumer, handlers []Handler) (transport.Server, error) {
+func NewServer(consumers []Consumer, handlers []Handler, opts ...ServerOption) (transport.Server, error) {
 	if len(consumers) == 0 {
 		return nil, fmt.Errorf("no consumers")
 	}
@@ -69,8 +63,13 @@ func NewServer(consumers []Consumer, handlers []Handler) (transport.Server, erro
 	}
 
 	server := &Server{
-		consumers: consumers,
-		handlers:  make(map[string]Handler),
+		consumers:     consumers,
+		handlers:      make(map[string]Handler),
+		errorHandlers: make(map[string]Handler),
+	}
+
+	for _, opt := range opts {
+		opt(server)
 	}
 
 	for _, handler := range handlers {
@@ -83,6 +82,10 @@ func NewServer(consumers []Consumer, handlers []Handler) (transport.Server, erro
 			return nil, fmt.Errorf("consumer for topic %s has no handler", consumer.Topic())
 		}
 		consumer.RegisterHandler(handler)
+
+		if errorHandler, ok := server.errorHandlers[consumer.Topic()]; ok {
+			consumer.RegisterErrorHandler(errorHandler)
+		}
 	}
 
 	return server, nil
