@@ -148,7 +148,7 @@ func TestJWTServerParse(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			server := Server(
 				func(token *jwt.Token) (interface{}, error) { return []byte(testKey), nil },
-				WithServerClaims(test.claims),
+				WithClaims(test.claims),
 			)(next)
 			wg := sync.WaitGroup{}
 			for i := 0; i < test.goroutineNum; i++ {
@@ -383,6 +383,7 @@ func TestClientWithClaims(t *testing.T) {
 	testKey := "testKey"
 	mapClaims := jwt.MapClaims{}
 	mapClaims["name"] = "xiaoli"
+	mapClaimsFunc := func() jwt.Claims { return mapClaims }
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
 	token, err := claims.SignedString([]byte(testKey))
 	if err != nil {
@@ -405,7 +406,7 @@ func TestClientWithClaims(t *testing.T) {
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return "reply", nil
 		}
-		handler := Client(test.tokenProvider, WithClaims(mapClaims))(next)
+		handler := Client(test.tokenProvider, WithClaims(mapClaimsFunc))(next)
 		header := &headerCarrier{}
 		_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
 		if !errors.Is(test.expectError, err2) {
@@ -423,6 +424,7 @@ func TestClientWithHeader(t *testing.T) {
 	testKey := "testKey"
 	mapClaims := jwt.MapClaims{}
 	mapClaims["name"] = "xiaoli"
+	mapClaimsFunc := func() jwt.Claims { return mapClaims }
 	tokenHeader := map[string]interface{}{
 		"test": "test",
 	}
@@ -440,7 +442,7 @@ func TestClientWithHeader(t *testing.T) {
 	next := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return "reply", nil
 	}
-	handler := Client(tProvider, WithClaims(mapClaims), WithTokenHeader(tokenHeader))(next)
+	handler := Client(tProvider, WithClaims(mapClaimsFunc), WithTokenHeader(tokenHeader))(next)
 	header := &headerCarrier{}
 	_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
 	if err2 != nil {
@@ -455,6 +457,7 @@ func TestClientMissKey(t *testing.T) {
 	testKey := "testKey"
 	mapClaims := jwt.MapClaims{}
 	mapClaims["name"] = "xiaoli"
+	mapClaimsFunc := func() jwt.Claims { return mapClaims }
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
 	token, err := claims.SignedString([]byte(testKey))
 	if err != nil {
@@ -477,7 +480,7 @@ func TestClientMissKey(t *testing.T) {
 		next := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return "reply", nil
 		}
-		handler := Client(test.tokenProvider, WithClaims(mapClaims))(next)
+		handler := Client(test.tokenProvider, WithClaims(mapClaimsFunc))(next)
 		header := &headerCarrier{}
 		_, err2 := handler(transport.NewClientContext(context.Background(), &Transport{reqHeader: header}), "ok")
 		if !errors.Is(test.expectError, err2) {

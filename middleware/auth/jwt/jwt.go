@@ -60,17 +60,9 @@ func WithSigningMethod(method jwt.SigningMethod) Option {
 }
 
 // WithClaims with customer claim
-func WithClaims(claims jwt.Claims) Option {
-	return func(o *options) {
-		o.claims = func() jwt.Claims {
-			return claims
-		}
-	}
-}
-
-// WithServerClaims with server claim.
-// Note that the parameter f needs to return a new jwt.Claims to avoid concurrent write problems
-func WithServerClaims(f func() jwt.Claims) Option {
+// If you use it in Server, f needs to return a new jwt.Claims object each time to avoid concurrent write problems
+// If you use it in Client, f only needs to return a single object to provide performance
+func WithClaims(f func() jwt.Claims) Option {
 	return func(o *options) {
 		o.claims = f
 	}
@@ -87,6 +79,7 @@ func WithTokenHeader(header map[string]interface{}) Option {
 func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	o := &options{
 		signingMethod: jwt.SigningMethodHS256,
+		claims:        func() jwt.Claims { return jwt.RegisteredClaims{} },
 	}
 	for _, opt := range opts {
 		opt(o)
