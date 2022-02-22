@@ -217,19 +217,22 @@ func (c *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim saram
 	for message := range claim.Messages() {
 		msg := &Message{key: string(message.Key), value: message.Value}
 		err := c.handler.Handle(msg)
-		if err != nil {
-			if c.errorHandler != nil {
-				if err := c.errorHandler.Handle(msg); err != nil {
-					c.logger.Errorf("errorHandler failed for message %s of topic %s partition %d error %+v", string(message.Value), message.Topic, message.Partition, err)
-					continue
-				}
-				session.MarkMessage(message, "")
-				continue
-			}
-			c.logger.Errorf("consume message %s of topic %s partition %d error %+v", string(message.Value), message.Topic, message.Partition, err)
+		if err == nil {
+			session.MarkMessage(message, "")
 			continue
 		}
-		session.MarkMessage(message, "")
+		c.logger.Errorf("consume message %s of topic %s error %+v", string(message.Value), message.Topic, err)
+
+		if c.errorHandler == nil {
+			continue
+		}
+
+		err = c.errorHandler.Handle(msg)
+		if err == nil {
+			session.MarkMessage(message, "")
+			continue
+		}
+		c.logger.Errorf("errorHandler failed for message %s of topic %s error %+v", string(message.Value), message.Topic, err)
 	}
 
 	return nil
