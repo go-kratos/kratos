@@ -216,7 +216,8 @@ func (c *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim saram
 	// https://github.com/Shopify/sarama/blob/main/consumer_group.go#L27-L29
 	for message := range claim.Messages() {
 		msg := &Message{key: string(message.Key), value: message.Value}
-		if err := c.handler.Handle(msg); err != nil {
+		err := c.handler.Handle(msg)
+		if err != nil {
 			if c.errorHandler != nil {
 				if err := c.errorHandler.Handle(msg); err != nil {
 					c.logger.Errorf("errorHandler failed for message %s of topic %s partition %d error %+v", string(message.Value), message.Topic, message.Partition, err)
