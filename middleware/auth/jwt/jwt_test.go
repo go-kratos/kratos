@@ -78,18 +78,16 @@ func TestJWTServerParse(t *testing.T) {
 	)
 
 	testKey := "testKey"
-	singleClaims := &CustomerClaims{}
 	tests := []struct {
-		name          string
-		signingMethod jwt.SigningMethod
-		token         func() string
-		claims        func() jwt.Claims
-		exceptErr     error
-		key           string
+		name         string
+		token        func() string
+		claims       func() jwt.Claims
+		exceptErr    error
+		key          string
+		goroutineNum int
 	}{
 		{
-			name:          "normal",
-			signingMethod: jwt.SigningMethodHS256,
+			name: "normal",
 			token: func() string {
 				token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, &CustomerClaims{}).SignedString([]byte(testKey))
 				if err != nil {
@@ -100,12 +98,12 @@ func TestJWTServerParse(t *testing.T) {
 			claims: func() jwt.Claims {
 				return &CustomerClaims{}
 			},
-			exceptErr: nil,
-			key:       testKey,
+			exceptErr:    nil,
+			key:          testKey,
+			goroutineNum: 1,
 		},
 		{
-			name:          "single claims",
-			signingMethod: jwt.SigningMethodHS256,
+			name: "concurrent request",
 			token: func() string {
 				token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, &CustomerClaims{
 					Name: strconv.Itoa(rand.Int()),
@@ -116,10 +114,11 @@ func TestJWTServerParse(t *testing.T) {
 				return fmt.Sprintf(bearerFormat, token)
 			},
 			claims: func() jwt.Claims {
-				return singleClaims
+				return &CustomerClaims{}
 			},
-			exceptErr: errConcurrentWrite,
-			key:       testKey,
+			exceptErr:    nil,
+			key:          testKey,
+			goroutineNum: 10000,
 		},
 	}
 
@@ -152,15 +151,12 @@ func TestJWTServerParse(t *testing.T) {
 				WithServerClaims(test.claims),
 			)(next)
 			wg := sync.WaitGroup{}
-			for i := 0; i < 100000; i++ {
+			for i := 0; i < test.goroutineNum; i++ {
 				wg.Add(1)
 				go func() {
 					defer wg.Done()
 					ctx := transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(authorizationKey, test.token())})
 					_, err2 := server(ctx, test.name)
-					if err2 == nil {
-						return
-					}
 					if !errors.Is(test.exceptErr, err2) {
 						t.Errorf("except error %v, but got %v", test.exceptErr, err2)
 					}
