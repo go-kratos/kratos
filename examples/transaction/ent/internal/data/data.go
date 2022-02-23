@@ -18,7 +18,7 @@ var ProviderSet = wire.NewSet(NewData, NewTransaction, NewUserRepo, NewCardRepo)
 
 // Data .
 type Data struct {
-	db  *ent.Client
+	db         *ent.Client
 	userClient *ent.UserClient
 }
 
@@ -76,7 +76,7 @@ func NewData(conf *conf.Data, logger log.Logger) (*Data, func(), error) {
 	}
 
 	d := &Data{
-		db:  client,
+		db: client,
 	}
 	return d, func() {
 		log.Info("message", "closing the data resources")

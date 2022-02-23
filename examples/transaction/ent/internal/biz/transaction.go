@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	Name string
+	Name  string
 	Email string
 }
 
@@ -21,14 +21,14 @@ type CardRepo interface {
 type UserUsecase struct {
 	userRepo UserRepo
 	cardRepo CardRepo
-	tm Transaction
+	tm       Transaction
 }
 
-func NewArticleUsecase(user UserRepo,card CardRepo,tm Transaction, logger log.Logger) *UserUsecase {
-	return &UserUsecase{userRepo: user, cardRepo: card,tm: tm}
+func NewArticleUsecase(user UserRepo, card CardRepo, tm Transaction, logger log.Logger) *UserUsecase {
+	return &UserUsecase{userRepo: user, cardRepo: card, tm: tm}
 }
 
-func (u *UserUsecase) CreateUser(ctx context.Context, m *User) (int ,error) {
+func (u *UserUsecase) CreateUser(ctx context.Context, m *User) (int, error) {
 	id, err := 0, error(nil)
 	if err := u.tm.ExecTx(ctx, func(ctx context.Context) error {
 		id, err = u.userRepo.CreateUser(ctx, m)
@@ -44,4 +44,3 @@ func (u *UserUsecase) CreateUser(ctx context.Context, m *User) (int ,error) {
 	}
 	return id, nil
 }
-
