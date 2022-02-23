@@ -12,6 +12,7 @@ require (
 	github.com/spf13/viper v1.10.1 // indirect
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
 	gopkg.in/ini.v1 v1.66.3 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
 replace github.com/go-kratos/kratos/v2 => ../../../
