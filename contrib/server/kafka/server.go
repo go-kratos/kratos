@@ -1,3 +1,4 @@
+//go:generate mockery --all --inpackage --case underscore
 package kafka
 
 import (
@@ -28,28 +29,24 @@ type Handler interface {
 type Consumer interface {
 	Topic() string
 	RegisterHandler(handler Handler)
-	RegisterErrorHandler(handler Handler)
 	Consume(ctx context.Context) error
 	Close() error
 }
 
 // Server is a Kafka server wrapper
 type Server struct {
-	consumers     []Consumer
-	handlers      map[string]Handler
-	errorHandlers map[string]Handler
-	logger        log.Helper
+	consumers []Consumer
+	handlers  map[string]Handler
+	logger    *log.Helper
 }
 
 // ServerOption is a Kafka server option.
 type ServerOption func(server *Server)
 
-// ErrorHandlers registers a set of errorHandlers to the Server.
-func ErrorHandlers(errorHandlers []Handler) ServerOption {
+// Logger sets the server logger
+func Logger(logger log.Logger) func(server *Server) {
 	return func(server *Server) {
-		for _, handler := range errorHandlers {
-			server.errorHandlers[handler.Topic()] = handler
-		}
+		server.logger = log.NewHelper(logger)
 	}
 }
 
@@ -63,9 +60,8 @@ func NewServer(consumers []Consumer, handlers []Handler, opts ...ServerOption) (
 	}
 
 	server := &Server{
-		consumers:     consumers,
-		handlers:      make(map[string]Handler),
-		errorHandlers: make(map[string]Handler),
+		consumers: consumers,
+		handlers:  make(map[string]Handler),
 	}
 
 	for _, opt := range opts {
@@ -82,10 +78,6 @@ func NewServer(consumers []Consumer, handlers []Handler, opts ...ServerOption) (
 			return nil, fmt.Errorf("consumer for topic %s has no handler", consumer.Topic())
 		}
 		consumer.RegisterHandler(handler)
-
-		if errorHandler, ok := server.errorHandlers[consumer.Topic()]; ok {
-			consumer.RegisterErrorHandler(errorHandler)
-		}
 	}
 
 	return server, nil

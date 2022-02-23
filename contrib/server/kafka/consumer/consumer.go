@@ -43,10 +43,9 @@ type Consumer struct {
 	ready chan struct{}
 
 	sarama.Client
-	consumer     sarama.ConsumerGroup
-	handler      kafka.Handler
-	errorHandler kafka.Handler
-	logger       *log.Helper
+	consumer sarama.ConsumerGroup
+	handler  kafka.Handler
+	logger   *log.Helper
 }
 
 // ConsumerOption is a Consumer config option.
@@ -141,11 +140,6 @@ func (c *Consumer) RegisterHandler(handler kafka.Handler) {
 	c.handler = handler
 }
 
-// RegisterErrorHandler registers a handler to handle errors if the messages are failed to process
-func (c *Consumer) RegisterErrorHandler(handler kafka.Handler) {
-	c.errorHandler = handler
-}
-
 // Consume receives and handles messages
 func (c *Consumer) Consume(ctx context.Context) error {
 	// check handlers before consuming
@@ -215,24 +209,12 @@ func (c *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim saram
 	// The `ConsumeClaim` itself is called within a goroutine, see:
 	// https://github.com/Shopify/sarama/blob/main/consumer_group.go#L27-L29
 	for message := range claim.Messages() {
-		msg := &Message{key: string(message.Key), value: message.Value}
-		err := c.handler.Handle(msg)
-		if err == nil {
-			session.MarkMessage(message, "")
+		err := c.handler.Handle(&Message{key: string(message.Key), value: message.Value})
+		if err != nil {
+			c.logger.Errorf("consume message %s of topic %s error %+v", string(message.Value), message.Topic, err)
 			continue
 		}
-		c.logger.Errorf("consume message %s of topic %s error %+v", string(message.Value), message.Topic, err)
-
-		if c.errorHandler == nil {
-			continue
-		}
-
-		err = c.errorHandler.Handle(msg)
-		if err == nil {
-			session.MarkMessage(message, "")
-			continue
-		}
-		c.logger.Errorf("errorHandler failed for message %s of topic %s error %+v", string(message.Value), message.Topic, err)
+		session.MarkMessage(message, "")
 	}
 
 	return nil
