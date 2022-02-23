@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/go-kratos/kratos/examples/transaction/ent/internal/biz"
-	
+
 	"github.com/go-kratos/kratos/v2/log"
 )
 

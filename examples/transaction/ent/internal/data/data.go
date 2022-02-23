@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/go-kratos/kratos/v2/log"
-	// import sql driver
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/wire"
 )
