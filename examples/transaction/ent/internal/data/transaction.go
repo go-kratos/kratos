@@ -17,20 +17,8 @@ type cardRepo struct {
 	log  *log.Helper
 }
 
-func (c *cardRepo) CreateCard(ctx context.Context, id int) (int, error) {
-	card, err := c.data.CardClient(ctx).
-		Create().
-		SetMoney("1000").
-		SetUserID(strconv.Itoa(id)).
-		Save(ctx)
-	if err != nil {
-		return 0, err
-	}
-	return card.ID, nil
-}
-
 func (u *userRepo) CreateUser(ctx context.Context,m *biz.User) (int, error) {
-	user, err := u.data.UserClient(ctx).
+	user, err := u.data.User(ctx).
 		Create().
 		SetName(m.Name).
 		SetEmail(m.Email).
@@ -47,6 +35,18 @@ func NewUserRepo(data *Data, logger log.Logger) biz.UserRepo {
 		data: data,
 		log:  log.NewHelper(logger),
 	}
+}
+
+func (c *cardRepo) CreateCard(ctx context.Context, id int) (int, error) {
+	card, err := c.data.Card(ctx).
+		Create().
+		SetMoney("1000").
+		SetUserID(strconv.Itoa(id)).
+		Save(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return card.ID, nil
 }
 
 func NewCardRepo(data *Data, logger log.Logger) biz.CardRepo {

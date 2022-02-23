@@ -37,7 +37,7 @@ func (d *Data) ExecTx(ctx context.Context, f func(ctx context.Context) error) er
 	return tx.Commit()
 }
 
-func (d *Data) UserClient(ctx context.Context) *ent.UserClient {
+func (d *Data) User(ctx context.Context) *ent.UserClient {
 	tx, ok := ctx.Value(contextTxKey{}).(*ent.Tx)
 	if ok {
 		return tx.User
@@ -45,7 +45,7 @@ func (d *Data) UserClient(ctx context.Context) *ent.UserClient {
 	return d.db.User
 }
 
-func (d *Data) CardClient(ctx context.Context) *ent.CardClient {
+func (d *Data) Card(ctx context.Context) *ent.CardClient {
 	tx, ok := ctx.Value(contextTxKey{}).(*ent.Tx)
 	if ok {
 		return tx.Card
