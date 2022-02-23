@@ -29,4 +29,3 @@ func (b *TransactionService) CreateUser(ctx context.Context, in *pb.CreateUserRe
 		Id: strconv.Itoa(id),
 	}, nil
 }
-
