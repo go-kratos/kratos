@@ -29,7 +29,11 @@ func NewArticleUsecase(user UserRepo, card CardRepo, tm Transaction, logger log.
 }
 
 func (u *UserUsecase) CreateUser(ctx context.Context, m *User) (int, error) {
-	id, err := 0, error(nil)
+	var(
+		err error
+		id int
+	)
+
 	if err := u.tm.ExecTx(ctx, func(ctx context.Context) error {
 		id, err = u.userRepo.CreateUser(ctx, m)
 		if err != nil {
