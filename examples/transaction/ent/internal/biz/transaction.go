@@ -24,17 +24,17 @@ type UserUsecase struct {
 	tm       Transaction
 }
 
-func NewArticleUsecase(user UserRepo, card CardRepo, tm Transaction, logger log.Logger) *UserUsecase {
+func NewUserUsecase(user UserRepo, card CardRepo, tm Transaction, logger log.Logger) *UserUsecase {
 	return &UserUsecase{userRepo: user, cardRepo: card, tm: tm}
 }
 
 func (u *UserUsecase) CreateUser(ctx context.Context, m *User) (int, error) {
-	var(
+	var (
 		err error
-		id int
+		id  int
 	)
 
-	if err := u.tm.ExecTx(ctx, func(ctx context.Context) error {
+	if e := u.tm.ExecTx(ctx, func(ctx context.Context) error {
 		id, err = u.userRepo.CreateUser(ctx, m)
 		if err != nil {
 			return err
@@ -43,7 +43,7 @@ func (u *UserUsecase) CreateUser(ctx context.Context, m *User) (int, error) {
 			return err
 		}
 		return nil
-	}); err != nil {
+	}); e != nil {
 		return 0, err
 	}
 	return id, nil

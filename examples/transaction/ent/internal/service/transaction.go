@@ -13,12 +13,12 @@ import (
 func NewTransactionService(user *biz.UserUsecase, logger log.Logger) *TransactionService {
 	return &TransactionService{
 		user: user,
-		log:     log.NewHelper(logger),
+		log:  log.NewHelper(logger),
 	}
 }
 
 func (b *TransactionService) CreateUser(ctx context.Context, in *pb.CreateUserRequest) (*pb.CreateUserReply, error) {
-	id, err := b.user.CreateUser(ctx,&biz.User{
+	id, err := b.user.CreateUser(ctx, &biz.User{
 		Name:  in.Name,
 		Email: in.Email,
 	})
@@ -29,3 +29,4 @@ func (b *TransactionService) CreateUser(ctx context.Context, in *pb.CreateUserRe
 		Id: strconv.Itoa(id),
 	}, nil
 }
+

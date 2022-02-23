@@ -2,15 +2,15 @@ package data
 
 import (
 	"context"
+
 	"github.com/go-kratos/kratos/examples/transaction/ent/internal/biz"
 	"github.com/go-kratos/kratos/examples/transaction/ent/internal/conf"
 	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/google/wire"
-	// init mysql driver
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/google/wire"
 )
 
 // ProviderSet is data providers.
@@ -18,8 +18,7 @@ var ProviderSet = wire.NewSet(NewData, NewTransaction, NewUserRepo, NewCardRepo)
 
 // Data .
 type Data struct {
-	db         *ent.Client
-	userClient *ent.UserClient
+	db *ent.Client
 }
 
 type contextTxKey struct{}
