@@ -2,9 +2,11 @@ package data
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/biz"
-	"github.com/go-kratos/kratos/v2/log"
 	"strconv"
+
+	"github.com/go-kratos/kratos/examples/transaction/ent/internal/biz"
+	
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 type userRepo struct {
@@ -17,7 +19,7 @@ type cardRepo struct {
 	log  *log.Helper
 }
 
-func (u *userRepo) CreateUser(ctx context.Context,m *biz.User) (int, error) {
+func (u *userRepo) CreateUser(ctx context.Context, m *biz.User) (int, error) {
 	user, err := u.data.User(ctx).
 		Create().
 		SetName(m.Name).
