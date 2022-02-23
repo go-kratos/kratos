@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -33,14 +34,13 @@ func (u *UserUsecase) CreateUser(ctx context.Context, m *User) (int, error) {
 		err error
 		id  int
 	)
-
 	if e := u.tm.ExecTx(ctx, func(ctx context.Context) error {
 		id, err = u.userRepo.CreateUser(ctx, m)
 		if err != nil {
 			return err
 		}
-		if _, err := u.cardRepo.CreateCard(ctx, id); err != nil {
-			return err
+		if _, e := u.cardRepo.CreateCard(ctx, id); err != nil {
+			return e
 		}
 		return nil
 	}); e != nil {
