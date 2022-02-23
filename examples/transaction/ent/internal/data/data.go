@@ -9,8 +9,10 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/go-kratos/kratos/v2/log"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/wire"
+
+	// init mysql driver
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // ProviderSet is data providers.
