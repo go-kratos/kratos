@@ -86,7 +86,7 @@ func (c *config) watch(w Watcher) {
 		c.cached.Range(func(key, value interface{}) bool {
 			k := key.(string)
 			v := value.(Value)
-			if n, ok := c.reader.Value(k); ok && !reflect.DeepEqual(n.Load(), v.Load()) {
+			if n, ok := c.reader.Value(k); ok && reflect.TypeOf(n.Load()) == reflect.TypeOf(v.Load()) && !reflect.DeepEqual(n.Load(), v.Load()) {
 				v.Store(n.Load())
 				if o, ok := c.observers.Load(k); ok {
 					o.(Observer)(k, v)
