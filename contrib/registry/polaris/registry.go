@@ -323,7 +323,7 @@ func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registr
 
 // Watch creates a watcher according to the service name.
 func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
-	return newWatcher(r.opt.Namespace, serviceName, ctx, r.consumer)
+	return newWatcher(ctx, r.opt.Namespace, serviceName, r.consumer)
 }
 
 type Watcher struct {
@@ -335,7 +335,7 @@ type Watcher struct {
 	ServiceInstances []*registry.ServiceInstance
 }
 
-func newWatcher(namespace string, serviceName string, ctx context.Context, consumer api.ConsumerAPI) (*Watcher, error) {
+func newWatcher(ctx context.Context, namespace string, serviceName string, consumer api.ConsumerAPI) (*Watcher, error) {
 	watchServiceResponse, err := consumer.WatchService(&api.WatchServiceRequest{
 		WatchServiceRequest: model.WatchServiceRequest{
 			Key: model.ServiceKey{

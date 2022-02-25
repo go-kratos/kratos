@@ -171,6 +171,9 @@ func TestWatch(t *testing.T) {
 
 	// svc register, AddEvent
 	next, err := watch.Next()
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, instance := range next {
 		// it will output one instance
 		log.Info(instance)
@@ -183,6 +186,9 @@ func TestWatch(t *testing.T) {
 
 	// svc deregister, DeleteEvent
 	next, err = watch.Next()
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, instance := range next {
 		// it will output nothing
 		log.Info(instance)
@@ -192,7 +198,7 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	next, err = watch.Next()
+	_, err = watch.Next()
 	if err == nil {
 		// if nil, stop failed
 		t.Fatal()
