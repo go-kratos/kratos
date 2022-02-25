@@ -34,7 +34,7 @@ func (u *UserUsecase) CreateUser(ctx context.Context, m *User) (int, error) {
 		err error
 		id  int64
 	)
-	err = u.tm.Transaction(ctx, func(ctx context.Context) error {
+	err = u.tm.ExecTx(ctx, func(ctx context.Context) error {
 		id, err = u.userRepo.CreateUser(ctx, m)
 		if err != nil {
 			return err
