@@ -45,6 +45,8 @@ require (
 	google.golang.org/grpc v1.44.0
 	google.golang.org/grpc/examples v0.0.0-20220105183818-2fb1ac854b20 // indirect
 	google.golang.org/protobuf v1.27.1
+	gorm.io/driver/mysql v1.3.2
+	gorm.io/gorm v1.23.1
 )
 
 replace (
