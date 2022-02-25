@@ -349,10 +349,10 @@ func newWatcher(ctx context.Context, namespace string, serviceName string, consu
 	}
 
 	w := &Watcher{
-		Namespace:   namespace,
-		ServiceName: serviceName,
-		Channel:     watchServiceResponse.EventChannel,
-		// new watcher but don't init ServiceInstances
+		Namespace:        namespace,
+		ServiceName:      serviceName,
+		Channel:          watchServiceResponse.EventChannel,
+		ServiceInstances: instancesToServiceInstances(watchServiceResponse.GetAllInstancesResp.GetInstances()),
 	}
 	w.Ctx, w.Cancel = context.WithCancel(ctx)
 	return w, nil
