@@ -12,6 +12,7 @@ init:
 	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest
 	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2@latest
 	go install github.com/google/gnostic/cmd/protoc-gen-openapi@v0.6.1
+	go install entgo.io/ent/cmd/ent@latest
 
 .PHONY: errors
 # generate errors code
