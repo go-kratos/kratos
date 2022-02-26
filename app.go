@@ -153,7 +153,7 @@ func (a *App) Stop() error {
 }
 
 func (a *App) buildInstance() (*registry.ServiceInstance, error) {
-	endpoints := make([]string, 0) //nolint:gomnd
+	endpoints := make([]string, 0, len(a.opts.endpoints))
 	for _, e := range a.opts.endpoints {
 		endpoints = append(endpoints, e.String())
 	}
