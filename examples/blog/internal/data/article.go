@@ -26,7 +26,7 @@ func (ar *articleRepo) ListArticle(ctx context.Context) ([]*biz.Article, error) 
 	if err != nil {
 		return nil, err
 	}
-	rv := make([]*biz.Article, 0)
+	rv := make([]*biz.Article, 0, len(ps))
 	for _, p := range ps {
 		rv = append(rv, &biz.Article{
 			ID:        p.ID,

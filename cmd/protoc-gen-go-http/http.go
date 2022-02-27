@@ -236,8 +236,8 @@ func replacePath(name string, value string, path string) string {
 }
 
 func camelCaseVars(s string) string {
-	vars := make([]string, 0)
 	subs := strings.Split(s, ".")
+	vars := make([]string, 0, len(subs))
 	for _, sub := range subs {
 		vars = append(vars, camelCase(sub))
 	}
