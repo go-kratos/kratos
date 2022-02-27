@@ -51,7 +51,7 @@ func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry
 				version = ss[1]
 			}
 		}
-		var endpoints []string //nolint:prealloc
+		endpoints := make([]string, 0)
 		for scheme, addr := range entry.Service.TaggedAddresses {
 			if scheme == "lan_ipv4" || scheme == "wan_ipv4" || scheme == "lan_ipv6" || scheme == "wan_ipv6" {
 				continue
