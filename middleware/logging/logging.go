@@ -94,7 +94,7 @@ func extractArgs(req interface{}) string {
 // extractError returns the string of the error
 func extractError(err error) (log.Level, string) {
 	if err != nil {
-		return log.LevelError, fmt.Sprintf("%+v", err)
+		return log.LevelError, err.Error()
 	}
 	return log.LevelInfo, ""
 }
