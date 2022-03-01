@@ -84,7 +84,8 @@ func findCMD(base string) (map[string]string, error) {
 				}
 				for _, fileInfo := range paths {
 					if fileInfo.IsDir() {
-						cmdPath[path.Join("cmd", fileInfo.Name())] = filepath.Join(walkPath, "..")
+						parent := filepath.Join(walkPath, "..")
+						cmdPath[path.Join(filepath.Base(parent), filepath.Base(walkPath), fileInfo.Name())] = filepath.Join(parent, "..")
 					}
 				}
 				return nil

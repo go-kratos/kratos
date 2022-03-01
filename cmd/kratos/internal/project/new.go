@@ -14,15 +14,16 @@ import (
 
 // Project is a project template.
 type Project struct {
-	Name string
-	Path string
+	Name   string
+	Path   string
+	Module string
 }
 
 // New new a project from remote repo.
 func (p *Project) New(ctx context.Context, dir string, layout string, branch string) error {
-	to := path.Join(dir, p.Name)
+	to := path.Join(dir, p.Path)
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
-		fmt.Printf("🚫 %s already exists\n", p.Name)
+		fmt.Printf("🚫 %s already exists\n", p.Path)
 		override := false
 		prompt := &survey.Confirm{
 			Message: "📂 Do you want to override the folder ?",
@@ -39,16 +40,10 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 	}
 	fmt.Printf("🚀 Creating service %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
 	repo := base.NewRepo(layout, branch)
-	if err := repo.CopyTo(ctx, to, p.Path, []string{".git", ".github"}); err != nil {
+	if err := repo.CopyTo(ctx, to, path.Join(p.Module, p.Path), []string{".git", ".github"}); err != nil {
 		return err
 	}
-	e := os.Rename(
-		path.Join(to, "cmd", "server"),
-		path.Join(to, "cmd", p.Name),
-	)
-	if e != nil {
-		return e
-	}
+
 	base.Tree(to, dir)
 
 	fmt.Printf("\n🍺 Project creation succeeded %s\n", color.GreenString(p.Name))

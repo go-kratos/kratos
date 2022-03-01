@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 	"os"
 	"path"
 	"time"
@@ -28,7 +29,7 @@ var (
 
 func init() {
 	if repoURL = os.Getenv("KRATOS_LAYOUT_REPO"); repoURL == "" {
-		repoURL = "https://github.com/go-kratos/kratos-layout.git"
+		repoURL = "https://github.com/SeeMusic/musicverse_layout.git"
 	}
 	timeout = "60s"
 	CmdNew.Flags().StringVarP(&repoURL, "repo-url", "r", repoURL, "layout repo")
@@ -41,6 +42,17 @@ func run(cmd *cobra.Command, args []string) {
 	if err != nil {
 		panic(err)
 	}
+
+	mod, err := base.FindModulePath(wd)
+	if err != nil {
+		panic("can not found go.mod")
+	}
+
+	modulePath, err := base.ModulePath(mod)
+	if err != nil {
+		panic(err)
+	}
+
 	t, err := time.ParseDuration(timeout)
 	if err != nil {
 		panic(err)
@@ -60,7 +72,7 @@ func run(cmd *cobra.Command, args []string) {
 	} else {
 		name = args[0]
 	}
-	p := &Project{Name: path.Base(name), Path: name}
+	p := &Project{Name: path.Base(name), Path: name, Module: modulePath}
 	done := make(chan error, 1)
 	go func() {
 		done <- p.New(ctx, wd, repoURL, branch)

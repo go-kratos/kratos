@@ -11,6 +11,20 @@ import (
 	"golang.org/x/mod/modfile"
 )
 
+// FindModulePath returns go.mod file path
+func FindModulePath(current string) (string, error) {
+	target, err := filepath.Abs(current)
+	if err != nil {
+		return "", err
+	}
+	name := filepath.Join(target, "go.mod")
+	_, err = os.Stat(name)
+	if err != nil {
+		return FindModulePath(filepath.Join(target, ".."))
+	}
+	return name, nil
+}
+
 // ModulePath returns go module path.
 func ModulePath(filename string) (string, error) {
 	modBytes, err := os.ReadFile(filename)
