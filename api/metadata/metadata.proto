@@ -11,7 +11,7 @@ option java_package = "com.github.kratos.api";
 option objc_class_prefix = "KratosAPI";
 
 
-// Metadata is api defintion metadata service.
+// Metadata is api definition metadata service.
 service Metadata {
   // ListServices list the full name of all services.
   rpc ListServices (ListServicesRequest) returns (ListServicesReply)  {
