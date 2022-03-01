@@ -38,7 +38,7 @@ func (e *Error) GRPCStatus() *status.Status {
 // Is matches each error in the chain with the target value.
 func (e *Error) Is(err error) bool {
 	if se := new(Error); errors.As(err, &se) {
-		return se.Reason == e.Reason
+		return se.Code == e.Code && se.Reason == e.Reason
 	}
 	return false
 }
