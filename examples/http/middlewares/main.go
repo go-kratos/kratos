@@ -22,7 +22,7 @@ func main() {
 		// add global filter
 		http.Filter(globalFilter, globalFilter2),
 	)
-	// register http hanlder to http server
+	// register http handler to http server
 	helloworld.RegisterGreeterHTTPServer(httpSrv, s)
 
 	// add route filter
