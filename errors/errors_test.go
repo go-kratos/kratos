@@ -76,7 +76,7 @@ func TestIs(t *testing.T) {
 	}{
 		{
 			name: "true",
-			e:    &Error{Reason: "test"},
+			e:    &Error{Code: 404, Reason: "test"},
 			err:  New(http.StatusNotFound, "test", ""),
 			want: true,
 		},
