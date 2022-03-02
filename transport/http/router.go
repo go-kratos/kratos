@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 	"path"
+	"strings"
 	"sync"
 )
 
@@ -50,7 +51,12 @@ func (r *Router) Handle(method, relativePath string, h HandlerFunc, filters ...F
 	}))
 	next = FilterChain(filters...)(next)
 	next = FilterChain(r.filters...)(next)
-	r.srv.router.Handle(path.Join(r.prefix, relativePath), next).Methods(method)
+
+	p := path.Join(r.prefix, relativePath)
+	if strings.HasSuffix(relativePath, "/") {
+		p += "/"
+	}
+	r.srv.router.Handle(p, next).Methods(method)
 }
 
 // GET registers a new GET route for a path with matching handler in the router.
