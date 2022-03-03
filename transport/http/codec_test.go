@@ -52,9 +52,19 @@ func (w *mockResponseWriter) WriteHeader(statusCode int) {
 	w.StatusCode = statusCode
 }
 
-type dataWithStatusCode struct {
+type respData struct {
 	A string `json:"a"`
 	B int64  `json:"b"`
+}
+
+type respDataWithStatusCode struct {
+	A     string `json:"a"`
+	B     int64  `json:"b"`
+	sCode int
+}
+
+func (r *respDataWithStatusCode) StatusCode() int {
+	return r.sCode
 }
 
 func TestDefaultResponseEncoder(t *testing.T) {
@@ -64,7 +74,7 @@ func TestDefaultResponseEncoder(t *testing.T) {
 	}
 	req1.Header.Set("Content-Type", "application/json")
 
-	v1 := &dataWithStatusCode{A: "1", B: 2}
+	v1 := &respData{A: "1", B: 2}
 	err := DefaultResponseEncoder(w, req1, v1)
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
@@ -127,5 +137,28 @@ func TestCodecForRequest(t *testing.T) {
 	}
 	if !reflect.DeepEqual("json", c.Name()) {
 		t.Errorf("expected %v, got %v", "json", c.Name())
+	}
+}
+
+func TestDefaultResponseEncoderWithStatusCoder(t *testing.T) {
+	w := &mockResponseWriter{StatusCode: 200, header: make(nethttp.Header)}
+	req1 := &nethttp.Request{
+		Header: make(nethttp.Header),
+	}
+	req1.Header.Set("Content-Type", "application/json")
+	cusStatusCode := 201
+	v1 := &respDataWithStatusCode{A: "1", B: 2, sCode: cusStatusCode}
+	err := DefaultResponseEncoder(w, req1, v1)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if !reflect.DeepEqual("application/json", w.Header().Get("Content-Type")) {
+		t.Errorf("expected %v, got %v", "application/json", w.Header().Get("Content-Type"))
+	}
+	if !reflect.DeepEqual(cusStatusCode, w.StatusCode) {
+		t.Errorf("expected %v, got %v", cusStatusCode, w.StatusCode)
+	}
+	if w.Data == nil {
+		t.Errorf("expected not nil, got %v", w.Data)
 	}
 }

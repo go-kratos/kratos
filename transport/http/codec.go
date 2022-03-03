@@ -45,6 +45,9 @@ func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{
 		return err
 	}
 	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
+	if code, ok := v.(StatusCoder); ok {
+		w.WriteHeader(code.StatusCode())
+	}
 	_, err = w.Write(data)
 	if err != nil {
 		return err
@@ -75,4 +78,10 @@ func CodecForRequest(r *http.Request, name string) (encoding.Codec, bool) {
 		}
 	}
 	return encoding.GetCodec("json"), false
+}
+
+// StatusCoder is checked by DefaultResponseEncoder. If a response value implements
+// StatusCoder, the StatusCode will be used to set http status code.
+type StatusCoder interface {
+	StatusCode() int
 }
