@@ -129,6 +129,12 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	return newWatcher(ctx, key, name, r.client)
 }
 
+func (r *Registry) SetEndpoints(eps []string) {
+	if len(eps) > 0 {
+		r.client.SetEndpoints(eps...)
+	}
+}
+
 // registerWithKV create a new lease, return current leaseID
 func (r *Registry) registerWithKV(ctx context.Context, key string, value string) (clientv3.LeaseID, error) {
 	grant, err := r.lease.Grant(ctx, int64(r.opts.ttl.Seconds()))

@@ -63,6 +63,12 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		err error
 		w   registry.Watcher
 	)
+	if disco, ok := b.discoverer.(interface{ SetEndpoints(eps []string) }); ok {
+		hosts := strings.FieldsFunc(target.URL.Host, func(r rune) bool {
+			return r == ','
+		})
+		disco.SetEndpoints(hosts)
+	}
 	done := make(chan struct{}, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
