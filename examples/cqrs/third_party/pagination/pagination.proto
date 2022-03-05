@@ -1,0 +1,41 @@
+syntax = "proto3";
+package pagination;
+
+option go_package = "kratos-cqrs/third_party/pagination;pagination";
+
+import "google/protobuf/any.proto";
+
+
+// 分页排序
+enum SortOrder {
+  // 不排序
+  UNSORTED = 0;
+  // 升序
+  ASCENDING = 1;
+  // 降序
+  DESCENDING = 2;
+}
+
+// 分页通用请求
+message PagingRequest {
+  // 当前页
+  optional int32 page = 1;
+
+  // 每一页的行数
+  optional int32 page_size = 2;
+
+  // 查询参数
+  map<string, string> query = 3;
+
+  // 排序
+  map<string, SortOrder> order_by = 4;
+
+  // 是否不分页
+  optional bool nopaging = 5;
+}
+
+// 分页通用结果
+message PagingResponse {
+  int32 total = 1;
+  repeated google.protobuf.Any items = 2;
+}

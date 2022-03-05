@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package logger.job.v1;
+
+//import "google/api/annotations.proto";
+
+option go_package = "api/logger/job/v1;v1";
+
+
+service LoggerJob {
+}

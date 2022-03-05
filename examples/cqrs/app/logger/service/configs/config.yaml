@@ -1,0 +1,21 @@
+trace:
+  endpoint: http://127.0.0.1:14268/api/traces
+server:
+  http:
+    addr: 0.0.0.0:0
+    timeout: 1s
+  grpc:
+    addr: 0.0.0.0:0
+    timeout: 1s
+data:
+  database:
+    driver: postgres
+    source: host=localhost port=5432 user=postgres password=123456 dbname=postgres sslmode=disable
+  redis:
+    addr: 127.0.0.1:6379
+    dial_timeout: 1s
+    read_timeout: 0.4s
+    write_timeout: 0.6s
+auth:
+  service_key: some_jwt_sign_key
+  api_key: some_api_key

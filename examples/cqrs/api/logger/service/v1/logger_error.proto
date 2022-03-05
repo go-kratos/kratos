@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package logger.service.v1;
+import "errors/errors.proto";
+
+option go_package = "logger/service/v1;v1";
+option java_multiple_files = true;
+
+enum LoggerServiceErrorReason {
+    option (errors.default_code) = 500;
+
+    UNKNOWN_ERROR = 0;
+}

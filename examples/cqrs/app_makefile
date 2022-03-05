@@ -1,0 +1,121 @@
+GOPATH:=$(shell go env GOPATH)
+VERSION=$(shell git describe --tags --always)
+APP_RELATIVE_PATH=$(shell a=`basename $$PWD` && cd .. && b=`basename $$PWD` && echo $$b/$$a)
+INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
+API_PROTO_FILES=$(shell cd ../../../api/$(APP_RELATIVE_PATH) && find . -name *.proto)
+KRATOS_VERSION=$(shell go mod graph |grep go-kratos/kratos/v2 |head -n 1 |awk -F '@' '{print $$2}')
+KRATOS=$(GOPATH)/pkg/mod/github.com/go-kratos/kratos/v2@$(KRATOS_VERSION)
+APP_NAME=$(shell echo $(APP_RELATIVE_PATH) | sed -En "s/\//-/p")
+DOCKER_IMAGE=$(shell echo $(APP_NAME) |awk -F '@' '{print "go-kratos/beer-" $$0 ":0.1.0"}')
+
+.PHONY: init
+# init env
+init:
+	go install google.golang.org/protobuf/cmd/protoc-gen-go
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
+	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2
+	go install github.com/google/wire/cmd/wire
+	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
+
+.PHONY: grpc
+# generate grpc code
+grpc:
+	 cd ../../../api/$(APP_RELATIVE_PATH) && protoc --proto_path=. \
+           --proto_path=../../../third_party \
+           --go_out=paths=source_relative:. \
+           --go-grpc_out=paths=source_relative:. \
+           $(API_PROTO_FILES)
+
+.PHONY: http
+# generate http code
+http:
+	cd ../../../api/$(APP_RELATIVE_PATH) && protoc --proto_path=. \
+           --proto_path=../../../third_party \
+           --go_out=paths=source_relative:. \
+           --go-http_out=paths=source_relative:. \
+           $(API_PROTO_FILES)
+
+.PHONY: errors
+# generate errors code
+errors:
+	cd ../../../api/$(APP_RELATIVE_PATH) && protoc --proto_path=. \
+           --proto_path=../../../third_party \
+           --go_out=paths=source_relative:. \
+           --go-errors_out=paths=source_relative:. \
+           $(API_PROTO_FILES)
+
+.PHONY: swagger
+# generate swagger
+swagger:
+	cd ../../../api/$(APP_RELATIVE_PATH) && protoc --proto_path=. \
+	        --proto_path=../../../third_party \
+	        --openapiv2_out . \
+	        --openapiv2_opt logtostderr=true \
+           $(API_PROTO_FILES)
+
+.PHONY: proto
+# generate internal proto struct
+proto:
+	protoc --proto_path=. \
+           --proto_path=../../../third_party \
+           --go_out=paths=source_relative:. \
+           $(INTERNAL_PROTO_FILES)
+
+.PHONY: generate
+# generate client code
+generate:
+	go generate ./...
+
+.PHONY: build
+# build
+build:
+	mkdir -p bin/ && go build -ldflags "-X main.Service.Version=$(VERSION)" -o ./bin/ ./...
+
+.PHONY: test
+# test
+test:
+	go test -v ./... -cover
+
+.PHONY: run
+run:
+	cd cmd/server/ && go run .
+
+.PHONY: ent
+ent:
+	cd internal/data/ && entc generate ./ent/schema
+
+.PHONY: docker
+docker:
+	cd ../../.. && docker build -f deploy/build/Dockerfile --build-arg APP_RELATIVE_PATH=$(APP_RELATIVE_PATH) -t $(DOCKER_IMAGE) .
+
+.PHONY: wire
+# generate wire
+wire:
+	cd cmd/server && wire
+
+.PHONY: api
+# generate api proto
+api: grpc http swagger errors
+
+.PHONY: all
+# generate all
+all: grpc http proto generate build test
+
+# show help
+help:
+	@echo ''
+	@echo 'Usage:'
+	@echo ' make [target]'
+	@echo ''
+	@echo 'Targets:'
+	@awk '/^[a-zA-Z\-\_0-9]+:/ { \
+	helpMessage = match(lastLine, /^# (.*)/); \
+		if (helpMessage) { \
+			helpCommand = substr($$1, 0, index($$1, ":")-1); \
+			helpMessage = substr(lastLine, RSTART + 2, RLENGTH); \
+			printf "\033[36m%-22s\033[0m %s\n", helpCommand,helpMessage; \
+		} \
+	} \
+	{ lastLine = $$0 }' $(MAKEFILE_LIST)
+
+.DEFAULT_GOAL := help

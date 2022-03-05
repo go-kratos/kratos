@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package logger.service.v1;
+
+option go_package = "api/logger/service/v1;v1";
+
+service Logger {
+  rpc ListSensor(ListSensorReq) returns (ListSensorReply) {
+  }
+
+  rpc ListSensorData(ListSensorDataReq) returns (ListSensorDataReply) {
+  }
+
+  rpc GetSensorAvgData(GetSensorAvgDataReq) returns (GetSensorAvgDataReply) {
+  }
+
+  rpc GetSensorAvgAndLatestData(GetSensorAvgAndLatestDataReq) returns (GetSensorAvgAndLatestDataReply) {
+  }
+}
+
+message Sensor {
+  int64 id = 1;
+  string type = 2;
+  string location = 3;
+}
+
+message SensorData {
+  int64 ts = 1;
+  int64 sensor_id = 2;
+  double temperature = 3;
+  double cpu = 4;
+}
+
+message SensorAvgData  {
+  int64 period = 1;
+  double avg_temp = 2;
+  double avg_cpu = 3;
+}
+
+message SensorAvgAndLatestData  {
+  int64 period = 1;
+  double avg_temp = 2;
+  double avg_cpu = 3;
+  double last_temp = 4;
+}
+
+message ListSensorReq {
+  // 当前页
+  optional int32 page = 1;
+  // 每一页的行数
+  optional int32 page_size = 2;
+}
+
+message ListSensorReply {
+  repeated Sensor results = 1;
+}
+
+message ListSensorDataReq {
+  // 当前页
+  optional int32 page = 1;
+  // 每一页的行数
+  optional int32 page_size = 2;
+}
+
+message ListSensorDataReply {
+  repeated SensorData results = 1;
+}
+
+message GetSensorAvgDataReq {
+
+}
+
+message GetSensorAvgDataReply {
+  repeated SensorAvgData results = 1;
+}
+message GetSensorAvgAndLatestDataReq {
+
+}
+
+message GetSensorAvgAndLatestDataReply {
+  repeated SensorAvgAndLatestData results = 1;
+}

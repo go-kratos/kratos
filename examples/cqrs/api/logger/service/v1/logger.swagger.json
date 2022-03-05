@@ -1,0 +1,166 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "logger.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Logger"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {},
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1GetSensorAvgAndLatestDataReply": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1SensorAvgAndLatestData"
+          }
+        }
+      }
+    },
+    "v1GetSensorAvgDataReply": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1SensorAvgData"
+          }
+        }
+      }
+    },
+    "v1ListSensorDataReply": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1SensorData"
+          }
+        }
+      }
+    },
+    "v1ListSensorReply": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Sensor"
+          }
+        }
+      }
+    },
+    "v1Sensor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "type": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        }
+      }
+    },
+    "v1SensorAvgAndLatestData": {
+      "type": "object",
+      "properties": {
+        "period": {
+          "type": "string",
+          "format": "int64"
+        },
+        "avg_temp": {
+          "type": "number",
+          "format": "double"
+        },
+        "avg_cpu": {
+          "type": "number",
+          "format": "double"
+        },
+        "last_temp": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "v1SensorAvgData": {
+      "type": "object",
+      "properties": {
+        "period": {
+          "type": "string",
+          "format": "int64"
+        },
+        "avg_temp": {
+          "type": "number",
+          "format": "double"
+        },
+        "avg_cpu": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "v1SensorData": {
+      "type": "object",
+      "properties": {
+        "ts": {
+          "type": "string",
+          "format": "int64"
+        },
+        "sensor_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "temperature": {
+          "type": "number",
+          "format": "double"
+        },
+        "cpu": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    }
+  }
+}
