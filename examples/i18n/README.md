@@ -103,7 +103,7 @@ goi18n extract
 The string which should be translated will be extracted from your code, and write into `active.en.toml`
 You should create the empty target language file:
 ```bash
-touch tranlate.zh.toml
+touch translate.zh.toml
 ```
 
 Then fill the translate file:
