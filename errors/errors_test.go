@@ -32,10 +32,10 @@ func TestError(t *testing.T) {
 	}
 
 	if !errors.As(err, &base) {
-		t.Errorf("should be matchs: %v", err)
+		t.Errorf("should be matches: %v", err)
 	}
 	if !IsBadRequest(err) {
-		t.Errorf("should be matchs: %v", err)
+		t.Errorf("should be matches: %v", err)
 	}
 
 	if reason := Reason(err); reason != err3.Reason {

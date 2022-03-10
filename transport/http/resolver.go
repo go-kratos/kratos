@@ -125,7 +125,7 @@ func (r *resolver) update(services []*registry.ServiceInstance) bool {
 		nodes = append(nodes, selector.NewNode(ept, ins))
 	}
 	if len(nodes) == 0 {
-		r.logger.Warnf("[http resovler]Zero endpoint found,refused to write,ser: %s ins: %v", r.target.Endpoint, nodes)
+		r.logger.Warnf("[http resolver]Zero endpoint found,refused to write,set: %s ins: %v", r.target.Endpoint, nodes)
 		return false
 	}
 	r.rebalancer.Apply(nodes)
