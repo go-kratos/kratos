@@ -69,7 +69,7 @@ func Errorf(code int, reason, format string, a ...interface{}) error {
 	return New(code, reason, fmt.Sprintf(format, a...))
 }
 
-// Code returns the http code for a error.
+// Code returns the http code for an error.
 // It supports wrapped errors.
 func Code(err error) int {
 	if err == nil {
