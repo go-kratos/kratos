@@ -98,7 +98,8 @@ func (a *App) Run() error {
 		wg.Add(1)
 		eg.Go(func() error {
 			wg.Done()
-			return srv.Start(ctx)
+			tctx := NewContext(context.Background(), a)
+			return srv.Start(tctx)
 		})
 	}
 	wg.Wait()
