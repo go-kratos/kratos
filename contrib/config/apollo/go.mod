@@ -1,10 +1,10 @@
-module github.com/go-kratos/kratos/contrib/config/apollo/v2
+module github.com/SeeMusic/kratos/contrib/config/apollo/v2
 
 go 1.16
 
 require (
 	github.com/apolloconfig/agollo/v4 v4.1.0
-	github.com/go-kratos/kratos/v2 v2.2.0
+	github.com/SeeMusic/kratos/v2 v2.2.0
 )
 
 require (
@@ -15,4 +15,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
-replace github.com/go-kratos/kratos/v2 => ../../../
+replace github.com/SeeMusic/kratos/v2 => ../../../

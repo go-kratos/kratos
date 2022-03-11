@@ -1,4 +1,4 @@
-module github.com/go-kratos/kratos/examples
+module github.com/SeeMusic/kratos/examples
 
 go 1.16
 
@@ -8,14 +8,14 @@ require (
 	github.com/envoyproxy/protoc-gen-validate v0.6.2
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-kratos/gin v0.1.0
-	github.com/go-kratos/kratos/contrib/config/apollo/v2 v2.0.0-20210901080230-515b71ec9061
-	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 v2.0.0-00010101000000-000000000000
-	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-00010101000000-000000000000
-	github.com/go-kratos/kratos/contrib/registry/discovery/v2 v2.0.0-00010101000000-000000000000
-	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-00010101000000-000000000000
-	github.com/go-kratos/kratos/contrib/registry/nacos/v2 v2.0.0-00010101000000-000000000000
-	github.com/go-kratos/kratos/contrib/registry/zookeeper/v2 v2.0.0-00010101000000-000000000000
-	github.com/go-kratos/kratos/v2 v2.2.0
+	github.com/SeeMusic/kratos/contrib/config/apollo/v2 v2.0.0-20210901080230-515b71ec9061
+	github.com/SeeMusic/kratos/contrib/metrics/prometheus/v2 v2.0.0-00010101000000-000000000000
+	github.com/SeeMusic/kratos/contrib/registry/consul/v2 v2.0.0-00010101000000-000000000000
+	github.com/SeeMusic/kratos/contrib/registry/discovery/v2 v2.0.0-00010101000000-000000000000
+	github.com/SeeMusic/kratos/contrib/registry/etcd/v2 v2.0.0-00010101000000-000000000000
+	github.com/SeeMusic/kratos/contrib/registry/nacos/v2 v2.0.0-00010101000000-000000000000
+	github.com/SeeMusic/kratos/contrib/registry/zookeeper/v2 v2.0.0-00010101000000-000000000000
+	github.com/SeeMusic/kratos/v2 v2.2.0
 	github.com/go-kratos/swagger-api v1.0.0
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.11.2
@@ -51,12 +51,12 @@ require (
 
 replace (
 	github.com/buger/jsonparser => github.com/buger/jsonparser v1.1.1
-	github.com/go-kratos/kratos/contrib/config/apollo/v2 => ../contrib/config/apollo
-	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 => ../contrib/metrics/prometheus
-	github.com/go-kratos/kratos/contrib/registry/consul/v2 => ../contrib/registry/consul
-	github.com/go-kratos/kratos/contrib/registry/discovery/v2 => ../contrib/registry/discovery
-	github.com/go-kratos/kratos/contrib/registry/etcd/v2 => ../contrib/registry/etcd
-	github.com/go-kratos/kratos/contrib/registry/nacos/v2 => ../contrib/registry/nacos
-	github.com/go-kratos/kratos/contrib/registry/zookeeper/v2 => ../contrib/registry/zookeeper
-	github.com/go-kratos/kratos/v2 => ../
+	github.com/SeeMusic/kratos/contrib/config/apollo/v2 => ../contrib/config/apollo
+	github.com/SeeMusic/kratos/contrib/metrics/prometheus/v2 => ../contrib/metrics/prometheus
+	github.com/SeeMusic/kratos/contrib/registry/consul/v2 => ../contrib/registry/consul
+	github.com/SeeMusic/kratos/contrib/registry/discovery/v2 => ../contrib/registry/discovery
+	github.com/SeeMusic/kratos/contrib/registry/etcd/v2 => ../contrib/registry/etcd
+	github.com/SeeMusic/kratos/contrib/registry/nacos/v2 => ../contrib/registry/nacos
+	github.com/SeeMusic/kratos/contrib/registry/zookeeper/v2 => ../contrib/registry/zookeeper
+	github.com/SeeMusic/kratos/v2 => ../
 )
