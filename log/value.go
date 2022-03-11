@@ -28,7 +28,7 @@ func Value(ctx context.Context, v interface{}) interface{} {
 	return v
 }
 
-// Caller returns returns a Valuer that returns a pkg/file:line description of the caller.
+// Caller returns a Valuer that returns a pkg/file:line description of the caller.
 func Caller(depth int) Valuer {
 	return func(context.Context) interface{} {
 		d := depth
