@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
+	"github.com/SeeMusic/kratos/cmd/kratos/v2/internal/base"
 	"os"
 	"path"
 	"time"
@@ -17,7 +17,7 @@ import (
 var CmdNew = &cobra.Command{
 	Use:   "new",
 	Short: "Create a service template",
-	Long:  "Create a service project using the repository template. Example: kratos new helloworld",
+	Long:  "Create a service project using the repository template. Example: kratos new app/core/helloworld",
 	Run:   run,
 }
 

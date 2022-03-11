@@ -1,9 +1,9 @@
 package proto
 
 import (
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto/add"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto/client"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto/server"
+	"github.com/SeeMusic/kratos/cmd/kratos/v2/internal/proto/add"
+	"github.com/SeeMusic/kratos/cmd/kratos/v2/internal/proto/client"
+	"github.com/SeeMusic/kratos/cmd/kratos/v2/internal/proto/server"
 
 	"github.com/spf13/cobra"
 )
