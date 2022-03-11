@@ -11,7 +11,7 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/vo"
 	"gopkg.in/yaml.v3"
 
-	kconfig "github.com/go-kratos/kratos/v2/config"
+	kconfig "github.com/SeeMusic/kratos/v2/config"
 )
 
 func getIntranetIP() string {

@@ -3,7 +3,7 @@ package zap
 import (
 	"fmt"
 
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/log"
 	"go.uber.org/zap"
 )
 

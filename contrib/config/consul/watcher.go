@@ -1,7 +1,7 @@
 package consul
 
 import (
-	"github.com/go-kratos/kratos/v2/config"
+	"github.com/SeeMusic/kratos/v2/config"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/api/watch"
 )

@@ -8,7 +8,7 @@ import (
 var global = &loggerAppliance{}
 
 // loggerAppliance is the proxy of `Logger` to
-// make logger change will effect to all sub-logger.
+// make logger change will affect all sub-logger.
 type loggerAppliance struct {
 	lock sync.Mutex
 	Logger

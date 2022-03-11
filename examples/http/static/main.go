@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-kratos/kratos/v2"
-	transhttp "github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/SeeMusic/kratos/v2"
+	transhttp "github.com/SeeMusic/kratos/v2/transport/http"
 	"github.com/gorilla/mux"
 )
 

@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/SeeMusic/kratos/v2/errors"
 )
 
 func TestDefaultRequestDecoder(t *testing.T) {

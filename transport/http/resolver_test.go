@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/selector"
+	"github.com/SeeMusic/kratos/v2/registry"
+	"github.com/SeeMusic/kratos/v2/selector"
 )
 
 func TestParseTarget(t *testing.T) {
@@ -59,15 +59,15 @@ type mockRebalancer struct{}
 
 func (m *mockRebalancer) Apply(nodes []selector.Node) {}
 
-type mockDiscoverys struct {
+type mockDiscoveries struct {
 	isSecure bool
 }
 
-func (d *mockDiscoverys) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+func (d *mockDiscoveries) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
 	return nil, nil
 }
 
-func (d *mockDiscoverys) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
+func (d *mockDiscoveries) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
 	return &mockWatch{isSecure: d.isSecure}, nil
 }
 
@@ -104,11 +104,11 @@ func TestResolver(t *testing.T) {
 		Authority: "",
 		Endpoint:  "discovery://helloworld",
 	}
-	_, err := newResolver(context.Background(), &mockDiscoverys{true}, ta, &mockRebalancer{}, false, false)
+	_, err := newResolver(context.Background(), &mockDiscoveries{true}, ta, &mockRebalancer{}, false, false)
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
-	_, err = newResolver(context.Background(), &mockDiscoverys{false}, ta, &mockRebalancer{}, true, true)
+	_, err = newResolver(context.Background(), &mockDiscoveries{false}, ta, &mockRebalancer{}, true, true)
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}

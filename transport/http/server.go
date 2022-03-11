@@ -9,12 +9,12 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
+	"github.com/SeeMusic/kratos/v2/internal/endpoint"
 
-	"github.com/go-kratos/kratos/v2/internal/host"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/SeeMusic/kratos/v2/internal/host"
+	"github.com/SeeMusic/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/middleware"
+	"github.com/SeeMusic/kratos/v2/transport"
 
 	"github.com/gorilla/mux"
 )

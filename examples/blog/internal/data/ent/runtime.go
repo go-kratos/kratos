@@ -5,10 +5,10 @@ package ent
 import (
 	"time"
 
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/article"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/comment"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/schema"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/tag"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/article"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/comment"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/schema"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/tag"
 )
 
 // The init function reads all schema descriptors with runtime code

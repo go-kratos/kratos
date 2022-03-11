@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/go-kratos/kratos/cmd/protoc-gen-go-http/internal/encoding/complex/;complex";
+option go_package = "github.com/SeeMusic/kratos/cmd/protoc-gen-go-http/internal/encoding/complex/;complex";
 
 package testproto;
 

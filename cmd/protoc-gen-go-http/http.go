@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/protobuf/reflect/protoreflect"
 
-	"github.com/go-kratos/kratos/v2"
+	"github.com/SeeMusic/kratos/v2"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
@@ -17,8 +17,8 @@ import (
 
 const (
 	contextPackage       = protogen.GoImportPath("context")
-	transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
-	bindingPackage       = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http/binding")
+	transportHTTPPackage = protogen.GoImportPath("github.com/SeeMusic/kratos/v2/transport/http")
+	bindingPackage       = protogen.GoImportPath("github.com/SeeMusic/kratos/v2/transport/http/binding")
 )
 
 var methodSets = make(map[string]int)

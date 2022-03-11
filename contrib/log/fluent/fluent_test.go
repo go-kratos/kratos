@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/log"
 )
 
 func TestMain(m *testing.M) {

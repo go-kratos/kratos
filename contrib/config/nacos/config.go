@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/config"
+	"github.com/SeeMusic/kratos/v2/config"
 	"github.com/nacos-group/nacos-sdk-go/clients/config_client"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 )

@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent"
 )
 
 // The CardFunc type is an adapter to allow the use of ordinary

@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2/errors"
+	"github.com/SeeMusic/kratos/cmd/protoc-gen-go-errors/v2/errors"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 )
 
 const (
-	errorsPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/errors")
+	errorsPackage = protogen.GoImportPath("github.com/SeeMusic/kratos/v2/errors")
 	fmtPackage    = protogen.GoImportPath("fmt")
 )
 

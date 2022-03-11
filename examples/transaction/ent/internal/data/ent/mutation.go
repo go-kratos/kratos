@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent/card"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent/predicate"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent/user"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent/card"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent/predicate"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent/user"
 
 	"entgo.io/ent"
 )

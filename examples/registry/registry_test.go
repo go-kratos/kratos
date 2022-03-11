@@ -7,15 +7,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
+	"github.com/SeeMusic/kratos/examples/helloworld/helloworld"
+	pb "github.com/SeeMusic/kratos/examples/helloworld/helloworld"
 
-	consulregistry "github.com/go-kratos/kratos/contrib/registry/consul/v2"
-	etcdregistry "github.com/go-kratos/kratos/contrib/registry/etcd/v2"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	consulregistry "github.com/SeeMusic/kratos/contrib/registry/consul/v2"
+	etcdregistry "github.com/SeeMusic/kratos/contrib/registry/etcd/v2"
+	"github.com/SeeMusic/kratos/v2"
+	"github.com/SeeMusic/kratos/v2/registry"
+	"github.com/SeeMusic/kratos/v2/transport/grpc"
+	"github.com/SeeMusic/kratos/v2/transport/http"
 	consul "github.com/hashicorp/consul/api"
 	etcd "go.etcd.io/etcd/client/v3"
 )

@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/SeeMusic/kratos/v2"
+	"github.com/SeeMusic/kratos/v2/transport/http"
 )
 
 func uploadFile(ctx http.Context) error {

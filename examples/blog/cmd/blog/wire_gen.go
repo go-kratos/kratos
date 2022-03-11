@@ -7,13 +7,13 @@
 package main
 
 import (
-	"github.com/go-kratos/kratos/examples/blog/internal/biz"
-	"github.com/go-kratos/kratos/examples/blog/internal/conf"
-	"github.com/go-kratos/kratos/examples/blog/internal/data"
-	"github.com/go-kratos/kratos/examples/blog/internal/server"
-	"github.com/go-kratos/kratos/examples/blog/internal/service"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/SeeMusic/kratos/examples/blog/internal/biz"
+	"github.com/SeeMusic/kratos/examples/blog/internal/conf"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data"
+	"github.com/SeeMusic/kratos/examples/blog/internal/server"
+	"github.com/SeeMusic/kratos/examples/blog/internal/service"
+	"github.com/SeeMusic/kratos/v2"
+	"github.com/SeeMusic/kratos/v2/log"
 )
 
 // Injectors from wire.go:

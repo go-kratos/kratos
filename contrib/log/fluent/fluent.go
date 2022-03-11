@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/fluent/fluent-logger-golang/fluent"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/log"
 )
 
 var _ log.Logger = (*Logger)(nil)

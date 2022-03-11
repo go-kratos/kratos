@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/SeeMusic/kratos/v2/encoding"
 )
 
 func TestReader_Merge(t *testing.T) {

@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/errors"
-	pb "github.com/go-kratos/kratos/v2/internal/testdata/helloworld"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/SeeMusic/kratos/v2/errors"
+	pb "github.com/SeeMusic/kratos/v2/internal/testdata/helloworld"
+	"github.com/SeeMusic/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/middleware"
+	"github.com/SeeMusic/kratos/v2/transport"
 
 	"google.golang.org/grpc"
 )
@@ -211,7 +211,7 @@ func TestUnaryInterceptor(t *testing.T) {
 	}
 }
 
-func TestStramInterceptor(t *testing.T) {
+func TestStreamInterceptor(t *testing.T) {
 	o := &Server{}
 	v := []grpc.StreamServerInterceptor{
 		func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {

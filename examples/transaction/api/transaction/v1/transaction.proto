@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package blog.api.v1;
 
-option go_package = "github.com/go-kratos/kratos/examples/transaction/api/transaction/v1;v1";
+option go_package = "github.com/SeeMusic/kratos/examples/transaction/api/transaction/v1;v1";
 option java_multiple_files = true;
 option java_package = "transaction.api.v1";
 

@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/selector"
+	"github.com/SeeMusic/kratos/v2/internal/endpoint"
+	"github.com/SeeMusic/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/registry"
+	"github.com/SeeMusic/kratos/v2/selector"
 )
 
 // Target is resolver target
@@ -125,7 +125,7 @@ func (r *resolver) update(services []*registry.ServiceInstance) bool {
 		nodes = append(nodes, selector.NewNode(ept, ins))
 	}
 	if len(nodes) == 0 {
-		r.logger.Warnf("[http resovler]Zero endpoint found,refused to write,ser: %s ins: %v", r.target.Endpoint, nodes)
+		r.logger.Warnf("[http resolver]Zero endpoint found,refused to write,set: %s ins: %v", r.target.Endpoint, nodes)
 		return false
 	}
 	r.rebalancer.Apply(nodes)

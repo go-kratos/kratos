@@ -4,7 +4,7 @@ package helloworld;
 
 import "google/api/annotations.proto";
 
-option go_package = "github.com/go-kratos/kratos/v2/internal/testdata/helloworld";
+option go_package = "github.com/SeeMusic/kratos/v2/internal/testdata/helloworld";
 
 // The greeting service definition.
 service Greeter {

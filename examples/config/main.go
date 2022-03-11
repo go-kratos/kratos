@@ -4,8 +4,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/config/file"
+	"github.com/SeeMusic/kratos/v2/config"
+	"github.com/SeeMusic/kratos/v2/config/file"
 )
 
 var flagconf string

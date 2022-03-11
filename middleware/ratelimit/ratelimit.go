@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-kratos/aegis/ratelimit"
 	"github.com/go-kratos/aegis/ratelimit/bbr"
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/SeeMusic/kratos/v2/errors"
+	"github.com/SeeMusic/kratos/v2/middleware"
 )
 
 // ErrLimitExceed is service unavailable due to rate limit exceeded.

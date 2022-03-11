@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent"
 )
 
 // The ArticleFunc type is an adapter to allow the use of ordinary

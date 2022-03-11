@@ -4,8 +4,8 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/biz"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/biz"
+	"github.com/SeeMusic/kratos/v2/log"
 )
 
 type userRepo struct {

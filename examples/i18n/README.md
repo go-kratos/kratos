@@ -33,8 +33,8 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/SeeMusic/kratos/v2/middleware"
+	"github.com/SeeMusic/kratos/v2/transport"
 )
 
 type localizerKey struct{}
@@ -103,7 +103,7 @@ goi18n extract
 The string which should be translated will be extracted from your code, and write into `active.en.toml`
 You should create the empty target language file:
 ```bash
-touch tranlate.zh.toml
+touch translate.zh.toml
 ```
 
 Then fill the translate file:

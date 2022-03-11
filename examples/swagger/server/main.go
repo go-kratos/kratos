@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	pb "github.com/go-kratos/kratos/examples/swagger/helloworld"
-	reply "github.com/go-kratos/kratos/examples/swagger/reply"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	pb "github.com/SeeMusic/kratos/examples/swagger/helloworld"
+	"github.com/SeeMusic/kratos/examples/swagger/reply"
+	"github.com/SeeMusic/kratos/v2"
+	"github.com/SeeMusic/kratos/v2/errors"
+	"github.com/SeeMusic/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/transport/http"
 	"github.com/go-kratos/swagger-api/openapiv2"
 )
 
@@ -28,7 +28,7 @@ type server struct {
 }
 
 // SayHello implements helloworld.GreeterServer
-func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+func (s *server) SayHello(_ context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	if in.Name == "error" {
 		return nil, errors.BadRequest("custom_error", fmt.Sprintf("invalid argument %s", in.Name))
 	}
@@ -40,9 +40,9 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 }
 
 func main() {
-	logger := log.NewStdLogger(os.Stdout)
+	stdLogger := log.NewStdLogger(os.Stdout)
 
-	log := log.NewHelper(logger)
+	logger := log.NewHelper(stdLogger)
 	s := &server{}
 
 	httpSrv := http.NewServer(http.Address(":8000"))
@@ -62,6 +62,6 @@ func main() {
 	)
 
 	if err := app.Run(); err != nil {
-		log.Error(err)
+		logger.Error(err)
 	}
 }

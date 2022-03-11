@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/SeeMusic/kratos/v2/registry"
 	jsoniter "github.com/json-iterator/go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/tag"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/tag"
 )
 
 // Tag is the model entity for the Tag schema.

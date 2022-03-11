@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package binding;
 
-option go_package = "github.com/go-kratos/kratos/transport/binding";
+option go_package = "github.com/SeeMusic/kratos/transport/binding";
 
 // The request message containing the user's name.
 message HelloRequest {

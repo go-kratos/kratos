@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/article"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/tag"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/article"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/tag"
 )
 
 // TagCreate is the builder for creating a Tag entity.

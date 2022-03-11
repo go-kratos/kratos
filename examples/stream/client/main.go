@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kratos/kratos/examples/stream/hello"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/SeeMusic/kratos/examples/stream/hello"
+	"github.com/SeeMusic/kratos/v2/middleware/recovery"
+	transgrpc "github.com/SeeMusic/kratos/v2/transport/grpc"
 )
 
 var wg = sync.WaitGroup{}

@@ -7,7 +7,7 @@ import (
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/aliyun-log-go-sdk/producer"
-	klog "github.com/go-kratos/kratos/v2/log"
+	klog "github.com/SeeMusic/kratos/v2/log"
 	"google.golang.org/protobuf/proto"
 )
 

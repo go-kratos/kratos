@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/SeeMusic/kratos/v2/middleware"
 )
 
 func globalFilter(next http.Handler) http.Handler {

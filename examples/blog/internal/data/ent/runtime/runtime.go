@@ -2,7 +2,7 @@
 
 package runtime
 
-// The schema-stitching logic is generated in github.com/go-kratos/kratos/examples/blog/internal/data/ent/runtime.go
+// The schema-stitching logic is generated in github.com/SeeMusic/kratos/examples/blog/internal/data/ent/runtime.go
 
 const (
 	Version = "v0.6.0"                                          // Version of ent codegen.

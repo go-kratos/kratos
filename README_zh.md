@@ -1,11 +1,11 @@
-<p align="center"><a href="https://go-kratos.dev/" target="_blank"><img src="https://github.com/go-kratos/kratos/blob/main/docs/images/kratos-large.png?raw=true"></a></p>
+<p align="center"><a href="https://go-kratos.dev/" target="_blank"><img src="https://github.com/SeeMusic/kratos/blob/main/docs/images/kratos-large.png?raw=true"></a></p>
 
 <p align="center">
-<a href="https://github.com/go-kratos/kratos/actions"><img src="https://github.com/go-kratos/kratos/workflows/Go/badge.svg" alt="Build Status"></a>
-<a href="https://pkg.go.dev/github.com/go-kratos/kratos/v2"><img src="https://pkg.go.dev/badge/github.com/go-kratos/kratos/v2" alt="GoDoc"></a>
+<a href="https://github.com/SeeMusic/kratos/actions"><img src="https://github.com/SeeMusic/kratos/workflows/Go/badge.svg" alt="Build Status"></a>
+<a href="https://pkg.go.dev/github.com/SeeMusic/kratos/v2"><img src="https://pkg.go.dev/badge/github.com/SeeMusic/kratos/v2" alt="GoDoc"></a>
 <a href="https://codecov.io/gh/go-kratos/kratos"><img src="https://codecov.io/gh/go-kratos/kratos/master/graph/badge.svg" alt="codeCov"></a>
-<a href="https://goreportcard.com/report/github.com/go-kratos/kratos"><img src="https://goreportcard.com/badge/github.com/go-kratos/kratos" alt="Go Report Card" /a>
-<a href="https://github.com/go-kratos/kratos/blob/main/LICENSE"><img src="https://img.shields.io/github/license/go-kratos/kratos" alt="License"></a>
+<a href="https://goreportcard.com/report/github.com/SeeMusic/kratos"><img src="https://goreportcard.com/badge/github.com/SeeMusic/kratos" alt="Go Report Card"></a>
+<a href="https://github.com/SeeMusic/kratos/blob/main/LICENSE"><img src="https://img.shields.io/github/license/go-kratos/kratos" alt="License"></a>
 <a href="https://github.com/avelino/awesome-go"><img src="https://awesome.re/mentioned-badge.svg" alt="Awesome Go"></a>
 <a href="https://discord.gg/BWzJsUJ"><img src="https://img.shields.io/discord/766619759214854164?label=chat&logo=discord" alt="Discord"></a>
 </p>
@@ -60,12 +60,12 @@ Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关功能及
 ### Installing
 ##### go install 安装：
 ```
-go install github.com/go-kratos/kratos/cmd/kratos/v2@latest
+go install github.com/SeeMusic/kratos/cmd/kratos/v2@latest
 kratos upgrade
 ```
 ##### 源码编译安装：
 ```
-git clone https://github.com/go-kratos/kratos
+git clone https://github.com/SeeMusic/kratos
 cd kratos
 make install
 ```
@@ -95,9 +95,9 @@ kratos run
 
 ### Kratos Boot
 ```
-import "github.com/go-kratos/kratos/v2"
-import "github.com/go-kratos/kratos/v2/transport/grpc"
-import "github.com/go-kratos/kratos/v2/transport/http"
+import "github.com/SeeMusic/kratos/v2"
+import "github.com/SeeMusic/kratos/v2/transport/grpc"
+import "github.com/SeeMusic/kratos/v2/transport/http"
 
 httpSrv := http.NewServer(http.Address(":8000"))
 grpcSrv := grpc.NewServer(grpc.Address(":9000"))
@@ -114,10 +114,10 @@ app.Run()
 
 * [Docs](https://go-kratos.dev/)
 * [Examples](./examples)
-* [Service Layout](https://github.com/go-kratos/kratos-layout)
+* [Service Layout](https://github.com/SeeMusic/kratos-layout)
 
 ## Community
-* [Wechat Group](https://github.com/go-kratos/kratos/issues/682)
+* [Wechat Group](https://github.com/SeeMusic/kratos/issues/682)
 * [Discord Group](https://discord.gg/BWzJsUJ)
 * Website:  [go-kratos.dev](https://go-kratos.dev)
 * QQ Group: 716486124

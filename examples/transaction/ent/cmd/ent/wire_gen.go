@@ -6,13 +6,13 @@
 package main
 
 import (
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/biz"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/conf"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/server"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/service"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/biz"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/conf"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/server"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/service"
+	"github.com/SeeMusic/kratos/v2"
+	"github.com/SeeMusic/kratos/v2/log"
 )
 
 // Injectors from wire.go:

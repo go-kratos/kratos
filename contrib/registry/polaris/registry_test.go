@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/log"
 
 	"github.com/polarismesh/polaris-go/pkg/config"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/SeeMusic/kratos/v2/registry"
 )
 
 // TestRegistry . TestRegistryManyService

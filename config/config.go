@@ -7,13 +7,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/log"
 
 	// init encoding
-	_ "github.com/go-kratos/kratos/v2/encoding/json"
-	_ "github.com/go-kratos/kratos/v2/encoding/proto"
-	_ "github.com/go-kratos/kratos/v2/encoding/xml"
-	_ "github.com/go-kratos/kratos/v2/encoding/yaml"
+	_ "github.com/SeeMusic/kratos/v2/encoding/json"
+	_ "github.com/SeeMusic/kratos/v2/encoding/proto"
+	_ "github.com/SeeMusic/kratos/v2/encoding/xml"
+	_ "github.com/SeeMusic/kratos/v2/encoding/yaml"
 )
 
 var (

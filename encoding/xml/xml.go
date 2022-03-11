@@ -3,7 +3,7 @@ package xml
 import (
 	"encoding/xml"
 
-	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/SeeMusic/kratos/v2/encoding"
 )
 
 // Name is the name registered for the xml codec.

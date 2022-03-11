@@ -9,15 +9,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/internal/host"
-	"github.com/go-kratos/kratos/v2/internal/httputil"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/wrr"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/SeeMusic/kratos/v2/encoding"
+	"github.com/SeeMusic/kratos/v2/errors"
+	"github.com/SeeMusic/kratos/v2/internal/host"
+	"github.com/SeeMusic/kratos/v2/internal/httputil"
+	"github.com/SeeMusic/kratos/v2/middleware"
+	"github.com/SeeMusic/kratos/v2/registry"
+	"github.com/SeeMusic/kratos/v2/selector"
+	"github.com/SeeMusic/kratos/v2/selector/wrr"
+	"github.com/SeeMusic/kratos/v2/transport"
 )
 
 // DecodeErrorFunc is decode error func.

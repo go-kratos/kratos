@@ -1,16 +1,16 @@
 package server
 
 import (
-	v1 "github.com/go-kratos/kratos/examples/i18n/api/helloworld/v1"
-	"github.com/go-kratos/kratos/examples/i18n/internal/conf"
-	"github.com/go-kratos/kratos/examples/i18n/internal/service"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware/logging"
-	"github.com/go-kratos/kratos/v2/middleware/metrics"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/middleware/tracing"
-	"github.com/go-kratos/kratos/v2/middleware/validate"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
+	v1 "github.com/SeeMusic/kratos/examples/i18n/api/helloworld/v1"
+	"github.com/SeeMusic/kratos/examples/i18n/internal/conf"
+	"github.com/SeeMusic/kratos/examples/i18n/internal/service"
+	"github.com/SeeMusic/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/middleware/logging"
+	"github.com/SeeMusic/kratos/v2/middleware/metrics"
+	"github.com/SeeMusic/kratos/v2/middleware/recovery"
+	"github.com/SeeMusic/kratos/v2/middleware/tracing"
+	"github.com/SeeMusic/kratos/v2/middleware/validate"
+	"github.com/SeeMusic/kratos/v2/transport/grpc"
 )
 
 // NewGRPCServer new a gRPC server.

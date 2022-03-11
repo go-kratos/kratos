@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/filter"
+	"github.com/SeeMusic/kratos/v2/registry"
+	"github.com/SeeMusic/kratos/v2/selector"
+	"github.com/SeeMusic/kratos/v2/selector/filter"
 )
 
 func TestWrr(t *testing.T) {

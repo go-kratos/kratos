@@ -4,9 +4,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/internal/httputil"
+	"github.com/SeeMusic/kratos/v2/encoding"
+	"github.com/SeeMusic/kratos/v2/errors"
+	"github.com/SeeMusic/kratos/v2/internal/httputil"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.

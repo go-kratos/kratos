@@ -1,8 +1,8 @@
 package grpc
 
 import (
-	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/SeeMusic/kratos/v2/selector"
+	"github.com/SeeMusic/kratos/v2/transport"
 	"google.golang.org/grpc/metadata"
 )
 

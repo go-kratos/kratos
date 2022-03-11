@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	pb "github.com/go-kratos/kratos/examples/stream/hello"
+	pb "github.com/SeeMusic/kratos/examples/stream/hello"
 )
 
 type HelloService struct {

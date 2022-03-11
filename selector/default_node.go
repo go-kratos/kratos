@@ -3,7 +3,7 @@ package selector
 import (
 	"strconv"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/SeeMusic/kratos/v2/registry"
 )
 
 // DefaultNode is selector node

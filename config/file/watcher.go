@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/go-kratos/kratos/v2/config"
+	"github.com/SeeMusic/kratos/v2/config"
 )
 
 type watcher struct {

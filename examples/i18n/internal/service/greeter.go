@@ -3,12 +3,12 @@ package service
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/examples/i18n/internal/pkg/middleware/localize"
+	"github.com/SeeMusic/kratos/examples/i18n/internal/pkg/middleware/localize"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 
-	v1 "github.com/go-kratos/kratos/examples/i18n/api/helloworld/v1"
-	"github.com/go-kratos/kratos/examples/i18n/internal/biz"
-	"github.com/go-kratos/kratos/v2/log"
+	v1 "github.com/SeeMusic/kratos/examples/i18n/api/helloworld/v1"
+	"github.com/SeeMusic/kratos/examples/i18n/internal/biz"
+	"github.com/SeeMusic/kratos/v2/log"
 )
 
 // GreeterService is a greeter service.

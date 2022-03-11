@@ -4,11 +4,11 @@ import (
 	"context"
 	"log"
 
-	v1 "github.com/go-kratos/kratos/examples/validate/api"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/middleware/validate"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	v1 "github.com/SeeMusic/kratos/examples/validate/api"
+	"github.com/SeeMusic/kratos/v2"
+	"github.com/SeeMusic/kratos/v2/middleware/validate"
+	"github.com/SeeMusic/kratos/v2/transport/grpc"
+	"github.com/SeeMusic/kratos/v2/transport/http"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"

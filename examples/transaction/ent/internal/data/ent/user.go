@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent/user"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent/user"
 )
 
 // User is the model entity for the User schema.

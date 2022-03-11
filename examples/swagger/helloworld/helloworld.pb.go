@@ -7,7 +7,7 @@
 package helloworld
 
 import (
-	reply "github.com/go-kratos/kratos/examples/swagger/reply"
+	reply "github.com/SeeMusic/kratos/examples/swagger/reply"
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"

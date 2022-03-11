@@ -10,9 +10,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/article"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/comment"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/tag"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/article"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/comment"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/tag"
 )
 
 // ArticleCreate is the builder for creating a Article entity.

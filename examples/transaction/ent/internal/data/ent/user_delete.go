@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent/predicate"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent/user"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent/predicate"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent/user"
 )
 
 // UserDelete is the builder for deleting a User entity.

@@ -7,7 +7,7 @@
 package v1
 
 import (
-	_ "github.com/go-kratos/kratos/v2/errors"
+	_ "github.com/SeeMusic/kratos/v2/errors"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

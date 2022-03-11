@@ -9,8 +9,8 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
-	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/internal/testdata/complex"
+	"github.com/SeeMusic/kratos/v2/encoding"
+	"github.com/SeeMusic/kratos/v2/internal/testdata/complex"
 )
 
 type LoginRequest struct {

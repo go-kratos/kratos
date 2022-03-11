@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-kratos/kratos/examples/event/event"
-	"github.com/go-kratos/kratos/examples/event/kafka"
+	"github.com/SeeMusic/kratos/examples/event/event"
+	"github.com/SeeMusic/kratos/examples/event/kafka"
 )
 
 func main() {

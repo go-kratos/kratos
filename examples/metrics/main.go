@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"log"
 
-	prom "github.com/go-kratos/kratos/contrib/metrics/prometheus/v2"
-	"github.com/go-kratos/kratos/v2/middleware/metrics"
+	prom "github.com/SeeMusic/kratos/contrib/metrics/prometheus/v2"
+	"github.com/SeeMusic/kratos/v2/middleware/metrics"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/SeeMusic/kratos/examples/helloworld/helloworld"
+	"github.com/SeeMusic/kratos/v2"
+	"github.com/SeeMusic/kratos/v2/transport/grpc"
+	"github.com/SeeMusic/kratos/v2/transport/http"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

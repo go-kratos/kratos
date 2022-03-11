@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/article"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/article"
 )
 
 // Article is the model entity for the Article schema.

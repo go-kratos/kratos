@@ -4,11 +4,11 @@ import (
 	"context"
 	"log"
 
-	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/v2/metadata"
-	mmd "github.com/go-kratos/kratos/v2/middleware/metadata"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/SeeMusic/kratos/examples/helloworld/helloworld"
+	"github.com/SeeMusic/kratos/v2/metadata"
+	mmd "github.com/SeeMusic/kratos/v2/middleware/metadata"
+	"github.com/SeeMusic/kratos/v2/transport/grpc"
+	"github.com/SeeMusic/kratos/v2/transport/http"
 )
 
 func main() {

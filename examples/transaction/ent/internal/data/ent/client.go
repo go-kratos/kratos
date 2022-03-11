@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent/migrate"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent/migrate"
 
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent/card"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent/user"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent/card"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent/user"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/log"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/SeeMusic/kratos/v2/registry"
 
 	"github.com/polarismesh/polaris-go/api"
 	"github.com/polarismesh/polaris-go/pkg/config"
@@ -415,7 +415,9 @@ func (w *Watcher) Stop() error {
 func instancesToServiceInstances(instances []model.Instance) []*registry.ServiceInstance {
 	serviceInstances := make([]*registry.ServiceInstance, 0, len(instances))
 	for _, instance := range instances {
-		serviceInstances = append(serviceInstances, instanceToServiceInstance(instance))
+		if instance.IsHealthy() {
+			serviceInstances = append(serviceInstances, instanceToServiceInstance(instance))
+		}
 	}
 	return serviceInstances
 }

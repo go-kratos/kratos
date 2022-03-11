@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/migrate"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/migrate"
 
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/article"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/comment"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/tag"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/article"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/comment"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/tag"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

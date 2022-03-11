@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-kratos/kratos/examples/blog/internal/conf"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent"
+	"github.com/SeeMusic/kratos/examples/blog/internal/conf"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/log"
 	"github.com/go-redis/redis/extra/redisotel"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/wire"

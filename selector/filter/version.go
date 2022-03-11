@@ -3,7 +3,7 @@ package filter
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/v2/selector"
+	"github.com/SeeMusic/kratos/v2/selector"
 )
 
 // Version is version filter.

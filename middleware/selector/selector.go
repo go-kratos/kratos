@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/SeeMusic/kratos/v2/middleware"
+	"github.com/SeeMusic/kratos/v2/transport"
 )
 
 type (
@@ -79,11 +79,11 @@ func (b *Builder) Build() middleware.Middleware {
 	} else {
 		transporter = serverTransporter
 	}
-	return selector(transporter, b.matchs, b.ms...)
+	return selector(transporter, b.matches, b.ms...)
 }
 
-// matchs is match operation compliance Builder
-func (b *Builder) matchs(ctx context.Context, transporter transporter) bool {
+// matches is match operation compliance Builder
+func (b *Builder) matches(ctx context.Context, transporter transporter) bool {
 	info, ok := transporter(ctx)
 	if !ok {
 		return false

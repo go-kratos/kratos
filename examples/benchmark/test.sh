@@ -26,7 +26,7 @@ test_web_framework()
 
   pkill -9 $server_bin_name
   sleep 2
-  echo "finsihed testing $2"
+  echo "finished testing $2"
   echo
 }
 

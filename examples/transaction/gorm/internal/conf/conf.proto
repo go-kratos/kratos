@@ -1,7 +1,7 @@
 syntax = "proto3";
 package kratos.internal.conf;
 
-option go_package = "github.com/go-kratos/kratos/examples/blog/internal/conf;conf";
+option go_package = "github.com/SeeMusic/kratos/examples/blog/internal/conf;conf";
 
 import "google/protobuf/duration.proto";
 

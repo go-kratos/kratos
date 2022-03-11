@@ -7,14 +7,14 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
+	"github.com/SeeMusic/kratos/v2/internal/endpoint"
 
-	apimd "github.com/go-kratos/kratos/v2/api/metadata"
+	apimd "github.com/SeeMusic/kratos/v2/api/metadata"
 
-	"github.com/go-kratos/kratos/v2/internal/host"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/SeeMusic/kratos/v2/internal/host"
+	"github.com/SeeMusic/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/middleware"
+	"github.com/SeeMusic/kratos/v2/transport"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

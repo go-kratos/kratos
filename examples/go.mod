@@ -14,6 +14,7 @@ require (
 	github.com/SeeMusic/kratos/contrib/registry/discovery/v2 v2.0.0-00010101000000-000000000000
 	github.com/SeeMusic/kratos/contrib/registry/etcd/v2 v2.0.0-00010101000000-000000000000
 	github.com/SeeMusic/kratos/contrib/registry/nacos/v2 v2.0.0-00010101000000-000000000000
+	github.com/SeeMusic/kratos/contrib/registry/polaris/v2 v2.0.0
 	github.com/SeeMusic/kratos/contrib/registry/zookeeper/v2 v2.0.0-00010101000000-000000000000
 	github.com/SeeMusic/kratos/v2 v2.2.0
 	github.com/go-kratos/swagger-api v1.0.0
@@ -30,6 +31,7 @@ require (
 	github.com/labstack/echo/v4 v4.6.3
 	github.com/nacos-group/nacos-sdk-go v1.0.9
 	github.com/nicksnyder/go-i18n/v2 v2.1.2
+	github.com/polarismesh/polaris-go v1.0.1
 	github.com/prometheus/client_golang v1.12.0
 	github.com/segmentio/kafka-go v0.4.27
 	github.com/sirupsen/logrus v1.8.1
@@ -39,7 +41,7 @@ require (
 	go.opentelemetry.io/otel/exporters/jaeger v1.3.0
 	go.opentelemetry.io/otel/sdk v1.3.0
 	go.opentelemetry.io/otel/trace v1.3.0
-	go.uber.org/zap v1.19.0
+	go.uber.org/zap v1.19.1
 	golang.org/x/text v0.3.7
 	google.golang.org/genproto v0.0.0-20220126215142-9970aeb2e350
 	google.golang.org/grpc v1.44.0
@@ -57,6 +59,8 @@ replace (
 	github.com/SeeMusic/kratos/contrib/registry/discovery/v2 => ../contrib/registry/discovery
 	github.com/SeeMusic/kratos/contrib/registry/etcd/v2 => ../contrib/registry/etcd
 	github.com/SeeMusic/kratos/contrib/registry/nacos/v2 => ../contrib/registry/nacos
+	github.com/SeeMusic/kratos/contrib/registry/polaris/v2 => ../contrib/registry/polaris
 	github.com/SeeMusic/kratos/contrib/registry/zookeeper/v2 => ../contrib/registry/zookeeper
+
 	github.com/SeeMusic/kratos/v2 => ../
 )

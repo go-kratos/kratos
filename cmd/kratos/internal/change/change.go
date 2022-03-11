@@ -22,7 +22,7 @@ var (
 
 func init() {
 	if repoURL = os.Getenv("KRATOS_REPO"); repoURL == "" {
-		repoURL = "https://github.com/go-kratos/kratos.git"
+		repoURL = "https://github.com/SeeMusic/kratos.git"
 	}
 	CmdChange.Flags().StringVarP(&repoURL, "repo-url", "r", repoURL, "github repo")
 	token = os.Getenv("GITHUB_TOKEN")

@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
-	"github.com/go-kratos/kratos/examples/stream/hello"
-	"github.com/go-kratos/kratos/examples/stream/service"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/SeeMusic/kratos/examples/stream/hello"
+	"github.com/SeeMusic/kratos/examples/stream/service"
+	"github.com/SeeMusic/kratos/v2"
+	"github.com/SeeMusic/kratos/v2/middleware/recovery"
+	"github.com/SeeMusic/kratos/v2/transport/grpc"
 )
 
 func main() {

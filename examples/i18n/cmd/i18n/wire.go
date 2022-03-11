@@ -6,13 +6,13 @@
 package main
 
 import (
-	"github.com/go-kratos/kratos/examples/i18n/internal/biz"
-	"github.com/go-kratos/kratos/examples/i18n/internal/conf"
-	"github.com/go-kratos/kratos/examples/i18n/internal/data"
-	"github.com/go-kratos/kratos/examples/i18n/internal/server"
-	"github.com/go-kratos/kratos/examples/i18n/internal/service"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/SeeMusic/kratos/examples/i18n/internal/biz"
+	"github.com/SeeMusic/kratos/examples/i18n/internal/conf"
+	"github.com/SeeMusic/kratos/examples/i18n/internal/data"
+	"github.com/SeeMusic/kratos/examples/i18n/internal/server"
+	"github.com/SeeMusic/kratos/examples/i18n/internal/service"
+	"github.com/SeeMusic/kratos/v2"
+	"github.com/SeeMusic/kratos/v2/log"
 	"github.com/google/wire"
 )
 

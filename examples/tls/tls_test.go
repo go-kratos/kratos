@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
-	etcdregistry "github.com/go-kratos/kratos/contrib/registry/etcd/v2"
-	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	etcdregistry "github.com/SeeMusic/kratos/contrib/registry/etcd/v2"
+	pb "github.com/SeeMusic/kratos/examples/helloworld/helloworld"
+	"github.com/SeeMusic/kratos/v2"
+	"github.com/SeeMusic/kratos/v2/registry"
+	"github.com/SeeMusic/kratos/v2/transport/grpc"
+	"github.com/SeeMusic/kratos/v2/transport/http"
 	etcd "go.etcd.io/etcd/client/v3"
 )
 

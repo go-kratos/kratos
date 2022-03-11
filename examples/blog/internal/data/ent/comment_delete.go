@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/comment"
-	"github.com/go-kratos/kratos/examples/blog/internal/data/ent/predicate"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/comment"
+	"github.com/SeeMusic/kratos/examples/blog/internal/data/ent/predicate"
 )
 
 // CommentDelete is the builder for deleting a Comment entity.

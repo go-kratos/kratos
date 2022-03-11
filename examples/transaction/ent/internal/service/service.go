@@ -1,10 +1,10 @@
 package service
 
 import (
-	pb "github.com/go-kratos/kratos/examples/transaction/api/transaction/v1"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/biz"
+	pb "github.com/SeeMusic/kratos/examples/transaction/api/transaction/v1"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/biz"
 
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/log"
 	"github.com/google/wire"
 )
 

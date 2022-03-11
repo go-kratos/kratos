@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/SeeMusic/kratos/examples/helloworld/helloworld"
+	"github.com/SeeMusic/kratos/v2/transport/http"
 )
 
 func sayHelloHandler(ctx http.Context) error {

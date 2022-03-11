@@ -5,7 +5,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/go-kratos/kratos/examples/event/event"
+	"github.com/SeeMusic/kratos/examples/event/event"
 )
 
 var (

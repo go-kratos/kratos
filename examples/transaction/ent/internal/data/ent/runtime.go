@@ -3,8 +3,8 @@
 package ent
 
 import (
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent/schema"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent/user"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent/schema"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent/user"
 )
 
 // The init function reads all schema descriptors with runtime code

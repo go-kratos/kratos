@@ -6,11 +6,11 @@ import (
 
 	stdhttp "net/http"
 
-	"github.com/go-kratos/kratos/examples/errors/api"
-	pb "github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/SeeMusic/kratos/examples/errors/api"
+	pb "github.com/SeeMusic/kratos/examples/helloworld/helloworld"
+	"github.com/SeeMusic/kratos/v2/errors"
+	"github.com/SeeMusic/kratos/v2/transport/grpc"
+	"github.com/SeeMusic/kratos/v2/transport/http"
 )
 
 func main() {

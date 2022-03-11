@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/go-kratos/kratos/examples/event/event"
+	"github.com/SeeMusic/kratos/examples/event/event"
 	"github.com/segmentio/kafka-go"
 )
 

@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent/card"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent/predicate"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent/card"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent/predicate"
 )
 
 // CardDelete is the builder for deleting a Card entity.

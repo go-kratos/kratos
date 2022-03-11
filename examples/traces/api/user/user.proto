@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package api.user.v1;
 
-option go_package = "github.com/go-kratos/kratos/examples/kratos-http-grpc/api/user/v1;v1";
+option go_package = "github.com/SeeMusic/kratos/examples/kratos-http-grpc/api/user/v1;v1";
 option java_multiple_files = true;
 option java_package = "api.user.v1";
 

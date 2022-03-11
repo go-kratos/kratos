@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/go-kratos/kratos/examples/ws/handler"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/SeeMusic/kratos/examples/ws/handler"
+	"github.com/SeeMusic/kratos/v2"
+	"github.com/SeeMusic/kratos/v2/transport/http"
 	"github.com/gorilla/mux"
 )
 

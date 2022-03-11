@@ -4,7 +4,7 @@ package card
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"github.com/go-kratos/kratos/examples/transaction/ent/internal/data/ent/predicate"
+	"github.com/SeeMusic/kratos/examples/transaction/ent/internal/data/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

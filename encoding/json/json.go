@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/SeeMusic/kratos/v2/encoding"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )

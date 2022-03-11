@@ -1,11 +1,11 @@
-<p align="center"><a href="https://go-kratos.dev/" target="_blank"><img src="https://github.com/go-kratos/kratos/blob/main/docs/images/kratos-large.png?raw=true"></a></p>
+<p align="center"><a href="https://go-kratos.dev/" target="_blank"><img src="https://github.com/SeeMusic/kratos/blob/main/docs/images/kratos-large.png?raw=true"></a></p>
 
 <p align="center">
-<a href="https://github.com/go-kratos/kratos/actions"><img src="https://github.com/go-kratos/kratos/workflows/Go/badge.svg" alt="Build Status"></a>
-<a href="https://pkg.go.dev/github.com/go-kratos/kratos/v2"><img src="https://pkg.go.dev/badge/github.com/go-kratos/kratos/v2" alt="GoDoc"></a>
+<a href="https://github.com/SeeMusic/kratos/actions"><img src="https://github.com/SeeMusic/kratos/workflows/Go/badge.svg" alt="Build Status"></a>
+<a href="https://pkg.go.dev/github.com/SeeMusic/kratos/v2"><img src="https://pkg.go.dev/badge/github.com/SeeMusic/kratos/v2" alt="GoDoc"></a>
 <a href="https://codecov.io/gh/go-kratos/kratos"><img src="https://codecov.io/gh/go-kratos/kratos/master/graph/badge.svg" alt="codeCov"></a>
-<a href="https://goreportcard.com/report/github.com/go-kratos/kratos"><img src="https://goreportcard.com/badge/github.com/go-kratos/kratos" alt="Go Report Card" /a>
-<a href="https://github.com/go-kratos/kratos/blob/main/LICENSE"><img src="https://img.shields.io/github/license/go-kratos/kratos" alt="License"></a>
+<a href="https://goreportcard.com/report/github.com/SeeMusic/kratos"><img src="https://goreportcard.com/badge/github.com/SeeMusic/kratos" alt="Go Report Card"></a>
+<a href="https://github.com/SeeMusic/kratos/blob/main/LICENSE"><img src="https://img.shields.io/github/license/go-kratos/kratos" alt="License"></a>
 <a href="https://github.com/avelino/awesome-go"><img src="https://awesome.re/mentioned-badge.svg" alt="Awesome Go"></a>
 <a href="https://discord.gg/BWzJsUJ"><img src="https://img.shields.io/discord/766619759214854164?label=chat&logo=discord" alt="Discord"></a>
 </p>
@@ -39,7 +39,7 @@ Kratos is accessible, powerful, and provides tools required for large, robust ap
 
 Kratos has the most extensive and thorough [documentation](https://go-kratos.dev/en/docs/getting-started/start) and [example](./examples) library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-We also provide a [moderm template](https://github.com/go-kratos/kratos-layout), This template should help reduce the work required to setup up a modern project.
+We also provide a [modern template](https://github.com/SeeMusic/kratos-layout), This template should help reduce the work required to setup up a modern project.
 
 ### Goals
 
@@ -68,7 +68,7 @@ docker run -it --rm -p 8000:8000 --workdir /workspace golang
 ```shell
 apt-get update && apt-get -y install protobuf-compiler
 export GOPROXY=https://goproxy.io,direct
-go install github.com/go-kratos/kratos/cmd/kratos/v2@latest && kratos upgrade
+go install github.com/SeeMusic/kratos/cmd/kratos/v2@latest && kratos upgrade
 ```
   
 ```shell
@@ -86,7 +86,7 @@ If you discover a security vulnerability within Kratos, please send an e-mail to
 
 ## Community
 
-- [Wechat Group](https://github.com/go-kratos/kratos/issues/682)
+- [Wechat Group](https://github.com/SeeMusic/kratos/issues/682)
 - [Discord Group](https://discord.gg/BWzJsUJ)
 - [go-kratos.dev](https://go-kratos.dev/en)
 - QQ Group: 716486124
@@ -95,7 +95,7 @@ If you discover a security vulnerability within Kratos, please send an e-mail to
 
 Thank you for considering contributing to the Kratos framework! The contribution guide can be found in the [Kratos documentation](https://go-kratos.dev/en/docs/community/contribution).
 
-<a href="https://github.com/go-kratos/kratos/graphs/contributors">
+<a href="https://github.com/SeeMusic/kratos/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=go-kratos/kratos" />
 </a>
 

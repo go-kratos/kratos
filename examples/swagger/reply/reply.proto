@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package reply;
 
-option go_package = "github.com/go-kratos/kratos/examples/swagger/reply;reply";
+option go_package = "github.com/SeeMusic/kratos/examples/swagger/reply;reply";
 
 message Reply {
     string value = 1;

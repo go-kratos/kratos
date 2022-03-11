@@ -5,9 +5,9 @@ import (
 	"log"
 	stdhttp "net/http"
 
-	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/SeeMusic/kratos/examples/helloworld/helloworld"
+	"github.com/SeeMusic/kratos/v2/transport/grpc"
+	"github.com/SeeMusic/kratos/v2/transport/http"
 
 	stdgrpc "google.golang.org/grpc"
 	grpcmd "google.golang.org/grpc/metadata"

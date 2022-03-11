@@ -7,9 +7,9 @@ import (
 
 	srcgrpc "google.golang.org/grpc"
 
-	"github.com/go-kratos/kratos/contrib/registry/discovery/v2"
-	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/SeeMusic/kratos/contrib/registry/discovery/v2"
+	"github.com/SeeMusic/kratos/examples/helloworld/helloworld"
+	"github.com/SeeMusic/kratos/v2/transport/grpc"
 )
 
 func main() {

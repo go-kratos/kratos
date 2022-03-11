@@ -6,13 +6,13 @@
 package main
 
 import (
-	"github.com/go-kratos/kratos/examples/transaction/gorm/internal/biz"
-	"github.com/go-kratos/kratos/examples/transaction/gorm/internal/conf"
-	"github.com/go-kratos/kratos/examples/transaction/gorm/internal/data"
-	"github.com/go-kratos/kratos/examples/transaction/gorm/internal/server"
-	"github.com/go-kratos/kratos/examples/transaction/gorm/internal/service"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/SeeMusic/kratos/examples/transaction/gorm/internal/biz"
+	"github.com/SeeMusic/kratos/examples/transaction/gorm/internal/conf"
+	"github.com/SeeMusic/kratos/examples/transaction/gorm/internal/data"
+	"github.com/SeeMusic/kratos/examples/transaction/gorm/internal/server"
+	"github.com/SeeMusic/kratos/examples/transaction/gorm/internal/service"
+	"github.com/SeeMusic/kratos/v2"
+	"github.com/SeeMusic/kratos/v2/log"
 	"github.com/google/wire"
 )
 

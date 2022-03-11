@@ -7,12 +7,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	kgin "github.com/go-kratos/gin"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/transport"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/SeeMusic/kratos/v2"
+	"github.com/SeeMusic/kratos/v2/errors"
+	"github.com/SeeMusic/kratos/v2/middleware"
+	"github.com/SeeMusic/kratos/v2/middleware/recovery"
+	"github.com/SeeMusic/kratos/v2/transport"
+	"github.com/SeeMusic/kratos/v2/transport/http"
 )
 
 func customMiddleware(handler middleware.Handler) middleware.Handler {

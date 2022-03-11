@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/examples/event/event"
+	"github.com/SeeMusic/kratos/examples/event/event"
 )
 
 func TestSendAndReceive(t *testing.T) {

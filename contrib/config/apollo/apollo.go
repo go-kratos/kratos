@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/SeeMusic/kratos/v2/config"
+	"github.com/SeeMusic/kratos/v2/encoding"
+	"github.com/SeeMusic/kratos/v2/log"
 
 	"github.com/apolloconfig/agollo/v4"
 	apolloConfig "github.com/apolloconfig/agollo/v4/env/config"

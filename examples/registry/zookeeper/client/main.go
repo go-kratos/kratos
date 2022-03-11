@@ -5,10 +5,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/go-kratos/kratos/contrib/registry/zookeeper/v2"
-	"github.com/go-kratos/kratos/examples/helloworld/helloworld"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/SeeMusic/kratos/contrib/registry/zookeeper/v2"
+	"github.com/SeeMusic/kratos/examples/helloworld/helloworld"
+	"github.com/SeeMusic/kratos/v2/transport/grpc"
+	"github.com/SeeMusic/kratos/v2/transport/http"
 )
 
 func main() {

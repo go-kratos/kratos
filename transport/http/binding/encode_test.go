@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/internal/testdata/binding"
+	"github.com/SeeMusic/kratos/v2/internal/testdata/binding"
 )
 
 func TestProtoPath(t *testing.T) {

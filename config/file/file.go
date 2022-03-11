@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/go-kratos/kratos/v2/config"
+	"github.com/SeeMusic/kratos/v2/config"
 )
 
 var _ config.Source = (*file)(nil)

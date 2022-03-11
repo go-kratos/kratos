@@ -6,7 +6,7 @@ import "google/api/annotations.proto";
 import "reply/reply.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
-option go_package = "github.com/go-kratos/kratos/examples/swagger/helloworld;helloworld";
+option go_package = "github.com/SeeMusic/kratos/examples/swagger/helloworld;helloworld";
 
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 	info: {

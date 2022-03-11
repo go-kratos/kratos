@@ -4,7 +4,7 @@ package helloworld.v1;
 
 import "google/api/annotations.proto";
 
-option go_package = "github.com/go-kratos/kratos/examples/i18n/api/helloworld/v1;v1";
+option go_package = "github.com/SeeMusic/kratos/examples/i18n/api/helloworld/v1;v1";
 option java_multiple_files = true;
 option java_package = "dev.kratos.api.helloworld.v1";
 option java_outer_classname = "HelloWorldProtoV1";
