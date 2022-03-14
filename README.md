@@ -37,7 +37,7 @@ Kratos is accessible, powerful, and provides tools required for large, robust ap
 
 ## Learning Kratos
 
-Kratos has the most extensive and thorough [documentation](https://go-kratos.dev/en/docs/getting-started/start) and [example](./examples) library of all modern web application frameworks, making it a breeze to get started with the framework.
+Kratos has the most extensive and thorough [documentation](https://go-kratos.dev/en/docs/getting-started/start) and [example](https://github.com/go-kratos/examples) library of all modern web application frameworks, making it a breeze to get started with the framework.
 
 We also provide a [modern template](https://github.com/go-kratos/kratos-layout), This template should help reduce the work required to setup up a modern project.
 
