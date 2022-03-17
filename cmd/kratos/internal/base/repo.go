@@ -3,6 +3,7 @@ package base
 import (
 	"context"
 	"fmt"
+	stdurl "net/url"
 	"os"
 	"os/exec"
 	"path"
@@ -16,8 +17,11 @@ type Repo struct {
 	branch string
 }
 
-// NewRepo new a repository manager.
-func NewRepo(url string, branch string) *Repo {
+func repoDir(url string) string {
+	u, err := stdurl.Parse(url)
+	if err == nil {
+		url = fmt.Sprintf("%s://%s%s", u.Scheme, u.Hostname(), u.RequestURI())
+	}
 	var start int
 	start = strings.Index(url, "//")
 	if start == -1 {
@@ -26,9 +30,14 @@ func NewRepo(url string, branch string) *Repo {
 		start += 2
 	}
 	end := strings.LastIndex(url, "/")
+	return url[start:end]
+}
+
+// NewRepo new a repository manager.
+func NewRepo(url string, branch string) *Repo {
 	return &Repo{
 		url:    url,
-		home:   kratosHomeWithDir("repo/" + url[start:end]),
+		home:   kratosHomeWithDir("repo/" + repoDir(url)),
 		branch: branch,
 	}
 }
