@@ -119,12 +119,12 @@ func (h *Helper) Fatal(a ...interface{}) {
 
 // Fatalf logs a message at fatal level.
 func (h *Helper) Fatalf(format string, a ...interface{}) {
-	h.logger.Log(LevelFatal, h.msgKey, fmt.Sprintf(format, a...))
+	_ = h.logger.Log(LevelFatal, h.msgKey, fmt.Sprintf(format, a...))
 	os.Exit(1)
 }
 
 // Fatalw logs a message at fatal level.
 func (h *Helper) Fatalw(keyvals ...interface{}) {
-	h.logger.Log(LevelFatal, keyvals...)
+	_ = h.logger.Log(LevelFatal, keyvals...)
 	os.Exit(1)
 }
