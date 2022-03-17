@@ -18,9 +18,17 @@ type Repo struct {
 }
 
 func repoDir(url string) string {
+	if !strings.Contains(url, "//") {
+		url = "//" + url
+	}
+	if strings.HasPrefix(url, "//git@") {
+		url = "ssh:" + url
+	} else if strings.HasPrefix(url, "//") {
+		url = "https:" + url
+	}
 	u, err := stdurl.Parse(url)
 	if err == nil {
-		url = fmt.Sprintf("%s://%s%s", u.Scheme, u.Hostname(), u.RequestURI())
+		url = fmt.Sprintf("%s://%s%s", u.Scheme, u.Hostname(), u.Path)
 	}
 	var start int
 	start = strings.Index(url, "//")
