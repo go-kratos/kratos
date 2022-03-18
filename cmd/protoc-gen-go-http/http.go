@@ -204,8 +204,7 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 
 func buildPathVars(path string) (res map[string]*string) {
 	if strings.HasSuffix(path, "/") {
-		fmt.Fprintf(os.Stderr, "\u001B[31mERROR\u001B[m: Path %s should not end with \"/\" \n", path)
-		os.Exit(2)
+		fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: Path %s should not end with \"/\" \n", path)
 	}
 	res = make(map[string]*string)
 	pattern := regexp.MustCompile(`(?i){([a-z\.0-9_\s]*)=?([^{}]*)}`)
