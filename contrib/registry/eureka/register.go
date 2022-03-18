@@ -45,8 +45,8 @@ type Registry struct {
 func New(eurekaUrls []string, opts ...Option) (*Registry, error) {
 	r := &Registry{
 		ctx:               context.Background(),
-		heartbeatInterval: 10,
-		refreshInterval:   30,
+		heartbeatInterval: heartbeatTime,
+		refreshInterval:   refreshTime,
 		eurekaPath:        "eureka/v2",
 	}
 

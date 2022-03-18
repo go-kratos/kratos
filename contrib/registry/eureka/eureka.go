@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-const refreshTime = 30
-
 type subscriber struct {
 	appID    string
 	callBack func()

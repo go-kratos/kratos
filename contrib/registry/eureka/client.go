@@ -22,6 +22,7 @@ const (
 	maxIdleConns        = 100
 	heartbeatTime       = 10
 	httpTimeout         = 3
+	refreshTime         = 30
 )
 
 type Endpoint struct {
@@ -305,14 +306,6 @@ func (e *Client) buildAPI(currentTimes int, params ...string) string {
 	server := e.pickServer(currentTimes)
 	params = append([]string{server, e.eurekaPath}, params...)
 	return strings.Join(params, "/")
-}
-
-func (e *Client) toDuration(interval string) time.Duration {
-	duration, err := time.ParseDuration(interval)
-	if err != nil {
-		return 0
-	}
-	return duration
 }
 
 func (e *Client) do(ctx context.Context, method string, params []string, input io.Reader, output interface{}) error {
