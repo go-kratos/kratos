@@ -38,7 +38,7 @@ func (e *Error) GRPCStatus() *status.Status {
 // Is matches each error in the chain with the target value.
 func (e *Error) Is(err error) bool {
 	if se := new(Error); errors.As(err, &se) {
-		return se.Reason == e.Reason
+		return se.Code == e.Code && se.Reason == e.Reason
 	}
 	return false
 }
@@ -69,7 +69,7 @@ func Errorf(code int, reason, format string, a ...interface{}) error {
 	return New(code, reason, fmt.Sprintf(format, a...))
 }
 
-// Code returns the http code for a error.
+// Code returns the http code for an error.
 // It supports wrapped errors.
 func Code(err error) int {
 	if err == nil {

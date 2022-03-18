@@ -22,17 +22,12 @@ type API struct {
 	lock            sync.Mutex
 }
 
-func NewAPI(ctx context.Context, client *Client, refreshInterval string) *API {
-	duration, err := time.ParseDuration(refreshInterval)
-	if err != nil {
-		duration = time.Second * refreshTime
-	}
-
+func NewAPI(ctx context.Context, client *Client, refreshInterval time.Duration) *API {
 	e := &API{
 		cli:             client,
 		allInstances:    make(map[string][]Instance),
 		subscribers:     make(map[string]*subscriber),
-		refreshInterval: duration,
+		refreshInterval: refreshInterval,
 	}
 
 	// 首次广播一次

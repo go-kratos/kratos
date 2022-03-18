@@ -98,7 +98,8 @@ func (a *App) Run() error {
 		wg.Add(1)
 		eg.Go(func() error {
 			wg.Done()
-			return srv.Start(ctx)
+			tctx := NewContext(context.Background(), a)
+			return srv.Start(tctx)
 		})
 	}
 	wg.Wait()
@@ -153,7 +154,7 @@ func (a *App) Stop() error {
 }
 
 func (a *App) buildInstance() (*registry.ServiceInstance, error) {
-	endpoints := make([]string, 0) //nolint:gomnd
+	endpoints := make([]string, 0, len(a.opts.endpoints))
 	for _, e := range a.opts.endpoints {
 		endpoints = append(endpoints, e.String())
 	}

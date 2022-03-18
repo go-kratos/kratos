@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -21,11 +22,11 @@ func WithContext(ctx context.Context) Option {
 	return func(o *Registry) { o.ctx = ctx }
 }
 
-func WithHeartbeat(interval string) Option {
+func WithHeartbeat(interval time.Duration) Option {
 	return func(o *Registry) { o.heartbeatInterval = interval }
 }
 
-func WithRefresh(interval string) Option {
+func WithRefresh(interval time.Duration) Option {
 	return func(o *Registry) { o.refreshInterval = interval }
 }
 
@@ -36,16 +37,16 @@ func WithEurekaPath(path string) Option {
 type Registry struct {
 	ctx               context.Context
 	api               *API
-	heartbeatInterval string
-	refreshInterval   string
+	heartbeatInterval time.Duration
+	refreshInterval   time.Duration
 	eurekaPath        string
 }
 
 func New(eurekaUrls []string, opts ...Option) (*Registry, error) {
 	r := &Registry{
 		ctx:               context.Background(),
-		heartbeatInterval: "10s",
-		refreshInterval:   "30s",
+		heartbeatInterval: 10,
+		refreshInterval:   30,
 		eurekaPath:        "eureka/v2",
 	}
 
@@ -53,7 +54,7 @@ func New(eurekaUrls []string, opts ...Option) (*Registry, error) {
 		o(r)
 	}
 
-	client := NewClient(eurekaUrls, WithHeartbeatInterval(r.heartbeatInterval), WithCtx(r.ctx), WithPath(r.eurekaPath))
+	client := NewClient(eurekaUrls, WithHeartbeatInterval(r.heartbeatInterval), WithClientContext(r.ctx), WithNamespace(r.eurekaPath))
 	r.api = NewAPI(r.ctx, client, r.refreshInterval)
 	return r, nil
 }

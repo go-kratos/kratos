@@ -104,19 +104,17 @@ func WithMaxRetry(maxRetry int) ClientOption {
 	return func(e *Client) { e.maxRetry = maxRetry }
 }
 
-func WithHeartbeatInterval(interval string) ClientOption {
+func WithHeartbeatInterval(interval time.Duration) ClientOption {
 	return func(e *Client) {
-		if duration := e.toDuration(interval); duration > 0 {
-			e.heartbeatInterval = duration
-		}
+		e.heartbeatInterval = interval
 	}
 }
 
-func WithCtx(ctx context.Context) ClientOption {
+func WithClientContext(ctx context.Context) ClientOption {
 	return func(e *Client) { e.ctx = ctx }
 }
 
-func WithPath(path string) ClientOption {
+func WithNamespace(path string) ClientOption {
 	return func(e *Client) { e.eurekaPath = path }
 }
 
