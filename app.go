@@ -119,8 +119,7 @@ func (a *App) Run() error {
 			case <-ctx.Done():
 				return ctx.Err()
 			case <-c:
-				err := a.Stop()
-				if err != nil {
+				if err := a.Stop(); err != nil {
 					a.opts.logger.Errorf("failed to stop app: %v", err)
 					return err
 				}
@@ -139,7 +138,7 @@ func (a *App) Stop() error {
 	instance := a.instance
 	a.lk.Unlock()
 	if a.opts.registrar != nil && instance != nil {
-		ctx, cancel := context.WithTimeout(a.ctx, a.opts.registrarTimeout)
+		ctx, cancel := context.WithTimeout(NewContext(a.ctx, a), a.opts.registrarTimeout)
 		defer cancel()
 		if err := a.opts.registrar.Deregister(ctx, instance); err != nil {
 			return err
