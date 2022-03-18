@@ -19,6 +19,7 @@ scopes:
   - third_party
   - transport
 types:
+  - deps
   - feat
   - fix
   - docs
