@@ -84,27 +84,25 @@ func (a *App) Run() error {
 	if err != nil {
 		return err
 	}
-	ctx := NewContext(a.ctx, a)
-	eg, ctx := errgroup.WithContext(ctx)
+	eg, ctx := errgroup.WithContext(NewContext(a.ctx, a))
 	wg := sync.WaitGroup{}
 	for _, srv := range a.opts.servers {
 		srv := srv
 		eg.Go(func() error {
 			<-ctx.Done() // wait for stop signal
-			sctx, cancel := context.WithTimeout(NewContext(context.Background(), a), a.opts.stopTimeout)
+			stopCtx, cancel := context.WithTimeout(NewContext(a.opts.ctx, a), a.opts.stopTimeout)
 			defer cancel()
-			return srv.Stop(sctx)
+			return srv.Stop(stopCtx)
 		})
 		wg.Add(1)
 		eg.Go(func() error {
 			wg.Done()
-			tctx := NewContext(context.Background(), a)
-			return srv.Start(tctx)
+			return srv.Start(NewContext(a.opts.ctx, a))
 		})
 	}
 	wg.Wait()
 	if a.opts.registrar != nil {
-		rctx, rcancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
+		rctx, rcancel := context.WithTimeout(ctx, a.opts.registrarTimeout)
 		defer rcancel()
 		if err := a.opts.registrar.Register(rctx, instance); err != nil {
 			return err
