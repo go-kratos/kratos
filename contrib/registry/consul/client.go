@@ -58,6 +58,9 @@ func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry
 			}
 			endpoints = append(endpoints, addr.Address)
 		}
+		if len(endpoints) == 0 && entry.Service.Address != "" && entry.Service.Port != 0 {
+			endpoints = append(endpoints, fmt.Sprintf("http://%s:%d", entry.Service.Address, entry.Service.Port))
+		}
 		services = append(services, &registry.ServiceInstance{
 			ID:        entry.Service.ID,
 			Name:      entry.Service.Service,
