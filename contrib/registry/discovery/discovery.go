@@ -105,7 +105,7 @@ func (d *Discovery) selfProc(resolver *Resolve, event <-chan struct{}) {
 		if !ok {
 			return
 		}
-		zones, ok := resolver.Fetch(context.Background())
+		zones, ok := resolver.fetch(context.Background())
 		if ok {
 			d.newSelf(zones.Instances)
 		}
