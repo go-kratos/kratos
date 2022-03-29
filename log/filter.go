@@ -64,7 +64,16 @@ func (f *Filter) Log(level Level, keyvals ...interface{}) error {
 	if level < f.level {
 		return nil
 	}
-	if f.filter != nil && f.filter(level, keyvals...) {
+	var fkv []interface{}
+	// is use logger and with prefix,
+	// carry them to filer keyvals also.
+	if l, ok := f.logger.(*logger); ok {
+		if len(l.prefix) > 0 {
+			fkv = append(fkv, l.prefix...)
+		}
+	}
+	fkv = append(fkv, keyvals...)
+	if f.filter != nil && f.filter(level, fkv...) {
 		return nil
 	}
 	if len(f.key) > 0 || len(f.value) > 0 {
