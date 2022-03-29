@@ -27,7 +27,6 @@ var (
 const _instanceIDSeparator = "-"
 
 type options struct {
-
 	// required, namespace in polaris
 	Namespace string
 
