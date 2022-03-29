@@ -71,11 +71,11 @@ func (f *Filter) Log(level Level, keyvals ...interface{}) error {
 		if len(l.prefix) > 0 {
 			fkv = make([]interface{}, 0, len(l.prefix)+len(keyvals))
 			fkv = append(fkv, l.prefix...)
+			fkv = append(fkv, keyvals...)
 		}
 	} else {
-		fkv = make([]interface{}, 0, len(keyvals))
+		fkv = keyvals
 	}
-	fkv = append(fkv, keyvals...)
 	if f.filter != nil && f.filter(level, fkv...) {
 		return nil
 	}
