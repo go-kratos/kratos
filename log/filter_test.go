@@ -108,7 +108,10 @@ func TestFilterFuncWitchLoggerPrefix(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt.logger.Log(LevelInfo, "msg", "msg")
+		err := tt.logger.Log(LevelInfo, "msg", "msg")
+		if err != nil {
+			t.Fatal("err should be nil")
+		}
 		got := buf.String()
 		if got != tt.want {
 			t.Fatalf("filter should catch prefix, want %s, got %s.", tt.want, got)
