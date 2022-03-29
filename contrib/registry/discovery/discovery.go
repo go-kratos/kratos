@@ -79,7 +79,7 @@ func New(c *Config, logger log.Logger) *Discovery {
 	if !ok {
 		panic("Discovery watch self failed")
 	}
-	discoveryIns, ok := r.Fetch(context.Background())
+	discoveryIns, ok := r.fetch(context.Background())
 	if ok {
 		d.newSelf(discoveryIns.Instances)
 	}
@@ -444,8 +444,8 @@ func (r *Resolve) Watch() <-chan struct{} {
 	return r.event
 }
 
-// Fetch resolver instance.
-func (r *Resolve) Fetch(ctx context.Context) (ins *disInstancesInfo, ok bool) {
+// fetch resolver instance.
+func (r *Resolve) fetch(ctx context.Context) (ins *disInstancesInfo, ok bool) {
 	r.d.mutex.RLock()
 	app, ok := r.d.apps[r.id]
 	r.d.mutex.RUnlock()
