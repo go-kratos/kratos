@@ -90,6 +90,7 @@ func testFilterFunc(level Level, keyvals ...interface{}) bool {
 	}
 	return false
 }
+
 func TestFilterFuncWitchLoggerPrefix(t *testing.T) {
 	buf := new(bytes.Buffer)
 	tests := []struct {
