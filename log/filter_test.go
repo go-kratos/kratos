@@ -1,6 +1,7 @@
 package log
 
 import (
+	"bytes"
 	"io"
 	"testing"
 )
@@ -85,6 +86,47 @@ func testFilterFunc(level Level, keyvals ...interface{}) bool {
 	for i := 0; i < len(keyvals); i++ {
 		if keyvals[i] == "password" {
 			keyvals[i+1] = fuzzyStr
+		}
+	}
+	return false
+}
+
+func TestFilterFuncWitchLoggerPrefix(t *testing.T) {
+	buf := new(bytes.Buffer)
+	tests := []struct {
+		logger Logger
+		want   string
+	}{
+		{
+			logger: NewFilter(With(NewStdLogger(buf), "caller", "caller", "prefix", "whaterver"), FilterFunc(testFilterFuncWithLoggerPrefix)),
+			want:   "",
+		},
+		{
+			logger: NewFilter(With(NewStdLogger(buf), "caller", "caller"), FilterFunc(testFilterFuncWithLoggerPrefix)),
+			want:   "INFO caller=caller msg=msg\n",
+		},
+	}
+
+	for _, tt := range tests {
+		err := tt.logger.Log(LevelInfo, "msg", "msg")
+		if err != nil {
+			t.Fatal("err should be nil")
+		}
+		got := buf.String()
+		if got != tt.want {
+			t.Fatalf("filter should catch prefix, want %s, got %s.", tt.want, got)
+		}
+		buf.Reset()
+	}
+}
+
+func testFilterFuncWithLoggerPrefix(level Level, keyvals ...interface{}) bool {
+	if level == LevelWarn {
+		return true
+	}
+	for i := 0; i < len(keyvals); i += 2 {
+		if keyvals[i] == "prefix" {
+			return true
 		}
 	}
 	return false
