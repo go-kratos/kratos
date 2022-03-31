@@ -42,7 +42,6 @@ func newWatcher(ctx context.Context, cli naming_client.INamingClient, serviceNam
 			if len(services) > 0 {
 				w.watchChan <- struct{}{}
 			}
-
 		},
 	})
 	return w, e
