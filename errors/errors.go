@@ -9,6 +9,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+//go:generate protoc -I. --go_out=paths=source_relative:. errors.proto
+
 const (
 	// UnknownCode is unknown code for error info.
 	UnknownCode = 500
@@ -20,12 +22,8 @@ const (
 
 // Error is a status error.
 type Error struct {
+	Status
 	cause error
-
-	Code     int32             `json:"code"`
-	Reason   string            `json:"reason"`
-	Message  string            `json:"message"`
-	Metadata map[string]string `json:"metadata"`
 }
 
 func (e *Error) Error() string {
@@ -56,8 +54,8 @@ func (e *Error) GRPCStatus() *status.Status {
 	return s
 }
 
-// WithError with the underlying cause of the error.
-func (e *Error) WithError(cause error) *Error {
+// WithCause with the underlying cause of the error.
+func (e *Error) WithCause(cause error) *Error {
 	err := Clone(e)
 	err.cause = cause
 	return err
@@ -73,9 +71,11 @@ func (e *Error) WithMetadata(md map[string]string) *Error {
 // New returns an error object for the code, message.
 func New(code int, reason, message string) *Error {
 	return &Error{
-		Code:    int32(code),
-		Message: message,
-		Reason:  reason,
+		Status: Status{
+			Code:    int32(code),
+			Message: message,
+			Reason:  reason,
+		},
 	}
 }
 
@@ -114,10 +114,12 @@ func Clone(err *Error) *Error {
 		metadata[k] = v
 	}
 	return &Error{
-		Code:     err.Code,
-		Reason:   err.Reason,
-		Message:  err.Message,
-		Metadata: metadata,
+		Status: Status{
+			Code:     err.Code,
+			Reason:   err.Reason,
+			Message:  err.Message,
+			Metadata: metadata,
+		},
 	}
 }
 
