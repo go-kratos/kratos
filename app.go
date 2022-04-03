@@ -96,7 +96,7 @@ func (a *App) Run() error {
 		})
 		wg.Add(1)
 		eg.Go(func() error {
-			wg.Done()
+			defer wg.Done()
 			return srv.Start(NewContext(a.opts.ctx, a))
 		})
 	}
