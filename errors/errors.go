@@ -114,6 +114,7 @@ func Clone(err *Error) *Error {
 		metadata[k] = v
 	}
 	return &Error{
+		cause: err.cause,
 		Status: Status{
 			Code:     err.Code,
 			Reason:   err.Reason,
