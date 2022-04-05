@@ -45,9 +45,10 @@ func TestRegistry(t *testing.T) {
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
 		CacheDir:            "/tmp/nacos/cache",
-		RotateTime:          "1h",
-		MaxAge:              3,
-		LogLevel:            "debug",
+		LogRollingConfig: &constant.ClientLogRollingConfig{
+			MaxSize: 1,
+		},
+		LogLevel: "debug",
 	}
 
 	// a more graceful way to create naming client
@@ -138,9 +139,10 @@ func TestRegistryMany(t *testing.T) {
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
 		CacheDir:            "/tmp/nacos/cache",
-		RotateTime:          "1h",
-		MaxAge:              3,
-		LogLevel:            "debug",
+		LogRollingConfig: &constant.ClientLogRollingConfig{
+			MaxSize: 1,
+		},
+		LogLevel: "debug",
 	}
 
 	// a more graceful way to create naming client
