@@ -103,6 +103,9 @@ func TestIs(t *testing.T) {
 func TestCause(t *testing.T) {
 	testError := &TestError{message: "test"}
 	err := BadRequest("foo", "bar").WithCause(testError)
+	if !errors.Is(err, testError) {
+		t.Fatalf("want %v but got %v", testError, err)
+	}
 	if te := new(TestError); errors.As(err, &te) {
 		if te.message != testError.message {
 			t.Fatalf("want %s but got %s", testError.message, te.message)
