@@ -12,7 +12,11 @@ import (
 	"google.golang.org/grpc/test/grpc_testing"
 )
 
-func TestError(t *testing.T) {
+type TestError struct{ message string }
+
+func (e *TestError) Error() string { return e.message }
+
+func TestErrors(t *testing.T) {
 	var base *Error
 	err := Newf(http.StatusBadRequest, "reason", "message")
 	err2 := Newf(http.StatusBadRequest, "reason", "message")
@@ -93,6 +97,16 @@ func TestIs(t *testing.T) {
 				t.Errorf("Error.Error() = %v, want %v", ok, tt.want)
 			}
 		})
+	}
+}
+
+func TestCause(t *testing.T) {
+	testError := &TestError{message: "test"}
+	err := BadRequest("foo", "bar").WithCause(testError)
+	if te := new(TestError); errors.As(err, &te) {
+		if te.message != testError.message {
+			t.Fatalf("want %s but got %s", testError.message, te.message)
+		}
 	}
 }
 
