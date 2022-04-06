@@ -51,11 +51,16 @@ func Test_case2Camel(t *testing.T) {
 			args: args{"system"},
 			want: "System",
 		},
+		{
+			name: "unicode_punctuation1",
+			args: args{"go_go_\u2024go"},
+			want: "GoGo\u2024Go",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := case2Camel(tt.args.name); got != tt.want {
-				t.Errorf("case2Camel() = %v, want %v", got, tt.want)
+				t.Errorf("input: %v, case2Camel() = %v, want %v", tt.args.name, got, tt.want)
 			}
 		})
 	}

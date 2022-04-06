@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2/errors"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 )
@@ -98,10 +100,10 @@ func case2Camel(name string) string {
 		if upperName == name {
 			name = strings.ToLower(name)
 		}
-		return strings.Title(name)
+		return cases.Title(language.Und, cases.NoLower).String(name)
 	}
 	name = strings.ToLower(name)
 	name = strings.Replace(name, "_", " ", -1)
-	name = strings.Title(name)
+	name = cases.Title(language.Und, cases.NoLower).String(name)
 	return strings.Replace(name, " ", "", -1)
 }
