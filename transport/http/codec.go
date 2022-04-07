@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -25,7 +26,7 @@ type EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
 func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 	codec, ok := CodecForRequest(r, "Content-Type")
 	if !ok {
-		return errors.BadRequest("CODEC", r.Header.Get("Content-Type"))
+		return errors.BadRequest("CODEC", fmt.Sprintf("unregister Content-Type: %s", r.Header.Get("Content-Type")))
 	}
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -35,7 +36,7 @@ func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 		return nil
 	}
 	if err = codec.Unmarshal(data, v); err != nil {
-		return errors.BadRequest("CODEC", err.Error())
+		return errors.BadRequest("CODEC", fmt.Sprintf("body unmarshal %s", err.Error()))
 	}
 	return nil
 }
