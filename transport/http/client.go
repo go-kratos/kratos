@@ -341,7 +341,7 @@ func DefaultErrorDecoder(ctx context.Context, res *http.Response) error {
 			return e
 		}
 	}
-	return errors.Errorf(res.StatusCode, errors.UnknownReason, err.Error())
+	return errors.Newf(res.StatusCode, errors.UnknownReason, "").WithCause(err)
 }
 
 // CodecForResponse get encoding.Codec via http.Response
