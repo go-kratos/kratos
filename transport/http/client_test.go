@@ -255,14 +255,14 @@ func TestDefaultErrorDecoder(t *testing.T) {
 	if err2 == nil {
 		t.Errorf("expected error, got nil")
 	}
-	if !reflect.DeepEqual(int32(500), err2.(*kratosErrors.Error).GetCode()) {
-		t.Errorf("expected %v, got %v", 500, err2.(*kratosErrors.Error).GetCode())
+	if !reflect.DeepEqual(int32(500), err2.(*kratosErrors.Error).Code) {
+		t.Errorf("expected %v, got %v", 500, err2.(*kratosErrors.Error).Code)
 	}
-	if !reflect.DeepEqual("hi", err2.(*kratosErrors.Error).GetMessage()) {
-		t.Errorf("expected %v, got %v", "hi", err2.(*kratosErrors.Error).GetMessage())
+	if !reflect.DeepEqual("hi", err2.(*kratosErrors.Error).Message) {
+		t.Errorf("expected %v, got %v", "hi", err2.(*kratosErrors.Error).Message)
 	}
-	if !reflect.DeepEqual("FOO", err2.(*kratosErrors.Error).GetReason()) {
-		t.Errorf("expected %v, got %v", "FOO", err2.(*kratosErrors.Error).GetReason())
+	if !reflect.DeepEqual("FOO", err2.(*kratosErrors.Error).Reason) {
+		t.Errorf("expected %v, got %v", "FOO", err2.(*kratosErrors.Error).Reason)
 	}
 }
 
