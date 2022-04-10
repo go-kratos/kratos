@@ -86,7 +86,7 @@ func FromClientContext(ctx context.Context) (Metadata, bool) {
 // with any existing metadata in the context.
 func AppendToClientContext(ctx context.Context, kv ...string) context.Context {
 	if len(kv)%2 == 1 {
-		panic(fmt.Sprintf("metadata: AppendToOutgoingContext got an odd number of input pairs for metadata: %d", len(kv)))
+		panic(fmt.Sprintf("metadata: AppendToClientContext got an odd number of input pairs for metadata: %d", len(kv)))
 	}
 	md, _ := FromClientContext(ctx)
 	md = md.Clone()
