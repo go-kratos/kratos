@@ -17,7 +17,7 @@ const (
 	fmtPackage    = protogen.GoImportPath("fmt")
 )
 
-var enCases = cases.Title(language.AmericanEnglish)
+var enCases = cases.Title(language.AmericanEnglish, cases.NoLower)
 
 // generateFile generates a _errors.pb.go file containing kratos errors definitions.
 func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.GeneratedFile {
