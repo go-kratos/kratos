@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
-  
+
 	"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2/errors"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
