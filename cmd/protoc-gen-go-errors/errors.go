@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
 	"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2/errors"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
@@ -13,6 +16,8 @@ const (
 	errorsPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/errors")
 	fmtPackage    = protogen.GoImportPath("fmt")
 )
+
+var enCases = cases.Title(language.AmericanEnglish, cases.NoLower)
 
 // generateFile generates a _errors.pb.go file containing kratos errors definitions.
 func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.GeneratedFile {
@@ -98,10 +103,10 @@ func case2Camel(name string) string {
 		if upperName == name {
 			name = strings.ToLower(name)
 		}
-		return strings.Title(name)
+		return enCases.String(name)
 	}
 	name = strings.ToLower(name)
 	name = strings.Replace(name, "_", " ", -1)
-	name = strings.Title(name)
+	name = enCases.String(name)
 	return strings.Replace(name, " ", "", -1)
 }

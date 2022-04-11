@@ -87,7 +87,7 @@ func TestDefaultResponseEncoderWithError(t *testing.T) {
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	se := &errors.Error{Code: 511}
+	se := errors.New(511, "", "")
 	DefaultErrorEncoder(w, req, se)
 	if !reflect.DeepEqual("application/json", w.Header().Get("Content-Type")) {
 		t.Errorf("expected %v, got %v", "application/json", w.Header().Get("Content-Type"))
