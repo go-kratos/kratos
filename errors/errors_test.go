@@ -12,7 +12,11 @@ import (
 	"google.golang.org/grpc/test/grpc_testing"
 )
 
-func TestError(t *testing.T) {
+type TestError struct{ message string }
+
+func (e *TestError) Error() string { return e.message }
+
+func TestErrors(t *testing.T) {
 	var base *Error
 	err := Newf(http.StatusBadRequest, "reason", "message")
 	err2 := Newf(http.StatusBadRequest, "reason", "message")
@@ -32,10 +36,10 @@ func TestError(t *testing.T) {
 	}
 
 	if !errors.As(err, &base) {
-		t.Errorf("should be matchs: %v", err)
+		t.Errorf("should be matches: %v", err)
 	}
 	if !IsBadRequest(err) {
-		t.Errorf("should be matchs: %v", err)
+		t.Errorf("should be matches: %v", err)
 	}
 
 	if reason := Reason(err); reason != err3.Reason {
@@ -76,13 +80,13 @@ func TestIs(t *testing.T) {
 	}{
 		{
 			name: "true",
-			e:    &Error{Code: 404, Reason: "test"},
+			e:    New(404, "test", ""),
 			err:  New(http.StatusNotFound, "test", ""),
 			want: true,
 		},
 		{
 			name: "false",
-			e:    &Error{Reason: "test"},
+			e:    New(0, "test", ""),
 			err:  errors.New("test"),
 			want: false,
 		},
@@ -93,6 +97,19 @@ func TestIs(t *testing.T) {
 				t.Errorf("Error.Error() = %v, want %v", ok, tt.want)
 			}
 		})
+	}
+}
+
+func TestCause(t *testing.T) {
+	testError := &TestError{message: "test"}
+	err := BadRequest("foo", "bar").WithCause(testError)
+	if !errors.Is(err, testError) {
+		t.Fatalf("want %v but got %v", testError, err)
+	}
+	if te := new(TestError); errors.As(err, &te) {
+		if te.message != testError.message {
+			t.Fatalf("want %s but got %s", testError.message, te.message)
+		}
 	}
 }
 

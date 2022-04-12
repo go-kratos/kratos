@@ -17,7 +17,7 @@
 
 ## About Kratos
   
-> The name is inspired by the game God of War which is based on Greek myths, tells the Kratos from mortals to become a God of War and launches the adventure of killing god.
+> The name is inspired by the game God of War which is based on Greek myths, tells the adventures of Kratos who became a god of war from a mortal and launched a god-killing slaughter.
 
 Kratos is a microservice-oriented governance framework implemented by golang, which offers convenient capabilities to help you quickly build a bulletproof application from scratch, such as:
 
@@ -37,7 +37,7 @@ Kratos is accessible, powerful, and provides tools required for large, robust ap
 
 ## Learning Kratos
 
-Kratos has the most extensive and thorough [documentation](https://go-kratos.dev/en/docs/getting-started/start) and [example](./examples) library of all modern web application frameworks, making it a breeze to get started with the framework.
+Kratos has the most extensive and thorough [documentation](https://go-kratos.dev/en/docs/getting-started/start) and [example](https://github.com/go-kratos/examples) library of all modern web application frameworks, making it a breeze to get started with the framework.
 
 We also provide a [modern template](https://github.com/go-kratos/kratos-layout), This template should help reduce the work required to setup up a modern project.
 

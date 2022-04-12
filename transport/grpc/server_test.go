@@ -211,7 +211,7 @@ func TestUnaryInterceptor(t *testing.T) {
 	}
 }
 
-func TestStramInterceptor(t *testing.T) {
+func TestStreamInterceptor(t *testing.T) {
 	o := &Server{}
 	v := []grpc.StreamServerInterceptor{
 		func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {

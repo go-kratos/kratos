@@ -27,15 +27,18 @@ type Client struct {
 	healthcheckInterval int
 	// heartbeat enable heartbeat
 	heartbeat bool
+	// deregisterCriticalServiceAfter time interval in seconds
+	deregisterCriticalServiceAfter int
 }
 
 // NewClient creates consul client
 func NewClient(cli *api.Client) *Client {
 	c := &Client{
-		cli:                 cli,
-		resolver:            defaultResolver,
-		healthcheckInterval: 10,
-		heartbeat:           true,
+		cli:                            cli,
+		resolver:                       defaultResolver,
+		healthcheckInterval:            10,
+		heartbeat:                      true,
+		deregisterCriticalServiceAfter: 600,
 	}
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 	return c
@@ -57,6 +60,9 @@ func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry
 				continue
 			}
 			endpoints = append(endpoints, addr.Address)
+		}
+		if len(endpoints) == 0 && entry.Service.Address != "" && entry.Service.Port != 0 {
+			endpoints = append(endpoints, fmt.Sprintf("http://%s:%d", entry.Service.Address, entry.Service.Port))
 		}
 		services = append(services, &registry.ServiceInstance{
 			ID:        entry.Service.ID,
@@ -120,7 +126,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
 				TCP:                            address,
 				Interval:                       fmt.Sprintf("%ds", c.healthcheckInterval),
-				DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.healthcheckInterval*60),
+				DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.deregisterCriticalServiceAfter),
 				Timeout:                        "5s",
 			})
 		}
@@ -129,7 +135,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
 			CheckID:                        "service:" + svc.ID,
 			TTL:                            fmt.Sprintf("%ds", c.healthcheckInterval*2),
-			DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.healthcheckInterval*60),
+			DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.deregisterCriticalServiceAfter),
 		})
 	}
 

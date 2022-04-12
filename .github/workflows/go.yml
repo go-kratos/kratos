@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        go: [ 1.16, 1.17 ]
+        go: [ 1.16, 1.17, 1.18 ]
     name: build & test
     runs-on: ubuntu-latest
     services:
@@ -65,11 +65,5 @@ jobs:
       - name: HTTP
         run: |
           cd cmd/protoc-gen-go-http
-          go build ./...
-          go test ./...
-
-      - name: Examples
-        run: |
-          cd examples
           go build ./...
           go test ./...
