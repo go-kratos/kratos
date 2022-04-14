@@ -49,10 +49,10 @@ func (n *DefaultNode) Metadata() map[string]string {
 // NewNode new node
 func NewNode(scheme, addr string, ins *registry.ServiceInstance) Node {
 	n := &DefaultNode{
-		addr: addr,
+		scheme: scheme,
+		addr:   addr,
 	}
 	if ins != nil {
-		n.scheme = scheme
 		n.name = ins.Name
 		n.version = ins.Version
 		n.metadata = ins.Metadata
