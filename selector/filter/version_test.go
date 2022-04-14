@@ -13,6 +13,7 @@ func TestVersion(t *testing.T) {
 	f := Version("v2.0.0")
 	var nodes []selector.Node
 	nodes = append(nodes, selector.NewNode(
+		"http",
 		"127.0.0.1:9090",
 		&registry.ServiceInstance{
 			ID:        "127.0.0.1:9090",
@@ -22,6 +23,7 @@ func TestVersion(t *testing.T) {
 		}))
 
 	nodes = append(nodes, selector.NewNode(
+		"http",
 		"127.0.0.2:9090",
 		&registry.ServiceInstance{
 			ID:        "127.0.0.2:9090",
