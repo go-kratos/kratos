@@ -122,7 +122,7 @@ func (r *resolver) update(services []*registry.ServiceInstance) bool {
 		if ept == "" {
 			continue
 		}
-		nodes = append(nodes, selector.NewNode(ept, ins))
+		nodes = append(nodes, selector.NewNode("http", ept, ins))
 	}
 	if len(nodes) == 0 {
 		r.logger.Warnf("[http resolver]Zero endpoint found,refused to write,set: %s ins: %v", r.target.Endpoint, nodes)
