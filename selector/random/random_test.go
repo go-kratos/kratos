@@ -13,6 +13,7 @@ func TestWrr(t *testing.T) {
 	random := New(WithFilter(filter.Version("v2.0.0")))
 	var nodes []selector.Node
 	nodes = append(nodes, selector.NewNode(
+		"http",
 		"127.0.0.1:8080",
 		&registry.ServiceInstance{
 			ID:       "127.0.0.1:8080",
@@ -20,6 +21,7 @@ func TestWrr(t *testing.T) {
 			Metadata: map[string]string{"weight": "10"},
 		}))
 	nodes = append(nodes, selector.NewNode(
+		"http",
 		"127.0.0.1:9090",
 		&registry.ServiceInstance{
 			ID:       "127.0.0.1:9090",

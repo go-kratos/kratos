@@ -89,6 +89,7 @@ func TestDefault(t *testing.T) {
 	selector := builder.Build()
 	var nodes []Node
 	nodes = append(nodes, NewNode(
+		"http",
 		"127.0.0.1:8080",
 		&registry.ServiceInstance{
 			ID:        "127.0.0.1:8080",
@@ -98,6 +99,7 @@ func TestDefault(t *testing.T) {
 			Metadata:  map[string]string{"weight": "10"},
 		}))
 	nodes = append(nodes, NewNode(
+		"http",
 		"127.0.0.1:9090",
 		&registry.ServiceInstance{
 			ID:        "127.0.0.1:9090",

@@ -21,6 +21,7 @@ func TestWrr3(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		addr := fmt.Sprintf("127.0.0.%d:8080", i)
 		nodes = append(nodes, selector.NewNode(
+			"http",
 			addr,
 			&registry.ServiceInstance{
 				ID:       addr,
@@ -96,6 +97,7 @@ func TestOne(t *testing.T) {
 	for i := 0; i < 1; i++ {
 		addr := fmt.Sprintf("127.0.0.%d:8080", i)
 		nodes = append(nodes, selector.NewNode(
+			"http",
 			addr,
 			&registry.ServiceInstance{
 				ID:       addr,
