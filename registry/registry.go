@@ -1,6 +1,9 @@
 package registry
 
-import "context"
+import (
+	"context"
+	"golang.org/x/sync/errgroup"
+)
 
 // Registrar is service registrar.
 type Registrar interface {
@@ -44,4 +47,35 @@ type ServiceInstance struct {
 	//   http://127.0.0.1:8000?isSecure=false
 	//   grpc://127.0.0.1:9000?isSecure=false
 	Endpoints []string `json:"endpoints"`
+}
+
+//RegistrarGroup Aggregate a set of registrars into one.
+func RegistrarGroup(r ...Registrar) Registrar {
+	return &registrarGroup{registrars: r}
+}
+
+type registrarGroup struct {
+	registrars []Registrar
+}
+
+func (g *registrarGroup) Register(ctx context.Context, service *ServiceInstance) error {
+	eg := &errgroup.Group{}
+	for _, reg := range g.registrars {
+		r := reg
+		eg.Go(func() error {
+			return r.Register(ctx, service)
+		})
+	}
+	return eg.Wait()
+}
+
+func (g *registrarGroup) Deregister(ctx context.Context, service *ServiceInstance) error {
+	eg := &errgroup.Group{}
+	for _, reg := range g.registrars {
+		r := reg
+		eg.Go(func() error {
+			return r.Deregister(ctx, service)
+		})
+	}
+	return eg.Wait()
 }
