@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"google.golang.org/grpc/resolver"
-
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
+
+	"google.golang.org/grpc/resolver"
 )
 
 const name = "discovery"
