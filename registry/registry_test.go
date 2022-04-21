@@ -3,7 +3,6 @@ package registry_test
 import (
 	"context"
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/stretchr/testify/assert"
 	"sync/atomic"
 	"testing"
 )
@@ -28,11 +27,17 @@ func TestRegistrarGroup(t *testing.T) {
 	ins := &registry.ServiceInstance{}
 	g := registry.RegistrarGroup(r1, r2)
 	err := g.Register(context.Background(), ins)
-	assert.NoError(t, err)
-	assert.Equal(t, 1, int(r1.count))
-	assert.Equal(t, 1, int(r2.count))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if int(r1.count) != 1 || int(r2.count) != 1 {
+		t.Error("failed")
+	}
 	err = g.Deregister(context.Background(), ins)
-	assert.NoError(t, err)
-	assert.Equal(t, 0, int(r1.count))
-	assert.Equal(t, 0, int(r2.count))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if int(r1.count) != 0 || int(r2.count) != 0 {
+		t.Error("failed")
+	}
 }
