@@ -53,7 +53,7 @@ func New(opts ...Option) (*OpenSergo, error) {
 		if err != nil {
 			return nil, err
 		}
-		if err := opt.ParseJSON([]byte(b)); err != nil {
+		if err := opt.ParseJSON(b); err != nil {
 			return nil, err
 		}
 	}

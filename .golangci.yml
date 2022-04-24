@@ -28,7 +28,6 @@ linters:
     - structcheck
     - typecheck
     - unused
-    - unconvert
     - varcheck
     - whitespace
     - wastedassign
