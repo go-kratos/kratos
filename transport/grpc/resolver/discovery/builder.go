@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
+
 	"google.golang.org/grpc/resolver"
 )
 
@@ -37,20 +38,29 @@ func WithInsecure(insecure bool) Option {
 	}
 }
 
+// DisableDebugLog disables update instances log.
+func DisableDebugLog() Option {
+	return func(b *builder) {
+		b.debugLogDisabled = true
+	}
+}
+
 type builder struct {
-	discoverer registry.Discovery
-	logger     log.Logger
-	timeout    time.Duration
-	insecure   bool
+	discoverer       registry.Discovery
+	logger           log.Logger
+	timeout          time.Duration
+	insecure         bool
+	debugLogDisabled bool
 }
 
 // NewBuilder creates a builder which is used to factory registry resolvers.
 func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 	b := &builder{
-		discoverer: d,
-		logger:     log.GetLogger(),
-		timeout:    time.Second * 10,
-		insecure:   false,
+		discoverer:       d,
+		logger:           log.GetLogger(),
+		timeout:          time.Second * 10,
+		insecure:         false,
+		debugLogDisabled: false,
 	}
 	for _, o := range opts {
 		o(b)
@@ -79,12 +89,13 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		return nil, err
 	}
 	r := &discoveryResolver{
-		w:        w,
-		cc:       cc,
-		ctx:      ctx,
-		cancel:   cancel,
-		log:      log.NewHelper(b.logger),
-		insecure: b.insecure,
+		w:                w,
+		cc:               cc,
+		ctx:              ctx,
+		cancel:           cancel,
+		log:              log.NewHelper(b.logger),
+		insecure:         b.insecure,
+		debugLogDisabled: b.debugLogDisabled,
 	}
 	go r.watch()
 	return r, nil
