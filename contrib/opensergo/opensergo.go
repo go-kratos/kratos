@@ -83,7 +83,7 @@ func (s *OpenSergo) ReportMetadata(ctx context.Context, app kratos.AppInfo) erro
 		},
 	}
 	for _, endpoint := range app.Endpoint() {
-		u, err := url.Parse(endpoint)
+		u, err := url.Parse(endpoint) //nolint
 		if err != nil {
 			return err
 		}
