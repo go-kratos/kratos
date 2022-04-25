@@ -1,9 +1,11 @@
 package binding
 
 import (
+	"io"
 	"net/http"
 	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -73,7 +75,11 @@ func TestBindForm(t *testing.T) {
 		{
 			name: "error is nil",
 			args: args{
-				req:    &http.Request{Form: map[string][]string{"name": {"kratos"}, "url": {"https://go-kratos.dev/"}}},
+				req: &http.Request{
+					Method: "POST",
+					Header: http.Header{"Content-Type": {"application/x-www-form-urlencoded; param=value"}},
+					Body:   io.NopCloser(strings.NewReader("name=kratos&url=https://go-kratos.dev/")),
+				},
 				target: &p1,
 			},
 			wantErr: false,
