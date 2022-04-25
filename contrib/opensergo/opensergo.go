@@ -116,7 +116,7 @@ func (s *OpenSergo) listServiceDescriptors() (services []*v1.ServiceDescriptor, 
 				sd      = fd.Services().Get(i)
 			)
 			for j := 0; j < sd.Methods().Len(); j++ {
-				md := sd.Methods().Get(i)
+				md := sd.Methods().Get(j)
 				mName := string(md.Name())
 				inputType := string(md.Input().FullName())
 				outputType := string(md.Output().FullName())
