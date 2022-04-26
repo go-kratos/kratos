@@ -125,6 +125,5 @@ func (r *Repo) CopyToV2(ctx context.Context, to string, modPath string, ignores,
 		return err
 	}
 	replaces = append([]string{mod, modPath}, replaces...)
-	fmt.Println(replaces)
 	return copyDir(r.Path(), to, replaces, ignores)
 }
