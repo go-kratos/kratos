@@ -13,8 +13,10 @@ import (
 
 var (
 	repoNewIgnores = []string{".git", ".github", "cmd", "configs", "internal", "Dockerfile"}
-	repoAddIgnores = []string{".git", ".github", "api", "README.md", "Makefile", "LICENSE", "go.mod",
-		"go.sum", "openapi.yaml", "third_party"}
+	repoAddIgnores = []string{
+		".git", ".github", "api", "README.md", "Makefile", "LICENSE", "go.mod",
+		"go.sum", "openapi.yaml", "third_party",
+	}
 )
 
 type Project struct {

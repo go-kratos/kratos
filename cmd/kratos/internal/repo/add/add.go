@@ -43,7 +43,7 @@ func run(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	if _, err := os.Stat(path.Join(wd, "go.mod")); os.IsNotExist(err) {
+	if _, e := os.Stat(path.Join(wd, "go.mod")); os.IsNotExist(e) {
 		fmt.Printf("🚫 go.mod don't exists in %s\n", wd)
 		return
 	}

@@ -20,5 +20,4 @@ func init() {
 }
 
 func run(cmd *cobra.Command, args []string) {
-
 }
