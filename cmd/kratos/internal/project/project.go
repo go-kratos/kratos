@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 	"github.com/spf13/cobra"
 )
 
@@ -24,6 +25,7 @@ var (
 	repoURL string
 	branch  string
 	timeout string
+	mod     bool
 )
 
 func init() {
@@ -31,9 +33,11 @@ func init() {
 		repoURL = "https://github.com/go-kratos/kratos-layout.git"
 	}
 	timeout = "60s"
+	mod = true
 	CmdNew.Flags().StringVarP(&repoURL, "repo-url", "r", repoURL, "layout repo")
 	CmdNew.Flags().StringVarP(&branch, "branch", "b", branch, "repo branch")
 	CmdNew.Flags().StringVarP(&timeout, "timeout", "t", timeout, "time out")
+	CmdNew.Flags().BoolVarP(&mod, "mod", "m", mod, "retain go mod")
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -63,7 +67,20 @@ func run(cmd *cobra.Command, args []string) {
 	p := &Project{Name: path.Base(name), Path: name}
 	done := make(chan error, 1)
 	go func() {
-		done <- p.New(ctx, wd, repoURL, branch)
+		if mod {
+			done <- p.New(ctx, wd, repoURL, branch)
+		} else {
+			if _, e := os.Stat(path.Join(wd, "go.mod")); os.IsNotExist(e) {
+				fmt.Printf("🚫 go.mod don't exists in %s\n", wd)
+				return
+			}
+
+			mod, err := base.ModulePath(path.Join(wd, "go.mod"))
+			if err != nil {
+				panic(err)
+			}
+			done <- p.Add(ctx, wd, repoURL, branch, mod)
+		}
 	}()
 	select {
 	case <-ctx.Done():

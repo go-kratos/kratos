@@ -12,55 +12,10 @@ import (
 )
 
 var (
-	repoNewIgnores = []string{".git", ".github", "cmd", "configs", "internal", "Dockerfile"}
 	repoAddIgnores = []string{
-		".git", ".github", "api", "README.md", "Makefile", "LICENSE", "go.mod",
-		"go.sum", "openapi.yaml", "third_party",
+		".git", ".github", "api", "README.md", "LICENSE", "go.mod", "go.sum", "third_party",
 	}
 )
-
-type Project struct {
-	Name string
-	Path string
-}
-
-func (p *Project) New(ctx context.Context, dir string, layout string, branch string) error {
-	to := path.Join(dir, p.Name)
-
-	if _, err := os.Stat(to); !os.IsNotExist(err) {
-		fmt.Printf("🚫 %s already exists\n", p.Name)
-		override := false
-		prompt := &survey.Confirm{
-			Message: "📂 Do you want to override the folder ?",
-			Help:    "Delete the existing folder and create the project.",
-		}
-		e := survey.AskOne(prompt, &override)
-		if e != nil {
-			return e
-		}
-		if !override {
-			return err
-		}
-		os.RemoveAll(to)
-	}
-	fmt.Printf("🚀 Creating repository %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
-
-	repo := base.NewRepo(layout, branch)
-	if err := repo.CopyTo(ctx, to, p.Path, repoNewIgnores); err != nil {
-		return err
-	}
-
-	base.Tree(to, dir)
-
-	fmt.Printf("\n🍺 Repository creation succeeded %s\n", color.GreenString(p.Name))
-	fmt.Print("💻 Use the following command to add a service 👇:\n\n")
-
-	fmt.Println(color.WhiteString("$ kratos repo add [service name], examples: kratos repo add app/user"))
-
-	fmt.Println("			🤝 Thanks for using Kratos")
-	fmt.Println("	📚 Tutorial: https://go-kratos.dev/docs/getting-started/start")
-	return nil
-}
 
 func (p *Project) Add(ctx context.Context, dir string, layout string, branch string, mod string) error {
 	to := path.Join(dir, p.Path)
