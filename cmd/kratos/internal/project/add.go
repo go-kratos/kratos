@@ -11,11 +11,9 @@ import (
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 )
 
-var (
-	repoAddIgnores = []string{
-		".git", ".github", "api", "README.md", "LICENSE", "go.mod", "go.sum", "third_party",
-	}
-)
+var repoAddIgnores = []string{
+	".git", ".github", "api", "README.md", "LICENSE", "go.mod", "go.sum", "third_party",
+}
 
 func (p *Project) Add(ctx context.Context, dir string, layout string, branch string, mod string) error {
 	to := path.Join(dir, p.Path)

@@ -75,9 +75,9 @@ func run(cmd *cobra.Command, args []string) {
 				return
 			}
 
-			mod, err := base.ModulePath(path.Join(wd, "go.mod"))
-			if err != nil {
-				panic(err)
+			mod, e := base.ModulePath(path.Join(wd, "go.mod"))
+			if e != nil {
+				panic(e)
 			}
 			done <- p.Add(ctx, wd, repoURL, branch, mod)
 		}
