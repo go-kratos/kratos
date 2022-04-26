@@ -2,6 +2,7 @@ package registry
 
 import (
 	"context"
+
 	"golang.org/x/sync/errgroup"
 )
 
@@ -49,7 +50,7 @@ type ServiceInstance struct {
 	Endpoints []string `json:"endpoints"`
 }
 
-//RegistrarGroup Aggregate a set of registrars into one.
+// RegistrarGroup Aggregate a set of registrars into one.
 func RegistrarGroup(r ...Registrar) Registrar {
 	return &registrarGroup{registrars: r}
 }
@@ -58,6 +59,7 @@ type registrarGroup struct {
 	registrars []Registrar
 }
 
+// Register the registration.
 func (g *registrarGroup) Register(ctx context.Context, service *ServiceInstance) error {
 	eg := &errgroup.Group{}
 	for _, reg := range g.registrars {
@@ -69,6 +71,7 @@ func (g *registrarGroup) Register(ctx context.Context, service *ServiceInstance)
 	return eg.Wait()
 }
 
+// Deregister the registration.
 func (g *registrarGroup) Deregister(ctx context.Context, service *ServiceInstance) error {
 	eg := &errgroup.Group{}
 	for _, reg := range g.registrars {

@@ -2,9 +2,10 @@ package registry_test
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/registry"
 	"sync/atomic"
 	"testing"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 type mockRegistrar struct {
