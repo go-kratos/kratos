@@ -70,7 +70,7 @@ func run(cmd *cobra.Command, args []string) {
 			done <- p.New(ctx, wd, repoURL, branch)
 		} else {
 			if _, e := os.Stat(path.Join(wd, "go.mod")); os.IsNotExist(e) {
-				fmt.Printf("🚫 go.mod don't exists in %s\n", wd)
+				done <- fmt.Errorf("🚫 go.mod don't exists in %s", wd)
 				return
 			}
 
