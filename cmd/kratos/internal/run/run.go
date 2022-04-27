@@ -42,8 +42,8 @@ func Run(cmd *cobra.Command, args []string) {
 			fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", "The cmd directory cannot be found in the current directory")
 			return
 		} else if len(cmdPath) == 1 {
-			for k, v := range cmdPath {
-				dir = path.Join(v, k)
+			for _, v := range cmdPath {
+				dir = v
 			}
 		} else {
 			var cmdPaths []string
