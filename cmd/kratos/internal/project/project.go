@@ -25,7 +25,7 @@ var (
 	repoURL string
 	branch  string
 	timeout string
-	mod     bool
+	nomod   bool
 )
 
 func init() {
@@ -33,11 +33,10 @@ func init() {
 		repoURL = "https://github.com/go-kratos/kratos-layout.git"
 	}
 	timeout = "60s"
-	mod = true
 	CmdNew.Flags().StringVarP(&repoURL, "repo-url", "r", repoURL, "layout repo")
 	CmdNew.Flags().StringVarP(&branch, "branch", "b", branch, "repo branch")
 	CmdNew.Flags().StringVarP(&timeout, "timeout", "t", timeout, "time out")
-	CmdNew.Flags().BoolVarP(&mod, "mod", "m", mod, "retain go mod")
+	CmdNew.Flags().BoolVarP(&nomod, "nomod", "n", nomod, "retain go mod")
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -67,7 +66,7 @@ func run(cmd *cobra.Command, args []string) {
 	p := &Project{Name: path.Base(name), Path: name}
 	done := make(chan error, 1)
 	go func() {
-		if mod {
+		if !nomod {
 			done <- p.New(ctx, wd, repoURL, branch)
 		} else {
 			if _, e := os.Stat(path.Join(wd, "go.mod")); os.IsNotExist(e) {
