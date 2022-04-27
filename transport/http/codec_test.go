@@ -100,6 +100,28 @@ func TestDefaultResponseEncoderWithError(t *testing.T) {
 	}
 }
 
+func TestDefaultResponseEncoderEncodeNil(t *testing.T) {
+	w := &mockResponseWriter{StatusCode: 204, header: make(nethttp.Header)}
+	req1 := &nethttp.Request{
+		Header: make(nethttp.Header),
+	}
+	req1.Header.Set("Content-Type", "application/json")
+
+	err := DefaultResponseEncoder(w, req1, nil)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+	if !reflect.DeepEqual("", w.Header().Get("Content-Type")) {
+		t.Errorf("expected empty string, got %v", w.Header().Get("Content-Type"))
+	}
+	if !reflect.DeepEqual(204, w.StatusCode) {
+		t.Errorf("expected %v, got %v", 204, w.StatusCode)
+	}
+	if w.Data != nil {
+		t.Errorf("expected nil, got %v", w.Data)
+	}
+}
+
 func TestCodecForRequest(t *testing.T) {
 	req1 := &nethttp.Request{
 		Header: make(nethttp.Header),

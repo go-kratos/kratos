@@ -42,6 +42,10 @@ func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 
 // DefaultResponseEncoder encodes the object to the HTTP response.
 func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{}) error {
+	if v == nil {
+		_, err := w.Write(nil)
+		return err
+	}
 	codec, _ := CodecForRequest(r, "Accept")
 	data, err := codec.Marshal(v)
 	if err != nil {
