@@ -111,8 +111,8 @@ func TestDefaultResponseEncoderEncodeNil(t *testing.T) {
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}
-	if !reflect.DeepEqual("application/json", w.Header().Get("Content-Type")) {
-		t.Errorf("expected %v, got %v", "application/json", w.Header().Get("Content-Type"))
+	if !reflect.DeepEqual("", w.Header().Get("Content-Type")) {
+		t.Errorf("expected empty string, got %v", w.Header().Get("Content-Type"))
 	}
 	if !reflect.DeepEqual(204, w.StatusCode) {
 		t.Errorf("expected %v, got %v", 204, w.StatusCode)
