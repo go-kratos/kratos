@@ -8,7 +8,7 @@ import (
 var errorsTemplate = `
 {{ range .Errors }}
 
-func Is{{.CamelValue}}(err error) bool {
+{{if .HasComment}}{{.Comment}}{{end}}func Is{{.CamelValue}}(err error) bool {
 	if err == nil {
 		return false
 	}
@@ -16,7 +16,7 @@ func Is{{.CamelValue}}(err error) bool {
 	return e.Reason == {{.Name}}_{{.Value}}.String() && e.Code == {{.HTTPCode}} 
 }
 
-func Error{{.CamelValue}}(format string, args ...interface{}) *errors.Error {
+{{if .HasComment}}{{.Comment}}{{end}}func Error{{.CamelValue}}(format string, args ...interface{}) *errors.Error {
 	 return errors.New({{.HTTPCode}}, {{.Name}}_{{.Value}}.String(), fmt.Sprintf(format, args...))
 }
 
@@ -28,6 +28,8 @@ type errorInfo struct {
 	Value      string
 	HTTPCode   int
 	CamelValue string
+	Comment    string
+	HasComment bool
 }
 
 type errorWrapper struct {
