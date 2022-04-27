@@ -67,6 +67,11 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	if code > 600 || code < 0 {
 		panic(fmt.Sprintf("Enum '%s' range must be greater than 0 and less than or equal to 600", string(enum.Desc.Name())))
 	}
+	domain := string(file.Desc.Package())
+	if do := proto.GetExtension(enum.Desc.Options(), errors.E_Domain).(string); do != "" {
+		domain = do
+	}
+
 	var ew errorWrapper
 	for _, v := range enum.Values {
 		enumCode := code
@@ -87,6 +92,7 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 			Value:      string(v.Desc.Name()),
 			CamelValue: case2Camel(string(v.Desc.Name())),
 			HTTPCode:   enumCode,
+			Domain:     domain,
 		}
 		ew.Errors = append(ew.Errors, err)
 	}

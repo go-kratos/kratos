@@ -13,11 +13,14 @@ func Is{{.CamelValue}}(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
+	if e.Domain != "" {
+		return e.Reason == {{.Name}}_{{.Value}}.String() && e.Code == {{.HTTPCode}}  && e.Domain == "{{.Domain}}"
+	}
 	return e.Reason == {{.Name}}_{{.Value}}.String() && e.Code == {{.HTTPCode}} 
 }
 
 func Error{{.CamelValue}}(format string, args ...interface{}) *errors.Error {
-	 return errors.New({{.HTTPCode}}, {{.Name}}_{{.Value}}.String(), fmt.Sprintf(format, args...))
+	 return errors.New({{.HTTPCode}}, {{.Name}}_{{.Value}}.String(), fmt.Sprintf(format, args...), "{{.Domain}}")
 }
 
 {{- end }}
@@ -28,6 +31,7 @@ type errorInfo struct {
 	Value      string
 	HTTPCode   int
 	CamelValue string
+	Domain     string
 }
 
 type errorWrapper struct {

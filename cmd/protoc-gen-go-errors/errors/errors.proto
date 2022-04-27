@@ -18,6 +18,7 @@ message Error {
 
 extend google.protobuf.EnumOptions {
   int32 default_code = 1108;
+  string domain = 1110;
 }
 
 extend google.protobuf.EnumValueOptions {

@@ -27,7 +27,7 @@ type Error struct {
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("error: code = %d reason = %s message = %s metadata = %v cause = %v", e.Code, e.Reason, e.Message, e.Metadata, e.cause)
+	return fmt.Sprintf("error: code = %d domain = %s reason = %s message = %s metadata = %v cause = %v", e.Code, e.Domain, e.Reason, e.Message, e.Metadata, e.cause)
 }
 
 // Unwrap provides compatibility for Go 1.13 error chains.
@@ -36,6 +36,9 @@ func (e *Error) Unwrap() error { return e.cause }
 // Is matches each error in the chain with the target value.
 func (e *Error) Is(err error) bool {
 	if se := new(Error); errors.As(err, &se) {
+		if e.Domain != "" && se.Domain != "" {
+			return se.Code == e.Code && se.Reason == e.Reason && se.Domain == e.Domain
+		}
 		return se.Code == e.Code && se.Reason == e.Reason
 	}
 	return false
@@ -66,7 +69,7 @@ func (e *Error) GRPCStatus() *status.Status {
 }
 
 // New returns an error object for the code, message.
-func New(code int, reason, message string) *Error {
+func New(code int, reason, message string, doamin ...string) *Error {
 	return &Error{
 		Status: Status{
 			Code:    int32(code),
@@ -81,8 +84,18 @@ func Newf(code int, reason, format string, a ...interface{}) *Error {
 	return New(code, reason, fmt.Sprintf(format, a...))
 }
 
+// Newf New(code fmt.Sprintf(format, a...))
+func NewfV2(code int, domain, reason, format string, a ...interface{}) *Error {
+	return New(code, reason, fmt.Sprintf(format, a...))
+}
+
 // Errorf returns an error object for the code, message and error info.
 func Errorf(code int, reason, format string, a ...interface{}) error {
+	return New(code, reason, fmt.Sprintf(format, a...))
+}
+
+// Errorf returns an error object for the code, message and error info.
+func ErrorfV2(code int, domain, reason, format string, a ...interface{}) error {
 	return New(code, reason, fmt.Sprintf(format, a...))
 }
 
@@ -102,6 +115,15 @@ func Reason(err error) string {
 		return UnknownReason
 	}
 	return FromError(err).Reason
+}
+
+// Doamin returns the domain for a particular error.
+// It supports wrapped errors.
+func Doamin(err error) string {
+	if err == nil {
+		return UnknownReason
+	}
+	return FromError(err).Domain
 }
 
 // Clone deep clone error to a new error.
