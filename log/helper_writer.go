@@ -7,17 +7,17 @@ type writerWrapper struct {
 	level  Level
 }
 
-type writerOption func(w *writerWrapper)
+type WriterOptionFn func(w *writerWrapper)
 
 // WithWriteLevel set writerWrapper level.
-func WithWriterLevel(level Level) writerOption {
+func WithWriterLevel(level Level) WriterOptionFn {
 	return func(w *writerWrapper) {
 		w.level = level
 	}
 }
 
 // WithWriteMessageKey set writerWrapper helper message key.
-func WithWriteMessageKey(key string) writerOption {
+func WithWriteMessageKey(key string) WriterOptionFn {
 	return func(w *writerWrapper) {
 		if key != "" {
 			w.helper.msgKey = key
@@ -26,7 +26,7 @@ func WithWriteMessageKey(key string) writerOption {
 }
 
 // NewWriter return a writer wrapper.
-func NewWriter(logger Logger, opts ...writerOption) io.Writer {
+func NewWriter(logger Logger, opts ...WriterOptionFn) io.Writer {
 	ww := &writerWrapper{
 		helper: NewHelper(logger, WithMessageKey(DefaultMessageKey)),
 		level:  LevelInfo, // default level
