@@ -44,16 +44,10 @@ func WithTimeout(timeout time.Duration) Option {
 	return func(o *options) { o.timeout = timeout }
 }
 
-// WithUser with registry user.
-func WithUser(user string) Option {
+// WithDigestACL with registry password.
+func WithDigestACL(user string, password string) Option {
 	return func(o *options) {
 		o.user = user
-	}
-}
-
-// WithPassword with registry password.
-func WithPassword(password string) Option {
-	return func(o *options) {
 		o.password = password
 	}
 }
