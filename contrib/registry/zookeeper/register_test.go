@@ -16,7 +16,7 @@ func TestRegistry(t *testing.T) {
 		Endpoints: []string{"http://127.0.0.1:1111"},
 	}
 
-	r, _ := New([]string{"127.0.0.1:2181"})
+	r, _ := New([]string{"127.0.0.1:2181"}, WithDigestACL("username", "password"))
 
 	w, err := r.Watch(ctx, s.Name)
 	if err != nil {
