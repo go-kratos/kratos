@@ -25,6 +25,8 @@ type options struct {
 	ctx      context.Context
 	rootPath string
 	timeout  time.Duration
+	user     string
+	password string
 }
 
 // WithContext with registry context.
@@ -40,6 +42,14 @@ func WithRootPath(path string) Option {
 // WithTimeout with registry timeout.
 func WithTimeout(timeout time.Duration) Option {
 	return func(o *options) { o.timeout = timeout }
+}
+
+// WithDigestACL with registry password.
+func WithDigestACL(user string, password string) Option {
+	return func(o *options) {
+		o.user = user
+		o.password = password
+	}
 }
 
 // Registry is consul registry
@@ -62,6 +72,12 @@ func New(zkServers []string, opts ...Option) (*Registry, error) {
 	conn, _, err := zk.Connect(zkServers, options.timeout)
 	if err != nil {
 		return nil, err
+	}
+	if len(options.user) > 0 && len(options.password) > 0 {
+		err = conn.AddAuth("digest", []byte(options.user+":"+options.password))
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &Registry{
 		opts:     options,
@@ -182,7 +198,12 @@ func (r *Registry) ensureName(path string, data []byte, flags int32) error {
 		return err
 	}
 	if !exists {
-		_, err := r.conn.Create(path, data, flags, zk.WorldACL(zk.PermAll))
+		var err error
+		if len(r.opts.user) > 0 && len(r.opts.password) > 0 {
+			_, err = r.conn.Create(path, data, flags, zk.DigestACL(zk.PermAll, r.opts.user, r.opts.password))
+		} else {
+			_, err = r.conn.Create(path, data, flags, zk.WorldACL(zk.PermAll))
+		}
 		if err != nil {
 			return err
 		}
