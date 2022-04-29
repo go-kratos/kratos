@@ -83,7 +83,7 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 			continue
 		}
 
-		var comment = v.Comments.Leading.String()
+		comment := v.Comments.Leading.String()
 		if comment == "" {
 			comment = v.Comments.Trailing.String()
 		}
