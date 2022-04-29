@@ -88,9 +88,6 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 			comment = v.Comments.Trailing.String()
 		}
 
-		camelValue := case2Camel(string(v.Desc.Name()))
-		comment = buildComment(camelValue, comment)
-
 		err := &errorInfo{
 			Name:       string(enum.Desc.Name()),
 			Value:      string(v.Desc.Name()),
@@ -107,16 +104,6 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	g.P(ew.execute())
 
 	return false
-}
-
-// buildComment returns comment content with prefix //
-func buildComment(camelValue, comment string) string {
-	if comment == "" {
-		return ""
-	}
-
-	comment = strings.Replace(comment, "//", "", 1)
-	return fmt.Sprintf("// %s %s", camelValue, comment)
 }
 
 func case2Camel(name string) string {
