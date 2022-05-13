@@ -21,7 +21,10 @@ func newWatcher(s *source) *watcher {
 	if s.options.prefix {
 		opts = append(opts, clientv3.WithPrefix())
 	}
-	w.ch = s.client.Watch(s.options.ctx, s.options.path, opts...)
+
+	for _, path := range s.options.paths {
+		w.ch = s.client.Watch(s.options.ctx, path, opts...)
+	}
 
 	return w
 }

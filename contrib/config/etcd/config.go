@@ -15,7 +15,7 @@ type Option func(o *options)
 
 type options struct {
 	ctx    context.Context
-	path   string
+	paths  []string
 	prefix bool
 }
 
@@ -27,9 +27,9 @@ func WithContext(ctx context.Context) Option {
 }
 
 // WithPath is config path
-func WithPath(p string) Option {
+func WithPath(paths ...string) Option {
 	return func(o *options) {
-		o.path = p
+		o.paths = paths
 	}
 }
 
@@ -48,7 +48,6 @@ type source struct {
 func New(client *clientv3.Client, opts ...Option) (config.Source, error) {
 	options := &options{
 		ctx:    context.Background(),
-		path:   "",
 		prefix: false,
 	}
 
@@ -56,8 +55,8 @@ func New(client *clientv3.Client, opts ...Option) (config.Source, error) {
 		opt(options)
 	}
 
-	if options.path == "" {
-		return nil, errors.New("path invalid")
+	if len(options.paths) == 0 {
+		return nil, errors.New("paths can't empty")
 	}
 
 	return &source{
@@ -73,18 +72,23 @@ func (s *source) Load() ([]*config.KeyValue, error) {
 		opts = append(opts, clientv3.WithPrefix())
 	}
 
-	rsp, err := s.client.Get(s.options.ctx, s.options.path, opts...)
-	if err != nil {
-		return nil, err
-	}
-	kvs := make([]*config.KeyValue, 0, len(rsp.Kvs))
-	for _, item := range rsp.Kvs {
-		k := string(item.Key)
-		kvs = append(kvs, &config.KeyValue{
-			Key:    k,
-			Value:  item.Value,
-			Format: strings.TrimPrefix(filepath.Ext(k), "."),
-		})
+	kvs := make([]*config.KeyValue, 0)
+	for _, path := range s.options.paths {
+		rsp, err := s.client.Get(s.options.ctx, path, opts...)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, item := range rsp.Kvs {
+			k := string(item.Key)
+			ext := strings.TrimPrefix(filepath.Ext(k), ".")
+
+			kvs = append(kvs, &config.KeyValue{
+				Key:    k,
+				Value:  item.Value,
+				Format: ext,
+			})
+		}
 	}
 	return kvs, nil
 }

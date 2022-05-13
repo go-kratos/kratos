@@ -3,6 +3,7 @@ package etcd
 import (
 	"context"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -10,12 +11,17 @@ import (
 	"google.golang.org/grpc"
 )
 
-const testKey = "/kratos/test/config"
-
 func TestConfig(t *testing.T) {
+	cases := map[string]string{
+		"/kratos/test/db.yaml":    "db config",
+		"/kratos/test/cache.yaml": "cache config",
+		"/kratos/test/app.yaml":   "app config",
+	}
+
 	client, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"127.0.0.1:2379"},
-		DialTimeout: time.Second, DialOptions: []grpc.DialOption{grpc.WithBlock()},
+		DialTimeout: time.Second,
+		DialOptions: []grpc.DialOption{grpc.WithBlock()},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -23,11 +29,19 @@ func TestConfig(t *testing.T) {
 	defer func() {
 		_ = client.Close()
 	}()
-	if _, err = client.Put(context.Background(), testKey, "test config"); err != nil {
-		t.Fatal(err)
+
+	for key, val := range cases {
+		if _, err = client.Put(context.Background(), key, val); err != nil {
+			t.Fatal(err)
+		}
 	}
 
-	source, err := New(client, WithPath(testKey))
+	var keys []string
+	for key := range cases {
+		keys = append(keys, key)
+	}
+
+	source, err := New(client, WithPath(keys...))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,8 +51,10 @@ func TestConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(kvs) != 1 || kvs[0].Key != testKey || string(kvs[0].Value) != "test config" {
-		t.Fatal("config error")
+	for _, kv := range kvs {
+		if val, exist := cases[kv.Key]; exist && string(kv.Value) != val {
+			t.Fatalf("%q config error. expected: %q, actual: %q", kv.Key, kv.Value, val)
+		}
 	}
 
 	w, err := source.Watch()
@@ -49,20 +65,26 @@ func TestConfig(t *testing.T) {
 		_ = w.Stop()
 	}()
 
-	if _, err = client.Put(context.Background(), testKey, "new config"); err != nil {
-		t.Error(err)
+	for key, val := range cases {
+		if _, err = client.Put(context.Background(), key, strings.ToUpper(val)); err != nil {
+			t.Error(err)
+		}
 	}
 
 	if kvs, err = w.Next(); err != nil {
 		t.Fatal(err)
 	}
 
-	if len(kvs) != 1 || kvs[0].Key != testKey || string(kvs[0].Value) != "new config" {
-		t.Fatal("config error")
+	for _, kv := range kvs {
+		if val, exist := cases[kv.Key]; exist && string(kv.Value) != strings.ToUpper(val) {
+			t.Fatalf("%q config error. expected: %q, actual: %q", kv.Key, kv.Value, val)
+		}
 	}
 
-	if _, err := client.Delete(context.Background(), testKey); err != nil {
-		t.Error(err)
+	for key := range cases {
+		if _, err := client.Delete(context.Background(), key); err != nil {
+			t.Error(err)
+		}
 	}
 }
 
