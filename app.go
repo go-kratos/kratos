@@ -85,7 +85,7 @@ func (a *App) Run() error {
 		return err
 	}
 	eg, ctx := errgroup.WithContext(NewContext(a.ctx, a))
-	wg := sync.WaitGroup{}
+
 	for _, srv := range a.opts.servers {
 		srv := srv
 		eg.Go(func() error {
@@ -94,13 +94,12 @@ func (a *App) Run() error {
 			defer cancel()
 			return srv.Stop(stopCtx)
 		})
-		wg.Add(1)
+
 		eg.Go(func() error {
-			wg.Done()
 			return srv.Start(NewContext(a.opts.ctx, a))
 		})
 	}
-	wg.Wait()
+
 	if a.opts.registrar != nil {
 		rctx, rcancel := context.WithTimeout(ctx, a.opts.registrarTimeout)
 		defer rcancel()
