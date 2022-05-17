@@ -22,6 +22,13 @@ func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}HTTP
 	{{- end}}
 }
 
+func Register{{.ServiceType}}HTTPServerWithPrefixPath(s *http.Server, srv {{.ServiceType}}HTTPServer,prefixPath string) {
+	r := s.Route(prefixPath)
+	{{- range .Methods}}
+	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv))
+	{{- end}}
+}
+
 {{range .Methods}}
 func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
