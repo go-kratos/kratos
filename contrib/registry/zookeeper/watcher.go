@@ -27,7 +27,7 @@ type watcher struct {
 	serviceName string
 }
 
-func NewWatcher(ctx context.Context, prefix, serviceName string, conn *zk.Conn) (*watcher, error) {
+func newWatcher(ctx context.Context, prefix, serviceName string, conn *zk.Conn) (*watcher, error) {
 	w := &watcher{conn: conn, event: make(chan zk.Event, 1), prefix: prefix, serviceName: serviceName}
 	w.ctx, w.cancel = context.WithCancel(ctx)
 	go w.watch(w.ctx)

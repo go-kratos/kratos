@@ -128,7 +128,7 @@ func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*regis
 
 func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
 	prefix := path.Join(r.opts.namespace, serviceName)
-	return NewWatcher(ctx, prefix, serviceName, r.conn)
+	return newWatcher(ctx, prefix, serviceName, r.conn)
 }
 
 // ensureName ensure node exists, if not exist, create and set data
