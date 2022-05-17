@@ -20,8 +20,9 @@ func TestRegistry(t *testing.T) {
 	conn, _, err := zk.Connect([]string{"127.0.0.1:2181"}, time.Second*15)
 
 	r := New(conn)
-	if err = r.Register(ctx, s); err != nil {
+	if err := r.Register(ctx, s); err != nil {
 		t.Fatal(err)
+		return
 	}
 	time.Sleep(time.Second)
 
