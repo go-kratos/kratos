@@ -48,7 +48,6 @@ func (w *watcher) watch(ctx context.Context) {
 			w.event <- <-ch
 		}
 	}
-
 }
 
 func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
