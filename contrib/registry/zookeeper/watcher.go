@@ -70,6 +70,7 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 }
 
 func (w *watcher) Stop() error {
+	w.cancel()
 	return nil
 }
 
