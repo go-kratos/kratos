@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 
 	"google.golang.org/genproto/protobuf/field_mask"
@@ -297,6 +298,12 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 			return protoreflect.Value{}, err
 		}
 		msg = fm
+	case "google.protobuf.Struct":
+		var v structpb.Struct
+		if err := protojson.Unmarshal([]byte(value), &v); err != nil {
+			return protoreflect.Value{}, err
+		}
+		msg = &v
 	default:
 		return protoreflect.Value{}, fmt.Errorf("unsupported message type: %q", string(md.FullName()))
 	}

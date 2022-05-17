@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/internal/testdata/complex"
+	ectest "github.com/go-kratos/kratos/v2/internal/testdata/encoding"
 )
 
 type LoginRequest struct {
@@ -154,5 +155,26 @@ func TestProtoEncodeDecode(t *testing.T) {
 	}
 	if !reflect.DeepEqual("5566", in2.Simples[1]) {
 		t.Errorf("expect %v, got %v", "5566", in2.Simples[1])
+	}
+}
+
+func TestDecodeStructPb(t *testing.T) {
+	req := new(ectest.StructPb)
+	query := `data={"name":"kratos"}&data_list={"name1": "kratos"}&data_list={"name2": "go-kratos"}`
+	if err := encoding.GetCodec(contentType).Unmarshal([]byte(query), req); err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
+	if !reflect.DeepEqual("kratos", req.Data.GetFields()["name"].GetStringValue()) {
+		t.Errorf("except %v, got %v", "kratos", req.Data.GetFields()["name"].GetStringValue())
+	}
+	if len(req.DataList) != 2 {
+		t.Errorf("execpt %v, got %v", 2, len(req.DataList))
+		return
+	}
+	if !reflect.DeepEqual("kratos", req.DataList[0].GetFields()["name1"].GetStringValue()) {
+		t.Errorf("except %v, got %v", "kratos", req.Data.GetFields()["name1"].GetStringValue())
+	}
+	if !reflect.DeepEqual("go-kratos", req.DataList[1].GetFields()["name2"].GetStringValue()) {
+		t.Errorf("except %v, got %v", "go-kratos", req.Data.GetFields()["name2"].GetStringValue())
 	}
 }
