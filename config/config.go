@@ -31,7 +31,7 @@ type Observer func(string, Value)
 // Config is a config interface.
 type Config interface {
 	Load() error
-	Scan(v interface{}) error
+	Scan(v ...interface{}) error
 	Value(key string) Value
 	Watch(key string, o Observer) error
 	Close() error
@@ -136,12 +136,17 @@ func (c *config) Value(key string) Value {
 	return &errValue{err: ErrNotFound}
 }
 
-func (c *config) Scan(v interface{}) error {
+func (c *config) Scan(vs ...interface{}) error {
 	data, err := c.reader.Source()
 	if err != nil {
 		return err
 	}
-	return unmarshalJSON(data, v)
+	for _, v := range vs {
+		if err := unmarshalJSON(data, v); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (c *config) Watch(key string, o Observer) error {
