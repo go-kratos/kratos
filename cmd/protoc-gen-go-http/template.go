@@ -79,7 +79,7 @@ func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Reque
 	var out {{.Reply}}
 	pattern := "{{.Path}}"
 	path := binding.EncodeURL(pattern, in, {{not .HasBody}})
-	opts = append(opts, http.Operation("/{{$svrName}}/{{.Name}}"))
+	opts = append(opts, http.Operation("/{{$svrName}}/{{.ParseName}}"))
 	opts = append(opts, http.PathTemplate(pattern))
 	{{if .HasBody -}}
 	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, opts...)
@@ -104,10 +104,11 @@ type serviceDesc struct {
 
 type methodDesc struct {
 	// method
-	Name    string
-	Num     int
-	Request string
-	Reply   string
+	Name      string
+	ParseName string // 解析出来的原名称
+	Num       int
+	Request   string
+	Reply     string
 	// http_rule
 	Path         string
 	Method       string
