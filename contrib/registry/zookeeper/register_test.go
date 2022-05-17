@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-zookeeper/zk"
 )
 
 func TestRegistry(t *testing.T) {
@@ -16,7 +17,13 @@ func TestRegistry(t *testing.T) {
 		Endpoints: []string{"http://127.0.0.1:1111"},
 	}
 
-	r, _ := New([]string{"127.0.0.1:2181"}, WithDigestACL("username", "password"))
+	conn, _, err := zk.Connect([]string{"127.0.0.1:2181"}, time.Second*15)
+
+	r := New(conn)
+	if err = r.Register(ctx, s); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(time.Second)
 
 	w, err := r.Watch(ctx, s.Name)
 	if err != nil {
@@ -29,6 +36,7 @@ func TestRegistry(t *testing.T) {
 		for {
 			res, nextErr := w.Next()
 			if nextErr != nil {
+				t.Errorf("watch next error: %s", nextErr)
 				return
 			}
 			t.Logf("watch: %d", len(res))
