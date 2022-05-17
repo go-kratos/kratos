@@ -4,9 +4,16 @@ package test;
 
 option go_package = "../encoding";
 
+import "google/protobuf/struct.proto";
+
 message test_model {
   int64 id = 1;
   string name = 2;
   repeated string hobby = 3;
   map<string, string> attrs = 4;
+}
+
+message StructPb {
+  google.protobuf.Struct data = 1;
+  repeated  google.protobuf.Struct data_list = 2;
 }
