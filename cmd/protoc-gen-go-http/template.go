@@ -105,7 +105,7 @@ type serviceDesc struct {
 type methodDesc struct {
 	// method
 	Name         string
-	OriginalName string // 解析出来的原名称
+	OriginalName string // The parsed original name
 	Num          int
 	Request      string
 	Reply        string
