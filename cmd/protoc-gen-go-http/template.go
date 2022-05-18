@@ -46,7 +46,7 @@ func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) fu
 			return err
 		}
 		{{- end}}
-		http.SetOperation(ctx,"/{{$svrName}}/{{.Name}}")
+		http.SetOperation(ctx,"/{{$svrName}}/{{.OriginalName}}")
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.{{.Name}}(ctx, req.(*{{.Request}}))
 		})
