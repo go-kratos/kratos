@@ -75,16 +75,26 @@ type {{.ServiceType}}HTTPClient interface {
 	
 type {{.ServiceType}}HTTPClientImpl struct{
 	cc *http.Client
+	prefixPath *string
 }
 	
 func New{{.ServiceType}}HTTPClient (client *http.Client) {{.ServiceType}}HTTPClient {
 	return &{{.ServiceType}}HTTPClientImpl{client}
 }
 
+func New{{.ServiceType}}HTTPClientWithPrefixPath (client *http.Client, prefixPath string) {{.ServiceType}}HTTPClient {
+	return &{{.ServiceType}}HTTPClientImpl{cc: client, prefixPath: &prefixPath}
+}
+
 {{range .MethodSets}}
 func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
 	pattern := "{{.Path}}"
+
+	if c.prefixPath != nil {
+		pattern = "/" + *c.prefixPath + pattern
+	}
+
 	path := binding.EncodeURL(pattern, in, {{not .HasBody}})
 	opts = append(opts, http.Operation("/{{$svrName}}/{{.Name}}"))
 	opts = append(opts, http.PathTemplate(pattern))
