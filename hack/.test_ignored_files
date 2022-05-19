@@ -6,4 +6,3 @@
 ./contrib/registry/kubernetes
 ./contrib/registry/zookeeper
 ./contrib/registry/eureka
-./contrib/registry/polaris
