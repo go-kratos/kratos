@@ -132,8 +132,8 @@ func listDescriptors() (services []*v1.ServiceDescriptor, types []*v1.TypeDescri
 					OutputTypes:     []string{outputType},
 					ClientStreaming: &isClientStreaming,
 					ServerStreaming: &isServerStreaming,
-					// TODO: Description: ,
-					// TODO: HttpPaths: md.,
+					// TODO: Description: *string,
+					// TODO: HttpPaths: []string,
 					// TODO: HttpMethods: []string,
 				}
 				methods = append(methods, &methodDesc)
@@ -161,7 +161,7 @@ func listDescriptors() (services []*v1.ServiceDescriptor, types []*v1.TypeDescri
 					Number:   int32(fd.Number()),
 					Type:     v1.FieldDescriptor_Type(kind),
 					TypeName: &typeName,
-					// TODO: Description: ,
+					// TODO: Description: *string,
 				})
 			}
 
