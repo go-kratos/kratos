@@ -4,7 +4,7 @@
 1. If this is your first time contributing to Kratos, please read our contribution guide: https://go-kratos.dev/en/docs/community/contribution/
 2. Ensure you have added or ran the appropriate tests and lint for your PR, please use `make lint` and `make test` before filing your PR, use `make clean` to tidy your go mod.
 3. If the PR is unfinished, you may need to mark it as a WIP(Work In Progress) PR or draft PR
-4. Please use a conventional commits format title: 
+4. Please use a semantic commits format title, such as `<type>[optional scope]: <description>`, see: https://go-kratos.dev/docs/community/contribution#type
 -->
 
 #### Description (what this PR does / why we need it):
@@ -20,7 +20,7 @@
 
 Usage: `fixes/resolves #<issue number>`, or `fixes/resolves (paste link of issue)`.
 -->
-fixes #
+
 
 #### Other special notes for the reviewers:
 <!--
