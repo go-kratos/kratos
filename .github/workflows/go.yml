@@ -36,7 +36,7 @@ jobs:
           - "8848:8848"
           - "9848:9848"
       polaris:
-        image: huyuanxin/polaris-server-with-config:latest
+        image: houseme/polaris-server-with-config:latest
         ports:
           - 8090:8090
           - 8091:8091
