@@ -57,10 +57,6 @@ func TestRegister(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	err = r.Deregister(ctx, svc)
-	if err != nil {
-		t.Errorf("Deregister failed: %v", err)
-	}
 	err = r.Register(ctx, svc)
 	if err != nil {
 		t.Errorf("Register failed: %v", err)
@@ -85,6 +81,10 @@ func TestRegister(t *testing.T) {
 	}
 	if !reflect.DeepEqual(version, services[0].Version) {
 		t.Errorf("no expect float_key value: %v, but got: %v", services[0].Version, version)
+	}
+	err = r.Deregister(ctx, svc)
+	if err != nil {
+		t.Errorf("Deregister failed: %v", err)
 	}
 }
 
