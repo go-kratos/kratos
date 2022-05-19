@@ -77,10 +77,10 @@ type mockWatch struct {
 }
 
 func (m *mockWatch) Next() ([]*registry.ServiceInstance, error) {
-	m.count++
 	if m.count == 1 {
 		return nil, errors.New("mock test error")
 	}
+	m.count++
 	instance := &registry.ServiceInstance{
 		ID:        "1",
 		Name:      "kratos",
