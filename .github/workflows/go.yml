@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        go: [ 1.16, 1.17, 1.18 ]
+        go: [1.16, 1.17, 1.18]
     name: build & test
     runs-on: ubuntu-latest
     services:
@@ -35,11 +35,6 @@ jobs:
         ports:
           - "8848:8848"
           - "9848:9848"
-      polaris:
-        image: huyuanxin/polaris-server-with-config:latest
-        ports:
-          - 8090:8090
-          - 8091:8091
     steps:
       - uses: actions/checkout@v2
       - name: Set up Go
