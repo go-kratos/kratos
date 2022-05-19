@@ -283,7 +283,9 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 	case "google.protobuf.BytesValue":
 		v, err := base64.StdEncoding.DecodeString(value)
 		if err != nil {
-			return protoreflect.Value{}, err
+			if v, err = base64.URLEncoding.DecodeString(value); err != nil {
+				return protoreflect.Value{}, err
+			}
 		}
 		msg = wrapperspb.Bytes(v)
 	case "google.protobuf.FieldMask":

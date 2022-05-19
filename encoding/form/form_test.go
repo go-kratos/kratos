@@ -1,6 +1,7 @@
 package form
 
 import (
+	"encoding/base64"
 	"reflect"
 	"testing"
 
@@ -176,5 +177,18 @@ func TestDecodeStructPb(t *testing.T) {
 	}
 	if !reflect.DeepEqual("go-kratos", req.DataList[1].GetFields()["name2"].GetStringValue()) {
 		t.Errorf("except %v, got %v", "go-kratos", req.Data.GetFields()["name2"].GetStringValue())
+	}
+}
+
+func TestDecodeBytesValuePb(t *testing.T) {
+	url := "https://example.com/xx/?a=1&b=2&c=3"
+	val := base64.URLEncoding.EncodeToString([]byte(url))
+	content := "bytes=" + val
+	in2 := &complex.Complex{}
+	if err := encoding.GetCodec(contentType).Unmarshal([]byte(content), in2); err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
+	if !reflect.DeepEqual(url, string(in2.Bytes.Value)) {
+		t.Errorf("except %v, got %v", val, string(in2.Bytes.Value))
 	}
 }
