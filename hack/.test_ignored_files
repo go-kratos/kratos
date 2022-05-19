@@ -5,6 +5,4 @@
 ./contrib/config/kubernetes
 ./contrib/registry/kubernetes
 ./contrib/registry/zookeeper
-./contrib/registry/etcd
-./contrib/registry/consul
 ./contrib/registry/eureka
