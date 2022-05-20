@@ -1,27 +1,16 @@
 package zookeeper
 
 import (
-	"sync"
-	"sync/atomic"
+	"encoding/json"
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
-type serviceSet struct {
-	serviceName string
-	watcher     map[*watcher]struct{}
-	services    *atomic.Value
-	lock        sync.RWMutex
+func marshal(si *registry.ServiceInstance) ([]byte, error) {
+	return json.Marshal(si)
 }
 
-func (s *serviceSet) broadcast(ss []*registry.ServiceInstance) {
-	s.services.Store(ss)
-	s.lock.RLock()
-	defer s.lock.RUnlock()
-	for k := range s.watcher {
-		select {
-		case k.event <- struct{}{}:
-		default:
-		}
-	}
+func unmarshal(data []byte) (si *registry.ServiceInstance, err error) {
+	err = json.Unmarshal(data, &si)
+	return
 }

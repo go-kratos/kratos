@@ -2,13 +2,10 @@ package zookeeper
 
 import (
 	"context"
-	"encoding/json"
 	"path"
-	"sync"
-	"sync/atomic"
-	"time"
 
 	"github.com/go-zookeeper/zk"
+	"golang.org/x/sync/singleflight"
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -22,26 +19,14 @@ var (
 type Option func(o *options)
 
 type options struct {
-	ctx      context.Context
-	rootPath string
-	timeout  time.Duration
-	user     string
-	password string
-}
-
-// WithContext with registry context.
-func WithContext(ctx context.Context) Option {
-	return func(o *options) { o.ctx = ctx }
+	namespace string
+	user      string
+	password  string
 }
 
 // WithRootPath with registry root path.
 func WithRootPath(path string) Option {
-	return func(o *options) { o.rootPath = path }
-}
-
-// WithTimeout with registry timeout.
-func WithTimeout(timeout time.Duration) Option {
-	return func(o *options) { o.timeout = timeout }
+	return func(o *options) { o.namespace = path }
 }
 
 // WithDigestACL with registry password.
@@ -54,36 +39,23 @@ func WithDigestACL(user string, password string) Option {
 
 // Registry is consul registry
 type Registry struct {
-	opts     *options
-	conn     *zk.Conn
-	lock     sync.Mutex
-	registry map[string]*serviceSet
+	opts *options
+	conn *zk.Conn
+
+	group singleflight.Group
 }
 
-func New(zkServers []string, opts ...Option) (*Registry, error) {
+func New(conn *zk.Conn, opts ...Option) *Registry {
 	options := &options{
-		ctx:      context.Background(),
-		rootPath: "/microservices",
-		timeout:  time.Second * 5,
+		namespace: "/microservices",
 	}
 	for _, o := range opts {
 		o(options)
 	}
-	conn, _, err := zk.Connect(zkServers, options.timeout)
-	if err != nil {
-		return nil, err
-	}
-	if len(options.user) > 0 && len(options.password) > 0 {
-		err = conn.AddAuth("digest", []byte(options.user+":"+options.password))
-		if err != nil {
-			return nil, err
-		}
-	}
 	return &Registry{
-		opts:     options,
-		conn:     conn,
-		registry: make(map[string]*serviceSet),
-	}, err
+		opts: options,
+		conn: conn,
+	}
 }
 
 func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstance) error {
@@ -91,14 +63,14 @@ func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 		data []byte
 		err  error
 	)
-	if err = r.ensureName(r.opts.rootPath, []byte(""), 0); err != nil {
+	if err = r.ensureName(r.opts.namespace, []byte(""), 0); err != nil {
 		return err
 	}
-	serviceNamePath := path.Join(r.opts.rootPath, service.Name)
+	serviceNamePath := path.Join(r.opts.namespace, service.Name)
 	if err = r.ensureName(serviceNamePath, []byte(""), 0); err != nil {
 		return err
 	}
-	if data, err = json.Marshal(service); err != nil {
+	if data, err = marshal(service); err != nil {
 		return err
 	}
 	servicePath := path.Join(serviceNamePath, service.ID)
@@ -111,7 +83,7 @@ func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 // Deregister registry service to zookeeper.
 func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
 	ch := make(chan error, 1)
-	servicePath := path.Join(r.opts.rootPath, service.Name, service.ID)
+	servicePath := path.Join(r.opts.namespace, service.Name, service.ID)
 	go func() {
 		err := r.conn.Delete(servicePath, -1)
 		ch <- err
@@ -127,68 +99,36 @@ func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInst
 
 // GetService get services from zookeeper
 func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
-	serviceNamePath := path.Join(r.opts.rootPath, serviceName)
-	servicesID, _, err := r.conn.Children(serviceNamePath)
-	if err != nil {
-		return nil, err
-	}
-	items := make([]*registry.ServiceInstance, 0, len(servicesID))
-	for _, service := range servicesID {
-		item := &registry.ServiceInstance{}
-		servicePath := path.Join(serviceNamePath, service)
-		serviceInstanceByte, _, err := r.conn.Get(servicePath)
+	instances, err, _ := r.group.Do(serviceName, func() (interface{}, error) {
+		serviceNamePath := path.Join(r.opts.namespace, serviceName)
+		servicesID, _, err := r.conn.Children(serviceNamePath)
 		if err != nil {
 			return nil, err
 		}
-		if err := json.Unmarshal(serviceInstanceByte, item); err != nil {
-			return nil, err
+		items := make([]*registry.ServiceInstance, 0, len(servicesID))
+		for _, service := range servicesID {
+			servicePath := path.Join(serviceNamePath, service)
+			serviceInstanceByte, _, err := r.conn.Get(servicePath)
+			if err != nil {
+				return nil, err
+			}
+			item, err := unmarshal(serviceInstanceByte)
+			if err != nil {
+				return nil, err
+			}
+			items = append(items, item)
 		}
-		items = append(items, item)
+		return items, nil
+	})
+	if err != nil {
+		return nil, err
 	}
-	return items, nil
+	return instances.([]*registry.ServiceInstance), nil
 }
 
 func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	set, ok := r.registry[serviceName]
-	if !ok {
-		set = &serviceSet{
-			watcher:     make(map[*watcher]struct{}),
-			services:    &atomic.Value{},
-			serviceName: serviceName,
-		}
-		r.registry[serviceName] = set
-	}
-	// 初始化watcher
-	w := &watcher{
-		event: make(chan struct{}, 1),
-	}
-	w.ctx, w.cancel = context.WithCancel(context.Background())
-	w.set = set
-	set.lock.Lock()
-	set.watcher[w] = struct{}{}
-	set.lock.Unlock()
-	ss, _ := set.services.Load().([]*registry.ServiceInstance)
-	if len(ss) > 0 {
-		// 如果services有值需要推送给watcher，否则watch的时候可能会永远阻塞拿不到初始的数据
-		w.event <- struct{}{}
-	}
-
-	// 放在最后是为了防止漏推送
-	if !ok {
-		go r.resolve(set)
-	}
-	return w, nil
-}
-
-func (r *Registry) resolve(ss *serviceSet) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	services, err := r.GetService(ctx, ss.serviceName)
-	cancel()
-	if err == nil && len(services) > 0 {
-		ss.broadcast(services)
-	}
+	prefix := path.Join(r.opts.namespace, serviceName)
+	return newWatcher(ctx, prefix, serviceName, r.conn)
 }
 
 // ensureName ensure node exists, if not exist, create and set data
