@@ -1,15 +1,16 @@
 package config
 
 import (
-	"encoding/json"
+	stdjson "encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
 	"sync/atomic"
 	"time"
 
-	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/go-kratos/kratos/v2/encoding/json"
 )
 
 var (
@@ -128,14 +129,14 @@ func (v *atomicValue) Duration() (time.Duration, error) {
 }
 
 func (v *atomicValue) Scan(obj interface{}) error {
-	data, err := json.Marshal(v.Load())
+	data, err := stdjson.Marshal(v.Load())
 	if err != nil {
 		return err
 	}
 	if pb, ok := obj.(proto.Message); ok {
-		return protojson.Unmarshal(data, pb)
+		return json.UnmarshalOptions.Unmarshal(data, pb)
 	}
-	return json.Unmarshal(data, obj)
+	return stdjson.Unmarshal(data, obj)
 }
 
 type errValue struct {
