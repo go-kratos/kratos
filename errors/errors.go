@@ -131,20 +131,20 @@ func FromError(err error) *Error {
 		return se
 	}
 	gs, ok := status.FromError(err)
-	if ok {
-		ret := New(
-			httpstatus.FromGRPCCode(gs.Code()),
-			UnknownReason,
-			gs.Message(),
-		)
-		for _, detail := range gs.Details() {
-			switch d := detail.(type) {
-			case *errdetails.ErrorInfo:
-				ret.Reason = d.Reason
-				return ret.WithMetadata(d.Metadata)
-			}
-		}
-		return ret
+	if !ok {
+		return New(UnknownCode, UnknownReason, err.Error())
 	}
-	return New(UnknownCode, UnknownReason, err.Error())
+	ret := New(
+		httpstatus.FromGRPCCode(gs.Code()),
+		UnknownReason,
+		gs.Message(),
+	)
+	for _, detail := range gs.Details() {
+		switch d := detail.(type) {
+		case *errdetails.ErrorInfo:
+			ret.Reason = d.Reason
+			return ret.WithMetadata(d.Metadata)
+		}
+	}
+	return ret
 }
