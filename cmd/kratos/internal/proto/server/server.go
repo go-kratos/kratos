@@ -2,6 +2,8 @@ package server
 
 import (
 	"fmt"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"log"
 	"os"
 	"path"
@@ -10,6 +12,8 @@ import (
 	"github.com/emicklei/proto"
 	"github.com/spf13/cobra"
 )
+
+var caser = cases.Title(language.English)
 
 // CmdServer the service command.
 var CmdServer = &cobra.Command{
@@ -60,7 +64,7 @@ func run(cmd *cobra.Command, args []string) {
 				r, ok := e.(*proto.RPC)
 				if ok {
 					cs.Methods = append(cs.Methods, &Method{
-						Service: s.Name, Name: r.Name, Request: r.RequestType,
+						Service: s.Name, Name: caser.String(r.Name), Request: r.RequestType,
 						Reply: r.ReturnsType, Type: getMethodType(r.StreamsRequest, r.StreamsReturns),
 					})
 				}
