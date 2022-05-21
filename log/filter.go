@@ -66,13 +66,13 @@ func (f *Filter) Log(level Level, keyvals ...interface{}) error {
 	}
 	// fkv is used to provide a slice to contains both logger.prefix and keyvals for filter
 	var fkv []interface{}
-	if l, ok := f.logger.(*logger); ok {
-		if len(l.prefix) > 0 {
-			fkv = make([]interface{}, 0, len(l.prefix)+len(keyvals))
-			fkv = append(fkv, l.prefix...)
-			fkv = append(fkv, keyvals...)
-		}
-	} else {
+	l, ok := f.logger.(*logger)
+	if ok && len(l.prefix) > 0 {
+		fkv = make([]interface{}, 0, len(l.prefix)+len(keyvals))
+		fkv = append(fkv, l.prefix...)
+		fkv = append(fkv, keyvals...)
+	}
+	if !ok {
 		fkv = keyvals
 	}
 	if f.filter != nil && f.filter(level, fkv...) {

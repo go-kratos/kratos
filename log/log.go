@@ -37,32 +37,34 @@ func (c *logger) Log(level Level, keyvals ...interface{}) error {
 
 // With with logger fields.
 func With(l Logger, kv ...interface{}) Logger {
-	if c, ok := l.(*logger); ok {
-		kvs := make([]interface{}, 0, len(c.prefix)+len(kv))
-		kvs = append(kvs, kv...)
-		kvs = append(kvs, c.prefix...)
-		return &logger{
-			logs:      c.logs,
-			prefix:    kvs,
-			hasValuer: containsValuer(kvs),
-			ctx:       c.ctx,
-		}
+	c, ok := l.(*logger)
+	if !ok {
+		return &logger{logs: []Logger{l}, prefix: kv, hasValuer: containsValuer(kv)}
 	}
-	return &logger{logs: []Logger{l}, prefix: kv, hasValuer: containsValuer(kv)}
+	kvs := make([]interface{}, 0, len(c.prefix)+len(kv))
+	kvs = append(kvs, kv...)
+	kvs = append(kvs, c.prefix...)
+	return &logger{
+		logs:      c.logs,
+		prefix:    kvs,
+		hasValuer: containsValuer(kvs),
+		ctx:       c.ctx,
+	}
 }
 
 // WithContext returns a shallow copy of l with its context changed
 // to ctx. The provided ctx must be non-nil.
 func WithContext(ctx context.Context, l Logger) Logger {
-	if c, ok := l.(*logger); ok {
-		return &logger{
-			logs:      c.logs,
-			prefix:    c.prefix,
-			hasValuer: c.hasValuer,
-			ctx:       ctx,
-		}
+	c, ok := l.(*logger)
+	if !ok {
+		return &logger{logs: []Logger{l}, ctx: ctx}
 	}
-	return &logger{logs: []Logger{l}, ctx: ctx}
+	return &logger{
+		logs:      c.logs,
+		prefix:    c.prefix,
+		hasValuer: c.hasValuer,
+		ctx:       ctx,
+	}
 }
 
 // MultiLogger wraps multi logger.
