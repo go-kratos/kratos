@@ -104,19 +104,22 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 					tokenInfo, err = jwt.Parse(jwtToken, keyFunc)
 				}
 				if err != nil {
-					if ve, ok := err.(*jwt.ValidationError); ok {
-						if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-							return nil, ErrTokenInvalid
-						} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
-							return nil, ErrTokenExpired
-						} else {
-							return nil, ErrTokenParseFail
-						}
+					ve, ok := err.(*jwt.ValidationError)
+					if !ok {
+						return nil, errors.Unauthorized(reason, err.Error())
 					}
-					return nil, errors.Unauthorized(reason, err.Error())
-				} else if !tokenInfo.Valid {
+					if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+						return nil, ErrTokenInvalid
+					}
+					if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+						return nil, ErrTokenExpired
+					}
+					return nil, ErrTokenParseFail
+				}
+				if !tokenInfo.Valid {
 					return nil, ErrTokenInvalid
-				} else if tokenInfo.Method != o.signingMethod {
+				}
+				if tokenInfo.Method != o.signingMethod {
 					return nil, ErrUnSupportSigningMethod
 				}
 				ctx = NewContext(ctx, tokenInfo.Claims)
