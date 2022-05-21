@@ -62,7 +62,7 @@ func (group *RouterGroup) Prefix(prefix string, handlers ...Handler) IRoutes {
 // PrefixFunc adds a matcher for the URL path prefix.
 func (group *RouterGroup) PrefixFunc(prefix string, handlers ...HandlerFunc) IRoutes {
 	return group.UseFunc(func(c *Context) {
-		if strings.HasPrefix(c.Request.RequestURI, prefix) {
+		if strings.HasPrefix(c.Request.URL.Path, prefix) {
 			for _, h := range handlers {
 				h.ServeHTTP(c)
 			}
