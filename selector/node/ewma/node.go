@@ -159,10 +159,8 @@ func (n *Node) Pick() selector.DoneFunc {
 			success = uint64(float64(oldSuc)*w + float64(success)*(1.0-w))
 			atomic.StoreUint64(&n.success, success)
 		}
-		if n.errHandler != nil {
-			if n.errHandler(di.Err) {
-				success = 0
-			}
+		if n.errHandler != nil && n.errHandler(di.Err) {
+			success = 0
 		}
 		if errors.Is(context.DeadlineExceeded, di.Err) || errors.Is(context.Canceled, di.Err) ||
 			errors.IsServiceUnavailable(di.Err) || errors.IsGatewayTimeout(di.Err) {
