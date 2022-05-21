@@ -19,9 +19,7 @@ func WithWriterLevel(level Level) WriterOptionFn {
 // WithWriteMessageKey set writerWrapper helper message key.
 func WithWriteMessageKey(key string) WriterOptionFn {
 	return func(w *writerWrapper) {
-		if key != "" {
-			w.helper.msgKey = key
-		}
+		w.helper.msgKey = key
 	}
 }
 
