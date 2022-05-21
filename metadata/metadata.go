@@ -24,8 +24,7 @@ func New(mds ...map[string]string) Metadata {
 
 // Get returns the value associated with the passed key.
 func (m Metadata) Get(key string) string {
-	k := strings.ToLower(key)
-	return m[k]
+	return m[strings.ToLower(key)]
 }
 
 // Set stores the key-value pair.
@@ -33,15 +32,13 @@ func (m Metadata) Set(key string, value string) {
 	if key == "" || value == "" {
 		return
 	}
-	k := strings.ToLower(key)
-	m[k] = value
+	m[strings.ToLower(key)] = value
 }
 
 // Range iterate over element in metadata.
 func (m Metadata) Range(f func(k, v string) bool) {
 	for k, v := range m {
-		ret := f(k, v)
-		if !ret {
+		if !f(k, v) {
 			break
 		}
 	}
