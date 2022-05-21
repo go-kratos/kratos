@@ -3,11 +3,12 @@ package ewma
 import (
 	"container/list"
 	"context"
-	"github.com/go-kratos/kratos/v2/errors"
 	"math"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/errors"
 
 	"github.com/go-kratos/kratos/v2/selector"
 )
