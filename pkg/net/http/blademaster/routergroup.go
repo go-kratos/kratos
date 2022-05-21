@@ -2,6 +2,7 @@ package blademaster
 
 import (
 	"regexp"
+	"strings"
 )
 
 // IRouter http router framework interface.
@@ -47,6 +48,29 @@ func (group *RouterGroup) Use(middleware ...Handler) IRoutes {
 func (group *RouterGroup) UseFunc(middleware ...HandlerFunc) IRoutes {
 	group.Handlers = append(group.Handlers, middleware...)
 	return group.returnObj()
+}
+
+// Prefix adds a matcher for the URL path prefix.
+func (group *RouterGroup) Prefix(prefix string, handlers ...Handler) IRoutes {
+	return group.PrefixFunc(prefix, func(c *Context) {
+		for _, h := range handlers {
+			h.ServeHTTP(c)
+		}
+	})
+}
+
+// PrefixFunc adds a matcher for the URL path prefix.
+func (group *RouterGroup) PrefixFunc(prefix string, handlers ...HandlerFunc) IRoutes {
+	return group.UseFunc(func(c *Context) {
+		if strings.HasPrefix(c.Request.RequestURI, prefix) {
+			for _, h := range handlers {
+				h.ServeHTTP(c)
+			}
+			c.Abort()
+			return
+		}
+		c.Next()
+	})
 }
 
 // Group creates a new router group. You should add all the routes that have common middlwares or the same path prefix.
