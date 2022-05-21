@@ -47,7 +47,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P()
 	index := 0
 	for _, enum := range file.Enums {
-		if genErrorsReason(gen, file, g, enum) {
+		if !genErrorsReason(gen, file, g, enum) {
 			index++
 		}
 	}
