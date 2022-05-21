@@ -28,22 +28,24 @@ func EncodeURL(pathTemplate string, msg proto.Message, needQuery bool) string {
 		}
 		key := in[2 : len(in)-1]
 		vars := strings.Split(key, ".")
-		if value, err := getValueByField(msg.ProtoReflect(), vars); err == nil {
-			pathParams[key] = struct{}{}
-			return "/" + value
+		value, err := getValueByField(msg.ProtoReflect(), vars)
+		if err != nil {
+			return in
 		}
-		return in
+		pathParams[key] = struct{}{}
+		return "/" + value
 	})
-	if needQuery {
-		u, err := form.EncodeValues(msg)
-		if err == nil && len(u) > 0 {
-			for key := range pathParams {
-				delete(u, key)
-			}
-			query := u.Encode()
-			if query != "" {
-				path += "?" + query
-			}
+	if !needQuery {
+		return path
+	}
+	u, err := form.EncodeValues(msg)
+	if err == nil && len(u) > 0 {
+		for key := range pathParams {
+			delete(u, key)
+		}
+		query := u.Encode()
+		if query != "" {
+			path += "?" + query
 		}
 	}
 	return path
