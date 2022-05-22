@@ -392,6 +392,22 @@ func (engine *Engine) Use(middleware ...Handler) IRoutes {
 	return engine
 }
 
+// PrefixFunc adds a matcher for the URL path prefix.
+func (engine *Engine) PrefixFunc(prefix string, handlers ...HandlerFunc) IRoutes {
+	engine.RouterGroup.PrefixFunc(prefix, handlers...)
+	engine.rebuild404Handlers()
+	engine.rebuild405Handlers()
+	return engine
+}
+
+// Prefix adds a matcher for the URL path prefix.
+func (engine *Engine) Prefix(prefix string, handlers ...Handler) IRoutes {
+	engine.RouterGroup.Prefix(prefix, handlers...)
+	engine.rebuild404Handlers()
+	engine.rebuild405Handlers()
+	return engine
+}
+
 // Ping is used to set the general HTTP ping handler.
 func (engine *Engine) Ping(handler HandlerFunc) {
 	engine.GET("/ping", handler)
