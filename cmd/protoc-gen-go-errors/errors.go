@@ -47,8 +47,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P()
 	index := 0
 	for _, enum := range file.Enums {
-		skip := genErrorsReason(gen, file, g, enum)
-		if !skip {
+		if !genErrorsReason(gen, file, g, enum) {
 			index++
 		}
 	}
@@ -108,8 +107,7 @@ func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 
 func case2Camel(name string) string {
 	if !strings.Contains(name, "_") {
-		upperName := strings.ToUpper(name)
-		if upperName == name {
+		if name == strings.ToUpper(name) {
 			name = strings.ToLower(name)
 		}
 		return enCases.String(name)
