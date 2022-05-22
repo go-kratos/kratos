@@ -68,26 +68,26 @@ func run(cmd *cobra.Command, args []string) {
 	go func() {
 		if !nomod {
 			done <- p.New(ctx, wd, repoURL, branch)
-		} else {
-			if _, e := os.Stat(path.Join(wd, "go.mod")); os.IsNotExist(e) {
-				done <- fmt.Errorf("🚫 go.mod don't exists in %s", wd)
-				return
-			}
-
-			mod, e := base.ModulePath(path.Join(wd, "go.mod"))
-			if e != nil {
-				panic(e)
-			}
-			done <- p.Add(ctx, wd, repoURL, branch, mod)
+			return
 		}
+		if _, e := os.Stat(path.Join(wd, "go.mod")); os.IsNotExist(e) {
+			done <- fmt.Errorf("🚫 go.mod don't exists in %s", wd)
+			return
+		}
+
+		mod, e := base.ModulePath(path.Join(wd, "go.mod"))
+		if e != nil {
+			panic(e)
+		}
+		done <- p.Add(ctx, wd, repoURL, branch, mod)
 	}()
 	select {
 	case <-ctx.Done():
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			fmt.Fprint(os.Stderr, "\033[31mERROR: project creation timed out\033[m\n")
-		} else {
-			fmt.Fprintf(os.Stderr, "\033[31mERROR: failed to create project(%s)\033[m\n", ctx.Err().Error())
+			return
 		}
+		fmt.Fprintf(os.Stderr, "\033[31mERROR: failed to create project(%s)\033[m\n", ctx.Err().Error())
 	case err = <-done:
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "\033[31mERROR: Failed to create project(%s)\033[m\n", err.Error())
