@@ -4,5 +4,5 @@ go 1.16
 
 require (
 	golang.org/x/text v0.3.7
-	google.golang.org/protobuf v1.27.1
+	google.golang.org/protobuf v1.28.0
 )
