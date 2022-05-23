@@ -37,7 +37,7 @@ func (c *logger) Log(level Level, keyvals ...interface{}) error {
 func With(l Logger, kv ...interface{}) Logger {
 	c, ok := l.(*logger)
 	if !ok {
-		return &logger{logger: l, prefix: kv, hasValuer: containsValuer(kv)}
+		return &logger{logger: l, prefix: kv, hasValuer: containsValuer(kv), ctx: context.Background()}
 	}
 	kvs := make([]interface{}, 0, len(c.prefix)+len(kv))
 	kvs = append(kvs, kv...)
