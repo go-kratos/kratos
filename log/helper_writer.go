@@ -36,6 +36,6 @@ func NewWriter(logger Logger, opts ...WriterOptionFn) io.Writer {
 }
 
 func (ww *writerWrapper) Write(p []byte) (int, error) {
-	ww.helper.Log(ww.level, ww.helper.msgKey, string(p))
+	_ = ww.helper.Log(ww.level, ww.helper.msgKey, string(p))
 	return 0, nil
 }
