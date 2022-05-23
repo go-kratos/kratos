@@ -186,15 +186,15 @@ func listDescriptors() (services []*v1.ServiceDescriptor, types []*v1.TypeDescri
 func HttpPatternInfo(pattern interface{}) (method string, path string) {
 	switch p := pattern.(type) {
 	case *annotations.HttpRule_Get:
-		return "Get", p.Get
+		return "GET", p.Get
 	case *annotations.HttpRule_Post:
-		return "Post", p.Post
+		return "POST", p.Post
 	case *annotations.HttpRule_Delete:
-		return "Delete", p.Delete
+		return "DELETE", p.Delete
 	case *annotations.HttpRule_Patch:
-		return "Patch", p.Patch
+		return "PATCH", p.Patch
 	case *annotations.HttpRule_Put:
-		return "Put", p.Put
+		return "PUT", p.Put
 	case *annotations.HttpRule_Custom:
 		return p.Custom.Kind, p.Custom.Path
 	default:
