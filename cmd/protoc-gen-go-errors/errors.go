@@ -114,7 +114,7 @@ func case2Camel(name string) string {
 		return enCases.String(name)
 	}
 	strs := strings.Split(name, "_")
-	var words []string
+	words := make([]string, 0, len(strs))
 	for _, w := range strs {
 		hasLower := false
 		for _, r := range w {
