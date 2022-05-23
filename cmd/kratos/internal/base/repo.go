@@ -3,6 +3,7 @@ package base
 import (
 	"context"
 	"fmt"
+	stdurl "net/url"
 	"os"
 	"os/exec"
 	"path"
@@ -16,8 +17,19 @@ type Repo struct {
 	branch string
 }
 
-// NewRepo new a repository manager.
-func NewRepo(url string, branch string) *Repo {
+func repoDir(url string) string {
+	if !strings.Contains(url, "//") {
+		url = "//" + url
+	}
+	if strings.HasPrefix(url, "//git@") {
+		url = "ssh:" + url
+	} else if strings.HasPrefix(url, "//") {
+		url = "https:" + url
+	}
+	u, err := stdurl.Parse(url)
+	if err == nil {
+		url = fmt.Sprintf("%s://%s%s", u.Scheme, u.Hostname(), u.Path)
+	}
 	var start int
 	start = strings.Index(url, "//")
 	if start == -1 {
@@ -26,9 +38,14 @@ func NewRepo(url string, branch string) *Repo {
 		start += 2
 	}
 	end := strings.LastIndex(url, "/")
+	return url[start:end]
+}
+
+// NewRepo new a repository manager.
+func NewRepo(url string, branch string) *Repo {
 	return &Repo{
 		url:    url,
-		home:   kratosHomeWithDir("repo/" + url[start:end]),
+		home:   kratosHomeWithDir("repo/" + repoDir(url)),
 		branch: branch,
 	}
 }
@@ -96,4 +113,17 @@ func (r *Repo) CopyTo(ctx context.Context, to string, modPath string, ignores []
 		return err
 	}
 	return copyDir(r.Path(), to, []string{mod, modPath}, ignores)
+}
+
+// CopyToV2 copies the repository to project path
+func (r *Repo) CopyToV2(ctx context.Context, to string, modPath string, ignores, replaces []string) error {
+	if err := r.Clone(ctx); err != nil {
+		return err
+	}
+	mod, err := ModulePath(path.Join(r.Path(), "go.mod"))
+	if err != nil {
+		return err
+	}
+	replaces = append([]string{mod, modPath}, replaces...)
+	return copyDir(r.Path(), to, replaces, ignores)
 }

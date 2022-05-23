@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// DefaultMessageKey default message key.
 var DefaultMessageKey = "msg"
 
 // Option is Helper option.
@@ -17,6 +18,7 @@ type Helper struct {
 	msgKey string
 }
 
+// WithMessageKey with message key.
 func WithMessageKey(k string) Option {
 	return func(opts *Helper) {
 		opts.msgKey = k

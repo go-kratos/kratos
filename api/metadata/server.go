@@ -63,26 +63,28 @@ func (s *Server) load() error {
 	}
 	var err error
 	protoregistry.GlobalFiles.RangeFiles(func(fd protoreflect.FileDescriptor) bool {
-		if fd.Services() != nil {
-			for i := 0; i < fd.Services().Len(); i++ {
-				svc := fd.Services().Get(i)
-				fdp, e := fileDescriptorProto(fd.Path())
-				if e != nil {
-					err = e
-					return false
-				}
-				fdps, e := allDependency(fdp)
-				if e != nil {
-					err = e
-					return false
-				}
-				s.services[string(svc.FullName())] = &dpb.FileDescriptorSet{File: fdps}
-				if svc.Methods() != nil {
-					for j := 0; j < svc.Methods().Len(); j++ {
-						method := svc.Methods().Get(j)
-						s.methods[string(svc.FullName())] = append(s.methods[string(svc.FullName())], string(method.Name()))
-					}
-				}
+		if fd.Services() == nil {
+			return true
+		}
+		for i := 0; i < fd.Services().Len(); i++ {
+			svc := fd.Services().Get(i)
+			fdp, e := fileDescriptorProto(fd.Path())
+			if e != nil {
+				err = e
+				return false
+			}
+			fdps, e := allDependency(fdp)
+			if e != nil {
+				err = e
+				return false
+			}
+			s.services[string(svc.FullName())] = &dpb.FileDescriptorSet{File: fdps}
+			if svc.Methods() == nil {
+				continue
+			}
+			for j := 0; j < svc.Methods().Len(); j++ {
+				method := svc.Methods().Get(j)
+				s.methods[string(svc.FullName())] = append(s.methods[string(svc.FullName())], string(method.Name()))
 			}
 		}
 		return true
@@ -134,11 +136,7 @@ func parseMetadata(meta interface{}) (*dpb.FileDescriptorProto, error) {
 	}
 	// Check if meta is the byte slice.
 	if enc, ok := meta.([]byte); ok {
-		fd, err := decodeFileDesc(enc)
-		if err != nil {
-			return nil, err
-		}
-		return fd, nil
+		return decodeFileDesc(enc)
 	}
 	return nil, fmt.Errorf("proto not sumpport metadata: %v", meta)
 }

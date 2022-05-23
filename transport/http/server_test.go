@@ -36,6 +36,11 @@ func TestServer(t *testing.T) {
 	srv.HandleHeader("content-type", "application/grpc-web+json", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	})
+	srv.Route("/errors").GET("/cause", func(ctx Context) error {
+		return errors.BadRequest("xxx", "zzz").
+			WithMetadata(map[string]string{"foo": "bar"}).
+			WithCause(fmt.Errorf("error cause"))
+	})
 
 	if e, err := srv.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
 		t.Fatal(e, err)
@@ -49,8 +54,42 @@ func TestServer(t *testing.T) {
 	time.Sleep(time.Second)
 	testHeader(t, srv)
 	testClient(t, srv)
+	testAccept(t, srv)
 	if srv.Stop(ctx) != nil {
 		t.Errorf("expected nil got %v", srv.Stop(ctx))
+	}
+}
+
+func testAccept(t *testing.T, srv *Server) {
+	tests := []struct {
+		method      string
+		path        string
+		contentType string
+	}{
+		{"GET", "/errors/cause", "application/json"},
+		{"GET", "/errors/cause", "application/proto"},
+	}
+	e, err := srv.Endpoint()
+	if err != nil {
+		t.Errorf("expected nil got %v", err)
+	}
+	client, err := NewClient(context.Background(), WithEndpoint(e.Host))
+	if err != nil {
+		t.Errorf("expected nil got %v", err)
+	}
+	for _, test := range tests {
+		req, err := http.NewRequest(test.method, e.String()+test.path, nil)
+		if err != nil {
+			t.Errorf("expected nil got %v", err)
+		}
+		req.Header.Set("Content-Type", test.contentType)
+		resp, err := client.Do(req)
+		if errors.Code(err) != 400 {
+			t.Errorf("expected 400 got %v", err)
+		}
+		if err == nil {
+			resp.Body.Close()
+		}
 	}
 }
 
@@ -80,20 +119,22 @@ func testClient(t *testing.T, srv *Server) {
 	tests := []struct {
 		method string
 		path   string
+		code   int
 	}{
-		{"GET", "/index"},
-		{"PUT", "/index"},
-		{"POST", "/index"},
-		{"PATCH", "/index"},
-		{"DELETE", "/index"},
+		{"GET", "/index", 200},
+		{"PUT", "/index", 200},
+		{"POST", "/index", 200},
+		{"PATCH", "/index", 200},
+		{"DELETE", "/index", 200},
 
-		{"GET", "/index/1"},
-		{"PUT", "/index/1"},
-		{"POST", "/index/1"},
-		{"PATCH", "/index/1"},
-		{"DELETE", "/index/1"},
+		{"GET", "/index/1", 200},
+		{"PUT", "/index/1", 200},
+		{"POST", "/index/1", 200},
+		{"PATCH", "/index/1", 200},
+		{"DELETE", "/index/1", 200},
 
-		{"GET", "/index/notfound"},
+		{"GET", "/index/notfound", 404},
+		{"GET", "/errors/cause", 400},
 	}
 	e, err := srv.Endpoint()
 	if err != nil {
@@ -112,13 +153,11 @@ func testClient(t *testing.T, srv *Server) {
 			t.Fatal(err)
 		}
 		resp, err := client.Do(req)
-		if test.path == "/index/notfound" && err != nil {
-			if e, ok := err.(*errors.Error); ok && e.Code == http.StatusNotFound {
-				continue
-			}
+		if errors.Code(err) != test.code {
+			t.Fatalf("want %v, but got %v", test, err)
 		}
 		if err != nil {
-			t.Fatal(err)
+			continue
 		}
 		if resp.StatusCode != 200 {
 			_ = resp.Body.Close()
@@ -140,13 +179,11 @@ func testClient(t *testing.T, srv *Server) {
 	for _, test := range tests {
 		var res testData
 		err := client.Invoke(context.Background(), test.method, test.path, nil, &res)
-		if test.path == "/index/notfound" && err != nil {
-			if e, ok := err.(*errors.Error); ok && e.Code == http.StatusNotFound {
-				continue
-			}
+		if errors.Code(err) != test.code {
+			t.Fatalf("want %v, but got %v", test, err)
 		}
 		if err != nil {
-			t.Fatalf("invoke  error %v", err)
+			continue
 		}
 		if res.Path != test.path {
 			t.Errorf("expected %s got %s", test.path, res.Path)

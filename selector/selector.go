@@ -31,6 +31,9 @@ type Builder interface {
 
 // Node is node interface.
 type Node interface {
+	// Scheme is service node scheme
+	Scheme() string
+
 	// Address is the unique address under the same service
 	Address() string
 

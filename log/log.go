@@ -6,7 +6,7 @@ import (
 )
 
 // DefaultLogger is default logger.
-var DefaultLogger Logger = NewStdLogger(log.Writer())
+var DefaultLogger = NewStdLogger(log.Writer())
 
 // Logger is a logger interface.
 type Logger interface {

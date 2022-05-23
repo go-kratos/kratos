@@ -86,7 +86,7 @@ func (c *config) watch(w Watcher) {
 		c.cached.Range(func(key, value interface{}) bool {
 			k := key.(string)
 			v := value.(Value)
-			if n, ok := c.reader.Value(k); ok && !reflect.DeepEqual(n.Load(), v.Load()) {
+			if n, ok := c.reader.Value(k); ok && reflect.TypeOf(n.Load()) == reflect.TypeOf(v.Load()) && !reflect.DeepEqual(n.Load(), v.Load()) {
 				v.Store(n.Load())
 				if o, ok := c.observers.Load(k); ok {
 					o.(Observer)(k, v)
@@ -104,7 +104,7 @@ func (c *config) Load() error {
 			return err
 		}
 		for _, v := range kvs {
-			c.log.Infof("config loaded: %s format: %s", v.Key, v.Format)
+			c.log.Debugf("config loaded: %s format: %s", v.Key, v.Format)
 		}
 		if err = c.reader.Merge(kvs...); err != nil {
 			c.log.Errorf("failed to merge config source: %v", err)
