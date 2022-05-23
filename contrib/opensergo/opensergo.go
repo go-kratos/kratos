@@ -12,8 +12,10 @@ import (
 	"github.com/go-kratos/kratos/v2"
 	v1 "github.com/opensergo/opensergo-go/proto/service_contract/v1"
 	"golang.org/x/net/context"
+	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 )
@@ -105,9 +107,9 @@ func (s *OpenSergo) ReportMetadata(ctx context.Context, app kratos.AppInfo) erro
 		})
 	}
 	_, err = s.mdClient.ReportMetadata(ctx, &v1.ReportMetadataRequest{
-		AppName: app.Name(),
-		// TODO: Node: *v1.Node,
+		AppName:         app.Name(),
 		ServiceMetadata: []*v1.ServiceMetadata{serviceMetadata},
+		// TODO: Node: *v1.Node,
 	})
 	return err
 }
@@ -126,15 +128,20 @@ func listDescriptors() (services []*v1.ServiceDescriptor, types []*v1.TypeDescri
 				outputType := string(md.Output().FullName())
 				isClientStreaming := md.IsStreamingClient()
 				isServerStreaming := md.IsStreamingServer()
+				pattern := proto.GetExtension(md.Options(), annotations.E_Http).(*annotations.HttpRule).GetPattern()
+				var httpPath, httpMethod string
+				if pattern != nil {
+					httpPath, httpMethod = HttpPatternInfo(pattern)
+				}
 				methodDesc := v1.MethodDescriptor{
 					Name:            mName,
 					InputTypes:      []string{inputType},
 					OutputTypes:     []string{outputType},
 					ClientStreaming: &isClientStreaming,
 					ServerStreaming: &isServerStreaming,
+					HttpPaths:       []string{httpPath},
+					HttpMethods:     []string{httpMethod},
 					// TODO: Description: *string,
-					// TODO: HttpPaths: []string,
-					// TODO: HttpMethods: []string,
 				}
 				methods = append(methods, &methodDesc)
 			}
@@ -174,4 +181,23 @@ func listDescriptors() (services []*v1.ServiceDescriptor, types []*v1.TypeDescri
 		return true
 	})
 	return
+}
+
+func HttpPatternInfo(pattern interface{}) (method string, path string) {
+	switch p := pattern.(type) {
+	case *annotations.HttpRule_Get:
+		return "Get", p.Get
+	case *annotations.HttpRule_Post:
+		return "Post", p.Post
+	case *annotations.HttpRule_Delete:
+		return "Delete", p.Delete
+	case *annotations.HttpRule_Patch:
+		return "Patch", p.Patch
+	case *annotations.HttpRule_Put:
+		return "Put", p.Put
+	case *annotations.HttpRule_Custom:
+		return p.Custom.Kind, p.Custom.Path
+	default:
+		return "", ""
+	}
 }
