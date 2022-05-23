@@ -10,8 +10,8 @@ var global = &loggerAppliance{}
 // loggerAppliance is the proxy of `Logger` to
 // make logger change will affect all sub-logger.
 type loggerAppliance struct {
-	lock sync.Mutex
-	Logger
+	lock   sync.Mutex
+	logger Logger
 	helper *Helper
 }
 
@@ -22,12 +22,12 @@ func init() {
 func (a *loggerAppliance) SetLogger(in Logger) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
-	a.Logger = in
-	a.helper = NewHelper(a.Logger)
+	a.logger = in
+	a.helper = NewHelper(a.logger)
 }
 
 func (a *loggerAppliance) GetLogger() Logger {
-	return a.Logger
+	return a.logger
 }
 
 // SetLogger should be called before any other log call.
@@ -38,7 +38,7 @@ func SetLogger(logger Logger) {
 
 // GetLogger returns global logger appliance as logger in current process.
 func GetLogger() Logger {
-	return global
+	return global.helper.logger
 }
 
 // Log Print log by level and keyvals.
