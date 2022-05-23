@@ -131,7 +131,7 @@ func listDescriptors() (services []*v1.ServiceDescriptor, types []*v1.TypeDescri
 				pattern := proto.GetExtension(md.Options(), annotations.E_Http).(*annotations.HttpRule).GetPattern()
 				var httpPath, httpMethod string
 				if pattern != nil {
-					httpPath, httpMethod = HttpPatternInfo(pattern)
+					httpPath, httpMethod = HTTPPatternInfo(pattern)
 				}
 				methodDesc := v1.MethodDescriptor{
 					Name:            mName,
@@ -183,7 +183,7 @@ func listDescriptors() (services []*v1.ServiceDescriptor, types []*v1.TypeDescri
 	return
 }
 
-func HttpPatternInfo(pattern interface{}) (method string, path string) {
+func HTTPPatternInfo(pattern interface{}) (method string, path string) {
 	switch p := pattern.(type) {
 	case *annotations.HttpRule_Get:
 		return "GET", p.Get
