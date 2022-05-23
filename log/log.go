@@ -14,7 +14,7 @@ type Logger interface {
 }
 
 type logger struct {
-	logs      []Logger
+	logger    Logger
 	prefix    []interface{}
 	hasValuer bool
 	ctx       context.Context
@@ -27,10 +27,8 @@ func (c *logger) Log(level Level, keyvals ...interface{}) error {
 		bindValues(c.ctx, kvs)
 	}
 	kvs = append(kvs, keyvals...)
-	for _, l := range c.logs {
-		if err := l.Log(level, kvs...); err != nil {
-			return err
-		}
+	if err := c.logger.Log(level, kvs...); err != nil {
+		return err
 	}
 	return nil
 }
@@ -39,13 +37,13 @@ func (c *logger) Log(level Level, keyvals ...interface{}) error {
 func With(l Logger, kv ...interface{}) Logger {
 	c, ok := l.(*logger)
 	if !ok {
-		return &logger{logs: []Logger{l}, prefix: kv, hasValuer: containsValuer(kv)}
+		return &logger{logger: l, prefix: kv, hasValuer: containsValuer(kv)}
 	}
 	kvs := make([]interface{}, 0, len(c.prefix)+len(kv))
 	kvs = append(kvs, kv...)
 	kvs = append(kvs, c.prefix...)
 	return &logger{
-		logs:      c.logs,
+		logger:    l,
 		prefix:    kvs,
 		hasValuer: containsValuer(kvs),
 		ctx:       c.ctx,
@@ -57,17 +55,12 @@ func With(l Logger, kv ...interface{}) Logger {
 func WithContext(ctx context.Context, l Logger) Logger {
 	c, ok := l.(*logger)
 	if !ok {
-		return &logger{logs: []Logger{l}, ctx: ctx}
+		return &logger{logger: l, ctx: ctx}
 	}
 	return &logger{
-		logs:      c.logs,
+		logger:    l,
 		prefix:    c.prefix,
 		hasValuer: c.hasValuer,
 		ctx:       ctx,
 	}
-}
-
-// MultiLogger wraps multi logger.
-func MultiLogger(logs ...Logger) Logger {
-	return &logger{logs: logs}
 }
