@@ -51,7 +51,7 @@ type Filter struct {
 // NewFilter new a logger filter.
 func NewFilter(logger Logger, opts ...FilterOption) *Filter {
 	options := &Filter{
-		logger: withContext(context.Background(), logger, 2),
+		logger: withContext(context.Background(), logger, 1, false),
 		key:    make(map[interface{}]struct{}),
 		value:  make(map[interface{}]struct{}),
 	}

@@ -76,36 +76,42 @@ func WithContext(ctx context.Context, l Logger) Logger {
 	if ctx == nil {
 		return l
 	}
-	return withContext(ctx, l, 1)
+	return withContext(ctx, l, 0, false)
 }
 
-func withContext(ctx context.Context, l Logger, relativeDepth int) Logger {
+func withContext(ctx context.Context, l Logger, relativeDepth int, isSub bool) Logger {
 	switch lgr := l.(type) {
 	case *logger:
 		lgs := make([]Logger, 0, len(lgr.logs))
 		for _, subLog := range lgr.logs {
-			lgs = append(lgs, withContext(ctx, subLog, relativeDepth+1))
+			lgs = append(lgs, withContext(ctx, subLog, relativeDepth+1, true))
 		}
 		return &logger{
 			logs:      lgs,
 			prefix:    lgr.prefix,
 			hasValuer: lgr.hasValuer,
-			ctx:       setRelativeDepth(ctx, relativeDepth),
+			ctx:       context.WithValue(ctx, relativeDepthKey{}, relativeDepth+1),
 		}
 	case *Filter:
 		return &Filter{
-			logger: withContext(ctx, lgr.logger, relativeDepth+1),
+			logger: withContext(ctx, lgr.logger, relativeDepth+1, false),
 			level:  lgr.level,
 			key:    lgr.key,
 			filter: lgr.filter,
 		}
 	case *Helper:
 		return &Helper{
-			logger: withContext(ctx, lgr.logger, relativeDepth+1),
+			logger: withContext(ctx, lgr.logger, relativeDepth+1, false),
 			msgKey: lgr.msgKey,
 		}
 	default:
-		return l // Other log struct cannot be bound to a context
+		if isSub {
+			return l
+		}
+		return &logger{
+			logs: []Logger{l},
+			ctx:  context.WithValue(ctx, relativeDepthKey{}, relativeDepth+1),
+		}
 	}
 }
 

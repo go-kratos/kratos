@@ -37,26 +37,16 @@ func Value(ctx context.Context, v interface{}) interface{} {
 // Caller returns a Valuer that returns a pkg/file:line description of the caller.
 func Caller(depth int) Valuer {
 	return func(ctx context.Context) interface{} {
-		relativeDepth := getRelativeDepth(ctx)
+		relativeDepth := 0
+		if ctx != nil {
+			if rd := ctx.Value(relativeDepthKey{}); rd != nil {
+				relativeDepth = rd.(int)
+			}
+		}
 		_, file, line, _ := runtime.Caller(depth + relativeDepth + baseDepth)
 		idx := strings.LastIndexByte(file, '/')
 		return file[idx+1:] + ":" + strconv.Itoa(line)
 	}
-}
-
-// Set the relative depth of caller to logger.Log in ctx
-func setRelativeDepth(ctx context.Context, relativeDepth int) context.Context {
-	return context.WithValue(ctx, relativeDepthKey{}, relativeDepth)
-}
-
-// Get the relative depth of caller to logger.Log from ctx
-func getRelativeDepth(ctx context.Context) int {
-	if ctx != nil {
-		if depth := ctx.Value(relativeDepthKey{}); depth != nil {
-			return depth.(int)
-		}
-	}
-	return 0
 }
 
 // Timestamp returns a timestamp Valuer with a custom time format.

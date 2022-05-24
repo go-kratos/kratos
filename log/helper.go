@@ -29,7 +29,7 @@ func WithMessageKey(k string) Option {
 func NewHelper(logger Logger, opts ...Option) *Helper {
 	options := &Helper{
 		msgKey: DefaultMessageKey, // default message key
-		logger: withContext(context.Background(), logger, 2),
+		logger: withContext(context.Background(), logger, 1, false),
 	}
 
 	for _, o := range opts {
@@ -44,7 +44,7 @@ func NewHelper(logger Logger, opts ...Option) *Helper {
 func (h *Helper) WithContext(ctx context.Context) *Helper {
 	return &Helper{
 		msgKey: h.msgKey,
-		logger: withContext(ctx, h.logger, 2),
+		logger: withContext(ctx, h.logger, 1, false),
 	}
 }
 

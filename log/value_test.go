@@ -32,25 +32,24 @@ func TestValue(t *testing.T) {
 
 func TestCallerDepth(t *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-	filter := NewFilter(logger, FilterLevel(LevelDebug))
-	helper := NewHelper(logger)
-	mLog := MultiLogger(logger, filter, helper)
-	logs := []Logger{logger, filter, helper, mLog}
+	filter1 := NewFilter(logger, FilterLevel(LevelDebug))
+	helper1 := NewHelper(logger)
+	filter2 := NewFilter(DefaultLogger, FilterLevel(LevelDebug))
+	helper2 := NewHelper(DefaultLogger)
+	mLog := MultiLogger(logger, filter1, helper1, filter2, helper2)
+	logs := []Logger{logger, filter1, helper1, filter2, helper2, mLog}
 	for i := 0; i < 2; i++ {
 		for _, lgr := range logs {
-			logs = append(logs, With(lgr))
+			logs = append(logs, With(lgr, "caller2", DefaultCaller))
 			logs = append(logs, NewFilter(lgr, FilterLevel(LevelDebug)))
 			logs = append(logs, NewHelper(lgr))
 		}
 	}
 	logs = append(logs, MultiLogger(logs...))
-	filter = NewFilter(DefaultLogger, FilterLevel(LevelDebug))
-	helper = NewHelper(DefaultLogger)
-	logs = append(logs, filter, helper)
 	for _, lgr := range logs {
-		_ = lgr.Log(LevelDebug, "msg", "51")
+		_ = lgr.Log(LevelDebug, "msg", "50")
 		if h, ok := lgr.(*Helper); ok {
-			h.Debug("53")
+			h.Debug("52")
 		}
 	}
 }
@@ -80,7 +79,7 @@ func TestCancel(t *testing.T) {
 		go func() {
 			ctx, cancel := context.WithCancel(context.Background())
 			lg := WithContext(ctx, lgr)
-			_ = lg.Log(LevelDebug, "msg", "83")
+			_ = lg.Log(LevelDebug, "msg", "82")
 			select {
 			case <-ctx.Done():
 				t.Error("Canceled")
