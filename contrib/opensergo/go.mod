@@ -6,6 +6,7 @@ require (
 	github.com/go-kratos/kratos/v2 v2.2.2
 	github.com/opensergo/opensergo-go v0.0.0-20220331070310-e5b01fee4d1c
 	golang.org/x/net v0.0.0-20220520000938-2e3eb7b945c2
+	google.golang.org/genproto v0.0.0-20220519153652-3a47de7e79bd
 	google.golang.org/grpc v1.46.2
 	google.golang.org/protobuf v1.28.0
 )
@@ -17,6 +18,5 @@ require (
 	golang.org/x/sync v0.0.0-20220513210516-0976fa681c29 // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/genproto v0.0.0-20220519153652-3a47de7e79bd // indirect
 	gopkg.in/yaml.v3 v3.0.0 // indirect
 )
