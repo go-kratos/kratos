@@ -131,7 +131,7 @@ func listDescriptors() (services []*v1.ServiceDescriptor, types []*v1.TypeDescri
 				pattern := proto.GetExtension(md.Options(), annotations.E_Http).(*annotations.HttpRule).GetPattern()
 				var httpPath, httpMethod string
 				if pattern != nil {
-					httpPath, httpMethod = HTTPPatternInfo(pattern)
+					httpMethod, httpPath = HTTPPatternInfo(pattern)
 				}
 				methodDesc := v1.MethodDescriptor{
 					Name:            mName,
