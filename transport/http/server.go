@@ -149,6 +149,8 @@ func NewServer(opts ...ServerOption) *Server {
 		o(srv)
 	}
 	srv.router = mux.NewRouter().StrictSlash(srv.strictSlash)
+	srv.router.NotFoundHandler = http.DefaultServeMux
+	srv.router.MethodNotAllowedHandler = http.DefaultServeMux
 	srv.router.Use(srv.filter())
 	srv.Server = &http.Server{
 		Handler:   FilterChain(srv.filters...)(srv.router),

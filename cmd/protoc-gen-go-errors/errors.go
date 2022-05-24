@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"unicode"
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -112,8 +113,22 @@ func case2Camel(name string) string {
 		}
 		return enCases.String(name)
 	}
-	name = strings.ToLower(name)
-	name = strings.Replace(name, "_", " ", -1)
-	name = enCases.String(name)
-	return strings.Replace(name, " ", "", -1)
+	strs := strings.Split(name, "_")
+	words := make([]string, 0, len(strs))
+	for _, w := range strs {
+		hasLower := false
+		for _, r := range w {
+			if unicode.IsLower(r) {
+				hasLower = true
+				break
+			}
+		}
+		if !hasLower {
+			w = strings.ToLower(w)
+		}
+		w = enCases.String(w)
+		words = append(words, w)
+	}
+
+	return strings.Join(words, "")
 }
