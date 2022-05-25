@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	nethttp "net/http"
 	"reflect"
 	"strconv"
@@ -17,6 +18,7 @@ import (
 	kratosErrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v2/selector"
 )
 
 type mockRoundTripper struct{}
@@ -304,5 +306,46 @@ func TestNewClient(t *testing.T) {
 	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{})
 	if err == nil {
 		t.Error("err should not be equal to nil")
+	}
+}
+
+type mockSelector struct {
+	invoked bool
+}
+
+func (*mockSelector) Apply([]selector.Node) {}
+func (ms *mockSelector) Select(ctx context.Context, opts ...selector.SelectOption) (selector.Node, selector.DoneFunc, error) {
+	ms.invoked = true
+	//return err anyway,because i just want to check if selector invoked
+	return nil, nil, errors.New("return err anyway")
+}
+
+func TestWithSelector(t *testing.T) {
+	myselector := &mockSelector{}
+	o := WithSelector(myselector)
+	co := &clientOptions{}
+	o(co)
+	if !reflect.DeepEqual(co.selector, myselector) {
+		t.Errorf("expected selector to be %v, got %v", myselector, co.selector)
+	}
+}
+
+func TestWithSelectorInvoked(t *testing.T) {
+	myselector := &mockSelector{invoked: false}
+	client, err := NewClient(context.Background(), WithSelector(myselector))
+	if err != nil {
+		t.Error(err)
+	}
+
+	req, err := http.NewRequest(http.MethodGet, "https://test.com/test", nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	client.Do(req)
+
+	// check if myselector invoked
+	if !myselector.invoked {
+		t.Errorf("myselector didn't invoked")
 	}
 }
