@@ -28,7 +28,6 @@ linters:
     - structcheck
     - typecheck
     - unused
-    - unconvert
     - varcheck
     - whitespace
     - wastedassign
@@ -57,12 +56,13 @@ linters-settings:
   lll:
     line-length: 160
   gomnd:
-    settings:
-      mnd:
-        # don't include the "operation", "argument" and "assign"
-        checks: case,condition,return
+    # don't include the "operation", "argument" and "assign"
+    checks: 
+      - case
+      - condition
+      - return
   goconst:
     ignore-tests: true
   gocyclo:
     # recommend 10-20
-    min-complexity: 30
+    min-complexity: 50

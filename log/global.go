@@ -8,7 +8,7 @@ import (
 var global = &loggerAppliance{}
 
 // loggerAppliance is the proxy of `Logger` to
-// make logger change will effect to all sub-logger.
+// make logger change will affect all sub-logger.
 type loggerAppliance struct {
 	lock sync.Mutex
 	Logger
@@ -38,7 +38,7 @@ func SetLogger(logger Logger) {
 
 // GetLogger returns global logger appliance as logger in current process.
 func GetLogger() Logger {
-	return global
+	return global.GetLogger()
 }
 
 // Log Print log by level and keyvals.

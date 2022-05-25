@@ -21,10 +21,8 @@ func ParseEndpoint(endpoints []string, scheme string, isSecure bool) (string, er
 		if err != nil {
 			return "", err
 		}
-		if u.Scheme == scheme {
-			if IsSecure(u) == isSecure {
-				return u.Host, nil
-			}
+		if u.Scheme == scheme && IsSecure(u) == isSecure {
+			return u.Host, nil
 		}
 	}
 	return "", nil

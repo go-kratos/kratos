@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
+
 	"github.com/hashicorp/consul/api"
 )
 
@@ -49,6 +50,15 @@ func WithHealthCheckInterval(interval int) Option {
 	return func(o *Registry) {
 		if o.cli != nil {
 			o.cli.healthcheckInterval = interval
+		}
+	}
+}
+
+// WithDeregisterCriticalServiceAfter with deregister-critical-service-after in seconds.
+func WithDeregisterCriticalServiceAfter(interval int) Option {
+	return func(o *Registry) {
+		if o.cli != nil {
+			o.cli.deregisterCriticalServiceAfter = interval
 		}
 	}
 }

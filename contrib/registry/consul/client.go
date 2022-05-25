@@ -9,7 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
+
 	"github.com/hashicorp/consul/api"
 )
 
@@ -25,15 +27,18 @@ type Client struct {
 	healthcheckInterval int
 	// heartbeat enable heartbeat
 	heartbeat bool
+	// deregisterCriticalServiceAfter time interval in seconds
+	deregisterCriticalServiceAfter int
 }
 
 // NewClient creates consul client
 func NewClient(cli *api.Client) *Client {
 	c := &Client{
-		cli:                 cli,
-		resolver:            defaultResolver,
-		healthcheckInterval: 10,
-		heartbeat:           true,
+		cli:                            cli,
+		resolver:                       defaultResolver,
+		healthcheckInterval:            10,
+		heartbeat:                      true,
+		deregisterCriticalServiceAfter: 600,
 	}
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 	return c
@@ -49,12 +54,15 @@ func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry
 				version = ss[1]
 			}
 		}
-		var endpoints []string //nolint:prealloc
+		endpoints := make([]string, 0)
 		for scheme, addr := range entry.Service.TaggedAddresses {
 			if scheme == "lan_ipv4" || scheme == "wan_ipv4" || scheme == "lan_ipv6" || scheme == "wan_ipv6" {
 				continue
 			}
 			endpoints = append(endpoints, addr.Address)
+		}
+		if len(endpoints) == 0 && entry.Service.Address != "" && entry.Service.Port != 0 {
+			endpoints = append(endpoints, fmt.Sprintf("http://%s:%d", entry.Service.Address, entry.Service.Port))
 		}
 		services = append(services, &registry.ServiceInstance{
 			ID:        entry.Service.ID,
@@ -96,7 +104,8 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		}
 		addr := raw.Hostname()
 		port, _ := strconv.ParseUint(raw.Port(), 10, 16)
-		checkAddresses = append(checkAddresses, fmt.Sprintf("%s:%d", addr, port))
+
+		checkAddresses = append(checkAddresses, net.JoinHostPort(addr, strconv.FormatUint(port, 10)))
 		addresses[raw.Scheme] = api.ServiceAddress{Address: endpoint, Port: int(port)}
 	}
 	asr := &api.AgentServiceRegistration{
@@ -117,23 +126,39 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
 				TCP:                            address,
 				Interval:                       fmt.Sprintf("%ds", c.healthcheckInterval),
-				DeregisterCriticalServiceAfter: "70s",
+				DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.deregisterCriticalServiceAfter),
+				Timeout:                        "5s",
 			})
 		}
 	}
+	if c.heartbeat {
+		asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
+			CheckID:                        "service:" + svc.ID,
+			TTL:                            fmt.Sprintf("%ds", c.healthcheckInterval*2),
+			DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.deregisterCriticalServiceAfter),
+		})
+	}
+
 	err := c.cli.Agent().ServiceRegister(asr)
 	if err != nil {
 		return err
 	}
-	_ = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 	if c.heartbeat {
 		go func() {
+			time.Sleep(time.Second)
+			err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+			if err != nil {
+				log.Errorf("[Consul]update ttl heartbeat to consul failed!err:=%v", err)
+			}
 			ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
 			defer ticker.Stop()
 			for {
 				select {
 				case <-ticker.C:
-					_ = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+					err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+					if err != nil {
+						log.Errorf("[Consul]update ttl heartbeat to consul failed!err:=%v", err)
+					}
 				case <-c.ctx.Done():
 					return
 				}

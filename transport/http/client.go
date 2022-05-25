@@ -289,12 +289,11 @@ func (client *Client) do(req *http.Request) (*http.Response, error) {
 	if err == nil {
 		err = client.opts.errorDecoder(req.Context(), resp)
 	}
-
-	if err != nil {
-		return nil, err
-	}
 	if done != nil {
 		done(req.Context(), selector.DoneInfo{Err: err})
+	}
+	if err != nil {
+		return nil, err
 	}
 	return resp, nil
 }
@@ -341,7 +340,7 @@ func DefaultErrorDecoder(ctx context.Context, res *http.Response) error {
 			return e
 		}
 	}
-	return errors.Errorf(res.StatusCode, errors.UnknownReason, err.Error())
+	return errors.Newf(res.StatusCode, errors.UnknownReason, "").WithCause(err)
 }
 
 // CodecForResponse get encoding.Codec via http.Response

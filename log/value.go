@@ -9,9 +9,8 @@ import (
 )
 
 var (
-	defaultDepth = 3
 	// DefaultCaller is a Valuer that returns the file and line.
-	DefaultCaller = Caller(defaultDepth)
+	DefaultCaller = Caller(3)
 
 	// DefaultTimestamp is a Valuer that returns the current wallclock time.
 	DefaultTimestamp = Timestamp(time.RFC3339)
@@ -28,7 +27,7 @@ func Value(ctx context.Context, v interface{}) interface{} {
 	return v
 }
 
-// Caller returns returns a Valuer that returns a pkg/file:line description of the caller.
+// Caller returns a Valuer that returns a pkg/file:line description of the caller.
 func Caller(depth int) Valuer {
 	return func(context.Context) interface{} {
 		d := depth

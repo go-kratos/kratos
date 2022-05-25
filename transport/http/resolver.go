@@ -79,17 +79,17 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 		select {
 		case err := <-done:
 			if err != nil {
-				err := watcher.Stop()
-				if err != nil {
-					r.logger.Errorf("failed to http client watch stop: %v", target)
+				stopErr := watcher.Stop()
+				if stopErr != nil {
+					r.logger.Errorf("failed to http client watch stop: %v, error: %+v", target, stopErr)
 				}
 				return nil, err
 			}
 		case <-ctx.Done():
 			r.logger.Errorf("http client watch service %v reaching context deadline!", target)
-			err := watcher.Stop()
-			if err != nil {
-				r.logger.Errorf("failed to http client watch stop: %v", target)
+			stopErr := watcher.Stop()
+			if stopErr != nil {
+				r.logger.Errorf("failed to http client watch stop: %v, error: %+v", target, stopErr)
 			}
 			return nil, ctx.Err()
 		}
@@ -122,10 +122,10 @@ func (r *resolver) update(services []*registry.ServiceInstance) bool {
 		if ept == "" {
 			continue
 		}
-		nodes = append(nodes, selector.NewNode(ept, ins))
+		nodes = append(nodes, selector.NewNode("http", ept, ins))
 	}
 	if len(nodes) == 0 {
-		r.logger.Warnf("[http resovler]Zero endpoint found,refused to write,ser: %s ins: %v", r.target.Endpoint, nodes)
+		r.logger.Warnf("[http resolver]Zero endpoint found,refused to write,set: %s ins: %v", r.target.Endpoint, nodes)
 		return false
 	}
 	r.rebalancer.Apply(nodes)

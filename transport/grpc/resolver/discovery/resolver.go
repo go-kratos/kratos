@@ -9,6 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
+
 	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/resolver"
 )
@@ -21,7 +22,8 @@ type discoveryResolver struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	insecure bool
+	insecure         bool
+	debugLogDisabled bool
 }
 
 func (r *discoveryResolver) watch() {
@@ -77,8 +79,11 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	if err != nil {
 		r.log.Errorf("[resolver] failed to update state: %s", err)
 	}
-	b, _ := json.Marshal(ins)
-	r.log.Infof("[resolver] update instances: %s", b)
+
+	if !r.debugLogDisabled {
+		b, _ := json.Marshal(ins)
+		r.log.Infof("[resolver] update instances: %s", b)
+	}
 }
 
 func (r *discoveryResolver) Close() {

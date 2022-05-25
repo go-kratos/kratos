@@ -149,6 +149,8 @@ func NewServer(opts ...ServerOption) *Server {
 		o(srv)
 	}
 	srv.router = mux.NewRouter().StrictSlash(srv.strictSlash)
+	srv.router.NotFoundHandler = http.DefaultServeMux
+	srv.router.MethodNotAllowedHandler = http.DefaultServeMux
 	srv.router.Use(srv.filter())
 	srv.Server = &http.Server{
 		Handler:   FilterChain(srv.filters...)(srv.router),
@@ -207,6 +209,7 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				// /path/123 -> /path/{id}
 				pathTemplate, _ = route.GetPathTemplate()
 			}
+
 			tr := &Transport{
 				endpoint:     s.endpoint.String(),
 				operation:    pathTemplate,
@@ -215,8 +218,9 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				request:      req,
 				pathTemplate: pathTemplate,
 			}
-			ctx = transport.NewServerContext(ctx, tr)
-			next.ServeHTTP(w, req.WithContext(ctx))
+
+			tr.request = req.WithContext(transport.NewServerContext(ctx, tr))
+			next.ServeHTTP(w, tr.request)
 		})
 	}
 }
