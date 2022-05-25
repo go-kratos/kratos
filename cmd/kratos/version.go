@@ -1,4 +1,4 @@
 package main
 
 // release is the current kratos tool version.
-var release = ""
+var release = "v2.3.0"
