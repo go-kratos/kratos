@@ -271,7 +271,6 @@ func (client *Client) Do(req *http.Request, opts ...CallOption) (*http.Response,
 
 func (client *Client) do(req *http.Request) (*http.Response, error) {
 	var done func(context.Context, selector.DoneInfo)
-	//if client.r != nil {
 	if client.opts.selector != nil {
 		var (
 			err  error
