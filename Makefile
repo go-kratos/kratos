@@ -1,6 +1,10 @@
 user	:=	$(shell whoami)
 rev 	:= 	$(shell git rev-parse --short HEAD)
 
+
+# Kratos Version
+KRATOS_VERSION := $(shell cat VERSION)
+
 # GOBIN > GOPATH > INSTALLDIR
 GOBIN	:=	$(shell echo ${GOBIN} | cut -d':' -f1)
 GOPATH	:=	$(shell echo $(GOPATH) | cut -d':' -f1)
@@ -24,9 +28,12 @@ $(LINTER):
 	curl -SL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s latest
 
 all:
-	@cd cmd/kratos && go build && cd - &> /dev/null
-	@cd cmd/protoc-gen-go-errors && go build && cd - &> /dev/null
-	@cd cmd/protoc-gen-go-http && go build && cd - &> /dev/null
+	@cd cmd/kratos && go build \
+ 				-ldflags "-X main.release=${KRATOS_VERSION}" && cd - &> /dev/null
+	@cd cmd/protoc-gen-go-errors && go build \
+				-ldflags "-X main.release=${KRATOS_VERSION}" && cd - &> /dev/null
+	@cd cmd/protoc-gen-go-http && go build \
+				-ldflags "-X main.release=${KRATOS_VERSION}" && cd - &> /dev/null
 
 .PHONY: install
 install: all

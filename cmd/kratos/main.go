@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/change"
@@ -19,6 +21,8 @@ var rootCmd = &cobra.Command{
 	Version: release,
 }
 
+var showVersion = flag.Bool("version", false, "print the version and exit")
+
 func init() {
 	rootCmd.AddCommand(project.CmdNew)
 	rootCmd.AddCommand(proto.CmdProto)
@@ -28,6 +32,10 @@ func init() {
 }
 
 func main() {
+	if *showVersion {
+		fmt.Printf("protoc-gen-go-errors %v\n", release)
+		return
+	}
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
