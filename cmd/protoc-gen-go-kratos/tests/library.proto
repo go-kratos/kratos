@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+import "google/api/client.proto";
+import "google/api/annotations.proto";
+
+// The hostname for this service.
+// This should be specified with no prefix or protocol.
+service LibraryService {
+    option (google.api.default_host) = "discovery://service_name";
+    rpc Hello (HelloReq) returns (HelloResp) {
+        option (google.api.http) = {
+            get: "/hello/{name}"
+        };
+    }
+}
+
+
+message HelloReq {
+    string name = 1;
+}
+
+message HelloResp {
+    string msg = 1;
+}

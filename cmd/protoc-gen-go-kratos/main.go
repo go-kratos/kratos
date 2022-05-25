@@ -25,7 +25,7 @@ func main() {
 			if !f.Generate {
 				continue
 			}
-			//generateFile(gen, f)
+			generateFile(gen, f)
 		}
 		return nil
 	})
