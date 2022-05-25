@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	nethttp "net/http"
 	"reflect"
 	"strconv"
@@ -337,7 +336,7 @@ func TestWithSelectorInvoked(t *testing.T) {
 		t.Error(err)
 	}
 
-	req, err := http.NewRequest(http.MethodGet, "https://test.com/test", nil)
+	req, err := nethttp.NewRequest(nethttp.MethodGet, "https://test.com/test", nil)
 	if err != nil {
 		t.Error(err)
 	}
