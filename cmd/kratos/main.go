@@ -33,7 +33,7 @@ func init() {
 
 func main() {
 	if *showVersion {
-		fmt.Printf("protoc-gen-go-errors %v\n", release)
+		fmt.Printf("kratos version %v\n", release)
 		return
 	}
 	if err := rootCmd.Execute(); err != nil {
