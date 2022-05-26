@@ -89,7 +89,7 @@ func TestGolbalContext(t *testing.T) {
 	buffer := &bytes.Buffer{}
 	SetLogger(NewStdLogger(buffer))
 	Context(context.Background()).Infof("111")
-	if string(buffer.Bytes()) != "INFO msg=111\n" {
+	if buffer.String() != "INFO msg=111\n" {
 		t.Errorf("Expected:%s, got:%s", "INFO msg=111", buffer.String())
 	}
 }
