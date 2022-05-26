@@ -1,0 +1,15 @@
+---
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: npm
+    directory: "/javascript"
+    schedule:
+      interval: daily
+  - package-ecosystem: bundler
+    directory: "/ruby"
+    schedule:
+      interval: weekly
