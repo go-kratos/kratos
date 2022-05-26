@@ -31,6 +31,7 @@ type App struct {
 	opts     options
 	ctx      context.Context
 	cancel   func()
+	mu       sync.Mutex
 	instance *registry.ServiceInstance
 }
 
@@ -85,7 +86,9 @@ func (a *App) Run() error {
 	if err != nil {
 		return err
 	}
+	a.mu.Lock()
 	a.instance = instance
+	a.mu.Unlock()
 	eg, ctx := errgroup.WithContext(NewContext(a.ctx, a))
 	wg := sync.WaitGroup{}
 	for _, srv := range a.opts.servers {
@@ -132,10 +135,13 @@ func (a *App) Run() error {
 
 // Stop gracefully stops the application.
 func (a *App) Stop() error {
-	if a.opts.registrar != nil && a.instance != nil {
+	a.mu.Lock()
+	instance := a.instance
+	a.mu.Unlock()
+	if a.opts.registrar != nil && instance != nil {
 		ctx, cancel := context.WithTimeout(NewContext(a.ctx, a), a.opts.registrarTimeout)
 		defer cancel()
-		if err := a.opts.registrar.Deregister(ctx, a.instance); err != nil {
+		if err := a.opts.registrar.Deregister(ctx, instance); err != nil {
 			return err
 		}
 	}
