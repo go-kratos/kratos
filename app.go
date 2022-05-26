@@ -31,7 +31,6 @@ type App struct {
 	opts     options
 	ctx      context.Context
 	cancel   func()
-	lk       sync.Mutex
 	instance *registry.ServiceInstance
 }
 
@@ -39,7 +38,6 @@ type App struct {
 func New(opts ...Option) *App {
 	o := options{
 		ctx:              context.Background(),
-		logger:           log.NewHelper(log.GetLogger()),
 		sigs:             []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		registrarTimeout: 10 * time.Second,
 		stopTimeout:      10 * time.Second,
@@ -49,6 +47,9 @@ func New(opts ...Option) *App {
 	}
 	for _, opt := range opts {
 		opt(&o)
+	}
+	if o.logger != nil {
+		log.SetLogger(o.logger)
 	}
 	ctx, cancel := context.WithCancel(o.ctx)
 	return &App{
@@ -72,10 +73,10 @@ func (a *App) Metadata() map[string]string { return a.opts.metadata }
 
 // Endpoint returns endpoints.
 func (a *App) Endpoint() []string {
-	if a.instance == nil {
-		return []string{}
+	if a.instance != nil {
+		return a.instance.Endpoints
 	}
-	return a.instance.Endpoints
+	return nil
 }
 
 // Run executes all OnStart hooks registered with the application's Lifecycle.
@@ -84,6 +85,7 @@ func (a *App) Run() error {
 	if err != nil {
 		return err
 	}
+	a.instance = instance
 	eg, ctx := errgroup.WithContext(NewContext(a.ctx, a))
 	wg := sync.WaitGroup{}
 	for _, srv := range a.opts.servers {
@@ -107,9 +109,6 @@ func (a *App) Run() error {
 		if err := a.opts.registrar.Register(rctx, instance); err != nil {
 			return err
 		}
-		a.lk.Lock()
-		a.instance = instance
-		a.lk.Unlock()
 	}
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, a.opts.sigs...)
@@ -120,7 +119,6 @@ func (a *App) Run() error {
 				return ctx.Err()
 			case <-c:
 				if err := a.Stop(); err != nil {
-					a.opts.logger.Errorf("failed to stop app: %v", err)
 					return err
 				}
 			}
@@ -134,13 +132,10 @@ func (a *App) Run() error {
 
 // Stop gracefully stops the application.
 func (a *App) Stop() error {
-	a.lk.Lock()
-	instance := a.instance
-	a.lk.Unlock()
-	if a.opts.registrar != nil && instance != nil {
+	if a.opts.registrar != nil && a.instance != nil {
 		ctx, cancel := context.WithTimeout(NewContext(a.ctx, a), a.opts.registrarTimeout)
 		defer cancel()
-		if err := a.opts.registrar.Deregister(ctx, instance); err != nil {
+		if err := a.opts.registrar.Deregister(ctx, a.instance); err != nil {
 			return err
 		}
 	}

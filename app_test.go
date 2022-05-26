@@ -154,7 +154,7 @@ func TestApp_Endpoint(t *testing.T) {
 				endpoint []string
 				metadata map[string]string
 			}{
-				id: "3", version: "v3", name: "kratos-v3", endpoint: []string{},
+				id: "3", version: "v3", name: "kratos-v3", endpoint: nil,
 				metadata: map[string]string{},
 			},
 		},
