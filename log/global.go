@@ -1,6 +1,7 @@
 package log
 
 import (
+	"context"
 	"sync"
 )
 
@@ -44,6 +45,10 @@ func GetLogger() Logger {
 // Log Print log by level and keyvals.
 func Log(level Level, keyvals ...interface{}) {
 	global.helper.Log(level, keyvals...)
+}
+
+func Context(ctx context.Context) *Helper {
+	return global.helper.WithContext(ctx)
 }
 
 // Debug logs a message at debug level.
