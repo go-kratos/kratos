@@ -90,7 +90,7 @@ func WithFilter(filters ...selector.Filter) ClientOption {
 }
 
 // WithLogger with logger
-// Deprecated: use global logging instead
+// Deprecated: use global logger instead.
 func WithLogger(log log.Logger) ClientOption {
 	return func(o *clientOptions) {}
 }

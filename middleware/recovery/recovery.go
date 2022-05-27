@@ -30,7 +30,7 @@ func WithHandler(h HandlerFunc) Option {
 }
 
 // WithLogger with recovery logger.
-// Deprecated: use global logging instead
+// Deprecated: use global logger instead.
 func WithLogger(logger log.Logger) Option {
 	return func(o *options) {}
 }

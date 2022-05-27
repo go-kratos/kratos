@@ -50,7 +50,7 @@ func WithResolver(r Resolver) Option {
 }
 
 // WithLogger with config logger.
-// Deprecated: use global logging instead
+// Deprecated: use global logger instead.
 func WithLogger(l log.Logger) Option {
 	return func(o *options) {}
 }
