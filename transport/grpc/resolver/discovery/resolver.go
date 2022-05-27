@@ -15,9 +15,8 @@ import (
 )
 
 type discoveryResolver struct {
-	w   registry.Watcher
-	cc  resolver.ClientConn
-	log *log.Helper
+	w  registry.Watcher
+	cc resolver.ClientConn
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -38,7 +37,7 @@ func (r *discoveryResolver) watch() {
 			if errors.Is(err, context.Canceled) {
 				return
 			}
-			r.log.Errorf("[resolver] Failed to watch discovery endpoint: %v", err)
+			log.Errorf("[resolver] Failed to watch discovery endpoint: %v", err)
 			time.Sleep(time.Second)
 			continue
 		}
@@ -52,7 +51,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	for _, in := range ins {
 		endpoint, err := endpoint.ParseEndpoint(in.Endpoints, "grpc", !r.insecure)
 		if err != nil {
-			r.log.Errorf("[resolver] Failed to parse discovery endpoint: %v", err)
+			log.Errorf("[resolver] Failed to parse discovery endpoint: %v", err)
 			continue
 		}
 		if endpoint == "" {
@@ -72,17 +71,17 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		addrs = append(addrs, addr)
 	}
 	if len(addrs) == 0 {
-		r.log.Warnf("[resolver] Zero endpoint found,refused to write, instances: %v", ins)
+		log.Warnf("[resolver] Zero endpoint found,refused to write, instances: %v", ins)
 		return
 	}
 	err := r.cc.UpdateState(resolver.State{Addresses: addrs})
 	if err != nil {
-		r.log.Errorf("[resolver] failed to update state: %s", err)
+		log.Errorf("[resolver] failed to update state: %s", err)
 	}
 
 	if !r.debugLogDisabled {
 		b, _ := json.Marshal(ins)
-		r.log.Infof("[resolver] update instances: %s", b)
+		log.Infof("[resolver] update instances: %s", b)
 	}
 }
 
@@ -90,7 +89,7 @@ func (r *discoveryResolver) Close() {
 	r.cancel()
 	err := r.w.Stop()
 	if err != nil {
-		r.log.Errorf("[resolver] failed to watch top: %s", err)
+		log.Errorf("[resolver] failed to watch top: %s", err)
 	}
 }
 
