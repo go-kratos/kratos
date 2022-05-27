@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 
 	"google.golang.org/grpc/resolver"
@@ -16,13 +15,6 @@ const name = "discovery"
 
 // Option is builder option.
 type Option func(o *builder)
-
-// WithLogger with builder logger.
-func WithLogger(logger log.Logger) Option {
-	return func(b *builder) {
-		b.logger = logger
-	}
-}
 
 // WithTimeout with timeout option.
 func WithTimeout(timeout time.Duration) Option {
@@ -47,7 +39,6 @@ func DisableDebugLog() Option {
 
 type builder struct {
 	discoverer       registry.Discovery
-	logger           log.Logger
 	timeout          time.Duration
 	insecure         bool
 	debugLogDisabled bool
@@ -57,7 +48,6 @@ type builder struct {
 func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 	b := &builder{
 		discoverer:       d,
-		logger:           log.GetLogger(),
 		timeout:          time.Second * 10,
 		insecure:         false,
 		debugLogDisabled: false,
@@ -93,7 +83,6 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		cc:               cc,
 		ctx:              ctx,
 		cancel:           cancel,
-		log:              log.NewHelper(b.logger),
 		insecure:         b.insecure,
 		debugLogDisabled: b.debugLogDisabled,
 	}

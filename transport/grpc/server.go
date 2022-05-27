@@ -54,9 +54,10 @@ func Timeout(timeout time.Duration) ServerOption {
 }
 
 // Logger with server logger.
+// Deprecated: use global logger instead.
 func Logger(logger log.Logger) ServerOption {
 	return func(s *Server) {
-		s.log = log.NewHelper(logger)
+		//s.log = log.NewHelper(logger)
 	}
 }
 
@@ -113,7 +114,6 @@ type Server struct {
 	address    string
 	endpoint   *url.URL
 	timeout    time.Duration
-	log        *log.Helper
 	middleware []middleware.Middleware
 	unaryInts  []grpc.UnaryServerInterceptor
 	streamInts []grpc.StreamServerInterceptor
@@ -130,7 +130,6 @@ func NewServer(opts ...ServerOption) *Server {
 		address: ":0",
 		timeout: 1 * time.Second,
 		health:  health.NewServer(),
-		log:     log.NewHelper(log.GetLogger()),
 	}
 	for _, o := range opts {
 		o(srv)
@@ -184,7 +183,7 @@ func (s *Server) Start(ctx context.Context) error {
 		return s.err
 	}
 	s.baseCtx = ctx
-	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
+	log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
 	s.health.Resume()
 	return s.Serve(s.lis)
 }
@@ -193,7 +192,7 @@ func (s *Server) Start(ctx context.Context) error {
 func (s *Server) Stop(ctx context.Context) error {
 	s.health.Shutdown()
 	s.GracefulStop()
-	s.log.Info("[gRPC] server stopping")
+	log.Info("[gRPC] server stopping")
 	return nil
 }
 
