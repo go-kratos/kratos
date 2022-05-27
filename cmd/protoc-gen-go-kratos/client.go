@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -11,6 +13,7 @@ const (
 	transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
 )
 
+//generateFile generates a _kratos.pb.go file.
 func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.GeneratedFile {
 	filename := file.GeneratedFilenamePrefix + "_kratos.pb.go"
 	g := gen.NewGeneratedFile(filename, file.GoImportPath)
@@ -20,5 +23,26 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.Generated
 	g.P()
 	g.P("package ", file.GoPackageName)
 	g.P()
+	generateFileContent(gen, file, g)
 	return g
+}
+
+//generateFileContent generates file content.
+func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile) {
+	if len(file.Services) == 0 {
+		return
+	}
+	g.P("// This is a compile-time assertion to ensure that this generated file")
+	g.P("// is compatible with the kratos package it is being compiled against.")
+	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
+	g.P("const _ = ", transportHTTPPackage.Ident("SupportPackageIsVersion1"))
+	g.P("const _ = ", transportGRPCPackage.Ident("SupportPackageIsVersion1"))
+	g.P()
+	clientTemplateS := NewClientTemplate()
+	for _, service := range file.Services {
+		host := proto.GetExtension(service.Desc.Options(), annotations.E_DefaultHost).(string)
+		name := service.GoName
+		clientTemplateS.AppendClientInfo(name, host)
+	}
+	g.P(clientTemplateS.execute())
 }
