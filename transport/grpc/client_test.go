@@ -68,6 +68,7 @@ func TestWithTLSConfig(t *testing.T) {
 		t.Errorf("expect %v but got %v", v, o.tlsConf)
 	}
 }
+
 func EmptyMiddleware() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
