@@ -40,6 +40,10 @@ func Caller(depth int) Valuer {
 			d++
 			_, file, line, _ = runtime.Caller(d)
 		}
+		if strings.LastIndex(file, "/log/global.go") > 0 {
+			d++
+			_, file, line, _ = runtime.Caller(d)
+		}
 		idx := strings.LastIndexByte(file, '/')
 		return file[idx+1:] + ":" + strconv.Itoa(line)
 	}
