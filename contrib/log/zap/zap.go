@@ -46,3 +46,7 @@ func (l *Logger) Log(level log.Level, keyvals ...interface{}) error {
 func (l *Logger) Sync() error {
 	return l.log.Sync()
 }
+
+func (l *Logger) Close() error {
+	return l.log.Sync()
+}
