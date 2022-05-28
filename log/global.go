@@ -49,7 +49,7 @@ func Log(level Level, keyvals ...interface{}) {
 
 // Context with context logger.
 func Context(ctx context.Context) *Helper {
-	return NewHelper(WithContext(ctx, global))
+	return NewHelper(WithContext(ctx, GetLogger()))
 }
 
 // Debug logs a message at debug level.
