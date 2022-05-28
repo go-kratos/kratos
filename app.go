@@ -148,6 +148,9 @@ func (a *App) Stop() error {
 	if a.cancel != nil {
 		a.cancel()
 	}
+	if a.opts.logger != nil {
+		a.opts.logger.Close()
+	}
 	return nil
 }
 

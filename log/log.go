@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+	"io"
 	"log"
 )
 
@@ -10,6 +11,7 @@ var DefaultLogger = NewStdLogger(log.Writer())
 
 // Logger is a logger interface.
 type Logger interface {
+	io.Closer
 	Log(level Level, keyvals ...interface{}) error
 }
 
@@ -31,6 +33,10 @@ func (c *logger) Log(level Level, keyvals ...interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func (c *logger) Close() error {
+	return c.logger.Close()
 }
 
 // With with logger fields.
