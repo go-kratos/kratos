@@ -43,7 +43,7 @@ func With(l Logger, kv ...interface{}) Logger {
 	kvs = append(kvs, kv...)
 	kvs = append(kvs, c.prefix...)
 	return &logger{
-		logger:    l,
+		logger:    c.logger,
 		prefix:    kvs,
 		hasValuer: containsValuer(kvs),
 		ctx:       c.ctx,
@@ -58,7 +58,7 @@ func WithContext(ctx context.Context, l Logger) Logger {
 		return &logger{logger: l, ctx: ctx}
 	}
 	return &logger{
-		logger:    l,
+		logger:    c.logger,
 		prefix:    c.prefix,
 		hasValuer: c.hasValuer,
 		ctx:       ctx,
