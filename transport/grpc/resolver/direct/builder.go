@@ -37,5 +37,5 @@ func (d *directBuilder) Build(target resolver.Target, cc resolver.ClientConn, op
 }
 
 func (d *directBuilder) Scheme() string {
-	return Name
+	return name
 }
