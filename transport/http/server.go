@@ -112,6 +112,15 @@ func Listener(lis net.Listener) ServerOption {
 	}
 }
 
+type RouteInfo struct {
+	// api endpoint
+	EndPoint string
+	// api operation
+	Operation string
+	// Method type
+	Method string
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
@@ -129,6 +138,8 @@ type Server struct {
 	ene         EncodeErrorFunc
 	strictSlash bool
 	router      *mux.Router
+	// registered routes
+	Routes []*RouteInfo
 }
 
 // NewServer creates an HTTP server by options.
@@ -145,6 +156,7 @@ func NewServer(opts ...ServerOption) *Server {
 	for _, o := range opts {
 		o(srv)
 	}
+	srv.Routes = make([]*RouteInfo, 0)
 	srv.router = mux.NewRouter().StrictSlash(srv.strictSlash)
 	srv.router.NotFoundHandler = http.DefaultServeMux
 	srv.router.MethodNotAllowedHandler = http.DefaultServeMux

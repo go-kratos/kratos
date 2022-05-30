@@ -20,6 +20,18 @@ func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}HTTP
 	{{- range .Methods}}
 	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv))
 	{{- end}}
+    record{{.ServiceType}}Route(s)
+}
+
+func record{{.ServiceType}}Route(s *http.Server) {
+ {{- range .Methods}}
+	{{.Name}}_route:=&http.RouteInfo{
+			EndPoint:  "{{.Path}}",
+			Operation: "{{$svrName}}/{{.OriginalName}}",
+			Method:    "{{.Method}}",
+	}
+    s.Routes =append(s.Routes, {{.Name}}_route)
+ {{- end}}
 }
 
 {{range .Methods}}
