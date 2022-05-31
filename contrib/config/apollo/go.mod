@@ -9,7 +9,7 @@ require (
 
 require (
 	github.com/spf13/viper v1.11.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 replace github.com/go-kratos/kratos/v2 => ../../../
