@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/go-kratos/kratos/v2 v2.3.0
-	github.com/nacos-group/nacos-sdk-go v1.0.9
+	github.com/nacos-group/nacos-sdk-go v1.1.1
 )
 
 replace github.com/go-kratos/kratos/v2 => ../../../
