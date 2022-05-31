@@ -12,6 +12,18 @@ import (
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
 const SupportPackageIsVersion1 = true
 
+// StatusCoder is checked by DefaultResponseEncoder. If a response value implements
+// StatusCoder, the StatusCode will be used to set http status code.
+type StatusCoder interface {
+	StatusCode() int
+}
+
+// Redirector replies to the request with a redirect to url
+// which may be a path relative to the request path.
+type Redirector interface {
+	Redirect() (int, string)
+}
+
 // Request type net/http.
 type Request = http.Request
 
@@ -57,6 +69,11 @@ func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{
 	if err != nil {
 		return err
 	}
+	if rd, ok := v.(Redirector); ok {
+		code, url := rd.Redirect()
+		http.Redirect(w, r, url, code)
+		return nil
+	}
 	w.Header().Set("Content-Type", httputil.ContentType(codec.Name()))
 	if code, ok := v.(StatusCoder); ok {
 		w.WriteHeader(code.StatusCode())
@@ -91,10 +108,4 @@ func CodecForRequest(r *http.Request, name string) (encoding.Codec, bool) {
 		}
 	}
 	return encoding.GetCodec("json"), false
-}
-
-// StatusCoder is checked by DefaultResponseEncoder. If a response value implements
-// StatusCoder, the StatusCode will be used to set http status code.
-type StatusCoder interface {
-	StatusCode() int
 }
