@@ -30,7 +30,7 @@ func ParseEndpoint(endpoints []string, scheme string, isSecure bool) (string, er
 }
 
 // IsSecure parses isSecure for Endpoint URL.
-// Node: It will be deleted after some time,
+// Note: It will be deleted after some time,
 // unified use grpcs://127.0.0.1:8080 instead of grpc://127.0.0.1:8080?isSecure=true
 func IsSecure(u *url.URL) bool {
 	if strings.HasSuffix(u.Scheme, "s") {
