@@ -45,3 +45,7 @@ func (l *stdLogger) Log(level Level, keyvals ...interface{}) error {
 	l.pool.Put(buf)
 	return nil
 }
+
+func (l *stdLogger) Close() error {
+	return nil
+}

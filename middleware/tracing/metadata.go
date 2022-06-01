@@ -26,16 +26,16 @@ func (b Metadata) Inject(ctx context.Context, carrier propagation.TextMapCarrier
 // Extract returns a copy of parent with the metadata from the carrier added.
 func (b Metadata) Extract(parent context.Context, carrier propagation.TextMapCarrier) context.Context {
 	name := carrier.Get(serviceHeader)
-	if name != "" {
-		if md, ok := metadata.FromServerContext(parent); ok {
-			md.Set(serviceHeader, name)
-		} else {
-			md := metadata.New()
-			md.Set(serviceHeader, name)
-			parent = metadata.NewServerContext(parent, md)
-		}
+	if name == "" {
+		return parent
 	}
-
+	if md, ok := metadata.FromServerContext(parent); ok {
+		md.Set(serviceHeader, name)
+		return parent
+	}
+	md := metadata.New()
+	md.Set(serviceHeader, name)
+	parent = metadata.NewServerContext(parent, md)
 	return parent
 }
 

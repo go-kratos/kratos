@@ -157,11 +157,12 @@ func ParseCommitsInfo(info []CommitInfo) string {
 		case "other":
 			text = "### Others\n"
 		}
-		if len(value) > 0 {
-			md[key] += text
-			for _, value := range value {
-				md[key] += fmt.Sprintf("- %s\n", value)
-			}
+		if len(value) == 0 {
+			continue
+		}
+		md[key] += text
+		for _, value := range value {
+			md[key] += fmt.Sprintf("- %s\n", value)
 		}
 	}
 	return fmt.Sprint(md["break"], md["deps"], md["feat"], md["fix"], md["chore"], md["other"])

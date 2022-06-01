@@ -10,10 +10,13 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2"
+
 	v1 "github.com/opensergo/opensergo-go/proto/service_contract/v1"
 	"golang.org/x/net/context"
+	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 )
@@ -73,15 +76,18 @@ func New(opts ...Option) (*OpenSergo, error) {
 }
 
 func (s *OpenSergo) ReportMetadata(ctx context.Context, app kratos.AppInfo) error {
-	services, err := s.listServiceDescriptors()
+	services, types, err := listDescriptors()
 	if err != nil {
 		return err
 	}
+
 	serviceMetadata := &v1.ServiceMetadata{
 		ServiceContract: &v1.ServiceContract{
 			Services: services,
+			Types:    types,
 		},
 	}
+
 	for _, endpoint := range app.Endpoint() {
 		u, err := url.Parse(endpoint) //nolint
 		if err != nil {
@@ -104,11 +110,12 @@ func (s *OpenSergo) ReportMetadata(ctx context.Context, app kratos.AppInfo) erro
 	_, err = s.mdClient.ReportMetadata(ctx, &v1.ReportMetadataRequest{
 		AppName:         app.Name(),
 		ServiceMetadata: []*v1.ServiceMetadata{serviceMetadata},
+		// TODO: Node: *v1.Node,
 	})
 	return err
 }
 
-func (s *OpenSergo) listServiceDescriptors() (services []*v1.ServiceDescriptor, err error) {
+func listDescriptors() (services []*v1.ServiceDescriptor, types []*v1.TypeDescriptor, err error) {
 	protoregistry.GlobalFiles.RangeFiles(func(fd protoreflect.FileDescriptor) bool {
 		for i := 0; i < fd.Services().Len(); i++ {
 			var (
@@ -120,19 +127,78 @@ func (s *OpenSergo) listServiceDescriptors() (services []*v1.ServiceDescriptor, 
 				mName := string(md.Name())
 				inputType := string(md.Input().FullName())
 				outputType := string(md.Output().FullName())
+				isClientStreaming := md.IsStreamingClient()
+				isServerStreaming := md.IsStreamingServer()
+				pattern := proto.GetExtension(md.Options(), annotations.E_Http).(*annotations.HttpRule).GetPattern()
+				var httpPath, httpMethod string
+				if pattern != nil {
+					httpMethod, httpPath = HTTPPatternInfo(pattern)
+				}
 				methodDesc := v1.MethodDescriptor{
-					Name:        mName,
-					InputTypes:  []string{inputType},
-					OutputTypes: []string{outputType},
+					Name:            mName,
+					InputTypes:      []string{inputType},
+					OutputTypes:     []string{outputType},
+					ClientStreaming: &isClientStreaming,
+					ServerStreaming: &isServerStreaming,
+					HttpPaths:       []string{httpPath},
+					HttpMethods:     []string{httpMethod},
+					// TODO: Description: *string,
 				}
 				methods = append(methods, &methodDesc)
 			}
 			services = append(services, &v1.ServiceDescriptor{
 				Name:    string(sd.Name()),
 				Methods: methods,
+				// TODO: Description: *string,
 			})
 		}
+
+		for i := 0; i < fd.Messages().Len(); i++ {
+			var (
+				fields []*v1.FieldDescriptor
+				md     = fd.Messages().Get(i)
+			)
+
+			for j := 0; j < md.Fields().Len(); j++ {
+				fd := md.Fields().Get(j)
+				kind := fd.Kind()
+				typeName := kind.String()
+
+				fields = append(fields, &v1.FieldDescriptor{
+					Name:     string(fd.Name()),
+					Number:   int32(fd.Number()),
+					Type:     v1.FieldDescriptor_Type(kind),
+					TypeName: &typeName,
+					// TODO: Description: *string,
+				})
+			}
+
+			types = append(types, &v1.TypeDescriptor{
+				Name:   string(md.Name()),
+				Fields: fields,
+			})
+		}
+
 		return true
 	})
 	return
+}
+
+func HTTPPatternInfo(pattern interface{}) (method string, path string) {
+	switch p := pattern.(type) {
+	case *annotations.HttpRule_Get:
+		return "GET", p.Get
+	case *annotations.HttpRule_Post:
+		return "POST", p.Post
+	case *annotations.HttpRule_Delete:
+		return "DELETE", p.Delete
+	case *annotations.HttpRule_Patch:
+		return "PATCH", p.Patch
+	case *annotations.HttpRule_Put:
+		return "PUT", p.Put
+	case *annotations.HttpRule_Custom:
+		return p.Custom.Kind, p.Custom.Path
+	default:
+		return "", ""
+	}
 }

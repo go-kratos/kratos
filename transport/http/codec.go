@@ -12,6 +12,12 @@ import (
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
 const SupportPackageIsVersion1 = true
 
+// Request type net/http.
+type Request = http.Request
+
+// ResponseWriter type net/http.
+type ResponseWriter = http.ResponseWriter
+
 // DecodeRequestFunc is decode request func.
 type DecodeRequestFunc func(*http.Request, interface{}) error
 

@@ -6,29 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/serviceconfig"
 )
-
-type mockLogger struct {
-	level log.Level
-	key   string
-	val   string
-}
-
-func (l *mockLogger) Log(level log.Level, keyvals ...interface{}) error {
-	l.level = level
-	l.key = keyvals[0].(string)
-	l.val = keyvals[1].(string)
-	return nil
-}
-
-func TestWithLogger(t *testing.T) {
-	b := &builder{}
-	WithLogger(&mockLogger{})(b)
-}
 
 func TestWithInsecure(t *testing.T) {
 	b := &builder{}

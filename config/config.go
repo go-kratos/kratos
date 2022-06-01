@@ -7,13 +7,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
-
 	// init encoding
 	_ "github.com/go-kratos/kratos/v2/encoding/json"
 	_ "github.com/go-kratos/kratos/v2/encoding/proto"
 	_ "github.com/go-kratos/kratos/v2/encoding/xml"
 	_ "github.com/go-kratos/kratos/v2/encoding/yaml"
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 var (
@@ -43,13 +42,11 @@ type config struct {
 	cached    sync.Map
 	observers sync.Map
 	watchers  []Watcher
-	log       *log.Helper
 }
 
 // New new a config with options.
 func New(opts ...Option) Config {
 	o := options{
-		logger:   log.GetLogger(),
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
 	}
@@ -59,7 +56,6 @@ func New(opts ...Option) Config {
 	return &config{
 		opts:   o,
 		reader: newReader(o),
-		log:    log.NewHelper(o.logger),
 	}
 }
 
@@ -67,20 +63,20 @@ func (c *config) watch(w Watcher) {
 	for {
 		kvs, err := w.Next()
 		if errors.Is(err, context.Canceled) {
-			c.log.Infof("watcher's ctx cancel : %v", err)
+			log.Infof("watcher's ctx cancel : %v", err)
 			return
 		}
 		if err != nil {
 			time.Sleep(time.Second)
-			c.log.Errorf("failed to watch next config: %v", err)
+			log.Errorf("failed to watch next config: %v", err)
 			continue
 		}
 		if err := c.reader.Merge(kvs...); err != nil {
-			c.log.Errorf("failed to merge next config: %v", err)
+			log.Errorf("failed to merge next config: %v", err)
 			continue
 		}
 		if err := c.reader.Resolve(); err != nil {
-			c.log.Errorf("failed to resolve next config: %v", err)
+			log.Errorf("failed to resolve next config: %v", err)
 			continue
 		}
 		c.cached.Range(func(key, value interface{}) bool {
@@ -104,22 +100,22 @@ func (c *config) Load() error {
 			return err
 		}
 		for _, v := range kvs {
-			c.log.Debugf("config loaded: %s format: %s", v.Key, v.Format)
+			log.Debugf("config loaded: %s format: %s", v.Key, v.Format)
 		}
 		if err = c.reader.Merge(kvs...); err != nil {
-			c.log.Errorf("failed to merge config source: %v", err)
+			log.Errorf("failed to merge config source: %v", err)
 			return err
 		}
 		w, err := src.Watch()
 		if err != nil {
-			c.log.Errorf("failed to watch config source: %v", err)
+			log.Errorf("failed to watch config source: %v", err)
 			return err
 		}
 		c.watchers = append(c.watchers, w)
 		go c.watch(w)
 	}
 	if err := c.reader.Resolve(); err != nil {
-		c.log.Errorf("failed to resolve config source: %v", err)
+		log.Errorf("failed to resolve config source: %v", err)
 		return err
 	}
 	return nil

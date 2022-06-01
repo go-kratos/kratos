@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"google.golang.org/grpc"
@@ -67,15 +66,6 @@ func TestWithTLSConfig(t *testing.T) {
 	WithTLSConfig(v)(o)
 	if !reflect.DeepEqual(v, o.tlsConf) {
 		t.Errorf("expect %v but got %v", v, o.tlsConf)
-	}
-}
-
-func TestWithLogger(t *testing.T) {
-	o := &clientOptions{}
-	v := log.DefaultLogger
-	WithLogger(v)(o)
-	if !reflect.DeepEqual(v, o.logger) {
-		t.Errorf("expect %v but got %v", v, o.logger)
 	}
 }
 
@@ -145,7 +135,6 @@ func TestDialConn(t *testing.T) {
 		true,
 		WithDiscovery(&mockRegistry{}),
 		WithTimeout(10*time.Second),
-		WithLogger(log.DefaultLogger),
 		WithEndpoint("abc"),
 		WithMiddleware(EmptyMiddleware()),
 	)

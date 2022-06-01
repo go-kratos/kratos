@@ -90,10 +90,9 @@ func WithFilter(filters ...selector.Filter) ClientOption {
 }
 
 // WithLogger with logger
+// Deprecated: use global logger instead.
 func WithLogger(log log.Logger) ClientOption {
-	return func(o *clientOptions) {
-		o.logger = log
-	}
+	return func(o *clientOptions) {}
 }
 
 // clientOptions is gRPC Client
@@ -107,7 +106,6 @@ type clientOptions struct {
 	grpcOpts     []grpc.DialOption
 	balancerName string
 	filters      []selector.Filter
-	logger       log.Logger
 }
 
 // Dial returns a GRPC connection.
@@ -124,7 +122,6 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	options := clientOptions{
 		timeout:      2000 * time.Millisecond,
 		balancerName: wrr.Name,
-		logger:       log.GetLogger(),
 	}
 	for _, o := range opts {
 		o(&options)
@@ -136,7 +133,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		ints = append(ints, options.ints...)
 	}
 	grpcOpts := []grpc.DialOption{
-		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, options.balancerName)),
+		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"loadBalancingConfig": [{"%s":{}}]}`, options.balancerName)),
 		grpc.WithChainUnaryInterceptor(ints...),
 	}
 	if options.discovery != nil {
@@ -145,7 +142,6 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 				discovery.NewBuilder(
 					options.discovery,
 					discovery.WithInsecure(insecure),
-					discovery.WithLogger(options.logger),
 				)))
 	}
 	if insecure {
