@@ -2,6 +2,9 @@ package tracing
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/v2/errors"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 
 	"github.com/go-kratos/kratos/v2/log"
 
@@ -14,9 +17,24 @@ import (
 // Option is tracing option.
 type Option func(*options)
 
+type HandlerErrorFunc func(ctx context.Context, span trace.Span, err error)
+
 type options struct {
-	tracerProvider trace.TracerProvider
-	propagator     propagation.TextMapPropagator
+	tracerProvider   trace.TracerProvider
+	propagator       propagation.TextMapPropagator
+	handlerErrorFunc HandlerErrorFunc
+}
+
+var DefaultHandlerErrorFunc = func(ctx context.Context, span trace.Span, err error) {
+	if err != nil {
+		span.RecordError(err)
+		if e := errors.FromError(err); e != nil {
+			span.SetAttributes(attribute.Key("rpc.status_code").Int64(int64(e.Code)))
+		}
+		span.SetStatus(codes.Error, err.Error())
+	} else {
+		span.SetStatus(codes.Ok, "OK")
+	}
 }
 
 // WithPropagator with tracer propagator.
@@ -31,6 +49,13 @@ func WithPropagator(propagator propagation.TextMapPropagator) Option {
 func WithTracerProvider(provider trace.TracerProvider) Option {
 	return func(opts *options) {
 		opts.tracerProvider = provider
+	}
+}
+
+// WithHandlerErrorFunc with handler error function
+func WithHandlerErrorFunc(handler HandlerErrorFunc) Option {
+	return func(opts *options) {
+		opts.handlerErrorFunc = handler
 	}
 }
 

@@ -4,10 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-kratos/kratos/v2/errors"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/protobuf/proto"
@@ -23,7 +21,8 @@ type Tracer struct {
 // NewTracer create tracer instance
 func NewTracer(kind trace.SpanKind, opts ...Option) *Tracer {
 	op := options{
-		propagator: propagation.NewCompositeTextMapPropagator(Metadata{}, propagation.Baggage{}, propagation.TraceContext{}),
+		propagator:       propagation.NewCompositeTextMapPropagator(Metadata{}, propagation.Baggage{}, propagation.TraceContext{}),
+		handlerErrorFunc: DefaultHandlerErrorFunc,
 	}
 	for _, o := range opts {
 		o(&op)
@@ -59,16 +58,7 @@ func (t *Tracer) Start(ctx context.Context, operation string, carrier propagatio
 
 // End finish tracing span
 func (t *Tracer) End(ctx context.Context, span trace.Span, m interface{}, err error) {
-	if err != nil {
-		span.RecordError(err)
-		if e := errors.FromError(err); e != nil {
-			span.SetAttributes(attribute.Key("rpc.status_code").Int64(int64(e.Code)))
-		}
-		span.SetStatus(codes.Error, err.Error())
-	} else {
-		span.SetStatus(codes.Ok, "OK")
-	}
-
+	t.opt.handlerErrorFunc(ctx, span, err)
 	if p, ok := m.(proto.Message); ok {
 		if t.kind == trace.SpanKindServer {
 			span.SetAttributes(attribute.Key("send_msg.size").Int(proto.Size(p)))

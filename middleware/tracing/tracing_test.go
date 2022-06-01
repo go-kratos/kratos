@@ -2,6 +2,9 @@ package tracing
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/v2/errors"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"net/http"
 	"os"
 	"reflect"
@@ -50,6 +53,24 @@ func (tr *mockTransport) Operation() string               { return tr.operation 
 func (tr *mockTransport) RequestHeader() transport.Header { return tr.header }
 func (tr *mockTransport) ReplyHeader() transport.Header   { return tr.header }
 
+var customHandlerErrorFunc = func(ctx context.Context, span trace.Span, err error) {
+	if err != nil {
+		span.RecordError(err)
+		if e := errors.FromError(err); e != nil {
+			span.SetAttributes(attribute.Key("rpc.status_code").Int64(int64(e.Code)))
+			if e.Code >= 500 {
+				span.SetStatus(codes.Error, err.Error())
+			} else {
+				span.SetStatus(codes.Ok, "OK")
+			}
+		} else {
+			span.SetStatus(codes.Error, err.Error())
+		}
+	} else {
+		span.SetStatus(codes.Ok, "OK")
+	}
+}
+
 func TestTracer(t *testing.T) {
 	carrier := headerCarrier{}
 	tp := tracesdk.NewTracerProvider(tracesdk.WithSampler(tracesdk.TraceIDRatioBased(0)))
@@ -61,6 +82,7 @@ func TestTracer(t *testing.T) {
 		WithPropagator(
 			propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{}),
 		),
+		WithHandlerErrorFunc(customHandlerErrorFunc),
 	)
 
 	ts := &mockTransport{kind: transport.KindHTTP, header: carrier}
