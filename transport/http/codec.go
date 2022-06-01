@@ -21,7 +21,7 @@ type StatusCoder interface {
 // Redirector replies to the request with a redirect to url
 // which may be a path relative to the request path.
 type Redirector interface {
-	Redirect() (int, string)
+	Redirect() (string, int)
 }
 
 // Request type net/http.
@@ -70,7 +70,7 @@ func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{
 		return err
 	}
 	if rd, ok := v.(Redirector); ok {
-		code, url := rd.Redirect()
+		url, code := rd.Redirect()
 		http.Redirect(w, r, url, code)
 		return nil
 	}
