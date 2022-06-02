@@ -207,6 +207,6 @@ func (s *Server) listenAndEndpoint() error {
 		_ = s.lis.Close()
 		return err
 	}
-	s.endpoint = endpoint.NewEndpoint("grpc", addr, s.tlsConf != nil)
+	s.endpoint = endpoint.NewEndpoint(endpoint.Scheme("grpc", s.tlsConf != nil), addr)
 	return nil
 }
