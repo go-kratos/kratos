@@ -24,6 +24,9 @@ type Request = http.Request
 // ResponseWriter type net/http.
 type ResponseWriter = http.ResponseWriter
 
+// Flusher type net/http
+type Flusher = http.Flusher
+
 // DecodeRequestFunc is decode request func.
 type DecodeRequestFunc func(*http.Request, interface{}) error
 
