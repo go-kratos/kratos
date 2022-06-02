@@ -7,32 +7,40 @@ import (
 )
 
 var clientTemplate = `
+{{range .ClientInfoList }}
 
+type {{ .ServiceName }}HTTPKratosClient struct {
+	cli {{ .ServiceName }}HTTPClient
+}
 
-//New{{ .ServiceName }}HTTPClient 
-func New{{ .ServiceName }}HTTPKratosClient(opts ...http.ClientOption) ({{ .ServiceName }}HTTPClient, error) {
-	opts = append(opts, http.WithEndpoint({{ .Endpoint }}))
+//New{{ .ServiceName }}HTTPKratosClient create http client for kratos
+func New{{ .ServiceName }}HTTPKratosClient(opts ...http.ClientOption) (*{{ .ServiceName }}HTTPKratosClient, error) {
+	opts = append(opts, http.WithEndpoint("{{ .Endpoint }}"))
 	client, err := http.NewClient(context.Background(),
 		opts...,
 	)
 	if err != nil {
 		return nil, err
 	}
-	return New{{ .ServiceName }}HTTPClient(client), nil
+	cli := New{{ .ServiceName }}HTTPClient(client)
+	return &{{ .ServiceName }}HTTPKratosClient{cli: cli}, nil
 }
 
-//New{{ .ServiceName }}GRPCClient 
-func New{{ .ServiceName }}GRPCKratosClient(opts ...grpc.ClientOption) ({{ .ServiceName }}Client, error) {
-	opts = append(opts, grpc.WithEndpoint({{ .Endpoint }}))
+type {{ .ServiceName }}GRPCKratosClient struct {
+	cli {{ .ServiceName }}Client
+}
+
+//New{{ .ServiceName }}GRPCKratosClient create grpc client for kratos
+func New{{ .ServiceName }}GRPCKratosClient(opts ...grpc.ClientOption) (*{{ .ServiceName }}GRPCKratosClient, error) {
+	opts = append(opts, grpc.WithEndpoint("{{ .Endpoint }}"))
 	conn, err := grpc.DialInsecure(context.Background(), opts...)
 	if err != nil {
 		return nil, err
 	}
-	return New{{ .ServiceName }}Client(conn), nil
+	cli := New{{ .ServiceName }}Client(conn)
+	return &{{ .ServiceName }}GRPCKratosClient{cli:cli}, nil
 }
-
-
-
+{{ end }}
 `
 
 type ClientInfo struct {
@@ -57,14 +65,6 @@ func (receiver *ClientTemplate) AppendClientInfo(serviceName, endpoint string) {
 		Endpoint:    endpoint,
 	})
 }
-
-//NewClientTemplate new client template
-//func NewClientTemplate(serviceName, endpoint string) *ClientTemplate {
-//	return &ClientTemplate{
-//		ServiceName: serviceName,
-//		Endpoint:    endpoint,
-//	}
-//}
 
 //Parse create content
 func (receiver *ClientTemplate) execute() string {

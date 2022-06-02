@@ -1,7 +1,9 @@
 syntax = "proto3";
 
-import "google/api/client.proto";
 import "google/api/annotations.proto";
+import "google/api/client.proto";
+
+option go_package = "./;tests";
 
 // The hostname for this service.
 // This should be specified with no prefix or protocol.

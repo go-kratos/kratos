@@ -5,6 +5,7 @@ import (
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
+	"log"
 )
 
 const (
@@ -36,7 +37,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("// is compatible with the kratos package it is being compiled against.")
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
 	g.P("const _ = ", transportHTTPPackage.Ident("SupportPackageIsVersion1"))
-	g.P("const _ = ", transportGRPCPackage.Ident("SupportPackageIsVersion1"))
+	g.QualifiedGoIdent(transportGRPCPackage.Ident(""))
 	g.P()
 	clientTemplateS := NewClientTemplate()
 	for _, service := range file.Services {
@@ -44,5 +45,6 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 		name := service.GoName
 		clientTemplateS.AppendClientInfo(name, host)
 	}
+	log.Printf("%+v\n", clientTemplateS.ClientInfoList)
 	g.P(clientTemplateS.execute())
 }
