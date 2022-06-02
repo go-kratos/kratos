@@ -11,7 +11,7 @@ type LogrusLogger struct {
 	log *logrus.Logger
 }
 
-func NewLogrusLogger(logger *logrus.Logger) log.Logger {
+func NewLogger(logger *logrus.Logger) log.Logger {
 	return &LogrusLogger{
 		log: logger,
 	}
