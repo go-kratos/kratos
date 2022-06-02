@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/apolloconfig/agollo/v4 v4.2.0
-	github.com/go-kratos/kratos/v2 v2.3.0
+	github.com/go-kratos/kratos/v2 v2.3.1
 )
 
 require (
