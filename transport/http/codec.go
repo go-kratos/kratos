@@ -12,6 +12,12 @@ import (
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
 const SupportPackageIsVersion1 = true
 
+// Redirector replies to the request with a redirect to url
+// which may be a path relative to the request path.
+type Redirector interface {
+	Redirect() (string, int)
+}
+
 // Request type net/http.
 type Request = http.Request
 
@@ -49,8 +55,12 @@ func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 // DefaultResponseEncoder encodes the object to the HTTP response.
 func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	if v == nil {
-		_, err := w.Write(nil)
-		return err
+		return nil
+	}
+	if rd, ok := v.(Redirector); ok {
+		url, code := rd.Redirect()
+		http.Redirect(w, r, url, code)
+		return nil
 	}
 	codec, _ := CodecForRequest(r, "Accept")
 	data, err := codec.Marshal(v)
