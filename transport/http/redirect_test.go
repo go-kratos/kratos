@@ -12,7 +12,7 @@ func TestRedirect(t *testing.T) {
 	)
 	r := httptest.NewRequest("POST", "/test", nil)
 	w := httptest.NewRecorder()
-	DefaultResponseEncoder(w, r, NewRedirect(redirectURL, redirectCode))
+	_ = DefaultResponseEncoder(w, r, NewRedirect(redirectURL, redirectCode))
 
 	if w.Code != redirectCode {
 		t.Fatalf("want %d but got %d", redirectCode, w.Code)
