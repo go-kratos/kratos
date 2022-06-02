@@ -112,7 +112,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 func (r *resolver) update(services []*registry.ServiceInstance) bool {
 	nodes := make([]selector.Node, 0)
 	for _, ins := range services {
-		ept, err := endpoint.ParseEndpoint(ins.Endpoints, "http", !r.insecure)
+		ept, err := endpoint.ParseEndpoint(ins.Endpoints, endpoint.Scheme("http", !r.insecure))
 		if err != nil {
 			log.Errorf("Failed to parse (%v) discovery endpoint: %v error %v", r.target, ins.Endpoints, err)
 			continue

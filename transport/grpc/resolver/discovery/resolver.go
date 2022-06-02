@@ -49,7 +49,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	addrs := make([]resolver.Address, 0)
 	endpoints := make(map[string]struct{})
 	for _, in := range ins {
-		endpoint, err := endpoint.ParseEndpoint(in.Endpoints, "grpc", !r.insecure)
+		endpoint, err := endpoint.ParseEndpoint(in.Endpoints, endpoint.Scheme("grpc", !r.insecure))
 		if err != nil {
 			log.Errorf("[resolver] Failed to parse discovery endpoint: %v", err)
 			continue
