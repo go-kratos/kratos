@@ -7,22 +7,18 @@ import (
 )
 
 // NewEndpoint new an Endpoint URL.
-func NewEndpoint(scheme, host string, isSecure bool) *url.URL {
-	if isSecure && !strings.HasSuffix(scheme, "s") {
-		scheme += "s"
-	}
+func NewEndpoint(scheme, host string) *url.URL {
 	return &url.URL{Scheme: scheme, Host: host}
 }
 
 // ParseEndpoint parses an Endpoint URL.
-func ParseEndpoint(endpoints []string, scheme string, isSecure bool) (string, error) {
+func ParseEndpoint(endpoints []string, scheme string) (string, error) {
 	for _, e := range endpoints {
 		u, err := url.Parse(e)
 		if err != nil {
 			return "", err
 		}
-		if strings.TrimSuffix(u.Scheme, "s") == strings.TrimSuffix(scheme, "s") &&
-			IsSecure(u) == isSecure {
+		if u.Scheme == scheme {
 			return u.Host, nil
 		}
 	}
@@ -41,4 +37,13 @@ func IsSecure(u *url.URL) bool {
 		return false
 	}
 	return ok
+}
+
+// Scheme is the scheme of endpoint url.
+// examples: scheme="http",isSecure=true get "https"
+func Scheme(scheme string, isSecure bool) string {
+	if isSecure && scheme != "https" && scheme != "grpcs" {
+		scheme += "s"
+	}
+	return scheme
 }

@@ -273,6 +273,6 @@ func (s *Server) listenAndEndpoint() error {
 		_ = s.lis.Close()
 		return err
 	}
-	s.endpoint = endpoint.NewEndpoint("http", addr, s.tlsConf != nil)
+	s.endpoint = endpoint.NewEndpoint(endpoint.Scheme("http", s.tlsConf != nil), addr)
 	return nil
 }

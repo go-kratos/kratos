@@ -18,27 +18,27 @@ func TestEndPoint(t *testing.T) {
 		// TODO: Add test cases.
 		{
 			name: "grpc://127.0.0.1?isSecure=false",
-			args: args{NewEndpoint("grpc", "127.0.0.1", false)},
+			args: args{NewEndpoint("grpc", "127.0.0.1")},
 			want: false,
 		},
 		{
 			name: "grpc://127.0.0.1?isSecure=true",
-			args: args{NewEndpoint("http", "127.0.0.1", true)},
+			args: args{NewEndpoint("grpcs", "127.0.0.1")},
 			want: true,
 		},
 		{
 			name: "grpc://127.0.0.1",
-			args: args{NewEndpoint("grpc", "localhost", false)},
+			args: args{NewEndpoint("grpc", "localhost")},
 			want: false,
 		},
 		{
 			name: "grpcs://127.0.0.1",
-			args: args{NewEndpoint("grpcs", "localhost", false)},
+			args: args{NewEndpoint("grpcs", "localhost")},
 			want: true,
 		},
 		{
 			name: "https://127.0.0.1",
-			args: args{NewEndpoint("https", "localhost", false)},
+			args: args{NewEndpoint("https", "localhost")},
 			want: true,
 		},
 	}
@@ -69,7 +69,7 @@ func TestNewEndpoint(t *testing.T) {
 		},
 		{
 			name: "https://go-kratos.dev/",
-			args: args{"http", "go-kratos.dev/", true},
+			args: args{"https", "go-kratos.dev/", true},
 			want: &url.URL{Scheme: "https", Host: "go-kratos.dev/"},
 		},
 		{
@@ -80,7 +80,7 @@ func TestNewEndpoint(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewEndpoint(tt.args.scheme, tt.args.host, tt.args.isSecure); !reflect.DeepEqual(got, tt.want) {
+			if got := NewEndpoint(tt.args.scheme, tt.args.host); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewEndpoint() = %v, want %v", got, tt.want)
 			}
 		})
@@ -126,7 +126,7 @@ func TestParseEndpoint(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseEndpoint(tt.args.endpoints, tt.args.scheme, tt.args.isSecure)
+			got, err := ParseEndpoint(tt.args.endpoints, tt.args.scheme)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ParseEndpoint() error = %v, wantErr %v", err, tt.wantErr)
 				return
