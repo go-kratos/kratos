@@ -18,28 +18,18 @@ func TestEndPoint(t *testing.T) {
 		// TODO: Add test cases.
 		{
 			name: "grpc://127.0.0.1?isSecure=false",
-			args: args{NewEndpoint("grpc", "127.0.0.1")},
+			args: args{&url.URL{Scheme: "grpc", Host: "127.0.0.1", RawQuery: "isSecure=false"}},
 			want: false,
 		},
 		{
 			name: "grpc://127.0.0.1?isSecure=true",
-			args: args{NewEndpoint("grpcs", "127.0.0.1")},
+			args: args{&url.URL{Scheme: "grpc", Host: "127.0.0.1", RawQuery: "isSecure=true"}},
 			want: true,
 		},
 		{
 			name: "grpc://127.0.0.1",
-			args: args{NewEndpoint("grpc", "localhost")},
+			args: args{&url.URL{Scheme: "grpc", Host: "127.0.0.1"}},
 			want: false,
-		},
-		{
-			name: "grpcs://127.0.0.1",
-			args: args{NewEndpoint("grpcs", "localhost")},
-			want: true,
-		},
-		{
-			name: "https://127.0.0.1",
-			args: args{NewEndpoint("https", "localhost")},
-			want: true,
 		},
 	}
 	for _, tt := range tests {
@@ -53,9 +43,8 @@ func TestEndPoint(t *testing.T) {
 
 func TestNewEndpoint(t *testing.T) {
 	type args struct {
-		scheme   string
-		host     string
-		isSecure bool
+		scheme string
+		host   string
 	}
 	tests := []struct {
 		name string
@@ -64,17 +53,17 @@ func TestNewEndpoint(t *testing.T) {
 	}{
 		{
 			name: "https://github.com/go-kratos/kratos/",
-			args: args{"https", "github.com/go-kratos/kratos/", false},
+			args: args{"https", "github.com/go-kratos/kratos/"},
 			want: &url.URL{Scheme: "https", Host: "github.com/go-kratos/kratos/"},
 		},
 		{
 			name: "https://go-kratos.dev/",
-			args: args{"https", "go-kratos.dev/", true},
+			args: args{"https", "go-kratos.dev/"},
 			want: &url.URL{Scheme: "https", Host: "go-kratos.dev/"},
 		},
 		{
 			name: "https://www.google.com/",
-			args: args{"https", "www.google.com/", true},
+			args: args{"https", "www.google.com/"},
 			want: &url.URL{Scheme: "https", Host: "www.google.com/"},
 		},
 	}
@@ -91,7 +80,6 @@ func TestParseEndpoint(t *testing.T) {
 	type args struct {
 		endpoints []string
 		scheme    string
-		isSecure  bool
 	}
 	tests := []struct {
 		name    string
@@ -101,26 +89,40 @@ func TestParseEndpoint(t *testing.T) {
 	}{
 		{
 			name:    "kratos",
-			args:    args{endpoints: []string{"https://github.com/go-kratos/kratos"}, scheme: "http", isSecure: true},
+			args:    args{endpoints: []string{"https://github.com/go-kratos/kratos"}, scheme: "https"},
 			want:    "github.com",
 			wantErr: false,
 		},
 		{
 			name:    "test",
-			args:    args{endpoints: []string{"http://go-kratos.dev/"}, scheme: "http", isSecure: true},
+			args:    args{endpoints: []string{"http://go-kratos.dev/"}, scheme: "https"},
 			want:    "",
 			wantErr: false,
 		},
 		{
 			name:    "localhost:8080",
-			args:    args{endpoints: []string{"grpcs://localhost:8080/"}, scheme: "grpc", isSecure: true},
+			args:    args{endpoints: []string{"grpcs://localhost:8080/"}, scheme: "grpcs"},
 			want:    "localhost:8080",
 			wantErr: false,
 		},
 		{
 			name:    "localhost:8081",
-			args:    args{endpoints: []string{"grpcs://localhost:8080/"}, scheme: "grpc", isSecure: false},
+			args:    args{endpoints: []string{"grpcs://localhost:8080/"}, scheme: "grpc"},
 			want:    "",
+			wantErr: false,
+		},
+
+		// Legacy
+		{
+			name:    "google",
+			args:    args{endpoints: []string{"grpc://www.google.com/?isSecure=true"}, scheme: "grpcs"},
+			want:    "www.google.com",
+			wantErr: false,
+		},
+		{
+			name:    "baidu",
+			args:    args{endpoints: []string{"http://www.baidu.com/?isSecure=true"}, scheme: "https"},
+			want:    "www.baidu.com",
 			wantErr: false,
 		},
 	}
