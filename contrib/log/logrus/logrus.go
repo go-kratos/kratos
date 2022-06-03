@@ -5,19 +5,19 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var _ log.Logger = (*LogrusLogger)(nil)
+var _ log.Logger = (*Logger)(nil)
 
-type LogrusLogger struct {
+type Logger struct {
 	log *logrus.Logger
 }
 
 func NewLogger(logger *logrus.Logger) log.Logger {
-	return &LogrusLogger{
+	return &Logger{
 		log: logger,
 	}
 }
 
-func (l *LogrusLogger) Log(level log.Level, keyvals ...interface{}) (err error) {
+func (l *Logger) Log(level log.Level, keyvals ...interface{}) (err error) {
 	var (
 		logrusLevel logrus.Level
 		fields      logrus.Fields = make(map[string]interface{})
