@@ -30,7 +30,7 @@ func TestLoggerLog(t *testing.T) {
 			logger.Level = test.level
 			logger.Out = output
 			logger.Formatter = test.formatter
-			wrapped := NewLogrusLogger(logger)
+			wrapped := NewLogger(logger)
 			_ = wrapped.Log(test.logLevel, test.kvs...)
 
 			assert.True(t, strings.HasPrefix(output.String(), test.want))
