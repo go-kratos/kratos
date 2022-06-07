@@ -6,7 +6,7 @@ import (
 )
 
 func TestPeer(t *testing.T) {
-	var p Peer = Peer{
+	p := Peer{
 		Node: mockWeightedNode{},
 	}
 	ctx := NewPeerContext(context.Background(), &p)
