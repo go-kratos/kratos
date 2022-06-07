@@ -247,6 +247,8 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 		}
 		return reply, nil
 	}
+	var p selector.Peer
+	ctx = selector.NewPeerContext(ctx, &p)
 	if len(client.opts.middleware) > 0 {
 		h = middleware.Chain(client.opts.middleware...)(h)
 	}

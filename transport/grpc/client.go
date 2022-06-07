@@ -184,6 +184,8 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, f
 		if len(ms) > 0 {
 			h = middleware.Chain(ms...)(h)
 		}
+		var p selector.Peer
+		ctx = selector.NewPeerContext(ctx, &p)
 		_, err := h(ctx, req)
 		return err
 	}
