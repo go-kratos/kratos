@@ -3,8 +3,6 @@ package selector
 import (
 	"context"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestPeer(t *testing.T) {
@@ -13,13 +11,14 @@ func TestPeer(t *testing.T) {
 	}
 	ctx := NewPeerContext(context.Background(), &p)
 	p2, ok := FromPeerContext(ctx)
-	if ok {
-		assert.NotNil(t, p2.Node)
+	if !ok || p2.Node == nil {
+		t.Fatalf(" no peer found!")
 	}
 }
 
 func TestNotPeer(t *testing.T) {
 	_, ok := FromPeerContext(context.Background())
-
-	assert.True(t, !ok)
+	if ok {
+		t.Fatalf("test no peer found peer!")
+	}
 }
