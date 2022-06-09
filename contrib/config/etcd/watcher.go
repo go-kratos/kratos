@@ -1,6 +1,8 @@
 package etcd
 
 import (
+	"context"
+
 	"github.com/go-kratos/kratos/v2/config"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
@@ -30,7 +32,7 @@ func (s *watcher) Next() ([]*config.KeyValue, error) {
 	select {
 	case _, ok := <-s.ch:
 		if !ok {
-			return nil, nil
+			return nil, context.Canceled
 		}
 		return s.source.Load()
 	case <-s.closeChan:

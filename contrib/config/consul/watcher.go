@@ -1,6 +1,8 @@
 package consul
 
 import (
+	"context"
+
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/api/watch"
@@ -56,7 +58,7 @@ func (w *watcher) Next() ([]*config.KeyValue, error) {
 	select {
 	case _, ok := <-w.ch:
 		if !ok {
-			return nil, nil
+			return nil, context.Canceled
 		}
 		return w.source.Load()
 	case <-w.closeChan:
