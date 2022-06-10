@@ -28,10 +28,7 @@ func newWatcher(s *source) *watcher {
 
 func (s *watcher) Next() ([]*config.KeyValue, error) {
 	select {
-	case _, ok := <-s.ch:
-		if !ok {
-			return nil, nil
-		}
+	case <-s.ch:
 		return s.source.Load()
 	case <-s.closeChan:
 		return nil, config.ErrWatcherStopped
