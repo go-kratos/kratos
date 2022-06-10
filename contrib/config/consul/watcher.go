@@ -60,7 +60,7 @@ func (w *watcher) Next() ([]*config.KeyValue, error) {
 		}
 		return w.source.Load()
 	case <-w.closeChan:
-		return nil, nil
+		return nil, config.ErrWatcherStopped
 	}
 }
 

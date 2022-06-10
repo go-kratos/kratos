@@ -34,7 +34,7 @@ func (s *watcher) Next() ([]*config.KeyValue, error) {
 		}
 		return s.source.Load()
 	case <-s.closeChan:
-		return nil, nil
+		return nil, config.ErrWatcherStopped
 	}
 }
 
