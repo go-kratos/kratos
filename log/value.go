@@ -10,7 +10,7 @@ import (
 
 var (
 	// DefaultCaller is a Valuer that returns the file and line.
-	DefaultCaller = Caller(3)
+	DefaultCaller = Caller(4)
 
 	// DefaultTimestamp is a Valuer that returns the current wallclock time.
 	DefaultTimestamp = Timestamp(time.RFC3339)
@@ -30,16 +30,7 @@ func Value(ctx context.Context, v interface{}) interface{} {
 // Caller returns a Valuer that returns a pkg/file:line description of the caller.
 func Caller(depth int) Valuer {
 	return func(context.Context) interface{} {
-		d := depth
-		_, file, line, _ := runtime.Caller(d)
-		if strings.LastIndex(file, "/log/filter.go") > 0 {
-			d++
-			_, file, line, _ = runtime.Caller(d)
-		}
-		if strings.LastIndex(file, "/log/helper.go") > 0 {
-			d++
-			_, file, line, _ = runtime.Caller(d)
-		}
+		_, file, line, _ := runtime.Caller(depth)
 		idx := strings.LastIndexByte(file, '/')
 		return file[idx+1:] + ":" + strconv.Itoa(line)
 	}

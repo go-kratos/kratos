@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 func TestOnce(t *testing.T) {
@@ -19,7 +18,7 @@ func TestOnce(t *testing.T) {
 	next := func(ctx context.Context, req interface{}) (interface{}, error) {
 		panic("panic reason")
 	}
-	_, e := Recovery(WithLogger(log.GetLogger()))(next)(context.Background(), "panic")
+	_, e := Recovery()(next)(context.Background(), "panic")
 	t.Logf("succ and reason is %v", e)
 }
 

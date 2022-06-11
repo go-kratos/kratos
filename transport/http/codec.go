@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -12,11 +13,20 @@ import (
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
 const SupportPackageIsVersion1 = true
 
+// Redirector replies to the request with a redirect to url
+// which may be a path relative to the request path.
+type Redirector interface {
+	Redirect() (string, int)
+}
+
 // Request type net/http.
 type Request = http.Request
 
 // ResponseWriter type net/http.
 type ResponseWriter = http.ResponseWriter
+
+// Flusher type net/http
+type Flusher = http.Flusher
 
 // DecodeRequestFunc is decode request func.
 type DecodeRequestFunc func(*http.Request, interface{}) error
@@ -31,7 +41,7 @@ type EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
 func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 	codec, ok := CodecForRequest(r, "Content-Type")
 	if !ok {
-		return errors.BadRequest("CODEC", r.Header.Get("Content-Type"))
+		return errors.BadRequest("CODEC", fmt.Sprintf("unregister Content-Type: %s", r.Header.Get("Content-Type")))
 	}
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -41,7 +51,7 @@ func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 		return nil
 	}
 	if err = codec.Unmarshal(data, v); err != nil {
-		return errors.BadRequest("CODEC", err.Error())
+		return errors.BadRequest("CODEC", fmt.Sprintf("body unmarshal %s", err.Error()))
 	}
 	return nil
 }
@@ -49,8 +59,12 @@ func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 // DefaultResponseEncoder encodes the object to the HTTP response.
 func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	if v == nil {
-		_, err := w.Write(nil)
-		return err
+		return nil
+	}
+	if rd, ok := v.(Redirector); ok {
+		url, code := rd.Redirect()
+		http.Redirect(w, r, url, code)
+		return nil
 	}
 	codec, _ := CodecForRequest(r, "Accept")
 	data, err := codec.Marshal(v)

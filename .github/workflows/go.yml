@@ -41,9 +41,9 @@ jobs:
           - 8090:8090
           - 8091:8091
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3.2.0
         with:
           go-version: ${{ matrix.go }}
 

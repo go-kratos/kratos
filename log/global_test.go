@@ -2,6 +2,7 @@ package log
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -81,5 +82,14 @@ func TestGlobalLogUpdate(t *testing.T) {
 	expected := "INFO msg=Log to buffer\n"
 	if buffer.String() != expected {
 		t.Errorf("Expected: %s, got: %s", expected, buffer.String())
+	}
+}
+
+func TestGolbalContext(t *testing.T) {
+	buffer := &bytes.Buffer{}
+	SetLogger(NewStdLogger(buffer))
+	Context(context.Background()).Infof("111")
+	if buffer.String() != "INFO msg=111\n" {
+		t.Errorf("Expected:%s, got:%s", "INFO msg=111", buffer.String())
 	}
 }

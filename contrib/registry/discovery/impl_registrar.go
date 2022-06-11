@@ -9,6 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
@@ -43,7 +44,7 @@ func (d *Discovery) Register(ctx context.Context, service *registry.ServiceInsta
 
 	// renew the current register_service
 	go func() {
-		defer d.Logger().Warn("Discovery:register_service goroutine quit")
+		defer log.Warn("Discovery:register_service goroutine quit")
 		ticker := time.NewTicker(_registerGap)
 		defer ticker.Stop()
 		for {
@@ -70,7 +71,7 @@ func (d *Discovery) register(ctx context.Context, ins *discoveryInstance) (err e
 	var metadata []byte
 	if ins.Metadata != nil {
 		if metadata, err = json.Marshal(ins.Metadata); err != nil {
-			d.Logger().Errorf(
+			log.Errorf(
 				"Discovery:register instance Marshal metadata(%v) failed!error(%v)", ins.Metadata, err,
 			)
 		}
@@ -102,18 +103,18 @@ func (d *Discovery) register(ctx context.Context, ins *discoveryInstance) (err e
 		SetResult(&res).
 		Post(uri); err != nil {
 		d.switchNode()
-		d.Logger().Errorf("Discovery: register client.Get(%s)  zone(%s) env(%s) appid(%s) addrs(%v) error(%v)",
+		log.Errorf("Discovery: register client.Get(%s)  zone(%s) env(%s) appid(%s) addrs(%v) error(%v)",
 			uri+"?"+p.Encode(), c.Zone, c.Env, ins.AppID, ins.Addrs, err)
 		return
 	}
 
 	if res.Code != 0 {
 		err = fmt.Errorf("ErrorCode: %d", res.Code)
-		d.Logger().Errorf("Discovery: register client.Get(%v)  env(%s) appid(%s) addrs(%v) code(%v)",
+		log.Errorf("Discovery: register client.Get(%v)  env(%s) appid(%s) addrs(%v) code(%v)",
 			uri, c.Env, ins.AppID, ins.Addrs, res.Code)
 	}
 
-	d.Logger().Infof(
+	log.Infof(
 		"Discovery: register client.Get(%v) env(%s) appid(%s) addrs(%s) success\n",
 		uri, c.Env, ins.AppID, ins.Addrs,
 	)
