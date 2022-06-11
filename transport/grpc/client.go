@@ -95,7 +95,7 @@ func WithLogger(log log.Logger) ClientOption {
 	return func(o *clientOptions) {}
 }
 
-//WithServiceConfig with service config
+// WithServiceConfig with service config
 func WithServiceConfig(serviceConfig string) ClientOption {
 	return func(o *clientOptions) {
 		o.serviceConfigRawJSON = &serviceConfig
