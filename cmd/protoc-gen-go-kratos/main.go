@@ -3,13 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
-var (
-	showVersion = flag.Bool("version", false, "print the version and exit")
-)
+var showVersion = flag.Bool("version", false, "print the version and exit")
 
 func main() {
 	flag.Parse()

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestExecute(t *testing.T) {
-
 	tables := []struct {
 		name   string
 		data   ClientTemplate

@@ -45,7 +45,7 @@ type ClientTemplate struct {
 	ClientInfoList []ClientInfo
 }
 
-//NewClientTemplate new client template
+// NewClientTemplate new client template
 func NewClientTemplate() *ClientTemplate {
 	return &ClientTemplate{
 		ClientInfoList: make([]ClientInfo, 0, 5),
@@ -59,7 +59,7 @@ func (receiver *ClientTemplate) AppendClientInfo(serviceName, endpoint string) {
 	})
 }
 
-//Parse create content
+// Parse create content
 func (receiver *ClientTemplate) execute() string {
 	parser, err := template.New("clientTemplate").Parse(clientTemplate)
 	if err != nil {

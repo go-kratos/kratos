@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
@@ -14,7 +15,7 @@ const (
 	wrrPackage           = protogen.GoImportPath("github.com/go-kratos/kratos/v2/selector/wrr")
 )
 
-//generateFile generates a _kratos.pb.go file.
+// generateFile generates a _kratos.pb.go file.
 func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.GeneratedFile {
 	if len(file.Services) == 0 {
 		return nil
@@ -31,9 +32,8 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.Generated
 	return g
 }
 
-//generateFileContent generates file content.
+// generateFileContent generates file content.
 func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile) {
-
 	g.P("// This is a compile-time assertion to ensure that this generated file")
 	g.P("// is compatible with the kratos package it is being compiled against.")
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
