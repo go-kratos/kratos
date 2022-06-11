@@ -13,7 +13,8 @@ type {{ .ServiceName }}GRPCClient struct {
 
 //New{{ .ServiceName }}GRPCClient create grpc client for kratos
 func New{{ .ServiceName }}GRPCClient(opts ...grpc.ClientOption) (cli *{{ .ServiceName }}GRPCClient, err error) {
-	{{ if .Endpoint }}
+	opts = append(opts, grpc.WithBalancerName(wrr.Name))
+	{{- if .Endpoint }}
 	conn, ok := connMap["{{ .Endpoint }}"]
 	if !ok {
 		opts = append(opts, grpc.WithEndpoint("{{ .Endpoint }}"))

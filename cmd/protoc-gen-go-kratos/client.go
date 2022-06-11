@@ -11,6 +11,7 @@ const (
 	contextPackage       = protogen.GoImportPath("context")
 	transportGRPCPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/grpc")
 	gRPCPackage          = protogen.GoImportPath("google.golang.org/grpc")
+	wrrPackage           = protogen.GoImportPath("github.com/go-kratos/kratos/v2/selector/wrr")
 )
 
 //generateFile generates a _kratos.pb.go file.
@@ -37,6 +38,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("// is compatible with the kratos package it is being compiled against.")
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
 	g.QualifiedGoIdent(transportGRPCPackage.Ident(""))
+	g.QualifiedGoIdent(wrrPackage.Ident(""))
 	g.P()
 	clientTemplateS := NewClientTemplate()
 	count := 0

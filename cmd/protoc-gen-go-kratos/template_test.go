@@ -28,7 +28,7 @@ func TestExecute(t *testing.T) {
 
 //NewLibraryServiceGRPCClient create grpc client for kratos
 func NewLibraryServiceGRPCClient(opts ...grpc.ClientOption) (cli *LibraryServiceGRPCClient, err error) {
-	
+	opts = append(opts, grpc.WithBalancerName(wrr.Name))
 	conn, ok := connMap["discovery://service_name"]
 	if !ok {
 		opts = append(opts, grpc.WithEndpoint("discovery://service_name"))
@@ -60,7 +60,7 @@ func NewLibraryServiceGRPCClient(opts ...grpc.ClientOption) (cli *LibraryService
 
 //NewLibraryServiceGRPCClient create grpc client for kratos
 func NewLibraryServiceGRPCClient(opts ...grpc.ClientOption) (cli *LibraryServiceGRPCClient, err error) {
-	
+	opts = append(opts, grpc.WithBalancerName(wrr.Name))
 	conn, err := grpc.DialInsecure(context.Background(), opts...)
 	if err != nil {
 		return nil, err
