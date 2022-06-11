@@ -6,41 +6,33 @@ import (
 	"text/template"
 )
 
-var clientTemplate = `
-{{range .ClientInfoList }}
-
-type {{ .ServiceName }}HTTPKratosClient struct {
-	cli {{ .ServiceName }}HTTPClient
-}
-
-//New{{ .ServiceName }}HTTPKratosClient create http client for kratos
-func New{{ .ServiceName }}HTTPKratosClient(opts ...http.ClientOption) (*{{ .ServiceName }}HTTPKratosClient, error) {
-	opts = append(opts, http.WithEndpoint("{{ .Endpoint }}"))
-	client, err := http.NewClient(context.Background(),
-		opts...,
-	)
-	if err != nil {
-		return nil, err
-	}
-	cli := New{{ .ServiceName }}HTTPClient(client)
-	return &{{ .ServiceName }}HTTPKratosClient{cli: cli}, nil
-}
-
-type {{ .ServiceName }}GRPCKratosClient struct {
+var clientTemplate = `{{range .ClientInfoList }}
+type {{ .ServiceName }}GRPCClient struct {
 	cli {{ .ServiceName }}Client
 }
 
-//New{{ .ServiceName }}GRPCKratosClient create grpc client for kratos
-func New{{ .ServiceName }}GRPCKratosClient(opts ...grpc.ClientOption) (*{{ .ServiceName }}GRPCKratosClient, error) {
-	opts = append(opts, grpc.WithEndpoint("{{ .Endpoint }}"))
+//New{{ .ServiceName }}GRPCClient create grpc client for kratos
+func New{{ .ServiceName }}GRPCClient(opts ...grpc.ClientOption) (cli *{{ .ServiceName }}GRPCClient, err error) {
+	{{ if .Endpoint }}
+	conn, ok := connMap["{{ .Endpoint }}"]
+	if !ok {
+		opts = append(opts, grpc.WithEndpoint("{{ .Endpoint }}"))
+		conn, err = grpc.DialInsecure(context.Background(), opts...)
+		if err != nil {
+			return nil, err
+		}
+		connMap["{{ .Endpoint }}"] = conn
+	}
+	{{- else }}
 	conn, err := grpc.DialInsecure(context.Background(), opts...)
+	{{- end }}
 	if err != nil {
 		return nil, err
 	}
-	cli := New{{ .ServiceName }}Client(conn)
-	return &{{ .ServiceName }}GRPCKratosClient{cli:cli}, nil
+	client := New{{ .ServiceName }}Client(conn)
+	return &{{ .ServiceName }}GRPCClient{cli:client}, nil
 }
-{{ end }}
+{{- end }}
 `
 
 type ClientInfo struct {
