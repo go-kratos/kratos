@@ -341,8 +341,10 @@ func TestWithSelectorInvoked(t *testing.T) {
 		t.Error(err)
 	}
 
-	client.Do(req)
-
+	_, err = client.Do(req)
+	if err != nil {
+		t.Log(err)
+	}
 	// check if myselector invoked
 	if !myselector.invoked {
 		t.Errorf("myselector didn't invoked")
