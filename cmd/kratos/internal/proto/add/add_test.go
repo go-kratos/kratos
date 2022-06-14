@@ -3,7 +3,6 @@ package add
 import "testing"
 
 func TestUnderscoreToUpperCamelCase(t *testing.T) {
-
 	tests := []struct {
 		name string
 		want string
