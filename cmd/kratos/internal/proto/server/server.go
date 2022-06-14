@@ -7,14 +7,9 @@ import (
 	"path"
 	"strings"
 
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
-
 	"github.com/emicklei/proto"
 	"github.com/spf13/cobra"
 )
-
-var caser = cases.Title(language.English)
 
 // CmdServer the service command.
 var CmdServer = &cobra.Command{
@@ -67,7 +62,7 @@ func run(cmd *cobra.Command, args []string) {
 					continue
 				}
 				cs.Methods = append(cs.Methods, &Method{
-					Service: s.Name, Name: caser.String(r.Name), Request: r.RequestType,
+					Service: s.Name, Name: ucFirst(r.Name), Request: r.RequestType,
 					Reply: r.ReturnsType, Type: getMethodType(r.StreamsRequest, r.StreamsReturns),
 				})
 			}
@@ -106,4 +101,12 @@ func getMethodType(streamsRequest, streamsReturns bool) MethodType {
 		return returnsStreamsType
 	}
 	return unaryType
+}
+
+func ucFirst(str string) string {
+	if str == "" {
+		return ""
+	}
+
+	return strings.ToUpper(str[:1]) + str[1:]
 }
