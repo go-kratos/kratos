@@ -24,10 +24,14 @@ func TestUnderscoreToUpperCamelCase(t *testing.T) {
 			name: "wwwBaidu_com",
 			want: "WwwBaiduCom",
 		},
+		{
+			name: "HelloWorld",
+			want: "HelloWorld",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := UnderscoreToUpperCamelCase(tt.name); got != tt.want {
+			if got := toUpperCamelCase(tt.name); got != tt.want {
 				t.Errorf("UnderscoreToUpperCamelCase() = %v, want %v", got, tt.want)
 			}
 		})

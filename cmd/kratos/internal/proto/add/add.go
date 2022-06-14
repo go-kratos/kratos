@@ -65,10 +65,10 @@ func javaPackage(name string) string {
 }
 
 func serviceName(name string) string {
-	return UnderscoreToUpperCamelCase(strings.Split(name, ".")[0])
+	return toUpperCamelCase(strings.Split(name, ".")[0])
 }
 
-func UnderscoreToUpperCamelCase(s string) string {
+func toUpperCamelCase(s string) string {
 	s = strings.Replace(s, "_", " ", -1)
 	s = cases.Title(language.Und, cases.NoLower).String(s)
 	return strings.Replace(s, " ", "", -1)
