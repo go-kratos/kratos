@@ -69,7 +69,7 @@ func serviceName(name string) string {
 }
 
 func toUpperCamelCase(s string) string {
-	s = strings.Replace(s, "_", " ", -1)
+	s = strings.ReplaceAll(s, "_", " ")
 	s = cases.Title(language.Und, cases.NoLower).String(s)
 	return strings.Replace(s, " ", "", -1)
 }
