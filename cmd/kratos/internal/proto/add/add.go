@@ -63,7 +63,13 @@ func javaPackage(name string) string {
 }
 
 func serviceName(name string) string {
-	return export(strings.Split(name, ".")[0])
+	return UnderscoreToUpperCamelCase(strings.Split(name, ".")[0])
 }
 
 func export(s string) string { return strings.ToUpper(s[:1]) + s[1:] }
+
+func UnderscoreToUpperCamelCase(s string) string {
+	s = strings.Replace(s, "_", " ", -1)
+	s = strings.Title(s)
+	return strings.Replace(s, " ", "", -1)
+}
