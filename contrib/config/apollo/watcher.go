@@ -21,19 +21,14 @@ type customChangeListener struct {
 
 func (c *customChangeListener) onChange(namespace string, changes map[string]*storage.ConfigChange) []*config.KeyValue {
 	kv := make([]*config.KeyValue, 0, 2)
-	f := format(namespace)
 	value, err := c.apollo.client.GetConfigCache(namespace).Get("content")
 	if err != nil {
 		log.Warnw("apollo get config failed", "err", err)
 	}
-	if err != nil {
-		log.Warnf("apollo could not handle namespace %s: %v", namespace, err)
-		return nil
-	}
 	kv = append(kv, &config.KeyValue{
 		Key:    namespace,
 		Value:  []byte(value.(string)),
-		Format: f,
+		Format: format(namespace),
 	})
 
 	return kv
