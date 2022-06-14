@@ -7,6 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"golang.org/x/mod/modfile"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // CmdAdd represents the add command.
@@ -70,6 +72,6 @@ func export(s string) string { return strings.ToUpper(s[:1]) + s[1:] }
 
 func UnderscoreToUpperCamelCase(s string) string {
 	s = strings.Replace(s, "_", " ", -1)
-	s = strings.Title(s)
+	s = cases.Title(language.Und).String(s)
 	return strings.Replace(s, " ", "", -1)
 }
