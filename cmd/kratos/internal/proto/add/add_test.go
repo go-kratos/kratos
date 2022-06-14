@@ -32,7 +32,7 @@ func TestUnderscoreToUpperCamelCase(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := toUpperCamelCase(tt.name); got != tt.want {
-				t.Errorf("UnderscoreToUpperCamelCase() = %v, want %v", got, tt.want)
+				t.Errorf("toUpperCamelCase() = %v, want %v", got, tt.want)
 			}
 		})
 	}
