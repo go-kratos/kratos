@@ -1,8 +1,6 @@
 package apollo
 
 import (
-	"context"
-
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/log"
 
@@ -62,7 +60,7 @@ func newWatcher(a *apollo) (config.Watcher, error) {
 func (w *watcher) Next() ([]*config.KeyValue, error) {
 	kv, ok := <-w.out
 	if !ok {
-		return nil, context.Canceled
+		return nil, config.ErrWatcherStopped
 	}
 	return kv, nil
 }

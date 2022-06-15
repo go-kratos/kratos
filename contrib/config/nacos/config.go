@@ -106,7 +106,7 @@ func (c *Config) Watch() (config.Watcher, error) {
 	err := c.client.ListenConfig(vo.ConfigParam{
 		DataId: c.opts.dataID,
 		Group:  c.opts.group,
-		OnChange: func(namespace, group, dataId, data string) {
+		OnChange: func(_, group, dataId, data string) {
 			if dataId == watcher.dataID && group == watcher.group {
 				watcher.content <- data
 			}
@@ -144,8 +144,8 @@ func newWatcher(ctx context.Context, dataID string, group string, cancelListenCo
 
 func (w *Watcher) Next() ([]*config.KeyValue, error) {
 	select {
-	case <-w.Context.Done():
-		return nil, nil
+	case <-w.Done():
+		return nil, config.ErrWatcherStopped
 	case content := <-w.content:
 		k := w.dataID
 		return []*config.KeyValue{
