@@ -112,23 +112,36 @@ func Listener(lis net.Listener) ServerOption {
 	}
 }
 
+func DisableEndpoint() ServerOption {
+	return func(s *Server) {
+		s.disableEndpoint = true
+	}
+}
+
+func MuxRouter(mux *mux.Router) ServerOption {
+	return func(s *Server) {
+		s.router = mux
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
-	lis         net.Listener
-	tlsConf     *tls.Config
-	endpoint    *url.URL
-	err         error
-	network     string
-	address     string
-	timeout     time.Duration
-	filters     []FilterFunc
-	ms          []middleware.Middleware
-	dec         DecodeRequestFunc
-	enc         EncodeResponseFunc
-	ene         EncodeErrorFunc
-	strictSlash bool
-	router      *mux.Router
+	lis             net.Listener
+	tlsConf         *tls.Config
+	endpoint        *url.URL
+	err             error
+	network         string
+	address         string
+	timeout         time.Duration
+	filters         []FilterFunc
+	ms              []middleware.Middleware
+	dec             DecodeRequestFunc
+	enc             EncodeResponseFunc
+	ene             EncodeErrorFunc
+	strictSlash     bool
+	router          *mux.Router
+	disableEndpoint bool
 }
 
 // NewServer creates an HTTP server by options.
@@ -145,15 +158,23 @@ func NewServer(opts ...ServerOption) *Server {
 	for _, o := range opts {
 		o(srv)
 	}
-	srv.router = mux.NewRouter().StrictSlash(srv.strictSlash)
-	srv.router.NotFoundHandler = http.DefaultServeMux
-	srv.router.MethodNotAllowedHandler = http.DefaultServeMux
+	if srv.router == nil {
+		srv.router = mux.NewRouter().StrictSlash(srv.strictSlash)
+	}
+	if srv.router.NotFoundHandler == nil {
+		srv.router.NotFoundHandler = http.DefaultServeMux
+	}
+	if srv.router.MethodNotAllowedHandler == nil {
+		srv.router.MethodNotAllowedHandler = http.DefaultServeMux
+	}
 	srv.router.Use(srv.filter())
 	srv.Server = &http.Server{
 		Handler:   FilterChain(srv.filters...)(srv.router),
 		TLSConfig: srv.tlsConf,
 	}
-	srv.err = srv.listenAndEndpoint()
+	if !srv.disableEndpoint {
+		srv.err = srv.listenAndEndpoint()
+	}
 	return srv
 }
 
@@ -208,12 +229,14 @@ func (s *Server) filter() mux.MiddlewareFunc {
 			}
 
 			tr := &Transport{
-				endpoint:     s.endpoint.String(),
 				operation:    pathTemplate,
 				reqHeader:    headerCarrier(req.Header),
 				replyHeader:  headerCarrier(w.Header()),
 				request:      req,
 				pathTemplate: pathTemplate,
+			}
+			if !s.disableEndpoint {
+				tr.endpoint = s.endpoint.String()
 			}
 
 			tr.request = req.WithContext(transport.NewServerContext(ctx, tr))
