@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.19.4
-// source: api/metadata/metadata.proto
+// source: metadata/metadata.proto
 
 package metadata
 
@@ -141,5 +141,5 @@ var Metadata_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/metadata/metadata.proto",
+	Metadata: "metadata/metadata.proto",
 }
