@@ -21,7 +21,7 @@ func NewWatcher() (config.Watcher, error) {
 // Next will be blocked until the Stop method is called
 func (w *watcher) Next() ([]*config.KeyValue, error) {
 	<-w.ctx.Done()
-	return nil, w.ctx.Err()
+	return nil, config.ErrWatcherStopped
 }
 
 func (w *watcher) Stop() error {

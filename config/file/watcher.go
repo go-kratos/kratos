@@ -34,7 +34,7 @@ func newWatcher(f *file) (config.Watcher, error) {
 func (w *watcher) Next() ([]*config.KeyValue, error) {
 	select {
 	case <-w.ctx.Done():
-		return nil, w.ctx.Err()
+		return nil, config.ErrWatcherStopped
 	case event := <-w.fw.Events:
 		if event.Op == fsnotify.Rename {
 			if _, err := os.Stat(event.Name); err == nil || os.IsExist(err) {
