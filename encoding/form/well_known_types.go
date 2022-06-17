@@ -32,7 +32,7 @@ const (
 	structMessageFullname   protoreflect.FullName    = "google.protobuf.Struct"
 	structFieldsFieldNumber protoreflect.FieldNumber = 1
 
-	fieldMaskFullName = "google.protobuf.FieldMask"
+	fieldMaskFullName protoreflect.FullName = "google.protobuf.FieldMask"
 )
 
 func marshalTimestamp(m protoreflect.Message) (string, error) {
