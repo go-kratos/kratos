@@ -147,9 +147,11 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 		md.Body = ""
 	} else if body != "" {
 		md.HasBody = true
+		md.NeedQuery = true
 		md.Body = "." + camelCaseVars(body)
 	} else {
 		md.HasBody = false
+		md.NeedQuery = true
 	}
 	if responseBody == "*" {
 		md.ResponseBody = ""
