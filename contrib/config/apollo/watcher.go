@@ -1,6 +1,8 @@
 package apollo
 
 import (
+	"context"
+
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/log"
 
@@ -8,7 +10,9 @@ import (
 )
 
 type watcher struct {
-	out      <-chan []*config.KeyValue
+	out <-chan []*config.KeyValue
+
+	ctx      context.Context
 	cancelFn func()
 }
 
@@ -47,28 +51,32 @@ func newWatcher(a *apollo) (config.Watcher, error) {
 	changeCh := make(chan []*config.KeyValue)
 	listener := &customChangeListener{in: changeCh, apollo: a}
 	a.client.AddChangeListener(listener)
+
+	ctx, cancel := context.WithCancel(context.Background())
 	return &watcher{
 		out: changeCh,
+
+		ctx: ctx,
 		cancelFn: func() {
 			a.client.RemoveChangeListener(listener)
-			close(changeCh)
+			cancel()
 		},
 	}, nil
 }
 
 // Next will be blocked until the Stop method is called
 func (w *watcher) Next() ([]*config.KeyValue, error) {
-	kv, ok := <-w.out
-	if !ok {
-		return nil, config.ErrWatcherStopped
+	select {
+	case kv := <-w.out:
+		return kv, nil
+	case <-w.ctx.Done():
+		return nil, w.ctx.Err()
 	}
-	return kv, nil
 }
 
 func (w *watcher) Stop() error {
 	if w.cancelFn != nil {
 		w.cancelFn()
 	}
-
 	return nil
 }
