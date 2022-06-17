@@ -12,20 +12,21 @@ type {{ .ServiceName }}GRPCClient struct {
 }
 
 //New{{ .ServiceName }}GRPCClient create grpc client for kratos
-func New{{ .ServiceName }}GRPCClient(opts ...grpc.ClientOption) (cli *{{ .ServiceName }}GRPCClient, err error) {
+func New{{ .ServiceName }}GRPCClient(ctx context.Context,opts ...grpc.ClientOption) (cli *{{ .ServiceName }}GRPCClient, err error) {
 	opts = append(opts, grpc.WithBalancerName(wrr.Name))
 	{{- if .Endpoint }}
-	conn, ok := connMap["{{ .Endpoint }}"]
+	endPoint := "{{ .Endpoint }}"
+	conn, ok := connMap[endPoint]
 	if !ok {
-		opts = append(opts, grpc.WithEndpoint("{{ .Endpoint }}"))
-		conn, err = grpc.DialInsecure(context.Background(), opts...)
+		opts = append(opts, grpc.WithEndpoint(endPoint))
+		conn, err = grpc.DialInsecure(ctx, opts...)
 		if err != nil {
 			return nil, err
 		}
-		connMap["{{ .Endpoint }}"] = conn
+		connMap[endPoint] = conn
 	}
 	{{- else }}
-	conn, err := grpc.DialInsecure(context.Background(), opts...)
+	conn, err := grpc.DialInsecure(ctx, opts...)
 	{{- end }}
 	if err != nil {
 		return nil, err
