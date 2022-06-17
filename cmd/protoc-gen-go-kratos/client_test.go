@@ -89,13 +89,10 @@ func NewLibraryServiceV3GRPCClient(ctx context.Context, opts ...grpc.ClientOptio
 
 func createPlugin(t *testing.T) *protogen.Plugin {
 	file, err := ioutil.ReadFile("request_data.json")
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 	req := &pluginpb.CodeGeneratorRequest{}
-	if err := json.Unmarshal(file, req); err != nil {
-		assert.Nil(t, err)
-	}
+	err = json.Unmarshal(file, req)
+	assert.Nil(t, err)
 	target, err := protogen.Options{}.New(req)
 	assert.Nil(t, err)
 	return target
