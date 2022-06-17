@@ -1,6 +1,8 @@
 package consul
 
 import (
+	"errors"
+
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/api/watch"
@@ -57,7 +59,7 @@ func (w *watcher) Next() ([]*config.KeyValue, error) {
 	case <-w.ch:
 		return w.source.Load()
 	case <-w.closeChan:
-		return nil, config.ErrWatcherStopped
+		return nil, errors.New("watcher stopped")
 	}
 }
 

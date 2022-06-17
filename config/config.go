@@ -20,8 +20,6 @@ var (
 	ErrNotFound = errors.New("key not found")
 	// ErrTypeAssert is type assert error.
 	ErrTypeAssert = errors.New("type assert error")
-	// ErrWatcherStopped means watcher is stopped.
-	ErrWatcherStopped = errors.New("warcher stopped")
 
 	_ Config = (*config)(nil)
 )

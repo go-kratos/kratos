@@ -1,6 +1,8 @@
 package etcd
 
 import (
+	"errors"
+
 	"github.com/go-kratos/kratos/v2/config"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
@@ -34,7 +36,7 @@ func (s *watcher) Next() ([]*config.KeyValue, error) {
 		}
 		return s.source.Load()
 	case <-s.closeChan:
-		return nil, config.ErrWatcherStopped
+		return nil, errors.New("watcher stopped")
 	}
 }
 
