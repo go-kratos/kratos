@@ -56,5 +56,4 @@ func TestProtoPath(t *testing.T) {
 	if url != `http://helloworld.Greeter/helloworld/sub/kratos?updateMask=name,sub.name` {
 		t.Fatalf("proto path not expected!actual: %s ", url)
 	}
-
 }
