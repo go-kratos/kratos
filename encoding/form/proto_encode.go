@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 // EncodeValues encode a message into url values.
@@ -160,9 +160,9 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 		fd := msgDescriptor.Fields()
 		v := value.Message().Get(fd.ByName(protoreflect.Name("value")))
 		return fmt.Sprintf("%v", v.Interface()), nil
-	case "google.protobuf.FieldMask":
-		m, ok := value.Message().Interface().(*field_mask.FieldMask)
-		if !ok {
+	case fieldMaskFullName:
+		m, ok := value.Message().Interface().(*fieldmaskpb.FieldMask)
+		if !ok || m == nil {
 			return "", nil
 		}
 		for i, v := range m.Paths {
@@ -172,6 +172,28 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 	default:
 		return "", fmt.Errorf("unsupported message type: %q", string(msgDescriptor.FullName()))
 	}
+}
+
+// EncodeFieldMask return field mask name=paths
+func EncodeFieldMask(m protoreflect.Message) (query string) {
+	m.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
+		if fd.Kind() == protoreflect.MessageKind {
+			if msg := fd.Message(); msg.FullName() == fieldMaskFullName {
+				value, err := encodeMessage(msg, v)
+				if err != nil {
+					return false
+				}
+				if fd.HasJSONName() {
+					query = fd.JSONName() + "=" + value
+				} else {
+					query = fd.TextName() + "=" + value
+				}
+				return false
+			}
+		}
+		return true
+	})
+	return
 }
 
 // JSONCamelCase converts a snake_case identifier to a camelCase identifier,

@@ -36,6 +36,9 @@ func EncodeURL(pathTemplate string, msg proto.Message, needQuery bool) string {
 		return "/" + value
 	})
 	if !needQuery {
+		if query := form.EncodeFieldMask(msg.ProtoReflect()); query != "" {
+			return path + "?" + query
+		}
 		return path
 	}
 	u, err := form.EncodeValues(msg)

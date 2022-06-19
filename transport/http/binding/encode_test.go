@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/internal/testdata/binding"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 func TestProtoPath(t *testing.T) {
@@ -43,7 +44,16 @@ func TestProtoPath(t *testing.T) {
 		Sub:  &binding.Sub{Name: "kratos"},
 	}, true)
 	fmt.Println(url)
-	if url != `http://helloworld.Greeter/helloworld/go/sub?sub.naming=kratos` {
+	if url != `http://helloworld.Greeter/helloworld/go/sub?sub.naming=kratos&updateMask=` {
+		t.Fatalf("proto path not expected!actual: %s ", url)
+	}
+
+	url = EncodeURL("http://helloworld.Greeter/helloworld/sub/{sub.name}", &binding.HelloRequest{
+		Sub:        &binding.Sub{Name: "kratos"},
+		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"name", "sub.name"}},
+	}, false)
+	fmt.Println(url)
+	if url != `http://helloworld.Greeter/helloworld/sub/kratos?updateMask=name,sub.name` {
 		t.Fatalf("proto path not expected!actual: %s ", url)
 	}
 }
