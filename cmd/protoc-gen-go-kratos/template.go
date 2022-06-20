@@ -7,32 +7,20 @@ import (
 )
 
 var clientTemplate = `{{range .ClientInfoList }}
-type {{ .ServiceName }}GRPCClient struct {
-	{{ .ServiceName }} {{ .ServiceName }}Client
-}
-
 //New{{ .ServiceName }}GRPCClient create grpc client for kratos
-func New{{ .ServiceName }}GRPCClient(ctx context.Context,opts ...grpc.ClientOption) (cli *{{ .ServiceName }}GRPCClient, err error) {
+func New{{ .ServiceName }}GRPCClient(ctx context.Context,opts ...grpc.ClientOption) (cli {{ .ServiceName }}Client, err error) {
 	opts = append(opts, grpc.WithBalancerName(wrr.Name))
 	{{- if .Endpoint }}
 	endPoint := "{{ .Endpoint }}"
-	conn, ok := connMap[endPoint]
-	if !ok {
-		opts = append(opts, grpc.WithEndpoint(endPoint))
-		conn, err = grpc.DialInsecure(ctx, opts...)
-		if err != nil {
-			return nil, err
-		}
-		connMap[endPoint] = conn
-	}
+	opts = append(opts, grpc.WithEndpoint(endPoint))
+	conn, err := grpc.DialInsecure(ctx, opts...)
 	{{- else }}
 	conn, err := grpc.DialInsecure(ctx, opts...)
 	{{- end }}
 	if err != nil {
 		return nil, err
 	}
-	client := New{{ .ServiceName }}Client(conn)
-	return &{{ .ServiceName }}GRPCClient{ {{ .ServiceName }}:client}, nil
+	return New{{ .ServiceName }}Client(conn), nil
 }
 {{- end }}
 `

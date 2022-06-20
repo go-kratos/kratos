@@ -41,18 +41,10 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.QualifiedGoIdent(wrrPackage.Ident(""))
 	g.P()
 	clientTemplateS := NewClientTemplate()
-	count := 0
 	for _, service := range file.Services {
 		host := proto.GetExtension(service.Desc.Options(), annotations.E_DefaultHost).(string)
-		if len(host) != 0 {
-			count++
-		}
 		name := service.GoName
 		clientTemplateS.AppendClientInfo(name, host)
-	}
-	if count > 0 {
-		g.QualifiedGoIdent(gRPCPackage.Ident(""))
-		g.P("var connMap = make(map[string]*", gRPCPackage.Ident("ClientConn"), ", ", count, ")")
 	}
 	g.P(clientTemplateS.execute())
 }
