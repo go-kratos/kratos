@@ -8,7 +8,7 @@ import (
 
 var clientTemplate = `{{range .ClientInfoList }}
 type {{ .ServiceName }}GRPCClient struct {
-	cli {{ .ServiceName }}Client
+	{{ .ServiceName }} {{ .ServiceName }}Client
 }
 
 //New{{ .ServiceName }}GRPCClient create grpc client for kratos
@@ -32,7 +32,7 @@ func New{{ .ServiceName }}GRPCClient(ctx context.Context,opts ...grpc.ClientOpti
 		return nil, err
 	}
 	client := New{{ .ServiceName }}Client(conn)
-	return &{{ .ServiceName }}GRPCClient{cli:client}, nil
+	return &{{ .ServiceName }}GRPCClient{ {{ .ServiceName }}:client}, nil
 }
 {{- end }}
 `
