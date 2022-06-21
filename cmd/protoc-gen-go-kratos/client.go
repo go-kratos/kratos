@@ -12,7 +12,6 @@ const (
 	contextPackage       = protogen.GoImportPath("context")
 	transportGRPCPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/grpc")
 	transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
-	gRPCPackage          = protogen.GoImportPath("google.golang.org/grpc")
 	wrrPackage           = protogen.GoImportPath("github.com/go-kratos/kratos/v2/selector/wrr")
 )
 
