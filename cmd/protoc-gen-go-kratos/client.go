@@ -11,6 +11,7 @@ import (
 const (
 	contextPackage       = protogen.GoImportPath("context")
 	transportGRPCPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/grpc")
+	transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
 	gRPCPackage          = protogen.GoImportPath("google.golang.org/grpc")
 	wrrPackage           = protogen.GoImportPath("github.com/go-kratos/kratos/v2/selector/wrr")
 )
@@ -39,6 +40,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
 	g.QualifiedGoIdent(transportGRPCPackage.Ident(""))
 	g.QualifiedGoIdent(wrrPackage.Ident(""))
+	g.QualifiedGoIdent(transportHTTPPackage.Ident(""))
 	g.P()
 	clientTemplateS := NewClientTemplate()
 	for _, service := range file.Services {

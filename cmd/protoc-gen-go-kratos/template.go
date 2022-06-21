@@ -9,18 +9,33 @@ import (
 var clientTemplate = `{{range .ClientInfoList }}
 //New{{ .ServiceName }}GRPCClient create grpc client for kratos
 func New{{ .ServiceName }}GRPCClient(ctx context.Context,opts ...grpc.ClientOption) (cli {{ .ServiceName }}Client, err error) {
-	opts = append(opts, grpc.WithBalancerName(wrr.Name))
-	{{- if .Endpoint }}
-	endPoint := "{{ .Endpoint }}"
-	opts = append(opts, grpc.WithEndpoint(endPoint))
-	conn, err := grpc.DialInsecure(ctx, opts...)
-	{{- else }}
-	conn, err := grpc.DialInsecure(ctx, opts...)
-	{{- end }}
+	targetOpts := make([]grpc.ClientOption, 0, len(opts)+2)
+	targetOpts = append(targetOpts,
+		grpc.WithBalancerName(wrr.Name),
+		{{- if .Endpoint }}
+		grpc.WithEndpoint("{{ .Endpoint }}"),
+		{{- end }}
+	)
+	conn, err := grpc.DialInsecure(ctx, append(targetOpts, opts...)...)
 	if err != nil {
 		return nil, err
 	}
 	return New{{ .ServiceName }}Client(conn), nil
+}
+
+//New{{ .ServiceName }}KratosHTTPClientV2 create http client for kratos
+func New{{ .ServiceName }}KratosHTTPClientV2(ctx context.Context, opts ...http.ClientOption) (cli {{ .ServiceName }}HTTPClient, err error) {
+	{{- if .Endpoint }}
+	targetOpts := make([]http.ClientOption, 0, len(opts)+2)
+	targetOpts = append(targetOpts, http.WithEndpoint("{{ .Endpoint }}"))
+	client, err := http.NewClient(ctx, append(targetOpts, opts...)...)
+	{{- else }}
+	client, err := http.NewClient(ctx, opts...)
+	{{- end }}
+	if err != nil {
+		return nil, err
+	}
+	return New{{ .ServiceName }}HTTPClient(client), nil
 }
 {{- end }}
 `
