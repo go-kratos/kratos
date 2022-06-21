@@ -116,15 +116,11 @@ func (a *App) Run() error {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, a.opts.sigs...)
 	eg.Go(func() error {
-		for {
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			case <-c:
-				if err := a.Stop(); err != nil {
-					return err
-				}
-			}
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-c:
+			return a.Stop()
 		}
 	})
 	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
