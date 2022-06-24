@@ -15,11 +15,11 @@ import (
 )
 
 func init() {
-	appId = os.Getenv(AppIdVar)
+	appId = os.Getenv(appIdVar)
 	if appId == "" {
 		appId = "default"
 	}
-	env = os.Getenv(EnvVar)
+	env = os.Getenv(envVar)
 }
 
 var (
@@ -34,12 +34,12 @@ var (
 )
 
 const (
-	AppIdKey         = "appId"
-	EnvKey           = "environment"
-	EnvVar           = "CAS_ENVIRONMENT_ID"
-	AppIdVar         = "CAS_APPLICATION_NAME"
-	FrameWorkName    = "kratos"
-	FrameWorkVersion = "v2"
+	appIdKey         = "appId"
+	envKey           = "environment"
+	envVar           = "CAS_ENVIRONMENT_ID"
+	appIdVar         = "CAS_APPLICATION_NAME"
+	frameWorkName    = "kratos"
+	frameWorkVersion = "v2"
 )
 
 // Registry is servicecomb registry.
@@ -78,8 +78,8 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 
 func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance) error {
 	fw := &discovery.FrameWork{
-		Name:    FrameWorkName,
-		Version: FrameWorkVersion,
+		Name:    frameWorkName,
+		Version: frameWorkVersion,
 	}
 	ms := &discovery.MicroService{
 		ServiceName: svcIns.Name,
@@ -114,8 +114,8 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 		curServiceId = sid
 	}
 	props := make(map[string]string)
-	props[AppIdKey] = appId
-	props[EnvKey] = env
+	props[appIdKey] = appId
+	props[envKey] = env
 	if svcIns.ID == "" {
 		id, err := uuid.NewV4()
 		if err != nil {
