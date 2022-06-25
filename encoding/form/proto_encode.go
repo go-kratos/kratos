@@ -48,7 +48,6 @@ func encodeByField(u url.Values, path string, v protoreflect.Message) error {
 					continue
 				}
 			}
-			continue
 		}
 		switch {
 		case fd.IsList():
