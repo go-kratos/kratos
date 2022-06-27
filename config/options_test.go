@@ -121,7 +121,7 @@ func TestDefaultResolver(t *testing.T) {
 		{
 			name:   "test array",
 			path:   "foo.bar.array",
-			expect: []interface{}{portString, map[string]interface{}{"foobar": "8081"}},
+			expect: []interface{}{8080, map[string]interface{}{"foobar": 8081}},
 		},
 		{
 			name:   "test ${test.value}",
