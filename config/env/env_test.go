@@ -91,7 +91,7 @@ func TestEnvWithPrefix(t *testing.T) {
 			expect: []interface{}{
 				map[string]interface{}{
 					"name": "Tom",
-					"age":  "20",
+					"age":  20,
 				},
 			},
 		},
@@ -205,7 +205,7 @@ func TestEnvWithoutPrefix(t *testing.T) {
 			expect: []interface{}{
 				map[string]interface{}{
 					"name": "Tom",
-					"age":  "20",
+					"age":  20,
 				},
 			},
 		},
