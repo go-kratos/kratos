@@ -3,13 +3,10 @@ package opensergo
 import (
 	"io/ioutil"
 	"net"
-	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
-
-	"github.com/go-kratos/kratos/v2"
 
 	srvContractPb "github.com/opensergo/opensergo-go/proto/service_contract/v1"
 	"golang.org/x/net/context"
@@ -22,12 +19,40 @@ import (
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
-type MetadataServiceServer struct {
+type testMetadataServiceServer struct {
 	srvContractPb.UnimplementedMetadataServiceServer
 }
 
-func (m *MetadataServiceServer) ReportMetadata(ctx context.Context, request *srvContractPb.ReportMetadataRequest) (*srvContractPb.ReportMetadataReply, error) {
+func (m *testMetadataServiceServer) ReportMetadata(ctx context.Context, request *srvContractPb.ReportMetadataRequest) (*srvContractPb.ReportMetadataReply, error) {
 	return &srvContractPb.ReportMetadataReply{}, nil
+}
+
+type testAppInfo struct {
+	id       string
+	name     string
+	version  string
+	metaData map[string]string
+	endpoint []string
+}
+
+func (t testAppInfo) ID() string {
+	return t.id
+}
+
+func (t testAppInfo) Name() string {
+	return t.name
+}
+
+func (t testAppInfo) Version() string {
+	return t.version
+}
+
+func (t testAppInfo) Metadata() map[string]string {
+	return t.metaData
+}
+
+func (t testAppInfo) Endpoint() []string {
+	return t.endpoint
 }
 
 func TestWithEndpoint(t *testing.T) {
@@ -243,7 +268,7 @@ func TestHTTPPatternInfo(t *testing.T) {
 
 func TestOpenSergo(t *testing.T) {
 	srv := grpc.NewServer()
-	srvContractPb.RegisterMetadataServiceServer(srv, new(MetadataServiceServer))
+	srvContractPb.RegisterMetadataServiceServer(srv, new(testMetadataServiceServer))
 	lis, err := net.Listen("tcp", "127.0.0.1:9090")
 	if err != nil {
 		t.Fatalf("net.Listen error:%s", err)
@@ -255,13 +280,10 @@ func TestOpenSergo(t *testing.T) {
 		}
 	}()
 
-	app := kratos.New(kratos.Endpoint(&url.URL{Host: "example.com:9090"}, &url.URL{Host: "foo.com:9090"}))
-	go func() {
-		err := app.Run()
-		if err != nil {
-			panic(err)
-		}
-	}()
+	app := &testAppInfo{
+		name:     "testApp",
+		endpoint: []string{"//example.com:9090", "//foo.com:9090"},
+	}
 
 	type args struct {
 		opts []Option
@@ -309,7 +331,7 @@ func TestOpenSergo(t *testing.T) {
 			},
 			preFunc: func(t *testing.T) {
 				fileContent := `{"endpoint": "127.0.0.1:9090"}`
-				err := ioutil.WriteFile("test.json", []byte(fileContent), 0644)
+				err := ioutil.WriteFile("test.json", []byte(fileContent), 0o644)
 				if err != nil {
 					t.Fatalf("ioutil.WriteFile error:%s", err)
 				}
