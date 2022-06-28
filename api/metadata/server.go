@@ -8,6 +8,7 @@ import (
 	"io"
 	"sync"
 
+	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -160,7 +161,8 @@ func allDependency(fd *dpb.FileDescriptorProto) ([]*dpb.FileDescriptorProto, err
 	for _, dep := range fd.Dependency {
 		fdDep, err := fileDescriptorProto(dep)
 		if err != nil {
-			return nil, err
+			log.Warnf("%s", err)
+			continue
 		}
 		temp, err := allDependency(fdDep)
 		if err != nil {
@@ -188,7 +190,7 @@ func decompress(b []byte) ([]byte, error) {
 func fileDescriptorProto(path string) (*dpb.FileDescriptorProto, error) {
 	fd, err := protoregistry.GlobalFiles.FindFileByPath(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("find proto by path failed, path: %s, err: %s", path, err)
 	}
 	fdpb := protodesc.ToFileDescriptorProto(fd)
 	return fdpb, nil
