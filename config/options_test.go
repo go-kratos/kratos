@@ -43,21 +43,31 @@ func TestDefaultDecoder(t *testing.T) {
 
 func TestDefaultResolver(t *testing.T) {
 	var (
-		portString = "8080"
-		countInt   = 10
-		rateFloat  = 0.9
+		portString       = "8080"
+		countInt         = 10
+		rateFloat        = 0.9
+		decimals         = 0.1314
+		binary           = 0b111010
+		minusBinary      = -0b111010
+		hexadecimal      = 0xF3B
+		minusHexadecimal = -0xF3B
 	)
 
 	data := map[string]interface{}{
 		"foo": map[string]interface{}{
 			"bar": map[string]interface{}{
-				"notexist": "${NOTEXIST:100}",
-				"port":     "${PORT:8081}",
-				"count":    "${COUNT:0}",
-				"enable":   "${ENABLE:false}",
-				"rate":     "${RATE}",
-				"empty":    "${EMPTY:foobar}",
-				"url":      "${URL:http://example.com}",
+				"notexist":         "${NOTEXIST:100}",
+				"port":             "${PORT:8081}",
+				"count":            "${COUNT:0}",
+				"enable":           "${ENABLE:false}",
+				"rate":             "${RATE}",
+				"empty":            "${EMPTY:foobar}",
+				"url":              "${URL:http://example.com}",
+				"decimals":         "${DECIMALS}",
+				"binary":           "${BINARY}",
+				"minusBinary":      "${MINUSBINARY}",
+				"hexadecimal":      "${HEXADECIMAL}",
+				"minusHexadecimal": "${MINUSHEXADECIMAL}",
 				"array": []interface{}{
 					"${PORT}",
 					map[string]interface{}{"foobar": "${NOTEXIST:8081}"},
@@ -71,11 +81,16 @@ func TestDefaultResolver(t *testing.T) {
 		"test": map[string]interface{}{
 			"value": "foobar",
 		},
-		"PORT":   "8080",
-		"COUNT":  "10",
-		"ENABLE": "true",
-		"RATE":   "0.9",
-		"EMPTY":  "",
+		"PORT":             "8080",
+		"COUNT":            "10",
+		"ENABLE":           "true",
+		"RATE":             "0.9",
+		"EMPTY":            "",
+		"DECIMALS":         ".1314",
+		"BINARY":           "0b111010",
+		"MINUSBINARY":      "-0b111010",
+		"HEXADECIMAL":      "0xF3B",
+		"MINUSHEXADECIMAL": "-0xF3B",
 	}
 
 	tests := []struct {
@@ -142,6 +157,31 @@ func TestDefaultResolver(t *testing.T) {
 			name:   "test ${foo${bar}}",
 			path:   "foo.bar.value4",
 			expect: "}",
+		},
+		{
+			name:   "test decimals",
+			path:   "foo.bar.decimals",
+			expect: decimals,
+		},
+		{
+			name:   "test binary",
+			path:   "foo.bar.binary",
+			expect: binary,
+		},
+		{
+			name:   "test minusBinary",
+			path:   "foo.bar.minusBinary",
+			expect: minusBinary,
+		},
+		{
+			name:   "test hexadecimal",
+			path:   "foo.bar.hexadecimal",
+			expect: hexadecimal,
+		},
+		{
+			name:   "test minusHexadecimal",
+			path:   "foo.bar.minusHexadecimal",
+			expect: minusHexadecimal,
 		},
 	}
 
