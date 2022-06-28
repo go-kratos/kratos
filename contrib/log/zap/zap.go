@@ -48,5 +48,5 @@ func (l *Logger) Sync() error {
 }
 
 func (l *Logger) Close() error {
-	return l.log.Sync()
+	return l.Sync()
 }
