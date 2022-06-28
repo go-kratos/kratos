@@ -1,7 +1,16 @@
 package opensergo
 
 import (
+	"io/ioutil"
+	"net"
+	"net/url"
+	"os"
+	"path/filepath"
+	"reflect"
+	"testing"
+
 	"github.com/go-kratos/kratos/v2"
+
 	srvContractPb "github.com/opensergo/opensergo-go/proto/service_contract/v1"
 	"golang.org/x/net/context"
 	"google.golang.org/genproto/googleapis/api/annotations"
@@ -11,13 +20,6 @@ import (
 	pref "google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/descriptorpb"
-	"io/ioutil"
-	"net"
-	"net/url"
-	"os"
-	"path/filepath"
-	"reflect"
-	"testing"
 )
 
 type MetadataServiceServer struct {
