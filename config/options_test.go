@@ -49,6 +49,8 @@ func TestDefaultResolver(t *testing.T) {
 		decimals         = 0.1314
 		binary           = 0b111010
 		minusBinary      = -0b111010
+		octal            = 0o61
+		minusOctal       = -0o61
 		hexadecimal      = 0xF3B
 		minusHexadecimal = -0xF3B
 	)
@@ -68,6 +70,8 @@ func TestDefaultResolver(t *testing.T) {
 				"minusBinary":      "${MINUSBINARY}",
 				"hexadecimal":      "${HEXADECIMAL}",
 				"minusHexadecimal": "${MINUSHEXADECIMAL}",
+				"octal":            "${OCTAL}",
+				"minusOctal":       "${MINUSOCTAL}",
 				"array": []interface{}{
 					"${PORT}",
 					map[string]interface{}{"foobar": "${NOTEXIST:8081}"},
@@ -91,6 +95,8 @@ func TestDefaultResolver(t *testing.T) {
 		"MINUSBINARY":      "-0b111010",
 		"HEXADECIMAL":      "0xF3B",
 		"MINUSHEXADECIMAL": "-0xF3B",
+		"OCTAL":            "0o61",
+		"MINUSOCTAL":       "-0o61",
 	}
 
 	tests := []struct {
@@ -182,6 +188,16 @@ func TestDefaultResolver(t *testing.T) {
 			name:   "test minusHexadecimal",
 			path:   "foo.bar.minusHexadecimal",
 			expect: minusHexadecimal,
+		},
+		{
+			name:   "test octal",
+			path:   "foo.bar.octal",
+			expect: octal,
+		},
+		{
+			name:   "test minusOctal",
+			path:   "foo.bar.minusOctal",
+			expect: minusOctal,
 		},
 	}
 
