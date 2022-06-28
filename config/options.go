@@ -26,8 +26,8 @@ var (
 	}
 	resolveMap = map[string]interface{}{
 		"+.INF": math.Inf(1), "+.Inf": math.Inf(1), "+.inf": math.Inf(1), "-.INF": math.Inf(-1), "-.Inf": math.Inf(-1), "-.inf": math.Inf(-1),
-		".INF": math.Inf(1), ".Inf": math.Inf(1), ".NAN": math.NaN(), ".NaN": math.NaN(), ".inf": math.Inf(1), ".nan": math.NaN(), "<<": "<<",
-		"FALSE": false, "False": false, "NULL": nil, "Null": nil, "TRUE": true, "True": true, "false": false, "null": nil, "true": true, "~": nil,
+		".INF": math.Inf(1), ".Inf": math.Inf(1), ".NAN": math.NaN(), ".NaN": math.NaN(), ".inf": math.Inf(1), ".nan": math.NaN(), "FALSE": false,
+		"False": false, "NULL": nil, "Null": nil, "TRUE": true, "True": true, "false": false, "null": nil, "true": true, "~": nil,
 	}
 	floatregexp = regexp.MustCompile(`^[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?$`)
 )
