@@ -310,7 +310,10 @@ func TestOpenSergo(t *testing.T) {
 				opts: []Option{},
 			},
 			preFunc: func(t *testing.T) {
-				t.Setenv("OPENSERGO_ENDPOINT", "127.0.0.1:9090")
+				err := os.Setenv("OPENSERGO_ENDPOINT", "127.0.0.1:9090")
+				if err != nil {
+					panic(err)
+				}
 			},
 			wantErr: false,
 		},
@@ -320,7 +323,10 @@ func TestOpenSergo(t *testing.T) {
 				opts: []Option{},
 			},
 			preFunc: func(t *testing.T) {
-				t.Setenv("OPENSERGO_BOOTSTRAP", `{"endpoint": "127.0.0.1:9090"}`)
+				err := os.Setenv("OPENSERGO_BOOTSTRAP", `{"endpoint": "127.0.0.1:9090"}`)
+				if err != nil {
+					panic(err)
+				}
 			},
 			wantErr: false,
 		},
@@ -339,7 +345,10 @@ func TestOpenSergo(t *testing.T) {
 				if err != nil {
 					t.Fatalf("filepath.Abs error:%s", err)
 				}
-				t.Setenv("OPENSERGO_BOOTSTRAP_CONFIG", confPath)
+				err = os.Setenv("OPENSERGO_BOOTSTRAP_CONFIG", confPath)
+				if err != nil {
+					panic(err)
+				}
 			},
 			deferFunc: func(t *testing.T) {
 				path := os.Getenv("OPENSERGO_BOOTSTRAP_CONFIG")
