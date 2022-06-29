@@ -31,7 +31,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestWithTimeout(t *testing.T) {
-	var opts = new(options)
+	opts := new(options)
 	var duration time.Duration = 1000000000
 	funcTimeout := WithTimeout(duration)
 	funcTimeout(opts)
@@ -41,7 +41,7 @@ func TestWithTimeout(t *testing.T) {
 }
 
 func TestWithWriteTimeout(t *testing.T) {
-	var opts = new(options)
+	opts := new(options)
 	var duration time.Duration = 1000000000
 	funcWriteTimeout := WithWriteTimeout(duration)
 	funcWriteTimeout(opts)
@@ -51,8 +51,8 @@ func TestWithWriteTimeout(t *testing.T) {
 }
 
 func TestWithBufferLimit(t *testing.T) {
-	var opts = new(options)
-	var bufferLimit int = 1000000000
+	opts := new(options)
+	bufferLimit := 1000000000
 	funcBufferLimit := WithBufferLimit(bufferLimit)
 	funcBufferLimit(opts)
 	if opts.bufferLimit != bufferLimit {
@@ -61,8 +61,8 @@ func TestWithBufferLimit(t *testing.T) {
 }
 
 func TestWithRetryWait(t *testing.T) {
-	var opts = new(options)
-	var retryWait int = 1000000000
+	opts := new(options)
+	retryWait := 1000000000
 	funcRetryWait := WithRetryWait(retryWait)
 	funcRetryWait(opts)
 	if opts.retryWait != retryWait {
@@ -71,8 +71,8 @@ func TestWithRetryWait(t *testing.T) {
 }
 
 func TestWithMaxRetry(t *testing.T) {
-	var opts = new(options)
-	var maxRetry int = 1000000000
+	opts := new(options)
+	maxRetry := 1000000000
 	funcMaxRetry := WithMaxRetry(maxRetry)
 	funcMaxRetry(opts)
 	if opts.maxRetry != maxRetry {
@@ -81,8 +81,8 @@ func TestWithMaxRetry(t *testing.T) {
 }
 
 func TestWithMaxRetryWait(t *testing.T) {
-	var opts = new(options)
-	var maxRetryWait int = 1000000000
+	opts := new(options)
+	maxRetryWait := 1000000000
 	funcMaxRetryWait := WithMaxRetryWait(maxRetryWait)
 	funcMaxRetryWait(opts)
 	if opts.maxRetryWait != maxRetryWait {
@@ -91,8 +91,8 @@ func TestWithMaxRetryWait(t *testing.T) {
 }
 
 func TestWithTagPrefix(t *testing.T) {
-	var opts = new(options)
-	var tagPrefix string = "tag_prefix"
+	opts := new(options)
+	tagPrefix := "tag_prefix"
 	funcTagPrefix := WithTagPrefix(tagPrefix)
 	funcTagPrefix(opts)
 	if opts.tagPrefix != tagPrefix {
@@ -101,8 +101,8 @@ func TestWithTagPrefix(t *testing.T) {
 }
 
 func TestWithAsync(t *testing.T) {
-	var opts = new(options)
-	var async bool = true
+	opts := new(options)
+	async := true
 	funcAsync := WithAsync(async)
 	funcAsync(opts)
 	if opts.async != async {
@@ -111,8 +111,8 @@ func TestWithAsync(t *testing.T) {
 }
 
 func TestWithForceStopAsyncSend(t *testing.T) {
-	var opts = new(options)
-	var forceStopAsyncSend bool = true
+	opts := new(options)
+	forceStopAsyncSend := true
 	funcForceStopAsyncSend := WithForceStopAsyncSend(forceStopAsyncSend)
 	funcForceStopAsyncSend(opts)
 	if opts.forceStopAsyncSend != forceStopAsyncSend {
