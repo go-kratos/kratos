@@ -24,14 +24,10 @@ func tcpServer(t *testing.T, lis net.Listener) {
 }
 
 func TestRegistry_Register(t *testing.T) {
-
 	opts := []Option{
 		WithHealthCheck(false),
 	}
 
-	type fields struct {
-		registry *Registry
-	}
 	type args struct {
 		ctx        context.Context
 		serverName string
@@ -40,7 +36,6 @@ func TestRegistry_Register(t *testing.T) {
 
 	test := []struct {
 		name    string
-		fields  fields
 		args    args
 		want    []*registry.ServiceInstance
 		wantErr bool
@@ -116,7 +111,7 @@ func TestRegistry_Register(t *testing.T) {
 			r := New(cli, opts...)
 
 			for _, instance := range tt.args.server {
-				err := r.Register(tt.args.ctx, instance)
+				err = r.Register(tt.args.ctx, instance)
 				if err != nil {
 					t.Error(err)
 				}
@@ -142,7 +137,6 @@ func TestRegistry_Register(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestRegistry_GetService(t *testing.T) {
@@ -210,7 +204,6 @@ func TestRegistry_GetService(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-
 			},
 			deferFunc: func(t *testing.T) {
 				err := r.Deregister(context.Background(), instance1)
@@ -240,7 +233,6 @@ func TestRegistry_GetService(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-
 			},
 			deferFunc: func(t *testing.T) {
 				err := r.Deregister(context.Background(), instance1)
@@ -269,10 +261,8 @@ func TestRegistry_GetService(t *testing.T) {
 			if !reflect.DeepEqual(service, test.want) {
 				t.Errorf("GetService() got = %v, want %v", service, test.want)
 			}
-
 		})
 	}
-
 }
 
 func TestRegistry_Watch(t *testing.T) {
@@ -291,9 +281,6 @@ func TestRegistry_Watch(t *testing.T) {
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
 
-	type fields struct {
-		registry *Registry
-	}
 	type args struct {
 		ctx      context.Context
 		opts     []Option
@@ -301,7 +288,6 @@ func TestRegistry_Watch(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		fields  fields
 		args    args
 		want    []*registry.ServiceInstance
 		wantErr bool
@@ -319,7 +305,6 @@ func TestRegistry_Watch(t *testing.T) {
 			want:    []*registry.ServiceInstance{instance1},
 			wantErr: false,
 			preFunc: func(t *testing.T) {
-
 			},
 		},
 		{
@@ -358,7 +343,7 @@ func TestRegistry_Watch(t *testing.T) {
 				t.Error(err)
 			}
 			defer func() {
-				err := r.Deregister(tt.args.ctx, tt.args.instance)
+				err = r.Deregister(tt.args.ctx, tt.args.instance)
 				if err != nil {
 					t.Error(err)
 				}
@@ -379,10 +364,8 @@ func TestRegistry_Watch(t *testing.T) {
 			if !reflect.DeepEqual(service, tt.want) {
 				t.Errorf("GetService() got = %v, want %v", service, tt.want)
 			}
-
 		})
 	}
-
 }
 
 func getIntranetIP() string {
