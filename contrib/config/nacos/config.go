@@ -4,28 +4,18 @@ import (
 	"context"
 	"path/filepath"
 	"strings"
-	"time"
 
-	"github.com/go-kratos/kratos/v2/config"
 	"github.com/nacos-group/nacos-sdk-go/clients/config_client"
 	"github.com/nacos-group/nacos-sdk-go/vo"
+
+	"github.com/go-kratos/kratos/v2/config"
 )
 
 type Option func(*options)
 
 type options struct {
-	endpoint string // nolint:structcheck,unused
-
-	namespaceID string // nolint:structcheck,unused
-
 	group  string
 	dataID string
-
-	timeoutMs uint64
-	logLevel  string
-
-	logDir   string
-	cacheDir string
 }
 
 // WithGroup With nacos config group.
@@ -39,34 +29,6 @@ func WithGroup(group string) Option {
 func WithDataID(dataID string) Option {
 	return func(o *options) {
 		o.dataID = dataID
-	}
-}
-
-// WithLogDir With nacos config group.
-func WithLogDir(logDir string) Option {
-	return func(o *options) {
-		o.logDir = logDir
-	}
-}
-
-// WithCacheDir With nacos config cache dir.
-func WithCacheDir(cacheDir string) Option {
-	return func(o *options) {
-		o.cacheDir = cacheDir
-	}
-}
-
-// WithLogLevel With nacos config log level.
-func WithLogLevel(logLevel string) Option {
-	return func(o *options) {
-		o.logLevel = logLevel
-	}
-}
-
-// WithTimeout With nacos config timeout.
-func WithTimeout(time time.Duration) Option {
-	return func(o *options) {
-		o.timeoutMs = uint64(time.Milliseconds())
 	}
 }
 
