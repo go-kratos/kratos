@@ -132,7 +132,7 @@ func TestClientContext(t *testing.T) {
 			if !ok {
 				t.Errorf("FromClientContext() = %v, want %v", ok, true)
 			}
-			
+
 			if !reflect.DeepEqual(m, tt.args.md) {
 				t.Errorf("meta = %v, want %v", m, tt.args.md)
 			}
@@ -165,7 +165,7 @@ func TestServerContext(t *testing.T) {
 			if !ok {
 				t.Errorf("FromServerContext() = %v, want %v", ok, true)
 			}
-			
+
 			if !reflect.DeepEqual(m, tt.args.md) {
 				t.Errorf("meta = %v, want %v", m, tt.args.md)
 			}
@@ -209,6 +209,7 @@ func TestAppendToClientContext(t *testing.T) {
 	}
 }
 
+// nolint directives: sa5012
 func TestAppendToClientContextThatPanics(t *testing.T) {
 	kvs := []string{"hello", "kratos", "env"}
 	defer func() {
@@ -218,6 +219,13 @@ func TestAppendToClientContextThatPanics(t *testing.T) {
 	}()
 	ctx := NewClientContext(context.Background(), Metadata{})
 	ctx = AppendToClientContext(ctx, kvs...)
+	md, ok := FromClientContext(ctx)
+	if !ok {
+		t.Errorf("FromServerContext() = %v, want %v", ok, true)
+	}
+	if !reflect.DeepEqual(md, Metadata{}) {
+		t.Errorf("metadata = %v, want %v", md, Metadata{})
+	}
 }
 
 func TestMergeToClientContext(t *testing.T) {
