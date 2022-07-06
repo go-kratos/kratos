@@ -209,6 +209,17 @@ func TestAppendToClientContext(t *testing.T) {
 	}
 }
 
+func TestAppendToClientContextThatPanics(t *testing.T) {
+	kvs := []string{"hello", "kratos", "env"}
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("append to client context singular kvs did not panic")
+		}
+	}()
+	ctx := NewClientContext(context.Background(), Metadata{})
+	ctx = AppendToClientContext(ctx, kvs...)
+}
+
 func TestMergeToClientContext(t *testing.T) {
 	type args struct {
 		md       Metadata
