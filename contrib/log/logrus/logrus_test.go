@@ -23,19 +23,22 @@ func TestLoggerLog(t *testing.T) {
 			formatter: &logrus.JSONFormatter{},
 			logLevel:  log.LevelInfo,
 			kvs:       []interface{}{"case", "json format", "msg", "1"},
-			want:      `{"case":"json format","level":"info","msg":"1"`},
+			want:      `{"case":"json format","level":"info","msg":"1"`,
+		},
 		"level unmatch": {
 			level:     logrus.InfoLevel,
 			formatter: &logrus.JSONFormatter{},
 			logLevel:  log.LevelDebug,
 			kvs:       []interface{}{"case", "level unmatch", "msg", "1"},
-			want:      ""},
+			want:      "",
+		},
 		"no tags": {
 			level:     logrus.InfoLevel,
 			formatter: &logrus.JSONFormatter{},
 			logLevel:  log.LevelInfo,
 			kvs:       []interface{}{"msg", "1"},
-			want:      `{"level":"info","msg":"1"`},
+			want:      `{"level":"info","msg":"1"`,
+		},
 	}
 
 	for name, test := range tests {
