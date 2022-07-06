@@ -246,12 +246,13 @@ func TestMergeToClientContext(t *testing.T) {
 }
 
 func TestMetadata_Range(t *testing.T) {
-	md := Metadata{"kratos": "kratos", "https://go-kratos.dev/": "https://go-kratos.dev/", "go-kratos": "go-kratos"}
+	md := Metadata{"kratos": "kratos", "https://go-kratos.dev/": "https://go-kratos.dev/", "go-kratos": "go-kratos", "language": "golang"}
 	tmp := Metadata{}
 	md.Range(func(k, v string) bool {
-		if k == "https://go-kratos.dev/" || k == "kratos" {
-			tmp[k] = v
+		if len(tmp) == 2 {
+			return false
 		}
+		tmp[k] = v
 		return true
 	})
 	if !reflect.DeepEqual(tmp, Metadata{"https://go-kratos.dev/": "https://go-kratos.dev/", "kratos": "kratos"}) {
