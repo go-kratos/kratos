@@ -13,10 +13,11 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:     "kratos",
-	Short:   "Kratos: An elegant toolkit for Go microservices.",
-	Long:    `Kratos: An elegant toolkit for Go microservices.`,
-	Version: release,
+	Use:       "kratos",
+	Short:     "Kratos: An elegant toolkit for Go microservices.",
+	Long:      `Kratos: An elegant toolkit for Go microservices.`,
+	ValidArgs: []string{"new", "proto", "upgrade", "changelog", "run"},
+	Version:   release,
 }
 
 func init() {
