@@ -38,12 +38,12 @@ func init() {
 
 	CmdNew.Flags().StringVarP(&timeout, "timeout", "t", timeout, "time out")
 	_ = CmdNew.RegisterFlagCompletionFunc("timeout", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return []string{"30s", "1m", "5m", "10m"}, cobra.ShellCompDirectiveNoFileComp
+		return []string{"30s", "1m", "5m", "10m"}, cobra.ShellCompDirectiveDefault
 	})
 
 	CmdNew.Flags().BoolVarP(&nomod, "nomod", "", nomod, "retain go mod")
 	_ = CmdNew.RegisterFlagCompletionFunc("nomod", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return []string{"true", "false"}, cobra.ShellCompDirectiveNoFileComp
+		return []string{"true", "false"}, cobra.ShellCompDirectiveDefault
 	})
 }
 
