@@ -90,6 +90,12 @@ func TestMetadata_Set(t *testing.T) {
 			args: args{key: "env", value: "pro"},
 			want: Metadata{"hello": "kratos", "env": "pro"},
 		},
+		{
+			name: "empty",
+			m:    Metadata{},
+			args: args{key: "", value: ""},
+			want: Metadata{},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -126,7 +132,7 @@ func TestClientContext(t *testing.T) {
 			if !ok {
 				t.Errorf("FromClientContext() = %v, want %v", ok, true)
 			}
-
+			
 			if !reflect.DeepEqual(m, tt.args.md) {
 				t.Errorf("meta = %v, want %v", m, tt.args.md)
 			}
@@ -159,7 +165,7 @@ func TestServerContext(t *testing.T) {
 			if !ok {
 				t.Errorf("FromServerContext() = %v, want %v", ok, true)
 			}
-
+			
 			if !reflect.DeepEqual(m, tt.args.md) {
 				t.Errorf("meta = %v, want %v", m, tt.args.md)
 			}
