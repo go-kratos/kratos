@@ -1,4 +1,4 @@
-package kratos
+package httpcache
 
 import (
 	"encoding/json"
@@ -40,6 +40,8 @@ func parseRecursively(values map[string]config.Value) map[string]interface{} {
 	return result
 }
 
+// ParseConfiguration parse the Kratos configuration into a valid HTTP
+// cache configuration object.
 func ParseConfiguration(c config.Config) plugins.BaseConfiguration {
 	var configuration plugins.BaseConfiguration
 

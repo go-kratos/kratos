@@ -1,4 +1,4 @@
-package kratos
+package httpcache
 
 import (
 	"bytes"
@@ -7,8 +7,34 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
+	"github.com/darkweak/souin/configurationtypes"
 	"github.com/darkweak/souin/plugins"
+)
+
+var (
+	devDefaultConfiguration = plugins.BaseConfiguration{
+		API: configurationtypes.API{
+			BasePath: "/httpcache_api",
+			Prometheus: configurationtypes.APIEndpoint{
+				Enable: true,
+			},
+			Souin: configurationtypes.APIEndpoint{
+				BasePath: "/httpcache",
+				Enable:   true,
+			},
+		},
+		DefaultCache: &configurationtypes.DefaultCache{
+			Regex: configurationtypes.Regex{
+				Exclude: "/excluded",
+			},
+			TTL: configurationtypes.Duration{
+				Duration: time.Second,
+			},
+		},
+		LogLevel: "debug",
+	}
 )
 
 type next struct{}
@@ -20,24 +46,6 @@ func (n *next) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 var nextFilter = &next{}
 
-func Test_New(t *testing.T) {
-	s := NewHTTPCache(DevDefaultConfiguration)
-	if s.bufPool == nil {
-		t.Error("The bufpool must be set.")
-	}
-	c := plugins.BaseConfiguration{}
-	defer func() {
-		if recover() == nil {
-			t.Error("The New method must crash if an incomplete configuration is provided.")
-		}
-	}()
-	NewHTTPCache(c)
-
-	if NewHTTPCacheFilter(DevDefaultConfiguration) == nil {
-		t.Error("The NewHTTPCacheFilter method must not return nil if a valid configuration is provided.")
-	}
-}
-
 func prepare(endpoint string) (req *http.Request, res1 *httptest.ResponseRecorder, res2 *httptest.ResponseRecorder) {
 	req = httptest.NewRequest(http.MethodGet, endpoint, nil)
 	res1 = httptest.NewRecorder()
@@ -46,32 +54,22 @@ func prepare(endpoint string) (req *http.Request, res1 *httptest.ResponseRecorde
 	return
 }
 
-func Test_HttpcacheKratosPlugin_FilterHandler(t *testing.T) {
-	httpcache := NewHTTPCache(DevDefaultConfiguration)
-	if httpcache.FilterHandler() == nil {
-		t.Error("The FilterHandler method must return an HTTP Handler.")
-	}
-}
-
 func Test_HttpcacheKratosPlugin_NewHTTPCacheFilterHandler(t *testing.T) {
-	if NewHTTPCacheFilter(DevDefaultConfiguration) == nil {
+	if NewHTTPCacheFilter(devDefaultConfiguration) == nil {
 		t.Error("The NewHTTPCacheFilter method must return an HTTP Handler.")
 	}
 }
 
 func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter(t *testing.T) {
-	httpcache := NewHTTPCache(DevDefaultConfiguration)
-	defer func() {
-		_ = httpcache.Retriever.GetProvider().Reset()
-	}()
-	handler := httpcache.handle(nextFilter)
+	time.Sleep(time.Second)
+	handler := NewHTTPCacheFilter(devDefaultConfiguration)(nextFilter)
 	req, res, res2 := prepare("/handled")
 	handler.ServeHTTP(res, req)
 	if res.Result().Header.Get("Cache-Status") != "Souin; fwd=uri-miss; stored" {
 		t.Error("The response must contain a Cache-Status header with the stored directive.")
 	}
 	handler.ServeHTTP(res2, req)
-	if res2.Result().Header.Get("Cache-Status") != "Souin; hit; ttl=4" {
+	if res2.Result().Header.Get("Cache-Status") != "Souin; hit; ttl=0" {
 		t.Error("The response must contain a Cache-Status header with the hit and ttl directives.")
 	}
 	if res2.Result().Header.Get("Age") != "1" {
@@ -80,11 +78,8 @@ func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter(t *testing.T) {
 }
 
 func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter_Excluded(t *testing.T) {
-	httpcache := NewHTTPCache(DevDefaultConfiguration)
-	defer func() {
-		_ = httpcache.Retriever.GetProvider().Reset()
-	}()
-	handler := httpcache.handle(nextFilter)
+	time.Sleep(time.Second)
+	handler := NewHTTPCacheFilter(devDefaultConfiguration)(nextFilter)
 	req, res, res2 := prepare("/excluded")
 	handler.ServeHTTP(res, req)
 	if res.Result().Header.Get("Cache-Status") != "Souin; fwd=uri-miss" {
@@ -100,13 +95,10 @@ func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter_Excluded(t *testing.T) {
 }
 
 func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter_Mutation(t *testing.T) {
-	config := DevDefaultConfiguration
+	config := devDefaultConfiguration
 	config.DefaultCache.AllowedHTTPVerbs = []string{http.MethodGet, http.MethodPost}
-	httpcache := NewHTTPCache(config)
-	defer func() {
-		_ = httpcache.Retriever.GetProvider().Reset()
-	}()
-	handler := httpcache.handle(nextFilter)
+	time.Sleep(time.Second)
+	handler := NewHTTPCacheFilter(config)(nextFilter)
 	req, res, res2 := prepare("/handled")
 	req.Body = ioutil.NopCloser(bytes.NewBuffer([]byte(`{"query":"mutation":{something mutated}}`)))
 	handler.ServeHTTP(res, req)
@@ -124,11 +116,8 @@ func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter_Mutation(t *testing.T) {
 }
 
 func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter_API(t *testing.T) {
-	httpcache := NewHTTPCache(DevDefaultConfiguration)
-	defer func() {
-		_ = httpcache.Retriever.GetProvider().Reset()
-	}()
-	handler := httpcache.handle(nextFilter)
+	time.Sleep(time.Second)
+	handler := NewHTTPCacheFilter(devDefaultConfiguration)(nextFilter)
 	req, res, res2 := prepare("/httpcache_api/httpcache")
 	handler.ServeHTTP(res, req)
 	if res.Result().Header.Get("Content-Type") != "application/json" {

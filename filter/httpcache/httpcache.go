@@ -1,4 +1,4 @@
-package kratos
+package httpcache
 
 import (
 	"bytes"
@@ -9,7 +9,6 @@ import (
 
 	"github.com/darkweak/souin/api"
 	"github.com/darkweak/souin/cache/coalescing"
-	"github.com/darkweak/souin/configurationtypes"
 	"github.com/darkweak/souin/plugins"
 	"github.com/darkweak/souin/rfc"
 	kratos_http "github.com/go-kratos/kratos/v2/transport/http"
@@ -19,39 +18,6 @@ const (
 	getterContextCtxKey key = "getter_context"
 )
 
-var (
-	DefaultConfiguration = plugins.BaseConfiguration{
-		DefaultCache: &configurationtypes.DefaultCache{
-			TTL: configurationtypes.Duration{
-				Duration: 10 * time.Second,
-			},
-		},
-		LogLevel: "info",
-	}
-	DevDefaultConfiguration = plugins.BaseConfiguration{
-		API: configurationtypes.API{
-			BasePath: "/httpcache_api",
-			Prometheus: configurationtypes.APIEndpoint{
-				Enable: true,
-			},
-			Souin: configurationtypes.APIEndpoint{
-				BasePath: "/httpcache",
-				Enable:   true,
-			},
-		},
-		DefaultCache: &configurationtypes.DefaultCache{
-			Regex: configurationtypes.Regex{
-				Exclude: "/excluded",
-			},
-			TTL: configurationtypes.Duration{
-				Duration: 5 * time.Second,
-			},
-		},
-		LogLevel: "debug",
-	}
-)
-
-// httpcacheKratosPlugin declaration.
 type (
 	key                   string
 	httpcacheKratosPlugin struct {
@@ -66,7 +32,12 @@ type (
 	}
 )
 
-func NewHTTPCache(c plugins.BaseConfiguration) *httpcacheKratosPlugin {
+// NewHTTPCacheFilter, allows the user to set up an HTTP cache system,
+// RFC-7234 compliant and supports the tag based cache purge,
+// distributed and not-distributed storage, key generation tweaking.
+// Use it with
+// httpcache.NewHTTPCacheFilter(httpcache.ParseConfiguration(config))
+func NewHTTPCacheFilter(c plugins.BaseConfiguration) kratos_http.FilterFunc {
 	s := &httpcacheKratosPlugin{}
 	s.Configuration = &c
 	s.bufPool = &sync.Pool{
@@ -79,16 +50,6 @@ func NewHTTPCache(c plugins.BaseConfiguration) *httpcacheKratosPlugin {
 	s.RequestCoalescing = coalescing.Initialize()
 	s.MapHandler = api.GenerateHandlerMap(s.Configuration, s.Retriever.GetTransport())
 
-	return s
-}
-
-func NewHTTPCacheFilter(c plugins.BaseConfiguration) kratos_http.FilterFunc {
-	s := NewHTTPCache(c)
-
-	return s.handle
-}
-
-func (s *httpcacheKratosPlugin) FilterHandler() kratos_http.FilterFunc {
 	return s.handle
 }
 
