@@ -1,7 +1,7 @@
 package plain
 
 import (
-	"errors"
+	"encoding/json"
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -23,13 +23,14 @@ func init() {
 type codec struct{}
 
 func (codec) Marshal(v interface{}) ([]byte, error) {
-	reply,ok:=v.(*wrappers.StringValue)
-
-	if !ok {
-		return nil, errors.New("please use wrappers.StringValue")
+	switch m := v.(type) {
+	case *wrappers.StringValue:
+		reply:=v.(*wrappers.StringValue)
+		return []byte(reply.GetValue()),nil
+	default:
+		//default json codec
+		return json.Marshal(m)
 	}
-
-	return []byte(reply.GetValue()),nil
 }
 
 func (codec) Unmarshal(data []byte, v interface{}) error {
@@ -42,7 +43,8 @@ func (codec) Unmarshal(data []byte, v interface{}) error {
 
 		return nil
 	default:
-		return errors.New("please use wrappers.StringValue")
+		//default json codec
+		return json.Unmarshal(data, m)
 	}
 }
 
