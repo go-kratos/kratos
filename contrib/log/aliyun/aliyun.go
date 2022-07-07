@@ -15,6 +15,7 @@ import (
 type Log interface {
 	klog.Logger
 	GetProducer() *producer.Producer
+	Close() error
 }
 
 type aliyunLog struct {
