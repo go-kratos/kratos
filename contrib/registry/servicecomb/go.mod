@@ -1,4 +1,4 @@
-module servicecomb
+module github.com/go-kratos/kratos/contrib/registry/servicecomb/v2
 
 go 1.16
 

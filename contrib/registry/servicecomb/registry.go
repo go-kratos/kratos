@@ -42,12 +42,22 @@ const (
 	frameWorkVersion = "v2"
 )
 
-// Registry is servicecomb registry.
-type Registry struct {
-	cli *sc.Client
+type RegistryClient interface {
+	GetMicroServiceID(appID, microServiceName, version, env string, opts ...sc.CallOption) (string, error)
+	FindMicroServiceInstances(consumerID, appID, microServiceName, versionRule string, opts ...sc.CallOption) ([]*discovery.MicroServiceInstance, error)
+	RegisterService(microService *discovery.MicroService) (string, error)
+	RegisterMicroServiceInstance(microServiceInstance *discovery.MicroServiceInstance) (string, error)
+	Heartbeat(microServiceID, microServiceInstanceID string) (bool, error)
+	UnregisterMicroServiceInstance(microServiceID, microServiceInstanceID string) (bool, error)
+	WatchMicroService(microServiceID string, callback func(*sc.MicroServiceInstanceChangedEvent)) error
 }
 
-func NewRegistry(client *sc.Client) *Registry {
+// Registry is servicecomb registry.
+type Registry struct {
+	cli RegistryClient
+}
+
+func NewRegistry(client RegistryClient) *Registry {
 	r := &Registry{
 		cli: client,
 	}
@@ -59,7 +69,7 @@ func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registr
 	if err != nil {
 		return nil, err
 	}
-	var svcInstances []*registry.ServiceInstance
+	svcInstances := make([]*registry.ServiceInstance, 0, len(instances))
 	for _, instance := range instances {
 		svcInstances = append(svcInstances, &registry.ServiceInstance{
 			ID:        instance.InstanceId,
@@ -134,10 +144,10 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 	if err != nil {
 		return err
 	}
-	ch := time.Tick(30 * time.Second)
+	ticker := time.NewTicker(30 * time.Second)
 	go func() {
 		for {
-			<-ch
+			<-ticker.C
 			_, err = r.cli.Heartbeat(sid, svcIns.ID)
 			if err != nil {
 				log.Errorf("failed to send heartbeat: %v", err)

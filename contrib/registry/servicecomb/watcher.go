@@ -6,20 +6,20 @@ import (
 	"golang.org/x/net/context"
 )
 
-var _ registry.Watcher = (*watcher)(nil)
+var _ registry.Watcher = (*Watcher)(nil)
 
-type watcher struct {
-	cli *sc.Client
+type Watcher struct {
+	cli RegistryClient
 	ch  chan *registry.ServiceInstance
 }
 
-func newWatcher(_ context.Context, cli *sc.Client, serviceName string) (*watcher, error) {
+func newWatcher(_ context.Context, cli RegistryClient, serviceName string) (*Watcher, error) {
 	//构建当前服务与目标服务之间的依赖关系，完成discovery
 	_, err := cli.FindMicroServiceInstances(curServiceId, appId, serviceName, "")
 	if err != nil {
 		return nil, err
 	}
-	w := &watcher{
+	w := &Watcher{
 		cli: cli,
 		ch:  make(chan *registry.ServiceInstance),
 	}
@@ -35,7 +35,7 @@ func newWatcher(_ context.Context, cli *sc.Client, serviceName string) (*watcher
 				Metadata:  event.Instance.Properties,
 				Endpoints: event.Instance.Endpoints,
 			}
-			w.ch <- svcIns
+			w.Put(svcIns)
 		})
 		if watchErr != nil {
 			return
@@ -44,14 +44,19 @@ func newWatcher(_ context.Context, cli *sc.Client, serviceName string) (*watcher
 	return w, nil
 }
 
-func (w watcher) Next() ([]*registry.ServiceInstance, error) {
+// Put only for UT
+func (w *Watcher) Put(svcIns *registry.ServiceInstance) {
+	w.ch <- svcIns
+}
+
+func (w *Watcher) Next() ([]*registry.ServiceInstance, error) {
 	var svcInstances []*registry.ServiceInstance
 	svcIns := <-w.ch
 	svcInstances = append(svcInstances, svcIns)
 	return svcInstances, nil
 }
 
-func (w watcher) Stop() error {
+func (w *Watcher) Stop() error {
 	close(w.ch)
 	return nil
 }
