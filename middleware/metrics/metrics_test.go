@@ -24,9 +24,11 @@ type (
 func (m *mockCounter) With(lvs ...string) metrics.Counter {
 	return m
 }
+
 func (m *mockCounter) Inc() {
 	m.value += 1.0
 }
+
 func (m *mockCounter) Add(delta float64) {
 	m.value += delta
 }
@@ -34,6 +36,7 @@ func (m *mockCounter) Add(delta float64) {
 func (m *mockObserver) With(lvs ...string) metrics.Observer {
 	return m
 }
+
 func (m *mockObserver) Observe(delta float64) {
 	m.value += delta
 }
@@ -89,7 +92,7 @@ func TestWithSeconds(t *testing.T) {
 }
 
 func TestServer(t *testing.T) {
-	e := errors.New("Got an error.")
+	e := errors.New("got an error")
 	nextError := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return nil, e
 	}
@@ -121,7 +124,7 @@ func TestServer(t *testing.T) {
 }
 
 func TestClient(t *testing.T) {
-	e := errors.New("Got an error.")
+	e := errors.New("got an error")
 	nextError := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return nil, e
 	}

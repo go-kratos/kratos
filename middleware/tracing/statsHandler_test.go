@@ -10,25 +10,29 @@ import (
 	"google.golang.org/grpc/stats"
 )
 
+type ctxKey string
+
+const testKey ctxKey = "MY_TEST_KEY"
+
 func Test_Client_HandleConn(t *testing.T) {
 	(&ClientHandler{}).HandleConn(context.Background(), nil)
 }
 
 func Test_Client_TagConn(t *testing.T) {
 	client := &ClientHandler{}
-	ctx := context.WithValue(context.Background(), "MY_TEST_KEY", 123)
+	ctx := context.WithValue(context.Background(), testKey, 123)
 
-	if client.TagConn(ctx, nil).Value("MY_TEST_KEY") != 123 {
-		t.Errorf(`The context value must be 123 for the "MY_KEY_TEST" key, %v given.`, client.TagConn(ctx, nil).Value("MY_TEST_KEY"))
+	if client.TagConn(ctx, nil).Value(testKey) != 123 {
+		t.Errorf(`The context value must be 123 for the "MY_KEY_TEST" key, %v given.`, client.TagConn(ctx, nil).Value(testKey))
 	}
 }
 
 func Test_Client_TagRPC(t *testing.T) {
 	client := &ClientHandler{}
-	ctx := context.WithValue(context.Background(), "MY_TEST_KEY", 123)
+	ctx := context.WithValue(context.Background(), testKey, 123)
 
-	if client.TagRPC(ctx, nil).Value("MY_TEST_KEY") != 123 {
-		t.Errorf(`The context value must be 123 for the "MY_KEY_TEST" key, %v given.`, client.TagConn(ctx, nil).Value("MY_TEST_KEY"))
+	if client.TagRPC(ctx, nil).Value(testKey) != 123 {
+		t.Errorf(`The context value must be 123 for the "MY_KEY_TEST" key, %v given.`, client.TagConn(ctx, nil).Value(testKey))
 	}
 }
 
@@ -49,7 +53,7 @@ func Test_Client_HandleRPC(t *testing.T) {
 	rs := stats.OutHeader{}
 
 	// Handle stats.RPCStats is not type of stats.OutHeader case
-	client.HandleRPC(nil, nil)
+	client.HandleRPC(context.TODO(), nil)
 
 	// Handle context doesn't have the peerkey filled with a Peer instance
 	client.HandleRPC(ctx, &rs)
@@ -64,10 +68,10 @@ func Test_Client_HandleRPC(t *testing.T) {
 	// Handle context with Span
 	_, span := trace.NewNoopTracerProvider().Tracer("Tracer").Start(ctx, "Spanname")
 	spanCtx := trace.SpanContext{}
-	spanId := [8]byte{12, 12, 12, 12, 12, 12, 12, 12}
-	traceId := [16]byte{12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12}
-	spanCtx = spanCtx.WithTraceID(traceId)
-	spanCtx = spanCtx.WithSpanID(spanId)
+	spanID := [8]byte{12, 12, 12, 12, 12, 12, 12, 12}
+	traceID := [16]byte{12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12}
+	spanCtx = spanCtx.WithTraceID(traceID)
+	spanCtx = spanCtx.WithSpanID(spanID)
 	mSpan := mockSpan{
 		Span:        span,
 		mockSpanCtx: &spanCtx,

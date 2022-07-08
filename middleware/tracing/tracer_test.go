@@ -23,7 +23,7 @@ func Test_NewTracer(t *testing.T) {
 			t.Error("The NewTracer with an invalid SpanKindMustCrash must panic")
 		}
 	}()
-	tracer = NewTracer(666, func(o *options) {
+	_ = NewTracer(666, func(o *options) {
 		o.tracerProvider = trace.NewNoopTracerProvider()
 	})
 }
@@ -35,7 +35,7 @@ func Test_Tracer_End(t *testing.T) {
 	ctx, span := trace.NewNoopTracerProvider().Tracer("noop").Start(context.Background(), "noopSpan")
 
 	// Handle with error case
-	tracer.End(ctx, span, nil, errors.New("Dummy error."))
+	tracer.End(ctx, span, nil, errors.New("dummy error"))
 
 	// Handle without error case
 	tracer.End(ctx, span, nil, nil)

@@ -67,13 +67,13 @@ func Test_Server(t *testing.T) {
 
 	ctx := transport.NewClientContext(context.Background(), &transportMock{})
 
-	Client(func(o *options) {
+	_, _ = Client(func(o *options) {
 		o.group = group.NewGroup(func() interface{} {
-			return &circuitBreakerMock{err: errors.New("CB Error.")}
+			return &circuitBreakerMock{err: errors.New("circuitbreaker error")}
 		})
 	})(nextValid)(ctx, nil)
 
-	Client(func(_ *options) {})(nextValid)(ctx, nil)
+	_, _ = Client(func(_ *options) {})(nextValid)(ctx, nil)
 
-	Client(func(_ *options) {})(nextInvalid)(ctx, nil)
+	_, _ = Client(func(_ *options) {})(nextInvalid)(ctx, nil)
 }

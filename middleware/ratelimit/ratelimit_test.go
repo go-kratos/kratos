@@ -26,7 +26,7 @@ func (r *ratelimitMock) Allow() (ratelimit.DoneFunc, error) {
 func (r *ratelimitReachedMock) Allow() (ratelimit.DoneFunc, error) {
 	return func(_ ratelimit.DoneInfo) {
 		r.reached = true
-	}, errors.New("Errored.")
+	}, errors.New("errored")
 }
 
 func Test_WithLimiter(t *testing.T) {
@@ -48,14 +48,14 @@ func Test_Server(t *testing.T) {
 	rlm := &ratelimitMock{}
 	rlrm := &ratelimitReachedMock{}
 
-	Server(func(o *options) {
+	_, _ = Server(func(o *options) {
 		o.limiter = rlm
 	})(nextValid)(context.Background(), nil)
 	if !rlm.reached {
 		t.Error("The ratelimit must run the done function.")
 	}
 
-	Server(func(o *options) {
+	_, _ = Server(func(o *options) {
 		o.limiter = rlrm
 	})(nextValid)(context.Background(), nil)
 	if rlrm.reached {
