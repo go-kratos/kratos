@@ -145,6 +145,10 @@ func TestRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if len(pod.Items) < 1 {
+		t.Fatal("fetch resource error")
+	}
+
 	os.Setenv("HOSTNAME", pod.Items[0].Name)
 
 	// Alway remember delete test resource
