@@ -2,12 +2,13 @@ package servicecomb
 
 import (
 	"context"
+	"testing"
+
 	pb "github.com/go-chassis/cari/discovery"
 	"github.com/go-chassis/sc-client"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 var r *Registry
@@ -17,14 +18,15 @@ func init() {
 	r = NewRegistry(c)
 }
 
-type mockClient struct {
-}
+type mockClient struct{}
 
 func (receiver *mockClient) WatchMicroService(microServiceID string, callback func(*sc.MicroServiceInstanceChangedEvent)) error {
 	return nil
 }
 
-func (receiver *mockClient) FindMicroServiceInstances(consumerID, appID, microServiceName, versionRule string, opts ...sc.CallOption) ([]*pb.MicroServiceInstance, error) {
+func (receiver *mockClient) FindMicroServiceInstances(consumerID,
+	appID, microServiceName, versionRule string, opts ...sc.CallOption,
+) ([]*pb.MicroServiceInstance, error) {
 	if microServiceName == "KratosServicecomb" {
 		return []*pb.MicroServiceInstance{{}}, nil
 	}
@@ -106,7 +108,7 @@ func TestWatcher(t *testing.T) {
 		assert.Equal(t, instanceId1.String(), instances[0].ID)
 	})
 	t.Run("Watch deregister event, expected: success", func(t *testing.T) {
-		//Deregister instance1.
+		// Deregister instance1.
 		err = r.Deregister(ctx, svc1)
 		assert.NoError(t, err)
 		go sbWatcher.Put(svc1)
@@ -120,5 +122,4 @@ func TestWatcher(t *testing.T) {
 		err = w.Stop()
 		assert.NoError(t, err)
 	})
-
 }

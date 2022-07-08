@@ -14,7 +14,7 @@ type Watcher struct {
 }
 
 func newWatcher(_ context.Context, cli RegistryClient, serviceName string) (*Watcher, error) {
-	//构建当前服务与目标服务之间的依赖关系，完成discovery
+	// 构建当前服务与目标服务之间的依赖关系，完成discovery
 	_, err := cli.FindMicroServiceInstances(curServiceId, appId, serviceName, "")
 	if err != nil {
 		return nil, err

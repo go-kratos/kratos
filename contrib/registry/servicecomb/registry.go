@@ -3,6 +3,9 @@ package servicecomb
 import (
 	"context"
 	"encoding/json"
+	"os"
+	"time"
+
 	"github.com/go-chassis/cari/discovery"
 	pb "github.com/go-chassis/cari/discovery"
 	"github.com/go-chassis/cari/pkg/errsvc"
@@ -10,8 +13,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/gofrs/uuid"
-	"os"
-	"time"
 )
 
 func init() {
@@ -98,9 +99,9 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 		Environment: env,
 		Framework:   fw,
 	}
-	//先尝试创建微服务
+	// 先尝试创建微服务
 	sid, err := r.cli.RegisterService(ms)
-	//若失败，说明服务可能已注册
+	// 若失败，说明服务可能已注册
 	if err != nil {
 		registryException, ok := err.(*sc.RegistryException)
 		if !ok {
@@ -111,7 +112,7 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 		if parseErr != nil {
 			return parseErr
 		}
-		//若错误码显示服务未注册，直接返回
+		// 若错误码显示服务未注册，直接返回
 		if svcErr.Code != pb.ErrServiceAlreadyExists {
 			return err
 		}
@@ -120,14 +121,15 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 			return err
 		}
 	} else {
-		//保存当前版本微服务对应的sid
+		// 保存当前版本微服务对应的sid
 		curServiceId = sid
 	}
 	props := make(map[string]string)
 	props[appIdKey] = appId
 	props[envKey] = env
 	if svcIns.ID == "" {
-		id, err := uuid.NewV4()
+		var id uuid.UUID
+		id, err = uuid.NewV4()
 		if err != nil {
 			return err
 		}

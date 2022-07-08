@@ -6,10 +6,11 @@
 package main
 
 import (
-	"github.com/go-chassis/sc-client"
-	"github.com/go-kratos/kratos/v2"
 	"log"
-	"servicecomb"
+
+	"github.com/go-chassis/sc-client"
+	"github.com/go-kratos/kratos/contrib/registry/servicecomb/v2"
+	"github.com/go-kratos/kratos/v2"
 )
 
 func main() {
@@ -36,10 +37,11 @@ package main
 
 import (
 	"context"
-	"github.com/go-chassis/sc-client"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"log"
-	"servicecomb"
+
+	"github.com/go-chassis/sc-client"
+	"github.com/go-kratos/kratos/contrib/registry/servicecomb/v2"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
 )
 
 func main() {
