@@ -7,7 +7,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	k8s.io/api v0.24.2
 	k8s.io/apimachinery v0.24.2
-	k8s.io/client-go v0.24.1
+	k8s.io/client-go v0.24.2
 )
 
 replace github.com/go-kratos/kratos/v2 => ../../../
