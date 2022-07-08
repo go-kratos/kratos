@@ -76,6 +76,10 @@ func (s *Server) load() error {
 			}
 			fdps, e := allDependency(fdp)
 			if e != nil {
+				if e == protoregistry.NotFound {
+					// Skip this service if one of its dependencies is not found.
+					continue
+				}
 				err = e
 				return false
 			}
