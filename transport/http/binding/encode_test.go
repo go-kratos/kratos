@@ -32,8 +32,10 @@ func TestProtoPath(t *testing.T) {
 
 	url = EncodeURL(
 		"http://helloworld.Greeter/helloworld/{}/sub/{test_repeated.1}",
-		&binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "hello"},
-			TestRepeated: []string{"123", "456"}},
+		&binding.HelloRequest{
+			Name: "test", Sub: &binding.Sub{Name: "hello"},
+			TestRepeated: []string{"123", "456"},
+		},
 		false,
 	)
 	fmt.Println(url)

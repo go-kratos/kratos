@@ -172,5 +172,4 @@ func TestResolver(t *testing.T) {
 	if err == nil {
 		t.Errorf("expect ctx cancel err, got nil")
 	}
-
 }
