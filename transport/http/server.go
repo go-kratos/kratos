@@ -113,19 +113,6 @@ func Listener(lis net.Listener) ServerOption {
 	}
 }
 
-// handleFuncWrapper is a wrapper for http.HandlerFunc to implement http.Handler
-type handleFuncWrapper struct {
-	fn http.HandlerFunc
-}
-
-func (x *handleFuncWrapper) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	x.fn.ServeHTTP(writer, request)
-}
-
-func NewHandleFuncWrapper(fn http.HandlerFunc) http.Handler {
-	return &handleFuncWrapper{fn: fn}
-}
-
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
