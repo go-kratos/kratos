@@ -72,13 +72,27 @@ func (m *mockConn) ParseServiceConfig(serviceConfigJSON string) *serviceconfig.P
 
 func TestBuilder_Build(t *testing.T) {
 	b := NewBuilder(&mockDiscovery{}, DisableDebugLog())
-	_, err := b.Build(resolver.Target{Scheme: resolver.GetDefaultScheme(), Endpoint: "gprc://authority/endpoint"}, &mockConn{}, resolver.BuildOptions{})
+	_, err := b.Build(
+		resolver.Target{
+			Scheme:   resolver.GetDefaultScheme(),
+			Endpoint: "gprc://authority/endpoint",
+		},
+		&mockConn{},
+		resolver.BuildOptions{},
+	)
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 		return
 	}
 	timeoutBuilder := NewBuilder(&mockDiscovery{}, WithTimeout(0))
-	_, err = timeoutBuilder.Build(resolver.Target{Scheme: resolver.GetDefaultScheme(), Endpoint: "gprc://authority/endpoint"}, &mockConn{}, resolver.BuildOptions{})
+	_, err = timeoutBuilder.Build(
+		resolver.Target{
+			Scheme:   resolver.GetDefaultScheme(),
+			Endpoint: "gprc://authority/endpoint",
+		},
+		&mockConn{},
+		resolver.BuildOptions{},
+	)
 	if err == nil {
 		t.Errorf("expected error, got %v", err)
 	}
