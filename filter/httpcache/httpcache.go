@@ -91,6 +91,7 @@ func (s *httpcacheKratosPlugin) handle(next http.Handler) http.Handler {
 			combo.next.ServeHTTP(customWriter, r)
 
 			combo.req.Response = customWriter.Response
+			// nolint
 			if combo.req.Response, e = s.Retriever.GetTransport().(*rfc.VaryTransport).UpdateCacheEventually(combo.req); e != nil {
 				return e
 			}

@@ -13,35 +13,33 @@ import (
 	"github.com/darkweak/souin/plugins"
 )
 
-var (
-	devDefaultConfiguration = plugins.BaseConfiguration{
-		API: configurationtypes.API{
-			BasePath: "/httpcache_api",
-			Prometheus: configurationtypes.APIEndpoint{
-				Enable: true,
-			},
-			Souin: configurationtypes.APIEndpoint{
-				BasePath: "/httpcache",
-				Enable:   true,
-			},
+var devDefaultConfiguration = plugins.BaseConfiguration{
+	API: configurationtypes.API{
+		BasePath: "/httpcache_api",
+		Prometheus: configurationtypes.APIEndpoint{
+			Enable: true,
 		},
-		DefaultCache: &configurationtypes.DefaultCache{
-			Regex: configurationtypes.Regex{
-				Exclude: "/excluded",
-			},
-			TTL: configurationtypes.Duration{
-				Duration: time.Second,
-			},
+		Souin: configurationtypes.APIEndpoint{
+			BasePath: "/httpcache",
+			Enable:   true,
 		},
-		LogLevel: "debug",
-	}
-)
+	},
+	DefaultCache: &configurationtypes.DefaultCache{
+		Regex: configurationtypes.Regex{
+			Exclude: "/excluded",
+		},
+		TTL: configurationtypes.Duration{
+			Duration: time.Second,
+		},
+	},
+	LogLevel: "debug",
+}
 
 type next struct{}
 
 func (n *next) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusOK)
-	rw.Write([]byte("Hello Kratos!"))
+	_, _ = rw.Write([]byte("Hello Kratos!"))
 }
 
 var nextFilter = &next{}
@@ -65,14 +63,18 @@ func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter(t *testing.T) {
 	handler := NewHTTPCacheFilter(devDefaultConfiguration)(nextFilter)
 	req, res, res2 := prepare("/handled")
 	handler.ServeHTTP(res, req)
-	if res.Result().Header.Get("Cache-Status") != "Souin; fwd=uri-miss; stored" {
+	rs := res.Result()
+	rs.Body.Close()
+	if rs.Header.Get("Cache-Status") != "Souin; fwd=uri-miss; stored" {
 		t.Error("The response must contain a Cache-Status header with the stored directive.")
 	}
 	handler.ServeHTTP(res2, req)
-	if res2.Result().Header.Get("Cache-Status") != "Souin; hit; ttl=0" {
+	rs = res2.Result()
+	rs.Body.Close()
+	if rs.Header.Get("Cache-Status") != "Souin; hit; ttl=0" {
 		t.Error("The response must contain a Cache-Status header with the hit and ttl directives.")
 	}
-	if res2.Result().Header.Get("Age") != "1" {
+	if rs.Header.Get("Age") != "1" {
 		t.Error("The response must contain a Age header with the value 1.")
 	}
 }
@@ -82,14 +84,18 @@ func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter_Excluded(t *testing.T) {
 	handler := NewHTTPCacheFilter(devDefaultConfiguration)(nextFilter)
 	req, res, res2 := prepare("/excluded")
 	handler.ServeHTTP(res, req)
-	if res.Result().Header.Get("Cache-Status") != "Souin; fwd=uri-miss" {
+	rs := res.Result()
+	rs.Body.Close()
+	if rs.Header.Get("Cache-Status") != "Souin; fwd=uri-miss" {
 		t.Error("The response must contain a Cache-Status header without the stored directive and with the uri-miss only.")
 	}
 	handler.ServeHTTP(res2, req)
-	if res2.Result().Header.Get("Cache-Status") != "Souin; fwd=uri-miss" {
+	rs = res2.Result()
+	rs.Body.Close()
+	if rs.Header.Get("Cache-Status") != "Souin; fwd=uri-miss" {
 		t.Error("The response must contain a Cache-Status header without the stored directive and with the uri-miss only.")
 	}
-	if res2.Result().Header.Get("Age") != "" {
+	if rs.Header.Get("Age") != "" {
 		t.Error("The response must not contain a Age header.")
 	}
 }
@@ -102,15 +108,19 @@ func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter_Mutation(t *testing.T) {
 	req, res, res2 := prepare("/handled")
 	req.Body = ioutil.NopCloser(bytes.NewBuffer([]byte(`{"query":"mutation":{something mutated}}`)))
 	handler.ServeHTTP(res, req)
-	if res.Result().Header.Get("Cache-Status") != "Souin; fwd=uri-miss" {
+	rs := res.Result()
+	rs.Body.Close()
+	if rs.Header.Get("Cache-Status") != "Souin; fwd=uri-miss" {
 		t.Error("The response must contain a Cache-Status header without the stored directive and with the uri-miss only.")
 	}
 	req.Body = ioutil.NopCloser(bytes.NewBuffer([]byte(`{"query":"mutation":{something mutated}}`)))
 	handler.ServeHTTP(res2, req)
-	if res2.Result().Header.Get("Cache-Status") != "Souin; fwd=uri-miss" {
+	rs = res2.Result()
+	rs.Body.Close()
+	if rs.Header.Get("Cache-Status") != "Souin; fwd=uri-miss" {
 		t.Error("The response must contain a Cache-Status header without the stored directive and with the uri-miss only.")
 	}
-	if res2.Result().Header.Get("Age") != "" {
+	if rs.Header.Get("Age") != "" {
 		t.Error("The response must not contain a Age header.")
 	}
 }
@@ -120,26 +130,32 @@ func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter_API(t *testing.T) {
 	handler := NewHTTPCacheFilter(devDefaultConfiguration)(nextFilter)
 	req, res, res2 := prepare("/httpcache_api/httpcache")
 	handler.ServeHTTP(res, req)
-	if res.Result().Header.Get("Content-Type") != "application/json" {
+	rs := res.Result()
+	defer rs.Body.Close()
+	if rs.Header.Get("Content-Type") != "application/json" {
 		t.Error("The response must contain be in JSON.")
 	}
-	b, _ := ioutil.ReadAll(res.Result().Body)
+	b, _ := ioutil.ReadAll(rs.Body)
 	res.Result().Body.Close()
 	if string(b) != "[]" {
 		t.Error("The response body must be an empty array because no request has been stored")
 	}
 	req2 := httptest.NewRequest(http.MethodGet, "/handled", nil)
 	handler.ServeHTTP(res2, req2)
-	if res2.Result().Header.Get("Cache-Status") != "Souin; fwd=uri-miss; stored" {
+	rs = res2.Result()
+	rs.Body.Close()
+	if rs.Header.Get("Cache-Status") != "Souin; fwd=uri-miss; stored" {
 		t.Error("The response must contain a Cache-Status header with the stored directive.")
 	}
 	res3 := httptest.NewRecorder()
 	handler.ServeHTTP(res3, req)
-	if res3.Result().Header.Get("Content-Type") != "application/json" {
+	rs = res3.Result()
+	rs.Body.Close()
+	if rs.Header.Get("Content-Type") != "application/json" {
 		t.Error("The response must contain be in JSON.")
 	}
-	b, _ = ioutil.ReadAll(res3.Result().Body)
-	res3.Result().Body.Close()
+	b, _ = ioutil.ReadAll(rs.Body)
+	rs.Body.Close()
 	var payload []string
 	_ = json.Unmarshal(b, &payload)
 	if len(payload) != 2 {
