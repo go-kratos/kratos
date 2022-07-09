@@ -97,7 +97,7 @@ httpcache:
 
 func Test_ParseConfiguration(t *testing.T) {
 	filename := "/tmp/httpcache-" + time.Now().String() + ".yml"
-	ioutil.WriteFile(filename, dummyConfig, 0777)
+	_ = ioutil.WriteFile(filename, dummyConfig, 0o777)
 	c := config.New(
 		config.WithSource(file.NewSource(filename)),
 		config.WithDecoder(func(kv *config.KeyValue, v map[string]interface{}) error {
