@@ -29,7 +29,7 @@ var devDefaultConfiguration = plugins.BaseConfiguration{
 			Exclude: "/excluded",
 		},
 		TTL: configurationtypes.Duration{
-			Duration: time.Second,
+			Duration: 5 * time.Second,
 		},
 	},
 	LogLevel: "debug",
@@ -59,7 +59,7 @@ func Test_HttpcacheKratosPlugin_NewHTTPCacheFilterHandler(t *testing.T) {
 }
 
 func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter(t *testing.T) {
-	time.Sleep(time.Second)
+	time.Sleep(devDefaultConfiguration.DefaultCache.GetTTL())
 	handler := NewHTTPCacheFilter(devDefaultConfiguration)(nextFilter)
 	req, res, res2 := prepare("/handled")
 	handler.ServeHTTP(res, req)
@@ -71,7 +71,7 @@ func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter(t *testing.T) {
 	handler.ServeHTTP(res2, req)
 	rs = res2.Result()
 	rs.Body.Close()
-	if rs.Header.Get("Cache-Status") != "Souin; hit; ttl=0" {
+	if rs.Header.Get("Cache-Status") != "Souin; hit; ttl=4" {
 		t.Error("The response must contain a Cache-Status header with the hit and ttl directives.")
 	}
 	if rs.Header.Get("Age") != "1" {
@@ -80,7 +80,7 @@ func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter(t *testing.T) {
 }
 
 func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter_Excluded(t *testing.T) {
-	time.Sleep(time.Second)
+	time.Sleep(devDefaultConfiguration.DefaultCache.GetTTL())
 	handler := NewHTTPCacheFilter(devDefaultConfiguration)(nextFilter)
 	req, res, res2 := prepare("/excluded")
 	handler.ServeHTTP(res, req)
@@ -103,7 +103,7 @@ func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter_Excluded(t *testing.T) {
 func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter_Mutation(t *testing.T) {
 	config := devDefaultConfiguration
 	config.DefaultCache.AllowedHTTPVerbs = []string{http.MethodGet, http.MethodPost}
-	time.Sleep(time.Second)
+	time.Sleep(config.DefaultCache.GetTTL())
 	handler := NewHTTPCacheFilter(config)(nextFilter)
 	req, res, res2 := prepare("/handled")
 	req.Body = ioutil.NopCloser(bytes.NewBuffer([]byte(`{"query":"mutation":{something mutated}}`)))
@@ -126,7 +126,7 @@ func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter_Mutation(t *testing.T) {
 }
 
 func Test_HttpcacheKratosPlugin_NewHTTPCacheFilter_API(t *testing.T) {
-	time.Sleep(time.Second)
+	time.Sleep(devDefaultConfiguration.DefaultCache.GetTTL())
 	handler := NewHTTPCacheFilter(devDefaultConfiguration)(nextFilter)
 	req, res, res2 := prepare("/httpcache_api/httpcache")
 	handler.ServeHTTP(res, req)
