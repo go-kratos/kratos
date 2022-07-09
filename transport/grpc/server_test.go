@@ -15,13 +15,42 @@ import (
 	pb "github.com/go-kratos/kratos/v2/internal/testdata/helloworld"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
-
 	"google.golang.org/grpc"
 )
 
 // server is used to implement helloworld.GreeterServer.
 type server struct {
 	pb.UnimplementedGreeterServer
+}
+
+func (s *server) SayHelloStream(streamServer pb.Greeter_SayHelloStreamServer) error {
+	tctx, ok := transport.FromServerContext(streamServer.Context())
+	if ok {
+		tctx.ReplyHeader().Set("123", "123")
+	}
+	var cnt uint
+	for {
+		in, err := streamServer.Recv()
+		if err != nil {
+			return err
+		}
+		if in.Name == "error" {
+			return errors.BadRequest("custom_error", fmt.Sprintf("invalid argument %s", in.Name))
+		}
+		if in.Name == "panic" {
+			panic("server panic")
+		}
+		err = streamServer.Send(&pb.HelloReply{
+			Message: fmt.Sprintf("hello %s", in.Name),
+		})
+		if err != nil {
+			return err
+		}
+		cnt++
+		if cnt > 1 {
+			return nil
+		}
+	}
 }
 
 // SayHello implements helloworld.GreeterServer
@@ -97,6 +126,7 @@ func testClient(t *testing.T, srv *Server) {
 			}
 		}),
 	)
+	defer conn.Close()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,7 +139,26 @@ func testClient(t *testing.T, srv *Server) {
 	if !reflect.DeepEqual(reply.Message, "Hello kratos") {
 		t.Errorf("expect %s, got %s", "Hello kratos", reply.Message)
 	}
-	_ = conn.Close()
+
+	streamCli, err := client.SayHelloStream(context.Background())
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer streamCli.CloseSend()
+	err = streamCli.Send(&pb.HelloRequest{Name: "cc"})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	reply, err = streamCli.Recv()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if !reflect.DeepEqual(reply.Message, "hello cc") {
+		t.Errorf("expect %s, got %s", "hello cc", reply.Message)
+	}
 }
 
 func TestNetwork(t *testing.T) {
