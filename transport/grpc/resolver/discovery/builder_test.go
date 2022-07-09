@@ -74,6 +74,7 @@ func TestBuilder_Build(t *testing.T) {
 	_, err := b.Build(resolver.Target{Scheme: resolver.GetDefaultScheme(), Endpoint: "gprc://authority/endpoint"}, &mockConn{}, resolver.BuildOptions{})
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
+		return
 	}
 	timeoutBuilder := NewBuilder(&mockDiscovery{}, WithTimeout(0))
 	_, err = timeoutBuilder.Build(resolver.Target{Scheme: resolver.GetDefaultScheme(), Endpoint: "gprc://authority/endpoint"}, &mockConn{}, resolver.BuildOptions{})

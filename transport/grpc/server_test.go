@@ -126,7 +126,9 @@ func testClient(t *testing.T, srv *Server) {
 			}
 		}),
 	)
-	defer conn.Close()
+	defer func() {
+		_ = conn.Close()
+	}()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,7 +147,9 @@ func testClient(t *testing.T, srv *Server) {
 		t.Error(err)
 		return
 	}
-	defer streamCli.CloseSend()
+	defer func() {
+		_ = streamCli.CloseSend()
+	}()
 	err = streamCli.Send(&pb.HelloRequest{Name: "cc"})
 	if err != nil {
 		t.Error(err)
