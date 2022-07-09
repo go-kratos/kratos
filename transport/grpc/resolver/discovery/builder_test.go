@@ -43,6 +43,7 @@ func (m *mockDiscovery) GetService(ctx context.Context, serviceName string) ([]*
 }
 
 func (m *mockDiscovery) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
+	time.Sleep(time.Microsecond * 500)
 	return &testWatch{}, nil
 }
 
