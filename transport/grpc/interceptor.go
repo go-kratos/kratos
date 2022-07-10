@@ -17,12 +17,15 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		defer cancel()
 		md, _ := grpcmd.FromIncomingContext(ctx)
 		replyHeader := grpcmd.MD{}
-		ctx = transport.NewServerContext(ctx, &Transport{
-			endpoint:    s.endpoint.String(),
+		tr := &Transport{
 			operation:   info.FullMethod,
 			reqHeader:   headerCarrier(md),
 			replyHeader: headerCarrier(replyHeader),
-		})
+		}
+		if s.endpoint != nil {
+			tr.endpoint = s.endpoint.String()
+		}
+		ctx = transport.NewServerContext(ctx, tr)
 		if s.timeout > 0 {
 			ctx, cancel = context.WithTimeout(ctx, s.timeout)
 			defer cancel()
