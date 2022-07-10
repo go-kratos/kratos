@@ -29,6 +29,19 @@ type testData struct {
 	Path string `json:"path"`
 }
 
+// handleFuncWrapper is a wrapper for http.HandlerFunc to implement http.Handler
+type handleFuncWrapper struct {
+	fn http.HandlerFunc
+}
+
+func (x *handleFuncWrapper) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	x.fn.ServeHTTP(writer, request)
+}
+
+func newHandleFuncWrapper(fn http.HandlerFunc) http.Handler {
+	return &handleFuncWrapper{fn: fn}
+}
+
 func TestServeHTTP(t *testing.T) {
 	ln, err := net.Listen("tcp", ":0")
 	if err != nil {
@@ -64,8 +77,9 @@ func TestServeHTTP(t *testing.T) {
 func TestServer(t *testing.T) {
 	ctx := context.Background()
 	srv := NewServer()
-	srv.HandleFunc("/index", h)
+	srv.Handle("/index", newHandleFuncWrapper(h))
 	srv.HandleFunc("/index/{id:[0-9]+}", h)
+	srv.HandlePrefix("/test/prefix", newHandleFuncWrapper(h))
 	srv.HandleHeader("content-type", "application/grpc-web+json", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	})
@@ -88,6 +102,7 @@ func TestServer(t *testing.T) {
 	testHeader(t, srv)
 	testClient(t, srv)
 	testAccept(t, srv)
+	time.Sleep(time.Second)
 	if srv.Stop(ctx) != nil {
 		t.Errorf("expected nil got %v", srv.Stop(ctx))
 	}
@@ -154,20 +169,21 @@ func testClient(t *testing.T, srv *Server) {
 		path   string
 		code   int
 	}{
-		{"GET", "/index", 200},
-		{"PUT", "/index", 200},
-		{"POST", "/index", 200},
-		{"PATCH", "/index", 200},
-		{"DELETE", "/index", 200},
+		{"GET", "/index", http.StatusOK},
+		{"PUT", "/index", http.StatusOK},
+		{"POST", "/index", http.StatusOK},
+		{"PATCH", "/index", http.StatusOK},
+		{"DELETE", "/index", http.StatusOK},
 
-		{"GET", "/index/1", 200},
-		{"PUT", "/index/1", 200},
-		{"POST", "/index/1", 200},
-		{"PATCH", "/index/1", 200},
-		{"DELETE", "/index/1", 200},
+		{"GET", "/index/1", http.StatusOK},
+		{"PUT", "/index/1", http.StatusOK},
+		{"POST", "/index/1", http.StatusOK},
+		{"PATCH", "/index/1", http.StatusOK},
+		{"DELETE", "/index/1", http.StatusOK},
 
-		{"GET", "/index/notfound", 404},
-		{"GET", "/errors/cause", 400},
+		{"GET", "/index/notfound", http.StatusNotFound},
+		{"GET", "/errors/cause", http.StatusBadRequest},
+		{"GET", "/test/prefix/123111", http.StatusOK},
 	}
 	e, err := srv.Endpoint()
 	if err != nil {
@@ -336,6 +352,15 @@ func TestTLSConfig(t *testing.T) {
 	v := &tls.Config{}
 	TLSConfig(v)(o)
 	if !reflect.DeepEqual(v, o.tlsConf) {
+		t.Errorf("expected %v got %v", v, o.tlsConf)
+	}
+}
+
+func TestStrictSlash(t *testing.T) {
+	o := &Server{}
+	v := true
+	StrictSlash(v)(o)
+	if !reflect.DeepEqual(v, o.strictSlash) {
 		t.Errorf("expected %v got %v", v, o.tlsConf)
 	}
 }

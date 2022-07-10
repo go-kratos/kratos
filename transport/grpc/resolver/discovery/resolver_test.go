@@ -23,10 +23,16 @@ func (t *testClientConn) UpdateState(s resolver.State) error {
 
 type testWatch struct {
 	err error
+
+	count uint
 }
 
 func (m *testWatch) Next() ([]*registry.ServiceInstance, error) {
 	time.Sleep(time.Millisecond * 200)
+	if m.count > 1 {
+		return nil, nil
+	}
+	m.count++
 	ins := []*registry.ServiceInstance{
 		{
 			ID:        "mock_ID",
@@ -59,6 +65,7 @@ func TestWatch(t *testing.T) {
 		cancel:   cancel,
 		insecure: false,
 	}
+	r.ResolveNow(resolver.ResolveNowOptions{})
 	go func() {
 		time.Sleep(time.Second * 2)
 		r.Close()
@@ -102,7 +109,10 @@ func TestWatchContextCancel(t *testing.T) {
 }
 
 func TestParseAttributes(t *testing.T) {
-	a := parseAttributes(map[string]string{"a": "b"})
+	a := parseAttributes(map[string]string{
+		"a": "b",
+		"c": "d",
+	})
 	if !reflect.DeepEqual("b", a.Value("a").(string)) {
 		t.Errorf("expect b, got %v", a.Value("a"))
 	}
