@@ -97,7 +97,6 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 			services, err := watcher.Next()
 			if err != nil {
 				if errors.Is(err, context.Canceled) {
-					log.Error("http client watch service context canceled")
 					return
 				}
 				log.Errorf("http client watch service %v got unexpected error:=%v", target, err)
