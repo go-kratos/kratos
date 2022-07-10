@@ -59,21 +59,24 @@ func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 }
 
 func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
-	var (
+	watchRes := &struct {
 		err error
 		w   registry.Watcher
-	)
-	done := make(chan error, 1)
+	}{}
+
+	done := make(chan struct{}, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		var err1 error
-		// 这里 err 赋值会产生 data race (timeout = 0) 通过 chan 消除 data race
-		w, err1 = b.discoverer.Watch(ctx, strings.TrimPrefix(target.URL.Path, "/"))
-		done <- err1
+		w, err := b.discoverer.Watch(ctx, strings.TrimPrefix(target.URL.Path, "/"))
+		watchRes.w = w
+		watchRes.err = err
 		close(done)
 	}()
+
+	var err error
 	select {
-	case err = <-done:
+	case <-done:
+		err = watchRes.err
 	case <-time.After(b.timeout):
 		err = errors.New("discovery create watcher overtime")
 	}
@@ -82,7 +85,7 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		return nil, err
 	}
 	r := &discoveryResolver{
-		w:                w,
+		w:                watchRes.w,
 		cc:               cc,
 		ctx:              ctx,
 		cancel:           cancel,
