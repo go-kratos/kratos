@@ -59,6 +59,9 @@ func TestServeHTTP(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
+	if e, err := mux.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
+		t.Fatal(e, err)
+	}
 	srv := http.Server{Handler: mux}
 	go func() {
 		if err := srv.Serve(ln); err != nil {
