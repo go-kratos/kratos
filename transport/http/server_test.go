@@ -19,11 +19,9 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/host"
 )
 
-var (
-	h = func(w http.ResponseWriter, r *http.Request) {
-		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
-	}
-)
+var h = func(w http.ResponseWriter, r *http.Request) {
+	_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
+}
 
 type testKey struct{}
 
@@ -54,11 +52,13 @@ func TestServeHTTP(t *testing.T) {
 			if errors.Is(err, http.ErrServerClosed) {
 				return
 			}
-			t.Fatal(err)
+			panic(err)
 		}
 	}()
 	time.Sleep(time.Second)
-	srv.Shutdown(context.Background())
+	if err := srv.Shutdown(context.Background()); err != nil {
+		t.Log(err)
+	}
 }
 
 func TestServer(t *testing.T) {
