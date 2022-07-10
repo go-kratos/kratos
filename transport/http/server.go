@@ -22,6 +22,7 @@ import (
 var (
 	_ transport.Server     = (*Server)(nil)
 	_ transport.Endpointer = (*Server)(nil)
+	_ http.Handler         = (*Server)(nil)
 )
 
 // ServerOption is an HTTP server option.

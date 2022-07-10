@@ -15,6 +15,7 @@ message HelloRequest {
   optional int64 opt_int64 = 5;
   optional string opt_string = 6;
   Sub subField = 7;
+  repeated string test_repeated = 8 [json_name = "test_repeated"];
 }
 
 message Sub{
