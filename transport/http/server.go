@@ -153,7 +153,6 @@ func NewServer(opts ...ServerOption) *Server {
 		Handler:   FilterChain(srv.filters...)(srv.router),
 		TLSConfig: srv.tlsConf,
 	}
-	srv.err = srv.listenAndEndpoint()
 	return srv
 }
 
@@ -208,14 +207,15 @@ func (s *Server) filter() mux.MiddlewareFunc {
 			}
 
 			tr := &Transport{
-				endpoint:     s.endpoint.String(),
 				operation:    pathTemplate,
 				reqHeader:    headerCarrier(req.Header),
 				replyHeader:  headerCarrier(w.Header()),
 				request:      req,
 				pathTemplate: pathTemplate,
 			}
-
+			if s.endpoint != nil {
+				tr.endpoint = s.endpoint.String()
+			}
 			tr.request = req.WithContext(transport.NewServerContext(ctx, tr))
 			next.ServeHTTP(w, tr.request)
 		})
