@@ -162,7 +162,7 @@ func (s *Server) WalkRoute(fn WalkRouteFunc) error {
 	return s.router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		methods, err := route.GetMethods()
 		if err != nil {
-			return err
+			return nil // ignore no methods
 		}
 		path, err := route.GetPathTemplate()
 		if err != nil {
