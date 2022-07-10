@@ -156,6 +156,26 @@ func NewServer(opts ...ServerOption) *Server {
 	return srv
 }
 
+// WalkRoute walks the router and all its sub-routers, calling walkFn for each route in the tree.
+func (s *Server) WalkRoute(fn WalkRouteFunc) error {
+	return s.router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+		methods, err := route.GetMethods()
+		if err != nil {
+			return err
+		}
+		path, err := route.GetPathTemplate()
+		if err != nil {
+			return err
+		}
+		for _, method := range methods {
+			if err := fn(RouteInfo{Method: method, Path: path}); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
 // Route registers an HTTP router.
 func (s *Server) Route(prefix string, filters ...FilterFunc) *Router {
 	return newRouter(prefix, s, filters...)
