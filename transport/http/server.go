@@ -153,7 +153,6 @@ func NewServer(opts ...ServerOption) *Server {
 		Handler:   FilterChain(srv.filters...)(srv.router),
 		TLSConfig: srv.tlsConf,
 	}
-	srv.err = srv.listenAndEndpoint()
 	return srv
 }
 
@@ -208,14 +207,15 @@ func (s *Server) filter() mux.MiddlewareFunc {
 			}
 
 			tr := &Transport{
-				endpoint:     s.endpoint.String(),
 				operation:    pathTemplate,
 				reqHeader:    headerCarrier(req.Header),
 				replyHeader:  headerCarrier(w.Header()),
 				request:      req,
 				pathTemplate: pathTemplate,
 			}
-
+			if s.endpoint != nil {
+				tr.endpoint = s.endpoint.String()
+			}
 			tr.request = req.WithContext(transport.NewServerContext(ctx, tr))
 			next.ServeHTTP(w, tr.request)
 		})
@@ -227,16 +227,16 @@ func (s *Server) filter() mux.MiddlewareFunc {
 //   https://127.0.0.1:8000
 //   Legacy: http://127.0.0.1:8000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
-	if s.err != nil {
-		return nil, s.err
+	if err := s.listenAndEndpoint(); err != nil {
+		return nil, err
 	}
 	return s.endpoint, nil
 }
 
 // Start start the HTTP server.
 func (s *Server) Start(ctx context.Context) error {
-	if s.err != nil {
-		return s.err
+	if err := s.listenAndEndpoint(); err != nil {
+		return err
 	}
 	s.BaseContext = func(net.Listener) context.Context {
 		return ctx
@@ -264,15 +264,17 @@ func (s *Server) listenAndEndpoint() error {
 	if s.lis == nil {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
+			s.err = err
+			return err
+		}
+		addr, err := host.Extract(s.address, lis)
+		if err != nil {
+			_ = s.lis.Close()
+			s.err = err
 			return err
 		}
 		s.lis = lis
+		s.endpoint = endpoint.NewEndpoint(endpoint.Scheme("http", s.tlsConf != nil), addr)
 	}
-	addr, err := host.Extract(s.address, s.lis)
-	if err != nil {
-		_ = s.lis.Close()
-		return err
-	}
-	s.endpoint = endpoint.NewEndpoint(endpoint.Scheme("http", s.tlsConf != nil), addr)
-	return nil
+	return s.err
 }
