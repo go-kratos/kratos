@@ -114,20 +114,37 @@ func TestCause(t *testing.T) {
 }
 
 func TestOther(t *testing.T) {
+	err := Errorf(10001, "test code 10001", "message")
+	// Code
 	if !reflect.DeepEqual(Code(nil), 200) {
 		t.Errorf("Code(nil) = %v, want %v", Code(nil), 200)
 	}
 	if !reflect.DeepEqual(Code(errors.New("test")), UnknownCode) {
 		t.Errorf(`Code(errors.New("test")) = %v, want %v`, Code(nil), 200)
 	}
-	if !reflect.DeepEqual(Reason(errors.New("test")), UnknownReason) {
-		t.Errorf(`Reason(errors.New("test")) = %v, want %v`, Reason(nil), UnknownReason)
-	}
-	err := Errorf(10001, "test code 10001", "message")
 	if !reflect.DeepEqual(Code(err), 10001) {
 		t.Errorf(`Code(err) = %v, want %v`, Code(err), 10001)
 	}
+	// Reason
+	if !reflect.DeepEqual(Reason(nil), UnknownReason) {
+		t.Errorf(`Reason(nil) = %v, want %v`, Reason(nil), UnknownReason)
+	}
+	if !reflect.DeepEqual(Reason(errors.New("test")), UnknownReason) {
+		t.Errorf(`Reason(errors.New("test")) = %v, want %v`, Reason(nil), UnknownReason)
+	}
 	if !reflect.DeepEqual(Reason(err), "test code 10001") {
 		t.Errorf(`Reason(err) = %v, want %v`, Reason(err), "test code 10001")
+	}
+	// Clone
+	err400 := Newf(http.StatusBadRequest, "BAD_REQUEST", "param invalid")
+	err400.Metadata = map[string]string{
+		"key1": "val1",
+		"key2": "val2",
+	}
+	if cerr := Clone(err400); cerr == nil || cerr.Error() != err400.Error() {
+		t.Errorf("Clone(err) = %v, want %v", Clone(err400), err400)
+	}
+	if cerr := Clone(nil); cerr != nil {
+		t.Errorf("Clone(nil) = %v, want %v", Clone(err400), err400)
 	}
 }
