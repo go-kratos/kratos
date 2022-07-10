@@ -293,7 +293,6 @@ func (s *Server) listenAndEndpoint() error {
 	if s.endpoint == nil {
 		addr, err := host.Extract(s.address, s.lis)
 		if err != nil {
-			_ = s.lis.Close()
 			s.err = err
 			return err
 		}
