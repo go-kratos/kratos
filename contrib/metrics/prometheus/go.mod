@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/go-kratos/kratos/v2 v2.3.1
 	github.com/prometheus/client_golang v1.12.2
+	github.com/prometheus/common v0.32.1
 )
 
 replace github.com/go-kratos/kratos/v2 => ../../../
