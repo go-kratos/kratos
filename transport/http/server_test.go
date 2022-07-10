@@ -19,20 +19,53 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/host"
 )
 
+var (
+	h = func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
+	}
+)
+
 type testKey struct{}
 
 type testData struct {
 	Path string `json:"path"`
 }
 
-func TestServer(t *testing.T) {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
+func TestServeHTTP(t *testing.T) {
+	ln, err := net.Listen("tcp", ":0")
+	if err != nil {
+		t.Fatal(err)
 	}
+	mux := NewServer(Listener(ln))
+	mux.Route("/errors").GET("/cause", func(ctx Context) error {
+		return errors.BadRequest("xxx", "zzz").
+			WithMetadata(map[string]string{"foo": "bar"}).
+			WithCause(fmt.Errorf("error cause"))
+	})
+	if err = mux.WalkRoute(func(r RouteInfo) error {
+		t.Logf("WalkRoute: %+v", r)
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	srv := http.Server{Handler: mux}
+	go func() {
+		if err := srv.Serve(ln); err != nil {
+			if errors.Is(err, http.ErrServerClosed) {
+				return
+			}
+			t.Fatal(err)
+		}
+	}()
+	time.Sleep(time.Second)
+	srv.Shutdown(context.Background())
+}
+
+func TestServer(t *testing.T) {
 	ctx := context.Background()
 	srv := NewServer()
-	srv.HandleFunc("/index", fn)
-	srv.HandleFunc("/index/{id:[0-9]+}", fn)
+	srv.HandleFunc("/index", h)
+	srv.HandleFunc("/index/{id:[0-9]+}", h)
 	srv.HandleHeader("content-type", "application/grpc-web+json", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	})

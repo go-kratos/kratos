@@ -199,14 +199,14 @@ func (s *Server) listenAndEndpoint() error {
 			s.err = err
 			return err
 		}
-		addr, err := host.Extract(s.address, lis)
-		if err != nil {
-			_ = s.lis.Close()
-			s.err = err
-			return err
-		}
 		s.lis = lis
-		s.endpoint = endpoint.NewEndpoint(endpoint.Scheme("grpc", s.tlsConf != nil), addr)
 	}
+	addr, err := host.Extract(s.address, s.lis)
+	if err != nil {
+		_ = s.lis.Close()
+		s.err = err
+		return err
+	}
+	s.endpoint = endpoint.NewEndpoint(endpoint.Scheme("grpc", s.tlsConf != nil), addr)
 	return s.err
 }
