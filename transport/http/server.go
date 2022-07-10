@@ -153,7 +153,6 @@ func NewServer(opts ...ServerOption) *Server {
 		Handler:   FilterChain(srv.filters...)(srv.router),
 		TLSConfig: srv.tlsConf,
 	}
-	srv.err = srv.listenAndEndpoint()
 	return srv
 }
 
