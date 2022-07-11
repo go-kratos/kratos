@@ -157,6 +157,26 @@ func NewServer(opts ...ServerOption) *Server {
 	return srv
 }
 
+// WalkRoute walks the router and all its sub-routers, calling walkFn for each route in the tree.
+func (s *Server) WalkRoute(fn WalkRouteFunc) error {
+	return s.router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+		methods, err := route.GetMethods()
+		if err != nil {
+			return nil // ignore no methods
+		}
+		path, err := route.GetPathTemplate()
+		if err != nil {
+			return err
+		}
+		for _, method := range methods {
+			if err := fn(RouteInfo{Method: method, Path: path}); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
 // Route registers an HTTP router.
 func (s *Server) Route(prefix string, filters ...FilterFunc) *Router {
 	return newRouter(prefix, s, filters...)
@@ -268,13 +288,14 @@ func (s *Server) listenAndEndpoint() error {
 			s.err = err
 			return err
 		}
-		addr, err := host.Extract(s.address, lis)
+		s.lis = lis
+	}
+	if s.endpoint == nil {
+		addr, err := host.Extract(s.address, s.lis)
 		if err != nil {
-			_ = s.lis.Close()
 			s.err = err
 			return err
 		}
-		s.lis = lis
 		s.endpoint = endpoint.NewEndpoint(endpoint.Scheme("http", s.tlsConf != nil), addr)
 	}
 	return s.err

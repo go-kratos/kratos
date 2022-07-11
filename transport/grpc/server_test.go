@@ -289,10 +289,16 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 }
 
 func TestListener(t *testing.T) {
-	lis := &net.TCPListener{}
+	lis, err := net.Listen("tcp", ":0")
+	if err != nil {
+		t.Fatal(err)
+	}
 	s := &Server{}
 	Listener(lis)(s)
 	if !reflect.DeepEqual(lis, s.lis) {
 		t.Errorf("expect %v, got %v", lis, s.lis)
+	}
+	if e, err := s.Endpoint(); err != nil || e == nil {
+		t.Errorf("expect not empty")
 	}
 }
