@@ -48,6 +48,7 @@ func TestServeHTTP(t *testing.T) {
 		t.Fatal(err)
 	}
 	mux := NewServer(Listener(ln))
+	mux.HandleFunc("/index", h)
 	mux.Route("/errors").GET("/cause", func(ctx Context) error {
 		return errors.BadRequest("xxx", "zzz").
 			WithMetadata(map[string]string{"foo": "bar"}).
