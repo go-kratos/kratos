@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/contrib/config/polaris/v2
 go 1.16
 
 require (
-	github.com/go-kratos/kratos/v2 v2.3.1
+	github.com/go-kratos/kratos/v2 v2.4.0
 	github.com/polarismesh/polaris-go v1.1.0
 )
 
@@ -19,3 +19,5 @@ require (
 	google.golang.org/genproto v0.0.0-20220628213854-d9e0b6570c03 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/go-kratos/kratos/v2 => ../../../
