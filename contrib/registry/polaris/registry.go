@@ -3,9 +3,8 @@ package polaris
 import (
 	"context"
 	"fmt"
-	"net"
+	"github.com/go-kratos/kratos/v2/internal/host"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
@@ -169,13 +168,7 @@ func (r *Registry) Register(_ context.Context, serviceInstance *registry.Service
 		}
 
 		// get host and port
-		host, port, err := net.SplitHostPort(u.Host)
-		if err != nil {
-			return err
-		}
-
-		// port to int
-		portNum, err := strconv.Atoi(port)
+		h, port, err := host.ExtractHostPort(u.Host)
 		if err != nil {
 			return err
 		}
@@ -202,8 +195,8 @@ func (r *Registry) Register(_ context.Context, serviceInstance *registry.Service
 					Service:      serviceInstance.Name + u.Scheme,
 					ServiceToken: r.opt.ServiceToken,
 					Namespace:    r.opt.Namespace,
-					Host:         host,
-					Port:         portNum,
+					Host:         h,
+					Port:         int(port),
 					Protocol:     r.opt.Protocol,
 					Weight:       &r.opt.Weight,
 					Priority:     &r.opt.Priority,
@@ -234,8 +227,8 @@ func (r *Registry) Register(_ context.Context, serviceInstance *registry.Service
 						InstanceHeartbeatRequest: model.InstanceHeartbeatRequest{
 							Service:      serviceInstance.Name + u.Scheme,
 							Namespace:    r.opt.Namespace,
-							Host:         host,
-							Port:         portNum,
+							Host:         h,
+							Port:         int(port),
 							ServiceToken: r.opt.ServiceToken,
 							InstanceID:   instanceID,
 							Timeout:      &r.opt.Timeout,
@@ -268,16 +261,11 @@ func (r *Registry) Deregister(_ context.Context, serviceInstance *registry.Servi
 		}
 
 		// get host and port
-		host, port, err := net.SplitHostPort(u.Host)
+		h, port, err := host.ExtractHostPort(u.Host)
 		if err != nil {
 			return err
 		}
 
-		// port to int
-		portNum, err := strconv.Atoi(port)
-		if err != nil {
-			return err
-		}
 		// Deregister
 		err = r.provider.Deregister(
 			&api.InstanceDeRegisterRequest{
@@ -286,8 +274,8 @@ func (r *Registry) Deregister(_ context.Context, serviceInstance *registry.Servi
 					ServiceToken: r.opt.ServiceToken,
 					Namespace:    r.opt.Namespace,
 					InstanceID:   split[i],
-					Host:         host,
-					Port:         portNum,
+					Host:         h,
+					Port:         int(port),
 					Timeout:      &r.opt.Timeout,
 					RetryCount:   &r.opt.RetryCount,
 				},

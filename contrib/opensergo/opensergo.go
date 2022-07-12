@@ -2,11 +2,10 @@ package opensergo
 
 import (
 	"encoding/json"
+	"github.com/go-kratos/kratos/v2/internal/host"
 	"io/ioutil"
-	"net"
 	"net/url"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/go-kratos/kratos/v2"
@@ -93,18 +92,14 @@ func (s *OpenSergo) ReportMetadata(ctx context.Context, app kratos.AppInfo) erro
 		if err != nil {
 			return err
 		}
-		host, port, err := net.SplitHostPort(u.Host)
-		if err != nil {
-			return err
-		}
-		portValue, err := strconv.Atoi(port)
+		h, port, err := host.ExtractHostPort(u.Host)
 		if err != nil {
 			return err
 		}
 		serviceMetadata.Protocols = append(serviceMetadata.Protocols, u.Scheme)
 		serviceMetadata.ListeningAddresses = append(serviceMetadata.ListeningAddresses, &v1.SocketAddress{
-			Address:   host,
-			PortValue: uint32(portValue),
+			Address:   h,
+			PortValue: uint32(port),
 		})
 	}
 	_, err = s.mdClient.ReportMetadata(ctx, &v1.ReportMetadataRequest{

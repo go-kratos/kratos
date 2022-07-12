@@ -3,13 +3,11 @@ package nacos
 import (
 	"context"
 	"fmt"
-	"net"
-	"net/url"
-	"strconv"
-
+	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/nacos-group/nacos-sdk-go/clients/naming_client"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
+	"net/url"
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -89,11 +87,7 @@ func (r *Registry) Register(_ context.Context, si *registry.ServiceInstance) err
 		if err != nil {
 			return err
 		}
-		host, port, err := net.SplitHostPort(u.Host)
-		if err != nil {
-			return err
-		}
-		p, err := strconv.Atoi(port)
+		h, p, err := host.ExtractHostPort(u.Host)
 		if err != nil {
 			return err
 		}
@@ -112,8 +106,8 @@ func (r *Registry) Register(_ context.Context, si *registry.ServiceInstance) err
 			rmd["version"] = si.Version
 		}
 		_, e := r.cli.RegisterInstance(vo.RegisterInstanceParam{
-			Ip:          host,
-			Port:        uint64(p),
+			Ip:          h,
+			Port:        p,
 			ServiceName: si.Name + "." + u.Scheme,
 			Weight:      r.opts.weight,
 			Enable:      true,
@@ -137,17 +131,14 @@ func (r *Registry) Deregister(_ context.Context, service *registry.ServiceInstan
 		if err != nil {
 			return err
 		}
-		host, port, err := net.SplitHostPort(u.Host)
+		h, p, err := host.ExtractHostPort(u.Host)
 		if err != nil {
 			return err
 		}
-		p, err := strconv.Atoi(port)
-		if err != nil {
-			return err
-		}
+
 		if _, err = r.cli.DeregisterInstance(vo.DeregisterInstanceParam{
-			Ip:          host,
-			Port:        uint64(p),
+			Ip:          h,
+			Port:        p,
 			ServiceName: service.Name + "." + u.Scheme,
 			GroupName:   r.opts.group,
 			Cluster:     r.opts.cluster,
