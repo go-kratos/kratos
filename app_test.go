@@ -114,7 +114,7 @@ func TestApp_Endpoint(t *testing.T) {
 }
 
 func TestApp_buildInstance(t *testing.T) {
-	target := struct {
+	want := struct {
 		id        string
 		name      string
 		version   string
@@ -131,7 +131,7 @@ func TestApp_buildInstance(t *testing.T) {
 		endpoints: []string{"https://go-kratos.dev", "localhost"},
 	}
 	var endpoints []*url.URL
-	for _, urlStr := range target.endpoints {
+	for _, urlStr := range want.endpoints {
 		if endpoint, err := url.Parse(urlStr); err != nil {
 			t.Errorf("invalid endpoint:%v", urlStr)
 		} else {
@@ -139,80 +139,131 @@ func TestApp_buildInstance(t *testing.T) {
 		}
 	}
 	app := New(
-		ID(target.id),
-		Name(target.name),
-		Version(target.version),
-		Metadata(target.metadata),
+		ID(want.id),
+		Name(want.name),
+		Version(want.version),
+		Metadata(want.metadata),
 		Endpoint(endpoints...),
 	)
-	if instance, err := app.buildInstance(); err != nil {
-		t.Error("build instance failed")
+	if got, err := app.buildInstance(); err != nil {
+		t.Error("build got failed")
 	} else {
-		if instance.ID != target.id {
-			t.Errorf("ID() = %v, want %v", instance.ID, target.id)
+		if got.ID != want.id {
+			t.Errorf("ID() = %v, want %v", got.ID, want.id)
 		}
-		if instance.Name != target.name {
-			t.Errorf("Name() = %v, want %v", instance.Name, target.name)
+		if got.Name != want.name {
+			t.Errorf("Name() = %v, want %v", got.Name, want.name)
 		}
-		if instance.Version != target.version {
-			t.Errorf("Version() = %v, want %v", instance.Version, target.version)
+		if got.Version != want.version {
+			t.Errorf("Version() = %v, want %v", got.Version, want.version)
 		}
-		if !reflect.DeepEqual(instance.Endpoints, target.endpoints) {
-			t.Errorf("Endpoint() = %v, want %v", instance.Endpoints, target.endpoints)
+		if !reflect.DeepEqual(got.Endpoints, want.endpoints) {
+			t.Errorf("Endpoint() = %v, want %v", got.Endpoints, want.endpoints)
 		}
-		if !reflect.DeepEqual(instance.Metadata, target.metadata) {
-			t.Errorf("Metadata() = %v, want %v", instance.Metadata, target.metadata)
+		if !reflect.DeepEqual(got.Metadata, want.metadata) {
+			t.Errorf("Metadata() = %v, want %v", got.Metadata, want.metadata)
 		}
 	}
 }
 
-func TestApp_NewContext(t *testing.T) {
-	app := New(
-		ID("testId"),
-	)
-	NewContext(context.Background(), app)
-}
-
-func TestApp_FromContext(t *testing.T) {
-	target := struct {
-		id        string
-		version   string
-		name      string
-		metadata  map[string]string
-		endpoints []string
-	}{
-		id:        "1",
-		name:      "kratos-v1",
-		metadata:  map[string]string{},
-		version:   "v1",
-		endpoints: []string{"https://go-kratos.dev", "localhost"},
+func TestApp_Context(t *testing.T) {
+	type fields struct {
+		id       string
+		version  string
+		name     string
+		instance *registry.ServiceInstance
+		metadata map[string]string
+		want     struct {
+			id       string
+			version  string
+			name     string
+			endpoint []string
+			metadata map[string]string
+		}
 	}
-	a := &App{
-		opts:     options{id: target.id, name: target.name, metadata: target.metadata, version: target.version},
-		ctx:      context.Background(),
-		cancel:   nil,
-		instance: &registry.ServiceInstance{Endpoints: target.endpoints},
+	tests := []fields{
+		{
+			id:       "1",
+			name:     "kratos-v1",
+			instance: &registry.ServiceInstance{Endpoints: []string{"https://go-kratos.dev", "localhost"}},
+			metadata: map[string]string{},
+			version:  "v1",
+			want: struct {
+				id       string
+				version  string
+				name     string
+				endpoint []string
+				metadata map[string]string
+			}{
+				id: "1", version: "v1", name: "kratos-v1", endpoint: []string{"https://go-kratos.dev", "localhost"},
+				metadata: map[string]string{},
+			},
+		},
+		{
+			id:       "2",
+			name:     "kratos-v2",
+			instance: &registry.ServiceInstance{Endpoints: []string{"test"}},
+			metadata: map[string]string{"kratos": "https://github.com/go-kratos/kratos"},
+			version:  "v2",
+			want: struct {
+				id       string
+				version  string
+				name     string
+				endpoint []string
+				metadata map[string]string
+			}{
+				id: "2", version: "v2", name: "kratos-v2", endpoint: []string{"test"},
+				metadata: map[string]string{"kratos": "https://github.com/go-kratos/kratos"},
+			},
+		},
+		{
+			id:       "3",
+			name:     "kratos-v3",
+			instance: nil,
+			metadata: make(map[string]string),
+			version:  "v3",
+			want: struct {
+				id       string
+				version  string
+				name     string
+				endpoint []string
+				metadata map[string]string
+			}{
+				id: "3", version: "v3", name: "kratos-v3", endpoint: nil,
+				metadata: map[string]string{},
+			},
+		},
 	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := &App{
+				opts:     options{id: tt.id, name: tt.name, metadata: tt.metadata, version: tt.version},
+				ctx:      context.Background(),
+				cancel:   nil,
+				instance: tt.instance,
+			}
 
-	ctx := NewContext(context.Background(), a)
+			ctx := NewContext(context.Background(), a)
 
-	if got, ok := FromContext(ctx); ok {
-		if got.ID() != target.id {
-			t.Errorf("ID() = %v, want %v", got.ID(), target.id)
-		}
-		if got.Name() != target.name {
-			t.Errorf("Name() = %v, want %v", got.Name(), target.name)
-		}
-		if got.Version() != target.version {
-			t.Errorf("Version() = %v, want %v", got.Version(), target.version)
-		}
-		if !reflect.DeepEqual(got.Endpoint(), target.endpoints) {
-			t.Errorf("Endpoint() = %v, want %v", got.Endpoint(), target.endpoints)
-		}
-		if !reflect.DeepEqual(got.Metadata(), target.metadata) {
-			t.Errorf("Metadata() = %v, want %v", got.Metadata(), target.metadata)
-		}
-	} else {
-		t.Errorf("ok() = %v, want %v", ok, true)
+			if got, ok := FromContext(ctx); ok {
+				if got.ID() != tt.want.id {
+					t.Errorf("ID() = %v, want %v", got.ID(), tt.want.id)
+				}
+				if got.Name() != tt.want.name {
+					t.Errorf("Name() = %v, want %v", got.Name(), tt.want.name)
+				}
+				if got.Version() != tt.want.version {
+					t.Errorf("Version() = %v, want %v", got.Version(), tt.want.version)
+				}
+				if !reflect.DeepEqual(got.Endpoint(), tt.want.endpoint) {
+					t.Errorf("Endpoint() = %v, want %v", got.Endpoint(), tt.want.endpoint)
+				}
+				if !reflect.DeepEqual(got.Metadata(), tt.want.metadata) {
+					t.Errorf("Metadata() = %v, want %v", got.Metadata(), tt.want.metadata)
+				}
+			} else {
+				t.Errorf("ok() = %v, want %v", ok, true)
+			}
+		})
 	}
 }
