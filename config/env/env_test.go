@@ -417,3 +417,13 @@ func Test_matchPrefix(t *testing.T) {
 		})
 	}
 }
+
+func Test_env_watch(t *testing.T) {
+	prefixs := []string{"BAR", "FOO"}
+	source := NewSource(prefixs...)
+	w, err := source.Watch()
+	if err != nil {
+		t.Errorf("expect no err, got %v", err)
+	}
+	_ = w.Stop()
+}
