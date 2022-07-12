@@ -143,3 +143,12 @@ func TestRegistrarTimeout(t *testing.T) {
 		t.Fatal("o.registrarTimeout is not equal to v")
 	}
 }
+
+func TestStopTimeout(t *testing.T) {
+	o := &options{}
+	v := time.Duration(123)
+	StopTimeout(v)(o)
+	if !reflect.DeepEqual(v, o.stopTimeout) {
+		t.Fatal("o.stopTimeout is not equal to v")
+	}
+}

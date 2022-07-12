@@ -156,8 +156,6 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 	srv.Server = grpc.NewServer(grpcOpts...)
 	srv.metadata = apimd.NewServer(srv.Server)
-	// listen and endpoint
-	srv.err = srv.listenAndEndpoint()
 	// internal register
 	grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
 	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
@@ -169,7 +167,7 @@ func NewServer(opts ...ServerOption) *Server {
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
-	if s.err != nil {
+	if err := s.listenAndEndpoint(); err != nil {
 		return nil, s.err
 	}
 	return s.endpoint, nil
@@ -177,7 +175,7 @@ func (s *Server) Endpoint() (*url.URL, error) {
 
 // Start start the gRPC server.
 func (s *Server) Start(ctx context.Context) error {
-	if s.err != nil {
+	if err := s.listenAndEndpoint(); err != nil {
 		return s.err
 	}
 	s.baseCtx = ctx
@@ -198,15 +196,18 @@ func (s *Server) listenAndEndpoint() error {
 	if s.lis == nil {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
+			s.err = err
 			return err
 		}
 		s.lis = lis
 	}
-	addr, err := host.Extract(s.address, s.lis)
-	if err != nil {
-		_ = s.lis.Close()
-		return err
+	if s.endpoint == nil {
+		addr, err := host.Extract(s.address, s.lis)
+		if err != nil {
+			s.err = err
+			return err
+		}
+		s.endpoint = endpoint.NewEndpoint(endpoint.Scheme("grpc", s.tlsConf != nil), addr)
 	}
-	s.endpoint = endpoint.NewEndpoint(endpoint.Scheme("grpc", s.tlsConf != nil), addr)
-	return nil
+	return s.err
 }
