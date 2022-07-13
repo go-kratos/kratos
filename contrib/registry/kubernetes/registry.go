@@ -1,4 +1,4 @@
-// The package registry simply implements the Kubernetes-based Registry
+// Package kuberegistry registry simply implements the Kubernetes-based Registry
 package kuberegistry
 
 import (
@@ -78,7 +78,7 @@ const (
 	AnnotationsKeyProtocolMap = "kratos-service-protocols"
 )
 
-// The registry simply implements service discovery based on Kubernetes
+// The Registry simply implements service discovery based on Kubernetes
 // It has not been verified in the production environment and is currently for reference only
 type Registry struct {
 	clientSet       *kubernetes.Clientset
@@ -156,7 +156,7 @@ func (s *Registry) Deregister(ctx context.Context, service *registry.ServiceInst
 	})
 }
 
-// Service return the service instances in memory according to the service name.
+// GetService return the service instances in memory according to the service name.
 func (s *Registry) GetService(ctx context.Context, name string) ([]*registry.ServiceInstance, error) {
 	pods, err := s.podLister.List(labels.SelectorFromSet(map[string]string{
 		LabelsKeyServiceName: name,
@@ -258,7 +258,7 @@ func GetNamespace() string {
 	return currentNamespace
 }
 
-// GetNamespace is used to get the name of the Pod where the current container is located
+// GetPodName is used to get the name of the Pod where the current container is located
 func GetPodName() string {
 	return os.Getenv("HOSTNAME")
 }

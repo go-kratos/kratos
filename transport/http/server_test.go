@@ -19,6 +19,10 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/host"
 )
 
+var h = func(w http.ResponseWriter, r *http.Request) {
+	_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
+}
+
 type testKey struct{}
 
 type testData struct {
@@ -38,15 +42,48 @@ func newHandleFuncWrapper(fn http.HandlerFunc) http.Handler {
 	return &handleFuncWrapper{fn: fn}
 }
 
-func TestServer(t *testing.T) {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
+func TestServeHTTP(t *testing.T) {
+	ln, err := net.Listen("tcp", ":0")
+	if err != nil {
+		t.Fatal(err)
 	}
+	mux := NewServer(Listener(ln))
+	mux.HandleFunc("/index", h)
+	mux.Route("/errors").GET("/cause", func(ctx Context) error {
+		return errors.BadRequest("xxx", "zzz").
+			WithMetadata(map[string]string{"foo": "bar"}).
+			WithCause(fmt.Errorf("error cause"))
+	})
+	if err = mux.WalkRoute(func(r RouteInfo) error {
+		t.Logf("WalkRoute: %+v", r)
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if e, err := mux.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
+		t.Fatal(e, err)
+	}
+	srv := http.Server{Handler: mux}
+	go func() {
+		if err := srv.Serve(ln); err != nil {
+			if errors.Is(err, http.ErrServerClosed) {
+				return
+			}
+			panic(err)
+		}
+	}()
+	time.Sleep(time.Second)
+	if err := srv.Shutdown(context.Background()); err != nil {
+		t.Log(err)
+	}
+}
+
+func TestServer(t *testing.T) {
 	ctx := context.Background()
 	srv := NewServer()
-	srv.Handle("/index", newHandleFuncWrapper(fn))
-	srv.HandleFunc("/index/{id:[0-9]+}", fn)
-	srv.HandlePrefix("/test/prefix", newHandleFuncWrapper(fn))
+	srv.Handle("/index", newHandleFuncWrapper(h))
+	srv.HandleFunc("/index/{id:[0-9]+}", h)
+	srv.HandlePrefix("/test/prefix", newHandleFuncWrapper(h))
 	srv.HandleHeader("content-type", "application/grpc-web+json", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	})
@@ -333,10 +370,16 @@ func TestStrictSlash(t *testing.T) {
 }
 
 func TestListener(t *testing.T) {
-	lis := &net.TCPListener{}
+	lis, err := net.Listen("tcp", ":0")
+	if err != nil {
+		t.Fatal(err)
+	}
 	s := &Server{}
 	Listener(lis)(s)
 	if !reflect.DeepEqual(s.lis, lis) {
 		t.Errorf("expected %v got %v", lis, s.lis)
+	}
+	if e, err := s.Endpoint(); err != nil || e == nil {
+		t.Errorf("expected not empty")
 	}
 }
