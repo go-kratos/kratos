@@ -7,3 +7,5 @@ require (
 	github.com/segmentio/kafka-go v0.4.32
 	github.com/stretchr/testify v1.7.1
 )
+
+replace github.com/go-kratos/kratos/v2 => ../../../

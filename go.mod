@@ -3,6 +3,7 @@ module github.com/go-kratos/kratos/v2
 go 1.16
 
 require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/go-kratos/aegis v0.1.2
 	github.com/go-playground/form/v4 v4.2.0
@@ -10,7 +11,6 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/imdario/mergo v0.3.12
-	github.com/segmentio/kafka-go v0.4.32
 	github.com/stretchr/testify v1.7.1
 	go.opentelemetry.io/otel v1.7.0
 	go.opentelemetry.io/otel/sdk v1.7.0
