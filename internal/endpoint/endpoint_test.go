@@ -139,3 +139,87 @@ func TestParseEndpoint(t *testing.T) {
 		})
 	}
 }
+
+func TestIsSecure(t *testing.T) {
+	tests := []struct {
+		url  *url.URL
+		want bool
+	}{
+		{
+			url:  &url.URL{Scheme: "http", Host: "127.0.0.1"},
+			want: false,
+		},
+		{
+			url:  &url.URL{Scheme: "http", Host: "127.0.0.1", RawQuery: "isSecure=false"},
+			want: false,
+		},
+		{
+			url:  &url.URL{Scheme: "grpc", Host: "127.0.0.1", RawQuery: "isSecure=true"},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		if got := IsSecure(tt.url); got != tt.want {
+			t.Errorf("IsSecure() = %v, want %v", got, tt.want)
+		}
+	}
+}
+
+func TestLegacyURLToNew(t *testing.T) {
+	tests := []struct {
+		url  *url.URL
+		want *url.URL
+	}{
+		{
+			url:  &url.URL{Scheme: "http", Host: "www.google.com", RawQuery: "isSecure=true"},
+			want: &url.URL{Scheme: "https", Host: "www.google.com"},
+		},
+		{
+			url:  &url.URL{Scheme: "https", Host: "www.google.com", RawQuery: "isSecure=true"},
+			want: &url.URL{Scheme: "https", Host: "www.google.com", RawQuery: "isSecure=true"},
+		},
+		{
+			url:  &url.URL{Scheme: "http", Host: "go-kratos.dev", RawQuery: "isSecure=false"},
+			want: &url.URL{Scheme: "http", Host: "go-kratos.dev", RawQuery: "isSecure=false"},
+		},
+	}
+	for _, tt := range tests {
+		if got := legacyURLToNew(tt.url); !reflect.DeepEqual(got, tt.want) {
+			t.Errorf("legacyURLToNew() = %v, want %v", got, tt.want)
+		}
+	}
+}
+
+func TestSchema(t *testing.T) {
+	tests := []struct {
+		schema string
+		secure bool
+		want   string
+	}{
+		{
+			schema: "http",
+			secure: true,
+			want:   "https",
+		},
+		{
+			schema: "http",
+			secure: false,
+			want:   "http",
+		},
+		{
+			schema: "grpc",
+			secure: true,
+			want:   "grpcs",
+		},
+		{
+			schema: "grpc",
+			secure: false,
+			want:   "grpc",
+		},
+	}
+	for _, tt := range tests {
+		if got := Scheme(tt.schema, tt.secure); got != tt.want {
+			t.Errorf("Schema() = %v, want %v", got, tt.want)
+		}
+	}
+}
