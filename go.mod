@@ -10,6 +10,8 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/imdario/mergo v0.3.12
+	github.com/segmentio/kafka-go v0.4.32
+	github.com/stretchr/testify v1.7.1
 	go.opentelemetry.io/otel v1.7.0
 	go.opentelemetry.io/otel/sdk v1.7.0
 	go.opentelemetry.io/otel/trace v1.7.0
