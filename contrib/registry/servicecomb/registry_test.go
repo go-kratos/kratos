@@ -26,6 +26,7 @@ func (receiver *mockClient) WatchMicroService(microServiceID string, callback fu
 
 func (receiver *mockClient) FindMicroServiceInstances(consumerID,
 	appID, microServiceName, versionRule string, opts ...sc.CallOption,
+
 ) ([]*pb.MicroServiceInstance, error) {
 	if microServiceName == "KratosServicecomb" {
 		return []*pb.MicroServiceInstance{{}}, nil
