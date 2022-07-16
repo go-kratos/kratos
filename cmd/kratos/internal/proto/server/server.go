@@ -2,8 +2,6 @@ package server
 
 import (
 	"fmt"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"log"
 	"os"
 	"path"
@@ -11,6 +9,8 @@ import (
 
 	"github.com/emicklei/proto"
 	"github.com/spf13/cobra"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // CmdServer the service command.
