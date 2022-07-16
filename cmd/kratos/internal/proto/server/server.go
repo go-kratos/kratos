@@ -58,18 +58,19 @@ func run(cmd *cobra.Command, args []string) {
 			}
 			for _, e := range s.Elements {
 				r, ok := e.(*proto.RPC)
-				if ok {
-					cs.Methods = append(cs.Methods, &Method{
-						Service: s.Name, Name: r.Name, Request: r.RequestType,
-						Reply: r.ReturnsType, Type: getMethodType(r.StreamsRequest, r.StreamsReturns),
-					})
+				if !ok {
+					continue
 				}
+				cs.Methods = append(cs.Methods, &Method{
+					Service: s.Name, Name: ucFirst(r.Name), Request: r.RequestType,
+					Reply: r.ReturnsType, Type: getMethodType(r.StreamsRequest, r.StreamsReturns),
+				})
 			}
 			res = append(res, cs)
 		}),
 	)
 	if _, err := os.Stat(targetDir); os.IsNotExist(err) {
-		fmt.Printf("Target directory: %s does not exsits\n", targetDir)
+		fmt.Printf("Target directory: %s does not exsit\n", targetDir)
 		return
 	}
 	for _, s := range res {
@@ -100,4 +101,12 @@ func getMethodType(streamsRequest, streamsReturns bool) MethodType {
 		return returnsStreamsType
 	}
 	return unaryType
+}
+
+func ucFirst(str string) string {
+	if str == "" {
+		return ""
+	}
+
+	return strings.ToUpper(str[:1]) + str[1:]
 }

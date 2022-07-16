@@ -1,9 +1,11 @@
 package binding
 
 import (
+	"io"
 	"net/http"
 	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -30,7 +32,7 @@ func TestBindQuery(t *testing.T) {
 				target: &p1,
 			},
 			wantErr: false,
-			want:    TestBind{"kratos", "https://go-kratos.dev/"},
+			want:    &TestBind{"kratos", "https://go-kratos.dev/"},
 		},
 	}
 	for _, tt := range tests {
@@ -38,7 +40,7 @@ func TestBindQuery(t *testing.T) {
 			if err := BindQuery(tt.args.vars, tt.args.target); (err != nil) != tt.wantErr {
 				t.Errorf("BindQuery() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if reflect.DeepEqual(tt.args.target, tt.want) {
+			if !tt.wantErr && !reflect.DeepEqual(tt.args.target, tt.want) {
 				t.Errorf("BindQuery() target = %v, want %v", tt.args.target, tt.want)
 			}
 		})
@@ -73,11 +75,15 @@ func TestBindForm(t *testing.T) {
 		{
 			name: "error is nil",
 			args: args{
-				req:    &http.Request{Form: map[string][]string{"name": {"kratos"}, "url": {"https://go-kratos.dev/"}}},
+				req: &http.Request{
+					Method: "POST",
+					Header: http.Header{"Content-Type": {"application/x-www-form-urlencoded; param=value"}},
+					Body:   io.NopCloser(strings.NewReader("name=kratos&url=https://go-kratos.dev/")),
+				},
 				target: &p1,
 			},
 			wantErr: false,
-			want:    TestBind{"kratos", "https://go-kratos.dev/"},
+			want:    &TestBind{"kratos", "https://go-kratos.dev/"},
 		},
 	}
 	for _, tt := range tests {
@@ -86,8 +92,8 @@ func TestBindForm(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("BindForm() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if err != nil && reflect.DeepEqual(tt.args.target, tt.want) {
-				t.Errorf("BindQuery() target = %v, want %v", tt.args.target, tt.want)
+			if !tt.wantErr && !reflect.DeepEqual(tt.args.target, tt.want) {
+				t.Errorf("BindForm() target = %v, want %v", tt.args.target, tt.want)
 			}
 		})
 	}

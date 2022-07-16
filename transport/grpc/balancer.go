@@ -58,7 +58,7 @@ func (b *Builder) Build(info base.PickerBuildInfo) gBalancer.Picker {
 	for conn, info := range info.ReadySCs {
 		ins, _ := info.Address.Attributes.Value("rawServiceInstance").(*registry.ServiceInstance)
 		nodes = append(nodes, &grpcNode{
-			Node:    selector.NewNode(info.Address.Addr, ins),
+			Node:    selector.NewNode("grpc", info.Address.Addr, ins),
 			subConn: conn,
 		})
 	}

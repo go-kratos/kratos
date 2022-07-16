@@ -53,6 +53,10 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 	if err != nil {
 		return nil, nil, err
 	}
+	p, ok := FromPeerContext(ctx)
+	if ok {
+		p.Node = wn.Raw()
+	}
 	return wn.Raw(), done, nil
 }
 

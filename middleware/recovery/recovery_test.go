@@ -19,7 +19,7 @@ func TestOnce(t *testing.T) {
 	next := func(ctx context.Context, req interface{}) (interface{}, error) {
 		panic("panic reason")
 	}
-	_, e := Recovery(WithLogger(log.GetLogger()))(next)(context.Background(), "panic")
+	_, e := Recovery()(next)(context.Background(), "panic")
 	t.Logf("succ and reason is %v", e)
 }
 
@@ -34,4 +34,9 @@ func TestNotPanic(t *testing.T) {
 	if e != nil {
 		t.Errorf("e isn't nil")
 	}
+}
+
+// Deprecated: Remove this test with WithLogger method.
+func TestWithLogger(t *testing.T) {
+	_ = WithLogger(log.DefaultLogger)
 }

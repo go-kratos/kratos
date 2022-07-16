@@ -79,8 +79,8 @@ func TestLogger(t *testing.T) {
 	o := &options{}
 	v := xlog.NewStdLogger(log.Writer())
 	Logger(v)(o)
-	if !reflect.DeepEqual(xlog.NewHelper(v), o.logger) {
-		t.Fatalf("o.logger:%s is not equal to xlog.NewHelper(v):%s", o.logger, xlog.NewHelper(v))
+	if !reflect.DeepEqual(v, o.logger) {
+		t.Fatalf("o.logger:%v is not equal to xlog.NewHelper(v):%v", o.logger, xlog.NewHelper(v))
 	}
 }
 
@@ -141,5 +141,14 @@ func TestRegistrarTimeout(t *testing.T) {
 	RegistrarTimeout(v)(o)
 	if !reflect.DeepEqual(v, o.registrarTimeout) {
 		t.Fatal("o.registrarTimeout is not equal to v")
+	}
+}
+
+func TestStopTimeout(t *testing.T) {
+	o := &options{}
+	v := time.Duration(123)
+	StopTimeout(v)(o)
+	if !reflect.DeepEqual(v, o.stopTimeout) {
+		t.Fatal("o.stopTimeout is not equal to v")
 	}
 }

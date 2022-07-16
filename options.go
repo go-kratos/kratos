@@ -25,7 +25,7 @@ type options struct {
 	ctx  context.Context
 	sigs []os.Signal
 
-	logger           *log.Helper
+	logger           log.Logger
 	registrar        registry.Registrar
 	registrarTimeout time.Duration
 	stopTimeout      time.Duration
@@ -64,9 +64,7 @@ func Context(ctx context.Context) Option {
 
 // Logger with service logger.
 func Logger(logger log.Logger) Option {
-	return func(o *options) {
-		o.logger = log.NewHelper(logger)
-	}
+	return func(o *options) { o.logger = logger }
 }
 
 // Server with transport servers.

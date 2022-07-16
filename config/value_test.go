@@ -33,7 +33,7 @@ func Test_atomicValue_Bool(t *testing.T) {
 		}
 	}
 
-	vlist = []interface{}{uint16(1), "bbb", "-1"}
+	vlist = []interface{}{"bbb", "-1"}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
@@ -58,7 +58,7 @@ func Test_atomicValue_Int(t *testing.T) {
 		}
 	}
 
-	vlist = []interface{}{uint16(1), "bbb", "-x1", true}
+	vlist = []interface{}{"bbb", "-x1", true}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
@@ -83,7 +83,7 @@ func Test_atomicValue_Float(t *testing.T) {
 		}
 	}
 
-	vlist = []interface{}{float32(1123123), uint16(1), "bbb", "-x1"}
+	vlist = []interface{}{"bbb", "-x1"}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)

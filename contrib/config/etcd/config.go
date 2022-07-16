@@ -19,25 +19,25 @@ type options struct {
 	prefix bool
 }
 
-//  WithContext with registry context.
+// WithContext with registry context.
 func WithContext(ctx context.Context) Option {
-	return Option(func(o *options) {
+	return func(o *options) {
 		o.ctx = ctx
-	})
+	}
 }
 
 // WithPath is config path
 func WithPath(p string) Option {
-	return Option(func(o *options) {
+	return func(o *options) {
 		o.path = p
-	})
+	}
 }
 
 // WithPrefix is config prefix
 func WithPrefix(prefix bool) Option {
-	return Option(func(o *options) {
+	return func(o *options) {
 		o.prefix = prefix
-	})
+	}
 }
 
 type source struct {
@@ -77,7 +77,7 @@ func (s *source) Load() ([]*config.KeyValue, error) {
 	if err != nil {
 		return nil, err
 	}
-	kvs := make([]*config.KeyValue, 0)
+	kvs := make([]*config.KeyValue, 0, len(rsp.Kvs))
 	for _, item := range rsp.Kvs {
 		k := string(item.Key)
 		kvs = append(kvs, &config.KeyValue{

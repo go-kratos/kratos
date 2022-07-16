@@ -29,7 +29,7 @@ func newWatcher(ctx context.Context, key, name string, client *clientv3.Client) 
 		serviceName: name,
 	}
 	w.ctx, w.cancel = context.WithCancel(ctx)
-	w.watchChan = w.watcher.Watch(w.ctx, key, clientv3.WithPrefix(), clientv3.WithRev(0))
+	w.watchChan = w.watcher.Watch(w.ctx, key, clientv3.WithPrefix(), clientv3.WithRev(0), clientv3.WithKeysOnly())
 	err := w.watcher.RequestProgress(context.Background())
 	if err != nil {
 		return nil, err

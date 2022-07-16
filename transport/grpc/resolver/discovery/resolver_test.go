@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"google.golang.org/grpc/resolver"
 )
@@ -24,10 +23,16 @@ func (t *testClientConn) UpdateState(s resolver.State) error {
 
 type testWatch struct {
 	err error
+
+	count uint
 }
 
 func (m *testWatch) Next() ([]*registry.ServiceInstance, error) {
 	time.Sleep(time.Millisecond * 200)
+	if m.count > 1 {
+		return nil, nil
+	}
+	m.count++
 	ins := []*registry.ServiceInstance{
 		{
 			ID:        "mock_ID",
@@ -56,11 +61,11 @@ func TestWatch(t *testing.T) {
 	r := &discoveryResolver{
 		w:        &testWatch{},
 		cc:       &testClientConn{te: t},
-		log:      log.NewHelper(log.GetLogger()),
 		ctx:      ctx,
 		cancel:   cancel,
 		insecure: false,
 	}
+	r.ResolveNow(resolver.ResolveNowOptions{})
 	go func() {
 		time.Sleep(time.Second * 2)
 		r.Close()
@@ -75,7 +80,6 @@ func TestWatchError(t *testing.T) {
 	r := &discoveryResolver{
 		w:      &testWatch{err: errors.New("bad")},
 		cc:     &testClientConn{te: t},
-		log:    log.NewHelper(log.GetLogger()),
 		ctx:    ctx,
 		cancel: cancel,
 	}
@@ -93,7 +97,6 @@ func TestWatchContextCancel(t *testing.T) {
 	r := &discoveryResolver{
 		w:      &testWatch{err: context.Canceled},
 		cc:     &testClientConn{te: t},
-		log:    log.NewHelper(log.GetLogger()),
 		ctx:    ctx,
 		cancel: cancel,
 	}
@@ -106,7 +109,10 @@ func TestWatchContextCancel(t *testing.T) {
 }
 
 func TestParseAttributes(t *testing.T) {
-	a := parseAttributes(map[string]string{"a": "b"})
+	a := parseAttributes(map[string]string{
+		"a": "b",
+		"c": "d",
+	})
 	if !reflect.DeepEqual("b", a.Value("a").(string)) {
 		t.Errorf("expect b, got %v", a.Value("a"))
 	}

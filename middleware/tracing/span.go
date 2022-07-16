@@ -22,10 +22,12 @@ func setClientSpan(ctx context.Context, span trace.Span, m interface{}) {
 	var remote string
 	var operation string
 	var rpcKind string
-	if tr, ok := transport.FromClientContext(ctx); ok {
+	tr, ok := transport.FromClientContext(ctx)
+	if ok {
 		operation = tr.Operation()
 		rpcKind = tr.Kind().String()
-		if tr.Kind() == transport.KindHTTP {
+		switch tr.Kind() {
+		case transport.KindHTTP:
 			if ht, ok := tr.(http.Transporter); ok {
 				method := ht.Request().Method
 				route := ht.PathTemplate()
@@ -35,7 +37,7 @@ func setClientSpan(ctx context.Context, span trace.Span, m interface{}) {
 				attrs = append(attrs, semconv.HTTPTargetKey.String(path))
 				remote = ht.Request().Host
 			}
-		} else if tr.Kind() == transport.KindGRPC {
+		case transport.KindGRPC:
 			remote, _ = parseTarget(tr.Endpoint())
 		}
 	}
@@ -57,10 +59,12 @@ func setServerSpan(ctx context.Context, span trace.Span, m interface{}) {
 	var remote string
 	var operation string
 	var rpcKind string
-	if tr, ok := transport.FromServerContext(ctx); ok {
+	tr, ok := transport.FromServerContext(ctx)
+	if ok {
 		operation = tr.Operation()
 		rpcKind = tr.Kind().String()
-		if tr.Kind() == transport.KindHTTP {
+		switch tr.Kind() {
+		case transport.KindHTTP:
 			if ht, ok := tr.(http.Transporter); ok {
 				method := ht.Request().Method
 				route := ht.PathTemplate()
@@ -70,7 +74,7 @@ func setServerSpan(ctx context.Context, span trace.Span, m interface{}) {
 				attrs = append(attrs, semconv.HTTPTargetKey.String(path))
 				remote = ht.Request().RemoteAddr
 			}
-		} else if tr.Kind() == transport.KindGRPC {
+		case transport.KindGRPC:
 			if p, ok := peer.FromContext(ctx); ok {
 				remote = p.Addr.String()
 			}

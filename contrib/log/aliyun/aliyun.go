@@ -15,6 +15,7 @@ import (
 type Log interface {
 	klog.Logger
 	GetProducer() *producer.Producer
+	Close() error
 }
 
 type aliyunLog struct {
@@ -72,6 +73,10 @@ func WithAccessSecret(as string) Option {
 }
 
 type Option func(alc *options)
+
+func (a *aliyunLog) Close() error {
+	return a.producer.Close(5000)
+}
 
 func (a *aliyunLog) Log(level klog.Level, keyvals ...interface{}) error {
 	buf := level.String()

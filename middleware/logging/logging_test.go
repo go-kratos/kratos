@@ -97,3 +97,26 @@ func TestHTTP(t *testing.T) {
 		})
 	}
 }
+
+type (
+	dummy struct {
+		field string
+	}
+	dummyStringer struct {
+		field string
+	}
+)
+
+func (d *dummyStringer) String() string {
+	return "my value"
+}
+
+func Test_extractArgs(t *testing.T) {
+	if extractArgs(&dummyStringer{field: ""}) != "my value" {
+		t.Errorf(`The stringified dummyStringer structure must be equal to "my value", %v given`, extractArgs(&dummyStringer{field: ""}))
+	}
+
+	if extractArgs(&dummy{field: "value"}) != "&{field:value}" {
+		t.Errorf(`The stringified dummy structure must be equal to "&{field:value}", %v given`, extractArgs(&dummy{field: "value"}))
+	}
+}

@@ -18,11 +18,11 @@ type options struct {
 	path string
 }
 
-//  WithContext with registry context.
+// WithContext with registry context.
 func WithContext(ctx context.Context) Option {
-	return Option(func(o *options) {
+	return func(o *options) {
 		o.ctx = ctx
-	})
+	}
 }
 
 // WithPath is config path
@@ -71,6 +71,9 @@ func (s *source) Load() ([]*config.KeyValue, error) {
 	kvs := make([]*config.KeyValue, 0)
 	for _, item := range kv {
 		k := strings.TrimPrefix(item.Key, pathPrefix)
+		if k == "" {
+			continue
+		}
 		kvs = append(kvs, &config.KeyValue{
 			Key:    k,
 			Value:  item.Value,

@@ -90,6 +90,12 @@ func TestMetadata_Set(t *testing.T) {
 			args: args{key: "env", value: "pro"},
 			want: Metadata{"hello": "kratos", "env": "pro"},
 		},
+		{
+			name: "empty",
+			m:    Metadata{},
+			args: args{key: "", value: ""},
+			want: Metadata{},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -203,6 +209,25 @@ func TestAppendToClientContext(t *testing.T) {
 	}
 }
 
+// nolint directives: sa5012
+func TestAppendToClientContextThatPanics(t *testing.T) {
+	kvs := []string{"hello", "kratos", "env"}
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("append to client context singular kvs did not panic")
+		}
+	}()
+	ctx := NewClientContext(context.Background(), Metadata{})
+	ctx = AppendToClientContext(ctx, kvs...)
+	md, ok := FromClientContext(ctx)
+	if !ok {
+		t.Errorf("FromServerContext() = %v, want %v", ok, true)
+	}
+	if !reflect.DeepEqual(md, Metadata{}) {
+		t.Errorf("metadata = %v, want %v", md, Metadata{})
+	}
+}
+
 func TestMergeToClientContext(t *testing.T) {
 	type args struct {
 		md       Metadata
@@ -249,7 +274,14 @@ func TestMetadata_Range(t *testing.T) {
 		return true
 	})
 	if !reflect.DeepEqual(tmp, Metadata{"https://go-kratos.dev/": "https://go-kratos.dev/", "kratos": "kratos"}) {
-		t.Errorf("metadata = %v, want %v", tmp, Metadata{"kratos": "kratos"})
+		t.Errorf("metadata = %v, want %v", tmp, Metadata{"https://go-kratos.dev/": "https://go-kratos.dev/", "kratos": "kratos"})
+	}
+	tmp = Metadata{}
+	md.Range(func(k, v string) bool {
+		return false
+	})
+	if !reflect.DeepEqual(tmp, Metadata{}) {
+		t.Errorf("metadata = %v, want %v", tmp, Metadata{})
 	}
 }
 
