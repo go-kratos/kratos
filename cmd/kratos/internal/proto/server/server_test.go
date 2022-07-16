@@ -11,7 +11,6 @@ func Test_serviceName(t *testing.T) {
 		args args
 		want string
 	}{
-
 		{
 			name: "serviceName on Lower Camel Case words",
 			args: args{str: "helloWorld"},
