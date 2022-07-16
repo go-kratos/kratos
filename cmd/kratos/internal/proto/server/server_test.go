@@ -44,7 +44,7 @@ func Test_ucFirst(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ucFirst(tt.args.str); got != tt.want {
+			if got := serviceName(tt.args.str); got != tt.want {
 				t.Errorf("ucFirst() = %v, want %v", got, tt.want)
 			}
 		})
