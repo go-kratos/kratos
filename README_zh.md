@@ -38,18 +38,18 @@ Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关功能及
 * 工具链：包含大量工具链，比如 cache 代码生成，lint 工具等等；
 
 ## Features
-* [APIs](https://github.com/go-kratos/examples/helloworld/helloworld) ：协议通信以 HTTP/gRPC 为基础，通过 Protobuf 进行定义；
-* [Errors](https://github.com/go-kratos/examples/errors/api) ：通过 Protobuf 的 Enum 作为错误码定义，以及工具生成判定接口；
-* [Metadata](https://github.com/go-kratos/examples/metadata) ：在协议通信 HTTP/gRPC 中，通过 Middleware 规范化服务元信息传递；
-* [Config](https://github.com/go-kratos/examples/config) ：支持多数据源方式，进行配置合并铺平，通过 Atomic 方式支持动态配置；
-* [Logger](https://github.com/go-kratos/examples/log) ：标准日志接口，可方便集成三方 log 库，并可通过 fluentd 收集日志；
-* [Metrics](https://github.com/go-kratos/examples/metrics) ：统一指标接口，可以实现各种指标系统，默认集成 Prometheus；
-* [Tracing](https://github.com/go-kratos/examples/traces) ：遵循 OpenTelemetry 规范定义，以实现微服务链路追踪；
-* [Encoding](encoding)：支持 Accept 和 Content-Type 进行自动选择内容编码；
-* [Transport](transport/transport.go) ：通用的 [HTTP](https://github.com/go-kratos/examples/http/middlewares) /[gRPC](https://github.com/go-kratos/examples/middleware/main.go) 传输层，实现统一的 [Middleware](middleware) 插件支持；
-* [Registry](https://github.com/go-kratos/examples/registry) ：实现统一注册中心接口，可插件化对接各种注册中心；
-* [Validation](https://github.com/go-kratos/examples/validate): 通过Protobuf统一定义校验规则，并同时适用于HTTP/gRPC服务.
-* [SwaggerAPI](https://github.com/go-kratos/swagger-api/blob/main/examples/helloworld/server/main.go): 通过集成第三方[Swagger插件](https://github.com/go-kratos/swagger-api) 能够自动生成Swagger API json并启动一个内置的Swagger UI服务.
+* [APIs](https://go-kratos.dev/docs/component/api) ：协议通信以 HTTP/gRPC 为基础，通过 Protobuf 进行定义；
+* [Errors](https://go-kratos.dev/docs/component/errors/) ：通过 Protobuf 的 Enum 作为错误码定义，以及工具生成判定接口；
+* [Metadata](https://go-kratos.dev/docs/component/metadata) ：在协议通信 HTTP/gRPC 中，通过 Middleware 规范化服务元信息传递；
+* [Config](https://go-kratos.dev/docs/component/config) ：支持多数据源方式，进行配置合并铺平，通过 Atomic 方式支持动态配置；
+* [Logger](https://go-kratos.dev/docs/component/log) ：标准日志接口，可方便集成三方 log 库，并可通过 fluentd 收集日志；
+* [Metrics](https://go-kratos.dev/docs/component/middleware/metrics) ：统一指标接口，可以实现各种指标系统，默认集成 Prometheus；
+* [Tracing](https://go-kratos.dev/docs/component/middleware/tracing) ：遵循 OpenTelemetry 规范定义，以实现微服务链路追踪；
+* [Encoding](https://go-kratos.dev/docs/component/encoding) ：支持 Accept 和 Content-Type 进行自动选择内容编码；
+* [Transport](https://go-kratos.dev/docs/component/transport/overview) ：通用的 [HTTP](https://go-kratos.dev/docs/component/transport/http) /[gRPC](https://go-kratos.dev/docs/component/transport/grpc) 传输层，实现统一的 [Middleware](https://go-kratos.dev/docs/component/middleware/overview) 插件支持；
+* [Registry](https://go-kratos.dev/docs/component/registry) ：实现统一注册中心接口，可插件化对接各种注册中心；
+* [Validation](https://go-kratos.dev/docs/component/middleware/validate): 通过Protobuf统一定义校验规则，并同时适用于HTTP/gRPC服务.
+* [SwaggerAPI](https://go-kratos.dev/docs/guide/openapi): 通过集成第三方[Swagger插件](https://github.com/go-kratos/swagger-api) 能够自动生成Swagger API json并启动一个内置的Swagger UI服务.
 
 ## Getting Started
 ### Required
