@@ -59,7 +59,7 @@ func New(eurekaUrls []string, opts ...Option) (*Registry, error) {
 	return r, nil
 }
 
-// 这里的Context是每个注册器独享的
+// Register 这里的Context是每个注册器独享的
 func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstance) error {
 	return r.api.Register(ctx, service.Name, r.Endpoints(service)...)
 }
@@ -86,7 +86,7 @@ func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*regis
 	return items, nil
 }
 
-// watch 是独立的ctx
+// Watch 是独立的ctx
 func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
 	return newWatch(ctx, r.api, serviceName)
 }
