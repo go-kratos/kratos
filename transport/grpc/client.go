@@ -165,7 +165,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	return grpc.DialContext(ctx, options.endpoint, grpcOpts...)
 }
 
-func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, filters []selector.Filter, retryStrategy *retry.Strategy) grpc.UnaryClientInterceptor {
+func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, filters []selector.Filter, rs *retry.Strategy) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		ctx = transport.NewClientContext(ctx, &Transport{
 			endpoint:  cc.Target(),
@@ -178,8 +178,8 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, f
 			ctx, cancel = context.WithTimeout(ctx, timeout)
 			defer cancel()
 		}
-		if retryStrategy == nil {
-			retryStrategy = retry.NewStrategy(0, retry.NewNoRetrier(), nil)
+		if rs == nil {
+			rs = retry.NewStrategy(0, retry.NewNoRetrier(), nil)
 		}
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			var err error
@@ -192,22 +192,22 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, f
 				}
 				ctx = grpcmd.AppendToOutgoingContext(ctx, keyvals...)
 			}
-			for i := 0; i <= retryStrategy.Attempts; i++ {
+			for i := 0; i <= rs.Attempts; i++ {
 				err = invoker(ctx, method, req, reply, cc, opts...)
 				md, _ := grpcmd.FromOutgoingContext(ctx)
 
-				if i >= retryStrategy.Attempts || err == nil {
+				if i >= rs.Attempts || err == nil {
 					break
 				}
 
-				if !retryStrategy.JudgeConditions(retry.Resp{MD: md, Code: int(cc.GetState())}) {
+				if !rs.JudgeConditions(retry.Resp{MD: md, Code: int(cc.GetState())}) {
 					break
 				}
 
 				select {
 				case <-ctx.Done():
 					return nil, ctx.Err()
-				case <-time.After(retryStrategy.Retrier.NextInterval(uint(i))):
+				case <-time.After(rs.Retrier.NextInterval(uint(i))):
 				}
 			}
 			return reply, err

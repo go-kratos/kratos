@@ -79,7 +79,12 @@ func EmptyMiddleware() middleware.Middleware {
 }
 
 func TestUnaryClientInterceptor(t *testing.T) {
-	f := unaryClientInterceptor([]middleware.Middleware{EmptyMiddleware()}, time.Duration(100), nil, &retry.Strategy{Attempts: 0, Retrier: retry.NewNoRetrier(), Conditions: nil})
+	f := unaryClientInterceptor(
+		[]middleware.Middleware{EmptyMiddleware()},
+		time.Duration(100),
+		nil,
+		&retry.Strategy{Attempts: 0, Retrier: retry.NewNoRetrier(), Conditions: nil},
+	)
 	req := &struct{}{}
 	resp := &struct{}{}
 

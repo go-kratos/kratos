@@ -9,13 +9,13 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
-	nethttp "net/http"
 	"net/http/httptest"
 	"reflect"
 	"strconv"
 	"testing"
 	"time"
+
+	nethttp "net/http"
 
 	kratosErrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -328,7 +328,7 @@ func TestClientRetry(t *testing.T) {
 		{"path": "/test-retry-count", "expected": 3},
 		{"path": "/test-error-doing-nothing", "expected": 2},
 	}
-	ts := httptest.NewServer(http.HandlerFunc(func(w nethttp.ResponseWriter, r *nethttp.Request) {
+	ts := httptest.NewServer(nethttp.HandlerFunc(func(w nethttp.ResponseWriter, r *nethttp.Request) {
 		resp, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			w.WriteHeader(nethttp.StatusBadRequest)
@@ -367,7 +367,7 @@ func TestClientRetry(t *testing.T) {
 		defer client.Close()
 		var resp map[string]int
 		path := ts.Listener.Addr().String() + testCase["path"].(string)
-		if err := client.Invoke(ctx, http.MethodGet, path, map[string]int{"count": 1}, &resp, EmptyCallOption{}); err != nil {
+		if err := client.Invoke(ctx, nethttp.MethodGet, path, map[string]int{"count": 1}, &resp, EmptyCallOption{}); err != nil {
 			t.Error(err)
 		}
 		attempt = 1
