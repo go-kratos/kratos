@@ -8,7 +8,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
 	nethttp "net/http"
+	"net/http/httptest"
 	"reflect"
 	"strconv"
 	"testing"
@@ -17,6 +20,7 @@ import (
 	kratosErrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v2/retry"
 )
 
 type mockRoundTripper struct{}
@@ -124,6 +128,16 @@ func TestWithErrorDecoder(t *testing.T) {
 	WithErrorDecoder(v)(o)
 	if o.errorDecoder == nil {
 		t.Errorf("expected encoder to be not nil")
+	}
+}
+
+func TestWithRetryStrategy(t *testing.T) {
+	o := &clientOptions{}
+	ov := &retry.Strategy{Attempts: 0, Retrier: retry.NewNoRetrier(), Conditions: nil}
+	v := retry.NewStrategy(0, retry.NewNoRetrier(), nil)
+	WithRetryStrategy(v)(o)
+	if !reflect.DeepEqual(o.retryStrategy, ov) {
+		t.Errorf("expected retryStrategy to be %v,got %v", ov, o.retryStrategy)
 	}
 }
 
@@ -304,5 +318,58 @@ func TestNewClient(t *testing.T) {
 	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{})
 	if err == nil {
 		t.Error("err should not be equal to nil")
+	}
+}
+
+func TestClientRetry(t *testing.T) {
+	attempt := 1
+	testCases := []map[string]interface{}{
+		{"path": "/test-normal-roundtrip", "expected": 2},
+		{"path": "/test-retry-count", "expected": 3},
+		{"path": "/test-error-doing-nothing", "expected": 2},
+	}
+	ts := httptest.NewServer(http.HandlerFunc(func(w nethttp.ResponseWriter, r *nethttp.Request) {
+		resp, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(nethttp.StatusBadRequest)
+			return
+		}
+		if _, err := w.Write(resp); err != nil {
+			w.WriteHeader(nethttp.StatusBadRequest)
+			return
+		}
+		switch r.URL.Path {
+		case "/test-normal-roundtrip":
+			attempt++
+			w.WriteHeader(nethttp.StatusOK)
+		case "/test-retry-count":
+			attempt++
+			if attempt == 3 {
+				w.WriteHeader(nethttp.StatusOK)
+			}
+			w.WriteHeader(nethttp.StatusInternalServerError)
+		case "/test-error-doing-nothing":
+			attempt++
+			w.WriteHeader(nethttp.StatusBadRequest)
+		}
+	}))
+	defer ts.Close()
+	for _, testCase := range testCases {
+		ctx := context.Background()
+		client, err := NewClient(ctx, WithRetryStrategy(retry.NewStrategy(
+			3,
+			retry.NewRetrier(retry.NewConstantBackoff(100*time.Millisecond, 1000*time.Millisecond)),
+			[]retry.Condition{retry.NewByCode(500, 504)},
+		)))
+		if err != nil {
+			t.Error(err)
+		}
+		defer client.Close()
+		var resp map[string]int
+		path := ts.Listener.Addr().String() + testCase["path"].(string)
+		if err := client.Invoke(ctx, http.MethodGet, path, map[string]int{"count": 1}, &resp, EmptyCallOption{}); err != nil {
+			t.Error(err)
+		}
+		attempt = 1
 	}
 }

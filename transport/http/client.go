@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v2/retry"
 	"github.com/go-kratos/kratos/v2/selector"
 	"github.com/go-kratos/kratos/v2/selector/wrr"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -34,19 +36,20 @@ type ClientOption func(*clientOptions)
 
 // Client is an HTTP transport client.
 type clientOptions struct {
-	ctx          context.Context
-	tlsConf      *tls.Config
-	timeout      time.Duration
-	endpoint     string
-	userAgent    string
-	encoder      EncodeRequestFunc
-	decoder      DecodeResponseFunc
-	errorDecoder DecodeErrorFunc
-	transport    http.RoundTripper
-	selector     selector.Selector
-	discovery    registry.Discovery
-	middleware   []middleware.Middleware
-	block        bool
+	ctx           context.Context
+	tlsConf       *tls.Config
+	timeout       time.Duration
+	endpoint      string
+	userAgent     string
+	encoder       EncodeRequestFunc
+	decoder       DecodeResponseFunc
+	errorDecoder  DecodeErrorFunc
+	transport     http.RoundTripper
+	selector      selector.Selector
+	discovery     registry.Discovery
+	middleware    []middleware.Middleware
+	block         bool
+	retryStrategy *retry.Strategy
 }
 
 // WithTransport with client transport.
@@ -133,6 +136,13 @@ func WithTLSConfig(c *tls.Config) ClientOption {
 	}
 }
 
+// WithRetryAttempts with retry attempts
+func WithRetryStrategy(rs *retry.Strategy) ClientOption {
+	return func(o *clientOptions) {
+		o.retryStrategy = rs
+	}
+}
+
 // Client is an HTTP client.
 type Client struct {
 	opts     clientOptions
@@ -145,13 +155,14 @@ type Client struct {
 // NewClient returns an HTTP client.
 func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	options := clientOptions{
-		ctx:          ctx,
-		timeout:      2000 * time.Millisecond,
-		encoder:      DefaultRequestEncoder,
-		decoder:      DefaultResponseDecoder,
-		errorDecoder: DefaultErrorDecoder,
-		transport:    http.DefaultTransport,
-		selector:     wrr.New(),
+		ctx:           ctx,
+		timeout:       2000 * time.Millisecond,
+		encoder:       DefaultRequestEncoder,
+		decoder:       DefaultResponseDecoder,
+		errorDecoder:  DefaultErrorDecoder,
+		transport:     http.DefaultTransport,
+		selector:      wrr.New(),
+		retryStrategy: retry.NewStrategy(0, retry.NewNoRetrier(), nil),
 	}
 	for _, o := range opts {
 		o(&options)
@@ -231,7 +242,46 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 
 func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo, opts ...CallOption) error {
 	h := func(ctx context.Context, in interface{}) (interface{}, error) {
-		res, err := client.do(req.WithContext(ctx))
+		var (
+			err     error
+			res     *http.Response
+			body    *bytes.Reader
+			reqData []byte
+		)
+		if req.Body != nil {
+			reqData, err = ioutil.ReadAll(req.Body)
+			if err != nil {
+				return nil, err
+			}
+			body = bytes.NewReader(reqData)
+			req.Body = ioutil.NopCloser(body)
+		}
+		defer func() {
+			if res != nil {
+				res.Body.Close()
+			}
+		}()
+		for i := 0; i <= client.opts.retryStrategy.Attempts; i++ {
+			res, err = client.do(req.WithContext(ctx))
+
+			if i >= client.opts.retryStrategy.Attempts || err == nil {
+				break
+			}
+
+			if (res != nil && !client.opts.retryStrategy.JudgeConditions(retry.Resp{MD: res.Header, Code: res.StatusCode})) {
+				break
+			}
+
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			case <-time.After(client.opts.retryStrategy.Retrier.NextInterval(uint(i))):
+			}
+			if body != nil {
+				_, _ = body.Seek(0, 0)
+			}
+		}
+
 		if res != nil {
 			cs := csAttempt{res: res}
 			for _, o := range opts {
@@ -241,7 +291,7 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 		if err != nil {
 			return nil, err
 		}
-		defer res.Body.Close()
+
 		if err := client.opts.decoder(ctx, res, reply); err != nil {
 			return nil, err
 		}

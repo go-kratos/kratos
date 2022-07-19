@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v2/retry"
 	"google.golang.org/grpc"
 )
 
@@ -78,7 +79,7 @@ func EmptyMiddleware() middleware.Middleware {
 }
 
 func TestUnaryClientInterceptor(t *testing.T) {
-	f := unaryClientInterceptor([]middleware.Middleware{EmptyMiddleware()}, time.Duration(100), nil)
+	f := unaryClientInterceptor([]middleware.Middleware{EmptyMiddleware()}, time.Duration(100), nil, &retry.Strategy{Attempts: 0, Retrier: retry.NewNoRetrier(), Conditions: nil})
 	req := &struct{}{}
 	resp := &struct{}{}
 
@@ -140,5 +141,14 @@ func TestDialConn(t *testing.T) {
 	)
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestWithRetryStrategy(t *testing.T) {
+	o := &clientOptions{}
+	v := retry.NewStrategy(0, retry.NewNoRetrier(), nil)
+	WithRetryStrategy(v)(o)
+	if !reflect.DeepEqual(v, o.retryStrategy) {
+		t.Errorf("expect %v but got %v", v, o.retryStrategy)
 	}
 }
