@@ -49,23 +49,23 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	addrs := make([]resolver.Address, 0)
 	endpoints := make(map[string]struct{})
 	for _, in := range ins {
-		endpoint, err := endpoint.ParseEndpoint(in.Endpoints, endpoint.Scheme("grpc", !r.insecure))
+		ept, err := endpoint.ParseEndpoint(in.Endpoints, endpoint.Scheme("grpc", !r.insecure))
 		if err != nil {
 			log.Errorf("[resolver] Failed to parse discovery endpoint: %v", err)
 			continue
 		}
-		if endpoint == "" {
+		if ept == "" {
 			continue
 		}
 		// filter redundant endpoints
-		if _, ok := endpoints[endpoint]; ok {
+		if _, ok := endpoints[ept]; ok {
 			continue
 		}
-		endpoints[endpoint] = struct{}{}
+		endpoints[ept] = struct{}{}
 		addr := resolver.Address{
 			ServerName: in.Name,
 			Attributes: parseAttributes(in.Metadata),
-			Addr:       endpoint,
+			Addr:       ept,
 		}
 		addr.Attributes = addr.Attributes.WithValue("rawServiceInstance", in)
 		addrs = append(addrs, addr)

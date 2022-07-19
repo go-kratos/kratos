@@ -77,10 +77,10 @@ func (r *Repo) Pull(ctx context.Context) error {
 	cmd = exec.CommandContext(ctx, "git", "pull")
 	cmd.Dir = r.Path()
 	out, err := cmd.CombinedOutput()
+	fmt.Println(string(out))
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(out))
 	return err
 }
 
@@ -96,10 +96,10 @@ func (r *Repo) Clone(ctx context.Context) error {
 		cmd = exec.CommandContext(ctx, "git", "clone", "-b", r.branch, r.url, r.Path())
 	}
 	out, err := cmd.CombinedOutput()
+	fmt.Println(string(out))
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(out))
 	return nil
 }
 

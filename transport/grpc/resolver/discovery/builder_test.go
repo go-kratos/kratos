@@ -28,6 +28,14 @@ func TestWithTimeout(t *testing.T) {
 	}
 }
 
+func TestDisableDebugLog(t *testing.T) {
+	o := &builder{}
+	DisableDebugLog()(o)
+	if !o.debugLogDisabled {
+		t.Errorf("expected debugLogDisabled true, got %v", o.debugLogDisabled)
+	}
+}
+
 type mockDiscovery struct{}
 
 func (m *mockDiscovery) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
@@ -35,6 +43,7 @@ func (m *mockDiscovery) GetService(ctx context.Context, serviceName string) ([]*
 }
 
 func (m *mockDiscovery) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
+	time.Sleep(time.Microsecond * 500)
 	return &testWatch{}, nil
 }
 
@@ -62,9 +71,29 @@ func (m *mockConn) ParseServiceConfig(serviceConfigJSON string) *serviceconfig.P
 }
 
 func TestBuilder_Build(t *testing.T) {
-	b := NewBuilder(&mockDiscovery{})
-	_, err := b.Build(resolver.Target{Scheme: resolver.GetDefaultScheme(), Endpoint: "gprc://authority/endpoint"}, &mockConn{}, resolver.BuildOptions{})
+	b := NewBuilder(&mockDiscovery{}, DisableDebugLog())
+	_, err := b.Build(
+		resolver.Target{
+			Scheme:   resolver.GetDefaultScheme(),
+			Endpoint: "gprc://authority/endpoint",
+		},
+		&mockConn{},
+		resolver.BuildOptions{},
+	)
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
+		return
+	}
+	timeoutBuilder := NewBuilder(&mockDiscovery{}, WithTimeout(0))
+	_, err = timeoutBuilder.Build(
+		resolver.Target{
+			Scheme:   resolver.GetDefaultScheme(),
+			Endpoint: "gprc://authority/endpoint",
+		},
+		&mockConn{},
+		resolver.BuildOptions{},
+	)
+	if err == nil {
+		t.Errorf("expected error, got %v", err)
 	}
 }

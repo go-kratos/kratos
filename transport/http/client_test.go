@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
+	"log"
 	nethttp "net/http"
 	"net/http/httptest"
 	"reflect"
@@ -21,12 +21,28 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/retry"
+	"github.com/go-kratos/kratos/v2/selector"
 )
 
 type mockRoundTripper struct{}
 
 func (rt *mockRoundTripper) RoundTrip(req *nethttp.Request) (resp *nethttp.Response, err error) {
 	return
+}
+
+type mockCallOption struct {
+	needErr bool
+}
+
+func (x *mockCallOption) before(info *callInfo) error {
+	if x.needErr {
+		return fmt.Errorf("option need return err")
+	}
+	return nil
+}
+
+func (x *mockCallOption) after(info *callInfo, attempt *csAttempt) {
+	log.Println("run in mockCallOption.after")
 }
 
 func TestWithTransport(t *testing.T) {
@@ -179,6 +195,16 @@ func TestWithDiscovery(t *testing.T) {
 	}
 }
 
+func TestWithSelector(t *testing.T) {
+	ov := &selector.Default{}
+	o := WithSelector(ov)
+	co := &clientOptions{}
+	o(co)
+	if !reflect.DeepEqual(co.selector, ov) {
+		t.Errorf("expected selector to be %v, got %v", ov, co.selector)
+	}
+}
+
 func TestDefaultRequestEncoder(t *testing.T) {
 	req1 := &nethttp.Request{
 		Header: make(nethttp.Header),
@@ -298,10 +324,6 @@ func TestNewClient(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	client, err := NewClient(context.Background(), WithDiscovery(&mockDiscovery{}), WithEndpoint("discovery:///go-kratos"))
-	if err != nil {
-		t.Error(err)
-	}
 	_, err = NewClient(context.Background(), WithDiscovery(&mockDiscovery{}), WithEndpoint("discovery:///go-kratos"))
 	if err != nil {
 		t.Error(err)
@@ -310,14 +332,44 @@ func TestNewClient(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	_, err = NewClient(context.Background(), WithEndpoint("127.0.0.1:8888:xxxxa"))
+	if err == nil {
+		t.Error("except a parseTarget error")
+	}
 	_, err = NewClient(context.Background(), WithDiscovery(&mockDiscovery{}), WithEndpoint("https://go-kratos.dev/"))
 	if err == nil {
 		t.Error("err should not be equal to nil")
 	}
 
-	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{})
+	client, err := NewClient(
+		context.Background(),
+		WithDiscovery(&mockDiscovery{}),
+		WithEndpoint("discovery:///go-kratos"),
+		WithMiddleware(func(handler middleware.Handler) middleware.Handler {
+			t.Logf("handle in middleware")
+			return func(ctx context.Context, req interface{}) (interface{}, error) {
+				return handler(ctx, req)
+			}
+		}),
+	)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{}, &mockCallOption{})
 	if err == nil {
 		t.Error("err should not be equal to nil")
+	}
+	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{}, &mockCallOption{needErr: true})
+	if err == nil {
+		t.Error("err should be equal to callOption err")
+	}
+	client.opts.encoder = func(ctx context.Context, contentType string, in interface{}) (body []byte, err error) {
+		return nil, fmt.Errorf("mock test encoder error")
+	}
+	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{})
+	if err == nil {
+		t.Error("err should be equal to encoder error")
 	}
 }
 
@@ -328,7 +380,7 @@ func TestClientRetry(t *testing.T) {
 		{"path": "/test-retry-count", "expected": 3},
 		{"path": "/test-error-doing-nothing", "expected": 2},
 	}
-	ts := httptest.NewServer(http.HandlerFunc(func(w nethttp.ResponseWriter, r *nethttp.Request) {
+	ts := httptest.NewServer(nethttp.HandlerFunc(func(w nethttp.ResponseWriter, r *nethttp.Request) {
 		resp, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			w.WriteHeader(nethttp.StatusBadRequest)
@@ -367,7 +419,7 @@ func TestClientRetry(t *testing.T) {
 		defer client.Close()
 		var resp map[string]int
 		path := ts.Listener.Addr().String() + testCase["path"].(string)
-		if err := client.Invoke(ctx, http.MethodGet, path, map[string]int{"count": 1}, &resp, EmptyCallOption{}); err != nil {
+		if err := client.Invoke(ctx, nethttp.MethodGet, path, map[string]int{"count": 1}, &resp, EmptyCallOption{}); err != nil {
 			t.Error(err)
 		}
 		attempt = 1
