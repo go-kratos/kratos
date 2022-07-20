@@ -189,6 +189,18 @@ func TestAddress(t *testing.T) {
 	}
 }
 
+func TestEndpoint(t *testing.T) {
+	o := &Server{}
+	v := &url.URL{
+		Scheme: "unix",
+		Host:   "/tmp/kratos.grpc.sock",
+	}
+	Endpoint(v)(o)
+	if !reflect.DeepEqual(v, o.endpoint) {
+		t.Errorf("expected %v got %v", v, o.address)
+	}
+}
+
 func TestTimeout(t *testing.T) {
 	o := &Server{}
 	v := time.Duration(123)

@@ -73,6 +73,13 @@ func TLSConfig(c *tls.Config) ServerOption {
 	}
 }
 
+// Endpoint with server endpoint.
+func Endpoint(ep *url.URL) ServerOption {
+	return func(o *Server) {
+		o.endpoint = ep
+	}
+}
+
 // Listener with server lis
 func Listener(lis net.Listener) ServerOption {
 	return func(s *Server) {

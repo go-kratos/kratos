@@ -8,6 +8,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"reflect"
 	"strings"
 	"testing"
@@ -306,6 +307,18 @@ func TestTimeout(t *testing.T) {
 	Timeout(v)(o)
 	if !reflect.DeepEqual(v, o.timeout) {
 		t.Errorf("expected %v got %v", v, o.timeout)
+	}
+}
+
+func TestEndpoint(t *testing.T) {
+	o := &Server{}
+	v := &url.URL{
+		Scheme: "unix",
+		Host:   "/tmp/kratos.http.sock",
+	}
+	Endpoint(v)(o)
+	if !reflect.DeepEqual(v, o.endpoint) {
+		t.Errorf("expected %v got %v", v, o.address)
 	}
 }
 
