@@ -91,4 +91,7 @@ func TestStrategy(t *testing.T) {
 	if strage.JudgeConditions(Resp{Code: 400}) {
 		t.Errorf("expected:false,got:true")
 	}
+	if !strage.JudgeConditions(Resp{Code: 500}) {
+		t.Errorf("expected:true,got:false")
+	}
 }

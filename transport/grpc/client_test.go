@@ -153,11 +153,15 @@ func TestDialConn(t *testing.T) {
 
 func TestWithRetryStrategy(t *testing.T) {
 	attempt := 0
+	ctx := context.Background()
+	cTx, _ := context.WithTimeout(ctx, 10*time.Microsecond)
+
 	testCases := []map[string]interface{}{
-		{"method": "test-normal-roundtrip", "expected": 1},
-		{"method": "test-retry-count", "expected": 4},
-		{"method": "test-error-doing-nothing", "expected": 1},
-		{"method": "test-retry-early-exit", "expected": 3},
+		{"method": "test-retry-context-timeout", "expected": 1, "context": cTx},
+		{"method": "test-normal-roundtrip", "expected": 1, "context": ctx},
+		{"method": "test-retry-count", "expected": 4, "context": ctx},
+		{"method": "test-error-doing-nothing", "expected": 1, "context": ctx},
+		{"method": "test-retry-early-exit", "expected": 3, "context": ctx},
 	}
 
 	f := unaryClientInterceptor(
@@ -166,14 +170,14 @@ func TestWithRetryStrategy(t *testing.T) {
 		nil,
 		&retry.Strategy{
 			Attempts:   3,
-			Retrier:    retry.NewRetrier(retry.NewConstantBackoff(10*time.Millisecond, 100*time.Millisecond)),
+			Retrier:    retry.NewRetrier(retry.NewConstantBackoff(100*time.Millisecond, 1000*time.Millisecond)),
 			Conditions: []retry.Condition{retry.NewByCode(13, 14)},
 		},
 	)
 	req := &struct{}{}
 	resp := &struct{}{}
 	for _, testCase := range testCases {
-		_ = f(context.Background(), testCase["method"].(string), req, resp, &grpc.ClientConn{},
+		_ = f(testCase["context"].(context.Context), testCase["method"].(string), req, resp, &grpc.ClientConn{},
 			func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
 				attempt++
 				switch method {
@@ -187,6 +191,8 @@ func TestWithRetryStrategy(t *testing.T) {
 					if attempt == 3 {
 						return nil
 					}
+					return status.Error(codes.Internal, "")
+				case "test-retry-context-timeout":
 					return status.Error(codes.Internal, "")
 				}
 				t.Error("unexpected error")

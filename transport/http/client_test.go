@@ -374,11 +374,14 @@ func TestWithRetryStrategy(t *testing.T) {
 
 func TestClientRetry(t *testing.T) {
 	attempt := 0
+	ctx := context.Background()
+	cTx, _ := context.WithTimeout(ctx, 10*time.Microsecond)
 	testCases := []map[string]interface{}{
-		{"path": "/test-normal-roundtrip", "expected": 1},
-		{"path": "/test-retry-count", "expected": 4},
-		{"path": "/test-error-doing-nothing", "expected": 1},
-		{"path": "/test-retry-early-exit", "expected": 3},
+		{"path": "/test-retry-context-timeout", "expected": 0, "context": cTx},
+		{"path": "/test-normal-roundtrip", "expected": 1, "context": ctx},
+		{"path": "/test-retry-count", "expected": 4, "context": ctx},
+		{"path": "/test-error-doing-nothing", "expected": 1, "context": ctx},
+		{"path": "/test-retry-early-exit", "expected": 3, "context": ctx},
 	}
 	ts := httptest.NewServer(nethttp.HandlerFunc(func(w nethttp.ResponseWriter, r *nethttp.Request) {
 		switch r.URL.Path {
@@ -413,10 +416,16 @@ func TestClientRetry(t *testing.T) {
 			err := kratosErrors.New(500, "test-retry-early-exit", "")
 			resp, _ := json.Marshal(err)
 			_, _ = w.Write(resp)
+		case "/test-retry-context-timeout":
+			attempt++
+			w.WriteHeader(nethttp.StatusInternalServerError)
+			err := kratosErrors.New(500, "test-retry-context-timeout", "")
+			resp, _ := json.Marshal(err)
+			_, _ = w.Write(resp)
 		}
 	}))
 	defer ts.Close()
-	ctx := context.Background()
+
 	client, err := NewClient(ctx, WithRetryStrategy(retry.NewStrategy(
 		3,
 		retry.NewRetrier(retry.NewConstantBackoff(100*time.Millisecond, 1000*time.Millisecond)),
@@ -431,7 +440,7 @@ func TestClientRetry(t *testing.T) {
 	for _, testCase := range testCases {
 		var resp string
 		path := ts.Listener.Addr().String() + testCase["path"].(string)
-		_ = client.Invoke(ctx, nethttp.MethodGet, path, map[string]string{"name": "kratos"}, &resp, EmptyCallOption{})
+		_ = client.Invoke(testCase["context"].(context.Context), nethttp.MethodGet, path, map[string]string{"name": "kratos"}, &resp, EmptyCallOption{})
 		if attempt != testCase["expected"].(int) {
 			t.Errorf("expected:%v, got:%v", testCase["expected"].(int), attempt)
 		}

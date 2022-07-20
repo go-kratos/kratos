@@ -267,7 +267,11 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 				break
 			}
 
-			if !client.opts.retryStrategy.JudgeConditions(retry.Resp{MD: res.Header, Code: errors.Code(err)}) {
+			header := map[string][]string{}
+			if res != nil {
+				header = res.Header
+			}
+			if !client.opts.retryStrategy.JudgeConditions(retry.Resp{MD: header, Code: errors.Code(err)}) {
 				break
 			}
 
