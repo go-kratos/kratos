@@ -97,6 +97,13 @@ func TLSConfig(c *tls.Config) ServerOption {
 	}
 }
 
+// Endpoint with server endpoint.
+func Endpoint(ep *url.URL) ServerOption {
+	return func(o *Server) {
+		o.endpoint = ep
+	}
+}
+
 // StrictSlash is with mux's StrictSlash
 // If true, when the path pattern is "/path/", accessing "/path" will
 // redirect to the former and vice versa.
