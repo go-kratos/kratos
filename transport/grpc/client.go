@@ -9,6 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v2/retry"
 	"github.com/go-kratos/kratos/v2/selector"
 	"github.com/go-kratos/kratos/v2/selector/wrr"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -21,6 +22,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	grpcinsecure "google.golang.org/grpc/credentials/insecure"
 	grpcmd "google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 // ClientOption is gRPC client option.
@@ -97,15 +99,16 @@ func WithLogger(log log.Logger) ClientOption {
 
 // clientOptions is gRPC Client
 type clientOptions struct {
-	endpoint     string
-	tlsConf      *tls.Config
-	timeout      time.Duration
-	discovery    registry.Discovery
-	middleware   []middleware.Middleware
-	ints         []grpc.UnaryClientInterceptor
-	grpcOpts     []grpc.DialOption
-	balancerName string
-	filters      []selector.Filter
+	endpoint      string
+	tlsConf       *tls.Config
+	timeout       time.Duration
+	discovery     registry.Discovery
+	middleware    []middleware.Middleware
+	ints          []grpc.UnaryClientInterceptor
+	grpcOpts      []grpc.DialOption
+	balancerName  string
+	filters       []selector.Filter
+	retryStrategy *retry.Strategy
 }
 
 // Dial returns a GRPC connection.
@@ -127,7 +130,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		o(&options)
 	}
 	ints := []grpc.UnaryClientInterceptor{
-		unaryClientInterceptor(options.middleware, options.timeout, options.filters),
+		unaryClientInterceptor(options.middleware, options.timeout, options.filters, options.retryStrategy),
 	}
 	if len(options.ints) > 0 {
 		ints = append(ints, options.ints...)
@@ -156,7 +159,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	return grpc.DialContext(ctx, options.endpoint, grpcOpts...)
 }
 
-func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, filters []selector.Filter) grpc.UnaryClientInterceptor {
+func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, filters []selector.Filter, rs *retry.Strategy) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		ctx = transport.NewClientContext(ctx, &Transport{
 			endpoint:  cc.Target(),
@@ -169,7 +172,11 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, f
 			ctx, cancel = context.WithTimeout(ctx, timeout)
 			defer cancel()
 		}
+		if rs == nil {
+			rs = retry.NewStrategy(0, retry.NewNoRetrier(), nil)
+		}
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
+			var err error
 			if tr, ok := transport.FromClientContext(ctx); ok {
 				header := tr.RequestHeader()
 				keys := header.Keys()
@@ -179,7 +186,25 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, f
 				}
 				ctx = grpcmd.AppendToOutgoingContext(ctx, keyvals...)
 			}
-			return reply, invoker(ctx, method, req, reply, cc, opts...)
+			for i := 0; i <= rs.Attempts; i++ {
+				err = invoker(ctx, method, req, reply, cc, opts...)
+				md, _ := grpcmd.FromOutgoingContext(ctx)
+
+				if i >= rs.Attempts || err == nil {
+					break
+				}
+
+				if !rs.JudgeConditions(retry.Resp{MD: md, Code: int(status.Code(err))}) {
+					break
+				}
+
+				select {
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				case <-time.After(rs.Retrier.NextInterval(uint(i))):
+				}
+			}
+			return reply, err
 		}
 		if len(ms) > 0 {
 			h = middleware.Chain(ms...)(h)

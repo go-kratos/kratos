@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	nethttp "net/http"
+	"net/http/httptest"
 	"reflect"
 	"strconv"
 	"testing"
@@ -18,6 +19,7 @@ import (
 	kratosErrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v2/retry"
 	"github.com/go-kratos/kratos/v2/selector"
 )
 
@@ -357,5 +359,82 @@ func TestNewClient(t *testing.T) {
 	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{})
 	if err == nil {
 		t.Error("err should be equal to encoder error")
+	}
+}
+
+func TestWithRetryStrategy(t *testing.T) {
+	o := &clientOptions{}
+	ov := &retry.Strategy{Attempts: 0, Retrier: retry.NewNoRetrier(), Conditions: nil}
+	v := retry.NewStrategy(0, retry.NewNoRetrier(), nil)
+	WithRetryStrategy(v)(o)
+	if !reflect.DeepEqual(o.retryStrategy, ov) {
+		t.Errorf("expected retryStrategy to be %v,got %v", ov, o.retryStrategy)
+	}
+}
+
+func TestClientRetry(t *testing.T) {
+	attempt := 0
+	testCases := []map[string]interface{}{
+		{"path": "/test-normal-roundtrip", "expected": 1},
+		{"path": "/test-retry-count", "expected": 4},
+		{"path": "/test-error-doing-nothing", "expected": 1},
+		{"path": "/test-retry-early-exit", "expected": 3},
+	}
+	ts := httptest.NewServer(nethttp.HandlerFunc(func(w nethttp.ResponseWriter, r *nethttp.Request) {
+		switch r.URL.Path {
+		case "/test-normal-roundtrip":
+			attempt++
+			w.WriteHeader(nethttp.StatusOK)
+			resp, _ := json.Marshal("test-normal-roundtrip")
+			_, _ = w.Write(resp)
+		case "/test-retry-count":
+			attempt++
+			w.WriteHeader(nethttp.StatusInternalServerError)
+			err := kratosErrors.New(500, "test-retry-count", "")
+			resp, _ := json.Marshal(err)
+			_, _ = w.Write(resp)
+
+		case "/test-error-doing-nothing":
+			attempt++
+			w.WriteHeader(nethttp.StatusBadRequest)
+			err := kratosErrors.New(400, "test-error-doing-nothing", "")
+			resp, _ := json.Marshal(err)
+			_, _ = w.Write(resp)
+
+		case "/test-retry-early-exit":
+			attempt++
+			if attempt == 3 {
+				w.WriteHeader(nethttp.StatusOK)
+				resp, _ := json.Marshal("test-retry-early-exit")
+				_, _ = w.Write(resp)
+				return
+			}
+			w.WriteHeader(nethttp.StatusInternalServerError)
+			err := kratosErrors.New(500, "test-retry-early-exit", "")
+			resp, _ := json.Marshal(err)
+			_, _ = w.Write(resp)
+		}
+	}))
+	defer ts.Close()
+	ctx := context.Background()
+	client, err := NewClient(ctx, WithRetryStrategy(retry.NewStrategy(
+		3,
+		retry.NewRetrier(retry.NewConstantBackoff(100*time.Millisecond, 1000*time.Millisecond)),
+		[]retry.Condition{retry.NewByCode(500, 504)},
+	)),
+		WithTimeout(10*time.Second))
+	if err != nil {
+		t.Error(err)
+	}
+	defer client.Close()
+
+	for _, testCase := range testCases {
+		var resp string
+		path := ts.Listener.Addr().String() + testCase["path"].(string)
+		_ = client.Invoke(ctx, nethttp.MethodGet, path, map[string]string{"name": "kratos"}, &resp, EmptyCallOption{})
+		if attempt != testCase["expected"].(int) {
+			t.Errorf("expected:%v, got:%v", testCase["expected"].(int), attempt)
+		}
+		attempt = 0
 	}
 }

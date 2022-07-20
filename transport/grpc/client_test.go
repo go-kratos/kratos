@@ -9,7 +9,10 @@ import (
 
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v2/retry"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestWithEndpoint(t *testing.T) {
@@ -78,7 +81,12 @@ func EmptyMiddleware() middleware.Middleware {
 }
 
 func TestUnaryClientInterceptor(t *testing.T) {
-	f := unaryClientInterceptor([]middleware.Middleware{EmptyMiddleware()}, time.Duration(100), nil)
+	f := unaryClientInterceptor(
+		[]middleware.Middleware{EmptyMiddleware()},
+		time.Duration(100),
+		nil,
+		&retry.Strategy{Attempts: 0, Retrier: retry.NewNoRetrier(), Conditions: nil},
+	)
 	req := &struct{}{}
 	resp := &struct{}{}
 
@@ -140,5 +148,53 @@ func TestDialConn(t *testing.T) {
 	)
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestWithRetryStrategy(t *testing.T) {
+	attempt := 0
+	testCases := []map[string]interface{}{
+		{"method": "test-normal-roundtrip", "expected": 1},
+		{"method": "test-retry-count", "expected": 4},
+		{"method": "test-error-doing-nothing", "expected": 1},
+		{"method": "test-retry-early-exit", "expected": 3},
+	}
+
+	f := unaryClientInterceptor(
+		[]middleware.Middleware{EmptyMiddleware()},
+		time.Duration(100)*time.Second,
+		nil,
+		&retry.Strategy{
+			Attempts:   3,
+			Retrier:    retry.NewRetrier(retry.NewConstantBackoff(10*time.Millisecond, 100*time.Millisecond)),
+			Conditions: []retry.Condition{retry.NewByCode(13, 14)},
+		},
+	)
+	req := &struct{}{}
+	resp := &struct{}{}
+	for _, testCase := range testCases {
+		_ = f(context.Background(), testCase["method"].(string), req, resp, &grpc.ClientConn{},
+			func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
+				attempt++
+				switch method {
+				case "test-normal-roundtrip":
+					return nil
+				case "test-retry-count":
+					return status.Error(codes.Internal, "")
+				case "test-error-doing-nothing":
+					return status.Error(codes.NotFound, "")
+				case "test-retry-early-exit":
+					if attempt == 3 {
+						return nil
+					}
+					return status.Error(codes.Internal, "")
+				}
+				t.Error("unexpected error")
+				return nil
+			})
+		if attempt != testCase["expected"].(int) {
+			t.Errorf("expected:%v, got:%v", testCase["expected"].(int), attempt)
+		}
+		attempt = 0
 	}
 }
