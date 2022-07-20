@@ -154,8 +154,8 @@ func TestDialConn(t *testing.T) {
 func TestWithRetryStrategy(t *testing.T) {
 	attempt := 0
 	ctx := context.Background()
-	cTx, _ := context.WithTimeout(ctx, 10*time.Microsecond)
-
+	cTx, cancel := context.WithTimeout(ctx, 10*time.Microsecond)
+	defer cancel()
 	testCases := []map[string]interface{}{
 		{"method": "test-retry-context-timeout", "expected": 1, "context": cTx},
 		{"method": "test-normal-roundtrip", "expected": 1, "context": ctx},

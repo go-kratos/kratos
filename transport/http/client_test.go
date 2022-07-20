@@ -375,7 +375,8 @@ func TestWithRetryStrategy(t *testing.T) {
 func TestClientRetry(t *testing.T) {
 	attempt := 0
 	ctx := context.Background()
-	cTx, _ := context.WithTimeout(ctx, 10*time.Microsecond)
+	cTx, cancel := context.WithTimeout(ctx, 10*time.Microsecond)
+	defer cancel()
 	testCases := []map[string]interface{}{
 		{"path": "/test-retry-context-timeout", "expected": 0, "context": cTx},
 		{"path": "/test-normal-roundtrip", "expected": 1, "context": ctx},
