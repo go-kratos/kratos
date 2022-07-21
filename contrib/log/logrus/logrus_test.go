@@ -32,6 +32,13 @@ func TestLoggerLog(t *testing.T) {
 			kvs:       []interface{}{"case", "level unmatch", "msg", "1"},
 			want:      "",
 		},
+		"fatal level": {
+			level:     logrus.InfoLevel,
+			formatter: &logrus.JSONFormatter{},
+			logLevel:  log.LevelFatal,
+			kvs:       []interface{}{"case", "json format", "msg", "1"},
+			want:      `{"case":"json format","level":"fatal","msg":"1"`,
+		},
 		"no tags": {
 			level:     logrus.InfoLevel,
 			formatter: &logrus.JSONFormatter{},
