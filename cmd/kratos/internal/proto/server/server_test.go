@@ -12,6 +12,31 @@ func Test_serviceName(t *testing.T) {
 		want string
 	}{
 		{
+			name: "serviceName on lowercase words",
+			args: args{str: "helloworld"},
+			want: "Helloworld",
+		},
+		{
+			name: "serviceName on uppercase words",
+			args: args{str: "HELLOWORLD"},
+			want: "HELLOWORLD",
+		},
+		{
+			name: "serviceName on lowercase words with spaces",
+			args: args{str: "hello world"},
+			want: "HelloWorld",
+		},
+		{
+			name: "serviceName on uppercase words with spaces",
+			args: args{str: "HELLO WORLD"},
+			want: "HELLOWORLD",
+		},
+		{
+			name: "serviceName on Lower Camel Case words",
+			args: args{str: "helloWorld"},
+			want: "HelloWorld",
+		},
+		{
 			name: "serviceName on Lower Camel Case words",
 			args: args{str: "helloWorld"},
 			want: "HelloWorld",
