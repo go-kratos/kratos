@@ -32,7 +32,8 @@ func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) fu
 	return func(ctx http.Context) error {
 		var in {{.Request}}
 		{{- if .HasBody}}
-		if err := ctx.Bind(&in{{.Body}}); err != nil {
+		body := in{{.Body}}
+		if err := ctx.Bind(&body); err != nil {
 			return err
 		}
 		
