@@ -153,7 +153,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 		md.Body = ""
 	} else if body != "" {
 		md.HasBody = true
-		md.Body = fmt.Sprintf(".Get%s()" + camelCaseVars(body))
+		md.Body = fmt.Sprintf(".Get%s()", camelCaseVars(body))
 	} else {
 		md.HasBody = false
 	}
