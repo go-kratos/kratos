@@ -33,6 +33,8 @@ func (l *Logger) Log(level log.Level, keyvals ...interface{}) (err error) {
 		logrusLevel = logrus.WarnLevel
 	case log.LevelError:
 		logrusLevel = logrus.ErrorLevel
+	case log.LevelFatal:
+		logrusLevel = logrus.FatalLevel
 	default:
 		logrusLevel = logrus.DebugLevel
 	}
