@@ -158,18 +158,15 @@ func (r *Registry) reRegister(path string, data []byte) {
 	sessionID := r.conn.SessionID()
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			cur := r.conn.SessionID()
-			// sessionID changed
-			if cur > 0 && sessionID != cur {
-				// re-ensureName
-				if err := r.ensureName(path, data, zk.FlagEphemeral); err != nil {
-					return
-				}
-				sessionID = cur
+	for range ticker.C {
+		cur := r.conn.SessionID()
+		// sessionID changed
+		if cur > 0 && sessionID != cur {
+			// re-ensureName
+			if err := r.ensureName(path, data, zk.FlagEphemeral); err != nil {
+				return
 			}
+			sessionID = cur
 		}
 	}
 }
