@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
+	"github.com/go-kratos/kratos/v2/internal/matcher"
 
 	apimd "github.com/go-kratos/kratos/v2/api/metadata"
 
@@ -62,7 +63,7 @@ func Logger(logger log.Logger) ServerOption {
 // Middleware with server middleware.
 func Middleware(m ...middleware.Middleware) ServerOption {
 	return func(s *Server) {
-		s.middleware = m
+		s.middleware.Use(m...)
 	}
 }
 
@@ -112,7 +113,7 @@ type Server struct {
 	address    string
 	endpoint   *url.URL
 	timeout    time.Duration
-	middleware []middleware.Middleware
+	middleware matcher.Matcher
 	unaryInts  []grpc.UnaryServerInterceptor
 	streamInts []grpc.StreamServerInterceptor
 	grpcOpts   []grpc.ServerOption
@@ -123,11 +124,12 @@ type Server struct {
 // NewServer creates a gRPC server by options.
 func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
-		baseCtx: context.Background(),
-		network: "tcp",
-		address: ":0",
-		timeout: 1 * time.Second,
-		health:  health.NewServer(),
+		baseCtx:    context.Background(),
+		network:    "tcp",
+		address:    ":0",
+		timeout:    1 * time.Second,
+		health:     health.NewServer(),
+		middleware: matcher.New(),
 	}
 	for _, o := range opts {
 		o(srv)
@@ -161,6 +163,15 @@ func NewServer(opts ...ServerOption) *Server {
 	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
 	reflection.Register(srv.Server)
 	return srv
+}
+
+// Use uses a service middleware with selector.
+// selector:
+//   - '*'
+//   - '/helloworld.v1.Greeter/*'
+//   - '/helloworld.v1.Greeter/SayHello'
+func (s *Server) Use(selector string, m ...middleware.Middleware) error {
+	return s.middleware.Add(selector, m...)
 }
 
 // Endpoint return a real address to registry endpoint.

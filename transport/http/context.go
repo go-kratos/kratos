@@ -89,7 +89,7 @@ func (c *wrapper) Query() url.Values {
 func (c *wrapper) Request() *http.Request        { return c.req }
 func (c *wrapper) Response() http.ResponseWriter { return c.res }
 func (c *wrapper) Middleware(h middleware.Handler) middleware.Handler {
-	return middleware.Chain(c.router.srv.ms...)(h)
+	return middleware.Chain(c.router.srv.middleware.Match(c.req.URL.Path)...)(h)
 }
 func (c *wrapper) Bind(v interface{}) error      { return c.router.srv.dec(c.req, v) }
 func (c *wrapper) BindVars(v interface{}) error  { return binding.BindQuery(c.Vars(), v) }

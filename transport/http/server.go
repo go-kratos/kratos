@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
+	"github.com/go-kratos/kratos/v2/internal/matcher"
 
 	"github.com/go-kratos/kratos/v2/internal/host"
 	"github.com/go-kratos/kratos/v2/log"
@@ -58,7 +59,7 @@ func Logger(logger log.Logger) ServerOption {
 // Middleware with service middleware option.
 func Middleware(m ...middleware.Middleware) ServerOption {
 	return func(o *Server) {
-		o.ms = m
+		o.middleware.Use(m...)
 	}
 }
 
@@ -124,7 +125,9 @@ type Server struct {
 	address     string
 	timeout     time.Duration
 	filters     []FilterFunc
-	ms          []middleware.Middleware
+	middleware  matcher.Matcher
+	prefix      map[string][]middleware.Middleware
+	exact       map[string][]middleware.Middleware
 	dec         DecodeRequestFunc
 	enc         EncodeResponseFunc
 	ene         EncodeErrorFunc
@@ -138,6 +141,7 @@ func NewServer(opts ...ServerOption) *Server {
 		network:     "tcp",
 		address:     ":0",
 		timeout:     1 * time.Second,
+		middleware:  matcher.New(),
 		dec:         DefaultRequestDecoder,
 		enc:         DefaultResponseEncoder,
 		ene:         DefaultErrorEncoder,
@@ -207,6 +211,15 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	s.Handler.ServeHTTP(res, req)
 }
 
+// Use uses a service middleware with selector.
+// selector:
+//   - '*'
+//   - '/helloworld.v1.Greeter/*'
+//   - '/helloworld.v1.Greeter/SayHello'
+func (s *Server) Use(selector string, m ...middleware.Middleware) {
+	s.middleware.Add(selector, m...)
+}
+
 func (s *Server) filter() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -229,10 +242,10 @@ func (s *Server) filter() mux.MiddlewareFunc {
 
 			tr := &Transport{
 				operation:    pathTemplate,
+				pathTemplate: pathTemplate,
 				reqHeader:    headerCarrier(req.Header),
 				replyHeader:  headerCarrier(w.Header()),
 				request:      req,
-				pathTemplate: pathTemplate,
 			}
 			if s.endpoint != nil {
 				tr.endpoint = s.endpoint.String()
