@@ -213,7 +213,7 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 
 // Use uses a service middleware with selector.
 // selector:
-//   - '*'
+//   - '/*'
 //   - '/helloworld.v1.Greeter/*'
 //   - '/helloworld.v1.Greeter/SayHello'
 func (s *Server) Use(selector string, m ...middleware.Middleware) {
