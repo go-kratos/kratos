@@ -33,7 +33,7 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return handler(ctx, req)
 		}
-		if next := s.middleware.Match(tr.Operation()); len(next) > 0 {
+		if next := s.middleware.Match(info.FullMethod); len(next) > 0 {
 			h = middleware.Chain(next...)(h)
 		}
 		reply, err := h(ctx, req)
