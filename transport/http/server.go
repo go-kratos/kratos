@@ -126,8 +126,6 @@ type Server struct {
 	timeout     time.Duration
 	filters     []FilterFunc
 	middleware  matcher.Matcher
-	prefix      map[string][]middleware.Middleware
-	exact       map[string][]middleware.Middleware
 	dec         DecodeRequestFunc
 	enc         EncodeResponseFunc
 	ene         EncodeErrorFunc
