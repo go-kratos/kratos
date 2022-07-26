@@ -29,7 +29,6 @@ type matcher struct {
 
 func (m *matcher) Use(ms ...middleware.Middleware) {
 	m.defaults = ms
-	return
 }
 
 func (m *matcher) Add(selector string, ms ...middleware.Middleware) {
@@ -44,7 +43,6 @@ func (m *matcher) Add(selector string, ms ...middleware.Middleware) {
 		})
 	}
 	m.matchs[selector] = ms
-	return
 }
 
 func (m *matcher) Match(operation string) []middleware.Middleware {
