@@ -1,7 +1,6 @@
 package matcher
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -10,8 +9,8 @@ import (
 
 // Matcher is a middleware matcher.
 type Matcher interface {
-	Use(ms ...middleware.Middleware) error
-	Add(selector string, ms ...middleware.Middleware) error
+	Use(ms ...middleware.Middleware)
+	Add(selector string, ms ...middleware.Middleware)
 	Match(operation string) []middleware.Middleware
 }
 
@@ -28,12 +27,12 @@ type matcher struct {
 	matchs   map[string][]middleware.Middleware
 }
 
-func (m *matcher) Use(ms ...middleware.Middleware) error {
+func (m *matcher) Use(ms ...middleware.Middleware) {
 	m.defaults = ms
-	return nil
+	return
 }
 
-func (m *matcher) Add(selector string, ms ...middleware.Middleware) error {
+func (m *matcher) Add(selector string, ms ...middleware.Middleware) {
 	if strings.HasSuffix(selector, "*") {
 		selector = strings.TrimSuffix(selector, "*")
 		m.prefix = append(m.prefix, selector)
@@ -44,11 +43,8 @@ func (m *matcher) Add(selector string, ms ...middleware.Middleware) error {
 			return m.prefix[i] > m.prefix[j]
 		})
 	}
-	if _, ok := m.matchs[selector]; ok {
-		return fmt.Errorf("middleware: selector already exists: %s", selector)
-	}
 	m.matchs[selector] = ms
-	return nil
+	return
 }
 
 func (m *matcher) Match(operation string) []middleware.Middleware {

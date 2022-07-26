@@ -170,8 +170,8 @@ func NewServer(opts ...ServerOption) *Server {
 //   - '/*'
 //   - '/helloworld.v1.Greeter/*'
 //   - '/helloworld.v1.Greeter/SayHello'
-func (s *Server) Use(selector string, m ...middleware.Middleware) error {
-	return s.middleware.Add(selector, m...)
+func (s *Server) Use(selector string, m ...middleware.Middleware) {
+	s.middleware.Add(selector, m...)
 }
 
 // Endpoint return a real address to registry endpoint.

@@ -161,6 +161,15 @@ func NewServer(opts ...ServerOption) *Server {
 	return srv
 }
 
+// Use uses a service middleware with selector.
+// selector:
+//   - '/*'
+//   - '/helloworld.v1.Greeter/*'
+//   - '/helloworld.v1.Greeter/SayHello'
+func (s *Server) Use(selector string, m ...middleware.Middleware) {
+	s.middleware.Add(selector, m...)
+}
+
 // WalkRoute walks the router and all its sub-routers, calling walkFn for each route in the tree.
 func (s *Server) WalkRoute(fn WalkRouteFunc) error {
 	return s.router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
@@ -209,15 +218,6 @@ func (s *Server) HandleHeader(key, val string, h http.HandlerFunc) {
 // ServeHTTP should write reply headers and data to the ResponseWriter and then return.
 func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	s.Handler.ServeHTTP(res, req)
-}
-
-// Use uses a service middleware with selector.
-// selector:
-//   - '/*'
-//   - '/helloworld.v1.Greeter/*'
-//   - '/helloworld.v1.Greeter/SayHello'
-func (s *Server) Use(selector string, m ...middleware.Middleware) {
-	s.middleware.Add(selector, m...)
 }
 
 func (s *Server) filter() mux.MiddlewareFunc {
