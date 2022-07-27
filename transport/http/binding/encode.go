@@ -12,38 +12,42 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 )
 
+var reg = regexp.MustCompile(`/{[\\.\w]+}`)
+
 // EncodeURL encode proto message to url path.
 func EncodeURL(pathTemplate string, msg proto.Message, needQuery bool) string {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return pathTemplate
 	}
-	reg := regexp.MustCompile(`/{[.\w]+}`)
-	if reg == nil {
-		return pathTemplate
-	}
 	pathParams := make(map[string]struct{})
 	path := reg.ReplaceAllStringFunc(pathTemplate, func(in string) string {
-		if len(in) < 4 { //nolint:gomnd // **  explain the 4 number here :-) **
-			return in
-		}
+		// it's unreachable because the reg means that must have more than one char in {}
+		//if len(in) < 4 { //nolint:gomnd // **  explain the 4 number here :-) **
+		//	return in
+		//}
 		key := in[2 : len(in)-1]
 		vars := strings.Split(key, ".")
-		if value, err := getValueByField(msg.ProtoReflect(), vars); err == nil {
-			pathParams[key] = struct{}{}
-			return "/" + value
+		value, err := getValueByField(msg.ProtoReflect(), vars)
+		if err != nil {
+			return in
 		}
-		return in
+		pathParams[key] = struct{}{}
+		return "/" + value
 	})
-	if needQuery {
-		u, err := form.EncodeValues(msg)
-		if err == nil && len(u) > 0 {
-			for key := range pathParams {
-				delete(u, key)
-			}
-			query := u.Encode()
-			if query != "" {
-				path += "?" + query
-			}
+	if !needQuery {
+		if query := form.EncodeFieldMask(msg.ProtoReflect()); query != "" {
+			return path + "?" + query
+		}
+		return path
+	}
+	u, err := form.EncodeValues(msg)
+	if err == nil && len(u) > 0 {
+		for key := range pathParams {
+			delete(u, key)
+		}
+		query := u.Encode()
+		if query != "" {
+			path += "?" + query
 		}
 	}
 	return path

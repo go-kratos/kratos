@@ -48,7 +48,7 @@ type Option func(*options)
 // Parser is a jwt parser
 type options struct {
 	signingMethod jwt.SigningMethod
-	claims        jwt.Claims
+	claims        func() jwt.Claims
 	tokenHeader   map[string]interface{}
 }
 
@@ -60,9 +60,11 @@ func WithSigningMethod(method jwt.SigningMethod) Option {
 }
 
 // WithClaims with customer claim
-func WithClaims(claims jwt.Claims) Option {
+// If you use it in Server, f needs to return a new jwt.Claims object each time to avoid concurrent write problems
+// If you use it in Client, f only needs to return a single object to provide performance
+func WithClaims(f func() jwt.Claims) Option {
 	return func(o *options) {
-		o.claims = claims
+		o.claims = f
 	}
 }
 
@@ -77,7 +79,6 @@ func WithTokenHeader(header map[string]interface{}) Option {
 func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	o := &options{
 		signingMethod: jwt.SigningMethodHS256,
-		claims:        jwt.RegisteredClaims{},
 	}
 	for _, opt := range opts {
 		opt(o)
@@ -93,21 +94,32 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 					return nil, ErrMissingJwtToken
 				}
 				jwtToken := auths[1]
-				tokenInfo, err := jwt.Parse(jwtToken, keyFunc)
+				var (
+					tokenInfo *jwt.Token
+					err       error
+				)
+				if o.claims != nil {
+					tokenInfo, err = jwt.ParseWithClaims(jwtToken, o.claims(), keyFunc)
+				} else {
+					tokenInfo, err = jwt.Parse(jwtToken, keyFunc)
+				}
 				if err != nil {
-					if ve, ok := err.(*jwt.ValidationError); ok {
-						if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-							return nil, ErrTokenInvalid
-						} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
-							return nil, ErrTokenExpired
-						} else {
-							return nil, ErrTokenParseFail
-						}
+					ve, ok := err.(*jwt.ValidationError)
+					if !ok {
+						return nil, errors.Unauthorized(reason, err.Error())
 					}
-					return nil, errors.Unauthorized(reason, err.Error())
-				} else if !tokenInfo.Valid {
+					if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+						return nil, ErrTokenInvalid
+					}
+					if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+						return nil, ErrTokenExpired
+					}
+					return nil, ErrTokenParseFail
+				}
+				if !tokenInfo.Valid {
 					return nil, ErrTokenInvalid
-				} else if tokenInfo.Method != o.signingMethod {
+				}
+				if tokenInfo.Method != o.signingMethod {
 					return nil, ErrUnSupportSigningMethod
 				}
 				ctx = NewContext(ctx, tokenInfo.Claims)
@@ -120,9 +132,10 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 
 // Client is a client jwt middleware.
 func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
+	claims := jwt.RegisteredClaims{}
 	o := &options{
 		signingMethod: jwt.SigningMethodHS256,
-		claims:        jwt.RegisteredClaims{},
+		claims:        func() jwt.Claims { return claims },
 	}
 	for _, opt := range opts {
 		opt(o)
@@ -132,7 +145,7 @@ func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 			if keyProvider == nil {
 				return nil, ErrNeedTokenProvider
 			}
-			token := jwt.NewWithClaims(o.signingMethod, o.claims)
+			token := jwt.NewWithClaims(o.signingMethod, o.claims())
 			if o.tokenHeader != nil {
 				for k, v := range o.tokenHeader {
 					token.Header[k] = v

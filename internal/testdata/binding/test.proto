@@ -2,12 +2,20 @@ syntax = "proto3";
 
 package binding;
 
+import "google/protobuf/field_mask.proto";
+
 option go_package = "github.com/go-kratos/kratos/transport/binding";
 
 // The request message containing the user's name.
 message HelloRequest {
   string name = 1;
-  Sub  sub = 2;
+  Sub sub = 2;
+  google.protobuf.FieldMask update_mask = 3;
+  optional int32 opt_int32 = 4;
+  optional int64 opt_int64 = 5;
+  optional string opt_string = 6;
+  Sub subField = 7;
+  repeated string test_repeated = 8 [json_name = "test_repeated"];
 }
 
 message Sub{

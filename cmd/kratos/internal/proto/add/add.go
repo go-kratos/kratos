@@ -7,6 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"golang.org/x/mod/modfile"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // CmdAdd represents the add command.
@@ -63,7 +65,11 @@ func javaPackage(name string) string {
 }
 
 func serviceName(name string) string {
-	return export(strings.Split(name, ".")[0])
+	return toUpperCamelCase(strings.Split(name, ".")[0])
 }
 
-func export(s string) string { return strings.ToUpper(s[:1]) + s[1:] }
+func toUpperCamelCase(s string) string {
+	s = strings.ReplaceAll(s, "_", " ")
+	s = cases.Title(language.Und, cases.NoLower).String(s)
+	return strings.ReplaceAll(s, " ", "")
+}

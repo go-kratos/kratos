@@ -2,6 +2,7 @@ package tracing
 
 import (
 	"context"
+	"fmt"
 
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/peer"
@@ -13,6 +14,7 @@ type ClientHandler struct{}
 
 // HandleConn exists to satisfy gRPC stats.Handler.
 func (c *ClientHandler) HandleConn(ctx context.Context, cs stats.ConnStats) {
+	fmt.Println("Handle connection.")
 }
 
 // TagConn exists to satisfy gRPC stats.Handler.
@@ -22,13 +24,16 @@ func (c *ClientHandler) TagConn(ctx context.Context, cti *stats.ConnTagInfo) con
 
 // HandleRPC implements per-RPC tracing and stats instrumentation.
 func (c *ClientHandler) HandleRPC(ctx context.Context, rs stats.RPCStats) {
-	if _, ok := rs.(*stats.OutHeader); ok {
-		if p, ok := peer.FromContext(ctx); ok {
-			remoteAddr := p.Addr.String()
-			if span := trace.SpanFromContext(ctx); span.SpanContext().IsValid() {
-				span.SetAttributes(peerAttr(remoteAddr)...)
-			}
-		}
+	if _, ok := rs.(*stats.OutHeader); !ok {
+		return
+	}
+	p, ok := peer.FromContext(ctx)
+	if !ok {
+		return
+	}
+	remoteAddr := p.Addr.String()
+	if span := trace.SpanFromContext(ctx); span.SpanContext().IsValid() {
+		span.SetAttributes(peerAttr(remoteAddr)...)
 	}
 }
 

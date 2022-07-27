@@ -9,7 +9,7 @@ option objc_class_prefix = "KratosErrors";
 
 import "google/protobuf/descriptor.proto";
 
-message Error {
+message Status {
   int32 code = 1;
   string reason = 2;
   string message = 3;
