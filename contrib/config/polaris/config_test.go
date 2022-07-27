@@ -213,7 +213,7 @@ func TestConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	config, err := New(&configAPI, WithNamespace(namespace), WithFileGroup(fileGroup), WithFileName(name))
+	config, err := New(configAPI, WithNamespace(namespace), WithFileGroup(fileGroup), WithFileName(name))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -285,7 +285,7 @@ func TestExtToFormat(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	config, err := New(&configAPI, WithNamespace(namespace), WithFileGroup(fileGroup), WithFileName(name))
+	config, err := New(configAPI, WithNamespace(namespace), WithFileGroup(fileGroup), WithFileName(name))
 	if err != nil {
 		t.Fatal(err)
 	}

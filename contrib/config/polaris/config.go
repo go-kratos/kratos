@@ -43,11 +43,11 @@ func WithFileName(fileName string) Option {
 }
 
 type source struct {
-	client  *polaris.ConfigAPI
+	client  polaris.ConfigAPI
 	options *options
 }
 
-func New(client *polaris.ConfigAPI, opts ...Option) (config.Source, error) {
+func New(client polaris.ConfigAPI, opts ...Option) (config.Source, error) {
 	options := &options{
 		namespace: "default",
 		fileGroup: "",
@@ -74,12 +74,7 @@ func New(client *polaris.ConfigAPI, opts ...Option) (config.Source, error) {
 
 // Load return the config values
 func (s *source) Load() ([]*config.KeyValue, error) {
-	configAPI, err := polaris.NewConfigAPI()
-	if err != nil {
-		return nil, err
-	}
-
-	configFile, err := configAPI.GetConfigFile(s.options.namespace, s.options.fileGroup, s.options.fileName)
+	configFile, err := s.client.GetConfigFile(s.options.namespace, s.options.fileGroup, s.options.fileName)
 	if err != nil {
 		fmt.Println("fail to get config.", err)
 		return nil, err
