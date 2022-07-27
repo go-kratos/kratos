@@ -3,6 +3,7 @@ package zookeeper
 import (
 	"context"
 	"path"
+	"time"
 
 	"github.com/go-zookeeper/zk"
 	"golang.org/x/sync/singleflight"
@@ -77,6 +78,7 @@ func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 	if err = r.ensureName(servicePath, data, zk.FlagEphemeral); err != nil {
 		return err
 	}
+	go r.reRegister(servicePath, data)
 	return nil
 }
 
@@ -149,4 +151,22 @@ func (r *Registry) ensureName(path string, data []byte, flags int32) error {
 		}
 	}
 	return nil
+}
+
+// reRegister re-register data node info when bad connection recovered
+func (r *Registry) reRegister(path string, data []byte) {
+	sessionID := r.conn.SessionID()
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+	for range ticker.C {
+		cur := r.conn.SessionID()
+		// sessionID changed
+		if cur > 0 && sessionID != cur {
+			// re-ensureName
+			if err := r.ensureName(path, data, zk.FlagEphemeral); err != nil {
+				return
+			}
+			sessionID = cur
+		}
+	}
 }
