@@ -3,6 +3,7 @@ package grpc
 import (
 	"fmt"
 
+	enc "github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/encoding/json"
 	"google.golang.org/grpc/encoding"
 	"google.golang.org/protobuf/proto"
@@ -20,7 +21,7 @@ func (codec) Marshal(v interface{}) ([]byte, error) {
 	if !ok {
 		return nil, fmt.Errorf("failed to marshal, message is %T, want proto.Message", v)
 	}
-	return json.MarshalOptions.Marshal(vv)
+	return enc.GetCodec(json.Name).Marshal(vv)
 }
 
 func (codec) Unmarshal(data []byte, v interface{}) error {
@@ -28,9 +29,9 @@ func (codec) Unmarshal(data []byte, v interface{}) error {
 	if !ok {
 		return fmt.Errorf("failed to unmarshal, message is %T, want proto.Message", v)
 	}
-	return json.UnmarshalOptions.Unmarshal(data, vv)
+	return enc.GetCodec(json.Name).Unmarshal(data, vv)
 }
 
 func (codec) Name() string {
-	return "json"
+	return json.Name
 }
