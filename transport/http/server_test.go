@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/middleware"
 
 	"github.com/go-kratos/kratos/v2/internal/host"
 )
@@ -311,17 +310,6 @@ func TestTimeout(t *testing.T) {
 
 func TestLogger(t *testing.T) {
 	// todo
-}
-
-func TestMiddleware(t *testing.T) {
-	o := &Server{}
-	v := []middleware.Middleware{
-		func(middleware.Handler) middleware.Handler { return nil },
-	}
-	Middleware(v...)(o)
-	if !reflect.DeepEqual(v, o.ms) {
-		t.Errorf("expected %v got %v", v, o.ms)
-	}
 }
 
 func TestRequestDecoder(t *testing.T) {
