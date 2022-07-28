@@ -23,6 +23,7 @@ type discoveryResolver struct {
 
 	insecure         bool
 	debugLogDisabled bool
+	firstUpdateState bool
 }
 
 func (r *discoveryResolver) watch() {
@@ -72,11 +73,17 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	}
 	if len(addrs) == 0 {
 		log.Warnf("[resolver] Zero endpoint found,refused to write, instances: %v", ins)
-		return
+		// Not directly return with firstUpdateState
+		// because gRPC client will block until the resolver has provided addresses or the context expires.
+		if !r.firstUpdateState {
+			return
+		}
 	}
 	err := r.cc.UpdateState(resolver.State{Addresses: addrs})
 	if err != nil {
 		log.Errorf("[resolver] failed to update state: %s", err)
+	} else {
+		r.firstUpdateState = false
 	}
 
 	if !r.debugLogDisabled {
