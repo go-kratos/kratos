@@ -20,28 +20,29 @@ var CmdAdd = &cobra.Command{
 }
 
 func run(cmd *cobra.Command, args []string) {
-	// kratos proto add helloworld/v1/helloworld.proto
-	input := args[0]
-	n := strings.LastIndex(input, "/")
-	if n == -1 {
-		fmt.Println("The proto path needs to be hierarchical.")
-		return
-	}
-	path := input[:n]
-	fileName := input[n+1:]
-	pkgName := strings.ReplaceAll(path, "/", ".")
+	// kratos proto add helloworld/v1/helloworld.proto helloworld/v1/helloworld2.proto
+	for _, input := range args {
+		n := strings.LastIndex(input, "/")
+		if n == -1 {
+			fmt.Println("The proto path needs to be hierarchical.")
+			return
+		}
+		path := input[:n]
+		fileName := input[n+1:]
+		pkgName := strings.ReplaceAll(path, "/", ".")
 
-	p := &Proto{
-		Name:        fileName,
-		Path:        path,
-		Package:     pkgName,
-		GoPackage:   goPackage(path),
-		JavaPackage: javaPackage(pkgName),
-		Service:     serviceName(fileName),
-	}
-	if err := p.Generate(); err != nil {
-		fmt.Println(err)
-		return
+		p := &Proto{
+			Name:        fileName,
+			Path:        path,
+			Package:     pkgName,
+			GoPackage:   goPackage(path),
+			JavaPackage: javaPackage(pkgName),
+			Service:     serviceName(fileName),
+		}
+		if err := p.Generate(); err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 }
 
