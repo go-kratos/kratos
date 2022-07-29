@@ -8,6 +8,7 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/selector"
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
@@ -56,6 +57,7 @@ func Client(logger log.Logger) middleware.Middleware {
 				reason    string
 				kind      string
 				operation string
+				addr      string
 			)
 			startTime := time.Now()
 			if info, ok := transport.FromClientContext(ctx); ok {
@@ -63,6 +65,9 @@ func Client(logger log.Logger) middleware.Middleware {
 				operation = info.Operation()
 			}
 			reply, err = handler(ctx, req)
+			if p, ok := selector.FromPeerContext(ctx); ok && p.Node != nil {
+				addr = p.Node.Address()
+			}
 			if se := errors.FromError(err); se != nil {
 				code = se.Code
 				reason = se.Reason
@@ -72,6 +77,7 @@ func Client(logger log.Logger) middleware.Middleware {
 				"kind", "client",
 				"component", kind,
 				"operation", operation,
+				"addr", addr,
 				"args", extractArgs(req),
 				"code", code,
 				"reason", reason,
