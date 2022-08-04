@@ -1,13 +1,14 @@
 package binding
 
 import (
-	"github.com/go-kratos/kratos/v2/errors"
 	"io"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/go-kratos/kratos/v2/errors"
 )
 
 func TestBindQuery(t *testing.T) {
