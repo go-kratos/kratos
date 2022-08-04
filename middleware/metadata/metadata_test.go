@@ -126,3 +126,14 @@ func TestClient(t *testing.T) {
 		t.Fatalf("want foo got %v", reply)
 	}
 }
+
+func Test_WithPropagatedPrefix(t *testing.T) {
+	o := &options{
+		prefix: []string{"override"},
+	}
+	WithPropagatedPrefix("something", "another")(o)
+
+	if len(o.prefix) != 2 {
+		t.Error("The prefix must be overrided.")
+	}
+}

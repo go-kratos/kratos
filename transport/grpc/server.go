@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
+	"github.com/go-kratos/kratos/v2/internal/matcher"
 
 	apimd "github.com/go-kratos/kratos/v2/api/metadata"
 
@@ -62,7 +63,7 @@ func Logger(logger log.Logger) ServerOption {
 // Middleware with server middleware.
 func Middleware(m ...middleware.Middleware) ServerOption {
 	return func(s *Server) {
-		s.middleware = m
+		s.middleware.Use(m...)
 	}
 }
 
@@ -112,7 +113,7 @@ type Server struct {
 	address    string
 	endpoint   *url.URL
 	timeout    time.Duration
-	middleware []middleware.Middleware
+	middleware matcher.Matcher
 	unaryInts  []grpc.UnaryServerInterceptor
 	streamInts []grpc.StreamServerInterceptor
 	grpcOpts   []grpc.ServerOption
@@ -123,11 +124,12 @@ type Server struct {
 // NewServer creates a gRPC server by options.
 func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
-		baseCtx: context.Background(),
-		network: "tcp",
-		address: ":0",
-		timeout: 1 * time.Second,
-		health:  health.NewServer(),
+		baseCtx:    context.Background(),
+		network:    "tcp",
+		address:    ":0",
+		timeout:    1 * time.Second,
+		health:     health.NewServer(),
+		middleware: matcher.New(),
 	}
 	for _, o := range opts {
 		o(srv)
@@ -156,8 +158,6 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 	srv.Server = grpc.NewServer(grpcOpts...)
 	srv.metadata = apimd.NewServer(srv.Server)
-	// listen and endpoint
-	srv.err = srv.listenAndEndpoint()
 	// internal register
 	grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
 	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
@@ -165,11 +165,20 @@ func NewServer(opts ...ServerOption) *Server {
 	return srv
 }
 
+// Use uses a service middleware with selector.
+// selector:
+//   - '/*'
+//   - '/helloworld.v1.Greeter/*'
+//   - '/helloworld.v1.Greeter/SayHello'
+func (s *Server) Use(selector string, m ...middleware.Middleware) {
+	s.middleware.Add(selector, m...)
+}
+
 // Endpoint return a real address to registry endpoint.
 // examples:
 //   grpc://127.0.0.1:9000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
-	if s.err != nil {
+	if err := s.listenAndEndpoint(); err != nil {
 		return nil, s.err
 	}
 	return s.endpoint, nil
@@ -177,7 +186,7 @@ func (s *Server) Endpoint() (*url.URL, error) {
 
 // Start start the gRPC server.
 func (s *Server) Start(ctx context.Context) error {
-	if s.err != nil {
+	if err := s.listenAndEndpoint(); err != nil {
 		return s.err
 	}
 	s.baseCtx = ctx
@@ -198,15 +207,18 @@ func (s *Server) listenAndEndpoint() error {
 	if s.lis == nil {
 		lis, err := net.Listen(s.network, s.address)
 		if err != nil {
+			s.err = err
 			return err
 		}
 		s.lis = lis
 	}
-	addr, err := host.Extract(s.address, s.lis)
-	if err != nil {
-		_ = s.lis.Close()
-		return err
+	if s.endpoint == nil {
+		addr, err := host.Extract(s.address, s.lis)
+		if err != nil {
+			s.err = err
+			return err
+		}
+		s.endpoint = endpoint.NewEndpoint(endpoint.Scheme("grpc", s.tlsConf != nil), addr)
 	}
-	s.endpoint = endpoint.NewEndpoint(endpoint.Scheme("grpc", s.tlsConf != nil), addr)
-	return nil
+	return s.err
 }

@@ -106,6 +106,9 @@ func Reason(err error) string {
 
 // Clone deep clone error to a new error.
 func Clone(err *Error) *Error {
+	if err == nil {
+		return nil
+	}
 	metadata := make(map[string]string, len(err.Metadata))
 	for k, v := range err.Metadata {
 		metadata[k] = v

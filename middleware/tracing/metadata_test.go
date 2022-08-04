@@ -51,9 +51,10 @@ func TestMetadata_Extract(t *testing.T) {
 		carrier propagation.TextMapCarrier
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name  string
+		args  args
+		want  string
+		crash bool
 	}{
 		{
 			name: "https://go-kratos.dev",
@@ -71,6 +72,14 @@ func TestMetadata_Extract(t *testing.T) {
 			},
 			want: "https://github.com/go-kratos/kratos",
 		},
+		{
+			name: "https://github.com/go-kratos/kratos",
+			args: args{
+				parent:  metadata.NewServerContext(context.Background(), metadata.Metadata{}),
+				carrier: propagation.HeaderCarrier{"X-Md-Service-Name": nil},
+			},
+			crash: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -78,6 +87,9 @@ func TestMetadata_Extract(t *testing.T) {
 			ctx := b.Extract(tt.args.parent, tt.args.carrier)
 			md, ok := metadata.FromServerContext(ctx)
 			if !ok {
+				if tt.crash {
+					return
+				}
 				t.Errorf("expect %v, got %v", true, ok)
 			}
 			if !reflect.DeepEqual(md.Get(serviceHeader), tt.want) {

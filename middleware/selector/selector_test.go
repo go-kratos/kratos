@@ -2,7 +2,6 @@ package selector
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -243,9 +242,20 @@ func TestHeaderFunc(t *testing.T) {
 
 func testMiddleware(handler middleware.Handler) middleware.Handler {
 	return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-		fmt.Println("before")
 		reply, err = handler(ctx, req)
-		fmt.Println("after")
 		return
+	}
+}
+
+func Test_RegexMatch(t *testing.T) {
+	if regexMatch("^\b(?", "something") {
+		t.Error("The invalid regex must not match.")
+	}
+}
+
+func Test_matches(t *testing.T) {
+	b := Builder{}
+	if b.matches(context.Background(), func(_ context.Context) (transport.Transporter, bool) { return nil, false }) {
+		t.Error("The matches method must return false.")
 	}
 }

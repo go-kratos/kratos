@@ -3,6 +3,8 @@ package http
 import (
 	"bytes"
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -89,6 +91,11 @@ func TestContextResponse(t *testing.T) {
 	err := w.Returns(map[string]string{}, nil)
 	if err != nil {
 		t.Errorf("expected %v, got %v", nil, err)
+	}
+	needErr := fmt.Errorf("some error")
+	err = w.Returns(map[string]string{}, needErr)
+	if !errors.Is(err, needErr) {
+		t.Errorf("expected %v, got %v", needErr, err)
 	}
 }
 

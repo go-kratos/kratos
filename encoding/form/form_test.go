@@ -204,3 +204,17 @@ func TestEncodeFieldMask(t *testing.T) {
 		t.Log(v)
 	}
 }
+
+func TestOptional(t *testing.T) {
+	v := int32(100)
+	req := &bdtest.HelloRequest{
+		Name:     "foo",
+		Sub:      &bdtest.Sub{Name: "bar"},
+		OptInt32: &v,
+	}
+	if v, _ := EncodeValues(req); v.Encode() != "name=foo&optInt32=100&sub.naming=bar" {
+		t.Errorf("got %s", v.Encode())
+	} else {
+		t.Log(v)
+	}
+}

@@ -14,10 +14,13 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/middleware"
 
 	"github.com/go-kratos/kratos/v2/internal/host"
 )
+
+var h = func(w http.ResponseWriter, r *http.Request) {
+	_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
+}
 
 type testKey struct{}
 
@@ -25,14 +28,61 @@ type testData struct {
 	Path string `json:"path"`
 }
 
-func TestServer(t *testing.T) {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
+// handleFuncWrapper is a wrapper for http.HandlerFunc to implement http.Handler
+type handleFuncWrapper struct {
+	fn http.HandlerFunc
+}
+
+func (x *handleFuncWrapper) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	x.fn.ServeHTTP(writer, request)
+}
+
+func newHandleFuncWrapper(fn http.HandlerFunc) http.Handler {
+	return &handleFuncWrapper{fn: fn}
+}
+
+func TestServeHTTP(t *testing.T) {
+	ln, err := net.Listen("tcp", ":0")
+	if err != nil {
+		t.Fatal(err)
 	}
+	mux := NewServer(Listener(ln))
+	mux.HandleFunc("/index", h)
+	mux.Route("/errors").GET("/cause", func(ctx Context) error {
+		return errors.BadRequest("xxx", "zzz").
+			WithMetadata(map[string]string{"foo": "bar"}).
+			WithCause(fmt.Errorf("error cause"))
+	})
+	if err = mux.WalkRoute(func(r RouteInfo) error {
+		t.Logf("WalkRoute: %+v", r)
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if e, err := mux.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
+		t.Fatal(e, err)
+	}
+	srv := http.Server{Handler: mux}
+	go func() {
+		if err := srv.Serve(ln); err != nil {
+			if errors.Is(err, http.ErrServerClosed) {
+				return
+			}
+			panic(err)
+		}
+	}()
+	time.Sleep(time.Second)
+	if err := srv.Shutdown(context.Background()); err != nil {
+		t.Log(err)
+	}
+}
+
+func TestServer(t *testing.T) {
 	ctx := context.Background()
 	srv := NewServer()
-	srv.HandleFunc("/index", fn)
-	srv.HandleFunc("/index/{id:[0-9]+}", fn)
+	srv.Handle("/index", newHandleFuncWrapper(h))
+	srv.HandleFunc("/index/{id:[0-9]+}", h)
+	srv.HandlePrefix("/test/prefix", newHandleFuncWrapper(h))
 	srv.HandleHeader("content-type", "application/grpc-web+json", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	})
@@ -55,6 +105,7 @@ func TestServer(t *testing.T) {
 	testHeader(t, srv)
 	testClient(t, srv)
 	testAccept(t, srv)
+	time.Sleep(time.Second)
 	if srv.Stop(ctx) != nil {
 		t.Errorf("expected nil got %v", srv.Stop(ctx))
 	}
@@ -121,20 +172,21 @@ func testClient(t *testing.T, srv *Server) {
 		path   string
 		code   int
 	}{
-		{"GET", "/index", 200},
-		{"PUT", "/index", 200},
-		{"POST", "/index", 200},
-		{"PATCH", "/index", 200},
-		{"DELETE", "/index", 200},
+		{"GET", "/index", http.StatusOK},
+		{"PUT", "/index", http.StatusOK},
+		{"POST", "/index", http.StatusOK},
+		{"PATCH", "/index", http.StatusOK},
+		{"DELETE", "/index", http.StatusOK},
 
-		{"GET", "/index/1", 200},
-		{"PUT", "/index/1", 200},
-		{"POST", "/index/1", 200},
-		{"PATCH", "/index/1", 200},
-		{"DELETE", "/index/1", 200},
+		{"GET", "/index/1", http.StatusOK},
+		{"PUT", "/index/1", http.StatusOK},
+		{"POST", "/index/1", http.StatusOK},
+		{"PATCH", "/index/1", http.StatusOK},
+		{"DELETE", "/index/1", http.StatusOK},
 
-		{"GET", "/index/notfound", 404},
-		{"GET", "/errors/cause", 400},
+		{"GET", "/index/notfound", http.StatusNotFound},
+		{"GET", "/errors/cause", http.StatusBadRequest},
+		{"GET", "/test/prefix/123111", http.StatusOK},
 	}
 	e, err := srv.Endpoint()
 	if err != nil {
@@ -260,17 +312,6 @@ func TestLogger(t *testing.T) {
 	// todo
 }
 
-func TestMiddleware(t *testing.T) {
-	o := &Server{}
-	v := []middleware.Middleware{
-		func(middleware.Handler) middleware.Handler { return nil },
-	}
-	Middleware(v...)(o)
-	if !reflect.DeepEqual(v, o.ms) {
-		t.Errorf("expected %v got %v", v, o.ms)
-	}
-}
-
 func TestRequestDecoder(t *testing.T) {
 	o := &Server{}
 	v := func(*http.Request, interface{}) error { return nil }
@@ -307,11 +348,26 @@ func TestTLSConfig(t *testing.T) {
 	}
 }
 
+func TestStrictSlash(t *testing.T) {
+	o := &Server{}
+	v := true
+	StrictSlash(v)(o)
+	if !reflect.DeepEqual(v, o.strictSlash) {
+		t.Errorf("expected %v got %v", v, o.tlsConf)
+	}
+}
+
 func TestListener(t *testing.T) {
-	lis := &net.TCPListener{}
+	lis, err := net.Listen("tcp", ":0")
+	if err != nil {
+		t.Fatal(err)
+	}
 	s := &Server{}
 	Listener(lis)(s)
 	if !reflect.DeepEqual(s.lis, lis) {
 		t.Errorf("expected %v got %v", lis, s.lis)
+	}
+	if e, err := s.Endpoint(); err != nil || e == nil {
+		t.Errorf("expected not empty")
 	}
 }

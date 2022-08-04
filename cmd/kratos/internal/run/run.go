@@ -23,8 +23,9 @@ var CmdRun = &cobra.Command{
 // Run run project.
 func Run(cmd *cobra.Command, args []string) {
 	var dir string
-	if len(args) > 0 {
-		dir = args[0]
+	cmdArgs, programArgs := splitArgs(cmd, args)
+	if len(cmdArgs) > 0 {
+		dir = cmdArgs[0]
 	}
 	base, err := os.Getwd()
 	if err != nil {
@@ -63,7 +64,7 @@ func Run(cmd *cobra.Command, args []string) {
 			dir = cmdPath[dir]
 		}
 	}
-	fd := exec.Command("go", "run", ".")
+	fd := exec.Command("go", append([]string{"run", "."}, programArgs...)...)
 	fd.Stdout = os.Stdout
 	fd.Stderr = os.Stderr
 	fd.Dir = dir
@@ -71,6 +72,14 @@ func Run(cmd *cobra.Command, args []string) {
 		fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err.Error())
 		return
 	}
+}
+
+func splitArgs(cmd *cobra.Command, args []string) (cmdArgs, programArgs []string) {
+	dashAt := cmd.ArgsLenAtDash()
+	if dashAt >= 0 {
+		return args[:dashAt], args[dashAt:]
+	}
+	return args, []string{}
 }
 
 func findCMD(base string) (map[string]string, error) {

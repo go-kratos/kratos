@@ -2,6 +2,7 @@ package tracing
 
 import (
 	"context"
+	"fmt"
 
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/peer"
@@ -13,6 +14,7 @@ type ClientHandler struct{}
 
 // HandleConn exists to satisfy gRPC stats.Handler.
 func (c *ClientHandler) HandleConn(ctx context.Context, cs stats.ConnStats) {
+	fmt.Println("Handle connection.")
 }
 
 // TagConn exists to satisfy gRPC stats.Handler.

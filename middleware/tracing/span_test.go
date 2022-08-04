@@ -1,11 +1,19 @@
 package tracing
 
 import (
+	"context"
+	"net"
+	"net/http"
 	"reflect"
 	"testing"
 
+	"github.com/go-kratos/kratos/v2/internal/testdata/binding"
+	"github.com/go-kratos/kratos/v2/metadata"
+	"github.com/go-kratos/kratos/v2/transport"
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/grpc/peer"
 )
 
 func Test_parseFullMethod(t *testing.T) {
@@ -142,6 +150,18 @@ func Test_parseTarget(t *testing.T) {
 			wantAddress: "hello",
 			wantErr:     false,
 		},
+		{
+			name:        "empty",
+			endpoint:    "%%",
+			wantAddress: "",
+			wantErr:     true,
+		},
+		{
+			name:        "invalid path",
+			endpoint:    "//%2F/#%2Fanother",
+			wantAddress: "",
+			wantErr:     false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -155,4 +175,75 @@ func Test_parseTarget(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_setServerSpan(t *testing.T) {
+	ctx := context.Background()
+	_, span := trace.NewNoopTracerProvider().Tracer("Tracer").Start(ctx, "Spanname")
+
+	// Handle without Transport context
+	setServerSpan(ctx, span, nil)
+
+	// Handle with proto message
+	m := &binding.HelloRequest{}
+	setServerSpan(ctx, span, m)
+
+	// Handle with metadata context
+	ctx = metadata.NewServerContext(ctx, metadata.New())
+	setServerSpan(ctx, span, m)
+
+	// Handle with KindHTTP transport context
+	mt := &mockTransport{
+		kind: transport.KindHTTP,
+	}
+	mt.request, _ = http.NewRequest(http.MethodGet, "/endpoint", nil)
+	ctx = transport.NewServerContext(ctx, mt)
+	setServerSpan(ctx, span, m)
+
+	// Handle with KindGRPC transport context
+	mt.kind = transport.KindGRPC
+	ctx = transport.NewServerContext(ctx, mt)
+	ip, _ := net.ResolveIPAddr("ip", "1.1.1.1")
+	ctx = peer.NewContext(ctx, &peer.Peer{
+		Addr: ip,
+	})
+	setServerSpan(ctx, span, m)
+}
+
+func Test_setClientSpan(t *testing.T) {
+	ctx := context.Background()
+	_, span := trace.NewNoopTracerProvider().Tracer("Tracer").Start(ctx, "Spanname")
+
+	// Handle without Transport context
+	setClientSpan(ctx, span, nil)
+
+	// Handle with proto message
+	m := &binding.HelloRequest{}
+	setClientSpan(ctx, span, m)
+
+	// Handle with metadata context
+	ctx = metadata.NewClientContext(ctx, metadata.New())
+	setClientSpan(ctx, span, m)
+
+	// Handle with KindHTTP transport context
+	mt := &mockTransport{
+		kind: transport.KindHTTP,
+	}
+	mt.request, _ = http.NewRequest(http.MethodGet, "/endpoint", nil)
+	mt.request.Host = "MyServer"
+	ctx = transport.NewClientContext(ctx, mt)
+	setClientSpan(ctx, span, m)
+
+	// Handle with KindGRPC transport context
+	mt.kind = transport.KindGRPC
+	ctx = transport.NewClientContext(ctx, mt)
+	ip, _ := net.ResolveIPAddr("ip", "1.1.1.1")
+	ctx = peer.NewContext(ctx, &peer.Peer{
+		Addr: ip,
+	})
+	setClientSpan(ctx, span, m)
+
+	// Handle without Host request
+	ctx = transport.NewClientContext(ctx, mt)
+	setClientSpan(ctx, span, m)
 }

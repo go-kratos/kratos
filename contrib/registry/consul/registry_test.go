@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"reflect"
-	"strconv"
 	"testing"
 	"time"
 
@@ -24,7 +23,123 @@ func tcpServer(t *testing.T, lis net.Listener) {
 	}
 }
 
-func TestRegister(t *testing.T) {
+func TestRegistry_Register(t *testing.T) {
+	opts := []Option{
+		WithHealthCheck(false),
+	}
+
+	type args struct {
+		ctx        context.Context
+		serverName string
+		server     []*registry.ServiceInstance
+	}
+
+	test := []struct {
+		name    string
+		args    args
+		want    []*registry.ServiceInstance
+		wantErr bool
+	}{
+		{
+			name: "normal",
+			args: args{
+				ctx:        context.Background(),
+				serverName: "server-1",
+				server: []*registry.ServiceInstance{
+					{
+						ID:        "1",
+						Name:      "server-1",
+						Version:   "v0.0.1",
+						Metadata:  nil,
+						Endpoints: []string{"http://127.0.0.1:8000"},
+					},
+				},
+			},
+			want: []*registry.ServiceInstance{
+				{
+					ID:        "1",
+					Name:      "server-1",
+					Version:   "v0.0.1",
+					Metadata:  nil,
+					Endpoints: []string{"http://127.0.0.1:8000"},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "registry new service replace old service",
+			args: args{
+				ctx:        context.Background(),
+				serverName: "server-1",
+				server: []*registry.ServiceInstance{
+					{
+						ID:        "1",
+						Name:      "server-1",
+						Version:   "v0.0.1",
+						Metadata:  nil,
+						Endpoints: []string{"http://127.0.0.1:8000"},
+					},
+					{
+						ID:        "1",
+						Name:      "server-1",
+						Version:   "v0.0.2",
+						Metadata:  nil,
+						Endpoints: []string{"http://127.0.0.1:8000"},
+					},
+				},
+			},
+			want: []*registry.ServiceInstance{
+				{
+					ID:        "1",
+					Name:      "server-1",
+					Version:   "v0.0.2",
+					Metadata:  nil,
+					Endpoints: []string{"http://127.0.0.1:8000"},
+				},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range test {
+		t.Run(tt.name, func(t *testing.T) {
+			cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500"})
+			if err != nil {
+				t.Fatalf("create consul client failed: %v", err)
+			}
+
+			r := New(cli, opts...)
+
+			for _, instance := range tt.args.server {
+				err = r.Register(tt.args.ctx, instance)
+				if err != nil {
+					t.Error(err)
+				}
+			}
+
+			watch, err := r.Watch(tt.args.ctx, tt.args.serverName)
+			if err != nil {
+				t.Error(err)
+			}
+			got, err := watch.Next()
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("GetService() got = %v", got)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetService() got = %v, want %v", got, tt.want)
+			}
+
+			for _, instance := range tt.args.server {
+				_ = r.Deregister(tt.args.ctx, instance)
+			}
+		})
+	}
+}
+
+func TestRegistry_GetService(t *testing.T) {
 	addr := fmt.Sprintf("%s:9091", getIntranetIP())
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -44,47 +159,212 @@ func TestRegister(t *testing.T) {
 		WithHealthCheckInterval(5),
 	}
 	r := New(cli, opts...)
-	if err != nil {
-		t.Errorf("new consul registry failed: %v", err)
-	}
-	version := strconv.FormatInt(time.Now().Unix(), 10)
-	svc := &registry.ServiceInstance{
-		ID:        "test2233",
-		Name:      "test-provider",
-		Version:   version,
-		Metadata:  map[string]string{"app": "kratos"},
+
+	instance1 := &registry.ServiceInstance{
+		ID:        "1",
+		Name:      "server-1",
+		Version:   "v0.0.1",
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	err = r.Register(ctx, svc)
-	if err != nil {
-		t.Errorf("Register failed: %v", err)
+
+	type fields struct {
+		registry *Registry
 	}
-	w, err := r.Watch(ctx, "test-provider")
-	if err != nil {
-		t.Errorf("Watchfailed: %v", err)
+	type args struct {
+		ctx         context.Context
+		serviceName string
+	}
+	tests := []struct {
+		name      string
+		fields    fields
+		args      args
+		want      []*registry.ServiceInstance
+		wantErr   bool
+		preFunc   func(t *testing.T)
+		deferFunc func(t *testing.T)
+	}{
+		{
+			name:   "normal",
+			fields: fields{r},
+			args: args{
+				ctx:         context.Background(),
+				serviceName: "server-1",
+			},
+			want:    []*registry.ServiceInstance{instance1},
+			wantErr: false,
+			preFunc: func(t *testing.T) {
+				if err := r.Register(context.Background(), instance1); err != nil {
+					t.Error(err)
+				}
+				watch, err := r.Watch(context.Background(), instance1.Name)
+				if err != nil {
+					t.Error(err)
+				}
+				_, err = watch.Next()
+				if err != nil {
+					t.Error(err)
+				}
+			},
+			deferFunc: func(t *testing.T) {
+				err := r.Deregister(context.Background(), instance1)
+				if err != nil {
+					t.Error(err)
+				}
+			},
+		},
+		{
+			name:   "can't get any",
+			fields: fields{r},
+			args: args{
+				ctx:         context.Background(),
+				serviceName: "server-x",
+			},
+			want:    nil,
+			wantErr: true,
+			preFunc: func(t *testing.T) {
+				if err := r.Register(context.Background(), instance1); err != nil {
+					t.Error(err)
+				}
+				watch, err := r.Watch(context.Background(), instance1.Name)
+				if err != nil {
+					t.Error(err)
+				}
+				_, err = watch.Next()
+				if err != nil {
+					t.Error(err)
+				}
+			},
+			deferFunc: func(t *testing.T) {
+				err := r.Deregister(context.Background(), instance1)
+				if err != nil {
+					t.Error(err)
+				}
+			},
+		},
 	}
 
-	services, err := w.Next()
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if test.preFunc != nil {
+				test.preFunc(t)
+			}
+			if test.deferFunc != nil {
+				defer test.deferFunc(t)
+			}
+
+			service, err := test.fields.registry.GetService(context.Background(), test.args.serviceName)
+			if (err != nil) != test.wantErr {
+				t.Errorf("GetService() error = %v, wantErr %v", err, test.wantErr)
+				t.Errorf("GetService() got = %v", service)
+				return
+			}
+			if !reflect.DeepEqual(service, test.want) {
+				t.Errorf("GetService() got = %v, want %v", service, test.want)
+			}
+		})
+	}
+}
+
+func TestRegistry_Watch(t *testing.T) {
+	addr := fmt.Sprintf("%s:9091", getIntranetIP())
+
+	time.Sleep(time.Millisecond * 100)
+	cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500", WaitTime: 2 * time.Second})
 	if err != nil {
-		t.Errorf("Next failed: %v", err)
+		t.Fatalf("create consul client failed: %v", err)
 	}
-	if !reflect.DeepEqual(1, len(services)) {
-		t.Errorf("no expect float_key value: %v, but got: %v", len(services), 1)
+
+	instance1 := &registry.ServiceInstance{
+		ID:        "1",
+		Name:      "server-1",
+		Version:   "v0.0.1",
+		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
-	if !reflect.DeepEqual("test2233", services[0].ID) {
-		t.Errorf("no expect float_key value: %v, but got: %v", services[0].ID, "test2233")
+
+	type args struct {
+		ctx      context.Context
+		opts     []Option
+		instance *registry.ServiceInstance
 	}
-	if !reflect.DeepEqual("test-provider", services[0].Name) {
-		t.Errorf("no expect float_key value: %v, but got: %v", services[0].Name, "test-provider")
+	tests := []struct {
+		name    string
+		args    args
+		want    []*registry.ServiceInstance
+		wantErr bool
+		preFunc func(t *testing.T)
+	}{
+		{
+			name: "normal",
+			args: args{
+				ctx:      context.Background(),
+				instance: instance1,
+				opts: []Option{
+					WithHealthCheck(false),
+				},
+			},
+			want:    []*registry.ServiceInstance{instance1},
+			wantErr: false,
+			preFunc: func(t *testing.T) {
+			},
+		},
+		{
+			name: "register with healthCheck",
+			args: args{
+				ctx:      context.Background(),
+				instance: instance1,
+				opts: []Option{
+					WithHeartbeat(true),
+					WithHealthCheck(true),
+					WithHealthCheckInterval(5),
+				},
+			},
+			want:    []*registry.ServiceInstance{instance1},
+			wantErr: false,
+			preFunc: func(t *testing.T) {
+				lis, err := net.Listen("tcp", addr)
+				if err != nil {
+					t.Errorf("listen tcp %s failed!", addr)
+				}
+				go tcpServer(t, lis)
+			},
+		},
 	}
-	if !reflect.DeepEqual(version, services[0].Version) {
-		t.Errorf("no expect float_key value: %v, but got: %v", services[0].Version, version)
-	}
-	err = r.Deregister(ctx, svc)
-	if err != nil {
-		t.Errorf("Deregister failed: %v", err)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.preFunc != nil {
+				tt.preFunc(t)
+			}
+
+			r := New(cli, tt.args.opts...)
+
+			err := r.Register(tt.args.ctx, tt.args.instance)
+			if err != nil {
+				t.Error(err)
+			}
+			defer func() {
+				err = r.Deregister(tt.args.ctx, tt.args.instance)
+				if err != nil {
+					t.Error(err)
+				}
+			}()
+
+			watch, err := r.Watch(tt.args.ctx, tt.args.instance.Name)
+			if err != nil {
+				t.Error(err)
+			}
+
+			service, err := watch.Next()
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("GetService() got = %v", service)
+				return
+			}
+			if !reflect.DeepEqual(service, tt.want) {
+				t.Errorf("GetService() got = %v, want %v", service, tt.want)
+			}
+		})
 	}
 }
 

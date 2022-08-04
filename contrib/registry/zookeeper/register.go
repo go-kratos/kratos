@@ -3,6 +3,7 @@ package zookeeper
 import (
 	"context"
 	"path"
+	"time"
 
 	"github.com/go-zookeeper/zk"
 	"golang.org/x/sync/singleflight"
@@ -77,6 +78,7 @@ func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 	if err = r.ensureName(servicePath, data, zk.FlagEphemeral); err != nil {
 		return err
 	}
+	go r.reRegister(servicePath, data)
 	return nil
 }
 
@@ -133,12 +135,20 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 
 // ensureName ensure node exists, if not exist, create and set data
 func (r *Registry) ensureName(path string, data []byte, flags int32) error {
-	exists, _, err := r.conn.Exists(path)
+	exists, stat, err := r.conn.Exists(path)
 	if err != nil {
 		return err
 	}
+	// ephemeral nodes handling after restart
+	// fixes a race condition if the server crashes without using CreateProtectedEphemeralSequential()
+	if flags&zk.FlagEphemeral == zk.FlagEphemeral {
+		err = r.conn.Delete(path, stat.Version)
+		if err != nil && err != zk.ErrNoNode {
+			return err
+		}
+		exists = false
+	}
 	if !exists {
-		var err error
 		if len(r.opts.user) > 0 && len(r.opts.password) > 0 {
 			_, err = r.conn.Create(path, data, flags, zk.DigestACL(zk.PermAll, r.opts.user, r.opts.password))
 		} else {
@@ -149,4 +159,22 @@ func (r *Registry) ensureName(path string, data []byte, flags int32) error {
 		}
 	}
 	return nil
+}
+
+// reRegister re-register data node info when bad connection recovered
+func (r *Registry) reRegister(path string, data []byte) {
+	sessionID := r.conn.SessionID()
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+	for range ticker.C {
+		cur := r.conn.SessionID()
+		// sessionID changed
+		if cur > 0 && sessionID != cur {
+			// re-ensureName
+			if err := r.ensureName(path, data, zk.FlagEphemeral); err != nil {
+				return
+			}
+			sessionID = cur
+		}
+	}
 }

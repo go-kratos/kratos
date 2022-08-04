@@ -26,11 +26,12 @@ func EncodeValues(msg proto.Message) (url.Values, error) {
 	return u, nil
 }
 
-func encodeByField(u url.Values, path string, v protoreflect.Message) error {
-	for i := 0; i < v.Descriptor().Fields().Len(); i++ {
-		fd := v.Descriptor().Fields().Get(i)
-		var key string
-		var newPath string
+func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr error) {
+	m.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
+		var (
+			key     string
+			newPath string
+		)
 		if fd.HasJSONName() {
 			key = fd.JSONName()
 		} else {
@@ -41,53 +42,55 @@ func encodeByField(u url.Values, path string, v protoreflect.Message) error {
 		} else {
 			newPath = path + "." + key
 		}
-
 		if of := fd.ContainingOneof(); of != nil {
-			if f := v.WhichOneof(of); f != nil {
+			if f := m.WhichOneof(of); f != nil {
 				if f != fd {
-					continue
+					return true
 				}
 			}
 		}
 		switch {
 		case fd.IsList():
-			if v.Get(fd).List().Len() > 0 {
-				list, err := encodeRepeatedField(fd, v.Get(fd).List())
+			if v.List().Len() > 0 {
+				list, err := encodeRepeatedField(fd, v.List())
 				if err != nil {
-					return err
+					finalErr = err
+					return false
 				}
 				u[newPath] = list
 			}
 		case fd.IsMap():
-			if v.Get(fd).Map().Len() > 0 {
-				m, err := encodeMapField(fd, v.Get(fd).Map())
+			if v.Map().Len() > 0 {
+				m, err := encodeMapField(fd, v.Map())
 				if err != nil {
-					return err
+					finalErr = err
+					return false
 				}
 				for k, value := range m {
 					u[fmt.Sprintf("%s[%s]", newPath, k)] = []string{value}
 				}
 			}
 		case (fd.Kind() == protoreflect.MessageKind) || (fd.Kind() == protoreflect.GroupKind):
-			value, err := encodeMessage(fd.Message(), v.Get(fd))
+			value, err := encodeMessage(fd.Message(), v)
 			if err == nil {
 				u[newPath] = []string{value}
-				continue
+				return true
 			}
-			err = encodeByField(u, newPath, v.Get(fd).Message())
-			if err != nil {
-				return err
+			if err = encodeByField(u, newPath, v.Message()); err != nil {
+				finalErr = err
+				return false
 			}
 		default:
-			value, err := EncodeField(fd, v.Get(fd))
+			value, err := EncodeField(fd, v)
 			if err != nil {
-				return err
+				finalErr = err
+				return false
 			}
 			u[newPath] = []string{value}
 		}
-	}
-
-	return nil
+		return true
+	})
+	return
 }
 
 func encodeRepeatedField(fieldDescriptor protoreflect.FieldDescriptor, list protoreflect.List) ([]string, error) {
@@ -99,7 +102,6 @@ func encodeRepeatedField(fieldDescriptor protoreflect.FieldDescriptor, list prot
 		}
 		values = append(values, value)
 	}
-
 	return values, nil
 }
 
@@ -139,7 +141,7 @@ func EncodeField(fieldDescriptor protoreflect.FieldDescriptor, value protoreflec
 	case protoreflect.MessageKind, protoreflect.GroupKind:
 		return encodeMessage(fieldDescriptor.Message(), value)
 	default:
-		return fmt.Sprintf("%v", value.Interface()), nil
+		return fmt.Sprint(value.Interface()), nil
 	}
 }
 
@@ -158,7 +160,7 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 		"google.protobuf.UInt64Value", "google.protobuf.UInt32Value", "google.protobuf.BoolValue", "google.protobuf.StringValue":
 		fd := msgDescriptor.Fields()
 		v := value.Message().Get(fd.ByName(protoreflect.Name("value")))
-		return fmt.Sprintf("%v", v.Interface()), nil
+		return fmt.Sprint(v.Interface()), nil
 	case fieldMaskFullName:
 		m, ok := value.Message().Interface().(*fieldmaskpb.FieldMask)
 		if !ok || m == nil {

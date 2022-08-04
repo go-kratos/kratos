@@ -6,6 +6,15 @@ import (
 	"sync"
 )
 
+// WalkRouteFunc is the type of the function called for each route visited by Walk.
+type WalkRouteFunc func(RouteInfo) error
+
+// RouteInfo is an HTTP route info.
+type RouteInfo struct {
+	Path   string
+	Method string
+}
+
 // HandlerFunc defines a function to serve HTTP requests.
 type HandlerFunc func(Context) error
 

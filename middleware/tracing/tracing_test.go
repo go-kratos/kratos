@@ -42,6 +42,7 @@ type mockTransport struct {
 	endpoint  string
 	operation string
 	header    headerCarrier
+	request   *http.Request
 }
 
 func (tr *mockTransport) Kind() transport.Kind            { return tr.kind }
@@ -49,6 +50,16 @@ func (tr *mockTransport) Endpoint() string                { return tr.endpoint }
 func (tr *mockTransport) Operation() string               { return tr.operation }
 func (tr *mockTransport) RequestHeader() transport.Header { return tr.header }
 func (tr *mockTransport) ReplyHeader() transport.Header   { return tr.header }
+func (tr *mockTransport) Request() *http.Request {
+	if tr.request == nil {
+		rq, _ := http.NewRequest(http.MethodGet, "/endpoint", nil)
+
+		return rq
+	}
+
+	return tr.request
+}
+func (tr *mockTransport) PathTemplate() string { return "" }
 
 func TestTracer(t *testing.T) {
 	carrier := headerCarrier{}
