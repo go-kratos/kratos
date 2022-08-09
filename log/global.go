@@ -39,7 +39,7 @@ func SetLogger(logger Logger) {
 
 // GetLogger returns global logger appliance as logger in current process.
 func GetLogger() Logger {
-	return global.GetLogger()
+	return global
 }
 
 // Log Print log by level and keyvals.
