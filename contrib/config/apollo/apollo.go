@@ -123,7 +123,10 @@ func (e *apollo) load() []*config.KeyValue {
 		value, err := e.client.GetConfigCache(ns).Get("content")
 		if err != nil {
 			log.Warnw("apollo get config failed", "err", err)
+			// occur panic while KeyValue is nil
+			continue
 		}
+
 		// serialize the namespace content KeyValue into bytes.
 		kv = append(kv, &config.KeyValue{
 			Key:    ns,
