@@ -53,7 +53,6 @@ jobs:
 
       - name: Test
         run: |
-          lsof -i:8848
           make test-coverage
       - name: Upload coverage to Codecov
         run: bash <(curl -s https://codecov.io/bash)
