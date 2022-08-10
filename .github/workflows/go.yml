@@ -25,11 +25,11 @@ jobs:
           ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
           ETCD_ADVERTISE_CLIENT_URLS: http://0.0.0.0:2379
       consul:
-        image: consul:latest
+        image: consul:1.12.3
         ports:
           - 8500:8500
       nacos:
-        image: nacos/nacos-server:latest
+        image: nacos/nacos-server:v2.1.0
         env:
           MODE: standalone
         ports:
