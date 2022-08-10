@@ -117,7 +117,7 @@ func NewSource(opts ...Option) config.Source {
 func format(ns string) string {
     arr := strings.Split(ns, ".")
     if len(arr) <= 1 || arr[len(arr)-1] == properties {
-        return "json"
+        return json
     }
     return arr[len(arr)-1]
 }
