@@ -13,7 +13,7 @@ func (parser jsonExtParser) Parse(configContent interface{}) (map[string]interfa
 
 type yamlExtParser struct{}
 
-func (parser yamlExtParser) Parse(configContent interface{}) (out map[string]interface{}, err error) {
+func (parser yamlExtParser) Parse(configContent interface{}) (map[string]interface{}, error) {
 	return map[string]interface{}{"content": configContent}, nil
 }
 
