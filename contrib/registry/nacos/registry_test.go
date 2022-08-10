@@ -2,6 +2,8 @@ package nacos
 
 import (
 	"context"
+	"fmt"
+	"os/exec"
 	"reflect"
 	"testing"
 	"time"
@@ -14,6 +16,8 @@ import (
 )
 
 func TestRegistry_Register(t *testing.T) {
+	out := exec.Command("lsof-i:8848").String()
+	fmt.Println(out)
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig("127.0.0.1", 8848),
 	}
