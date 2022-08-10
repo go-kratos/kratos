@@ -126,7 +126,6 @@ func (e *apollo) load() []*config.KeyValue {
 			// occur panic while KeyValue is nil
 			continue
 		}
-
 		// serialize the namespace content KeyValue into bytes.
 		kv = append(kv, &config.KeyValue{
 			Key:    ns,
