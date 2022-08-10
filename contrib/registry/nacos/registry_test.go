@@ -15,7 +15,7 @@ import (
 
 func TestRegistry_Register(t *testing.T) {
 	sc := []constant.ServerConfig{
-		*constant.NewServerConfig("127.0.0.1", 8848),
+		*constant.NewServerConfig("nacos", 8848),
 	}
 
 	cc := constant.ClientConfig{
