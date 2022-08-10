@@ -18,7 +18,7 @@ import (
 func TestRegistry_Register(t *testing.T) {
 	exec := exec.Command("lsof-i:8848")
 	exec.Run()
-	fmt.Println(exec.String())
+	fmt.Println(exec.Stdout)
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig("127.0.0.1", 8848),
 	}
