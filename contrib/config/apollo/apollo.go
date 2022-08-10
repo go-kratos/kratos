@@ -18,8 +18,8 @@ type apollo struct {
 
 const (
     yaml       = "yaml"
-    json       = "json"
     yml        = "yml"
+    json       = "json"
     properties = "properties"
 )
 
