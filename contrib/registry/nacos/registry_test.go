@@ -2,7 +2,6 @@ package nacos
 
 import (
 	"context"
-	"net"
 	"reflect"
 	"testing"
 	"time"
@@ -15,11 +14,6 @@ import (
 )
 
 func TestRegistry_Register(t *testing.T) {
-	dial, err := net.Dial("tcp", "127.0.0.1:8848")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(dial)
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig("127.0.0.1", 8848),
 	}

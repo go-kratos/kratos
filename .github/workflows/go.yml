@@ -29,12 +29,12 @@ jobs:
         ports:
           - 8500:8500
       nacos:
-        image: nacos/nacos-server:v2.1.1
+        image: nacos/nacos-server:v1.4.4
         env:
           MODE: standalone
         ports:
-          - "8848:8848"
-          - "9848:9848"
+          - 8848:8848
+          - 9848:9848
       polaris:
         image: polarismesh/polaris-server-standalone:v1.9.0
         ports:
