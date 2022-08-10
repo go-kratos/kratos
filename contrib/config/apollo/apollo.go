@@ -16,6 +16,13 @@ type apollo struct {
 	opt    *options
 }
 
+const (
+	yaml = "yaml"
+	json = "json"
+	yml = "yml"
+	properties = "properties"
+)
+
 // Option is apollo option
 type Option func(*options)
 
@@ -109,7 +116,7 @@ func NewSource(opts ...Option) config.Source {
 
 func format(ns string) string {
 	arr := strings.Split(ns, ".")
-	if len(arr) <= 1 || arr[len(arr)-1] == "properties" {
+	if len(arr) <= 1 || arr[len(arr)-1] ==  {
 		return "json"
 	}
 	return arr[len(arr)-1]
@@ -120,8 +127,8 @@ func (e *apollo) load() []*config.KeyValue {
 	namespaces := strings.Split(e.opt.namespace, ",")
 
 	for _, ns := range namespaces {
-		if strings.Contains(ns, ".") && !strings.Contains(ns, "properties") &&
-			(format(ns) == "yaml" || format(ns) == "yaml" || format(ns) == "json") {
+		if strings.Contains(ns, ".") && !strings.Contains(ns, properties) &&
+			(format(ns) == yaml || format(ns) == yml || format(ns) == json) {
 			value, err := e.client.GetConfigCache(ns).Get("content")
 			if err != nil {
 				log.Errorf("apollo get config failed，err:%v", err)

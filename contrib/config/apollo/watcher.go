@@ -2,8 +2,9 @@ package apollo
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/encoding"
 	"strings"
+
+	"github.com/go-kratos/kratos/v2/encoding"
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/log"
@@ -25,8 +26,8 @@ type customChangeListener struct {
 
 func (c *customChangeListener) onChange(namespace string, changes map[string]*storage.ConfigChange) []*config.KeyValue {
 	kv := make([]*config.KeyValue, 0, 2)
-	if strings.Contains(namespace, ".") && !strings.Contains(namespace, "properties") &&
-		(format(namespace) == "yaml" || format(namespace) == "yaml" || format(namespace) == "json") {
+	if strings.Contains(namespace, ".") && !strings.Contains(namespace, properties) &&
+		(format(namespace) == yaml || format(namespace) == yml || format(namespace) == json) {
 		value, err := c.apollo.client.GetConfigCache(namespace).Get("content")
 		if err != nil {
 			log.Warnw("apollo get config failed", "err", err)
