@@ -256,8 +256,9 @@ func (s *Server) filter() mux.MiddlewareFunc {
 
 // Endpoint return a real address to registry endpoint.
 // examples:
-//   https://127.0.0.1:8000
-//   Legacy: http://127.0.0.1:8000?isSecure=false
+//
+//	https://127.0.0.1:8000
+//	Legacy: http://127.0.0.1:8000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
 	if err := s.listenAndEndpoint(); err != nil {
 		return nil, err
