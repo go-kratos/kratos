@@ -4,11 +4,13 @@ import (
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/log"
 
 	"github.com/apolloconfig/agollo/v4"
+	"github.com/apolloconfig/agollo/v4/constant"
 	apolloConfig "github.com/apolloconfig/agollo/v4/env/config"
+	"github.com/apolloconfig/agollo/v4/extension"
+	"github.com/go-kratos/kratos/v2/encoding"
 )
 
 type apollo struct {
@@ -34,6 +36,7 @@ type options struct {
 	namespace      string
 	isBackupConfig bool
 	backupPath     string
+	originConfig   bool
 }
 
 // WithAppID with apollo config app id
@@ -92,6 +95,16 @@ func WithBackupPath(backupPath string) Option {
 	}
 }
 
+// WithOriginalConfig use the original configuration file without parse processing
+func WithOriginalConfig() Option {
+	return func(o *options) {
+		extension.AddFormatParser(constant.JSON, &jsonExtParser{})
+		extension.AddFormatParser(constant.YAML, &yamlExtParser{})
+		extension.AddFormatParser(constant.YML, &yamlExtParser{})
+		o.originConfig = true
+	}
+}
+
 func NewSource(opts ...Option) config.Source {
 	op := options{}
 	for _, o := range opts {
@@ -123,45 +136,71 @@ func format(ns string) string {
 }
 
 func (e *apollo) load() []*config.KeyValue {
-	kv := make([]*config.KeyValue, 0)
+	kvs := make([]*config.KeyValue, 0)
 	namespaces := strings.Split(e.opt.namespace, ",")
 
 	for _, ns := range namespaces {
-		if strings.Contains(ns, ".") && !strings.Contains(ns, properties) &&
-			(format(ns) == yaml || format(ns) == yml || format(ns) == json) {
-			value, err := e.client.GetConfigCache(ns).Get("content")
+		if !e.opt.originConfig {
+			kv, err := e.getConfig(ns)
 			if err != nil {
 				log.Errorf("apollo get config failed，err:%v", err)
 				continue
 			}
-			// serialize the namespace content KeyValue into bytes.
-			kv = append(kv, &config.KeyValue{
-				Key:    ns,
-				Value:  []byte(value.(string)),
-				Format: format(ns),
-			})
+			kvs = append(kvs, kv)
 			continue
 		}
-		next := map[string]interface{}{}
-		e.client.GetConfigCache(ns).Range(func(key, value interface{}) bool {
-			// all values are out properties format
-			resolve(genKey(ns, key.(string)), value, next)
-			return true
-		})
-		f := format(ns)
-		codec := encoding.GetCodec(f)
-		val, err := codec.Marshal(next)
-		if err != nil {
-			log.Warnf("apollo could not handle namespace %s: %v", ns, err)
+		if strings.Contains(ns, ".") && !strings.Contains(ns, properties) &&
+			(format(ns) == yaml || format(ns) == yml || format(ns) == json) {
+			kv, err := e.getOriginConfig(ns)
+			if err != nil {
+				log.Errorf("apollo get config failed，err:%v", err)
+				continue
+			}
+			kvs = append(kvs, kv)
 			continue
+		} else {
+			kv, err := e.getConfig(ns)
+			if err != nil {
+				log.Errorf("apollo get config failed，err:%v", err)
+				continue
+			}
+			kvs = append(kvs, kv)
 		}
-		kv = append(kv, &config.KeyValue{
-			Key:    ns,
-			Value:  val,
-			Format: f,
-		})
 	}
-	return kv
+	return kvs
+}
+
+func (e *apollo) getConfig(ns string) (*config.KeyValue, error) {
+	next := map[string]interface{}{}
+	e.client.GetConfigCache(ns).Range(func(key, value interface{}) bool {
+		// all values are out properties format
+		resolve(genKey(ns, key.(string)), value, next)
+		return true
+	})
+	f := format(ns)
+	codec := encoding.GetCodec(f)
+	val, err := codec.Marshal(next)
+	if err != nil {
+		return nil, err
+	}
+	return &config.KeyValue{
+		Key:    ns,
+		Value:  val,
+		Format: f,
+	}, nil
+}
+
+func (e apollo) getOriginConfig(ns string) (*config.KeyValue, error) {
+	value, err := e.client.GetConfigCache(ns).Get("content")
+	if err != nil {
+		return nil, err
+	}
+	// serialize the namespace content KeyValue into bytes.
+	return &config.KeyValue{
+		Key:    ns,
+		Value:  []byte(value.(string)),
+		Format: format(ns),
+	}, nil
 }
 
 func (e *apollo) Load() (kv []*config.KeyValue, err error) {
