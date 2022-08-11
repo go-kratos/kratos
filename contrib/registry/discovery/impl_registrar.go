@@ -62,7 +62,7 @@ func (d *Discovery) Register(ctx context.Context, service *registry.ServiceInsta
 	return
 }
 
-//  register an instance with Discovery
+// register an instance with Discovery
 func (d *Discovery) register(ctx context.Context, ins *discoveryInstance) (err error) {
 	d.mutex.RLock()
 	c := d.config
