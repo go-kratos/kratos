@@ -2,7 +2,6 @@ package aliyun
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -158,8 +157,10 @@ func toString(v interface{}) string {
 		key = strconv.FormatInt(v, 10)
 	case uint64:
 		key = strconv.FormatUint(v, 10)
-	case fmt.Stringer:
-		key = v.String()
+	case string:
+		key = v
+	case []byte:
+		key = string(v)
 	default:
 		newValue, _ := json.Marshal(v)
 		key = string(newValue)
