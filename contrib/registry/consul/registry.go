@@ -104,11 +104,26 @@ func (r *Registry) GetService(ctx context.Context, name string) (services []*reg
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 	set := r.registry[name]
+
+	getRemote := func() []*registry.ServiceInstance {
+		services, _, err := r.cli.Service(ctx, name, 0, true)
+		if err == nil && len(services) > 0 {
+			return services
+		}
+		return nil
+	}
+
 	if set == nil {
+		if s := getRemote(); len(s) > 0 {
+			return s, nil
+		}
 		return nil, fmt.Errorf("service %s not resolved in registry", name)
 	}
 	ss, _ := set.services.Load().([]*registry.ServiceInstance)
 	if ss == nil {
+		if s := getRemote(); len(s) > 0 {
+			return s, nil
+		}
 		return nil, fmt.Errorf("service %s not found in registry", name)
 	}
 	services = append(services, ss...)
