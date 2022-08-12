@@ -100,7 +100,7 @@ func (r *Registry) Deregister(ctx context.Context, svc *registry.ServiceInstance
 }
 
 // GetService return service by name
-func (r *Registry) GetService(ctx context.Context, name string) (services []*registry.ServiceInstance, err error) {
+func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.ServiceInstance, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 	set := r.registry[name]
@@ -126,8 +126,7 @@ func (r *Registry) GetService(ctx context.Context, name string) (services []*reg
 		}
 		return nil, fmt.Errorf("service %s not found in registry", name)
 	}
-	services = append(services, ss...)
-	return
+	return ss, nil
 }
 
 // ListServices return service list.
