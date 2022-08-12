@@ -27,8 +27,8 @@ func (a *loggerAppliance) SetLogger(in Logger) {
 	a.Logger = in
 }
 
-func (a *loggerAppliance) Log(level Level, keyvals ...interface{}) error {
-	return a.Logger.Log(level, keyvals...)
+func (a *loggerAppliance) GetLogger() Logger {
+	return a.Logger
 }
 
 // SetLogger should be called before any other log call.
@@ -39,7 +39,7 @@ func SetLogger(logger Logger) {
 
 // GetLogger returns global logger appliance as logger in current process.
 func GetLogger() Logger {
-	return global
+	return global.GetLogger()
 }
 
 // Log Print log by level and keyvals.

@@ -14,7 +14,7 @@ func TestGlobalLog(t *testing.T) {
 	logger := NewStdLogger(buffer)
 	SetLogger(logger)
 
-	if global.Logger != logger {
+	if GetLogger() != logger {
 		t.Error("GetLogger() is not equal to logger")
 	}
 
