@@ -40,8 +40,8 @@ func With(l Logger, kv ...interface{}) Logger {
 		return &logger{logger: l, prefix: kv, hasValuer: containsValuer(kv), ctx: context.Background()}
 	}
 	kvs := make([]interface{}, 0, len(c.prefix)+len(kv))
-	kvs = append(kvs, kv...)
 	kvs = append(kvs, c.prefix...)
+	kvs = append(kvs, kv...)
 	return &logger{
 		logger:    c.logger,
 		prefix:    kvs,
