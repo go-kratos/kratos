@@ -117,3 +117,16 @@ func TestGlobalContext(t *testing.T) {
 		t.Errorf("Expected:%s, got:%s", "INFO msg=111", buffer.String())
 	}
 }
+
+func TestGlobalLoggerCaller(t *testing.T) {
+	buffer := &bytes.Buffer{}
+	logger := NewStdLogger(buffer)
+	logger = With(logger, "caller", Caller(5))
+	SetLogger(logger)
+	Info("test", "logger")
+	content := buffer.String()
+	t.Log(content)
+	if !strings.Contains(content, "global_test.go:126") {
+		t.Errorf("Expected:%q, got:%q", "global_test.go:126", buffer.String())
+	}
+}
