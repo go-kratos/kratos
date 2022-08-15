@@ -49,7 +49,7 @@ func (b *mockWeightedNodeBuilder) Build(n Node) WeightedNode {
 	return &mockWeightedNode{Node: n}
 }
 
-func mockFilter(version string) Filter {
+func mockFilter(version string) NodeFilter {
 	return func(_ context.Context, nodes []Node) []Node {
 		newNodes := nodes[:0]
 		for _, n := range nodes {
@@ -83,7 +83,7 @@ func (b *mockBalancer) Pick(ctx context.Context, nodes []WeightedNode) (selected
 func TestDefault(t *testing.T) {
 	builder := DefaultBuilder{
 		Node:     &mockWeightedNodeBuilder{},
-		Filters:  []Filter{mockFilter("v2.0.0")},
+		Filters:  []NodeFilter{mockFilter("v2.0.0")},
 		Balancer: &mockBalancerBuilder{},
 	}
 	selector := builder.Build()

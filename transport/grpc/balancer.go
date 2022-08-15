@@ -5,14 +5,15 @@ import (
 
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/p2c"
-	"github.com/go-kratos/kratos/v2/selector/random"
-	"github.com/go-kratos/kratos/v2/selector/wrr"
 	"github.com/go-kratos/kratos/v2/transport"
 
 	gBalancer "google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 	"google.golang.org/grpc/metadata"
+)
+
+const (
+	globalSelectorName = "global"
 )
 
 var (
@@ -24,9 +25,7 @@ var (
 
 func init() {
 	// inject global grpc balancer
-	SetGlobalBalancer(random.Name, random.NewBuilder())
-	SetGlobalBalancer(wrr.Name, wrr.NewBuilder())
-	SetGlobalBalancer(p2c.Name, p2c.NewBuilder())
+	SetGlobalBalancer(globalSelectorName, transport.GlobalSelector())
 }
 
 // SetGlobalBalancer set grpc balancer with scheme.
@@ -76,7 +75,7 @@ type Picker struct {
 
 // Pick pick instances.
 func (p *Picker) Pick(info gBalancer.PickInfo) (gBalancer.PickResult, error) {
-	var filters []selector.Filter
+	var filters []selector.NodeFilter
 	if tr, ok := transport.FromClientContext(info.Ctx); ok {
 		if gtr, ok := tr.(*Transport); ok {
 			filters = gtr.SelectFilters()

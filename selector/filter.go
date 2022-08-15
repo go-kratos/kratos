@@ -2,5 +2,5 @@ package selector
 
 import "context"
 
-// Filter is select filter.
-type Filter func(context.Context, []Node) []Node
+// NodeFilter is select filter.
+type NodeFilter func(context.Context, []Node) []Node

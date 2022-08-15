@@ -9,7 +9,7 @@ import (
 type Default struct {
 	NodeBuilder WeightedNodeBuilder
 	Balancer    Balancer
-	Filters     []Filter
+	Filters     []NodeFilter
 
 	nodes atomic.Value
 }
@@ -74,7 +74,7 @@ func (d *Default) Apply(nodes []Node) {
 type DefaultBuilder struct {
 	Node     WeightedNodeBuilder
 	Balancer BalancerBuilder
-	Filters  []Filter
+	Filters  []NodeFilter
 }
 
 // Build create builder
