@@ -58,14 +58,14 @@ func (receiver *mockClient) GetMicroServiceID(appID, microServiceName, version, 
 
 // TestRegistry
 func TestRegistry(t *testing.T) {
-	instanceId, err := uuid.NewV4()
+	instanceID, err := uuid.NewV4()
 	assert.NoError(t, err)
 	svc := &registry.ServiceInstance{
 		Name:      "KratosServicecomb",
 		Version:   "0.0.1",
 		Metadata:  map[string]string{"app": "kratos"},
 		Endpoints: []string{"tcp://127.0.0.1:9000?isSecure=false"},
-		ID:        instanceId.String(),
+		ID:        instanceID.String(),
 	}
 	ctx := context.TODO()
 	t.Run("Register test, expected: success.", func(t *testing.T) {
@@ -79,7 +79,7 @@ func TestRegistry(t *testing.T) {
 		assert.Greater(t, len(insts), 0)
 	})
 	t.Run("Deregister test, expected: success.", func(t *testing.T) {
-		svc.ID = instanceId.String()
+		svc.ID = instanceID.String()
 		err = r.Deregister(ctx, svc)
 		assert.NoError(t, err)
 	})
@@ -87,14 +87,14 @@ func TestRegistry(t *testing.T) {
 
 func TestWatcher(t *testing.T) {
 	ctx := context.TODO()
-	instanceId1, err := uuid.NewV4()
+	instanceID1, err := uuid.NewV4()
 	assert.NoError(t, err)
 	svc1 := &registry.ServiceInstance{
 		Name:      "WatcherTest",
 		Version:   "0.0.1",
 		Metadata:  map[string]string{"app": "kratos"},
 		Endpoints: []string{"tcp://127.0.0.1:9000?isSecure=false"},
-		ID:        instanceId1.String(),
+		ID:        instanceID1.String(),
 	}
 	err = r.Register(ctx, svc1)
 	assert.NoError(t, err)
@@ -108,7 +108,7 @@ func TestWatcher(t *testing.T) {
 		instances, err = w.Next()
 		assert.NoError(t, err)
 		assert.NotEmpty(t, instances)
-		assert.Equal(t, instanceId1.String(), instances[0].ID)
+		assert.Equal(t, instanceID1.String(), instances[0].ID)
 	})
 	t.Run("Watch deregister event, expected: success", func(t *testing.T) {
 		// Deregister instance1.
@@ -119,7 +119,7 @@ func TestWatcher(t *testing.T) {
 		instances, err = w.Next()
 		assert.NoError(t, err)
 		assert.NotEmpty(t, instances)
-		assert.Equal(t, instanceId1.String(), instances[0].ID)
+		assert.Equal(t, instanceID1.String(), instances[0].ID)
 	})
 	t.Run("Stop test, expected: success", func(t *testing.T) {
 		err = w.Stop()

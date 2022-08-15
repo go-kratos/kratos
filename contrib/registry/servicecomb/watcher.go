@@ -16,7 +16,7 @@ type Watcher struct {
 
 func newWatcher(_ context.Context, cli RegistryClient, serviceName string) (*Watcher, error) {
 	// 构建当前服务与目标服务之间的依赖关系，完成discovery
-	_, err := cli.FindMicroServiceInstances(curServiceId, appId, serviceName, "")
+	_, err := cli.FindMicroServiceInstances(curServiceID, appID, serviceName, "")
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func newWatcher(_ context.Context, cli RegistryClient, serviceName string) (*Wat
 		ch:  make(chan *registry.ServiceInstance),
 	}
 	go func() {
-		watchErr := w.cli.WatchMicroService(curServiceId, func(event *sc.MicroServiceInstanceChangedEvent) {
+		watchErr := w.cli.WatchMicroService(curServiceID, func(event *sc.MicroServiceInstanceChangedEvent) {
 			if event.Key.ServiceName != serviceName {
 				return
 			}

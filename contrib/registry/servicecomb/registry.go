@@ -17,9 +17,9 @@ import (
 )
 
 func init() {
-	appId = os.Getenv(appIdVar)
-	if appId == "" {
-		appId = "default"
+	appID = os.Getenv(appIDVar)
+	if appID == "" {
+		appID = "default"
 	}
 	env = os.Getenv(envVar)
 }
@@ -30,16 +30,16 @@ var (
 )
 
 var (
-	curServiceId string
-	appId        string
+	curServiceID string
+	appID        string
 	env          string
 )
 
 const (
-	appIdKey         = "appId"
+	appIDKey         = "appId"
 	envKey           = "environment"
 	envVar           = "CAS_ENVIRONMENT_ID"
-	appIdVar         = "CAS_APPLICATION_NAME"
+	appIDVar         = "CAS_APPLICATION_NAME"
 	frameWorkName    = "kratos"
 	frameWorkVersion = "v2"
 )
@@ -67,7 +67,7 @@ func NewRegistry(client RegistryClient) *Registry {
 }
 
 func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
-	instances, err := r.cli.FindMicroServiceInstances("", appId, serviceName, "")
+	instances, err := r.cli.FindMicroServiceInstances("", appID, serviceName, "")
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 	}
 	ms := &discovery.MicroService{
 		ServiceName: svcIns.Name,
-		AppId:       appId,
+		AppId:       appID,
 		Version:     svcIns.Version,
 		Environment: env,
 		Framework:   fw,
@@ -117,16 +117,16 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 		if svcErr.Code != pb.ErrServiceAlreadyExists {
 			return err
 		}
-		sid, err = r.cli.GetMicroServiceID(appId, ms.ServiceName, ms.Version, ms.Environment)
+		sid, err = r.cli.GetMicroServiceID(appID, ms.ServiceName, ms.Version, ms.Environment)
 		if err != nil {
 			return err
 		}
 	} else {
 		// 保存当前版本微服务对应的sid
-		curServiceId = sid
+		curServiceID = sid
 	}
 	props := make(map[string]string)
-	props[appIdKey] = appId
+	props[appIDKey] = appID
 	props[envKey] = env
 	if svcIns.ID == "" {
 		var id uuid.UUID
@@ -162,7 +162,7 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 }
 
 func (r *Registry) Deregister(_ context.Context, svcIns *registry.ServiceInstance) error {
-	sid, err := r.cli.GetMicroServiceID(appId, svcIns.Name, svcIns.Version, env)
+	sid, err := r.cli.GetMicroServiceID(appID, svcIns.Name, svcIns.Version, env)
 	if err != nil {
 		return err
 	}
