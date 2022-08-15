@@ -23,7 +23,7 @@ func init() {
 	b := base.NewBalancerBuilder(
 		balancerName,
 		&balancerBuilder{
-			builder: transport.GlobalSelector(),
+			builder: selector.GlobalSelector(),
 		},
 		base.Config{HealthCheck: true},
 	)
@@ -81,7 +81,7 @@ func (p *balancerPicker) Pick(info balancer.PickInfo) (balancer.PickResult, erro
 				Err:           di.Err,
 				BytesSent:     di.BytesSent,
 				BytesReceived: di.BytesReceived,
-				ReplyMeta:     Trailer(di.Trailer),
+				ReplyMD:       Trailer(di.Trailer),
 			})
 		},
 	}, nil
