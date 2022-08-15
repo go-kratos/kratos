@@ -113,7 +113,7 @@ func DialInsecure(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, 
 func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.ClientConn, error) {
 	options := clientOptions{
 		timeout:      2000 * time.Millisecond,
-		balancerName: globalSelectorName,
+		balancerName: balancerName,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -151,10 +151,10 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, filters []selector.NodeFilter) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		ctx = transport.NewClientContext(ctx, &Transport{
-			endpoint:  cc.Target(),
-			operation: method,
-			reqHeader: headerCarrier{},
-			filters:   filters,
+			endpoint:    cc.Target(),
+			operation:   method,
+			reqHeader:   headerCarrier{},
+			nodeFilters: filters,
 		})
 		if timeout > 0 {
 			var cancel context.CancelFunc

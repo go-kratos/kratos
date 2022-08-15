@@ -277,7 +277,7 @@ func (client *Client) do(req *http.Request) (*http.Response, error) {
 			err  error
 			node selector.Node
 		)
-		if node, done, err = client.selector.Select(req.Context(), selector.WithFilter(client.opts.nodeFilters...)); err != nil {
+		if node, done, err = client.selector.Select(req.Context(), selector.WithNodeFilter(client.opts.nodeFilters...)); err != nil {
 			return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 		}
 		if client.insecure {
