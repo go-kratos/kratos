@@ -25,6 +25,7 @@ func (receiver *mockClient) WatchMicroService(microServiceID string, callback fu
 	return nil
 }
 
+//nolint
 func (receiver *mockClient) FindMicroServiceInstances(consumerID,
 	appID, microServiceName, versionRule string, opts ...sc.CallOption,
 
