@@ -10,7 +10,7 @@ import (
 	_ "github.com/go-kratos/kratos/v2/encoding/proto"
 	_ "github.com/go-kratos/kratos/v2/encoding/xml"
 	_ "github.com/go-kratos/kratos/v2/encoding/yaml"
-	_ "github.com/go-kratos/kratos/v2/selector"
+	_ "github.com/go-kratos/kratos/v2/selector/p2c"
 )
 
 // Server is transport server.
