@@ -27,10 +27,6 @@ func (a *loggerAppliance) SetLogger(in Logger) {
 	a.Logger = in
 }
 
-func (a *loggerAppliance) Log(level Level, keyvals ...interface{}) error {
-	return a.Logger.Log(level, keyvals...)
-}
-
 // SetLogger should be called before any other log call.
 // And it is NOT THREAD SAFE.
 func SetLogger(logger Logger) {
