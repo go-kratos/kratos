@@ -10,8 +10,14 @@ import (
 	_ "github.com/go-kratos/kratos/v2/encoding/proto"
 	_ "github.com/go-kratos/kratos/v2/encoding/xml"
 	_ "github.com/go-kratos/kratos/v2/encoding/yaml"
-	_ "github.com/go-kratos/kratos/v2/selector/p2c"
+	"github.com/go-kratos/kratos/v2/selector"
+	"github.com/go-kratos/kratos/v2/selector/p2c"
 )
+
+func init() {
+	// init global selector
+	selector.SetGlobalSelector(p2c.NewBuilder())
+}
 
 // Server is transport server.
 type Server interface {

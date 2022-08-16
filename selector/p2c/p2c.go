@@ -19,11 +19,6 @@ const (
 
 var _ selector.Balancer = &Balancer{}
 
-func init() {
-	// init global selector
-	selector.SetGlobalSelector(NewBuilder())
-}
-
 // Option is random builder option.
 type Option func(o *options)
 
