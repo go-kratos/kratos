@@ -151,7 +151,6 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		decoder:      DefaultResponseDecoder,
 		errorDecoder: DefaultErrorDecoder,
 		transport:    http.DefaultTransport,
-		selector:     wrr.New(),
 	}
 	for _, o := range opts {
 		o(&options)
@@ -169,6 +168,9 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	var r *resolver
 	if options.discovery != nil {
 		if target.Scheme == "discovery" {
+			if options.selector == nil {
+				options.selector = wrr.New()
+			}
 			if r, err = newResolver(ctx, options.discovery, target, options.selector, options.block, insecure); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
@@ -271,7 +273,7 @@ func (client *Client) Do(req *http.Request, opts ...CallOption) (*http.Response,
 
 func (client *Client) do(req *http.Request) (*http.Response, error) {
 	var done func(context.Context, selector.DoneInfo)
-	if client.r != nil {
+	if client.opts.selector != nil {
 		var (
 			err  error
 			node selector.Node

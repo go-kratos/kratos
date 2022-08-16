@@ -359,3 +359,46 @@ func TestNewClient(t *testing.T) {
 		t.Error("err should be equal to encoder error")
 	}
 }
+
+type mockSelector struct {
+	invoked bool
+}
+
+func (*mockSelector) Apply([]selector.Node) {}
+func (ms *mockSelector) Select(ctx context.Context, opts ...selector.SelectOption) (selector.Node, selector.DoneFunc, error) {
+	ms.invoked = true
+	//return err anyway,because i just want to check if selector invoked
+	return nil, nil, errors.New("return err anyway")
+}
+
+func TestWithSelector(t *testing.T) {
+	myselector := &mockSelector{}
+	o := WithSelector(myselector)
+	co := &clientOptions{}
+	o(co)
+	if !reflect.DeepEqual(co.selector, myselector) {
+		t.Errorf("expected selector to be %v, got %v", myselector, co.selector)
+	}
+}
+
+func TestWithSelectorInvoked(t *testing.T) {
+	myselector := &mockSelector{invoked: false}
+	client, err := NewClient(context.Background(), WithSelector(myselector))
+	if err != nil {
+		t.Error(err)
+	}
+
+	req, err := nethttp.NewRequest(nethttp.MethodGet, "https://test.com/test", nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, err = client.Do(req)
+	if err != nil {
+		t.Log(err)
+	}
+	// check if myselector invoked
+	if !myselector.invoked {
+		t.Errorf("myselector didn't invoked")
+	}
+}
