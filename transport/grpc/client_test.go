@@ -30,6 +30,15 @@ func TestWithTimeout(t *testing.T) {
 	}
 }
 
+func TestWithServiceConfig(t *testing.T) {
+	o := &clientOptions{}
+	v := "{\"loadBalancingPolicy\":\"round_robin\"}"
+	WithServiceConfig(v)(o)
+	if v != *o.serviceConfigRawJSON {
+		t.Errorf("expect %v but got %v", v, *o.serviceConfigRawJSON)
+	}
+}
+
 func TestWithMiddleware(t *testing.T) {
 	o := &clientOptions{}
 	v := []middleware.Middleware{

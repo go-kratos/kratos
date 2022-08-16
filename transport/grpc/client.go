@@ -95,17 +95,25 @@ func WithLogger(log log.Logger) ClientOption {
 	return func(o *clientOptions) {}
 }
 
+// WithServiceConfig with service config
+func WithServiceConfig(serviceConfig string) ClientOption {
+	return func(o *clientOptions) {
+		o.serviceConfigRawJSON = &serviceConfig
+	}
+}
+
 // clientOptions is gRPC Client
 type clientOptions struct {
-	endpoint     string
-	tlsConf      *tls.Config
-	timeout      time.Duration
-	discovery    registry.Discovery
-	middleware   []middleware.Middleware
-	ints         []grpc.UnaryClientInterceptor
-	grpcOpts     []grpc.DialOption
-	balancerName string
-	filters      []selector.Filter
+	endpoint             string
+	tlsConf              *tls.Config
+	timeout              time.Duration
+	discovery            registry.Discovery
+	middleware           []middleware.Middleware
+	ints                 []grpc.UnaryClientInterceptor
+	grpcOpts             []grpc.DialOption
+	balancerName         string
+	filters              []selector.Filter
+	serviceConfigRawJSON *string
 }
 
 // Dial returns a GRPC connection.
@@ -152,6 +160,9 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	}
 	if len(options.grpcOpts) > 0 {
 		grpcOpts = append(grpcOpts, options.grpcOpts...)
+	}
+	if options.serviceConfigRawJSON != nil {
+		grpcOpts = append(grpcOpts, grpc.WithDefaultServiceConfig(*options.serviceConfigRawJSON))
 	}
 	return grpc.DialContext(ctx, options.endpoint, grpcOpts...)
 }
