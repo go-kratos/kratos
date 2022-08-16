@@ -182,13 +182,18 @@ func TestWithDiscovery(t *testing.T) {
 	}
 }
 
-func TestWithSelector(t *testing.T) {
-	ov := &selector.Default{}
-	o := WithSelector(ov)
+func TestWithNodeFilter(t *testing.T) {
+	ov := func(context.Context, []selector.Node) []selector.Node {
+		return []selector.Node{&selector.DefaultNode{}}
+	}
+	o := WithNodeFilter(ov)
 	co := &clientOptions{}
 	o(co)
-	if !reflect.DeepEqual(co.selector, ov) {
-		t.Errorf("expected selector to be %v, got %v", ov, co.selector)
+	for _, n := range co.nodeFilters {
+		ret := n(context.Background(), nil)
+		if len(ret) != 1 {
+			t.Errorf("expected node  length to be 1, got %v", len(ret))
+		}
 	}
 }
 

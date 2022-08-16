@@ -57,7 +57,7 @@ type DoneInfo struct {
 	// Response Error
 	Err error
 	// Response Metadata
-	ReplyMeta ReplyMeta
+	ReplyMD ReplyMD
 
 	// BytesSent indicates if any bytes have been sent to the server.
 	BytesSent bool
@@ -65,8 +65,8 @@ type DoneInfo struct {
 	BytesReceived bool
 }
 
-// ReplyMeta is Reply Metadata.
-type ReplyMeta interface {
+// ReplyMD is Reply Metadata.
+type ReplyMD interface {
 	Get(key string) string
 }
 
