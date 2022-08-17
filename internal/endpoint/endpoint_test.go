@@ -5,8 +5,6 @@ import (
 	"reflect"
 	"testing"
 )
-
-
 func TestNewEndpoint(t *testing.T) {
 	type args struct {
 		scheme string
