@@ -2,7 +2,6 @@ package endpoint
 
 import (
 	"net/url"
-	"strconv"
 )
 
 // NewEndpoint new an Endpoint URL.
