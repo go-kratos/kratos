@@ -111,20 +111,6 @@ func TestParseEndpoint(t *testing.T) {
 			want:    "",
 			wantErr: false,
 		},
-
-		// Legacy
-		{
-			name:    "google",
-			args:    args{endpoints: []string{"grpc://www.google.com/?isSecure=true"}, scheme: "grpcs"},
-			want:    "www.google.com",
-			wantErr: false,
-		},
-		{
-			name:    "baidu",
-			args:    args{endpoints: []string{"http://www.baidu.com/?isSecure=true"}, scheme: "https"},
-			want:    "www.baidu.com",
-			wantErr: false,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -137,56 +123,6 @@ func TestParseEndpoint(t *testing.T) {
 				t.Errorf("ParseEndpoint() got = %v, want %v", got, tt.want)
 			}
 		})
-	}
-}
-
-func TestIsSecure(t *testing.T) {
-	tests := []struct {
-		url  *url.URL
-		want bool
-	}{
-		{
-			url:  &url.URL{Scheme: "http", Host: "127.0.0.1"},
-			want: false,
-		},
-		{
-			url:  &url.URL{Scheme: "http", Host: "127.0.0.1", RawQuery: "isSecure=false"},
-			want: false,
-		},
-		{
-			url:  &url.URL{Scheme: "grpc", Host: "127.0.0.1", RawQuery: "isSecure=true"},
-			want: true,
-		},
-	}
-	for _, tt := range tests {
-		if got := IsSecure(tt.url); got != tt.want {
-			t.Errorf("IsSecure() = %v, want %v", got, tt.want)
-		}
-	}
-}
-
-func TestLegacyURLToNew(t *testing.T) {
-	tests := []struct {
-		url  *url.URL
-		want *url.URL
-	}{
-		{
-			url:  &url.URL{Scheme: "http", Host: "www.google.com", RawQuery: "isSecure=true"},
-			want: &url.URL{Scheme: "https", Host: "www.google.com"},
-		},
-		{
-			url:  &url.URL{Scheme: "https", Host: "www.google.com", RawQuery: "isSecure=true"},
-			want: &url.URL{Scheme: "https", Host: "www.google.com", RawQuery: "isSecure=true"},
-		},
-		{
-			url:  &url.URL{Scheme: "http", Host: "go-kratos.dev", RawQuery: "isSecure=false"},
-			want: &url.URL{Scheme: "http", Host: "go-kratos.dev", RawQuery: "isSecure=false"},
-		},
-	}
-	for _, tt := range tests {
-		if got := legacyURLToNew(tt.url); !reflect.DeepEqual(got, tt.want) {
-			t.Errorf("legacyURLToNew() = %v, want %v", got, tt.want)
-		}
 	}
 }
 

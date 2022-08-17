@@ -18,36 +18,11 @@ func ParseEndpoint(endpoints []string, scheme string) (string, error) {
 			return "", err
 		}
 
-		// TODO: Compatibility processing
-		// Function is to convert grpc:/127.0.0.1/?isSecure=true into grpcs:/127.0.0.1/
-		// It will be deleted in about a month
-		u = legacyURLToNew(u)
 		if u.Scheme == scheme {
 			return u.Host, nil
 		}
 	}
 	return "", nil
-}
-
-func legacyURLToNew(u *url.URL) *url.URL {
-	if u.Scheme == "https" || u.Scheme == "grpcs" {
-		return u
-	}
-	if IsSecure(u) {
-		return &url.URL{Scheme: u.Scheme + "s", Host: u.Host}
-	}
-	return u
-}
-
-// IsSecure parses isSecure for Endpoint URL.
-// Note: It will be deleted after some time,
-// unified use grpcs://127.0.0.1:8080 instead of grpc://127.0.0.1:8080?isSecure=true
-func IsSecure(u *url.URL) bool {
-	ok, err := strconv.ParseBool(u.Query().Get("isSecure"))
-	if err != nil {
-		return false
-	}
-	return ok
 }
 
 // Scheme is the scheme of endpoint url.
