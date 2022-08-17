@@ -18,17 +18,13 @@ type loggerAppliance struct {
 }
 
 func init() {
-	global.SetLogger(With(DefaultLogger, "caller", Caller(5)))
+	global.SetLogger(DefaultLogger)
 }
 
 func (a *loggerAppliance) SetLogger(in Logger) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	a.Logger = in
-}
-
-func (a *loggerAppliance) Log(level Level, keyvals ...interface{}) error {
-	return a.Logger.Log(level, keyvals...)
 }
 
 // SetLogger should be called before any other log call.

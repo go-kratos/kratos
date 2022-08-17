@@ -121,7 +121,7 @@ func TestGlobalContext(t *testing.T) {
 func TestGlobalLoggerCaller(t *testing.T) {
 	buffer := &bytes.Buffer{}
 	logger := NewStdLogger(buffer)
-	logger = With(logger, "caller", Caller(5))
+	logger = With(logger, "caller", DefaultCaller)
 	SetLogger(logger)
 	Info("test", "logger")
 	content := buffer.String()
