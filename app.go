@@ -101,7 +101,7 @@ func (a *App) Run() error {
 		})
 		wg.Add(1)
 		eg.Go(func() error {
-			wg.Done()
+			wg.Done() // here is to ensure server start has begun running before register, so defer is not needed
 			return srv.Start(NewContext(a.opts.ctx, a))
 		})
 	}
