@@ -27,6 +27,7 @@ type Endpointer interface {
 type Header interface {
 	Get(key string) string
 	Set(key string, value string)
+	Append(key string, value ...string)
 	Keys() []string
 }
 
