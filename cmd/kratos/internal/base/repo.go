@@ -3,11 +3,15 @@ package base
 import (
 	"context"
 	"fmt"
-	stdurl "net/url"
+	"net"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
+)
+
+var (
+	unExpandVarPath = []string{"~", ".", ".."}
 )
 
 // Repo is git repository manager.
@@ -18,27 +22,21 @@ type Repo struct {
 }
 
 func repoDir(url string) string {
-	if !strings.Contains(url, "//") {
-		url = "//" + url
+	vcsUrl, err := ParseVCSUrl(url)
+	if err != nil {
+		return url
 	}
-	if strings.HasPrefix(url, "//git@") {
-		url = "ssh:" + url
-	} else if strings.HasPrefix(url, "//") {
-		url = "https:" + url
+	// check host contains port
+	host, _, err := net.SplitHostPort(vcsUrl.Host)
+	if err != nil {
+		host = vcsUrl.Host
 	}
-	u, err := stdurl.Parse(url)
-	if err == nil {
-		url = fmt.Sprintf("%s://%s%s", u.Scheme, u.Hostname(), u.Path)
+	for _, p := range unExpandVarPath {
+		host = strings.TrimLeft(host, p)
 	}
-	var start int
-	start = strings.Index(url, "//")
-	if start == -1 {
-		start = strings.Index(url, ":") + 1
-	} else {
-		start += 2
-	}
-	end := strings.LastIndex(url, "/")
-	return url[start:end]
+	dir := path.Base(path.Dir(vcsUrl.Path))
+	url = fmt.Sprintf("%s/%s", host, dir)
+	return url
 }
 
 // NewRepo new a repository manager.

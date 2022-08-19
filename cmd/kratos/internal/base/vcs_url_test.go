@@ -1,19 +1,13 @@
 package base
 
 import (
+	"net"
+	"strings"
 	"testing"
 )
 
-func TestRepo(t *testing.T) {
-	//os.RemoveAll("/tmp/test_repo")
-	//r := NewRepo("https://github.com/go-kratos/service-layout.git", "")
-	//if err := r.Clone(context.Background()); err != nil {
-	//	t.Fatal(err)
-	//}
-	//if err := r.CopyTo(context.Background(), "/tmp/test_repo", "github.com/go-kratos/kratos-layout", nil); err != nil {
-	//	t.Fatal(err)
-	//}
-	urls := []string{
+func TestParseVCSUrl(t *testing.T) {
+	repos := []string{
 		//ssh://[user@]host.xz[:port]/path/to/repo.git/
 		"ssh://git@github.com:7875/go-kratos/kratos.git",
 		//git://host.xz[:port]/path/to/repo.git/
@@ -31,14 +25,31 @@ func TestRepo(t *testing.T) {
 		//[user@]host.xz:/~[user]/path/to/repo.git/
 		"git@github.com:go-kratos/kratos.git",
 		///path/to/repo.git/
-		"//github.com/go-kratos/kratos.git",
+		"~/go-kratos/kratos.git",
 		//file:///path/to/repo.git/
-		"file://./github.com/go-kratos/kratos.git",
+		"file://~/go-kratos/kratos.git",
 	}
-	for _, url := range urls {
-		dir := repoDir(url)
-		if dir != "github.com/go-kratos" && dir != "/go-kratos" {
-			t.Fatal(url, "repoDir test failed", dir)
+	for _, repo := range repos {
+		url, err := ParseVCSUrl(repo)
+		if err != nil {
+			t.Fatal(repo, err)
+		}
+		urlPath := strings.TrimLeft(url.Path, "/")
+		if urlPath != "go-kratos/kratos.git" {
+			t.Fatal(repo, "parse url failed", urlPath)
 		}
 	}
+}
+
+func TestParseSsh(t *testing.T) {
+	repo := "ssh://git@github.com:7875/go-kratos/kratos.git"
+	url, err := ParseVCSUrl(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	host, _, err := net.SplitHostPort(url.Host)
+	if err != nil {
+		host = url.Host
+	}
+	t.Log(host, url.Path)
 }
