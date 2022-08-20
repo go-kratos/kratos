@@ -46,7 +46,7 @@ func (m Metadata) Range(f func(k, v string) bool) {
 
 // Clone returns a deep copy of Metadata
 func (m Metadata) Clone() Metadata {
-	md := Metadata{}
+	md := make(Metadata, len(m))
 	for k, v := range m {
 		md[k] = v
 	}
