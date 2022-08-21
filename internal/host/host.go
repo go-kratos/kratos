@@ -2,7 +2,6 @@ package host
 
 import (
 	"fmt"
-	"math"
 	"net"
 	"strconv"
 )
@@ -51,7 +50,7 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	minIndex := math.MaxInt
+	minIndex := int(^uint(0) >> 1)
 	var result net.IP
 	for _, iface := range ifaces {
 		if (iface.Flags & net.FlagUp) == 0 {
