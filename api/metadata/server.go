@@ -105,7 +105,10 @@ func (s *Server) ListServices(ctx context.Context, in *ListServicesRequest) (*Li
 	if err := s.load(); err != nil {
 		return nil, err
 	}
-	reply := new(ListServicesReply)
+	reply := &ListServicesReply{
+		Services: make([]string, 0, len(s.services)),
+		Methods:  make([]string, 0, len(s.methods)),
+	}
 	for name := range s.services {
 		reply.Services = append(reply.Services, name)
 	}
