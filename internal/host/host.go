@@ -59,7 +59,6 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 		if iface.Index >= minIndex && result != nil {
 			continue
 		}
-		minIndex = iface.Index
 		addrs, err := iface.Addrs()
 		if err != nil {
 			continue
@@ -75,6 +74,7 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 				continue
 			}
 			if isValidIP(ip.String()) {
+				minIndex = iface.Index
 				result = ip
 				break
 			}
