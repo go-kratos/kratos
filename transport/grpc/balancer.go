@@ -40,7 +40,7 @@ func (b *balancerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 		// Block the RPC until a new picker is available via UpdateState().
 		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
 	}
-	nodes := make([]selector.Node, 0)
+	nodes := make([]selector.Node, 0, len(info.ReadySCs))
 	for conn, info := range info.ReadySCs {
 		ins, _ := info.Address.Attributes.Value("rawServiceInstance").(*registry.ServiceInstance)
 		nodes = append(nodes, &grpcNode{

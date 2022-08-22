@@ -124,7 +124,7 @@ type methodDesc struct {
 }
 
 func (s *serviceDesc) execute() string {
-	s.MethodSets = make(map[string]*methodDesc)
+	s.MethodSets = make(map[string]*methodDesc, len(s.Methods))
 	for _, m := range s.Methods {
 		s.MethodSets[m.Name] = m
 	}

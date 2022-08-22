@@ -95,7 +95,7 @@ func (c *Client) Service(ctx context.Context, service string, index uint64, pass
 
 // Register register service instance to consul
 func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enableHealthCheck bool) error {
-	addresses := make(map[string]api.ServiceAddress)
+	addresses := make(map[string]api.ServiceAddress, len(svc.Endpoints))
 	checkAddresses := make([]string, 0, len(svc.Endpoints))
 	for _, endpoint := range svc.Endpoints {
 		raw, err := url.Parse(endpoint)
