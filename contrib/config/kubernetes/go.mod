@@ -4,8 +4,8 @@ go 1.16
 
 require (
 	github.com/go-kratos/kratos/v2 v2.4.0
-	k8s.io/api v0.24.3
-	k8s.io/apimachinery v0.24.3
+	k8s.io/api v0.24.4
+	k8s.io/apimachinery v0.24.4
 	k8s.io/client-go v0.24.3
 )
 
