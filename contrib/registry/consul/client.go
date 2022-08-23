@@ -149,6 +149,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			port, _ := strconv.ParseInt(portRaw, 10, 32)
 			asr.Address = host
 			asr.Port = int(port)
+			break
 		}
 	}
 
