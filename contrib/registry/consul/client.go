@@ -133,20 +133,14 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		TaggedAddresses: addresses,
 	}
 
-	if len(checkAddresses) > 0 {
+	for _, address := range checkAddresses {
 		host, portRaw, _ := net.SplitHostPort(checkAddresses[0])
 		port, _ := strconv.ParseInt(portRaw, 10, 32)
 		asr.Address = host
 		asr.Port = int(port)
-	}
-
-	if c.registryPortByScheme != "" {
-		for _, address := range checkAddresses {
-			if !strings.HasPrefix(address, c.registryPortByScheme) {
-				continue
-			}
-			host, portRaw, _ := net.SplitHostPort(checkAddresses[0])
-			port, _ := strconv.ParseInt(portRaw, 10, 32)
+		if strings.HasPrefix(address, c.registryPortByScheme) {
+			host, portRaw, _ = net.SplitHostPort(address)
+			port, _ = strconv.ParseInt(portRaw, 10, 32)
 			asr.Address = host
 			asr.Port = int(port)
 			break
