@@ -26,6 +26,7 @@ func tcpServer(t *testing.T, lis net.Listener) {
 func TestRegistry_Register(t *testing.T) {
 	opts := []Option{
 		WithHealthCheck(false),
+		WithRegistryServicePortByScheme("http"),
 	}
 
 	type args struct {
@@ -157,6 +158,7 @@ func TestRegistry_GetService(t *testing.T) {
 		WithHeartbeat(true),
 		WithHealthCheck(true),
 		WithHealthCheckInterval(5),
+		WithRegistryServicePortByScheme("http"),
 	}
 	r := New(cli, opts...)
 

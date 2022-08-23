@@ -29,9 +29,26 @@ type Client struct {
 	heartbeat bool
 	// deregisterCriticalServiceAfter time interval in seconds
 	deregisterCriticalServiceAfter int
+	// registryPortByScheme specifies the schema port registered to the service port
+	registryPortByScheme string
+}
+
+// newClient creates consul client
+func newClient(cli *api.Client, scheme string) *Client {
+	c := &Client{
+		cli:                            cli,
+		resolver:                       defaultResolver,
+		healthcheckInterval:            10,
+		heartbeat:                      true,
+		deregisterCriticalServiceAfter: 600,
+		registryPortByScheme:           scheme,
+	}
+	c.ctx, c.cancel = context.WithCancel(context.Background())
+	return c
 }
 
 // NewClient creates consul client
+// Deprecated
 func NewClient(cli *api.Client) *Client {
 	c := &Client{
 		cli:                            cli,
@@ -115,12 +132,26 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		Tags:            []string{fmt.Sprintf("version=%s", svc.Version)},
 		TaggedAddresses: addresses,
 	}
+
 	if len(checkAddresses) > 0 {
 		host, portRaw, _ := net.SplitHostPort(checkAddresses[0])
 		port, _ := strconv.ParseInt(portRaw, 10, 32)
 		asr.Address = host
 		asr.Port = int(port)
 	}
+
+	if c.registryPortByScheme != "" {
+		for _, address := range checkAddresses {
+			if !strings.HasPrefix(address, c.registryPortByScheme) {
+				continue
+			}
+			host, portRaw, _ := net.SplitHostPort(checkAddresses[0])
+			port, _ := strconv.ParseInt(portRaw, 10, 32)
+			asr.Address = host
+			asr.Port = int(port)
+		}
+	}
+
 	if enableHealthCheck {
 		for _, address := range checkAddresses {
 			asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
