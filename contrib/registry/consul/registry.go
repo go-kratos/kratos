@@ -63,6 +63,7 @@ func WithDeregisterCriticalServiceAfter(interval int) Option {
 	}
 }
 
+// WithRegistryServicePortByScheme with registry service port by scheme
 func WithRegistryServicePortByScheme(scheme string) Option {
 	return func(o *Registry) {
 		if o.cli != nil {
