@@ -64,3 +64,8 @@ func WithContext(ctx context.Context, l Logger) Logger {
 		ctx:       ctx,
 	}
 }
+
+// Prefix Flexible for filters and other scenarios
+func (c *logger) Prefix() []interface{} {
+	return c.prefix
+}

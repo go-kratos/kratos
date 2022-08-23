@@ -56,6 +56,7 @@ func TestFilterFunc(t *testing.T) {
 	log := NewHelper(NewFilter(logger, FilterFunc(testFilterFunc)))
 	log.Debug("debug level")
 	log.Infow("password", "123456")
+	// see the std out, caller now is correct
 }
 
 func BenchmarkFilterKey(b *testing.B) {
@@ -79,9 +80,18 @@ func BenchmarkFilterFunc(b *testing.B) {
 	}
 }
 
-func testFilterFunc(level Level, keyvals ...interface{}) bool {
+func testFilterFunc(level Level, prefix []interface{}, keyvals ...interface{}) bool {
 	if level == LevelWarn {
 		return true
+	}
+	check := len(prefix)&0x01 == 0
+	l := len(prefix) >> 1
+	for i := 0; check && i < l; i++ {
+		// test modify caller
+		if prefix[2*i] == "caller" {
+			prefix[2*i+1] = Caller(5)
+			break
+		}
 	}
 	for i := 0; i < len(keyvals); i++ {
 		if keyvals[i] == "password" {
@@ -120,12 +130,14 @@ func TestFilterFuncWitchLoggerPrefix(t *testing.T) {
 	}
 }
 
-func testFilterFuncWithLoggerPrefix(level Level, keyvals ...interface{}) bool {
+func testFilterFuncWithLoggerPrefix(level Level, prefix []interface{}, _ ...interface{}) bool {
 	if level == LevelWarn {
 		return true
 	}
-	for i := 0; i < len(keyvals); i += 2 {
-		if keyvals[i] == "prefix" {
+	check := len(prefix)&0x01 == 0
+	l := len(prefix) >> 1
+	for i := 0; check && i < l; i++ {
+		if prefix[2*i] == "prefix" {
 			return true
 		}
 	}
