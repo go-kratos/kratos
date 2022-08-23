@@ -138,6 +138,11 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		port, _ := strconv.ParseInt(portRaw, 10, 32)
 		asr.Address = host
 		asr.Port = int(port)
+
+		if c.registryPortByScheme == "" {
+			break
+		}
+
 		if strings.HasPrefix(address, c.registryPortByScheme) {
 			host, portRaw, _ = net.SplitHostPort(address)
 			port, _ = strconv.ParseInt(portRaw, 10, 32)
