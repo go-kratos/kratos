@@ -10,7 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/wrr"
+	"github.com/go-kratos/kratos/v2/selector/p2c"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/grpc/resolver/discovery"
 
@@ -22,6 +22,12 @@ import (
 	grpcinsecure "google.golang.org/grpc/credentials/insecure"
 	grpcmd "google.golang.org/grpc/metadata"
 )
+
+func init() {
+	if selector.GlobalSelector() == nil {
+		selector.SetGlobalSelector(p2c.NewBuilder())
+	}
+}
 
 // ClientOption is gRPC client option.
 type ClientOption func(o *clientOptions)
@@ -75,15 +81,8 @@ func WithOptions(opts ...grpc.DialOption) ClientOption {
 	}
 }
 
-// WithBalancerName with balancer name
-func WithBalancerName(name string) ClientOption {
-	return func(o *clientOptions) {
-		o.balancerName = name
-	}
-}
-
-// WithFilter with select filters
-func WithFilter(filters ...selector.Filter) ClientOption {
+// WithNodeFilter with select filters
+func WithNodeFilter(filters ...selector.NodeFilter) ClientOption {
 	return func(o *clientOptions) {
 		o.filters = filters
 	}
@@ -105,7 +104,7 @@ type clientOptions struct {
 	ints         []grpc.UnaryClientInterceptor
 	grpcOpts     []grpc.DialOption
 	balancerName string
-	filters      []selector.Filter
+	filters      []selector.NodeFilter
 }
 
 // Dial returns a GRPC connection.
@@ -121,7 +120,7 @@ func DialInsecure(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, 
 func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.ClientConn, error) {
 	options := clientOptions{
 		timeout:      2000 * time.Millisecond,
-		balancerName: wrr.Name,
+		balancerName: balancerName,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -156,13 +155,13 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	return grpc.DialContext(ctx, options.endpoint, grpcOpts...)
 }
 
-func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, filters []selector.Filter) grpc.UnaryClientInterceptor {
+func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, filters []selector.NodeFilter) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		ctx = transport.NewClientContext(ctx, &Transport{
-			endpoint:  cc.Target(),
-			operation: method,
-			reqHeader: headerCarrier{},
-			filters:   filters,
+			endpoint:    cc.Target(),
+			operation:   method,
+			reqHeader:   headerCarrier{},
+			nodeFilters: filters,
 		})
 		if timeout > 0 {
 			var cancel context.CancelFunc

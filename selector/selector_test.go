@@ -49,7 +49,7 @@ func (b *mockWeightedNodeBuilder) Build(n Node) WeightedNode {
 	return &mockWeightedNode{Node: n}
 }
 
-func mockFilter(version string) Filter {
+func mockFilter(version string) NodeFilter {
 	return func(_ context.Context, nodes []Node) []Node {
 		newNodes := nodes[:0]
 		for _, n := range nodes {
@@ -83,7 +83,6 @@ func (b *mockBalancer) Pick(ctx context.Context, nodes []WeightedNode) (selected
 func TestDefault(t *testing.T) {
 	builder := DefaultBuilder{
 		Node:     &mockWeightedNodeBuilder{},
-		Filters:  []Filter{mockFilter("v2.0.0")},
 		Balancer: &mockBalancerBuilder{},
 	}
 	selector := builder.Build()
@@ -109,7 +108,7 @@ func TestDefault(t *testing.T) {
 			Metadata:  map[string]string{"weight": "10"},
 		}))
 	selector.Apply(nodes)
-	n, done, err := selector.Select(context.Background(), WithFilter(mockFilter("v2.0.0")))
+	n, done, err := selector.Select(context.Background(), WithNodeFilter(mockFilter("v2.0.0")))
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
@@ -137,7 +136,7 @@ func TestDefault(t *testing.T) {
 	done(context.Background(), DoneInfo{})
 
 	// no v3.0.0 instance
-	n, done, err = selector.Select(context.Background(), WithFilter(mockFilter("v3.0.0")))
+	n, done, err = selector.Select(context.Background(), WithNodeFilter(mockFilter("v3.0.0")))
 	if !errors.Is(ErrNoAvailable, err) {
 		t.Errorf("expect %v, got %v", ErrNoAvailable, err)
 	}
@@ -150,7 +149,7 @@ func TestDefault(t *testing.T) {
 
 	// apply zero instance
 	selector.Apply([]Node{})
-	n, done, err = selector.Select(context.Background(), WithFilter(mockFilter("v2.0.0")))
+	n, done, err = selector.Select(context.Background(), WithNodeFilter(mockFilter("v2.0.0")))
 	if !errors.Is(ErrNoAvailable, err) {
 		t.Errorf("expect %v, got %v", ErrNoAvailable, err)
 	}
@@ -163,7 +162,7 @@ func TestDefault(t *testing.T) {
 
 	// apply zero instance
 	selector.Apply(nil)
-	n, done, err = selector.Select(context.Background(), WithFilter(mockFilter("v2.0.0")))
+	n, done, err = selector.Select(context.Background(), WithNodeFilter(mockFilter("v2.0.0")))
 	if !errors.Is(ErrNoAvailable, err) {
 		t.Errorf("expect %v, got %v", ErrNoAvailable, err)
 	}

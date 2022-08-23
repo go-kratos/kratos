@@ -1,59 +1,45 @@
 package grpc
 
 import (
-	"sync"
-
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/p2c"
-	"github.com/go-kratos/kratos/v2/selector/random"
-	"github.com/go-kratos/kratos/v2/selector/wrr"
 	"github.com/go-kratos/kratos/v2/transport"
 
-	gBalancer "google.golang.org/grpc/balancer"
+	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 	"google.golang.org/grpc/metadata"
 )
 
-var (
-	_ base.PickerBuilder = &Builder{}
-	_ gBalancer.Picker   = &Picker{}
+const (
+	balancerName = "selector"
+)
 
-	mu sync.Mutex
+var (
+	_ base.PickerBuilder = &balancerBuilder{}
+	_ balancer.Picker    = &balancerPicker{}
 )
 
 func init() {
-	// inject global grpc balancer
-	SetGlobalBalancer(random.Name, random.NewBuilder())
-	SetGlobalBalancer(wrr.Name, wrr.NewBuilder())
-	SetGlobalBalancer(p2c.Name, p2c.NewBuilder())
-}
-
-// SetGlobalBalancer set grpc balancer with scheme.
-func SetGlobalBalancer(scheme string, builder selector.Builder) {
-	mu.Lock()
-	defer mu.Unlock()
-
 	b := base.NewBalancerBuilder(
-		scheme,
-		&Builder{builder: builder},
+		balancerName,
+		&balancerBuilder{
+			builder: selector.GlobalSelector(),
+		},
 		base.Config{HealthCheck: true},
 	)
-	gBalancer.Register(b)
+	balancer.Register(b)
 }
 
-// Builder is grpc balancer builder.
-type Builder struct {
+type balancerBuilder struct {
 	builder selector.Builder
 }
 
 // Build creates a grpc Picker.
-func (b *Builder) Build(info base.PickerBuildInfo) gBalancer.Picker {
+func (b *balancerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	if len(info.ReadySCs) == 0 {
 		// Block the RPC until a new picker is available via UpdateState().
-		return base.NewErrPicker(gBalancer.ErrNoSubConnAvailable)
+		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
 	}
-
 	nodes := make([]selector.Node, 0)
 	for conn, info := range info.ReadySCs {
 		ins, _ := info.Address.Attributes.Value("rawServiceInstance").(*registry.ServiceInstance)
@@ -62,40 +48,40 @@ func (b *Builder) Build(info base.PickerBuildInfo) gBalancer.Picker {
 			subConn: conn,
 		})
 	}
-	p := &Picker{
+	p := &balancerPicker{
 		selector: b.builder.Build(),
 	}
 	p.selector.Apply(nodes)
 	return p
 }
 
-// Picker is a grpc picker.
-type Picker struct {
+// balancerPicker is a grpc picker.
+type balancerPicker struct {
 	selector selector.Selector
 }
 
 // Pick pick instances.
-func (p *Picker) Pick(info gBalancer.PickInfo) (gBalancer.PickResult, error) {
-	var filters []selector.Filter
+func (p *balancerPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
+	var filters []selector.NodeFilter
 	if tr, ok := transport.FromClientContext(info.Ctx); ok {
 		if gtr, ok := tr.(*Transport); ok {
-			filters = gtr.SelectFilters()
+			filters = gtr.NodeFilters()
 		}
 	}
 
-	n, done, err := p.selector.Select(info.Ctx, selector.WithFilter(filters...))
+	n, done, err := p.selector.Select(info.Ctx, selector.WithNodeFilter(filters...))
 	if err != nil {
-		return gBalancer.PickResult{}, err
+		return balancer.PickResult{}, err
 	}
 
-	return gBalancer.PickResult{
+	return balancer.PickResult{
 		SubConn: n.(*grpcNode).subConn,
-		Done: func(di gBalancer.DoneInfo) {
+		Done: func(di balancer.DoneInfo) {
 			done(info.Ctx, selector.DoneInfo{
 				Err:           di.Err,
 				BytesSent:     di.BytesSent,
 				BytesReceived: di.BytesReceived,
-				ReplyMeta:     Trailer(di.Trailer),
+				ReplyMD:       Trailer(di.Trailer),
 			})
 		},
 	}, nil
@@ -115,5 +101,5 @@ func (t Trailer) Get(k string) string {
 
 type grpcNode struct {
 	selector.Node
-	subConn gBalancer.SubConn
+	subConn balancer.SubConn
 }

@@ -14,7 +14,7 @@ type Transport struct {
 	operation   string
 	reqHeader   headerCarrier
 	replyHeader headerCarrier
-	filters     []selector.Filter
+	nodeFilters []selector.NodeFilter
 }
 
 // Kind returns the transport kind.
@@ -42,9 +42,9 @@ func (tr *Transport) ReplyHeader() transport.Header {
 	return tr.replyHeader
 }
 
-// SelectFilters returns the client select filters.
-func (tr *Transport) SelectFilters() []selector.Filter {
-	return tr.filters
+// NodeFilters returns the client select filters.
+func (tr *Transport) NodeFilters() []selector.NodeFilter {
+	return tr.nodeFilters
 }
 
 type headerCarrier metadata.MD

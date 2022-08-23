@@ -46,7 +46,7 @@ type responseWriter struct {
 	w    http.ResponseWriter
 }
 
-func (w *responseWriter) rest(res http.ResponseWriter) {
+func (w *responseWriter) reset(res http.ResponseWriter) {
 	w.w = res
 	w.code = http.StatusOK
 }
@@ -151,7 +151,7 @@ func (c *wrapper) Stream(code int, contentType string, rd io.Reader) error {
 }
 
 func (c *wrapper) Reset(res http.ResponseWriter, req *http.Request) {
-	c.w.rest(res)
+	c.w.reset(res)
 	c.res = res
 	c.req = req
 }

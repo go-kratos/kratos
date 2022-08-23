@@ -2,6 +2,9 @@ package apollo
 
 import (
 	"context"
+	"strings"
+
+	"github.com/go-kratos/kratos/v2/encoding"
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/log"
@@ -23,14 +26,38 @@ type customChangeListener struct {
 
 func (c *customChangeListener) onChange(namespace string, changes map[string]*storage.ConfigChange) []*config.KeyValue {
 	kv := make([]*config.KeyValue, 0, 2)
-	value, err := c.apollo.client.GetConfigCache(namespace).Get("content")
+	if strings.Contains(namespace, ".") && !strings.Contains(namespace, properties) &&
+		(format(namespace) == yaml || format(namespace) == yml || format(namespace) == json) {
+		value, err := c.apollo.client.GetConfigCache(namespace).Get("content")
+		if err != nil {
+			log.Warnw("apollo get config failed", "err", err)
+		}
+		kv = append(kv, &config.KeyValue{
+			Key:    namespace,
+			Value:  []byte(value.(string)),
+			Format: format(namespace),
+		})
+
+		return kv
+	}
+
+	next := make(map[string]interface{})
+
+	for key, change := range changes {
+		resolve(genKey(namespace, key), change.NewValue, next)
+	}
+
+	f := format(namespace)
+	codec := encoding.GetCodec(f)
+	val, err := codec.Marshal(next)
 	if err != nil {
-		log.Warnw("apollo get config failed", "err", err)
+		log.Warnf("apollo could not handle namespace %s: %v", namespace, err)
+		return nil
 	}
 	kv = append(kv, &config.KeyValue{
 		Key:    namespace,
-		Value:  []byte(value.(string)),
-		Format: format(namespace),
+		Value:  val,
+		Format: f,
 	})
 
 	return kv
