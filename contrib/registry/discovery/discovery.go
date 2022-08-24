@@ -439,7 +439,7 @@ func (r *Resolve) fetch(ctx context.Context) (ins *disInstancesInfo, ok bool) {
 		ins = new(disInstancesInfo)
 		ins.LastTs = appIns.LastTs
 		ins.Scheduler = appIns.Scheduler
-		ins.Instances = make(map[string][]*discoveryInstance)
+		ins.Instances = make(map[string][]*discoveryInstance, len(appIns.Instances))
 		for zone, in := range appIns.Instances {
 			ins.Instances[zone] = in
 		}
