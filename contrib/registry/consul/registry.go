@@ -63,6 +63,15 @@ func WithDeregisterCriticalServiceAfter(interval int) Option {
 	}
 }
 
+// WithRegistryServicePortByScheme with registry service port by scheme
+func WithRegistryServicePortByScheme(scheme string) Option {
+	return func(o *Registry) {
+		if o.cli != nil {
+			o.registryPortByScheme = scheme
+		}
+	}
+}
+
 // Config is consul registry config
 type Config struct {
 	*api.Config
@@ -70,22 +79,23 @@ type Config struct {
 
 // Registry is consul registry
 type Registry struct {
-	cli               *Client
-	enableHealthCheck bool
-	registry          map[string]*serviceSet
-	lock              sync.RWMutex
+	cli                  *Client
+	enableHealthCheck    bool
+	registry             map[string]*serviceSet
+	registryPortByScheme string
+	lock                 sync.RWMutex
 }
 
 // New creates consul registry
 func New(apiClient *api.Client, opts ...Option) *Registry {
 	r := &Registry{
-		cli:               NewClient(apiClient),
 		registry:          make(map[string]*serviceSet),
 		enableHealthCheck: true,
 	}
 	for _, o := range opts {
 		o(r)
 	}
+	r.cli = newClient(apiClient, r.registryPortByScheme)
 	return r
 }
 
