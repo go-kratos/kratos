@@ -29,6 +29,8 @@ type Client struct {
 	heartbeat bool
 	// deregisterCriticalServiceAfter time interval in seconds
 	deregisterCriticalServiceAfter int
+	// customChecks  user custom checks
+	customChecks api.AgentServiceChecks
 }
 
 // NewClient creates consul client
@@ -138,6 +140,9 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.deregisterCriticalServiceAfter),
 		})
 	}
+
+	// custom checks
+	asr.Checks = append(asr.Checks, c.customChecks...)
 
 	err := c.cli.Agent().ServiceRegister(asr)
 	if err != nil {
