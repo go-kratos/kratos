@@ -264,6 +264,43 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 	return err
 }
 
+// DoWithMiddleware send an HTTP request WithMiddleware and decodes the body of response into target.
+// returns an error (of type *Error) if the response status code is not 2xx.
+func (client *Client) DoWithMiddleware(req *http.Request, opts ...CallOption) (*http.Response, error) {
+	c := defaultCallInfo(req.URL.Path)
+	for _, o := range opts {
+		if err := o.before(&c); err != nil {
+			return nil, err
+		}
+	}
+	h := func(ctx context.Context, in interface{}) (interface{}, error) {
+		res, err := client.do(req)
+		if res != nil {
+			cs := csAttempt{res: res}
+			for _, o := range opts {
+				o.after(&c, &cs)
+			}
+		}
+		if err != nil {
+			return nil, err
+		}
+		return res, nil
+	}
+	if len(client.opts.middleware) > 0 {
+		h = middleware.Chain(client.opts.middleware...)(h)
+	}
+	resp, err := h(req.Context(), req)
+	if err != nil {
+		return nil, err
+	}
+
+	response, ok := resp.(*http.Response)
+	if ok {
+		return response, nil
+	}
+	return nil, errors.New(500, "Client DoWithMiddleware Failed", "response convert failed ")
+}
+
 // Do send an HTTP request and decodes the body of response into target.
 // returns an error (of type *Error) if the response status code is not 2xx.
 func (client *Client) Do(req *http.Request, opts ...CallOption) (*http.Response, error) {

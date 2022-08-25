@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/middleware"
 	"io"
 	"net"
 	"net/http"
@@ -192,7 +193,12 @@ func testClient(t *testing.T, srv *Server) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	client, err := NewClient(context.Background(), WithEndpoint(e.Host))
+	client, err := NewClient(context.Background(), WithEndpoint(e.Host), WithMiddleware(func(handler middleware.Handler) middleware.Handler {
+		t.Logf("handle in middleware")
+		return func(ctx context.Context, req interface{}) (interface{}, error) {
+			return handler(ctx, req)
+		}
+	}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -205,6 +211,37 @@ func testClient(t *testing.T, srv *Server) {
 			t.Fatal(err)
 		}
 		resp, err := client.Do(req)
+		if errors.Code(err) != test.code {
+			t.Fatalf("want %v, but got %v", test, err)
+		}
+		if err != nil {
+			continue
+		}
+		if resp.StatusCode != 200 {
+			_ = resp.Body.Close()
+			t.Fatalf("http status got %d", resp.StatusCode)
+		}
+		content, err := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		if err != nil {
+			t.Fatalf("read resp error %v", err)
+		}
+		err = json.Unmarshal(content, &res)
+		if err != nil {
+			t.Fatalf("unmarshal resp error %v", err)
+		}
+		if res.Path != test.path {
+			t.Errorf("expected %s got %s", test.path, res.Path)
+		}
+	}
+	for _, test := range tests {
+		var res testData
+		reqURL := fmt.Sprintf(e.String() + test.path)
+		req, err := http.NewRequest(test.method, reqURL, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp, err := client.DoWithMiddleware(req)
 		if errors.Code(err) != test.code {
 			t.Fatalf("want %v, but got %v", test, err)
 		}
