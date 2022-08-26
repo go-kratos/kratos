@@ -1,18 +1,12 @@
 package base
 
 import (
+	"context"
+	"os"
 	"testing"
 )
 
 func TestRepo(t *testing.T) {
-	//os.RemoveAll("/tmp/test_repo")
-	//r := NewRepo("https://github.com/go-kratos/service-layout.git", "")
-	//if err := r.Clone(context.Background()); err != nil {
-	//	t.Fatal(err)
-	//}
-	//if err := r.CopyTo(context.Background(), "/tmp/test_repo", "github.com/go-kratos/kratos-layout", nil); err != nil {
-	//	t.Fatal(err)
-	//}
 	urls := []string{
 		// ssh://[user@]host.xz[:port]/path/to/repo.git/
 		"ssh://git@github.com:7875/go-kratos/kratos.git",
@@ -41,4 +35,17 @@ func TestRepo(t *testing.T) {
 			t.Fatal(url, "repoDir test failed", dir)
 		}
 	}
+}
+
+func TestRepoClone(t *testing.T) {
+	r := NewRepo("https://github.com/go-kratos/service-layout.git", "")
+	if err := r.Clone(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.CopyTo(context.Background(), "/tmp/test_repo", "github.com/go-kratos/kratos-layout", nil); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		os.RemoveAll("/tmp/test_repo")
+	})
 }

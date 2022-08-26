@@ -54,5 +54,5 @@ func ParseVCSUrl(repo string) (*url.URL, error) {
 			return repoURL, nil
 		}
 	}
-	return nil, errors.New("unable to parse repo url ")
+	return nil, errors.New("unable to parse repo url")
 }
