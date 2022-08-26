@@ -93,9 +93,9 @@ func (v *atomicValue) Slice() ([]Value, error) {
 
 func (v *atomicValue) Map() (map[string]Value, error) {
 	if vals, ok := v.Load().(map[string]interface{}); ok {
-		m := make(map[string]Value)
+		m := make(map[string]Value, len(vals))
 		for key, val := range vals {
-			a := &atomicValue{}
+			a := new(atomicValue)
 			a.Store(val)
 			m[key] = a
 		}

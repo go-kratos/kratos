@@ -15,6 +15,7 @@ import (
 type Option func(*options)
 
 type options struct {
+	tracerName     string
 	tracerProvider trace.TracerProvider
 	propagator     propagation.TextMapPropagator
 }
@@ -31,6 +32,13 @@ func WithPropagator(propagator propagation.TextMapPropagator) Option {
 func WithTracerProvider(provider trace.TracerProvider) Option {
 	return func(opts *options) {
 		opts.tracerProvider = provider
+	}
+}
+
+// WithTracerName with tracer name
+func WithTracerName(tracerName string) Option {
+	return func(opts *options) {
+		opts.tracerName = tracerName
 	}
 }
 
