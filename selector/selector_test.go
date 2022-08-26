@@ -12,9 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
-var (
-	errNodeNotMatch = errors.New("node is not match")
-)
+var errNodeNotMatch = errors.New("node is not match")
 
 type mockWeightedNode struct {
 	Node
@@ -219,7 +217,6 @@ func TestDefault(t *testing.T) {
 	if n != nil {
 		t.Errorf("expect %v, got %v", nil, n)
 	}
-
 }
 
 func TestWithoutApply(t *testing.T) {
