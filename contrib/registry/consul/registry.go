@@ -63,11 +63,11 @@ func WithDeregisterCriticalServiceAfter(interval int) Option {
 	}
 }
 
-// WithCustomChecks with custom checks
-func WithCustomChecks(checks ...*api.AgentServiceCheck) Option {
+// WithServiceCheck with service checks
+func WithServiceCheck(checks ...*api.AgentServiceCheck) Option {
 	return func(o *Registry) {
 		if o.cli != nil {
-			o.cli.customChecks = checks
+			o.cli.serviceChecks = checks
 		}
 	}
 }
