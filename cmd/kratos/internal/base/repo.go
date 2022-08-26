@@ -22,19 +22,19 @@ type Repo struct {
 }
 
 func repoDir(url string) string {
-	vcsUrl, err := ParseVCSUrl(url)
+	vcsURL, err := ParseVCSUrl(url)
 	if err != nil {
 		return url
 	}
 	// check host contains port
-	host, _, err := net.SplitHostPort(vcsUrl.Host)
+	host, _, err := net.SplitHostPort(vcsURL.Host)
 	if err != nil {
-		host = vcsUrl.Host
+		host = vcsURL.Host
 	}
 	for _, p := range unExpandVarPath {
 		host = strings.TrimLeft(host, p)
 	}
-	dir := path.Base(path.Dir(vcsUrl.Path))
+	dir := path.Base(path.Dir(vcsURL.Path))
 	url = fmt.Sprintf("%s/%s", host, dir)
 	return url
 }
