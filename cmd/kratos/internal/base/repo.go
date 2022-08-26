@@ -10,9 +10,7 @@ import (
 	"strings"
 )
 
-var (
-	unExpandVarPath = []string{"~", ".", ".."}
-)
+var unExpandVarPath = []string{"~", ".", ".."}
 
 // Repo is git repository manager.
 type Repo struct {
