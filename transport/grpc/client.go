@@ -10,7 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/p2c"
+	"github.com/go-kratos/kratos/v2/selector/wrr"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/grpc/resolver/discovery"
 
@@ -25,7 +25,7 @@ import (
 
 func init() {
 	if selector.GlobalSelector() == nil {
-		selector.SetGlobalSelector(p2c.NewBuilder())
+		selector.SetGlobalSelector(wrr.NewBuilder())
 	}
 }
 
