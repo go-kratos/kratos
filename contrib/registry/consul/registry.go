@@ -72,6 +72,20 @@ func WithServiceCheck(checks ...*api.AgentServiceCheck) Option {
 	}
 }
 
+// WithDisableServiceReRegistry do not re register the service when the service is abnormal
+func WithDisableServiceReRegistry(enable bool) Option {
+	return func(r *Registry) {
+		r.cli.reRegistry = enable
+	}
+}
+
+// WithServiceReRegistryCheckInterval service abnormal state inspection interval
+func WithServiceReRegistryCheckInterval(interval int) Option {
+	return func(r *Registry) {
+		r.cli.reRegistryCheckInterval = interval
+	}
+}
+
 // Config is consul registry config
 type Config struct {
 	*api.Config
