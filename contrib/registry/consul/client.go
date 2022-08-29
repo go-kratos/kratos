@@ -157,7 +157,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			time.Sleep(time.Second)
 			err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 			if err != nil {
-				log.Errorf("[Consul] update ttl heartbeat to consul failed! err:=%v", err)
+				log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
 			}
 			ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
 			defer ticker.Stop()
@@ -166,7 +166,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 				case <-ticker.C:
 					err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 					if err != nil {
-						log.Errorf("[Consul] update ttl heartbeat to consul failed! err:=%v", err)
+						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
 					}
 				case <-c.ctx.Done():
 					return
@@ -184,7 +184,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 					srv, _, err := c.cli.Agent().Service(svc.ID, nil)
 					if err != nil || srv == nil {
 						err := c.cli.Agent().ServiceRegister(asr)
-						log.Errorf("[Consul] re-register service to consul failed! err:=%v", err)
+						log.Errorf("[Consul] re-register service to consul failed! err=%v", err)
 					}
 				case <-c.ctx.Done():
 					return
