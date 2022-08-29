@@ -174,6 +174,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			}
 		}()
 	}
+
 	if c.reRegistry {
 		go func() {
 			ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
