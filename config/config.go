@@ -99,23 +99,17 @@ func (c *config) Load() error {
 		if err != nil {
 			return err
 		}
-		for _, v := range kvs {
-			log.Debugf("config loaded: %s format: %s", v.Key, v.Format)
-		}
 		if err = c.reader.Merge(kvs...); err != nil {
-			log.Errorf("failed to merge config source: %v", err)
 			return err
 		}
 		w, err := src.Watch()
 		if err != nil {
-			log.Errorf("failed to watch config source: %v", err)
 			return err
 		}
 		c.watchers = append(c.watchers, w)
 		go c.watch(w)
 	}
 	if err := c.reader.Resolve(); err != nil {
-		log.Errorf("failed to resolve config source: %v", err)
 		return err
 	}
 	return nil
