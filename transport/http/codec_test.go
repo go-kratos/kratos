@@ -34,9 +34,9 @@ func TestDefaultRequestDecoder(t *testing.T) {
 }
 
 type mockResponseWriter struct {
-	StatusCode int
-	Data       []byte
 	header     nethttp.Header
+	Data       []byte
+	StatusCode int
 }
 
 func (w *mockResponseWriter) Header() nethttp.Header {

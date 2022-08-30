@@ -247,9 +247,9 @@ func testConfig(t *testing.T, c config.Config) {
 	}
 	// scan
 	var settings struct {
+		StringKey   string        `json:"string_key"`
 		IntKey      int64         `json:"int_key"`
 		FloatKey    float64       `json:"float_key"`
-		StringKey   string        `json:"string_key"`
 		DurationKey time.Duration `json:"duration_key"`
 	}
 	if err := c.Value("test.settings").Scan(&settings); err != nil {
@@ -276,22 +276,22 @@ func testConfig(t *testing.T, c config.Config) {
 
 func testScan(t *testing.T, c config.Config) {
 	type TestJSON struct {
-		Test struct {
-			Settings struct {
-				IntKey      int     `json:"int_key"`
-				FloatKey    float64 `json:"float_key"`
-				DurationKey int     `json:"duration_key"`
-				StringKey   string  `json:"string_key"`
-			} `json:"settings"`
-			Server struct {
-				Addr string `json:"addr"`
-				Port int    `json:"port"`
-			} `json:"server"`
-		} `json:"test"`
 		Foo []struct {
 			Name string `json:"name"`
 			Age  int    `json:"age"`
 		} `json:"foo"`
+		Test struct {
+			Server struct {
+				Addr string `json:"addr"`
+				Port int    `json:"port"`
+			} `json:"server"`
+			Settings struct {
+				StringKey   string  `json:"string_key"`
+				IntKey      int     `json:"int_key"`
+				FloatKey    float64 `json:"float_key"`
+				DurationKey int     `json:"duration_key"`
+			} `json:"settings"`
+		} `json:"test"`
 	}
 	var conf TestJSON
 	if err := c.Load(); err != nil {

@@ -26,11 +26,10 @@ import (
 // Server is api meta server
 type Server struct {
 	UnimplementedMetadataServer
-
 	srv      *grpc.Server
-	lock     sync.Mutex
 	services map[string]*dpb.FileDescriptorSet
 	methods  map[string][]string
+	lock     sync.Mutex
 }
 
 // NewServer create server instance

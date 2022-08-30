@@ -13,8 +13,8 @@ import (
 
 func TestMetadata_Inject(t *testing.T) {
 	type args struct {
-		appName string
 		carrier propagation.TextMapCarrier
+		appName string
 	}
 	tests := []struct {
 		name string
@@ -23,12 +23,12 @@ func TestMetadata_Inject(t *testing.T) {
 	}{
 		{
 			name: "https://go-kratos.dev",
-			args: args{"https://go-kratos.dev", propagation.HeaderCarrier{}},
+			args: args{propagation.HeaderCarrier{}, "https://go-kratos.dev"},
 			want: "https://go-kratos.dev",
 		},
 		{
 			name: "https://github.com/go-kratos/kratos",
-			args: args{"https://github.com/go-kratos/kratos", propagation.HeaderCarrier{"mode": []string{"test"}}},
+			args: args{propagation.HeaderCarrier{"mode": []string{"test"}}, "https://github.com/go-kratos/kratos"},
 			want: "https://github.com/go-kratos/kratos",
 		},
 	}

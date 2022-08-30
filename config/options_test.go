@@ -80,9 +80,9 @@ func TestDefaultResolver(t *testing.T) {
 	}
 
 	tests := []struct {
+		expect interface{}
 		name   string
 		path   string
-		expect interface{}
 	}{
 		{
 			name:   "test not exist int env with default",

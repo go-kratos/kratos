@@ -13,8 +13,8 @@ import (
 type Option func(*options)
 
 type options struct {
-	prefix []string
 	md     metadata.Metadata
+	prefix []string
 }
 
 func (o *options) hasPrefix(key string) bool {

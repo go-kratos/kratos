@@ -102,8 +102,8 @@ func TestCodec_NilUnmarshal(t *testing.T) {
 
 	for _, tt := range tests {
 		s := struct {
-			A string `xml:"a"`
 			B *NestedOrder
+			A string `xml:"a"`
 		}{A: "a"}
 		data := []byte(tt.InputXML)
 		err := (codec{}).Unmarshal(data, &s.B)

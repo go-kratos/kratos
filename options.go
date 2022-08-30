@@ -16,20 +16,18 @@ type Option func(o *options)
 
 // options is an application options.
 type options struct {
-	id        string
-	name      string
-	version   string
-	metadata  map[string]string
-	endpoints []*url.URL
-
-	ctx  context.Context
-	sigs []os.Signal
-
+	ctx              context.Context
 	logger           log.Logger
 	registrar        registry.Registrar
+	metadata         map[string]string
+	id               string
+	name             string
+	version          string
+	endpoints        []*url.URL
+	sigs             []os.Signal
+	servers          []transport.Server
 	registrarTimeout time.Duration
 	stopTimeout      time.Duration
-	servers          []transport.Server
 }
 
 // ID with service id.

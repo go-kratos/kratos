@@ -19,32 +19,32 @@ func TestGlobalLog(t *testing.T) {
 	}
 
 	testCases := []struct {
-		level   Level
 		content []interface{}
+		level   Level
 	}{
 		{
-			LevelDebug,
-			[]interface{}{"test debug"},
+			level:   LevelDebug,
+			content: []interface{}{"test debug"},
 		},
 		{
-			LevelInfo,
-			[]interface{}{"test info"},
+			level:   LevelInfo,
+			content: []interface{}{"test info"},
 		},
 		{
-			LevelInfo,
-			[]interface{}{"test %s", "info"},
+			level:   LevelInfo,
+			content: []interface{}{"test %s", "info"},
 		},
 		{
-			LevelWarn,
-			[]interface{}{"test warn"},
+			level:   LevelWarn,
+			content: []interface{}{"test warn"},
 		},
 		{
-			LevelError,
-			[]interface{}{"test error"},
+			level:   LevelError,
+			content: []interface{}{"test error"},
 		},
 		{
-			LevelError,
-			[]interface{}{"test %s", "error"},
+			level:   LevelError,
+			content: []interface{}{"test %s", "error"},
 		},
 	}
 

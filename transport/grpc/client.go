@@ -96,15 +96,15 @@ func WithLogger(log log.Logger) ClientOption {
 
 // clientOptions is gRPC Client
 type clientOptions struct {
-	endpoint     string
-	tlsConf      *tls.Config
-	timeout      time.Duration
 	discovery    registry.Discovery
+	tlsConf      *tls.Config
+	endpoint     string
+	balancerName string
 	middleware   []middleware.Middleware
 	ints         []grpc.UnaryClientInterceptor
 	grpcOpts     []grpc.DialOption
-	balancerName string
 	filters      []selector.NodeFilter
+	timeout      time.Duration
 }
 
 // Dial returns a GRPC connection.

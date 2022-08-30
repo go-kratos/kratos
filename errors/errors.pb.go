@@ -23,13 +23,12 @@ const (
 
 type Status struct {
 	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
+	Metadata      map[string]string `protobuf:"bytes,4,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	Reason        string            `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	Message       string            `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
-
-	Code     int32             `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
-	Reason   string            `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	Message  string            `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
-	Metadata map[string]string `protobuf:"bytes,4,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	sizeCache     protoimpl.SizeCache
+	Code          int32 `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
 }
 
 func (x *Status) Reset() {

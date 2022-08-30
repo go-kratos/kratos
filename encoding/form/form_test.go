@@ -22,8 +22,8 @@ type LoginRequest struct {
 }
 
 type TestModel struct {
-	ID   int32  `json:"id"`
 	Name string `json:"name"`
+	ID   int32  `json:"id"`
 }
 
 const contentType = "x-www-form-urlencoded"

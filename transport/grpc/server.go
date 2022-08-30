@@ -104,21 +104,21 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 
 // Server is a gRPC server wrapper.
 type Server struct {
-	*grpc.Server
-	baseCtx    context.Context
-	tlsConf    *tls.Config
+	middleware matcher.Matcher
 	lis        net.Listener
 	err        error
+	baseCtx    context.Context
+	health     *health.Server
+	tlsConf    *tls.Config
+	metadata   *apimd.Server
+	*grpc.Server
+	endpoint   *url.URL
 	network    string
 	address    string
-	endpoint   *url.URL
-	timeout    time.Duration
-	middleware matcher.Matcher
 	unaryInts  []grpc.UnaryServerInterceptor
-	streamInts []grpc.StreamServerInterceptor
 	grpcOpts   []grpc.ServerOption
-	health     *health.Server
-	metadata   *apimd.Server
+	streamInts []grpc.StreamServerInterceptor
+	timeout    time.Duration
 }
 
 // NewServer creates a gRPC server by options.

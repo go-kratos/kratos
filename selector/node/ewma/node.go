@@ -28,22 +28,16 @@ var (
 // Node is endpoint instance
 type Node struct {
 	selector.Node
-
-	// client statistic data
-	lag       int64
-	success   uint64
-	inflight  int64
-	inflights *list.List
-	// last collected timestamp
-	stamp     int64
-	predictTs int64
-	predict   int64
-	// request number in a period time
-	reqs int64
-	// last lastPick timestamp
-	lastPick int64
-
+	inflights  *list.List
 	errHandler func(err error) (isErr bool)
+	lag        int64
+	success    uint64
+	inflight   int64
+	stamp      int64
+	predictTs  int64
+	predict    int64
+	reqs       int64
+	lastPick   int64
 	lk         sync.RWMutex
 }
 

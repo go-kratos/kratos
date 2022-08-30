@@ -22,8 +22,8 @@ const (
 
 // Error is a status error.
 type Error struct {
-	Status
 	cause error
+	Status
 }
 
 func (e *Error) Error() string {

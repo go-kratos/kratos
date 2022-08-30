@@ -36,19 +36,6 @@ const (
 )
 
 type testConfigStruct struct {
-	Server struct {
-		HTTP struct {
-			Addr      string  `json:"addr"`
-			Port      int     `json:"port"`
-			Timeout   float64 `json:"timeout"`
-			EnableSSL bool    `json:"enable_ssl"`
-		} `json:"http"`
-		GRPC struct {
-			Addr    string  `json:"addr"`
-			Port    int     `json:"port"`
-			Timeout float64 `json:"timeout"`
-		} `json:"grpc"`
-	} `json:"server"`
 	Data struct {
 		Database struct {
 			Driver string `json:"driver"`
@@ -56,12 +43,25 @@ type testConfigStruct struct {
 		} `json:"database"`
 	} `json:"data"`
 	Endpoints []string `json:"endpoints"`
+	Server    struct {
+		GRPC struct {
+			Addr    string  `json:"addr"`
+			Port    int     `json:"port"`
+			Timeout float64 `json:"timeout"`
+		} `json:"grpc"`
+		HTTP struct {
+			Addr      string  `json:"addr"`
+			Port      int     `json:"port"`
+			Timeout   float64 `json:"timeout"`
+			EnableSSL bool    `json:"enable_ssl"`
+		} `json:"http"`
+	} `json:"server"`
 }
 
 type testJSONSource struct {
-	data string
 	sig  chan struct{}
 	err  chan struct{}
+	data string
 }
 
 func newTestJSONSource(data string) *testJSONSource {

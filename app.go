@@ -28,11 +28,11 @@ type AppInfo interface {
 
 // App is an application components lifecycle manager.
 type App struct {
-	opts     options
 	ctx      context.Context
 	cancel   func()
-	mu       sync.Mutex
 	instance *registry.ServiceInstance
+	opts     options
+	mu       sync.Mutex
 }
 
 // New create an application lifecycle manager.

@@ -8,12 +8,12 @@ import (
 
 // DefaultNode is selector node
 type DefaultNode struct {
+	weight   *int64
+	metadata map[string]string
 	scheme   string
 	addr     string
-	weight   *int64
 	version  string
 	name     string
-	metadata map[string]string
 }
 
 // Scheme is node scheme

@@ -5,8 +5,8 @@ import "testing"
 func TestLevel_String(t *testing.T) {
 	tests := []struct {
 		name string
-		l    Level
 		want string
+		l    Level
 	}{
 		{
 			name: "DEBUG",

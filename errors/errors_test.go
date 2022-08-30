@@ -73,9 +73,9 @@ func TestErrors(t *testing.T) {
 
 func TestIs(t *testing.T) {
 	tests := []struct {
-		name string
-		e    *Error
 		err  error
+		e    *Error
+		name string
 		want bool
 	}{
 		{

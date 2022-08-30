@@ -15,8 +15,8 @@ import (
 )
 
 type mockRegistry struct {
-	lk      sync.Mutex
 	service map[string]*registry.ServiceInstance
+	lk      sync.Mutex
 }
 
 func (r *mockRegistry) Register(ctx context.Context, service *registry.ServiceInstance) error {
@@ -168,17 +168,17 @@ func TestApp_buildInstance(t *testing.T) {
 
 func TestApp_Context(t *testing.T) {
 	type fields struct {
+		instance *registry.ServiceInstance
+		metadata map[string]string
 		id       string
 		version  string
 		name     string
-		instance *registry.ServiceInstance
-		metadata map[string]string
 		want     struct {
+			metadata map[string]string
 			id       string
 			version  string
 			name     string
 			endpoint []string
-			metadata map[string]string
 		}
 	}
 	tests := []fields{
@@ -189,11 +189,11 @@ func TestApp_Context(t *testing.T) {
 			metadata: map[string]string{},
 			version:  "v1",
 			want: struct {
+				metadata map[string]string
 				id       string
 				version  string
 				name     string
 				endpoint []string
-				metadata map[string]string
 			}{
 				id: "1", version: "v1", name: "kratos-v1", endpoint: []string{"https://go-kratos.dev", "localhost"},
 				metadata: map[string]string{},
@@ -206,11 +206,11 @@ func TestApp_Context(t *testing.T) {
 			metadata: map[string]string{"kratos": "https://github.com/go-kratos/kratos"},
 			version:  "v2",
 			want: struct {
+				metadata map[string]string
 				id       string
 				version  string
 				name     string
 				endpoint []string
-				metadata map[string]string
 			}{
 				id: "2", version: "v2", name: "kratos-v2", endpoint: []string{"test"},
 				metadata: map[string]string{"kratos": "https://github.com/go-kratos/kratos"},
@@ -223,11 +223,11 @@ func TestApp_Context(t *testing.T) {
 			metadata: make(map[string]string),
 			version:  "v3",
 			want: struct {
+				metadata map[string]string
 				id       string
 				version  string
 				name     string
 				endpoint []string
-				metadata map[string]string
 			}{
 				id: "3", version: "v3", name: "kratos-v3", endpoint: nil,
 				metadata: map[string]string{},

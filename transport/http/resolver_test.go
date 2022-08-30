@@ -79,13 +79,11 @@ func (d *mockDiscoveries) Watch(ctx context.Context, serviceName string) (regist
 }
 
 type mockWatch struct {
-	ctx context.Context
-
-	isSecure bool
+	ctx      context.Context
 	count    int
-
-	nextErr bool
-	stopErr bool
+	isSecure bool
+	nextErr  bool
+	stopErr  bool
 }
 
 func (m *mockWatch) Next() ([]*registry.ServiceInstance, error) {

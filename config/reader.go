@@ -24,8 +24,8 @@ type Reader interface {
 }
 
 type reader struct {
-	opts   options
 	values map[string]interface{}
+	opts   options
 	lock   sync.Mutex
 }
 

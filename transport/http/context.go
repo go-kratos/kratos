@@ -42,8 +42,8 @@ type Context interface {
 }
 
 type responseWriter struct {
-	code int
 	w    http.ResponseWriter
+	code int
 }
 
 func (w *responseWriter) reset(res http.ResponseWriter) {

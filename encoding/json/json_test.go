@@ -16,10 +16,10 @@ type testEmbed struct {
 }
 
 type testMessage struct {
+	Embed  *testEmbed `json:"embed,omitempty"`
 	Field1 string     `json:"a"`
 	Field2 string     `json:"b"`
 	Field3 string     `json:"c"`
-	Embed  *testEmbed `json:"embed,omitempty"`
 }
 
 type mock struct {
@@ -106,8 +106,8 @@ func TestJSON_Unmarshal(t *testing.T) {
 	p3 := &testData.TestModel{}
 	p4 := &mock{}
 	tests := []struct {
-		input  string
 		expect interface{}
+		input  string
 	}{
 		{
 			input:  `{"a":"","b":"","c":""}`,

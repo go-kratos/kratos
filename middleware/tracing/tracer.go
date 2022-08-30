@@ -16,8 +16,8 @@ import (
 // Tracer is otel span tracer
 type Tracer struct {
 	tracer trace.Tracer
-	kind   trace.SpanKind
 	opt    *options
+	kind   trace.SpanKind
 }
 
 // NewTracer create tracer instance

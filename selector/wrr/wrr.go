@@ -23,8 +23,8 @@ type options struct{}
 
 // Balancer is a random balancer.
 type Balancer struct {
-	mu            sync.Mutex
 	currentWeight map[string]float64
+	mu            sync.Mutex
 }
 
 // New random a selector.

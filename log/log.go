@@ -15,9 +15,9 @@ type Logger interface {
 
 type logger struct {
 	logger    Logger
+	ctx       context.Context
 	prefix    []interface{}
 	hasValuer bool
-	ctx       context.Context
 }
 
 func (c *logger) Log(level Level, keyvals ...interface{}) error {

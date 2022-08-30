@@ -11,9 +11,9 @@ func TestNew(t *testing.T) {
 		mds []map[string]string
 	}
 	tests := []struct {
+		want Metadata
 		name string
 		args args
-		want Metadata
 	}{
 		{
 			name: "hello",
@@ -73,10 +73,10 @@ func TestMetadata_Set(t *testing.T) {
 		value string
 	}
 	tests := []struct {
-		name string
 		m    Metadata
-		args args
 		want Metadata
+		args args
+		name string
 	}{
 		{
 			name: "kratos",
@@ -113,8 +113,8 @@ func TestClientContext(t *testing.T) {
 		md  Metadata
 	}
 	tests := []struct {
-		name string
 		args args
+		name string
 	}{
 		{
 			name: "kratos",
@@ -146,8 +146,8 @@ func TestServerContext(t *testing.T) {
 		md  Metadata
 	}
 	tests := []struct {
-		name string
 		args args
+		name string
 	}{
 		{
 			name: "kratos",
@@ -179,9 +179,9 @@ func TestAppendToClientContext(t *testing.T) {
 		kv []string
 	}
 	tests := []struct {
+		want Metadata
 		name string
 		args args
-		want Metadata
 	}{
 		{
 			name: "kratos",
@@ -234,9 +234,9 @@ func TestMergeToClientContext(t *testing.T) {
 		appendMd Metadata
 	}
 	tests := []struct {
-		name string
 		args args
 		want Metadata
+		name string
 	}{
 		{
 			name: "kratos",
@@ -287,9 +287,9 @@ func TestMetadata_Range(t *testing.T) {
 
 func TestMetadata_Clone(t *testing.T) {
 	tests := []struct {
-		name string
 		m    Metadata
 		want Metadata
+		name string
 	}{
 		{
 			name: "kratos",

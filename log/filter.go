@@ -40,10 +40,10 @@ func FilterFunc(f func(level Level, keyvals ...interface{}) bool) FilterOption {
 // Filter is a logger filter.
 type Filter struct {
 	logger Logger
-	level  Level
 	key    map[interface{}]struct{}
 	value  map[interface{}]struct{}
 	filter func(level Level, keyvals ...interface{}) bool
+	level  Level
 }
 
 // NewFilter new a logger filter.

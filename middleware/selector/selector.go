@@ -27,14 +27,12 @@ var (
 
 // Builder is a selector builder
 type Builder struct {
-	client bool
-
+	match  MatchFunc
 	prefix []string
 	regex  []string
 	path   []string
-	match  MatchFunc
-
-	ms []middleware.Middleware
+	ms     []middleware.Middleware
+	client bool
 }
 
 // Server selector middleware

@@ -299,8 +299,8 @@ func TestReadValue(t *testing.T) {
 	vbde.Store(true)
 
 	tests := []struct {
-		path string
 		want atomicValue
+		path string
 	}{
 		{
 			path: "a",

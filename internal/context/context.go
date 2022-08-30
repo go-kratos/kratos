@@ -8,15 +8,14 @@ import (
 )
 
 type mergeCtx struct {
-	parent1, parent2 context.Context
-
-	done     chan struct{}
-	doneMark uint32
-	doneOnce sync.Once
-	doneErr  error
-
+	parent1    context.Context
+	parent2    context.Context
+	doneErr    error
+	done       chan struct{}
 	cancelCh   chan struct{}
+	doneOnce   sync.Once
 	cancelOnce sync.Once
+	doneMark   uint32
 }
 
 // Merge merges two contexts into one.

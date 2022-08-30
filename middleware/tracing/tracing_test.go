@@ -38,11 +38,11 @@ func (hc headerCarrier) Keys() []string {
 }
 
 type mockTransport struct {
+	header    headerCarrier
+	request   *http.Request
 	kind      transport.Kind
 	endpoint  string
 	operation string
-	header    headerCarrier
-	request   *http.Request
 }
 
 func (tr *mockTransport) Kind() transport.Kind            { return tr.kind }

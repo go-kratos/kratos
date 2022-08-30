@@ -27,10 +27,10 @@ func TestBindQuery(t *testing.T) {
 		target interface{}
 	}
 	tests := []struct {
-		name    string
 		args    args
-		wantErr bool
 		want    interface{}
+		name    string
+		wantErr bool
 	}{
 		{
 			name: "test",
@@ -88,10 +88,10 @@ func TestBindForm(t *testing.T) {
 		target interface{}
 	}
 	tests := []struct {
-		name    string
 		args    args
-		wantErr bool
 		want    interface{}
+		name    string
+		wantErr bool
 	}{
 		{
 			name: "error not nil",

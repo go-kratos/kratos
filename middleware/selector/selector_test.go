@@ -13,10 +13,10 @@ import (
 var _ transport.Transporter = &Transport{}
 
 type Transport struct {
+	headers   *mockHeader
 	kind      transport.Kind
 	endpoint  string
 	operation string
-	headers   *mockHeader
 }
 
 func (tr *Transport) Kind() transport.Kind {
@@ -61,8 +61,8 @@ func (m *mockHeader) Keys() []string {
 
 func TestMatch(t *testing.T) {
 	tests := []struct {
-		name string
 		ctx  context.Context
+		name string
 	}{
 		// TODO: Add test cases.
 		{
@@ -97,8 +97,8 @@ func TestMatch(t *testing.T) {
 
 func TestMatchClient(t *testing.T) {
 	tests := []struct {
-		name string
 		ctx  context.Context
+		name string
 	}{
 		// TODO: Add test cases.
 		{
@@ -133,8 +133,8 @@ func TestMatchClient(t *testing.T) {
 
 func TestFunc(t *testing.T) {
 	tests := []struct {
-		name string
 		ctx  context.Context
+		name string
 	}{
 		{
 			name: "/hello.Update/world",
@@ -178,8 +178,8 @@ func TestFunc(t *testing.T) {
 
 func TestHeaderFunc(t *testing.T) {
 	tests := []struct {
-		name string
 		ctx  context.Context
+		name string
 	}{
 		{
 			name: "/hello.Update/world",

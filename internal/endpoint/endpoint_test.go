@@ -12,9 +12,9 @@ func TestNewEndpoint(t *testing.T) {
 		host   string
 	}
 	tests := []struct {
-		name string
-		args args
 		want *url.URL
+		args args
+		name string
 	}{
 		{
 			name: "https://github.com/go-kratos/kratos/",
@@ -43,13 +43,13 @@ func TestNewEndpoint(t *testing.T) {
 
 func TestParseEndpoint(t *testing.T) {
 	type args struct {
-		endpoints []string
 		scheme    string
+		endpoints []string
 	}
 	tests := []struct {
 		name    string
-		args    args
 		want    string
+		args    args
 		wantErr bool
 	}{
 		{
@@ -94,8 +94,8 @@ func TestParseEndpoint(t *testing.T) {
 func TestSchema(t *testing.T) {
 	tests := []struct {
 		schema string
-		secure bool
 		want   string
+		secure bool
 	}{
 		{
 			schema: "http",

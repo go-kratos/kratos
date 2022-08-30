@@ -24,8 +24,8 @@ const (
 
 type ListServicesRequest struct {
 	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListServicesRequest) Reset() {
@@ -62,11 +62,10 @@ func (*ListServicesRequest) Descriptor() ([]byte, []int) {
 
 type ListServicesReply struct {
 	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
-
-	Services []string `protobuf:"bytes,1,rep,name=services,proto3" json:"services,omitempty"`
-	Methods  []string `protobuf:"bytes,2,rep,name=methods,proto3" json:"methods,omitempty"`
+	Services      []string `protobuf:"bytes,1,rep,name=services,proto3" json:"services,omitempty"`
+	Methods       []string `protobuf:"bytes,2,rep,name=methods,proto3" json:"methods,omitempty"`
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListServicesReply) Reset() {
@@ -117,10 +116,9 @@ func (x *ListServicesReply) GetMethods() []string {
 
 type GetServiceDescRequest struct {
 	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
-
-	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetServiceDescRequest) Reset() {
@@ -164,10 +162,9 @@ func (x *GetServiceDescRequest) GetName() string {
 
 type GetServiceDescReply struct {
 	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
+	FileDescSet   *descriptorpb.FileDescriptorSet `protobuf:"bytes,1,opt,name=file_desc_set,json=fileDescSet,proto3" json:"file_desc_set,omitempty"`
 	unknownFields protoimpl.UnknownFields
-
-	FileDescSet *descriptorpb.FileDescriptorSet `protobuf:"bytes,1,opt,name=file_desc_set,json=fileDescSet,proto3" json:"file_desc_set,omitempty"`
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetServiceDescReply) Reset() {

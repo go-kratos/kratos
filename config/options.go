@@ -19,9 +19,9 @@ type Resolver func(map[string]interface{}) error
 type Option func(*options)
 
 type options struct {
-	sources  []Source
 	decoder  Decoder
 	resolver Resolver
+	sources  []Source
 }
 
 // WithSource with config source.

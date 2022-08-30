@@ -116,21 +116,21 @@ func Listener(lis net.Listener) ServerOption {
 
 // Server is an HTTP server wrapper.
 type Server struct {
+	err        error
+	lis        net.Listener
+	middleware matcher.Matcher
+	endpoint   *url.URL
 	*http.Server
-	lis         net.Listener
 	tlsConf     *tls.Config
-	endpoint    *url.URL
-	err         error
-	network     string
-	address     string
-	timeout     time.Duration
-	filters     []FilterFunc
-	middleware  matcher.Matcher
 	dec         DecodeRequestFunc
 	enc         EncodeResponseFunc
 	ene         EncodeErrorFunc
-	strictSlash bool
 	router      *mux.Router
+	network     string
+	address     string
+	filters     []FilterFunc
+	timeout     time.Duration
+	strictSlash bool
 }
 
 // NewServer creates an HTTP server by options.

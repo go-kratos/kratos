@@ -66,9 +66,9 @@ func TestEnvWithPrefix(t *testing.T) {
 	}
 
 	tests := []struct {
+		expect interface{}
 		name   string
 		path   string
-		expect interface{}
 	}{
 		{
 			name:   "test $KEY",
@@ -180,9 +180,9 @@ func TestEnvWithoutPrefix(t *testing.T) {
 	}
 
 	tests := []struct {
+		expect interface{}
 		name   string
 		path   string
-		expect interface{}
 	}{
 		{
 			name:   "test $KEY",
@@ -389,13 +389,13 @@ func Test_env_load(t *testing.T) {
 
 func Test_matchPrefix(t *testing.T) {
 	type args struct {
-		prefixes []string
 		s        string
+		prefixes []string
 	}
 	tests := []struct {
 		name   string
-		args   args
 		want   string
+		args   args
 		wantOk bool
 	}{
 		{args: args{prefixes: nil, s: "foo=123"}, want: "", wantOk: false},

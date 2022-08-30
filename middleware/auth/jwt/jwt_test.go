@@ -40,10 +40,10 @@ func newTokenHeader(headerKey string, token string) *headerCarrier {
 }
 
 type Transport struct {
+	reqHeader transport.Header
 	kind      transport.Kind
 	endpoint  string
 	operation string
-	reqHeader transport.Header
 }
 
 func (tr *Transport) Kind() transport.Kind {
@@ -277,9 +277,9 @@ func TestClient(t *testing.T) {
 		return []byte(testKey), nil
 	}
 	tests := []struct {
-		name          string
 		expectError   error
 		tokenProvider jwt.Keyfunc
+		name          string
 	}{
 		{
 			name:          "normal",
@@ -393,9 +393,9 @@ func TestClientWithClaims(t *testing.T) {
 		return []byte(testKey), nil
 	}
 	test := struct {
-		name          string
 		expectError   error
 		tokenProvider jwt.Keyfunc
+		name          string
 	}{
 		name:          "normal",
 		expectError:   nil,
@@ -467,9 +467,9 @@ func TestClientMissKey(t *testing.T) {
 		return nil, errors.New("some error")
 	}
 	test := struct {
-		name          string
 		expectError   error
 		tokenProvider jwt.Keyfunc
+		name          string
 	}{
 		name:          "normal",
 		expectError:   ErrGetKey,

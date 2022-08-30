@@ -13,8 +13,8 @@ func TestWriterWrapper(t *testing.T) {
 	content := "ThisIsSomeTestLogMessage"
 	testCases := []struct {
 		w                io.Writer
-		acceptLevel      Level
 		acceptMessageKey string
+		acceptLevel      Level
 	}{
 		{
 			w:                NewWriter(logger),

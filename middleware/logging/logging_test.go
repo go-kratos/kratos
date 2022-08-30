@@ -45,40 +45,40 @@ func TestHTTP(t *testing.T) {
 	logger := log.NewStdLogger(bf)
 
 	tests := []struct {
-		name string
-		kind func(logger log.Logger) middleware.Middleware
 		err  error
 		ctx  context.Context
+		kind func(logger log.Logger) middleware.Middleware
+		name string
 	}{
 		{
-			"http-server@fail",
-			Server,
-			err,
-			func() context.Context {
+			name: "http-server@fail",
+			kind: Server,
+			err:  err,
+			ctx: func() context.Context {
 				return transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
 			}(),
 		},
 		{
-			"http-server@succ",
-			Server,
-			nil,
-			func() context.Context {
+			name: "http-server@succ",
+			kind: Server,
+			err:  nil,
+			ctx: func() context.Context {
 				return transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
 			}(),
 		},
 		{
-			"http-client@succ",
-			Client,
-			nil,
-			func() context.Context {
+			name: "http-client@succ",
+			kind: Client,
+			err:  nil,
+			ctx: func() context.Context {
 				return transport.NewClientContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
 			}(),
 		},
 		{
-			"http-client@fail",
-			Client,
-			err,
-			func() context.Context {
+			name: "http-client@fail",
+			kind: Client,
+			err:  err,
+			ctx: func() context.Context {
 				return transport.NewClientContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
 			}(),
 		},

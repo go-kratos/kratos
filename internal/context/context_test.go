@@ -176,8 +176,8 @@ func Test_mergeCtx_Deadline(t *testing.T) {
 		parent2Timeout time.Time
 	}
 	tests := []struct {
-		name   string
 		fields fields
+		name   string
 		want1  bool
 	}{
 		{

@@ -32,9 +32,9 @@ func New(opts ...Option) selector.Selector {
 
 // Balancer is p2c selector.
 type Balancer struct {
-	mu     sync.Mutex
 	r      *rand.Rand
 	picked int64
+	mu     sync.Mutex
 }
 
 // choose two distinct nodes.
