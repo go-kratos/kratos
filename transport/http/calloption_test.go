@@ -96,3 +96,30 @@ func TestHeaderCallOption_after(t *testing.T) {
 		t.Errorf("want: %v,got: %v", &h, o.(HeaderCallOption).header)
 	}
 }
+
+func TestHeaders(t *testing.T) {
+	if !reflect.DeepEqual(map[string]string{
+		"trace_id": "xxxx",
+	}, Headers(map[string]string{
+		"trace_id": "xxxx",
+	}).(HeadersCallOption).headers) {
+		t.Errorf("want: %v,got: %v", "{'trace_id': 'xxxx'}", Headers(map[string]string{
+			"trace_id": "xxxx",
+		}).(HeadersCallOption).headers)
+	}
+}
+
+func TestHeadersCallOption_before(t *testing.T) {
+	c := &callInfo{}
+	err := Headers(map[string]string{
+		"trace_id": "xxxx",
+	}).before(c)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if !reflect.DeepEqual(map[string]string{
+		"trace_id": "xxxx",
+	}, c.headers) {
+		t.Errorf("want: %v, got: %v", "{'trace_id': 'xxxx'}", c.headers)
+	}
+}
