@@ -221,6 +221,9 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 	if err != nil {
 		return err
 	}
+	for key, value := range c.headers {
+		req.Header.Set(key, value)
+	}
 	if contentType != "" {
 		req.Header.Set("Content-Type", c.contentType)
 	}
