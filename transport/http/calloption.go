@@ -20,6 +20,7 @@ type callInfo struct {
 	contentType  string
 	operation    string
 	pathTemplate string
+	headers      map[string]string
 }
 
 // EmptyCallOption does not alter the Call configuration.
@@ -55,6 +56,7 @@ func defaultCallInfo(path string) callInfo {
 		contentType:  "application/json",
 		operation:    path,
 		pathTemplate: path,
+		headers:      make(map[string]string),
 	}
 }
 
@@ -106,4 +108,21 @@ func (o HeaderCallOption) after(c *callInfo, cs *csAttempt) {
 	if cs.res != nil && cs.res.Header != nil {
 		*o.header = cs.res.Header
 	}
+}
+
+// Headers returns a CallOptions that pass the http request header
+// to server .
+func Headers(headers map[string]string) CallOption {
+	return HeadersCallOption{headers: headers}
+}
+
+// HeaderCallOption is http headers that want to set before call the client
+type HeadersCallOption struct {
+	EmptyCallOption
+	headers map[string]string
+}
+
+func (o HeadersCallOption) before(c *callInfo) error {
+	c.headers = o.headers
+	return nil
 }
