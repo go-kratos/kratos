@@ -363,4 +363,11 @@ func TestNewClient(t *testing.T) {
 	if err == nil {
 		t.Error("err should be equal to encoder error")
 	}
+	headersCallOpt := Headers(map[string]string{
+		"trace_id": "xxxx",
+	})
+	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, headersCallOpt)
+	if err == nil {
+		t.Error("err should be equal to encoder error")
+	}
 }
