@@ -15,7 +15,7 @@ import (
 var CmdAdd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a proto API template",
-	Long:  "Add a proto API template. Example: kratos add helloworld/v1/hello.proto",
+	Long:  "Add a proto API template. Example: kratos proto add helloworld/v1/hello.proto",
 	Run:   run,
 }
 
