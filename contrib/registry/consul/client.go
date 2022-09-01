@@ -50,7 +50,6 @@ func NewClient(cli *api.Client) *Client {
 		deregisterCriticalServiceAfter: 600,
 		reRegistry:                     true,
 		reRegistryCheckMaxInterval:     30,
-		reRegistryMaximumAttempts:      3,
 	}
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 	return c
@@ -184,7 +183,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		go func() {
 			failedNum := 0
 			rand.Seed(time.Now().UnixNano())
-			for failedNum <= c.reRegistryMaximumAttempts {
+			for c.reRegistryMaximumAttempts == 0 || failedNum <= c.reRegistryMaximumAttempts {
 				// backoff retry
 				randNum := rand.Int63n(int64(c.reRegistryCheckMaxInterval-1)) + 1
 				time.Sleep(time.Duration(randNum))
