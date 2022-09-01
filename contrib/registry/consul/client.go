@@ -3,6 +3,7 @@ package consul
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net"
 	"net/url"
 	"strconv"
@@ -34,7 +35,9 @@ type Client struct {
 	// reRegistry when service is not healthy re registry
 	reRegistry bool
 	// re registry check interval in seconds
-	reRegistryCheckInterval int
+	reRegistryCheckMaxInterval int
+	// re registry maximum attempts
+	reRegistryMaximumAttempts int
 }
 
 // NewClient creates consul client
@@ -154,7 +157,6 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 	}
 	if c.heartbeat {
 		go func() {
-			time.Sleep(time.Second)
 			err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 			if err != nil {
 				log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
@@ -177,18 +179,21 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 
 	if c.reRegistry {
 		go func() {
-			ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
-			defer ticker.Stop()
-			for {
-				select {
-				case <-ticker.C:
-					srv, _, err := c.cli.Agent().Service(svc.ID, nil)
-					if err != nil || srv == nil {
-						err := c.cli.Agent().ServiceRegister(asr)
+			failedNum := 0
+			rand.Seed(time.Now().UnixNano())
+			for failedNum <= c.reRegistryMaximumAttempts {
+				// backoff retry
+				randNum := rand.Int63n(int64(c.reRegistryCheckMaxInterval-1)) + 1
+				time.Sleep(time.Duration(randNum))
+				_, _, err := c.cli.Agent().Service(svc.ID, nil)
+				if err != nil && strings.Contains(err.Error(), "unknown service ID") {
+					err := c.cli.Agent().ServiceRegister(asr)
+					if err != nil {
 						log.Errorf("[Consul] re-register service to consul failed! err=%v", err)
+						failedNum++
+					} else {
+						failedNum = 0
 					}
-				case <-c.ctx.Done():
-					return
 				}
 			}
 		}()

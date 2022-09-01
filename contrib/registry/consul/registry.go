@@ -79,10 +79,17 @@ func WithDisableServiceReRegistry(enable bool) Option {
 	}
 }
 
-// WithServiceReRegistryCheckInterval service abnormal state inspection interval
-func WithServiceReRegistryCheckInterval(interval int) Option {
+// WithServiceReRegistryCheckMaxInterval service exception status check maximum interval, 1 - maximum interval(backoff retry)
+func WithServiceReRegistryCheckMaxInterval(interval int) Option {
 	return func(r *Registry) {
-		r.cli.reRegistryCheckInterval = interval
+		r.cli.reRegistryCheckMaxInterval = interval
+	}
+}
+
+// WithServiceReRegistryMaximumAttempts maximum number of service re registry attempts
+func WithServiceReRegistryMaximumAttempts(num int) Option {
+	return func(r *Registry) {
+		r.cli.reRegistryMaximumAttempts = num
 	}
 }
 

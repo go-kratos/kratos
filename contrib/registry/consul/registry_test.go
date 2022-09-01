@@ -3,6 +3,7 @@ package consul
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net"
 	"reflect"
 	"testing"
@@ -382,4 +383,12 @@ func getIntranetIP() string {
 		}
 	}
 	return "127.0.0.1"
+}
+
+func TestBackOffRetry(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
+	for i := 0; i < 10; i++ {
+		randNum := rand.Int63n(int64(30-1)) + 1
+		t.Logf("randNum: %d", randNum)
+	}
 }
