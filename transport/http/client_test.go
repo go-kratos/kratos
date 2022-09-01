@@ -364,7 +364,7 @@ func TestNewClient(t *testing.T) {
 		t.Error("err should be equal to encoder error")
 	}
 	reqURL := fmt.Sprintf(client.target.Endpoint + "/go")
-	req, err := nethttp.NewRequest("POST", reqURL, nil)
+	req, _ := nethttp.NewRequest("POST", reqURL, nil)
 	err = client.DoWithMiddleware(req, nil, EmptyCallOption{})
 	if err == nil {
 		t.Error("err should not be equal to nil")
