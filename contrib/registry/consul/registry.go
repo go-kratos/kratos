@@ -7,8 +7,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-
 	"github.com/hashicorp/consul/api"
 )
 
@@ -233,6 +233,7 @@ func (r *Registry) resolve(ss *serviceSet) error {
 			tmpService, tmpIdx, err := r.cli.Service(ctx, ss.serviceName, idx, true)
 			cancel()
 			if err != nil {
+				log.Errorf("consul get service failed, err=%v", err)
 				time.Sleep(time.Second)
 				continue
 			}
