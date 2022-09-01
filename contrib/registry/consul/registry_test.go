@@ -27,6 +27,7 @@ func tcpServer(t *testing.T, lis net.Listener) {
 func TestRegistry_Register(t *testing.T) {
 	opts := []Option{
 		WithHealthCheck(false),
+		WithDisableServiceReRegistry(),
 	}
 
 	type args struct {
@@ -158,6 +159,7 @@ func TestRegistry_GetService(t *testing.T) {
 		WithHeartbeat(true),
 		WithHealthCheck(true),
 		WithHealthCheckInterval(5),
+		WithDisableServiceReRegistry(),
 	}
 	r := New(cli, opts...)
 
@@ -301,6 +303,7 @@ func TestRegistry_Watch(t *testing.T) {
 				instance: instance1,
 				opts: []Option{
 					WithHealthCheck(false),
+					WithDisableServiceReRegistry(),
 				},
 			},
 			want:    []*registry.ServiceInstance{instance1},
@@ -317,6 +320,7 @@ func TestRegistry_Watch(t *testing.T) {
 					WithHeartbeat(true),
 					WithHealthCheck(true),
 					WithHealthCheckInterval(5),
+					WithDisableServiceReRegistry(),
 				},
 			},
 			want:    []*registry.ServiceInstance{instance1},

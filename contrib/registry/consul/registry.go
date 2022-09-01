@@ -73,9 +73,9 @@ func WithServiceCheck(checks ...*api.AgentServiceCheck) Option {
 }
 
 // WithDisableServiceReRegistry do not re register the service when the service is abnormal
-func WithDisableServiceReRegistry(enable bool) Option {
+func WithDisableServiceReRegistry() Option {
 	return func(r *Registry) {
-		r.cli.reRegistry = enable
+		r.cli.reRegistry = false
 	}
 }
 
