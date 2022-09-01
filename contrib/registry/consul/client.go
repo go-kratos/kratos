@@ -48,6 +48,9 @@ func NewClient(cli *api.Client) *Client {
 		healthcheckInterval:            10,
 		heartbeat:                      true,
 		deregisterCriticalServiceAfter: 600,
+		reRegistry:                     true,
+		reRegistryCheckMaxInterval:     30,
+		reRegistryMaximumAttempts:      3,
 	}
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 	return c
