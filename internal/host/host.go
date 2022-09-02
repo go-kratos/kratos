@@ -86,14 +86,7 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 		}
 	}
 	if len(ips) != 0 {
-		var ip net.IP
-		for i := range ips {
-			ip = ips[i]
-			if ip.To4() != nil {
-				break
-			}
-		}
-		return net.JoinHostPort(ip.String(), port), nil
+		return net.JoinHostPort(ips[len(ips)-1].String(), port), nil
 	}
 	return "", nil
 }
