@@ -75,7 +75,7 @@ func WithContext(ctx context.Context, l Logger) Logger {
 func appendWithFilter(src []interface{}, to []interface{}, filter map[interface{}]bool) []interface{} {
 	// If len is an odd number, the last element is discard.
 	vl := len(src)
-	if vl&0x1 == 0x1 {
+	if vl&1 == 1 {
 		vl--
 	}
 	for i := vl - 1; i > 0; i = i - 2 {
