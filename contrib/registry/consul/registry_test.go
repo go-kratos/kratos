@@ -393,6 +393,7 @@ func TestBackOffRetry(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	for i := 0; i < 10; i++ {
 		randNum := rand.Int63n(int64(30-1)) + 1
-		t.Logf("randNum: %d", randNum)
+		a := time.Second * time.Duration(randNum)
+		t.Logf("randNum: %d, %s", randNum, a.String())
 	}
 }

@@ -230,7 +230,6 @@ func (r *Registry) resolve(ss *serviceSet) error {
 		for {
 			<-ticker.C
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*120)
-			log.Infow("consul resolve", "service", ss.serviceName)
 			tmpService, tmpIdx, err := r.cli.Service(ctx, ss.serviceName, idx, true)
 			cancel()
 			if err != nil {

@@ -186,7 +186,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			for c.reRegistryMaximumAttempts == 0 || failedNum <= c.reRegistryMaximumAttempts {
 				// backoff retry
 				randNum := rand.Int63n(int64(c.reRegistryCheckMaxInterval-1)) + 1
-				time.Sleep(time.Duration(randNum))
+				time.Sleep(time.Second * time.Duration(randNum))
 				_, _, err := c.cli.Agent().Service(svc.ID, nil)
 				if err != nil && strings.Contains(err.Error(), "unknown service ID") {
 					err := c.cli.Agent().ServiceRegister(asr)
