@@ -2,22 +2,29 @@ package log
 
 import (
 	"context"
-	"reflect"
 	"testing"
 )
 
-func TestUniqKeys(t *testing.T) {
-	uniq := uniqKeys([]interface{}{"k1", "v1", "k1", "vv1", "k1", "vvv1", "k2", "v2"})
-	if !reflect.DeepEqual(uniq, []interface{}{"k1", "vvv1", "k2", "v2"}) {
-		t.Error("inconsistent data after deduplication")
+func TestWithUniq(t *testing.T) {
+	l := DefaultLogger
+	l = WithUniq(l, "caller", 10)
+	l = WithUniq(l, "caller", 11)
+	c, ok := l.(*logger)
+	if !ok {
+		t.Error("Interface Logger is not implemented")
+	}
+	if v, ok := c.prefixUniq["caller"]; !ok {
+		t.Error("prefix uniq map err")
+	} else if c.prefix[v] != 11 {
+		t.Error("prefix map does not save the last key")
 	}
 }
 
 func TestInfo(t *testing.T) {
 	logger := DefaultLogger
 	logger = With(logger, "ts", DefaultTimestamp)
-	logger = With(logger, "caller", DefaultCaller)
-	logger = With(logger, "caller", Caller(1))
+	logger = WithUniq(logger, "caller", DefaultCaller)
+	logger = WithUniq(logger, "caller", Caller(1))
 	_ = logger.Log(LevelInfo, "key1", "value1")
 }
 
