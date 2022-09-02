@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -38,7 +38,7 @@ func makeJSONRequest(uri string, data string, method string, headers map[string]
 		return nil, err
 	}
 	defer res.Body.Close()
-	return ioutil.ReadAll(res.Body)
+	return io.ReadAll(res.Body)
 }
 
 type commonRes struct {

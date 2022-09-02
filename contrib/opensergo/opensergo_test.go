@@ -1,7 +1,6 @@
 package opensergo
 
 import (
-	"io/ioutil"
 	"net"
 	"os"
 	"path/filepath"
@@ -337,7 +336,7 @@ func TestOpenSergo(t *testing.T) {
 			},
 			preFunc: func(t *testing.T) {
 				fileContent := `{"endpoint": "127.0.0.1:9090"}`
-				err := ioutil.WriteFile("test.json", []byte(fileContent), 0o644)
+				err := os.WriteFile("test.json", []byte(fileContent), 0o644)
 				if err != nil {
 					t.Fatalf("ioutil.WriteFile error:%s", err)
 				}
