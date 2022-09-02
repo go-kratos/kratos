@@ -15,13 +15,18 @@ func TestMain(m *testing.M) {
 		defer ln.Close()
 		go func() {
 			for {
-				conn, err := ln.Accept()
+				err := func() error {
+					conn, err := ln.Accept()
+					if err != nil {
+						return err
+					}
+					defer conn.Close()
+					_, _ = io.ReadAll(conn)
+					// pass
+					return nil
+				}()
 				if err != nil {
 					return
-				}
-				defer conn.Close()
-				if _, err = io.ReadAll(conn); err != nil {
-					continue
 				}
 			}
 		}()
