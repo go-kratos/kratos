@@ -3,6 +3,7 @@ package base
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -41,6 +42,20 @@ func ModuleVersion(path string) (string, error) {
 			return path + str[i:], nil
 		}
 	}
+}
+
+func RenameModuleName(filename string, moduleName string) error {
+	modBytes, err := os.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	module := strings.Split(string(modBytes), "\n")
+	module[0] = fmt.Sprintf("module %s", moduleName)
+
+	if err := os.WriteFile(filename, []byte(strings.Join(module, "\n")), 0o644); err != nil {
+		return err
+	}
+	return nil
 }
 
 // KratosMod returns kratos mod.

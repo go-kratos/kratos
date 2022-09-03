@@ -14,8 +14,9 @@ import (
 
 // Project is a project template.
 type Project struct {
-	Name string
-	Path string
+	Name   string
+	Path   string
+	Module string
 }
 
 // New new a project from remote repo.
@@ -37,7 +38,7 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 		}
 		os.RemoveAll(to)
 	}
-	fmt.Printf("🚀 Creating service %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
+	fmt.Printf("🚀 Creating service %s, layout repo is %s, module name is %s, please wait a moment.\n\n", p.Name, layout, p.Module)
 	repo := base.NewRepo(layout, branch)
 	if err := repo.CopyTo(ctx, to, p.Path, []string{".git", ".github"}); err != nil {
 		return err
@@ -49,6 +50,14 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 	if e != nil {
 		return e
 	}
+
+	if p.Module != p.Name {
+		e = base.RenameModuleName(path.Join(to, "go.mod"), p.Module)
+		if e != nil {
+			return e
+		}
+	}
+
 	base.Tree(to, dir)
 
 	fmt.Printf("\n🍺 Project creation succeeded %s\n", color.GreenString(p.Name))
