@@ -48,7 +48,7 @@ func Timestamp(layout string) Valuer {
 }
 
 func bindValues(ctx context.Context, keyvals []interface{}) {
-	for i := 1; i < len(keyvals); i += 2 {
+	for i := 0; i < len(keyvals); i++ {
 		if v, ok := keyvals[i].(Valuer); ok {
 			keyvals[i] = v(ctx)
 		}
@@ -56,7 +56,7 @@ func bindValues(ctx context.Context, keyvals []interface{}) {
 }
 
 func containsValuer(keyvals []interface{}) bool {
-	for i := 1; i < len(keyvals); i += 2 {
+	for i := 0; i < len(keyvals); i++ {
 		if _, ok := keyvals[i].(Valuer); ok {
 			return true
 		}
