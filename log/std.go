@@ -36,13 +36,16 @@ func (l *stdLogger) Log(level Level, keyvals ...interface{}) error {
 		keyvals = append(keyvals, "KEYVALS UNPAIRED")
 	}
 	buf := l.pool.Get().(*bytes.Buffer)
+	defer func() {
+		buf.Reset()
+		l.pool.Put(buf)
+	}()
+
 	buf.WriteString(level.String())
 	for i := 0; i < len(keyvals); i += 2 {
 		_, _ = fmt.Fprintf(buf, " %s=%v", keyvals[i], keyvals[i+1])
 	}
 	_ = l.log.Output(4, buf.String()) //nolint:gomnd
-	buf.Reset()
-	l.pool.Put(buf)
 	return nil
 }
 
