@@ -207,9 +207,12 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 	}()
 	select {
 	case <-ctx.Done():
-		return ctx.Err()
+		return fmt.Errorf("register service to consul failed, error=%w", ctx.Err())
 	case err := <-done:
-		return err
+		if err != nil {
+			return fmt.Errorf("register service to consul failed, error=%w", err)
+		}
+		return nil
 	}
 }
 
