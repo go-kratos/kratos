@@ -105,102 +105,112 @@ func (c *Client) Service(ctx context.Context, service string, index uint64, pass
 }
 
 // Register register service instance to consul
-func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enableHealthCheck bool) error {
-	addresses := make(map[string]api.ServiceAddress, len(svc.Endpoints))
-	checkAddresses := make([]string, 0, len(svc.Endpoints))
-	for _, endpoint := range svc.Endpoints {
-		raw, err := url.Parse(endpoint)
-		if err != nil {
-			return err
-		}
-		addr := raw.Hostname()
-		port, _ := strconv.ParseUint(raw.Port(), 10, 16)
+func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, enableHealthCheck bool) error {
+	done := make(chan error)
+	go func() {
+		addresses := make(map[string]api.ServiceAddress, len(svc.Endpoints))
+		checkAddresses := make([]string, 0, len(svc.Endpoints))
+		for _, endpoint := range svc.Endpoints {
+			raw, err := url.Parse(endpoint)
+			if err != nil {
+				done <- err
+				return
+			}
+			addr := raw.Hostname()
+			port, _ := strconv.ParseUint(raw.Port(), 10, 16)
 
-		checkAddresses = append(checkAddresses, net.JoinHostPort(addr, strconv.FormatUint(port, 10)))
-		addresses[raw.Scheme] = api.ServiceAddress{Address: endpoint, Port: int(port)}
-	}
-	asr := &api.AgentServiceRegistration{
-		ID:              svc.ID,
-		Name:            svc.Name,
-		Meta:            svc.Metadata,
-		Tags:            []string{fmt.Sprintf("version=%s", svc.Version)},
-		TaggedAddresses: addresses,
-	}
-	if len(checkAddresses) > 0 {
-		host, portRaw, _ := net.SplitHostPort(checkAddresses[0])
-		port, _ := strconv.ParseInt(portRaw, 10, 32)
-		asr.Address = host
-		asr.Port = int(port)
-	}
-	if enableHealthCheck {
-		for _, address := range checkAddresses {
+			checkAddresses = append(checkAddresses, net.JoinHostPort(addr, strconv.FormatUint(port, 10)))
+			addresses[raw.Scheme] = api.ServiceAddress{Address: endpoint, Port: int(port)}
+		}
+		asr := &api.AgentServiceRegistration{
+			ID:              svc.ID,
+			Name:            svc.Name,
+			Meta:            svc.Metadata,
+			Tags:            []string{fmt.Sprintf("version=%s", svc.Version)},
+			TaggedAddresses: addresses,
+		}
+		if len(checkAddresses) > 0 {
+			host, portRaw, _ := net.SplitHostPort(checkAddresses[0])
+			port, _ := strconv.ParseInt(portRaw, 10, 32)
+			asr.Address = host
+			asr.Port = int(port)
+		}
+		if enableHealthCheck {
+			for _, address := range checkAddresses {
+				asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
+					TCP:                            address,
+					Interval:                       fmt.Sprintf("%ds", c.healthcheckInterval),
+					DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.deregisterCriticalServiceAfter),
+					Timeout:                        "5s",
+				})
+			}
+		}
+		if c.heartbeat {
 			asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
-				TCP:                            address,
-				Interval:                       fmt.Sprintf("%ds", c.healthcheckInterval),
+				CheckID:                        "service:" + svc.ID,
+				TTL:                            fmt.Sprintf("%ds", c.healthcheckInterval*2),
 				DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.deregisterCriticalServiceAfter),
-				Timeout:                        "5s",
 			})
 		}
-	}
-	if c.heartbeat {
-		asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
-			CheckID:                        "service:" + svc.ID,
-			TTL:                            fmt.Sprintf("%ds", c.healthcheckInterval*2),
-			DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.deregisterCriticalServiceAfter),
-		})
-	}
 
-	// custom checks
-	asr.Checks = append(asr.Checks, c.serviceChecks...)
+		// custom checks
+		asr.Checks = append(asr.Checks, c.serviceChecks...)
 
-	err := c.cli.Agent().ServiceRegister(asr)
-	if err != nil {
+		err := c.cli.Agent().ServiceRegister(asr)
+		if err != nil {
+			done <- err
+			return
+		}
+		if c.heartbeat {
+			go func() {
+				err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+				if err != nil {
+					log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
+				}
+				ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
+				defer ticker.Stop()
+				for {
+					select {
+					case <-ticker.C:
+						err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+						if err != nil {
+							log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
+						}
+					case <-c.ctx.Done():
+						return
+					}
+				}
+			}()
+		}
+
+		if c.reRegistry {
+			go func() {
+				failedNum := 0
+				rand.Seed(time.Now().UnixNano())
+				for c.reRegistryMaximumAttempts == 0 || failedNum <= c.reRegistryMaximumAttempts {
+					// backoff retry
+					randNum := rand.Int63n(int64(c.reRegistryCheckMaxInterval-1)) + 1
+					time.Sleep(time.Second * time.Duration(randNum))
+					_, _, err := c.cli.Agent().Service(svc.ID, nil)
+					if err != nil && strings.Contains(err.Error(), "unknown service ID") {
+						err := c.cli.Agent().ServiceRegister(asr)
+						if err != nil {
+							log.Errorf("[Consul] re-register service to consul failed! err=%v", err)
+							failedNum++
+						} else {
+							failedNum = 0
+						}
+					}
+				}
+			}()
+		}
+	}()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case err := <-done:
 		return err
 	}
-	if c.heartbeat {
-		go func() {
-			err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
-			if err != nil {
-				log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
-			}
-			ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
-			defer ticker.Stop()
-			for {
-				select {
-				case <-ticker.C:
-					err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
-					if err != nil {
-						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
-					}
-				case <-c.ctx.Done():
-					return
-				}
-			}
-		}()
-	}
-
-	if c.reRegistry {
-		go func() {
-			failedNum := 0
-			rand.Seed(time.Now().UnixNano())
-			for c.reRegistryMaximumAttempts == 0 || failedNum <= c.reRegistryMaximumAttempts {
-				// backoff retry
-				randNum := rand.Int63n(int64(c.reRegistryCheckMaxInterval-1)) + 1
-				time.Sleep(time.Second * time.Duration(randNum))
-				_, _, err := c.cli.Agent().Service(svc.ID, nil)
-				if err != nil && strings.Contains(err.Error(), "unknown service ID") {
-					err := c.cli.Agent().ServiceRegister(asr)
-					if err != nil {
-						log.Errorf("[Consul] re-register service to consul failed! err=%v", err)
-						failedNum++
-					} else {
-						failedNum = 0
-					}
-				}
-			}
-		}()
-	}
-	return nil
 }
 
 // Deregister deregister service by service ID
