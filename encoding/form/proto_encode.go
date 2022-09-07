@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 // EncodeValues encode a message into url values.
@@ -26,11 +26,12 @@ func EncodeValues(msg proto.Message) (url.Values, error) {
 	return u, nil
 }
 
-func encodeByField(u url.Values, path string, v protoreflect.Message) error {
-	for i := 0; i < v.Descriptor().Fields().Len(); i++ {
-		fd := v.Descriptor().Fields().Get(i)
-		var key string
-		var newPath string
+func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr error) {
+	m.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
+		var (
+			key     string
+			newPath string
+		)
 		if fd.HasJSONName() {
 			key = fd.JSONName()
 		} else {
@@ -41,54 +42,55 @@ func encodeByField(u url.Values, path string, v protoreflect.Message) error {
 		} else {
 			newPath = path + "." + key
 		}
-
 		if of := fd.ContainingOneof(); of != nil {
-			if f := v.WhichOneof(of); f != nil {
+			if f := m.WhichOneof(of); f != nil {
 				if f != fd {
-					continue
+					return true
 				}
 			}
-			continue
 		}
 		switch {
 		case fd.IsList():
-			if v.Get(fd).List().Len() > 0 {
-				list, err := encodeRepeatedField(fd, v.Get(fd).List())
+			if v.List().Len() > 0 {
+				list, err := encodeRepeatedField(fd, v.List())
 				if err != nil {
-					return err
+					finalErr = err
+					return false
 				}
 				u[newPath] = list
 			}
 		case fd.IsMap():
-			if v.Get(fd).Map().Len() > 0 {
-				m, err := encodeMapField(fd, v.Get(fd).Map())
+			if v.Map().Len() > 0 {
+				m, err := encodeMapField(fd, v.Map())
 				if err != nil {
-					return err
+					finalErr = err
+					return false
 				}
 				for k, value := range m {
 					u[fmt.Sprintf("%s[%s]", newPath, k)] = []string{value}
 				}
 			}
 		case (fd.Kind() == protoreflect.MessageKind) || (fd.Kind() == protoreflect.GroupKind):
-			value, err := encodeMessage(fd.Message(), v.Get(fd))
+			value, err := encodeMessage(fd.Message(), v)
 			if err == nil {
 				u[newPath] = []string{value}
-				continue
+				return true
 			}
-			err = encodeByField(u, newPath, v.Get(fd).Message())
-			if err != nil {
-				return err
+			if err = encodeByField(u, newPath, v.Message()); err != nil {
+				finalErr = err
+				return false
 			}
 		default:
-			value, err := EncodeField(fd, v.Get(fd))
+			value, err := EncodeField(fd, v)
 			if err != nil {
-				return err
+				finalErr = err
+				return false
 			}
 			u[newPath] = []string{value}
 		}
-	}
-
-	return nil
+		return true
+	})
+	return
 }
 
 func encodeRepeatedField(fieldDescriptor protoreflect.FieldDescriptor, list protoreflect.List) ([]string, error) {
@@ -100,7 +102,6 @@ func encodeRepeatedField(fieldDescriptor protoreflect.FieldDescriptor, list prot
 		}
 		values = append(values, value)
 	}
-
 	return values, nil
 }
 
@@ -140,7 +141,7 @@ func EncodeField(fieldDescriptor protoreflect.FieldDescriptor, value protoreflec
 	case protoreflect.MessageKind, protoreflect.GroupKind:
 		return encodeMessage(fieldDescriptor.Message(), value)
 	default:
-		return fmt.Sprintf("%v", value.Interface()), nil
+		return fmt.Sprint(value.Interface()), nil
 	}
 }
 
@@ -159,10 +160,10 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 		"google.protobuf.UInt64Value", "google.protobuf.UInt32Value", "google.protobuf.BoolValue", "google.protobuf.StringValue":
 		fd := msgDescriptor.Fields()
 		v := value.Message().Get(fd.ByName(protoreflect.Name("value")))
-		return fmt.Sprintf("%v", v.Interface()), nil
-	case "google.protobuf.FieldMask":
-		m, ok := value.Message().Interface().(*field_mask.FieldMask)
-		if !ok {
+		return fmt.Sprint(v.Interface()), nil
+	case fieldMaskFullName:
+		m, ok := value.Message().Interface().(*fieldmaskpb.FieldMask)
+		if !ok || m == nil {
 			return "", nil
 		}
 		for i, v := range m.Paths {
@@ -172,6 +173,28 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 	default:
 		return "", fmt.Errorf("unsupported message type: %q", string(msgDescriptor.FullName()))
 	}
+}
+
+// EncodeFieldMask return field mask name=paths
+func EncodeFieldMask(m protoreflect.Message) (query string) {
+	m.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
+		if fd.Kind() == protoreflect.MessageKind {
+			if msg := fd.Message(); msg.FullName() == fieldMaskFullName {
+				value, err := encodeMessage(msg, v)
+				if err != nil {
+					return false
+				}
+				if fd.HasJSONName() {
+					query = fd.JSONName() + "=" + value
+				} else {
+					query = fd.TextName() + "=" + value
+				}
+				return false
+			}
+		}
+		return true
+	})
+	return
 }
 
 // JSONCamelCase converts a snake_case identifier to a camelCase identifier,

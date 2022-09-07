@@ -2,39 +2,33 @@ package endpoint
 
 import (
 	"net/url"
-	"strconv"
 )
 
 // NewEndpoint new an Endpoint URL.
-func NewEndpoint(scheme, host string, isSecure bool) *url.URL {
-	var query string
-	if isSecure {
-		query = "isSecure=true"
-	}
-	return &url.URL{Scheme: scheme, Host: host, RawQuery: query}
+func NewEndpoint(scheme, host string) *url.URL {
+	return &url.URL{Scheme: scheme, Host: host}
 }
 
 // ParseEndpoint parses an Endpoint URL.
-func ParseEndpoint(endpoints []string, scheme string, isSecure bool) (string, error) {
+func ParseEndpoint(endpoints []string, scheme string) (string, error) {
 	for _, e := range endpoints {
 		u, err := url.Parse(e)
 		if err != nil {
 			return "", err
 		}
+
 		if u.Scheme == scheme {
-			if IsSecure(u) == isSecure {
-				return u.Host, nil
-			}
+			return u.Host, nil
 		}
 	}
 	return "", nil
 }
 
-// IsSecure parses isSecure for Endpoint URL.
-func IsSecure(u *url.URL) bool {
-	ok, err := strconv.ParseBool(u.Query().Get("isSecure"))
-	if err != nil {
-		return false
+// Scheme is the scheme of endpoint url.
+// examples: scheme="http",isSecure=true get "https"
+func Scheme(scheme string, isSecure bool) string {
+	if isSecure {
+		return scheme + "s"
 	}
-	return ok
+	return scheme
 }

@@ -11,6 +11,9 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        go: [1.16, 1.17, 1.18]
     name: build & test
     runs-on: ubuntu-latest
     services:
@@ -22,22 +25,28 @@ jobs:
           ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
           ETCD_ADVERTISE_CLIENT_URLS: http://0.0.0.0:2379
       consul:
-        image: consul:latest
+        image: consul:1.12.3
         ports:
           - 8500:8500
       nacos:
-        image: nacos/nacos-server:latest
+        image: nacos/nacos-server:v2.1.0
         env:
           MODE: standalone
         ports:
           - "8848:8848"
           - "9848:9848"
+      polaris:
+        image: polarismesh/polaris-server-standalone:v1.9.0
+        ports:
+          - 8090:8090
+          - 8091:8091
+          - 8093:8093
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3.3.0
         with:
-          go-version: 1.16
+          go-version: ${{ matrix.go }}
 
       - name: Build
         run: go build ./...
@@ -57,11 +66,5 @@ jobs:
       - name: HTTP
         run: |
           cd cmd/protoc-gen-go-http
-          go build ./...
-          go test ./...
-
-      - name: Examples
-        run: |
-          cd examples
           go build ./...
           go test ./...

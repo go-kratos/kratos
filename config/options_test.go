@@ -2,6 +2,7 @@ package config
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -195,5 +196,33 @@ func TestDefaultResolver(t *testing.T) {
 				t.Error("value path not found")
 			}
 		})
+	}
+}
+
+func TestExpand(t *testing.T) {
+	tests := []struct {
+		input   string
+		mapping func(string) string
+		want    string
+	}{
+		{
+			input: "${a}",
+			mapping: func(s string) string {
+				return strings.ToUpper(s)
+			},
+			want: "A",
+		},
+		{
+			input: "a",
+			mapping: func(s string) string {
+				return strings.ToUpper(s)
+			},
+			want: "a",
+		},
+	}
+	for _, tt := range tests {
+		if got := expand(tt.input, tt.mapping); got != tt.want {
+			t.Errorf("expand() want: %s, got: %s", tt.want, got)
+		}
 	}
 }

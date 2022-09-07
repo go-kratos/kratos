@@ -208,3 +208,118 @@ func TestReader_Source(t *testing.T) {
 		t.Fatal("[]byte(`{\"a\":{\"b\":{\"X\":1}}}`) is not equal to b")
 	}
 }
+
+func TestCloneMap(t *testing.T) {
+	tests := []struct {
+		input map[string]interface{}
+		want  map[string]interface{}
+	}{
+		{
+			input: map[string]interface{}{
+				"a": 1,
+				"b": "2",
+				"c": true,
+			},
+			want: map[string]interface{}{
+				"a": 1,
+				"b": "2",
+				"c": true,
+			},
+		},
+		{
+			input: map[string]interface{}{},
+			want:  map[string]interface{}{},
+		},
+		{
+			input: nil,
+			want:  map[string]interface{}{},
+		},
+	}
+	for _, tt := range tests {
+		if got, err := cloneMap(tt.input); err != nil {
+			t.Errorf("expect no err, got %v", err)
+		} else if !reflect.DeepEqual(got, tt.want) {
+			t.Errorf("cloneMap(%v) = %v, want %v", tt.input, got, tt.want)
+		}
+	}
+}
+
+func TestConvertMap(t *testing.T) {
+	tests := []struct {
+		input interface{}
+		want  interface{}
+	}{
+		{
+			input: map[string]interface{}{
+				"a": 1,
+				"b": "2",
+				"c": true,
+				"d": []byte{65, 66, 67},
+			},
+			want: map[string]interface{}{
+				"a": 1,
+				"b": "2",
+				"c": true,
+				"d": "ABC",
+			},
+		},
+		{
+			input: []interface{}{1, 2.0, "3", true, nil, []interface{}{1, 2.0, "3", true, nil}},
+			want:  []interface{}{1, 2.0, "3", true, nil, []interface{}{1, 2.0, "3", true, nil}},
+		},
+		{
+			input: []byte{65, 66, 67},
+			want:  "ABC",
+		},
+	}
+	for _, tt := range tests {
+		if got := convertMap(tt.input); !reflect.DeepEqual(got, tt.want) {
+			t.Errorf("convertMap(%v) = %v, want %v", tt.input, got, tt.want)
+		}
+	}
+}
+
+func TestReadValue(t *testing.T) {
+	m := map[string]interface{}{
+		"a": 1,
+		"b": map[string]interface{}{
+			"c": "3",
+			"d": map[string]interface{}{
+				"e": true,
+			},
+		},
+	}
+	va := atomicValue{}
+	va.Store(1)
+
+	vbc := atomicValue{}
+	vbc.Store("3")
+
+	vbde := atomicValue{}
+	vbde.Store(true)
+
+	tests := []struct {
+		path string
+		want atomicValue
+	}{
+		{
+			path: "a",
+			want: va,
+		},
+		{
+			path: "b.c",
+			want: vbc,
+		},
+		{
+			path: "b.d.e",
+			want: vbde,
+		},
+	}
+	for _, tt := range tests {
+		if got, found := readValue(m, tt.path); !found {
+			t.Errorf("expect found %v in %v, but not.", tt.path, m)
+		} else if got.Load() != tt.want.Load() {
+			t.Errorf("readValue(%v, %v) = %v, want %v", m, tt.path, got, tt.want)
+		}
+	}
+}

@@ -13,6 +13,7 @@ import (
 func TestDirect(t *testing.T) {
 	b := &Builder{}
 	wn := b.Build(selector.NewNode(
+		"http",
 		"127.0.0.1:9090",
 		&registry.ServiceInstance{
 			ID:        "127.0.0.1:9090",
@@ -53,6 +54,7 @@ func TestDirect(t *testing.T) {
 func TestDirectError(t *testing.T) {
 	b := &Builder{}
 	wn := b.Build(selector.NewNode(
+		"http",
 		"127.0.0.1:9090",
 		&registry.ServiceInstance{
 			ID:        "127.0.0.1:9090",
@@ -89,6 +91,7 @@ func TestDirectErrorHandler(t *testing.T) {
 		},
 	}
 	wn := b.Build(selector.NewNode(
+		"http",
 		"127.0.0.1:9090",
 		&registry.ServiceInstance{
 			ID:        "127.0.0.1:9090",

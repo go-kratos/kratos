@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/nacos-group/nacos-sdk-go/clients/naming_client"
+	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 
 	"github.com/go-kratos/kratos/v2/registry"
@@ -65,7 +66,7 @@ func New(cli naming_client.INamingClient, opts ...Option) (r *Registry) {
 	op := options{
 		prefix:  "/microservices",
 		cluster: "DEFAULT",
-		group:   "DEFAULT_GROUP",
+		group:   constant.DEFAULT_GROUP,
 		weight:  100,
 		kind:    "grpc",
 	}
@@ -167,6 +168,7 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
 	res, err := r.cli.SelectInstances(vo.SelectInstancesParam{
 		ServiceName: serviceName,
+		GroupName:   r.opts.group,
 		HealthyOnly: true,
 	})
 	if err != nil {

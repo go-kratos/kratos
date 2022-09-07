@@ -1,4 +1,0 @@
-[sayHello]
-description = "sayhello"
-one = "Hello {{.Name}}"
-other = "Hello {{.Name}}"

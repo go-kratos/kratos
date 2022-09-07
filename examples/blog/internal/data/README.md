@@ -1,5 +1,0 @@
-# Data
-
-```
-go generate ./ent
-```

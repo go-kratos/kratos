@@ -1,4 +1,0 @@
-[sayHello]
-description = "sayhello"
-hash = "sha1-52d93a5edde18c01bc0ec531f302116b43cdd635"
-other = "你好 {{.Name}}"

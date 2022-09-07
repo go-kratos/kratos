@@ -1,6 +1,0 @@
-cd ./app/message
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./bin/message ./...
-cd ../../
-cd ./app/user
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./bin/user ./...
-docker-compose up --build

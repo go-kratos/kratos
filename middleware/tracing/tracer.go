@@ -24,6 +24,7 @@ type Tracer struct {
 func NewTracer(kind trace.SpanKind, opts ...Option) *Tracer {
 	op := options{
 		propagator: propagation.NewCompositeTextMapPropagator(Metadata{}, propagation.Baggage{}, propagation.TraceContext{}),
+		tracerName: "kratos",
 	}
 	for _, o := range opts {
 		o(&op)
@@ -34,9 +35,9 @@ func NewTracer(kind trace.SpanKind, opts ...Option) *Tracer {
 
 	switch kind {
 	case trace.SpanKindClient:
-		return &Tracer{tracer: otel.Tracer("kratos"), kind: kind, opt: &op}
+		return &Tracer{tracer: otel.Tracer(op.tracerName), kind: kind, opt: &op}
 	case trace.SpanKindServer:
-		return &Tracer{tracer: otel.Tracer("kratos"), kind: kind, opt: &op}
+		return &Tracer{tracer: otel.Tracer(op.tracerName), kind: kind, opt: &op}
 	default:
 		panic(fmt.Sprintf("unsupported span kind: %v", kind))
 	}

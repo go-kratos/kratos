@@ -1,16 +1,20 @@
 package consul
 
 import (
+	"context"
+
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/api/watch"
 )
 
 type watcher struct {
-	source    *source
-	ch        chan interface{}
-	closeChan chan struct{}
-	wp        *watch.Plan
+	source *source
+	ch     chan interface{}
+	wp     *watch.Plan
+
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 func (w *watcher) handle(idx uint64, data interface{}) {
@@ -27,10 +31,13 @@ func (w *watcher) handle(idx uint64, data interface{}) {
 }
 
 func newWatcher(s *source) (*watcher, error) {
+	ctx, cancel := context.WithCancel(context.Background())
 	w := &watcher{
-		source:    s,
-		ch:        make(chan interface{}),
-		closeChan: make(chan struct{}),
+		source: s,
+		ch:     make(chan interface{}),
+
+		ctx:    ctx,
+		cancel: cancel,
 	}
 
 	wp, err := watch.Parse(map[string]interface{}{"type": "keyprefix", "prefix": s.options.path})
@@ -54,18 +61,15 @@ func newWatcher(s *source) (*watcher, error) {
 
 func (w *watcher) Next() ([]*config.KeyValue, error) {
 	select {
-	case _, ok := <-w.ch:
-		if !ok {
-			return nil, nil
-		}
+	case <-w.ch:
 		return w.source.Load()
-	case <-w.closeChan:
-		return nil, nil
+	case <-w.ctx.Done():
+		return nil, w.ctx.Err()
 	}
 }
 
 func (w *watcher) Stop() error {
 	w.wp.Stop()
-	close(w.closeChan)
+	w.cancel()
 	return nil
 }

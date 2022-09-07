@@ -1,6 +1,7 @@
 package direct
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -15,9 +16,14 @@ func TestDirectBuilder_Scheme(t *testing.T) {
 	}
 }
 
-type mockConn struct{}
+type mockConn struct {
+	needUpdateStateErr bool
+}
 
 func (m *mockConn) UpdateState(resolver.State) error {
+	if m.needUpdateStateErr {
+		return fmt.Errorf("mock test needUpdateStateErr")
+	}
 	return nil
 }
 
@@ -38,4 +44,11 @@ func TestDirectBuilder_Build(t *testing.T) {
 		t.Errorf("expect no error, got %v", err)
 	}
 	r.ResolveNow(resolver.ResolveNowOptions{})
+	r.Close()
+
+	// need update state err
+	_, err = b.Build(resolver.Target{}, &mockConn{needUpdateStateErr: true}, resolver.BuildOptions{})
+	if err == nil {
+		t.Errorf("expect needUpdateStateErr, got nil")
+	}
 }

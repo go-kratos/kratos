@@ -73,7 +73,10 @@ func TestContext(t *testing.T) {
 
 func Trace() Valuer {
 	return func(ctx context.Context) interface{} {
-		s := ctx.Value(traceKey{}).(string)
+		s, ok := ctx.Value(traceKey{}).(string)
+		if !ok {
+			return nil
+		}
 		return s
 	}
 }

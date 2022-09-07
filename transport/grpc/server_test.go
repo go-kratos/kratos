@@ -12,17 +12,46 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/internal/matcher"
 	pb "github.com/go-kratos/kratos/v2/internal/testdata/helloworld"
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
-
 	"google.golang.org/grpc"
 )
 
 // server is used to implement helloworld.GreeterServer.
 type server struct {
 	pb.UnimplementedGreeterServer
+}
+
+func (s *server) SayHelloStream(streamServer pb.Greeter_SayHelloStreamServer) error {
+	tctx, ok := transport.FromServerContext(streamServer.Context())
+	if ok {
+		tctx.ReplyHeader().Set("123", "123")
+	}
+	var cnt uint
+	for {
+		in, err := streamServer.Recv()
+		if err != nil {
+			return err
+		}
+		if in.Name == "error" {
+			return errors.BadRequest("custom_error", fmt.Sprintf("invalid argument %s", in.Name))
+		}
+		if in.Name == "panic" {
+			panic("server panic")
+		}
+		err = streamServer.Send(&pb.HelloReply{
+			Message: fmt.Sprintf("hello %s", in.Name),
+		})
+		if err != nil {
+			return err
+		}
+		cnt++
+		if cnt > 1 {
+			return nil
+		}
+	}
 }
 
 // SayHello implements helloworld.GreeterServer
@@ -53,8 +82,7 @@ func TestServer(t *testing.T) {
 					return handler(ctx, req)
 				}
 			}),
-		UnaryInterceptor(func(ctx context.Context, req interface{},
-			info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		UnaryInterceptor(func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 			return handler(ctx, req)
 		}),
 		Options(grpc.InitialConnWindowSize(0)),
@@ -85,10 +113,10 @@ func testClient(t *testing.T, srv *Server) {
 	conn, err := DialInsecure(context.Background(),
 		WithEndpoint(u.Host),
 		WithOptions(grpc.WithBlock()),
-		WithUnaryInterceptor(func(ctx context.Context, method string, req, reply interface{},
-			cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-			return invoker(ctx, method, req, reply, cc, opts...)
-		}),
+		WithUnaryInterceptor(
+			func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+				return invoker(ctx, method, req, reply, cc, opts...)
+			}),
 		WithMiddleware(func(handler middleware.Handler) middleware.Handler {
 			return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 				if tr, ok := transport.FromClientContext(ctx); ok {
@@ -99,6 +127,9 @@ func testClient(t *testing.T, srv *Server) {
 			}
 		}),
 	)
+	defer func() {
+		_ = conn.Close()
+	}()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -111,7 +142,28 @@ func testClient(t *testing.T, srv *Server) {
 	if !reflect.DeepEqual(reply.Message, "Hello kratos") {
 		t.Errorf("expect %s, got %s", "Hello kratos", reply.Message)
 	}
-	_ = conn.Close()
+
+	streamCli, err := client.SayHelloStream(context.Background())
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer func() {
+		_ = streamCli.CloseSend()
+	}()
+	err = streamCli.Send(&pb.HelloRequest{Name: "cc"})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	reply, err = streamCli.Recv()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if !reflect.DeepEqual(reply.Message, "hello cc") {
+		t.Errorf("expect %s, got %s", "hello cc", reply.Message)
+	}
 }
 
 func TestNetwork(t *testing.T) {
@@ -147,46 +199,6 @@ func TestTimeout(t *testing.T) {
 	}
 }
 
-func TestMiddleware(t *testing.T) {
-	o := &Server{}
-	v := []middleware.Middleware{
-		func(middleware.Handler) middleware.Handler { return nil },
-	}
-	Middleware(v...)(o)
-	if !reflect.DeepEqual(v, o.middleware) {
-		t.Errorf("expect %v, got %v", v, o.middleware)
-	}
-}
-
-type mockLogger struct {
-	level log.Level
-	key   string
-	val   string
-}
-
-func (l *mockLogger) Log(level log.Level, keyvals ...interface{}) error {
-	l.level = level
-	l.key = keyvals[0].(string)
-	l.val = keyvals[1].(string)
-	return nil
-}
-
-func TestLogger(t *testing.T) {
-	o := &Server{}
-	v := &mockLogger{}
-	Logger(v)(o)
-	o.log.Log(log.LevelWarn, "foo", "bar")
-	if !reflect.DeepEqual("foo", v.key) {
-		t.Errorf("expect %s, got %s", "foo", v.key)
-	}
-	if !reflect.DeepEqual("bar", v.val) {
-		t.Errorf("expect %s, got %s", "bar", v.val)
-	}
-	if !reflect.DeepEqual(log.LevelWarn, v.level) {
-		t.Errorf("expect %s, got %s", log.LevelWarn, v.level)
-	}
-}
-
 func TestTLSConfig(t *testing.T) {
 	o := &Server{}
 	v := &tls.Config{}
@@ -212,7 +224,7 @@ func TestUnaryInterceptor(t *testing.T) {
 	}
 }
 
-func TestStramInterceptor(t *testing.T) {
+func TestStreamInterceptor(t *testing.T) {
 	o := &Server{}
 	v := []grpc.StreamServerInterceptor{
 		func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
@@ -251,9 +263,10 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 	srv := &Server{
 		baseCtx:    context.Background(),
 		endpoint:   u,
-		middleware: []middleware.Middleware{EmptyMiddleware()},
 		timeout:    time.Duration(10),
+		middleware: matcher.New(),
 	}
+	srv.middleware.Use(EmptyMiddleware())
 	req := &struct{}{}
 	rv, err := srv.unaryServerInterceptor()(context.TODO(), req, &grpc.UnaryServerInfo{}, func(ctx context.Context, req interface{}) (i interface{}, e error) {
 		return &testResp{Data: "hi"}, nil
@@ -267,10 +280,16 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 }
 
 func TestListener(t *testing.T) {
-	lis := &net.TCPListener{}
+	lis, err := net.Listen("tcp", ":0")
+	if err != nil {
+		t.Fatal(err)
+	}
 	s := &Server{}
 	Listener(lis)(s)
 	if !reflect.DeepEqual(lis, s.lis) {
 		t.Errorf("expect %v, got %v", lis, s.lis)
+	}
+	if e, err := s.Endpoint(); err != nil || e == nil {
+		t.Errorf("expect not empty")
 	}
 }

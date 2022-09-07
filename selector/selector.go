@@ -31,6 +31,9 @@ type Builder interface {
 
 // Node is node interface.
 type Node interface {
+	// Scheme is service node scheme
+	Scheme() string
+
 	// Address is the unique address under the same service
 	Address() string
 
@@ -54,7 +57,7 @@ type DoneInfo struct {
 	// Response Error
 	Err error
 	// Response Metadata
-	ReplyMeta ReplyMeta
+	ReplyMD ReplyMD
 
 	// BytesSent indicates if any bytes have been sent to the server.
 	BytesSent bool
@@ -62,8 +65,8 @@ type DoneInfo struct {
 	BytesReceived bool
 }
 
-// ReplyMeta is Reply Metadata.
-type ReplyMeta interface {
+// ReplyMD is Reply Metadata.
+type ReplyMD interface {
 	Get(key string) string
 }
 

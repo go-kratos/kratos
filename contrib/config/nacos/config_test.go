@@ -1,41 +1,20 @@
 package config
 
 import (
-	"fmt"
-	"net"
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
-	"gopkg.in/yaml.v3"
 
-	kconfig "github.com/go-kratos/kratos/v2/config"
+	"github.com/go-kratos/kratos/v2/config"
 )
 
-func getIntranetIP() string {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return "127.0.0.1"
-	}
-
-	for _, address := range addrs {
-		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String()
-			}
-		}
-	}
-	return "127.0.0.1"
-}
-
-func TestGetConfig(t *testing.T) {
-	ip := getIntranetIP()
-	// ctx := context.Background()
-
+func TestConfig_Load(t *testing.T) {
 	sc := []constant.ServerConfig{
-		*constant.NewServerConfig(ip, 8848),
+		*constant.NewServerConfig("127.0.0.1", 8848),
 	}
 
 	cc := constant.ClientConfig{
@@ -48,7 +27,116 @@ func TestGetConfig(t *testing.T) {
 		LogLevel:            "debug",
 	}
 
-	// a more graceful way to create naming client
+	client, err := clients.NewConfigClient(
+		vo.NacosClientParam{
+			ClientConfig:  &cc,
+			ServerConfigs: sc,
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := NewConfigSource(client, WithGroup("test"), WithDataID("test.yaml"))
+
+	type fields struct {
+		source config.Source
+	}
+	tests := []struct {
+		name      string
+		fields    fields
+		want      []*config.KeyValue
+		wantErr   bool
+		preFunc   func(t *testing.T)
+		deferFunc func(t *testing.T)
+	}{
+		{
+			name: "normal",
+			fields: fields{
+				source: source,
+			},
+			wantErr: false,
+			preFunc: func(t *testing.T) {
+				_, err = client.PublishConfig(vo.ConfigParam{DataId: "test.yaml", Group: "test", Content: "test: test"})
+				if err != nil {
+					t.Error(err)
+				}
+				time.Sleep(time.Second * 1)
+			},
+			deferFunc: func(t *testing.T) {
+				_, dErr := client.DeleteConfig(vo.ConfigParam{DataId: "test.yaml", Group: "test"})
+				if dErr != nil {
+					t.Error(dErr)
+				}
+			},
+			want: []*config.KeyValue{{
+				Key:    "test.yaml",
+				Value:  []byte("test: test"),
+				Format: "yaml",
+			}},
+		},
+		{
+			name: "error",
+			fields: fields{
+				source: source,
+			},
+			wantErr: false,
+			preFunc: func(t *testing.T) {
+				_, err = client.PublishConfig(vo.ConfigParam{DataId: "111.yaml", Group: "notExist", Content: "test: test"})
+				if err != nil {
+					t.Error(err)
+				}
+				time.Sleep(time.Second * 1)
+			},
+			deferFunc: func(t *testing.T) {
+				_, dErr := client.DeleteConfig(vo.ConfigParam{DataId: "111.yaml", Group: "notExist"})
+				if dErr != nil {
+					t.Error(dErr)
+				}
+			},
+			want: []*config.KeyValue{{
+				Key:    "test.yaml",
+				Value:  []byte{},
+				Format: "yaml",
+			}},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if test.preFunc != nil {
+				test.preFunc(t)
+			}
+			if test.deferFunc != nil {
+				defer test.deferFunc(t)
+			}
+			s := test.fields.source
+			configs, lErr := s.Load()
+			if (lErr != nil) != test.wantErr {
+				t.Errorf("Load error = %v, wantErr %v", lErr, test.wantErr)
+				t.Errorf("Load configs = %v", configs)
+				return
+			}
+			if !reflect.DeepEqual(configs, test.want) {
+				t.Errorf("Load configs = %v, want %v", configs, test.want)
+			}
+		})
+	}
+}
+
+func TestConfig_Watch(t *testing.T) {
+	sc := []constant.ServerConfig{
+		*constant.NewServerConfig("127.0.0.1", 8848),
+	}
+
+	cc := constant.ClientConfig{
+		TimeoutMs:           5000,
+		NotLoadCacheAtStart: true,
+		LogDir:              "/tmp/nacos/log",
+		CacheDir:            "/tmp/nacos/cache",
+		RotateTime:          "1h",
+		MaxAge:              3,
+		LogLevel:            "debug",
+	}
+
 	client, err := clients.NewConfigClient(
 		vo.NacosClientParam{
 			ClientConfig:  &cc,
@@ -59,51 +147,66 @@ func TestGetConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dataID := "test.yaml"
-	group := "test"
-	_, err = client.PublishConfig(vo.ConfigParam{DataId: dataID, Group: group, Content: `
-logger:
-  level: info
-`})
-	if err != nil {
-		t.Fatal(err)
-	}
-	time.Sleep(1 * time.Second)
-	c := kconfig.New(
-		kconfig.WithSource(
-			NewConfigSource(client, WithGroup(group), WithDataID(dataID)),
-		),
-		kconfig.WithDecoder(func(kv *kconfig.KeyValue, v map[string]interface{}) error {
-			return yaml.Unmarshal(kv.Value, v)
-		}),
-	)
+	source := NewConfigSource(client, WithGroup("test"), WithDataID("test.yaml"))
 
-	if err = c.Load(); err != nil {
-		t.Fatal(err)
+	type fields struct {
+		source config.Source
 	}
-
-	name, err := c.Value("logger.level").String()
-	if err != nil {
-		t.Fatal(err)
+	tests := []struct {
+		name        string
+		fields      fields
+		want        []*config.KeyValue
+		wantErr     bool
+		processFunc func(t *testing.T, w config.Watcher)
+		deferFunc   func(t *testing.T, w config.Watcher)
+	}{
+		{
+			name: "normal",
+			fields: fields{
+				source: source,
+			},
+			wantErr: false,
+			processFunc: func(t *testing.T, w config.Watcher) {
+				_, pErr := client.PublishConfig(vo.ConfigParam{DataId: "test.yaml", Group: "test", Content: "test: test"})
+				if pErr != nil {
+					t.Error(pErr)
+				}
+			},
+			deferFunc: func(t *testing.T, w config.Watcher) {
+				_, dErr := client.DeleteConfig(vo.ConfigParam{DataId: "test.yaml", Group: "test"})
+				if dErr != nil {
+					t.Error(dErr)
+				}
+			},
+			want: []*config.KeyValue{{
+				Key:    "test.yaml",
+				Value:  []byte("test: test"),
+				Format: "yaml",
+			}},
+		},
 	}
-	fmt.Println("get value", name)
-
-	done := make(chan struct{})
-	err = c.Watch("logger.level", func(key string, value kconfig.Value) {
-		fmt.Println(key, " value change", value)
-		done <- struct{}{}
-	})
-	if err != nil {
-		t.Fatal(err)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			s := test.fields.source
+			watch, wErr := s.Watch()
+			if wErr != nil {
+				t.Error(wErr)
+				return
+			}
+			if test.processFunc != nil {
+				test.processFunc(t, watch)
+			}
+			if test.deferFunc != nil {
+				defer test.deferFunc(t, watch)
+			}
+			want, nErr := watch.Next()
+			if (nErr != nil) != test.wantErr {
+				t.Errorf("Watch error = %v, wantErr %v", nErr, test.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(want, test.want) {
+				t.Errorf("Watch watcher = %v, want %v", watch, test.want)
+			}
+		})
 	}
-
-	_, err = client.PublishConfig(vo.ConfigParam{DataId: dataID, Group: group, Content: `
-logger:
-  level: debug
-`})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	<-done
 }

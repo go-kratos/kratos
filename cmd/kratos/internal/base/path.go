@@ -79,14 +79,14 @@ func copyDir(src, dst string, replaces, ignores []string) error {
 		}
 		srcfp := path.Join(src, fd.Name())
 		dstfp := path.Join(dst, fd.Name())
+		var e error
 		if fd.IsDir() {
-			if err = copyDir(srcfp, dstfp, replaces, ignores); err != nil {
-				return err
-			}
+			e = copyDir(srcfp, dstfp, replaces, ignores)
 		} else {
-			if err = copyFile(srcfp, dstfp, replaces); err != nil {
-				return err
-			}
+			e = copyFile(srcfp, dstfp, replaces)
+		}
+		if e != nil {
+			return e
 		}
 	}
 	return nil

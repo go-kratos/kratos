@@ -7,14 +7,15 @@ import (
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/aliyun-log-go-sdk/producer"
-	klog "github.com/go-kratos/kratos/v2/log"
+	log "github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/proto"
 )
 
 // Log see more detail https://github.com/aliyun/aliyun-log-go-sdk
-type Log interface {
-	klog.Logger
+type Logger interface {
+	log.Logger
 	GetProducer() *producer.Producer
+	Close() error
 }
 
 type aliyunLog struct {
@@ -73,7 +74,11 @@ func WithAccessSecret(as string) Option {
 
 type Option func(alc *options)
 
-func (a *aliyunLog) Log(level klog.Level, keyvals ...interface{}) error {
+func (a *aliyunLog) Close() error {
+	return a.producer.Close(5000)
+}
+
+func (a *aliyunLog) Log(level log.Level, keyvals ...interface{}) error {
 	buf := level.String()
 	levelTitle := "level"
 
@@ -103,7 +108,7 @@ func (a *aliyunLog) Log(level klog.Level, keyvals ...interface{}) error {
 }
 
 // NewAliyunLog new a aliyun logger with options.
-func NewAliyunLog(options ...Option) Log {
+func NewAliyunLog(options ...Option) Logger {
 	opts := defaultOptions()
 	for _, o := range options {
 		o(opts)

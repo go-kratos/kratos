@@ -31,7 +31,7 @@ type App struct {
 	opts     options
 	ctx      context.Context
 	cancel   func()
-	lk       sync.Mutex
+	mu       sync.Mutex
 	instance *registry.ServiceInstance
 }
 
@@ -39,7 +39,6 @@ type App struct {
 func New(opts ...Option) *App {
 	o := options{
 		ctx:              context.Background(),
-		logger:           log.NewHelper(log.GetLogger()),
 		sigs:             []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		registrarTimeout: 10 * time.Second,
 		stopTimeout:      10 * time.Second,
@@ -49,6 +48,9 @@ func New(opts ...Option) *App {
 	}
 	for _, opt := range opts {
 		opt(&o)
+	}
+	if o.logger != nil {
+		log.SetLogger(o.logger)
 	}
 	ctx, cancel := context.WithCancel(o.ctx)
 	return &App{
@@ -72,10 +74,10 @@ func (a *App) Metadata() map[string]string { return a.opts.metadata }
 
 // Endpoint returns endpoints.
 func (a *App) Endpoint() []string {
-	if a.instance == nil {
-		return []string{}
+	if a.instance != nil {
+		return a.instance.Endpoints
 	}
-	return a.instance.Endpoints
+	return nil
 }
 
 // Run executes all OnStart hooks registered with the application's Lifecycle.
@@ -84,48 +86,41 @@ func (a *App) Run() error {
 	if err != nil {
 		return err
 	}
-	ctx := NewContext(a.ctx, a)
-	eg, ctx := errgroup.WithContext(ctx)
+	a.mu.Lock()
+	a.instance = instance
+	a.mu.Unlock()
+	eg, ctx := errgroup.WithContext(NewContext(a.ctx, a))
 	wg := sync.WaitGroup{}
 	for _, srv := range a.opts.servers {
 		srv := srv
 		eg.Go(func() error {
 			<-ctx.Done() // wait for stop signal
-			sctx, cancel := context.WithTimeout(NewContext(context.Background(), a), a.opts.stopTimeout)
+			stopCtx, cancel := context.WithTimeout(NewContext(a.opts.ctx, a), a.opts.stopTimeout)
 			defer cancel()
-			return srv.Stop(sctx)
+			return srv.Stop(stopCtx)
 		})
 		wg.Add(1)
 		eg.Go(func() error {
-			wg.Done()
-			return srv.Start(ctx)
+			wg.Done() // here is to ensure server start has begun running before register, so defer is not needed
+			return srv.Start(NewContext(a.opts.ctx, a))
 		})
 	}
 	wg.Wait()
 	if a.opts.registrar != nil {
-		rctx, rcancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
+		rctx, rcancel := context.WithTimeout(ctx, a.opts.registrarTimeout)
 		defer rcancel()
 		if err := a.opts.registrar.Register(rctx, instance); err != nil {
 			return err
 		}
-		a.lk.Lock()
-		a.instance = instance
-		a.lk.Unlock()
 	}
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, a.opts.sigs...)
 	eg.Go(func() error {
-		for {
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			case <-c:
-				err := a.Stop()
-				if err != nil {
-					a.opts.logger.Errorf("failed to stop app: %v", err)
-					return err
-				}
-			}
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-c:
+			return a.Stop()
 		}
 	})
 	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
@@ -136,11 +131,11 @@ func (a *App) Run() error {
 
 // Stop gracefully stops the application.
 func (a *App) Stop() error {
-	a.lk.Lock()
+	a.mu.Lock()
 	instance := a.instance
-	a.lk.Unlock()
+	a.mu.Unlock()
 	if a.opts.registrar != nil && instance != nil {
-		ctx, cancel := context.WithTimeout(a.opts.ctx, a.opts.registrarTimeout)
+		ctx, cancel := context.WithTimeout(NewContext(a.ctx, a), a.opts.registrarTimeout)
 		defer cancel()
 		if err := a.opts.registrar.Deregister(ctx, instance); err != nil {
 			return err
@@ -153,7 +148,7 @@ func (a *App) Stop() error {
 }
 
 func (a *App) buildInstance() (*registry.ServiceInstance, error) {
-	endpoints := make([]string, 0) //nolint:gomnd
+	endpoints := make([]string, 0, len(a.opts.endpoints))
 	for _, e := range a.opts.endpoints {
 		endpoints = append(endpoints, e.String())
 	}

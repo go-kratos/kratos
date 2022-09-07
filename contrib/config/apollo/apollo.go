@@ -1,21 +1,29 @@
 package apollo
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/log"
 
 	"github.com/apolloconfig/agollo/v4"
+	"github.com/apolloconfig/agollo/v4/constant"
 	apolloConfig "github.com/apolloconfig/agollo/v4/env/config"
+	"github.com/apolloconfig/agollo/v4/extension"
+	"github.com/go-kratos/kratos/v2/encoding"
 )
 
 type apollo struct {
 	client agollo.Client
 	opt    *options
 }
+
+const (
+	yaml       = "yaml"
+	yml        = "yml"
+	json       = "json"
+	properties = "properties"
+)
 
 // Option is apollo option
 type Option func(*options)
@@ -28,8 +36,7 @@ type options struct {
 	namespace      string
 	isBackupConfig bool
 	backupPath     string
-
-	logger log.Logger
+	originConfig   bool
 }
 
 // WithAppID with apollo config app id
@@ -88,19 +95,18 @@ func WithBackupPath(backupPath string) Option {
 	}
 }
 
-// WithLogger use custom logger to replace default logger.
-func WithLogger(logger log.Logger) Option {
+// WithOriginalConfig use the original configuration file without parse processing
+func WithOriginalConfig() Option {
 	return func(o *options) {
-		if logger != nil {
-			o.logger = logger
-		}
+		extension.AddFormatParser(constant.JSON, &jsonExtParser{})
+		extension.AddFormatParser(constant.YAML, &yamlExtParser{})
+		extension.AddFormatParser(constant.YML, &yamlExtParser{})
+		o.originConfig = true
 	}
 }
 
 func NewSource(opts ...Option) config.Source {
-	op := options{
-		logger: log.GetLogger(),
-	}
+	op := options{}
 	for _, o := range opts {
 		o(&op)
 	}
@@ -118,26 +124,95 @@ func NewSource(opts ...Option) config.Source {
 	if err != nil {
 		panic(err)
 	}
-
 	return &apollo{client: client, opt: &op}
 }
 
-// genKey got the key of config.KeyValue pair.
-// eg: namespace.ext with subKey got namespace.subKey
-func genKey(ns, sub string) string {
+func format(ns string) string {
 	arr := strings.Split(ns, ".")
-	if len(arr) < 1 {
-		return sub
+	if len(arr) <= 1 || arr[len(arr)-1] == properties {
+		return json
 	}
+	return arr[len(arr)-1]
+}
 
-	if len(arr) == 1 {
-		if ns == "" {
-			return sub
+func (e *apollo) load() []*config.KeyValue {
+	kvs := make([]*config.KeyValue, 0)
+	namespaces := strings.Split(e.opt.namespace, ",")
+
+	for _, ns := range namespaces {
+		if !e.opt.originConfig {
+			kv, err := e.getConfig(ns)
+			if err != nil {
+				log.Errorf("apollo get config failed，err:%v", err)
+				continue
+			}
+			kvs = append(kvs, kv)
+			continue
 		}
-		return ns + "." + sub
+		if strings.Contains(ns, ".") && !strings.Contains(ns, properties) &&
+			(format(ns) == yaml || format(ns) == yml || format(ns) == json) {
+			kv, err := e.getOriginConfig(ns)
+			if err != nil {
+				log.Errorf("apollo get config failed，err:%v", err)
+				continue
+			}
+			kvs = append(kvs, kv)
+			continue
+		} else {
+			kv, err := e.getConfig(ns)
+			if err != nil {
+				log.Errorf("apollo get config failed，err:%v", err)
+				continue
+			}
+			kvs = append(kvs, kv)
+		}
 	}
+	return kvs
+}
 
-	return strings.Join(arr[:len(arr)-1], ".") + "." + sub
+func (e *apollo) getConfig(ns string) (*config.KeyValue, error) {
+	next := map[string]interface{}{}
+	e.client.GetConfigCache(ns).Range(func(key, value interface{}) bool {
+		// all values are out properties format
+		resolve(genKey(ns, key.(string)), value, next)
+		return true
+	})
+	f := format(ns)
+	codec := encoding.GetCodec(f)
+	val, err := codec.Marshal(next)
+	if err != nil {
+		return nil, err
+	}
+	return &config.KeyValue{
+		Key:    ns,
+		Value:  val,
+		Format: f,
+	}, nil
+}
+
+func (e apollo) getOriginConfig(ns string) (*config.KeyValue, error) {
+	value, err := e.client.GetConfigCache(ns).Get("content")
+	if err != nil {
+		return nil, err
+	}
+	// serialize the namespace content KeyValue into bytes.
+	return &config.KeyValue{
+		Key:    ns,
+		Value:  []byte(value.(string)),
+		Format: format(ns),
+	}, nil
+}
+
+func (e *apollo) Load() (kv []*config.KeyValue, err error) {
+	return e.load(), nil
+}
+
+func (e *apollo) Watch() (config.Watcher, error) {
+	w, err := newWatcher(e)
+	if err != nil {
+		return nil, err
+	}
+	return w, nil
 }
 
 // resolve convert kv pair into one map[string]interface{} by split key into different
@@ -167,66 +242,26 @@ func resolve(key string, value interface{}, target map[string]interface{}) {
 		// current exists, then check existing value type, if it's not map
 		// that means duplicate keys, and at least one is not map instance.
 		if cursor, ok = v.(map[string]interface{}); !ok {
-			_ = log.GetLogger().Log(log.LevelWarn,
-				"msg",
-				fmt.Sprintf("duplicate key: %v\n", strings.Join(keys[:i+1], ".")),
-			)
+			log.Warnf("duplicate key: %v\n", strings.Join(keys[:i+1], "."))
 			break
 		}
 	}
 }
 
-func format(ns string) string {
+// genKey got the key of config.KeyValue pair.
+// eg: namespace.ext with subKey got namespace.subKey
+func genKey(ns, sub string) string {
 	arr := strings.Split(ns, ".")
-	if len(arr) <= 1 {
-		return "json"
+	if len(arr) < 1 {
+		return sub
 	}
 
-	return arr[len(arr)-1]
-}
-
-func (e *apollo) load() []*config.KeyValue {
-	kv := make([]*config.KeyValue, 0)
-	namespaces := strings.Split(e.opt.namespace, ",")
-
-	for _, ns := range namespaces {
-		next := map[string]interface{}{}
-		e.client.GetConfigCache(ns).Range(func(key, value interface{}) bool {
-			// all values are out properties format
-			resolve(genKey(ns, key.(string)), value, next)
-			return true
-		})
-
-		// serialize the namespace content KeyValue into bytes.
-		f := format(ns)
-		codec := encoding.GetCodec(f)
-		val, err := codec.Marshal(next)
-		if err != nil {
-			_ = e.opt.logger.Log(log.LevelWarn,
-				"msg",
-				fmt.Sprintf("apollo could not handle namespace %s: %v", ns, err),
-			)
-			continue
+	if len(arr) == 1 {
+		if ns == "" {
+			return sub
 		}
-
-		kv = append(kv, &config.KeyValue{
-			Key:    ns,
-			Value:  val,
-			Format: f,
-		})
+		return ns + "." + sub
 	}
 
-	return kv
-}
-
-func (e *apollo) Load() (kv []*config.KeyValue, err error) {
-	return e.load(), nil
-}
-
-func (e *apollo) Watch() (config.Watcher, error) {
-	w, err := newWatcher(e, e.opt.logger)
-	if err != nil {
-		return nil, err
-	}
-	return w, nil
+	return strings.Join(arr[:len(arr)-1], ".") + "." + sub
 }

@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"sync"
 
+	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -63,26 +65,32 @@ func (s *Server) load() error {
 	}
 	var err error
 	protoregistry.GlobalFiles.RangeFiles(func(fd protoreflect.FileDescriptor) bool {
-		if fd.Services() != nil {
-			for i := 0; i < fd.Services().Len(); i++ {
-				svc := fd.Services().Get(i)
-				fdp, e := fileDescriptorProto(fd.Path())
-				if e != nil {
-					err = e
-					return false
+		if fd.Services() == nil {
+			return true
+		}
+		for i := 0; i < fd.Services().Len(); i++ {
+			svc := fd.Services().Get(i)
+			fdp, e := fileDescriptorProto(fd.Path())
+			if e != nil {
+				err = e
+				return false
+			}
+			fdps, e := allDependency(fdp)
+			if e != nil {
+				if errors.Is(e, protoregistry.NotFound) {
+					// Skip this service if one of its dependencies is not found.
+					continue
 				}
-				fdps, e := allDependency(fdp)
-				if e != nil {
-					err = e
-					return false
-				}
-				s.services[string(svc.FullName())] = &dpb.FileDescriptorSet{File: fdps}
-				if svc.Methods() != nil {
-					for j := 0; j < svc.Methods().Len(); j++ {
-						method := svc.Methods().Get(j)
-						s.methods[string(svc.FullName())] = append(s.methods[string(svc.FullName())], string(method.Name()))
-					}
-				}
+				err = e
+				return false
+			}
+			s.services[string(svc.FullName())] = &dpb.FileDescriptorSet{File: fdps}
+			if svc.Methods() == nil {
+				continue
+			}
+			for j := 0; j < svc.Methods().Len(); j++ {
+				method := svc.Methods().Get(j)
+				s.methods[string(svc.FullName())] = append(s.methods[string(svc.FullName())], string(method.Name()))
 			}
 		}
 		return true
@@ -97,7 +105,10 @@ func (s *Server) ListServices(ctx context.Context, in *ListServicesRequest) (*Li
 	if err := s.load(); err != nil {
 		return nil, err
 	}
-	reply := new(ListServicesReply)
+	reply := &ListServicesReply{
+		Services: make([]string, 0, len(s.services)),
+		Methods:  make([]string, 0, len(s.methods)),
+	}
 	for name := range s.services {
 		reply.Services = append(reply.Services, name)
 	}
@@ -134,11 +145,7 @@ func parseMetadata(meta interface{}) (*dpb.FileDescriptorProto, error) {
 	}
 	// Check if meta is the byte slice.
 	if enc, ok := meta.([]byte); ok {
-		fd, err := decodeFileDesc(enc)
-		if err != nil {
-			return nil, err
-		}
-		return fd, nil
+		return decodeFileDesc(enc)
 	}
 	return nil, fmt.Errorf("proto not sumpport metadata: %v", meta)
 }
@@ -162,7 +169,8 @@ func allDependency(fd *dpb.FileDescriptorProto) ([]*dpb.FileDescriptorProto, err
 	for _, dep := range fd.Dependency {
 		fdDep, err := fileDescriptorProto(dep)
 		if err != nil {
-			return nil, err
+			log.Warnf("%s", err)
+			continue
 		}
 		temp, err := allDependency(fdDep)
 		if err != nil {
@@ -190,7 +198,7 @@ func decompress(b []byte) ([]byte, error) {
 func fileDescriptorProto(path string) (*dpb.FileDescriptorProto, error) {
 	fd, err := protoregistry.GlobalFiles.FindFileByPath(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("find proto by path failed, path: %s, err: %s", path, err)
 	}
 	fdpb := protodesc.ToFileDescriptorProto(fd)
 	return fdpb, nil

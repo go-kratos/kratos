@@ -55,9 +55,6 @@ func WithEnableBackup() Option
 // specify apollo endpoint, such as http://localhost:8080
 func WithEndpoint(endpoint string) Option
 
-// inject a logger to debug
-func WithLogger(logger log.Logger) Option
-
 // namespaces to load, comma to separate. 
 func WithNamespace(name string) Option
 

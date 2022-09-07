@@ -3,7 +3,9 @@ package consul
 import (
 	"reflect"
 	"testing"
+	"time"
 
+	"github.com/go-kratos/kratos/v2/config"
 	"github.com/hashicorp/consul/api"
 )
 
@@ -97,5 +99,160 @@ func TestExtToFormat(t *testing.T) {
 	}
 	if !reflect.DeepEqual("json", kvs[0].Format) {
 		t.Errorf("kvs[0].Format is %s", kvs[0].Format)
+	}
+}
+
+func Test_source_Watch(t *testing.T) {
+	client, err := api.NewClient(&api.Config{
+		Address: "127.0.0.1:8500",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	source, err := New(client, WithPath(testPath))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	type fields struct {
+		source config.Source
+	}
+
+	type args struct {
+		key   string
+		value string
+	}
+
+	tests := []struct {
+		name      string
+		fields    fields
+		args      args
+		want      string
+		wantErr   bool
+		deferFunc func(t *testing.T)
+	}{
+		{
+			name:   "normal",
+			fields: fields{source: source},
+			args: args{
+				key:   testKey,
+				value: "test value",
+			},
+			want:    "test value",
+			wantErr: false,
+			deferFunc: func(t *testing.T) {
+				_, err := client.KV().Delete(testKey, nil)
+				if err != nil {
+					t.Error(err)
+				}
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.deferFunc != nil {
+				defer tt.deferFunc(t)
+			}
+
+			got, err := tt.fields.source.Watch()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Watch() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			time.Sleep(100 * time.Millisecond)
+			_, err = client.KV().Put(&api.KVPair{Key: tt.args.key, Value: []byte(tt.args.value)}, nil)
+			if err != nil {
+				t.Error(err)
+			}
+
+			next, err := got.Next()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Watch() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if len(next) != 1 {
+				t.Error("watch is error")
+			}
+
+			if !reflect.DeepEqual(string(next[0].Value), tt.want) {
+				t.Errorf("Watch got = %v, want %v", string(next[0].Value), tt.want)
+			}
+		})
+	}
+}
+
+func Test_source_Load(t *testing.T) {
+	client, err := api.NewClient(&api.Config{
+		Address: "127.0.0.1:8500",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	source, err := New(client, WithPath(testPath))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	type args struct {
+		key   string
+		value string
+	}
+	type fields struct {
+		source config.Source
+	}
+	tests := []struct {
+		name      string
+		args      args
+		fields    fields
+		want      []*config.KeyValue
+		wantErr   bool
+		deferFunc func(t *testing.T)
+	}{
+		{
+			name: "normal",
+			args: args{
+				key:   testKey,
+				value: "test value",
+			},
+			fields: fields{
+				source: source,
+			},
+			want: []*config.KeyValue{
+				{
+					Key:   "key",
+					Value: []byte("test value"),
+				},
+			},
+			deferFunc: func(t *testing.T) {
+				_, err1 := client.KV().Delete(testKey, nil)
+				if err1 != nil {
+					t.Error(err)
+				}
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.deferFunc != nil {
+				defer tt.deferFunc(t)
+			}
+			_, err = client.KV().Put(&api.KVPair{Key: tt.args.key, Value: []byte(tt.args.value)}, nil)
+			if err != nil {
+				t.Error(err)
+			}
+			got, err := tt.fields.source.Load()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Load() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if !reflect.DeepEqual(got[0], tt.want[0]) {
+				t.Errorf("Load() got = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

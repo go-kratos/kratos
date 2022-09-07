@@ -8,11 +8,17 @@ import (
 
 // DefaultNode is selector node
 type DefaultNode struct {
+	scheme   string
 	addr     string
 	weight   *int64
 	version  string
 	name     string
 	metadata map[string]string
+}
+
+// Scheme is node scheme
+func (n *DefaultNode) Scheme() string {
+	return n.scheme
 }
 
 // Address is node address
@@ -41,9 +47,10 @@ func (n *DefaultNode) Metadata() map[string]string {
 }
 
 // NewNode new node
-func NewNode(addr string, ins *registry.ServiceInstance) Node {
+func NewNode(scheme, addr string, ins *registry.ServiceInstance) Node {
 	n := &DefaultNode{
-		addr: addr,
+		scheme: scheme,
+		addr:   addr,
 	}
 	if ins != nil {
 		n.name = ins.Name

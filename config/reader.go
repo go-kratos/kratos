@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/go-kratos/kratos/v2/log"
+
 	"github.com/imdario/mergo"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -45,9 +47,11 @@ func (r *reader) Merge(kvs ...*KeyValue) error {
 	for _, kv := range kvs {
 		next := make(map[string]interface{})
 		if err := r.opts.decoder(kv, next); err != nil {
+			log.Errorf("Failed to config decode error: %v key: %s value: %s", err, kv.Key, string(kv.Value))
 			return err
 		}
 		if err := mergo.Map(&merged, convertMap(next), mergo.WithOverride); err != nil {
+			log.Errorf("Failed to config merge error: %v key: %s value: %s", err, kv.Key, string(kv.Value))
 			return err
 		}
 	}

@@ -9,7 +9,6 @@ import (
 type Default struct {
 	NodeBuilder WeightedNodeBuilder
 	Balancer    Balancer
-	Filters     []Filter
 
 	nodes atomic.Value
 }
@@ -27,16 +26,13 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 	for _, o := range opts {
 		o(&options)
 	}
-	if len(d.Filters) > 0 || len(options.Filters) > 0 {
+	if len(options.NodeFilters) > 0 {
 		newNodes := make([]Node, len(nodes))
 		for i, wc := range nodes {
 			newNodes[i] = wc
 		}
-		for _, f := range d.Filters {
-			newNodes = f(ctx, newNodes)
-		}
-		for _, f := range options.Filters {
-			newNodes = f(ctx, newNodes)
+		for _, filter := range options.NodeFilters {
+			newNodes = filter(ctx, newNodes)
 		}
 		candidates = make([]WeightedNode, len(newNodes))
 		for i, n := range newNodes {
@@ -52,6 +48,10 @@ func (d *Default) Select(ctx context.Context, opts ...SelectOption) (selected No
 	wn, done, err := d.Balancer.Pick(ctx, candidates)
 	if err != nil {
 		return nil, nil, err
+	}
+	p, ok := FromPeerContext(ctx)
+	if ok {
+		p.Node = wn.Raw()
 	}
 	return wn.Raw(), done, nil
 }
@@ -70,7 +70,6 @@ func (d *Default) Apply(nodes []Node) {
 type DefaultBuilder struct {
 	Node     WeightedNodeBuilder
 	Balancer BalancerBuilder
-	Filters  []Filter
 }
 
 // Build create builder
@@ -78,6 +77,5 @@ func (db *DefaultBuilder) Build() Selector {
 	return &Default{
 		NodeBuilder: db.Node,
 		Balancer:    db.Balancer.Build(),
-		Filters:     db.Filters,
 	}
 }

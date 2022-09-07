@@ -38,8 +38,8 @@ func run(cmd *cobra.Command, args []string) {
 	if version == "dev" {
 		info := api.GetCommitsInfo()
 		fmt.Print(ParseCommitsInfo(info))
-	} else {
-		info := api.GetReleaseInfo(version)
-		fmt.Print(ParseReleaseInfo(info))
+		return
 	}
+	info := api.GetReleaseInfo(version)
+	fmt.Print(ParseReleaseInfo(info))
 }

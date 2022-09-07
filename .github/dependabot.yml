@@ -1,0 +1,87 @@
+---
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/config/apollo"
+    schedule:
+      interval: "weekly"    
+  - package-ecosystem: "gomod"
+    directory: "/contrib/config/consul"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/config/etcd"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/config/kubernetes"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/config/nacos"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/encoding/msgpack"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/log/aliyun"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/log/zap"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/log/fluent"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/metrics/datadog"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/metrics/prometheus"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/opensergo"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/registry/apollo"
+    schedule:
+      interval: "weekly"    
+  - package-ecosystem: "gomod"
+    directory: "/contrib/registry/consul"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/registry/etcd"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/registry/kubernetes"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/registry/nacos"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/registry/zookeeper"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/registry/eureka"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/registry/polaris"
+    schedule:
+      interval: "weekly"

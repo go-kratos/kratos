@@ -1,20 +1,26 @@
 package etcd
 
 import (
+	"context"
+
 	"github.com/go-kratos/kratos/v2/config"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type watcher struct {
-	source    *source
-	ch        clientv3.WatchChan
-	closeChan chan struct{}
+	source *source
+	ch     clientv3.WatchChan
+
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 func newWatcher(s *source) *watcher {
+	ctx, cancel := context.WithCancel(context.Background())
 	w := &watcher{
-		source:    s,
-		closeChan: make(chan struct{}),
+		source: s,
+		ctx:    ctx,
+		cancel: cancel,
 	}
 
 	var opts []clientv3.OpOption
@@ -26,19 +32,19 @@ func newWatcher(s *source) *watcher {
 	return w
 }
 
-func (s *watcher) Next() ([]*config.KeyValue, error) {
+func (w *watcher) Next() ([]*config.KeyValue, error) {
 	select {
-	case _, ok := <-s.ch:
-		if !ok {
-			return nil, nil
+	case resp := <-w.ch:
+		if resp.Err() != nil {
+			return nil, resp.Err()
 		}
-		return s.source.Load()
-	case <-s.closeChan:
-		return nil, nil
+		return w.source.Load()
+	case <-w.ctx.Done():
+		return nil, w.ctx.Err()
 	}
 }
 
-func (s *watcher) Stop() error {
-	close(s.closeChan)
+func (w *watcher) Stop() error {
+	w.cancel()
 	return nil
 }

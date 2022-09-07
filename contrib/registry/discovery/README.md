@@ -14,9 +14,6 @@ import (
 )
 
 func main() {
-	logger := log.NewStdLogger(os.Stdout)
-	logger = log.With(logger, "service", "example.registry.discovery")
-	
 	// initialize a registry
 	r := discovery.New(&discovery.Config{
 		Nodes:  []string{"0.0.0.0:7171"},
@@ -24,7 +21,7 @@ func main() {
 		Region: "sh1",
 		Zone:   "zone1",
 		Host:   "hostname",
-	}, logger)
+	})
 
 	// construct srv instance
 	// ...

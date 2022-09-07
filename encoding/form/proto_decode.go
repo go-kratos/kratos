@@ -9,13 +9,14 @@ import (
 	"strings"
 	"time"
 
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 
-	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -282,11 +283,13 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 	case "google.protobuf.BytesValue":
 		v, err := base64.StdEncoding.DecodeString(value)
 		if err != nil {
-			return protoreflect.Value{}, err
+			if v, err = base64.URLEncoding.DecodeString(value); err != nil {
+				return protoreflect.Value{}, err
+			}
 		}
 		msg = wrapperspb.Bytes(v)
 	case "google.protobuf.FieldMask":
-		fm := &field_mask.FieldMask{}
+		fm := &fieldmaskpb.FieldMask{}
 		for _, fv := range strings.Split(value, ",") {
 			fm.Paths = append(fm.Paths, jsonSnakeCase(fv))
 		}
@@ -297,6 +300,12 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 			return protoreflect.Value{}, err
 		}
 		msg = fm
+	case "google.protobuf.Struct":
+		var v structpb.Struct
+		if err := protojson.Unmarshal([]byte(value), &v); err != nil {
+			return protoreflect.Value{}, err
+		}
+		msg = &v
 	default:
 		return protoreflect.Value{}, fmt.Errorf("unsupported message type: %q", string(md.FullName()))
 	}

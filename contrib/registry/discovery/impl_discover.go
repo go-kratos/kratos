@@ -29,7 +29,7 @@ func filterInstancesByZone(ins *disInstancesInfo, zone string) []*registry.Servi
 
 func (d *Discovery) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
 	r := d.resolveBuild(serviceName)
-	ins, ok := r.Fetch(ctx)
+	ins, ok := r.fetch(ctx)
 	if !ok {
 		return nil, errors.New("Discovery.GetService fetch failed")
 	}
@@ -70,7 +70,7 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 	ctx, cancel := context.WithTimeout(context.TODO(), 15*time.Second)
 	defer cancel()
 
-	ins, ok := w.Resolve.Fetch(ctx)
+	ins, ok := w.Resolve.fetch(ctx)
 	if !ok {
 		return nil, errors.New("Discovery.GetService fetch failed")
 	}

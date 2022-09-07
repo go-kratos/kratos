@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"google.golang.org/grpc"
@@ -70,15 +69,6 @@ func TestWithTLSConfig(t *testing.T) {
 	}
 }
 
-func TestWithLogger(t *testing.T) {
-	o := &clientOptions{}
-	v := log.DefaultLogger
-	WithLogger(v)(o)
-	if !reflect.DeepEqual(v, o.logger) {
-		t.Errorf("expect %v but got %v", v, o.logger)
-	}
-}
-
 func EmptyMiddleware() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
@@ -104,12 +94,10 @@ func TestUnaryClientInterceptor(t *testing.T) {
 func TestWithUnaryInterceptor(t *testing.T) {
 	o := &clientOptions{}
 	v := []grpc.UnaryClientInterceptor{
-		func(ctx context.Context, method string, req, reply interface{},
-			cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 			return nil
 		},
-		func(ctx context.Context, method string, req, reply interface{},
-			cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 			return nil
 		},
 	}
@@ -147,7 +135,6 @@ func TestDialConn(t *testing.T) {
 		true,
 		WithDiscovery(&mockRegistry{}),
 		WithTimeout(10*time.Second),
-		WithLogger(log.DefaultLogger),
 		WithEndpoint("abc"),
 		WithMiddleware(EmptyMiddleware()),
 	)

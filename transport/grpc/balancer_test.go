@@ -19,19 +19,10 @@ func TestTrailer(t *testing.T) {
 	}
 }
 
-func TestBalancerName(t *testing.T) {
-	o := &clientOptions{}
-
-	WithBalancerName("p2c")(o)
-	if !reflect.DeepEqual("p2c", o.balancerName) {
-		t.Errorf("expect %v, got %v", "p2c", o.balancerName)
-	}
-}
-
 func TestFilters(t *testing.T) {
 	o := &clientOptions{}
 
-	WithFilter(func(_ context.Context, nodes []selector.Node) []selector.Node {
+	WithNodeFilter(func(_ context.Context, nodes []selector.Node) []selector.Node {
 		return nodes
 	})(o)
 	if !reflect.DeepEqual(1, len(o.filters)) {

@@ -4,8 +4,6 @@ import (
 	"errors"
 	"reflect"
 	"testing"
-
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 const (
@@ -123,7 +121,6 @@ func TestConfig(t *testing.T) {
 		WithSource(newTestJSONSource(_testJSON)),
 		WithDecoder(defaultDecoder),
 		WithResolver(defaultResolver),
-		WithLogger(log.GetLogger()),
 	)
 	err = c.Close()
 	if err != nil {
@@ -135,12 +132,10 @@ func TestConfig(t *testing.T) {
 		sources:  []Source{jSource},
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
-		logger:   log.GetLogger(),
 	}
 	cf := &config{}
 	cf.opts = opts
 	cf.reader = newReader(opts)
-	cf.log = log.NewHelper(opts.logger)
 
 	err = cf.Load()
 	if err != nil {

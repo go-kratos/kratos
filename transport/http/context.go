@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 	"github.com/gorilla/mux"
 )
@@ -45,7 +46,7 @@ type responseWriter struct {
 	w    http.ResponseWriter
 }
 
-func (w *responseWriter) rest(res http.ResponseWriter) {
+func (w *responseWriter) reset(res http.ResponseWriter) {
 	w.w = res
 	w.code = http.StatusOK
 }
@@ -89,7 +90,10 @@ func (c *wrapper) Query() url.Values {
 func (c *wrapper) Request() *http.Request        { return c.req }
 func (c *wrapper) Response() http.ResponseWriter { return c.res }
 func (c *wrapper) Middleware(h middleware.Handler) middleware.Handler {
-	return middleware.Chain(c.router.srv.ms...)(h)
+	if tr, ok := transport.FromServerContext(c.req.Context()); ok {
+		return middleware.Chain(c.router.srv.middleware.Match(tr.Operation())...)(h)
+	}
+	return middleware.Chain(c.router.srv.middleware.Match(c.req.URL.Path)...)(h)
 }
 func (c *wrapper) Bind(v interface{}) error      { return c.router.srv.dec(c.req, v) }
 func (c *wrapper) BindVars(v interface{}) error  { return binding.BindQuery(c.Vars(), v) }
@@ -147,7 +151,7 @@ func (c *wrapper) Stream(code int, contentType string, rd io.Reader) error {
 }
 
 func (c *wrapper) Reset(res http.ResponseWriter, req *http.Request) {
-	c.w.rest(res)
+	c.w.reset(res)
 	c.res = res
 	c.req = req
 }
