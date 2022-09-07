@@ -59,9 +59,10 @@ func (g *GithubAPI) GetReleaseInfo(version string) ReleaseInfo {
 func (g *GithubAPI) GetCommitsInfo() []CommitInfo {
 	info := g.GetReleaseInfo("latest")
 	page := 1
+	prePage := 100
 	var list []CommitInfo
 	for {
-		url := fmt.Sprintf("https://api.github.com/repos/%s/%s/commits?pre_page=100&page=%d&since=%s", g.Owner, g.Repo, page, info.PublishedAt)
+		url := fmt.Sprintf("https://api.github.com/repos/%s/%s/commits?pre_page=%d&page=%d&since=%s", g.Owner, g.Repo, prePage, page, info.PublishedAt)
 		resp, code := requestGithubAPI(url, "GET", nil, g.Token)
 		if code != http.StatusOK {
 			printGithubErrorInfo(resp)
@@ -72,7 +73,7 @@ func (g *GithubAPI) GetCommitsInfo() []CommitInfo {
 			fatal(err)
 		}
 		list = append(list, res...)
-		if len(res) < http.StatusContinue {
+		if len(res) < prePage {
 			break
 		}
 		page++
