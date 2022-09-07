@@ -167,3 +167,32 @@ func TestEtcdWithPrefix(t *testing.T) {
 		})
 	}
 }
+
+func TestEtcdWithDir(t *testing.T) {
+	tests := []struct {
+		name   string
+		fields bool
+		want   bool
+	}{
+		{
+			name:   "default",
+			fields: false,
+			want:   false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			options := &options{
+				ctx: context.Background(),
+			}
+
+			got := WithDir(tt.fields)
+			got(options)
+
+			if options.dir != tt.want {
+				t.Errorf("WithPrefix(tt.fields) = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

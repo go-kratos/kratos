@@ -119,8 +119,15 @@ func convertMap(src interface{}) interface{} {
 		}
 		return dst
 	case []byte:
-		// there will be no binary data in the config data
-		return string(m)
+		tmp := make(map[string]interface{})
+		if err := json.Unmarshal(m, &tmp); err != nil {
+			return string(m)
+		}
+		dst := make(map[string]interface{}, len(tmp))
+		for k, v := range tmp {
+			dst[fmt.Sprint(k)] = convertMap(v)
+		}
+		return dst
 	default:
 		return src
 	}

@@ -17,12 +17,19 @@ type options struct {
 	ctx    context.Context
 	path   string
 	prefix bool
+	dir    bool
 }
 
 // WithContext with registry context.
 func WithContext(ctx context.Context) Option {
 	return func(o *options) {
 		o.ctx = ctx
+	}
+}
+
+func WithDir(d bool) Option {
+	return func(o *options) {
+		o.dir = d
 	}
 }
 
@@ -80,6 +87,10 @@ func (s *source) Load() ([]*config.KeyValue, error) {
 	kvs := make([]*config.KeyValue, 0, len(rsp.Kvs))
 	for _, item := range rsp.Kvs {
 		k := string(item.Key)
+		if s.options.dir {
+			k = strings.ReplaceAll(strings.ReplaceAll(k, s.options.path, ""), "/", "")
+		}
+
 		kvs = append(kvs, &config.KeyValue{
 			Key:    k,
 			Value:  item.Value,
