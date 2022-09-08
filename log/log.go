@@ -39,6 +39,23 @@ func With(l Logger, kv ...interface{}) Logger {
 	if !ok {
 		return &logger{logger: l, prefix: kv, hasValuer: containsValuer(kv), ctx: context.Background()}
 	}
+	kvs := make([]interface{}, 0, len(c.prefix)+len(kv))
+	kvs = append(kvs, c.prefix...)
+	kvs = append(kvs, kv...)
+	return &logger{
+		logger:    c.logger,
+		prefix:    kvs,
+		hasValuer: containsValuer(kvs),
+		ctx:       c.ctx,
+	}
+}
+
+// WithReplace : Add logger fields, and, if the key already exists, replace the older value with the new value.
+func WithReplace(l Logger, kv ...interface{}) Logger {
+	c, ok := l.(*logger)
+	if !ok {
+		return &logger{logger: l, prefix: kv, hasValuer: containsValuer(kv), ctx: context.Background()}
+	}
 	ca := len(c.prefix) + len(kv)
 	kvs := make([]interface{}, 0, ca)
 	m := make(map[interface{}]bool, ca)

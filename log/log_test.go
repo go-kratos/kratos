@@ -17,9 +17,9 @@ func TestWithContext(t *testing.T) {
 	WithContext(context.Background(), nil)
 }
 
-func TestWith(t *testing.T) {
+func TestWithReplace(t *testing.T) {
 	logger := DefaultLogger
-	logger = With(logger, "ts", DefaultTimestamp, "caller", DefaultCaller, "test_error_key_val_pair")
-	logger = With(logger, "ts", Timestamp(time.ANSIC), "caller", Caller(-1), "test_error_key_val_pair")
+	logger = WithReplace(logger, "ts", DefaultTimestamp, "caller", DefaultCaller, "test_error_key_val_pair")
+	logger = WithReplace(logger, "ts", Timestamp(time.ANSIC), "caller", Caller(-1), "test_error_key_val_pair")
 	_ = logger.Log(LevelInfo, "key1", "value1")
 }
