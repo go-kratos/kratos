@@ -103,7 +103,7 @@ func TestFilterFuncWitchLoggerPrefix(t *testing.T) {
 		},
 		{
 			logger: NewFilter(With(NewStdLogger(buf), "caller", "caller"), FilterFunc(testFilterFuncWithLoggerPrefix)),
-			want:   "INFO caller=caller msg=msg\n",
+			want:   `{"caller":"caller","level":"INFO","msg":"msg"}` + "\n",
 		},
 	}
 

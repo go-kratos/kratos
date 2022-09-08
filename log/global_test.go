@@ -54,36 +54,36 @@ func TestGlobalLog(t *testing.T) {
 		switch tc.level {
 		case LevelDebug:
 			Debug(msg)
-			expected = append(expected, fmt.Sprintf("%s msg=%s", "DEBUG", msg))
+			expected = append(expected, fmt.Sprintf(`{"level":"%s","msg":"%s"}`, "DEBUG", msg))
 			Debugf(tc.content[0].(string), tc.content[1:]...)
-			expected = append(expected, fmt.Sprintf("%s msg=%s", "DEBUG", msg))
+			expected = append(expected, fmt.Sprintf(`{"level":"%s","msg":"%s"}`, "DEBUG", msg))
 			Debugw("log", msg)
-			expected = append(expected, fmt.Sprintf("%s log=%s", "DEBUG", msg))
+			expected = append(expected, fmt.Sprintf(`{"level":"%s","log":"%s"}`, "DEBUG", msg))
 		case LevelInfo:
 			Info(msg)
-			expected = append(expected, fmt.Sprintf("%s msg=%s", "INFO", msg))
+			expected = append(expected, fmt.Sprintf(`{"level":"%s","msg":"%s"}`, "INFO", msg))
 			Infof(tc.content[0].(string), tc.content[1:]...)
-			expected = append(expected, fmt.Sprintf("%s msg=%s", "INFO", msg))
+			expected = append(expected, fmt.Sprintf(`{"level":"%s","msg":"%s"}`, "INFO", msg))
 			Infow("log", msg)
-			expected = append(expected, fmt.Sprintf("%s log=%s", "INFO", msg))
+			expected = append(expected, fmt.Sprintf(`{"level":"%s","log":"%s"}`, "INFO", msg))
 		case LevelWarn:
 			Warn(msg)
-			expected = append(expected, fmt.Sprintf("%s msg=%s", "WARN", msg))
+			expected = append(expected, fmt.Sprintf(`{"level":"%s","msg":"%s"}`, "WARN", msg))
 			Warnf(tc.content[0].(string), tc.content[1:]...)
-			expected = append(expected, fmt.Sprintf("%s msg=%s", "WARN", msg))
+			expected = append(expected, fmt.Sprintf(`{"level":"%s","msg":"%s"}`, "WARN", msg))
 			Warnw("log", msg)
-			expected = append(expected, fmt.Sprintf("%s log=%s", "WARN", msg))
+			expected = append(expected, fmt.Sprintf(`{"level":"%s","log":"%s"}`, "WARN", msg))
 		case LevelError:
 			Error(msg)
-			expected = append(expected, fmt.Sprintf("%s msg=%s", "ERROR", msg))
+			expected = append(expected, fmt.Sprintf(`{"level":"%s","msg":"%s"}`, "ERROR", msg))
 			Errorf(tc.content[0].(string), tc.content[1:]...)
-			expected = append(expected, fmt.Sprintf("%s msg=%s", "ERROR", msg))
+			expected = append(expected, fmt.Sprintf(`{"level":"%s","msg":"%s"}`, "ERROR", msg))
 			Errorw("log", msg)
-			expected = append(expected, fmt.Sprintf("%s log=%s", "ERROR", msg))
+			expected = append(expected, fmt.Sprintf(`{"level":"%s","log":"%s"}`, "ERROR", msg))
 		}
 	}
 	Log(LevelInfo, DefaultMessageKey, "test log")
-	expected = append(expected, fmt.Sprintf("%s msg=%s", "INFO", "test log"))
+	expected = append(expected, fmt.Sprintf(`{"level":"%s","msg":"%s"}`, "INFO", "test log"))
 
 	expected = append(expected, "")
 
@@ -103,7 +103,7 @@ func TestGlobalLogUpdate(t *testing.T) {
 	l.SetLogger(NewStdLogger(buffer))
 	LOG.Info("Log to buffer")
 
-	expected := "INFO msg=Log to buffer\n"
+	expected := `{"level":"INFO","msg":"Log to buffer"}` + "\n"
 	if buffer.String() != expected {
 		t.Errorf("Expected: %s, got: %s", expected, buffer.String())
 	}
@@ -113,7 +113,9 @@ func TestGlobalContext(t *testing.T) {
 	buffer := &bytes.Buffer{}
 	SetLogger(NewStdLogger(buffer))
 	Context(context.Background()).Infof("111")
-	if buffer.String() != "INFO msg=111\n" {
-		t.Errorf("Expected:%s, got:%s", "INFO msg=111", buffer.String())
+
+	expected := `{"level":"INFO","msg":"111"}` + "\n"
+	if buffer.String() != expected {
+		t.Errorf("Expected:%s, got:%s", expected, buffer.String())
 	}
 }

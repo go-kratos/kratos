@@ -10,6 +10,7 @@ func TestStdLogger(t *testing.T) {
 	_ = logger.Log(LevelInfo, "msg", "test info")
 	_ = logger.Log(LevelInfo, "msg", "test warn")
 	_ = logger.Log(LevelInfo, "msg", "test error")
+	_ = logger.Log(LevelInfo, "repeat", "1", "repeat", "2") // should print: "repeat":"2"
 	_ = logger.Log(LevelDebug, "singular")
 
 	logger2 := DefaultLogger
