@@ -58,11 +58,11 @@ func WithReplace(l Logger, kv ...interface{}) Logger {
 	}
 	ca := len(c.prefix) + len(kv)
 	kvs := make([]interface{}, 0, ca)
-	m := make(map[interface{}]bool, ca)
+	filter := make(map[interface{}]bool, ca)
 
 	// Add in reverse order, and the later will cover the earlier
-	kvs = appendWithFilter(kv, kvs, m)
-	kvs = appendWithFilter(c.prefix, kvs, m)
+	kvs = appendWithFilter(kv, kvs, filter)
+	kvs = appendWithFilter(c.prefix, kvs, filter)
 	// Reverse to asc order
 	kvs = reverse(kvs)
 
