@@ -39,6 +39,16 @@ func With(l Logger, kv ...interface{}) Logger {
 	if !ok {
 		return &logger{logger: l, prefix: kv, hasValuer: containsValuer(kv), ctx: context.Background()}
 	}
+	kvl := len(kv)
+	// at lest one kv pair, or else return itself
+	if kvl < 2 {
+		return l
+	}
+	// If len is an odd number, the last element is discard.
+	if kvl&1 == 1 {
+		kv = kv[:kvl-1]
+	}
+
 	kvs := make([]interface{}, 0, len(c.prefix)+len(kv))
 	kvs = append(kvs, c.prefix...)
 	kvs = append(kvs, kv...)
@@ -56,6 +66,11 @@ func WithReplace(l Logger, kv ...interface{}) Logger {
 	if !ok {
 		return &logger{logger: l, prefix: kv, hasValuer: containsValuer(kv), ctx: context.Background()}
 	}
+	// at lest one kv pair, or else return itself
+	if len(kv) < 2 {
+		return l
+	}
+
 	ca := len(c.prefix) + len(kv)
 	kvs := make([]interface{}, 0, ca)
 	filter := make(map[interface{}]bool, ca)
@@ -91,11 +106,11 @@ func WithContext(ctx context.Context, l Logger) Logger {
 
 func appendWithFilter(src []interface{}, to []interface{}, filter map[interface{}]bool) []interface{} {
 	// If len is an odd number, the last element is discard.
-	vl := len(src)
-	if vl&1 == 1 {
-		vl--
+	l := len(src)
+	if l&1 == 1 {
+		l--
 	}
-	for i := vl - 1; i > 0; i = i - 2 {
+	for i := l - 1; i > 0; i = i - 2 {
 		// exists key, skip kv
 		if b, ok := filter[src[i-1]]; b && ok {
 			i = i - 2
