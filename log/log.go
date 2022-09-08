@@ -33,6 +33,9 @@ func (c *logger) Log(level Level, keyvals ...interface{}) error {
 	return nil
 }
 
+// MinLen At lest one kv pair
+const MinLen = 2
+
 // With logger fields.
 func With(l Logger, kv ...interface{}) Logger {
 	c, ok := l.(*logger)
@@ -41,7 +44,7 @@ func With(l Logger, kv ...interface{}) Logger {
 	}
 	kvl := len(kv)
 	// at lest one kv pair, or else return itself
-	if kvl < 2 {
+	if kvl < MinLen {
 		return l
 	}
 	// If len is an odd number, the last element is discard.
@@ -67,7 +70,7 @@ func WithReplace(l Logger, kv ...interface{}) Logger {
 		return &logger{logger: l, prefix: kv, hasValuer: containsValuer(kv), ctx: context.Background()}
 	}
 	// at lest one kv pair, or else return itself
-	if len(kv) < 2 {
+	if len(kv) < MinLen {
 		return l
 	}
 
