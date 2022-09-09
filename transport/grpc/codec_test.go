@@ -3,7 +3,7 @@ package grpc
 import (
 	"reflect"
 	"testing"
-
+	
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -17,7 +17,6 @@ func TestCodec(t *testing.T) {
 	if err != nil {
 		t.Errorf("grpc codec marshal error:%v", err)
 	}
-	_ = data
 	out := &structpb.Struct{}
 	err = c.Unmarshal(data, out)
 	if err != nil {
