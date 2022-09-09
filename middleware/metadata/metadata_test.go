@@ -134,6 +134,6 @@ func Test_WithPropagatedPrefix(t *testing.T) {
 	WithPropagatedPrefix("something", "another")(o)
 
 	if len(o.prefix) != 2 {
-		t.Error("The prefix must be overrided.")
+		t.Error("The prefix must be override.")
 	}
 }

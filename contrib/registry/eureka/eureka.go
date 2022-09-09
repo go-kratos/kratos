@@ -121,7 +121,7 @@ func (e *API) GetService(ctx context.Context, serverName string) []Instance {
 		return ins
 	}
 
-	// 如果不再allinstances 中可以尝试再单独获取一次
+	// 如果不再所有实例中可以尝试再单独获取一次
 	return e.cli.FetchAppUpInstances(ctx, appID)
 }
 

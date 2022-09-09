@@ -43,7 +43,7 @@ example:
 ### Requirements description of the feature
 <!--
 example:
-    The event interface should be added to Kratos. The interface should contain subscribers and publishers, and the message body should contain key value heade
+    The event interface should be added to Kratos. The interface should contain subscribers and publishers, and the message body should contain key value head
 -->
 ### References
 <!--
