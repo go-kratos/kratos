@@ -33,8 +33,7 @@ func (c *logger) Log(level Level, keyvals ...interface{}) error {
 	return nil
 }
 
-// MinLen At lest one kv pair
-const MinLen = 2
+const UnPaired = "KEYVALS UNPAIRED"
 
 // With logger fields.
 func With(l Logger, kv ...interface{}) Logger {
@@ -42,14 +41,12 @@ func With(l Logger, kv ...interface{}) Logger {
 	if !ok {
 		return &logger{logger: l, prefix: kv, hasValuer: containsValuer(kv), ctx: context.Background()}
 	}
-	kvl := len(kv)
-	// at lest one kv pair, or else return itself
-	if kvl < MinLen {
+	if len(kv) == 0 {
 		return l
 	}
-	// If len is an odd number, the last element is discard.
-	if kvl&1 == 1 {
-		kv = kv[:kvl-1]
+	// If len is an odd number, fill in default value.
+	if len(kv)&1 == 1 {
+		kv = append(kv, UnPaired)
 	}
 
 	kvs := make([]interface{}, 0, len(c.prefix)+len(kv))
@@ -69,9 +66,12 @@ func WithReplace(l Logger, kv ...interface{}) Logger {
 	if !ok {
 		return &logger{logger: l, prefix: kv, hasValuer: containsValuer(kv), ctx: context.Background()}
 	}
-	// at lest one kv pair, or else return itself
-	if len(kv) < MinLen {
+	if len(kv) == 0 {
 		return l
+	}
+	// If len is an odd number, Fill in default string.
+	if len(kv)&1 == 1 {
+		kv = append(kv, UnPaired)
 	}
 
 	ca := len(c.prefix) + len(kv)
@@ -108,12 +108,7 @@ func WithContext(ctx context.Context, l Logger) Logger {
 }
 
 func appendWithFilter(src []interface{}, to []interface{}, filter map[interface{}]bool) []interface{} {
-	// If len is an odd number, the last element is discard.
-	l := len(src)
-	if l&1 == 1 {
-		l--
-	}
-	for i := l - 1; i > 0; i = i - 2 {
+	for i := len(src) - 1; i > 0; i = i - 2 {
 		// exists key, skip kv
 		if b, ok := filter[src[i-1]]; b && ok {
 			i = i - 2
