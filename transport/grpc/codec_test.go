@@ -3,7 +3,7 @@ package grpc
 import (
 	"reflect"
 	"testing"
-	
+
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
