@@ -126,7 +126,7 @@ func NewAliyunLog(options ...Option) Logger {
 	}
 }
 
-// toString 任意类型转string
+// toString any type to string
 func toString(v interface{}) string {
 	var key string
 	if v == nil {

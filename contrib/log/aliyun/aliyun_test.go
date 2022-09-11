@@ -1,6 +1,7 @@
 package aliyun
 
 import (
+	"math"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -91,5 +92,32 @@ func TestLog(t *testing.T) {
 	err = logger.Log(log.LevelDebug, []byte{0, 1, 2, 3}, "foo")
 	if err != nil {
 		t.Errorf("Log() returns error:%v", err)
+	}
+}
+
+func TestToString(t *testing.T) {
+	var tests = []struct {
+		in  interface{}
+		out string
+	}{
+		{math.MaxFloat64, "179769313486231570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"},
+		{math.MaxFloat32, "340282346638528860000000000000000000000"},
+		{math.MaxInt, "9223372036854775807"},
+		{uint(math.MaxUint), "-1"},
+		{math.MaxInt8, "127"},
+		{math.MaxUint8, "255"},
+		{math.MaxInt16, "32767"},
+		{math.MaxUint16, "65535"},
+		{math.MaxInt32, "2147483647"},
+		{math.MaxUint32, "4294967295"},
+		{math.MaxInt64, "9223372036854775807"},
+		{uint64(math.MaxUint64), "18446744073709551615"},
+		{"abc", "abc"},
+		{[]byte("abc"), "abc"},
+	}
+	for _, test := range tests {
+		if toString(test.in) != test.out {
+			t.Fatalf("want: %s, got: %s", test.out, toString(test.in))
+		}
 	}
 }
