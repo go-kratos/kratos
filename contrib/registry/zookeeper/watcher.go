@@ -10,7 +10,7 @@ import (
 	"github.com/go-zookeeper/zk"
 )
 
-var _ registry.Watcher = &watcher{}
+var _ registry.Watcher = (*watcher)(nil)
 
 var ErrWatcherStopped = errors.New("watcher stopped")
 

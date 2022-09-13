@@ -10,7 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-var _ transport.Transporter = &Transport{}
+var _ transport.Transporter = (*Transport)(nil)
 
 type Transport struct {
 	kind      transport.Kind

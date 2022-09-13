@@ -7,7 +7,7 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
-var _ registry.Watcher = &watcher{}
+var _ registry.Watcher = (*watcher)(nil)
 
 type watcher struct {
 	key         string
