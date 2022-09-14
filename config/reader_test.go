@@ -132,9 +132,6 @@ a:
 				t.Fatal(`vvv is not equal to 1`)
 			}
 
-			if err != nil {
-				t.Fatal(`err is not nil`)
-			}
 			vv, ok = r.Value("a.b.Y")
 			if !ok {
 				t.Fatal(`ok is false`)
@@ -147,9 +144,6 @@ a:
 				t.Fatal(`vvy is not equal to "lol"`)
 			}
 
-			if err != nil {
-				t.Fatal(`err is not nil`)
-			}
 			vv, ok = r.Value("a.b.z")
 			if !ok {
 				t.Fatal(`ok is false`)
