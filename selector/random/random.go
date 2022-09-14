@@ -13,7 +13,7 @@ const (
 	Name = "random"
 )
 
-var _ selector.Balancer = &Balancer{} // Name is balancer name
+var _ selector.Balancer = (*Balancer)(nil) // Name is balancer name
 
 // Option is random builder option.
 type Option func(o *options)

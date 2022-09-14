@@ -14,7 +14,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-var _ transport.Transporter = &mockTransport{}
+var _ transport.Transporter = (*mockTransport)(nil)
 
 type headerCarrier http.Header
 
