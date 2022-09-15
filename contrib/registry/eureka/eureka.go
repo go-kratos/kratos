@@ -121,7 +121,7 @@ func (e *API) GetService(ctx context.Context, serverName string) []Instance {
 		return ins
 	}
 
-	// if not in all instances, you can try to obtain it separately again
+	// if not in allInstances of API, you can try to obtain it separately again
 	return e.cli.FetchAppUpInstances(ctx, appID)
 }
 
