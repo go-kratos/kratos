@@ -2,7 +2,6 @@ package validate
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -18,7 +17,7 @@ type protoVali struct {
 
 func (v protoVali) Validate() error {
 	if v.name == "" || v.age < 0 {
-		return fmt.Errorf("err")
+		return errors.New("err")
 	}
 	return nil
 }

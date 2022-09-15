@@ -1,7 +1,7 @@
 package direct
 
 import (
-	"fmt"
+	"errors"
 	"reflect"
 	"testing"
 
@@ -22,7 +22,7 @@ type mockConn struct {
 
 func (m *mockConn) UpdateState(resolver.State) error {
 	if m.needUpdateStateErr {
-		return fmt.Errorf("mock test needUpdateStateErr")
+		return errors.New("mock test needUpdateStateErr")
 	}
 	return nil
 }

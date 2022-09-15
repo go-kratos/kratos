@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -92,7 +91,7 @@ func TestContextResponse(t *testing.T) {
 	if err != nil {
 		t.Errorf("expected %v, got %v", nil, err)
 	}
-	needErr := fmt.Errorf("some error")
+	needErr := errors.New("some error")
 	err = w.Returns(map[string]string{}, needErr)
 	if !errors.Is(err, needErr) {
 		t.Errorf("expected %v, got %v", needErr, err)
