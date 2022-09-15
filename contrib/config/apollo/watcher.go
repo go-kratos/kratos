@@ -31,6 +31,7 @@ func (c *customChangeListener) onChange(namespace string, changes map[string]*st
 		value, err := c.apollo.client.GetConfigCache(namespace).Get("content")
 		if err != nil {
 			log.Warnw("apollo get config failed", "err", err)
+			return nil
 		}
 		kv = append(kv, &config.KeyValue{
 			Key:    namespace,

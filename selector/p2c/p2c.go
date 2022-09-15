@@ -17,7 +17,7 @@ const (
 	Name = "p2c"
 )
 
-var _ selector.Balancer = &Balancer{}
+var _ selector.Balancer = (*Balancer)(nil)
 
 // Option is random builder option.
 type Option func(o *options)

@@ -7,7 +7,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-var _ Transporter = &Transport{}
+var _ Transporter = (*Transport)(nil)
 
 // Transporter is http Transporter
 type Transporter interface {
