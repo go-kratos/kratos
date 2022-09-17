@@ -6,9 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
 	"google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/serviceconfig"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 func TestWithInsecure(t *testing.T) {

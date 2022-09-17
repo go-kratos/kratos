@@ -10,9 +10,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 type Discovery struct {
