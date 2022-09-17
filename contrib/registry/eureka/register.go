@@ -93,7 +93,7 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 
 func (r *Registry) Endpoints(service *registry.ServiceInstance) []Endpoint {
 	var (
-		res   = []Endpoint{}
+		res   []Endpoint
 		start int
 	)
 	for _, ep := range service.Endpoints {
