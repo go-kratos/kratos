@@ -42,6 +42,11 @@ func (tr *Transport) ReplyHeader() transport.Header {
 	return tr.replyHeader
 }
 
+// PathTemplate returns the grpc operation.
+func (tr *Transport) PathTemplate() string {
+	return tr.operation
+}
+
 // SelectFilters returns the client select filters.
 func (tr *Transport) SelectFilters() []selector.Filter {
 	return tr.filters

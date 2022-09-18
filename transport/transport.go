@@ -52,6 +52,11 @@ type Transporter interface {
 	// http: http.Header
 	// grpc: metadata.MD
 	ReplyHeader() Header
+	// PathTemplate returns the request path.
+	// only valid for server transport
+	// http: http.path
+	// grpc: grpc.operation
+	PathTemplate() string
 }
 
 // Kind defines the type of Transport
