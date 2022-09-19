@@ -2,7 +2,7 @@ package datadog
 
 import "github.com/DataDog/datadog-go/statsd"
 
-// Option is doatadog option.
+// Option is datadog option.
 type Option func(*options)
 
 type options struct {

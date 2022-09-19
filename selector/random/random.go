@@ -24,7 +24,7 @@ type options struct{}
 // Balancer is a random balancer.
 type Balancer struct{}
 
-// New an random selector.
+// New a random selector.
 func New(opts ...Option) selector.Selector {
 	return NewBuilder(opts...).Build()
 }
