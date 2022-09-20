@@ -17,10 +17,13 @@ const (
 	nullStr = "null"
 )
 
+var (
+	encoder = form.NewEncoder()
+	decoder = form.NewDecoder()
+)
+
 func init() {
-	decoder := form.NewDecoder()
 	decoder.SetTagName("json")
-	encoder := form.NewEncoder()
 	encoder.SetTagName("json")
 	encoding.RegisterCodec(codec{encoder: encoder, decoder: decoder})
 }
