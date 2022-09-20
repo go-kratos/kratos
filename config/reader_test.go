@@ -90,6 +90,14 @@ a:
     X: 1
     Y: "lol"
     z: true
+    S: 
+      - S0
+      - S1
+    Sm:
+      - k1: smk1
+    m.k1: mk1
+    m.k2: 
+      v: mkv
 `
 	tests := []struct {
 		name string
@@ -99,7 +107,7 @@ a:
 			name: "json value",
 			kv: KeyValue{
 				Key:    "config",
-				Value:  []byte(`{"a": {"b": {"X": 1, "Y": "lol", "z": true}}}`),
+				Value:  []byte(`{"a":{"b":{"X":1,"Y":"lol","z":true,"S":["S0","S1"],"Sm":[{"k1":"smk1"}],"m.k1":"mk1","m.k2":{"v":"mkv"}}}}`),
 				Format: "json",
 			},
 		},
@@ -167,6 +175,82 @@ a:
 			}
 
 			_, ok = r.Value("a.b.Y.")
+			if ok {
+				t.Fatal(`ok is true`)
+			}
+
+			vv, ok = r.Value("a.b.S")
+			if !ok {
+				t.Fatal(`ok is false`)
+			}
+			vvSlice, err := vv.Slice()
+			if err != nil {
+				t.Fatal(`err is not nil`)
+			}
+			vvStrSlice := make([]string, 2)
+			for k, v := range vvSlice {
+				v, err := v.String()
+				if err != nil {
+					t.Fatal(`err is not nil`)
+				}
+				vvStrSlice[k] = v
+			}
+			if len(vvStrSlice) != 2 || vvStrSlice[0] != "S0" || vvStrSlice[1] != "S1" {
+				t.Fatal(`vvSlice is not equal to ["S0", "S1"]`)
+			}
+			vv, ok = r.Value("a.b.S.1")
+			if !ok {
+				t.Fatal(`ok is false`)
+			}
+			vvS, err := vv.String()
+			if err != nil {
+				t.Fatal(`err is not nil`)
+			}
+			if vvS != "S1" {
+				t.Fatal(`vvS is not equal to "S1"`)
+			}
+			_, ok = r.Value("a.b.S.3")
+			if ok {
+				t.Fatal(`ok is true`)
+			}
+
+			vv, ok = r.Value("a.b.m.k1")
+			if !ok {
+				t.Fatal(`ok is false`)
+			}
+			vvm, err := vv.String()
+			if err != nil {
+				t.Fatal(`err is not nil`)
+			}
+			if vvm != "mk1" {
+				t.Fatal(`vvm is not equal to "mk1"`)
+			}
+
+			vv, ok = r.Value("a.b.m.k2.v")
+			if !ok {
+				t.Fatal(`ok is false`)
+			}
+			vvmkv, err := vv.String()
+			if err != nil {
+				t.Fatal(`err is not nil`)
+			}
+			if vvmkv != "mkv" {
+				t.Fatal(`vvmkv is not equal to "mkv"`)
+			}
+
+			vv, ok = r.Value("a.b.Sm.0.k1")
+			if !ok {
+				t.Fatal(`ok is false`)
+			}
+			vvsmk, err := vv.String()
+			if err != nil {
+				t.Fatal(`err is not nil`)
+			}
+			if vvsmk != "smk1" {
+				t.Fatal(`vvsmk is not equal to "smk1"`)
+			}
+
+			_, ok = r.Value("")
 			if ok {
 				t.Fatal(`ok is true`)
 			}

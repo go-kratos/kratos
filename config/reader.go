@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -129,29 +130,72 @@ func convertMap(src interface{}) interface{} {
 // readValue read Value in given map[string]interface{}
 // by the given path, will return false if not found.
 func readValue(values map[string]interface{}, path string) (Value, bool) {
-	var (
-		next = values
-		keys = strings.Split(path, ".")
-		last = len(keys) - 1
-	)
-	for idx, key := range keys {
-		value, ok := next[key]
-		if !ok {
-			return nil, false
-		}
-		if idx == last {
-			av := &atomicValue{}
-			av.Store(value)
-			return av, true
-		}
-		switch vm := value.(type) {
+	value := readValueWithPathPrefixes(values, strings.Split(path, "."))
+	if value == nil {
+		return nil, false
+	}
+	av := &atomicValue{}
+	av.Store(value)
+	return av, true
+}
+
+// readValueWithPathPrefixes read for path prefixes
+func readValueWithPathPrefixes(values interface{}, path []string) interface{} {
+	if len(path) == 0 {
+		return nil
+	}
+	for i := len(path); i > 0; i-- {
+		prefixKey := strings.Join(path[0:i], ".")
+		var val interface{}
+		switch v := values.(type) {
+		case []interface{}:
+			val = readSliceWithPathPrefixes(v, prefixKey, i, path)
 		case map[string]interface{}:
-			next = vm
-		default:
-			return nil, false
+			val = readMapWithPathPrefixes(v, prefixKey, i, path)
+		}
+		if val != nil {
+			return val
 		}
 	}
-	return nil, false
+	return nil
+}
+
+func readSliceWithPathPrefixes(values []interface{}, prefixKey string, pathIndex int, path []string) interface{} {
+	index, err := strconv.Atoi(prefixKey)
+	if err != nil || len(values) <= index {
+		return nil
+	}
+	next := values[index]
+
+	if pathIndex == len(path) {
+		return next
+	}
+	switch n := next.(type) {
+	case map[interface{}]interface{}:
+		return readValueWithPathPrefixes(convertMap(n), path[pathIndex:])
+	case map[string]interface{}, []interface{}:
+		return readValueWithPathPrefixes(n, path[pathIndex:])
+	default:
+	}
+	return nil
+}
+
+func readMapWithPathPrefixes(values map[string]interface{}, prefixKey string, pathIndex int, path []string) interface{} {
+	next, ok := values[prefixKey]
+	if !ok {
+		return nil
+	}
+	if pathIndex == len(path) {
+		return next
+	}
+	switch n := next.(type) {
+	case map[interface{}]interface{}:
+		return readValueWithPathPrefixes(convertMap(n), path[pathIndex:])
+	case map[string]interface{}, []interface{}:
+		return readValueWithPathPrefixes(n, path[pathIndex:])
+	default:
+	}
+	return nil
 }
 
 func marshalJSON(v interface{}) ([]byte, error) {
