@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"net/url"
 	"reflect"
 	"testing"
 	"time"
@@ -74,8 +75,10 @@ func TestBuilder_Build(t *testing.T) {
 	b := NewBuilder(&mockDiscovery{}, DisableDebugLog())
 	_, err := b.Build(
 		resolver.Target{
-			Scheme:   resolver.GetDefaultScheme(),
-			Endpoint: "gprc://authority/endpoint",
+			URL: url.URL{
+				Scheme: resolver.GetDefaultScheme(),
+				Path:   "grpc://authority/endpoint",
+			},
 		},
 		&mockConn{},
 		resolver.BuildOptions{},
@@ -87,8 +90,10 @@ func TestBuilder_Build(t *testing.T) {
 	timeoutBuilder := NewBuilder(&mockDiscovery{}, WithTimeout(0))
 	_, err = timeoutBuilder.Build(
 		resolver.Target{
-			Scheme:   resolver.GetDefaultScheme(),
-			Endpoint: "gprc://authority/endpoint",
+			URL: url.URL{
+				Scheme: resolver.GetDefaultScheme(),
+				Path:   "grpc://authority/endpoint",
+			},
 		},
 		&mockConn{},
 		resolver.BuildOptions{},
