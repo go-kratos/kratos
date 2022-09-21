@@ -9,7 +9,9 @@ import (
 )
 
 func TestProtoPath(t *testing.T) {
-	url := EncodeURL("http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}", &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "2233!!!"}}, false)
+	url := EncodeURL("http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}", &binding.HelloRequest{
+		Name: "test", Sub: &binding.Sub{Name: "2233!!!"},
+	}, false)
 	if url != `http://helloworld.Greeter/helloworld/test/sub/2233!!!` {
 		t.Fatalf("proto path not expected!actual: %s ", url)
 	}
@@ -18,12 +20,16 @@ func TestProtoPath(t *testing.T) {
 	if url != "http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}" {
 		t.Fatalf("proto path not expected!actual: %s ", url)
 	}
-	url = EncodeURL("http://helloworld.Greeter/helloworld/{}/sub/{sub.naming}", &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "hello"}}, false)
+	url = EncodeURL("http://helloworld.Greeter/helloworld/{}/sub/{sub.naming}", &binding.HelloRequest{
+		Name: "test", Sub: &binding.Sub{Name: "hello"},
+	}, false)
 	fmt.Println(url)
 	if url != "http://helloworld.Greeter/helloworld/{}/sub/hello" {
 		t.Fatalf("proto path not expected!actual: %s ", url)
 	}
-	url = EncodeURL("http://helloworld.Greeter/helloworld/{}/sub/{sub.name.cc}", &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "hello"}}, false)
+	url = EncodeURL("http://helloworld.Greeter/helloworld/{}/sub/{sub.name.cc}", &binding.HelloRequest{
+		Name: "test", Sub: &binding.Sub{Name: "hello"},
+	}, false)
 	fmt.Println(url)
 	if url != "http://helloworld.Greeter/helloworld/{}/sub/" {
 		t.Fatalf("proto path not expected!actual: %s ", url)
@@ -42,13 +48,17 @@ func TestProtoPath(t *testing.T) {
 		t.Fatalf("proto path not expected!actual: %s ", url)
 	}
 
-	url = EncodeURL("http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}", &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "5566!!!"}}, false)
+	url = EncodeURL("http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}", &binding.HelloRequest{
+		Name: "test", Sub: &binding.Sub{Name: "5566!!!"},
+	}, false)
 	fmt.Println(url)
 	if url != `http://helloworld.Greeter/helloworld/test/sub/5566!!!` {
 		t.Fatalf("proto path not expected!actual: %s ", url)
 	}
 
-	url = EncodeURL("http://helloworld.Greeter/helloworld/sub", &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "2233!!!"}}, false)
+	url = EncodeURL("http://helloworld.Greeter/helloworld/sub", &binding.HelloRequest{
+		Name: "test", Sub: &binding.Sub{Name: "2233!!!"},
+	}, false)
 	fmt.Println(url)
 	if url != `http://helloworld.Greeter/helloworld/sub` {
 		t.Fatalf("proto path not expected!actual: %s ", url)
