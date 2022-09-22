@@ -132,6 +132,8 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 				Timeout:                        "5s",
 			})
 		}
+		// custom checks
+		asr.Checks = append(asr.Checks, c.serviceChecks...)
 	}
 	if c.heartbeat {
 		asr.Checks = append(asr.Checks, &api.AgentServiceCheck{
@@ -140,9 +142,6 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.deregisterCriticalServiceAfter),
 		})
 	}
-
-	// custom checks
-	asr.Checks = append(asr.Checks, c.serviceChecks...)
 
 	err := c.cli.Agent().ServiceRegister(asr)
 	if err != nil {
@@ -173,7 +172,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 	return nil
 }
 
-// Deregister deregister service by service ID
+// Deregister service by service ID
 func (c *Client) Deregister(_ context.Context, serviceID string) error {
 	c.cancel()
 	return c.cli.Agent().ServiceDeregister(serviceID)

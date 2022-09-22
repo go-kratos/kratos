@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// Log see more detail https://github.com/aliyun/aliyun-log-go-sdk
+// Logger see more detail https://github.com/aliyun/aliyun-log-go-sdk
 type Logger interface {
 	log.Logger
 	GetProducer() *producer.Producer

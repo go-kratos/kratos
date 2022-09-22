@@ -338,7 +338,7 @@ func TestOpenSergo(t *testing.T) {
 				fileContent := `{"endpoint": "127.0.0.1:9090"}`
 				err := os.WriteFile("test.json", []byte(fileContent), 0o644)
 				if err != nil {
-					t.Fatalf("ioutil.WriteFile error:%s", err)
+					t.Fatalf("os.WriteFile error:%s", err)
 				}
 				confPath, err := filepath.Abs("./test.json")
 				if err != nil {

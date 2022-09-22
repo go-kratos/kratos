@@ -26,12 +26,12 @@ var (
 func makeJSONRequest(uri string, data string, method string, headers map[string]string) ([]byte, error) {
 	client := http.Client{}
 	req, err := http.NewRequest(method, uri, strings.NewReader(data))
+	if err != nil {
+		return nil, err
+	}
 	req.Header.Add("Content-Type", "application/json")
 	for k, v := range headers {
 		req.Header.Add(k, v)
-	}
-	if err != nil {
-		return nil, err
 	}
 	res, err := client.Do(req)
 	if err != nil {

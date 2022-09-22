@@ -2,7 +2,7 @@ package http
 
 import "net/http"
 
-// FilterFunc is a function which receives an http.Handler and returns another http.Handler.
+// FilterFunc is a function which receives a http.Handler and returns another http.Handler.
 type FilterFunc func(http.Handler) http.Handler
 
 // FilterChain returns a FilterFunc that specifies the chained handler for HTTP Router.

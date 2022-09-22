@@ -27,7 +27,7 @@ type statusConverter struct{}
 // DefaultConverter default converter.
 var DefaultConverter Converter = statusConverter{}
 
-// ToGRPCCode converts a HTTP error code into the corresponding gRPC response status.
+// ToGRPCCode converts an HTTP error code into the corresponding gRPC response status.
 // See: https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
 func (c statusConverter) ToGRPCCode(code int) codes.Code {
 	switch code {

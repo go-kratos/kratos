@@ -9,8 +9,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-//go:generate protoc -I. --go_out=paths=source_relative:. errors.proto
-
 const (
 	// UnknownCode is unknown code for error info.
 	UnknownCode = 500

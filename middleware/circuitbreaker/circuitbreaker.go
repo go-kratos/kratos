@@ -46,8 +46,8 @@ func Client(opts ...Option) middleware.Middleware {
 			breaker := opt.group.Get(info.Operation()).(circuitbreaker.CircuitBreaker)
 			if err := breaker.Allow(); err != nil {
 				// rejected
-				// NOTE: when client reject requets locally,
-				// continue add counter let the drop ratio higher.
+				// NOTE: when client reject requests locally,
+				// continue to add counter let the drop ratio higher.
 				breaker.MarkFailed()
 				return nil, ErrNotAllowed
 			}

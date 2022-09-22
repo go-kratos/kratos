@@ -82,7 +82,7 @@ type DataCenterInfo struct {
 	Class string `json:"@class"`
 }
 
-var _ APIInterface = new(Client)
+var _ APIInterface = (*Client)(nil)
 
 type APIInterface interface {
 	Register(ctx context.Context, ep Endpoint) error

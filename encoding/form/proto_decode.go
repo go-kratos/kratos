@@ -52,7 +52,7 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 
 		if fd.Message() == nil || fd.Cardinality() == protoreflect.Repeated {
 			if fd.IsMap() && len(fieldPath) > 1 {
-				// post sub field
+				// post subfield
 				return populateMapField(fd, v.Mutable(fd).Map(), []string{fieldPath[1]}, values)
 			}
 			return fmt.Errorf("invalid path: %q is not a message", fieldName)

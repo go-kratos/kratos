@@ -277,7 +277,7 @@ func TestNoPick(t *testing.T) {
 	}
 }
 
-func TestGolobal(t *testing.T) {
+func TestGlobalSelector(t *testing.T) {
 	builder := DefaultBuilder{
 		Node:     &mockWeightedNodeBuilder{},
 		Balancer: &mockBalancerBuilder{},
