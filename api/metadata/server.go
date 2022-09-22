@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"sync"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -114,6 +115,8 @@ func (s *Server) ListServices(ctx context.Context, in *ListServicesRequest) (*Li
 			reply.Methods = append(reply.Methods, fmt.Sprintf("/%s/%s", name, method))
 		}
 	}
+	sort.Strings(reply.Services)
+	sort.Strings(reply.Methods)
 	return reply, nil
 }
 
