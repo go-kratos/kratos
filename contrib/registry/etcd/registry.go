@@ -190,7 +190,10 @@ func (r *Registry) heartBeat(ctx context.Context, leaseID clientv3.LeaseID, key 
 			}
 			if _, ok := <-kac; !ok {
 				// retry failed
-				return
+				if ctx.Err() != nil {
+					return
+				}
+				continue
 			}
 		}
 
