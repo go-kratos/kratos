@@ -91,6 +91,12 @@ func (a *App) Run() error {
 	a.mu.Unlock()
 	eg, ctx := errgroup.WithContext(NewContext(a.ctx, a))
 	wg := sync.WaitGroup{}
+
+	for _, fn := range a.opts.beforeStart {
+		if err = fn(); err != nil {
+			return err
+		}
+	}
 	for _, srv := range a.opts.servers {
 		srv := srv
 		eg.Go(func() error {
@@ -113,6 +119,12 @@ func (a *App) Run() error {
 			return err
 		}
 	}
+	for _, fn := range a.opts.afterStart {
+		if err = fn(); err != nil {
+			return err
+		}
+	}
+
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, a.opts.sigs...)
 	eg.Go(func() error {
@@ -126,25 +138,32 @@ func (a *App) Run() error {
 	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return err
 	}
-	return nil
+	for _, fn := range a.opts.afterStop {
+		err = fn()
+	}
+	return err
 }
 
 // Stop gracefully stops the application.
-func (a *App) Stop() error {
+func (a *App) Stop() (err error) {
+	for _, fn := range a.opts.beforeStop {
+		err = fn()
+	}
+
 	a.mu.Lock()
 	instance := a.instance
 	a.mu.Unlock()
 	if a.opts.registrar != nil && instance != nil {
 		ctx, cancel := context.WithTimeout(NewContext(a.ctx, a), a.opts.registrarTimeout)
 		defer cancel()
-		if err := a.opts.registrar.Deregister(ctx, instance); err != nil {
+		if err = a.opts.registrar.Deregister(ctx, instance); err != nil {
 			return err
 		}
 	}
 	if a.cancel != nil {
 		a.cancel()
 	}
-	return nil
+	return err
 }
 
 func (a *App) buildInstance() (*registry.ServiceInstance, error) {
