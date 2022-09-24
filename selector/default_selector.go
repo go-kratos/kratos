@@ -5,6 +5,11 @@ import (
 	"sync/atomic"
 )
 
+var (
+	_ Rebalancer = (*Default)(nil)
+	_ Builder    = (*DefaultBuilder)(nil)
+)
+
 // Default is composite selector.
 type Default struct {
 	NodeBuilder WeightedNodeBuilder
