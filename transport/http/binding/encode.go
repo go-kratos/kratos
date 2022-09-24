@@ -8,7 +8,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var reg = regexp.MustCompile(`/{[\\.\w]+}`)
+var reg = regexp.MustCompile(`{[\\.\w]+}`)
 
 // EncodeURL encode proto message to url path.
 func EncodeURL(pathTemplate string, msg interface{}, needQuery bool) string {
@@ -22,10 +22,10 @@ func EncodeURL(pathTemplate string, msg interface{}, needQuery bool) string {
 		//if len(in) < 4 { //nolint:gomnd // **  explain the 4 number here :-) **
 		//	return in
 		//}
-		key := in[2 : len(in)-1]
+		key := in[1 : len(in)-1]
 		value := queryParams.Get(key)
 		pathParams[key] = struct{}{}
-		return "/" + value
+		return value
 	})
 	if !needQuery {
 		if v, ok := msg.(proto.Message); ok {
