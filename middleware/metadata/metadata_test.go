@@ -137,3 +137,24 @@ func Test_WithPropagatedPrefix(t *testing.T) {
 		t.Error("The prefix must be overridden.")
 	}
 }
+
+func Test_hasPrefix(t *testing.T) {
+	o := &options{
+		prefix: []string{"some"},
+	}
+	tests := []struct {
+		in  string
+		out bool
+	}{
+		{"some", true},
+		{"some_thing", true},
+		{"some-thing", true},
+		{"thing", false},
+	}
+	t.Log(o.prefix)
+	for _, tt := range tests {
+		if o.hasPrefix(tt.in) != tt.out {
+			t.Errorf("o.hasPrefix(%s) want: %v, got: %v", tt.in, tt.out, o.hasPrefix(tt.in))
+		}
+	}
+}
