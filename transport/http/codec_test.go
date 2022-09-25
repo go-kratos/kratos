@@ -141,12 +141,8 @@ func TestCodecForRequest(t *testing.T) {
 		Header: make(nethttp.Header),
 		Body:   io.NopCloser(bytes.NewBufferString("{\"a\":\"1\", \"b\": 2}")),
 	}
-	req2.Header.Set("Content-Type", "blablablabla")
 
 	c, ok = CodecForRequest(req2, "Content-Type")
-	if ok {
-		t.Errorf("expected false, got %v", ok)
-	}
 	if !reflect.DeepEqual("json", c.Name()) {
 		t.Errorf("expected %v, got %v", "json", c.Name())
 	}

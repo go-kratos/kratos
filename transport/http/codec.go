@@ -96,7 +96,11 @@ func DefaultErrorEncoder(w http.ResponseWriter, r *http.Request, err error) {
 // CodecForRequest get encoding.Codec via http.Request
 func CodecForRequest(r *http.Request, name string) (encoding.Codec, bool) {
 	for _, accept := range r.Header[name] {
-		codec := encoding.GetCodec(httputil.ContentSubtype(accept))
+		contentSubtype := httputil.ContentSubtype(accept)
+		if contentSubtype == "" {
+			contentSubtype = "json"
+		}
+		codec := encoding.GetCodec(contentSubtype)
 		if codec != nil {
 			return codec, true
 		}
