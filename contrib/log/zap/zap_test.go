@@ -3,10 +3,10 @@ package zap
 import (
 	"testing"
 
+	"github.com/go-kratos/kratos/v2/log"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 type testWriteSyncer struct {
@@ -58,5 +58,14 @@ func TestLogger(t *testing.T) {
 			t.Logf("except=%s, got=%s", s, syncer.output[i])
 			t.Fail()
 		}
+	}
+}
+
+func TestWithLogSugar(t *testing.T) {
+	opts := new(options)
+	funcIsSugar := WithLogSugar()
+	funcIsSugar(opts)
+	if !opts.isSugar {
+		t.Errorf("WithLogSugar() = %v, want %v", opts.isSugar, true)
 	}
 }
