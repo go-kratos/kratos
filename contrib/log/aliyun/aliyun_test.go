@@ -92,4 +92,8 @@ func TestLog(t *testing.T) {
 	if err != nil {
 		t.Errorf("Log() returns error:%v", err)
 	}
+	err = logger.Log(log.LevelDebug, true, 0)
+	if err != nil {
+		t.Errorf("Log() returns error:%v", err)
+	}
 }
