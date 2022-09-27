@@ -159,6 +159,8 @@ func toString(v interface{}) string {
 		key = strconv.FormatUint(v, 10)
 	case string:
 		key = v
+	case bool:
+		key = strconv.FormatBool(v)
 	case []byte:
 		key = string(v)
 	default:
