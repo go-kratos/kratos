@@ -1,9 +1,10 @@
 package grpc
 
 import (
+	"google.golang.org/grpc/metadata"
+
 	"github.com/go-kratos/kratos/v2/selector"
 	"github.com/go-kratos/kratos/v2/transport"
-	"google.golang.org/grpc/metadata"
 )
 
 var _ transport.Transporter = (*Transport)(nil)

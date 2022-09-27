@@ -7,9 +7,10 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/grpc"
+
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
-	"google.golang.org/grpc"
 )
 
 func TestWithEndpoint(t *testing.T) {
