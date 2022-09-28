@@ -307,39 +307,50 @@ func (e *Client) buildAPI(currentTimes int, params ...string) string {
 	return strings.Join(params, "/")
 }
 
+func (e *Client) request(ctx context.Context, method string, params []string, input io.Reader, output interface{}, i int) (bool, error) {
+	request, err := http.NewRequestWithContext(ctx, method, e.buildAPI(i, params...), input)
+	if err != nil {
+		return false, err
+	}
+	request.Header.Add("User-Agent", "go-eureka-client")
+	request.Header.Add("Accept", "application/json;charset=UTF-8")
+	request.Header.Add("Content-Type", "application/json;charset=UTF-8")
+	resp, err := e.client.Do(request)
+	if err != nil {
+		return true, err
+	}
+	defer func() {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		_ = resp.Body.Close()
+	}()
+
+	if output != nil && resp.StatusCode/100 == 2 {
+		data, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return false, err
+		}
+		err = json.Unmarshal(data, output)
+		if err != nil {
+			return false, err
+		}
+	}
+
+	if resp.StatusCode >= http.StatusBadRequest {
+		return false, fmt.Errorf("response Error %d", resp.StatusCode)
+	}
+
+	return false, nil
+}
+
 func (e *Client) do(ctx context.Context, method string, params []string, input io.Reader, output interface{}) error {
 	for i := 0; i < e.maxRetry; i++ {
-		request, err := http.NewRequest(method, e.buildAPI(i, params...), input)
+		retry, err := e.request(ctx, method, params, input, output, i)
+		if retry {
+			continue
+		}
 		if err != nil {
 			return err
 		}
-		request = request.WithContext(ctx)
-		request.Header.Add("User-Agent", "go-eureka-client")
-		request.Header.Add("Accept", "application/json;charset=UTF-8")
-		request.Header.Add("Content-Type", "application/json;charset=UTF-8")
-		resp, err := e.client.Do(request)
-		if err != nil {
-			continue
-		}
-		defer func() {
-			_, _ = io.Copy(io.Discard, resp.Body)
-			resp.Body.Close()
-		}()
-
-		if output != nil && resp.StatusCode/100 == 2 {
-			data, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return err
-			}
-			if err = json.Unmarshal(data, output); err != nil {
-				return err
-			}
-		}
-
-		if resp.StatusCode >= http.StatusBadRequest {
-			return fmt.Errorf("response Error %d", resp.StatusCode)
-		}
-
 		return nil
 	}
 	return fmt.Errorf("retry after %d times", e.maxRetry)
