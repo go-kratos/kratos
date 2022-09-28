@@ -117,8 +117,8 @@ func testAccept(t *testing.T, srv *Server) {
 		path        string
 		contentType string
 	}{
-		{"GET", "/errors/cause", "application/json"},
-		{"GET", "/errors/cause", "application/proto"},
+		{http.MethodGet, "/errors/cause", "application/json"},
+		{http.MethodGet, "/errors/cause", "application/proto"},
 	}
 	e, err := srv.Endpoint()
 	if err != nil {
@@ -154,7 +154,7 @@ func testHeader(t *testing.T, srv *Server) {
 		t.Errorf("expected nil got %v", err)
 	}
 	reqURL := fmt.Sprintf(e.String() + "/index")
-	req, err := http.NewRequest("GET", reqURL, nil)
+	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 	if err != nil {
 		t.Errorf("expected nil got %v", err)
 	}
@@ -172,21 +172,21 @@ func testClient(t *testing.T, srv *Server) {
 		path   string
 		code   int
 	}{
-		{"GET", "/index", http.StatusOK},
-		{"PUT", "/index", http.StatusOK},
-		{"POST", "/index", http.StatusOK},
-		{"PATCH", "/index", http.StatusOK},
-		{"DELETE", "/index", http.StatusOK},
+		{http.MethodGet, "/index", http.StatusOK},
+		{http.MethodPut, "/index", http.StatusOK},
+		{http.MethodPost, "/index", http.StatusOK},
+		{http.MethodPatch, "/index", http.StatusOK},
+		{http.MethodDelete, "/index", http.StatusOK},
 
-		{"GET", "/index/1", http.StatusOK},
-		{"PUT", "/index/1", http.StatusOK},
-		{"POST", "/index/1", http.StatusOK},
-		{"PATCH", "/index/1", http.StatusOK},
-		{"DELETE", "/index/1", http.StatusOK},
+		{http.MethodGet, "/index/1", http.StatusOK},
+		{http.MethodPut, "/index/1", http.StatusOK},
+		{http.MethodPost, "/index/1", http.StatusOK},
+		{http.MethodPatch, "/index/1", http.StatusOK},
+		{http.MethodDelete, "/index/1", http.StatusOK},
 
-		{"GET", "/index/notfound", http.StatusNotFound},
-		{"GET", "/errors/cause", http.StatusBadRequest},
-		{"GET", "/test/prefix/123111", http.StatusOK},
+		{http.MethodGet, "/index/notfound", http.StatusNotFound},
+		{http.MethodGet, "/errors/cause", http.StatusBadRequest},
+		{http.MethodGet, "/test/prefix/123111", http.StatusOK},
 	}
 	e, err := srv.Endpoint()
 	if err != nil {
@@ -273,7 +273,7 @@ func BenchmarkServer(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		var res testData
-		err := client.Invoke(context.Background(), "POST", "/index", nil, &res)
+		err := client.Invoke(context.Background(), http.MethodPost, "/index", nil, &res)
 		if err != nil {
 			b.Errorf("expected nil got %v", err)
 		}
