@@ -1,0 +1,18 @@
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+indent_style = space
+indent_size = 4
+
+# Go code uses tabs. Display with 4 space indentation in editors and on GitHub
+# (see https://github.com/isaacs/github/issues/170#issuecomment-150489692).
+[*.go]
+indent_style = tab
+
+[*.proto]
+indent_size = 2
+indent_style = space
