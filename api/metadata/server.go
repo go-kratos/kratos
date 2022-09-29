@@ -9,7 +9,6 @@ import (
 	"io"
 	"sync"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -18,6 +17,8 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 	dpb "google.golang.org/protobuf/types/descriptorpb"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 // Server is api meta server

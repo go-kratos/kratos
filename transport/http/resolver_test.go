@@ -73,7 +73,7 @@ const errServiceName = "needErr"
 
 func (d *mockDiscoveries) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
 	if serviceName == errServiceName {
-		return nil, fmt.Errorf("mock test service name watch err")
+		return nil, errors.New("mock test service name watch err")
 	}
 	return &mockWatch{ctx: ctx, isSecure: d.isSecure, nextErr: d.nextErr, stopErr: d.stopErr}, nil
 }
@@ -116,7 +116,7 @@ func (m *mockWatch) Next() ([]*registry.ServiceInstance, error) {
 
 func (m *mockWatch) Stop() error {
 	if m.stopErr {
-		return fmt.Errorf("mock test error")
+		return errors.New("mock test error")
 	}
 	// 标记 next 需要报错
 	m.nextErr = true

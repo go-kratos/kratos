@@ -7,8 +7,9 @@ import (
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/aliyun-log-go-sdk/producer"
-	log "github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/proto"
+
+	log "github.com/go-kratos/kratos/v2/log"
 )
 
 // Logger see more detail https://github.com/aliyun/aliyun-log-go-sdk
@@ -126,7 +127,7 @@ func NewAliyunLog(options ...Option) Logger {
 	}
 }
 
-// toString 任意类型转string
+// toString convert any type to string
 func toString(v interface{}) string {
 	var key string
 	if v == nil {
@@ -159,6 +160,8 @@ func toString(v interface{}) string {
 		key = strconv.FormatUint(v, 10)
 	case string:
 		key = v
+	case bool:
+		key = strconv.FormatBool(v)
 	case []byte:
 		key = string(v)
 	default:
