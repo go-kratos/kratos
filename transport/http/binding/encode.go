@@ -4,8 +4,9 @@ import (
 	"reflect"
 	"regexp"
 
-	"github.com/go-kratos/kratos/v2/encoding/form"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/go-kratos/kratos/v2/encoding/form"
 )
 
 var reg = regexp.MustCompile(`{[\\.\w]+}`)
