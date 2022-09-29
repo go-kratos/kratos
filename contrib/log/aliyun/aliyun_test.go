@@ -121,6 +121,7 @@ func TestToString(t *testing.T) {
 		{math.MaxInt64, "9223372036854775807"},
 		{uint64(math.MaxUint64), "18446744073709551615"},
 		{"abc", "abc"},
+		{false, "false"},
 		{[]byte("abc"), "abc"},
 	}
 	for _, test := range tests {
