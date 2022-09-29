@@ -138,7 +138,7 @@ func Test_WithPropagatedPrefix(t *testing.T) {
 	}
 }
 
-func Test_hasPrefix(t *testing.T) {
+func TestOptions_hasPrefix(t *testing.T) {
 	o := &options{
 		prefix: []string{"some"},
 	}
