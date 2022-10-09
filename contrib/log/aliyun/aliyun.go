@@ -2,6 +2,7 @@ package aliyun
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -164,6 +165,8 @@ func toString(v interface{}) string {
 		key = strconv.FormatBool(v)
 	case []byte:
 		key = string(v)
+	case fmt.Stringer:
+		key = v.String()
 	default:
 		newValue, _ := json.Marshal(v)
 		key = string(newValue)
