@@ -70,6 +70,16 @@ func SetOperation(ctx context.Context, op string) {
 	}
 }
 
+// RequestFromServerContext returns request from context.
+func RequestFromServerContext(ctx context.Context) (*http.Request, bool) {
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		if tr, ok := tr.(*Transport); ok {
+			return tr.request, true
+		}
+	}
+	return nil, false
+}
+
 type headerCarrier http.Header
 
 // Get returns the value associated with the passed key.
