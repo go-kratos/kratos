@@ -101,7 +101,7 @@ func run(cmd *cobra.Command, args []string) {
 
 func getProjectPlaceDir(projectName string, fallbackPlaceDir string) string {
 	projectWorkingDir := filepath.Dir(projectName)
-	//check for home dir
+	// check for home dir
 	if strings.HasPrefix(projectWorkingDir, "~") {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
