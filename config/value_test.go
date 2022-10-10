@@ -70,7 +70,7 @@ func Test_atomicValue_Int(t *testing.T) {
 }
 
 func Test_atomicValue_Float(t *testing.T) {
-	vlist := []interface{}{"123123.1", float64(123123.1)}
+	vlist := []interface{}{"123123.1", 123123.1}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
@@ -78,7 +78,7 @@ func Test_atomicValue_Float(t *testing.T) {
 		if err != nil {
 			t.Fatal(`err is not nil`)
 		}
-		if b != float64(123123.1) {
+		if b != 123123.1 {
 			t.Fatal(`b is not equal to 123123.1`)
 		}
 	}

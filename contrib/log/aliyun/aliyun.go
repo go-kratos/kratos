@@ -10,7 +10,7 @@ import (
 	"github.com/aliyun/aliyun-log-go-sdk/producer"
 	"google.golang.org/protobuf/proto"
 
-	log "github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 // Logger see more detail https://github.com/aliyun/aliyun-log-go-sdk
