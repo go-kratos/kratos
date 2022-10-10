@@ -200,7 +200,7 @@ func EncodeFieldMask(m protoreflect.Message) (query string) {
 	return
 }
 
-// JSONCamelCase converts a snake_case identifier to a camelCase identifier,
+// jsonCamelCase converts a snake_case identifier to a camelCase identifier,
 // according to the protobuf JSON specification.
 // references: https://github.com/protocolbuffers/protobuf-go/blob/master/encoding/protojson/well_known_types.go#L842
 func jsonCamelCase(s string) string {
