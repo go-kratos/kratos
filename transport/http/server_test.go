@@ -316,8 +316,8 @@ func TestRequestDecoder(t *testing.T) {
 	o := &Server{}
 	v := func(*http.Request, interface{}) error { return nil }
 	RequestDecoder(v)(o)
-	if o.dec == nil {
-		t.Errorf("expected nil got %v", o.dec)
+	if o.decBody == nil {
+		t.Errorf("expected nil got %v", o.decBody)
 	}
 }
 

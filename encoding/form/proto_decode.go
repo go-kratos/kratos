@@ -99,6 +99,9 @@ func getDescriptorByFieldAndName(fields protoreflect.FieldDescriptors, fieldName
 }
 
 func populateField(fd protoreflect.FieldDescriptor, v protoreflect.Message, value string) error {
+	if value == "" {
+		return nil
+	}
 	val, err := parseField(fd, value)
 	if err != nil {
 		return fmt.Errorf("parsing field %q: %w", fd.FullName().Name(), err)
