@@ -9,10 +9,10 @@ import (
 	"github.com/go-chassis/cari/discovery"
 	"github.com/go-chassis/cari/pkg/errsvc"
 	"github.com/go-chassis/sc-client"
+	"github.com/gofrs/uuid"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/gofrs/uuid"
 )
 
 func init() {
