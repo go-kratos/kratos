@@ -9,19 +9,17 @@ import (
 	"io"
 	"sync"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protodesc"
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 	dpb "google.golang.org/protobuf/types/descriptorpb"
-)
 
-//nolint:lll
-//go:generate protoc --proto_path=. --proto_path=../../third_party --go_out=paths=source_relative:. --go-grpc_out=paths=source_relative:. --go-http_out=paths=source_relative:. metadata.proto
+	"github.com/go-kratos/kratos/v2/log"
+)
 
 // Server is api meta server
 type Server struct {
@@ -105,7 +103,10 @@ func (s *Server) ListServices(ctx context.Context, in *ListServicesRequest) (*Li
 	if err := s.load(); err != nil {
 		return nil, err
 	}
-	reply := new(ListServicesReply)
+	reply := &ListServicesReply{
+		Services: make([]string, 0, len(s.services)),
+		Methods:  make([]string, 0, len(s.methods)),
+	}
 	for name := range s.services {
 		reply.Services = append(reply.Services, name)
 	}

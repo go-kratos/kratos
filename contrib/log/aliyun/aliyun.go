@@ -2,18 +2,20 @@ package aliyun
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/aliyun-log-go-sdk/producer"
-	klog "github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
-// Log see more detail https://github.com/aliyun/aliyun-log-go-sdk
-type Log interface {
-	klog.Logger
+// Logger see more detail https://github.com/aliyun/aliyun-log-go-sdk
+type Logger interface {
+	log.Logger
 	GetProducer() *producer.Producer
 	Close() error
 }
@@ -78,7 +80,7 @@ func (a *aliyunLog) Close() error {
 	return a.producer.Close(5000)
 }
 
-func (a *aliyunLog) Log(level klog.Level, keyvals ...interface{}) error {
+func (a *aliyunLog) Log(level log.Level, keyvals ...interface{}) error {
 	buf := level.String()
 	levelTitle := "level"
 
@@ -108,7 +110,7 @@ func (a *aliyunLog) Log(level klog.Level, keyvals ...interface{}) error {
 }
 
 // NewAliyunLog new a aliyun logger with options.
-func NewAliyunLog(options ...Option) Log {
+func NewAliyunLog(options ...Option) Logger {
 	opts := defaultOptions()
 	for _, o := range options {
 		o(opts)
@@ -126,7 +128,7 @@ func NewAliyunLog(options ...Option) Log {
 	}
 }
 
-// toString 任意类型转string
+// toString convert any type to string
 func toString(v interface{}) string {
 	var key string
 	if v == nil {
@@ -159,8 +161,12 @@ func toString(v interface{}) string {
 		key = strconv.FormatUint(v, 10)
 	case string:
 		key = v
+	case bool:
+		key = strconv.FormatBool(v)
 	case []byte:
 		key = string(v)
+	case fmt.Stringer:
+		key = v.String()
 	default:
 		newValue, _ := json.Marshal(v)
 		key = string(newValue)

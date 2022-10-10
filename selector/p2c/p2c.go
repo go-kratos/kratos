@@ -17,22 +17,13 @@ const (
 	Name = "p2c"
 )
 
-var _ selector.Balancer = &Balancer{}
-
-// WithFilter with select filters
-func WithFilter(filters ...selector.Filter) Option {
-	return func(o *options) {
-		o.filters = filters
-	}
-}
+var _ selector.Balancer = (*Balancer)(nil)
 
 // Option is random builder option.
 type Option func(o *options)
 
 // options is random builder options
-type options struct {
-	filters []selector.Filter
-}
+type options struct{}
 
 // New creates a p2c selector.
 func New(opts ...Option) selector.Selector {
@@ -95,7 +86,6 @@ func NewBuilder(opts ...Option) selector.Builder {
 		opt(&option)
 	}
 	return &selector.DefaultBuilder{
-		Filters:  option.filters,
 		Balancer: &Builder{},
 		Node:     &ewma.Builder{},
 	}

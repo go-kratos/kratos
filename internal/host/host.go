@@ -50,23 +50,20 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	lowest := int(^uint(0) >> 1)
-	var result net.IP
+	minIndex := int(^uint(0) >> 1)
+	ips := make([]net.IP, 0)
 	for _, iface := range ifaces {
 		if (iface.Flags & net.FlagUp) == 0 {
 			continue
 		}
-		if iface.Index < lowest || result == nil {
-			lowest = iface.Index
-		}
-		if result != nil {
+		if iface.Index >= minIndex && len(ips) != 0 {
 			continue
 		}
 		addrs, err := iface.Addrs()
 		if err != nil {
 			continue
 		}
-		for _, rawAddr := range addrs {
+		for i, rawAddr := range addrs {
 			var ip net.IP
 			switch addr := rawAddr.(type) {
 			case *net.IPAddr:
@@ -77,12 +74,19 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 				continue
 			}
 			if isValidIP(ip.String()) {
-				result = ip
+				minIndex = iface.Index
+				if i == 0 {
+					ips = make([]net.IP, 0, 1)
+				}
+				ips = append(ips, ip)
+				if ip.To4() != nil {
+					break
+				}
 			}
 		}
 	}
-	if result != nil {
-		return net.JoinHostPort(result.String(), port), nil
+	if len(ips) != 0 {
+		return net.JoinHostPort(ips[len(ips)-1].String(), port), nil
 	}
 	return "", nil
 }

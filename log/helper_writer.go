@@ -9,7 +9,7 @@ type writerWrapper struct {
 
 type WriterOptionFn func(w *writerWrapper)
 
-// WithWriteLevel set writerWrapper level.
+// WithWriterLevel set writerWrapper level.
 func WithWriterLevel(level Level) WriterOptionFn {
 	return func(w *writerWrapper) {
 		w.level = level

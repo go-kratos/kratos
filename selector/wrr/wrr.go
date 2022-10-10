@@ -13,22 +13,13 @@ const (
 	Name = "wrr"
 )
 
-var _ selector.Balancer = &Balancer{} // Name is balancer name
-
-// WithFilter with select filters
-func WithFilter(filters ...selector.Filter) Option {
-	return func(o *options) {
-		o.filters = filters
-	}
-}
+var _ selector.Balancer = (*Balancer)(nil) // Name is balancer name
 
 // Option is random builder option.
 type Option func(o *options)
 
 // options is random builder options
-type options struct {
-	filters []selector.Filter
-}
+type options struct{}
 
 // Balancer is a random balancer.
 type Balancer struct {
@@ -77,7 +68,6 @@ func NewBuilder(opts ...Option) selector.Builder {
 		opt(&option)
 	}
 	return &selector.DefaultBuilder{
-		Filters:  option.filters,
 		Balancer: &Builder{},
 		Node:     &direct.Builder{},
 	}

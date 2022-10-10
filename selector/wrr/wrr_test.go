@@ -11,7 +11,7 @@ import (
 )
 
 func TestWrr(t *testing.T) {
-	wrr := New(WithFilter(filter.Version("v2.0.0")))
+	wrr := New()
 	var nodes []selector.Node
 	nodes = append(nodes, selector.NewNode(
 		"http",
@@ -32,7 +32,7 @@ func TestWrr(t *testing.T) {
 	wrr.Apply(nodes)
 	var count1, count2 int
 	for i := 0; i < 90; i++ {
-		n, done, err := wrr.Select(context.Background())
+		n, done, err := wrr.Select(context.Background(), selector.WithNodeFilter(filter.Version("v2.0.0")))
 		if err != nil {
 			t.Errorf("expect no error, got %v", err)
 		}

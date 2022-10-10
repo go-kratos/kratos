@@ -12,11 +12,11 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 
-	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/known/durationpb"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -52,7 +52,7 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 
 		if fd.Message() == nil || fd.Cardinality() == protoreflect.Repeated {
 			if fd.IsMap() && len(fieldPath) > 1 {
-				// post sub field
+				// post subfield
 				return populateMapField(fd, v.Mutable(fd).Map(), []string{fieldPath[1]}, values)
 			}
 			return fmt.Errorf("invalid path: %q is not a message", fieldName)
@@ -99,6 +99,9 @@ func getDescriptorByFieldAndName(fields protoreflect.FieldDescriptors, fieldName
 }
 
 func populateField(fd protoreflect.FieldDescriptor, v protoreflect.Message, value string) error {
+	if value == "" {
+		return nil
+	}
 	val, err := parseField(fd, value)
 	if err != nil {
 		return fmt.Errorf("parsing field %q: %w", fd.FullName().Name(), err)
@@ -289,7 +292,7 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		}
 		msg = wrapperspb.Bytes(v)
 	case "google.protobuf.FieldMask":
-		fm := &field_mask.FieldMask{}
+		fm := &fieldmaskpb.FieldMask{}
 		for _, fv := range strings.Split(value, ",") {
 			fm.Paths = append(fm.Paths, jsonSnakeCase(fv))
 		}

@@ -16,7 +16,7 @@ import (
 )
 
 func TestWrr3(t *testing.T) {
-	p2c := New(WithFilter(filter.Version("v2.0.0")))
+	p2c := New()
 	var nodes []selector.Node
 	for i := 0; i < 3; i++ {
 		addr := fmt.Sprintf("127.0.0.%d:8080", i)
@@ -41,7 +41,7 @@ func TestWrr3(t *testing.T) {
 			d := time.Duration(rand.Intn(500)) * time.Millisecond
 			lk.Unlock()
 			time.Sleep(d)
-			n, done, err := p2c.Select(context.Background())
+			n, done, err := p2c.Select(context.Background(), selector.WithNodeFilter(filter.Version("v2.0.0")))
 			if err != nil {
 				t.Errorf("expect %v, got %v", nil, err)
 			}
@@ -92,7 +92,7 @@ func TestEmpty(t *testing.T) {
 }
 
 func TestOne(t *testing.T) {
-	p2c := New(WithFilter(filter.Version("v2.0.0")))
+	p2c := New()
 	var nodes []selector.Node
 	for i := 0; i < 1; i++ {
 		addr := fmt.Sprintf("127.0.0.%d:8080", i)
@@ -106,7 +106,7 @@ func TestOne(t *testing.T) {
 			}))
 	}
 	p2c.Apply(nodes)
-	n, done, err := p2c.Select(context.Background())
+	n, done, err := p2c.Select(context.Background(), selector.WithNodeFilter(filter.Version("v2.0.0")))
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}

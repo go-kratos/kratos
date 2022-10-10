@@ -33,7 +33,7 @@ type mockCallOption struct {
 
 func (x *mockCallOption) before(info *callInfo) error {
 	if x.needErr {
-		return fmt.Errorf("option need return err")
+		return errors.New("option need return err")
 	}
 	return nil
 }
@@ -182,13 +182,18 @@ func TestWithDiscovery(t *testing.T) {
 	}
 }
 
-func TestWithSelector(t *testing.T) {
-	ov := &selector.Default{}
-	o := WithSelector(ov)
+func TestWithNodeFilter(t *testing.T) {
+	ov := func(context.Context, []selector.Node) []selector.Node {
+		return []selector.Node{&selector.DefaultNode{}}
+	}
+	o := WithNodeFilter(ov)
 	co := &clientOptions{}
 	o(co)
-	if !reflect.DeepEqual(co.selector, ov) {
-		t.Errorf("expected selector to be %v, got %v", ov, co.selector)
+	for _, n := range co.nodeFilters {
+		ret := n(context.Background(), nil)
+		if len(ret) != 1 {
+			t.Errorf("expected node  length to be 1, got %v", len(ret))
+		}
 	}
 }
 
@@ -352,7 +357,7 @@ func TestNewClient(t *testing.T) {
 		t.Error("err should be equal to callOption err")
 	}
 	client.opts.encoder = func(ctx context.Context, contentType string, in interface{}) (body []byte, err error) {
-		return nil, fmt.Errorf("mock test encoder error")
+		return nil, errors.New("mock test encoder error")
 	}
 	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{})
 	if err == nil {

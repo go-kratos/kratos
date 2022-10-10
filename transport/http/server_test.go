@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -13,8 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/errors"
-
+	kratoserrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/host"
 )
 
@@ -49,9 +49,9 @@ func TestServeHTTP(t *testing.T) {
 	mux := NewServer(Listener(ln))
 	mux.HandleFunc("/index", h)
 	mux.Route("/errors").GET("/cause", func(ctx Context) error {
-		return errors.BadRequest("xxx", "zzz").
+		return kratoserrors.BadRequest("xxx", "zzz").
 			WithMetadata(map[string]string{"foo": "bar"}).
-			WithCause(fmt.Errorf("error cause"))
+			WithCause(errors.New("error cause"))
 	})
 	if err = mux.WalkRoute(func(r RouteInfo) error {
 		t.Logf("WalkRoute: %+v", r)
@@ -65,7 +65,7 @@ func TestServeHTTP(t *testing.T) {
 	srv := http.Server{Handler: mux}
 	go func() {
 		if err := srv.Serve(ln); err != nil {
-			if errors.Is(err, http.ErrServerClosed) {
+			if kratoserrors.Is(err, http.ErrServerClosed) {
 				return
 			}
 			panic(err)
@@ -87,9 +87,9 @@ func TestServer(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	})
 	srv.Route("/errors").GET("/cause", func(ctx Context) error {
-		return errors.BadRequest("xxx", "zzz").
+		return kratoserrors.BadRequest("xxx", "zzz").
 			WithMetadata(map[string]string{"foo": "bar"}).
-			WithCause(fmt.Errorf("error cause"))
+			WithCause(errors.New("error cause"))
 	})
 
 	if e, err := srv.Endpoint(); err != nil || e == nil || strings.HasSuffix(e.Host, ":0") {
@@ -135,7 +135,7 @@ func testAccept(t *testing.T, srv *Server) {
 		}
 		req.Header.Set("Content-Type", test.contentType)
 		resp, err := client.Do(req)
-		if errors.Code(err) != 400 {
+		if kratoserrors.Code(err) != 400 {
 			t.Errorf("expected 400 got %v", err)
 		}
 		if err == nil {
@@ -205,7 +205,7 @@ func testClient(t *testing.T, srv *Server) {
 			t.Fatal(err)
 		}
 		resp, err := client.Do(req)
-		if errors.Code(err) != test.code {
+		if kratoserrors.Code(err) != test.code {
 			t.Fatalf("want %v, but got %v", test, err)
 		}
 		if err != nil {
@@ -231,7 +231,7 @@ func testClient(t *testing.T, srv *Server) {
 	for _, test := range tests {
 		var res testData
 		err := client.Invoke(context.Background(), test.method, test.path, nil, &res)
-		if errors.Code(err) != test.code {
+		if kratoserrors.Code(err) != test.code {
 			t.Fatalf("want %v, but got %v", test, err)
 		}
 		if err != nil {
@@ -316,8 +316,8 @@ func TestRequestDecoder(t *testing.T) {
 	o := &Server{}
 	v := func(*http.Request, interface{}) error { return nil }
 	RequestDecoder(v)(o)
-	if o.dec == nil {
-		t.Errorf("expected nil got %v", o.dec)
+	if o.decBody == nil {
+		t.Errorf("expected nil got %v", o.decBody)
 	}
 }
 

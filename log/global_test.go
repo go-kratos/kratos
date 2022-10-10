@@ -14,7 +14,7 @@ func TestGlobalLog(t *testing.T) {
 	logger := NewStdLogger(buffer)
 	SetLogger(logger)
 
-	if GetLogger() != logger {
+	if global.Logger != logger {
 		t.Error("GetLogger() is not equal to logger")
 	}
 
@@ -48,7 +48,7 @@ func TestGlobalLog(t *testing.T) {
 		},
 	}
 
-	expected := []string{}
+	var expected []string
 	for _, tc := range testCases {
 		msg := fmt.Sprintf(tc.content[0].(string), tc.content[1:]...)
 		switch tc.level {

@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
 	jsoniter "github.com/json-iterator/go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,6 +20,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	listerv1 "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 // Defines the key name of specific fields
@@ -32,37 +33,37 @@ import (
 // kratos-service-protocols: define the protocols of the service
 //
 // Example Deployment:
-//
-// apiVersion: apps/v1
-// kind: Deployment
-// metadata:
-//  name: nginx
-//  labels:
-//    app: nginx
-// spec:
-//  replicas: 5
-//  selector:
-//    matchLabels:
-//      app: nginx
-//  template:
-//    metadata:
-//      labels:
-//        app: nginx
-//        kratos-service-id: "56991810-c77f-4a95-8190-393efa9c1a61"
-//        kratos-service-app: "nginx"
-//        kratos-service-version: "v3.5.0"
-//      annotations:
-//        kratos-service-protocols: |
-//          {"80": "http"}
-//        kratos-service-metadata: |
-//          {"region": "sh", "zone": "sh001", "cluster": "pd"}
-//    spec:
-//      containers:
-//        - name: nginx
-//          image: nginx:1.7.9
-//          ports:
-//            - containerPort: 80
-//
+/*
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+name: nginx
+labels:
+  app: nginx
+spec:
+replicas: 5
+selector:
+  matchLabels:
+    app: nginx
+template:
+  metadata:
+    labels:
+      app: nginx
+      kratos-service-id: "56991810-c77f-4a95-8190-393efa9c1a61"
+      kratos-service-app: "nginx"
+      kratos-service-version: "v3.5.0"
+    annotations:
+      kratos-service-protocols: |
+        {"80": "http"}
+      kratos-service-metadata: |
+        {"region": "sh", "zone": "sh001", "cluster": "pd"}
+  spec:
+    containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+          - containerPort: 80
+*/
 const (
 	// LabelsKeyServiceID is used to define the ID of the service
 	LabelsKeyServiceID = "kratos-service-id"
@@ -299,7 +300,7 @@ func (iter *Iterator) Next() ([]*registry.ServiceInstance, error) {
 	}
 }
 
-// Close is used to close the iterator
+// Stop is used to close the iterator
 func (iter *Iterator) Stop() error {
 	select {
 	case <-iter.stopCh:

@@ -27,10 +27,6 @@ func (a *loggerAppliance) SetLogger(in Logger) {
 	a.Logger = in
 }
 
-func (a *loggerAppliance) GetLogger() Logger {
-	return a.Logger
-}
-
 // SetLogger should be called before any other log call.
 // And it is NOT THREAD SAFE.
 func SetLogger(logger Logger) {
@@ -39,7 +35,7 @@ func SetLogger(logger Logger) {
 
 // GetLogger returns global logger appliance as logger in current process.
 func GetLogger() Logger {
-	return global.GetLogger()
+	return global
 }
 
 // Log Print log by level and keyvals.

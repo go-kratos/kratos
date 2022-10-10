@@ -5,16 +5,18 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
 )
 
 // Option is tracing option.
 type Option func(*options)
 
 type options struct {
+	tracerName     string
 	tracerProvider trace.TracerProvider
 	propagator     propagation.TextMapPropagator
 }
@@ -31,6 +33,13 @@ func WithPropagator(propagator propagation.TextMapPropagator) Option {
 func WithTracerProvider(provider trace.TracerProvider) Option {
 	return func(opts *options) {
 		opts.tracerProvider = provider
+	}
+}
+
+// WithTracerName with tracer name
+func WithTracerName(tracerName string) Option {
+	return func(opts *options) {
+		opts.tracerName = tracerName
 	}
 }
 

@@ -6,9 +6,10 @@ import (
 	"strconv"
 	"time"
 
-	log "github.com/go-kratos/kratos/v2/log"
 	cls "github.com/tencentcloud/tencentcloud-cls-sdk-go"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 type Logger interface {
@@ -114,7 +115,7 @@ func NewLogger(options ...Option) (Logger, error) {
 	}, nil
 }
 
-// toString any type to string
+// toString convert any type to string
 func toString(v interface{}) string {
 	var key string
 	if v == nil {
@@ -145,6 +146,12 @@ func toString(v interface{}) string {
 		key = strconv.FormatInt(v, 10)
 	case uint64:
 		key = strconv.FormatUint(v, 10)
+	case string:
+		key = v
+	case bool:
+		key = strconv.FormatBool(v)
+	case []byte:
+		key = string(v)
 	case fmt.Stringer:
 		key = v.String()
 	default:

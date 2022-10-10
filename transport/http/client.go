@@ -20,6 +20,12 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
+func init() {
+	if selector.GlobalSelector() == nil {
+		selector.SetGlobalSelector(wrr.NewBuilder())
+	}
+}
+
 // DecodeErrorFunc is decode error func.
 type DecodeErrorFunc func(ctx context.Context, res *http.Response) error
 
@@ -43,7 +49,7 @@ type clientOptions struct {
 	decoder      DecodeResponseFunc
 	errorDecoder DecodeErrorFunc
 	transport    http.RoundTripper
-	selector     selector.Selector
+	nodeFilters  []selector.NodeFilter
 	discovery    registry.Discovery
 	middleware   []middleware.Middleware
 	block        bool
@@ -112,10 +118,10 @@ func WithDiscovery(d registry.Discovery) ClientOption {
 	}
 }
 
-// WithSelector with client selector.
-func WithSelector(selector selector.Selector) ClientOption {
+// WithNodeFilter with select filters
+func WithNodeFilter(filters ...selector.NodeFilter) ClientOption {
 	return func(o *clientOptions) {
-		o.selector = selector
+		o.nodeFilters = filters
 	}
 }
 
@@ -140,6 +146,7 @@ type Client struct {
 	r        *resolver
 	cc       *http.Client
 	insecure bool
+	selector selector.Selector
 }
 
 // NewClient returns an HTTP client.
@@ -151,7 +158,6 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		decoder:      DefaultResponseDecoder,
 		errorDecoder: DefaultErrorDecoder,
 		transport:    http.DefaultTransport,
-		selector:     wrr.New(),
 	}
 	for _, o := range opts {
 		o(&options)
@@ -166,10 +172,11 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	selector := selector.GlobalSelector().Build()
 	var r *resolver
 	if options.discovery != nil {
 		if target.Scheme == "discovery" {
-			if r, err = newResolver(ctx, options.discovery, target, options.selector, options.block, insecure); err != nil {
+			if r, err = newResolver(ctx, options.discovery, target, selector, options.block, insecure); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
 		} else if _, _, err := host.ExtractHostPort(options.endpoint); err != nil {
@@ -185,10 +192,11 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 			Timeout:   options.timeout,
 			Transport: options.transport,
 		},
+		selector: selector,
 	}, nil
 }
 
-// Invoke makes an rpc call procedure for remote service.
+// Invoke makes a rpc call procedure for remote service.
 func (client *Client) Invoke(ctx context.Context, method, path string, args interface{}, reply interface{}, opts ...CallOption) error {
 	var (
 		contentType string
@@ -276,7 +284,7 @@ func (client *Client) do(req *http.Request) (*http.Response, error) {
 			err  error
 			node selector.Node
 		)
-		if node, done, err = client.opts.selector.Select(req.Context()); err != nil {
+		if node, done, err = client.selector.Select(req.Context(), selector.WithNodeFilter(client.opts.nodeFilters...)); err != nil {
 			return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 		}
 		if client.insecure {

@@ -2,7 +2,6 @@ package opensergo
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net"
 	"net/url"
 	"os"
@@ -52,7 +51,7 @@ func New(opts ...Option) (*OpenSergo, error) {
 		}
 	}
 	if v := os.Getenv("OPENSERGO_BOOTSTRAP_CONFIG"); v != "" {
-		b, err := ioutil.ReadFile(v)
+		b, err := os.ReadFile(v)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +88,7 @@ func (s *OpenSergo) ReportMetadata(ctx context.Context, app kratos.AppInfo) erro
 	}
 
 	for _, endpoint := range app.Endpoint() {
-		u, err := url.Parse(endpoint) //nolint
+		u, err := url.Parse(endpoint) // nolint
 		if err != nil {
 			return err
 		}

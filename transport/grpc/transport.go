@@ -1,12 +1,13 @@
 package grpc
 
 import (
+	"google.golang.org/grpc/metadata"
+
 	"github.com/go-kratos/kratos/v2/selector"
 	"github.com/go-kratos/kratos/v2/transport"
-	"google.golang.org/grpc/metadata"
 )
 
-var _ transport.Transporter = &Transport{}
+var _ transport.Transporter = (*Transport)(nil)
 
 // Transport is a gRPC transport.
 type Transport struct {
@@ -14,7 +15,7 @@ type Transport struct {
 	operation   string
 	reqHeader   headerCarrier
 	replyHeader headerCarrier
-	filters     []selector.Filter
+	nodeFilters []selector.NodeFilter
 }
 
 // Kind returns the transport kind.
@@ -42,9 +43,9 @@ func (tr *Transport) ReplyHeader() transport.Header {
 	return tr.replyHeader
 }
 
-// SelectFilters returns the client select filters.
-func (tr *Transport) SelectFilters() []selector.Filter {
-	return tr.filters
+// NodeFilters returns the client select filters.
+func (tr *Transport) NodeFilters() []selector.NodeFilter {
+	return tr.nodeFilters
 }
 
 type headerCarrier metadata.MD

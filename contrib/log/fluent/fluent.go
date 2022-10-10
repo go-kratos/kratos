@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/fluent/fluent-logger-golang/fluent"
+
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -99,8 +100,9 @@ type Logger struct {
 
 // NewLogger new a std logger with options.
 // target:
-//   tcp://127.0.0.1:24224
-//   unix://var/run/fluent/fluent.sock
+//
+//	tcp://127.0.0.1:24224
+//	unix://var/run/fluent/fluent.sock
 func NewLogger(addr string, opts ...Option) (*Logger, error) {
 	option := options{}
 	for _, o := range opts {

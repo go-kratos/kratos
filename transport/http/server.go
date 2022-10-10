@@ -70,10 +70,24 @@ func Filter(filters ...FilterFunc) ServerOption {
 	}
 }
 
+// RequestVarsDecoder with request decoder.
+func RequestVarsDecoder(dec DecodeRequestFunc) ServerOption {
+	return func(o *Server) {
+		o.decVars = dec
+	}
+}
+
+// RequestQueryDecoder with request decoder.
+func RequestQueryDecoder(dec DecodeRequestFunc) ServerOption {
+	return func(o *Server) {
+		o.decQuery = dec
+	}
+}
+
 // RequestDecoder with request decoder.
 func RequestDecoder(dec DecodeRequestFunc) ServerOption {
 	return func(o *Server) {
-		o.dec = dec
+		o.decBody = dec
 	}
 }
 
@@ -126,7 +140,9 @@ type Server struct {
 	timeout     time.Duration
 	filters     []FilterFunc
 	middleware  matcher.Matcher
-	dec         DecodeRequestFunc
+	decVars     DecodeRequestFunc
+	decQuery    DecodeRequestFunc
+	decBody     DecodeRequestFunc
 	enc         EncodeResponseFunc
 	ene         EncodeErrorFunc
 	strictSlash bool
@@ -140,7 +156,9 @@ func NewServer(opts ...ServerOption) *Server {
 		address:     ":0",
 		timeout:     1 * time.Second,
 		middleware:  matcher.New(),
-		dec:         DefaultRequestDecoder,
+		decVars:     DefaultRequestVars,
+		decQuery:    DefaultRequestQuery,
+		decBody:     DefaultRequestDecoder,
 		enc:         DefaultResponseEncoder,
 		ene:         DefaultErrorEncoder,
 		strictSlash: true,
@@ -256,8 +274,9 @@ func (s *Server) filter() mux.MiddlewareFunc {
 
 // Endpoint return a real address to registry endpoint.
 // examples:
-//   https://127.0.0.1:8000
-//   Legacy: http://127.0.0.1:8000?isSecure=false
+//
+//	https://127.0.0.1:8000
+//	Legacy: http://127.0.0.1:8000?isSecure=false
 func (s *Server) Endpoint() (*url.URL, error) {
 	if err := s.listenAndEndpoint(); err != nil {
 		return nil, err
