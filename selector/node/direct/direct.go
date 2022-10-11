@@ -13,8 +13,8 @@ const (
 )
 
 var (
-	_ selector.WeightedNode        = &Node{}
-	_ selector.WeightedNodeBuilder = &Builder{}
+	_ selector.WeightedNode        = (*Node)(nil)
+	_ selector.WeightedNodeBuilder = (*Builder)(nil)
 )
 
 // Node is endpoint instance

@@ -10,6 +10,7 @@ import (
 	"github.com/apolloconfig/agollo/v4/constant"
 	apolloConfig "github.com/apolloconfig/agollo/v4/env/config"
 	"github.com/apolloconfig/agollo/v4/extension"
+
 	"github.com/go-kratos/kratos/v2/encoding"
 )
 

@@ -3,8 +3,9 @@ package zap
 import (
 	"fmt"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"go.uber.org/zap"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 var _ log.Logger = (*Logger)(nil)

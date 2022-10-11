@@ -2,7 +2,7 @@ package kratos
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"net/url"
 	"reflect"
 	"sync"
@@ -21,7 +21,7 @@ type mockRegistry struct {
 
 func (r *mockRegistry) Register(ctx context.Context, service *registry.ServiceInstance) error {
 	if service == nil || service.ID == "" {
-		return fmt.Errorf("no service id")
+		return errors.New("no service id")
 	}
 	r.lk.Lock()
 	defer r.lk.Unlock()
@@ -34,7 +34,7 @@ func (r *mockRegistry) Deregister(ctx context.Context, service *registry.Service
 	r.lk.Lock()
 	defer r.lk.Unlock()
 	if r.service[service.ID] == nil {
-		return fmt.Errorf("deregister service not found")
+		return errors.New("deregister service not found")
 	}
 	delete(r.service, service.ID)
 	return nil

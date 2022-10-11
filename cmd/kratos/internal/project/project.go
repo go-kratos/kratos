@@ -9,8 +9,9 @@ import (
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 	"github.com/spf13/cobra"
+
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 )
 
 // CmdNew represents the new command.

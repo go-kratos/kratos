@@ -5,8 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/config"
 	"github.com/hashicorp/consul/api"
+
+	"github.com/go-kratos/kratos/v2/config"
 )
 
 const testPath = "kratos/test/config"

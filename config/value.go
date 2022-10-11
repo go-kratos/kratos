@@ -144,10 +144,8 @@ func (v *atomicValue) String() (string, error) {
 		return fmt.Sprint(val), nil
 	case []byte:
 		return string(val), nil
-	default:
-		if s, ok := val.(fmt.Stringer); ok {
-			return s.String(), nil
-		}
+	case fmt.Stringer:
+		return val.String(), nil
 	}
 	return "", fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
 }

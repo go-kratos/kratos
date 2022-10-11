@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	kratos_errors "github.com/go-kratos/kratos/v2/errors"
+	kratoserrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/group"
 	"github.com/go-kratos/kratos/v2/transport"
 )
@@ -62,7 +62,7 @@ func Test_Server(t *testing.T) {
 		return "Hello valid", nil
 	}
 	nextInvalid := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return nil, kratos_errors.InternalServer("", "")
+		return nil, kratoserrors.InternalServer("", "")
 	}
 
 	ctx := transport.NewClientContext(context.Background(), &transportMock{})
