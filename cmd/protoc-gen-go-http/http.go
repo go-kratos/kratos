@@ -213,9 +213,9 @@ func buildPathVars(path string) (res map[string]*string) {
 	if strings.HasSuffix(path, "/") {
 		fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: Path %s should not end with \"/\" \n", path)
 	}
-	res = make(map[string]*string)
 	pattern := regexp.MustCompile(`(?i){([a-z\.0-9_\s]*)=?([^{}]*)}`)
 	matches := pattern.FindAllStringSubmatch(path, -1)
+	res = make(map[string]*string, len(matches))
 	for _, m := range matches {
 		name := strings.TrimSpace(m[1])
 		if len(name) > 1 && len(m[2]) > 0 {
