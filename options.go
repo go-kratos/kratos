@@ -32,10 +32,10 @@ type options struct {
 	servers          []transport.Server
 
 	// Before and After funcs
-	beforeStart []func() error
-	beforeStop  []func() error
-	afterStart  []func() error
-	afterStop   []func() error
+	beforeStart []func(context.Context) error
+	beforeStop  []func(context.Context) error
+	afterStart  []func(context.Context) error
+	afterStop   []func(context.Context) error
 }
 
 // ID with service id.
@@ -101,28 +101,28 @@ func StopTimeout(t time.Duration) Option {
 // Before and Afters
 
 // BeforeStart run funcs before app starts
-func BeforeStart(fn func() error) Option {
+func BeforeStart(fn func(context.Context) error) Option {
 	return func(o *options) {
 		o.beforeStart = append(o.beforeStart, fn)
 	}
 }
 
 // BeforeStop run funcs before app stops
-func BeforeStop(fn func() error) Option {
+func BeforeStop(fn func(context.Context) error) Option {
 	return func(o *options) {
 		o.beforeStop = append(o.beforeStop, fn)
 	}
 }
 
 // AfterStart run funcs after app starts
-func AfterStart(fn func() error) Option {
+func AfterStart(fn func(context.Context) error) Option {
 	return func(o *options) {
 		o.afterStart = append(o.afterStart, fn)
 	}
 }
 
 // AfterStop run funcs after app stops
-func AfterStop(fn func() error) Option {
+func AfterStop(fn func(context.Context) error) Option {
 	return func(o *options) {
 		o.afterStop = append(o.afterStop, fn)
 	}

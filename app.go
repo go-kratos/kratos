@@ -89,11 +89,12 @@ func (a *App) Run() error {
 	a.mu.Lock()
 	a.instance = instance
 	a.mu.Unlock()
-	eg, ctx := errgroup.WithContext(NewContext(a.ctx, a))
+	sctx := NewContext(a.ctx, a)
+	eg, ctx := errgroup.WithContext(sctx)
 	wg := sync.WaitGroup{}
 
 	for _, fn := range a.opts.beforeStart {
-		if err = fn(); err != nil {
+		if err = fn(sctx); err != nil {
 			return err
 		}
 	}
@@ -108,7 +109,7 @@ func (a *App) Run() error {
 		wg.Add(1)
 		eg.Go(func() error {
 			wg.Done() // here is to ensure server start has begun running before register, so defer is not needed
-			return srv.Start(NewContext(a.opts.ctx, a))
+			return srv.Start(sctx)
 		})
 	}
 	wg.Wait()
@@ -120,7 +121,7 @@ func (a *App) Run() error {
 		}
 	}
 	for _, fn := range a.opts.afterStart {
-		if err = fn(); err != nil {
+		if err = fn(sctx); err != nil {
 			return err
 		}
 	}
@@ -139,15 +140,16 @@ func (a *App) Run() error {
 		return err
 	}
 	for _, fn := range a.opts.afterStop {
-		err = fn()
+		err = fn(sctx)
 	}
 	return err
 }
 
 // Stop gracefully stops the application.
 func (a *App) Stop() (err error) {
+	sctx := NewContext(a.ctx, a)
 	for _, fn := range a.opts.beforeStop {
-		err = fn()
+		err = fn(sctx)
 	}
 
 	a.mu.Lock()

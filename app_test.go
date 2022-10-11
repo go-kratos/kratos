@@ -47,19 +47,19 @@ func TestApp(t *testing.T) {
 		Name("kratos"),
 		Version("v1.0.0"),
 		Server(hs, gs),
-		BeforeStart(func() error {
+		BeforeStart(func(_ context.Context) error {
 			t.Log("BeforeStart...")
 			return nil
 		}),
-		BeforeStop(func() error {
+		BeforeStop(func(_ context.Context) error {
 			t.Log("BeforeStop...")
 			return nil
 		}),
-		AfterStart(func() error {
+		AfterStart(func(_ context.Context) error {
 			t.Log("AfterStart...")
 			return nil
 		}),
-		AfterStop(func() error {
+		AfterStop(func(_ context.Context) error {
 			t.Log("AfterStop...")
 			return nil
 		}),

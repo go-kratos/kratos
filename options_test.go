@@ -155,7 +155,7 @@ func TestStopTimeout(t *testing.T) {
 
 func TestBeforeStart(t *testing.T) {
 	o := &options{}
-	v := func() error {
+	v := func(_ context.Context) error {
 		t.Log("BeforeStart...")
 		return nil
 	}
@@ -164,7 +164,7 @@ func TestBeforeStart(t *testing.T) {
 
 func TestBeforeStop(t *testing.T) {
 	o := &options{}
-	v := func() error {
+	v := func(_ context.Context) error {
 		t.Log("BeforeStop...")
 		return nil
 	}
@@ -173,7 +173,7 @@ func TestBeforeStop(t *testing.T) {
 
 func TestAfterStart(t *testing.T) {
 	o := &options{}
-	v := func() error {
+	v := func(_ context.Context) error {
 		t.Log("AfterStart...")
 		return nil
 	}
@@ -182,7 +182,7 @@ func TestAfterStart(t *testing.T) {
 
 func TestAfterStop(t *testing.T) {
 	o := &options{}
-	v := func() error {
+	v := func(_ context.Context) error {
 		t.Log("AfterStop...")
 		return nil
 	}
