@@ -128,6 +128,16 @@ func Listener(lis net.Listener) ServerOption {
 	}
 }
 
+// PathPrefix with mux's PathPrefix, router will replaced by a subrouter that start with prefix.
+func PathPrefix(prefix string) ServerOption {
+	return func(s *Server) {
+		if s.router == nil {
+			return
+		}
+		s.router = s.router.PathPrefix(prefix).Subrouter()
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
@@ -162,11 +172,12 @@ func NewServer(opts ...ServerOption) *Server {
 		enc:         DefaultResponseEncoder,
 		ene:         DefaultErrorEncoder,
 		strictSlash: true,
+		router:      mux.NewRouter(),
 	}
 	for _, o := range opts {
 		o(srv)
 	}
-	srv.router = mux.NewRouter().StrictSlash(srv.strictSlash)
+	srv.router.StrictSlash(srv.strictSlash)
 	srv.router.NotFoundHandler = http.DefaultServeMux
 	srv.router.MethodNotAllowedHandler = http.DefaultServeMux
 	srv.router.Use(srv.filter())
