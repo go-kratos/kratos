@@ -15,8 +15,8 @@ const (
 )
 
 var (
-	_ base.PickerBuilder = &balancerBuilder{}
-	_ balancer.Picker    = &balancerPicker{}
+	_ base.PickerBuilder = (*balancerBuilder)(nil)
+	_ balancer.Picker    = (*balancerPicker)(nil)
 )
 
 func init() {
