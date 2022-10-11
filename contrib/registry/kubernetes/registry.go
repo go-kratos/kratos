@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
 	jsoniter "github.com/json-iterator/go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,6 +20,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	listerv1 "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 // Defines the key name of specific fields
@@ -299,7 +300,7 @@ func (iter *Iterator) Next() ([]*registry.ServiceInstance, error) {
 	}
 }
 
-// Close is used to close the iterator
+// Stop is used to close the iterator
 func (iter *Iterator) Stop() error {
 	select {
 	case <-iter.stopCh:

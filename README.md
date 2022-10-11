@@ -90,7 +90,6 @@ If you discover a security vulnerability within Kratos, please send an e-mail to
 - [Wechat Group](https://github.com/go-kratos/kratos/issues/682)
 - [Discord Group](https://discord.gg/BWzJsUJ)
 - [go-kratos.dev](https://go-kratos.dev/en)
-- QQ Group: 716486124
 
 ## Contributors
 

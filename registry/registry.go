@@ -39,7 +39,7 @@ type ServiceInstance struct {
 	Version string `json:"version"`
 	// Metadata is the kv pair metadata associated with the service instance.
 	Metadata map[string]string `json:"metadata"`
-	// Endpoints is endpoint addresses of the service instance.
+	// Endpoints are endpoint addresses of the service instance.
 	// schema:
 	//   http://127.0.0.1:8000?isSecure=false
 	//   grpc://127.0.0.1:9000?isSecure=false

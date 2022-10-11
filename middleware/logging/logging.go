@@ -47,7 +47,7 @@ func Server(logger log.Logger) middleware.Middleware {
 	}
 }
 
-// Client is an client logging middleware.
+// Client is a client logging middleware.
 func Client(logger log.Logger) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {

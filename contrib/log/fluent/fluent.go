@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/fluent/fluent-logger-golang/fluent"
+
 	"github.com/go-kratos/kratos/v2/log"
 )
 

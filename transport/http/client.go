@@ -16,13 +16,13 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/p2c"
+	"github.com/go-kratos/kratos/v2/selector/wrr"
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
 func init() {
 	if selector.GlobalSelector() == nil {
-		selector.SetGlobalSelector(p2c.NewBuilder())
+		selector.SetGlobalSelector(wrr.NewBuilder())
 	}
 }
 
@@ -196,7 +196,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	}, nil
 }
 
-// Invoke makes an rpc call procedure for remote service.
+// Invoke makes a rpc call procedure for remote service.
 func (client *Client) Invoke(ctx context.Context, method, path string, args interface{}, reply interface{}, opts ...CallOption) error {
 	var (
 		contentType string

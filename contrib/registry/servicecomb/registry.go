@@ -7,13 +7,12 @@ import (
 	"time"
 
 	"github.com/go-chassis/cari/discovery"
-	pb "github.com/go-chassis/cari/discovery"
 	"github.com/go-chassis/cari/pkg/errsvc"
 	"github.com/go-chassis/sc-client"
+	"github.com/gofrs/uuid"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/gofrs/uuid"
 )
 
 func init() {
@@ -114,7 +113,7 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 			return parseErr
 		}
 		// 若错误码显示服务未注册，直接返回
-		if svcErr.Code != pb.ErrServiceAlreadyExists {
+		if svcErr.Code != discovery.ErrServiceAlreadyExists {
 			return err
 		}
 		sid, err = r.cli.GetMicroServiceID(appID, ms.ServiceName, ms.Version, ms.Environment)

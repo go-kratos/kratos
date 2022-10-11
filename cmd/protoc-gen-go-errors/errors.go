@@ -8,9 +8,10 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
-	"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2/errors"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2/errors"
 )
 
 const (

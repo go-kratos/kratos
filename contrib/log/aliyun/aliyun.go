@@ -2,16 +2,18 @@ package aliyun
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/aliyun-log-go-sdk/producer"
-	log "github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
-// Log see more detail https://github.com/aliyun/aliyun-log-go-sdk
+// Logger see more detail https://github.com/aliyun/aliyun-log-go-sdk
 type Logger interface {
 	log.Logger
 	GetProducer() *producer.Producer
@@ -126,7 +128,7 @@ func NewAliyunLog(options ...Option) Logger {
 	}
 }
 
-// toString 任意类型转string
+// toString convert any type to string
 func toString(v interface{}) string {
 	var key string
 	if v == nil {
@@ -159,8 +161,12 @@ func toString(v interface{}) string {
 		key = strconv.FormatUint(v, 10)
 	case string:
 		key = v
+	case bool:
+		key = strconv.FormatBool(v)
 	case []byte:
 		key = string(v)
+	case fmt.Stringer:
+		key = v.String()
 	default:
 		newValue, _ := json.Marshal(v)
 		key = string(newValue)

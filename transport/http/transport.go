@@ -7,7 +7,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-var _ Transporter = &Transport{}
+var _ Transporter = (*Transport)(nil)
 
 // Transporter is http Transporter
 type Transporter interface {
@@ -68,6 +68,16 @@ func SetOperation(ctx context.Context, op string) {
 			tr.operation = op
 		}
 	}
+}
+
+// RequestFromServerContext returns request from context.
+func RequestFromServerContext(ctx context.Context) (*http.Request, bool) {
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		if tr, ok := tr.(*Transport); ok {
+			return tr.request, true
+		}
+	}
+	return nil, false
 }
 
 type headerCarrier http.Header

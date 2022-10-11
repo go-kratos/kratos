@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-// create a etcd client
+// create an etcd client
 client, err := clientv3.New(clientv3.Config{
     Endpoints:   []string{"127.0.0.1:2379"},
     DialTimeout: time.Second,

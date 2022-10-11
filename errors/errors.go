@@ -4,12 +4,11 @@ import (
 	"errors"
 	"fmt"
 
-	httpstatus "github.com/go-kratos/kratos/v2/transport/http/status"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/status"
-)
 
-//go:generate protoc -I. --go_out=paths=source_relative:. errors.proto
+	httpstatus "github.com/go-kratos/kratos/v2/transport/http/status"
+)
 
 const (
 	// UnknownCode is unknown code for error info.
