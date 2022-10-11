@@ -14,14 +14,14 @@ import (
 )
 
 const (
-	statusUp            = "UP"
-	statusDown          = "DOWN"
-	statusOutOfServeice = "OUT_OF_SERVICE"
-	heartbeatRetry      = 3
-	maxIdleConns        = 100
-	heartbeatTime       = 10
-	httpTimeout         = 3
-	refreshTime         = 30
+	statusUp           = "UP"
+	statusDown         = "DOWN"
+	statusOutOfService = "OUT_OF_SERVICE"
+	heartbeatRetry     = 3
+	maxIdleConns       = 100
+	heartbeatTime      = 10
+	httpTimeout        = 3
+	refreshTime        = 30
 )
 
 type Endpoint struct {
@@ -184,7 +184,7 @@ func (e *Client) FetchInstance(ctx context.Context, instanceID string) (m Instan
 }
 
 func (e *Client) Out(ctx context.Context, appID, instanceID string) error {
-	return e.do(ctx, "PUT", []string{"apps", appID, instanceID, fmt.Sprintf("status?value=%s", statusOutOfServeice)}, nil, nil)
+	return e.do(ctx, "PUT", []string{"apps", appID, instanceID, fmt.Sprintf("status?value=%s", statusOutOfService)}, nil, nil)
 }
 
 func (e *Client) Down(ctx context.Context, appID, instanceID string) error {
@@ -268,8 +268,8 @@ func (e *Client) Heartbeat(ep Endpoint) {
 }
 
 func (e *Client) cancelHeartbeat(appID string) {
-	defer e.lock.Unlock()
 	e.lock.Lock()
+	defer e.lock.Unlock()
 	if ch, ok := e.keepalive[appID]; ok {
 		ch <- struct{}{}
 	}
