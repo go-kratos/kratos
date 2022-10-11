@@ -87,7 +87,7 @@ func (p *balancerPicker) Pick(info balancer.PickInfo) (balancer.PickResult, erro
 	}, nil
 }
 
-// Trailer is a grpc trailder MD.
+// Trailer is a grpc trailer MD.
 type Trailer metadata.MD
 
 // Get get a grpc trailer value.

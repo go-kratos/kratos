@@ -17,7 +17,7 @@ func Unauthorized(reason, message string) *Error {
 	return New(401, reason, message)
 }
 
-// IsUnauthorized determines if err is an error which indicates a Unauthorized error.
+// IsUnauthorized determines if err is an error which indicates an Unauthorized error.
 // It supports wrapped errors.
 func IsUnauthorized(err error) bool {
 	return Code(err) == 401
@@ -67,18 +67,18 @@ func IsInternalServer(err error) bool {
 	return Code(err) == 500
 }
 
-// ServiceUnavailable new ServiceUnavailable error that is mapped to a HTTP 503 response.
+// ServiceUnavailable new ServiceUnavailable error that is mapped to an HTTP 503 response.
 func ServiceUnavailable(reason, message string) *Error {
 	return New(503, reason, message)
 }
 
-// IsServiceUnavailable determines if err is an error which indicates a Unavailable error.
+// IsServiceUnavailable determines if err is an error which indicates an Unavailable error.
 // It supports wrapped errors.
 func IsServiceUnavailable(err error) bool {
 	return Code(err) == 503
 }
 
-// GatewayTimeout new GatewayTimeout error that is mapped to a HTTP 504 response.
+// GatewayTimeout new GatewayTimeout error that is mapped to an HTTP 504 response.
 func GatewayTimeout(reason, message string) *Error {
 	return New(504, reason, message)
 }
@@ -89,7 +89,7 @@ func IsGatewayTimeout(err error) bool {
 	return Code(err) == 504
 }
 
-// ClientClosed new ClientClosed error that is mapped to a HTTP 499 response.
+// ClientClosed new ClientClosed error that is mapped to an HTTP 499 response.
 func ClientClosed(reason, message string) *Error {
 	return New(499, reason, message)
 }

@@ -255,8 +255,8 @@ func camelCaseVars(s string) string {
 // drop the underscore and convert the letter to upper case.
 // There is a remote possibility of this rewrite causing a name collision,
 // but it's so remote we're prepared to pretend it's nonexistent - since the
-// C++ generator lowercases names, it's extremely unlikely to have two fields
-// with different capitalizations.
+// C++ generator lowercase names, it's extremely unlikely to have two fields
+// with different capitalization.
 // In short, _my_field_name_2 becomes XMyFieldName_2.
 func camelCase(s string) string {
 	if s == "" {

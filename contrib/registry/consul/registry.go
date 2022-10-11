@@ -63,6 +63,15 @@ func WithDeregisterCriticalServiceAfter(interval int) Option {
 	}
 }
 
+// WithServiceCheck with service checks
+func WithServiceCheck(checks ...*api.AgentServiceCheck) Option {
+	return func(o *Registry) {
+		if o.cli != nil {
+			o.cli.serviceChecks = checks
+		}
+	}
+}
+
 // Config is consul registry config
 type Config struct {
 	*api.Config

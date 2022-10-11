@@ -6,8 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/go-kratos/kratos/v2/config"
 	"github.com/hashicorp/consul/api"
+
+	"github.com/go-kratos/kratos/v2/config"
 )
 
 // Option is etcd config option.
@@ -27,9 +28,9 @@ func WithContext(ctx context.Context) Option {
 
 // WithPath is config path
 func WithPath(p string) Option {
-	return Option(func(o *options) {
+	return func(o *options) {
 		o.path = p
-	})
+	}
 }
 
 type source struct {

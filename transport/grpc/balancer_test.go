@@ -5,8 +5,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/selector"
 	"google.golang.org/grpc/metadata"
+
+	"github.com/go-kratos/kratos/v2/selector"
 )
 
 func TestTrailer(t *testing.T) {

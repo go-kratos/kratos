@@ -33,7 +33,7 @@ type mockCallOption struct {
 
 func (x *mockCallOption) before(info *callInfo) error {
 	if x.needErr {
-		return fmt.Errorf("option need return err")
+		return errors.New("option need return err")
 	}
 	return nil
 }
@@ -357,7 +357,7 @@ func TestNewClient(t *testing.T) {
 		t.Error("err should be equal to callOption err")
 	}
 	client.opts.encoder = func(ctx context.Context, contentType string, in interface{}) (body []byte, err error) {
-		return nil, fmt.Errorf("mock test encoder error")
+		return nil, errors.New("mock test encoder error")
 	}
 	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{})
 	if err == nil {

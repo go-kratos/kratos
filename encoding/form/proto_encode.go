@@ -14,16 +14,19 @@ import (
 )
 
 // EncodeValues encode a message into url values.
-func EncodeValues(msg proto.Message) (url.Values, error) {
+func EncodeValues(msg interface{}) (url.Values, error) {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return url.Values{}, nil
 	}
-	u := make(url.Values)
-	err := encodeByField(u, "", msg.ProtoReflect())
-	if err != nil {
-		return nil, err
+	if v, ok := msg.(proto.Message); ok {
+		u := make(url.Values)
+		err := encodeByField(u, "", v.ProtoReflect())
+		if err != nil {
+			return nil, err
+		}
+		return u, nil
 	}
-	return u, nil
+	return encoder.Encode(msg)
 }
 
 func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr error) {
@@ -159,7 +162,7 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 	case "google.protobuf.DoubleValue", "google.protobuf.FloatValue", "google.protobuf.Int64Value", "google.protobuf.Int32Value",
 		"google.protobuf.UInt64Value", "google.protobuf.UInt32Value", "google.protobuf.BoolValue", "google.protobuf.StringValue":
 		fd := msgDescriptor.Fields()
-		v := value.Message().Get(fd.ByName(protoreflect.Name("value")))
+		v := value.Message().Get(fd.ByName("value"))
 		return fmt.Sprint(v.Interface()), nil
 	case fieldMaskFullName:
 		m, ok := value.Message().Interface().(*fieldmaskpb.FieldMask)

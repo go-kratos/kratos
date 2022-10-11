@@ -2,6 +2,7 @@ package nacos
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/url"
@@ -13,6 +14,8 @@ import (
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
+
+var ErrServiceInstanceNameEmpty = errors.New("kratos/nacos: ServiceInstance.Name can not be empty")
 
 var (
 	_ registry.Registrar = (*Registry)(nil)
@@ -82,7 +85,7 @@ func New(cli naming_client.INamingClient, opts ...Option) (r *Registry) {
 // Register the registration.
 func (r *Registry) Register(_ context.Context, si *registry.ServiceInstance) error {
 	if si.Name == "" {
-		return fmt.Errorf("kratos/nacos: serviceInstance.name can not be empty")
+		return ErrServiceInstanceNameEmpty
 	}
 	for _, endpoint := range si.Endpoints {
 		u, err := url.Parse(endpoint)

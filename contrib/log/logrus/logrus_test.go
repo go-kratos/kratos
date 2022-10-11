@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 func TestLoggerLog(t *testing.T) {
@@ -58,7 +58,9 @@ func TestLoggerLog(t *testing.T) {
 			wrapped := NewLogger(logger)
 			_ = wrapped.Log(test.logLevel, test.kvs...)
 
-			assert.True(t, strings.HasPrefix(output.String(), test.want))
+			if !strings.HasPrefix(output.String(), test.want) {
+				t.Errorf("TestName(%s): %s has not prefix %s", name, output.String(), test.want)
+			}
 		})
 	}
 }

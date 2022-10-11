@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -83,7 +82,7 @@ type DataCenterInfo struct {
 	Class string `json:"@class"`
 }
 
-var _ APIInterface = new(Client)
+var _ APIInterface = (*Client)(nil)
 
 type APIInterface interface {
 	Register(ctx context.Context, ep Endpoint) error
@@ -323,12 +322,12 @@ func (e *Client) do(ctx context.Context, method string, params []string, input i
 			continue
 		}
 		defer func() {
-			_, _ = io.Copy(ioutil.Discard, resp.Body)
+			_, _ = io.Copy(io.Discard, resp.Body)
 			resp.Body.Close()
 		}()
 
 		if output != nil && resp.StatusCode/100 == 2 {
-			data, err := ioutil.ReadAll(resp.Body)
+			data, err := io.ReadAll(resp.Body)
 			if err != nil {
 				return err
 			}
