@@ -60,6 +60,13 @@ func WithDiscovery(d registry.Discovery) ClientOption {
 	}
 }
 
+// WithDiscoveryOption with discovery options.
+func WithDiscoveryOptions(opts ...discovery.Option) ClientOption {
+	return func(o *clientOptions) {
+		o.discoveryOpts = opts
+	}
+}
+
 // WithTLSConfig with TLS config.
 func WithTLSConfig(c *tls.Config) ClientOption {
 	return func(o *clientOptions) {
@@ -96,15 +103,16 @@ func WithLogger(log log.Logger) ClientOption {
 
 // clientOptions is gRPC Client
 type clientOptions struct {
-	endpoint     string
-	tlsConf      *tls.Config
-	timeout      time.Duration
-	discovery    registry.Discovery
-	middleware   []middleware.Middleware
-	ints         []grpc.UnaryClientInterceptor
-	grpcOpts     []grpc.DialOption
-	balancerName string
-	filters      []selector.NodeFilter
+	endpoint      string
+	tlsConf       *tls.Config
+	timeout       time.Duration
+	discovery     registry.Discovery
+	discoveryOpts []discovery.Option
+	middleware    []middleware.Middleware
+	ints          []grpc.UnaryClientInterceptor
+	grpcOpts      []grpc.DialOption
+	balancerName  string
+	filters       []selector.NodeFilter
 }
 
 // Dial returns a GRPC connection.
@@ -136,11 +144,14 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		grpc.WithChainUnaryInterceptor(ints...),
 	}
 	if options.discovery != nil {
+		if insecure {
+			options.discoveryOpts = append(options.discoveryOpts, discovery.WithInsecure(insecure))
+		}
 		grpcOpts = append(grpcOpts,
 			grpc.WithResolvers(
 				discovery.NewBuilder(
 					options.discovery,
-					discovery.WithInsecure(insecure),
+					options.discoveryOpts...,
 				)))
 	}
 	if insecure {
