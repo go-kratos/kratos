@@ -43,6 +43,13 @@ func Address(addr string) ServerOption {
 	}
 }
 
+// Prefix with server prefix
+func Prefix(prefix string) ServerOption {
+	return func(s *Server) {
+		s.prefix = prefix
+	}
+}
+
 // Timeout with server timeout.
 func Timeout(timeout time.Duration) ServerOption {
 	return func(s *Server) {
@@ -137,6 +144,7 @@ type Server struct {
 	err         error
 	network     string
 	address     string
+	prefix      string
 	timeout     time.Duration
 	filters     []FilterFunc
 	middleware  matcher.Matcher
@@ -292,7 +300,7 @@ func (s *Server) Start(ctx context.Context) error {
 	s.BaseContext = func(net.Listener) context.Context {
 		return ctx
 	}
-	log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
+	log.Infof("[HTTP] server %s listening on: %s", s.prefix, s.lis.Addr().String())
 	var err error
 	if s.tlsConf != nil {
 		err = s.ServeTLS(s.lis, "", "")
@@ -307,7 +315,7 @@ func (s *Server) Start(ctx context.Context) error {
 
 // Stop stop the HTTP server.
 func (s *Server) Stop(ctx context.Context) error {
-	log.Info("[HTTP] server stopping")
+	log.Infof("[HTTP] server %s stopping", s.prefix)
 	return s.Shutdown(ctx)
 }
 

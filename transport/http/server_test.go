@@ -299,6 +299,15 @@ func TestAddress(t *testing.T) {
 	}
 }
 
+func TestPrefix(t *testing.T) {
+	o := &Server{}
+	v := "kratos"
+	Prefix(v)(o)
+	if !reflect.DeepEqual(v, o.prefix) {
+		t.Errorf("expected %v got %v", v, o.prefix)
+	}
+}
+
 func TestTimeout(t *testing.T) {
 	o := &Server{}
 	v := time.Duration(123)
