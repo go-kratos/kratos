@@ -51,16 +51,19 @@ func Server(opts ...Option) middleware.Middleware {
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			if tr, ok := transport.FromServerContext(ctx); ok {
-				md := options.md.Clone()
-				header := tr.RequestHeader()
-				for _, k := range header.Keys() {
-					if options.hasPrefix(k) {
-						md.Set(k, header.Get(k))
-					}
-				}
-				ctx = metadata.NewServerContext(ctx, md)
+			tr, ok := transport.FromServerContext(ctx)
+			if !ok {
+				return handler(ctx, req)
 			}
+
+			md := options.md.Clone()
+			header := tr.RequestHeader()
+			for _, k := range header.Keys() {
+				if options.hasPrefix(k) {
+					md.Set(k, header.Get(k))
+				}
+			}
+			ctx = metadata.NewServerContext(ctx, md)
 			return handler(ctx, req)
 		}
 	}
@@ -76,23 +79,26 @@ func Client(opts ...Option) middleware.Middleware {
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			if tr, ok := transport.FromClientContext(ctx); ok {
-				header := tr.RequestHeader()
-				// x-md-local-
-				for k, v := range options.md {
+			tr, ok := transport.FromClientContext(ctx)
+			if !ok {
+				return handler(ctx, req)
+			}
+
+			header := tr.RequestHeader()
+			// x-md-local-
+			for k, v := range options.md {
+				header.Set(k, v)
+			}
+			if md, ok := metadata.FromClientContext(ctx); ok {
+				for k, v := range md {
 					header.Set(k, v)
 				}
-				if md, ok := metadata.FromClientContext(ctx); ok {
-					for k, v := range md {
+			}
+			// x-md-global-
+			if md, ok := metadata.FromServerContext(ctx); ok {
+				for k, v := range md {
+					if options.hasPrefix(k) {
 						header.Set(k, v)
-					}
-				}
-				// x-md-global-
-				if md, ok := metadata.FromServerContext(ctx); ok {
-					for k, v := range md {
-						if options.hasPrefix(k) {
-							header.Set(k, v)
-						}
 					}
 				}
 			}
