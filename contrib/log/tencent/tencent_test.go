@@ -122,7 +122,7 @@ func TestToString(t *testing.T) {
 		{"float32", float32(6.66), "6.66"},
 		{"max float32", math.MaxFloat32, "340282346638528860000000000000000000000"},
 		{"int", int(math.MaxInt64), "9223372036854775807"},
-		{"uint", uint(math.MaxUint64), "-1"},
+		{"uint", uint(math.MaxUint64), "18446744073709551615"},
 		{"int8", math.MaxInt8, "127"},
 		{"uint8", math.MaxUint8, "255"},
 		{"int16", math.MaxInt16, "32767"},

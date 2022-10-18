@@ -140,19 +140,19 @@ func toString(v interface{}) string {
 	case int:
 		key = strconv.Itoa(v)
 	case uint:
-		key = strconv.Itoa(int(v))
+		key = strconv.FormatUint(uint64(v), 10)
 	case int8:
 		key = strconv.Itoa(int(v))
 	case uint8:
-		key = strconv.Itoa(int(v))
+		key = strconv.FormatUint(uint64(v), 10)
 	case int16:
 		key = strconv.Itoa(int(v))
 	case uint16:
-		key = strconv.Itoa(int(v))
+		key = strconv.FormatUint(uint64(v), 10)
 	case int32:
 		key = strconv.Itoa(int(v))
 	case uint32:
-		key = strconv.Itoa(int(v))
+		key = strconv.FormatUint(uint64(v), 10)
 	case int64:
 		key = strconv.FormatInt(v, 10)
 	case uint64:
