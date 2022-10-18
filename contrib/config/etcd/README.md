@@ -30,12 +30,16 @@ if err != nil {
 c := config.New(config.WithSource(source))
 defer c.Close()
 
+// load sources before get
+if err := c.Load(); err != nil {
+    log.Fatalln(err)
+}
+
 // acquire config value
 foo, err := c.Value("/app-config").String()
 if err != nil {
-    log.Println(err)
+    log.Fatalln(err)
 }
-println(foo)
 
+log.Println(foo)
 ```
-
