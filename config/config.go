@@ -15,13 +15,13 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
+var _ Config = (*config)(nil)
+
 var (
 	// ErrNotFound is key not found.
 	ErrNotFound = errors.New("key not found")
 	// ErrTypeAssert is type assert error.
 	ErrTypeAssert = errors.New("type assert error")
-
-	_ Config = (*config)(nil)
 )
 
 // Observer is config observer.
@@ -44,7 +44,7 @@ type config struct {
 	watchers  []Watcher
 }
 
-// New new a config with options.
+// New a config with options.
 func New(opts ...Option) Config {
 	o := options{
 		decoder:  defaultDecoder,
@@ -62,11 +62,11 @@ func New(opts ...Option) Config {
 func (c *config) watch(w Watcher) {
 	for {
 		kvs, err := w.Next()
-		if errors.Is(err, context.Canceled) {
-			log.Infof("watcher's ctx cancel : %v", err)
-			return
-		}
 		if err != nil {
+			if errors.Is(err, context.Canceled) {
+				log.Infof("watcher's ctx cancel : %v", err)
+				return
+			}
 			time.Sleep(time.Second)
 			log.Errorf("failed to watch next config: %v", err)
 			continue

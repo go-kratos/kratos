@@ -150,7 +150,7 @@ func TestDefaultResolver(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			err := defaultResolver(data)
 			if err != nil {
-				t.Fatal(`err is not nil`)
+				t.Fatal(err)
 			}
 			rd := reader{
 				values: data,
@@ -167,19 +167,19 @@ func TestDefaultResolver(t *testing.T) {
 				case string:
 					if actual, err = v.String(); err == nil {
 						if !reflect.DeepEqual(test.expect, actual) {
-							t.Fatal(`expect is not equal to actual`)
+							t.Fatal("expect is not equal to actual")
 						}
 					}
 				case bool:
 					if actual, err = v.Bool(); err == nil {
 						if !reflect.DeepEqual(test.expect, actual) {
-							t.Fatal(`expect is not equal to actual`)
+							t.Fatal("expect is not equal to actual")
 						}
 					}
 				case float64:
 					if actual, err = v.Float(); err == nil {
 						if !reflect.DeepEqual(test.expect, actual) {
-							t.Fatal(`expect is not equal to actual`)
+							t.Fatal("expect is not equal to actual")
 						}
 					}
 				default:

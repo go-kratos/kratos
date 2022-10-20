@@ -8,11 +8,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/go-kratos/kratos/v2/log"
-
 	"github.com/imdario/mergo"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 // Reader is config reader.
@@ -38,9 +38,7 @@ func newReader(opts options) Reader {
 }
 
 func (r *reader) Merge(kvs ...*KeyValue) error {
-	r.lock.Lock()
-	merged, err := cloneMap(r.values)
-	r.lock.Unlock()
+	merged, err := r.cloneMap()
 	if err != nil {
 		return err
 	}
@@ -90,12 +88,12 @@ func cloneMap(src map[string]interface{}) (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	var copy map[string]interface{}
-	err = dec.Decode(&copy)
+	var clone map[string]interface{}
+	err = dec.Decode(&clone)
 	if err != nil {
 		return nil, err
 	}
-	return copy, nil
+	return clone, nil
 }
 
 func convertMap(src interface{}) interface{} {
@@ -152,6 +150,12 @@ func readValue(values map[string]interface{}, path string) (Value, bool) {
 		}
 	}
 	return nil, false
+}
+
+func (r *reader) cloneMap() (map[string]interface{}, error) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	return cloneMap(r.values)
 }
 
 func marshalJSON(v interface{}) ([]byte, error) {
