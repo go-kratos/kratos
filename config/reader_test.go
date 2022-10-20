@@ -118,7 +118,7 @@ a:
 			r := newReader(opts)
 			err := r.Merge(&test.kv)
 			if err != nil {
-				t.Fatal("err is not nil")
+				t.Fatal(err)
 			}
 			vv, ok := r.Value("a.b.X")
 			if !ok {
@@ -126,7 +126,7 @@ a:
 			}
 			vvv, err := vv.Int()
 			if err != nil {
-				t.Fatal("err is not nil")
+				t.Fatal(err)
 			}
 			if int64(1) != vvv {
 				t.Fatal("vvv is not equal to 1")
@@ -138,7 +138,7 @@ a:
 			}
 			vvy, err := vv.String()
 			if err != nil {
-				t.Fatal("err is not nil")
+				t.Fatal(err)
 			}
 			if vvy != "lol" {
 				t.Fatal(`vvy is not equal to "lol"`)

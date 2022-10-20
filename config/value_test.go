@@ -13,10 +13,10 @@ func TestAtomicValue_Bool(t *testing.T) {
 		v.Store(x)
 		b, err := v.Bool()
 		if err != nil {
-			t.Fatal("err is not nil")
+			t.Fatal(err)
 		}
 		if !b {
-			t.Fatal(`b is not equal to true`)
+			t.Fatal("b is not equal to true")
 		}
 	}
 
@@ -26,10 +26,10 @@ func TestAtomicValue_Bool(t *testing.T) {
 		v.Store(x)
 		b, err := v.Bool()
 		if err != nil {
-			t.Fatal("err is not nil")
+			t.Fatal(err)
 		}
 		if b {
-			t.Fatal(`b is not equal to false`)
+			t.Fatal("b is not equal to false")
 		}
 	}
 
@@ -39,7 +39,7 @@ func TestAtomicValue_Bool(t *testing.T) {
 		v.Store(x)
 		_, err := v.Bool()
 		if err == nil {
-			t.Fatal(`err is nil`)
+			t.Fatal("err is nil")
 		}
 	}
 }
@@ -51,10 +51,10 @@ func TestAtomicValue_Int(t *testing.T) {
 		v.Store(x)
 		b, err := v.Int()
 		if err != nil {
-			t.Fatal("err is not nil")
+			t.Fatal(err)
 		}
 		if b != 123123 {
-			t.Fatal(`b is not equal to 123123`)
+			t.Fatal("b is not equal to 123123")
 		}
 	}
 
@@ -64,7 +64,7 @@ func TestAtomicValue_Int(t *testing.T) {
 		v.Store(x)
 		_, err := v.Int()
 		if err == nil {
-			t.Fatal(`err is nil`)
+			t.Fatal("err is nil")
 		}
 	}
 }
@@ -76,10 +76,10 @@ func TestAtomicValue_Float(t *testing.T) {
 		v.Store(x)
 		b, err := v.Float()
 		if err != nil {
-			t.Fatal("err is not nil")
+			t.Fatal(err)
 		}
 		if b != 123123.1 {
-			t.Fatal(`b is not equal to 123123.1`)
+			t.Fatal("b is not equal to 123123.1")
 		}
 	}
 
@@ -89,7 +89,7 @@ func TestAtomicValue_Float(t *testing.T) {
 		v.Store(x)
 		_, err := v.Float()
 		if err == nil {
-			t.Fatal(`err is nil`)
+			t.Fatal("err is nil")
 		}
 	}
 }
@@ -110,7 +110,7 @@ func TestAtomicValue_String(t *testing.T) {
 		v.Store(x)
 		b, err := v.String()
 		if err != nil {
-			t.Fatal("err is not nil")
+			t.Fatal(err)
 		}
 		if b != "1" {
 			t.Fatal("b is not equal to 1")
@@ -121,7 +121,7 @@ func TestAtomicValue_String(t *testing.T) {
 	v.Store(true)
 	b, err := v.String()
 	if err != nil {
-		t.Fatal("err is not nil")
+		t.Fatal(err)
 	}
 	if b != "true" {
 		t.Fatal(`b is not equal to "true"`)
@@ -134,7 +134,7 @@ func TestAtomicValue_String(t *testing.T) {
 	})
 	b, err = v.String()
 	if err != nil {
-		t.Fatal("err is not nil")
+		t.Fatal(err)
 	}
 	if b != "test10" {
 		t.Fatal(`b is not equal to "test10"`)
@@ -148,10 +148,10 @@ func TestAtomicValue_Duration(t *testing.T) {
 		v.Store(x)
 		b, err := v.Duration()
 		if err != nil {
-			t.Fatal("err is not nil")
+			t.Fatal(err)
 		}
 		if b != time.Duration(5) {
-			t.Fatal(`b is not equal to time.Duration(5)`)
+			t.Fatal("b is not equal to time.Duration(5)")
 		}
 	}
 }
@@ -162,15 +162,15 @@ func TestAtomicValue_Slice(t *testing.T) {
 	v.Store(vlist)
 	slices, err := v.Slice()
 	if err != nil {
-		t.Fatal("err is not nil")
+		t.Fatal(err)
 	}
 	for _, v := range slices {
 		b, err := v.Duration()
 		if err != nil {
-			t.Fatal("err is not nil")
+			t.Fatal(err)
 		}
 		if b != time.Duration(5) {
-			t.Fatal(`b is not equal to time.Duration(5)`)
+			t.Fatal("b is not equal to time.Duration(5)")
 		}
 	}
 }
@@ -183,21 +183,21 @@ func TestAtomicValue_Map(t *testing.T) {
 	v.Store(vlist)
 	m, err := v.Map()
 	if err != nil {
-		t.Fatal("err is not nil")
+		t.Fatal(err)
 	}
 	for k, v := range m {
 		if k == "5" {
 			b, err := v.Duration()
 			if err != nil {
-				t.Fatal("err is not nil")
+				t.Fatal(err)
 			}
 			if b != time.Duration(5) {
-				t.Fatal(`b is not equal to time.Duration(5)`)
+				t.Fatal("b is not equal to time.Duration(5)")
 			}
 		} else {
 			b, err := v.String()
 			if err != nil {
-				t.Fatal("err is not nil")
+				t.Fatal(err)
 			}
 			if b != "text" {
 				t.Fatal(`b is not equal to "text"`)
@@ -212,13 +212,13 @@ func TestAtomicValue_Scan(t *testing.T) {
 		A string `json:"a"`
 	}{"a"})
 	if err != nil {
-		t.Fatal("err is not nil")
+		t.Fatal(err)
 	}
 
 	err = v.Scan(&struct {
 		A string `json:"a"`
 	}{"a"})
 	if err != nil {
-		t.Fatal("err is not nil")
+		t.Fatal(err)
 	}
 }

@@ -15,7 +15,7 @@ func TestDefaultDecoder(t *testing.T) {
 	target := make(map[string]interface{})
 	err := defaultDecoder(src, target)
 	if err != nil {
-		t.Fatal("err is not nil")
+		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(target, map[string]interface{}{"service": []byte("config")}) {
 		t.Fatal(`target is not equal to map[string]interface{}{"service": "config"}`)
@@ -29,7 +29,7 @@ func TestDefaultDecoder(t *testing.T) {
 	target = make(map[string]interface{})
 	err = defaultDecoder(src, target)
 	if err != nil {
-		t.Fatal("err is not nil")
+		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(map[string]interface{}{
 		"service": map[string]interface{}{
@@ -161,7 +161,7 @@ func TestDefaultResolver(t *testing.T) {
 				case int:
 					if actual, err = v.Int(); err == nil {
 						if !reflect.DeepEqual(test.expect.(int), int(actual.(int64))) {
-							t.Fatal(`expect is not equal to actual`)
+							t.Fatal("expect is not equal to actual")
 						}
 					}
 				case string:
