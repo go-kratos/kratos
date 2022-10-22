@@ -70,14 +70,13 @@ func TestPopulateMapField(t *testing.T) {
 	comp := &complex.Complex{}
 	field := getFieldDescriptor(comp.ProtoReflect(), "map")
 	// Fill the comp map field with the url query values
-	err = populateMapField(field, comp.ProtoReflect().Mutable(field).Map(), []string{"map"}, query["map[kratos]"])
+	err = populateMapField(field, comp.ProtoReflect().Mutable(field).Map(), []string{"kratos"}, query["map[kratos]"])
 	if err != nil {
 		t.Fatal(err)
 	}
 	// Get the comp map field value
-	val := comp.ProtoReflect().Mutable(field).Map().Get(protoreflect.ValueOfString("map").MapKey())
-	if !reflect.DeepEqual(protoreflect.ValueOfString(query["map[kratos]"][0]), val) {
-		t.Errorf("want: %s, got: %s", query["map"], val)
+	if query["map[kratos]"][0] != comp.Map["kratos"] {
+		t.Errorf("want: %s, got: %s", query["map[kratos]"], comp.Map["kratos"])
 	}
 }
 
