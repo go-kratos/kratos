@@ -62,6 +62,23 @@ func TestGetFieldDescriptor(t *testing.T) {
 	}
 }
 
+func TestPopulateRepeatedField(t *testing.T) {
+	query, err := url.ParseQuery("simples=3344&simples=5566")
+	if err != nil {
+		t.Fatal(err)
+	}
+	comp := &complex.Complex{}
+	field := getFieldDescriptor(comp.ProtoReflect(), "simples")
+
+	err = populateRepeatedField(field, comp.ProtoReflect().Mutable(field).List(), query["simples"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual([]string{"3344", "5566"}, comp.GetSimples()) {
+		t.Errorf("want: %v, got: %v", []string{"3344", "5566"}, comp.GetSimples())
+	}
+}
+
 func TestPopulateMapField(t *testing.T) {
 	query, err := url.ParseQuery("map%5Bkratos%5D=https://go-kratos.dev/")
 	if err != nil {
