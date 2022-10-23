@@ -116,7 +116,7 @@ func (a *App) Run() error {
 	if a.opts.registrar != nil {
 		rctx, rcancel := context.WithTimeout(ctx, a.opts.registrarTimeout)
 		defer rcancel()
-		if err := a.opts.registrar.Register(rctx, instance); err != nil {
+		if err = a.opts.registrar.Register(rctx, instance); err != nil {
 			return err
 		}
 	}
@@ -136,7 +136,7 @@ func (a *App) Run() error {
 			return a.Stop()
 		}
 	})
-	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
+	if err = eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return err
 	}
 	for _, fn := range a.opts.afterStop {
