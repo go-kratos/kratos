@@ -254,7 +254,7 @@ func TestServer(t *testing.T) {
 			}
 			if test.exceptErr == nil {
 				if testToken == nil {
-					t.Errorf("except testToken not nil, but got nil")
+					t.Fatal("except testToken not nil, but got nil")
 				}
 				_, ok := testToken.(jwt.MapClaims)
 				if !ok {
@@ -492,4 +492,27 @@ func TestClientMissKey(t *testing.T) {
 			}
 		}
 	})
+}
+
+func TestNewContextAndFromContext(t *testing.T) {
+	tests := []struct {
+		name   string
+		claims jwt.MapClaims
+	}{
+		{"val not nil", jwt.MapClaims{"name": "kratos"}},
+		{"val nil", nil},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctx := NewContext(context.Background(), test.claims)
+
+			claims, ok := FromContext(ctx)
+			if !ok {
+				t.Fatal("ctx not found authKey{}")
+			}
+			if !reflect.DeepEqual(test.claims, claims) {
+				t.Errorf(`want: %s, got: %v`, test.claims, claims)
+			}
+		})
+	}
 }

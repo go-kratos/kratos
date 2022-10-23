@@ -3,6 +3,7 @@ package opensergo
 import (
 	"encoding/json"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"strconv"
@@ -186,15 +187,15 @@ func listDescriptors() (services []*v1.ServiceDescriptor, types []*v1.TypeDescri
 func HTTPPatternInfo(pattern interface{}) (method string, path string) {
 	switch p := pattern.(type) {
 	case *annotations.HttpRule_Get:
-		return "GET", p.Get
+		return http.MethodGet, p.Get
 	case *annotations.HttpRule_Post:
-		return "POST", p.Post
+		return http.MethodPost, p.Post
 	case *annotations.HttpRule_Delete:
-		return "DELETE", p.Delete
+		return http.MethodDelete, p.Delete
 	case *annotations.HttpRule_Patch:
-		return "PATCH", p.Patch
+		return http.MethodPatch, p.Patch
 	case *annotations.HttpRule_Put:
-		return "PUT", p.Put
+		return http.MethodPut, p.Put
 	case *annotations.HttpRule_Custom:
 		return p.Custom.Kind, p.Custom.Path
 	default:
