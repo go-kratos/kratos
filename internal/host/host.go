@@ -74,6 +74,9 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 				continue
 			}
 			if isValidIP(ip.String()) {
+				if ip.IsPrivate() {
+					return net.JoinHostPort(ip.String(), port), nil
+				}
 				minIndex = iface.Index
 				if i == 0 {
 					ips = make([]net.IP, 0, 1)
