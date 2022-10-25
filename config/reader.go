@@ -77,6 +77,12 @@ func (r *reader) Resolve() error {
 	return r.opts.resolver(r.values)
 }
 
+func (r *reader) cloneMap() (map[string]interface{}, error) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	return cloneMap(r.values)
+}
+
 func cloneMap(src map[string]interface{}) (map[string]interface{}, error) {
 	// https://gist.github.com/soroushjp/0ec92102641ddfc3ad5515ca76405f4d
 	var buf bytes.Buffer
@@ -150,12 +156,6 @@ func readValue(values map[string]interface{}, path string) (Value, bool) {
 		}
 	}
 	return nil, false
-}
-
-func (r *reader) cloneMap() (map[string]interface{}, error) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	return cloneMap(r.values)
 }
 
 func marshalJSON(v interface{}) ([]byte, error) {
