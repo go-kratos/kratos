@@ -22,6 +22,24 @@ func isValidIP(addr string) bool {
 	return ip.IsGlobalUnicast() && !ip.IsInterfaceLocalMulticast()
 }
 
+func isPrivateIP(addr string) bool {
+	ip := net.ParseIP(addr)
+	if ip4 := ip.To4(); ip4 != nil {
+		// Following RFC 1918, Section 3. Private Address Space which says:
+		//   The Internet Assigned Numbers Authority (IANA) has reserved the
+		//   following three blocks of the IP address space for private internets:
+		//     10.0.0.0        -   10.255.255.255  (10/8 prefix)
+		//     172.16.0.0      -   172.31.255.255  (172.16/12 prefix)
+		//     192.168.0.0     -   192.168.255.255 (192.168/16 prefix)
+		return ip4[0] == 10 ||
+			(ip4[0] == 172 && ip4[1]&0xf0 == 16) ||
+			(ip4[0] == 192 && ip4[1] == 168)
+	}
+	// Following RFC 4193, Section 8. IANA Considerations which says:
+	//   The IANA has assigned the FC00::/7 prefix to "Unique Local Unicast".
+	return len(ip) == net.IPv6len && ip[0]&0xfe == 0xfc
+}
+
 // Port return a real port.
 func Port(lis net.Listener) (int, bool) {
 	if addr, ok := lis.Addr().(*net.TCPAddr); ok {
@@ -74,7 +92,7 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 				continue
 			}
 			if isValidIP(ip.String()) {
-				if ip.IsPrivate() {
+				if isPrivateIP(ip.String()) {
 					return net.JoinHostPort(ip.String(), port), nil
 				}
 				minIndex = iface.Index
