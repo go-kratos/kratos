@@ -57,6 +57,20 @@ func Test_WithGroup(t *testing.T) {
 	}
 }
 
+func  Test_WithCircuitBreaker(t *testing.T)  {
+	o := options{
+		group: group.NewGroup(func() interface{} {
+			return ""
+		}),
+	}
+
+	WithCircuitBreaker(new(circuitBreakerMock))(&o)
+	_, ok := o.group.Get("pass").(*circuitBreakerMock)
+	if !ok {
+		t.Error("The circuit breaker didn't set rightly.")
+	}
+}
+
 func Test_Server(t *testing.T) {
 	nextValid := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return "Hello valid", nil
