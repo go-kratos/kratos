@@ -97,5 +97,4 @@ config := map[string]interface{}{
         }
     }
 }
-_ = config
 ```
