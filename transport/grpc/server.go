@@ -102,6 +102,13 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 	}
 }
 
+// Health with grpc health check
+func Health(h HealthCheck) ServerOption {
+	return func(o *Server) {
+		o.health = h
+	}
+}
+
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
@@ -117,7 +124,7 @@ type Server struct {
 	unaryInts  []grpc.UnaryServerInterceptor
 	streamInts []grpc.StreamServerInterceptor
 	grpcOpts   []grpc.ServerOption
-	health     *health.Server
+	health     HealthCheck
 	metadata   *apimd.Server
 }
 
