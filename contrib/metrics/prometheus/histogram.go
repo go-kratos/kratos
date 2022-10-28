@@ -1,8 +1,9 @@
 package prometheus
 
 import (
-	"github.com/go-kratos/kratos/v2/metrics"
 	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/go-kratos/kratos/v2/metrics"
 )
 
 var _ metrics.Observer = (*histogram)(nil)

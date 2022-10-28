@@ -25,7 +25,7 @@ func TestCodec_Marshal(t *testing.T) {
 		// Test value types
 		{Value: &Plain{true}, ExpectXML: `<Plain><V>true</V></Plain>`},
 		{Value: &Plain{false}, ExpectXML: `<Plain><V>false</V></Plain>`},
-		{Value: &Plain{int(42)}, ExpectXML: `<Plain><V>42</V></Plain>`},
+		{Value: &Plain{42}, ExpectXML: `<Plain><V>42</V></Plain>`},
 		{
 			Value: &NestedOrder{Field1: "C", Field2: "B", Field3: "A"},
 			ExpectXML: `<result>` +

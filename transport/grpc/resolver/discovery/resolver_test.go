@@ -7,8 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
 	"google.golang.org/grpc/resolver"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 type testClientConn struct {

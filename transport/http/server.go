@@ -70,10 +70,24 @@ func Filter(filters ...FilterFunc) ServerOption {
 	}
 }
 
+// RequestVarsDecoder with request decoder.
+func RequestVarsDecoder(dec DecodeRequestFunc) ServerOption {
+	return func(o *Server) {
+		o.decVars = dec
+	}
+}
+
+// RequestQueryDecoder with request decoder.
+func RequestQueryDecoder(dec DecodeRequestFunc) ServerOption {
+	return func(o *Server) {
+		o.decQuery = dec
+	}
+}
+
 // RequestDecoder with request decoder.
 func RequestDecoder(dec DecodeRequestFunc) ServerOption {
 	return func(o *Server) {
-		o.dec = dec
+		o.decBody = dec
 	}
 }
 
@@ -114,6 +128,13 @@ func Listener(lis net.Listener) ServerOption {
 	}
 }
 
+// PathPrefix with mux's PathPrefix, router will replaced by a subrouter that start with prefix.
+func PathPrefix(prefix string) ServerOption {
+	return func(s *Server) {
+		s.router = s.router.PathPrefix(prefix).Subrouter()
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
@@ -126,7 +147,9 @@ type Server struct {
 	timeout     time.Duration
 	filters     []FilterFunc
 	middleware  matcher.Matcher
-	dec         DecodeRequestFunc
+	decVars     DecodeRequestFunc
+	decQuery    DecodeRequestFunc
+	decBody     DecodeRequestFunc
 	enc         EncodeResponseFunc
 	ene         EncodeErrorFunc
 	strictSlash bool
@@ -140,15 +163,18 @@ func NewServer(opts ...ServerOption) *Server {
 		address:     ":0",
 		timeout:     1 * time.Second,
 		middleware:  matcher.New(),
-		dec:         DefaultRequestDecoder,
+		decVars:     DefaultRequestVars,
+		decQuery:    DefaultRequestQuery,
+		decBody:     DefaultRequestDecoder,
 		enc:         DefaultResponseEncoder,
 		ene:         DefaultErrorEncoder,
 		strictSlash: true,
+		router:      mux.NewRouter(),
 	}
 	for _, o := range opts {
 		o(srv)
 	}
-	srv.router = mux.NewRouter().StrictSlash(srv.strictSlash)
+	srv.router.StrictSlash(srv.strictSlash)
 	srv.router.NotFoundHandler = http.DefaultServeMux
 	srv.router.MethodNotAllowedHandler = http.DefaultServeMux
 	srv.router.Use(srv.filter())

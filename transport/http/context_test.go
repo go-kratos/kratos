@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -13,9 +12,11 @@ import (
 	"time"
 )
 
+var testRouter = &Router{srv: NewServer()}
+
 func TestContextHeader(t *testing.T) {
 	w := wrapper{
-		router: nil,
+		router: testRouter,
 		req:    &http.Request{Header: map[string][]string{"name": {"kratos"}}},
 		res:    nil,
 		w:      responseWriter{},
@@ -28,8 +29,8 @@ func TestContextHeader(t *testing.T) {
 
 func TestContextForm(t *testing.T) {
 	w := wrapper{
-		router: nil,
-		req:    &http.Request{Header: map[string][]string{"name": {"kratos"}}, Method: "POST"},
+		router: testRouter,
+		req:    &http.Request{Header: map[string][]string{"name": {"kratos"}}, Method: http.MethodPost},
 		res:    nil,
 		w:      responseWriter{},
 	}
@@ -39,7 +40,7 @@ func TestContextForm(t *testing.T) {
 	}
 
 	w = wrapper{
-		router: nil,
+		router: testRouter,
 		req:    &http.Request{Form: map[string][]string{"name": {"kratos"}}},
 		res:    nil,
 		w:      responseWriter{},
@@ -52,8 +53,8 @@ func TestContextForm(t *testing.T) {
 
 func TestContextQuery(t *testing.T) {
 	w := wrapper{
-		router: nil,
-		req:    &http.Request{URL: &url.URL{Scheme: "https", Host: "github.com", Path: "go-kratos/kratos", RawQuery: "page=1"}, Method: "POST"},
+		router: testRouter,
+		req:    &http.Request{URL: &url.URL{Scheme: "https", Host: "github.com", Path: "go-kratos/kratos", RawQuery: "page=1"}, Method: http.MethodPost},
 		res:    nil,
 		w:      responseWriter{},
 	}
@@ -64,9 +65,9 @@ func TestContextQuery(t *testing.T) {
 }
 
 func TestContextRequest(t *testing.T) {
-	req := &http.Request{Method: "POST"}
+	req := &http.Request{Method: http.MethodPost}
 	w := wrapper{
-		router: nil,
+		router: testRouter,
 		req:    req,
 		res:    nil,
 		w:      responseWriter{},
@@ -81,7 +82,7 @@ func TestContextResponse(t *testing.T) {
 	res := httptest.NewRecorder()
 	w := wrapper{
 		router: &Router{srv: &Server{enc: DefaultResponseEncoder}},
-		req:    &http.Request{Method: "POST"},
+		req:    &http.Request{Method: http.MethodPost},
 		res:    res,
 		w:      responseWriter{200, res},
 	}
@@ -92,7 +93,7 @@ func TestContextResponse(t *testing.T) {
 	if err != nil {
 		t.Errorf("expected %v, got %v", nil, err)
 	}
-	needErr := fmt.Errorf("some error")
+	needErr := errors.New("some error")
 	err = w.Returns(map[string]string{}, needErr)
 	if !errors.Is(err, needErr) {
 		t.Errorf("expected %v, got %v", needErr, err)
@@ -101,7 +102,7 @@ func TestContextResponse(t *testing.T) {
 
 func TestContextBindQuery(t *testing.T) {
 	w := wrapper{
-		router: nil,
+		router: testRouter,
 		req:    &http.Request{URL: &url.URL{Scheme: "https", Host: "go-kratos-dev", RawQuery: "page=2"}},
 		res:    nil,
 		w:      responseWriter{},
@@ -121,7 +122,7 @@ func TestContextBindQuery(t *testing.T) {
 
 func TestContextBindForm(t *testing.T) {
 	w := wrapper{
-		router: nil,
+		router: testRouter,
 		req:    &http.Request{URL: &url.URL{Scheme: "https", Host: "go-kratos-dev"}, Form: map[string][]string{"page": {"2"}}},
 		res:    nil,
 		w:      responseWriter{},
@@ -142,7 +143,7 @@ func TestContextBindForm(t *testing.T) {
 func TestContextResponseReturn(t *testing.T) {
 	writer := httptest.NewRecorder()
 	w := wrapper{
-		router: nil,
+		router: testRouter,
 		req:    nil,
 		res:    writer,
 		w:      responseWriter{},
@@ -172,10 +173,10 @@ func TestContextResponseReturn(t *testing.T) {
 func TestContextCtx(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	req := &http.Request{Method: "POST"}
+	req := &http.Request{Method: http.MethodPost}
 	req = req.WithContext(ctx)
 	w := wrapper{
-		router: &Router{srv: &Server{enc: DefaultResponseEncoder}},
+		router: testRouter,
 		req:    req,
 		res:    nil,
 		w:      responseWriter{},

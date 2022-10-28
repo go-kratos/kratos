@@ -7,17 +7,19 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"sync"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protodesc"
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 	dpb "google.golang.org/protobuf/types/descriptorpb"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 // Server is api meta server
@@ -114,6 +116,8 @@ func (s *Server) ListServices(ctx context.Context, in *ListServicesRequest) (*Li
 			reply.Methods = append(reply.Methods, fmt.Sprintf("/%s/%s", name, method))
 		}
 	}
+	sort.Strings(reply.Services)
+	sort.Strings(reply.Methods)
 	return reply, nil
 }
 

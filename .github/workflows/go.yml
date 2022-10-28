@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        go: [1.16, 1.17, 1.18]
+        go: [1.16, 1.17, 1.18, 1.19]
     name: build & test
     runs-on: ubuntu-latest
     services:
@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
-        uses: actions/setup-go@v3.3.0
+        uses: actions/setup-go@v3.3.1
         with:
           go-version: ${{ matrix.go }}
 

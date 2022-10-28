@@ -208,7 +208,7 @@ func TestConfig(t *testing.T) {
 func testConfig(t *testing.T, c config.Config) {
 	expected := map[string]interface{}{
 		"test.settings.int_key":      int64(1000),
-		"test.settings.float_key":    float64(1000.1),
+		"test.settings.float_key":    1000.1,
 		"test.settings.string_key":   "string_value",
 		"test.settings.duration_key": time.Duration(10000),
 		"test.server.addr":           "127.0.0.1",

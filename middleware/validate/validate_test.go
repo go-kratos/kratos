@@ -2,10 +2,10 @@ package validate
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/errors"
+	kratoserrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 )
 
@@ -18,7 +18,7 @@ type protoVali struct {
 
 func (v protoVali) Validate() error {
 	if v.name == "" || v.age < 0 {
-		return fmt.Errorf("err")
+		return errors.New("err")
 	}
 	return nil
 }
@@ -35,7 +35,7 @@ func TestTable(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			v := Validator()(mock)
 			_, err := v(context.Background(), test)
-			if want, have := test.isErr, errors.IsBadRequest(err); want != have {
+			if want, have := test.isErr, kratoserrors.IsBadRequest(err); want != have {
 				t.Errorf("fail data %v, want %v, have %v", test, want, have)
 			}
 		})

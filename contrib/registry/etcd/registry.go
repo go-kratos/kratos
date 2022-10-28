@@ -6,13 +6,14 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
 	clientv3 "go.etcd.io/etcd/client/v3"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 var (
-	_ registry.Registrar = &Registry{}
-	_ registry.Discovery = &Registry{}
+	_ registry.Registrar = (*Registry)(nil)
+	_ registry.Discovery = (*Registry)(nil)
 )
 
 // Option is etcd registry option.

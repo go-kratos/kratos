@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	_ registry.Registrar = &Registry{}
-	_ registry.Discovery = &Registry{}
+	_ registry.Registrar = (*Registry)(nil)
+	_ registry.Discovery = (*Registry)(nil)
 )
 
 type Option func(o *Registry)
@@ -92,12 +92,9 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 }
 
 func (r *Registry) Endpoints(service *registry.ServiceInstance) []Endpoint {
-	var (
-		res   = []Endpoint{}
-		start int
-	)
+	res := make([]Endpoint, 0, len(service.Endpoints))
 	for _, ep := range service.Endpoints {
-		start = strings.Index(ep, "//")
+		start := strings.Index(ep, "//")
 		end := strings.LastIndex(ep, ":")
 		appID := strings.ToUpper(service.Name)
 		ip := ep[start+2 : end]
