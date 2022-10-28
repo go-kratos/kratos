@@ -101,13 +101,11 @@ func TestDirectErrorHandler(t *testing.T) {
 			Endpoints: []string{"http://127.0.0.1:9090"},
 			Metadata:  map[string]string{"weight": "10"},
 		}))
-	var (
-		errs = []error{
-			context.DeadlineExceeded,
-			context.Canceled,
-			net.ErrClosed,
-		}
-	)
+	errs := []error{
+		context.DeadlineExceeded,
+		context.Canceled,
+		net.ErrClosed,
+	}
 	for i := 0; i < 5; i++ {
 		var err error
 		if i != 0 {
