@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
@@ -85,7 +86,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 			sd.Methods = append(sd.Methods, buildHTTPRule(g, method, rule))
 		} else if !omitempty {
 			path := fmt.Sprintf("/%s/%s", service.Desc.FullName(), method.Desc.Name())
-			sd.Methods = append(sd.Methods, buildMethodDesc(g, method, "POST", path))
+			sd.Methods = append(sd.Methods, buildMethodDesc(g, method, http.MethodPost, path))
 		}
 	}
 	if len(sd.Methods) != 0 {
@@ -119,19 +120,19 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	switch pattern := rule.Pattern.(type) {
 	case *annotations.HttpRule_Get:
 		path = pattern.Get
-		method = "GET"
+		method = http.MethodGet
 	case *annotations.HttpRule_Put:
 		path = pattern.Put
-		method = "PUT"
+		method = http.MethodPut
 	case *annotations.HttpRule_Post:
 		path = pattern.Post
-		method = "POST"
+		method = http.MethodPost
 	case *annotations.HttpRule_Delete:
 		path = pattern.Delete
-		method = "DELETE"
+		method = http.MethodDelete
 	case *annotations.HttpRule_Patch:
 		path = pattern.Patch
-		method = "PATCH"
+		method = http.MethodPatch
 	case *annotations.HttpRule_Custom:
 		path = pattern.Custom.Path
 		method = pattern.Custom.Kind
@@ -139,7 +140,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	body = rule.Body
 	responseBody = rule.ResponseBody
 	md := buildMethodDesc(g, m, method, path)
-	if method == "GET" || method == "DELETE" {
+	if method == http.MethodGet || method == http.MethodDelete {
 		if body != "" {
 			_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s body should not be declared.\n", method, path)
 		}
@@ -213,7 +214,7 @@ func buildPathVars(path string) (res map[string]*string) {
 	if strings.HasSuffix(path, "/") {
 		fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: Path %s should not end with \"/\" \n", path)
 	}
-	pattern := regexp.MustCompile(`(?i){([a-z\.0-9_\s]*)=?([^{}]*)}`)
+	pattern := regexp.MustCompile(`(?i){([a-z.0-9_\s]*)=?([^{}]*)}`)
 	matches := pattern.FindAllStringSubmatch(path, -1)
 	res = make(map[string]*string, len(matches))
 	for _, m := range matches {

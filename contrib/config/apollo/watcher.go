@@ -4,12 +4,11 @@ import (
 	"context"
 	"strings"
 
-	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/apolloconfig/agollo/v4/storage"
 
 	"github.com/go-kratos/kratos/v2/config"
+	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/log"
-
-	"github.com/apolloconfig/agollo/v4/storage"
 )
 
 type watcher struct {

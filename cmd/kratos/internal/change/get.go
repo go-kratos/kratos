@@ -43,7 +43,7 @@ func (g *GithubAPI) GetReleaseInfo(version string) ReleaseInfo {
 	if version != "latest" {
 		api = fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/tags/%s", g.Owner, g.Repo, version)
 	}
-	resp, code := requestGithubAPI(api, "GET", nil, g.Token)
+	resp, code := requestGithubAPI(api, http.MethodGet, nil, g.Token)
 	if code != http.StatusOK {
 		printGithubErrorInfo(resp)
 	}
@@ -63,7 +63,7 @@ func (g *GithubAPI) GetCommitsInfo() []CommitInfo {
 	var list []CommitInfo
 	for {
 		url := fmt.Sprintf("https://api.github.com/repos/%s/%s/commits?pre_page=%d&page=%d&since=%s", g.Owner, g.Repo, prePage, page, info.PublishedAt)
-		resp, code := requestGithubAPI(url, "GET", nil, g.Token)
+		resp, code := requestGithubAPI(url, http.MethodGet, nil, g.Token)
 		if code != http.StatusOK {
 			printGithubErrorInfo(resp)
 		}
