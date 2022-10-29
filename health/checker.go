@@ -31,16 +31,18 @@ type checkerHandler struct {
 	Notifier
 }
 
-func NewChecker(name string, ch Checker, interval, timeout time.Duration) CheckerHandler {
-	return &checkerHandler{
+func NewChecker(name string, ch Checker, opt ...CheckOption) CheckerHandler {
+	c := &checkerHandler{
 		Name:          name,
-		intervalTime:  interval,
-		timeout:       timeout,
 		Checker:       ch,
 		CheckerStatus: CheckerStatus{},
 		RWMutex:       &sync.RWMutex{},
 		Notifier:      nil,
 	}
+	for _, v := range opt {
+		v(c)
+	}
+	return c
 }
 
 func (c *checkerHandler) setNotifier(w Notifier) {
@@ -103,4 +105,18 @@ func (c *checkerHandler) getStatus() CheckerStatus {
 	c.RLock()
 	defer c.RUnlock()
 	return c.CheckerStatus
+}
+
+type CheckOption func(handler *checkerHandler)
+
+func WithInterval(interval time.Duration) CheckOption {
+	return func(handler *checkerHandler) {
+		handler.intervalTime = interval
+	}
+}
+
+func WithTimeout(timeout time.Duration) CheckOption {
+	return func(handler *checkerHandler) {
+		handler.timeout = timeout
+	}
 }

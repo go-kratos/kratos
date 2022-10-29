@@ -100,7 +100,7 @@ func (c *CheckerMgr) NewWatcher() Watcher {
 	c.lock.Lock()
 	wID := c.watcherID
 	c.watcherID++
-	ch := make(chan string, 1)
+	ch := make(chan string, len(c.checkers))
 	c.watchers[wID] = ch
 	c.lock.Unlock()
 	return Watcher{
