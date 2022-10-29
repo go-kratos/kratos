@@ -96,7 +96,7 @@ func TestBindForm(t *testing.T) {
 		{
 			name: "error not nil",
 			args: args{
-				req:    &http.Request{Method: "POST"},
+				req:    &http.Request{Method: http.MethodPost},
 				target: &p1,
 			},
 			wantErr: true,
@@ -106,7 +106,7 @@ func TestBindForm(t *testing.T) {
 			name: "error is nil",
 			args: args{
 				req: &http.Request{
-					Method: "POST",
+					Method: http.MethodPost,
 					Header: http.Header{"Content-Type": {"application/x-www-form-urlencoded; param=value"}},
 					Body:   io.NopCloser(strings.NewReader("name=kratos&url=https://go-kratos.dev/")),
 				},
@@ -119,7 +119,7 @@ func TestBindForm(t *testing.T) {
 			name: "error BadRequest",
 			args: args{
 				req: &http.Request{
-					Method: "POST",
+					Method: http.MethodPost,
 					Header: http.Header{"Content-Type": {"application/x-www-form-urlencoded; param=value"}},
 					Body:   io.NopCloser(strings.NewReader("age=a")),
 				},

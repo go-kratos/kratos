@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	nethttp "net/http"
 	"reflect"
 	"strconv"
@@ -348,18 +349,18 @@ func TestNewClient(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{}, &mockCallOption{})
+	err = client.Invoke(context.Background(), http.MethodPost, "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{}, &mockCallOption{})
 	if err == nil {
 		t.Error("err should not be equal to nil")
 	}
-	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{}, &mockCallOption{needErr: true})
+	err = client.Invoke(context.Background(), http.MethodPost, "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{}, &mockCallOption{needErr: true})
 	if err == nil {
 		t.Error("err should be equal to callOption err")
 	}
 	client.opts.encoder = func(ctx context.Context, contentType string, in interface{}) (body []byte, err error) {
 		return nil, errors.New("mock test encoder error")
 	}
-	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{})
+	err = client.Invoke(context.Background(), http.MethodPost, "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{})
 	if err == nil {
 		t.Error("err should be equal to encoder error")
 	}
