@@ -1,0 +1,5 @@
+syntax="proto3";
+
+package kratos.health;
+
+option go_package = "github.com/go-kratos/kratos/v2/api/proto/kratos/api;metadata";

@@ -10,7 +10,9 @@ type Checker interface {
 	Check(ctx context.Context) (interface{}, error)
 }
 
-type Watcher func(string)
+type Watcher interface {
+	Watch(string)
+}
 
 type checker struct {
 	Name         string
@@ -18,25 +20,43 @@ type checker struct {
 	timeout      time.Duration
 	Checker
 	CheckerStatus
-	sync.RWMutex
+	*sync.RWMutex
 	Watcher
 }
 
-func NewChecker(name string, checker Checker) {
+func NewChecker(name string, ch Checker, interval, timeout time.Duration) *checker {
+	return &checker{
+		Name:          name,
+		intervalTime:  interval,
+		timeout:       timeout,
+		Checker:       ch,
+		CheckerStatus: CheckerStatus{},
+		RWMutex:       &sync.RWMutex{},
+		Watcher:       nil,
+	}
+}
 
+func (c *checker) setWatcher(w Watcher) {
+	c.Watcher = w
 }
 
 func (c *checker) check(ctx context.Context) bool {
 	defer func() {
 		recover()
 	}()
-	ctx, cancel := context.WithTimeout(ctx, c.timeout)
-	defer cancel()
+
+	var cancel func()
+	if c.timeout > 0 {
+		ctx, cancel = context.WithTimeout(ctx, c.timeout)
+		defer cancel()
+	}
+
 	detail, err := c.Check(ctx)
 	status := StatusUp
 	if err != nil {
 		status = StatusDown
 	}
+
 	c.Lock()
 	defer c.Unlock()
 	old := c.CheckerStatus
@@ -59,8 +79,10 @@ func (c *checker) run(ctx context.Context) {
 		default:
 		}
 		if c.check(ctx) {
-			//发送改变通知
-			c.Watcher(c.Name)
+			//notify
+			if c.Watcher != nil {
+				c.Watcher.Watch(c.Name)
+			}
 		}
 		time.Sleep(c.intervalTime)
 	}
