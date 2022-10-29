@@ -2,14 +2,14 @@ package health
 
 import (
 	"fmt"
-	"golang.org/x/net/context"
 	"math/rand"
 	"testing"
 	"time"
+
+	"golang.org/x/net/context"
 )
 
-type A struct {
-}
+type A struct{}
 
 func (A) Check(ctx context.Context) (interface{}, error) {
 	fmt.Println("check A")
@@ -19,8 +19,7 @@ func (A) Check(ctx context.Context) (interface{}, error) {
 	return "正常A", nil
 }
 
-type B struct {
-}
+type B struct{}
 
 func (B) Check(ctx context.Context) (interface{}, error) {
 	fmt.Println("check B")

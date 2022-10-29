@@ -2,6 +2,7 @@ package health
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -53,10 +54,13 @@ func (c *checkerHandler) getName() string {
 	return c.Name
 }
 
-func (c *checkerHandler) check(ctx context.Context) bool {
+func (c *checkerHandler) check(ctx context.Context) (r bool) {
 	defer func() {
 		if err := recover(); err != nil {
-
+			r = true
+			c.Lock()
+			c.CheckerStatus.Err = fmt.Errorf("%v", err)
+			c.Unlock()
 		}
 	}()
 
@@ -92,7 +96,7 @@ func (c *checkerHandler) run(ctx context.Context) {
 		default:
 		}
 		if c.check(ctx) {
-			//notify
+			// notify
 			if c.Notifier != nil {
 				c.Notifier.notify(c.Name)
 			}
