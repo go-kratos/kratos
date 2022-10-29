@@ -33,8 +33,8 @@ func (B) Check(ctx context.Context) (interface{}, error) {
 func TestNew(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.TODO())
 	cm := New(ctx)
-	cm.RegisterChecker(NewChecker("A", A{}, WithInterval(time.Second), WithInterval(time.Second)))
-	cm.RegisterChecker(NewChecker("B", B{}, WithInterval(time.Second), WithInterval(time.Second)))
+	cm.RegisterChecker(NewChecker("A", A{}, WithInterval(time.Second), WithTimeout(time.Second)))
+	cm.RegisterChecker(NewChecker("B", B{}, WithInterval(time.Second), WithTimeout(time.Second)))
 	cm.Start()
 	go func() {
 		w := cm.NewWatcher()
