@@ -10,37 +10,48 @@ type Checker interface {
 	Check(ctx context.Context) (interface{}, error)
 }
 
-type Watcher interface {
-	Watch(string)
+type Notifier interface {
+	notify(string)
 }
 
-type checker struct {
+type CheckerHandler interface {
+	setNotifier(w Notifier)
+	run(ctx context.Context)
+	getStatus() CheckerStatus
+	getName() string
+}
+
+type checkerHandler struct {
 	Name         string
 	intervalTime time.Duration
 	timeout      time.Duration
 	Checker
 	CheckerStatus
 	*sync.RWMutex
-	Watcher
+	Notifier
 }
 
-func NewChecker(name string, ch Checker, interval, timeout time.Duration) *checker {
-	return &checker{
+func NewChecker(name string, ch Checker, interval, timeout time.Duration) CheckerHandler {
+	return &checkerHandler{
 		Name:          name,
 		intervalTime:  interval,
 		timeout:       timeout,
 		Checker:       ch,
 		CheckerStatus: CheckerStatus{},
 		RWMutex:       &sync.RWMutex{},
-		Watcher:       nil,
+		Notifier:      nil,
 	}
 }
 
-func (c *checker) setWatcher(w Watcher) {
-	c.Watcher = w
+func (c *checkerHandler) setNotifier(w Notifier) {
+	c.Notifier = w
 }
 
-func (c *checker) check(ctx context.Context) bool {
+func (c *checkerHandler) getName() string {
+	return c.Name
+}
+
+func (c *checkerHandler) check(ctx context.Context) bool {
 	defer func() {
 		recover()
 	}()
@@ -71,7 +82,7 @@ func (c *checker) check(ctx context.Context) bool {
 	return true
 }
 
-func (c *checker) run(ctx context.Context) {
+func (c *checkerHandler) run(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -80,15 +91,15 @@ func (c *checker) run(ctx context.Context) {
 		}
 		if c.check(ctx) {
 			//notify
-			if c.Watcher != nil {
-				c.Watcher.Watch(c.Name)
+			if c.Notifier != nil {
+				c.Notifier.notify(c.Name)
 			}
 		}
 		time.Sleep(c.intervalTime)
 	}
 }
 
-func (c *checker) getStatus() CheckerStatus {
+func (c *checkerHandler) getStatus() CheckerStatus {
 	c.RLock()
 	defer c.RUnlock()
 	return c.CheckerStatus

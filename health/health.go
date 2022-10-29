@@ -6,7 +6,7 @@ import (
 )
 
 type CheckerMgr struct {
-	checkers  map[string]*checker
+	checkers  map[string]CheckerHandler
 	ctx       context.Context
 	cancel    func()
 	watchers  map[uint64]chan string
@@ -18,7 +18,7 @@ type CheckerMgr struct {
 func New(ctx context.Context) *CheckerMgr {
 	c, cancel := context.WithCancel(ctx)
 	return &CheckerMgr{
-		checkers: make(map[string]*checker),
+		checkers: make(map[string]CheckerHandler),
 		ctx:      c,
 		cancel:   cancel,
 		lock:     sync.RWMutex{},
@@ -53,7 +53,7 @@ func (c *CheckerMgr) GetStatus(name ...string) []StatusResult {
 	if len(name) == 0 {
 		for _, v := range c.checkers {
 			status = append(status, StatusResult{
-				Name:          v.Name,
+				Name:          v.getName(),
 				CheckerStatus: v.getStatus(),
 			})
 		}
@@ -61,7 +61,7 @@ func (c *CheckerMgr) GetStatus(name ...string) []StatusResult {
 		for _, n := range name {
 			if v, ok := c.checkers[n]; ok {
 				status = append(status, StatusResult{
-					Name:          v.Name,
+					Name:          v.getName(),
 					CheckerStatus: v.getStatus(),
 				})
 			}
@@ -70,12 +70,12 @@ func (c *CheckerMgr) GetStatus(name ...string) []StatusResult {
 	return status
 }
 
-func (c *CheckerMgr) RegisterChecker(checker2 *checker) {
-	c.checkers[checker2.Name] = checker2
-	checker2.setWatcher(c)
+func (c *CheckerMgr) RegisterChecker(checker CheckerHandler) {
+	c.checkers[checker.getName()] = checker
+	checker.setNotifier(c)
 }
 
-func (c *CheckerMgr) Watch(name string) {
+func (c *CheckerMgr) notify(name string) {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 	for _, ch := range c.watchers {
@@ -86,24 +86,24 @@ func (c *CheckerMgr) Watch(name string) {
 	}
 }
 
-type WatcherResult struct {
+type Watcher struct {
 	id uint64
 	Ch <-chan string
 	c  *CheckerMgr
 }
 
-func (w *WatcherResult) Close() {
+func (w *Watcher) Close() {
 	w.c.closeWatcher(w.id)
 }
 
-func (c *CheckerMgr) NewWatcher() WatcherResult {
+func (c *CheckerMgr) NewWatcher() Watcher {
 	c.lock.Lock()
 	wID := c.watcherID
 	c.watcherID++
 	ch := make(chan string, 1)
 	c.watchers[wID] = ch
 	c.lock.Unlock()
-	return WatcherResult{
+	return Watcher{
 		id: wID,
 		Ch: ch,
 		c:  c,
