@@ -55,7 +55,9 @@ func (c *checkerHandler) getName() string {
 
 func (c *checkerHandler) check(ctx context.Context) bool {
 	defer func() {
-		recover()
+		if err := recover(); err != nil {
+
+		}
 	}()
 
 	var cancel func()
@@ -78,10 +80,8 @@ func (c *checkerHandler) check(ctx context.Context) bool {
 		Detail: detail,
 		Err:    err,
 	}
-	if c.CheckerStatus == old {
-		return false
-	}
-	return true
+
+	return c.CheckerStatus != old
 }
 
 func (c *checkerHandler) run(ctx context.Context) {
