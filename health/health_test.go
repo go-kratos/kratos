@@ -1,12 +1,11 @@
 package health
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"testing"
 	"time"
-
-	"context"
 )
 
 type A struct{}
