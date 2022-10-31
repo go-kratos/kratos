@@ -6,8 +6,6 @@ import (
 	"net/http"
 )
 
-type Option func(*Health)
-
 type Status string
 
 const (
