@@ -68,13 +68,9 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	minIndex := int(^uint(0) >> 1)
 	ips := make([]net.IP, 0)
 	for _, iface := range ifaces {
 		if (iface.Flags & net.FlagUp) == 0 {
-			continue
-		}
-		if iface.Index >= minIndex && len(ips) != 0 {
 			continue
 		}
 		addrs, err := iface.Addrs()
@@ -95,7 +91,6 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 				if isPrivateIP(ip.String()) {
 					return net.JoinHostPort(ip.String(), port), nil
 				}
-				minIndex = iface.Index
 				if i == 0 {
 					ips = make([]net.IP, 0, 1)
 				}
