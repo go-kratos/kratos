@@ -57,12 +57,10 @@ func (h *Health) AddReadness(name string, checker Checker) {
 }
 
 func (h *Health) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var (
-		res struct {
-			Status  Status
-			Details map[string]Result `json:"details"`
-		}
-	)
+	var res struct {
+		Status  Status
+		Details map[string]Result `json:"details"`
+	}
 	res.Status = StatusUp
 	for n, c := range h.liveness {
 		if err := c.CheckHealth(r.Context()); err != nil {
@@ -72,7 +70,7 @@ func (h *Health) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			res.Details[n] = Result{Status: StatusUp}
 		}
 	}
-	for n, c := range h.liveness {
+	for n, c := range h.readness {
 		if err := c.CheckHealth(r.Context()); err != nil {
 			res.Details[n] = Result{StatusUp, err.Error()}
 		} else {
