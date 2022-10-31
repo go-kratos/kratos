@@ -20,6 +20,21 @@ type Result struct {
 	Error  string `json:"error"`
 }
 
+// Checker returns nil if the resource is healthy, or a non-nil
+// error if the resource is not healthy.
+type Checker interface {
+	CheckHealth(ctx context.Context) error
+}
+
+// CheckerFunc is an adapter type to allow the use of ordinary functions as
+// health checks.
+type CheckerFunc func() error
+
+// CheckHealth calls f().
+func (f CheckerFunc) CheckHealth() error {
+	return f()
+}
+
 // Health .
 type Health struct {
 	liveness map[string]Checker
@@ -27,7 +42,18 @@ type Health struct {
 }
 
 func New() *Health {
-	return &Health{}
+	return &Health{
+		liveness: map[string]Checker{},
+		readness: map[string]Checker{},
+	}
+}
+
+func (h *Health) AddLiveness(name string, checker Checker) {
+	h.liveness[name] = checker
+}
+
+func (h *Health) AddReadness(name string, checker Checker) {
+	h.readness[name] = checker
 }
 
 func (h *Health) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -59,20 +85,4 @@ func (h *Health) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}
 	json.NewEncoder(w).Encode(res)
-}
-
-// Checker returns nil if the resource is healthy, or a non-nil
-// error if the resource is not healthy.
-type Checker interface {
-	CheckHealth(ctx context.Context) error
-}
-
-// CheckerFunc is an adapter type to allow the use of ordinary functions as
-// health checks. If f is a function with the appropriate signature,
-// CheckerFunc(f) is a Checker that calls f.
-type CheckerFunc func() error
-
-// CheckHealth calls f().
-func (f CheckerFunc) CheckHealth() error {
-	return f()
 }
