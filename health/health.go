@@ -70,7 +70,7 @@ func (h *Health) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	for n, c := range h.readness {
 		if err := c.CheckHealth(r.Context()); err != nil {
-			res.Details[n] = Result{StatusUp, err.Error()}
+			res.Details[n] = Result{Status: StatusDown, Error: err.Error()}
 		} else {
 			res.Details[n] = Result{Status: StatusUp}
 		}
