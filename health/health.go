@@ -14,6 +14,11 @@ const (
 )
 
 type Result struct {
+	Status  Status            `json:"status"`
+	Details map[string]Detail `json:"details"`
+}
+
+type Detail struct {
 	Status Status `json:"status"`
 	Error  string `json:"error"`
 }
@@ -54,27 +59,28 @@ func (h *Health) AddReadness(name string, checker Checker) {
 	h.readness[name] = checker
 }
 
-func (h *Health) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var res struct {
-		Status  Status
-		Details map[string]Result `json:"details"`
-	}
-	res.Status = StatusUp
+func (h *Health) CheckHealth(ctx context.Context) Result {
+	res := Result{Status: StatusUp}
 	for n, c := range h.liveness {
-		if err := c.CheckHealth(r.Context()); err != nil {
+		if err := c.CheckHealth(ctx); err != nil {
 			res.Status = StatusDown
-			res.Details[n] = Result{Status: StatusDown, Error: err.Error()}
+			res.Details[n] = Detail{Status: StatusDown, Error: err.Error()}
 		} else {
-			res.Details[n] = Result{Status: StatusUp}
+			res.Details[n] = Detail{Status: StatusUp}
 		}
 	}
 	for n, c := range h.readness {
-		if err := c.CheckHealth(r.Context()); err != nil {
-			res.Details[n] = Result{Status: StatusDown, Error: err.Error()}
+		if err := c.CheckHealth(ctx); err != nil {
+			res.Details[n] = Detail{Status: StatusDown, Error: err.Error()}
 		} else {
-			res.Details[n] = Result{Status: StatusUp}
+			res.Details[n] = Detail{Status: StatusUp}
 		}
 	}
+	return res
+}
+
+func (h *Health) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	res := h.CheckHealth(r.Context())
 	if res.Status == StatusDown {
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
