@@ -1,6 +1,8 @@
 package file
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestFormat(t *testing.T) {
 	tests := []struct {
