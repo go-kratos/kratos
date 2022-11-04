@@ -131,6 +131,7 @@ func TestToString(t *testing.T) {
 		{"bool", false, "false"},
 		{"[]byte", []byte("abc"), "abc"},
 		{"struct", struct{ Name string }{}, `{"Name":""}`},
+		{"nil", nil, ""},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
