@@ -1,6 +1,12 @@
 package selector
 
-var globalSelector Builder
+var globalSelector = &wrapSelector{}
+
+// wrapSelector wrapped Selector.
+// help override global Selector implementation
+type wrapSelector struct {
+	Builder
+}
 
 // GlobalSelector returns global selector builder.
 func GlobalSelector() Builder {
@@ -9,5 +15,5 @@ func GlobalSelector() Builder {
 
 // SetGlobalSelector set global selector builder.
 func SetGlobalSelector(builder Builder) {
-	globalSelector = builder
+	globalSelector.Builder = builder
 }
