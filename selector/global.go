@@ -18,6 +18,7 @@ func GlobalSelector() Builder {
 func SetGlobalSelector(builder Builder) {
 	if globalSelector == nil {
 		globalSelector = &wrapSelector{builder}
+		return
 	}
 	globalSelector.(*wrapSelector).Builder = builder
 }
