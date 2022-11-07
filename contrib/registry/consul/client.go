@@ -144,6 +144,37 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 	}
 
 	err := c.cli.Agent().ServiceRegister(asr)
+	/*
+		for _, name := range c.otherName {
+			// 执行注册多个服务名的流程
+			addresses := make(map[string]api.ServiceAddress, len(svc.Endpoints))
+			checkAddresses := make([]string, 0, len(svc.Endpoints))
+			for _, endpoint := range svc.Endpoints {
+				raw, err := url.Parse(endpoint)
+				if err != nil {
+					return err
+				}
+				addr := raw.Hostname()
+				port, _ := strconv.ParseUint(raw.Port(), 10, 16)
+
+				checkAddresses = append(checkAddresses, net.JoinHostPort(addr, strconv.FormatUint(port, 10)))
+				addresses[raw.Scheme] = api.ServiceAddress{Address: endpoint, Port: int(port)}
+			}
+			asr := &api.AgentServiceRegistration{
+				ID:              svc.ID,
+				Name:            name, // 改成你要注册的其他服务名
+				Meta:            svc.Metadata,
+				Tags:            []string{fmt.Sprintf("version=%s", svc.Version)},
+				TaggedAddresses: addresses,
+			}
+			if len(checkAddresses) > 0 {
+				host, portRaw, _ := net.SplitHostPort(checkAddresses[0])
+				port, _ := strconv.ParseInt(portRaw, 10, 32)
+				asr.Address = host
+				asr.Port = int(port)
+			}
+		}
+	*/
 	if err != nil {
 		return err
 	}

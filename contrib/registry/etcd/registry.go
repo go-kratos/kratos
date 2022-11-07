@@ -88,6 +88,25 @@ func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 	}
 
 	go r.heartBeat(r.opts.ctx, leaseID, key, value)
+
+	// 注册额外服务名
+	for _, name := range o.names {
+		key := fmt.Sprintf("%s/%s/%s", r.opts.namespace, service.Name, service.ID)
+		value, err := marshal(service)
+		if err != nil {
+			return err
+		}
+		if r.lease != nil {
+			r.lease.Close()
+		}
+		r.lease = clientv3.NewLease(r.client)
+		leaseID, err := r.registerWithKV(ctx, key, value)
+		if err != nil {
+			return err
+		}
+
+		go r.heartBeat(r.opts.ctx, leaseID, key, value)
+	}
 	return nil
 }
 

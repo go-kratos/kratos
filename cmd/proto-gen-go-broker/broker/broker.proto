@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package errors;
+
+option go_package = "github.com/go-kratos/kratos/v2/cmd/proto-gen-go-broker;broker";
+option java_multiple_files = true;
+option java_package = "com.github.kratos.Broker";
+option objc_class_prefix = "KratosBroker";
+
+import "google/protobuf/descriptor.proto";
+
+
+
+extend google.protobuf.MethodOptions {
+  string receive_topic = 1001011;
+  string output_topic = 1008611;
+}

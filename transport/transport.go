@@ -61,8 +61,9 @@ func (k Kind) String() string { return string(k) }
 
 // Defines a set of transport kind
 const (
-	KindGRPC Kind = "grpc"
-	KindHTTP Kind = "http"
+	KindGRPC   Kind = "grpc"
+	KindHTTP   Kind = "http"
+	KindBroker Kind = "broker"
 )
 
 type (

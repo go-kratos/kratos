@@ -19,6 +19,10 @@ var (
 	_ balancer.Picker    = (*balancerPicker)(nil)
 )
 
+type balancerBuilder struct {
+	builder selector.Builder
+}
+
 func init() {
 	b := base.NewBalancerBuilder(
 		balancerName,
@@ -28,10 +32,6 @@ func init() {
 		base.Config{HealthCheck: true},
 	)
 	balancer.Register(b)
-}
-
-type balancerBuilder struct {
-	builder selector.Builder
 }
 
 // Build creates a grpc Picker.
