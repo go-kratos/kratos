@@ -34,6 +34,18 @@ type balancerBuilder struct {
 	builder selector.Builder
 }
 
+// RegisterGlobalBalancerSelector register global balancer selector.
+func RegisterGlobalBalancerSelector(s selector.Builder) {
+	b := base.NewBalancerBuilder(
+		balancerName,
+		&balancerBuilder{
+			builder: s,
+		},
+		base.Config{HealthCheck: true},
+	)
+	balancer.Register(b)
+}
+
 // Build creates a grpc Picker.
 func (b *balancerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	if len(info.ReadySCs) == 0 {
