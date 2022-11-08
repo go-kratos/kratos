@@ -26,14 +26,12 @@ type TestModel struct {
 	Name string `json:"name"`
 }
 
-const contentType = "x-www-form-urlencoded"
-
 func TestFormCodecMarshal(t *testing.T) {
 	req := &LoginRequest{
 		Username: "kratos",
 		Password: "kratos_pwd",
 	}
-	content, err := encoding.GetCodec(contentType).Marshal(req)
+	content, err := encoding.GetCodec(Name).Marshal(req)
 	if err != nil {
 		t.Errorf("marshal error: %v", err)
 	}
@@ -45,7 +43,7 @@ func TestFormCodecMarshal(t *testing.T) {
 		Username: "kratos",
 		Password: "",
 	}
-	content, err = encoding.GetCodec(contentType).Marshal(req)
+	content, err = encoding.GetCodec(Name).Marshal(req)
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
@@ -57,7 +55,7 @@ func TestFormCodecMarshal(t *testing.T) {
 		ID:   1,
 		Name: "kratos",
 	}
-	content, err = encoding.GetCodec(contentType).Marshal(m)
+	content, err = encoding.GetCodec(Name).Marshal(m)
 	t.Log(string(content))
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
@@ -72,13 +70,13 @@ func TestFormCodecUnmarshal(t *testing.T) {
 		Username: "kratos",
 		Password: "kratos_pwd",
 	}
-	content, err := encoding.GetCodec(contentType).Marshal(req)
+	content, err := encoding.GetCodec(Name).Marshal(req)
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
 
 	bindReq := new(LoginRequest)
-	err = encoding.GetCodec(contentType).Unmarshal(content, bindReq)
+	err = encoding.GetCodec(Name).Unmarshal(content, bindReq)
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
@@ -119,7 +117,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 		String_:   &wrapperspb.StringValue{Value: "go-kratos"},
 		Bytes:     &wrapperspb.BytesValue{Value: []byte("123")},
 	}
-	content, err := encoding.GetCodec(contentType).Marshal(in)
+	content, err := encoding.GetCodec(Name).Marshal(in)
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
@@ -130,7 +128,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 		t.Errorf("rawpath is not equal to %v", string(content))
 	}
 	in2 := &complex.Complex{}
-	err = encoding.GetCodec(contentType).Unmarshal(content, in2)
+	err = encoding.GetCodec(Name).Unmarshal(content, in2)
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
@@ -163,7 +161,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 func TestDecodeStructPb(t *testing.T) {
 	req := new(ectest.StructPb)
 	query := `data={"name":"kratos"}&data_list={"name1": "kratos"}&data_list={"name2": "go-kratos"}`
-	if err := encoding.GetCodec(contentType).Unmarshal([]byte(query), req); err != nil {
+	if err := encoding.GetCodec(Name).Unmarshal([]byte(query), req); err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
 	if !reflect.DeepEqual("kratos", req.Data.GetFields()["name"].GetStringValue()) {
@@ -186,7 +184,7 @@ func TestDecodeBytesValuePb(t *testing.T) {
 	val := base64.URLEncoding.EncodeToString([]byte(url))
 	content := "bytes=" + val
 	in2 := &complex.Complex{}
-	if err := encoding.GetCodec(contentType).Unmarshal([]byte(content), in2); err != nil {
+	if err := encoding.GetCodec(Name).Unmarshal([]byte(content), in2); err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
 	if !reflect.DeepEqual(url, string(in2.Bytes.Value)) {
