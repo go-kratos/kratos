@@ -9,8 +9,8 @@ type wrapSelector struct{ Builder }
 
 // GlobalSelector returns global selector builder.
 func GlobalSelector() Builder {
-	if globalSelector != nil {
-		return globalSelector.Builder
+	if globalSelector.Builder != nil {
+		return globalSelector
 	}
 	return nil
 }
