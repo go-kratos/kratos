@@ -57,7 +57,7 @@ func Test_WithGroup(t *testing.T) {
 	}
 }
 
-func  Test_WithCircuitBreaker(t *testing.T)  {
+func Test_WithCircuitBreaker(t *testing.T) {
 	o := options{
 		group: group.NewGroup(func() interface{} {
 			return ""
