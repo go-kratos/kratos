@@ -2,6 +2,7 @@ package opensergo
 
 import (
 	"net"
+	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -195,7 +196,7 @@ func TestHTTPPatternInfo(t *testing.T) {
 			args: args{
 				pattern: &annotations.HttpRule_Get{Get: "/foo"},
 			},
-			wantMethod: "GET",
+			wantMethod: http.MethodGet,
 			wantPath:   "/foo",
 		},
 		{
@@ -203,7 +204,7 @@ func TestHTTPPatternInfo(t *testing.T) {
 			args: args{
 				pattern: &annotations.HttpRule_Post{Post: "/foo"},
 			},
-			wantMethod: "POST",
+			wantMethod: http.MethodPost,
 			wantPath:   "/foo",
 		},
 		{
@@ -211,7 +212,7 @@ func TestHTTPPatternInfo(t *testing.T) {
 			args: args{
 				pattern: &annotations.HttpRule_Put{Put: "/foo"},
 			},
-			wantMethod: "PUT",
+			wantMethod: http.MethodPut,
 			wantPath:   "/foo",
 		},
 		{
@@ -219,7 +220,7 @@ func TestHTTPPatternInfo(t *testing.T) {
 			args: args{
 				pattern: &annotations.HttpRule_Delete{Delete: "/foo"},
 			},
-			wantMethod: "DELETE",
+			wantMethod: http.MethodDelete,
 			wantPath:   "/foo",
 		},
 		{
@@ -227,7 +228,7 @@ func TestHTTPPatternInfo(t *testing.T) {
 			args: args{
 				pattern: &annotations.HttpRule_Patch{Patch: "/foo"},
 			},
-			wantMethod: "PATCH",
+			wantMethod: http.MethodPatch,
 			wantPath:   "/foo",
 		},
 		{

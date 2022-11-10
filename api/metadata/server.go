@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"sync"
 
 	"google.golang.org/grpc"
@@ -115,6 +116,8 @@ func (s *Server) ListServices(ctx context.Context, in *ListServicesRequest) (*Li
 			reply.Methods = append(reply.Methods, fmt.Sprintf("/%s/%s", name, method))
 		}
 	}
+	sort.Strings(reply.Services)
+	sort.Strings(reply.Methods)
 	return reply, nil
 }
 

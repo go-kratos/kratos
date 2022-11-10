@@ -70,7 +70,7 @@ func TestWrr3(t *testing.T) {
 		t.Errorf("count1(%v) >= int64(4500),", count1)
 	}
 	if count2 <= int64(1500) {
-		t.Errorf("count2(%v) <= int64(1500)", count1)
+		t.Errorf("count2(%v) <= int64(1500)", count2)
 	}
 	if count2 >= int64(4500) {
 		t.Errorf("count2(%v) >= int64(4500),", count2)
