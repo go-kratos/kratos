@@ -47,6 +47,22 @@ func TestApp(t *testing.T) {
 		Name("kratos"),
 		Version("v1.0.0"),
 		Server(hs, gs),
+		BeforeStart(func(_ context.Context) error {
+			t.Log("BeforeStart...")
+			return nil
+		}),
+		BeforeStop(func(_ context.Context) error {
+			t.Log("BeforeStop...")
+			return nil
+		}),
+		AfterStart(func(_ context.Context) error {
+			t.Log("AfterStart...")
+			return nil
+		}),
+		AfterStop(func(_ context.Context) error {
+			t.Log("AfterStop...")
+			return nil
+		}),
 		Registrar(&mockRegistry{service: make(map[string]*registry.ServiceInstance)}),
 	)
 	time.AfterFunc(time.Second, func() {

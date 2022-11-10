@@ -1,7 +1,7 @@
 package config
 
 import (
-	stdjson "encoding/json"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -10,7 +10,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/go-kratos/kratos/v2/encoding/json"
+	kratosjson "github.com/go-kratos/kratos/v2/encoding/json"
 )
 
 var (
@@ -36,6 +36,10 @@ type atomicValue struct {
 	atomic.Value
 }
 
+func (v *atomicValue) typeAssertError() error {
+	return fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
+}
+
 func (v *atomicValue) Bool() (bool, error) {
 	switch val := v.Load().(type) {
 	case bool:
@@ -43,7 +47,7 @@ func (v *atomicValue) Bool() (bool, error) {
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, string:
 		return strconv.ParseBool(fmt.Sprint(val))
 	}
-	return false, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
+	return false, v.typeAssertError()
 }
 
 func (v *atomicValue) Int() (int64, error) {
@@ -73,35 +77,37 @@ func (v *atomicValue) Int() (int64, error) {
 	case float64:
 		return int64(val), nil
 	case string:
-		return strconv.ParseInt(val, 10, 64) //nolint:gomnd
+		return strconv.ParseInt(val, 10, 64)
 	}
-	return 0, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
+	return 0, v.typeAssertError()
 }
 
 func (v *atomicValue) Slice() ([]Value, error) {
-	if vals, ok := v.Load().([]interface{}); ok {
-		var slices []Value
-		for _, val := range vals {
-			a := &atomicValue{}
-			a.Store(val)
-			slices = append(slices, a)
-		}
-		return slices, nil
+	vals, ok := v.Load().([]interface{})
+	if !ok {
+		return nil, v.typeAssertError()
 	}
-	return nil, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
+	slices := make([]Value, 0, len(vals))
+	for _, val := range vals {
+		a := new(atomicValue)
+		a.Store(val)
+		slices = append(slices, a)
+	}
+	return slices, nil
 }
 
 func (v *atomicValue) Map() (map[string]Value, error) {
-	if vals, ok := v.Load().(map[string]interface{}); ok {
-		m := make(map[string]Value, len(vals))
-		for key, val := range vals {
-			a := new(atomicValue)
-			a.Store(val)
-			m[key] = a
-		}
-		return m, nil
+	vals, ok := v.Load().(map[string]interface{})
+	if !ok {
+		return nil, v.typeAssertError()
 	}
-	return nil, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
+	m := make(map[string]Value, len(vals))
+	for key, val := range vals {
+		a := new(atomicValue)
+		a.Store(val)
+		m[key] = a
+	}
+	return m, nil
 }
 
 func (v *atomicValue) Float() (float64, error) {
@@ -131,9 +137,9 @@ func (v *atomicValue) Float() (float64, error) {
 	case float64:
 		return val, nil
 	case string:
-		return strconv.ParseFloat(val, 64) //nolint:gomnd
+		return strconv.ParseFloat(val, 64)
 	}
-	return 0.0, fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
+	return 0.0, v.typeAssertError()
 }
 
 func (v *atomicValue) String() (string, error) {
@@ -147,7 +153,7 @@ func (v *atomicValue) String() (string, error) {
 	case fmt.Stringer:
 		return val.String(), nil
 	}
-	return "", fmt.Errorf("type assert to %v failed", reflect.TypeOf(v.Load()))
+	return "", v.typeAssertError()
 }
 
 func (v *atomicValue) Duration() (time.Duration, error) {
@@ -159,14 +165,14 @@ func (v *atomicValue) Duration() (time.Duration, error) {
 }
 
 func (v *atomicValue) Scan(obj interface{}) error {
-	data, err := stdjson.Marshal(v.Load())
+	data, err := json.Marshal(v.Load())
 	if err != nil {
 		return err
 	}
 	if pb, ok := obj.(proto.Message); ok {
-		return json.UnmarshalOptions.Unmarshal(data, pb)
+		return kratosjson.UnmarshalOptions.Unmarshal(data, pb)
 	}
-	return stdjson.Unmarshal(data, obj)
+	return json.Unmarshal(data, obj)
 }
 
 type errValue struct {

@@ -11,18 +11,23 @@ import (
 )
 
 func TestMain(m *testing.M) {
+	listener := func(ln net.Listener) {
+		conn, err := ln.Accept()
+		if err != nil {
+			return
+		}
+		defer conn.Close()
+		_, err = io.ReadAll(conn)
+		if err != nil {
+			return
+		}
+	}
+
 	if ln, err := net.Listen("tcp", ":24224"); err == nil {
 		defer ln.Close()
 		go func() {
 			for {
-				conn, err := ln.Accept()
-				if err != nil {
-					return
-				}
-				defer conn.Close()
-				if _, err = io.ReadAll(conn); err != nil {
-					continue
-				}
+				listener(ln)
 			}
 		}()
 	}
