@@ -8,6 +8,23 @@ import (
 	"time"
 )
 
+type Status string
+
+const (
+	Up   Status = "UP"
+	Down Status = "DOWN"
+)
+
+type Checker interface {
+	Check(ctx context.Context) error
+}
+
+type CheckerFunc func(ctx context.Context) error
+
+func (f CheckerFunc) Check(ctx context.Context) error {
+	return f(ctx)
+}
+
 type Health struct {
 	ctx    context.Context
 	done   context.CancelFunc
@@ -49,34 +66,7 @@ func New(opts ...Option) *Health {
 	return h
 }
 
-func (h *Health) Register(name string, checker Checker) {
-	h.checkers[name] = checker
-}
-
-func (h *Health) Start() {
-	h.startOnce.Do(func() {
-		h.status = Up
-		h.check()
-		for {
-			select {
-			case <-h.ctx.Done():
-				return
-			case <-h.ticker.C:
-				h.check()
-			}
-		}
-	})
-}
-
-func (h *Health) Stop() {
-	h.stopOnce.Do(func() {
-		h.done()
-		h.ticker.Stop()
-		h.status = Down
-	})
-}
-
-func (h *Health) CheckAll() Result {
+func (h *Health) CheckAll(_ context.Context) Result {
 	r := Result{Status: h.status}
 	h.lock.RLock()
 	defer h.lock.RUnlock()
@@ -93,19 +83,63 @@ func (h *Health) CheckAll() Result {
 	return r
 }
 
-func (h *Health) Check(service string) Detail {
-	e, ok := h.errors[service]
+func (h *Health) Check(ctx context.Context, service string) error {
+	h.lock.RLock()
+	defer h.lock.RUnlock()
+	err, ok := h.errors[service]
 	if !ok {
-		return Detail{Down, ErrServiceNotFind.Error()}
+		return ErrServiceNotFind
 	}
-	d := Detail{}
-	if e == nil {
-		d.Status = Up
+	return err
+}
+
+func (h *Health) Start(ctx context.Context) error {
+	h.startOnce.Do(func() {
+		h.status = Up
+		h.check()
+		for {
+			select {
+			case <-h.ctx.Done():
+				return
+			case <-h.ticker.C:
+				h.check()
+			}
+		}
+	})
+	return nil
+}
+
+func (h *Health) Stop(ctx context.Context) error {
+	h.stopOnce.Do(func() {
+		h.done()
+		h.ticker.Stop()
+		h.status = Down
+	})
+	return nil
+}
+
+func (h *Health) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	service := r.URL.Query().Get("service")
+	if service == "" {
+		res := h.CheckAll(r.Context())
+		if res.Status == Down {
+			w.WriteHeader(http.StatusInternalServerError)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+		_ = json.NewEncoder(w).Encode(res)
 	} else {
-		d.Status = Down
-		d.Error = e.Error()
+		d := &Detail{Status: Up}
+		code := http.StatusOK
+		err := h.Check(r.Context(), service)
+		if err != nil {
+			code = http.StatusInternalServerError
+			d.Status = Down
+			d.Error = err.Error()
+		}
+		w.WriteHeader(code)
+		_ = json.NewEncoder(w).Encode(d)
 	}
-	return d
 }
 
 func (h *Health) check() {
@@ -132,23 +166,12 @@ func (h *Health) check() {
 	wg.Wait()
 }
 
-func (h *Health) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	service := r.URL.Query().Get("service")
-	if service == "" {
-		res := h.CheckAll()
-		if res.Status == Down {
-			w.WriteHeader(http.StatusInternalServerError)
-		} else {
-			w.WriteHeader(http.StatusOK)
-		}
-		_ = json.NewEncoder(w).Encode(res)
-	} else {
-		d := h.Check(service)
-		if d.Status == Down {
-			w.WriteHeader(http.StatusInternalServerError)
-		} else {
-			w.WriteHeader(http.StatusOK)
-		}
-		_ = json.NewEncoder(w).Encode(d)
-	}
+type Result struct {
+	Status  Status            `json:"status"`
+	Details map[string]Detail `json:"details"`
+}
+
+type Detail struct {
+	Status Status `json:"status"`
+	Error  string `json:"error"`
 }
