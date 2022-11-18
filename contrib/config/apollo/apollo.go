@@ -25,6 +25,8 @@ const (
 	properties = "properties"
 )
 
+var formats map[string]struct{}
+
 // Option is apollo option
 type Option func(*options)
 
@@ -129,10 +131,16 @@ func NewSource(opts ...Option) config.Source {
 
 func format(ns string) string {
 	arr := strings.Split(ns, ".")
-	if len(arr) <= 1 || arr[len(arr)-1] == properties {
+	suffix := arr[len(arr)-1]
+	if len(arr) <= 1 || suffix == properties {
 		return json
 	}
-	return arr[len(arr)-1]
+	if _, ok := formats[suffix]; !ok {
+		// fallback
+		return json
+	}
+
+	return suffix
 }
 
 func (e *apollo) load() []*config.KeyValue {
@@ -149,7 +157,7 @@ func (e *apollo) load() []*config.KeyValue {
 			kvs = append(kvs, kv)
 			continue
 		}
-		if strings.Contains(ns, ".") && !strings.Contains(ns, properties) &&
+		if strings.Contains(ns, ".") && !strings.HasSuffix(ns, "."+properties) &&
 			(format(ns) == yaml || format(ns) == yml || format(ns) == json) {
 			kv, err := e.getOriginConfig(ns)
 			if err != nil {
@@ -264,4 +272,13 @@ func genKey(ns, sub string) string {
 	}
 
 	return strings.Join(arr[:len(arr)-1], ".") + "." + sub
+}
+
+func init() {
+	formats = make(map[string]struct{})
+
+	formats[yaml] = struct{}{}
+	formats[yml] = struct{}{}
+	formats[json] = struct{}{}
+	formats[properties] = struct{}{}
 }
