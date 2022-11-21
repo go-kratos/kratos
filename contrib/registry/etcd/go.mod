@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/go-kratos/kratos/v2 v2.5.3
-	go.etcd.io/etcd/client/v3 v3.5.5
+	go.etcd.io/etcd/client/v3 v3.5.6
 	google.golang.org/grpc v1.50.1
 )
 
