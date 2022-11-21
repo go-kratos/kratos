@@ -4,12 +4,10 @@ go 1.16
 
 require (
 	github.com/go-kratos/kratos/v2 v2.4.0
-	github.com/nacos-group/nacos-sdk-go v1.0.9
+	github.com/nacos-group/nacos-sdk-go v1.1.3
 )
 
-require (
-	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
+require gopkg.in/yaml.v3 v3.0.1 // indirect
 
 replace github.com/go-kratos/kratos/v2 => ../../../
 
