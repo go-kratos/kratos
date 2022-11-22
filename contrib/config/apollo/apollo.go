@@ -260,18 +260,21 @@ func resolve(key string, value interface{}, target map[string]interface{}) {
 // eg: namespace.ext with subKey got namespace.subKey
 func genKey(ns, sub string) string {
 	arr := strings.Split(ns, ".")
-	if len(arr) < 1 {
-		return sub
-	}
-
 	if len(arr) == 1 {
 		if ns == "" {
 			return sub
 		}
+
 		return ns + "." + sub
 	}
 
-	return strings.Join(arr[:len(arr)-1], ".") + "." + sub
+	suffix := arr[len(arr)-1]
+	_, ok := formats[suffix]
+	if ok {
+		return strings.Join(arr[:len(arr)-1], ".") + "." + sub
+	}
+
+	return ns + "." + sub
 }
 
 func init() {
