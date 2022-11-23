@@ -15,8 +15,16 @@ import (
 	"github.com/hashicorp/consul/api"
 )
 
+type Datacenter string
+
+const (
+	SingleDatacenter Datacenter = "SINGLE"
+	MultiDatacenter  Datacenter = "MULTI"
+)
+
 // Client is consul client config
 type Client struct {
+	dcMode Datacenter
 	cli    *api.Client
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -33,9 +41,14 @@ type Client struct {
 	serviceChecks api.AgentServiceChecks
 }
 
+type ClientConfig struct {
+	DCMode Datacenter
+}
+
 // NewClient creates consul client
-func NewClient(cli *api.Client) *Client {
+func NewClient(cli *api.Client, cfg *ClientConfig) *Client {
 	c := &Client{
+		dcMode:                         cfg.DCMode,
 		cli:                            cli,
 		resolver:                       defaultResolver,
 		healthcheckInterval:            10,
@@ -83,16 +96,61 @@ type ServiceResolver func(ctx context.Context, entries []*api.ServiceEntry) []*r
 
 // Service get services from consul
 func (c *Client) Service(ctx context.Context, service string, index uint64, passingOnly bool) ([]*registry.ServiceInstance, uint64, error) {
+	if c.dcMode == MultiDatacenter {
+		return c.multiDCService(ctx, service, index, passingOnly)
+	}
+
+	opts := &api.QueryOptions{
+		WaitIndex:  index,
+		WaitTime:   time.Second * 55,
+		Datacenter: string(c.dcMode),
+	}
+	opts = opts.WithContext(ctx)
+
+	if c.dcMode == SingleDatacenter {
+		opts.Datacenter = ""
+	}
+
+	entries, meta, err := c.singleDCEntries(service, "", passingOnly, opts)
+	if err != nil {
+		return nil, 0, err
+	}
+	return c.resolver(ctx, entries), meta.LastIndex, nil
+}
+
+func (c *Client) multiDCService(ctx context.Context, service string, index uint64, passingOnly bool) ([]*registry.ServiceInstance, uint64, error) {
 	opts := &api.QueryOptions{
 		WaitIndex: index,
 		WaitTime:  time.Second * 55,
 	}
 	opts = opts.WithContext(ctx)
-	entries, meta, err := c.cli.Health().Service(service, "", passingOnly, opts)
+
+	var (
+		entries []*api.ServiceEntry
+		li      uint64
+	)
+
+	dcs, err := c.cli.Catalog().Datacenters()
 	if err != nil {
 		return nil, 0, err
 	}
-	return c.resolver(ctx, entries), meta.LastIndex, nil
+
+	for _, dc := range dcs {
+		opts.Datacenter = dc
+		e, m, err := c.singleDCEntries(service, "", passingOnly, opts)
+		if err != nil {
+			return nil, 0, err
+		}
+		entries = append(entries, e...)
+		li += m.LastIndex
+	}
+
+	// fixme: li该是多少
+	return c.resolver(ctx, entries), li, nil
+}
+
+func (c *Client) singleDCEntries(service, tag string, passingOnly bool, opts *api.QueryOptions) ([]*api.ServiceEntry, *api.QueryMeta, error) {
+	return c.cli.Health().Service(service, tag, passingOnly, opts)
 }
 
 // Register register service instance to consul
