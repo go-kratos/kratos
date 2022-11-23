@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"sync"
-	"time"
 )
 
 type Status string
@@ -26,102 +24,61 @@ func (f CheckerFunc) Check(ctx context.Context) error {
 }
 
 type Health struct {
-	ctx    context.Context
-	done   context.CancelFunc
-	ticker *time.Ticker
-	lock   sync.RWMutex
-
 	status   Status
 	checkers map[string]Checker
-	errors   map[string]error
-
-	// can configurable
-	timeout      time.Duration
-	intervalTime time.Duration
-
-	startOnce sync.Once
-	stopOnce  sync.Once
 }
 
-func New(opts ...Option) *Health {
+func New() *Health {
 	h := &Health{
-		lock:         sync.RWMutex{},
-		status:       Down,
-		checkers:     make(map[string]Checker),
-		errors:       make(map[string]error),
-		timeout:      time.Second * 2,
-		intervalTime: time.Second * 10,
-		startOnce:    sync.Once{},
-		stopOnce:     sync.Once{},
+		status:   Down,
+		checkers: make(map[string]Checker),
 	}
-
-	for _, opt := range opts {
-		opt(h)
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	h.ctx = ctx
-	h.done = cancel
-	h.ticker = time.NewTicker(h.intervalTime)
 	return h
 }
 
-func (h *Health) CheckAll(_ context.Context) Result {
-	r := Result{Status: h.status}
-	h.lock.RLock()
-	defer h.lock.RUnlock()
-	for c, e := range h.errors {
-		d := Detail{}
-		if e == nil {
-			d.Status = Up
+func (h *Health) Register(name string, checker Checker) {
+	h.checkers[name] = checker
+}
+
+func (h *Health) Start(_ context.Context) error {
+	h.status = Up
+	return nil
+}
+
+func (h *Health) Stop(_ context.Context) error {
+	h.status = Down
+	return nil
+}
+
+func (h *Health) Check(ctx context.Context) Result {
+	res := Result{Status: h.status}
+	for n, c := range h.checkers {
+		if err := c.Check(ctx); err != nil {
+			res.Status = Down
+			res.Details[n] = Detail{Status: Down, Error: err.Error()}
 		} else {
-			d.Status = Down
-			d.Error = e.Error()
+			res.Details[n] = Detail{Status: Up}
 		}
-		r.Details[c] = d
 	}
-	return r
+	return res
 }
 
-func (h *Health) Check(ctx context.Context, service string) error {
-	h.lock.RLock()
-	defer h.lock.RUnlock()
-	err, ok := h.errors[service]
+func (h *Health) CheckService(ctx context.Context, svc string) Detail {
+	c, ok := h.checkers[svc]
 	if !ok {
-		return ErrServiceNotFind
+		return Detail{Status: Down, Error: "service not find"}
 	}
-	return err
-}
-
-func (h *Health) Start(ctx context.Context) error {
-	h.startOnce.Do(func() {
-		h.status = Up
-		h.check()
-		for {
-			select {
-			case <-h.ctx.Done():
-				return
-			case <-h.ticker.C:
-				h.check()
-			}
-		}
-	})
-	return nil
-}
-
-func (h *Health) Stop(ctx context.Context) error {
-	h.stopOnce.Do(func() {
-		h.done()
-		h.ticker.Stop()
-		h.status = Down
-	})
-	return nil
+	err := c.Check(ctx)
+	if err != nil {
+		return Detail{Status: Down, Error: err.Error()}
+	}
+	return Detail{Status: Up}
 }
 
 func (h *Health) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	service := r.URL.Query().Get("service")
 	if service == "" {
-		res := h.CheckAll(r.Context())
+		res := h.Check(r.Context())
 		if res.Status == Down {
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
@@ -129,41 +86,14 @@ func (h *Health) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		_ = json.NewEncoder(w).Encode(res)
 	} else {
-		d := &Detail{Status: Up}
-		code := http.StatusOK
-		err := h.Check(r.Context(), service)
-		if err != nil {
-			code = http.StatusInternalServerError
-			d.Status = Down
-			d.Error = err.Error()
+		detail := h.CheckService(r.Context(), service)
+		if detail.Status == Down {
+			w.WriteHeader(http.StatusInternalServerError)
+		} else {
+			w.WriteHeader(http.StatusOK)
 		}
-		w.WriteHeader(code)
-		_ = json.NewEncoder(w).Encode(d)
+		_ = json.NewEncoder(w).Encode(detail)
 	}
-}
-
-func (h *Health) check() {
-	ctx, cancel := context.WithTimeout(h.ctx, h.timeout)
-	defer cancel()
-
-	var wg sync.WaitGroup
-
-	for component, checker := range h.checkers {
-		wg.Add(1)
-		go func(ctx context.Context, component string, checker Checker) {
-			defer wg.Done()
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				err := checker.Check(ctx)
-				h.lock.Lock()
-				h.errors[component] = err
-				h.lock.Unlock()
-			}
-		}(ctx, component, checker)
-	}
-	wg.Wait()
 }
 
 type Result struct {
