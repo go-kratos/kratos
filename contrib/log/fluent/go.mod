@@ -1,6 +1,6 @@
 module github.com/go-kratos/kratos/contrib/log/fluent/v2
 
-go 1.16
+go 1.18
 
 require (
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect

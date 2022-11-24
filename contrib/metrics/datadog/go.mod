@@ -1,6 +1,6 @@
 module github.com/go-kratos/kratos/contrib/metrics/datadog/v2
 
-go 1.16
+go 1.18
 
 require (
 	github.com/DataDog/datadog-go v4.8.3+incompatible
