@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/DataDog/datadog-go v4.8.3+incompatible
-	github.com/go-kratos/kratos/v2 v2.5.2
+	github.com/go-kratos/kratos/v2 v2.5.3
 )
 
 require (
