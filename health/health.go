@@ -23,6 +23,11 @@ func (f CheckerFunc) Check(ctx context.Context) error {
 	return f(ctx)
 }
 
+type HealthOption struct {
+	Name string
+	CheckerFunc
+}
+
 type Health struct {
 	status   Status
 	checkers map[string]Checker
@@ -36,7 +41,7 @@ func New() *Health {
 	return h
 }
 
-func (h *Health) Register(name string, checker Checker) {
+func (h *Health) Register(name string, checker CheckerFunc) {
 	h.checkers[name] = checker
 }
 
@@ -51,7 +56,7 @@ func (h *Health) Stop(_ context.Context) error {
 }
 
 func (h *Health) Check(ctx context.Context) Result {
-	res := Result{Status: h.status}
+	res := Result{Status: h.status, Details: make(map[string]Detail, len(h.checkers))}
 	for n, c := range h.checkers {
 		if err := c.Check(ctx); err != nil {
 			res.Status = Down

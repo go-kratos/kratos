@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/health"
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/internal/matcher"
 
@@ -135,6 +136,12 @@ func PathPrefix(prefix string) ServerOption {
 	}
 }
 
+func HealthChecks(ho ...health.HealthOption) ServerOption {
+	return func(s *Server) {
+		s.ho = ho
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
@@ -154,6 +161,8 @@ type Server struct {
 	ene         EncodeErrorFunc
 	strictSlash bool
 	router      *mux.Router
+	health      *health.Health
+	ho          []health.HealthOption
 }
 
 // NewServer creates an HTTP server by options.
@@ -170,10 +179,16 @@ func NewServer(opts ...ServerOption) *Server {
 		ene:         DefaultErrorEncoder,
 		strictSlash: true,
 		router:      mux.NewRouter(),
+		health:      health.New(),
+		ho:          make([]health.HealthOption, 0),
 	}
 	for _, o := range opts {
 		o(srv)
 	}
+	for _, v := range srv.ho {
+		srv.health.Register(v.Name, v.CheckerFunc)
+	}
+
 	srv.router.StrictSlash(srv.strictSlash)
 	srv.router.NotFoundHandler = http.DefaultServeMux
 	srv.router.MethodNotAllowedHandler = http.DefaultServeMux
@@ -182,6 +197,8 @@ func NewServer(opts ...ServerOption) *Server {
 		Handler:   FilterChain(srv.filters...)(srv.router),
 		TLSConfig: srv.tlsConf,
 	}
+	// health
+	srv.router.Handle("/health", srv.health).Methods("GET")
 	return srv
 }
 
@@ -301,6 +318,7 @@ func (s *Server) Start(ctx context.Context) error {
 		return ctx
 	}
 	log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
+	s.health.Start(ctx)
 	var err error
 	if s.tlsConf != nil {
 		err = s.ServeTLS(s.lis, "", "")
@@ -316,6 +334,7 @@ func (s *Server) Start(ctx context.Context) error {
 // Stop stop the HTTP server.
 func (s *Server) Stop(ctx context.Context) error {
 	log.Info("[HTTP] server stopping")
+	s.health.Stop(ctx)
 	return s.Shutdown(ctx)
 }
 
