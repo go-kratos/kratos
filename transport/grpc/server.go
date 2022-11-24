@@ -67,6 +67,13 @@ func Middleware(m ...middleware.Middleware) ServerOption {
 	}
 }
 
+// Healthcheck custom checks.
+func Healthcheck(c *health.Server) ServerOption {
+	return func(s *Server) {
+		s.health = c
+	}
+}
+
 // TLSConfig with TLS config.
 func TLSConfig(c *tls.Config) ServerOption {
 	return func(s *Server) {
@@ -122,7 +129,7 @@ type Server struct {
 }
 
 // NewServer creates a gRPC server by options.
-func NewServer(opts ...ServerOption) *Server {
+func NewServer(checks *health.Server, opts ...ServerOption) *Server {
 	srv := &Server{
 		baseCtx:    context.Background(),
 		network:    "tcp",
@@ -149,6 +156,9 @@ func NewServer(opts ...ServerOption) *Server {
 	grpcOpts := []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(unaryInts...),
 		grpc.ChainStreamInterceptor(streamInts...),
+	}
+	if checks != nil {
+		srv.health = checks
 	}
 	if srv.tlsConf != nil {
 		grpcOpts = append(grpcOpts, grpc.Creds(credentials.NewTLS(srv.tlsConf)))
