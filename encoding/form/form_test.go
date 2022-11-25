@@ -46,7 +46,7 @@ func TestFormCodecMarshal(t *testing.T) {
 		t.Errorf("expect %s, got %s", "username=kratos", content)
 	}
 
-	var m = struct {
+	m := struct {
 		ID   int32  `json:"id"`
 		Name string `json:"name"`
 	}{
