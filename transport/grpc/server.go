@@ -122,7 +122,7 @@ type Server struct {
 }
 
 // NewServer creates a gRPC server by options.
-func NewServer(opts ...ServerOption) *Server {
+func NewServer(customHealth bool, opts ...ServerOption) *Server {
 	srv := &Server{
 		baseCtx:    context.Background(),
 		network:    "tcp",
@@ -159,7 +159,9 @@ func NewServer(opts ...ServerOption) *Server {
 	srv.Server = grpc.NewServer(grpcOpts...)
 	srv.metadata = apimd.NewServer(srv.Server)
 	// internal register
-	grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
+	if !customHealth {
+		grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
+	}
 	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
 	reflection.Register(srv.Server)
 	return srv
