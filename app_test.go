@@ -42,7 +42,7 @@ func (r *mockRegistry) Deregister(ctx context.Context, service *registry.Service
 
 func TestApp(t *testing.T) {
 	hs := http.NewServer()
-	gs := grpc.NewServer()
+	gs := grpc.NewServer(false)
 	app := New(
 		Name("kratos"),
 		Version("v1.0.0"),
