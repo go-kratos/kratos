@@ -68,9 +68,9 @@ func Middleware(m ...middleware.Middleware) ServerOption {
 }
 
 // CustomHealth Checks server.
-func CustomHealth(enabled bool) ServerOption {
+func CustomHealth() ServerOption {
 	return func(s *Server) {
-		s.customHealth = enabled
+		s.customHealth = true
 	}
 }
 
