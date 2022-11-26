@@ -67,6 +67,13 @@ func Middleware(m ...middleware.Middleware) ServerOption {
 	}
 }
 
+// CustomHealth Checks server.
+func CustomHealth(enabled bool) ServerOption {
+	return func(s *Server) {
+		s.customHealth = enabled
+	}
+}
+
 // TLSConfig with TLS config.
 func TLSConfig(c *tls.Config) ServerOption {
 	return func(s *Server) {
@@ -105,24 +112,25 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
-	baseCtx    context.Context
-	tlsConf    *tls.Config
-	lis        net.Listener
-	err        error
-	network    string
-	address    string
-	endpoint   *url.URL
-	timeout    time.Duration
-	middleware matcher.Matcher
-	unaryInts  []grpc.UnaryServerInterceptor
-	streamInts []grpc.StreamServerInterceptor
-	grpcOpts   []grpc.ServerOption
-	health     *health.Server
-	metadata   *apimd.Server
+	baseCtx      context.Context
+	tlsConf      *tls.Config
+	lis          net.Listener
+	err          error
+	network      string
+	address      string
+	endpoint     *url.URL
+	timeout      time.Duration
+	middleware   matcher.Matcher
+	unaryInts    []grpc.UnaryServerInterceptor
+	streamInts   []grpc.StreamServerInterceptor
+	grpcOpts     []grpc.ServerOption
+	health       *health.Server
+	customHealth bool
+	metadata     *apimd.Server
 }
 
 // NewServer creates a gRPC server by options.
-func NewServer(customHealth bool, opts ...ServerOption) *Server {
+func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
 		baseCtx:    context.Background(),
 		network:    "tcp",
@@ -159,7 +167,7 @@ func NewServer(customHealth bool, opts ...ServerOption) *Server {
 	srv.Server = grpc.NewServer(grpcOpts...)
 	srv.metadata = apimd.NewServer(srv.Server)
 	// internal register
-	if !customHealth {
+	if !srv.customHealth {
 		grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
 	}
 	apimd.RegisterMetadataServer(srv.Server, srv.metadata)

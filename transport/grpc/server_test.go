@@ -72,7 +72,6 @@ func TestServer(t *testing.T) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, testKey{}, "test")
 	srv := NewServer(
-		false,
 		Middleware(
 			func(handler middleware.Handler) middleware.Handler {
 				return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
@@ -179,7 +178,7 @@ func TestNetwork(t *testing.T) {
 
 func TestAddress(t *testing.T) {
 	v := "abc"
-	o := NewServer(false, Address(v))
+	o := NewServer(Address(v))
 	if !reflect.DeepEqual(v, o.address) {
 		t.Errorf("expect %s, got %s", v, o.address)
 	}
