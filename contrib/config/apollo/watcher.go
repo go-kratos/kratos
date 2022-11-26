@@ -25,7 +25,7 @@ type customChangeListener struct {
 
 func (c *customChangeListener) onChange(namespace string, changes map[string]*storage.ConfigChange) []*config.KeyValue {
 	kv := make([]*config.KeyValue, 0, 2)
-	if strings.Contains(namespace, ".") && !strings.Contains(namespace, properties) &&
+	if strings.Contains(namespace, ".") && !strings.HasSuffix(namespace, "."+properties) &&
 		(format(namespace) == yaml || format(namespace) == yml || format(namespace) == json) {
 		value, err := c.apollo.client.GetConfigCache(namespace).Get("content")
 		if err != nil {
