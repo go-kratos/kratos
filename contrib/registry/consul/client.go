@@ -41,20 +41,28 @@ type Client struct {
 	serviceChecks api.AgentServiceChecks
 }
 
-type ClientConfig struct {
-	DCMode Datacenter
+type ClientOption func(cls *Client)
+
+// DCMode datacenter mode
+func DCMode(dcMode Datacenter) ClientOption {
+	return func(c *Client) {
+		c.dcMode = dcMode
+	}
 }
 
 // NewClient creates consul client
-func NewClient(cli *api.Client, cfg *ClientConfig) *Client {
+func NewClient(cli *api.Client, opts ...ClientOption) *Client {
 	c := &Client{
-		dcMode:                         cfg.DCMode,
 		cli:                            cli,
 		resolver:                       defaultResolver,
 		healthcheckInterval:            10,
 		heartbeat:                      true,
 		deregisterCriticalServiceAfter: 600,
 	}
+	for _, opt := range opts {
+		opt(c)
+	}
+
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 	return c
 }
@@ -125,10 +133,7 @@ func (c *Client) multiDCService(ctx context.Context, service string, index uint6
 	}
 	opts = opts.WithContext(ctx)
 
-	var (
-		entries []*api.ServiceEntry
-		li      uint64
-	)
+	var instances []*registry.ServiceInstance
 
 	dcs, err := c.cli.Catalog().Datacenters()
 	if err != nil {
@@ -141,12 +146,20 @@ func (c *Client) multiDCService(ctx context.Context, service string, index uint6
 		if err != nil {
 			return nil, 0, err
 		}
-		entries = append(entries, e...)
-		li += m.LastIndex
+
+		ins := c.resolver(ctx, e)
+		for _, in := range ins {
+			if in.Metadata == nil {
+				in.Metadata = make(map[string]string, 1)
+			}
+			in.Metadata["dc"] = dc
+		}
+
+		instances = append(instances, ins...)
+		opts.WaitIndex = m.LastIndex
 	}
 
-	// fixme: li该是多少
-	return c.resolver(ctx, entries), li, nil
+	return instances, opts.WaitIndex, nil
 }
 
 func (c *Client) singleDCEntries(service, tag string, passingOnly bool, opts *api.QueryOptions) ([]*api.ServiceEntry, *api.QueryMeta, error) {

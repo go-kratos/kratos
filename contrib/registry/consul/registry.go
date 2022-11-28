@@ -103,7 +103,7 @@ func New(apiClient *api.Client, opts ...Option) *Registry {
 	for _, o := range opts {
 		o(r)
 	}
-	r.cli = NewClient(apiClient, &ClientConfig{DCMode: r.dcMode})
+	r.cli = NewClient(apiClient, DCMode(r.dcMode))
 	return r
 }
 
