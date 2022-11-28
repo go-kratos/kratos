@@ -24,7 +24,7 @@ const (
 
 // Client is consul client config
 type Client struct {
-	dcMode Datacenter
+	dc     Datacenter
 	cli    *api.Client
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -41,12 +41,12 @@ type Client struct {
 	serviceChecks api.AgentServiceChecks
 }
 
-type ClientOption func(cls *Client)
+type ClientOption func(c *Client)
 
-// DCMode datacenter mode
-func DCMode(dcMode Datacenter) ClientOption {
+// WithDataCenter datacenter names.
+func WithDataCenter(dc Datacenter) ClientOption {
 	return func(c *Client) {
-		c.dcMode = dcMode
+		c.dc = dc
 	}
 }
 
@@ -104,18 +104,18 @@ type ServiceResolver func(ctx context.Context, entries []*api.ServiceEntry) []*r
 
 // Service get services from consul
 func (c *Client) Service(ctx context.Context, service string, index uint64, passingOnly bool) ([]*registry.ServiceInstance, uint64, error) {
-	if c.dcMode == MultiDatacenter {
+	if c.dc == MultiDatacenter {
 		return c.multiDCService(ctx, service, index, passingOnly)
 	}
 
 	opts := &api.QueryOptions{
 		WaitIndex:  index,
 		WaitTime:   time.Second * 55,
-		Datacenter: string(c.dcMode),
+		Datacenter: string(c.dc),
 	}
 	opts = opts.WithContext(ctx)
 
-	if c.dcMode == SingleDatacenter {
+	if c.dc == SingleDatacenter {
 		opts.Datacenter = ""
 	}
 

@@ -30,7 +30,7 @@ func WithHealthCheck(enable bool) Option {
 // WithDCMode with registry datacenter option
 func WithDCMode(mode Datacenter) Option {
 	return func(o *Registry) {
-		o.dcMode = mode
+		o.dc = mode
 	}
 }
 
@@ -90,20 +90,20 @@ type Registry struct {
 	enableHealthCheck bool
 	registry          map[string]*serviceSet
 	lock              sync.RWMutex
-	dcMode            Datacenter
+	dc                Datacenter
 }
 
 // New creates consul registry
 func New(apiClient *api.Client, opts ...Option) *Registry {
 	r := &Registry{
-		dcMode:            SingleDatacenter,
+		dc:                SingleDatacenter,
 		registry:          make(map[string]*serviceSet),
 		enableHealthCheck: true,
 	}
 	for _, o := range opts {
 		o(r)
 	}
-	r.cli = NewClient(apiClient, DCMode(r.dcMode))
+	r.cli = NewClient(apiClient, WithDataCenter(r.dc))
 	return r
 }
 
