@@ -28,9 +28,9 @@ func WithHealthCheck(enable bool) Option {
 }
 
 // WithDatacenter with registry datacenter option
-func WithDatacenter(mode Datacenter) Option {
+func WithDatacenter(dc Datacenter) Option {
 	return func(o *Registry) {
-		o.dc = mode
+		o.dc = dc
 	}
 }
 
