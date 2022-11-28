@@ -103,7 +103,7 @@ func New(apiClient *api.Client, opts ...Option) *Registry {
 	for _, o := range opts {
 		o(r)
 	}
-	r.cli = NewClient(apiClient, WithDataCenter(r.dc))
+	r.cli = newClient(apiClient, r.dc)
 	return r
 }
 

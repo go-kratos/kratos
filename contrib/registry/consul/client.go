@@ -41,26 +41,19 @@ type Client struct {
 	serviceChecks api.AgentServiceChecks
 }
 
-type ClientOption func(c *Client)
-
-// WithDataCenter datacenter names.
-func WithDataCenter(dc Datacenter) ClientOption {
-	return func(c *Client) {
-		c.dc = dc
-	}
+// Deprecated use newClient instead.
+func NewClient(cli *api.Client) *Client {
+	return newClient(cli, SingleDatacenter)
 }
 
-// NewClient creates consul client
-func NewClient(cli *api.Client, opts ...ClientOption) *Client {
+func newClient(cli *api.Client, dc Datacenter) *Client {
 	c := &Client{
+		dc:                             dc,
 		cli:                            cli,
 		resolver:                       defaultResolver,
 		healthcheckInterval:            10,
 		heartbeat:                      true,
 		deregisterCriticalServiceAfter: 600,
-	}
-	for _, opt := range opts {
-		opt(c)
 	}
 
 	c.ctx, c.cancel = context.WithCancel(context.Background())
