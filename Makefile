@@ -1,9 +1,25 @@
 user	:=	$(shell whoami)
 rev 	:= 	$(shell git rev-parse --short HEAD)
+os		:=	$(shell expr substr $(shell uname -s) 1 5)
 
 # GOBIN > GOPATH > INSTALLDIR
+# Mac OS X
+ifeq ($(shell uname),Darwin)
 GOBIN	:=	$(shell echo ${GOBIN} | cut -d':' -f1)
 GOPATH	:=	$(shell echo $(GOPATH) | cut -d':' -f1)
+endif
+
+# Linux
+ifeq ($(os),Linux)
+GOBIN	:=	$(shell echo ${GOBIN} | cut -d':' -f1)
+GOPATH	:=	$(shell echo $(GOPATH) | cut -d':' -f1)
+endif
+
+# Windows
+ifeq ($(os),MINGW)
+GOBIN	:=	$(shell echo "${GOBIN}" | cut -d';' -f1)
+GOPATH	:=	$(shell echo "$(GOPATH)" | cut -d';' -f1)
+endif
 BIN		:= 	""
 
 TOOLS_SHELL="./hack/tools.sh"
@@ -14,7 +30,7 @@ LINTER := bin/golangci-lint
 ifneq ($(GOBIN),)
 	BIN=$(GOBIN)
 else
-	# check GOPATH
+# check GOPATH
 	ifneq ($(GOPATH),)
 		BIN=$(GOPATH)/bin
 	endif
