@@ -27,6 +27,13 @@ func WithHealthCheck(enable bool) Option {
 	}
 }
 
+// WithDatacenter with registry datacenter option
+func WithDatacenter(dc Datacenter) Option {
+	return func(o *Registry) {
+		o.dc = dc
+	}
+}
+
 // WithHeartbeat enable or disable heartbeat
 func WithHeartbeat(enable bool) Option {
 	return func(o *Registry) {
@@ -83,18 +90,20 @@ type Registry struct {
 	enableHealthCheck bool
 	registry          map[string]*serviceSet
 	lock              sync.RWMutex
+	dc                Datacenter
 }
 
 // New creates consul registry
 func New(apiClient *api.Client, opts ...Option) *Registry {
 	r := &Registry{
-		cli:               NewClient(apiClient),
+		dc:                SingleDatacenter,
 		registry:          make(map[string]*serviceSet),
 		enableHealthCheck: true,
 	}
 	for _, o := range opts {
 		o(r)
 	}
+	r.cli = newClient(apiClient, r.dc)
 	return r
 }
 
