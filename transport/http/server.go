@@ -136,10 +136,15 @@ func PathPrefix(prefix string) ServerOption {
 	}
 }
 
-func HealthChecks(ho ...health.HealthOption) ServerOption {
+func HealthChecks(ho ...HealthOption) ServerOption {
 	return func(s *Server) {
 		s.ho = ho
 	}
+}
+
+type HealthOption struct {
+	Name string
+	health.CheckerFunc
 }
 
 // Server is an HTTP server wrapper.
@@ -162,7 +167,7 @@ type Server struct {
 	strictSlash bool
 	router      *mux.Router
 	health      *health.Health
-	ho          []health.HealthOption
+	ho          []HealthOption
 }
 
 // NewServer creates an HTTP server by options.
@@ -180,7 +185,7 @@ func NewServer(opts ...ServerOption) *Server {
 		strictSlash: true,
 		router:      mux.NewRouter(),
 		health:      health.New(),
-		ho:          make([]health.HealthOption, 0),
+		ho:          make([]HealthOption, 0),
 	}
 	for _, o := range opts {
 		o(srv)
@@ -318,7 +323,7 @@ func (s *Server) Start(ctx context.Context) error {
 		return ctx
 	}
 	log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
-	s.health.Start(ctx)
+	_ = s.health.Start(ctx)
 	var err error
 	if s.tlsConf != nil {
 		err = s.ServeTLS(s.lis, "", "")
@@ -334,7 +339,7 @@ func (s *Server) Start(ctx context.Context) error {
 // Stop stop the HTTP server.
 func (s *Server) Stop(ctx context.Context) error {
 	log.Info("[HTTP] server stopping")
-	s.health.Stop(ctx)
+	_ = s.health.Stop(ctx)
 	return s.Shutdown(ctx)
 }
 

@@ -23,11 +23,6 @@ func (f CheckerFunc) Check(ctx context.Context) error {
 	return f(ctx)
 }
 
-type HealthOption struct {
-	Name string
-	CheckerFunc
-}
-
 type Health struct {
 	status   Status
 	checkers map[string]Checker
