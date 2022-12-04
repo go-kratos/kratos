@@ -64,10 +64,12 @@ func Run(cmd *cobra.Command, args []string) {
 			dir = cmdPath[dir]
 		}
 	}
-	fd := exec.Command("go", append([]string{"run", "."}, programArgs...)...)
+	var rootPath string
+	rootPath = filepath.Join(dir, "../../")
+	fd := exec.Command("go", append([]string{"run", "." + dir[len(rootPath):]}, programArgs...)...)
 	fd.Stdout = os.Stdout
 	fd.Stderr = os.Stderr
-	fd.Dir = dir
+	fd.Dir = rootPath
 	if err := fd.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err.Error())
 		return
