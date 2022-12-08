@@ -55,6 +55,13 @@ func With(l Logger, kv ...interface{}) Logger {
 func WithContext(ctx context.Context, l Logger) Logger {
 	c, ok := l.(*logger)
 	if !ok {
+		f, ok := l.(*Filter)
+		if ok {
+			c, ok := f.logger.(*logger)
+			if ok {
+				return &logger{logger: c.logger, prefix: c.prefix, hasValuer: c.hasValuer, ctx: ctx}
+			}
+		}
 		return &logger{logger: l, ctx: ctx}
 	}
 	return &logger{
