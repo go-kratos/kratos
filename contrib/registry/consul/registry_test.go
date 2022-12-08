@@ -8,9 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/consul/api"
-
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/hashicorp/consul/api"
 )
 
 func tcpServer(t *testing.T, lis net.Listener) {
@@ -118,23 +117,11 @@ func TestRegistry_Register(t *testing.T) {
 				}
 			}
 
-			watch, err := r.Watch(tt.args.ctx, tt.args.serverName)
-			if err != nil {
-				t.Error(err)
-			}
-			got, err := watch.Next()
-
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
-				t.Errorf("GetService() got = %v", got)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetService() got = %v, want %v", got, tt.want)
-			}
-
 			for _, instance := range tt.args.server {
-				_ = r.Deregister(tt.args.ctx, instance)
+				err = r.Deregister(tt.args.ctx, instance)
+				if err != nil {
+					t.Error(err)
+				}
 			}
 		})
 	}
@@ -338,8 +325,30 @@ func TestRegistry_Watch(t *testing.T) {
 			}
 
 			r := New(cli, tt.args.opts...)
+			watch, err := r.Watch(tt.args.ctx, tt.args.instance.Name)
+			if err != nil {
+				t.Error(err)
+			}
+			defer func() {
+				_ = watch.Stop()
+			}()
 
-			err := r.Register(tt.args.ctx, tt.args.instance)
+			go func() {
+				service, err := watch.Next()
+				if err == context.Canceled {
+					return
+				}
+				if (err != nil) != tt.wantErr {
+					t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("GetService() got = %v", service)
+					return
+				}
+				if !reflect.DeepEqual(service, tt.want) {
+					t.Errorf("GetService() got = %v, want %v", service, tt.want)
+				}
+			}()
+
+			err = r.Register(tt.args.ctx, tt.args.instance)
 			if err != nil {
 				t.Error(err)
 			}
@@ -349,22 +358,6 @@ func TestRegistry_Watch(t *testing.T) {
 					t.Error(err)
 				}
 			}()
-
-			watch, err := r.Watch(tt.args.ctx, tt.args.instance.Name)
-			if err != nil {
-				t.Error(err)
-			}
-
-			service, err := watch.Next()
-
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
-				t.Errorf("GetService() got = %v", service)
-				return
-			}
-			if !reflect.DeepEqual(service, tt.want) {
-				t.Errorf("GetService() got = %v, want %v", service, tt.want)
-			}
 		})
 	}
 }

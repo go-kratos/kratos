@@ -20,7 +20,7 @@ func (s *serviceSet) broadcast(ss []*registry.ServiceInstance) {
 	defer s.lock.RUnlock()
 	for k := range s.watcher {
 		select {
-		case k.event <- struct{}{}:
+		case k.ch <- s.serviceName:
 		default:
 		}
 	}

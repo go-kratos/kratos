@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/hashicorp/consul/api"
@@ -166,41 +165,7 @@ func (r *Registry) ListServices() (allServices map[string][]*registry.ServiceIns
 
 // Watch resolve service by name
 func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, error) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	set, ok := r.registry[name]
-	if !ok {
-		set = &serviceSet{
-			watcher:     make(map[*watcher]struct{}),
-			services:    &atomic.Value{},
-			serviceName: name,
-		}
-		r.registry[name] = set
-	}
-
-	// 初始化watcher
-	w := &watcher{
-		event: make(chan struct{}, 1),
-	}
-	w.ctx, w.cancel = context.WithCancel(context.Background())
-	w.set = set
-	set.lock.Lock()
-	set.watcher[w] = struct{}{}
-	set.lock.Unlock()
-	ss, _ := set.services.Load().([]*registry.ServiceInstance)
-	if len(ss) > 0 {
-		// If the service has a value, it needs to be pushed to the watcher,
-		// otherwise the initial data may be blocked forever during the watch.
-		w.event <- struct{}{}
-	}
-
-	if !ok {
-		err := r.resolve(set)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return w, nil
+	return newWatcher(ctx, name, r)
 }
 
 func (r *Registry) resolve(ss *serviceSet) error {
