@@ -21,6 +21,10 @@ const (
 	LevelFatal
 )
 
+func (l Level) Key() string {
+	return LevelKey
+}
+
 func (l Level) String() string {
 	switch l {
 	case LevelDebug:

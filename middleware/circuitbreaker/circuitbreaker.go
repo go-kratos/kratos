@@ -26,6 +26,15 @@ func WithGroup(g *group.Group) Option {
 	}
 }
 
+// WithCircuitBreaker with circuit breaker genFunc.
+func WithCircuitBreaker(genBreakerFunc func() circuitbreaker.CircuitBreaker) Option {
+	return func(o *options) {
+		o.group = group.NewGroup(func() interface{} {
+			return genBreakerFunc()
+		})
+	}
+}
+
 type options struct {
 	group *group.Group
 }

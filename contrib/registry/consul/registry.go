@@ -7,14 +7,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
-
 	"github.com/hashicorp/consul/api"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 var (
-	_ registry.Registrar = &Registry{}
-	_ registry.Discovery = &Registry{}
+	_ registry.Registrar = (*Registry)(nil)
+	_ registry.Discovery = (*Registry)(nil)
 )
 
 // Option is consul registry option.
@@ -24,6 +24,13 @@ type Option func(*Registry)
 func WithHealthCheck(enable bool) Option {
 	return func(o *Registry) {
 		o.enableHealthCheck = enable
+	}
+}
+
+// WithDatacenter with registry datacenter option
+func WithDatacenter(dc Datacenter) Option {
+	return func(o *Registry) {
+		o.dc = dc
 	}
 }
 
@@ -83,18 +90,20 @@ type Registry struct {
 	enableHealthCheck bool
 	registry          map[string]*serviceSet
 	lock              sync.RWMutex
+	dc                Datacenter
 }
 
 // New creates consul registry
 func New(apiClient *api.Client, opts ...Option) *Registry {
 	r := &Registry{
-		cli:               NewClient(apiClient),
+		dc:                SingleDatacenter,
 		registry:          make(map[string]*serviceSet),
 		enableHealthCheck: true,
 	}
 	for _, o := range opts {
 		o(r)
 	}
+	r.cli = newClient(apiClient, r.dc)
 	return r
 }
 

@@ -111,12 +111,39 @@ func (d *dummyStringer) String() string {
 	return "my value"
 }
 
-func Test_extractArgs(t *testing.T) {
+func TestExtractArgs(t *testing.T) {
 	if extractArgs(&dummyStringer{field: ""}) != "my value" {
 		t.Errorf(`The stringified dummyStringer structure must be equal to "my value", %v given`, extractArgs(&dummyStringer{field: ""}))
 	}
 
 	if extractArgs(&dummy{field: "value"}) != "&{field:value}" {
 		t.Errorf(`The stringified dummy structure must be equal to "&{field:value}", %v given`, extractArgs(&dummy{field: "value"}))
+	}
+}
+
+func TestExtractError(t *testing.T) {
+	tests := []struct {
+		name       string
+		err        error
+		wantLevel  log.Level
+		wantErrStr string
+	}{
+		{
+			"no error", nil, log.LevelInfo, "",
+		},
+		{
+			"error", errors.New("test error"), log.LevelError, "test error",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			level, errStr := extractError(test.err)
+			if level != test.wantLevel {
+				t.Errorf("want: %d, got: %d", test.wantLevel, level)
+			}
+			if errStr != test.wantErrStr {
+				t.Errorf("want: %s, got: %s", test.wantErrStr, errStr)
+			}
+		})
 	}
 }

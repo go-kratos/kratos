@@ -6,12 +6,12 @@ import (
 	"github.com/go-kratos/kratos/v2/config"
 )
 
+var _ config.Watcher = (*watcher)(nil)
+
 type watcher struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 }
-
-var _ config.Watcher = (*watcher)(nil)
 
 func NewWatcher() (config.Watcher, error) {
 	ctx, cancel := context.WithCancel(context.Background())
