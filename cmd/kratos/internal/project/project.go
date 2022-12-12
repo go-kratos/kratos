@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -64,7 +66,8 @@ func run(cmd *cobra.Command, args []string) {
 	} else {
 		name = args[0]
 	}
-	p := &Project{Name: path.Base(name), Path: name}
+	wd = getProjectPlaceDir(name, wd)
+	p := &Project{Name: filepath.Base(name), Path: name}
 	done := make(chan error, 1)
 	go func() {
 		if !nomod {
@@ -94,4 +97,27 @@ func run(cmd *cobra.Command, args []string) {
 			fmt.Fprintf(os.Stderr, "\033[31mERROR: Failed to create project(%s)\033[m\n", err.Error())
 		}
 	}
+}
+
+func getProjectPlaceDir(projectName string, fallbackPlaceDir string) string {
+	projectWorkingDir := filepath.Dir(projectName)
+	// check for home dir
+	if strings.HasPrefix(projectWorkingDir, "~") {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			// cannot get user home return fallback place dir
+			return fallbackPlaceDir
+		}
+		projectName = filepath.Join(homeDir, projectName[2:])
+	}
+	// check path is relative
+	if !filepath.IsAbs(projectWorkingDir) {
+		wdAbs, err := filepath.Abs(projectName)
+		if err != nil {
+			return fallbackPlaceDir
+		}
+		projectWorkingDir = wdAbs
+	}
+	// create project logic will check stat,so not check path stat here
+	return projectWorkingDir
 }
