@@ -100,24 +100,26 @@ func run(cmd *cobra.Command, args []string) {
 }
 
 func getProjectPlaceDir(projectName string, fallbackPlaceDir string) string {
-	projectWorkingDir := filepath.Dir(projectName)
+	projectFullPath := projectName
+
+	wd := filepath.Dir(projectName)
 	// check for home dir
-	if strings.HasPrefix(projectWorkingDir, "~") {
+	if strings.HasPrefix(wd, "~") {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			// cannot get user home return fallback place dir
 			return fallbackPlaceDir
 		}
-		projectName = filepath.Join(homeDir, projectName[2:])
+		projectFullPath = filepath.Join(homeDir, projectName[2:])
 	}
 	// check path is relative
-	if !filepath.IsAbs(projectWorkingDir) {
-		wdAbs, err := filepath.Abs(projectName)
+	if !filepath.IsAbs(projectFullPath) {
+		absPath, err := filepath.Abs(projectFullPath)
 		if err != nil {
 			return fallbackPlaceDir
 		}
-		projectWorkingDir = wdAbs
+		projectFullPath = absPath
 	}
 	// create project logic will check stat,so not check path stat here
-	return projectWorkingDir
+	return filepath.Dir(projectFullPath)
 }
