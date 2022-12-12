@@ -1,3 +1,5 @@
+//go:build linux
+
 package project
 
 import (
@@ -14,8 +16,6 @@ func Test_getProjectPlaceDir(t *testing.T) {
 		args args
 		want string
 	}{
-		{"absWindows", args{projectName: "c:\\kratos\\awesome\\go\\demo", fallbackPlaceDir: ""}, "c:\\kratos\\awesome\\go"},
-		{"windowsHome", args{projectName: "~\\kratos\\awesome\\go\\demo", fallbackPlaceDir: ""}, "C:\\Users\\czyt\\kratos\\awesome\\go"},
 		{"absLinux", args{projectName: "/home/kratos/awesome/go/demo", fallbackPlaceDir: ""}, "/home/kratos/awesome/go"},
 	}
 	for _, tt := range tests {
