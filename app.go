@@ -113,12 +113,16 @@ func (a *App) Run() error {
 		})
 	}
 	wg.Wait()
-	if a.opts.registrar != nil {
+	if a.opts.registrars != nil {
 		rctx, rcancel := context.WithTimeout(ctx, a.opts.registrarTimeout)
 		defer rcancel()
-		if err = a.opts.registrar.Register(rctx, instance); err != nil {
-			return err
+
+		for _, registrar := range a.opts.registrars {
+			if err = registrar.Register(rctx, instance); err != nil {
+				return err
+			}
 		}
+
 	}
 	for _, fn := range a.opts.afterStart {
 		if err = fn(sctx); err != nil {
@@ -155,12 +159,16 @@ func (a *App) Stop() (err error) {
 	a.mu.Lock()
 	instance := a.instance
 	a.mu.Unlock()
-	if a.opts.registrar != nil && instance != nil {
+	if a.opts.registrars != nil && instance != nil {
 		ctx, cancel := context.WithTimeout(NewContext(a.ctx, a), a.opts.registrarTimeout)
 		defer cancel()
-		if err = a.opts.registrar.Deregister(ctx, instance); err != nil {
-			return err
+
+		for _, registrar := range a.opts.registrars {
+			if err = registrar.Deregister(ctx, instance); err != nil {
+				return err
+			}
 		}
+
 	}
 	if a.cancel != nil {
 		a.cancel()

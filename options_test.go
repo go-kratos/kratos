@@ -130,8 +130,8 @@ func TestRegistrar(t *testing.T) {
 	o := &options{}
 	v := &mockRegistrar{}
 	Registrar(v)(o)
-	if !reflect.DeepEqual(v, o.registrar) {
-		t.Fatal("o.registrar is not equal to v")
+	if !reflect.DeepEqual(v, o.registrars) {
+		t.Fatal("o.registrars is not equal to v")
 	}
 }
 

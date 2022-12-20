@@ -26,7 +26,7 @@ type options struct {
 	sigs []os.Signal
 
 	logger           log.Logger
-	registrar        registry.Registrar
+	registrars       []registry.Registrar
 	registrarTimeout time.Duration
 	stopTimeout      time.Duration
 	servers          []transport.Server
@@ -84,11 +84,11 @@ func Signal(sigs ...os.Signal) Option {
 }
 
 // Registrar with service registry.
-func Registrar(r registry.Registrar) Option {
-	return func(o *options) { o.registrar = r }
+func Registrar(r ...registry.Registrar) Option {
+	return func(o *options) { o.registrars = r }
 }
 
-// RegistrarTimeout with registrar timeout.
+// RegistrarTimeout with registrars timeout.
 func RegistrarTimeout(t time.Duration) Option {
 	return func(o *options) { o.registrarTimeout = t }
 }
