@@ -9,8 +9,6 @@ import (
 	"github.com/polarismesh/polaris-go/pkg/model"
 )
 
-// check
-
 type (
 	// Option function for polaris limiter
 	Option func(*options)
@@ -80,7 +78,7 @@ func WithToken(token uint32) Option {
 	}
 }
 
-type PolarisLimiter struct {
+type Limiter struct {
 	// polaris limit api
 	limitAPI polaris.LimitAPI
 
@@ -99,7 +97,7 @@ func buildRequest(opts options) polaris.QuotaRequest {
 }
 
 // NewLimiter New a Polaris limiter impl.
-func NewLimiter(opts ...Option) *PolarisLimiter {
+func NewLimiter(opts ...Option) *Limiter {
 	opt := options{
 		conf:       nil,
 		namespace:  "default",
@@ -116,14 +114,14 @@ func NewLimiter(opts ...Option) *PolarisLimiter {
 	if err != nil {
 		panic(err)
 	}
-	return &PolarisLimiter{
+	return &Limiter{
 		limitAPI: limitAPI,
 		opts:     opt,
 	}
 }
 
 // Allow interface impl
-func (l *PolarisLimiter) Allow(method string, argument ...model.Argument) (ratelimit.DoneFunc, error) {
+func (l *Limiter) Allow(method string, argument ...model.Argument) (ratelimit.DoneFunc, error) {
 	request := buildRequest(l.opts)
 	request.SetMethod(method)
 	for _, arg := range argument {
