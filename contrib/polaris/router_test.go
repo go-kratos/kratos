@@ -107,29 +107,29 @@ func BenchmarkPolaris_NodeFilter(b *testing.B) {
 	//}
 }
 
-type mockApp struct {
-}
-
-func (m mockApp) ID() string {
-	return "1"
-}
-
-func (m mockApp) Name() string {
-	//TODO implement me
-	return "kratos"
-}
-
-func (m mockApp) Version() string {
-	//TODO implement me
-	return "v2.0.0"
-}
-
-func (m mockApp) Metadata() map[string]string {
-	//TODO implement me
-	return map[string]string{}
-}
-
-func (m mockApp) Endpoint() []string {
-	//TODO implement me
-	return []string{"grpc://123.123.123.123:9090"}
-}
+//type mockApp struct {
+//}
+//
+//func (m mockApp) ID() string {
+//	return "1"
+//}
+//
+//func (m mockApp) Name() string {
+//	//TODO implement me
+//	return "kratos"
+//}
+//
+//func (m mockApp) Version() string {
+//	//TODO implement me
+//	return "v2.0.0"
+//}
+//
+//func (m mockApp) Metadata() map[string]string {
+//	//TODO implement me
+//	return map[string]string{}
+//}
+//
+//func (m mockApp) Endpoint() []string {
+//	//TODO implement me
+//	return []string{"grpc://123.123.123.123:9090"}
+//}
