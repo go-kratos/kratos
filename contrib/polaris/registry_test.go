@@ -2,9 +2,10 @@ package polaris
 
 import (
 	"context"
-	"github.com/polarismesh/polaris-go"
 	"testing"
 	"time"
+
+	"github.com/polarismesh/polaris-go"
 
 	"github.com/go-kratos/kratos/v2/registry"
 )

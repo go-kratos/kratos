@@ -286,7 +286,7 @@ func TestExtToFormat(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := New(sdk)
-	
+
 	config, err := p.Config(WithConfigNamespace(namespace), WithFileGroup(fileGroup), WithFileName(name))
 	if err != nil {
 		t.Fatal(err)
