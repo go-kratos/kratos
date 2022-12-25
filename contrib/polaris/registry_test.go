@@ -20,10 +20,9 @@ func TestRegistry(t *testing.T) {
 
 	r := p.Registry(
 		WithTimeout(time.Second),
-		//WithHealthy(true),
-		WithIsolate(true),
+		WithHealthy(true),
+		WithIsolate(false),
 		WithRegistryNamespace("default"),
-		WithProtocol("tcp"),
 		WithRetryCount(0),
 		WithWeight(100),
 		WithTTL(10),
@@ -32,10 +31,10 @@ func TestRegistry(t *testing.T) {
 	ctx := context.Background()
 
 	svc := &registry.ServiceInstance{
-		Name:      "kratos-provider-0-",
+		Name:      "kratos-provider",
 		Version:   "test",
 		Metadata:  map[string]string{"app": "kratos"},
-		Endpoints: []string{"tcp://127.0.0.1:9000?isSecure=false"},
+		Endpoints: []string{"grpc://127.0.0.1:9000", "http://127.0.0.1:8000"},
 	}
 
 	err = r.Register(ctx, svc)
@@ -45,82 +44,13 @@ func TestRegistry(t *testing.T) {
 
 	time.Sleep(time.Second)
 
-	result, err := r.GetService(context.Background(), "kratos-provider-0-tcp")
+	result, err := r.GetService(context.Background(), "kratos-provider")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(result) != 1 {
-		t.Fatal("register error")
-	}
-
-	for _, item := range result {
-		if item.Name != "kratos-provider-0-tcp" || item.Endpoints[0] != "tcp://127.0.0.1:9000" {
-			t.Fatal("register error")
-		}
-	}
-
-	watch, err := r.Watch(ctx, "kratos-provider-0-tcp")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Test update
-	svc.Version = "release1.0.0"
-
-	if err = r.Register(ctx, svc); err != nil {
-		t.Fatal(err)
-	}
-
-	result, err = watch.Next()
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(result) != 1 || result[0].Version != "release1.0.0" {
-		t.Fatal("register error")
-	}
-	// Test add instance
-	svc1 := &registry.ServiceInstance{
-		Name:      "kratos-provider-0-",
-		Version:   "test",
-		Metadata:  map[string]string{"app": "kratos"},
-		Endpoints: []string{"tcp://127.0.0.1:9001?isSecure=false"},
-	}
-
-	if err = r.Register(ctx, svc1); err != nil {
-		t.Fatal(err)
-	}
-
-	if _, err = watch.Next(); err != nil {
-		t.Fatal(err)
-	}
-
-	result, err = r.GetService(ctx, "kratos-provider-0-tcp")
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(result) != 2 {
-		t.Fatal("register error")
-	}
-
-	if err = r.Deregister(ctx, svc); err != nil {
-		t.Fatal(err)
-	}
-	if err = r.Deregister(ctx, svc1); err != nil {
-		t.Fatal(err)
-	}
-
-	result, err = watch.Next()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(result) != 0 {
-		t.Fatal("register error")
+	for _, instance := range result {
+		t.Log(instance)
 	}
 }
 
@@ -137,7 +67,7 @@ func TestRegistryMany(t *testing.T) {
 		//WithHealthy(true),
 		WithIsolate(true),
 		WithRegistryNamespace("default"),
-		WithProtocol("tcp"),
+		//WithProtocol("tcp"),
 		WithRetryCount(0),
 		WithWeight(100),
 		WithTTL(10),
