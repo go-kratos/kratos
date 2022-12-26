@@ -35,20 +35,9 @@ func Server(l Limiter) middleware.Middleware {
 				}
 				// handle http
 				if ht, ok := tr.(*http.Transport); ok {
-					// handle query
-					querys := strings.Split(ht.Request().URL.RawQuery, querySplit)
-					requestStringMap := make(map[string]string)
-					for _, query := range querys {
-						// the build result of test=1&test=2 is '1,2'
-						params := strings.Split(query, paramSplit)
-						if requestStringMap[params[0]] == "" {
-							requestStringMap[params[0]] = requestStringMap[params[0]] + params[1]
-							continue
-						}
-						requestStringMap[params[0]] = requestStringMap[params[0]] + polarisArgumentsSplist + params[1]
-					}
-					for k, v := range requestStringMap {
-						args = append(args, model.BuildQueryArgument(k, v))
+					// url query
+					for key, values := range ht.Request().URL.Query() {
+						args = append(args, model.BuildQueryArgument(key, strings.Join(values, ",")))
 					}
 				}
 				done, e := l.Allow(tr.Operation(), args...)
