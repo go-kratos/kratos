@@ -16,10 +16,7 @@ import (
 
 // ErrLimitExceed is service unavailable due to rate limit exceeded.
 var (
-	ErrLimitExceed         = errors.New(429, "RATELIMIT", "service unavailable due to rate limit exceeded")
-	querySplit             = "&"
-	paramSplit             = "="
-	polarisArgumentsSplist = ","
+	ErrLimitExceed = errors.New(429, "RATELIMIT", "service unavailable due to rate limit exceeded")
 )
 
 // Server ratelimiter middleware
