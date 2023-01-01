@@ -27,6 +27,13 @@ func WithHealthCheck(enable bool) Option {
 	}
 }
 
+// WithTimeout with get services timeout option.
+func WithTimeout(timeout time.Duration) Option {
+	return func(o *Registry) {
+		o.timeout = timeout
+	}
+}
+
 // WithDatacenter with registry datacenter option
 func WithDatacenter(dc Datacenter) Option {
 	return func(o *Registry) {
@@ -90,6 +97,7 @@ type Registry struct {
 	enableHealthCheck bool
 	registry          map[string]*serviceSet
 	lock              sync.RWMutex
+	timeout           time.Duration
 	dc                Datacenter
 }
 
@@ -99,6 +107,7 @@ func New(apiClient *api.Client, opts ...Option) *Registry {
 		dc:                SingleDatacenter,
 		registry:          make(map[string]*serviceSet),
 		enableHealthCheck: true,
+		timeout:           10 * time.Second,
 	}
 	for _, o := range opts {
 		o(r)
@@ -178,11 +187,11 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 		r.registry[name] = set
 	}
 
-	// 初始化watcher
+	// init watcher
 	w := &watcher{
 		event: make(chan struct{}, 1),
 	}
-	w.ctx, w.cancel = context.WithCancel(context.Background())
+	w.ctx, w.cancel = context.WithCancel(ctx)
 	w.set = set
 	set.lock.Lock()
 	set.watcher[w] = struct{}{}
@@ -195,7 +204,7 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	}
 
 	if !ok {
-		err := r.resolve(set)
+		err := r.resolve(ctx, set)
 		if err != nil {
 			return nil, err
 		}
@@ -203,32 +212,39 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	return w, nil
 }
 
-func (r *Registry) resolve(ss *serviceSet) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	services, idx, err := r.cli.Service(ctx, ss.serviceName, 0, true)
-	cancel()
+func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
+	timeoutCtx, cancel := context.WithTimeout(ctx, r.timeout)
+	defer cancel()
+
+	services, idx, err := r.cli.Service(timeoutCtx, ss.serviceName, 0, true)
 	if err != nil {
 		return err
-	} else if len(services) > 0 {
+	}
+	if len(services) > 0 {
 		ss.broadcast(services)
 	}
+
 	go func() {
 		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
 		for {
-			<-ticker.C
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*120)
-			tmpService, tmpIdx, err := r.cli.Service(ctx, ss.serviceName, idx, true)
-			cancel()
-			if err != nil {
-				time.Sleep(time.Second)
-				continue
+			select {
+			case <-ticker.C:
+				timeoutCtx, cancel := context.WithTimeout(context.Background(), r.timeout)
+				tmpService, tmpIdx, err := r.cli.Service(timeoutCtx, ss.serviceName, idx, true)
+				cancel()
+				if err != nil {
+					time.Sleep(time.Second)
+					continue
+				}
+				if len(tmpService) != 0 && tmpIdx != idx {
+					services = tmpService
+					ss.broadcast(services)
+				}
+				idx = tmpIdx
+			case <-ctx.Done():
+				return
 			}
-			if len(tmpService) != 0 && tmpIdx != idx {
-				services = tmpService
-				ss.broadcast(services)
-			}
-			idx = tmpIdx
 		}
 	}()
 
