@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,11 +20,8 @@ var (
 	_ registry.Discovery = (*Registry)(nil)
 )
 
-// _instanceIDSeparator . Instance id Separator.
-const _instanceIDSeparator = "-"
-
 type registryOptions struct {
-	// required, namespace in polaris
+	// required, testNamespace in polaris
 	Namespace string
 
 	// required, service access token
@@ -104,39 +100,9 @@ func WithRetryCount(retryCount int) RegistryOption {
 	return func(o *registryOptions) { o.RetryCount = retryCount }
 }
 
-func (p *Polaris) Registry(opts ...RegistryOption) (r *Registry) {
-	op := registryOptions{
-		Namespace:    "default",
-		ServiceToken: "",
-		Weight:       0,
-		Priority:     0,
-		Healthy:      true,
-		Isolate:      false,
-		TTL:          0,
-		Timeout:      0,
-		RetryCount:   0,
-	}
-	for _, option := range opts {
-		option(&op)
-	}
-	return &Registry{
-		opt:      op,
-		provider: p.registry,
-		consumer: p.discovery,
-	}
-}
-
 // Register the registration.
 func (r *Registry) Register(_ context.Context, instance *registry.ServiceInstance) error {
-	ids := make([]string, 0, len(instance.Endpoints))
-	if instance.ID == "" {
-		id, err := uuid.NewUUID()
-		if err != nil {
-			return err
-		}
-		instance.ID = id.String()
-	}
-
+	merge := uuid.NewString()
 	for _, endpoint := range instance.Endpoints {
 		u, err := url.Parse(endpoint)
 		if err != nil {
@@ -154,13 +120,17 @@ func (r *Registry) Register(_ context.Context, instance *registry.ServiceInstanc
 		}
 
 		// metadata
-		instance.Metadata["id"] = instance.ID
+		if instance.Metadata == nil {
+			instance.Metadata = make(map[string]string)
+		}
+		instance.Metadata["merge"] = merge
 		if _, ok := instance.Metadata["weight"]; !ok {
 			instance.Metadata["weight"] = strconv.Itoa(r.opt.Weight)
 		}
+
 		weight, _ := strconv.Atoi(instance.Metadata["weight"])
 
-		m, err := r.provider.RegisterInstance(
+		_, err = r.provider.RegisterInstance(
 			&polaris.InstanceRegisterRequest{
 				InstanceRegisterRequest: model.InstanceRegisterRequest{
 					Service:      instance.Name,
@@ -184,17 +154,13 @@ func (r *Registry) Register(_ context.Context, instance *registry.ServiceInstanc
 		if err != nil {
 			return err
 		}
-		ids = append(ids, m.InstanceID)
 	}
-	// need to set InstanceID for Deregister
-	instance.ID = strings.Join(ids, _instanceIDSeparator)
 	return nil
 }
 
 // Deregister the registration.
 func (r *Registry) Deregister(_ context.Context, serviceInstance *registry.ServiceInstance) error {
-	split := strings.Split(serviceInstance.ID, _instanceIDSeparator)
-	for i, endpoint := range serviceInstance.Endpoints {
+	for _, endpoint := range serviceInstance.Endpoints {
 		// get url
 		u, err := url.Parse(endpoint)
 		if err != nil {
@@ -216,10 +182,9 @@ func (r *Registry) Deregister(_ context.Context, serviceInstance *registry.Servi
 		err = r.provider.Deregister(
 			&polaris.InstanceDeRegisterRequest{
 				InstanceDeRegisterRequest: model.InstanceDeRegisterRequest{
-					Service:      serviceInstance.Name + u.Scheme,
+					Service:      serviceInstance.Name,
 					ServiceToken: r.opt.ServiceToken,
 					Namespace:    r.opt.Namespace,
-					InstanceID:   split[i],
 					Host:         host,
 					Port:         portNum,
 					Timeout:      &r.opt.Timeout,
@@ -239,10 +204,11 @@ func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registr
 	// get all instances
 	instancesResponse, err := r.consumer.GetInstances(&polaris.GetInstancesRequest{
 		GetInstancesRequest: model.GetInstancesRequest{
-			Service:    serviceName,
-			Namespace:  r.opt.Namespace,
-			Timeout:    &r.opt.Timeout,
-			RetryCount: &r.opt.RetryCount,
+			Service:         serviceName,
+			Namespace:       r.opt.Namespace,
+			Timeout:         &r.opt.Timeout,
+			RetryCount:      &r.opt.RetryCount,
+			SkipRouteFilter: true,
 		},
 	})
 	if err != nil {
@@ -257,10 +223,10 @@ func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registr
 func merge(instances []model.Instance) map[string][]model.Instance {
 	m := make(map[string][]model.Instance)
 	for _, instance := range instances {
-		if v, ok := m[instance.GetHost()+instance.GetMetadata()["id"]]; ok {
-			m[instance.GetHost()+instance.GetMetadata()["id"]] = append(v, instance)
+		if v, ok := m[instance.GetMetadata()["merge"]]; ok {
+			m[instance.GetMetadata()["merge"]] = append(v, instance)
 		} else {
-			m[instance.GetHost()+instance.GetMetadata()["id"]] = []model.Instance{instance}
+			m[instance.GetMetadata()["merge"]] = []model.Instance{instance}
 		}
 	}
 	return m
@@ -320,55 +286,43 @@ func (w *Watcher) Next() ([]*registry.ServiceInstance, error) {
 				// handle DeleteEvent
 				if instanceEvent.DeleteEvent != nil {
 					for _, instance := range instanceEvent.DeleteEvent.Instances {
-						if v, ok := w.ServiceInstances[instance.GetHost()+instance.GetMetadata()["id"]]; ok {
+						if v, ok := w.ServiceInstances[instance.GetMetadata()["merge"]]; ok {
 							var nv []model.Instance
-							for _, m := range v {
-								if m.GetId() != instance.GetId() {
-									nv = append(nv, instance)
-								}
+							m := map[string]model.Instance{}
+							for _, ins := range v {
+								m[ins.GetId()] = ins
 							}
-							for index, ins := range w.service.Instances {
-								if instance.GetId() == ins.GetId() {
-									// remove equal
-									if len(w.service.Instances) <= 1 {
-										w.service.Instances = w.service.Instances[0:0]
-										continue
-									}
-									w.service.Instances = append(w.service.Instances[:index], w.service.Instances[index+1:]...)
-								}
+							delete(m, instance.GetId())
+							for _, ins := range m {
+								nv = append(nv, ins)
 							}
-							w.ServiceInstances[instance.GetHost()+instance.GetMetadata()["id"]] = nv
+							w.ServiceInstances[instance.GetMetadata()["merge"]] = nv
 						}
 					}
 				}
 				// handle UpdateEvent
 				if instanceEvent.UpdateEvent != nil {
 					for _, update := range instanceEvent.UpdateEvent.UpdateList {
-						if v, ok := w.ServiceInstances[update.After.GetHost()+update.After.GetMetadata()["id"]]; ok {
-							nv := []model.Instance{update.After}
-							for _, m := range v {
-								if m.GetId() != update.After.GetId() {
-									// Insert directly those not updated this time
-									nv = append(nv, m)
-								}
+						if v, ok := w.ServiceInstances[update.After.GetMetadata()["merge"]]; ok {
+							var nv []model.Instance
+							m := map[string]model.Instance{}
+							for _, ins := range v {
+								m[ins.GetId()] = ins
 							}
-							w.ServiceInstances[update.After.GetHost()+update.After.GetMetadata()["id"]] = nv
+							m[update.After.GetId()] = update.After
+							for _, ins := range m {
+								nv = append(nv, ins)
+							}
+							w.ServiceInstances[update.After.GetMetadata()["merge"]] = nv
 						} else {
-							w.ServiceInstances[update.After.GetHost()+update.After.GetMetadata()["id"]] = []model.Instance{update.After}
-						}
-						for i, serviceInstance := range w.service.Instances {
-							for _, update := range instanceEvent.UpdateEvent.UpdateList {
-								if serviceInstance.GetId() == update.Before.GetId() {
-									w.service.Instances[i] = update.After
-								}
-							}
+							w.ServiceInstances[update.After.GetMetadata()["merge"]] = []model.Instance{update.After}
 						}
 					}
 				}
 				// handle AddEvent
 				if instanceEvent.AddEvent != nil {
 					for _, instance := range instanceEvent.AddEvent.Instances {
-						if v, ok := w.ServiceInstances[instance.GetHost()+instance.GetMetadata()["id"]]; ok {
+						if v, ok := w.ServiceInstances[instance.GetMetadata()["merge"]]; ok {
 							var nv []model.Instance
 							m := map[string]model.Instance{}
 							for _, ins := range v {
@@ -378,11 +332,10 @@ func (w *Watcher) Next() ([]*registry.ServiceInstance, error) {
 							for _, ins := range m {
 								nv = append(nv, ins)
 							}
-							w.ServiceInstances[instance.GetHost()+instance.GetMetadata()["id"]] = nv
+							w.ServiceInstances[instance.GetMetadata()["merge"]] = nv
 						} else {
-							w.ServiceInstances[instance.GetHost()+instance.GetMetadata()["id"]] = []model.Instance{instance}
+							w.ServiceInstances[instance.GetMetadata()["merge"]] = []model.Instance{instance}
 						}
-						w.service.Instances = append(w.service.Instances, instanceEvent.AddEvent.Instances...)
 					}
 				}
 			}
@@ -405,14 +358,13 @@ func instancesToServiceInstances(instances map[string][]model.Instance) []*regis
 			continue
 		}
 		ins := &registry.ServiceInstance{
-			ID:        inss[0].GetMetadata()["id"],
-			Name:      inss[0].GetService(),
-			Version:   inss[0].GetVersion(),
-			Metadata:  inss[0].GetMetadata(),
-			Endpoints: []string{fmt.Sprintf("%s://%s:%d", inss[0].GetProtocol(), inss[0].GetHost(), inss[0].GetPort())},
+			ID:       inss[0].GetId(),
+			Name:     inss[0].GetService(),
+			Version:  inss[0].GetVersion(),
+			Metadata: inss[0].GetMetadata(),
 		}
-		for i := 1; i < len(inss); i++ {
-			ins.Endpoints = append(ins.Endpoints, fmt.Sprintf("%s://%s:%d", inss[i].GetProtocol(), inss[i].GetHost(), inss[i].GetPort()))
+		for _, item := range inss {
+			ins.Endpoints = append(ins.Endpoints, fmt.Sprintf("%s://%s:%d", item.GetProtocol(), item.GetHost(), item.GetPort()))
 		}
 		serviceInstances = append(serviceInstances, ins)
 	}

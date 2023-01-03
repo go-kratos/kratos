@@ -1,7 +1,6 @@
 package polaris
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -23,14 +22,14 @@ type configOptions struct {
 	configFile polaris.ConfigFile
 }
 
-// WithConfigNamespace with polaris config namespace
+// WithConfigNamespace with polaris config testNamespace
 func WithConfigNamespace(namespace string) ConfigOption {
 	return func(o *configOptions) {
 		o.namespace = namespace
 	}
 }
 
-// WithFileGroup with polaris config fileGroup
+// WithFileGroup with polaris config testFileGroup
 func WithFileGroup(fileGroup string) ConfigOption {
 	return func(o *configOptions) {
 		o.fileGroup = fileGroup
@@ -47,31 +46,6 @@ func WithFileName(fileName string) ConfigOption {
 type source struct {
 	client  polaris.ConfigAPI
 	options *configOptions
-}
-
-func (p *Polaris) Config(opts ...ConfigOption) (config.Source, error) {
-	options := &configOptions{
-		namespace: "default",
-		fileGroup: "",
-		fileName:  "",
-	}
-
-	for _, opt := range opts {
-		opt(options)
-	}
-
-	if options.fileGroup == "" {
-		return nil, errors.New("fileGroup invalid")
-	}
-
-	if options.fileName == "" {
-		return nil, errors.New("fileName invalid")
-	}
-
-	return &source{
-		client:  p.config,
-		options: options,
-	}, nil
 }
 
 // Load return the config values

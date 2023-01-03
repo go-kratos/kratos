@@ -14,13 +14,13 @@ import (
 )
 
 var (
-	namespace     = "default"
-	fileGroup     = "test"
-	originContent = `server:
+	testNamespace     = "default"
+	testFileGroup     = "test"
+	testOriginContent = `server:
 		port: 8080`
-	updatedContent = `server:
+	testUpdatedContent = `server:
 		port: 8090`
-	configCenterURL = "http://127.0.0.1:8090"
+	testCenterURL = "http://127.0.0.1:8090"
 )
 
 func makeJSONRequest(uri string, data string, method string, headers map[string]string) ([]byte, error) {
@@ -75,7 +75,7 @@ func getToken() (string, error) {
 		return "", err
 	}
 	// login use default user
-	res, err := makeJSONRequest(fmt.Sprintf("%s/core/v1/user/login", configCenterURL), string(data), http.MethodPost, map[string]string{})
+	res, err := makeJSONRequest(fmt.Sprintf("%s/core/v1/user/login", testCenterURL), string(data), http.MethodPost, map[string]string{})
 	if err != nil {
 		return "", nil
 	}
@@ -89,16 +89,16 @@ func getToken() (string, error) {
 func (client *configClient) createConfigFile(name string) error {
 	data, err := json.Marshal(map[string]string{
 		"name":      name,
-		"namespace": namespace,
-		"group":     fileGroup,
-		"content":   originContent,
+		"namespace": testNamespace,
+		"group":     testFileGroup,
+		"content":   testOriginContent,
 		"modifyBy":  "polaris",
 		"format":    "yaml",
 	})
 	if err != nil {
 		return err
 	}
-	res, err := makeJSONRequest(fmt.Sprintf("%s/config/v1/configfiles", configCenterURL), string(data), http.MethodPost, map[string]string{
+	res, err := makeJSONRequest(fmt.Sprintf("%s/config/v1/configfiles", testCenterURL), string(data), http.MethodPost, map[string]string{
 		"X-Polaris-Token": client.token,
 	})
 	if err != nil {
@@ -119,16 +119,16 @@ func (client *configClient) createConfigFile(name string) error {
 func (client *configClient) updateConfigFile(name string) error {
 	data, err := json.Marshal(map[string]string{
 		"name":      name,
-		"namespace": namespace,
-		"group":     fileGroup,
-		"content":   updatedContent,
+		"namespace": testNamespace,
+		"group":     testFileGroup,
+		"content":   testUpdatedContent,
 		"modifyBy":  "polaris",
 		"format":    "yaml",
 	})
 	if err != nil {
 		return err
 	}
-	res, err := makeJSONRequest(fmt.Sprintf("%s/config/v1/configfiles", configCenterURL), string(data), http.MethodPut, map[string]string{
+	res, err := makeJSONRequest(fmt.Sprintf("%s/config/v1/configfiles", testCenterURL), string(data), http.MethodPut, map[string]string{
 		"X-Polaris-Token": client.token,
 	})
 	if err != nil {
@@ -150,7 +150,7 @@ func (client *configClient) deleteConfigFile(name string) error {
 	if err != nil {
 		return err
 	}
-	url := fmt.Sprintf("%s/config/v1/configfiles?namespace=%s&group=%s&name=%s", configCenterURL, namespace, fileGroup, name)
+	url := fmt.Sprintf("%s/config/v1/configfiles?namespace=%s&group=%s&name=%s", testCenterURL, testNamespace, testFileGroup, name)
 	res, err := makeJSONRequest(url, string(data), http.MethodDelete, map[string]string{
 		"X-Polaris-Token": client.token,
 	})
@@ -170,15 +170,15 @@ func (client *configClient) deleteConfigFile(name string) error {
 
 func (client *configClient) publishConfigFile(name string) error {
 	data, err := json.Marshal(map[string]string{
-		"namespace": namespace,
-		"group":     fileGroup,
+		"namespace": testNamespace,
+		"group":     testFileGroup,
 		"fileName":  name,
 		"name":      name,
 	})
 	if err != nil {
 		return err
 	}
-	res, err := makeJSONRequest(fmt.Sprintf("%s/config/v1/configfiles/release", configCenterURL), string(data), http.MethodPost, map[string]string{
+	res, err := makeJSONRequest(fmt.Sprintf("%s/config/v1/configfiles/release", testCenterURL), string(data), http.MethodPost, map[string]string{
 		"X-Polaris-Token": client.token,
 	})
 	if err != nil {
@@ -214,7 +214,7 @@ func TestConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := New(sdk)
-	config, err := p.Config(WithConfigNamespace(namespace), WithFileGroup(fileGroup), WithFileName(name))
+	config, err := p.Config(WithConfigNamespace(testNamespace), WithFileGroup(testFileGroup), WithFileName(name))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -223,7 +223,7 @@ func TestConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(kv) != 1 || kv[0].Key != name || string(kv[0].Value) != originContent {
+	if len(kv) != 1 || kv[0].Key != name || string(kv[0].Value) != testOriginContent {
 		t.Fatal("config error")
 	}
 
@@ -256,7 +256,7 @@ func TestConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(kv) != 1 || kv[0].Key != name || string(kv[0].Value) != updatedContent {
+	if len(kv) != 1 || kv[0].Key != name || string(kv[0].Value) != testUpdatedContent {
 		t.Fatal("config error")
 	}
 }
@@ -287,7 +287,7 @@ func TestExtToFormat(t *testing.T) {
 	}
 	p := New(sdk)
 
-	config, err := p.Config(WithConfigNamespace(namespace), WithFileGroup(fileGroup), WithFileName(name))
+	config, err := p.Config(WithConfigNamespace(testNamespace), WithFileGroup(testFileGroup), WithFileName(name))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -302,7 +302,7 @@ func TestExtToFormat(t *testing.T) {
 	if !reflect.DeepEqual(name, kv[0].Key) {
 		t.Errorf("kvs[0].Key is %s", kv[0].Key)
 	}
-	if !reflect.DeepEqual(originContent, string(kv[0].Value)) {
+	if !reflect.DeepEqual(testOriginContent, string(kv[0].Value)) {
 		t.Errorf("kvs[0].Value is %s", kv[0].Value)
 	}
 	if !reflect.DeepEqual("yaml", kv[0].Format) {

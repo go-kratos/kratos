@@ -2,13 +2,17 @@ package polaris
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"net"
+	"strconv"
 	"strings"
-	"time"
 
 	"github.com/polarismesh/polaris-go"
 	"github.com/polarismesh/polaris-go/pkg/model"
+	"github.com/polarismesh/polaris-go/pkg/model/local"
+	"github.com/polarismesh/polaris-go/pkg/model/pb"
+	"github.com/polarismesh/polaris-go/pkg/model/pb/v1"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
@@ -18,27 +22,10 @@ import (
 )
 
 // NodeFilter polaris dynamic router selector
-func (p *Polaris) NodeFilter(service, namespace string) (selector.NodeFilter, error) {
-	watcher, err := newWatcher(context.Background(), namespace, service, p.discovery)
-	// FIXME: 是否需要返回 err, 还是后续不生效即可？
-	if err != nil {
-		return nil, err
+func (p *Polaris) NodeFilter(namespace string) selector.NodeFilter {
+	if namespace == "" {
+		namespace = p.namespace
 	}
-	go func() {
-		// 缓存北极星数据
-		for {
-			_, err = watcher.Next()
-			if err != nil {
-				if errors.Is(err, context.Canceled) {
-					return
-				}
-				log.Errorf("failed to watch polaris discovery endpoint: %v", err)
-				time.Sleep(time.Second)
-				continue
-			}
-		}
-	}()
-
 	return func(ctx context.Context, nodes []selector.Node) []selector.Node {
 		if len(nodes) == 0 {
 			return nodes
@@ -50,7 +37,7 @@ func (p *Polaris) NodeFilter(service, namespace string) (selector.NodeFilter, er
 						Service:   appInfo.Name(),
 						Namespace: namespace,
 					},
-					DstInstances: watcher.service,
+					DstInstances: buildPolarisInstance(namespace, nodes),
 				},
 			}
 			req.AddArguments(model.BuildCallerServiceArgument(appInfo.Name(), namespace))
@@ -99,9 +86,44 @@ func (p *Polaris) NodeFilter(service, namespace string) (selector.NodeFilter, er
 					newNode = append(newNode, v)
 				}
 			}
-
 			return newNode
 		}
 		return nodes
-	}, nil
+	}
+}
+
+func buildPolarisInstance(namespace string, nodes []selector.Node) *pb.ServiceInstancesInProto {
+	ins := make([]*v1.Instance, 0, len(nodes))
+	for _, node := range nodes {
+		host, port, err := net.SplitHostPort(node.Address())
+		if err != nil {
+			return nil
+		}
+		portInt, err := strconv.Atoi(port)
+		if err != nil {
+			return nil
+		}
+		ins = append(ins, &v1.Instance{
+			Id:        wrapperspb.String(node.Metadata()["merge"]),
+			Service:   wrapperspb.String(node.ServiceName()),
+			Namespace: wrapperspb.String(namespace),
+			Host:      wrapperspb.String(host),
+			Port:      wrapperspb.UInt32(uint32(portInt)),
+			Protocol:  wrapperspb.String(node.Scheme()),
+			Version:   wrapperspb.String(node.Version()),
+			Weight:    wrapperspb.UInt32(uint32(*node.InitialWeight())),
+			Metadata:  node.Metadata(),
+		})
+	}
+
+	d := &v1.DiscoverResponse{
+		Code:      wrapperspb.UInt32(1),
+		Info:      wrapperspb.String("ok"),
+		Type:      v1.DiscoverResponse_INSTANCE,
+		Service:   &v1.Service{Name: wrapperspb.String(nodes[0].ServiceName()), Namespace: wrapperspb.String("default")},
+		Instances: ins,
+	}
+	return pb.NewServiceInstancesInProto(d, func(s string) local.InstanceLocalValue {
+		return local.NewInstanceLocalValue()
+	}, &pb.SvcPluginValues{Routers: nil, Loadbalancer: nil}, nil)
 }
