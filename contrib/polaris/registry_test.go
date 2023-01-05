@@ -2,7 +2,6 @@ package polaris
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -13,7 +12,6 @@ import (
 
 // TestRegistry
 func TestRegistry(t *testing.T) {
-	name := fmt.Sprintf("test-ut-%d", time.Now().Unix())
 	sdk, err := polaris.NewSDKContextByAddress("127.0.0.1:8091")
 	if err != nil {
 		t.Fatal(err)
@@ -33,7 +31,7 @@ func TestRegistry(t *testing.T) {
 
 	ins := &registry.ServiceInstance{
 		ID:      "test-ut",
-		Name:    name,
+		Name:    "test-ut",
 		Version: "v1.0.0",
 		Endpoints: []string{
 			"grpc://127.0.0.1:8080",
@@ -52,7 +50,7 @@ func TestRegistry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	service, err := r.GetService(context.Background(), name)
+	service, err := r.GetService(context.Background(), "test-ut")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +58,6 @@ func TestRegistry(t *testing.T) {
 }
 
 func TestWatch(t *testing.T) {
-	name := fmt.Sprintf("test-ut-%d", time.Now().Unix())
 	sdk, err := polaris.NewSDKContextByAddress("127.0.0.1:8091")
 	if err != nil {
 		t.Fatal(err)
@@ -80,7 +77,7 @@ func TestWatch(t *testing.T) {
 
 	err = r.Register(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
-		Name:    name,
+		Name:    "test-ut",
 		Version: "v1.0.0",
 		Endpoints: []string{
 			"grpc://127.0.0.1:8080",
@@ -91,7 +88,7 @@ func TestWatch(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	w, err := r.Watch(context.Background(), name)
+	w, err := r.Watch(context.Background(), "test-ut")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -108,7 +105,7 @@ func TestWatch(t *testing.T) {
 
 	err = r.Register(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
-		Name:    name,
+		Name:    "test-ut",
 		Version: "v1.0.0",
 		Endpoints: []string{
 			"grpc://127.0.0.2:8080",
@@ -130,7 +127,7 @@ func TestWatch(t *testing.T) {
 
 	err = r.Deregister(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
-		Name:    name,
+		Name:    "test-ut",
 		Version: "v1.0.0",
 		Endpoints: []string{
 			"grpc://127.0.0.1:8080",
@@ -150,7 +147,7 @@ func TestWatch(t *testing.T) {
 	}
 	err = r.Deregister(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
-		Name:    name,
+		Name:    "test-ut",
 		Version: "v1.0.0",
 		Endpoints: []string{
 			"grpc://127.0.0.2:8080",
