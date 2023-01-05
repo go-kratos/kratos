@@ -2,6 +2,7 @@ package etcd
 
 import (
 	"context"
+	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 
@@ -48,7 +49,14 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 	select {
 	case <-w.ctx.Done():
 		return nil, w.ctx.Err()
-	case <-w.watchChan:
+	case watchResp, ok := <-w.watchChan:
+		if !ok || watchResp.Err() != nil {
+			time.Sleep(time.Second)
+			err := w.reWatch()
+			if err != nil {
+				return nil, err
+			}
+		}
 		return w.getInstance()
 	}
 }
@@ -75,4 +83,9 @@ func (w *watcher) getInstance() ([]*registry.ServiceInstance, error) {
 		items = append(items, si)
 	}
 	return items, nil
+}
+
+func (w *watcher) reWatch() error {
+	w.watchChan = w.watcher.Watch(w.ctx, w.key, clientv3.WithPrefix(), clientv3.WithRev(0), clientv3.WithKeysOnly())
+	return w.watcher.RequestProgress(context.Background())
 }
