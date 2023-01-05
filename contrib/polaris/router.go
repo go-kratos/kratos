@@ -11,7 +11,7 @@ import (
 	"github.com/polarismesh/polaris-go/pkg/model"
 	"github.com/polarismesh/polaris-go/pkg/model/local"
 	"github.com/polarismesh/polaris-go/pkg/model/pb"
-	"github.com/polarismesh/polaris-go/pkg/model/pb/v1"
+	v1 "github.com/polarismesh/polaris-go/pkg/model/pb/v1"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/go-kratos/kratos/v2"
