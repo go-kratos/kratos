@@ -22,7 +22,7 @@ jobs:
       - id: set-matrix
         run: ./hack/resolve-modules-test.sh
 
-  Test:
+  test:
     name: test module
     runs-on: ubuntu-latest
     needs: resolve-modules
