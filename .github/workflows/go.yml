@@ -48,6 +48,11 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
 
+      - name: Setup Environment
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
       - name: Module cache
         uses: actions/cache@v3
         env:
