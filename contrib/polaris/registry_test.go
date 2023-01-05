@@ -52,7 +52,7 @@ func TestRegistry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	service, err := r.GetService(context.Background(), "test-ut")
+	service, err := r.GetService(context.Background(), name)
 	if err != nil {
 		t.Fatal(err)
 	}
