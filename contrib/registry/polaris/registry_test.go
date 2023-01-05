@@ -12,16 +12,17 @@ import (
 
 // TestRegistry
 func TestRegistry(t *testing.T) {
-	conf := config.NewDefaultConfiguration([]string{"183.47.111.80:8091"})
+	conf := config.NewDefaultConfiguration([]string{"127.0.0.1:8091"})
 
 	r := NewRegistryWithConfig(
 		conf,
-		WithTimeout(time.Second*10),
+		WithTimeout(time.Second),
+		WithHeartbeat(true),
 		WithHealthy(true),
-		WithIsolate(false),
+		WithIsolate(true),
 		WithNamespace("default"),
 		WithProtocol("tcp"),
-		WithRetryCount(3),
+		WithRetryCount(0),
 		WithWeight(100),
 		WithTTL(10),
 	)
@@ -111,7 +112,6 @@ func TestRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	time.Sleep(time.Second * 3)
 	result, err = watch.Next()
 	if err != nil {
 		t.Fatal(err)
@@ -124,16 +124,17 @@ func TestRegistry(t *testing.T) {
 
 // TestRegistryMany
 func TestRegistryMany(t *testing.T) {
-	conf := config.NewDefaultConfiguration([]string{"183.47.111.80:8091"})
+	conf := config.NewDefaultConfiguration([]string{"127.0.0.1:8091"})
 
 	r := NewRegistryWithConfig(
 		conf,
-		WithTimeout(time.Second*10),
+		WithTimeout(time.Second),
+		WithHeartbeat(true),
 		WithHealthy(true),
-		WithIsolate(false),
+		WithIsolate(true),
 		WithNamespace("default"),
 		WithProtocol("tcp"),
-		WithRetryCount(3),
+		WithRetryCount(0),
 		WithWeight(100),
 		WithTTL(10),
 	)
@@ -209,7 +210,7 @@ func TestRegistryMany(t *testing.T) {
 	if err = r.Deregister(ctx, svc); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(time.Second * 3)
+
 	result1, err = watch1.Next()
 	if err != nil || len(result1) != 0 {
 		t.Fatal("deregister error")
@@ -219,7 +220,7 @@ func TestRegistryMany(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(time.Second * 3)
+
 	result2, err = watch2.Next()
 	if err != nil || len(result2) != 0 {
 		t.Fatal("deregister error")
@@ -228,7 +229,7 @@ func TestRegistryMany(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(time.Second * 3)
+
 	result3, err = watch3.Next()
 	if err != nil || len(result3) != 0 {
 		t.Fatal("deregister error")

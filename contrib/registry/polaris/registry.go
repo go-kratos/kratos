@@ -6,7 +6,10 @@ import (
 	"net"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/log"
 
 	"github.com/go-kratos/kratos/v2/registry"
 
@@ -19,6 +22,9 @@ var (
 	_ registry.Registrar = (*Registry)(nil)
 	_ registry.Discovery = (*Registry)(nil)
 )
+
+// _instanceIDSeparator . Instance id Separator.
+const _instanceIDSeparator = "-"
 
 type options struct {
 	// required, namespace in polaris
@@ -111,10 +117,9 @@ func WithRetryCount(retryCount int) Option {
 	return func(o *options) { o.RetryCount = retryCount }
 }
 
-// WithHeartbeat with Heartbeat option.
-// Deprecated
+// WithHeartbeat . with Heartbeat option.
 func WithHeartbeat(heartbeat bool) Option {
-	return func(o *options) {}
+	return func(o *options) { o.Heartbeat = heartbeat }
 }
 
 func NewRegistry(provider api.ProviderAPI, consumer api.ConsumerAPI, opts ...Option) (r *Registry) {
@@ -155,6 +160,7 @@ func NewRegistryWithConfig(conf config.Configuration, opts ...Option) (r *Regist
 
 // Register the registration.
 func (r *Registry) Register(_ context.Context, serviceInstance *registry.ServiceInstance) error {
+	ids := make([]string, 0, len(serviceInstance.Endpoints))
 	for _, endpoint := range serviceInstance.Endpoints {
 		// get url
 		u, err := url.Parse(endpoint)
@@ -190,7 +196,7 @@ func (r *Registry) Register(_ context.Context, serviceInstance *registry.Service
 			rmd["version"] = serviceInstance.Version
 		}
 		// Register
-		_, err = r.provider.RegisterInstance(
+		service, err := r.provider.Register(
 			&api.InstanceRegisterRequest{
 				InstanceRegisterRequest: model.InstanceRegisterRequest{
 					Service:      serviceInstance.Name + u.Scheme,
@@ -213,13 +219,48 @@ func (r *Registry) Register(_ context.Context, serviceInstance *registry.Service
 		if err != nil {
 			return err
 		}
+		instanceID := service.InstanceID
+
+		if r.opt.Heartbeat {
+			// start heartbeat report
+			go func() {
+				ticker := time.NewTicker(time.Second * time.Duration(r.opt.TTL))
+				defer ticker.Stop()
+
+				for {
+					<-ticker.C
+
+					err = r.provider.Heartbeat(&api.InstanceHeartbeatRequest{
+						InstanceHeartbeatRequest: model.InstanceHeartbeatRequest{
+							Service:      serviceInstance.Name + u.Scheme,
+							Namespace:    r.opt.Namespace,
+							Host:         host,
+							Port:         portNum,
+							ServiceToken: r.opt.ServiceToken,
+							InstanceID:   instanceID,
+							Timeout:      &r.opt.Timeout,
+							RetryCount:   &r.opt.RetryCount,
+						},
+					})
+					if err != nil {
+						log.Error(err.Error())
+						continue
+					}
+				}
+			}()
+		}
+
+		ids = append(ids, instanceID)
 	}
+	// need to set InstanceID for Deregister
+	serviceInstance.ID = strings.Join(ids, _instanceIDSeparator)
 	return nil
 }
 
 // Deregister the registration.
 func (r *Registry) Deregister(_ context.Context, serviceInstance *registry.ServiceInstance) error {
-	for _, endpoint := range serviceInstance.Endpoints {
+	split := strings.Split(serviceInstance.ID, _instanceIDSeparator)
+	for i, endpoint := range serviceInstance.Endpoints {
 		// get url
 		u, err := url.Parse(endpoint)
 		if err != nil {
@@ -244,6 +285,7 @@ func (r *Registry) Deregister(_ context.Context, serviceInstance *registry.Servi
 					Service:      serviceInstance.Name + u.Scheme,
 					ServiceToken: r.opt.ServiceToken,
 					Namespace:    r.opt.Namespace,
+					InstanceID:   split[i],
 					Host:         host,
 					Port:         portNum,
 					Timeout:      &r.opt.Timeout,

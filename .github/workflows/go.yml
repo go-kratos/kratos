@@ -35,10 +35,16 @@ jobs:
         ports:
           - "8848:8848"
           - "9848:9848"
+      polaris:
+        image: polarismesh/polaris-server-standalone:v1.9.0
+        ports:
+          - 8090:8090
+          - 8091:8091
+          - 8093:8093
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
-        uses: actions/setup-go@v3.3.1
+        uses: actions/setup-go@v3.5.0
         with:
           go-version: ${{ matrix.go }}
 

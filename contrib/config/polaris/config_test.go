@@ -2,13 +2,13 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/polarismesh/polaris-go"
 )
@@ -20,7 +20,7 @@ var (
 		port: 8080`
 	updatedContent = `server:
 		port: 8090`
-	configCenterURL = "http://183.47.111.80:8090"
+	configCenterURL = "http://127.0.0.1:8090"
 )
 
 func makeJSONRequest(uri string, data string, method string, headers map[string]string) ([]byte, error) {
@@ -111,7 +111,7 @@ func (client *configClient) createConfigFile(name string) error {
 		return err
 	}
 	if resJSON.Code != 200000 {
-		return fmt.Errorf("create error, res: %s", string(res))
+		return errors.New("create error")
 	}
 	return nil
 }
@@ -140,7 +140,7 @@ func (client *configClient) updateConfigFile(name string) error {
 		return err
 	}
 	if resJSON.Code != 200000 {
-		return fmt.Errorf("update error, res: %s", string(res))
+		return errors.New("update error")
 	}
 	return nil
 }
@@ -163,7 +163,7 @@ func (client *configClient) deleteConfigFile(name string) error {
 		return err
 	}
 	if resJSON.Code != 200000 {
-		return fmt.Errorf("delete error, res: %s", string(res))
+		return errors.New("delete error")
 	}
 	return nil
 }
@@ -190,31 +190,23 @@ func (client *configClient) publishConfigFile(name string) error {
 		return err
 	}
 	if resJSON.Code != 200000 {
-		return fmt.Errorf("publish error, res: %s", string(res))
+		return errors.New("publish error")
 	}
 	return nil
 }
 
 func TestConfig(t *testing.T) {
-	name := fmt.Sprintf("kratos-test-%d.yaml", time.Now().Unix())
+	name := "test.yaml"
 	client, err := newConfigClient()
 	if err != nil {
 		t.Fatal(err)
 	}
-	_ = client.deleteConfigFile(name)
 	if err = client.createConfigFile(name); err != nil {
 		t.Fatal(err)
 	}
 	if err = client.publishConfigFile(name); err != nil {
 		t.Fatal(err)
 	}
-
-	t.Cleanup(func() {
-		err = client.deleteConfigFile(name)
-		if err != nil {
-			t.Fatal(err)
-		}
-	})
 
 	// Always remember clear test resource
 	configAPI, err := polaris.NewConfigAPI()
@@ -238,6 +230,18 @@ func TestConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() {
+		err = client.deleteConfigFile(name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err = w.Next(); err != nil {
+			t.Fatal(err)
+		}
+		if err = w.Stop(); err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	if err = client.updateConfigFile(name); err != nil {
 		t.Fatal(err)
@@ -257,12 +261,11 @@ func TestConfig(t *testing.T) {
 }
 
 func TestExtToFormat(t *testing.T) {
-	name := fmt.Sprintf("kratos-test-ext-%d.yaml", time.Now().Unix())
+	name := "ext.yaml"
 	client, err := newConfigClient()
 	if err != nil {
 		t.Fatal(err)
 	}
-	_ = client.deleteConfigFile(name)
 	if err = client.createConfigFile(name); err != nil {
 		t.Fatal(err)
 	}
@@ -271,11 +274,11 @@ func TestExtToFormat(t *testing.T) {
 	}
 
 	// Always remember clear test resource
-	t.Cleanup(func() {
+	defer func() {
 		if err = client.deleteConfigFile(name); err != nil {
 			t.Fatal(err)
 		}
-	})
+	}()
 
 	configAPI, err := polaris.NewConfigAPI()
 	if err != nil {
