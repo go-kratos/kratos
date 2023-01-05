@@ -271,7 +271,6 @@ func TestExtToFormat(t *testing.T) {
 	}
 
 	// Always remember clear test resource
-
 	t.Cleanup(func() {
 		if err = client.deleteConfigFile(name); err != nil {
 			t.Fatal(err)

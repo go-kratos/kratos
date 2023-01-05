@@ -239,7 +239,7 @@ func TestConfig(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
-	
+
 	if err = client.updateConfigFile(name); err != nil {
 		t.Fatal(err)
 	}
