@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/polarismesh/polaris-go"
 
@@ -120,6 +121,33 @@ func TestRouter(t *testing.T) {
 
 	p := New(sdk)
 
+	p := New(sdk)
+
+	r := p.Registry(
+		WithTimeout(time.Second),
+		WithHealthy(false),
+		WithIsolate(false),
+		WithRegistryNamespace("default"),
+		WithRetryCount(0),
+		WithWeight(100),
+		WithTTL(10),
+	)
+
+	ins := &registry.ServiceInstance{
+		ID:      "kratos",
+		Name:    "kratos",
+		Version: "v1.0.0",
+		Endpoints: []string{
+			"grpc://127.0.0.1:8080",
+			"http://127.0.0.1:9090",
+		},
+	}
+
+	err = r.Register(context.Background(), ins)
+	if err != nil {
+		t.Fatal(err)
+	}
+	
 	nodes := []selector.Node{
 		selector.NewNode("grpc", "127.0.0.1:9000", &registry.ServiceInstance{
 			ID:        "123",
