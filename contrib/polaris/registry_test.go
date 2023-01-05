@@ -2,6 +2,7 @@ package polaris
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 
 // TestRegistry
 func TestRegistry(t *testing.T) {
+	name := fmt.Sprintf("test-ut-%d", time.Now().Unix())
 	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
 	if err != nil {
 		t.Fatal(err)
@@ -29,15 +31,24 @@ func TestRegistry(t *testing.T) {
 		WithTTL(10),
 	)
 
-	err = r.Register(context.Background(), &registry.ServiceInstance{
+	ins := &registry.ServiceInstance{
 		ID:      "test-ut",
-		Name:    "test-ut",
+		Name:    name,
 		Version: "v1.0.0",
 		Endpoints: []string{
 			"grpc://127.0.0.1:8080",
 			"http://127.0.0.1:9090",
 		},
+	}
+
+	err = r.Register(context.Background(), ins)
+
+	t.Cleanup(func() {
+		if err = r.Deregister(context.Background(), ins); err != nil {
+			t.Fatal(err)
+		}
 	})
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,39 +59,8 @@ func TestRegistry(t *testing.T) {
 	t.Log(service)
 }
 
-func TestDeregister(t *testing.T) {
-	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	p := New(sdk)
-
-	r := p.Registry(
-		WithTimeout(time.Second),
-		WithHealthy(true),
-		WithIsolate(false),
-		WithRegistryNamespace("default"),
-		WithRetryCount(0),
-		WithWeight(100),
-		WithTTL(10),
-	)
-	err = r.Deregister(context.Background(), &registry.ServiceInstance{
-		ID:      "test-ut",
-		Name:    "test-ut",
-		Version: "v1.0.0",
-		Endpoints: []string{
-			"grpc://127.0.0.1:8080",
-			"http://127.0.0.1:9090",
-		},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestWatch(t *testing.T) {
-	name := "test-ut"
+	name := fmt.Sprintf("test-ut-%d", time.Now().Unix())
 	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
 	if err != nil {
 		t.Fatal(err)
