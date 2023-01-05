@@ -76,7 +76,7 @@ func TestRouter(t *testing.T) {
 
 	err = json.Unmarshal(res, &resJSON)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(err, string(res))
 	}
 	if resJSON.Code != 200000 {
 		t.Fatal("create failed", string(res))
@@ -99,7 +99,7 @@ func TestRouter(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		enableData := fmt.Sprintf(`[{"id":"%s","enable":true}]`, resJSON.Responses[0].Data.ID)
+		enableData := fmt.Sprintf(`[{"id":"%s"}]`, resJSON.Responses[0].Data.ID)
 		res, err = makeJSONRequest("http://127.0.0.1:8090/naming/v2/routings/delete", enableData, http.MethodPost, map[string]string{
 			"X-Polaris-Token": token,
 		})
