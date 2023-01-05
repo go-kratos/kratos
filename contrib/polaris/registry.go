@@ -286,9 +286,7 @@ func (w *Watcher) Next() ([]*registry.ServiceInstance, error) {
 				// handle DeleteEvent
 				if instanceEvent.DeleteEvent != nil {
 					for _, instance := range instanceEvent.DeleteEvent.Instances {
-						if _, ok := w.ServiceInstances[instance.GetMetadata()["merge"]]; ok {
-							delete(w.ServiceInstances, instance.GetMetadata()["merge"])
-						}
+						delete(w.ServiceInstances, instance.GetMetadata()["merge"])
 					}
 				}
 				// handle UpdateEvent
