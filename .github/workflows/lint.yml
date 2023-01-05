@@ -34,3 +34,8 @@ jobs:
           version: latest
           working-directory: ${{ matrix.workdir }}
           skip-pkg-cache: true
+      - name: Test
+        uses: actions/setup-go@v2
+        run: go test -race ./...
+        with:
+          go-version: 1.18
