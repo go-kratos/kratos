@@ -214,7 +214,7 @@ func TestConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := New(sdk)
-	config, err := p.Config(WithConfigNamespace(testNamespace), WithFileGroup(testFileGroup), WithFileName(name))
+	config, err := p.Config(WithConfigNamespace(testNamespace), WithConfigFileGroup(testFileGroup), WithConfigFileName(name))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -287,7 +287,7 @@ func TestExtToFormat(t *testing.T) {
 	}
 	p := New(sdk)
 
-	config, err := p.Config(WithConfigNamespace(testNamespace), WithFileGroup(testFileGroup), WithFileName(name))
+	config, err := p.Config(WithConfigNamespace(testNamespace), WithConfigFileGroup(testFileGroup), WithConfigFileName(name))
 	if err != nil {
 		t.Fatal(err)
 	}

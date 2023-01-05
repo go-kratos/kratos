@@ -2,6 +2,7 @@ package polaris
 
 import (
 	"errors"
+
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/polarismesh/polaris-go"
 	"github.com/polarismesh/polaris-go/api"

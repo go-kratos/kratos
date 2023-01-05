@@ -3,12 +3,13 @@ package polaris
 import (
 	"context"
 	"encoding/json"
-	"github.com/go-kratos/kratos/v2/registry"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/polarismesh/polaris-go"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 // TestRegistry
@@ -106,14 +107,14 @@ func TestWatch(t *testing.T) {
 	ch := make(chan struct{})
 	go func(t *testing.T) {
 		for {
-			next, err := w.Next()
-			if err != nil {
-				t.Error(err)
+			next, err1 := w.Next()
+			if err1 != nil {
+				t.Error(err1)
 				os.Exit(1)
 			}
-			bytes, err := json.Marshal(next)
-			if err != nil {
-				t.Error(err)
+			bytes, err2 := json.Marshal(next)
+			if err2 != nil {
+				t.Error(err2)
 				os.Exit(1)
 			}
 			t.Log(string(bytes))
@@ -132,6 +133,9 @@ func TestWatch(t *testing.T) {
 			"http://127.0.0.1:9090",
 		},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	time.Sleep(time.Second * 2)
 	err = r.Register(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
@@ -142,6 +146,9 @@ func TestWatch(t *testing.T) {
 			"http://127.0.0.2:9090",
 		},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	time.Sleep(time.Second * 2)
 	err = r.Deregister(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
@@ -152,6 +159,9 @@ func TestWatch(t *testing.T) {
 			"http://127.0.0.1:9090",
 		},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	time.Sleep(time.Second * 2)
 	err = r.Deregister(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
@@ -162,5 +172,8 @@ func TestWatch(t *testing.T) {
 			"http://127.0.0.2:9090",
 		},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	<-ch
 }

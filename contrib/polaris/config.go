@@ -22,22 +22,22 @@ type configOptions struct {
 	configFile polaris.ConfigFile
 }
 
-// WithConfigNamespace with polaris config testNamespace
+// WithConfigNamespace with polaris config namespace
 func WithConfigNamespace(namespace string) ConfigOption {
 	return func(o *configOptions) {
 		o.namespace = namespace
 	}
 }
 
-// WithFileGroup with polaris config testFileGroup
-func WithFileGroup(fileGroup string) ConfigOption {
+// WithConfigFileGroup with polaris config testFileGroup
+func WithConfigFileGroup(fileGroup string) ConfigOption {
 	return func(o *configOptions) {
 		o.fileGroup = fileGroup
 	}
 }
 
-// WithFileName with polaris config fileName
-func WithFileName(fileName string) ConfigOption {
+// WithConfigFileName with polaris config fileName
+func WithConfigFileName(fileName string) ConfigOption {
 	return func(o *configOptions) {
 		o.fileName = fileName
 	}
