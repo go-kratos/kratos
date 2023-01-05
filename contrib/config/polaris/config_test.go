@@ -201,6 +201,7 @@ func TestConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	_ = client.deleteConfigFile(name)
 	if err = client.createConfigFile(name); err != nil {
 		t.Fatal(err)
 	}
@@ -266,6 +267,7 @@ func TestExtToFormat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	_ = client.deleteConfigFile(name)
 	if err = client.createConfigFile(name); err != nil {
 		t.Fatal(err)
 	}
@@ -274,11 +276,12 @@ func TestExtToFormat(t *testing.T) {
 	}
 
 	// Always remember clear test resource
-	defer func() {
+
+	t.Cleanup(func() {
 		if err = client.deleteConfigFile(name); err != nil {
 			t.Fatal(err)
 		}
-	}()
+	})
 
 	configAPI, err := polaris.NewConfigAPI()
 	if err != nil {
