@@ -6,3 +6,7 @@ breaking:
 lint:
   use:
     - DEFAULT
+build:
+  excludes:
+    - google
+    - validate
