@@ -10,17 +10,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  resolve-modules:
-    name: resolve module
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-
-      - id: set-matrix
-        run: ./hack/resolve-modules.sh
   build:
     strategy:
       matrix:
@@ -54,6 +43,19 @@ jobs:
           cd cmd/protoc-gen-go-http
           go build ./...
           go test ./...
+
+  resolve-modules:
+    name: resolve module
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - id: set-matrix
+        run: ./hack/resolve-modules.sh
+
   test:
     name: lint module
     runs-on: ubuntu-latest
