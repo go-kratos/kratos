@@ -58,8 +58,12 @@ jobs:
         env:
           cache-name: go-mod-cache
         with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/go.sum') }}
+          path: |
+             ~/.cache/go-build
+             ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go
 
       - name: Build
         run: go build ./...
