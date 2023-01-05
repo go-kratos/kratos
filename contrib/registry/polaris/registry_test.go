@@ -111,7 +111,7 @@ func TestRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	time.Sleep(time.Second)
+	time.Sleep(time.Second * 3)
 	result, err = watch.Next()
 	if err != nil {
 		t.Fatal(err)
@@ -209,7 +209,7 @@ func TestRegistryMany(t *testing.T) {
 	if err = r.Deregister(ctx, svc); err != nil {
 		t.Fatal(err)
 	}
-
+	time.Sleep(time.Second * 3)
 	result1, err = watch1.Next()
 	if err != nil || len(result1) != 0 {
 		t.Fatal("deregister error")
@@ -219,7 +219,7 @@ func TestRegistryMany(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	time.Sleep(time.Second * 3)
 	result2, err = watch2.Next()
 	if err != nil || len(result2) != 0 {
 		t.Fatal("deregister error")
@@ -228,7 +228,7 @@ func TestRegistryMany(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	time.Sleep(time.Second * 3)
 	result3, err = watch3.Next()
 	if err != nil || len(result3) != 0 {
 		t.Fatal("deregister error")
