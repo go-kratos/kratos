@@ -13,7 +13,7 @@ import (
 
 // TestRegistry
 func TestRegistry(t *testing.T) {
-	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
+	sdk, err := polaris.NewSDKContextByAddress("127.0.0.1:8091")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,8 +81,8 @@ func TestDeregister(t *testing.T) {
 }
 
 func TestWatch(t *testing.T) {
-	name := fmt.Sprintf("test-ut-%d", time.Now().Unix())
-	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
+	name := fmt.Sprintf("test-ut")
+	sdk, err := polaris.NewSDKContextByAddress("127.0.0.1:8091")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -111,7 +111,7 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	w, err := r.Watch(context.Background(), name)
 	if err != nil {
 		t.Fatal(err)

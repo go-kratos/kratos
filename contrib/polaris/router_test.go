@@ -15,7 +15,7 @@ import (
 )
 
 func TestRouter(t *testing.T) {
-	token, err := getToken()
+	token, err := getToken("127.0.0.1:9090")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,14 +51,14 @@ func TestRouter(t *testing.T) {
                     "isolate":false,
                     "name":"实例分组1",
                     "namespace":"default",
-                    "service":"test"
+                    "service":"test-ut"
                 }
             ]
         }
     }
 ]
 `
-	res, err := makeJSONRequest("http://127.0.0.1:8090/naming/v2/routings", data, http.MethodPost, map[string]string{
+	res, err := makeJSONRequest("http://127.0.0.1:9090/naming/v2/routings", data, http.MethodPost, map[string]string{
 		"X-Polaris-Token": token,
 	})
 	if err != nil {
@@ -84,7 +84,7 @@ func TestRouter(t *testing.T) {
 
 	// enable router
 	enableData := fmt.Sprintf(`[{"id":"%s","enable":true}]`, resJSON.Responses[0].Data.ID)
-	res, err = makeJSONRequest("http://127.0.0.1:8090/naming/v2/routings/enable", enableData, http.MethodPut, map[string]string{
+	res, err = makeJSONRequest("http://127.0.0.1:9090/naming/v2/routings/enable", enableData, http.MethodPut, map[string]string{
 		"X-Polaris-Token": token,
 	})
 	if err != nil {
@@ -100,7 +100,7 @@ func TestRouter(t *testing.T) {
 
 	t.Cleanup(func() {
 		enableData := fmt.Sprintf(`[{"id":"%s"}]`, resJSON.Responses[0].Data.ID)
-		res, err = makeJSONRequest("http://127.0.0.1:8090/naming/v2/routings/delete", enableData, http.MethodPost, map[string]string{
+		res, err = makeJSONRequest("http://127.0.0.1:9090/naming/v2/routings/delete", enableData, http.MethodPost, map[string]string{
 			"X-Polaris-Token": token,
 		})
 		resJSON := &commonRes{}
@@ -113,7 +113,7 @@ func TestRouter(t *testing.T) {
 		}
 	})
 
-	sdk, err := polaris.NewSDKContextByAddress("127.0.0.1:8091")
+	sdk, err := polaris.NewSDKContextByAddress("127.0.0.1:9091")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,21 +123,21 @@ func TestRouter(t *testing.T) {
 	nodes := []selector.Node{
 		selector.NewNode("grpc", "127.0.0.1:9000", &registry.ServiceInstance{
 			ID:        "123",
-			Name:      "test",
+			Name:      "test-ut",
 			Version:   "v1.0.0",
 			Metadata:  map[string]string{"weight": "100", "az": "1"},
 			Endpoints: []string{"grpc://127.0.0.1:9000"},
 		}),
 		selector.NewNode("grpc", "127.0.0.1:9000", &registry.ServiceInstance{
 			ID:        "123",
-			Name:      "test",
+			Name:      "test-ut",
 			Version:   "v1.0.0",
 			Metadata:  map[string]string{"weight": "100", "az": "2"},
 			Endpoints: []string{"grpc://127.0.0.2:9000"},
 		}),
 		selector.NewNode("grpc", "127.0.0.1:9000", &registry.ServiceInstance{
 			ID:        "123",
-			Name:      "test",
+			Name:      "test-ut",
 			Version:   "v1.0.0",
 			Metadata:  map[string]string{"weight": "100", "az": "1"},
 			Endpoints: []string{"grpc://127.0.0.3:9000"},
@@ -165,7 +165,7 @@ func (m mockApp) ID() string {
 }
 
 func (m mockApp) Name() string {
-	return "kratos"
+	return "test-ut"
 }
 
 func (m mockApp) Version() string {

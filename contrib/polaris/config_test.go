@@ -57,7 +57,7 @@ type configClient struct {
 }
 
 func newConfigClient() (*configClient, error) {
-	token, err := getToken()
+	token, err := getToken(testCenterURL)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func newConfigClient() (*configClient, error) {
 	}, nil
 }
 
-func getToken() (string, error) {
+func getToken(testCenterURL string) (string, error) {
 	data, err := json.Marshal(map[string]string{
 		"name":     "polaris",
 		"password": "polaris",
