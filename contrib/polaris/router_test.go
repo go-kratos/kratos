@@ -87,6 +87,9 @@ func TestRouter(t *testing.T) {
 	res, err = makeJSONRequest("http://127.0.0.1:8090/naming/v2/routings/enable", enableData, http.MethodPut, map[string]string{
 		"X-Polaris-Token": token,
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	err = json.Unmarshal(res, &resJSON)
 	if err != nil {
 		t.Fatal(err)
@@ -155,8 +158,7 @@ func TestRouter(t *testing.T) {
 	}
 }
 
-type mockApp struct {
-}
+type mockApp struct{}
 
 func (m mockApp) ID() string {
 	return "1"
