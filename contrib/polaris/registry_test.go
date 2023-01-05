@@ -140,7 +140,7 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(time.Second * 2)
+	time.Sleep(time.Second * 5)
 	service, err = w.Next()
 	if err != nil {
 		t.Fatal(err)

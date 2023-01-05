@@ -286,17 +286,8 @@ func (w *Watcher) Next() ([]*registry.ServiceInstance, error) {
 				// handle DeleteEvent
 				if instanceEvent.DeleteEvent != nil {
 					for _, instance := range instanceEvent.DeleteEvent.Instances {
-						if v, ok := w.ServiceInstances[instance.GetMetadata()["merge"]]; ok {
-							var nv []model.Instance
-							m := map[string]model.Instance{}
-							for _, ins := range v {
-								m[ins.GetId()] = ins
-							}
-							delete(m, instance.GetId())
-							for _, ins := range m {
-								nv = append(nv, ins)
-							}
-							w.ServiceInstances[instance.GetMetadata()["merge"]] = nv
+						if _, ok := w.ServiceInstances[instance.GetMetadata()["merge"]]; ok {
+							delete(w.ServiceInstances, instance.GetMetadata()["merge"])
 						}
 					}
 				}
@@ -311,11 +302,18 @@ func (w *Watcher) Next() ([]*registry.ServiceInstance, error) {
 							}
 							m[update.After.GetId()] = update.After
 							for _, ins := range m {
-								nv = append(nv, ins)
+								if ins.IsHealthy() {
+									nv = append(nv, ins)
+								}
 							}
 							w.ServiceInstances[update.After.GetMetadata()["merge"]] = nv
+							if len(nv) == 0 {
+								delete(w.ServiceInstances, update.After.GetMetadata()["merge"])
+							}
 						} else {
-							w.ServiceInstances[update.After.GetMetadata()["merge"]] = []model.Instance{update.After}
+							if update.After.IsHealthy() {
+								w.ServiceInstances[update.After.GetMetadata()["merge"]] = []model.Instance{update.After}
+							}
 						}
 					}
 				}
