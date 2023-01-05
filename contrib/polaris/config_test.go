@@ -252,6 +252,10 @@ func TestConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	for _, value := range kv {
+		t.Log(value.Key, string(value.Value))
+	}
+
 	if len(kv) != 1 || kv[0].Key != name || string(kv[0].Value) != testUpdatedContent {
 		t.Fatal("config error")
 	}
