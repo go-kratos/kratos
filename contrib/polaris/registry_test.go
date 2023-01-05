@@ -30,8 +30,8 @@ func TestRegistry(t *testing.T) {
 	)
 
 	ins := &registry.ServiceInstance{
-		ID:      "test-ut",
-		Name:    "test-ut",
+		ID:      "test-ut-1",
+		Name:    "test-ut-1",
 		Version: "v1.0.0",
 		Endpoints: []string{
 			"grpc://127.0.0.1:8080",
@@ -50,7 +50,7 @@ func TestRegistry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	service, err := r.GetService(context.Background(), "test-ut")
+	service, err := r.GetService(context.Background(), "test-ut-1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -115,7 +115,6 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(time.Second * 2)
 
 	service, err = w.Next()
 	if err != nil {
@@ -137,7 +136,6 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(time.Second * 5)
 	service, err = w.Next()
 	if err != nil {
 		t.Fatal(err)
@@ -157,7 +155,6 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(time.Second * 2)
 	service, err = w.Next()
 	if err != nil {
 		t.Fatal(err)
