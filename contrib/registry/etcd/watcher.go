@@ -15,6 +15,7 @@ type watcher struct {
 	key         string
 	ctx         context.Context
 	cancel      context.CancelFunc
+	client      *clientv3.Client
 	watchChan   clientv3.WatchChan
 	watcher     clientv3.Watcher
 	kv          clientv3.KV
@@ -25,6 +26,7 @@ type watcher struct {
 func newWatcher(ctx context.Context, key, name string, client *clientv3.Client) (*watcher, error) {
 	w := &watcher{
 		key:         key,
+		client:      client,
 		watcher:     clientv3.NewWatcher(client),
 		kv:          clientv3.NewKV(client),
 		first:       true,
@@ -86,6 +88,8 @@ func (w *watcher) getInstance() ([]*registry.ServiceInstance, error) {
 }
 
 func (w *watcher) reWatch() error {
+	w.watcher.Close()
+	w.watcher = clientv3.NewWatcher(w.client)
 	w.watchChan = w.watcher.Watch(w.ctx, w.key, clientv3.WithPrefix(), clientv3.WithRev(0), clientv3.WithKeysOnly())
 	return w.watcher.RequestProgress(context.Background())
 }
