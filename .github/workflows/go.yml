@@ -13,9 +13,34 @@ jobs:
   build:
     strategy:
       matrix:
-        go: [1.17, 1.18, 1.19]
+        go: [1.16, 1.17, 1.18, 1.19]
     name: build & test
     runs-on: ubuntu-latest
+    services:
+      etcd:
+        image: gcr.io/etcd-development/etcd:v3.5.0
+        ports:
+          - 2379:2379
+        env:
+          ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+          ETCD_ADVERTISE_CLIENT_URLS: http://0.0.0.0:2379
+      consul:
+        image: consul:1.12.3
+        ports:
+          - 8500:8500
+      nacos:
+        image: nacos/nacos-server:v2.1.0
+        env:
+          MODE: standalone
+        ports:
+          - "8848:8848"
+          - "9848:9848"
+      polaris:
+        image: polarismesh/polaris-server-standalone:v1.9.0
+        ports:
+          - 8090:8090
+          - 8091:8091
+          - 8093:8093
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
@@ -27,7 +52,7 @@ jobs:
         run: go build ./...
 
       - name: Test
-        run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+        run: make test-coverage
 
       - name: Upload coverage to Codecov
         run: bash <(curl -s https://codecov.io/bash)
