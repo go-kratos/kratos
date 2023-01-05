@@ -26,7 +26,7 @@ func TestRegistry(t *testing.T) {
 		WithRegistryNamespace("default"),
 		WithRetryCount(3),
 		WithWeight(100),
-		WithTTL(10),
+		WithTTL(1000),
 	)
 
 	ins := &registry.ServiceInstance{
@@ -50,6 +50,7 @@ func TestRegistry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	time.Sleep(time.Second * 3)
 	service, err := r.GetService(context.Background(), "test-ut-1")
 	if err != nil {
 		t.Fatal(err)
@@ -72,7 +73,7 @@ func TestWatch(t *testing.T) {
 		WithRegistryNamespace("default"),
 		WithRetryCount(3),
 		WithWeight(100),
-		WithTTL(10),
+		WithTTL(1000),
 	)
 
 	err = r.Register(context.Background(), &registry.ServiceInstance{
@@ -91,7 +92,7 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(time.Second * 2)
+	time.Sleep(time.Second * 3)
 	service, err := w.Next()
 	if err != nil {
 		t.Fatal(err)
@@ -113,7 +114,7 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	time.Sleep(time.Second * 3)
 	service, err = w.Next()
 	if err != nil {
 		t.Fatal(err)
@@ -134,6 +135,7 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	time.Sleep(time.Second * 3)
 	service, err = w.Next()
 	if err != nil {
 		t.Fatal(err)
@@ -153,6 +155,7 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	time.Sleep(time.Second * 3)
 	service, err = w.Next()
 	if err != nil {
 		t.Fatal(err)
