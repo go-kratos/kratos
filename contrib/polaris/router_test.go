@@ -145,7 +145,7 @@ func TestRouter(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	time.Sleep(time.Second * 5)
 	nodes := []selector.Node{
 		selector.NewNode("grpc", "127.0.0.1:9000", &registry.ServiceInstance{
 			ID:        "123",

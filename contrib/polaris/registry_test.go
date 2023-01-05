@@ -88,11 +88,11 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	time.Sleep(time.Second * 3)
 	w, err := r.Watch(context.Background(), "test-ut")
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(time.Second * 3)
 	service, err := w.Next()
 	if err != nil {
 		t.Fatal(err)
