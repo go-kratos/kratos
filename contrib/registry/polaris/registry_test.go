@@ -17,8 +17,7 @@ func TestRegistry(t *testing.T) {
 	r := NewRegistryWithConfig(
 		conf,
 		WithTimeout(time.Second),
-		WithHeartbeat(false),
-		WithHealthy(false),
+		WithHealthy(true),
 		WithIsolate(true),
 		WithNamespace("default"),
 		WithProtocol("tcp"),
@@ -129,8 +128,7 @@ func TestRegistryMany(t *testing.T) {
 	r := NewRegistryWithConfig(
 		conf,
 		WithTimeout(time.Second),
-		WithHeartbeat(false),
-		WithHealthy(false),
+		WithHealthy(true),
 		WithIsolate(true),
 		WithNamespace("default"),
 		WithProtocol("tcp"),

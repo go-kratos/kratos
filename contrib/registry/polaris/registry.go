@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
-
 	"github.com/go-kratos/kratos/v2/registry"
 
 	"github.com/polarismesh/polaris-go/api"
@@ -117,9 +115,10 @@ func WithRetryCount(retryCount int) Option {
 	return func(o *options) { o.RetryCount = retryCount }
 }
 
-// WithHeartbeat . with Heartbeat option.
+// WithHeartbeat with Heartbeat option.
+// Deprecated
 func WithHeartbeat(heartbeat bool) Option {
-	return func(o *options) { o.Heartbeat = heartbeat }
+	return func(o *options) {}
 }
 
 func NewRegistry(provider api.ProviderAPI, consumer api.ConsumerAPI, opts ...Option) (r *Registry) {
@@ -196,7 +195,7 @@ func (r *Registry) Register(_ context.Context, serviceInstance *registry.Service
 			rmd["version"] = serviceInstance.Version
 		}
 		// Register
-		service, err := r.provider.Register(
+		service, err := r.provider.RegisterInstance(
 			&api.InstanceRegisterRequest{
 				InstanceRegisterRequest: model.InstanceRegisterRequest{
 					Service:      serviceInstance.Name + u.Scheme,
@@ -220,36 +219,6 @@ func (r *Registry) Register(_ context.Context, serviceInstance *registry.Service
 			return err
 		}
 		instanceID := service.InstanceID
-
-		if r.opt.Heartbeat {
-			// start heartbeat report
-			go func() {
-				ticker := time.NewTicker(time.Second * time.Duration(r.opt.TTL))
-				defer ticker.Stop()
-
-				for {
-					<-ticker.C
-
-					err = r.provider.Heartbeat(&api.InstanceHeartbeatRequest{
-						InstanceHeartbeatRequest: model.InstanceHeartbeatRequest{
-							Service:      serviceInstance.Name + u.Scheme,
-							Namespace:    r.opt.Namespace,
-							Host:         host,
-							Port:         portNum,
-							ServiceToken: r.opt.ServiceToken,
-							InstanceID:   instanceID,
-							Timeout:      &r.opt.Timeout,
-							RetryCount:   &r.opt.RetryCount,
-						},
-					})
-					if err != nil {
-						log.Error(err.Error())
-						continue
-					}
-				}
-			}()
-		}
-
 		ids = append(ids, instanceID)
 	}
 	// need to set InstanceID for Deregister
