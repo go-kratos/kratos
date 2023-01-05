@@ -34,7 +34,7 @@ func newWatcher(ctx context.Context, key, name string, client *clientv3.Client) 
 	}
 	w.ctx, w.cancel = context.WithCancel(ctx)
 	w.watchChan = w.watcher.Watch(w.ctx, key, clientv3.WithPrefix(), clientv3.WithRev(0), clientv3.WithKeysOnly())
-	err := w.watcher.RequestProgress(context.Background())
+	err := w.watcher.RequestProgress(w.ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -91,5 +91,5 @@ func (w *watcher) reWatch() error {
 	w.watcher.Close()
 	w.watcher = clientv3.NewWatcher(w.client)
 	w.watchChan = w.watcher.Watch(w.ctx, w.key, clientv3.WithPrefix(), clientv3.WithRev(0), clientv3.WithKeysOnly())
-	return w.watcher.RequestProgress(context.Background())
+	return w.watcher.RequestProgress(w.ctx)
 }
