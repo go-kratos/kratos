@@ -12,7 +12,7 @@ import (
 
 // TestRegistry
 func TestRegistry(t *testing.T) {
-	conf := config.NewDefaultConfiguration([]string{"127.0.0.1:8091"})
+	conf := config.NewDefaultConfiguration([]string{"183.47.111.80:8091"})
 
 	r := NewRegistryWithConfig(
 		conf,
@@ -124,7 +124,7 @@ func TestRegistry(t *testing.T) {
 
 // TestRegistryMany
 func TestRegistryMany(t *testing.T) {
-	conf := config.NewDefaultConfiguration([]string{"127.0.0.1:8091"})
+	conf := config.NewDefaultConfiguration([]string{"183.47.111.80:8091"})
 
 	r := NewRegistryWithConfig(
 		conf,

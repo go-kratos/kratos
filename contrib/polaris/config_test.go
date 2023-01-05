@@ -20,7 +20,7 @@ var (
 		port: 8080`
 	testUpdatedContent = `server:
 		port: 8090`
-	testCenterURL = "http://127.0.0.1:8090"
+	testCenterURL = "http://183.47.111.80:8090"
 )
 
 func makeJSONRequest(uri string, data string, method string, headers map[string]string) ([]byte, error) {
