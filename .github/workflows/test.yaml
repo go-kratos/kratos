@@ -1,0 +1,36 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  resolve-modules-test:
+    name: resolve module test
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - id: set-matrix
+        run: ./hack/resolve-modules.sh
+
+  test:
+    name: test module
+    runs-on: ubuntu-latest
+    needs: resolve-modules
+    strategy:
+      matrix: ${{ fromJson(needs.resolve-modules.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Lint
+        uses: actions/setup-go@v3.5.0
+        run: go test ./...
+        with:
+          go-version: 1.18
+          working-directory: ${{ matrix.workdir }}
