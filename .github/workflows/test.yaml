@@ -27,9 +27,11 @@ jobs:
       matrix: ${{ fromJson(needs.resolve-modules-test.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v3
-      - name: Test
+      - name: Set up Go
         uses: actions/setup-go@v3.5.0
-        run: go test ./...
         with:
           go-version: 1.18
+      - name: test
+        run: go test ./...
+        with:
           working-directory: ${{ matrix.workdir }}
