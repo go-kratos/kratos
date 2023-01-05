@@ -27,7 +27,7 @@ jobs:
       matrix: ${{ fromJson(needs.resolve-modules.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v3
-      - name: Lint
+      - name: Test
         uses: actions/setup-go@v3.5.0
         run: go test ./...
         with:
