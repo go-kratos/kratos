@@ -75,6 +75,12 @@ func TestWatch(t *testing.T) {
 		WithTTL(10),
 	)
 
+	w, err := r.Watch(context.Background(), "test-ut")
+	if err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(time.Second * 2)
+
 	err = r.Register(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
 		Name:    "test-ut",
@@ -88,19 +94,13 @@ func TestWatch(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	w, err := r.Watch(context.Background(), "test-ut")
-	if err != nil {
-		t.Fatal(err)
-	}
-	time.Sleep(time.Second * 2)
-
 	service, err := w.Next()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if len(service) != 1 {
-		t.Errorf("want 1, got %d, service %+v", len(service), service)
+		t.Fatalf("want 1, got %d, service %+v", len(service), service)
 	}
 
 	err = r.Register(context.Background(), &registry.ServiceInstance{
@@ -122,7 +122,7 @@ func TestWatch(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(service) != 2 {
-		t.Errorf("want 1, got %d, service %+v", len(service), service)
+		t.Fatalf("want 1, got %d, service %+v", len(service), service)
 	}
 
 	err = r.Deregister(context.Background(), &registry.ServiceInstance{
@@ -143,7 +143,7 @@ func TestWatch(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(service) != 1 {
-		t.Errorf("want 1, got %d, service %+v", len(service), service)
+		t.Fatalf("want 1, got %d, service %+v", len(service), service)
 	}
 	err = r.Deregister(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
@@ -163,6 +163,6 @@ func TestWatch(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(service) != 0 {
-		t.Errorf("want 0, got %d", len(service))
+		t.Fatalf("want 0, got %d", len(service))
 	}
 }
