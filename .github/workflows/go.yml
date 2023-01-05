@@ -41,12 +41,6 @@ jobs:
           - 8090:8090
           - 8091:8091
           - 8093:8093
-      polaris2:
-        image: polarismesh/polaris-server-standalone:v1.13.3
-        ports:
-          - 9090:8090
-          - 9091:8091
-          - 9093:8093
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go

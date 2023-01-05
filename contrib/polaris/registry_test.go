@@ -2,7 +2,6 @@ package polaris
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -81,7 +80,7 @@ func TestDeregister(t *testing.T) {
 }
 
 func TestWatch(t *testing.T) {
-	name := fmt.Sprintf("test-ut")
+	name := "test-ut"
 	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
 	if err != nil {
 		t.Fatal(err)
