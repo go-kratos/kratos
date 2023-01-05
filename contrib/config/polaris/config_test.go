@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/polarismesh/polaris-go"
 )
@@ -196,7 +197,7 @@ func (client *configClient) publishConfigFile(name string) error {
 }
 
 func TestConfig(t *testing.T) {
-	name := "kratos-test.yaml"
+	name := fmt.Sprintf("kratos-test-%d.yaml", time.Now().Unix())
 	client, err := newConfigClient()
 	if err != nil {
 		t.Fatal(err)
@@ -257,7 +258,7 @@ func TestConfig(t *testing.T) {
 }
 
 func TestExtToFormat(t *testing.T) {
-	name := "kratos-ext.yaml"
+	name := fmt.Sprintf("kratos-test-ext-%d.yaml", time.Now().Unix())
 	client, err := newConfigClient()
 	if err != nil {
 		t.Fatal(err)
