@@ -10,12 +10,54 @@ on:
   workflow_dispatch:
 
 jobs:
+  resolve-modules:
+    name: resolve module
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - id: set-matrix
+        run: ./hack/resolve-modules.sh
   build:
     strategy:
       matrix:
         go: [1.16, 1.17, 1.18, 1.19]
     name: build & test
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3.5.0
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: Build
+        run: go build ./...
+
+      - name: Test
+        run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Upload coverage to Codecov
+        run: bash <(curl -s https://codecov.io/bash)
+
+      - name: Kratos
+        run: |
+          cd cmd/kratos
+          go build ./...
+          go test ./...
+
+      - name: HTTP
+        run: |
+          cd cmd/protoc-gen-go-http
+          go build ./...
+          go test ./...
+  test:
+    name: lint module
+    runs-on: ubuntu-latest
+    needs: resolve-modules
     services:
       etcd:
         image: gcr.io/etcd-development/etcd:v3.5.0
@@ -41,30 +83,13 @@ jobs:
           - 8090:8090
           - 8091:8091
           - 8093:8093
+    strategy:
+      matrix: ${{ fromJson(needs.resolve-modules.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Go
+      - name: test
         uses: actions/setup-go@v3.5.0
         with:
           go-version: ${{ matrix.go }}
-
-      - name: Build
-        run: go build ./...
-
-      - name: Test
-        run: make test-coverage
-
-      - name: Upload coverage to Codecov
-        run: bash <(curl -s https://codecov.io/bash)
-
-      - name: Kratos
-        run: |
-          cd cmd/kratos
-          go build ./...
-          go test ./...
-
-      - name: HTTP
-        run: |
-          cd cmd/protoc-gen-go-http
-          go build ./...
-          go test ./...
+          working-directory: ${{ matrix.workdir }}
+        run: go test ./...
