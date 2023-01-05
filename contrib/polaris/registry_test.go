@@ -13,7 +13,7 @@ import (
 
 // TestRegistry
 func TestRegistry(t *testing.T) {
-	sdk, err := polaris.NewSDKContextByAddress("127.0.0.1:8091")
+	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func TestRegistry(t *testing.T) {
 }
 
 func TestDeregister(t *testing.T) {
-	sdk, err := polaris.NewSDKContextByAddress("127.0.0.1:8091")
+	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,7 +82,7 @@ func TestDeregister(t *testing.T) {
 
 func TestWatch(t *testing.T) {
 	name := fmt.Sprintf("test-ut")
-	sdk, err := polaris.NewSDKContextByAddress("127.0.0.1:8091")
+	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,7 +124,7 @@ func TestWatch(t *testing.T) {
 	}
 
 	if len(service) != 1 {
-		t.Errorf("want 1, got %d", len(service))
+		t.Errorf("want 1, got %d, service %+v", len(service), service)
 	}
 
 	err = r.Register(context.Background(), &registry.ServiceInstance{
@@ -146,7 +146,7 @@ func TestWatch(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(service) != 2 {
-		t.Errorf("want 1, got %d", len(service))
+		t.Errorf("want 1, got %d, service %+v", len(service), service)
 	}
 
 	err = r.Deregister(context.Background(), &registry.ServiceInstance{
@@ -167,7 +167,7 @@ func TestWatch(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(service) != 1 {
-		t.Errorf("want 1, got %d", len(service))
+		t.Errorf("want 1, got %d, service %+v", len(service), service)
 	}
 	err = r.Deregister(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
