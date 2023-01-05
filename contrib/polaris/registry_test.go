@@ -2,8 +2,7 @@ package polaris
 
 import (
 	"context"
-	"encoding/json"
-	"os"
+	"fmt"
 	"testing"
 	"time"
 
@@ -82,6 +81,7 @@ func TestDeregister(t *testing.T) {
 }
 
 func TestWatch(t *testing.T) {
+	name := fmt.Sprintf("test-ut-%d", time.Now().Unix())
 	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
 	if err != nil {
 		t.Fatal(err)
@@ -99,34 +99,9 @@ func TestWatch(t *testing.T) {
 		WithTTL(10),
 	)
 
-	w, err := r.Watch(context.Background(), "test-ut")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	ch := make(chan struct{})
-	go func(t *testing.T) {
-		for {
-			next, err1 := w.Next()
-			if err1 != nil {
-				t.Error(err1)
-				os.Exit(1)
-			}
-			bytes, err2 := json.Marshal(next)
-			if err2 != nil {
-				t.Error(err2)
-				os.Exit(1)
-			}
-			t.Log(string(bytes))
-			if len(next) == 0 {
-				ch <- struct{}{}
-			}
-		}
-	}(t)
-
 	err = r.Register(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
-		Name:    "test-ut",
+		Name:    name,
 		Version: "v1.0.0",
 		Endpoints: []string{
 			"grpc://127.0.0.1:8080",
@@ -136,10 +111,25 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	
+	w, err := r.Watch(context.Background(), name)
+	if err != nil {
+		t.Fatal(err)
+	}
 	time.Sleep(time.Second * 2)
+
+	service, err := w.Next()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(service) != 1 {
+		t.Errorf("want 1, got %d", len(service))
+	}
+
 	err = r.Register(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
-		Name:    "test-ut",
+		Name:    name,
 		Version: "v1.0.0",
 		Endpoints: []string{
 			"grpc://127.0.0.2:8080",
@@ -150,9 +140,18 @@ func TestWatch(t *testing.T) {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Second * 2)
+
+	service, err = w.Next()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(service) != 2 {
+		t.Errorf("want 1, got %d", len(service))
+	}
+
 	err = r.Deregister(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
-		Name:    "test-ut",
+		Name:    name,
 		Version: "v1.0.0",
 		Endpoints: []string{
 			"grpc://127.0.0.1:8080",
@@ -163,9 +162,16 @@ func TestWatch(t *testing.T) {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Second * 2)
+	service, err = w.Next()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(service) != 1 {
+		t.Errorf("want 1, got %d", len(service))
+	}
 	err = r.Deregister(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
-		Name:    "test-ut",
+		Name:    name,
 		Version: "v1.0.0",
 		Endpoints: []string{
 			"grpc://127.0.0.2:8080",
@@ -175,5 +181,12 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	<-ch
+	time.Sleep(time.Second * 2)
+	service, err = w.Next()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(service) != 0 {
+		t.Errorf("want 0, got %d", len(service))
+	}
 }
