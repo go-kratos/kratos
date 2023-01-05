@@ -12,12 +12,12 @@ jobs:
     name: resolve module test
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.set-matrix-test.outputs.matrix }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - id: set-matrix
+      - id: set-matrix-test
         run: ./hack/resolve-modules.sh
   test:
     name: test module
