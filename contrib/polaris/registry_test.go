@@ -70,7 +70,7 @@ func TestWatch(t *testing.T) {
 
 	r := p.Registry(
 		WithTimeout(time.Second),
-		WithHealthy(false),
+		WithHealthy(true),
 		WithIsolate(false),
 		WithRegistryNamespace("default"),
 		WithRetryCount(0),

@@ -120,10 +120,10 @@ func TestRouter(t *testing.T) {
 	}
 
 	p := New(sdk)
-	
+
 	r := p.Registry(
 		WithTimeout(time.Second),
-		WithHealthy(false),
+		WithHealthy(true),
 		WithIsolate(false),
 		WithRegistryNamespace("default"),
 		WithRetryCount(0),

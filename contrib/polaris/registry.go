@@ -326,11 +326,17 @@ func (w *Watcher) Next() ([]*registry.ServiceInstance, error) {
 							}
 							m[instance.GetId()] = instance
 							for _, ins := range m {
-								nv = append(nv, ins)
+								if ins.IsHealthy() {
+									nv = append(nv, ins)
+								}
 							}
-							w.ServiceInstances[instance.GetMetadata()["merge"]] = nv
+							if len(nv) != 0 {
+								w.ServiceInstances[instance.GetMetadata()["merge"]] = nv
+							}
 						} else {
-							w.ServiceInstances[instance.GetMetadata()["merge"]] = []model.Instance{instance}
+							if instance.IsHealthy() {
+								w.ServiceInstances[instance.GetMetadata()["merge"]] = []model.Instance{instance}
+							}
 						}
 					}
 				}
