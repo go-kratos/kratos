@@ -196,7 +196,7 @@ func (client *configClient) publishConfigFile(name string) error {
 }
 
 func TestConfig(t *testing.T) {
-	name := "test.yaml"
+	name := "kratos-test.yaml"
 	client, err := newConfigClient()
 	if err != nil {
 		t.Fatal(err)
@@ -261,7 +261,7 @@ func TestConfig(t *testing.T) {
 }
 
 func TestExtToFormat(t *testing.T) {
-	name := "ext.yaml"
+	name := "kratos-ext.yaml"
 	client, err := newConfigClient()
 	if err != nil {
 		t.Fatal(err)

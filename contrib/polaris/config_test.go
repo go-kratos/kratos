@@ -196,7 +196,7 @@ func (client *configClient) publishConfigFile(name string) error {
 }
 
 func TestConfig(t *testing.T) {
-	name := "test.yaml"
+	name := "kratos-test.yaml"
 	client, err := newConfigClient()
 	if err != nil {
 		t.Fatal(err)
@@ -209,7 +209,7 @@ func TestConfig(t *testing.T) {
 	}
 
 	// Always remember clear test resource
-	sdk, err := polaris.NewSDKContextByAddress("127.0.0.1:8091")
+	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -262,7 +262,7 @@ func TestConfig(t *testing.T) {
 }
 
 func TestExtToFormat(t *testing.T) {
-	name := "ext.yaml"
+	name := "kratos-ext.yaml"
 	client, err := newConfigClient()
 	if err != nil {
 		t.Fatal(err)
@@ -281,7 +281,7 @@ func TestExtToFormat(t *testing.T) {
 		}
 	}()
 
-	sdk, err := polaris.NewSDKContextByAddress("127.0.0.1:8091")
+	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
 	if err != nil {
 		t.Fatal(err)
 	}
