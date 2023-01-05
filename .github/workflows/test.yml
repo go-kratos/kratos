@@ -1,4 +1,4 @@
-name: Test
+name: test
 
 on:
   push:
@@ -36,12 +36,12 @@ jobs:
           go-version: 1.18
 
       - name: test 1.19
-      - run: go test -race ./...
+        run: go test -race ./...
 
-#      - name: Set up Go
-#        uses: actions/setup-go@v3.5.0
-#        with:
-#          go-version: 1.19
-#
-#      - name: Test 1.19
-#      - run: go test -race ./...
+      - name: Set up Go
+        uses: actions/setup-go@v3.5.0
+        with:
+          go-version: 1.19
+
+      - name: Test 1.19
+        run: go test -race ./...
