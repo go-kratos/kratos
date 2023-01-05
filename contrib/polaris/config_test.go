@@ -20,7 +20,7 @@ var (
 		port: 8080`
 	testUpdatedContent = `server:
 		port: 8090`
-	testCenterURL = "http://183.47.111.80:8090"
+	testCenterURL = "http://127.0.0.1:8090"
 )
 
 func makeJSONRequest(uri string, data string, method string, headers map[string]string) ([]byte, error) {
@@ -196,20 +196,24 @@ func (client *configClient) publishConfigFile(name string) error {
 }
 
 func TestConfig(t *testing.T) {
-	name := fmt.Sprintf("test-%d.yaml", time.Now().Unix())
+	name := "kratos-polaris-test.yaml"
 	client, err := newConfigClient()
 	if err != nil {
 		t.Fatal(err)
 	}
+	_ = client.deleteConfigFile(name)
 	if err = client.createConfigFile(name); err != nil {
 		t.Fatal(err)
 	}
+	time.Sleep(5 * time.Second)
 	if err = client.publishConfigFile(name); err != nil {
 		t.Fatal(err)
 	}
 
+	time.Sleep(5 * time.Second)
+
 	// Always remember clear test resource
-	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
+	sdk, err := polaris.NewSDKContextByAddress("127.0.0.1:8091")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -223,6 +227,9 @@ func TestConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	for _, value := range kv {
+		t.Logf("key: %s, value: %s", value.Key, value.Value)
+	}
 	if len(kv) != 1 || kv[0].Key != name || string(kv[0].Value) != testOriginContent {
 		t.Fatal("config error")
 	}
@@ -261,7 +268,7 @@ func TestConfig(t *testing.T) {
 }
 
 func TestExtToFormat(t *testing.T) {
-	name := fmt.Sprintf("test-ext-%d.yaml", time.Now().Unix())
+	name := "kratos-polaris-ext.yaml"
 	client, err := newConfigClient()
 	if err != nil {
 		t.Fatal(err)
@@ -281,7 +288,7 @@ func TestExtToFormat(t *testing.T) {
 		}
 	})
 
-	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
+	sdk, err := polaris.NewSDKContextByAddress("127.0.0.1:8091")
 	if err != nil {
 		t.Fatal(err)
 	}
