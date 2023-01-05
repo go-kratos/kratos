@@ -55,8 +55,6 @@ jobs:
 
       - name: Module cache
         uses: actions/cache@v3
-        env:
-          cache-name: go-mod-cache
         with:
           path: |
              ~/.cache/go-build
