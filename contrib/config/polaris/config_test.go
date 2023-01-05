@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -112,7 +111,7 @@ func (client *configClient) createConfigFile(name string) error {
 		return err
 	}
 	if resJSON.Code != 200000 {
-		return errors.New(fmt.Sprintf("create error, res: %s", string(res)))
+		return fmt.Errorf("create error, res: %s", string(res))
 	}
 	return nil
 }
@@ -141,7 +140,7 @@ func (client *configClient) updateConfigFile(name string) error {
 		return err
 	}
 	if resJSON.Code != 200000 {
-		return errors.New(fmt.Sprintf("update error, res: %s", string(res)))
+		return fmt.Errorf("update error, res: %s", string(res))
 	}
 	return nil
 }
@@ -164,7 +163,7 @@ func (client *configClient) deleteConfigFile(name string) error {
 		return err
 	}
 	if resJSON.Code != 200000 {
-		return errors.New(fmt.Sprintf("delete error, res: %s", string(res)))
+		return fmt.Errorf("delete error, res: %s", string(res))
 	}
 	return nil
 }
@@ -191,7 +190,7 @@ func (client *configClient) publishConfigFile(name string) error {
 		return err
 	}
 	if resJSON.Code != 200000 {
-		return errors.New(fmt.Sprintf("publish error, res: %s", string(res)))
+		return fmt.Errorf("publish error, res: %s", string(res))
 	}
 	return nil
 }
