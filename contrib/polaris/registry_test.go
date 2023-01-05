@@ -26,7 +26,7 @@ func TestRegistry(t *testing.T) {
 		WithHealthy(true),
 		WithIsolate(false),
 		WithRegistryNamespace("default"),
-		WithRetryCount(0),
+		WithRetryCount(3),
 		WithWeight(100),
 		WithTTL(10),
 	)
@@ -73,7 +73,7 @@ func TestWatch(t *testing.T) {
 		WithHealthy(true),
 		WithIsolate(false),
 		WithRegistryNamespace("default"),
-		WithRetryCount(0),
+		WithRetryCount(3),
 		WithWeight(100),
 		WithTTL(10),
 	)
