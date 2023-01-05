@@ -1,4 +1,4 @@
-name: CI
+name: Lint
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
         run: ./hack/resolve-modules.sh
 
   lint:
-    name: lint module & test
+    name: lint module
     runs-on: ubuntu-latest
     needs: resolve-modules
     strategy:
@@ -34,9 +34,3 @@ jobs:
           version: latest
           working-directory: ${{ matrix.workdir }}
           skip-pkg-cache: true
-      - name: Test
-        uses: actions/setup-go@v3.5.0
-        run: go test ./...
-        with:
-          go-version: 1.18
-          working-directory: ${{ matrix.workdir }}
