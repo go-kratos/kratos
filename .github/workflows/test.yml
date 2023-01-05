@@ -62,6 +62,8 @@ jobs:
 
       - name: test 1.19
         run: go test -race ./...
+        with:
+          working-directory: ${{ matrix.workdir }}
 
       - name: Set up Go
         uses: actions/setup-go@v3.5.0
@@ -70,3 +72,5 @@ jobs:
 
       - name: Test 1.19
         run: go test -race ./...
+        with:
+          working-directory: ${{ matrix.workdir }}
