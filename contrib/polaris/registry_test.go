@@ -75,12 +75,6 @@ func TestWatch(t *testing.T) {
 		WithTTL(10),
 	)
 
-	w, err := r.Watch(context.Background(), "test-ut")
-	if err != nil {
-		t.Fatal(err)
-	}
-	time.Sleep(time.Second * 2)
-
 	err = r.Register(context.Background(), &registry.ServiceInstance{
 		ID:      "test-ut",
 		Name:    "test-ut",
@@ -93,7 +87,11 @@ func TestWatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	w, err := r.Watch(context.Background(), "test-ut")
+	if err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(time.Second * 2)
 	service, err := w.Next()
 	if err != nil {
 		t.Fatal(err)
