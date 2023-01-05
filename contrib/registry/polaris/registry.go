@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
@@ -20,9 +19,6 @@ var (
 	_ registry.Registrar = (*Registry)(nil)
 	_ registry.Discovery = (*Registry)(nil)
 )
-
-// _instanceIDSeparator . Instance id Separator.
-const _instanceIDSeparator = "-"
 
 type options struct {
 	// required, namespace in polaris
@@ -159,7 +155,6 @@ func NewRegistryWithConfig(conf config.Configuration, opts ...Option) (r *Regist
 
 // Register the registration.
 func (r *Registry) Register(_ context.Context, serviceInstance *registry.ServiceInstance) error {
-	ids := make([]string, 0, len(serviceInstance.Endpoints))
 	for _, endpoint := range serviceInstance.Endpoints {
 		// get url
 		u, err := url.Parse(endpoint)
@@ -195,7 +190,7 @@ func (r *Registry) Register(_ context.Context, serviceInstance *registry.Service
 			rmd["version"] = serviceInstance.Version
 		}
 		// Register
-		service, err := r.provider.RegisterInstance(
+		_, err = r.provider.RegisterInstance(
 			&api.InstanceRegisterRequest{
 				InstanceRegisterRequest: model.InstanceRegisterRequest{
 					Service:      serviceInstance.Name + u.Scheme,
@@ -218,18 +213,13 @@ func (r *Registry) Register(_ context.Context, serviceInstance *registry.Service
 		if err != nil {
 			return err
 		}
-		instanceID := service.InstanceID
-		ids = append(ids, instanceID)
 	}
-	// need to set InstanceID for Deregister
-	serviceInstance.ID = strings.Join(ids, _instanceIDSeparator)
 	return nil
 }
 
 // Deregister the registration.
 func (r *Registry) Deregister(_ context.Context, serviceInstance *registry.ServiceInstance) error {
-	split := strings.Split(serviceInstance.ID, _instanceIDSeparator)
-	for i, endpoint := range serviceInstance.Endpoints {
+	for _, endpoint := range serviceInstance.Endpoints {
 		// get url
 		u, err := url.Parse(endpoint)
 		if err != nil {
@@ -254,7 +244,6 @@ func (r *Registry) Deregister(_ context.Context, serviceInstance *registry.Servi
 					Service:      serviceInstance.Name + u.Scheme,
 					ServiceToken: r.opt.ServiceToken,
 					Namespace:    r.opt.Namespace,
-					InstanceID:   split[i],
 					Host:         host,
 					Port:         portNum,
 					Timeout:      &r.opt.Timeout,

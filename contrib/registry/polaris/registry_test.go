@@ -111,6 +111,7 @@ func TestRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	time.Sleep(time.Second)
 	result, err = watch.Next()
 	if err != nil {
 		t.Fatal(err)
