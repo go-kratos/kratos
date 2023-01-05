@@ -366,9 +366,13 @@ func instancesToServiceInstances(instances map[string][]model.Instance) []*regis
 			Metadata: inss[0].GetMetadata(),
 		}
 		for _, item := range inss {
-			ins.Endpoints = append(ins.Endpoints, fmt.Sprintf("%s://%s:%d", item.GetProtocol(), item.GetHost(), item.GetPort()))
+			if item.IsHealthy() {
+				ins.Endpoints = append(ins.Endpoints, fmt.Sprintf("%s://%s:%d", item.GetProtocol(), item.GetHost(), item.GetPort()))
+			}
 		}
-		serviceInstances = append(serviceInstances, ins)
+		if len(ins.Endpoints) != 0 {
+			serviceInstances = append(serviceInstances, ins)
+		}
 	}
 	return serviceInstances
 }
