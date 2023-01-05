@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: resolve-modules-test
     strategy:
-      matrix: ${{ fromJson(needs.resolve-modules.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.resolve-modules-test.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v3
       - name: Test
