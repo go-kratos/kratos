@@ -209,6 +209,13 @@ func TestConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	t.Cleanup(func() {
+		err = client.deleteConfigFile(name)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
 	// Always remember clear test resource
 	configAPI, err := polaris.NewConfigAPI()
 	if err != nil {
@@ -231,18 +238,6 @@ func TestConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer func() {
-		err = client.deleteConfigFile(name)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if _, err = w.Next(); err != nil {
-			t.Fatal(err)
-		}
-		if err = w.Stop(); err != nil {
-			t.Fatal(err)
-		}
-	}()
 
 	if err = client.updateConfigFile(name); err != nil {
 		t.Fatal(err)

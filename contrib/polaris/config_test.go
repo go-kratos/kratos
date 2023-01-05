@@ -196,11 +196,12 @@ func (client *configClient) publishConfigFile(name string) error {
 }
 
 func TestConfig(t *testing.T) {
-	name := "kratos-test.yaml"
+	name := "kratos-polaris-test.yaml"
 	client, err := newConfigClient()
 	if err != nil {
 		t.Fatal(err)
 	}
+	_ = client.deleteConfigFile(name)
 	if err = client.createConfigFile(name); err != nil {
 		t.Fatal(err)
 	}
@@ -231,19 +232,14 @@ func TestConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer func() {
+
+	t.Cleanup(func() {
 		err = client.deleteConfigFile(name)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if _, err = w.Next(); err != nil {
-			t.Fatal(err)
-		}
-		if err = w.Stop(); err != nil {
-			t.Fatal(err)
-		}
-	}()
-
+	})
+	
 	if err = client.updateConfigFile(name); err != nil {
 		t.Fatal(err)
 	}
@@ -267,6 +263,7 @@ func TestExtToFormat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	_ = client.deleteConfigFile(name)
 	if err = client.createConfigFile(name); err != nil {
 		t.Fatal(err)
 	}
@@ -275,11 +272,11 @@ func TestExtToFormat(t *testing.T) {
 	}
 
 	// Always remember clear test resource
-	defer func() {
+	t.Cleanup(func() {
 		if err = client.deleteConfigFile(name); err != nil {
 			t.Fatal(err)
 		}
-	}()
+	})
 
 	sdk, err := polaris.NewSDKContextByAddress("183.47.111.80:8091")
 	if err != nil {
