@@ -13,7 +13,7 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
-func tcpServer(t *testing.T, lis net.Listener) {
+func tcpServer(lis net.Listener) {
 	for {
 		conn, err := lis.Accept()
 		if err != nil {
@@ -150,7 +150,7 @@ func TestRegistry_GetService(t *testing.T) {
 		t.Fail()
 	}
 	defer lis.Close()
-	go tcpServer(t, lis)
+	go tcpServer(lis)
 	time.Sleep(time.Millisecond * 100)
 	cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500"})
 	if err != nil {
@@ -286,9 +286,12 @@ func TestRegistry_Watch(t *testing.T) {
 
 	type args struct {
 		ctx      context.Context
+		cancel   func()
 		opts     []Option
 		instance *registry.ServiceInstance
 	}
+	canceledCtx, cancel := context.WithCancel(context.Background())
+
 	tests := []struct {
 		name    string
 		args    args
@@ -311,6 +314,21 @@ func TestRegistry_Watch(t *testing.T) {
 			},
 		},
 		{
+			name: "ctx has been cancelled",
+			args: args{
+				ctx:      canceledCtx,
+				cancel:   cancel,
+				instance: instance1,
+				opts: []Option{
+					WithHealthCheck(false),
+				},
+			},
+			want:    nil,
+			wantErr: true,
+			preFunc: func(t *testing.T) {
+			},
+		},
+		{
 			name: "register with healthCheck",
 			args: args{
 				ctx:      context.Background(),
@@ -327,8 +345,9 @@ func TestRegistry_Watch(t *testing.T) {
 				lis, err := net.Listen("tcp", addr)
 				if err != nil {
 					t.Errorf("listen tcp %s failed!", addr)
+					return
 				}
-				go tcpServer(t, lis)
+				go tcpServer(lis)
 			},
 		},
 	}
@@ -355,6 +374,10 @@ func TestRegistry_Watch(t *testing.T) {
 			watch, err := r.Watch(tt.args.ctx, tt.args.instance.Name)
 			if err != nil {
 				t.Error(err)
+			}
+
+			if tt.args.cancel != nil {
+				tt.args.cancel()
 			}
 
 			service, err := watch.Next()

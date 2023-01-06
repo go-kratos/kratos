@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/contrib/log/aliyun/v2
 go 1.16
 
 require (
-	github.com/aliyun/aliyun-log-go-sdk v0.1.41
+	github.com/aliyun/aliyun-log-go-sdk v0.1.43
 	github.com/go-kratos/kratos/v2 v2.5.3
 	google.golang.org/protobuf v1.28.1
 )

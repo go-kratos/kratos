@@ -19,6 +19,7 @@ func (w *watcher) Next() (services []*registry.ServiceInstance, err error) {
 	select {
 	case <-w.ctx.Done():
 		err = w.ctx.Err()
+		return
 	case <-w.event:
 	}
 
