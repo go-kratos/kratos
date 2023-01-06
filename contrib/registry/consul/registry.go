@@ -30,7 +30,7 @@ func WithHealthCheck(enable bool) Option {
 // WithDatacenter with registry datacenter option
 func WithDatacenter(dc Datacenter) Option {
 	return func(o *Registry) {
-		o.dc = dc
+		o.cli.dc = dc
 	}
 }
 
@@ -79,6 +79,14 @@ func WithServiceCheck(checks ...*api.AgentServiceCheck) Option {
 	}
 }
 
+// WithDisableReRegister disable re-register service when the service is running but removed by the registry
+// re-register will work when the heartbeat is enabled
+func WithDisableReRegister() Option {
+	return func(o *Registry) {
+		o.cli.reRegister = false
+	}
+}
+
 // Config is consul registry config
 type Config struct {
 	*api.Config
@@ -96,14 +104,22 @@ type Registry struct {
 // New creates consul registry
 func New(apiClient *api.Client, opts ...Option) *Registry {
 	r := &Registry{
-		dc:                SingleDatacenter,
 		registry:          make(map[string]*serviceSet),
 		enableHealthCheck: true,
+		cli: &Client{
+			dc:                             SingleDatacenter,
+			cli:                            apiClient,
+			resolver:                       defaultResolver,
+			healthcheckInterval:            10,
+			heartbeat:                      true,
+			deregisterCriticalServiceAfter: 600,
+			reRegister:                     true,
+		},
 	}
 	for _, o := range opts {
 		o(r)
 	}
-	r.cli = newClient(apiClient, r.dc)
+	r.cli.ctx, r.cli.cancel = context.WithCancel(context.Background())
 	return r
 }
 

@@ -3,6 +3,7 @@ package consul
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net"
 	"net/url"
 	"strconv"
@@ -39,25 +40,8 @@ type Client struct {
 	deregisterCriticalServiceAfter int
 	// serviceChecks  user custom checks
 	serviceChecks api.AgentServiceChecks
-}
-
-// Deprecated use newClient instead.
-func NewClient(cli *api.Client) *Client {
-	return newClient(cli, SingleDatacenter)
-}
-
-func newClient(cli *api.Client, dc Datacenter) *Client {
-	c := &Client{
-		dc:                             dc,
-		cli:                            cli,
-		resolver:                       defaultResolver,
-		healthcheckInterval:            10,
-		heartbeat:                      true,
-		deregisterCriticalServiceAfter: 600,
-	}
-
-	c.ctx, c.cancel = context.WithCancel(context.Background())
-	return c
+	// reRegistry re-register service when the service is running but removed by the registry
+	reRegister bool
 }
 
 func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance {
@@ -225,7 +209,17 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 				case <-ticker.C:
 					err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 					if err != nil {
-						log.Errorf("[Consul]update ttl heartbeat to consul failed!err:=%v", err)
+						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
+						// when the previous report fails, try to re register the service
+						if c.reRegister {
+							time.AfterFunc(time.Duration(rand.Intn(5))*time.Second, func() {
+								if err := c.cli.Agent().ServiceRegister(asr); err != nil {
+									log.Errorf("[Consul] re-registry service failed!, err=%v", err)
+								} else {
+									log.Info("[Consul] re-registry service success!")
+								}
+							})
+						}
 					}
 				case <-c.ctx.Done():
 					return
