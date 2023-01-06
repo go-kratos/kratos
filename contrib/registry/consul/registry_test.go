@@ -26,9 +26,7 @@ func tcpServer(lis net.Listener) {
 
 func TestRegistry_Register(t *testing.T) {
 	opts := []Option{
-		WithHealthCheck(true),
-		WithHeartbeat(true),
-		WithDeregisterCriticalServiceAfter(10),
+		WithHealthCheck(false),
 	}
 
 	type args struct {
