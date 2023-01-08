@@ -8,29 +8,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  resolve-modules:
-    name: resolve module
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-
-      - id: set-matrix
-        run: ./hack/resolve-modules.sh
-
   lint:
     name: lint module
     runs-on: ubuntu-latest
-    needs: resolve-modules
-    strategy:
-      matrix: ${{ fromJson(needs.resolve-modules.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v3
       - name: Lint
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          working-directory: ${{ matrix.workdir }}
-          skip-pkg-cache: true
