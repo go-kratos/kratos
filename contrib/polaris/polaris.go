@@ -36,6 +36,7 @@ func New(sdk api.SDKContext, opts ...Option) Polaris {
 		limit:     polaris.NewLimitAPIByContext(sdk),
 		registry:  polaris.NewProviderAPIByContext(sdk),
 		discovery: polaris.NewConsumerAPIByContext(sdk),
+		namespace: "default",
 	}
 	for _, option := range opts {
 		option(&op)
@@ -46,20 +47,14 @@ func New(sdk api.SDKContext, opts ...Option) Polaris {
 func (p *Polaris) Config(opts ...ConfigOption) (config.Source, error) {
 	options := &configOptions{
 		namespace: p.namespace,
-		fileGroup: "",
-		fileName:  "",
 	}
 
 	for _, opt := range opts {
 		opt(options)
 	}
 
-	if options.fileGroup == "" {
-		return nil, errors.New("testFileGroup invalid")
-	}
-
-	if options.fileName == "" {
-		return nil, errors.New("fileName invalid")
+	if len(options.files) == 0 {
+		return nil, errors.New("fileNames invalid")
 	}
 
 	return &source{

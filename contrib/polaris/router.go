@@ -40,7 +40,7 @@ func (p *Polaris) NodeFilter(namespace string) selector.NodeFilter {
 					DstInstances: buildPolarisInstance(namespace, nodes),
 				},
 			}
-			req.AddArguments(model.BuildCallerServiceArgument(appInfo.Name(), namespace))
+			req.AddArguments(model.BuildCallerServiceArgument(namespace, appInfo.Name()))
 
 			// process transport
 			if tr, ok := transport.FromServerContext(ctx); ok {

@@ -1,7 +1,6 @@
 package polaris
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -17,30 +16,20 @@ type ConfigOption func(o *configOptions)
 
 type configOptions struct {
 	namespace  string
-	fileGroup  string
-	fileName   string
-	configFile polaris.ConfigFile
+	files      []File
+	configFile []polaris.ConfigFile
 }
 
-// WithConfigNamespace with polaris config namespace
-func WithConfigNamespace(namespace string) ConfigOption {
+// WithConfigFile with polaris config file
+func WithConfigFile(file ...File) ConfigOption {
 	return func(o *configOptions) {
-		o.namespace = namespace
+		o.files = file
 	}
 }
 
-// WithConfigFileGroup with polaris config testFileGroup
-func WithConfigFileGroup(fileGroup string) ConfigOption {
-	return func(o *configOptions) {
-		o.fileGroup = fileGroup
-	}
-}
-
-// WithConfigFileName with polaris config fileName
-func WithConfigFileName(fileName string) ConfigOption {
-	return func(o *configOptions) {
-		o.fileName = fileName
-	}
+type File struct {
+	Name  string
+	Group string
 }
 
 type source struct {
@@ -50,27 +39,20 @@ type source struct {
 
 // Load return the config values
 func (s *source) Load() ([]*config.KeyValue, error) {
-	configFile, err := s.client.GetConfigFile(s.options.namespace, s.options.fileGroup, s.options.fileName)
-	if err != nil {
-		fmt.Println("fail to get config.", err)
-		return nil, err
+	kv := make([]*config.KeyValue, 0)
+	for _, file := range s.options.files {
+		configFile, err := s.client.GetConfigFile(s.options.namespace, file.Group, file.Name)
+		if err != nil {
+			return nil, err
+		}
+		s.options.configFile = append(s.options.configFile, configFile)
+		kv = append(kv, &config.KeyValue{
+			Key:    file.Name,
+			Value:  []byte(configFile.GetContent()),
+			Format: strings.TrimPrefix(filepath.Ext(file.Name), "."),
+		})
 	}
-
-	if err != nil {
-		return nil, err
-	}
-	content := configFile.GetContent()
-	k := s.options.fileName
-
-	s.options.configFile = configFile
-
-	return []*config.KeyValue{
-		{
-			Key:    k,
-			Value:  []byte(content),
-			Format: strings.TrimPrefix(filepath.Ext(k), "."),
-		},
-	}, nil
+	return kv, nil
 }
 
 // Watch return the watcher
@@ -79,68 +61,61 @@ func (s *source) Watch() (config.Watcher, error) {
 }
 
 type ConfigWatcher struct {
-	configFile polaris.ConfigFile
-	fullPath   string
+	event chan model.ConfigFileChangeEvent
+	cfg   []*config.KeyValue
 }
 
-type eventChan struct {
-	closed bool
-	event  chan model.ConfigFileChangeEvent
-}
-
-var eventChanMap = make(map[string]eventChan)
-
-func getFullPath(namespace string, fileGroup string, fileName string) string {
-	return fmt.Sprintf("%s/%s/%s", namespace, fileGroup, fileName)
-}
-
-func receive(event model.ConfigFileChangeEvent) {
-	meta := event.ConfigFileMetadata
-	ec := eventChanMap[getFullPath(meta.GetNamespace(), meta.GetFileGroup(), meta.GetFileName())]
-	defer func() {
-		if err := recover(); err != nil {
-			log.Error(err)
-		}
-	}()
-	if !ec.closed {
-		ec.event <- event
+func receive(event chan model.ConfigFileChangeEvent) func(m model.ConfigFileChangeEvent) {
+	return func(m model.ConfigFileChangeEvent) {
+		defer func() {
+			if err := recover(); err != nil {
+				log.Error(err)
+			}
+		}()
+		event <- m
 	}
 }
 
-func newConfigWatcher(configFile polaris.ConfigFile) *ConfigWatcher {
-	configFile.AddChangeListener(receive)
-
-	fullPath := getFullPath(configFile.GetNamespace(), configFile.GetFileGroup(), configFile.GetFileName())
-	if _, ok := eventChanMap[fullPath]; !ok {
-		eventChanMap[fullPath] = eventChan{
-			closed: false,
-			event:  make(chan model.ConfigFileChangeEvent),
-		}
-	}
+func newConfigWatcher(configFile []polaris.ConfigFile) *ConfigWatcher {
 	w := &ConfigWatcher{
-		configFile: configFile,
-		fullPath:   fullPath,
+		event: make(chan model.ConfigFileChangeEvent, len(configFile)),
+	}
+	for _, file := range configFile {
+		w.cfg = append(w.cfg, &config.KeyValue{
+			Key:    file.GetFileName(),
+			Value:  []byte(file.GetContent()),
+			Format: strings.TrimPrefix(filepath.Ext(file.GetFileName()), "."),
+		})
+	}
+	for _, file := range configFile {
+		file.AddChangeListener(receive(w.event))
 	}
 	return w
 }
 
 func (w *ConfigWatcher) Next() ([]*config.KeyValue, error) {
-	ec := eventChanMap[w.fullPath]
-	event := <-ec.event
-	return []*config.KeyValue{
-		{
-			Key:    w.configFile.GetFileName(),
-			Value:  []byte(event.NewValue),
-			Format: strings.TrimPrefix(filepath.Ext(w.configFile.GetFileName()), "."),
-		},
-	}, nil
+	for {
+		select {
+		case event := <-w.event:
+			m := make(map[string]*config.KeyValue)
+			for _, file := range w.cfg {
+				m[file.Key] = file
+			}
+			m[event.ConfigFileMetadata.GetFileName()] = &config.KeyValue{
+				Key:    event.ConfigFileMetadata.GetFileName(),
+				Value:  []byte(event.NewValue),
+				Format: strings.TrimPrefix(filepath.Ext(event.ConfigFileMetadata.GetFileName()), "."),
+			}
+			w.cfg = make([]*config.KeyValue, 0, len(m))
+			for _, kv := range m {
+				w.cfg = append(w.cfg, kv)
+			}
+			return w.cfg, nil
+		}
+	}
 }
 
 func (w *ConfigWatcher) Stop() error {
-	ec := eventChanMap[w.fullPath]
-	if !ec.closed {
-		ec.closed = true
-		close(ec.event)
-	}
+	close(w.event)
 	return nil
 }

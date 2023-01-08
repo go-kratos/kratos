@@ -3,6 +3,7 @@ package polaris
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/config"
 	"io"
 	"net/http"
 	"reflect"
@@ -218,7 +219,7 @@ func TestConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := New(sdk)
-	config, err := p.Config(WithConfigNamespace(testNamespace), WithConfigFileGroup(testFileGroup), WithConfigFileName(name))
+	config, err := p.Config(WithConfigFile(File{Name: name, Group: testFileGroup}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -294,7 +295,7 @@ func TestExtToFormat(t *testing.T) {
 	}
 	p := New(sdk)
 
-	config, err := p.Config(WithConfigNamespace(testNamespace), WithConfigFileGroup(testFileGroup), WithConfigFileName(name))
+	config, err := p.Config(WithConfigFile(File{Name: name, Group: testFileGroup}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -314,5 +315,71 @@ func TestExtToFormat(t *testing.T) {
 	}
 	if !reflect.DeepEqual("yaml", kv[0].Format) {
 		t.Errorf("kvs[0].Format is %s", kv[0].Format)
+	}
+}
+
+func TestGetMultipleConfig(t *testing.T) {
+	client, err := newConfigClient()
+	files := make([]File, 0, 3)
+	for i := 0; i < 3; i++ {
+		name := fmt.Sprintf("kratos-polaris-test-%d.yaml", i)
+		if err != nil {
+			t.Fatal(err)
+		}
+		_ = client.deleteConfigFile(name)
+		if err = client.createConfigFile(name); err != nil {
+			t.Fatal(err)
+		}
+		if err = client.publishConfigFile(name); err != nil {
+			t.Fatal(err)
+		}
+		files = append(files, File{Name: name, Group: testFileGroup})
+	}
+
+	sdk, err := polaris.NewSDKContextByAddress("127.0.0.1:8091")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := New(sdk, WithNamespace("default"))
+
+	cfg, err := p.Config(WithConfigFile(files...))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	kvs, err := cfg.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, kv := range kvs {
+		t.Logf("key: %s, value: %s", kv.Key, kv.Value)
+	}
+
+	w, err := cfg.Watch()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, file := range files {
+		if err = client.publishConfigFile(file.Name); err != nil {
+			t.Fatal(err)
+		}
+		kvs, err := w.Next()
+		if err != nil {
+			t.Fatal(err)
+		}
+		m := make(map[string]*config.KeyValue)
+		for _, kv := range kvs {
+			m[kv.Key] = kv
+		}
+		if !reflect.DeepEqual(file.Name, m[file.Name].Key) {
+			t.Errorf("m[file.Name].Key is %s", m[file.Name].Key)
+		}
+		if !reflect.DeepEqual(testOriginContent, string(m[file.Name].Value)) {
+			t.Errorf("m[file.Name].Value is %s", m[file.Name].Value)
+		}
+		if !reflect.DeepEqual("yaml", m[file.Name].Format) {
+			t.Errorf("m[file.Name].Format is %s", m[file.Name].Format)
+		}
 	}
 }
