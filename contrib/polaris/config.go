@@ -94,25 +94,23 @@ func newConfigWatcher(configFile []polaris.ConfigFile) *ConfigWatcher {
 }
 
 func (w *ConfigWatcher) Next() ([]*config.KeyValue, error) {
-	for {
-		select {
-		case event := <-w.event:
-			m := make(map[string]*config.KeyValue)
-			for _, file := range w.cfg {
-				m[file.Key] = file
-			}
-			m[event.ConfigFileMetadata.GetFileName()] = &config.KeyValue{
-				Key:    event.ConfigFileMetadata.GetFileName(),
-				Value:  []byte(event.NewValue),
-				Format: strings.TrimPrefix(filepath.Ext(event.ConfigFileMetadata.GetFileName()), "."),
-			}
-			w.cfg = make([]*config.KeyValue, 0, len(m))
-			for _, kv := range m {
-				w.cfg = append(w.cfg, kv)
-			}
-			return w.cfg, nil
+	if event, ok := <-w.event; ok {
+		m := make(map[string]*config.KeyValue)
+		for _, file := range w.cfg {
+			m[file.Key] = file
 		}
+		m[event.ConfigFileMetadata.GetFileName()] = &config.KeyValue{
+			Key:    event.ConfigFileMetadata.GetFileName(),
+			Value:  []byte(event.NewValue),
+			Format: strings.TrimPrefix(filepath.Ext(event.ConfigFileMetadata.GetFileName()), "."),
+		}
+		w.cfg = make([]*config.KeyValue, 0, len(m))
+		for _, kv := range m {
+			w.cfg = append(w.cfg, kv)
+		}
+		return w.cfg, nil
 	}
+	return w.cfg, nil
 }
 
 func (w *ConfigWatcher) Stop() error {

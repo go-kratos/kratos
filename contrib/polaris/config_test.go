@@ -3,13 +3,14 @@ package polaris
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-kratos/kratos/v2/config"
 	"io"
 	"net/http"
 	"reflect"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/go-kratos/kratos/v2/config"
 
 	"github.com/polarismesh/polaris-go"
 )
@@ -295,12 +296,12 @@ func TestExtToFormat(t *testing.T) {
 	}
 	p := New(sdk)
 
-	config, err := p.Config(WithConfigFile(File{Name: name, Group: testFileGroup}))
+	cfg, err := p.Config(WithConfigFile(File{Name: name, Group: testFileGroup}))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	kv, err := config.Load()
+	kv, err := cfg.Load()
 	if err != nil {
 		t.Fatal(err)
 	}

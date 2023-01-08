@@ -125,7 +125,6 @@ func TestRouter(t *testing.T) {
 		WithTimeout(time.Second),
 		WithHealthy(true),
 		WithIsolate(false),
-		WithRegistryNamespace("default"),
 		WithRetryCount(0),
 		WithWeight(100),
 		WithTTL(10),

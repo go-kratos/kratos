@@ -60,11 +60,6 @@ type Registry struct {
 	consumer polaris.ConsumerAPI
 }
 
-// WithRegistryNamespace with Namespace option.
-func WithRegistryNamespace(namespace string) RegistryOption {
-	return func(o *registryOptions) { o.Namespace = namespace }
-}
-
 // WithServiceToken with ServiceToken option.
 func WithServiceToken(serviceToken string) RegistryOption {
 	return func(o *registryOptions) { o.ServiceToken = serviceToken }
@@ -102,7 +97,7 @@ func WithRetryCount(retryCount int) RegistryOption {
 
 // Register the registration.
 func (r *Registry) Register(_ context.Context, instance *registry.ServiceInstance) error {
-	merge := uuid.NewString()
+	id := uuid.NewString()
 	for _, endpoint := range instance.Endpoints {
 		u, err := url.Parse(endpoint)
 		if err != nil {
@@ -123,7 +118,7 @@ func (r *Registry) Register(_ context.Context, instance *registry.ServiceInstanc
 		if instance.Metadata == nil {
 			instance.Metadata = make(map[string]string)
 		}
-		instance.Metadata["merge"] = merge
+		instance.Metadata["merge"] = id
 		if _, ok := instance.Metadata["weight"]; !ok {
 			instance.Metadata["weight"] = strconv.Itoa(r.opt.Weight)
 		}
