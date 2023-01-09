@@ -65,15 +65,8 @@ func (p *Polaris) Config(opts ...ConfigOption) (config.Source, error) {
 
 func (p *Polaris) Registry(opts ...RegistryOption) (r *Registry) {
 	op := registryOptions{
-		Namespace:    p.namespace,
-		ServiceToken: "",
-		Weight:       0,
-		Priority:     0,
-		Healthy:      true,
-		Isolate:      false,
-		TTL:          0,
-		Timeout:      0,
-		RetryCount:   0,
+		Namespace: p.namespace,
+		Healthy:   true,
 	}
 	for _, option := range opts {
 		option(&op)
