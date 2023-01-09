@@ -40,13 +40,21 @@ func (w *watcher) watch(ctx context.Context) {
 		// 每次 watch 只有一次有效期 所以循环 watch
 		_, _, ch, err := w.conn.ChildrenW(w.prefix)
 		if err != nil {
-			w.event <- zk.Event{Err: err}
+			// If the target service node has not been created
+			if errors.Is(err, zk.ErrNoNode) {
+				// Add watcher for the node exists
+				_, _, ch, err = w.conn.ExistsW(w.prefix)
+			}
+			if err != nil {
+				w.event <- zk.Event{Err: err}
+				return
+			}
 		}
 		select {
 		case <-ctx.Done():
 			return
-		default:
-			w.event <- <-ch
+		case ev := <-ch:
+			w.event <- ev
 		}
 	}
 }
