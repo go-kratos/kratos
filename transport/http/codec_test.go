@@ -11,9 +11,11 @@ import (
 )
 
 func TestDefaultRequestDecoder(t *testing.T) {
+	bodyString := "{\"a\":\"1\", \"b\": 2}"
+
 	req1 := &nethttp.Request{
 		Header: make(nethttp.Header),
-		Body:   io.NopCloser(bytes.NewBufferString("{\"a\":\"1\", \"b\": 2}")),
+		Body:   io.NopCloser(bytes.NewBufferString(bodyString)),
 	}
 	req1.Header.Set("Content-Type", "application/json")
 
@@ -30,6 +32,14 @@ func TestDefaultRequestDecoder(t *testing.T) {
 	}
 	if !reflect.DeepEqual(int64(2), v1.B) {
 		t.Errorf("expected %v, got %v", 2, v1.B)
+	}
+
+	data, err := io.ReadAll(req1.Body)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err1)
+	}
+	if !reflect.DeepEqual([]byte(bodyString), data) {
+		t.Errorf("expected %v, got %v", bodyString, data)
 	}
 }
 
