@@ -74,12 +74,13 @@ func run(cmd *cobra.Command, args []string) {
 			done <- p.New(ctx, wd, repoURL, branch)
 			return
 		}
-		if _, e := os.Stat(path.Join(wd, "go.mod")); os.IsNotExist(e) {
-			done <- fmt.Errorf("🚫 go.mod don't exists in %s", wd)
+		projectRoot := getgomodProjectRoot(wd)
+		if gomodIsNotExistIn(projectRoot) {
+			done <- fmt.Errorf("🚫 go.mod don't exists in %s", projectRoot)
 			return
 		}
 
-		mod, e := base.ModulePath(path.Join(wd, "go.mod"))
+		mod, e := base.ModulePath(path.Join(projectRoot, "go.mod"))
 		if e != nil {
 			panic(e)
 		}
@@ -122,4 +123,19 @@ func getProjectPlaceDir(projectName string, fallbackPlaceDir string) string {
 	}
 	// create project logic will check stat,so not check path stat here
 	return filepath.Dir(projectFullPath)
+}
+
+func getgomodProjectRoot(dir string) string {
+	if dir == filepath.Dir(dir) {
+		return dir
+	}
+	if gomodIsNotExistIn(dir) {
+		return getgomodProjectRoot(filepath.Dir(dir))
+	}
+	return dir
+}
+
+func gomodIsNotExistIn(dir string) bool {
+	_, e := os.Stat(path.Join(dir, "go.mod"))
+	return os.IsNotExist(e)
 }
