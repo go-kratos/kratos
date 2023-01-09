@@ -86,14 +86,6 @@ func WithServiceCheck(checks ...*api.AgentServiceCheck) Option {
 	}
 }
 
-// WithDisableReRegister disable re-register service when the service is running but removed by the registry
-// re-register will work when the heartbeat is enabled
-func WithDisableReRegister() Option {
-	return func(o *Registry) {
-		o.cli.reRegister = false
-	}
-}
-
 // Config is consul registry config
 type Config struct {
 	*api.Config
@@ -121,7 +113,6 @@ func New(apiClient *api.Client, opts ...Option) *Registry {
 			healthcheckInterval:            10,
 			heartbeat:                      true,
 			deregisterCriticalServiceAfter: 600,
-			reRegister:                     true,
 		},
 	}
 	for _, o := range opts {
