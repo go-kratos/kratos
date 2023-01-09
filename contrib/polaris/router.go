@@ -22,10 +22,7 @@ import (
 )
 
 // NodeFilter polaris dynamic router selector
-func (p *Polaris) NodeFilter(namespace string) selector.NodeFilter {
-	if namespace == "" {
-		namespace = p.namespace
-	}
+func (p *Polaris) NodeFilter() selector.NodeFilter {
 	return func(ctx context.Context, nodes []selector.Node) []selector.Node {
 		if len(nodes) == 0 {
 			return nodes
@@ -35,12 +32,12 @@ func (p *Polaris) NodeFilter(namespace string) selector.NodeFilter {
 				ProcessRoutersRequest: model.ProcessRoutersRequest{
 					SourceService: model.ServiceInfo{
 						Service:   appInfo.Name(),
-						Namespace: namespace,
+						Namespace: p.namespace,
 					},
-					DstInstances: buildPolarisInstance(namespace, nodes),
+					DstInstances: buildPolarisInstance(p.namespace, nodes),
 				},
 			}
-			req.AddArguments(model.BuildCallerServiceArgument(namespace, appInfo.Name()))
+			req.AddArguments(model.BuildCallerServiceArgument(p.namespace, appInfo.Name()))
 
 			// process transport
 			if tr, ok := transport.FromServerContext(ctx); ok {

@@ -60,38 +60,38 @@ type Registry struct {
 	consumer polaris.ConsumerAPI
 }
 
-// WithServiceToken with ServiceToken option.
-func WithServiceToken(serviceToken string) RegistryOption {
+// WithRegistryServiceToken with ServiceToken option.
+func WithRegistryServiceToken(serviceToken string) RegistryOption {
 	return func(o *registryOptions) { o.ServiceToken = serviceToken }
 }
 
-// WithWeight with Weight option.
-func WithWeight(weight int) RegistryOption {
+// WithRegistryWeight with Weight option.
+func WithRegistryWeight(weight int) RegistryOption {
 	return func(o *registryOptions) { o.Weight = weight }
 }
 
-// WithHealthy with Healthy option.
-func WithHealthy(healthy bool) RegistryOption {
+// WithRegistryHealthy with Healthy option.
+func WithRegistryHealthy(healthy bool) RegistryOption {
 	return func(o *registryOptions) { o.Healthy = healthy }
 }
 
-// WithIsolate with Isolate option.
-func WithIsolate(isolate bool) RegistryOption {
+// WithRegistryIsolate with Isolate option.
+func WithRegistryIsolate(isolate bool) RegistryOption {
 	return func(o *registryOptions) { o.Isolate = isolate }
 }
 
-// WithTTL with TTL option.
-func WithTTL(TTL int) RegistryOption {
+// WithRegistryTTL with TTL option.
+func WithRegistryTTL(TTL int) RegistryOption {
 	return func(o *registryOptions) { o.TTL = TTL }
 }
 
-// WithTimeout with Timeout option.
-func WithTimeout(timeout time.Duration) RegistryOption {
+// WithRegistryTimeout with Timeout option.
+func WithRegistryTimeout(timeout time.Duration) RegistryOption {
 	return func(o *registryOptions) { o.Timeout = timeout }
 }
 
-// WithRetryCount with RetryCount option.
-func WithRetryCount(retryCount int) RegistryOption {
+// WithRegistryRetryCount with RetryCount option.
+func WithRegistryRetryCount(retryCount int) RegistryOption {
 	return func(o *registryOptions) { o.RetryCount = retryCount }
 }
 

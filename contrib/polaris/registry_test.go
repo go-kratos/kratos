@@ -20,12 +20,12 @@ func TestRegistry(t *testing.T) {
 	p := New(sdk)
 
 	r := p.Registry(
-		WithTimeout(time.Second),
-		WithHealthy(true),
-		WithIsolate(false),
-		WithRetryCount(3),
-		WithWeight(100),
-		WithTTL(1000),
+		WithRegistryTimeout(time.Second),
+		WithRegistryHealthy(true),
+		WithRegistryIsolate(false),
+		WithRegistryRetryCount(3),
+		WithRegistryWeight(100),
+		WithRegistryTTL(1000),
 	)
 
 	ins := &registry.ServiceInstance{
@@ -66,12 +66,12 @@ func TestWatch(t *testing.T) {
 	p := New(sdk)
 
 	r := p.Registry(
-		WithTimeout(time.Second),
-		WithHealthy(true),
-		WithIsolate(false),
-		WithRetryCount(3),
-		WithWeight(100),
-		WithTTL(1000),
+		WithRegistryTimeout(time.Second),
+		WithRegistryHealthy(true),
+		WithRegistryIsolate(false),
+		WithRegistryRetryCount(3),
+		WithRegistryWeight(100),
+		WithRegistryTTL(1000),
 	)
 
 	err = r.Register(context.Background(), &registry.ServiceInstance{

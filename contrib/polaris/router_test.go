@@ -122,12 +122,12 @@ func TestRouter(t *testing.T) {
 	p := New(sdk)
 
 	r := p.Registry(
-		WithTimeout(time.Second),
-		WithHealthy(true),
-		WithIsolate(false),
-		WithRetryCount(0),
-		WithWeight(100),
-		WithTTL(10),
+		WithRegistryTimeout(time.Second),
+		WithRegistryHealthy(true),
+		WithRegistryIsolate(false),
+		WithRegistryRetryCount(0),
+		WithRegistryWeight(100),
+		WithRegistryTTL(10),
 	)
 
 	ins := &registry.ServiceInstance{
@@ -169,7 +169,7 @@ func TestRouter(t *testing.T) {
 		}),
 	}
 
-	f := p.NodeFilter("default")
+	f := p.NodeFilter()
 	ctx := kratos.NewContext(context.Background(), &mockApp{})
 	n := f(ctx, nodes)
 	for _, node := range n {
