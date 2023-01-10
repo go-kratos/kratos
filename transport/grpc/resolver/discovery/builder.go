@@ -91,6 +91,7 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		cancel:           cancel,
 		insecure:         b.insecure,
 		debugLogDisabled: b.debugLogDisabled,
+		firstUpdateState: true,
 	}
 	go r.watch()
 	return r, nil
