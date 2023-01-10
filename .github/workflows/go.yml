@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        go: [1.16, 1.17, 1.18, 1.19]
+        go: [1.17,1.18,1.19]
     name: build & test
     runs-on: ubuntu-latest
     services:
@@ -36,7 +36,7 @@ jobs:
           - "8848:8848"
           - "9848:9848"
       polaris:
-        image: polarismesh/polaris-server-standalone:v1.9.0
+        image: polarismesh/polaris-server-standalone:v1.13.3
         ports:
           - 8090:8090
           - 8091:8091
@@ -44,9 +44,24 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
-        uses: actions/setup-go@v3.3.1
+        uses: actions/setup-go@v3.5.0
         with:
           go-version: ${{ matrix.go }}
+
+      - name: Setup Environment
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+      - name: Module cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go
 
       - name: Build
         run: go build ./...

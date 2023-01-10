@@ -18,10 +18,10 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/admin"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
-
 	"google.golang.org/grpc/reflection"
 )
 
@@ -127,6 +127,7 @@ type Server struct {
 	health       *health.Server
 	customHealth bool
 	metadata     *apimd.Server
+	adminClean   func()
 }
 
 // NewServer creates a gRPC server by options.
@@ -172,6 +173,8 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
 	reflection.Register(srv.Server)
+	// admin register
+	srv.adminClean, _ = admin.Register(srv.Server)
 	return srv
 }
 
@@ -208,6 +211,9 @@ func (s *Server) Start(ctx context.Context) error {
 
 // Stop stop the gRPC server.
 func (s *Server) Stop(ctx context.Context) error {
+	if s.adminClean != nil {
+		s.adminClean()
+	}
 	s.health.Shutdown()
 	s.GracefulStop()
 	log.Info("[gRPC] server stopping")
