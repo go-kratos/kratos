@@ -3,6 +3,7 @@ module github.com/go-kratos/kratos/contrib/polaris/v2
 go 1.18
 
 require (
+	github.com/go-kratos/aegis v0.1.2
 	github.com/go-kratos/kratos/v2 v2.5.3
 	github.com/google/uuid v1.3.0
 	github.com/polarismesh/polaris-go v1.3.0
@@ -39,12 +40,6 @@ require (
 	google.golang.org/grpc v1.46.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0 // indirect
-go 1.16
-
-require (
-	github.com/go-kratos/aegis v0.1.2
-	github.com/go-kratos/kratos/v2 v2.5.3
-	github.com/polarismesh/polaris-go v1.3.0
 )
 
 replace github.com/go-kratos/kratos/v2 => ../../
