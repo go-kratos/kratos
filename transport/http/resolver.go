@@ -7,10 +7,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-kratos/aegis/subset"
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
+	"github.com/google/uuid"
 )
 
 // Target is resolver target
@@ -42,22 +44,26 @@ func parseTarget(endpoint string, insecure bool) (*Target, error) {
 type resolver struct {
 	rebalancer selector.Rebalancer
 
-	target  *Target
-	watcher registry.Watcher
+	target      *Target
+	watcher     registry.Watcher
+	selecterKey string
+	subsetSize  int
 
 	insecure bool
 }
 
-func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, rebalancer selector.Rebalancer, block, insecure bool) (*resolver, error) {
+func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, rebalancer selector.Rebalancer, block, insecure bool, subsetSize int) (*resolver, error) {
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
 	}
 	r := &resolver{
-		target:     target,
-		watcher:    watcher,
-		rebalancer: rebalancer,
-		insecure:   insecure,
+		target:      target,
+		watcher:     watcher,
+		rebalancer:  rebalancer,
+		insecure:    insecure,
+		selecterKey: uuid.New().String(),
+		subsetSize:  subsetSize,
 	}
 	if block {
 		done := make(chan error, 1)
@@ -110,7 +116,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 }
 
 func (r *resolver) update(services []*registry.ServiceInstance) bool {
-	nodes := make([]selector.Node, 0)
+	var filtered []*registry.ServiceInstance
 	for _, ins := range services {
 		ept, err := endpoint.ParseEndpoint(ins.Endpoints, endpoint.Scheme("http", !r.insecure))
 		if err != nil {
@@ -120,8 +126,17 @@ func (r *resolver) update(services []*registry.ServiceInstance) bool {
 		if ept == "" {
 			continue
 		}
+		filtered = append(filtered, ins)
+	}
+	if r.subsetSize != 0 {
+		filtered = subset.Subset(r.selecterKey, filtered, r.subsetSize)
+	}
+	nodes := make([]selector.Node, 0)
+	for _, ins := range filtered {
+		ept, _ := endpoint.ParseEndpoint(ins.Endpoints, endpoint.Scheme("http", !r.insecure))
 		nodes = append(nodes, selector.NewNode("http", ept, ins))
 	}
+
 	if len(nodes) == 0 {
 		log.Warnf("[http resolver]Zero endpoint found,refused to write,set: %s ins: %v", r.target.Endpoint, nodes)
 		return false
