@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/google/uuid"
 
+	"github.com/google/uuid"
 	"google.golang.org/grpc/resolver"
 )
 

@@ -7,11 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/aegis/subset"
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
+
+	"github.com/go-kratos/aegis/subset"
 	"github.com/google/uuid"
 )
 
@@ -52,7 +53,8 @@ type resolver struct {
 	insecure bool
 }
 
-func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, rebalancer selector.Rebalancer, block, insecure bool, subsetSize int) (*resolver, error) {
+func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, rebalancer selector.Rebalancer,
+	block, insecure bool, subsetSize int) (*resolver, error) {
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
@@ -116,7 +118,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 }
 
 func (r *resolver) update(services []*registry.ServiceInstance) bool {
-	var filtered []*registry.ServiceInstance
+	filtered := make([]*registry.ServiceInstance, 0, len(services))
 	for _, ins := range services {
 		ept, err := endpoint.ParseEndpoint(ins.Endpoints, endpoint.Scheme("http", !r.insecure))
 		if err != nil {

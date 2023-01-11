@@ -6,10 +6,11 @@ import (
 	"errors"
 	"time"
 
-	"github.com/go-kratos/aegis/subset"
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
+
+	"github.com/go-kratos/aegis/subset"
 	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/resolver"
 )
@@ -50,7 +51,7 @@ func (r *discoveryResolver) watch() {
 func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	addrs := make([]resolver.Address, 0)
 	endpoints := make(map[string]struct{})
-	var filtered []*registry.ServiceInstance
+	filtered := make([]*registry.ServiceInstance, 0, len(ins))
 	for _, in := range ins {
 		ept, err := endpoint.ParseEndpoint(in.Endpoints, endpoint.Scheme("grpc", !r.insecure))
 		if err != nil {
