@@ -10,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/selector/node/ewma"
+
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
 	"github.com/go-kratos/kratos/v2/selector/filter"
@@ -85,7 +87,7 @@ func TestWrr3(t *testing.T) {
 
 func TestEmpty(t *testing.T) {
 	b := &Balancer{}
-	_, _, err := b.Pick(context.Background(), []selector.WeightedNode{})
+	_, _, err := b.Pick(context.Background(), []*ewma.Node{})
 	if err == nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}

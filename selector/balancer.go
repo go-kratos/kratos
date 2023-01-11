@@ -6,13 +6,13 @@ import (
 )
 
 // Balancer is balancer interface
-type Balancer interface {
-	Pick(ctx context.Context, nodes []WeightedNode) (selected WeightedNode, done DoneFunc, err error)
+type Balancer[W WeightedNode] interface {
+	Pick(ctx context.Context, nodes []W) (selected W, done DoneFunc, err error)
 }
 
 // BalancerBuilder build balancer
-type BalancerBuilder interface {
-	Build() Balancer
+type BalancerBuilder[W WeightedNode] interface {
+	Build() Balancer[W]
 }
 
 // WeightedNode calculates scheduling weight in real time
@@ -33,6 +33,6 @@ type WeightedNode interface {
 }
 
 // WeightedNodeBuilder is WeightedNode Builder
-type WeightedNodeBuilder interface {
-	Build(Node) WeightedNode
+type WeightedNodeBuilder[W WeightedNode] interface {
+	Build(Node) W
 }

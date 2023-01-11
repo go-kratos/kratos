@@ -22,8 +22,8 @@ const (
 )
 
 var (
-	_ selector.WeightedNode        = (*Node)(nil)
-	_ selector.WeightedNodeBuilder = (*Builder)(nil)
+	_ selector.WeightedNode               = (*Node)(nil)
+	_ selector.WeightedNodeBuilder[*Node] = (*Builder)(nil)
 )
 
 // Node is endpoint instance
@@ -54,7 +54,7 @@ type Builder struct {
 }
 
 // Build create a weighted node.
-func (b *Builder) Build(n selector.Node) selector.WeightedNode {
+func (b *Builder) Build(n selector.Node) *Node {
 	s := &Node{
 		Node:       n,
 		lag:        0,

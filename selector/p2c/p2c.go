@@ -17,7 +17,7 @@ const (
 	Name = "p2c"
 )
 
-var _ selector.Balancer = (*Balancer)(nil)
+var _ selector.Balancer[*ewma.Node] = (*Balancer)(nil)
 
 // Option is random builder option.
 type Option func(o *options)
@@ -38,7 +38,7 @@ type Balancer struct {
 }
 
 // choose two distinct nodes.
-func (s *Balancer) prePick(nodes []selector.WeightedNode) (nodeA selector.WeightedNode, nodeB selector.WeightedNode) {
+func (s *Balancer) prePick(nodes []*ewma.Node) (nodeA *ewma.Node, nodeB *ewma.Node) {
 	s.mu.Lock()
 	a := s.r.Intn(len(nodes))
 	b := s.r.Intn(len(nodes) - 1)
@@ -51,7 +51,7 @@ func (s *Balancer) prePick(nodes []selector.WeightedNode) (nodeA selector.Weight
 }
 
 // Pick pick a node.
-func (s *Balancer) Pick(ctx context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.DoneFunc, error) {
+func (s *Balancer) Pick(ctx context.Context, nodes []*ewma.Node) (*ewma.Node, selector.DoneFunc, error) {
 	if len(nodes) == 0 {
 		return nil, nil, selector.ErrNoAvailable
 	}
@@ -60,7 +60,7 @@ func (s *Balancer) Pick(ctx context.Context, nodes []selector.WeightedNode) (sel
 		return nodes[0], done, nil
 	}
 
-	var pc, upc selector.WeightedNode
+	var pc, upc *ewma.Node
 	nodeA, nodeB := s.prePick(nodes)
 	// meta.Weight is the weight set by the service publisher in discovery
 	if nodeB.Weight() > nodeA.Weight() {
@@ -85,7 +85,7 @@ func NewBuilder(opts ...Option) selector.Builder {
 	for _, opt := range opts {
 		opt(&option)
 	}
-	return &selector.DefaultBuilder{
+	return &selector.DefaultBuilder[*ewma.Node]{
 		Balancer: &Builder{},
 		Node:     &ewma.Builder{},
 	}
@@ -95,6 +95,6 @@ func NewBuilder(opts ...Option) selector.Builder {
 type Builder struct{}
 
 // Build creates Balancer
-func (b *Builder) Build() selector.Balancer {
+func (b *Builder) Build() selector.Balancer[*ewma.Node] {
 	return &Balancer{r: rand.New(rand.NewSource(time.Now().UnixNano()))}
 }

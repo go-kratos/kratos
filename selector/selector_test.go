@@ -5,51 +5,12 @@ import (
 	"errors"
 	"math/rand"
 	"reflect"
-	"sync/atomic"
 	"testing"
-	"time"
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
 var errNodeNotMatch = errors.New("node is not match")
-
-type mockWeightedNode struct {
-	Node
-
-	lastPick int64
-}
-
-// Raw returns the original node
-func (n *mockWeightedNode) Raw() Node {
-	return n.Node
-}
-
-// Weight is the runtime calculated weight
-func (n *mockWeightedNode) Weight() float64 {
-	if n.InitialWeight() != nil {
-		return float64(*n.InitialWeight())
-	}
-	return 100
-}
-
-// Pick the node
-func (n *mockWeightedNode) Pick() DoneFunc {
-	now := time.Now().UnixNano()
-	atomic.StoreInt64(&n.lastPick, now)
-	return func(ctx context.Context, di DoneInfo) {}
-}
-
-// PickElapsed is time elapsed since the latest pick
-func (n *mockWeightedNode) PickElapsed() time.Duration {
-	return time.Duration(time.Now().UnixNano() - atomic.LoadInt64(&n.lastPick))
-}
-
-type mockWeightedNodeBuilder struct{}
-
-func (b *mockWeightedNodeBuilder) Build(n Node) WeightedNode {
-	return &mockWeightedNode{Node: n}
-}
 
 func mockFilter(version string) NodeFilter {
 	return func(_ context.Context, nodes []Node) []Node {
@@ -63,15 +24,16 @@ func mockFilter(version string) NodeFilter {
 	}
 }
 
-type mockBalancerBuilder struct{}
-
-func (b *mockBalancerBuilder) Build() Balancer {
-	return &mockBalancer{}
+type mockBalancerBuilder[W WeightedNode] struct {
 }
 
-type mockBalancer struct{}
+func (b *mockBalancerBuilder[W]) Build() Balancer[W] {
+	return &mockBalancer[W]{}
+}
 
-func (b *mockBalancer) Pick(ctx context.Context, nodes []WeightedNode) (selected WeightedNode, done DoneFunc, err error) {
+type mockBalancer[W WeightedNode] struct{}
+
+func (b *mockBalancer[W]) Pick(ctx context.Context, nodes []W) (selected W, done DoneFunc, err error) {
 	if len(nodes) == 0 {
 		err = ErrNoAvailable
 		return
@@ -82,22 +44,23 @@ func (b *mockBalancer) Pick(ctx context.Context, nodes []WeightedNode) (selected
 	return
 }
 
-type mockMustErrorBalancerBuilder struct{}
+type mockMustErrorBalancerBuilder[W WeightedNode] struct{}
 
-func (b *mockMustErrorBalancerBuilder) Build() Balancer {
-	return &mockMustErrorBalancer{}
+func (b *mockMustErrorBalancerBuilder[W]) Build() Balancer[W] {
+	return &mockMustErrorBalancer[W]{}
 }
 
-type mockMustErrorBalancer struct{}
+type mockMustErrorBalancer[W WeightedNode] struct{}
 
-func (b *mockMustErrorBalancer) Pick(ctx context.Context, nodes []WeightedNode) (selected WeightedNode, done DoneFunc, err error) {
-	return nil, nil, errNodeNotMatch
+func (b *mockMustErrorBalancer[W]) Pick(ctx context.Context, nodes []W) (selected W, done DoneFunc, err error) {
+	var zero W
+	return zero, nil, errNodeNotMatch
 }
 
 func TestDefault(t *testing.T) {
-	builder := DefaultBuilder{
+	builder := DefaultBuilder[*mockWeightedNode]{
 		Node:     &mockWeightedNodeBuilder{},
-		Balancer: &mockBalancerBuilder{},
+		Balancer: &mockBalancerBuilder[*mockWeightedNode]{},
 	}
 	selector := builder.Build()
 	var nodes []Node
@@ -220,9 +183,9 @@ func TestDefault(t *testing.T) {
 }
 
 func TestWithoutApply(t *testing.T) {
-	builder := DefaultBuilder{
+	builder := DefaultBuilder[*mockWeightedNode]{
 		Node:     &mockWeightedNodeBuilder{},
-		Balancer: &mockBalancerBuilder{},
+		Balancer: &mockBalancerBuilder[*mockWeightedNode]{},
 	}
 	selector := builder.Build()
 	n, done, err := selector.Select(context.Background())
@@ -238,9 +201,9 @@ func TestWithoutApply(t *testing.T) {
 }
 
 func TestNoPick(t *testing.T) {
-	builder := DefaultBuilder{
+	builder := DefaultBuilder[*mockWeightedNode]{
 		Node:     &mockWeightedNodeBuilder{},
-		Balancer: &mockMustErrorBalancerBuilder{},
+		Balancer: &mockMustErrorBalancerBuilder[*mockWeightedNode]{},
 	}
 	var nodes []Node
 	nodes = append(nodes, NewNode(
@@ -278,9 +241,9 @@ func TestNoPick(t *testing.T) {
 }
 
 func TestGlobalSelector(t *testing.T) {
-	builder := DefaultBuilder{
+	builder := DefaultBuilder[*mockWeightedNode]{
 		Node:     &mockWeightedNodeBuilder{},
-		Balancer: &mockBalancerBuilder{},
+		Balancer: &mockBalancerBuilder[*mockWeightedNode]{},
 	}
 	SetGlobalSelector(&builder)
 

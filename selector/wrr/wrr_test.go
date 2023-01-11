@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/go-kratos/kratos/v2/selector/node/direct"
+
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
 	"github.com/go-kratos/kratos/v2/selector/filter"
@@ -59,7 +61,7 @@ func TestWrr(t *testing.T) {
 
 func TestEmpty(t *testing.T) {
 	b := &Balancer{}
-	_, _, err := b.Pick(context.Background(), []selector.WeightedNode{})
+	_, _, err := b.Pick(context.Background(), []*direct.Node{})
 	if err == nil {
 		t.Errorf("expect no error, got %v", err)
 	}
