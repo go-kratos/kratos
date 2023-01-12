@@ -101,7 +101,7 @@ func TestWatch(t *testing.T) {
 	}
 
 	err = r.Register(context.Background(), &registry.ServiceInstance{
-		ID:      "test-ut",
+		ID:      "test-ut2",
 		Name:    "test-ut",
 		Version: "v1.0.0",
 		Endpoints: []string{
