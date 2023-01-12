@@ -57,9 +57,9 @@ func WithContext(ctx context.Context, l Logger) Logger {
 	if !ok {
 		f, ok := l.(*Filter)
 		if ok {
-			c, ok := f.logger.(*logger)
+			lg, ok := f.logger.(*logger)
 			if ok {
-				return &logger{logger: c.logger, prefix: c.prefix, hasValuer: c.hasValuer, ctx: ctx}
+				return &logger{logger: lg.logger, prefix: lg.prefix, hasValuer: lg.hasValuer, ctx: ctx}
 			}
 		}
 		return &logger{logger: l, ctx: ctx}

@@ -13,5 +13,11 @@ func TestInfo(t *testing.T) {
 }
 
 func TestWithContext(t *testing.T) {
-	WithContext(context.Background(), nil)
+	WithContext(context.Background(), &Filter{
+		logger: DefaultLogger,
+		level:  LevelWarn,
+		key:    nil,
+		value:  nil,
+		filter: nil,
+	})
 }
