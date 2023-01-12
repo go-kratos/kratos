@@ -86,7 +86,7 @@ func TestWrr3(t *testing.T) {
 }
 
 func TestEmpty(t *testing.T) {
-	b := &Balancer{}
+	b := &Balancer[*ewma.Node]{}
 	_, _, err := b.Pick(context.Background(), []*ewma.Node{})
 	if err == nil {
 		t.Errorf("expect %v, got %v", nil, err)

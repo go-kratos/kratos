@@ -65,7 +65,7 @@ func TestWrr(t *testing.T) {
 }
 
 func TestEmpty(t *testing.T) {
-	b := &Balancer{}
+	b := &Balancer[*direct.Node]{}
 	_, _, err := b.Pick(context.Background(), []*direct.Node{})
 	if err == nil {
 		t.Errorf("expect nil, got %v", err)

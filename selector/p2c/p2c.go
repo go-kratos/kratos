@@ -17,7 +17,7 @@ const (
 	Name = "p2c"
 )
 
-var _ selector.Balancer[*ewma.Node] = (*Balancer)(nil)
+var _ selector.Balancer[*ewma.Node] = (*Balancer[*ewma.Node])(nil)
 
 // Option is random builder option.
 type Option func(o *options)
@@ -31,14 +31,14 @@ func New(opts ...Option) selector.Selector {
 }
 
 // Balancer is p2c selector.
-type Balancer struct {
+type Balancer[W selector.WeightedNode] struct {
 	mu     sync.Mutex
 	r      *rand.Rand
 	picked int64
 }
 
 // choose two distinct nodes.
-func (s *Balancer) prePick(nodes []*ewma.Node) (nodeA *ewma.Node, nodeB *ewma.Node) {
+func (s *Balancer[W]) prePick(nodes []W) (nodeA W, nodeB W) {
 	s.mu.Lock()
 	a := s.r.Intn(len(nodes))
 	b := s.r.Intn(len(nodes) - 1)
@@ -51,16 +51,17 @@ func (s *Balancer) prePick(nodes []*ewma.Node) (nodeA *ewma.Node, nodeB *ewma.No
 }
 
 // Pick pick a node.
-func (s *Balancer) Pick(ctx context.Context, nodes []*ewma.Node) (*ewma.Node, selector.DoneFunc, error) {
+func (s *Balancer[W]) Pick(ctx context.Context, nodes []W) (W, selector.DoneFunc, error) {
 	if len(nodes) == 0 {
-		return nil, nil, selector.ErrNoAvailable
+		var zero W
+		return zero, nil, selector.ErrNoAvailable
 	}
 	if len(nodes) == 1 {
 		done := nodes[0].Pick()
 		return nodes[0], done, nil
 	}
 
-	var pc, upc *ewma.Node
+	var pc, upc W
 	nodeA, nodeB := s.prePick(nodes)
 	// meta.Weight is the weight set by the service publisher in discovery
 	if nodeB.Weight() > nodeA.Weight() {
@@ -81,20 +82,24 @@ func (s *Balancer) Pick(ctx context.Context, nodes []*ewma.Node) (*ewma.Node, se
 
 // NewBuilder returns a selector builder with p2c balancer
 func NewBuilder(opts ...Option) selector.Builder {
+	return NewWithBuilder[*ewma.Node](&ewma.Builder{}, opts...)
+}
+
+func NewWithBuilder[W selector.WeightedNode](weightedNodeBuilder selector.WeightedNodeBuilder[W], opts ...Option) selector.Builder {
 	var option options
 	for _, opt := range opts {
 		opt(&option)
 	}
-	return &selector.DefaultBuilder[*ewma.Node]{
-		Balancer: &Builder{},
-		Node:     &ewma.Builder{},
+	return &selector.DefaultBuilder[W]{
+		Balancer: &Builder[W]{},
+		Node:     weightedNodeBuilder,
 	}
 }
 
 // Builder is p2c builder
-type Builder struct{}
+type Builder[W selector.WeightedNode] struct{}
 
 // Build creates Balancer
-func (b *Builder) Build() selector.Balancer[*ewma.Node] {
-	return &Balancer{r: rand.New(rand.NewSource(time.Now().UnixNano()))}
+func (b *Builder[W]) Build() selector.Balancer[W] {
+	return &Balancer[W]{r: rand.New(rand.NewSource(time.Now().UnixNano()))}
 }

@@ -13,7 +13,7 @@ const (
 	Name = "wrr"
 )
 
-var _ selector.Balancer[*direct.Node] = (*Balancer)(nil) // Name is balancer name
+var _ selector.Balancer[*direct.Node] = (*Balancer[*direct.Node])(nil) // Name is balancer name
 
 // Option is random builder option.
 type Option func(o *options)
@@ -22,7 +22,7 @@ type Option func(o *options)
 type options struct{}
 
 // Balancer is a random balancer.
-type Balancer struct {
+type Balancer[W selector.WeightedNode] struct {
 	mu            sync.Mutex
 	currentWeight map[string]float64
 }
@@ -33,12 +33,13 @@ func New(opts ...Option) selector.Selector {
 }
 
 // Pick is pick a weighted node.
-func (p *Balancer) Pick(_ context.Context, nodes []*direct.Node) (*direct.Node, selector.DoneFunc, error) {
+func (p *Balancer[W]) Pick(_ context.Context, nodes []W) (W, selector.DoneFunc, error) {
 	if len(nodes) == 0 {
-		return nil, nil, selector.ErrNoAvailable
+		var zero W
+		return zero, nil, selector.ErrNoAvailable
 	}
 	var totalWeight float64
-	var selected *direct.Node
+	var selected W
 	var selectWeight float64
 
 	// nginx wrr load balancing algorithm: http://blog.csdn.net/zhangskd/article/details/50194069
@@ -49,7 +50,7 @@ func (p *Balancer) Pick(_ context.Context, nodes []*direct.Node) (*direct.Node, 
 		// current += effectiveWeight
 		cwt += node.Weight()
 		p.currentWeight[node.Address()] = cwt
-		if selected == nil || selectWeight < cwt {
+		if selector.IsNil(selected) || selectWeight < cwt {
 			selectWeight = cwt
 			selected = node
 		}
@@ -63,20 +64,24 @@ func (p *Balancer) Pick(_ context.Context, nodes []*direct.Node) (*direct.Node, 
 
 // NewBuilder returns a selector builder with wrr balancer
 func NewBuilder(opts ...Option) selector.Builder {
+	return NewWithBuilder[*direct.Node](&direct.Builder{}, opts...)
+}
+
+func NewWithBuilder[W selector.WeightedNode](weightedNodeBuilder selector.WeightedNodeBuilder[W], opts ...Option) selector.Builder {
 	var option options
 	for _, opt := range opts {
 		opt(&option)
 	}
-	return &selector.DefaultBuilder[*direct.Node]{
-		Balancer: &Builder{},
-		Node:     &direct.Builder{},
+	return &selector.DefaultBuilder[W]{
+		Balancer: &Builder[W]{},
+		Node:     weightedNodeBuilder,
 	}
 }
 
 // Builder is wrr builder
-type Builder struct{}
+type Builder[W selector.WeightedNode] struct{}
 
 // Build creates Balancer
-func (b *Builder) Build() selector.Balancer[*direct.Node] {
-	return &Balancer{currentWeight: make(map[string]float64)}
+func (b *Builder[W]) Build() selector.Balancer[W] {
+	return &Balancer[W]{currentWeight: make(map[string]float64)}
 }
