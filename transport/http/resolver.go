@@ -53,9 +53,10 @@ type resolver struct {
 	insecure bool
 }
 
-func newResolver(ctx context.Context, discovery registry.Discovery, target *Target, rebalancer selector.Rebalancer,
-	block, insecure bool, subsetSize int,
+func newResolver(ctx context.Context, discovery registry.Discovery, target *Target,
+	rebalancer selector.Rebalancer, block, insecure bool, subsetSize int,
 ) (*resolver, error) {
+	// this is new resovler
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
