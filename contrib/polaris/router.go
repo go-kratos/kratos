@@ -99,8 +99,10 @@ func (p *Polaris) NodeFilter(opts ...RouterOption) selector.NodeFilter {
 				newNode = append(newNode, v)
 			}
 		}
+		if len(newNode) == 0 {
+			return nodes
+		}
 		return newNode
-		return nodes
 	}
 }
 
