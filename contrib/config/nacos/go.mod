@@ -7,9 +7,7 @@ require (
 	github.com/nacos-group/nacos-sdk-go v1.0.9
 )
 
-require (
-	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
+require gopkg.in/yaml.v3 v3.0.1 // indirect
 
 replace github.com/go-kratos/kratos/v2 => ../../../
 

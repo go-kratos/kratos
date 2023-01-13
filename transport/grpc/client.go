@@ -39,6 +39,14 @@ func WithEndpoint(endpoint string) ClientOption {
 	}
 }
 
+// WithSubset with client disocvery subset size.
+// zero value means subset filter disabled
+func WithSubset(size int) ClientOption {
+	return func(o *clientOptions) {
+		o.subsetSize = size
+	}
+}
+
 // WithTimeout with client timeout.
 func WithTimeout(timeout time.Duration) ClientOption {
 	return func(o *clientOptions) {
@@ -97,6 +105,7 @@ func WithLogger(log log.Logger) ClientOption {
 // clientOptions is gRPC Client
 type clientOptions struct {
 	endpoint     string
+	subsetSize   int
 	tlsConf      *tls.Config
 	timeout      time.Duration
 	discovery    registry.Discovery
@@ -121,6 +130,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	options := clientOptions{
 		timeout:      2000 * time.Millisecond,
 		balancerName: balancerName,
+		subsetSize:   25,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -141,6 +151,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 				discovery.NewBuilder(
 					options.discovery,
 					discovery.WithInsecure(insecure),
+					discovery.WithSubset(options.subsetSize),
 				)))
 	}
 	if insecure {

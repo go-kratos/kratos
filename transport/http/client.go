@@ -53,6 +53,15 @@ type clientOptions struct {
 	discovery    registry.Discovery
 	middleware   []middleware.Middleware
 	block        bool
+	subsetSize   int
+}
+
+// WithSubset with client disocvery subset size.
+// zero value means subset filter disabled
+func WithSubset(size int) ClientOption {
+	return func(o *clientOptions) {
+		o.subsetSize = size
+	}
 }
 
 // WithTransport with client transport.
@@ -158,6 +167,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		decoder:      DefaultResponseDecoder,
 		errorDecoder: DefaultErrorDecoder,
 		transport:    http.DefaultTransport,
+		subsetSize:   25,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -176,7 +186,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	var r *resolver
 	if options.discovery != nil {
 		if target.Scheme == "discovery" {
-			if r, err = newResolver(ctx, options.discovery, target, selector, options.block, insecure); err != nil {
+			if r, err = newResolver(ctx, options.discovery, target, selector, options.block, insecure, options.subsetSize); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
 		} else if _, _, err := host.ExtractHostPort(options.endpoint); err != nil {

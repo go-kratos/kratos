@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/registry"
 
+	"github.com/google/uuid"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -30,6 +31,13 @@ func WithInsecure(insecure bool) Option {
 	}
 }
 
+// WithInsecure with isSecure option.
+func WithSubset(size int) Option {
+	return func(b *builder) {
+		b.subsetSize = size
+	}
+}
+
 // DisableDebugLog disables update instances log.
 func DisableDebugLog() Option {
 	return func(b *builder) {
@@ -41,6 +49,7 @@ type builder struct {
 	discoverer       registry.Discovery
 	timeout          time.Duration
 	insecure         bool
+	subsetSize       int
 	debugLogDisabled bool
 }
 
@@ -51,6 +60,7 @@ func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 		timeout:          time.Second * 10,
 		insecure:         false,
 		debugLogDisabled: false,
+		subsetSize:       25,
 	}
 	for _, o := range opts {
 		o(b)
@@ -84,6 +94,7 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		cancel()
 		return nil, err
 	}
+
 	r := &discoveryResolver{
 		w:                watchRes.w,
 		cc:               cc,
@@ -91,6 +102,8 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		cancel:           cancel,
 		insecure:         b.insecure,
 		debugLogDisabled: b.debugLogDisabled,
+		subsetSize:       b.subsetSize,
+		selecterKey:      uuid.New().String(),
 	}
 	go r.watch()
 	return r, nil
