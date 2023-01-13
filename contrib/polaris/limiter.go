@@ -6,16 +6,15 @@ import (
 	"github.com/go-kratos/aegis/ratelimit"
 
 	"github.com/polarismesh/polaris-go"
-	"github.com/polarismesh/polaris-go/api"
 	"github.com/polarismesh/polaris-go/pkg/model"
 )
 
 type (
 	// LimiterOption function for polaris limiter
-	LimiterOption func(*options)
+	LimiterOption func(*limiterOptions)
 )
 
-type options struct {
+type limiterOptions struct {
 	// required, polaris limit namespace
 	namespace string
 
@@ -36,35 +35,35 @@ type options struct {
 
 // WithLimiterNamespace with limiter namespace.
 func WithLimiterNamespace(namespace string) LimiterOption {
-	return func(o *options) {
+	return func(o *limiterOptions) {
 		o.namespace = namespace
 	}
 }
 
 // WithLimiterService with limiter service.
 func WithLimiterService(service string) LimiterOption {
-	return func(o *options) {
+	return func(o *limiterOptions) {
 		o.service = service
 	}
 }
 
 // WithLimiterTimeout with limiter arguments.
 func WithLimiterTimeout(timeout time.Duration) LimiterOption {
-	return func(o *options) {
+	return func(o *limiterOptions) {
 		o.timeout = timeout
 	}
 }
 
 // WithLimiterRetryCount with limiter retryCount.
 func WithLimiterRetryCount(retryCount int) LimiterOption {
-	return func(o *options) {
+	return func(o *limiterOptions) {
 		o.retryCount = retryCount
 	}
 }
 
 // WithLimiterToken with limiter token.
 func WithLimiterToken(token uint32) LimiterOption {
-	return func(o *options) {
+	return func(o *limiterOptions) {
 		o.token = token
 	}
 }
@@ -73,11 +72,11 @@ type Limiter struct {
 	// polaris limit api
 	limitAPI polaris.LimitAPI
 
-	opts options
+	opts limiterOptions
 }
 
 // init quotaRequest
-func buildRequest(opts options) polaris.QuotaRequest {
+func buildRequest(opts limiterOptions) polaris.QuotaRequest {
 	quotaRequest := polaris.NewQuotaRequest()
 	quotaRequest.SetNamespace(opts.namespace)
 	quotaRequest.SetRetryCount(opts.retryCount)
@@ -85,24 +84,6 @@ func buildRequest(opts options) polaris.QuotaRequest {
 	quotaRequest.SetTimeout(opts.timeout)
 	quotaRequest.SetToken(opts.token)
 	return quotaRequest
-}
-
-// NewLimiter New a Polaris limiter impl.
-func NewLimiter(sdk api.SDKContext, opts ...LimiterOption) *Limiter {
-	opt := options{
-		namespace:  "default",
-		service:    "",
-		retryCount: 3,
-		timeout:    3 * time.Second,
-		token:      1,
-	}
-	for _, o := range opts {
-		o(&opt)
-	}
-	return &Limiter{
-		limitAPI: New(sdk, WithNamespace(opt.namespace)).limit,
-		opts:     opt,
-	}
 }
 
 // Allow interface impl
@@ -114,7 +95,8 @@ func (l *Limiter) Allow(method string, argument ...model.Argument) (ratelimit.Do
 	}
 	resp, err := l.limitAPI.GetQuota(request)
 	if err != nil {
-		return nil, err
+		// ignore err
+		return func(ratelimit.DoneInfo) {}, nil
 	}
 	if resp.Get().Code == model.QuotaResultOk {
 		return func(ratelimit.DoneInfo) {}, nil
