@@ -27,7 +27,13 @@ func kratosHome() string {
 }
 
 func kratosHomeWithDir(dir string) string {
-	home := path.Join(kratosHome(), dir)
+	var home string
+	kHome := os.Getenv("KRATOS_HOME")
+	if kHome == "" {
+		home = path.Join(kratosHome(), dir)
+	} else {
+		home = path.Join(kHome, dir)
+	}
 	if _, err := os.Stat(home); os.IsNotExist(err) {
 		if err := os.MkdirAll(home, 0o700); err != nil {
 			log.Fatal(err)
