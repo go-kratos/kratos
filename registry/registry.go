@@ -2,6 +2,7 @@ package registry
 
 import (
 	"context"
+	"fmt"
 	"sort"
 )
 
@@ -47,6 +48,10 @@ type ServiceInstance struct {
 	//   http://127.0.0.1:8000?isSecure=false
 	//   grpc://127.0.0.1:9000?isSecure=false
 	Endpoints []string `json:"endpoints"`
+}
+
+func (i *ServiceInstance) String() string {
+	return fmt.Sprintf("%s-%s", i.Name, i.ID)
 }
 
 // Equal returns whether i and o are equivalent.

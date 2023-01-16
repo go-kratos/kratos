@@ -8,7 +8,7 @@ import (
 	"github.com/go-kratos/kratos/v2/internal/testdata/binding"
 )
 
-func TestProtoPath(t *testing.T) {
+func TestEncodeURL(t *testing.T) {
 	tests := []struct {
 		pathTemplate string
 		request      *binding.HelloRequest

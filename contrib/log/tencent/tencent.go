@@ -103,6 +103,7 @@ func NewLogger(options ...Option) (Logger, error) {
 	if err != nil {
 		return nil, err
 	}
+	producerInst.Start()
 	return &tencentLog{
 		producer: producerInst,
 		opts:     opts,
