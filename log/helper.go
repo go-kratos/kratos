@@ -59,8 +59,10 @@ func NewHelper(logger Logger, opts ...Option) *Helper {
 // to ctx. The provided ctx must be non-nil.
 func (h *Helper) WithContext(ctx context.Context) *Helper {
 	return &Helper{
-		msgKey: h.msgKey,
-		logger: WithContext(ctx, h.logger),
+		msgKey:  h.msgKey,
+		logger:  WithContext(ctx, h.logger),
+		sprint:  h.sprint,
+		sprintf: h.sprintf,
 	}
 }
 
