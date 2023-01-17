@@ -24,21 +24,19 @@ type customChangeListener struct {
 }
 
 func (c *customChangeListener) onChange(namespace string, changes map[string]*storage.ConfigChange) []*config.KeyValue {
-	kv := make([]*config.KeyValue, 0, 2)
-	if strings.Contains(namespace, ".") && !strings.HasSuffix(namespace, "."+properties) &&
-		(format(namespace) == yaml || format(namespace) == yml || format(namespace) == json) {
+	if strings.Contains(namespace, ".") && !strings.HasSuffix(namespace, "."+properties) && isOriginConfig(namespace) {
 		value, err := c.apollo.client.GetConfigCache(namespace).Get("content")
 		if err != nil {
 			log.Warnw("apollo get config failed", "err", err)
 			return nil
 		}
-		kv = append(kv, &config.KeyValue{
-			Key:    namespace,
-			Value:  []byte(value.(string)),
-			Format: format(namespace),
-		})
-
-		return kv
+		return []*config.KeyValue{
+			{
+				Key:    namespace,
+				Value:  []byte(value.(string)),
+				Format: format(namespace),
+			},
+		}
 	}
 
 	next := make(map[string]interface{})
@@ -48,19 +46,18 @@ func (c *customChangeListener) onChange(namespace string, changes map[string]*st
 	}
 
 	f := format(namespace)
-	codec := encoding.GetCodec(f)
-	val, err := codec.Marshal(next)
+	val, err := encoding.GetCodec(f).Marshal(next)
 	if err != nil {
 		log.Warnf("apollo could not handle namespace %s: %v", namespace, err)
 		return nil
 	}
-	kv = append(kv, &config.KeyValue{
-		Key:    namespace,
-		Value:  val,
-		Format: f,
-	})
-
-	return kv
+	return []*config.KeyValue{
+		{
+			Key:    namespace,
+			Value:  val,
+			Format: f,
+		},
+	}
 }
 
 func (c *customChangeListener) OnChange(changeEvent *storage.ChangeEvent) {

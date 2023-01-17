@@ -150,6 +150,11 @@ func format(ns string) string {
 	return suffix
 }
 
+func isOriginConfig(ns string) bool {
+	f := format(ns)
+	return f == yaml || f == yml || f == json
+}
+
 func (e *apollo) load() []*config.KeyValue {
 	var (
 		kvs        = make([]*config.KeyValue, 0)
@@ -166,8 +171,7 @@ func (e *apollo) load() []*config.KeyValue {
 			kvs = append(kvs, kv)
 			continue
 		}
-		if strings.Contains(ns, ".") && !strings.HasSuffix(ns, "."+properties) &&
-			(format(ns) == yaml || format(ns) == yml || format(ns) == json) {
+		if strings.Contains(ns, ".") && !strings.HasSuffix(ns, "."+properties) && isOriginConfig(ns) {
 			kv, err := e.getOriginConfig(ns)
 			if err != nil {
 				log.Errorf("apollo get config failed，err:%v", err)
