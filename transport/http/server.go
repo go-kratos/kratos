@@ -127,7 +127,7 @@ func Listener(lis net.Listener) ServerOption {
 	}
 }
 
-// PathPrefix with mux's PathPrefix, router will be replaced by a subroutine that start with prefix.
+// PathPrefix with mux's PathPrefix, router will replaced by a subrouter that start with prefix.
 func PathPrefix(prefix string) ServerOption {
 	return func(s *Server) {
 		s.router = s.router.PathPrefix(prefix).Subrouter()
