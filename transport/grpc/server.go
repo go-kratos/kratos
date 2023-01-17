@@ -184,7 +184,7 @@ func (s *Server) Start(ctx context.Context) error {
 		return s.err
 	}
 	s.baseCtx = ctx
-	s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
+	s.log.Context(ctx).Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
 	s.health.Resume()
 	return s.Serve(s.lis)
 }
@@ -193,7 +193,7 @@ func (s *Server) Start(ctx context.Context) error {
 func (s *Server) Stop(ctx context.Context) error {
 	s.health.Shutdown()
 	s.GracefulStop()
-	s.log.Info("[gRPC] server stopping")
+	s.log.Context(ctx).Info("[gRPC] server stopping")
 	return nil
 }
 
