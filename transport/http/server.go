@@ -239,7 +239,7 @@ func (s *Server) Start(ctx context.Context) error {
 	s.BaseContext = func(net.Listener) context.Context {
 		return ctx
 	}
-	s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
+	s.log.Context(ctx).Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
 	var err error
 	if s.tlsConf != nil {
 		err = s.ServeTLS(s.lis, "", "")
@@ -254,7 +254,7 @@ func (s *Server) Start(ctx context.Context) error {
 
 // Stop stop the HTTP server.
 func (s *Server) Stop(ctx context.Context) error {
-	s.log.Info("[HTTP] server stopping")
+	s.log.Context(ctx).Info("[HTTP] server stopping")
 	return s.Shutdown(ctx)
 }
 
