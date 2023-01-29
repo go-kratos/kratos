@@ -64,3 +64,27 @@ func WithContext(ctx context.Context, l Logger) Logger {
 		ctx:       ctx,
 	}
 }
+
+type loggerKey struct{}
+
+// NewContext returns a new Context that carries logger.
+func NewContext(ctx context.Context, logger Logger) context.Context {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	return context.WithValue(ctx, loggerKey{}, logger)
+}
+
+// FromContext returns the logger value stored in ctx, if not exist, return global logger.
+func FromContext(ctx context.Context) Logger {
+	if ctx == nil {
+		return global
+	}
+
+	if logger, ok := ctx.Value(loggerKey{}).(Logger); ok {
+		return logger
+	}
+
+	return global
+}
