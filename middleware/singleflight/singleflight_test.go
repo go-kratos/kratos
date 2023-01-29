@@ -2,14 +2,12 @@ package singleflight
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"sync"
 	"testing"
 	"time"
-	"xiaozhu/pkg/convert"
-
-	"github.com/go-kratos/kratos/v2/middleware"
 )
 
 type testVali struct {
@@ -90,7 +88,7 @@ func TestNoUse(t *testing.T) {
 		callNum++
 		mu.Unlock()
 		time.Sleep(1*time.Second)
-		return convert.ToInt(in.in), nil
+		return in.out, nil
 	}
 
 	tests := []testVali{
