@@ -13,22 +13,22 @@ var singleflightGroup singleflight.Group
 
 // 单飞 middleware.
 /*
-	//只在grpc服务端下使用，通过传入op名称，使用单飞：
+	//服务端下使用，通过传入op名称，使用单飞：
 	singleflight.SingleFlight(
 			"/service.test1/GetCityName",
 			"/service.test2/GetAllCityName",
 			)
 */
-func SingleFlight(ops... string) middleware.Middleware {
+func SingleFlight(ops ...string) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if tr, ok := transport.FromServerContext(ctx); ok {
-				if Contains(ops,tr.Operation()){
-					cacheKey:=fmt.Sprintf("%s %s",tr.Operation(),req)
+				if Contains(ops, tr.Operation()) {
+					cacheKey := fmt.Sprintf("%s %s", tr.Operation(), req)
 					reply, err, _ = singleflightGroup.Do(cacheKey, func() (interface{}, error) {
 						return handler(ctx, req)
 					})
-					return reply,err
+					return reply, err
 				}
 			}
 			return handler(ctx, req)
