@@ -31,7 +31,7 @@ func WithInsecure(insecure bool) Option {
 	}
 }
 
-// WithInsecure with isSecure option.
+// WithSubset with subset size.
 func WithSubset(size int) Option {
 	return func(b *builder) {
 		b.subsetSize = size
