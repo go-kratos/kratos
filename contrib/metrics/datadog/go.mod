@@ -7,8 +7,6 @@ require (
 	github.com/go-kratos/kratos/v2 v2.5.3
 )
 
-require (
-	github.com/Microsoft/go-winio v0.5.2 // indirect
-)
+require github.com/Microsoft/go-winio v0.5.2 // indirect
 
 replace github.com/go-kratos/kratos/v2 => ../../../
