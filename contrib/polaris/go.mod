@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/contrib/polaris/v2
 go 1.18
 
 require (
-	github.com/go-kratos/aegis v0.1.2
+	github.com/go-kratos/aegis v0.1.4
 	github.com/go-kratos/kratos/v2 v2.5.3
 	github.com/google/uuid v1.3.0
 	github.com/polarismesh/polaris-go v1.3.0
@@ -14,7 +14,6 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/dlclark/regexp2 v1.7.0 // indirect
-	github.com/go-kratos/aegis v0.1.4 // indirect
 	github.com/go-playground/form/v4 v4.2.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
