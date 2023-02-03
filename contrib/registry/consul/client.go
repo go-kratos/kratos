@@ -2,6 +2,7 @@ package consul
 
 import (
 	"context"
+        "errors"
 	"fmt"
 	"math/rand"
 	"net"
