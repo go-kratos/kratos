@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 func TestOnce(t *testing.T) {
@@ -34,9 +33,4 @@ func TestNotPanic(t *testing.T) {
 	if e != nil {
 		t.Errorf("e isn't nil")
 	}
-}
-
-// Deprecated: Remove this test with WithLogger method.
-func TestWithLogger(t *testing.T) {
-	_ = WithLogger(log.DefaultLogger)
 }
