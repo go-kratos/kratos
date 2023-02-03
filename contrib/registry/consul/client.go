@@ -206,7 +206,7 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 				select {
 				case <-ticker.C:
 					err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
-					if err != nil {
+					if err != nil && !errors.Is(c.ctx.Err(), context.Canceled) && !errors.Is(c.ctx.Err(), context.DeadlineExceeded) {
 						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
 						// when the previous report fails, try to re register the service
 						time.AfterFunc(time.Duration(rand.Intn(5))*time.Second, func() {
