@@ -28,6 +28,10 @@ func TestNotPanic(t *testing.T) {
 	}
 
 	_, e := Recovery(WithHandler(func(ctx context.Context, req, err interface{}) error {
+		_, ok := ctx.Value(Latency{}).(float64)
+		if !ok {
+			t.Errorf("not latency")
+		}
 		return errors.InternalServer("RECOVERY", fmt.Sprintf("panic triggered: %v", err))
 	}))(next)(context.Background(), "notPanic")
 	if e != nil {
