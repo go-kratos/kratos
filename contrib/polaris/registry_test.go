@@ -29,8 +29,8 @@ func TestRegistry(t *testing.T) {
 	)
 
 	ins := &registry.ServiceInstance{
-		ID:      "test-ut-1",
-		Name:    "test-ut-1",
+		ID:      "test-ut",
+		Name:    "test-ut",
 		Version: "v1.0.0",
 		Endpoints: []string{
 			"grpc://127.0.0.1:8080",
@@ -50,7 +50,7 @@ func TestRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Second * 3)
-	service, err := r.GetService(context.Background(), "test-ut-1")
+	service, err := r.GetService(context.Background(), "test-ut")
 	if err != nil {
 		t.Fatal(err)
 	}
