@@ -216,7 +216,6 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 							// when the previous report fails, try to re register the service
 							time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
 							if errors.Is(c.ctx.Err(), context.Canceled) || errors.Is(c.ctx.Err(), context.DeadlineExceeded) {
-								ticker.Stop()
 								return
 							}
 							if err := c.cli.Agent().ServiceRegister(asr); err != nil {
