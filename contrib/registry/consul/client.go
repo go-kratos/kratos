@@ -206,20 +206,26 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			for {
 				select {
 				case <-ticker.C:
-					// ensure that unregistered services will not be re-registered by mistake
-					if errors.Is(c.ctx.Err(), context.Canceled) || errors.Is(c.ctx.Err(), context.DeadlineExceeded) {
+					select {
+					case <-c.ctx.Done():
 						_ = c.cli.Agent().ServiceDeregister(svc.ID)
 						return
-					}
-					err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
-					if err != nil {
-						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
-						// when the previous report fails, try to re register the service
-						time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
-						if err := c.cli.Agent().ServiceRegister(asr); err != nil {
-							log.Errorf("[Consul] re registry service failed!, err=%v", err)
-						} else {
-							log.Warn("[Consul] re registry of service occurred success")
+					default:
+						// ensure that unregistered services will not be re-registered by mistake
+						if errors.Is(c.ctx.Err(), context.Canceled) || errors.Is(c.ctx.Err(), context.DeadlineExceeded) {
+							_ = c.cli.Agent().ServiceDeregister(svc.ID)
+							return
+						}
+						err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+						if err != nil {
+							log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
+							// when the previous report fails, try to re register the service
+							time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
+							if err := c.cli.Agent().ServiceRegister(asr); err != nil {
+								log.Errorf("[Consul] re registry service failed!, err=%v", err)
+							} else {
+								log.Warn("[Consul] re registry of service occurred success")
+							}
 						}
 					}
 				case <-c.ctx.Done():
