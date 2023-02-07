@@ -238,6 +238,6 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 
 // Deregister service by service ID
 func (c *Client) Deregister(_ context.Context, serviceID string) error {
-	defer c.cancel()
+	c.cancel()
 	return c.cli.Agent().ServiceDeregister(serviceID)
 }
