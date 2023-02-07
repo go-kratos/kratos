@@ -74,14 +74,14 @@ func TestRegistry_Register(t *testing.T) {
 				serverName: "server-1",
 				server: []*registry.ServiceInstance{
 					{
-						ID:        "1",
+						ID:        "2",
 						Name:      "server-1",
 						Version:   "v0.0.1",
 						Metadata:  nil,
 						Endpoints: []string{"http://127.0.0.1:8000"},
 					},
 					{
-						ID:        "1",
+						ID:        "2",
 						Name:      "server-1",
 						Version:   "v0.0.2",
 						Metadata:  nil,
@@ -91,7 +91,7 @@ func TestRegistry_Register(t *testing.T) {
 			},
 			want: []*registry.ServiceInstance{
 				{
-					ID:        "1",
+					ID:        "2",
 					Name:      "server-1",
 					Version:   "v0.0.2",
 					Metadata:  nil,
@@ -168,6 +168,13 @@ func TestRegistry_GetService(t *testing.T) {
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
 
+	instance2 := &registry.ServiceInstance{
+		ID:        "2",
+		Name:      "server-1",
+		Version:   "v0.0.1",
+		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
+	}
+
 	type fields struct {
 		registry *Registry
 	}
@@ -223,10 +230,10 @@ func TestRegistry_GetService(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			preFunc: func(t *testing.T) {
-				if err := r.Register(context.Background(), instance1); err != nil {
+				if err := r.Register(context.Background(), instance2); err != nil {
 					t.Error(err)
 				}
-				watch, err := r.Watch(context.Background(), instance1.Name)
+				watch, err := r.Watch(context.Background(), instance2.Name)
 				if err != nil {
 					t.Error(err)
 				}
@@ -236,7 +243,7 @@ func TestRegistry_GetService(t *testing.T) {
 				}
 			},
 			deferFunc: func(t *testing.T) {
-				err := r.Deregister(context.Background(), instance1)
+				err := r.Deregister(context.Background(), instance2)
 				if err != nil {
 					t.Error(err)
 				}
