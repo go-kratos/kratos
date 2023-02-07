@@ -206,13 +206,11 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			for {
 				select {
 				case <-c.ctx.Done():
-					_ = c.cli.Agent().ServiceDeregister(svc.ID)
 					return
 				default:
 				}
 				select {
 				case <-c.ctx.Done():
-					_ = c.cli.Agent().ServiceDeregister(svc.ID)
 					return
 				case <-ticker.C:
 					// ensure that unregistered services will not be re-registered by mistake
