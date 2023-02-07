@@ -282,6 +282,20 @@ func TestRegistry_Watch(t *testing.T) {
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
 
+	instance2 := &registry.ServiceInstance{
+		ID:        "2",
+		Name:      "server-1",
+		Version:   "v0.0.1",
+		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
+	}
+
+	instance3 := &registry.ServiceInstance{
+		ID:        "3",
+		Name:      "server-1",
+		Version:   "v0.0.1",
+		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
+	}
+
 	type args struct {
 		ctx      context.Context
 		cancel   func()
@@ -316,7 +330,7 @@ func TestRegistry_Watch(t *testing.T) {
 			args: args{
 				ctx:      canceledCtx,
 				cancel:   cancel,
-				instance: instance1,
+				instance: instance2,
 				opts: []Option{
 					WithHealthCheck(false),
 				},
@@ -330,14 +344,14 @@ func TestRegistry_Watch(t *testing.T) {
 			name: "register with healthCheck",
 			args: args{
 				ctx:      context.Background(),
-				instance: instance1,
+				instance: instance3,
 				opts: []Option{
 					WithHeartbeat(true),
 					WithHealthCheck(true),
 					WithHealthCheckInterval(5),
 				},
 			},
-			want:    []*registry.ServiceInstance{instance1},
+			want:    []*registry.ServiceInstance{instance3},
 			wantErr: false,
 			preFunc: func(t *testing.T) {
 				lis, err := net.Listen("tcp", addr)
