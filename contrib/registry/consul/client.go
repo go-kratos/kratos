@@ -2,6 +2,7 @@ package consul
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net"
@@ -204,21 +205,32 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			defer ticker.Stop()
 			for {
 				select {
+				case <-c.ctx.Done():
+					_ = c.cli.Agent().ServiceDeregister(svc.ID)
+					return
+				default:
+				}
+				select {
+				case <-c.ctx.Done():
+					_ = c.cli.Agent().ServiceDeregister(svc.ID)
+					return
 				case <-ticker.C:
+					// ensure that unregistered services will not be re-registered by mistake
+					if errors.Is(c.ctx.Err(), context.Canceled) || errors.Is(c.ctx.Err(), context.DeadlineExceeded) {
+						_ = c.cli.Agent().ServiceDeregister(svc.ID)
+						return
+					}
 					err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 					if err != nil {
 						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
 						// when the previous report fails, try to re register the service
-						time.AfterFunc(time.Duration(rand.Intn(5))*time.Second, func() {
-							if err := c.cli.Agent().ServiceRegister(asr); err != nil {
-								log.Errorf("[Consul] re registry service failed!, err=%v", err)
-							} else {
-								log.Warn("[Consul] re registry of service occurred success")
-							}
-						})
+						time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
+						if err := c.cli.Agent().ServiceRegister(asr); err != nil {
+							log.Errorf("[Consul] re registry service failed!, err=%v", err)
+						} else {
+							log.Warn("[Consul] re registry of service occurred success")
+						}
 					}
-				case <-c.ctx.Done():
-					return
 				}
 			}
 		}()
@@ -228,6 +240,6 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 
 // Deregister service by service ID
 func (c *Client) Deregister(_ context.Context, serviceID string) error {
-	c.cancel()
+	defer c.cancel()
 	return c.cli.Agent().ServiceDeregister(serviceID)
 }
