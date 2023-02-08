@@ -17,7 +17,7 @@ var repoAddIgnores = []string{
 }
 
 func (p *Project) Add(ctx context.Context, dir string, layout string, branch string, mod string) error {
-	to := path.Join(dir, p.Path)
+	to := path.Join(dir, p.Name)
 
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
 		fmt.Printf("🚫 %s already exists\n", p.Name)

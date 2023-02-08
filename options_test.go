@@ -152,3 +152,39 @@ func TestStopTimeout(t *testing.T) {
 		t.Fatal("o.stopTimeout is not equal to v")
 	}
 }
+
+func TestBeforeStart(t *testing.T) {
+	o := &options{}
+	v := func(_ context.Context) error {
+		t.Log("BeforeStart...")
+		return nil
+	}
+	BeforeStart(v)(o)
+}
+
+func TestBeforeStop(t *testing.T) {
+	o := &options{}
+	v := func(_ context.Context) error {
+		t.Log("BeforeStop...")
+		return nil
+	}
+	BeforeStop(v)(o)
+}
+
+func TestAfterStart(t *testing.T) {
+	o := &options{}
+	v := func(_ context.Context) error {
+		t.Log("AfterStart...")
+		return nil
+	}
+	AfterStart(v)(o)
+}
+
+func TestAfterStop(t *testing.T) {
+	o := &options{}
+	v := func(_ context.Context) error {
+		t.Log("AfterStop...")
+		return nil
+	}
+	AfterStop(v)(o)
+}

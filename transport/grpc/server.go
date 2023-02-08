@@ -18,10 +18,10 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/admin"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
-
 	"google.golang.org/grpc/reflection"
 )
 
@@ -67,6 +67,13 @@ func Middleware(m ...middleware.Middleware) ServerOption {
 	}
 }
 
+// CustomHealth Checks server.
+func CustomHealth() ServerOption {
+	return func(s *Server) {
+		s.customHealth = true
+	}
+}
+
 // TLSConfig with TLS config.
 func TLSConfig(c *tls.Config) ServerOption {
 	return func(s *Server) {
@@ -105,20 +112,22 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
-	baseCtx    context.Context
-	tlsConf    *tls.Config
-	lis        net.Listener
-	err        error
-	network    string
-	address    string
-	endpoint   *url.URL
-	timeout    time.Duration
-	middleware matcher.Matcher
-	unaryInts  []grpc.UnaryServerInterceptor
-	streamInts []grpc.StreamServerInterceptor
-	grpcOpts   []grpc.ServerOption
-	health     *health.Server
-	metadata   *apimd.Server
+	baseCtx      context.Context
+	tlsConf      *tls.Config
+	lis          net.Listener
+	err          error
+	network      string
+	address      string
+	endpoint     *url.URL
+	timeout      time.Duration
+	middleware   matcher.Matcher
+	unaryInts    []grpc.UnaryServerInterceptor
+	streamInts   []grpc.StreamServerInterceptor
+	grpcOpts     []grpc.ServerOption
+	health       *health.Server
+	customHealth bool
+	metadata     *apimd.Server
+	adminClean   func()
 }
 
 // NewServer creates a gRPC server by options.
@@ -159,9 +168,13 @@ func NewServer(opts ...ServerOption) *Server {
 	srv.Server = grpc.NewServer(grpcOpts...)
 	srv.metadata = apimd.NewServer(srv.Server)
 	// internal register
-	grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
+	if !srv.customHealth {
+		grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
+	}
 	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
 	reflection.Register(srv.Server)
+	// admin register
+	srv.adminClean, _ = admin.Register(srv.Server)
 	return srv
 }
 
@@ -198,6 +211,9 @@ func (s *Server) Start(ctx context.Context) error {
 
 // Stop stop the gRPC server.
 func (s *Server) Stop(ctx context.Context) error {
+	if s.adminClean != nil {
+		s.adminClean()
+	}
 	s.health.Shutdown()
 	s.GracefulStop()
 	log.Info("[gRPC] server stopping")

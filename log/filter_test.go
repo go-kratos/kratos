@@ -102,13 +102,19 @@ func TestFilterFuncWitchLoggerPrefix(t *testing.T) {
 			want:   "",
 		},
 		{
+			// Filtered value
 			logger: NewFilter(With(NewStdLogger(buf), "caller", "caller"), FilterFunc(testFilterFuncWithLoggerPrefix)),
-			want:   "INFO caller=caller msg=msg\n",
+			want:   "INFO caller=caller msg=msg filtered=***\n",
+		},
+		{
+			// NO prefix
+			logger: NewFilter(With(NewStdLogger(buf)), FilterFunc(testFilterFuncWithLoggerPrefix)),
+			want:   "INFO msg=msg filtered=***\n",
 		},
 	}
 
 	for _, tt := range tests {
-		err := tt.logger.Log(LevelInfo, "msg", "msg")
+		err := tt.logger.Log(LevelInfo, "msg", "msg", "filtered", "true")
 		if err != nil {
 			t.Fatal("err should be nil")
 		}
@@ -127,6 +133,9 @@ func testFilterFuncWithLoggerPrefix(level Level, keyvals ...interface{}) bool {
 	for i := 0; i < len(keyvals); i += 2 {
 		if keyvals[i] == "prefix" {
 			return true
+		}
+		if keyvals[i] == "filtered" {
+			keyvals[i+1] = fuzzyStr
 		}
 	}
 	return false
