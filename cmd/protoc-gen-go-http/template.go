@@ -14,6 +14,10 @@ var httpTemplate = `
 const Operation{{$svrType}}{{.OriginalName}} = "/{{$svrName}}/{{.OriginalName}}"
 {{- end}}
 
+{{- range .Methods}}
+const Operation{{.Method}}{{.OriginalName}}URL = "{{.Path}}"
+{{- end}}
+
 type {{.ServiceType}}HTTPServer interface {
 {{- range .MethodSets}}
 	{{.Name}}(context.Context, *{{.Request}}) (*{{.Reply}}, error)
@@ -23,7 +27,7 @@ type {{.ServiceType}}HTTPServer interface {
 func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}HTTPServer) {
 	r := s.Route("/")
 	{{- range .Methods}}
-	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv))
+	r.{{.Method}}(Operation{{.Method}}{{.OriginalName}}URL, _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv))
 	{{- end}}
 }
 
