@@ -86,10 +86,9 @@ func New{{.ServiceType}}HTTPClient (client *http.Client) {{.ServiceType}}HTTPCli
 {{range .MethodSets}}
 func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
-	pattern := Operation{{.Method}}{{.OriginalName}}URL
-	path := binding.EncodeURL(pattern, in, {{not .HasBody}})
+	path := binding.EncodeURL(Operation{{.Method}}{{.OriginalName}}URL, in, {{not .HasBody}})
 	opts = append(opts, http.Operation(Operation{{$svrType}}{{.OriginalName}}))
-	opts = append(opts, http.PathTemplate(pattern))
+	opts = append(opts, http.PathTemplate(Operation{{.Method}}{{.OriginalName}}URL))
 	{{if .HasBody -}}
 	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, opts...)
 	{{else -}} 
