@@ -86,7 +86,7 @@ func New{{.ServiceType}}HTTPClient (client *http.Client) {{.ServiceType}}HTTPCli
 {{range .MethodSets}}
 func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
-	pattern := "{{.Path}}"
+	pattern := Operation{{.Method}}{{.OriginalName}}URL
 	path := binding.EncodeURL(pattern, in, {{not .HasBody}})
 	opts = append(opts, http.Operation(Operation{{$svrType}}{{.OriginalName}}))
 	opts = append(opts, http.PathTemplate(pattern))
