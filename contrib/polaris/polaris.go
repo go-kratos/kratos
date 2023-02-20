@@ -86,7 +86,7 @@ func (p *Polaris) Registry(opts ...RegistryOption) (r *Registry) {
 	}
 }
 
-func (p *Polaris) Limiter(opts ...LimiterOption) (r *Limiter) {
+func (p *Polaris) Limiter(opts ...LimiterOption) (r Limiter) {
 	op := limiterOptions{
 		namespace: p.namespace,
 		service:   p.service,
@@ -94,7 +94,7 @@ func (p *Polaris) Limiter(opts ...LimiterOption) (r *Limiter) {
 	for _, option := range opts {
 		option(&op)
 	}
-	return &Limiter{
+	return Limiter{
 		limitAPI: p.limit,
 		opts:     op,
 	}
