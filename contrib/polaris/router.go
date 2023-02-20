@@ -27,7 +27,8 @@ type router struct {
 
 type RouterOption func(o *router)
 
-func WithService(service string) RouterOption {
+// WithRouterService set the caller service name used by the route
+func WithRouterService(service string) RouterOption {
 	return func(o *router) {
 		o.service = service
 	}
@@ -35,7 +36,7 @@ func WithService(service string) RouterOption {
 
 // NodeFilter polaris dynamic router selector
 func (p *Polaris) NodeFilter(opts ...RouterOption) selector.NodeFilter {
-	o := router{}
+	o := router{service: p.service}
 	for _, opt := range opts {
 		opt(&o)
 	}

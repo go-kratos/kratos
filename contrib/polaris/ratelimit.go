@@ -19,7 +19,7 @@ var (
 	ErrLimitExceed = errors.New(429, "RATELIMIT", "service unavailable due to rate limit exceeded")
 )
 
-// Ratelimit ratelimiter middleware
+// Ratelimit Request rate limit middleware
 func Ratelimit(l Limiter) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
@@ -47,7 +47,7 @@ func Ratelimit(l Limiter) middleware.Middleware {
 				done(ratelimit.DoneInfo{Err: err})
 				return
 			}
-			return nil, errors.New(400, "Error with transport.FromServerContext", "Error with transport.FromServerContext")
+			return reply, nil
 		}
 	}
 }
