@@ -29,7 +29,6 @@ func WithNamespace(ns string) Option {
 	}
 }
 
-
 // WithService set the current service name
 func WithService(service string) Option {
 	return func(o *Polaris) {
@@ -90,7 +89,7 @@ func (p *Polaris) Registry(opts ...RegistryOption) (r *Registry) {
 func (p *Polaris) Limiter(opts ...LimiterOption) (r *Limiter) {
 	op := limiterOptions{
 		namespace: p.namespace,
-		service: p.service,
+		service:   p.service,
 	}
 	for _, option := range opts {
 		option(&op)
