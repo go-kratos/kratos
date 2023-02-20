@@ -29,12 +29,6 @@ func WithHandler(h HandlerFunc) Option {
 	}
 }
 
-// WithLogger with recovery logger.
-// Deprecated: use global logger instead.
-func WithLogger(logger log.Logger) Option {
-	return func(o *options) {}
-}
-
 // Recovery is a server middleware that recovers from any panics.
 func Recovery(opts ...Option) middleware.Middleware {
 	op := options{

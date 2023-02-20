@@ -10,6 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 
+	"github.com/go-kratos/aegis/subset"
 	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/resolver"
 )
@@ -23,6 +24,8 @@ type discoveryResolver struct {
 
 	insecure         bool
 	debugLogDisabled bool
+	selecterKey      string
+	subsetSize       int
 }
 
 func (r *discoveryResolver) watch() {
@@ -48,6 +51,7 @@ func (r *discoveryResolver) watch() {
 func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	addrs := make([]resolver.Address, 0)
 	endpoints := make(map[string]struct{})
+	filtered := make([]*registry.ServiceInstance, 0, len(ins))
 	for _, in := range ins {
 		ept, err := endpoint.ParseEndpoint(in.Endpoints, endpoint.Scheme("grpc", !r.insecure))
 		if err != nil {
@@ -61,6 +65,13 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		if _, ok := endpoints[ept]; ok {
 			continue
 		}
+		filtered = append(filtered, in)
+	}
+	if r.subsetSize != 0 {
+		filtered = subset.Subset(r.selecterKey, filtered, r.subsetSize)
+	}
+	for _, in := range filtered {
+		ept, _ := endpoint.ParseEndpoint(in.Endpoints, endpoint.Scheme("grpc", !r.insecure))
 		endpoints[ept] = struct{}{}
 		addr := resolver.Address{
 			ServerName: in.Name,
@@ -80,7 +91,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	}
 
 	if !r.debugLogDisabled {
-		b, _ := json.Marshal(ins)
+		b, _ := json.Marshal(filtered)
 		log.Infof("[resolver] update instances: %s", b)
 	}
 }
