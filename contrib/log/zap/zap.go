@@ -25,7 +25,7 @@ func (l *Logger) Log(level log.Level, keyvals ...interface{}) error {
 		return nil
 	}
 
-	var data []zap.Field = make([]zap.Field, 0, (keylen/2)+1)
+	data := make([]zap.Field, 0, (keylen/2)+1)
 	for i := 0; i < keylen; i += 2 {
 		data = append(data, zap.Any(fmt.Sprint(keyvals[i]), keyvals[i+1]))
 	}
