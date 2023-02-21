@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -67,7 +66,7 @@ func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 	data, err := io.ReadAll(r.Body)
 
 	// reset body.
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
+	r.Body = io.NopCloser(bytes.NewBuffer(data))
 
 	if err != nil {
 		return errors.BadRequest("CODEC", err.Error())
