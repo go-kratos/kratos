@@ -219,7 +219,7 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, f
 }
 
 func streamClientInterceptor(filters []selector.NodeFilter) grpc.StreamClientInterceptor {
-	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
+	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) { // nolint
 		ctx = transport.NewClientContext(ctx, &Transport{
 			endpoint:    cc.Target(),
 			operation:   method,
