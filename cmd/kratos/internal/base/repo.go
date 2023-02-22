@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -104,7 +105,7 @@ func (r *Repo) CopyTo(ctx context.Context, to string, modPath string, ignores []
 	if err := r.Clone(ctx); err != nil {
 		return err
 	}
-	mod, err := ModulePath(path.Join(r.Path(), "go.mod"))
+	mod, err := ModulePath(filepath.Join(r.Path(), "go.mod"))
 	if err != nil {
 		return err
 	}
@@ -116,7 +117,7 @@ func (r *Repo) CopyToV2(ctx context.Context, to string, modPath string, ignores,
 	if err := r.Clone(ctx); err != nil {
 		return err
 	}
-	mod, err := ModulePath(path.Join(r.Path(), "go.mod"))
+	mod, err := ModulePath(filepath.Join(r.Path(), "go.mod"))
 	if err != nil {
 		return err
 	}

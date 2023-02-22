@@ -5,12 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
@@ -80,7 +78,7 @@ func run(cmd *cobra.Command, args []string) {
 			return
 		}
 
-		mod, e := base.ModulePath(path.Join(projectRoot, "go.mod"))
+		mod, e := base.ModulePath(filepath.Join(projectRoot, "go.mod"))
 		if e != nil {
 			panic(e)
 		}
@@ -136,6 +134,6 @@ func getgomodProjectRoot(dir string) string {
 }
 
 func gomodIsNotExistIn(dir string) bool {
-	_, e := os.Stat(path.Join(dir, "go.mod"))
+	_, e := os.Stat(filepath.Join(dir, "go.mod"))
 	return os.IsNotExist(e)
 }

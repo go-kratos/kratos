@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path"
-
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
+	"path/filepath"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
+
 	"github.com/fatih/color"
 )
 
@@ -20,7 +20,7 @@ type Project struct {
 
 // New new a project from remote repo.
 func (p *Project) New(ctx context.Context, dir string, layout string, branch string) error {
-	to := path.Join(dir, p.Name)
+	to := filepath.Join(dir, p.Name)
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
 		fmt.Printf("🚫 %s already exists\n", p.Name)
 		override := false
@@ -43,8 +43,8 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 		return err
 	}
 	e := os.Rename(
-		path.Join(to, "cmd", "server"),
-		path.Join(to, "cmd", p.Name),
+		filepath.Join(to, "cmd", "server"),
+		filepath.Join(to, "cmd", p.Name),
 	)
 	if e != nil {
 		return e

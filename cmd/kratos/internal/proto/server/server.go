@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/emicklei/proto"
@@ -76,7 +76,7 @@ func run(cmd *cobra.Command, args []string) {
 		return
 	}
 	for _, s := range res {
-		to := path.Join(targetDir, strings.ToLower(s.Service)+".go")
+		to := filepath.Join(targetDir, strings.ToLower(s.Service)+".go")
 		if _, err := os.Stat(to); !os.IsNotExist(err) {
 			fmt.Fprintf(os.Stderr, "%s already exists: %s\n", s.Service, to)
 			continue
