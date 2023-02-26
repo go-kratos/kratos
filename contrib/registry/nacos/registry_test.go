@@ -24,8 +24,6 @@ func TestRegistry_Register(t *testing.T) {
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
 		CacheDir:            "/tmp/nacos/cache",
-		RotateTime:          "1h",
-		MaxAge:              3,
 		LogLevel:            "debug",
 	}
 
@@ -241,8 +239,6 @@ func TestRegistry_Deregister(t *testing.T) {
 					NotLoadCacheAtStart: true,
 					LogDir:              "/tmp/nacos/log",
 					CacheDir:            "/tmp/nacos/cache",
-					RotateTime:          "1h",
-					MaxAge:              3,
 					LogLevel:            "debug",
 				}
 
@@ -302,8 +298,6 @@ func TestRegistry_Deregister(t *testing.T) {
 				NotLoadCacheAtStart: true,
 				LogDir:              "/tmp/nacos/log",
 				CacheDir:            "/tmp/nacos/cache",
-				RotateTime:          "1h",
-				MaxAge:              3,
 				LogLevel:            "debug",
 			}
 
@@ -339,8 +333,6 @@ func TestRegistry_GetService(t *testing.T) {
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
 		CacheDir:            "/tmp/nacos/cache",
-		RotateTime:          "1h",
-		MaxAge:              3,
 		LogLevel:            "debug",
 	}
 
@@ -455,8 +447,6 @@ func TestRegistry_Watch(t *testing.T) {
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
 		CacheDir:            "/tmp/nacos/cache",
-		RotateTime:          "1h",
-		MaxAge:              3,
 		LogLevel:            "debug",
 	}
 

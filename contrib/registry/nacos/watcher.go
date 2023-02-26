@@ -40,7 +40,7 @@ func newWatcher(ctx context.Context, cli naming_client.INamingClient, serviceNam
 		Clusters:    clusters,
 		GroupName:   groupName,
 		SubscribeCallback: func(services []model.SubscribeService, err error) {
-			w.watchChan <- struct{}{}
+			go func(){ w.watchChan <- struct{}{} }()
 		},
 	})
 	return w, e
