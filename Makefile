@@ -17,10 +17,8 @@ endif
 
 # Windows
 ifeq ($(os),MINGW)
-GOBIN	:=	$(subst \,/,$(GOBIN))
-GOPATH	:=	$(subst \,/,$(GOPATH))
-GOBIN :=/$(shell echo "$(GOBIN)" | cut -d';' -f1 | sed 's/://g')
-GOPATH :=/$(shell echo "$(GOPATH)" | cut -d';' -f1 | sed 's/://g')
+GOBIN	:=	$(shell echo "$(GOBIN)" | cut -d';' -f1 | sed 's/[\\/:]//g')
+GOPATH	:=	$(shell echo "$(GOPATH)" | cut -d';' -f1 | sed 's/[\\/:]//g')
 endif
 BIN		:= 	""
 
