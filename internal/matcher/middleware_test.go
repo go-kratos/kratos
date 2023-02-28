@@ -31,10 +31,10 @@ func equal(ms []middleware.Middleware, modules ...string) bool {
 func TestMatcher(t *testing.T) {
 	m := New()
 	m.Use(logging("logging"))
-	m.Add("*", logging("*"))
-	m.Add("/foo/*", logging("foo/*"))
+	m.Add("/*", logging("*"))
 	m.Add("/foo/bar/*", logging("foo/bar/*"))
 	m.Add("/foo/bar", logging("foo/bar"))
+	m.Add("/foo/*", logging("foo/*"))
 
 	if ms := m.Match("/"); len(ms) != 2 {
 		t.Fatal("not equal")
@@ -42,21 +42,21 @@ func TestMatcher(t *testing.T) {
 		t.Fatal("not equal")
 	}
 
-	if ms := m.Match("/foo/xxx"); len(ms) != 2 {
+	if ms := m.Match("/foo/xxx"); len(ms) != 3 {
 		t.Fatal("not equal")
-	} else if !equal(ms, "logging", "foo/*") {
-		t.Fatal("not equal")
-	}
-
-	if ms := m.Match("/foo/bar"); len(ms) != 2 {
-		t.Fatal("not equal")
-	} else if !equal(ms, "logging", "foo/bar") {
+	} else if !equal(ms, "logging", "*", "foo/*") {
 		t.Fatal("not equal")
 	}
 
-	if ms := m.Match("/foo/bar/x"); len(ms) != 2 {
+	if ms := m.Match("/foo/bar"); len(ms) != 4 {
 		t.Fatal("not equal")
-	} else if !equal(ms, "logging", "foo/bar/*") {
+	} else if !equal(ms, "logging", "*", "foo/*", "foo/bar") {
+		t.Fatal("not equal")
+	}
+
+	if ms := m.Match("/foo/bar/x"); len(ms) != 4 {
+		t.Fatal("not equal")
+	} else if !equal(ms, "logging", "*", "foo/*", "foo/bar/*") {
 		t.Fatal("not equal")
 	}
 }
