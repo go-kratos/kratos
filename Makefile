@@ -88,6 +88,7 @@ test:
 
 .PHONY: test-coverage
 test-coverage:
+	@go mod download golang.org/x/net
 	@${TOOLS_SHELL} test_coverage
 	@echo "go test with coverage finished"
 
