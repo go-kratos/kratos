@@ -177,7 +177,7 @@ func (a *App) buildInstance() (*registry.ServiceInstance, error) {
 		for _, srv := range a.opts.servers {
 			if r, ok := srv.(transport.Endpointer); ok {
 				e, err := r.Endpoint()
-				if err != nil {
+				if err != nil || e == nil {
 					return nil, err
 				}
 				endpoints = append(endpoints, e.String())
