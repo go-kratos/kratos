@@ -16,8 +16,8 @@ import (
 // CmdClient represents the source command.
 var CmdClient = &cobra.Command{
 	Use:   "client",
-	Short: "Generate the proto client code",
-	Long:  "Generate the proto client code. Example: kratos proto client helloworld.proto",
+	Short: "Generate the proto Client code",
+	Long:  "Generate the proto Client code. Example: kratos proto client helloworld.proto",
 	Run:   run,
 }
 
