@@ -147,6 +147,7 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 		return err
 	}
 	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
 	go func() {
 		for {
 			<-ticker.C
