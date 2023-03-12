@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -64,19 +66,21 @@ func run(cmd *cobra.Command, args []string) {
 	} else {
 		name = args[0]
 	}
-	p := &Project{Name: path.Base(name), Path: name}
+	wd = getProjectPlaceDir(name, wd)
+	p := &Project{Name: filepath.Base(name), Path: name}
 	done := make(chan error, 1)
 	go func() {
 		if !nomod {
 			done <- p.New(ctx, wd, repoURL, branch)
 			return
 		}
-		if _, e := os.Stat(path.Join(wd, "go.mod")); os.IsNotExist(e) {
-			done <- fmt.Errorf("🚫 go.mod don't exists in %s", wd)
+		projectRoot := getgomodProjectRoot(wd)
+		if gomodIsNotExistIn(projectRoot) {
+			done <- fmt.Errorf("🚫 go.mod don't exists in %s", projectRoot)
 			return
 		}
 
-		mod, e := base.ModulePath(path.Join(wd, "go.mod"))
+		mod, e := base.ModulePath(path.Join(projectRoot, "go.mod"))
 		if e != nil {
 			panic(e)
 		}
@@ -94,4 +98,44 @@ func run(cmd *cobra.Command, args []string) {
 			fmt.Fprintf(os.Stderr, "\033[31mERROR: Failed to create project(%s)\033[m\n", err.Error())
 		}
 	}
+}
+
+func getProjectPlaceDir(projectName string, fallbackPlaceDir string) string {
+	projectFullPath := projectName
+
+	wd := filepath.Dir(projectName)
+	// check for home dir
+	if strings.HasPrefix(wd, "~") {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			// cannot get user home return fallback place dir
+			return fallbackPlaceDir
+		}
+		projectFullPath = filepath.Join(homeDir, projectName[2:])
+	}
+	// check path is relative
+	if !filepath.IsAbs(projectFullPath) {
+		absPath, err := filepath.Abs(projectFullPath)
+		if err != nil {
+			return fallbackPlaceDir
+		}
+		projectFullPath = absPath
+	}
+	// create project logic will check stat,so not check path stat here
+	return filepath.Dir(projectFullPath)
+}
+
+func getgomodProjectRoot(dir string) string {
+	if dir == filepath.Dir(dir) {
+		return dir
+	}
+	if gomodIsNotExistIn(dir) {
+		return getgomodProjectRoot(filepath.Dir(dir))
+	}
+	return dir
+}
+
+func gomodIsNotExistIn(dir string) bool {
+	_, e := os.Stat(path.Join(dir, "go.mod"))
+	return os.IsNotExist(e)
 }

@@ -39,6 +39,14 @@ func WithEndpoint(endpoint string) ClientOption {
 	}
 }
 
+// WithSubset with client disocvery subset size.
+// zero value means subset filter disabled
+func WithSubset(size int) ClientOption {
+	return func(o *clientOptions) {
+		o.subsetSize = size
+	}
+}
+
 // WithTimeout with client timeout.
 func WithTimeout(timeout time.Duration) ClientOption {
 	return func(o *clientOptions) {
@@ -74,6 +82,13 @@ func WithUnaryInterceptor(in ...grpc.UnaryClientInterceptor) ClientOption {
 	}
 }
 
+// WithStreamInterceptor returns a DialOption that specifies the interceptor for streaming RPCs.
+func WithStreamInterceptor(in ...grpc.StreamClientInterceptor) ClientOption {
+	return func(o *clientOptions) {
+		o.streamInts = in
+	}
+}
+
 // WithOptions with gRPC options.
 func WithOptions(opts ...grpc.DialOption) ClientOption {
 	return func(o *clientOptions) {
@@ -97,11 +112,13 @@ func WithLogger(log log.Logger) ClientOption {
 // clientOptions is gRPC Client
 type clientOptions struct {
 	endpoint     string
+	subsetSize   int
 	tlsConf      *tls.Config
 	timeout      time.Duration
 	discovery    registry.Discovery
 	middleware   []middleware.Middleware
 	ints         []grpc.UnaryClientInterceptor
+	streamInts   []grpc.StreamClientInterceptor
 	grpcOpts     []grpc.DialOption
 	balancerName string
 	filters      []selector.NodeFilter
@@ -121,6 +138,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	options := clientOptions{
 		timeout:      2000 * time.Millisecond,
 		balancerName: balancerName,
+		subsetSize:   25,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -128,19 +146,29 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	ints := []grpc.UnaryClientInterceptor{
 		unaryClientInterceptor(options.middleware, options.timeout, options.filters),
 	}
+	sints := []grpc.StreamClientInterceptor{
+		streamClientInterceptor(options.filters),
+	}
+
 	if len(options.ints) > 0 {
 		ints = append(ints, options.ints...)
+	}
+	if len(options.streamInts) > 0 {
+		sints = append(sints, options.streamInts...)
 	}
 	grpcOpts := []grpc.DialOption{
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"loadBalancingConfig": [{"%s":{}}]}`, options.balancerName)),
 		grpc.WithChainUnaryInterceptor(ints...),
+		grpc.WithChainStreamInterceptor(sints...),
 	}
+
 	if options.discovery != nil {
 		grpcOpts = append(grpcOpts,
 			grpc.WithResolvers(
 				discovery.NewBuilder(
 					options.discovery,
 					discovery.WithInsecure(insecure),
+					discovery.WithSubset(options.subsetSize),
 				)))
 	}
 	if insecure {
@@ -187,5 +215,19 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, f
 		ctx = selector.NewPeerContext(ctx, &p)
 		_, err := h(ctx, req)
 		return err
+	}
+}
+
+func streamClientInterceptor(filters []selector.NodeFilter) grpc.StreamClientInterceptor {
+	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) { // nolint
+		ctx = transport.NewClientContext(ctx, &Transport{
+			endpoint:    cc.Target(),
+			operation:   method,
+			reqHeader:   headerCarrier{},
+			nodeFilters: filters,
+		})
+		var p selector.Peer
+		ctx = selector.NewPeerContext(ctx, &p)
+		return streamer(ctx, desc, cc, method, opts...)
 	}
 }

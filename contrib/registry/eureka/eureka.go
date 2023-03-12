@@ -29,7 +29,7 @@ func NewAPI(ctx context.Context, client *Client, refreshInterval time.Duration) 
 	}
 
 	// it is required to broadcast for the first time
-	e.broadcast()
+	go e.broadcast()
 
 	go e.refresh(ctx)
 
@@ -112,6 +112,7 @@ func (e *API) Subscribe(serverName string, fn func()) error {
 		appID:    appID,
 		callBack: fn,
 	}
+	go e.broadcast()
 	return nil
 }
 

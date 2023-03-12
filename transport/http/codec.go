@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -63,6 +64,10 @@ func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 		return errors.BadRequest("CODEC", fmt.Sprintf("unregister Content-Type: %s", r.Header.Get("Content-Type")))
 	}
 	data, err := io.ReadAll(r.Body)
+
+	// reset body.
+	r.Body = io.NopCloser(bytes.NewBuffer(data))
+
 	if err != nil {
 		return errors.BadRequest("CODEC", err.Error())
 	}

@@ -16,6 +16,9 @@ const Operation{{$svrType}}{{.OriginalName}} = "/{{$svrName}}/{{.OriginalName}}"
 
 type {{.ServiceType}}HTTPServer interface {
 {{- range .MethodSets}}
+	{{- if ne .Comment ""}}
+	{{.Comment}}
+	{{- end}}
 	{{.Name}}(context.Context, *{{.Request}}) (*{{.Reply}}, error)
 {{- end}}
 }
@@ -114,6 +117,7 @@ type methodDesc struct {
 	Num          int
 	Request      string
 	Reply        string
+	Comment      string
 	// http_rule
 	Path         string
 	Method       string
