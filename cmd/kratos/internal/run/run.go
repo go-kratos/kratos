@@ -19,6 +19,11 @@ var CmdRun = &cobra.Command{
 	Long:  "Run project. Example: kratos run",
 	Run:   Run,
 }
+var targetDir string
+
+func init() {
+	CmdRun.Flags().StringVarP(&targetDir, "work", "w", "", "target working directory")
+}
 
 // Run run project.
 func Run(cmd *cobra.Command, args []string) {
@@ -64,12 +69,11 @@ func Run(cmd *cobra.Command, args []string) {
 			dir = cmdPath[dir]
 		}
 	}
-	var rootPath string
-	rootPath = filepath.Join(dir, "../../")
-	fd := exec.Command("go", append([]string{"run", "." + dir[len(rootPath):]}, programArgs...)...)
+	fd := exec.Command("go", append([]string{"run", dir}, programArgs...)...)
 	fd.Stdout = os.Stdout
 	fd.Stderr = os.Stderr
-	fd.Dir = rootPath
+	fd.Dir = dir
+	changeWorkingDirectory(fd, targetDir)
 	if err := fd.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err.Error())
 		return
@@ -132,4 +136,11 @@ func findCMD(base string) (map[string]string, error) {
 		_ = filepath.Join(base, "..")
 	}
 	return map[string]string{"": base}, nil
+}
+
+func changeWorkingDirectory(cmd *exec.Cmd, targetDir string) {
+	targetDir = strings.TrimSpace(targetDir)
+	if targetDir != "" {
+		cmd.Dir = targetDir
+	}
 }
