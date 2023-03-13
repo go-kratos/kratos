@@ -17,7 +17,7 @@ import (
 var CmdServer = &cobra.Command{
 	Use:   "server",
 	Short: "Generate the proto Server implementations",
-	Long:  "Generate the proto Server implementations. Example: kratos proto server api/xxx.proto -target-dir=internal/service",
+	Long:  "Generate the proto Server implementations. Example: kratos proto server api/xxx.proto --target-dir=internal/service",
 	Run:   run,
 }
 var targetDir string
