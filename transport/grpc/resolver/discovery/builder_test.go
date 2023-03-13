@@ -33,8 +33,8 @@ func TestWithTimeout(t *testing.T) {
 func TestDisableDebugLog(t *testing.T) {
 	o := &builder{}
 	DisableDebugLog()(o)
-	if !o.debugLogDisabled {
-		t.Errorf("expected debugLogDisabled true, got %v", o.debugLogDisabled)
+	if o.debugLog {
+		t.Errorf("expected debugLog true, got %v", o.debugLog)
 	}
 }
 
