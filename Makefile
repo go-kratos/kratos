@@ -89,7 +89,7 @@ test:
 .PHONY: test-coverage
 test-coverage:
 	@${TOOLS_SHELL} test_coverage
-	@echo "go test with coverage finished"	
+	@echo "go test with coverage finished"
 
 .PHONY: lint
 lint: $(LINTER)
