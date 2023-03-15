@@ -68,7 +68,7 @@ func (r *Repo) Pull(ctx context.Context) error {
 	cmd.Dir = r.Path()
 	_, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil
+		return err
 	}
 	cmd = exec.CommandContext(ctx, "git", "pull")
 	cmd.Dir = r.Path()
