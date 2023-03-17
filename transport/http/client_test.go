@@ -227,7 +227,7 @@ func TestDefaultResponseDecoder(t *testing.T) {
 	resp1 := &http.Response{
 		Header:     make(http.Header),
 		StatusCode: 200,
-		Body:       io.NopCloser(bytes.NewBufferString("{\"a\":\"1\", \"b\": 2}")),
+		Body:       io.NopCloser(bytes.NewBufferString(`{"a":"1", "b": 2}`)),
 	}
 	v1 := &struct {
 		A string `json:"a"`
@@ -279,7 +279,7 @@ func TestDefaultErrorDecoder(t *testing.T) {
 	resp2 := &http.Response{
 		Header:     make(http.Header),
 		StatusCode: 500,
-		Body:       io.NopCloser(bytes.NewBufferString("{\"code\":54321, \"message\": \"hi\", \"reason\": \"FOO\"}")),
+		Body:       io.NopCloser(bytes.NewBufferString(`{"code":54321, "message": "hi", "reason": "FOO"}`)),
 	}
 	err := DefaultErrorDecoder(context.TODO(), resp2)
 	if err == nil {
