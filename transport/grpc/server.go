@@ -33,6 +33,30 @@ var (
 // ServerOption is gRPC server option.
 type ServerOption func(o *Server)
 
+// Append returns an ServerOption that appends other ServerOption to it.
+func (o ServerOption) Append(opts ...ServerOption) ServerOption {
+	return func(op *Server) {
+		o(op)
+		for _, opt := range opts {
+			opt(op)
+		}
+	}
+}
+
+// IfAppend returns an ServerOption that conditionally appends other ServerOption to it.
+func (o ServerOption) IfAppend(cond bool, opts ...ServerOption) ServerOption {
+	if !cond {
+		return o
+	}
+
+	return o.Append(opts...)
+}
+
+// DefaultServer returns an ServerOption that does not modify the Server struct.
+func DefaultServer() ServerOption {
+	return func(o *Server) {}
+}
+
 // Network with server network.
 func Network(network string) ServerOption {
 	return func(s *Server) {

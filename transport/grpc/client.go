@@ -32,6 +32,30 @@ func init() {
 // ClientOption is gRPC client option.
 type ClientOption func(o *clientOptions)
 
+// Append returns an ClientOption that appends other ClientOption to it.
+func (o ClientOption) Append(opts ...ClientOption) ClientOption {
+	return func(op *clientOptions) {
+		o(op)
+		for _, opt := range opts {
+			opt(op)
+		}
+	}
+}
+
+// IfAppend returns an ClientOption that conditionally appends other ClientOption to it.
+func (o ClientOption) IfAppend(cond bool, opts ...ClientOption) ClientOption {
+	if !cond {
+		return o
+	}
+
+	return o.Append(opts...)
+}
+
+// WithDefaultClient returns an ClientOption that does not modify the clientOptions struct.
+func WithDefaultClient() ClientOption {
+	return func(o *clientOptions) {}
+}
+
 // WithEndpoint with client endpoint.
 func WithEndpoint(endpoint string) ClientOption {
 	return func(o *clientOptions) {
@@ -39,7 +63,7 @@ func WithEndpoint(endpoint string) ClientOption {
 	}
 }
 
-// WithSubset with client disocvery subset size.
+// WithSubset with client discovery subset size.
 // zero value means subset filter disabled
 func WithSubset(size int) ClientOption {
 	return func(o *clientOptions) {

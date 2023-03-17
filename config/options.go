@@ -24,6 +24,30 @@ type options struct {
 	resolver Resolver
 }
 
+// Append returns an Option that appends other Options to it.
+func (o Option) Append(opts ...Option) Option {
+	return func(op *options) {
+		o(op)
+		for _, opt := range opts {
+			opt(op)
+		}
+	}
+}
+
+// IfAppend returns an Option that conditionally appends other Options to it.
+func (o Option) IfAppend(cond bool, opts ...Option) Option {
+	if !cond {
+		return o
+	}
+
+	return o.Append(opts...)
+}
+
+// WithDefault returns an Option that does not modify the options struct.
+func WithDefault() Option {
+	return func(o *options) {}
+}
+
 // WithSource with config source.
 func WithSource(s ...Source) Option {
 	return func(o *options) {
