@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"errors"
+	"github.com/go-kratos/kratos/v2/encoding"
 	"reflect"
 	"sync"
 	"time"
@@ -47,8 +48,9 @@ type config struct {
 // New a config with options.
 func New(opts ...Option) Config {
 	o := options{
-		decoder:  defaultDecoder,
-		resolver: defaultResolver,
+		decoder:    defaultDecoder,
+		resolver:   defaultResolver,
+		mergeCodec: encoding.GetCodec("json"),
 	}
 	for _, opt := range opts {
 		opt(&o)
