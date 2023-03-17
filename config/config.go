@@ -3,11 +3,11 @@ package config
 import (
 	"context"
 	"errors"
-	"github.com/go-kratos/kratos/v2/encoding"
 	"reflect"
 	"sync"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/encoding"
 	// init encoding
 	_ "github.com/go-kratos/kratos/v2/encoding/json"
 	_ "github.com/go-kratos/kratos/v2/encoding/proto"

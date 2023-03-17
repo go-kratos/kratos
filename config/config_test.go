@@ -3,6 +3,9 @@ package config
 import (
 	"errors"
 	"testing"
+
+	"github.com/go-kratos/kratos/v2/encoding"
+	_ "github.com/go-kratos/kratos/v2/encoding/json"
 )
 
 const (
@@ -128,9 +131,10 @@ func TestConfig(t *testing.T) {
 
 	jSource := newTestJSONSource(_testJSON)
 	opts := options{
-		sources:  []Source{jSource},
-		decoder:  defaultDecoder,
-		resolver: defaultResolver,
+		sources:    []Source{jSource},
+		decoder:    defaultDecoder,
+		resolver:   defaultResolver,
+		mergeCodec: encoding.GetCodec("json"),
 	}
 	cf := &config{}
 	cf.opts = opts
