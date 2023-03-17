@@ -3,16 +3,13 @@ package config
 import (
 	"bytes"
 	"encoding/gob"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
 
-	"github.com/imdario/mergo"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/go-kratos/kratos/v2/log"
+
+	"github.com/imdario/mergo"
 )
 
 // Reader is config reader.
@@ -68,7 +65,7 @@ func (r *reader) Value(path string) (Value, bool) {
 func (r *reader) Source() ([]byte, error) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	return marshalJSON(convertMap(r.values))
+	return r.opts.mergeCodec.Marshal(convertMap(r.values))
 }
 
 func (r *reader) Resolve() error {
@@ -156,18 +153,4 @@ func readValue(values map[string]interface{}, path string) (Value, bool) {
 		}
 	}
 	return nil, false
-}
-
-func marshalJSON(v interface{}) ([]byte, error) {
-	if m, ok := v.(proto.Message); ok {
-		return protojson.MarshalOptions{EmitUnpopulated: true}.Marshal(m)
-	}
-	return json.Marshal(v)
-}
-
-func unmarshalJSON(data []byte, v interface{}) error {
-	if m, ok := v.(proto.Message); ok {
-		return protojson.UnmarshalOptions{DiscardUnknown: true}.Unmarshal(data, m)
-	}
-	return json.Unmarshal(data, v)
 }

@@ -137,7 +137,7 @@ func (c *config) Scan(v interface{}) error {
 	if err != nil {
 		return err
 	}
-	return unmarshalJSON(data, v)
+	return c.opts.mergeCodec.Unmarshal(data, v)
 }
 
 func (c *config) Watch(key string, o Observer) error {
