@@ -151,14 +151,14 @@ func (s *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 }
 
 // Deregister the registration.
-func (s *Registry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
+func (s *Registry) Deregister(ctx context.Context, _ *registry.ServiceInstance) error {
 	return s.Register(ctx, &registry.ServiceInstance{
 		Metadata: map[string]string{},
 	})
 }
 
 // GetService return the service instances in memory according to the service name.
-func (s *Registry) GetService(ctx context.Context, name string) ([]*registry.ServiceInstance, error) {
+func (s *Registry) GetService(_ context.Context, name string) ([]*registry.ServiceInstance, error) {
 	pods, err := s.podLister.List(labels.SelectorFromSet(map[string]string{
 		LabelsKeyServiceName: name,
 	}))

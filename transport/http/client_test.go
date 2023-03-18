@@ -23,7 +23,7 @@ import (
 
 type mockRoundTripper struct{}
 
-func (rt *mockRoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+func (rt *mockRoundTripper) RoundTrip(_ *http.Request) (resp *http.Response, err error) {
 	return
 }
 
@@ -31,14 +31,14 @@ type mockCallOption struct {
 	needErr bool
 }
 
-func (x *mockCallOption) before(info *callInfo) error {
+func (x *mockCallOption) before(_ *callInfo) error {
 	if x.needErr {
 		return errors.New("option need return err")
 	}
 	return nil
 }
 
-func (x *mockCallOption) after(info *callInfo, attempt *csAttempt) {
+func (x *mockCallOption) after(_ *callInfo, _ *csAttempt) {
 	log.Println("run in mockCallOption.after")
 }
 
@@ -71,7 +71,8 @@ func TestWithBlock(t *testing.T) {
 	}
 }
 
-func TestWithBalancer(t *testing.T) {
+func TestWithBalancer(_ *testing.T) {
+	// TODO
 }
 
 func TestWithTLSConfig(t *testing.T) {
@@ -146,11 +147,11 @@ func TestWithErrorDecoder(t *testing.T) {
 
 type mockDiscovery struct{}
 
-func (*mockDiscovery) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+func (*mockDiscovery) GetService(_ context.Context, _ string) ([]*registry.ServiceInstance, error) {
 	return nil, nil
 }
 
-func (*mockDiscovery) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
+func (*mockDiscovery) Watch(_ context.Context, _ string) (registry.Watcher, error) {
 	return &mockWatcher{}, nil
 }
 

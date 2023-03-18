@@ -57,7 +57,7 @@ func Test_WithGroup(t *testing.T) {
 	}
 }
 
-func Test_Server(t *testing.T) {
+func TestServer(_ *testing.T) {
 	nextValid := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return "Hello valid", nil
 	}

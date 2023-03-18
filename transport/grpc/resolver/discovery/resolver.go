@@ -104,7 +104,7 @@ func (r *discoveryResolver) Close() {
 	}
 }
 
-func (r *discoveryResolver) ResolveNow(options resolver.ResolveNowOptions) {}
+func (r *discoveryResolver) ResolveNow(_ resolver.ResolveNowOptions) {}
 
 func parseAttributes(md map[string]string) (a *attributes.Attributes) {
 	for k, v := range md {

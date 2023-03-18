@@ -76,7 +76,7 @@ func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 	return b
 }
 
-func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
+func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (resolver.Resolver, error) {
 	watchRes := &struct {
 		err error
 		w   registry.Watcher
