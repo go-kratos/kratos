@@ -50,9 +50,10 @@ linters:
   # - wsl
 
 linters-settings:
-  rules:
-    - name: unused-parameter
-      disabled: true
+  revive:
+    rules:
+      - name: unused-parameter
+        disabled: true
   govet:
     check-shadowing: true
   whitespace:
