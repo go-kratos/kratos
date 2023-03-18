@@ -13,16 +13,16 @@ import (
 
 const (
 	forcePick = time.Second * 3
-	// Name is balancer name
+	// Name is p2c(Pick of 2 choices) balancer name
 	Name = "p2c"
 )
 
 var _ selector.Balancer = (*Balancer)(nil)
 
-// Option is random builder option.
+// Option is p2c builder option.
 type Option func(o *options)
 
-// options is random builder options
+// options is p2c builder options
 type options struct{}
 
 // New creates a p2c selector.
