@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/encoding"
+	_ "github.com/go-kratos/kratos/v2/encoding/json"
 )
 
 func TestReader_Merge(t *testing.T) {
@@ -183,7 +184,8 @@ func TestReader_Source(t *testing.T) {
 			}
 			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
-		resolver: defaultResolver,
+		resolver:   defaultResolver,
+		mergeCodec: encoding.GetCodec("json"),
 	}
 	r := newReader(opts)
 	err = r.Merge(&KeyValue{
