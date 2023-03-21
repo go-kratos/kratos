@@ -87,7 +87,7 @@ func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watc
 	return newWatcher(ctx, r.cli, serviceName)
 }
 
-func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance) error {
+func (r *Registry) Register(ctx context.Context, svcIns *registry.ServiceInstance) error {
 	fw := &discovery.FrameWork{
 		Name:    frameWorkName,
 		Version: frameWorkVersion,
@@ -151,11 +151,15 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 		ticker := time.NewTicker(30 * time.Second)
 		defer ticker.Stop()
 		for {
-			<-ticker.C
-			_, err = r.cli.Heartbeat(sid, svcIns.ID)
-			if err != nil {
-				log.Errorf("failed to send heartbeat: %v", err)
-				continue
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				_, err = r.cli.Heartbeat(sid, svcIns.ID)
+				if err != nil {
+					log.Errorf("failed to send heartbeat: %v", err)
+					continue
+				}
 			}
 		}
 	}()
