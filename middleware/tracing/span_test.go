@@ -178,7 +178,7 @@ func Test_parseTarget(t *testing.T) {
 	}
 }
 
-func Test_setServerSpan(t *testing.T) {
+func TestSetServerSpan(_ *testing.T) {
 	ctx := context.Background()
 	_, span := trace.NewNoopTracerProvider().Tracer("Tracer").Start(ctx, "Spanname")
 
@@ -211,7 +211,7 @@ func Test_setServerSpan(t *testing.T) {
 	setServerSpan(ctx, span, m)
 }
 
-func Test_setClientSpan(t *testing.T) {
+func TestSetClientSpan(_ *testing.T) {
 	ctx := context.Background()
 	_, span := trace.NewNoopTracerProvider().Tracer("Tracer").Start(ctx, "Spanname")
 

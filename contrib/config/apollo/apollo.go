@@ -5,7 +5,7 @@ import (
 
 	"github.com/apolloconfig/agollo/v4"
 	"github.com/apolloconfig/agollo/v4/constant"
-	apolloConfig "github.com/apolloconfig/agollo/v4/env/config"
+	apolloconfig "github.com/apolloconfig/agollo/v4/env/config"
 	"github.com/apolloconfig/agollo/v4/extension"
 
 	"github.com/go-kratos/kratos/v2/config"
@@ -112,8 +112,8 @@ func NewSource(opts ...Option) config.Source {
 	for _, o := range opts {
 		o(&op)
 	}
-	client, err := agollo.StartWithConfig(func() (*apolloConfig.AppConfig, error) {
-		return &apolloConfig.AppConfig{
+	client, err := agollo.StartWithConfig(func() (*apolloconfig.AppConfig, error) {
+		return &apolloconfig.AppConfig{
 			AppID:            op.appid,
 			Cluster:          op.cluster,
 			NamespaceName:    op.namespace,
@@ -166,14 +166,13 @@ func (e *apollo) load() []*config.KeyValue {
 			}
 			kvs = append(kvs, kv)
 			continue
-		} else {
-			kv, err := e.getConfig(ns)
-			if err != nil {
-				log.Errorf("apollo get config failed，err:%v", err)
-				continue
-			}
-			kvs = append(kvs, kv)
 		}
+		kv, err := e.getConfig(ns)
+		if err != nil {
+			log.Errorf("apollo get config failed，err:%v", err)
+			continue
+		}
+		kvs = append(kvs, kv)
 	}
 	return kvs
 }

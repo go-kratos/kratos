@@ -30,7 +30,7 @@ func init() {
 	CmdClient.Flags().StringVarP(&protoPath, "proto_path", "p", protoPath, "proto path")
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(_ *cobra.Command, args []string) {
 	if len(args) == 0 {
 		fmt.Println("Please enter the proto file or directory")
 		return

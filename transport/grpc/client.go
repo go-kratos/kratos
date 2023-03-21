@@ -105,7 +105,7 @@ func WithNodeFilter(filters ...selector.NodeFilter) ClientOption {
 
 // WithLogger with logger
 // Deprecated: use global logger instead.
-func WithLogger(log log.Logger) ClientOption {
+func WithLogger(_ log.Logger) ClientOption {
 	return func(o *clientOptions) {}
 }
 

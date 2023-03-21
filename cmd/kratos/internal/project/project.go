@@ -42,7 +42,7 @@ func init() {
 	CmdNew.Flags().BoolVarP(&nomod, "nomod", "", nomod, "retain go mod")
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(_ *cobra.Command, args []string) {
 	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)

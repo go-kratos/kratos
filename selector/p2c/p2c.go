@@ -51,7 +51,7 @@ func (s *Balancer) prePick(nodes []selector.WeightedNode) (nodeA selector.Weight
 }
 
 // Pick pick a node.
-func (s *Balancer) Pick(ctx context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.DoneFunc, error) {
+func (s *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.DoneFunc, error) {
 	if len(nodes) == 0 {
 		return nil, nil, selector.ErrNoAvailable
 	}
