@@ -29,11 +29,11 @@ func (m *mockConn) UpdateState(resolver.State) error {
 
 func (m *mockConn) ReportError(error) {}
 
-func (m *mockConn) NewAddress(addresses []resolver.Address) {}
+func (m *mockConn) NewAddress(_ []resolver.Address) {}
 
-func (m *mockConn) NewServiceConfig(serviceConfig string) {}
+func (m *mockConn) NewServiceConfig(_ string) {}
 
-func (m *mockConn) ParseServiceConfig(serviceConfigJSON string) *serviceconfig.ParseResult {
+func (m *mockConn) ParseServiceConfig(_ string) *serviceconfig.ParseResult {
 	return nil
 }
 

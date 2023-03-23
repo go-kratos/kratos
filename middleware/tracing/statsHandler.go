@@ -13,12 +13,12 @@ import (
 type ClientHandler struct{}
 
 // HandleConn exists to satisfy gRPC stats.Handler.
-func (c *ClientHandler) HandleConn(ctx context.Context, cs stats.ConnStats) {
+func (c *ClientHandler) HandleConn(_ context.Context, _ stats.ConnStats) {
 	fmt.Println("Handle connection.")
 }
 
 // TagConn exists to satisfy gRPC stats.Handler.
-func (c *ClientHandler) TagConn(ctx context.Context, cti *stats.ConnTagInfo) context.Context {
+func (c *ClientHandler) TagConn(ctx context.Context, _ *stats.ConnTagInfo) context.Context {
 	return ctx
 }
 
@@ -38,6 +38,6 @@ func (c *ClientHandler) HandleRPC(ctx context.Context, rs stats.RPCStats) {
 }
 
 // TagRPC implements per-RPC context management.
-func (c *ClientHandler) TagRPC(ctx context.Context, rti *stats.RPCTagInfo) context.Context {
+func (c *ClientHandler) TagRPC(ctx context.Context, _ *stats.RPCTagInfo) context.Context {
 	return ctx
 }

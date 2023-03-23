@@ -17,7 +17,7 @@ import (
 var CmdServer = &cobra.Command{
 	Use:   "server",
 	Short: "Generate the proto Server implementations",
-	Long:  "Generate the proto Server implementations. Example: kratos proto server api/xxx.proto -target-dir=internal/service",
+	Long:  "Generate the proto Server implementations. Example: kratos proto server api/xxx.proto --target-dir=internal/service",
 	Run:   run,
 }
 var targetDir string
@@ -26,7 +26,7 @@ func init() {
 	CmdServer.Flags().StringVarP(&targetDir, "target-dir", "t", "internal/service", "generate target directory")
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(_ *cobra.Command, args []string) {
 	if len(args) == 0 {
 		fmt.Fprintln(os.Stderr, "Please specify the proto file. Example: kratos proto server api/xxx.proto")
 		return

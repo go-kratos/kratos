@@ -105,23 +105,30 @@ func WithNodeFilter(filters ...selector.NodeFilter) ClientOption {
 
 // WithLogger with logger
 // Deprecated: use global logger instead.
-func WithLogger(log log.Logger) ClientOption {
+func WithLogger(_ log.Logger) ClientOption {
 	return func(o *clientOptions) {}
+}
+
+func WithPrintDiscoveryDebugLog(p bool) ClientOption {
+	return func(o *clientOptions) {
+		o.printDiscoveryDebugLog = p
+	}
 }
 
 // clientOptions is gRPC Client
 type clientOptions struct {
-	endpoint     string
-	subsetSize   int
-	tlsConf      *tls.Config
-	timeout      time.Duration
-	discovery    registry.Discovery
-	middleware   []middleware.Middleware
-	ints         []grpc.UnaryClientInterceptor
-	streamInts   []grpc.StreamClientInterceptor
-	grpcOpts     []grpc.DialOption
-	balancerName string
-	filters      []selector.NodeFilter
+	endpoint               string
+	subsetSize             int
+	tlsConf                *tls.Config
+	timeout                time.Duration
+	discovery              registry.Discovery
+	middleware             []middleware.Middleware
+	ints                   []grpc.UnaryClientInterceptor
+	streamInts             []grpc.StreamClientInterceptor
+	grpcOpts               []grpc.DialOption
+	balancerName           string
+	filters                []selector.NodeFilter
+	printDiscoveryDebugLog bool
 }
 
 // Dial returns a GRPC connection.
@@ -136,9 +143,10 @@ func DialInsecure(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, 
 
 func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.ClientConn, error) {
 	options := clientOptions{
-		timeout:      2000 * time.Millisecond,
-		balancerName: balancerName,
-		subsetSize:   25,
+		timeout:                2000 * time.Millisecond,
+		balancerName:           balancerName,
+		subsetSize:             25,
+		printDiscoveryDebugLog: true,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -157,7 +165,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		sints = append(sints, options.streamInts...)
 	}
 	grpcOpts := []grpc.DialOption{
-		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"loadBalancingConfig": [{"%s":{}}]}`, options.balancerName)),
+		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"loadBalancingConfig": [{"%s":{}}],"healthCheckConfig":{"serviceName":""}}`, options.balancerName)),
 		grpc.WithChainUnaryInterceptor(ints...),
 		grpc.WithChainStreamInterceptor(sints...),
 	}
@@ -169,6 +177,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 					options.discovery,
 					discovery.WithInsecure(insecure),
 					discovery.WithSubset(options.subsetSize),
+					discovery.PrintDebugLog(options.printDiscoveryDebugLog),
 				)))
 	}
 	if insecure {

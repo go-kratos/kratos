@@ -72,7 +72,7 @@ func (c *customChangeListener) OnChange(changeEvent *storage.ChangeEvent) {
 	c.in <- change
 }
 
-func (c *customChangeListener) OnNewestChange(changeEvent *storage.FullChangeEvent) {}
+func (c *customChangeListener) OnNewestChange(_ *storage.FullChangeEvent) {}
 
 func newWatcher(a *apollo) (config.Watcher, error) {
 	changeCh := make(chan []*config.KeyValue)

@@ -14,7 +14,7 @@ type ctxKey string
 
 const testKey ctxKey = "MY_TEST_KEY"
 
-func Test_Client_HandleConn(t *testing.T) {
+func TestClient_HandleConn(_ *testing.T) {
 	(&ClientHandler{}).HandleConn(context.Background(), nil)
 }
 
@@ -47,7 +47,7 @@ func (m *mockSpan) SpanContext() trace.SpanContext {
 	return *m.mockSpanCtx
 }
 
-func Test_Client_HandleRPC(t *testing.T) {
+func TestClient_HandleRPC(_ *testing.T) {
 	client := &ClientHandler{}
 	ctx := context.Background()
 	rs := stats.OutHeader{}

@@ -42,7 +42,7 @@ func init() {
 	CmdNew.Flags().BoolVarP(&nomod, "nomod", "", nomod, "retain go mod")
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(_ *cobra.Command, args []string) {
 	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
@@ -66,15 +66,15 @@ func run(cmd *cobra.Command, args []string) {
 	} else {
 		name = args[0]
 	}
-	wd = getProjectPlaceDir(name, wd)
-	p := &Project{Name: filepath.Base(name), Path: name}
+	projectName, workingDir := processProjectParams(name, wd)
+	p := &Project{Name: projectName, Path: projectName}
 	done := make(chan error, 1)
 	go func() {
 		if !nomod {
-			done <- p.New(ctx, wd, repoURL, branch)
+			done <- p.New(ctx, workingDir, repoURL, branch)
 			return
 		}
-		projectRoot := getgomodProjectRoot(wd)
+		projectRoot := getgomodProjectRoot(workingDir)
 		if gomodIsNotExistIn(projectRoot) {
 			done <- fmt.Errorf("🚫 go.mod don't exists in %s", projectRoot)
 			return
@@ -84,7 +84,7 @@ func run(cmd *cobra.Command, args []string) {
 		if e != nil {
 			panic(e)
 		}
-		done <- p.Add(ctx, wd, repoURL, branch, mod)
+		done <- p.Add(ctx, workingDir, repoURL, branch, mod)
 	}()
 	select {
 	case <-ctx.Done():
@@ -100,29 +100,29 @@ func run(cmd *cobra.Command, args []string) {
 	}
 }
 
-func getProjectPlaceDir(projectName string, fallbackPlaceDir string) string {
-	projectFullPath := projectName
-
-	wd := filepath.Dir(projectName)
-	// check for home dir
-	if strings.HasPrefix(wd, "~") {
+func processProjectParams(projectName string, workingDir string) (projectNameResult, workingDirResult string) {
+	_projectDir := projectName
+	_workingDir := workingDir
+	// Process ProjectName with system variable
+	if strings.HasPrefix(projectName, "~") {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			// cannot get user home return fallback place dir
-			return fallbackPlaceDir
+			return _projectDir, _workingDir
 		}
-		projectFullPath = filepath.Join(homeDir, projectName[2:])
+		_projectDir = filepath.Join(homeDir, projectName[2:])
 	}
+
 	// check path is relative
-	if !filepath.IsAbs(projectFullPath) {
-		absPath, err := filepath.Abs(projectFullPath)
+	if !filepath.IsAbs(projectName) {
+		absPath, err := filepath.Abs(projectName)
 		if err != nil {
-			return fallbackPlaceDir
+			return _projectDir, _workingDir
 		}
-		projectFullPath = absPath
+		_projectDir = absPath
 	}
-	// create project logic will check stat,so not check path stat here
-	return filepath.Dir(projectFullPath)
+
+	return filepath.Base(_projectDir), filepath.Dir(_projectDir)
 }
 
 func getgomodProjectRoot(dir string) string {

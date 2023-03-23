@@ -102,7 +102,7 @@ type HeaderCallOption struct {
 	header *http.Header
 }
 
-func (o HeaderCallOption) after(c *callInfo, cs *csAttempt) {
+func (o HeaderCallOption) after(_ *callInfo, cs *csAttempt) {
 	if cs.res != nil && cs.res.Header != nil {
 		*o.header = cs.res.Header
 	}

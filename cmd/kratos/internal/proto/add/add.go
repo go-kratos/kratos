@@ -19,7 +19,7 @@ var CmdAdd = &cobra.Command{
 	Run:   run,
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(_ *cobra.Command, args []string) {
 	if len(args) == 0 {
 		fmt.Println("Please enter the proto file or directory")
 		return

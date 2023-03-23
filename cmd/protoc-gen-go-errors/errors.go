@@ -59,7 +59,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	}
 }
 
-func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, enum *protogen.Enum) bool {
+func genErrorsReason(_ *protogen.Plugin, _ *protogen.File, g *protogen.GeneratedFile, enum *protogen.Enum) bool {
 	defaultCode := proto.GetExtension(enum.Desc.Options(), errors.E_DefaultCode)
 	code := 0
 	if ok := defaultCode.(int32); ok != 0 {

@@ -22,10 +22,10 @@ type discoveryResolver struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	insecure         bool
-	debugLogDisabled bool
-	selecterKey      string
-	subsetSize       int
+	insecure    bool
+	debugLog    bool
+	selecterKey string
+	subsetSize  int
 }
 
 func (r *discoveryResolver) watch() {
@@ -90,7 +90,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		log.Errorf("[resolver] failed to update state: %s", err)
 	}
 
-	if !r.debugLogDisabled {
+	if r.debugLog {
 		b, _ := json.Marshal(filtered)
 		log.Infof("[resolver] update instances: %s", b)
 	}
@@ -104,16 +104,11 @@ func (r *discoveryResolver) Close() {
 	}
 }
 
-func (r *discoveryResolver) ResolveNow(options resolver.ResolveNowOptions) {}
+func (r *discoveryResolver) ResolveNow(_ resolver.ResolveNowOptions) {}
 
-func parseAttributes(md map[string]string) *attributes.Attributes {
-	var a *attributes.Attributes
+func parseAttributes(md map[string]string) (a *attributes.Attributes) {
 	for k, v := range md {
-		if a == nil {
-			a = attributes.New(k, v)
-		} else {
-			a = a.WithValue(k, v)
-		}
+		a = a.WithValue(k, v)
 	}
 	return a
 }

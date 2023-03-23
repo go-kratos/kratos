@@ -20,7 +20,7 @@ func NewBuilder() resolver.Builder {
 	return &directBuilder{}
 }
 
-func (d *directBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
+func (d *directBuilder) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (resolver.Resolver, error) {
 	addrs := make([]resolver.Address, 0)
 	for _, addr := range strings.Split(strings.TrimPrefix(target.URL.Path, "/"), ",") {
 		addrs = append(addrs, resolver.Address{Addr: addr})

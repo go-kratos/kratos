@@ -27,10 +27,7 @@ func (c *logger) Log(level Level, keyvals ...interface{}) error {
 		bindValues(c.ctx, kvs)
 	}
 	kvs = append(kvs, keyvals...)
-	if err := c.logger.Log(level, kvs...); err != nil {
-		return err
-	}
-	return nil
+	return c.logger.Log(level, kvs...)
 }
 
 // With with logger fields.

@@ -58,7 +58,7 @@ func TestWithAccessSecret(t *testing.T) {
 	}
 }
 
-func TestLogger(t *testing.T) {
+func TestLogger(_ *testing.T) {
 	project := "foo"
 	logger := NewAliyunLog(WithProject(project))
 	defer logger.Close()
