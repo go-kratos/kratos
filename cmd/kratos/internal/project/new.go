@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
-
 	"github.com/fatih/color"
+
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 )
 
 // Project is a project template.
@@ -23,11 +23,11 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 	to := filepath.Join(dir, p.Name)
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
 		fmt.Printf("🚫 %s already exists\n", p.Name)
-		override := false
 		prompt := &survey.Confirm{
 			Message: "📂 Do you want to override the folder ?",
 			Help:    "Delete the existing folder and create the project.",
 		}
+		var override bool
 		e := survey.AskOne(prompt, &override)
 		if e != nil {
 			return e

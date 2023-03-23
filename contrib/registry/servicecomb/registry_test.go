@@ -19,13 +19,13 @@ func init() {
 
 type mockClient struct{}
 
-func (receiver *mockClient) WatchMicroService(microServiceID string, callback func(*sc.MicroServiceInstanceChangedEvent)) error {
+func (receiver *mockClient) WatchMicroService(_ string, _ func(*sc.MicroServiceInstanceChangedEvent)) error {
 	return nil
 }
 
 //nolint
-func (receiver *mockClient) FindMicroServiceInstances(consumerID,
-	appID, microServiceName, versionRule string, opts ...sc.CallOption,
+func (receiver *mockClient) FindMicroServiceInstances(_,
+	_, microServiceName, _ string, _ ...sc.CallOption,
 ) ([]*pb.MicroServiceInstance, error) {
 	if microServiceName == "KratosServicecomb" {
 		return []*pb.MicroServiceInstance{{}}, nil
@@ -33,23 +33,23 @@ func (receiver *mockClient) FindMicroServiceInstances(consumerID,
 	return nil, nil
 }
 
-func (receiver *mockClient) RegisterService(microService *pb.MicroService) (string, error) {
+func (receiver *mockClient) RegisterService(_ *pb.MicroService) (string, error) {
 	return "", nil
 }
 
-func (receiver *mockClient) RegisterMicroServiceInstance(microServiceInstance *pb.MicroServiceInstance) (string, error) {
+func (receiver *mockClient) RegisterMicroServiceInstance(_ *pb.MicroServiceInstance) (string, error) {
 	return "", nil
 }
 
-func (receiver *mockClient) Heartbeat(microServiceID, microServiceInstanceID string) (bool, error) {
+func (receiver *mockClient) Heartbeat(_, _ string) (bool, error) {
 	return true, nil
 }
 
-func (receiver *mockClient) UnregisterMicroServiceInstance(microServiceID, microServiceInstanceID string) (bool, error) {
+func (receiver *mockClient) UnregisterMicroServiceInstance(_, _ string) (bool, error) {
 	return true, nil
 }
 
-func (receiver *mockClient) GetMicroServiceID(appID, microServiceName, version, env string, opts ...sc.CallOption) (string, error) {
+func (receiver *mockClient) GetMicroServiceID(_, _, _, _ string, _ ...sc.CallOption) (string, error) {
 	return "", nil
 }
 

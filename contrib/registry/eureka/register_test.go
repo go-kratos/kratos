@@ -11,7 +11,7 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
-func TestRegistry(t *testing.T) {
+func TestRegistry(_ *testing.T) {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	s1 := &registry.ServiceInstance{
@@ -92,7 +92,7 @@ func do(r *Registry, s *registry.ServiceInstance) {
 	}
 }
 
-func TestLock(t *testing.T) {
+func TestLock(_ *testing.T) {
 	type me struct {
 		lock sync.Mutex
 	}

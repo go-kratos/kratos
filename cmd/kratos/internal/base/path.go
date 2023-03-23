@@ -36,7 +36,6 @@ func kratosHomeWithDir(dir string) string {
 }
 
 func copyFile(src, dst string, replaces []string) error {
-	var err error
 	srcinfo, err := os.Stat(src)
 	if err != nil {
 		return err
@@ -57,19 +56,18 @@ func copyFile(src, dst string, replaces []string) error {
 }
 
 func copyDir(src, dst string, replaces, ignores []string) error {
-	var err error
-	var fds []os.DirEntry
-	var srcinfo os.FileInfo
-
-	if srcinfo, err = os.Stat(src); err != nil {
+	srcinfo, err := os.Stat(src)
+	if err != nil {
 		return err
 	}
 
-	if err = os.MkdirAll(dst, srcinfo.Mode()); err != nil {
+	err = os.MkdirAll(dst, srcinfo.Mode())
+	if err != nil {
 		return err
 	}
 
-	if fds, err = os.ReadDir(src); err != nil {
+	fds, err := os.ReadDir(src)
+	if err != nil {
 		return err
 	}
 	for _, fd := range fds {
