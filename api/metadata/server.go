@@ -98,7 +98,7 @@ func (s *Server) load() error {
 }
 
 // ListServices return all services
-func (s *Server) ListServices(ctx context.Context, in *ListServicesRequest) (*ListServicesReply, error) {
+func (s *Server) ListServices(_ context.Context, _ *ListServicesRequest) (*ListServicesReply, error) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	if err := s.load(); err != nil {
@@ -122,7 +122,7 @@ func (s *Server) ListServices(ctx context.Context, in *ListServicesRequest) (*Li
 }
 
 // GetServiceDesc return service meta by name
-func (s *Server) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest) (*GetServiceDescReply, error) {
+func (s *Server) GetServiceDesc(_ context.Context, in *GetServiceDescRequest) (*GetServiceDescReply, error) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	if err := s.load(); err != nil {

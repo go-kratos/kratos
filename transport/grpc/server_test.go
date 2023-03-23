@@ -56,7 +56,7 @@ func (s *server) SayHelloStream(streamServer pb.Greeter_SayHelloStreamServer) er
 }
 
 // SayHello implements helloworld.GreeterServer
-func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+func (s *server) SayHello(_ context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	if in.Name == "error" {
 		return nil, errors.BadRequest("custom_error", fmt.Sprintf("invalid argument %s", in.Name))
 	}

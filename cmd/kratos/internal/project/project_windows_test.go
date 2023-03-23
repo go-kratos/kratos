@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func Test_getProjectPlaceDir(t *testing.T) {
+func Test_processProjectParams(t *testing.T) {
 	type args struct {
 		projectName      string
 		fallbackPlaceDir string
@@ -22,7 +22,7 @@ func Test_getProjectPlaceDir(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getProjectPlaceDir(tt.args.projectName, tt.args.fallbackPlaceDir); got != tt.want {
+			if _, got := processProjectParams(tt.args.projectName, tt.args.fallbackPlaceDir); got != tt.want {
 				t.Errorf("getProjectPlaceDir() = %v, want %v", got, tt.want)
 			}
 		})
