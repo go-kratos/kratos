@@ -105,7 +105,7 @@ func WithNodeFilter(filters ...selector.NodeFilter) ClientOption {
 
 // WithLogger with logger
 // Deprecated: use global logger instead.
-func WithLogger(log log.Logger) ClientOption {
+func WithLogger(_ log.Logger) ClientOption {
 	return func(o *clientOptions) {}
 }
 
@@ -165,7 +165,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		sints = append(sints, options.streamInts...)
 	}
 	grpcOpts := []grpc.DialOption{
-		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"loadBalancingConfig": [{"%s":{}}]}`, options.balancerName)),
+		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"loadBalancingConfig": [{"%s":{}}],"healthCheckConfig":{"serviceName":""}}`, options.balancerName)),
 		grpc.WithChainUnaryInterceptor(ints...),
 		grpc.WithChainStreamInterceptor(sints...),
 	}

@@ -11,5 +11,5 @@ func newDirectResolver() resolver.Resolver {
 func (r *directResolver) Close() {
 }
 
-func (r *directResolver) ResolveNow(options resolver.ResolveNowOptions) {
+func (r *directResolver) ResolveNow(_ resolver.ResolveNowOptions) {
 }

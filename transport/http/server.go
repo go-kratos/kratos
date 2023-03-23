@@ -52,7 +52,7 @@ func Timeout(timeout time.Duration) ServerOption {
 
 // Logger with server logger.
 // Deprecated: use global logger instead.
-func Logger(logger log.Logger) ServerOption {
+func Logger(_ log.Logger) ServerOption {
 	return func(s *Server) {}
 }
 

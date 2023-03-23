@@ -9,11 +9,11 @@ import (
 
 type codec struct{}
 
-func (c codec) Marshal(v interface{}) ([]byte, error) {
+func (c codec) Marshal(_ interface{}) ([]byte, error) {
 	panic("implement me")
 }
 
-func (c codec) Unmarshal(data []byte, v interface{}) error {
+func (c codec) Unmarshal(_ []byte, _ interface{}) error {
 	panic("implement me")
 }
 

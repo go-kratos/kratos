@@ -104,16 +104,11 @@ func (r *discoveryResolver) Close() {
 	}
 }
 
-func (r *discoveryResolver) ResolveNow(options resolver.ResolveNowOptions) {}
+func (r *discoveryResolver) ResolveNow(_ resolver.ResolveNowOptions) {}
 
-func parseAttributes(md map[string]string) *attributes.Attributes {
-	var a *attributes.Attributes
+func parseAttributes(md map[string]string) (a *attributes.Attributes) {
 	for k, v := range md {
-		if a == nil {
-			a = attributes.New(k, v)
-		} else {
-			a = a.WithValue(k, v)
-		}
+		a = a.WithValue(k, v)
 	}
 	return a
 }

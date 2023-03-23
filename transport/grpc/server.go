@@ -56,7 +56,7 @@ func Timeout(timeout time.Duration) ServerOption {
 
 // Logger with server logger.
 // Deprecated: use global logger instead.
-func Logger(logger log.Logger) ServerOption {
+func Logger(_ log.Logger) ServerOption {
 	return func(s *Server) {}
 }
 
@@ -210,7 +210,7 @@ func (s *Server) Start(ctx context.Context) error {
 }
 
 // Stop stop the gRPC server.
-func (s *Server) Stop(ctx context.Context) error {
+func (s *Server) Stop(_ context.Context) error {
 	if s.adminClean != nil {
 		s.adminClean()
 	}
