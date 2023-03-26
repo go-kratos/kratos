@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+
+	"github.com/go-kratos/aegis/subset"
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
-
-	"github.com/go-kratos/aegis/subset"
-	"github.com/google/uuid"
 )
 
 // Target is resolver target
@@ -135,7 +135,7 @@ func (r *resolver) update(services []*registry.ServiceInstance) bool {
 	if r.subsetSize != 0 {
 		filtered = subset.Subset(r.selecterKey, filtered, r.subsetSize)
 	}
-	nodes := make([]selector.Node, 0)
+	nodes := make([]selector.Node, 0, len(filtered))
 	for _, ins := range filtered {
 		ept, _ := endpoint.ParseEndpoint(ins.Endpoints, endpoint.Scheme("http", !r.insecure))
 		nodes = append(nodes, selector.NewNode("http", ept, ins))

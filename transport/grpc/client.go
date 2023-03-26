@@ -6,6 +6,11 @@ import (
 	"fmt"
 	"time"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	grpcinsecure "google.golang.org/grpc/credentials/insecure"
+	grpcmd "google.golang.org/grpc/metadata"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
@@ -16,11 +21,6 @@ import (
 
 	// init resolver
 	_ "github.com/go-kratos/kratos/v2/transport/grpc/resolver/direct"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-	grpcinsecure "google.golang.org/grpc/credentials/insecure"
-	grpcmd "google.golang.org/grpc/metadata"
 )
 
 func init() {
