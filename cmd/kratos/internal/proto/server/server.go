@@ -16,8 +16,8 @@ import (
 // CmdServer the service command.
 var CmdServer = &cobra.Command{
 	Use:   "server",
-	Short: "Generate the proto Server implementations",
-	Long:  "Generate the proto Server implementations. Example: kratos proto server api/xxx.proto --target-dir=internal/service",
+	Short: "Generate the proto server implementations",
+	Long:  "Generate the proto server implementations. Example: kratos proto server api/xxx.proto --target-dir=internal/service",
 	Run:   run,
 }
 var targetDir string
@@ -64,8 +64,8 @@ func run(_ *cobra.Command, args []string) {
 					continue
 				}
 				cs.Methods = append(cs.Methods, &Method{
-					Service: serviceName(s.Name), Name: serviceName(r.Name), Request: r.RequestType,
-					Reply: r.ReturnsType, Type: getMethodType(r.StreamsRequest, r.StreamsReturns),
+					Service: serviceName(s.Name), Name: serviceName(r.Name), Request: parametersName(r.RequestType),
+					Reply: parametersName(r.ReturnsType), Type: getMethodType(r.StreamsRequest, r.StreamsReturns),
 				})
 			}
 			res = append(res, cs)
@@ -103,6 +103,10 @@ func getMethodType(streamsRequest, streamsReturns bool) MethodType {
 		return returnsStreamsType
 	}
 	return unaryType
+}
+
+func parametersName(name string) string {
+	return strings.ReplaceAll(name, ".", "_")
 }
 
 func serviceName(name string) string {
