@@ -31,9 +31,9 @@ func (c *ClientHandler) HandleRPC(ctx context.Context, rs stats.RPCStats) {
 	if !ok {
 		return
 	}
-	remoteAddr := p.Addr.String()
-	if span := trace.SpanFromContext(ctx); span.SpanContext().IsValid() {
-		span.SetAttributes(peerAttr(remoteAddr)...)
+	span := trace.SpanFromContext(ctx)
+	if span.SpanContext().IsValid() {
+		span.SetAttributes(peerAttr(p.Addr.String())...)
 	}
 }
 

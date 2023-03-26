@@ -18,7 +18,7 @@ func TestClient_HandleConn(_ *testing.T) {
 	(&ClientHandler{}).HandleConn(context.Background(), nil)
 }
 
-func Test_Client_TagConn(t *testing.T) {
+func TestClient_TagConn(t *testing.T) {
 	client := &ClientHandler{}
 	ctx := context.WithValue(context.Background(), testKey, 123)
 
@@ -27,7 +27,7 @@ func Test_Client_TagConn(t *testing.T) {
 	}
 }
 
-func Test_Client_TagRPC(t *testing.T) {
+func TestClient_TagRPC(t *testing.T) {
 	client := &ClientHandler{}
 	ctx := context.WithValue(context.Background(), testKey, 123)
 
@@ -36,12 +36,10 @@ func Test_Client_TagRPC(t *testing.T) {
 	}
 }
 
-type (
-	mockSpan struct {
-		trace.Span
-		mockSpanCtx *trace.SpanContext
-	}
-)
+type mockSpan struct {
+	trace.Span
+	mockSpanCtx *trace.SpanContext
+}
 
 func (m *mockSpan) SpanContext() trace.SpanContext {
 	return *m.mockSpanCtx
