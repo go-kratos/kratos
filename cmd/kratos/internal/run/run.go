@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -108,7 +107,7 @@ func findCMD(base string) (map[string]string, error) {
 				}
 				for _, fileInfo := range paths {
 					if fileInfo.IsDir() {
-						abs := path.Join(walkPath, fileInfo.Name())
+						abs := filepath.Join(walkPath, fileInfo.Name())
 						cmdPath[strings.TrimPrefix(abs, wd)] = abs
 					}
 				}
