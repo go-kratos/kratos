@@ -204,6 +204,8 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
 			defer ticker.Stop()
 			for {
+				// NOTICE: the try-receive operation here is to try to exit the sender goroutine as early as possible.
+				// https://go101.org/article/channel-closing.html
 				select {
 				case <-c.ctx.Done():
 					_ = c.cli.Agent().ServiceDeregister(svc.ID)
