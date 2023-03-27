@@ -324,7 +324,11 @@ func (e *Client) request(ctx context.Context, method string, params []string, in
 		_ = resp.Body.Close()
 	}()
 
-	if output != nil && resp.StatusCode/100 == 2 {
+	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusNoContent {
+		if output == nil {
+			return false, nil
+		}
+
 		data, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
@@ -334,12 +338,7 @@ func (e *Client) request(ctx context.Context, method string, params []string, in
 			return false, err
 		}
 	}
-
-	if resp.StatusCode >= http.StatusBadRequest {
-		return false, fmt.Errorf("response Error %d", resp.StatusCode)
-	}
-
-	return false, nil
+	return false, fmt.Errorf("response error %d", resp.StatusCode)
 }
 
 func (e *Client) do(ctx context.Context, method string, params []string, input io.Reader, output interface{}) error {
