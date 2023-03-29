@@ -308,10 +308,6 @@ func TestTimeout(t *testing.T) {
 	}
 }
 
-func TestLogger(_ *testing.T) {
-	// TODO
-}
-
 func TestRequestDecoder(t *testing.T) {
 	o := &Server{}
 	v := func(*http.Request, interface{}) error { return nil }
