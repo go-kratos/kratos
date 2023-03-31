@@ -13,14 +13,13 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// EncodeValues encode a message into url values.
-func EncodeValues(msg interface{}) (url.Values, error) {
+func encodeValues(msg interface{}, forceTextName bool) (url.Values, error) {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return url.Values{}, nil
 	}
 	if v, ok := msg.(proto.Message); ok {
 		u := make(url.Values)
-		err := encodeByField(u, "", v.ProtoReflect(), false)
+		err := encodeByField(u, "", v.ProtoReflect(), forceTextName)
 		if err != nil {
 			return nil, err
 		}
@@ -29,20 +28,14 @@ func EncodeValues(msg interface{}) (url.Values, error) {
 	return encoder.Encode(msg)
 }
 
+// EncodeValues encode a message into url values.
+func EncodeValues(msg interface{}) (url.Values, error) {
+	return encodeValues(msg, false)
+}
+
 // EncodeTextNameValues encode a message into url values.
 func EncodeTextNameValues(msg interface{}) (url.Values, error) {
-	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
-		return url.Values{}, nil
-	}
-	if v, ok := msg.(proto.Message); ok {
-		u := make(url.Values)
-		err := encodeByField(u, "", v.ProtoReflect(), true)
-		if err != nil {
-			return nil, err
-		}
-		return u, nil
-	}
-	return encoder.Encode(msg)
+	return encodeValues(msg, true)
 }
 
 func encodeByField(u url.Values, path string, m protoreflect.Message, forceTextName bool) (finalErr error) {
