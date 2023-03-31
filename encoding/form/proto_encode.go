@@ -20,7 +20,7 @@ func EncodeValues(msg interface{}) (url.Values, error) {
 	}
 	if v, ok := msg.(proto.Message); ok {
 		u := make(url.Values)
-		err := encodeByField(u, "", v.ProtoReflect())
+		err := encodeByField(u, "", v.ProtoReflect(), false)
 		if err != nil {
 			return nil, err
 		}
@@ -29,13 +29,31 @@ func EncodeValues(msg interface{}) (url.Values, error) {
 	return encoder.Encode(msg)
 }
 
-func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr error) {
+// EncodeTextNameValues encode a message into url values.
+func EncodeTextNameValues(msg interface{}) (url.Values, error) {
+	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
+		return url.Values{}, nil
+	}
+	if v, ok := msg.(proto.Message); ok {
+		u := make(url.Values)
+		err := encodeByField(u, "", v.ProtoReflect(), true)
+		if err != nil {
+			return nil, err
+		}
+		return u, nil
+	}
+	return encoder.Encode(msg)
+}
+
+func encodeByField(u url.Values, path string, m protoreflect.Message, forceTextName bool) (finalErr error) {
 	m.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
 		var (
 			key     string
 			newPath string
 		)
-		if fd.HasJSONName() {
+		if forceTextName {
+			key = fd.TextName()
+		} else if fd.HasJSONName() {
 			key = fd.JSONName()
 		} else {
 			key = fd.TextName()
@@ -79,7 +97,7 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 				u.Set(newPath, value)
 				return true
 			}
-			if err = encodeByField(u, newPath, v.Message()); err != nil {
+			if err = encodeByField(u, newPath, v.Message(), forceTextName); err != nil {
 				finalErr = err
 				return false
 			}
