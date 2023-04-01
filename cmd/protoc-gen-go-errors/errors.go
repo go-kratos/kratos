@@ -89,6 +89,12 @@ func genErrorsReason(_ *protogen.Plugin, _ *protogen.File, g *protogen.Generated
 			comment = v.Comments.Trailing.String()
 		}
 
+		var enumDetails *errorDetails
+		eDetails := proto.GetExtension(v.Desc.Options(), errors.E_Details)
+		if d := eDetails.(*errors.Details); d != nil {
+			enumDetails = getDetails(d)
+		}
+
 		err := &errorInfo{
 			Name:       string(enum.Desc.Name()),
 			Value:      string(v.Desc.Name()),
@@ -96,6 +102,8 @@ func genErrorsReason(_ *protogen.Plugin, _ *protogen.File, g *protogen.Generated
 			HTTPCode:   enumCode,
 			Comment:    comment,
 			HasComment: len(comment) > 0,
+			Details:    enumDetails,
+			HasDetails: enumDetails != nil,
 		}
 		ew.Errors = append(ew.Errors, err)
 	}
@@ -105,6 +113,14 @@ func genErrorsReason(_ *protogen.Plugin, _ *protogen.File, g *protogen.Generated
 	g.P(ew.execute())
 
 	return false
+}
+
+func getDetails(d *errors.Details) *errorDetails {
+	details := &errorDetails{
+		Format:    d.GetFormat(),
+		HasFormat: d.Format != nil,
+	}
+	return details
 }
 
 func case2Camel(name string) string {

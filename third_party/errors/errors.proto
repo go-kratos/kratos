@@ -15,4 +15,9 @@ extend google.protobuf.EnumOptions {
 
 extend google.protobuf.EnumValueOptions {
   int32 code = 1109;
+  optional Details details = 1110;
+}
+
+message Details {
+  optional string format = 1;
 }
