@@ -3,7 +3,6 @@ package metadata
 import (
 	"context"
 	"fmt"
-	grpcmd "google.golang.org/grpc/metadata"
 	"strings"
 )
 
@@ -72,10 +71,6 @@ func (m Metadata) Clone() Metadata {
 		md[k] = v
 	}
 	return md
-}
-
-func (m Metadata) ToGrpcMD() grpcmd.MD {
-	return grpcmd.MD(m)
 }
 
 type serverMetadataKey struct{}
