@@ -64,6 +64,11 @@ func (mc headerCarrier) Set(key string, value string) {
 	metadata.MD(mc).Set(key, value)
 }
 
+// Append appends the key-value pair.
+func (mc headerCarrier) Append(key string, value ...string) {
+	metadata.MD(mc).Append(key, value...)
+}
+
 // Keys lists the keys stored in this carrier.
 func (mc headerCarrier) Keys() []string {
 	keys := make([]string, 0, len(mc))

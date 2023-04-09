@@ -29,6 +29,13 @@ func (hc headerCarrier) Set(key string, value string) {
 	http.Header(hc).Set(key, value)
 }
 
+// Append appends the key-value pair.
+func (hc headerCarrier) Append(key string, value ...string) {
+	for _, v := range value {
+		http.Header(hc).Add(key, v)
+	}
+}
+
 // Keys lists the keys stored in this carrier.
 func (hc headerCarrier) Keys() []string {
 	keys := make([]string, 0, len(hc))
