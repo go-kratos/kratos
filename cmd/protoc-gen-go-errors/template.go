@@ -21,8 +21,13 @@ type errorInfo struct {
 }
 
 type errorDetails struct {
-	Format    string
+	Format    *errorFormat
 	HasFormat bool
+}
+
+type errorFormat struct {
+	Str      string
+	WithArgs bool
 }
 
 type errorWrapper struct {

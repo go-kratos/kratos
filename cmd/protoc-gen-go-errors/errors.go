@@ -116,11 +116,25 @@ func genErrorsReason(_ *protogen.Plugin, _ *protogen.File, g *protogen.Generated
 }
 
 func getDetails(d *errors.Details) *errorDetails {
+	var format *errorFormat
+	hasFormat := d.Format != nil
+	if hasFormat {
+		format = getFormat(d.Format)
+	}
+
 	details := &errorDetails{
-		Format:    d.GetFormat(),
-		HasFormat: d.Format != nil,
+		Format:    format,
+		HasFormat: hasFormat,
 	}
 	return details
+}
+
+func getFormat(f *errors.Format) *errorFormat {
+	format := &errorFormat{
+		Str:      f.Str,
+		WithArgs: f.WithArgs,
+	}
+	return format
 }
 
 func case2Camel(name string) string {

@@ -19,5 +19,10 @@ extend google.protobuf.EnumValueOptions {
 }
 
 message Details {
-  optional string format = 1;
+  optional Format format = 1;
+}
+
+message Format {
+  string str = 1;
+  bool with_args = 2;
 }
