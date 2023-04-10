@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/go-kratos/kratos/v2 v2.6.1
-	github.com/polarismesh/polaris-go v1.3.0
+	github.com/polarismesh/polaris-go v1.4.0
 )
 
 replace github.com/go-kratos/kratos/v2 => ../../../
