@@ -68,7 +68,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 			continue
 		}
 		// filter weight <= 0
-		if w, ok := in.Metadata["weight"]; ok {
+		if w, ok := in.Metadata["weight"]; ok && w != "" {
 			if i, err := strconv.ParseInt(w, 10, 64); err == nil && i <= 0 {
 				continue
 			}
