@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"google.golang.org/grpc/resolver"
-
 	"github.com/go-kratos/kratos/v2/registry"
+
+	"google.golang.org/grpc/resolver"
 )
 
 type testClientConn struct {
@@ -123,5 +123,37 @@ func TestParseAttributes(t *testing.T) {
 	}
 	if x.Value("notfound") != nil {
 		t.Errorf("expect nil, got %v", x.Value("notfound"))
+	}
+}
+
+func Test_discoveryResolver_parseAddress(t *testing.T) {
+	r := &discoveryResolver{
+		insecure: true,
+	}
+	redundantEndpoints := []*registry.ServiceInstance{
+		{
+			Endpoints: []string{"grpc://192.168.101.2:8000"},
+		},
+		{
+			Endpoints: []string{"grpc://192.168.101.2:8000"},
+		},
+		{
+			Endpoints: []string{"grpc://192.168.101.3:8000"},
+		},
+		{
+			Endpoints: []string{"grpc://192.168.101.3:8000"},
+		},
+	}
+	resultAddr := []*registry.ServiceInstance{
+		{
+			Endpoints: []string{"grpc://192.168.101.2:8000"},
+		},
+		{
+			Endpoints: []string{"grpc://192.168.101.3:8000"},
+		},
+	}
+	_, endpoints, _ := r.parseAddress(redundantEndpoints)
+	if !reflect.DeepEqual(endpoints, resultAddr) {
+		t.Errorf("expect %d, got %d", len(endpoints), len(endpoints))
 	}
 }

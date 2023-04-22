@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"google.golang.org/grpc/attributes"
@@ -49,6 +50,22 @@ func (r *discoveryResolver) watch() {
 }
 
 func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
+	addrs, filtered, err := r.parseAddress(ins)
+	if err != nil {
+		log.Warn(err.Error())
+		return
+	}
+	err = r.cc.UpdateState(resolver.State{Addresses: addrs})
+	if err != nil {
+		log.Errorf("[resolver] failed to update state: %s", err)
+	}
+	if r.debugLog {
+		b, _ := json.Marshal(filtered)
+		log.Infof("[resolver] update instances: %s", b)
+	}
+}
+
+func (r *discoveryResolver) parseAddress(ins []*registry.ServiceInstance) ([]resolver.Address, []*registry.ServiceInstance, error) {
 	var (
 		endpoints = make(map[string]struct{})
 		filtered  = make([]*registry.ServiceInstance, 0, len(ins))
@@ -66,6 +83,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		if _, ok := endpoints[ept]; ok {
 			continue
 		}
+		endpoints[ept] = struct{}{}
 		filtered = append(filtered, in)
 	}
 	if r.subsetSize != 0 {
@@ -75,7 +93,6 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	addrs := make([]resolver.Address, 0, len(filtered))
 	for _, in := range filtered {
 		ept, _ := endpoint.ParseEndpoint(in.Endpoints, endpoint.Scheme("grpc", !r.insecure))
-		endpoints[ept] = struct{}{}
 		addr := resolver.Address{
 			ServerName: in.Name,
 			Attributes: parseAttributes(in.Metadata).WithValue("rawServiceInstance", in),
@@ -84,17 +101,9 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		addrs = append(addrs, addr)
 	}
 	if len(addrs) == 0 {
-		log.Warnf("[resolver] Zero endpoint found,refused to write, instances: %v", ins)
-		return
+		return nil, nil, fmt.Errorf("[resolver] Zero endpoint found,refused to write, instances: %v", ins)
 	}
-	err := r.cc.UpdateState(resolver.State{Addresses: addrs})
-	if err != nil {
-		log.Errorf("[resolver] failed to update state: %s", err)
-	}
-	if r.debugLog {
-		b, _ := json.Marshal(filtered)
-		log.Infof("[resolver] update instances: %s", b)
-	}
+	return addrs, filtered, nil
 }
 
 func (r *discoveryResolver) Close() {
