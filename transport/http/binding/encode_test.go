@@ -17,6 +17,18 @@ func TestEncodeURL(t *testing.T) {
 	}{
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}",
+			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "2233!!!!"}, SubRepeated: []*binding.Sub{{Name: "2233!!!!"}}},
+			needQuery:    false,
+			want:         "http://helloworld.Greeter/helloworld/test/sub/2233!!!!",
+		},
+		{
+			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}",
+			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "2233!!!!"}, TestRepeated: []string{"xxx", "xx"}},
+			needQuery:    false,
+			want:         "http://helloworld.Greeter/helloworld/test/sub/2233!!!!",
+		},
+		{
+			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}",
 			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "2233!!!!"}},
 			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/test/sub/2233!!!!",

@@ -64,13 +64,10 @@ func encodeByField(u url.Values, path string, m protoreflect.Message, forceTextN
 		switch {
 		case fd.IsList():
 			if v.List().Len() > 0 {
-				list, err := encodeRepeatedField(fd, v.List())
+				err := encodeRepeatedField(fd, v.List(), u, newPath, forceTextName)
 				if err != nil {
 					finalErr = err
 					return false
-				}
-				for _, item := range list {
-					u.Add(newPath, item)
 				}
 			}
 		case fd.IsMap():
@@ -107,16 +104,18 @@ func encodeByField(u url.Values, path string, m protoreflect.Message, forceTextN
 	return
 }
 
-func encodeRepeatedField(fieldDescriptor protoreflect.FieldDescriptor, list protoreflect.List) ([]string, error) {
-	var values []string
+func encodeRepeatedField(fieldDescriptor protoreflect.FieldDescriptor, list protoreflect.List, u url.Values, newPath string, forceTextName bool) error {
 	for i := 0; i < list.Len(); i++ {
 		value, err := EncodeField(fieldDescriptor, list.Get(i))
-		if err != nil {
-			return nil, err
+		if err == nil {
+			u.Add(newPath, value)
+		} else {
+			if err = encodeByField(u, fmt.Sprintf("%s[%d]", newPath, i), list.Get(i).Message(), forceTextName); err != nil {
+				return err
+			}
 		}
-		values = append(values, value)
 	}
-	return values, nil
+	return nil
 }
 
 func encodeMapField(fieldDescriptor protoreflect.FieldDescriptor, mp protoreflect.Map) (map[string]string, error) {

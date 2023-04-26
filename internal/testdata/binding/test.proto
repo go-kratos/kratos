@@ -16,6 +16,8 @@ message HelloRequest {
   optional string opt_string = 6;
   Sub subField = 7;
   repeated string test_repeated = 8 [json_name = "test_repeated"];
+  repeated Sub sub_repeated = 9;
+  map<string, Sub> sub_map = 10;
 }
 
 message Sub{
