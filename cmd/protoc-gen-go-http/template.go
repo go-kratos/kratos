@@ -14,6 +14,10 @@ var httpTemplate = `
 const Operation{{$svrType}}{{.OriginalName}} = "/{{$svrName}}/{{.OriginalName}}"
 {{- end}}
 
+{{- range .Methods}}
+const Operation{{.Method}}{{.OriginalName}}URL = "{{.Path}}"
+{{- end}}
+
 type {{.ServiceType}}HTTPServer interface {
 {{- range .MethodSets}}
 	{{- if ne .Comment ""}}
@@ -26,7 +30,7 @@ type {{.ServiceType}}HTTPServer interface {
 func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}HTTPServer) {
 	r := s.Route("/")
 	{{- range .Methods}}
-	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv))
+	r.{{.Method}}(Operation{{.Method}}{{.OriginalName}}URL, _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv))
 	{{- end}}
 }
 
@@ -85,10 +89,9 @@ func New{{.ServiceType}}HTTPClient (client *http.Client) {{.ServiceType}}HTTPCli
 {{range .MethodSets}}
 func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
-	pattern := "{{.Path}}"
-	path := binding.EncodeURL(pattern, in, {{not .HasBody}})
+	path := binding.EncodeURL(Operation{{.Method}}{{.OriginalName}}URL, in, {{not .HasBody}})
 	opts = append(opts, http.Operation(Operation{{$svrType}}{{.OriginalName}}))
-	opts = append(opts, http.PathTemplate(pattern))
+	opts = append(opts, http.PathTemplate(Operation{{.Method}}{{.OriginalName}}URL))
 	{{if .HasBody -}}
 	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, opts...)
 	{{else -}} 
