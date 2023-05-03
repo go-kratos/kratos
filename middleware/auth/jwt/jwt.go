@@ -108,6 +108,9 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 					if !ok {
 						return nil, errors.Unauthorized(reason, err.Error())
 					}
+					if ve.Inner != nil {
+						return nil, ve.Inner
+					}
 					if ve.Errors&jwt.ValidationErrorMalformed != 0 {
 						return nil, ErrTokenInvalid
 					}
