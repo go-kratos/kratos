@@ -3,9 +3,9 @@ package singleflight
 import (
 	"context"
 	"fmt"
-	"github.com/go-kratos/kratos/v2/transport"
 
 	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
 	"golang.org/x/sync/singleflight"
 )
 
