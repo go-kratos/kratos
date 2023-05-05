@@ -179,11 +179,11 @@ func TestServer(t *testing.T) {
 	mapClaims := jwt.MapClaims{}
 	mapClaims["name"] = "xiaoli"
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
-	token, err := claims.SignedString([]byte(testKey))
+	rowToken, err := claims.SignedString([]byte(testKey))
 	if err != nil {
 		panic(err)
 	}
-	token = fmt.Sprintf(bearerFormat, token)
+	token := fmt.Sprintf(bearerFormat, rowToken)
 	tests := []struct {
 		name          string
 		ctx           context.Context
@@ -240,8 +240,10 @@ func TestServer(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			var testToken jwt.Claims
+			var parseRowToken string
 			next := func(ctx context.Context, req interface{}) (interface{}, error) {
 				t.Log(req)
+				parseRowToken, _ = FromContextWithRawAuthKey(ctx)
 				testToken, _ = FromContext(ctx)
 				return "reply", nil
 			}
@@ -267,7 +269,11 @@ func TestServer(t *testing.T) {
 				if !ok {
 					t.Errorf("except testToken is jwt.MapClaims, but got %T", testToken)
 				}
+				if parseRowToken != rowToken {
+					t.Errorf("except rowToken is %s, but got %s", token, rowToken)
+				}
 			}
+
 		})
 	}
 }
@@ -519,6 +525,29 @@ func TestNewContextAndFromContext(t *testing.T) {
 			}
 			if !reflect.DeepEqual(test.claims, claims) {
 				t.Errorf(`want: %s, got: %v`, test.claims, claims)
+			}
+		})
+	}
+}
+
+func TestNewContextWithRawAuthKeyAndFromContextWithRawAuthKey(t *testing.T) {
+	tests := []struct {
+		name       string
+		rawAuthKey string
+	}{
+		{"val not nil", "kratos"},
+		{"val nil", ""},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctx := NewContextWithRawAuthKey(context.Background(), test.rawAuthKey)
+
+			token, ok := FromContextWithRawAuthKey(ctx)
+			if !ok {
+				t.Fatal("ctx not found rawAuthKey{}")
+			}
+			if !reflect.DeepEqual(test.rawAuthKey, token) {
+				t.Fatal("ctx not found rawAuthKey{}")
 			}
 		})
 	}
