@@ -273,7 +273,6 @@ func TestServer(t *testing.T) {
 					t.Errorf("except rowToken is %s, but got %s", token, rowToken)
 				}
 			}
-
 		})
 	}
 }
