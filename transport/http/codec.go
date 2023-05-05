@@ -4,16 +4,15 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/gorilla/mux"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
-
-	"github.com/gorilla/mux"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
@@ -67,7 +66,7 @@ func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 	data, err := io.ReadAll(r.Body)
 
 	// reset body.
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
+	r.Body = io.NopCloser(bytes.NewBuffer(data))
 
 	if err != nil {
 		return errors.BadRequest("CODEC", err.Error())

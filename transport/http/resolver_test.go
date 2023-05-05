@@ -57,7 +57,7 @@ func TestParseTarget(t *testing.T) {
 
 type mockRebalancer struct{}
 
-func (m *mockRebalancer) Apply(nodes []selector.Node) {}
+func (m *mockRebalancer) Apply(_ []selector.Node) {}
 
 type mockDiscoveries struct {
 	isSecure bool
@@ -65,7 +65,7 @@ type mockDiscoveries struct {
 	stopErr  bool
 }
 
-func (d *mockDiscoveries) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+func (d *mockDiscoveries) GetService(_ context.Context, _ string) ([]*registry.ServiceInstance, error) {
 	return nil, nil
 }
 
