@@ -12,8 +12,10 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-type authKey struct{}
-type rawAuthKey struct{}
+type (
+	authKey    struct{}
+	rawAuthKey struct{}
+)
 
 const (
 
