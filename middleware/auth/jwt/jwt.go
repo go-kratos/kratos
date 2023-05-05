@@ -13,6 +13,7 @@ import (
 )
 
 type authKey struct{}
+type rawAuthKey struct{}
 
 const (
 
@@ -50,6 +51,9 @@ type options struct {
 	signingMethod jwt.SigningMethod
 	claims        func() jwt.Claims
 	tokenHeader   map[string]interface{}
+
+	authBefore func(ctx context.Context, rawAuthKey string) error
+	authAfter  func(ctx context.Context, claims *jwt.Token) error
 }
 
 // WithSigningMethod with signing method option.
@@ -75,6 +79,20 @@ func WithTokenHeader(header map[string]interface{}) Option {
 	}
 }
 
+// WithAuthBefore with auth before
+func WithAuthBefore(f func(ctx context.Context, rawAuthKey string) error) Option {
+	return func(o *options) {
+		o.authBefore = f
+	}
+}
+
+// WithAuthAfter with auth after
+func WithAuthAfter(f func(ctx context.Context, claims *jwt.Token) error) Option {
+	return func(o *options) {
+		o.authAfter = f
+	}
+}
+
 // Server is a server auth middleware. Check the token and extract the info from token.
 func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 	o := &options{
@@ -94,6 +112,14 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 					return nil, ErrMissingJwtToken
 				}
 				jwtToken := auths[1]
+				ctx = NewContextWithRawAuthKey(ctx, jwtToken)
+
+				if o.authBefore != nil {
+					if err := o.authBefore(ctx, jwtToken); err != nil {
+						return nil, err
+					}
+				}
+
 				var (
 					tokenInfo *jwt.Token
 					err       error
@@ -125,6 +151,13 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 				if tokenInfo.Method != o.signingMethod {
 					return nil, ErrUnSupportSigningMethod
 				}
+
+				if o.authAfter != nil {
+					if err = o.authAfter(ctx, tokenInfo); err != nil {
+						return nil, err
+					}
+				}
+
 				ctx = NewContext(ctx, tokenInfo.Claims)
 				return handler(ctx, req)
 			}
@@ -169,6 +202,15 @@ func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 			return nil, ErrWrongContext
 		}
 	}
+}
+
+func NewContextWithRawAuthKey(ctx context.Context, key string) context.Context {
+	return context.WithValue(ctx, rawAuthKey{}, key)
+}
+
+func FromContextWithRawAuthKey(ctx context.Context) (key string, ok bool) {
+	key, ok = ctx.Value(rawAuthKey{}).(string)
+	return
 }
 
 // NewContext put auth info into context
