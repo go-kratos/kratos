@@ -21,7 +21,7 @@ type (
 	}
 )
 
-func (m *mockCounter) With(lvs ...string) metrics.Counter {
+func (m *mockCounter) With(_ ...string) metrics.Counter {
 	return m
 }
 
@@ -33,7 +33,7 @@ func (m *mockCounter) Add(delta float64) {
 	m.value += delta
 }
 
-func (m *mockObserver) With(lvs ...string) metrics.Observer {
+func (m *mockObserver) With(_ ...string) metrics.Observer {
 	return m
 }
 

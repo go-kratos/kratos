@@ -40,11 +40,11 @@ func TestDisableDebugLog(t *testing.T) {
 
 type mockDiscovery struct{}
 
-func (m *mockDiscovery) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+func (m *mockDiscovery) GetService(_ context.Context, _ string) ([]*registry.ServiceInstance, error) {
 	return nil, nil
 }
 
-func (m *mockDiscovery) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
+func (m *mockDiscovery) Watch(_ context.Context, _ string) (registry.Watcher, error) {
 	time.Sleep(time.Microsecond * 500)
 	return &testWatch{}, nil
 }
@@ -64,11 +64,11 @@ func (m *mockConn) UpdateState(resolver.State) error {
 
 func (m *mockConn) ReportError(error) {}
 
-func (m *mockConn) NewAddress(addresses []resolver.Address) {}
+func (m *mockConn) NewAddress(_ []resolver.Address) {}
 
-func (m *mockConn) NewServiceConfig(serviceConfig string) {}
+func (m *mockConn) NewServiceConfig(_ string) {}
 
-func (m *mockConn) ParseServiceConfig(serviceConfigJSON string) *serviceconfig.ParseResult {
+func (m *mockConn) ParseServiceConfig(_ string) *serviceconfig.ParseResult {
 	return nil
 }
 
