@@ -14,7 +14,6 @@ import (
 
 type Logger interface {
 	log.Logger
-
 	GetProducer() *cls.AsyncProducerClient
 	Close() error
 }
