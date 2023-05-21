@@ -47,8 +47,8 @@ func (l *Logger) Log(level log.Level, keyvals ...interface{}) (err error) {
 	if len(keyvals) == 0 {
 		return nil
 	}
-	if len(keyvals)%2 != 0 {
-		keyvals = append(keyvals, "")
+	if (len(keyvals) & 1) == 1 {
+		keyvals = append(keyvals, "KEYVALS UNPAIRED")
 	}
 	for i := 0; i < len(keyvals); i += 2 {
 		key, ok := keyvals[i].(string)

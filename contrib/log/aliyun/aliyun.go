@@ -82,8 +82,11 @@ func (a *aliyunLog) Close() error {
 }
 
 func (a *aliyunLog) Log(level log.Level, keyvals ...interface{}) error {
-	contents := make([]*sls.LogContent, 0, len(keyvals)/2+1)
 
+	contents := make([]*sls.LogContent, 0, len(keyvals)/2+1)
+	if (len(keyvals) & 1) == 1 {
+		keyvals = append(keyvals, "KEYVALS UNPAIRED")
+	}
 	contents = append(contents, &sls.LogContent{
 		Key:   newString(level.Key()),
 		Value: newString(level.String()),

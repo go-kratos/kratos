@@ -155,7 +155,7 @@ func (l *Logger) Log(level log.Level, keyvals ...interface{}) error {
 	if len(keyvals) == 0 {
 		return nil
 	}
-	if len(keyvals)%2 != 0 {
+	if (len(keyvals) & 1) == 1 {
 		keyvals = append(keyvals, "KEYVALS UNPAIRED")
 	}
 
