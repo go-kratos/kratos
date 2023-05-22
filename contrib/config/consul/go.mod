@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/armon/go-metrics v0.3.10 // indirect
-	github.com/go-kratos/kratos/v2 v2.4.0
+	github.com/go-kratos/kratos/v2 v2.6.2
 	github.com/google/btree v1.0.0 // indirect
 	github.com/hashicorp/consul/api v1.20.0
 	github.com/hashicorp/go-hclog v0.14.1 // indirect
