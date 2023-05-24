@@ -3,7 +3,9 @@
 package proto
 
 import (
+	"errors"
 	"google.golang.org/protobuf/proto"
+	"reflect"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 )
@@ -23,9 +25,26 @@ func (codec) Marshal(v interface{}) ([]byte, error) {
 }
 
 func (codec) Unmarshal(data []byte, v interface{}) error {
-	return proto.Unmarshal(data, v.(proto.Message))
+	pm, err := getProtoMessage(v)
+	if err != nil {
+		return err
+	}
+	return proto.Unmarshal(data, pm)
 }
 
 func (codec) Name() string {
 	return Name
+}
+
+func getProtoMessage(v interface{}) (proto.Message, error) {
+	if d, ok := v.(proto.Message); ok {
+		return d, nil
+	}
+	e := reflect.ValueOf(v)
+	if e.Kind() != reflect.Ptr {
+		return nil, errors.New("not proto message")
+	}
+
+	e = e.Elem()
+	return getProtoMessage(e.Interface())
 }
