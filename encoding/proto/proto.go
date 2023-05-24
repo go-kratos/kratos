@@ -4,8 +4,9 @@ package proto
 
 import (
 	"errors"
-	"google.golang.org/protobuf/proto"
 	"reflect"
+
+	"google.golang.org/protobuf/proto"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 )
