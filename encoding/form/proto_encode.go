@@ -46,10 +46,8 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 			newPath = path + "." + key
 		}
 		if of := fd.ContainingOneof(); of != nil {
-			if f := m.WhichOneof(of); f != nil {
-				if f != fd {
-					return true
-				}
+			if f := m.WhichOneof(of); f != nil && f != fd {
+				return true
 			}
 		}
 		switch {
@@ -60,7 +58,9 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 					finalErr = err
 					return false
 				}
-				u[newPath] = list
+				for _, item := range list {
+					u.Add(newPath, item)
+				}
 			}
 		case fd.IsMap():
 			if v.Map().Len() > 0 {
@@ -70,13 +70,13 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 					return false
 				}
 				for k, value := range m {
-					u[fmt.Sprintf("%s[%s]", newPath, k)] = []string{value}
+					u.Set(fmt.Sprintf("%s[%s]", newPath, k), value)
 				}
 			}
 		case (fd.Kind() == protoreflect.MessageKind) || (fd.Kind() == protoreflect.GroupKind):
 			value, err := encodeMessage(fd.Message(), v)
 			if err == nil {
-				u[newPath] = []string{value}
+				u.Set(newPath, value)
 				return true
 			}
 			if err = encodeByField(u, newPath, v.Message()); err != nil {
@@ -89,7 +89,7 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 				finalErr = err
 				return false
 			}
-			u[newPath] = []string{value}
+			u.Set(newPath, value)
 		}
 		return true
 	})
@@ -200,7 +200,7 @@ func EncodeFieldMask(m protoreflect.Message) (query string) {
 	return
 }
 
-// JSONCamelCase converts a snake_case identifier to a camelCase identifier,
+// jsonCamelCase converts a snake_case identifier to a camelCase identifier,
 // according to the protobuf JSON specification.
 // references: https://github.com/protocolbuffers/protobuf-go/blob/master/encoding/protojson/well_known_types.go#L842
 func jsonCamelCase(s string) string {

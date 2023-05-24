@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestFilterAll(t *testing.T) {
+func TestFilterAll(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(NewFilter(logger,
 		FilterLevel(LevelDebug),
@@ -21,7 +21,7 @@ func TestFilterAll(t *testing.T) {
 	log.Warn("warn log")
 }
 
-func TestFilterLevel(t *testing.T) {
+func TestFilterLevel(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(NewFilter(NewFilter(logger, FilterLevel(LevelWarn))))
 	log.Log(LevelDebug, "msg1", "te1st debug")
@@ -31,7 +31,7 @@ func TestFilterLevel(t *testing.T) {
 	log.Warn("warn log")
 }
 
-func TestFilterCaller(t *testing.T) {
+func TestFilterCaller(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewFilter(logger)
 	_ = log.Log(LevelDebug, "msg1", "te1st debug")
@@ -39,19 +39,19 @@ func TestFilterCaller(t *testing.T) {
 	logHelper.Log(LevelDebug, "msg1", "te1st debug")
 }
 
-func TestFilterKey(t *testing.T) {
+func TestFilterKey(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(NewFilter(logger, FilterKey("password")))
 	log.Debugw("password", "123456")
 }
 
-func TestFilterValue(t *testing.T) {
+func TestFilterValue(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(NewFilter(logger, FilterValue("debug")))
 	log.Debugf("test %s", "debug")
 }
 
-func TestFilterFunc(t *testing.T) {
+func TestFilterFunc(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(NewFilter(logger, FilterFunc(testFilterFunc)))
 	log.Debug("debug level")
@@ -102,13 +102,19 @@ func TestFilterFuncWitchLoggerPrefix(t *testing.T) {
 			want:   "",
 		},
 		{
+			// Filtered value
 			logger: NewFilter(With(NewStdLogger(buf), "caller", "caller"), FilterFunc(testFilterFuncWithLoggerPrefix)),
-			want:   "INFO caller=caller msg=msg\n",
+			want:   "INFO caller=caller msg=msg filtered=***\n",
+		},
+		{
+			// NO prefix
+			logger: NewFilter(With(NewStdLogger(buf)), FilterFunc(testFilterFuncWithLoggerPrefix)),
+			want:   "INFO msg=msg filtered=***\n",
 		},
 	}
 
 	for _, tt := range tests {
-		err := tt.logger.Log(LevelInfo, "msg", "msg")
+		err := tt.logger.Log(LevelInfo, "msg", "msg", "filtered", "true")
 		if err != nil {
 			t.Fatal("err should be nil")
 		}
@@ -127,6 +133,9 @@ func testFilterFuncWithLoggerPrefix(level Level, keyvals ...interface{}) bool {
 	for i := 0; i < len(keyvals); i += 2 {
 		if keyvals[i] == "prefix" {
 			return true
+		}
+		if keyvals[i] == "filtered" {
+			keyvals[i+1] = fuzzyStr
 		}
 	}
 	return false

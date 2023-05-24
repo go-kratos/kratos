@@ -427,7 +427,7 @@ func (r *Resolve) Watch() <-chan struct{} {
 }
 
 // fetch resolver instance.
-func (r *Resolve) fetch(ctx context.Context) (ins *disInstancesInfo, ok bool) {
+func (r *Resolve) fetch(_ context.Context) (ins *disInstancesInfo, ok bool) {
 	r.d.mutex.RLock()
 	app, ok := r.d.apps[r.id]
 	r.d.mutex.RUnlock()

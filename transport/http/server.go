@@ -9,15 +9,14 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
-	"github.com/go-kratos/kratos/v2/internal/matcher"
+	"github.com/gorilla/mux"
 
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/internal/host"
+	"github.com/go-kratos/kratos/v2/internal/matcher"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
-
-	"github.com/gorilla/mux"
 )
 
 var (
@@ -52,7 +51,7 @@ func Timeout(timeout time.Duration) ServerOption {
 
 // Logger with server logger.
 // Deprecated: use global logger instead.
-func Logger(logger log.Logger) ServerOption {
+func Logger(_ log.Logger) ServerOption {
 	return func(s *Server) {}
 }
 

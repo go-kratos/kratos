@@ -19,7 +19,7 @@ type mockRegistry struct {
 	service map[string]*registry.ServiceInstance
 }
 
-func (r *mockRegistry) Register(ctx context.Context, service *registry.ServiceInstance) error {
+func (r *mockRegistry) Register(_ context.Context, service *registry.ServiceInstance) error {
 	if service == nil || service.ID == "" {
 		return errors.New("no service id")
 	}
@@ -30,7 +30,7 @@ func (r *mockRegistry) Register(ctx context.Context, service *registry.ServiceIn
 }
 
 // Deregister the registration.
-func (r *mockRegistry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
+func (r *mockRegistry) Deregister(_ context.Context, service *registry.ServiceInstance) error {
 	r.lk.Lock()
 	defer r.lk.Unlock()
 	if r.service[service.ID] == nil {
@@ -47,6 +47,22 @@ func TestApp(t *testing.T) {
 		Name("kratos"),
 		Version("v1.0.0"),
 		Server(hs, gs),
+		BeforeStart(func(_ context.Context) error {
+			t.Log("BeforeStart...")
+			return nil
+		}),
+		BeforeStop(func(_ context.Context) error {
+			t.Log("BeforeStop...")
+			return nil
+		}),
+		AfterStart(func(_ context.Context) error {
+			t.Log("AfterStart...")
+			return nil
+		}),
+		AfterStop(func(_ context.Context) error {
+			t.Log("AfterStop...")
+			return nil
+		}),
 		Registrar(&mockRegistry{service: make(map[string]*registry.ServiceInstance)}),
 	)
 	time.AfterFunc(time.Second, func() {

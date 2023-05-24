@@ -23,7 +23,7 @@ type testMetadataServiceServer struct {
 	srvContractPb.UnimplementedMetadataServiceServer
 }
 
-func (m *testMetadataServiceServer) ReportMetadata(ctx context.Context, req *srvContractPb.ReportMetadataRequest) (*srvContractPb.ReportMetadataReply, error) {
+func (m *testMetadataServiceServer) ReportMetadata(_ context.Context, _ *srvContractPb.ReportMetadataRequest) (*srvContractPb.ReportMetadataReply, error) {
 	return &srvContractPb.ReportMetadataReply{}, nil
 }
 

@@ -6,12 +6,13 @@ import (
 	"errors"
 	"time"
 
+	"google.golang.org/grpc/attributes"
+	"google.golang.org/grpc/resolver"
+
+	"github.com/go-kratos/aegis/subset"
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-
-	"google.golang.org/grpc/attributes"
-	"google.golang.org/grpc/resolver"
 )
 
 type discoveryResolver struct {
@@ -21,8 +22,10 @@ type discoveryResolver struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	insecure         bool
-	debugLogDisabled bool
+	insecure    bool
+	debugLog    bool
+	selecterKey string
+	subsetSize  int
 }
 
 func (r *discoveryResolver) watch() {
@@ -46,8 +49,10 @@ func (r *discoveryResolver) watch() {
 }
 
 func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
-	addrs := make([]resolver.Address, 0)
-	endpoints := make(map[string]struct{})
+	var (
+		endpoints = make(map[string]struct{})
+		filtered  = make([]*registry.ServiceInstance, 0, len(ins))
+	)
 	for _, in := range ins {
 		ept, err := endpoint.ParseEndpoint(in.Endpoints, endpoint.Scheme("grpc", !r.insecure))
 		if err != nil {
@@ -61,13 +66,21 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		if _, ok := endpoints[ept]; ok {
 			continue
 		}
+		filtered = append(filtered, in)
+	}
+	if r.subsetSize != 0 {
+		filtered = subset.Subset(r.selecterKey, filtered, r.subsetSize)
+	}
+
+	addrs := make([]resolver.Address, 0, len(filtered))
+	for _, in := range filtered {
+		ept, _ := endpoint.ParseEndpoint(in.Endpoints, endpoint.Scheme("grpc", !r.insecure))
 		endpoints[ept] = struct{}{}
 		addr := resolver.Address{
 			ServerName: in.Name,
-			Attributes: parseAttributes(in.Metadata),
+			Attributes: parseAttributes(in.Metadata).WithValue("rawServiceInstance", in),
 			Addr:       ept,
 		}
-		addr.Attributes = addr.Attributes.WithValue("rawServiceInstance", in)
 		addrs = append(addrs, addr)
 	}
 	if len(addrs) == 0 {
@@ -78,9 +91,8 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	if err != nil {
 		log.Errorf("[resolver] failed to update state: %s", err)
 	}
-
-	if !r.debugLogDisabled {
-		b, _ := json.Marshal(ins)
+	if r.debugLog {
+		b, _ := json.Marshal(filtered)
 		log.Infof("[resolver] update instances: %s", b)
 	}
 }
@@ -93,16 +105,11 @@ func (r *discoveryResolver) Close() {
 	}
 }
 
-func (r *discoveryResolver) ResolveNow(options resolver.ResolveNowOptions) {}
+func (r *discoveryResolver) ResolveNow(_ resolver.ResolveNowOptions) {}
 
-func parseAttributes(md map[string]string) *attributes.Attributes {
-	var a *attributes.Attributes
+func parseAttributes(md map[string]string) (a *attributes.Attributes) {
 	for k, v := range md {
-		if a == nil {
-			a = attributes.New(k, v)
-		} else {
-			a = a.WithValue(k, v)
-		}
+		a = a.WithValue(k, v)
 	}
 	return a
 }

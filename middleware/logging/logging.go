@@ -11,6 +11,11 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
+// Redacter defines how to log an object
+type Redacter interface {
+	Redact() string
+}
+
 // Server is an server logging middleware.
 func Server(logger log.Logger) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
@@ -85,6 +90,9 @@ func Client(logger log.Logger) middleware.Middleware {
 
 // extractArgs returns the string of the req
 func extractArgs(req interface{}) string {
+	if redacter, ok := req.(Redacter); ok {
+		return redacter.Redact()
+	}
 	if stringer, ok := req.(fmt.Stringer); ok {
 		return stringer.String()
 	}

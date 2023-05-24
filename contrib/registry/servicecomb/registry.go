@@ -124,9 +124,6 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 		// 保存当前版本微服务对应的sid
 		curServiceID = sid
 	}
-	props := make(map[string]string)
-	props[appIDKey] = appID
-	props[envKey] = env
 	if svcIns.ID == "" {
 		var id uuid.UUID
 		id, err = uuid.NewV4()
@@ -134,6 +131,10 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 			return err
 		}
 		svcIns.ID = id.String()
+	}
+	props := map[string]string{
+		appIDKey: appID,
+		envKey:   env,
 	}
 	_, err = r.cli.RegisterMicroServiceInstance(&discovery.MicroServiceInstance{
 		InstanceId: svcIns.ID,
@@ -146,8 +147,9 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 	if err != nil {
 		return err
 	}
-	ticker := time.NewTicker(30 * time.Second)
 	go func() {
+		ticker := time.NewTicker(30 * time.Second)
+		defer ticker.Stop()
 		for {
 			<-ticker.C
 			_, err = r.cli.Heartbeat(sid, svcIns.ID)
