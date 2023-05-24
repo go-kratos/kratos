@@ -37,14 +37,14 @@ func (codec) Name() string {
 }
 
 func getProtoMessage(v interface{}) (proto.Message, error) {
-	if d, ok := v.(proto.Message); ok {
-		return d, nil
+	if msg, ok := v.(proto.Message); ok {
+		return msg, nil
 	}
-	e := reflect.ValueOf(v)
-	if e.Kind() != reflect.Ptr {
+	val := reflect.ValueOf(v)
+	if val.Kind() != reflect.Ptr {
 		return nil, errors.New("not proto message")
 	}
 
-	e = e.Elem()
-	return getProtoMessage(e.Interface())
+	val = val.Elem()
+	return getProtoMessage(val.Interface())
 }
