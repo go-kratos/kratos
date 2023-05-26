@@ -16,6 +16,7 @@ import (
 type Project struct {
 	Name string
 	Path string
+	Mod  string
 }
 
 // New new a project from remote repo.
@@ -39,7 +40,7 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 	}
 	fmt.Printf("🚀 Creating service %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
 	repo := base.NewRepo(layout, branch)
-	if err := repo.CopyTo(ctx, to, p.Path, []string{".git", ".github"}); err != nil {
+	if err := repo.CopyTo(ctx, to, p.Mod, []string{".git", ".github"}); err != nil {
 		return err
 	}
 	e := os.Rename(

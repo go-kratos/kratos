@@ -66,7 +66,7 @@ func run(_ *cobra.Command, args []string) {
 		name = args[0]
 	}
 	projectName, workingDir := processProjectParams(name, wd)
-	p := &Project{Name: projectName, Path: projectName}
+	p := &Project{Name: projectName, Path: projectName, Mod: name}
 	done := make(chan error, 1)
 	go func() {
 		if !nomod {
