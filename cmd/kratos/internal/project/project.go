@@ -84,7 +84,7 @@ func run(_ *cobra.Command, args []string) {
 			panic(e)
 		}
 		// Get the relative path for adding a project based on Go modules
-		p.Path = filepath.Join(strings.TrimPrefix(workingDir, projectRoot+"/"), p.Name)
+		p.Path = filepath.ToSlash(filepath.Join(strings.TrimPrefix(filepath.ToSlash(workingDir), filepath.ToSlash(projectRoot)+"/"), p.Name))
 		done <- p.Add(ctx, workingDir, repoURL, branch, mod)
 	}()
 	select {
