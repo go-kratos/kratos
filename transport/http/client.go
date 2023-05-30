@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"time"
 
+	"google.golang.org/genproto/googleapis/api/httpbody"
+
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/host"
@@ -213,6 +215,9 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 		body        io.Reader
 	)
 	c := defaultCallInfo(path)
+	if hb, ok := args.(*httpbody.HttpBody); ok {
+		c.contentType = hb.ContentType
+	}
 	for _, o := range opts {
 		if err := o.before(&c); err != nil {
 			return err
@@ -328,6 +333,9 @@ func (client *Client) Close() error {
 
 // DefaultRequestEncoder is an HTTP request encoder.
 func DefaultRequestEncoder(_ context.Context, contentType string, in interface{}) ([]byte, error) {
+	if hb, ok := in.(*httpbody.HttpBody); ok {
+		return hb.Data, nil
+	}
 	name := httputil.ContentSubtype(contentType)
 	body, err := encoding.GetCodec(name).Marshal(in)
 	if err != nil {
@@ -342,6 +350,11 @@ func DefaultResponseDecoder(_ context.Context, res *http.Response, v interface{}
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
+	}
+	if hb, ok := v.(*httpbody.HttpBody); ok {
+		hb.ContentType = res.Header.Get("Content-Type")
+		hb.Data = data
+		return nil
 	}
 	return CodecForResponse(res).Unmarshal(data, v)
 }

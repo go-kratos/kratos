@@ -10,10 +10,13 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"strconv"
 	"testing"
 	"time"
+
+	"google.golang.org/genproto/googleapis/api/httpbody"
 
 	kratoserrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -199,9 +202,6 @@ func TestWithNodeFilter(t *testing.T) {
 }
 
 func TestDefaultRequestEncoder(t *testing.T) {
-	r, _ := http.NewRequest(http.MethodPost, "", io.NopCloser(bytes.NewBufferString(`{"a":"1", "b": 2}`)))
-	r.Header.Set("Content-Type", "application/xml")
-
 	v1 := &struct {
 		A string `json:"a"`
 		B int64  `json:"b"`
@@ -220,6 +220,18 @@ func TestDefaultRequestEncoder(t *testing.T) {
 	}
 	if !reflect.DeepEqual(v1b, v1) {
 		t.Errorf("expected %v, got %v", v1, v1b)
+	}
+
+	v2 := &httpbody.HttpBody{
+		ContentType: "custom-type",
+		Data:        []byte("unstructured-data"),
+	}
+	b2, err := DefaultRequestEncoder(context.TODO(), "application/json", v2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(v2.Data) != string(b2) {
+		t.Errorf("expected %v, got %v", string(v2.Data), string(b2))
 	}
 }
 
@@ -257,6 +269,25 @@ func TestDefaultResponseDecoder(t *testing.T) {
 	syntaxErr := &json.SyntaxError{}
 	if !errors.As(err, &syntaxErr) {
 		t.Errorf("expected %v, got %v", syntaxErr, err)
+	}
+
+	resp3 := &http.Response{
+		Header: http.Header{
+			"Content-Type": []string{"any-type"},
+		},
+		StatusCode: 200,
+		Body:       io.NopCloser(bytes.NewBufferString("This doesn't matter")),
+	}
+	v3 := &httpbody.HttpBody{}
+	err = DefaultResponseDecoder(context.TODO(), resp3, v3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v3.ContentType != "any-type" {
+		t.Errorf("expected %v, got %v", "any-type", v3.ContentType)
+	}
+	if string(v3.Data) != "This doesn't matter" {
+		t.Errorf("expected %v, got %v", "This doesn't matter", string(v3.Data))
 	}
 }
 
@@ -361,4 +392,58 @@ func TestNewClient(t *testing.T) {
 	if err == nil {
 		t.Error("err should be equal to encoder error")
 	}
+}
+
+func TestClientInvoke(t *testing.T) {
+	t.Run("Test httpbody", func(t *testing.T) {
+		reqContentType := "req-content-type"
+		reqBody := "This is raw request body"
+		respContentType := "resp-content-type"
+		respBody := "This is raw response body"
+
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			b, err := io.ReadAll(r.Body)
+			if err != nil {
+				t.Error("err should be nil")
+			}
+			defer r.Body.Close()
+			if string(b) != reqBody {
+				t.Error("request body should be equal")
+			}
+			if r.Header.Get("Content-Type") != reqContentType {
+				t.Error("request header content-type should be equal")
+			}
+			w.Header().Set("Content-Type", respContentType)
+			_, err = w.Write([]byte(respBody))
+			if err != nil {
+				t.Error("err should be nil")
+			}
+		}))
+
+		client, err := NewClient(
+			context.Background(),
+			WithEndpoint(srv.URL),
+		)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		httpBodyResp := new(httpbody.HttpBody)
+		err = client.Invoke(
+			context.Background(),
+			http.MethodPost,
+			"/go",
+			&httpbody.HttpBody{ContentType: reqContentType, Data: []byte(reqBody)},
+			httpBodyResp,
+		)
+		if err != nil {
+			t.Error("err should be nil")
+		}
+		if httpBodyResp.ContentType != respContentType {
+			t.Error("response header content-type should be equal")
+		}
+		if string(httpBodyResp.Data) != respBody {
+			t.Error("response body should be equal")
+		}
+	})
 }
