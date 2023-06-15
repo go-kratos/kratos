@@ -1,10 +1,12 @@
 package tracing
 
 import (
+	"bytes"
 	"context"
 	"net/http"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 
 	"go.opentelemetry.io/otel/propagation"
@@ -176,6 +178,71 @@ func TestServer(t *testing.T) {
 	if childTraceID != "" {
 		t.Errorf("expected empty, got %v", childTraceID)
 	}
+}
+
+func TestServerWithFilter(t *testing.T) {
+	tr := &mockTransport{
+		kind:      transport.KindHTTP,
+		endpoint:  "server:2233",
+		operation: "/test.server/hello",
+		header:    headerCarrier{},
+	}
+
+	tracer := NewTracer(
+		trace.SpanKindClient,
+		WithTracerProvider(tracesdk.NewTracerProvider()),
+	)
+
+	var b = &bytes.Buffer{}
+
+	logger := log.NewStdLogger(b)
+	logger = log.With(logger, "span_id", SpanID())
+	logger = log.With(logger, "trace_id", TraceID())
+
+	var (
+		childSpanID  string
+		childTraceID string
+	)
+	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+		_ = log.WithContext(ctx, logger).Log(log.LevelInfo,
+			"kind", "server",
+		)
+
+		childSpanID = SpanID()(ctx).(string)
+		childTraceID = TraceID()(ctx).(string)
+		return req.(string) + "https://go-kratos.dev", nil
+	}
+
+	var ctx context.Context
+	ctx, span := tracer.Start(
+		transport.NewServerContext(context.Background(), tr),
+		tr.Operation(),
+		tr.RequestHeader(),
+	)
+
+	_, err := Server(
+		WithTracerProvider(tracesdk.NewTracerProvider()),
+		WithPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})),
+	)(next)(ctx, "test server: ")
+
+	span.End()
+	if err != nil {
+		t.Errorf("expected nil, got %v", err)
+	}
+	if childSpanID == "" {
+		t.Errorf("expected empty, got %v", childSpanID)
+	}
+	if reflect.DeepEqual(span.SpanContext().SpanID().String(), childSpanID) {
+		t.Errorf("span.SpanContext().SpanID().String()(%v)  is not equal to childSpanID(%v)", span.SpanContext().SpanID().String(), childSpanID)
+	}
+	if !reflect.DeepEqual(span.SpanContext().TraceID().String(), childTraceID) {
+		t.Errorf("expected %v, got %v", childTraceID, span.SpanContext().TraceID().String())
+	}
+
+	if strings.Contains(b.String(), childSpanID) {
+		t.Errorf("filter is don't working")
+	}
+
 }
 
 func TestClient(t *testing.T) {

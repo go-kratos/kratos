@@ -2,7 +2,9 @@ package log
 
 import (
 	"bytes"
+	"context"
 	"io"
+	"strings"
 	"testing"
 )
 
@@ -139,4 +141,35 @@ func testFilterFuncWithLoggerPrefix(level Level, keyvals ...interface{}) bool {
 		}
 	}
 	return false
+}
+
+func TestFilterWithContext(t *testing.T) {
+	var ctxKey = struct{}{}
+	var ctxValue = "filter test value"
+
+	v1 := func() Valuer {
+		return func(ctx context.Context) interface{} {
+			return ctx.Value(ctxKey)
+		}
+	}
+
+	var info =&bytes.Buffer{}
+
+	logger := With(NewStdLogger(info), "request_id", v1())
+	filter := NewFilter(logger, FilterLevel(LevelError))
+
+	ctx := context.WithValue(context.Background(), ctxKey, ctxValue)
+
+	_ = WithContext(ctx, filter).Log(LevelInfo, "kind", "test")
+
+	if info.String() != "" {
+		t.Error("filter is not woring")
+		return
+	}
+
+	_ = WithContext(ctx, filter).Log(LevelError, "kind", "test")
+	if !strings.Contains(info.String(), ctxValue) {
+		t.Error("don't read ctx value")
+	}
+
 }
