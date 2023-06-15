@@ -144,8 +144,8 @@ func testFilterFuncWithLoggerPrefix(level Level, keyvals ...interface{}) bool {
 }
 
 func TestFilterWithContext(t *testing.T) {
-	var ctxKey = struct{}{}
-	var ctxValue = "filter test value"
+	ctxKey := struct{}{}
+	ctxValue := "filter test value"
 
 	v1 := func() Valuer {
 		return func(ctx context.Context) interface{} {
@@ -153,7 +153,7 @@ func TestFilterWithContext(t *testing.T) {
 		}
 	}
 
-	var info =&bytes.Buffer{}
+	info := &bytes.Buffer{}
 
 	logger := With(NewStdLogger(info), "request_id", v1())
 	filter := NewFilter(logger, FilterLevel(LevelError))
@@ -171,5 +171,4 @@ func TestFilterWithContext(t *testing.T) {
 	if !strings.Contains(info.String(), ctxValue) {
 		t.Error("don't read ctx value")
 	}
-
 }
