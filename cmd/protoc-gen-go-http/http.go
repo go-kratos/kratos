@@ -137,6 +137,9 @@ func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *prot
 		path = pattern.Custom.Path
 		method = pattern.Custom.Kind
 	}
+	if method == "" {
+		method = http.MethodPost
+	}
 	if path == "" {
 		path = fmt.Sprintf("%s/%s/%s", omitemptyPrefix, service.Desc.FullName(), m.Desc.Name())
 	}
