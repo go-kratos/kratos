@@ -27,7 +27,9 @@ type Endpointer interface {
 type Header interface {
 	Get(key string) string
 	Set(key string, value string)
+	Add(key string, value string)
 	Keys() []string
+	Values(key string) []string
 }
 
 // Transporter is transport context value interface.

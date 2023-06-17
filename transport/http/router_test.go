@@ -136,7 +136,7 @@ func testRoute(t *testing.T, srv *Server) {
 		t.Fatalf("got %s want bar", u.Name)
 	}
 	// PUT
-	req, _ := http.NewRequest("PUT", base+"/users", strings.NewReader(`{"name":"bar"}`))
+	req, _ := http.NewRequest(http.MethodPut, base+"/users", strings.NewReader(`{"name":"bar"}`))
 	req.Header.Set("Content-Type", appJSONStr)
 	resp, err = http.DefaultClient.Do(req)
 	if err != nil {
@@ -157,7 +157,7 @@ func testRoute(t *testing.T, srv *Server) {
 		t.Fatalf("got %s want bar", u.Name)
 	}
 	// OPTIONS
-	req, _ = http.NewRequest("OPTIONS", base+"/users", nil)
+	req, _ = http.NewRequest(http.MethodOptions, base+"/users", nil)
 	resp, err = http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatal(err)
@@ -166,7 +166,7 @@ func testRoute(t *testing.T, srv *Server) {
 	if resp.StatusCode != 200 {
 		t.Fatalf("code: %d", resp.StatusCode)
 	}
-	if resp.Header.Get("Access-Control-Allow-Methods") != "OPTIONS" {
+	if resp.Header.Get("Access-Control-Allow-Methods") != http.MethodOptions {
 		t.Fatal("cors failed")
 	}
 }
@@ -179,7 +179,7 @@ func TestRouter_Group(t *testing.T) {
 	}
 }
 
-func TestHandle(t *testing.T) {
+func TestHandle(_ *testing.T) {
 	r := newRouter("/", NewServer())
 	h := func(i Context) error {
 		return nil

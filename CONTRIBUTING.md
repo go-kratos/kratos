@@ -1,7 +1,7 @@
 The kratos community wants to be helped by a wide range of developers, so you'd like to take a few minutes to read this guide before you mention the problem or pull request.
 
-## Reportings Bug or Fixing Bugs
-We use github issues to manage issues. If you want to submit , first make sure you've searched for existing issues, pull requests and read our [FAQ](https://go-kratos.dev/docs/intro/faq).
+## Reporting Bug or Fixing Bugs
+We use GitHub issues to manage issues. If you want to submit , first make sure you've searched for existing issues, pull requests and read our [FAQ](https://go-kratos.dev/docs/intro/faq).
 
 When submitting a bug report, use the issue template we provide to clearly describe the problems encountered and how to reproduce, and if convenient it is best to provide a minimal reproduce repository.
 
@@ -16,9 +16,9 @@ After the function is implemented, a merge request will be initiated to associat
 After the merge is completed, Close all issues.
 
 ## How to submit code
-If you've never submitted code on github, follow these steps:
+If you've never submitted code on GitHub, follow these steps:
 
-- First, please fork items to your github account
+- First, please fork items to your GitHub account
 - Then create a new feature branch based on the main branch and name it features such as feature-log 
 - Write code
 - Submit code to the far end branch

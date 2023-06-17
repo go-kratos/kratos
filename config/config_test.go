@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"reflect"
 	"testing"
 )
 
@@ -124,7 +123,7 @@ func TestConfig(t *testing.T) {
 	)
 	err = c.Close()
 	if err != nil {
-		t.Fatal("t is not nil")
+		t.Fatal(err)
 	}
 
 	jSource := newTestJSONSource(_testJSON)
@@ -139,21 +138,21 @@ func TestConfig(t *testing.T) {
 
 	err = cf.Load()
 	if err != nil {
-		t.Fatal("t is not nil")
+		t.Fatal(err)
 	}
 
-	val, err := cf.Value("data.database.driver").String()
+	driver, err := cf.Value("data.database.driver").String()
 	if err != nil {
-		t.Fatal("t is not nil")
+		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(databaseDriver, val) {
-		t.Fatal(`databaseDriver is not equal to val`)
+	if databaseDriver != driver {
+		t.Fatal("databaseDriver is not equal to val")
 	}
 
 	err = cf.Watch("endpoints", func(key string, value Value) {
 	})
 	if err != nil {
-		t.Fatal("t is not nil")
+		t.Fatal(err)
 	}
 
 	jSource.sig <- struct{}{}
@@ -162,24 +161,24 @@ func TestConfig(t *testing.T) {
 	var testConf testConfigStruct
 	err = cf.Scan(&testConf)
 	if err != nil {
-		t.Fatal("t is not nil")
+		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(httpAddr, testConf.Server.HTTP.Addr) {
-		t.Fatal(`httpAddr is not equal to testConf.Server.HTTP.Addr`)
+	if httpAddr != testConf.Server.HTTP.Addr {
+		t.Errorf("testConf.Server.HTTP.Addr want: %s, got: %s", httpAddr, testConf.Server.HTTP.Addr)
 	}
-	if !reflect.DeepEqual(httpTimeout, testConf.Server.HTTP.Timeout) {
-		t.Fatal(`httpTimeout is not equal to testConf.Server.HTTP.Timeout`)
+	if httpTimeout != testConf.Server.HTTP.Timeout {
+		t.Errorf("testConf.Server.HTTP.Timeout want: %.1f, got: %.1f", httpTimeout, testConf.Server.HTTP.Timeout)
 	}
-	if !reflect.DeepEqual(true, testConf.Server.HTTP.EnableSSL) {
-		t.Fatal(`testConf.Server.HTTP.EnableSSL is not equal to true`)
+	if !testConf.Server.HTTP.EnableSSL {
+		t.Error("testConf.Server.HTTP.EnableSSL is not equal to true")
 	}
-	if !reflect.DeepEqual(grpcPort, testConf.Server.GRPC.Port) {
-		t.Fatal(`grpcPort is not equal to testConf.Server.GRPC.Port`)
+	if grpcPort != testConf.Server.GRPC.Port {
+		t.Errorf("testConf.Server.GRPC.Port want: %d, got: %d", grpcPort, testConf.Server.GRPC.Port)
 	}
-	if !reflect.DeepEqual(endpoint1, testConf.Endpoints[0]) {
-		t.Fatal(`endpoint1 is not equal to testConf.Endpoints[0]`)
+	if endpoint1 != testConf.Endpoints[0] {
+		t.Errorf("testConf.Endpoints[0] want: %s, got: %s", endpoint1, testConf.Endpoints[0])
 	}
-	if !reflect.DeepEqual(len(testConf.Endpoints), 2) {
-		t.Fatal(`len(testConf.Endpoints) is not equal to 2`)
+	if len(testConf.Endpoints) != 2 {
+		t.Error("len(testConf.Endpoints) is not equal to 2")
 	}
 }

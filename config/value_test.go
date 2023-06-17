@@ -6,17 +6,17 @@ import (
 	"time"
 )
 
-func Test_atomicValue_Bool(t *testing.T) {
+func TestAtomicValue_Bool(t *testing.T) {
 	vlist := []interface{}{"1", "t", "T", "true", "TRUE", "True", true, 1, int32(1)}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
 		b, err := v.Bool()
 		if err != nil {
-			t.Fatal(`err is not nil`)
+			t.Fatal(err)
 		}
 		if !b {
-			t.Fatal(`b is not equal to true`)
+			t.Fatal("b is not equal to true")
 		}
 	}
 
@@ -26,10 +26,10 @@ func Test_atomicValue_Bool(t *testing.T) {
 		v.Store(x)
 		b, err := v.Bool()
 		if err != nil {
-			t.Fatal(`err is not nil`)
+			t.Fatal(err)
 		}
 		if b {
-			t.Fatal(`b is not equal to false`)
+			t.Fatal("b is not equal to false")
 		}
 	}
 
@@ -39,22 +39,22 @@ func Test_atomicValue_Bool(t *testing.T) {
 		v.Store(x)
 		_, err := v.Bool()
 		if err == nil {
-			t.Fatal(`err is nil`)
+			t.Fatal("err is nil")
 		}
 	}
 }
 
-func Test_atomicValue_Int(t *testing.T) {
+func TestAtomicValue_Int(t *testing.T) {
 	vlist := []interface{}{"123123", float64(123123), int64(123123), int32(123123), 123123}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
 		b, err := v.Int()
 		if err != nil {
-			t.Fatal(`err is not nil`)
+			t.Fatal(err)
 		}
 		if b != 123123 {
-			t.Fatal(`b is not equal to 123123`)
+			t.Fatal("b is not equal to 123123")
 		}
 	}
 
@@ -64,22 +64,22 @@ func Test_atomicValue_Int(t *testing.T) {
 		v.Store(x)
 		_, err := v.Int()
 		if err == nil {
-			t.Fatal(`err is nil`)
+			t.Fatal("err is nil")
 		}
 	}
 }
 
-func Test_atomicValue_Float(t *testing.T) {
-	vlist := []interface{}{"123123.1", float64(123123.1)}
+func TestAtomicValue_Float(t *testing.T) {
+	vlist := []interface{}{"123123.1", 123123.1}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
 		b, err := v.Float()
 		if err != nil {
-			t.Fatal(`err is not nil`)
+			t.Fatal(err)
 		}
-		if b != float64(123123.1) {
-			t.Fatal(`b is not equal to 123123.1`)
+		if b != 123123.1 {
+			t.Fatal("b is not equal to 123123.1")
 		}
 	}
 
@@ -89,7 +89,7 @@ func Test_atomicValue_Float(t *testing.T) {
 		v.Store(x)
 		_, err := v.Float()
 		if err == nil {
-			t.Fatal(`err is nil`)
+			t.Fatal("err is nil")
 		}
 	}
 }
@@ -103,17 +103,17 @@ func (t ts) String() string {
 	return fmt.Sprintf("%s%d", t.Name, t.Age)
 }
 
-func Test_atomicValue_String(t *testing.T) {
+func TestAtomicValue_String(t *testing.T) {
 	vlist := []interface{}{"1", float64(1), int64(1), 1, int64(1)}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
 		b, err := v.String()
 		if err != nil {
-			t.Fatal(`err is not nil`)
+			t.Fatal(err)
 		}
 		if b != "1" {
-			t.Fatal(`b is not equal to 1`)
+			t.Fatal("b is not equal to 1")
 		}
 	}
 
@@ -121,7 +121,7 @@ func Test_atomicValue_String(t *testing.T) {
 	v.Store(true)
 	b, err := v.String()
 	if err != nil {
-		t.Fatal(`err is not nil`)
+		t.Fatal(err)
 	}
 	if b != "true" {
 		t.Fatal(`b is not equal to "true"`)
@@ -134,48 +134,48 @@ func Test_atomicValue_String(t *testing.T) {
 	})
 	b, err = v.String()
 	if err != nil {
-		t.Fatal(`err is not nil`)
+		t.Fatal(err)
 	}
 	if b != "test10" {
 		t.Fatal(`b is not equal to "test10"`)
 	}
 }
 
-func Test_atomicValue_Duration(t *testing.T) {
+func TestAtomicValue_Duration(t *testing.T) {
 	vlist := []interface{}{int64(5)}
 	for _, x := range vlist {
 		v := atomicValue{}
 		v.Store(x)
 		b, err := v.Duration()
 		if err != nil {
-			t.Fatal(`err is not nil`)
+			t.Fatal(err)
 		}
 		if b != time.Duration(5) {
-			t.Fatal(`b is not equal to time.Duration(5)`)
+			t.Fatal("b is not equal to time.Duration(5)")
 		}
 	}
 }
 
-func Test_atomicValue_Slice(t *testing.T) {
+func TestAtomicValue_Slice(t *testing.T) {
 	vlist := []interface{}{int64(5)}
 	v := atomicValue{}
 	v.Store(vlist)
 	slices, err := v.Slice()
 	if err != nil {
-		t.Fatal(`err is not nil`)
+		t.Fatal(err)
 	}
 	for _, v := range slices {
 		b, err := v.Duration()
 		if err != nil {
-			t.Fatal(`err is not nil`)
+			t.Fatal(err)
 		}
 		if b != time.Duration(5) {
-			t.Fatal(`b is not equal to time.Duration(5)`)
+			t.Fatal("b is not equal to time.Duration(5)")
 		}
 	}
 }
 
-func Test_atomicValue_Map(t *testing.T) {
+func TestAtomicValue_Map(t *testing.T) {
 	vlist := make(map[string]interface{})
 	vlist["5"] = int64(5)
 	vlist["text"] = "text"
@@ -183,21 +183,21 @@ func Test_atomicValue_Map(t *testing.T) {
 	v.Store(vlist)
 	m, err := v.Map()
 	if err != nil {
-		t.Fatal(`err is not nil`)
+		t.Fatal(err)
 	}
 	for k, v := range m {
 		if k == "5" {
 			b, err := v.Duration()
 			if err != nil {
-				t.Fatal(`err is not nil`)
+				t.Fatal(err)
 			}
 			if b != time.Duration(5) {
-				t.Fatal(`b is not equal to time.Duration(5)`)
+				t.Fatal("b is not equal to time.Duration(5)")
 			}
 		} else {
 			b, err := v.String()
 			if err != nil {
-				t.Fatal(`err is not nil`)
+				t.Fatal(err)
 			}
 			if b != "text" {
 				t.Fatal(`b is not equal to "text"`)
@@ -206,20 +206,19 @@ func Test_atomicValue_Map(t *testing.T) {
 	}
 }
 
-func Test_atomicValue_Scan(t *testing.T) {
-	var err error
+func TestAtomicValue_Scan(t *testing.T) {
 	v := atomicValue{}
-	err = v.Scan(&struct {
+	err := v.Scan(&struct {
 		A string `json:"a"`
 	}{"a"})
 	if err != nil {
-		t.Fatal(`err is not nil`)
+		t.Fatal(err)
 	}
 
 	err = v.Scan(&struct {
 		A string `json:"a"`
 	}{"a"})
 	if err != nil {
-		t.Fatal(`err is not nil`)
+		t.Fatal(err)
 	}
 }

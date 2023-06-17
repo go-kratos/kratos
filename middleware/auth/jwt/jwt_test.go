@@ -24,6 +24,8 @@ func (hc headerCarrier) Get(key string) string { return http.Header(hc).Get(key)
 
 func (hc headerCarrier) Set(key string, value string) { http.Header(hc).Set(key, value) }
 
+func (hc headerCarrier) Add(key string, value string) { http.Header(hc).Add(key, value) }
+
 // Keys lists the keys stored in this carrier.
 func (hc headerCarrier) Keys() []string {
 	keys := make([]string, 0, len(hc))
@@ -31,6 +33,11 @@ func (hc headerCarrier) Keys() []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// Values returns a slice value associated with the passed key.
+func (hc headerCarrier) Values(key string) []string {
+	return http.Header(hc).Values(key)
 }
 
 func newTokenHeader(headerKey string, token string) *headerCarrier {
@@ -254,7 +261,7 @@ func TestServer(t *testing.T) {
 			}
 			if test.exceptErr == nil {
 				if testToken == nil {
-					t.Errorf("except testToken not nil, but got nil")
+					t.Fatal("except testToken not nil, but got nil")
 				}
 				_, ok := testToken.(jwt.MapClaims)
 				if !ok {
@@ -492,4 +499,27 @@ func TestClientMissKey(t *testing.T) {
 			}
 		}
 	})
+}
+
+func TestNewContextAndFromContext(t *testing.T) {
+	tests := []struct {
+		name   string
+		claims jwt.MapClaims
+	}{
+		{"val not nil", jwt.MapClaims{"name": "kratos"}},
+		{"val nil", nil},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctx := NewContext(context.Background(), test.claims)
+
+			claims, ok := FromContext(ctx)
+			if !ok {
+				t.Fatal("ctx not found authKey{}")
+			}
+			if !reflect.DeepEqual(test.claims, claims) {
+				t.Errorf(`want: %s, got: %v`, test.claims, claims)
+			}
+		})
+	}
 }

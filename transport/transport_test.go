@@ -53,7 +53,7 @@ func TestServerTransport(t *testing.T) {
 		t.Errorf("expected:%v got:%v", true, ok)
 	}
 	if mtr == nil {
-		t.Errorf("expected:%v got:%v", nil, mtr)
+		t.Fatalf("expected:%v got:%v", nil, mtr)
 	}
 	if mtr.Kind().String() != KindGRPC.String() {
 		t.Errorf("expected:%v got:%v", KindGRPC.String(), mtr.Kind().String())

@@ -6,8 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-zookeeper/zk"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 func TestRegistry_GetService(t *testing.T) {

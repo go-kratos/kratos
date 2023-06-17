@@ -3,9 +3,10 @@ package tracing
 import (
 	"context"
 
+	"go.opentelemetry.io/otel/propagation"
+
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/metadata"
-	"go.opentelemetry.io/otel/propagation"
 )
 
 const serviceHeader = "x-md-service-name"

@@ -3,9 +3,10 @@ package consul
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/v2/config"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/api/watch"
+
+	"github.com/go-kratos/kratos/v2/config"
 )
 
 type watcher struct {
@@ -17,7 +18,7 @@ type watcher struct {
 	cancel context.CancelFunc
 }
 
-func (w *watcher) handle(idx uint64, data interface{}) {
+func (w *watcher) handle(_ uint64, data interface{}) {
 	if data == nil {
 		return
 	}

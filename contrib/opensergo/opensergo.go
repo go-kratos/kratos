@@ -2,14 +2,12 @@ package opensergo
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/go-kratos/kratos/v2"
 
 	v1 "github.com/opensergo/opensergo-go/proto/service_contract/v1"
 	"golang.org/x/net/context"
@@ -19,6 +17,8 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
+
+	"github.com/go-kratos/kratos/v2"
 )
 
 type Option func(*options)
@@ -52,7 +52,7 @@ func New(opts ...Option) (*OpenSergo, error) {
 		}
 	}
 	if v := os.Getenv("OPENSERGO_BOOTSTRAP_CONFIG"); v != "" {
-		b, err := ioutil.ReadFile(v)
+		b, err := os.ReadFile(v)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +89,7 @@ func (s *OpenSergo) ReportMetadata(ctx context.Context, app kratos.AppInfo) erro
 	}
 
 	for _, endpoint := range app.Endpoint() {
-		u, err := url.Parse(endpoint) //nolint
+		u, err := url.Parse(endpoint) // nolint
 		if err != nil {
 			return err
 		}
@@ -187,15 +187,15 @@ func listDescriptors() (services []*v1.ServiceDescriptor, types []*v1.TypeDescri
 func HTTPPatternInfo(pattern interface{}) (method string, path string) {
 	switch p := pattern.(type) {
 	case *annotations.HttpRule_Get:
-		return "GET", p.Get
+		return http.MethodGet, p.Get
 	case *annotations.HttpRule_Post:
-		return "POST", p.Post
+		return http.MethodPost, p.Post
 	case *annotations.HttpRule_Delete:
-		return "DELETE", p.Delete
+		return http.MethodDelete, p.Delete
 	case *annotations.HttpRule_Patch:
-		return "PATCH", p.Patch
+		return http.MethodPatch, p.Patch
 	case *annotations.HttpRule_Put:
-		return "PUT", p.Put
+		return http.MethodPut, p.Put
 	case *annotations.HttpRule_Custom:
 		return p.Custom.Kind, p.Custom.Path
 	default:

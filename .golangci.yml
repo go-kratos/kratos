@@ -31,6 +31,7 @@ linters:
     - varcheck
     - whitespace
     - wastedassign
+    - unconvert
 
   # don't enable:
   # - asciicheck
@@ -66,3 +67,5 @@ linters-settings:
   gocyclo:
     # recommend 10-20
     min-complexity: 50
+  goimports:
+    local-prefixes: github.com/go-kratos # Put imports beginning with prefix after 3rd-party packages

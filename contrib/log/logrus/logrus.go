@@ -1,8 +1,9 @@
 package logrus
 
 import (
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/sirupsen/logrus"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 var _ log.Logger = (*Logger)(nil)

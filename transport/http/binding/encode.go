@@ -1,75 +1,47 @@
 package binding
 
 import (
-	"fmt"
 	"reflect"
 	"regexp"
-	"strings"
-
-	"github.com/go-kratos/kratos/v2/encoding/form"
 
 	"google.golang.org/protobuf/proto"
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+
+	"github.com/go-kratos/kratos/v2/encoding/form"
 )
 
-var reg = regexp.MustCompile(`/{[\\.\w]+}`)
+var reg = regexp.MustCompile(`{[\\.\w]+}`)
 
 // EncodeURL encode proto message to url path.
-func EncodeURL(pathTemplate string, msg proto.Message, needQuery bool) string {
+func EncodeURL(pathTemplate string, msg interface{}, needQuery bool) string {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return pathTemplate
 	}
+	queryParams, _ := form.EncodeValues(msg)
 	pathParams := make(map[string]struct{})
 	path := reg.ReplaceAllStringFunc(pathTemplate, func(in string) string {
 		// it's unreachable because the reg means that must have more than one char in {}
-		//if len(in) < 4 { //nolint:gomnd // **  explain the 4 number here :-) **
+		// if len(in) < 4 { //nolint:gomnd // **  explain the 4 number here :-) **
 		//	return in
-		//}
-		key := in[2 : len(in)-1]
-		vars := strings.Split(key, ".")
-		value, err := getValueByField(msg.ProtoReflect(), vars)
-		if err != nil {
-			return in
-		}
+		// }
+		key := in[1 : len(in)-1]
 		pathParams[key] = struct{}{}
-		return "/" + value
+		return queryParams.Get(key)
 	})
 	if !needQuery {
-		if query := form.EncodeFieldMask(msg.ProtoReflect()); query != "" {
-			return path + "?" + query
+		if v, ok := msg.(proto.Message); ok {
+			if query := form.EncodeFieldMask(v.ProtoReflect()); query != "" {
+				return path + "?" + query
+			}
 		}
 		return path
 	}
-	u, err := form.EncodeValues(msg)
-	if err == nil && len(u) > 0 {
+	if len(queryParams) > 0 {
 		for key := range pathParams {
-			delete(u, key)
+			delete(queryParams, key)
 		}
-		query := u.Encode()
-		if query != "" {
+		if query := queryParams.Encode(); query != "" {
 			path += "?" + query
 		}
 	}
 	return path
-}
-
-func getValueByField(v protoreflect.Message, fieldPath []string) (string, error) {
-	var fd protoreflect.FieldDescriptor
-	for i, fieldName := range fieldPath {
-		fields := v.Descriptor().Fields()
-		if fd = fields.ByJSONName(fieldName); fd == nil {
-			fd = fields.ByName(protoreflect.Name(fieldName))
-			if fd == nil {
-				return "", fmt.Errorf("field path not found: %q", fieldName)
-			}
-		}
-		if i == len(fieldPath)-1 {
-			break
-		}
-		if fd.Message() == nil || fd.Cardinality() == protoreflect.Repeated {
-			return "", fmt.Errorf("invalid path: %q is not a message", fieldName)
-		}
-		v = v.Get(fd).Message()
-	}
-	return form.EncodeField(fd, v.Get(fd))
 }

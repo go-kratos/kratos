@@ -15,12 +15,15 @@ import (
 var CmdAdd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a proto API template",
-	Long:  "Add a proto API template. Example: kratos add helloworld/v1/hello.proto",
+	Long:  "Add a proto API template. Example: kratos proto add helloworld/v1/hello.proto",
 	Run:   run,
 }
 
-func run(cmd *cobra.Command, args []string) {
-	// kratos proto add helloworld/v1/helloworld.proto
+func run(_ *cobra.Command, args []string) {
+	if len(args) == 0 {
+		fmt.Println("Please enter the proto file or directory")
+		return
+	}
 	input := args[0]
 	n := strings.LastIndex(input, "/")
 	if n == -1 {

@@ -9,11 +9,11 @@ import (
 
 type codec struct{}
 
-func (c codec) Marshal(v interface{}) ([]byte, error) {
+func (c codec) Marshal(_ interface{}) ([]byte, error) {
 	panic("implement me")
 }
 
-func (c codec) Unmarshal(data []byte, v interface{}) error {
+func (c codec) Unmarshal(_ []byte, _ interface{}) error {
 	panic("implement me")
 }
 
@@ -63,7 +63,7 @@ func TestRegisterCodec(t *testing.T) {
 	}
 }
 
-// PanicTestFunc defines a func that should be passed to the assert.Panics and assert.NotPanics
+// PanicTestFunc defines a func that should be passed to assert.Panics and assert.NotPanics
 // methods, and represents a simple func that takes no arguments, and returns nothing.
 type PanicTestFunc func()
 

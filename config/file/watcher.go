@@ -6,8 +6,11 @@ import (
 	"path/filepath"
 
 	"github.com/fsnotify/fsnotify"
+
 	"github.com/go-kratos/kratos/v2/config"
 )
+
+var _ config.Watcher = (*watcher)(nil)
 
 type watcher struct {
 	f  *file
@@ -16,8 +19,6 @@ type watcher struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 }
-
-var _ config.Watcher = (*watcher)(nil)
 
 func newWatcher(f *file) (config.Watcher, error) {
 	fw, err := fsnotify.NewWatcher()

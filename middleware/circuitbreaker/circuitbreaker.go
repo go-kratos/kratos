@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-kratos/aegis/circuitbreaker"
 	"github.com/go-kratos/aegis/circuitbreaker/sre"
+
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/group"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -22,6 +23,15 @@ type Option func(*options)
 func WithGroup(g *group.Group) Option {
 	return func(o *options) {
 		o.group = g
+	}
+}
+
+// WithCircuitBreaker with circuit breaker genFunc.
+func WithCircuitBreaker(genBreakerFunc func() circuitbreaker.CircuitBreaker) Option {
+	return func(o *options) {
+		o.group = group.NewGroup(func() interface{} {
+			return genBreakerFunc()
+		})
 	}
 }
 
@@ -46,8 +56,8 @@ func Client(opts ...Option) middleware.Middleware {
 			breaker := opt.group.Get(info.Operation()).(circuitbreaker.CircuitBreaker)
 			if err := breaker.Allow(); err != nil {
 				// rejected
-				// NOTE: when client reject requets locally,
-				// continue add counter let the drop ratio higher.
+				// NOTE: when client reject requests locally,
+				// continue to add counter let the drop ratio higher.
 				breaker.MarkFailed()
 				return nil, ErrNotAllowed
 			}

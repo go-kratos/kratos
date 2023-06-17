@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestHelper(t *testing.T) {
+func TestHelper(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(logger)
 
@@ -21,14 +21,14 @@ func TestHelper(t *testing.T) {
 	log.Warnw("log", "test warn")
 }
 
-func TestHelperWithMsgKey(t *testing.T) {
+func TestHelperWithMsgKey(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(logger, WithMessageKey("message"))
 	log.Debugf("test %s", "debug")
 	log.Debugw("log", "test debug")
 }
 
-func TestHelperLevel(t *testing.T) {
+func TestHelperLevel(_ *testing.T) {
 	log := NewHelper(DefaultLogger)
 	log.Debug("test debug")
 	log.Info("test info")
@@ -62,7 +62,7 @@ func BenchmarkHelperPrintw(b *testing.B) {
 
 type traceKey struct{}
 
-func TestContext(t *testing.T) {
+func TestContext(_ *testing.T) {
 	logger := With(NewStdLogger(os.Stdout),
 		"trace", Trace(),
 	)

@@ -1,13 +1,18 @@
 package http
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+
+	"github.com/gorilla/mux"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
+	"github.com/go-kratos/kratos/v2/transport/http/binding"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
@@ -37,6 +42,21 @@ type EncodeResponseFunc func(http.ResponseWriter, *http.Request, interface{}) er
 // EncodeErrorFunc is encode error func.
 type EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
 
+// DefaultRequestVars decodes the request vars to object.
+func DefaultRequestVars(r *http.Request, v interface{}) error {
+	raws := mux.Vars(r)
+	vars := make(url.Values, len(raws))
+	for k, v := range raws {
+		vars[k] = []string{v}
+	}
+	return binding.BindQuery(vars, v)
+}
+
+// DefaultRequestQuery decodes the request vars to object.
+func DefaultRequestQuery(r *http.Request, v interface{}) error {
+	return binding.BindQuery(r.URL.Query(), v)
+}
+
 // DefaultRequestDecoder decodes the request body to object.
 func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 	codec, ok := CodecForRequest(r, "Content-Type")
@@ -44,6 +64,10 @@ func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 		return errors.BadRequest("CODEC", fmt.Sprintf("unregister Content-Type: %s", r.Header.Get("Content-Type")))
 	}
 	data, err := io.ReadAll(r.Body)
+
+	// reset body.
+	r.Body = io.NopCloser(bytes.NewBuffer(data))
+
 	if err != nil {
 		return errors.BadRequest("CODEC", err.Error())
 	}

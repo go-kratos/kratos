@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"reflect"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/metadata"
@@ -16,6 +17,8 @@ func (hc headerCarrier) Get(key string) string { return http.Header(hc).Get(key)
 
 func (hc headerCarrier) Set(key string, value string) { http.Header(hc).Set(key, value) }
 
+func (hc headerCarrier) Add(key string, value string) { http.Header(hc).Add(key, value) }
+
 // Keys lists the keys stored in this carrier.
 func (hc headerCarrier) Keys() []string {
 	keys := make([]string, 0, len(hc))
@@ -23,6 +26,11 @@ func (hc headerCarrier) Keys() []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// Values returns a slice value associated with the passed key.
+func (hc headerCarrier) Values(key string) []string {
+	return http.Header(hc).Values(key)
 }
 
 type testTransport struct{ header headerCarrier }
@@ -33,15 +41,18 @@ func (tr *testTransport) Operation() string               { return "" }
 func (tr *testTransport) RequestHeader() transport.Header { return tr.header }
 func (tr *testTransport) ReplyHeader() transport.Header   { return tr.header }
 
+var (
+	globalKey   = "x-md-global-key"
+	globalValue = "global-value"
+	localKey    = "x-md-local-key"
+	localValue  = "local-value"
+	customKey   = "x-md-local-custom"
+	customValue = "custom-value"
+	constKey    = "x-md-local-const"
+	constValue  = "x-md-local-const"
+)
+
 func TestSever(t *testing.T) {
-	var (
-		globalKey   = "x-md-global-key"
-		globalValue = "global-value"
-		localKey    = "x-md-local-key"
-		localValue  = "local-value"
-		constKey    = "x-md-local-const"
-		constValue  = "x-md-local-const"
-	)
 	hs := func(ctx context.Context, in interface{}) (interface{}, error) {
 		md, ok := metadata.FromServerContext(ctx)
 		if !ok {
@@ -75,16 +86,6 @@ func TestSever(t *testing.T) {
 }
 
 func TestClient(t *testing.T) {
-	var (
-		globalKey   = "x-md-global-key"
-		globalValue = "global-value"
-		localKey    = "x-md-local-key"
-		localValue  = "local-value"
-		customKey   = "x-md-local-custom"
-		customValue = "custom-value"
-		constKey    = "x-md-local-const"
-		constValue  = "x-md-local-const"
-	)
 	hs := func(ctx context.Context, in interface{}) (interface{}, error) {
 		tr, ok := transport.FromClientContext(ctx)
 		if !ok {
@@ -127,13 +128,52 @@ func TestClient(t *testing.T) {
 	}
 }
 
-func Test_WithPropagatedPrefix(t *testing.T) {
-	o := &options{
+func TestWithConstants(t *testing.T) {
+	md := metadata.Metadata{
+		constKey: {constValue},
+	}
+	options := &options{
+		md: metadata.Metadata{
+			"override": {"override"},
+		},
+	}
+
+	WithConstants(md)(options)
+	if !reflect.DeepEqual(md, options.md) {
+		t.Errorf("want: %v, got: %v", md, options.md)
+	}
+}
+
+func TestOptions_WithPropagatedPrefix(t *testing.T) {
+	options := &options{
 		prefix: []string{"override"},
 	}
-	WithPropagatedPrefix("something", "another")(o)
+	prefixes := []string{"something", "another"}
 
-	if len(o.prefix) != 2 {
-		t.Error("The prefix must be overrided.")
+	WithPropagatedPrefix(prefixes...)(options)
+	if !reflect.DeepEqual(prefixes, options.prefix) {
+		t.Error("The prefix must be overridden.")
+	}
+}
+
+func TestOptions_hasPrefix(t *testing.T) {
+	tests := []struct {
+		name    string
+		options *options
+		key     string
+		exists  bool
+	}{
+		{"exists key upper", &options{prefix: []string{"prefix"}}, "PREFIX_true", true},
+		{"exists key lower", &options{prefix: []string{"prefix"}}, "prefix_true", true},
+		{"not exists key upper", &options{prefix: []string{"prefix"}}, "false_PREFIX", false},
+		{"not exists key lower", &options{prefix: []string{"prefix"}}, "false_prefix", false},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			exists := test.options.hasPrefix(test.key)
+			if test.exists != exists {
+				t.Errorf("key: '%sr', not exists prefixs: %v", test.key, test.options.prefix)
+			}
+		})
 	}
 }

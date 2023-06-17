@@ -8,11 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/hashicorp/consul/api"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
-func tcpServer(t *testing.T, lis net.Listener) {
+func tcpServer(lis net.Listener) {
 	for {
 		conn, err := lis.Accept()
 		if err != nil {
@@ -73,14 +74,14 @@ func TestRegistry_Register(t *testing.T) {
 				serverName: "server-1",
 				server: []*registry.ServiceInstance{
 					{
-						ID:        "1",
+						ID:        "2",
 						Name:      "server-1",
 						Version:   "v0.0.1",
 						Metadata:  nil,
 						Endpoints: []string{"http://127.0.0.1:8000"},
 					},
 					{
-						ID:        "1",
+						ID:        "2",
 						Name:      "server-1",
 						Version:   "v0.0.2",
 						Metadata:  nil,
@@ -90,7 +91,7 @@ func TestRegistry_Register(t *testing.T) {
 			},
 			want: []*registry.ServiceInstance{
 				{
-					ID:        "1",
+					ID:        "2",
 					Name:      "server-1",
 					Version:   "v0.0.2",
 					Metadata:  nil,
@@ -147,7 +148,7 @@ func TestRegistry_GetService(t *testing.T) {
 		t.Fail()
 	}
 	defer lis.Close()
-	go tcpServer(t, lis)
+	go tcpServer(lis)
 	time.Sleep(time.Millisecond * 100)
 	cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500"})
 	if err != nil {
@@ -162,6 +163,13 @@ func TestRegistry_GetService(t *testing.T) {
 
 	instance1 := &registry.ServiceInstance{
 		ID:        "1",
+		Name:      "server-1",
+		Version:   "v0.0.1",
+		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
+	}
+
+	instance2 := &registry.ServiceInstance{
+		ID:        "2",
 		Name:      "server-1",
 		Version:   "v0.0.1",
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
@@ -222,10 +230,10 @@ func TestRegistry_GetService(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 			preFunc: func(t *testing.T) {
-				if err := r.Register(context.Background(), instance1); err != nil {
+				if err := r.Register(context.Background(), instance2); err != nil {
 					t.Error(err)
 				}
-				watch, err := r.Watch(context.Background(), instance1.Name)
+				watch, err := r.Watch(context.Background(), instance2.Name)
 				if err != nil {
 					t.Error(err)
 				}
@@ -235,7 +243,7 @@ func TestRegistry_GetService(t *testing.T) {
 				}
 			},
 			deferFunc: func(t *testing.T) {
-				err := r.Deregister(context.Background(), instance1)
+				err := r.Deregister(context.Background(), instance2)
 				if err != nil {
 					t.Error(err)
 				}
@@ -281,11 +289,28 @@ func TestRegistry_Watch(t *testing.T) {
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
 
+	instance2 := &registry.ServiceInstance{
+		ID:        "2",
+		Name:      "server-1",
+		Version:   "v0.0.1",
+		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
+	}
+
+	instance3 := &registry.ServiceInstance{
+		ID:        "3",
+		Name:      "server-1",
+		Version:   "v0.0.1",
+		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
+	}
+
 	type args struct {
 		ctx      context.Context
+		cancel   func()
 		opts     []Option
 		instance *registry.ServiceInstance
 	}
+	canceledCtx, cancel := context.WithCancel(context.Background())
+
 	tests := []struct {
 		name    string
 		args    args
@@ -308,24 +333,40 @@ func TestRegistry_Watch(t *testing.T) {
 			},
 		},
 		{
+			name: "ctx has been cancelled",
+			args: args{
+				ctx:      canceledCtx,
+				cancel:   cancel,
+				instance: instance2,
+				opts: []Option{
+					WithHealthCheck(false),
+				},
+			},
+			want:    nil,
+			wantErr: true,
+			preFunc: func(t *testing.T) {
+			},
+		},
+		{
 			name: "register with healthCheck",
 			args: args{
 				ctx:      context.Background(),
-				instance: instance1,
+				instance: instance3,
 				opts: []Option{
 					WithHeartbeat(true),
 					WithHealthCheck(true),
 					WithHealthCheckInterval(5),
 				},
 			},
-			want:    []*registry.ServiceInstance{instance1},
+			want:    []*registry.ServiceInstance{instance3},
 			wantErr: false,
 			preFunc: func(t *testing.T) {
 				lis, err := net.Listen("tcp", addr)
 				if err != nil {
 					t.Errorf("listen tcp %s failed!", addr)
+					return
 				}
-				go tcpServer(t, lis)
+				go tcpServer(lis)
 			},
 		},
 	}
@@ -352,6 +393,10 @@ func TestRegistry_Watch(t *testing.T) {
 			watch, err := r.Watch(tt.args.ctx, tt.args.instance.Name)
 			if err != nil {
 				t.Error(err)
+			}
+
+			if tt.args.cancel != nil {
+				tt.args.cancel()
 			}
 
 			service, err := watch.Next()

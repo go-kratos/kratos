@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
 	jsoniter "github.com/json-iterator/go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,6 +20,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	listerv1 "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 // Defines the key name of specific fields
@@ -150,14 +151,14 @@ func (s *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 }
 
 // Deregister the registration.
-func (s *Registry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
+func (s *Registry) Deregister(ctx context.Context, _ *registry.ServiceInstance) error {
 	return s.Register(ctx, &registry.ServiceInstance{
 		Metadata: map[string]string{},
 	})
 }
 
 // GetService return the service instances in memory according to the service name.
-func (s *Registry) GetService(ctx context.Context, name string) ([]*registry.ServiceInstance, error) {
+func (s *Registry) GetService(_ context.Context, name string) ([]*registry.ServiceInstance, error) {
 	pods, err := s.podLister.List(labels.SelectorFromSet(map[string]string{
 		LabelsKeyServiceName: name,
 	}))
@@ -299,7 +300,7 @@ func (iter *Iterator) Next() ([]*registry.ServiceInstance, error) {
 	}
 }
 
-// Close is used to close the iterator
+// Stop is used to close the iterator
 func (iter *Iterator) Stop() error {
 	select {
 	case <-iter.stopCh:

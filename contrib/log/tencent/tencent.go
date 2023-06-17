@@ -6,15 +6,16 @@ import (
 	"strconv"
 	"time"
 
-	log "github.com/go-kratos/kratos/v2/log"
 	cls "github.com/tencentcloud/tencentcloud-cls-sdk-go"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 type Logger interface {
 	log.Logger
-	GetProducer() *cls.AsyncProducerClient
 
+	GetProducer() *cls.AsyncProducerClient
 	Close() error
 }
 
@@ -65,25 +66,20 @@ func WithAccessSecret(as string) Option {
 type Option func(cls *options)
 
 func (log *tencentLog) Close() error {
-	err := log.producer.Close(5000)
-	return err
+	return log.producer.Close(5000)
 }
 
 func (log *tencentLog) Log(level log.Level, keyvals ...interface{}) error {
-	buf := level.String()
-	levelTitle := "level"
-	contents := make([]*cls.Log_Content, 0)
+	contents := make([]*cls.Log_Content, 0, len(keyvals)/2+1)
 
 	contents = append(contents, &cls.Log_Content{
-		Key:   &levelTitle,
-		Value: &buf,
+		Key:   newString(level.Key()),
+		Value: newString(level.String()),
 	})
 	for i := 0; i < len(keyvals); i += 2 {
-		key := toString(keyvals[i])
-		value := toString(keyvals[i+1])
 		contents = append(contents, &cls.Log_Content{
-			Key:   &key,
-			Value: &value,
+			Key:   newString(toString(keyvals[i])),
+			Value: newString(toString(keyvals[i+1])),
 		})
 	}
 
@@ -91,8 +87,7 @@ func (log *tencentLog) Log(level log.Level, keyvals ...interface{}) error {
 		Time:     proto.Int64(time.Now().Unix()),
 		Contents: contents,
 	}
-	err := log.producer.SendLog(log.opts.topicID, logInst, nil)
-	return err
+	return log.producer.SendLog(log.opts.topicID, logInst, nil)
 }
 
 func NewLogger(options ...Option) (Logger, error) {
@@ -108,13 +103,18 @@ func NewLogger(options ...Option) (Logger, error) {
 	if err != nil {
 		return nil, err
 	}
+	producerInst.Start()
 	return &tencentLog{
 		producer: producerInst,
 		opts:     opts,
 	}, nil
 }
 
-// toString any type to string
+func newString(s string) *string {
+	return &s
+}
+
+// toString convert any type to string
 func toString(v interface{}) string {
 	var key string
 	if v == nil {
@@ -124,27 +124,33 @@ func toString(v interface{}) string {
 	case float64:
 		key = strconv.FormatFloat(v, 'f', -1, 64)
 	case float32:
-		key = strconv.FormatFloat(float64(v), 'f', -1, 64)
+		key = strconv.FormatFloat(float64(v), 'f', -1, 32)
 	case int:
 		key = strconv.Itoa(v)
 	case uint:
-		key = strconv.Itoa(int(v))
+		key = strconv.FormatUint(uint64(v), 10)
 	case int8:
 		key = strconv.Itoa(int(v))
 	case uint8:
-		key = strconv.Itoa(int(v))
+		key = strconv.FormatUint(uint64(v), 10)
 	case int16:
 		key = strconv.Itoa(int(v))
 	case uint16:
-		key = strconv.Itoa(int(v))
+		key = strconv.FormatUint(uint64(v), 10)
 	case int32:
 		key = strconv.Itoa(int(v))
 	case uint32:
-		key = strconv.Itoa(int(v))
+		key = strconv.FormatUint(uint64(v), 10)
 	case int64:
 		key = strconv.FormatInt(v, 10)
 	case uint64:
 		key = strconv.FormatUint(v, 10)
+	case string:
+		key = v
+	case bool:
+		key = strconv.FormatBool(v)
+	case []byte:
+		key = string(v)
 	case fmt.Stringer:
 		key = v.String()
 	default:

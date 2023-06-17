@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"
+
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 )
 
@@ -16,7 +17,7 @@ var repoAddIgnores = []string{
 }
 
 func (p *Project) Add(ctx context.Context, dir string, layout string, branch string, mod string) error {
-	to := path.Join(dir, p.Path)
+	to := filepath.Join(dir, p.Name)
 
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
 		fmt.Printf("🚫 %s already exists\n", p.Name)
@@ -39,13 +40,13 @@ func (p *Project) Add(ctx context.Context, dir string, layout string, branch str
 
 	repo := base.NewRepo(layout, branch)
 
-	if err := repo.CopyToV2(ctx, to, path.Join(mod, p.Path), repoAddIgnores, []string{path.Join(p.Path, "api"), "api"}); err != nil {
+	if err := repo.CopyToV2(ctx, to, filepath.Join(mod, p.Path), repoAddIgnores, []string{filepath.Join(p.Path, "api"), "api"}); err != nil {
 		return err
 	}
 
 	e := os.Rename(
-		path.Join(to, "cmd", "server"),
-		path.Join(to, "cmd", p.Name),
+		filepath.Join(to, "cmd", "server"),
+		filepath.Join(to, "cmd", p.Name),
 	)
 	if e != nil {
 		return e

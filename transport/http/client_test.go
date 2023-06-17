@@ -9,13 +9,13 @@ import (
 	"fmt"
 	"io"
 	"log"
-	nethttp "net/http"
+	"net/http"
 	"reflect"
 	"strconv"
 	"testing"
 	"time"
 
-	kratosErrors "github.com/go-kratos/kratos/v2/errors"
+	kratoserrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
@@ -23,7 +23,7 @@ import (
 
 type mockRoundTripper struct{}
 
-func (rt *mockRoundTripper) RoundTrip(req *nethttp.Request) (resp *nethttp.Response, err error) {
+func (rt *mockRoundTripper) RoundTrip(_ *http.Request) (resp *http.Response, err error) {
 	return
 }
 
@@ -31,14 +31,14 @@ type mockCallOption struct {
 	needErr bool
 }
 
-func (x *mockCallOption) before(info *callInfo) error {
+func (x *mockCallOption) before(_ *callInfo) error {
 	if x.needErr {
-		return fmt.Errorf("option need return err")
+		return errors.New("option need return err")
 	}
 	return nil
 }
 
-func (x *mockCallOption) after(info *callInfo, attempt *csAttempt) {
+func (x *mockCallOption) after(_ *callInfo, _ *csAttempt) {
 	log.Println("run in mockCallOption.after")
 }
 
@@ -71,7 +71,8 @@ func TestWithBlock(t *testing.T) {
 	}
 }
 
-func TestWithBalancer(t *testing.T) {
+func TestWithBalancer(_ *testing.T) {
+	// TODO
 }
 
 func TestWithTLSConfig(t *testing.T) {
@@ -128,7 +129,7 @@ func TestWithRequestEncoder(t *testing.T) {
 
 func TestWithResponseDecoder(t *testing.T) {
 	o := &clientOptions{}
-	v := func(ctx context.Context, res *nethttp.Response, out interface{}) error { return nil }
+	v := func(ctx context.Context, res *http.Response, out interface{}) error { return nil }
 	WithResponseDecoder(v)(o)
 	if o.decoder == nil {
 		t.Errorf("expected encoder to be not nil")
@@ -137,7 +138,7 @@ func TestWithResponseDecoder(t *testing.T) {
 
 func TestWithErrorDecoder(t *testing.T) {
 	o := &clientOptions{}
-	v := func(ctx context.Context, res *nethttp.Response) error { return nil }
+	v := func(ctx context.Context, res *http.Response) error { return nil }
 	WithErrorDecoder(v)(o)
 	if o.errorDecoder == nil {
 		t.Errorf("expected encoder to be not nil")
@@ -146,11 +147,11 @@ func TestWithErrorDecoder(t *testing.T) {
 
 type mockDiscovery struct{}
 
-func (*mockDiscovery) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+func (*mockDiscovery) GetService(_ context.Context, _ string) ([]*registry.ServiceInstance, error) {
 	return nil, nil
 }
 
-func (*mockDiscovery) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
+func (*mockDiscovery) Watch(_ context.Context, _ string) (registry.Watcher, error) {
 	return &mockWatcher{}, nil
 }
 
@@ -198,27 +199,24 @@ func TestWithNodeFilter(t *testing.T) {
 }
 
 func TestDefaultRequestEncoder(t *testing.T) {
-	req1 := &nethttp.Request{
-		Header: make(nethttp.Header),
-		Body:   io.NopCloser(bytes.NewBufferString("{\"a\":\"1\", \"b\": 2}")),
-	}
-	req1.Header.Set("Content-Type", "application/xml")
+	r, _ := http.NewRequest(http.MethodPost, "", io.NopCloser(bytes.NewBufferString(`{"a":"1", "b": 2}`)))
+	r.Header.Set("Content-Type", "application/xml")
 
 	v1 := &struct {
 		A string `json:"a"`
 		B int64  `json:"b"`
 	}{"a", 1}
-	b, err1 := DefaultRequestEncoder(context.TODO(), "application/json", v1)
-	if err1 != nil {
-		t.Errorf("expected no error, got %v", err1)
+	b, err := DefaultRequestEncoder(context.TODO(), "application/json", v1)
+	if err != nil {
+		t.Fatal(err)
 	}
 	v1b := &struct {
 		A string `json:"a"`
 		B int64  `json:"b"`
 	}{}
-	err1 = json.Unmarshal(b, v1b)
-	if err1 != nil {
-		t.Errorf("expected no error, got %v", err1)
+	err = json.Unmarshal(b, v1b)
+	if err != nil {
+		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(v1b, v1) {
 		t.Errorf("expected %v, got %v", v1, v1b)
@@ -226,28 +224,28 @@ func TestDefaultRequestEncoder(t *testing.T) {
 }
 
 func TestDefaultResponseDecoder(t *testing.T) {
-	resp1 := &nethttp.Response{
-		Header:     make(nethttp.Header),
+	resp1 := &http.Response{
+		Header:     make(http.Header),
 		StatusCode: 200,
-		Body:       io.NopCloser(bytes.NewBufferString("{\"a\":\"1\", \"b\": 2}")),
+		Body:       io.NopCloser(bytes.NewBufferString(`{"a":"1", "b": 2}`)),
 	}
 	v1 := &struct {
 		A string `json:"a"`
 		B int64  `json:"b"`
 	}{}
-	err1 := DefaultResponseDecoder(context.TODO(), resp1, &v1)
-	if err1 != nil {
-		t.Errorf("expected no error, got %v", err1)
+	err := DefaultResponseDecoder(context.TODO(), resp1, &v1)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if !reflect.DeepEqual("1", v1.A) {
+	if v1.A != "1" {
 		t.Errorf("expected %v, got %v", "1", v1.A)
 	}
-	if !reflect.DeepEqual(int64(2), v1.B) {
+	if v1.B != int64(2) {
 		t.Errorf("expected %v, got %v", 2, v1.B)
 	}
 
-	resp2 := &nethttp.Response{
-		Header:     make(nethttp.Header),
+	resp2 := &http.Response{
+		Header:     make(http.Header),
 		StatusCode: 200,
 		Body:       io.NopCloser(bytes.NewBufferString("{badjson}")),
 	}
@@ -255,22 +253,22 @@ func TestDefaultResponseDecoder(t *testing.T) {
 		A string `json:"a"`
 		B int64  `json:"b"`
 	}{}
-	err2 := DefaultResponseDecoder(context.TODO(), resp2, &v2)
-	terr1 := &json.SyntaxError{}
-	if !errors.As(err2, &terr1) {
-		t.Errorf("expected %v, got %v", terr1, err2)
+	err = DefaultResponseDecoder(context.TODO(), resp2, &v2)
+	syntaxErr := &json.SyntaxError{}
+	if !errors.As(err, &syntaxErr) {
+		t.Errorf("expected %v, got %v", syntaxErr, err)
 	}
 }
 
 func TestDefaultErrorDecoder(t *testing.T) {
 	for i := 200; i < 300; i++ {
-		resp := &nethttp.Response{Header: make(nethttp.Header), StatusCode: i}
+		resp := &http.Response{Header: make(http.Header), StatusCode: i}
 		if DefaultErrorDecoder(context.TODO(), resp) != nil {
 			t.Errorf("expected no error, got %v", DefaultErrorDecoder(context.TODO(), resp))
 		}
 	}
-	resp1 := &nethttp.Response{
-		Header:     make(nethttp.Header),
+	resp1 := &http.Response{
+		Header:     make(http.Header),
 		StatusCode: 300,
 		Body:       io.NopCloser(bytes.NewBufferString("{\"foo\":\"bar\"}")),
 	}
@@ -278,28 +276,28 @@ func TestDefaultErrorDecoder(t *testing.T) {
 		t.Errorf("expected error, got nil")
 	}
 
-	resp2 := &nethttp.Response{
-		Header:     make(nethttp.Header),
+	resp2 := &http.Response{
+		Header:     make(http.Header),
 		StatusCode: 500,
-		Body:       io.NopCloser(bytes.NewBufferString("{\"code\":54321, \"message\": \"hi\", \"reason\": \"FOO\"}")),
+		Body:       io.NopCloser(bytes.NewBufferString(`{"code":54321, "message": "hi", "reason": "FOO"}`)),
 	}
-	err2 := DefaultErrorDecoder(context.TODO(), resp2)
-	if err2 == nil {
+	err := DefaultErrorDecoder(context.TODO(), resp2)
+	if err == nil {
 		t.Errorf("expected error, got nil")
 	}
-	if !reflect.DeepEqual(int32(500), err2.(*kratosErrors.Error).Code) {
-		t.Errorf("expected %v, got %v", 500, err2.(*kratosErrors.Error).Code)
+	if err.(*kratoserrors.Error).Code != int32(500) {
+		t.Errorf("expected %v, got %v", 500, err.(*kratoserrors.Error).Code)
 	}
-	if !reflect.DeepEqual("hi", err2.(*kratosErrors.Error).Message) {
-		t.Errorf("expected %v, got %v", "hi", err2.(*kratosErrors.Error).Message)
+	if err.(*kratoserrors.Error).Message != "hi" {
+		t.Errorf("expected %v, got %v", "hi", err.(*kratoserrors.Error).Message)
 	}
-	if !reflect.DeepEqual("FOO", err2.(*kratosErrors.Error).Reason) {
-		t.Errorf("expected %v, got %v", "FOO", err2.(*kratosErrors.Error).Reason)
+	if err.(*kratoserrors.Error).Reason != "FOO" {
+		t.Errorf("expected %v, got %v", "FOO", err.(*kratoserrors.Error).Reason)
 	}
 }
 
 func TestCodecForResponse(t *testing.T) {
-	resp := &nethttp.Response{Header: make(nethttp.Header)}
+	resp := &http.Response{Header: make(http.Header)}
 	resp.Header.Set("Content-Type", "application/xml")
 	c := CodecForResponse(resp)
 	if !reflect.DeepEqual("xml", c.Name()) {
@@ -345,21 +343,21 @@ func TestNewClient(t *testing.T) {
 		}),
 	)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
-	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{}, &mockCallOption{})
+	err = client.Invoke(context.Background(), http.MethodPost, "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{}, &mockCallOption{})
 	if err == nil {
 		t.Error("err should not be equal to nil")
 	}
-	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{}, &mockCallOption{needErr: true})
+	err = client.Invoke(context.Background(), http.MethodPost, "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{}, &mockCallOption{needErr: true})
 	if err == nil {
 		t.Error("err should be equal to callOption err")
 	}
 	client.opts.encoder = func(ctx context.Context, contentType string, in interface{}) (body []byte, err error) {
-		return nil, fmt.Errorf("mock test encoder error")
+		return nil, errors.New("mock test encoder error")
 	}
-	err = client.Invoke(context.Background(), "POST", "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{})
+	err = client.Invoke(context.Background(), http.MethodPost, "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{})
 	if err == nil {
 		t.Error("err should be equal to encoder error")
 	}

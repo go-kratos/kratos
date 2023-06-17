@@ -1,6 +1,7 @@
 package http
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"testing"
 )
@@ -10,7 +11,7 @@ func TestRedirect(t *testing.T) {
 		redirectURL  = "/redirect"
 		redirectCode = 302
 	)
-	r := httptest.NewRequest("POST", "/test", nil)
+	r := httptest.NewRequest(http.MethodPost, "/test", nil)
 	w := httptest.NewRecorder()
 	_ = DefaultResponseEncoder(w, r, NewRedirect(redirectURL, redirectCode))
 
