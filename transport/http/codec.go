@@ -1,17 +1,18 @@
 package http
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 
+	"github.com/gorilla/mux"
+
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
-
-	"github.com/gorilla/mux"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
@@ -63,6 +64,10 @@ func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 		return errors.BadRequest("CODEC", fmt.Sprintf("unregister Content-Type: %s", r.Header.Get("Content-Type")))
 	}
 	data, err := io.ReadAll(r.Body)
+
+	// reset body.
+	r.Body = io.NopCloser(bytes.NewBuffer(data))
+
 	if err != nil {
 		return errors.BadRequest("CODEC", err.Error())
 	}

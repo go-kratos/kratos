@@ -19,8 +19,11 @@ var CmdAdd = &cobra.Command{
 	Run:   run,
 }
 
-func run(cmd *cobra.Command, args []string) {
-	// kratos proto add helloworld/v1/helloworld.proto
+func run(_ *cobra.Command, args []string) {
+	if len(args) == 0 {
+		fmt.Println("Please enter the proto file or directory")
+		return
+	}
 	input := args[0]
 	n := strings.LastIndex(input, "/")
 	if n == -1 {

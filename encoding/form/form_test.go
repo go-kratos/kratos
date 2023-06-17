@@ -99,7 +99,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 		Price:   11.23,
 		D:       22.22,
 		Byte:    []byte("123"),
-		Map:     map[string]string{"kratos": "https://go-kratos.dev/"},
+		Map:     map[string]string{"kratos": "https://go-kratos.dev/", "kratos_start": "https://go-kratos.dev/en/docs/getting-started/start/"},
 
 		Timestamp: &timestamppb.Timestamp{Seconds: 20, Nanos: 2},
 		Duration:  &durationpb.Duration{Seconds: 120, Nanos: 22},
@@ -119,7 +119,8 @@ func TestProtoEncodeDecode(t *testing.T) {
 		t.Fatal(err)
 	}
 	if "a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=22.22&double=12.33&duration="+
-		"2m0.000000022s&field=1%2C2&float=12.34&id=2233&int32=32&int64=64&map%5Bkratos%5D=https%3A%2F%2Fgo-kratos.dev%2F&"+
+		"2m0.000000022s&field=1%2C2&float=12.34&id=2233&int32=32&int64=64&"+
+		"map%5Bkratos%5D=https%3A%2F%2Fgo-kratos.dev%2F&map%5Bkratos_start%5D=https%3A%2F%2Fgo-kratos.dev%2Fen%2Fdocs%2Fgetting-started%2Fstart%2F&"+
 		"numberOne=2233&price=11.23&sex=woman&simples=3344&simples=5566&string=go-kratos"+
 		"&timestamp=1970-01-01T00%3A00%3A20.000000002Z&uint32=32&uint64=64&very_simple.component=5566" != string(content) {
 		t.Errorf("rawpath is not equal to %s", content)
@@ -153,6 +154,14 @@ func TestProtoEncodeDecode(t *testing.T) {
 	if "5566" != in2.Simples[1] {
 		t.Errorf("expect %v, got %v", "5566", in2.Simples[1])
 	}
+	if l := len(in2.GetMap()); l != 2 {
+		t.Fatalf("in2.Map length want: %d, got: %d", 2, l)
+	}
+	for key, val := range in.GetMap() {
+		if in2Val := in2.GetMap()[key]; in2Val != val {
+			t.Errorf("%s want: %q, got: %q", "map["+key+"]", val, in2Val)
+		}
+	}
 }
 
 func TestDecodeStructPb(t *testing.T) {
@@ -181,7 +190,7 @@ func TestDecodeBytesValuePb(t *testing.T) {
 	content := "bytes=" + val
 	in2 := &complex.Complex{}
 	if err := encoding.GetCodec(Name).Unmarshal([]byte(content), in2); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if url != string(in2.Bytes.Value) {
 		t.Errorf("except %s, got %s", val, in2.Bytes.Value)

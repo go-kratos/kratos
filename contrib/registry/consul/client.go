@@ -2,7 +2,9 @@ package consul
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"math/rand"
 	"net"
 	"net/url"
 	"strconv"
@@ -39,25 +41,6 @@ type Client struct {
 	deregisterCriticalServiceAfter int
 	// serviceChecks  user custom checks
 	serviceChecks api.AgentServiceChecks
-}
-
-// Deprecated use newClient instead.
-func NewClient(cli *api.Client) *Client {
-	return newClient(cli, SingleDatacenter)
-}
-
-func newClient(cli *api.Client, dc Datacenter) *Client {
-	c := &Client{
-		dc:                             dc,
-		cli:                            cli,
-		resolver:                       defaultResolver,
-		healthcheckInterval:            10,
-		heartbeat:                      true,
-		deregisterCriticalServiceAfter: 600,
-	}
-
-	c.ctx, c.cancel = context.WithCancel(context.Background())
-	return c
 }
 
 func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance {
@@ -222,13 +205,32 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			defer ticker.Stop()
 			for {
 				select {
+				case <-c.ctx.Done():
+					_ = c.cli.Agent().ServiceDeregister(svc.ID)
+					return
+				default:
+				}
+				select {
+				case <-c.ctx.Done():
+					_ = c.cli.Agent().ServiceDeregister(svc.ID)
+					return
 				case <-ticker.C:
+					// ensure that unregistered services will not be re-registered by mistake
+					if errors.Is(c.ctx.Err(), context.Canceled) || errors.Is(c.ctx.Err(), context.DeadlineExceeded) {
+						_ = c.cli.Agent().ServiceDeregister(svc.ID)
+						return
+					}
 					err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 					if err != nil {
-						log.Errorf("[Consul]update ttl heartbeat to consul failed!err:=%v", err)
+						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
+						// when the previous report fails, try to re register the service
+						time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
+						if err := c.cli.Agent().ServiceRegister(asr); err != nil {
+							log.Errorf("[Consul] re registry service failed!, err=%v", err)
+						} else {
+							log.Warn("[Consul] re registry of service occurred success")
+						}
 					}
-				case <-c.ctx.Done():
-					return
 				}
 			}
 		}()
@@ -238,6 +240,6 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 
 // Deregister service by service ID
 func (c *Client) Deregister(_ context.Context, serviceID string) error {
-	c.cancel()
+	defer c.cancel()
 	return c.cli.Agent().ServiceDeregister(serviceID)
 }

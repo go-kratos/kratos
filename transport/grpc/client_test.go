@@ -44,11 +44,11 @@ func TestWithMiddleware(t *testing.T) {
 
 type mockRegistry struct{}
 
-func (m *mockRegistry) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+func (m *mockRegistry) GetService(_ context.Context, _ string) ([]*registry.ServiceInstance, error) {
 	return nil, nil
 }
 
-func (m *mockRegistry) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
+func (m *mockRegistry) Watch(_ context.Context, _ string) (registry.Watcher, error) {
 	return nil, nil
 }
 

@@ -24,6 +24,8 @@ func (hc headerCarrier) Get(key string) string { return http.Header(hc).Get(key)
 
 func (hc headerCarrier) Set(key string, value string) { http.Header(hc).Set(key, value) }
 
+func (hc headerCarrier) Add(key string, value string) { http.Header(hc).Add(key, value) }
+
 // Keys lists the keys stored in this carrier.
 func (hc headerCarrier) Keys() []string {
 	keys := make([]string, 0, len(hc))
@@ -31,6 +33,11 @@ func (hc headerCarrier) Keys() []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// Values returns a slice value associated with the passed key.
+func (hc headerCarrier) Values(key string) []string {
+	return http.Header(hc).Values(key)
 }
 
 func newTokenHeader(headerKey string, token string) *headerCarrier {

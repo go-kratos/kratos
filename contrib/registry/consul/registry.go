@@ -37,7 +37,7 @@ func WithTimeout(timeout time.Duration) Option {
 // WithDatacenter with registry datacenter option
 func WithDatacenter(dc Datacenter) Option {
 	return func(o *Registry) {
-		o.dc = dc
+		o.cli.dc = dc
 	}
 }
 
@@ -98,21 +98,27 @@ type Registry struct {
 	registry          map[string]*serviceSet
 	lock              sync.RWMutex
 	timeout           time.Duration
-	dc                Datacenter
 }
 
 // New creates consul registry
 func New(apiClient *api.Client, opts ...Option) *Registry {
 	r := &Registry{
-		dc:                SingleDatacenter,
 		registry:          make(map[string]*serviceSet),
 		enableHealthCheck: true,
 		timeout:           10 * time.Second,
+		cli: &Client{
+			dc:                             SingleDatacenter,
+			cli:                            apiClient,
+			resolver:                       defaultResolver,
+			healthcheckInterval:            10,
+			heartbeat:                      true,
+			deregisterCriticalServiceAfter: 600,
+		},
 	}
 	for _, o := range opts {
 		o(r)
 	}
-	r.cli = newClient(apiClient, r.dc)
+	r.cli.ctx, r.cli.cancel = context.WithCancel(context.Background())
 	return r
 }
 
