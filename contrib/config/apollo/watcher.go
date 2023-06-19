@@ -2,7 +2,6 @@ package apollo
 
 import (
 	"context"
-	"strings"
 
 	"github.com/apolloconfig/agollo/v4/storage"
 
@@ -24,7 +23,7 @@ type customChangeListener struct {
 }
 
 func (c *customChangeListener) onChange(namespace string, changes map[string]*storage.ConfigChange) []*config.KeyValue {
-	if strings.Contains(namespace, ".") && !strings.HasSuffix(namespace, "."+properties) && isOriginConfig(namespace) {
+	if isOriginConfig(namespace) {
 		value, err := c.apollo.client.GetConfigCache(namespace).Get("content")
 		if err != nil {
 			log.Warnw("apollo get config failed", "err", err)
