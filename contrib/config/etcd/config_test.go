@@ -15,7 +15,8 @@ const testKey = "/kratos/test/config"
 func TestConfig(t *testing.T) {
 	client, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"127.0.0.1:2379"},
-		DialTimeout: time.Second, DialOptions: []grpc.DialOption{grpc.WithBlock()},
+		DialTimeout: time.Second,
+		DialOptions: []grpc.DialOption{grpc.WithBlock()},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -106,5 +107,63 @@ func TestExtToFormat(t *testing.T) {
 	}
 	if !reflect.DeepEqual("json", kvs[0].Format) {
 		t.Errorf("kvs[0].Format is %s", kvs[0].Format)
+	}
+}
+
+func TestEtcdWithPath(t *testing.T) {
+	tests := []struct {
+		name   string
+		fields string
+		want   string
+	}{
+		{
+			name:   "default",
+			fields: testKey,
+			want:   testKey,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			options := &options{
+				ctx: context.Background(),
+			}
+
+			got := WithPath(tt.fields)
+			got(options)
+
+			if options.path != tt.want {
+				t.Errorf("WithPath(tt.fields) = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestEtcdWithPrefix(t *testing.T) {
+	tests := []struct {
+		name   string
+		fields bool
+		want   bool
+	}{
+		{
+			name:   "default",
+			fields: false,
+			want:   false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			options := &options{
+				ctx: context.Background(),
+			}
+
+			got := WithPrefix(tt.fields)
+			got(options)
+
+			if options.prefix != tt.want {
+				t.Errorf("WithPrefix(tt.fields) = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

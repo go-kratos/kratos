@@ -57,7 +57,7 @@ func TestParseTarget(t *testing.T) {
 
 type mockRebalancer struct{}
 
-func (m *mockRebalancer) Apply(nodes []selector.Node) {}
+func (m *mockRebalancer) Apply(_ []selector.Node) {}
 
 type mockDiscoveries struct {
 	isSecure bool
@@ -65,7 +65,7 @@ type mockDiscoveries struct {
 	stopErr  bool
 }
 
-func (d *mockDiscoveries) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+func (d *mockDiscoveries) GetService(_ context.Context, _ string) ([]*registry.ServiceInstance, error) {
 	return nil, nil
 }
 
@@ -73,7 +73,7 @@ const errServiceName = "needErr"
 
 func (d *mockDiscoveries) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
 	if serviceName == errServiceName {
-		return nil, fmt.Errorf("mock test service name watch err")
+		return nil, errors.New("mock test service name watch err")
 	}
 	return &mockWatch{ctx: ctx, isSecure: d.isSecure, nextErr: d.nextErr, stopErr: d.stopErr}, nil
 }
@@ -116,7 +116,7 @@ func (m *mockWatch) Next() ([]*registry.ServiceInstance, error) {
 
 func (m *mockWatch) Stop() error {
 	if m.stopErr {
-		return fmt.Errorf("mock test error")
+		return errors.New("mock test error")
 	}
 	// 标记 next 需要报错
 	m.nextErr = true
@@ -131,19 +131,19 @@ func TestResolver(t *testing.T) {
 	}
 
 	// 异步 无需报错
-	_, err = newResolver(context.Background(), &mockDiscoveries{true, false, false}, ta, &mockRebalancer{}, false, false)
+	_, err = newResolver(context.Background(), &mockDiscoveries{true, false, false}, ta, &mockRebalancer{}, false, false, 25)
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
 
 	// 同步 一切正常运行
-	_, err = newResolver(context.Background(), &mockDiscoveries{false, false, false}, ta, &mockRebalancer{}, true, true)
+	_, err = newResolver(context.Background(), &mockDiscoveries{false, false, false}, ta, &mockRebalancer{}, true, true, 25)
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
 
 	// 同步 但是 next 出错 以及 stop 出错
-	_, err = newResolver(context.Background(), &mockDiscoveries{false, true, true}, ta, &mockRebalancer{}, true, true)
+	_, err = newResolver(context.Background(), &mockDiscoveries{false, true, true}, ta, &mockRebalancer{}, true, true, 25)
 	if err == nil {
 		t.Errorf("expect err, got nil")
 	}
@@ -152,7 +152,7 @@ func TestResolver(t *testing.T) {
 	_, err = newResolver(context.Background(), &mockDiscoveries{false, true, true}, &Target{
 		Scheme:   "discovery",
 		Endpoint: errServiceName,
-	}, &mockRebalancer{}, true, true)
+	}, &mockRebalancer{}, true, true, 25)
 	if err == nil {
 		t.Errorf("expect err, got nil")
 	}
@@ -161,14 +161,14 @@ func TestResolver(t *testing.T) {
 	cancel()
 
 	// 此处应该打印出来 context.Canceled
-	r, err := newResolver(cancelCtx, &mockDiscoveries{false, false, false}, ta, &mockRebalancer{}, false, false)
+	r, err := newResolver(cancelCtx, &mockDiscoveries{false, false, false}, ta, &mockRebalancer{}, false, false, 25)
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
 	_ = r.Close()
 
 	// 同步 但是服务取消，此时需要报错
-	_, err = newResolver(cancelCtx, &mockDiscoveries{false, false, true}, ta, &mockRebalancer{}, true, true)
+	_, err = newResolver(cancelCtx, &mockDiscoveries{false, false, true}, ta, &mockRebalancer{}, true, true, 25)
 	if err == nil {
 		t.Errorf("expect ctx cancel err, got nil")
 	}

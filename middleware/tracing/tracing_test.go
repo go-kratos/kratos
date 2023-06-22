@@ -7,14 +7,15 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/transport"
 	"go.opentelemetry.io/otel/propagation"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/transport"
 )
 
-var _ transport.Transporter = &mockTransport{}
+var _ transport.Transporter = (*mockTransport)(nil)
 
 type headerCarrier http.Header
 
@@ -28,6 +29,11 @@ func (hc headerCarrier) Set(key string, value string) {
 	http.Header(hc).Set(key, value)
 }
 
+// Add value to the key-value pair.
+func (hc headerCarrier) Add(key string, value string) {
+	http.Header(hc).Add(key, value)
+}
+
 // Keys lists the keys stored in this carrier.
 func (hc headerCarrier) Keys() []string {
 	keys := make([]string, 0, len(hc))
@@ -35,6 +41,11 @@ func (hc headerCarrier) Keys() []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// Values returns a slice value associated with the passed key.
+func (hc headerCarrier) Values(key string) []string {
+	return http.Header(hc).Values(key)
 }
 
 type mockTransport struct {

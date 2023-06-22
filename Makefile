@@ -1,9 +1,27 @@
 user	:=	$(shell whoami)
 rev 	:= 	$(shell git rev-parse --short HEAD)
+os		:=	$(shell expr substr $(shell uname -s) 1 5)
 
 # GOBIN > GOPATH > INSTALLDIR
+# Mac OS X
+ifeq ($(shell uname),Darwin)
 GOBIN	:=	$(shell echo ${GOBIN} | cut -d':' -f1)
 GOPATH	:=	$(shell echo $(GOPATH) | cut -d':' -f1)
+endif
+
+# Linux
+ifeq ($(os),Linux)
+GOBIN	:=	$(shell echo ${GOBIN} | cut -d':' -f1)
+GOPATH	:=	$(shell echo $(GOPATH) | cut -d':' -f1)
+endif
+
+# Windows
+ifeq ($(os),MINGW)
+GOBIN	:=	$(subst \,/,$(GOBIN))
+GOPATH	:=	$(subst \,/,$(GOPATH))
+GOBIN :=/$(shell echo "$(GOBIN)" | cut -d';' -f1 | sed 's/://g')
+GOPATH :=/$(shell echo "$(GOPATH)" | cut -d';' -f1 | sed 's/://g')
+endif
 BIN		:= 	""
 
 TOOLS_SHELL="./hack/tools.sh"
@@ -14,7 +32,7 @@ LINTER := bin/golangci-lint
 ifneq ($(GOBIN),)
 	BIN=$(GOBIN)
 else
-	# check GOPATH
+# check GOPATH
 	ifneq ($(GOPATH),)
 		BIN=$(GOPATH)/bin
 	endif
@@ -37,9 +55,9 @@ ifeq ($(user),root)
 	@cp ./cmd/protoc-gen-go-http/protoc-gen-go-http /usr/bin
 else
 #!root, install for current user
-	$(shell if [ -z $(BIN) ]; then read -p "Please select installdir: " REPLY; mkdir -p $${REPLY};\
-	cp ./cmd/kratos/kratos $${REPLY}/;cp ./cmd/protoc-gen-go-errors/protoc-gen-go-errors $${REPLY}/;cp ./cmd/protoc-gen-go-http/protoc-gen-go-http $${REPLY}/;else mkdir -p $(BIN);\
-	cp ./cmd/kratos/kratos $(BIN);cp ./cmd/protoc-gen-go-errors/protoc-gen-go-errors $(BIN);cp ./cmd/protoc-gen-go-http/protoc-gen-go-http $(BIN); fi)
+	$(shell if [ -z '$(BIN)' ]; then read -p "Please select installdir: " REPLY; mkdir -p $${REPLY};\
+	cp ./cmd/kratos/kratos $${REPLY}/;cp ./cmd/protoc-gen-go-errors/protoc-gen-go-errors $${REPLY}/;cp ./cmd/protoc-gen-go-http/protoc-gen-go-http $${REPLY}/;else mkdir -p '$(BIN)';\
+	cp ./cmd/kratos/kratos '$(BIN)';cp ./cmd/protoc-gen-go-errors/protoc-gen-go-errors '$(BIN)';cp ./cmd/protoc-gen-go-http/protoc-gen-go-http '$(BIN)'; fi)
 endif
 	@which protoc-gen-go &> /dev/null || go get google.golang.org/protobuf/cmd/protoc-gen-go
 	@which protoc-gen-go-grpc &> /dev/null || go get google.golang.org/grpc/cmd/protoc-gen-go-grpc
@@ -71,9 +89,14 @@ test:
 .PHONY: test-coverage
 test-coverage:
 	@${TOOLS_SHELL} test_coverage
-	@echo "go test with coverage finished"	
+	@echo "go test with coverage finished"
 
 .PHONY: lint
 lint: $(LINTER)
 	@${TOOLS_SHELL} lint
 	@echo "lint check finished"
+
+.PHONY: proto
+proto:
+	protoc --proto_path=./api --proto_path=./third_party --go_out=paths=source_relative:./api --go-grpc_out=paths=source_relative:./api --go-http_out=paths=source_relative:./api metadata/metadata.proto
+	protoc --proto_path=./third_party --go_out=paths=source_relative:./errors/errors.proto

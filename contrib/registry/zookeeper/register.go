@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	_ registry.Registrar = &Registry{}
-	_ registry.Discovery = &Registry{}
+	_ registry.Registrar = (*Registry)(nil)
+	_ registry.Discovery = (*Registry)(nil)
 )
 
 // Option is etcd registry option.
@@ -59,7 +59,7 @@ func New(conn *zk.Conn, opts ...Option) *Registry {
 	}
 }
 
-func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstance) error {
+func (r *Registry) Register(_ context.Context, service *registry.ServiceInstance) error {
 	var (
 		data []byte
 		err  error
@@ -100,7 +100,7 @@ func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInst
 }
 
 // GetService get services from zookeeper
-func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
 	instances, err, _ := r.group.Do(serviceName, func() (interface{}, error) {
 		serviceNamePath := path.Join(r.opts.namespace, serviceName)
 		servicesID, _, err := r.conn.Children(serviceNamePath)

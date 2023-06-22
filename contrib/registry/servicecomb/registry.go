@@ -7,13 +7,12 @@ import (
 	"time"
 
 	"github.com/go-chassis/cari/discovery"
-	pb "github.com/go-chassis/cari/discovery"
 	"github.com/go-chassis/cari/pkg/errsvc"
 	"github.com/go-chassis/sc-client"
+	"github.com/gofrs/uuid"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/gofrs/uuid"
 )
 
 func init() {
@@ -114,7 +113,7 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 			return parseErr
 		}
 		// 若错误码显示服务未注册，直接返回
-		if svcErr.Code != pb.ErrServiceAlreadyExists {
+		if svcErr.Code != discovery.ErrServiceAlreadyExists {
 			return err
 		}
 		sid, err = r.cli.GetMicroServiceID(appID, ms.ServiceName, ms.Version, ms.Environment)
@@ -125,9 +124,6 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 		// 保存当前版本微服务对应的sid
 		curServiceID = sid
 	}
-	props := make(map[string]string)
-	props[appIDKey] = appID
-	props[envKey] = env
 	if svcIns.ID == "" {
 		var id uuid.UUID
 		id, err = uuid.NewV4()
@@ -135,6 +131,10 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 			return err
 		}
 		svcIns.ID = id.String()
+	}
+	props := map[string]string{
+		appIDKey: appID,
+		envKey:   env,
 	}
 	_, err = r.cli.RegisterMicroServiceInstance(&discovery.MicroServiceInstance{
 		InstanceId: svcIns.ID,
@@ -147,8 +147,9 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 	if err != nil {
 		return err
 	}
-	ticker := time.NewTicker(30 * time.Second)
 	go func() {
+		ticker := time.NewTicker(30 * time.Second)
+		defer ticker.Stop()
 		for {
 			<-ticker.C
 			_, err = r.cli.Heartbeat(sid, svcIns.ID)

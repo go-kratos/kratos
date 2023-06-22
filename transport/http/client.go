@@ -53,6 +53,15 @@ type clientOptions struct {
 	discovery    registry.Discovery
 	middleware   []middleware.Middleware
 	block        bool
+	subsetSize   int
+}
+
+// WithSubset with client disocvery subset size.
+// zero value means subset filter disabled
+func WithSubset(size int) ClientOption {
+	return func(o *clientOptions) {
+		o.subsetSize = size
+	}
 }
 
 // WithTransport with client transport.
@@ -158,6 +167,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 		decoder:      DefaultResponseDecoder,
 		errorDecoder: DefaultErrorDecoder,
 		transport:    http.DefaultTransport,
+		subsetSize:   25,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -176,7 +186,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	var r *resolver
 	if options.discovery != nil {
 		if target.Scheme == "discovery" {
-			if r, err = newResolver(ctx, options.discovery, target, selector, options.block, insecure); err != nil {
+			if r, err = newResolver(ctx, options.discovery, target, selector, options.block, insecure, options.subsetSize); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
 		} else if _, _, err := host.ExtractHostPort(options.endpoint); err != nil {
@@ -196,7 +206,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	}, nil
 }
 
-// Invoke makes an rpc call procedure for remote service.
+// Invoke makes a rpc call procedure for remote service.
 func (client *Client) Invoke(ctx context.Context, method, path string, args interface{}, reply interface{}, opts ...CallOption) error {
 	var (
 		contentType string
@@ -320,7 +330,7 @@ func (client *Client) Close() error {
 }
 
 // DefaultRequestEncoder is an HTTP request encoder.
-func DefaultRequestEncoder(ctx context.Context, contentType string, in interface{}) ([]byte, error) {
+func DefaultRequestEncoder(_ context.Context, contentType string, in interface{}) ([]byte, error) {
 	name := httputil.ContentSubtype(contentType)
 	body, err := encoding.GetCodec(name).Marshal(in)
 	if err != nil {
@@ -330,7 +340,7 @@ func DefaultRequestEncoder(ctx context.Context, contentType string, in interface
 }
 
 // DefaultResponseDecoder is an HTTP response decoder.
-func DefaultResponseDecoder(ctx context.Context, res *http.Response, v interface{}) error {
+func DefaultResponseDecoder(_ context.Context, res *http.Response, v interface{}) error {
 	defer res.Body.Close()
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
@@ -340,7 +350,7 @@ func DefaultResponseDecoder(ctx context.Context, res *http.Response, v interface
 }
 
 // DefaultErrorDecoder is an HTTP error decoder.
-func DefaultErrorDecoder(ctx context.Context, res *http.Response) error {
+func DefaultErrorDecoder(_ context.Context, res *http.Response) error {
 	if res.StatusCode >= 200 && res.StatusCode <= 299 {
 		return nil
 	}

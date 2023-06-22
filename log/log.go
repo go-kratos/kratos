@@ -27,10 +27,7 @@ func (c *logger) Log(level Level, keyvals ...interface{}) error {
 		bindValues(c.ctx, kvs)
 	}
 	kvs = append(kvs, keyvals...)
-	if err := c.logger.Log(level, kvs...); err != nil {
-		return err
-	}
-	return nil
+	return c.logger.Log(level, kvs...)
 }
 
 // With with logger fields.
@@ -54,13 +51,27 @@ func With(l Logger, kv ...interface{}) Logger {
 // to ctx. The provided ctx must be non-nil.
 func WithContext(ctx context.Context, l Logger) Logger {
 	c, ok := l.(*logger)
-	if !ok {
-		return &logger{logger: l, ctx: ctx}
+	if ok {
+		return &logger{
+			logger:    c.logger,
+			prefix:    c.prefix,
+			hasValuer: c.hasValuer,
+			ctx:       ctx,
+		}
 	}
-	return &logger{
-		logger:    c.logger,
-		prefix:    c.prefix,
-		hasValuer: c.hasValuer,
-		ctx:       ctx,
+
+	f, ok := l.(*Filter)
+	if ok {
+		f.ctx = ctx
+		return &Filter{
+			ctx:    ctx,
+			logger: f.logger,
+			level:  f.level,
+			key:    f.key,
+			value:  f.value,
+			filter: f.filter,
+		}
 	}
+
+	return &logger{logger: l, ctx: ctx}
 }

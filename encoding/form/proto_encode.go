@@ -14,16 +14,19 @@ import (
 )
 
 // EncodeValues encode a message into url values.
-func EncodeValues(msg proto.Message) (url.Values, error) {
+func EncodeValues(msg interface{}) (url.Values, error) {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return url.Values{}, nil
 	}
-	u := make(url.Values)
-	err := encodeByField(u, "", msg.ProtoReflect())
-	if err != nil {
-		return nil, err
+	if v, ok := msg.(proto.Message); ok {
+		u := make(url.Values)
+		err := encodeByField(u, "", v.ProtoReflect())
+		if err != nil {
+			return nil, err
+		}
+		return u, nil
 	}
-	return u, nil
+	return encoder.Encode(msg)
 }
 
 func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr error) {
@@ -43,10 +46,8 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 			newPath = path + "." + key
 		}
 		if of := fd.ContainingOneof(); of != nil {
-			if f := m.WhichOneof(of); f != nil {
-				if f != fd {
-					return true
-				}
+			if f := m.WhichOneof(of); f != nil && f != fd {
+				return true
 			}
 		}
 		switch {
@@ -57,7 +58,9 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 					finalErr = err
 					return false
 				}
-				u[newPath] = list
+				for _, item := range list {
+					u.Add(newPath, item)
+				}
 			}
 		case fd.IsMap():
 			if v.Map().Len() > 0 {
@@ -67,13 +70,13 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 					return false
 				}
 				for k, value := range m {
-					u[fmt.Sprintf("%s[%s]", newPath, k)] = []string{value}
+					u.Set(fmt.Sprintf("%s[%s]", newPath, k), value)
 				}
 			}
 		case (fd.Kind() == protoreflect.MessageKind) || (fd.Kind() == protoreflect.GroupKind):
 			value, err := encodeMessage(fd.Message(), v)
 			if err == nil {
-				u[newPath] = []string{value}
+				u.Set(newPath, value)
 				return true
 			}
 			if err = encodeByField(u, newPath, v.Message()); err != nil {
@@ -86,7 +89,7 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 				finalErr = err
 				return false
 			}
-			u[newPath] = []string{value}
+			u.Set(newPath, value)
 		}
 		return true
 	})
@@ -159,7 +162,7 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 	case "google.protobuf.DoubleValue", "google.protobuf.FloatValue", "google.protobuf.Int64Value", "google.protobuf.Int32Value",
 		"google.protobuf.UInt64Value", "google.protobuf.UInt32Value", "google.protobuf.BoolValue", "google.protobuf.StringValue":
 		fd := msgDescriptor.Fields()
-		v := value.Message().Get(fd.ByName(protoreflect.Name("value")))
+		v := value.Message().Get(fd.ByName("value"))
 		return fmt.Sprint(v.Interface()), nil
 	case fieldMaskFullName:
 		m, ok := value.Message().Interface().(*fieldmaskpb.FieldMask)
@@ -197,7 +200,7 @@ func EncodeFieldMask(m protoreflect.Message) (query string) {
 	return
 }
 
-// JSONCamelCase converts a snake_case identifier to a camelCase identifier,
+// jsonCamelCase converts a snake_case identifier to a camelCase identifier,
 // according to the protobuf JSON specification.
 // references: https://github.com/protocolbuffers/protobuf-go/blob/master/encoding/protojson/well_known_types.go#L842
 func jsonCamelCase(s string) string {

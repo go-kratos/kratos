@@ -121,10 +121,10 @@ func testWatchFile(t *testing.T, path string) {
 	}
 	kvs, err := watch.Next()
 	if err != nil {
-		t.Errorf(`watch.Next() error(%v)`, err)
+		t.Errorf("watch.Next() error(%v)", err)
 	}
 	if !reflect.DeepEqual(string(kvs[0].Value), _testJSONUpdate) {
-		t.Errorf(`string(kvs[0].Value(%v) is  not equal to _testJSONUpdate(%v)`, kvs[0].Value, _testJSONUpdate)
+		t.Errorf("string(kvs[0].Value(%v) is  not equal to _testJSONUpdate(%v)", kvs[0].Value, _testJSONUpdate)
 	}
 
 	newFilepath := filepath.Join(filepath.Dir(path), "test1.json")
@@ -133,15 +133,15 @@ func testWatchFile(t *testing.T, path string) {
 	}
 	kvs, err = watch.Next()
 	if err == nil {
-		t.Errorf(`watch.Next() error(%v)`, err)
+		t.Errorf("watch.Next() error(%v)", err)
 	}
 	if kvs != nil {
-		t.Errorf(`watch.Next() error(%v)`, err)
+		t.Errorf("watch.Next() error(%v)", err)
 	}
 
 	err = watch.Stop()
 	if err != nil {
-		t.Errorf(`watch.Stop() error(%v)`, err)
+		t.Errorf("watch.Stop() error(%v)", err)
 	}
 
 	if err := os.Rename(newFilepath, path); err != nil {
@@ -171,10 +171,10 @@ func testWatchDir(t *testing.T, path, file string) {
 
 	kvs, err := watch.Next()
 	if err != nil {
-		t.Errorf(`watch.Next() error(%v)`, err)
+		t.Errorf("watch.Next() error(%v)", err)
 	}
 	if !reflect.DeepEqual(string(kvs[0].Value), _testJSONUpdate) {
-		t.Errorf(`string(kvs[0].Value(%v) is  not equal to _testJSONUpdate(%v)`, kvs[0].Value, _testJSONUpdate)
+		t.Errorf("string(kvs[0].Value(%s) is  not equal to _testJSONUpdate(%v)", kvs[0].Value, _testJSONUpdate)
 	}
 }
 
@@ -208,7 +208,7 @@ func TestConfig(t *testing.T) {
 func testConfig(t *testing.T, c config.Config) {
 	expected := map[string]interface{}{
 		"test.settings.int_key":      int64(1000),
-		"test.settings.float_key":    float64(1000.1),
+		"test.settings.float_key":    1000.1,
 		"test.settings.string_key":   "string_value",
 		"test.settings.duration_key": time.Duration(10000),
 		"test.server.addr":           "127.0.0.1",

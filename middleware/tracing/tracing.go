@@ -5,10 +5,11 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
 )
 
 // Option is tracing option.
@@ -28,7 +29,7 @@ func WithPropagator(propagator propagation.TextMapPropagator) Option {
 }
 
 // WithTracerProvider with tracer provider.
-// Deprecated: use otel.SetTracerProvider(provider) instead.
+// By default, it uses the global provider that is set by otel.SetTracerProvider(provider).
 func WithTracerProvider(provider trace.TracerProvider) Option {
 	return func(opts *options) {
 		opts.tracerProvider = provider

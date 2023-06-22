@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -15,14 +14,14 @@ import (
 )
 
 const (
-	statusUp            = "UP"
-	statusDown          = "DOWN"
-	statusOutOfServeice = "OUT_OF_SERVICE"
-	heartbeatRetry      = 3
-	maxIdleConns        = 100
-	heartbeatTime       = 10
-	httpTimeout         = 3
-	refreshTime         = 30
+	statusUp           = "UP"
+	statusDown         = "DOWN"
+	statusOutOfService = "OUT_OF_SERVICE"
+	heartbeatRetry     = 3
+	maxIdleConns       = 100
+	heartbeatTime      = 10 * time.Second
+	httpTimeout        = 3 * time.Second
+	refreshTime        = 30 * time.Second
 )
 
 type Endpoint struct {
@@ -83,7 +82,7 @@ type DataCenterInfo struct {
 	Class string `json:"@class"`
 }
 
-var _ APIInterface = new(Client)
+var _ APIInterface = (*Client)(nil)
 
 type APIInterface interface {
 	Register(ctx context.Context, ep Endpoint) error
@@ -140,8 +139,8 @@ func NewClient(urls []string, opts ...ClientOption) *Client {
 		urls:              urls,
 		eurekaPath:        "eureka/v2",
 		maxRetry:          len(urls),
-		heartbeatInterval: time.Second * heartbeatTime,
-		client:            &http.Client{Transport: tr, Timeout: time.Second * httpTimeout},
+		heartbeatInterval: heartbeatTime,
+		client:            &http.Client{Transport: tr, Timeout: httpTimeout},
 		keepalive:         make(map[string]chan struct{}),
 	}
 
@@ -154,7 +153,7 @@ func NewClient(urls []string, opts ...ClientOption) *Client {
 
 func (e *Client) FetchApps(ctx context.Context) []Application {
 	var m ApplicationsRootResponse
-	if err := e.do(ctx, "GET", []string{"apps"}, nil, &m); err != nil {
+	if err := e.do(ctx, http.MethodGet, []string{"apps"}, nil, &m); err != nil {
 		return nil
 	}
 
@@ -162,7 +161,7 @@ func (e *Client) FetchApps(ctx context.Context) []Application {
 }
 
 func (e *Client) FetchAppInstances(ctx context.Context, appID string) (m Application, err error) {
-	err = e.do(ctx, "GET", []string{"apps", appID}, nil, &m)
+	err = e.do(ctx, http.MethodGet, []string{"apps", appID}, nil, &m)
 	return
 }
 
@@ -175,21 +174,21 @@ func (e *Client) FetchAppUpInstances(ctx context.Context, appID string) []Instan
 }
 
 func (e *Client) FetchAppInstance(ctx context.Context, appID string, instanceID string) (m Instance, err error) {
-	err = e.do(ctx, "GET", []string{"apps", appID, instanceID}, nil, &m)
+	err = e.do(ctx, http.MethodGet, []string{"apps", appID, instanceID}, nil, &m)
 	return
 }
 
 func (e *Client) FetchInstance(ctx context.Context, instanceID string) (m Instance, err error) {
-	err = e.do(ctx, "GET", []string{"instances", instanceID}, nil, &m)
+	err = e.do(ctx, http.MethodGet, []string{"instances", instanceID}, nil, &m)
 	return
 }
 
 func (e *Client) Out(ctx context.Context, appID, instanceID string) error {
-	return e.do(ctx, "PUT", []string{"apps", appID, instanceID, fmt.Sprintf("status?value=%s", statusOutOfServeice)}, nil, nil)
+	return e.do(ctx, http.MethodPut, []string{"apps", appID, instanceID, fmt.Sprintf("status?value=%s", statusOutOfService)}, nil, nil)
 }
 
 func (e *Client) Down(ctx context.Context, appID, instanceID string) error {
-	return e.do(ctx, "PUT", []string{"apps", appID, instanceID, fmt.Sprintf("status?value=%s", statusDown)}, nil, nil)
+	return e.do(ctx, http.MethodPut, []string{"apps", appID, instanceID, fmt.Sprintf("status?value=%s", statusDown)}, nil, nil)
 }
 
 func (e *Client) FetchAllUpInstances(ctx context.Context) []Instance {
@@ -201,7 +200,7 @@ func (e *Client) Register(ctx context.Context, ep Endpoint) error {
 }
 
 func (e *Client) Deregister(ctx context.Context, appID, instanceID string) error {
-	if err := e.do(ctx, "DELETE", []string{"apps", appID, instanceID}, nil, nil); err != nil {
+	if err := e.do(ctx, http.MethodDelete, []string{"apps", appID, instanceID}, nil, nil); err != nil {
 		return err
 	}
 	go e.cancelHeartbeat(appID)
@@ -240,7 +239,7 @@ func (e *Client) registerEndpoint(ctx context.Context, ep Endpoint) error {
 	if err != nil {
 		return err
 	}
-	return e.do(ctx, "POST", []string{"apps", ep.AppID}, bytes.NewReader(body), nil)
+	return e.do(ctx, http.MethodPost, []string{"apps", ep.AppID}, bytes.NewReader(body), nil)
 }
 
 func (e *Client) Heartbeat(ep Endpoint) {
@@ -258,7 +257,7 @@ func (e *Client) Heartbeat(ep Endpoint) {
 		case <-e.keepalive[ep.AppID]:
 			return
 		case <-ticker.C:
-			if err := e.do(e.ctx, "PUT", []string{"apps", ep.AppID, ep.InstanceID}, nil, nil); err != nil {
+			if err := e.do(e.ctx, http.MethodPut, []string{"apps", ep.AppID, ep.InstanceID}, nil, nil); err != nil {
 				if retryCount++; retryCount > heartbeatRetry {
 					_ = e.registerEndpoint(e.ctx, ep)
 					retryCount = 0
@@ -269,8 +268,8 @@ func (e *Client) Heartbeat(ep Endpoint) {
 }
 
 func (e *Client) cancelHeartbeat(appID string) {
-	defer e.lock.Unlock()
 	e.lock.Lock()
+	defer e.lock.Unlock()
 	if ch, ok := e.keepalive[appID]; ok {
 		ch <- struct{}{}
 	}
@@ -308,39 +307,50 @@ func (e *Client) buildAPI(currentTimes int, params ...string) string {
 	return strings.Join(params, "/")
 }
 
+func (e *Client) request(ctx context.Context, method string, params []string, input io.Reader, output interface{}, i int) (bool, error) {
+	request, err := http.NewRequestWithContext(ctx, method, e.buildAPI(i, params...), input)
+	if err != nil {
+		return false, err
+	}
+	request.Header.Add("User-Agent", "go-eureka-client")
+	request.Header.Add("Accept", "application/json;charset=UTF-8")
+	request.Header.Add("Content-Type", "application/json;charset=UTF-8")
+	resp, err := e.client.Do(request)
+	if err != nil {
+		return true, err
+	}
+	defer func() {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		_ = resp.Body.Close()
+	}()
+
+	if output != nil && resp.StatusCode/100 == 2 {
+		data, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return false, err
+		}
+		err = json.Unmarshal(data, output)
+		if err != nil {
+			return false, err
+		}
+	}
+
+	if resp.StatusCode >= http.StatusBadRequest {
+		return false, fmt.Errorf("response Error %d", resp.StatusCode)
+	}
+
+	return false, nil
+}
+
 func (e *Client) do(ctx context.Context, method string, params []string, input io.Reader, output interface{}) error {
 	for i := 0; i < e.maxRetry; i++ {
-		request, err := http.NewRequest(method, e.buildAPI(i, params...), input)
+		retry, err := e.request(ctx, method, params, input, output, i)
+		if retry {
+			continue
+		}
 		if err != nil {
 			return err
 		}
-		request = request.WithContext(ctx)
-		request.Header.Add("User-Agent", "go-eureka-client")
-		request.Header.Add("Accept", "application/json;charset=UTF-8")
-		request.Header.Add("Content-Type", "application/json;charset=UTF-8")
-		resp, err := e.client.Do(request)
-		if err != nil {
-			continue
-		}
-		defer func() {
-			_, _ = io.Copy(ioutil.Discard, resp.Body)
-			resp.Body.Close()
-		}()
-
-		if output != nil && resp.StatusCode/100 == 2 {
-			data, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return err
-			}
-			if err = json.Unmarshal(data, output); err != nil {
-				return err
-			}
-		}
-
-		if resp.StatusCode >= http.StatusBadRequest {
-			return fmt.Errorf("response Error %d", resp.StatusCode)
-		}
-
 		return nil
 	}
 	return fmt.Errorf("retry after %d times", e.maxRetry)

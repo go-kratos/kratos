@@ -11,12 +11,13 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/grpc"
+
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/matcher"
 	pb "github.com/go-kratos/kratos/v2/internal/testdata/helloworld"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
-	"google.golang.org/grpc"
 )
 
 // server is used to implement helloworld.GreeterServer.
@@ -55,7 +56,7 @@ func (s *server) SayHelloStream(streamServer pb.Greeter_SayHelloStreamServer) er
 }
 
 // SayHello implements helloworld.GreeterServer
-func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+func (s *server) SayHello(_ context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	if in.Name == "error" {
 		return nil, errors.BadRequest("custom_error", fmt.Sprintf("invalid argument %s", in.Name))
 	}

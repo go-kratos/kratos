@@ -6,7 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
-var _ registry.Watcher = &watcher{}
+var _ registry.Watcher = (*watcher)(nil)
 
 type watcher struct {
 	ctx        context.Context
@@ -33,7 +33,7 @@ func newWatch(ctx context.Context, cli *API, serverName string) (*watcher, error
 	return w, e
 }
 
-func (w watcher) Next() (services []*registry.ServiceInstance, err error) {
+func (w *watcher) Next() (services []*registry.ServiceInstance, err error) {
 	select {
 	case <-w.ctx.Done():
 		return nil, w.ctx.Err()

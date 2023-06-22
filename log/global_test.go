@@ -48,7 +48,7 @@ func TestGlobalLog(t *testing.T) {
 		},
 	}
 
-	expected := []string{}
+	var expected []string
 	for _, tc := range testCases {
 		msg := fmt.Sprintf(tc.content[0].(string), tc.content[1:]...)
 		switch tc.level {

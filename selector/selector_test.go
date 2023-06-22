@@ -71,7 +71,7 @@ func (b *mockBalancerBuilder) Build() Balancer {
 
 type mockBalancer struct{}
 
-func (b *mockBalancer) Pick(ctx context.Context, nodes []WeightedNode) (selected WeightedNode, done DoneFunc, err error) {
+func (b *mockBalancer) Pick(_ context.Context, nodes []WeightedNode) (selected WeightedNode, done DoneFunc, err error) {
 	if len(nodes) == 0 {
 		err = ErrNoAvailable
 		return
@@ -90,7 +90,7 @@ func (b *mockMustErrorBalancerBuilder) Build() Balancer {
 
 type mockMustErrorBalancer struct{}
 
-func (b *mockMustErrorBalancer) Pick(ctx context.Context, nodes []WeightedNode) (selected WeightedNode, done DoneFunc, err error) {
+func (b *mockMustErrorBalancer) Pick(_ context.Context, _ []WeightedNode) (selected WeightedNode, done DoneFunc, err error) {
 	return nil, nil, errNodeNotMatch
 }
 
@@ -277,7 +277,7 @@ func TestNoPick(t *testing.T) {
 	}
 }
 
-func TestGolobal(t *testing.T) {
+func TestGlobalSelector(t *testing.T) {
 	builder := DefaultBuilder{
 		Node:     &mockWeightedNodeBuilder{},
 		Balancer: &mockBalancerBuilder{},

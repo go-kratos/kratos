@@ -10,9 +10,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 type Discovery struct {
@@ -308,7 +309,7 @@ func (d *Discovery) cancel(ins *discoveryInstance) (err error) {
 func (d *Discovery) broadcast(apps map[string]*disInstancesInfo) {
 	for appID, v := range apps {
 		var count int
-		// v maybe nil in old version(less than v1.1) Discovery,check incase of panic
+		// v maybe nil in old version(less than v1.1) Discovery, check in case of panic
 		if v == nil {
 			continue
 		}
@@ -426,7 +427,7 @@ func (r *Resolve) Watch() <-chan struct{} {
 }
 
 // fetch resolver instance.
-func (r *Resolve) fetch(ctx context.Context) (ins *disInstancesInfo, ok bool) {
+func (r *Resolve) fetch(_ context.Context) (ins *disInstancesInfo, ok bool) {
 	r.d.mutex.RLock()
 	app, ok := r.d.apps[r.id]
 	r.d.mutex.RUnlock()

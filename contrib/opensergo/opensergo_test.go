@@ -1,8 +1,8 @@
 package opensergo
 
 import (
-	"io/ioutil"
 	"net"
+	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -23,7 +23,7 @@ type testMetadataServiceServer struct {
 	srvContractPb.UnimplementedMetadataServiceServer
 }
 
-func (m *testMetadataServiceServer) ReportMetadata(ctx context.Context, req *srvContractPb.ReportMetadataRequest) (*srvContractPb.ReportMetadataReply, error) {
+func (m *testMetadataServiceServer) ReportMetadata(_ context.Context, _ *srvContractPb.ReportMetadataRequest) (*srvContractPb.ReportMetadataReply, error) {
 	return &srvContractPb.ReportMetadataReply{}, nil
 }
 
@@ -196,7 +196,7 @@ func TestHTTPPatternInfo(t *testing.T) {
 			args: args{
 				pattern: &annotations.HttpRule_Get{Get: "/foo"},
 			},
-			wantMethod: "GET",
+			wantMethod: http.MethodGet,
 			wantPath:   "/foo",
 		},
 		{
@@ -204,7 +204,7 @@ func TestHTTPPatternInfo(t *testing.T) {
 			args: args{
 				pattern: &annotations.HttpRule_Post{Post: "/foo"},
 			},
-			wantMethod: "POST",
+			wantMethod: http.MethodPost,
 			wantPath:   "/foo",
 		},
 		{
@@ -212,7 +212,7 @@ func TestHTTPPatternInfo(t *testing.T) {
 			args: args{
 				pattern: &annotations.HttpRule_Put{Put: "/foo"},
 			},
-			wantMethod: "PUT",
+			wantMethod: http.MethodPut,
 			wantPath:   "/foo",
 		},
 		{
@@ -220,7 +220,7 @@ func TestHTTPPatternInfo(t *testing.T) {
 			args: args{
 				pattern: &annotations.HttpRule_Delete{Delete: "/foo"},
 			},
-			wantMethod: "DELETE",
+			wantMethod: http.MethodDelete,
 			wantPath:   "/foo",
 		},
 		{
@@ -228,7 +228,7 @@ func TestHTTPPatternInfo(t *testing.T) {
 			args: args{
 				pattern: &annotations.HttpRule_Patch{Patch: "/foo"},
 			},
-			wantMethod: "PATCH",
+			wantMethod: http.MethodPatch,
 			wantPath:   "/foo",
 		},
 		{
@@ -337,9 +337,9 @@ func TestOpenSergo(t *testing.T) {
 			},
 			preFunc: func(t *testing.T) {
 				fileContent := `{"endpoint": "127.0.0.1:9090"}`
-				err := ioutil.WriteFile("test.json", []byte(fileContent), 0o644)
+				err := os.WriteFile("test.json", []byte(fileContent), 0o644)
 				if err != nil {
-					t.Fatalf("ioutil.WriteFile error:%s", err)
+					t.Fatalf("os.WriteFile error:%s", err)
 				}
 				confPath, err := filepath.Abs("./test.json")
 				if err != nil {

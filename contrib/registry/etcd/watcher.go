@@ -2,17 +2,20 @@ package etcd
 
 import (
 	"context"
+	"time"
+
+	clientv3 "go.etcd.io/etcd/client/v3"
 
 	"github.com/go-kratos/kratos/v2/registry"
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
-var _ registry.Watcher = &watcher{}
+var _ registry.Watcher = (*watcher)(nil)
 
 type watcher struct {
 	key         string
 	ctx         context.Context
 	cancel      context.CancelFunc
+	client      *clientv3.Client
 	watchChan   clientv3.WatchChan
 	watcher     clientv3.Watcher
 	kv          clientv3.KV
@@ -23,6 +26,7 @@ type watcher struct {
 func newWatcher(ctx context.Context, key, name string, client *clientv3.Client) (*watcher, error) {
 	w := &watcher{
 		key:         key,
+		client:      client,
 		watcher:     clientv3.NewWatcher(client),
 		kv:          clientv3.NewKV(client),
 		first:       true,
@@ -30,7 +34,7 @@ func newWatcher(ctx context.Context, key, name string, client *clientv3.Client) 
 	}
 	w.ctx, w.cancel = context.WithCancel(ctx)
 	w.watchChan = w.watcher.Watch(w.ctx, key, clientv3.WithPrefix(), clientv3.WithRev(0), clientv3.WithKeysOnly())
-	err := w.watcher.RequestProgress(context.Background())
+	err := w.watcher.RequestProgress(w.ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +51,14 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 	select {
 	case <-w.ctx.Done():
 		return nil, w.ctx.Err()
-	case <-w.watchChan:
+	case watchResp, ok := <-w.watchChan:
+		if !ok || watchResp.Err() != nil {
+			time.Sleep(time.Second)
+			err := w.reWatch()
+			if err != nil {
+				return nil, err
+			}
+		}
 		return w.getInstance()
 	}
 }
@@ -74,4 +85,11 @@ func (w *watcher) getInstance() ([]*registry.ServiceInstance, error) {
 		items = append(items, si)
 	}
 	return items, nil
+}
+
+func (w *watcher) reWatch() error {
+	w.watcher.Close()
+	w.watcher = clientv3.NewWatcher(w.client)
+	w.watchChan = w.watcher.Watch(w.ctx, w.key, clientv3.WithPrefix(), clientv3.WithRev(0), clientv3.WithKeysOnly())
+	return w.watcher.RequestProgress(w.ctx)
 }

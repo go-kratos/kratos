@@ -29,7 +29,7 @@ func TestReader_Merge(t *testing.T) {
 		Format: "json",
 	})
 	if err == nil {
-		t.Fatal(`err is nil`)
+		t.Fatal("err is nil")
 	}
 
 	err = r.Merge(&KeyValue{
@@ -38,15 +38,15 @@ func TestReader_Merge(t *testing.T) {
 		Format: "json",
 	})
 	if err != nil {
-		t.Fatal(`err is not nil`)
+		t.Fatal(err)
 	}
 	vv, ok := r.Value("nice")
 	if !ok {
-		t.Fatal(`ok is false`)
+		t.Fatal("ok is false")
 	}
 	vvv, err := vv.String()
 	if err != nil {
-		t.Fatal(`err is not nil`)
+		t.Fatal(err)
 	}
 	if vvv != "boat" {
 		t.Fatal(`vvv is not equal to "boat"`)
@@ -58,18 +58,18 @@ func TestReader_Merge(t *testing.T) {
 		Format: "json",
 	})
 	if err != nil {
-		t.Fatal(`err is not nil`)
+		t.Fatal(err)
 	}
 	vv, ok = r.Value("x")
 	if !ok {
-		t.Fatal(`ok is false`)
+		t.Fatal("ok is false")
 	}
 	vvx, err := vv.Int()
 	if err != nil {
-		t.Fatal(`err is not nil`)
+		t.Fatal(err)
 	}
-	if int64(2) != vvx {
-		t.Fatal(`vvx is not equal to 2`)
+	if vvx != 2 {
+		t.Fatal("vvx is not equal to 2")
 	}
 }
 
@@ -118,63 +118,57 @@ a:
 			r := newReader(opts)
 			err := r.Merge(&test.kv)
 			if err != nil {
-				t.Fatal(`err is not nil`)
+				t.Fatal(err)
 			}
 			vv, ok := r.Value("a.b.X")
 			if !ok {
-				t.Fatal(`ok is false`)
+				t.Fatal("ok is false")
 			}
 			vvv, err := vv.Int()
 			if err != nil {
-				t.Fatal(`err is not nil`)
+				t.Fatal(err)
 			}
 			if int64(1) != vvv {
-				t.Fatal(`vvv is not equal to 1`)
+				t.Fatal("vvv is not equal to 1")
 			}
 
-			if err != nil {
-				t.Fatal(`err is not nil`)
-			}
 			vv, ok = r.Value("a.b.Y")
 			if !ok {
-				t.Fatal(`ok is false`)
+				t.Fatal("ok is false")
 			}
 			vvy, err := vv.String()
 			if err != nil {
-				t.Fatal(`err is not nil`)
+				t.Fatal(err)
 			}
 			if vvy != "lol" {
 				t.Fatal(`vvy is not equal to "lol"`)
 			}
 
-			if err != nil {
-				t.Fatal(`err is not nil`)
-			}
 			vv, ok = r.Value("a.b.z")
 			if !ok {
-				t.Fatal(`ok is false`)
+				t.Fatal("ok is false")
 			}
 			vvz, err := vv.Bool()
 			if err != nil {
-				t.Fatal(`err is not nil`)
+				t.Fatal(err)
 			}
 			if !vvz {
-				t.Fatal(`vvz is not equal to true`)
+				t.Fatal("vvz is not equal to true")
 			}
 
 			_, ok = r.Value("aasasdg=234l.asdfk,")
 			if ok {
-				t.Fatal(`ok is true`)
+				t.Fatal("ok is true")
 			}
 
 			_, ok = r.Value("aas......asdg=234l.asdfk,")
 			if ok {
-				t.Fatal(`ok is true`)
+				t.Fatal("ok is true")
 			}
 
 			_, ok = r.Value("a.b.Y.")
 			if ok {
-				t.Fatal(`ok is true`)
+				t.Fatal("ok is true")
 			}
 		})
 	}
@@ -198,11 +192,11 @@ func TestReader_Source(t *testing.T) {
 		Format: "json",
 	})
 	if err != nil {
-		t.Fatal(`err is not nil`)
+		t.Fatal(err)
 	}
 	b, err := r.Source()
 	if err != nil {
-		t.Fatal(`err is not nil`)
+		t.Fatal(err)
 	}
 	if !reflect.DeepEqual([]byte(`{"a":{"b":{"X":1}}}`), b) {
 		t.Fatal("[]byte(`{\"a\":{\"b\":{\"X\":1}}}`) is not equal to b")

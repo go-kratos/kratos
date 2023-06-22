@@ -7,7 +7,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-var _ Transporter = &Transport{}
+var _ Transporter = (*Transport)(nil)
 
 // Transporter is http Transporter
 type Transporter interface {
@@ -70,6 +70,16 @@ func SetOperation(ctx context.Context, op string) {
 	}
 }
 
+// RequestFromServerContext returns request from context.
+func RequestFromServerContext(ctx context.Context) (*http.Request, bool) {
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		if tr, ok := tr.(*Transport); ok {
+			return tr.request, true
+		}
+	}
+	return nil, false
+}
+
 type headerCarrier http.Header
 
 // Get returns the value associated with the passed key.
@@ -82,6 +92,11 @@ func (hc headerCarrier) Set(key string, value string) {
 	http.Header(hc).Set(key, value)
 }
 
+// Add append value to key-values pair.
+func (hc headerCarrier) Add(key string, value string) {
+	http.Header(hc).Add(key, value)
+}
+
 // Keys lists the keys stored in this carrier.
 func (hc headerCarrier) Keys() []string {
 	keys := make([]string, 0, len(hc))
@@ -89,4 +104,9 @@ func (hc headerCarrier) Keys() []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// Values returns a slice of values associated with the passed key.
+func (hc headerCarrier) Values(key string) []string {
+	return http.Header(hc).Values(key)
 }

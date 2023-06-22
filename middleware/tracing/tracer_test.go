@@ -5,11 +5,12 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/internal/testdata/binding"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/go-kratos/kratos/v2/internal/testdata/binding"
 )
 
-func Test_NewTracer(t *testing.T) {
+func TestNewTracer(t *testing.T) {
 	tracer := NewTracer(trace.SpanKindClient, func(o *options) {
 		o.tracerProvider = trace.NewNoopTracerProvider()
 	})
@@ -28,7 +29,7 @@ func Test_NewTracer(t *testing.T) {
 	})
 }
 
-func Test_Tracer_End(t *testing.T) {
+func TestTracer_End(_ *testing.T) {
 	tracer := NewTracer(trace.SpanKindClient, func(o *options) {
 		o.tracerProvider = trace.NewNoopTracerProvider()
 	})

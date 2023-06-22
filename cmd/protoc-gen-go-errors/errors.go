@@ -8,9 +8,10 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
-	"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2/errors"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2/errors"
 )
 
 const (
@@ -58,7 +59,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	}
 }
 
-func genErrorsReason(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, enum *protogen.Enum) bool {
+func genErrorsReason(_ *protogen.Plugin, _ *protogen.File, g *protogen.GeneratedFile, enum *protogen.Enum) bool {
 	defaultCode := proto.GetExtension(enum.Desc.Options(), errors.E_DefaultCode)
 	code := 0
 	if ok := defaultCode.(int32); ok != 0 {

@@ -3,8 +3,9 @@ package zap
 import (
 	"fmt"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"go.uber.org/zap"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 var _ log.Logger = (*Logger)(nil)
@@ -18,13 +19,14 @@ func NewLogger(zlog *zap.Logger) *Logger {
 }
 
 func (l *Logger) Log(level log.Level, keyvals ...interface{}) error {
-	if len(keyvals) == 0 || len(keyvals)%2 != 0 {
+	keylen := len(keyvals)
+	if keylen == 0 || keylen%2 != 0 {
 		l.log.Warn(fmt.Sprint("Keyvalues must appear in pairs: ", keyvals))
 		return nil
 	}
 
-	var data []zap.Field
-	for i := 0; i < len(keyvals); i += 2 {
+	data := make([]zap.Field, 0, (keylen/2)+1)
+	for i := 0; i < keylen; i += 2 {
 		data = append(data, zap.Any(fmt.Sprint(keyvals[i]), keyvals[i+1]))
 	}
 

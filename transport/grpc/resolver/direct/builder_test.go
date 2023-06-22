@@ -1,7 +1,7 @@
 package direct
 
 import (
-	"fmt"
+	"errors"
 	"reflect"
 	"testing"
 
@@ -22,18 +22,18 @@ type mockConn struct {
 
 func (m *mockConn) UpdateState(resolver.State) error {
 	if m.needUpdateStateErr {
-		return fmt.Errorf("mock test needUpdateStateErr")
+		return errors.New("mock test needUpdateStateErr")
 	}
 	return nil
 }
 
 func (m *mockConn) ReportError(error) {}
 
-func (m *mockConn) NewAddress(addresses []resolver.Address) {}
+func (m *mockConn) NewAddress(_ []resolver.Address) {}
 
-func (m *mockConn) NewServiceConfig(serviceConfig string) {}
+func (m *mockConn) NewServiceConfig(_ string) {}
 
-func (m *mockConn) ParseServiceConfig(serviceConfigJSON string) *serviceconfig.ParseResult {
+func (m *mockConn) ParseServiceConfig(_ string) *serviceconfig.ParseResult {
 	return nil
 }
 

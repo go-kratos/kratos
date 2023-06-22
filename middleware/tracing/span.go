@@ -18,10 +18,12 @@ import (
 )
 
 func setClientSpan(ctx context.Context, span trace.Span, m interface{}) {
-	attrs := []attribute.KeyValue{}
-	var remote string
-	var operation string
-	var rpcKind string
+	var (
+		attrs     []attribute.KeyValue
+		remote    string
+		operation string
+		rpcKind   string
+	)
 	tr, ok := transport.FromClientContext(ctx)
 	if ok {
 		operation = tr.Operation()
@@ -55,10 +57,12 @@ func setClientSpan(ctx context.Context, span trace.Span, m interface{}) {
 }
 
 func setServerSpan(ctx context.Context, span trace.Span, m interface{}) {
-	attrs := []attribute.KeyValue{}
-	var remote string
-	var operation string
-	var rpcKind string
+	var (
+		attrs     []attribute.KeyValue
+		remote    string
+		operation string
+		rpcKind   string
+	)
 	tr, ok := transport.FromServerContext(ctx)
 	if ok {
 		operation = tr.Operation()
