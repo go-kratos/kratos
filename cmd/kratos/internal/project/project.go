@@ -85,7 +85,6 @@ func run(_ *cobra.Command, args []string) {
 			return
 		}
 		p.Path = filepath.Join(wd, p.Name)
-		fmt.Println(wd, p.Name, p.Path)
 		done <- p.Add(ctx, wd, repoURL, branch, mod)
 	}()
 	select {
