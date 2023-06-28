@@ -85,7 +85,7 @@ func run(_ *cobra.Command, args []string) {
 			return
 		}
 		p.Path = filepath.Join(wd, p.Name)
-		done <- p.Add(ctx, wd, repoURL, branch, mod)
+		done <- p.Add(ctx, wd, repoURL, branch, mod, projectRoot)
 	}()
 	select {
 	case <-ctx.Done():

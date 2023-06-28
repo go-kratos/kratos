@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"
@@ -17,7 +18,7 @@ var repoAddIgnores = []string{
 	".git", ".github", "api", "README.md", "LICENSE", "go.mod", "go.sum", "third_party", "openapi.yaml", ".gitignore",
 }
 
-func (p *Project) Add(ctx context.Context, wd string, layout string, branch string, mod string) error {
+func (p *Project) Add(ctx context.Context, wd string, layout string, branch string, mod string, modPath string) error {
 	to := p.Path
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
 		fmt.Printf("🚫 %s already exists\n", p.Name)
@@ -39,8 +40,8 @@ func (p *Project) Add(ctx context.Context, wd string, layout string, branch stri
 	fmt.Printf("🚀 Add service %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
 
 	repo := base.NewRepo(layout, branch)
-
-	if err := repo.CopyToV2(ctx, to, mod, repoAddIgnores, []string{filepath.Join(p.Path, "api"), "api"}); err != nil {
+	subPath := subtractPath(to, modPath)
+	if err := repo.CopyToV2(ctx, to, path.Join(mod, subPath), repoAddIgnores, []string{filepath.Join(subPath, "api"), "api"}); err != nil {
 		return err
 	}
 
@@ -64,4 +65,14 @@ func (p *Project) Add(ctx context.Context, wd string, layout string, branch stri
 	fmt.Println("			🤝 Thanks for using Kratos")
 	fmt.Println("	📚 Tutorial: https://go-kratos.dev/docs/getting-started/start")
 	return nil
+}
+
+func subtractPath(basePath, subtractPath string) string {
+	if !strings.HasPrefix(basePath, subtractPath) {
+		return basePath
+	}
+
+	remainingPath := strings.TrimPrefix(basePath, subtractPath)
+	remainingPath = strings.TrimPrefix(remainingPath, "/")
+	return remainingPath
 }

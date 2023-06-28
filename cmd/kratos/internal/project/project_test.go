@@ -5,6 +5,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"path"
 	"path/filepath"
 	"testing"
 
@@ -50,8 +51,13 @@ func TestCmdNewNoMod(t *testing.T) {
 		t.Fatalf("executing command: %v", err)
 	}
 
+	// ch to new project
+	if err := os.Chdir(path.Join(cwd, "project")); err != nil {
+		t.Fatalf("changing working directory: %v", err)
+	}
+
 	// add new app with --nomod flag
-	CmdNew.SetArgs([]string{"--nomod", "project/app/user"})
+	CmdNew.SetArgs([]string{"--nomod", "app/user"})
 	if err := CmdNew.Execute(); err != nil {
 		t.Fatalf("executing command: %v", err)
 	}
