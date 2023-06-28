@@ -55,7 +55,7 @@ func copyFile(src, dst string, replaces []string) error {
 	return os.WriteFile(dst, buf, srcinfo.Mode())
 }
 
-func  copyDir(src, dst string, replaces, ignores []string) error {
+func copyDir(src, dst string, replaces, ignores []string) error {
 	srcinfo, err := os.Stat(src)
 	if err != nil {
 		return err
