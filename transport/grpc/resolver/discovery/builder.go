@@ -6,9 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
-
+	"github.com/google/uuid"
 	"google.golang.org/grpc/resolver"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 const name = "discovery"
@@ -30,27 +31,44 @@ func WithInsecure(insecure bool) Option {
 	}
 }
 
+// WithSubset with subset size.
+func WithSubset(size int) Option {
+	return func(b *builder) {
+		b.subsetSize = size
+	}
+}
+
+// Deprecated: please use PrintDebugLog
 // DisableDebugLog disables update instances log.
 func DisableDebugLog() Option {
 	return func(b *builder) {
-		b.debugLogDisabled = true
+		b.debugLog = false
+	}
+}
+
+// PrintDebugLog print grpc resolver watch service log
+func PrintDebugLog(p bool) Option {
+	return func(b *builder) {
+		b.debugLog = p
 	}
 }
 
 type builder struct {
-	discoverer       registry.Discovery
-	timeout          time.Duration
-	insecure         bool
-	debugLogDisabled bool
+	discoverer registry.Discovery
+	timeout    time.Duration
+	insecure   bool
+	subsetSize int
+	debugLog   bool
 }
 
 // NewBuilder creates a builder which is used to factory registry resolvers.
 func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 	b := &builder{
-		discoverer:       d,
-		timeout:          time.Second * 10,
-		insecure:         false,
-		debugLogDisabled: false,
+		discoverer: d,
+		timeout:    time.Second * 10,
+		insecure:   false,
+		debugLog:   true,
+		subsetSize: 25,
 	}
 	for _, o := range opts {
 		o(b)
@@ -58,7 +76,7 @@ func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 	return b
 }
 
-func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
+func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (resolver.Resolver, error) {
 	watchRes := &struct {
 		err error
 		w   registry.Watcher
@@ -84,13 +102,16 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		cancel()
 		return nil, err
 	}
+
 	r := &discoveryResolver{
-		w:                watchRes.w,
-		cc:               cc,
-		ctx:              ctx,
-		cancel:           cancel,
-		insecure:         b.insecure,
-		debugLogDisabled: b.debugLogDisabled,
+		w:           watchRes.w,
+		cc:          cc,
+		ctx:         ctx,
+		cancel:      cancel,
+		insecure:    b.insecure,
+		debugLog:    b.debugLog,
+		subsetSize:  b.subsetSize,
+		selecterKey: uuid.New().String(),
 	}
 	go r.watch()
 	return r, nil

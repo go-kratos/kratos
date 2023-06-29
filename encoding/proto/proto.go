@@ -3,9 +3,12 @@
 package proto
 
 import (
-	"github.com/go-kratos/kratos/v2/encoding"
+	"errors"
+	"reflect"
 
 	"google.golang.org/protobuf/proto"
+
+	"github.com/go-kratos/kratos/v2/encoding"
 )
 
 // Name is the name registered for the proto compressor.
@@ -23,9 +26,26 @@ func (codec) Marshal(v interface{}) ([]byte, error) {
 }
 
 func (codec) Unmarshal(data []byte, v interface{}) error {
-	return proto.Unmarshal(data, v.(proto.Message))
+	pm, err := getProtoMessage(v)
+	if err != nil {
+		return err
+	}
+	return proto.Unmarshal(data, pm)
 }
 
 func (codec) Name() string {
 	return Name
+}
+
+func getProtoMessage(v interface{}) (proto.Message, error) {
+	if msg, ok := v.(proto.Message); ok {
+		return msg, nil
+	}
+	val := reflect.ValueOf(v)
+	if val.Kind() != reflect.Ptr {
+		return nil, errors.New("not proto message")
+	}
+
+	val = val.Elem()
+	return getProtoMessage(val.Interface())
 }

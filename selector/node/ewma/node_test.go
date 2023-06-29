@@ -2,6 +2,7 @@ package ewma
 
 import (
 	"context"
+	"net"
 	"reflect"
 	"testing"
 	"time"
@@ -100,11 +101,15 @@ func TestDirectErrorHandler(t *testing.T) {
 			Endpoints: []string{"http://127.0.0.1:9090"},
 			Metadata:  map[string]string{"weight": "10"},
 		}))
-
+	errs := []error{
+		context.DeadlineExceeded,
+		context.Canceled,
+		net.ErrClosed,
+	}
 	for i := 0; i < 5; i++ {
 		var err error
 		if i != 0 {
-			err = context.DeadlineExceeded
+			err = errs[i%len(errs)]
 		}
 		done := wn.Pick()
 		if done == nil {

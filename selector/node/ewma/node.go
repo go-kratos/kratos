@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
-
 	"github.com/go-kratos/kratos/v2/selector"
 )
 
@@ -161,7 +160,7 @@ func (n *Node) Pick() selector.DoneFunc {
 			}
 			var netErr net.Error
 			if errors.Is(context.DeadlineExceeded, di.Err) || errors.Is(context.Canceled, di.Err) ||
-				errors.IsServiceUnavailable(di.Err) || errors.IsGatewayTimeout(di.Err) || errors.As(di.Err, netErr) {
+				errors.IsServiceUnavailable(di.Err) || errors.IsGatewayTimeout(di.Err) || errors.As(di.Err, &netErr) {
 				success = 0
 			}
 		}

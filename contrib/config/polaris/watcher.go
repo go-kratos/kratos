@@ -5,11 +5,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/log"
-
 	"github.com/polarismesh/polaris-go"
 	"github.com/polarismesh/polaris-go/pkg/model"
+
+	"github.com/go-kratos/kratos/v2/config"
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 type Watcher struct {
@@ -28,7 +28,7 @@ func getFullPath(namespace string, fileGroup string, fileName string) string {
 	return fmt.Sprintf("%s/%s/%s", namespace, fileGroup, fileName)
 }
 
-func recieve(event model.ConfigFileChangeEvent) {
+func receive(event model.ConfigFileChangeEvent) {
 	meta := event.ConfigFileMetadata
 	ec := eventChanMap[getFullPath(meta.GetNamespace(), meta.GetFileGroup(), meta.GetFileName())]
 	defer func() {
@@ -42,7 +42,7 @@ func recieve(event model.ConfigFileChangeEvent) {
 }
 
 func newWatcher(configFile polaris.ConfigFile) *Watcher {
-	configFile.AddChangeListener(recieve)
+	configFile.AddChangeListener(receive)
 
 	fullPath := getFullPath(configFile.GetNamespace(), configFile.GetFileGroup(), configFile.GetFileName())
 	if _, ok := eventChanMap[fullPath]; !ok {

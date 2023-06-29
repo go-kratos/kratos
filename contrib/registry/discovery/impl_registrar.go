@@ -122,7 +122,7 @@ func (d *Discovery) register(ctx context.Context, ins *discoveryInstance) (err e
 	return
 }
 
-func (d *Discovery) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
+func (d *Discovery) Deregister(_ context.Context, service *registry.ServiceInstance) error {
 	ins := fromServerInstance(service, d.config)
 	return d.cancel(ins)
 }

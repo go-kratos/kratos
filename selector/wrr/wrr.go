@@ -9,19 +9,19 @@ import (
 )
 
 const (
-	// Name is wrr balancer name
+	// Name is wrr(Weighted Round Robin) balancer name
 	Name = "wrr"
 )
 
 var _ selector.Balancer = (*Balancer)(nil) // Name is balancer name
 
-// Option is random builder option.
+// Option is wrr builder option.
 type Option func(o *options)
 
-// options is random builder options
+// options is wrr builder options
 type options struct{}
 
-// Balancer is a random balancer.
+// Balancer is a wrr balancer.
 type Balancer struct {
 	mu            sync.Mutex
 	currentWeight map[string]float64

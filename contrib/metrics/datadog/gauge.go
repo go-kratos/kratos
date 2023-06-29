@@ -39,8 +39,8 @@ func (d *gauge) Set(value float64) {
 	_ = d.opts.client.Gauge(d.name, value, d.lvs, d.opts.sampleRate)
 }
 
-func (d *gauge) Add(delta float64) {
+func (d *gauge) Add(_ float64) {
 }
 
-func (d *gauge) Sub(delta float64) {
+func (d *gauge) Sub(_ float64) {
 }
