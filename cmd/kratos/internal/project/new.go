@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -14,8 +15,9 @@ import (
 
 // Project is a project template.
 type Project struct {
-	Name string
-	Path string
+	Name       string
+	Path       string
+	ModuleName string
 }
 
 // New new a project from remote repo.
@@ -37,7 +39,7 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 		}
 		os.RemoveAll(to)
 	}
-	fmt.Printf("🚀 Creating service %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
+	fmt.Printf("🚀 Creating service %s, layout repo is %s, module name is %s, please wait a moment.\n\n", p.Name, layout, p.ModuleName)
 	repo := base.NewRepo(layout, branch)
 	if err := repo.CopyTo(ctx, to, p.Name, []string{".git", ".github"}); err != nil {
 		return err
@@ -48,6 +50,12 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 	)
 	if e != nil {
 		return e
+	}
+	if p.ModuleName != "" && p.ModuleName != p.Name {
+		e = base.ModuleName(path.Join(to, "go.mod"), p.ModuleName)
+		if e != nil {
+			return e
+		}
 	}
 	base.Tree(to, dir)
 
