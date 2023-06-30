@@ -66,9 +66,6 @@ func run(_ *cobra.Command, args []string) {
 		}
 	} else {
 		name = args[0]
-		if moduleName == "" {
-			moduleName = name
-		}
 	}
 	projectName, workingDir := processProjectParams(name, wd)
 	p := &Project{Name: projectName, ModuleName: moduleName}

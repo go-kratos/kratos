@@ -39,7 +39,7 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 		}
 		os.RemoveAll(to)
 	}
-	fmt.Printf("🚀 Creating service %s, layout repo is %s, module name is %s, please wait a moment.\n\n", p.Name, layout, p.ModuleName)
+	fmt.Printf("🚀 Creating service %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
 	repo := base.NewRepo(layout, branch)
 	if err := repo.CopyTo(ctx, to, p.Name, []string{".git", ".github"}); err != nil {
 		return err
@@ -51,15 +51,20 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 	if e != nil {
 		return e
 	}
-	if p.ModuleName != "" && p.ModuleName != p.Name {
-		e = base.ModuleName(path.Join(to, "go.mod"), p.ModuleName)
-		if e != nil {
-			return e
-		}
+	e = base.ModuleName(
+		path.Join(to, "go.mod"),
+		p.ModuleName,
+		p.Name,
+	)
+	if e != nil {
+		return e
 	}
 	base.Tree(to, dir)
 
 	fmt.Printf("\n🍺 Project creation succeeded %s\n", color.GreenString(p.Name))
+	if p.ModuleName != "" {
+		fmt.Printf("👉 Module name replace succeeded %s\n", color.BlueString(p.ModuleName))
+	}
 	fmt.Print("💻 Use the following command to start the project 👇:\n\n")
 
 	fmt.Println(color.WhiteString("$ cd %s", p.Name))

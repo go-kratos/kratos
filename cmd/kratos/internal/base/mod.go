@@ -62,7 +62,11 @@ func KratosMod() string {
 }
 
 // ModuleName returns custom module name
-func ModuleName(moduleFile, moduleName string) error {
+func ModuleName(moduleFile, moduleName, name string) error {
+	if moduleName == "" || moduleName == name {
+		return nil
+	}
+
 	modBytes, err := os.ReadFile(moduleFile)
 	if err != nil {
 		return err
