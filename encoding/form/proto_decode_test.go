@@ -87,7 +87,7 @@ func TestPopulateMapField(t *testing.T) {
 	comp := &complex.Complex{}
 	field := getFieldDescriptor(comp.ProtoReflect(), "map")
 	// Fill the comp map field with the url query values
-	err = populateMapField(field, comp.ProtoReflect().Mutable(field).Map(), []string{"kratos"}, query["map[kratos]"])
+	err = populateMapField(field, comp.ProtoReflect().Mutable(field).Map(), []string{"map[kratos]"}, query["map[kratos]"])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -211,6 +211,63 @@ func TestIsASCIIUpper(t *testing.T) {
 			upper := isASCIIUpper(test.b)
 			if test.upper != upper {
 				t.Errorf("'%s' is not ascii upper", string(test.b))
+			}
+		})
+	}
+}
+
+func TestParseURLQueryMapKey(t *testing.T) {
+	tests := []struct {
+		fieldName string
+		field     string
+		fieldKey  string
+		err       error
+	}{
+		{
+			fieldName: "map[kratos]", field: "map", fieldKey: "kratos", err: nil,
+		},
+		{
+			fieldName: "map[]", field: "map", fieldKey: "", err: nil,
+		},
+		{
+			fieldName: "", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+		},
+		{
+			fieldName: "[[]", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+		},
+		{
+			fieldName: "map[kratos]=", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+		},
+		{
+			fieldName: "[kratos]", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+		},
+		{
+			fieldName: "map", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+		},
+		{
+			fieldName: "map[", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+		},
+		{
+			fieldName: "]kratos[", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+		},
+		{
+			fieldName: "[kratos", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+		},
+		{
+			fieldName: "kratos]", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.fieldName, func(t *testing.T) {
+			fieldName, fieldKey, err := parseURLQueryMapKey(test.fieldName)
+			if test.err != err {
+				t.Fatalf("want: %s, got: %s", test.err, err)
+			}
+			if test.field != fieldName {
+				t.Errorf("want: %s, got: %s", test.field, fieldName)
+			}
+			if test.fieldKey != fieldKey {
+				t.Errorf("want: %s, got: %s", test.fieldKey, fieldKey)
 			}
 		})
 	}
