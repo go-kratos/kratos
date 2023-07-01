@@ -2,37 +2,45 @@ package metrics
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/metrics"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
+	"go.opentelemetry.io/otel/attribute"
+	api "go.opentelemetry.io/otel/metric"
 )
 
 // Option is metrics option.
 type Option func(*options)
 
+// WithMeter with meter.
+func WithMeter(m api.Meter) Option {
+	return func(o *options) {
+		o.meter = m
+	}
+}
+
 // WithRequests with requests counter.
-func WithRequests(c metrics.Counter) Option {
+func WithRequests(c api.Int64Counter) Option {
 	return func(o *options) {
 		o.requests = c
 	}
 }
 
 // WithSeconds with seconds histogram.
-func WithSeconds(c metrics.Observer) Option {
+func WithSeconds(c api.Float64Histogram) Option {
 	return func(o *options) {
 		o.seconds = c
 	}
 }
 
 type options struct {
+	meter api.Meter
 	// counter: <client/server>_requests_code_total{kind, operation, code, reason}
-	requests metrics.Counter
+	requests api.Int64Counter
 	// histogram: <client/server>_requests_seconds_bucket{kind, operation}
-	seconds metrics.Observer
+	seconds api.Float64Histogram
 }
 
 // Server is middleware server-side metrics.
@@ -43,27 +51,26 @@ func Server(opts ...Option) middleware.Middleware {
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
-			var (
-				code      int
-				reason    string
-				kind      string
-				operation string
-			)
+			var attributes []attribute.KeyValue
 			startTime := time.Now()
 			if info, ok := transport.FromServerContext(ctx); ok {
-				kind = info.Kind().String()
-				operation = info.Operation()
+				attributes = append(attributes,
+					attribute.String("kind", info.Kind().String()),
+					attribute.String("operation", info.Operation()),
+				)
 			}
 			reply, err := handler(ctx, req)
 			if se := errors.FromError(err); se != nil {
-				code = int(se.Code)
-				reason = se.Reason
+				attributes = append(attributes,
+					attribute.Int("code", int(se.Code)),
+					attribute.String("reason", se.Reason),
+				)
 			}
 			if op.requests != nil {
-				op.requests.With(kind, operation, strconv.Itoa(code), reason).Inc()
+				op.requests.Add(ctx, 1, api.WithAttributes(attributes...))
 			}
 			if op.seconds != nil {
-				op.seconds.With(kind, operation).Observe(time.Since(startTime).Seconds())
+				op.seconds.Record(ctx, time.Since(startTime).Seconds(), api.WithAttributes(attributes...))
 			}
 			return reply, err
 		}
@@ -78,27 +85,26 @@ func Client(opts ...Option) middleware.Middleware {
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
-			var (
-				code      int
-				reason    string
-				kind      string
-				operation string
-			)
+			var attributes []attribute.KeyValue
 			startTime := time.Now()
-			if info, ok := transport.FromClientContext(ctx); ok {
-				kind = info.Kind().String()
-				operation = info.Operation()
+			if info, ok := transport.FromServerContext(ctx); ok {
+				attributes = append(attributes,
+					attribute.String("kind", info.Kind().String()),
+					attribute.String("operation", info.Operation()),
+				)
 			}
 			reply, err := handler(ctx, req)
 			if se := errors.FromError(err); se != nil {
-				code = int(se.Code)
-				reason = se.Reason
+				attributes = append(attributes,
+					attribute.Int("code", int(se.Code)),
+					attribute.String("reason", se.Reason),
+				)
 			}
 			if op.requests != nil {
-				op.requests.With(kind, operation, strconv.Itoa(code), reason).Inc()
+				op.requests.Add(ctx, 1, api.WithAttributes(attributes...))
 			}
 			if op.seconds != nil {
-				op.seconds.With(kind, operation).Observe(time.Since(startTime).Seconds())
+				op.seconds.Record(ctx, time.Since(startTime).Seconds(), api.WithAttributes(attributes...))
 			}
 			return reply, err
 		}
