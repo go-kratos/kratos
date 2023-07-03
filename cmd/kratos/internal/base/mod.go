@@ -81,5 +81,5 @@ func ModuleName(moduleFile, moduleName, name string) error {
 		return err
 	}
 
-	return os.WriteFile(moduleFile, modBytes, 0644)
+	return os.WriteFile(moduleFile, modBytes, 0o644)
 }
