@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/contrib/config/polaris/v2
 go 1.16
 
 require (
-	github.com/go-kratos/kratos/v2 v2.6.2
+	github.com/go-kratos/kratos/v2 v2.6.3
 	github.com/polarismesh/polaris-go v1.1.0
 )
 
