@@ -308,8 +308,8 @@ func TestTimeout(t *testing.T) {
 	}
 }
 
-func TestLogger(t *testing.T) {
-	// todo
+func TestLogger(_ *testing.T) {
+	// TODO
 }
 
 func TestRequestDecoder(t *testing.T) {

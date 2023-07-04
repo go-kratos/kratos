@@ -13,16 +13,16 @@ import (
 
 const (
 	forcePick = time.Second * 3
-	// Name is balancer name
+	// Name is p2c(Pick of 2 choices) balancer name
 	Name = "p2c"
 )
 
 var _ selector.Balancer = (*Balancer)(nil)
 
-// Option is random builder option.
+// Option is p2c builder option.
 type Option func(o *options)
 
-// options is random builder options
+// options is p2c builder options
 type options struct{}
 
 // New creates a p2c selector.
@@ -51,7 +51,7 @@ func (s *Balancer) prePick(nodes []selector.WeightedNode) (nodeA selector.Weight
 }
 
 // Pick pick a node.
-func (s *Balancer) Pick(ctx context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.DoneFunc, error) {
+func (s *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.DoneFunc, error) {
 	if len(nodes) == 0 {
 		return nil, nil, selector.ErrNoAvailable
 	}

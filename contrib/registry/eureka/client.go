@@ -19,9 +19,9 @@ const (
 	statusOutOfService = "OUT_OF_SERVICE"
 	heartbeatRetry     = 3
 	maxIdleConns       = 100
-	heartbeatTime      = 10
-	httpTimeout        = 3
-	refreshTime        = 30
+	heartbeatTime      = 10 * time.Second
+	httpTimeout        = 3 * time.Second
+	refreshTime        = 30 * time.Second
 )
 
 type Endpoint struct {
@@ -139,8 +139,8 @@ func NewClient(urls []string, opts ...ClientOption) *Client {
 		urls:              urls,
 		eurekaPath:        "eureka/v2",
 		maxRetry:          len(urls),
-		heartbeatInterval: time.Second * heartbeatTime,
-		client:            &http.Client{Transport: tr, Timeout: time.Second * httpTimeout},
+		heartbeatInterval: heartbeatTime,
+		client:            &http.Client{Transport: tr, Timeout: httpTimeout},
 		keepalive:         make(map[string]chan struct{}),
 	}
 

@@ -30,15 +30,15 @@ func NewTracer(kind trace.SpanKind, opts ...Option) *Tracer {
 	for _, o := range opts {
 		o(&op)
 	}
-	if op.tracerProvider != nil {
-		otel.SetTracerProvider(op.tracerProvider)
+	if op.tracerProvider == nil {
+		op.tracerProvider = otel.GetTracerProvider()
 	}
 
 	switch kind {
 	case trace.SpanKindClient:
-		return &Tracer{tracer: otel.Tracer(op.tracerName), kind: kind, opt: &op}
+		return &Tracer{tracer: op.tracerProvider.Tracer(op.tracerName), kind: kind, opt: &op}
 	case trace.SpanKindServer:
-		return &Tracer{tracer: otel.Tracer(op.tracerName), kind: kind, opt: &op}
+		return &Tracer{tracer: op.tracerProvider.Tracer(op.tracerName), kind: kind, opt: &op}
 	default:
 		panic(fmt.Sprintf("unsupported span kind: %v", kind))
 	}
@@ -60,7 +60,7 @@ func (t *Tracer) Start(ctx context.Context, operation string, carrier propagatio
 }
 
 // End finish tracing span
-func (t *Tracer) End(ctx context.Context, span trace.Span, m interface{}, err error) {
+func (t *Tracer) End(_ context.Context, span trace.Span, m interface{}, err error) {
 	if err != nil {
 		span.RecordError(err)
 		if e := errors.FromError(err); e != nil {

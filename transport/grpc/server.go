@@ -7,22 +7,20 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
-	"github.com/go-kratos/kratos/v2/internal/matcher"
-
-	apimd "github.com/go-kratos/kratos/v2/api/metadata"
-
-	"github.com/go-kratos/kratos/v2/internal/host"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/admin"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
+
+	apimd "github.com/go-kratos/kratos/v2/api/metadata"
+	"github.com/go-kratos/kratos/v2/internal/endpoint"
+	"github.com/go-kratos/kratos/v2/internal/host"
+	"github.com/go-kratos/kratos/v2/internal/matcher"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
 )
 
 var (
@@ -56,7 +54,7 @@ func Timeout(timeout time.Duration) ServerOption {
 
 // Logger with server logger.
 // Deprecated: use global logger instead.
-func Logger(logger log.Logger) ServerOption {
+func Logger(_ log.Logger) ServerOption {
 	return func(s *Server) {}
 }
 
@@ -210,7 +208,7 @@ func (s *Server) Start(ctx context.Context) error {
 }
 
 // Stop stop the gRPC server.
-func (s *Server) Stop(ctx context.Context) error {
+func (s *Server) Stop(_ context.Context) error {
 	if s.adminClean != nil {
 		s.adminClean()
 	}

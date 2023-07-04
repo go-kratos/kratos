@@ -114,6 +114,9 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 					if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
 						return nil, ErrTokenExpired
 					}
+					if ve.Inner != nil {
+						return nil, ve.Inner
+					}
 					return nil, ErrTokenParseFail
 				}
 				if !tokenInfo.Valid {

@@ -28,7 +28,7 @@ func init() {
 	token = os.Getenv("GITHUB_TOKEN")
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(_ *cobra.Command, args []string) {
 	owner, repo := ParseGithubURL(repoURL)
 	api := GithubAPI{Owner: owner, Repo: repo, Token: token}
 	version := "latest"
