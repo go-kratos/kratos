@@ -5,7 +5,6 @@ go 1.15
 require (
 	github.com/armon/go-metrics v0.3.10 // indirect
 	github.com/go-kratos/kratos/v2 v2.6.3
-	github.com/google/btree v1.0.0 // indirect
 	github.com/hashicorp/consul/api v1.20.0
 	github.com/hashicorp/go-hclog v0.14.1 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.0 // indirect
