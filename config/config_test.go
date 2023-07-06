@@ -198,27 +198,27 @@ func AssertStringValue(t *testing.T, expect any, v Value) bool {
 }
 
 func TestConfig_WatchBetweenSourcesReferenceConfig(t *testing.T) {
-	var testJson = `
+	testJSON := `
 {
 	"foo": "${remote.foo}"
 }
 `
-	var testJson2 = `
+	testJSON2 := `
 {
 	"remote": {
 		"foo": "bar"
 	}
 }
 `
-	var testJsonUpdate = `
+	testJSONUpdate := `
 {
 	"remote": {
 		"foo": "bar2"
 	}
 }
 `
-	var src1 = newTestJSONSource(testJson)
-	var src2 = newTestJSONSource(testJson2)
+	src1 := newTestJSONSource(testJSON)
+	src2 := newTestJSONSource(testJSON2)
 	opts := options{
 		sources:  []Source{src1, src2},
 		decoder:  defaultDecoder,
@@ -241,7 +241,7 @@ func TestConfig_WatchBetweenSourcesReferenceConfig(t *testing.T) {
 	}
 
 	// update remote.foo value
-	src2.data = testJsonUpdate
+	src2.data = testJSONUpdate
 	src2.sig <- struct{}{}
 	// wait for watch to finish
 	src2.sig <- struct{}{}

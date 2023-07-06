@@ -61,7 +61,7 @@ func New(opts ...Option) Config {
 }
 
 func (c *config) watch(w Watcher) {
-	var reloadReader = func(opts options) (Reader, error) {
+	reloadReader := func(opts options) (Reader, error) {
 		r := newReader(c.opts)
 		for _, src := range c.opts.sources {
 			kvs, err := src.Load()
