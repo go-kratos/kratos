@@ -42,6 +42,13 @@ func Address(addr string) ServerOption {
 	}
 }
 
+// Endpoint with server address.
+func Endpoint(endpoint *url.URL) ServerOption {
+	return func(s *Server) {
+		s.endpoint = endpoint
+	}
+}
+
 // Timeout with server timeout.
 func Timeout(timeout time.Duration) ServerOption {
 	return func(s *Server) {
