@@ -86,6 +86,13 @@ func WithServiceCheck(checks ...*api.AgentServiceCheck) Option {
 	}
 }
 
+// WithReRegistry re-registry when service is deregistered
+func WithReRegistry() Option {
+	return func(r *Registry) {
+		r.cli.reRegistry = true
+	}
+}
+
 // Config is consul registry config
 type Config struct {
 	*api.Config
@@ -190,7 +197,6 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 			services:    &atomic.Value{},
 			serviceName: name,
 		}
-		r.registry[name] = set
 	}
 
 	// init watcher
@@ -215,6 +221,9 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 			return nil, err
 		}
 	}
+
+	r.registry[name] = set
+
 	return w, nil
 }
 

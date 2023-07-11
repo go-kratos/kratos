@@ -41,6 +41,8 @@ type Client struct {
 	deregisterCriticalServiceAfter int
 	// serviceChecks  user custom checks
 	serviceChecks api.AgentServiceChecks
+	// reRegistry re-registry when service is deregistered
+	reRegistry bool
 }
 
 func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance {
@@ -223,12 +225,14 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 					err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 					if err != nil {
 						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
-						// when the previous report fails, try to re register the service
-						time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
-						if err := c.cli.Agent().ServiceRegister(asr); err != nil {
-							log.Errorf("[Consul] re registry service failed!, err=%v", err)
-						} else {
-							log.Warn("[Consul] re registry of service occurred success")
+						if c.reRegistry {
+							// when the previous report fails, try to re register the service
+							time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
+							if err := c.cli.Agent().ServiceRegister(asr); err != nil {
+								log.Errorf("[Consul] re registry service failed!, err=%v", err)
+							} else {
+								log.Warn("[Consul] re registry of service occurred success")
+							}
 						}
 					}
 				}
