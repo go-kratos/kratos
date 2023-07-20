@@ -221,3 +221,49 @@ func TestContextCtx(t *testing.T) {
 		t.Errorf("expected %v, got %v", nil, v)
 	}
 }
+
+func TestContextSetAndGet(t *testing.T) {
+	w := wrapper{
+		router: testRouter,
+		req:    &http.Request{},
+		res:    nil,
+		w:      responseWriter{},
+	}
+	if w.Set("test", "test") != nil {
+		t.Errorf("expected %v, got %v", nil, w.Set("test", "test"))
+	}
+
+	v := w.Get("test")
+	if w.Get("test") != "test" {
+		t.Errorf("expected %v, got %v", "test", v)
+	}
+
+	// test reset
+	w = wrapper{
+		router: testRouter,
+		req:    &http.Request{},
+		res:    nil,
+		w:      responseWriter{},
+	}
+
+	v = w.Get("test")
+	if v != nil {
+		t.Errorf("expected %v, got %v", nil, v)
+	}
+
+	// nil
+	w = wrapper{
+		router: testRouter,
+		req:    nil,
+		res:    nil,
+		w:      responseWriter{},
+	}
+
+	if w.Set("test", "test") == nil {
+		t.Errorf("expected %v, got %v", "error", nil)
+	}
+
+	if w.Get("test") != nil {
+		t.Errorf("expected %v, got %v", nil, w.Get("test"))
+	}
+}

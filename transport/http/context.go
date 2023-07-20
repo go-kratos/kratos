@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -40,6 +41,8 @@ type Context interface {
 	Blob(int, string, []byte) error
 	Stream(int, string, io.Reader) error
 	Reset(http.ResponseWriter, *http.Request)
+	Set(key, value interface{}) error
+	Get(key interface{}) interface{}
 }
 
 type responseWriter struct {
@@ -183,4 +186,18 @@ func (c *wrapper) Value(key interface{}) interface{} {
 		return nil
 	}
 	return c.req.Context().Value(key)
+}
+
+func (c *wrapper) Set(key, value interface{}) error {
+	if c.req == nil {
+		return errors.New("request is nil")
+	}
+
+	c.req = c.req.WithContext(context.WithValue(c.req.Context(), key, value))
+
+	return nil
+}
+
+func (c *wrapper) Get(key interface{}) interface{} {
+	return c.Value(key)
 }
