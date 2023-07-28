@@ -87,7 +87,6 @@ func TestIterationMiddle(t *testing.T) {
 }
 
 func TestReplaceBoundary(t *testing.T) {
-
 	path := "/test/{message.namespace=*}/name/{message.name=*}"
 	vars := buildPathVars(path)
 	for v, s := range vars {
