@@ -25,14 +25,14 @@ func Register{{.ServiceType}}HTTPServer(s *http.Server, srv {{.ServiceType}}HTTP
 func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in {{.Request}}
-		if err := ctx.BindQuery(&in{{.Body}}); err != nil {
-			return err
-		}
 		{{- if .HasBody}}
 		if err := ctx.Bind(&in{{.Body}}); err != nil {
 			return err
 		}
 		{{- end}}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
 		{{- if .HasVars}}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
