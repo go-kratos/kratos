@@ -220,8 +220,8 @@ func (s *Server) WalkRoute(fn WalkRouteFunc) error {
 	})
 }
 
-// WalkHandler walks the router and all its sub-routers, calling walkFn for each route in the tree.
-func (s *Server) WalkHandler(handle func(method, path string, handler http.HandlerFunc)) error {
+// WalkHandle walks the router and all its sub-routers, calling walkFn for each route in the tree.
+func (s *Server) WalkHandle(handle func(method, path string, handler http.HandlerFunc)) error {
 	return s.WalkRoute(func(r RouteInfo) error {
 		handle(r.Method, r.Path, s.ServeHTTP)
 		return nil
