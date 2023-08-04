@@ -85,3 +85,16 @@ func TestIterationMiddle(t *testing.T) {
 		t.Fatal(`replacePath("message.name", "messages/*", path) should be "/test/{message.name:messages/.*}/books"`)
 	}
 }
+
+func TestReplaceBoundary(t *testing.T) {
+	path := "/test/{message.namespace=*}/name/{message.name=*}"
+	vars := buildPathVars(path)
+	for v, s := range vars {
+		if s != nil {
+			path = replacePath(v, *s, path)
+		}
+	}
+	if !reflect.DeepEqual("/test/{message.namespace:.*}/name/{message.name:.*}", path) {
+		t.Fatal(`"/test/{message.namespace=*}/name/{message.name=*}" should be "/test/{message.namespace:.*}/name/{message.name:.*}"`)
+	}
+}
