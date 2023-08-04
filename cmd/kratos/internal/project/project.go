@@ -79,8 +79,8 @@ func run(_ *cobra.Command, args []string) {
 			return
 		}
 
-		packagePath, err := filepath.Rel(projectRoot, filepath.Join(workingDir, projectName))
-		if err != nil {
+		packagePath, e := filepath.Rel(projectRoot, filepath.Join(workingDir, projectName))
+		if e != nil {
 			done <- fmt.Errorf("🚫 failed to get relative path: %v", err)
 			return
 		}
