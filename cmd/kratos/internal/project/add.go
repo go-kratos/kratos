@@ -3,10 +3,11 @@ package project
 import (
 	"context"
 	"fmt"
-	"github.com/AlecAivazis/survey/v2"
-	"github.com/fatih/color"
 	"os"
 	"path/filepath"
+
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/fatih/color"
 
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 )
