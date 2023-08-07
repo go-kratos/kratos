@@ -220,6 +220,14 @@ func (s *Server) WalkRoute(fn WalkRouteFunc) error {
 	})
 }
 
+// WalkHandle walks the router and all its sub-routers, calling walkFn for each route in the tree.
+func (s *Server) WalkHandle(handle func(method, path string, handler http.HandlerFunc)) error {
+	return s.WalkRoute(func(r RouteInfo) error {
+		handle(r.Method, r.Path, s.ServeHTTP)
+		return nil
+	})
+}
+
 // Route registers an HTTP router.
 func (s *Server) Route(prefix string, filters ...FilterFunc) *Router {
 	return newRouter(prefix, s, filters...)
