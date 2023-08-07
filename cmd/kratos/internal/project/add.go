@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"
@@ -16,9 +18,8 @@ var repoAddIgnores = []string{
 	".git", ".github", "api", "README.md", "LICENSE", "go.mod", "go.sum", "third_party", "openapi.yaml", ".gitignore",
 }
 
-func (p *Project) Add(ctx context.Context, dir string, layout string, branch string, mod string) error {
-	to := filepath.Join(dir, p.Name)
-
+func (p *Project) Add(ctx context.Context, wd string, layout string, branch string, mod string, modPath string) error {
+	to := p.Path
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
 		fmt.Printf("🚫 %s already exists\n", p.Name)
 		override := false
@@ -39,20 +40,20 @@ func (p *Project) Add(ctx context.Context, dir string, layout string, branch str
 	fmt.Printf("🚀 Add service %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
 
 	repo := base.NewRepo(layout, branch)
-
-	if err := repo.CopyToV2(ctx, to, filepath.Join(mod, p.Path), repoAddIgnores, []string{filepath.Join(p.Path, "api"), "api"}); err != nil {
+	subPath := subtractPath(to, modPath)
+	if err := repo.CopyToV2(ctx, to, path.Join(mod, subPath), repoAddIgnores, []string{filepath.Join(subPath, "api"), "api"}); err != nil {
 		return err
 	}
 
 	e := os.Rename(
 		filepath.Join(to, "cmd", "server"),
-		filepath.Join(to, "cmd", p.Name),
+		filepath.Join(to, "cmd", path.Base(p.Name)),
 	)
 	if e != nil {
 		return e
 	}
 
-	base.Tree(to, dir)
+	base.Tree(to, wd)
 
 	fmt.Printf("\n🍺 Repository creation succeeded %s\n", color.GreenString(p.Name))
 	fmt.Print("💻 Use the following command to add a project 👇:\n\n")
@@ -64,4 +65,14 @@ func (p *Project) Add(ctx context.Context, dir string, layout string, branch str
 	fmt.Println("			🤝 Thanks for using Kratos")
 	fmt.Println("	📚 Tutorial: https://go-kratos.dev/docs/getting-started/start")
 	return nil
+}
+
+func subtractPath(basePath, subtractPath string) string {
+	if !strings.HasPrefix(basePath, subtractPath) {
+		return basePath
+	}
+
+	remainingPath := strings.TrimPrefix(basePath, subtractPath)
+	remainingPath = strings.TrimPrefix(remainingPath, "/")
+	return remainingPath
 }

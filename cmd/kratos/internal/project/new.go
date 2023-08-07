@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -19,8 +20,8 @@ type Project struct {
 }
 
 // New new a project from remote repo.
-func (p *Project) New(ctx context.Context, dir string, layout string, branch string) error {
-	to := filepath.Join(dir, p.Name)
+func (p *Project) New(ctx context.Context, wd string, layout string, branch string) error {
+	to := p.Path
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
 		fmt.Printf("🚫 %s already exists\n", p.Name)
 		prompt := &survey.Confirm{
@@ -44,12 +45,12 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 	}
 	e := os.Rename(
 		filepath.Join(to, "cmd", "server"),
-		filepath.Join(to, "cmd", p.Name),
+		filepath.Join(to, "cmd", path.Base(p.Name)),
 	)
 	if e != nil {
 		return e
 	}
-	base.Tree(to, dir)
+	base.Tree(to, wd)
 
 	fmt.Printf("\n🍺 Project creation succeeded %s\n", color.GreenString(p.Name))
 	fmt.Print("💻 Use the following command to start the project 👇:\n\n")
