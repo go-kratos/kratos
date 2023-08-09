@@ -15,3 +15,11 @@ func TestInfo(_ *testing.T) {
 func TestWithContext(_ *testing.T) {
 	WithContext(context.Background(), nil)
 }
+
+func TestClosedLogger(t *testing.T) {
+	logger := DefaultLogger
+
+	if l, ok := logger.(Closeable); ok {
+		_ = l.Close()
+	}
+}

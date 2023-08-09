@@ -13,6 +13,11 @@ type Logger interface {
 	Log(level Level, keyvals ...interface{}) error
 }
 
+// Closeable is a logger that can be closed.
+type Closeable interface {
+	Close() error
+}
+
 type logger struct {
 	logger    Logger
 	prefix    []interface{}
