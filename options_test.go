@@ -159,7 +159,7 @@ func TestBeforeStart(t *testing.T) {
 		t.Log("BeforeStart...")
 		return nil
 	}
-	BeforeStart(v)(o)
+	BeforeStart(v, v)(o)
 }
 
 func TestBeforeStop(t *testing.T) {
@@ -168,7 +168,7 @@ func TestBeforeStop(t *testing.T) {
 		t.Log("BeforeStop...")
 		return nil
 	}
-	BeforeStop(v)(o)
+	BeforeStop(v, v)(o)
 }
 
 func TestAfterStart(t *testing.T) {
@@ -177,7 +177,7 @@ func TestAfterStart(t *testing.T) {
 		t.Log("AfterStart...")
 		return nil
 	}
-	AfterStart(v)(o)
+	AfterStart(v, v)(o)
 }
 
 func TestAfterStop(t *testing.T) {
@@ -186,5 +186,5 @@ func TestAfterStop(t *testing.T) {
 		t.Log("AfterStop...")
 		return nil
 	}
-	AfterStop(v)(o)
+	AfterStop(v, v)(o)
 }
