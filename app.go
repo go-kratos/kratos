@@ -139,10 +139,14 @@ func (a *App) Run() error {
 	if err = eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return err
 	}
-	for _, fn := range a.opts.afterStop {
-		err = fn(sctx)
+
+	if len(a.opts.afterStop) != 0 {
+		for _, fn := range a.opts.afterStop {
+			err = fn(sctx)
+		}
+		return err
 	}
-	return err
+	return nil
 }
 
 // Stop gracefully stops the application.
