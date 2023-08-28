@@ -62,7 +62,10 @@ func WithContext(ctx context.Context, l Logger) Logger {
 
 	f, ok := l.(*Filter)
 	if ok {
+		f.mutex.Lock()
 		f.ctx = ctx
+		defer f.mutex.Unlock()
+
 		return &Filter{
 			ctx:    ctx,
 			logger: f.logger,
@@ -70,6 +73,7 @@ func WithContext(ctx context.Context, l Logger) Logger {
 			key:    f.key,
 			value:  f.value,
 			filter: f.filter,
+			mutex:  f.mutex,
 		}
 	}
 
