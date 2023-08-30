@@ -362,7 +362,9 @@ func parseURLQueryMapKey(key string) (string, string, error) {
 		endIndex   = strings.IndexByte(key, ']')
 	)
 	if startIndex < 0 {
+		//nolint:gomnd
 		values := strings.SplitN(key, fieldSeparater, 2)
+		//nolint:gomnd
 		if len(values) != 2 {
 			return "", "", errInvalidFormatMapKey
 		}
