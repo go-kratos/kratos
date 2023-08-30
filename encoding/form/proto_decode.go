@@ -20,6 +20,8 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
+const fieldSeparater = "."
+
 var errInvalidFormatMapKey = errors.New("invalid formatting for map key")
 
 // DecodeValues decode url value into proto message.
@@ -359,12 +361,12 @@ func parseURLQueryMapKey(key string) (string, string, error) {
 		startIndex = strings.IndexByte(key, '[')
 		endIndex   = strings.IndexByte(key, ']')
 	)
-	if startIndex < 0 && endIndex < 0 {
-		n := strings.SplitN(key, ".", 2)
-		if len(n) != 2 {
+	if startIndex < 0 {
+		values := strings.SplitN(key, fieldSeparater, 2)
+		if len(values) != 2 {
 			return "", "", errInvalidFormatMapKey
 		}
-		return n[0], n[1], nil
+		return values[0], values[1], nil
 	}
 	if startIndex <= 0 || startIndex >= endIndex || len(key) != endIndex+1 {
 		return "", "", errInvalidFormatMapKey
