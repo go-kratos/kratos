@@ -24,7 +24,7 @@ const (
 var methodSets = make(map[string]int)
 
 // generateFile generates a _http.pb.go file containing kratos errors definitions.
-func generateFile(gen *protogen.Plugin, file *protogen.File, omitempty bool) *protogen.GeneratedFile {
+func generateFile(gen *protogen.Plugin, file *protogen.File, omitempty bool, omitemptyPrefix string) *protogen.GeneratedFile {
 	if len(file.Services) == 0 || (omitempty && !hasHTTPRule(file.Services)) {
 		return nil
 	}
@@ -42,12 +42,12 @@ func generateFile(gen *protogen.Plugin, file *protogen.File, omitempty bool) *pr
 	g.P()
 	g.P("package ", file.GoPackageName)
 	g.P()
-	generateFileContent(gen, file, g, omitempty)
+	generateFileContent(gen, file, g, omitempty, omitemptyPrefix)
 	return g
 }
 
 // generateFileContent generates the kratos errors definitions, excluding the package statement.
-func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, omitempty bool) {
+func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, omitempty bool, omitemptyPrefix string) {
 	if len(file.Services) == 0 {
 		return
 	}
@@ -59,11 +59,11 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P()
 
 	for _, service := range file.Services {
-		genService(gen, file, g, service, omitempty)
+		genService(gen, file, g, service, omitempty, omitemptyPrefix)
 	}
 }
 
-func genService(_ *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, service *protogen.Service, omitempty bool) {
+func genService(_ *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, service *protogen.Service, omitempty bool, omitemptyPrefix string) {
 	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() {
 		g.P("//")
 		g.P(deprecationComment)
@@ -81,11 +81,11 @@ func genService(_ *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFi
 		rule, ok := proto.GetExtension(method.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
 		if rule != nil && ok {
 			for _, bind := range rule.AdditionalBindings {
-				sd.Methods = append(sd.Methods, buildHTTPRule(g, method, bind))
+				sd.Methods = append(sd.Methods, buildHTTPRule(g, service, method, bind, omitemptyPrefix))
 			}
-			sd.Methods = append(sd.Methods, buildHTTPRule(g, method, rule))
+			sd.Methods = append(sd.Methods, buildHTTPRule(g, service, method, rule, omitemptyPrefix))
 		} else if !omitempty {
-			path := fmt.Sprintf("/%s/%s", service.Desc.FullName(), method.Desc.Name())
+			path := fmt.Sprintf("%s/%s/%s", omitemptyPrefix, service.Desc.FullName(), method.Desc.Name())
 			sd.Methods = append(sd.Methods, buildMethodDesc(g, method, http.MethodPost, path))
 		}
 	}
@@ -109,7 +109,7 @@ func hasHTTPRule(services []*protogen.Service) bool {
 	return false
 }
 
-func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotations.HttpRule) *methodDesc {
+func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *protogen.Method, rule *annotations.HttpRule, omitemptyPrefix string) *methodDesc {
 	var (
 		path         string
 		method       string
@@ -136,6 +136,12 @@ func buildHTTPRule(g *protogen.GeneratedFile, m *protogen.Method, rule *annotati
 	case *annotations.HttpRule_Custom:
 		path = pattern.Custom.Path
 		method = pattern.Custom.Kind
+	}
+	if method == "" {
+		method = http.MethodPost
+	}
+	if path == "" {
+		path = fmt.Sprintf("%s/%s/%s", omitemptyPrefix, service.Desc.FullName(), m.Desc.Name())
 	}
 	body = rule.Body
 	responseBody = rule.ResponseBody
@@ -234,7 +240,7 @@ func buildPathVars(path string) (res map[string]*string) {
 }
 
 func replacePath(name string, value string, path string) string {
-	pattern := regexp.MustCompile(fmt.Sprintf(`(?i){([\s]*%s[\s]*)=?([^{}]*)}`, name))
+	pattern := regexp.MustCompile(fmt.Sprintf(`(?i){([\s]*%s\b[\s]*)=?([^{}]*)}`, name))
 	idx := pattern.FindStringIndex(path)
 	if len(idx) > 0 {
 		path = fmt.Sprintf("%s{%s:%s}%s",
