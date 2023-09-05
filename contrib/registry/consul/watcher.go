@@ -23,11 +23,9 @@ func (w *watcher) Next() (services []*registry.ServiceInstance, err error) {
 	case <-w.event:
 	}
 
-	ss, ok := w.set.services.Load().([]*registry.ServiceInstance)
-
-	if ok {
-		services = append(services, ss...)
-	}
+	w.set.lock.RLock()
+	defer w.set.lock.RUnlock()
+	services = w.set.flatServices()
 	return
 }
 

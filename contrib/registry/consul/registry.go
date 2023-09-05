@@ -2,257 +2,67 @@ package consul
 
 import (
 	"context"
-	"fmt"
-	"sync"
-	"sync/atomic"
-	"time"
-
-	"github.com/hashicorp/consul/api"
 
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/hashicorp/consul/api"
 )
 
-var (
-	_ registry.Registrar = (*Registry)(nil)
-	_ registry.Discovery = (*Registry)(nil)
-)
-
-// Option is consul registry option.
-type Option func(*Registry)
-
-// WithHealthCheck with registry health check option.
-func WithHealthCheck(enable bool) Option {
-	return func(o *Registry) {
-		o.enableHealthCheck = enable
-	}
-}
-
-// WithTimeout with get services timeout option.
-func WithTimeout(timeout time.Duration) Option {
-	return func(o *Registry) {
-		o.timeout = timeout
-	}
-}
-
-// WithDatacenter with registry datacenter option
-func WithDatacenter(dc Datacenter) Option {
-	return func(o *Registry) {
-		o.cli.dc = dc
-	}
-}
-
-// WithHeartbeat enable or disable heartbeat
-func WithHeartbeat(enable bool) Option {
-	return func(o *Registry) {
-		if o.cli != nil {
-			o.cli.heartbeat = enable
-		}
-	}
-}
-
-// WithServiceResolver with endpoint function option.
-func WithServiceResolver(fn ServiceResolver) Option {
-	return func(o *Registry) {
-		if o.cli != nil {
-			o.cli.resolver = fn
-		}
-	}
-}
-
-// WithHealthCheckInterval with healthcheck interval in seconds.
-func WithHealthCheckInterval(interval int) Option {
-	return func(o *Registry) {
-		if o.cli != nil {
-			o.cli.healthcheckInterval = interval
-		}
-	}
-}
-
-// WithDeregisterCriticalServiceAfter with deregister-critical-service-after in seconds.
-func WithDeregisterCriticalServiceAfter(interval int) Option {
-	return func(o *Registry) {
-		if o.cli != nil {
-			o.cli.deregisterCriticalServiceAfter = interval
-		}
-	}
-}
-
-// WithServiceCheck with service checks
-func WithServiceCheck(checks ...*api.AgentServiceCheck) Option {
-	return func(o *Registry) {
-		if o.cli != nil {
-			o.cli.serviceChecks = checks
-		}
-	}
-}
-
-// Config is consul registry config
-type Config struct {
-	*api.Config
-}
-
-// Registry is consul registry
+// A mix up of implmentations of registry.Registrar and registry.Discovery
+// Still use this name for backward compatibility
+// @deprecated use NewDiscovery and NewRegistrar instead
 type Registry struct {
-	cli               *Client
-	enableHealthCheck bool
-	registry          map[string]*serviceSet
-	lock              sync.RWMutex
-	timeout           time.Duration
+	*kratosRegistrar
+	*kratosDiscovery
+	runContext context.Context
+}
+
+// @deprecated
+type Option interface{}
+
+// @deprecated
+type Datacenter string
+
+// @deprecated
+const (
+	SingleDatacenter Datacenter = "SINGLE"
+	MultiDatacenter  Datacenter = "MULTI"
+)
+
+// @deprecated useless now, remove this option in your code
+func WithDatacenter(dc Datacenter) DiscoveryOption {
+	return func(o *kratosDiscovery) {
+	}
 }
 
 // New creates consul registry
+// @deprecated
 func New(apiClient *api.Client, opts ...Option) *Registry {
 	r := &Registry{
-		registry:          make(map[string]*serviceSet),
-		enableHealthCheck: true,
-		timeout:           10 * time.Second,
-		cli: &Client{
-			dc:                             SingleDatacenter,
-			cli:                            apiClient,
-			resolver:                       defaultResolver,
-			healthcheckInterval:            10,
-			heartbeat:                      true,
-			deregisterCriticalServiceAfter: 600,
-		},
+		// old interface have no way to specify context, just use background
+		runContext: context.Background(),
 	}
+
+	regOpts := []RegistrarOption{}
+	disOpts := []DiscoveryOption{
+		WithOldGetServiceBehavior(),
+	}
+
 	for _, o := range opts {
-		o(r)
+		switch v := o.(type) {
+		case RegistrarOption:
+			regOpts = append(regOpts, v)
+		case DiscoveryOption:
+			disOpts = append(disOpts, v)
+		default:
+			panic("invalid option")
+		}
 	}
-	r.cli.ctx, r.cli.cancel = context.WithCancel(context.Background())
+
+	r.kratosDiscovery = NewDiscovery(r.runContext, apiClient, disOpts...).(*kratosDiscovery)
+	r.kratosRegistrar = NewRegistrar(r.runContext, apiClient, regOpts...).(*kratosRegistrar)
 	return r
 }
 
-// Register register service
-func (r *Registry) Register(ctx context.Context, svc *registry.ServiceInstance) error {
-	return r.cli.Register(ctx, svc, r.enableHealthCheck)
-}
-
-// Deregister deregister service
-func (r *Registry) Deregister(ctx context.Context, svc *registry.ServiceInstance) error {
-	return r.cli.Deregister(ctx, svc.ID)
-}
-
-// GetService return service by name
-func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.ServiceInstance, error) {
-	r.lock.RLock()
-	defer r.lock.RUnlock()
-	set := r.registry[name]
-
-	getRemote := func() []*registry.ServiceInstance {
-		services, _, err := r.cli.Service(ctx, name, 0, true)
-		if err == nil && len(services) > 0 {
-			return services
-		}
-		return nil
-	}
-
-	if set == nil {
-		if s := getRemote(); len(s) > 0 {
-			return s, nil
-		}
-		return nil, fmt.Errorf("service %s not resolved in registry", name)
-	}
-	ss, _ := set.services.Load().([]*registry.ServiceInstance)
-	if ss == nil {
-		if s := getRemote(); len(s) > 0 {
-			return s, nil
-		}
-		return nil, fmt.Errorf("service %s not found in registry", name)
-	}
-	return ss, nil
-}
-
-// ListServices return service list.
 func (r *Registry) ListServices() (allServices map[string][]*registry.ServiceInstance, err error) {
-	r.lock.RLock()
-	defer r.lock.RUnlock()
-	allServices = make(map[string][]*registry.ServiceInstance)
-	for name, set := range r.registry {
-		var services []*registry.ServiceInstance
-		ss, _ := set.services.Load().([]*registry.ServiceInstance)
-		if ss == nil {
-			continue
-		}
-		services = append(services, ss...)
-		allServices[name] = services
-	}
-	return
-}
-
-// Watch resolve service by name
-func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, error) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	set, ok := r.registry[name]
-	if !ok {
-		set = &serviceSet{
-			watcher:     make(map[*watcher]struct{}),
-			services:    &atomic.Value{},
-			serviceName: name,
-		}
-		r.registry[name] = set
-	}
-
-	// init watcher
-	w := &watcher{
-		event: make(chan struct{}, 1),
-	}
-	w.ctx, w.cancel = context.WithCancel(ctx)
-	w.set = set
-	set.lock.Lock()
-	set.watcher[w] = struct{}{}
-	set.lock.Unlock()
-	ss, _ := set.services.Load().([]*registry.ServiceInstance)
-	if len(ss) > 0 {
-		// If the service has a value, it needs to be pushed to the watcher,
-		// otherwise the initial data may be blocked forever during the watch.
-		w.event <- struct{}{}
-	}
-
-	if !ok {
-		err := r.resolve(ctx, set)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return w, nil
-}
-
-func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
-	timeoutCtx, cancel := context.WithTimeout(ctx, r.timeout)
-	defer cancel()
-
-	services, idx, err := r.cli.Service(timeoutCtx, ss.serviceName, 0, true)
-	if err != nil {
-		return err
-	}
-	if len(services) > 0 {
-		ss.broadcast(services)
-	}
-
-	go func() {
-		ticker := time.NewTicker(time.Second)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ticker.C:
-				timeoutCtx, cancel := context.WithTimeout(context.Background(), r.timeout)
-				tmpService, tmpIdx, err := r.cli.Service(timeoutCtx, ss.serviceName, idx, true)
-				cancel()
-				if err != nil {
-					time.Sleep(time.Second)
-					continue
-				}
-				if len(tmpService) != 0 && tmpIdx != idx {
-					services = tmpService
-					ss.broadcast(services)
-				}
-				idx = tmpIdx
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
-
-	return nil
+	return r.kratosDiscovery.ListServices(r.kratosDiscovery.ctx)
 }

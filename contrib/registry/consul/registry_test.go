@@ -2,6 +2,7 @@ package consul
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
 	"reflect"
@@ -22,6 +23,11 @@ func tcpServer(lis net.Listener) {
 		fmt.Println("get tcp")
 		conn.Close()
 	}
+}
+
+func dumpInterface(i interface{}) {
+	j, _ := json.MarshalIndent(i, "", " ")
+	fmt.Println(string(j))
 }
 
 func TestRegistry_Register(t *testing.T) {
@@ -131,6 +137,8 @@ func TestRegistry_Register(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetService() got = %v, want %v", got, tt.want)
+				dumpInterface(got)
+				dumpInterface(tt.want)
 			}
 
 			for _, instance := range tt.args.server {
