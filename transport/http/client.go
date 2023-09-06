@@ -318,6 +318,26 @@ func (client *Client) do(req *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
+func (client *Client) Host() (string, error) {
+	var host string
+	if client.r != nil {
+		var (
+			err  error
+			node selector.Node
+		)
+		if node, _, err = client.selector.Select(context.Background(), selector.WithNodeFilter(client.opts.nodeFilters...)); err != nil {
+			return host, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
+		}
+		schema := "https"
+		if client.insecure {
+			schema = "http"
+		}
+		return schema + node.Address(), nil
+	}
+
+	return host, errors.ServiceUnavailable("NODE_IS_NIL", "NODE_IS_NIL")
+}
+
 // Close tears down the Transport and all underlying connections.
 func (client *Client) Close() error {
 	if client.r != nil {
