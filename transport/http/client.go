@@ -332,7 +332,7 @@ func (client *Client) Host() (string, error) {
 		if client.insecure {
 			schema = "http"
 		}
-		return schema + node.Address(), nil
+		return schema + ":" + node.Address(), nil
 	}
 
 	return host, errors.ServiceUnavailable("NODE_IS_NIL", "NODE_IS_NIL")
