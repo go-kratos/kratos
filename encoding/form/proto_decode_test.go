@@ -97,6 +97,24 @@ func TestPopulateMapField(t *testing.T) {
 	}
 }
 
+func TestPopulateMapSepField(t *testing.T) {
+	query, err := url.ParseQuery("map.name=kratos")
+	if err != nil {
+		t.Fatal(err)
+	}
+	comp := &complex.Complex{}
+	field := getFieldDescriptor(comp.ProtoReflect(), "map")
+	// Fill the comp map field with the url query values
+	err = populateMapField(field, comp.ProtoReflect().Mutable(field).Map(), []string{"map.name"}, query["map.name"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Get the comp map field value
+	if query["map.name"][0] != comp.Map["name"] {
+		t.Errorf("want: %s, got: %s", query, comp.Map)
+	}
+}
+
 func TestParseField(t *testing.T) {
 	tests := []struct {
 		name                    string
@@ -230,31 +248,31 @@ func TestParseURLQueryMapKey(t *testing.T) {
 			fieldName: "map[]", field: "map", fieldKey: "", err: nil,
 		},
 		{
-			fieldName: "", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+			fieldName: "", field: "", fieldKey: "", err: errInvalidFormatMapKey,
 		},
 		{
-			fieldName: "[[]", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+			fieldName: "[[]", field: "", fieldKey: "", err: errInvalidFormatMapKey,
 		},
 		{
-			fieldName: "map[kratos]=", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+			fieldName: "map[kratos]=", field: "", fieldKey: "", err: errInvalidFormatMapKey,
 		},
 		{
-			fieldName: "[kratos]", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+			fieldName: "[kratos]", field: "", fieldKey: "", err: errInvalidFormatMapKey,
 		},
 		{
-			fieldName: "map", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+			fieldName: "map", field: "", fieldKey: "", err: errInvalidFormatMapKey,
 		},
 		{
-			fieldName: "map[", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+			fieldName: "map[", field: "", fieldKey: "", err: errInvalidFormatMapKey,
 		},
 		{
-			fieldName: "]kratos[", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+			fieldName: "]kratos[", field: "", fieldKey: "", err: errInvalidFormatMapKey,
 		},
 		{
-			fieldName: "[kratos", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+			fieldName: "[kratos", field: "", fieldKey: "", err: errInvalidFormatMapKey,
 		},
 		{
-			fieldName: "kratos]", field: "", fieldKey: "", err: ErrInvalidFormatMapKey,
+			fieldName: "kratos]", field: "", fieldKey: "", err: errInvalidFormatMapKey,
 		},
 	}
 	for _, test := range tests {
