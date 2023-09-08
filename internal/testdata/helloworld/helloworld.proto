@@ -3,6 +3,7 @@ syntax = "proto3";
 package helloworld;
 
 import "google/api/annotations.proto";
+import "redact/redact.proto";
 
 option go_package = "github.com/go-kratos/kratos/v2/internal/testdata/helloworld";
 
@@ -26,4 +27,5 @@ message HelloRequest {
 // The response message containing the greetings
 message HelloReply {
   string message = 1;
+  string sensitive_message = 2 [(redact.sensitive) = true];
 }
