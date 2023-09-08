@@ -133,11 +133,13 @@ func TestExtractArgs(t *testing.T) {
 			name:     "dummyStringer",
 			req:      &dummyStringer{field: ""},
 			expected: "my value",
-		}, {
+		},
+		{
 			name:     "dummy",
 			req:      &dummy{field: "value"},
 			expected: "&{field:value}",
-		}, {
+		},
+		{
 			name:     "dummyStringerRedacter",
 			req:      &dummyStringerRedacter{field: ""},
 			expected: "my value redacted",
