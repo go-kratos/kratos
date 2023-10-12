@@ -11,7 +11,7 @@ import (
 	"github.com/polarismesh/polaris-go/pkg/model"
 	"github.com/polarismesh/polaris-go/pkg/model/local"
 	"github.com/polarismesh/polaris-go/pkg/model/pb"
-	v1 "github.com/polarismesh/polaris-go/pkg/model/pb/v1"
+	apiService "github.com/polarismesh/specification/source/go/api/v1/service_manage"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/go-kratos/kratos/v2"
@@ -108,7 +108,7 @@ func (p *Polaris) NodeFilter(opts ...RouterOption) selector.NodeFilter {
 }
 
 func buildPolarisInstance(namespace string, nodes []selector.Node) *pb.ServiceInstancesInProto {
-	ins := make([]*v1.Instance, 0, len(nodes))
+	ins := make([]*apiService.Instance, 0, len(nodes))
 	for _, node := range nodes {
 		host, port, err := net.SplitHostPort(node.Address())
 		if err != nil {
@@ -118,7 +118,7 @@ func buildPolarisInstance(namespace string, nodes []selector.Node) *pb.ServiceIn
 		if err != nil {
 			return nil
 		}
-		ins = append(ins, &v1.Instance{
+		ins = append(ins, &apiService.Instance{
 			Id:        wrapperspb.String(node.Metadata()["merge"]),
 			Service:   wrapperspb.String(node.ServiceName()),
 			Namespace: wrapperspb.String(namespace),
@@ -131,11 +131,11 @@ func buildPolarisInstance(namespace string, nodes []selector.Node) *pb.ServiceIn
 		})
 	}
 
-	d := &v1.DiscoverResponse{
+	d := &apiService.DiscoverResponse{
 		Code:      wrapperspb.UInt32(1),
 		Info:      wrapperspb.String("ok"),
-		Type:      v1.DiscoverResponse_INSTANCE,
-		Service:   &v1.Service{Name: wrapperspb.String(nodes[0].ServiceName()), Namespace: wrapperspb.String("default")},
+		Type:      apiService.DiscoverResponse_INSTANCE,
+		Service:   &apiService.Service{Name: wrapperspb.String(nodes[0].ServiceName()), Namespace: wrapperspb.String("default")},
 		Instances: ins,
 	}
 	return pb.NewServiceInstancesInProto(d, func(s string) local.InstanceLocalValue {
