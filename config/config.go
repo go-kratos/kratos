@@ -12,6 +12,7 @@ import (
 	_ "github.com/go-kratos/kratos/v2/encoding/proto"
 	_ "github.com/go-kratos/kratos/v2/encoding/xml"
 	_ "github.com/go-kratos/kratos/v2/encoding/yaml"
+	_ "github.com/go-kratos/kratos/v2/encoding/yml"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
