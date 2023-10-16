@@ -86,6 +86,19 @@ func TestHeader(t *testing.T) {
 	}
 }
 
+func TestHeaderCallOption_before(t *testing.T) {
+	h := http.Header{"A": []string{"123"}}
+	c := &callInfo{}
+	o := Header(&h)
+	err := o.before(c)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if !reflect.DeepEqual(&h, c.headerCarrier) {
+		t.Errorf("want: %v,got: %v", &h, o.(HeaderCallOption).header)
+	}
+}
+
 func TestHeaderCallOption_after(t *testing.T) {
 	h := http.Header{"A": []string{"123"}}
 	c := &callInfo{}
