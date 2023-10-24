@@ -6,6 +6,7 @@ import (
 	"errors"
 	"testing"
 
+	pb "github.com/go-kratos/kratos/v2/internal/testdata/helloworld"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -132,19 +133,26 @@ func TestExtractArgs(t *testing.T) {
 			name:     "dummyStringer",
 			req:      &dummyStringer{field: ""},
 			expected: "my value",
-		}, {
+		},
+		{
 			name:     "dummy",
 			req:      &dummy{field: "value"},
 			expected: "&{field:value}",
-		}, {
+		},
+		{
 			name:     "dummyStringerRedacter",
 			req:      &dummyStringerRedacter{field: ""},
 			expected: "my value redacted",
 		},
+		{
+			name:     "protoMessageRedacter",
+			req:      &pb.HelloReply{Message: "normal", SensitiveMessage: "sensitive"},
+			expected: (&pb.HelloReply{Message: "normal", SensitiveMessage: "***"}).String(),
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			if value := extractArgs(test.req); value != test.expected {
+			if value := extractArgs(test.req, ""); value != test.expected {
 				t.Errorf(`The stringified %s structure must be equal to "%s", %v given`, test.name, test.expected, value)
 			}
 		})
