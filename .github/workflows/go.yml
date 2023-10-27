@@ -34,7 +34,12 @@ jobs:
         ports:
           - 8501:8500
           - 8504:8504
-        options: agent -dev -bind=0.0.0.0 -client=0.0.0.0 --grpc-tls-port=8504
+        command: agent
+        args:
+          - -dev
+          - -bind=0.0.0.0
+          - -client=0.0.0.0
+          - --grpc-tls-port=8504
       nacos:
         image: nacos/nacos-server:v2.1.0
         env:
