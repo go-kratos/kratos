@@ -25,12 +25,12 @@ jobs:
           ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
           ETCD_ADVERTISE_CLIENT_URLS: http://0.0.0.0:2379
       consul1:
-        image: consul:1.16.2
+        image: hashicorp/consul:1.16.2
         ports:
           - 8500:8500
           - 8503:8503
       consul2:
-        image: consul:1.16.2
+        image: hashicorp/consul:1.16.2
         ports:
           - 8501:8500
           - 8504:8504
