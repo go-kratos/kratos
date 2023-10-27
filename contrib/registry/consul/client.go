@@ -45,6 +45,8 @@ type Client struct {
 	// multiClusterMode is the consul cluster mode
 	multiClusterMode ClusterMode
 
+	allowReRegistration bool // allow re-registration of services
+
 	// clusters specify the cluster to be used, if not set, obtain all currently associated clusters
 	clusters []string
 }
@@ -189,6 +191,9 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 					err = c.consul.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 					if err != nil {
 						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
+						if !c.allowReRegistration {
+							continue
+						}
 						// when the previous report fails, try to re register the service
 						time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
 						if err := c.consul.Agent().ServiceRegister(asr); err != nil {

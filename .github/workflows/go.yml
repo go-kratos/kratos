@@ -24,10 +24,17 @@ jobs:
         env:
           ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
           ETCD_ADVERTISE_CLIENT_URLS: http://0.0.0.0:2379
-      consul:
-        image: consul:1.12.3
+      consul1:
+        image: consul:1.16.2
         ports:
           - 8500:8500
+          - 8503:8503
+      consul2:
+        image: consul:1.16.2
+        ports:
+          - 8501:8500
+          - 8504:8504
+        options: agent -dev -bind=0.0.0.0 -client=0.0.0.0 --grpc-tls-port=8504
       nacos:
         image: nacos/nacos-server:v2.1.0
         env:

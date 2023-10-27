@@ -2,7 +2,6 @@ package consul
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	"sync"
 	"sync/atomic"
@@ -93,6 +92,15 @@ func WithServiceCheck(checks ...*api.AgentServiceCheck) Option {
 	}
 }
 
+// WithAllowReRegistration allow re registration when the service is automatically removed by the registry
+func WithAllowReRegistration(allow bool) Option {
+	return func(o *Registry) {
+		if o.cli != nil {
+			o.cli.allowReRegistration = allow
+		}
+	}
+}
+
 // Config is consul registry config
 type Config struct {
 	*api.Config
@@ -148,6 +156,9 @@ func New(apiClient *api.Client, opts ...Option) *Registry {
 		}
 	}
 
+	// append the current cluster
+	r.cli.clusters = append(r.cli.clusters, "")
+
 	r.cli.ctx, r.cli.cancel = context.WithCancel(context.Background())
 	return r
 }
@@ -164,39 +175,28 @@ func (r *Registry) Deregister(ctx context.Context, svc *registry.ServiceInstance
 
 // GetService return service by name
 func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.ServiceInstance, error) {
-	r.lock.RLock()
-	defer r.lock.RUnlock()
-	set := r.registry[name]
-
-	getRemote := func() []*registry.ServiceInstance {
-		services, _, err := r.cli.service(ctx, name, true, nil)
-		if err == nil && len(services) > 0 {
-			return services
-		}
-		return nil
-	}
-
-	if set == nil {
-		if s := getRemote(); len(s) > 0 {
-			return s, nil
-		}
-		return nil, fmt.Errorf("service %s not resolved in registry", name)
-	}
-	ss, _ := set.services.Load().(map[string][]*registry.ServiceInstance)
-	if ss == nil {
-		if s := getRemote(); len(s) > 0 {
-			return s, nil
-		}
-		return nil, fmt.Errorf("service %s not found in registry", name)
-	}
 	var services []*registry.ServiceInstance
-	for _, instances := range ss {
-		services = append(services, instances...)
+	for _, cluster := range r.cli.clusters {
+		opts := &api.QueryOptions{}
+		switch r.cli.multiClusterMode {
+		case WanFederation:
+			opts.Datacenter = cluster
+		case Peering:
+			opts.Peer = cluster
+		}
+
+		tmp, _, err := r.cli.service(ctx, name, true, opts)
+		if err != nil {
+			return nil, err
+		}
+		services = append(services, tmp...)
 	}
+
 	return services, nil
 }
 
-// ListServices return service list.
+// Deprecated: This method should not be exported
+//ListServices return service list.
 func (r *Registry) ListServices() (allServices map[string][]*registry.ServiceInstance, err error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
@@ -258,29 +258,19 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 	timeoutCtx, cancel := context.WithTimeout(ctx, r.timeout)
 	defer cancel()
 
-	// append the current cluster
-	r.cli.clusters = append(r.cli.clusters, "")
-
-	var services []*registry.ServiceInstance
+	m := make(map[string][]*registry.ServiceInstance)
 
 	for _, cluster := range r.cli.clusters {
-		opts := &api.QueryOptions{}
-		switch r.cli.multiClusterMode {
-		case WanFederation:
-			opts.Datacenter = cluster
-		case Peering:
-			opts.Peer = cluster
-		}
-
-		tmp, _, err := r.cli.service(timeoutCtx, ss.serviceName, true, opts)
+		res, _, err := r.cli.service(timeoutCtx, ss.serviceName, true, processClusterOption(nil, r.cli.multiClusterMode, cluster))
 		if err != nil {
 			return err
 		}
+		m[cluster] = res
+	}
+	ss.broadcast(m)
 
-		if len(services) > 0 {
-			ss.broadcast(cluster, tmp)
-		}
-
+	for _, cluster := range r.cli.clusters {
+		opts := processClusterOption(nil, r.cli.multiClusterMode, cluster)
 		go func(cluster string) {
 			ticker := time.NewTicker(time.Second)
 			defer ticker.Stop()
@@ -302,7 +292,7 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 						continue
 					}
 					if len(tmpService) != 0 {
-						ss.broadcast(cluster, tmpService)
+						ss.broadcast(map[string][]*registry.ServiceInstance{cluster: tmpService})
 					}
 				}
 			}
@@ -310,4 +300,17 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 	}
 
 	return nil
+}
+
+func processClusterOption(opts *api.QueryOptions, mode ClusterMode, cluster string) *api.QueryOptions {
+	if opts == nil {
+		opts = &api.QueryOptions{}
+	}
+	switch mode {
+	case WanFederation:
+		opts.Datacenter = cluster
+	case Peering:
+		opts.Peer = cluster
+	}
+	return opts
 }

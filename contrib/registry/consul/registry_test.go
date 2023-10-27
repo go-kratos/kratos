@@ -2,7 +2,6 @@ package consul
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net"
 	"reflect"
@@ -431,73 +430,224 @@ func getIntranetIP() string {
 	return "127.0.0.1"
 }
 
-func TestPeering(t *testing.T) {
-	//http://10.200.0.151:8500/
+func TestEstablishPeering(t *testing.T) {
+	cluster1, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500", WaitTime: 2 * time.Second})
+	if err != nil {
+		t.Fatalf("create consul client failed: %v", err)
+	}
+	res, _, err := cluster1.Peerings().GenerateToken(context.Background(), api.PeeringGenerateTokenRequest{PeerName: "cluster02"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cluster2, err := api.NewClient(&api.Config{Address: "127.0.0.1:8501", WaitTime: 2 * time.Second})
+	if err != nil {
+		t.Fatalf("create consul client failed: %v", err)
+	}
+	establish, _, err := cluster2.Peerings().Establish(context.Background(), api.PeeringEstablishRequest{PeerName: "cluster01", PeeringToken: res.PeeringToken}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(establish)
 
-	cluster1, err := api.NewClient(&api.Config{Address: "10.200.0.151:8500", WaitTime: 2 * time.Second})
+	peerings, _, err := cluster1.Peerings().List(context.Background(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(peerings) != 1 {
+		t.Fatal("peerings len != 1")
+	}
+
+	// cluster01 -> cluster 02
+	// cluster02 x<-x cluster01
+	ok, _, err := cluster1.ConfigEntries().Set(
+		&api.ExportedServicesConfigEntry{
+			Name: "default",
+			Services: []api.ExportedService{
+				{
+					Name: "*",
+					Consumers: []api.ServiceConsumer{
+						{Peer: "cluster02"},
+					},
+				},
+			},
+		}, nil)
+	if err != nil || !ok {
+		t.Fatal(err)
+	}
+}
+
+func TestPeeringGetService(t *testing.T) {
+	cluster1, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500", WaitTime: 2 * time.Second})
 	if err != nil {
 		t.Fatalf("create consul client failed: %v", err)
 	}
+	cluster2, err := api.NewClient(&api.Config{Address: "127.0.0.1:8501", WaitTime: 2 * time.Second})
+	if err != nil {
+		t.Fatalf("create consul client failed: %v", err)
+	}
+
 	c1 := New(cluster1, WithMultiClusterMode(Peering), WithHealthCheck(false), WithHeartbeat(false))
-	cluster2, err := api.NewClient(&api.Config{Address: "10.200.0.202:8500", WaitTime: 2 * time.Second})
-	if err != nil {
-		t.Fatalf("create consul client failed: %v", err)
-	}
 	c2 := New(cluster2, WithMultiClusterMode(Peering), WithHealthCheck(false), WithHeartbeat(false))
 
-	err = c1.Register(context.Background(), &registry.ServiceInstance{
-		ID:        "123",
-		Name:      "peer-01-mock-service-0",
-		Endpoints: []string{"http://123.123.123.123", "grpc://123.123.123.123"},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
+	for i := 0; i < 5; i++ {
+		id := fmt.Sprintf("ci-test-%d", i)
+		if err := c1.Register(context.Background(), &registry.ServiceInstance{
+			Name: "ci-test",
+			ID:   id,
+			Endpoints: []string{
+				"grpc://123.123.123.123",
+			},
+		}); err != nil {
+			t.Fatal(err)
+		}
 
-	err = c2.Register(context.Background(), &registry.ServiceInstance{
-		ID:        "123",
-		Name:      "peer-01-mock-service-0",
-		Endpoints: []string{"http://123.123.123.123", "grpc://123.123.123.123"},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
+		if err := c2.Register(context.Background(), &registry.ServiceInstance{
+			Name: "ci-test",
+			ID:   id,
+			Endpoints: []string{
+				"grpc://123.123.123.123",
+			},
+		}); err != nil {
+			t.Fatal(err)
+		}
 
-	t.Cleanup(func() {
-		err = c1.Deregister(context.Background(), &registry.ServiceInstance{
-			ID:        "123",
-			Name:      "peer-01-mock-service-0",
-			Endpoints: []string{"http://123.123.123.123", "grpc://123.123.123.123"},
+		// cluster01 - want len 5, cluster want len 10
+		t.Cleanup(func() {
+			_ = c1.Deregister(context.Background(), &registry.ServiceInstance{
+				ID: id,
+			})
+			_ = c2.Deregister(context.Background(), &registry.ServiceInstance{
+				ID: id,
+			})
 		})
+
+	}
+
+	cluster1Services, err := c1.GetService(context.Background(), "ci-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(cluster1Services) != 5 {
+		t.Fatal("cluster1Services len != 5")
+	}
+
+	cluster2Services, err := c2.GetService(context.Background(), "ci-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(cluster2Services) != 10 {
+		t.Fatal("cluster2 get service len != 10")
+	}
+}
+
+func TestPeeringWatch(t *testing.T) {
+	cluster1, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500", WaitTime: 2 * time.Second})
+	if err != nil {
+		t.Fatalf("create consul client failed: %v", err)
+	}
+	cluster2, err := api.NewClient(&api.Config{Address: "127.0.0.1:8501", WaitTime: 2 * time.Second})
+	if err != nil {
+		t.Fatalf("create consul client failed: %v", err)
+	}
+
+	c1 := New(cluster1, WithMultiClusterMode(Peering), WithHealthCheck(false), WithHeartbeat(false))
+	c2 := New(cluster2, WithMultiClusterMode(Peering), WithHealthCheck(false), WithHeartbeat(false))
+
+	cw1, err := c1.Watch(context.Background(), "ci-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cw2, err := c2.Watch(context.Background(), "ci-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for i := 0; i < 5; i++ {
+		id := fmt.Sprintf("ci-test-%d", i)
+
+		err = c1.Register(context.Background(), &registry.ServiceInstance{
+			ID: fmt.Sprintf("ci-test-%d", i),
+			Endpoints: []string{
+				"grpc://123.123.123.123",
+			},
+			Name: "ci-test",
+		})
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = c2.Register(context.Background(), &registry.ServiceInstance{
+			ID: fmt.Sprintf("ci-test-%d", i),
+			Endpoints: []string{
+				"grpc://123.123.123.123",
+			},
+			Name: "ci-test",
+		})
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		t.Cleanup(func() {
+			_ = c1.Deregister(context.Background(), &registry.ServiceInstance{
+				ID: id,
+			})
+			_ = c2.Deregister(context.Background(), &registry.ServiceInstance{
+				ID: id,
+			})
+		})
+
+		time.Sleep(time.Second * 2)
+
+		if res, err := cw1.Next(); err != nil || len(res) != i+1 {
+			t.Errorf("cluster1 watch failed, len %d != %d or err=%v", len(res), i+1, err)
+		}
+
+		if res, err := cw2.Next(); err != nil || len(res) != (i+1)*2 {
+			t.Errorf("cluster2 watch failed, len %d != %d or err=%v", len(res), i+1, err)
+		}
+	}
+
+	// when the obtained instance is 0, the broadcast will not be triggered to prevent all nodes from being removed, so there is one less test here
+	for i := 4; i > 0; i-- {
+		t.Log(i)
+		err = c1.Deregister(context.Background(), &registry.ServiceInstance{
+			ID: fmt.Sprintf("ci-test-%d", i-1),
+			Endpoints: []string{
+				"grpc://123.123.123.123",
+			},
+			Name: "ci-test",
+		})
+
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		err = c2.Deregister(context.Background(), &registry.ServiceInstance{
-			ID:        "123",
-			Name:      "peer-01-mock-service-0",
-			Endpoints: []string{"http://123.123.123.123", "grpc://123.123.123.123"},
+			ID: fmt.Sprintf("ci-test-%d", i-1),
+			Endpoints: []string{
+				"grpc://123.123.123.123",
+			},
+			Name: "ci-test",
 		})
+
 		if err != nil {
 			t.Fatal(err)
 		}
-	})
 
-	w, err := c2.Watch(context.Background(), "peer-01-mock-service-0")
-	if err != nil {
-		t.Fatal(err)
-	}
+		time.Sleep(time.Second * 2)
 
-	for {
-		sev, err := w.Next()
-		if err != nil {
-			t.Fatal(err)
+		if res, err := cw1.Next(); err != nil || len(res) != i-1 {
+			t.Errorf("cluster1 watch failed, len %d != %d or err=%v", len(res), i-1, err)
 		}
-		marshal, err := json.Marshal(sev)
-		if err != nil {
-			return
-		}
-		t.Log(string(marshal))
-	}
 
+		if res, err := cw2.Next(); err != nil || len(res) != (i-1)*2 {
+			t.Errorf("cluster2 watch failed, len %d != %d or err=%v", len(res), i-1, err)
+		}
+	}
 }
