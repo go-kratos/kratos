@@ -3,6 +3,7 @@ package consul
 import (
 	"context"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/log"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -34,10 +35,16 @@ func WithTimeout(timeout time.Duration) Option {
 	}
 }
 
-// WithDatacenter with registry datacenter option
-func WithDatacenter(dc Datacenter) Option {
+// WithClusters specify the cluster to be used, if not set, obtain all currently associated clusters.
+func WithClusters(cs ...string) Option {
 	return func(o *Registry) {
-		o.cli.dc = dc
+		o.cli.clusters = cs
+	}
+}
+
+func WithMultiClusterMode(mode ClusterMode) Option {
+	return func(r *Registry) {
+		r.cli.multiClusterMode = mode
 	}
 }
 
@@ -107,17 +114,40 @@ func New(apiClient *api.Client, opts ...Option) *Registry {
 		enableHealthCheck: true,
 		timeout:           10 * time.Second,
 		cli: &Client{
-			dc:                             SingleDatacenter,
-			cli:                            apiClient,
+			consul:                         apiClient,
 			resolver:                       defaultResolver,
 			healthcheckInterval:            10,
 			heartbeat:                      true,
 			deregisterCriticalServiceAfter: 600,
+			multiClusterMode:               Single,
 		},
 	}
 	for _, o := range opts {
 		o(r)
 	}
+
+	var err error
+	if r.cli.multiClusterMode == WanFederation || r.cli.multiClusterMode == Peering {
+		if len(r.cli.clusters) == 0 {
+			switch r.cli.multiClusterMode {
+			case WanFederation:
+				r.cli.clusters, err = r.cli.consul.Catalog().Datacenters()
+				if err != nil {
+					log.Errorf("[Consul] get datacenters failed，will use the current cluster! err=%v", err)
+				}
+			case Peering:
+				peerings, _, err := r.cli.consul.Peerings().List(context.Background(), nil)
+				if err != nil {
+					log.Errorf("[Consul] get peerings failed，will use the current cluster! err=%v", err)
+					break
+				}
+				for _, peering := range peerings {
+					r.cli.clusters = append(r.cli.clusters, peering.Name)
+				}
+			}
+		}
+	}
+
 	r.cli.ctx, r.cli.cancel = context.WithCancel(context.Background())
 	return r
 }
@@ -139,7 +169,7 @@ func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.Ser
 	set := r.registry[name]
 
 	getRemote := func() []*registry.ServiceInstance {
-		services, _, err := r.cli.Service(ctx, name, 0, true)
+		services, _, err := r.cli.service(ctx, name, true, nil)
 		if err == nil && len(services) > 0 {
 			return services
 		}
@@ -152,14 +182,18 @@ func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.Ser
 		}
 		return nil, fmt.Errorf("service %s not resolved in registry", name)
 	}
-	ss, _ := set.services.Load().([]*registry.ServiceInstance)
+	ss, _ := set.services.Load().(map[string][]*registry.ServiceInstance)
 	if ss == nil {
 		if s := getRemote(); len(s) > 0 {
 			return s, nil
 		}
 		return nil, fmt.Errorf("service %s not found in registry", name)
 	}
-	return ss, nil
+	var services []*registry.ServiceInstance
+	for _, instances := range ss {
+		services = append(services, instances...)
+	}
+	return services, nil
 }
 
 // ListServices return service list.
@@ -169,11 +203,13 @@ func (r *Registry) ListServices() (allServices map[string][]*registry.ServiceIns
 	allServices = make(map[string][]*registry.ServiceInstance)
 	for name, set := range r.registry {
 		var services []*registry.ServiceInstance
-		ss, _ := set.services.Load().([]*registry.ServiceInstance)
+		ss, _ := set.services.Load().(map[string][]*registry.ServiceInstance)
 		if ss == nil {
 			continue
 		}
-		services = append(services, ss...)
+		for _, instances := range ss {
+			services = append(services, instances...)
+		}
 		allServices[name] = services
 	}
 	return
@@ -202,7 +238,7 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	set.lock.Lock()
 	set.watcher[w] = struct{}{}
 	set.lock.Unlock()
-	ss, _ := set.services.Load().([]*registry.ServiceInstance)
+	ss, _ := set.services.Load().(map[string][]*registry.ServiceInstance)
 	if len(ss) > 0 {
 		// If the service has a value, it needs to be pushed to the watcher,
 		// otherwise the initial data may be blocked forever during the watch.
@@ -222,37 +258,56 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 	timeoutCtx, cancel := context.WithTimeout(ctx, r.timeout)
 	defer cancel()
 
-	services, idx, err := r.cli.Service(timeoutCtx, ss.serviceName, 0, true)
-	if err != nil {
-		return err
-	}
-	if len(services) > 0 {
-		ss.broadcast(services)
-	}
+	// append the current cluster
+	r.cli.clusters = append(r.cli.clusters, "")
 
-	go func() {
-		ticker := time.NewTicker(time.Second)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ticker.C:
-				timeoutCtx, cancel := context.WithTimeout(context.Background(), r.timeout)
-				tmpService, tmpIdx, err := r.cli.Service(timeoutCtx, ss.serviceName, idx, true)
-				cancel()
-				if err != nil {
-					time.Sleep(time.Second)
-					continue
-				}
-				if len(tmpService) != 0 && tmpIdx != idx {
-					services = tmpService
-					ss.broadcast(services)
-				}
-				idx = tmpIdx
-			case <-ctx.Done():
-				return
-			}
+	var services []*registry.ServiceInstance
+
+	for _, cluster := range r.cli.clusters {
+		opts := &api.QueryOptions{}
+		switch r.cli.multiClusterMode {
+		case WanFederation:
+			opts.Datacenter = cluster
+		case Peering:
+			opts.Peer = cluster
 		}
-	}()
+
+		tmp, _, err := r.cli.service(timeoutCtx, ss.serviceName, true, opts)
+		if err != nil {
+			return err
+		}
+
+		if len(services) > 0 {
+			ss.broadcast(cluster, tmp)
+		}
+
+		go func(cluster string) {
+			ticker := time.NewTicker(time.Second)
+			defer ticker.Stop()
+
+			opts.WaitIndex = 0
+			opts.WaitTime = time.Second * 55
+
+			var err error
+			var tmpService []*registry.ServiceInstance
+
+			for {
+				select {
+				case <-ticker.C:
+					timeoutCtx, cancel := context.WithTimeout(context.Background(), r.timeout)
+					tmpService, opts.WaitIndex, err = r.cli.service(timeoutCtx, ss.serviceName, true, opts)
+					cancel()
+					if err != nil {
+						time.Sleep(time.Second)
+						continue
+					}
+					if len(tmpService) != 0 {
+						ss.broadcast(cluster, tmpService)
+					}
+				}
+			}
+		}(cluster)
+	}
 
 	return nil
 }

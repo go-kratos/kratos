@@ -14,10 +14,17 @@ type serviceSet struct {
 	lock        sync.RWMutex
 }
 
-func (s *serviceSet) broadcast(ss []*registry.ServiceInstance) {
-	s.services.Store(ss)
+func (s *serviceSet) broadcast(cluster string, ss []*registry.ServiceInstance) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
+	if s.services.Load() == nil {
+		s.services.Store(map[string][]*registry.ServiceInstance{cluster: ss})
+	} else {
+		ms := s.services.Load().(map[string][]*registry.ServiceInstance)
+		ms[cluster] = ss
+		s.services.Store(ms)
+	}
+
 	for k := range s.watcher {
 		select {
 		case k.event <- struct{}{}:

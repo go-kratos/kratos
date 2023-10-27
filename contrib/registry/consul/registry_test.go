@@ -2,6 +2,7 @@ package consul
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
 	"reflect"
@@ -27,6 +28,7 @@ func tcpServer(lis net.Listener) {
 func TestRegistry_Register(t *testing.T) {
 	opts := []Option{
 		WithHealthCheck(false),
+		WithHeartbeat(false),
 	}
 
 	type args struct {
@@ -104,7 +106,7 @@ func TestRegistry_Register(t *testing.T) {
 
 	for _, tt := range test {
 		t.Run(tt.name, func(t *testing.T) {
-			cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500"})
+			cli, err := api.NewClient(&api.Config{Address: "10.200.0.202:8500"})
 			if err != nil {
 				t.Fatalf("create consul client failed: %v", err)
 			}
@@ -150,13 +152,13 @@ func TestRegistry_GetService(t *testing.T) {
 	defer lis.Close()
 	go tcpServer(lis)
 	time.Sleep(time.Millisecond * 100)
-	cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500"})
+	cli, err := api.NewClient(&api.Config{Address: "10.200.0.202:8500"})
 	if err != nil {
 		t.Fatalf("create consul client failed: %v", err)
 	}
 	opts := []Option{
-		WithHeartbeat(true),
-		WithHealthCheck(true),
+		WithHeartbeat(false),
+		WithHealthCheck(false),
 		WithHealthCheckInterval(5),
 	}
 	r := New(cli, opts...)
@@ -277,7 +279,7 @@ func TestRegistry_Watch(t *testing.T) {
 	addr := fmt.Sprintf("%s:9091", getIntranetIP())
 
 	time.Sleep(time.Millisecond * 100)
-	cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500", WaitTime: 2 * time.Second})
+	cli, err := api.NewClient(&api.Config{Address: "10.200.0.202:8500", WaitTime: 2 * time.Second})
 	if err != nil {
 		t.Fatalf("create consul client failed: %v", err)
 	}
@@ -427,4 +429,75 @@ func getIntranetIP() string {
 		}
 	}
 	return "127.0.0.1"
+}
+
+func TestPeering(t *testing.T) {
+	//http://10.200.0.151:8500/
+
+	cluster1, err := api.NewClient(&api.Config{Address: "10.200.0.151:8500", WaitTime: 2 * time.Second})
+	if err != nil {
+		t.Fatalf("create consul client failed: %v", err)
+	}
+	c1 := New(cluster1, WithMultiClusterMode(Peering), WithHealthCheck(false), WithHeartbeat(false))
+	cluster2, err := api.NewClient(&api.Config{Address: "10.200.0.202:8500", WaitTime: 2 * time.Second})
+	if err != nil {
+		t.Fatalf("create consul client failed: %v", err)
+	}
+	c2 := New(cluster2, WithMultiClusterMode(Peering), WithHealthCheck(false), WithHeartbeat(false))
+
+	err = c1.Register(context.Background(), &registry.ServiceInstance{
+		ID:        "123",
+		Name:      "peer-01-mock-service-0",
+		Endpoints: []string{"http://123.123.123.123", "grpc://123.123.123.123"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = c2.Register(context.Background(), &registry.ServiceInstance{
+		ID:        "123",
+		Name:      "peer-01-mock-service-0",
+		Endpoints: []string{"http://123.123.123.123", "grpc://123.123.123.123"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() {
+		err = c1.Deregister(context.Background(), &registry.ServiceInstance{
+			ID:        "123",
+			Name:      "peer-01-mock-service-0",
+			Endpoints: []string{"http://123.123.123.123", "grpc://123.123.123.123"},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = c2.Deregister(context.Background(), &registry.ServiceInstance{
+			ID:        "123",
+			Name:      "peer-01-mock-service-0",
+			Endpoints: []string{"http://123.123.123.123", "grpc://123.123.123.123"},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	w, err := c2.Watch(context.Background(), "peer-01-mock-service-0")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for {
+		sev, err := w.Next()
+		if err != nil {
+			t.Fatal(err)
+		}
+		marshal, err := json.Marshal(sev)
+		if err != nil {
+			return
+		}
+		t.Log(string(marshal))
+	}
+
 }

@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/go-kratos/kratos/v2 v2.7.1
+	github.com/google/uuid v1.3.0
 	github.com/hashicorp/consul/api v1.20.0
 )
 
