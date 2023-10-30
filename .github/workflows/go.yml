@@ -29,15 +29,11 @@ jobs:
         ports:
           - 8500:8500
           - 8503:8503
-        command:
-          - agent -dev -bind=0.0.0.0 -client=0.0.0.0 --grpc-tls-port=8503
       consul2:
         image: hashicorp/consul:1.16.2
         ports:
           - 8501:8500
           - 8504:8504
-        command:
-          - agent -dev -bind=0.0.0.0 -client=0.0.0.0 --grpc-tls-port=8504
 
       nacos:
         image: nacos/nacos-server:v2.1.0

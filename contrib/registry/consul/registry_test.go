@@ -2,6 +2,7 @@ package consul
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"net"
 	"reflect"
@@ -445,6 +446,14 @@ func TestEstablishPeering(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	bytes, err := base64.StdEncoding.DecodeString(res.PeeringToken)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(string(bytes))
+
 	cluster2, err := api.NewClient(&api.Config{Address: "127.0.0.1:8501", WaitTime: 2 * time.Second})
 	if err != nil {
 		t.Fatalf("create consul client failed: %v", err)
