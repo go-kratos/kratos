@@ -30,6 +30,10 @@ func (w *watcher) Next() (services []*registry.ServiceInstance, err error) {
 		}
 	}
 
+	if err = w.ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	return
 }
 

@@ -399,6 +399,8 @@ func TestRegistry_Watch(t *testing.T) {
 				}
 			}()
 
+			time.Sleep(5 * time.Second)
+
 			watch, err := r.Watch(tt.args.ctx, tt.args.instance.Name)
 			if err != nil {
 				t.Error(err)
