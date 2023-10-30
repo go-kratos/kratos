@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -452,7 +453,9 @@ func TestEstablishPeering(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Log(string(bytes))
+	str := strings.ReplaceAll(string(bytes), "127.0.0.1", getIntranetIP())
+
+	t.Log(string(str))
 
 	cluster2, err := api.NewClient(&api.Config{Address: "127.0.0.1:8501", WaitTime: 2 * time.Second})
 	if err != nil {
@@ -462,7 +465,7 @@ func TestEstablishPeering(t *testing.T) {
 		context.Background(),
 		api.PeeringEstablishRequest{
 			PeerName:     "cluster01",
-			PeeringToken: res.PeeringToken,
+			PeeringToken: base64.StdEncoding.EncodeToString([]byte(str)),
 		}, nil)
 	if err != nil {
 		t.Fatal(err)
