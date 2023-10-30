@@ -93,11 +93,6 @@ func (c *Client) service(ctx context.Context, service string, passingOnly bool, 
 		return nil, 0, err
 	}
 
-	cluster := opts.Datacenter
-	if cluster == "" {
-		cluster = opts.Peer
-	}
-
 	for _, entry := range entries {
 		if entry.Service.Meta == nil {
 			entry.Service.Meta = make(map[string]string, 1)

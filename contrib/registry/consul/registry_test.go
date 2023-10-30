@@ -105,7 +105,7 @@ func TestRegistry_Register(t *testing.T) {
 
 	for _, tt := range test {
 		t.Run(tt.name, func(t *testing.T) {
-			cli, err := api.NewClient(&api.Config{Address: "10.200.0.202:8500"})
+			cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500"})
 			if err != nil {
 				t.Fatalf("create consul client failed: %v", err)
 			}
@@ -151,7 +151,7 @@ func TestRegistry_GetService(t *testing.T) {
 	defer lis.Close()
 	go tcpServer(lis)
 	time.Sleep(time.Millisecond * 100)
-	cli, err := api.NewClient(&api.Config{Address: "10.200.0.202:8500"})
+	cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500"})
 	if err != nil {
 		t.Fatalf("create consul client failed: %v", err)
 	}
@@ -278,7 +278,7 @@ func TestRegistry_Watch(t *testing.T) {
 	addr := fmt.Sprintf("%s:9091", getIntranetIP())
 
 	time.Sleep(time.Millisecond * 100)
-	cli, err := api.NewClient(&api.Config{Address: "10.200.0.202:8500", WaitTime: 2 * time.Second})
+	cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500", WaitTime: 2 * time.Second})
 	if err != nil {
 		t.Fatalf("create consul client failed: %v", err)
 	}
