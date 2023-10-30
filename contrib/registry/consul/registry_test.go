@@ -614,12 +614,13 @@ func TestPeeringWatch(t *testing.T) {
 
 		time.Sleep(time.Second * 2)
 
-		if res, err := cw1.Next(); err != nil || len(res) != i+1 {
+		var res []*registry.ServiceInstance
+		if res, err = cw1.Next(); err != nil || len(res) != i+1 {
 			t.Errorf("cluster1 watch failed, len %d != %d or err=%v", len(res), i+1, err)
 		}
 
-		if res, err := cw2.Next(); err != nil || len(res) != (i+1)*2 {
-			t.Errorf("cluster2 watch failed, len %d != %d or err=%v", len(res), i+1, err)
+		if res, err = cw2.Next(); err != nil || len(res) != (i+1)*2 {
+			t.Errorf("cluster2 watch failed, len %d != %d or err=%v", len(res), (i+1)*2, err)
 		}
 	}
 
@@ -651,12 +652,13 @@ func TestPeeringWatch(t *testing.T) {
 
 		time.Sleep(time.Second * 2)
 
-		if res, err := cw1.Next(); err != nil || len(res) != i {
-			t.Errorf("cluster1 watch failed, len %d != %d or err=%v", len(res), i-1, err)
+		var res []*registry.ServiceInstance
+		if res, err = cw1.Next(); err != nil || len(res) != i {
+			t.Errorf("cluster1 watch failed, len %d != %d or err=%v", len(res), i, err)
 		}
 
-		if res, err := cw2.Next(); err != nil || len(res) != i*2 {
-			t.Errorf("cluster2 watch failed, len %d != %d or err=%v", len(res), i-1, err)
+		if res, err = cw2.Next(); err != nil || len(res) != i*2 {
+			t.Errorf("cluster2 watch failed, len %d != %d or err=%v", len(res), i*2, err)
 		}
 	}
 }
