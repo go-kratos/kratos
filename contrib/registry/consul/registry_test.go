@@ -52,7 +52,7 @@ func TestRegistry_Register(t *testing.T) {
 						ID:        "1",
 						Name:      "server-1",
 						Version:   "v0.0.1",
-						Metadata:  nil,
+						Metadata:  map[string]string{"cluster": "dc1"},
 						Endpoints: []string{"http://127.0.0.1:8000"},
 					},
 				},
@@ -62,7 +62,7 @@ func TestRegistry_Register(t *testing.T) {
 					ID:        "1",
 					Name:      "server-1",
 					Version:   "v0.0.1",
-					Metadata:  nil,
+					Metadata:  map[string]string{"cluster": "dc1"},
 					Endpoints: []string{"http://127.0.0.1:8000"},
 				},
 			},
@@ -78,14 +78,14 @@ func TestRegistry_Register(t *testing.T) {
 						ID:        "2",
 						Name:      "server-1",
 						Version:   "v0.0.1",
-						Metadata:  nil,
+						Metadata:  map[string]string{"cluster": "dc1"},
 						Endpoints: []string{"http://127.0.0.1:8000"},
 					},
 					{
 						ID:        "2",
 						Name:      "server-1",
 						Version:   "v0.0.2",
-						Metadata:  nil,
+						Metadata:  map[string]string{"cluster": "dc1"},
 						Endpoints: []string{"http://127.0.0.1:8000"},
 					},
 				},
@@ -95,7 +95,7 @@ func TestRegistry_Register(t *testing.T) {
 					ID:        "2",
 					Name:      "server-1",
 					Version:   "v0.0.2",
-					Metadata:  nil,
+					Metadata:  map[string]string{"cluster": "dc1"},
 					Endpoints: []string{"http://127.0.0.1:8000"},
 				},
 			},
@@ -158,7 +158,6 @@ func TestRegistry_GetService(t *testing.T) {
 	opts := []Option{
 		WithHeartbeat(false),
 		WithHealthCheck(false),
-		WithHealthCheckInterval(5),
 	}
 	r := New(cli, opts...)
 
@@ -166,6 +165,7 @@ func TestRegistry_GetService(t *testing.T) {
 		ID:        "1",
 		Name:      "server-1",
 		Version:   "v0.0.1",
+		Metadata:  map[string]string{"cluster": "dc1"},
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
 
@@ -173,6 +173,7 @@ func TestRegistry_GetService(t *testing.T) {
 		ID:        "2",
 		Name:      "server-1",
 		Version:   "v0.0.1",
+		Metadata:  map[string]string{"cluster": "dc1"},
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
 
@@ -287,6 +288,7 @@ func TestRegistry_Watch(t *testing.T) {
 		ID:        "1",
 		Name:      "server-1",
 		Version:   "v0.0.1",
+		Metadata:  map[string]string{"cluster": "dc1"},
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
 
@@ -294,6 +296,7 @@ func TestRegistry_Watch(t *testing.T) {
 		ID:        "2",
 		Name:      "server-1",
 		Version:   "v0.0.1",
+		Metadata:  map[string]string{"cluster": "dc1"},
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
 
@@ -301,6 +304,7 @@ func TestRegistry_Watch(t *testing.T) {
 		ID:        "3",
 		Name:      "server-1",
 		Version:   "v0.0.1",
+		Metadata:  map[string]string{"cluster": "dc1"},
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
 
@@ -326,6 +330,7 @@ func TestRegistry_Watch(t *testing.T) {
 				instance: instance1,
 				opts: []Option{
 					WithHealthCheck(false),
+					WithHeartbeat(false),
 				},
 			},
 			want:    []*registry.ServiceInstance{instance1},
@@ -341,6 +346,7 @@ func TestRegistry_Watch(t *testing.T) {
 				instance: instance2,
 				opts: []Option{
 					WithHealthCheck(false),
+					WithHeartbeat(false),
 				},
 			},
 			want:    nil,
@@ -496,7 +502,6 @@ func TestPeeringGetService(t *testing.T) {
 	c2 := New(cluster2, WithMultiClusterMode(Peering), WithHealthCheck(false), WithHeartbeat(false))
 
 	for i := 0; i < 5; i++ {
-
 		id := fmt.Sprintf("ci-test-%d", i)
 		if err = c1.Register(context.Background(), &registry.ServiceInstance{
 			Name: "ci-test",

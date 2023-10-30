@@ -2,6 +2,7 @@ package consul
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -190,6 +191,10 @@ func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.Ser
 			return nil, err
 		}
 		services = append(services, tmp...)
+	}
+
+	if len(services) == 0 {
+		return nil, errors.New("service instances not found")
 	}
 
 	return services, nil
