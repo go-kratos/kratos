@@ -457,7 +457,7 @@ func TestEstablishPeering(t *testing.T) {
 
 	str := strings.ReplaceAll(string(bytes), "127.0.0.1", getIntranetIP())
 
-	t.Log(string(str))
+	t.Log(str)
 
 	cluster2, err := api.NewClient(&api.Config{Address: "127.0.0.1:8501", WaitTime: 2 * time.Second})
 	if err != nil {
