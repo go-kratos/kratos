@@ -2,13 +2,13 @@ package consul
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/log"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/hashicorp/consul/api"
 
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
@@ -196,7 +196,7 @@ func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.Ser
 }
 
 // Deprecated: This method should not be exported
-//ListServices return service list.
+// ListServices return service list.
 func (r *Registry) ListServices() (allServices map[string][]*registry.ServiceInstance, err error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
@@ -281,19 +281,16 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 			var err error
 			var tmpService []*registry.ServiceInstance
 
-			for {
-				select {
-				case <-ticker.C:
-					timeoutCtx, cancel := context.WithTimeout(context.Background(), r.timeout)
-					tmpService, opts.WaitIndex, err = r.cli.service(timeoutCtx, ss.serviceName, true, opts)
-					cancel()
-					if err != nil {
-						time.Sleep(time.Second)
-						continue
-					}
-					if len(tmpService) != 0 {
-						ss.broadcast(map[string][]*registry.ServiceInstance{cluster: tmpService})
-					}
+			for range ticker.C {
+				timeoutCtx, cancel := context.WithTimeout(context.Background(), r.timeout)
+				tmpService, opts.WaitIndex, err = r.cli.service(timeoutCtx, ss.serviceName, true, opts)
+				cancel()
+				if err != nil {
+					time.Sleep(time.Second)
+					continue
+				}
+				if len(tmpService) != 0 {
+					ss.broadcast(map[string][]*registry.ServiceInstance{cluster: tmpService})
 				}
 			}
 		}(cluster)

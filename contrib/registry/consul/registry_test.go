@@ -443,7 +443,12 @@ func TestEstablishPeering(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create consul client failed: %v", err)
 	}
-	establish, _, err := cluster2.Peerings().Establish(context.Background(), api.PeeringEstablishRequest{PeerName: "cluster01", PeeringToken: res.PeeringToken}, nil)
+	establish, _, err := cluster2.Peerings().Establish(
+		context.Background(),
+		api.PeeringEstablishRequest{
+			PeerName:     "cluster01",
+			PeeringToken: res.PeeringToken,
+		}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -491,8 +496,9 @@ func TestPeeringGetService(t *testing.T) {
 	c2 := New(cluster2, WithMultiClusterMode(Peering), WithHealthCheck(false), WithHeartbeat(false))
 
 	for i := 0; i < 5; i++ {
+
 		id := fmt.Sprintf("ci-test-%d", i)
-		if err := c1.Register(context.Background(), &registry.ServiceInstance{
+		if err = c1.Register(context.Background(), &registry.ServiceInstance{
 			Name: "ci-test",
 			ID:   id,
 			Endpoints: []string{
@@ -502,7 +508,7 @@ func TestPeeringGetService(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if err := c2.Register(context.Background(), &registry.ServiceInstance{
+		if err = c2.Register(context.Background(), &registry.ServiceInstance{
 			Name: "ci-test",
 			ID:   id,
 			Endpoints: []string{
@@ -521,7 +527,6 @@ func TestPeeringGetService(t *testing.T) {
 				ID: id,
 			})
 		})
-
 	}
 
 	cluster1Services, err := c1.GetService(context.Background(), "ci-test")
@@ -615,7 +620,6 @@ func TestPeeringWatch(t *testing.T) {
 
 	// when the obtained instance is 0, the broadcast will not be triggered to prevent all nodes from being removed, so there is one less test here
 	for i := 4; i > 0; i-- {
-		t.Log(i)
 		err = c1.Deregister(context.Background(), &registry.ServiceInstance{
 			ID: fmt.Sprintf("ci-test-%d", i-1),
 			Endpoints: []string{
@@ -642,11 +646,11 @@ func TestPeeringWatch(t *testing.T) {
 
 		time.Sleep(time.Second * 2)
 
-		if res, err := cw1.Next(); err != nil || len(res) != i-1 {
+		if res, err := cw1.Next(); err != nil || len(res) != i {
 			t.Errorf("cluster1 watch failed, len %d != %d or err=%v", len(res), i-1, err)
 		}
 
-		if res, err := cw2.Next(); err != nil || len(res) != (i-1)*2 {
+		if res, err := cw2.Next(); err != nil || len(res) != i*2 {
 			t.Errorf("cluster2 watch failed, len %d != %d or err=%v", len(res), i-1, err)
 		}
 	}

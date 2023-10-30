@@ -21,7 +21,7 @@ func (s *serviceSet) broadcast(ss map[string][]*registry.ServiceInstance) {
 	if ss == nil {
 		return
 	}
-	
+
 	if s.services.Load() == nil {
 		s.services.Store(ss)
 	} else {
