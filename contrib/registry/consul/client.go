@@ -17,17 +17,17 @@ import (
 	"github.com/hashicorp/consul/api"
 )
 
-type Datacenter string
+type ClusterMode string
 
 const (
-	SingleDatacenter Datacenter = "SINGLE"
-	MultiDatacenter  Datacenter = "MULTI"
+	Single        ClusterMode = "Single"
+	Peering       ClusterMode = "Cluster Peering"
+	WanFederation ClusterMode = "WAN Federation"
 )
 
 // Client is consul client config
 type Client struct {
-	dc     Datacenter
-	cli    *api.Client
+	consul *api.Client
 	ctx    context.Context
 	cancel context.CancelFunc
 
@@ -41,6 +41,14 @@ type Client struct {
 	deregisterCriticalServiceAfter int
 	// serviceChecks  user custom checks
 	serviceChecks api.AgentServiceChecks
+
+	// multiClusterMode is the consul cluster mode
+	multiClusterMode ClusterMode
+
+	allowReRegistration bool // allow re-registration of services
+
+	// clusters specify the cluster to be used, if not set, obtain all currently associated clusters
+	clusters []string
 }
 
 func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance {
@@ -78,68 +86,23 @@ func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry
 // ServiceResolver is used to resolve service endpoints
 type ServiceResolver func(ctx context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance
 
-// Service get services from consul
-func (c *Client) Service(ctx context.Context, service string, index uint64, passingOnly bool) ([]*registry.ServiceInstance, uint64, error) {
-	if c.dc == MultiDatacenter {
-		return c.multiDCService(ctx, service, index, passingOnly)
-	}
-
-	opts := &api.QueryOptions{
-		WaitIndex:  index,
-		WaitTime:   time.Second * 55,
-		Datacenter: string(c.dc),
-	}
-	opts = opts.WithContext(ctx)
-
-	if c.dc == SingleDatacenter {
-		opts.Datacenter = ""
-	}
-
-	entries, meta, err := c.singleDCEntries(service, "", passingOnly, opts)
+// service get services from consul
+func (c *Client) service(ctx context.Context, service string, passingOnly bool, opts *api.QueryOptions) ([]*registry.ServiceInstance, uint64, error) {
+	entries, meta, err := c.consul.Health().Service(service, "", passingOnly, opts)
 	if err != nil {
 		return nil, 0, err
 	}
+
+	for _, entry := range entries {
+		if entry.Service.Meta == nil {
+			entry.Service.Meta = make(map[string]string, 1)
+		}
+		if _, ok := entry.Service.Meta["cluster"]; !ok {
+			entry.Service.Meta["cluster"] = entry.Node.Datacenter
+		}
+	}
+
 	return c.resolver(ctx, entries), meta.LastIndex, nil
-}
-
-func (c *Client) multiDCService(ctx context.Context, service string, index uint64, passingOnly bool) ([]*registry.ServiceInstance, uint64, error) {
-	opts := &api.QueryOptions{
-		WaitIndex: index,
-		WaitTime:  time.Second * 55,
-	}
-	opts = opts.WithContext(ctx)
-
-	var instances []*registry.ServiceInstance
-
-	dcs, err := c.cli.Catalog().Datacenters()
-	if err != nil {
-		return nil, 0, err
-	}
-
-	for _, dc := range dcs {
-		opts.Datacenter = dc
-		e, m, err := c.singleDCEntries(service, "", passingOnly, opts)
-		if err != nil {
-			return nil, 0, err
-		}
-
-		ins := c.resolver(ctx, e)
-		for _, in := range ins {
-			if in.Metadata == nil {
-				in.Metadata = make(map[string]string, 1)
-			}
-			in.Metadata["dc"] = dc
-		}
-
-		instances = append(instances, ins...)
-		opts.WaitIndex = m.LastIndex
-	}
-
-	return instances, opts.WaitIndex, nil
-}
-
-func (c *Client) singleDCEntries(service, tag string, passingOnly bool, opts *api.QueryOptions) ([]*api.ServiceEntry, *api.QueryMeta, error) {
-	return c.cli.Health().Service(service, tag, passingOnly, opts)
 }
 
 // Register register service instance to consul
@@ -190,14 +153,14 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		})
 	}
 
-	err := c.cli.Agent().ServiceRegister(asr)
+	err := c.consul.Agent().ServiceRegister(asr)
 	if err != nil {
 		return err
 	}
 	if c.heartbeat {
 		go func() {
 			time.Sleep(time.Second)
-			err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+			err = c.consul.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 			if err != nil {
 				log.Errorf("[Consul]update ttl heartbeat to consul failed!err:=%v", err)
 			}
@@ -206,26 +169,29 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			for {
 				select {
 				case <-c.ctx.Done():
-					_ = c.cli.Agent().ServiceDeregister(svc.ID)
+					_ = c.consul.Agent().ServiceDeregister(svc.ID)
 					return
 				default:
 				}
 				select {
 				case <-c.ctx.Done():
-					_ = c.cli.Agent().ServiceDeregister(svc.ID)
+					_ = c.consul.Agent().ServiceDeregister(svc.ID)
 					return
 				case <-ticker.C:
 					// ensure that unregistered services will not be re-registered by mistake
 					if errors.Is(c.ctx.Err(), context.Canceled) || errors.Is(c.ctx.Err(), context.DeadlineExceeded) {
-						_ = c.cli.Agent().ServiceDeregister(svc.ID)
+						_ = c.consul.Agent().ServiceDeregister(svc.ID)
 						return
 					}
-					err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+					err = c.consul.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 					if err != nil {
 						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
+						if !c.allowReRegistration {
+							continue
+						}
 						// when the previous report fails, try to re register the service
 						time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
-						if err := c.cli.Agent().ServiceRegister(asr); err != nil {
+						if err := c.consul.Agent().ServiceRegister(asr); err != nil {
 							log.Errorf("[Consul] re registry service failed!, err=%v", err)
 						} else {
 							log.Warn("[Consul] re registry of service occurred success")
@@ -241,5 +207,5 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 // Deregister service by service ID
 func (c *Client) Deregister(_ context.Context, serviceID string) error {
 	defer c.cancel()
-	return c.cli.Agent().ServiceDeregister(serviceID)
+	return c.consul.Agent().ServiceDeregister(serviceID)
 }
