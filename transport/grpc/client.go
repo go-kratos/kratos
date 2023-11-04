@@ -103,6 +103,15 @@ func WithNodeFilter(filters ...selector.NodeFilter) ClientOption {
 	}
 }
 
+// WithHealthCheck with health check
+func WithHealthCheck(healthCheck bool) ClientOption {
+	return func(o *clientOptions) {
+		if !healthCheck {
+			o.healthCheckConfig = ""
+		}
+	}
+}
+
 // WithLogger with logger
 // Deprecated: use global logger instead.
 func WithLogger(_ log.Logger) ClientOption {
@@ -128,6 +137,7 @@ type clientOptions struct {
 	grpcOpts               []grpc.DialOption
 	balancerName           string
 	filters                []selector.NodeFilter
+	healthCheckConfig      string
 	printDiscoveryDebugLog bool
 }
 
@@ -147,6 +157,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		balancerName:           balancerName,
 		subsetSize:             25,
 		printDiscoveryDebugLog: true,
+		healthCheckConfig:      `,"healthCheckConfig":{"serviceName":""}`,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -165,7 +176,8 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		sints = append(sints, options.streamInts...)
 	}
 	grpcOpts := []grpc.DialOption{
-		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"loadBalancingConfig": [{"%s":{}}],"healthCheckConfig":{"serviceName":""}}`, options.balancerName)),
+		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"loadBalancingConfig": [{"%s":{}}]%s}`,
+			options.balancerName, options.healthCheckConfig)),
 		grpc.WithChainUnaryInterceptor(ints...),
 		grpc.WithChainStreamInterceptor(sints...),
 	}

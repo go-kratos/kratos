@@ -42,6 +42,13 @@ func Address(addr string) ServerOption {
 	}
 }
 
+// Endpoint with server address.
+func Endpoint(endpoint *url.URL) ServerOption {
+	return func(s *Server) {
+		s.endpoint = endpoint
+	}
+}
+
 // Timeout with server timeout.
 func Timeout(timeout time.Duration) ServerOption {
 	return func(s *Server) {
@@ -209,6 +216,14 @@ func (s *Server) WalkRoute(fn WalkRouteFunc) error {
 				return err
 			}
 		}
+		return nil
+	})
+}
+
+// WalkHandle walks the router and all its sub-routers, calling walkFn for each route in the tree.
+func (s *Server) WalkHandle(handle func(method, path string, handler http.HandlerFunc)) error {
+	return s.WalkRoute(func(r RouteInfo) error {
+		handle(r.Method, r.Path, s.ServeHTTP)
 		return nil
 	})
 }

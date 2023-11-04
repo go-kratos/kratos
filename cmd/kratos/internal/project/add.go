@@ -16,7 +16,7 @@ var repoAddIgnores = []string{
 	".git", ".github", "api", "README.md", "LICENSE", "go.mod", "go.sum", "third_party", "openapi.yaml", ".gitignore",
 }
 
-func (p *Project) Add(ctx context.Context, dir string, layout string, branch string, mod string) error {
+func (p *Project) Add(ctx context.Context, dir string, layout string, branch string, mod string, pkgPath string) error {
 	to := filepath.Join(dir, p.Name)
 
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
@@ -38,9 +38,10 @@ func (p *Project) Add(ctx context.Context, dir string, layout string, branch str
 
 	fmt.Printf("🚀 Add service %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
 
+	pkgPath = fmt.Sprintf("%s/%s", mod, pkgPath)
 	repo := base.NewRepo(layout, branch)
-
-	if err := repo.CopyToV2(ctx, to, filepath.Join(mod, p.Path), repoAddIgnores, []string{filepath.Join(p.Path, "api"), "api"}); err != nil {
+	err := repo.CopyToV2(ctx, to, pkgPath, repoAddIgnores, []string{filepath.Join(p.Path, "api"), "api"})
+	if err != nil {
 		return err
 	}
 

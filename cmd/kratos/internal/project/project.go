@@ -79,11 +79,12 @@ func run(_ *cobra.Command, args []string) {
 			return
 		}
 
-		p.Path, err = filepath.Rel(projectRoot, filepath.Join(workingDir, projectName))
-		if err != nil {
+		packagePath, e := filepath.Rel(projectRoot, filepath.Join(workingDir, projectName))
+		if e != nil {
 			done <- fmt.Errorf("🚫 failed to get relative path: %v", err)
 			return
 		}
+		packagePath = strings.ReplaceAll(packagePath, "\\", "/")
 
 		mod, e := base.ModulePath(filepath.Join(projectRoot, "go.mod"))
 		if e != nil {
@@ -92,7 +93,7 @@ func run(_ *cobra.Command, args []string) {
 		}
 		// Get the relative path for adding a project based on Go modules
 		p.Path = filepath.Join(strings.TrimPrefix(workingDir, projectRoot+"/"), p.Name)
-		done <- p.Add(ctx, workingDir, repoURL, branch, mod)
+		done <- p.Add(ctx, workingDir, repoURL, branch, mod, packagePath)
 	}()
 	select {
 	case <-ctx.Done():
