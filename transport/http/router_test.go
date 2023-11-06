@@ -231,9 +231,11 @@ func TestRouter_ContextDataRace(t *testing.T) {
 		go func() {
 			for {
 				req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "http://localhost:18080/ping", nil)
-				if _, err := http.DefaultClient.Do(req); err != nil {
+				res, err := http.DefaultClient.Do(req)
+				if err != nil {
 					break
 				}
+				_ = res.Body.Close()
 			}
 			t.Logf("worker: %d shutdown\n", _i)
 		}()
