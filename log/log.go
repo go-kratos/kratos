@@ -62,7 +62,6 @@ func WithContext(ctx context.Context, l Logger) Logger {
 
 	f, ok := l.(*Filter)
 	if ok {
-		f.ctx = ctx
 		return &Filter{
 			ctx:    ctx,
 			logger: f.logger,
