@@ -234,9 +234,11 @@ func TestRouter_ContextDataRace(t *testing.T) {
 			defer wg.Done()
 			for j := 0; j < 100; j++ {
 				req, _ := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/ping", port), nil)
-				if _, err := http.DefaultClient.Do(req); err != nil {
+				res, err := http.DefaultClient.Do(req)
+				if err != nil {
 					break
 				}
+				_ = res.Body.Close()
 			}
 		}()
 	}
