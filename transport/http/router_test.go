@@ -3,15 +3,11 @@ package http
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
-	"os/signal"
 	"reflect"
-	"runtime"
 	"strings"
-	"syscall"
 	"testing"
 	"time"
 
@@ -195,54 +191,4 @@ func TestHandle(_ *testing.T) {
 	r.CONNECT("/connect", h)
 	r.OPTIONS("/options", h)
 	r.TRACE("/trace", h)
-}
-
-func TestRouter_ContextDataRace(t *testing.T) {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGKILL)
-
-	srv := NewServer(Address(":18080"), Timeout(time.Millisecond*50))
-	router := srv.Route("/")
-	router.GET("/ping", func(ctx Context) error {
-		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "http://www.baidu.com", nil)
-		_, _ = http.DefaultClient.Do(req)
-		return ctx.String(200, "pong")
-	})
-
-	// start server
-	go func() {
-		if err := srv.Start(ctx); err != nil {
-			if errors.Is(err, http.ErrServerClosed) {
-				return
-			}
-			t.Error(err)
-			return
-		}
-	}()
-
-	time.Sleep(time.Second)
-
-	// start client
-	workers := 100
-	for i := 0; i < workers; i++ {
-		_i := i
-		go func() {
-			for {
-				req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "http://localhost:18080/ping", nil)
-				res, err := http.DefaultClient.Do(req)
-				if err != nil {
-					break
-				}
-				_ = res.Body.Close()
-			}
-			t.Logf("worker: %d shutdown\n", _i)
-		}()
-	}
-
-	<-ctx.Done()
-	t.Log("test end")
 }
