@@ -3,11 +3,14 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"reflect"
+	"runtime"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -191,4 +194,52 @@ func TestHandle(_ *testing.T) {
 	r.CONNECT("/connect", h)
 	r.OPTIONS("/options", h)
 	r.TRACE("/trace", h)
+}
+
+func TestRouter_ContextDataRace(t *testing.T) {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	ctx := context.Background()
+	srv := NewServer(Timeout(time.Millisecond * 50))
+
+	router := srv.Route("/")
+	router.GET("/ping", func(ctx Context) error {
+		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "http://www.baidu.com", nil)
+		_, _ = http.DefaultClient.Do(req)
+		return ctx.String(200, "pong")
+	})
+
+	// start server
+	go func() {
+		if err := srv.Start(ctx); err != nil {
+			if errors.Is(err, http.ErrServerClosed) {
+				return
+			}
+			panic(err)
+		}
+	}()
+
+	time.Sleep(time.Second)
+	port, ok := host.Port(srv.lis)
+	if !ok {
+		t.Fatalf("extract port error: %v", srv.lis)
+	}
+
+	// start client
+	workers := 50
+	wg := sync.WaitGroup{}
+	wg.Add(workers)
+	for i := 0; i < workers; i++ {
+		go func() {
+			defer wg.Done()
+			for j := 0; j < 100; j++ {
+				req, _ := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/ping", port), nil)
+				if _, err := http.DefaultClient.Do(req); err != nil {
+					break
+				}
+			}
+		}()
+	}
+	wg.Wait()
+	_ = srv.Stop(ctx)
 }
