@@ -200,7 +200,9 @@ func TestHandle(_ *testing.T) {
 func TestRouter_ContextDataRace(t *testing.T) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGKILL)
 
 	srv := NewServer(Address(":18080"), Timeout(time.Millisecond*50))
