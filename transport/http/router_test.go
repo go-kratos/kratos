@@ -246,4 +246,5 @@ func TestRouter_ContextDataRace(t *testing.T) {
 	}
 	wg.Wait()
 	_ = srv.Stop(ctx)
+	t.Log("test end")
 }
