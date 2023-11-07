@@ -205,7 +205,11 @@ func TestRouter_ContextDataRace(t *testing.T) {
 	router := srv.Route("/")
 	router.GET("/ping", func(ctx Context) error {
 		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "http://www.baidu.com", nil)
-		_, _ = http.DefaultClient.Do(req)
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return ctx.String(200, err.Error())
+		}
+		_ = resp.Body.Close()
 		return ctx.String(200, "pong")
 	})
 
