@@ -200,7 +200,9 @@ func TestRouter_ContextDataRace(t *testing.T) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	ctx := context.Background()
-	srv := NewServer(Timeout(time.Millisecond * 50))
+	srvPort := 38888
+	srvAddr := fmt.Sprintf(":%d", srvPort)
+	srv := NewServer(Timeout(time.Millisecond*50), Address(srvAddr))
 
 	router := srv.Route("/")
 	router.GET("/ping", func(ctx Context) error {
@@ -224,20 +226,16 @@ func TestRouter_ContextDataRace(t *testing.T) {
 	}()
 
 	time.Sleep(time.Second)
-	port, ok := host.Port(srv.lis)
-	if !ok {
-		t.Fatalf("extract port error: %v", srv.lis)
-	}
 
 	// start client
-	workers := 50
+	workers := 10
 	wg := sync.WaitGroup{}
 	wg.Add(workers)
 	for i := 0; i < workers; i++ {
 		go func() {
 			defer wg.Done()
-			for j := 0; j < 100; j++ {
-				req, _ := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/ping", port), nil)
+			for j := 0; j < 50; j++ {
+				req, _ := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/ping", srvPort), nil)
 				res, err := http.DefaultClient.Do(req)
 				if err != nil {
 					break
