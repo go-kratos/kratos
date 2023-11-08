@@ -3,8 +3,9 @@ package consul
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/hashicorp/consul/api"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 // A mix up of implmentations of registry.Registrar and registry.Discovery
@@ -29,7 +30,7 @@ const (
 )
 
 // @deprecated useless now, remove this option in your code
-func WithDatacenter(dc Datacenter) DiscoveryOption {
+func WithDatacenter(_ Datacenter) DiscoveryOption {
 	return func(o *kratosDiscovery) {
 	}
 }

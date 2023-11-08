@@ -9,9 +9,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hashicorp/consul/api"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/hashicorp/consul/api"
 )
 
 // Option is consul registry option.
@@ -95,7 +96,7 @@ func NewRegistrar(ctx context.Context, apiClient *api.Client, opts ...RegistrarO
 	return r
 }
 
-func (r *kratosRegistrar) Register(ctx context.Context, svc *registry.ServiceInstance) error {
+func (r *kratosRegistrar) Register(_ context.Context, svc *registry.ServiceInstance) error {
 	addresses := make(map[string]api.ServiceAddress, len(svc.Endpoints))
 	checkAddresses := make([]string, 0, len(svc.Endpoints))
 	for _, endpoint := range svc.Endpoints {
@@ -188,7 +189,7 @@ func (r *kratosRegistrar) Register(ctx context.Context, svc *registry.ServiceIns
 	return nil
 }
 
-func (r *kratosRegistrar) Deregister(ctx context.Context, svc *registry.ServiceInstance) error {
+func (r *kratosRegistrar) Deregister(_ context.Context, svc *registry.ServiceInstance) error {
 	r.heartbeatDone <- true
 	return r.cli.Agent().ServiceDeregister(svc.ID)
 }

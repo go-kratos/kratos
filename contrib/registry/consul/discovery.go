@@ -7,8 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/hashicorp/consul/api"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 type kratosDiscovery struct {
@@ -49,13 +50,15 @@ func WithOldGetServiceBehavior() DiscoveryOption {
 }
 
 // @deprecated useless now, timeout is hardcoded, remove this option in your code
-func WithTimeout(timeout time.Duration) DiscoveryOption {
+func WithTimeout(_ time.Duration) DiscoveryOption {
 	return func(o *kratosDiscovery) {
 	}
 }
 
-const CONSUL_WAIT_TIME = 55 * time.Second
-const CONSUL_API_CONTEXT_TIMEOUT = 60 * time.Second
+const (
+	ConsulWaitTime          = 55 * time.Second
+	ConsulAPIContextTimeout = 60 * time.Second
+)
 
 func NewDiscovery(ctx context.Context, apiClient *api.Client, opts ...DiscoveryOption) registry.Discovery {
 	d := &kratosDiscovery{
@@ -153,12 +156,12 @@ func (d *kratosDiscovery) Watch(ctx context.Context, name string) (registry.Watc
 }
 
 // return service list.
-func (r *kratosDiscovery) ListServices(ctx context.Context) (allServices map[string][]*registry.ServiceInstance, err error) {
-	r.lock.RLock()
-	defer r.lock.RUnlock()
+func (d *kratosDiscovery) ListServices(ctx context.Context) (allServices map[string][]*registry.ServiceInstance, err error) {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
 	allServices = make(map[string][]*registry.ServiceInstance)
-	for name := range r.registry {
-		allServices[name], err = r.GetService(ctx, name)
+	for name := range d.registry {
+		allServices[name], err = d.GetService(ctx, name)
 		if err != nil {
 			return nil, err
 		}
@@ -167,9 +170,11 @@ func (r *kratosDiscovery) ListServices(ctx context.Context) (allServices map[str
 }
 
 // Query consul and return the service instances with index for next call
-func (d *kratosDiscovery) queryService(ctx context.Context, service string, indexs map[string]uint64, passingOnly bool) (map[string][]*registry.ServiceInstance, map[string]uint64, bool, error) {
-	var instancesByDc = map[string][]*registry.ServiceInstance{}
-	var newIndexs = map[string]uint64{}
+func (d *kratosDiscovery) queryService(ctx context.Context,
+	service string, indexs map[string]uint64, passingOnly bool,
+) (map[string][]*registry.ServiceInstance, map[string]uint64, bool, error) {
+	instancesByDc := map[string][]*registry.ServiceInstance{}
+	newIndexs := map[string]uint64{}
 	var wg sync.WaitGroup
 	var anyErr error
 	var lock sync.Mutex
@@ -185,7 +190,7 @@ func (d *kratosDiscovery) queryService(ctx context.Context, service string, inde
 	for _, dc := range dcs {
 		opts := &api.QueryOptions{
 			WaitIndex: indexs[dc],
-			WaitTime:  CONSUL_WAIT_TIME,
+			WaitTime:  ConsulWaitTime,
 		}
 		opts = opts.WithContext(queryCtx)
 		opts.Datacenter = dc
@@ -203,9 +208,8 @@ func (d *kratosDiscovery) queryService(ctx context.Context, service string, inde
 				if !errors.Is(err, context.Canceled) {
 					anyErr = err
 					return
-				} else {
-					useCachedInsts = true
 				}
+				useCachedInsts = true
 			} else {
 				if m.LastIndex == indexs[localDc] {
 					useCachedInsts = true
@@ -302,7 +306,7 @@ func (d *kratosDiscovery) monitorUpdate(ss *serviceSet) {
 	idxs := map[string]uint64{}
 
 	updateBroadcast := func() {
-		timeoutCtx, cancel := context.WithTimeout(d.ctx, CONSUL_API_CONTEXT_TIMEOUT)
+		timeoutCtx, cancel := context.WithTimeout(d.ctx, ConsulAPIContextTimeout)
 		tmpService, tmpIdxs, updated, err := d.queryService(timeoutCtx, ss.serviceName, idxs, true)
 		fmt.Println("???", ss.serviceName)
 		cancel()
