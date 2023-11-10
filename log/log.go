@@ -50,27 +50,16 @@ func With(l Logger, kv ...interface{}) Logger {
 // WithContext returns a shallow copy of l with its context changed
 // to ctx. The provided ctx must be non-nil.
 func WithContext(ctx context.Context, l Logger) Logger {
-	c, ok := l.(*logger)
-	if ok {
-		return &logger{
-			logger:    c.logger,
-			prefix:    c.prefix,
-			hasValuer: c.hasValuer,
-			ctx:       ctx,
-		}
+	switch v := l.(type) {
+	default:
+		return &logger{logger: l, ctx: ctx}
+	case *logger:
+		lv := *v
+		lv.ctx = ctx
+		return &lv
+	case *Filter:
+		fv := *v
+		fv.logger = WithContext(ctx, fv.logger)
+		return &fv
 	}
-
-	f, ok := l.(*Filter)
-	if ok {
-		return &Filter{
-			ctx:    ctx,
-			logger: f.logger,
-			level:  f.level,
-			key:    f.key,
-			value:  f.value,
-			filter: f.filter,
-		}
-	}
-
-	return &logger{logger: l, ctx: ctx}
 }
