@@ -6,9 +6,10 @@ import (
 	"os"
 
 	"github.com/bufbuild/protovalidate-go"
+	"google.golang.org/protobuf/reflect/protoreflect"
+
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
-	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 // ugly but permit to allocate one time CLE engine

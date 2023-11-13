@@ -86,7 +86,7 @@ func generate(proto string, args []string) error {
 		"--proto_path=.",
 	}
 	if pathExists(protoPath) {
-		input = append(input, "--proto_path="+protoPath)
+		input = append(input, fmt.Sprintf("--proto_path=%s", protoPath))
 	}
 	inputExt := []string{
 		"--proto_path=" + base.KratosMod(),

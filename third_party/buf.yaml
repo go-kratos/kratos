@@ -9,4 +9,3 @@ lint:
 build:
   excludes:
     - google
-    - validate
