@@ -25,20 +25,23 @@ type customChangeListener struct {
 
 func (c *customChangeListener) onChange(namespace string, changes map[string]*storage.ConfigChange) []*config.KeyValue {
 	kv := make([]*config.KeyValue, 0, 2)
-	if strings.Contains(namespace, ".") && !strings.HasSuffix(namespace, "."+properties) &&
-		(format(namespace) == yaml || format(namespace) == yml || format(namespace) == json) {
-		value, err := c.apollo.client.GetConfigCache(namespace).Get("content")
-		if err != nil {
-			log.Warnw("apollo get config failed", "err", err)
-			return nil
-		}
-		kv = append(kv, &config.KeyValue{
-			Key:    namespace,
-			Value:  []byte(value.(string)),
-			Format: format(namespace),
-		})
+	if c.apollo.opt.originConfig {
+		if strings.Contains(namespace, ".") && !strings.HasSuffix(namespace, "."+properties) &&
+			(format(namespace) == yaml || format(namespace) == yml || format(namespace) == json) {
+			value, err := c.apollo.client.GetConfigCache(namespace).Get("content")
+			if err != nil {
+				log.Errorw("apollo get config failed, be aware that apollo should enable \"apollo.WithOriginalConfig()\" option", "err", err)
+				return nil
+			} else {
+				kv = append(kv, &config.KeyValue{
+					Key:    namespace,
+					Value:  []byte(value.(string)),
+					Format: format(namespace),
+				})
 
-		return kv
+				return kv
+			}
+		}
 	}
 
 	next := make(map[string]interface{})
