@@ -25,7 +25,12 @@ const (
 	properties = "properties"
 )
 
-var formats map[string]struct{}
+var formats = map[string]struct{}{
+	yaml:       {},
+	yml:        {},
+	json:       {},
+	properties: {},
+}
 
 // Option is apollo option
 type Option func(*options)
@@ -130,8 +135,10 @@ func NewSource(opts ...Option) config.Source {
 }
 
 func format(ns string) string {
-	arr := strings.Split(ns, ".")
-	suffix := arr[len(arr)-1]
+	var (
+		arr    = strings.Split(ns, ".")
+		suffix = arr[len(arr)-1]
+	)
 	if len(arr) <= 1 || suffix == properties {
 		return json
 	}
@@ -143,9 +150,18 @@ func format(ns string) string {
 	return suffix
 }
 
+func isOriginConfig(namespace string) bool {
+	f := format(namespace)
+	return strings.Contains(namespace, ".") &&
+		!strings.HasSuffix(namespace, "."+properties) &&
+		(f == yaml || f == yml || f == json)
+}
+
 func (e *apollo) load() []*config.KeyValue {
-	kvs := make([]*config.KeyValue, 0)
-	namespaces := strings.Split(e.opt.namespace, ",")
+	var (
+		kvs        = make([]*config.KeyValue, 0)
+		namespaces = strings.Split(e.opt.namespace, ",")
+	)
 
 	for _, ns := range namespaces {
 		if !e.opt.originConfig {
@@ -157,8 +173,7 @@ func (e *apollo) load() []*config.KeyValue {
 			kvs = append(kvs, kv)
 			continue
 		}
-		if strings.Contains(ns, ".") && !strings.HasSuffix(ns, "."+properties) &&
-			(format(ns) == yaml || format(ns) == yml || format(ns) == json) {
+		if isOriginConfig(ns) {
 			kv, err := e.getOriginConfig(ns)
 			if err != nil {
 				log.Errorf("apollo get config failed，err:%v", err)
@@ -225,10 +240,12 @@ func (e *apollo) Watch() (config.Watcher, error) {
 // resolve convert kv pair into one map[string]interface{} by split key into different
 // map level. such as: app.name = "application" => map[app][name] = "application"
 func resolve(key string, value interface{}, target map[string]interface{}) {
-	// expand key "aaa.bbb" into map[aaa]map[bbb]interface{}
-	keys := strings.Split(key, ".")
-	last := len(keys) - 1
-	cursor := target
+	var (
+		// expand key "aaa.bbb" into map[aaa]map[bbb]interface{}
+		keys   = strings.Split(key, ".")
+		last   = len(keys) - 1
+		cursor = target
+	)
 
 	for i, k := range keys {
 		if i == last {
@@ -274,13 +291,4 @@ func genKey(ns, sub string) string {
 	}
 
 	return ns + "." + sub
-}
-
-func init() {
-	formats = make(map[string]struct{})
-
-	formats[yaml] = struct{}{}
-	formats[yml] = struct{}{}
-	formats[json] = struct{}{}
-	formats[properties] = struct{}{}
 }
