@@ -1,6 +1,9 @@
 package log
 
-import "context"
+import (
+	"context"
+	"sync"
+)
 
 // FilterOption is filter option.
 type FilterOption func(*Filter)
@@ -41,6 +44,7 @@ func FilterFunc(f func(level Level, keyvals ...interface{}) bool) FilterOption {
 
 // Filter is a logger filter.
 type Filter struct {
+	mutex  *sync.Mutex
 	ctx    context.Context
 	logger Logger
 	level  Level
@@ -55,6 +59,7 @@ func NewFilter(logger Logger, opts ...FilterOption) *Filter {
 		logger: logger,
 		key:    make(map[interface{}]struct{}),
 		value:  make(map[interface{}]struct{}),
+		mutex:  new(sync.Mutex),
 	}
 	for _, o := range opts {
 		o(&options)
@@ -71,7 +76,9 @@ func (f *Filter) Log(level Level, keyvals ...interface{}) error {
 	var prefixkv []interface{}
 	l, ok := f.logger.(*logger)
 	if ok {
+		f.mutex.Lock()
 		l.ctx = f.ctx
+		defer f.mutex.Unlock()
 	}
 	if ok && len(l.prefix) > 0 {
 		prefixkv = make([]interface{}, 0, len(l.prefix))
