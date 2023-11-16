@@ -69,5 +69,3 @@ linters-settings:
     local-prefixes: github.com/go-kratos # Put imports beginning with prefix after 3rd-party packages
   misspell: # Finds commonly misspelled English words in comments
     locale: US
-#    ignore-words:
-#      - someword
