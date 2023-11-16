@@ -9,13 +9,13 @@ import (
 
 func TestGauge(t *testing.T) {
 	expect := `# HELP test_request_test_gauge_metric test
-# TYPE test_request_test_guage_metric gauge
+# TYPE test_request_test_gauge_metric gauge
 test_request_test_gauge_metric{code="test",kind="test",operation="test",reason="test"} %d
 `
 
 	guageVec := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "test",
-		Name:      "test_guage_metric",
+		Name:      "test_gauge_metric",
 		Subsystem: "request",
 		Help:      "test",
 	}, []string{"kind", "operation", "code", "reason"})
