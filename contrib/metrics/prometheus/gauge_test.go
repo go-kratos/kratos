@@ -7,10 +7,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-func TestGuage(t *testing.T) {
-	expect := `# HELP test_request_test_guage_metric test
+func TestGauge(t *testing.T) {
+	expect := `# HELP test_request_test_gauge_metric test
 # TYPE test_request_test_guage_metric gauge
-test_request_test_guage_metric{code="test",kind="test",operation="test",reason="test"} %d
+test_request_test_gauge_metric{code="test",kind="test",operation="test",reason="test"} %d
 `
 
 	guageVec := prometheus.NewGaugeVec(prometheus.GaugeOpts{
@@ -20,8 +20,8 @@ test_request_test_guage_metric{code="test",kind="test",operation="test",reason="
 		Help:      "test",
 	}, []string{"kind", "operation", "code", "reason"})
 
-	guage := NewGauge(guageVec)
-	guage.With("test", "test", "test", "test").Set(1)
+	gauge := NewGauge(guageVec)
+	gauge.With("test", "test", "test", "test").Set(1)
 
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(guageVec)
@@ -35,7 +35,7 @@ test_request_test_guage_metric{code="test",kind="test",operation="test",reason="
 		t.Fatal("metrics error")
 	}
 
-	guage.With("test", "test", "test", "test").Add(1)
+	gauge.With("test", "test", "test", "test").Add(1)
 	result, err = gatherLatest(reg)
 	if err != nil {
 		t.Fatal(err)
@@ -44,7 +44,7 @@ test_request_test_guage_metric{code="test",kind="test",operation="test",reason="
 		t.Fatal("metrics error")
 	}
 
-	guage.With("test", "test", "test", "test").Sub(1)
+	gauge.With("test", "test", "test", "test").Sub(1)
 	result, err = gatherLatest(reg)
 	if err != nil {
 		t.Fatal(err)
