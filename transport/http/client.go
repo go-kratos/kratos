@@ -231,6 +231,10 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 	if err != nil {
 		return err
 	}
+	if c.headerCarrier != nil {
+		req.Header = *c.headerCarrier
+	}
+
 	if contentType != "" {
 		req.Header.Set("Content-Type", c.contentType)
 	}
