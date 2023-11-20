@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/v2
 go 1.19
 
 require (
-	github.com/bufbuild/protovalidate-go v0.4.1
+	github.com/bufbuild/protovalidate-go v0.4.2
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-kratos/aegis v0.2.0
 	github.com/go-playground/form/v4 v4.2.0
