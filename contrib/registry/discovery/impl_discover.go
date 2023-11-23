@@ -64,7 +64,7 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 	case <-event:
 	// change event come
 	case <-w.cancelCtx.Done():
-		return nil, fmt.Errorf("watch context cancelled: %v", w.cancelCtx.Err())
+		return nil, fmt.Errorf("watch context canceled: %v", w.cancelCtx.Err())
 	}
 
 	ctx, cancel := context.WithTimeout(context.TODO(), 15*time.Second)
