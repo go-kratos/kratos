@@ -1,4 +1,4 @@
-module github.com/go-kratos/kratos/contrib/registry/nacos/v2
+module github.com/go-kratos/kratos/contrib/registry/nacosv2/v2
 
 go 1.19
 
