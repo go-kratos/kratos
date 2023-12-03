@@ -1,10 +1,11 @@
 package config
 
 import (
-	"github.com/imdario/mergo"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/imdario/mergo"
 )
 
 func TestDefaultDecoder(t *testing.T) {

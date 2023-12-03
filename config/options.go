@@ -2,11 +2,11 @@ package config
 
 import (
 	"fmt"
-	"github.com/imdario/mergo"
 	"regexp"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/imdario/mergo"
 )
 
 // Decoder is config decoder.
