@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"errors"
+	"github.com/imdario/mergo"
 	"reflect"
 	"sync"
 	"time"
@@ -20,8 +21,6 @@ var _ Config = (*config)(nil)
 var (
 	// ErrNotFound is key not found.
 	ErrNotFound = errors.New("key not found")
-	// ErrTypeAssert is type assert error.
-	ErrTypeAssert = errors.New("type assert error")
 )
 
 // Observer is config observer.
@@ -49,6 +48,9 @@ func New(opts ...Option) Config {
 	o := options{
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
+		mergoConfigs: []func(config *mergo.Config){
+			mergo.WithOverride,
+		},
 	}
 	for _, opt := range opts {
 		opt(&o)

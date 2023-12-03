@@ -2,11 +2,11 @@ package config
 
 import (
 	"fmt"
+	"github.com/imdario/mergo"
 	"regexp"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 // Decoder is config decoder.
@@ -19,9 +19,10 @@ type Resolver func(map[string]interface{}) error
 type Option func(*options)
 
 type options struct {
-	sources  []Source
-	decoder  Decoder
-	resolver Resolver
+	sources      []Source
+	decoder      Decoder
+	resolver     Resolver
+	mergoConfigs []func(*mergo.Config)
 }
 
 // WithSource with config source.
@@ -49,10 +50,11 @@ func WithResolver(r Resolver) Option {
 	}
 }
 
-// WithLogger with config logger.
-// Deprecated: use global logger instead.
-func WithLogger(_ log.Logger) Option {
-	return func(o *options) {}
+// WithMergoConfig with mergo config
+func WithMergoConfig(mc ...func(*mergo.Config)) Option {
+	return func(o *options) {
+		o.mergoConfigs = mc
+	}
 }
 
 // defaultDecoder decode config from source KeyValue

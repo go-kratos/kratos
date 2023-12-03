@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/imdario/mergo"
 	"reflect"
 	"strings"
 	"testing"
@@ -224,5 +225,16 @@ func TestExpand(t *testing.T) {
 		if got := expand(tt.input, tt.mapping); got != tt.want {
 			t.Errorf("expand() want: %s, got: %s", tt.want, got)
 		}
+	}
+}
+
+func TestWithMergoConfig(t *testing.T) {
+	c := &options{}
+	a := []func(*mergo.Config){
+		mergo.WithOverride,
+	}
+	WithMergoConfig(a...)(c)
+	if !reflect.DeepEqual(a, c.mergoConfigs) {
+		t.Errorf("want: %v, got: %v", a, c.mergoConfigs)
 	}
 }
