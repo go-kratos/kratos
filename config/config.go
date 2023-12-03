@@ -19,10 +19,7 @@ import (
 
 var _ Config = (*config)(nil)
 
-var (
-	// ErrNotFound is key not found.
-	ErrNotFound = errors.New("key not found")
-)
+var ErrNotFound = errors.New("key not found") // ErrNotFound is key not found.
 
 // Observer is config observer.
 type Observer func(string, Value)

@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/imdario/mergo"
 	"reflect"
 	"testing"
 
@@ -20,7 +21,8 @@ func TestReader_Merge(t *testing.T) {
 			}
 			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
-		resolver: defaultResolver,
+		resolver:     defaultResolver,
+		mergoConfigs: []func(config2 *mergo.Config){mergo.WithOverride},
 	}
 	r := newReader(opts)
 	err = r.Merge(&KeyValue{
