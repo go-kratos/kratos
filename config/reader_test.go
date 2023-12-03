@@ -2,11 +2,11 @@ package config
 
 import (
 	"fmt"
-	"github.com/imdario/mergo"
 	"reflect"
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/imdario/mergo"
 )
 
 func TestReader_Merge(t *testing.T) {
