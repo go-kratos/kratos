@@ -3,10 +3,11 @@ package config
 import (
 	"context"
 	"errors"
-	"github.com/imdario/mergo"
 	"reflect"
 	"sync"
 	"time"
+
+	"github.com/imdario/mergo"
 
 	// init encoding
 	_ "github.com/go-kratos/kratos/v2/encoding/json"
