@@ -111,7 +111,7 @@ func (w *ConfigWatcher) Next() ([]*config.KeyValue, error) {
 		}
 		return w.cfg, nil
 	}
-	return w.cfg, context.Canceled
+	return nil, context.Canceled
 }
 
 func (w *ConfigWatcher) Stop() error {
