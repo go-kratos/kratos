@@ -3,11 +3,10 @@ package config
 import (
 	"context"
 	"errors"
+	"github.com/imdario/mergo"
 	"reflect"
 	"sync"
 	"time"
-
-	"github.com/imdario/mergo"
 
 	// init encoding
 	_ "github.com/go-kratos/kratos/v2/encoding/json"
@@ -46,8 +45,8 @@ func New(opts ...Option) Config {
 	o := options{
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
-		mergoConfigs: []func(config *mergo.Config){
-			mergo.WithOverride,
+		merge: func(dst, src interface{}) error {
+			return mergo.Map(dst, src, mergo.WithOverride)
 		},
 	}
 	for _, opt := range opts {

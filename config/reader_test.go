@@ -22,8 +22,10 @@ func TestReader_Merge(t *testing.T) {
 			}
 			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
-		resolver:     defaultResolver,
-		mergoConfigs: []func(config2 *mergo.Config){mergo.WithOverride},
+		resolver: defaultResolver,
+		merge: func(dst, src interface{}) error {
+			return mergo.Map(dst, src, mergo.WithOverride)
+		},
 	}
 	r := newReader(opts)
 	err = r.Merge(&KeyValue{
@@ -85,6 +87,9 @@ func TestReader_Value(t *testing.T) {
 			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
 		resolver: defaultResolver,
+		merge: func(dst, src interface{}) error {
+			return mergo.Map(dst, src, mergo.WithOverride)
+		},
 	}
 
 	ymlval := `
@@ -187,6 +192,9 @@ func TestReader_Source(t *testing.T) {
 			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
 		resolver: defaultResolver,
+		merge: func(dst, src interface{}) error {
+			return mergo.Map(dst, src, mergo.WithOverride)
+		},
 	}
 	r := newReader(opts)
 	err = r.Merge(&KeyValue{

@@ -6,8 +6,6 @@ import (
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/encoding"
-
-	"github.com/imdario/mergo"
 )
 
 // Decoder is config decoder.
@@ -16,14 +14,17 @@ type Decoder func(*KeyValue, map[string]interface{}) error
 // Resolver resolve placeholder in config.
 type Resolver func(map[string]interface{}) error
 
+// Merge is config merge func.
+type Merge func(dst, src interface{}) error
+
 // Option is config option.
 type Option func(*options)
 
 type options struct {
-	sources      []Source
-	decoder      Decoder
-	resolver     Resolver
-	mergoConfigs []func(*mergo.Config)
+	sources  []Source
+	decoder  Decoder
+	resolver Resolver
+	merge    Merge
 }
 
 // WithSource with config source.
@@ -51,10 +52,10 @@ func WithResolver(r Resolver) Option {
 	}
 }
 
-// WithMergoConfig with mergo config
-func WithMergoConfig(mc ...func(*mergo.Config)) Option {
+// WithMergeFunc with config merge func.
+func WithMergeFunc(m Merge) Option {
 	return func(o *options) {
-		o.mergoConfigs = mc
+		o.merge = m
 	}
 }
 

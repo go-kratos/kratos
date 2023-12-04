@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"github.com/imdario/mergo"
 	"testing"
 )
 
@@ -131,6 +132,9 @@ func TestConfig(t *testing.T) {
 		sources:  []Source{jSource},
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
+		merge: func(dst, src interface{}) error {
+			return mergo.Map(dst, src, mergo.WithOverride)
+		},
 	}
 	cf := &config{}
 	cf.opts = opts

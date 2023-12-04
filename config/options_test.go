@@ -4,8 +4,6 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-
-	"github.com/imdario/mergo"
 )
 
 func TestDefaultDecoder(t *testing.T) {
@@ -229,13 +227,13 @@ func TestExpand(t *testing.T) {
 	}
 }
 
-func TestWithMergoConfig(t *testing.T) {
+func TestWithMergeFunc(t *testing.T) {
 	c := &options{}
-	a := []func(*mergo.Config){
-		mergo.WithOverride,
+	a := func(dst, src interface{}) error {
+		return nil
 	}
-	WithMergoConfig(a...)(c)
-	if !reflect.DeepEqual(a, c.mergoConfigs) {
-		t.Errorf("want: %v, got: %v", a, c.mergoConfigs)
+	WithMergeFunc(a)(c)
+	if c.merge == nil {
+		t.Fatal("c.merge is nil")
 	}
 }
