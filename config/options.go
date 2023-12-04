@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 // Decoder is config decoder.
@@ -15,6 +14,9 @@ type Decoder func(*KeyValue, map[string]interface{}) error
 // Resolver resolve placeholder in config.
 type Resolver func(map[string]interface{}) error
 
+// Merge is config merge func.
+type Merge func(dst, src interface{}) error
+
 // Option is config option.
 type Option func(*options)
 
@@ -22,6 +24,7 @@ type options struct {
 	sources  []Source
 	decoder  Decoder
 	resolver Resolver
+	merge    Merge
 }
 
 // WithSource with config source.
@@ -49,10 +52,11 @@ func WithResolver(r Resolver) Option {
 	}
 }
 
-// WithLogger with config logger.
-// Deprecated: use global logger instead.
-func WithLogger(_ log.Logger) Option {
-	return func(o *options) {}
+// WithMergeFunc with config merge func.
+func WithMergeFunc(m Merge) Option {
+	return func(o *options) {
+		o.merge = m
+	}
 }
 
 // defaultDecoder decode config from source KeyValue
