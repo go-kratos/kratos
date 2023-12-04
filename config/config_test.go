@@ -2,8 +2,9 @@ package config
 
 import (
 	"errors"
-	"github.com/imdario/mergo"
 	"testing"
+
+	"github.com/imdario/mergo"
 )
 
 const (
