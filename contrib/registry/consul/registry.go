@@ -215,7 +215,8 @@ func (r *Registry) resolve(ss *serviceSet) error {
 				time.Sleep(time.Second)
 				continue
 			}
-			if len(tmpService) != 0 && tmpIdx != idx {
+			// if the service is empty, it will not be updated
+			if len(ss.services.Load().([]*registry.ServiceInstance)) != 0 && tmpIdx != idx {
 				services = tmpService
 				ss.broadcast(services)
 			}
