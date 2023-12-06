@@ -294,13 +294,31 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 					time.Sleep(time.Second)
 					continue
 				}
+
 				if len(tmpService) != 0 {
+					ss.broadcast(map[string][]*registry.ServiceInstance{cluster: tmpService})
+					continue
+				}
+
+				ss.lock.Lock()
+				flag := false
+
+				for c, services := range ss.services.Load().(map[string][]*registry.ServiceInstance) {
+					if c == cluster {
+						continue
+					}
+					if len(services) > 0 {
+						flag = true
+						break
+					}
+				}
+				ss.lock.Unlock()
+				if flag {
 					ss.broadcast(map[string][]*registry.ServiceInstance{cluster: tmpService})
 				}
 			}
 		}(cluster)
 	}
-
 	return nil
 }
 
