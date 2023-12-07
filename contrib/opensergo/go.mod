@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/contrib/opensergo/v2
 go 1.19
 
 require (
-	github.com/go-kratos/kratos/v2 v2.7.1
+	github.com/go-kratos/kratos/v2 v2.7.2
 	github.com/opensergo/opensergo-go v0.0.0-20220331070310-e5b01fee4d1c
 	golang.org/x/net v0.19.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20230822172742-b8732ec3820d

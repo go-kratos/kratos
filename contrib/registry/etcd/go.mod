@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/contrib/registry/etcd/v2
 go 1.19
 
 require (
-	github.com/go-kratos/kratos/v2 v2.7.1
+	github.com/go-kratos/kratos/v2 v2.7.2
 	go.etcd.io/etcd/client/v3 v3.5.10
 	google.golang.org/grpc v1.59.0
 )
