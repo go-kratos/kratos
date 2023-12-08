@@ -140,6 +140,9 @@ func (a *App) Run() error {
 		return err
 	}
 	for _, fn := range a.opts.afterStop {
+		if err != nil {
+			log.Warnf("%s", err)
+		}
 		err = fn(sctx)
 	}
 	return err
@@ -149,6 +152,9 @@ func (a *App) Run() error {
 func (a *App) Stop() (err error) {
 	sctx := NewContext(a.ctx, a)
 	for _, fn := range a.opts.beforeStop {
+		if err != nil {
+			log.Warnf("%s", err)
+		}
 		err = fn(sctx)
 	}
 
