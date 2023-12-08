@@ -143,7 +143,11 @@ func (a *App) Run() error {
 		if err != nil {
 			log.Warnf("%s", err)
 		}
-		err = fn(sctx)
+
+		fnErr := fn(sctx)
+		if fnErr != nil {
+			err = fnErr
+		}
 	}
 	return err
 }
@@ -155,7 +159,10 @@ func (a *App) Stop() (err error) {
 		if err != nil {
 			log.Warnf("%s", err)
 		}
-		err = fn(sctx)
+		fnErr := fn(sctx)
+		if fnErr != nil {
+			err = fnErr
+		}
 	}
 
 	a.mu.Lock()
