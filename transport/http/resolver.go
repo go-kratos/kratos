@@ -56,7 +56,7 @@ type resolver struct {
 func newResolver(ctx context.Context, discovery registry.Discovery, target *Target,
 	rebalancer selector.Rebalancer, block, insecure bool, subsetSize int,
 ) (*resolver, error) {
-	// this is new resovler
+	// this is new resolver
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
