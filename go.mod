@@ -8,7 +8,7 @@ require (
 	github.com/go-playground/form/v4 v4.2.0
 	github.com/golang-jwt/jwt/v5 v5.1.0
 	github.com/google/uuid v1.3.0
-	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/mux v1.8.1
 	github.com/imdario/mergo v0.3.16
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/sdk v1.16.0
