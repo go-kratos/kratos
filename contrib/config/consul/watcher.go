@@ -51,6 +51,10 @@ func (w *watcher) handle(_ uint64, data interface{}) {
 		w.fileModifyIndex[item.Key] = item.ModifyIndex
 	}
 
+	if len(kvs) == 0 {
+		return
+	}
+
 	w.ch <- kvs
 }
 
