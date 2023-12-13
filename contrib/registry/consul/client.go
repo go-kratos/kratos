@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -49,6 +50,9 @@ type Client struct {
 
 	// clusters specify the cluster to be used, if not set, obtain all currently associated clusters
 	clusters []string
+
+	lock                sync.RWMutex
+	deregisteredService map[string]struct{}
 }
 
 func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance {
@@ -106,7 +110,7 @@ func (c *Client) service(ctx context.Context, service string, passingOnly bool, 
 }
 
 // Register register service instance to consul
-func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enableHealthCheck bool) error {
+func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, enableHealthCheck bool) error {
 	addresses := make(map[string]api.ServiceAddress, len(svc.Endpoints))
 	checkAddresses := make([]string, 0, len(svc.Endpoints))
 	for _, endpoint := range svc.Endpoints {
@@ -169,18 +173,12 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			for {
 				select {
 				case <-c.ctx.Done():
-					_ = c.consul.Agent().ServiceDeregister(svc.ID)
 					return
-				default:
-				}
-				select {
-				case <-c.ctx.Done():
-					_ = c.consul.Agent().ServiceDeregister(svc.ID)
+				case <-ctx.Done():
 					return
 				case <-ticker.C:
 					// ensure that unregistered services will not be re-registered by mistake
 					if errors.Is(c.ctx.Err(), context.Canceled) || errors.Is(c.ctx.Err(), context.DeadlineExceeded) {
-						_ = c.consul.Agent().ServiceDeregister(svc.ID)
 						return
 					}
 					err = c.consul.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
@@ -191,6 +189,11 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 						}
 						// when the previous report fails, try to re register the service
 						time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
+						c.lock.RLock()
+						if _, ok := c.deregisteredService[svc.ID]; ok {
+							return
+						}
+						c.lock.RUnlock()
 						if err := c.consul.Agent().ServiceRegister(asr); err != nil {
 							log.Errorf("[Consul] re registry service failed!, err=%v", err)
 						} else {
@@ -201,11 +204,17 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			}
 		}()
 	}
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	// the service may need to be re registered, so the record needs to be deleted
+	delete(c.deregisteredService, svc.ID)
 	return nil
 }
 
 // Deregister service by service ID
 func (c *Client) Deregister(_ context.Context, serviceID string) error {
-	defer c.cancel()
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.deregisteredService[serviceID] = struct{}{}
 	return c.consul.Agent().ServiceDeregister(serviceID)
 }

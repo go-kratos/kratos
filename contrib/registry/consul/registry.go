@@ -129,6 +129,7 @@ func New(apiClient *api.Client, opts ...Option) *Registry {
 			heartbeat:                      true,
 			deregisterCriticalServiceAfter: 600,
 			multiClusterMode:               Single,
+			deregisteredService:            make(map[string]struct{}),
 		},
 	}
 	for _, o := range opts {
