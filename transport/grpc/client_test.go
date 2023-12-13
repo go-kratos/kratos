@@ -119,6 +119,16 @@ func TestWithOptions(t *testing.T) {
 	}
 }
 
+func TestWithHealthCheck(t *testing.T) {
+	o := &clientOptions{
+		healthCheckConfig: `,"healthCheckConfig":{"serviceName":""}`,
+	}
+	WithHealthCheck(false)(o)
+	if !reflect.DeepEqual("", o.healthCheckConfig) {
+		t.Errorf("expect %v but got %v", "", o.healthCheckConfig)
+	}
+}
+
 func TestDial(t *testing.T) {
 	o := &clientOptions{}
 	v := []grpc.DialOption{
