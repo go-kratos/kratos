@@ -9,7 +9,7 @@ require (
 
 require (
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.18 // indirect
-	github.com/buger/jsonparser v0.0.0-20181115193947-bf1c66bbce23 // indirect
+	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af // indirect
 	github.com/json-iterator/go v1.1.6 // indirect
