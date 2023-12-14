@@ -46,8 +46,8 @@ type Client struct {
 	// multiClusterMode is the consul cluster mode
 	multiClusterMode ClusterMode
 
-        // allow re-registration of services
-	allowReRegistration bool 
+	// allow re-registration of services
+	allowReRegistration bool
 
 	// clusters specify the cluster to be used, if not set, obtain all currently associated clusters
 	clusters []string
