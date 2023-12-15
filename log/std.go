@@ -47,6 +47,7 @@ func (l *stdLogger) Log(level Level, keyvals ...interface{}) error {
 	for i := 0; i < len(keyvals); i += 2 {
 		_, _ = fmt.Fprintf(buf, " %s=%v", keyvals[i], keyvals[i+1])
 	}
+	buf.WriteByte('\n')
 	defer buf.Reset()
 
 	l.mu.Lock()

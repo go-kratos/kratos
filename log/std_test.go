@@ -26,15 +26,15 @@ func TestStdLogger_Log(t *testing.T) {
 	logger := NewStdLogger(&b)
 
 	var eg errgroup.Group
-	eg.Go(func() error { return logger.Log(LevelInfo, "msg", "a", "k", "v ") })
-	eg.Go(func() error { return logger.Log(LevelInfo, "msg", "a", "k", "v ") })
+	eg.Go(func() error { return logger.Log(LevelInfo, "msg", "a", "k", "v") })
+	eg.Go(func() error { return logger.Log(LevelInfo, "msg", "a", "k", "v") })
 
 	err := eg.Wait()
 	if err != nil {
 		t.Fatalf("log error: %v", err)
 	}
 
-	if s := b.String(); s != "INFO msg=a k=v INFO msg=a k=v " {
+	if s := b.String(); s != "INFO msg=a k=v\nINFO msg=a k=v\n" {
 		t.Fatalf("log not match: %q", s)
 	}
 }
