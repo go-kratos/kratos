@@ -57,8 +57,5 @@ func (l *stdLogger) Log(level Level, keyvals ...interface{}) error {
 }
 
 func (l *stdLogger) Close() error {
-	if wc, ok := l.w.(io.Closer); ok {
-		return wc.Close()
-	}
 	return nil
 }
