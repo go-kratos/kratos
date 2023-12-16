@@ -57,12 +57,12 @@ func WithTags(kvs map[string]interface{}) Option {
 
 // Server returns a new server middleware for Sentry.
 func Server(opts ...Option) middleware.Middleware {
-	options := options{repanic: true}
+	conf := options{repanic: true}
 	for _, o := range opts {
-		o(&options)
+		o(&conf)
 	}
-	if options.timeout == 0 {
-		options.timeout = 2 * time.Second
+	if conf.timeout == 0 {
+		conf.timeout = 2 * time.Second
 	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
@@ -72,7 +72,7 @@ func Server(opts ...Option) middleware.Middleware {
 			}
 			scope := hub.Scope()
 
-			for k, v := range options.tags {
+			for k, v := range conf.tags {
 				switch val := v.(type) {
 				case string:
 					scope.SetTag(k, val)
@@ -104,7 +104,7 @@ func Server(opts ...Option) middleware.Middleware {
 			}
 
 			ctx = context.WithValue(ctx, valuesKey, hub)
-			defer recoverWithSentry(options, hub, ctx, req)
+			defer recoverWithSentry(conf, hub, ctx, req)
 			return handler(ctx, req)
 		}
 	}
