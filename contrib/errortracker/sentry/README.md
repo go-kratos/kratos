@@ -22,7 +22,7 @@ import 	ksentry "github.com/go-kratos/sentry"
 var opts = []http.ServerOption{
 	http.Middleware(
 		recovery.Recovery(), 
-		ksentry.Server(WithTags(kvs map[string]interface{}{
+		ksentry.Server(ksentry.WithTags(map[string]interface{}{
 			"tag": "some-custom-constant-tag",
 			"trace_id": tracing.TraceID(),
 		})), // must after Recovery middleware, because of the exiting order will be reversed
@@ -35,7 +35,7 @@ var opts = []http.ServerOption{
 var opts = []grpc.ServerOption{
      grpc.Middleware(
 		recovery.Recovery(),
-		ksentry.Server(WithTags(kvs map[string]interface{}{
+		ksentry.Server(ksentry.WithTags(map[string]interface{}{
 			"tag": "some-custom-constant-tag",
 			"trace_id": tracing.TraceID(),
 		})), // must after Recovery middleware, because of the exiting order will be reversed
