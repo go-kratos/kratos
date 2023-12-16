@@ -68,9 +68,6 @@ func Server(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			hub := sentry.GetHubFromContext(ctx)
-			if hub == nil {
-				hub = sentry.CurrentHub().Clone()
-			}
 			scope := hub.Scope()
 
 			for k, v := range conf.tags {
@@ -138,10 +135,11 @@ func isBrokenPipeError(err interface{}) bool {
 	return false
 }
 
-// GetHubFromContext retrieves attached *sentry.Hub instance from context.
+// GetHubFromContext retrieves attached *sentry.Hub instance from context or sentry.
+// You can use this hub for extra information reporting
 func GetHubFromContext(ctx context.Context) *sentry.Hub {
 	if hub, ok := ctx.Value(ctxKey{}).(*sentry.Hub); ok {
 		return hub
 	}
-	return nil
+	return sentry.CurrentHub().Clone()
 }
