@@ -1,4 +1,5 @@
 # Sentry middleware for Kratos
+Catch panics and report it to [sentry](https://sentry.io/)
 
 ## Quick Start
 You could check the full demo in example folder.
