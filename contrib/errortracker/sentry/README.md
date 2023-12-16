@@ -23,9 +23,9 @@ var opts = []http.ServerOption{
 	http.Middleware(
 		recovery.Recovery(), 
 		ksentry.Server(WithTags(kvs map[string]interface{}{
-            "tag": "some-custom-constant-tag",
-            "trace_id": tracing.TraceID(),
-        })), // must after Recovery middleware, because of the exiting order will be reversed
+			"tag": "some-custom-constant-tag",
+			"trace_id": tracing.TraceID(),
+		})), // must after Recovery middleware, because of the exiting order will be reversed
 		tracing.Server(),
 		logging.Server(logger), 
 	),
@@ -36,9 +36,9 @@ var opts = []grpc.ServerOption{
      grpc.Middleware(
 		recovery.Recovery(),
 		ksentry.Server(WithTags(kvs map[string]interface{}{
-            "tag": "some-custom-constant-tag",
-            "trace_id": tracing.TraceID(),
-        })), // must after Recovery middleware, because of the exiting order will be reversed
+			"tag": "some-custom-constant-tag",
+			"trace_id": tracing.TraceID(),
+		})), // must after Recovery middleware, because of the exiting order will be reversed
 		tracing.Server(),
 		logging.Server(logger),
      ),
