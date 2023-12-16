@@ -104,13 +104,13 @@ func Server(opts ...Option) middleware.Middleware {
 			}
 
 			ctx = context.WithValue(ctx, ctxKey{}, hub)
-			defer recoverWithSentry(conf, hub, ctx, req)
+			defer recoverWithSentry(ctx, conf, hub, req)
 			return handler(ctx, req)
 		}
 	}
 }
 
-func recoverWithSentry(opts options, hub *sentry.Hub, ctx context.Context, req interface{}) {
+func recoverWithSentry(ctx context.Context, opts options, hub *sentry.Hub, req interface{}) {
 	if err := recover(); err != nil {
 		if !isBrokenPipeError(err) {
 			eventID := hub.RecoverWithContext(
