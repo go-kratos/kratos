@@ -16,7 +16,7 @@ import (
 	http2 "github.com/go-kratos/kratos/v2/transport/http"
 )
 
-const valuesKey = struct{}
+type ctxKey struct{}
 
 type Option func(*options)
 
@@ -103,7 +103,7 @@ func Server(opts ...Option) middleware.Middleware {
 				}
 			}
 
-			ctx = context.WithValue(ctx, valuesKey, hub)
+			ctx = context.WithValue(ctx, ctxKey{}, hub)
 			defer recoverWithSentry(conf, hub, ctx, req)
 			return handler(ctx, req)
 		}
@@ -141,7 +141,7 @@ func isBrokenPipeError(err interface{}) bool {
 
 // GetHubFromContext retrieves attached *sentry.Hub instance from context.
 func GetHubFromContext(ctx context.Context) *sentry.Hub {
-	if hub, ok := ctx.Value(valuesKey).(*sentry.Hub); ok {
+	if hub, ok := ctx.Value(ctxKey{}).(*sentry.Hub); ok {
 		return hub
 	}
 	return nil
