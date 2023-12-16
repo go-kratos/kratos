@@ -16,7 +16,7 @@ import (
 	http2 "github.com/go-kratos/kratos/v2/transport/http"
 )
 
-const valuesKey = "sentry"
+const valuesKey = struct{}
 
 type Option func(*options)
 
