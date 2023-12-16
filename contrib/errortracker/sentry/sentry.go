@@ -2,6 +2,7 @@ package sentry
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"os"
 	"strings"
