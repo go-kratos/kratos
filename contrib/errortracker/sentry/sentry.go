@@ -77,9 +77,7 @@ func Server(opts ...Option) middleware.Middleware {
 				case string:
 					scope.SetTag(k, val)
 				case log.Valuer:
-					if vs, ok := val(ctx).(string); ok {
-						scope.SetTag(k, vs)
-					}
+					scope.SetTag(k, fmt.Sprintf("%v", val(ctx)))
 				}
 			}
 
