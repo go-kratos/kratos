@@ -30,7 +30,7 @@ type AppInfo interface {
 type App struct {
 	opts     options
 	ctx      context.Context
-	cancel   func()
+	cancel   context.CancelFunc
 	mu       sync.Mutex
 	instance *registry.ServiceInstance
 }

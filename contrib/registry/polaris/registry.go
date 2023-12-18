@@ -376,7 +376,7 @@ func (w *Watcher) Next() ([]*registry.ServiceInstance, error) {
 							if serviceInstance.ID == instance.GetId() {
 								// remove equal
 								if len(w.ServiceInstances) <= 1 {
-									w.ServiceInstances = w.ServiceInstances[0:0]
+									w.ServiceInstances = w.ServiceInstances[:0]
 									continue
 								}
 								w.ServiceInstances = append(w.ServiceInstances[:i], w.ServiceInstances[i+1:]...)
