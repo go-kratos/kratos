@@ -23,9 +23,9 @@ func (x *testWriteSyncer) Sync() error {
 
 func TestLogger_Log(t *testing.T) {
 	syncer := &testWriteSyncer{}
-	slg := log.NewHelper(NewLogger(slog.New(slog.NewTextHandler(syncer, &slog.HandlerOptions{
+	slg := log.NewHelper(NewLogger(slog.NewTextHandler(syncer, &slog.HandlerOptions{
 		Level: slog.LevelDebug,
-	}))))
+	})))
 	slg.Debugw("log", "debug")
 	slg.Infow("log", "info")
 	slg.Warnw("log", "warn")
