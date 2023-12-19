@@ -21,12 +21,13 @@ import 	ksentry "github.com/go-kratos/kratos/contrib/errortracker/sentry/v2"
 // for HTTP server, new HTTP server with sentry middleware options
 var opts = []http.ServerOption{
 	http.Middleware(
-		recovery.Recovery(), 
+		recovery.Recovery(),
+		tracing.Server(),
 		ksentry.Server(ksentry.WithTags(map[string]interface{}{
 			"tag": "some-custom-constant-tag",
-			"trace_id": tracing.TraceID(),
+			"trace_id": tracing.TraceID(), // If you want to use the TraceID valuer, you need to place it after the A middleware.
 		})), // must after Recovery middleware, because of the exiting order will be reversed
-		tracing.Server(),
+		
 		logging.Server(logger), 
 	),
 }
@@ -35,11 +36,11 @@ var opts = []http.ServerOption{
 var opts = []grpc.ServerOption{
      grpc.Middleware(
 		recovery.Recovery(),
+		tracing.Server(),
 		ksentry.Server(ksentry.WithTags(map[string]interface{}{
 			"tag": "some-custom-constant-tag",
-			"trace_id": tracing.TraceID(),
+			"trace_id": tracing.TraceID(), // If you want to use the TraceID valuer, you need to place it after the A middleware.
 		})), // must after Recovery middleware, because of the exiting order will be reversed
-		tracing.Server(),
 		logging.Server(logger),
      ),
  }
