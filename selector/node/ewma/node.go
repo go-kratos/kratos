@@ -15,7 +15,7 @@ const (
 	// The mean lifetime of `cost`, it reaches its half-life after Tau*ln(2).
 	tau = int64(time.Millisecond * 600)
 	// if statistic not collected,we add a big lag penalty to endpoint
-	penalty = uint64(time.Second * 10)
+	penalty = uint64(time.Microsecond * 100)
 )
 
 var (
@@ -73,11 +73,29 @@ func (n *Node) health() uint64 {
 func (n *Node) load() (load uint64) {
 	now := time.Now().UnixNano()
 	avgLag := atomic.LoadInt64(&n.lag)
+	predict := n.predict(avgLag, now)
+
+	if avgLag == 0 {
+		// penalty is the penalty value when there is no data when the node is just started.
+		load = penalty * uint64(atomic.LoadInt64(&n.inflight))
+		return
+	}
+	if predict > avgLag {
+		avgLag = predict
+	}
+	// add 5ms to eliminate the latency gap between different zones
+	avgLag += int64(time.Millisecond * 5)
+	avgLag = int64(math.Sqrt(float64(avgLag)))
+	load = uint64(avgLag) * uint64(atomic.LoadInt64(&n.inflight))
+	return load
+
+}
+
+func (n *Node) predict(avgLag int64, now int64) (predict int64) {
 	var (
 		total    int64
 		slowNum  int
 		totalNum int
-		predict  int64
 	)
 	for i := range n.inflights {
 		start := atomic.LoadInt64(&n.inflights[i])
@@ -90,22 +108,9 @@ func (n *Node) load() (load uint64) {
 			}
 		}
 	}
-	if slowNum > (totalNum/2 + 1) {
+	if slowNum >= (totalNum/2 + 1) {
 		predict = total / int64(slowNum)
 	}
-
-	if avgLag == 0 {
-		// penalty is the penalty value when there is no data when the node is just started.
-		// The default value is 1e9 * 10
-		load = penalty * uint64(atomic.LoadInt64(&n.inflight))
-		return
-	}
-	if predict > avgLag {
-		avgLag = predict
-	}
-	// add 5ms to eliminate the latency gap between different zones
-	avgLag += int64(time.Millisecond * 5)
-	load = uint64(avgLag) * uint64(atomic.LoadInt64(&n.inflight))
 	return
 }
 
@@ -167,7 +172,7 @@ func (n *Node) Weight() (weight float64) {
 	if !ok || time.Duration(now-w.updateAt) > (time.Millisecond*5) {
 		health := n.health()
 		load := n.load()
-		weight = float64(health*uint64(time.Second)) / float64(load)
+		weight = float64(health*uint64(time.Microsecond)*10) / float64(load)
 		n.cachedWeight.Store(&nodeWeight{
 			value:    weight,
 			updateAt: now,
