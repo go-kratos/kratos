@@ -88,7 +88,6 @@ func (n *Node) load() (load uint64) {
 	avgLag = int64(math.Sqrt(float64(avgLag)))
 	load = uint64(avgLag) * uint64(atomic.LoadInt64(&n.inflight))
 	return load
-
 }
 
 func (n *Node) predict(avgLag int64, now int64) (predict int64) {
