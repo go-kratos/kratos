@@ -75,7 +75,7 @@ func TestLogger_Log_with(t *testing.T) {
 	}
 }
 
-func TestLogger_Log_no_msg_key(t *testing.T) {
+func TestLogger_Log_another_msg_key(t *testing.T) {
 	var buf bytes.Buffer
 	l := NewLogger(slog.NewTextHandler(&buf, &slog.HandlerOptions{
 		AddSource: false,
@@ -88,6 +88,25 @@ func TestLogger_Log_no_msg_key(t *testing.T) {
 	}))
 
 	h := log.NewHelper(l, log.WithMessageKey("other"))
+	h.Info("hello")
+
+	expect := "level=INFO msg=\"\" other=hello\n"
+	if got := buf.String(); got != expect {
+		t.Fatalf("expect=%q, got=%q,", expect, got)
+	}
+}
+
+func TestLogger_Log_no_msg_key(t *testing.T) {
+	var buf bytes.Buffer
+	h := log.NewHelper(NewLogger(slog.NewTextHandler(&buf, &slog.HandlerOptions{
+		AddSource: false,
+		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
+			if a.Key == slog.TimeKey {
+				return slog.Attr{}
+			}
+			return a
+		},
+	})))
 	h.Infow("key", "value")
 
 	expect := "level=INFO msg=\"\" key=value\n"
