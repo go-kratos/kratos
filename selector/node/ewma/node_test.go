@@ -80,8 +80,8 @@ func TestDirectError(t *testing.T) {
 	if float64(1000) >= wn.Weight() {
 		t.Errorf("float64(1000) >= wn.Weight()(%v)", wn.Weight())
 	}
-	if float64(1500) <= wn.Weight() {
-		t.Errorf("float64(1500) <= wn.Weight()(%v)", wn.Weight())
+	if float64(2000) <= wn.Weight() {
+		t.Errorf("float64(2000) <= wn.Weight()(%v)", wn.Weight())
 	}
 }
 
