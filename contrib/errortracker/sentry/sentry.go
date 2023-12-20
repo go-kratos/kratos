@@ -14,7 +14,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
-	http2 "github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
 type ctxKey struct{}
@@ -93,7 +93,7 @@ func Server(opts ...Option) middleware.Middleware {
 					}
 					scope.SetContext("Headers", headers)
 				case transport.KindHTTP:
-					htr := tr.(*http2.Transport)
+					htr := tr.(*http.Transport)
 					r := htr.Request()
 					scope.SetRequest(r)
 				}
