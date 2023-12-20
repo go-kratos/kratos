@@ -2,13 +2,13 @@ package consul
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/hashicorp/consul/api"
 
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
@@ -34,10 +34,16 @@ func WithTimeout(timeout time.Duration) Option {
 	}
 }
 
-// WithDatacenter with registry datacenter option
-func WithDatacenter(dc Datacenter) Option {
+// WithClusters specify the cluster to be used, if not set, obtain all currently associated clusters.
+func WithClusters(cs ...string) Option {
 	return func(o *Registry) {
-		o.cli.dc = dc
+		o.cli.clusters = cs
+	}
+}
+
+func WithMultiClusterMode(mode ClusterMode) Option {
+	return func(r *Registry) {
+		r.cli.multiClusterMode = mode
 	}
 }
 
@@ -86,6 +92,15 @@ func WithServiceCheck(checks ...*api.AgentServiceCheck) Option {
 	}
 }
 
+// WithAllowReRegistration allow re registration when the service is automatically removed by the registry
+func WithAllowReRegistration(allow bool) Option {
+	return func(o *Registry) {
+		if o.cli != nil {
+			o.cli.allowReRegistration = allow
+		}
+	}
+}
+
 // Config is consul registry config
 type Config struct {
 	*api.Config
@@ -107,17 +122,44 @@ func New(apiClient *api.Client, opts ...Option) *Registry {
 		enableHealthCheck: true,
 		timeout:           10 * time.Second,
 		cli: &Client{
-			dc:                             SingleDatacenter,
-			cli:                            apiClient,
+			consul:                         apiClient,
 			resolver:                       defaultResolver,
 			healthcheckInterval:            10,
 			heartbeat:                      true,
 			deregisterCriticalServiceAfter: 600,
+			multiClusterMode:               Single,
+			deregisteredService:            make(map[string]struct{}),
 		},
 	}
 	for _, o := range opts {
 		o(r)
 	}
+
+	var err error
+	if r.cli.multiClusterMode == WanFederation || r.cli.multiClusterMode == Peering {
+		if len(r.cli.clusters) == 0 {
+			switch r.cli.multiClusterMode {
+			case WanFederation:
+				r.cli.clusters, err = r.cli.consul.Catalog().Datacenters()
+				if err != nil {
+					log.Warnf("[Consul] get datacenters failed，will use the current cluster! err=%v", err)
+				}
+			case Peering:
+				peerings, _, err := r.cli.consul.Peerings().List(context.Background(), nil)
+				if err != nil {
+					log.Warnf("[Consul] get peerings failed，will use the current cluster! err=%v", err)
+					break
+				}
+				for _, peering := range peerings {
+					r.cli.clusters = append(r.cli.clusters, peering.Name)
+				}
+			}
+		}
+	}
+
+	// append the current cluster
+	r.cli.clusters = append(r.cli.clusters, "")
+
 	r.cli.ctx, r.cli.cancel = context.WithCancel(context.Background())
 	return r
 }
@@ -134,47 +176,42 @@ func (r *Registry) Deregister(ctx context.Context, svc *registry.ServiceInstance
 
 // GetService return service by name
 func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.ServiceInstance, error) {
-	r.lock.RLock()
-	defer r.lock.RUnlock()
-	set := r.registry[name]
+	var services []*registry.ServiceInstance
+	for _, cluster := range r.cli.clusters {
+		opts := &api.QueryOptions{}
+		switch r.cli.multiClusterMode {
+		case WanFederation:
+			opts.Datacenter = cluster
+		case Peering:
+			opts.Peer = cluster
+		}
 
-	getRemote := func() []*registry.ServiceInstance {
-		services, _, err := r.cli.Service(ctx, name, 0, true)
-		if err == nil && len(services) > 0 {
-			return services
+		tmp, _, err := r.cli.service(ctx, name, true, opts)
+		if err != nil {
+			return nil, err
 		}
-		return nil
+		services = append(services, tmp...)
 	}
 
-	if set == nil {
-		if s := getRemote(); len(s) > 0 {
-			return s, nil
-		}
-		return nil, fmt.Errorf("service %s not resolved in registry", name)
+	if len(services) == 0 {
+		return nil, errors.New("service instances not found")
 	}
-	ss, _ := set.services.Load().([]*registry.ServiceInstance)
-	if ss == nil {
-		if s := getRemote(); len(s) > 0 {
-			return s, nil
-		}
-		return nil, fmt.Errorf("service %s not found in registry", name)
-	}
-	return ss, nil
+
+	return services, nil
 }
 
+// Deprecated: This method should not be exported
 // ListServices return service list.
 func (r *Registry) ListServices() (allServices map[string][]*registry.ServiceInstance, err error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 	allServices = make(map[string][]*registry.ServiceInstance)
 	for name, set := range r.registry {
-		var services []*registry.ServiceInstance
-		ss, _ := set.services.Load().([]*registry.ServiceInstance)
+		ss := set.getInstances()
 		if ss == nil {
 			continue
 		}
-		services = append(services, ss...)
-		allServices[name] = services
+		allServices[name] = ss
 	}
 	return
 }
@@ -187,7 +224,7 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	if !ok {
 		set = &serviceSet{
 			watcher:     make(map[*watcher]struct{}),
-			services:    &atomic.Value{},
+			services:    make(map[string][]*registry.ServiceInstance),
 			serviceName: name,
 		}
 		r.registry[name] = set
@@ -199,10 +236,8 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	}
 	w.ctx, w.cancel = context.WithCancel(ctx)
 	w.set = set
-	set.lock.Lock()
-	set.watcher[w] = struct{}{}
-	set.lock.Unlock()
-	ss, _ := set.services.Load().([]*registry.ServiceInstance)
+	set.addWatcher(w)
+	ss := set.getInstances()
 	if len(ss) > 0 {
 		// If the service has a value, it needs to be pushed to the watcher,
 		// otherwise the initial data may be blocked forever during the watch.
@@ -222,37 +257,72 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 	timeoutCtx, cancel := context.WithTimeout(ctx, r.timeout)
 	defer cancel()
 
-	services, idx, err := r.cli.Service(timeoutCtx, ss.serviceName, 0, true)
-	if err != nil {
-		return err
-	}
-	if len(services) > 0 {
-		ss.broadcast(services)
-	}
+	m := make(map[string][]*registry.ServiceInstance)
 
-	go func() {
-		ticker := time.NewTicker(time.Second)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ticker.C:
+	for _, cluster := range r.cli.clusters {
+		res, _, err := r.cli.service(timeoutCtx, ss.serviceName, true, processClusterOption(nil, r.cli.multiClusterMode, cluster))
+		if err != nil {
+			return err
+		}
+		m[cluster] = res
+	}
+	ss.broadcast(m)
+
+	for _, cluster := range r.cli.clusters {
+		opts := processClusterOption(nil, r.cli.multiClusterMode, cluster)
+		go func(cluster string) {
+			ticker := time.NewTicker(time.Second)
+			defer ticker.Stop()
+
+			opts.WaitIndex = 0
+			opts.WaitTime = time.Second * 55
+
+			var err error
+			var tmpService []*registry.ServiceInstance
+
+			for range ticker.C {
 				timeoutCtx, cancel := context.WithTimeout(context.Background(), r.timeout)
-				tmpService, tmpIdx, err := r.cli.Service(timeoutCtx, ss.serviceName, idx, true)
+				tmpService, opts.WaitIndex, err = r.cli.service(timeoutCtx, ss.serviceName, true, opts)
 				cancel()
 				if err != nil {
 					time.Sleep(time.Second)
 					continue
 				}
-				if len(tmpService) != 0 && tmpIdx != idx {
-					services = tmpService
-					ss.broadcast(services)
-				}
-				idx = tmpIdx
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
 
+				if len(tmpService) != 0 {
+					ss.broadcast(map[string][]*registry.ServiceInstance{cluster: tmpService})
+					continue
+				}
+
+				flag := false
+
+				for c, services := range ss.getInstancesMap(cluster) {
+					if c == cluster {
+						continue
+					}
+					if len(services) > 0 {
+						flag = true
+						break
+					}
+				}
+				if flag {
+					ss.broadcast(map[string][]*registry.ServiceInstance{cluster: tmpService})
+				}
+			}
+		}(cluster)
+	}
 	return nil
+}
+
+func processClusterOption(opts *api.QueryOptions, mode ClusterMode, cluster string) *api.QueryOptions {
+	if opts == nil {
+		opts = &api.QueryOptions{}
+	}
+	switch mode {
+	case WanFederation:
+		opts.Datacenter = cluster
+	case Peering:
+		opts.Peer = cluster
+	}
+	return opts
 }

@@ -23,18 +23,15 @@ func (w *watcher) Next() (services []*registry.ServiceInstance, err error) {
 	case <-w.event:
 	}
 
-	ss, ok := w.set.services.Load().([]*registry.ServiceInstance)
-
-	if ok {
-		services = append(services, ss...)
+	if err = w.ctx.Err(); err != nil {
+		return nil, err
 	}
-	return
+
+	return w.set.getInstances(), nil
 }
 
 func (w *watcher) Stop() error {
 	w.cancel()
-	w.set.lock.Lock()
-	defer w.set.lock.Unlock()
-	delete(w.set.watcher, w)
+	w.set.delWatcher(w)
 	return nil
 }
