@@ -38,6 +38,14 @@ func TestDisableDebugLog(t *testing.T) {
 	}
 }
 
+func TestPrintDebugLog(t *testing.T) {
+	o := &builder{}
+	PrintDebugLog(true)(o)
+	if !o.debugLog {
+		t.Errorf("expected PrintdebugLog true, got %v", o.debugLog)
+	}
+}
+
 type mockDiscovery struct{}
 
 func (m *mockDiscovery) GetService(_ context.Context, _ string) ([]*registry.ServiceInstance, error) {

@@ -6,6 +6,8 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
+const name = "direct"
+
 func init() {
 	resolver.Register(NewBuilder())
 }
@@ -35,5 +37,5 @@ func (d *directBuilder) Build(target resolver.Target, cc resolver.ClientConn, _ 
 }
 
 func (d *directBuilder) Scheme() string {
-	return "direct"
+	return name
 }
