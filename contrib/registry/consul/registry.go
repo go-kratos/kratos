@@ -142,12 +142,12 @@ func New(apiClient *api.Client, opts ...Option) *Registry {
 			case WanFederation:
 				r.cli.clusters, err = r.cli.consul.Catalog().Datacenters()
 				if err != nil {
-					log.Errorf("[Consul] get datacenters failed，will use the current cluster! err=%v", err)
+					log.Warnf("[Consul] get datacenters failed，will use the current cluster! err=%v", err)
 				}
 			case Peering:
 				peerings, _, err := r.cli.consul.Peerings().List(context.Background(), nil)
 				if err != nil {
-					log.Errorf("[Consul] get peerings failed，will use the current cluster! err=%v", err)
+					log.Warnf("[Consul] get peerings failed，will use the current cluster! err=%v", err)
 					break
 				}
 				for _, peering := range peerings {
