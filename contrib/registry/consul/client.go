@@ -179,9 +179,14 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 					return
 				case <-ticker.C:
 					// ensure that unregistered services will not be re-registered by mistake
-					if errors.Is(c.ctx.Err(), context.Canceled) || errors.Is(c.ctx.Err(), context.DeadlineExceeded) {
+
+					c.lock.RLock()
+					_, ok := c.deregisteredService[svc.ID]
+					c.lock.RUnlock()
+					if ok || errors.Is(c.ctx.Err(), context.Canceled) || errors.Is(c.ctx.Err(), context.DeadlineExceeded) {
 						return
 					}
+
 					err = c.consul.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
 					if err != nil {
 						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
@@ -190,11 +195,6 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 						}
 						// when the previous report fails, try to re register the service
 						time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
-						c.lock.RLock()
-						if _, ok := c.deregisteredService[svc.ID]; ok {
-							return
-						}
-						c.lock.RUnlock()
 						if err := c.consul.Agent().ServiceRegister(asr); err != nil {
 							log.Errorf("[Consul] re registry service failed!, err=%v", err)
 						} else {
