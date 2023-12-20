@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/hashicorp/consul/api"
@@ -208,15 +207,11 @@ func (r *Registry) ListServices() (allServices map[string][]*registry.ServiceIns
 	defer r.lock.RUnlock()
 	allServices = make(map[string][]*registry.ServiceInstance)
 	for name, set := range r.registry {
-		var services []*registry.ServiceInstance
-		ss, _ := set.services.Load().(map[string][]*registry.ServiceInstance)
+		ss := set.getInstances()
 		if ss == nil {
 			continue
 		}
-		for _, instances := range ss {
-			services = append(services, instances...)
-		}
-		allServices[name] = services
+		allServices[name] = ss
 	}
 	return
 }
@@ -229,7 +224,7 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	if !ok {
 		set = &serviceSet{
 			watcher:     make(map[*watcher]struct{}),
-			services:    &atomic.Value{},
+			services:    make(map[string][]*registry.ServiceInstance),
 			serviceName: name,
 		}
 		r.registry[name] = set
@@ -241,10 +236,8 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	}
 	w.ctx, w.cancel = context.WithCancel(ctx)
 	w.set = set
-	set.lock.Lock()
-	set.watcher[w] = struct{}{}
-	set.lock.Unlock()
-	ss, _ := set.services.Load().(map[string][]*registry.ServiceInstance)
+	set.addWatcher(w)
+	ss := set.getInstances()
 	if len(ss) > 0 {
 		// If the service has a value, it needs to be pushed to the watcher,
 		// otherwise the initial data may be blocked forever during the watch.
@@ -301,10 +294,9 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 					continue
 				}
 
-				ss.lock.Lock()
 				flag := false
 
-				for c, services := range ss.services.Load().(map[string][]*registry.ServiceInstance) {
+				for c, services := range ss.getInstancesMap(cluster) {
 					if c == cluster {
 						continue
 					}
@@ -313,7 +305,6 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 						break
 					}
 				}
-				ss.lock.Unlock()
 				if flag {
 					ss.broadcast(map[string][]*registry.ServiceInstance{cluster: tmpService})
 				}
