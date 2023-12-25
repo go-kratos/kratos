@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/aliyun/aliyun-log-go-sdk v0.1.67
 	github.com/go-kratos/kratos/v2 v2.7.2
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.32.0
 )
 
 require (
