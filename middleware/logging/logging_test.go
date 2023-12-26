@@ -187,7 +187,7 @@ func TestServer_CallerPath(t *testing.T) {
 	logger := log.With(&a, "caller", log.Caller(5)) // report where the helper was called
 
 	// make sure the caller is same
-	sameCaller := func(fn middleware.Handler) { fn(context.Background(), nil) }
+	sameCaller := func(fn middleware.Handler) { _, _ = fn(context.Background(), nil) }
 
 	// caller: [... log inside middleware, fn(context.Background(), nil)]
 	h := func(context.Context, any) (a any, e error) { return }
@@ -213,7 +213,7 @@ func TestClient_CallerPath(t *testing.T) {
 	logger := log.With(&a, "caller", log.Caller(5)) // report where the helper was called
 
 	// make sure the caller is same
-	sameCaller := func(fn middleware.Handler) { fn(context.Background(), nil) }
+	sameCaller := func(fn middleware.Handler) { _, _ = fn(context.Background(), nil) }
 
 	// caller: [... log inside middleware, fn(context.Background(), nil)]
 	h := func(context.Context, any) (a any, e error) { return }
