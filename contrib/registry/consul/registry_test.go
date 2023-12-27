@@ -333,7 +333,7 @@ func TestRegistry_Watch(t *testing.T) {
 			},
 		},
 		{
-			name: "ctx has been cancelled",
+			name: "ctx has been canceled",
 			args: args{
 				ctx:      canceledCtx,
 				cancel:   cancel,

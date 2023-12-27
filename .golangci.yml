@@ -7,7 +7,6 @@ linters:
   fast: false
   enable:
     - bodyclose
-    - deadcode
     - dogsled
     - durationcheck
     - errcheck
@@ -25,13 +24,12 @@ linters:
     - prealloc
     - revive
     - staticcheck
-    - structcheck
     - typecheck
     - unused
-    - varcheck
     - whitespace
     - wastedassign
     - unconvert
+    - misspell
 
   # don't enable:
   # - asciicheck
@@ -69,3 +67,5 @@ linters-settings:
     min-complexity: 50
   goimports:
     local-prefixes: github.com/go-kratos # Put imports beginning with prefix after 3rd-party packages
+  misspell: # Finds commonly misspelled English words in comments
+    locale: US
