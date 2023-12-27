@@ -40,8 +40,9 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 		os.RemoveAll(to)
 	}
 	fmt.Printf("🚀 Creating service %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
+	modName, notifyFunc := p.getModName()
 	repo := base.NewRepo(layout, branch)
-	if err := repo.CopyTo(ctx, to, p.Name, []string{".git", ".github"}); err != nil {
+	if err := repo.CopyTo(ctx, to, modName, []string{".git", ".github"}); err != nil {
 		return err
 	}
 	e := os.Rename(
@@ -62,9 +63,7 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 	base.Tree(to, dir)
 
 	fmt.Printf("\n🍺 Project creation succeeded %s\n", color.GreenString(p.Name))
-	if p.ModuleName != "" {
-		fmt.Printf("👉 Module name replace succeeded %s\n", color.BlueString(p.ModuleName))
-	}
+	notifyFunc()
 	fmt.Print("💻 Use the following command to start the project 👇:\n\n")
 
 	fmt.Println(color.WhiteString("$ cd %s", p.Name))
@@ -74,4 +73,14 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 	fmt.Println("			🤝 Thanks for using Kratos")
 	fmt.Println("	📚 Tutorial: https://go-kratos.dev/docs/getting-started/start")
 	return nil
+}
+
+func (p *Project) getModName() (string, func()) {
+	if p.ModuleName != "" {
+		return p.ModuleName, func() {
+			fmt.Printf("👉 Module name replace succeeded %s\n", color.BlueString(p.ModuleName))
+		}
+	}
+
+	return p.Name, func() {}
 }
