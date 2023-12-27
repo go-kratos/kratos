@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"runtime"
+	"slices"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -57,17 +58,28 @@ func (l *Logger) Log(level log.Level, keyvals ...interface{}) error {
 		return nil
 	}
 
+	msg, keyvals := extractMessage(keyvals)
+
 	switch level {
 	case log.LevelDebug:
-		l.Debug("", keyvals...)
+		l.Debug(msg, keyvals...)
 	case log.LevelInfo:
-		l.Info("", keyvals...)
+		l.Info(msg, keyvals...)
 	case log.LevelWarn:
-		l.Warn("", keyvals...)
+		l.Warn(msg, keyvals...)
 	case log.LevelError:
-		l.Error("", keyvals...)
+		l.Error(msg, keyvals...)
 	case log.LevelFatal:
-		l.Error("", keyvals...)
+		l.Error(msg, keyvals...)
 	}
 	return nil
+}
+
+func extractMessage(keyvals []interface{}) (msg string, kvs []interface{}) {
+	for i := 1; i < len(keyvals); i++ {
+		if keyvals[i-1] == log.DefaultMessageKey {
+			return fmt.Sprint(keyvals[i]), slices.Delete(keyvals, i-1, i+1)
+		}
+	}
+	return "", keyvals
 }
