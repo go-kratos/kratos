@@ -193,8 +193,8 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 					} else {
 						log.Warn("[Consul] re registry of service occurred success")
 					}
-					c.lock.RUnlock()
 				}
+				c.lock.RUnlock()
 			}
 		}()
 	}
@@ -210,5 +210,6 @@ func (c *Client) Deregister(_ context.Context, serviceID string) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	c.deregisteredService[serviceID] = struct{}{}
+	log.Debugf("[Consul] deregister service: %s", serviceID)
 	return c.consul.Agent().ServiceDeregister(serviceID)
 }
