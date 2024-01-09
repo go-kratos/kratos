@@ -2,7 +2,6 @@ package consul
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math/rand"
 	"net"
@@ -173,17 +172,12 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 			defer ticker.Stop()
 			for {
 				select {
-				case <-c.ctx.Done():
-					return
-				case <-ctx.Done():
-					return
 				case <-ticker.C:
 					// ensure that unregistered services will not be re-registered by mistake
-
 					c.lock.RLock()
 					_, ok := c.deregisteredService[svc.ID]
 					c.lock.RUnlock()
-					if ok || errors.Is(c.ctx.Err(), context.Canceled) || errors.Is(c.ctx.Err(), context.DeadlineExceeded) {
+					if ok {
 						return
 					}
 
