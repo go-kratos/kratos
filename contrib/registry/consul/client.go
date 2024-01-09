@@ -170,31 +170,30 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 			}
 			ticker := time.NewTicker(time.Second * time.Duration(c.healthcheckInterval))
 			defer ticker.Stop()
-			for {
-				select {
-				case <-ticker.C:
-					// ensure that unregistered services will not be re-registered by mistake
-					c.lock.RLock()
-					_, ok := c.deregisteredService[svc.ID]
-					c.lock.RUnlock()
-					if ok {
-						return
-					}
 
-					err = c.consul.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
-					if err != nil {
-						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
-						if !c.allowReRegistration {
-							continue
-						}
-						// when the previous report fails, try to re register the service
-						time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
-						if err := c.consul.Agent().ServiceRegister(asr); err != nil {
-							log.Errorf("[Consul] re registry service failed!, err=%v", err)
-						} else {
-							log.Warn("[Consul] re registry of service occurred success")
-						}
+			for range ticker.C {
+				// ensure that unregistered services will not be re-registered by mistake
+				c.lock.RLock()
+				if _, ok := c.deregisteredService[svc.ID]; ok {
+					c.lock.RUnlock()
+					return
+				}
+
+				err = c.consul.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+				if err != nil {
+					log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
+					if !c.allowReRegistration {
+						c.lock.RUnlock()
+						continue
 					}
+					// when the previous report fails, try to re register the service
+					time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
+					if err := c.consul.Agent().ServiceRegister(asr); err != nil {
+						log.Errorf("[Consul] re registry service failed!, err=%v", err)
+					} else {
+						log.Warn("[Consul] re registry of service occurred success")
+					}
+					c.lock.RUnlock()
 				}
 			}
 		}()
