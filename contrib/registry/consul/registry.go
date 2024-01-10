@@ -257,23 +257,22 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 	timeoutCtx, cancel := context.WithTimeout(ctx, r.timeout)
 	defer cancel()
 
-	m := make(map[string][]*registry.ServiceInstance)
-
 	for _, cluster := range r.cli.clusters {
 		res, _, err := r.cli.service(timeoutCtx, ss.serviceName, true, processClusterOption(nil, r.cli.multiClusterMode, cluster))
 		if err != nil {
 			return err
 		}
-		m[cluster] = res
+		if len(res) > 0 {
+			ss.broadcast(cluster, res)
+		}
 	}
-	ss.broadcast(m)
 
 	for _, cluster := range r.cli.clusters {
-		opts := processClusterOption(nil, r.cli.multiClusterMode, cluster)
 		go func(cluster string) {
 			ticker := time.NewTicker(time.Second)
 			defer ticker.Stop()
 
+			opts := processClusterOption(nil, r.cli.multiClusterMode, cluster)
 			opts.WaitIndex = 0
 			opts.WaitTime = time.Second * 55
 
@@ -288,26 +287,7 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 					time.Sleep(time.Second)
 					continue
 				}
-
-				if len(tmpService) != 0 {
-					ss.broadcast(map[string][]*registry.ServiceInstance{cluster: tmpService})
-					continue
-				}
-
-				flag := false
-
-				for c, services := range ss.getInstancesMap(cluster) {
-					if c == cluster {
-						continue
-					}
-					if len(services) > 0 {
-						flag = true
-						break
-					}
-				}
-				if flag {
-					ss.broadcast(map[string][]*registry.ServiceInstance{cluster: tmpService})
-				}
+				ss.broadcast(cluster, tmpService)
 			}
 		}(cluster)
 	}

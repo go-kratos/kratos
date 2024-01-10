@@ -13,20 +13,25 @@ type serviceSet struct {
 	lock        sync.RWMutex
 }
 
-func (s *serviceSet) broadcast(ss map[string][]*registry.ServiceInstance) {
+func (s *serviceSet) broadcast(cluster string, instances []*registry.ServiceInstance) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	if ss == nil {
-		return
+	if s.services == nil {
+		s.services = make(map[string][]*registry.ServiceInstance)
 	}
 
-	if s.services == nil {
-		s.services = ss
-	} else {
-		for cluster, service := range ss {
-			s.services[cluster] = service
+	if len(instances) == 0 {
+		for c, ins := range s.services {
+			if cluster == c {
+				continue
+			}
+			if len(ins) != 0 {
+				delete(s.services, cluster)
+			}
 		}
+	} else {
+		s.services[cluster] = instances
 	}
 
 	for k := range s.watcher {
@@ -47,21 +52,6 @@ func (s *serviceSet) getInstances() []*registry.ServiceInstance {
 		services = append(services, instances...)
 	}
 	return services
-}
-
-// getInstances get service instances
-func (s *serviceSet) getInstancesMap(cluster string) map[string][]*registry.ServiceInstance {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
-
-	tmp := make(map[string][]*registry.ServiceInstance)
-	for k, instances := range s.services {
-		if k == cluster {
-			tmp[k] = instances
-		}
-	}
-
-	return tmp
 }
 
 func (s *serviceSet) addWatcher(w *watcher) {
