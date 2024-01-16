@@ -27,13 +27,7 @@ func (d *directBuilder) Build(target resolver.Target, cc resolver.ClientConn, _ 
 	for _, addr := range strings.Split(strings.TrimPrefix(target.URL.Path, "/"), ",") {
 		addrs = append(addrs, resolver.Address{Addr: addr})
 	}
-	err := cc.UpdateState(resolver.State{
-		Addresses: addrs,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return newDirectResolver(), nil
+	return newDirectResolver(cc, addrs), nil
 }
 
 func (d *directBuilder) Scheme() string {

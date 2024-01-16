@@ -65,6 +65,7 @@ func TestWatch(t *testing.T) {
 		ctx:      ctx,
 		cancel:   cancel,
 		insecure: false,
+		ch:       make(chan struct{}, 1),
 	}
 	r.ResolveNow(resolver.ResolveNowOptions{})
 	go func() {
@@ -100,6 +101,7 @@ func TestWatchContextCancel(t *testing.T) {
 		cc:     &testClientConn{te: t},
 		ctx:    ctx,
 		cancel: cancel,
+		ch:     make(chan struct{}, 1),
 	}
 	go func() {
 		time.Sleep(time.Second * 2)

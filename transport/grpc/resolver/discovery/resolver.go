@@ -16,9 +16,11 @@ import (
 )
 
 type discoveryResolver struct {
-	w  registry.Watcher
-	cc resolver.ClientConn
+	w   registry.Watcher
+	cc  resolver.ClientConn
+	ins []*registry.ServiceInstance
 
+	ch     chan struct{}
 	ctx    context.Context
 	cancel context.CancelFunc
 
@@ -33,6 +35,8 @@ func (r *discoveryResolver) watch() {
 		select {
 		case <-r.ctx.Done():
 			return
+		case <-r.ch:
+			r.update(r.ins)
 		default:
 		}
 		ins, err := r.w.Next()
@@ -44,6 +48,7 @@ func (r *discoveryResolver) watch() {
 			time.Sleep(time.Second)
 			continue
 		}
+		r.ins = ins
 		r.update(ins)
 	}
 }
@@ -105,7 +110,12 @@ func (r *discoveryResolver) Close() {
 	}
 }
 
-func (r *discoveryResolver) ResolveNow(_ resolver.ResolveNowOptions) {}
+func (r *discoveryResolver) ResolveNow(_ resolver.ResolveNowOptions) {
+	select {
+	case r.ch <- struct{}{}:
+	default:
+	}
+}
 
 func parseAttributes(md map[string]string) (a *attributes.Attributes) {
 	for k, v := range md {

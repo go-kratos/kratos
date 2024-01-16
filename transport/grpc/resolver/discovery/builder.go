@@ -112,6 +112,7 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, _ resolv
 		debugLog:    b.debugLog,
 		subsetSize:  b.subsetSize,
 		selecterKey: uuid.New().String(),
+		ch:          make(chan struct{}, 1),
 	}
 	go r.watch()
 	return r, nil
