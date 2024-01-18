@@ -330,6 +330,10 @@ func TestNewClient(t *testing.T) {
 	if err == nil {
 		t.Error("err should not be equal to nil")
 	}
+	_, err = NewClient(context.Background(), WithDiscovery(&mockDiscovery{}), WithEndpoint("https://go-kratos.dev/path"))
+	if err == nil {
+		t.Error("err should not be equal to nil")
+	}
 
 	client, err := NewClient(
 		context.Background(),
