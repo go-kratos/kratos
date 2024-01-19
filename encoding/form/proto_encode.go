@@ -22,6 +22,9 @@ func EncodeValues(msg interface{}) (url.Values, error) {
 		u := make(url.Values)
 		err := encodeByField(u, "", v.ProtoReflect())
 		if err != nil {
+			if len(u) > 0 {
+				return u, err
+			}
 			return nil, err
 		}
 		return u, nil
