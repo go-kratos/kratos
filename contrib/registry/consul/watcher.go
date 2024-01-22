@@ -36,5 +36,9 @@ func (w *watcher) Stop() error {
 	w.set.lock.Lock()
 	defer w.set.lock.Unlock()
 	delete(w.set.watcher, w)
+	// close resolve
+	if len(w.set.watcher) == 0 {
+		w.set.cancel()
+	}
 	return nil
 }

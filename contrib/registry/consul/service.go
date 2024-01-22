@@ -1,6 +1,7 @@
 package consul
 
 import (
+	"context"
 	"sync"
 	"sync/atomic"
 
@@ -12,6 +13,9 @@ type serviceSet struct {
 	watcher     map[*watcher]struct{}
 	services    *atomic.Value
 	lock        sync.RWMutex
+
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 func (s *serviceSet) broadcast(ss []*registry.ServiceInstance) {
