@@ -11,11 +11,24 @@ import (
 var _ log.Logger = (*Logger)(nil)
 
 type Logger struct {
-	log *zap.Logger
+	log    *zap.Logger
+	msgKey string
+}
+
+type Option func(*Logger)
+
+// WithMessageKey with message key.
+func WithMessageKey(key string) Option {
+	return func(l *Logger) {
+		l.msgKey = key
+	}
 }
 
 func NewLogger(zlog *zap.Logger) *Logger {
-	return &Logger{zlog}
+	return &Logger{
+		log:    zlog,
+		msgKey: log.DefaultMessageKey,
+	}
 }
 
 func (l *Logger) Log(level log.Level, keyvals ...interface{}) error {
@@ -30,7 +43,7 @@ func (l *Logger) Log(level log.Level, keyvals ...interface{}) error {
 
 	data := make([]zap.Field, 0, (keylen/2)+1)
 	for i := 0; i < keylen; i += 2 {
-		if keyvals[i].(string) == log.DefaultMessageKey {
+		if keyvals[i].(string) == l.msgKey {
 			msg, _ = keyvals[i+1].(string)
 			continue
 		}
