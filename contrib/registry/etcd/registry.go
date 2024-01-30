@@ -21,12 +21,15 @@ type Option func(o *options)
 
 type options struct {
 	ctx       context.Context
+	cancel    context.CancelFunc // should call when deregister
 	namespace string
 	ttl       time.Duration
 	maxRetry  int
 }
 
 // Context with registry context.
+// But you should not use this option to set the context of the registry's lifecycle.
+// you should control the lifecycle of the registry by Register and Deregister.
 func Context(ctx context.Context) Option {
 	return func(o *options) { o.ctx = ctx }
 }
@@ -55,8 +58,8 @@ type Registry struct {
 
 // New creates etcd registry
 func New(client *clientv3.Client, opts ...Option) (r *Registry) {
+	rCtx := context.Background()
 	op := &options{
-		ctx:       context.Background(),
 		namespace: "/microservices",
 		ttl:       time.Second * 15,
 		maxRetry:  5,
@@ -64,6 +67,9 @@ func New(client *clientv3.Client, opts ...Option) (r *Registry) {
 	for _, o := range opts {
 		o(op)
 	}
+	// op.ctx means the context of the registry's
+	// op.cancel means the cancel function of the registry's lifecycle
+	op.ctx, op.cancel = context.WithCancel(rCtx)
 	return &Registry{
 		opts:   op,
 		client: client,
@@ -95,8 +101,10 @@ func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
 	defer func() {
 		if r.lease != nil {
-			r.lease.Close()
+			_ = r.lease.Close()
 		}
+		// once call delete, the registry will be closed
+		r.opts.cancel()
 	}()
 	key := fmt.Sprintf("%s/%s/%s", r.opts.namespace, service.Name, service.ID)
 	_, err := r.client.Delete(ctx, key)
