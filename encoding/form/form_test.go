@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"reflect"
 	"testing"
+	"time"
 
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
@@ -86,6 +87,10 @@ func TestFormCodecUnmarshal(t *testing.T) {
 }
 
 func TestProtoEncodeDecode(t *testing.T) {
+	loc := time.Local
+	time.Local = time.UTC
+	t.Cleanup(func() { time.Local = loc })
+
 	in := &complex.Complex{
 		Id:      2233,
 		NoOne:   "2233",
