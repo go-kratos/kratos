@@ -19,7 +19,6 @@ func TestContextHeader(t *testing.T) {
 		router: testRouter,
 		req:    &http.Request{Header: map[string][]string{"name": {"kratos"}}},
 		res:    nil,
-		w:      responseWriter{},
 	}
 	h := w.Header()
 	if !reflect.DeepEqual(h, http.Header{"name": {"kratos"}}) {
@@ -32,7 +31,6 @@ func TestContextForm(t *testing.T) {
 		router: testRouter,
 		req:    &http.Request{Header: map[string][]string{"name": {"kratos"}}, Method: http.MethodPost},
 		res:    nil,
-		w:      responseWriter{},
 	}
 	form := w.Form()
 	if !reflect.DeepEqual(form, url.Values{}) {
@@ -43,7 +41,6 @@ func TestContextForm(t *testing.T) {
 		router: testRouter,
 		req:    &http.Request{Form: map[string][]string{"name": {"kratos"}}},
 		res:    nil,
-		w:      responseWriter{},
 	}
 	form = w.Form()
 	if !reflect.DeepEqual(form, url.Values{"name": {"kratos"}}) {
@@ -56,7 +53,6 @@ func TestContextQuery(t *testing.T) {
 		router: testRouter,
 		req:    &http.Request{URL: &url.URL{Scheme: "https", Host: "github.com", Path: "go-kratos/kratos", RawQuery: "page=1"}, Method: http.MethodPost},
 		res:    nil,
-		w:      responseWriter{},
 	}
 	q := w.Query()
 	if !reflect.DeepEqual(q, url.Values{"page": {"1"}}) {
@@ -70,7 +66,6 @@ func TestContextRequest(t *testing.T) {
 		router: testRouter,
 		req:    req,
 		res:    nil,
-		w:      responseWriter{},
 	}
 	res := w.Request()
 	if !reflect.DeepEqual(res, req) {
@@ -84,7 +79,6 @@ func TestContextResponse(t *testing.T) {
 		router: &Router{srv: &Server{enc: DefaultResponseEncoder}},
 		req:    &http.Request{Method: http.MethodPost},
 		res:    res,
-		w:      responseWriter{200, res},
 	}
 	if !reflect.DeepEqual(w.Response(), res) {
 		t.Errorf("expected %v, got %v", res, w.Response())
@@ -100,12 +94,83 @@ func TestContextResponse(t *testing.T) {
 	}
 }
 
+func TestContextResult(t *testing.T) {
+	testCases := []struct {
+		name   string
+		enc    EncodeResponseFunc
+		code   int
+		header string
+	}{
+		{
+			name: "normal",
+			enc: func(rw http.ResponseWriter, r *http.Request, v interface{}) error {
+				rw.Header().Add("X-Foo", "foo")
+				_, err := rw.Write([]byte(v.(string)))
+				return err
+			},
+			code:   400,
+			header: "foo",
+		},
+		{
+			name: "writeHeader",
+			enc: func(rw http.ResponseWriter, r *http.Request, v interface{}) error {
+				rw.Header().Add("X-Foo", "foo")
+				rw.WriteHeader(500)
+				_, err := rw.Write([]byte(v.(string)))
+				return err
+			},
+			code:   500,
+			header: "foo",
+		},
+		{
+			name: "unwrap",
+			enc: func(rw http.ResponseWriter, r *http.Request, v interface{}) error {
+				u, ok := rw.(interface{ Unwrap() http.ResponseWriter })
+				if !ok {
+					t.Fatal("can not wrap http.ResponseWriter")
+				}
+
+				w := u.Unwrap()
+				w.Header().Add("X-Foo", "foo")
+				w.WriteHeader(500)
+
+				_, err := w.Write([]byte(v.(string)))
+				return err
+			},
+			code:   500,
+			header: "foo",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			res := httptest.NewRecorder()
+			w := wrapper{
+				router: &Router{srv: &Server{enc: tc.enc}},
+				req:    nil,
+				res:    res,
+			}
+			err := w.Result(400, "body")
+			if err != nil {
+				t.Fatalf("expected %v, got %v", nil, err)
+			}
+			if res.Code != tc.code {
+				t.Fatalf("expected %d, got %d", tc.code, res.Code)
+			}
+			if s := res.Header().Get("X-Foo"); s != tc.header {
+				t.Fatalf("expected %q, got %q", tc.header, s)
+			}
+			if s := res.Body.String(); s != "body" {
+				t.Fatalf("expected %s, resp.Body: %v", "body", s)
+			}
+		})
+	}
+}
+
 func TestContextBindQuery(t *testing.T) {
 	w := wrapper{
 		router: testRouter,
 		req:    &http.Request{URL: &url.URL{Scheme: "https", Host: "go-kratos-dev", RawQuery: "page=2"}},
 		res:    nil,
-		w:      responseWriter{},
 	}
 	type BindQuery struct {
 		Page int `json:"page"`
@@ -125,7 +190,6 @@ func TestContextBindForm(t *testing.T) {
 		router: testRouter,
 		req:    &http.Request{URL: &url.URL{Scheme: "https", Host: "go-kratos-dev"}, Form: map[string][]string{"page": {"2"}}},
 		res:    nil,
-		w:      responseWriter{},
 	}
 	type BindForm struct {
 		Page int `json:"page"`
@@ -146,7 +210,6 @@ func TestContextResponseReturn(t *testing.T) {
 		router: testRouter,
 		req:    nil,
 		res:    writer,
-		w:      responseWriter{},
 	}
 	err := w.JSON(200, "success")
 	if err != nil {
@@ -179,7 +242,6 @@ func TestContextCtx(t *testing.T) {
 		router: testRouter,
 		req:    req,
 		res:    nil,
-		w:      responseWriter{},
 	}
 	_, ok := w.Deadline()
 	if !ok {
@@ -202,7 +264,6 @@ func TestContextCtx(t *testing.T) {
 		router: &Router{srv: &Server{enc: DefaultResponseEncoder}},
 		req:    nil,
 		res:    nil,
-		w:      responseWriter{},
 	}
 	_, ok = w.Deadline()
 	if ok {

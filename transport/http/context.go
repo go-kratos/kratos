@@ -42,27 +42,24 @@ type Context interface {
 	Reset(http.ResponseWriter, *http.Request)
 }
 
-type responseWriter struct {
+type wrappedWriter struct {
 	code int
-	w    http.ResponseWriter
+	http.ResponseWriter
 }
 
-func (w *responseWriter) reset(res http.ResponseWriter) {
-	w.w = res
-	w.code = http.StatusOK
+func (w *wrappedWriter) WriteHeader(statusCode int) { w.code = statusCode }
+func (w *wrappedWriter) Write(data []byte) (int, error) {
+	w.ResponseWriter.WriteHeader(w.code)
+	return w.ResponseWriter.Write(data)
 }
-func (w *responseWriter) Header() http.Header        { return w.w.Header() }
-func (w *responseWriter) WriteHeader(statusCode int) { w.code = statusCode }
-func (w *responseWriter) Write(data []byte) (int, error) {
-	w.w.WriteHeader(w.code)
-	return w.w.Write(data)
-}
+
+// Unwrap is a escape hatch for accessing wrapped http.ResponseWriter.
+func (w *wrappedWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 
 type wrapper struct {
 	router *Router
 	req    *http.Request
 	res    http.ResponseWriter
-	w      responseWriter
 }
 
 func (c *wrapper) Header() http.Header {
@@ -104,12 +101,11 @@ func (c *wrapper) Returns(v interface{}, err error) error {
 	if err != nil {
 		return err
 	}
-	return c.router.srv.enc(&c.w, c.req, v)
+	return c.router.srv.enc(c.res, c.req, v)
 }
 
 func (c *wrapper) Result(code int, v interface{}) error {
-	c.w.WriteHeader(code)
-	return c.router.srv.enc(&c.w, c.req, v)
+	return c.router.srv.enc(&wrappedWriter{code, c.res}, c.req, v)
 }
 
 func (c *wrapper) JSON(code int, v interface{}) error {
@@ -152,7 +148,6 @@ func (c *wrapper) Stream(code int, contentType string, rd io.Reader) error {
 }
 
 func (c *wrapper) Reset(res http.ResponseWriter, req *http.Request) {
-	c.w.reset(res)
 	c.res = res
 	c.req = req
 }
