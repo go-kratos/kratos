@@ -156,6 +156,7 @@ func TestContextResult(t *testing.T) {
 			}
 
 			resp := res.Result()
+			defer resp.Body.Close()
 			if resp.StatusCode != tc.code {
 				t.Fatalf("expected %d, got %d", tc.code, resp.StatusCode)
 			}
