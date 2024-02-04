@@ -16,6 +16,8 @@ func TestRedirect(t *testing.T) {
 	_ = DefaultResponseEncoder(w, r, NewRedirect(redirectURL, redirectCode))
 
 	resp := w.Result()
+	defer resp.Body.Close()
+
 	if resp.StatusCode != redirectCode {
 		t.Fatalf("want %d but got %d", redirectCode, resp.StatusCode)
 	}
