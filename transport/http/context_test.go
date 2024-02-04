@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -153,14 +154,16 @@ func TestContextResult(t *testing.T) {
 			if err != nil {
 				t.Fatalf("expected %v, got %v", nil, err)
 			}
-			if res.Code != tc.code {
-				t.Fatalf("expected %d, got %d", tc.code, res.Code)
+
+			resp := res.Result()
+			if resp.StatusCode != tc.code {
+				t.Fatalf("expected %d, got %d", tc.code, resp.StatusCode)
 			}
-			if s := res.Header().Get("X-Foo"); s != tc.header {
+			if s := resp.Header.Get("X-Foo"); s != tc.header {
 				t.Fatalf("expected %q, got %q", tc.header, s)
 			}
-			if s := res.Body.String(); s != "body" {
-				t.Fatalf("expected %s, resp.Body: %v", "body", s)
+			if bs, _ := io.ReadAll(res.Body); string(bs) != "body" {
+				t.Fatalf("expected %s, got: %s", "body", bs)
 			}
 		})
 	}
