@@ -105,7 +105,7 @@ func TestContextResult(t *testing.T) {
 		{
 			name: "normal",
 			enc: func(rw http.ResponseWriter, r *http.Request, v interface{}) error {
-				rw.Header().Add("X-Foo", "foo")
+				rw.Header().Set("X-Foo", "foo")
 				_, err := rw.Write([]byte(v.(string)))
 				return err
 			},
@@ -115,7 +115,7 @@ func TestContextResult(t *testing.T) {
 		{
 			name: "writeHeader",
 			enc: func(rw http.ResponseWriter, r *http.Request, v interface{}) error {
-				rw.Header().Add("X-Foo", "foo")
+				rw.Header().Set("X-Foo", "foo")
 				rw.WriteHeader(500)
 				_, err := rw.Write([]byte(v.(string)))
 				return err
@@ -132,7 +132,7 @@ func TestContextResult(t *testing.T) {
 				}
 
 				w := u.Unwrap()
-				w.Header().Add("X-Foo", "foo")
+				w.Header().Set("X-Foo", "foo")
 				w.WriteHeader(500)
 
 				_, err := w.Write([]byte(v.(string)))
