@@ -111,7 +111,7 @@ func encodeRepeatedField(fieldDescriptor protoreflect.FieldDescriptor, list prot
 func encodeMapField(fieldDescriptor protoreflect.FieldDescriptor, mp protoreflect.Map) (map[string]string, error) {
 	m := make(map[string]string)
 	mp.Range(func(k protoreflect.MapKey, v protoreflect.Value) bool {
-		key, err := EncodeField(fieldDescriptor.MapValue(), k.Value())
+		key, err := EncodeField(fieldDescriptor.MapKey(), k.Value())
 		if err != nil {
 			return false
 		}
