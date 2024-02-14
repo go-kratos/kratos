@@ -16,7 +16,7 @@ func EncodeURL(pathTemplate string, msg interface{}, needQuery bool) string {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return pathTemplate
 	}
-	queryParams, _ := form.EncodeValues(msg)
+	queryParams, _ := form.GetValues(msg)
 	pathParams := make(map[string]struct{})
 	path := reg.ReplaceAllStringFunc(pathTemplate, func(in string) string {
 		// it's unreachable because the reg means that must have more than one char in {}

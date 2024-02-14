@@ -20,7 +20,7 @@ func EncodeValues(msg interface{}) (url.Values, error) {
 	}
 	if v, ok := msg.(proto.Message); ok {
 		u := make(url.Values)
-		err := encodeByField(u, "", v.ProtoReflect())
+		err := encodeByField(u, "", v.ProtoReflect(), false)
 		if err != nil {
 			return nil, err
 		}
@@ -29,7 +29,23 @@ func EncodeValues(msg interface{}) (url.Values, error) {
 	return encoder.Encode(msg)
 }
 
-func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr error) {
+// GetValues encode a message into url values but ignore proto message field parse errors.
+func GetValues(msg interface{}) (url.Values, error) {
+	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
+		return url.Values{}, nil
+	}
+	if v, ok := msg.(proto.Message); ok {
+		u := make(url.Values)
+		err := encodeByField(u, "", v.ProtoReflect(), true)
+		if err != nil {
+			return nil, err
+		}
+		return u, nil
+	}
+	return encoder.Encode(msg)
+}
+
+func encodeByField(u url.Values, path string, m protoreflect.Message, ignore bool) (finalErr error) {
 	m.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
 		var (
 			key     string
@@ -54,6 +70,9 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 		case fd.IsList():
 			if v.List().Len() > 0 {
 				list, err := encodeRepeatedField(fd, v.List())
+				if err != nil && ignore {
+					return true
+				}
 				if err != nil {
 					finalErr = err
 					return false
@@ -65,6 +84,9 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 		case fd.IsMap():
 			if v.Map().Len() > 0 {
 				m, err := encodeMapField(fd, v.Map())
+				if err != nil && ignore {
+					return true
+				}
 				if err != nil {
 					finalErr = err
 					return false
@@ -79,12 +101,19 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 				u.Set(newPath, value)
 				return true
 			}
-			if err = encodeByField(u, newPath, v.Message()); err != nil {
+			err = encodeByField(u, newPath, v.Message(), ignore)
+			if err != nil && ignore {
+				return true
+			}
+			if err != nil {
 				finalErr = err
 				return false
 			}
 		default:
 			value, err := EncodeField(fd, v)
+			if err != nil && ignore {
+				return true
+			}
 			if err != nil {
 				finalErr = err
 				return false
