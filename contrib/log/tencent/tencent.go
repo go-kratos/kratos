@@ -14,7 +14,6 @@ import (
 
 type Logger interface {
 	log.Logger
-
 	GetProducer() *cls.AsyncProducerClient
 	Close() error
 }
@@ -71,6 +70,9 @@ func (log *tencentLog) Close() error {
 
 func (log *tencentLog) Log(level log.Level, keyvals ...interface{}) error {
 	contents := make([]*cls.Log_Content, 0, len(keyvals)/2+1)
+	if (len(keyvals) & 1) == 1 {
+		keyvals = append(keyvals, "KEYVALS UNPAIRED")
+	}
 
 	contents = append(contents, &cls.Log_Content{
 		Key:   newString(level.Key()),

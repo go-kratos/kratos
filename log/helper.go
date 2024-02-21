@@ -14,10 +14,8 @@ type Option func(*Helper)
 
 // Helper is a logger helper.
 type Helper struct {
-	logger  Logger
-	msgKey  string
-	sprint  func(...interface{}) string
-	sprintf func(format string, a ...interface{}) string
+	logger Logger
+	msgKey string
 }
 
 // WithMessageKey with message key.
@@ -27,27 +25,11 @@ func WithMessageKey(k string) Option {
 	}
 }
 
-// WithSprint with sprint
-func WithSprint(sprint func(...interface{}) string) Option {
-	return func(opts *Helper) {
-		opts.sprint = sprint
-	}
-}
-
-// WithSprintf with sprintf
-func WithSprintf(sprintf func(format string, a ...interface{}) string) Option {
-	return func(opts *Helper) {
-		opts.sprintf = sprintf
-	}
-}
-
 // NewHelper new a logger helper.
 func NewHelper(logger Logger, opts ...Option) *Helper {
 	options := &Helper{
-		msgKey:  DefaultMessageKey, // default message key
-		logger:  logger,
-		sprint:  fmt.Sprint,
-		sprintf: fmt.Sprintf,
+		msgKey: DefaultMessageKey, // default message key
+		logger: logger,
 	}
 	for _, o := range opts {
 		o(options)
@@ -59,10 +41,8 @@ func NewHelper(logger Logger, opts ...Option) *Helper {
 // to ctx. The provided ctx must be non-nil.
 func (h *Helper) WithContext(ctx context.Context) *Helper {
 	return &Helper{
-		msgKey:  h.msgKey,
-		logger:  WithContext(ctx, h.logger),
-		sprint:  h.sprint,
-		sprintf: h.sprintf,
+		msgKey: h.msgKey,
+		logger: WithContext(ctx, h.logger),
 	}
 }
 
@@ -73,12 +53,12 @@ func (h *Helper) Log(level Level, keyvals ...interface{}) {
 
 // Debug logs a message at debug level.
 func (h *Helper) Debug(a ...interface{}) {
-	_ = h.logger.Log(LevelDebug, h.msgKey, h.sprint(a...))
+	_ = h.logger.Log(LevelDebug, append([]interface{}{h.msgKey}, a...)...)
 }
 
 // Debugf logs a message at debug level.
 func (h *Helper) Debugf(format string, a ...interface{}) {
-	_ = h.logger.Log(LevelDebug, h.msgKey, h.sprintf(format, a...))
+	_ = h.logger.Log(LevelDebug, h.msgKey, fmt.Sprintf(format, a...))
 }
 
 // Debugw logs a message at debug level.
@@ -88,12 +68,12 @@ func (h *Helper) Debugw(keyvals ...interface{}) {
 
 // Info logs a message at info level.
 func (h *Helper) Info(a ...interface{}) {
-	_ = h.logger.Log(LevelInfo, h.msgKey, h.sprint(a...))
+	_ = h.logger.Log(LevelInfo, append([]interface{}{h.msgKey}, a...)...)
 }
 
 // Infof logs a message at info level.
 func (h *Helper) Infof(format string, a ...interface{}) {
-	_ = h.logger.Log(LevelInfo, h.msgKey, h.sprintf(format, a...))
+	_ = h.logger.Log(LevelInfo, h.msgKey, fmt.Sprintf(format, a...))
 }
 
 // Infow logs a message at info level.
@@ -103,12 +83,12 @@ func (h *Helper) Infow(keyvals ...interface{}) {
 
 // Warn logs a message at warn level.
 func (h *Helper) Warn(a ...interface{}) {
-	_ = h.logger.Log(LevelWarn, h.msgKey, h.sprint(a...))
+	_ = h.logger.Log(LevelWarn, append([]interface{}{h.msgKey}, a...)...)
 }
 
 // Warnf logs a message at warnf level.
 func (h *Helper) Warnf(format string, a ...interface{}) {
-	_ = h.logger.Log(LevelWarn, h.msgKey, h.sprintf(format, a...))
+	_ = h.logger.Log(LevelWarn, h.msgKey, fmt.Sprintf(format, a...))
 }
 
 // Warnw logs a message at warnf level.
@@ -118,12 +98,12 @@ func (h *Helper) Warnw(keyvals ...interface{}) {
 
 // Error logs a message at error level.
 func (h *Helper) Error(a ...interface{}) {
-	_ = h.logger.Log(LevelError, h.msgKey, h.sprint(a...))
+	_ = h.logger.Log(LevelError, append([]interface{}{h.msgKey}, a...)...)
 }
 
 // Errorf logs a message at error level.
 func (h *Helper) Errorf(format string, a ...interface{}) {
-	_ = h.logger.Log(LevelError, h.msgKey, h.sprintf(format, a...))
+	_ = h.logger.Log(LevelError, h.msgKey, fmt.Sprintf(format, a...))
 }
 
 // Errorw logs a message at error level.
@@ -133,13 +113,13 @@ func (h *Helper) Errorw(keyvals ...interface{}) {
 
 // Fatal logs a message at fatal level.
 func (h *Helper) Fatal(a ...interface{}) {
-	_ = h.logger.Log(LevelFatal, h.msgKey, h.sprint(a...))
+	_ = h.logger.Log(LevelFatal, append([]interface{}{h.msgKey}, a...)...)
 	os.Exit(1)
 }
 
 // Fatalf logs a message at fatal level.
 func (h *Helper) Fatalf(format string, a ...interface{}) {
-	_ = h.logger.Log(LevelFatal, h.msgKey, h.sprintf(format, a...))
+	_ = h.logger.Log(LevelFatal, h.msgKey, fmt.Sprintf(format, a...))
 	os.Exit(1)
 }
 
