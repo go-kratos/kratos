@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        go: [1.18,1.19,1.20.x]
+        go: [1.19,1.20.x,1.21.x]
     name: build & test
     runs-on: ubuntu-latest
     services:
@@ -36,15 +36,15 @@ jobs:
           - "8848:8848"
           - "9848:9848"
       polaris:
-        image: polarismesh/polaris-server-standalone:v1.13.3
+        image: polarismesh/polaris-standalone:latest
         ports:
           - 8090:8090
           - 8091:8091
           - 8093:8093
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Go
-        uses: actions/setup-go@v4.0.0
+        uses: actions/setup-go@v5.0.0
         with:
           go-version: ${{ matrix.go }}
 

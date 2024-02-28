@@ -11,15 +11,31 @@ import (
 var _ log.Logger = (*Logger)(nil)
 
 type Logger struct {
-	log *zap.Logger
+	log    *zap.Logger
+	msgKey string
+}
+
+type Option func(*Logger)
+
+// WithMessageKey with message key.
+func WithMessageKey(key string) Option {
+	return func(l *Logger) {
+		l.msgKey = key
+	}
 }
 
 func NewLogger(zlog *zap.Logger) *Logger {
-	return &Logger{zlog}
+	return &Logger{
+		log:    zlog,
+		msgKey: log.DefaultMessageKey,
+	}
 }
 
 func (l *Logger) Log(level log.Level, keyvals ...interface{}) error {
-	keylen := len(keyvals)
+	var (
+		msg    = ""
+		keylen = len(keyvals)
+	)
 	if keylen == 0 || keylen%2 != 0 {
 		l.log.Warn(fmt.Sprint("Keyvalues must appear in pairs: ", keyvals))
 		return nil
@@ -27,20 +43,24 @@ func (l *Logger) Log(level log.Level, keyvals ...interface{}) error {
 
 	data := make([]zap.Field, 0, (keylen/2)+1)
 	for i := 0; i < keylen; i += 2 {
+		if keyvals[i].(string) == l.msgKey {
+			msg, _ = keyvals[i+1].(string)
+			continue
+		}
 		data = append(data, zap.Any(fmt.Sprint(keyvals[i]), keyvals[i+1]))
 	}
 
 	switch level {
 	case log.LevelDebug:
-		l.log.Debug("", data...)
+		l.log.Debug(msg, data...)
 	case log.LevelInfo:
-		l.log.Info("", data...)
+		l.log.Info(msg, data...)
 	case log.LevelWarn:
-		l.log.Warn("", data...)
+		l.log.Warn(msg, data...)
 	case log.LevelError:
-		l.log.Error("", data...)
+		l.log.Error(msg, data...)
 	case log.LevelFatal:
-		l.log.Fatal("", data...)
+		l.log.Fatal(msg, data...)
 	}
 	return nil
 }

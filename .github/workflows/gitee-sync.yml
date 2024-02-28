@@ -12,9 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Mirror Github to Gitee
-        uses: Yikun/hub-mirror-action@v1.2
+        uses: Yikun/hub-mirror-action@v1.3
         with:
           src: github/go-kratos
           dst: gitee/go-kratos

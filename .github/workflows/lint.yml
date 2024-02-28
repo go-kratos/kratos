@@ -15,7 +15,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - id: set-matrix
         run: ./hack/resolve-modules.sh
@@ -27,10 +27,10 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.resolve-modules.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: latest
+          version: v1.54.2
           working-directory: ${{ matrix.workdir }}
           skip-pkg-cache: true

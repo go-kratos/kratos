@@ -66,7 +66,7 @@ func run(_ *cobra.Command, args []string) {
 		name = args[0]
 	}
 	projectName, workingDir := processProjectParams(name, wd)
-	p := &Project{Name: projectName, Path: projectName}
+	p := &Project{Name: projectName}
 	done := make(chan error, 1)
 	go func() {
 		if !nomod {
@@ -79,11 +79,21 @@ func run(_ *cobra.Command, args []string) {
 			return
 		}
 
+		packagePath, e := filepath.Rel(projectRoot, filepath.Join(workingDir, projectName))
+		if e != nil {
+			done <- fmt.Errorf("🚫 failed to get relative path: %v", err)
+			return
+		}
+		packagePath = strings.ReplaceAll(packagePath, "\\", "/")
+
 		mod, e := base.ModulePath(filepath.Join(projectRoot, "go.mod"))
 		if e != nil {
-			panic(e)
+			done <- fmt.Errorf("🚫 failed to parse `go.mod`: %v", e)
+			return
 		}
-		done <- p.Add(ctx, workingDir, repoURL, branch, mod)
+		// Get the relative path for adding a project based on Go modules
+		p.Path = filepath.Join(strings.TrimPrefix(workingDir, projectRoot+"/"), p.Name)
+		done <- p.Add(ctx, workingDir, repoURL, branch, mod, packagePath)
 	}()
 	select {
 	case <-ctx.Done():

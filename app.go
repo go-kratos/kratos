@@ -30,7 +30,7 @@ type AppInfo interface {
 type App struct {
 	opts     options
 	ctx      context.Context
-	cancel   func()
+	cancel   context.CancelFunc
 	mu       sync.Mutex
 	instance *registry.ServiceInstance
 }
@@ -109,7 +109,7 @@ func (a *App) Run() error {
 		wg.Add(1)
 		eg.Go(func() error {
 			wg.Done() // here is to ensure server start has begun running before register, so defer is not needed
-			return srv.Start(sctx)
+			return srv.Start(NewContext(a.opts.ctx, a))
 		})
 	}
 	wg.Wait()
@@ -139,6 +139,7 @@ func (a *App) Run() error {
 	if err = eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return err
 	}
+	err = nil
 	for _, fn := range a.opts.afterStop {
 		err = fn(sctx)
 	}

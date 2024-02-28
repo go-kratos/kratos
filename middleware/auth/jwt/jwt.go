@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -104,18 +104,15 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 					tokenInfo, err = jwt.Parse(jwtToken, keyFunc)
 				}
 				if err != nil {
-					ve, ok := err.(*jwt.ValidationError)
-					if !ok {
-						return nil, errors.Unauthorized(reason, err.Error())
-					}
-					if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+					if errors.Is(err, jwt.ErrTokenMalformed) || errors.Is(err, jwt.ErrTokenUnverifiable) {
 						return nil, ErrTokenInvalid
 					}
-					if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+					if errors.Is(err, jwt.ErrTokenNotValidYet) || errors.Is(err, jwt.ErrTokenExpired) {
 						return nil, ErrTokenExpired
 					}
 					return nil, ErrTokenParseFail
 				}
+
 				if !tokenInfo.Valid {
 					return nil, ErrTokenInvalid
 				}

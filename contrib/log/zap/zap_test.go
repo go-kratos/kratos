@@ -45,6 +45,7 @@ func TestLogger(t *testing.T) {
 	zlog.Warnw("log", "warn")
 	zlog.Errorw("log", "error")
 	zlog.Errorw("log", "error", "except warn")
+	zlog.Info("hello world")
 
 	except := []string{
 		"{\"level\":\"debug\",\"msg\":\"\",\"log\":\"debug\"}\n",
@@ -52,6 +53,7 @@ func TestLogger(t *testing.T) {
 		"{\"level\":\"warn\",\"msg\":\"\",\"log\":\"warn\"}\n",
 		"{\"level\":\"error\",\"msg\":\"\",\"log\":\"error\"}\n",
 		"{\"level\":\"warn\",\"msg\":\"Keyvalues must appear in pairs: [log error except warn]\"}\n",
+		"{\"level\":\"info\",\"msg\":\"hello world\"}\n", // not {"level":"info","msg":"","msg":"hello world"}
 	}
 	for i, s := range except {
 		if s != syncer.output[i] {

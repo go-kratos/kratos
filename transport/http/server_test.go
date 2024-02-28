@@ -371,3 +371,19 @@ func TestListener(t *testing.T) {
 		t.Errorf("expected not empty")
 	}
 }
+
+func TestNotFoundHandler(t *testing.T) {
+	mux := http.NewServeMux()
+	srv := NewServer(NotFoundHandler(mux))
+	if !reflect.DeepEqual(srv.router.NotFoundHandler, mux) {
+		t.Errorf("expected %v got %v", mux, srv.router.NotFoundHandler)
+	}
+}
+
+func TestMethodNotAllowedHandler(t *testing.T) {
+	mux := http.NewServeMux()
+	srv := NewServer(MethodNotAllowedHandler(mux))
+	if !reflect.DeepEqual(srv.router.MethodNotAllowedHandler, mux) {
+		t.Errorf("expected %v got %v", mux, srv.router.MethodNotAllowedHandler)
+	}
+}
