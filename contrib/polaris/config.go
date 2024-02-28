@@ -1,6 +1,7 @@
 package polaris
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 
@@ -110,7 +111,7 @@ func (w *ConfigWatcher) Next() ([]*config.KeyValue, error) {
 		}
 		return w.cfg, nil
 	}
-	return w.cfg, nil
+	return nil, context.Canceled
 }
 
 func (w *ConfigWatcher) Stop() error {

@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/imdario/mergo"
+
 	// init encoding
 	_ "github.com/go-kratos/kratos/v2/encoding/json"
 	_ "github.com/go-kratos/kratos/v2/encoding/proto"
@@ -17,12 +19,7 @@ import (
 
 var _ Config = (*config)(nil)
 
-var (
-	// ErrNotFound is key not found.
-	ErrNotFound = errors.New("key not found")
-	// ErrTypeAssert is type assert error.
-	ErrTypeAssert = errors.New("type assert error")
-)
+var ErrNotFound = errors.New("key not found") // ErrNotFound is key not found.
 
 // Observer is config observer.
 type Observer func(string, Value)
@@ -49,6 +46,9 @@ func New(opts ...Option) Config {
 	o := options{
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
+		merge: func(dst, src interface{}) error {
+			return mergo.Map(dst, src, mergo.WithOverride)
+		},
 	}
 	for _, opt := range opts {
 		opt(&o)

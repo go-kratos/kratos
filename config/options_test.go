@@ -226,3 +226,14 @@ func TestExpand(t *testing.T) {
 		}
 	}
 }
+
+func TestWithMergeFunc(t *testing.T) {
+	c := &options{}
+	a := func(dst, src interface{}) error {
+		return nil
+	}
+	WithMergeFunc(a)(c)
+	if c.merge == nil {
+		t.Fatal("c.merge is nil")
+	}
+}

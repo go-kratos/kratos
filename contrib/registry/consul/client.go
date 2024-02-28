@@ -220,7 +220,11 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 						_ = c.cli.Agent().ServiceDeregister(svc.ID)
 						return
 					}
-					err = c.cli.Agent().UpdateTTL("service:"+svc.ID, "pass", "pass")
+					err = c.cli.Agent().UpdateTTLOpts("service:"+svc.ID, "pass", "pass", new(api.QueryOptions).WithContext(c.ctx))
+					if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+						_ = c.cli.Agent().ServiceDeregister(svc.ID)
+						return
+					}
 					if err != nil {
 						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
 						// when the previous report fails, try to re register the service
