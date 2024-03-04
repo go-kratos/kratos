@@ -66,6 +66,11 @@ func (h *Helper) WithContext(ctx context.Context) *Helper {
 	}
 }
 
+func (h *Helper) preCheckLevel(level Level) bool {
+	l, ok := h.logger.(*Filter)
+	return ok && level < l.level
+}
+
 // Log Print log by level and keyvals.
 func (h *Helper) Log(level Level, keyvals ...interface{}) {
 	_ = h.logger.Log(level, keyvals...)
@@ -73,11 +78,17 @@ func (h *Helper) Log(level Level, keyvals ...interface{}) {
 
 // Debug logs a message at debug level.
 func (h *Helper) Debug(a ...interface{}) {
+	if h.preCheckLevel(LevelDebug) {
+		return
+	}
 	_ = h.logger.Log(LevelDebug, h.msgKey, h.sprint(a...))
 }
 
 // Debugf logs a message at debug level.
 func (h *Helper) Debugf(format string, a ...interface{}) {
+	if h.preCheckLevel(LevelDebug) {
+		return
+	}
 	_ = h.logger.Log(LevelDebug, h.msgKey, h.sprintf(format, a...))
 }
 
@@ -88,11 +99,17 @@ func (h *Helper) Debugw(keyvals ...interface{}) {
 
 // Info logs a message at info level.
 func (h *Helper) Info(a ...interface{}) {
+	if h.preCheckLevel(LevelInfo) {
+		return
+	}
 	_ = h.logger.Log(LevelInfo, h.msgKey, h.sprint(a...))
 }
 
 // Infof logs a message at info level.
 func (h *Helper) Infof(format string, a ...interface{}) {
+	if h.preCheckLevel(LevelInfo) {
+		return
+	}
 	_ = h.logger.Log(LevelInfo, h.msgKey, h.sprintf(format, a...))
 }
 
@@ -103,11 +120,17 @@ func (h *Helper) Infow(keyvals ...interface{}) {
 
 // Warn logs a message at warn level.
 func (h *Helper) Warn(a ...interface{}) {
+	if h.preCheckLevel(LevelWarn) {
+		return
+	}
 	_ = h.logger.Log(LevelWarn, h.msgKey, h.sprint(a...))
 }
 
 // Warnf logs a message at warnf level.
 func (h *Helper) Warnf(format string, a ...interface{}) {
+	if h.preCheckLevel(LevelWarn) {
+		return
+	}
 	_ = h.logger.Log(LevelWarn, h.msgKey, h.sprintf(format, a...))
 }
 
@@ -118,11 +141,17 @@ func (h *Helper) Warnw(keyvals ...interface{}) {
 
 // Error logs a message at error level.
 func (h *Helper) Error(a ...interface{}) {
+	if h.preCheckLevel(LevelError) {
+		return
+	}
 	_ = h.logger.Log(LevelError, h.msgKey, h.sprint(a...))
 }
 
 // Errorf logs a message at error level.
 func (h *Helper) Errorf(format string, a ...interface{}) {
+	if h.preCheckLevel(LevelError) {
+		return
+	}
 	_ = h.logger.Log(LevelError, h.msgKey, h.sprintf(format, a...))
 }
 
