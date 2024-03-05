@@ -66,9 +66,13 @@ func (h *Helper) WithContext(ctx context.Context) *Helper {
 	}
 }
 
-func (h *Helper) preCheckLevel(level Level) bool {
-	l, ok := h.logger.(*Filter)
-	return ok && level < l.level
+// Enabled returns true if the given level above this level.
+// It delegates to the underlying *Filter.
+func (h *Helper) Enabled(level Level) bool {
+	if l, ok := h.logger.(*Filter); ok {
+		return level >= l.level
+	}
+	return true
 }
 
 // Log Print log by level and keyvals.
@@ -78,7 +82,7 @@ func (h *Helper) Log(level Level, keyvals ...interface{}) {
 
 // Debug logs a message at debug level.
 func (h *Helper) Debug(a ...interface{}) {
-	if h.preCheckLevel(LevelDebug) {
+	if !h.Enabled(LevelDebug) {
 		return
 	}
 	_ = h.logger.Log(LevelDebug, h.msgKey, h.sprint(a...))
@@ -86,7 +90,7 @@ func (h *Helper) Debug(a ...interface{}) {
 
 // Debugf logs a message at debug level.
 func (h *Helper) Debugf(format string, a ...interface{}) {
-	if h.preCheckLevel(LevelDebug) {
+	if !h.Enabled(LevelDebug) {
 		return
 	}
 	_ = h.logger.Log(LevelDebug, h.msgKey, h.sprintf(format, a...))
@@ -99,7 +103,7 @@ func (h *Helper) Debugw(keyvals ...interface{}) {
 
 // Info logs a message at info level.
 func (h *Helper) Info(a ...interface{}) {
-	if h.preCheckLevel(LevelInfo) {
+	if !h.Enabled(LevelInfo) {
 		return
 	}
 	_ = h.logger.Log(LevelInfo, h.msgKey, h.sprint(a...))
@@ -107,7 +111,7 @@ func (h *Helper) Info(a ...interface{}) {
 
 // Infof logs a message at info level.
 func (h *Helper) Infof(format string, a ...interface{}) {
-	if h.preCheckLevel(LevelInfo) {
+	if !h.Enabled(LevelInfo) {
 		return
 	}
 	_ = h.logger.Log(LevelInfo, h.msgKey, h.sprintf(format, a...))
@@ -120,7 +124,7 @@ func (h *Helper) Infow(keyvals ...interface{}) {
 
 // Warn logs a message at warn level.
 func (h *Helper) Warn(a ...interface{}) {
-	if h.preCheckLevel(LevelWarn) {
+	if !h.Enabled(LevelWarn) {
 		return
 	}
 	_ = h.logger.Log(LevelWarn, h.msgKey, h.sprint(a...))
@@ -128,7 +132,7 @@ func (h *Helper) Warn(a ...interface{}) {
 
 // Warnf logs a message at warnf level.
 func (h *Helper) Warnf(format string, a ...interface{}) {
-	if h.preCheckLevel(LevelWarn) {
+	if !h.Enabled(LevelWarn) {
 		return
 	}
 	_ = h.logger.Log(LevelWarn, h.msgKey, h.sprintf(format, a...))
@@ -141,7 +145,7 @@ func (h *Helper) Warnw(keyvals ...interface{}) {
 
 // Error logs a message at error level.
 func (h *Helper) Error(a ...interface{}) {
-	if h.preCheckLevel(LevelError) {
+	if !h.Enabled(LevelError) {
 		return
 	}
 	_ = h.logger.Log(LevelError, h.msgKey, h.sprint(a...))
@@ -149,7 +153,7 @@ func (h *Helper) Error(a ...interface{}) {
 
 // Errorf logs a message at error level.
 func (h *Helper) Errorf(format string, a ...interface{}) {
-	if h.preCheckLevel(LevelError) {
+	if !h.Enabled(LevelError) {
 		return
 	}
 	_ = h.logger.Log(LevelError, h.msgKey, h.sprintf(format, a...))
