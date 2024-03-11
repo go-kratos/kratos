@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -86,7 +85,7 @@ func generate(proto string, args []string) error {
 		"--proto_path=.",
 	}
 	if pathExists(protoPath) {
-		input = append(input, "--proto_path="+protoPath)
+		input = append(input, fmt.Sprintf("--proto_path=%s", protoPath))
 	}
 	inputExt := []string{
 		"--proto_path=" + base.KratosMod(),
@@ -98,12 +97,6 @@ func generate(proto string, args []string) error {
 		"--openapi_out=paths=source_relative:.",
 	}
 	input = append(input, inputExt...)
-	protoBytes, err := os.ReadFile(proto)
-	if err == nil && len(protoBytes) > 0 {
-		if ok, _ := regexp.Match(`\n[^/]*(import)\s+"validate/validate.proto"`, protoBytes); ok {
-			input = append(input, "--validate_out=lang=go,paths=source_relative:.")
-		}
-	}
 	input = append(input, proto)
 	for _, a := range args {
 		if strings.HasPrefix(a, "-") {

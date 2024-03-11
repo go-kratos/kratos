@@ -61,14 +61,12 @@ else
 endif
 	@which protoc-gen-go &> /dev/null || go get google.golang.org/protobuf/cmd/protoc-gen-go
 	@which protoc-gen-go-grpc &> /dev/null || go get google.golang.org/grpc/cmd/protoc-gen-go-grpc
-	@which protoc-gen-validate  &> /dev/null || go get github.com/envoyproxy/protoc-gen-validate
 	@echo "install finished"
 
 .PHONY: uninstall
 uninstall:
 	$(shell for i in `which -a kratos | grep -v '/usr/bin/kratos' 2>/dev/null | sort | uniq`; do read -p "Press to remove $${i} (y/n): " REPLY; if [ $${REPLY} = "y" ]; then rm -f $${i}; fi; done)
 	$(shell for i in `which -a protoc-gen-go-grpc | grep -v '/usr/bin/protoc-gen-go-errors' 2>/dev/null | sort | uniq`; do read -p "Press to remove $${i} (y/n): " REPLY; if [ $${REPLY} = "y" ]; then rm -f $${i}; fi; done)
-	$(shell for i in `which -a protoc-gen-validate | grep -v '/usr/bin/protoc-gen-go-errors' 2>/dev/null | sort | uniq`; do read -p "Press to remove $${i} (y/n): " REPLY; if [ $${REPLY} = "y" ]; then rm -f $${i}; fi; done)
 	@echo "uninstall finished"
 
 .PHONY: clean
