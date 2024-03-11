@@ -56,7 +56,7 @@ type clientOptions struct {
 	subsetSize   int
 }
 
-// WithSubset with client disocvery subset size.
+// WithSubset with client discovery subset size.
 // zero value means subset filter disabled
 func WithSubset(size int) ClientOption {
 	return func(o *clientOptions) {
@@ -231,6 +231,10 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 	if err != nil {
 		return err
 	}
+	if c.headerCarrier != nil {
+		req.Header = *c.headerCarrier
+	}
+
 	if contentType != "" {
 		req.Header.Set("Content-Type", c.contentType)
 	}

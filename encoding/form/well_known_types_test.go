@@ -17,11 +17,11 @@ func TestMarshalTimeStamp(t *testing.T) {
 		expect string
 	}{
 		{
-			input:  timestamppb.New(time.Date(2022, 1, 2, 3, 4, 5, 6, time.UTC)),
+			input:  timestamppb.New(time.Date(2022, 1, 2, 3, 4, 5, 6, time.Local)),
 			expect: "2022-01-02T03:04:05.000000006Z",
 		},
 		{
-			input:  timestamppb.New(time.Date(2022, 13, 1, 13, 61, 61, 100, time.UTC)),
+			input:  timestamppb.New(time.Date(2022, 13, 1, 13, 61, 61, 100, time.Local)),
 			expect: "2023-01-01T14:02:01.000000100Z",
 		},
 	}

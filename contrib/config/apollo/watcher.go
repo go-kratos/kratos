@@ -27,18 +27,15 @@ func (c *customChangeListener) onChange(namespace string, changes map[string]*st
 	kv := make([]*config.KeyValue, 0, 2)
 	if strings.Contains(namespace, ".") && !strings.HasSuffix(namespace, "."+properties) &&
 		(format(namespace) == yaml || format(namespace) == yml || format(namespace) == json) {
-		value, err := c.apollo.client.GetConfigCache(namespace).Get("content")
-		if err != nil {
-			log.Warnw("apollo get config failed", "err", err)
-			return nil
-		}
-		kv = append(kv, &config.KeyValue{
-			Key:    namespace,
-			Value:  []byte(value.(string)),
-			Format: format(namespace),
-		})
+		if value, ok := changes["content"]; ok {
+			kv = append(kv, &config.KeyValue{
+				Key:    namespace,
+				Value:  []byte(value.NewValue.(string)),
+				Format: format(namespace),
+			})
 
-		return kv
+			return kv
+		}
 	}
 
 	next := make(map[string]interface{})
