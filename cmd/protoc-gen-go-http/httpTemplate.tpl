@@ -81,6 +81,6 @@ func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Reque
 	if err != nil {
 		return nil, err
 	}
-	return &out, err
+	return &out, nil
 }
 {{end}}
