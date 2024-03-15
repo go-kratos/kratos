@@ -46,8 +46,22 @@ func BenchmarkHelperPrint(b *testing.B) {
 	}
 }
 
+func BenchmarkHelperPrintFilterLevel(b *testing.B) {
+	log := NewHelper(NewFilter(NewStdLogger(io.Discard), FilterLevel(LevelDebug)))
+	for i := 0; i < b.N; i++ {
+		log.Debug("test")
+	}
+}
+
 func BenchmarkHelperPrintf(b *testing.B) {
 	log := NewHelper(NewStdLogger(io.Discard))
+	for i := 0; i < b.N; i++ {
+		log.Debugf("%s", "test")
+	}
+}
+
+func BenchmarkHelperPrintfFilterLevel(b *testing.B) {
+	log := NewHelper(NewFilter(NewStdLogger(io.Discard), FilterLevel(LevelInfo)))
 	for i := 0; i < b.N; i++ {
 		log.Debugf("%s", "test")
 	}
