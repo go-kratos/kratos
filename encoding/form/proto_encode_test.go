@@ -13,7 +13,6 @@ import (
 )
 
 func TestEncodeValues(t *testing.T) {
-
 	in := &complex.Complex{
 		Id:      2233,
 		NoOne:   "2233",

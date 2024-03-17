@@ -244,7 +244,7 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		if value == nullStr {
 			break
 		}
-		t, err := time.Parse(time.RFC3339Nano, value)
+		t, err := time.ParseInLocation(time.RFC3339Nano, value, time.Local)
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
