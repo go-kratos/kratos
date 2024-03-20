@@ -120,8 +120,8 @@ func TestEncodeURL(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if path := EncodeURL(test.pathTemplate, test.request, test.needQuery); path != test.want {
-			t.Fatalf("want: %s, got: %s", test.want, path)
+		if EncodeURL(test.pathTemplate, test.request, test.needQuery) != test.want {
+			t.Fatalf("want: %s, got: %s", test.want, EncodeURL(test.pathTemplate, test.request, test.needQuery))
 		}
 	}
 }

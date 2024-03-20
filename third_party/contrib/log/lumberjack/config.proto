@@ -1,0 +1,15 @@
+syntax = "proto3";
+package lumberjack;
+
+option go_package = "github.com/go-kratos/kratos/contrib/log/lumberjack/v2;lumberjack";
+
+import "google/protobuf/descriptor.proto";
+
+message Config {
+    string filename = 1;
+    int32 maxsize = 2;
+    int32 maxage = 3;
+    int32 maxbackups = 4;
+    bool localtime = 5;
+    bool compress = 6;
+}

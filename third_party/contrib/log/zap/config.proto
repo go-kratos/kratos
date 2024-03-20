@@ -1,0 +1,37 @@
+syntax = "proto3";
+package zap;
+
+option go_package = "github.com/go-kratos/kratos/contrib/log/zap/v2;zap";
+
+import "google/protobuf/descriptor.proto";
+
+message Config {
+    string level = 1;
+    string encoding = 2;
+    bool development = 3;
+    bool disableCaller = 4;
+    bool disableStacktrace = 5;
+    repeated string outputPaths = 6;
+    repeated string errorOutputPaths = 7;
+    map<string, string> initialFields = 8;
+    SamplingConfig sampling = 9;
+    EncoderConfig encoderConfig = 10;
+}
+
+message SamplingConfig {
+    int32 initial = 1;
+    int32 thereafter = 2;
+}
+
+message EncoderConfig {
+    string messageKey = 1;
+    string levelKey = 2;
+    string timeKey = 3;
+    string nameKey = 4;
+    string callerKey = 5;
+    string functionKey = 6;
+    string stacktraceKey = 7;
+    string lineEnding = 8;
+    string consoleSeparator = 9;
+    bool skipLineEnding = 10;
+}
