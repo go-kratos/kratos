@@ -79,6 +79,13 @@ func CustomHealth() ServerOption {
 	}
 }
 
+// CustomReflection with custom reflection.
+func CustomReflection() ServerOption {
+	return func(s *Server) {
+		s.customReflection = true
+	}
+}
+
 // TLSConfig with TLS config.
 func TLSConfig(c *tls.Config) ServerOption {
 	return func(s *Server) {
@@ -117,22 +124,23 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
-	baseCtx      context.Context
-	tlsConf      *tls.Config
-	lis          net.Listener
-	err          error
-	network      string
-	address      string
-	endpoint     *url.URL
-	timeout      time.Duration
-	middleware   matcher.Matcher
-	unaryInts    []grpc.UnaryServerInterceptor
-	streamInts   []grpc.StreamServerInterceptor
-	grpcOpts     []grpc.ServerOption
-	health       *health.Server
-	customHealth bool
-	metadata     *apimd.Server
-	adminClean   func()
+	baseCtx          context.Context
+	tlsConf          *tls.Config
+	lis              net.Listener
+	err              error
+	network          string
+	address          string
+	endpoint         *url.URL
+	timeout          time.Duration
+	middleware       matcher.Matcher
+	unaryInts        []grpc.UnaryServerInterceptor
+	streamInts       []grpc.StreamServerInterceptor
+	grpcOpts         []grpc.ServerOption
+	health           *health.Server
+	customHealth     bool
+	customReflection bool
+	metadata         *apimd.Server
+	adminClean       func()
 }
 
 // NewServer creates a gRPC server by options.
@@ -177,7 +185,9 @@ func NewServer(opts ...ServerOption) *Server {
 		grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
 	}
 	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
-	reflection.Register(srv.Server)
+	if !srv.customReflection {
+		reflection.Register(srv.Server)
+	}
 	// admin register
 	srv.adminClean, _ = admin.Register(srv.Server)
 	return srv
