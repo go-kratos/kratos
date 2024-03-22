@@ -137,14 +137,12 @@ func EncodeField(fieldDescriptor protoreflect.FieldDescriptor, value protoreflec
 		}
 		desc := fieldDescriptor.Enum().Values().ByNumber(value.Enum())
 		return string(desc.Name()), nil
-	case protoreflect.StringKind:
-		return value.String(), nil
 	case protoreflect.BytesKind:
 		return base64.URLEncoding.EncodeToString(value.Bytes()), nil
 	case protoreflect.MessageKind, protoreflect.GroupKind:
 		return encodeMessage(fieldDescriptor.Message(), value)
 	default:
-		return fmt.Sprint(value.Interface()), nil
+		return value.String(), nil
 	}
 }
 
