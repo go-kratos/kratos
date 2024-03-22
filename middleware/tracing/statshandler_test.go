@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/stats"
 )
@@ -64,7 +65,7 @@ func TestClient_HandleRPC(_ *testing.T) {
 	client.HandleRPC(ctx, &rs)
 
 	// Handle context with Span
-	_, span := trace.NewNoopTracerProvider().Tracer("Tracer").Start(ctx, "Spanname")
+	_, span := noop.NewTracerProvider().Tracer("Tracer").Start(ctx, "Spanname")
 	spanCtx := trace.SpanContext{}
 	spanID := [8]byte{12, 12, 12, 12, 12, 12, 12, 12}
 	traceID := [16]byte{12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12}

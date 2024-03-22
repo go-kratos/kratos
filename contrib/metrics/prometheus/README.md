@@ -1,2 +1,0 @@
-# prometheus
-Monitor Prometheus metrics.
