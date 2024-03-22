@@ -7,7 +7,7 @@ require (
 	github.com/go-kratos/kratos/v2 v2.7.3
 	github.com/google/uuid v1.3.0
 	github.com/polarismesh/polaris-go v1.3.0
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
