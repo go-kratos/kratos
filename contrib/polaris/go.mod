@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/go-kratos/aegis v0.2.0
-	github.com/go-kratos/kratos/v2 v2.7.2
+	github.com/go-kratos/kratos/v2 v2.7.3
 	github.com/google/uuid v1.3.0
 	github.com/polarismesh/polaris-go v1.3.0
 	google.golang.org/protobuf v1.31.0
