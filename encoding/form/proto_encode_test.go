@@ -13,10 +13,6 @@ import (
 )
 
 func TestEncodeValues(t *testing.T) {
-	loc := time.Local
-	time.Local = time.UTC
-	t.Cleanup(func() { time.Local = loc })
-
 	in := &complex.Complex{
 		Id:          2233,
 		NoOne:       "2233",
@@ -33,7 +29,7 @@ func TestEncodeValues(t *testing.T) {
 		Map:         map[string]string{"kratos": "https://go-kratos.dev/", "kratos_start": "https://go-kratos.dev/en/docs/getting-started/start/"},
 		MapInt64Key: map[int64]string{1: "kratos", 2: "go-zero"},
 
-		Timestamp: &timestamppb.Timestamp{Seconds: 20, Nanos: 2},
+		Timestamp: timestamppb.New(time.Date(1970, 1, 1, 0, 0, 20, 2, time.Local)),
 		Duration:  &durationpb.Duration{Seconds: 120, Nanos: 22},
 		Field:     &fieldmaskpb.FieldMask{Paths: []string{"1", "2"}},
 		Double:    &wrapperspb.DoubleValue{Value: 12.33},
