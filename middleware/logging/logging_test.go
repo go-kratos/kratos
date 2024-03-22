@@ -177,3 +177,59 @@ func TestExtractError(t *testing.T) {
 		})
 	}
 }
+
+type extractKeyValues [][]any
+
+func (l *extractKeyValues) Log(_ log.Level, kv ...any) error { *l = append(*l, kv); return nil }
+
+func TestServer_CallerPath(t *testing.T) {
+	var a extractKeyValues
+	logger := log.With(&a, "caller", log.Caller(5)) // report where the helper was called
+
+	// make sure the caller is same
+	sameCaller := func(fn middleware.Handler) { _, _ = fn(context.Background(), nil) }
+
+	// caller: [... log inside middleware, fn(context.Background(), nil)]
+	h := func(context.Context, any) (a any, e error) { return }
+	h = Server(logger)(h)
+	sameCaller(h)
+
+	// caller: [... helper.Info("foo"), fn(context.Background(), nil)]
+	helper := log.NewHelper(logger)
+	sameCaller(func(context.Context, any) (a any, e error) { helper.Info("foo"); return })
+
+	t.Log(a[0])
+	t.Log(a[1])
+	if a[0][0] != "caller" || a[1][0] != "caller" {
+		t.Fatal("caller not found")
+	}
+	if a[0][1] != a[1][1] {
+		t.Fatalf("middleware should have the same caller as log.Helper. middleware: %s, helper: %s", a[0][1], a[1][1])
+	}
+}
+
+func TestClient_CallerPath(t *testing.T) {
+	var a extractKeyValues
+	logger := log.With(&a, "caller", log.Caller(5)) // report where the helper was called
+
+	// make sure the caller is same
+	sameCaller := func(fn middleware.Handler) { _, _ = fn(context.Background(), nil) }
+
+	// caller: [... log inside middleware, fn(context.Background(), nil)]
+	h := func(context.Context, any) (a any, e error) { return }
+	h = Client(logger)(h)
+	sameCaller(h)
+
+	// caller: [... helper.Info("foo"), fn(context.Background(), nil)]
+	helper := log.NewHelper(logger)
+	sameCaller(func(context.Context, any) (a any, e error) { helper.Info("foo"); return })
+
+	t.Log(a[0])
+	t.Log(a[1])
+	if a[0][0] != "caller" || a[1][0] != "caller" {
+		t.Fatal("caller not found")
+	}
+	if a[0][1] != a[1][1] {
+		t.Fatalf("middleware should have the same caller as log.Helper. middleware: %s, helper: %s", a[0][1], a[1][1])
+	}
+}

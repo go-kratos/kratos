@@ -51,6 +51,11 @@ type Registry struct {
 	client *clientv3.Client
 	kv     clientv3.KV
 	lease  clientv3.Lease
+	/*
+		ctxMap is used to store the context cancel function of each service instance.
+		When the service instance is deregistered, the corresponding context cancel function is called to stop the heartbeat.
+	*/
+	ctxMap map[*registry.ServiceInstance]context.CancelFunc
 }
 
 // New creates etcd registry
@@ -68,6 +73,7 @@ func New(client *clientv3.Client, opts ...Option) (r *Registry) {
 		opts:   op,
 		client: client,
 		kv:     clientv3.NewKV(client),
+		ctxMap: make(map[*registry.ServiceInstance]context.CancelFunc),
 	}
 }
 
@@ -87,7 +93,9 @@ func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 		return err
 	}
 
-	go r.heartBeat(r.opts.ctx, leaseID, key, value)
+	hctx, cancel := context.WithCancel(r.opts.ctx)
+	r.ctxMap[service] = cancel
+	go r.heartBeat(hctx, leaseID, key, value)
 	return nil
 }
 
@@ -98,6 +106,11 @@ func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInst
 			r.lease.Close()
 		}
 	}()
+	// cancel heartbeat
+	if cancel, ok := r.ctxMap[service]; ok {
+		cancel()
+		delete(r.ctxMap, service)
+	}
 	key := fmt.Sprintf("%s/%s/%s", r.opts.namespace, service.Name, service.ID)
 	_, err := r.client.Delete(ctx, key)
 	return err
