@@ -153,6 +153,15 @@ func TestStopTimeout(t *testing.T) {
 	}
 }
 
+func TestAfterStopTimeout(t *testing.T) {
+	o := &options{}
+	v := time.Duration(123)
+	AfterStopTimeout(v)(o)
+	if !reflect.DeepEqual(v, o.afterStopTimeout) {
+		t.Fatal("o.afterStopTimeout is not equal to v")
+	}
+}
+
 func TestBeforeStart(t *testing.T) {
 	o := &options{}
 	v := func(_ context.Context) error {
