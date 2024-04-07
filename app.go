@@ -42,7 +42,7 @@ func New(opts ...Option) *App {
 		sigs:             []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		registrarTimeout: 10 * time.Second,
 		stopTimeout:      10 * time.Second,
-		afterStopTimeout: 5 * time.Second,
+		afterStopTimeout: 0 * time.Second,
 	}
 	if id, err := uuid.NewUUID(); err == nil {
 		o.id = id.String()

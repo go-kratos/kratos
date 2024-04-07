@@ -131,7 +131,7 @@ func AfterStop(fn func(context.Context) error) Option {
 }
 
 // AfterStopTimeout specifies the total duration for the AfterStop funcs to complete.
-// It is 5s by default.
+// If not specified, kratos will pass a canceled context to AfterStop functions to ensure compatibility.
 func AfterStopTimeout(timeout time.Duration) Option {
 	return func(o *options) {
 		o.afterStopTimeout = timeout

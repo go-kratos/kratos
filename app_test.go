@@ -284,13 +284,45 @@ func TestApp_Context(t *testing.T) {
 	}
 }
 
-func TestApp_AfterStop(t *testing.T) {
+func TestApp_AfterStop_Default(t *testing.T) {
 	hs := http.NewServer()
 	gs := grpc.NewServer()
 	app := New(
 		Name("kratos"),
 		Version("v1.0.0"),
 		Server(hs, gs),
+		AfterStop(func(ctx context.Context) error {
+			select {
+			case <-ctx.Done():
+				// Keep the same behavior as before to ensure compatibility.
+			default:
+				t.Error("The default context passed to afterStop should be already canceled.")
+			}
+
+			_, ok := ctx.Deadline()
+			if !ok {
+				t.Error("Timeout of AfterStop is not set.")
+			}
+			return nil
+		}),
+		Registrar(&mockRegistry{service: make(map[string]*registry.ServiceInstance)}),
+	)
+	time.AfterFunc(time.Second, func() {
+		_ = app.Stop()
+	})
+	if err := app.Run(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestApp_AfterStopWithTimeoutOption(t *testing.T) {
+	hs := http.NewServer()
+	gs := grpc.NewServer()
+	app := New(
+		Name("kratos"),
+		Version("v1.0.0"),
+		Server(hs, gs),
+		AfterStopTimeout(5*time.Second),
 		AfterStop(func(ctx context.Context) error {
 			select {
 			case <-ctx.Done():
