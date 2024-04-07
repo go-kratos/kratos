@@ -142,7 +142,7 @@ func (a *App) Run() error {
 	}
 	err = nil
 
-	asCtx, cancel := context.WithTimeout(NewContext(context.Background(), a), a.opts.afterStopTimeout)
+	asCtx, cancel := context.WithTimeout(NewContext(a.opts.ctx, a), a.opts.afterStopTimeout)
 	defer cancel()
 	for _, fn := range a.opts.afterStop {
 		err = fn(asCtx)
