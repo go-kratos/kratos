@@ -27,7 +27,7 @@ var errInvalidFormatMapKey = errors.New("invalid formatting for map key")
 // DecodeValues decode url value into proto message.
 func DecodeValues(msg proto.Message, values url.Values) error {
 	for key, vs := range values {
-		if err := populateFieldValues(msg.ProtoReflect(), strings.Split(key, "."), vs); err != nil {
+		if err := populateFieldValues(msg.ProtoReflect(), []string{key}, vs); err != nil {
 			return err
 		}
 	}
@@ -361,6 +361,15 @@ func parseURLQueryMapKey(key string) (string, string, error) {
 		startIndex = strings.IndexByte(key, '[')
 		endIndex   = strings.IndexByte(key, ']')
 	)
+	if startIndex < 0 {
+		//nolint:gomnd
+		values := strings.Split(key, fieldSeparater)
+		//nolint:gomnd
+		if len(values) != 2 {
+			return "", "", errInvalidFormatMapKey
+		}
+		return values[0], values[1], nil
+	}
 	if startIndex <= 0 || startIndex >= endIndex || len(key) != endIndex+1 {
 		return "", "", errInvalidFormatMapKey
 	}
