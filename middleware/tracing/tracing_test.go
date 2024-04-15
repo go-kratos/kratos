@@ -58,6 +58,7 @@ type mockTransport struct {
 
 func (tr *mockTransport) Kind() transport.Kind            { return tr.kind }
 func (tr *mockTransport) Endpoint() string                { return tr.endpoint }
+func (tr *mockTransport) Server() interface{}             { return nil }
 func (tr *mockTransport) Operation() string               { return tr.operation }
 func (tr *mockTransport) RequestHeader() transport.Header { return tr.header }
 func (tr *mockTransport) ReplyHeader() transport.Header   { return tr.header }
