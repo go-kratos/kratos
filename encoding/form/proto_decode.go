@@ -26,8 +26,8 @@ var errInvalidFormatMapKey = errors.New("invalid formatting for map key")
 
 // DecodeValues decode url value into proto message.
 func DecodeValues(msg proto.Message, values url.Values) error {
-	for key, vs := range values {
-		if err := populateFieldValues(msg.ProtoReflect(), []string{key}, vs); err != nil {
+	for key, values := range values {
+		if err := populateFieldValues(msg.ProtoReflect(), strings.Split(key, "."), values); err != nil {
 			return err
 		}
 	}
@@ -48,7 +48,9 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 			// ignore unexpected field.
 			return nil
 		}
-
+		if fd.IsMap() && len(fieldPath) == 2 {
+			break
+		}
 		if i == len(fieldPath)-1 {
 			break
 		}
@@ -56,7 +58,7 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 		if fd.Message() == nil || fd.Cardinality() == protoreflect.Repeated {
 			if fd.IsMap() && len(fieldPath) > 1 {
 				// post subfield
-				return populateMapField(fd, v.Mutable(fd).Map(), []string{fieldPath[0]}, values)
+				return populateMapField(fd, v.Mutable(fd).Map(), []string{fieldPath[1]}, values)
 			}
 			return fmt.Errorf("invalid path: %q is not a message", fieldName)
 		}
