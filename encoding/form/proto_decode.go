@@ -144,7 +144,7 @@ func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, fiel
 		fieldName = fieldPath[nKey]
 	)
 	// compatile for map[krato] type
-	if len(fieldPath) > 1 {
+	if len(fieldPath) == 2 {
 		fieldName = fieldPath[0] + "." + fieldPath[1]
 	}
 	_, keyName, err := parseURLQueryMapKey(fieldName)
