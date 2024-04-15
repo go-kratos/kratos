@@ -23,6 +23,14 @@ func TestTransport_Endpoint(t *testing.T) {
 	}
 }
 
+func TestTransport_Server(t *testing.T) {
+	v := struct{}{}
+	o := &Transport{server: v}
+	if !reflect.DeepEqual(v, o.Server()) {
+		t.Errorf("expect %v, got %v", v, o.Server())
+	}
+}
+
 func TestTransport_Operation(t *testing.T) {
 	v := "hello"
 	o := &Transport{operation: v}

@@ -22,6 +22,7 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		replyHeader := grpcmd.MD{}
 		tr := &Transport{
 			operation:   info.FullMethod,
+			server:      info.Server,
 			reqHeader:   headerCarrier(md),
 			replyHeader: headerCarrier(replyHeader),
 		}
@@ -75,6 +76,7 @@ func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
 		replyHeader := grpcmd.MD{}
 		ctx = transport.NewServerContext(ctx, &Transport{
 			endpoint:    s.endpoint.String(),
+			server:      srv,
 			operation:   info.FullMethod,
 			reqHeader:   headerCarrier(md),
 			replyHeader: headerCarrier(replyHeader),
