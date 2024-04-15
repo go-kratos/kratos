@@ -138,16 +138,7 @@ func populateRepeatedField(fd protoreflect.FieldDescriptor, list protoreflect.Li
 }
 
 func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, fieldPath []string, values []string) error {
-	var (
-		nKey      = len(fieldPath) - 1 // post sub key
-		vKey      = len(values) - 1
-		fieldName = fieldPath[nKey]
-	)
-	// compatile for map[krato] type
-	if len(fieldPath) == 2 {
-		fieldName = fieldPath[0] + "." + fieldPath[1]
-	}
-	_, keyName, err := parseURLQueryMapKey(fieldName)
+	_, keyName, err := parseURLQueryMapKey(strings.Join(fieldPath, fieldSeparater))
 	if err != nil {
 		return err
 	}
@@ -155,7 +146,7 @@ func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, fiel
 	if err != nil {
 		return fmt.Errorf("parsing map key %q: %w", fd.FullName().Name(), err)
 	}
-	value, err := parseField(fd.MapValue(), values[vKey])
+	value, err := parseField(fd.MapValue(), values[len(values)-1])
 	if err != nil {
 		return fmt.Errorf("parsing map value %q: %w", fd.FullName().Name(), err)
 	}
