@@ -49,12 +49,11 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 			return nil
 		}
 		if fd.IsMap() && len(fieldPath) == 2 {
-			break
+			return populateMapField(fd, v.Mutable(fd).Map(), fieldPath, values)
 		}
 		if i == len(fieldPath)-1 {
 			break
 		}
-
 		if fd.Message() == nil || fd.Cardinality() == protoreflect.Repeated {
 			if fd.IsMap() && len(fieldPath) > 1 {
 				// post subfield
@@ -144,6 +143,10 @@ func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, fiel
 		vKey      = len(values) - 1
 		fieldName = fieldPath[nKey]
 	)
+	// compatile for map[krato] type
+	if len(fieldPath) == 2 {
+		fieldName = fieldPath[0] + "." + fieldPath[1]
+	}
 	_, keyName, err := parseURLQueryMapKey(fieldName)
 	if err != nil {
 		return err
