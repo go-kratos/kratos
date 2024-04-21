@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/encoding"
 
-	"github.com/imdario/mergo"
+	"dario.cat/mergo"
 )
 
 func TestReader_Merge(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/imdario/mergo"
+	"dario.cat/mergo"
 )
 
 const (
