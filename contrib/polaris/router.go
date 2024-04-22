@@ -114,7 +114,7 @@ func buildPolarisInstance(namespace string, nodes []selector.Node) *pb.ServiceIn
 		if err != nil {
 			return nil
 		}
-		portInt, err := strconv.Atoi(port)
+		portInt, err := strconv.ParseUint(port, 10, 32) //nolint:gomnd
 		if err != nil {
 			return nil
 		}
