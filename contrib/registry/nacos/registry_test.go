@@ -18,6 +18,7 @@ func TestRegistry_Register(t *testing.T) {
 		*constant.NewServerConfig("127.0.0.1", 8848),
 	}
 
+	
 	cc := constant.ClientConfig{
 		NamespaceId:         "public", // namespace id
 		TimeoutMs:           5000,
