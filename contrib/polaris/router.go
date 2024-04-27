@@ -114,7 +114,7 @@ func buildPolarisInstance(namespace string, nodes []selector.Node) *pb.ServiceIn
 		if err != nil {
 			return nil
 		}
-		portInt, err := strconv.Atoi(port)
+		portUint64, err := strconv.ParseUint(port, 10, 32) //nolint:gomnd
 		if err != nil {
 			return nil
 		}
@@ -123,7 +123,7 @@ func buildPolarisInstance(namespace string, nodes []selector.Node) *pb.ServiceIn
 			Service:   wrapperspb.String(node.ServiceName()),
 			Namespace: wrapperspb.String(namespace),
 			Host:      wrapperspb.String(host),
-			Port:      wrapperspb.UInt32(uint32(portInt)),
+			Port:      wrapperspb.UInt32(uint32(portUint64)),
 			Protocol:  wrapperspb.String(node.Scheme()),
 			Version:   wrapperspb.String(node.Version()),
 			Weight:    wrapperspb.UInt32(uint32(*node.InitialWeight())),
