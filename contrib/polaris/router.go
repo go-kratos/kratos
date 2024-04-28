@@ -83,7 +83,6 @@ func (p *Polaris) NodeFilter(opts ...RouterOption) selector.NodeFilter {
 		}
 
 		n := make(map[string]selector.Node, len(nodes))
-
 		for _, node := range nodes {
 			n[node.Address()] = node
 		}
