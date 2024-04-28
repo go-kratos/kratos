@@ -115,7 +115,7 @@ func buildPolarisInstance(namespace string, nodes []selector.Node) *pb.ServiceIn
 			log.Errorf("split host port failed error: %v", err)
 			return nil
 		}
-		portUint64, err := strconv.ParseUint(port, 10, 32) //nolint:gomnd
+		portUint64, err := strconv.ParseUint(port, 10, 32)
 		if err != nil {
 			log.Errorf("parse port failed error: %v", err)
 			return nil
