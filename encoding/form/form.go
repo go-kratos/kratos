@@ -27,8 +27,8 @@ var (
 var tagName = "json"
 
 func init() {
-	decoder.SetTagName(tagName)
 	encoder.SetTagName(tagName)
+	decoder.SetTagName(tagName)
 	encoding.RegisterCodec(codec{encoder: encoder, decoder: decoder})
 }
 
