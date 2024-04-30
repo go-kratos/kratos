@@ -83,7 +83,6 @@ func (p *Polaris) NodeFilter(opts ...RouterOption) selector.NodeFilter {
 		}
 
 		n := make(map[string]selector.Node, len(nodes))
-
 		for _, node := range nodes {
 			n[node.Address()] = node
 		}
@@ -112,10 +111,12 @@ func buildPolarisInstance(namespace string, nodes []selector.Node) *pb.ServiceIn
 	for _, node := range nodes {
 		host, port, err := net.SplitHostPort(node.Address())
 		if err != nil {
+			log.Errorf("split host port failed error: %v", err)
 			return nil
 		}
-		portUint64, err := strconv.ParseUint(port, 10, 32) //nolint:gomnd
+		portUint64, err := strconv.ParseUint(port, 10, 32)
 		if err != nil {
+			log.Errorf("parse port failed error: %v", err)
 			return nil
 		}
 		ins = append(ins, &v1.Instance{

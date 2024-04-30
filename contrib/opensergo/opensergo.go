@@ -97,14 +97,14 @@ func (s *OpenSergo) ReportMetadata(ctx context.Context, app kratos.AppInfo) erro
 		if err != nil {
 			return err
 		}
-		portValue, err := strconv.Atoi(port)
+		portUint64, err := strconv.ParseUint(port, 10, 32)
 		if err != nil {
 			return err
 		}
 		serviceMetadata.Protocols = append(serviceMetadata.Protocols, u.Scheme)
 		serviceMetadata.ListeningAddresses = append(serviceMetadata.ListeningAddresses, &v1.SocketAddress{
 			Address:   host,
-			PortValue: uint32(portValue),
+			PortValue: uint32(portUint64),
 		})
 	}
 	_, err = s.mdClient.ReportMetadata(ctx, &v1.ReportMetadataRequest{
