@@ -70,7 +70,7 @@ func New{{.ServiceType}}HTTPClient (client *http.Client) {{.ServiceType}}HTTPCli
 func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
 	pattern := "{{.Path}}"
-	path := binding.EncodeURL(pattern, in, {{not .HasBody}})
+	path := binding.EncodeURL(pattern, in, {{not .HasBody}}, option.Encode().UseProtoTextAsKey({{.UseProtoTextEncodeURL}}))
 	opts = append(opts, http.Operation(Operation{{$svrType}}{{.OriginalName}}))
 	opts = append(opts, http.PathTemplate(pattern))
 	{{if .HasBody -}}
