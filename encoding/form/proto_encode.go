@@ -11,16 +11,18 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
+
+	"github.com/go-kratos/kratos/v2/encoding/form/option"
 )
 
 // EncodeValues encode a message into url values.
-func EncodeValues(msg any) (url.Values, error) {
+func EncodeValues(msg any, opts ...*option.EncodeOption) (url.Values, error) {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return url.Values{}, nil
 	}
 	if v, ok := msg.(proto.Message); ok {
 		u := make(url.Values)
-		err := encodeByField(u, "", v.ProtoReflect())
+		err := encodeByField(u, "", v.ProtoReflect(), opts...)
 		if err != nil {
 			return nil, err
 		}
@@ -29,16 +31,17 @@ func EncodeValues(msg any) (url.Values, error) {
 	return encoder.Encode(msg)
 }
 
-func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr error) {
+func encodeByField(u url.Values, path string, m protoreflect.Message, opts ...*option.EncodeOption) (finalErr error) {
+	opt := option.MergeEncodeOptions(opts...)
 	m.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
 		var (
 			key     string
 			newPath string
 		)
-		if fd.HasJSONName() {
-			key = fd.JSONName()
-		} else {
+		if opt.ForceProtoTextAsKey || !fd.HasJSONName() {
 			key = fd.TextName()
+		} else {
+			key = fd.JSONName()
 		}
 		if path == "" {
 			newPath = key
@@ -177,7 +180,8 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 }
 
 // EncodeFieldMask return field mask name=paths
-func EncodeFieldMask(m protoreflect.Message) (query string) {
+func EncodeFieldMask(m protoreflect.Message, opts ...*option.EncodeOption) (query string) {
+	opt := option.MergeEncodeOptions(opts...)
 	m.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
 		if fd.Kind() == protoreflect.MessageKind {
 			if msg := fd.Message(); msg.FullName() == fieldMaskFullName {
@@ -185,10 +189,10 @@ func EncodeFieldMask(m protoreflect.Message) (query string) {
 				if err != nil {
 					return false
 				}
-				if fd.HasJSONName() {
-					query = fd.JSONName() + "=" + value
-				} else {
+				if opt.ForceProtoTextAsKey || !fd.HasJSONName() {
 					query = fd.TextName() + "=" + value
+				} else {
+					query = fd.JSONName() + "=" + value
 				}
 				return false
 			}
