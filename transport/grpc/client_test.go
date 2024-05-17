@@ -141,14 +141,29 @@ func TestDial(t *testing.T) {
 }
 
 func TestDialConn(t *testing.T) {
-	_, err := dial(
-		context.Background(),
-		true,
+	opts, grpcOpts := makeOptions(true,
 		WithDiscovery(&mockRegistry{}),
 		WithTimeout(10*time.Second),
 		WithEndpoint("abc"),
 		WithMiddleware(EmptyMiddleware()),
 	)
+	_, err := dial(
+		context.Background(),
+		opts,
+		grpcOpts)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestNewClient(t *testing.T) {
+	opts, grpcOpts := makeOptions(true,
+		WithDiscovery(&mockRegistry{}),
+		WithTimeout(10*time.Second),
+		WithEndpoint("abc"),
+		WithMiddleware(EmptyMiddleware()),
+	)
+	_, err := newClient(opts, grpcOpts)
 	if err != nil {
 		t.Error(err)
 	}

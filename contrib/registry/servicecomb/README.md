@@ -53,8 +53,7 @@ func main() {
 	}
 	r := servicecomb.NewRegistry(c)
 	ctx := context.Background()
-	conn, err := grpc.DialInsecure(
-		ctx,
+	conn, err := grpc.NewClient(
 		grpc.WithEndpoint("discovery:///helloServicecomb"),
 		grpc.WithDiscovery(r),
 	)

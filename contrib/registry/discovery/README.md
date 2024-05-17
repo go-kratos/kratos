@@ -61,8 +61,7 @@ func main() {
 		Host:   "localhost",
 	}, nil)
 
-	conn, err := grpc.DialInsecure(
-		context.Background(),
+	conn, err := grpc.NewClient(
 		grpc.WithEndpoint("discovery:///appid"),
 		// use discovery
 		grpc.WithDiscovery(r),
