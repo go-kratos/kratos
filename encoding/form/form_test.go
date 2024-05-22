@@ -17,6 +17,68 @@ import (
 	ectest "github.com/go-kratos/kratos/v2/internal/testdata/encoding"
 )
 
+// This variable can be replaced with -ldflags like below:
+// go test "-ldflags=-X github.com/go-kratos/kratos/v2/encoding/form.tagNameTest=form"
+var tagNameTest string
+
+func init() {
+	if tagNameTest == "" {
+		tagNameTest = tagName
+	}
+}
+
+func TestFormEncoderAndDecoder(t *testing.T) {
+	t.Cleanup(func() {
+		encoder.SetTagName(tagName)
+		decoder.SetTagName(tagName)
+	})
+
+	encoder.SetTagName(tagNameTest)
+	decoder.SetTagName(tagNameTest)
+
+	type testFormTagName struct {
+		Name string `form:"name_form" json:"name_json"`
+	}
+	v, err := encoder.Encode(&testFormTagName{
+		Name: "test tag name",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	jsonName := v.Get("name_json")
+	formName := v.Get("name_form")
+	switch tagNameTest {
+	case "json":
+		if jsonName != "test tag name" {
+			t.Errorf("got: %s", jsonName)
+		}
+		if formName != "" {
+			t.Errorf("want: empty, got: %s", formName)
+		}
+	case "form":
+		if formName != "test tag name" {
+			t.Errorf("got: %s", formName)
+		}
+		if jsonName != "" {
+			t.Errorf("want: empty, got: %s", jsonName)
+		}
+	default:
+		t.Fatalf("unknown tag name: %s", tagNameTest)
+	}
+
+	var tn *testFormTagName
+	err = decoder.Decode(&tn, v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if tn == nil {
+		t.Fatal("nil tag name")
+	}
+	if tn.Name != "test tag name" {
+		t.Errorf("got %s", tn.Name)
+	}
+}
+
 type LoginRequest struct {
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
