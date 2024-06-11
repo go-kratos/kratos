@@ -72,7 +72,7 @@ func run(_ *cobra.Command, args []string) {
 		}),
 	)
 	if _, err := os.Stat(targetDir); os.IsNotExist(err) {
-		fmt.Printf("Target directory: %s does not exsit\n", targetDir)
+		fmt.Printf("Target directory: %s does not exist\n", targetDir)
 		return
 	}
 	for _, s := range res {

@@ -102,7 +102,7 @@ func (a *aliyunLog) Log(level log.Level, keyvals ...interface{}) error {
 	return a.producer.SendLog(a.opts.project, a.opts.logstore, "", "", logInst)
 }
 
-// NewAliyunLog new a aliyun logger with options.
+// NewAliyunLog new aliyun logger with options.
 func NewAliyunLog(options ...Option) Logger {
 	opts := defaultOptions()
 	for _, o := range options {

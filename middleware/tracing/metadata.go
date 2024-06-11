@@ -40,7 +40,7 @@ func (b Metadata) Extract(parent context.Context, carrier propagation.TextMapCar
 	return parent
 }
 
-// Fields returns the keys who's values are set with Inject.
+// Fields returns the keys whose values are set with Inject.
 func (b Metadata) Fields() []string {
 	return []string{serviceHeader}
 }
