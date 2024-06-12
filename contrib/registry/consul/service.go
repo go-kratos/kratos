@@ -21,17 +21,25 @@ func (s *serviceSet) broadcast(cluster string, instances []*registry.ServiceInst
 		s.services = make(map[string][]*registry.ServiceInstance)
 	}
 
+	hasInstances := false
 	if len(instances) == 0 {
 		for c, ins := range s.services {
 			if cluster == c {
 				continue
 			}
 			if len(ins) != 0 {
+				hasInstances = true
 				delete(s.services, cluster)
 			}
 		}
 	} else {
+		hasInstances = true
 		s.services[cluster] = instances
+	}
+
+	// If there is no instance, no need to notify the watcher
+	if !hasInstances {
+		return
 	}
 
 	for k := range s.watcher {

@@ -287,9 +287,7 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 					time.Sleep(time.Second)
 					continue
 				}
-				if len(tmpService) > 0 {
-					ss.broadcast(cluster, tmpService)
-				}
+				ss.broadcast(cluster, tmpService)
 			}
 		}(cluster)
 	}
