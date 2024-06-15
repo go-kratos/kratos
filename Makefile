@@ -74,6 +74,7 @@ uninstall:
 .PHONY: clean
 clean:
 	@${TOOLS_SHELL} tidy
+	@rm cmd/kratos/kratos && rm cmd/protoc-gen-go-errors/protoc-gen-go-errors && rm cmd/protoc-gen-go-http/protoc-gen-go-http
 	@echo "clean finished"
 
 .PHONY: fix
