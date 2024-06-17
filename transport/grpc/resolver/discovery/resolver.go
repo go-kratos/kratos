@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"time"
 
 	"google.golang.org/grpc/attributes"
@@ -65,6 +66,12 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		// filter redundant endpoints
 		if _, ok := endpoints[ept]; ok {
 			continue
+		}
+		// filter weight <= 0
+		if w, ok := in.Metadata["weight"]; ok && w != "" {
+			if i, err := strconv.ParseInt(w, 10, 64); err == nil && i <= 0 {
+				continue
+			}
 		}
 		filtered = append(filtered, in)
 	}
