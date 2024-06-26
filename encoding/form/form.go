@@ -22,9 +22,13 @@ var (
 	decoder = form.NewDecoder()
 )
 
+// This variable can be replaced with -ldflags like below:
+// go build "-ldflags=-X github.com/go-kratos/kratos/v2/encoding/form.tagName=form"
+var tagName = "json"
+
 func init() {
-	decoder.SetTagName("json")
-	encoder.SetTagName("json")
+	decoder.SetTagName(tagName)
+	encoder.SetTagName(tagName)
 	encoding.RegisterCodec(codec{encoder: encoder, decoder: decoder})
 }
 
