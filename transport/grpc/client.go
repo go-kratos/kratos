@@ -141,17 +141,33 @@ type clientOptions struct {
 	printDiscoveryDebugLog bool
 }
 
+// NewClient returns a GRPC connection.
+func NewClient(opts ...ClientOption) (*grpc.ClientConn, error) {
+	options, grpcOpts := makeOptions(false, opts...)
+	return newClient(options, grpcOpts)
+}
+
+// NewClientInsecure returns an insecure GRPC connection.
+func NewClientInsecure(opts ...ClientOption) (*grpc.ClientConn, error) {
+	options, grpcOpts := makeOptions(true, opts...)
+	return newClient(options, grpcOpts)
+}
+
 // Dial returns a GRPC connection.
+// Deprecated: use NewClient instead.
 func Dial(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, error) {
-	return dial(ctx, false, opts...)
+	options, grpcOpts := makeOptions(false, opts...)
+	return dial(ctx, options, grpcOpts)
 }
 
 // DialInsecure returns an insecure GRPC connection.
+// Deprecated: use NewClientInsecure instead.
 func DialInsecure(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, error) {
-	return dial(ctx, true, opts...)
+	options, grpcOpts := makeOptions(true, opts...)
+	return dial(ctx, options, grpcOpts)
 }
 
-func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.ClientConn, error) {
+func makeOptions(insecure bool, opts ...ClientOption) (clientOptions, []grpc.DialOption) {
 	options := clientOptions{
 		timeout:                2000 * time.Millisecond,
 		balancerName:           balancerName,
@@ -201,6 +217,15 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 	if len(options.grpcOpts) > 0 {
 		grpcOpts = append(grpcOpts, options.grpcOpts...)
 	}
+	return options, grpcOpts
+}
+
+func newClient(options clientOptions, grpcOpts []grpc.DialOption) (*grpc.ClientConn, error) {
+	return grpc.NewClient(options.endpoint, grpcOpts...)
+}
+
+// Deprecated: use newClient instead.
+func dial(ctx context.Context, options clientOptions, grpcOpts []grpc.DialOption) (*grpc.ClientConn, error) {
 	return grpc.DialContext(ctx, options.endpoint, grpcOpts...)
 }
 

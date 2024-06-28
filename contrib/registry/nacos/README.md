@@ -80,8 +80,7 @@ func main() {
 	r := nacos.New(client)
 
 	// client
-	conn, err := grpc.DialInsecure(
-		context.Background(),
+	conn, err := grpc.NewClient(
 		grpc.WithEndpoint("discovery:///helloworld"),
 		grpc.WithDiscovery(r),
 	)

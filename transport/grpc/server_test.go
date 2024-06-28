@@ -111,7 +111,7 @@ func testClient(t *testing.T, srv *Server) {
 		t.Fatal(err)
 	}
 	// new a gRPC client
-	conn, err := DialInsecure(context.Background(),
+	conn, err := NewClientInsecure(
 		WithEndpoint(u.Host),
 		WithOptions(grpc.WithBlock()),
 		WithUnaryInterceptor(
