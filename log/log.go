@@ -13,6 +13,12 @@ type Logger interface {
 	Log(level Level, keyvals ...interface{}) error
 }
 
+type LoggerFunc func(level Level, keyvals ...interface{}) error
+
+func (f LoggerFunc) Log(level Level, keyvals ...interface{}) error {
+	return f(level, keyvals...)
+}
+
 type logger struct {
 	logger    Logger
 	prefix    []interface{}
