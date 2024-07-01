@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/imdario/mergo"
+	"dario.cat/mergo"
 
 	// init encoding
 	_ "github.com/go-kratos/kratos/v2/encoding/json"

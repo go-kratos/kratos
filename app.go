@@ -30,7 +30,7 @@ type AppInfo interface {
 type App struct {
 	opts     options
 	ctx      context.Context
-	cancel   func()
+	cancel   context.CancelFunc
 	mu       sync.Mutex
 	instance *registry.ServiceInstance
 }
@@ -139,6 +139,7 @@ func (a *App) Run() error {
 	if err = eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return err
 	}
+	err = nil
 	for _, fn := range a.opts.afterStop {
 		err = fn(sctx)
 	}

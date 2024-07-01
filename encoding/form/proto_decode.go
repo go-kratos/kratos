@@ -48,11 +48,12 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 			// ignore unexpected field.
 			return nil
 		}
-
+		if fd.IsMap() && len(fieldPath) == 2 {
+			return populateMapField(fd, v.Mutable(fd).Map(), fieldPath, values)
+		}
 		if i == len(fieldPath)-1 {
 			break
 		}
-
 		if fd.Message() == nil || fd.Cardinality() == protoreflect.Repeated {
 			if fd.IsMap() && len(fieldPath) > 1 {
 				// post subfield
@@ -137,12 +138,7 @@ func populateRepeatedField(fd protoreflect.FieldDescriptor, list protoreflect.Li
 }
 
 func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, fieldPath []string, values []string) error {
-	var (
-		nKey      = len(fieldPath) - 1 // post sub key
-		vKey      = len(values) - 1
-		fieldName = fieldPath[nKey]
-	)
-	_, keyName, err := parseURLQueryMapKey(fieldName)
+	_, keyName, err := parseURLQueryMapKey(strings.Join(fieldPath, fieldSeparater))
 	if err != nil {
 		return err
 	}
@@ -150,7 +146,7 @@ func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, fiel
 	if err != nil {
 		return fmt.Errorf("parsing map key %q: %w", fd.FullName().Name(), err)
 	}
-	value, err := parseField(fd.MapValue(), values[vKey])
+	value, err := parseField(fd.MapValue(), values[len(values)-1])
 	if err != nil {
 		return fmt.Errorf("parsing map value %q: %w", fd.FullName().Name(), err)
 	}
@@ -244,7 +240,7 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		if value == nullStr {
 			break
 		}
-		t, err := time.Parse(time.RFC3339Nano, value)
+		t, err := time.ParseInLocation(time.RFC3339Nano, value, time.Local)
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
@@ -363,7 +359,7 @@ func parseURLQueryMapKey(key string) (string, string, error) {
 	)
 	if startIndex < 0 {
 		//nolint:gomnd
-		values := strings.SplitN(key, fieldSeparater, 2)
+		values := strings.Split(key, fieldSeparater)
 		//nolint:gomnd
 		if len(values) != 2 {
 			return "", "", errInvalidFormatMapKey

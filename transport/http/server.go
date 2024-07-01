@@ -134,10 +134,22 @@ func Listener(lis net.Listener) ServerOption {
 	}
 }
 
-// PathPrefix with mux's PathPrefix, router will replaced by a subrouter that start with prefix.
+// PathPrefix with mux's PathPrefix, router will be replaced by a subrouter that start with prefix.
 func PathPrefix(prefix string) ServerOption {
 	return func(s *Server) {
 		s.router = s.router.PathPrefix(prefix).Subrouter()
+	}
+}
+
+func NotFoundHandler(handler http.Handler) ServerOption {
+	return func(s *Server) {
+		s.router.NotFoundHandler = handler
+	}
+}
+
+func MethodNotAllowedHandler(handler http.Handler) ServerOption {
+	return func(s *Server) {
+		s.router.MethodNotAllowedHandler = handler
 	}
 }
 
@@ -177,12 +189,12 @@ func NewServer(opts ...ServerOption) *Server {
 		strictSlash: true,
 		router:      mux.NewRouter(),
 	}
+	srv.router.NotFoundHandler = http.DefaultServeMux
+	srv.router.MethodNotAllowedHandler = http.DefaultServeMux
 	for _, o := range opts {
 		o(srv)
 	}
 	srv.router.StrictSlash(srv.strictSlash)
-	srv.router.NotFoundHandler = http.DefaultServeMux
-	srv.router.MethodNotAllowedHandler = http.DefaultServeMux
 	srv.router.Use(srv.filter())
 	srv.Server = &http.Server{
 		Handler:   FilterChain(srv.filters...)(srv.router),
@@ -284,6 +296,7 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				reqHeader:    headerCarrier(req.Header),
 				replyHeader:  headerCarrier(w.Header()),
 				request:      req,
+				response:     w,
 			}
 			if s.endpoint != nil {
 				tr.endpoint = s.endpoint.String()

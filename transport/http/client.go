@@ -56,7 +56,7 @@ type clientOptions struct {
 	subsetSize   int
 }
 
-// WithSubset with client disocvery subset size.
+// WithSubset with client discovery subset size.
 // zero value means subset filter disabled
 func WithSubset(size int) ClientOption {
 	return func(o *clientOptions) {
@@ -311,6 +311,13 @@ func (client *Client) do(req *http.Request) (*http.Response, error) {
 	}
 	resp, err := client.cc.Do(req)
 	if err == nil {
+		t, ok := transport.FromClientContext(req.Context())
+		if ok {
+			ht, ok := t.(*Transport)
+			if ok {
+				ht.replyHeader = headerCarrier(resp.Header)
+			}
+		}
 		err = client.opts.errorDecoder(req.Context(), resp)
 	}
 	if done != nil {

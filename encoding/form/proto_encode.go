@@ -111,7 +111,7 @@ func encodeRepeatedField(fieldDescriptor protoreflect.FieldDescriptor, list prot
 func encodeMapField(fieldDescriptor protoreflect.FieldDescriptor, mp protoreflect.Map) (map[string]string, error) {
 	m := make(map[string]string)
 	mp.Range(func(k protoreflect.MapKey, v protoreflect.Value) bool {
-		key, err := EncodeField(fieldDescriptor.MapValue(), k.Value())
+		key, err := EncodeField(fieldDescriptor.MapKey(), k.Value())
 		if err != nil {
 			return false
 		}
@@ -137,14 +137,12 @@ func EncodeField(fieldDescriptor protoreflect.FieldDescriptor, value protoreflec
 		}
 		desc := fieldDescriptor.Enum().Values().ByNumber(value.Enum())
 		return string(desc.Name()), nil
-	case protoreflect.StringKind:
-		return value.String(), nil
 	case protoreflect.BytesKind:
 		return base64.URLEncoding.EncodeToString(value.Bytes()), nil
 	case protoreflect.MessageKind, protoreflect.GroupKind:
 		return encodeMessage(fieldDescriptor.Message(), value)
 	default:
-		return fmt.Sprint(value.Interface()), nil
+		return value.String(), nil
 	}
 }
 

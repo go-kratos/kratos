@@ -332,6 +332,7 @@ type Watcher struct {
 	Cancel           context.CancelFunc
 	Channel          <-chan model.SubScribeEvent
 	ServiceInstances []*registry.ServiceInstance
+	first            bool
 }
 
 func newWatcher(ctx context.Context, namespace string, serviceName string, consumer api.ConsumerAPI) (*Watcher, error) {
@@ -350,6 +351,7 @@ func newWatcher(ctx context.Context, namespace string, serviceName string, consu
 	w := &Watcher{
 		Namespace:        namespace,
 		ServiceName:      serviceName,
+		first:            true,
 		Channel:          watchServiceResponse.EventChannel,
 		ServiceInstances: instancesToServiceInstances(watchServiceResponse.GetAllInstancesResp.GetInstances()),
 	}
@@ -362,6 +364,10 @@ func newWatcher(ctx context.Context, namespace string, serviceName string, consu
 // 2.any service instance changes found.
 // if the above two conditions are not met, it will block until context deadline exceeded or canceled
 func (w *Watcher) Next() ([]*registry.ServiceInstance, error) {
+	if w.first {
+		w.first = false
+		return w.ServiceInstances, nil
+	}
 	select {
 	case <-w.Ctx.Done():
 		return nil, w.Ctx.Err()
@@ -376,7 +382,7 @@ func (w *Watcher) Next() ([]*registry.ServiceInstance, error) {
 							if serviceInstance.ID == instance.GetId() {
 								// remove equal
 								if len(w.ServiceInstances) <= 1 {
-									w.ServiceInstances = w.ServiceInstances[0:0]
+									w.ServiceInstances = w.ServiceInstances[:0]
 									continue
 								}
 								w.ServiceInstances = append(w.ServiceInstances[:i], w.ServiceInstances[i+1:]...)

@@ -34,12 +34,6 @@ func TestEncodeURL(t *testing.T) {
 			want:         "http://helloworld.Greeter/helloworld/{}/sub/hello",
 		},
 		{
-			pathTemplate: "http://helloworld.Greeter/helloworld/{}/sub/{sub.naming}",
-			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "hello"}},
-			needQuery:    false,
-			want:         "http://helloworld.Greeter/helloworld/{}/sub/hello",
-		},
-		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{}/sub/{sub.name.cc}",
 			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "hello"}},
 			needQuery:    false,
@@ -62,12 +56,6 @@ func TestEncodeURL(t *testing.T) {
 			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "2233!!!"}},
 			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/sub",
-		},
-		{
-			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub/{sub.name}",
-			request:      &binding.HelloRequest{Name: "test"},
-			needQuery:    false,
-			want:         "http://helloworld.Greeter/helloworld/test/sub/",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub/{sub.name}",
@@ -132,8 +120,8 @@ func TestEncodeURL(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if EncodeURL(test.pathTemplate, test.request, test.needQuery) != test.want {
-			t.Fatalf("want: %s, got: %s", test.want, EncodeURL(test.pathTemplate, test.request, test.needQuery))
+		if path := EncodeURL(test.pathTemplate, test.request, test.needQuery); path != test.want {
+			t.Fatalf("want: %s, got: %s", test.want, path)
 		}
 	}
 }

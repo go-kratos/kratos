@@ -39,7 +39,7 @@ func WithEndpoint(endpoint string) ClientOption {
 	}
 }
 
-// WithSubset with client disocvery subset size.
+// WithSubset with client discovery subset size.
 // zero value means subset filter disabled
 func WithSubset(size int) ClientOption {
 	return func(o *clientOptions) {
