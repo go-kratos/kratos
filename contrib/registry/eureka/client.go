@@ -292,8 +292,8 @@ func (e *Client) pickServer(currentTimes int) string {
 }
 
 func (e *Client) shuffle() {
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(e.urls), func(i, j int) {
+	rd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	rd.Shuffle(len(e.urls), func(i, j int) {
 		e.urls[i], e.urls[j] = e.urls[j], e.urls[i]
 	})
 }
