@@ -62,9 +62,13 @@ func (t *Tracer) Start(ctx context.Context, operation string, carrier propagatio
 // End finish tracing span
 func (t *Tracer) End(_ context.Context, span trace.Span, m interface{}, err error) {
 	if err != nil {
-		span.RecordError(err)
-		if e := errors.FromError(err); e != nil {
-			span.SetAttributes(attribute.Key("rpc.status_code").Int64(int64(e.Code)))
+		if t.opt.customReportErr != nil {
+			t.opt.customReportErr(span, err)
+		} else {
+			span.RecordError(err)
+			if e := errors.FromError(err); e != nil {
+				span.SetAttributes(attribute.Key("rpc.status_code").Int64(int64(e.Code)))
+			}
 		}
 		span.SetStatus(codes.Error, err.Error())
 	} else {
