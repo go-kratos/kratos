@@ -15,14 +15,14 @@ import (
 // Option is tracing option.
 type Option func(*options)
 
-// customReportErrFunc custom report err func handler
-type customReportErrFunc func(ctx context.Context, span trace.Span, err error)
+// ReportErrHandle report err func handler
+type ReportErrHandle func(ctx context.Context, span trace.Span, err error)
 
 type options struct {
 	tracerName      string
 	tracerProvider  trace.TracerProvider
 	propagator      propagation.TextMapPropagator
-	customReportErr customReportErrFunc
+	reportErrHandle ReportErrHandle
 }
 
 // WithPropagator with tracer propagator.
@@ -47,10 +47,10 @@ func WithTracerName(tracerName string) Option {
 	}
 }
 
-// WithCustomReportErr with custom report err func
-func WithCustomReportErr(f customReportErrFunc) Option {
+// WithReportErrHandle with custom report err func
+func WithReportErrHandle(f ReportErrHandle) Option {
 	return func(o *options) {
-		o.customReportErr = f
+		o.reportErrHandle = f
 	}
 }
 
