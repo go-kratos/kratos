@@ -16,7 +16,7 @@ import (
 type Option func(*options)
 
 // customReportErrFunc custom report err func handler
-type customReportErrFunc func(span trace.Span, err error)
+type customReportErrFunc func(ctx context.Context, span trace.Span, err error)
 
 type options struct {
 	tracerName      string
