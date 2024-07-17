@@ -57,6 +57,7 @@ func (w *responseWriter) Write(data []byte) (int, error) {
 	w.w.WriteHeader(w.code)
 	return w.w.Write(data)
 }
+func (w *responseWriter) Unwrap() http.ResponseWriter { return w.w }
 
 type wrapper struct {
 	router *Router

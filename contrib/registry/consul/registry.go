@@ -190,6 +190,7 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 			services:    &atomic.Value{},
 			serviceName: name,
 		}
+		set.ctx, set.cancel = context.WithCancel(context.Background())
 		r.registry[name] = set
 	}
 
@@ -208,10 +209,8 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 		// otherwise the initial data may be blocked forever during the watch.
 		w.event <- struct{}{}
 	}
-
 	if !ok {
-		err := r.resolve(ctx, set)
-		if err != nil {
+		if err := r.resolve(set.ctx, set); err != nil {
 			return nil, err
 		}
 	}
@@ -249,6 +248,9 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 				}
 				idx = tmpIdx
 			case <-ctx.Done():
+				r.lock.Lock()
+				delete(r.registry, ss.serviceName)
+				r.lock.Unlock()
 				return
 			}
 		}
