@@ -3,13 +3,13 @@ module github.com/go-kratos/kratos/v2
 go 1.20
 
 require (
+	dario.cat/mergo v1.0.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-kratos/aegis v0.2.0
 	github.com/go-playground/form/v4 v4.2.0
 	github.com/golang-jwt/jwt/v5 v5.1.0
 	github.com/google/uuid v1.4.0
 	github.com/gorilla/mux v1.8.1
-	github.com/imdario/mergo v0.3.16
 	go.opentelemetry.io/otel v1.24.0
 	go.opentelemetry.io/otel/metric v1.24.0
 	go.opentelemetry.io/otel/sdk v1.24.0
