@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -129,6 +130,12 @@ func (r *resolver) update(services []*registry.ServiceInstance) bool {
 		}
 		if ept == "" {
 			continue
+		}
+		// filter weight <= 0
+		if w, ok := ins.Metadata["weight"]; ok && w != "" {
+			if i, err := strconv.ParseInt(w, 10, 64); err == nil && i <= 0 {
+				continue
+			}
 		}
 		filtered = append(filtered, ins)
 	}
