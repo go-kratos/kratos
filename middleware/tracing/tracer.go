@@ -26,6 +26,12 @@ func NewTracer(kind trace.SpanKind, opts ...Option) *Tracer {
 	op := options{
 		propagator: propagation.NewCompositeTextMapPropagator(Metadata{}, propagation.Baggage{}, propagation.TraceContext{}),
 		tracerName: "kratos",
+		reportErrorHandle: func(_ context.Context, span trace.Span, err error) {
+			span.RecordError(err)
+			if e := errors.FromError(err); e != nil {
+				span.SetAttributes(attribute.Key("rpc.status_code").Int64(int64(e.Code)))
+			}
+		},
 	}
 	for _, o := range opts {
 		o(&op)
@@ -60,12 +66,9 @@ func (t *Tracer) Start(ctx context.Context, operation string, carrier propagatio
 }
 
 // End finish tracing span
-func (t *Tracer) End(_ context.Context, span trace.Span, m interface{}, err error) {
+func (t *Tracer) End(ctx context.Context, span trace.Span, m interface{}, err error) {
 	if err != nil {
-		span.RecordError(err)
-		if e := errors.FromError(err); e != nil {
-			span.SetAttributes(attribute.Key("rpc.status_code").Int64(int64(e.Code)))
-		}
+		t.opt.reportErrorHandle(ctx, span, err)
 		span.SetStatus(codes.Error, err.Error())
 	} else {
 		span.SetStatus(codes.Ok, "OK")
