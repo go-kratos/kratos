@@ -28,28 +28,28 @@ type options struct {
 	tags            map[string]interface{}
 }
 
-// Repanic configures whether Sentry should repanic after recovery, in most cases it should be set to true.
+// WithRepanic repanic configures whether Sentry should repanic after recovery, in most cases it should be set to true.
 func WithRepanic(repanic bool) Option {
 	return func(opts *options) {
 		opts.repanic = repanic
 	}
 }
 
-// WaitForDelivery configures whether you want to block the request before moving forward with the response.
+// WithWaitForDelivery waitForDelivery configures whether you want to block the request before moving forward with the response.
 func WithWaitForDelivery(waitForDelivery bool) Option {
 	return func(opts *options) {
 		opts.waitForDelivery = waitForDelivery
 	}
 }
 
-// Timeout for the event delivery requests.
+// WithTimeout timeout for the event delivery requests.
 func WithTimeout(timeout time.Duration) Option {
 	return func(opts *options) {
 		opts.timeout = timeout
 	}
 }
 
-// Global tags injection, the value type must be string or log.Valuer
+// WithTags global tags injection, the value type must be string or log.Valuer
 func WithTags(kvs map[string]interface{}) Option {
 	return func(opts *options) {
 		opts.tags = kvs
