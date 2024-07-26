@@ -81,7 +81,7 @@ func (m *mockConn) ParseServiceConfig(_ string) *serviceconfig.ParseResult {
 }
 
 func TestBuilder_Build(t *testing.T) {
-	b := NewBuilder(&mockDiscovery{}, DisableDebugLog())
+	b := NewBuilder(&mockDiscovery{}, PrintDebugLog(false))
 	_, err := b.Build(
 		resolver.Target{
 			URL: url.URL{
