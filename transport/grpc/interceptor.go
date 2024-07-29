@@ -77,6 +77,12 @@ func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
 		})
 
 		ws := NewWrappedStream(ctx, ss)
+		h := func(srv interface{}, stream grpc.ServerStream) error {
+			return handler(srv, stream)
+		}
+		if next := s.streamMiddleware.MatchStream(info.FullMethod); len(next) > 0 {
+			h = middleware.ChainStream(next...)(h)
+		}
 
 		err := handler(srv, ws)
 		if len(replyHeader) > 0 {
