@@ -166,13 +166,13 @@ func TestConfig_Watch(t *testing.T) {
 				source: source,
 			},
 			wantErr: false,
-			processFunc: func(t *testing.T, w config.Watcher) {
+			processFunc: func(t *testing.T, _ config.Watcher) {
 				_, pErr := client.PublishConfig(vo.ConfigParam{DataId: "test.yaml", Group: "test", Content: "test: test"})
 				if pErr != nil {
 					t.Error(pErr)
 				}
 			},
-			deferFunc: func(t *testing.T, w config.Watcher) {
+			deferFunc: func(t *testing.T, _ config.Watcher) {
 				_, dErr := client.DeleteConfig(vo.ConfigParam{DataId: "test.yaml", Group: "test"})
 				if dErr != nil {
 					t.Error(dErr)

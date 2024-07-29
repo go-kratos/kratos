@@ -17,7 +17,7 @@ linters:
     - gofumpt
     - goconst
     - goimports
-    - gomnd
+    - mnd
     - gocyclo
     - ineffassign
     - lll
@@ -54,9 +54,9 @@ linters-settings:
     multi-func: true
   lll:
     line-length: 160
-  gomnd:
+  mnd:
     # don't include the "operation", "argument" and "assign"
-    checks: 
+    checks:
       - case
       - condition
       - return
