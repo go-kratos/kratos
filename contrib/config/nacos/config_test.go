@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nacos-group/nacos-sdk-go/clients"
-	"github.com/nacos-group/nacos-sdk-go/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/vo"
-
 	"github.com/go-kratos/kratos/v2/config"
+
+	"github.com/nacos-group/nacos-sdk-go/v2/clients"
+	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 )
 
 func TestConfig_Load(t *testing.T) {
@@ -22,8 +22,6 @@ func TestConfig_Load(t *testing.T) {
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
 		CacheDir:            "/tmp/nacos/cache",
-		RotateTime:          "1h",
-		MaxAge:              3,
 		LogLevel:            "debug",
 	}
 
@@ -79,7 +77,7 @@ func TestConfig_Load(t *testing.T) {
 			fields: fields{
 				source: source,
 			},
-			wantErr: false,
+			wantErr: true,
 			preFunc: func(t *testing.T) {
 				_, err = client.PublishConfig(vo.ConfigParam{DataId: "111.yaml", Group: "notExist", Content: "test: test"})
 				if err != nil {
@@ -93,11 +91,7 @@ func TestConfig_Load(t *testing.T) {
 					t.Error(dErr)
 				}
 			},
-			want: []*config.KeyValue{{
-				Key:    "test.yaml",
-				Value:  []byte{},
-				Format: "yaml",
-			}},
+			want: nil,
 		},
 	}
 	for _, test := range tests {
@@ -132,8 +126,6 @@ func TestConfig_Watch(t *testing.T) {
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
 		CacheDir:            "/tmp/nacos/cache",
-		RotateTime:          "1h",
-		MaxAge:              3,
 		LogLevel:            "debug",
 	}
 

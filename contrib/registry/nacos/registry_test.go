@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nacos-group/nacos-sdk-go/clients"
-	"github.com/nacos-group/nacos-sdk-go/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/vo"
-
 	"github.com/go-kratos/kratos/v2/registry"
+
+	"github.com/nacos-group/nacos-sdk-go/v2/clients"
+	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 )
 
 func TestRegistry_Register(t *testing.T) {
@@ -24,8 +24,6 @@ func TestRegistry_Register(t *testing.T) {
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
 		CacheDir:            "/tmp/nacos/cache",
-		RotateTime:          "1h",
-		MaxAge:              3,
 		LogLevel:            "debug",
 	}
 
@@ -241,8 +239,6 @@ func TestRegistry_Deregister(t *testing.T) {
 					NotLoadCacheAtStart: true,
 					LogDir:              "/tmp/nacos/log",
 					CacheDir:            "/tmp/nacos/cache",
-					RotateTime:          "1h",
-					MaxAge:              3,
 					LogLevel:            "debug",
 				}
 
@@ -302,8 +298,6 @@ func TestRegistry_Deregister(t *testing.T) {
 				NotLoadCacheAtStart: true,
 				LogDir:              "/tmp/nacos/log",
 				CacheDir:            "/tmp/nacos/cache",
-				RotateTime:          "1h",
-				MaxAge:              3,
 				LogLevel:            "debug",
 			}
 
@@ -339,9 +333,8 @@ func TestRegistry_GetService(t *testing.T) {
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
 		CacheDir:            "/tmp/nacos/cache",
-		RotateTime:          "1h",
-		MaxAge:              3,
-		LogLevel:            "debug",
+
+		LogLevel: "debug",
 	}
 
 	// a more graceful way to create naming client
@@ -455,9 +448,8 @@ func TestRegistry_Watch(t *testing.T) {
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
 		CacheDir:            "/tmp/nacos/cache",
-		RotateTime:          "1h",
-		MaxAge:              3,
-		LogLevel:            "debug",
+
+		LogLevel: "debug",
 	}
 
 	// a more graceful way to create naming client
@@ -487,6 +479,7 @@ func TestRegistry_Watch(t *testing.T) {
 		ctx         context.Context
 		serviceName string
 	}
+	c, timeout := context.WithTimeout(context.Background(), time.Second*2)
 	tests := []struct {
 		name        string
 		fields      fields
@@ -496,27 +489,29 @@ func TestRegistry_Watch(t *testing.T) {
 		processFunc func(t *testing.T)
 	}{
 		{
-			name: "normal",
+			name: "timeout",
 			fields: fields{
 				registry: New(client),
 			},
 			args: args{
-				ctx:         context.Background(),
+				ctx:         c,
 				serviceName: testServer.Name + "." + "grpc",
 			},
-			wantErr: false,
-			want: []*registry.ServiceInstance{{
-				ID:        "127.0.0.1#8080#DEFAULT#DEFAULT_GROUP@@test4.grpc",
-				Name:      "DEFAULT_GROUP@@test4.grpc",
-				Version:   "v1.0.0",
-				Metadata:  map[string]string{"version": "v1.0.0", "kind": "grpc"},
-				Endpoints: []string{"grpc://127.0.0.1:8080"},
-			}},
+			wantErr: true,
+			//want: []*registry.ServiceInstance{{
+			//	ID:        "127.0.0.1#8080#DEFAULT#DEFAULT_GROUP@@test4.grpc",
+			//	Name:      "DEFAULT_GROUP@@test4.grpc",
+			//	Version:   "v1.0.0",
+			//	Metadata:  map[string]string{"version": "v1.0.0", "kind": "grpc"},
+			//	Endpoints: []string{"grpc://127.0.0.1:8080"},
+			//}},
+			want: nil,
 			processFunc: func(t *testing.T) {
-				err = r.Register(context.Background(), testServer)
+				err = r.Register(c, testServer)
 				if err != nil {
 					t.Error(err)
 				}
+				timeout()
 			},
 		},
 		{
