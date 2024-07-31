@@ -3,6 +3,7 @@ package polaris
 import (
 	"context"
 	"fmt"
+	"maps"
 	"net"
 	"net/url"
 	"strconv"
@@ -115,15 +116,16 @@ func (r *Registry) Register(_ context.Context, instance *registry.ServiceInstanc
 		}
 
 		// metadata
-		if instance.Metadata == nil {
-			instance.Metadata = make(map[string]string)
+		rmd := maps.Clone(instance.Metadata)
+		if rmd == nil {
+			rmd = make(map[string]string)
 		}
-		instance.Metadata["merge"] = id
-		if _, ok := instance.Metadata["weight"]; !ok {
-			instance.Metadata["weight"] = strconv.Itoa(r.opt.Weight)
+		rmd["merge"] = id
+		if _, ok := rmd["weight"]; !ok {
+			rmd["weight"] = strconv.Itoa(r.opt.Weight)
 		}
 
-		weight, _ := strconv.Atoi(instance.Metadata["weight"])
+		weight, _ := strconv.Atoi(rmd["weight"])
 
 		_, err = r.provider.RegisterInstance(
 			&polaris.InstanceRegisterRequest{
