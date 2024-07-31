@@ -56,7 +56,11 @@ func DefaultRequestsCounter(meter metric.Meter, histogramName string) (metric.In
 // return metric.Float64Histogram for WithSeconds
 // suggest histogramName = <client/server>_requests_seconds_bucket
 func DefaultSecondsHistogram(meter metric.Meter, histogramName string) (metric.Float64Histogram, error) {
-	return meter.Float64Histogram(histogramName, metric.WithUnit("s"))
+	return meter.Float64Histogram(
+		histogramName,
+		metric.WithUnit("s"),
+		metric.WithExplicitBucketBoundaries(0.005, 0.01, 0.025, 0.05, 0.1, 0.250, 0.5, 1),
+	)
 }
 
 // DefaultSecondsHistogramView
