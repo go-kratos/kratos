@@ -2,6 +2,7 @@ package polaris
 
 import (
 	"context"
+	"strconv"
 	"testing"
 	"time"
 
@@ -28,6 +29,9 @@ func TestRegistry(t *testing.T) {
 		WithRegistryTTL(1000),
 	)
 
+	mm := map[string]string{
+		"test1": "test1",
+	}
 	ins := &registry.ServiceInstance{
 		ID:      "test-ut",
 		Name:    "test-ut",
@@ -36,7 +40,18 @@ func TestRegistry(t *testing.T) {
 			"grpc://127.0.0.1:8080",
 			"http://127.0.0.1:9090",
 		},
+		Metadata: mm,
 	}
+
+	go func() {
+		for i := 0; true; i++ {
+			str := "test" + strconv.Itoa(i)
+			_ = mm[str]
+			if i > 100 {
+				i = 0
+			}
+		}
+	}()
 
 	err = r.Register(context.Background(), ins)
 
