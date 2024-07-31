@@ -3,7 +3,6 @@ package polaris
 import (
 	"context"
 	"fmt"
-	"maps"
 	"net"
 	"net/url"
 	"strconv"
@@ -116,7 +115,7 @@ func (r *Registry) Register(_ context.Context, instance *registry.ServiceInstanc
 		}
 
 		// metadata
-		rmd := maps.Clone(instance.Metadata)
+		rmd := mapClone(instance.Metadata)
 		if rmd == nil {
 			rmd = make(map[string]string)
 		}
@@ -379,4 +378,19 @@ func instancesToServiceInstances(instances map[string][]model.Instance) []*regis
 		}
 	}
 	return serviceInstances
+}
+
+// Clone returns a copy of m.  This is a shallow clone:
+// the new keys and values are set using ordinary assignment.
+func mapClone[M ~map[K]V, K comparable, V any](m M) M {
+	// Preserve nil in case it matters.
+	if m == nil {
+		return nil
+	}
+	// Make a shallow copy of the map.
+	m2 := make(M, len(m))
+	for k, v := range m {
+		m2[k] = v
+	}
+	return m2
 }
