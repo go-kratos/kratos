@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/v2/internal/matcher"
 
 	"google.golang.org/grpc"
 	grpcmd "google.golang.org/grpc/metadata"
@@ -48,13 +49,15 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 // wrappedStream is rewrite grpc stream's context
 type wrappedStream struct {
 	grpc.ServerStream
-	ctx context.Context
+	ctx        context.Context
+	middleware matcher.Matcher
 }
 
-func NewWrappedStream(ctx context.Context, stream grpc.ServerStream) grpc.ServerStream {
+func NewWrappedStream(ctx context.Context, stream grpc.ServerStream, m matcher.Matcher) grpc.ServerStream {
 	return &wrappedStream{
 		ServerStream: stream,
 		ctx:          ctx,
+		middleware:   m,
 	}
 }
 
@@ -76,13 +79,18 @@ func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
 			replyHeader: headerCarrier(replyHeader),
 		})
 
-		ws := NewWrappedStream(ctx, ss)
-		h := func(srv interface{}, stream grpc.ServerStream) error {
-			return handler(srv, stream)
+		h := func(ctx context.Context, req interface{}) (interface{}, error) {
+			ctx = context.WithValue(ctx, stream{
+				ServerStream: ss,
+				middlware:    s.middleware,
+			}, ss)
+			return handler(srv, ss), nil
 		}
-		if next := s.streamMiddleware.MatchStream(info.FullMethod); len(next) > 0 {
-			h = middleware.ChainStream(next...)(h)
+		if next := s.middleware.Match(info.FullMethod); len(next) > 0 {
+			h = middleware.Chain(next...)(h)
 		}
+
+		ws := NewWrappedStream(ctx, ss, s.middleware)
 
 		err := handler(srv, ws)
 		if len(replyHeader) > 0 {
@@ -90,4 +98,46 @@ func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
 		}
 		return err
 	}
+}
+
+type stream struct {
+	grpc.ServerStream
+	middlware matcher.Matcher
+}
+
+func GetStream(ctx context.Context) grpc.ServerStream {
+	return ctx.Value(stream{}).(grpc.ServerStream)
+}
+
+func (w *wrappedStream) SendMsg(m interface{}) error {
+	err := w.ServerStream.SendMsg(m)
+	info, _ := transport.FromServerContext(w.ctx)
+
+	h := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return req, nil
+	}
+
+	if next := w.middleware.Match(info.Operation()); len(next) > 0 {
+		h = middleware.Chain(next...)(h)
+	}
+
+	_, err = h(w.ctx, m)
+
+	return err
+}
+
+func (w *wrappedStream) RecvMsg(m interface{}) error {
+	err := w.ServerStream.RecvMsg(m)
+	info, _ := transport.FromServerContext(w.ctx)
+
+	h := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return req, nil
+	}
+
+	if next := w.middleware.Match(info.Operation()); len(next) > 0 {
+		h = middleware.Chain(next...)(h)
+	}
+
+	_, err = h(w.ctx, m)
+	return err
 }
