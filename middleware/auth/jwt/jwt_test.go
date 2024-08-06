@@ -61,6 +61,10 @@ func (tr *Transport) Endpoint() string {
 	return tr.endpoint
 }
 
+func (tr *Transport) Server() interface{} {
+	return nil
+}
+
 func (tr *Transport) Operation() string {
 	return tr.operation
 }
