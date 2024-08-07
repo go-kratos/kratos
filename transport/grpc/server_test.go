@@ -11,6 +11,8 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/grpc/metadata"
+
 	"google.golang.org/grpc"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -277,6 +279,80 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 	}
 	if !reflect.DeepEqual("hi", rv.(*testResp).Data) {
 		t.Errorf("expect %s, got %s", "hi", rv.(*testResp).Data)
+	}
+}
+
+type mockServerStream struct {
+	ctx      context.Context
+	sentMsg  interface{}
+	recvMsg  interface{}
+	metadata metadata.MD
+	grpc.ServerStream
+}
+
+func (m *mockServerStream) SetHeader(md metadata.MD) error {
+	m.metadata = md
+	return nil
+}
+
+func (m *mockServerStream) SendHeader(md metadata.MD) error {
+	m.metadata = md
+	return nil
+}
+
+func (m *mockServerStream) SetTrailer(md metadata.MD) {
+	m.metadata = md
+}
+
+func (m *mockServerStream) Context() context.Context {
+	return m.ctx
+}
+
+func (m *mockServerStream) SendMsg(msg interface{}) error {
+	m.sentMsg = msg
+	return nil
+}
+
+func (m *mockServerStream) RecvMsg(msg interface{}) error {
+	m.recvMsg = msg
+	return nil
+}
+
+func TestServer_streamServerInterceptor(t *testing.T) {
+	u, err := url.Parse("grpc://hello/world")
+	if err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
+	srv := &Server{
+		baseCtx:    context.Background(),
+		endpoint:   u,
+		timeout:    time.Duration(10),
+		middleware: matcher.New(),
+	}
+	srv.middleware.Use(EmptyMiddleware())
+
+	mockStream := &mockServerStream{
+		ctx: srv.baseCtx,
+	}
+
+	handler := func(srv interface{}, stream grpc.ServerStream) error {
+		resp := &testResp{Data: "stream hi"}
+		return stream.SendMsg(resp)
+	}
+
+	info := &grpc.StreamServerInfo{
+		FullMethod: "/grpc.reflection.v1.ServerReflection/ServerReflectionInfo",
+	}
+
+	err = srv.streamServerInterceptor()(nil, mockStream, info, handler)
+	if err != nil {
+		t.Errorf("expect %v, got %v", nil, err)
+	}
+
+	// Check response
+	resp := mockStream.sentMsg.(*testResp)
+	if !reflect.DeepEqual("stream hi", resp.Data) {
+		t.Errorf("expect %s, got %s", "stream hi", resp.Data)
 	}
 }
 

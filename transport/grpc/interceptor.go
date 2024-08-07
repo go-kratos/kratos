@@ -85,7 +85,7 @@ func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
 		}
 
 		if next := s.middleware.Match(info.FullMethod); len(next) > 0 {
-			h = middleware.Chain(next...)(h)
+			middleware.Chain(next...)(h)
 		}
 
 		ctx = context.WithValue(ctx, stream{
