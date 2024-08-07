@@ -2,12 +2,13 @@ package grpc
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/internal/matcher"
+	"fmt"
 
 	"google.golang.org/grpc"
 	grpcmd "google.golang.org/grpc/metadata"
 
 	ic "github.com/go-kratos/kratos/v2/internal/context"
+	"github.com/go-kratos/kratos/v2/internal/matcher"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 )
@@ -80,16 +81,17 @@ func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
 		})
 
 		h := func(ctx context.Context, req interface{}) (interface{}, error) {
-			ctx = context.WithValue(ctx, stream{
-				ServerStream: ss,
-				middlware:    s.middleware,
-			}, ss)
 			return handler(srv, ss), nil
 		}
+
 		if next := s.middleware.Match(info.FullMethod); len(next) > 0 {
 			h = middleware.Chain(next...)(h)
 		}
 
+		ctx = context.WithValue(ctx, stream{
+			ServerStream: ss,
+			middlware:    s.middleware,
+		}, ss)
 		ws := NewWrappedStream(ctx, ss, s.middleware)
 
 		err := handler(srv, ws)
@@ -110,34 +112,37 @@ func GetStream(ctx context.Context) grpc.ServerStream {
 }
 
 func (w *wrappedStream) SendMsg(m interface{}) error {
-	err := w.ServerStream.SendMsg(m)
-	info, _ := transport.FromServerContext(w.ctx)
-
 	h := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return req, nil
+		return req, w.ServerStream.SendMsg(m)
+	}
+
+	info, ok := transport.FromServerContext(w.ctx)
+	if !ok {
+		return fmt.Errorf("transport value stored in ctx returns: %v", ok)
 	}
 
 	if next := w.middleware.Match(info.Operation()); len(next) > 0 {
 		h = middleware.Chain(next...)(h)
 	}
 
-	_, err = h(w.ctx, m)
-
+	_, err := h(w.ctx, m)
 	return err
 }
 
 func (w *wrappedStream) RecvMsg(m interface{}) error {
-	err := w.ServerStream.RecvMsg(m)
-	info, _ := transport.FromServerContext(w.ctx)
-
 	h := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return req, nil
+		return req, w.ServerStream.RecvMsg(m)
+	}
+
+	info, ok := transport.FromServerContext(w.ctx)
+	if !ok {
+		return fmt.Errorf("transport value stored in ctx returns: %v", ok)
 	}
 
 	if next := w.middleware.Match(info.Operation()); len(next) > 0 {
 		h = middleware.Chain(next...)(h)
 	}
 
-	_, err = h(w.ctx, m)
+	_, err := h(w.ctx, m)
 	return err
 }
