@@ -72,12 +72,6 @@ func Middleware(m ...middleware.Middleware) ServerOption {
 	}
 }
 
-func StreamMiddleware(m ...middleware.StreamMiddleware) ServerOption {
-	return func(s *Server) {
-		s.streamMiddleware.UseStream(m...)
-	}
-}
-
 // CustomHealth Checks server.
 func CustomHealth() ServerOption {
 	return func(s *Server) {
@@ -123,35 +117,33 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
-	baseCtx          context.Context
-	tlsConf          *tls.Config
-	lis              net.Listener
-	err              error
-	network          string
-	address          string
-	endpoint         *url.URL
-	timeout          time.Duration
-	middleware       matcher.Matcher
-	streamMiddleware matcher.Matcher
-	unaryInts        []grpc.UnaryServerInterceptor
-	streamInts       []grpc.StreamServerInterceptor
-	grpcOpts         []grpc.ServerOption
-	health           *health.Server
-	customHealth     bool
-	metadata         *apimd.Server
-	adminClean       func()
+	baseCtx      context.Context
+	tlsConf      *tls.Config
+	lis          net.Listener
+	err          error
+	network      string
+	address      string
+	endpoint     *url.URL
+	timeout      time.Duration
+	middleware   matcher.Matcher
+	unaryInts    []grpc.UnaryServerInterceptor
+	streamInts   []grpc.StreamServerInterceptor
+	grpcOpts     []grpc.ServerOption
+	health       *health.Server
+	customHealth bool
+	metadata     *apimd.Server
+	adminClean   func()
 }
 
 // NewServer creates a gRPC server by options.
 func NewServer(opts ...ServerOption) *Server {
 	srv := &Server{
-		baseCtx:          context.Background(),
-		network:          "tcp",
-		address:          ":0",
-		timeout:          1 * time.Second,
-		health:           health.NewServer(),
-		middleware:       matcher.New(),
-		streamMiddleware: matcher.New(),
+		baseCtx:    context.Background(),
+		network:    "tcp",
+		address:    ":0",
+		timeout:    1 * time.Second,
+		health:     health.NewServer(),
+		middleware: matcher.New(),
 	}
 	for _, o := range opts {
 		o(srv)
@@ -198,10 +190,6 @@ func NewServer(opts ...ServerOption) *Server {
 //   - '/helloworld.v1.Greeter/SayHello'
 func (s *Server) Use(selector string, m ...middleware.Middleware) {
 	s.middleware.Add(selector, m...)
-}
-
-func (s *Server) UseStream(selector string, m ...middleware.StreamMiddleware) {
-	s.middleware.AddStream(selector, m...)
 }
 
 // Endpoint return a real address to registry endpoint.
