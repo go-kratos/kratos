@@ -45,7 +45,7 @@ func Server(logger log.Logger) middleware.Middleware {
 				"code", code,
 				"reason", reason,
 				"stack", stack,
-				"latency", time.Since(startTime).Seconds(),
+				"latency", time.Since(startTime),
 			)
 			return
 		}
@@ -81,7 +81,7 @@ func Client(logger log.Logger) middleware.Middleware {
 				"code", code,
 				"reason", reason,
 				"stack", stack,
-				"latency", time.Since(startTime).Seconds(),
+				"latency", time.Since(startTime),
 			)
 			return
 		}
