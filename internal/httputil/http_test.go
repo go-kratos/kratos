@@ -15,6 +15,7 @@ func TestContentSubtype(t *testing.T) {
 		{"application/json", "json"},
 		{"application/xml", "xml"},
 		{"text/xml", "xml"},
+		{"*/*", "*"},
 		{";text/xml", ""},
 		{"application", ""},
 	}
