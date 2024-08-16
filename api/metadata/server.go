@@ -148,7 +148,7 @@ func parseMetadata(meta interface{}) (*dpb.FileDescriptorProto, error) {
 	if enc, ok := meta.([]byte); ok {
 		return decodeFileDesc(enc)
 	}
-	return nil, fmt.Errorf("proto not sumpport metadata: %v", meta)
+	return nil, fmt.Errorf("proto does not support metadata: %v", meta)
 }
 
 // decodeFileDesc does decompression and unmarshalling on the given

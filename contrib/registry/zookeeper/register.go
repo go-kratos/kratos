@@ -2,6 +2,7 @@ package zookeeper
 
 import (
 	"context"
+	"errors"
 	"path"
 	"time"
 
@@ -143,7 +144,7 @@ func (r *Registry) ensureName(path string, data []byte, flags int32) error {
 	// fixes a race condition if the server crashes without using CreateProtectedEphemeralSequential()
 	if flags&zk.FlagEphemeral == zk.FlagEphemeral {
 		err = r.conn.Delete(path, stat.Version)
-		if err != nil && err != zk.ErrNoNode {
+		if err != nil && !errors.Is(err, zk.ErrNoNode) {
 			return err
 		}
 		exists = false

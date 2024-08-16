@@ -80,9 +80,6 @@ func (s *source) Load() ([]*config.KeyValue, error) {
 		return nil, err
 	}
 
-	if err != nil {
-		return nil, err
-	}
 	content := configFile.GetContent()
 	k := s.options.fileName
 

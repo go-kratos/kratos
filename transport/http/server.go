@@ -296,6 +296,7 @@ func (s *Server) filter() mux.MiddlewareFunc {
 				reqHeader:    headerCarrier(req.Header),
 				replyHeader:  headerCarrier(w.Header()),
 				request:      req,
+				response:     w,
 			}
 			if s.endpoint != nil {
 				tr.endpoint = s.endpoint.String()

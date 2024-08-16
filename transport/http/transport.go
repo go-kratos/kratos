@@ -23,6 +23,7 @@ type Transport struct {
 	reqHeader    headerCarrier
 	replyHeader  headerCarrier
 	request      *http.Request
+	response     http.ResponseWriter
 	pathTemplate string
 }
 
@@ -66,6 +67,17 @@ func SetOperation(ctx context.Context, op string) {
 	if tr, ok := transport.FromServerContext(ctx); ok {
 		if tr, ok := tr.(*Transport); ok {
 			tr.operation = op
+		}
+	}
+}
+
+// SetCookie adds a Set-Cookie header to the provided [ResponseWriter]'s headers.
+// The provided cookie must have a valid Name. Invalid cookies may be
+// silently dropped.
+func SetCookie(ctx context.Context, cookie *http.Cookie) {
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		if tr, ok := tr.(*Transport); ok {
+			http.SetCookie(tr.response, cookie)
 		}
 	}
 }
