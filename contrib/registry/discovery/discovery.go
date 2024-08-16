@@ -199,7 +199,7 @@ func (d *Discovery) serverProc() {
 		apps, err := d.polls(ctx)
 		if err != nil {
 			d.switchNode()
-			if ctx.Err() == context.Canceled {
+			if errors.Is(ctx.Err(), context.Canceled) {
 				ctx = nil
 				continue
 			}
