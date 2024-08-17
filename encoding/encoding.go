@@ -40,3 +40,23 @@ func RegisterCodec(codec Codec) {
 func GetCodec(contentSubtype string) Codec {
 	return registeredCodecs[contentSubtype]
 }
+
+func FormCodec() Codec {
+	return registeredCodecs["x-www-form-urlencoded"]
+}
+
+func JsonCodec() Codec {
+	return registeredCodecs["json"]
+}
+
+func ProtoCodec() Codec {
+	return registeredCodecs["proto"]
+}
+
+func XmlCodec() Codec {
+	return registeredCodecs["xml"]
+}
+
+func YamlCodec() Codec {
+	return registeredCodecs["yaml"]
+}
