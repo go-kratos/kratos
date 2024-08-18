@@ -84,15 +84,15 @@ func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
 			return handler(srv, ss), nil
 		}
 
-		if next := s.middleware.Match(info.FullMethod); len(next) > 0 {
+		if next := s.streamMiddleware.Match(info.FullMethod); len(next) > 0 {
 			middleware.Chain(next...)(h)
 		}
 
 		ctx = context.WithValue(ctx, stream{
-			ServerStream: ss,
-			middlware:    s.middleware,
+			ServerStream:     ss,
+			streamMiddleware: s.streamMiddleware,
 		}, ss)
-		ws := NewWrappedStream(ctx, ss, s.middleware)
+		ws := NewWrappedStream(ctx, ss, s.streamMiddleware)
 
 		err := handler(srv, ws)
 		if len(replyHeader) > 0 {
@@ -104,7 +104,7 @@ func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
 
 type stream struct {
 	grpc.ServerStream
-	middlware matcher.Matcher
+	streamMiddleware matcher.Matcher
 }
 
 func GetStream(ctx context.Context) grpc.ServerStream {

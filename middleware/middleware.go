@@ -19,3 +19,5 @@ func Chain(m ...Middleware) Middleware {
 		return next
 	}
 }
+
+type StreamMiddleware func(Handler) Handler

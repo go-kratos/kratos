@@ -324,12 +324,14 @@ func TestServer_streamServerInterceptor(t *testing.T) {
 		t.Errorf("expect %v, got %v", nil, err)
 	}
 	srv := &Server{
-		baseCtx:    context.Background(),
-		endpoint:   u,
-		timeout:    time.Duration(10),
-		middleware: matcher.New(),
+		baseCtx:          context.Background(),
+		endpoint:         u,
+		timeout:          time.Duration(10),
+		middleware:       matcher.New(),
+		streamMiddleware: matcher.New(),
 	}
-	srv.middleware.Use(EmptyMiddleware())
+
+	srv.streamMiddleware.Use(EmptyMiddleware())
 
 	mockStream := &mockServerStream{
 		ctx: srv.baseCtx,
