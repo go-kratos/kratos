@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/internal/matcher"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	grpcinsecure "google.golang.org/grpc/credentials/insecure"
@@ -166,7 +168,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		unaryClientInterceptor(options.middleware, options.timeout, options.filters),
 	}
 	sints := []grpc.StreamClientInterceptor{
-		streamClientInterceptor(options.filters),
+		streamClientInterceptor(options.middleware, options.filters),
 	}
 
 	if len(options.ints) > 0 {
@@ -239,7 +241,54 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, f
 	}
 }
 
-func streamClientInterceptor(filters []selector.NodeFilter) grpc.StreamClientInterceptor {
+// wrappedClientStream wraps the grpc.ClientStream and applies middleware
+type wrappedClientStream struct {
+	grpc.ClientStream
+	ctx        context.Context
+	middleware matcher.Matcher
+}
+
+func (w *wrappedClientStream) Context() context.Context {
+	return w.ctx
+}
+
+func (w *wrappedClientStream) SendMsg(m interface{}) error {
+	h := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return req, w.ClientStream.SendMsg(m)
+	}
+
+	info, ok := transport.FromClientContext(w.ctx)
+	if !ok {
+		return fmt.Errorf("transport value stored in ctx returns: %v", ok)
+	}
+
+	if next := w.middleware.Match(info.Operation()); len(next) > 0 {
+		h = middleware.Chain(next...)(h)
+	}
+
+	_, err := h(w.ctx, m)
+	return err
+}
+
+func (w *wrappedClientStream) RecvMsg(m interface{}) error {
+	h := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return req, w.ClientStream.RecvMsg(m)
+	}
+
+	info, ok := transport.FromClientContext(w.ctx)
+	if !ok {
+		return fmt.Errorf("transport value stored in ctx returns: %v", ok)
+	}
+
+	if next := w.middleware.Match(info.Operation()); len(next) > 0 {
+		h = middleware.Chain(next...)(h)
+	}
+
+	_, err := h(w.ctx, m)
+	return err
+}
+
+func streamClientInterceptor(ms []middleware.Middleware, filters []selector.NodeFilter) grpc.StreamClientInterceptor {
 	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) { // nolint
 		ctx = transport.NewClientContext(ctx, &Transport{
 			endpoint:    cc.Target(),
@@ -249,6 +298,28 @@ func streamClientInterceptor(filters []selector.NodeFilter) grpc.StreamClientInt
 		})
 		var p selector.Peer
 		ctx = selector.NewPeerContext(ctx, &p)
-		return streamer(ctx, desc, cc, method, opts...)
+
+		clientStream, err := streamer(ctx, desc, cc, method, opts...)
+		if err != nil {
+			return nil, err
+		}
+
+		h := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return streamer, nil
+		}
+
+		m := matcher.New()
+		if len(ms) > 0 {
+			m.Use(ms...)
+			middleware.Chain(ms...)(h)
+		}
+
+		wrappedStream := &wrappedClientStream{
+			ClientStream: clientStream,
+			ctx:          ctx,
+			middleware:   m,
+		}
+
+		return wrappedStream, nil
 	}
 }
