@@ -1,4 +1,4 @@
-module github.com/dagehuifei/kratos/contrib/registry/kubernetes/v2
+module github.com/go-kratos/kratos/contrib/registry/kubernetes/v2
 
 go 1.19
 
