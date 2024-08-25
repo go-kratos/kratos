@@ -100,7 +100,7 @@ func TestRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	r := NewRegistry(clientSet)
+	r := NewRegistry(clientSet, currentNamespace)
 	r.Start()
 
 	svrHello := &registry.ServiceInstance{
