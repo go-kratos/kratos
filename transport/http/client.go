@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"reflect"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
@@ -275,20 +274,8 @@ func (client *Client) invoke(ctx context.Context, req *http.Request, args interf
 	if len(client.opts.middleware) > 0 {
 		h = middleware.Chain(client.opts.middleware...)(h)
 	}
-
-	ret, err := h(ctx, args)
-	if err != nil {
-		return err
-	}
-	retValue := reflect.ValueOf(ret)
-	replyValue := reflect.ValueOf(reply)
-	if replyValue.Kind() == reflect.Ptr && !replyValue.IsNil() && retValue.Type() == replyValue.Elem().Type() {
-		replyValue.Elem().Set(retValue.Elem())
-	} else {
-		reply = ret
-	}
-
-	return nil
+	_, err := h(ctx, args)
+	return err
 }
 
 // Do send an HTTP request and decodes the body of response into target.
