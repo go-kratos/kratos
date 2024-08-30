@@ -121,7 +121,7 @@ func (n *Node) Pick() selector.DoneFunc {
 	reqs := atomic.AddInt64(&n.reqs, 1)
 	slot := reqs % 200
 	swapped := atomic.CompareAndSwapInt64(&n.inflights[slot], 0, start)
-	return func(ctx context.Context, di selector.DoneInfo) {
+	return func(_ context.Context, di selector.DoneInfo) {
 		if swapped {
 			atomic.CompareAndSwapInt64(&n.inflights[slot], start, 0)
 		}

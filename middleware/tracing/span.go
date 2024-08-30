@@ -104,7 +104,7 @@ func setServerSpan(ctx context.Context, span trace.Span, m interface{}) {
 func parseFullMethod(fullMethod string) (string, []attribute.KeyValue) {
 	name := strings.TrimLeft(fullMethod, "/")
 	parts := strings.SplitN(name, "/", 2)
-	if len(parts) != 2 { //nolint:gomnd
+	if len(parts) != 2 { //nolint:mnd
 		// Invalid format, does not follow `/package.service/method`.
 		return name, []attribute.KeyValue{attribute.Key("rpc.operation").String(fullMethod)}
 	}

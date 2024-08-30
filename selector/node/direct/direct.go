@@ -36,7 +36,7 @@ func (*Builder) Build(n selector.Node) selector.WeightedNode {
 func (n *Node) Pick() selector.DoneFunc {
 	now := time.Now().UnixNano()
 	atomic.StoreInt64(&n.lastPick, now)
-	return func(ctx context.Context, di selector.DoneInfo) {}
+	return func(context.Context, selector.DoneInfo) {}
 }
 
 // Weight is node effective weight

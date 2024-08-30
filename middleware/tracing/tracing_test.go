@@ -166,7 +166,6 @@ func TestServer(t *testing.T) {
 		WithTracerProvider(tracesdk.NewTracerProvider()),
 		WithPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})),
 	)(next)(context.Background(), "test server: ")
-
 	if err != nil {
 		t.Errorf("expected error, got nil")
 	}

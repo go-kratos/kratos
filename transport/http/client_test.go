@@ -118,7 +118,7 @@ func TestWithEndpoint(t *testing.T) {
 
 func TestWithRequestEncoder(t *testing.T) {
 	o := &clientOptions{}
-	v := func(ctx context.Context, contentType string, in interface{}) (body []byte, err error) {
+	v := func(context.Context, string, interface{}) (body []byte, err error) {
 		return nil, nil
 	}
 	WithRequestEncoder(v)(o)
@@ -129,7 +129,7 @@ func TestWithRequestEncoder(t *testing.T) {
 
 func TestWithResponseDecoder(t *testing.T) {
 	o := &clientOptions{}
-	v := func(ctx context.Context, res *http.Response, out interface{}) error { return nil }
+	v := func(context.Context, *http.Response, interface{}) error { return nil }
 	WithResponseDecoder(v)(o)
 	if o.decoder == nil {
 		t.Errorf("expected encoder to be not nil")
@@ -138,7 +138,7 @@ func TestWithResponseDecoder(t *testing.T) {
 
 func TestWithErrorDecoder(t *testing.T) {
 	o := &clientOptions{}
-	v := func(ctx context.Context, res *http.Response) error { return nil }
+	v := func(context.Context, *http.Response) error { return nil }
 	WithErrorDecoder(v)(o)
 	if o.errorDecoder == nil {
 		t.Errorf("expected encoder to be not nil")
@@ -354,7 +354,7 @@ func TestNewClient(t *testing.T) {
 	if err == nil {
 		t.Error("err should be equal to callOption err")
 	}
-	client.opts.encoder = func(ctx context.Context, contentType string, in interface{}) (body []byte, err error) {
+	client.opts.encoder = func(context.Context, string, interface{}) (body []byte, err error) {
 		return nil, errors.New("mock test encoder error")
 	}
 	err = client.Invoke(context.Background(), http.MethodPost, "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{})

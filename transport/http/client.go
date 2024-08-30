@@ -252,7 +252,7 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 }
 
 func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo, opts ...CallOption) error {
-	h := func(ctx context.Context, in interface{}) (interface{}, error) {
+	h := func(ctx context.Context, _ interface{}) (interface{}, error) {
 		res, err := client.do(req.WithContext(ctx))
 		if res != nil {
 			cs := csAttempt{res: res}

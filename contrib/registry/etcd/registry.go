@@ -162,7 +162,7 @@ func (r *Registry) heartBeat(ctx context.Context, leaseID clientv3.LeaseID, key 
 	if err != nil {
 		curLeaseID = 0
 	}
-	rand.Seed(time.Now().Unix())
+	randSource := rand.New(rand.NewSource(time.Now().Unix()))
 
 	for {
 		if curLeaseID == 0 {
@@ -200,7 +200,7 @@ func (r *Registry) heartBeat(ctx context.Context, leaseID clientv3.LeaseID, key 
 					break
 				}
 				retreat = append(retreat, 1<<retryCnt)
-				time.Sleep(time.Duration(retreat[rand.Intn(len(retreat))]) * time.Second)
+				time.Sleep(time.Duration(retreat[randSource.Intn(len(retreat))]) * time.Second)
 			}
 			if _, ok := <-kac; !ok {
 				// retry failed

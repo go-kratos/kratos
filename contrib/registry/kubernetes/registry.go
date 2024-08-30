@@ -205,13 +205,13 @@ func (s *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 			}
 		},
 		Handler: cache.ResourceEventHandlerFuncs{
-			AddFunc: func(obj interface{}) {
+			AddFunc: func(interface{}) {
 				s.sendLatestInstances(ctx, name, announcement)
 			},
-			UpdateFunc: func(oldObj, newObj interface{}) {
+			UpdateFunc: func(interface{}, interface{}) {
 				s.sendLatestInstances(ctx, name, announcement)
 			},
-			DeleteFunc: func(obj interface{}) {
+			DeleteFunc: func(interface{}) {
 				s.sendLatestInstances(ctx, name, announcement)
 			},
 		},

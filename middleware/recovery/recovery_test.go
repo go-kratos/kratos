@@ -15,7 +15,7 @@ func TestOnce(t *testing.T) {
 		}
 	}()
 
-	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+	next := func(context.Context, interface{}) (interface{}, error) {
 		panic("panic reason")
 	}
 	_, e := Recovery(WithHandler(func(ctx context.Context, _, err interface{}) error {
@@ -29,11 +29,11 @@ func TestOnce(t *testing.T) {
 }
 
 func TestNotPanic(t *testing.T) {
-	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+	next := func(_ context.Context, req interface{}) (interface{}, error) {
 		return req.(string) + "https://go-kratos.dev", nil
 	}
 
-	_, e := Recovery(WithHandler(func(ctx context.Context, req, err interface{}) error {
+	_, e := Recovery(WithHandler(func(_ context.Context, _ any, err any) error {
 		return errors.InternalServer("RECOVERY", fmt.Sprintf("panic triggered: %v", err))
 	}))(next)(context.Background(), "notPanic")
 	if e != nil {

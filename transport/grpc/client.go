@@ -114,8 +114,8 @@ func WithHealthCheck(healthCheck bool) ClientOption {
 
 // WithLogger with logger
 // Deprecated: use global logger instead.
-func WithLogger(_ log.Logger) ClientOption {
-	return func(o *clientOptions) {}
+func WithLogger(log.Logger) ClientOption {
+	return func(*clientOptions) {}
 }
 
 func WithPrintDiscoveryDebugLog(p bool) ClientOption {

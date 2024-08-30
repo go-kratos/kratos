@@ -76,7 +76,7 @@ func DefaultSecondsHistogramView(histogramName string) metricsdk.View {
 					Boundaries: []float64{0.005, 0.01, 0.025, 0.05, 0.1, 0.250, 0.5, 1},
 					NoMinMax:   true,
 				},
-				AttributeFilter: func(value attribute.KeyValue) bool {
+				AttributeFilter: func(attribute.KeyValue) bool {
 					return true
 				},
 			}, true
