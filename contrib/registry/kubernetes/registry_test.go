@@ -110,7 +110,6 @@ func TestRegistry(t *testing.T) {
 		Endpoints: []string{"http://127.0.0.1:80"},
 	}
 	_, err = clientSet.AppsV1().Deployments(namespace).Create(context.Background(), &deployment, metav1.CreateOptions{})
-
 	if err != nil {
 		t.Fatal(err)
 	}
