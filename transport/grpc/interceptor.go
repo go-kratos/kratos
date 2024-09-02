@@ -112,7 +112,7 @@ func GetStream(ctx context.Context) grpc.ServerStream {
 }
 
 func (w *wrappedStream) SendMsg(m interface{}) error {
-	h := func(ctx context.Context, req interface{}) (interface{}, error) {
+	h := func(_ context.Context, req interface{}) (interface{}, error) {
 		return req, w.ServerStream.SendMsg(m)
 	}
 
@@ -130,7 +130,7 @@ func (w *wrappedStream) SendMsg(m interface{}) error {
 }
 
 func (w *wrappedStream) RecvMsg(m interface{}) error {
-	h := func(ctx context.Context, req interface{}) (interface{}, error) {
+	h := func(_ context.Context, req interface{}) (interface{}, error) {
 		return req, w.ServerStream.RecvMsg(m)
 	}
 

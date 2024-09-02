@@ -11,9 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"google.golang.org/grpc/metadata"
-
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/matcher"
@@ -337,7 +336,7 @@ func TestServer_streamServerInterceptor(t *testing.T) {
 		ctx: srv.baseCtx,
 	}
 
-	handler := func(srv interface{}, stream grpc.ServerStream) error {
+	handler := func(_ interface{}, stream grpc.ServerStream) error {
 		resp := &testResp{Data: "stream hi"}
 		return stream.SendMsg(resp)
 	}
