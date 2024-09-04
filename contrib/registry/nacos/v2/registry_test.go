@@ -544,8 +544,8 @@ func TestRegistry_Watch(t *testing.T) {
 				t.Errorf("Watch error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(want, tt.want) {
-				t.Errorf("Watch watcher = %v, want %v", watch, tt.want)
+			if !reflect.DeepEqual(want[0], tt.want) {
+				t.Errorf("Watch watcher = %v,got %v, want %v", watch, want, tt.want)
 			}
 		})
 	}
