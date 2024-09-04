@@ -40,13 +40,11 @@ func TestRegistry_Register(t *testing.T) {
 	r := New(client)
 
 	testServer := &registry.ServiceInstance{
-		ID:        "1",
 		Name:      "test1",
 		Version:   "v1.0.0",
 		Endpoints: []string{"http://127.0.0.1:8080?isSecure=false"},
 	}
 	testServerWithMetadata := &registry.ServiceInstance{
-		ID:        "1",
 		Name:      "test1",
 		Version:   "v1.0.0",
 		Endpoints: []string{"http://127.0.0.1:8080?isSecure=false"},
@@ -108,7 +106,6 @@ func TestRegistry_Register(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				service: &registry.ServiceInstance{
-					ID:        "1",
 					Name:      "",
 					Version:   "v1.0.0",
 					Endpoints: []string{"http://127.0.0.1:8080?isSecure=false"},
@@ -124,7 +121,6 @@ func TestRegistry_Register(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				service: &registry.ServiceInstance{
-					ID:        "1",
 					Name:      "test",
 					Version:   "v1.0.0",
 					Endpoints: []string{"127.0.0.1:8080"},
@@ -140,7 +136,6 @@ func TestRegistry_Register(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				service: &registry.ServiceInstance{
-					ID:        "1",
 					Name:      "test",
 					Version:   "v1.0.0",
 					Endpoints: []string{"http://127.0.0.1888"},
@@ -205,7 +200,6 @@ func TestRegistry_Register(t *testing.T) {
 
 func TestRegistry_Deregister(t *testing.T) {
 	testServer := &registry.ServiceInstance{
-		ID:        "1",
 		Name:      "test2",
 		Version:   "v1.0.0",
 		Endpoints: []string{"http://127.0.0.1:8080?isSecure=false"},
@@ -264,7 +258,6 @@ func TestRegistry_Deregister(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				service: &registry.ServiceInstance{
-					ID:        "1",
 					Name:      "test",
 					Version:   "v1.0.0",
 					Endpoints: []string{"127.0.0.1:8080"},
@@ -277,7 +270,6 @@ func TestRegistry_Deregister(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				service: &registry.ServiceInstance{
-					ID:        "1",
 					Name:      "notExist",
 					Version:   "v1.0.0",
 					Endpoints: []string{"http://127.0.0.18080"},
@@ -348,7 +340,6 @@ func TestRegistry_GetService(t *testing.T) {
 	}
 	r := New(client)
 	testServer := &registry.ServiceInstance{
-		ID:        "1",
 		Name:      "test3",
 		Version:   "v1.0.0",
 		Endpoints: []string{"grpc://127.0.0.1:8080?isSecure=false"},
@@ -463,7 +454,6 @@ func TestRegistry_Watch(t *testing.T) {
 	r := New(client)
 
 	testServer := &registry.ServiceInstance{
-		ID:        "1",
 		Name:      "test4",
 		Version:   "v1.0.0",
 		Endpoints: []string{"grpc://127.0.0.1:8080?isSecure=false"},

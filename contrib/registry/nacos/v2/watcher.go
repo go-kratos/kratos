@@ -77,7 +77,7 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 		}
 		items = append(items, &registry.ServiceInstance{
 			ID:        in.InstanceId,
-			Name:      res.Name,
+			Name:      res.GroupName + "@@" + res.Name,
 			Version:   in.Metadata["version"],
 			Metadata:  in.Metadata,
 			Endpoints: []string{fmt.Sprintf("%s://%s:%d", kind, in.Ip, in.Port)},
