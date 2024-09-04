@@ -474,7 +474,6 @@ func TestRegistry_Watch(t *testing.T) {
 		wantErr     bool
 		want        []*registry.ServiceInstance
 		processFunc func(t *testing.T)
-		deferFunc   func(t *testing.T)
 	}{
 		{
 			name: "normal",
@@ -495,12 +494,6 @@ func TestRegistry_Watch(t *testing.T) {
 			}},
 			processFunc: func(t *testing.T) {
 				err = r.Register(context.Background(), testServer)
-				if err != nil {
-					t.Error(err)
-				}
-			},
-			deferFunc: func(t *testing.T) {
-				err = r.Deregister(context.Background(), testServer)
 				if err != nil {
 					t.Error(err)
 				}
@@ -546,17 +539,13 @@ func TestRegistry_Watch(t *testing.T) {
 				tt.processFunc(t)
 			}
 
-			if tt.deferFunc != nil {
-				defer tt.deferFunc(t)
-			}
-
 			want, err := watch.Next()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Watch error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(want, tt.want) {
-				t.Errorf("Watch watcher = %v, want %v", want, tt.want)
+				t.Errorf("Watch watcher = %v, want %v", watch, tt.want)
 			}
 		})
 	}
