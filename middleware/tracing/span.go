@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/metadata"
@@ -11,7 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 
 	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/protobuf/proto"
@@ -34,9 +35,9 @@ func setClientSpan(ctx context.Context, span trace.Span, m interface{}) {
 				method := ht.Request().Method
 				route := ht.PathTemplate()
 				path := ht.Request().URL.Path
-				attrs = append(attrs, semconv.HTTPMethodKey.String(method))
+				attrs = append(attrs, semconv.HTTPRequestMethodKey.String(method))
 				attrs = append(attrs, semconv.HTTPRouteKey.String(route))
-				attrs = append(attrs, semconv.HTTPTargetKey.String(path))
+				attrs = append(attrs, semconv.URLFull(path))
 				remote = ht.Request().Host
 			}
 		case transport.KindGRPC:
@@ -73,9 +74,11 @@ func setServerSpan(ctx context.Context, span trace.Span, m interface{}) {
 				method := ht.Request().Method
 				route := ht.PathTemplate()
 				path := ht.Request().URL.Path
-				attrs = append(attrs, semconv.HTTPMethodKey.String(method))
+				ua := ht.Request().UserAgent()
+				attrs = append(attrs, semconv.HTTPRequestMethodKey.String(method))
 				attrs = append(attrs, semconv.HTTPRouteKey.String(route))
-				attrs = append(attrs, semconv.HTTPTargetKey.String(path))
+				attrs = append(attrs, semconv.URLFull(path))
+				attrs = append(attrs, semconv.UserAgentOriginal(ua))
 				remote = ht.Request().RemoteAddr
 			}
 		case transport.KindGRPC:
@@ -130,9 +133,11 @@ func peerAttr(addr string) []attribute.KeyValue {
 		host = "127.0.0.1"
 	}
 
+	pi, _ := strconv.Atoi(port)
+
 	return []attribute.KeyValue{
-		semconv.NetPeerIPKey.String(host),
-		semconv.NetPeerPortKey.String(port),
+		semconv.NetworkPeerAddress(host),
+		semconv.NetworkPeerPort(pi),
 	}
 }
 
