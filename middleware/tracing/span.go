@@ -139,12 +139,15 @@ func peerAttr(addr string) []attribute.KeyValue {
 		host = "127.0.0.1"
 	}
 
-	pi, _ := strconv.Atoi(port)
-
-	return []attribute.KeyValue{
+	attrs := []attribute.KeyValue{
 		semconv.NetworkPeerAddress(host),
-		semconv.NetworkPeerPort(pi),
 	}
+
+	if pi, err := strconv.Atoi(port); err == nil {
+		attrs = append(attrs, semconv.NetworkPeerPort(pi))
+	}
+
+	return attrs
 }
 
 func parseTarget(endpoint string) (address string, err error) {
