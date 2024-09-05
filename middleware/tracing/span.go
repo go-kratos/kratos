@@ -32,12 +32,16 @@ func setClientSpan(ctx context.Context, span trace.Span, m interface{}) {
 		switch tr.Kind() {
 		case transport.KindHTTP:
 			if ht, ok := tr.(http.Transporter); ok {
-				method := ht.Request().Method
-				route := ht.PathTemplate()
-				path := ht.Request().URL.Path
-				attrs = append(attrs, semconv.HTTPRequestMethodKey.String(method))
-				attrs = append(attrs, semconv.HTTPRouteKey.String(route))
-				attrs = append(attrs, semconv.URLFull(path))
+				attrs = append(attrs,
+					semconv.HTTPRequestMethodKey.String(ht.Request().Method),
+					semconv.HTTPRouteKey.String(ht.PathTemplate()),
+					semconv.URLFragment(ht.Request().URL.Fragment),
+					semconv.URLPath(ht.Request().URL.Path),
+					semconv.URLFull(ht.Request().URL.String()),
+					semconv.URLQuery(ht.Request().URL.RawQuery),
+					semconv.URLScheme(ht.Request().URL.Scheme),
+					semconv.UserAgentOriginal(ht.Request().UserAgent()),
+				)
 				remote = ht.Request().Host
 			}
 		case transport.KindGRPC:
@@ -71,14 +75,16 @@ func setServerSpan(ctx context.Context, span trace.Span, m interface{}) {
 		switch tr.Kind() {
 		case transport.KindHTTP:
 			if ht, ok := tr.(http.Transporter); ok {
-				method := ht.Request().Method
-				route := ht.PathTemplate()
-				path := ht.Request().URL.Path
-				ua := ht.Request().UserAgent()
-				attrs = append(attrs, semconv.HTTPRequestMethodKey.String(method))
-				attrs = append(attrs, semconv.HTTPRouteKey.String(route))
-				attrs = append(attrs, semconv.URLFull(path))
-				attrs = append(attrs, semconv.UserAgentOriginal(ua))
+				attrs = append(attrs,
+					semconv.HTTPRequestMethodKey.String(ht.Request().Method),
+					semconv.HTTPRouteKey.String(ht.PathTemplate()),
+					semconv.URLFragment(ht.Request().URL.Fragment),
+					semconv.URLPath(ht.Request().URL.Path),
+					semconv.URLFull(ht.Request().URL.String()),
+					semconv.URLQuery(ht.Request().URL.RawQuery),
+					semconv.URLScheme(ht.Request().URL.Scheme),
+					semconv.UserAgentOriginal(ht.Request().UserAgent()),
+				)
 				remote = ht.Request().RemoteAddr
 			}
 		case transport.KindGRPC:
