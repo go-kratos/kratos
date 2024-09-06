@@ -133,6 +133,7 @@ type clientOptions struct {
 	timeout                time.Duration
 	discovery              registry.Discovery
 	middleware             []middleware.Middleware
+	streamMiddleware       []middleware.Middleware
 	ints                   []grpc.UnaryClientInterceptor
 	streamInts             []grpc.StreamClientInterceptor
 	grpcOpts               []grpc.DialOption
@@ -167,7 +168,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 		unaryClientInterceptor(options.middleware, options.timeout, options.filters),
 	}
 	sints := []grpc.StreamClientInterceptor{
-		streamClientInterceptor(options.middleware, options.filters),
+		streamClientInterceptor(options.streamMiddleware, options.filters),
 	}
 
 	if len(options.ints) > 0 {
