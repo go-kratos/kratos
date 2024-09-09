@@ -10,7 +10,7 @@ const (
 
 // ContentType returns the content-type with base prefix.
 func ContentType(subtype string) string {
-	return strings.Join([]string{baseContentType, subtype}, "/")
+	return baseContentType + "/" + subtype
 }
 
 // ContentSubtype returns the content-subtype for the given content-type.  The

@@ -1,0 +1,16 @@
+version: v2
+name: buf.build/go-kratos/protoc-gen-go-errors
+lint:
+  use:
+    - DEFAULT
+  except:
+    - PACKAGE_DIRECTORY_MATCH
+    - ENUM_VALUE_UPPER_SNAKE_CASE
+    - ENUM_VALUE_PREFIX
+    - ENUM_ZERO_VALUE_SUFFIX
+    - FIELD_LOWER_SNAKE_CASE
+deps:
+  - buf.build/googleapis/googleapis
+breaking:
+  use:
+    - FILE
