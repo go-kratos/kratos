@@ -42,6 +42,15 @@ func (x *mockCallOption) after(_ *callInfo, _ *csAttempt) {
 	log.Println("run in mockCallOption.after")
 }
 
+func TestWithSubset(t *testing.T) {
+	co := &clientOptions{}
+	o := WithSubset(1)
+	o(co)
+	if co.subsetSize != 1 {
+		t.Error("expected subset size to be 1")
+	}
+}
+
 func TestWithTransport(t *testing.T) {
 	ov := &mockRoundTripper{}
 	o := WithTransport(ov)
@@ -69,10 +78,6 @@ func TestWithBlock(t *testing.T) {
 	if !co.block {
 		t.Errorf("expected block to be true, got %v", co.block)
 	}
-}
-
-func TestWithBalancer(_ *testing.T) {
-	// TODO
 }
 
 func TestWithTLSConfig(t *testing.T) {
