@@ -33,8 +33,10 @@ func setClientSpan(ctx context.Context, span trace.Span, m interface{}) {
 		case transport.KindHTTP:
 			if ht, ok := tr.(http.Transporter); ok {
 				attrs = append(attrs,
+					semconv.HTTPMethod(ht.Request().Method), // deprecated, use HTTPRequestMethodKey
 					semconv.HTTPRequestMethodKey.String(ht.Request().Method),
 					semconv.HTTPRouteKey.String(ht.PathTemplate()),
+					semconv.HTTPTarget(ht.Request().URL.Path), // deprecated, use URLPath, URLQuery
 					semconv.URLFragment(ht.Request().URL.Fragment),
 					semconv.URLPath(ht.Request().URL.Path),
 					semconv.URLFull(ht.Request().URL.String()),
@@ -76,8 +78,10 @@ func setServerSpan(ctx context.Context, span trace.Span, m interface{}) {
 		case transport.KindHTTP:
 			if ht, ok := tr.(http.Transporter); ok {
 				attrs = append(attrs,
+					semconv.HTTPMethod(ht.Request().Method), // deprecated, use HTTPRequestMethodKey
 					semconv.HTTPRequestMethodKey.String(ht.Request().Method),
 					semconv.HTTPRouteKey.String(ht.PathTemplate()),
+					semconv.HTTPTarget(ht.Request().URL.Path), // deprecated, use URLPath, URLQuery
 					semconv.URLFragment(ht.Request().URL.Fragment),
 					semconv.URLPath(ht.Request().URL.Path),
 					semconv.URLFull(ht.Request().URL.String()),
