@@ -4,17 +4,19 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 )
 
 func TestGlobalLog(t *testing.T) {
+	defaultLogger := GetLogger()
+	t.Cleanup(func() { SetLogger(defaultLogger) })
+
 	buffer := &bytes.Buffer{}
 	logger := NewStdLogger(buffer)
 	SetLogger(logger)
 
-	if global.Logger != logger {
+	if GetLogger() != logger {
 		t.Error("GetLogger() is not equal to logger")
 	}
 
@@ -93,27 +95,41 @@ func TestGlobalLog(t *testing.T) {
 	}
 }
 
-func TestGlobalLogUpdate(t *testing.T) {
-	l := &loggerAppliance{}
-	l.SetLogger(NewStdLogger(os.Stdout))
-	LOG := NewHelper(l)
-	LOG.Info("Log to stdout")
+func TestGlobalContext(t *testing.T) {
+	defaultLogger := GetLogger()
+	t.Cleanup(func() { SetLogger(defaultLogger) })
 
 	buffer := &bytes.Buffer{}
-	l.SetLogger(NewStdLogger(buffer))
-	LOG.Info("Log to buffer")
-
-	expected := "INFO msg=Log to buffer\n"
-	if buffer.String() != expected {
-		t.Errorf("Expected: %s, got: %s", expected, buffer.String())
+	SetLogger(NewStdLogger(buffer))
+	Context(context.Background()).Info("111")
+	if buffer.String() != "INFO msg=111\n" {
+		t.Errorf("Expected:%s, got:%s", "INFO msg=111", buffer.String())
 	}
 }
 
-func TestGlobalContext(t *testing.T) {
-	buffer := &bytes.Buffer{}
-	SetLogger(NewStdLogger(buffer))
-	Context(context.Background()).Infof("111")
-	if buffer.String() != "INFO msg=111\n" {
-		t.Errorf("Expected:%s, got:%s", "INFO msg=111", buffer.String())
+type traceIdKey struct{}
+
+func TestValuerUnderGlobalValue(t *testing.T) {
+	defaultLogger := GetLogger()
+	t.Cleanup(func() { SetLogger(defaultLogger) })
+
+	var traceIdValuer Valuer = func(ctx context.Context) any {
+		return ctx.Value(traceIdKey{})
+	}
+
+	var buf bytes.Buffer
+	l1 := NewStdLogger(&buf)
+	l2 := With(l1, "traceId", traceIdValuer)
+
+	SetLogger(l2)
+	l3 := GetLogger()
+
+	ctx := context.WithValue(context.Background(), traceIdKey{}, "123")
+	l4 := WithContext(ctx, l3)
+	l4.Log(LevelInfo, "msg", "m")
+
+	want := "INFO traceId=123 msg=m\n"
+	if got := buf.String(); got != want {
+		t.Errorf("Expected:%q, got:%q", want, got)
 	}
 }
