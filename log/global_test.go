@@ -107,26 +107,26 @@ func TestGlobalContext(t *testing.T) {
 	}
 }
 
-type traceIdKey struct{}
+type tidKey struct{}
 
 func TestValuerUnderGlobalValue(t *testing.T) {
 	defaultLogger := GetLogger()
 	t.Cleanup(func() { SetLogger(defaultLogger) })
 
-	var traceIdValuer Valuer = func(ctx context.Context) any {
-		return ctx.Value(traceIdKey{})
+	var tidValuer Valuer = func(ctx context.Context) any {
+		return ctx.Value(tidKey{})
 	}
 
 	var buf bytes.Buffer
 	l1 := NewStdLogger(&buf)
-	l2 := With(l1, "traceId", traceIdValuer)
+	l2 := With(l1, "traceId", tidValuer)
 
 	SetLogger(l2)
 	l3 := GetLogger()
 
-	ctx := context.WithValue(context.Background(), traceIdKey{}, "123")
+	ctx := context.WithValue(context.Background(), tidKey{}, "123")
 	l4 := WithContext(ctx, l3)
-	l4.Log(LevelInfo, "msg", "m")
+	_ = l4.Log(LevelInfo, "msg", "m")
 
 	want := "INFO traceId=123 msg=m\n"
 	if got := buf.String(); got != want {
