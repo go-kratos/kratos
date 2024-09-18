@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # need ignore Dirs
+      # Directories to be excluded
       EXCLUDE_DIRS: ".git docs tests scripts assets node_modules build"
-      # need ignore Files
-      EXCLUDE_FILES: "*.md *.txt *.html *.css *.min.js *.mdx"
+      # Files to be excluded
+      EXCLUDE_FILES: "*.txt *.html *.css *.min.js *.mdx"
 
     steps:
       - uses: actions/checkout@v4
@@ -37,17 +37,25 @@ jobs:
             exclude_files="$exclude_files --exclude=$file"
           done
 
-          # Use grep to find all comments containing Non-English characters and save to file
-          grep -Pnr "$pattern" . $exclude_dirs $exclude_files --exclude='.github/pull_request_template.md' > non_english_comments.txt || true
+          # Use grep to find all comments containing Non-English characters
+          # Check if the file contains '.md' and skip if it does
+          grep -Pnr "$pattern" . $exclude_dirs $exclude_files | while read -r line ; do
+            # If the filename contains '.md', skip it
+            if echo "$line" | grep -q '\.md'; then
+              continue
+            fi
+            # Write the result to the non_english_comments.txt file
+            echo "$line" >> non_english_comments.txt
+          done || true
 
-      - name: Output non-English comments are found
+      - name: Output non-English comments if found
         run: |
           if [ -s non_english_comments.txt ]; then
             echo "Non-English comments found in the following locations:"
             cat non_english_comments.txt
             exit 1  # terminate the workflow
           else
-            echo "No Non_English comments found."
+            echo "No Non-English comments found."
           fi
 
       # 如果在此处存在非英文注释，将会终止CI流程并报错
