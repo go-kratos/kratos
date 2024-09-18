@@ -36,6 +36,9 @@ jobs:
           for file in $EXCLUDE_FILES; do
             exclude_files="$exclude_files --exclude=$file"
           done
+          
+          # .github/pull_request_template.md need to specify handling
+          exclude_files="$exclude_files --exclude=.github/pull_request_template.md"
 
           # Use grep to find all comments containing Non-English characters and save to file
           grep -Pnr "$pattern" . $exclude_dirs $exclude_files > non_english_comments.txt || true
