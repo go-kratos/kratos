@@ -1,0 +1,54 @@
+name: Non-English Comments Check
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  non-english-comments-check:
+    runs-on: ubuntu-latest
+
+    env:
+      # need ignore Dirs
+      EXCLUDE_DIRS: ".git docs tests scripts assets node_modules build"
+      # need ignore Files
+      EXCLUDE_FILES: "*.md *.txt *.html *.css *.min.js *.mdx"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Search for Non-English comments
+        run: |
+          set -e
+          # Define the regex pattern to match Chinese characters
+          pattern='[\p{Han}]'
+
+          # Process the directories to be excluded
+          exclude_dirs=""
+          for dir in $EXCLUDE_DIRS; do
+            exclude_dirs="$exclude_dirs --exclude-dir=$dir"
+          done
+
+          # Process the file types to be excluded
+          exclude_files=""
+          for file in $EXCLUDE_FILES; do
+            exclude_files="$exclude_files --exclude=$file"
+          done
+
+          # Use grep to find all comments containing Non-English characters and save to file
+          grep -Pnr "$pattern" . $exclude_dirs $exclude_files > non_english_comments.txt || true
+
+      - name: Output non-English comments are found
+        run: |
+          if [ -s non_english_comments.txt ]; then
+            echo "Non-English comments found in the following locations:"
+            cat non_english_comments.txt
+            exit 1  # terminate the workflow
+          else
+            echo "No Non_English comments found."
+          fi
+
+      # 如果在此处存在非英文注释，将会终止CI流程并报错
+      # 里面会提示具体文件以及对应行数，方便快速定位
