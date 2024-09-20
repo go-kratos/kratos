@@ -9,6 +9,8 @@ on:
 jobs:
   non-english-comments-check:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
 
     env:
       # Directories to be excluded
