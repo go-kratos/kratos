@@ -14,39 +14,106 @@ jobs:
       # Directories to be excluded
       EXCLUDE_DIRS: ".git docs tests scripts assets node_modules build"
       # Files to be excluded
-      EXCLUDE_FILES: "*.txt *.html *.css *.min.js *.mdx"
+      EXCLUDE_FILES: ".md .txt .html .css .min.js .mdx"
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
 
-      - name: Search for Non-English comments
+      # - name: Search for Non-English comments in the entire repository
+      #   run: |
+      #     set -e
+      #     # Define the regex pattern to match Chinese characters
+      #     pattern='[\p{Han}]'
+      
+      #     # Use find to get all files in the repository
+      #     all_files=$(find . -type f)
+      
+      #     # Loop over each file in the repository
+      #     for file in $all_files; do
+      #       # Skip files in excluded directories
+      #       skip_file=false
+      #       for dir in ${EXCLUDE_DIRS}; do
+      #         if [[ "$file" == ./$dir/* ]]; then
+      #           skip_file=true
+      #           break
+      #         fi
+      #       done
+      
+      #       # Skip files matching excluded patterns
+      #       for file_pattern in ${EXCLUDE_FILES}; do
+      #         if [[ "$file" == *$file_pattern ]]; then
+      #           skip_file=true
+      #           break
+      #         fi
+      #       done
+      
+      #       # If the file matches any exclude pattern, skip it
+      #       if [ "$skip_file" = true ]; then
+      #         continue
+      #       fi
+      
+      #       # Use grep to find all comments containing Non-English characters in filtered files
+      #       grep_output=$(grep -PnH "$pattern" "$file" || true)
+      #       if [ -n "$grep_output" ]; then
+      #         # Insert a tab after the line number, keeping the colon between the file path and line number
+      #         formatted_output=$(echo "$grep_output" | sed 's/^\(.*:[0-9]\+\):/\1\t/')
+      #         echo "$formatted_output" >> non_english_comments.txt  # Save to file
+      #       fi
+      #     done
+
+      - name: Search for Non-English comments in PR diff files
         run: |
           set -e
           # Define the regex pattern to match Chinese characters
           pattern='[\p{Han}]'
-
-          # Process the directories to be excluded
-          exclude_dirs=""
-          for dir in $EXCLUDE_DIRS; do
-            exclude_dirs="$exclude_dirs --exclude-dir=$dir"
-          done
-
-          # Process the file types to be excluded
-          exclude_files=""
-          for file in $EXCLUDE_FILES; do
-            exclude_files="$exclude_files --exclude=$file"
-          done
-
-          # Use grep to find all comments containing Non-English characters
-          # Check if the file contains '.md' and skip if it does
-          grep -Pnr "$pattern" . $exclude_dirs $exclude_files | while read -r line ; do
-            # If the filename contains '.md', skip it
-            if echo "$line" | grep -q '\.md'; then
+            
+          # Get the list of files changed in this PR compared to the base branch
+          changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }})
+            
+          # Loop over each changed file
+          for file in $changed_files; do
+            # Skip files in excluded directories
+            skip_file=false
+            for dir in ${EXCLUDE_DIRS}; do
+              if [[ "$file" == ./$dir/* ]]; then
+                skip_file=true
+                break
+              fi
+            done
+       
+            # Skip files matching excluded patterns
+            for file_pattern in ${EXCLUDE_FILES}; do
+              if [[ "$file" == *$file_pattern ]]; then
+                skip_file=true
+                break
+              fi
+            done
+       
+            # If the file matches any exclude pattern, skip it
+            if [ "$skip_file" = true ]; then
               continue
             fi
-            # Write the result to the non_english_comments.txt file
-            echo "$line" >> non_english_comments.txt
-          done || true
+       
+            # Use grep to find all comments containing Non-English characters in filtered files
+            grep_output=$(grep -PnH "$pattern" "$file" || true)
+            if [ -n "$grep_output" ]; then
+              # Insert a tab after the line number, keeping the colon between the file path and line number
+              formatted_output=$(echo "$grep_output" | sed 's/^\(.*:[0-9]\+\):/\1\t/')
+              echo "$formatted_output" >> non_english_comments.txt  # Save to file
+            fi
+          done
+        
+      - name: Store non-English comments in ENV
+        run: |
+          # Store the entire content of non_english_comments.txt into an environment variable
+          if [ -f non_english_comments.txt ]; then
+            NON_ENGLISH_COMMENTS=$(cat non_english_comments.txt)
+            echo "NON_ENGLISH_COMMENTS<<EOF" >> $GITHUB_ENV
+            echo "$NON_ENGLISH_COMMENTS" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          fi
 
       - name: Output non-English comments if found
         run: |
@@ -58,5 +125,25 @@ jobs:
             echo "No Non-English comments found."
           fi
 
-      # 如果在此处存在非英文注释，将会终止CI流程并报错
-      # 里面会提示具体文件以及对应行数，方便快速定位
+      - name: Find Comment
+        if: failure()
+        uses: peter-evans/find-comment@v3.1.0
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: Non-English comments were found in the following locations
+    
+      - name: Comment on PR if errors found
+        if: failure()  # This step runs only if the previous step fails
+        uses: peter-evans/create-or-update-comment@v4.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          edit-mode: replace
+          body: |
+            ⚠️ Non-English comments were found in the following locations:
+            ```
+            ${{ env.NON_ENGLISH_COMMENTS }}
+            ```
