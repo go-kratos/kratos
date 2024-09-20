@@ -147,3 +147,7 @@ jobs:
             ```
             ${{ env.NON_ENGLISH_COMMENTS }}
             ```
+
+
+  # 测试一下 如果当前提交的PR内的非Excluded文件中有中文注释，
+  # 那么这个workflow会失败，同时会在PR内添加一条评论，告知用户有中文注释
