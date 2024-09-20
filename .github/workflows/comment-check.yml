@@ -10,6 +10,7 @@ jobs:
   non-english-comments-check:
     runs-on: ubuntu-latest
     permissions:
+      issues: write
       pull-requests: write
 
     env:
@@ -140,6 +141,7 @@ jobs:
         if: failure()  # This step runs only if the previous step fails
         uses: peter-evans/create-or-update-comment@v4.0.0
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
           comment-id: ${{ steps.fc.outputs.comment-id }}
           edit-mode: replace
