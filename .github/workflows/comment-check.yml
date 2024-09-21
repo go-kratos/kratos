@@ -1,16 +1,17 @@
 name: Non-English Comments Check
 
 on:
-  pull_request:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
     branches:
       - main
-  workflow_dispatch:
+  # workflow_dispatch:
 
 jobs:
   non-english-comments-check:
     runs-on: ubuntu-latest
     permissions:
-      issues: write
+      contents: read
       pull-requests: write
 
     env:
@@ -22,7 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
 
       # - name: Search for Non-English comments in the entire repository
       #   run: |
@@ -73,7 +76,7 @@ jobs:
           pattern='[\p{Han}]'
             
           # Get the list of files changed in this PR compared to the base branch
-          changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }})
+          changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
             
           # Loop over each changed file
           for file in $changed_files; do
@@ -107,7 +110,7 @@ jobs:
               echo "$formatted_output" >> non_english_comments.txt  # Save to file
             fi
           done
-        
+
       - name: Store non-English comments in ENV
         run: |
           # Store the entire content of non_english_comments.txt into an environment variable
@@ -126,19 +129,18 @@ jobs:
             exit 1  # terminate the workflow
           else
             echo "No Non-English comments found."
-          fi
-
+      
       - name: Find Comment
-        if: failure()
+        if: failure() && github.event_name != 'workflow_dispatch'
         uses: peter-evans/find-comment@v3.1.0
         id: fc
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
+          comment-author: "kratos-ci-bot"
           body-includes: Non-English comments were found in the following locations
-    
+
       - name: Comment on PR if errors found
-        if: failure()  # This step runs only if the previous step fails
+        if: failure() && github.event_name != 'workflow_dispatch' # This step runs only if the previous step fails
         uses: peter-evans/create-or-update-comment@v4.0.0
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
@@ -150,7 +152,3 @@ jobs:
             ```
             ${{ env.NON_ENGLISH_COMMENTS }}
             ```
-
-
-  # 测试一下 如果当前提交的PR内的非Excluded文件中有中文注释，
-  # 那么这个workflow会失败，同时会在PR内添加一条评论，告知用户有中文注释
