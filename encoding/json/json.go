@@ -43,6 +43,9 @@ func (codec) Marshal(v interface{}) ([]byte, error) {
 }
 
 func (codec) Unmarshal(data []byte, v interface{}) error {
+	if len(data) == 0 {
+		return nil
+	}
 	switch m := v.(type) {
 	case json.Unmarshaler:
 		return m.UnmarshalJSON(data)
