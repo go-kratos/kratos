@@ -56,6 +56,20 @@ func Timeout(timeout time.Duration) ServerOption {
 	}
 }
 
+// ReadTimeout with server timeout.
+func ReadTimeout(timeout time.Duration) ServerOption {
+	return func(s *Server) {
+		s.readTimeout = timeout
+	}
+}
+
+// WriteTimeout with server timeout.
+func WriteTimeout(timeout time.Duration) ServerOption {
+	return func(s *Server) {
+		s.writeTimeout = timeout
+	}
+}
+
 // Logger with server logger.
 // Deprecated: use global logger instead.
 func Logger(log.Logger) ServerOption {
@@ -156,22 +170,24 @@ func MethodNotAllowedHandler(handler http.Handler) ServerOption {
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
-	lis         net.Listener
-	tlsConf     *tls.Config
-	endpoint    *url.URL
-	err         error
-	network     string
-	address     string
-	timeout     time.Duration
-	filters     []FilterFunc
-	middleware  matcher.Matcher
-	decVars     DecodeRequestFunc
-	decQuery    DecodeRequestFunc
-	decBody     DecodeRequestFunc
-	enc         EncodeResponseFunc
-	ene         EncodeErrorFunc
-	strictSlash bool
-	router      *mux.Router
+	lis          net.Listener
+	tlsConf      *tls.Config
+	endpoint     *url.URL
+	err          error
+	network      string
+	address      string
+	timeout      time.Duration
+	readTimeout  time.Duration
+	writeTimeout time.Duration
+	filters      []FilterFunc
+	middleware   matcher.Matcher
+	decVars      DecodeRequestFunc
+	decQuery     DecodeRequestFunc
+	decBody      DecodeRequestFunc
+	enc          EncodeResponseFunc
+	ene          EncodeErrorFunc
+	strictSlash  bool
+	router       *mux.Router
 }
 
 // NewServer creates an HTTP server by options.
@@ -197,8 +213,10 @@ func NewServer(opts ...ServerOption) *Server {
 	srv.router.StrictSlash(srv.strictSlash)
 	srv.router.Use(srv.filter())
 	srv.Server = &http.Server{
-		Handler:   FilterChain(srv.filters...)(srv.router),
-		TLSConfig: srv.tlsConf,
+		Handler:      FilterChain(srv.filters...)(srv.router),
+		TLSConfig:    srv.tlsConf,
+		ReadTimeout:  srv.readTimeout,
+		WriteTimeout: srv.writeTimeout,
 	}
 	return srv
 }
