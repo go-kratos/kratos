@@ -137,7 +137,7 @@ func resolver(input map[string]interface{}, mapper func(name string) string, toT
 
 func mapper(input map[string]interface{}) func(name string) string {
 	mapper := func(name string) string {
-		args := strings.SplitN(strings.TrimSpace(name), ":", 2) //nolint:gomnd
+		args := strings.SplitN(strings.TrimSpace(name), ":", 2) //nolint:mnd
 		if v, has := readValue(input, args[0]); has {
 			s, _ := v.String()
 			return s
@@ -183,7 +183,7 @@ func expand(s string, mapping func(string) string, toType bool) interface{} {
 	re := r.FindAllStringSubmatch(s, -1)
 	var ct interface{}
 	for _, i := range re {
-		if len(i) == 2 { //nolint:gomnd
+		if len(i) == 2 { //nolint:mnd
 			m := mapping(i[1])
 			if toType {
 				ct = convertToType(m)

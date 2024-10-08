@@ -37,7 +37,7 @@ func (n *mockWeightedNode) Weight() float64 {
 func (n *mockWeightedNode) Pick() DoneFunc {
 	now := time.Now().UnixNano()
 	atomic.StoreInt64(&n.lastPick, now)
-	return func(ctx context.Context, di DoneInfo) {}
+	return func(context.Context, DoneInfo) {}
 }
 
 // PickElapsed is time elapsed since the latest pick

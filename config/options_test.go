@@ -387,7 +387,7 @@ func TestExpand(t *testing.T) {
 
 func TestWithMergeFunc(t *testing.T) {
 	c := &options{}
-	a := func(dst, src interface{}) error {
+	a := func(any, any) error {
 		return nil
 	}
 	WithMergeFunc(a)(c)

@@ -89,7 +89,7 @@ func Errorf(code int, reason, format string, a ...interface{}) error {
 // It supports wrapped errors.
 func Code(err error) int {
 	if err == nil {
-		return 200 //nolint:gomnd
+		return 200 //nolint:mnd
 	}
 	return int(FromError(err).Code)
 }
