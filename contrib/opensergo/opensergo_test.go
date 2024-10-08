@@ -309,7 +309,7 @@ func TestOpenSergo(t *testing.T) {
 			args: args{
 				opts: []Option{},
 			},
-			preFunc: func(t *testing.T) {
+			preFunc: func(_ *testing.T) {
 				err := os.Setenv("OPENSERGO_ENDPOINT", "127.0.0.1:9090")
 				if err != nil {
 					panic(err)
@@ -322,7 +322,7 @@ func TestOpenSergo(t *testing.T) {
 			args: args{
 				opts: []Option{},
 			},
-			preFunc: func(t *testing.T) {
+			preFunc: func(_ *testing.T) {
 				err := os.Setenv("OPENSERGO_BOOTSTRAP", `{"endpoint": "127.0.0.1:9090"}`)
 				if err != nil {
 					panic(err)

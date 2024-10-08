@@ -530,7 +530,7 @@ func TestRegistry_Watch(t *testing.T) {
 			},
 			wantErr: true,
 			want:    nil,
-			processFunc: func(t *testing.T) {
+			processFunc: func(*testing.T) {
 				cancel()
 			},
 		},

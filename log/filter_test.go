@@ -146,7 +146,10 @@ func testFilterFuncWithLoggerPrefix(level Level, keyvals ...interface{}) bool {
 }
 
 func TestFilterWithContext(t *testing.T) {
-	ctxKey := struct{}{}
+	type CtxKey struct {
+		Key string
+	}
+	ctxKey := CtxKey{Key: "context"}
 	ctxValue := "filter test value"
 
 	v1 := func() Valuer {

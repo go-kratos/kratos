@@ -139,7 +139,7 @@ func buildPolarisInstance(namespace string, nodes []selector.Node) *pb.ServiceIn
 		Service:   &v1.Service{Name: wrapperspb.String(nodes[0].ServiceName()), Namespace: wrapperspb.String("default")},
 		Instances: ins,
 	}
-	return pb.NewServiceInstancesInProto(d, func(s string) local.InstanceLocalValue {
+	return pb.NewServiceInstancesInProto(d, func(string) local.InstanceLocalValue {
 		return local.NewInstanceLocalValue()
 	}, &pb.SvcPluginValues{Routers: nil, Loadbalancer: nil}, nil)
 }

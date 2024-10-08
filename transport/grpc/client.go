@@ -115,8 +115,8 @@ func WithHealthCheck(healthCheck bool) ClientOption {
 
 // WithLogger with logger
 // Deprecated: use global logger instead.
-func WithLogger(_ log.Logger) ClientOption {
-	return func(o *clientOptions) {}
+func WithLogger(log.Logger) ClientOption {
+	return func(*clientOptions) {}
 }
 
 func WithPrintDiscoveryDebugLog(p bool) ClientOption {
@@ -190,6 +190,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 				discovery.NewBuilder(
 					options.discovery,
 					discovery.WithInsecure(insecure),
+					discovery.WithTimeout(options.timeout),
 					discovery.WithSubset(options.subsetSize),
 					discovery.PrintDebugLog(options.printDiscoveryDebugLog),
 				)))

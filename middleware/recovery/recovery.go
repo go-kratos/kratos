@@ -36,7 +36,7 @@ func WithHandler(h HandlerFunc) Option {
 // Recovery is a server middleware that recovers from any panics.
 func Recovery(opts ...Option) middleware.Middleware {
 	op := options{
-		handler: func(ctx context.Context, req, err interface{}) error {
+		handler: func(context.Context, any, any) error {
 			return ErrUnknownRequest
 		},
 	}
@@ -48,7 +48,7 @@ func Recovery(opts ...Option) middleware.Middleware {
 			startTime := time.Now()
 			defer func() {
 				if rerr := recover(); rerr != nil {
-					buf := make([]byte, 64<<10) //nolint:gomnd
+					buf := make([]byte, 64<<10) //nolint:mnd
 					n := runtime.Stack(buf, false)
 					buf = buf[:n]
 					log.Context(ctx).Errorf("%v: %+v\n%s\n", rerr, req, buf)
