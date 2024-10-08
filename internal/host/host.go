@@ -13,7 +13,7 @@ func ExtractHostPort(addr string) (host string, port uint64, err error) {
 	if err != nil {
 		return
 	}
-	port, err = strconv.ParseUint(ports, 10, 16) //nolint:gomnd
+	port, err = strconv.ParseUint(ports, 10, 16) //nolint:mnd
 	return
 }
 

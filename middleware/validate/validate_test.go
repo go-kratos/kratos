@@ -24,7 +24,7 @@ func (v protoVali) Validate() error {
 }
 
 func TestTable(t *testing.T) {
-	var mock middleware.Handler = func(ctx context.Context, req interface{}) (interface{}, error) { return nil, nil }
+	var mock middleware.Handler = func(context.Context, interface{}) (interface{}, error) { return nil, nil }
 
 	tests := []protoVali{
 		{"v1", 365, false},

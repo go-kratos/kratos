@@ -329,8 +329,7 @@ func TestRegistry_Watch(t *testing.T) {
 			},
 			want:    []*registry.ServiceInstance{instance1},
 			wantErr: false,
-			preFunc: func(t *testing.T) {
-			},
+			preFunc: func(*testing.T) {},
 		},
 		{
 			name: "ctx has been canceled",
@@ -344,8 +343,7 @@ func TestRegistry_Watch(t *testing.T) {
 			},
 			want:    nil,
 			wantErr: true,
-			preFunc: func(t *testing.T) {
-			},
+			preFunc: func(*testing.T) {},
 		},
 		{
 			name: "register with healthCheck",

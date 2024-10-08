@@ -349,7 +349,7 @@ func TestMetadata_Range(t *testing.T) {
 		t.Errorf("metadata = %v, want %v", tmp, Metadata{"https://go-kratos.dev/": {"https://go-kratos.dev/"}, "kratos": {"kratos"}})
 	}
 	tmp = Metadata{}
-	md.Range(func(k string, v []string) bool {
+	md.Range(func(string, []string) bool {
 		return false
 	})
 	if !reflect.DeepEqual(tmp, Metadata{}) {

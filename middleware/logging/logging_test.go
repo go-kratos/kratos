@@ -87,7 +87,7 @@ func TestHTTP(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			bf.Reset()
-			next := func(ctx context.Context, req interface{}) (interface{}, error) {
+			next := func(context.Context, interface{}) (interface{}, error) {
 				return "reply", test.err
 			}
 			next = test.kind(logger)(next)

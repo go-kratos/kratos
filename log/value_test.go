@@ -19,7 +19,7 @@ func TestValue(t *testing.T) {
 	if got != v1 {
 		t.Errorf("Value() = %v, want %v", got, v1)
 	}
-	var v2 Valuer = func(ctx context.Context) interface{} {
+	var v2 Valuer = func(context.Context) interface{} {
 		return 3
 	}
 	got = Value(context.Background(), v2)

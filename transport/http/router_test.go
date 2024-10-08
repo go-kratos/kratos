@@ -75,7 +75,7 @@ func TestRoute(t *testing.T) {
 		if err := ctx.Bind(u); err != nil {
 			return err
 		}
-		h := ctx.Middleware(func(ctx context.Context, in interface{}) (interface{}, error) {
+		h := ctx.Middleware(func(context.Context, interface{}) (interface{}, error) {
 			return u, nil
 		})
 		return ctx.Returns(h(ctx, u))
@@ -184,7 +184,7 @@ func TestRouter_Group(t *testing.T) {
 
 func TestHandle(_ *testing.T) {
 	r := newRouter("/", NewServer())
-	h := func(i Context) error {
+	h := func(Context) error {
 		return nil
 	}
 	r.GET("/get", h)

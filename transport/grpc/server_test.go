@@ -84,7 +84,7 @@ func TestServer(t *testing.T) {
 					return handler(ctx, req)
 				}
 			}),
-		UnaryInterceptor(func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		UnaryInterceptor(func(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 			return handler(ctx, req)
 		}),
 		Options(grpc.InitialConnWindowSize(0)),
@@ -213,10 +213,10 @@ func TestTLSConfig(t *testing.T) {
 func TestUnaryInterceptor(t *testing.T) {
 	o := &Server{}
 	v := []grpc.UnaryServerInterceptor{
-		func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		func(context.Context, interface{}, *grpc.UnaryServerInfo, grpc.UnaryHandler) (resp interface{}, err error) {
 			return nil, nil
 		},
-		func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		func(context.Context, interface{}, *grpc.UnaryServerInfo, grpc.UnaryHandler) (resp interface{}, err error) {
 			return nil, nil
 		},
 	}
@@ -229,10 +229,10 @@ func TestUnaryInterceptor(t *testing.T) {
 func TestStreamInterceptor(t *testing.T) {
 	o := &Server{}
 	v := []grpc.StreamServerInterceptor{
-		func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		func(interface{}, grpc.ServerStream, *grpc.StreamServerInfo, grpc.StreamHandler) error {
 			return nil
 		},
-		func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		func(interface{}, grpc.ServerStream, *grpc.StreamServerInfo, grpc.StreamHandler) error {
 			return nil
 		},
 	}
@@ -270,7 +270,7 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 	}
 	srv.middleware.Use(EmptyMiddleware())
 	req := &struct{}{}
-	rv, err := srv.unaryServerInterceptor()(context.TODO(), req, &grpc.UnaryServerInfo{}, func(ctx context.Context, req interface{}) (i interface{}, e error) {
+	rv, err := srv.unaryServerInterceptor()(context.TODO(), req, &grpc.UnaryServerInfo{}, func(context.Context, interface{}) (interface{}, error) {
 		return &testResp{Data: "hi"}, nil
 	})
 	if err != nil {
