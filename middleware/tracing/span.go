@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/metadata"
@@ -11,7 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 
 	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/protobuf/proto"
@@ -31,12 +32,20 @@ func setClientSpan(ctx context.Context, span trace.Span, m interface{}) {
 		switch tr.Kind() {
 		case transport.KindHTTP:
 			if ht, ok := tr.(http.Transporter); ok {
-				method := ht.Request().Method
-				route := ht.PathTemplate()
-				path := ht.Request().URL.Path
-				attrs = append(attrs, semconv.HTTPMethodKey.String(method))
-				attrs = append(attrs, semconv.HTTPRouteKey.String(route))
-				attrs = append(attrs, semconv.HTTPTargetKey.String(path))
+				attrs = append(attrs,
+					// nolint:staticcheck
+					semconv.HTTPMethod(ht.Request().Method), // deprecated, use HTTPRequestMethodKey
+					semconv.HTTPRequestMethodKey.String(ht.Request().Method),
+					semconv.HTTPRouteKey.String(ht.PathTemplate()),
+					// nolint:staticcheck
+					semconv.HTTPTarget(ht.Request().URL.Path), // deprecated, use URLPath, URLQuery
+					semconv.URLFragment(ht.Request().URL.Fragment),
+					semconv.URLPath(ht.Request().URL.Path),
+					semconv.URLFull(ht.Request().URL.String()),
+					semconv.URLQuery(ht.Request().URL.RawQuery),
+					semconv.URLScheme(ht.Request().URL.Scheme),
+					semconv.UserAgentOriginal(ht.Request().UserAgent()),
+				)
 				remote = ht.Request().Host
 			}
 		case transport.KindGRPC:
@@ -70,12 +79,20 @@ func setServerSpan(ctx context.Context, span trace.Span, m interface{}) {
 		switch tr.Kind() {
 		case transport.KindHTTP:
 			if ht, ok := tr.(http.Transporter); ok {
-				method := ht.Request().Method
-				route := ht.PathTemplate()
-				path := ht.Request().URL.Path
-				attrs = append(attrs, semconv.HTTPMethodKey.String(method))
-				attrs = append(attrs, semconv.HTTPRouteKey.String(route))
-				attrs = append(attrs, semconv.HTTPTargetKey.String(path))
+				attrs = append(attrs,
+					// nolint:staticcheck
+					semconv.HTTPMethod(ht.Request().Method), // deprecated, use HTTPRequestMethodKey
+					semconv.HTTPRequestMethodKey.String(ht.Request().Method),
+					semconv.HTTPRouteKey.String(ht.PathTemplate()),
+					// nolint:staticcheck
+					semconv.HTTPTarget(ht.Request().URL.Path), // deprecated, use URLPath, URLQuery
+					semconv.URLFragment(ht.Request().URL.Fragment),
+					semconv.URLPath(ht.Request().URL.Path),
+					semconv.URLFull(ht.Request().URL.String()),
+					semconv.URLQuery(ht.Request().URL.RawQuery),
+					semconv.URLScheme(ht.Request().URL.Scheme),
+					semconv.UserAgentOriginal(ht.Request().UserAgent()),
+				)
 				remote = ht.Request().RemoteAddr
 			}
 		case transport.KindGRPC:
@@ -130,10 +147,15 @@ func peerAttr(addr string) []attribute.KeyValue {
 		host = "127.0.0.1"
 	}
 
-	return []attribute.KeyValue{
-		semconv.NetPeerIPKey.String(host),
-		semconv.NetPeerPortKey.String(port),
+	attrs := []attribute.KeyValue{
+		semconv.NetworkPeerAddress(host),
 	}
+
+	if pi, err := strconv.Atoi(port); err == nil {
+		attrs = append(attrs, semconv.NetworkPeerPort(pi))
+	}
+
+	return attrs
 }
 
 func parseTarget(endpoint string) (address string, err error) {
