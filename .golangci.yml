@@ -10,7 +10,7 @@ linters:
     - dogsled
     - durationcheck
     - errcheck
-    - exportloopref
+    - copyloopvar
     - govet
     - gosimple
     - gofmt
@@ -30,6 +30,7 @@ linters:
     - wastedassign
     - unconvert
     - misspell
+    - shadow
 
   # don't enable:
   # - asciicheck
@@ -48,8 +49,6 @@ linters:
   # - wsl
 
 linters-settings:
-  govet:
-    check-shadowing: true
   whitespace:
     multi-func: true
   lll:
