@@ -10,8 +10,9 @@ linters:
     - dogsled
     - durationcheck
     - errcheck
-    - copyloopvar
+    # - copyloopvar # need upgrade to Go 1.22
     - govet
+    - staticcheck
     - gosimple
     - gofmt
     - gofumpt
@@ -30,7 +31,6 @@ linters:
     - wastedassign
     - unconvert
     - misspell
-    - shadow
 
   # don't enable:
   # - asciicheck
@@ -49,6 +49,9 @@ linters:
   # - wsl
 
 linters-settings:
+  govet:
+    enable:
+      - shadow
   whitespace:
     multi-func: true
   lll:

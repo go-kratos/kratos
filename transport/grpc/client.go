@@ -305,7 +305,7 @@ func streamClientInterceptor(ms []middleware.Middleware, filters []selector.Node
 			return nil, err
 		}
 
-		h := func(ctx context.Context, req interface{}) (interface{}, error) {
+		h := func(_ context.Context, _ interface{}) (interface{}, error) {
 			return streamer, nil
 		}
 

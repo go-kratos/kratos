@@ -80,7 +80,7 @@ func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
 			replyHeader: headerCarrier(replyHeader),
 		})
 
-		h := func(_ context.Context, req interface{}) (interface{}, error) {
+		h := func(_ context.Context, _ interface{}) (interface{}, error) {
 			return handler(srv, ss), nil
 		}
 
