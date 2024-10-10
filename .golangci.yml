@@ -10,8 +10,9 @@ linters:
     - dogsled
     - durationcheck
     - errcheck
-    - exportloopref
+    # - copyloopvar # need upgrade to Go 1.22
     - govet
+    - staticcheck
     - gosimple
     - gofmt
     - gofumpt
@@ -49,7 +50,8 @@ linters:
 
 linters-settings:
   govet:
-    check-shadowing: true
+    enable:
+      - shadow
   whitespace:
     multi-func: true
   lll:

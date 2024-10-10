@@ -99,7 +99,6 @@ func (a *App) Run() error {
 		}
 	}
 	for _, srv := range a.opts.servers {
-		srv := srv
 		eg.Go(func() error {
 			<-ctx.Done() // wait for stop signal
 			stopCtx, cancel := context.WithTimeout(NewContext(a.opts.ctx, a), a.opts.stopTimeout)
