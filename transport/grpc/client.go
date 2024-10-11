@@ -254,7 +254,7 @@ func (w *wrappedClientStream) Context() context.Context {
 }
 
 func (w *wrappedClientStream) SendMsg(m interface{}) error {
-	h := func(ctx context.Context, req interface{}) (interface{}, error) {
+	h := func(_ context.Context, req interface{}) (interface{}, error) {
 		return req, w.ClientStream.SendMsg(m)
 	}
 
@@ -272,7 +272,7 @@ func (w *wrappedClientStream) SendMsg(m interface{}) error {
 }
 
 func (w *wrappedClientStream) RecvMsg(m interface{}) error {
-	h := func(ctx context.Context, req interface{}) (interface{}, error) {
+	h := func(_ context.Context, req interface{}) (interface{}, error) {
 		return req, w.ClientStream.RecvMsg(m)
 	}
 
@@ -305,7 +305,7 @@ func streamClientInterceptor(ms []middleware.Middleware, filters []selector.Node
 			return nil, err
 		}
 
-		h := func(ctx context.Context, req interface{}) (interface{}, error) {
+		h := func(_ context.Context, _ interface{}) (interface{}, error) {
 			return streamer, nil
 		}
 
