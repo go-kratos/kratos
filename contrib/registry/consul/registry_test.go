@@ -584,7 +584,7 @@ func TestRegistry_IdleAndWatch2(t *testing.T) {
 				if err1 != nil {
 					t.Error(err1)
 				}
-				go func(i int) {
+				go func(_ int) {
 					// first
 					service, err2 := watch.Next()
 					if (err2 != nil) != tt.wantErr {
