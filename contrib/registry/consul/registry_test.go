@@ -660,7 +660,6 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 		instance        *registry.ServiceInstance
 		initialInstance *registry.ServiceInstance
 	}
-
 	tests := []struct {
 		name    string
 		args    args
