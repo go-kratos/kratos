@@ -643,13 +643,13 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 	}
 
 	instance1 := &registry.ServiceInstance{
-		ID:        "1",
+		ID:        "t1",
 		Name:      "server-1",
 		Version:   "v0.0.1",
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
 	instance2 := &registry.ServiceInstance{
-		ID:        "2",
+		ID:        "t2",
 		Name:      "server-1",
 		Version:   "v0.0.2",
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
