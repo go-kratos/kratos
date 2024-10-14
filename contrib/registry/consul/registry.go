@@ -228,6 +228,7 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 
 	go func() {
 		tag := time.Now().UnixNano()
+		fmt.Println("开始watch, tag:", tag)
 		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
 		for {
