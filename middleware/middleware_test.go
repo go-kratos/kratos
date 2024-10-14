@@ -10,8 +10,10 @@ import (
 var i int
 
 func TestChain(t *testing.T) {
-	next := func(ctx context.Context, req interface{}) (interface{}, error) {
-		t.Log(req)
+	next := func(_ context.Context, req interface{}) (interface{}, error) {
+		if req != "hello kratos!" {
+			t.Errorf("expect %v, got %v", "hello kratos!", req)
+		}
 		i += 10
 		return "reply", nil
 	}

@@ -9,12 +9,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/google/uuid"
+	"golang.org/x/sync/errgroup"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
-
-	"github.com/google/uuid"
-	"golang.org/x/sync/errgroup"
 )
 
 // AppInfo is application context value.
@@ -99,17 +99,17 @@ func (a *App) Run() error {
 		}
 	}
 	for _, srv := range a.opts.servers {
-		srv := srv
+		server := srv
 		eg.Go(func() error {
 			<-ctx.Done() // wait for stop signal
 			stopCtx, cancel := context.WithTimeout(NewContext(a.opts.ctx, a), a.opts.stopTimeout)
 			defer cancel()
-			return srv.Stop(stopCtx)
+			return server.Stop(stopCtx)
 		})
 		wg.Add(1)
 		eg.Go(func() error {
 			wg.Done() // here is to ensure server start has begun running before register, so defer is not needed
-			return srv.Start(NewContext(a.opts.ctx, a))
+			return server.Start(NewContext(a.opts.ctx, a))
 		})
 	}
 	wg.Wait()

@@ -66,9 +66,11 @@ func TestEndpoint(t *testing.T) {
 }
 
 func TestContext(t *testing.T) {
-	type ctxKey = struct{}
+	type ctxKey struct {
+		Key string
+	}
 	o := &options{}
-	v := context.WithValue(context.TODO(), ctxKey{}, "b")
+	v := context.WithValue(context.TODO(), ctxKey{Key: "context"}, "b")
 	Context(v)(o)
 	if !reflect.DeepEqual(v, o.ctx) {
 		t.Fatalf("o.ctx:%s is not equal to v:%s", o.ctx, v)

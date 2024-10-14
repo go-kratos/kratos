@@ -163,7 +163,6 @@ func (r *Registry) heartBeat(ctx context.Context, leaseID clientv3.LeaseID, key 
 		curLeaseID = 0
 	}
 	rd := rand.New(rand.NewSource(time.Now().Unix()))
-
 	for {
 		if curLeaseID == 0 {
 			// try to registerWithKV
