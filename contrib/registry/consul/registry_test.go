@@ -735,6 +735,7 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			c := make(chan struct{}, 1)
 
 			go func() {
+				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 6, t:", time.Now().Unix())
 				err = r.Register(tt.args.ctx, tt.args.instance)
 				if err != nil {
 					t.Error(err)
@@ -755,7 +756,7 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			time.AfterFunc(time.Second*15, newWatchCancel)
 			select {
 			case <-newWatchCtx.Done():
-				t.Errorf("Timeout getservice. May be no new resolve goroutine to obtain the latest service information")
+				t.Errorf("Timeout getservice. May be no new resolve goroutine to obtain the latest service information", "t:", time.Now().Unix())
 			case <-c:
 				return
 			}
