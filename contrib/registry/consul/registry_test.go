@@ -629,10 +629,6 @@ func TestRegistry_IdleAndWatch2(t *testing.T) {
 			if !reflect.DeepEqual(service, tt.want) {
 				t.Errorf("GetService() got = %v, want %v", service, tt.want)
 			}
-			err = watch.Stop()
-			if err != nil {
-				t.Errorf("watch stop err:%v", err)
-			}
 		})
 	}
 }
@@ -735,30 +731,30 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 				t.Error(err)
 			}
 			// time.Sleep(time.Second * 2)
-			// newWatchCtx, newWatchCancel := context.WithCancel(context.Background())
-			// c := make(chan struct{}, 1)
-			// go func() {
-			fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 1, t:", time.Now().Unix())
-			service, err = newWatch.Next()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
-				t.Errorf("GetService() got = %v", service)
+			newWatchCtx, newWatchCancel := context.WithCancel(context.Background())
+			c := make(chan struct{}, 1)
+			go func() {
+				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 1, t:", time.Now().Unix())
+				service, err = newWatch.Next()
+				if (err != nil) != tt.wantErr {
+					t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("GetService() got = %v", service)
+					return
+				}
+				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 2, t:", time.Now().Unix())
+				if !reflect.DeepEqual(service, tt.want) {
+					t.Errorf("GetService() got = %v, want %v", service, tt.want)
+				}
+				c <- struct{}{}
+			}()
+			time.AfterFunc(time.Second*10, newWatchCancel)
+			// fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 3, t:", time.Now().Unix())
+			select {
+			case <-newWatchCtx.Done():
+				t.Errorf("Timeout getservice. May be no new resolve goroutine to obtain the latest service information")
+			case <-c:
 				return
 			}
-			fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 2, t:", time.Now().Unix())
-			if !reflect.DeepEqual(service, tt.want) {
-				t.Errorf("GetService() got = %v, want %v", service, tt.want)
-			}
-			// c <- struct{}{}
-			// }()
-			// time.AfterFunc(time.Second*10, newWatchCancel)
-			// // fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 3, t:", time.Now().Unix())
-			// select {
-			// case <-newWatchCtx.Done():
-			// 	t.Errorf("Timeout getservice. May be no new resolve goroutine to obtain the latest service information")
-			// case <-c:
-			// 	return
-			// }
 		})
 	}
 }

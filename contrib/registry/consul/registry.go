@@ -238,6 +238,7 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 				tmpService, tmpIdx, err := r.cli.Service(timeoutCtx, ss.serviceName, idx, true)
 				cancel()
 				if err != nil {
+					fmt.Println("timeoutctx err:", err, ", tag:", tag)
 					time.Sleep(time.Second)
 					continue
 				}
