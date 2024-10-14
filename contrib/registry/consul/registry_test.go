@@ -516,6 +516,7 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
+			defer r.Deregister(tt.args.ctx, tt.args.changeInstance)
 			time.Sleep(1 * time.Second)
 		})
 	}
