@@ -240,7 +240,9 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 					time.Sleep(time.Second)
 					continue
 				}
-				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 10, t:", time.Now().Unix(), "idx:", idx, "tmpIds", tmpIdx, "service:", tmpService, "tag", tag)
+				if ss.serviceName == "server-1t" {
+					fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 10, t:", time.Now().Unix(), "idx:", idx, "tmpIds", tmpIdx, "service:", tmpService, "tag", tag)
+				}
 				if len(tmpService) != 0 && tmpIdx != idx {
 					services = tmpService
 					ss.broadcast(services)
