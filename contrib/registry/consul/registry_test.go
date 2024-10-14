@@ -728,14 +728,6 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			go func() {
-				time.Sleep(time.Second * 5)
-				err = r.Register(tt.args.ctx, tt.args.instance)
-				if err != nil {
-					t.Error(err)
-				}
-
-			}()
 
 			time.Sleep(time.Second * 3)
 
@@ -756,6 +748,12 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 				}
 				c <- struct{}{}
 			}()
+			time.AfterFunc(time.Second*2, func() {
+				err = r.Register(tt.args.ctx, tt.args.instance)
+				if err != nil {
+					t.Error(err)
+				}
+			})
 			time.AfterFunc(time.Second*10, newWatchCancel)
 			select {
 			case <-newWatchCtx.Done():
