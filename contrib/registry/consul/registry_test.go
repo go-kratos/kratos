@@ -635,13 +635,11 @@ func TestRegistry_IdleAndWatch2(t *testing.T) {
 
 func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 	addr := fmt.Sprintf("%s:9091", getIntranetIP())
-
 	time.Sleep(time.Millisecond * 100)
 	cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500", WaitTime: 2 * time.Second})
 	if err != nil {
 		t.Fatalf("create consul client failed: %v", err)
 	}
-
 	instance1 := &registry.ServiceInstance{
 		ID:        "1",
 		Name:      "server-1",
@@ -660,7 +658,6 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 		instance        *registry.ServiceInstance
 		initialInstance *registry.ServiceInstance
 	}
-
 	tests := []struct {
 		name    string
 		args    args
@@ -682,11 +679,9 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			wantErr: false,
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := New(cli, tt.args.opts...)
-
 			err = r.Register(tt.args.ctx, tt.args.initialInstance)
 			if err != nil {
 				t.Error(err)
@@ -702,11 +697,11 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 				t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
 				t.Errorf("GetService() got = %v", service)
 			}
-
 			time.Sleep(time.Second * 3)
 			// The simulation entered idle mode first, but the old resolver was not closed yet, and new requests triggered a new Watch.
 			watchCtx := context.Background()
 			// old resolver cancel
+			fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 4, t:", time.Now().Unix())
 			err = watch.Stop()
 			if err != nil {
 				t.Errorf("watch stop err:%v", err)
@@ -730,29 +725,30 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 				t.Error(err)
 			}
 			time.Sleep(time.Second * 5)
+			fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 3, t:", time.Now().Unix())
 			err = r.Register(tt.args.ctx, tt.args.instance)
 			if err != nil {
 				t.Error(err)
 			}
-
-			time.Sleep(time.Second * 2)
-
+			// time.Sleep(time.Second * 2)
 			newWatchCtx, newWatchCancel := context.WithCancel(context.Background())
 			c := make(chan struct{}, 1)
-
 			go func() {
+				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 1, t:", time.Now().Unix())
 				service, err = newWatch.Next()
 				if (err != nil) != tt.wantErr {
 					t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
 					t.Errorf("GetService() got = %v", service)
 					return
 				}
+				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 2, t:", time.Now().Unix())
 				if !reflect.DeepEqual(service, tt.want) {
 					t.Errorf("GetService() got = %v, want %v", service, tt.want)
 				}
 				c <- struct{}{}
 			}()
 			time.AfterFunc(time.Second*10, newWatchCancel)
+			// fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 3, t:", time.Now().Unix())
 			select {
 			case <-newWatchCtx.Done():
 				t.Errorf("Timeout getservice. May be no new resolve goroutine to obtain the latest service information")

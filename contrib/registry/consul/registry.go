@@ -227,6 +227,8 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 	}
 
 	go func() {
+		tag := time.Now().UnixNano()
+		fmt.Println("开始watch, tag:", tag)
 		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
 		for {
@@ -236,15 +238,20 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 				tmpService, tmpIdx, err := r.cli.Service(timeoutCtx, ss.serviceName, idx, true)
 				cancel()
 				if err != nil {
+					fmt.Println("timeoutctx err:", err, ", tag:", tag)
 					time.Sleep(time.Second)
 					continue
 				}
+				// if ss.serviceName == "server-1t" {
+				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 16, t:", time.Now().Unix(), "idx:", idx, "tmpIds", tmpIdx, "service:", tmpService, "tag", tag)
+				// }
 				if len(tmpService) != 0 && tmpIdx != idx {
 					services = tmpService
 					ss.broadcast(services)
 				}
 				idx = tmpIdx
 			case <-ctx.Done():
+				fmt.Println("ctx done, tag:", tag)
 				return
 			}
 		}
