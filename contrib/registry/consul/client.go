@@ -189,7 +189,6 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 			DeregisterCriticalServiceAfter: fmt.Sprintf("%ds", c.deregisterCriticalServiceAfter),
 		})
 	}
-    fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 11, t:", time.Now().Unix(), "asr:%+v", asr)
 	err := c.cli.Agent().ServiceRegister(asr)
 	if err != nil {
 		return err
