@@ -684,14 +684,12 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 1, t:", time.Now().Unix())
 			r := New(cli, tt.args.opts...)
 
 			err = r.Register(tt.args.ctx, tt.args.initialInstance)
 			if err != nil {
 				t.Error(err)
 			}
-			fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 2, t:", time.Now().Unix())
 			// first watch
 			ctx, cancel := context.WithCancel(context.Background())
 			watch, err := r.Watch(ctx, tt.args.instance.Name)
@@ -703,7 +701,6 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 				t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
 				t.Errorf("GetService() got = %v", service)
 			}
-			fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 3, t:", time.Now().Unix(), "service:%+v", service)
 
 			time.Sleep(time.Second * 3)
 			// The simulation entered idle mode first, but the old resolver was not closed yet, and new requests triggered a new Watch.
@@ -725,7 +722,6 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 				t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
 				t.Errorf("GetService() got = %v", service)
 			}
-			fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 4, t:", time.Now().Unix(), "service:%+v", service)
 			// change register info
 			time.Sleep(time.Second * 1)
 			err = r.Deregister(tt.args.ctx, tt.args.initialInstance)
@@ -742,7 +738,6 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 
 			newWatchCtx, newWatchCancel := context.WithCancel(context.Background())
 			c := make(chan struct{}, 1)
-			fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 5, t:", time.Now().Unix())
 
 			go func() {
 				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 7, t:", time.Now().Unix())
