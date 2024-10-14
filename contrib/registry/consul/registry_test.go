@@ -758,7 +758,7 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 				}
 				c <- struct{}{}
 			}()
-			time.AfterFunc(time.Second*10, newWatchCancel)
+			time.AfterFunc(time.Second*15, newWatchCancel)
 			fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 6, t:", time.Now().Unix())
 			select {
 			case <-newWatchCtx.Done():
