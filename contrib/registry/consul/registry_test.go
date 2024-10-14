@@ -735,6 +735,10 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			c := make(chan struct{}, 1)
 
 			go func() {
+				err = r.Register(tt.args.ctx, tt.args.instance)
+				if err != nil {
+					t.Error(err)
+				}
 				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 7, t:", time.Now().Unix())
 				service, err = newWatch.Next()
 				if (err != nil) != tt.wantErr {
@@ -748,12 +752,6 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 				}
 				c <- struct{}{}
 			}()
-			time.AfterFunc(time.Second*2, func() {
-				err = r.Register(tt.args.ctx, tt.args.instance)
-				if err != nil {
-					t.Error(err)
-				}
-			})
 			time.AfterFunc(time.Second*10, newWatchCancel)
 			select {
 			case <-newWatchCtx.Done():
