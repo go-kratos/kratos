@@ -242,7 +242,7 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 					continue
 				}
 				// if ss.serviceName == "server-1t" {
-				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 13, t:", time.Now().Unix(), "idx:", idx, "tmpIds", tmpIdx, "service:", tmpService, "tag", tag)
+				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 14, t:", time.Now().Unix(), "idx:", idx, "tmpIds", tmpIdx, "service:", tmpService, "tag", tag)
 				// }
 				if len(tmpService) != 0 && tmpIdx != idx {
 					services = tmpService
