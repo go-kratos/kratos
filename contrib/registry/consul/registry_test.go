@@ -735,7 +735,7 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			c := make(chan struct{}, 1)
 
 			go func() {
-				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 6, t:", time.Now().Unix())
+				// fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 6, t:", time.Now().Unix())
 				err = r.Register(tt.args.ctx, tt.args.instance)
 				if err != nil {
 					t.Error(err)
