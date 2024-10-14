@@ -635,22 +635,20 @@ func TestRegistry_IdleAndWatch2(t *testing.T) {
 
 func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 	addr := fmt.Sprintf("%s:9091", getIntranetIP())
-
 	time.Sleep(time.Millisecond * 100)
 	cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500", WaitTime: 2 * time.Second})
 	if err != nil {
 		t.Fatalf("create consul client failed: %v", err)
 	}
-
 	instance1 := &registry.ServiceInstance{
-		ID:        "t1",
-		Name:      "server-1t",
+		ID:        "1",
+		Name:      "server-1",
 		Version:   "v0.0.1",
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
 	instance2 := &registry.ServiceInstance{
-		ID:        "t2",
-		Name:      "server-1t",
+		ID:        "2",
+		Name:      "server-1",
 		Version:   "v0.0.2",
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
@@ -681,11 +679,9 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			wantErr: false,
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := New(cli, tt.args.opts...)
-
 			err = r.Register(tt.args.ctx, tt.args.initialInstance)
 			if err != nil {
 				t.Error(err)
@@ -701,7 +697,6 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 				t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
 				t.Errorf("GetService() got = %v", service)
 			}
-
 			time.Sleep(time.Second * 3)
 			// The simulation entered idle mode first, but the old resolver was not closed yet, and new requests triggered a new Watch.
 			watchCtx := context.Background()
@@ -728,26 +723,23 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-
 			time.Sleep(time.Second * 5)
-
+			err = r.Register(tt.args.ctx, tt.args.instance)
+			if err != nil {
+				t.Error(err)
+			}
+			time.Sleep(time.Second * 2)
 			newWatchCtx, newWatchCancel := context.WithCancel(context.Background())
 			c := make(chan struct{}, 1)
-
 			go func() {
-				// fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 6, t:", time.Now().Unix())
-				err = r.Register(tt.args.ctx, tt.args.instance)
-				if err != nil {
-					t.Error(err)
-				}
-				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 7, t:", time.Now().Unix())
+				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 1, t:", time.Now().Unix())
 				service, err = newWatch.Next()
 				if (err != nil) != tt.wantErr {
 					t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
 					t.Errorf("GetService() got = %v", service)
 					return
 				}
-				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 8, t:", time.Now().Unix(), "service:%+v", service)
+				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 2, t:", time.Now().Unix())
 				if !reflect.DeepEqual(service, tt.want) {
 					t.Errorf("GetService() got = %v, want %v", service, tt.want)
 				}
@@ -756,13 +748,14 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			time.AfterFunc(time.Second*10, newWatchCancel)
 			select {
 			case <-newWatchCtx.Done():
-				t.Errorf("Timeout getservice. May be no new resolve goroutine to obtain the latest service information, t:%d", time.Now().Unix())
+				t.Errorf("Timeout getservice. May be no new resolve goroutine to obtain the latest service information")
 			case <-c:
 				return
 			}
 		})
 	}
 }
+
 
 func getIntranetIP() string {
 	addrs, err := net.InterfaceAddrs()
