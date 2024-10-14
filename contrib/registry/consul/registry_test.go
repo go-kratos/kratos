@@ -756,7 +756,7 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			time.AfterFunc(time.Second*15, newWatchCancel)
 			select {
 			case <-newWatchCtx.Done():
-				t.Errorf("Timeout getservice. May be no new resolve goroutine to obtain the latest service information", "t:", time.Now().Unix())
+				t.Errorf("Timeout getservice. May be no new resolve goroutine to obtain the latest service information, t:%d", time.Now().Unix())
 			case <-c:
 				return
 			}
