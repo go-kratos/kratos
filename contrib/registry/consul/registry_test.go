@@ -641,14 +641,14 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 		t.Fatalf("create consul client failed: %v", err)
 	}
 	instance1 := &registry.ServiceInstance{
-		ID:        "1",
-		Name:      "server-1",
+		ID:        "1t",
+		Name:      "server-1t",
 		Version:   "v0.0.1",
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
 	instance2 := &registry.ServiceInstance{
-		ID:        "2",
-		Name:      "server-1",
+		ID:        "2t",
+		Name:      "server-1t",
 		Version:   "v0.0.2",
 		Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
 	}
