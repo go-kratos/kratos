@@ -227,6 +227,7 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 	}
 
 	go func() {
+		tag := time.Now().UnixNano()
 		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
 		for {
@@ -239,7 +240,7 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 					time.Sleep(time.Second)
 					continue
 				}
-				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 10, t:", time.Now().Unix(), "idx:", idx, "tmpIds", tmpIdx, "service:", tmpService)
+				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 10, t:", time.Now().Unix(), "idx:", idx, "tmpIds", tmpIdx, "service:", tmpService, "tag", tag)
 				if len(tmpService) != 0 && tmpIdx != idx {
 					services = tmpService
 					ss.broadcast(services)
