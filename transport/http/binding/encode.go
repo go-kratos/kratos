@@ -18,18 +18,22 @@ func EncodeURL(pathTemplate string, msg interface{}, needQuery bool) string {
 	}
 	queryParams, _ := form.EncodeValues(msg)
 	pathParams := make(map[string]struct{})
+	protoMsg, isProtoMsg := msg.(proto.Message)
 	path := reg.ReplaceAllStringFunc(pathTemplate, func(in string) string {
 		// it's unreachable because the reg means that must have more than one char in {}
 		// if len(in) < 4 { //nolint:mnd // **  explain the 4 number here :-) **
 		//	return in
 		// }
 		key := in[1 : len(in)-1]
+		if !queryParams.Has(key) && isProtoMsg {
+			key = form.JsonCamelCase(key)
+		}
 		pathParams[key] = struct{}{}
 		return queryParams.Get(key)
 	})
 	if !needQuery {
-		if v, ok := msg.(proto.Message); ok {
-			if query := form.EncodeFieldMask(v.ProtoReflect()); query != "" {
+		if isProtoMsg {
+			if query := form.EncodeFieldMask(protoMsg.ProtoReflect()); query != "" {
 				return path + "?" + query
 			}
 		}
