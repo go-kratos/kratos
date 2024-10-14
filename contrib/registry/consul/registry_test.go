@@ -756,7 +756,6 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 	}
 }
 
-
 func getIntranetIP() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
