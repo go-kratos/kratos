@@ -745,12 +745,14 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 5, t:", time.Now().Second())
 
 			go func() {
+				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 7, t:", time.Now().Second())
 				service, err = newWatch.Next()
 				if (err != nil) != tt.wantErr {
 					t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
 					t.Errorf("GetService() got = %v", service)
 					return
 				}
+				fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 8, t:", time.Now().Second(), "service:%+v", service)
 				if !reflect.DeepEqual(service, tt.want) {
 					t.Errorf("GetService() got = %v, want %v", service, tt.want)
 				}
