@@ -516,12 +516,6 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			defer func() {
-				err = r.Deregister(tt.args.ctx, tt.args.changeInstance)
-				if err != nil {
-					t.Error(err)
-				}
-			}()
 			time.Sleep(1 * time.Second)
 		})
 	}
@@ -730,6 +724,7 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 				t.Error(err)
 			}
 			time.Sleep(time.Second * 5)
+			fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 3, t:", time.Now().Unix())
 			err = r.Register(tt.args.ctx, tt.args.instance)
 			if err != nil {
 				t.Error(err)
