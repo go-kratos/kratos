@@ -249,6 +249,7 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 				}
 				idx = tmpIdx
 			case <-ctx.Done():
+				fmt.Println("ctx done, tag:", tag)
 				return
 			}
 		}
