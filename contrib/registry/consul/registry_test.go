@@ -701,6 +701,7 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			// The simulation entered idle mode first, but the old resolver was not closed yet, and new requests triggered a new Watch.
 			watchCtx := context.Background()
 			// old resolver cancel
+			fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 4, t:", time.Now().Unix())
 			err = watch.Stop()
 			if err != nil {
 				t.Errorf("watch stop err:%v", err)
