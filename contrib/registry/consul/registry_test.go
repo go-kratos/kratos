@@ -637,7 +637,7 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 	addr := fmt.Sprintf("%s:9091", getIntranetIP())
 
 	time.Sleep(time.Millisecond * 100)
-	cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500", WaitTime: 2 * time.Second})
+	cli, err := api.NewClient(&api.Config{Address: "nodeport-test.oa.com:31502", WaitTime: 2 * time.Second})
 	if err != nil {
 		t.Fatalf("create consul client failed: %v", err)
 	}
@@ -729,7 +729,7 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 				t.Error(err)
 			}
 
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Second * 5)
 
 			newWatchCtx, newWatchCancel := context.WithCancel(context.Background())
 			c := make(chan struct{}, 1)
