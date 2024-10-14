@@ -729,7 +729,7 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			time.Sleep(time.Second * 2)
+			// time.Sleep(time.Second * 2)
 			newWatchCtx, newWatchCancel := context.WithCancel(context.Background())
 			c := make(chan struct{}, 1)
 			go func() {
