@@ -749,7 +749,7 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			if !reflect.DeepEqual(service, tt.want) {
 				t.Errorf("GetService() got = %v, want %v", service, tt.want)
 			}
-				// c <- struct{}{}
+			// c <- struct{}{}
 			// }()
 			// time.AfterFunc(time.Second*10, newWatchCancel)
 			// // fmt.Println("begin TestRegistry_ExitOldResolverAndReWatch 3, t:", time.Now().Unix())
