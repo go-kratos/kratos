@@ -2,6 +2,8 @@ package metrics
 
 import (
 	"context"
+	httpstatus "github.com/go-kratos/kratos/v2/transport/http/status"
+	"google.golang.org/grpc/codes"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -115,6 +117,10 @@ func Server(opts ...Option) middleware.Middleware {
 				kind      string
 				operation string
 			)
+
+			// default code
+			code = httpstatus.FromGRPCCode(codes.OK)
+
 			startTime := time.Now()
 			if info, ok := transport.FromServerContext(ctx); ok {
 				kind = info.Kind().String()
@@ -164,6 +170,10 @@ func Client(opts ...Option) middleware.Middleware {
 				kind      string
 				operation string
 			)
+
+			// default code
+			code = httpstatus.FromGRPCCode(codes.OK)
+
 			startTime := time.Now()
 			if info, ok := transport.FromClientContext(ctx); ok {
 				kind = info.Kind().String()
