@@ -483,34 +483,35 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 				if err1 != nil {
 					t.Error(err1)
 				}
-				go func(i int) {
-					// first
-					service, err2 := watch.Next()
-					if (err2 != nil) != tt.wantErr {
-						t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
-						t.Errorf("GetService() got = %v", service)
-						return
-					}
-					// instance changes
-					service, err2 = watch.Next()
-					if i == 9 {
-						return
-					}
-					if (err2 != nil) != tt.wantErr {
-						t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
-						t.Errorf("GetService() got = %v", service)
-						return
-					}
-					if !reflect.DeepEqual(service, tt.want) {
-						t.Errorf("GetService() got = %v, want %v", service, tt.want)
-					}
-					err = watch.Stop()
-					if err != nil {
-						t.Error(err)
-					}
-					// t.Logf("service:%v, i:%d", service, i)
-				}(i)
-				if i == 9 {
+				if i != 9 {
+					go func(i int) {
+						// first
+						service, err2 := watch.Next()
+						if (err2 != nil) != tt.wantErr {
+							t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
+							t.Errorf("GetService() got = %v", service)
+							return
+						}
+						// instance changes
+						service, err2 = watch.Next()
+						if i == 9 {
+							return
+						}
+						if (err2 != nil) != tt.wantErr {
+							t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
+							t.Errorf("GetService() got = %v", service)
+							return
+						}
+						if !reflect.DeepEqual(service, tt.want) {
+							t.Errorf("GetService() got = %v, want %v", service, tt.want)
+						}
+						err = watch.Stop()
+						if err != nil {
+							t.Error(err)
+						}
+						// t.Logf("service:%v, i:%d", service, i)
+					}(i)
+				} else {
 					time.Sleep(time.Second * 3)
 					// become idle, close watcher
 					err1 = watch.Stop()
