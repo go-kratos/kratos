@@ -678,7 +678,7 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "When it has entered idle mode1111, but the old resolver has not completely exited, the watch will be re-established due to new requests coming in.",
+			name: "When it has entered idle mode, but the old resolver has not completely exited, the watch will be re-established due to new requests coming in.",
 			args: args{
 				ctx:             context.Background(),
 				initialInstance: instance1,
