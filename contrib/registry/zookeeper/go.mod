@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/go-kratos/kratos/v2 v2.8.1
 	github.com/go-zookeeper/zk v1.0.3
-	golang.org/x/sync v0.7.0
+	golang.org/x/sync v0.8.0
 )
 
 replace github.com/go-kratos/kratos/v2 => ../../../
