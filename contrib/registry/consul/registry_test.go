@@ -407,6 +407,10 @@ func TestRegistry_Watch(t *testing.T) {
 			if !reflect.DeepEqual(service, tt.want) {
 				t.Errorf("GetService() got = %v, want %v", service, tt.want)
 			}
+			err = watch.Stop()
+			if err != nil {
+				t.Error(err)
+			}
 		})
 	}
 }
@@ -499,6 +503,10 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 					}
 					if !reflect.DeepEqual(service, tt.want) {
 						t.Errorf("GetService() got = %v, want %v", service, tt.want)
+					}
+					err = watch.Stop()
+					if err != nil {
+						t.Error(err)
 					}
 					// t.Logf("service:%v, i:%d", service, i)
 				}(i)
@@ -628,6 +636,10 @@ func TestRegistry_IdleAndWatch2(t *testing.T) {
 			}
 			if !reflect.DeepEqual(service, tt.want) {
 				t.Errorf("GetService() got = %v, want %v", service, tt.want)
+			}
+			err = watch.Stop()
+			if err != nil {
+				t.Error(err)
 			}
 		})
 	}
