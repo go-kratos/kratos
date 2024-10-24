@@ -117,8 +117,8 @@ func TestRegistry_Register(t *testing.T) {
 					t.Error(err)
 				}
 			}
-
-			watch, err := r.Watch(tt.args.ctx, tt.args.serverName)
+            watchCtx, watchCancel := context.WithCancel(context.Background())
+			watch, err := r.Watch(watchCtx, tt.args.serverName)
 			if err != nil {
 				t.Error(err)
 			}
@@ -127,6 +127,7 @@ func TestRegistry_Register(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
 				t.Errorf("GetService() got = %v", got)
+				watchCancel()
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
@@ -140,6 +141,7 @@ func TestRegistry_Register(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
+			watchCancel()
 		})
 	}
 }
@@ -226,7 +228,6 @@ func TestRegistry_GetService(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-
 			},
 		},
 		{
@@ -492,7 +493,8 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 			}()
 
 			for i := 0; i < 10; i++ {
-				watch, err1 := r.Watch(context.Background(), tt.args.instance.Name)
+				watchCtx, watchCancel := context.WithCancel(context.Background())
+				watch, err1 := r.Watch(watchCtx, tt.args.instance.Name)
 				if err1 != nil {
 					t.Error(err1)
 				}
@@ -503,6 +505,7 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 						if (err2 != nil) != tt.wantErr {
 							t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
 							t.Errorf("GetService() got = %v", service)
+							watchCancel()
 							return
 						}
 						// instance changes
@@ -513,6 +516,7 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 						if (err2 != nil) != tt.wantErr {
 							t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
 							t.Errorf("GetService() got = %v", service)
+							watchCancel()
 							return
 						}
 						if !reflect.DeepEqual(service, tt.want) {
@@ -522,6 +526,7 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 						if err2 != nil {
 							t.Error(err)
 						}
+						watchCancel()
 						// t.Logf("service:%v, i:%d", service, i)
 					}(i)
 				} else {
@@ -531,6 +536,7 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 					if err1 != nil {
 						t.Errorf("watch stop err:%v", err)
 					}
+					watchCancel()
 				}
 			}
 			time.Sleep(2 * time.Second)
@@ -637,7 +643,7 @@ func TestRegistry_IdleAndWatch2(t *testing.T) {
 			cancel()
 			time.Sleep(time.Second * 2)
 			// Everything is idle. Add new watch.
-			watchCtx := context.Background()
+			watchCtx, watchCancel := context.WithCancel(context.Background())
 			watch, err := r.Watch(watchCtx, tt.args.instance.Name)
 			if err != nil {
 				t.Error(err)
@@ -646,15 +652,13 @@ func TestRegistry_IdleAndWatch2(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
 				t.Errorf("GetService() got = %v", service)
+				watchCancel()
 				return
 			}
 			if !reflect.DeepEqual(service, tt.want) {
 				t.Errorf("GetService() got = %v, want %v", service, tt.want)
 			}
-			err = watch.Stop()
-			if err != nil {
-				t.Error(err)
-			}
+			watchCancel()
 		})
 	}
 }
