@@ -75,6 +75,11 @@ func (h *Helper) Enabled(level Level) bool {
 	return true
 }
 
+// Logger returns logger in the helper.
+func (h *Helper) Logger() Logger {
+	return h.logger
+}
+
 // Log Print log by level and keyvals.
 func (h *Helper) Log(level Level, keyvals ...interface{}) {
 	_ = h.logger.Log(level, keyvals...)
