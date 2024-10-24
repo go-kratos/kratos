@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"time"
 
+	"google.golang.org/grpc/codes"
+
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v2/transport/http/status"
 )
 
 // Redacter defines how to log an object
@@ -26,6 +29,10 @@ func Server(logger log.Logger) middleware.Middleware {
 				kind      string
 				operation string
 			)
+
+			// default code
+			code = int32(status.FromGRPCCode(codes.OK))
+
 			startTime := time.Now()
 			if info, ok := transport.FromServerContext(ctx); ok {
 				kind = info.Kind().String()
@@ -62,6 +69,10 @@ func Client(logger log.Logger) middleware.Middleware {
 				kind      string
 				operation string
 			)
+
+			// default code
+			code = int32(status.FromGRPCCode(codes.OK))
+
 			startTime := time.Now()
 			if info, ok := transport.FromClientContext(ctx); ok {
 				kind = info.Kind().String()

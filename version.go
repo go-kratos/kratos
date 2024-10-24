@@ -1,4 +1,4 @@
 package kratos
 
 // Release is the current kratos version.
-const Release = "v2.8.0"
+const Release = "v2.8.1"
