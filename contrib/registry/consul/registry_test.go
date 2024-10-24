@@ -117,7 +117,7 @@ func TestRegistry_Register(t *testing.T) {
 					t.Error(err)
 				}
 			}
-            watchCtx, watchCancel := context.WithCancel(context.Background())
+			watchCtx, watchCancel := context.WithCancel(context.Background())
 			watch, err := r.Watch(watchCtx, tt.args.serverName)
 			if err != nil {
 				t.Error(err)
