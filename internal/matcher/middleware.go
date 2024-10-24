@@ -33,13 +33,12 @@ func (m *matcher) Use(ms ...middleware.Middleware) {
 
 func (m *matcher) Add(selector string, ms ...middleware.Middleware) {
 	if strings.HasSuffix(selector, "*") {
-		selector = strings.TrimSuffix(selector, "*")
-		m.prefix = append(m.prefix, selector)
+		m.prefix = append(m.prefix, strings.TrimSuffix(selector, "*"))
 		// sort the prefix:
-		//  - /foo/bar
 		//  - /foo
+		//  - /foo/bar
 		sort.Slice(m.prefix, func(i, j int) bool {
-			return m.prefix[i] > m.prefix[j]
+			return m.prefix[i] < m.prefix[j]
 		})
 	}
 	m.matchs[selector] = ms
@@ -50,13 +49,13 @@ func (m *matcher) Match(operation string) []middleware.Middleware {
 	if len(m.defaults) > 0 {
 		ms = append(ms, m.defaults...)
 	}
-	if next, ok := m.matchs[operation]; ok {
-		return append(ms, next...)
-	}
 	for _, prefix := range m.prefix {
 		if strings.HasPrefix(operation, prefix) {
-			return append(ms, m.matchs[prefix]...)
+			ms = append(ms, m.matchs[prefix+"*"]...)
 		}
+	}
+	if next, ok := m.matchs[operation]; ok {
+		ms = append(ms, next...)
 	}
 	return ms
 }
