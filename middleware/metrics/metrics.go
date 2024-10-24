@@ -4,13 +4,15 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
-
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	metricsdk "go.opentelemetry.io/otel/sdk/metric"
+	"google.golang.org/grpc/codes"
+
+	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v2/transport/http/status"
 )
 
 const (
@@ -115,6 +117,10 @@ func Server(opts ...Option) middleware.Middleware {
 				kind      string
 				operation string
 			)
+
+			// default code
+			code = status.FromGRPCCode(codes.OK)
+
 			startTime := time.Now()
 			if info, ok := transport.FromServerContext(ctx); ok {
 				kind = info.Kind().String()
@@ -164,6 +170,10 @@ func Client(opts ...Option) middleware.Middleware {
 				kind      string
 				operation string
 			)
+
+			// default code
+			code = status.FromGRPCCode(codes.OK)
+
 			startTime := time.Now()
 			if info, ok := transport.FromClientContext(ctx); ok {
 				kind = info.Kind().String()
