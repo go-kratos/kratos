@@ -505,8 +505,8 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 						if !reflect.DeepEqual(service, tt.want) {
 							t.Errorf("GetService() got = %v, want %v", service, tt.want)
 						}
-						err = watch.Stop()
-						if err != nil {
+						err2 = watch.Stop()
+						if err2 != nil {
 							t.Error(err)
 						}
 						// t.Logf("service:%v, i:%d", service, i)
