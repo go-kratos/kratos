@@ -136,6 +136,10 @@ func TestRegistry_Register(t *testing.T) {
 			for _, instance := range tt.args.server {
 				_ = r.Deregister(tt.args.ctx, instance)
 			}
+			err = watch.Stop()
+			if err != nil {
+				t.Error(err)
+			}
 		})
 	}
 }
@@ -212,12 +216,17 @@ func TestRegistry_GetService(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
+				err = watch.Stop()
+				if err != nil {
+					t.Error(err)
+				}
 			},
 			deferFunc: func(t *testing.T) {
 				err := r.Deregister(context.Background(), instance1)
 				if err != nil {
 					t.Error(err)
 				}
+
 			},
 		},
 		{
@@ -238,6 +247,10 @@ func TestRegistry_GetService(t *testing.T) {
 					t.Error(err)
 				}
 				_, err = watch.Next()
+				if err != nil {
+					t.Error(err)
+				}
+				err = watch.Stop()
 				if err != nil {
 					t.Error(err)
 				}
