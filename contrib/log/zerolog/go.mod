@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/contrib/log/zerolog/v2
 go 1.19
 
 require (
-	github.com/go-kratos/kratos/v2 v2.8.1
+	github.com/go-kratos/kratos/v2 v2.8.2
 	github.com/rs/zerolog v1.30.0
 )
 
