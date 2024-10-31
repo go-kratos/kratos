@@ -7,7 +7,7 @@ execute this command:
 ```
 kubectl create clusterrolebinding go-kratos:kube --clusterrole=view --serviceaccount=mesh:default
 ```
-or use `kubect apply -f bind-role.yaml`
+or use `kubectl apply -f bind-role.yaml`
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

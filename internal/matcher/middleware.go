@@ -17,14 +17,14 @@ type Matcher interface {
 // New new a middleware matcher.
 func New() Matcher {
 	return &matcher{
-		matchs: make(map[string][]middleware.Middleware),
+		matches: make(map[string][]middleware.Middleware),
 	}
 }
 
 type matcher struct {
 	prefix   []string
 	defaults []middleware.Middleware
-	matchs   map[string][]middleware.Middleware
+	matches  map[string][]middleware.Middleware
 }
 
 func (m *matcher) Use(ms ...middleware.Middleware) {
@@ -42,7 +42,7 @@ func (m *matcher) Add(selector string, ms ...middleware.Middleware) {
 			return m.prefix[i] > m.prefix[j]
 		})
 	}
-	m.matchs[selector] = ms
+	m.matches[selector] = ms
 }
 
 func (m *matcher) Match(operation string) []middleware.Middleware {
@@ -50,12 +50,12 @@ func (m *matcher) Match(operation string) []middleware.Middleware {
 	if len(m.defaults) > 0 {
 		ms = append(ms, m.defaults...)
 	}
-	if next, ok := m.matchs[operation]; ok {
+	if next, ok := m.matches[operation]; ok {
 		return append(ms, next...)
 	}
 	for _, prefix := range m.prefix {
 		if strings.HasPrefix(operation, prefix) {
-			return append(ms, m.matchs[prefix]...)
+			return append(ms, m.matches[prefix]...)
 		}
 	}
 	return ms

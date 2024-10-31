@@ -113,7 +113,7 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, _ resolv
 		insecure:    b.insecure,
 		debugLog:    b.debugLog,
 		subsetSize:  b.subsetSize,
-		selecterKey: uuid.New().String(),
+		selectorKey: uuid.New().String(),
 	}
 	go r.watch()
 	return r, nil
