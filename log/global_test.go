@@ -121,15 +121,16 @@ func TestGlobalContext(t *testing.T) {
 func TestContextWithGlobalLog(t *testing.T) {
 	buffer := &bytes.Buffer{}
 
+	type traceKey struct{}
 	// set "trace-id" Valuer
 	newLogger := With(NewStdLogger(buffer), "trace-id", Valuer(func(ctx context.Context) interface{} {
-		return ctx.Value("trace-id")
+		return ctx.Value(traceKey{})
 	}))
 
 	SetLogger(newLogger)
 
 	// add value to ctx
-	ctx := context.WithValue(context.Background(), "trace-id", "test-trace-id")
+	ctx := context.WithValue(context.Background(), traceKey{}, "test-trace-id")
 
 	_ = WithContext(ctx, GetLogger()).Log(LevelInfo)
 	if buffer.String() != "INFO trace-id=test-trace-id\n" {
