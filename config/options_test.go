@@ -185,7 +185,7 @@ func TestDefaultResolver(t *testing.T) {
 				default:
 					actual = v.Load()
 					if !reflect.DeepEqual(test.expect, actual) {
-						t.Logf("expect: %#v, actural: %#v", test.expect, actual)
+						t.Logf("expect: %#v, actual: %#v", test.expect, actual)
 						t.Fail()
 					}
 				}
@@ -343,7 +343,7 @@ func TestNewDefaultResolver(t *testing.T) {
 				default:
 					actual = v.Load()
 					if !reflect.DeepEqual(test.expect, actual) {
-						t.Logf("expect: %#v, actural: %#v", test.expect, actual)
+						t.Logf("expect: %#v, actual: %#v", test.expect, actual)
 						t.Fail()
 					}
 				}

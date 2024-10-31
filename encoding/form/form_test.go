@@ -237,7 +237,7 @@ func TestDecodeStructPb(t *testing.T) {
 		t.Errorf("except %v, got %v", "kratos", req.Data.GetFields()["name"].GetStringValue())
 	}
 	if len(req.DataList) != 2 {
-		t.Fatalf("execpt %v, got %v", 2, len(req.DataList))
+		t.Fatalf("except %v, got %v", 2, len(req.DataList))
 	}
 	if "kratos" != req.DataList[0].GetFields()["name1"].GetStringValue() {
 		t.Errorf("except %v, got %v", "kratos", req.Data.GetFields()["name1"].GetStringValue())

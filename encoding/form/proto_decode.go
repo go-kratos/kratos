@@ -20,7 +20,7 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-const fieldSeparater = "."
+const fieldSeparator = "."
 
 var errInvalidFormatMapKey = errors.New("invalid formatting for map key")
 
@@ -138,7 +138,7 @@ func populateRepeatedField(fd protoreflect.FieldDescriptor, list protoreflect.Li
 }
 
 func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, fieldPath []string, values []string) error {
-	_, keyName, err := parseURLQueryMapKey(strings.Join(fieldPath, fieldSeparater))
+	_, keyName, err := parseURLQueryMapKey(strings.Join(fieldPath, fieldSeparator))
 	if err != nil {
 		return err
 	}
@@ -359,7 +359,7 @@ func parseURLQueryMapKey(key string) (string, string, error) {
 	)
 	if startIndex < 0 {
 		//nolint:mnd
-		values := strings.Split(key, fieldSeparater)
+		values := strings.Split(key, fieldSeparator)
 		//nolint:mnd
 		if len(values) != 2 {
 			return "", "", errInvalidFormatMapKey

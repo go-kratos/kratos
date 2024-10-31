@@ -41,7 +41,7 @@ This document defines the roadmap for Kratos development.
         - [ ] javascript/typescript clients
     - [x] gRPC
         - [x] TLS
-        - [x] Uarry Handler
+        - [x] Unary Handler
         - [x] Streaming Handler
 - [ ] Cache
     - [ ] go-redis

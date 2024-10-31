@@ -35,6 +35,6 @@ Usage: `fixes/resolves #<issue number>`, or `fixes/resolves (paste link of issue
 
 #### Other special notes for the reviewers:
 <!--
-* Somethings that need extra attention for the reviewers
+* Some things that need extra attention for the reviewers
 * Some additional notes, TODO list, etc.
 -->

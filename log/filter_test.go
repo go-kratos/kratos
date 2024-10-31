@@ -102,7 +102,7 @@ func TestFilterFuncWitchLoggerPrefix(t *testing.T) {
 		want   string
 	}{
 		{
-			logger: NewFilter(With(NewStdLogger(buf), "caller", "caller", "prefix", "whaterver"), FilterFunc(testFilterFuncWithLoggerPrefix)),
+			logger: NewFilter(With(NewStdLogger(buf), "caller", "caller", "prefix", "whatever"), FilterFunc(testFilterFuncWithLoggerPrefix)),
 			want:   "",
 		},
 		{
@@ -168,7 +168,7 @@ func TestFilterWithContext(t *testing.T) {
 	_ = WithContext(ctx, filter).Log(LevelInfo, "kind", "test")
 
 	if info.String() != "" {
-		t.Error("filter is not woring")
+		t.Error("filter is not working")
 		return
 	}
 

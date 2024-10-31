@@ -150,7 +150,7 @@ func TestRegistry(t *testing.T) {
 
 	os.Setenv("HOSTNAME", pod.Items[0].Name)
 
-	// Alway remember delete test resource
+	// Always remember delete test resource
 	defer func() {
 		_ = clientSet.AppsV1().Deployments(namespace).Delete(context.Background(), deployName, metav1.DeleteOptions{})
 	}()

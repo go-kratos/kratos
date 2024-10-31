@@ -47,7 +47,7 @@ type resolver struct {
 
 	target      *Target
 	watcher     registry.Watcher
-	selecterKey string
+	selectorKey string
 	subsetSize  int
 
 	insecure bool
@@ -66,7 +66,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 		watcher:     watcher,
 		rebalancer:  rebalancer,
 		insecure:    insecure,
-		selecterKey: uuid.New().String(),
+		selectorKey: uuid.New().String(),
 		subsetSize:  subsetSize,
 	}
 	if block {
@@ -133,7 +133,7 @@ func (r *resolver) update(services []*registry.ServiceInstance) bool {
 		filtered = append(filtered, ins)
 	}
 	if r.subsetSize != 0 {
-		filtered = subset.Subset(r.selecterKey, filtered, r.subsetSize)
+		filtered = subset.Subset(r.selectorKey, filtered, r.subsetSize)
 	}
 	nodes := make([]selector.Node, 0, len(filtered))
 	for _, ins := range filtered {
