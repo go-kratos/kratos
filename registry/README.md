@@ -35,3 +35,21 @@ go get -u github.com/go-kratos/kratos/contrib/registry/kubernetes/v2
 ```shell
 go get -u github.com/go-kratos/kratos/contrib/registry/polaris/v2
 ```
+
+## discovery
+
+```shell
+go get -u github.com/go-kratos/kratos/contrib/registry/discovery/v2
+```
+
+## eureka
+
+```shell
+go get -u github.com/go-kratos/kratos/contrib/registry/eureka/v2
+```
+
+## servicecomb
+
+```shell
+go get -u github.com/go-kratos/kratos/contrib/registry/servicecomb/v2
+```
