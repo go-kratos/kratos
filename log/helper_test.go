@@ -8,7 +8,12 @@ import (
 )
 
 func TestHelper(_ *testing.T) {
-	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
+	logger := With(
+		DefaultLogger,
+		"ts", DefaultTimestamp,
+		"caller", DefaultCaller,
+		"module", "test",
+	)
 	log := NewHelper(logger)
 
 	log.Log(LevelDebug, "msg", "test debug")
@@ -19,6 +24,12 @@ func TestHelper(_ *testing.T) {
 	log.Warn("test warn")
 	log.Warnf("test %s", "warn")
 	log.Warnw("log", "test warn")
+
+	subLogger := With(log.Logger(),
+		"module", "sub",
+	)
+	subLog := NewHelper(subLogger)
+	subLog.Infof("sub logger test with level %s", "info")
 }
 
 func TestHelperWithMsgKey(_ *testing.T) {
