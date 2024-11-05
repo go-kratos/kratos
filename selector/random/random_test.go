@@ -30,7 +30,8 @@ func TestWrr(t *testing.T) {
 		}))
 	random.Apply(nodes)
 	var count1, count2 int
-	for i := 0; i < 200; i++ {
+	randomNumber := 2000
+	for i := 0; i < randomNumber; i++ {
 		n, done, err := random.Select(context.Background(), selector.WithNodeFilter(filter.Version("v2.0.0")))
 		if err != nil {
 			t.Errorf("expect no error, got %v", err)
@@ -48,17 +49,20 @@ func TestWrr(t *testing.T) {
 			count2++
 		}
 	}
-	if count1 <= 80 {
-		t.Errorf("count1(%v) <= 80", count1)
+	// output
+	percentage1 := float64(count1) / float64(randomNumber) * 100
+	percentage2 := float64(count2) / float64(randomNumber) * 100
+	if percentage1 > 60 {
+		t.Errorf("percentage1(%v) > 60", percentage1)
 	}
-	if count1 >= 120 {
-		t.Errorf("count1(%v) >= 120", count1)
+	if percentage1 < 40 {
+		t.Errorf("percentage1(%v) < 40", percentage1)
 	}
-	if count2 <= 80 {
-		t.Errorf("count2(%v) <= 80", count2)
+	if percentage2 > 60 {
+		t.Errorf("percentage2(%v) > 60", percentage2)
 	}
-	if count2 >= 120 {
-		t.Errorf("count2(%v) >= 120", count2)
+	if percentage2 < 40 {
+		t.Errorf("percentage2(%v) < 40", percentage2)
 	}
 }
 
