@@ -84,6 +84,16 @@ func TestHeaderCarrier_Keys(t *testing.T) {
 	}
 }
 
+func TestSetServer(t *testing.T) {
+	tr := &Transport{}
+	ctx := transport.NewServerContext(context.Background(), tr)
+	srv := struct{}{}
+	SetServer(ctx, srv)
+	if !reflect.DeepEqual(tr.server, srv) {
+		t.Errorf("expect %v, got %v", srv, tr.server)
+	}
+}
+
 func TestSetOperation(t *testing.T) {
 	tr := &Transport{}
 	ctx := transport.NewServerContext(context.Background(), tr)
