@@ -51,7 +51,7 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 		return "", err
 	}
 	var (
-		minIndex int
+		minIndex = 0
 		ips      = make([]net.IP, 0, 1)
 	)
 	for _, iface := range ifaces {
