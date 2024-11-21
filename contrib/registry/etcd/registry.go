@@ -168,7 +168,8 @@ func (r *Registry) heartBeat(ctx context.Context, leaseID clientv3.LeaseID, key 
 		if curLeaseID == 0 {
 			// try to registerWithKV
 			var retreat []int
-			for retryCnt := 0; retryCnt < r.opts.maxRetry; retryCnt++ {
+			var retryCnt int
+			for retryCnt = 0; retryCnt < r.opts.maxRetry; retryCnt++ {
 				if ctx.Err() != nil {
 					return
 				}
@@ -202,7 +203,7 @@ func (r *Registry) heartBeat(ctx context.Context, leaseID clientv3.LeaseID, key 
 				retreat = append(retreat, 1<<retryCnt)
 				time.Sleep(time.Duration(retreat[randSource.Intn(len(retreat))]) * time.Second)
 			}
-			if _, ok := <-kac; !ok {
+			if _, ok := <-kac; !ok && retryCnt >= r.opts.maxRetry {
 				// retry failed
 				return
 			}
