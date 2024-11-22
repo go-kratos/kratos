@@ -24,7 +24,7 @@ type discoveryResolver struct {
 
 	insecure    bool
 	debugLog    bool
-	selecterKey string
+	selectorKey string
 	subsetSize  int
 }
 
@@ -70,7 +70,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		filtered = append(filtered, in)
 	}
 	if r.subsetSize != 0 {
-		filtered = subset.Subset(r.selecterKey, filtered, r.subsetSize)
+		filtered = subset.Subset(r.selectorKey, filtered, r.subsetSize)
 	}
 
 	addrs := make([]resolver.Address, 0, len(filtered))
