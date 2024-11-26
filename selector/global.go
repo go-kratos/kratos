@@ -19,3 +19,8 @@ func GlobalSelector() Builder {
 func SetGlobalSelector(builder Builder) {
 	globalSelector.Builder = builder
 }
+
+// NewSelector generate a selector builder.
+func NewSelector(builder Builder) Builder {
+	return &wrapSelector{Builder: builder}
+}

@@ -40,20 +40,21 @@ type ClientOption func(*clientOptions)
 
 // Client is an HTTP transport client.
 type clientOptions struct {
-	ctx          context.Context
-	tlsConf      *tls.Config
-	timeout      time.Duration
-	endpoint     string
-	userAgent    string
-	encoder      EncodeRequestFunc
-	decoder      DecodeResponseFunc
-	errorDecoder DecodeErrorFunc
-	transport    http.RoundTripper
-	nodeFilters  []selector.NodeFilter
-	discovery    registry.Discovery
-	middleware   []middleware.Middleware
-	block        bool
-	subsetSize   int
+	ctx             context.Context
+	tlsConf         *tls.Config
+	timeout         time.Duration
+	endpoint        string
+	userAgent       string
+	encoder         EncodeRequestFunc
+	decoder         DecodeResponseFunc
+	errorDecoder    DecodeErrorFunc
+	transport       http.RoundTripper
+	nodeFilters     []selector.NodeFilter
+	discovery       registry.Discovery
+	selectorBuilder selector.Builder
+	middleware      []middleware.Middleware
+	block           bool
+	subsetSize      int
 }
 
 // WithSubset with client discovery subset size.
@@ -148,6 +149,13 @@ func WithTLSConfig(c *tls.Config) ClientOption {
 	}
 }
 
+// WithSelectorBuilder with selector builder
+func WithSelectorBuilder(b selector.Builder) ClientOption {
+	return func(o *clientOptions) {
+		o.selectorBuilder = b
+	}
+}
+
 // Client is an HTTP client.
 type Client struct {
 	opts     clientOptions
@@ -182,11 +190,14 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	selector := selector.GlobalSelector().Build()
+	sel := selector.GlobalSelector().Build()
+	if options.selectorBuilder != nil {
+		sel = options.selectorBuilder.Build()
+	}
 	var r *resolver
 	if options.discovery != nil {
 		if target.Scheme == "discovery" {
-			if r, err = newResolver(ctx, options.discovery, target, selector, options.block, insecure, options.subsetSize); err != nil {
+			if r, err = newResolver(ctx, options.discovery, target, sel, options.block, insecure, options.subsetSize); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
 			}
 		} else if _, _, err := host.ExtractHostPort(options.endpoint); err != nil {
@@ -202,7 +213,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 			Timeout:   options.timeout,
 			Transport: options.transport,
 		},
-		selector: selector,
+		selector: sel,
 	}, nil
 }
 

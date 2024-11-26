@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/selector/wrr"
 	"io"
 	"log"
 	"net/http"
@@ -147,6 +148,16 @@ func TestWithErrorDecoder(t *testing.T) {
 	WithErrorDecoder(v)(o)
 	if o.errorDecoder == nil {
 		t.Errorf("expected encoder to be not nil")
+	}
+}
+
+func TestWithSelectorBuilder(t *testing.T) {
+	b := wrr.NewBuilder()
+	o := WithSelectorBuilder(b)
+	co := &clientOptions{}
+	o(co)
+	if !reflect.DeepEqual(co.selectorBuilder, b) {
+		t.Errorf("expected select builder to be %v, got %v", b, co.selectorBuilder)
 	}
 }
 

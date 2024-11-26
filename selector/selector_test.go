@@ -289,3 +289,13 @@ func TestGlobalSelector(t *testing.T) {
 		t.Errorf("expect %v, got %v", nil, gBuilder)
 	}
 }
+func TestNewSelector(t *testing.T) {
+	builder := DefaultBuilder{
+		Node:     &mockWeightedNodeBuilder{},
+		Balancer: &mockBalancerBuilder{},
+	}
+	selector := builder.Build()
+	if selector == nil {
+		t.Errorf("expect %v, got %v", nil, selector)
+	}
+}
