@@ -44,8 +44,10 @@ func (v *atomicValue) Bool() (bool, error) {
 	switch val := v.Load().(type) {
 	case bool:
 		return val, nil
-	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, string:
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64:
 		return strconv.ParseBool(fmt.Sprint(val))
+	case string:
+		return strconv.ParseBool(val)
 	}
 	return false, v.typeAssertError()
 }
