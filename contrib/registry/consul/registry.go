@@ -86,6 +86,14 @@ func WithServiceCheck(checks ...*api.AgentServiceCheck) Option {
 	}
 }
 
+func WithServiceTags(tags []string) Option {
+	return func(o *Registry) {
+		if len(tags) > 0 {
+			o.cli.tags = tags
+		}
+	}
+}
+
 // Config is consul registry config
 type Config struct {
 	*api.Config
@@ -124,7 +132,7 @@ func New(apiClient *api.Client, opts ...Option) *Registry {
 
 // Register register service
 func (r *Registry) Register(ctx context.Context, svc *registry.ServiceInstance) error {
-	return r.cli.Register(ctx, svc, r.enableHealthCheck)
+	return r.cli.Register(ctx, svc, r.enableHealthCheck, r.cli.tags)
 }
 
 // Deregister deregister service
