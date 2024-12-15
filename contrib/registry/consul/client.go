@@ -182,7 +182,6 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 				Timeout:                        "5s",
 			})
 		}
-		// custom checks
 		asr.Checks = append(asr.Checks, c.serviceChecks...)
 	}
 	if c.heartbeat {
