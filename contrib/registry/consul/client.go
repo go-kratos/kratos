@@ -41,7 +41,7 @@ type Client struct {
 	deregisterCriticalServiceAfter int
 	// serviceChecks  user custom checks
 	serviceChecks api.AgentServiceChecks
-	//custom tags
+	// tags custom consul tags
 	tags []string
 }
 
