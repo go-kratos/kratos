@@ -19,12 +19,10 @@ var ErrWatcherCreateTimeout = errors.New("discovery create watcher overtime")
 // Option is builder option.
 type Option func(o *builder)
 
-// WithTimeout with timeout option. timeout must be greater than 0.
+// WithTimeout with timeout option.
 func WithTimeout(timeout time.Duration) Option {
 	return func(b *builder) {
-		if timeout > 0 {
-			b.timeout = timeout
-		}
+		b.timeout = timeout
 	}
 }
 
@@ -96,11 +94,16 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, _ resolv
 	}()
 
 	var err error
-	select {
-	case <-done:
+	if b.timeout > 0 {
+		select {
+		case <-done:
+			err = watchRes.err
+		case <-time.After(b.timeout):
+			err = ErrWatcherCreateTimeout
+		}
+	} else {
+		<-done
 		err = watchRes.err
-	case <-time.After(b.timeout):
-		err = ErrWatcherCreateTimeout
 	}
 	if err != nil {
 		cancel()
