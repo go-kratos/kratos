@@ -19,10 +19,12 @@ var ErrWatcherCreateTimeout = errors.New("discovery create watcher overtime")
 // Option is builder option.
 type Option func(o *builder)
 
-// WithTimeout with timeout option.
+// WithTimeout with timeout option. timeout must be greater than 0.
 func WithTimeout(timeout time.Duration) Option {
 	return func(b *builder) {
-		b.timeout = timeout
+		if timeout > 0 {
+			b.timeout = timeout
+		}
 	}
 }
 
