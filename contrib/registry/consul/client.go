@@ -41,6 +41,8 @@ type Client struct {
 	deregisterCriticalServiceAfter int
 	// serviceChecks  user custom checks
 	serviceChecks api.AgentServiceChecks
+	// tags custom consul tags
+	tags []string
 }
 
 func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance {
@@ -143,7 +145,7 @@ func (c *Client) singleDCEntries(service, tag string, passingOnly bool, opts *ap
 }
 
 // Register register service instance to consul
-func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enableHealthCheck bool) error {
+func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enableHealthCheck bool, tags []string) error {
 	addresses := make(map[string]api.ServiceAddress, len(svc.Endpoints))
 	checkAddresses := make([]string, 0, len(svc.Endpoints))
 	for _, endpoint := range svc.Endpoints {
@@ -157,11 +159,12 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 		checkAddresses = append(checkAddresses, net.JoinHostPort(addr, strconv.FormatUint(port, 10)))
 		addresses[raw.Scheme] = api.ServiceAddress{Address: endpoint, Port: int(port)}
 	}
+	tags = append(tags, fmt.Sprintf("version=%s", svc.Version))
 	asr := &api.AgentServiceRegistration{
 		ID:              svc.ID,
 		Name:            svc.Name,
 		Meta:            svc.Metadata,
-		Tags:            []string{fmt.Sprintf("version=%s", svc.Version)},
+		Tags:            tags,
 		TaggedAddresses: addresses,
 	}
 	if len(checkAddresses) > 0 {
@@ -179,7 +182,6 @@ func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enab
 				Timeout:                        "5s",
 			})
 		}
-		// custom checks
 		asr.Checks = append(asr.Checks, c.serviceChecks...)
 	}
 	if c.heartbeat {
