@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/getsentry/sentry-go v0.25.0
-	github.com/go-kratos/kratos/v2 v2.8.2
+	github.com/go-kratos/kratos/v2 v2.8.3
 )
 
 require (
