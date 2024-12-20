@@ -3,6 +3,7 @@ package kratos
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"os/signal"
 	"sync"
@@ -108,11 +109,15 @@ func (a *App) Run() error {
 		})
 		wg.Add(1)
 		eg.Go(func() error {
-			wg.Done() // here is to ensure server start has begun running before register, so defer is not needed
+			defer wg.Done() // should call Done after Start since we need to capture any potential error
 			return server.Start(NewContext(a.opts.ctx, a))
 		})
 	}
 	wg.Wait()
+	if err = ctx.Err(); err != nil {
+		return fmt.Errorf("%w: %w", err, context.Cause(ctx))
+	}
+
 	if a.opts.registrar != nil {
 		rctx, rcancel := context.WithTimeout(ctx, a.opts.registrarTimeout)
 		defer rcancel()
