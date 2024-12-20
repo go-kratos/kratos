@@ -3,8 +3,10 @@ module github.com/go-kratos/kratos/v2
 go 1.22.0
 
 require (
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.35.2-20241127180247-a33202765966.1
 	dario.cat/mergo v1.0.0
 	github.com/bufbuild/protovalidate-go v0.8.0
+	github.com/envoyproxy/protoc-gen-validate v1.1.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-kratos/aegis v0.2.0
 	github.com/go-playground/form/v4 v4.2.0
@@ -18,17 +20,15 @@ require (
 	go.opentelemetry.io/otel/trace v1.24.0
 	golang.org/x/sync v0.10.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240826202546-f6391c0de4c7
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240826202546-f6391c0de4c7
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241209162323-e6fa225c2576
 	google.golang.org/grpc v1.67.1
 	google.golang.org/protobuf v1.35.2
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.35.2-20241127180247-a33202765966.1 // indirect
 	cel.dev/expr v0.19.1 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
-	github.com/envoyproxy/protoc-gen-validate v1.1.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
