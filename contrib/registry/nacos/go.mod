@@ -1,6 +1,8 @@
 module github.com/go-kratos/kratos/contrib/registry/nacos/v2
 
-go 1.19
+go 1.22
+
+toolchain go1.23.2
 
 require (
 	github.com/go-kratos/kratos/v2 v2.8.3
