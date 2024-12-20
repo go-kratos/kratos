@@ -1,6 +1,6 @@
 module github.com/go-kratos/kratos/contrib/registry/nacos/v2
 
-go 1.19
+go 1.22.0
 
 require (
 	github.com/go-kratos/kratos/v2 v2.8.3
@@ -22,6 +22,7 @@ require (
 	go.uber.org/atomic v1.6.0 // indirect
 	go.uber.org/multierr v1.5.0 // indirect
 	go.uber.org/zap v1.15.0 // indirect
+	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	gopkg.in/ini.v1 v1.42.0 // indirect
 )
 

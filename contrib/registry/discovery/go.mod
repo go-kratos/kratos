@@ -1,6 +1,6 @@
 module github.com/go-kratos/kratos/contrib/registry/discovery/v2
 
-go 1.19
+go 1.22.0
 
 require (
 	github.com/go-kratos/kratos/v2 v2.8.3
@@ -8,6 +8,6 @@ require (
 	github.com/pkg/errors v0.9.1
 )
 
-require golang.org/x/net v0.23.0 // indirect
+require golang.org/x/net v0.33.0 // indirect
 
 replace github.com/go-kratos/kratos/v2 => ../../../

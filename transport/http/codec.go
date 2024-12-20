@@ -15,6 +15,9 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 )
 
+// ResponseController is type net/http.ResponseController which was added in Go 1.20.
+type ResponseController = http.ResponseController
+
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
 const SupportPackageIsVersion1 = true
 
