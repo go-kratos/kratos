@@ -10,6 +10,7 @@ require (
 
 require (
 	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/klauspost/compress v1.15.1 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	go.uber.org/atomic v1.9.0 // indirect
