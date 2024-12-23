@@ -107,7 +107,7 @@ func TestBuilder_Build(t *testing.T) {
 		&mockConn{},
 		resolver.BuildOptions{},
 	)
-	if err == nil {
-		t.Errorf("expected error, got %v", err)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
 	}
 }
