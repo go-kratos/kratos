@@ -68,8 +68,8 @@ func (f *Filter) Log(level Level, keyvals ...interface{}) error {
 	var prefixkv []interface{}
 	l, ok := f.logger.(*logger)
 	if ok && len(l.prefix) > 0 {
-		prefixkv = make([]interface{}, 0, len(l.prefix))
-		prefixkv = append(prefixkv, l.prefix...)
+		prefixkv = make([]interface{}, len(l.prefix))
+		copy(prefixkv, l.prefix)
 	}
 
 	if f.filter != nil && (f.filter(level, prefixkv...) || f.filter(level, keyvals...)) {
