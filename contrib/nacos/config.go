@@ -2,11 +2,13 @@ package nacos
 
 import (
 	"context"
-	kconfig "github.com/go-kratos/kratos/v2/config"
-	"github.com/nacos-group/nacos-sdk-go/v2/clients/config_client"
-	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 	"path/filepath"
 	"strings"
+
+	"github.com/go-kratos/kratos/v2/config"
+
+	"github.com/nacos-group/nacos-sdk-go/v2/clients/config_client"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 )
 
 type ConfigOption func(*configOptions)
@@ -40,7 +42,7 @@ type Config struct {
 	client config_client.IConfigClient
 }
 
-func NewConfigSource(client config_client.IConfigClient, opts ...ConfigOption) kconfig.Source {
+func NewConfigSource(client config_client.IConfigClient, opts ...ConfigOption) config.Source {
 	_options := configOptions{}
 	for _, o := range opts {
 		o(&_options)
@@ -48,7 +50,7 @@ func NewConfigSource(client config_client.IConfigClient, opts ...ConfigOption) k
 	return &Config{client: client, opts: _options}
 }
 
-func (c *Config) Load() ([]*kconfig.KeyValue, error) {
+func (c *Config) Load() ([]*config.KeyValue, error) {
 	content, err := c.client.GetConfig(vo.ConfigParam{
 		DataId:   c.opts.dataID,
 		Group:    c.opts.group,
@@ -58,7 +60,7 @@ func (c *Config) Load() ([]*kconfig.KeyValue, error) {
 		return nil, err
 	}
 	k := c.opts.dataID
-	return []*kconfig.KeyValue{
+	return []*config.KeyValue{
 		{
 			Key:    k,
 			Value:  []byte(content),
@@ -67,7 +69,7 @@ func (c *Config) Load() ([]*kconfig.KeyValue, error) {
 	}, nil
 }
 
-func (c *Config) Watch() (kconfig.Watcher, error) {
+func (c *Config) Watch() (config.Watcher, error) {
 	watcher := newWatcher(context.Background(), c.opts.dataID, c.opts.group, c.client.CancelListenConfig)
 	err := c.client.ListenConfig(vo.ConfigParam{
 		DataId:   c.opts.dataID,

@@ -1,36 +1,48 @@
 package nacos
 
 import (
-	"github.com/nacos-group/nacos-sdk-go/v2/clients"
-	"github.com/nacos-group/nacos-sdk-go/v2/clients/config_client"
-	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/nacos-group/nacos-sdk-go/v2/clients"
+	"github.com/nacos-group/nacos-sdk-go/v2/clients/config_client"
+	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 )
 
 var (
-	DATA_ID = "nacos-test-config.json"
-	GROUP   = "DEFAULT_GROUP"
+	DataID = "nacos-test-config.json"
+	Group  = "DEFAULT_GROUP"
 )
 
 func newConfigClient() (config_client.IConfigClient, error) {
 	userHomeDir, _ := os.UserHomeDir()
 
+	// 设置默认值
+	serverAddr := os.Getenv("NACOS_SERVER_ADDRESS")
+	if serverAddr == "" {
+		serverAddr = "127.0.0.1" // 设置默认地址
+	}
+
+	username := os.Getenv("NACOS_USER_NAME")
+	password := os.Getenv("NACOS_USER_PASSWORD")
+
 	clientConfig := constant.NewClientConfig(
 		constant.WithLogDir(filepath.Join(userHomeDir, "logs", "nacos")),
 		constant.WithCacheDir(filepath.Join(userHomeDir, "nacos", "cache")),
-		constant.WithUsername(os.Getenv("NACOS_USER_NAME")),
-		constant.WithPassword(os.Getenv("NACOS_USER_PASSWORD")),
+		constant.WithUsername(username),
+		constant.WithPassword(password),
 		constant.WithLogLevel("info"),
 	)
+
 	serverConfigs := []constant.ServerConfig{
 		{
-			IpAddr:      os.Getenv("NACOS_SERVER_ADDRESS"),
+			IpAddr:      serverAddr,
 			ContextPath: "/nacos",
 			Port:        8848,
+			Scheme:      "http", // 添加scheme
 		},
 	}
 
@@ -41,23 +53,28 @@ func newConfigClient() (config_client.IConfigClient, error) {
 }
 
 func TestConfig_Get_AND_WATCH(t *testing.T) {
+	// 检查必要的环境变量
+	if os.Getenv("NACOS_SERVER_ADDRESS") == "" {
+		t.Skip("NACOS_SERVER_ADDRESS environment variable not set")
+	}
+
 	client, err := newConfigClient()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	_, err = client.PublishConfig(vo.ConfigParam{
-		DataId:  DATA_ID,
-		Group:   GROUP,
-		Content: "hello world"})
-
+		DataId:  DataID,
+		Group:   Group,
+		Content: "hello world",
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	time.Sleep(1 * time.Second)
 
-	source := NewConfigSource(client, WithConfigGroup(GROUP), WithDataID(DATA_ID))
+	source := NewConfigSource(client, WithConfigGroup(Group), WithDataID(DataID))
 
 	kvs, err := source.Load()
 	if err != nil {
@@ -73,10 +90,10 @@ func TestConfig_Get_AND_WATCH(t *testing.T) {
 	}
 
 	_, err = client.PublishConfig(vo.ConfigParam{
-		DataId:  DATA_ID,
-		Group:   GROUP,
-		Content: "hello world2"})
-
+		DataId:  DataID,
+		Group:   Group,
+		Content: "hello world2",
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

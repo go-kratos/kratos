@@ -1,6 +1,6 @@
 module github.com/go-kratos/kratos/contrib/config/nacos/v2
 
-go 1.21
+go 1.19
 
 require (
 	github.com/go-kratos/kratos/v2 v2.8.3
@@ -23,7 +23,7 @@ require (
 	go.uber.org/atomic v1.6.0 // indirect
 	go.uber.org/multierr v1.5.0 // indirect
 	go.uber.org/zap v1.15.0 // indirect
-	google.golang.org/protobuf v1.36.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/ini.v1 v1.42.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

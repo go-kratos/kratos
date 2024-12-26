@@ -1,11 +1,9 @@
 module github.com/go-kratos/kratos/contrib/nacos/v2
 
-go 1.21
-
-toolchain go1.23.2
+go 1.19
 
 require (
-	github.com/go-kratos/kratos/v2 v2.8.2
+	github.com/go-kratos/kratos/v2 v2.8.3
 	github.com/nacos-group/nacos-sdk-go/v2 v2.2.7
 )
 
@@ -48,3 +46,5 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/go-kratos/kratos/v2 => ../../

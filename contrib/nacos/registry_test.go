@@ -2,37 +2,49 @@ package nacos
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/nacos-group/nacos-sdk-go/v2/clients"
-	"github.com/nacos-group/nacos-sdk-go/v2/clients/naming_client"
-	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/nacos-group/nacos-sdk-go/v2/clients"
+	"github.com/nacos-group/nacos-sdk-go/v2/clients/naming_client"
+	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 var (
-	REGISTRY_GROUP   = "DEFAULT_GROUP"
-	REGISTRY_CLUSTER = "DEFAULT"
+	RegistryGroup   = "DEFAULT_GROUP"
+	RegistryCluster = "DEFAULT"
 )
 
 func newNamingClient() (naming_client.INamingClient, error) {
 	userHomeDir, _ := os.UserHomeDir()
 
+	serverAddr := os.Getenv("NACOS_SERVER_ADDRESS")
+	if serverAddr == "" {
+		serverAddr = "127.0.0.1"
+	}
+
+	username := os.Getenv("NACOS_USER_NAME")
+	password := os.Getenv("NACOS_USER_PASSWORD")
+
 	clientConfig := constant.NewClientConfig(
 		constant.WithLogDir(filepath.Join(userHomeDir, "logs", "nacos")),
 		constant.WithCacheDir(filepath.Join(userHomeDir, "nacos", "cache")),
-		constant.WithUsername(os.Getenv("NACOS_USER_NAME")),
-		constant.WithPassword(os.Getenv("NACOS_USER_PASSWORD")),
+		constant.WithUsername(username),
+		constant.WithPassword(password),
 		constant.WithLogLevel("info"),
 	)
+
 	serverConfigs := []constant.ServerConfig{
 		{
-			IpAddr:      os.Getenv("NACOS_SERVER_ADDRESS"),
+			IpAddr:      serverAddr,
 			ContextPath: "/nacos",
 			Port:        8848,
+			Scheme:      "http",
 		},
 	}
 
@@ -43,6 +55,10 @@ func newNamingClient() (naming_client.INamingClient, error) {
 }
 
 func TestRegistry(t *testing.T) {
+	if os.Getenv("NACOS_SERVER_ADDRESS") == "" {
+		t.Skip("NACOS_SERVER_ADDRESS environment variable not set")
+	}
+
 	client, err := newNamingClient()
 	if err != nil {
 		t.Fatal(err)
@@ -50,8 +66,8 @@ func TestRegistry(t *testing.T) {
 
 	nacosRegistry := NewRegistry(
 		client,
-		WithRegistryGroup(REGISTRY_GROUP),
-		WithCluster(REGISTRY_CLUSTER),
+		WithRegistryGroup(RegistryGroup),
+		WithCluster(RegistryCluster),
 		WithWeight(1.0))
 
 	mm := map[string]string{
@@ -68,7 +84,9 @@ func TestRegistry(t *testing.T) {
 	}
 
 	err = nacosRegistry.Register(context.Background(), ins)
-
+	if err != nil {
+		t.Fatal(err)
+	}
 	nacosWatcher, err := nacosRegistry.Watch(context.Background(), "test-ut")
 	if err != nil {
 		t.Fatal(err)
@@ -104,7 +122,10 @@ func TestRegistry(t *testing.T) {
 		Metadata: mm,
 	}
 
-	nacosRegistry.Register(context.Background(), ins)
+	err = nacosRegistry.Register(context.Background(), ins)
+	if err != nil {
+		return
+	}
 
 	instances, err := nacosWatcher.Next()
 	for _, instance := range instances {

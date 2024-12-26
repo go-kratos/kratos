@@ -3,6 +3,7 @@ package nacos
 import (
 	"context"
 	"fmt"
+
 	"github.com/nacos-group/nacos-sdk-go/v2/clients/naming_client"
 	"github.com/nacos-group/nacos-sdk-go/v2/model"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
@@ -39,7 +40,7 @@ func newSubscriber(ctx context.Context, cli naming_client.INamingClient, service
 		ServiceName: serviceName,
 		Clusters:    clusters,
 		GroupName:   groupName,
-		SubscribeCallback: func(instances []model.Instance, err error) {
+		SubscribeCallback: func(instances []model.Instance, _ error) {
 			w.subscribeChan <- instances
 		},
 	}
