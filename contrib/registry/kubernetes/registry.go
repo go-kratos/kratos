@@ -37,32 +37,32 @@ import (
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-name: nginx
-labels:
-  app: nginx
-spec:
-replicas: 5
-selector:
-  matchLabels:
+  name: nginx
+  labels:
     app: nginx
-template:
-  metadata:
-    labels:
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
       app: nginx
-      kratos-service-id: "56991810-c77f-4a95-8190-393efa9c1a61"
-      kratos-service-app: "nginx"
-      kratos-service-version: "v3.5.0"
-    annotations:
-      kratos-service-protocols: |
-        {"80": "http"}
-      kratos-service-metadata: |
-        {"region": "sh", "zone": "sh001", "cluster": "pd"}
-  spec:
-    containers:
-      - name: nginx
-        image: nginx:1.7.9
-        ports:
-          - containerPort: 80
+  template:
+    metadata:
+      labels:
+        app: nginx
+        kratos-service-id: "56991810-c77f-4a95-8190-393efa9c1a61"
+        kratos-service-app: "nginx"
+        kratos-service-version: "v3.5.0"
+      annotations:
+        kratos-service-protocols: |
+          {"80": "http"}
+        kratos-service-metadata: |
+          {"region": "sh", "zone": "sh001", "cluster": "pd"}
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.7.9
+          ports:
+            - containerPort: 80
 */
 const (
 	// LabelsKeyServiceID is used to define the ID of the service
