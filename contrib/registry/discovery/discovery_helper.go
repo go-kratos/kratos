@@ -158,15 +158,16 @@ type strategy struct {
 }
 
 const (
-	_paramKeyRegion   = "region"
-	_paramKeyZone     = "zone"
-	_paramKeyEnv      = "env"
-	_paramKeyHostname = "hostname"
-	_paramKeyAppID    = "appid"
-	_paramKeyAddrs    = "addrs"
-	_paramKeyVersion  = "version"
-	_paramKeyStatus   = "status"
-	_paramKeyMetadata = "metadata"
+	_paramKeyRegion          = "region"
+	_paramKeyZone            = "zone"
+	_paramKeyEnv             = "env"
+	_paramKeyHostname        = "hostname"
+	_paramKeyAppID           = "appid"
+	_paramKeyLatestTimestamp = "latest_timestamp"
+	_paramKeyAddrs           = "addrs"
+	_paramKeyVersion         = "version"
+	_paramKeyStatus          = "status"
+	_paramKeyMetadata        = "metadata"
 )
 
 func newParams(c *Config) url.Values {
