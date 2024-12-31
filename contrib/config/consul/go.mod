@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/contrib/config/consul/v2
 go 1.19
 
 require (
-	github.com/go-kratos/kratos/v2 v2.8.2
+	github.com/go-kratos/kratos/v2 v2.8.3
 	github.com/hashicorp/consul/api v1.26.1
 )
 

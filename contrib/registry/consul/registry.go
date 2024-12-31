@@ -215,10 +215,17 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 }
 
 func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
-	timeoutCtx, cancel := context.WithTimeout(ctx, r.timeout)
-	defer cancel()
+	listServices := r.cli.Service
+	if r.timeout > 0 {
+		listServices = func(ctx context.Context, service string, index uint64, passingOnly bool) ([]*registry.ServiceInstance, uint64, error) {
+			timeoutCtx, cancel := context.WithTimeout(ctx, r.timeout)
+			defer cancel()
 
-	services, idx, err := r.cli.Service(timeoutCtx, ss.serviceName, 0, true)
+			return r.cli.Service(timeoutCtx, service, index, passingOnly)
+		}
+	}
+
+	services, idx, err := listServices(ctx, ss.serviceName, 0, true)
 	if err != nil {
 		return err
 	}
@@ -232,9 +239,7 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 		for {
 			select {
 			case <-ticker.C:
-				timeoutCtx, cancel := context.WithTimeout(context.Background(), r.timeout)
-				tmpService, tmpIdx, err := r.cli.Service(timeoutCtx, ss.serviceName, idx, true)
-				cancel()
+				tmpService, tmpIdx, err := listServices(context.Background(), ss.serviceName, idx, true)
 				if err != nil {
 					time.Sleep(time.Second)
 					continue

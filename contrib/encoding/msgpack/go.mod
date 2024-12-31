@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/contrib/encoding/msgpack/v2
 go 1.19
 
 require (
-	github.com/go-kratos/kratos/v2 v2.8.2
+	github.com/go-kratos/kratos/v2 v2.8.3
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 )
 
