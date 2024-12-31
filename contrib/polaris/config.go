@@ -40,20 +40,20 @@ type source struct {
 
 // Load return the config values
 func (s *source) Load() ([]*config.KeyValue, error) {
-	kv := make([]*config.KeyValue, 0)
+	kvs := make([]*config.KeyValue, 0, len(s.options.files))
 	for _, file := range s.options.files {
 		configFile, err := s.client.GetConfigFile(s.options.namespace, file.Group, file.Name)
 		if err != nil {
 			return nil, err
 		}
 		s.options.configFile = append(s.options.configFile, configFile)
-		kv = append(kv, &config.KeyValue{
+		kvs = append(kvs, &config.KeyValue{
 			Key:    file.Name,
 			Value:  []byte(configFile.GetContent()),
 			Format: strings.TrimPrefix(filepath.Ext(file.Name), "."),
 		})
 	}
-	return kv, nil
+	return kvs, nil
 }
 
 // Watch return the watcher
