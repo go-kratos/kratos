@@ -2,9 +2,15 @@ package consul
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
+	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -19,8 +25,10 @@ func tcpServer(lis net.Listener) {
 		if err != nil {
 			return
 		}
-		fmt.Println("get tcp")
-		conn.Close()
+		go func() {
+			_, _ = io.Copy(io.Discard, conn)
+			_ = conn.Close()
+		}()
 	}
 }
 
@@ -112,18 +120,27 @@ func TestRegistry_Register(t *testing.T) {
 			r := New(cli, opts...)
 
 			for _, instance := range tt.args.server {
+				instance := instance
 				err = r.Register(tt.args.ctx, instance)
 				if err != nil {
 					t.Error(err)
 				}
+				defer func() {
+					err = r.Deregister(tt.args.ctx, instance)
+					if err != nil {
+						t.Error(err)
+					}
+				}()
 			}
 			watchCtx, watchCancel := context.WithCancel(context.Background())
 			watch, err := r.Watch(watchCtx, tt.args.serverName)
 			if err != nil {
 				t.Error(err)
+				watchCancel()
+				return
 			}
-			got, err := watch.Next()
 
+			got, err := watch.Next()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
 				t.Errorf("GetService() got = %v", got)
@@ -134,9 +151,6 @@ func TestRegistry_Register(t *testing.T) {
 				t.Errorf("GetService() got = %v, want %v", got, tt.want)
 			}
 
-			for _, instance := range tt.args.server {
-				_ = r.Deregister(tt.args.ctx, instance)
-			}
 			err = watch.Stop()
 			if err != nil {
 				t.Error(err)
@@ -293,8 +307,14 @@ func TestRegistry_GetService(t *testing.T) {
 
 func TestRegistry_Watch(t *testing.T) {
 	addr := fmt.Sprintf("%s:9091", getIntranetIP())
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		t.Errorf("listen tcp %s failed!", addr)
+		return
+	}
+	defer lis.Close()
+	go tcpServer(lis)
 
-	time.Sleep(time.Millisecond * 100)
 	cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500", WaitTime: 2 * time.Second})
 	if err != nil {
 		t.Fatalf("create consul client failed: %v", err)
@@ -376,14 +396,7 @@ func TestRegistry_Watch(t *testing.T) {
 			},
 			want:    []*registry.ServiceInstance{instance3},
 			wantErr: false,
-			preFunc: func(t *testing.T) {
-				lis, err := net.Listen("tcp", addr)
-				if err != nil {
-					t.Errorf("listen tcp %s failed!", addr)
-					return
-				}
-				go tcpServer(lis)
-			},
+			preFunc: func(*testing.T) {},
 		},
 	}
 
@@ -398,9 +411,10 @@ func TestRegistry_Watch(t *testing.T) {
 			err := r.Register(tt.args.ctx, tt.args.instance)
 			if err != nil {
 				t.Error(err)
+				return
 			}
 			defer func() {
-				err = r.Deregister(tt.args.ctx, tt.args.instance)
+				err = r.Deregister(context.Background(), tt.args.instance)
 				if err != nil {
 					t.Error(err)
 				}
@@ -465,10 +479,10 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		args    args
-		want    []*registry.ServiceInstance
-		wantErr bool
+		name  string
+		args  args
+		want1 []*registry.ServiceInstance
+		want2 []*registry.ServiceInstance
 	}{
 		{
 			name: "many client, one idle",
@@ -477,77 +491,86 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 				instance:       instance1,
 				changeInstance: instance2,
 			},
-			want:    []*registry.ServiceInstance{instance1},
-			wantErr: false,
+			want1: []*registry.ServiceInstance{instance1},
+			want2: []*registry.ServiceInstance{instance2},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			var watchs []registry.Watcher
+			for i := 0; i < 10; i++ {
+				watch, err := r.Watch(tt.args.ctx, tt.args.instance.Name) //nolint
+				if err != nil {
+					t.Error(err)
+				}
+				defer func() {
+					_ = watch.Stop()
+				}()
+
+				watchs = append(watchs, watch)
+			}
+
 			err = r.Register(tt.args.ctx, tt.args.instance)
 			if err != nil {
 				t.Error(err)
 			}
 			defer func() {
-				err = r.Deregister(tt.args.ctx, tt.args.instance)
+				err = r.Deregister(context.Background(), tt.args.instance)
 				if err != nil {
 					t.Error(err)
 				}
 			}()
 
-			for i := 0; i < 10; i++ {
-				watchCtx, watchCancel := context.WithCancel(context.Background())
-				watch, err1 := r.Watch(watchCtx, tt.args.instance.Name)
-				if err1 != nil {
-					t.Error(err1)
-				}
-				if i != 9 {
-					go func(i int) {
-						// first
-						service, err2 := watch.Next()
-						if (err2 != nil) != tt.wantErr {
-							t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
-							t.Errorf("GetService() got = %v", service)
-							watchCancel()
-							return
-						}
-						// instance changes
-						service, err2 = watch.Next()
-						if i == 9 {
-							return
-						}
-						if (err2 != nil) != tt.wantErr {
-							t.Errorf("GetService() error = %v, wantErr %v", err, tt.wantErr)
-							t.Errorf("GetService() got = %v", service)
-							watchCancel()
-							return
-						}
-						if !reflect.DeepEqual(service, tt.want) {
-							t.Errorf("GetService() got = %v, want %v", service, tt.want)
-						}
-						err2 = watch.Stop()
-						if err2 != nil {
-							t.Error(err)
-						}
-						watchCancel()
-						// t.Logf("service:%v, i:%d", service, i)
-					}(i)
-				} else {
-					time.Sleep(time.Second * 3)
-					// become idle, close watcher
-					err1 = watch.Stop()
-					if err1 != nil {
-						t.Errorf("watch stop err:%v", err)
+			var wg1 sync.WaitGroup
+			for _, watch := range watchs {
+				wg1.Add(1)
+				go func(watch registry.Watcher, want []*registry.ServiceInstance) {
+					defer wg1.Done()
+
+					// first
+					service, err := watch.Next() //nolint
+					if err != nil {
+						t.Error(err)
+						return
 					}
-					watchCancel()
-				}
+					if !reflect.DeepEqual(service, want) {
+						t.Errorf("GetService() got = %v, want = %v", service, want)
+						return
+					}
+				}(watch, tt.want1)
 			}
-			time.Sleep(2 * time.Second)
+			wg1.Wait()
+
 			err = r.Register(tt.args.ctx, tt.args.changeInstance)
 			if err != nil {
 				t.Error(err)
 			}
-			time.Sleep(1 * time.Second)
+			defer func() {
+				err := r.Deregister(context.Background(), tt.args.changeInstance)
+				if err != nil {
+					t.Error(err)
+				}
+			}()
+
+			var wg2 sync.WaitGroup
+			for _, watch := range watchs {
+				wg2.Add(1)
+				go func(watch registry.Watcher, want []*registry.ServiceInstance) {
+					defer wg2.Done()
+
+					// instance changes
+					service, err := watch.Next() //nolint
+					if err != nil {
+						t.Error(err)
+						return
+					}
+					if !reflect.DeepEqual(service, want) {
+						t.Errorf("GetService() got = %v, want = %v", service, want)
+					}
+				}(watch, tt.want2)
+			}
+			wg2.Wait()
 		})
 	}
 }
@@ -767,6 +790,12 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
+			defer func() {
+				err = r.Deregister(tt.args.ctx, tt.args.instance)
+				if err != nil {
+					t.Error(err)
+				}
+			}()
 
 			time.Sleep(time.Second * 2)
 
@@ -793,6 +822,193 @@ func TestRegistry_ExitOldResolverAndReWatch(t *testing.T) {
 				return
 			}
 		})
+	}
+}
+
+func TestRegistry_ShareServiceSet(t *testing.T) {
+	lastIndex := uint64(0)
+	serviceName := "share-service-set"
+	mux := http.NewServeMux()
+	mux.HandleFunc("/v1/health/service/"+serviceName, func(w http.ResponseWriter, r *http.Request) {
+		var index uint64
+		if s := r.URL.Query().Get("index"); s != "" {
+			val, err := strconv.ParseUint(s, 10, 64)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			index = val
+		}
+
+		if index < lastIndex {
+			msg := "repeated request, not the same ServiceSet"
+			http.Error(w, msg, http.StatusBadRequest)
+			t.Error(msg)
+			t.FailNow()
+			return
+		}
+
+		lastIndex = index + 1
+		w.Header().Set("X-Consul-Index", strconv.FormatUint(lastIndex, 10))
+
+		out := []*api.ServiceEntry{
+			{
+				Service: &api.AgentService{
+					ID:      "1",
+					Service: serviceName,
+				},
+			},
+		}
+		err := json.NewEncoder(w).Encode(out)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
+
+	ts := httptest.NewServer(mux)
+	defer ts.Close()
+
+	cli, err := api.NewClient(&api.Config{Address: ts.URL, WaitTime: 2 * time.Second})
+	if err != nil {
+		t.Fatalf("create consul client failed: %v", err)
+	}
+
+	var prev registry.Watcher
+	r := New(cli, WithHealthCheck(false), WithHeartbeat(false))
+	for i := 0; i < 100; i++ {
+		w, err := r.Watch(context.Background(), serviceName) //nolint
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		// close previous watcher
+		if prev != nil {
+			if err = prev.Stop(); err != nil {
+				t.Error(err)
+				return
+			}
+		}
+		prev = w
+	}
+
+	time.Sleep(time.Second * 5)
+
+	if prev != nil {
+		if err = prev.Stop(); err != nil {
+			t.Error(err)
+			return
+		}
+	}
+}
+
+func TestRegistry_MultiWatch(t *testing.T) {
+	cli, err := api.NewClient(&api.Config{Address: "127.0.0.1:8500", WaitTime: 2 * time.Second})
+	if err != nil {
+		t.Fatalf("create consul client failed: %v", err)
+	}
+
+	serviceName := "multi-watch"
+	addr := fmt.Sprintf("%s:9091", getIntranetIP())
+	instances := []*registry.ServiceInstance{
+		{
+			ID:        "1",
+			Name:      serviceName,
+			Version:   "v1.0.0",
+			Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
+		},
+		{
+			ID:        "2",
+			Name:      serviceName,
+			Version:   "v1.0.0",
+			Endpoints: []string{fmt.Sprintf("tcp://%s?isSecure=false", addr)},
+		},
+	}
+
+	r := New(cli, WithHealthCheck(false), WithHeartbeat(true))
+	err = r.Register(context.Background(), instances[0])
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer func() {
+		err = r.Deregister(context.Background(), instances[0])
+		if err != nil {
+			t.Error(err)
+		}
+	}()
+
+	watch1, err := r.Watch(context.Background(), serviceName)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer func() {
+		if err = watch1.Stop(); err != nil {
+			t.Error(err)
+		}
+	}()
+
+	watch2, err := r.Watch(context.Background(), serviceName)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer func() {
+		if err = watch2.Stop(); err != nil {
+			t.Error(err)
+		}
+	}()
+
+	got1, err := watch1.Next()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	got2, err := watch2.Next()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !reflect.DeepEqual(got1, instances[:1]) {
+		t.Errorf("got = %v, want = %v", got1, instances[:1])
+		return
+	}
+	if !reflect.DeepEqual(got2, instances[:1]) {
+		t.Errorf("got = %v, want = %v", got2, instances[:1])
+		return
+	}
+
+	// close first watcher
+	if err = watch1.Stop(); err != nil {
+		t.Error(err)
+		return
+	}
+
+	// register a new instance
+	err = r.Register(context.Background(), instances[1])
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer func() {
+		err = r.Deregister(context.Background(), instances[1])
+		if err != nil {
+			t.Error(err)
+		}
+	}()
+
+	// second watcher should get the new instance
+	got, err := watch2.Next()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !reflect.DeepEqual(got, instances[:2]) {
+		t.Errorf("got = %v, want = %v", got, instances[:2])
+		return
 	}
 }
 
