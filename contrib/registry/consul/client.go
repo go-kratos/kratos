@@ -206,9 +206,9 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 	}
 	var cc *canceler
 	if c.heartbeat {
-		ctx, cancel := context.WithCancel(context.Background())
+		cancelCtx, cancel := context.WithCancel(context.Background())
 		cc = &canceler{
-			ctx:    ctx,
+			ctx:    cancelCtx,
 			cancel: cancel,
 			done:   make(chan struct{}),
 		}

@@ -188,13 +188,13 @@ func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	r.lock.Lock()
 	set, ok := r.registry[name]
 	if !ok {
-		ctx, cancel := context.WithCancel(context.Background())
+		cancelCtx, cancel := context.WithCancel(context.Background())
 		set = &serviceSet{
 			registry:    r,
 			watcher:     make(map[*watcher]struct{}),
 			services:    &atomic.Value{},
 			serviceName: name,
-			ctx:         ctx,
+			ctx:         cancelCtx,
 			cancel:      cancel,
 		}
 		r.registry[name] = set

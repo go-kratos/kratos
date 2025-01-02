@@ -126,7 +126,7 @@ func TestRegistry_Register(t *testing.T) {
 					t.Error(err)
 				}
 				defer func() {
-					err := r.Deregister(tt.args.ctx, instance)
+					err = r.Deregister(tt.args.ctx, instance)
 					if err != nil {
 						t.Error(err)
 					}
@@ -396,7 +396,7 @@ func TestRegistry_Watch(t *testing.T) {
 			},
 			want:    []*registry.ServiceInstance{instance3},
 			wantErr: false,
-			preFunc: func(t *testing.T) {},
+			preFunc: func(*testing.T) {},
 		},
 	}
 
@@ -500,11 +500,13 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var watchs []registry.Watcher
 			for i := 0; i < 10; i++ {
-				watch, err := r.Watch(tt.args.ctx, tt.args.instance.Name)
+				watch, err := r.Watch(tt.args.ctx, tt.args.instance.Name) //nolint
 				if err != nil {
 					t.Error(err)
 				}
-				defer watch.Stop()
+				defer func() {
+					_ = watch.Stop()
+				}()
 
 				watchs = append(watchs, watch)
 			}
@@ -514,7 +516,7 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 				t.Error(err)
 			}
 			defer func() {
-				err := r.Deregister(context.Background(), tt.args.instance)
+				err = r.Deregister(context.Background(), tt.args.instance)
 				if err != nil {
 					t.Error(err)
 				}
@@ -527,7 +529,7 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 					defer wg1.Done()
 
 					// first
-					service, err := watch.Next()
+					service, err := watch.Next() //nolint
 					if err != nil {
 						t.Error(err)
 						return
@@ -558,7 +560,7 @@ func TestRegistry_IdleAndWatch(t *testing.T) {
 					defer wg2.Done()
 
 					// instance changes
-					service, err := watch.Next()
+					service, err := watch.Next() //nolint
 					if err != nil {
 						t.Error(err)
 						return
@@ -874,7 +876,7 @@ func TestRegistry_ShareServiceSet(t *testing.T) {
 	var prev registry.Watcher
 	r := New(cli, WithHealthCheck(false), WithHeartbeat(false))
 	for i := 0; i < 100; i++ {
-		w, err := r.Watch(context.Background(), serviceName)
+		w, err := r.Watch(context.Background(), serviceName) //nolint
 		if err != nil {
 			t.Error(err)
 			return
@@ -941,7 +943,7 @@ func TestRegistry_MultiWatch(t *testing.T) {
 		return
 	}
 	defer func() {
-		if err := watch1.Stop(); err != nil {
+		if err = watch1.Stop(); err != nil {
 			t.Error(err)
 		}
 	}()
@@ -952,7 +954,7 @@ func TestRegistry_MultiWatch(t *testing.T) {
 		return
 	}
 	defer func() {
-		if err := watch2.Stop(); err != nil {
+		if err = watch2.Stop(); err != nil {
 			t.Error(err)
 		}
 	}()
