@@ -3,7 +3,7 @@ module github.com/go-kratos/kratos/contrib/registry/nacos/v2
 go 1.19
 
 require (
-	github.com/go-kratos/kratos/v2 v2.8.2
+	github.com/go-kratos/kratos/v2 v2.8.3
 	github.com/nacos-group/nacos-sdk-go v1.0.9
 )
 
