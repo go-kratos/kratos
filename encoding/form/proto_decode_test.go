@@ -85,7 +85,6 @@ func TestDecodeJsonValues(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(string(data))
 
 	// url.ParseQuery("complex_field={"name":"ComplexField", "inner1":{"name":"Inner1"}, "inner2":[{"name":"Inner11", "inner1":[{"name":"Inner111"}]}, {"name":"Inner12", "inner1":[{"name":"Inner121"}, {"name":"Inner122", "sex":"woman"}]}]}")
 	form, err := url.ParseQuery(fmt.Sprintf("complex_field=%s", string(data)))
@@ -93,13 +92,17 @@ func TestDecodeJsonValues(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	comp := &complex.Complex{}
+	comp := &complex.Complex{Age: 10}
 	err = DecodeValues(comp, form)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if reflect.DeepEqual(origin, comp.ComplexField) {
+	if !reflect.DeepEqual(origin, comp.ComplexField) {
 		t.Errorf("want %v, got %v", origin, comp.ComplexField)
+	}
+	// check if age is not overridden
+	if comp.Age != 10 {
+		t.Errorf("want %v, got %v", "10", comp.Age)
 	}
 }
 

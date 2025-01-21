@@ -35,15 +35,7 @@ func DecodeValues(msg proto.Message, values url.Values) error {
 		}
 	}
 
-	data, err := proto.Marshal(dynamicMessage)
-	if err != nil {
-		return fmt.Errorf("failed to marshal dynamic message: %v", err)
-	}
-
-	err = proto.Unmarshal(data, msg)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal: %v", err)
-	}
+	proto.Merge(msg, dynamicMessage)
 
 	return nil
 }
