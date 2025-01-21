@@ -277,11 +277,11 @@ func (r *Registry) resolve(ctx context.Context, ss *serviceSet) error {
 }
 
 func (r *Registry) tryDelete(ss *serviceSet) bool {
+	r.lock.Lock()
+	defer r.lock.Unlock()
 	if ss.ref.Add(-1) != 0 {
 		return false
 	}
-	r.lock.Lock()
-	defer r.lock.Unlock()
 	ss.cancel()
 	delete(r.registry, ss.serviceName)
 	return true
