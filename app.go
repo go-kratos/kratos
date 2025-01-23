@@ -42,6 +42,7 @@ func New(opts ...Option) *App {
 		sigs:             []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		registrarTimeout: 10 * time.Second,
 		stopTimeout:      10 * time.Second,
+		afterStopTimeout: 0 * time.Second,
 	}
 	if id, err := uuid.NewUUID(); err == nil {
 		o.id = id.String()
@@ -140,8 +141,11 @@ func (a *App) Run() error {
 		return err
 	}
 	err = nil
+
+	asCtx, cancel := context.WithTimeout(NewContext(a.opts.ctx, a), a.opts.afterStopTimeout)
+	defer cancel()
 	for _, fn := range a.opts.afterStop {
-		err = fn(sctx)
+		err = fn(asCtx)
 	}
 	return err
 }

@@ -36,6 +36,8 @@ type options struct {
 	beforeStop  []func(context.Context) error
 	afterStart  []func(context.Context) error
 	afterStop   []func(context.Context) error
+
+	afterStopTimeout time.Duration
 }
 
 // ID with service id.
@@ -125,5 +127,13 @@ func AfterStart(fn func(context.Context) error) Option {
 func AfterStop(fn func(context.Context) error) Option {
 	return func(o *options) {
 		o.afterStop = append(o.afterStop, fn)
+	}
+}
+
+// AfterStopTimeout specifies the total duration for the AfterStop funcs to complete.
+// If not specified, kratos will pass a canceled context to AfterStop functions to ensure compatibility.
+func AfterStopTimeout(timeout time.Duration) Option {
+	return func(o *options) {
+		o.afterStopTimeout = timeout
 	}
 }
