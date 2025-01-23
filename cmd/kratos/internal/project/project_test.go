@@ -72,6 +72,71 @@ func TestCmdNewNoMod(t *testing.T) {
 	assertImportsInclude(t, filepath.Join(cwd, "project/app/user/cmd/user/wire.go"), `"project/app/user/internal/biz"`)
 }
 
+func TestCmdNewModuleName(t *testing.T) {
+	cwd := changeCurrentDir(t)
+	projectName := "helloworld"
+	moduleName := "go-kratos.dev/example"
+
+	// create a new project with module name.
+	CmdNew.SetArgs([]string{projectName, "--module-name", moduleName})
+	if err := CmdNew.Execute(); err != nil {
+		t.Fatalf("executing command: %v", err)
+	}
+
+	// check that the expected files were created
+	for _, file := range []string{
+		"go.mod",
+		"go.sum",
+		"README.md",
+		fmt.Sprintf("cmd/%s/main.go", projectName),
+	} {
+		if _, err := os.Stat(filepath.Join(cwd, projectName, file)); err != nil {
+			t.Errorf("expected file %s to exist", file)
+		}
+	}
+
+	// check that the go.mod file contains the expected module name
+	assertGoMod(t, filepath.Join(cwd, projectName, "go.mod"), moduleName)
+
+	assertImportsInclude(t, filepath.Join(cwd, projectName, "cmd", projectName, "wire.go"), fmt.Sprintf(`"%s/internal/biz"`, moduleName))
+}
+
+func TestCmdNewModuleNameNoMod(t *testing.T) {
+	cwd := changeCurrentDir(t)
+	projectName := "helloworld"
+	moduleName := "go-kratos.dev/example"
+
+	// create a new project with module name.
+	CmdNew.SetArgs([]string{projectName, "--module-name", moduleName})
+	if err := CmdNew.Execute(); err != nil {
+		t.Fatalf("executing command: %v", err)
+	}
+
+	// add new app with --nomod --module-name flag
+	CmdNew.SetArgs([]string{"--nomod", fmt.Sprintf("%s/app/user", projectName)})
+	if err := CmdNew.Execute(); err != nil {
+		t.Fatalf("executing command: %v", err)
+	}
+
+	// check that the expected files were created
+	for _, file := range []string{
+		"go.mod",
+		"go.sum",
+		"README.md",
+		fmt.Sprintf("cmd/%s/main.go", projectName),
+		"app/user/cmd/user/main.go",
+	} {
+		if _, err := os.Stat(filepath.Join(cwd, projectName, file)); err != nil {
+			t.Errorf("expected file %s to exist", file)
+		}
+	}
+
+	// check that the go.mod file contains the expected module name
+	assertGoMod(t, filepath.Join(cwd, projectName, "go.mod"), moduleName)
+
+	assertImportsInclude(t, filepath.Join(cwd, fmt.Sprintf("%s/app/user/cmd/user/wire.go", projectName)), fmt.Sprintf(`"%s/app/user/internal/biz"`, moduleName))
+}
+
 // assertImportsInclude checks that the file at path contains the expected import.
 func assertImportsInclude(t *testing.T, path, expected string) {
 	t.Helper()
