@@ -223,13 +223,25 @@ func (s *Server) Start(ctx context.Context) error {
 }
 
 // Stop stop the gRPC server.
-func (s *Server) Stop(_ context.Context) error {
+func (s *Server) Stop(ctx context.Context) error {
 	if s.adminClean != nil {
 		s.adminClean()
 	}
 	s.health.Shutdown()
-	s.GracefulStop()
-	log.Info("[gRPC] server stopping")
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		log.Info("[gRPC] server stopping")
+		s.Server.GracefulStop()
+	}()
+
+	select {
+	case <-done:
+	case <-ctx.Done():
+		log.Warn("[gRPC] server couldn't stop gracefully in time, doing force stop")
+		s.Server.Stop()
+	}
 	return nil
 }
 
