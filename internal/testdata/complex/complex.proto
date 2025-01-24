@@ -41,6 +41,7 @@ message Complex {
 
   map<string,string> map = 25;
   map<int64,string> map_int64_key = 26 [json_name = "map_int64_key"];
+  ComplexField complex_field = 27;
 }
 
 message Simple {
@@ -50,4 +51,20 @@ message Simple {
 enum sex {
   man = 0;
   woman = 1;
+}
+
+message ComplexField {
+  string name = 1;
+  Inner1 inner1 = 2;
+  repeated Inner2 inner2 = 3;
+}
+
+message Inner1 {
+  string name = 1;
+  sex sex = 2;
+}
+
+message Inner2 {
+  string name = 1;
+  repeated Inner1 inner1 = 2;
 }
