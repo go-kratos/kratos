@@ -5,7 +5,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"io"
 	"net"
 	"net/url"
 	"reflect"
@@ -450,10 +449,7 @@ func TestStop(t *testing.T) {
 						// Intentionally do not send messages, only receive messages
 						_, err := s.Recv()
 						if err != nil {
-							if errors.Is(err, io.EOF) {
-								log.Error(err)
-								break
-							}
+							break
 						}
 					}
 				} else {
