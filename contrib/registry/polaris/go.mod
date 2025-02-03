@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/go-kratos/kratos/v2 v2.8.3
-	github.com/polarismesh/polaris-go v1.3.0
+	github.com/polarismesh/polaris-go v1.6.0
 )
 
 require (
@@ -19,7 +19,9 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/natefinch/lumberjack v2.0.0+incompatible // indirect
-	github.com/prometheus/client_golang v1.12.1 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/polarismesh/specification v1.5.5-alpha.1 // indirect
+	github.com/prometheus/client_golang v1.12.2 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
