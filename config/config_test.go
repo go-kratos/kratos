@@ -186,3 +186,74 @@ func TestConfig(t *testing.T) {
 		t.Error("len(testConf.Endpoints) is not equal to 2")
 	}
 }
+
+func AssertStringValue(t *testing.T, expect any, v Value) bool {
+	t.Helper()
+	vs, err := v.String()
+	if err != nil {
+		t.Errorf("get string value error: %s", err.Error())
+		return false
+	}
+	if vs != expect {
+		t.Errorf("value '%s' not equal '%s'", vs, expect)
+		return false
+	}
+	return true
+}
+
+func TestConfig_WatchBetweenSourcesReferenceConfig(t *testing.T) {
+	testJSON := `
+{
+	"foo": "${remote.foo}"
+}
+`
+	testJSON2 := `
+{
+	"remote": {
+		"foo": "bar"
+	}
+}
+`
+	testJSONUpdate := `
+{
+	"remote": {
+		"foo": "bar2"
+	}
+}
+`
+	src1 := newTestJSONSource(testJSON)
+	src2 := newTestJSONSource(testJSON2)
+	opts := options{
+		sources:  []Source{src1, src2},
+		decoder:  defaultDecoder,
+		resolver: defaultResolver,
+	}
+	cf := &config{}
+	cf.opts = opts
+	cf.reader = newReader(opts)
+
+	// load config
+	if err := cf.Load(); err != nil {
+		t.Fatal(err)
+	}
+
+	if !AssertStringValue(t, "bar", cf.Value("foo")) {
+		t.FailNow()
+	}
+	if !AssertStringValue(t, "bar", cf.Value("remote.foo")) {
+		t.FailNow()
+	}
+
+	// update remote.foo value
+	src2.data = testJSONUpdate
+	src2.sig <- struct{}{}
+	// wait for watch to finish
+	src2.sig <- struct{}{}
+
+	if !AssertStringValue(t, "bar2", cf.Value("foo")) {
+		t.FailNow()
+	}
+	if !AssertStringValue(t, "bar2", cf.Value("remote.foo")) {
+		t.FailNow()
+	}
+}

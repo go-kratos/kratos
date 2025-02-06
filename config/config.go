@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"sync"
 	"time"
@@ -60,8 +61,28 @@ func New(opts ...Option) Config {
 }
 
 func (c *config) watch(w Watcher) {
+	reloadReader := func(opts options) (Reader, error) {
+		r := newReader(c.opts)
+		for _, src := range c.opts.sources {
+			kvs, err := src.Load()
+			if err != nil {
+				return nil, fmt.Errorf("failed to load config source: %w", err)
+			}
+			for _, v := range kvs {
+				log.Debugf("config loaded: %s format: %s", v.Key, v.Format)
+			}
+			if err = r.Merge(kvs...); err != nil {
+				return nil, fmt.Errorf("failed to merge config source: %w", err)
+			}
+		}
+		if err := r.Resolve(); err != nil {
+			return nil, fmt.Errorf("failed to resolve config: %w", err)
+		}
+		return r, nil
+	}
+
 	for {
-		kvs, err := w.Next()
+		_, err := w.Next()
 		if err != nil {
 			if errors.Is(err, context.Canceled) {
 				log.Infof("watcher's ctx cancel : %v", err)
@@ -71,14 +92,12 @@ func (c *config) watch(w Watcher) {
 			log.Errorf("failed to watch next config: %v", err)
 			continue
 		}
-		if err := c.reader.Merge(kvs...); err != nil {
-			log.Errorf("failed to merge next config: %v", err)
+		r, err := reloadReader(c.opts)
+		if err != nil {
+			log.Errorf("failed to reload reader all sources: %v", err)
 			continue
 		}
-		if err := c.reader.Resolve(); err != nil {
-			log.Errorf("failed to resolve next config: %v", err)
-			continue
-		}
+		c.reader = r
 		c.cached.Range(func(key, value interface{}) bool {
 			k := key.(string)
 			v := value.(Value)
