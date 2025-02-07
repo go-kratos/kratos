@@ -13,14 +13,13 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// EncodeValues encode a message into url values.
-func EncodeValues(msg interface{}) (url.Values, error) {
+func encodeValues(msg interface{}, forceTextName bool) (url.Values, error) {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return url.Values{}, nil
 	}
 	if v, ok := msg.(proto.Message); ok {
 		u := make(url.Values)
-		err := encodeByField(u, "", v.ProtoReflect())
+		err := encodeByField(u, "", v.ProtoReflect(), forceTextName)
 		if err != nil {
 			return nil, err
 		}
@@ -29,13 +28,25 @@ func EncodeValues(msg interface{}) (url.Values, error) {
 	return encoder.Encode(msg)
 }
 
-func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr error) {
+// EncodeValues encode a message into url values.
+func EncodeValues(msg interface{}) (url.Values, error) {
+	return encodeValues(msg, false)
+}
+
+// EncodeTextNameValues encode a message into url values.
+func EncodeTextNameValues(msg interface{}) (url.Values, error) {
+	return encodeValues(msg, true)
+}
+
+func encodeByField(u url.Values, path string, m protoreflect.Message, forceTextName bool) (finalErr error) {
 	m.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
 		var (
 			key     string
 			newPath string
 		)
-		if fd.HasJSONName() {
+		if forceTextName {
+			key = fd.TextName()
+		} else if fd.HasJSONName() {
 			key = fd.JSONName()
 		} else {
 			key = fd.TextName()
@@ -53,13 +64,10 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 		switch {
 		case fd.IsList():
 			if v.List().Len() > 0 {
-				list, err := encodeRepeatedField(fd, v.List())
+				err := encodeRepeatedField(fd, v.List(), u, newPath, forceTextName)
 				if err != nil {
 					finalErr = err
 					return false
-				}
-				for _, item := range list {
-					u.Add(newPath, item)
 				}
 			}
 		case fd.IsMap():
@@ -79,7 +87,7 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 				u.Set(newPath, value)
 				return true
 			}
-			if err = encodeByField(u, newPath, v.Message()); err != nil {
+			if err = encodeByField(u, newPath, v.Message(), forceTextName); err != nil {
 				finalErr = err
 				return false
 			}
@@ -96,16 +104,18 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 	return
 }
 
-func encodeRepeatedField(fieldDescriptor protoreflect.FieldDescriptor, list protoreflect.List) ([]string, error) {
-	var values []string
+func encodeRepeatedField(fieldDescriptor protoreflect.FieldDescriptor, list protoreflect.List, u url.Values, newPath string, forceTextName bool) error {
 	for i := 0; i < list.Len(); i++ {
 		value, err := EncodeField(fieldDescriptor, list.Get(i))
-		if err != nil {
-			return nil, err
+		if err == nil {
+			u.Add(newPath, value)
+		} else {
+			if err = encodeByField(u, fmt.Sprintf("%s[%d]", newPath, i), list.Get(i).Message(), forceTextName); err != nil {
+				return err
+			}
 		}
-		values = append(values, value)
 	}
-	return values, nil
+	return nil
 }
 
 func encodeMapField(fieldDescriptor protoreflect.FieldDescriptor, mp protoreflect.Map) (map[string]string, error) {
