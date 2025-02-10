@@ -1,6 +1,7 @@
 package grpc
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"net/url"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -17,6 +19,7 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/matcher"
 	pb "github.com/go-kratos/kratos/v2/internal/testdata/helloworld"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 )
@@ -370,4 +373,128 @@ func TestListener(t *testing.T) {
 	if e, err := s.Endpoint(); err != nil || e == nil {
 		t.Errorf("expect not empty")
 	}
+}
+
+func TestStop(t *testing.T) {
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	defer cancel()
+
+	tests := []struct {
+		name          string
+		ctx           context.Context
+		cancel        context.CancelFunc
+		wantForceStop bool
+	}{
+		{
+			name:          "normal",
+			ctx:           context.Background(),
+			cancel:        func() {},
+			wantForceStop: false,
+		},
+		{
+			name:          "timeout",
+			ctx:           timeoutCtx,
+			cancel:        cancel,
+			wantForceStop: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			l, err := net.Listen("tcp", ":0")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer l.Close()
+
+			old := log.GetLogger()
+			defer log.SetLogger(old)
+
+			// Create a logger to capture logs
+			var logs safeBytesBuffer
+			log.SetLogger(log.NewStdLogger(&logs))
+
+			s := NewServer(Listener(l))
+			pb.RegisterGreeterServer(s, &server{})
+
+			go func() {
+				err := s.Start(context.Background()) //nolint
+				if err != nil {
+					log.Fatal(err)
+				}
+			}()
+
+			time.Sleep(100 * time.Millisecond)
+
+			conn, err := DialInsecure(
+				context.Background(),
+				WithEndpoint(l.Addr().String()),
+				WithOptions(grpc.WithBlock()),
+			)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer conn.Close()
+
+			go func() {
+				client := pb.NewGreeterClient(conn)
+				if tt.wantForceStop {
+					// Simulate a long-running request
+					s, err := client.SayHelloStream(context.Background()) //nolint
+					if err != nil {
+						log.Fatal(err)
+					}
+					// Keep the stream open
+					for {
+						// Intentionally do not send messages, only receive messages
+						_, err := s.Recv()
+						if err != nil {
+							break
+						}
+					}
+				} else {
+					_, err := client.SayHello(context.Background(), &pb.HelloRequest{Name: "test"}) //nolint
+					if err != nil {
+						log.Error(err)
+					}
+				}
+			}()
+
+			time.Sleep(100 * time.Millisecond)
+
+			err = s.Stop(tt.ctx)
+			if err != nil {
+				t.Errorf("Expected no error, got %v", err)
+				return
+			}
+
+			// Check if the stop was forced or graceful
+			if tt.wantForceStop {
+				if !strings.Contains(logs.String(), "force stop") {
+					t.Errorf("Expected force stop\n%s", logs.String())
+				}
+			} else {
+				if strings.Contains(logs.String(), "force stop") {
+					t.Errorf("Expected graceful stop\n%s", logs.String())
+				}
+			}
+		})
+	}
+}
+
+type safeBytesBuffer struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (b *safeBytesBuffer) Write(p []byte) (n int, err error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.Write(p)
+}
+
+func (b *safeBytesBuffer) String() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.String()
 }
