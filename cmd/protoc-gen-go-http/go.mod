@@ -1,6 +1,6 @@
-module github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2
+module github.com/amineck/kratos/cmd/protoc-gen-go-http/v2
 
-go 1.19
+go 1.23
 
 require (
 	google.golang.org/genproto v0.0.0-20220519153652-3a47de7e79bd
