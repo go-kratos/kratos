@@ -246,7 +246,7 @@ func replacePath(name string, value string, path string) string {
 		path = fmt.Sprintf("%s{%s:%s}%s",
 			path[:idx[0]], // The start of the match
 			name,
-			strings.ReplaceAll(value, "*", ".*"),
+			strings.ReplaceAll(value, "*", "[^/:]+"),
 			path[idx[1]:],
 		)
 	}
