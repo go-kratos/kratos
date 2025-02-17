@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/json"
@@ -9,13 +10,16 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	kratoserrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/host"
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 var h = func(w http.ResponseWriter, r *http.Request) {
@@ -381,4 +385,103 @@ func TestMethodNotAllowedHandler(t *testing.T) {
 	if !reflect.DeepEqual(srv.router.MethodNotAllowedHandler, mux) {
 		t.Errorf("expected %v got %v", mux, srv.router.MethodNotAllowedHandler)
 	}
+}
+
+func TestStop(t *testing.T) {
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	defer cancel()
+
+	tests := []struct {
+		name          string
+		sleep         time.Duration
+		ctx           context.Context
+		cancel        context.CancelFunc
+		wantForceStop bool
+	}{
+		{
+			name:          "normal",
+			sleep:         0,
+			ctx:           context.Background(),
+			cancel:        func() {},
+			wantForceStop: false,
+		},
+		{
+			name:          "timeout",
+			sleep:         2 * time.Second,
+			ctx:           timeoutCtx,
+			cancel:        cancel,
+			wantForceStop: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			old := log.GetLogger()
+			defer log.SetLogger(old)
+
+			// Create a logger to capture logs
+			var logs safeBytesBuffer
+			log.SetLogger(log.NewStdLogger(&logs))
+
+			testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				t := time.NewTimer(tt.sleep)
+				defer t.Stop()
+				select {
+				case <-t.C:
+				case <-r.Context().Done():
+				}
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer testServer.Close()
+
+			go func() {
+				resp, err := http.Get(testServer.URL)
+				if err != nil {
+					return
+				}
+				_ = resp.Body.Close()
+			}()
+
+			time.Sleep(100 * time.Millisecond)
+
+			s := &Server{
+				Server: testServer.Config,
+			}
+
+			tt.cancel()
+			err := s.Stop(tt.ctx)
+			if err != nil {
+				t.Errorf("Expected no error, got %v", err)
+				return
+			}
+
+			// Check if the stop was forced or graceful
+			if tt.wantForceStop {
+				if !strings.Contains(logs.String(), "force stop") {
+					t.Errorf("Expected force stop\n%s", logs.String())
+				}
+			} else {
+				if strings.Contains(logs.String(), "force stop") {
+					t.Errorf("Expected graceful stop\n%s", logs.String())
+				}
+			}
+		})
+	}
+}
+
+type safeBytesBuffer struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (b *safeBytesBuffer) Write(p []byte) (n int, err error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.Write(p)
+}
+
+func (b *safeBytesBuffer) String() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.String()
 }
