@@ -92,3 +92,22 @@ func TestSetOperation(t *testing.T) {
 		t.Errorf("expect %v, got %v", "kratos", tr.operation)
 	}
 }
+
+func TestResponseFromServerContext(t *testing.T) {
+	tr := &Transport{}
+	ctx := transport.NewServerContext(context.Background(), tr)
+	_, ok := ResponseFromServerContext(ctx)
+	if ok {
+		t.Errorf("expect %v, got %v", false, ok)
+	}
+	res, ok := ResponseFromServerContext(ctx)
+	if !ok {
+		t.Errorf("expect %v, got %v", true, ok)
+	}
+	if res == nil {
+		t.Errorf("expect %v, got %v", "*http.ResponseWriter", res)
+	}
+	if !reflect.DeepEqual(res, tr.response) {
+		t.Errorf("expect %v, got %v", tr.response, res)
+	}
+}
