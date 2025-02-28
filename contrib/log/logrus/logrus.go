@@ -18,10 +18,10 @@ func NewLogger(logger *logrus.Logger) log.Logger {
 	}
 }
 
-func (l *Logger) Log(level log.Level, keyvals ...interface{}) (err error) {
+func (l *Logger) Log(level log.Level, keyvals ...any) (err error) {
 	var (
 		logrusLevel logrus.Level
-		fields      logrus.Fields = make(map[string]interface{})
+		fields      logrus.Fields = make(map[string]any)
 		msg         string
 	)
 

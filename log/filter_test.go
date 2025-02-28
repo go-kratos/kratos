@@ -83,7 +83,7 @@ func BenchmarkFilterFunc(b *testing.B) {
 	}
 }
 
-func testFilterFunc(level Level, keyvals ...interface{}) bool {
+func testFilterFunc(level Level, keyvals ...any) bool {
 	if level == LevelWarn {
 		return true
 	}
@@ -130,7 +130,7 @@ func TestFilterFuncWitchLoggerPrefix(t *testing.T) {
 	}
 }
 
-func testFilterFuncWithLoggerPrefix(level Level, keyvals ...interface{}) bool {
+func testFilterFuncWithLoggerPrefix(level Level, keyvals ...any) bool {
 	if level == LevelWarn {
 		return true
 	}
@@ -153,7 +153,7 @@ func TestFilterWithContext(t *testing.T) {
 	ctxValue := "filter test value"
 
 	v1 := func() Valuer {
-		return func(ctx context.Context) interface{} {
+		return func(ctx context.Context) any {
 			return ctx.Value(ctxKey)
 		}
 	}

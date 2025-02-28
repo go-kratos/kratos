@@ -78,7 +78,7 @@ func TestServer(t *testing.T) {
 	srv := NewServer(
 		Middleware(
 			func(handler middleware.Handler) middleware.Handler {
-				return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+				return func(ctx context.Context, req any) (reply any, err error) {
 					if tr, ok := transport.FromServerContext(ctx); ok {
 						if tr.ReplyHeader() != nil {
 							tr.ReplyHeader().Set("req_id", "3344")
@@ -87,7 +87,7 @@ func TestServer(t *testing.T) {
 					return handler(ctx, req)
 				}
 			}),
-		UnaryInterceptor(func(ctx context.Context, req interface{}, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		UnaryInterceptor(func(ctx context.Context, req any, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
 			return handler(ctx, req)
 		}),
 		Options(grpc.InitialConnWindowSize(0)),
@@ -119,11 +119,11 @@ func testClient(t *testing.T, srv *Server) {
 		WithEndpoint(u.Host),
 		WithOptions(grpc.WithBlock()),
 		WithUnaryInterceptor(
-			func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+			func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 				return invoker(ctx, method, req, reply, cc, opts...)
 			}),
 		WithMiddleware(func(handler middleware.Handler) middleware.Handler {
-			return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+			return func(ctx context.Context, req any) (reply any, err error) {
 				if tr, ok := transport.FromClientContext(ctx); ok {
 					header := tr.RequestHeader()
 					header.Set("x-md-trace", "2233")
@@ -216,10 +216,10 @@ func TestTLSConfig(t *testing.T) {
 func TestUnaryInterceptor(t *testing.T) {
 	o := &Server{}
 	v := []grpc.UnaryServerInterceptor{
-		func(context.Context, interface{}, *grpc.UnaryServerInfo, grpc.UnaryHandler) (resp interface{}, err error) {
+		func(context.Context, any, *grpc.UnaryServerInfo, grpc.UnaryHandler) (resp any, err error) {
 			return nil, nil
 		},
-		func(context.Context, interface{}, *grpc.UnaryServerInfo, grpc.UnaryHandler) (resp interface{}, err error) {
+		func(context.Context, any, *grpc.UnaryServerInfo, grpc.UnaryHandler) (resp any, err error) {
 			return nil, nil
 		},
 	}
@@ -232,10 +232,10 @@ func TestUnaryInterceptor(t *testing.T) {
 func TestStreamInterceptor(t *testing.T) {
 	o := &Server{}
 	v := []grpc.StreamServerInterceptor{
-		func(interface{}, grpc.ServerStream, *grpc.StreamServerInfo, grpc.StreamHandler) error {
+		func(any, grpc.ServerStream, *grpc.StreamServerInfo, grpc.StreamHandler) error {
 			return nil
 		},
-		func(interface{}, grpc.ServerStream, *grpc.StreamServerInfo, grpc.StreamHandler) error {
+		func(any, grpc.ServerStream, *grpc.StreamServerInfo, grpc.StreamHandler) error {
 			return nil
 		},
 	}
@@ -273,7 +273,7 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 	}
 	srv.middleware.Use(EmptyMiddleware())
 	req := &struct{}{}
-	rv, err := srv.unaryServerInterceptor()(context.TODO(), req, &grpc.UnaryServerInfo{}, func(context.Context, interface{}) (interface{}, error) {
+	rv, err := srv.unaryServerInterceptor()(context.TODO(), req, &grpc.UnaryServerInfo{}, func(context.Context, any) (any, error) {
 		return &testResp{Data: "hi"}, nil
 	})
 	if err != nil {
@@ -286,8 +286,8 @@ func TestServer_unaryServerInterceptor(t *testing.T) {
 
 type mockServerStream struct {
 	ctx      context.Context
-	sentMsg  interface{}
-	recvMsg  interface{}
+	sentMsg  any
+	recvMsg  any
 	metadata metadata.MD
 	grpc.ServerStream
 }
@@ -310,12 +310,12 @@ func (m *mockServerStream) Context() context.Context {
 	return m.ctx
 }
 
-func (m *mockServerStream) SendMsg(msg interface{}) error {
+func (m *mockServerStream) SendMsg(msg any) error {
 	m.sentMsg = msg
 	return nil
 }
 
-func (m *mockServerStream) RecvMsg(msg interface{}) error {
+func (m *mockServerStream) RecvMsg(msg any) error {
 	m.recvMsg = msg
 	return nil
 }
@@ -339,7 +339,7 @@ func TestServer_streamServerInterceptor(t *testing.T) {
 		ctx: srv.baseCtx,
 	}
 
-	handler := func(_ interface{}, stream grpc.ServerStream) error {
+	handler := func(_ any, stream grpc.ServerStream) error {
 		resp := &testResp{Data: "stream hi"}
 		return stream.SendMsg(resp)
 	}

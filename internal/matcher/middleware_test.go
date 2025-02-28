@@ -9,7 +9,7 @@ import (
 
 func logging(module string) middleware.Middleware {
 	return func(middleware.Handler) middleware.Handler {
-		return func(context.Context, interface{}) (reply interface{}, err error) {
+		return func(context.Context, any) (reply any, err error) {
 			return module, nil
 		}
 	}
