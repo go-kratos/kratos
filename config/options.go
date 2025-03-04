@@ -181,14 +181,16 @@ func convertToType(input string) interface{} {
 func expand(s string, mapping func(string) string, toType bool) interface{} {
 	r := regexp.MustCompile(`\${(.*?)}`)
 	re := r.FindAllStringSubmatch(s, -1)
-	var ct interface{}
+
+	// Convert to type if the string is a single `${VAR}` placeholder.
+	if toType && len(re) == 1 && regexp.MustCompile(`^\${(.*?)}$`).MatchString(s) {
+		m := mapping(re[0][1])
+		return convertToType(m)
+	}
+
 	for _, i := range re {
 		if len(i) == 2 { //nolint:mnd
 			m := mapping(i[1])
-			if toType {
-				ct = convertToType(m)
-				return ct
-			}
 			s = strings.ReplaceAll(s, i[0], m)
 		}
 	}

@@ -67,6 +67,7 @@ func TestDefaultResolver(t *testing.T) {
 				"value2": "$PORT",
 				"value3": "abc${PORT}foo${COUNT}bar",
 				"value4": "${foo${bar}}",
+				"url_with_port": "${URL:http://example.com}:8080",
 			},
 		},
 		"test": map[string]interface{}{
@@ -143,6 +144,11 @@ func TestDefaultResolver(t *testing.T) {
 			name:   "test ${foo${bar}}",
 			path:   "foo.bar.value4",
 			expect: "}",
+		},
+		{
+			name:   "test ${URL:http://example.com}:8080",
+			path:   "foo.bar.url_with_port",
+			expect: "http://example.com:8080",
 		},
 	}
 
@@ -224,6 +230,7 @@ func TestNewDefaultResolver(t *testing.T) {
 				"value2": "$PORT",
 				"value3": "abc${PORT}foo${COUNT}bar",
 				"value4": "${foo${bar}}",
+				"url_with_port": "${URL:http://example.com}:8080",
 			},
 		},
 		"test": map[string]interface{}{
@@ -300,6 +307,11 @@ func TestNewDefaultResolver(t *testing.T) {
 			name:   "test ${foo${bar}}",
 			path:   "foo.bar.value4",
 			expect: "",
+		},
+		{
+			name:   "test ${URL:http://example.com}:8080",
+			path:   "foo.bar.url_with_port",
+			expect: "http://example.com:8080",
 		},
 	}
 
