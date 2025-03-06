@@ -94,20 +94,16 @@ func TestSetOperation(t *testing.T) {
 }
 
 func TestResponseFromServerContext(t *testing.T) {
-	tr := &Transport{}
-	ctx := transport.NewServerContext(context.Background(), tr)
-	_, ok := ResponseFromServerContext(ctx)
+	ctx := context.Background()
+	tr := &Transport{response: http.ResponseWriter(nil)}
+	ctx = transport.NewServerContext(ctx, tr)
+	resp, ok := ResponseFromServerContext(ctx)
+	if !ok || resp != tr.response {
+		t.Errorf("Expected response and ok, got %v and %v", resp, ok)
+	}
+	ctx = context.Background()
+	_, ok = ResponseFromServerContext(ctx)
 	if ok {
-		t.Errorf("expect %v, got %v", false, ok)
-	}
-	res, ok := ResponseFromServerContext(ctx)
-	if !ok {
-		t.Errorf("expect %v, got %v", true, ok)
-	}
-	if res == nil {
-		t.Errorf("expect %v, got %v", "*http.ResponseWriter", res)
-	}
-	if !reflect.DeepEqual(res, tr.response) {
-		t.Errorf("expect %v, got %v", tr.response, res)
+		t.Errorf("Expected no response and not ok, got %v and %v", resp, ok)
 	}
 }
