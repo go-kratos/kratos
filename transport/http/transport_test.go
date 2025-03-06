@@ -104,6 +104,6 @@ func TestResponseFromServerContext(t *testing.T) {
 	ctx = context.Background()
 	_, ok = ResponseFromServerContext(ctx)
 	if ok {
-		t.Errorf("Expected no response and not ok, got %v and %v", resp, ok)
+		t.Errorf("Expected no response and not ok, got %v and %v", false, ok)
 	}
 }
