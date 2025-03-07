@@ -11,7 +11,7 @@ func (c *Counter) Incr() {
 }
 
 func ExampleGroup_Get() {
-	group := NewGroup(func() interface{} {
+	group := NewGroup(func() any {
 		fmt.Println("Only Once")
 		return &Counter{}
 	})
@@ -26,12 +26,12 @@ func ExampleGroup_Get() {
 }
 
 func ExampleGroup_Reset() {
-	group := NewGroup(func() interface{} {
+	group := NewGroup(func() any {
 		return &Counter{}
 	})
 
 	// Reset the new function and clear all created objects.
-	group.Reset(func() interface{} {
+	group.Reset(func() any {
 		fmt.Println("reset")
 		return &Counter{}
 	})
