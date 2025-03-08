@@ -307,7 +307,7 @@ func (e *Client) buildAPI(currentTimes int, params ...string) string {
 	return strings.Join(params, "/")
 }
 
-func (e *Client) request(ctx context.Context, method string, params []string, input io.Reader, output interface{}, i int) (bool, error) {
+func (e *Client) request(ctx context.Context, method string, params []string, input io.Reader, output any, i int) (bool, error) {
 	request, err := http.NewRequestWithContext(ctx, method, e.buildAPI(i, params...), input)
 	if err != nil {
 		return false, err
@@ -342,7 +342,7 @@ func (e *Client) request(ctx context.Context, method string, params []string, in
 	return false, nil
 }
 
-func (e *Client) do(ctx context.Context, method string, params []string, input io.Reader, output interface{}) error {
+func (e *Client) do(ctx context.Context, method string, params []string, input io.Reader, output any) error {
 	for i := 0; i < e.maxRetry; i++ {
 		retry, err := e.request(ctx, method, params, input, output, i)
 		if retry {

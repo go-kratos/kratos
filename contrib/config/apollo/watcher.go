@@ -38,7 +38,7 @@ func (c *customChangeListener) onChange(namespace string, changes map[string]*st
 		}
 	}
 
-	next := make(map[string]interface{})
+	next := make(map[string]any)
 
 	for key, change := range changes {
 		resolve(genKey(namespace, key), change.NewValue, next)

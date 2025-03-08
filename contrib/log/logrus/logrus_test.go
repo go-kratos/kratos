@@ -15,35 +15,35 @@ func TestLoggerLog(t *testing.T) {
 		level     logrus.Level
 		formatter logrus.Formatter
 		logLevel  log.Level
-		kvs       []interface{}
+		kvs       []any
 		want      string
 	}{
 		"json format": {
 			level:     logrus.InfoLevel,
 			formatter: &logrus.JSONFormatter{},
 			logLevel:  log.LevelInfo,
-			kvs:       []interface{}{"case", "json format", "msg", "1"},
+			kvs:       []any{"case", "json format", "msg", "1"},
 			want:      `{"case":"json format","level":"info","msg":"1"`,
 		},
 		"level unmatch": {
 			level:     logrus.InfoLevel,
 			formatter: &logrus.JSONFormatter{},
 			logLevel:  log.LevelDebug,
-			kvs:       []interface{}{"case", "level unmatch", "msg", "1"},
+			kvs:       []any{"case", "level unmatch", "msg", "1"},
 			want:      "",
 		},
 		"fatal level": {
 			level:     logrus.InfoLevel,
 			formatter: &logrus.JSONFormatter{},
 			logLevel:  log.LevelFatal,
-			kvs:       []interface{}{"case", "json format", "msg", "1"},
+			kvs:       []any{"case", "json format", "msg", "1"},
 			want:      `{"case":"json format","level":"fatal","msg":"1"`,
 		},
 		"no tags": {
 			level:     logrus.InfoLevel,
 			formatter: &logrus.JSONFormatter{},
 			logLevel:  log.LevelInfo,
-			kvs:       []interface{}{"msg", "1"},
+			kvs:       []any{"msg", "1"},
 			want:      `{"level":"info","msg":"1"`,
 		},
 	}

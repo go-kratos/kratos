@@ -31,7 +31,7 @@ func FilterValue(value ...string) FilterOption {
 }
 
 // FilterFunc with filter func.
-func FilterFunc(f func(level Level, keyvals ...interface{}) bool) FilterOption {
+func FilterFunc(f func(level Level, keyvals ...any) bool) FilterOption {
 	return func(o *Filter) {
 		o.filter = f
 	}
@@ -41,17 +41,17 @@ func FilterFunc(f func(level Level, keyvals ...interface{}) bool) FilterOption {
 type Filter struct {
 	logger Logger
 	level  Level
-	key    map[interface{}]struct{}
-	value  map[interface{}]struct{}
-	filter func(level Level, keyvals ...interface{}) bool
+	key    map[any]struct{}
+	value  map[any]struct{}
+	filter func(level Level, keyvals ...any) bool
 }
 
 // NewFilter new a logger filter.
 func NewFilter(logger Logger, opts ...FilterOption) *Filter {
 	options := Filter{
 		logger: logger,
-		key:    make(map[interface{}]struct{}),
-		value:  make(map[interface{}]struct{}),
+		key:    make(map[any]struct{}),
+		value:  make(map[any]struct{}),
 	}
 	for _, o := range opts {
 		o(&options)
@@ -60,15 +60,15 @@ func NewFilter(logger Logger, opts ...FilterOption) *Filter {
 }
 
 // Log Print log by level and keyvals.
-func (f *Filter) Log(level Level, keyvals ...interface{}) error {
+func (f *Filter) Log(level Level, keyvals ...any) error {
 	if level < f.level {
 		return nil
 	}
 	// prefixkv contains the slice of arguments defined as prefixes during the log initialization
-	var prefixkv []interface{}
+	var prefixkv []any
 	l, ok := f.logger.(*logger)
 	if ok && len(l.prefix) > 0 {
-		prefixkv = make([]interface{}, 0, len(l.prefix))
+		prefixkv = make([]any, 0, len(l.prefix))
 		prefixkv = append(prefixkv, l.prefix...)
 	}
 

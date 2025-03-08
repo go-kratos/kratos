@@ -65,7 +65,7 @@ func (a *mock) MarshalJSON() ([]byte, error) {
 
 func TestJSON_Marshal(t *testing.T) {
 	tests := []struct {
-		input  interface{}
+		input  any
 		expect string
 	}{
 		{
@@ -107,7 +107,7 @@ func TestJSON_Unmarshal(t *testing.T) {
 	p4 := &mock{}
 	tests := []struct {
 		input  string
-		expect interface{}
+		expect any
 	}{
 		{
 			input:  `{"a":"","b":"","c":""}`,

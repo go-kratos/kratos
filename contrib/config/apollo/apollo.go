@@ -178,8 +178,8 @@ func (e *apollo) load() []*config.KeyValue {
 }
 
 func (e *apollo) getConfig(ns string) (*config.KeyValue, error) {
-	next := map[string]interface{}{}
-	e.client.GetConfigCache(ns).Range(func(key, value interface{}) bool {
+	next := map[string]any{}
+	e.client.GetConfigCache(ns).Range(func(key, value any) bool {
 		// all values are out properties format
 		resolve(genKey(ns, key.(string)), value, next)
 		return true
@@ -224,7 +224,7 @@ func (e *apollo) Watch() (config.Watcher, error) {
 
 // resolve convert kv pair into one map[string]interface{} by split key into different
 // map level. such as: app.name = "application" => map[app][name] = "application"
-func resolve(key string, value interface{}, target map[string]interface{}) {
+func resolve(key string, value any, target map[string]any) {
 	// expand key "aaa.bbb" into map[aaa]map[bbb]interface{}
 	keys := strings.Split(key, ".")
 	last := len(keys) - 1
@@ -240,7 +240,7 @@ func resolve(key string, value interface{}, target map[string]interface{}) {
 		v, ok := cursor[k]
 		if !ok {
 			// create a new map
-			deeper := make(map[string]interface{})
+			deeper := make(map[string]any)
 			cursor[k] = deeper
 			cursor = deeper
 			continue
@@ -248,7 +248,7 @@ func resolve(key string, value interface{}, target map[string]interface{}) {
 
 		// current exists, then check existing value type, if it's not map
 		// that means duplicate keys, and at least one is not map instance.
-		if cursor, ok = v.(map[string]interface{}); !ok {
+		if cursor, ok = v.(map[string]any); !ok {
 			log.Warnf("duplicate key: %v\n", strings.Join(keys[:i+1], "."))
 			break
 		}

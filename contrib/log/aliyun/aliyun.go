@@ -81,7 +81,7 @@ func (a *aliyunLog) Close() error {
 	return a.producer.Close(5000)
 }
 
-func (a *aliyunLog) Log(level log.Level, keyvals ...interface{}) error {
+func (a *aliyunLog) Log(level log.Level, keyvals ...any) error {
 	contents := make([]*sls.LogContent, 0, len(keyvals)/2+1)
 
 	contents = append(contents, &sls.LogContent{
@@ -127,7 +127,7 @@ func newString(s string) *string {
 }
 
 // toString convert any type to string
-func toString(v interface{}) string {
+func toString(v any) string {
 	var key string
 	if v == nil {
 		return key

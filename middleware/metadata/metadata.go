@@ -50,7 +50,7 @@ func Server(opts ...Option) middleware.Middleware {
 		o(options)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, req any) (reply any, err error) {
 			tr, ok := transport.FromServerContext(ctx)
 			if !ok {
 				return handler(ctx, req)
@@ -80,7 +80,7 @@ func Client(opts ...Option) middleware.Middleware {
 		o(options)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, req any) (reply any, err error) {
 			tr, ok := transport.FromClientContext(ctx)
 			if !ok {
 				return handler(ctx, req)

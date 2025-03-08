@@ -16,11 +16,11 @@ func init() {
 // codec is a Codec implementation with xml.
 type codec struct{}
 
-func (codec) Marshal(v interface{}) ([]byte, error) {
+func (codec) Marshal(v any) ([]byte, error) {
 	return xml.Marshal(v)
 }
 
-func (codec) Unmarshal(data []byte, v interface{}) error {
+func (codec) Unmarshal(data []byte, v any) error {
 	return xml.Unmarshal(data, v)
 }
 

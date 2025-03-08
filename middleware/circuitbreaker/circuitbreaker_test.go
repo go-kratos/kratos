@@ -46,7 +46,7 @@ func (c *circuitBreakerMock) MarkFailed()  {}
 
 func Test_WithGroup(t *testing.T) {
 	o := options{
-		group: group.NewGroup(func() interface{} {
+		group: group.NewGroup(func() any {
 			return ""
 		}),
 	}
@@ -58,17 +58,17 @@ func Test_WithGroup(t *testing.T) {
 }
 
 func TestServer(_ *testing.T) {
-	nextValid := func(context.Context, interface{}) (interface{}, error) {
+	nextValid := func(context.Context, any) (any, error) {
 		return "Hello valid", nil
 	}
-	nextInvalid := func(context.Context, interface{}) (interface{}, error) {
+	nextInvalid := func(context.Context, any) (any, error) {
 		return nil, kratoserrors.InternalServer("", "")
 	}
 
 	ctx := transport.NewClientContext(context.Background(), &transportMock{})
 
 	_, _ = Client(func(o *options) {
-		o.group = group.NewGroup(func() interface{} {
+		o.group = group.NewGroup(func() any {
 			return &circuitBreakerMock{err: errors.New("circuitbreaker error")}
 		})
 	})(nextValid)(ctx, nil)
