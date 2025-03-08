@@ -30,6 +30,7 @@ func TestRegistry(t *testing.T) {
 	}
 
 	r := New(client)
+	allServiceR := New(client, AllowAllServices(true))
 	w, err := r.Watch(ctx, s.Name)
 	if err != nil {
 		t.Fatal(err)
@@ -62,6 +63,20 @@ func TestRegistry(t *testing.T) {
 	}
 	if len(res) != 1 && res[0].Name != s.Name {
 		t.Errorf("not expected: %+v", res)
+	}
+	res, err = r.GetService(ctx, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(res) != 0 {
+		t.Errorf("will be return empty service")
+	}
+	res, err = allServiceR.GetService(ctx, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(res) == 0 {
+		t.Errorf("will be return all service")
 	}
 
 	if err1 := r.Deregister(ctx, s); err1 != nil {

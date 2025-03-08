@@ -20,10 +20,11 @@ var (
 type Option func(o *options)
 
 type options struct {
-	ctx       context.Context
-	namespace string
-	ttl       time.Duration
-	maxRetry  int
+	ctx              context.Context
+	namespace        string
+	ttl              time.Duration
+	maxRetry         int
+	allowAllServices bool // If the condition is true, retrieve all services when the GetService parameter name is an empty string
 }
 
 // Context with registry context.
@@ -43,6 +44,9 @@ func RegisterTTL(ttl time.Duration) Option {
 
 func MaxRetry(num int) Option {
 	return func(o *options) { o.maxRetry = num }
+}
+func AllowAllServices(allow bool) Option {
+	return func(o *options) { o.allowAllServices = allow }
 }
 
 // Registry is etcd registry.
@@ -130,7 +134,9 @@ func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.Ser
 			return nil, err
 		}
 		if si.Name != name {
-			continue
+			if !(r.opts.allowAllServices && len(name) == 0) {
+				continue
+			}
 		}
 		items = append(items, si)
 	}
