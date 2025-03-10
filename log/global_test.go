@@ -20,31 +20,31 @@ func TestGlobalLog(t *testing.T) {
 
 	testCases := []struct {
 		level   Level
-		content []interface{}
+		content []any
 	}{
 		{
 			LevelDebug,
-			[]interface{}{"test debug"},
+			[]any{"test debug"},
 		},
 		{
 			LevelInfo,
-			[]interface{}{"test info"},
+			[]any{"test info"},
 		},
 		{
 			LevelInfo,
-			[]interface{}{"test %s", "info"},
+			[]any{"test %s", "info"},
 		},
 		{
 			LevelWarn,
-			[]interface{}{"test warn"},
+			[]any{"test warn"},
 		},
 		{
 			LevelError,
-			[]interface{}{"test error"},
+			[]any{"test error"},
 		},
 		{
 			LevelError,
-			[]interface{}{"test %s", "error"},
+			[]any{"test %s", "error"},
 		},
 	}
 
@@ -123,7 +123,7 @@ func TestContextWithGlobalLog(t *testing.T) {
 
 	type traceKey struct{}
 	// set "trace-id" Valuer
-	newLogger := With(NewStdLogger(buffer), "trace-id", Valuer(func(ctx context.Context) interface{} {
+	newLogger := With(NewStdLogger(buffer), "trace-id", Valuer(func(ctx context.Context) any {
 		return ctx.Value(traceKey{})
 	}))
 
