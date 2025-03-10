@@ -80,7 +80,7 @@ func TestCodec2(t *testing.T) {
 func Test_getProtoMessage(t *testing.T) {
 	p := &testData.TestModel{Id: 1}
 	type args struct {
-		v interface{}
+		v any
 	}
 	tests := []struct {
 		name    string

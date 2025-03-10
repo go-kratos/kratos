@@ -87,7 +87,7 @@ func TestHTTP(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			bf.Reset()
-			next := func(context.Context, interface{}) (interface{}, error) {
+			next := func(context.Context, any) (any, error) {
 				return "reply", test.err
 			}
 			next = test.kind(logger)(next)
@@ -125,7 +125,7 @@ func (d *dummyStringerRedacter) Redact() string {
 func TestExtractArgs(t *testing.T) {
 	tests := []struct {
 		name     string
-		req      interface{}
+		req      any
 		expected string
 	}{
 		{
