@@ -139,7 +139,7 @@ func (s *Server) GetServiceDesc(_ context.Context, in *GetServiceDescRequest) (*
 // For SupportPackageIsVersion4, m is the name of the proto file, we
 // call proto.FileDescriptor to get the byte slice.
 // For SupportPackageIsVersion3, m is a byte slice itself.
-func parseMetadata(meta interface{}) (*dpb.FileDescriptorProto, error) {
+func parseMetadata(meta any) (*dpb.FileDescriptorProto, error) {
 	// Check if meta is the file name.
 	if fileNameForMeta, ok := meta.(string); ok {
 		return fileDescriptorProto(fileNameForMeta)

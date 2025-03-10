@@ -105,7 +105,7 @@ func Server(opts ...Option) middleware.Middleware {
 		o(&op)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (interface{}, error) {
+		return func(ctx context.Context, req any) (any, error) {
 			// if requests and seconds are nil, return directly
 			if op.requests == nil && op.seconds == nil {
 				return handler(ctx, req)
@@ -163,7 +163,7 @@ func Client(opts ...Option) middleware.Middleware {
 		o(&op)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (interface{}, error) {
+		return func(ctx context.Context, req any) (any, error) {
 			var (
 				code      int
 				reason    string

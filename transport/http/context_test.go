@@ -102,7 +102,7 @@ func TestContextResponse(t *testing.T) {
 
 func TestResponseUnwrap(t *testing.T) {
 	res := httptest.NewRecorder()
-	f := func(rw http.ResponseWriter, _ *http.Request, _ interface{}) error {
+	f := func(rw http.ResponseWriter, _ *http.Request, _ any) error {
 		u, ok := rw.(interface {
 			Unwrap() http.ResponseWriter
 		})

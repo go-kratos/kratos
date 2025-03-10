@@ -183,7 +183,7 @@ func TestListDescriptors(t *testing.T) {
 
 func TestHTTPPatternInfo(t *testing.T) {
 	type args struct {
-		pattern interface{}
+		pattern any
 	}
 	tests := []struct {
 		name       string

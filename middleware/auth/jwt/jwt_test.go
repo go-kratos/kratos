@@ -129,7 +129,7 @@ func TestJWTServerParse(t *testing.T) {
 		},
 	}
 
-	next := func(ctx context.Context, _ interface{}) (interface{}, error) {
+	next := func(ctx context.Context, _ any) (any, error) {
 		testToken, _ := FromContext(ctx)
 		var name string
 		if customerClaims, ok := testToken.(*CustomerClaims); ok {
@@ -154,7 +154,7 @@ func TestJWTServerParse(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			server := Server(
-				func(*jwt.Token) (interface{}, error) { return []byte(testKey), nil },
+				func(*jwt.Token) (any, error) { return []byte(testKey), nil },
 				WithClaims(test.claims),
 			)(next)
 			wg := sync.WaitGroup{}
@@ -240,18 +240,18 @@ func TestServer(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			var testToken jwt.Claims
-			next := func(ctx context.Context, req interface{}) (interface{}, error) {
+			next := func(ctx context.Context, req any) (any, error) {
 				t.Log(req)
 				testToken, _ = FromContext(ctx)
 				return "reply", nil
 			}
 			var server middleware.Handler
 			if test.signingMethod != nil {
-				server = Server(func(*jwt.Token) (interface{}, error) {
+				server = Server(func(*jwt.Token) (any, error) {
 					return []byte(test.key), nil
 				}, WithSigningMethod(test.signingMethod))(next)
 			} else {
-				server = Server(func(*jwt.Token) (interface{}, error) {
+				server = Server(func(*jwt.Token) (any, error) {
 					return []byte(test.key), nil
 				})(next)
 			}
@@ -280,7 +280,7 @@ func TestClient(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	tProvider := func(*jwt.Token) (interface{}, error) {
+	tProvider := func(*jwt.Token) (any, error) {
 		return []byte(testKey), nil
 	}
 	tests := []struct {
@@ -301,7 +301,7 @@ func TestClient(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			next := func(context.Context, any) (interface{}, error) {
+			next := func(context.Context, any) (any, error) {
 				return "reply", nil
 			}
 			handler := Client(test.tokenProvider)(next)
@@ -330,12 +330,12 @@ func TestTokenExpire(t *testing.T) {
 	}
 	token = fmt.Sprintf(bearerFormat, token)
 	time.Sleep(time.Second)
-	next := func(_ context.Context, req interface{}) (interface{}, error) {
+	next := func(_ context.Context, req any) (any, error) {
 		t.Log(req)
 		return "reply", nil
 	}
 	ctx := transport.NewServerContext(context.Background(), &Transport{reqHeader: newTokenHeader(authorizationKey, token)})
-	server := Server(func(*jwt.Token) (interface{}, error) {
+	server := Server(func(*jwt.Token) (any, error) {
 		return []byte(testKey), nil
 	}, WithSigningMethod(jwt.SigningMethodHS256))(next)
 	_, err2 := server(ctx, "test expire token")
@@ -369,7 +369,7 @@ func TestMissingKeyFunc(t *testing.T) {
 	}
 
 	var testToken jwt.Claims
-	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+	next := func(ctx context.Context, req any) (any, error) {
 		t.Log(req)
 		testToken, _ = FromContext(ctx)
 		return "reply", nil
@@ -396,7 +396,7 @@ func TestClientWithClaims(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	tProvider := func(*jwt.Token) (interface{}, error) {
+	tProvider := func(*jwt.Token) (any, error) {
 		return []byte(testKey), nil
 	}
 	test := struct {
@@ -410,7 +410,7 @@ func TestClientWithClaims(t *testing.T) {
 	}
 
 	t.Run(test.name, func(t *testing.T) {
-		next := func(context.Context, interface{}) (interface{}, error) {
+		next := func(context.Context, any) (any, error) {
 			return "reply", nil
 		}
 		handler := Client(test.tokenProvider, WithClaims(mapClaimsFunc))(next)
@@ -432,7 +432,7 @@ func TestClientWithHeader(t *testing.T) {
 	mapClaims := jwt.MapClaims{}
 	mapClaims["name"] = "xiaoli"
 	mapClaimsFunc := func() jwt.Claims { return mapClaims }
-	tokenHeader := map[string]interface{}{
+	tokenHeader := map[string]any{
 		"test": "test",
 	}
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
@@ -443,10 +443,10 @@ func TestClientWithHeader(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	tProvider := func(*jwt.Token) (interface{}, error) {
+	tProvider := func(*jwt.Token) (any, error) {
 		return []byte(testKey), nil
 	}
-	next := func(context.Context, interface{}) (interface{}, error) {
+	next := func(context.Context, any) (any, error) {
 		return "reply", nil
 	}
 	handler := Client(tProvider, WithClaims(mapClaimsFunc), WithTokenHeader(tokenHeader))(next)
@@ -470,7 +470,7 @@ func TestClientMissKey(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	tProvider := func(*jwt.Token) (interface{}, error) {
+	tProvider := func(*jwt.Token) (any, error) {
 		return nil, errors.New("some error")
 	}
 	test := struct {
@@ -484,7 +484,7 @@ func TestClientMissKey(t *testing.T) {
 	}
 
 	t.Run(test.name, func(t *testing.T) {
-		next := func(context.Context, interface{}) (interface{}, error) {
+		next := func(context.Context, any) (any, error) {
 			return "reply", nil
 		}
 		handler := Client(test.tokenProvider, WithClaims(mapClaimsFunc))(next)

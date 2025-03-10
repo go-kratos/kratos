@@ -23,7 +23,7 @@ func ProtoValidate() middleware.Middleware {
 	}
 
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, req any) (reply any, err error) {
 			if msg, ok := req.(proto.Message); ok {
 				if err := validator.Validate(msg); err != nil {
 					return nil, errors.BadRequest("VALIDATOR", err.Error()).WithCause(err)

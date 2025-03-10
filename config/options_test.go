@@ -12,12 +12,12 @@ func TestDefaultDecoder(t *testing.T) {
 		Value:  []byte("config"),
 		Format: "",
 	}
-	target := make(map[string]interface{})
+	target := make(map[string]any)
 	err := defaultDecoder(src, target)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(target, map[string]interface{}{"service": []byte("config")}) {
+	if !reflect.DeepEqual(target, map[string]any{"service": []byte("config")}) {
 		t.Fatal(`target is not equal to map[string]interface{}{"service": "config"}`)
 	}
 
@@ -26,14 +26,14 @@ func TestDefaultDecoder(t *testing.T) {
 		Value:  []byte("2233"),
 		Format: "",
 	}
-	target = make(map[string]interface{})
+	target = make(map[string]any)
 	err = defaultDecoder(src, target)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(map[string]interface{}{
-		"service": map[string]interface{}{
-			"name": map[string]interface{}{
+	if !reflect.DeepEqual(map[string]any{
+		"service": map[string]any{
+			"name": map[string]any{
 				"alias": []byte("2233"),
 			},
 		},
@@ -49,9 +49,9 @@ func TestDefaultResolver(t *testing.T) {
 		rateFloat  = 0.9
 	)
 
-	data := map[string]interface{}{
-		"foo": map[string]interface{}{
-			"bar": map[string]interface{}{
+	data := map[string]any{
+		"foo": map[string]any{
+			"bar": map[string]any{
 				"notexist": "${NOTEXIST:100}",
 				"port":     "${PORT:8081}",
 				"count":    "${COUNT:0}",
@@ -59,9 +59,9 @@ func TestDefaultResolver(t *testing.T) {
 				"rate":     "${RATE}",
 				"empty":    "${EMPTY:foobar}",
 				"url":      "${URL:http://example.com}",
-				"array": []interface{}{
+				"array": []any{
 					"${PORT}",
-					map[string]interface{}{"foobar": "${NOTEXIST:8081}"},
+					map[string]any{"foobar": "${NOTEXIST:8081}"},
 				},
 				"value1": "${test.value}",
 				"value2": "$PORT",
@@ -69,7 +69,7 @@ func TestDefaultResolver(t *testing.T) {
 				"value4": "${foo${bar}}",
 			},
 		},
-		"test": map[string]interface{}{
+		"test": map[string]any{
 			"value": "foobar",
 		},
 		"PORT":   "8080",
@@ -82,7 +82,7 @@ func TestDefaultResolver(t *testing.T) {
 	tests := []struct {
 		name   string
 		path   string
-		expect interface{}
+		expect any
 	}{
 		{
 			name:   "test not exist int env with default",
@@ -122,7 +122,7 @@ func TestDefaultResolver(t *testing.T) {
 		{
 			name:   "test array",
 			path:   "foo.bar.array",
-			expect: []interface{}{portString, map[string]interface{}{"foobar": "8081"}},
+			expect: []any{portString, map[string]any{"foobar": "8081"}},
 		},
 		{
 			name:   "test ${test.value}",
@@ -156,7 +156,7 @@ func TestDefaultResolver(t *testing.T) {
 				values: data,
 			}
 			if v, ok := rd.Value(test.path); ok {
-				var actual interface{}
+				var actual any
 				switch test.expect.(type) {
 				case int:
 					if actual, err = v.Int(); err == nil {
@@ -206,9 +206,9 @@ func TestNewDefaultResolver(t *testing.T) {
 		rateFloat  = 0.9
 	)
 
-	data := map[string]interface{}{
-		"foo": map[string]interface{}{
-			"bar": map[string]interface{}{
+	data := map[string]any{
+		"foo": map[string]any{
+			"bar": map[string]any{
 				"notexist": "${NOTEXIST:100}",
 				"port":     "${PORT:\"8081\"}",
 				"count":    "${COUNT:\"0\"}",
@@ -216,9 +216,9 @@ func TestNewDefaultResolver(t *testing.T) {
 				"rate":     "${RATE}",
 				"empty":    "${EMPTY:foobar}",
 				"url":      "${URL:\"http://example.com\"}",
-				"array": []interface{}{
+				"array": []any{
 					"${PORT}",
-					map[string]interface{}{"foobar": "${NOTEXIST:\"8081\"}"},
+					map[string]any{"foobar": "${NOTEXIST:\"8081\"}"},
 				},
 				"value1": "${test.value}",
 				"value2": "$PORT",
@@ -226,7 +226,7 @@ func TestNewDefaultResolver(t *testing.T) {
 				"value4": "${foo${bar}}",
 			},
 		},
-		"test": map[string]interface{}{
+		"test": map[string]any{
 			"value": "foobar",
 		},
 		"PORT":   "\"8080\"",
@@ -239,7 +239,7 @@ func TestNewDefaultResolver(t *testing.T) {
 	tests := []struct {
 		name   string
 		path   string
-		expect interface{}
+		expect any
 	}{
 		{
 			name:   "test not exist int env with default",
@@ -279,7 +279,7 @@ func TestNewDefaultResolver(t *testing.T) {
 		{
 			name:   "test array",
 			path:   "foo.bar.array",
-			expect: []interface{}{portString, map[string]interface{}{"foobar": "8081"}},
+			expect: []any{portString, map[string]any{"foobar": "8081"}},
 		},
 		{
 			name:   "test ${test.value}",
@@ -314,7 +314,7 @@ func TestNewDefaultResolver(t *testing.T) {
 				values: data,
 			}
 			if v, ok := rd.Value(test.path); ok {
-				var actual interface{}
+				var actual any
 				switch test.expect.(type) {
 				case int:
 					if actual, err = v.Int(); err == nil {

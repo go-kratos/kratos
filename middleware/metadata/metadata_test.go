@@ -53,7 +53,7 @@ var (
 )
 
 func TestSever(t *testing.T) {
-	hs := func(ctx context.Context, in interface{}) (interface{}, error) {
+	hs := func(ctx context.Context, in any) (any, error) {
 		md, ok := metadata.FromServerContext(ctx)
 		if !ok {
 			return nil, errors.New("no md")
@@ -86,7 +86,7 @@ func TestSever(t *testing.T) {
 }
 
 func TestClient(t *testing.T) {
-	hs := func(ctx context.Context, in interface{}) (interface{}, error) {
+	hs := func(ctx context.Context, in any) (any, error) {
 		tr, ok := transport.FromClientContext(ctx)
 		if !ok {
 			return nil, errors.New("no md")

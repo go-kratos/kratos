@@ -96,7 +96,7 @@ func TestMatch(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			next := func(_ context.Context, req interface{}) (interface{}, error) {
+			next := func(_ context.Context, req any) (any, error) {
 				t.Log(req)
 				return "reply", nil
 			}
@@ -132,7 +132,7 @@ func TestMatchClient(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			next := func(_ context.Context, req interface{}) (interface{}, error) {
+			next := func(_ context.Context, req any) (any, error) {
 				t.Log(req)
 				return "reply", nil
 			}
@@ -167,7 +167,7 @@ func TestFunc(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			next := func(_ context.Context, req interface{}) (interface{}, error) {
+			next := func(_ context.Context, req any) (any, error) {
 				t.Log(req)
 				return "reply", nil
 			}
@@ -224,7 +224,7 @@ func TestHeaderFunc(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			next := func(_ context.Context, req interface{}) (interface{}, error) {
+			next := func(_ context.Context, req any) (any, error) {
 				t.Log(req)
 				return "reply", nil
 			}
@@ -253,7 +253,7 @@ func TestHeaderFunc(t *testing.T) {
 }
 
 func testMiddleware(handler middleware.Handler) middleware.Handler {
-	return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+	return func(ctx context.Context, req any) (reply any, err error) {
 		reply, err = handler(ctx, req)
 		return
 	}

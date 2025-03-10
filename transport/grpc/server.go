@@ -113,6 +113,13 @@ func StreamInterceptor(in ...grpc.StreamServerInterceptor) ServerOption {
 	}
 }
 
+// DisableReflection disable grpc reflection.
+func DisableReflection() ServerOption {
+	return func(s *Server) {
+		s.disableReflection = true
+	}
+}
+
 // Options with grpc options.
 func Options(opts ...grpc.ServerOption) ServerOption {
 	return func(s *Server) {
@@ -123,23 +130,24 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
-	baseCtx          context.Context
-	tlsConf          *tls.Config
-	lis              net.Listener
-	err              error
-	network          string
-	address          string
-	endpoint         *url.URL
-	timeout          time.Duration
-	middleware       matcher.Matcher
-	streamMiddleware matcher.Matcher
-	unaryInts        []grpc.UnaryServerInterceptor
-	streamInts       []grpc.StreamServerInterceptor
-	grpcOpts         []grpc.ServerOption
-	health           *health.Server
-	customHealth     bool
-	metadata         *apimd.Server
-	adminClean       func()
+	baseCtx           context.Context
+	tlsConf           *tls.Config
+	lis               net.Listener
+	err               error
+	network           string
+	address           string
+	endpoint          *url.URL
+	timeout           time.Duration
+	middleware        matcher.Matcher
+	streamMiddleware  matcher.Matcher
+	unaryInts         []grpc.UnaryServerInterceptor
+	streamInts        []grpc.StreamServerInterceptor
+	grpcOpts          []grpc.ServerOption
+	health            *health.Server
+	customHealth      bool
+	metadata          *apimd.Server
+	adminClean        func()
+	disableReflection bool
 }
 
 // NewServer creates a gRPC server by options.
@@ -185,7 +193,10 @@ func NewServer(opts ...ServerOption) *Server {
 		grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
 	}
 	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
-	reflection.Register(srv.Server)
+	// reflection register
+	if !srv.disableReflection {
+		reflection.Register(srv.Server)
+	}
 	// admin register
 	srv.adminClean, _ = admin.Register(srv.Server)
 	return srv

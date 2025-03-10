@@ -16,11 +16,11 @@ func init() {
 // codec is a Codec implementation with yaml.
 type codec struct{}
 
-func (codec) Marshal(v interface{}) ([]byte, error) {
+func (codec) Marshal(v any) ([]byte, error) {
 	return yaml.Marshal(v)
 }
 
-func (codec) Unmarshal(data []byte, v interface{}) error {
+func (codec) Unmarshal(data []byte, v any) error {
 	return yaml.Unmarshal(data, v)
 }
 
