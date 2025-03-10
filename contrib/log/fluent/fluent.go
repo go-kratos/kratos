@@ -151,7 +151,7 @@ func NewLogger(addr string, opts ...Option) (*Logger, error) {
 }
 
 // Log print the kv pairs log.
-func (l *Logger) Log(level log.Level, keyvals ...interface{}) error {
+func (l *Logger) Log(level log.Level, keyvals ...any) error {
 	if len(keyvals) == 0 {
 		return nil
 	}

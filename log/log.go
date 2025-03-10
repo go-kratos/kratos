@@ -10,18 +10,18 @@ var DefaultLogger = NewStdLogger(log.Writer())
 
 // Logger is a logger interface.
 type Logger interface {
-	Log(level Level, keyvals ...interface{}) error
+	Log(level Level, keyvals ...any) error
 }
 
 type logger struct {
 	logger    Logger
-	prefix    []interface{}
+	prefix    []any
 	hasValuer bool
 	ctx       context.Context
 }
 
-func (c *logger) Log(level Level, keyvals ...interface{}) error {
-	kvs := make([]interface{}, 0, len(c.prefix)+len(keyvals))
+func (c *logger) Log(level Level, keyvals ...any) error {
+	kvs := make([]any, 0, len(c.prefix)+len(keyvals))
 	kvs = append(kvs, c.prefix...)
 	if c.hasValuer {
 		bindValues(c.ctx, kvs)
@@ -31,12 +31,12 @@ func (c *logger) Log(level Level, keyvals ...interface{}) error {
 }
 
 // With with logger fields.
-func With(l Logger, kv ...interface{}) Logger {
+func With(l Logger, kv ...any) Logger {
 	c, ok := l.(*logger)
 	if !ok {
 		return &logger{logger: l, prefix: kv, hasValuer: containsValuer(kv), ctx: context.Background()}
 	}
-	kvs := make([]interface{}, 0, len(c.prefix)+len(kv))
+	kvs := make([]any, 0, len(c.prefix)+len(kv))
 	kvs = append(kvs, c.prefix...)
 	kvs = append(kvs, kv...)
 	return &logger{

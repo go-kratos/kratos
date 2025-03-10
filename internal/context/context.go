@@ -107,7 +107,7 @@ func (mc *mergeCtx) Deadline() (time.Time, bool) {
 }
 
 // Value implements context.Context.
-func (mc *mergeCtx) Value(key interface{}) interface{} {
+func (mc *mergeCtx) Value(key any) any {
 	if v := mc.parent1.Value(key); v != nil {
 		return v
 	}

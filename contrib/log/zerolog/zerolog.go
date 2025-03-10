@@ -18,7 +18,7 @@ func NewLogger(logger *zerolog.Logger) log.Logger {
 	}
 }
 
-func (l *Logger) Log(level log.Level, keyvals ...interface{}) (err error) {
+func (l *Logger) Log(level log.Level, keyvals ...any) (err error) {
 	var event *zerolog.Event
 	if len(keyvals) == 0 {
 		return nil

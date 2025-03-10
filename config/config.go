@@ -27,7 +27,7 @@ type Observer func(string, Value)
 // Config is a config interface.
 type Config interface {
 	Load() error
-	Scan(v interface{}) error
+	Scan(v any) error
 	Value(key string) Value
 	Watch(key string, o Observer) error
 	Close() error
@@ -46,7 +46,7 @@ func New(opts ...Option) Config {
 	o := options{
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
-		merge: func(dst, src interface{}) error {
+		merge: func(dst, src any) error {
 			return mergo.Map(dst, src, mergo.WithOverride)
 		},
 	}
@@ -79,7 +79,7 @@ func (c *config) watch(w Watcher) {
 			log.Errorf("failed to resolve next config: %v", err)
 			continue
 		}
-		c.cached.Range(func(key, value interface{}) bool {
+		c.cached.Range(func(key, value any) bool {
 			k := key.(string)
 			v := value.(Value)
 			if n, ok := c.reader.Value(k); ok && reflect.TypeOf(n.Load()) == reflect.TypeOf(v.Load()) && !reflect.DeepEqual(n.Load(), v.Load()) {
@@ -132,7 +132,7 @@ func (c *config) Value(key string) Value {
 	return &errValue{err: ErrNotFound}
 }
 
-func (c *config) Scan(v interface{}) error {
+func (c *config) Scan(v any) error {
 	data, err := c.reader.Source()
 	if err != nil {
 		return err

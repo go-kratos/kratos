@@ -75,7 +75,7 @@ func TestRoute(t *testing.T) {
 		if err := ctx.Bind(u); err != nil {
 			return err
 		}
-		h := ctx.Middleware(func(context.Context, interface{}) (interface{}, error) {
+		h := ctx.Middleware(func(context.Context, any) (any, error) {
 			return u, nil
 		})
 		return ctx.Returns(h(ctx, u))

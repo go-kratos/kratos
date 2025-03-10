@@ -27,9 +27,9 @@ type Value interface {
 	Duration() (time.Duration, error)
 	Slice() ([]Value, error)
 	Map() (map[string]Value, error)
-	Scan(interface{}) error
-	Load() interface{}
-	Store(interface{})
+	Scan(any) error
+	Load() any
+	Store(any)
 }
 
 type atomicValue struct {
@@ -83,7 +83,7 @@ func (v *atomicValue) Int() (int64, error) {
 }
 
 func (v *atomicValue) Slice() ([]Value, error) {
-	vals, ok := v.Load().([]interface{})
+	vals, ok := v.Load().([]any)
 	if !ok {
 		return nil, v.typeAssertError()
 	}
@@ -97,7 +97,7 @@ func (v *atomicValue) Slice() ([]Value, error) {
 }
 
 func (v *atomicValue) Map() (map[string]Value, error) {
-	vals, ok := v.Load().(map[string]interface{})
+	vals, ok := v.Load().(map[string]any)
 	if !ok {
 		return nil, v.typeAssertError()
 	}
@@ -164,7 +164,7 @@ func (v *atomicValue) Duration() (time.Duration, error) {
 	return time.Duration(val), nil
 }
 
-func (v *atomicValue) Scan(obj interface{}) error {
+func (v *atomicValue) Scan(obj any) error {
 	data, err := json.Marshal(v.Load())
 	if err != nil {
 		return err
@@ -184,8 +184,8 @@ func (v errValue) Int() (int64, error)              { return 0, v.err }
 func (v errValue) Float() (float64, error)          { return 0.0, v.err }
 func (v errValue) Duration() (time.Duration, error) { return 0, v.err }
 func (v errValue) String() (string, error)          { return "", v.err }
-func (v errValue) Scan(interface{}) error           { return v.err }
-func (v errValue) Load() interface{}                { return nil }
-func (v errValue) Store(interface{})                {}
+func (v errValue) Scan(any) error                   { return v.err }
+func (v errValue) Load() any                        { return nil }
+func (v errValue) Store(any)                        {}
 func (v errValue) Slice() ([]Value, error)          { return nil, v.err }
 func (v errValue) Map() (map[string]Value, error)   { return nil, v.err }

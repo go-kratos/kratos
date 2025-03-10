@@ -55,7 +55,7 @@ func (i *ServiceInstance) String() string {
 }
 
 // Equal returns whether i and o are equivalent.
-func (i *ServiceInstance) Equal(o interface{}) bool {
+func (i *ServiceInstance) Equal(o any) bool {
 	if i == nil && o == nil {
 		return true
 	}

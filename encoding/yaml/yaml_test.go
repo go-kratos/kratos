@@ -9,7 +9,7 @@ import (
 func TestCodec_Unmarshal(t *testing.T) {
 	tests := []struct {
 		data  string
-		value interface{}
+		value any
 	}{
 		{
 			"",
@@ -23,7 +23,7 @@ func TestCodec_Unmarshal(t *testing.T) {
 			map[string]string{"v": "hi"},
 		},
 		{
-			"v: hi", map[string]interface{}{"v": "hi"},
+			"v: hi", map[string]any{"v": "hi"},
 		},
 		{
 			"v: true",
@@ -31,19 +31,19 @@ func TestCodec_Unmarshal(t *testing.T) {
 		},
 		{
 			"v: true",
-			map[string]interface{}{"v": true},
+			map[string]any{"v": true},
 		},
 		{
 			"v: 10",
-			map[string]interface{}{"v": 10},
+			map[string]any{"v": 10},
 		},
 		{
 			"v: 0b10",
-			map[string]interface{}{"v": 2},
+			map[string]any{"v": 2},
 		},
 		{
 			"v: 0xA",
-			map[string]interface{}{"v": 10},
+			map[string]any{"v": 10},
 		},
 		{
 			"v: 4294967296",
@@ -51,27 +51,27 @@ func TestCodec_Unmarshal(t *testing.T) {
 		},
 		{
 			"v: 0.1",
-			map[string]interface{}{"v": 0.1},
+			map[string]any{"v": 0.1},
 		},
 		{
 			"v: .1",
-			map[string]interface{}{"v": 0.1},
+			map[string]any{"v": 0.1},
 		},
 		{
 			"v: .Inf",
-			map[string]interface{}{"v": math.Inf(+1)},
+			map[string]any{"v": math.Inf(+1)},
 		},
 		{
 			"v: -.Inf",
-			map[string]interface{}{"v": math.Inf(-1)},
+			map[string]any{"v": math.Inf(-1)},
 		},
 		{
 			"v: -10",
-			map[string]interface{}{"v": -10},
+			map[string]any{"v": -10},
 		},
 		{
 			"v: -.1",
-			map[string]interface{}{"v": -0.1},
+			map[string]any{"v": -0.1},
 		},
 	}
 	for _, tt := range tests {
@@ -84,7 +84,7 @@ func TestCodec_Unmarshal(t *testing.T) {
 	}
 	spec := struct {
 		A string
-		B map[string]interface{}
+		B map[string]any
 	}{A: "a"}
 	err := (codec{}).Unmarshal([]byte("v: hi"), &spec.B)
 	if err != nil {

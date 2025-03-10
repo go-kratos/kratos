@@ -10,13 +10,13 @@ import (
 )
 
 // Decoder is config decoder.
-type Decoder func(*KeyValue, map[string]interface{}) error
+type Decoder func(*KeyValue, map[string]any) error
 
 // Resolver resolve placeholder in config.
-type Resolver func(map[string]interface{}) error
+type Resolver func(map[string]any) error
 
 // Merge is config merge func.
-type Merge func(dst, src interface{}) error
+type Merge func(dst, src any) error
 
 // Option is config option.
 type Option func(*options)
@@ -70,7 +70,7 @@ func WithMergeFunc(m Merge) Option {
 
 // defaultDecoder decode config from source KeyValue
 // to target map[string]interface{} using src.Format codec.
-func defaultDecoder(src *KeyValue, target map[string]interface{}) error {
+func defaultDecoder(src *KeyValue, target map[string]any) error {
 	if src.Format == "" {
 		// expand key "aaa.bbb" into map[aaa]map[bbb]interface{}
 		keys := strings.Split(src.Key, ".")
@@ -78,7 +78,7 @@ func defaultDecoder(src *KeyValue, target map[string]interface{}) error {
 			if i == len(keys)-1 {
 				target[k] = src.Value
 			} else {
-				sub := make(map[string]interface{})
+				sub := make(map[string]any)
 				target[k] = sub
 				target = sub
 			}
@@ -91,8 +91,8 @@ func defaultDecoder(src *KeyValue, target map[string]interface{}) error {
 	return fmt.Errorf("unsupported key: %s format: %s", src.Key, src.Format)
 }
 
-func newActualTypesResolver(enableConvertToType bool) func(map[string]interface{}) error {
-	return func(input map[string]interface{}) error {
+func newActualTypesResolver(enableConvertToType bool) func(map[string]any) error {
+	return func(input map[string]any) error {
 		mapper := mapper(input)
 		return resolver(input, mapper, enableConvertToType)
 	}
@@ -100,28 +100,28 @@ func newActualTypesResolver(enableConvertToType bool) func(map[string]interface{
 
 // defaultResolver resolve placeholder in map value,
 // placeholder format in ${key:default}.
-func defaultResolver(input map[string]interface{}) error {
+func defaultResolver(input map[string]any) error {
 	mapper := mapper(input)
 	return resolver(input, mapper, false)
 }
 
-func resolver(input map[string]interface{}, mapper func(name string) string, toType bool) error {
-	var resolve func(map[string]interface{}) error
-	resolve = func(sub map[string]interface{}) error {
+func resolver(input map[string]any, mapper func(name string) string, toType bool) error {
+	var resolve func(map[string]any) error
+	resolve = func(sub map[string]any) error {
 		for k, v := range sub {
 			switch vt := v.(type) {
 			case string:
 				sub[k] = expand(vt, mapper, toType)
-			case map[string]interface{}:
+			case map[string]any:
 				if err := resolve(vt); err != nil {
 					return err
 				}
-			case []interface{}:
+			case []any:
 				for i, iface := range vt {
 					switch it := iface.(type) {
 					case string:
 						vt[i] = expand(it, mapper, toType)
-					case map[string]interface{}:
+					case map[string]any:
 						if err := resolve(it); err != nil {
 							return err
 						}
@@ -135,7 +135,7 @@ func resolver(input map[string]interface{}, mapper func(name string) string, toT
 	return resolve(input)
 }
 
-func mapper(input map[string]interface{}) func(name string) string {
+func mapper(input map[string]any) func(name string) string {
 	mapper := func(name string) string {
 		args := strings.SplitN(strings.TrimSpace(name), ":", 2) //nolint:mnd
 		if v, has := readValue(input, args[0]); has {
@@ -149,7 +149,7 @@ func mapper(input map[string]interface{}) func(name string) string {
 	return mapper
 }
 
-func convertToType(input string) interface{} {
+func convertToType(input string) any {
 	// Check if the input is a string with quotes
 	if strings.HasPrefix(input, "\"") && strings.HasSuffix(input, "\"") {
 		// Trim the quotes and return the string value
@@ -178,10 +178,10 @@ func convertToType(input string) interface{} {
 	return input
 }
 
-func expand(s string, mapping func(string) string, toType bool) interface{} {
+func expand(s string, mapping func(string) string, toType bool) any {
 	r := regexp.MustCompile(`\${(.*?)}`)
 	re := r.FindAllStringSubmatch(s, -1)
-	var ct interface{}
+	var ct any
 	for _, i := range re {
 		if len(i) == 2 { //nolint:mnd
 			m := mapping(i[1])
