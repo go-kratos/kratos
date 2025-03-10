@@ -268,7 +268,7 @@ func (d *Discovery) renew(ctx context.Context, ins *discoveryInstance) (err erro
 }
 
 // cancel Remove the registered instance from Discovery
-func (d *Discovery) cancel(ins *discoveryInstance) (err error) {
+func (d *Discovery) cancel(ctx context.Context, ins *discoveryInstance) (err error) {
 	d.mutex.RLock()
 	config := d.config
 	d.mutex.RUnlock()
@@ -281,7 +281,7 @@ func (d *Discovery) cancel(ins *discoveryInstance) (err error) {
 	// request
 	// send request to Discovery server.
 	if _, err = d.httpClient.R().
-		SetContext(context.TODO()).
+		SetContext(ctx).
 		SetQueryParamsFromValues(p).
 		SetResult(&res).
 		Post(uri); err != nil {
