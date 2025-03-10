@@ -20,7 +20,7 @@ type watcher struct {
 	cancel          context.CancelFunc
 }
 
-func (w *watcher) handle(_ uint64, data interface{}) {
+func (w *watcher) handle(_ uint64, data any) {
 	if data == nil {
 		return
 	}
@@ -68,7 +68,7 @@ func newWatcher(s *source) (*watcher, error) {
 		cancel:          cancel,
 	}
 
-	wp, err := watch.Parse(map[string]interface{}{"type": "keyprefix", "prefix": s.options.path})
+	wp, err := watch.Parse(map[string]any{"type": "keyprefix", "prefix": s.options.path})
 	if err != nil {
 		return nil, err
 	}
