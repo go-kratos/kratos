@@ -13,11 +13,9 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
-var (
-	testServerConfig = []constant.ServerConfig{
-		*constant.NewServerConfig("127.0.0.1", 8848),
-	}
-)
+var testServerConfig = []constant.ServerConfig{
+	*constant.NewServerConfig("127.0.0.1", 8848),
+}
 
 func TestRegistry_Register(t *testing.T) {
 	sc := testServerConfig
