@@ -139,10 +139,10 @@ func TestServer(t *testing.T) {
 	defer span.End()
 
 	e := errors.New("got an error")
-	nextError := func(context.Context, interface{}) (interface{}, error) {
+	nextError := func(context.Context, any) (any, error) {
 		return nil, e
 	}
-	nextValid := func(context.Context, interface{}) (interface{}, error) {
+	nextValid := func(context.Context, any) (any, error) {
 		time.Sleep(time.Millisecond * time.Duration(rand.Int31n(100)))
 		return "Hello valid", nil
 	}
@@ -201,10 +201,10 @@ func TestClient(t *testing.T) {
 	defer span.End()
 
 	e := errors.New("got an error")
-	nextError := func(context.Context, interface{}) (interface{}, error) {
+	nextError := func(context.Context, any) (any, error) {
 		return nil, e
 	}
-	nextValid := func(context.Context, interface{}) (interface{}, error) {
+	nextValid := func(context.Context, any) (any, error) {
 		return "Hello valid", nil
 	}
 

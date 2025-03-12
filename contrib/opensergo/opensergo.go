@@ -184,7 +184,7 @@ func listDescriptors() (services []*v1.ServiceDescriptor, types []*v1.TypeDescri
 	return
 }
 
-func HTTPPatternInfo(pattern interface{}) (method string, path string) {
+func HTTPPatternInfo(pattern any) (method string, path string) {
 	switch p := pattern.(type) {
 	case *annotations.HttpRule_Get:
 		return http.MethodGet, p.Get
