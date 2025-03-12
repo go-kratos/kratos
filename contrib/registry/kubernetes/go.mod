@@ -1,9 +1,9 @@
 module github.com/go-kratos/kratos/contrib/registry/kubernetes/v2
 
-go 1.19
+go 1.21
 
 require (
-	github.com/go-kratos/kratos/v2 v2.8.3
+	github.com/go-kratos/kratos/v2 v2.8.4
 	github.com/json-iterator/go v1.1.12
 	k8s.io/api v0.24.3
 	k8s.io/apimachinery v0.24.3

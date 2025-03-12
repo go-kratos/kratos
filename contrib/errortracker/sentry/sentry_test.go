@@ -8,7 +8,7 @@ import (
 func TestWithTags(t *testing.T) {
 	opts := new(options)
 	strval := "bar"
-	kvs := map[string]interface{}{
+	kvs := map[string]any{
 		"foo": strval,
 	}
 	funcTags := WithTags(kvs)

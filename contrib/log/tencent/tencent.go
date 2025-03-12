@@ -69,7 +69,7 @@ func (log *tencentLog) Close() error {
 	return log.producer.Close(5000)
 }
 
-func (log *tencentLog) Log(level log.Level, keyvals ...interface{}) error {
+func (log *tencentLog) Log(level log.Level, keyvals ...any) error {
 	contents := make([]*cls.Log_Content, 0, len(keyvals)/2+1)
 
 	contents = append(contents, &cls.Log_Content{
@@ -115,7 +115,7 @@ func newString(s string) *string {
 }
 
 // toString convert any type to string
-func toString(v interface{}) string {
+func toString(v any) string {
 	var key string
 	if v == nil {
 		return key
