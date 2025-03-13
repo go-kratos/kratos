@@ -62,7 +62,7 @@ func TestLogger(_ *testing.T) {
 	project := "foo"
 	logger := NewAliyunLog(WithProject(project))
 	defer logger.Close()
-	logger.GetProducer()
+	logger.GetClient()
 	flog := log.NewHelper(logger)
 	flog.Debug("log", "test")
 	flog.Info("log", "test")
