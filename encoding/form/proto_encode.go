@@ -11,12 +11,10 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
-
-	"github.com/go-kratos/kratos/v2/encoding/form/option"
 )
 
 // EncodeValues encode a message into url values.
-func EncodeValues(msg any, opts ...*option.EncodeOption) (url.Values, error) {
+func EncodeValues(msg any, opts ...*EncodeOption) (url.Values, error) {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return url.Values{}, nil
 	}
@@ -31,8 +29,8 @@ func EncodeValues(msg any, opts ...*option.EncodeOption) (url.Values, error) {
 	return encoder.Encode(msg)
 }
 
-func encodeByField(u url.Values, path string, m protoreflect.Message, opts ...*option.EncodeOption) (finalErr error) {
-	opt := option.MergeEncodeOptions(opts...)
+func encodeByField(u url.Values, path string, m protoreflect.Message, opts ...*EncodeOption) (finalErr error) {
+	opt := MergeEncodeOptions(opts...)
 	m.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
 		var (
 			key     string
@@ -180,8 +178,8 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 }
 
 // EncodeFieldMask return field mask name=paths
-func EncodeFieldMask(m protoreflect.Message, opts ...*option.EncodeOption) (query string) {
-	opt := option.MergeEncodeOptions(opts...)
+func EncodeFieldMask(m protoreflect.Message, opts ...*EncodeOption) (query string) {
+	opt := MergeEncodeOptions(opts...)
 	m.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
 		if fd.Kind() == protoreflect.MessageKind {
 			if msg := fd.Message(); msg.FullName() == fieldMaskFullName {

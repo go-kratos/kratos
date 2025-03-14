@@ -12,7 +12,6 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/encoding/form/option"
 	bdtest "github.com/go-kratos/kratos/v2/internal/testdata/binding"
 	"github.com/go-kratos/kratos/v2/internal/testdata/complex"
 	ectest "github.com/go-kratos/kratos/v2/internal/testdata/encoding"
@@ -271,7 +270,7 @@ func TestEncodeFieldMask(t *testing.T) {
 	if v != "updateMask=foo,bar" {
 		t.Errorf("got %s", v)
 	}
-	v = EncodeFieldMask(req.ProtoReflect(), option.Encode().UseProtoTextAsKey(true))
+	v = EncodeFieldMask(req.ProtoReflect(), Encode().UseProtoTextAsKey(true))
 	if v != "update_mask=foo,bar" {
 		t.Errorf("got %s", v)
 	}
@@ -289,7 +288,7 @@ func TestOptional(t *testing.T) {
 		t.Fatalf("got %s", query.Encode())
 	}
 
-	query, _ = EncodeValues(req, option.Encode().UseProtoTextAsKey(true))
+	query, _ = EncodeValues(req, Encode().UseProtoTextAsKey(true))
 	if query.Encode() != "name=foo&opt_int32=100&sub.naming=bar" {
 		t.Fatalf("got %s", query.Encode())
 	}

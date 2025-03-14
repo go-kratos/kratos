@@ -1,4 +1,4 @@
-package option
+package form
 
 // EncodeOption is the encoding options.
 type EncodeOption struct {
