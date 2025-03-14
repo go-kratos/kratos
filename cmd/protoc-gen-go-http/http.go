@@ -15,10 +15,10 @@ import (
 )
 
 const (
-	contextPackage          = protogen.GoImportPath("context")
-	transportHTTPPackage    = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
-	bindingPackage          = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http/binding")
-	formEncodeOptionPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/encoding/form/option")
+	contextPackage       = protogen.GoImportPath("context")
+	transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
+	bindingPackage       = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http/binding")
+	formPackage          = protogen.GoImportPath("github.com/go-kratos/kratos/v2/encoding/form")
 )
 
 var methodSets = make(map[string]int)
@@ -55,7 +55,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("// is compatible with the kratos package it is being compiled against.")
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
 	g.P("var _ = ", bindingPackage.Ident("EncodeURL"))
-	g.P("var _ = ", formEncodeOptionPackage.Ident("Encode"))
+	g.P("var _ = ", formPackage.Ident("Encode"))
 	g.P("const _ = ", transportHTTPPackage.Ident("SupportPackageIsVersion1"))
 	g.P()
 
