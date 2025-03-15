@@ -7,35 +7,37 @@ import (
 	"time"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
-	"github.com/aliyun/aliyun-log-go-sdk/producer"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
 
+var _ log.Logger = (*aliyunLog)(nil)
+
 // Logger see more detail https://github.com/aliyun/aliyun-log-go-sdk
 type Logger interface {
 	log.Logger
 
-	GetProducer() *producer.Producer
+	GetClient() sls.ClientInterface
 	Close() error
 }
 
 type aliyunLog struct {
-	producer *producer.Producer
-	opts     *options
+	client sls.ClientInterface
+	opts   *options
 }
 
-func (a *aliyunLog) GetProducer() *producer.Producer {
-	return a.producer
+func (a *aliyunLog) GetClient() sls.ClientInterface {
+	return a.client
 }
 
 type options struct {
-	accessKey    string
-	accessSecret string
-	endpoint     string
-	project      string
-	logstore     string
+	accessKey     string
+	accessSecret  string
+	endpoint      string
+	project       string
+	logstore      string
+	securityToken string
 }
 
 func defaultOptions() *options {
@@ -75,10 +77,16 @@ func WithAccessSecret(as string) Option {
 	}
 }
 
+func WithSecurityToken(st string) Option {
+	return func(alc *options) {
+		alc.securityToken = st
+	}
+}
+
 type Option func(alc *options)
 
 func (a *aliyunLog) Close() error {
-	return a.producer.Close(5000)
+	return a.client.Close()
 }
 
 func (a *aliyunLog) Log(level log.Level, keyvals ...any) error {
@@ -88,6 +96,7 @@ func (a *aliyunLog) Log(level log.Level, keyvals ...any) error {
 		Key:   newString(level.Key()),
 		Value: newString(level.String()),
 	})
+
 	for i := 0; i < len(keyvals); i += 2 {
 		contents = append(contents, &sls.LogContent{
 			Key:   newString(toString(keyvals[i])),
@@ -99,7 +108,8 @@ func (a *aliyunLog) Log(level log.Level, keyvals ...any) error {
 		Time:     proto.Uint32(uint32(time.Now().Unix())),
 		Contents: contents,
 	}
-	return a.producer.SendLog(a.opts.project, a.opts.logstore, "", "", logInst)
+
+	return a.client.PutLogs(a.opts.project, a.opts.logstore, &sls.LogGroup{Logs: []*sls.Log{logInst}})
 }
 
 // NewAliyunLog new aliyun logger with options.
@@ -108,16 +118,12 @@ func NewAliyunLog(options ...Option) Logger {
 	for _, o := range options {
 		o(opts)
 	}
-
-	producerConfig := producer.GetDefaultProducerConfig()
-	producerConfig.Endpoint = opts.endpoint
-	producerConfig.AccessKeyID = opts.accessKey
-	producerConfig.AccessKeySecret = opts.accessSecret
-	producerInst := producer.InitProducer(producerConfig)
+	provider := sls.NewStaticCredentialsProvider(opts.accessKey, opts.accessSecret, opts.securityToken)
+	client := sls.CreateNormalInterfaceV2(opts.endpoint, provider)
 
 	return &aliyunLog{
-		opts:     opts,
-		producer: producerInst,
+		opts:   opts,
+		client: client,
 	}
 }
 
