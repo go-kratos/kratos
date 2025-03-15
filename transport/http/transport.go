@@ -92,6 +92,16 @@ func RequestFromServerContext(ctx context.Context) (*http.Request, bool) {
 	return nil, false
 }
 
+// ResponseFromServerContext returns response from context.
+func ResponseFromServerContext(ctx context.Context) (http.ResponseWriter, bool) {
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		if tr, ok := tr.(*Transport); ok {
+			return tr.response, true
+		}
+	}
+	return nil, false
+}
+
 type headerCarrier http.Header
 
 // Get returns the value associated with the passed key.

@@ -92,3 +92,18 @@ func TestSetOperation(t *testing.T) {
 		t.Errorf("expect %v, got %v", "kratos", tr.operation)
 	}
 }
+
+func TestResponseFromServerContext(t *testing.T) {
+	ctx := context.Background()
+	tr := &Transport{response: http.ResponseWriter(nil)}
+	ctx = transport.NewServerContext(ctx, tr)
+	resp, ok := ResponseFromServerContext(ctx)
+	if !ok || resp != tr.response {
+		t.Errorf("Expected response and ok, got %v and %v", resp, ok)
+	}
+	ctx = context.Background()
+	_, ok = ResponseFromServerContext(ctx)
+	if ok {
+		t.Errorf("Expected no response and not ok, got %v and %v", false, ok)
+	}
+}
