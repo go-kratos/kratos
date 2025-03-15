@@ -1,6 +1,6 @@
 module github.com/go-kratos/kratos/contrib/middleware/validate/v2
 
-go 1.21.1
+go 1.23.0
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.5-20250307204501-0409229c3780.1
