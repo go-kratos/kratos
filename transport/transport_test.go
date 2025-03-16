@@ -22,6 +22,11 @@ func (tr *mockTransport) Endpoint() string {
 	return tr.endpoint
 }
 
+// Server returns the transport server.
+func (tr *mockTransport) Server() interface{} {
+	return nil
+}
+
 // Operation returns the transport operation.
 func (tr *mockTransport) Operation() string {
 	return tr.operation
