@@ -47,7 +47,7 @@ func (w *watcher) watch(ctx context.Context) {
 			}
 			if err != nil {
 				w.event <- zk.Event{Err: err}
-				return
+				continue
 			}
 		}
 		select {
