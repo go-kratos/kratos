@@ -7,7 +7,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-kratos/aegis v0.2.0
 	github.com/go-playground/form/v4 v4.2.0
-	github.com/golang-jwt/jwt/v5 v5.1.0
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.4.0
 	github.com/gorilla/mux v1.8.1
 	go.opentelemetry.io/otel v1.24.0
