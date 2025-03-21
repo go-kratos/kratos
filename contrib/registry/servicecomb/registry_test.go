@@ -23,7 +23,7 @@ func (receiver *mockClient) WatchMicroService(_ string, _ func(*sc.MicroServiceI
 	return nil
 }
 
-//nolint
+// nolint
 func (receiver *mockClient) FindMicroServiceInstances(_,
 	_, microServiceName, _ string, _ ...sc.CallOption,
 ) ([]*pb.MicroServiceInstance, error) {

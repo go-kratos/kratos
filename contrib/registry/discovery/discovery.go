@@ -113,8 +113,8 @@ func (d *Discovery) newSelf(zones map[string][]*discoveryInstance) {
 	}
 	// diff old nodes
 	var olds int
-	for _, n := range nodes {
-		if node, ok := d.node.Load().([]string); ok {
+	if node, ok := d.node.Load().([]string); ok {
+		for _, n := range nodes {
 			for _, o := range node {
 				if o == n {
 					olds++

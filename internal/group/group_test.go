@@ -7,7 +7,7 @@ import (
 
 func TestGroupGet(t *testing.T) {
 	count := 0
-	g := NewGroup(func() interface{} {
+	g := NewGroup(func() any {
 		count++
 		return count
 	})
@@ -31,12 +31,12 @@ func TestGroupGet(t *testing.T) {
 }
 
 func TestGroupReset(t *testing.T) {
-	g := NewGroup(func() interface{} {
+	g := NewGroup(func() any {
 		return 1
 	})
 	g.Get("key")
 	call := false
-	g.Reset(func() interface{} {
+	g.Reset(func() any {
 		call = true
 		return 1
 	})
@@ -56,7 +56,7 @@ func TestGroupReset(t *testing.T) {
 }
 
 func TestGroupClear(t *testing.T) {
-	g := NewGroup(func() interface{} {
+	g := NewGroup(func() any {
 		return 1
 	})
 	g.Get("key")
