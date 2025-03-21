@@ -202,19 +202,22 @@ func EncodeFieldMask(m protoreflect.Message) (query string) {
 // according to the protobuf JSON specification.
 // references: https://github.com/protocolbuffers/protobuf-go/blob/master/encoding/protojson/well_known_types.go#L842
 func jsonCamelCase(s string) string {
-	var b []byte
-	var wasUnderscore bool
-	for i := 0; i < len(s); i++ { // proto identifiers are always ASCII
+	var builder strings.Builder
+	builder.Grow(len(s))
+
+	wasUnderscore := false
+	for i := 0; i < len(s); i++ { // proto identifiers are always ASCIIS
 		c := s[i]
 		if c != '_' {
 			if wasUnderscore && isASCIILower(c) {
 				c -= 'a' - 'A' // convert to uppercase
 			}
-			b = append(b, c)
+			builder.WriteByte(c)
 		}
 		wasUnderscore = c == '_'
 	}
-	return string(b)
+
+	return builder.String()
 }
 
 func isASCIILower(c byte) bool {
