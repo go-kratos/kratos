@@ -99,7 +99,7 @@ func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 	}
 
 	hctx, cancel := context.WithCancel(r.opts.ctx)
-	r.ctxMap[service.ID] = &serviceCancel{
+	r.ctxMap[key] = &serviceCancel{
 		service: service,
 		cancel:  cancel,
 	}
@@ -115,11 +115,11 @@ func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInst
 		}
 	}()
 	// cancel heartbeat
-	if serviceCancel, ok := r.ctxMap[service.ID]; ok {
+	key := fmt.Sprintf("%s/%s/%s", r.opts.namespace, service.Name, service.ID)
+	if serviceCancel, ok := r.ctxMap[key]; ok {
 		serviceCancel.cancel()
 		delete(r.ctxMap, service.ID)
 	}
-	key := fmt.Sprintf("%s/%s/%s", r.opts.namespace, service.Name, service.ID)
 	_, err := r.client.Delete(ctx, key)
 	return err
 }
