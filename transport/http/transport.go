@@ -18,6 +18,7 @@ type Transporter interface {
 
 // Transport is an HTTP transport.
 type Transport struct {
+	server       interface{}
 	endpoint     string
 	operation    string
 	reqHeader    headerCarrier
@@ -35,6 +36,11 @@ func (tr *Transport) Kind() transport.Kind {
 // Endpoint returns the transport endpoint.
 func (tr *Transport) Endpoint() string {
 	return tr.endpoint
+}
+
+// Server returns the transport server.
+func (tr *Transport) Server() interface{} {
+	return tr.server
 }
 
 // Operation returns the transport operation.
@@ -67,6 +73,15 @@ func SetOperation(ctx context.Context, op string) {
 	if tr, ok := transport.FromServerContext(ctx); ok {
 		if tr, ok := tr.(*Transport); ok {
 			tr.operation = op
+		}
+	}
+}
+
+// SetServer sets the transport server.
+func SetServer(ctx context.Context, srv interface{}) {
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		if tr, ok := tr.(*Transport); ok {
+			tr.server = srv
 		}
 	}
 }

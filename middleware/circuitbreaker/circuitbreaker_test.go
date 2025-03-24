@@ -28,6 +28,10 @@ func (tr *transportMock) Endpoint() string {
 	return tr.endpoint
 }
 
+func (tr *transportMock) Server() interface{} {
+	return nil
+}
+
 func (tr *transportMock) Operation() string {
 	return tr.operation
 }
