@@ -9,6 +9,7 @@ import (
 )
 
 func TestEncodeURL(t *testing.T) {
+	kratosName := "kratos"
 	tests := []struct {
 		pathTemplate string
 		request      *binding.HelloRequest
@@ -116,6 +117,18 @@ func TestEncodeURL(t *testing.T) {
 			request:      &binding.HelloRequest{Sub: &binding.Sub{Name: "kratos"}},
 			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/{}/[]/[kratos]",
+		},
+		{
+			pathTemplate: "http://helloworld.Greeter/helloworld/{optString}",
+			request:      &binding.HelloRequest{OptString: &kratosName},
+			needQuery:    false,
+			want:         "http://helloworld.Greeter/helloworld/kratos",
+		},
+		{
+			pathTemplate: "http://helloworld.Greeter/helloworld/{opt_string}",
+			request:      &binding.HelloRequest{OptString: &kratosName},
+			needQuery:    false,
+			want:         "http://helloworld.Greeter/helloworld/kratos",
 		},
 	}
 
