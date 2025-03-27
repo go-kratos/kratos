@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -55,7 +56,8 @@ type Registry struct {
 		ctxMap is used to store the context cancel function of each service instance.
 		When the service instance is deregistered, the corresponding context cancel function is called to stop the heartbeat.
 	*/
-	ctxMap map[string]*serviceCancel
+	ctxMap   map[string]*serviceCancel
+	ctxMapMu sync.RWMutex
 }
 
 type serviceCancel struct {
@@ -99,6 +101,8 @@ func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 	}
 
 	hctx, cancel := context.WithCancel(r.opts.ctx)
+	r.ctxMapMu.Lock()
+	defer r.ctxMapMu.Unlock()
 	r.ctxMap[service.ID] = &serviceCancel{
 		service: service,
 		cancel:  cancel,
@@ -115,6 +119,8 @@ func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInst
 		}
 	}()
 	// cancel heartbeat
+	r.ctxMapMu.Lock()
+	defer r.ctxMapMu.Unlock()
 	if serviceCancel, ok := r.ctxMap[service.ID]; ok {
 		serviceCancel.cancel()
 		delete(r.ctxMap, service.ID)
