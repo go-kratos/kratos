@@ -99,7 +99,7 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 		Environment: env,
 		Framework:   fw,
 	}
-	// attempt to create the microservice
+	// attempt to register the microservice
 	sid, err := r.cli.RegisterService(ms)
 	// if it fails, it may indicate that the service is already registered
 	if err != nil {
@@ -112,7 +112,7 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 		if parseErr != nil {
 			return parseErr
 		}
-		// if the error code does not indicate that the service already exists, return the error
+		// if the error code is not specific to the service already existing, return the current error
 		if svcErr.Code != discovery.ErrServiceAlreadyExists {
 			return err
 		}
