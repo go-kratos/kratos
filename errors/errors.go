@@ -15,6 +15,11 @@ const (
 	UnknownCode = 500
 	// UnknownReason is unknown reason for error info.
 	UnknownReason = ""
+	// ValidatorReason indicates an error related to request validation.
+	ValidatorReason = "VALIDATOR"
+	// CodecReason indicates an error related to encoding/decoding.
+	CodecReason = "CODEC"
+
 	// SupportPackageIsVersion1 this constant should not be referenced by any other code.
 	SupportPackageIsVersion1 = true
 )

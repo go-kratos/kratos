@@ -20,14 +20,14 @@ func ProtoValidate() middleware.Middleware {
 		return func(ctx context.Context, req any) (reply any, err error) {
 			if msg, ok := req.(proto.Message); ok {
 				if err := protovalidate.Validate(msg); err != nil {
-					return nil, errors.BadRequest("VALIDATOR", err.Error()).WithCause(err)
+					return nil, errors.BadRequest(errors.ValidatorReason, err.Error()).WithCause(err)
 				}
 			}
 
 			// to compatible with the [old validator](https://github.com/envoyproxy/protoc-gen-validate)
 			if v, ok := req.(validator); ok {
 				if err := v.Validate(); err != nil {
-					return nil, errors.BadRequest("VALIDATOR", err.Error()).WithCause(err)
+					return nil, errors.BadRequest(errors.ValidatorReason, err.Error()).WithCause(err)
 				}
 			}
 
