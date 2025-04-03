@@ -334,16 +334,19 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 // according to the protobuf JSON specification.
 // references: https://github.com/protocolbuffers/protobuf-go/blob/master/encoding/protojson/well_known_types.go#L864
 func jsonSnakeCase(s string) string {
-	var b []byte
+	var builder strings.Builder
+	builder.Grow(len(s))
+
 	for i := 0; i < len(s); i++ { // proto identifiers are always ASCII
 		c := s[i]
 		if isASCIIUpper(c) {
-			b = append(b, '_')
+			builder.WriteByte('_')
 			c += 'a' - 'A' // convert to lowercase
 		}
-		b = append(b, c)
+		builder.WriteByte(c)
 	}
-	return string(b)
+
+	return builder.String()
 }
 
 func isASCIIUpper(c byte) bool {
