@@ -379,7 +379,7 @@ func (d *Discovery) polls(ctx context.Context) (apps map[string]*disInstancesInf
 		p.Add(_paramKeyAppID, appID)
 	}
 	for _, ts := range lastTss {
-		p.Add("latest_timestamp", strconv.FormatInt(ts, 10))
+		p.Add(_paramKeyLatestTimestamp, strconv.FormatInt(ts, 10))
 	}
 
 	// request
