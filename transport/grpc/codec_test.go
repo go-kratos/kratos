@@ -8,7 +8,7 @@ import (
 )
 
 func TestCodec(t *testing.T) {
-	in, err := structpb.NewStruct(map[string]interface{}{"Golang": "Kratos"})
+	in, err := structpb.NewStruct(map[string]any{"Golang": "Kratos"})
 	if err != nil {
 		t.Errorf("grpc codec create input data error:%v", err)
 	}

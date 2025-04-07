@@ -83,7 +83,7 @@ func BenchmarkFilterFunc(b *testing.B) {
 	}
 }
 
-func testFilterFunc(level Level, keyvals ...interface{}) bool {
+func testFilterFunc(level Level, keyvals ...any) bool {
 	if level == LevelWarn {
 		return true
 	}
@@ -102,7 +102,7 @@ func TestFilterFuncWitchLoggerPrefix(t *testing.T) {
 		want   string
 	}{
 		{
-			logger: NewFilter(With(NewStdLogger(buf), "caller", "caller", "prefix", "whaterver"), FilterFunc(testFilterFuncWithLoggerPrefix)),
+			logger: NewFilter(With(NewStdLogger(buf), "caller", "caller", "prefix", "whatever"), FilterFunc(testFilterFuncWithLoggerPrefix)),
 			want:   "",
 		},
 		{
@@ -130,7 +130,7 @@ func TestFilterFuncWitchLoggerPrefix(t *testing.T) {
 	}
 }
 
-func testFilterFuncWithLoggerPrefix(level Level, keyvals ...interface{}) bool {
+func testFilterFuncWithLoggerPrefix(level Level, keyvals ...any) bool {
 	if level == LevelWarn {
 		return true
 	}
@@ -146,11 +146,14 @@ func testFilterFuncWithLoggerPrefix(level Level, keyvals ...interface{}) bool {
 }
 
 func TestFilterWithContext(t *testing.T) {
-	ctxKey := struct{}{}
+	type CtxKey struct {
+		Key string
+	}
+	ctxKey := CtxKey{Key: "context"}
 	ctxValue := "filter test value"
 
 	v1 := func() Valuer {
-		return func(ctx context.Context) interface{} {
+		return func(ctx context.Context) any {
 			return ctx.Value(ctxKey)
 		}
 	}
@@ -165,7 +168,7 @@ func TestFilterWithContext(t *testing.T) {
 	_ = WithContext(ctx, filter).Log(LevelInfo, "kind", "test")
 
 	if info.String() != "" {
-		t.Error("filter is not woring")
+		t.Error("filter is not working")
 		return
 	}
 

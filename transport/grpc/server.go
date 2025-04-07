@@ -61,8 +61,8 @@ func Timeout(timeout time.Duration) ServerOption {
 
 // Logger with server logger.
 // Deprecated: use global logger instead.
-func Logger(_ log.Logger) ServerOption {
-	return func(s *Server) {}
+func Logger(log.Logger) ServerOption {
+	return func(*Server) {}
 }
 
 // Middleware with server middleware.
@@ -113,6 +113,13 @@ func StreamInterceptor(in ...grpc.StreamServerInterceptor) ServerOption {
 	}
 }
 
+// DisableReflection disable grpc reflection.
+func DisableReflection() ServerOption {
+	return func(s *Server) {
+		s.disableReflection = true
+	}
+}
+
 // Options with grpc options.
 func Options(opts ...grpc.ServerOption) ServerOption {
 	return func(s *Server) {
@@ -123,23 +130,24 @@ func Options(opts ...grpc.ServerOption) ServerOption {
 // Server is a gRPC server wrapper.
 type Server struct {
 	*grpc.Server
-	baseCtx          context.Context
-	tlsConf          *tls.Config
-	lis              net.Listener
-	err              error
-	network          string
-	address          string
-	endpoint         *url.URL
-	timeout          time.Duration
-	middleware       matcher.Matcher
-	streamMiddleware matcher.Matcher
-	unaryInts        []grpc.UnaryServerInterceptor
-	streamInts       []grpc.StreamServerInterceptor
-	grpcOpts         []grpc.ServerOption
-	health           *health.Server
-	customHealth     bool
-	metadata         *apimd.Server
-	adminClean       func()
+	baseCtx           context.Context
+	tlsConf           *tls.Config
+	lis               net.Listener
+	err               error
+	network           string
+	address           string
+	endpoint          *url.URL
+	timeout           time.Duration
+	middleware        matcher.Matcher
+	streamMiddleware  matcher.Matcher
+	unaryInts         []grpc.UnaryServerInterceptor
+	streamInts        []grpc.StreamServerInterceptor
+	grpcOpts          []grpc.ServerOption
+	health            *health.Server
+	customHealth      bool
+	metadata          *apimd.Server
+	adminClean        func()
+	disableReflection bool
 }
 
 // NewServer creates a gRPC server by options.
@@ -185,7 +193,10 @@ func NewServer(opts ...ServerOption) *Server {
 		grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
 	}
 	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
-	reflection.Register(srv.Server)
+	// reflection register
+	if !srv.disableReflection {
+		reflection.Register(srv.Server)
+	}
 	// admin register
 	srv.adminClean, _ = admin.Register(srv.Server)
 	return srv
@@ -223,13 +234,25 @@ func (s *Server) Start(ctx context.Context) error {
 }
 
 // Stop stop the gRPC server.
-func (s *Server) Stop(_ context.Context) error {
+func (s *Server) Stop(ctx context.Context) error {
 	if s.adminClean != nil {
 		s.adminClean()
 	}
 	s.health.Shutdown()
-	s.GracefulStop()
-	log.Info("[gRPC] server stopping")
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		log.Info("[gRPC] server stopping")
+		s.Server.GracefulStop()
+	}()
+
+	select {
+	case <-done:
+	case <-ctx.Done():
+		log.Warn("[gRPC] server couldn't stop gracefully in time, doing force stop")
+		s.Server.Stop()
+	}
 	return nil
 }
 

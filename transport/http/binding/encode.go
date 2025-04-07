@@ -12,7 +12,7 @@ import (
 var reg = regexp.MustCompile(`{[\\.\w]+}`)
 
 // EncodeURL encode proto message to url path.
-func EncodeURL(pathTemplate string, msg interface{}, needQuery bool) string {
+func EncodeURL(pathTemplate string, msg any, needQuery bool) string {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return pathTemplate
 	}
@@ -20,7 +20,7 @@ func EncodeURL(pathTemplate string, msg interface{}, needQuery bool) string {
 	pathParams := make(map[string]struct{})
 	path := reg.ReplaceAllStringFunc(pathTemplate, func(in string) string {
 		// it's unreachable because the reg means that must have more than one char in {}
-		// if len(in) < 4 { //nolint:gomnd // **  explain the 4 number here :-) **
+		// if len(in) < 4 { //nolint:mnd // **  explain the 4 number here :-) **
 		//	return in
 		// }
 		key := in[1 : len(in)-1]

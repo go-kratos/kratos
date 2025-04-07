@@ -1,9 +1,9 @@
 module github.com/go-kratos/kratos/contrib/log/zerolog/v2
 
-go 1.19
+go 1.21
 
 require (
-	github.com/go-kratos/kratos/v2 v2.8.0
+	github.com/go-kratos/kratos/v2 v2.8.4
 	github.com/rs/zerolog v1.30.0
 )
 

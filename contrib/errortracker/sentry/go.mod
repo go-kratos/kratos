@@ -1,10 +1,10 @@
 module github.com/go-kratos/kratos/contrib/errortracker/sentry/v2
 
-go 1.19
+go 1.21
 
 require (
 	github.com/getsentry/sentry-go v0.25.0
-	github.com/go-kratos/kratos/v2 v2.0.0-00010101000000-000000000000
+	github.com/go-kratos/kratos/v2 v2.8.4
 )
 
 require (

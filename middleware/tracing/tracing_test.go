@@ -127,7 +127,7 @@ func TestServer(t *testing.T) {
 		childSpanID  string
 		childTraceID string
 	)
-	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+	next := func(ctx context.Context, req any) (any, error) {
 		_ = log.WithContext(ctx, logger).Log(log.LevelInfo,
 			"kind", "server",
 		)
@@ -166,7 +166,6 @@ func TestServer(t *testing.T) {
 		WithTracerProvider(tracesdk.NewTracerProvider()),
 		WithPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})),
 	)(next)(context.Background(), "test server: ")
-
 	if err != nil {
 		t.Errorf("expected error, got nil")
 	}
@@ -199,7 +198,7 @@ func TestClient(t *testing.T) {
 		childSpanID  string
 		childTraceID string
 	)
-	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+	next := func(ctx context.Context, req any) (any, error) {
 		_ = log.WithContext(ctx, logger).Log(log.LevelInfo,
 			"kind", "client",
 		)

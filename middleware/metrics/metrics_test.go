@@ -77,7 +77,7 @@ func init() {
 				Name:        instrument.Name,
 				Description: instrument.Description,
 				Unit:        instrument.Unit,
-				AttributeFilter: func(value attribute.KeyValue) bool {
+				AttributeFilter: func(attribute.KeyValue) bool {
 					return true
 				},
 			}, true
@@ -139,10 +139,10 @@ func TestServer(t *testing.T) {
 	defer span.End()
 
 	e := errors.New("got an error")
-	nextError := func(ctx context.Context, req interface{}) (interface{}, error) {
+	nextError := func(context.Context, any) (any, error) {
 		return nil, e
 	}
-	nextValid := func(ctx context.Context, req interface{}) (interface{}, error) {
+	nextValid := func(context.Context, any) (any, error) {
 		time.Sleep(time.Millisecond * time.Duration(rand.Int31n(100)))
 		return "Hello valid", nil
 	}
@@ -201,10 +201,10 @@ func TestClient(t *testing.T) {
 	defer span.End()
 
 	e := errors.New("got an error")
-	nextError := func(ctx context.Context, req interface{}) (interface{}, error) {
+	nextError := func(context.Context, any) (any, error) {
 		return nil, e
 	}
-	nextValid := func(ctx context.Context, req interface{}) (interface{}, error) {
+	nextValid := func(context.Context, any) (any, error) {
 		return "Hello valid", nil
 	}
 

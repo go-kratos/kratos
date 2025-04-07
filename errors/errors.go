@@ -76,12 +76,12 @@ func New(code int, reason, message string) *Error {
 }
 
 // Newf New(code fmt.Sprintf(format, a...))
-func Newf(code int, reason, format string, a ...interface{}) *Error {
+func Newf(code int, reason, format string, a ...any) *Error {
 	return New(code, reason, fmt.Sprintf(format, a...))
 }
 
 // Errorf returns an error object for the code, message and error info.
-func Errorf(code int, reason, format string, a ...interface{}) error {
+func Errorf(code int, reason, format string, a ...any) error {
 	return New(code, reason, fmt.Sprintf(format, a...))
 }
 
@@ -89,7 +89,7 @@ func Errorf(code int, reason, format string, a ...interface{}) error {
 // It supports wrapped errors.
 func Code(err error) int {
 	if err == nil {
-		return 200 //nolint:gomnd
+		return 200 //nolint:mnd
 	}
 	return int(FromError(err).Code)
 }

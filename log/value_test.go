@@ -14,12 +14,12 @@ func TestValue(t *testing.T) {
 	logger = With(logger)
 	_ = logger.Log(LevelDebug, "msg", "helloworld")
 
-	var v1 interface{}
+	var v1 any
 	got := Value(context.Background(), v1)
 	if got != v1 {
 		t.Errorf("Value() = %v, want %v", got, v1)
 	}
-	var v2 Valuer = func(ctx context.Context) interface{} {
+	var v2 Valuer = func(context.Context) any {
 		return 3
 	}
 	got = Value(context.Background(), v2)

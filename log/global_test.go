@@ -20,31 +20,31 @@ func TestGlobalLog(t *testing.T) {
 
 	testCases := []struct {
 		level   Level
-		content []interface{}
+		content []any
 	}{
 		{
 			LevelDebug,
-			[]interface{}{"test debug"},
+			[]any{"test debug"},
 		},
 		{
 			LevelInfo,
-			[]interface{}{"test info"},
+			[]any{"test info"},
 		},
 		{
 			LevelInfo,
-			[]interface{}{"test %s", "info"},
+			[]any{"test %s", "info"},
 		},
 		{
 			LevelWarn,
-			[]interface{}{"test warn"},
+			[]any{"test warn"},
 		},
 		{
 			LevelError,
-			[]interface{}{"test error"},
+			[]any{"test error"},
 		},
 		{
 			LevelError,
-			[]interface{}{"test %s", "error"},
+			[]any{"test %s", "error"},
 		},
 	}
 
@@ -115,5 +115,25 @@ func TestGlobalContext(t *testing.T) {
 	Context(context.Background()).Infof("111")
 	if buffer.String() != "INFO msg=111\n" {
 		t.Errorf("Expected:%s, got:%s", "INFO msg=111", buffer.String())
+	}
+}
+
+func TestContextWithGlobalLog(t *testing.T) {
+	buffer := &bytes.Buffer{}
+
+	type traceKey struct{}
+	// set "trace-id" Valuer
+	newLogger := With(NewStdLogger(buffer), "trace-id", Valuer(func(ctx context.Context) any {
+		return ctx.Value(traceKey{})
+	}))
+
+	SetLogger(newLogger)
+
+	// add value to ctx
+	ctx := context.WithValue(context.Background(), traceKey{}, "test-trace-id")
+
+	_ = WithContext(ctx, GetLogger()).Log(LevelInfo)
+	if buffer.String() != "INFO trace-id=test-trace-id\n" {
+		t.Errorf("Expected:%s, got:%s", "INFO trace-id=test-trace-id", buffer.String())
 	}
 }

@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        go: [ 1.20.x, 1.21.x, 1.22.x ]
+        go: [ 1.21.x, 1.22.x, 1.23.x ]
     name: build & test
     runs-on: ubuntu-latest
     services:
@@ -25,7 +25,7 @@ jobs:
           ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
           ETCD_ADVERTISE_CLIENT_URLS: http://0.0.0.0:2379
       consul:
-        image: consul:1.12.3
+        image: hashicorp/consul:1.20
         ports:
           - 8500:8500
       nacos:
@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Go
-        uses: actions/setup-go@v5.0.2
+        uses: actions/setup-go@v5.4.0
         with:
           go-version: ${{ matrix.go }}
 

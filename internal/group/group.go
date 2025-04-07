@@ -7,24 +7,24 @@ import "sync"
 
 // Group is a lazy load container.
 type Group struct {
-	new  func() interface{}
-	vals map[string]interface{}
+	new  func() any
+	vals map[string]any
 	sync.RWMutex
 }
 
 // NewGroup news a group container.
-func NewGroup(new func() interface{}) *Group {
+func NewGroup(new func() any) *Group {
 	if new == nil {
 		panic("container.group: can't assign a nil to the new function")
 	}
 	return &Group{
 		new:  new,
-		vals: make(map[string]interface{}),
+		vals: make(map[string]any),
 	}
 }
 
 // Get gets the object by the given key.
-func (g *Group) Get(key string) interface{} {
+func (g *Group) Get(key string) any {
 	g.RLock()
 	v, ok := g.vals[key]
 	if ok {
@@ -46,7 +46,7 @@ func (g *Group) Get(key string) interface{} {
 }
 
 // Reset resets the new function and deletes all existing objects.
-func (g *Group) Reset(new func() interface{}) {
+func (g *Group) Reset(new func() any) {
 	if new == nil {
 		panic("container.group: can't assign a nil to the new function")
 	}
@@ -59,6 +59,6 @@ func (g *Group) Reset(new func() interface{}) {
 // Clear deletes all objects.
 func (g *Group) Clear() {
 	g.Lock()
-	g.vals = make(map[string]interface{})
+	g.vals = make(map[string]any)
 	g.Unlock()
 }

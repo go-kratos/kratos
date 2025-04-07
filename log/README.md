@@ -8,7 +8,7 @@
 logger := log.NewStdLogger(os.Stdout)
 // fields & valuer
 logger = log.With(logger,
-    "service.name", "hellworld",
+    "service.name", "helloworld",
     "service.version", "v1.0.0",
     "ts", log.DefaultTimestamp,
     "caller", log.DefaultCaller,

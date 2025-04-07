@@ -10,14 +10,15 @@ linters:
     - dogsled
     - durationcheck
     - errcheck
-    - exportloopref
+    # - copyloopvar # need upgrade to Go 1.22
     - govet
+    - staticcheck
     - gosimple
     - gofmt
     - gofumpt
     - goconst
     - goimports
-    - gomnd
+    - mnd
     - gocyclo
     - ineffassign
     - lll
@@ -44,19 +45,20 @@ linters:
   # - nestif
   # - prealloc
   # - testpackage
-  # - stylrcheck
+  # - stylecheck
   # - wsl
 
 linters-settings:
   govet:
-    check-shadowing: true
+    enable:
+      - shadow
   whitespace:
     multi-func: true
   lll:
     line-length: 160
-  gomnd:
+  mnd:
     # don't include the "operation", "argument" and "assign"
-    checks: 
+    checks:
       - case
       - condition
       - return

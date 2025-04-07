@@ -23,7 +23,7 @@ func (e *env) load(envs []string) []*config.KeyValue {
 	var kv []*config.KeyValue
 	for _, env := range envs {
 		var k, v string
-		subs := strings.SplitN(env, "=", 2) //nolint:gomnd
+		subs := strings.SplitN(env, "=", 2) //nolint:mnd
 		k = subs[0]
 		if len(subs) > 1 {
 			v = subs[1]

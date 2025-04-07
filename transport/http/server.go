@@ -58,8 +58,8 @@ func Timeout(timeout time.Duration) ServerOption {
 
 // Logger with server logger.
 // Deprecated: use global logger instead.
-func Logger(_ log.Logger) ServerOption {
-	return func(s *Server) {}
+func Logger(log.Logger) ServerOption {
+	return func(*Server) {}
 }
 
 // Middleware with service middleware option.
@@ -214,7 +214,7 @@ func (s *Server) Use(selector string, m ...middleware.Middleware) {
 
 // WalkRoute walks the router and all its sub-routers, calling walkFn for each route in the tree.
 func (s *Server) WalkRoute(fn WalkRouteFunc) error {
-	return s.router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+	return s.router.Walk(func(route *mux.Route, _ *mux.Router, _ []*mux.Route) error {
 		methods, err := route.GetMethods()
 		if err != nil {
 			return nil // ignore no methods
@@ -343,7 +343,14 @@ func (s *Server) Start(ctx context.Context) error {
 // Stop stop the HTTP server.
 func (s *Server) Stop(ctx context.Context) error {
 	log.Info("[HTTP] server stopping")
-	return s.Shutdown(ctx)
+	err := s.Shutdown(ctx)
+	if err != nil {
+		if ctx.Err() != nil {
+			log.Warn("[HTTP] server couldn't stop gracefully in time, doing force stop")
+			err = s.Server.Close()
+		}
+	}
+	return err
 }
 
 func (s *Server) listenAndEndpoint() error {
