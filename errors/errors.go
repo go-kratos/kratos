@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -66,6 +67,22 @@ func (e *Error) GRPCStatus() *status.Status {
 
 // New returns an error object for the code, message.
 func New(code int, reason, message string) *Error {
+	return &Error{
+		Status: Status{
+			Code:    int32(code),
+			Message: message,
+			Reason:  reason,
+		},
+	}
+}
+
+// NewWithContext Use context to create error objects and support i18n localization
+func NewWithContext(ctx context.Context, code int, reason string, data any) *Error {
+	message := ""
+	// If the global i18n manager is registered, it is used to localize the error message
+	if globalI18n != nil {
+		message = globalI18n.Localize(ctx, reason, data)
+	}
 	return &Error{
 		Status: Status{
 			Code:    int32(code),

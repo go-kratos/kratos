@@ -15,8 +15,9 @@ import (
 )
 
 const (
-	errorsPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/errors")
-	fmtPackage    = protogen.GoImportPath("fmt")
+	errorsPackage  = protogen.GoImportPath("github.com/go-kratos/kratos/v2/errors")
+	fmtPackage     = protogen.GoImportPath("fmt")
+	contextPackage = protogen.GoImportPath("context")
 )
 
 var enCases = cases.Title(language.AmericanEnglish, cases.NoLower)
@@ -32,6 +33,7 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) *protogen.Generated
 	g.P()
 	g.P("package ", file.GoPackageName)
 	g.P()
+	g.QualifiedGoIdent(contextPackage.Ident(""))
 	g.QualifiedGoIdent(fmtPackage.Ident(""))
 	generateFileContent(gen, file, g)
 	return g
