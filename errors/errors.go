@@ -83,13 +83,7 @@ func NewWithContext(ctx context.Context, code int, reason string, data any) *Err
 	if globalI18n != nil {
 		message = globalI18n.Localize(ctx, reason, data)
 	}
-	return &Error{
-		Status: Status{
-			Code:    int32(code),
-			Message: message,
-			Reason:  reason,
-		},
-	}
+	return New(code, reason, message)
 }
 
 // Newf New(code fmt.Sprintf(format, a...))
