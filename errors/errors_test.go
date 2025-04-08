@@ -239,15 +239,15 @@ func TestNewWithContext_GlobalI18nIsNotNil(t *testing.T) {
 	if !errors.Is(err, New(code, reason, "")) {
 		t.Errorf("Expected error to be %v, but got %v", New(code, reason, ""), err)
 	}
-	if err.Message != "kratos is the best" {
-		t.Errorf("Expected error message to be %v, but got %v", "kratos is the best", err.Message)
+	if err.Message != "Kratos is the best" {
+		t.Errorf("Expected error message to be %v, but got %v", "Kratos is the best", err.Message)
 	}
 
 	err = NewWithContext(withLang(ctx, "zh_CN"), code, reason, data)
 	if !errors.Is(err, New(code, reason, "")) {
 		t.Errorf("Expected error to be %v, but got %v", New(code, reason, ""), err)
 	}
-	if err.Message != "kratos是最好的" {
-		t.Errorf("Expected error message to be %v, but got %v", "kratos是最好的", err.Message)
+	if err.Message != "Kratos是最好的" {
+		t.Errorf("Expected error message to be %v, but got %v", "Kratos是最好的", err.Message)
 	}
 }
