@@ -1,11 +1,14 @@
 package errors
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
+	text "text/template"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -145,5 +148,106 @@ func TestOther(t *testing.T) {
 	}
 	if cerr := Clone(nil); cerr != nil {
 		t.Errorf("Clone(nil) = %v, want %v", Clone(err400), err400)
+	}
+}
+
+// MockI18n is a mock implementation of the I18n interface
+type MockI18n struct {
+	localizeFunc func(ctx context.Context, reason string, data any) string
+}
+
+// Localize mocks the Localize method of the I18n interface
+func (m *MockI18n) Localize(ctx context.Context, reason string, data any) string {
+	return m.localizeFunc(ctx, reason, data)
+}
+
+func textFormatter(format string, data any) (s string, err error) {
+	t, err := text.New("text/template").Parse(format)
+	if err != nil {
+		return "", nil
+	}
+	tmpl := text.Must(t, err)
+	resultIoWriter := new(strings.Builder)
+
+	if err = tmpl.Execute(resultIoWriter, data); err != nil {
+		return "", err
+	}
+	return resultIoWriter.String(), nil
+}
+
+// TestNewWithContext_GlobalI18nIsNil tests the NewWithContext function when globalI18n is nil.
+// It verifies that the returned Error object has an empty Message field.
+func TestNewWithContext_GlobalI18nIsNil(t *testing.T) {
+	// Arrange
+	ctx := context.Background()
+	code := 404
+	reason := "not_found"
+	data := map[string]string{"resource": "user"}
+
+	// Act
+	err := NewWithContext(ctx, code, reason, data)
+
+	// Assert
+	if !errors.Is(err, New(code, reason, "")) {
+		t.Errorf("Expected error to be %v, but got %v", New(code, reason, ""), err)
+	}
+	if err.Message != "" {
+		t.Errorf("Expected error Message to be empty, but got %v", err.Message)
+	}
+}
+
+type langContextKey struct{}
+
+func withLang(ctx context.Context, lang string) context.Context {
+	return context.WithValue(ctx, langContextKey{}, lang)
+}
+
+func getLang(ctx context.Context) string {
+	lang, _ := ctx.Value(langContextKey{}).(string)
+	return lang
+}
+
+// TestNewWithContext_GlobalI18nIsNotNil tests the NewWithContext function when globalI18n is not nil.
+// It verifies that the returned Error object has a localized Message field.
+func TestNewWithContext_GlobalI18nIsNotNil(t *testing.T) {
+	// Arrange
+	ctx := context.Background()
+	code := 404
+	reason := "not_found"
+	data := map[string]string{"resource": "Kratos"}
+	lang := map[string]string{
+		"en_CH": "{{ .resource }} is the best",
+		"zh_CN": "{{ .resource }}是最好的",
+	}
+
+	// Mock the globalI18n
+	mockI18n := &MockI18n{
+		localizeFunc: func(ctx context.Context, reason string, data any) string {
+			message := lang[getLang(ctx)]
+			s, err := textFormatter(message, data)
+			if err != nil {
+				return ""
+			}
+			return s
+		},
+	}
+	RegisterI18nManager(mockI18n)
+
+	// Act
+	err := NewWithContext(withLang(ctx, "en_CH"), code, reason, data)
+	// Assert
+	if !errors.Is(err, New(code, reason, "")) {
+		t.Errorf("Expected error to be %v, but got %v", New(code, reason, ""), err)
+	}
+	if err.Message != "kratos is the best" {
+		t.Errorf("Expected error message to be %v, but got %v", "kratos is the best", err.Message)
+	}
+
+	err = NewWithContext(withLang(ctx, "zh_CN"), code, reason, data)
+	if !errors.Is(err, New(code, reason, "")) {
+		t.Errorf("Expected error to be %v, but got %v", New(code, reason, ""), err)
+	}
+	if err.Message != "kratos是最好的" {
+		t.Errorf("Expected error message to be %v, but got %v", "kratos是最好的", err.Message)
 	}
 }
