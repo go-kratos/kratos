@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/go-kratos/aegis v0.2.0
 	github.com/go-kratos/kratos/v2 v2.8.4
-	github.com/google/uuid v1.4.0
+	github.com/google/uuid v1.6.0
 	github.com/polarismesh/polaris-go v1.3.0
 	google.golang.org/protobuf v1.33.0
 )
@@ -34,7 +34,7 @@ require (
 	go.uber.org/zap v1.21.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240102182953-50ed04b92917 // indirect
 	google.golang.org/grpc v1.61.1 // indirect
