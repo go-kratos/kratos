@@ -168,7 +168,7 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 			return "", nil
 		}
 		for i, v := range m.Paths {
-			m.Paths[i] = jsonCamelCase(v)
+			m.Paths[i] = JsonCamelCase(v)
 		}
 		return strings.Join(m.Paths, ","), nil
 	default:
@@ -198,10 +198,10 @@ func EncodeFieldMask(m protoreflect.Message) (query string) {
 	return
 }
 
-// jsonCamelCase converts a snake_case identifier to a camelCase identifier,
+// JsonCamelCase converts a snake_case identifier to a camelCase identifier,
 // according to the protobuf JSON specification.
 // references: https://github.com/protocolbuffers/protobuf-go/blob/master/encoding/protojson/well_known_types.go#L842
-func jsonCamelCase(s string) string {
+func JsonCamelCase(s string) string {
 	var b []byte
 	var wasUnderscore bool
 	for i := 0; i < len(s); i++ { // proto identifiers are always ASCII

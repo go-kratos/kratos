@@ -72,7 +72,7 @@ func TestJsonCamelCase(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.snakeCase, func(t *testing.T) {
-			camel := jsonCamelCase(test.snakeCase)
+			camel := JsonCamelCase(test.snakeCase)
 			if camel != test.camelCase {
 				t.Errorf("want: %s, got: %s", test.camelCase, camel)
 			}
