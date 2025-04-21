@@ -1,11 +1,12 @@
 module github.com/go-kratos/kratos/contrib/log/aliyun/v2
 
 go 1.21
+toolchain go1.24.1
 
 require (
 	github.com/aliyun/aliyun-log-go-sdk v0.1.99
 	github.com/go-kratos/kratos/v2 v2.8.4
-	google.golang.org/protobuf v1.33.0
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
@@ -22,6 +23,4 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 )
 
-replace (
-	github.com/go-kratos/kratos/v2 => ../../../
-)
+replace github.com/go-kratos/kratos/v2 => ../../../
