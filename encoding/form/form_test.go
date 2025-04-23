@@ -181,6 +181,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	//lint:ignore ST1017
 	if "a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=22.22&double=12.33&duration="+
 		"2m0.000000022s&field=1%2C2&float=12.34&id=2233&int32=32&int64=64&"+
 		"map%5Bkratos%5D=https%3A%2F%2Fgo-kratos.dev%2F&map%5Bkratos_start%5D=https%3A%2F%2Fgo-kratos.dev%2Fen%2Fdocs%2Fgetting-started%2Fstart%2F&"+
@@ -196,12 +197,14 @@ func TestProtoEncodeDecode(t *testing.T) {
 	if int64(2233) != in2.Id {
 		t.Errorf("expect %v, got %v", int64(2233), in2.Id)
 	}
+	//lint:ignore ST1017
 	if "2233" != in2.NoOne {
 		t.Errorf("expect %v, got %v", "2233", in2.NoOne)
 	}
 	if in2.Simple == nil {
 		t.Errorf("expect %v, got %v", nil, in2.Simple)
 	}
+	//lint:ignore ST1017
 	if "5566" != in2.Simple.Component {
 		t.Errorf("expect %v, got %v", "5566", in2.Simple.Component)
 	}
@@ -211,9 +214,11 @@ func TestProtoEncodeDecode(t *testing.T) {
 	if len(in2.Simples) != 2 {
 		t.Errorf("expect %v, got %v", 2, len(in2.Simples))
 	}
+	//lint:ignore ST1017
 	if "3344" != in2.Simples[0] {
 		t.Errorf("expect %v, got %v", "3344", in2.Simples[0])
 	}
+	//lint:ignore ST1017
 	if "5566" != in2.Simples[1] {
 		t.Errorf("expect %v, got %v", "5566", in2.Simples[1])
 	}
