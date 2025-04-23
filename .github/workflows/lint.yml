@@ -31,6 +31,6 @@ jobs:
       - name: Lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          version: v2.0
           working-directory: ${{ matrix.workdir }}
           skip-pkg-cache: true
