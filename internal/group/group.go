@@ -10,19 +10,19 @@ type Factory[T any] func() T
 
 // Group is a lazy load container.
 type Group[T any] struct {
-	new  func() T
-	vals map[string]T
+	factory func() T
+	vals    map[string]T
 	sync.RWMutex
 }
 
 // NewGroup news a group container.
-func NewGroup[T any](new Factory[T]) *Group[T] {
-	if new == nil {
+func NewGroup[T any](factory Factory[T]) *Group[T] {
+	if factory == nil {
 		panic("container.group: can't assign a nil to the new function")
 	}
 	return &Group[T]{
-		new:  new,
-		vals: make(map[string]T),
+		factory: factory,
+		vals:    make(map[string]T),
 	}
 }
 
@@ -43,18 +43,18 @@ func (g *Group[T]) Get(key string) T {
 	if ok {
 		return v
 	}
-	v = g.new()
+	v = g.factory()
 	g.vals[key] = v
 	return v
 }
 
 // Reset resets the new function and deletes all existing objects.
-func (g *Group[T]) Reset(new Factory[T]) {
-	if new == nil {
+func (g *Group[T]) Reset(factory Factory[T]) {
+	if factory == nil {
 		panic("container.group: can't assign a nil to the new function")
 	}
 	g.Lock()
-	g.new = new
+	g.factory = factory
 	g.Unlock()
 	g.Clear()
 }

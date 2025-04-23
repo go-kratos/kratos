@@ -53,7 +53,7 @@ func Client(opts ...Option) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req any) (any, error) {
 			info, _ := transport.FromClientContext(ctx)
-			breaker := opt.group.Get(info.Operation()).(circuitbreaker.CircuitBreaker)
+			breaker := opt.group.Get(info.Operation())
 			if err := breaker.Allow(); err != nil {
 				// rejected
 				// NOTE: when client reject requests locally,
