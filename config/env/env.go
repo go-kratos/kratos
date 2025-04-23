@@ -20,7 +20,7 @@ func (e *env) Load() (kvs []*config.KeyValue, err error) {
 }
 
 func (e *env) load(envs []string) []*config.KeyValue {
-	kvs := make([]*config.KeyValue, 0, len(envs))
+	var kvs []*config.KeyValue
 	for _, env := range envs {
 		k, v, _ := strings.Cut(env, "=")
 		if k == "" {
