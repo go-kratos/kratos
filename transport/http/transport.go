@@ -14,6 +14,7 @@ type Transporter interface {
 	transport.Transporter
 	Request() *http.Request
 	PathTemplate() string
+	Response() http.ResponseWriter
 }
 
 // Transport is an HTTP transport.
@@ -50,6 +51,11 @@ func (tr *Transport) Request() *http.Request {
 // RequestHeader returns the request header.
 func (tr *Transport) RequestHeader() transport.Header {
 	return tr.reqHeader
+}
+
+// Response returns the HTTP response.
+func (tr *Transport) Response() http.ResponseWriter {
+	return tr.response
 }
 
 // ReplyHeader returns the reply header.
