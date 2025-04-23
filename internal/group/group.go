@@ -5,26 +5,29 @@ package group
 
 import "sync"
 
+// Factory is a function that creates an object of type T.
+type Factory[T any] func() T
+
 // Group is a lazy load container.
-type Group struct {
-	new  func() any
-	vals map[string]any
+type Group[T any] struct {
+	new  func() T
+	vals map[string]T
 	sync.RWMutex
 }
 
 // NewGroup news a group container.
-func NewGroup(new func() any) *Group {
+func NewGroup[T any](new Factory[T]) *Group[T] {
 	if new == nil {
 		panic("container.group: can't assign a nil to the new function")
 	}
-	return &Group{
+	return &Group[T]{
 		new:  new,
-		vals: make(map[string]any),
+		vals: make(map[string]T),
 	}
 }
 
 // Get gets the object by the given key.
-func (g *Group) Get(key string) any {
+func (g *Group[T]) Get(key string) T {
 	g.RLock()
 	v, ok := g.vals[key]
 	if ok {
@@ -46,7 +49,7 @@ func (g *Group) Get(key string) any {
 }
 
 // Reset resets the new function and deletes all existing objects.
-func (g *Group) Reset(new func() any) {
+func (g *Group[T]) Reset(new Factory[T]) {
 	if new == nil {
 		panic("container.group: can't assign a nil to the new function")
 	}
@@ -57,8 +60,8 @@ func (g *Group) Reset(new func() any) {
 }
 
 // Clear deletes all objects.
-func (g *Group) Clear() {
+func (g *Group[T]) Clear() {
 	g.Lock()
-	g.vals = make(map[string]any)
+	g.vals = make(map[string]T)
 	g.Unlock()
 }

@@ -20,7 +20,7 @@ type Option func(*options)
 
 // WithGroup with circuit breaker group.
 // NOTE: implements generics circuitbreaker.CircuitBreaker
-func WithGroup(g *group.Group) Option {
+func WithGroup(g *group.Group[circuitbreaker.CircuitBreaker]) Option {
 	return func(o *options) {
 		o.group = g
 	}
@@ -29,21 +29,21 @@ func WithGroup(g *group.Group) Option {
 // WithCircuitBreaker with circuit breaker genFunc.
 func WithCircuitBreaker(genBreakerFunc func() circuitbreaker.CircuitBreaker) Option {
 	return func(o *options) {
-		o.group = group.NewGroup(func() any {
+		o.group = group.NewGroup(func() circuitbreaker.CircuitBreaker {
 			return genBreakerFunc()
 		})
 	}
 }
 
 type options struct {
-	group *group.Group
+	group *group.Group[circuitbreaker.CircuitBreaker]
 }
 
 // Client circuitbreaker middleware will return errBreakerTriggered when the circuit
 // breaker is triggered and the request is rejected directly.
 func Client(opts ...Option) middleware.Middleware {
 	opt := &options{
-		group: group.NewGroup(func() any {
+		group: group.NewGroup(func() circuitbreaker.CircuitBreaker {
 			return sre.NewBreaker()
 		}),
 	}
