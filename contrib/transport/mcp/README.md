@@ -32,11 +32,11 @@ func main() {
     srv.AddTool(tool, helloHandler)
     // creates a kratos application
     app := kratos.New(
-		kratos.Name("kratos-app"),
-		kratos.Server(srv)
+	kratos.Name("kratos-app"),
+	kratos.Server(srv)
     )
     if err := app.Run(); err != nil {
-		panic(err)
+	panic(err)
     }
 }
 ```
