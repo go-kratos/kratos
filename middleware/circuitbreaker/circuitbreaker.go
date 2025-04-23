@@ -29,7 +29,7 @@ func WithGroup(g *group.Group) Option {
 // WithCircuitBreaker with circuit breaker genFunc.
 func WithCircuitBreaker(genBreakerFunc func() circuitbreaker.CircuitBreaker) Option {
 	return func(o *options) {
-		o.group = group.NewGroup(func() interface{} {
+		o.group = group.NewGroup(func() any {
 			return genBreakerFunc()
 		})
 	}
@@ -43,7 +43,7 @@ type options struct {
 // breaker is triggered and the request is rejected directly.
 func Client(opts ...Option) middleware.Middleware {
 	opt := &options{
-		group: group.NewGroup(func() interface{} {
+		group: group.NewGroup(func() any {
 			return sre.NewBreaker()
 		}),
 	}
@@ -51,7 +51,7 @@ func Client(opts ...Option) middleware.Middleware {
 		o(opt)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (interface{}, error) {
+		return func(ctx context.Context, req any) (any, error) {
 			info, _ := transport.FromClientContext(ctx)
 			breaker := opt.group.Get(info.Operation()).(circuitbreaker.CircuitBreaker)
 			if err := breaker.Allow(); err != nil {

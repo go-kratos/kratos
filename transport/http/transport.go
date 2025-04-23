@@ -14,6 +14,7 @@ type Transporter interface {
 	transport.Transporter
 	Request() *http.Request
 	PathTemplate() string
+	Response() http.ResponseWriter
 }
 
 // Transport is an HTTP transport.
@@ -23,6 +24,7 @@ type Transport struct {
 	reqHeader    headerCarrier
 	replyHeader  headerCarrier
 	request      *http.Request
+	response     http.ResponseWriter
 	pathTemplate string
 }
 
@@ -51,6 +53,11 @@ func (tr *Transport) RequestHeader() transport.Header {
 	return tr.reqHeader
 }
 
+// Response returns the HTTP response.
+func (tr *Transport) Response() http.ResponseWriter {
+	return tr.response
+}
+
 // ReplyHeader returns the reply header.
 func (tr *Transport) ReplyHeader() transport.Header {
 	return tr.replyHeader
@@ -66,6 +73,17 @@ func SetOperation(ctx context.Context, op string) {
 	if tr, ok := transport.FromServerContext(ctx); ok {
 		if tr, ok := tr.(*Transport); ok {
 			tr.operation = op
+		}
+	}
+}
+
+// SetCookie adds a Set-Cookie header to the provided [ResponseWriter]'s headers.
+// The provided cookie must have a valid Name. Invalid cookies may be
+// silently dropped.
+func SetCookie(ctx context.Context, cookie *http.Cookie) {
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		if tr, ok := tr.(*Transport); ok {
+			http.SetCookie(tr.response, cookie)
 		}
 	}
 }

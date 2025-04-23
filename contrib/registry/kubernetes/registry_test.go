@@ -100,7 +100,7 @@ func TestRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	r := NewRegistry(clientSet)
+	r := NewRegistry(clientSet, currentNamespace)
 	r.Start()
 
 	svrHello := &registry.ServiceInstance{
@@ -110,7 +110,6 @@ func TestRegistry(t *testing.T) {
 		Endpoints: []string{"http://127.0.0.1:80"},
 	}
 	_, err = clientSet.AppsV1().Deployments(namespace).Create(context.Background(), &deployment, metav1.CreateOptions{})
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -151,7 +150,7 @@ func TestRegistry(t *testing.T) {
 
 	os.Setenv("HOSTNAME", pod.Items[0].Name)
 
-	// Alway remember delete test resource
+	// Always remember delete test resource
 	defer func() {
 		_ = clientSet.AppsV1().Deployments(namespace).Delete(context.Background(), deployName, metav1.DeleteOptions{})
 	}()

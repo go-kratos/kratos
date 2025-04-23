@@ -24,7 +24,7 @@ type discoveryResolver struct {
 
 	insecure    bool
 	debugLog    bool
-	selecterKey string
+	selectorKey string
 	subsetSize  int
 }
 
@@ -66,16 +66,16 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		if _, ok := endpoints[ept]; ok {
 			continue
 		}
+		endpoints[ept] = struct{}{}
 		filtered = append(filtered, in)
 	}
 	if r.subsetSize != 0 {
-		filtered = subset.Subset(r.selecterKey, filtered, r.subsetSize)
+		filtered = subset.Subset(r.selectorKey, filtered, r.subsetSize)
 	}
 
 	addrs := make([]resolver.Address, 0, len(filtered))
 	for _, in := range filtered {
 		ept, _ := endpoint.ParseEndpoint(in.Endpoints, endpoint.Scheme("grpc", !r.insecure))
-		endpoints[ept] = struct{}{}
 		addr := resolver.Address{
 			ServerName: in.Name,
 			Attributes: parseAttributes(in.Metadata).WithValue("rawServiceInstance", in),

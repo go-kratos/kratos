@@ -25,32 +25,32 @@ type options struct {
 	repanic         bool
 	waitForDelivery bool
 	timeout         time.Duration
-	tags            map[string]interface{}
+	tags            map[string]any
 }
 
-// Repanic configures whether Sentry should repanic after recovery, in most cases it should be set to true.
+// WithRepanic repanic configures whether Sentry should repanic after recovery, in most cases it should be set to true.
 func WithRepanic(repanic bool) Option {
 	return func(opts *options) {
 		opts.repanic = repanic
 	}
 }
 
-// WaitForDelivery configures whether you want to block the request before moving forward with the response.
+// WithWaitForDelivery waitForDelivery configures whether you want to block the request before moving forward with the response.
 func WithWaitForDelivery(waitForDelivery bool) Option {
 	return func(opts *options) {
 		opts.waitForDelivery = waitForDelivery
 	}
 }
 
-// Timeout for the event delivery requests.
+// WithTimeout timeout for the event delivery requests.
 func WithTimeout(timeout time.Duration) Option {
 	return func(opts *options) {
 		opts.timeout = timeout
 	}
 }
 
-// Global tags injection, the value type must be string or log.Valuer
-func WithTags(kvs map[string]interface{}) Option {
+// WithTags global tags injection, the value type must be string or log.Valuer
+func WithTags(kvs map[string]any) Option {
 	return func(opts *options) {
 		opts.tags = kvs
 	}
@@ -66,7 +66,7 @@ func Server(opts ...Option) middleware.Middleware {
 		conf.timeout = 2 * time.Second
 	}
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, req any) (reply any, err error) {
 			hub := GetHubFromContext(ctx)
 			scope := hub.Scope()
 
@@ -83,11 +83,11 @@ func Server(opts ...Option) middleware.Middleware {
 				switch tr.Kind() {
 				case transport.KindGRPC:
 					gtr := tr.(*grpc.Transport)
-					scope.SetContext("gRPC", map[string]interface{}{
+					scope.SetContext("gRPC", map[string]any{
 						"endpoint":  gtr.Endpoint(),
 						"operation": gtr.Operation(),
 					})
-					headers := make(map[string]interface{})
+					headers := make(map[string]any)
 					for _, k := range gtr.RequestHeader().Keys() {
 						headers[k] = gtr.RequestHeader().Get(k)
 					}
@@ -106,7 +106,7 @@ func Server(opts ...Option) middleware.Middleware {
 	}
 }
 
-func recoverWithSentry(ctx context.Context, opts options, hub *sentry.Hub, req interface{}) {
+func recoverWithSentry(ctx context.Context, opts options, hub *sentry.Hub, req any) {
 	if err := recover(); err != nil {
 		if !isBrokenPipeError(err) {
 			eventID := hub.RecoverWithContext(
@@ -123,7 +123,7 @@ func recoverWithSentry(ctx context.Context, opts options, hub *sentry.Hub, req i
 	}
 }
 
-func isBrokenPipeError(err interface{}) bool {
+func isBrokenPipeError(err any) bool {
 	if netErr, ok := err.(*net.OpError); ok {
 		if sysErr, ok := netErr.Err.(*os.SyscallError); ok {
 			if strings.Contains(strings.ToLower(sysErr.Error()), "broken pipe") ||

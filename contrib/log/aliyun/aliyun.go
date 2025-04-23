@@ -81,7 +81,7 @@ func (a *aliyunLog) Close() error {
 	return a.producer.Close(5000)
 }
 
-func (a *aliyunLog) Log(level log.Level, keyvals ...interface{}) error {
+func (a *aliyunLog) Log(level log.Level, keyvals ...any) error {
 	contents := make([]*sls.LogContent, 0, len(keyvals)/2+1)
 
 	contents = append(contents, &sls.LogContent{
@@ -102,8 +102,8 @@ func (a *aliyunLog) Log(level log.Level, keyvals ...interface{}) error {
 	return a.producer.SendLog(a.opts.project, a.opts.logstore, "", "", logInst)
 }
 
-// NewAliyunLog new a aliyun logger with options.
-func NewAliyunLog(options ...Option) Logger {
+// NewAliyunLog new aliyun logger with options.
+func NewAliyunLog(options ...Option) (Logger, error) {
 	opts := defaultOptions()
 	for _, o := range options {
 		o(opts)
@@ -113,12 +113,16 @@ func NewAliyunLog(options ...Option) Logger {
 	producerConfig.Endpoint = opts.endpoint
 	producerConfig.AccessKeyID = opts.accessKey
 	producerConfig.AccessKeySecret = opts.accessSecret
-	producerInst := producer.InitProducer(producerConfig)
+	producerInst, err := producer.NewProducer(producerConfig)
+	if err != nil {
+		return nil, err
+	}
+	producerInst.Start()
 
 	return &aliyunLog{
 		opts:     opts,
 		producer: producerInst,
-	}
+	}, nil
 }
 
 // newString string convert to *string
@@ -127,7 +131,7 @@ func newString(s string) *string {
 }
 
 // toString convert any type to string
-func toString(v interface{}) string {
+func toString(v any) string {
 	var key string
 	if v == nil {
 		return key

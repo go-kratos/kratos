@@ -4,13 +4,15 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
-
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	metricsdk "go.opentelemetry.io/otel/sdk/metric"
+	"google.golang.org/grpc/codes"
+
+	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v2/transport/http/status"
 )
 
 const (
@@ -56,7 +58,11 @@ func DefaultRequestsCounter(meter metric.Meter, histogramName string) (metric.In
 // return metric.Float64Histogram for WithSeconds
 // suggest histogramName = <client/server>_requests_seconds_bucket
 func DefaultSecondsHistogram(meter metric.Meter, histogramName string) (metric.Float64Histogram, error) {
-	return meter.Float64Histogram(histogramName, metric.WithUnit("s"))
+	return meter.Float64Histogram(
+		histogramName,
+		metric.WithUnit("s"),
+		metric.WithExplicitBucketBoundaries(0.005, 0.01, 0.025, 0.05, 0.1, 0.250, 0.5, 1),
+	)
 }
 
 // DefaultSecondsHistogramView
@@ -76,7 +82,7 @@ func DefaultSecondsHistogramView(histogramName string) metricsdk.View {
 					Boundaries: []float64{0.005, 0.01, 0.025, 0.05, 0.1, 0.250, 0.5, 1},
 					NoMinMax:   true,
 				},
-				AttributeFilter: func(value attribute.KeyValue) bool {
+				AttributeFilter: func(attribute.KeyValue) bool {
 					return true
 				},
 			}, true
@@ -99,7 +105,7 @@ func Server(opts ...Option) middleware.Middleware {
 		o(&op)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (interface{}, error) {
+		return func(ctx context.Context, req any) (any, error) {
 			// if requests and seconds are nil, return directly
 			if op.requests == nil && op.seconds == nil {
 				return handler(ctx, req)
@@ -111,6 +117,10 @@ func Server(opts ...Option) middleware.Middleware {
 				kind      string
 				operation string
 			)
+
+			// default code
+			code = status.FromGRPCCode(codes.OK)
+
 			startTime := time.Now()
 			if info, ok := transport.FromServerContext(ctx); ok {
 				kind = info.Kind().String()
@@ -153,13 +163,17 @@ func Client(opts ...Option) middleware.Middleware {
 		o(&op)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (interface{}, error) {
+		return func(ctx context.Context, req any) (any, error) {
 			var (
 				code      int
 				reason    string
 				kind      string
 				operation string
 			)
+
+			// default code
+			code = status.FromGRPCCode(codes.OK)
+
 			startTime := time.Now()
 			if info, ok := transport.FromClientContext(ctx); ok {
 				kind = info.Kind().String()

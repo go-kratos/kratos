@@ -14,6 +14,8 @@ import (
 
 const name = "discovery"
 
+var ErrWatcherCreateTimeout = errors.New("discovery create watcher overtime")
+
 // Option is builder option.
 type Option func(o *builder)
 
@@ -92,11 +94,16 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, _ resolv
 	}()
 
 	var err error
-	select {
-	case <-done:
+	if b.timeout > 0 {
+		select {
+		case <-done:
+			err = watchRes.err
+		case <-time.After(b.timeout):
+			err = ErrWatcherCreateTimeout
+		}
+	} else {
+		<-done
 		err = watchRes.err
-	case <-time.After(b.timeout):
-		err = errors.New("discovery create watcher overtime")
 	}
 	if err != nil {
 		cancel()
@@ -111,7 +118,7 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, _ resolv
 		insecure:    b.insecure,
 		debugLog:    b.debugLog,
 		subsetSize:  b.subsetSize,
-		selecterKey: uuid.New().String(),
+		selectorKey: uuid.New().String(),
 	}
 	go r.watch()
 	return r, nil

@@ -81,7 +81,7 @@ func (m *mockConn) ParseServiceConfig(_ string) *serviceconfig.ParseResult {
 }
 
 func TestBuilder_Build(t *testing.T) {
-	b := NewBuilder(&mockDiscovery{}, DisableDebugLog())
+	b := NewBuilder(&mockDiscovery{}, PrintDebugLog(false))
 	_, err := b.Build(
 		resolver.Target{
 			URL: url.URL{
@@ -107,7 +107,7 @@ func TestBuilder_Build(t *testing.T) {
 		&mockConn{},
 		resolver.BuildOptions{},
 	)
-	if err == nil {
-		t.Errorf("expected error, got %v", err)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
 	}
 }

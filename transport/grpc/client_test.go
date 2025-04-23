@@ -72,7 +72,7 @@ func TestWithTLSConfig(t *testing.T) {
 
 func EmptyMiddleware() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, req any) (reply any, err error) {
 			return handler(ctx, req)
 		}
 	}
@@ -84,7 +84,7 @@ func TestUnaryClientInterceptor(t *testing.T) {
 	resp := &struct{}{}
 
 	err := f(context.TODO(), "hello", req, resp, &grpc.ClientConn{},
-		func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
+		func(context.Context, string, any, any, *grpc.ClientConn, ...grpc.CallOption) error {
 			return nil
 		})
 	if err != nil {
@@ -95,10 +95,10 @@ func TestUnaryClientInterceptor(t *testing.T) {
 func TestWithUnaryInterceptor(t *testing.T) {
 	o := &clientOptions{}
 	v := []grpc.UnaryClientInterceptor{
-		func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		func(context.Context, string, any, any, *grpc.ClientConn, grpc.UnaryInvoker, ...grpc.CallOption) error {
 			return nil
 		},
-		func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		func(context.Context, string, any, any, *grpc.ClientConn, grpc.UnaryInvoker, ...grpc.CallOption) error {
 			return nil
 		},
 	}
