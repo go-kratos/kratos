@@ -50,6 +50,14 @@ func TestTransport_RequestHeader(t *testing.T) {
 	}
 }
 
+func TestTransport_Response(t *testing.T) {
+	v := http.ResponseWriter(nil)
+	o := &Transport{response: v}
+	if !reflect.DeepEqual(v, o.Response()) {
+		t.Errorf("expect %v, got %v", v, o.Request())
+	}
+}
+
 func TestTransport_ReplyHeader(t *testing.T) {
 	v := headerCarrier{}
 	v.Set("a", "1")
