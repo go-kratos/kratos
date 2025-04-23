@@ -244,7 +244,7 @@ func (s *Server) Stop(ctx context.Context) error {
 	go func() {
 		defer close(done)
 		log.Info("[gRPC] server stopping")
-		s.Server.GracefulStop()
+		s.GracefulStop()
 	}()
 
 	select {

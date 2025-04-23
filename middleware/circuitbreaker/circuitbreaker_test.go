@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/go-kratos/aegis/circuitbreaker"
 	kratoserrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/group"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -46,8 +47,8 @@ func (c *circuitBreakerMock) MarkFailed()  {}
 
 func Test_WithGroup(t *testing.T) {
 	o := options{
-		group: group.NewGroup(func() any {
-			return ""
+		group: group.NewGroup(func() circuitbreaker.CircuitBreaker {
+			return &circuitBreakerMock{}
 		}),
 	}
 
@@ -68,7 +69,7 @@ func TestServer(_ *testing.T) {
 	ctx := transport.NewClientContext(context.Background(), &transportMock{})
 
 	_, _ = Client(func(o *options) {
-		o.group = group.NewGroup(func() any {
+		o.group = group.NewGroup(func() circuitbreaker.CircuitBreaker {
 			return &circuitBreakerMock{err: errors.New("circuitbreaker error")}
 		})
 	})(nextValid)(ctx, nil)
