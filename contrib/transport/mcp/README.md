@@ -29,7 +29,7 @@ func main() {
         ),
     )
     // Add tool handler
-    s.AddTool(tool, helloHandler)
+    srv.AddTool(tool, helloHandler)
     // creates a kratos application
     app := kratos.New(
 		kratos.Name("kratos-app"),

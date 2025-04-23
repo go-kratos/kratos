@@ -8,6 +8,7 @@ import (
 	"net/url"
 
 	"github.com/go-kratos/kratos/v2/transport"
+
 	"github.com/mark3labs/mcp-go/server"
 )
 
@@ -73,7 +74,7 @@ func (s *Server) Endpoint() (*url.URL, error) {
 }
 
 // Start start the MCP server.
-func (s *Server) Start(ctx context.Context) error {
+func (s *Server) Start(_ context.Context) error {
 	if err := s.sse.Start(s.address); err != nil {
 		if !errors.Is(err, http.ErrServerClosed) {
 			return err
