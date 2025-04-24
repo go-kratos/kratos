@@ -8,6 +8,6 @@ require (
 	github.com/pkg/errors v0.9.1
 )
 
-require golang.org/x/net v0.23.0 // indirect
+require golang.org/x/net v0.33.0 // indirect
 
 replace github.com/go-kratos/kratos/v2 => ../../../
