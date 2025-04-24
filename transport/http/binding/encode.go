@@ -12,7 +12,7 @@ import (
 var reg = regexp.MustCompile(`{[\\.\w]+}`)
 
 // EncodeURL encode proto message to url path.
-func EncodeURL(pathTemplate string, msg interface{}, needQuery bool) string {
+func EncodeURL(pathTemplate string, msg any, needQuery bool) string {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return pathTemplate
 	}

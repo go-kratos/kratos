@@ -41,7 +41,6 @@ func New(opts ...Option) *App {
 		ctx:              context.Background(),
 		sigs:             []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
 		registrarTimeout: 10 * time.Second,
-		stopTimeout:      10 * time.Second,
 	}
 	if id, err := uuid.NewUUID(); err == nil {
 		o.id = id.String()
@@ -98,18 +97,23 @@ func (a *App) Run() error {
 			return err
 		}
 	}
+	octx := NewContext(a.opts.ctx, a)
 	for _, srv := range a.opts.servers {
 		server := srv
 		eg.Go(func() error {
 			<-ctx.Done() // wait for stop signal
-			stopCtx, cancel := context.WithTimeout(NewContext(a.opts.ctx, a), a.opts.stopTimeout)
-			defer cancel()
+			stopCtx := octx
+			if a.opts.stopTimeout > 0 {
+				var cancel context.CancelFunc
+				stopCtx, cancel = context.WithTimeout(stopCtx, a.opts.stopTimeout)
+				defer cancel()
+			}
 			return server.Stop(stopCtx)
 		})
 		wg.Add(1)
 		eg.Go(func() error {
 			wg.Done() // here is to ensure server start has begun running before register, so defer is not needed
-			return server.Start(NewContext(a.opts.ctx, a))
+			return server.Start(octx)
 		})
 	}
 	wg.Wait()

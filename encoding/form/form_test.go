@@ -148,6 +148,7 @@ func TestFormCodecUnmarshal(t *testing.T) {
 	}
 }
 
+//nolint:staticcheck
 func TestProtoEncodeDecode(t *testing.T) {
 	in := &complex.Complex{
 		Id:      2233,
@@ -227,6 +228,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 	}
 }
 
+//nolint:staticcheck
 func TestDecodeStructPb(t *testing.T) {
 	req := new(ectest.StructPb)
 	query := `data={"name":"kratos"}&data_list={"name1": "kratos"}&data_list={"name2": "go-kratos"}`
