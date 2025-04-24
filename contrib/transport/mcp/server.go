@@ -18,6 +18,9 @@ var (
 	_ http.Handler         = (*Server)(nil)
 )
 
+// MiddlewareFunc is a function that takes an http.Handler and returns an http.Handler.
+type MiddlewareFunc func(http.Handler) http.Handler
+
 // ServerOption is an HTTP server option.
 type ServerOption func(*Server)
 
@@ -35,26 +38,37 @@ func Endpoint(endpoint *url.URL) ServerOption {
 	}
 }
 
+// Middleware with server middleware.
+func Middleware(m MiddlewareFunc) ServerOption {
+	return func(s *Server) {
+		s.middleware = m
+	}
+}
+
 // Server is a MCP server.
 type Server struct {
 	*server.MCPServer
-	sse      *server.SSEServer
-	address  string
-	endpoint *url.URL
-	mcpOpts  []server.ServerOption
-	sseOpts  []server.SSEOption
+	srv        *http.Server
+	sse        *server.SSEServer
+	middleware MiddlewareFunc
+	address    string
+	endpoint   *url.URL
+	mcpOpts    []server.ServerOption
+	sseOpts    []server.SSEOption
 }
 
 // NewServer creates a new MCP server.
 func NewServer(name, version string, opts ...ServerOption) *Server {
 	srv := &Server{
-		address: ":7000",
+		address:    ":8000",
+		middleware: func(next http.Handler) http.Handler { return next },
 	}
 	for _, o := range opts {
 		o(srv)
 	}
 	srv.MCPServer = server.NewMCPServer(name, version, srv.mcpOpts...)
-	srv.sse = server.NewSSEServer(srv.MCPServer, srv.sseOpts...)
+	srv.srv = &http.Server{Addr: srv.address, Handler: srv.middleware(srv)}
+	srv.sse = server.NewSSEServer(srv.MCPServer, append(srv.sseOpts, server.WithHTTPServer(srv.srv))...)
 	return srv
 }
 
@@ -75,7 +89,7 @@ func (s *Server) Endpoint() (*url.URL, error) {
 
 // Start start the MCP server.
 func (s *Server) Start(_ context.Context) error {
-	if err := s.sse.Start(s.address); err != nil {
+	if err := s.srv.ListenAndServe(); err != nil {
 		if !errors.Is(err, http.ErrServerClosed) {
 			return err
 		}
