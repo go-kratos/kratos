@@ -54,7 +54,7 @@ func (p *Polaris) NodeFilter(opts ...RouterOption) selector.NodeFilter {
 			req.SourceService.Service = appInfo.Name()
 		}
 
-		req.AddArguments(model.BuildCallerServiceArgument(p.namespace, req.ProcessRoutersRequest.SourceService.Service))
+		req.AddArguments(model.BuildCallerServiceArgument(p.namespace, req.SourceService.Service))
 
 		// process transport
 		if tr, ok := transport.FromClientContext(ctx); ok {

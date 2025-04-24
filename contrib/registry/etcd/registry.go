@@ -84,7 +84,7 @@ func New(client *clientv3.Client, opts ...Option) (r *Registry) {
 
 // Register the registration.
 func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstance) error {
-	key := fmt.Sprintf("%s/%s/%s", r.opts.namespace, service.Name, service.ID)
+	key := r.registerKey(service)
 	value, err := marshal(service)
 	if err != nil {
 		return err
@@ -107,6 +107,10 @@ func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 	return nil
 }
 
+func (r *Registry) registerKey(service *registry.ServiceInstance) string {
+	return fmt.Sprintf("%s/%s/%s", r.opts.namespace, service.Name, service.ID)
+}
+
 // Deregister the registration.
 func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
 	defer func() {
@@ -115,10 +119,10 @@ func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInst
 		}
 	}()
 	// cancel heartbeat
-	key := fmt.Sprintf("%s/%s/%s", r.opts.namespace, service.Name, service.ID)
+	key := r.registerKey(service)
 	if serviceCancel, ok := r.ctxMap[key]; ok {
 		serviceCancel.cancel()
-		delete(r.ctxMap, service.ID)
+		delete(r.ctxMap, key)
 	}
 	_, err := r.client.Delete(ctx, key)
 	return err
@@ -126,7 +130,7 @@ func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInst
 
 // GetService return the service instances in memory according to the service name.
 func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.ServiceInstance, error) {
-	key := fmt.Sprintf("%s/%s", r.opts.namespace, name)
+	key := r.serviceKey(name)
 	resp, err := r.kv.Get(ctx, key, clientv3.WithPrefix())
 	if err != nil {
 		return nil, err
@@ -145,9 +149,13 @@ func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.Ser
 	return items, nil
 }
 
+func (r *Registry) serviceKey(name string) string {
+	return fmt.Sprintf("%s/%s", r.opts.namespace, name)
+}
+
 // Watch creates a watcher according to the service name.
 func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, error) {
-	key := fmt.Sprintf("%s/%s", r.opts.namespace, name)
+	key := r.serviceKey(name)
 	return newWatcher(ctx, key, name, r.client)
 }
 

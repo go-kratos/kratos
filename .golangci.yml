@@ -1,73 +1,71 @@
+version: "2"
 run:
-  timeout: 5m
   modules-download-mode: readonly
-
 linters:
-  disable-all: true
-  fast: false
+  default: none
   enable:
     - bodyclose
     - dogsled
     - durationcheck
     - errcheck
-    # - copyloopvar # need upgrade to Go 1.22
-    - govet
-    - staticcheck
-    - gosimple
-    - gofmt
-    - gofumpt
     - goconst
-    - goimports
-    - mnd
     - gocyclo
+    - govet
     - ineffassign
     - lll
+    - misspell
+    - mnd
     - prealloc
     - revive
     - staticcheck
-    - typecheck
-    - unused
-    - whitespace
-    - wastedassign
     - unconvert
-    - misspell
-
-  # don't enable:
-  # - asciicheck
-  # - scopelint
-  # - gochecknoglobals
-  # - gocognit
-  # - godot
-  # - godox
-  # - goerr113
-  # - interfacer
-  # - maligned
-  # - nestif
-  # - prealloc
-  # - testpackage
-  # - stylecheck
-  # - wsl
-
-linters-settings:
-  govet:
-    enable:
-      - shadow
-  whitespace:
-    multi-func: true
-  lll:
-    line-length: 160
-  mnd:
-    # don't include the "operation", "argument" and "assign"
-    checks:
-      - case
-      - condition
-      - return
-  goconst:
-    ignore-tests: true
-  gocyclo:
-    # recommend 10-20
-    min-complexity: 50
-  goimports:
-    local-prefixes: github.com/go-kratos # Put imports beginning with prefix after 3rd-party packages
-  misspell: # Finds commonly misspelled English words in comments
-    locale: US
+    - unused
+    - wastedassign
+    - whitespace
+  settings:
+    gocyclo:
+      min-complexity: 50
+    govet:
+      enable:
+        - shadow
+    lll:
+      line-length: 160
+    misspell:
+      locale: US
+    mnd:
+      checks:
+        - case
+        - condition
+        - return
+    whitespace:
+      multi-func: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - goconst
+        path: (.+)_test\.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/go-kratos
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
