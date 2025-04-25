@@ -11,7 +11,7 @@ import (
 )
 
 // ErrLimitExceed is service unavailable due to rate limit exceeded.
-var ErrLimitExceed = errors.New(429, "RATELIMIT", "service unavailable due to rate limit exceeded")
+var ErrLimitExceed = errors.New(429, errors.RateLimitReason, "service unavailable due to rate limit exceeded")
 
 // Option is ratelimit option.
 type Option func(*options)
@@ -37,7 +37,7 @@ func Server(opts ...Option) middleware.Middleware {
 		o(options)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, req any) (reply any, err error) {
 			done, e := options.limiter.Allow()
 			if e != nil {
 				// rejected

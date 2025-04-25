@@ -36,8 +36,8 @@ func newWatcher(s *source) *watcher {
 func (w *watcher) Next() ([]*config.KeyValue, error) {
 	select {
 	case resp := <-w.ch:
-		if resp.Err() != nil {
-			return nil, resp.Err()
+		if err := resp.Err(); err != nil {
+			return nil, err
 		}
 		return w.source.Load()
 	case <-w.ctx.Done():

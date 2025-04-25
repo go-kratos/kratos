@@ -1,9 +1,9 @@
 module github.com/go-kratos/kratos/contrib/log/tencent/v2
 
-go 1.19
+go 1.21
 
 require (
-	github.com/go-kratos/kratos/v2 v2.8.2
+	github.com/go-kratos/kratos/v2 v2.8.4
 	github.com/tencentcloud/tencentcloud-cls-sdk-go v1.0.2
 	google.golang.org/protobuf v1.33.0
 )

@@ -1,9 +1,9 @@
 module github.com/go-kratos/kratos/contrib/config/consul/v2
 
-go 1.19
+go 1.21
 
 require (
-	github.com/go-kratos/kratos/v2 v2.8.2
+	github.com/go-kratos/kratos/v2 v2.8.4
 	github.com/hashicorp/consul/api v1.26.1
 )
 
@@ -24,7 +24,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
-	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

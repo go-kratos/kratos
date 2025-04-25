@@ -3,6 +3,7 @@ package tracing
 import (
 	"context"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"reflect"
 	"testing"
@@ -71,6 +72,9 @@ func (tr *mockTransport) Request() *http.Request {
 	return tr.request
 }
 func (tr *mockTransport) PathTemplate() string { return "" }
+func (tr *mockTransport) Response() http.ResponseWriter {
+	return httptest.NewRecorder()
+}
 
 func TestTracer(t *testing.T) {
 	carrier := headerCarrier{}
@@ -127,7 +131,7 @@ func TestServer(t *testing.T) {
 		childSpanID  string
 		childTraceID string
 	)
-	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+	next := func(ctx context.Context, req any) (any, error) {
 		_ = log.WithContext(ctx, logger).Log(log.LevelInfo,
 			"kind", "server",
 		)
@@ -198,7 +202,7 @@ func TestClient(t *testing.T) {
 		childSpanID  string
 		childTraceID string
 	)
-	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+	next := func(ctx context.Context, req any) (any, error) {
 		_ = log.WithContext(ctx, logger).Log(log.LevelInfo,
 			"kind", "client",
 		)

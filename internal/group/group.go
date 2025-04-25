@@ -5,26 +5,29 @@ package group
 
 import "sync"
 
+// Factory is a function that creates an object of type T.
+type Factory[T any] func() T
+
 // Group is a lazy load container.
-type Group struct {
-	new  func() interface{}
-	vals map[string]interface{}
+type Group[T any] struct {
+	factory func() T
+	vals    map[string]T
 	sync.RWMutex
 }
 
 // NewGroup news a group container.
-func NewGroup(new func() interface{}) *Group {
-	if new == nil {
+func NewGroup[T any](factory Factory[T]) *Group[T] {
+	if factory == nil {
 		panic("container.group: can't assign a nil to the new function")
 	}
-	return &Group{
-		new:  new,
-		vals: make(map[string]interface{}),
+	return &Group[T]{
+		factory: factory,
+		vals:    make(map[string]T),
 	}
 }
 
 // Get gets the object by the given key.
-func (g *Group) Get(key string) interface{} {
+func (g *Group[T]) Get(key string) T {
 	g.RLock()
 	v, ok := g.vals[key]
 	if ok {
@@ -40,25 +43,25 @@ func (g *Group) Get(key string) interface{} {
 	if ok {
 		return v
 	}
-	v = g.new()
+	v = g.factory()
 	g.vals[key] = v
 	return v
 }
 
 // Reset resets the new function and deletes all existing objects.
-func (g *Group) Reset(new func() interface{}) {
-	if new == nil {
+func (g *Group[T]) Reset(factory Factory[T]) {
+	if factory == nil {
 		panic("container.group: can't assign a nil to the new function")
 	}
 	g.Lock()
-	g.new = new
+	g.factory = factory
 	g.Unlock()
 	g.Clear()
 }
 
 // Clear deletes all objects.
-func (g *Group) Clear() {
+func (g *Group[T]) Clear() {
 	g.Lock()
-	g.vals = make(map[string]interface{})
+	g.vals = make(map[string]T)
 	g.Unlock()
 }

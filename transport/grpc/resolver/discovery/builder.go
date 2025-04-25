@@ -94,11 +94,16 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, _ resolv
 	}()
 
 	var err error
-	select {
-	case <-done:
+	if b.timeout > 0 {
+		select {
+		case <-done:
+			err = watchRes.err
+		case <-time.After(b.timeout):
+			err = ErrWatcherCreateTimeout
+		}
+	} else {
+		<-done
 		err = watchRes.err
-	case <-time.After(b.timeout):
-		err = ErrWatcherCreateTimeout
 	}
 	if err != nil {
 		cancel()
