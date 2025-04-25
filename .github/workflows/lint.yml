@@ -29,7 +29,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
-          version: v1.61.0
+          version: v2.0
           working-directory: ${{ matrix.workdir }}
+          skip-pkg-cache: true

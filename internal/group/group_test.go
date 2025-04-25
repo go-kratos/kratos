@@ -7,22 +7,22 @@ import (
 
 func TestGroupGet(t *testing.T) {
 	count := 0
-	g := NewGroup(func() interface{} {
+	g := NewGroup[int](func() int {
 		count++
 		return count
 	})
 	v := g.Get("key_0")
-	if !reflect.DeepEqual(v.(int), 1) {
+	if !reflect.DeepEqual(v, 1) {
 		t.Errorf("expect 1, actual %v", v)
 	}
 
 	v = g.Get("key_1")
-	if !reflect.DeepEqual(v.(int), 2) {
+	if !reflect.DeepEqual(v, 2) {
 		t.Errorf("expect 2, actual %v", v)
 	}
 
 	v = g.Get("key_0")
-	if !reflect.DeepEqual(v.(int), 1) {
+	if !reflect.DeepEqual(v, 1) {
 		t.Errorf("expect 1, actual %v", v)
 	}
 	if !reflect.DeepEqual(count, 2) {
@@ -31,12 +31,12 @@ func TestGroupGet(t *testing.T) {
 }
 
 func TestGroupReset(t *testing.T) {
-	g := NewGroup(func() interface{} {
+	g := NewGroup(func() int {
 		return 1
 	})
 	g.Get("key")
 	call := false
-	g.Reset(func() interface{} {
+	g.Reset(func() int {
 		call = true
 		return 1
 	})
@@ -56,7 +56,7 @@ func TestGroupReset(t *testing.T) {
 }
 
 func TestGroupClear(t *testing.T) {
-	g := NewGroup(func() interface{} {
+	g := NewGroup(func() int {
 		return 1
 	})
 	g.Get("key")

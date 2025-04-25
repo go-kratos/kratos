@@ -127,7 +127,7 @@ func (s *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 		return err
 	}
 
-	patchBytes, err := jsoniter.Marshal(map[string]interface{}{
+	patchBytes, err := jsoniter.Marshal(map[string]any{
 		"metadata": metav1.ObjectMeta{
 			Labels: map[string]string{
 				LabelsKeyServiceID:      service.ID,
@@ -195,7 +195,7 @@ func (s *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	stopCh := make(chan struct{}, 1)
 	announcement := make(chan []*registry.ServiceInstance, 1)
 	s.podInformer.AddEventHandler(cache.FilteringResourceEventHandler{
-		FilterFunc: func(obj interface{}) bool {
+		FilterFunc: func(obj any) bool {
 			select {
 			case <-stopCh:
 				return false
@@ -208,13 +208,13 @@ func (s *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 			}
 		},
 		Handler: cache.ResourceEventHandlerFuncs{
-			AddFunc: func(interface{}) {
+			AddFunc: func(any) {
 				s.sendLatestInstances(ctx, name, announcement)
 			},
-			UpdateFunc: func(interface{}, interface{}) {
+			UpdateFunc: func(any, any) {
 				s.sendLatestInstances(ctx, name, announcement)
 			},
-			DeleteFunc: func(interface{}) {
+			DeleteFunc: func(any) {
 				s.sendLatestInstances(ctx, name, announcement)
 			},
 		},
@@ -315,11 +315,11 @@ func (iter *Iterator) Stop() error {
 
 // //////////// Helper Func ////////////
 
-func marshal(in interface{}) (string, error) {
+func marshal(in any) (string, error) {
 	return jsoniter.MarshalToString(in)
 }
 
-func unmarshal(data string, in interface{}) error {
+func unmarshal(data string, in any) error {
 	return jsoniter.UnmarshalFromString(data, in)
 }
 

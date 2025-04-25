@@ -15,6 +15,12 @@ const (
 	UnknownCode = 500
 	// UnknownReason is unknown reason for error info.
 	UnknownReason = ""
+	// ValidatorReason indicates an error related to request validation.
+	ValidatorReason = "VALIDATOR"
+	// CodecReason indicates an error related to encoding/decoding.
+	CodecReason = "CODEC"
+	// RateLimitReason indicates an error caused by rate limiting.
+	RateLimitReason = "RATELIMIT"
 	// SupportPackageIsVersion1 this constant should not be referenced by any other code.
 	SupportPackageIsVersion1 = true
 )
@@ -76,12 +82,12 @@ func New(code int, reason, message string) *Error {
 }
 
 // Newf New(code fmt.Sprintf(format, a...))
-func Newf(code int, reason, format string, a ...interface{}) *Error {
+func Newf(code int, reason, format string, a ...any) *Error {
 	return New(code, reason, fmt.Sprintf(format, a...))
 }
 
 // Errorf returns an error object for the code, message and error info.
-func Errorf(code int, reason, format string, a ...interface{}) error {
+func Errorf(code int, reason, format string, a ...any) error {
 	return New(code, reason, fmt.Sprintf(format, a...))
 }
 

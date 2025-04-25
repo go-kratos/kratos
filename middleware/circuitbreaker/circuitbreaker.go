@@ -20,7 +20,7 @@ type Option func(*options)
 
 // WithGroup with circuit breaker group.
 // NOTE: implements generics circuitbreaker.CircuitBreaker
-func WithGroup(g *group.Group) Option {
+func WithGroup(g *group.Group[circuitbreaker.CircuitBreaker]) Option {
 	return func(o *options) {
 		o.group = g
 	}
@@ -29,21 +29,21 @@ func WithGroup(g *group.Group) Option {
 // WithCircuitBreaker with circuit breaker genFunc.
 func WithCircuitBreaker(genBreakerFunc func() circuitbreaker.CircuitBreaker) Option {
 	return func(o *options) {
-		o.group = group.NewGroup(func() interface{} {
+		o.group = group.NewGroup(func() circuitbreaker.CircuitBreaker {
 			return genBreakerFunc()
 		})
 	}
 }
 
 type options struct {
-	group *group.Group
+	group *group.Group[circuitbreaker.CircuitBreaker]
 }
 
 // Client circuitbreaker middleware will return errBreakerTriggered when the circuit
 // breaker is triggered and the request is rejected directly.
 func Client(opts ...Option) middleware.Middleware {
 	opt := &options{
-		group: group.NewGroup(func() interface{} {
+		group: group.NewGroup(func() circuitbreaker.CircuitBreaker {
 			return sre.NewBreaker()
 		}),
 	}
@@ -51,9 +51,9 @@ func Client(opts ...Option) middleware.Middleware {
 		o(opt)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (interface{}, error) {
+		return func(ctx context.Context, req any) (any, error) {
 			info, _ := transport.FromClientContext(ctx)
-			breaker := opt.group.Get(info.Operation()).(circuitbreaker.CircuitBreaker)
+			breaker := opt.group.Get(info.Operation())
 			if err := breaker.Allow(); err != nil {
 				// rejected
 				// NOTE: when client reject requests locally,

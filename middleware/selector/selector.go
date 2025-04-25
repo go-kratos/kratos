@@ -118,7 +118,7 @@ func (b *Builder) matches(ctx context.Context, transporter transporter) bool {
 // selector middleware
 func selector(transporter transporter, match func(context.Context, transporter) bool, ms ...middleware.Middleware) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, req any) (reply any, err error) {
 			if !match(ctx, transporter) {
 				return handler(ctx, req)
 			}

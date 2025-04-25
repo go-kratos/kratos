@@ -25,14 +25,14 @@ type (
 func TestBindQuery(t *testing.T) {
 	type args struct {
 		vars   url.Values
-		target interface{}
+		target any
 	}
 
 	tests := []struct {
 		name string
 		args args
 		err  error
-		want interface{}
+		want any
 	}{
 		{
 			name: "test",
@@ -49,7 +49,7 @@ func TestBindQuery(t *testing.T) {
 				vars:   map[string][]string{"age": {"kratos"}, "url": {"https://go-kratos.dev/"}},
 				target: &TestBind2{},
 			},
-			err: kratoserror.BadRequest("CODEC", "Field Namespace:age ERROR:Invalid Integer Value 'kratos' Type 'int' Namespace 'age'"),
+			err: kratoserror.BadRequest(kratoserror.CodecReason, "Field Namespace:age ERROR:Invalid Integer Value 'kratos' Type 'int' Namespace 'age'"),
 		},
 		{
 			name: "test2",
@@ -77,7 +77,7 @@ func TestBindQuery(t *testing.T) {
 func TestBindForm(t *testing.T) {
 	type args struct {
 		req    *http.Request
-		target interface{}
+		target any
 	}
 
 	tests := []struct {
@@ -118,7 +118,7 @@ func TestBindForm(t *testing.T) {
 				},
 				target: &TestBind2{},
 			},
-			err:  kratoserror.BadRequest("CODEC", "Field Namespace:age ERROR:Invalid Integer Value 'a' Type 'int' Namespace 'age'"),
+			err:  kratoserror.BadRequest(kratoserror.CodecReason, "Field Namespace:age ERROR:Invalid Integer Value 'a' Type 'int' Namespace 'age'"),
 			want: nil,
 		},
 	}

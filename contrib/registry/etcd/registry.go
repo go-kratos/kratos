@@ -55,7 +55,12 @@ type Registry struct {
 		ctxMap is used to store the context cancel function of each service instance.
 		When the service instance is deregistered, the corresponding context cancel function is called to stop the heartbeat.
 	*/
-	ctxMap map[*registry.ServiceInstance]context.CancelFunc
+	ctxMap map[string]*serviceCancel
+}
+
+type serviceCancel struct {
+	service *registry.ServiceInstance
+	cancel  context.CancelFunc
 }
 
 // New creates etcd registry
@@ -73,13 +78,13 @@ func New(client *clientv3.Client, opts ...Option) (r *Registry) {
 		opts:   op,
 		client: client,
 		kv:     clientv3.NewKV(client),
-		ctxMap: make(map[*registry.ServiceInstance]context.CancelFunc),
+		ctxMap: make(map[string]*serviceCancel),
 	}
 }
 
 // Register the registration.
 func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstance) error {
-	key := fmt.Sprintf("%s/%s/%s", r.opts.namespace, service.Name, service.ID)
+	key := r.registerKey(service)
 	value, err := marshal(service)
 	if err != nil {
 		return err
@@ -94,9 +99,16 @@ func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 	}
 
 	hctx, cancel := context.WithCancel(r.opts.ctx)
-	r.ctxMap[service] = cancel
+	r.ctxMap[key] = &serviceCancel{
+		service: service,
+		cancel:  cancel,
+	}
 	go r.heartBeat(hctx, leaseID, key, value)
 	return nil
+}
+
+func (r *Registry) registerKey(service *registry.ServiceInstance) string {
+	return fmt.Sprintf("%s/%s/%s", r.opts.namespace, service.Name, service.ID)
 }
 
 // Deregister the registration.
@@ -107,18 +119,18 @@ func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInst
 		}
 	}()
 	// cancel heartbeat
-	if cancel, ok := r.ctxMap[service]; ok {
-		cancel()
-		delete(r.ctxMap, service)
+	key := r.registerKey(service)
+	if serviceCancel, ok := r.ctxMap[key]; ok {
+		serviceCancel.cancel()
+		delete(r.ctxMap, key)
 	}
-	key := fmt.Sprintf("%s/%s/%s", r.opts.namespace, service.Name, service.ID)
 	_, err := r.client.Delete(ctx, key)
 	return err
 }
 
 // GetService return the service instances in memory according to the service name.
 func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.ServiceInstance, error) {
-	key := fmt.Sprintf("%s/%s", r.opts.namespace, name)
+	key := r.serviceKey(name)
 	resp, err := r.kv.Get(ctx, key, clientv3.WithPrefix())
 	if err != nil {
 		return nil, err
@@ -137,9 +149,13 @@ func (r *Registry) GetService(ctx context.Context, name string) ([]*registry.Ser
 	return items, nil
 }
 
+func (r *Registry) serviceKey(name string) string {
+	return fmt.Sprintf("%s/%s", r.opts.namespace, name)
+}
+
 // Watch creates a watcher according to the service name.
 func (r *Registry) Watch(ctx context.Context, name string) (registry.Watcher, error) {
-	key := fmt.Sprintf("%s/%s", r.opts.namespace, name)
+	key := r.serviceKey(name)
 	return newWatcher(ctx, key, name, r.client)
 }
 
