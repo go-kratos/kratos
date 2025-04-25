@@ -3,10 +3,11 @@ package server
 import (
 	"bytes"
 	"html/template"
+	"os"
 )
 
 //nolint:lll
-var serviceTemplate = `
+var defaultServiceTemplate = `
 {{- /* delete empty line */ -}}
 package service
 
@@ -116,7 +117,21 @@ type Method struct {
 	Type MethodType
 }
 
-func (s *Service) execute() ([]byte, error) {
+// LoadTemplate loads a template from a file or uses the default template
+func LoadTemplate(templatePath string) (string, error) {
+	if templatePath == "" {
+		return defaultServiceTemplate, nil
+	}
+
+	content, err := os.ReadFile(templatePath)
+	if err != nil {
+		return "", err
+	}
+
+	return string(content), nil
+}
+
+func (s *Service) execute(templatePath string) ([]byte, error) {
 	const empty = "google.protobuf.Empty"
 	buf := new(bytes.Buffer)
 	for _, method := range s.Methods {
@@ -131,7 +146,13 @@ func (s *Service) execute() ([]byte, error) {
 			s.UseContext = true
 		}
 	}
-	tmpl, err := template.New("service").Parse(serviceTemplate)
+
+	templateContent, err := LoadTemplate(templatePath)
+	if err != nil {
+		return nil, err
+	}
+
+	tmpl, err := template.New("service").Parse(templateContent)
 	if err != nil {
 		return nil, err
 	}
