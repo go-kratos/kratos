@@ -12,7 +12,7 @@ import (
 // BindQuery bind vars parameters to target.
 func BindQuery(vars url.Values, target any) error {
 	if err := encoding.GetCodec(form.Name).Unmarshal([]byte(vars.Encode()), target); err != nil {
-		return errors.BadRequest(errors.CodecReason, err.Error())
+		return errors.BadRequest("CODEC", err.Error())
 	}
 	return nil
 }
@@ -23,7 +23,7 @@ func BindForm(req *http.Request, target any) error {
 		return err
 	}
 	if err := encoding.GetCodec(form.Name).Unmarshal([]byte(req.Form.Encode()), target); err != nil {
-		return errors.BadRequest(errors.CodecReason, err.Error())
+		return errors.BadRequest("CODEC", err.Error())
 	}
 	return nil
 }
