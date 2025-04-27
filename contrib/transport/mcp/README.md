@@ -19,8 +19,18 @@ func helloHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
     return mcp.NewToolResultText(fmt.Sprintf("Hello, %s!", name)), nil
 }
 
+func Health(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/health/ready" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
-    srv := tm.NewServer("kratos-mcp", "v1.0.0")
+    srv := tm.NewServer("kratos-mcp", "v1.0.0", tm.Address(":8000"), tm.Middleware(Health))
     tool := mcp.NewTool("hello_world",
         mcp.WithDescription("Say hello to someone"),
         mcp.WithString("name",
@@ -32,11 +42,11 @@ func main() {
     srv.AddTool(tool, helloHandler)
     // creates a kratos application
     app := kratos.New(
-	kratos.Name("kratos-app"),
-	kratos.Server(srv)
+        kratos.Name("kratos-app"),
+        kratos.Server(srv),
     )
     if err := app.Run(); err != nil {
-	panic(err)
+        panic(err)
     }
 }
 ```
