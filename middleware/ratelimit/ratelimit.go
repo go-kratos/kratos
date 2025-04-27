@@ -11,7 +11,7 @@ import (
 )
 
 // ErrLimitExceed is service unavailable due to rate limit exceeded.
-var ErrLimitExceed = errors.New(429, errors.RateLimitReason, "service unavailable due to rate limit exceeded")
+var ErrLimitExceed = errors.New(429, "RATELIMIT", "service unavailable due to rate limit exceeded")
 
 // Option is ratelimit option.
 type Option func(*options)
