@@ -45,6 +45,20 @@ func Middleware(m MiddlewareFunc) ServerOption {
 	}
 }
 
+// SrvOption with server options.
+func SrvOption(opts ...server.ServerOption) ServerOption {
+	return func(s *Server) {
+		s.srvOpts = append(s.srvOpts, opts...)
+	}
+}
+
+// SSEOption with server SSE options.
+func SSEOption(opts ...server.SSEOption) ServerOption {
+	return func(s *Server) {
+		s.sseOpts = append(s.sseOpts, opts...)
+	}
+}
+
 // Server is a MCP server.
 type Server struct {
 	*server.MCPServer
@@ -53,7 +67,7 @@ type Server struct {
 	middleware MiddlewareFunc
 	address    string
 	endpoint   *url.URL
-	mcpOpts    []server.ServerOption
+	srvOpts    []server.ServerOption
 	sseOpts    []server.SSEOption
 }
 
@@ -66,7 +80,7 @@ func NewServer(name, version string, opts ...ServerOption) *Server {
 	for _, o := range opts {
 		o(srv)
 	}
-	srv.MCPServer = server.NewMCPServer(name, version, srv.mcpOpts...)
+	srv.MCPServer = server.NewMCPServer(name, version, srv.srvOpts...)
 	srv.srv = &http.Server{Addr: srv.address, Handler: srv.middleware(srv)}
 	srv.sse = server.NewSSEServer(srv.MCPServer, append(srv.sseOpts, server.WithHTTPServer(srv.srv))...)
 	return srv
