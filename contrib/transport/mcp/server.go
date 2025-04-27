@@ -45,15 +45,15 @@ func Middleware(m MiddlewareFunc) ServerOption {
 	}
 }
 
-// SrvOption with server options.
-func SrvOption(opts ...server.ServerOption) ServerOption {
+// SrvOptions with server options.
+func SrvOptions(opts ...server.ServerOption) ServerOption {
 	return func(s *Server) {
 		s.srvOpts = append(s.srvOpts, opts...)
 	}
 }
 
-// SSEOption with server SSE options.
-func SSEOption(opts ...server.SSEOption) ServerOption {
+// SSEOptions with server SSE options.
+func SSEOptions(opts ...server.SSEOption) ServerOption {
 	return func(s *Server) {
 		s.sseOpts = append(s.sseOpts, opts...)
 	}
