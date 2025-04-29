@@ -9,9 +9,10 @@ import (
 )
 
 var (
-	showVersion     = flag.Bool("version", false, "print the version and exit")
-	omitempty       = flag.Bool("omitempty", true, "omit if google.api is empty")
-	omitemptyPrefix = flag.String("omitempty_prefix", "", "omit if google.api is empty")
+	showVersion             = flag.Bool("version", false, "print the version and exit")
+	omitempty               = flag.Bool("omitempty", true, "omit if google.api is empty")
+	omitemptyPrefix         = flag.String("omitempty_prefix", "", "omit if google.api is empty")
+	isUseProtoTextEncodeURL = flag.Bool("prototext_encodeurl", false, "use proto text name as params form key")
 )
 
 func main() {

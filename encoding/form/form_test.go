@@ -266,7 +266,12 @@ func TestEncodeFieldMask(t *testing.T) {
 	req := &bdtest.HelloRequest{
 		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"foo", "bar"}},
 	}
-	if v := EncodeFieldMask(req.ProtoReflect()); v != "updateMask=foo,bar" {
+	v := EncodeFieldMask(req.ProtoReflect())
+	if v != "updateMask=foo,bar" {
+		t.Errorf("got %s", v)
+	}
+	v = EncodeFieldMask(req.ProtoReflect(), Encode().UseProtoTextAsKey(true))
+	if v != "update_mask=foo,bar" {
 		t.Errorf("got %s", v)
 	}
 }
@@ -280,6 +285,11 @@ func TestOptional(t *testing.T) {
 	}
 	query, _ := EncodeValues(req)
 	if query.Encode() != "name=foo&optInt32=100&sub.naming=bar" {
+		t.Fatalf("got %s", query.Encode())
+	}
+
+	query, _ = EncodeValues(req, Encode().UseProtoTextAsKey(true))
+	if query.Encode() != "name=foo&opt_int32=100&sub.naming=bar" {
 		t.Fatalf("got %s", query.Encode())
 	}
 }
