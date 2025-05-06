@@ -13,17 +13,24 @@ func ContentType(subtype string) string {
 	return baseContentType + "/" + subtype
 }
 
-// ContentSubtype returns the content-subtype for the given content-type.  The
-// given content-type must be a valid content-type that starts with
-// but no content-subtype will be returned.
-// according rfc7231.
-// contentType is assumed to be lowercase already.
+// ContentSubtype returns the content-subtype for the given content-type.
+// If the content-type is empty or invalid, it returns an empty string.
+// The contentType is assumed to be lowercase, as per RFC7231.
+// The function extracts the subtype from the content-type in the format: "<type>/<subtype>",
+// and returns an empty string if the content-type is not well-formed or lacks a subtype.
 func ContentSubtype(contentType string) string {
-	left := strings.Index(contentType, "/")
+	switch contentType {
+	case "":
+		return ""
+	case "application/json":
+		return "json"
+	}
+
+	left := strings.IndexByte(contentType, '/')
 	if left == -1 {
 		return ""
 	}
-	right := strings.Index(contentType, ";")
+	right := strings.IndexByte(contentType, ';')
 	if right == -1 {
 		right = len(contentType)
 	}
