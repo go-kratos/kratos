@@ -37,6 +37,7 @@ type testTransport struct{ header headerCarrier }
 
 func (tr *testTransport) Kind() transport.Kind            { return transport.KindHTTP }
 func (tr *testTransport) Endpoint() string                { return "" }
+func (tr *testTransport) Server() interface{}             { return nil }
 func (tr *testTransport) Operation() string               { return "" }
 func (tr *testTransport) RequestHeader() transport.Header { return tr.header }
 func (tr *testTransport) ReplyHeader() transport.Header   { return tr.header }

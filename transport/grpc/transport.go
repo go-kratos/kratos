@@ -12,6 +12,7 @@ var _ transport.Transporter = (*Transport)(nil)
 // Transport is a gRPC transport.
 type Transport struct {
 	endpoint    string
+	server      interface{}
 	operation   string
 	reqHeader   headerCarrier
 	replyHeader headerCarrier
@@ -26,6 +27,11 @@ func (tr *Transport) Kind() transport.Kind {
 // Endpoint returns the transport endpoint.
 func (tr *Transport) Endpoint() string {
 	return tr.endpoint
+}
+
+// Server returns the transport server.
+func (tr *Transport) Server() interface{} {
+	return tr.server
 }
 
 // Operation returns the transport operation.
