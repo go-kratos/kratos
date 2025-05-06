@@ -14,7 +14,6 @@ func ContentType(subtype string) string {
 }
 
 // ContentSubtype returns the content-subtype for the given content-type.
-// If the content-type is empty or invalid, it returns an empty string.
 // The contentType is assumed to be lowercase, as per RFC7231.
 // The function extracts the subtype from the content-type in the format: "<type>/<subtype>",
 // and returns an empty string if the content-type is not well-formed or lacks a subtype.
