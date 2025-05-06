@@ -8,6 +8,7 @@ import (
 //nolint:lll
 var serviceTemplate = `
 {{- /* delete empty line */ -}}
+{{- if eq .ExistFile false }}
 package service
 
 import (
@@ -31,6 +32,8 @@ type {{ .Service }}Service struct {
 func New{{ .Service }}Service() *{{ .Service }}Service {
 	return &{{ .Service }}Service{}
 }
+
+{{- end }}
 
 {{- $s1 := "google.protobuf.Empty" }}
 {{ range .Methods }}
@@ -103,6 +106,7 @@ type Service struct {
 
 	UseIO      bool
 	UseContext bool
+	ExistFile  bool
 }
 
 // Method is a proto method.
