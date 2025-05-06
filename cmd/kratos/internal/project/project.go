@@ -24,10 +24,11 @@ var CmdNew = &cobra.Command{
 }
 
 var (
-	repoURL string
-	branch  string
-	timeout string
-	nomod   bool
+	repoURL    string
+	branch     string
+	timeout    string
+	nomod      bool
+	moduleName string
 )
 
 func init() {
@@ -39,6 +40,7 @@ func init() {
 	CmdNew.Flags().StringVarP(&branch, "branch", "b", branch, "repo branch")
 	CmdNew.Flags().StringVarP(&timeout, "timeout", "t", timeout, "time out")
 	CmdNew.Flags().BoolVarP(&nomod, "nomod", "", nomod, "retain go mod")
+	CmdNew.Flags().StringVarP(&moduleName, "module-name", "m", moduleName, "module name")
 }
 
 func run(_ *cobra.Command, args []string) {
@@ -66,7 +68,7 @@ func run(_ *cobra.Command, args []string) {
 		name = args[0]
 	}
 	projectName, workingDir := processProjectParams(name, wd)
-	p := &Project{Name: projectName}
+	p := &Project{Name: projectName, ModuleName: moduleName}
 	done := make(chan error, 1)
 	go func() {
 		if !nomod {
