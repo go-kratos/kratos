@@ -13,10 +13,10 @@ func ContentType(subtype string) string {
 	return baseContentType + "/" + subtype
 }
 
-// ContentSubtype returns the content-subtype for the given content-type.
-// The contentType is assumed to be lowercase, as per RFC7231.
-// The function extracts the subtype from the content-type in the format: "<type>/<subtype>",
-// and returns an empty string if the content-type is not well-formed or lacks a subtype.
+// ContentSubtype extracts and returns the content subtype from a given Content-Type string.
+// The input is expected to be lowercase, following the conventions of RFC 7231.
+// It handles formats like "type/subtype" or "type/subtype; key=value".
+// If the input is not well-formed, an empty string is returned.
 func ContentSubtype(contentType string) string {
 	switch contentType {
 	case "":
