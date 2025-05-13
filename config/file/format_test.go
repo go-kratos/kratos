@@ -22,6 +22,10 @@ func TestFormat(t *testing.T) {
 			expect: "",
 		},
 		{
+			input:  "a",
+			expect: "",
+		},
+		{
 			input:  "a.",
 			expect: "",
 		},
@@ -32,6 +36,10 @@ func TestFormat(t *testing.T) {
 		{
 			input:  "a.b",
 			expect: "b",
+		},
+		{
+			input:  "a.b.c",
+			expect: "c",
 		},
 	}
 	for _, v := range tests {
