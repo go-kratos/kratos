@@ -57,9 +57,9 @@ func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry
 	for _, entry := range entries {
 		var version string
 		for _, tag := range entry.Service.Tags {
-			ss := strings.SplitN(tag, "=", 2)
-			if len(ss) == 2 && ss[0] == "version" {
-				version = ss[1]
+			k, v, cut := strings.Cut(tag, "=")
+			if cut && k == "version" {
+				version = v
 			}
 		}
 		endpoints := make([]string, 0)
