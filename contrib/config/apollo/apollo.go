@@ -130,9 +130,12 @@ func NewSource(opts ...Option) config.Source {
 }
 
 func format(ns string) string {
-	arr := strings.Split(ns, ".")
-	suffix := arr[len(arr)-1]
-	if len(arr) <= 1 || suffix == properties {
+	lastDot := strings.LastIndexByte(ns, '.')
+	if lastDot == -1 || lastDot == len(ns)-1 {
+		return json
+	}
+	suffix := ns[lastDot+1:]
+	if suffix == properties {
 		return json
 	}
 	if _, ok := formats[suffix]; !ok {
