@@ -224,7 +224,7 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, f
 			if tr, ok := transport.FromClientContext(ctx); ok {
 				header := tr.RequestHeader()
 				keys := header.Keys()
-				keyvals := make([]string, 0, len(keys))
+				keyvals := make([]string, 0, len(keys)*2)
 				for _, k := range keys {
 					keyvals = append(keyvals, k, header.Get(k))
 				}
