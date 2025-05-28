@@ -13,6 +13,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
+	"google.golang.org/protobuf/types/dynamicpb"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -26,11 +27,16 @@ var errInvalidFormatMapKey = errors.New("invalid formatting for map key")
 
 // DecodeValues decode url value into proto message.
 func DecodeValues(msg proto.Message, values url.Values) error {
-	for key, values := range values {
-		if err := populateFieldValues(msg.ProtoReflect(), strings.Split(key, "."), values); err != nil {
+	dynamicMessage := dynamicpb.NewMessage(msg.ProtoReflect().Descriptor())
+
+	for key, vals := range values {
+		if err := populateFieldValues(dynamicMessage, strings.Split(key, "."), vals); err != nil {
 			return err
 		}
 	}
+
+	proto.Merge(msg, dynamicMessage)
+
 	return nil
 }
 
@@ -325,8 +331,16 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		}
 		msg = &v
 	default:
-		return protoreflect.Value{}, fmt.Errorf("unsupported message type: %q", string(md.FullName()))
+		msg = dynamicpb.NewMessage(md)
+		if err := protojson.Unmarshal([]byte(value), msg); err != nil {
+			return protoreflect.Value{}, err
+		}
 	}
+
+	if msg == nil {
+		return protoreflect.Value{}, nil
+	}
+
 	return protoreflect.ValueOfMessage(msg.ProtoReflect()), nil
 }
 
