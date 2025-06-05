@@ -2,7 +2,6 @@ package polaris
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"strconv"
 	"strings"
