@@ -70,7 +70,7 @@ func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry
 			endpoints = append(endpoints, addr.Address)
 		}
 		if len(endpoints) == 0 && entry.Service.Address != "" && entry.Service.Port != 0 {
-			endpoints = append(endpoints, "http://"+net.JoinHostPort( entry.Service.Address, strconv.FormatUint(entry.Service.Port, 10))))
+			endpoints = append(endpoints, "http://"+net.JoinHostPort(entry.Service.Address, strconv.FormatUint(uint64(entry.Service.Port), 10)))
 		}
 		services = append(services, &registry.ServiceInstance{
 			ID:        entry.Service.ID,
