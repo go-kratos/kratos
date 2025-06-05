@@ -26,6 +26,14 @@ type Error struct {
 }
 
 func (e *Error) Error() string {
+	k := 0
+	if e.Code != 0 {
+		k++
+	}
+	if e.Reason != "" {
+		k++
+	}
+	i := 0
 	return fmt.Sprintf("error: code = %d reason = %s message = %s metadata = %v cause = %v", e.Code, e.Reason, e.Message, e.Metadata, e.cause)
 }
 
