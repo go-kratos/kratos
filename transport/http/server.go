@@ -347,7 +347,7 @@ func (s *Server) Stop(ctx context.Context) error {
 	if err != nil {
 		if ctx.Err() != nil {
 			log.Warn("[HTTP] server couldn't stop gracefully in time, doing force stop")
-			err = s.Server.Close()
+			err = s.Close()
 		}
 	}
 	return err

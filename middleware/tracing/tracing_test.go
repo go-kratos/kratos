@@ -3,6 +3,7 @@ package tracing
 import (
 	"context"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"reflect"
 	"testing"
@@ -71,6 +72,9 @@ func (tr *mockTransport) Request() *http.Request {
 	return tr.request
 }
 func (tr *mockTransport) PathTemplate() string { return "" }
+func (tr *mockTransport) Response() http.ResponseWriter {
+	return httptest.NewRecorder()
+}
 
 func TestTracer(t *testing.T) {
 	carrier := headerCarrier{}

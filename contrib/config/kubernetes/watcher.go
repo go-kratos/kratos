@@ -34,7 +34,7 @@ func (w *watcher) Next() ([]*config.KeyValue, error) {
 ResultChan:
 	ch := <-w.watcher.ResultChan()
 	if ch.Object == nil {
-		// 重新获取watcher
+		// recreate the watcher
 		k8sWatcher, err := w.k.client.CoreV1().ConfigMaps(w.k.opts.Namespace).Watch(context.Background(), metav1.ListOptions{
 			LabelSelector: w.k.opts.LabelSelector,
 			FieldSelector: w.k.opts.FieldSelector,
