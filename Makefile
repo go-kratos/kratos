@@ -71,7 +71,6 @@ uninstall:
 
 .PHONY: clean
 clean:
-	@echo "$(GOBIN)"
 	@${TOOLS_SHELL} tidy
 	@echo "clean finished"
 
@@ -89,7 +88,6 @@ test:
 test-coverage:
 	@${TOOLS_SHELL} test_coverage
 	@echo "go test with coverage finished"
-	@bash -x ${TOOLS_SHELL} test_coverage 2>&1 | grep -B5 -A5 "expr:"
 
 .PHONY: lint
 lint: $(LINTER)
