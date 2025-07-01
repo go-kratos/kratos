@@ -1,26 +1,24 @@
 user	:=	$(shell whoami)
 rev 	:= 	$(shell git rev-parse --short HEAD)
-os		:=	$(shell expr substr $(shell uname -s) 1 5)
+os		:=	$(shell uname -s)
 
 # GOBIN > GOPATH > INSTALLDIR
 # Mac OS X
-ifeq ($(shell uname),Darwin)
-GOBIN	:=	$(shell echo ${GOBIN} | cut -d':' -f1)
+ifeq ($(os),Darwin)
+GOBIN	:=	$(shell echo $(GOBIN) | cut -d':' -f1)
 GOPATH	:=	$(shell echo $(GOPATH) | cut -d':' -f1)
 endif
 
 # Linux
 ifeq ($(os),Linux)
-GOBIN	:=	$(shell echo ${GOBIN} | cut -d':' -f1)
+GOBIN	:=	$(shell echo $(GOBIN) | cut -d':' -f1)
 GOPATH	:=	$(shell echo $(GOPATH) | cut -d':' -f1)
 endif
 
 # Windows
-ifeq ($(os),MINGW)
-GOBIN	:=	$(subst \,/,$(GOBIN))
-GOPATH	:=	$(subst \,/,$(GOPATH))
-GOBIN :=/$(shell echo "$(GOBIN)" | cut -d';' -f1 | sed 's/://g')
-GOPATH :=/$(shell echo "$(GOPATH)" | cut -d';' -f1 | sed 's/://g')
+ifeq ($(shell expr substr $(shell uname -s) 1 5),MINGW)
+GOBIN := $(shell echo "$(GOBIN)" | sed 's|\\|/|g' | cut -d';' -f1 | sed 's|^\([A-Za-z]\):|/\1|')
+GOPATH := $(shell echo "$(GOPATH)" | sed 's|\\|/|g' | cut -d';' -f1 | sed 's|^\([A-Za-z]\):|/\1|')
 endif
 BIN		:= 	""
 
@@ -73,6 +71,7 @@ uninstall:
 
 .PHONY: clean
 clean:
+	@echo "$(GOBIN)"
 	@${TOOLS_SHELL} tidy
 	@echo "clean finished"
 
@@ -90,6 +89,7 @@ test:
 test-coverage:
 	@${TOOLS_SHELL} test_coverage
 	@echo "go test with coverage finished"
+	@bash -x ${TOOLS_SHELL} test_coverage 2>&1 | grep -B5 -A5 "expr:"
 
 .PHONY: lint
 lint: $(LINTER)
