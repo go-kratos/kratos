@@ -1,6 +1,6 @@
 user	:=	$(shell whoami)
 rev 	:= 	$(shell git rev-parse --short HEAD)
-os		:=	$(shell uname -s)
+os		:=	$(shell uname)
 
 # GOBIN > GOPATH > INSTALLDIR
 # Mac OS X
@@ -16,7 +16,7 @@ GOPATH	:=	$(shell echo $(GOPATH) | cut -d':' -f1)
 endif
 
 # Windows
-ifeq ($(shell expr substr $(shell uname -s) 1 5),MINGW)
+ifneq ($(findstring MINGW,$(shell uname -s)),)
 GOBIN := $(shell echo "$(GOBIN)" | sed 's|\\|/|g' | cut -d';' -f1 | sed 's|^\([A-Za-z]\):|/\1|')
 GOPATH := $(shell echo "$(GOPATH)" | sed 's|\\|/|g' | cut -d';' -f1 | sed 's|^\([A-Za-z]\):|/\1|')
 endif
