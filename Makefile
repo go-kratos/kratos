@@ -1,26 +1,24 @@
 user	:=	$(shell whoami)
 rev 	:= 	$(shell git rev-parse --short HEAD)
-os		:=	$(shell expr substr $(shell uname -s) 1 5)
+os		:=	$(shell uname)
 
 # GOBIN > GOPATH > INSTALLDIR
 # Mac OS X
-ifeq ($(shell uname),Darwin)
-GOBIN	:=	$(shell echo ${GOBIN} | cut -d':' -f1)
+ifeq ($(os),Darwin)
+GOBIN	:=	$(shell echo $(GOBIN) | cut -d':' -f1)
 GOPATH	:=	$(shell echo $(GOPATH) | cut -d':' -f1)
 endif
 
 # Linux
 ifeq ($(os),Linux)
-GOBIN	:=	$(shell echo ${GOBIN} | cut -d':' -f1)
+GOBIN	:=	$(shell echo $(GOBIN) | cut -d':' -f1)
 GOPATH	:=	$(shell echo $(GOPATH) | cut -d':' -f1)
 endif
 
 # Windows
-ifeq ($(os),MINGW)
-GOBIN	:=	$(subst \,/,$(GOBIN))
-GOPATH	:=	$(subst \,/,$(GOPATH))
-GOBIN :=/$(shell echo "$(GOBIN)" | cut -d';' -f1 | sed 's/://g')
-GOPATH :=/$(shell echo "$(GOPATH)" | cut -d';' -f1 | sed 's/://g')
+ifneq ($(findstring MINGW,$(shell uname -s)),)
+GOBIN := $(shell echo "$(GOBIN)" | sed 's|\\|/|g' | cut -d';' -f1 | sed 's|^\([A-Za-z]\):|/\1|')
+GOPATH := $(shell echo "$(GOPATH)" | sed 's|\\|/|g' | cut -d';' -f1 | sed 's|^\([A-Za-z]\):|/\1|')
 endif
 BIN		:= 	""
 
