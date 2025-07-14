@@ -49,3 +49,9 @@ func TestFormat(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkFormat(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		format("abc.txt")
+	}
+}
