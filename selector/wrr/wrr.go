@@ -37,12 +37,28 @@ func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selec
 	if len(nodes) == 0 {
 		return nil, nil, selector.ErrNoAvailable
 	}
+
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	// Create a set of current node addresses for cleanup
+	currentNodes := make(map[string]bool)
+	for _, node := range nodes {
+		currentNodes[node.Address()] = true
+	}
+
+	// Clean up stale entries from currentWeight map
+	for address := range p.currentWeight {
+		if !currentNodes[address] {
+			delete(p.currentWeight, address)
+		}
+	}
+
 	var totalWeight float64
 	var selected selector.WeightedNode
 	var selectWeight float64
 
 	// nginx wrr load balancing algorithm: http://blog.csdn.net/zhangskd/article/details/50194069
-	p.mu.Lock()
 	for _, node := range nodes {
 		totalWeight += node.Weight()
 		cwt := p.currentWeight[node.Address()]
@@ -55,7 +71,6 @@ func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selec
 		}
 	}
 	p.currentWeight[selected.Address()] = selectWeight - totalWeight
-	p.mu.Unlock()
 
 	d := selected.Pick()
 	return selected, d, nil
