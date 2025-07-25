@@ -60,16 +60,15 @@ func DefaultRequestQuery(r *http.Request, v any) error {
 // DefaultRequestDecoder decodes the request body to object.
 func DefaultRequestDecoder(r *http.Request, v any) error {
 	data, err := io.ReadAll(r.Body)
-
-	// reset body.
-	r.Body = io.NopCloser(bytes.NewBuffer(data))
-
 	if err != nil {
 		return errors.BadRequest("CODEC", err.Error())
 	}
 	if len(data) == 0 {
 		return nil
 	}
+	
+	// reset body.
+	r.Body = io.NopCloser(bytes.NewBuffer(data))
 
 	codec, ok := CodecForRequest(r, "Content-Type")
 	if !ok {
