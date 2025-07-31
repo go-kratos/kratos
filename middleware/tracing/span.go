@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/metadata"
@@ -11,7 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 
 	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/protobuf/proto"
@@ -34,9 +35,9 @@ func setClientSpan(ctx context.Context, span trace.Span, m any) {
 				method := ht.Request().Method
 				route := ht.PathTemplate()
 				path := ht.Request().URL.Path
-				attrs = append(attrs, semconv.HTTPMethodKey.String(method))
+				attrs = append(attrs, semconv.HTTPRequestMethodKey.String(method))
 				attrs = append(attrs, semconv.HTTPRouteKey.String(route))
-				attrs = append(attrs, semconv.HTTPTargetKey.String(path))
+				attrs = append(attrs, semconv.URLPathKey.String(path))
 				remote = ht.Request().Host
 			}
 		case transport.KindGRPC:
@@ -47,7 +48,7 @@ func setClientSpan(ctx context.Context, span trace.Span, m any) {
 	_, mAttrs := parseFullMethod(operation)
 	attrs = append(attrs, mAttrs...)
 	if remote != "" {
-		attrs = append(attrs, peerAttr(remote)...)
+		attrs = append(attrs, peerAttr(remote, true)...)
 	}
 	if p, ok := m.(proto.Message); ok {
 		attrs = append(attrs, attribute.Key("send_msg.size").Int(proto.Size(p)))
@@ -73,9 +74,9 @@ func setServerSpan(ctx context.Context, span trace.Span, m any) {
 				method := ht.Request().Method
 				route := ht.PathTemplate()
 				path := ht.Request().URL.Path
-				attrs = append(attrs, semconv.HTTPMethodKey.String(method))
+				attrs = append(attrs, semconv.HTTPRequestMethodKey.String(method))
 				attrs = append(attrs, semconv.HTTPRouteKey.String(route))
-				attrs = append(attrs, semconv.HTTPTargetKey.String(path))
+				attrs = append(attrs, semconv.URLPathKey.String(path))
 				remote = ht.Request().RemoteAddr
 			}
 		case transport.KindGRPC:
@@ -87,7 +88,7 @@ func setServerSpan(ctx context.Context, span trace.Span, m any) {
 	attrs = append(attrs, semconv.RPCSystemKey.String(rpcKind))
 	_, mAttrs := parseFullMethod(operation)
 	attrs = append(attrs, mAttrs...)
-	attrs = append(attrs, peerAttr(remote)...)
+	attrs = append(attrs, peerAttr(remote, false)...)
 	if p, ok := m.(proto.Message); ok {
 		attrs = append(attrs, attribute.Key("recv_msg.size").Int(proto.Size(p)))
 	}
@@ -120,7 +121,7 @@ func parseFullMethod(fullMethod string) (string, []attribute.KeyValue) {
 }
 
 // peerAttr returns attributes about the peer address.
-func peerAttr(addr string) []attribute.KeyValue {
+func peerAttr(addr string, isClient bool) []attribute.KeyValue {
 	host, port, err := net.SplitHostPort(addr)
 	if err != nil {
 		return []attribute.KeyValue(nil)
@@ -130,10 +131,22 @@ func peerAttr(addr string) []attribute.KeyValue {
 		host = "127.0.0.1"
 	}
 
-	return []attribute.KeyValue{
-		semconv.NetPeerIPKey.String(host),
-		semconv.NetPeerPortKey.String(port),
+	attrs := []attribute.KeyValue{
+		semconv.NetworkPeerAddressKey.String(host),
 	}
+
+	portInt, err := strconv.Atoi(port)
+	if err != nil {
+		return attrs
+	}
+
+	if isClient {
+		attrs = append(attrs, semconv.ServerPort(portInt))
+	} else {
+		attrs = append(attrs, semconv.ClientPort(portInt))
+	}
+
+	return attrs
 }
 
 func parseTarget(endpoint string) (address string, err error) {

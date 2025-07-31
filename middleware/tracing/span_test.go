@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"google.golang.org/grpc/peer"
 
 	"go.opentelemetry.io/otel/trace/noop"
@@ -66,43 +66,75 @@ func Test_parseFullMethod(t *testing.T) {
 
 func Test_peerAttr(t *testing.T) {
 	tests := []struct {
-		name string
-		addr string
-		want []attribute.KeyValue
+		name     string
+		addr     string
+		isClient bool
+		want     []attribute.KeyValue
 	}{
 		{
-			name: "nil addr",
-			addr: ":8080",
+			name:     "nil addr with client context",
+			addr:     ":8080",
+			isClient: true,
 			want: []attribute.KeyValue{
-				semconv.NetPeerIPKey.String("127.0.0.1"),
-				semconv.NetPeerPortKey.String("8080"),
+				semconv.NetworkPeerAddressKey.String("127.0.0.1"),
+				semconv.ServerPortKey.Int(8080),
 			},
 		},
 		{
-			name: "normal addr without port",
-			addr: "192.168.0.1",
-			want: []attribute.KeyValue(nil),
-		},
-		{
-			name: "normal addr with port",
-			addr: "192.168.0.1:8080",
+			name:     "nil addr with server context",
+			addr:     ":8080",
+			isClient: false,
 			want: []attribute.KeyValue{
-				semconv.NetPeerIPKey.String("192.168.0.1"),
-				semconv.NetPeerPortKey.String("8080"),
+				semconv.NetworkPeerAddressKey.String("127.0.0.1"),
+				semconv.ClientPortKey.Int(8080),
 			},
 		},
 		{
-			name: "dns addr",
-			addr: "foo:8080",
+			name:     "normal addr without port",
+			addr:     "192.168.0.1",
+			isClient: true,
+			want:     []attribute.KeyValue(nil),
+		},
+		{
+			name:     "normal addr with port in client context",
+			addr:     "192.168.0.1:8080",
+			isClient: true,
 			want: []attribute.KeyValue{
-				semconv.NetPeerIPKey.String("foo"),
-				semconv.NetPeerPortKey.String("8080"),
+				semconv.NetworkPeerAddressKey.String("192.168.0.1"),
+				semconv.ServerPortKey.Int(8080),
+			},
+		},
+		{
+			name:     "normal addr with port in server context",
+			addr:     "192.168.0.1:8080",
+			isClient: false,
+			want: []attribute.KeyValue{
+				semconv.NetworkPeerAddressKey.String("192.168.0.1"),
+				semconv.ClientPortKey.Int(8080),
+			},
+		},
+		{
+			name:     "dns addr in client context",
+			addr:     "foo:8080",
+			isClient: true,
+			want: []attribute.KeyValue{
+				semconv.NetworkPeerAddressKey.String("foo"),
+				semconv.ServerPortKey.Int(8080),
+			},
+		},
+		{
+			name:     "dns addr in server context",
+			addr:     "foo:8080",
+			isClient: false,
+			want: []attribute.KeyValue{
+				semconv.NetworkPeerAddressKey.String("foo"),
+				semconv.ClientPortKey.Int(8080),
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := peerAttr(tt.addr); !reflect.DeepEqual(got, tt.want) {
+			if got := peerAttr(tt.addr, tt.isClient); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("peerAttr() = %v, want %v", got, tt.want)
 			}
 		})
