@@ -21,10 +21,7 @@ func EncodeValues(msg any) (url.Values, error) {
 	if v, ok := msg.(proto.Message); ok {
 		u := make(url.Values)
 		err := encodeByField(u, "", v.ProtoReflect())
-		if err != nil {
-			return nil, err
-		}
-		return u, nil
+		return u, err
 	}
 	return encoder.Encode(msg)
 }
@@ -56,7 +53,6 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 				list, err := encodeRepeatedField(fd, v.List())
 				if err != nil {
 					finalErr = err
-					return false
 				}
 				for _, item := range list {
 					u.Add(newPath, item)
@@ -67,7 +63,6 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 				m, err := encodeMapField(fd, v.Map())
 				if err != nil {
 					finalErr = err
-					return false
 				}
 				for k, value := range m {
 					u.Set(fmt.Sprintf("%s[%s]", newPath, k), value)
@@ -81,13 +76,11 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 			}
 			if err = encodeByField(u, newPath, v.Message()); err != nil {
 				finalErr = err
-				return false
 			}
 		default:
 			value, err := EncodeField(fd, v)
 			if err != nil {
 				finalErr = err
-				return false
 			}
 			u.Set(newPath, value)
 		}
