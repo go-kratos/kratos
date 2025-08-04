@@ -4,7 +4,7 @@ import (
 	"context"
 	"reflect"
 	"testing"
-	"time"
+// Removed unused import of "time"
 
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
