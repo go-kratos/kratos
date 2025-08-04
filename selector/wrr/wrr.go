@@ -25,6 +25,29 @@ type options struct{}
 type Balancer struct {
 	mu            sync.Mutex
 	currentWeight map[string]float64
+	lastNodes     []selector.WeightedNode
+}
+
+// equalNodes checks if two slices of WeightedNode contain the same nodes
+func equalNodes(a, b []selector.WeightedNode) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	// Create a map of addresses from slice a
+	aMap := make(map[string]bool)
+	for _, node := range a {
+		aMap[node.Address()] = true
+	}
+
+	// Check if all nodes in slice b exist in slice a
+	for _, node := range b {
+		if !aMap[node.Address()] {
+			return false
+		}
+	}
+
+	return true
 }
 
 // New random a selector.
