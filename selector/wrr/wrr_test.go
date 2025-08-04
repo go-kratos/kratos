@@ -127,7 +127,7 @@ func TestCleanupOnlyWhenNodesChange(t *testing.T) {
 		Balancer: &Balancer{currentWeight: make(map[string]float64)},
 	}
 
-	originalPick := func(ctx context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.DoneFunc, error) {
+	originalPick := func(_ context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.DoneFunc, error) {
 		if len(nodes) == 0 {
 			return nil, nil, selector.ErrNoAvailable
 		}
@@ -189,8 +189,10 @@ func TestCleanupOnlyWhenNodesChange(t *testing.T) {
 		&mockWeightedNode{address: "node4", weight: 40},
 	}
 
+	var err error
+
 	// First call with nodes1 - should trigger cleanup (initialization)
-	_, _, err := originalPick(ctx, nodes1)
+	_, _, err = originalPick(ctx, nodes1)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -201,7 +203,7 @@ func TestCleanupOnlyWhenNodesChange(t *testing.T) {
 
 	// Multiple calls with same nodes1 - should NOT trigger additional cleanup
 	for i := 0; i < 5; i++ {
-		_, _, err := originalPick(ctx, nodes1)
+		_, _, err = originalPick(ctx, nodes1)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -223,7 +225,7 @@ func TestCleanupOnlyWhenNodesChange(t *testing.T) {
 
 	// Multiple calls with same nodes2 - should NOT trigger additional cleanup
 	for i := 0; i < 3; i++ {
-		_, _, err := originalPick(ctx, nodes2)
+		_, _, err = originalPick(ctx, nodes2)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
