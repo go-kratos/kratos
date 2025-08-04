@@ -41,16 +41,23 @@ func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selec
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	// Create a set of current node addresses for cleanup
-	currentNodes := make(map[string]bool)
-	for _, node := range nodes {
-		currentNodes[node.Address()] = true
-	}
+	// Check if the node list has changed
+	if len(p.lastNodes) != len(nodes) || !equalNodes(p.lastNodes, nodes) {
+		// Update lastNodes
+		p.lastNodes = make([]selector.WeightedNode, len(nodes))
+		copy(p.lastNodes, nodes)
 
-	// Clean up stale entries from currentWeight map
-	for address := range p.currentWeight {
-		if !currentNodes[address] {
-			delete(p.currentWeight, address)
+		// Create a set of current node addresses for cleanup
+		currentNodes := make(map[string]bool)
+		for _, node := range nodes {
+			currentNodes[node.Address()] = true
+		}
+
+		// Clean up stale entries from currentWeight map
+		for address := range p.currentWeight {
+			if !currentNodes[address] {
+				delete(p.currentWeight, address)
+			}
 		}
 	}
 
