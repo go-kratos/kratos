@@ -93,7 +93,7 @@ type Registry struct {
 
 // NewRegistry is used to initialize the Registry
 func NewRegistry(clientSet *kubernetes.Clientset, namespace string) *Registry {
-	if strings.EqualFold(namespace, "") {
+	if namespace == "" {
 		namespace = metav1.NamespaceAll
 	}
 	informerFactory := informers.NewSharedInformerFactoryWithOptions(clientSet, time.Minute*10, informers.WithNamespace(namespace))
