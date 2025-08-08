@@ -16,6 +16,7 @@ message Complex {
   string no_one = 2 [json_name = "numberOne"];
   Simple simple = 3 [json_name = "very_simple"];
   repeated string strings = 4;
+  repeated Simple simples = 27;
   bool b = 5;
   sex sex = 6;
   int32 age = 7;

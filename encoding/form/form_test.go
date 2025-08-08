@@ -283,3 +283,14 @@ func TestOptional(t *testing.T) {
 		t.Fatalf("got %s", query.Encode())
 	}
 }
+
+func TestWithUnsupportedType(t *testing.T) {
+	in := &complex.Complex{
+		Id:      2233,
+		Simples: []*complex.Simple{{Component: "3344"}, {Component: "5566"}},
+	}
+	query, _ := EncodeValues(in)
+	if query.Encode() != "id=2233" {
+		t.Fatalf("got %s", query.Encode())
+	}
+}
