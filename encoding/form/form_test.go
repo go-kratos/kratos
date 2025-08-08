@@ -154,7 +154,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 		Id:      2233,
 		NoOne:   "2233",
 		Simple:  &complex.Simple{Component: "5566"},
-		Simples: []string{"3344", "5566"},
+		Strings: []string{"3344", "5566"},
 		B:       true,
 		Sex:     complex.Sex_woman,
 		Age:     18,
@@ -185,7 +185,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 	if "a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=22.22&double=12.33&duration="+
 		"2m0.000000022s&field=1%2C2&float=12.34&id=2233&int32=32&int64=64&"+
 		"map%5Bkratos%5D=https%3A%2F%2Fgo-kratos.dev%2F&map%5Bkratos_start%5D=https%3A%2F%2Fgo-kratos.dev%2Fen%2Fdocs%2Fgetting-started%2Fstart%2F&"+
-		"numberOne=2233&price=11.23&sex=woman&simples=3344&simples=5566&string=go-kratos"+
+		"numberOne=2233&price=11.23&sex=woman&string=go-kratos&strings=3344&strings=5566"+
 		"&timestamp=1970-01-01T00%3A00%3A20.000000002Z&uint32=32&uint64=64&very_simple.component=5566" != string(content) {
 		t.Errorf("rawpath is not equal to %s", content)
 	}
@@ -206,17 +206,17 @@ func TestProtoEncodeDecode(t *testing.T) {
 	if "5566" != in2.Simple.Component {
 		t.Errorf("expect %v, got %v", "5566", in2.Simple.Component)
 	}
-	if in2.Simples == nil {
-		t.Errorf("expect %v, got %v", nil, in2.Simples)
+	if in2.Strings == nil {
+		t.Errorf("expect %v, got %v", nil, in2.Strings)
 	}
-	if len(in2.Simples) != 2 {
-		t.Errorf("expect %v, got %v", 2, len(in2.Simples))
+	if len(in2.Strings) != 2 {
+		t.Errorf("expect %v, got %v", 2, len(in2.Strings))
 	}
-	if "3344" != in2.Simples[0] {
-		t.Errorf("expect %v, got %v", "3344", in2.Simples[0])
+	if "3344" != in2.Strings[0] {
+		t.Errorf("expect %v, got %v", "3344", in2.Strings[0])
 	}
-	if "5566" != in2.Simples[1] {
-		t.Errorf("expect %v, got %v", "5566", in2.Simples[1])
+	if "5566" != in2.Strings[1] {
+		t.Errorf("expect %v, got %v", "5566", in2.Strings[1])
 	}
 	if l := len(in2.GetMap()); l != 2 {
 		t.Fatalf("in2.Map length want: %d, got: %d", 2, l)

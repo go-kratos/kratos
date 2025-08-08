@@ -15,7 +15,7 @@ message Complex {
   int64 id = 1;
   string no_one = 2 [json_name = "numberOne"];
   Simple simple = 3 [json_name = "very_simple"];
-  repeated string simples = 4;
+  repeated string strings = 4;
   bool b = 5;
   sex sex = 6;
   int32 age = 7;
