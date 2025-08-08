@@ -38,7 +38,7 @@ type Client struct {
 	heartbeat bool
 	// deregisterCriticalServiceAfter time interval in seconds
 	deregisterCriticalServiceAfter int
-	// serviceChecks  user custom checks
+	// serviceChecks user custom checks
 	serviceChecks api.AgentServiceChecks
 
 	// used to control heartbeat
@@ -161,7 +161,10 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 			return err
 		}
 		addr := raw.Hostname()
-		port, _ := strconv.ParseUint(raw.Port(), 10, 16)
+		port, err := strconv.ParseUint(raw.Port(), 10, 16)
+		if err != nil || port == 0 {
+			return fmt.Errorf("invalid port in endpoint: %q", endpoint)
+		}
 
 		checkAddresses = append(checkAddresses, net.JoinHostPort(addr, strconv.FormatUint(port, 10)))
 		addresses[raw.Scheme] = api.ServiceAddress{Address: endpoint, Port: int(port)}
@@ -175,7 +178,7 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 	}
 	if len(checkAddresses) > 0 {
 		host, portRaw, _ := net.SplitHostPort(checkAddresses[0])
-		port, _ := strconv.ParseInt(portRaw, 10, 32)
+		port, _ := strconv.ParseUint(portRaw, 10, 16)
 		asr.Address = host
 		asr.Port = int(port)
 	}
