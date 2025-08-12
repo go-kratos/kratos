@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"testing"
 
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
 	"github.com/go-kratos/kratos/v2/internal/testdata/complex"
@@ -45,6 +46,63 @@ func TestDecodeValues(t *testing.T) {
 	}
 	if comp.Simples[1] != "5566" {
 		t.Errorf("want %v, got %v", "5566", comp.Simples[1])
+	}
+}
+
+func TestDecodeJsonValues(t *testing.T) {
+	origin := &complex.ComplexField{
+		Name: "ComplexField",
+		Inner1: &complex.Inner1{
+			Name: "Inner1",
+			Sex:  complex.Sex_man,
+		},
+		Inner2: []*complex.Inner2{
+			{
+				Name: "Inner11",
+				Inner1: []*complex.Inner1{
+					{
+						Name: "Inner111",
+						Sex:  complex.Sex_man,
+					},
+				},
+			},
+			{
+				Name: "Inner12",
+				Inner1: []*complex.Inner1{
+					{
+						Name: "Inner121",
+						Sex:  complex.Sex_man,
+					},
+					{
+						Name: "Inner122",
+						Sex:  complex.Sex_woman,
+					},
+				},
+			},
+		},
+	}
+	data, err := protojson.Marshal(origin)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// url.ParseQuery("complex_field={"name":"ComplexField", "inner1":{"name":"Inner1"}, "inner2":[{"name":"Inner11", "inner1":[{"name":"Inner111"}]}, {"name":"Inner12", "inner1":[{"name":"Inner121"}, {"name":"Inner122", "sex":"woman"}]}]}")
+	form, err := url.ParseQuery(fmt.Sprintf("complex_field=%s", string(data)))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	comp := &complex.Complex{Age: 10}
+	err = DecodeValues(comp, form)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(origin, comp.ComplexField) {
+		t.Errorf("want %v, got %v", origin, comp.ComplexField)
+	}
+	// check if age is not overridden
+	if comp.Age != 10 {
+		t.Errorf("want %v, got %v", "10", comp.Age)
 	}
 }
 
