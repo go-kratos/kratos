@@ -195,6 +195,7 @@ func (a *App) buildInstance() (*registry.ServiceInstance, error) {
 		Version:   a.opts.version,
 		Metadata:  a.opts.metadata,
 		Endpoints: endpoints,
+		Tags: 	   a.opts.registrarTags,
 	}, nil
 }
 

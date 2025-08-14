@@ -170,7 +170,7 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 		ID:              svc.ID,
 		Name:            svc.Name,
 		Meta:            svc.Metadata,
-		Tags:            []string{fmt.Sprintf("version=%s", svc.Version)},
+		Tags:            svc.Tags,
 		TaggedAddresses: addresses,
 	}
 	if len(checkAddresses) > 0 {

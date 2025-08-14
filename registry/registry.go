@@ -48,6 +48,8 @@ type ServiceInstance struct {
 	//   http://127.0.0.1:8000?isSecure=false
 	//   grpc://127.0.0.1:9000?isSecure=false
 	Endpoints []string `json:"endpoints"`
+	// Tags are the labels associated with the service instance.
+	Tags      []string `json:"tags"`
 }
 
 func (i *ServiceInstance) String() string {
