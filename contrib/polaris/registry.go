@@ -2,7 +2,6 @@ package polaris
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/url"
 	"strconv"
@@ -370,7 +369,7 @@ func instancesToServiceInstances(instances map[string][]model.Instance) []*regis
 		}
 		for _, item := range inss {
 			if item.IsHealthy() {
-				ins.Endpoints = append(ins.Endpoints, fmt.Sprintf("%s://%s:%d", item.GetProtocol(), item.GetHost(), item.GetPort()))
+				ins.Endpoints = append(ins.Endpoints, item.GetProtocol()+"://"+net.JoinHostPort(item.GetHost(), strconv.FormatUint(uint64(item.GetPort()), 10)))
 			}
 		}
 		if len(ins.Endpoints) != 0 {

@@ -2,7 +2,6 @@ package polaris
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"strconv"
 	"strings"
@@ -95,7 +94,7 @@ func (p *Polaris) NodeFilter(opts ...RouterOption) selector.NodeFilter {
 
 		newNode := make([]selector.Node, 0, len(m.Instances))
 		for _, ins := range m.GetInstances() {
-			if v, ok := n[fmt.Sprintf("%s:%d", ins.GetHost(), ins.GetPort())]; ok {
+			if v, ok := n[net.JoinHostPort(ins.GetHost(), strconv.FormatUint(uint64(ins.GetPort()), 10))]; ok {
 				newNode = append(newNode, v)
 			}
 		}
