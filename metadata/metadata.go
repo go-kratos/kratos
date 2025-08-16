@@ -26,11 +26,12 @@ func New(mds ...map[string][]string) Metadata {
 
 // Add adds the key, value pair to the header.
 func (m Metadata) Add(key, value string) {
-	if len(key) == 0 {
+	if key == "" {
 		return
 	}
 
-	m[strings.ToLower(key)] = append(m[strings.ToLower(key)], value)
+	lowerKey := strings.ToLower(key)
+	m[lowerKey] = append(m[lowerKey], value)
 }
 
 // Get returns the value associated with the passed key.
