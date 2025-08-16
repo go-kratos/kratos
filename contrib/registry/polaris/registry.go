@@ -2,7 +2,6 @@ package polaris
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/url"
 	"strconv"
@@ -439,6 +438,6 @@ func instanceToServiceInstance(instance model.Instance) *registry.ServiceInstanc
 		Name:      instance.GetService(),
 		Version:   metadata["version"],
 		Metadata:  metadata,
-		Endpoints: []string{fmt.Sprintf("%s://%s:%d", kind, instance.GetHost(), instance.GetPort())},
+		Endpoints: []string{kind + "://" + net.JoinHostPort(instance.GetHost(), strconv.Itoa(int(instance.GetPort())))},
 	}
 }
