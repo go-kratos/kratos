@@ -115,7 +115,7 @@ func toServiceInstance(ins *discoveryInstance) *registry.ServiceInstance {
 	md := map[string]string{
 		"region":   ins.Region,
 		"zone":     ins.Zone,
-		"lastTs":   strconv.Itoa(int(ins.LastTs)),
+		"lastTs":   strconv.FormatInt(ins.LastTs, 10),
 		"env":      ins.Env,
 		"hostname": ins.Hostname,
 	}

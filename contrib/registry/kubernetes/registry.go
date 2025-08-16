@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/url"
 	"os"
 	"strconv"
@@ -392,7 +393,7 @@ func getServiceInstanceFromPod(pod *corev1.Pod) (*registry.ServiceInstance, erro
 					protocol = string(cp.Protocol)
 				}
 			}
-			addr := fmt.Sprintf("%s://%s:%d", protocol, podIP, port)
+			addr := protocol + "://" + net.JoinHostPort(podIP, strconv.Itoa(int(port)))
 			endpoints = append(endpoints, addr)
 		}
 	}
