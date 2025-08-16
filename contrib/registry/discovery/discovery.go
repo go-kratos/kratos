@@ -24,7 +24,7 @@ type Discovery struct {
 	httpClient *resty.Client
 
 	node    atomic.Value
-	nodeIdx uint64
+	nodeIdx atomic.Uint64
 
 	mutex       sync.RWMutex
 	apps        map[string]*appInfo
@@ -217,11 +217,11 @@ func (d *Discovery) pickNode() string {
 	if !ok || len(nodes) == 0 {
 		return d.config.Nodes[rand.Intn(len(d.config.Nodes))]
 	}
-	return nodes[atomic.LoadUint64(&d.nodeIdx)%uint64(len(nodes))]
+	return nodes[d.nodeIdx.Load()%uint64(len(nodes))]
 }
 
 func (d *Discovery) switchNode() {
-	atomic.AddUint64(&d.nodeIdx, 1)
+	d.nodeIdx.Add(1)
 }
 
 // renew an instance with Discovery

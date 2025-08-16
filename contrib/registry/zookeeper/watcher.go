@@ -21,7 +21,7 @@ type watcher struct {
 	conn   *zk.Conn
 	cancel context.CancelFunc
 
-	first uint32
+	first atomic.Bool
 	// prefix for ZooKeeper paths or keys (used for filtering or identifying watched nodes)
 	prefix string
 	// the name of the service being watched in ZooKeeper
@@ -61,7 +61,7 @@ func (w *watcher) watch(ctx context.Context) {
 
 func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 	// TODO: multiple calls to Next may lead to inconsistent service instance information
-	if atomic.CompareAndSwapUint32(&w.first, 0, 1) {
+	if w.first.CompareAndSwap(false, true) {
 		return w.getServices()
 	}
 	select {
