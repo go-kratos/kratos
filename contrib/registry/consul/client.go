@@ -174,7 +174,7 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 		}
 	}
 	if customTags, ok := meta["tags"]; ok {
-		tags = append(tags, strings.Split(customTags, ",")...)
+		tags = append(tags, strings.Split(customTags, ";")...)
 		delete(meta, "tags")
 	}
 	asr := &api.AgentServiceRegistration{
