@@ -86,10 +86,17 @@ func TestLogger(t *testing.T) {
 	}
 }
 
-type mockServer struct{}
+type mockServer struct {
+	stopFn func(context.Context) error
+}
 
 func (m *mockServer) Start(_ context.Context) error { return nil }
-func (m *mockServer) Stop(_ context.Context) error  { return nil }
+func (m *mockServer) Stop(ctx context.Context) error {
+	if m.stopFn != nil {
+		return m.stopFn(ctx)
+	}
+	return nil
+}
 
 func TestServer(t *testing.T) {
 	o := &options{}

@@ -283,3 +283,18 @@ func TestApp_Context(t *testing.T) {
 		})
 	}
 }
+
+func TestApp_ContextCanceled(t *testing.T) {
+	ctx, stop := context.WithCancel(context.Background())
+	stopFn := func(ctx context.Context) error {
+		select {
+		case <-ctx.Done():
+			t.Fatal("context should not be done yet")
+		default:
+		}
+		return nil
+	}
+	app := New(Context(ctx), Server(&mockServer{stopFn: stopFn}), StopTimeout(time.Hour))
+	time.AfterFunc(time.Millisecond*10, stop)
+	_ = app.Run()
+}
