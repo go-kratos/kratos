@@ -17,7 +17,7 @@ func TestEncodeValues(t *testing.T) {
 		Id:          2233,
 		NoOne:       "2233",
 		Simple:      &complex.Simple{Component: "5566"},
-		Simples:     []string{"3344", "5566"},
+		Strings:     []string{"3344", "5566"},
 		B:           true,
 		Sex:         complex.Sex_woman,
 		Age:         18,
@@ -46,7 +46,7 @@ func TestEncodeValues(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := "a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=22.22&double=12.33&duration=2m0.000000022s&field=1%2C2&float=12.34&id=2233&int32=32&int64=64&map%5Bkratos%5D=https%3A%2F%2Fgo-kratos.dev%2F&map%5Bkratos_start%5D=https%3A%2F%2Fgo-kratos.dev%2Fen%2Fdocs%2Fgetting-started%2Fstart%2F&map_int64_key%5B1%5D=kratos&map_int64_key%5B2%5D=go-zero&numberOne=2233&price=11.23&sex=woman&simples=3344&simples=5566&string=go-kratos&timestamp=1970-01-01T00%3A00%3A20.000000002Z&uint32=32&uint64=64&very_simple.component=5566" // nolint:lll
+	want := "a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=22.22&double=12.33&duration=2m0.000000022s&field=1%2C2&float=12.34&id=2233&int32=32&int64=64&map%5Bkratos%5D=https%3A%2F%2Fgo-kratos.dev%2F&map%5Bkratos_start%5D=https%3A%2F%2Fgo-kratos.dev%2Fen%2Fdocs%2Fgetting-started%2Fstart%2F&map_int64_key%5B1%5D=kratos&map_int64_key%5B2%5D=go-zero&numberOne=2233&price=11.23&sex=woman&string=go-kratos&strings=3344&strings=5566&timestamp=1970-01-01T00%3A00%3A20.000000002Z&uint32=32&uint64=64&very_simple.component=5566" // nolint:lll
 	if got := query.Encode(); want != got {
 		t.Errorf("\nwant: %s, \ngot: %s", want, got)
 	}
