@@ -33,7 +33,7 @@ func (c *ClientHandler) HandleRPC(ctx context.Context, rs stats.RPCStats) {
 	}
 	span := trace.SpanFromContext(ctx)
 	if span.SpanContext().IsValid() {
-		span.SetAttributes(peerAttr(p.Addr.String())...)
+		span.SetAttributes(peerAttr(p.Addr.String(), true)...)
 	}
 }
 
