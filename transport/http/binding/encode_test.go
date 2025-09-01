@@ -5,6 +5,7 @@ import (
 
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 
+	"github.com/go-kratos/kratos/v2/encoding/form"
 	"github.com/go-kratos/kratos/v2/internal/testdata/binding"
 )
 
@@ -13,6 +14,7 @@ func TestEncodeURL(t *testing.T) {
 		pathTemplate string
 		request      *binding.HelloRequest
 		needQuery    bool
+		option       *form.EncodeOption
 		want         string
 	}{
 		{
@@ -117,10 +119,24 @@ func TestEncodeURL(t *testing.T) {
 			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/{}/[]/[kratos]",
 		},
+		{
+			pathTemplate: "http://helloworld.Greeter/helloworld/{snake_key}",
+			request:      &binding.HelloRequest{SnakeKey: "kratos"},
+			needQuery:    false,
+			option:       form.Encode().UseProtoTextAsKey(false),
+			want:         "http://helloworld.Greeter/helloworld/",
+		},
+		{
+			pathTemplate: "http://helloworld.Greeter/helloworld/{snake_key}",
+			request:      &binding.HelloRequest{SnakeKey: "kratos"},
+			needQuery:    false,
+			option:       form.Encode().UseProtoTextAsKey(true),
+			want:         "http://helloworld.Greeter/helloworld/kratos",
+		},
 	}
 
 	for _, test := range tests {
-		if path := EncodeURL(test.pathTemplate, test.request, test.needQuery); path != test.want {
+		if path := EncodeURL(test.pathTemplate, test.request, test.needQuery, test.option); path != test.want {
 			t.Fatalf("want: %s, got: %s", test.want, path)
 		}
 	}

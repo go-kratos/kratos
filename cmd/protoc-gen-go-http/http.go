@@ -7,11 +7,10 @@ import (
 	"regexp"
 	"strings"
 
-	"google.golang.org/protobuf/reflect/protoreflect"
-
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
@@ -19,6 +18,7 @@ const (
 	contextPackage       = protogen.GoImportPath("context")
 	transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
 	bindingPackage       = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http/binding")
+	formPackage          = protogen.GoImportPath("github.com/go-kratos/kratos/v2/encoding/form")
 )
 
 var methodSets = make(map[string]int)
@@ -55,6 +55,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("// is compatible with the kratos package it is being compiled against.")
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
 	g.P("var _ = ", bindingPackage.Ident("EncodeURL"))
+	g.P("var _ = ", formPackage.Ident("Encode"))
 	g.P("const _ = ", transportHTTPPackage.Ident("SupportPackageIsVersion1"))
 	g.P()
 
@@ -209,15 +210,16 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 		comment = "// " + m.GoName + strings.TrimPrefix(strings.TrimSuffix(comment, "\n"), "//")
 	}
 	return &methodDesc{
-		Name:         m.GoName,
-		OriginalName: string(m.Desc.Name()),
-		Num:          methodSets[m.GoName],
-		Request:      g.QualifiedGoIdent(m.Input.GoIdent),
-		Reply:        g.QualifiedGoIdent(m.Output.GoIdent),
-		Comment:      comment,
-		Path:         path,
-		Method:       method,
-		HasVars:      len(vars) > 0,
+		Name:                  m.GoName,
+		OriginalName:          string(m.Desc.Name()),
+		Num:                   methodSets[m.GoName],
+		Request:               g.QualifiedGoIdent(m.Input.GoIdent),
+		Reply:                 g.QualifiedGoIdent(m.Output.GoIdent),
+		Comment:               comment,
+		Path:                  path,
+		Method:                method,
+		HasVars:               len(vars) > 0,
+		UseProtoTextEncodeURL: *isUseProtoTextEncodeURL,
 	}
 }
 

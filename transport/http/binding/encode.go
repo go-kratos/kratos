@@ -12,11 +12,11 @@ import (
 var reg = regexp.MustCompile(`{[\\.\w]+}`)
 
 // EncodeURL encode proto message to url path.
-func EncodeURL(pathTemplate string, msg any, needQuery bool) string {
+func EncodeURL(pathTemplate string, msg any, needQuery bool, opts ...*form.EncodeOption) string {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return pathTemplate
 	}
-	queryParams, _ := form.EncodeValues(msg)
+	queryParams, _ := form.EncodeValues(msg, opts...)
 	pathParams := make(map[string]struct{})
 	path := reg.ReplaceAllStringFunc(pathTemplate, func(in string) string {
 		// it's unreachable because the reg means that must have more than one char in {}
@@ -29,7 +29,7 @@ func EncodeURL(pathTemplate string, msg any, needQuery bool) string {
 	})
 	if !needQuery {
 		if v, ok := msg.(proto.Message); ok {
-			if query := form.EncodeFieldMask(v.ProtoReflect()); query != "" {
+			if query := form.EncodeFieldMask(v.ProtoReflect(), opts...); query != "" {
 				return path + "?" + query
 			}
 		}
