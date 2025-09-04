@@ -110,7 +110,7 @@ func (r *Registry) Register(_ context.Context, si *registry.ServiceInstance) err
 				"version": si.Version,
 			}
 		} else {
-			rmd := maps.Clone(si.Metadata)
+			rmd = maps.Clone(si.Metadata)
 			rmd["kind"] = u.Scheme
 			rmd["version"] = si.Version
 			if w, ok := si.Metadata["weight"]; ok {
