@@ -40,8 +40,8 @@ message Complex {
   google.protobuf.StringValue string = 23;
   google.protobuf.BytesValue bytes = 24;
 
-  map<string,string> map = 25;
-  map<int64,string> map_int64_key = 26 [json_name = "map_int64_key"];
+  map<string, string> map = 25;
+  map<int64, string> map_int64_key = 26 [json_name = "map_int64_key"];
 }
 
 message Simple {
