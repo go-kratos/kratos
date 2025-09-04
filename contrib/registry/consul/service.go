@@ -9,11 +9,14 @@ import (
 )
 
 type serviceSet struct {
+	registry    *Registry
 	serviceName string
 	watcher     map[*watcher]struct{}
+	ref         atomic.Int32
 	services    *atomic.Value
 	lock        sync.RWMutex
 
+	// for cancel
 	ctx    context.Context
 	cancel context.CancelFunc
 }
@@ -28,4 +31,11 @@ func (s *serviceSet) broadcast(ss []*registry.ServiceInstance) {
 		default:
 		}
 	}
+}
+
+func (s *serviceSet) delete(w *watcher) {
+	s.lock.Lock()
+	delete(s.watcher, w)
+	s.lock.Unlock()
+	s.registry.tryDelete(s)
 }

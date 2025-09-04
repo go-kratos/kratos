@@ -42,6 +42,15 @@ func (x *mockCallOption) after(_ *callInfo, _ *csAttempt) {
 	log.Println("run in mockCallOption.after")
 }
 
+func TestWithSubset(t *testing.T) {
+	co := &clientOptions{}
+	o := WithSubset(1)
+	o(co)
+	if co.subsetSize != 1 {
+		t.Error("expected subset size to be 1")
+	}
+}
+
 func TestWithTransport(t *testing.T) {
 	ov := &mockRoundTripper{}
 	o := WithTransport(ov)
@@ -69,10 +78,6 @@ func TestWithBlock(t *testing.T) {
 	if !co.block {
 		t.Errorf("expected block to be true, got %v", co.block)
 	}
-}
-
-func TestWithBalancer(_ *testing.T) {
-	// TODO
 }
 
 func TestWithTLSConfig(t *testing.T) {
@@ -118,7 +123,7 @@ func TestWithEndpoint(t *testing.T) {
 
 func TestWithRequestEncoder(t *testing.T) {
 	o := &clientOptions{}
-	v := func(ctx context.Context, contentType string, in interface{}) (body []byte, err error) {
+	v := func(context.Context, string, any) (body []byte, err error) {
 		return nil, nil
 	}
 	WithRequestEncoder(v)(o)
@@ -129,7 +134,7 @@ func TestWithRequestEncoder(t *testing.T) {
 
 func TestWithResponseDecoder(t *testing.T) {
 	o := &clientOptions{}
-	v := func(ctx context.Context, res *http.Response, out interface{}) error { return nil }
+	v := func(context.Context, *http.Response, any) error { return nil }
 	WithResponseDecoder(v)(o)
 	if o.decoder == nil {
 		t.Errorf("expected encoder to be not nil")
@@ -138,7 +143,7 @@ func TestWithResponseDecoder(t *testing.T) {
 
 func TestWithErrorDecoder(t *testing.T) {
 	o := &clientOptions{}
-	v := func(ctx context.Context, res *http.Response) error { return nil }
+	v := func(context.Context, *http.Response) error { return nil }
 	WithErrorDecoder(v)(o)
 	if o.errorDecoder == nil {
 		t.Errorf("expected encoder to be not nil")
@@ -337,7 +342,7 @@ func TestNewClient(t *testing.T) {
 		WithEndpoint("discovery:///go-kratos"),
 		WithMiddleware(func(handler middleware.Handler) middleware.Handler {
 			t.Logf("handle in middleware")
-			return func(ctx context.Context, req interface{}) (interface{}, error) {
+			return func(ctx context.Context, req any) (any, error) {
 				return handler(ctx, req)
 			}
 		}),
@@ -354,7 +359,7 @@ func TestNewClient(t *testing.T) {
 	if err == nil {
 		t.Error("err should be equal to callOption err")
 	}
-	client.opts.encoder = func(ctx context.Context, contentType string, in interface{}) (body []byte, err error) {
+	client.opts.encoder = func(context.Context, string, any) (body []byte, err error) {
 		return nil, errors.New("mock test encoder error")
 	}
 	err = client.Invoke(context.Background(), http.MethodPost, "/go", map[string]string{"name": "kratos"}, nil, EmptyCallOption{})

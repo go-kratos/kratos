@@ -66,7 +66,7 @@ func (t *Tracer) Start(ctx context.Context, operation string, carrier propagatio
 }
 
 // End finish tracing span
-func (t *Tracer) End(ctx context.Context, span trace.Span, m interface{}, err error) {
+func (t *Tracer) End(ctx context.Context, span trace.Span, m any, err error) {
 	if err != nil {
 		t.opt.reportErrorHandle(ctx, span, err)
 		span.SetStatus(codes.Error, err.Error())

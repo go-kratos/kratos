@@ -2,7 +2,6 @@ package polaris
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"strconv"
 	"strings"
@@ -54,7 +53,7 @@ func (p *Polaris) NodeFilter(opts ...RouterOption) selector.NodeFilter {
 			req.SourceService.Service = appInfo.Name()
 		}
 
-		req.AddArguments(model.BuildCallerServiceArgument(p.namespace, req.ProcessRoutersRequest.SourceService.Service))
+		req.AddArguments(model.BuildCallerServiceArgument(p.namespace, req.SourceService.Service))
 
 		// process transport
 		if tr, ok := transport.FromClientContext(ctx); ok {
@@ -95,7 +94,7 @@ func (p *Polaris) NodeFilter(opts ...RouterOption) selector.NodeFilter {
 
 		newNode := make([]selector.Node, 0, len(m.Instances))
 		for _, ins := range m.GetInstances() {
-			if v, ok := n[fmt.Sprintf("%s:%d", ins.GetHost(), ins.GetPort())]; ok {
+			if v, ok := n[net.JoinHostPort(ins.GetHost(), strconv.FormatUint(uint64(ins.GetPort()), 10))]; ok {
 				newNode = append(newNode, v)
 			}
 		}
@@ -139,7 +138,7 @@ func buildPolarisInstance(namespace string, nodes []selector.Node) *pb.ServiceIn
 		Service:   &v1.Service{Name: wrapperspb.String(nodes[0].ServiceName()), Namespace: wrapperspb.String("default")},
 		Instances: ins,
 	}
-	return pb.NewServiceInstancesInProto(d, func(s string) local.InstanceLocalValue {
+	return pb.NewServiceInstancesInProto(d, func(string) local.InstanceLocalValue {
 		return local.NewInstanceLocalValue()
 	}, &pb.SvcPluginValues{Routers: nil, Loadbalancer: nil}, nil)
 }

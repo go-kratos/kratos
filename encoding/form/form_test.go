@@ -148,6 +148,7 @@ func TestFormCodecUnmarshal(t *testing.T) {
 	}
 }
 
+//nolint:staticcheck
 func TestProtoEncodeDecode(t *testing.T) {
 	in := &complex.Complex{
 		Id:      2233,
@@ -227,6 +228,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 	}
 }
 
+//nolint:staticcheck
 func TestDecodeStructPb(t *testing.T) {
 	req := new(ectest.StructPb)
 	query := `data={"name":"kratos"}&data_list={"name1": "kratos"}&data_list={"name2": "go-kratos"}`
@@ -237,7 +239,7 @@ func TestDecodeStructPb(t *testing.T) {
 		t.Errorf("except %v, got %v", "kratos", req.Data.GetFields()["name"].GetStringValue())
 	}
 	if len(req.DataList) != 2 {
-		t.Fatalf("execpt %v, got %v", 2, len(req.DataList))
+		t.Fatalf("except %v, got %v", 2, len(req.DataList))
 	}
 	if "kratos" != req.DataList[0].GetFields()["name1"].GetStringValue() {
 		t.Errorf("except %v, got %v", "kratos", req.Data.GetFields()["name1"].GetStringValue())

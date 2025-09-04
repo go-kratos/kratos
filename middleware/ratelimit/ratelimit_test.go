@@ -41,7 +41,7 @@ func Test_WithLimiter(t *testing.T) {
 }
 
 func TestServer(t *testing.T) {
-	nextValid := func(ctx context.Context, req interface{}) (interface{}, error) {
+	nextValid := func(context.Context, any) (any, error) {
 		return "Hello valid", nil
 	}
 

@@ -10,8 +10,10 @@ import (
 var i int
 
 func TestChain(t *testing.T) {
-	next := func(ctx context.Context, req interface{}) (interface{}, error) {
-		t.Log(req)
+	next := func(_ context.Context, req any) (any, error) {
+		if req != "hello kratos!" {
+			t.Errorf("expect %v, got %v", "hello kratos!", req)
+		}
 		i += 10
 		return "reply", nil
 	}
@@ -29,7 +31,7 @@ func TestChain(t *testing.T) {
 }
 
 func test1Middleware(handler Handler) Handler {
-	return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+	return func(ctx context.Context, req any) (reply any, err error) {
 		fmt.Println("test1 before")
 		i++
 		reply, err = handler(ctx, req)
@@ -39,7 +41,7 @@ func test1Middleware(handler Handler) Handler {
 }
 
 func test2Middleware(handler Handler) Handler {
-	return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+	return func(ctx context.Context, req any) (reply any, err error) {
 		fmt.Println("test2 before")
 		i += 2
 		reply, err = handler(ctx, req)
@@ -49,7 +51,7 @@ func test2Middleware(handler Handler) Handler {
 }
 
 func test3Middleware(handler Handler) Handler {
-	return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+	return func(ctx context.Context, req any) (reply any, err error) {
 		fmt.Println("test3 before")
 		i += 3
 		reply, err = handler(ctx, req)

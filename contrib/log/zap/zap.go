@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -31,7 +32,12 @@ func NewLogger(zlog *zap.Logger) *Logger {
 	}
 }
 
-func (l *Logger) Log(level log.Level, keyvals ...interface{}) error {
+func (l *Logger) Log(level log.Level, keyvals ...any) error {
+	// If logging at this level is completely disabled, skip the overhead of
+	// string formatting.
+	if zapcore.Level(level) < zapcore.DPanicLevel && !l.log.Core().Enabled(zapcore.Level(level)) {
+		return nil
+	}
 	var (
 		msg    = ""
 		keylen = len(keyvals)

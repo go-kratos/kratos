@@ -13,10 +13,12 @@ import (
 	"github.com/go-kratos/kratos/v2/registry"
 )
 
+var testServerConfig = []constant.ServerConfig{
+	*constant.NewServerConfig("127.0.0.1", 8848),
+}
+
 func TestRegistry_Register(t *testing.T) {
-	sc := []constant.ServerConfig{
-		*constant.NewServerConfig("127.0.0.1", 8848),
-	}
+	sc := testServerConfig
 
 	cc := constant.ClientConfig{
 		NamespaceId:         "public", // namespace id
@@ -231,9 +233,7 @@ func TestRegistry_Deregister(t *testing.T) {
 			},
 			wantErr: false,
 			preFunc: func(t *testing.T) {
-				sc := []constant.ServerConfig{
-					*constant.NewServerConfig("127.0.0.1", 8848),
-				}
+				sc := testServerConfig
 
 				cc := constant.ClientConfig{
 					NamespaceId:         "public", // namespace id
@@ -292,9 +292,7 @@ func TestRegistry_Deregister(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sc := []constant.ServerConfig{
-				*constant.NewServerConfig("127.0.0.1", 8848),
-			}
+			sc := testServerConfig
 
 			cc := constant.ClientConfig{
 				NamespaceId:         "public", // namespace id
@@ -329,9 +327,7 @@ func TestRegistry_Deregister(t *testing.T) {
 }
 
 func TestRegistry_GetService(t *testing.T) {
-	sc := []constant.ServerConfig{
-		*constant.NewServerConfig("127.0.0.1", 8848),
-	}
+	sc := testServerConfig
 
 	cc := constant.ClientConfig{
 		NamespaceId:         "public", // namespace id
@@ -385,7 +381,7 @@ func TestRegistry_GetService(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-				time.Sleep(time.Second)
+				time.Sleep(time.Second * 3)
 			},
 			deferFunc: func(t *testing.T) {
 				err = r.Deregister(context.Background(), testServer)
@@ -404,7 +400,7 @@ func TestRegistry_GetService(t *testing.T) {
 				ID:        "127.0.0.1#8080#DEFAULT#DEFAULT_GROUP@@test3.grpc",
 				Name:      "DEFAULT_GROUP@@test3.grpc",
 				Version:   "v1.0.0",
-				Metadata:  map[string]string{"version": "v1.0.0", "kind": "grpc"},
+				Metadata:  map[string]string{"version": "v1.0.0", "kind": "grpc", "weight": "100"},
 				Endpoints: []string{"grpc://127.0.0.1:8080"},
 			}},
 			wantErr: false,
@@ -445,9 +441,7 @@ func TestRegistry_GetService(t *testing.T) {
 }
 
 func TestRegistry_Watch(t *testing.T) {
-	sc := []constant.ServerConfig{
-		*constant.NewServerConfig("127.0.0.1", 8848),
-	}
+	sc := testServerConfig
 
 	cc := constant.ClientConfig{
 		NamespaceId:         "public", // namespace id
@@ -530,7 +524,7 @@ func TestRegistry_Watch(t *testing.T) {
 			},
 			wantErr: true,
 			want:    nil,
-			processFunc: func(t *testing.T) {
+			processFunc: func(*testing.T) {
 				cancel()
 			},
 		},

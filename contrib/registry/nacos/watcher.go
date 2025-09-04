@@ -2,7 +2,8 @@ package nacos
 
 import (
 	"context"
-	"fmt"
+	"net"
+	"strconv"
 
 	"github.com/nacos-group/nacos-sdk-go/clients/naming_client"
 	"github.com/nacos-group/nacos-sdk-go/model"
@@ -40,7 +41,7 @@ func newWatcher(ctx context.Context, cli naming_client.INamingClient, serviceNam
 		ServiceName: serviceName,
 		Clusters:    clusters,
 		GroupName:   groupName,
-		SubscribeCallback: func(services []model.SubscribeService, err error) {
+		SubscribeCallback: func([]model.SubscribeService, error) {
 			select {
 			case w.watchChan <- struct{}{}:
 			default:
@@ -80,7 +81,7 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 			Name:      res.Name,
 			Version:   in.Metadata["version"],
 			Metadata:  in.Metadata,
-			Endpoints: []string{fmt.Sprintf("%s://%s:%d", kind, in.Ip, in.Port)},
+			Endpoints: []string{kind + "://" + net.JoinHostPort(in.Ip, strconv.Itoa(int(in.Port)))},
 		})
 	}
 	return items, nil

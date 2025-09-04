@@ -1,0 +1,6 @@
+version: v2
+plugins:
+  - remote: buf.build/protocolbuffers/go:v1.33.0
+    out: .
+    opt:
+      - paths=source_relative

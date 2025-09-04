@@ -535,7 +535,7 @@ message StringRules {
     // at a maximum
     optional uint64 max_bytes = 5;
 
-    // Pattern specifes that this field must match against the specified
+    // Pattern specifies that this field must match against the specified
     // regular expression (RE2 syntax). The included expression should elide
     // any delimiters.
     optional string pattern  = 6;
@@ -647,7 +647,7 @@ message BytesRules {
     // at a maximum
     optional uint64 max_len = 3;
 
-    // Pattern specifes that this field must match against the specified
+    // Pattern specifies that this field must match against the specified
     // regular expression (RE2 syntax). The included expression should elide
     // any delimiters.
     optional string pattern  = 4;
