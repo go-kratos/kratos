@@ -63,9 +63,9 @@ const (
             "age":18
         }
     ],
-	"bar":{
-		"event":"update"
-	}
+    "bar":{
+        "event":"update"
+    }
 }`
 
 	//	_testYaml = `

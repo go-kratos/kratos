@@ -8,10 +8,10 @@ When submitting a bug report, use the issue template we provide to clearly descr
 ## Adding new features
 
 In order to accurately distinguish whether the needs put forward by users are the needs or reasonable needs of most users, solicit opinions from the community through the proposal process, and the proposals adopted by the community will be realized as new feature.
-In order to make the proposal process as simple as possible, the process includes three stages: proposal, feature and PR, in which proposal, feature is issue and PR is the specific function implementation. 
-In order to facilitate the community to correctly understand the requirements of the proposal, the proposal issue needs to describe the functional requirements and relevant references or literature in detail. 
+In order to make the proposal process as simple as possible, the process includes three stages: proposal, feature and PR, in which proposal, feature is issue and PR is the specific function implementation.
+In order to facilitate the community to correctly understand the requirements of the proposal, the proposal issue needs to describe the functional requirements and relevant references or literature in detail.
 When most community users agree with this proposal, they will create a feature issue associated with the proposal issue.
-The feature issue needs to describe the implementation method and function demonstration in detail as a reference for the final function implementation. 
+The feature issue needs to describe the implementation method and function demonstration in detail as a reference for the final function implementation.
 After the function is implemented, a merge request will be initiated to associate the proposal issue and feature issue.
 After the merge is completed, Close all issues.
 
@@ -19,7 +19,7 @@ After the merge is completed, Close all issues.
 If you've never submitted code on GitHub, follow these steps:
 
 - First, please fork items to your GitHub account
-- Then create a new feature branch based on the main branch and name it features such as feature-log 
+- Then create a new feature branch based on the main branch and name it features such as feature-log
 - Write code
 - Submit code to the far end branch
 - Submit a PR request in github
@@ -59,7 +59,7 @@ There are the following types of commit:
 - **chore** Daily work, examples, etc.
 - **ci**: Changes to our CI configuration files and scripts
 
-### scope 
+### scope
 
 The following is the list of supported scopes:
 
@@ -88,10 +88,9 @@ The footer should contain any information about **Breaking Changes** and is also
 
 ### examples
 
-
 #### Only commit message
 ```
-fix: The log debug level should be -1  
+fix: The log debug level should be -1
 ```
 
 #### Attention

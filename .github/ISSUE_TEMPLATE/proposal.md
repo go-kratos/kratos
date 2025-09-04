@@ -39,6 +39,7 @@ If the maintainer team members have major differences on a requirement, the fina
 example:
 Add event interface for accessing message oriented middleware
 -->
+
 ### Implementation mode
 <!--
 ```go
@@ -60,8 +61,9 @@ type Event interface {
 }
 ````
 -->
+
 ### Usage demonstration
-<!-- 
+<!--
 example:
 ```go
 msg := kafka.NewMessage("kratos", []byte("hello world"), map[string]string{
