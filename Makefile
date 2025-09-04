@@ -1,5 +1,5 @@
 user	:=	$(shell whoami)
-rev 	:= 	$(shell git rev-parse --short HEAD)
+rev		:= 	$(shell git rev-parse --short HEAD)
 os		:=	$(shell uname)
 
 # GOBIN > GOPATH > INSTALLDIR
@@ -20,7 +20,7 @@ ifneq ($(findstring MINGW,$(shell uname -s)),)
 GOBIN := $(shell echo "$(GOBIN)" | sed 's|\\|/|g' | cut -d';' -f1 | sed 's|^\([A-Za-z]\):|/\1|')
 GOPATH := $(shell echo "$(GOPATH)" | sed 's|\\|/|g' | cut -d';' -f1 | sed 's|^\([A-Za-z]\):|/\1|')
 endif
-BIN		:= 	""
+BIN		:= ""
 
 TOOLS_SHELL="./hack/tools.sh"
 # golangci-lint
@@ -36,7 +36,7 @@ else
 	endif
 endif
 
-$(LINTER): 
+$(LINTER):
 	curl -SL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s latest
 
 all:

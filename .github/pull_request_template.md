@@ -17,12 +17,10 @@
 5. 同时请注意，同类的工作请尽量在一个PR中提交，以减轻 review 者的工作负担，不要把一项工作拆分成很多个PR，除非它应该这样做。
 -->
 
-
 #### Description (what this PR does / why we need it):
 <!--
 * The description should include the motivation for this PR or contrast this with previous behavior
 -->
-
 
 #### Which issue(s) this PR fixes (resolves / be part of):
 <!--
@@ -31,7 +29,6 @@
 
 Usage: `fixes/resolves #<issue number>`, or `fixes/resolves (paste link of issue)`.
 -->
-
 
 #### Other special notes for the reviewers:
 <!--
