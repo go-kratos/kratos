@@ -28,16 +28,16 @@ type Node struct {
 	selector.Node
 
 	// client statistic data
-	lag       int64
-	success   uint64
-	inflight  int64
-	inflights [200]int64
+	lag       atomic.Int64
+	success   atomic.Uint64
+	inflight  atomic.Int64
+	inflights [200]atomic.Int64
 	// last collected timestamp
-	stamp int64
+	stamp atomic.Int64
 	// request number in a period time
-	reqs int64
+	reqs atomic.Int64
 	// last lastPick timestamp
-	lastPick int64
+	lastPick atomic.Int64
 
 	errHandler   func(err error) (isErr bool)
 	cachedWeight *atomic.Value
@@ -57,27 +57,27 @@ type Builder struct {
 func (b *Builder) Build(n selector.Node) selector.WeightedNode {
 	s := &Node{
 		Node:         n,
-		lag:          0,
-		success:      1000,
-		inflight:     1,
+		inflights:    [200]atomic.Int64{},
 		errHandler:   b.ErrHandler,
 		cachedWeight: &atomic.Value{},
 	}
+	s.success.Store(1000)
+	s.inflight.Store(1)
 	return s
 }
 
 func (n *Node) health() uint64 {
-	return atomic.LoadUint64(&n.success)
+	return n.success.Load()
 }
 
 func (n *Node) load() (load uint64) {
 	now := time.Now().UnixNano()
-	avgLag := atomic.LoadInt64(&n.lag)
+	avgLag := n.lag.Load()
 	predict := n.predict(avgLag, now)
 
 	if avgLag == 0 {
 		// penalty is the penalty value when there is no data when the node is just started.
-		load = penalty * uint64(atomic.LoadInt64(&n.inflight))
+		load = penalty * uint64(n.inflight.Load())
 		return
 	}
 	if predict > avgLag {
@@ -86,7 +86,7 @@ func (n *Node) load() (load uint64) {
 	// add 5ms to eliminate the latency gap between different zones
 	avgLag += int64(time.Millisecond * 5)
 	avgLag = int64(math.Sqrt(float64(avgLag)))
-	load = uint64(avgLag) * uint64(atomic.LoadInt64(&n.inflight))
+	load = uint64(avgLag) * uint64(n.inflight.Load())
 	return load
 }
 
@@ -97,7 +97,7 @@ func (n *Node) predict(avgLag int64, now int64) (predict int64) {
 		totalNum int
 	)
 	for i := range n.inflights {
-		start := atomic.LoadInt64(&n.inflights[i])
+		start := n.inflights[i].Load()
 		if start != 0 {
 			totalNum++
 			lag := now - start
@@ -116,20 +116,20 @@ func (n *Node) predict(avgLag int64, now int64) (predict int64) {
 // Pick pick a node.
 func (n *Node) Pick() selector.DoneFunc {
 	start := time.Now().UnixNano()
-	atomic.StoreInt64(&n.lastPick, start)
-	atomic.AddInt64(&n.inflight, 1)
-	reqs := atomic.AddInt64(&n.reqs, 1)
+	n.lastPick.Store(start)
+	n.inflight.Add(1)
+	reqs := n.reqs.Add(1)
 	slot := reqs % 200
-	swapped := atomic.CompareAndSwapInt64(&n.inflights[slot], 0, start)
+	swapped := n.inflights[slot].CompareAndSwap(0, start)
 	return func(_ context.Context, di selector.DoneInfo) {
 		if swapped {
-			atomic.CompareAndSwapInt64(&n.inflights[slot], start, 0)
+			n.inflights[slot].CompareAndSwap(start, 0)
 		}
-		atomic.AddInt64(&n.inflight, -1)
+		n.inflight.Add(-1)
 
 		now := time.Now().UnixNano()
 		// get moving average ratio w
-		stamp := atomic.SwapInt64(&n.stamp, now)
+		stamp := n.stamp.Swap(now)
 		td := now - stamp
 		if td < 0 {
 			td = 0
@@ -140,12 +140,12 @@ func (n *Node) Pick() selector.DoneFunc {
 		if lag < 0 {
 			lag = 0
 		}
-		oldLag := atomic.LoadInt64(&n.lag)
+		oldLag := n.lag.Load()
 		if oldLag == 0 {
 			w = 0.0
 		}
 		lag = int64(float64(oldLag)*w + float64(lag)*(1.0-w))
-		atomic.StoreInt64(&n.lag, lag)
+		n.lag.Store(lag)
 
 		success := uint64(1000) // error value ,if error set 1
 		if di.Err != nil {
@@ -158,9 +158,9 @@ func (n *Node) Pick() selector.DoneFunc {
 				success = 0
 			}
 		}
-		oldSuc := atomic.LoadUint64(&n.success)
+		oldSuc := n.success.Load()
 		success = uint64(float64(oldSuc)*w + float64(success)*(1.0-w))
-		atomic.StoreUint64(&n.success, success)
+		n.success.Store(success)
 	}
 }
 
@@ -183,7 +183,7 @@ func (n *Node) Weight() (weight float64) {
 }
 
 func (n *Node) PickElapsed() time.Duration {
-	return time.Duration(time.Now().UnixNano() - atomic.LoadInt64(&n.lastPick))
+	return time.Duration(time.Now().UnixNano() - n.lastPick.Load())
 }
 
 func (n *Node) Raw() selector.Node {

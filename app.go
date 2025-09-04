@@ -102,7 +102,7 @@ func (a *App) Run() error {
 		server := srv
 		eg.Go(func() error {
 			<-ctx.Done() // wait for stop signal
-			stopCtx := octx
+			stopCtx := context.WithoutCancel(octx)
 			if a.opts.stopTimeout > 0 {
 				var cancel context.CancelFunc
 				stopCtx, cancel = context.WithTimeout(stopCtx, a.opts.stopTimeout)
