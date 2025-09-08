@@ -40,6 +40,8 @@ type Client struct {
 	deregisterCriticalServiceAfter int
 	// serviceChecks  user custom checks
 	serviceChecks api.AgentServiceChecks
+	// tags is service tags
+	tags []string
 
 	// used to control heartbeat
 	lock      sync.RWMutex
@@ -167,20 +169,13 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 		addresses[raw.Scheme] = api.ServiceAddress{Address: endpoint, Port: int(port)}
 	}
 	tags := []string{fmt.Sprintf("version=%s", svc.Version)}
-	meta := make(map[string]string)
-	if svc.Metadata != nil {
-		for k, v := range svc.Metadata {
-			meta[k] = v
-		}
-	}
-	if customTags, ok := meta["tags"]; ok {
-		tags = append(tags, strings.Split(customTags, ";")...)
-		delete(meta, "tags")
+	if len(c.tags) > 0 {
+		tags = append(tags, c.tags...)
 	}
 	asr := &api.AgentServiceRegistration{
 		ID:              svc.ID,
 		Name:            svc.Name,
-		Meta:            meta,
+		Meta:            svc.Metadata,
 		Tags:            tags,
 		TaggedAddresses: addresses,
 	}
