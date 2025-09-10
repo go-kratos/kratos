@@ -60,3 +60,26 @@ func KratosMod() string {
 	// $GOPATH/src/github.com/go-kratos/kratos
 	return filepath.Join(gopath, "src", "github.com", "go-kratos", "kratos")
 }
+
+// ModuleName returns custom module name
+func ModuleName(moduleFile, moduleName, name string) error {
+	if moduleName == "" || moduleName == name {
+		return nil
+	}
+
+	modBytes, err := os.ReadFile(moduleFile)
+	if err != nil {
+		return err
+	}
+	goMod, err := modfile.Parse(moduleFile, modBytes, nil)
+	if err != nil {
+		return err
+	}
+	goMod.Module.Syntax.Token[1] = moduleName
+	modBytes, err = goMod.Format()
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(moduleFile, modBytes, 0o644)
+}
