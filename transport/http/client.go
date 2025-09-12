@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/encoding"
@@ -227,12 +226,8 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args any,
 		contentType = c.contentType
 		body = bytes.NewReader(data)
 	}
-	u := url.URL{
-		Scheme: client.target.Scheme,
-		Host:   client.target.Authority,
-		Path:   path,
-	}
-	req, err := http.NewRequest(method, u.String(), body)
+	url := fmt.Sprintf("%s://%s%s", client.target.Scheme, client.target.Authority, path)
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return err
 	}
