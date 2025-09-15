@@ -125,3 +125,64 @@ func TestEncodeURL(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkEncodeURL(b *testing.B) {
+	benchmarks := []struct {
+		name         string
+		pathTemplate string
+		msg          *binding.HelloRequest
+		needQuery    bool
+	}{
+		{
+			name:         "NoParams",
+			pathTemplate: "http://helloworld.Greeter/helloworld/sub",
+			msg: &binding.HelloRequest{
+				Name: "test",
+				Sub:  &binding.Sub{Name: "kratos"},
+			},
+			needQuery: false,
+		},
+		{
+			name:         "NoParamsWithQuery",
+			pathTemplate: "http://helloworld.Greeter/helloworld/sub",
+			msg: &binding.HelloRequest{
+				Name: "test",
+				Sub:  &binding.Sub{Name: "kratos"},
+				UpdateMask: &fieldmaskpb.FieldMask{
+					Paths: []string{"name", "sub.naming"},
+				},
+			},
+			needQuery: true,
+		},
+		{
+			name:         "WithParams",
+			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}",
+			msg: &binding.HelloRequest{
+				Name: "test",
+				Sub:  &binding.Sub{Name: "kratos"},
+			},
+			needQuery: false,
+		},
+		{
+			name:         "WithParamsAndQuery",
+			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}",
+			msg: &binding.HelloRequest{
+				Name: "test",
+				Sub:  &binding.Sub{Name: "kratos"},
+				UpdateMask: &fieldmaskpb.FieldMask{
+					Paths: []string{"name", "sub.naming"},
+				},
+			},
+			needQuery: true,
+		},
+	}
+
+	for _, bm := range benchmarks {
+		b.Run(bm.name, func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				EncodeURL(bm.pathTemplate, bm.msg, bm.needQuery)
+			}
+		})
+	}
+}

@@ -109,8 +109,8 @@ func TestFinish(t *testing.T) {
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Errorf("expect %v, got %v", context.DeadlineExceeded, err)
 	}
-	if !reflect.DeepEqual(mc.doneMark, uint32(1)) {
-		t.Errorf("expect %v, got %v", 1, mc.doneMark)
+	if done := mc.doneMark.Load(); done != true {
+		t.Errorf("expect %v, got %v", true, done)
 	}
 	if <-mc.done != struct{}{} {
 		t.Errorf("expect %v, got %v", struct{}{}, <-mc.done)
