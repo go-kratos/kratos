@@ -20,6 +20,10 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
+const fieldSeparator = "."
+
+var errInvalidFormatMapKey = errors.New("invalid formatting for map key")
+
 // DecodeValues decode url value into proto message.
 func DecodeValues(msg proto.Message, values url.Values) error {
 	for key, values := range values {
@@ -44,11 +48,12 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 			// ignore unexpected field.
 			return nil
 		}
-
+		if fd.IsMap() && len(fieldPath) == 2 {
+			return populateMapField(fd, v.Mutable(fd).Map(), fieldPath, values)
+		}
 		if i == len(fieldPath)-1 {
 			break
 		}
-
 		if fd.Message() == nil || fd.Cardinality() == protoreflect.Repeated {
 			if fd.IsMap() && len(fieldPath) > 1 {
 				// post subfield
@@ -77,13 +82,25 @@ func populateFieldValues(v protoreflect.Message, fieldPath []string, values []st
 }
 
 func getFieldDescriptor(v protoreflect.Message, fieldName string) protoreflect.FieldDescriptor {
-	fields := v.Descriptor().Fields()
-	var fd protoreflect.FieldDescriptor
-	if fd = getDescriptorByFieldAndName(fields, fieldName); fd == nil {
-		if v.Descriptor().FullName() == structMessageFullname {
+	var (
+		fields = v.Descriptor().Fields()
+		fd     = getDescriptorByFieldAndName(fields, fieldName)
+	)
+	if fd == nil {
+		switch {
+		case v.Descriptor().FullName() == structMessageFullname:
 			fd = fields.ByNumber(structFieldsFieldNumber)
-		} else if len(fieldName) > 2 && strings.HasSuffix(fieldName, "[]") {
+		case len(fieldName) > 2 && strings.HasSuffix(fieldName, "[]"):
 			fd = getDescriptorByFieldAndName(fields, strings.TrimSuffix(fieldName, "[]"))
+		default:
+			// If the type is map, you get the string "map[kratos]", where "map" is a field of proto and "kratos" is a key of map
+			// Use symbol . for separating fields/structs. (eg. structfield.field)
+			// ref: https://github.com/go-playground/form
+			field, _, err := parseURLQueryMapKey(fieldName)
+			if err != nil {
+				break
+			}
+			fd = getDescriptorByFieldAndName(fields, field)
 		}
 	}
 	return fd
@@ -121,14 +138,15 @@ func populateRepeatedField(fd protoreflect.FieldDescriptor, list protoreflect.Li
 }
 
 func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, fieldPath []string, values []string) error {
-	// post sub key.
-	nkey := len(fieldPath) - 1
-	key, err := parseField(fd.MapKey(), fieldPath[nkey])
+	_, keyName, err := parseURLQueryMapKey(strings.Join(fieldPath, fieldSeparator))
+	if err != nil {
+		return err
+	}
+	key, err := parseField(fd.MapKey(), keyName)
 	if err != nil {
 		return fmt.Errorf("parsing map key %q: %w", fd.FullName().Name(), err)
 	}
-	vkey := len(values) - 1
-	value, err := parseField(fd.MapValue(), values[vkey])
+	value, err := parseField(fd.MapValue(), values[len(values)-1])
 	if err != nil {
 		return fmt.Errorf("parsing map value %q: %w", fd.FullName().Name(), err)
 	}
@@ -154,7 +172,7 @@ func parseField(fd protoreflect.FieldDescriptor, value string) (protoreflect.Val
 		}
 		v := enum.Descriptor().Values().ByName(protoreflect.Name(value))
 		if v == nil {
-			i, err := strconv.ParseInt(value, 10, 32) //nolint:gomnd
+			i, err := strconv.ParseInt(value, 10, 32) //nolint:mnd
 			if err != nil {
 				return protoreflect.Value{}, fmt.Errorf("%q is not a valid value", value)
 			}
@@ -165,37 +183,37 @@ func parseField(fd protoreflect.FieldDescriptor, value string) (protoreflect.Val
 		}
 		return protoreflect.ValueOfEnum(v.Number()), nil
 	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind:
-		v, err := strconv.ParseInt(value, 10, 32) //nolint:gomnd
+		v, err := strconv.ParseInt(value, 10, 32) //nolint:mnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		return protoreflect.ValueOfInt32(int32(v)), nil
 	case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
-		v, err := strconv.ParseInt(value, 10, 64) //nolint:gomnd
+		v, err := strconv.ParseInt(value, 10, 64) //nolint:mnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		return protoreflect.ValueOfInt64(v), nil
 	case protoreflect.Uint32Kind, protoreflect.Fixed32Kind:
-		v, err := strconv.ParseUint(value, 10, 32) //nolint:gomnd
+		v, err := strconv.ParseUint(value, 10, 32) //nolint:mnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		return protoreflect.ValueOfUint32(uint32(v)), nil
 	case protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
-		v, err := strconv.ParseUint(value, 10, 64) //nolint:gomnd
+		v, err := strconv.ParseUint(value, 10, 64) //nolint:mnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		return protoreflect.ValueOfUint64(v), nil
 	case protoreflect.FloatKind:
-		v, err := strconv.ParseFloat(value, 32) //nolint:gomnd
+		v, err := strconv.ParseFloat(value, 32) //nolint:mnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		return protoreflect.ValueOfFloat32(float32(v)), nil
 	case protoreflect.DoubleKind:
-		v, err := strconv.ParseFloat(value, 64) //nolint:gomnd
+		v, err := strconv.ParseFloat(value, 64) //nolint:mnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
@@ -222,7 +240,7 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		if value == nullStr {
 			break
 		}
-		t, err := time.Parse(time.RFC3339Nano, value)
+		t, err := time.ParseInLocation(time.RFC3339Nano, value, time.Local)
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
@@ -237,37 +255,37 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		}
 		msg = durationpb.New(d)
 	case "google.protobuf.DoubleValue":
-		v, err := strconv.ParseFloat(value, 64) //nolint:gomnd
+		v, err := strconv.ParseFloat(value, 64) //nolint:mnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		msg = wrapperspb.Double(v)
 	case "google.protobuf.FloatValue":
-		v, err := strconv.ParseFloat(value, 32) //nolint:gomnd
+		v, err := strconv.ParseFloat(value, 32) //nolint:mnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		msg = wrapperspb.Float(float32(v))
 	case "google.protobuf.Int64Value":
-		v, err := strconv.ParseInt(value, 10, 64) //nolint:gomnd
+		v, err := strconv.ParseInt(value, 10, 64) //nolint:mnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		msg = wrapperspb.Int64(v)
 	case "google.protobuf.Int32Value":
-		v, err := strconv.ParseInt(value, 10, 32) //nolint:gomnd
+		v, err := strconv.ParseInt(value, 10, 32) //nolint:mnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		msg = wrapperspb.Int32(int32(v))
 	case "google.protobuf.UInt64Value":
-		v, err := strconv.ParseUint(value, 10, 64) //nolint:gomnd
+		v, err := strconv.ParseUint(value, 10, 64) //nolint:mnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
 		msg = wrapperspb.UInt64(v)
 	case "google.protobuf.UInt32Value":
-		v, err := strconv.ParseUint(value, 10, 32) //nolint:gomnd
+		v, err := strconv.ParseUint(value, 10, 32) //nolint:mnd
 		if err != nil {
 			return protoreflect.Value{}, err
 		}
@@ -316,18 +334,43 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 // according to the protobuf JSON specification.
 // references: https://github.com/protocolbuffers/protobuf-go/blob/master/encoding/protojson/well_known_types.go#L864
 func jsonSnakeCase(s string) string {
-	var b []byte
+	var builder strings.Builder
+	builder.Grow(len(s))
+
 	for i := 0; i < len(s); i++ { // proto identifiers are always ASCII
 		c := s[i]
 		if isASCIIUpper(c) {
-			b = append(b, '_')
+			builder.WriteByte('_')
 			c += 'a' - 'A' // convert to lowercase
 		}
-		b = append(b, c)
+		builder.WriteByte(c)
 	}
-	return string(b)
+
+	return builder.String()
 }
 
 func isASCIIUpper(c byte) bool {
 	return 'A' <= c && c <= 'Z'
+}
+
+// parseURLQueryMapKey parse the url.Values the field name and key name of the value map type key
+// for example: convert "map[key]" to "map" and "key"
+func parseURLQueryMapKey(key string) (string, string, error) {
+	var (
+		startIndex = strings.IndexByte(key, '[')
+		endIndex   = strings.IndexByte(key, ']')
+	)
+	if startIndex < 0 {
+		//nolint:mnd
+		values := strings.Split(key, fieldSeparator)
+		//nolint:mnd
+		if len(values) != 2 {
+			return "", "", errInvalidFormatMapKey
+		}
+		return values[0], values[1], nil
+	}
+	if startIndex <= 0 || startIndex >= endIndex || len(key) != endIndex+1 {
+		return "", "", errInvalidFormatMapKey
+	}
+	return key[:startIndex], key[startIndex+1 : endIndex], nil
 }

@@ -2,7 +2,6 @@ package polaris
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/url"
 	"strconv"
@@ -115,15 +114,16 @@ func (r *Registry) Register(_ context.Context, instance *registry.ServiceInstanc
 		}
 
 		// metadata
-		if instance.Metadata == nil {
-			instance.Metadata = make(map[string]string)
+		rmd := mapClone(instance.Metadata)
+		if rmd == nil {
+			rmd = make(map[string]string)
 		}
-		instance.Metadata["merge"] = id
-		if _, ok := instance.Metadata["weight"]; !ok {
-			instance.Metadata["weight"] = strconv.Itoa(r.opt.Weight)
+		rmd["merge"] = id
+		if _, ok := rmd["weight"]; !ok {
+			rmd["weight"] = strconv.Itoa(r.opt.Weight)
 		}
 
-		weight, _ := strconv.Atoi(instance.Metadata["weight"])
+		weight, _ := strconv.Atoi(rmd["weight"])
 
 		_, err = r.provider.RegisterInstance(
 			&polaris.InstanceRegisterRequest{
@@ -137,7 +137,7 @@ func (r *Registry) Register(_ context.Context, instance *registry.ServiceInstanc
 					Weight:       &weight,
 					Priority:     &r.opt.Priority,
 					Version:      &instance.Version,
-					Metadata:     instance.Metadata,
+					Metadata:     rmd,
 					Healthy:      &r.opt.Healthy,
 					Isolate:      &r.opt.Isolate,
 					TTL:          &r.opt.TTL,
@@ -369,7 +369,7 @@ func instancesToServiceInstances(instances map[string][]model.Instance) []*regis
 		}
 		for _, item := range inss {
 			if item.IsHealthy() {
-				ins.Endpoints = append(ins.Endpoints, fmt.Sprintf("%s://%s:%d", item.GetProtocol(), item.GetHost(), item.GetPort()))
+				ins.Endpoints = append(ins.Endpoints, item.GetProtocol()+"://"+net.JoinHostPort(item.GetHost(), strconv.FormatUint(uint64(item.GetPort()), 10)))
 			}
 		}
 		if len(ins.Endpoints) != 0 {
@@ -377,4 +377,19 @@ func instancesToServiceInstances(instances map[string][]model.Instance) []*regis
 		}
 	}
 	return serviceInstances
+}
+
+// Clone returns a copy of m. This is a shallow clone:
+// the new keys and values are set using ordinary assignment.
+func mapClone[M ~map[K]V, K comparable, V any](m M) M {
+	// Preserve nil in case it matters.
+	if m == nil {
+		return nil
+	}
+	// Make a shallow copy of the map.
+	m2 := make(M, len(m))
+	for k, v := range m {
+		m2[k] = v
+	}
+	return m2
 }

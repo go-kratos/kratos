@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"
@@ -16,8 +16,8 @@ var repoAddIgnores = []string{
 	".git", ".github", "api", "README.md", "LICENSE", "go.mod", "go.sum", "third_party", "openapi.yaml", ".gitignore",
 }
 
-func (p *Project) Add(ctx context.Context, dir string, layout string, branch string, mod string) error {
-	to := path.Join(dir, p.Name)
+func (p *Project) Add(ctx context.Context, dir string, layout string, branch string, mod string, pkgPath string) error {
+	to := filepath.Join(dir, p.Name)
 
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
 		fmt.Printf("🚫 %s already exists\n", p.Name)
@@ -38,15 +38,16 @@ func (p *Project) Add(ctx context.Context, dir string, layout string, branch str
 
 	fmt.Printf("🚀 Add service %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
 
+	pkgPath = fmt.Sprintf("%s/%s", mod, pkgPath)
 	repo := base.NewRepo(layout, branch)
-
-	if err := repo.CopyToV2(ctx, to, path.Join(mod, p.Path), repoAddIgnores, []string{path.Join(p.Path, "api"), "api"}); err != nil {
+	err := repo.CopyToV2(ctx, to, pkgPath, repoAddIgnores, []string{filepath.Join(p.Path, "api"), "api"})
+	if err != nil {
 		return err
 	}
 
 	e := os.Rename(
-		path.Join(to, "cmd", "server"),
-		path.Join(to, "cmd", p.Name),
+		filepath.Join(to, "cmd", "server"),
+		filepath.Join(to, "cmd", p.Name),
 	)
 	if e != nil {
 		return e

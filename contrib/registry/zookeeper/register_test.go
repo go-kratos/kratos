@@ -80,7 +80,7 @@ func TestRegistry_GetService(t *testing.T) {
 		},
 		{
 			name: "conn close",
-			preFunc: func(t *testing.T) {
+			preFunc: func(*testing.T) {
 				conn.Close()
 			},
 			fields: fields{
@@ -339,7 +339,7 @@ func TestRegistry_Watch(t *testing.T) {
 					t.Error(err)
 				}
 			},
-			processFunc: func(t *testing.T, w registry.Watcher) {
+			processFunc: func(t *testing.T, _ registry.Watcher) {
 				err = r.Register(context.Background(), svrHello)
 				if err != nil {
 					t.Error(err)
@@ -357,7 +357,7 @@ func TestRegistry_Watch(t *testing.T) {
 			},
 			wantErr: true,
 			want:    nil,
-			processFunc: func(t *testing.T, w registry.Watcher) {
+			processFunc: func(*testing.T, registry.Watcher) {
 				cancel()
 			},
 		},
@@ -372,7 +372,7 @@ func TestRegistry_Watch(t *testing.T) {
 			},
 			wantErr: true,
 			want:    nil,
-			processFunc: func(t *testing.T, w registry.Watcher) {
+			processFunc: func(*testing.T, registry.Watcher) {
 				closeConn.Close()
 			},
 		},

@@ -98,7 +98,7 @@ func (s *Server) load() error {
 }
 
 // ListServices return all services
-func (s *Server) ListServices(ctx context.Context, in *ListServicesRequest) (*ListServicesReply, error) {
+func (s *Server) ListServices(_ context.Context, _ *ListServicesRequest) (*ListServicesReply, error) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	if err := s.load(); err != nil {
@@ -122,7 +122,7 @@ func (s *Server) ListServices(ctx context.Context, in *ListServicesRequest) (*Li
 }
 
 // GetServiceDesc return service meta by name
-func (s *Server) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest) (*GetServiceDescReply, error) {
+func (s *Server) GetServiceDesc(_ context.Context, in *GetServiceDescRequest) (*GetServiceDescReply, error) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	if err := s.load(); err != nil {
@@ -139,7 +139,7 @@ func (s *Server) GetServiceDesc(ctx context.Context, in *GetServiceDescRequest) 
 // For SupportPackageIsVersion4, m is the name of the proto file, we
 // call proto.FileDescriptor to get the byte slice.
 // For SupportPackageIsVersion3, m is a byte slice itself.
-func parseMetadata(meta interface{}) (*dpb.FileDescriptorProto, error) {
+func parseMetadata(meta any) (*dpb.FileDescriptorProto, error) {
 	// Check if meta is the file name.
 	if fileNameForMeta, ok := meta.(string); ok {
 		return fileDescriptorProto(fileNameForMeta)
@@ -148,7 +148,7 @@ func parseMetadata(meta interface{}) (*dpb.FileDescriptorProto, error) {
 	if enc, ok := meta.([]byte); ok {
 		return decodeFileDesc(enc)
 	}
-	return nil, fmt.Errorf("proto not sumpport metadata: %v", meta)
+	return nil, fmt.Errorf("proto does not support metadata: %v", meta)
 }
 
 // decodeFileDesc does decompression and unmarshalling on the given

@@ -4,16 +4,15 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/gorilla/mux"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/httputil"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
-
-	"github.com/gorilla/mux"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
@@ -35,16 +34,16 @@ type ResponseWriter = http.ResponseWriter
 type Flusher = http.Flusher
 
 // DecodeRequestFunc is decode request func.
-type DecodeRequestFunc func(*http.Request, interface{}) error
+type DecodeRequestFunc func(*http.Request, any) error
 
 // EncodeResponseFunc is encode response func.
-type EncodeResponseFunc func(http.ResponseWriter, *http.Request, interface{}) error
+type EncodeResponseFunc func(http.ResponseWriter, *http.Request, any) error
 
 // EncodeErrorFunc is encode error func.
 type EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
 
 // DefaultRequestVars decodes the request vars to object.
-func DefaultRequestVars(r *http.Request, v interface{}) error {
+func DefaultRequestVars(r *http.Request, v any) error {
 	raws := mux.Vars(r)
 	vars := make(url.Values, len(raws))
 	for k, v := range raws {
@@ -54,12 +53,12 @@ func DefaultRequestVars(r *http.Request, v interface{}) error {
 }
 
 // DefaultRequestQuery decodes the request vars to object.
-func DefaultRequestQuery(r *http.Request, v interface{}) error {
+func DefaultRequestQuery(r *http.Request, v any) error {
 	return binding.BindQuery(r.URL.Query(), v)
 }
 
 // DefaultRequestDecoder decodes the request body to object.
-func DefaultRequestDecoder(r *http.Request, v interface{}) error {
+func DefaultRequestDecoder(r *http.Request, v any) error {
 	codec, ok := CodecForRequest(r, "Content-Type")
 	if !ok {
 		return errors.BadRequest("CODEC", fmt.Sprintf("unregister Content-Type: %s", r.Header.Get("Content-Type")))
@@ -67,7 +66,7 @@ func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 	data, err := io.ReadAll(r.Body)
 
 	// reset body.
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
+	r.Body = io.NopCloser(bytes.NewBuffer(data))
 
 	if err != nil {
 		return errors.BadRequest("CODEC", err.Error())
@@ -82,7 +81,7 @@ func DefaultRequestDecoder(r *http.Request, v interface{}) error {
 }
 
 // DefaultResponseEncoder encodes the object to the HTTP response.
-func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v interface{}) error {
+func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v any) error {
 	if v == nil {
 		return nil
 	}

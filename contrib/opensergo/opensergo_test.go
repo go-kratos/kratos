@@ -23,7 +23,7 @@ type testMetadataServiceServer struct {
 	srvContractPb.UnimplementedMetadataServiceServer
 }
 
-func (m *testMetadataServiceServer) ReportMetadata(ctx context.Context, req *srvContractPb.ReportMetadataRequest) (*srvContractPb.ReportMetadataReply, error) {
+func (m *testMetadataServiceServer) ReportMetadata(_ context.Context, _ *srvContractPb.ReportMetadataRequest) (*srvContractPb.ReportMetadataReply, error) {
 	return &srvContractPb.ReportMetadataReply{}, nil
 }
 
@@ -183,7 +183,7 @@ func TestListDescriptors(t *testing.T) {
 
 func TestHTTPPatternInfo(t *testing.T) {
 	type args struct {
-		pattern interface{}
+		pattern any
 	}
 	tests := []struct {
 		name       string
@@ -309,7 +309,7 @@ func TestOpenSergo(t *testing.T) {
 			args: args{
 				opts: []Option{},
 			},
-			preFunc: func(t *testing.T) {
+			preFunc: func(_ *testing.T) {
 				err := os.Setenv("OPENSERGO_ENDPOINT", "127.0.0.1:9090")
 				if err != nil {
 					panic(err)
@@ -322,7 +322,7 @@ func TestOpenSergo(t *testing.T) {
 			args: args{
 				opts: []Option{},
 			},
-			preFunc: func(t *testing.T) {
+			preFunc: func(_ *testing.T) {
 				err := os.Setenv("OPENSERGO_BOOTSTRAP", `{"endpoint": "127.0.0.1:9090"}`)
 				if err != nil {
 					panic(err)

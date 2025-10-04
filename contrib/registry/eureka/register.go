@@ -54,7 +54,11 @@ func New(eurekaUrls []string, opts ...Option) (*Registry, error) {
 		o(r)
 	}
 
-	client := NewClient(eurekaUrls, WithHeartbeatInterval(r.heartbeatInterval), WithClientContext(r.ctx), WithNamespace(r.eurekaPath))
+	client := NewClient(eurekaUrls,
+		WithHeartbeatInterval(r.heartbeatInterval),
+		WithClientContext(r.ctx),
+		WithNamespace(r.eurekaPath),
+	)
 	r.api = NewAPI(r.ctx, client, r.refreshInterval)
 	return r, nil
 }

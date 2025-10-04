@@ -3,6 +3,7 @@ package tracing
 import (
 	"context"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"reflect"
 	"testing"
@@ -29,6 +30,11 @@ func (hc headerCarrier) Set(key string, value string) {
 	http.Header(hc).Set(key, value)
 }
 
+// Add value to the key-value pair.
+func (hc headerCarrier) Add(key string, value string) {
+	http.Header(hc).Add(key, value)
+}
+
 // Keys lists the keys stored in this carrier.
 func (hc headerCarrier) Keys() []string {
 	keys := make([]string, 0, len(hc))
@@ -36,6 +42,11 @@ func (hc headerCarrier) Keys() []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// Values returns a slice value associated with the passed key.
+func (hc headerCarrier) Values(key string) []string {
+	return http.Header(hc).Values(key)
 }
 
 type mockTransport struct {
@@ -61,6 +72,9 @@ func (tr *mockTransport) Request() *http.Request {
 	return tr.request
 }
 func (tr *mockTransport) PathTemplate() string { return "" }
+func (tr *mockTransport) Response() http.ResponseWriter {
+	return httptest.NewRecorder()
+}
 
 func TestTracer(t *testing.T) {
 	carrier := headerCarrier{}
@@ -117,7 +131,7 @@ func TestServer(t *testing.T) {
 		childSpanID  string
 		childTraceID string
 	)
-	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+	next := func(ctx context.Context, req any) (any, error) {
 		_ = log.WithContext(ctx, logger).Log(log.LevelInfo,
 			"kind", "server",
 		)
@@ -156,7 +170,6 @@ func TestServer(t *testing.T) {
 		WithTracerProvider(tracesdk.NewTracerProvider()),
 		WithPropagator(propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})),
 	)(next)(context.Background(), "test server: ")
-
 	if err != nil {
 		t.Errorf("expected error, got nil")
 	}
@@ -189,7 +202,7 @@ func TestClient(t *testing.T) {
 		childSpanID  string
 		childTraceID string
 	)
-	next := func(ctx context.Context, req interface{}) (interface{}, error) {
+	next := func(ctx context.Context, req any) (any, error) {
 		_ = log.WithContext(ctx, logger).Log(log.LevelInfo,
 			"kind", "client",
 		)

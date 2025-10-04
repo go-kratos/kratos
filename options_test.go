@@ -66,9 +66,11 @@ func TestEndpoint(t *testing.T) {
 }
 
 func TestContext(t *testing.T) {
-	type ctxKey = struct{}
+	type ctxKey struct {
+		Key string
+	}
 	o := &options{}
-	v := context.WithValue(context.TODO(), ctxKey{}, "b")
+	v := context.WithValue(context.TODO(), ctxKey{Key: "context"}, "b")
 	Context(v)(o)
 	if !reflect.DeepEqual(v, o.ctx) {
 		t.Fatalf("o.ctx:%s is not equal to v:%s", o.ctx, v)
@@ -84,10 +86,17 @@ func TestLogger(t *testing.T) {
 	}
 }
 
-type mockServer struct{}
+type mockServer struct {
+	stopFn func(context.Context) error
+}
 
-func (m *mockServer) Start(ctx context.Context) error { return nil }
-func (m *mockServer) Stop(ctx context.Context) error  { return nil }
+func (m *mockServer) Start(_ context.Context) error { return nil }
+func (m *mockServer) Stop(ctx context.Context) error {
+	if m.stopFn != nil {
+		return m.stopFn(ctx)
+	}
+	return nil
+}
 
 func TestServer(t *testing.T) {
 	o := &options{}
@@ -118,11 +127,11 @@ func TestSignal(t *testing.T) {
 
 type mockRegistrar struct{}
 
-func (m *mockRegistrar) Register(ctx context.Context, service *registry.ServiceInstance) error {
+func (m *mockRegistrar) Register(_ context.Context, _ *registry.ServiceInstance) error {
 	return nil
 }
 
-func (m *mockRegistrar) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
+func (m *mockRegistrar) Deregister(_ context.Context, _ *registry.ServiceInstance) error {
 	return nil
 }
 

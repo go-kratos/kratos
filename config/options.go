@@ -3,17 +3,20 @@ package config
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 // Decoder is config decoder.
-type Decoder func(*KeyValue, map[string]interface{}) error
+type Decoder func(*KeyValue, map[string]any) error
 
 // Resolver resolve placeholder in config.
-type Resolver func(map[string]interface{}) error
+type Resolver func(map[string]any) error
+
+// Merge is config merge func.
+type Merge func(dst, src any) error
 
 // Option is config option.
 type Option func(*options)
@@ -22,6 +25,7 @@ type options struct {
 	sources  []Source
 	decoder  Decoder
 	resolver Resolver
+	merge    Merge
 }
 
 // WithSource with config source.
@@ -42,6 +46,14 @@ func WithDecoder(d Decoder) Option {
 	}
 }
 
+// WithResolveActualTypes with config resolver.
+// bool input will enable conversion of config to data types
+func WithResolveActualTypes(enableConvertToType bool) Option {
+	return func(o *options) {
+		o.resolver = newActualTypesResolver(enableConvertToType)
+	}
+}
+
 // WithResolver with config resolver.
 func WithResolver(r Resolver) Option {
 	return func(o *options) {
@@ -49,15 +61,16 @@ func WithResolver(r Resolver) Option {
 	}
 }
 
-// WithLogger with config logger.
-// Deprecated: use global logger instead.
-func WithLogger(l log.Logger) Option {
-	return func(o *options) {}
+// WithMergeFunc with config merge func.
+func WithMergeFunc(m Merge) Option {
+	return func(o *options) {
+		o.merge = m
+	}
 }
 
 // defaultDecoder decode config from source KeyValue
 // to target map[string]interface{} using src.Format codec.
-func defaultDecoder(src *KeyValue, target map[string]interface{}) error {
+func defaultDecoder(src *KeyValue, target map[string]any) error {
 	if src.Format == "" {
 		// expand key "aaa.bbb" into map[aaa]map[bbb]interface{}
 		keys := strings.Split(src.Key, ".")
@@ -65,7 +78,7 @@ func defaultDecoder(src *KeyValue, target map[string]interface{}) error {
 			if i == len(keys)-1 {
 				target[k] = src.Value
 			} else {
-				sub := make(map[string]interface{})
+				sub := make(map[string]any)
 				target[k] = sub
 				target = sub
 			}
@@ -78,36 +91,37 @@ func defaultDecoder(src *KeyValue, target map[string]interface{}) error {
 	return fmt.Errorf("unsupported key: %s format: %s", src.Key, src.Format)
 }
 
+func newActualTypesResolver(enableConvertToType bool) func(map[string]any) error {
+	return func(input map[string]any) error {
+		mapper := mapper(input)
+		return resolver(input, mapper, enableConvertToType)
+	}
+}
+
 // defaultResolver resolve placeholder in map value,
 // placeholder format in ${key:default}.
-func defaultResolver(input map[string]interface{}) error {
-	mapper := func(name string) string {
-		args := strings.SplitN(strings.TrimSpace(name), ":", 2) //nolint:gomnd
-		if v, has := readValue(input, args[0]); has {
-			s, _ := v.String()
-			return s
-		} else if len(args) > 1 { // default value
-			return args[1]
-		}
-		return ""
-	}
+func defaultResolver(input map[string]any) error {
+	mapper := mapper(input)
+	return resolver(input, mapper, false)
+}
 
-	var resolve func(map[string]interface{}) error
-	resolve = func(sub map[string]interface{}) error {
+func resolver(input map[string]any, mapper func(name string) string, toType bool) error {
+	var resolve func(map[string]any) error
+	resolve = func(sub map[string]any) error {
 		for k, v := range sub {
 			switch vt := v.(type) {
 			case string:
-				sub[k] = expand(vt, mapper)
-			case map[string]interface{}:
+				sub[k] = expand(vt, mapper, toType)
+			case map[string]any:
 				if err := resolve(vt); err != nil {
 					return err
 				}
-			case []interface{}:
+			case []any:
 				for i, iface := range vt {
 					switch it := iface.(type) {
 					case string:
-						vt[i] = expand(it, mapper)
-					case map[string]interface{}:
+						vt[i] = expand(it, mapper, toType)
+					case map[string]any:
 						if err := resolve(it); err != nil {
 							return err
 						}
@@ -121,12 +135,61 @@ func defaultResolver(input map[string]interface{}) error {
 	return resolve(input)
 }
 
-func expand(s string, mapping func(string) string) string {
+func mapper(input map[string]any) func(name string) string {
+	mapper := func(name string) string {
+		args := strings.SplitN(strings.TrimSpace(name), ":", 2) //nolint:mnd
+		if v, has := readValue(input, args[0]); has {
+			s, _ := v.String()
+			return s
+		} else if len(args) > 1 { // default value
+			return args[1]
+		}
+		return ""
+	}
+	return mapper
+}
+
+func convertToType(input string) any {
+	// Check if the input is a string with quotes
+	if strings.HasPrefix(input, "\"") && strings.HasSuffix(input, "\"") {
+		// Trim the quotes and return the string value
+		return strings.Trim(input, "\"")
+	}
+
+	// Try converting to bool
+	if input == "true" || input == "false" {
+		b, _ := strconv.ParseBool(input)
+		return b
+	}
+
+	// Try converting to float64
+	if strings.Contains(input, ".") {
+		if f, err := strconv.ParseFloat(input, 64); err == nil {
+			return f
+		}
+	}
+
+	// Try converting to int64
+	if i, err := strconv.ParseInt(input, 10, 64); err == nil {
+		return i
+	}
+
+	// Default to string if no other conversion succeeds
+	return input
+}
+
+func expand(s string, mapping func(string) string, toType bool) any {
 	r := regexp.MustCompile(`\${(.*?)}`)
 	re := r.FindAllStringSubmatch(s, -1)
+	var ct any
 	for _, i := range re {
-		if len(i) == 2 { //nolint:gomnd
-			s = strings.ReplaceAll(s, i[0], mapping(i[1]))
+		if len(i) == 2 { //nolint:mnd
+			m := mapping(i[1])
+			if toType {
+				ct = convertToType(m)
+				return ct
+			}
+			s = strings.ReplaceAll(s, i[0], m)
 		}
 	}
 	return s

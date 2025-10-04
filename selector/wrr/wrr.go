@@ -9,22 +9,45 @@ import (
 )
 
 const (
-	// Name is wrr balancer name
+	// Name is wrr(Weighted Round Robin) balancer name
 	Name = "wrr"
 )
 
 var _ selector.Balancer = (*Balancer)(nil) // Name is balancer name
 
-// Option is random builder option.
+// Option is wrr builder option.
 type Option func(o *options)
 
-// options is random builder options
+// options is wrr builder options
 type options struct{}
 
-// Balancer is a random balancer.
+// Balancer is a wrr balancer.
 type Balancer struct {
 	mu            sync.Mutex
 	currentWeight map[string]float64
+	lastNodes     []selector.WeightedNode
+}
+
+// equalNodes checks if two slices of WeightedNode contain the same nodes
+func equalNodes(a, b []selector.WeightedNode) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	// Create a map of addresses from slice a
+	aMap := make(map[string]bool)
+	for _, node := range a {
+		aMap[node.Address()] = true
+	}
+
+	// Check if all nodes in slice b exist in slice a
+	for _, node := range b {
+		if !aMap[node.Address()] {
+			return false
+		}
+	}
+
+	return true
 }
 
 // New random a selector.
@@ -37,12 +60,35 @@ func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selec
 	if len(nodes) == 0 {
 		return nil, nil, selector.ErrNoAvailable
 	}
+
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	// Check if the node list has changed
+	if len(p.lastNodes) != len(nodes) || !equalNodes(p.lastNodes, nodes) {
+		// Update lastNodes
+		p.lastNodes = make([]selector.WeightedNode, len(nodes))
+		copy(p.lastNodes, nodes)
+
+		// Create a set of current node addresses for cleanup
+		currentNodes := make(map[string]bool)
+		for _, node := range nodes {
+			currentNodes[node.Address()] = true
+		}
+
+		// Clean up stale entries from currentWeight map
+		for address := range p.currentWeight {
+			if !currentNodes[address] {
+				delete(p.currentWeight, address)
+			}
+		}
+	}
+
 	var totalWeight float64
 	var selected selector.WeightedNode
 	var selectWeight float64
 
 	// nginx wrr load balancing algorithm: http://blog.csdn.net/zhangskd/article/details/50194069
-	p.mu.Lock()
 	for _, node := range nodes {
 		totalWeight += node.Weight()
 		cwt := p.currentWeight[node.Address()]
@@ -55,7 +101,6 @@ func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selec
 		}
 	}
 	p.currentWeight[selected.Address()] = selectWeight - totalWeight
-	p.mu.Unlock()
 
 	d := selected.Pick()
 	return selected, d, nil

@@ -17,9 +17,10 @@ type CallOption interface {
 }
 
 type callInfo struct {
-	contentType  string
-	operation    string
-	pathTemplate string
+	contentType   string
+	operation     string
+	pathTemplate  string
+	headerCarrier *http.Header
 }
 
 // EmptyCallOption does not alter the Call configuration.
@@ -102,7 +103,12 @@ type HeaderCallOption struct {
 	header *http.Header
 }
 
-func (o HeaderCallOption) after(c *callInfo, cs *csAttempt) {
+func (o HeaderCallOption) before(c *callInfo) error {
+	c.headerCarrier = o.header
+	return nil
+}
+
+func (o HeaderCallOption) after(_ *callInfo, cs *csAttempt) {
 	if cs.res != nil && cs.res.Header != nil {
 		*o.header = cs.res.Header
 	}

@@ -30,10 +30,10 @@ func init() {
 type DecodeErrorFunc func(ctx context.Context, res *http.Response) error
 
 // EncodeRequestFunc is request encode func.
-type EncodeRequestFunc func(ctx context.Context, contentType string, in interface{}) (body []byte, err error)
+type EncodeRequestFunc func(ctx context.Context, contentType string, in any) (body []byte, err error)
 
 // DecodeResponseFunc is response decode func.
-type DecodeResponseFunc func(ctx context.Context, res *http.Response, out interface{}) error
+type DecodeResponseFunc func(ctx context.Context, res *http.Response, out any) error
 
 // ClientOption is HTTP client option.
 type ClientOption func(*clientOptions)
@@ -56,7 +56,7 @@ type clientOptions struct {
 	subsetSize   int
 }
 
-// WithSubset with client disocvery subset size.
+// WithSubset with client discovery subset size.
 // zero value means subset filter disabled
 func WithSubset(size int) ClientOption {
 	return func(o *clientOptions) {
@@ -207,7 +207,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 }
 
 // Invoke makes a rpc call procedure for remote service.
-func (client *Client) Invoke(ctx context.Context, method, path string, args interface{}, reply interface{}, opts ...CallOption) error {
+func (client *Client) Invoke(ctx context.Context, method, path string, args any, reply any, opts ...CallOption) error {
 	var (
 		contentType string
 		body        io.Reader
@@ -231,6 +231,10 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 	if err != nil {
 		return err
 	}
+	if c.headerCarrier != nil {
+		req.Header = *c.headerCarrier
+	}
+
 	if contentType != "" {
 		req.Header.Set("Content-Type", c.contentType)
 	}
@@ -247,8 +251,8 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args inte
 	return client.invoke(ctx, req, args, reply, c, opts...)
 }
 
-func (client *Client) invoke(ctx context.Context, req *http.Request, args interface{}, reply interface{}, c callInfo, opts ...CallOption) error {
-	h := func(ctx context.Context, in interface{}) (interface{}, error) {
+func (client *Client) invoke(ctx context.Context, req *http.Request, args any, reply any, c callInfo, opts ...CallOption) error {
+	h := func(ctx context.Context, _ any) (any, error) {
 		res, err := client.do(req.WithContext(ctx))
 		if res != nil {
 			cs := csAttempt{res: res}
@@ -307,6 +311,13 @@ func (client *Client) do(req *http.Request) (*http.Response, error) {
 	}
 	resp, err := client.cc.Do(req)
 	if err == nil {
+		t, ok := transport.FromClientContext(req.Context())
+		if ok {
+			ht, ok := t.(*Transport)
+			if ok {
+				ht.replyHeader = headerCarrier(resp.Header)
+			}
+		}
 		err = client.opts.errorDecoder(req.Context(), resp)
 	}
 	if done != nil {
@@ -327,7 +338,7 @@ func (client *Client) Close() error {
 }
 
 // DefaultRequestEncoder is an HTTP request encoder.
-func DefaultRequestEncoder(ctx context.Context, contentType string, in interface{}) ([]byte, error) {
+func DefaultRequestEncoder(_ context.Context, contentType string, in any) ([]byte, error) {
 	name := httputil.ContentSubtype(contentType)
 	body, err := encoding.GetCodec(name).Marshal(in)
 	if err != nil {
@@ -337,7 +348,7 @@ func DefaultRequestEncoder(ctx context.Context, contentType string, in interface
 }
 
 // DefaultResponseDecoder is an HTTP response decoder.
-func DefaultResponseDecoder(ctx context.Context, res *http.Response, v interface{}) error {
+func DefaultResponseDecoder(_ context.Context, res *http.Response, v any) error {
 	defer res.Body.Close()
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
@@ -347,7 +358,7 @@ func DefaultResponseDecoder(ctx context.Context, res *http.Response, v interface
 }
 
 // DefaultErrorDecoder is an HTTP error decoder.
-func DefaultErrorDecoder(ctx context.Context, res *http.Response) error {
+func DefaultErrorDecoder(_ context.Context, res *http.Response) error {
 	if res.StatusCode >= 200 && res.StatusCode <= 299 {
 		return nil
 	}

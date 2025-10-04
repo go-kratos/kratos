@@ -100,6 +100,34 @@ func TestContextResponse(t *testing.T) {
 	}
 }
 
+func TestResponseUnwrap(t *testing.T) {
+	res := httptest.NewRecorder()
+	f := func(rw http.ResponseWriter, _ *http.Request, _ any) error {
+		u, ok := rw.(interface {
+			Unwrap() http.ResponseWriter
+		})
+		if !ok {
+			return errors.New("can not unwrap")
+		}
+		w := u.Unwrap()
+		if !reflect.DeepEqual(w, res) {
+			return errors.New("underlying response writer not equal")
+		}
+		return nil
+	}
+
+	w := wrapper{
+		router: &Router{srv: &Server{enc: f}},
+		req:    nil,
+		res:    res,
+		w:      responseWriter{200, res},
+	}
+	err := w.Result(200, "ok")
+	if err != nil {
+		t.Errorf("expected %v, got %v", nil, err)
+	}
+}
+
 func TestContextBindQuery(t *testing.T) {
 	w := wrapper{
 		router: testRouter,

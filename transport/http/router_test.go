@@ -3,11 +3,14 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"reflect"
+	"runtime"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -72,7 +75,7 @@ func TestRoute(t *testing.T) {
 		if err := ctx.Bind(u); err != nil {
 			return err
 		}
-		h := ctx.Middleware(func(ctx context.Context, in interface{}) (interface{}, error) {
+		h := ctx.Middleware(func(context.Context, any) (any, error) {
 			return u, nil
 		})
 		return ctx.Returns(h(ctx, u))
@@ -179,9 +182,9 @@ func TestRouter_Group(t *testing.T) {
 	}
 }
 
-func TestHandle(t *testing.T) {
+func TestHandle(_ *testing.T) {
 	r := newRouter("/", NewServer())
-	h := func(i Context) error {
+	h := func(Context) error {
 		return nil
 	}
 	r.GET("/get", h)
@@ -191,4 +194,57 @@ func TestHandle(t *testing.T) {
 	r.CONNECT("/connect", h)
 	r.OPTIONS("/options", h)
 	r.TRACE("/trace", h)
+}
+
+func TestRouter_ContextDataRace(t *testing.T) {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	ctx := context.Background()
+	srvPort := 38888
+	srvAddr := fmt.Sprintf(":%d", srvPort)
+	srv := NewServer(Timeout(time.Millisecond*50), Address(srvAddr))
+
+	router := srv.Route("/")
+	router.GET("/ping", func(ctx Context) error {
+		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "http://www.baidu.com", nil)
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return ctx.String(200, err.Error())
+		}
+		_ = resp.Body.Close()
+		return ctx.String(200, "pong")
+	})
+
+	// start server
+	go func() {
+		if err := srv.Start(ctx); err != nil {
+			if errors.Is(err, http.ErrServerClosed) {
+				return
+			}
+			panic(err)
+		}
+	}()
+
+	time.Sleep(time.Second)
+
+	// start client
+	workers := 10
+	wg := sync.WaitGroup{}
+	wg.Add(workers)
+	for i := 0; i < workers; i++ {
+		go func() {
+			defer wg.Done()
+			for j := 0; j < 50; j++ {
+				req, _ := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/ping", srvPort), nil)
+				res, err := http.DefaultClient.Do(req)
+				if err != nil {
+					break
+				}
+				_ = res.Body.Close()
+			}
+		}()
+	}
+	wg.Wait()
+	_ = srv.Stop(ctx)
+	t.Log("test end")
 }

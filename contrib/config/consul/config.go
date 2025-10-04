@@ -11,7 +11,7 @@ import (
 	"github.com/go-kratos/kratos/v2/config"
 )
 
-// Option is etcd config option.
+// Option is consul config option.
 type Option func(o *options)
 
 type options struct {

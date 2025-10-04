@@ -206,7 +206,7 @@ func TestConfig(t *testing.T) {
 }
 
 func testConfig(t *testing.T, c config.Config) {
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"test.settings.int_key":      int64(1000),
 		"test.settings.float_key":    1000.1,
 		"test.settings.string_key":   "string_value",

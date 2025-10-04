@@ -2,11 +2,15 @@ package log
 
 import (
 	"bytes"
+	"context"
 	"io"
+	"strings"
+	"sync"
 	"testing"
+	"time"
 )
 
-func TestFilterAll(t *testing.T) {
+func TestFilterAll(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(NewFilter(logger,
 		FilterLevel(LevelDebug),
@@ -21,7 +25,7 @@ func TestFilterAll(t *testing.T) {
 	log.Warn("warn log")
 }
 
-func TestFilterLevel(t *testing.T) {
+func TestFilterLevel(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(NewFilter(NewFilter(logger, FilterLevel(LevelWarn))))
 	log.Log(LevelDebug, "msg1", "te1st debug")
@@ -31,7 +35,7 @@ func TestFilterLevel(t *testing.T) {
 	log.Warn("warn log")
 }
 
-func TestFilterCaller(t *testing.T) {
+func TestFilterCaller(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewFilter(logger)
 	_ = log.Log(LevelDebug, "msg1", "te1st debug")
@@ -39,19 +43,19 @@ func TestFilterCaller(t *testing.T) {
 	logHelper.Log(LevelDebug, "msg1", "te1st debug")
 }
 
-func TestFilterKey(t *testing.T) {
+func TestFilterKey(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(NewFilter(logger, FilterKey("password")))
 	log.Debugw("password", "123456")
 }
 
-func TestFilterValue(t *testing.T) {
+func TestFilterValue(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(NewFilter(logger, FilterValue("debug")))
 	log.Debugf("test %s", "debug")
 }
 
-func TestFilterFunc(t *testing.T) {
+func TestFilterFunc(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(NewFilter(logger, FilterFunc(testFilterFunc)))
 	log.Debug("debug level")
@@ -79,7 +83,7 @@ func BenchmarkFilterFunc(b *testing.B) {
 	}
 }
 
-func testFilterFunc(level Level, keyvals ...interface{}) bool {
+func testFilterFunc(level Level, keyvals ...any) bool {
 	if level == LevelWarn {
 		return true
 	}
@@ -98,7 +102,7 @@ func TestFilterFuncWitchLoggerPrefix(t *testing.T) {
 		want   string
 	}{
 		{
-			logger: NewFilter(With(NewStdLogger(buf), "caller", "caller", "prefix", "whaterver"), FilterFunc(testFilterFuncWithLoggerPrefix)),
+			logger: NewFilter(With(NewStdLogger(buf), "caller", "caller", "prefix", "whatever"), FilterFunc(testFilterFuncWithLoggerPrefix)),
 			want:   "",
 		},
 		{
@@ -126,7 +130,7 @@ func TestFilterFuncWitchLoggerPrefix(t *testing.T) {
 	}
 }
 
-func testFilterFuncWithLoggerPrefix(level Level, keyvals ...interface{}) bool {
+func testFilterFuncWithLoggerPrefix(level Level, keyvals ...any) bool {
 	if level == LevelWarn {
 		return true
 	}
@@ -139,4 +143,86 @@ func testFilterFuncWithLoggerPrefix(level Level, keyvals ...interface{}) bool {
 		}
 	}
 	return false
+}
+
+func TestFilterWithContext(t *testing.T) {
+	type CtxKey struct {
+		Key string
+	}
+	ctxKey := CtxKey{Key: "context"}
+	ctxValue := "filter test value"
+
+	v1 := func() Valuer {
+		return func(ctx context.Context) any {
+			return ctx.Value(ctxKey)
+		}
+	}
+
+	info := &bytes.Buffer{}
+
+	logger := With(NewStdLogger(info), "request_id", v1())
+	filter := NewFilter(logger, FilterLevel(LevelError))
+
+	ctx := context.WithValue(context.Background(), ctxKey, ctxValue)
+
+	_ = WithContext(ctx, filter).Log(LevelInfo, "kind", "test")
+
+	if info.String() != "" {
+		t.Error("filter is not working")
+		return
+	}
+
+	_ = WithContext(ctx, filter).Log(LevelError, "kind", "test")
+	if !strings.Contains(info.String(), ctxValue) {
+		t.Error("don't read ctx value")
+	}
+}
+
+type traceIDKey struct{}
+
+func setTraceID(ctx context.Context, tid string) context.Context {
+	return context.WithValue(ctx, traceIDKey{}, tid)
+}
+
+func traceIDValuer() Valuer {
+	return func(ctx context.Context) any {
+		if ctx == nil {
+			return ""
+		}
+		if tid := ctx.Value(traceIDKey{}); tid != nil {
+			return tid
+		}
+		return ""
+	}
+}
+
+func TestFilterWithContextConcurrent(t *testing.T) {
+	var buf bytes.Buffer
+	pctx := context.Background()
+	l := NewFilter(
+		With(NewStdLogger(&buf), "trace-id", traceIDValuer()),
+		FilterLevel(LevelInfo),
+	)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		time.Sleep(time.Second)
+		NewHelper(l).Info("done1")
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		tid := "world"
+		ctx := setTraceID(pctx, tid)
+		NewHelper((WithContext(ctx, l))).Info("done2")
+	}()
+
+	wg.Wait()
+	expected := "INFO trace-id=world msg=done2\nINFO trace-id= msg=done1\n"
+	if got := buf.String(); got != expected {
+		t.Errorf("got: %#v", got)
+	}
 }

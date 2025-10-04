@@ -33,18 +33,26 @@ func TestWithTimeout(t *testing.T) {
 func TestDisableDebugLog(t *testing.T) {
 	o := &builder{}
 	DisableDebugLog()(o)
-	if !o.debugLogDisabled {
-		t.Errorf("expected debugLogDisabled true, got %v", o.debugLogDisabled)
+	if o.debugLog {
+		t.Errorf("expected debugLog true, got %v", o.debugLog)
+	}
+}
+
+func TestPrintDebugLog(t *testing.T) {
+	o := &builder{}
+	PrintDebugLog(true)(o)
+	if !o.debugLog {
+		t.Errorf("expected PrintdebugLog true, got %v", o.debugLog)
 	}
 }
 
 type mockDiscovery struct{}
 
-func (m *mockDiscovery) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+func (m *mockDiscovery) GetService(_ context.Context, _ string) ([]*registry.ServiceInstance, error) {
 	return nil, nil
 }
 
-func (m *mockDiscovery) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
+func (m *mockDiscovery) Watch(_ context.Context, _ string) (registry.Watcher, error) {
 	time.Sleep(time.Microsecond * 500)
 	return &testWatch{}, nil
 }
@@ -64,16 +72,16 @@ func (m *mockConn) UpdateState(resolver.State) error {
 
 func (m *mockConn) ReportError(error) {}
 
-func (m *mockConn) NewAddress(addresses []resolver.Address) {}
+func (m *mockConn) NewAddress(_ []resolver.Address) {}
 
-func (m *mockConn) NewServiceConfig(serviceConfig string) {}
+func (m *mockConn) NewServiceConfig(_ string) {}
 
-func (m *mockConn) ParseServiceConfig(serviceConfigJSON string) *serviceconfig.ParseResult {
+func (m *mockConn) ParseServiceConfig(_ string) *serviceconfig.ParseResult {
 	return nil
 }
 
 func TestBuilder_Build(t *testing.T) {
-	b := NewBuilder(&mockDiscovery{}, DisableDebugLog())
+	b := NewBuilder(&mockDiscovery{}, PrintDebugLog(false))
 	_, err := b.Build(
 		resolver.Target{
 			URL: url.URL{
@@ -99,7 +107,7 @@ func TestBuilder_Build(t *testing.T) {
 		&mockConn{},
 		resolver.BuildOptions{},
 	)
-	if err == nil {
-		t.Errorf("expected error, got %v", err)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
 	}
 }

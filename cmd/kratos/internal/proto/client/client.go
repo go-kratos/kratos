@@ -8,9 +8,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
-
 	"github.com/spf13/cobra"
+
+	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
 )
 
 // CmdClient represents the source command.
@@ -30,7 +30,7 @@ func init() {
 	CmdClient.Flags().StringVarP(&protoPath, "proto_path", "p", protoPath, "proto path")
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(_ *cobra.Command, args []string) {
 	if len(args) == 0 {
 		fmt.Println("Please enter the proto file or directory")
 		return
@@ -72,7 +72,7 @@ func walk(dir string, args []string) error {
 	if dir == "" {
 		dir = "."
 	}
-	return filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	return filepath.Walk(dir, func(path string, _ os.FileInfo, _ error) error {
 		if ext := filepath.Ext(path); ext != ".proto" || strings.HasPrefix(path, "third_party") {
 			return nil
 		}

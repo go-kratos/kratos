@@ -15,7 +15,8 @@ message Complex {
   int64 id = 1;
   string no_one = 2 [json_name = "numberOne"];
   Simple simple = 3 [json_name = "very_simple"];
-  repeated string simples = 4;
+  repeated string strings = 4;
+  repeated Simple simples = 27;
   bool b = 5;
   sex sex = 6;
   int32 age = 7;
@@ -40,6 +41,7 @@ message Complex {
   google.protobuf.BytesValue bytes = 24;
 
   map<string,string> map = 25;
+  map<int64,string> map_int64_key = 26 [json_name = "map_int64_key"];
 }
 
 message Simple {

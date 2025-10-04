@@ -1,16 +1,13 @@
 package ewma
 
 import (
-	"container/list"
 	"context"
 	"math"
 	"net"
-	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
-
 	"github.com/go-kratos/kratos/v2/selector"
 )
 
@@ -18,7 +15,7 @@ const (
 	// The mean lifetime of `cost`, it reaches its half-life after Tau*ln(2).
 	tau = int64(time.Millisecond * 600)
 	// if statistic not collected,we add a big lag penalty to endpoint
-	penalty = uint64(time.Second * 10)
+	penalty = uint64(time.Microsecond * 100)
 )
 
 var (
@@ -31,21 +28,24 @@ type Node struct {
 	selector.Node
 
 	// client statistic data
-	lag       int64
-	success   uint64
-	inflight  int64
-	inflights *list.List
+	lag       atomic.Int64
+	success   atomic.Uint64
+	inflight  atomic.Int64
+	inflights [200]atomic.Int64
 	// last collected timestamp
-	stamp     int64
-	predictTs int64
-	predict   int64
+	stamp atomic.Int64
 	// request number in a period time
-	reqs int64
+	reqs atomic.Int64
 	// last lastPick timestamp
-	lastPick int64
+	lastPick atomic.Int64
 
-	errHandler func(err error) (isErr bool)
-	lk         sync.RWMutex
+	errHandler   func(err error) (isErr bool)
+	cachedWeight *atomic.Value
+}
+
+type nodeWeight struct {
+	value    float64
+	updateAt int64
 }
 
 // Builder is ewma node builder.
@@ -56,103 +56,96 @@ type Builder struct {
 // Build create a weighted node.
 func (b *Builder) Build(n selector.Node) selector.WeightedNode {
 	s := &Node{
-		Node:       n,
-		lag:        0,
-		success:    1000,
-		inflight:   1,
-		inflights:  list.New(),
-		errHandler: b.ErrHandler,
+		Node:         n,
+		inflights:    [200]atomic.Int64{},
+		errHandler:   b.ErrHandler,
+		cachedWeight: &atomic.Value{},
 	}
+	s.success.Store(1000)
+	s.inflight.Store(1)
 	return s
 }
 
 func (n *Node) health() uint64 {
-	return atomic.LoadUint64(&n.success)
+	return n.success.Load()
 }
 
 func (n *Node) load() (load uint64) {
 	now := time.Now().UnixNano()
-	avgLag := atomic.LoadInt64(&n.lag)
-	lastPredictTs := atomic.LoadInt64(&n.predictTs)
-	predictInterval := avgLag / 5
-	if predictInterval < int64(time.Millisecond*5) {
-		predictInterval = int64(time.Millisecond * 5)
-	}
-	if predictInterval > int64(time.Millisecond*200) {
-		predictInterval = int64(time.Millisecond * 200)
-	}
-	if now-lastPredictTs > predictInterval && atomic.CompareAndSwapInt64(&n.predictTs, lastPredictTs, now) {
-		var (
-			total   int64
-			count   int
-			predict int64
-		)
-		n.lk.RLock()
-		first := n.inflights.Front()
-		for first != nil {
-			lag := now - first.Value.(int64)
-			if lag > avgLag {
-				count++
-				total += lag
-			}
-			first = first.Next()
-		}
-		if count > (n.inflights.Len()/2 + 1) {
-			predict = total / int64(count)
-		}
-		n.lk.RUnlock()
-		atomic.StoreInt64(&n.predict, predict)
-	}
+	avgLag := n.lag.Load()
+	predict := n.predict(avgLag, now)
 
 	if avgLag == 0 {
 		// penalty is the penalty value when there is no data when the node is just started.
-		// The default value is 1e9 * 10
-		load = penalty * uint64(atomic.LoadInt64(&n.inflight))
+		load = penalty * uint64(n.inflight.Load())
 		return
 	}
-	predict := atomic.LoadInt64(&n.predict)
 	if predict > avgLag {
 		avgLag = predict
 	}
-	load = uint64(avgLag) * uint64(atomic.LoadInt64(&n.inflight))
+	// add 5ms to eliminate the latency gap between different zones
+	avgLag += int64(time.Millisecond * 5)
+	avgLag = int64(math.Sqrt(float64(avgLag)))
+	load = uint64(avgLag) * uint64(n.inflight.Load())
+	return load
+}
+
+func (n *Node) predict(avgLag int64, now int64) (predict int64) {
+	var (
+		total    int64
+		slowNum  int
+		totalNum int
+	)
+	for i := range n.inflights {
+		start := n.inflights[i].Load()
+		if start != 0 {
+			totalNum++
+			lag := now - start
+			if lag > avgLag {
+				slowNum++
+				total += lag
+			}
+		}
+	}
+	if slowNum >= (totalNum/2 + 1) {
+		predict = total / int64(slowNum)
+	}
 	return
 }
 
 // Pick pick a node.
 func (n *Node) Pick() selector.DoneFunc {
-	now := time.Now().UnixNano()
-	atomic.StoreInt64(&n.lastPick, now)
-	atomic.AddInt64(&n.inflight, 1)
-	atomic.AddInt64(&n.reqs, 1)
-	n.lk.Lock()
-	e := n.inflights.PushBack(now)
-	n.lk.Unlock()
-	return func(ctx context.Context, di selector.DoneInfo) {
-		n.lk.Lock()
-		n.inflights.Remove(e)
-		n.lk.Unlock()
-		atomic.AddInt64(&n.inflight, -1)
+	start := time.Now().UnixNano()
+	n.lastPick.Store(start)
+	n.inflight.Add(1)
+	reqs := n.reqs.Add(1)
+	slot := reqs % 200
+	swapped := n.inflights[slot].CompareAndSwap(0, start)
+	return func(_ context.Context, di selector.DoneInfo) {
+		if swapped {
+			n.inflights[slot].CompareAndSwap(start, 0)
+		}
+		n.inflight.Add(-1)
 
 		now := time.Now().UnixNano()
 		// get moving average ratio w
-		stamp := atomic.SwapInt64(&n.stamp, now)
+		stamp := n.stamp.Swap(now)
 		td := now - stamp
 		if td < 0 {
 			td = 0
 		}
 		w := math.Exp(float64(-td) / float64(tau))
 
-		start := e.Value.(int64)
 		lag := now - start
 		if lag < 0 {
 			lag = 0
 		}
-		oldLag := atomic.LoadInt64(&n.lag)
+		oldLag := n.lag.Load()
 		if oldLag == 0 {
 			w = 0.0
 		}
 		lag = int64(float64(oldLag)*w + float64(lag)*(1.0-w))
-		atomic.StoreInt64(&n.lag, lag)
+		n.lag.Store(lag)
 
 		success := uint64(1000) // error value ,if error set 1
 		if di.Err != nil {
@@ -165,20 +158,32 @@ func (n *Node) Pick() selector.DoneFunc {
 				success = 0
 			}
 		}
-		oldSuc := atomic.LoadUint64(&n.success)
+		oldSuc := n.success.Load()
 		success = uint64(float64(oldSuc)*w + float64(success)*(1.0-w))
-		atomic.StoreUint64(&n.success, success)
+		n.success.Store(success)
 	}
 }
 
 // Weight is node effective weight.
 func (n *Node) Weight() (weight float64) {
-	weight = float64(n.health()*uint64(time.Second)) / float64(n.load())
+	w, ok := n.cachedWeight.Load().(*nodeWeight)
+	now := time.Now().UnixNano()
+	if !ok || time.Duration(now-w.updateAt) > (time.Millisecond*5) {
+		health := n.health()
+		load := n.load()
+		weight = float64(health*uint64(time.Microsecond)*10) / float64(load)
+		n.cachedWeight.Store(&nodeWeight{
+			value:    weight,
+			updateAt: now,
+		})
+	} else {
+		weight = w.value
+	}
 	return
 }
 
 func (n *Node) PickElapsed() time.Duration {
-	return time.Duration(time.Now().UnixNano() - atomic.LoadInt64(&n.lastPick))
+	return time.Duration(time.Now().UnixNano() - n.lastPick.Load())
 }
 
 func (n *Node) Raw() selector.Node {

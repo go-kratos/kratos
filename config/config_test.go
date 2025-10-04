@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"testing"
+
+	"dario.cat/mergo"
 )
 
 const (
@@ -131,6 +133,9 @@ func TestConfig(t *testing.T) {
 		sources:  []Source{jSource},
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
+		merge: func(dst, src any) error {
+			return mergo.Map(dst, src, mergo.WithOverride)
+		},
 	}
 	cf := &config{}
 	cf.opts = opts
@@ -149,8 +154,7 @@ func TestConfig(t *testing.T) {
 		t.Fatal("databaseDriver is not equal to val")
 	}
 
-	err = cf.Watch("endpoints", func(key string, value Value) {
-	})
+	err = cf.Watch("endpoints", func(string, Value) {})
 	if err != nil {
 		t.Fatal(err)
 	}

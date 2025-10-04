@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/url"
 	"os"
 	"strconv"
@@ -91,8 +92,11 @@ type Registry struct {
 }
 
 // NewRegistry is used to initialize the Registry
-func NewRegistry(clientSet *kubernetes.Clientset) *Registry {
-	informerFactory := informers.NewSharedInformerFactory(clientSet, time.Minute*10)
+func NewRegistry(clientSet *kubernetes.Clientset, namespace string) *Registry {
+	if strings.EqualFold(namespace, "") {
+		namespace = metav1.NamespaceAll
+	}
+	informerFactory := informers.NewSharedInformerFactoryWithOptions(clientSet, time.Minute*10, informers.WithNamespace(namespace))
 	podInformer := informerFactory.Core().V1().Pods().Informer()
 	podLister := informerFactory.Core().V1().Pods().Lister()
 	return &Registry{
@@ -124,7 +128,7 @@ func (s *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 		return err
 	}
 
-	patchBytes, err := jsoniter.Marshal(map[string]interface{}{
+	patchBytes, err := jsoniter.Marshal(map[string]any{
 		"metadata": metav1.ObjectMeta{
 			Labels: map[string]string{
 				LabelsKeyServiceID:      service.ID,
@@ -151,14 +155,14 @@ func (s *Registry) Register(ctx context.Context, service *registry.ServiceInstan
 }
 
 // Deregister the registration.
-func (s *Registry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
+func (s *Registry) Deregister(ctx context.Context, _ *registry.ServiceInstance) error {
 	return s.Register(ctx, &registry.ServiceInstance{
 		Metadata: map[string]string{},
 	})
 }
 
 // GetService return the service instances in memory according to the service name.
-func (s *Registry) GetService(ctx context.Context, name string) ([]*registry.ServiceInstance, error) {
+func (s *Registry) GetService(_ context.Context, name string) ([]*registry.ServiceInstance, error) {
 	pods, err := s.podLister.List(labels.SelectorFromSet(map[string]string{
 		LabelsKeyServiceName: name,
 	}))
@@ -192,7 +196,7 @@ func (s *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 	stopCh := make(chan struct{}, 1)
 	announcement := make(chan []*registry.ServiceInstance, 1)
 	s.podInformer.AddEventHandler(cache.FilteringResourceEventHandler{
-		FilterFunc: func(obj interface{}) bool {
+		FilterFunc: func(obj any) bool {
 			select {
 			case <-stopCh:
 				return false
@@ -205,13 +209,13 @@ func (s *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 			}
 		},
 		Handler: cache.ResourceEventHandlerFuncs{
-			AddFunc: func(obj interface{}) {
+			AddFunc: func(any) {
 				s.sendLatestInstances(ctx, name, announcement)
 			},
-			UpdateFunc: func(oldObj, newObj interface{}) {
+			UpdateFunc: func(any, any) {
 				s.sendLatestInstances(ctx, name, announcement)
 			},
-			DeleteFunc: func(obj interface{}) {
+			DeleteFunc: func(any) {
 				s.sendLatestInstances(ctx, name, announcement)
 			},
 		},
@@ -312,11 +316,11 @@ func (iter *Iterator) Stop() error {
 
 // //////////// Helper Func ////////////
 
-func marshal(in interface{}) (string, error) {
+func marshal(in any) (string, error) {
 	return jsoniter.MarshalToString(in)
 }
 
-func unmarshal(data string, in interface{}) error {
+func unmarshal(data string, in any) error {
 	return jsoniter.UnmarshalFromString(data, in)
 }
 
@@ -389,7 +393,7 @@ func getServiceInstanceFromPod(pod *corev1.Pod) (*registry.ServiceInstance, erro
 					protocol = string(cp.Protocol)
 				}
 			}
-			addr := fmt.Sprintf("%s://%s:%d", protocol, podIP, port)
+			addr := protocol + "://" + net.JoinHostPort(podIP, strconv.Itoa(int(port)))
 			endpoints = append(endpoints, addr)
 		}
 	}

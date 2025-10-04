@@ -60,7 +60,11 @@ func TestWithAccessSecret(t *testing.T) {
 
 func TestLogger(t *testing.T) {
 	project := "foo"
-	logger := NewAliyunLog(WithProject(project))
+	logger, err := NewAliyunLog(WithProject(project))
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	defer logger.Close()
 	logger.GetProducer()
 	flog := log.NewHelper(logger)
@@ -72,9 +76,13 @@ func TestLogger(t *testing.T) {
 
 func TestLog(t *testing.T) {
 	project := "foo"
-	logger := NewAliyunLog(WithProject(project))
+	logger, err := NewAliyunLog(WithProject(project))
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	defer logger.Close()
-	err := logger.Log(log.LevelDebug, 0, int8(1), int16(2), int32(3))
+	err = logger.Log(log.LevelDebug, 0, int8(1), int16(2), int32(3))
 	if err != nil {
 		t.Errorf("Log() returns error:%v", err)
 	}
@@ -110,7 +118,7 @@ func TestNewString(t *testing.T) {
 func TestToString(t *testing.T) {
 	tests := []struct {
 		name string
-		in   interface{}
+		in   any
 		out  string
 	}{
 		{"float64", 6.66, "6.66"},

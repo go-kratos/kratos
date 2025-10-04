@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/json"
@@ -9,13 +10,16 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	kratoserrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/host"
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 var h = func(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +52,7 @@ func TestServeHTTP(t *testing.T) {
 	}
 	mux := NewServer(Listener(ln))
 	mux.HandleFunc("/index", h)
-	mux.Route("/errors").GET("/cause", func(ctx Context) error {
+	mux.Route("/errors").GET("/cause", func(Context) error {
 		return kratoserrors.BadRequest("xxx", "zzz").
 			WithMetadata(map[string]string{"foo": "bar"}).
 			WithCause(errors.New("error cause"))
@@ -86,7 +90,7 @@ func TestServer(t *testing.T) {
 	srv.HandleHeader("content-type", "application/grpc-web+json", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(testData{Path: r.RequestURI})
 	})
-	srv.Route("/errors").GET("/cause", func(ctx Context) error {
+	srv.Route("/errors").GET("/cause", func(Context) error {
 		return kratoserrors.BadRequest("xxx", "zzz").
 			WithMetadata(map[string]string{"foo": "bar"}).
 			WithCause(errors.New("error cause"))
@@ -153,8 +157,7 @@ func testHeader(t *testing.T, srv *Server) {
 	if err != nil {
 		t.Errorf("expected nil got %v", err)
 	}
-	reqURL := fmt.Sprintf(e.String() + "/index")
-	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
+	req, err := http.NewRequest(http.MethodGet, e.String()+"/index", nil)
 	if err != nil {
 		t.Errorf("expected nil got %v", err)
 	}
@@ -199,7 +202,7 @@ func testClient(t *testing.T, srv *Server) {
 	defer client.Close()
 	for _, test := range tests {
 		var res testData
-		reqURL := fmt.Sprintf(e.String() + test.path)
+		reqURL := e.String() + test.path
 		req, err := http.NewRequest(test.method, reqURL, nil)
 		if err != nil {
 			t.Fatal(err)
@@ -308,13 +311,9 @@ func TestTimeout(t *testing.T) {
 	}
 }
 
-func TestLogger(t *testing.T) {
-	// todo
-}
-
 func TestRequestDecoder(t *testing.T) {
 	o := &Server{}
-	v := func(*http.Request, interface{}) error { return nil }
+	v := func(*http.Request, any) error { return nil }
 	RequestDecoder(v)(o)
 	if o.decBody == nil {
 		t.Errorf("expected nil got %v", o.decBody)
@@ -323,7 +322,7 @@ func TestRequestDecoder(t *testing.T) {
 
 func TestResponseEncoder(t *testing.T) {
 	o := &Server{}
-	v := func(http.ResponseWriter, *http.Request, interface{}) error { return nil }
+	v := func(http.ResponseWriter, *http.Request, any) error { return nil }
 	ResponseEncoder(v)(o)
 	if o.enc == nil {
 		t.Errorf("expected nil got %v", o.enc)
@@ -370,4 +369,119 @@ func TestListener(t *testing.T) {
 	if e, err := s.Endpoint(); err != nil || e == nil {
 		t.Errorf("expected not empty")
 	}
+}
+
+func TestNotFoundHandler(t *testing.T) {
+	mux := http.NewServeMux()
+	srv := NewServer(NotFoundHandler(mux))
+	if !reflect.DeepEqual(srv.router.NotFoundHandler, mux) {
+		t.Errorf("expected %v got %v", mux, srv.router.NotFoundHandler)
+	}
+}
+
+func TestMethodNotAllowedHandler(t *testing.T) {
+	mux := http.NewServeMux()
+	srv := NewServer(MethodNotAllowedHandler(mux))
+	if !reflect.DeepEqual(srv.router.MethodNotAllowedHandler, mux) {
+		t.Errorf("expected %v got %v", mux, srv.router.MethodNotAllowedHandler)
+	}
+}
+
+func TestStop(t *testing.T) {
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	defer cancel()
+
+	tests := []struct {
+		name          string
+		sleep         time.Duration
+		ctx           context.Context
+		cancel        context.CancelFunc
+		wantForceStop bool
+	}{
+		{
+			name:          "normal",
+			sleep:         0,
+			ctx:           context.Background(),
+			cancel:        func() {},
+			wantForceStop: false,
+		},
+		{
+			name:          "timeout",
+			sleep:         2 * time.Second,
+			ctx:           timeoutCtx,
+			cancel:        cancel,
+			wantForceStop: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			old := log.GetLogger()
+			defer log.SetLogger(old)
+
+			// Create a logger to capture logs
+			var logs safeBytesBuffer
+			log.SetLogger(log.NewStdLogger(&logs))
+
+			testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				t := time.NewTimer(tt.sleep)
+				defer t.Stop()
+				select {
+				case <-t.C:
+				case <-r.Context().Done():
+				}
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer testServer.Close()
+
+			go func() {
+				resp, err := http.Get(testServer.URL)
+				if err != nil {
+					return
+				}
+				_ = resp.Body.Close()
+			}()
+
+			time.Sleep(100 * time.Millisecond)
+
+			s := &Server{
+				Server: testServer.Config,
+			}
+
+			tt.cancel()
+			err := s.Stop(tt.ctx)
+			if err != nil {
+				t.Errorf("Expected no error, got %v", err)
+				return
+			}
+
+			// Check if the stop was forced or graceful
+			if tt.wantForceStop {
+				if !strings.Contains(logs.String(), "force stop") {
+					t.Errorf("Expected force stop\n%s", logs.String())
+				}
+			} else {
+				if strings.Contains(logs.String(), "force stop") {
+					t.Errorf("Expected graceful stop\n%s", logs.String())
+				}
+			}
+		})
+	}
+}
+
+type safeBytesBuffer struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (b *safeBytesBuffer) Write(p []byte) (n int, err error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.Write(p)
+}
+
+func (b *safeBytesBuffer) String() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.String()
 }

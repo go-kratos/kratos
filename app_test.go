@@ -19,7 +19,7 @@ type mockRegistry struct {
 	service map[string]*registry.ServiceInstance
 }
 
-func (r *mockRegistry) Register(ctx context.Context, service *registry.ServiceInstance) error {
+func (r *mockRegistry) Register(_ context.Context, service *registry.ServiceInstance) error {
 	if service == nil || service.ID == "" {
 		return errors.New("no service id")
 	}
@@ -30,7 +30,7 @@ func (r *mockRegistry) Register(ctx context.Context, service *registry.ServiceIn
 }
 
 // Deregister the registration.
-func (r *mockRegistry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
+func (r *mockRegistry) Deregister(_ context.Context, service *registry.ServiceInstance) error {
 	r.lk.Lock()
 	defer r.lk.Unlock()
 	if r.service[service.ID] == nil {
@@ -282,4 +282,19 @@ func TestApp_Context(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestApp_ContextCanceled(t *testing.T) {
+	ctx, stop := context.WithCancel(context.Background())
+	stopFn := func(ctx context.Context) error {
+		select {
+		case <-ctx.Done():
+			t.Fatal("context should not be done yet")
+		default:
+		}
+		return nil
+	}
+	app := New(Context(ctx), Server(&mockServer{stopFn: stopFn}), StopTimeout(time.Hour))
+	time.AfterFunc(time.Millisecond*10, stop)
+	_ = app.Run()
 }

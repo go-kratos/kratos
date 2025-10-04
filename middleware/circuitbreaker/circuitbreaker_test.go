@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/go-kratos/aegis/circuitbreaker"
 	kratoserrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/internal/group"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -46,8 +47,8 @@ func (c *circuitBreakerMock) MarkFailed()  {}
 
 func Test_WithGroup(t *testing.T) {
 	o := options{
-		group: group.NewGroup(func() interface{} {
-			return ""
+		group: group.NewGroup(func() circuitbreaker.CircuitBreaker {
+			return &circuitBreakerMock{}
 		}),
 	}
 
@@ -57,18 +58,18 @@ func Test_WithGroup(t *testing.T) {
 	}
 }
 
-func Test_Server(t *testing.T) {
-	nextValid := func(ctx context.Context, req interface{}) (interface{}, error) {
+func TestServer(_ *testing.T) {
+	nextValid := func(context.Context, any) (any, error) {
 		return "Hello valid", nil
 	}
-	nextInvalid := func(ctx context.Context, req interface{}) (interface{}, error) {
+	nextInvalid := func(context.Context, any) (any, error) {
 		return nil, kratoserrors.InternalServer("", "")
 	}
 
 	ctx := transport.NewClientContext(context.Background(), &transportMock{})
 
 	_, _ = Client(func(o *options) {
-		o.group = group.NewGroup(func() interface{} {
+		o.group = group.NewGroup(func() circuitbreaker.CircuitBreaker {
 			return &circuitBreakerMock{err: errors.New("circuitbreaker error")}
 		})
 	})(nextValid)(ctx, nil)

@@ -6,6 +6,8 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
+const name = "direct"
+
 func init() {
 	resolver.Register(NewBuilder())
 }
@@ -20,7 +22,7 @@ func NewBuilder() resolver.Builder {
 	return &directBuilder{}
 }
 
-func (d *directBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
+func (d *directBuilder) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (resolver.Resolver, error) {
 	addrs := make([]resolver.Address, 0)
 	for _, addr := range strings.Split(strings.TrimPrefix(target.URL.Path, "/"), ",") {
 		addrs = append(addrs, resolver.Address{Addr: addr})
@@ -35,5 +37,5 @@ func (d *directBuilder) Build(target resolver.Target, cc resolver.ClientConn, op
 }
 
 func (d *directBuilder) Scheme() string {
-	return "direct"
+	return name
 }

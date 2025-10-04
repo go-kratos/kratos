@@ -29,7 +29,7 @@ func WithPropagator(propagator propagation.TextMapPropagator) Option {
 }
 
 // WithTracerProvider with tracer provider.
-// Deprecated: use otel.SetTracerProvider(provider) instead.
+// By default, it uses the global provider that is set by otel.SetTracerProvider(provider).
 func WithTracerProvider(provider trace.TracerProvider) Option {
 	return func(opts *options) {
 		opts.tracerProvider = provider
@@ -47,7 +47,7 @@ func WithTracerName(tracerName string) Option {
 func Server(opts ...Option) middleware.Middleware {
 	tracer := NewTracer(trace.SpanKindServer, opts...)
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, req any) (reply any, err error) {
 			if tr, ok := transport.FromServerContext(ctx); ok {
 				var span trace.Span
 				ctx, span = tracer.Start(ctx, tr.Operation(), tr.RequestHeader())
@@ -63,7 +63,7 @@ func Server(opts ...Option) middleware.Middleware {
 func Client(opts ...Option) middleware.Middleware {
 	tracer := NewTracer(trace.SpanKindClient, opts...)
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, req any) (reply any, err error) {
 			if tr, ok := transport.FromClientContext(ctx); ok {
 				var span trace.Span
 				ctx, span = tracer.Start(ctx, tr.Operation(), tr.RequestHeader())
@@ -77,7 +77,7 @@ func Client(opts ...Option) middleware.Middleware {
 
 // TraceID returns a traceid valuer.
 func TraceID() log.Valuer {
-	return func(ctx context.Context) interface{} {
+	return func(ctx context.Context) any {
 		if span := trace.SpanContextFromContext(ctx); span.HasTraceID() {
 			return span.TraceID().String()
 		}
@@ -87,7 +87,7 @@ func TraceID() log.Valuer {
 
 // SpanID returns a spanid valuer.
 func SpanID() log.Valuer {
-	return func(ctx context.Context) interface{} {
+	return func(ctx context.Context) any {
 		if span := trace.SpanContextFromContext(ctx); span.HasSpanID() {
 			return span.SpanID().String()
 		}

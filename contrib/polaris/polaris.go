@@ -16,6 +16,7 @@ type Polaris struct {
 	registry  polaris.ProviderAPI
 	discovery polaris.ConsumerAPI
 	namespace string
+	service   string
 }
 
 // Option is polaris option.
@@ -25,6 +26,13 @@ type Option func(o *Polaris)
 func WithNamespace(ns string) Option {
 	return func(o *Polaris) {
 		o.namespace = ns
+	}
+}
+
+// WithService set the current service name
+func WithService(service string) Option {
+	return func(o *Polaris) {
+		o.service = service
 	}
 }
 
@@ -75,5 +83,19 @@ func (p *Polaris) Registry(opts ...RegistryOption) (r *Registry) {
 		opt:      op,
 		provider: p.registry,
 		consumer: p.discovery,
+	}
+}
+
+func (p *Polaris) Limiter(opts ...LimiterOption) (r Limiter) {
+	op := limiterOptions{
+		namespace: p.namespace,
+		service:   p.service,
+	}
+	for _, option := range opts {
+		option(&op)
+	}
+	return Limiter{
+		limitAPI: p.limit,
+		opts:     op,
 	}
 }

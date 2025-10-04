@@ -6,13 +6,14 @@ import (
 	"testing"
 
 	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 
 	"github.com/go-kratos/kratos/v2/internal/testdata/binding"
 )
 
-func Test_NewTracer(t *testing.T) {
+func TestNewTracer(t *testing.T) {
 	tracer := NewTracer(trace.SpanKindClient, func(o *options) {
-		o.tracerProvider = trace.NewNoopTracerProvider()
+		o.tracerProvider = noop.NewTracerProvider()
 	})
 
 	if tracer.kind != trace.SpanKindClient {
@@ -25,15 +26,15 @@ func Test_NewTracer(t *testing.T) {
 		}
 	}()
 	_ = NewTracer(666, func(o *options) {
-		o.tracerProvider = trace.NewNoopTracerProvider()
+		o.tracerProvider = noop.NewTracerProvider()
 	})
 }
 
-func Test_Tracer_End(t *testing.T) {
+func TestTracer_End(_ *testing.T) {
 	tracer := NewTracer(trace.SpanKindClient, func(o *options) {
-		o.tracerProvider = trace.NewNoopTracerProvider()
+		o.tracerProvider = noop.NewTracerProvider()
 	})
-	ctx, span := trace.NewNoopTracerProvider().Tracer("noop").Start(context.Background(), "noopSpan")
+	ctx, span := noop.NewTracerProvider().Tracer("noop").Start(context.Background(), "noopSpan")
 
 	// Handle with error case
 	tracer.End(ctx, span, nil, errors.New("dummy error"))
@@ -45,11 +46,11 @@ func Test_Tracer_End(t *testing.T) {
 
 	// Handle the trace KindServer
 	tracer = NewTracer(trace.SpanKindServer, func(o *options) {
-		o.tracerProvider = trace.NewNoopTracerProvider()
+		o.tracerProvider = noop.NewTracerProvider()
 	})
 	tracer.End(ctx, span, m, nil)
 	tracer = NewTracer(trace.SpanKindClient, func(o *options) {
-		o.tracerProvider = trace.NewNoopTracerProvider()
+		o.tracerProvider = noop.NewTracerProvider()
 	})
 	tracer.End(ctx, span, m, nil)
 }

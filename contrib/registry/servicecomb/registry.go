@@ -99,9 +99,9 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 		Environment: env,
 		Framework:   fw,
 	}
-	// 先尝试创建微服务
+	// attempt to register the microservice
 	sid, err := r.cli.RegisterService(ms)
-	// 若失败，说明服务可能已注册
+	// if it fails, it may indicate that the service is already registered
 	if err != nil {
 		registryException, ok := err.(*sc.RegistryException)
 		if !ok {
@@ -112,7 +112,7 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 		if parseErr != nil {
 			return parseErr
 		}
-		// 若错误码显示服务未注册，直接返回
+		// if the error code is not specific to the service already existing, return the current error
 		if svcErr.Code != discovery.ErrServiceAlreadyExists {
 			return err
 		}
@@ -121,12 +121,9 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 			return err
 		}
 	} else {
-		// 保存当前版本微服务对应的sid
+		// save the service ID for the newly registered service
 		curServiceID = sid
 	}
-	props := make(map[string]string)
-	props[appIDKey] = appID
-	props[envKey] = env
 	if svcIns.ID == "" {
 		var id uuid.UUID
 		id, err = uuid.NewV4()
@@ -134,6 +131,10 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 			return err
 		}
 		svcIns.ID = id.String()
+	}
+	props := map[string]string{
+		appIDKey: appID,
+		envKey:   env,
 	}
 	_, err = r.cli.RegisterMicroServiceInstance(&discovery.MicroServiceInstance{
 		InstanceId: svcIns.ID,
@@ -146,8 +147,9 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 	if err != nil {
 		return err
 	}
-	ticker := time.NewTicker(30 * time.Second)
 	go func() {
+		ticker := time.NewTicker(30 * time.Second)
+		defer ticker.Stop()
 		for {
 			<-ticker.C
 			_, err = r.cli.Heartbeat(sid, svcIns.ID)

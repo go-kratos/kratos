@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+
+	"github.com/go-kratos/aegis/subset"
 	"github.com/go-kratos/kratos/v2/internal/endpoint"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
-
-	"github.com/go-kratos/aegis/subset"
-	"github.com/google/uuid"
 )
 
 // Target is resolver target
@@ -47,7 +47,7 @@ type resolver struct {
 
 	target      *Target
 	watcher     registry.Watcher
-	selecterKey string
+	selectorKey string
 	subsetSize  int
 
 	insecure bool
@@ -56,7 +56,7 @@ type resolver struct {
 func newResolver(ctx context.Context, discovery registry.Discovery, target *Target,
 	rebalancer selector.Rebalancer, block, insecure bool, subsetSize int,
 ) (*resolver, error) {
-	// this is new resovler
+	// this is new resolver
 	watcher, err := discovery.Watch(ctx, target.Endpoint)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 		watcher:     watcher,
 		rebalancer:  rebalancer,
 		insecure:    insecure,
-		selecterKey: uuid.New().String(),
+		selectorKey: uuid.New().String(),
 		subsetSize:  subsetSize,
 	}
 	if block {
@@ -133,9 +133,9 @@ func (r *resolver) update(services []*registry.ServiceInstance) bool {
 		filtered = append(filtered, ins)
 	}
 	if r.subsetSize != 0 {
-		filtered = subset.Subset(r.selecterKey, filtered, r.subsetSize)
+		filtered = subset.Subset(r.selectorKey, filtered, r.subsetSize)
 	}
-	nodes := make([]selector.Node, 0)
+	nodes := make([]selector.Node, 0, len(filtered))
 	for _, ins := range filtered {
 		ept, _ := endpoint.ParseEndpoint(ins.Endpoints, endpoint.Scheme("http", !r.insecure))
 		nodes = append(nodes, selector.NewNode("http", ept, ins))

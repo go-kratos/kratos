@@ -22,7 +22,7 @@ type Node struct {
 	selector.Node
 
 	// last lastPick timestamp
-	lastPick int64
+	lastPick atomic.Int64
 }
 
 // Builder is direct node builder
@@ -30,13 +30,13 @@ type Builder struct{}
 
 // Build create node
 func (*Builder) Build(n selector.Node) selector.WeightedNode {
-	return &Node{Node: n, lastPick: 0}
+	return &Node{Node: n, lastPick: atomic.Int64{}}
 }
 
 func (n *Node) Pick() selector.DoneFunc {
 	now := time.Now().UnixNano()
-	atomic.StoreInt64(&n.lastPick, now)
-	return func(ctx context.Context, di selector.DoneInfo) {}
+	n.lastPick.Store(now)
+	return func(context.Context, selector.DoneInfo) {}
 }
 
 // Weight is node effective weight
@@ -48,7 +48,7 @@ func (n *Node) Weight() float64 {
 }
 
 func (n *Node) PickElapsed() time.Duration {
-	return time.Duration(time.Now().UnixNano() - atomic.LoadInt64(&n.lastPick))
+	return time.Duration(time.Now().UnixNano() - n.lastPick.Load())
 }
 
 func (n *Node) Raw() selector.Node {

@@ -12,9 +12,11 @@ type validator interface {
 }
 
 // Validator is a validator middleware.
+//
+// Deprecated: use github.com/go-kratos/kratos/contrib/middleware/validate/v2.ProtoValidate instead.
 func Validator() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, req any) (reply any, err error) {
 			if v, ok := req.(validator); ok {
 				if err := v.Validate(); err != nil {
 					return nil, errors.BadRequest("VALIDATOR", err.Error()).WithCause(err)

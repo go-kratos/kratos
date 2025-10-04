@@ -9,8 +9,9 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
-	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/peer"
+
+	"go.opentelemetry.io/otel/trace/noop"
 
 	"github.com/go-kratos/kratos/v2/internal/testdata/binding"
 	"github.com/go-kratos/kratos/v2/metadata"
@@ -178,9 +179,9 @@ func Test_parseTarget(t *testing.T) {
 	}
 }
 
-func Test_setServerSpan(t *testing.T) {
+func TestSetServerSpan(_ *testing.T) {
 	ctx := context.Background()
-	_, span := trace.NewNoopTracerProvider().Tracer("Tracer").Start(ctx, "Spanname")
+	_, span := noop.NewTracerProvider().Tracer("Tracer").Start(ctx, "Spanname")
 
 	// Handle without Transport context
 	setServerSpan(ctx, span, nil)
@@ -211,9 +212,9 @@ func Test_setServerSpan(t *testing.T) {
 	setServerSpan(ctx, span, m)
 }
 
-func Test_setClientSpan(t *testing.T) {
+func TestSetClientSpan(_ *testing.T) {
 	ctx := context.Background()
-	_, span := trace.NewNoopTracerProvider().Tracer("Tracer").Start(ctx, "Spanname")
+	_, span := noop.NewTracerProvider().Tracer("Tracer").Start(ctx, "Spanname")
 
 	// Handle without Transport context
 	setClientSpan(ctx, span, nil)

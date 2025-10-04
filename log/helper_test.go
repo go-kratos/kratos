@@ -7,8 +7,13 @@ import (
 	"testing"
 )
 
-func TestHelper(t *testing.T) {
-	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
+func TestHelper(_ *testing.T) {
+	logger := With(
+		DefaultLogger,
+		"ts", DefaultTimestamp,
+		"caller", DefaultCaller,
+		"module", "test",
+	)
 	log := NewHelper(logger)
 
 	log.Log(LevelDebug, "msg", "test debug")
@@ -19,16 +24,22 @@ func TestHelper(t *testing.T) {
 	log.Warn("test warn")
 	log.Warnf("test %s", "warn")
 	log.Warnw("log", "test warn")
+
+	subLogger := With(log.Logger(),
+		"module", "sub",
+	)
+	subLog := NewHelper(subLogger)
+	subLog.Infof("sub logger test with level %s", "info")
 }
 
-func TestHelperWithMsgKey(t *testing.T) {
+func TestHelperWithMsgKey(_ *testing.T) {
 	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
 	log := NewHelper(logger, WithMessageKey("message"))
 	log.Debugf("test %s", "debug")
 	log.Debugw("log", "test debug")
 }
 
-func TestHelperLevel(t *testing.T) {
+func TestHelperLevel(_ *testing.T) {
 	log := NewHelper(DefaultLogger)
 	log.Debug("test debug")
 	log.Info("test info")
@@ -46,8 +57,22 @@ func BenchmarkHelperPrint(b *testing.B) {
 	}
 }
 
+func BenchmarkHelperPrintFilterLevel(b *testing.B) {
+	log := NewHelper(NewFilter(NewStdLogger(io.Discard), FilterLevel(LevelDebug)))
+	for i := 0; i < b.N; i++ {
+		log.Debug("test")
+	}
+}
+
 func BenchmarkHelperPrintf(b *testing.B) {
 	log := NewHelper(NewStdLogger(io.Discard))
+	for i := 0; i < b.N; i++ {
+		log.Debugf("%s", "test")
+	}
+}
+
+func BenchmarkHelperPrintfFilterLevel(b *testing.B) {
+	log := NewHelper(NewFilter(NewStdLogger(io.Discard), FilterLevel(LevelInfo)))
 	for i := 0; i < b.N; i++ {
 		log.Debugf("%s", "test")
 	}
@@ -62,7 +87,7 @@ func BenchmarkHelperPrintw(b *testing.B) {
 
 type traceKey struct{}
 
-func TestContext(t *testing.T) {
+func TestContext(_ *testing.T) {
 	logger := With(NewStdLogger(os.Stdout),
 		"trace", Trace(),
 	)
@@ -72,7 +97,7 @@ func TestContext(t *testing.T) {
 }
 
 func Trace() Valuer {
-	return func(ctx context.Context) interface{} {
+	return func(ctx context.Context) any {
 		s, ok := ctx.Value(traceKey{}).(string)
 		if !ok {
 			return nil

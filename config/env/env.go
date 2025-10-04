@@ -15,38 +15,33 @@ func NewSource(prefixes ...string) config.Source {
 	return &env{prefixes: prefixes}
 }
 
-func (e *env) Load() (kv []*config.KeyValue, err error) {
+func (e *env) Load() (kvs []*config.KeyValue, err error) {
 	return e.load(os.Environ()), nil
 }
 
 func (e *env) load(envs []string) []*config.KeyValue {
-	var kv []*config.KeyValue
+	var kvs []*config.KeyValue
 	for _, env := range envs {
-		var k, v string
-		subs := strings.SplitN(env, "=", 2) //nolint:gomnd
-		k = subs[0]
-		if len(subs) > 1 {
-			v = subs[1]
+		k, v, _ := strings.Cut(env, "=")
+		if k == "" {
+			continue
 		}
-
 		if len(e.prefixes) > 0 {
-			p, ok := matchPrefix(e.prefixes, k)
-			if !ok || len(p) == len(k) {
+			prefix, ok := matchPrefix(e.prefixes, k)
+			if !ok || k == prefix {
 				continue
 			}
-			// trim prefix
-			k = strings.TrimPrefix(k, p)
+			k = strings.TrimPrefix(k, prefix)
 			k = strings.TrimPrefix(k, "_")
 		}
-
-		if len(k) != 0 {
-			kv = append(kv, &config.KeyValue{
+		if k != "" {
+			kvs = append(kvs, &config.KeyValue{
 				Key:   k,
 				Value: []byte(v),
 			})
 		}
 	}
-	return kv
+	return kvs
 }
 
 func (e *env) Watch() (config.Watcher, error) {

@@ -60,3 +60,43 @@ func Test_serviceName(t *testing.T) {
 		})
 	}
 }
+
+func Test_parametersName(t *testing.T) {
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "parametersName on not nested",
+			args: args{
+				name: "MessageResponse",
+			},
+			want: "MessageResponse",
+		},
+		{
+			name: "parametersName on One layer of nesting",
+			args: args{
+				name: "Message.Response",
+			},
+			want: "Message_Response",
+		},
+		{
+			name: "parametersName on Two layer of nesting",
+			args: args{
+				name: "Message.Message2.Response",
+			},
+			want: "Message_Message2_Response",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := parametersName(tt.args.name); got != tt.want {
+				t.Errorf("parametersName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

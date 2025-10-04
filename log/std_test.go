@@ -1,8 +1,13 @@
 package log
 
-import "testing"
+import (
+	"bytes"
+	"testing"
 
-func TestStdLogger(t *testing.T) {
+	"golang.org/x/sync/errgroup"
+)
+
+func TestStdLogger(_ *testing.T) {
 	logger := DefaultLogger
 	logger = With(logger, "caller", DefaultCaller, "ts", DefaultTimestamp)
 
@@ -14,4 +19,22 @@ func TestStdLogger(t *testing.T) {
 
 	logger2 := DefaultLogger
 	_ = logger2.Log(LevelDebug)
+}
+
+func TestStdLogger_Log(t *testing.T) {
+	var b bytes.Buffer
+	logger := NewStdLogger(&b)
+
+	var eg errgroup.Group
+	eg.Go(func() error { return logger.Log(LevelInfo, "msg", "a", "k", "v") })
+	eg.Go(func() error { return logger.Log(LevelInfo, "msg", "a", "k", "v") })
+
+	err := eg.Wait()
+	if err != nil {
+		t.Fatalf("log error: %v", err)
+	}
+
+	if s := b.String(); s != "INFO msg=a k=v\nINFO msg=a k=v\n" {
+		t.Fatalf("log not match: %q", s)
+	}
 }

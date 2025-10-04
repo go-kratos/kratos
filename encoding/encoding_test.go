@@ -2,18 +2,17 @@ package encoding
 
 import (
 	"encoding/xml"
-	"fmt"
 	"runtime/debug"
 	"testing"
 )
 
 type codec struct{}
 
-func (c codec) Marshal(v interface{}) ([]byte, error) {
+func (c codec) Marshal(_ any) ([]byte, error) {
 	panic("implement me")
 }
 
-func (c codec) Unmarshal(data []byte, v interface{}) error {
+func (c codec) Unmarshal(_ []byte, _ any) error {
 	panic("implement me")
 }
 
@@ -24,11 +23,11 @@ func (c codec) Name() string {
 // codec2 is a Codec implementation with xml.
 type codec2 struct{}
 
-func (codec2) Marshal(v interface{}) ([]byte, error) {
+func (codec2) Marshal(v any) ([]byte, error) {
 	return xml.Marshal(v)
 }
 
-func (codec2) Unmarshal(data []byte, v interface{}) error {
+func (codec2) Unmarshal(data []byte, v any) error {
 	return xml.Unmarshal(data, v)
 }
 
@@ -40,7 +39,7 @@ func TestRegisterCodec(t *testing.T) {
 	f := func() { RegisterCodec(nil) }
 	funcDidPanic, panicValue, _ := didPanic(f)
 	if !funcDidPanic {
-		t.Fatalf(fmt.Sprintf("func should panic\n\tPanic value:\t%#v", panicValue))
+		t.Fatalf("func should panic\n\tPanic value:\t%#v", panicValue)
 	}
 	if panicValue != "cannot register a nil Codec" {
 		t.Fatalf("panic error got %s want cannot register a nil Codec", panicValue)
@@ -50,7 +49,7 @@ func TestRegisterCodec(t *testing.T) {
 	}
 	funcDidPanic, panicValue, _ = didPanic(f)
 	if !funcDidPanic {
-		t.Fatalf(fmt.Sprintf("func should panic\n\tPanic value:\t%#v", panicValue))
+		t.Fatalf("func should panic\n\tPanic value:\t%#v", panicValue)
 	}
 	if panicValue != "cannot register Codec with empty string result for Name()" {
 		t.Fatalf("panic error got %s want cannot register Codec with empty string result for Name()", panicValue)
@@ -68,9 +67,9 @@ func TestRegisterCodec(t *testing.T) {
 type PanicTestFunc func()
 
 // didPanic returns true if the function passed to it panics. Otherwise, it returns false.
-func didPanic(f PanicTestFunc) (bool, interface{}, string) {
+func didPanic(f PanicTestFunc) (bool, any, string) {
 	didPanic := false
-	var message interface{}
+	var message any
 	var stack string
 	func() {
 		defer func() {

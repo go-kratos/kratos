@@ -6,13 +6,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
-
 	"github.com/google/uuid"
 	"google.golang.org/grpc/resolver"
+
+	"github.com/go-kratos/kratos/v2/registry"
 )
 
 const name = "discovery"
+
+var ErrWatcherCreateTimeout = errors.New("discovery create watcher overtime")
 
 // Option is builder option.
 type Option func(o *builder)
@@ -31,36 +33,44 @@ func WithInsecure(insecure bool) Option {
 	}
 }
 
-// WithInsecure with isSecure option.
+// WithSubset with subset size.
 func WithSubset(size int) Option {
 	return func(b *builder) {
 		b.subsetSize = size
 	}
 }
 
+// Deprecated: please use PrintDebugLog
 // DisableDebugLog disables update instances log.
 func DisableDebugLog() Option {
 	return func(b *builder) {
-		b.debugLogDisabled = true
+		b.debugLog = false
+	}
+}
+
+// PrintDebugLog print grpc resolver watch service log
+func PrintDebugLog(p bool) Option {
+	return func(b *builder) {
+		b.debugLog = p
 	}
 }
 
 type builder struct {
-	discoverer       registry.Discovery
-	timeout          time.Duration
-	insecure         bool
-	subsetSize       int
-	debugLogDisabled bool
+	discoverer registry.Discovery
+	timeout    time.Duration
+	insecure   bool
+	subsetSize int
+	debugLog   bool
 }
 
 // NewBuilder creates a builder which is used to factory registry resolvers.
 func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 	b := &builder{
-		discoverer:       d,
-		timeout:          time.Second * 10,
-		insecure:         false,
-		debugLogDisabled: false,
-		subsetSize:       25,
+		discoverer: d,
+		timeout:    time.Second * 10,
+		insecure:   false,
+		debugLog:   true,
+		subsetSize: 25,
 	}
 	for _, o := range opts {
 		o(b)
@@ -68,7 +78,7 @@ func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 	return b
 }
 
-func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
+func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (resolver.Resolver, error) {
 	watchRes := &struct {
 		err error
 		w   registry.Watcher
@@ -84,11 +94,16 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 	}()
 
 	var err error
-	select {
-	case <-done:
+	if b.timeout > 0 {
+		select {
+		case <-done:
+			err = watchRes.err
+		case <-time.After(b.timeout):
+			err = ErrWatcherCreateTimeout
+		}
+	} else {
+		<-done
 		err = watchRes.err
-	case <-time.After(b.timeout):
-		err = errors.New("discovery create watcher overtime")
 	}
 	if err != nil {
 		cancel()
@@ -96,14 +111,14 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 	}
 
 	r := &discoveryResolver{
-		w:                watchRes.w,
-		cc:               cc,
-		ctx:              ctx,
-		cancel:           cancel,
-		insecure:         b.insecure,
-		debugLogDisabled: b.debugLogDisabled,
-		subsetSize:       b.subsetSize,
-		selecterKey:      uuid.New().String(),
+		w:           watchRes.w,
+		cc:          cc,
+		ctx:         ctx,
+		cancel:      cancel,
+		insecure:    b.insecure,
+		debugLog:    b.debugLog,
+		subsetSize:  b.subsetSize,
+		selectorKey: uuid.New().String(),
 	}
 	go r.watch()
 	return r, nil

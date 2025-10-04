@@ -19,9 +19,9 @@ const (
 	statusOutOfService = "OUT_OF_SERVICE"
 	heartbeatRetry     = 3
 	maxIdleConns       = 100
-	heartbeatTime      = 10
-	httpTimeout        = 3
-	refreshTime        = 30
+	heartbeatTime      = 10 * time.Second
+	httpTimeout        = 3 * time.Second
+	refreshTime        = 30 * time.Second
 )
 
 type Endpoint struct {
@@ -139,8 +139,8 @@ func NewClient(urls []string, opts ...ClientOption) *Client {
 		urls:              urls,
 		eurekaPath:        "eureka/v2",
 		maxRetry:          len(urls),
-		heartbeatInterval: time.Second * heartbeatTime,
-		client:            &http.Client{Transport: tr, Timeout: time.Second * httpTimeout},
+		heartbeatInterval: heartbeatTime,
+		client:            &http.Client{Transport: tr, Timeout: httpTimeout},
 		keepalive:         make(map[string]chan struct{}),
 	}
 
@@ -292,10 +292,10 @@ func (e *Client) pickServer(currentTimes int) string {
 }
 
 func (e *Client) shuffle() {
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(e.urls), func(i, j int) {
-		e.urls[i], e.urls[j] = e.urls[j], e.urls[i]
-	})
+	rand.New(rand.NewSource(time.Now().UnixNano())).
+		Shuffle(len(e.urls), func(i, j int) {
+			e.urls[i], e.urls[j] = e.urls[j], e.urls[i]
+		})
 }
 
 func (e *Client) buildAPI(currentTimes int, params ...string) string {
@@ -307,7 +307,7 @@ func (e *Client) buildAPI(currentTimes int, params ...string) string {
 	return strings.Join(params, "/")
 }
 
-func (e *Client) request(ctx context.Context, method string, params []string, input io.Reader, output interface{}, i int) (bool, error) {
+func (e *Client) request(ctx context.Context, method string, params []string, input io.Reader, output any, i int) (bool, error) {
 	request, err := http.NewRequestWithContext(ctx, method, e.buildAPI(i, params...), input)
 	if err != nil {
 		return false, err
@@ -342,7 +342,7 @@ func (e *Client) request(ctx context.Context, method string, params []string, in
 	return false, nil
 }
 
-func (e *Client) do(ctx context.Context, method string, params []string, input io.Reader, output interface{}) error {
+func (e *Client) do(ctx context.Context, method string, params []string, input io.Reader, output any) error {
 	for i := 0; i < e.maxRetry; i++ {
 		retry, err := e.request(ctx, method, params, input, output, i)
 		if retry {

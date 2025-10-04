@@ -17,6 +17,8 @@ func (hc headerCarrier) Get(key string) string { return http.Header(hc).Get(key)
 
 func (hc headerCarrier) Set(key string, value string) { http.Header(hc).Set(key, value) }
 
+func (hc headerCarrier) Add(key string, value string) { http.Header(hc).Add(key, value) }
+
 // Keys lists the keys stored in this carrier.
 func (hc headerCarrier) Keys() []string {
 	keys := make([]string, 0, len(hc))
@@ -24,6 +26,11 @@ func (hc headerCarrier) Keys() []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// Values returns a slice value associated with the passed key.
+func (hc headerCarrier) Values(key string) []string {
+	return http.Header(hc).Values(key)
 }
 
 type testTransport struct{ header headerCarrier }
@@ -46,7 +53,7 @@ var (
 )
 
 func TestSever(t *testing.T) {
-	hs := func(ctx context.Context, in interface{}) (interface{}, error) {
+	hs := func(ctx context.Context, in any) (any, error) {
 		md, ok := metadata.FromServerContext(ctx)
 		if !ok {
 			return nil, errors.New("no md")
@@ -79,7 +86,7 @@ func TestSever(t *testing.T) {
 }
 
 func TestClient(t *testing.T) {
-	hs := func(ctx context.Context, in interface{}) (interface{}, error) {
+	hs := func(ctx context.Context, in any) (any, error) {
 		tr, ok := transport.FromClientContext(ctx)
 		if !ok {
 			return nil, errors.New("no md")
@@ -123,11 +130,11 @@ func TestClient(t *testing.T) {
 
 func TestWithConstants(t *testing.T) {
 	md := metadata.Metadata{
-		constKey: constValue,
+		constKey: {constValue},
 	}
 	options := &options{
 		md: metadata.Metadata{
-			"override": "override",
+			"override": {"override"},
 		},
 	}
 

@@ -28,14 +28,14 @@ type Context interface {
 	Request() *http.Request
 	Response() http.ResponseWriter
 	Middleware(middleware.Handler) middleware.Handler
-	Bind(interface{}) error
-	BindVars(interface{}) error
-	BindQuery(interface{}) error
-	BindForm(interface{}) error
-	Returns(interface{}, error) error
-	Result(int, interface{}) error
-	JSON(int, interface{}) error
-	XML(int, interface{}) error
+	Bind(any) error
+	BindVars(any) error
+	BindQuery(any) error
+	BindForm(any) error
+	Returns(any, error) error
+	Result(int, any) error
+	JSON(int, any) error
+	XML(int, any) error
 	String(int, string) error
 	Blob(int, string, []byte) error
 	Stream(int, string, io.Reader) error
@@ -57,6 +57,7 @@ func (w *responseWriter) Write(data []byte) (int, error) {
 	w.w.WriteHeader(w.code)
 	return w.w.Write(data)
 }
+func (w *responseWriter) Unwrap() http.ResponseWriter { return w.w }
 
 type wrapper struct {
 	router *Router
@@ -96,29 +97,29 @@ func (c *wrapper) Middleware(h middleware.Handler) middleware.Handler {
 	}
 	return middleware.Chain(c.router.srv.middleware.Match(c.req.URL.Path)...)(h)
 }
-func (c *wrapper) Bind(v interface{}) error      { return c.router.srv.decBody(c.req, v) }
-func (c *wrapper) BindVars(v interface{}) error  { return c.router.srv.decVars(c.req, v) }
-func (c *wrapper) BindQuery(v interface{}) error { return c.router.srv.decQuery(c.req, v) }
-func (c *wrapper) BindForm(v interface{}) error  { return binding.BindForm(c.req, v) }
-func (c *wrapper) Returns(v interface{}, err error) error {
+func (c *wrapper) Bind(v any) error      { return c.router.srv.decBody(c.req, v) }
+func (c *wrapper) BindVars(v any) error  { return c.router.srv.decVars(c.req, v) }
+func (c *wrapper) BindQuery(v any) error { return c.router.srv.decQuery(c.req, v) }
+func (c *wrapper) BindForm(v any) error  { return binding.BindForm(c.req, v) }
+func (c *wrapper) Returns(v any, err error) error {
 	if err != nil {
 		return err
 	}
 	return c.router.srv.enc(&c.w, c.req, v)
 }
 
-func (c *wrapper) Result(code int, v interface{}) error {
+func (c *wrapper) Result(code int, v any) error {
 	c.w.WriteHeader(code)
 	return c.router.srv.enc(&c.w, c.req, v)
 }
 
-func (c *wrapper) JSON(code int, v interface{}) error {
+func (c *wrapper) JSON(code int, v any) error {
 	c.res.Header().Set("Content-Type", "application/json")
 	c.res.WriteHeader(code)
 	return json.NewEncoder(c.res).Encode(v)
 }
 
-func (c *wrapper) XML(code int, v interface{}) error {
+func (c *wrapper) XML(code int, v any) error {
 	c.res.Header().Set("Content-Type", "application/xml")
 	c.res.WriteHeader(code)
 	return xml.NewEncoder(c.res).Encode(v)
@@ -178,7 +179,7 @@ func (c *wrapper) Err() error {
 	return c.req.Context().Err()
 }
 
-func (c *wrapper) Value(key interface{}) interface{} {
+func (c *wrapper) Value(key any) any {
 	if c.req == nil {
 		return nil
 	}

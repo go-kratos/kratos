@@ -2,6 +2,7 @@ package zookeeper
 
 import (
 	"context"
+	"errors"
 	"path"
 	"time"
 
@@ -59,7 +60,7 @@ func New(conn *zk.Conn, opts ...Option) *Registry {
 	}
 }
 
-func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstance) error {
+func (r *Registry) Register(_ context.Context, service *registry.ServiceInstance) error {
 	var (
 		data []byte
 		err  error
@@ -100,8 +101,8 @@ func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInst
 }
 
 // GetService get services from zookeeper
-func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
-	instances, err, _ := r.group.Do(serviceName, func() (interface{}, error) {
+func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
+	instances, err, _ := r.group.Do(serviceName, func() (any, error) {
 		serviceNamePath := path.Join(r.opts.namespace, serviceName)
 		servicesID, _, err := r.conn.Children(serviceNamePath)
 		if err != nil {
@@ -143,7 +144,7 @@ func (r *Registry) ensureName(path string, data []byte, flags int32) error {
 	// fixes a race condition if the server crashes without using CreateProtectedEphemeralSequential()
 	if flags&zk.FlagEphemeral == zk.FlagEphemeral {
 		err = r.conn.Delete(path, stat.Version)
-		if err != nil && err != zk.ErrNoNode {
+		if err != nil && !errors.Is(err, zk.ErrNoNode) {
 			return err
 		}
 		exists = false

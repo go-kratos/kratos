@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -49,7 +49,7 @@ type Option func(*options)
 type options struct {
 	signingMethod jwt.SigningMethod
 	claims        func() jwt.Claims
-	tokenHeader   map[string]interface{}
+	tokenHeader   map[string]any
 }
 
 // WithSigningMethod with signing method option.
@@ -69,7 +69,7 @@ func WithClaims(f func() jwt.Claims) Option {
 }
 
 // WithTokenHeader withe customer tokenHeader for client side
-func WithTokenHeader(header map[string]interface{}) Option {
+func WithTokenHeader(header map[string]any) Option {
 	return func(o *options) {
 		o.tokenHeader = header
 	}
@@ -84,7 +84,7 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 		opt(o)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (interface{}, error) {
+		return func(ctx context.Context, req any) (any, error) {
 			if header, ok := transport.FromServerContext(ctx); ok {
 				if keyFunc == nil {
 					return nil, ErrMissingKeyFunc
@@ -104,18 +104,15 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 					tokenInfo, err = jwt.Parse(jwtToken, keyFunc)
 				}
 				if err != nil {
-					ve, ok := err.(*jwt.ValidationError)
-					if !ok {
-						return nil, errors.Unauthorized(reason, err.Error())
-					}
-					if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+					if errors.Is(err, jwt.ErrTokenMalformed) || errors.Is(err, jwt.ErrTokenUnverifiable) {
 						return nil, ErrTokenInvalid
 					}
-					if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+					if errors.Is(err, jwt.ErrTokenNotValidYet) || errors.Is(err, jwt.ErrTokenExpired) {
 						return nil, ErrTokenExpired
 					}
 					return nil, ErrTokenParseFail
 				}
+
 				if !tokenInfo.Valid {
 					return nil, ErrTokenInvalid
 				}
@@ -141,7 +138,7 @@ func Client(keyProvider jwt.Keyfunc, opts ...Option) middleware.Middleware {
 		opt(o)
 	}
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (interface{}, error) {
+		return func(ctx context.Context, req any) (any, error) {
 			if keyProvider == nil {
 				return nil, ErrNeedTokenProvider
 			}

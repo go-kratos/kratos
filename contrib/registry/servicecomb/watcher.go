@@ -1,8 +1,9 @@
 package servicecomb
 
 import (
+	"context"
+
 	"github.com/go-chassis/sc-client"
-	"golang.org/x/net/context"
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -15,7 +16,7 @@ type Watcher struct {
 }
 
 func newWatcher(_ context.Context, cli RegistryClient, serviceName string) (*Watcher, error) {
-	// 构建当前服务与目标服务之间的依赖关系，完成discovery
+	// establish dependency relationship between the current service and the target service for discovery
 	_, err := cli.FindMicroServiceInstances(curServiceID, appID, serviceName, "")
 	if err != nil {
 		return nil, err

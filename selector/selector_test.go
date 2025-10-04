@@ -37,7 +37,7 @@ func (n *mockWeightedNode) Weight() float64 {
 func (n *mockWeightedNode) Pick() DoneFunc {
 	now := time.Now().UnixNano()
 	atomic.StoreInt64(&n.lastPick, now)
-	return func(ctx context.Context, di DoneInfo) {}
+	return func(context.Context, DoneInfo) {}
 }
 
 // PickElapsed is time elapsed since the latest pick
@@ -71,7 +71,7 @@ func (b *mockBalancerBuilder) Build() Balancer {
 
 type mockBalancer struct{}
 
-func (b *mockBalancer) Pick(ctx context.Context, nodes []WeightedNode) (selected WeightedNode, done DoneFunc, err error) {
+func (b *mockBalancer) Pick(_ context.Context, nodes []WeightedNode) (selected WeightedNode, done DoneFunc, err error) {
 	if len(nodes) == 0 {
 		err = ErrNoAvailable
 		return
@@ -90,7 +90,7 @@ func (b *mockMustErrorBalancerBuilder) Build() Balancer {
 
 type mockMustErrorBalancer struct{}
 
-func (b *mockMustErrorBalancer) Pick(ctx context.Context, nodes []WeightedNode) (selected WeightedNode, done DoneFunc, err error) {
+func (b *mockMustErrorBalancer) Pick(_ context.Context, _ []WeightedNode) (selected WeightedNode, done DoneFunc, err error) {
 	return nil, nil, errNodeNotMatch
 }
 

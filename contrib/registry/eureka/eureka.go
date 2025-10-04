@@ -29,7 +29,7 @@ func NewAPI(ctx context.Context, client *Client, refreshInterval time.Duration) 
 	}
 
 	// it is required to broadcast for the first time
-	e.broadcast()
+	go e.broadcast()
 
 	go e.refresh(ctx)
 
@@ -58,9 +58,9 @@ func (e *API) broadcast() {
 	for _, subscriber := range e.subscribers {
 		go subscriber.callBack()
 	}
-	defer e.lock.Unlock()
 	e.lock.Lock()
 	e.allInstances = instances
+	e.lock.Unlock()
 }
 
 func (e *API) cacheAllInstances() map[string][]Instance {
@@ -106,12 +106,13 @@ func (e *API) Deregister(ctx context.Context, endpoints []Endpoint) error {
 
 func (e *API) Subscribe(serverName string, fn func()) error {
 	e.lock.Lock()
-	defer e.lock.Unlock()
 	appID := e.ToAppID(serverName)
 	e.subscribers[appID] = &subscriber{
 		appID:    appID,
 		callBack: fn,
 	}
+	e.lock.Unlock()
+	go e.broadcast()
 	return nil
 }
 
@@ -127,8 +128,8 @@ func (e *API) GetService(ctx context.Context, serverName string) []Instance {
 
 func (e *API) Unsubscribe(serverName string) {
 	e.lock.Lock()
-	defer e.lock.Unlock()
 	delete(e.subscribers, e.ToAppID(serverName))
+	e.lock.Unlock()
 }
 
 func (e *API) ToAppID(serverName string) string {
