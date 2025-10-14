@@ -42,7 +42,7 @@ type Client struct {
 	serviceChecks api.AgentServiceChecks
 	// tags custom consul tags
 	tags []string
-  
+
 	// used to control heartbeat
 	lock      sync.RWMutex
 	cancelers map[string]*canceler
@@ -154,7 +154,7 @@ func (c *Client) singleDCEntries(service, tag string, passingOnly bool, opts *ap
 }
 
 // Register register service instance to consul
-func (c *Client) Register(_ context.Context, svc *registry.ServiceInstance, enableHealthCheck bool, tags []string) error {
+func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, enableHealthCheck bool, tags []string) error {
 	addresses := make(map[string]api.ServiceAddress, len(svc.Endpoints))
 	checkAddresses := make([]string, 0, len(svc.Endpoints))
 	for _, endpoint := range svc.Endpoints {
