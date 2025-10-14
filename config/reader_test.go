@@ -16,14 +16,14 @@ func TestReader_Merge(t *testing.T) {
 		ok  bool
 	)
 	opts := options{
-		decoder: func(kv *KeyValue, v map[string]interface{}) error {
+		decoder: func(kv *KeyValue, v map[string]any) error {
 			if codec := encoding.GetCodec(kv.Format); codec != nil {
 				return codec.Unmarshal(kv.Value, &v)
 			}
 			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
 		resolver: defaultResolver,
-		merge: func(dst, src interface{}) error {
+		merge: func(dst, src any) error {
 			return mergo.Map(dst, src, mergo.WithOverride)
 		},
 	}
@@ -80,14 +80,14 @@ func TestReader_Merge(t *testing.T) {
 
 func TestReader_Value(t *testing.T) {
 	opts := options{
-		decoder: func(kv *KeyValue, v map[string]interface{}) error {
+		decoder: func(kv *KeyValue, v map[string]any) error {
 			if codec := encoding.GetCodec(kv.Format); codec != nil {
 				return codec.Unmarshal(kv.Value, &v)
 			}
 			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
 		resolver: defaultResolver,
-		merge: func(dst, src interface{}) error {
+		merge: func(dst, src any) error {
 			return mergo.Map(dst, src, mergo.WithOverride)
 		},
 	}
@@ -185,14 +185,14 @@ a:
 func TestReader_Source(t *testing.T) {
 	var err error
 	opts := options{
-		decoder: func(kv *KeyValue, v map[string]interface{}) error {
+		decoder: func(kv *KeyValue, v map[string]any) error {
 			if codec := encoding.GetCodec(kv.Format); codec != nil {
 				return codec.Unmarshal(kv.Value, &v)
 			}
 			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
 		resolver: defaultResolver,
-		merge: func(dst, src interface{}) error {
+		merge: func(dst, src any) error {
 			return mergo.Map(dst, src, mergo.WithOverride)
 		},
 	}
@@ -216,28 +216,28 @@ func TestReader_Source(t *testing.T) {
 
 func TestCloneMap(t *testing.T) {
 	tests := []struct {
-		input map[string]interface{}
-		want  map[string]interface{}
+		input map[string]any
+		want  map[string]any
 	}{
 		{
-			input: map[string]interface{}{
+			input: map[string]any{
 				"a": 1,
 				"b": "2",
 				"c": true,
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"a": 1,
 				"b": "2",
 				"c": true,
 			},
 		},
 		{
-			input: map[string]interface{}{},
-			want:  map[string]interface{}{},
+			input: map[string]any{},
+			want:  map[string]any{},
 		},
 		{
 			input: nil,
-			want:  map[string]interface{}{},
+			want:  map[string]any{},
 		},
 	}
 	for _, tt := range tests {
@@ -251,17 +251,17 @@ func TestCloneMap(t *testing.T) {
 
 func TestConvertMap(t *testing.T) {
 	tests := []struct {
-		input interface{}
-		want  interface{}
+		input any
+		want  any
 	}{
 		{
-			input: map[string]interface{}{
+			input: map[string]any{
 				"a": 1,
 				"b": "2",
 				"c": true,
 				"d": []byte{65, 66, 67},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"a": 1,
 				"b": "2",
 				"c": true,
@@ -269,8 +269,8 @@ func TestConvertMap(t *testing.T) {
 			},
 		},
 		{
-			input: []interface{}{1, 2.0, "3", true, nil, []interface{}{1, 2.0, "3", true, nil}},
-			want:  []interface{}{1, 2.0, "3", true, nil, []interface{}{1, 2.0, "3", true, nil}},
+			input: []any{1, 2.0, "3", true, nil, []any{1, 2.0, "3", true, nil}},
+			want:  []any{1, 2.0, "3", true, nil, []any{1, 2.0, "3", true, nil}},
 		},
 		{
 			input: []byte{65, 66, 67},
@@ -285,11 +285,11 @@ func TestConvertMap(t *testing.T) {
 }
 
 func TestReadValue(t *testing.T) {
-	m := map[string]interface{}{
+	m := map[string]any{
 		"a": 1,
-		"b": map[string]interface{}{
+		"b": map[string]any{
 			"c": "3",
-			"d": map[string]interface{}{
+			"d": map[string]any{
 				"e": true,
 			},
 		},

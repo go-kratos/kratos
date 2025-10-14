@@ -25,14 +25,14 @@ type (
 func TestBindQuery(t *testing.T) {
 	type args struct {
 		vars   url.Values
-		target interface{}
+		target any
 	}
 
 	tests := []struct {
 		name string
 		args args
 		err  error
-		want interface{}
+		want any
 	}{
 		{
 			name: "test",
@@ -77,7 +77,7 @@ func TestBindQuery(t *testing.T) {
 func TestBindForm(t *testing.T) {
 	type args struct {
 		req    *http.Request
-		target interface{}
+		target any
 	}
 
 	tests := []struct {

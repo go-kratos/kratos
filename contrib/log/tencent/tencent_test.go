@@ -114,7 +114,7 @@ func TestNewString(t *testing.T) {
 func TestToString(t *testing.T) {
 	tests := []struct {
 		name string
-		in   interface{}
+		in   any
 		out  string
 	}{
 		{"float64", 6.66, "6.66"},
