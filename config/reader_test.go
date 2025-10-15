@@ -93,8 +93,8 @@ func TestReader_Value(t *testing.T) {
 	}
 
 	ymlval := `
-a: 
-  b: 
+a:
+  b:
     X: 1
     Y: "lol"
     z: true

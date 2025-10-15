@@ -18,7 +18,7 @@ Translations: [English](README.md) | [简体中文](README_zh.md)
 
 # Kratos
 
-Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关功能及工具。  
+Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关功能及工具。
 
 > 名字来源于:《战神》游戏以希腊神话为背景，讲述奎托斯（Kratos）由凡人成为战神并展开弑神屠杀的冒险经历。
 

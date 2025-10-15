@@ -24,7 +24,7 @@ func EncodeURL(pathTemplate string, msg any, needQuery bool) string {
 	if strings.ContainsRune(pathTemplate, '{') {
 		path = reg.ReplaceAllStringFunc(pathTemplate, func(in string) string {
 			// it's unreachable because the reg means that must have more than one char in {}
-			// if len(in) < 4 { //nolint:mnd // **  explain the 4 number here :-) **
+			// if len(in) < 4 { //nolint:mnd // ** explain the 4 number here :-) **
 			//	return in
 			// }
 			key := in[1 : len(in)-1]

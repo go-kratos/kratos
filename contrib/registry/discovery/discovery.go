@@ -297,7 +297,7 @@ func (d *Discovery) cancel(ins *discoveryInstance) (err error) {
 			return nil
 		}
 
-		log.Warnf("Discovery cancel client.Get(%v)  env(%s) appid(%s) hostname(%s) code(%v)",
+		log.Warnf("Discovery cancel client.Get(%v) env(%s) appid(%s) hostname(%s) code(%v)",
 			uri, config.Env, ins.AppID, config.Host, res.Code)
 		err = fmt.Errorf("ErrorCode: %d", res.Code)
 		return

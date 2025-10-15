@@ -160,7 +160,7 @@ func TestServer(t *testing.T) {
 		t.Errorf("expected empty, got %v", childSpanID)
 	}
 	if reflect.DeepEqual(span.SpanContext().SpanID().String(), childSpanID) {
-		t.Errorf("span.SpanContext().SpanID().String()(%v)  is not equal to childSpanID(%v)", span.SpanContext().SpanID().String(), childSpanID)
+		t.Errorf("span.SpanContext().SpanID().String()(%v) is not equal to childSpanID(%v)", span.SpanContext().SpanID().String(), childSpanID)
 	}
 	if !reflect.DeepEqual(span.SpanContext().TraceID().String(), childTraceID) {
 		t.Errorf("expected %v, got %v", childTraceID, span.SpanContext().TraceID().String())
@@ -231,7 +231,7 @@ func TestClient(t *testing.T) {
 		t.Errorf("expected empty, got %v", childSpanID)
 	}
 	if reflect.DeepEqual(span.SpanContext().SpanID().String(), childSpanID) {
-		t.Errorf("span.SpanContext().SpanID().String()(%v)  is not equal to childSpanID(%v)", span.SpanContext().SpanID().String(), childSpanID)
+		t.Errorf("span.SpanContext().SpanID().String()(%v) is not equal to childSpanID(%v)", span.SpanContext().SpanID().String(), childSpanID)
 	}
 	if !reflect.DeepEqual(span.SpanContext().TraceID().String(), childTraceID) {
 		t.Errorf("expected %v, got %v", childTraceID, span.SpanContext().TraceID().String())
