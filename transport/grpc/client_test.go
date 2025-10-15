@@ -42,6 +42,17 @@ func TestWithMiddleware(t *testing.T) {
 	}
 }
 
+func TestWithStreamMiddleware(t *testing.T) {
+	o := &clientOptions{}
+	v := []middleware.Middleware{
+		func(middleware.Handler) middleware.Handler { return nil },
+	}
+	WithStreamMiddleware(v...)(o)
+	if !reflect.DeepEqual(v, o.streamMiddleware) {
+		t.Errorf("expect %v but got %v", v, o.streamInts)
+	}
+}
+
 type mockRegistry struct{}
 
 func (m *mockRegistry) GetService(_ context.Context, _ string) ([]*registry.ServiceInstance, error) {
@@ -148,6 +159,7 @@ func TestDialConn(t *testing.T) {
 		WithTimeout(10*time.Second),
 		WithEndpoint("abc"),
 		WithMiddleware(EmptyMiddleware()),
+		WithStreamMiddleware(EmptyMiddleware()),
 	)
 	if err != nil {
 		t.Error(err)
