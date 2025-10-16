@@ -35,7 +35,7 @@ func equalNodes(a, b []selector.WeightedNode) bool {
 	}
 
 	// Create a map of addresses from slice a
-	aMap := make(map[string]bool)
+	aMap := make(map[string]bool, len(a))
 	for _, node := range a {
 		aMap[node.Address()] = true
 	}
@@ -65,13 +65,13 @@ func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selec
 	defer p.mu.Unlock()
 
 	// Check if the node list has changed
-	if len(p.lastNodes) != len(nodes) || !equalNodes(p.lastNodes, nodes) {
+	if !equalNodes(p.lastNodes, nodes) {
 		// Update lastNodes
 		p.lastNodes = make([]selector.WeightedNode, len(nodes))
 		copy(p.lastNodes, nodes)
 
 		// Create a set of current node addresses for cleanup
-		currentNodes := make(map[string]bool)
+		currentNodes := make(map[string]bool, len(nodes))
 		for _, node := range nodes {
 			currentNodes[node.Address()] = true
 		}
