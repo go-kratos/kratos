@@ -86,6 +86,15 @@ func WithServiceCheck(checks ...*api.AgentServiceCheck) Option {
 	}
 }
 
+// WithTags with service tags.
+func WithTags(tags []string) Option {
+	return func(o *Registry) {
+		if o.cli != nil {
+			o.cli.tags = tags
+		}
+	}
+}
+
 // Config is consul registry config
 type Config struct {
 	*api.Config
