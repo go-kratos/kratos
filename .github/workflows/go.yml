@@ -70,6 +70,8 @@ jobs:
 
       - name: Test
         run: make test-coverage
+        env:
+          GOTOOLCHAIN: auto
 
       - name: Upload coverage to Codecov
         run: bash <(curl -s https://codecov.io/bash)
@@ -79,9 +81,13 @@ jobs:
           cd cmd/kratos
           go build ./...
           go test ./...
+        env:
+          GOTOOLCHAIN: auto
 
       - name: HTTP
         run: |
           cd cmd/protoc-gen-go-http
           go build ./...
           go test ./...
+        env:
+          GOTOOLCHAIN: auto
