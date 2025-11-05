@@ -8,7 +8,6 @@ import (
 	kconfig "github.com/go-kratos/kratos/v2/config"
 )
 
-
 sc := []constant.ServerConfig{
 	*constant.NewServerConfig("127.0.0.1", 8848),
 }

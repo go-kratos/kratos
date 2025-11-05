@@ -50,7 +50,7 @@ func (s *{{ .Service }}Service) {{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Se
 		if err != nil {
 			return err
 		}
-		
+
 		err = conn.Send(&pb.{{ .Reply }}{})
 		if err != nil {
 			return err

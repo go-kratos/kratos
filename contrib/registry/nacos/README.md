@@ -20,7 +20,6 @@ func main() {
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig("127.0.0.1", 8848),
 	}
-	
 
 	client, err := clients.NewNamingClient(
 		vo.NacosClientParam{
@@ -61,7 +60,6 @@ import (
 )
 
 func main() {
-
 	cc := constant.ClientConfig{
 		NamespaceId: "public",
 		TimeoutMs:   5000,

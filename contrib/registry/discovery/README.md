@@ -1,4 +1,4 @@
-## Discovery Registry 
+## Discovery Registry
 
 This module implements a `registry.Registrar` and `registry.Discovery` interface in kratos based `bilibili/discovery`.
 
@@ -25,7 +25,7 @@ func main() {
 
 	// construct srv instance
 	// ...
-	
+
 	app := kratos.New(
 		kratos.Name("helloworld"),
 		kratos.Server(
@@ -36,10 +36,10 @@ func main() {
 		// use Registrar
 		kratos.Registrar(r),
 	)
-	
+
 	if err := app.Run(); err != nil {
 		log.NewHelper(logger).Fatal(err)
-	}	
+	}
 }
 ```
 
@@ -71,7 +71,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-	
+
 	// request and log
 }
 ```
@@ -88,7 +88,6 @@ type Config struct {
 }
 ```
 
-### References 
+### References
 
 - [bilibili/discovery](https://github.com/bilibili/discovery)
-

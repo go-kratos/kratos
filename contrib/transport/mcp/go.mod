@@ -2,7 +2,7 @@ module github.com/go-kratos/kratos/contrib/transport/mcp/v2
 
 go 1.23
 
-toolchain go1.24.2
+toolchain go1.24.6
 
 require (
 	github.com/go-kratos/kratos/v2 v2.9.0
