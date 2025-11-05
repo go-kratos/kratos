@@ -42,9 +42,9 @@ jobs:
           - 8091:8091
           - 8093:8093
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go }}
 
@@ -65,9 +65,13 @@ jobs:
 
       - name: Build
         run: go build ./...
+        env:
+          GOTOOLCHAIN: auto
 
       - name: Test
         run: make test-coverage
+        env:
+          GOTOOLCHAIN: auto
 
       - name: Upload coverage to Codecov
         run: bash <(curl -s https://codecov.io/bash)
@@ -77,9 +81,13 @@ jobs:
           cd cmd/kratos
           go build ./...
           go test ./...
+        env:
+          GOTOOLCHAIN: auto
 
       - name: HTTP
         run: |
           cd cmd/protoc-gen-go-http
           go build ./...
           go test ./...
+        env:
+          GOTOOLCHAIN: auto
