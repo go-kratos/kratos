@@ -1,6 +1,7 @@
 # Servicecomb Registry
 
 ## example
+
 ### server
 ```go
 package main
@@ -29,8 +30,8 @@ func main() {
 		log.Fatal(err)
 	}
 }
-
 ```
+
 ### client
 ```go
 package main
@@ -63,5 +64,4 @@ func main() {
 	}
 	defer conn.Close()
 }
-
 ```
