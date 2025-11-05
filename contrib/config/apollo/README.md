@@ -32,8 +32,8 @@ func main() {
 	if err := c.Load(); err != nil {
 		panic(err)
 	}
-	
-	// use value and watch operations，help yourself. 
+
+	// use value and watch operations，help yourself.
 }
 ```
 
@@ -55,7 +55,7 @@ func WithEnableBackup() Option
 // specify apollo endpoint, such as http://localhost:8080
 func WithEndpoint(endpoint string) Option
 
-// namespaces to load, comma to separate. 
+// namespaces to load, comma to separate.
 func WithNamespace(name string) Option
 
 // secret is the apollo secret key to access application config.
@@ -87,14 +87,14 @@ you got them in kratos config instance maybe look like:
 config := map[string]interface{}{
 	// application be part of the key path.
 	"application": map[string]interface{}{
-        "http": map[string]interface{}{
-            "address": ":8080",
-            "tls": map[string]interface{}{
-                "enable": false,
-                "cert_file": "",
-                "key_file": ""
-            }
-        }
-    }
+		"http": map[string]interface{}{
+			"address": ":8080",
+			"tls": map[string]interface{}{
+				"enable": false,
+				"cert_file": "",
+				"key_file": "",
+			},
+		},
+	},
 }
 ```
