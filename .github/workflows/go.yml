@@ -42,11 +42,13 @@ jobs:
           - 8091:8091
           - 8093:8093
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go }}
+        env:
+          GOTOOLCHAIN: "auto"
 
       - name: Setup Environment
         run: |
