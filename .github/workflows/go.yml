@@ -52,8 +52,6 @@ jobs:
         run: |
           echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-        env:
-          GOTOOLCHAIN: auto
 
       - name: Module cache
         uses: actions/cache@v4
@@ -67,6 +65,8 @@ jobs:
 
       - name: Build
         run: go build ./...
+        env:
+          GOTOOLCHAIN: auto
 
       - name: Test
         run: make test-coverage
