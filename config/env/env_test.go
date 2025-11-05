@@ -14,7 +14,7 @@ const _testJSON = `
 {
     "test":{
         "server":{
-			"name":"${SERVICE_NAME}",
+            "name":"${SERVICE_NAME}",
             "addr":"${ADDR:127.0.0.1}",
             "port":"${PORT:8080}"
         }

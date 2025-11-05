@@ -10,6 +10,7 @@
 <a href="https://discord.gg/BWzJsUJ"><img src="https://img.shields.io/discord/766619759214854164?label=chat&logo=discord" alt="Discord"></a>
 </p>
 <p align="center">
+<a href="https://trendshift.io/repositories/3233" target="_blank"><img src="https://trendshift.io/api/badge/repositories/3233" alt="go-kratos%2Fkratos | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 <a href="https://www.producthunt.com/posts/go-kratos?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-go-kratos" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=306565&theme=light" alt="Go Kratos - A Go framework for microservices. | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 </p>
 
@@ -17,7 +18,7 @@ Translations: [English](README.md) | [简体中文](README_zh.md)
 
 # Kratos
 
-Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关功能及工具。  
+Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关功能及工具。
 
 > 名字来源于:《战神》游戏以希腊神话为背景，讲述奎托斯（Kratos）由凡人成为战神并展开弑神屠杀的冒险经历。
 

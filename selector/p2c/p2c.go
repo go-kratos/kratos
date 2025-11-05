@@ -34,7 +34,7 @@ func New(opts ...Option) selector.Selector {
 type Balancer struct {
 	mu     sync.Mutex
 	r      *rand.Rand
-	picked int64
+	picked atomic.Bool
 }
 
 // choose two distinct nodes.
@@ -71,9 +71,9 @@ func (s *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selec
 
 	// If the failed node has never been selected once during forceGap, it is forced to be selected once
 	// Take advantage of forced opportunities to trigger updates of success rate and delay
-	if upc.PickElapsed() > forcePick && atomic.CompareAndSwapInt64(&s.picked, 0, 1) {
+	if upc.PickElapsed() > forcePick && s.picked.CompareAndSwap(false, true) {
+		defer s.picked.Store(false)
 		pc = upc
-		atomic.StoreInt64(&s.picked, 0)
 	}
 	done := pc.Pick()
 	return pc, done, nil
