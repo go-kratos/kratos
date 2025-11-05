@@ -80,7 +80,7 @@ func (f *Filter) Log(level Level, keyvals ...any) error {
 		for i := 0; i < len(keyvals); i += 2 {
 			v := i + 1
 			if v >= len(keyvals) {
-				continue
+				break
 			}
 			if _, ok := f.key[keyvals[i]]; ok {
 				keyvals[v] = fuzzyStr
