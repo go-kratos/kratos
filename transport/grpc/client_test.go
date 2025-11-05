@@ -42,6 +42,17 @@ func TestWithMiddleware(t *testing.T) {
 	}
 }
 
+func TestWithStreamMiddleware(t *testing.T) {
+	o := &clientOptions{}
+	v := []middleware.Middleware{
+		func(middleware.Handler) middleware.Handler { return nil },
+	}
+	WithStreamMiddleware(v...)(o)
+	if !reflect.DeepEqual(v, o.streamMiddleware) {
+		t.Errorf("expect %v but got %v", v, o.streamInts)
+	}
+}
+
 type mockRegistry struct{}
 
 func (m *mockRegistry) GetService(_ context.Context, _ string) ([]*registry.ServiceInstance, error) {
@@ -72,7 +83,7 @@ func TestWithTLSConfig(t *testing.T) {
 
 func EmptyMiddleware() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, req any) (reply any, err error) {
 			return handler(ctx, req)
 		}
 	}
@@ -148,6 +159,7 @@ func TestDialConn(t *testing.T) {
 		WithTimeout(10*time.Second),
 		WithEndpoint("abc"),
 		WithMiddleware(EmptyMiddleware()),
+		WithStreamMiddleware(EmptyMiddleware()),
 	)
 	if err != nil {
 		t.Error(err)

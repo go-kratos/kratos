@@ -11,7 +11,7 @@ type mergeCtx struct {
 	parent1, parent2 context.Context
 
 	done     chan struct{}
-	doneMark uint32
+	doneMark atomic.Bool
 	doneOnce sync.Once
 	doneErr  error
 
@@ -41,7 +41,7 @@ func Merge(parent1, parent2 context.Context) (context.Context, context.CancelFun
 func (mc *mergeCtx) finish(err error) error {
 	mc.doneOnce.Do(func() {
 		mc.doneErr = err
-		atomic.StoreUint32(&mc.doneMark, 1)
+		mc.doneMark.Store(true)
 		close(mc.done)
 	})
 	return mc.doneErr
@@ -73,7 +73,7 @@ func (mc *mergeCtx) Done() <-chan struct{} {
 
 // Err implements context.Context.
 func (mc *mergeCtx) Err() error {
-	if atomic.LoadUint32(&mc.doneMark) != 0 {
+	if mc.doneMark.Load() {
 		return mc.doneErr
 	}
 	var err error
@@ -107,7 +107,7 @@ func (mc *mergeCtx) Deadline() (time.Time, bool) {
 }
 
 // Value implements context.Context.
-func (mc *mergeCtx) Value(key interface{}) interface{} {
+func (mc *mergeCtx) Value(key any) any {
 	if v := mc.parent1.Value(key); v != nil {
 		return v
 	}

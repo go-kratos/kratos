@@ -32,7 +32,7 @@ func NewLogger(zlog *zap.Logger) *Logger {
 	}
 }
 
-func (l *Logger) Log(level log.Level, keyvals ...interface{}) error {
+func (l *Logger) Log(level log.Level, keyvals ...any) error {
 	// If logging at this level is completely disabled, skip the overhead of
 	// string formatting.
 	if zapcore.Level(level) < zapcore.DPanicLevel && !l.log.Core().Enabled(zapcore.Level(level)) {

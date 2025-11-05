@@ -62,6 +62,13 @@ func WithMiddleware(m ...middleware.Middleware) ClientOption {
 	}
 }
 
+// WithStreamMiddleware with client stream middleware.
+func WithStreamMiddleware(m ...middleware.Middleware) ClientOption {
+	return func(o *clientOptions) {
+		o.streamMiddleware = m
+	}
+}
+
 // WithDiscovery with client discovery.
 func WithDiscovery(d registry.Discovery) ClientOption {
 	return func(o *clientOptions) {
@@ -208,7 +215,7 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 }
 
 func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, filters []selector.NodeFilter) grpc.UnaryClientInterceptor {
-	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		ctx = transport.NewClientContext(ctx, &Transport{
 			endpoint:    cc.Target(),
 			operation:   method,
@@ -220,7 +227,7 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, f
 			ctx, cancel = context.WithTimeout(ctx, timeout)
 			defer cancel()
 		}
-		h := func(ctx context.Context, req interface{}) (interface{}, error) {
+		h := func(ctx context.Context, req any) (any, error) {
 			if tr, ok := transport.FromClientContext(ctx); ok {
 				header := tr.RequestHeader()
 				keys := header.Keys()
@@ -253,8 +260,8 @@ func (w *wrappedClientStream) Context() context.Context {
 	return w.ctx
 }
 
-func (w *wrappedClientStream) SendMsg(m interface{}) error {
-	h := func(_ context.Context, req interface{}) (interface{}, error) {
+func (w *wrappedClientStream) SendMsg(m any) error {
+	h := func(_ context.Context, req any) (any, error) {
 		return req, w.ClientStream.SendMsg(m)
 	}
 
@@ -271,8 +278,8 @@ func (w *wrappedClientStream) SendMsg(m interface{}) error {
 	return err
 }
 
-func (w *wrappedClientStream) RecvMsg(m interface{}) error {
-	h := func(_ context.Context, req interface{}) (interface{}, error) {
+func (w *wrappedClientStream) RecvMsg(m any) error {
+	h := func(_ context.Context, req any) (any, error) {
 		return req, w.ClientStream.RecvMsg(m)
 	}
 
@@ -305,7 +312,7 @@ func streamClientInterceptor(ms []middleware.Middleware, filters []selector.Node
 			return nil, err
 		}
 
-		h := func(_ context.Context, _ interface{}) (interface{}, error) {
+		h := func(_ context.Context, _ any) (any, error) {
 			return streamer, nil
 		}
 

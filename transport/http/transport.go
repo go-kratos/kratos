@@ -9,11 +9,21 @@ import (
 
 var _ Transporter = (*Transport)(nil)
 
+var _ ResponseTransporter = (*Transport)(nil)
+
 // Transporter is http Transporter
 type Transporter interface {
 	transport.Transporter
 	Request() *http.Request
 	PathTemplate() string
+}
+
+// ResponseTransporter extends Transporter with HTTP response access
+// This interface provides access to the http.ResponseWriter for use cases
+// like file downloads, streaming responses, or direct response manipulation.
+type ResponseTransporter interface {
+	Transporter
+	Response() http.ResponseWriter
 }
 
 // Transport is an HTTP transport.
@@ -50,6 +60,11 @@ func (tr *Transport) Request() *http.Request {
 // RequestHeader returns the request header.
 func (tr *Transport) RequestHeader() transport.Header {
 	return tr.reqHeader
+}
+
+// Response returns the HTTP response.
+func (tr *Transport) Response() http.ResponseWriter {
+	return tr.response
 }
 
 // ReplyHeader returns the reply header.
@@ -121,4 +136,16 @@ func (hc headerCarrier) Keys() []string {
 // Values returns a slice of values associated with the passed key.
 func (hc headerCarrier) Values(key string) []string {
 	return http.Header(hc).Values(key)
+}
+
+// ResponseWriterFromServerContext returns the http.ResponseWriter from context if available.
+// This function provides backward compatibility and safe access to the ResponseWriter.
+// Returns nil if the transport doesn't implement ResponseTransporter.
+func ResponseWriterFromServerContext(ctx context.Context) (http.ResponseWriter, bool) {
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		if httpTr, ok := tr.(ResponseTransporter); ok {
+			return httpTr.Response(), true
+		}
+	}
+	return nil, false
 }

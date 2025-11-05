@@ -14,17 +14,14 @@ import (
 )
 
 // EncodeValues encode a message into url values.
-func EncodeValues(msg interface{}) (url.Values, error) {
+func EncodeValues(msg any) (url.Values, error) {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return url.Values{}, nil
 	}
 	if v, ok := msg.(proto.Message); ok {
 		u := make(url.Values)
 		err := encodeByField(u, "", v.ProtoReflect())
-		if err != nil {
-			return nil, err
-		}
-		return u, nil
+		return u, err
 	}
 	return encoder.Encode(msg)
 }
@@ -56,7 +53,6 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 				list, err := encodeRepeatedField(fd, v.List())
 				if err != nil {
 					finalErr = err
-					return false
 				}
 				for _, item := range list {
 					u.Add(newPath, item)
@@ -67,7 +63,6 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 				m, err := encodeMapField(fd, v.Map())
 				if err != nil {
 					finalErr = err
-					return false
 				}
 				for k, value := range m {
 					u.Set(fmt.Sprintf("%s[%s]", newPath, k), value)
@@ -81,13 +76,11 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 			}
 			if err = encodeByField(u, newPath, v.Message()); err != nil {
 				finalErr = err
-				return false
 			}
 		default:
 			value, err := EncodeField(fd, v)
 			if err != nil {
 				finalErr = err
-				return false
 			}
 			u.Set(newPath, value)
 		}
@@ -202,19 +195,22 @@ func EncodeFieldMask(m protoreflect.Message) (query string) {
 // according to the protobuf JSON specification.
 // references: https://github.com/protocolbuffers/protobuf-go/blob/master/encoding/protojson/well_known_types.go#L842
 func jsonCamelCase(s string) string {
-	var b []byte
-	var wasUnderscore bool
-	for i := 0; i < len(s); i++ { // proto identifiers are always ASCII
+	var builder strings.Builder
+	builder.Grow(len(s))
+
+	wasUnderscore := false
+	for i := 0; i < len(s); i++ { // proto identifiers are always ASCIIS
 		c := s[i]
 		if c != '_' {
 			if wasUnderscore && isASCIILower(c) {
 				c -= 'a' - 'A' // convert to uppercase
 			}
-			b = append(b, c)
+			builder.WriteByte(c)
 		}
 		wasUnderscore = c == '_'
 	}
-	return string(b)
+
+	return builder.String()
 }
 
 func isASCIILower(c byte) bool {

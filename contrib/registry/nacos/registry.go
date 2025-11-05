@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
+	"math"
 	"net"
 	"net/url"
 	"strconv"
@@ -100,6 +102,7 @@ func (r *Registry) Register(_ context.Context, si *registry.ServiceInstance) err
 		if err != nil {
 			return err
 		}
+		weight := r.opts.weight
 		var rmd map[string]string
 		if si.Metadata == nil {
 			rmd = map[string]string{
@@ -107,18 +110,21 @@ func (r *Registry) Register(_ context.Context, si *registry.ServiceInstance) err
 				"version": si.Version,
 			}
 		} else {
-			rmd = make(map[string]string, len(si.Metadata)+2)
-			for k, v := range si.Metadata {
-				rmd[k] = v
-			}
+			rmd = maps.Clone(si.Metadata)
 			rmd["kind"] = u.Scheme
 			rmd["version"] = si.Version
+			if w, ok := si.Metadata["weight"]; ok {
+				weight, err = strconv.ParseFloat(w, 64)
+				if err != nil {
+					weight = r.opts.weight
+				}
+			}
 		}
 		_, e := r.cli.RegisterInstance(vo.RegisterInstanceParam{
 			Ip:          host,
 			Port:        uint64(p),
 			ServiceName: si.Name + "." + u.Scheme,
-			Weight:      r.opts.weight,
+			Weight:      weight,
 			Enable:      true,
 			Healthy:     true,
 			Ephemeral:   true,
@@ -180,16 +186,23 @@ func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registr
 	items := make([]*registry.ServiceInstance, 0, len(res))
 	for _, in := range res {
 		kind := r.opts.kind
+		weight := r.opts.weight
 		if k, ok := in.Metadata["kind"]; ok {
 			kind = k
 		}
-		items = append(items, &registry.ServiceInstance{
+		if in.Weight > 0 {
+			weight = in.Weight
+		}
+
+		r := &registry.ServiceInstance{
 			ID:        in.InstanceId,
 			Name:      in.ServiceName,
 			Version:   in.Metadata["version"],
 			Metadata:  in.Metadata,
-			Endpoints: []string{fmt.Sprintf("%s://%s:%d", kind, in.Ip, in.Port)},
-		})
+			Endpoints: []string{kind + "://" + net.JoinHostPort(in.Ip, strconv.Itoa(int(in.Port)))},
+		}
+		r.Metadata["weight"] = strconv.FormatInt(int64(math.Ceil(weight)), 10)
+		items = append(items, r)
 	}
 	return items, nil
 }

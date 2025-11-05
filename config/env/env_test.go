@@ -14,7 +14,7 @@ const _testJSON = `
 {
     "test":{
         "server":{
-			"name":"${SERVICE_NAME}",
+            "name":"${SERVICE_NAME}",
             "addr":"${ADDR:127.0.0.1}",
             "port":"${PORT:8080}"
         }
@@ -68,7 +68,7 @@ func TestEnvWithPrefix(t *testing.T) {
 	tests := []struct {
 		name   string
 		path   string
-		expect interface{}
+		expect any
 	}{
 		{
 			name:   "test $KEY",
@@ -88,8 +88,8 @@ func TestEnvWithPrefix(t *testing.T) {
 		{
 			name: "test ${KEY} in array",
 			path: "foo",
-			expect: []interface{}{
-				map[string]interface{}{
+			expect: []any{
+				map[string]any{
 					"name": "Tom",
 					"age":  "20",
 				},
@@ -102,7 +102,7 @@ func TestEnvWithPrefix(t *testing.T) {
 			var err error
 			v := c.Value(test.path)
 			if v.Load() != nil {
-				var actual interface{}
+				var actual any
 				switch test.expect.(type) {
 				case int:
 					if actual, err = v.Int(); err == nil {
@@ -182,7 +182,7 @@ func TestEnvWithoutPrefix(t *testing.T) {
 	tests := []struct {
 		name   string
 		path   string
-		expect interface{}
+		expect any
 	}{
 		{
 			name:   "test $KEY",
@@ -202,8 +202,8 @@ func TestEnvWithoutPrefix(t *testing.T) {
 		{
 			name: "test ${KEY} in array",
 			path: "foo",
-			expect: []interface{}{
-				map[string]interface{}{
+			expect: []any{
+				map[string]any{
 					"name": "Tom",
 					"age":  "20",
 				},
@@ -216,7 +216,7 @@ func TestEnvWithoutPrefix(t *testing.T) {
 			var err error
 			v := c.Value(test.path)
 			if v.Load() != nil {
-				var actual interface{}
+				var actual any
 				switch test.expect.(type) {
 				case int:
 					if actual, err = v.Int(); err == nil {
