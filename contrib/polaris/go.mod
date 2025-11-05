@@ -2,11 +2,11 @@ module github.com/go-kratos/kratos/contrib/polaris/v2
 
 go 1.23.0
 
-toolchain go1.24.2
+toolchain go1.24.6
 
 require (
 	github.com/go-kratos/aegis v0.2.0
-	github.com/go-kratos/kratos/v2 v2.8.4
+	github.com/go-kratos/kratos/v2 v2.9.0
 	github.com/google/uuid v1.4.0
 	github.com/polarismesh/polaris-go v1.3.0
 	google.golang.org/protobuf v1.33.0
