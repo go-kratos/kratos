@@ -30,7 +30,7 @@ func TestWrr(t *testing.T) {
 		}))
 	random.Apply(nodes)
 	var count1, count2 int
-	for i := 0; i < 200; i++ {
+	for i := 0; i < 1000; i++ {
 		n, done, err := random.Select(context.Background(), selector.WithNodeFilter(filter.Version("v2.0.0")))
 		if err != nil {
 			t.Errorf("expect no error, got %v", err)
@@ -48,17 +48,17 @@ func TestWrr(t *testing.T) {
 			count2++
 		}
 	}
-	if count1 <= 80 {
-		t.Errorf("count1(%v) <= 80", count1)
+	if count1 <= 400 {
+		t.Errorf("count1(%v) <= 400", count1)
 	}
-	if count1 >= 120 {
-		t.Errorf("count1(%v) >= 120", count1)
+	if count1 >= 600 {
+		t.Errorf("count1(%v) >= 600", count1)
 	}
-	if count2 <= 80 {
-		t.Errorf("count2(%v) <= 80", count2)
+	if count2 <= 400 {
+		t.Errorf("count2(%v) <= 400", count2)
 	}
-	if count2 >= 120 {
-		t.Errorf("count2(%v) >= 120", count2)
+	if count2 >= 600 {
+		t.Errorf("count2(%v) >= 600", count2)
 	}
 }
 

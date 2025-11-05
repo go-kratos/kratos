@@ -70,9 +70,9 @@ func New{{.ServiceType}}HTTPClient (client *http.Client) {{.ServiceType}}HTTPCli
 }
 
 {{range .MethodSets}}
-    {{- if ne .Comment ""}}
-    {{.Comment}}
-    {{- end}}
+	{{- if ne .Comment ""}}
+	{{.Comment}}
+	{{- end}}
 func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
 	pattern := "{{.Path}}"
