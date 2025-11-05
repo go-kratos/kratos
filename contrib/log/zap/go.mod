@@ -1,6 +1,6 @@
 module github.com/go-kratos/kratos/contrib/log/zap/v2
 
-go 1.21
+go 1.22
 
 require (
 	github.com/go-kratos/kratos/v2 v2.8.4

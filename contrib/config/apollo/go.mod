@@ -1,6 +1,6 @@
 module github.com/go-kratos/kratos/contrib/config/apollo/v2
 
-go 1.21
+go 1.22
 
 require (
 	github.com/apolloconfig/agollo/v4 v4.3.1
