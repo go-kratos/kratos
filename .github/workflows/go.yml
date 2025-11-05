@@ -47,13 +47,13 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go }}
-        env:
-          GOTOOLCHAIN: "auto"
 
       - name: Setup Environment
         run: |
           echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+        env:
+          GOTOOLCHAIN: auto
 
       - name: Module cache
         uses: actions/cache@v4
