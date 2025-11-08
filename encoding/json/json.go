@@ -43,6 +43,9 @@ func (codec) Marshal(v any) ([]byte, error) {
 }
 
 func (codec) Unmarshal(data []byte, v any) error {
+  if len(data) == 0 {
+		return nil
+	}
 	switch m := v.(type) {
 	case json.Unmarshaler:
 		return m.UnmarshalJSON(data)
