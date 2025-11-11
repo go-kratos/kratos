@@ -33,6 +33,7 @@ type methodDesc struct {
 	HasBody      bool
 	Body         string
 	ResponseBody string
+	BindQuery    bool
 }
 
 func (s *serviceDesc) execute() string {
