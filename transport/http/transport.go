@@ -100,8 +100,8 @@ func SetCookie(ctx context.Context, cookie *http.Cookie) {
 // RequestFromServerContext returns request from context.
 func RequestFromServerContext(ctx context.Context) (*http.Request, bool) {
 	if tr, ok := transport.FromServerContext(ctx); ok {
-		if tr, ok := tr.(*Transport); ok {
-			return tr.request, true
+		if htr, ok := tr.(Transporter); ok {
+			return htr.Request(), true
 		}
 	}
 	return nil, false
