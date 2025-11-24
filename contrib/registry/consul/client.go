@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"net"
 	"net/url"
 	"strconv"
@@ -262,7 +262,7 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 					if err != nil {
 						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
 						// when the previous report fails, try to re register the service
-						if err := sleepCtx(cc.ctx, time.Duration(rand.Intn(5))*time.Second); err != nil {
+						if err := sleepCtx(cc.ctx, time.Duration(rand.IntN(5))*time.Second); err != nil {
 							_ = c.cli.Agent().ServiceDeregister(svc.ID)
 							return
 						}
