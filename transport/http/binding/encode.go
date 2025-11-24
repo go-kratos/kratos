@@ -3,6 +3,7 @@ package binding
 import (
 	"reflect"
 	"regexp"
+	"strings"
 
 	"google.golang.org/protobuf/proto"
 
@@ -16,17 +17,24 @@ func EncodeURL(pathTemplate string, msg any, needQuery bool) string {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
 		return pathTemplate
 	}
+
 	queryParams, _ := form.EncodeValues(msg)
 	pathParams := make(map[string]struct{})
-	path := reg.ReplaceAllStringFunc(pathTemplate, func(in string) string {
-		// it's unreachable because the reg means that must have more than one char in {}
-		// if len(in) < 4 { //nolint:mnd // **  explain the 4 number here :-) **
-		//	return in
-		// }
-		key := in[1 : len(in)-1]
-		pathParams[key] = struct{}{}
-		return queryParams.Get(key)
-	})
+	var path string
+	if strings.ContainsRune(pathTemplate, '{') {
+		path = reg.ReplaceAllStringFunc(pathTemplate, func(in string) string {
+			// it's unreachable because the reg means that must have more than one char in {}
+			// if len(in) < 4 { //nolint:mnd // ** explain the 4 number here :-) **
+			//	return in
+			// }
+			key := in[1 : len(in)-1]
+			pathParams[key] = struct{}{}
+			return queryParams.Get(key)
+		})
+	} else {
+		path = pathTemplate
+	}
+
 	if !needQuery {
 		if v, ok := msg.(proto.Message); ok {
 			if query := form.EncodeFieldMask(v.ProtoReflect()); query != "" {

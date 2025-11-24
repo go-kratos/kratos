@@ -40,6 +40,8 @@ type Client struct {
 	deregisterCriticalServiceAfter int
 	// serviceChecks  user custom checks
 	serviceChecks api.AgentServiceChecks
+	// tags is service tags
+	tags []string
 
 	// used to control heartbeat
 	lock      sync.RWMutex
@@ -70,7 +72,7 @@ func defaultResolver(_ context.Context, entries []*api.ServiceEntry) []*registry
 			endpoints = append(endpoints, addr.Address)
 		}
 		if len(endpoints) == 0 && entry.Service.Address != "" && entry.Service.Port != 0 {
-			endpoints = append(endpoints, fmt.Sprintf("http://%s:%d", entry.Service.Address, entry.Service.Port))
+			endpoints = append(endpoints, "http://"+net.JoinHostPort(entry.Service.Address, strconv.FormatUint(uint64(entry.Service.Port), 10)))
 		}
 		services = append(services, &registry.ServiceInstance{
 			ID:        entry.Service.ID,
@@ -166,11 +168,15 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 		checkAddresses = append(checkAddresses, net.JoinHostPort(addr, strconv.FormatUint(port, 10)))
 		addresses[raw.Scheme] = api.ServiceAddress{Address: endpoint, Port: int(port)}
 	}
+	tags := []string{fmt.Sprintf("version=%s", svc.Version)}
+	if len(c.tags) > 0 {
+		tags = append(tags, c.tags...)
+	}
 	asr := &api.AgentServiceRegistration{
 		ID:              svc.ID,
 		Name:            svc.Name,
 		Meta:            svc.Metadata,
-		Tags:            []string{fmt.Sprintf("version=%s", svc.Version)},
+		Tags:            tags,
 		TaggedAddresses: addresses,
 	}
 	if len(checkAddresses) > 0 {

@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/url"
 	"os"
 	"strconv"
@@ -92,7 +93,7 @@ type Registry struct {
 
 // NewRegistry is used to initialize the Registry
 func NewRegistry(clientSet *kubernetes.Clientset, namespace string) *Registry {
-	if strings.EqualFold(namespace, "") {
+	if namespace == "" {
 		namespace = metav1.NamespaceAll
 	}
 	informerFactory := informers.NewSharedInformerFactoryWithOptions(clientSet, time.Minute*10, informers.WithNamespace(namespace))
@@ -392,7 +393,7 @@ func getServiceInstanceFromPod(pod *corev1.Pod) (*registry.ServiceInstance, erro
 					protocol = string(cp.Protocol)
 				}
 			}
-			addr := fmt.Sprintf("%s://%s:%d", protocol, podIP, port)
+			addr := protocol + "://" + net.JoinHostPort(podIP, strconv.Itoa(int(port)))
 			endpoints = append(endpoints, addr)
 		}
 	}

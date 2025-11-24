@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"math"
 	"net"
 	"net/url"
@@ -109,10 +110,7 @@ func (r *Registry) Register(_ context.Context, si *registry.ServiceInstance) err
 				"version": si.Version,
 			}
 		} else {
-			rmd = make(map[string]string, len(si.Metadata)+2)
-			for k, v := range si.Metadata {
-				rmd[k] = v
-			}
+			rmd = maps.Clone(si.Metadata)
 			rmd["kind"] = u.Scheme
 			rmd["version"] = si.Version
 			if w, ok := si.Metadata["weight"]; ok {
@@ -201,9 +199,9 @@ func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registr
 			Name:      in.ServiceName,
 			Version:   in.Metadata["version"],
 			Metadata:  in.Metadata,
-			Endpoints: []string{fmt.Sprintf("%s://%s:%d", kind, in.Ip, in.Port)},
+			Endpoints: []string{kind + "://" + net.JoinHostPort(in.Ip, strconv.Itoa(int(in.Port)))},
 		}
-		r.Metadata["weight"] = strconv.Itoa(int(math.Ceil(weight)))
+		r.Metadata["weight"] = strconv.FormatInt(int64(math.Ceil(weight)), 10)
 		items = append(items, r)
 	}
 	return items, nil

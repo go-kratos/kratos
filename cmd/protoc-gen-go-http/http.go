@@ -208,6 +208,12 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 	if comment != "" {
 		comment = "// " + m.GoName + strings.TrimPrefix(strings.TrimSuffix(comment, "\n"), "//")
 	}
+	if m.Desc.Options().(*descriptorpb.MethodOptions).GetDeprecated() {
+		if comment != "" {
+			comment += "\n"
+		}
+		comment += deprecationComment
+	}
 	return &methodDesc{
 		Name:         m.GoName,
 		OriginalName: string(m.Desc.Name()),
