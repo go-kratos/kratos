@@ -153,6 +153,13 @@ func MethodNotAllowedHandler(handler http.Handler) ServerOption {
 	}
 }
 
+// RouterMiddleware is mux's MiddlewareFunc
+func RouterMiddleware(middlewareFunc mux.MiddlewareFunc) ServerOption {
+	return func(s *Server) {
+		s.router.Use(middlewareFunc)
+	}
+}
+
 // Server is an HTTP server wrapper.
 type Server struct {
 	*http.Server
