@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"strings"
 	"sync"
 	"testing"
@@ -143,7 +143,7 @@ func TestServer(t *testing.T) {
 		return nil, e
 	}
 	nextValid := func(context.Context, any) (any, error) {
-		time.Sleep(time.Millisecond * time.Duration(rand.Int31n(100)))
+		time.Sleep(time.Millisecond * time.Duration(rand.Int32N(100)))
 		return "Hello valid", nil
 	}
 

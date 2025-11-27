@@ -2,7 +2,7 @@ package p2c
 
 import (
 	"context"
-	"math/rand"
+	"math/rand/v2"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -40,8 +40,8 @@ type Balancer struct {
 // choose two distinct nodes.
 func (s *Balancer) prePick(nodes []selector.WeightedNode) (nodeA selector.WeightedNode, nodeB selector.WeightedNode) {
 	s.mu.Lock()
-	a := s.r.Intn(len(nodes))
-	b := s.r.Intn(len(nodes) - 1)
+	a := s.r.IntN(len(nodes))
+	b := s.r.IntN(len(nodes) - 1)
 	s.mu.Unlock()
 	if b >= a {
 		b = b + 1
@@ -96,5 +96,5 @@ type Builder struct{}
 
 // Build creates Balancer
 func (b *Builder) Build() selector.Balancer {
-	return &Balancer{r: rand.New(rand.NewSource(time.Now().UnixNano()))}
+	return &Balancer{r: rand.New(rand.NewPCG(uint64(time.Now().UnixNano()), 0))}
 }

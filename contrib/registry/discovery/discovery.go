@@ -3,7 +3,7 @@ package discovery
 import (
 	"context"
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"net/url"
 	"strconv"
 	"sync"
@@ -215,7 +215,7 @@ func (d *Discovery) serverProc() {
 func (d *Discovery) pickNode() string {
 	nodes, ok := d.node.Load().([]string)
 	if !ok || len(nodes) == 0 {
-		return d.config.Nodes[rand.Intn(len(d.config.Nodes))]
+		return d.config.Nodes[rand.IntN(len(d.config.Nodes))]
 	}
 	return nodes[d.nodeIdx.Load()%uint64(len(nodes))]
 }
