@@ -1,10 +1,10 @@
 module github.com/go-kratos/kratos/contrib/log/fluent/v2
 
-go 1.21
+go 1.22
 
 require (
 	github.com/fluent/fluent-logger-golang v1.9.0
-	github.com/go-kratos/kratos/v2 v2.8.4
+	github.com/go-kratos/kratos/v2 v2.9.0
 )
 
 require (

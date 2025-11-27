@@ -22,41 +22,40 @@ func TestRouter(t *testing.T) {
 	}
 	data := `
 [
-   {
-       "name":"kratos",
-       "enable":false,
-       "description":"123",
-       "priority":2,
-       "routing_config":{
-           "@type":"type.googleapis.com/v2.RuleRoutingConfig",
-           "sources":[
-               {
-                   "service":"*",
-                   "namespace":"*",
-                   "arguments":[
-
-                   ]
-               }
-           ],
-           "destinations":[
-               {
-                   "labels":{
-                       "az":{
-                           "value":"1",
-                           "value_type":"TEXT",
-                           "type":"EXACT"
-                       }
-                   },
-                   "weight":100,
-                   "priority":1,
-                   "isolate":false,
-                   "name":"实例分组1",
-                   "namespace":"default",
-                   "service":"test-ut"
-               }
-           ]
-       }
-   }
+    {
+        "name":"kratos",
+        "enable":false,
+        "description":"123",
+        "priority":2,
+        "routing_config":{
+            "@type":"type.googleapis.com/v2.RuleRoutingConfig",
+            "sources":[
+                {
+                    "service":"*",
+                    "namespace":"*",
+                    "arguments":[
+                    ]
+                }
+            ],
+            "destinations":[
+                {
+                    "labels":{
+                        "az":{
+                            "value":"1",
+                            "value_type":"TEXT",
+                            "type":"EXACT"
+                        }
+                    },
+                    "weight":100,
+                    "priority":1,
+                    "isolate":false,
+                    "name":"实例分组1",
+                    "namespace":"default",
+                    "service":"test-ut"
+                }
+            ]
+        }
+    }
 ]
 `
 	res, err := makeJSONRequest("http://127.0.0.1:8090/naming/v2/routings", data, http.MethodPost, map[string]string{

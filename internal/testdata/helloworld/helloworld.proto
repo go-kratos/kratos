@@ -9,10 +9,10 @@ option go_package = "github.com/go-kratos/kratos/v2/internal/testdata/helloworld
 // The greeting service definition.
 service Greeter {
   // Sends a greeting
-  rpc SayHello (HelloRequest) returns (HelloReply)  {
-        option (google.api.http) = {
-            get: "/helloworld/{name}",
-        };
+  rpc SayHello (HelloRequest) returns (HelloReply) {
+    option (google.api.http) = {
+      get: "/helloworld/{name}",
+    };
   }
   // Sends a greeting
   rpc SayHelloStream (stream HelloRequest) returns (stream HelloReply);

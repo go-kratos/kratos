@@ -13,7 +13,7 @@ func ContentType(subtype string) string {
 	return baseContentType + "/" + subtype
 }
 
-// ContentSubtype returns the content-subtype for the given content-type.  The
+// ContentSubtype returns the content-subtype for the given content-type. The
 // given content-type must be a valid content-type that starts with
 // but no content-subtype will be returned.
 // according rfc7231.
