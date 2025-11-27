@@ -388,7 +388,7 @@ func getServiceInstanceFromPod(pod *corev1.Pod) (*registry.ServiceInstance, erro
 			protocol := protocolMap.GetProtocol(port)
 			if protocol == "" {
 				if cp.Name != "" {
-					protocol = strings.Split(cp.Name, "-")[0]
+					protocol, _, _ = strings.Cut(cp.Name, "-")
 				} else {
 					protocol = string(cp.Protocol)
 				}
