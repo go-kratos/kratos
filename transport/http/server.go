@@ -153,10 +153,9 @@ func MethodNotAllowedHandler(handler http.Handler) ServerOption {
 	}
 }
 
-// RouterMiddleware is mux's MiddlewareFunc
 func RouterMiddleware(middlewareFunc mux.MiddlewareFunc) ServerOption {
 	return func(s *Server) {
-		s.router.Use(middlewareFunc)
+		s.routerMiddleware = append(s.routerMiddleware, middlewareFunc)
 	}
 }
 
@@ -179,6 +178,7 @@ type Server struct {
 	ene         EncodeErrorFunc
 	strictSlash bool
 	router      *mux.Router
+	routerMiddleware []mux.MiddlewareFunc
 }
 
 // NewServer creates an HTTP server by options.
@@ -203,6 +203,7 @@ func NewServer(opts ...ServerOption) *Server {
 	}
 	srv.router.StrictSlash(srv.strictSlash)
 	srv.router.Use(srv.filter())
+	srv.router.Use(srv.routerMiddleware...)
 	srv.Server = &http.Server{
 		Handler:   FilterChain(srv.filters...)(srv.router),
 		TLSConfig: srv.tlsConf,
