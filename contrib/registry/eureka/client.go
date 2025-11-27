@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/rand"
+	"math/rand/v2"
 	"net/http"
 	"strings"
 	"sync"
@@ -292,7 +292,7 @@ func (e *Client) pickServer(currentTimes int) string {
 }
 
 func (e *Client) shuffle() {
-	rand.New(rand.NewSource(time.Now().UnixNano())).
+	rand.New(rand.NewPCG(uint64(time.Now().UnixNano()), 0)).
 		Shuffle(len(e.urls), func(i, j int) {
 			e.urls[i], e.urls[j] = e.urls[j], e.urls[i]
 		})

@@ -1,8 +1,8 @@
 # Kubernetes Config
 
 ### Usage in the Kubernetes Cluster
-It is required to 
-> serviceaccount should be set to the actual account of your environment, the default account will be `namespace::default` if the `spec.serviceAccount` is unset. 
+It is required to
+> serviceaccount should be set to the actual account of your environment, the default account will be `namespace::default` if the `spec.serviceAccount` is unset.
 execute this command:
 ```
 kubectl create clusterrolebinding go-kratos:kube --clusterrole=view --serviceaccount=mesh:default
@@ -26,9 +26,9 @@ subjects:
 ### Usage outside the Kubernetes Cluster
 Set the path `~/.kube/config` to KubeConfig
 ```go
-    config.NewSource(SourceOption{
-		Namespace:     "mesh",
-		LabelSelector: "",
-		KubeConfig:    filepath.Join(homedir.HomeDir(), ".kube", "config"),
-	})
+config.NewSource(SourceOption{
+	Namespace:     "mesh",
+	LabelSelector: "",
+	KubeConfig:    filepath.Join(homedir.HomeDir(), ".kube", "config"),
+})
 ```

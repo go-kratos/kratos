@@ -1,6 +1,6 @@
 module github.com/go-kratos/kratos/v2
 
-go 1.21
+go 1.22
 
 require (
 	dario.cat/mergo v1.0.0
@@ -44,3 +44,5 @@ require (
 	google.golang.org/genproto v0.0.0-20231212172506-995d672761c0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
+
+retract v2.9.0

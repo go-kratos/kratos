@@ -3,7 +3,7 @@ package selector
 import (
 	"context"
 	"errors"
-	"math/rand"
+	"math/rand/v2"
 	"reflect"
 	"sync/atomic"
 	"testing"
@@ -76,7 +76,7 @@ func (b *mockBalancer) Pick(_ context.Context, nodes []WeightedNode) (selected W
 		err = ErrNoAvailable
 		return
 	}
-	cur := rand.Intn(len(nodes))
+	cur := rand.IntN(len(nodes))
 	selected = nodes[cur]
 	done = selected.Pick()
 	return

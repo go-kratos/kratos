@@ -3,7 +3,7 @@ package p2c
 import (
 	"context"
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -38,7 +38,7 @@ func TestWrr3(t *testing.T) {
 		go func() {
 			defer group.Done()
 			lk.Lock()
-			d := time.Duration(rand.Intn(500)) * time.Millisecond
+			d := time.Duration(rand.IntN(500)) * time.Millisecond
 			lk.Unlock()
 			time.Sleep(d)
 			n, done, err := p2c.Select(context.Background(), selector.WithNodeFilter(filter.Version("v2.0.0")))
