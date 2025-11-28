@@ -99,8 +99,10 @@ func (c *config) Load() error {
 		if err != nil {
 			return err
 		}
-		for _, v := range kvs {
-			log.Debugf("config loaded: %s format: %s", v.Key, v.Format)
+		if c.opts.printLoadedDebugLog {
+			for _, v := range kvs {
+				log.Debugf("config loaded: %s format: %s", v.Key, v.Format)
+			}
 		}
 		if err = c.reader.Merge(kvs...); err != nil {
 			log.Errorf("failed to merge config source: %v", err)

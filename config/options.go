@@ -22,16 +22,24 @@ type Merge func(dst, src any) error
 type Option func(*options)
 
 type options struct {
-	sources  []Source
-	decoder  Decoder
-	resolver Resolver
-	merge    Merge
+	sources             []Source
+	decoder             Decoder
+	resolver            Resolver
+	merge               Merge
+	printLoadedDebugLog bool
 }
 
 // WithSource with config source.
 func WithSource(s ...Source) Option {
 	return func(o *options) {
 		o.sources = s
+	}
+}
+
+// WithPrintLoadedDebugLog with config print loaded debug log.
+func WithPrintLoadedDebugLog(printLoadedDebugLog bool) Option {
+	return func(o *options) {
+		o.printLoadedDebugLog = printLoadedDebugLog
 	}
 }
 
