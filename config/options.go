@@ -37,6 +37,8 @@ func WithSource(s ...Source) Option {
 }
 
 // WithPrintLoadedDebugLog with config print loaded debug log.
+// Default is true.
+// When printLoadedDebugLog is set to false, the loaded configuration will not be printed in the log.
 func WithPrintLoadedDebugLog(printLoadedDebugLog bool) Option {
 	return func(o *options) {
 		o.printLoadedDebugLog = printLoadedDebugLog

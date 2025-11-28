@@ -49,6 +49,7 @@ func New(opts ...Option) Config {
 		merge: func(dst, src any) error {
 			return mergo.Map(dst, src, mergo.WithOverride)
 		},
+		printLoadedDebugLog: true,
 	}
 	for _, opt := range opts {
 		opt(&o)
