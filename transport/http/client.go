@@ -187,10 +187,10 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	if options.discovery != nil {
 		if target.Scheme == "discovery" {
 			if r, err = newResolver(ctx, options.discovery, target, selector, options.block, insecure, options.subsetSize); err != nil {
-				return nil, fmt.Errorf("[http client] new resolver failed!err: %v", options.endpoint)
+				return nil, fmt.Errorf("[http client] new resolver failed for endpoint %q: %w", options.endpoint, err)
 			}
 		} else if _, _, err := host.ExtractHostPort(options.endpoint); err != nil {
-			return nil, fmt.Errorf("[http client] invalid endpoint format: %v", options.endpoint)
+			return nil, fmt.Errorf("[http client] invalid endpoint format %q: %w", options.endpoint, err)
 		}
 	}
 	return &Client{
