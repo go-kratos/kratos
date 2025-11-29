@@ -129,6 +129,7 @@ jobs:
             exit 1  # terminate the workflow
           else
             echo "No Non-English comments found."
+          fi
       
       - name: Find Comment
         if: failure() && github.event_name != 'workflow_dispatch'
