@@ -10,20 +10,19 @@ option java_multiple_files = true;
 option java_package = "com.github.kratos.api";
 option objc_class_prefix = "KratosAPI";
 
-
 // Metadata is api definition metadata service.
 service Metadata {
   // ListServices list the full name of all services.
-  rpc ListServices (ListServicesRequest) returns (ListServicesReply)  {
-      option (google.api.http) = {
-        get: "/services",
-      };
+  rpc ListServices (ListServicesRequest) returns (ListServicesReply) {
+    option (google.api.http) = {
+      get: "/services",
+    };
   }
   // GetServiceDesc get the full fileDescriptorSet of service.
-  rpc GetServiceDesc (GetServiceDescRequest) returns (GetServiceDescReply)  {
-      option (google.api.http) = {
-        get: "/services/{name}",
-      };
+  rpc GetServiceDesc (GetServiceDescRequest) returns (GetServiceDescReply) {
+    option (google.api.http) = {
+      get: "/services/{name}",
+    };
   }
 }
 
@@ -40,4 +39,3 @@ message GetServiceDescRequest {
 message GetServiceDescReply {
   google.protobuf.FileDescriptorSet file_desc_set = 1;
 }
-

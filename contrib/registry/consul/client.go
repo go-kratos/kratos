@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"net"
 	"net/url"
 	"strconv"
@@ -40,6 +40,8 @@ type Client struct {
 	deregisterCriticalServiceAfter int
 	// serviceChecks user custom checks
 	serviceChecks api.AgentServiceChecks
+	// tags is service tags
+	tags []string
 
 	// used to control heartbeat
 	lock      sync.RWMutex
@@ -169,11 +171,15 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 		checkAddresses = append(checkAddresses, net.JoinHostPort(addr, strconv.FormatUint(port, 10)))
 		addresses[raw.Scheme] = api.ServiceAddress{Address: endpoint, Port: int(port)}
 	}
+	tags := []string{fmt.Sprintf("version=%s", svc.Version)}
+	if len(c.tags) > 0 {
+		tags = append(tags, c.tags...)
+	}
 	asr := &api.AgentServiceRegistration{
 		ID:              svc.ID,
 		Name:            svc.Name,
 		Meta:            svc.Metadata,
-		Tags:            []string{fmt.Sprintf("version=%s", svc.Version)},
+		Tags:            tags,
 		TaggedAddresses: addresses,
 	}
 	if len(checkAddresses) > 0 {
@@ -259,7 +265,7 @@ func (c *Client) Register(ctx context.Context, svc *registry.ServiceInstance, en
 					if err != nil {
 						log.Errorf("[Consul] update ttl heartbeat to consul failed! err=%v", err)
 						// when the previous report fails, try to re register the service
-						if err := sleepCtx(cc.ctx, time.Duration(rand.Intn(5))*time.Second); err != nil {
+						if err := sleepCtx(cc.ctx, time.Duration(rand.IntN(5))*time.Second); err != nil {
 							_ = c.cli.Agent().ServiceDeregister(svc.ID)
 							return
 						}

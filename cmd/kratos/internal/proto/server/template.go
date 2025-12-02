@@ -33,10 +33,11 @@ func New{{ .Service }}Service() *{{ .Service }}Service {
 }
 
 {{- $s1 := "google.protobuf.Empty" }}
+{{- $s2 := "google_protobuf_Empty" }}
 {{ range .Methods }}
 {{- if eq .Type 1 }}
-func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Reply }}{{ end }}, error) {
-	return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&pb.{{ .Reply }}{}{{ end }}, nil
+func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if or (eq .Request $s1) (eq .Request $s2) }}*emptypb.Empty{{ else }}*pb.{{ .Request }}{{ end }}) ({{ if or (eq .Reply $s1) (eq .Reply $s2) }}*emptypb.Empty{{ else }}*pb.{{ .Reply }}{{ end }}, error) {
+    return {{ if or (eq .Reply $s1) (eq .Reply $s2) }}&emptypb.Empty{}{{ else }}&pb.{{ .Reply }}{}{{ end }}, nil
 }
 
 {{- else if eq .Type 2 }}
@@ -49,7 +50,7 @@ func (s *{{ .Service }}Service) {{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Se
 		if err != nil {
 			return err
 		}
-		
+
 		err = conn.Send(&pb.{{ .Reply }}{})
 		if err != nil {
 			return err
@@ -71,14 +72,13 @@ func (s *{{ .Service }}Service) {{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Se
 }
 
 {{- else if eq .Type 4 }}
-func (s *{{ .Service }}Service) {{ .Name }}(req {{ if eq .Request $s1 }}*emptypb.Empty
-{{ else }}*pb.{{ .Request }}{{ end }}, conn pb.{{ .Service }}_{{ .Name }}Server) error {
-	for {
-		err := conn.Send(&pb.{{ .Reply }}{})
-		if err != nil {
-			return err
-		}
-	}
+func (s *{{ .Service }}Service) {{ .Name }}(req {{ if or (eq .Request $s1) (eq .Request $s2) }}*emptypb.Empty{{ else }}*pb.{{ .Request }}{{ end }}, conn pb.{{ .Service }}_{{ .Name }}Server) error {
+    for {
+        err := conn.Send(&pb.{{ .Reply }}{})
+        if err != nil {
+            return err
+        }
+    }
 }
 
 {{- end }}
@@ -118,10 +118,15 @@ type Method struct {
 
 func (s *Service) execute() ([]byte, error) {
 	const empty = "google.protobuf.Empty"
+	// another empty style
+	const emptyV2 = "google_protobuf_Empty"
 	buf := new(bytes.Buffer)
 	for _, method := range s.Methods {
-		if (method.Type == unaryType && (method.Request == empty || method.Reply == empty)) ||
-			(method.Type == returnsStreamsType && method.Request == empty) {
+		isReqEmpty := method.Request == empty || method.Request == emptyV2
+		isReplyEmpty := method.Reply == empty || method.Reply == emptyV2
+
+		if (method.Type == unaryType && (isReqEmpty || isReplyEmpty)) ||
+			(method.Type == returnsStreamsType && isReqEmpty) {
 			s.GoogleEmpty = true
 		}
 		if method.Type == twoWayStreamsType || method.Type == requestStreamsType {
