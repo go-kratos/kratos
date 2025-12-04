@@ -26,7 +26,7 @@ func TestEncodeValues(t *testing.T) {
 		Price:       11.23,
 		D:           22.22,
 		Byte:        []byte("123"),
-		Map:         map[string]string{"kratos": "https://go-kratos.dev/", "kratos_start": "https://go-kratos.dev/en/docs/getting-started/start/"},
+		Map:         map[string]string{"kratos": "https://go-kratos.dev/", "kratos_start": "https://go-kratos.dev/docs/getting-started/start/"},
 		MapInt64Key: map[int64]string{1: "kratos", 2: "go-zero"},
 
 		Timestamp: timestamppb.New(time.Date(1970, 1, 1, 0, 0, 20, 2, time.Local)),
