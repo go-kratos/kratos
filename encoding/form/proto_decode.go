@@ -356,21 +356,26 @@ func isASCIIUpper(c byte) bool {
 // parseURLQueryMapKey parse the url.Values the field name and key name of the value map type key
 // for example: convert "map[key]" to "map" and "key"
 func parseURLQueryMapKey(key string) (string, string, error) {
-	var (
-		startIndex = strings.IndexByte(key, '[')
-		endIndex   = strings.IndexByte(key, ']')
-	)
+	startIndex := strings.IndexByte(key, '[')
+	endIndex := strings.IndexByte(key, ']')
+
 	if startIndex < 0 {
-		//nolint:mnd
-		values := strings.Split(key, fieldSeparator)
-		//nolint:mnd
-		if len(values) != 2 {
+		fsCount := strings.Count(key, fieldSeparator)
+		if fsCount != 1 {
 			return "", "", errInvalidFormatMapKey
 		}
-		return values[0], values[1], nil
+
+		m, k, _ := strings.Cut(key, fieldSeparator)
+		if m == "" {
+			return "", "", errInvalidFormatMapKey
+		}
+
+		return m, k, nil
 	}
+
 	if startIndex <= 0 || startIndex >= endIndex || len(key) != endIndex+1 {
 		return "", "", errInvalidFormatMapKey
 	}
+
 	return key[:startIndex], key[startIndex+1 : endIndex], nil
 }
