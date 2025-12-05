@@ -178,9 +178,11 @@ func convertToType(input string) any {
 	return input
 }
 
+// placeholderRegexp matches ${...} placeholders in config value
+var placeholderRegexp = regexp.MustCompile(`\${(.*?)}`)
+
 func expand(s string, mapping func(string) string, toType bool) any {
-	r := regexp.MustCompile(`\${(.*?)}`)
-	re := r.FindAllStringSubmatch(s, -1)
+	re := placeholderRegexp.FindAllStringSubmatch(s, -1)
 	var ct any
 	for _, i := range re {
 		if len(i) == 2 { //nolint:mnd

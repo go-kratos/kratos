@@ -3,6 +3,7 @@ package metadata
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -69,7 +70,7 @@ func (m Metadata) Values(key string) []string {
 func (m Metadata) Clone() Metadata {
 	md := make(Metadata, len(m))
 	for k, v := range m {
-		md[k] = v
+		md[k] = slices.Clone(v)
 	}
 	return md
 }
