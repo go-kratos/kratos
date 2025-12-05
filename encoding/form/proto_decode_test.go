@@ -274,6 +274,18 @@ func TestParseURLQueryMapKey(t *testing.T) {
 		{
 			fieldName: "kratos]", field: "", fieldKey: "", err: errInvalidFormatMapKey,
 		},
+		{
+			fieldName: "map.kratos", field: "map", fieldKey: "kratos", err: nil,
+		},
+		{
+			fieldName: "map.", field: "map", fieldKey: "", err: nil,
+		},
+		{
+			fieldName: ".kratos", field: "", fieldKey: "", err: errInvalidFormatMapKey,
+		},
+		{
+			fieldName: "map.kratos.v2", field: "", fieldKey: "", err: errInvalidFormatMapKey,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.fieldName, func(t *testing.T) {
@@ -286,6 +298,50 @@ func TestParseURLQueryMapKey(t *testing.T) {
 			}
 			if test.fieldKey != fieldKey {
 				t.Errorf("want: %s, got: %s", test.fieldKey, fieldKey)
+			}
+		})
+	}
+}
+
+func BenchmarkParseURLQueryMapKey(b *testing.B) {
+	testCases := []struct {
+		testName       string
+		fieldName      string
+		wantedField    string
+		wantedFieldKey string
+		wantedErr      error
+	}{
+		{
+			testName:       "with bracket",
+			fieldName:      "kratos[version]",
+			wantedField:    "kratos",
+			wantedFieldKey: "version",
+			wantedErr:      nil,
+		},
+		{
+			testName:       "with point",
+			fieldName:      "kratos.version",
+			wantedField:    "kratos",
+			wantedFieldKey: "version",
+			wantedErr:      nil,
+		},
+	}
+
+	for _, testCase := range testCases {
+		b.Run(testCase.testName, func(b *testing.B) {
+			b.ReportAllocs()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				field, fieldKey, err := parseURLQueryMapKey(testCase.fieldName)
+				if testCase.wantedErr != err {
+					b.Fatalf("want: %s, got: %s", testCase.wantedErr, err)
+				}
+				if testCase.wantedField != field {
+					b.Errorf("want: %s, got: %s", testCase.wantedField, field)
+				}
+				if testCase.wantedFieldKey != fieldKey {
+					b.Errorf("want: %s, got: %s", testCase.wantedFieldKey, fieldKey)
+				}
 			}
 		})
 	}
