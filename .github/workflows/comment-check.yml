@@ -142,7 +142,7 @@ jobs:
 
       - name: Comment on PR if errors found
         if: failure() && github.event_name != 'workflow_dispatch' # This step runs only if the previous step fails
-        uses: peter-evans/create-or-update-comment@v4.0.0
+        uses: peter-evans/create-or-update-comment@v5.0.0
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
