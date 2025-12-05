@@ -21,7 +21,7 @@ jobs:
       EXCLUDE_FILES: ".md .txt .html .css .min.js .mdx"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
