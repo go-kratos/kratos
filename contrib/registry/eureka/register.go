@@ -63,17 +63,18 @@ func New(eurekaUrls []string, opts ...Option) (*Registry, error) {
 	return r, nil
 }
 
-// Register 这里的Context是每个注册器独享的
+// Register registers the service instance.
+// The context here is exclusive to each registry instance.
 func (r *Registry) Register(ctx context.Context, service *registry.ServiceInstance) error {
 	return r.api.Register(ctx, service.Name, r.Endpoints(service)...)
 }
 
-// Deregister registry service to zookeeper.
+// Deregister deregisters the service instance from Eureka.
 func (r *Registry) Deregister(ctx context.Context, service *registry.ServiceInstance) error {
 	return r.api.Deregister(ctx, r.Endpoints(service))
 }
 
-// GetService get services from zookeeper
+// GetService gets services from Eureka.
 func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
 	instances := r.api.GetService(ctx, serviceName)
 	items := make([]*registry.ServiceInstance, 0, len(instances))
@@ -90,7 +91,7 @@ func (r *Registry) GetService(ctx context.Context, serviceName string) ([]*regis
 	return items, nil
 }
 
-// Watch 是独立的ctx
+// Watch creates a watcher for the service. It uses an independent context.
 func (r *Registry) Watch(ctx context.Context, serviceName string) (registry.Watcher, error) {
 	return newWatch(ctx, r.api, serviceName)
 }
