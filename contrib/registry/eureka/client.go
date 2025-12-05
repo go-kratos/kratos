@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"math/rand/v2"
+	"net"
 	"net/http"
 	"strings"
 	"sync"
@@ -18,7 +19,6 @@ const (
 	statusDown         = "DOWN"
 	statusOutOfService = "OUT_OF_SERVICE"
 	heartbeatRetry     = 3
-	maxIdleConns       = 100
 	heartbeatTime      = 10 * time.Second
 	httpTimeout        = 3 * time.Second
 	refreshTime        = 30 * time.Second
@@ -129,18 +129,26 @@ type Client struct {
 	lock              sync.Mutex
 }
 
-func NewClient(urls []string, opts ...ClientOption) *Client {
-	tr := &http.Transport{
-		MaxIdleConns: maxIdleConns,
-	}
+var clientTransport = &http.Transport{
+	DialContext: (&net.Dialer{
+		Timeout:   5 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}).DialContext,
+	IdleConnTimeout:       30 * time.Second,
+	MaxIdleConns:          100,
+	MaxIdleConnsPerHost:   10,
+	TLSHandshakeTimeout:   5 * time.Second,
+	ResponseHeaderTimeout: 10 * time.Second,
+}
 
+func NewClient(urls []string, opts ...ClientOption) *Client {
 	e := &Client{
 		ctx:               context.Background(),
 		urls:              urls,
 		eurekaPath:        "eureka/v2",
 		maxRetry:          len(urls),
 		heartbeatInterval: heartbeatTime,
-		client:            &http.Client{Transport: tr, Timeout: httpTimeout},
+		client:            &http.Client{Transport: clientTransport, Timeout: httpTimeout},
 		keepalive:         make(map[string]chan struct{}),
 	}
 
