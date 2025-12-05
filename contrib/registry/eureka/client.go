@@ -288,7 +288,11 @@ func (e *Client) filterUp(apps ...Application) (res []Instance) {
 }
 
 func (e *Client) pickServer(currentTimes int) string {
-	return e.urls[currentTimes%e.maxRetry]
+	count := len(e.urls)
+	if count == 0 {
+		return ""
+	}
+	return e.urls[currentTimes%count]
 }
 
 func (e *Client) shuffle() {
@@ -343,6 +347,11 @@ func (e *Client) request(ctx context.Context, method string, params []string, in
 }
 
 func (e *Client) do(ctx context.Context, method string, params []string, input io.Reader, output any) error {
+	if e.maxRetry == 0 {
+		_, err := e.request(ctx, method, params, input, output, 0)
+		return err
+	}
+
 	for i := 0; i < e.maxRetry; i++ {
 		retry, err := e.request(ctx, method, params, input, output, i)
 		if retry {
@@ -353,5 +362,6 @@ func (e *Client) do(ctx context.Context, method string, params []string, input i
 		}
 		return nil
 	}
+
 	return fmt.Errorf("retry after %d times", e.maxRetry)
 }
