@@ -373,6 +373,11 @@ func TestMetadata_Clone(t *testing.T) {
 			m:    Metadata{"language": {"golang"}},
 			want: Metadata{"language": {"golang"}},
 		},
+		{
+			name: "plan9",
+			m:    Metadata{"k0": []string{}, "k1": nil},
+			want: Metadata{"k0": []string{}, "k1": nil},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -385,5 +390,46 @@ func TestMetadata_Clone(t *testing.T) {
 				t.Errorf("want got != want got %v want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+// TestMetadata_CloneDeepCopy tests that Clone creates a deep copy of metadata,
+// so modifications to the original metadata's slices don't affect the cloned one.
+func TestMetadata_CloneDeepCopy(t *testing.T) {
+	original := Metadata{
+		"test-key":   {"value1", "value2", "value3"},
+		"single-key": {"single-value"},
+	}
+
+	cloned := original.Clone()
+
+	// Test 1: Modify an element in the original metadata's slice
+	{
+		original["test-key"][1] = "modified-value"
+
+		// Verify that the cloned metadata's slice is not affected
+		if cloned["test-key"][1] != "value2" {
+			t.Errorf("Clone() modify leaked: original=%v, cloned=%v", original["test-key"], cloned["test-key"])
+		}
+	}
+
+	// Test 2: Append to the original metadata's slice
+	{
+		original["test-key"] = append(original["test-key"], "new-value")
+		if len(cloned["test-key"]) != 3 {
+			t.Errorf("Clone() append leaked: original len=%d, cloned len=%d", len(original["test-key"]), len(cloned["test-key"]))
+		}
+		expected := []string{"value1", "value2", "value3"}
+		if !reflect.DeepEqual(cloned["test-key"], expected) {
+			t.Errorf("Clone() append values: got=%v, want=%v", cloned["test-key"], expected)
+		}
+	}
+
+	// Test 3: Replace the entire slice in the original metadata
+	{
+		original["single-key"] = []string{"replaced-value"}
+		if cloned["single-key"][0] != "single-value" {
+			t.Errorf("Clone() replace leaked: original=%v, cloned=%v", original["single-key"], cloned["single-key"])
+		}
 	}
 }
