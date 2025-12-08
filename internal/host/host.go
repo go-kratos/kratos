@@ -17,9 +17,8 @@ func ExtractHostPort(addr string) (host string, port uint64, err error) {
 	return
 }
 
-func isValidIP(addr string) bool {
-	ip := net.ParseIP(addr)
-	return ip.IsGlobalUnicast() && !ip.IsInterfaceLocalMulticast()
+func isValidIP(ip net.IP) bool {
+	return ip != nil && ip.IsGlobalUnicast() && !ip.IsInterfaceLocalMulticast()
 }
 
 // Port return a real port.
@@ -50,21 +49,25 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	var (
-		minIndex = 0
-		ips      = make([]net.IP, 0, 1)
+		minIndex int
+		foundIP  net.IP
 	)
+
 	for _, iface := range ifaces {
 		if iface.Flags&net.FlagUp == 0 {
 			continue
 		}
-		if iface.Index >= minIndex && len(ips) != 0 {
+		if iface.Index >= minIndex && foundIP != nil {
 			continue
 		}
+
 		addrs, err := iface.Addrs()
 		if err != nil {
 			continue
 		}
+
 		for _, rawAddr := range addrs {
 			var ip net.IP
 			switch addr := rawAddr.(type) {
@@ -75,17 +78,20 @@ func Extract(hostPort string, lis net.Listener) (string, error) {
 			default:
 				continue
 			}
-			if isValidIP(ip.String()) {
+
+			if isValidIP(ip) {
 				minIndex = iface.Index
-				ips = append(ips, ip)
+				foundIP = ip
 				if ip.To4() != nil {
 					break
 				}
 			}
 		}
 	}
-	if len(ips) != 0 {
-		return net.JoinHostPort(ips[len(ips)-1].String(), port), nil
+
+	if foundIP != nil {
+		return net.JoinHostPort(foundIP.String(), port), nil
 	}
+
 	return "", nil
 }

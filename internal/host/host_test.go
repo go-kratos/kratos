@@ -43,7 +43,8 @@ func TestValidIP(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.addr, func(t *testing.T) {
-			res := isValidIP(test.addr)
+			ip := net.ParseIP(test.addr)
+			res := isValidIP(ip)
 			if res != test.expect {
 				t.Fatalf("expected %t got %t", test.expect, res)
 			}
@@ -145,5 +146,37 @@ func TestIpIsUp(t *testing.T) {
 	}
 	for i := range interfaces {
 		println(interfaces[i].Name, interfaces[i].Flags&net.FlagUp)
+	}
+}
+
+func BenchmarkExtract(b *testing.B) {
+	testCases := []struct {
+		name     string
+		hostPort string
+		lis      *net.Listener
+	}{
+		{
+			name:     "specific_ip",
+			hostPort: "127.0.0.1:8080", // should be found immediately
+			lis:      nil,
+		},
+		{
+			name:     "wildcard_address",
+			hostPort: "0.0.0.0:8080", // forces the function to search through all interfaces
+			lis:      nil,
+		},
+	}
+
+	for _, testCase := range testCases {
+		b.Run(testCase.name, func(b *testing.B) {
+			b.ResetTimer()
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				_, err := Extract(testCase.hostPort, nil)
+				if err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
 	}
 }
