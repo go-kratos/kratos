@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -73,6 +74,16 @@ func New(code int, reason, message string) *Error {
 			Reason:  reason,
 		},
 	}
+}
+
+// NewWithContext Use context to create error objects and support i18n localization
+func NewWithContext(ctx context.Context, code int, reason string, data any) *Error {
+	message := ""
+	// If the global i18n manager is registered, it is used to localize the error message
+	if globalI18n != nil {
+		message = globalI18n.Localize(ctx, reason, data)
+	}
+	return New(code, reason, message)
 }
 
 // Newf New(code fmt.Sprintf(format, a...))
