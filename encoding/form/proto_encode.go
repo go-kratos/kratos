@@ -65,7 +65,7 @@ func encodeByField(u url.Values, path string, m protoreflect.Message) (finalErr 
 					finalErr = err
 				}
 				for k, value := range m {
-					u.Set(fmt.Sprintf("%s[%s]", newPath, k), value)
+					u.Set(newPath+"["+k+"]", value)
 				}
 			}
 		case (fd.Kind() == protoreflect.MessageKind) || (fd.Kind() == protoreflect.GroupKind):
