@@ -114,11 +114,14 @@ func testWatchFile(t *testing.T, path string) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer f.Close()
 	_, err = f.WriteString(_testJSONUpdate)
 	if err != nil {
 		t.Error(err)
 	}
+	if err = f.Close(); err != nil {
+		t.Fatalf("close file error(%v)", err)
+	}
+
 	kvs, err := watch.Next()
 	if err != nil {
 		t.Errorf("watch.Next() error(%v)", err)
@@ -163,10 +166,12 @@ func testWatchDir(t *testing.T, path, file string) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer f.Close()
 	_, err = f.WriteString(_testJSONUpdate)
 	if err != nil {
 		t.Error(err)
+	}
+	if err = f.Close(); err != nil {
+		t.Fatalf("close file error(%v)", err)
 	}
 
 	kvs, err := watch.Next()
