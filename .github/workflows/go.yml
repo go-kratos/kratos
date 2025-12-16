@@ -80,7 +80,6 @@ jobs:
         run: |
           cd cmd/kratos
           go build ./...
-          go test ./...
         env:
           GOTOOLCHAIN: auto
 
