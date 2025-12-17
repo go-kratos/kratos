@@ -7,18 +7,50 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 )
 
+// ValidatorFunc defines a validation function type.
+type ValidatorFunc func(v any) error
+
+// validator is an interface for types that can validate themselves.
 type validator interface {
 	Validate() error
 }
 
-// Validator is a validator middleware.
+// Validator returns a middleware that performs validation on requests.
+// Example usage:
 //
-// Deprecated: use github.com/go-kratos/kratos/contrib/middleware/validate/v2.ProtoValidate instead.
-func Validator() middleware.Middleware {
+// buf validate(https://github.com/bufbuild/protovalidate):
+// import "buf.build/go/protovalidate"
+//
+//	Validator(func(v any) error {
+//	    if msg, ok := req.(proto.Message); ok {
+//	        if err := protovalidate.Validate(msg); err != nil {
+//	            return nil, err
+//			}
+//		}
+//	    return nil
+//	})
+//
+// Google AIP field behavior validate(https://google.aip.dev/203):
+// import "go.einride.tech/aip/fieldbehavior"
+//
+//	Validator(func(v any) error {
+//	    if msg, ok := req.(proto.Message); ok {
+//		    if err := fieldbehavior.ValidateRequiredFields(msg); err != nil {
+//		        return nil, err
+//		    }
+//		}
+//	    return nil
+//	})
+func Validator(validators ...ValidatorFunc) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req any) (reply any, err error) {
 			if v, ok := req.(validator); ok {
 				if err := v.Validate(); err != nil {
+					return nil, errors.BadRequest("VALIDATOR", err.Error()).WithCause(err)
+				}
+			}
+			for _, v := range validators {
+				if err := v(req); err != nil {
 					return nil, errors.BadRequest("VALIDATOR", err.Error()).WithCause(err)
 				}
 			}
