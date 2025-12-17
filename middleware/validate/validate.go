@@ -34,11 +34,11 @@ type validator interface {
 // import "go.einride.tech/aip/fieldbehavior"
 //
 //	Validator(func(v any) error {
-//	   if msg, ok := req.(proto.Message); ok {
-//		       if err := fieldbehavior.ValidateRequiredFields(msg); err != nil {
-//		           return nil, err
-//		       }
+//	    if msg, ok := req.(proto.Message); ok {
+//		    if err := fieldbehavior.ValidateRequiredFields(msg); err != nil {
+//		        return nil, err
 //		    }
+//		}
 //	    return nil
 //	})
 func Validator(validators ...ValidatorFunc) middleware.Middleware {
