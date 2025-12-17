@@ -7,19 +7,19 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 )
 
-// ValidateFunc defines a validation function type.
-type ValidateFunc func(v any) error
+// ValidatorFunc defines a validation function type.
+type ValidatorFunc func(v any) error
 
-// requestValidator is an interface for types that can validate themselves.
-type requestValidator interface {
+// validator is an interface for types that can validate themselves.
+type validator interface {
 	Validate() error
 }
 
 // Validator is a validator middleware.
-func Validator(validators ...ValidateFunc) middleware.Middleware {
+func Validator(validators ...ValidatorFunc) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req any) (reply any, err error) {
-			if v, ok := req.(requestValidator); ok {
+			if v, ok := req.(validator); ok {
 				if err := v.Validate(); err != nil {
 					return nil, errors.BadRequest("VALIDATOR", err.Error()).WithCause(err)
 				}
