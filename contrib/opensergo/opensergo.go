@@ -1,6 +1,7 @@
 package opensergo
 
 import (
+	"context"
 	"encoding/json"
 	"net"
 	"net/http"
@@ -10,7 +11,6 @@ import (
 	"time"
 
 	v1 "github.com/opensergo/opensergo-go/proto/service_contract/v1"
-	"golang.org/x/net/context"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
