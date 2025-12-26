@@ -1,5 +1,10 @@
 package http
 
+var (
+	_ error      = (*redirect)(nil)
+	_ Redirector = (*redirect)(nil)
+)
+
 type redirect struct {
 	URL  string
 	Code int
@@ -7,6 +12,10 @@ type redirect struct {
 
 func (r *redirect) Redirect() (string, int) {
 	return r.URL, r.Code
+}
+
+func (r *redirect) Error() string {
+	return "redirect to " + r.URL
 }
 
 // NewRedirect new a redirect with url, which may be a path relative to the request path.
