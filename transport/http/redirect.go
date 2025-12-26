@@ -22,6 +22,6 @@ func (r *redirect) Error() string {
 // The provided code should be in the 3xx range and is usually StatusMovedPermanently, StatusFound or StatusSeeOther.
 // If the Content-Type header has not been set, Redirect sets it to "text/html; charset=utf-8" and writes a small HTML body.
 // Setting the Content-Type header to any value, including nil, disables that behavior.
-func NewRedirect(url string, code int) Redirector {
+func NewRedirect(url string, code int) *redirect {
 	return &redirect{URL: url, Code: code}
 }
