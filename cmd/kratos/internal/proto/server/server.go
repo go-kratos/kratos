@@ -64,7 +64,7 @@ func run(_ *cobra.Command, args []string) {
 					continue
 				}
 				cs.Methods = append(cs.Methods, &Method{
-					Service: serviceName(s.Name), Name: serviceName(r.Name), Request: parametersName(r.RequestType),
+					Service: serviceName(s.Name), Name: rpcName(r.Name), Request: parametersName(r.RequestType),
 					Reply: parametersName(r.ReturnsType), Type: getMethodType(r.StreamsRequest, r.StreamsReturns),
 				})
 			}
@@ -110,6 +110,10 @@ func parametersName(name string) string {
 }
 
 func serviceName(name string) string {
+	return strings.TrimSuffix(toUpperCamelCase(strings.Split(name, ".")[0]), "Service")
+}
+
+func rpcName(name string) string {
 	return toUpperCamelCase(strings.Split(name, ".")[0])
 }
 

@@ -51,6 +51,21 @@ func Test_serviceName(t *testing.T) {
 			args: args{str: "hello_world"},
 			want: "HelloWorld",
 		},
+		{
+			name: "serviceName with service suffix",
+			args: args{str: "HelloWorldService"},
+			want: "HelloWorld",
+		},
+		{
+			name: "serviceName with spoace and service suffix",
+			args: args{str: "Hello world service"},
+			want: "HelloWorld",
+		},
+		{
+			name: "serviceName with snake case and service suffix",
+			args: args{str: "hello_world_service"},
+			want: "HelloWorld",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
