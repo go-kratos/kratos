@@ -26,6 +26,7 @@ go.work.sum
 # OS General
 Thumbs.db
 .DS_Store
+.cache
 
 # project
 *.cert
