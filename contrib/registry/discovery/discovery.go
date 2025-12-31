@@ -281,7 +281,7 @@ func (d *Discovery) cancel(ins *discoveryInstance) (err error) {
 	// request
 	// send request to Discovery server.
 	if _, err = d.httpClient.R().
-		SetContext(context.TODO()).
+		SetContext(context.Background()).
 		SetQueryParamsFromValues(p).
 		SetResult(&res).
 		Post(uri); err != nil {
