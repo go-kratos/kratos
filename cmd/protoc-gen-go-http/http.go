@@ -24,7 +24,7 @@ const (
 var methodSets = make(map[string]int)
 
 // generateFile generates a _http.pb.go file containing kratos errors definitions.
-func generateFile(gen *protogen.Plugin, file *protogen.File, omitempty bool, omitemptyPrefix string) *protogen.GeneratedFile {
+func generateFile(gen *protogen.Plugin, file *protogen.File, omitempty bool, omitemptyPrefix string, bindQuery bool) *protogen.GeneratedFile {
 	if len(file.Services) == 0 || (omitempty && !hasHTTPRule(file.Services)) {
 		return nil
 	}
@@ -42,12 +42,12 @@ func generateFile(gen *protogen.Plugin, file *protogen.File, omitempty bool, omi
 	g.P()
 	g.P("package ", file.GoPackageName)
 	g.P()
-	generateFileContent(gen, file, g, omitempty, omitemptyPrefix)
+	generateFileContent(gen, file, g, omitempty, omitemptyPrefix, bindQuery)
 	return g
 }
 
 // generateFileContent generates the kratos errors definitions, excluding the package statement.
-func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, omitempty bool, omitemptyPrefix string) {
+func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, omitempty bool, omitemptyPrefix string, bindQuery bool) {
 	if len(file.Services) == 0 {
 		return
 	}
@@ -59,11 +59,11 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P()
 
 	for _, service := range file.Services {
-		genService(gen, file, g, service, omitempty, omitemptyPrefix)
+		genService(gen, file, g, service, omitempty, omitemptyPrefix, bindQuery)
 	}
 }
 
-func genService(_ *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, service *protogen.Service, omitempty bool, omitemptyPrefix string) {
+func genService(_ *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, service *protogen.Service, omitempty bool, omitemptyPrefix string, bindQuery bool) {
 	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() {
 		g.P("//")
 		g.P(deprecationComment)
@@ -81,12 +81,12 @@ func genService(_ *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFi
 		rule, ok := proto.GetExtension(method.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
 		if rule != nil && ok {
 			for _, bind := range rule.AdditionalBindings {
-				sd.Methods = append(sd.Methods, buildHTTPRule(g, service, method, bind, omitemptyPrefix))
+				sd.Methods = append(sd.Methods, buildHTTPRule(g, service, method, bind, omitemptyPrefix, bindQuery))
 			}
-			sd.Methods = append(sd.Methods, buildHTTPRule(g, service, method, rule, omitemptyPrefix))
+			sd.Methods = append(sd.Methods, buildHTTPRule(g, service, method, rule, omitemptyPrefix, bindQuery))
 		} else if !omitempty {
 			path := fmt.Sprintf("%s/%s/%s", omitemptyPrefix, service.Desc.FullName(), method.Desc.Name())
-			sd.Methods = append(sd.Methods, buildMethodDesc(g, method, http.MethodPost, path))
+			sd.Methods = append(sd.Methods, buildMethodDesc(g, method, http.MethodPost, path, bindQuery))
 		}
 	}
 	if len(sd.Methods) != 0 {
@@ -109,7 +109,7 @@ func hasHTTPRule(services []*protogen.Service) bool {
 	return false
 }
 
-func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *protogen.Method, rule *annotations.HttpRule, omitemptyPrefix string) *methodDesc {
+func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *protogen.Method, rule *annotations.HttpRule, omitemptyPrefix string, bindQuery bool) *methodDesc {
 	var (
 		path         string
 		method       string
@@ -145,7 +145,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *prot
 	}
 	body = rule.Body
 	responseBody = rule.ResponseBody
-	md := buildMethodDesc(g, m, method, path)
+	md := buildMethodDesc(g, m, method, path, bindQuery)
 	if method == http.MethodGet || method == http.MethodDelete {
 		if body != "" {
 			_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s body should not be declared.\n", method, path)
@@ -172,7 +172,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *prot
 	return md
 }
 
-func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path string) *methodDesc {
+func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path string, bindQuery bool) *methodDesc {
 	defer func() { methodSets[m.GoName]++ }()
 
 	vars := buildPathVars(path)
@@ -224,6 +224,7 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 		Path:         path,
 		Method:       method,
 		HasVars:      len(vars) > 0,
+		BindQuery:    bindQuery,
 	}
 }
 
