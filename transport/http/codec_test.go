@@ -62,11 +62,11 @@ func (w *mockResponseWriter) WriteHeader(statusCode int) {
 
 type errorCodec struct{}
 
-func (errorCodec) Marshal(v any) ([]byte, error) {
+func (errorCodec) Marshal(any) ([]byte, error) {
 	return nil, errors.New(500, "mock", "marshal error")
 }
 
-func (errorCodec) Unmarshal(data []byte, v any) error {
+func (errorCodec) Unmarshal([]byte, any) error {
 	return nil
 }
 
