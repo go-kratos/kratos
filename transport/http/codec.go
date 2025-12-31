@@ -106,8 +106,8 @@ func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v any) error
 
 // DefaultErrorEncoder encodes the error to the HTTP response.
 func DefaultErrorEncoder(w http.ResponseWriter, r *http.Request, err error) {
-	var rd Redirector
-	if errors.As(err, rd) {
+	var rd *redirect
+	if errors.As(err, &rd) {
 		url, code := rd.Redirect()
 		http.Redirect(w, r, url, code)
 		return
