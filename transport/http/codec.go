@@ -21,6 +21,7 @@ const SupportPackageIsVersion1 = true
 // Redirector replies to the request with a redirect to url
 // which may be a path relative to the request path.
 type Redirector interface {
+	error
 	Redirect() (string, int)
 }
 
@@ -105,6 +106,12 @@ func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v any) error
 
 // DefaultErrorEncoder encodes the error to the HTTP response.
 func DefaultErrorEncoder(w http.ResponseWriter, r *http.Request, err error) {
+	var rd *redirect
+	if errors.As(err, &rd) {
+		url, code := rd.Redirect()
+		http.Redirect(w, r, url, code)
+		return
+	}
 	se := errors.FromError(err)
 	codec, _ := CodecForRequest(r, "Accept")
 	body, err := codec.Marshal(se)

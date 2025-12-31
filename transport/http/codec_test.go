@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/go-kratos/kratos/v2/encoding"
 	"github.com/go-kratos/kratos/v2/errors"
 )
 
@@ -59,6 +60,20 @@ func (w *mockResponseWriter) WriteHeader(statusCode int) {
 	w.StatusCode = statusCode
 }
 
+type errorCodec struct{}
+
+func (errorCodec) Marshal(any) ([]byte, error) {
+	return nil, errors.New(500, "mock", "marshal error")
+}
+
+func (errorCodec) Unmarshal([]byte, any) error {
+	return nil
+}
+
+func (errorCodec) Name() string {
+	return "mock"
+}
+
 func TestDefaultResponseEncoder(t *testing.T) {
 	var (
 		w    = &mockResponseWriter{StatusCode: 200, header: make(http.Header)}
@@ -105,6 +120,39 @@ func TestDefaultErrorEncoder(t *testing.T) {
 	}
 	if w.Data == nil {
 		t.Errorf("expected not nil, got %v", w.Data)
+	}
+}
+
+func TestDefaultErrorEncoderRedirect(t *testing.T) {
+	w := &mockResponseWriter{header: make(http.Header)}
+	r, _ := http.NewRequest(http.MethodGet, "/test", nil)
+
+	DefaultErrorEncoder(w, r, NewRedirect("/redirect", http.StatusTemporaryRedirect))
+
+	if w.StatusCode != http.StatusTemporaryRedirect {
+		t.Errorf("expected %v, got %v", http.StatusTemporaryRedirect, w.StatusCode)
+	}
+	if w.Header().Get("Location") != "/redirect" {
+		t.Errorf("expected %v, got %v", "/redirect", w.Header().Get("Location"))
+	}
+}
+
+func TestDefaultErrorEncoderMarshalError(t *testing.T) {
+	encoding.RegisterCodec(errorCodec{})
+	w := &mockResponseWriter{header: make(http.Header)}
+	r, _ := http.NewRequest(http.MethodGet, "", nil)
+	r.Header.Set("Accept", "application/mock")
+
+	DefaultErrorEncoder(w, r, errors.New(500, "mock", "marshal error"))
+
+	if w.StatusCode != http.StatusInternalServerError {
+		t.Errorf("expected %v, got %v", http.StatusInternalServerError, w.StatusCode)
+	}
+	if w.Header().Get("Content-Type") != "" {
+		t.Errorf("expected empty content type, got %v", w.Header().Get("Content-Type"))
+	}
+	if w.Data != nil {
+		t.Errorf("expected nil, got %v", w.Data)
 	}
 }
 
