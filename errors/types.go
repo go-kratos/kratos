@@ -56,6 +56,28 @@ func IsConflict(err error) bool {
 	return Code(err) == 409
 }
 
+// TooManyRequests new TooManyRequests error that is mapped to an HTTP 429 response.
+func TooManyRequests(reason, message string) *Error {
+	return New(429, reason, message)
+}
+
+// IsTooManyRequests determines if err is an error which indicates a TooManyRequests error.
+// It supports wrapped errors.
+func IsTooManyRequests(err error) bool {
+	return Code(err) == 429
+}
+
+// ClientClosed new ClientClosed error that is mapped to an HTTP 499 response.
+func ClientClosed(reason, message string) *Error {
+	return New(499, reason, message)
+}
+
+// IsClientClosed determines if err is an error which indicates a IsClientClosed error.
+// It supports wrapped errors.
+func IsClientClosed(err error) bool {
+	return Code(err) == 499
+}
+
 // InternalServer new InternalServer error that is mapped to a 500 response.
 func InternalServer(reason, message string) *Error {
 	return New(500, reason, message)
@@ -87,15 +109,4 @@ func GatewayTimeout(reason, message string) *Error {
 // It supports wrapped errors.
 func IsGatewayTimeout(err error) bool {
 	return Code(err) == 504
-}
-
-// ClientClosed new ClientClosed error that is mapped to an HTTP 499 response.
-func ClientClosed(reason, message string) *Error {
-	return New(499, reason, message)
-}
-
-// IsClientClosed determines if err is an error which indicates a IsClientClosed error.
-// It supports wrapped errors.
-func IsClientClosed(err error) bool {
-	return Code(err) == 499
 }
