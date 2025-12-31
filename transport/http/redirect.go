@@ -1,10 +1,5 @@
 package http
 
-var (
-	_ error      = (*redirect)(nil)
-	_ Redirector = (*redirect)(nil)
-)
-
 type redirect struct {
 	URL  string
 	Code int
@@ -23,10 +18,5 @@ func (r *redirect) Error() string {
 // If the Content-Type header has not been set, Redirect sets it to "text/html; charset=utf-8" and writes a small HTML body.
 // Setting the Content-Type header to any value, including nil, disables that behavior.
 func NewRedirect(url string, code int) Redirector {
-	return &redirect{URL: url, Code: code}
-}
-
-// NewRedirectError new a redirect error with url, which may be a path relative to the request path.
-func NewRedirectError(url string, code int) error {
 	return &redirect{URL: url, Code: code}
 }
