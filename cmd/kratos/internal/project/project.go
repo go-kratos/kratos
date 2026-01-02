@@ -31,11 +31,13 @@ var CmdNew = &cobra.Command{
 
 var (
 	nomod   bool
+	repo    string
 	branch  string
 	timeout = "60s"
 )
 
 func init() {
+	CmdNew.Flags().StringVarP(&repo, "repo", "c", repo, "custom repo url")
 	CmdNew.Flags().StringVarP(&branch, "branch", "b", branch, "repo branch")
 	CmdNew.Flags().StringVarP(&timeout, "timeout", "t", timeout, "time out")
 	CmdNew.Flags().BoolVarP(&nomod, "nomod", "", nomod, "retain go mod")
@@ -68,10 +70,15 @@ func run(_ *cobra.Command, args []string) {
 	projectName, workingDir := processProjectParams(name, wd)
 	p := &Project{Name: projectName}
 	done := make(chan error, 1)
-	repoURL, err := selectRepo()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "\033[31mERROR: failed to select repo(%s)\033[m\n", err.Error())
-		return
+	var repoURL string
+	if repo != "" {
+		repoURL = repo
+	} else {
+		repoURL, err = selectRepo()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\033[31mERROR: failed to select repo(%s)\033[m\n", err.Error())
+			return
+		}
 	}
 	go func() {
 		if !nomod {
@@ -86,7 +93,7 @@ func run(_ *cobra.Command, args []string) {
 
 		packagePath, e := filepath.Rel(projectRoot, filepath.Join(workingDir, projectName))
 		if e != nil {
-			done <- fmt.Errorf("🚫 failed to get relative path: %v", err)
+			done <- fmt.Errorf("🚫 failed to get relative path: %v", e)
 			return
 		}
 		packagePath = strings.ReplaceAll(packagePath, "\\", "/")
