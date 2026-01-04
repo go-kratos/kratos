@@ -154,6 +154,27 @@ func TestConfig(t *testing.T) {
 		t.Fatal("databaseDriver is not equal to val")
 	}
 
+	driverGet, err := Get[string](cf, "data.database.driver")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if databaseDriver != driverGet {
+		t.Errorf("Get[string] want: %s, got: %s", databaseDriver, driverGet)
+	}
+
+	type HTTPConfig struct {
+		Addr string `json:"addr"`
+		Port int    `json:"port"`
+	}
+	v, err := Get[HTTPConfig](cf, "server.http")
+	if err != nil {
+		t.Fatal(err)
+	} else if v.Addr != httpAddr {
+		t.Errorf("Get[HttpConfig] Addr want: %s, got: %s", httpAddr, v.Addr)
+	} else if v.Port != 80 {
+		t.Errorf("Get[HttpConfig] Port want: 80, got: %d", v.Port)
+	}
+
 	err = cf.Watch("endpoints", func(string, Value) {})
 	if err != nil {
 		t.Fatal(err)
