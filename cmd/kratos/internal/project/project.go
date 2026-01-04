@@ -37,7 +37,7 @@ var (
 )
 
 func init() {
-	CmdNew.Flags().StringVarP(&repo, "repo", "r", repo, "custom repo url")
+	CmdNew.Flags().StringVarP(&repo, "repo", "c", repo, "custom repo url")
 	CmdNew.Flags().StringVarP(&branch, "branch", "b", branch, "repo branch")
 	CmdNew.Flags().StringVarP(&timeout, "timeout", "t", timeout, "time out")
 	CmdNew.Flags().BoolVarP(&nomod, "nomod", "", nomod, "retain go mod")
