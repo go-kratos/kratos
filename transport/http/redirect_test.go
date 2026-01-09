@@ -15,10 +15,13 @@ func TestRedirect(t *testing.T) {
 	w := httptest.NewRecorder()
 	_ = DefaultResponseEncoder(w, r, NewRedirect(redirectURL, redirectCode))
 
-	if w.Code != redirectCode {
-		t.Fatalf("want %d but got %d", redirectCode, w.Code)
+	resp := w.Result()
+	defer resp.Body.Close()
+
+	if resp.StatusCode != redirectCode {
+		t.Fatalf("want %d but got %d", redirectCode, resp.StatusCode)
 	}
-	if v := w.Header().Get("Location"); v != redirectURL {
+	if v := resp.Header.Get("Location"); v != redirectURL {
 		t.Fatalf("want %s but got %s", redirectURL, v)
 	}
 }
