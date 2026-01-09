@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 
@@ -52,6 +53,7 @@ func (w *watcher) Next() ([]*config.KeyValue, error) {
 		if fi.IsDir() {
 			path = filepath.Join(w.f.path, filepath.Base(event.Name))
 		}
+		time.Sleep(time.Millisecond)
 		kv, err := w.f.loadFile(path)
 		if err != nil {
 			return nil, err
