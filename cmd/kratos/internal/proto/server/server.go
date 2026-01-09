@@ -79,17 +79,46 @@ func run(_ *cobra.Command, args []string) {
 		to := filepath.Join(targetDir, strings.ToLower(s.Service)+".go")
 		if _, err := os.Stat(to); !os.IsNotExist(err) {
 			fmt.Fprintf(os.Stderr, "%s already exists: %s\n", s.Service, to)
-			continue
+			s.checkRepeatedMethod(to)
 		}
 		b, err := s.execute()
 		if err != nil {
 			log.Fatal(err)
 		}
-		if err := os.WriteFile(to, b, 0o644); err != nil {
-			log.Fatal(err)
+
+		if s.ExistFile {
+			file, err := os.OpenFile(to, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if _, err = file.Write(b); err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			if err := os.WriteFile(to, b, 0o644); err != nil {
+				log.Fatal(err)
+			}
 		}
+
 		fmt.Println(to)
 	}
+}
+
+func (s *Service) checkRepeatedMethod(to string) {
+	contents, err := os.ReadFile(to)
+	if err != nil {
+		log.Fatal(err)
+	}
+	methods := make([]*Method, 0, len(s.Methods))
+	for _, method := range s.Methods {
+		if !(strings.Contains(string(contents), method.Request) &&
+			strings.Contains(string(contents), method.Reply) &&
+			strings.Contains(string(contents), method.Name)) {
+			methods = append(methods, method)
+		}
+	}
+	s.Methods = methods
+	s.ExistFile = true
 }
 
 func getMethodType(streamsRequest, streamsReturns bool) MethodType {
