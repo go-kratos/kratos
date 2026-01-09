@@ -8,6 +8,8 @@ import (
 	"github.com/fsnotify/fsnotify"
 
 	"github.com/go-kratos/kratos/v2/config"
+	configError "github.com/go-kratos/kratos/v2/config/errors"
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 var _ config.Watcher = (*watcher)(nil)
@@ -51,6 +53,10 @@ func (w *watcher) Next() ([]*config.KeyValue, error) {
 		path := w.f.path
 		if fi.IsDir() {
 			path = filepath.Join(w.f.path, filepath.Base(event.Name))
+		}
+		if isSkipFile(fi.Name()) {
+			log.Debugf("skip config file: %s", fi.Name())
+			return nil, configError.SkipFileError
 		}
 		kv, err := w.f.loadFile(path)
 		if err != nil {

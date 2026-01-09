@@ -9,6 +9,7 @@ import (
 
 	"dario.cat/mergo"
 
+	configError "github.com/go-kratos/kratos/v2/config/errors"
 	// init encoding
 	_ "github.com/go-kratos/kratos/v2/encoding/json"
 	_ "github.com/go-kratos/kratos/v2/encoding/proto"
@@ -66,6 +67,9 @@ func (c *config) watch(w Watcher) {
 			if errors.Is(err, context.Canceled) {
 				log.Infof("watcher's ctx cancel : %v", err)
 				return
+			}
+			if errors.Is(err, configError.SkipFileError) {
+				continue
 			}
 			time.Sleep(time.Second)
 			log.Errorf("failed to watch next config: %v", err)
