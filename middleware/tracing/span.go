@@ -103,17 +103,17 @@ func setServerSpan(ctx context.Context, span trace.Span, m any) {
 // on a gRPC's FullMethod.
 func parseFullMethod(fullMethod string) (string, []attribute.KeyValue) {
 	name := strings.TrimLeft(fullMethod, "/")
-	parts := strings.SplitN(name, "/", 2)
-	if len(parts) != 2 { //nolint:mnd
+	service, method, cut := strings.Cut(name, "/")
+	if !cut {
 		// Invalid format, does not follow `/package.service/method`.
 		return name, []attribute.KeyValue{attribute.Key("rpc.operation").String(fullMethod)}
 	}
 
 	var attrs []attribute.KeyValue
-	if service := parts[0]; service != "" {
+	if service != "" {
 		attrs = append(attrs, semconv.RPCServiceKey.String(service))
 	}
-	if method := parts[1]; method != "" {
+	if method != "" {
 		attrs = append(attrs, semconv.RPCMethodKey.String(method))
 	}
 	return name, attrs
