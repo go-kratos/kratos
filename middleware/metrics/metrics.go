@@ -23,9 +23,9 @@ const (
 )
 
 const (
-	DefaultServerSecondsHistogramName = "server_requests_seconds_bucket"
+	DefaultServerSecondsHistogramName = "server_requests_seconds"
 	DefaultServerRequestsCounterName  = "server_requests_code_total"
-	DefaultClientSecondsHistogramName = "client_requests_seconds_bucket"
+	DefaultClientSecondsHistogramName = "client_requests_seconds"
 	DefaultClientRequestsCounterName  = "client_requests_code_total"
 )
 
