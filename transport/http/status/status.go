@@ -55,6 +55,8 @@ func (c statusConverter) ToGRPCCode(code int) codes.Code {
 		return codes.DeadlineExceeded
 	case ClientClosed:
 		return codes.Canceled
+	case http.StatusPreconditionFailed:
+		return codes.FailedPrecondition
 	}
 	return codes.Unknown
 }
@@ -83,8 +85,6 @@ func (c statusConverter) FromGRPCCode(code codes.Code) int {
 		return http.StatusUnauthorized
 	case codes.ResourceExhausted:
 		return http.StatusTooManyRequests
-	case codes.FailedPrecondition:
-		return http.StatusBadRequest
 	case codes.Aborted:
 		return http.StatusConflict
 	case codes.OutOfRange:
@@ -97,6 +97,8 @@ func (c statusConverter) FromGRPCCode(code codes.Code) int {
 		return http.StatusServiceUnavailable
 	case codes.DataLoss:
 		return http.StatusInternalServerError
+	case codes.FailedPrecondition:
+		return http.StatusPreconditionFailed
 	}
 	return http.StatusInternalServerError
 }
