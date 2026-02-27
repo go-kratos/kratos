@@ -1,7 +1,9 @@
 package client
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -124,7 +126,7 @@ func generate(proto string, args []string) error {
 func pathExists(path string) bool {
 	_, err := os.Stat(path)
 	if err != nil {
-		return os.IsExist(err)
+		return !errors.Is(err, fs.ErrNotExist)
 	}
 	return true
 }
