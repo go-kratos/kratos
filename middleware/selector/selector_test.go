@@ -3,7 +3,6 @@ package selector
 import (
 	"context"
 	"reflect"
-	"regexp"
 	"strings"
 	"testing"
 
@@ -261,15 +260,91 @@ func testMiddleware(handler middleware.Handler) middleware.Handler {
 }
 
 func Test_RegexMatch(t *testing.T) {
-	b := Builder{regex: []string{"^\b(?"}}
-	b.compiled = make([]*regexp.Regexp, 0, len(b.regex))
-	for _, regex := range b.regex {
-		if r, err := regexp.Compile(regex); err == nil {
-			b.compiled = append(b.compiled, r)
-		}
+	tests := []struct {
+		name      string
+		regex     []string
+		operation string
+		want      bool
+	}{
+		{
+			name:      "exact match with digits",
+			regex:     []string{`/test/[0-9]+`},
+			operation: "/test/1234",
+			want:      true,
+		},
+		{
+			name:      "no match",
+			regex:     []string{`/test/[0-9]+`},
+			operation: "/test/abc",
+			want:      false,
+		},
+		{
+			name:      "multiple patterns first matches",
+			regex:     []string{`/api/v[0-9]+/.*`, `/test/.*`},
+			operation: "/api/v2/users",
+			want:      true,
+		},
+		{
+			name:      "multiple patterns second matches",
+			regex:     []string{`/api/v[0-9]+/.*`, `/test/.*`},
+			operation: "/test/hello",
+			want:      true,
+		},
+		{
+			name:      "multiple patterns none match",
+			regex:     []string{`/api/v[0-9]+/.*`, `/test/[0-9]+`},
+			operation: "/other/path",
+			want:      false,
+		},
+		{
+			name:      "invalid regex is skipped",
+			regex:     []string{"^\b(?"},
+			operation: "something",
+			want:      false,
+		},
+		{
+			name:      "invalid regex mixed with valid",
+			regex:     []string{"^\b(?", `/test/[0-9]+`},
+			operation: "/test/1234",
+			want:      true,
+		},
+		{
+			name:      "empty regex list",
+			regex:     []string{},
+			operation: "/test/1234",
+			want:      false,
+		},
 	}
-	if len(b.compiled) != 0 {
-		t.Error("The invalid regex must be skipped during compilation.")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var middlewareApplied bool
+			markMiddleware := func(handler middleware.Handler) middleware.Handler {
+				return func(ctx context.Context, req any) (any, error) {
+					middlewareApplied = true
+					return handler(ctx, req)
+				}
+			}
+			next := func(_ context.Context, _ any) (any, error) {
+				return "reply", nil
+			}
+			ctx := transport.NewServerContext(context.Background(), &Transport{operation: tt.operation})
+			handler := Server(markMiddleware).Regex(tt.regex...).Build()(next)
+			_, _ = handler(ctx, tt.operation)
+			if middlewareApplied != tt.want {
+				t.Errorf("middleware applied = %v, want %v", middlewareApplied, tt.want)
+			}
+		})
+	}
+}
+
+func Test_InvalidRegexSkipped(t *testing.T) {
+	b := Server(testMiddleware).Regex("^\b(?", `/valid/[0-9]+`)
+	m := b.Build()
+	if m == nil {
+		t.Fatal("Build() must not return nil")
+	}
+	if len(b.compiled) != 1 {
+		t.Errorf("expected 1 compiled regex, got %d", len(b.compiled))
 	}
 }
 
