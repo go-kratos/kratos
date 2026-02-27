@@ -23,9 +23,9 @@ const (
 )
 
 const (
-	DefaultServerSecondsHistogramName = "server_requests_seconds_bucket"
+	DefaultServerSecondsHistogramName = "server_requests_seconds"
 	DefaultServerRequestsCounterName  = "server_requests_code_total"
-	DefaultClientSecondsHistogramName = "client_requests_seconds_bucket"
+	DefaultClientSecondsHistogramName = "client_requests_seconds"
 	DefaultClientRequestsCounterName  = "client_requests_code_total"
 )
 
@@ -56,7 +56,7 @@ func DefaultRequestsCounter(meter metric.Meter, histogramName string) (metric.In
 
 // DefaultSecondsHistogram
 // return metric.Float64Histogram for WithSeconds
-// suggest histogramName = <client/server>_requests_seconds_bucket
+// suggest histogramName = <client/server>_requests_seconds
 func DefaultSecondsHistogram(meter metric.Meter, histogramName string) (metric.Float64Histogram, error) {
 	return meter.Float64Histogram(
 		histogramName,
@@ -94,7 +94,7 @@ func DefaultSecondsHistogramView(histogramName string) metricsdk.View {
 type options struct {
 	// counter: <client/server>_requests_code_total{kind, operation, code, reason}
 	requests metric.Int64Counter
-	// histogram: <client/server>_requests_seconds_bucket{kind, operation}
+	// histogram: <client/server>_requests_seconds{kind, operation}
 	seconds metric.Float64Histogram
 }
 
