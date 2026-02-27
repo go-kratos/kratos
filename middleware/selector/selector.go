@@ -141,4 +141,3 @@ func pathMatch(path string, operation string) bool {
 func prefixMatch(prefix string, operation string) bool {
 	return strings.HasPrefix(operation, prefix)
 }
-
