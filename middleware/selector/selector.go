@@ -29,10 +29,11 @@ var (
 type Builder struct {
 	client bool
 
-	prefix []string
-	regex  []string
-	path   []string
-	match  MatchFunc
+	prefix   []string
+	regex    []string
+	path     []string
+	match    MatchFunc
+	compiled []*regexp.Regexp
 
 	ms []middleware.Middleware
 }
@@ -79,6 +80,12 @@ func (b *Builder) Build() middleware.Middleware {
 	} else {
 		transporter = serverTransporter
 	}
+	b.compiled = make([]*regexp.Regexp, 0, len(b.regex))
+	for _, regex := range b.regex {
+		if r, err := regexp.Compile(regex); err == nil {
+			b.compiled = append(b.compiled, r)
+		}
+	}
 	return selector(transporter, b.matches, b.ms...)
 }
 
@@ -95,8 +102,8 @@ func (b *Builder) matches(ctx context.Context, transporter transporter) bool {
 			return true
 		}
 	}
-	for _, regex := range b.regex {
-		if regexMatch(regex, operation) {
+	for _, r := range b.compiled {
+		if r.FindString(operation) == operation {
 			return true
 		}
 	}
@@ -135,10 +142,3 @@ func prefixMatch(prefix string, operation string) bool {
 	return strings.HasPrefix(operation, prefix)
 }
 
-func regexMatch(regex string, operation string) bool {
-	r, err := regexp.Compile(regex)
-	if err != nil {
-		return false
-	}
-	return r.FindString(operation) == operation
-}

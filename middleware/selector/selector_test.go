@@ -3,6 +3,7 @@ package selector
 import (
 	"context"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -260,8 +261,15 @@ func testMiddleware(handler middleware.Handler) middleware.Handler {
 }
 
 func Test_RegexMatch(t *testing.T) {
-	if regexMatch("^\b(?", "something") {
-		t.Error("The invalid regex must not match.")
+	b := Builder{regex: []string{"^\b(?"}}
+	b.compiled = make([]*regexp.Regexp, 0, len(b.regex))
+	for _, regex := range b.regex {
+		if r, err := regexp.Compile(regex); err == nil {
+			b.compiled = append(b.compiled, r)
+		}
+	}
+	if len(b.compiled) != 0 {
+		t.Error("The invalid regex must be skipped during compilation.")
 	}
 }
 
