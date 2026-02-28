@@ -30,9 +30,11 @@ func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) fu
 			return err
 		}
 		{{- end}}
+		{{- if .BindQuery}}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
+		{{- end}}
 		{{- if .HasVars}}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
