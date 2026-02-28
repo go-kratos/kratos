@@ -130,9 +130,12 @@ func NewSource(opts ...Option) config.Source {
 }
 
 func format(ns string) string {
-	arr := strings.Split(ns, ".")
-	suffix := arr[len(arr)-1]
-	if len(arr) <= 1 || suffix == properties {
+	lastDot := strings.LastIndexByte(ns, '.')
+	if lastDot == -1 || lastDot == len(ns)-1 {
+		return json
+	}
+	suffix := ns[lastDot+1:]
+	if suffix == properties {
 		return json
 	}
 	if _, ok := formats[suffix]; !ok {
@@ -258,19 +261,19 @@ func resolve(key string, value any, target map[string]any) {
 // genKey got the key of config.KeyValue pair.
 // eg: namespace.ext with subKey got namespace.subKey
 func genKey(ns, sub string) string {
-	arr := strings.Split(ns, ".")
-	if len(arr) == 1 {
-		if ns == "" {
-			return sub
-		}
+	if ns == "" {
+		return sub
+	}
 
+	lastDot := strings.LastIndexByte(ns, '.')
+	if lastDot == -1 || lastDot == len(ns)-1 {
 		return ns + "." + sub
 	}
 
-	suffix := arr[len(arr)-1]
+	suffix := ns[lastDot+1:]
 	_, ok := formats[suffix]
 	if ok {
-		return strings.Join(arr[:len(arr)-1], ".") + "." + sub
+		return ns[:lastDot] + "." + sub
 	}
 
 	return ns + "." + sub

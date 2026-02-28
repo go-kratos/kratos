@@ -137,12 +137,12 @@ func resolver(input map[string]any, mapper func(name string) string, toType bool
 
 func mapper(input map[string]any) func(name string) string {
 	mapper := func(name string) string {
-		args := strings.SplitN(strings.TrimSpace(name), ":", 2) //nolint:mnd
-		if v, has := readValue(input, args[0]); has {
+		key, value, cut := strings.Cut(strings.TrimSpace(name), ":")
+		if v, has := readValue(input, key); has {
 			s, _ := v.String()
 			return s
-		} else if len(args) > 1 { // default value
-			return args[1]
+		} else if cut { // default value
+			return value
 		}
 		return ""
 	}

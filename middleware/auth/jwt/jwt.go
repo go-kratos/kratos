@@ -89,11 +89,10 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 				if keyFunc == nil {
 					return nil, ErrMissingKeyFunc
 				}
-				auths := strings.SplitN(header.RequestHeader().Get(authorizationKey), " ", 2)
-				if len(auths) != 2 || !strings.EqualFold(auths[0], bearerWord) {
+				bearer, jwtToken, cut := strings.Cut(header.RequestHeader().Get(authorizationKey), " ")
+				if !cut || !strings.EqualFold(bearer, bearerWord) {
 					return nil, ErrMissingJwtToken
 				}
-				jwtToken := auths[1]
 				var (
 					tokenInfo *jwt.Token
 					err       error
