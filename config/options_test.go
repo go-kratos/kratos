@@ -395,3 +395,15 @@ func TestWithMergeFunc(t *testing.T) {
 		t.Fatal("c.merge is nil")
 	}
 }
+
+func TestWithPrintLoadedDebugLog(t *testing.T) {
+	c := &options{}
+	WithPrintLoadedDebugLog(true)(c)
+	if !c.printLoadedDebugLog {
+		t.Fatal("c.printLoadedDebugLog is false")
+	}
+	WithPrintLoadedDebugLog(false)(c)
+	if c.printLoadedDebugLog {
+		t.Fatal("c.printLoadedDebugLog is true")
+	}
+}

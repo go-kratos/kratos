@@ -49,6 +49,7 @@ func New(opts ...Option) Config {
 		merge: func(dst, src any) error {
 			return mergo.Map(dst, src, mergo.WithOverride)
 		},
+		printLoadedDebugLog: true,
 	}
 	for _, opt := range opts {
 		opt(&o)
@@ -99,8 +100,10 @@ func (c *config) Load() error {
 		if err != nil {
 			return err
 		}
-		for _, v := range kvs {
-			log.Debugf("config loaded: %s format: %s", v.Key, v.Format)
+		if c.opts.printLoadedDebugLog {
+			for _, v := range kvs {
+				log.Debugf("config loaded: %s format: %s", v.Key, v.Format)
+			}
 		}
 		if err = c.reader.Merge(kvs...); err != nil {
 			log.Errorf("failed to merge config source: %v", err)
