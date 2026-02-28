@@ -156,3 +156,34 @@ func (c *config) Close() error {
 	}
 	return nil
 }
+
+// Get retrieves a config value by key and scans it into the target type.
+func Get[T any](c Config, key string) (T, error) {
+	var t T
+	v := c.Value(key)
+
+	if v.Load() == nil {
+		return t, ErrNotFound
+	}
+
+	switch any(t).(type) {
+	case bool:
+		b, err := v.Bool()
+		return any(b).(T), err
+	case int64:
+		i, err := v.Int()
+		return any(i).(T), err
+	case int:
+		i, err := v.Int()
+		return any(int(i)).(T), err
+	case float64:
+		f, err := v.Float()
+		return any(f).(T), err
+	case string:
+		s, err := v.String()
+		return any(s).(T), err
+	}
+
+	err := v.Scan(&t)
+	return t, err
+}
