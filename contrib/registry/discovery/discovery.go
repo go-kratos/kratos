@@ -173,7 +173,6 @@ func (d *Discovery) serverProc() {
 	defer log.Debug("Discovery serverProc quit")
 
 	var (
-		retry  int
 		ctx    context.Context
 		cancel context.CancelFunc
 	)
@@ -204,10 +203,8 @@ func (d *Discovery) serverProc() {
 				continue
 			}
 			time.Sleep(time.Second)
-			retry++
 			continue
 		}
-		retry = 0
 		d.broadcast(apps)
 	}
 }
@@ -444,22 +441,6 @@ func (r *Resolve) fetch(_ context.Context) (ins *disInstancesInfo, ok bool) {
 		for zone, in := range appIns.Instances {
 			ins.Instances[zone] = in
 		}
-		//if r.opt.Filter != nil {
-		//	ins.Instances = r.opt.Filter(appIns.Instances)
-		//} else {
-		//	ins.Instances = make(map[string][]*discoveryInstance)
-		//	for zone, in := range appIns.Instances {
-		//		ins.Instances[zone] = in
-		//	}
-		//}
-		//if r.opt.scheduler != nil {
-		//	ins.Instances[r.opt.ClientZone] = r.opt.scheduler(ins)
-		//}
-		//if r.opt.Subset != nil && r.opt.SubsetSize != 0 {
-		//	for zone, inss := range ins.Instances {
-		//		ins.Instances[zone] = r.opt.Subset(inss, r.opt.SubsetSize)
-		//	}
-		//}
 	}
 	return
 }
