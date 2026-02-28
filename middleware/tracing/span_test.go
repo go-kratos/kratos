@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"go.opentelemetry.io/otel/attribute"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 	"google.golang.org/grpc/peer"
 
 	"go.opentelemetry.io/otel/trace/noop"
@@ -74,8 +74,8 @@ func Test_peerAttr(t *testing.T) {
 			name: "nil addr",
 			addr: ":8080",
 			want: []attribute.KeyValue{
-				semconv.NetPeerIPKey.String("127.0.0.1"),
-				semconv.NetPeerPortKey.String("8080"),
+				semconv.NetworkPeerAddress("127.0.0.1"),
+				semconv.NetworkPeerPort(8080),
 			},
 		},
 		{
@@ -87,16 +87,16 @@ func Test_peerAttr(t *testing.T) {
 			name: "normal addr with port",
 			addr: "192.168.0.1:8080",
 			want: []attribute.KeyValue{
-				semconv.NetPeerIPKey.String("192.168.0.1"),
-				semconv.NetPeerPortKey.String("8080"),
+				semconv.NetworkPeerAddress("192.168.0.1"),
+				semconv.NetworkPeerPort(8080),
 			},
 		},
 		{
 			name: "dns addr",
 			addr: "foo:8080",
 			want: []attribute.KeyValue{
-				semconv.NetPeerIPKey.String("foo"),
-				semconv.NetPeerPortKey.String("8080"),
+				semconv.NetworkPeerAddress("foo"),
+				semconv.NetworkPeerPort(8080),
 			},
 		},
 	}
