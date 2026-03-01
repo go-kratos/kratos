@@ -10,6 +10,7 @@
 <a href="https://github.com/go-kratos/kratos/blob/main/LICENSE"><img src="https://img.shields.io/github/license/go-kratos/kratos" alt="License"></a>
 <a href="https://github.com/avelino/awesome-go"><img src="https://awesome.re/mentioned-badge.svg" alt="Awesome Go"></a>
 <a href="https://discord.gg/BWzJsUJ"><img src="https://img.shields.io/discord/766619759214854164?label=chat&logo=discord" alt="Discord"></a>
+<a href="https://gurubase.io/g/kratos"><img src="https://img.shields.io/badge/Gurubase-Ask%20Kratos%20Guru-006BFF" alt="Gurubase"></a>
 </p>
 <p align="center">
 <a href="https://trendshift.io/repositories/3233" target="_blank"><img src="https://trendshift.io/api/badge/repositories/3233" alt="go-kratos%2Fkratos | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
