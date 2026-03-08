@@ -50,6 +50,7 @@ type options struct {
 	signingMethod jwt.SigningMethod
 	claims        func() jwt.Claims
 	tokenHeader   map[string]any
+	parserOptions []jwt.ParserOption
 }
 
 // WithSigningMethod with signing method option.
@@ -72,6 +73,15 @@ func WithClaims(f func() jwt.Claims) Option {
 func WithTokenHeader(header map[string]any) Option {
 	return func(o *options) {
 		o.tokenHeader = header
+	}
+}
+
+// WithParserOptions with custom parser options for the jwt parser.
+// It allows customization of the jwt.Parser used during token validation,
+// for example, to enforce mandatory claim validations such as issuer, subject, or expiration.
+func WithParserOptions(opts ...jwt.ParserOption) Option {
+	return func(o *options) {
+		o.parserOptions = opts
 	}
 }
 
@@ -99,9 +109,9 @@ func Server(keyFunc jwt.Keyfunc, opts ...Option) middleware.Middleware {
 					err       error
 				)
 				if o.claims != nil {
-					tokenInfo, err = jwt.ParseWithClaims(jwtToken, o.claims(), keyFunc)
+					tokenInfo, err = jwt.ParseWithClaims(jwtToken, o.claims(), keyFunc, o.parserOptions...)
 				} else {
-					tokenInfo, err = jwt.Parse(jwtToken, keyFunc)
+					tokenInfo, err = jwt.Parse(jwtToken, keyFunc, o.parserOptions...)
 				}
 				if err != nil {
 					if errors.Is(err, jwt.ErrTokenMalformed) || errors.Is(err, jwt.ErrTokenUnverifiable) {
