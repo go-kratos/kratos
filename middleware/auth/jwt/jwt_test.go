@@ -529,7 +529,7 @@ func TestWithParserOptions(t *testing.T) {
 	issuer := "https://example.com"
 	subject := "user"
 
-	next := func(ctx context.Context, req any) (any, error) {
+	next := func(ctx context.Context, _ any) (any, error) {
 		testToken, _ := FromContext(ctx)
 		if testToken == nil {
 			t.Error("expected testToken not nil, but got nil")
@@ -686,7 +686,7 @@ func TestWithParserOptionsConcurrent(t *testing.T) {
 	testKey := "testKey"
 	issuer := "https://example.com"
 
-	next := func(ctx context.Context, req any) (any, error) {
+	next := func(ctx context.Context, _ any) (any, error) {
 		testToken, _ := FromContext(ctx)
 		if testToken == nil {
 			return nil, errors.New("expected testToken not nil, but got nil")
@@ -731,7 +731,7 @@ func TestWithParserOptionsConcurrent(t *testing.T) {
 func TestWithParserOptionsEmpty(t *testing.T) {
 	testKey := "testKey"
 
-	next := func(ctx context.Context, req any) (any, error) {
+	next := func(_ context.Context, _ any) (any, error) {
 		return "reply", nil
 	}
 
