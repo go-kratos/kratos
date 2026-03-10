@@ -523,3 +523,237 @@ func TestNewContextAndFromContext(t *testing.T) {
 		})
 	}
 }
+
+func TestWithParserOptions(t *testing.T) {
+	testKey := "testKey"
+	issuer := "https://example.com"
+	subject := "user"
+
+	next := func(ctx context.Context, _ any) (any, error) {
+		testToken, _ := FromContext(ctx)
+		if testToken == nil {
+			t.Error("expected testToken not nil, but got nil")
+		}
+		return "reply", nil
+	}
+
+	tests := []struct {
+		name          string
+		claims        jwt.RegisteredClaims
+		parserOptions []jwt.ParserOption
+		customClaims  func() jwt.Claims
+		exceptErr     error
+	}{
+		{
+			name: "valid token with matching issuer",
+			claims: jwt.RegisteredClaims{
+				Issuer:    issuer,
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+			},
+			parserOptions: []jwt.ParserOption{
+				jwt.WithIssuer(issuer),
+			},
+			exceptErr: nil,
+		},
+		{
+			name: "invalid token with wrong issuer",
+			claims: jwt.RegisteredClaims{
+				Issuer:    "https://wrong-issuer.com",
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+			},
+			parserOptions: []jwt.ParserOption{
+				jwt.WithIssuer(issuer),
+			},
+			exceptErr: ErrTokenParseFail,
+		},
+		{
+			name: "valid token with matching subject",
+			claims: jwt.RegisteredClaims{
+				Subject:   subject,
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+			},
+			parserOptions: []jwt.ParserOption{
+				jwt.WithSubject(subject),
+			},
+			exceptErr: nil,
+		},
+		{
+			name: "invalid token with wrong subject",
+			claims: jwt.RegisteredClaims{
+				Subject:   "admin",
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+			},
+			parserOptions: []jwt.ParserOption{
+				jwt.WithSubject(subject),
+			},
+			exceptErr: ErrTokenParseFail,
+		},
+		{
+			name: "valid token with multiple parser options",
+			claims: jwt.RegisteredClaims{
+				Issuer:    issuer,
+				Subject:   subject,
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+			},
+			parserOptions: []jwt.ParserOption{
+				jwt.WithIssuer(issuer),
+				jwt.WithSubject(subject),
+				jwt.WithExpirationRequired(),
+			},
+			exceptErr: nil,
+		},
+		{
+			name: "invalid token missing required expiration",
+			claims: jwt.RegisteredClaims{
+				Issuer:  issuer,
+				Subject: subject,
+			},
+			parserOptions: []jwt.ParserOption{
+				jwt.WithExpirationRequired(),
+			},
+			exceptErr: ErrTokenParseFail,
+		},
+		{
+			name: "valid token with no parser options (backward compatibility)",
+			claims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+			},
+			parserOptions: nil,
+			exceptErr:     nil,
+		},
+		{
+			name: "valid token with custom claims and matching issuer",
+			claims: jwt.RegisteredClaims{
+				Issuer:    issuer,
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+			},
+			parserOptions: []jwt.ParserOption{
+				jwt.WithIssuer(issuer),
+			},
+			customClaims: func() jwt.Claims {
+				return &CustomerClaims{}
+			},
+			exceptErr: nil,
+		},
+		{
+			name: "invalid token with custom claims and wrong issuer",
+			claims: jwt.RegisteredClaims{
+				Issuer:    "https://wrong-issuer.com",
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+			},
+			parserOptions: []jwt.ParserOption{
+				jwt.WithIssuer(issuer),
+			},
+			customClaims: func() jwt.Claims {
+				return &CustomerClaims{}
+			},
+			exceptErr: ErrTokenParseFail,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, test.claims).SignedString([]byte(testKey))
+			if err != nil {
+				t.Fatal(err)
+			}
+			ctx := transport.NewServerContext(context.Background(), &Transport{
+				reqHeader: newTokenHeader(authorizationKey, fmt.Sprintf(bearerFormat, token)),
+			})
+
+			opts := []Option{WithSigningMethod(jwt.SigningMethodHS256)}
+			if test.parserOptions != nil {
+				opts = append(opts, WithParserOptions(test.parserOptions...))
+			}
+			if test.customClaims != nil {
+				opts = append(opts, WithClaims(test.customClaims))
+			}
+
+			server := Server(
+				func(*jwt.Token) (any, error) { return []byte(testKey), nil },
+				opts...,
+			)(next)
+
+			_, err2 := server(ctx, test.name)
+			if !errors.Is(test.exceptErr, err2) {
+				t.Errorf("expected error %v, but got %v", test.exceptErr, err2)
+			}
+		})
+	}
+}
+
+func TestWithParserOptionsConcurrent(t *testing.T) {
+	testKey := "testKey"
+	issuer := "https://example.com"
+
+	next := func(ctx context.Context, _ any) (any, error) {
+		testToken, _ := FromContext(ctx)
+		if testToken == nil {
+			return nil, errors.New("expected testToken not nil, but got nil")
+		}
+		return "reply", nil
+	}
+
+	server := Server(
+		func(*jwt.Token) (any, error) { return []byte(testKey), nil },
+		WithClaims(func() jwt.Claims { return &CustomerClaims{} }),
+		WithParserOptions(jwt.WithIssuer(issuer), jwt.WithExpirationRequired()),
+	)(next)
+
+	wg := sync.WaitGroup{}
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, &CustomerClaims{
+				Name: strconv.Itoa(rand.Int()),
+				RegisteredClaims: jwt.RegisteredClaims{
+					Issuer:    issuer,
+					ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+				},
+			}).SignedString([]byte(testKey))
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			ctx := transport.NewServerContext(context.Background(), &Transport{
+				reqHeader: newTokenHeader(authorizationKey, fmt.Sprintf(bearerFormat, token)),
+			})
+			_, err2 := server(ctx, "concurrent")
+			if err2 != nil {
+				t.Errorf("expected nil error, but got %v", err2)
+			}
+		}()
+	}
+	wg.Wait()
+}
+
+func TestWithParserOptionsEmpty(t *testing.T) {
+	testKey := "testKey"
+
+	next := func(_ context.Context, _ any) (any, error) {
+		return "reply", nil
+	}
+
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"name": "kratos",
+	}).SignedString([]byte(testKey))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := transport.NewServerContext(context.Background(), &Transport{
+		reqHeader: newTokenHeader(authorizationKey, fmt.Sprintf(bearerFormat, token)),
+	})
+
+	// WithParserOptions called with no arguments should behave identically to not calling it.
+	server := Server(
+		func(*jwt.Token) (any, error) { return []byte(testKey), nil },
+		WithParserOptions(),
+	)(next)
+
+	_, err2 := server(ctx, "empty parser options")
+	if err2 != nil {
+		t.Errorf("expected nil error, but got %v", err2)
+	}
+}

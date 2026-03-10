@@ -57,7 +57,7 @@ func Test_serviceName(t *testing.T) {
 			want: "HelloWorld",
 		},
 		{
-			name: "serviceName with spoace and service suffix",
+			name: "serviceName with space and service suffix",
 			args: args{str: "Hello world service"},
 			want: "HelloWorld",
 		},
