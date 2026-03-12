@@ -78,11 +78,11 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 		}
 		id := in.InstanceId
 		if id == "" {
-			id = in.Ip + "#" + strconv.Itoa(int(in.Port)) + "#" + in.ClusterName + "#" + res.Name
+			id = in.Ip + "#" + strconv.Itoa(int(in.Port)) + "#" + in.ClusterName + "#" + in.ServiceName
 		}
 		items = append(items, &registry.ServiceInstance{
 			ID:        id,
-			Name:      res.Name,
+			Name:      in.ServiceName,
 			Version:   in.Metadata["version"],
 			Metadata:  in.Metadata,
 			Endpoints: []string{kind + "://" + net.JoinHostPort(in.Ip, strconv.Itoa(int(in.Port)))},
