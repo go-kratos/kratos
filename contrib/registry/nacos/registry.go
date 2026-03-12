@@ -194,8 +194,12 @@ func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registr
 			weight = in.Weight
 		}
 
+		id := in.InstanceId
+		if id == "" {
+			id = in.Ip + "#" + strconv.Itoa(int(in.Port)) + "#" + in.ClusterName + "#" + in.ServiceName
+		}
 		r := &registry.ServiceInstance{
-			ID:        in.InstanceId,
+			ID:        id,
 			Name:      in.ServiceName,
 			Version:   in.Metadata["version"],
 			Metadata:  in.Metadata,

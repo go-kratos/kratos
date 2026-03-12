@@ -76,8 +76,12 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 		if k, ok := in.Metadata["kind"]; ok {
 			kind = k
 		}
+		id := in.InstanceId
+		if id == "" {
+			id = in.Ip + "#" + strconv.Itoa(int(in.Port)) + "#" + in.ClusterName + "#" + res.Name
+		}
 		items = append(items, &registry.ServiceInstance{
-			ID:        in.InstanceId,
+			ID:        id,
 			Name:      res.Name,
 			Version:   in.Metadata["version"],
 			Metadata:  in.Metadata,
