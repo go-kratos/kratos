@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nacos-group/nacos-sdk-go/clients"
-	"github.com/nacos-group/nacos-sdk-go/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/vo"
+	"github.com/nacos-group/nacos-sdk-go/v2/clients"
+	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -21,17 +21,14 @@ func TestRegistry_Register(t *testing.T) {
 	sc := testServerConfig
 
 	cc := constant.ClientConfig{
-		NamespaceId:         "public", // namespace id
+		NamespaceId:         "public",
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
 		CacheDir:            "/tmp/nacos/cache",
-		RotateTime:          "1h",
-		MaxAge:              3,
 		LogLevel:            "debug",
 	}
 
-	// a more graceful way to create naming client
 	client, err := clients.NewNamingClient(
 		vo.NacosClientParam{
 			ClientConfig:  &cc,
@@ -236,17 +233,14 @@ func TestRegistry_Deregister(t *testing.T) {
 				sc := testServerConfig
 
 				cc := constant.ClientConfig{
-					NamespaceId:         "public", // namespace id
+					NamespaceId:         "public",
 					TimeoutMs:           5000,
 					NotLoadCacheAtStart: true,
 					LogDir:              "/tmp/nacos/log",
 					CacheDir:            "/tmp/nacos/cache",
-					RotateTime:          "1h",
-					MaxAge:              3,
 					LogLevel:            "debug",
 				}
 
-				// a more graceful way to create naming client
 				client, err := clients.NewNamingClient(
 					vo.NacosClientParam{
 						ClientConfig:  &cc,
@@ -295,17 +289,14 @@ func TestRegistry_Deregister(t *testing.T) {
 			sc := testServerConfig
 
 			cc := constant.ClientConfig{
-				NamespaceId:         "public", // namespace id
+				NamespaceId:         "public",
 				TimeoutMs:           5000,
 				NotLoadCacheAtStart: true,
 				LogDir:              "/tmp/nacos/log",
 				CacheDir:            "/tmp/nacos/cache",
-				RotateTime:          "1h",
-				MaxAge:              3,
 				LogLevel:            "debug",
 			}
 
-			// a more graceful way to create naming client
 			client, err := clients.NewNamingClient(
 				vo.NacosClientParam{
 					ClientConfig:  &cc,
@@ -330,17 +321,14 @@ func TestRegistry_GetService(t *testing.T) {
 	sc := testServerConfig
 
 	cc := constant.ClientConfig{
-		NamespaceId:         "public", // namespace id
+		NamespaceId:         "public",
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
 		CacheDir:            "/tmp/nacos/cache",
-		RotateTime:          "1h",
-		MaxAge:              3,
 		LogLevel:            "debug",
 	}
 
-	// a more graceful way to create naming client
 	client, err := clients.NewNamingClient(
 		vo.NacosClientParam{
 			ClientConfig:  &cc,
@@ -444,17 +432,14 @@ func TestRegistry_Watch(t *testing.T) {
 	sc := testServerConfig
 
 	cc := constant.ClientConfig{
-		NamespaceId:         "public", // namespace id
+		NamespaceId:         "public",
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
 		LogDir:              "/tmp/nacos/log",
 		CacheDir:            "/tmp/nacos/cache",
-		RotateTime:          "1h",
-		MaxAge:              3,
 		LogLevel:            "debug",
 	}
 
-	// a more graceful way to create naming client
 	client, err := clients.NewNamingClient(
 		vo.NacosClientParam{
 			ClientConfig:  &cc,
@@ -559,7 +544,7 @@ func TestRegistry_Watch(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(want, tt.want) {
-				t.Errorf("Watch watcher = %v, want %v", watch, tt.want)
+				t.Errorf("Watch got = %v, want %v", want, tt.want)
 			}
 		})
 	}
