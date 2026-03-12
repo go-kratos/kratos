@@ -5,9 +5,9 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/nacos-group/nacos-sdk-go/clients/naming_client"
-	"github.com/nacos-group/nacos-sdk-go/model"
-	"github.com/nacos-group/nacos-sdk-go/vo"
+	"github.com/nacos-group/nacos-sdk-go/v2/clients/naming_client"
+	"github.com/nacos-group/nacos-sdk-go/v2/model"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -41,7 +41,7 @@ func newWatcher(ctx context.Context, cli naming_client.INamingClient, serviceNam
 		ServiceName: serviceName,
 		Clusters:    clusters,
 		GroupName:   groupName,
-		SubscribeCallback: func([]model.SubscribeService, error) {
+		SubscribeCallback: func([]model.Instance, error) {
 			select {
 			case w.watchChan <- struct{}{}:
 			default:
