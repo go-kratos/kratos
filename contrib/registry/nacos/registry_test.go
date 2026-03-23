@@ -5,16 +5,9 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
 	// external nacos client creation removed; tests use fake client
-
 	"github.com/go-kratos/kratos/v2/registry"
 )
-
-var testServerConfig = []constant.ServerConfig{
-	*constant.NewServerConfig("127.0.0.1", 8848),
-}
 
 func TestRegistry_Register(t *testing.T) {
 	// real Nacos client config omitted; tests use in-memory fake client below

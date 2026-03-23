@@ -150,9 +150,11 @@ func (f *fakeNamingClient) CloseClient() {}
 func (f *fakeNamingClient) GetAllServicesInfo(_ vo.GetAllServiceInfoParam) (model.ServiceList, error) {
 	return model.ServiceList{}, nil
 }
+
 func (f *fakeNamingClient) SelectAllInstances(_ vo.SelectAllInstancesParam) ([]model.Instance, error) {
 	return nil, nil
 }
+
 func (f *fakeNamingClient) SelectOneHealthyInstance(arg0 vo.SelectOneHealthInstanceParam) (*model.Instance, error) {
 	// pick the first match if any
 	key := arg0.GroupName + "@@" + arg0.ServiceName
