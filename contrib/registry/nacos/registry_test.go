@@ -210,13 +210,13 @@ func TestRegistry_Deregister(t *testing.T) {
 			},
 			wantErr: false,
 			preFunc: func(t *testing.T) {
-					// use in-memory fake client so tests don't need a running nacos server
-					client := NewFakeNamingClient()
-					r := New(client)
-					if err := r.Register(context.Background(), testServer); err != nil {
-						t.Error(err)
-					}
-				},
+				// use in-memory fake client so tests don't need a running nacos server
+				client := NewFakeNamingClient()
+				r := New(client)
+				if err := r.Register(context.Background(), testServer); err != nil {
+					t.Error(err)
+				}
+			},
 		},
 		{
 			name: "error",
