@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
 	// external nacos client creation removed; tests use fake client
 	"github.com/go-kratos/kratos/v2/registry"
 )
