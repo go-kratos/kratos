@@ -196,7 +196,8 @@ func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registr
 
 		id := in.InstanceId
 		if id == "" {
-			id = in.Ip + "#" + strconv.Itoa(int(in.Port)) + "#" + in.ClusterName + "#" + in.ServiceName
+			// use ip:port#cluster#service as instance id if instance id is empty
+			id = instanceKey(&in)
 		}
 		r := &registry.ServiceInstance{
 			ID:        id,

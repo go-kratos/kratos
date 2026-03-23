@@ -6,9 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nacos-group/nacos-sdk-go/v2/clients"
 	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/v2/vo"
+	// external nacos client creation removed; tests use fake client
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -18,26 +17,9 @@ var testServerConfig = []constant.ServerConfig{
 }
 
 func TestRegistry_Register(t *testing.T) {
-	sc := testServerConfig
-
-	cc := constant.ClientConfig{
-		NamespaceId:         "public",
-		TimeoutMs:           5000,
-		NotLoadCacheAtStart: true,
-		LogDir:              "/tmp/nacos/log",
-		CacheDir:            "/tmp/nacos/cache",
-		LogLevel:            "debug",
-	}
-
-	client, err := clients.NewNamingClient(
-		vo.NacosClientParam{
-			ClientConfig:  &cc,
-			ServerConfigs: sc,
-		},
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
+	// real Nacos client config omitted; tests use in-memory fake client below
+	// use in-memory fake client so tests don't need a running nacos server
+	client := NewFakeNamingClient()
 	r := New(client)
 
 	testServer := &registry.ServiceInstance{
@@ -78,8 +60,7 @@ func TestRegistry_Register(t *testing.T) {
 			},
 			wantErr: false,
 			deferFunc: func(t *testing.T) {
-				err = r.Deregister(context.Background(), testServer)
-				if err != nil {
+				if err := r.Deregister(context.Background(), testServer); err != nil {
 					t.Error(err)
 				}
 			},
@@ -95,8 +76,7 @@ func TestRegistry_Register(t *testing.T) {
 			},
 			wantErr: false,
 			deferFunc: func(t *testing.T) {
-				err = r.Deregister(context.Background(), testServerWithMetadata)
-				if err != nil {
+				if err := r.Deregister(context.Background(), testServerWithMetadata); err != nil {
 					t.Error(err)
 				}
 			},
@@ -230,32 +210,13 @@ func TestRegistry_Deregister(t *testing.T) {
 			},
 			wantErr: false,
 			preFunc: func(t *testing.T) {
-				sc := testServerConfig
-
-				cc := constant.ClientConfig{
-					NamespaceId:         "public",
-					TimeoutMs:           5000,
-					NotLoadCacheAtStart: true,
-					LogDir:              "/tmp/nacos/log",
-					CacheDir:            "/tmp/nacos/cache",
-					LogLevel:            "debug",
-				}
-
-				client, err := clients.NewNamingClient(
-					vo.NacosClientParam{
-						ClientConfig:  &cc,
-						ServerConfigs: sc,
-					},
-				)
-				if err != nil {
-					t.Fatal(err)
-				}
-				r := New(client)
-				err = r.Register(context.Background(), testServer)
-				if err != nil {
-					t.Error(err)
-				}
-			},
+					// use in-memory fake client so tests don't need a running nacos server
+					client := NewFakeNamingClient()
+					r := New(client)
+					if err := r.Register(context.Background(), testServer); err != nil {
+						t.Error(err)
+					}
+				},
 		},
 		{
 			name: "error",
@@ -286,26 +247,8 @@ func TestRegistry_Deregister(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sc := testServerConfig
-
-			cc := constant.ClientConfig{
-				NamespaceId:         "public",
-				TimeoutMs:           5000,
-				NotLoadCacheAtStart: true,
-				LogDir:              "/tmp/nacos/log",
-				CacheDir:            "/tmp/nacos/cache",
-				LogLevel:            "debug",
-			}
-
-			client, err := clients.NewNamingClient(
-				vo.NacosClientParam{
-					ClientConfig:  &cc,
-					ServerConfigs: sc,
-				},
-			)
-			if err != nil {
-				t.Fatal(err)
-			}
+			// use in-memory fake client so tests don't need a running nacos server
+			client := NewFakeNamingClient()
 			r := New(client)
 			if tt.preFunc != nil {
 				tt.preFunc(t)
@@ -318,26 +261,8 @@ func TestRegistry_Deregister(t *testing.T) {
 }
 
 func TestRegistry_GetService(t *testing.T) {
-	sc := testServerConfig
-
-	cc := constant.ClientConfig{
-		NamespaceId:         "public",
-		TimeoutMs:           5000,
-		NotLoadCacheAtStart: true,
-		LogDir:              "/tmp/nacos/log",
-		CacheDir:            "/tmp/nacos/cache",
-		LogLevel:            "debug",
-	}
-
-	client, err := clients.NewNamingClient(
-		vo.NacosClientParam{
-			ClientConfig:  &cc,
-			ServerConfigs: sc,
-		},
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
+	// use in-memory fake client so tests don't need a running nacos server
+	client := NewFakeNamingClient()
 	r := New(client)
 	testServer := &registry.ServiceInstance{
 		ID:        "1",
@@ -365,15 +290,13 @@ func TestRegistry_GetService(t *testing.T) {
 		{
 			name: "normal",
 			preFunc: func(t *testing.T) {
-				err = r.Register(context.Background(), testServer)
-				if err != nil {
+				if err := r.Register(context.Background(), testServer); err != nil {
 					t.Error(err)
 				}
 				time.Sleep(time.Second * 3)
 			},
 			deferFunc: func(t *testing.T) {
-				err = r.Deregister(context.Background(), testServer)
-				if err != nil {
+				if err := r.Deregister(context.Background(), testServer); err != nil {
 					t.Error(err)
 				}
 			},
@@ -429,26 +352,8 @@ func TestRegistry_GetService(t *testing.T) {
 }
 
 func TestRegistry_Watch(t *testing.T) {
-	sc := testServerConfig
-
-	cc := constant.ClientConfig{
-		NamespaceId:         "public",
-		TimeoutMs:           5000,
-		NotLoadCacheAtStart: true,
-		LogDir:              "/tmp/nacos/log",
-		CacheDir:            "/tmp/nacos/cache",
-		LogLevel:            "debug",
-	}
-
-	client, err := clients.NewNamingClient(
-		vo.NacosClientParam{
-			ClientConfig:  &cc,
-			ServerConfigs: sc,
-		},
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
+	// use in-memory fake client so tests don't need a running nacos server
+	client := NewFakeNamingClient()
 	r := New(client)
 
 	testServer := &registry.ServiceInstance{
@@ -492,8 +397,7 @@ func TestRegistry_Watch(t *testing.T) {
 				Endpoints: []string{"grpc://127.0.0.1:8080"},
 			}},
 			processFunc: func(t *testing.T) {
-				err = r.Register(context.Background(), testServer)
-				if err != nil {
+				if err := r.Register(context.Background(), testServer); err != nil {
 					t.Error(err)
 				}
 			},
@@ -538,13 +442,14 @@ func TestRegistry_Watch(t *testing.T) {
 				tt.processFunc(t)
 			}
 
-			want, err := watch.Next()
+			got, err := watch.Next()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Watch error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(want, tt.want) {
-				t.Errorf("Watch got = %v, want %v", want, tt.want)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Watch watcher = %v, want %v", watch, tt.want)
+				t.Errorf("Watch got = %v, want %v", got, tt.want)
 			}
 		})
 	}
