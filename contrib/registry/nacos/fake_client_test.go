@@ -27,16 +27,18 @@ func NewFakeNamingClient() naming_client.INamingClient {
 }
 
 func (f *fakeNamingClient) notify(serviceKey string) {
+	// Copy subscribers slice under lock to avoid races if Subscribe/Unsubscribe
+	// modifies the slice concurrently.
 	f.mu.RLock()
-	subs := f.subscribers[serviceKey]
+	subs := append([]*vo.SubscribeParam(nil), f.subscribers[serviceKey]...)
+	// Make a single copy of hosts while still under the read-lock.
+	hosts := append([]model.Instance(nil), f.services[serviceKey]...)
 	f.mu.RUnlock()
+
 	for _, sp := range subs {
-		if sp.SubscribeCallback != nil {
-			// make a local copy of hosts
-			f.mu.RLock()
-			hosts := append([]model.Instance(nil), f.services[serviceKey]...)
-			f.mu.RUnlock()
-			sp.SubscribeCallback(hosts, nil)
+		if sp != nil && sp.SubscribeCallback != nil {
+			// deliver a copy of hosts per callback to be safe if callback mutates it
+			sp.SubscribeCallback(append([]model.Instance(nil), hosts...), nil)
 		}
 	}
 }

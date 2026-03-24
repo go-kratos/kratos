@@ -194,11 +194,9 @@ func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registr
 			weight = in.Weight
 		}
 
-		id := in.InstanceId
-		if id == "" {
-			// use ip:port#cluster#service as instance id if instance id is empty
-			id = instanceKey(&in)
-		}
+		// derive instance id (instanceKey returns InstanceId when present,
+		// otherwise falls back to ip#port#cluster#service)
+		id := instanceKey(&in)
 		r := &registry.ServiceInstance{
 			ID:        id,
 			Name:      in.ServiceName,

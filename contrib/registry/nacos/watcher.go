@@ -76,7 +76,7 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 		if k, ok := in.Metadata["kind"]; ok {
 			kind = k
 		}
-		// use ip:port#cluster#service as instance id if instance id is empty
+	// use ip#port#cluster#service as instance id if instance id is empty
 		id := instanceKey(&in)
 		items = append(items, &registry.ServiceInstance{
 			ID:        id,

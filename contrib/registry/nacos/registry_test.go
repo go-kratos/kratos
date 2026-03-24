@@ -4,7 +4,6 @@ import (
 	"context"
 	"reflect"
 	"testing"
-	"time"
 
 	// external nacos client creation removed; tests use fake client
 	"github.com/go-kratos/kratos/v2/registry"
@@ -194,7 +193,7 @@ func TestRegistry_Deregister(t *testing.T) {
 		name    string
 		args    args
 		wantErr bool
-		preFunc func(t *testing.T)
+		preFunc func(t *testing.T, r *Registry)
 	}{
 		{
 			name: "normal",
@@ -203,10 +202,8 @@ func TestRegistry_Deregister(t *testing.T) {
 				service: testServer,
 			},
 			wantErr: false,
-			preFunc: func(t *testing.T) {
-				// use in-memory fake client so tests don't need a running nacos server
-				client := NewFakeNamingClient()
-				r := New(client)
+			preFunc: func(t *testing.T, r *Registry) {
+				// register using the same registry/client used by the test
 				if err := r.Register(context.Background(), testServer); err != nil {
 					t.Error(err)
 				}
@@ -245,7 +242,7 @@ func TestRegistry_Deregister(t *testing.T) {
 			client := NewFakeNamingClient()
 			r := New(client)
 			if tt.preFunc != nil {
-				tt.preFunc(t)
+				tt.preFunc(t, r)
 			}
 			if err := r.Deregister(tt.args.ctx, tt.args.service); (err != nil) != tt.wantErr {
 				t.Errorf("Deregister error = %v, wantErr %v", err, tt.wantErr)
@@ -284,11 +281,10 @@ func TestRegistry_GetService(t *testing.T) {
 		{
 			name: "normal",
 			preFunc: func(t *testing.T) {
-				if err := r.Register(context.Background(), testServer); err != nil {
-					t.Error(err)
-				}
-				time.Sleep(time.Second * 3)
-			},
+					if err := r.Register(context.Background(), testServer); err != nil {
+						t.Error(err)
+					}
+				},
 			deferFunc: func(t *testing.T) {
 				if err := r.Deregister(context.Background(), testServer); err != nil {
 					t.Error(err)
