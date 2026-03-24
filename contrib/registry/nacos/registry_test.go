@@ -281,10 +281,10 @@ func TestRegistry_GetService(t *testing.T) {
 		{
 			name: "normal",
 			preFunc: func(t *testing.T) {
-					if err := r.Register(context.Background(), testServer); err != nil {
-						t.Error(err)
-					}
-				},
+				if err := r.Register(context.Background(), testServer); err != nil {
+					t.Error(err)
+				}
+			},
 			deferFunc: func(t *testing.T) {
 				if err := r.Deregister(context.Background(), testServer); err != nil {
 					t.Error(err)
