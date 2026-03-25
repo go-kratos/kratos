@@ -132,7 +132,7 @@ func findCMD(base string) (map[string]string, error) {
 		if root {
 			break
 		}
-		_ = filepath.Join(base, "..")
+		base = filepath.Join(base, "..")
 	}
 	return map[string]string{"": base}, nil
 }

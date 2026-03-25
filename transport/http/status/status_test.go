@@ -25,6 +25,7 @@ func TestToGRPCCode(t *testing.T) {
 		{"http.StatusServiceUnavailable", http.StatusServiceUnavailable, codes.Unavailable},
 		{"http.StatusGatewayTimeout", http.StatusGatewayTimeout, codes.DeadlineExceeded},
 		{"StatusClientClosed", ClientClosed, codes.Canceled},
+		{"http.StatusPreconditionFailed", http.StatusPreconditionFailed, codes.FailedPrecondition},
 		{"else", 100000, codes.Unknown},
 	}
 	for _, tt := range tests {
@@ -52,7 +53,7 @@ func TestFromGRPCCode(t *testing.T) {
 		{"codes.PermissionDenied", codes.PermissionDenied, http.StatusForbidden},
 		{"codes.Unauthenticated", codes.Unauthenticated, http.StatusUnauthorized},
 		{"codes.ResourceExhausted", codes.ResourceExhausted, http.StatusTooManyRequests},
-		{"codes.FailedPrecondition", codes.FailedPrecondition, http.StatusBadRequest},
+		{"codes.FailedPrecondition", codes.FailedPrecondition, http.StatusPreconditionFailed},
 		{"codes.Aborted", codes.Aborted, http.StatusConflict},
 		{"codes.OutOfRange", codes.OutOfRange, http.StatusBadRequest},
 		{"codes.Unimplemented", codes.Unimplemented, http.StatusNotImplemented},
