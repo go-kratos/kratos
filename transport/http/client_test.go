@@ -367,3 +367,20 @@ func TestNewClient(t *testing.T) {
 		t.Error("err should be equal to encoder error")
 	}
 }
+
+func TestNewClientWithTLSDoesNotModifyDefaultTransport(t *testing.T) {
+	defaultTransport, ok := http.DefaultTransport.(*http.Transport)
+	if !ok {
+		t.Skip("http.DefaultTransport is not *http.Transport")
+	}
+	originalTLSConfig := defaultTransport.TLSClientConfig
+
+	_, err := NewClient(context.Background(), WithEndpoint("127.0.0.1:9999"), WithTLSConfig(&tls.Config{ServerName: "www.kratos.com"}))
+	if err != nil {
+		t.Error(err)
+	}
+
+	if defaultTransport.TLSClientConfig != originalTLSConfig {
+		t.Error("NewClient modified http.DefaultTransport.TLSClientConfig")
+	}
+}
