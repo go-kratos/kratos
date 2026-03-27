@@ -10,9 +10,9 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/nacos-group/nacos-sdk-go/clients/naming_client"
-	"github.com/nacos-group/nacos-sdk-go/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/vo"
+	"github.com/nacos-group/nacos-sdk-go/v2/clients/naming_client"
+	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 
 	"github.com/go-kratos/kratos/v2/registry"
 )
@@ -194,8 +194,11 @@ func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registr
 			weight = in.Weight
 		}
 
+		// derive instance id (instanceKey returns InstanceId when present,
+		// otherwise falls back to ip#port#cluster#service)
+		id := instanceKey(&in)
 		r := &registry.ServiceInstance{
-			ID:        in.InstanceId,
+			ID:        id,
 			Name:      in.ServiceName,
 			Version:   in.Metadata["version"],
 			Metadata:  in.Metadata,
