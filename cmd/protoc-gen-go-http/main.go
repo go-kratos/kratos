@@ -12,6 +12,7 @@ var (
 	showVersion     = flag.Bool("version", false, "print the version and exit")
 	omitempty       = flag.Bool("omitempty", true, "omit if google.api is empty")
 	omitemptyPrefix = flag.String("omitempty_prefix", "", "omit if google.api is empty")
+	bindQuery       = flag.Bool("bind_query", true, "bind query")
 )
 
 func main() {
@@ -28,7 +29,7 @@ func main() {
 			if !f.Generate {
 				continue
 			}
-			generateFile(gen, f, *omitempty, *omitemptyPrefix)
+			generateFile(gen, f, *omitempty, *omitemptyPrefix, *bindQuery)
 		}
 		return nil
 	})
