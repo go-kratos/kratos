@@ -5,6 +5,7 @@ import (
 	"net"
 	"testing"
 
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"go.opentelemetry.io/otel/trace/noop"
 	"google.golang.org/grpc/peer"
@@ -15,8 +16,31 @@ type ctxKey string
 
 const testKey ctxKey = "MY_TEST_KEY"
 
-func TestClient_HandleConn(_ *testing.T) {
-	(&ClientHandler{}).HandleConn(context.Background(), nil)
+type recordingSpan struct {
+	trace.Span
+	spanCtx    trace.SpanContext
+	attributes []attribute.KeyValue
+}
+
+func (r *recordingSpan) SpanContext() trace.SpanContext {
+	return r.spanCtx
+}
+
+func (r *recordingSpan) SetAttributes(attrs ...attribute.KeyValue) {
+	r.attributes = append(r.attributes, attrs...)
+}
+
+func newValidSpanContext() trace.SpanContext {
+	sc := trace.SpanContext{}
+	sc = sc.WithTraceID([16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16})
+	sc = sc.WithSpanID([8]byte{1, 2, 3, 4, 5, 6, 7, 8})
+	return sc
+}
+
+func TestClient_HandleConn(t *testing.T) {
+	client := &ClientHandler{}
+	// HandleConn should not panic with nil stats
+	client.HandleConn(context.Background(), nil)
 }
 
 func TestClient_TagConn(t *testing.T) {
@@ -37,44 +61,73 @@ func TestClient_TagRPC(t *testing.T) {
 	}
 }
 
-type mockSpan struct {
-	trace.Span
-	mockSpanCtx *trace.SpanContext
-}
-
-func (m *mockSpan) SpanContext() trace.SpanContext {
-	return *m.mockSpanCtx
-}
-
-func TestClient_HandleRPC(_ *testing.T) {
+func TestClient_HandleRPC(t *testing.T) {
 	client := &ClientHandler{}
-	ctx := context.Background()
-	rs := stats.OutHeader{}
 
-	// Handle stats.RPCStats is not type of stats.OutHeader case
-	client.HandleRPC(context.TODO(), nil)
-
-	// Handle context doesn't have the peerkey filled with a Peer instance
-	client.HandleRPC(ctx, &rs)
-
-	// Handle context with the peerkey filled with a Peer instance
-	ip, _ := net.ResolveIPAddr("ip", "1.1.1.1")
-	ctx = peer.NewContext(ctx, &peer.Peer{
-		Addr: ip,
+	t.Run("non-OutHeader is ignored", func(t *testing.T) {
+		span := &recordingSpan{
+			Span:    noop.Span{},
+			spanCtx: newValidSpanContext(),
+		}
+		ctx := trace.ContextWithSpan(context.Background(), span)
+		ctx = peer.NewContext(ctx, &peer.Peer{Addr: &net.TCPAddr{IP: net.ParseIP("1.1.1.1"), Port: 8080}})
+		// pass nil instead of *stats.OutHeader
+		client.HandleRPC(ctx, nil)
+		if len(span.attributes) != 0 {
+			t.Errorf("expected no attributes for non-OutHeader, got %v", span.attributes)
+		}
 	})
-	client.HandleRPC(ctx, &rs)
 
-	// Handle context with Span
-	_, span := noop.NewTracerProvider().Tracer("Tracer").Start(ctx, "Spanname")
-	spanCtx := trace.SpanContext{}
-	spanID := [8]byte{12, 12, 12, 12, 12, 12, 12, 12}
-	traceID := [16]byte{12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12}
-	spanCtx = spanCtx.WithTraceID(traceID)
-	spanCtx = spanCtx.WithSpanID(spanID)
-	mSpan := mockSpan{
-		Span:        span,
-		mockSpanCtx: &spanCtx,
-	}
-	ctx = trace.ContextWithSpan(ctx, &mSpan)
-	client.HandleRPC(ctx, &rs)
+	t.Run("no peer in context", func(t *testing.T) {
+		span := &recordingSpan{
+			Span:    noop.Span{},
+			spanCtx: newValidSpanContext(),
+		}
+		ctx := trace.ContextWithSpan(context.Background(), span)
+		client.HandleRPC(ctx, &stats.OutHeader{})
+		if len(span.attributes) != 0 {
+			t.Errorf("expected no attributes without peer, got %v", span.attributes)
+		}
+	})
+
+	t.Run("invalid span context", func(t *testing.T) {
+		span := &recordingSpan{
+			Span:    noop.Span{},
+			spanCtx: trace.SpanContext{}, // invalid: zero trace/span IDs
+		}
+		ctx := trace.ContextWithSpan(context.Background(), span)
+		ctx = peer.NewContext(ctx, &peer.Peer{Addr: &net.TCPAddr{IP: net.ParseIP("1.1.1.1"), Port: 8080}})
+		client.HandleRPC(ctx, &stats.OutHeader{})
+		if len(span.attributes) != 0 {
+			t.Errorf("expected no attributes for invalid span context, got %v", span.attributes)
+		}
+	})
+
+	t.Run("valid span sets peer attributes", func(t *testing.T) {
+		span := &recordingSpan{
+			Span:    noop.Span{},
+			spanCtx: newValidSpanContext(),
+		}
+		ctx := trace.ContextWithSpan(context.Background(), span)
+		ctx = peer.NewContext(ctx, &peer.Peer{Addr: &net.TCPAddr{IP: net.ParseIP("1.1.1.1"), Port: 8080}})
+		client.HandleRPC(ctx, &stats.OutHeader{})
+		if len(span.attributes) == 0 {
+			t.Fatal("expected peer attributes to be set, got none")
+		}
+		var foundIP, foundPort bool
+		for _, attr := range span.attributes {
+			if attr.Key == "net.peer.ip" && attr.Value.AsString() == "1.1.1.1" {
+				foundIP = true
+			}
+			if attr.Key == "net.peer.port" && attr.Value.AsString() == "8080" {
+				foundPort = true
+			}
+		}
+		if !foundIP {
+			t.Error("expected net.peer.ip attribute with value 1.1.1.1")
+		}
+		if !foundPort {
+			t.Error("expected net.peer.port attribute with value 8080")
+		}
+	})
 }
