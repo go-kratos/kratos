@@ -28,13 +28,15 @@ func (c *customChangeListener) onChange(namespace string, changes map[string]*st
 	if strings.Contains(namespace, ".") && !strings.HasSuffix(namespace, "."+properties) &&
 		(format(namespace) == yaml || format(namespace) == yml || format(namespace) == json) {
 		if value, ok := changes["content"]; ok {
-			kv = append(kv, &config.KeyValue{
-				Key:    namespace,
-				Value:  []byte(value.NewValue.(string)),
-				Format: format(namespace),
-			})
+			if s, ok := value.NewValue.(string); ok {
+				kv = append(kv, &config.KeyValue{
+					Key:    namespace,
+					Value:  []byte(s),
+					Format: format(namespace),
+				})
 
-			return kv
+				return kv
+			}
 		}
 	}
 

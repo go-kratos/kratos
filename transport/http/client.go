@@ -174,7 +174,9 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	}
 	if options.tlsConf != nil {
 		if tr, ok := options.transport.(*http.Transport); ok {
-			tr.TLSClientConfig = options.tlsConf
+			cloned := tr.Clone()
+			cloned.TLSClientConfig = options.tlsConf
+			options.transport = cloned
 		}
 	}
 	insecure := options.tlsConf == nil
