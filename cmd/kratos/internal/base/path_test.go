@@ -60,6 +60,40 @@ var modulePath = "` + oldMod + `"
 	}
 }
 
+func TestReplaceTemplateContentPreservesProtobufRawDescWithCRLF(t *testing.T) {
+	const oldMod = "github.com/example/template"
+	const newMod = "github.com/example/service"
+
+	input := strings.Join([]string{
+		"package conf",
+		"",
+		"import dep \"" + oldMod + "/api/greeter/v1\"",
+		"",
+		"const file_conf_conf_proto_rawDesc = \"\" +",
+		"\t\"\\n\" +",
+		"\t\"\\x0fconf/conf.proto\\x12\\n\" +",
+		"\t\"kratos.apiB7Z5" + oldMod + "/internal/conf;confb\\x06proto3\"",
+		"",
+		"var wireImport = \"" + oldMod + "/internal/server\"",
+		"",
+	}, "\r\n")
+
+	got := string(replaceTemplateContent([]byte(input), []string{oldMod, newMod}))
+
+	if !strings.Contains(got, "import dep \""+newMod+"/api/greeter/v1\"\r\n") {
+		t.Fatalf("expected CRLF import path to be replaced, got:\n%s", got)
+	}
+	if !strings.Contains(got, "var wireImport = \""+newMod+"/internal/server\"\r\n") {
+		t.Fatalf("expected CRLF regular string to be replaced, got:\n%s", got)
+	}
+	if !strings.Contains(got, `B7Z5`+oldMod+`/internal/conf;confb\x06proto3"`) {
+		t.Fatalf("expected CRLF protobuf raw descriptor to stay untouched, got:\n%s", got)
+	}
+	if strings.Contains(got, `B7Z5`+newMod+`/internal/conf;confb\x06proto3"`) {
+		t.Fatalf("CRLF protobuf raw descriptor was unexpectedly rewritten:\n%s", got)
+	}
+}
+
 func TestReplaceTemplateContentReplacesLegacyProtobufByteDesc(t *testing.T) {
 	const oldMod = "github.com/example/template"
 	const newMod = "github.com/example/service"

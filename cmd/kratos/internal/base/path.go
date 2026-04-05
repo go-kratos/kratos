@@ -12,7 +12,7 @@ import (
 	"github.com/fatih/color"
 )
 
-var protobufRawDescBlockRE = regexp.MustCompile(`(?ms)^const file_.*?_rawDesc = "" \+\n(?:\t"(?:[^"\\]|\\.)*" \+\n)*\t"(?:[^"\\]|\\.)*"\n`)
+var protobufRawDescBlockRE = regexp.MustCompile(`(?ms)^const file_.*?_rawDesc = "" \+\r?\n(?:\t"(?:[^"\\]|\\.)*" \+\r?\n)*\t"(?:[^"\\]|\\.)*"\r?\n`)
 
 func kratosHome() string {
 	dir, err := os.UserHomeDir()
