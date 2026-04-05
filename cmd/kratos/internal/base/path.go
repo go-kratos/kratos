@@ -6,10 +6,13 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/fatih/color"
 )
+
+var protobufRawDescBlockRE = regexp.MustCompile(`(?ms)^const file_.*?_rawDesc = "" \+\r?\n(?:\t"(?:[^"\\]|\\.)*" \+\r?\n)*\t"(?:[^"\\]|\\.)*"\r?\n`)
 
 func kratosHome() string {
 	dir, err := os.UserHomeDir()
@@ -44,15 +47,32 @@ func copyFile(src, dst string, replaces []string) error {
 	if err != nil {
 		return err
 	}
-	var old string
-	for i, next := range replaces {
-		if i%2 == 0 {
-			old = next
-			continue
-		}
-		buf = bytes.ReplaceAll(buf, []byte(old), []byte(next))
-	}
+	buf = replaceTemplateContent(buf, replaces)
 	return os.WriteFile(dst, buf, srcinfo.Mode())
+}
+
+func replaceTemplateContent(buf []byte, replaces []string) []byte {
+	matches := protobufRawDescBlockRE.FindAllIndex(buf, -1)
+	if len(matches) == 0 {
+		return applyReplacements(buf, replaces)
+	}
+
+	var out bytes.Buffer
+	last := 0
+	for _, match := range matches {
+		out.Write(applyReplacements(buf[last:match[0]], replaces))
+		out.Write(buf[match[0]:match[1]])
+		last = match[1]
+	}
+	out.Write(applyReplacements(buf[last:], replaces))
+	return out.Bytes()
+}
+
+func applyReplacements(buf []byte, replaces []string) []byte {
+	for i := 0; i+1 < len(replaces); i += 2 {
+		buf = bytes.ReplaceAll(buf, []byte(replaces[i]), []byte(replaces[i+1]))
+	}
+	return buf
 }
 
 func copyDir(src, dst string, replaces, ignores []string) error {
