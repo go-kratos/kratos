@@ -75,34 +75,53 @@ func TestMatch(t *testing.T) {
 	tests := []struct {
 		name string
 		ctx  context.Context
+		want bool
 	}{
-		// TODO: Add test cases.
 		{
 			name: "/hello/world",
 			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/hello/world"}),
+			want: true, // matches Prefix("/hello/")
 		},
 		{
 			name: "/hi/world",
 			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/hi/world"}),
+			want: false, // no matching rule
 		},
 		{
 			name: "/test/1234",
 			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/test/1234"}),
+			want: true, // matches Regex(`/test/[0-9]+`)
 		},
 		{
 			name: "/example/kratos",
 			ctx:  transport.NewServerContext(context.Background(), &Transport{operation: "/example/kratos"}),
+			want: true, // matches Path("/example/kratos")
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			next := func(_ context.Context, req any) (any, error) {
-				t.Log(req)
+			var middlewareApplied bool
+			markMiddleware := func(handler middleware.Handler) middleware.Handler {
+				return func(ctx context.Context, req any) (any, error) {
+					middlewareApplied = true
+					return handler(ctx, req)
+				}
+			}
+			next := func(_ context.Context, _ any) (any, error) {
 				return "reply", nil
 			}
-			next = Server(testMiddleware).Prefix("/hello/").Regex(`/test/[0-9]+`).
+			next = Server(markMiddleware).Prefix("/hello/").Regex(`/test/[0-9]+`).
 				Path("/example/kratos").Build()(next)
-			_, _ = next(test.ctx, test.name)
+			reply, err := next(test.ctx, test.name)
+			if err != nil {
+				t.Errorf("expect error is nil, but got %v", err)
+			}
+			if !reflect.DeepEqual(reply, "reply") {
+				t.Errorf("expect reply is reply, but got %v", reply)
+			}
+			if middlewareApplied != test.want {
+				t.Errorf("middleware applied = %v, want %v", middlewareApplied, test.want)
+			}
 		})
 	}
 }
@@ -111,34 +130,53 @@ func TestMatchClient(t *testing.T) {
 	tests := []struct {
 		name string
 		ctx  context.Context
+		want bool
 	}{
-		// TODO: Add test cases.
 		{
 			name: "/hello/world",
 			ctx:  transport.NewClientContext(context.Background(), &Transport{operation: "/hello/world"}),
+			want: true, // matches Prefix("/hello/")
 		},
 		{
 			name: "/hi/world",
 			ctx:  transport.NewClientContext(context.Background(), &Transport{operation: "/hi/world"}),
+			want: false, // no matching rule
 		},
 		{
 			name: "/test/1234",
 			ctx:  transport.NewClientContext(context.Background(), &Transport{operation: "/test/1234"}),
+			want: true, // matches Regex(`/test/[0-9]+`)
 		},
 		{
 			name: "/example/kratos",
 			ctx:  transport.NewClientContext(context.Background(), &Transport{operation: "/example/kratos"}),
+			want: true, // matches Path("/example/kratos")
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			next := func(_ context.Context, req any) (any, error) {
-				t.Log(req)
+			var middlewareApplied bool
+			markMiddleware := func(handler middleware.Handler) middleware.Handler {
+				return func(ctx context.Context, req any) (any, error) {
+					middlewareApplied = true
+					return handler(ctx, req)
+				}
+			}
+			next := func(_ context.Context, _ any) (any, error) {
 				return "reply", nil
 			}
-			next = Client(testMiddleware).Prefix("/hello/").Regex(`/test/[0-9]+`).
+			next = Client(markMiddleware).Prefix("/hello/").Regex(`/test/[0-9]+`).
 				Path("/example/kratos").Build()(next)
-			_, _ = next(test.ctx, test.name)
+			reply, err := next(test.ctx, test.name)
+			if err != nil {
+				t.Errorf("expect error is nil, but got %v", err)
+			}
+			if !reflect.DeepEqual(reply, "reply") {
+				t.Errorf("expect reply is reply, but got %v", reply)
+			}
+			if middlewareApplied != test.want {
+				t.Errorf("middleware applied = %v, want %v", middlewareApplied, test.want)
+			}
 		})
 	}
 }
