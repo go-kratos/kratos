@@ -20,10 +20,15 @@ var CmdServer = &cobra.Command{
 	Long:  "Generate the proto server implementations. Example: kratos proto server api/xxx.proto --target-dir=internal/service",
 	Run:   run,
 }
-var targetDir string
+
+var (
+	targetDir    string
+	templatePath string
+)
 
 func init() {
 	CmdServer.Flags().StringVarP(&targetDir, "target-dir", "t", "internal/service", "generate target directory")
+	CmdServer.Flags().StringVarP(&templatePath, "template-file", "m", "", "specify custom template file")
 }
 
 func run(_ *cobra.Command, args []string) {
@@ -81,7 +86,7 @@ func run(_ *cobra.Command, args []string) {
 			fmt.Fprintf(os.Stderr, "%s already exists: %s\n", s.Service, to)
 			continue
 		}
-		b, err := s.execute()
+		b, err := s.execute(templatePath)
 		if err != nil {
 			log.Fatal(err)
 		}
