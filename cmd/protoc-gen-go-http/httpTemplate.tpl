@@ -26,9 +26,15 @@ func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) fu
 	return func(ctx http.Context) error {
 		var in {{.Request}}
 		{{- if .HasBody}}
-		if err := ctx.Bind(&in{{.Body}}); err != nil {
+		{{- if .BodyProtoName}}
+		if err := ctx.Bind(in.ProtoReflect().Mutable(in.ProtoReflect().Descriptor().Fields().ByName("{{.BodyProtoName}}")).Message().Interface()); err != nil {
 			return err
 		}
+		{{- else}}
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		{{- end}}
 		{{- end}}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
@@ -47,7 +53,11 @@ func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) fu
 			return err
 		}
 		reply := out.(*{{.Reply}})
+		{{- if .ResponseBodyProtoName}}
+		return ctx.Result(200, reply{{getterAccessor .ResponseBody}})
+		{{- else}}
 		return ctx.Result(200, reply{{.ResponseBody}})
+		{{- end}}
 	}
 }
 {{end}}
@@ -79,11 +89,15 @@ func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Reque
 	path := binding.EncodeURL(pattern, in, {{not .HasBody}})
 	opts = append(opts, http.Operation(Operation{{$svrType}}{{.OriginalName}}))
 	opts = append(opts, http.PathTemplate(pattern))
-	{{if .HasBody -}}
-	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, opts...)
-	{{else -}}
-	err := c.cc.Invoke(ctx, "{{.Method}}", path, nil, &out{{.ResponseBody}}, opts...)
-	{{end -}}
+	{{- if .HasBody}}
+	{{- if .BodyProtoName}}
+	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{getterAccessor .Body}}, {{if .ResponseBodyProtoName}}out.ProtoReflect().Mutable(out.ProtoReflect().Descriptor().Fields().ByName("{{.ResponseBodyProtoName}}")).Message().Interface(){{else}}&out{{.ResponseBody}}{{end}}, opts...)
+	{{- else}}
+	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, {{if .ResponseBodyProtoName}}out.ProtoReflect().Mutable(out.ProtoReflect().Descriptor().Fields().ByName("{{.ResponseBodyProtoName}}")).Message().Interface(){{else}}&out{{.ResponseBody}}{{end}}, opts...)
+	{{- end}}
+	{{- else}}
+	err := c.cc.Invoke(ctx, "{{.Method}}", path, nil, {{if .ResponseBodyProtoName}}out.ProtoReflect().Mutable(out.ProtoReflect().Descriptor().Fields().ByName("{{.ResponseBodyProtoName}}")).Message().Interface(){{else}}&out{{.ResponseBody}}{{end}}, opts...)
+	{{- end}}
 	if err != nil {
 		return nil, err
 	}

@@ -161,6 +161,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *prot
 	} else if body != "" {
 		md.HasBody = true
 		md.Body = "." + camelCaseVars(body)
+		md.BodyProtoName = body
 	} else {
 		md.HasBody = false
 	}
@@ -168,6 +169,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *prot
 		md.ResponseBody = ""
 	} else if responseBody != "" {
 		md.ResponseBody = "." + camelCaseVars(responseBody)
+		md.ResponseBodyProtoName = responseBody
 	}
 	return md
 }
@@ -257,6 +259,23 @@ func replacePath(name string, value string, path string) string {
 		)
 	}
 	return path
+}
+
+// toGetterAccessor converts a CamelCase field accessor like ".Payload" or ".User.Profile"
+// into a chained getter call like ".GetPayload()" or ".GetUser().GetProfile()".
+// This is compatible with both open and opaque protobuf Go API styles.
+func toGetterAccessor(camelCaseBody string) string {
+	if camelCaseBody == "" {
+		return ""
+	}
+	parts := strings.Split(camelCaseBody[1:], ".") // strip leading dot, split segments
+	var result strings.Builder
+	for _, part := range parts {
+		result.WriteString(".Get")
+		result.WriteString(part)
+		result.WriteString("()")
+	}
+	return result.String()
 }
 
 func camelCaseVars(s string) string {
