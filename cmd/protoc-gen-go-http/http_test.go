@@ -2,6 +2,7 @@ package main
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -96,5 +97,92 @@ func TestReplaceBoundary(t *testing.T) {
 	}
 	if !reflect.DeepEqual("/test/{message.namespace:.*}/name/{message.name:.*}", path) {
 		t.Fatal(`"/test/{message.namespace=*}/name/{message.name=*}" should be "/test/{message.namespace:.*}/name/{message.name:.*}"`)
+	}
+}
+
+func TestGetterAccessor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"", ""},
+		{".Payload", ".GetPayload()"},
+		{".UserProfile", ".GetUserProfile()"},
+		{".User.Profile", ".GetUser().GetProfile()"},
+	}
+	for _, tt := range tests {
+		got := toGetterAccessor(tt.input)
+		if got != tt.expected {
+			t.Fatalf("toGetterAccessor(%q) = %q, want %q", tt.input, got, tt.expected)
+		}
+	}
+}
+
+func TestTemplateBodyNamedField(t *testing.T) {
+	sd := &serviceDesc{
+		ServiceType: "TestSvc",
+		ServiceName: "test.v1.TestSvc",
+		Metadata:    "test/v1/test.proto",
+		Methods: []*methodDesc{
+			{
+				Name:          "BotHandler",
+				OriginalName: "BotHandler",
+				Num:           0,
+				Request:       "BotHandlerRequest",
+				Reply:         "emptypb.Empty",
+				Path:          "/api/v1/bot",
+				Method:        "POST",
+				HasBody:       true,
+				Body:          ".Payload",
+				BodyProtoName: "payload",
+			},
+		},
+	}
+	output := sd.execute()
+
+	// Server handler should use proto reflection for named body field
+	if !strings.Contains(output, `in.ProtoReflect().Mutable(in.ProtoReflect().Descriptor().Fields().ByName("payload")).Message().Interface()`) {
+		t.Fatal("server handler should use ProtoReflect().Mutable() for named body field")
+	}
+	if strings.Contains(output, "&in.Payload") {
+		t.Fatal("server handler should NOT use direct field access &in.Payload")
+	}
+
+	// Client should use getter for named body field
+	if !strings.Contains(output, "in.GetPayload()") {
+		t.Fatal("client should use getter in.GetPayload() for named body field")
+	}
+	if strings.Contains(output, "in.Payload") && !strings.Contains(output, "in.GetPayload()") {
+		t.Fatal("client should NOT use direct field access in.Payload")
+	}
+}
+
+func TestTemplateBodyStar(t *testing.T) {
+	sd := &serviceDesc{
+		ServiceType: "TestSvc",
+		ServiceName: "test.v1.TestSvc",
+		Metadata:    "test/v1/test.proto",
+		Methods: []*methodDesc{
+			{
+				Name:         "Create",
+				OriginalName: "Create",
+				Num:          0,
+				Request:      "CreateRequest",
+				Reply:        "CreateReply",
+				Path:         "/api/v1/create",
+				Method:       "POST",
+				HasBody:      true,
+				Body:         "",
+			},
+		},
+	}
+	output := sd.execute()
+
+	// body="*" should use &in for server bind and in for client
+	if !strings.Contains(output, "ctx.Bind(&in)") {
+		t.Fatal("body=* should use ctx.Bind(&in)")
+	}
+	if strings.Contains(output, "ProtoReflect") {
+		t.Fatal("body=* should NOT use ProtoReflect")
 	}
 }

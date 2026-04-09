@@ -27,12 +27,14 @@ type methodDesc struct {
 	Reply        string
 	Comment      string
 	// http_rule
-	Path         string
-	Method       string
-	HasVars      bool
-	HasBody      bool
-	Body         string
-	ResponseBody string
+	Path                  string
+	Method                string
+	HasVars               bool
+	HasBody               bool
+	Body                  string
+	BodyProtoName         string // proto field name for named body (empty when body is "*")
+	ResponseBody          string
+	ResponseBodyProtoName string // proto field name for named response_body (empty when "*")
 }
 
 func (s *serviceDesc) execute() string {
@@ -41,7 +43,9 @@ func (s *serviceDesc) execute() string {
 		s.MethodSets[m.Name] = m
 	}
 	buf := new(bytes.Buffer)
-	tmpl, err := template.New("http").Parse(strings.TrimSpace(httpTemplate))
+	tmpl, err := template.New("http").Funcs(template.FuncMap{
+		"getterAccessor": toGetterAccessor,
+	}).Parse(strings.TrimSpace(httpTemplate))
 	if err != nil {
 		panic(err)
 	}
