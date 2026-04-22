@@ -1,7 +1,7 @@
 package yaml
 
 import (
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v3"
 
 	"github.com/go-kratos/kratos/v2/encoding"
 )

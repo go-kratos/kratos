@@ -20,7 +20,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240102182953-50ed04b92917
 	google.golang.org/grpc v1.61.1
 	google.golang.org/protobuf v1.33.0
-	gopkg.in/yaml.v3 v3.0.1
+	go.yaml.in/yaml/v3 v3.0.1
 )
 
 require (
@@ -46,3 +46,5 @@ require (
 )
 
 retract v2.9.0
+
+replace go.yaml.in/yaml/v3 => gopkg.in/yaml.v3 v3.0.1
