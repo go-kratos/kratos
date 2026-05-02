@@ -69,7 +69,7 @@ func WithClaims(f func() jwt.Claims) Option {
 	}
 }
 
-// WithTokenHeader withe customer tokenHeader for client side
+// WithTokenHeader with custom tokenHeader for client side
 func WithTokenHeader(header map[string]any) Option {
 	return func(o *options) {
 		o.tokenHeader = header

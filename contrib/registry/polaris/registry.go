@@ -22,7 +22,7 @@ var (
 	_ registry.Discovery = (*Registry)(nil)
 )
 
-// _instanceIDSeparator . Instance id Separator.
+// _instanceIDSeparator. Instance ID Separator.
 const _instanceIDSeparator = "-"
 
 type options struct {
@@ -41,13 +41,13 @@ type options struct {
 	// service priority. Default value is 0. The smaller the value, the lower the priority
 	Priority int
 
-	// To show service is healthy or not. Default value is True .
+	// To show service is healthy or not. Default value is True.
 	Healthy bool
 
-	// Heartbeat enable .Not in polaris . Default value is True.
+	// Heartbeat enable. Not in polaris. Default value is True.
 	Heartbeat bool
 
-	// To show service is isolate or not. Default value is False .
+	// To show service is isolate or not. Default value is False.
 	Isolate bool
 
 	// TTL timeout. if node needs to use heartbeat to report,required. If not set,server will throw ErrorCode-400141
