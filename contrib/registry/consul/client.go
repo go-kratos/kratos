@@ -34,11 +34,11 @@ type Client struct {
 	resolver ServiceResolver
 	// healthcheck time interval in seconds
 	healthcheckInterval int
-	// heartbeat enable heartbeat
+	// heartbeat enables heartbeat
 	heartbeat bool
 	// deregisterCriticalServiceAfter time interval in seconds
 	deregisterCriticalServiceAfter int
-	// serviceChecks  user custom checks
+	// serviceChecks user custom checks
 	serviceChecks api.AgentServiceChecks
 	// tags is service tags
 	tags []string
