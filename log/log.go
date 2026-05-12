@@ -18,6 +18,12 @@ func Default() *slog.Logger {
 	return slog.Default()
 }
 
+// With returns a logger that includes the given attributes in each output
+// operation. It mirrors [slog.With].
+func With(args ...any) *slog.Logger {
+	return slog.With(args...)
+}
+
 // Log emits a record at the given level. It mirrors [slog.Log].
 func Log(ctx context.Context, level Level, msg string, args ...any) {
 	slog.Log(ctx, level, msg, args...)
