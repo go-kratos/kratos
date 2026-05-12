@@ -7,14 +7,14 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/go-kratos/kratos/v2/encoding/form"
+	"github.com/go-kratos/kratos/v3/encoding/form"
 )
 
 var reg = regexp.MustCompile(`{[\\.\w]+}`)
 
 // EncodeURL encode proto message to url path.
 func EncodeURL(pathTemplate string, msg any, needQuery bool) string {
-	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
+	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Pointer && reflect.ValueOf(msg).IsNil()) {
 		return pathTemplate
 	}
 

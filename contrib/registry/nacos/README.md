@@ -12,8 +12,8 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 
-	"github.com/go-kratos/kratos/contrib/registry/nacos/v2"
-	"github.com/go-kratos/kratos/v2"
+	"github.com/go-kratos/kratos/contrib/registry/nacos/v3"
+	"github.com/go-kratos/kratos/v3"
 )
 
 func main() {
@@ -55,8 +55,8 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 
-	"github.com/go-kratos/kratos/contrib/registry/nacos/v2"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/contrib/registry/nacos/v3"
+	"github.com/go-kratos/kratos/v3/transport/grpc"
 )
 
 func main() {

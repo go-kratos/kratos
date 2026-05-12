@@ -1,9 +1,9 @@
-module github.com/go-kratos/kratos/contrib/opensergo/v2
+module github.com/go-kratos/kratos/contrib/opensergo/v3
 
 go 1.22
 
 require (
-	github.com/go-kratos/kratos/v2 v2.9.2
+	github.com/go-kratos/kratos/v3 v3.0.0
 	github.com/opensergo/opensergo-go v0.0.0-20220331070310-e5b01fee4d1c
 	google.golang.org/genproto/googleapis/api v0.0.0-20240102182953-50ed04b92917
 	google.golang.org/grpc v1.61.1
@@ -24,4 +24,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/go-kratos/kratos/v2 => ../../
+replace github.com/go-kratos/kratos/v3 => ../../

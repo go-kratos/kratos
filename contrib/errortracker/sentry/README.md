@@ -15,7 +15,7 @@ sentry.Init(sentry.ClientOptions{
 
 // Step 2:
 // set middleware
-import ksentry "github.com/go-kratos/kratos/contrib/errortracker/sentry/v2"
+import ksentry "github.com/go-kratos/kratos/contrib/errortracker/sentry/v3"
 
 // for HTTP server, new HTTP server with sentry middleware options
 var opts = []http.ServerOption{

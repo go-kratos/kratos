@@ -5,11 +5,11 @@ import (
 	"net/url"
 
 	// init encoding
-	_ "github.com/go-kratos/kratos/v2/encoding/form"
-	_ "github.com/go-kratos/kratos/v2/encoding/json"
-	_ "github.com/go-kratos/kratos/v2/encoding/proto"
-	_ "github.com/go-kratos/kratos/v2/encoding/xml"
-	_ "github.com/go-kratos/kratos/v2/encoding/yaml"
+	_ "github.com/go-kratos/kratos/v3/encoding/form"
+	_ "github.com/go-kratos/kratos/v3/encoding/json"
+	_ "github.com/go-kratos/kratos/v3/encoding/proto"
+	_ "github.com/go-kratos/kratos/v3/encoding/xml"
+	_ "github.com/go-kratos/kratos/v3/encoding/yaml"
 )
 
 // Server is transport server.

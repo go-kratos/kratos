@@ -9,11 +9,17 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"
 
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
+	"github.com/go-kratos/kratos/cmd/kratos/v3/internal/base"
+)
+
+const (
+	goModFileName  = "go.mod"
+	goSumFileName  = "go.sum"
+	readmeFileName = "README.md"
 )
 
 var repoAddIgnores = []string{
-	".git", ".github", "api", "README.md", "LICENSE", "go.mod", "go.sum", "third_party", "openapi.yaml", ".gitignore",
+	".git", ".github", "api", readmeFileName, "LICENSE", goModFileName, goSumFileName, "third_party", "openapi.yaml", ".gitignore",
 }
 
 func (p *Project) Add(ctx context.Context, dir string, layout string, branch string, mod string, pkgPath string) error {

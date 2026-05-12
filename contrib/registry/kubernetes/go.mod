@@ -1,9 +1,9 @@
-module github.com/go-kratos/kratos/contrib/registry/kubernetes/v2
+module github.com/go-kratos/kratos/contrib/registry/kubernetes/v3
 
 go 1.22
 
 require (
-	github.com/go-kratos/kratos/v2 v2.9.2
+	github.com/go-kratos/kratos/v3 v3.0.0
 	github.com/json-iterator/go v1.1.12
 	k8s.io/api v0.24.3
 	k8s.io/apimachinery v0.24.3
@@ -50,4 +50,4 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace github.com/go-kratos/kratos/v2 => ../../../
+replace github.com/go-kratos/kratos/v3 => ../../../

@@ -1,10 +1,10 @@
-module github.com/go-kratos/kratos/contrib/config/apollo/v2
+module github.com/go-kratos/kratos/contrib/config/apollo/v3
 
 go 1.22
 
 require (
 	github.com/apolloconfig/agollo/v4 v4.3.1
-	github.com/go-kratos/kratos/v2 v2.9.2
+	github.com/go-kratos/kratos/v3 v3.0.0
 )
 
 require (
@@ -29,4 +29,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/go-kratos/kratos/v2 => ../../../
+replace github.com/go-kratos/kratos/v3 => ../../../

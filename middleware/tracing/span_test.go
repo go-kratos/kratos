@@ -13,9 +13,9 @@ import (
 
 	"go.opentelemetry.io/otel/trace/noop"
 
-	"github.com/go-kratos/kratos/v2/internal/testdata/binding"
-	"github.com/go-kratos/kratos/v2/metadata"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v3/internal/testdata/binding"
+	"github.com/go-kratos/kratos/v3/metadata"
+	"github.com/go-kratos/kratos/v3/transport"
 )
 
 func Test_parseFullMethod(t *testing.T) {

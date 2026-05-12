@@ -8,7 +8,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"go.opentelemetry.io/otel/trace/noop"
 
-	"github.com/go-kratos/kratos/v2/internal/testdata/binding"
+	"github.com/go-kratos/kratos/v3/internal/testdata/binding"
 )
 
 func TestNewTracer(t *testing.T) {

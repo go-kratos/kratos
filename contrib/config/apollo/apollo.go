@@ -8,9 +8,9 @@ import (
 	apolloconfig "github.com/apolloconfig/agollo/v4/env/config"
 	"github.com/apolloconfig/agollo/v4/extension"
 
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v3/config"
+	"github.com/go-kratos/kratos/v3/encoding"
+	"github.com/go-kratos/kratos/v3/log"
 )
 
 type apollo struct {
@@ -198,7 +198,7 @@ func (e *apollo) getConfig(ns string) (*config.KeyValue, error) {
 }
 
 func (e apollo) getOriginConfig(ns string) (*config.KeyValue, error) {
-	value, err := e.client.GetConfigCache(ns).Get("content")
+	value, err := e.client.GetConfigCache(ns).Get(contentKey)
 	if err != nil {
 		return nil, err
 	}

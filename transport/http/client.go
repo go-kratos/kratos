@@ -9,15 +9,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/internal/host"
-	"github.com/go-kratos/kratos/v2/internal/httputil"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/wrr"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v3/encoding"
+	"github.com/go-kratos/kratos/v3/errors"
+	"github.com/go-kratos/kratos/v3/internal/host"
+	"github.com/go-kratos/kratos/v3/internal/httputil"
+	"github.com/go-kratos/kratos/v3/middleware"
+	"github.com/go-kratos/kratos/v3/registry"
+	"github.com/go-kratos/kratos/v3/selector"
+	"github.com/go-kratos/kratos/v3/selector/wrr"
+	"github.com/go-kratos/kratos/v3/transport"
 )
 
 func init() {
@@ -187,7 +187,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	selector := selector.GlobalSelector().Build()
 	var r *resolver
 	if options.discovery != nil {
-		if target.Scheme == "discovery" {
+		if target.Scheme == schemeDiscovery {
 			if r, err = newResolver(ctx, options.discovery, target, selector, options.block, insecure, options.subsetSize); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed for endpoint %q: %w", options.endpoint, err)
 			}
@@ -304,9 +304,9 @@ func (client *Client) do(req *http.Request) (*http.Response, error) {
 			return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 		}
 		if client.insecure {
-			req.URL.Scheme = "http"
+			req.URL.Scheme = schemeHTTP
 		} else {
-			req.URL.Scheme = "https"
+			req.URL.Scheme = schemeHTTPS
 		}
 		req.URL.Host = node.Address()
 		req.Host = node.Address()

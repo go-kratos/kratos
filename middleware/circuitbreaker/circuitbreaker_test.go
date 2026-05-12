@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/go-kratos/aegis/circuitbreaker"
-	kratoserrors "github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/internal/group"
-	"github.com/go-kratos/kratos/v2/transport"
+	kratoserrors "github.com/go-kratos/kratos/v3/errors"
+	"github.com/go-kratos/kratos/v3/internal/group"
+	"github.com/go-kratos/kratos/v3/transport"
 )
 
 type transportMock struct {

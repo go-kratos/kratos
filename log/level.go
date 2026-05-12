@@ -21,6 +21,14 @@ const (
 	LevelFatal
 )
 
+const (
+	levelDebugString = "DEBUG"
+	levelInfoString  = "INFO"
+	levelWarnString  = "WARN"
+	levelErrorString = "ERROR"
+	levelFatalString = "FATAL"
+)
+
 func (l Level) Key() string {
 	return LevelKey
 }
@@ -28,15 +36,15 @@ func (l Level) Key() string {
 func (l Level) String() string {
 	switch l {
 	case LevelDebug:
-		return "DEBUG"
+		return levelDebugString
 	case LevelInfo:
-		return "INFO"
+		return levelInfoString
 	case LevelWarn:
-		return "WARN"
+		return levelWarnString
 	case LevelError:
-		return "ERROR"
+		return levelErrorString
 	case LevelFatal:
-		return "FATAL"
+		return levelFatalString
 	default:
 		return ""
 	}
@@ -45,15 +53,15 @@ func (l Level) String() string {
 // ParseLevel parses a level string into a logger Level value.
 func ParseLevel(s string) Level {
 	switch strings.ToUpper(s) {
-	case "DEBUG":
+	case levelDebugString:
 		return LevelDebug
-	case "INFO":
+	case levelInfoString:
 		return LevelInfo
-	case "WARN":
+	case levelWarnString:
 		return LevelWarn
-	case "ERROR":
+	case levelErrorString:
 		return LevelError
-	case "FATAL":
+	case levelFatalString:
 		return LevelFatal
 	}
 	return LevelInfo

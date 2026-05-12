@@ -2,7 +2,7 @@
 
 <p align="center">
 <a href="https://github.com/go-kratos/kratos/actions"><img src="https://github.com/go-kratos/kratos/workflows/Go/badge.svg" alt="Build Status"></a>
-<a href="https://pkg.go.dev/github.com/go-kratos/kratos/v2"><img src="https://pkg.go.dev/badge/github.com/go-kratos/kratos/v2" alt="GoDoc"></a>
+<a href="https://pkg.go.dev/github.com/go-kratos/kratos/v3"><img src="https://pkg.go.dev/badge/github.com/go-kratos/kratos/v3" alt="GoDoc"></a>
 <a href="https://codecov.io/gh/go-kratos/kratos"><img src="https://codecov.io/gh/go-kratos/kratos/master/graph/badge.svg" alt="codeCov"></a>
 <a href="https://goreportcard.com/report/github.com/go-kratos/kratos"><img src="https://goreportcard.com/badge/github.com/go-kratos/kratos" alt="Go Report Card"></a>
 <a href="https://github.com/go-kratos/kratos/blob/main/LICENSE"><img src="https://img.shields.io/github/license/go-kratos/kratos" alt="License"></a>
@@ -67,7 +67,7 @@ Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关功能及
 ##### go install 安装：
 
 ```
-go install github.com/go-kratos/kratos/cmd/kratos/v2@latest
+go install github.com/go-kratos/kratos/cmd/kratos/v3@latest
 kratos upgrade
 ```
 
@@ -106,9 +106,9 @@ kratos run
 ### Kratos Boot
 
 ```
-import "github.com/go-kratos/kratos/v2"
-import "github.com/go-kratos/kratos/v2/transport/grpc"
-import "github.com/go-kratos/kratos/v2/transport/http"
+import "github.com/go-kratos/kratos/v3"
+import "github.com/go-kratos/kratos/v3/transport/grpc"
+import "github.com/go-kratos/kratos/v3/transport/http"
 
 httpSrv := http.NewServer(http.Address(":8000"))
 grpcSrv := grpc.NewServer(grpc.Address(":9000"))

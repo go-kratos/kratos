@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/consul/api"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 var (
@@ -177,11 +177,11 @@ func (r *Registry) ListServices() (allServices map[string][]*registry.ServiceIns
 	defer r.lock.RUnlock()
 	allServices = make(map[string][]*registry.ServiceInstance)
 	for name, set := range r.registry {
-		var services []*registry.ServiceInstance
 		ss, _ := set.services.Load().([]*registry.ServiceInstance)
 		if ss == nil {
 			continue
 		}
+		services := make([]*registry.ServiceInstance, 0, len(ss))
 		services = append(services, ss...)
 		allServices[name] = services
 	}

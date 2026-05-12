@@ -1,11 +1,11 @@
-module github.com/go-kratos/kratos/contrib/transport/mcp/v2
+module github.com/go-kratos/kratos/contrib/transport/mcp/v3
 
 go 1.23
 
 toolchain go1.24.6
 
 require (
-	github.com/go-kratos/kratos/v2 v2.9.2
+	github.com/go-kratos/kratos/v3 v3.0.0
 	github.com/mark3labs/mcp-go v0.23.0
 )
 
@@ -18,4 +18,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/go-kratos/kratos/v2 => ../../../
+replace github.com/go-kratos/kratos/v3 => ../../../

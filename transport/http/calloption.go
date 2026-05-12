@@ -4,6 +4,13 @@ import (
 	"net/http"
 )
 
+const (
+	contentTypeJSON = "application/json"
+	schemeDiscovery = "discovery"
+	schemeHTTP      = "http"
+	schemeHTTPS     = "https"
+)
+
 // CallOption configures a Call before it starts or extracts information from
 // a Call after it completes.
 type CallOption interface {
@@ -53,7 +60,7 @@ func (o ContentTypeCallOption) before(c *callInfo) error {
 
 func defaultCallInfo(path string) callInfo {
 	return callInfo{
-		contentType:  "application/json",
+		contentType:  contentTypeJSON,
 		operation:    path,
 		pathTemplate: path,
 	}
