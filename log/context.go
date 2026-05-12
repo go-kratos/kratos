@@ -82,7 +82,7 @@ func (h *contextHandler) Handle(ctx context.Context, record slog.Record) error {
 }
 
 func (h *contextHandler) attrs(ctx context.Context) []slog.Attr {
-	var attrs []slog.Attr
+	attrs := make([]slog.Attr, 0, len(h.extractors))
 	for _, fn := range h.extractors {
 		attrs = append(attrs, fn(ctx)...)
 	}
