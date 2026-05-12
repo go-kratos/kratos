@@ -17,8 +17,8 @@ import (
 
 const (
 	contextPackage       = protogen.GoImportPath("context")
-	transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
-	bindingPackage       = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http/binding")
+	transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v3/transport/http")
+	bindingPackage       = protogen.GoImportPath("github.com/go-kratos/kratos/v3/transport/http/binding")
 )
 
 var methodSets = make(map[string]int)

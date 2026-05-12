@@ -11,9 +11,9 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
-	"github.com/go-kratos/kratos/v2/transport/http/binding"
+	"github.com/go-kratos/kratos/v3/middleware"
+	"github.com/go-kratos/kratos/v3/transport"
+	"github.com/go-kratos/kratos/v3/transport/http/binding"
 )
 
 var _ Context = (*wrapper)(nil)
@@ -114,7 +114,7 @@ func (c *wrapper) Result(code int, v any) error {
 }
 
 func (c *wrapper) JSON(code int, v any) error {
-	c.res.Header().Set("Content-Type", "application/json")
+	c.res.Header().Set("Content-Type", contentTypeJSON)
 	c.res.WriteHeader(code)
 	return json.NewEncoder(c.res).Encode(v)
 }

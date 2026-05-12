@@ -12,7 +12,7 @@ import (
 	cls "github.com/tencentcloud/tencentcloud-cls-sdk-go"
 	"google.golang.org/protobuf/proto"
 
-	klog "github.com/go-kratos/kratos/v2/log"
+	klog "github.com/go-kratos/kratos/v3/log"
 )
 
 // Handler writes slog records to Tencent CLS.

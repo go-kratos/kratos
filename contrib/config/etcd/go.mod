@@ -1,9 +1,9 @@
-module github.com/go-kratos/kratos/contrib/config/etcd/v2
+module github.com/go-kratos/kratos/contrib/config/etcd/v3
 
 go 1.22
 
 require (
-	github.com/go-kratos/kratos/v2 v2.9.2
+	github.com/go-kratos/kratos/v3 v3.0.0
 	go.etcd.io/etcd/client/v3 v3.5.11
 	google.golang.org/grpc v1.61.1
 )
@@ -30,4 +30,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/go-kratos/kratos/v2 => ../../../
+replace github.com/go-kratos/kratos/v3 => ../../../

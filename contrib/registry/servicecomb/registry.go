@@ -11,8 +11,8 @@ import (
 	"github.com/go-chassis/sc-client"
 	"github.com/gofrs/uuid"
 
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/log"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 func init() {

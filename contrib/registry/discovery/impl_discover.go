@@ -7,7 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 func filterInstancesByZone(ins *disInstancesInfo, zone string) []*registry.ServiceInstance {

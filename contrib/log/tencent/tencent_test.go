@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	klog "github.com/go-kratos/kratos/v2/log"
+	klog "github.com/go-kratos/kratos/v3/log"
 )
 
 func TestWithEndpoint(t *testing.T) {

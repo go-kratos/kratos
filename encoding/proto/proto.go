@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/go-kratos/kratos/v3/encoding"
 )
 
 // Name is the name registered for the proto compressor.
@@ -42,7 +42,7 @@ func getProtoMessage(v any) (proto.Message, error) {
 		return msg, nil
 	}
 	val := reflect.ValueOf(v)
-	if val.Kind() != reflect.Ptr {
+	if val.Kind() != reflect.Pointer {
 		return nil, errors.New("not proto message")
 	}
 

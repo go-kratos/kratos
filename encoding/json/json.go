@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/go-kratos/kratos/v3/encoding"
 )
 
 // Name is the name registered for the json codec.
@@ -53,7 +53,7 @@ func (codec) Unmarshal(data []byte, v any) error {
 		return UnmarshalOptions.Unmarshal(data, m)
 	default:
 		rv := reflect.ValueOf(v)
-		for rv := rv; rv.Kind() == reflect.Ptr; {
+		for rv := rv; rv.Kind() == reflect.Pointer; {
 			if rv.IsNil() {
 				rv.Set(reflect.New(rv.Type().Elem()))
 			}

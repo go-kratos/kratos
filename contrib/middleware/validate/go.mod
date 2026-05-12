@@ -1,4 +1,4 @@
-module github.com/go-kratos/kratos/contrib/middleware/validate/v2
+module github.com/go-kratos/kratos/contrib/middleware/validate/v3
 
 go 1.23.0
 
@@ -7,7 +7,7 @@ toolchain go1.24.6
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250717165733-d22d418d82d8.1
 	github.com/envoyproxy/protoc-gen-validate v1.2.1
-	github.com/go-kratos/kratos/v2 v2.9.2
+	github.com/go-kratos/kratos/v3 v3.0.0
 	google.golang.org/protobuf v1.36.6
 )
 
@@ -25,4 +25,4 @@ require (
 	google.golang.org/grpc v1.67.1 // indirect
 )
 
-replace github.com/go-kratos/kratos/v2 => ../../../
+replace github.com/go-kratos/kratos/v3 => ../../../

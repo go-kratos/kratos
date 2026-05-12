@@ -8,7 +8,7 @@ import (
 
 	"github.com/polarismesh/polaris-go"
 
-	"github.com/go-kratos/kratos/v2/config"
+	"github.com/go-kratos/kratos/v3/config"
 )
 
 // Option is polaris config option.

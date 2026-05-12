@@ -12,7 +12,7 @@ import (
 
 	"github.com/fluent/fluent-logger-golang/fluent"
 
-	klog "github.com/go-kratos/kratos/v2/log"
+	klog "github.com/go-kratos/kratos/v3/log"
 )
 
 // Option configures the fluentd handler or the NewLogger wrapper.

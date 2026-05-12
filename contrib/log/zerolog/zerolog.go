@@ -7,7 +7,7 @@ import (
 
 	"github.com/rs/zerolog"
 
-	klog "github.com/go-kratos/kratos/v2/log"
+	klog "github.com/go-kratos/kratos/v3/log"
 )
 
 // Handler writes slog records to a zerolog logger.

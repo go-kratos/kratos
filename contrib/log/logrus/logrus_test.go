@@ -9,7 +9,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	klog "github.com/go-kratos/kratos/v2/log"
+	klog "github.com/go-kratos/kratos/v3/log"
 )
 
 func TestLoggerLog(t *testing.T) {

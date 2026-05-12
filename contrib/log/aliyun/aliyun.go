@@ -13,7 +13,7 @@ import (
 	"github.com/aliyun/aliyun-log-go-sdk/producer"
 	"google.golang.org/protobuf/proto"
 
-	klog "github.com/go-kratos/kratos/v2/log"
+	klog "github.com/go-kratos/kratos/v3/log"
 )
 
 // Handler writes slog records to Aliyun Log Service.

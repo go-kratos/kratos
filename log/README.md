@@ -67,15 +67,15 @@ log.InfoContext(ctx, "handling request")
 import (
 	"log/slog"
 
-	otel "github.com/go-kratos/kratos/contrib/otel/v2/log"
-	"github.com/go-kratos/kratos/v2/log"
+	otel "github.com/go-kratos/kratos/contrib/otel/v3/log"
+	"github.com/go-kratos/kratos/v3/log"
 )
 
 logger := otel.NewLogger("helloworld")
 log.SetDefault(logger)
 ```
 
-The `github.com/go-kratos/kratos/contrib/otel/v2/log` handler bridges slog records to
+The `github.com/go-kratos/kratos/contrib/otel/v3/log` handler bridges slog records to
 OpenTelemetry Logs. Use `otel.WithLogOptions` when you need Kratos logger options:
 
 ```go
@@ -97,7 +97,7 @@ Adapters that wrap an existing logger accept core builder options directly on
 ### zap
 
 ```shell
-go get -u github.com/go-kratos/kratos/contrib/log/zap/v2
+go get -u github.com/go-kratos/kratos/contrib/log/zap/v3
 ```
 
 ```go
@@ -110,7 +110,7 @@ logger := kratoszap.NewLogger(
 ### logrus
 
 ```shell
-go get -u github.com/go-kratos/kratos/contrib/log/logrus/v2
+go get -u github.com/go-kratos/kratos/contrib/log/logrus/v3
 ```
 
 ```go
@@ -120,7 +120,7 @@ logger := kratoslogrus.NewLogger(logrusLogger)
 ### fluent
 
 ```shell
-go get -u github.com/go-kratos/kratos/contrib/log/fluent/v2
+go get -u github.com/go-kratos/kratos/contrib/log/fluent/v3
 ```
 
 ```go
@@ -133,7 +133,7 @@ logger, err := kratosfluent.NewLogger(
 ### aliyun
 
 ```shell
-go get -u github.com/go-kratos/kratos/contrib/log/aliyun/v2
+go get -u github.com/go-kratos/kratos/contrib/log/aliyun/v3
 ```
 
 ```go

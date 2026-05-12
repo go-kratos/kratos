@@ -1,4 +1,4 @@
-module github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2
+module github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v3
 
 go 1.22
 

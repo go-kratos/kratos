@@ -10,7 +10,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	kratosjson "github.com/go-kratos/kratos/v2/encoding/json"
+	kratosjson "github.com/go-kratos/kratos/v3/encoding/json"
 )
 
 var (

@@ -35,7 +35,7 @@ func newRouter(prefix string, srv *Server, filters ...FilterFunc) *Router {
 
 // Group returns a new router group.
 func (r *Router) Group(prefix string, filters ...FilterFunc) *Router {
-	var newFilters []FilterFunc
+	newFilters := make([]FilterFunc, 0, len(r.filters)+len(filters))
 	newFilters = append(newFilters, r.filters...)
 	newFilters = append(newFilters, filters...)
 	return newRouter(path.Join(r.prefix, prefix), r.srv, newFilters...)

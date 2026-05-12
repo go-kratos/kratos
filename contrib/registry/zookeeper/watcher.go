@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-zookeeper/zk"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 var _ registry.Watcher = (*watcher)(nil)

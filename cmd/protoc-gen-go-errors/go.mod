@@ -1,4 +1,4 @@
-module github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2
+module github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v3
 
 go 1.22
 
