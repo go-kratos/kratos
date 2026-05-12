@@ -79,7 +79,7 @@ func TestContext(t *testing.T) {
 
 func TestLogger(t *testing.T) {
 	o := &options{}
-	var v *slog.Logger = slog.New(slog.NewTextHandler(io.Discard, nil))
+	v := slog.New(slog.NewTextHandler(io.Discard, nil))
 	Logger(v)(o)
 	if !reflect.DeepEqual(v, o.logger) {
 		t.Fatalf("o.logger:%v is not equal to v:%v", o.logger, v)

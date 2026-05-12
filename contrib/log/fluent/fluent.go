@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/fluent/fluent-logger-golang/fluent"
+
 	klog "github.com/go-kratos/kratos/v2/log"
 )
 

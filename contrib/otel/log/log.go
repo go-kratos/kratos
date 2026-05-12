@@ -4,9 +4,10 @@ import (
 	"context"
 	"log/slog"
 
-	klog "github.com/go-kratos/kratos/v2/log"
 	"go.opentelemetry.io/contrib/bridges/otelslog"
 	"go.opentelemetry.io/otel/trace"
+
+	klog "github.com/go-kratos/kratos/v2/log"
 )
 
 // Option configures the OpenTelemetry slog bridge handler. Kratos logger
@@ -15,9 +16,6 @@ type Option = otelslog.Option
 
 // WithLoggerProvider configures the OpenTelemetry LoggerProvider.
 var WithLoggerProvider = otelslog.WithLoggerProvider
-
-// WithAttributes configures the instrumentation scope attributes.
-var WithAttributes = otelslog.WithAttributes
 
 // WithSchemaURL configures the semantic convention schema URL.
 var WithSchemaURL = otelslog.WithSchemaURL

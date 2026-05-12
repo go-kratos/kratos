@@ -10,31 +10,31 @@ import (
 )
 
 func TestFilterKeyRedacts(t *testing.T) {
-	cap := &captureHandler{}
-	h := newFilterHandler(cap, FilterKey("password"))
+	capture := &captureHandler{}
+	h := newFilterHandler(capture, FilterKey("password"))
 	record := slog.NewRecord(time.Now(), LevelInfo, "login", 0)
 	record.AddAttrs(slog.String("user", "alice"), slog.String("password", "secret"))
 	_ = h.Handle(context.Background(), record)
 
-	if got := cap.attrs[0]["password"]; got != redactedValue {
+	if got := capture.attrs[0]["password"]; got != redactedValue {
 		t.Fatalf("password = %v, want %q", got, redactedValue)
 	}
-	if got := cap.attrs[0]["user"]; got != "alice" {
+	if got := capture.attrs[0]["user"]; got != "alice" {
 		t.Fatalf("user = %v", got)
 	}
 }
 
 func TestFilterFuncDrops(t *testing.T) {
-	cap := &captureHandler{}
-	h := newFilterHandler(cap, FilterFunc(func(_ context.Context, r slog.Record) bool {
+	capture := &captureHandler{}
+	h := newFilterHandler(capture, FilterFunc(func(_ context.Context, r slog.Record) bool {
 		return r.Message == "drop"
 	}))
 	r1 := slog.NewRecord(time.Now(), LevelInfo, "drop", 0)
 	r2 := slog.NewRecord(time.Now(), LevelInfo, "keep", 0)
 	_ = h.Handle(context.Background(), r1)
 	_ = h.Handle(context.Background(), r2)
-	if len(cap.records) != 1 || cap.records[0].Message != "keep" {
-		t.Fatalf("records = %+v", cap.records)
+	if len(capture.records) != 1 || capture.records[0].Message != "keep" {
+		t.Fatalf("records = %+v", capture.records)
 	}
 }
 
@@ -79,9 +79,9 @@ func TestFilterKeyRedactsHandlerGroupPath(t *testing.T) {
 }
 
 func TestFilterEmptyReturnsNext(t *testing.T) {
-	cap := &captureHandler{}
-	h := newFilterHandler(cap)
-	if h != cap {
+	capture := &captureHandler{}
+	h := newFilterHandler(capture)
+	if h != capture {
 		t.Fatal("expected next returned as-is when no options")
 	}
 }

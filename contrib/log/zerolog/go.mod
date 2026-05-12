@@ -1,14 +1,16 @@
 module github.com/go-kratos/kratos/contrib/log/zerolog/v2
 
-go 1.25.0
-
-require github.com/rs/zerolog v1.35.1
+go 1.22
 
 require (
 	github.com/go-kratos/kratos/v2 v2.9.2
-	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-isatty v0.0.22 // indirect
-	golang.org/x/sys v0.44.0 // indirect
+	github.com/rs/zerolog v1.30.0
 )
 
-replace github.com/go-kratos/kratos/v2 => ../../..
+require (
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
+	golang.org/x/sys v0.28.0 // indirect
+)
+
+replace github.com/go-kratos/kratos/v2 => ../../../

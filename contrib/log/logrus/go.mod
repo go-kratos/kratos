@@ -1,12 +1,12 @@
 module github.com/go-kratos/kratos/contrib/log/logrus/v2
 
-go 1.25.0
-
-require github.com/sirupsen/logrus v1.9.4
+go 1.22
 
 require (
 	github.com/go-kratos/kratos/v2 v2.9.2
-	golang.org/x/sys v0.44.0 // indirect
+	github.com/sirupsen/logrus v1.8.1
 )
 
-replace github.com/go-kratos/kratos/v2 => ../../..
+require golang.org/x/sys v0.28.0 // indirect
+
+replace github.com/go-kratos/kratos/v2 => ../../../

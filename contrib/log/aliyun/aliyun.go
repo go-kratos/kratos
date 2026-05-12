@@ -11,8 +11,9 @@ import (
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/aliyun-log-go-sdk/producer"
-	klog "github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/proto"
+
+	klog "github.com/go-kratos/kratos/v2/log"
 )
 
 // Handler writes slog records to Aliyun Log Service.

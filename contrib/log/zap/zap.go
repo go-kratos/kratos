@@ -5,9 +5,10 @@ import (
 	"log/slog"
 	"strings"
 
-	klog "github.com/go-kratos/kratos/v2/log"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	klog "github.com/go-kratos/kratos/v2/log"
 )
 
 // Handler writes slog records to a zap logger.

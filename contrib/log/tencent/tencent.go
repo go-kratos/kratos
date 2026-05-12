@@ -9,9 +9,10 @@ import (
 	"strings"
 	"time"
 
-	klog "github.com/go-kratos/kratos/v2/log"
 	cls "github.com/tencentcloud/tencentcloud-cls-sdk-go"
 	"google.golang.org/protobuf/proto"
+
+	klog "github.com/go-kratos/kratos/v2/log"
 )
 
 // Handler writes slog records to Tencent CLS.

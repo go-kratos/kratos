@@ -5,8 +5,9 @@ import (
 	"log/slog"
 	"strings"
 
-	klog "github.com/go-kratos/kratos/v2/log"
 	"github.com/sirupsen/logrus"
+
+	klog "github.com/go-kratos/kratos/v2/log"
 )
 
 // Handler writes slog records to a logrus logger.

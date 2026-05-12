@@ -31,8 +31,8 @@ func TestContextWithAttrsNilCtx(t *testing.T) {
 }
 
 func TestContextHandlerMerges(t *testing.T) {
-	cap := &captureHandler{}
-	h := newContextHandler(cap, AttrsFromContext)
+	capture := &captureHandler{}
+	h := newContextHandler(capture, AttrsFromContext)
 
 	ctx := ContextWithAttrs(context.Background(), slog.String("trace_id", "t1"))
 	record := slog.NewRecord(now(), LevelInfo, "msg", 0)
@@ -40,23 +40,23 @@ func TestContextHandlerMerges(t *testing.T) {
 	if err := h.Handle(ctx, record); err != nil {
 		t.Fatalf("handle: %v", err)
 	}
-	if got := cap.attrs[0]["trace_id"]; got != "t1" {
+	if got := capture.attrs[0]["trace_id"]; got != "t1" {
 		t.Fatalf("trace_id = %v", got)
 	}
-	if got := cap.attrs[0]["k"]; got != "v" {
+	if got := capture.attrs[0]["k"]; got != "v" {
 		t.Fatalf("k = %v", got)
 	}
 }
 
 func TestContextHandlerNoAttrs(t *testing.T) {
-	cap := &captureHandler{}
-	h := newContextHandler(cap, AttrsFromContext)
+	capture := &captureHandler{}
+	h := newContextHandler(capture, AttrsFromContext)
 	record := slog.NewRecord(now(), LevelInfo, "msg", 0)
 	if err := h.Handle(context.Background(), record); err != nil {
 		t.Fatalf("handle: %v", err)
 	}
-	if len(cap.records) != 1 {
-		t.Fatalf("records = %d", len(cap.records))
+	if len(capture.records) != 1 {
+		t.Fatalf("records = %d", len(capture.records))
 	}
 }
 

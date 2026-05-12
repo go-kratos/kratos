@@ -25,6 +25,8 @@ func Log(ctx context.Context, level Level, msg string, args ...any) {
 
 // LogAttrs emits a typed-attr record at the given level. It mirrors
 // [slog.LogAttrs].
+//
+//nolint:revive // LogAttrs intentionally mirrors slog.LogAttrs.
 func LogAttrs(ctx context.Context, level Level, msg string, attrs ...slog.Attr) {
 	slog.LogAttrs(ctx, level, msg, attrs...)
 }
