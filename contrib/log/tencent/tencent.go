@@ -37,6 +37,7 @@ type options struct {
 	accessKey    string
 	accessSecret string
 	endpoint     string
+	logOptions   []klog.Option
 }
 
 func defaultOptions() *options {
@@ -67,7 +68,15 @@ func WithAccessSecret(as string) Option {
 	}
 }
 
-type Option func(cls *options)
+// WithLogOptions applies Kratos core log builder options to NewLogger.
+func WithLogOptions(opts ...klog.Option) Option {
+	return func(o *options) {
+		o.logOptions = append(o.logOptions, opts...)
+	}
+}
+
+// Option configures the Tencent CLS handler or the NewLogger wrapper.
+type Option func(o *options)
 
 func (h *Handler) Close() error {
 	return h.producer.Close(5000)
@@ -128,6 +137,10 @@ func NewHandler(options ...Option) (*Handler, error) {
 	for _, o := range options {
 		o(opts)
 	}
+	return newHandler(opts)
+}
+
+func newHandler(opts *options) (*Handler, error) {
 	producerConfig := cls.GetDefaultAsyncProducerClientConfig()
 	producerConfig.AccessKeyID = opts.accessKey
 	producerConfig.AccessKeySecret = opts.accessSecret
@@ -145,11 +158,17 @@ func NewHandler(options ...Option) (*Handler, error) {
 
 // NewLogger returns a slog logger backed by Tencent CLS.
 func NewLogger(options ...Option) (*slog.Logger, error) {
-	handler, err := NewHandler(options...)
+	opts := defaultOptions()
+	for _, o := range options {
+		o(opts)
+	}
+	handler, err := newHandler(opts)
 	if err != nil {
 		return nil, err
 	}
-	return klog.NewLogger(klog.WithHandler(handler)), nil
+	logOptions := append([]klog.Option{}, opts.logOptions...)
+	logOptions = append(logOptions, klog.WithHandler(handler))
+	return klog.NewLogger(logOptions...), nil
 }
 
 func newString(s string) *string {

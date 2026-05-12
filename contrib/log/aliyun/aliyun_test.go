@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	klog "github.com/go-kratos/kratos/v2/log"
 )
 
 func TestWithEndpoint(t *testing.T) {
@@ -56,6 +58,15 @@ func TestWithAccessSecret(t *testing.T) {
 	funcAccessSecret(opts)
 	if opts.accessSecret != accessSecret {
 		t.Errorf("WithAccessSecret() = %s, want %s", opts.accessSecret, accessSecret)
+	}
+}
+
+func TestWithLogOptions(t *testing.T) {
+	opts := new(options)
+	fn := WithLogOptions(klog.WithAttrs(slog.String("service.name", "helloworld")))
+	fn(opts)
+	if len(opts.logOptions) != 1 {
+		t.Fatalf("len(logOptions) = %d, want 1", len(opts.logOptions))
 	}
 }
 

@@ -7,6 +7,8 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	klog "github.com/go-kratos/kratos/v2/log"
 )
 
 func TestMain(m *testing.M) {
@@ -121,6 +123,15 @@ func TestWithForceStopAsyncSend(t *testing.T) {
 	funcForceStopAsyncSend(opts)
 	if opts.forceStopAsyncSend != forceStopAsyncSend {
 		t.Errorf("WithForceStopAsyncSend() = %t, want %t", opts.forceStopAsyncSend, forceStopAsyncSend)
+	}
+}
+
+func TestWithLogOptions(t *testing.T) {
+	opts := new(options)
+	fn := WithLogOptions(klog.WithAttrs(slog.String("service.name", "helloworld")))
+	fn(opts)
+	if len(opts.logOptions) != 1 {
+		t.Fatalf("len(logOptions) = %d, want 1", len(opts.logOptions))
 	}
 }
 

@@ -15,7 +15,7 @@ import (
 	klog "github.com/go-kratos/kratos/v2/log"
 )
 
-// Option is fluentd logger option.
+// Option configures the fluentd handler or the NewLogger wrapper.
 type Option func(*options)
 
 type options struct {
@@ -28,6 +28,7 @@ type options struct {
 	tagPrefix          string
 	async              bool
 	forceStopAsyncSend bool
+	logOptions         []klog.Option
 }
 
 // WithTimeout with config Timeout.
@@ -93,6 +94,13 @@ func WithForceStopAsyncSend(forceStopAsyncSend bool) Option {
 	}
 }
 
+// WithLogOptions applies Kratos core log builder options to NewLogger.
+func WithLogOptions(logOptions ...klog.Option) Option {
+	return func(opts *options) {
+		opts.logOptions = append(opts.logOptions, logOptions...)
+	}
+}
+
 // Handler writes slog records to fluentd.
 type Handler struct {
 	opts   options
@@ -116,6 +124,10 @@ func NewHandler(addr string, opts ...Option) (*Handler, error) {
 	for _, o := range opts {
 		o(&option)
 	}
+	return newHandler(addr, option)
+}
+
+func newHandler(addr string, option options) (*Handler, error) {
 	u, err := url.Parse(addr)
 	if err != nil {
 		return nil, err
@@ -160,11 +172,17 @@ func NewHandler(addr string, opts ...Option) (*Handler, error) {
 
 // NewLogger returns a slog logger backed by fluentd.
 func NewLogger(addr string, opts ...Option) (*slog.Logger, error) {
-	handler, err := NewHandler(addr, opts...)
+	option := options{}
+	for _, o := range opts {
+		o(&option)
+	}
+	handler, err := newHandler(addr, option)
 	if err != nil {
 		return nil, err
 	}
-	return klog.NewLogger(klog.WithHandler(handler)), nil
+	logOptions := append([]klog.Option{}, option.logOptions...)
+	logOptions = append(logOptions, klog.WithHandler(handler))
+	return klog.NewLogger(logOptions...), nil
 }
 
 func (h *Handler) Enabled(context.Context, slog.Level) bool {

@@ -16,7 +16,8 @@ import otel "github.com/go-kratos/kratos/contrib/otel/v2/log"
 logger := otel.NewLogger("helloworld")
 ```
 
-Use the core log builder when the logger also needs fixed attrs or filtering:
+Use `WithLogOptions` when the logger also needs core Kratos log builder
+options such as fixed attrs or filtering:
 
 ```go
 import (
@@ -26,10 +27,12 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
-logger := log.NewLogger(
-	log.WithHandler(otel.NewHandler("helloworld")),
-	log.WithExtractor(otel.TraceAttrs),
-	log.WithAttrs(slog.String("service.name", "helloworld")),
+logger := otel.NewLogger(
+	"helloworld",
+	otel.WithLogOptions(
+		log.WithAttrs(slog.String("service.name", "helloworld")),
+		log.WithFilter(log.FilterKey("password")),
+	),
 )
 ```
 

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	klog "github.com/go-kratos/kratos/v2/log"
 	"github.com/sirupsen/logrus"
 )
 
@@ -67,5 +68,26 @@ func TestLoggerLog(t *testing.T) {
 				t.Errorf("TestName(%s): %s has not prefix %s", name, output.String(), test.want)
 			}
 		})
+	}
+}
+
+func TestNewLoggerWithOptions(t *testing.T) {
+	output := new(bytes.Buffer)
+	logger := logrus.New()
+	logger.Level = logrus.InfoLevel
+	logger.Out = output
+	logger.Formatter = &logrus.JSONFormatter{}
+	wrapped := NewLogger(logger,
+		klog.WithAttrs(slog.String("service.name", "helloworld")),
+		klog.WithFilter(klog.FilterKey("password")),
+	)
+
+	wrapped.Info("login", "password", "secret")
+
+	got := output.String()
+	for _, want := range []string{`"service.name":"helloworld"`, `"password":"***"`} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("output %q does not contain %s", got, want)
+		}
 	}
 }

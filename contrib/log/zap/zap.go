@@ -27,8 +27,10 @@ func NewHandler(zlog *zap.Logger) slog.Handler {
 }
 
 // NewLogger returns a slog logger backed by zlog.
-func NewLogger(zlog *zap.Logger) *slog.Logger {
-	return klog.NewLogger(klog.WithHandler(NewHandler(zlog)))
+func NewLogger(zlog *zap.Logger, opts ...klog.Option) *slog.Logger {
+	logOptions := append([]klog.Option{}, opts...)
+	logOptions = append(logOptions, klog.WithHandler(NewHandler(zlog)))
+	return klog.NewLogger(logOptions...)
 }
 
 func (h *Handler) Enabled(_ context.Context, level slog.Level) bool {

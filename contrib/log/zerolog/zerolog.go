@@ -32,8 +32,10 @@ func NewHandler(logger *zerolog.Logger) slog.Handler {
 }
 
 // NewLogger returns a slog logger backed by logger.
-func NewLogger(logger *zerolog.Logger) *slog.Logger {
-	return klog.NewLogger(klog.WithHandler(NewHandler(logger)))
+func NewLogger(logger *zerolog.Logger, opts ...klog.Option) *slog.Logger {
+	logOptions := append([]klog.Option{}, opts...)
+	logOptions = append(logOptions, klog.WithHandler(NewHandler(logger)))
+	return klog.NewLogger(logOptions...)
 }
 
 func (h *Handler) Enabled(context.Context, slog.Level) bool {

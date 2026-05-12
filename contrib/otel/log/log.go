@@ -5,39 +5,89 @@ import (
 	"log/slog"
 
 	"go.opentelemetry.io/contrib/bridges/otelslog"
+	otellog "go.opentelemetry.io/otel/log"
 	"go.opentelemetry.io/otel/trace"
 
 	klog "github.com/go-kratos/kratos/v2/log"
 )
 
-// Option configures the OpenTelemetry slog bridge handler. Kratos logger
-// options are applied by composing [NewHandler] with the core log builder.
-type Option = otelslog.Option
+// Option configures the OpenTelemetry slog bridge and the Kratos log builder
+// wrapping it.
+type Option func(*options)
+
+type options struct {
+	otel []otelslog.Option
+	log  []klog.Option
+}
 
 // WithLoggerProvider configures the OpenTelemetry LoggerProvider.
-var WithLoggerProvider = otelslog.WithLoggerProvider
+func WithLoggerProvider(provider otellog.LoggerProvider) Option {
+	return func(c *options) {
+		c.otel = append(c.otel, otelslog.WithLoggerProvider(provider))
+	}
+}
 
 // WithSchemaURL configures the semantic convention schema URL.
-var WithSchemaURL = otelslog.WithSchemaURL
+func WithSchemaURL(schemaURL string) Option {
+	return func(c *options) {
+		c.otel = append(c.otel, otelslog.WithSchemaURL(schemaURL))
+	}
+}
 
 // WithSource configures whether source locations are emitted.
-var WithSource = otelslog.WithSource
+func WithSource(source bool) Option {
+	return func(c *options) {
+		c.otel = append(c.otel, otelslog.WithSource(source))
+	}
+}
 
 // WithVersion configures the instrumentation version.
-var WithVersion = otelslog.WithVersion
+func WithVersion(version string) Option {
+	return func(c *options) {
+		c.otel = append(c.otel, otelslog.WithVersion(version))
+	}
+}
+
+// WithAttrs attaches attrs to every record produced by the logger.
+func WithAttrs(attrs ...slog.Attr) Option {
+	return WithLogOptions(klog.WithAttrs(attrs...))
+}
+
+// WithFilter applies the provided filter options on top of the composed
+// handler.
+func WithFilter(opts ...klog.FilterOption) Option {
+	return WithLogOptions(klog.WithFilter(opts...))
+}
+
+// WithExtractor appends attrs extracted from each log call context.
+func WithExtractor(extractors ...klog.Extractor) Option {
+	return WithLogOptions(klog.WithExtractor(extractors...))
+}
+
+// WithLogOptions applies Kratos core log builder options around the
+// OpenTelemetry handler.
+func WithLogOptions(opts ...klog.Option) Option {
+	return func(c *options) {
+		c.log = append(c.log, opts...)
+	}
+}
 
 // NewHandler returns a slog handler that sends records to OpenTelemetry Logs.
 func NewHandler(name string, opts ...Option) slog.Handler {
-	return otelslog.NewHandler(name, opts...)
+	cfg := newOptions(opts)
+	return newHandler(name, cfg)
 }
 
 // NewLogger returns a slog logger backed by an OpenTelemetry Logs bridge handler
 // and trace correlation attrs from the log context.
 func NewLogger(name string, opts ...Option) *slog.Logger {
-	return klog.NewLogger(
-		klog.WithHandler(NewHandler(name, opts...)),
+	cfg := newOptions(opts)
+	logOpts := append([]klog.Option{}, cfg.log...)
+	logOpts = append(logOpts,
 		klog.WithExtractor(TraceAttrs),
+		klog.WithHandler(otelslog.NewHandler(name, cfg.otel...)),
 	)
+	return klog.NewLogger(logOpts...)
 }
 
 // TraceAttrs pulls trace_id / span_id / trace_flags from ctx.
@@ -51,4 +101,20 @@ func TraceAttrs(ctx context.Context) []slog.Attr {
 		slog.String("span_id", span.SpanID().String()),
 		slog.String("trace_flags", span.TraceFlags().String()),
 	}
+}
+
+func newOptions(opts []Option) options {
+	var cfg options
+	for _, opt := range opts {
+		if opt != nil {
+			opt(&cfg)
+		}
+	}
+	return cfg
+}
+
+func newHandler(name string, cfg options) slog.Handler {
+	logOpts := append([]klog.Option{}, cfg.log...)
+	logOpts = append(logOpts, klog.WithHandler(otelslog.NewHandler(name, cfg.otel...)))
+	return klog.NewHandler(logOpts...)
 }

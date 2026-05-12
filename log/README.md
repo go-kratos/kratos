@@ -76,17 +76,23 @@ log.SetDefault(logger)
 ```
 
 The `github.com/go-kratos/kratos/contrib/otel/v2/log` handler bridges slog records to
-OpenTelemetry Logs. Use the core builder when you need Kratos logger options:
+OpenTelemetry Logs. Use `otel.WithLogOptions` when you need Kratos logger options:
 
 ```go
-logger := log.NewLogger(
-	log.WithHandler(otel.NewHandler("helloworld")),
-	log.WithExtractor(otel.TraceAttrs),
-	log.WithAttrs(slog.String("service.name", "helloworld")),
+logger := otel.NewLogger(
+	"helloworld",
+	otel.WithLogOptions(
+		log.WithAttrs(slog.String("service.name", "helloworld")),
+		log.WithFilter(log.FilterKey("password")),
+	),
 )
 ```
 
 ## Third party log library
+
+Adapters that wrap an existing logger accept core builder options directly on
+`NewLogger`. Remote-service adapters keep their connection options and expose
+`WithLogOptions` for core builder options.
 
 ### zap
 
@@ -95,7 +101,10 @@ go get -u github.com/go-kratos/kratos/contrib/log/zap/v2
 ```
 
 ```go
-logger := kratoszap.NewLogger(zapLogger)
+logger := kratoszap.NewLogger(
+	zapLogger,
+	log.WithAttrs(slog.String("service.name", "helloworld")),
+)
 ```
 
 ### logrus
@@ -115,7 +124,10 @@ go get -u github.com/go-kratos/kratos/contrib/log/fluent/v2
 ```
 
 ```go
-logger, err := kratosfluent.NewLogger("tcp://127.0.0.1:24224")
+logger, err := kratosfluent.NewLogger(
+	"tcp://127.0.0.1:24224",
+	kratosfluent.WithLogOptions(log.WithAttrs(slog.String("service.name", "helloworld"))),
+)
 ```
 
 ### aliyun
@@ -128,5 +140,6 @@ go get -u github.com/go-kratos/kratos/contrib/log/aliyun/v2
 logger, err := kratosaliyun.NewLogger(
 	kratosaliyun.WithProject("project"),
 	kratosaliyun.WithLogstore("app"),
+	kratosaliyun.WithLogOptions(log.WithAttrs(slog.String("service.name", "helloworld"))),
 )
 ```
