@@ -49,7 +49,7 @@ func TestRouter(t *testing.T) {
                     "weight":100,
                     "priority":1,
                     "isolate":false,
-                    "name":"实例分组1",
+                    "name":"instance-group-1",
                     "namespace":"default",
                     "service":"test-ut"
                 }
