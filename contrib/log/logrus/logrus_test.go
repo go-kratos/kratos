@@ -7,8 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	klog "github.com/go-kratos/kratos/v2/log"
 	"github.com/sirupsen/logrus"
+
+	klog "github.com/go-kratos/kratos/v2/log"
 )
 
 func TestLoggerLog(t *testing.T) {

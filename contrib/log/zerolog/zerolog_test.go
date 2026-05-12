@@ -5,8 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	klog "github.com/go-kratos/kratos/v2/log"
 	"github.com/rs/zerolog"
+
+	klog "github.com/go-kratos/kratos/v2/log"
 )
 
 type testWriteSyncer struct {

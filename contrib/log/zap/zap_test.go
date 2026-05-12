@@ -5,9 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	klog "github.com/go-kratos/kratos/v2/log"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	klog "github.com/go-kratos/kratos/v2/log"
 )
 
 type testWriteSyncer struct {

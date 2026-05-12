@@ -5,10 +5,11 @@ import (
 	"log/slog"
 	"testing"
 
-	klog "github.com/go-kratos/kratos/v2/log"
 	otellog "go.opentelemetry.io/otel/log"
 	"go.opentelemetry.io/otel/log/logtest"
 	"go.opentelemetry.io/otel/trace"
+
+	klog "github.com/go-kratos/kratos/v2/log"
 )
 
 func TestTraceAttrs(t *testing.T) {
