@@ -11,7 +11,7 @@ import (
 
 func TestBuilderDefaultsText(t *testing.T) {
 	var buf bytes.Buffer
-	logger := NewLogger(WithWriter(&buf))
+	logger := slog.New(NewHandler(WithWriter(&buf)))
 	logger.Info("hello", "k", "v")
 	if !strings.Contains(buf.String(), "hello") || !strings.Contains(buf.String(), "k=v") {
 		t.Fatalf("output = %q", buf.String())
@@ -20,7 +20,7 @@ func TestBuilderDefaultsText(t *testing.T) {
 
 func TestBuilderJSON(t *testing.T) {
 	var buf bytes.Buffer
-	logger := NewLogger(WithWriter(&buf), WithFormat(FormatJSON))
+	logger := slog.New(NewHandler(WithWriter(&buf), WithFormat(FormatJSON)))
 	logger.LogAttrs(context.Background(), LevelFatal, "boom")
 	var got map[string]any
 	if err := json.Unmarshal(bytes.TrimSpace(buf.Bytes()), &got); err != nil {
@@ -33,14 +33,13 @@ func TestBuilderJSON(t *testing.T) {
 
 func TestBuilderWithAttrs(t *testing.T) {
 	var buf bytes.Buffer
-	logger := NewLogger(
+	logger := slog.New(NewHandler(
 		WithWriter(&buf),
 		WithFormat(FormatJSON),
-		WithAttrs(
-			slog.String("service.id", "i"),
-			slog.String("service.name", "n"),
-			slog.String("service.version", "v"),
-		),
+	)).With(
+		slog.String("service.id", "i"),
+		slog.String("service.name", "n"),
+		slog.String("service.version", "v"),
 	)
 	logger.Info("hi")
 	var got map[string]any
@@ -53,10 +52,7 @@ func TestBuilderWithAttrs(t *testing.T) {
 func TestBuilderWithHandler(t *testing.T) {
 	var buf bytes.Buffer
 	handler := slog.NewJSONHandler(&buf, nil)
-	logger := NewLogger(
-		WithHandler(handler),
-		WithAttrs(slog.String("service.name", "n")),
-	)
+	logger := NewLogger(handler).With(slog.String("service.name", "n"))
 	logger.Info("hi")
 	var got map[string]any
 	_ = json.Unmarshal(bytes.TrimSpace(buf.Bytes()), &got)
@@ -67,7 +63,8 @@ func TestBuilderWithHandler(t *testing.T) {
 
 func TestBuilderWithFilter(t *testing.T) {
 	var buf bytes.Buffer
-	logger := NewLogger(WithWriter(&buf), WithLevel(LevelWarn), WithFilter(FilterKey("password")))
+	handler := slog.NewTextHandler(&buf, &slog.HandlerOptions{Level: LevelWarn})
+	logger := NewLogger(handler, WithFilter(FilterKey("password")))
 	logger.Info("ignored")
 	logger.Warn("login", "password", "secret")
 	out := buf.String()
@@ -81,7 +78,7 @@ func TestBuilderWithFilter(t *testing.T) {
 
 func TestBuilderWithStoredContextAttrs(t *testing.T) {
 	var buf bytes.Buffer
-	logger := NewLogger(WithWriter(&buf), WithFormat(FormatJSON))
+	logger := slog.New(NewHandler(WithWriter(&buf), WithFormat(FormatJSON)))
 	ctx := ContextWithAttrs(context.Background(), slog.String("trace_id", "abc"))
 	logger.InfoContext(ctx, "hi")
 	var got map[string]any
@@ -96,9 +93,9 @@ func TestBuilderWithExtractor(t *testing.T) {
 	type requestIDKey struct{}
 
 	var buf bytes.Buffer
+	handler := slog.NewJSONHandler(&buf, nil)
 	logger := NewLogger(
-		WithWriter(&buf),
-		WithFormat(FormatJSON),
+		handler,
 		WithExtractor(func(ctx context.Context) []slog.Attr {
 			id, _ := ctx.Value(userIDKey{}).(string)
 			if id == "" {

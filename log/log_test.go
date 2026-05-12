@@ -99,7 +99,7 @@ func TestInfoContextPropagatesAttrs(t *testing.T) {
 	defer SetDefault(old)
 
 	handler := &captureHandler{}
-	SetDefault(NewLogger(WithHandler(handler)))
+	SetDefault(NewLogger(handler))
 
 	ctx := ContextWithAttrs(context.Background(), slog.String("trace_id", "abc"))
 	InfoContext(ctx, "hello")

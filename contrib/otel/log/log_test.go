@@ -23,7 +23,7 @@ func TestTraceAttrs(t *testing.T) {
 	ctx := trace.ContextWithSpanContext(context.Background(), spanContext)
 
 	attrs := map[string]string{}
-	for _, attr := range TraceAttrs(ctx) {
+	for _, attr := range traceAttrs(ctx) {
 		if attr.Value.Kind() == slog.KindString {
 			attrs[attr.Key] = attr.Value.String()
 		}
@@ -39,7 +39,7 @@ func TestTraceAttrs(t *testing.T) {
 	}
 }
 
-func TestNewLoggerAppliesLogBuilderOptions(t *testing.T) {
+func TestNewHandlerAppliesOTelOptionsAndTraceAttrs(t *testing.T) {
 	recorder := logtest.NewRecorder()
 	traceID := trace.TraceID{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
 	spanID := trace.SpanID{1, 2, 3, 4, 5, 6, 7, 8}
@@ -48,17 +48,14 @@ func TestNewLoggerAppliesLogBuilderOptions(t *testing.T) {
 		SpanID:     spanID,
 		TraceFlags: trace.FlagsSampled,
 	})
-	ctx := klog.ContextWithAttrs(context.Background(), slog.String("request_id", "req-1"))
-	ctx = trace.ContextWithSpanContext(ctx, spanContext)
+	ctx := trace.ContextWithSpanContext(context.Background(), spanContext)
 
-	logger := NewLogger("helloworld",
+	logger := slog.New(NewHandler("helloworld",
 		WithLoggerProvider(recorder),
 		WithVersion("v1.2.3"),
 		WithSchemaURL("https://example.test/schema"),
-		WithLogOptions(klog.WithAttrs(slog.String("service.name", "helloworld"))),
-		WithFilter(klog.FilterKey("password")),
-	)
-	logger.InfoContext(ctx, "user created", "user_id", "42", "password", "secret")
+	))
+	logger.InfoContext(ctx, "user created", "user_id", "42")
 
 	results := recorder.Result()
 	if len(results) != 1 {
@@ -79,6 +76,47 @@ func TestNewLoggerAppliesLogBuilderOptions(t *testing.T) {
 
 	attrs := recordAttrs(results[0].Records[0].Record)
 	tests := map[string]string{
+		"trace_id":    traceID.String(),
+		"span_id":     spanID.String(),
+		"trace_flags": trace.FlagsSampled.String(),
+		"user_id":     "42",
+	}
+	for key, want := range tests {
+		if attrs[key] != want {
+			t.Fatalf("%s = %q, want %q", key, attrs[key], want)
+		}
+	}
+}
+
+func TestNewHandlerComposesWithCoreLoggerOptions(t *testing.T) {
+	recorder := logtest.NewRecorder()
+	traceID := trace.TraceID{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
+	spanID := trace.SpanID{1, 2, 3, 4, 5, 6, 7, 8}
+	spanContext := trace.NewSpanContext(trace.SpanContextConfig{
+		TraceID:    traceID,
+		SpanID:     spanID,
+		TraceFlags: trace.FlagsSampled,
+	})
+	ctx := klog.ContextWithAttrs(context.Background(), slog.String("request_id", "req-1"))
+	ctx = trace.ContextWithSpanContext(ctx, spanContext)
+
+	logger := klog.NewLogger(
+		NewHandler("helloworld", WithLoggerProvider(recorder)),
+		klog.WithFilter(klog.FilterKey("password")),
+	).With(slog.String("service.name", "helloworld"))
+	logger.InfoContext(ctx, "user created", "user_id", "42", "password", "secret")
+
+	results := recorder.Result()
+	if len(results) != 1 {
+		t.Fatalf("len(results) = %d, want 1", len(results))
+	}
+	if len(results[0].Records) != 1 {
+		t.Fatalf("len(records) = %d, want 1", len(results[0].Records))
+	}
+
+	record := results[0].Records[0].Record
+	attrs := recordAttrs(record)
+	tests := map[string]string{
 		"service.name": "helloworld",
 		"request_id":   "req-1",
 		"trace_id":     traceID.String(),
@@ -92,6 +130,12 @@ func TestNewLoggerAppliesLogBuilderOptions(t *testing.T) {
 			t.Fatalf("%s = %q, want %q", key, attrs[key], want)
 		}
 	}
+	if count := recordAttrCount(record, "request_id"); count != 1 {
+		t.Fatalf("request_id count = %d, want 1", count)
+	}
+	if count := recordAttrCount(record, "trace_id"); count != 1 {
+		t.Fatalf("trace_id count = %d, want 1", count)
+	}
 }
 
 func recordAttrs(record otellog.Record) map[string]string {
@@ -103,4 +147,15 @@ func recordAttrs(record otellog.Record) map[string]string {
 		return true
 	})
 	return attrs
+}
+
+func recordAttrCount(record otellog.Record, key string) int {
+	var count int
+	record.WalkAttributes(func(kv otellog.KeyValue) bool {
+		if kv.Key == key {
+			count++
+		}
+		return true
+	})
+	return count
 }

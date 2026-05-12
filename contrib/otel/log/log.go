@@ -7,17 +7,13 @@ import (
 	"go.opentelemetry.io/contrib/bridges/otelslog"
 	otellog "go.opentelemetry.io/otel/log"
 	"go.opentelemetry.io/otel/trace"
-
-	klog "github.com/go-kratos/kratos/v3/log"
 )
 
-// Option configures the OpenTelemetry slog bridge and the Kratos log builder
-// wrapping it.
+// Option configures the OpenTelemetry slog bridge.
 type Option func(*options)
 
 type options struct {
 	otel []otelslog.Option
-	log  []klog.Option
 }
 
 // WithLoggerProvider configures the OpenTelemetry LoggerProvider.
@@ -48,59 +44,11 @@ func WithVersion(version string) Option {
 	}
 }
 
-// WithAttrs attaches attrs to every record produced by the logger.
-func WithAttrs(attrs ...slog.Attr) Option {
-	return WithLogOptions(klog.WithAttrs(attrs...))
-}
-
-// WithFilter applies the provided filter options on top of the composed
-// handler.
-func WithFilter(opts ...klog.FilterOption) Option {
-	return WithLogOptions(klog.WithFilter(opts...))
-}
-
-// WithExtractor appends attrs extracted from each log call context.
-func WithExtractor(extractors ...klog.Extractor) Option {
-	return WithLogOptions(klog.WithExtractor(extractors...))
-}
-
-// WithLogOptions applies Kratos core log builder options around the
-// OpenTelemetry handler.
-func WithLogOptions(opts ...klog.Option) Option {
-	return func(c *options) {
-		c.log = append(c.log, opts...)
-	}
-}
-
-// NewHandler returns a slog handler that sends records to OpenTelemetry Logs.
+// NewHandler returns a slog handler that sends records to OpenTelemetry Logs
+// and adds trace correlation attrs from the log context.
 func NewHandler(name string, opts ...Option) slog.Handler {
 	cfg := newOptions(opts)
 	return newHandler(name, cfg)
-}
-
-// NewLogger returns a slog logger backed by an OpenTelemetry Logs bridge handler
-// and trace correlation attrs from the log context.
-func NewLogger(name string, opts ...Option) *slog.Logger {
-	cfg := newOptions(opts)
-	logOpts := append([]klog.Option{}, cfg.log...)
-	logOpts = append(logOpts,
-		klog.WithExtractor(TraceAttrs),
-		klog.WithHandler(otelslog.NewHandler(name, cfg.otel...)),
-	)
-	return klog.NewLogger(logOpts...)
-}
-
-// TraceAttrs pulls trace_id / span_id / trace_flags from ctx.
-func TraceAttrs(ctx context.Context) []slog.Attr {
-	span := trace.SpanContextFromContext(ctx)
-	if !span.IsValid() {
-		return nil
-	}
-	return []slog.Attr{
-		slog.String("trace_id", span.TraceID().String()),
-		slog.String("span_id", span.SpanID().String()),
-		slog.String("trace_flags", span.TraceFlags().String()),
-	}
 }
 
 func newOptions(opts []Option) options {
@@ -114,7 +62,42 @@ func newOptions(opts []Option) options {
 }
 
 func newHandler(name string, cfg options) slog.Handler {
-	logOpts := append([]klog.Option{}, cfg.log...)
-	logOpts = append(logOpts, klog.WithHandler(otelslog.NewHandler(name, cfg.otel...)))
-	return klog.NewHandler(logOpts...)
+	return &traceHandler{next: otelslog.NewHandler(name, cfg.otel...)}
+}
+
+type traceHandler struct {
+	next slog.Handler
+}
+
+func (h *traceHandler) Enabled(ctx context.Context, level slog.Level) bool {
+	return h.next.Enabled(ctx, level)
+}
+
+func (h *traceHandler) Handle(ctx context.Context, record slog.Record) error {
+	attrs := traceAttrs(ctx)
+	if len(attrs) > 0 {
+		record = record.Clone()
+		record.AddAttrs(attrs...)
+	}
+	return h.next.Handle(ctx, record)
+}
+
+func (h *traceHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	return &traceHandler{next: h.next.WithAttrs(attrs)}
+}
+
+func (h *traceHandler) WithGroup(name string) slog.Handler {
+	return &traceHandler{next: h.next.WithGroup(name)}
+}
+
+func traceAttrs(ctx context.Context) []slog.Attr {
+	span := trace.SpanContextFromContext(ctx)
+	if !span.IsValid() {
+		return nil
+	}
+	return []slog.Attr{
+		slog.String("trace_id", span.TraceID().String()),
+		slog.String("span_id", span.SpanID().String()),
+		slog.String("trace_flags", span.TraceFlags().String()),
+	}
 }

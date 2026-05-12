@@ -32,21 +32,19 @@ log.InfoContext(ctx, "user created", "user_id", userID)
 
 ### Builder
 
-`log.NewLogger` assembles a fully wired `*slog.Logger` with the kratos
-defaults. Pass a handler directly when you already have one; attach fixed
-service attrs with `log.WithAttrs`.
+`log.NewHandler` builds a default handler. `log.NewLogger` wraps an existing
+handler with Kratos decorators. Attach fixed service attrs with `logger.With`.
 
 ```go
 logger := log.NewLogger(
-	log.WithHandler(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+	slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelInfo,
-	})),
-	log.WithAttrs(
-		slog.String("service.id", id),
-		slog.String("service.name", name),
-		slog.String("service.version", version),
-	),
+	}),
 	log.WithFilter(log.FilterKey("password")), // redact sensitive keys
+).With(
+	slog.String("service.id", id),
+	slog.String("service.name", name),
+	slog.String("service.version", version),
 )
 log.SetDefault(logger)
 ```
@@ -65,81 +63,27 @@ log.InfoContext(ctx, "handling request")
 
 ```go
 import (
+	otel "github.com/go-kratos/kratos/contrib/otel/v3/log"
+	"github.com/go-kratos/kratos/v3/log"
+)
+
+logger := log.NewLogger(otel.NewHandler("helloworld"))
+log.SetDefault(logger)
+```
+
+The `github.com/go-kratos/kratos/contrib/otel/v3/log` handler bridges slog records to
+OpenTelemetry Logs. Use the core log builder when you need Kratos logger options:
+
+```go
+import (
 	"log/slog"
 
 	otel "github.com/go-kratos/kratos/contrib/otel/v3/log"
 	"github.com/go-kratos/kratos/v3/log"
 )
 
-logger := otel.NewLogger("helloworld")
-log.SetDefault(logger)
-```
-
-The `github.com/go-kratos/kratos/contrib/otel/v3/log` handler bridges slog records to
-OpenTelemetry Logs. Use `otel.WithLogOptions` when you need Kratos logger options:
-
-```go
-logger := otel.NewLogger(
-	"helloworld",
-	otel.WithLogOptions(
-		log.WithAttrs(slog.String("service.name", "helloworld")),
-		log.WithFilter(log.FilterKey("password")),
-	),
-)
-```
-
-## Third party log library
-
-Adapters that wrap an existing logger accept core builder options directly on
-`NewLogger`. Remote-service adapters keep their connection options and expose
-`WithLogOptions` for core builder options.
-
-### zap
-
-```shell
-go get -u github.com/go-kratos/kratos/contrib/log/zap/v3
-```
-
-```go
-logger := kratoszap.NewLogger(
-	zapLogger,
-	log.WithAttrs(slog.String("service.name", "helloworld")),
-)
-```
-
-### logrus
-
-```shell
-go get -u github.com/go-kratos/kratos/contrib/log/logrus/v3
-```
-
-```go
-logger := kratoslogrus.NewLogger(logrusLogger)
-```
-
-### fluent
-
-```shell
-go get -u github.com/go-kratos/kratos/contrib/log/fluent/v3
-```
-
-```go
-logger, err := kratosfluent.NewLogger(
-	"tcp://127.0.0.1:24224",
-	kratosfluent.WithLogOptions(log.WithAttrs(slog.String("service.name", "helloworld"))),
-)
-```
-
-### aliyun
-
-```shell
-go get -u github.com/go-kratos/kratos/contrib/log/aliyun/v3
-```
-
-```go
-logger, err := kratosaliyun.NewLogger(
-	kratosaliyun.WithProject("project"),
-	kratosaliyun.WithLogstore("app"),
-	kratosaliyun.WithLogOptions(log.WithAttrs(slog.String("service.name", "helloworld"))),
-)
+logger := log.NewLogger(
+	otel.NewHandler("helloworld"),
+	log.WithFilter(log.FilterKey("password")),
+).With(slog.String("service.name", "helloworld"))
 ```

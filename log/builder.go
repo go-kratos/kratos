@@ -17,33 +17,20 @@ const (
 	FormatJSON
 )
 
-// Option configures [NewHandler] / [NewLogger].
+// Option configures [NewHandler] and the decorators applied by [NewLogger].
 type Option func(*handlerConfig)
 
 // Extractor extracts attrs from a log call context.
 type Extractor func(context.Context) []slog.Attr
 
 type handlerConfig struct {
-	handler     slog.Handler
 	writer      io.Writer
 	format      Format
 	level       Leveler
 	addSource   bool
 	replaceAttr func(groups []string, a slog.Attr) slog.Attr
-	attrs       []slog.Attr
 	extractors  []Extractor
 	filter      []FilterOption
-}
-
-// WithHandler sets the base slog handler. When set, writer/format/level/source
-// options only apply to the default handler and are ignored.
-func WithHandler(h slog.Handler) Option {
-	return func(c *handlerConfig) { c.handler = h }
-}
-
-// WithAttrs attaches attrs to every record produced by the logger.
-func WithAttrs(attrs ...slog.Attr) Option {
-	return func(c *handlerConfig) { c.attrs = append(c.attrs, attrs...) }
 }
 
 // WithExtractor appends attrs extracted from each log call context.
@@ -104,22 +91,27 @@ func NewHandler(opts ...Option) slog.Handler {
 	for _, o := range opts {
 		o(cfg)
 	}
-	h := cfg.handler
-	if h == nil {
-		h = newBaseHandler(cfg)
+	h := newBaseHandler(cfg)
+	return newComposedHandler(h, cfg)
+}
+
+// NewLogger returns a slog logger backed by handler with kratos decorators
+// applied.
+func NewLogger(handler slog.Handler, opts ...Option) *slog.Logger {
+	cfg := &handlerConfig{
+		extractors: []Extractor{AttrsFromContext},
 	}
+	for _, o := range opts {
+		o(cfg)
+	}
+	return slog.New(newComposedHandler(handler, cfg))
+}
+
+func newComposedHandler(h slog.Handler, cfg *handlerConfig) slog.Handler {
 	if len(cfg.filter) > 0 {
 		h = newFilterHandler(h, cfg.filter...)
 	}
-	if len(cfg.attrs) > 0 {
-		h = h.WithAttrs(cfg.attrs)
-	}
 	return newContextHandler(h, cfg.extractors...)
-}
-
-// NewLogger is shorthand for slog.New(NewHandler(opts...)).
-func NewLogger(opts ...Option) *slog.Logger {
-	return slog.New(NewHandler(opts...))
 }
 
 func newBaseHandler(cfg *handlerConfig) slog.Handler {
