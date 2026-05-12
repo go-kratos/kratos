@@ -70,7 +70,7 @@ func receive(event chan model.ConfigFileChangeEvent) func(m model.ConfigFileChan
 	return func(m model.ConfigFileChangeEvent) {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Error(err)
+				log.Error("panic recovered", "err", err)
 			}
 		}()
 		event <- m

@@ -33,7 +33,7 @@ func receive(event model.ConfigFileChangeEvent) {
 	ec := eventChanMap[getFullPath(meta.GetNamespace(), meta.GetFileGroup(), meta.GetFileName())]
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error(err)
+			log.Error("panic recovered", "err", err)
 		}
 	}()
 	if !ec.closed {
