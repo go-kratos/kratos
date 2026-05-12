@@ -3,12 +3,12 @@ package logging
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"google.golang.org/grpc/codes"
 
 	"github.com/go-kratos/kratos/v3/errors"
-	"github.com/go-kratos/kratos/v3/log"
 	"github.com/go-kratos/kratos/v3/middleware"
 	"github.com/go-kratos/kratos/v3/transport"
 	"github.com/go-kratos/kratos/v3/transport/http/status"
@@ -20,7 +20,10 @@ type Redacter interface {
 }
 
 // Server is an server logging middleware.
-func Server(logger log.Logger) middleware.Middleware {
+func Server(logger *slog.Logger) middleware.Middleware {
+	if logger == nil {
+		logger = slog.Default()
+	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req any) (reply any, err error) {
 			var (
@@ -44,23 +47,32 @@ func Server(logger log.Logger) middleware.Middleware {
 				reason = se.Reason
 			}
 			level, stack := extractError(err)
-			log.NewHelper(log.WithContext(ctx, logger)).Log(level,
-				"kind", "server",
-				"component", kind,
-				"operation", operation,
-				"args", extractArgs(req),
-				"code", code,
-				"reason", reason,
-				"stack", stack,
-				"latency", time.Since(startTime).Seconds(),
-			)
+			attrs := []slog.Attr{
+				slog.String("kind", "server"),
+				slog.String("component", kind),
+				slog.String("operation", operation),
+				slog.String("args", extractArgs(req)),
+				slog.Int64("code", int64(code)),
+				slog.String("reason", reason),
+				slog.Float64("latency", time.Since(startTime).Seconds()),
+			}
+			if err != nil {
+				attrs = append(attrs, slog.Any("error", err))
+				if stack != "" {
+					attrs = append(attrs, slog.String("stack", stack))
+				}
+			}
+			logger.LogAttrs(ctx, level, "server request", attrs...)
 			return
 		}
 	}
 }
 
 // Client is a client logging middleware.
-func Client(logger log.Logger) middleware.Middleware {
+func Client(logger *slog.Logger) middleware.Middleware {
+	if logger == nil {
+		logger = slog.Default()
+	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req any) (reply any, err error) {
 			var (
@@ -84,16 +96,22 @@ func Client(logger log.Logger) middleware.Middleware {
 				reason = se.Reason
 			}
 			level, stack := extractError(err)
-			log.NewHelper(log.WithContext(ctx, logger)).Log(level,
-				"kind", "client",
-				"component", kind,
-				"operation", operation,
-				"args", extractArgs(req),
-				"code", code,
-				"reason", reason,
-				"stack", stack,
-				"latency", time.Since(startTime).Seconds(),
-			)
+			attrs := []slog.Attr{
+				slog.String("kind", "client"),
+				slog.String("component", kind),
+				slog.String("operation", operation),
+				slog.String("args", extractArgs(req)),
+				slog.Int64("code", int64(code)),
+				slog.String("reason", reason),
+				slog.Float64("latency", time.Since(startTime).Seconds()),
+			}
+			if err != nil {
+				attrs = append(attrs, slog.Any("error", err))
+				if stack != "" {
+					attrs = append(attrs, slog.String("stack", stack))
+				}
+			}
+			logger.LogAttrs(ctx, level, "client request", attrs...)
 			return
 		}
 	}
@@ -110,10 +128,10 @@ func extractArgs(req any) string {
 	return fmt.Sprintf("%+v", req)
 }
 
-// extractError returns the string of the error
-func extractError(err error) (log.Level, string) {
+// extractError returns the level and stack to attach for err.
+func extractError(err error) (slog.Level, string) {
 	if err != nil {
-		return log.LevelError, fmt.Sprintf("%+v", err)
+		return slog.LevelError, fmt.Sprintf("%+v", err)
 	}
-	return log.LevelInfo, ""
+	return slog.LevelInfo, ""
 }

@@ -2,11 +2,11 @@ package recovery
 
 import (
 	"context"
+	"log/slog"
 	"runtime"
 	"time"
 
 	"github.com/go-kratos/kratos/v3/errors"
-	"github.com/go-kratos/kratos/v3/log"
 	"github.com/go-kratos/kratos/v3/middleware"
 )
 
@@ -24,12 +24,21 @@ type Option func(*options)
 
 type options struct {
 	handler HandlerFunc
+	logger  *slog.Logger
 }
 
 // WithHandler with recovery handler.
 func WithHandler(h HandlerFunc) Option {
 	return func(o *options) {
 		o.handler = h
+	}
+}
+
+// WithLogger sets the logger used to record recovered panics. Defaults to
+// [slog.Default].
+func WithLogger(logger *slog.Logger) Option {
+	return func(o *options) {
+		o.logger = logger
 	}
 }
 
@@ -43,6 +52,10 @@ func Recovery(opts ...Option) middleware.Middleware {
 	for _, o := range opts {
 		o(&op)
 	}
+	logger := op.logger
+	if logger == nil {
+		logger = slog.Default()
+	}
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req any) (reply any, err error) {
 			startTime := time.Now()
@@ -51,7 +64,11 @@ func Recovery(opts ...Option) middleware.Middleware {
 					buf := make([]byte, 64<<10) //nolint:mnd
 					n := runtime.Stack(buf, false)
 					buf = buf[:n]
-					log.Context(ctx).Errorf("%v: %+v\n%s\n", rerr, req, buf)
+					logger.ErrorContext(ctx, "panic recovered",
+						slog.Any("panic", rerr),
+						slog.Any("request", req),
+						slog.String("stack", string(buf)),
+					)
 					ctx = context.WithValue(ctx, Latency{}, time.Since(startTime).Seconds())
 					err = op.handler(ctx, req, rerr)
 				}

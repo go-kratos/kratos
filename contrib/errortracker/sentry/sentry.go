@@ -2,7 +2,6 @@ package sentry
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"os"
 	"strings"
@@ -10,7 +9,6 @@ import (
 
 	"github.com/getsentry/sentry-go"
 
-	"github.com/go-kratos/kratos/v3/log"
 	"github.com/go-kratos/kratos/v3/middleware"
 	"github.com/go-kratos/kratos/v3/transport"
 	"github.com/go-kratos/kratos/v3/transport/grpc"
@@ -25,7 +23,8 @@ type options struct {
 	repanic         bool
 	waitForDelivery bool
 	timeout         time.Duration
-	tags            map[string]any
+	tags            map[string]string
+	contextTags     func(context.Context) map[string]string
 }
 
 // WithRepanic repanic configures whether Sentry should repanic after recovery, in most cases it should be set to true.
@@ -49,10 +48,17 @@ func WithTimeout(timeout time.Duration) Option {
 	}
 }
 
-// WithTags global tags injection, the value type must be string or log.Valuer
-func WithTags(kvs map[string]any) Option {
+// WithTags configures global tags.
+func WithTags(kvs map[string]string) Option {
 	return func(opts *options) {
 		opts.tags = kvs
+	}
+}
+
+// WithContextTags configures tags resolved from each request context.
+func WithContextTags(fn func(context.Context) map[string]string) Option {
+	return func(opts *options) {
+		opts.contextTags = fn
 	}
 }
 
@@ -71,11 +77,11 @@ func Server(opts ...Option) middleware.Middleware {
 			scope := hub.Scope()
 
 			for k, v := range conf.tags {
-				switch val := v.(type) {
-				case string:
-					scope.SetTag(k, val)
-				case log.Valuer:
-					scope.SetTag(k, fmt.Sprintf("%v", val(ctx)))
+				scope.SetTag(k, v)
+			}
+			if conf.contextTags != nil {
+				for k, v := range conf.contextTags(ctx) {
+					scope.SetTag(k, v)
 				}
 			}
 

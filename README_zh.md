@@ -46,8 +46,7 @@ Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关功能及
 * [Metadata](https://go-kratos.dev/zh-cn/docs/component/metadata) ：在协议通信 HTTP/gRPC 中，通过 Middleware 规范化服务元信息传递；
 * [Config](https://go-kratos.dev/zh-cn/docs/component/config) ：支持多数据源方式，进行配置合并铺平，通过 Atomic 方式支持动态配置；
 * [Logger](https://go-kratos.dev/zh-cn/docs/component/log) ：标准日志接口，可方便集成三方 log 库，并可通过 fluentd 收集日志；
-* [Metrics](https://go-kratos.dev/zh-cn/docs/component/middleware/metrics) ：统一指标接口，可以实现各种指标系统，默认集成 Prometheus；
-* [Tracing](https://go-kratos.dev/zh-cn/docs/component/middleware/tracing) ：遵循 OpenTelemetry 规范定义，以实现微服务链路追踪；
+* Metrics 与 Tracing：OpenTelemetry 相关能力由 contrib 包提供，减少核心框架依赖；
 * [Encoding](https://go-kratos.dev/zh-cn/docs/component/encoding) ：支持 Accept 和 Content-Type 进行自动选择内容编码；
 * [Transport](https://go-kratos.dev/zh-cn/docs/component/transport/overview) ：通用的 [HTTP](https://go-kratos.dev/zh-cn/docs/component/transport/http) /[gRPC](https://go-kratos.dev/zh-cn/docs/component/transport/grpc) 传输层，实现统一的 [Middleware](https://go-kratos.dev/zh-cn/docs/component/middleware/overview) 插件支持；
 * [Registry](https://go-kratos.dev/zh-cn/docs/component/registry) ：实现统一注册中心接口，可插件化对接各种注册中心；

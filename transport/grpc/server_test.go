@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/url"
 	"reflect"
@@ -407,12 +408,12 @@ func TestStop(t *testing.T) {
 			}
 			defer l.Close()
 
-			old := log.GetLogger()
-			defer log.SetLogger(old)
+			old := log.Default()
+			defer log.SetDefault(old)
 
 			// Create a logger to capture logs
 			var logs safeBytesBuffer
-			log.SetLogger(log.NewStdLogger(&logs))
+			log.SetDefault(slog.New(slog.NewTextHandler(&logs, nil)))
 
 			s := NewServer(Listener(l))
 			pb.RegisterGreeterServer(s, &server{})
@@ -420,7 +421,7 @@ func TestStop(t *testing.T) {
 			go func() {
 				err := s.Start(context.Background()) //nolint
 				if err != nil {
-					log.Fatal(err)
+					log.Fatal("server error", "error", err)
 				}
 			}()
 
@@ -442,7 +443,7 @@ func TestStop(t *testing.T) {
 					// Simulate a long-running request
 					s, err := client.SayHelloStream(context.Background()) //nolint
 					if err != nil {
-						log.Fatal(err)
+						log.Fatal("server error", "error", err)
 					}
 					// Keep the stream open
 					for {
@@ -455,7 +456,7 @@ func TestStop(t *testing.T) {
 				} else {
 					_, err := client.SayHello(context.Background(), &pb.HelloRequest{Name: "test"}) //nolint
 					if err != nil {
-						log.Error(err)
+						log.Error("client error", "error", err)
 					}
 				}
 			}()

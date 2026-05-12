@@ -38,7 +38,7 @@ func main() {
 	)
 
 	if err := app.Run(); err != nil {
-		log.NewHelper(logger).Fatal(err)
+		log.Fatal(err)
 	}
 }
 ```
