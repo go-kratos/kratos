@@ -33,14 +33,14 @@ func run(_ *cobra.Command, args []string) {
 	}
 	reader, err := os.Open(args[0])
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatalf("Failed to open proto file %q: %v", args[0], err)
 	}
 	defer reader.Close()
 
 	parser := proto.NewParser(reader)
 	definition, err := parser.Parse()
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatalf("Failed to parse proto file %q: %v", args[0], err)
 	}
 
 	var (
@@ -83,10 +83,10 @@ func run(_ *cobra.Command, args []string) {
 		}
 		b, err := s.execute()
 		if err != nil {
-			log.Fatal(err.Error())
+			log.Fatalf("Failed to generate server implementation for %s: %v", s.Service, err)
 		}
 		if err := os.WriteFile(to, b, 0o644); err != nil {
-			log.Fatal(err.Error())
+			log.Fatalf("Failed to write server file %q: %v", to, err)
 		}
 		fmt.Println(to)
 	}

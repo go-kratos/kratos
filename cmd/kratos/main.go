@@ -29,6 +29,6 @@ func init() {
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err.Error())
+		log.Fatalf("Failed to execute command: %v", err)
 	}
 }
