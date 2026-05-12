@@ -49,7 +49,7 @@ func New(opts ...Option) *App {
 		opt(&o)
 	}
 	if o.logger != nil {
-		log.SetLogger(o.logger)
+		log.SetDefault(o.logger)
 	}
 	ctx, cancel := context.WithCancel(o.ctx)
 	return &App{

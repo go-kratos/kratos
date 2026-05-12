@@ -1,31 +1,34 @@
 package tencent
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"strconv"
+	"strings"
 	"time"
 
+	klog "github.com/go-kratos/kratos/v2/log"
 	cls "github.com/tencentcloud/tencentcloud-cls-sdk-go"
 	"google.golang.org/protobuf/proto"
-
-	"github.com/go-kratos/kratos/v2/log"
 )
 
-type Logger interface {
-	log.Logger
-
-	GetProducer() *cls.AsyncProducerClient
-	Close() error
-}
-
-type tencentLog struct {
+// Handler writes slog records to Tencent CLS.
+type Handler struct {
 	producer *cls.AsyncProducerClient
 	opts     *options
+	attrs    []groupedAttr
+	groups   []string
 }
 
-func (log *tencentLog) GetProducer() *cls.AsyncProducerClient {
-	return log.producer
+type groupedAttr struct {
+	groups []string
+	attr   slog.Attr
+}
+
+func (h *Handler) GetProducer() *cls.AsyncProducerClient {
+	return h.producer
 }
 
 type options struct {
@@ -65,32 +68,61 @@ func WithAccessSecret(as string) Option {
 
 type Option func(cls *options)
 
-func (log *tencentLog) Close() error {
-	return log.producer.Close(5000)
+func (h *Handler) Close() error {
+	return h.producer.Close(5000)
 }
 
-func (log *tencentLog) Log(level log.Level, keyvals ...any) error {
-	contents := make([]*cls.Log_Content, 0, len(keyvals)/2+1)
+func (h *Handler) Enabled(context.Context, slog.Level) bool {
+	return true
+}
 
+func (h *Handler) Handle(_ context.Context, record slog.Record) error {
+	contents := make([]*cls.Log_Content, 0, len(h.attrs)+record.NumAttrs()+2)
 	contents = append(contents, &cls.Log_Content{
-		Key:   newString(level.Key()),
-		Value: newString(level.String()),
+		Key:   newString(slog.LevelKey),
+		Value: newString(levelString(record.Level)),
 	})
-	for i := 0; i < len(keyvals); i += 2 {
+	if record.Message != "" {
 		contents = append(contents, &cls.Log_Content{
-			Key:   newString(toString(keyvals[i])),
-			Value: newString(toString(keyvals[i+1])),
+			Key:   newString("msg"),
+			Value: newString(record.Message),
 		})
 	}
+	for _, attr := range h.attrs {
+		appendAttr(&contents, attr.groups, attr.attr)
+	}
+	record.Attrs(func(attr slog.Attr) bool {
+		appendAttr(&contents, h.groups, attr)
+		return true
+	})
 
 	logInst := &cls.Log{
 		Time:     proto.Int64(time.Now().Unix()),
 		Contents: contents,
 	}
-	return log.producer.SendLog(log.opts.topicID, logInst, nil)
+	return h.producer.SendLog(h.opts.topicID, logInst, nil)
 }
 
-func NewLogger(options ...Option) (Logger, error) {
+func (h *Handler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	next := *h
+	next.attrs = append([]groupedAttr{}, h.attrs...)
+	for _, attr := range attrs {
+		next.attrs = append(next.attrs, groupedAttr{
+			groups: append([]string{}, h.groups...),
+			attr:   attr,
+		})
+	}
+	return &next
+}
+
+func (h *Handler) WithGroup(name string) slog.Handler {
+	next := *h
+	next.groups = append(append([]string{}, h.groups...), name)
+	return &next
+}
+
+// NewHandler returns a slog handler backed by Tencent CLS.
+func NewHandler(options ...Option) (*Handler, error) {
 	opts := defaultOptions()
 	for _, o := range options {
 		o(opts)
@@ -104,14 +136,60 @@ func NewLogger(options ...Option) (Logger, error) {
 		return nil, err
 	}
 	producerInst.Start()
-	return &tencentLog{
+	return &Handler{
 		producer: producerInst,
 		opts:     opts,
 	}, nil
 }
 
+// NewLogger returns a slog logger backed by Tencent CLS.
+func NewLogger(options ...Option) (*slog.Logger, error) {
+	handler, err := NewHandler(options...)
+	if err != nil {
+		return nil, err
+	}
+	return klog.NewLogger(klog.WithHandler(handler)), nil
+}
+
 func newString(s string) *string {
 	return &s
+}
+
+func appendAttr(contents *[]*cls.Log_Content, groups []string, attr slog.Attr) {
+	attr.Value = attr.Value.Resolve()
+	if attr.Value.Kind() == slog.KindGroup {
+		nextGroups := groups
+		if attr.Key != "" {
+			nextGroups = append(append([]string{}, groups...), attr.Key)
+		}
+		for _, groupAttr := range attr.Value.Group() {
+			appendAttr(contents, nextGroups, groupAttr)
+		}
+		return
+	}
+	key := attr.Key
+	if len(groups) > 0 {
+		key = strings.Join(append(append([]string{}, groups...), key), ".")
+	}
+	*contents = append(*contents, &cls.Log_Content{
+		Key:   newString(key),
+		Value: newString(toString(attr.Value.Any())),
+	})
+}
+
+func levelString(level slog.Level) string {
+	switch {
+	case level <= slog.LevelDebug:
+		return "DEBUG"
+	case level < slog.LevelWarn:
+		return "INFO"
+	case level < slog.LevelError:
+		return "WARN"
+	case level < slog.LevelError+4:
+		return "ERROR"
+	default:
+		return "FATAL"
+	}
 }
 
 // toString convert any type to string

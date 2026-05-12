@@ -1,72 +1,100 @@
 package logrus
 
 import (
-	"github.com/sirupsen/logrus"
+	"context"
+	"log/slog"
+	"strings"
 
-	"github.com/go-kratos/kratos/v2/log"
+	klog "github.com/go-kratos/kratos/v2/log"
+	"github.com/sirupsen/logrus"
 )
 
-var _ log.Logger = (*Logger)(nil)
-
-type Logger struct {
-	log *logrus.Logger
+// Handler writes slog records to a logrus logger.
+type Handler struct {
+	logger *logrus.Logger
+	attrs  logrus.Fields
+	groups []string
 }
 
-func NewLogger(logger *logrus.Logger) log.Logger {
-	return &Logger{
-		log: logger,
+// NewHandler returns a slog handler backed by logger.
+func NewHandler(logger *logrus.Logger) slog.Handler {
+	if logger == nil {
+		logger = logrus.New()
 	}
+	return &Handler{logger: logger}
 }
 
-func (l *Logger) Log(level log.Level, keyvals ...any) (err error) {
-	var (
-		logrusLevel logrus.Level
-		fields      logrus.Fields = make(map[string]any)
-		msg         string
-	)
+// NewLogger returns a slog logger backed by logger.
+func NewLogger(logger *logrus.Logger) *slog.Logger {
+	return klog.NewLogger(klog.WithHandler(NewHandler(logger)))
+}
 
-	switch level {
-	case log.LevelDebug:
-		logrusLevel = logrus.DebugLevel
-	case log.LevelInfo:
-		logrusLevel = logrus.InfoLevel
-	case log.LevelWarn:
-		logrusLevel = logrus.WarnLevel
-	case log.LevelError:
-		logrusLevel = logrus.ErrorLevel
-	case log.LevelFatal:
-		logrusLevel = logrus.FatalLevel
-	default:
-		logrusLevel = logrus.DebugLevel
+func (h *Handler) Enabled(_ context.Context, level slog.Level) bool {
+	return toLogrusLevel(level) <= h.logger.Level
+}
+
+func (h *Handler) Handle(_ context.Context, record slog.Record) error {
+	fields := make(logrus.Fields, len(h.attrs)+record.NumAttrs())
+	for key, value := range h.attrs {
+		fields[key] = value
 	}
+	record.Attrs(func(attr slog.Attr) bool {
+		appendAttr(fields, h.groups, attr)
+		return true
+	})
+	entry := h.logger.WithFields(fields)
+	entry.Log(toLogrusLevel(record.Level), record.Message)
+	return nil
+}
 
-	if logrusLevel > l.log.Level {
+func (h *Handler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	next := *h
+	next.attrs = make(logrus.Fields, len(h.attrs)+len(attrs))
+	for key, value := range h.attrs {
+		next.attrs[key] = value
+	}
+	for _, attr := range attrs {
+		appendAttr(next.attrs, h.groups, attr)
+	}
+	return &next
+}
+
+func (h *Handler) WithGroup(name string) slog.Handler {
+	next := *h
+	next.groups = append(append([]string{}, h.groups...), name)
+	return &next
+}
+
+func appendAttr(fields logrus.Fields, groups []string, attr slog.Attr) {
+	attr.Value = attr.Value.Resolve()
+	if attr.Value.Kind() == slog.KindGroup {
+		nextGroups := groups
+		if attr.Key != "" {
+			nextGroups = append(append([]string{}, groups...), attr.Key)
+		}
+		for _, groupAttr := range attr.Value.Group() {
+			appendAttr(fields, nextGroups, groupAttr)
+		}
 		return
 	}
+	key := attr.Key
+	if len(groups) > 0 {
+		key = strings.Join(append(append([]string{}, groups...), key), ".")
+	}
+	fields[key] = attr.Value.Any()
+}
 
-	if len(keyvals) == 0 {
-		return nil
+func toLogrusLevel(level slog.Level) logrus.Level {
+	switch {
+	case level <= slog.LevelDebug:
+		return logrus.DebugLevel
+	case level < slog.LevelWarn:
+		return logrus.InfoLevel
+	case level < slog.LevelError:
+		return logrus.WarnLevel
+	case level < slog.LevelError+4:
+		return logrus.ErrorLevel
+	default:
+		return logrus.FatalLevel
 	}
-	if len(keyvals)%2 != 0 {
-		keyvals = append(keyvals, "")
-	}
-	for i := 0; i < len(keyvals); i += 2 {
-		key, ok := keyvals[i].(string)
-		if !ok {
-			continue
-		}
-		if key == logrus.FieldKeyMsg {
-			msg, _ = keyvals[i+1].(string)
-			continue
-		}
-		fields[key] = keyvals[i+1]
-	}
-
-	if len(fields) > 0 {
-		l.log.WithFields(fields).Log(logrusLevel, msg)
-	} else {
-		l.log.Log(logrusLevel, msg)
-	}
-
-	return
 }

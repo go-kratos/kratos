@@ -12,8 +12,8 @@ import (
 	"google.golang.org/grpc/peer"
 
 	"go.opentelemetry.io/otel/trace/noop"
+	"google.golang.org/protobuf/types/known/emptypb"
 
-	"github.com/go-kratos/kratos/v2/internal/testdata/binding"
 	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/transport"
 )
@@ -187,7 +187,7 @@ func TestSetServerSpan(_ *testing.T) {
 	setServerSpan(ctx, span, nil)
 
 	// Handle with proto message
-	m := &binding.HelloRequest{}
+	m := &emptypb.Empty{}
 	setServerSpan(ctx, span, m)
 
 	// Handle with metadata context
@@ -220,7 +220,7 @@ func TestSetClientSpan(_ *testing.T) {
 	setClientSpan(ctx, span, nil)
 
 	// Handle with proto message
-	m := &binding.HelloRequest{}
+	m := &emptypb.Empty{}
 	setClientSpan(ctx, span, m)
 
 	// Handle with metadata context

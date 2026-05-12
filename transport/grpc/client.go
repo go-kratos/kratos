@@ -12,7 +12,6 @@ import (
 	grpcmd "google.golang.org/grpc/metadata"
 
 	"github.com/go-kratos/kratos/v2/internal/matcher"
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/selector"
@@ -118,12 +117,6 @@ func WithHealthCheck(healthCheck bool) ClientOption {
 			o.healthCheckConfig = ""
 		}
 	}
-}
-
-// WithLogger with logger
-// Deprecated: use global logger instead.
-func WithLogger(log.Logger) ClientOption {
-	return func(*clientOptions) {}
 }
 
 func WithPrintDiscoveryDebugLog(p bool) ClientOption {

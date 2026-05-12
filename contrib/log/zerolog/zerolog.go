@@ -1,54 +1,108 @@
 package zerolog
 
 import (
-	"github.com/rs/zerolog"
+	"context"
+	"log/slog"
+	"strings"
 
-	"github.com/go-kratos/kratos/v2/log"
+	klog "github.com/go-kratos/kratos/v2/log"
+	"github.com/rs/zerolog"
 )
 
-var _ log.Logger = (*Logger)(nil)
-
-type Logger struct {
-	log *zerolog.Logger
+// Handler writes slog records to a zerolog logger.
+type Handler struct {
+	logger *zerolog.Logger
+	attrs  []groupedAttr
+	groups []string
 }
 
-func NewLogger(logger *zerolog.Logger) log.Logger {
-	return &Logger{
-		log: logger,
+type groupedAttr struct {
+	groups []string
+	attr   slog.Attr
+}
+
+// NewHandler returns a slog handler backed by logger.
+func NewHandler(logger *zerolog.Logger) slog.Handler {
+	if logger == nil {
+		l := zerolog.Nop()
+		logger = &l
 	}
+	return &Handler{logger: logger}
 }
 
-func (l *Logger) Log(level log.Level, keyvals ...any) (err error) {
-	var event *zerolog.Event
-	if len(keyvals) == 0 {
+// NewLogger returns a slog logger backed by logger.
+func NewLogger(logger *zerolog.Logger) *slog.Logger {
+	return klog.NewLogger(klog.WithHandler(NewHandler(logger)))
+}
+
+func (h *Handler) Enabled(context.Context, slog.Level) bool {
+	return true
+}
+
+func (h *Handler) Handle(_ context.Context, record slog.Record) error {
+	event := h.event(record.Level)
+	if event == nil {
 		return nil
 	}
-	if len(keyvals)%2 != 0 {
-		keyvals = append(keyvals, "")
+	for _, attr := range h.attrs {
+		appendAttr(event, attr.groups, attr.attr)
 	}
+	record.Attrs(func(attr slog.Attr) bool {
+		appendAttr(event, h.groups, attr)
+		return true
+	})
+	event.Msg(record.Message)
+	return nil
+}
 
-	switch level {
-	case log.LevelDebug:
-		event = l.log.Debug()
-	case log.LevelInfo:
-		event = l.log.Info()
-	case log.LevelWarn:
-		event = l.log.Warn()
-	case log.LevelError:
-		event = l.log.Error()
-	case log.LevelFatal:
-		event = l.log.Fatal()
+func (h *Handler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	next := *h
+	next.attrs = append([]groupedAttr{}, h.attrs...)
+	for _, attr := range attrs {
+		next.attrs = append(next.attrs, groupedAttr{
+			groups: append([]string{}, h.groups...),
+			attr:   attr,
+		})
+	}
+	return &next
+}
+
+func (h *Handler) WithGroup(name string) slog.Handler {
+	next := *h
+	next.groups = append(append([]string{}, h.groups...), name)
+	return &next
+}
+
+func (h *Handler) event(level slog.Level) *zerolog.Event {
+	switch {
+	case level <= slog.LevelDebug:
+		return h.logger.Debug()
+	case level < slog.LevelWarn:
+		return h.logger.Info()
+	case level < slog.LevelError:
+		return h.logger.Warn()
+	case level < slog.LevelError+4:
+		return h.logger.Error()
 	default:
-		event = l.log.Debug()
+		return h.logger.Fatal()
 	}
+}
 
-	for i := 0; i < len(keyvals); i += 2 {
-		key, ok := keyvals[i].(string)
-		if !ok {
-			continue
+func appendAttr(event *zerolog.Event, groups []string, attr slog.Attr) {
+	attr.Value = attr.Value.Resolve()
+	if attr.Value.Kind() == slog.KindGroup {
+		nextGroups := groups
+		if attr.Key != "" {
+			nextGroups = append(append([]string{}, groups...), attr.Key)
 		}
-		event = event.Any(key, keyvals[i+1])
+		for _, groupAttr := range attr.Value.Group() {
+			appendAttr(event, nextGroups, groupAttr)
+		}
+		return
 	}
-	event.Send()
-	return
+	key := attr.Key
+	if len(groups) > 0 {
+		key = strings.Join(append(append([]string{}, groups...), key), ".")
+	}
+	event.Any(key, attr.Value.Any())
 }

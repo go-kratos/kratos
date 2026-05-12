@@ -1,11 +1,12 @@
 package aliyun
 
 import (
+	"context"
+	"log/slog"
 	"math"
 	"reflect"
 	"testing"
-
-	"github.com/go-kratos/kratos/v2/log"
+	"time"
 )
 
 func TestWithEndpoint(t *testing.T) {
@@ -60,51 +61,46 @@ func TestWithAccessSecret(t *testing.T) {
 
 func TestLogger(t *testing.T) {
 	project := "foo"
-	logger, err := NewAliyunLog(WithProject(project))
+	handler, err := NewHandler(WithProject(project))
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	defer logger.Close()
-	logger.GetProducer()
-	flog := log.NewHelper(logger)
-	flog.Debug("log", "test")
-	flog.Info("log", "test")
-	flog.Warn("log", "test")
-	flog.Error("log", "test")
+	defer handler.Close()
+	handler.GetProducer()
+	logger := slog.New(handler)
+	logger.Debug("logtest")
+	logger.Info("logtest")
+	logger.Warn("logtest")
+	logger.Error("logtest")
 }
 
 func TestLog(t *testing.T) {
 	project := "foo"
-	logger, err := NewAliyunLog(WithProject(project))
+	handler, err := NewHandler(WithProject(project))
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	defer logger.Close()
-	err = logger.Log(log.LevelDebug, 0, int8(1), int16(2), int32(3))
+	defer handler.Close()
+	record := slog.NewRecord(time.Now(), slog.LevelDebug, "message", 0)
+	record.AddAttrs(
+		slog.Any("int8", int8(1)),
+		slog.Any("int16", int16(2)),
+		slog.Any("int32", int32(3)),
+		slog.Any("uint8", uint8(1)),
+		slog.Any("uint16", uint16(2)),
+		slog.Any("uint32", uint32(3)),
+		slog.Any("int64", int64(0)),
+		slog.Any("uint64", uint64(1)),
+		slog.Any("float32", float32(2)),
+		slog.Any("float64", float64(3)),
+		slog.Any("bytes", []byte{0, 1, 2, 3}),
+		slog.Any("bool", true),
+	)
+	err = handler.Handle(context.Background(), record)
 	if err != nil {
-		t.Errorf("Log() returns error:%v", err)
-	}
-	err = logger.Log(log.LevelDebug, uint(0), uint8(1), uint16(2), uint32(3))
-	if err != nil {
-		t.Errorf("Log() returns error:%v", err)
-	}
-	err = logger.Log(log.LevelDebug, uint(0), uint8(1), uint16(2), uint32(3))
-	if err != nil {
-		t.Errorf("Log() returns error:%v", err)
-	}
-	err = logger.Log(log.LevelDebug, int64(0), uint64(1), float32(2), float64(3))
-	if err != nil {
-		t.Errorf("Log() returns error:%v", err)
-	}
-	err = logger.Log(log.LevelDebug, []byte{0, 1, 2, 3}, "foo")
-	if err != nil {
-		t.Errorf("Log() returns error:%v", err)
-	}
-	err = logger.Log(log.LevelDebug, true, 0)
-	if err != nil {
-		t.Errorf("Log() returns error:%v", err)
+		t.Errorf("Handle() returns error:%v", err)
 	}
 }
 

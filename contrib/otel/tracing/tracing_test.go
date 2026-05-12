@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"reflect"
 	"testing"
 
@@ -12,7 +11,6 @@ import (
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
@@ -123,20 +121,17 @@ func TestServer(t *testing.T) {
 		WithTracerProvider(tracesdk.NewTracerProvider()),
 	)
 
-	logger := log.NewStdLogger(os.Stdout)
-	logger = log.With(logger, "span_id", SpanID())
-	logger = log.With(logger, "trace_id", TraceID())
-
 	var (
 		childSpanID  string
 		childTraceID string
 	)
 	next := func(ctx context.Context, req any) (any, error) {
-		_ = log.WithContext(ctx, logger).Log(log.LevelInfo,
-			"kind", "server",
-		)
-		childSpanID = SpanID()(ctx).(string)
-		childTraceID = TraceID()(ctx).(string)
+		attrs := TraceAttrs(ctx)
+		if len(attrs) != 2 {
+			t.Fatalf("TraceAttrs len = %d, want 2", len(attrs))
+		}
+		childSpanID = SpanID(ctx)
+		childTraceID = TraceID(ctx)
 		return req.(string) + "https://go-kratos.dev", nil
 	}
 
@@ -194,20 +189,17 @@ func TestClient(t *testing.T) {
 		WithTracerProvider(tracesdk.NewTracerProvider()),
 	)
 
-	logger := log.NewStdLogger(os.Stdout)
-	logger = log.With(logger, "span_id", SpanID())
-	logger = log.With(logger, "trace_id", TraceID())
-
 	var (
 		childSpanID  string
 		childTraceID string
 	)
 	next := func(ctx context.Context, req any) (any, error) {
-		_ = log.WithContext(ctx, logger).Log(log.LevelInfo,
-			"kind", "client",
-		)
-		childSpanID = SpanID()(ctx).(string)
-		childTraceID = TraceID()(ctx).(string)
+		attrs := TraceAttrs(ctx)
+		if len(attrs) != 2 {
+			t.Fatalf("TraceAttrs len = %d, want 2", len(attrs))
+		}
+		childSpanID = SpanID(ctx)
+		childTraceID = TraceID(ctx)
 		return req.(string) + "https://go-kratos.dev", nil
 	}
 

@@ -14,12 +14,12 @@ import (
 func kratosHome() string {
 	dir, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 	home := filepath.Join(dir, ".kratos")
 	if _, err := os.Stat(home); os.IsNotExist(err) {
 		if err := os.MkdirAll(home, 0o700); err != nil {
-			log.Fatal(err)
+			log.Fatal(err.Error())
 		}
 	}
 	return home
@@ -29,7 +29,7 @@ func kratosHomeWithDir(dir string) string {
 	home := filepath.Join(kratosHome(), dir)
 	if _, err := os.Stat(home); os.IsNotExist(err) {
 		if err := os.MkdirAll(home, 0o700); err != nil {
-			log.Fatal(err)
+			log.Fatal(err.Error())
 		}
 	}
 	return home

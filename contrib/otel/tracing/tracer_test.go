@@ -7,8 +7,7 @@ import (
 
 	"go.opentelemetry.io/otel/trace"
 	"go.opentelemetry.io/otel/trace/noop"
-
-	"github.com/go-kratos/kratos/v2/internal/testdata/binding"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func TestNewTracer(t *testing.T) {
@@ -42,7 +41,7 @@ func TestTracer_End(_ *testing.T) {
 	// Handle without error case
 	tracer.End(ctx, span, nil, nil)
 
-	m := &binding.HelloRequest{}
+	m := &emptypb.Empty{}
 
 	// Handle the trace KindServer
 	tracer = NewTracer(trace.SpanKindServer, func(o *options) {

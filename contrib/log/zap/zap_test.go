@@ -1,12 +1,11 @@
 package zap
 
 import (
+	"log/slog"
 	"testing"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 type testWriteSyncer struct {
@@ -34,25 +33,22 @@ func TestLogger(t *testing.T) {
 	}
 	core := zapcore.NewCore(zapcore.NewJSONEncoder(encoderCfg), syncer, zap.DebugLevel)
 	zlogger := zap.New(core).WithOptions()
-	logger := NewLogger(zlogger)
+	handler := NewHandler(zlogger).(*Handler)
+	logger := slog.New(handler)
 
-	defer func() { _ = logger.Close() }()
+	defer func() { _ = handler.Close() }()
 
-	zlog := log.NewHelper(logger)
-
-	zlog.Debugw("log", "debug")
-	zlog.Infow("log", "info")
-	zlog.Warnw("log", "warn")
-	zlog.Errorw("log", "error")
-	zlog.Errorw("log", "error", "except warn")
-	zlog.Info("hello world")
+	logger.Debug("", "log", "debug")
+	logger.Info("", "log", "info")
+	logger.Warn("", "log", "warn")
+	logger.Error("", "log", "error")
+	logger.Info("hello world")
 
 	except := []string{
 		"{\"level\":\"debug\",\"msg\":\"\",\"log\":\"debug\"}\n",
 		"{\"level\":\"info\",\"msg\":\"\",\"log\":\"info\"}\n",
 		"{\"level\":\"warn\",\"msg\":\"\",\"log\":\"warn\"}\n",
 		"{\"level\":\"error\",\"msg\":\"\",\"log\":\"error\"}\n",
-		"{\"level\":\"warn\",\"msg\":\"Keyvalues must appear in pairs: [log error except warn]\"}\n",
 		"{\"level\":\"info\",\"msg\":\"hello world\"}\n", // not {"level":"info","msg":"","msg":"hello world"}
 	}
 	for i, s := range except {

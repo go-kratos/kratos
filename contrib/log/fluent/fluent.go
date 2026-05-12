@@ -1,18 +1,18 @@
 package fluent
 
 import (
+	"context"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/fluent/fluent-logger-golang/fluent"
-
-	"github.com/go-kratos/kratos/v2/log"
+	klog "github.com/go-kratos/kratos/v2/log"
 )
-
-var _ log.Logger = (*Logger)(nil)
 
 // Option is fluentd logger option.
 type Option func(*options)
@@ -92,18 +92,25 @@ func WithForceStopAsyncSend(forceStopAsyncSend bool) Option {
 	}
 }
 
-// Logger is fluent logger sdk.
-type Logger struct {
-	opts options
-	log  *fluent.Fluent
+// Handler writes slog records to fluentd.
+type Handler struct {
+	opts   options
+	log    *fluent.Fluent
+	attrs  []groupedAttr
+	groups []string
 }
 
-// NewLogger new a std logger with options.
+type groupedAttr struct {
+	groups []string
+	attr   slog.Attr
+}
+
+// NewHandler returns a slog handler backed by fluentd.
 // target:
 //
 //	tcp://127.0.0.1:24224
 //	unix://var/run/fluent/fluent.sock
-func NewLogger(addr string, opts ...Option) (*Logger, error) {
+func NewHandler(addr string, opts ...Option) (*Handler, error) {
 	option := options{}
 	for _, o := range opts {
 		o(&option)
@@ -144,34 +151,96 @@ func NewLogger(addr string, opts ...Option) (*Logger, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Logger{
+	return &Handler{
 		opts: option,
 		log:  fl,
 	}, nil
 }
 
-// Log print the kv pairs log.
-func (l *Logger) Log(level log.Level, keyvals ...any) error {
-	if len(keyvals) == 0 {
-		return nil
+// NewLogger returns a slog logger backed by fluentd.
+func NewLogger(addr string, opts ...Option) (*slog.Logger, error) {
+	handler, err := NewHandler(addr, opts...)
+	if err != nil {
+		return nil, err
 	}
-	if len(keyvals)%2 != 0 {
-		keyvals = append(keyvals, "KEYVALS UNPAIRED")
+	return klog.NewLogger(klog.WithHandler(handler)), nil
+}
+
+func (h *Handler) Enabled(context.Context, slog.Level) bool {
+	return true
+}
+
+func (h *Handler) Handle(_ context.Context, record slog.Record) error {
+	data := make(map[string]string, len(h.attrs)+record.NumAttrs()+1)
+	if record.Message != "" {
+		data["msg"] = record.Message
 	}
-
-	data := make(map[string]string, len(keyvals)/2+1)
-
-	for i := 0; i < len(keyvals); i += 2 {
-		data[fmt.Sprint(keyvals[i])] = fmt.Sprint(keyvals[i+1])
+	for _, attr := range h.attrs {
+		appendAttr(data, attr.groups, attr.attr)
 	}
-
-	if err := l.log.Post(level.String(), data); err != nil {
+	record.Attrs(func(attr slog.Attr) bool {
+		appendAttr(data, h.groups, attr)
+		return true
+	})
+	if err := h.log.Post(levelString(record.Level), data); err != nil {
 		println(err)
 	}
 	return nil
 }
 
+func (h *Handler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	next := *h
+	next.attrs = append([]groupedAttr{}, h.attrs...)
+	for _, attr := range attrs {
+		next.attrs = append(next.attrs, groupedAttr{
+			groups: append([]string{}, h.groups...),
+			attr:   attr,
+		})
+	}
+	return &next
+}
+
+func (h *Handler) WithGroup(name string) slog.Handler {
+	next := *h
+	next.groups = append(append([]string{}, h.groups...), name)
+	return &next
+}
+
 // Close close the logger.
-func (l *Logger) Close() error {
-	return l.log.Close()
+func (h *Handler) Close() error {
+	return h.log.Close()
+}
+
+func appendAttr(data map[string]string, groups []string, attr slog.Attr) {
+	attr.Value = attr.Value.Resolve()
+	if attr.Value.Kind() == slog.KindGroup {
+		nextGroups := groups
+		if attr.Key != "" {
+			nextGroups = append(append([]string{}, groups...), attr.Key)
+		}
+		for _, groupAttr := range attr.Value.Group() {
+			appendAttr(data, nextGroups, groupAttr)
+		}
+		return
+	}
+	key := attr.Key
+	if len(groups) > 0 {
+		key = strings.Join(append(append([]string{}, groups...), key), ".")
+	}
+	data[key] = fmt.Sprint(attr.Value.Any())
+}
+
+func levelString(level slog.Level) string {
+	switch {
+	case level <= slog.LevelDebug:
+		return "DEBUG"
+	case level < slog.LevelWarn:
+		return "INFO"
+	case level < slog.LevelError:
+		return "WARN"
+	case level < slog.LevelError+4:
+		return "ERROR"
+	default:
+		return "FATAL"
+	}
 }

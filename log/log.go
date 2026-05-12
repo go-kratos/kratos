@@ -2,64 +2,134 @@ package log
 
 import (
 	"context"
-	"log"
+	"fmt"
+	"log/slog"
+	"os"
 )
 
-// DefaultLogger is default logger.
-var DefaultLogger = NewStdLogger(log.Writer())
-
-// Logger is a logger interface.
-type Logger interface {
-	Log(level Level, keyvals ...any) error
+// SetDefault sets the default logger used by the package-level helpers and by
+// [slog.Default].
+func SetDefault(logger *slog.Logger) {
+	slog.SetDefault(logger)
 }
 
-type logger struct {
-	logger    Logger
-	prefix    []any
-	hasValuer bool
-	ctx       context.Context
+// Default returns the default logger.
+func Default() *slog.Logger {
+	return slog.Default()
 }
 
-func (c *logger) Log(level Level, keyvals ...any) error {
-	kvs := make([]any, 0, len(c.prefix)+len(keyvals))
-	kvs = append(kvs, c.prefix...)
-	if c.hasValuer {
-		bindValues(c.ctx, kvs)
-	}
-	kvs = append(kvs, keyvals...)
-	return c.logger.Log(level, kvs...)
+// Log emits a record at the given level. It mirrors [slog.Log].
+func Log(ctx context.Context, level Level, msg string, args ...any) {
+	slog.Log(ctx, level, msg, args...)
 }
 
-// With with logger fields.
-func With(l Logger, kv ...any) Logger {
-	c, ok := l.(*logger)
-	if !ok {
-		return &logger{logger: l, prefix: kv, hasValuer: containsValuer(kv), ctx: context.Background()}
-	}
-	kvs := make([]any, 0, len(c.prefix)+len(kv))
-	kvs = append(kvs, c.prefix...)
-	kvs = append(kvs, kv...)
-	return &logger{
-		logger:    c.logger,
-		prefix:    kvs,
-		hasValuer: containsValuer(kvs),
-		ctx:       c.ctx,
-	}
+// LogAttrs emits a typed-attr record at the given level. It mirrors
+// [slog.LogAttrs].
+func LogAttrs(ctx context.Context, level Level, msg string, attrs ...slog.Attr) {
+	slog.LogAttrs(ctx, level, msg, attrs...)
 }
 
-// WithContext returns a shallow copy of l with its context changed
-// to ctx. The provided ctx must be non-nil.
-func WithContext(ctx context.Context, l Logger) Logger {
-	switch v := l.(type) {
-	default:
-		return &logger{logger: l, ctx: ctx}
-	case *logger:
-		lv := *v
-		lv.ctx = ctx
-		return &lv
-	case *Filter:
-		fv := *v
-		fv.logger = WithContext(ctx, fv.logger)
-		return &fv
-	}
+// Debug logs at debug level. Signature mirrors [slog.Debug].
+func Debug(msg string, args ...any) {
+	slog.Debug(msg, args...)
+}
+
+// DebugContext logs at debug level with the provided context.
+func DebugContext(ctx context.Context, msg string, args ...any) {
+	slog.DebugContext(ctx, msg, args...)
+}
+
+// Debugf logs at debug level using fmt-style formatting. Kratos extension;
+// slog has no fmt variant.
+func Debugf(format string, args ...any) {
+	slog.Debug(fmt.Sprintf(format, args...))
+}
+
+// DebugfContext is the context-aware variant of [Debugf].
+func DebugfContext(ctx context.Context, format string, args ...any) {
+	slog.DebugContext(ctx, fmt.Sprintf(format, args...))
+}
+
+// Info logs at info level. Signature mirrors [slog.Info].
+func Info(msg string, args ...any) {
+	slog.Info(msg, args...)
+}
+
+// InfoContext logs at info level with the provided context.
+func InfoContext(ctx context.Context, msg string, args ...any) {
+	slog.InfoContext(ctx, msg, args...)
+}
+
+// Infof logs at info level using fmt-style formatting.
+func Infof(format string, args ...any) {
+	slog.Info(fmt.Sprintf(format, args...))
+}
+
+// InfofContext is the context-aware variant of [Infof].
+func InfofContext(ctx context.Context, format string, args ...any) {
+	slog.InfoContext(ctx, fmt.Sprintf(format, args...))
+}
+
+// Warn logs at warn level. Signature mirrors [slog.Warn].
+func Warn(msg string, args ...any) {
+	slog.Warn(msg, args...)
+}
+
+// WarnContext logs at warn level with the provided context.
+func WarnContext(ctx context.Context, msg string, args ...any) {
+	slog.WarnContext(ctx, msg, args...)
+}
+
+// Warnf logs at warn level using fmt-style formatting.
+func Warnf(format string, args ...any) {
+	slog.Warn(fmt.Sprintf(format, args...))
+}
+
+// WarnfContext is the context-aware variant of [Warnf].
+func WarnfContext(ctx context.Context, format string, args ...any) {
+	slog.WarnContext(ctx, fmt.Sprintf(format, args...))
+}
+
+// Error logs at error level. Signature mirrors [slog.Error].
+func Error(msg string, args ...any) {
+	slog.Error(msg, args...)
+}
+
+// ErrorContext logs at error level with the provided context.
+func ErrorContext(ctx context.Context, msg string, args ...any) {
+	slog.ErrorContext(ctx, msg, args...)
+}
+
+// Errorf logs at error level using fmt-style formatting.
+func Errorf(format string, args ...any) {
+	slog.Error(fmt.Sprintf(format, args...))
+}
+
+// ErrorfContext is the context-aware variant of [Errorf].
+func ErrorfContext(ctx context.Context, format string, args ...any) {
+	slog.ErrorContext(ctx, fmt.Sprintf(format, args...))
+}
+
+// Fatal logs at [LevelFatal] and then calls os.Exit(1). Kratos extension.
+func Fatal(msg string, args ...any) {
+	slog.Log(context.Background(), LevelFatal, msg, args...)
+	os.Exit(1)
+}
+
+// FatalContext is the context-aware variant of [Fatal].
+func FatalContext(ctx context.Context, msg string, args ...any) {
+	slog.Log(ctx, LevelFatal, msg, args...)
+	os.Exit(1)
+}
+
+// Fatalf logs at [LevelFatal] with fmt-style formatting and then exits.
+func Fatalf(format string, args ...any) {
+	slog.Log(context.Background(), LevelFatal, fmt.Sprintf(format, args...))
+	os.Exit(1)
+}
+
+// FatalfContext is the context-aware variant of [Fatalf].
+func FatalfContext(ctx context.Context, format string, args ...any) {
+	slog.Log(ctx, LevelFatal, fmt.Sprintf(format, args...))
+	os.Exit(1)
 }

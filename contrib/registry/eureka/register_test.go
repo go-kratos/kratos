@@ -38,7 +38,7 @@ func TestRegistry(_ *testing.T) {
 func do(r *Registry, s *registry.ServiceInstance) {
 	w, err := r.Watch(context.Background(), s.Name)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 	defer func() {
 		_ = w.Stop()
@@ -58,13 +58,13 @@ func do(r *Registry, s *registry.ServiceInstance) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	if err = r.Register(ctx, s); err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 
 	time.Sleep(time.Second * 10)
 	res, err := r.GetService(ctx, s.Name)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 	for i, re := range res {
 		log.Printf("first %d re:%v\n", i, re)
@@ -75,14 +75,14 @@ func do(r *Registry, s *registry.ServiceInstance) {
 	}
 
 	if err = r.Deregister(ctx, s); err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 	cancel()
 	time.Sleep(time.Second * 10)
 
 	res, err = r.GetService(ctx, s.Name)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 	for i, re := range res {
 		log.Printf("second %d re:%v\n", i, re)

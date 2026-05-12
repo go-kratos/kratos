@@ -2,12 +2,11 @@ package fluent
 
 import (
 	"io"
+	"log/slog"
 	"net"
 	"os"
 	"testing"
 	"time"
-
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 func TestMain(m *testing.M) {
@@ -126,32 +125,32 @@ func TestWithForceStopAsyncSend(t *testing.T) {
 }
 
 func TestLogger(t *testing.T) {
-	logger, err := NewLogger("tcp://127.0.0.1:24224")
+	handler, err := NewHandler("tcp://127.0.0.1:24224")
 	if err != nil {
 		t.Error(err)
 	}
-	defer logger.Close()
-	flog := log.NewHelper(logger)
+	defer handler.Close()
+	logger := slog.New(handler)
 
-	flog.Debug("log", "test")
-	flog.Info("log", "test")
-	flog.Warn("log", "test")
-	flog.Error("log", "test")
+	logger.Debug("logtest")
+	logger.Info("logtest")
+	logger.Warn("logtest")
+	logger.Error("logtest")
 }
 
 func TestLoggerWithOpt(t *testing.T) {
 	var duration time.Duration = 1000000000
-	logger, err := NewLogger("tcp://127.0.0.1:24224", WithTimeout(duration))
+	handler, err := NewHandler("tcp://127.0.0.1:24224", WithTimeout(duration))
 	if err != nil {
 		t.Error(err)
 	}
-	defer logger.Close()
-	flog := log.NewHelper(logger)
+	defer handler.Close()
+	logger := slog.New(handler)
 
-	flog.Debug("log", "test")
-	flog.Info("log", "test")
-	flog.Warn("log", "test")
-	flog.Error("log", "test")
+	logger.Debug("logtest")
+	logger.Info("logtest")
+	logger.Warn("logtest")
+	logger.Error("logtest")
 }
 
 func TestLoggerError(t *testing.T) {
@@ -164,7 +163,7 @@ func TestLoggerError(t *testing.T) {
 		"unix://foo/bar",
 	}
 	for _, errc := range errCase {
-		_, err := NewLogger(errc)
+		_, err := NewHandler(errc)
 		if err == nil {
 			t.Error(err)
 		}
@@ -173,74 +172,75 @@ func TestLoggerError(t *testing.T) {
 
 func BenchmarkLoggerPrint(b *testing.B) {
 	b.SetParallelism(100)
-	logger, err := NewLogger("tcp://127.0.0.1:24224")
-	flog := log.NewHelper(logger)
+	handler, err := NewHandler("tcp://127.0.0.1:24224")
 	if err != nil {
 		b.Error(err)
 	}
-	defer logger.Close()
+	defer handler.Close()
+	logger := slog.New(handler)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			flog.Info("log", "test")
+			logger.Info("logtest")
 		}
 	})
 }
 
 func BenchmarkLoggerHelperV(b *testing.B) {
 	b.SetParallelism(100)
-	logger, err := NewLogger("tcp://127.0.0.1:24224")
+	handler, err := NewHandler("tcp://127.0.0.1:24224")
 	if err != nil {
 		b.Error(err)
 	}
-	h := log.NewHelper(logger)
+	defer handler.Close()
+	logger := slog.New(handler)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			h.Info("log", "test")
+			logger.Info("logtest")
 		}
 	})
 }
 
 func BenchmarkLoggerHelperInfo(b *testing.B) {
 	b.SetParallelism(100)
-	logger, err := NewLogger("tcp://127.0.0.1:24224")
+	handler, err := NewHandler("tcp://127.0.0.1:24224")
 	if err != nil {
 		b.Error(err)
 	}
-	defer logger.Close()
-	h := log.NewHelper(logger)
+	defer handler.Close()
+	logger := slog.New(handler)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			h.Info("test")
+			logger.Info("test")
 		}
 	})
 }
 
 func BenchmarkLoggerHelperInfof(b *testing.B) {
 	b.SetParallelism(100)
-	logger, err := NewLogger("tcp://127.0.0.1:24224")
+	handler, err := NewHandler("tcp://127.0.0.1:24224")
 	if err != nil {
 		b.Error(err)
 	}
-	defer logger.Close()
-	h := log.NewHelper(logger)
+	defer handler.Close()
+	logger := slog.New(handler)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			h.Infof("log %s", "test")
+			logger.Info("log test")
 		}
 	})
 }
 
 func BenchmarkLoggerHelperInfow(b *testing.B) {
 	b.SetParallelism(100)
-	logger, err := NewLogger("tcp://127.0.0.1:24224")
+	handler, err := NewHandler("tcp://127.0.0.1:24224")
 	if err != nil {
 		b.Error(err)
 	}
-	defer logger.Close()
-	h := log.NewHelper(logger)
+	defer handler.Close()
+	logger := slog.New(handler)
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			h.Infow("log", "test")
+			logger.Info("", "log", "test")
 		}
 	})
 }

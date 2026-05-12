@@ -2,11 +2,11 @@ package kratos
 
 import (
 	"context"
+	"log/slog"
 	"net/url"
 	"os"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
 )
@@ -25,7 +25,7 @@ type options struct {
 	ctx  context.Context
 	sigs []os.Signal
 
-	logger           log.Logger
+	logger           *slog.Logger
 	registrar        registry.Registrar
 	registrarTimeout time.Duration
 	stopTimeout      time.Duration
@@ -69,7 +69,7 @@ func Context(ctx context.Context) Option {
 }
 
 // Logger with service logger.
-func Logger(logger log.Logger) Option {
+func Logger(logger *slog.Logger) Option {
 	return func(o *options) { o.logger = logger }
 }
 

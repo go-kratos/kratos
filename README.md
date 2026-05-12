@@ -26,7 +26,7 @@ Kratos is a microservice-oriented governance framework implemented by golang, wh
 
 - The [communication protocol](https://go-kratos.dev/docs/component/api) is based on the HTTP/gRPC through the definition of Protobuf.
 - Abstract [transport](https://go-kratos.dev/docs/component/transport/overview) layer support: [HTTP](https://go-kratos.dev/docs/component/transport/http) / [gRPC](https://go-kratos.dev/docs/component/transport/grpc).
-- Powerful [middleware](https://go-kratos.dev/docs/component/middleware/overview) design, support: [Tracing (OpenTelemetry)](https://go-kratos.dev/docs/component/middleware/tracing), [Metrics (Prometheus is default)](https://go-kratos.dev/docs/component/middleware/metrics), [Recovery](https://go-kratos.dev/docs/component/middleware/recovery) and more.
+- Powerful [middleware](https://go-kratos.dev/docs/component/middleware/overview) design, support: [Recovery](https://go-kratos.dev/docs/component/middleware/recovery) and more. OpenTelemetry tracing and metrics are available from contrib packages.
 - [Registry](https://go-kratos.dev/docs/component/registry) interface able to be connected with various other centralized registries through plug-ins.
 - The [standard log interfaces](https://go-kratos.dev/docs/component/log) ease the integration of the third-party log libs with logs collected through the *Fluentd*.
 - Automatically support the selection of the content [encoding](https://go-kratos.dev/docs/component/encoding) with Accept and Content-Type.

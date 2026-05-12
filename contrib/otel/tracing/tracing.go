@@ -2,8 +2,7 @@ package tracing
 
 import (
 	"context"
-
-	"github.com/go-kratos/kratos/v2/log"
+	"log/slog"
 
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
@@ -75,22 +74,26 @@ func Client(opts ...Option) middleware.Middleware {
 	}
 }
 
-// TraceID returns a traceid valuer.
-func TraceID() log.Valuer {
-	return func(ctx context.Context) any {
-		if span := trace.SpanContextFromContext(ctx); span.HasTraceID() {
-			return span.TraceID().String()
-		}
-		return ""
+// TraceID returns the trace ID from ctx.
+func TraceID(ctx context.Context) string {
+	if span := trace.SpanContextFromContext(ctx); span.HasTraceID() {
+		return span.TraceID().String()
 	}
+	return ""
 }
 
-// SpanID returns a spanid valuer.
-func SpanID() log.Valuer {
-	return func(ctx context.Context) any {
-		if span := trace.SpanContextFromContext(ctx); span.HasSpanID() {
-			return span.SpanID().String()
-		}
-		return ""
+// SpanID returns the span ID from ctx.
+func SpanID(ctx context.Context) string {
+	if span := trace.SpanContextFromContext(ctx); span.HasSpanID() {
+		return span.SpanID().String()
+	}
+	return ""
+}
+
+// TraceAttrs returns slog attributes for the trace and span IDs in ctx.
+func TraceAttrs(ctx context.Context) []slog.Attr {
+	return []slog.Attr{
+		slog.String("trace_id", TraceID(ctx)),
+		slog.String("span_id", SpanID(ctx)),
 	}
 }

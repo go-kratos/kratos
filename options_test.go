@@ -2,14 +2,14 @@ package kratos
 
 import (
 	"context"
-	"log"
+	"io"
+	"log/slog"
 	"net/url"
 	"os"
 	"reflect"
 	"testing"
 	"time"
 
-	xlog "github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/registry"
 	"github.com/go-kratos/kratos/v2/transport"
 )
@@ -79,10 +79,10 @@ func TestContext(t *testing.T) {
 
 func TestLogger(t *testing.T) {
 	o := &options{}
-	v := xlog.NewStdLogger(log.Writer())
+	var v *slog.Logger = slog.New(slog.NewTextHandler(io.Discard, nil))
 	Logger(v)(o)
 	if !reflect.DeepEqual(v, o.logger) {
-		t.Fatalf("o.logger:%v is not equal to xlog.NewHelper(v):%v", o.logger, xlog.NewHelper(v))
+		t.Fatalf("o.logger:%v is not equal to v:%v", o.logger, v)
 	}
 }
 
@@ -105,7 +105,7 @@ func TestServer(t *testing.T) {
 	}
 	Server(v...)(o)
 	if !reflect.DeepEqual(v, o.servers) {
-		t.Fatalf("o.servers:%s is not equal to xlog.NewHelper(v):%s", o.servers, v)
+		t.Fatalf("o.servers:%s is not equal to v:%s", o.servers, v)
 	}
 }
 

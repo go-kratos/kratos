@@ -33,14 +33,14 @@ func run(_ *cobra.Command, args []string) {
 	}
 	reader, err := os.Open(args[0])
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 	defer reader.Close()
 
 	parser := proto.NewParser(reader)
 	definition, err := parser.Parse()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 
 	var (
@@ -83,10 +83,10 @@ func run(_ *cobra.Command, args []string) {
 		}
 		b, err := s.execute()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(err.Error())
 		}
 		if err := os.WriteFile(to, b, 0o644); err != nil {
-			log.Fatal(err)
+			log.Fatal(err.Error())
 		}
 		fmt.Println(to)
 	}

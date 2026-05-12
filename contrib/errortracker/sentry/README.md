@@ -15,17 +15,26 @@ sentry.Init(sentry.ClientOptions{
 
 // Step 2:
 // set middleware
-import ksentry "github.com/go-kratos/kratos/contrib/errortracker/sentry/v2"
+import (
+	"context"
+
+	ksentry "github.com/go-kratos/kratos/contrib/errortracker/sentry/v2"
+	"github.com/go-kratos/kratos/contrib/otel/v2/tracing"
+)
 
 // for HTTP server, new HTTP server with sentry middleware options
 var opts = []http.ServerOption{
 	http.Middleware(
 		recovery.Recovery(),
 		tracing.Server(),
-		ksentry.Server(ksentry.WithTags(map[string]interface{}{
-			"tag": "some-custom-constant-tag",
-			"trace_id": tracing.TraceID(), // If you want to use the TraceID valuer, you need to place it after the A middleware.
-		})), // must after Recovery middleware, because of the exiting order will be reversed
+		ksentry.Server(
+			ksentry.WithTags(map[string]string{
+				"tag": "some-custom-constant-tag",
+			}),
+			ksentry.WithContextTags(func(ctx context.Context) map[string]string {
+				return map[string]string{"trace_id": tracing.TraceID(ctx)}
+			}),
+		), // must after Recovery middleware, because of the exiting order will be reversed
 		logging.Server(logger),
 	),
 }
@@ -35,10 +44,14 @@ var opts = []grpc.ServerOption{
 	grpc.Middleware(
 		recovery.Recovery(),
 		tracing.Server(),
-		ksentry.Server(ksentry.WithTags(map[string]interface{}{
-			"tag": "some-custom-constant-tag",
-			"trace_id": tracing.TraceID(), // If you want to use the TraceID valuer, you need to place it after the A middleware.
-		})), // must after Recovery middleware, because of the exiting order will be reversed
+		ksentry.Server(
+			ksentry.WithTags(map[string]string{
+				"tag": "some-custom-constant-tag",
+			}),
+			ksentry.WithContextTags(func(ctx context.Context) map[string]string {
+				return map[string]string{"trace_id": tracing.TraceID(ctx)}
+			}),
+		), // must after Recovery middleware, because of the exiting order will be reversed
 		logging.Server(logger),
 	),
 }

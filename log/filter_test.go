@@ -3,226 +3,94 @@ package log
 import (
 	"bytes"
 	"context"
-	"io"
-	"strings"
-	"sync"
+	"encoding/json"
+	"log/slog"
 	"testing"
 	"time"
 )
 
-func TestFilterAll(_ *testing.T) {
-	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-	log := NewHelper(NewFilter(logger,
-		FilterLevel(LevelDebug),
-		FilterKey("username"),
-		FilterValue("hello"),
-		FilterFunc(testFilterFunc),
-	))
-	log.Log(LevelDebug, "msg", "test debug")
-	log.Info("hello")
-	log.Infow("password", "123456")
-	log.Infow("username", "kratos")
-	log.Warn("warn log")
-}
+func TestFilterKeyRedacts(t *testing.T) {
+	cap := &captureHandler{}
+	h := newFilterHandler(cap, FilterKey("password"))
+	record := slog.NewRecord(time.Now(), LevelInfo, "login", 0)
+	record.AddAttrs(slog.String("user", "alice"), slog.String("password", "secret"))
+	_ = h.Handle(context.Background(), record)
 
-func TestFilterLevel(_ *testing.T) {
-	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-	log := NewHelper(NewFilter(NewFilter(logger, FilterLevel(LevelWarn))))
-	log.Log(LevelDebug, "msg1", "te1st debug")
-	log.Debug("test debug")
-	log.Debugf("test %s", "debug")
-	log.Debugw("log", "test debug")
-	log.Warn("warn log")
-}
-
-func TestFilterCaller(_ *testing.T) {
-	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-	log := NewFilter(logger)
-	_ = log.Log(LevelDebug, "msg1", "te1st debug")
-	logHelper := NewHelper(NewFilter(logger))
-	logHelper.Log(LevelDebug, "msg1", "te1st debug")
-}
-
-func TestFilterKey(_ *testing.T) {
-	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-	log := NewHelper(NewFilter(logger, FilterKey("password")))
-	log.Debugw("password", "123456")
-}
-
-func TestFilterValue(_ *testing.T) {
-	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-	log := NewHelper(NewFilter(logger, FilterValue("debug")))
-	log.Debugf("test %s", "debug")
-}
-
-func TestFilterFunc(_ *testing.T) {
-	logger := With(DefaultLogger, "ts", DefaultTimestamp, "caller", DefaultCaller)
-	log := NewHelper(NewFilter(logger, FilterFunc(testFilterFunc)))
-	log.Debug("debug level")
-	log.Infow("password", "123456")
-}
-
-func BenchmarkFilterKey(b *testing.B) {
-	log := NewHelper(NewFilter(NewStdLogger(io.Discard), FilterKey("password")))
-	for i := 0; i < b.N; i++ {
-		log.Infow("password", "123456")
+	if got := cap.attrs[0]["password"]; got != redactedValue {
+		t.Fatalf("password = %v, want %q", got, redactedValue)
+	}
+	if got := cap.attrs[0]["user"]; got != "alice" {
+		t.Fatalf("user = %v", got)
 	}
 }
 
-func BenchmarkFilterValue(b *testing.B) {
-	log := NewHelper(NewFilter(NewStdLogger(io.Discard), FilterValue("password")))
-	for i := 0; i < b.N; i++ {
-		log.Infow("password")
+func TestFilterFuncDrops(t *testing.T) {
+	cap := &captureHandler{}
+	h := newFilterHandler(cap, FilterFunc(func(_ context.Context, r slog.Record) bool {
+		return r.Message == "drop"
+	}))
+	r1 := slog.NewRecord(time.Now(), LevelInfo, "drop", 0)
+	r2 := slog.NewRecord(time.Now(), LevelInfo, "keep", 0)
+	_ = h.Handle(context.Background(), r1)
+	_ = h.Handle(context.Background(), r2)
+	if len(cap.records) != 1 || cap.records[0].Message != "keep" {
+		t.Fatalf("records = %+v", cap.records)
 	}
 }
 
-func BenchmarkFilterFunc(b *testing.B) {
-	log := NewHelper(NewFilter(NewStdLogger(io.Discard), FilterFunc(testFilterFunc)))
-	for i := 0; i < b.N; i++ {
-		log.Info("password", "123456")
-	}
-}
-
-func testFilterFunc(level Level, keyvals ...any) bool {
-	if level == LevelWarn {
-		return true
-	}
-	for i := 0; i < len(keyvals); i++ {
-		if keyvals[i] == "password" {
-			keyvals[i+1] = fuzzyStr
-		}
-	}
-	return false
-}
-
-func TestFilterFuncWitchLoggerPrefix(t *testing.T) {
-	buf := new(bytes.Buffer)
-	tests := []struct {
-		logger Logger
-		want   string
-	}{
-		{
-			logger: NewFilter(With(NewStdLogger(buf), "caller", "caller", "prefix", "whatever"), FilterFunc(testFilterFuncWithLoggerPrefix)),
-			want:   "",
-		},
-		{
-			// Filtered value
-			logger: NewFilter(With(NewStdLogger(buf), "caller", "caller"), FilterFunc(testFilterFuncWithLoggerPrefix)),
-			want:   "INFO caller=caller msg=msg filtered=***\n",
-		},
-		{
-			// NO prefix
-			logger: NewFilter(With(NewStdLogger(buf)), FilterFunc(testFilterFuncWithLoggerPrefix)),
-			want:   "INFO msg=msg filtered=***\n",
-		},
-	}
-
-	for _, tt := range tests {
-		err := tt.logger.Log(LevelInfo, "msg", "msg", "filtered", "true")
-		if err != nil {
-			t.Fatal("err should be nil")
-		}
-		got := buf.String()
-		if got != tt.want {
-			t.Fatalf("filter should catch prefix, want %s, got %s.", tt.want, got)
-		}
-		buf.Reset()
-	}
-}
-
-func testFilterFuncWithLoggerPrefix(level Level, keyvals ...any) bool {
-	if level == LevelWarn {
-		return true
-	}
-	for i := 0; i < len(keyvals); i += 2 {
-		if keyvals[i] == "prefix" {
-			return true
-		}
-		if keyvals[i] == "filtered" {
-			keyvals[i+1] = fuzzyStr
-		}
-	}
-	return false
-}
-
-func TestFilterWithContext(t *testing.T) {
-	type CtxKey struct {
-		Key string
-	}
-	ctxKey := CtxKey{Key: "context"}
-	ctxValue := "filter test value"
-
-	v1 := func() Valuer {
-		return func(ctx context.Context) any {
-			return ctx.Value(ctxKey)
-		}
-	}
-
-	info := &bytes.Buffer{}
-
-	logger := With(NewStdLogger(info), "request_id", v1())
-	filter := NewFilter(logger, FilterLevel(LevelError))
-
-	ctx := context.WithValue(context.Background(), ctxKey, ctxValue)
-
-	_ = WithContext(ctx, filter).Log(LevelInfo, "kind", "test")
-
-	if info.String() != "" {
-		t.Error("filter is not working")
-		return
-	}
-
-	_ = WithContext(ctx, filter).Log(LevelError, "kind", "test")
-	if !strings.Contains(info.String(), ctxValue) {
-		t.Error("don't read ctx value")
-	}
-}
-
-type traceIDKey struct{}
-
-func setTraceID(ctx context.Context, tid string) context.Context {
-	return context.WithValue(ctx, traceIDKey{}, tid)
-}
-
-func traceIDValuer() Valuer {
-	return func(ctx context.Context) any {
-		if ctx == nil {
-			return ""
-		}
-		if tid := ctx.Value(traceIDKey{}); tid != nil {
-			return tid
-		}
-		return ""
-	}
-}
-
-func TestFilterWithContextConcurrent(t *testing.T) {
+func TestFilterKeyRedactsGroupPath(t *testing.T) {
 	var buf bytes.Buffer
-	pctx := context.Background()
-	l := NewFilter(
-		With(NewStdLogger(&buf), "trace-id", traceIDValuer()),
-		FilterLevel(LevelInfo),
-	)
+	h := newFilterHandler(slog.NewJSONHandler(&buf, nil), FilterKey("user.password"))
+	logger := slog.New(h)
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		time.Sleep(time.Second)
-		NewHelper(l).Info("done1")
-	}()
+	logger.Info("login", slog.Group("user",
+		slog.String("name", "alice"),
+		slog.String("password", "secret"),
+	))
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		tid := "world"
-		ctx := setTraceID(pctx, tid)
-		NewHelper((WithContext(ctx, l))).Info("done2")
-	}()
-
-	wg.Wait()
-	expected := "INFO trace-id=world msg=done2\nINFO trace-id= msg=done1\n"
-	if got := buf.String(); got != expected {
-		t.Errorf("got: %#v", got)
+	got := decodeJSONLog(t, &buf)
+	user, ok := got["user"].(map[string]any)
+	if !ok {
+		t.Fatalf("user attr = %#v, want object", got["user"])
 	}
+	if user["password"] != redactedValue {
+		t.Fatalf("password = %v, want %q", user["password"], redactedValue)
+	}
+	if user["name"] != "alice" {
+		t.Fatalf("name = %v, want alice", user["name"])
+	}
+}
+
+func TestFilterKeyRedactsHandlerGroupPath(t *testing.T) {
+	var buf bytes.Buffer
+	h := newFilterHandler(slog.NewJSONHandler(&buf, nil), FilterKey("request.password"))
+	logger := slog.New(h).WithGroup("request")
+
+	logger.Info("login", "password", "secret")
+
+	got := decodeJSONLog(t, &buf)
+	request, ok := got["request"].(map[string]any)
+	if !ok {
+		t.Fatalf("request attr = %#v, want object", got["request"])
+	}
+	if request["password"] != redactedValue {
+		t.Fatalf("password = %v, want %q", request["password"], redactedValue)
+	}
+}
+
+func TestFilterEmptyReturnsNext(t *testing.T) {
+	cap := &captureHandler{}
+	h := newFilterHandler(cap)
+	if h != cap {
+		t.Fatal("expected next returned as-is when no options")
+	}
+}
+
+func decodeJSONLog(t *testing.T, buf *bytes.Buffer) map[string]any {
+	t.Helper()
+	var got map[string]any
+	if err := json.Unmarshal(bytes.TrimSpace(buf.Bytes()), &got); err != nil {
+		t.Fatalf("unmarshal log: %v (%q)", err, buf.String())
+	}
+	return got
 }

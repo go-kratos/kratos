@@ -1,80 +1,116 @@
 package zap
 
 import (
-	"fmt"
+	"context"
+	"log/slog"
+	"strings"
 
+	klog "github.com/go-kratos/kratos/v2/log"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	"github.com/go-kratos/kratos/v2/log"
 )
 
-var _ log.Logger = (*Logger)(nil)
-
-type Logger struct {
-	log    *zap.Logger
-	msgKey string
+// Handler writes slog records to a zap logger.
+type Handler struct {
+	logger *zap.Logger
+	attrs  []zap.Field
+	groups []string
 }
 
-type Option func(*Logger)
-
-// WithMessageKey with message key.
-func WithMessageKey(key string) Option {
-	return func(l *Logger) {
-		l.msgKey = key
+// NewHandler returns a slog handler backed by zlog.
+func NewHandler(zlog *zap.Logger) slog.Handler {
+	if zlog == nil {
+		zlog = zap.NewNop()
 	}
+	return &Handler{logger: zlog}
 }
 
-func NewLogger(zlog *zap.Logger) *Logger {
-	return &Logger{
-		log:    zlog,
-		msgKey: log.DefaultMessageKey,
-	}
+// NewLogger returns a slog logger backed by zlog.
+func NewLogger(zlog *zap.Logger) *slog.Logger {
+	return klog.NewLogger(klog.WithHandler(NewHandler(zlog)))
 }
 
-func (l *Logger) Log(level log.Level, keyvals ...any) error {
-	// If logging at this level is completely disabled, skip the overhead of
-	// string formatting.
-	if zapcore.Level(level) < zapcore.DPanicLevel && !l.log.Core().Enabled(zapcore.Level(level)) {
+func (h *Handler) Enabled(_ context.Context, level slog.Level) bool {
+	zapLevel := toZapLevel(level)
+	return zapLevel >= zapcore.DPanicLevel || h.logger.Core().Enabled(zapLevel)
+}
+
+func (h *Handler) Handle(_ context.Context, record slog.Record) error {
+	zapLevel := toZapLevel(record.Level)
+	checked := h.logger.Check(zapLevel, record.Message)
+	if checked == nil {
 		return nil
 	}
-	var (
-		msg    = ""
-		keylen = len(keyvals)
-	)
-	if keylen == 0 || keylen%2 != 0 {
-		l.log.Warn(fmt.Sprint("Keyvalues must appear in pairs: ", keyvals))
-		return nil
-	}
-
-	data := make([]zap.Field, 0, (keylen/2)+1)
-	for i := 0; i < keylen; i += 2 {
-		if keyvals[i].(string) == l.msgKey {
-			msg, _ = keyvals[i+1].(string)
-			continue
-		}
-		data = append(data, zap.Any(fmt.Sprint(keyvals[i]), keyvals[i+1]))
-	}
-
-	switch level {
-	case log.LevelDebug:
-		l.log.Debug(msg, data...)
-	case log.LevelInfo:
-		l.log.Info(msg, data...)
-	case log.LevelWarn:
-		l.log.Warn(msg, data...)
-	case log.LevelError:
-		l.log.Error(msg, data...)
-	case log.LevelFatal:
-		l.log.Fatal(msg, data...)
-	}
+	fields := make([]zap.Field, 0, len(h.attrs)+record.NumAttrs())
+	fields = append(fields, h.attrs...)
+	record.Attrs(func(attr slog.Attr) bool {
+		appendAttr(&fields, h.groups, attr)
+		return true
+	})
+	checked.Write(fields...)
 	return nil
 }
 
-func (l *Logger) Sync() error {
-	return l.log.Sync()
+func (h *Handler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	next := *h
+	next.attrs = append(append([]zap.Field{}, h.attrs...), attrsToFields(h.groups, attrs)...)
+	return &next
 }
 
-func (l *Logger) Close() error {
-	return l.Sync()
+func (h *Handler) WithGroup(name string) slog.Handler {
+	next := *h
+	next.groups = append(append([]string{}, h.groups...), name)
+	return &next
+}
+
+func attrsToFields(groups []string, attrs []slog.Attr) []zap.Field {
+	fields := make([]zap.Field, 0, len(attrs))
+	for _, attr := range attrs {
+		appendAttr(&fields, groups, attr)
+	}
+	return fields
+}
+
+func appendAttr(fields *[]zap.Field, groups []string, attr slog.Attr) {
+	attr.Value = attr.Value.Resolve()
+	if attr.Value.Kind() == slog.KindGroup {
+		nextGroups := groups
+		if attr.Key != "" {
+			nextGroups = append(append([]string{}, groups...), attr.Key)
+		}
+		for _, groupAttr := range attr.Value.Group() {
+			appendAttr(fields, nextGroups, groupAttr)
+		}
+		return
+	}
+	key := attr.Key
+	if len(groups) > 0 {
+		key = strings.Join(append(append([]string{}, groups...), key), ".")
+	}
+	*fields = append(*fields, zap.Any(key, attr.Value.Any()))
+}
+
+func toZapLevel(level slog.Level) zapcore.Level {
+	switch {
+	case level <= slog.LevelDebug:
+		return zapcore.DebugLevel
+	case level < slog.LevelWarn:
+		return zapcore.InfoLevel
+	case level < slog.LevelError:
+		return zapcore.WarnLevel
+	case level < slog.LevelError+4:
+		return zapcore.ErrorLevel
+	default:
+		return zapcore.FatalLevel
+	}
+}
+
+// Sync flushes buffered log entries.
+func (h *Handler) Sync() error {
+	return h.logger.Sync()
+}
+
+// Close flushes buffered log entries.
+func (h *Handler) Close() error {
+	return h.Sync()
 }
