@@ -4,10 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/go-kratos/aegis/ratelimit"
-
 	"github.com/go-kratos/kratos/v3/errors"
 	"github.com/go-kratos/kratos/v3/middleware"
+	"github.com/go-kratos/kratos/v3/middleware/ratelimit"
 	"github.com/go-kratos/kratos/v3/transport"
 	"github.com/go-kratos/kratos/v3/transport/http"
 

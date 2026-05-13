@@ -2,12 +2,10 @@ package circuitbreaker
 
 import (
 	"context"
-	"errors"
+	stderrors "errors"
 	"testing"
 
-	"github.com/go-kratos/aegis/circuitbreaker"
 	kratoserrors "github.com/go-kratos/kratos/v3/errors"
-	"github.com/go-kratos/kratos/v3/internal/group"
 	"github.com/go-kratos/kratos/v3/transport"
 )
 
@@ -18,7 +16,9 @@ type transportMock struct {
 }
 
 type circuitBreakerMock struct {
-	err error
+	err     error
+	success int
+	failed  int
 }
 
 func (tr *transportMock) Kind() transport.Kind {
@@ -42,39 +42,92 @@ func (tr *transportMock) ReplyHeader() transport.Header {
 }
 
 func (c *circuitBreakerMock) Allow() error { return c.err }
-func (c *circuitBreakerMock) MarkSuccess() {}
-func (c *circuitBreakerMock) MarkFailed()  {}
+func (c *circuitBreakerMock) MarkSuccess() { c.success++ }
+func (c *circuitBreakerMock) MarkFailed()  { c.failed++ }
 
-func Test_WithGroup(t *testing.T) {
-	o := options{
-		group: group.NewGroup(func() circuitbreaker.CircuitBreaker {
-			return &circuitBreakerMock{}
-		}),
+func TestWithBreakerFactory(t *testing.T) {
+	var created int
+	var o options
+
+	WithBreakerFactory(func() CircuitBreaker {
+		created++
+		return &circuitBreakerMock{}
+	})(&o)
+
+	if o.group == nil {
+		t.Fatal("breaker group must be updated")
 	}
-
-	WithGroup(nil)(&o)
-	if o.group != nil {
-		t.Error("The group property must be updated to nil.")
+	first := o.group.Get("/foo")
+	second := o.group.Get("/foo")
+	third := o.group.Get("/bar")
+	if first != second {
+		t.Fatal("same operation must reuse the same circuit breaker")
+	}
+	if first == third {
+		t.Fatal("different operations must use different circuit breakers")
+	}
+	if created != 2 {
+		t.Fatalf("factory created %d breakers, want 2", created)
 	}
 }
 
-func TestServer(_ *testing.T) {
-	nextValid := func(context.Context, any) (any, error) {
+func TestClient(t *testing.T) {
+	breaker := &circuitBreakerMock{}
+	ctx := transport.NewClientContext(context.Background(), &transportMock{operation: "/foo"})
+	next := func(context.Context, any) (any, error) {
 		return "Hello valid", nil
 	}
-	nextInvalid := func(context.Context, any) (any, error) {
+
+	reply, err := Client(WithBreakerFactory(func() CircuitBreaker {
+		return breaker
+	}))(next)(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reply != "Hello valid" {
+		t.Fatalf("reply = %v, want Hello valid", reply)
+	}
+	if breaker.success != 1 || breaker.failed != 0 {
+		t.Fatalf("breaker success=%d failed=%d, want success=1 failed=0", breaker.success, breaker.failed)
+	}
+}
+
+func TestClientRejectsWhenBreakerIsOpen(t *testing.T) {
+	breaker := &circuitBreakerMock{err: stderrors.New("circuitbreaker error")}
+	ctx := transport.NewClientContext(context.Background(), &transportMock{operation: "/foo"})
+	called := false
+	next := func(context.Context, any) (any, error) {
+		called = true
+		return nil, nil
+	}
+
+	_, err := Client(WithBreakerFactory(func() CircuitBreaker {
+		return breaker
+	}))(next)(ctx, nil)
+
+	if !stderrors.Is(err, ErrNotAllowed) {
+		t.Fatalf("err = %v, want ErrNotAllowed", err)
+	}
+	if called {
+		t.Fatal("handler must not be called when breaker is open")
+	}
+	if breaker.success != 0 || breaker.failed != 1 {
+		t.Fatalf("breaker success=%d failed=%d, want success=0 failed=1", breaker.success, breaker.failed)
+	}
+}
+
+func TestClientMarksServerErrorAsFailed(t *testing.T) {
+	breaker := &circuitBreakerMock{}
+	ctx := transport.NewClientContext(context.Background(), &transportMock{operation: "/foo"})
+	next := func(context.Context, any) (any, error) {
 		return nil, kratoserrors.InternalServer("", "")
 	}
 
-	ctx := transport.NewClientContext(context.Background(), &transportMock{})
+	_, _ = Client(WithBreakerFactory(func() CircuitBreaker {
+		return breaker
+	}))(next)(ctx, nil)
 
-	_, _ = Client(func(o *options) {
-		o.group = group.NewGroup(func() circuitbreaker.CircuitBreaker {
-			return &circuitBreakerMock{err: errors.New("circuitbreaker error")}
-		})
-	})(nextValid)(ctx, nil)
-
-	_, _ = Client(func(_ *options) {})(nextValid)(ctx, nil)
-
-	_, _ = Client(func(_ *options) {})(nextInvalid)(ctx, nil)
+	if breaker.success != 0 || breaker.failed != 1 {
+		t.Fatalf("breaker success=%d failed=%d, want success=0 failed=1", breaker.success, breaker.failed)
+	}
 }

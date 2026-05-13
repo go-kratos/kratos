@@ -5,7 +5,6 @@ go 1.23.0
 toolchain go1.24.6
 
 require (
-	github.com/go-kratos/aegis v0.2.0
 	github.com/go-kratos/kratos/v3 v3.0.0
 	github.com/google/uuid v1.4.0
 	github.com/polarismesh/polaris-go v1.3.0
