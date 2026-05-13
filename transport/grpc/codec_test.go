@@ -13,9 +13,15 @@ func TestCodec(t *testing.T) {
 		t.Errorf("grpc codec create input data error:%v", err)
 	}
 	c := codec{}
+	if c.Name() != "json" {
+		t.Errorf("grpc codec name want %v, got %v", "json", c.Name())
+	}
 	data, err := c.Marshal(in)
 	if err != nil {
 		t.Errorf("grpc codec marshal error:%v", err)
+	}
+	if string(data) != `{"Golang":"Kratos"}` {
+		t.Errorf("grpc codec marshal want %v, got %v", `{"Golang":"Kratos"}`, string(data))
 	}
 	out := &structpb.Struct{}
 	err = c.Unmarshal(data, out)

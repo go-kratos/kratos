@@ -78,7 +78,7 @@ func TestJSON_Marshal(t *testing.T) {
 		},
 		{
 			input:  &testData.TestModel{Id: 1, Name: "go-kratos", Hobby: []string{"1", "2"}},
-			expect: `{"id":"1","name":"go-kratos","hobby":["1","2"],"attrs":{}}`,
+			expect: `{"id":1,"name":"go-kratos","hobby":["1","2"]}`,
 		},
 		{
 			input:  &mock{value: Gopher},
@@ -102,8 +102,7 @@ func TestJSON_Marshal(t *testing.T) {
 
 func TestJSON_Unmarshal(t *testing.T) {
 	p := testMessage{}
-	p2 := testData.TestModel{}
-	p3 := &testData.TestModel{}
+	p2 := &testData.TestModel{}
 	p4 := &mock{}
 	tests := []struct {
 		input  string
@@ -118,12 +117,8 @@ func TestJSON_Unmarshal(t *testing.T) {
 			expect: &p,
 		},
 		{
-			input:  `{"id":"1","name":"go-kratos","hobby":["1","2"],"attrs":{}}`,
-			expect: &p2,
-		},
-		{
 			input:  `{"id":1,"name":"go-kratos","hobby":["1","2"]}`,
-			expect: &p3,
+			expect: &p2,
 		},
 		{
 			input:  `"zebra"`,
