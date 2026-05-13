@@ -3,35 +3,42 @@ package ratelimit
 import (
 	"context"
 
-	"github.com/go-kratos/aegis/ratelimit"
-	"github.com/go-kratos/aegis/ratelimit/bbr"
-
 	"github.com/go-kratos/kratos/v3/errors"
+	internalratelimit "github.com/go-kratos/kratos/v3/internal/ratelimit"
 	"github.com/go-kratos/kratos/v3/middleware"
 )
 
 // ErrLimitExceed is service unavailable due to rate limit exceeded.
 var ErrLimitExceed = errors.New(429, "RATELIMIT", "service unavailable due to rate limit exceeded")
 
+// DoneFunc records request completion.
+type DoneFunc = internalratelimit.DoneFunc
+
+// DoneInfo contains request completion metadata.
+type DoneInfo = internalratelimit.DoneInfo
+
+// Limiter is a rate limiter.
+type Limiter = internalratelimit.Limiter
+
 // Option is ratelimit option.
 type Option func(*options)
 
 // WithLimiter set Limiter implementation,
 // default is bbr limiter
-func WithLimiter(limiter ratelimit.Limiter) Option {
+func WithLimiter(limiter Limiter) Option {
 	return func(o *options) {
 		o.limiter = limiter
 	}
 }
 
 type options struct {
-	limiter ratelimit.Limiter
+	limiter Limiter
 }
 
 // Server ratelimiter middleware
 func Server(opts ...Option) middleware.Middleware {
 	options := &options{
-		limiter: bbr.NewLimiter(),
+		limiter: internalratelimit.NewLimiter(),
 	}
 	for _, o := range opts {
 		o(options)
@@ -45,7 +52,7 @@ func Server(opts ...Option) middleware.Middleware {
 			}
 			// allowed
 			reply, err = handler(ctx, req)
-			done(ratelimit.DoneInfo{Err: err})
+			done(DoneInfo{Err: err})
 			return
 		}
 	}

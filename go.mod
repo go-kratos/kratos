@@ -5,7 +5,6 @@ go 1.22
 require (
 	dario.cat/mergo v1.0.0
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/go-kratos/aegis v0.2.0
 	github.com/go-playground/form/v4 v4.2.0
 	github.com/google/uuid v1.4.0
 	github.com/gorilla/mux v1.8.1
@@ -19,17 +18,9 @@ require (
 
 require (
 	github.com/envoyproxy/go-control-plane v0.11.2-0.20230627204322-7d0032219fcb // indirect
-	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
-	github.com/lufia/plan9stats v0.0.0-20230326075908-cb1d2100619a // indirect
-	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
-	github.com/shirou/gopsutil/v3 v3.23.6 // indirect
-	github.com/shoenig/go-m1cpu v0.1.6 // indirect
-	github.com/tklauser/go-sysconf v0.3.11 // indirect
-	github.com/tklauser/numcpus v0.6.1 // indirect
-	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect

@@ -3,10 +3,8 @@ package circuitbreaker
 import (
 	"context"
 
-	"github.com/go-kratos/aegis/circuitbreaker"
-	"github.com/go-kratos/aegis/circuitbreaker/sre"
-
 	"github.com/go-kratos/kratos/v3/errors"
+	internalbreaker "github.com/go-kratos/kratos/v3/internal/circuitbreaker"
 	"github.com/go-kratos/kratos/v3/internal/group"
 	"github.com/go-kratos/kratos/v3/middleware"
 	"github.com/go-kratos/kratos/v3/transport"
@@ -15,36 +13,32 @@ import (
 // ErrNotAllowed is request failed due to circuit breaker triggered.
 var ErrNotAllowed = errors.New(503, "CIRCUITBREAKER", "request failed due to circuit breaker triggered")
 
+// CircuitBreaker is a circuit breaker.
+type CircuitBreaker = internalbreaker.CircuitBreaker
+
 // Option is circuit breaker option.
 type Option func(*options)
 
-// WithGroup with circuit breaker group.
-// NOTE: implements generics circuitbreaker.CircuitBreaker
-func WithGroup(g *group.Group[circuitbreaker.CircuitBreaker]) Option {
+// WithBreakerFactory configures a factory used to lazily create one circuit breaker per operation.
+func WithBreakerFactory(factory func() CircuitBreaker) Option {
 	return func(o *options) {
-		o.group = g
-	}
-}
-
-// WithCircuitBreaker with circuit breaker genFunc.
-func WithCircuitBreaker(genBreakerFunc func() circuitbreaker.CircuitBreaker) Option {
-	return func(o *options) {
-		o.group = group.NewGroup(func() circuitbreaker.CircuitBreaker {
-			return genBreakerFunc()
-		})
+		if factory == nil {
+			return
+		}
+		o.group = group.NewGroup(factory)
 	}
 }
 
 type options struct {
-	group *group.Group[circuitbreaker.CircuitBreaker]
+	group *group.Group[CircuitBreaker]
 }
 
 // Client circuitbreaker middleware will return errBreakerTriggered when the circuit
 // breaker is triggered and the request is rejected directly.
 func Client(opts ...Option) middleware.Middleware {
 	opt := &options{
-		group: group.NewGroup(func() circuitbreaker.CircuitBreaker {
-			return sre.NewBreaker()
+		group: group.NewGroup(func() CircuitBreaker {
+			return internalbreaker.NewBreaker()
 		}),
 	}
 	for _, o := range opts {
