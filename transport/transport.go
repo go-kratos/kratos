@@ -8,6 +8,7 @@ import (
 	_ "github.com/go-kratos/kratos/v3/encoding/form"
 	_ "github.com/go-kratos/kratos/v3/encoding/json"
 	_ "github.com/go-kratos/kratos/v3/encoding/proto"
+	_ "github.com/go-kratos/kratos/v3/encoding/protojson"
 	_ "github.com/go-kratos/kratos/v3/encoding/xml"
 	_ "github.com/go-kratos/kratos/v3/encoding/yaml"
 )

@@ -7,8 +7,10 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	enc "github.com/go-kratos/kratos/v3/encoding"
-	"github.com/go-kratos/kratos/v3/encoding/json"
+	"github.com/go-kratos/kratos/v3/encoding/protojson"
 )
+
+const jsonName = "json"
 
 func init() {
 	encoding.RegisterCodec(codec{})
@@ -22,7 +24,7 @@ func (codec) Marshal(v any) ([]byte, error) {
 	if !ok {
 		return nil, fmt.Errorf("failed to marshal, message is %T, want proto.Message", v)
 	}
-	return enc.GetCodec(json.Name).Marshal(vv)
+	return enc.GetCodec(protojson.Name).Marshal(vv)
 }
 
 func (codec) Unmarshal(data []byte, v any) error {
@@ -30,9 +32,9 @@ func (codec) Unmarshal(data []byte, v any) error {
 	if !ok {
 		return fmt.Errorf("failed to unmarshal, message is %T, want proto.Message", v)
 	}
-	return enc.GetCodec(json.Name).Unmarshal(data, vv)
+	return enc.GetCodec(protojson.Name).Unmarshal(data, vv)
 }
 
 func (codec) Name() string {
-	return json.Name
+	return jsonName
 }
