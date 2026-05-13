@@ -14,7 +14,6 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
-	apimd "github.com/go-kratos/kratos/v3/api/metadata"
 	"github.com/go-kratos/kratos/v3/internal/endpoint"
 	"github.com/go-kratos/kratos/v3/internal/host"
 	"github.com/go-kratos/kratos/v3/internal/matcher"
@@ -139,7 +138,6 @@ type Server struct {
 	grpcOpts          []grpc.ServerOption
 	health            *health.Server
 	customHealth      bool
-	metadata          *apimd.Server
 	adminClean        func()
 	disableReflection bool
 }
@@ -181,12 +179,10 @@ func NewServer(opts ...ServerOption) *Server {
 		grpcOpts = append(grpcOpts, srv.grpcOpts...)
 	}
 	srv.Server = grpc.NewServer(grpcOpts...)
-	srv.metadata = apimd.NewServer(srv.Server)
 	// internal register
 	if !srv.customHealth {
 		grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
 	}
-	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
 	// reflection register
 	if !srv.disableReflection {
 		reflection.Register(srv.Server)
