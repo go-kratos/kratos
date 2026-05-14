@@ -7,8 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"dario.cat/mergo"
-
 	// init encoding
 	_ "github.com/go-kratos/kratos/v3/encoding/json"
 	_ "github.com/go-kratos/kratos/v3/encoding/proto"
@@ -46,9 +44,7 @@ func New(opts ...Option) Config {
 	o := options{
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
-		merge: func(dst, src any) error {
-			return mergo.Map(dst, src, mergo.WithOverride)
-		},
+		merge:    defaultMerge,
 	}
 	for _, opt := range opts {
 		opt(&o)
