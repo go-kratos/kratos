@@ -11,6 +11,8 @@ import (
 	"github.com/polarismesh/polaris-go/pkg/model"
 	"github.com/polarismesh/polaris-go/pkg/model/local"
 	"github.com/polarismesh/polaris-go/pkg/model/pb"
+	"github.com/polarismesh/polaris-go/pkg/plugin/common"
+	"github.com/polarismesh/polaris-go/pkg/plugin/servicerouter"
 	v1 "github.com/polarismesh/specification/source/go/api/v1/service_manage"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
@@ -44,41 +46,39 @@ func (p *Polaris) NodeFilter(opts ...RouterOption) selector.NodeFilter {
 		if len(nodes) == 0 {
 			return nodes
 		}
-		req := &polaris.ProcessRoutersRequest{
-			ProcessRoutersRequest: model.ProcessRoutersRequest{
-				SourceService: model.ServiceInfo{Namespace: p.namespace, Service: o.service},
-				DstInstances:  buildPolarisInstance(p.namespace, nodes),
-				Routers:       []string{polarisconfig.DefaultServiceRouterRuleBased, polarisconfig.DefaultServiceRouterFilterOnly},
-			},
+		sourceService := &model.ServiceInfo{
+			Namespace: p.namespace,
+			Service:   o.service,
+			Metadata:  map[string]string{},
 		}
 		if appInfo, ok := kratos.FromContext(ctx); ok {
-			req.SourceService.Service = appInfo.Name()
+			sourceService.Service = appInfo.Name()
 		}
 
-		req.AddArguments(model.BuildCallerServiceArgument(p.namespace, req.SourceService.Service))
+		sourceService.AddArgument(model.BuildCallerServiceArgument(p.namespace, sourceService.Service))
 
 		// process transport
 		if tr, ok := transport.FromClientContext(ctx); ok {
-			req.AddArguments(model.BuildMethodArgument(tr.Operation()))
-			req.AddArguments(model.BuildPathArgument(tr.Operation()))
+			sourceService.AddArgument(model.BuildMethodArgument(tr.Operation()))
+			sourceService.AddArgument(model.BuildPathArgument(tr.Operation()))
 
 			for _, key := range tr.RequestHeader().Keys() {
-				req.AddArguments(model.BuildHeaderArgument(strings.ToLower(key), tr.RequestHeader().Get(key)))
+				sourceService.AddArgument(model.BuildHeaderArgument(strings.ToLower(key), tr.RequestHeader().Get(key)))
 			}
 
 			// http
 			if ht, ok := tr.(http.Transporter); ok {
-				req.AddArguments(model.BuildPathArgument(ht.Request().URL.Path))
-				req.AddArguments(model.BuildCallerIPArgument(ht.Request().RemoteAddr))
+				sourceService.AddArgument(model.BuildPathArgument(ht.Request().URL.Path))
+				sourceService.AddArgument(model.BuildCallerIPArgument(ht.Request().RemoteAddr))
 
 				// cookie
 				for _, cookie := range ht.Request().Cookies() {
-					req.AddArguments(model.BuildCookieArgument(cookie.Name, cookie.Value))
+					sourceService.AddArgument(model.BuildCookieArgument(cookie.Name, cookie.Value))
 				}
 
 				// url query
 				for key, values := range ht.Request().URL.Query() {
-					req.AddArguments(model.BuildQueryArgument(key, strings.Join(values, ",")))
+					sourceService.AddArgument(model.BuildQueryArgument(key, strings.Join(values, ",")))
 				}
 			}
 		}
@@ -88,14 +88,14 @@ func (p *Polaris) NodeFilter(opts ...RouterOption) selector.NodeFilter {
 			n[node.Address()] = node
 		}
 
-		m, err := p.router.ProcessRouters(req)
+		instances, err := p.processRouters(sourceService, buildPolarisInstance(p.namespace, nodes))
 		if err != nil {
 			log.Errorf("polaris process routers failed, err=%v", err)
 			return nodes
 		}
 
-		newNode := make([]selector.Node, 0, len(m.Instances))
-		for _, ins := range m.GetInstances() {
+		newNode := make([]selector.Node, 0, len(instances))
+		for _, ins := range instances {
 			if v, ok := n[net.JoinHostPort(ins.GetHost(), strconv.FormatUint(uint64(ins.GetPort()), 10))]; ok {
 				newNode = append(newNode, v)
 			}
@@ -105,6 +105,117 @@ func (p *Polaris) NodeFilter(opts ...RouterOption) selector.NodeFilter {
 		}
 		return newNode
 	}
+}
+
+func (p *Polaris) processRouters(sourceService *model.ServiceInfo, dstInstances *pb.ServiceInstancesInProto) ([]model.Instance, error) {
+	if dstInstances == nil {
+		return nil, nil
+	}
+	plugins := p.discovery.SDKContext().GetPlugins()
+	ruleBasedRouter, err := plugins.GetPlugin(common.TypeServiceRouter, polarisconfig.DefaultServiceRouterRuleBased)
+	if err != nil {
+		return nil, err
+	}
+	filterOnlyRouter, err := plugins.GetPlugin(common.TypeServiceRouter, polarisconfig.DefaultServiceRouterFilterOnly)
+	if err != nil {
+		return nil, err
+	}
+	dstRouteRule, err := p.getRouteRule(dstInstances)
+	if err != nil {
+		return nil, err
+	}
+	routeInfo := &servicerouter.RouteInfo{
+		SourceService:    sourceService,
+		DestService:      dstInstances,
+		DestRouteRule:    dstRouteRule,
+		FilterOnlyRouter: filterOnlyRouter.(servicerouter.ServiceRouter),
+	}
+	if sourceService.HasService() {
+		sourceRouteRule, routeErr := p.getRouteRule(sourceService)
+		if routeErr != nil {
+			return nil, routeErr
+		}
+		routeInfo.SourceRouteRule = sourceRouteRule
+	}
+	routeInfo.Init(plugins)
+	result, err := servicerouter.GetFilterCluster(
+		p.discovery.SDKContext().GetValueContext(),
+		[]servicerouter.ServiceRouter{ruleBasedRouter.(servicerouter.ServiceRouter)},
+		routeInfo,
+		dstInstances.GetServiceClusters(),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil || result.OutputCluster == nil {
+		return nil, nil
+	}
+	instances, _ := result.OutputCluster.GetInstances()
+	return instances, nil
+}
+
+func (p *Polaris) getRouteRule(service model.ServiceMetadata) (model.ServiceRule, error) {
+	resp, err := p.discovery.GetRouteRule(&polaris.GetServiceRuleRequest{
+		GetServiceRuleRequest: model.GetServiceRuleRequest{
+			Namespace: service.GetNamespace(),
+			Service:   service.GetService(),
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	if resp == nil {
+		return nil, nil
+	}
+	return &serviceRuleResponse{resp: resp}, nil
+}
+
+type serviceRuleResponse struct {
+	resp *model.ServiceRuleResponse
+}
+
+func (r serviceRuleResponse) GetType() model.EventType {
+	return r.resp.Type
+}
+
+func (r serviceRuleResponse) IsInitialized() bool {
+	return true
+}
+
+func (r serviceRuleResponse) GetRevision() string {
+	return r.resp.Revision
+}
+
+func (r serviceRuleResponse) GetHashValue() uint64 {
+	return r.resp.HashValue
+}
+
+func (r serviceRuleResponse) IsNotExists() bool {
+	return r.resp.NotExists
+}
+
+func (r serviceRuleResponse) GetNamespace() string {
+	return r.resp.Service.Namespace
+}
+
+func (r serviceRuleResponse) GetService() string {
+	return r.resp.Service.Service
+}
+
+func (r serviceRuleResponse) GetValue() interface{} {
+	return r.resp.Value
+}
+
+func (r serviceRuleResponse) GetRuleCache() model.RuleCache {
+	return r.resp.RuleCache
+}
+
+func (r serviceRuleResponse) GetValidateError() error {
+	return r.resp.ValidateError
+}
+
+func (r serviceRuleResponse) IsCacheLoaded() bool {
+	return false
 }
 
 func buildPolarisInstance(namespace string, nodes []selector.Node) *pb.ServiceInstancesInProto {
@@ -137,7 +248,7 @@ func buildPolarisInstance(namespace string, nodes []selector.Node) *pb.ServiceIn
 		Code:      wrapperspb.UInt32(1),
 		Info:      wrapperspb.String("ok"),
 		Type:      v1.DiscoverResponse_INSTANCE,
-		Service:   &v1.Service{Name: wrapperspb.String(nodes[0].ServiceName()), Namespace: wrapperspb.String("default")},
+		Service:   &v1.Service{Name: wrapperspb.String(nodes[0].ServiceName()), Namespace: wrapperspb.String(namespace)},
 		Instances: ins,
 	}
 	return pb.NewServiceInstancesInProto(d, func(string) local.InstanceLocalValue {
