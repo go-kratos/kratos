@@ -18,7 +18,6 @@ import (
 const (
 	contextPackage       = protogen.GoImportPath("context")
 	transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v3/transport/http")
-	bindingPackage       = protogen.GoImportPath("github.com/go-kratos/kratos/v3/transport/http/binding")
 )
 
 var methodSets = make(map[string]int)
@@ -54,7 +53,6 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("// This is a compile-time assertion to ensure that this generated file")
 	g.P("// is compatible with the kratos package it is being compiled against.")
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
-	g.P("var _ = ", bindingPackage.Ident("EncodeURL"))
 	g.P("const _ = ", transportHTTPPackage.Ident("SupportPackageIsVersion1"))
 	g.P()
 
@@ -175,6 +173,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *prot
 func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path string) *methodDesc {
 	defer func() { methodSets[m.GoName]++ }()
 
+	pathTemplate := path
 	vars := buildPathVars(path)
 
 	for v, s := range vars {
@@ -222,6 +221,7 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 		Reply:        g.QualifiedGoIdent(m.Output.GoIdent),
 		Comment:      comment,
 		Path:         path,
+		PathTemplate: pathTemplate,
 		Method:       method,
 		HasVars:      len(vars) > 0,
 	}
@@ -252,11 +252,26 @@ func replacePath(name string, value string, path string) string {
 		path = fmt.Sprintf("%s{%s:%s}%s",
 			path[:idx[0]], // The start of the match
 			name,
-			strings.ReplaceAll(value, "*", ".*"),
+			pathTemplateRegex(value),
 			path[idx[1]:],
 		)
 	}
 	return path
+}
+
+func pathTemplateRegex(value string) string {
+	segs := strings.Split(value, "/")
+	for i, seg := range segs {
+		switch seg {
+		case "*":
+			segs[i] = "[^/]+"
+		case "**":
+			segs[i] = ".*"
+		default:
+			segs[i] = regexp.QuoteMeta(seg)
+		}
+	}
+	return strings.Join(segs, "/")
 }
 
 func camelCaseVars(s string) string {

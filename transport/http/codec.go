@@ -12,7 +12,6 @@ import (
 	"github.com/go-kratos/kratos/v3/encoding"
 	"github.com/go-kratos/kratos/v3/errors"
 	"github.com/go-kratos/kratos/v3/internal/httputil"
-	"github.com/go-kratos/kratos/v3/transport/http/binding"
 )
 
 // SupportPackageIsVersion1 These constants should not be referenced from any other code.
@@ -50,12 +49,12 @@ func DefaultRequestVars(r *http.Request, v any) error {
 	for k, v := range raws {
 		vars[k] = []string{v}
 	}
-	return binding.BindQuery(vars, v)
+	return bindQuery(vars, v)
 }
 
 // DefaultRequestQuery decodes the request vars to object.
 func DefaultRequestQuery(r *http.Request, v any) error {
-	return binding.BindQuery(r.URL.Query(), v)
+	return bindQuery(r.URL.Query(), v)
 }
 
 // DefaultRequestDecoder decodes the request body to object.

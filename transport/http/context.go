@@ -13,7 +13,6 @@ import (
 
 	"github.com/go-kratos/kratos/v3/middleware"
 	"github.com/go-kratos/kratos/v3/transport"
-	"github.com/go-kratos/kratos/v3/transport/http/binding"
 )
 
 var _ Context = (*wrapper)(nil)
@@ -100,7 +99,7 @@ func (c *wrapper) Middleware(h middleware.Handler) middleware.Handler {
 func (c *wrapper) Bind(v any) error      { return c.router.srv.decBody(c.req, v) }
 func (c *wrapper) BindVars(v any) error  { return c.router.srv.decVars(c.req, v) }
 func (c *wrapper) BindQuery(v any) error { return c.router.srv.decQuery(c.req, v) }
-func (c *wrapper) BindForm(v any) error  { return binding.BindForm(c.req, v) }
+func (c *wrapper) BindForm(v any) error  { return bindForm(c.req, v) }
 func (c *wrapper) Returns(v any, err error) error {
 	if err != nil {
 		return err

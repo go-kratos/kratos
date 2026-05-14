@@ -15,6 +15,8 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/protobuf/types/known/emptypb"
+
 	kratoserrors "github.com/go-kratos/kratos/v3/errors"
 	"github.com/go-kratos/kratos/v3/middleware"
 	"github.com/go-kratos/kratos/v3/registry"
@@ -25,6 +27,19 @@ type mockRoundTripper struct{}
 
 func (rt *mockRoundTripper) RoundTrip(_ *http.Request) (resp *http.Response, err error) {
 	return
+}
+
+type captureRoundTripper struct {
+	req *http.Request
+}
+
+func (rt *captureRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	rt.req = req
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{"Content-Type": []string{"application/protojson"}},
+		Body:       io.NopCloser(bytes.NewBufferString("{}")),
+	}, nil
 }
 
 type mockCallOption struct {
@@ -225,6 +240,32 @@ func TestDefaultRequestEncoder(t *testing.T) {
 	}
 	if !reflect.DeepEqual(v1b, v1) {
 		t.Errorf("expected %v, got %v", v1, v1b)
+	}
+}
+
+func TestInvokeAcceptHeader(t *testing.T) {
+	rt := &captureRoundTripper{}
+	client, err := NewClient(context.Background(), WithEndpoint("127.0.0.1:8888"), WithTransport(rt))
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = client.Invoke(
+		context.Background(),
+		http.MethodPost,
+		"/go",
+		&emptypb.Empty{},
+		&emptypb.Empty{},
+		Accept("application/protojson"),
+		ContentType("application/protojson"),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := rt.req.Header.Get("Accept"); got != "application/protojson" {
+		t.Errorf("expected %v got %v", "application/protojson", got)
+	}
+	if got := rt.req.Header.Get("Content-Type"); got != "application/protojson" {
+		t.Errorf("expected %v got %v", "application/protojson", got)
 	}
 }
 
