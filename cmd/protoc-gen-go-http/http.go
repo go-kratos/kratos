@@ -53,7 +53,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("// This is a compile-time assertion to ensure that this generated file")
 	g.P("// is compatible with the kratos package it is being compiled against.")
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
-	g.P("const _ = ", transportHTTPPackage.Ident("SupportPackageIsVersion1"))
+	g.P("const _ = ", transportHTTPPackage.Ident("SupportPackageIsVersion3"))
 	g.P()
 
 	for _, service := range file.Services {

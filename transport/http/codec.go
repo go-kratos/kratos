@@ -14,8 +14,8 @@ import (
 	"github.com/go-kratos/kratos/v3/internal/httputil"
 )
 
-// SupportPackageIsVersion1 These constants should not be referenced from any other code.
-const SupportPackageIsVersion1 = true
+// SupportPackageIsVersion3 These constants should not be referenced from any other code.
+const SupportPackageIsVersion3 = true
 
 // Redirector replies to the request with a redirect to url
 // which may be a path relative to the request path.
