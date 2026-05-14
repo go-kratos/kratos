@@ -3,7 +3,6 @@ module github.com/go-kratos/kratos/v3
 go 1.22
 
 require (
-	dario.cat/mergo v1.0.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-playground/form/v4 v4.2.0
 	github.com/google/uuid v1.4.0

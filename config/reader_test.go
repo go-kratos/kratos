@@ -6,8 +6,6 @@ import (
 	"testing"
 
 	"github.com/go-kratos/kratos/v3/encoding"
-
-	"dario.cat/mergo"
 )
 
 func TestReader_Merge(t *testing.T) {
@@ -23,9 +21,7 @@ func TestReader_Merge(t *testing.T) {
 			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
 		resolver: defaultResolver,
-		merge: func(dst, src any) error {
-			return mergo.Map(dst, src, mergo.WithOverride)
-		},
+		merge:    defaultMerge,
 	}
 	r := newReader(opts)
 	err = r.Merge(&KeyValue{
@@ -87,9 +83,7 @@ func TestReader_Value(t *testing.T) {
 			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
 		resolver: defaultResolver,
-		merge: func(dst, src any) error {
-			return mergo.Map(dst, src, mergo.WithOverride)
-		},
+		merge:    defaultMerge,
 	}
 
 	ymlval := `
@@ -192,9 +186,7 @@ func TestReader_Source(t *testing.T) {
 			return fmt.Errorf("unsupported key: %s format: %s", kv.Key, kv.Format)
 		},
 		resolver: defaultResolver,
-		merge: func(dst, src any) error {
-			return mergo.Map(dst, src, mergo.WithOverride)
-		},
+		merge:    defaultMerge,
 	}
 	r := newReader(opts)
 	err = r.Merge(&KeyValue{

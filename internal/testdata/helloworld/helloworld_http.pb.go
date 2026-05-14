@@ -13,7 +13,7 @@ import (
 // is compatible with the kratos package it is being compiled against.
 var _ = new(context.Context)
 
-const _ = http.SupportPackageIsVersion1
+const _ = http.SupportPackageIsVersion3
 
 const OperationGreeterSayHello = "/helloworld.Greeter/SayHello"
 

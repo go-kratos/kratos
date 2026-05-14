@@ -3,8 +3,6 @@ package config
 import (
 	"errors"
 	"testing"
-
-	"dario.cat/mergo"
 )
 
 const (
@@ -133,9 +131,7 @@ func TestConfig(t *testing.T) {
 		sources:  []Source{jSource},
 		decoder:  defaultDecoder,
 		resolver: defaultResolver,
-		merge: func(dst, src any) error {
-			return mergo.Map(dst, src, mergo.WithOverride)
-		},
+		merge:    defaultMerge,
 	}
 	cf := &config{}
 	cf.opts = opts
