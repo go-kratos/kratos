@@ -42,7 +42,14 @@ type source struct {
 func (s *source) Load() ([]*config.KeyValue, error) {
 	kvs := make([]*config.KeyValue, 0, len(s.options.files))
 	for _, file := range s.options.files {
-		configFile, err := s.client.GetConfigFile(s.options.namespace, file.Group, file.Name)
+		configFile, err := s.client.FetchConfigFile(&polaris.GetConfigFileRequest{
+			GetConfigFileRequest: &model.GetConfigFileRequest{
+				Namespace: s.options.namespace,
+				FileGroup: file.Group,
+				FileName:  file.Name,
+				Subscribe: true,
+			},
+		})
 		if err != nil {
 			return nil, err
 		}

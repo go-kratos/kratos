@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"os"
 	"strconv"
-	"time"
 
 	v1 "github.com/opensergo/opensergo-go/proto/service_contract/v1"
 	"google.golang.org/genproto/googleapis/api/annotations"
@@ -63,13 +62,11 @@ func New(opts ...Option) (*OpenSergo, error) {
 	for _, o := range opts {
 		o(&opt)
 	}
-	dialCtx := context.Background()
-	dialCtx, cancel := context.WithTimeout(dialCtx, time.Second)
-	defer cancel()
-	conn, err := grpc.DialContext(dialCtx, opt.Endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(opt.Endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
+	conn.Connect()
 	return &OpenSergo{
 		mdClient: v1.NewMetadataServiceClient(conn),
 	}, nil

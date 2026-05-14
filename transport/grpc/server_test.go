@@ -116,9 +116,8 @@ func testClient(t *testing.T, srv *Server) {
 		t.Fatal(err)
 	}
 	// new a gRPC client
-	conn, err := DialInsecure(context.Background(),
+	conn, err := NewClient(context.Background(),
 		WithEndpoint(u.Host),
-		WithOptions(grpc.WithBlock()),
 		WithUnaryInterceptor(
 			func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 				return invoker(ctx, method, req, reply, cc, opts...)
@@ -427,10 +426,9 @@ func TestStop(t *testing.T) {
 
 			time.Sleep(100 * time.Millisecond)
 
-			conn, err := DialInsecure(
+			conn, err := NewClient(
 				context.Background(),
 				WithEndpoint(l.Addr().String()),
-				WithOptions(grpc.WithBlock()),
 			)
 			if err != nil {
 				t.Fatal(err)

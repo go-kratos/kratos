@@ -329,18 +329,41 @@ type Watcher struct {
 	Namespace        string
 	Ctx              context.Context
 	Cancel           context.CancelFunc
-	Channel          <-chan model.SubScribeEvent
+	Channel          <-chan *model.InstancesResponse
 	ServiceInstances []*registry.ServiceInstance
+	watchResponse    *model.WatchAllInstancesResponse
 	first            bool
 }
 
+type instancesListener struct {
+	events chan *model.InstancesResponse
+}
+
+func (l instancesListener) OnInstancesUpdate(resp *model.InstancesResponse) {
+	select {
+	case l.events <- resp:
+	default:
+		select {
+		case <-l.events:
+		default:
+		}
+		select {
+		case l.events <- resp:
+		default:
+		}
+	}
+}
+
 func newWatcher(ctx context.Context, namespace string, serviceName string, consumer api.ConsumerAPI) (*Watcher, error) {
-	watchServiceResponse, err := consumer.WatchService(&api.WatchServiceRequest{
-		WatchServiceRequest: model.WatchServiceRequest{
-			Key: model.ServiceKey{
+	events := make(chan *model.InstancesResponse, 1)
+	watchResponse, err := consumer.WatchAllInstances(&api.WatchAllInstancesRequest{
+		WatchAllInstancesRequest: model.WatchAllInstancesRequest{
+			ServiceKey: model.ServiceKey{
 				Namespace: namespace,
 				Service:   serviceName,
 			},
+			WatchMode:         model.WatchModeNotify,
+			InstancesListener: instancesListener{events: events},
 		},
 	})
 	if err != nil {
@@ -351,8 +374,9 @@ func newWatcher(ctx context.Context, namespace string, serviceName string, consu
 		Namespace:        namespace,
 		ServiceName:      serviceName,
 		first:            true,
-		Channel:          watchServiceResponse.EventChannel,
-		ServiceInstances: instancesToServiceInstances(watchServiceResponse.GetAllInstancesResp.GetInstances()),
+		Channel:          events,
+		ServiceInstances: instancesToServiceInstances(watchResponse.InstancesResponse().GetInstances()),
+		watchResponse:    watchResponse,
 	}
 	w.Ctx, w.Cancel = context.WithCancel(ctx)
 	return w, nil
@@ -370,49 +394,16 @@ func (w *Watcher) Next() ([]*registry.ServiceInstance, error) {
 	select {
 	case <-w.Ctx.Done():
 		return nil, w.Ctx.Err()
-	case event := <-w.Channel:
-		if event.GetSubScribeEventType() == model.EventInstance {
-			// this always true, but we need to check it to make sure EventType not change
-			if instanceEvent, ok := event.(*model.InstanceEvent); ok {
-				// handle DeleteEvent
-				if instanceEvent.DeleteEvent != nil {
-					for _, instance := range instanceEvent.DeleteEvent.Instances {
-						for i, serviceInstance := range w.ServiceInstances {
-							if serviceInstance.ID == instance.GetId() {
-								// remove equal
-								if len(w.ServiceInstances) <= 1 {
-									w.ServiceInstances = w.ServiceInstances[:0]
-									continue
-								}
-								w.ServiceInstances = append(w.ServiceInstances[:i], w.ServiceInstances[i+1:]...)
-							}
-						}
-					}
-				}
-				// handle UpdateEvent
-				if instanceEvent.UpdateEvent != nil {
-					for i, serviceInstance := range w.ServiceInstances {
-						for _, update := range instanceEvent.UpdateEvent.UpdateList {
-							if serviceInstance.ID == update.Before.GetId() {
-								w.ServiceInstances[i] = instanceToServiceInstance(update.After)
-							}
-						}
-					}
-				}
-				// handle AddEvent
-				if instanceEvent.AddEvent != nil {
-					w.ServiceInstances = append(w.ServiceInstances, instancesToServiceInstances(instanceEvent.AddEvent.Instances)...)
-				}
-			}
-			return w.ServiceInstances, nil
-		}
+	case instances := <-w.Channel:
+		w.ServiceInstances = instancesToServiceInstances(instances.GetInstances())
+		return w.ServiceInstances, nil
 	}
-	return w.ServiceInstances, nil
 }
 
 // Stop close the watcher.
 func (w *Watcher) Stop() error {
 	w.Cancel()
+	w.watchResponse.CancelWatch()
 	return nil
 }
 
