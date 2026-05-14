@@ -25,6 +25,7 @@ type CallOption interface {
 
 type callInfo struct {
 	contentType   string
+	accept        string
 	operation     string
 	pathTemplate  string
 	headerCarrier *http.Header
@@ -55,6 +56,22 @@ type ContentTypeCallOption struct {
 
 func (o ContentTypeCallOption) before(c *callInfo) error {
 	c.contentType = o.ContentType
+	return nil
+}
+
+// Accept sets the request Accept header.
+func Accept(contentType string) CallOption {
+	return AcceptCallOption{ContentType: contentType}
+}
+
+// AcceptCallOption sets the accepted response content type.
+type AcceptCallOption struct {
+	EmptyCallOption
+	ContentType string
+}
+
+func (o AcceptCallOption) before(c *callInfo) error {
+	c.accept = o.ContentType
 	return nil
 }
 

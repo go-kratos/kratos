@@ -1,4 +1,4 @@
-package binding
+package http
 
 import (
 	"testing"
@@ -8,130 +8,170 @@ import (
 	"github.com/go-kratos/kratos/v3/internal/testdata/binding"
 )
 
-func TestEncodeURL(t *testing.T) {
+func TestBuildPath(t *testing.T) {
+	tests := []struct {
+		name         string
+		pathTemplate string
+		request      *binding.HelloRequest
+		opts         []BuildPathOption
+		want         string
+	}{
+		{
+			name:         "path",
+			pathTemplate: "/helloworld/{name}",
+			request:      &binding.HelloRequest{Name: "kratos"},
+			want:         "/helloworld/kratos",
+		},
+		{
+			name:         "query",
+			pathTemplate: "/helloworld/{name}",
+			request:      &binding.HelloRequest{Name: "kratos", Sub: &binding.Sub{Name: "go"}},
+			opts:         []BuildPathOption{WithQueryParams()},
+			want:         "/helloworld/kratos?sub.naming=go",
+		},
+		{
+			name:         "resource name",
+			pathTemplate: "/v1/{name=publishers/*/books/*}",
+			request:      &binding.HelloRequest{Name: "publishers/go/books/kratos"},
+			opts:         []BuildPathOption{WithQueryParams()},
+			want:         "/v1/publishers/go/books/kratos",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := BuildPath(tt.pathTemplate, tt.request, tt.opts...); got != tt.want {
+				t.Errorf("expected %s got %s", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestBuildPathCompatibility(t *testing.T) {
 	tests := []struct {
 		pathTemplate string
 		request      *binding.HelloRequest
-		needQuery    bool
+		opts         []BuildPathOption
 		want         string
 	}{
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}",
 			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "2233!!!!"}},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/test/sub/2233!!!!",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}",
 			request:      nil,
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{}/sub/{sub.naming}",
 			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "hello"}},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/{}/sub/hello",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{}/sub/{sub.name.cc}",
 			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "hello"}},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/{}/sub/",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{}/sub/{test_repeated}",
 			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "hello"}, TestRepeated: []string{"123", "456"}},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/{}/sub/123",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}",
 			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "5566!!!"}},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/test/sub/5566!!!",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/sub",
 			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "2233!!!"}},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/sub",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub/{sub.name}",
 			request:      &binding.HelloRequest{Name: "test"},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/test/sub/",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub",
 			request:      &binding.HelloRequest{Name: "go", Sub: &binding.Sub{Name: "kratos"}},
-			needQuery:    true,
+			opts:         []BuildPathOption{WithQueryParams()},
 			want:         "http://helloworld.Greeter/helloworld/go/sub?sub.naming=kratos",
+		},
+		{
+			pathTemplate: "http://helloworld.Greeter/helloworld/{name=publishers/*/books/*}/sub",
+			request:      &binding.HelloRequest{Name: "publishers/go/books/kratos", Sub: &binding.Sub{Name: "kratos"}},
+			opts:         []BuildPathOption{WithQueryParams()},
+			want:         "http://helloworld.Greeter/helloworld/publishers/go/books/kratos/sub?sub.naming=kratos",
+		},
+		{
+			pathTemplate: "http://helloworld.Greeter/helloworld/{name=**}/sub",
+			request:      &binding.HelloRequest{Name: "publishers/go/books/kratos", Sub: &binding.Sub{Name: "kratos"}},
+			opts:         []BuildPathOption{WithQueryParams()},
+			want:         "http://helloworld.Greeter/helloworld/publishers/go/books/kratos/sub?sub.naming=kratos",
+		},
+		{
+			pathTemplate: "http://helloworld.Greeter/helloworld/{sub.naming=publishers/*}",
+			request:      &binding.HelloRequest{Sub: &binding.Sub{Name: "publishers/kratos"}},
+			want:         "http://helloworld.Greeter/helloworld/publishers/kratos",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/sub/{sub.naming}",
 			request:      &binding.HelloRequest{Sub: &binding.Sub{Name: "kratos"}, UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"name", "sub.naming"}}},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/sub/kratos?updateMask=name,sub.naming",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/sub/[{sub.naming}]",
 			request:      &binding.HelloRequest{Sub: &binding.Sub{Name: "kratos"}},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/sub/[kratos]",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/[{name}]/sub/[{sub.naming}]",
 			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "kratos"}},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/[test]/sub/[kratos]",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/[{}]/sub/[{sub.naming}]",
 			request:      &binding.HelloRequest{Sub: &binding.Sub{Name: "kratos"}},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/[{}]/sub/[kratos]",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/[{}]/sub/[{sub.naming}]/{[]}",
 			request:      &binding.HelloRequest{Sub: &binding.Sub{Name: "kratos"}},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/[{}]/sub/[kratos]/{[]}",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{[sub]}/[{sub.naming}]",
 			request:      &binding.HelloRequest{Sub: &binding.Sub{Name: "kratos"}},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/{[sub]}/[kratos]",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{[name]}/[{sub.naming}]",
 			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "kratos"}},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/{[name]}/[kratos]",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{}/[]/[{sub.naming}]",
 			request:      &binding.HelloRequest{Sub: &binding.Sub{Name: "kratos"}},
-			needQuery:    false,
 			want:         "http://helloworld.Greeter/helloworld/{}/[]/[kratos]",
 		},
 	}
 
 	for _, test := range tests {
-		if path := EncodeURL(test.pathTemplate, test.request, test.needQuery); path != test.want {
+		if path := BuildPath(test.pathTemplate, test.request, test.opts...); path != test.want {
 			t.Fatalf("want: %s, got: %s", test.want, path)
 		}
 	}
 }
 
-func BenchmarkEncodeURL(b *testing.B) {
+func BenchmarkBuildPath(b *testing.B) {
 	benchmarks := []struct {
 		name         string
 		pathTemplate string
 		msg          *binding.HelloRequest
-		needQuery    bool
+		opts         []BuildPathOption
 	}{
 		{
 			name:         "NoParams",
@@ -140,7 +180,6 @@ func BenchmarkEncodeURL(b *testing.B) {
 				Name: "test",
 				Sub:  &binding.Sub{Name: "kratos"},
 			},
-			needQuery: false,
 		},
 		{
 			name:         "NoParamsWithQuery",
@@ -152,7 +191,7 @@ func BenchmarkEncodeURL(b *testing.B) {
 					Paths: []string{"name", "sub.naming"},
 				},
 			},
-			needQuery: true,
+			opts: []BuildPathOption{WithQueryParams()},
 		},
 		{
 			name:         "WithParams",
@@ -161,7 +200,6 @@ func BenchmarkEncodeURL(b *testing.B) {
 				Name: "test",
 				Sub:  &binding.Sub{Name: "kratos"},
 			},
-			needQuery: false,
 		},
 		{
 			name:         "WithParamsAndQuery",
@@ -173,7 +211,7 @@ func BenchmarkEncodeURL(b *testing.B) {
 					Paths: []string{"name", "sub.naming"},
 				},
 			},
-			needQuery: true,
+			opts: []BuildPathOption{WithQueryParams()},
 		},
 	}
 
@@ -181,7 +219,7 @@ func BenchmarkEncodeURL(b *testing.B) {
 		b.Run(bm.name, func(b *testing.B) {
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
-				EncodeURL(bm.pathTemplate, bm.msg, bm.needQuery)
+				BuildPath(bm.pathTemplate, bm.msg, bm.opts...)
 			}
 		})
 	}

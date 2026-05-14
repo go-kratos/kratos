@@ -75,10 +75,23 @@ func New{{.ServiceType}}HTTPClient (client *http.Client) {{.ServiceType}}HTTPCli
 	{{- end}}
 func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...http.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
-	pattern := "{{.Path}}"
-	path := binding.EncodeURL(pattern, in, {{not .HasBody}})
-	opts = append(opts, http.Operation(Operation{{$svrType}}{{.OriginalName}}))
-	opts = append(opts, http.PathTemplate(pattern))
+	pattern := "{{.PathTemplate}}"
+	{{- if .HasBody}}
+	path := http.BuildPath(pattern, in)
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.ContentType("application/protojson"),
+		http.Operation(Operation{{$svrType}}{{.OriginalName}}),
+		http.PathTemplate(pattern),
+	}, opts...)
+	{{- else}}
+	path := http.BuildPath(pattern, in, http.WithQueryParams())
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.Operation(Operation{{$svrType}}{{.OriginalName}}),
+		http.PathTemplate(pattern),
+	}, opts...)
+	{{- end}}
 	{{if .HasBody -}}
 	err := c.cc.Invoke(ctx, "{{.Method}}", path, in{{.Body}}, &out{{.ResponseBody}}, opts...)
 	{{else -}}

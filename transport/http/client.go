@@ -240,6 +240,9 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args any,
 	if contentType != "" {
 		req.Header.Set("Content-Type", c.contentType)
 	}
+	if c.accept != "" {
+		req.Header.Set("Accept", c.accept)
+	}
 	if client.opts.userAgent != "" {
 		req.Header.Set("User-Agent", client.opts.userAgent)
 	}
