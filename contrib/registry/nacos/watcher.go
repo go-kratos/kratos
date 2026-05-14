@@ -60,7 +60,17 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 	select {
 	case <-w.ctx.Done():
 		return nil, w.ctx.Err()
+	default:
+	}
+	select {
+	case <-w.ctx.Done():
+		return nil, w.ctx.Err()
 	case <-w.watchChan:
+	}
+	select {
+	case <-w.ctx.Done():
+		return nil, w.ctx.Err()
+	default:
 	}
 	res, err := w.cli.GetService(vo.GetServiceParam{
 		ServiceName: w.serviceName,
