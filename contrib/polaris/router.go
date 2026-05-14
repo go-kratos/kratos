@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/polarismesh/polaris-go"
+	polarisconfig "github.com/polarismesh/polaris-go/pkg/config"
 	"github.com/polarismesh/polaris-go/pkg/model"
 	"github.com/polarismesh/polaris-go/pkg/model/local"
 	"github.com/polarismesh/polaris-go/pkg/model/pb"
@@ -47,6 +48,7 @@ func (p *Polaris) NodeFilter(opts ...RouterOption) selector.NodeFilter {
 			ProcessRoutersRequest: model.ProcessRoutersRequest{
 				SourceService: model.ServiceInfo{Namespace: p.namespace, Service: o.service},
 				DstInstances:  buildPolarisInstance(p.namespace, nodes),
+				Routers:       []string{polarisconfig.DefaultServiceRouterRuleBased, polarisconfig.DefaultServiceRouterFilterOnly},
 			},
 		}
 		if appInfo, ok := kratos.FromContext(ctx); ok {
