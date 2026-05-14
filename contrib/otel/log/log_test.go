@@ -57,24 +57,21 @@ func TestNewHandlerAppliesOTelOptionsAndTraceAttrs(t *testing.T) {
 	))
 	logger.InfoContext(ctx, "user created", "user_id", "42")
 
-	results := recorder.Result()
-	if len(results) != 1 {
-		t.Fatalf("len(results) = %d, want 1", len(results))
+	scope, records := onlyRecording(t, recorder.Result())
+	if scope.Name != "helloworld" {
+		t.Fatalf("scope name = %q, want %q", scope.Name, "helloworld")
 	}
-	if results[0].Name != "helloworld" {
-		t.Fatalf("scope name = %q, want %q", results[0].Name, "helloworld")
+	if scope.Version != "v1.2.3" {
+		t.Fatalf("scope version = %q, want %q", scope.Version, "v1.2.3")
 	}
-	if results[0].Version != "v1.2.3" {
-		t.Fatalf("scope version = %q, want %q", results[0].Version, "v1.2.3")
+	if scope.SchemaURL != "https://example.test/schema" {
+		t.Fatalf("scope schema URL = %q, want %q", scope.SchemaURL, "https://example.test/schema")
 	}
-	if results[0].SchemaURL != "https://example.test/schema" {
-		t.Fatalf("scope schema URL = %q, want %q", results[0].SchemaURL, "https://example.test/schema")
-	}
-	if len(results[0].Records) != 1 {
-		t.Fatalf("len(records) = %d, want 1", len(results[0].Records))
+	if len(records) != 1 {
+		t.Fatalf("len(records) = %d, want 1", len(records))
 	}
 
-	attrs := recordAttrs(results[0].Records[0].Record)
+	attrs := recordAttrs(records[0])
 	tests := map[string]string{
 		"trace_id":    traceID.String(),
 		"span_id":     spanID.String(),
@@ -106,15 +103,12 @@ func TestNewHandlerComposesWithCoreLoggerOptions(t *testing.T) {
 	).With(slog.String("service.name", "helloworld"))
 	logger.InfoContext(ctx, "user created", "user_id", "42", "password", "secret")
 
-	results := recorder.Result()
-	if len(results) != 1 {
-		t.Fatalf("len(results) = %d, want 1", len(results))
-	}
-	if len(results[0].Records) != 1 {
-		t.Fatalf("len(records) = %d, want 1", len(results[0].Records))
+	_, records := onlyRecording(t, recorder.Result())
+	if len(records) != 1 {
+		t.Fatalf("len(records) = %d, want 1", len(records))
 	}
 
-	record := results[0].Records[0].Record
+	record := records[0]
 	attrs := recordAttrs(record)
 	tests := map[string]string{
 		"service.name": "helloworld",
@@ -138,24 +132,34 @@ func TestNewHandlerComposesWithCoreLoggerOptions(t *testing.T) {
 	}
 }
 
-func recordAttrs(record otellog.Record) map[string]string {
+func onlyRecording(t *testing.T, results logtest.Recording) (logtest.Scope, []logtest.Record) {
+	t.Helper()
+	if len(results) != 1 {
+		t.Fatalf("len(results) = %d, want 1", len(results))
+	}
+	for scope, records := range results {
+		return scope, records
+	}
+	t.Fatal("missing recording")
+	return logtest.Scope{}, nil
+}
+
+func recordAttrs(record logtest.Record) map[string]string {
 	attrs := map[string]string{}
-	record.WalkAttributes(func(kv otellog.KeyValue) bool {
+	for _, kv := range record.Attributes {
 		if kv.Value.Kind() == otellog.KindString {
 			attrs[kv.Key] = kv.Value.AsString()
 		}
-		return true
-	})
+	}
 	return attrs
 }
 
-func recordAttrCount(record otellog.Record, key string) int {
+func recordAttrCount(record logtest.Record, key string) int {
 	var count int
-	record.WalkAttributes(func(kv otellog.KeyValue) bool {
+	for _, kv := range record.Attributes {
 		if kv.Key == key {
 			count++
 		}
-		return true
-	})
+	}
 	return count
 }
