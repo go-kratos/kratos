@@ -24,11 +24,12 @@ type CallOption interface {
 }
 
 type callInfo struct {
-	contentType   string
-	accept        string
-	operation     string
-	pathTemplate  string
-	headerCarrier *http.Header
+	contentType    string
+	contentTypeSet bool
+	accept         string
+	operation      string
+	pathTemplate   string
+	headerCarrier  *http.Header
 }
 
 // EmptyCallOption does not alter the Call configuration.
@@ -56,6 +57,7 @@ type ContentTypeCallOption struct {
 
 func (o ContentTypeCallOption) before(c *callInfo) error {
 	c.contentType = o.ContentType
+	c.contentTypeSet = true
 	return nil
 }
 

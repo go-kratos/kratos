@@ -15,6 +15,7 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/genproto/googleapis/api/httpbody"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	kratoserrors "github.com/go-kratos/kratos/v3/errors"
@@ -243,6 +244,17 @@ func TestDefaultRequestEncoder(t *testing.T) {
 	}
 }
 
+func TestDefaultRequestEncoderHTTPBody(t *testing.T) {
+	body := &httpbody.HttpBody{Data: []byte("raw request")}
+	got, err := DefaultRequestEncoder(context.TODO(), "application/octet-stream", body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != "raw request" {
+		t.Errorf("expected %v, got %v", "raw request", string(got))
+	}
+}
+
 func TestInvokeAcceptHeader(t *testing.T) {
 	rt := &captureRoundTripper{}
 	client, err := NewClient(context.Background(), WithEndpoint("127.0.0.1:8888"), WithTransport(rt))
@@ -303,6 +315,24 @@ func TestDefaultResponseDecoder(t *testing.T) {
 	syntaxErr := &json.SyntaxError{}
 	if !errors.As(err, &syntaxErr) {
 		t.Errorf("expected %v, got %v", syntaxErr, err)
+	}
+}
+
+func TestDefaultResponseDecoderHTTPBody(t *testing.T) {
+	resp := &http.Response{
+		Header:     http.Header{"Content-Type": []string{"application/pdf"}},
+		StatusCode: http.StatusOK,
+		Body:       io.NopCloser(bytes.NewBufferString("raw response")),
+	}
+	var body *httpbody.HttpBody
+	if err := DefaultResponseDecoder(context.TODO(), resp, &body); err != nil {
+		t.Fatal(err)
+	}
+	if body.GetContentType() != "application/pdf" {
+		t.Errorf("expected %v, got %v", "application/pdf", body.GetContentType())
+	}
+	if string(body.GetData()) != "raw response" {
+		t.Errorf("expected %v, got %v", "raw response", string(body.GetData()))
 	}
 }
 

@@ -27,13 +27,20 @@ type methodDesc struct {
 	Reply        string
 	Comment      string
 	// http_rule
-	Path         string
-	PathTemplate string
-	Method       string
-	HasVars      bool
-	HasBody      bool
-	Body         string
-	ResponseBody string
+	Path                 string
+	PathTemplate         string
+	Method               string
+	HasVars              bool
+	HasBody              bool
+	Body                 string
+	BodyField            string
+	BodyQueryName        string
+	BodyHTTPBody         bool
+	ResponseBody         string
+	ResponseBodyHTTPBody bool
+	ReplyHTTPBody        bool
+	ClientStreaming      bool
+	ServerStreaming      bool
 }
 
 func (s *serviceDesc) execute() string {

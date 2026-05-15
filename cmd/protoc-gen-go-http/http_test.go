@@ -174,3 +174,68 @@ func TestHTTPTemplateClientUsesBuildPathAndProtoJSONHeaders(t *testing.T) {
 		t.Fatalf("generated template should not reference binding package:\n%s", got)
 	}
 }
+
+func TestHTTPTemplateStreamsAndHTTPBody(t *testing.T) {
+	sd := &serviceDesc{
+		ServiceType: "Greeter",
+		ServiceName: "helloworld.Greeter",
+		Methods: []*methodDesc{
+			{
+				Name:            "ListHello",
+				OriginalName:    "ListHello",
+				Request:         "ListHelloRequest",
+				Reply:           "HelloReply",
+				Path:            "/helloworld",
+				PathTemplate:    "/helloworld",
+				Method:          "GET",
+				ServerStreaming: true,
+			},
+			{
+				Name:            "ChatHello",
+				OriginalName:    "ChatHello",
+				Request:         "HelloRequest",
+				Reply:           "HelloReply",
+				Path:            "/helloworld/chat",
+				PathTemplate:    "/helloworld/chat",
+				Method:          "POST",
+				ClientStreaming: true,
+				ServerStreaming: true,
+			},
+			{
+				Name:          "UploadHello",
+				OriginalName:  "UploadHello",
+				Request:       "UploadHelloRequest",
+				Reply:         "UploadHelloReply",
+				Path:          "/helloworld/upload",
+				PathTemplate:  "/helloworld/upload",
+				Method:        "POST",
+				HasBody:       true,
+				Body:          ".Body",
+				BodyField:     "body",
+				BodyQueryName: "body",
+				BodyHTTPBody:  true,
+				ResponseBody:  ".Body",
+			},
+		},
+	}
+	got := sd.execute()
+	for _, want := range []string{
+		`ListHello(*ListHelloRequest, Greeter_ListHelloServer) error`,
+		`stream := http.NewServerSentEventServerStream(ctx)`,
+		`stream, err := c.cc.ServerSentEvent(ctx, "GET", path, nil, opts...)`,
+		`ChatHello(Greeter_ChatHelloServer) error`,
+		`stream, err := http.NewWebSocketServerStream(ctx)`,
+		`func (x *Greeter_ChatHelloHTTPClient) open(m *HelloRequest) error`,
+		`path := http.BuildPath(x.pattern, m, http.WithQueryParams())`,
+		`stream, err := x.cc.WebSocket(x.ctx, path, opts...)`,
+		`http.ContentType("application/protojson")`,
+		`return &Greeter_ChatHelloHTTPClient{ctx: ctx, cc: c.cc, pattern: pattern, opts: opts}, nil`,
+		`http.ContentType(http.BodyContentType(in.Body))`,
+		`http.WithOmitFields("body")`,
+		`return ctx.Result(200, reply.Body)`,
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("generated template missing %q in:\n%s", want, got)
+		}
+	}
+}

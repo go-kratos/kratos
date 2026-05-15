@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"testing"
 
+	"google.golang.org/genproto/googleapis/api/httpbody"
+
 	"github.com/go-kratos/kratos/v3/encoding"
 	"github.com/go-kratos/kratos/v3/errors"
 )
@@ -38,6 +40,31 @@ func TestDefaultRequestDecoder(t *testing.T) {
 	}
 	if bodyStr != string(data) {
 		t.Errorf("expected %v, got %v", bodyStr, string(data))
+	}
+}
+
+func TestDefaultRequestDecoderHTTPBody(t *testing.T) {
+	const bodyStr = "raw file content"
+	r, _ := http.NewRequest(http.MethodPost, "", io.NopCloser(bytes.NewBufferString(bodyStr)))
+	r.Header.Set("Content-Type", "text/plain")
+
+	var body *httpbody.HttpBody
+	if err := DefaultRequestDecoder(r, &body); err != nil {
+		t.Fatal(err)
+	}
+	if body.GetContentType() != "text/plain" {
+		t.Errorf("expected %v, got %v", "text/plain", body.GetContentType())
+	}
+	if string(body.GetData()) != bodyStr {
+		t.Errorf("expected %v, got %v", bodyStr, string(body.GetData()))
+	}
+
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(data) != bodyStr {
+		t.Errorf("expected request body reset to %q, got %q", bodyStr, string(data))
 	}
 }
 
@@ -100,6 +127,25 @@ func TestDefaultResponseEncoder(t *testing.T) {
 	}
 	if w.Data == nil {
 		t.Errorf("expected not nil, got %v", w.Data)
+	}
+}
+
+func TestDefaultResponseEncoderHTTPBody(t *testing.T) {
+	w := &mockResponseWriter{StatusCode: 200, header: make(http.Header)}
+	r, _ := http.NewRequest(http.MethodGet, "", nil)
+	body := &httpbody.HttpBody{
+		ContentType: "application/octet-stream",
+		Data:        []byte("raw response"),
+	}
+
+	if err := DefaultResponseEncoder(w, r, body); err != nil {
+		t.Fatal(err)
+	}
+	if got := w.Header().Get("Content-Type"); got != "application/octet-stream" {
+		t.Errorf("expected %v, got %v", "application/octet-stream", got)
+	}
+	if string(w.Data) != "raw response" {
+		t.Errorf("expected %v, got %v", "raw response", string(w.Data))
 	}
 }
 

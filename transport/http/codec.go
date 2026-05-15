@@ -8,6 +8,7 @@ import (
 	"net/url"
 
 	"github.com/gorilla/mux"
+	"google.golang.org/genproto/googleapis/api/httpbody"
 
 	"github.com/go-kratos/kratos/v3/encoding"
 	"github.com/go-kratos/kratos/v3/errors"
@@ -16,6 +17,8 @@ import (
 
 // SupportPackageIsVersion3 These constants should not be referenced from any other code.
 const SupportPackageIsVersion3 = true
+
+const defaultHTTPBodyContentType = "application/octet-stream"
 
 // Redirector replies to the request with a redirect to url
 // which may be a path relative to the request path.
@@ -59,6 +62,16 @@ func DefaultRequestQuery(r *http.Request, v any) error {
 
 // DefaultRequestDecoder decodes the request body to object.
 func DefaultRequestDecoder(r *http.Request, v any) error {
+	if body, ok := httpBody(v); ok {
+		data, err := io.ReadAll(r.Body)
+		r.Body = io.NopCloser(bytes.NewBuffer(data))
+		if err != nil {
+			return errors.BadRequest("CODEC", err.Error())
+		}
+		body.ContentType = r.Header.Get("Content-Type")
+		body.Data = data
+		return nil
+	}
 	codec, ok := CodecForRequest(r, "Content-Type")
 	if !ok {
 		return errors.BadRequest("CODEC", fmt.Sprintf("unregister Content-Type: %s", r.Header.Get("Content-Type")))
@@ -84,6 +97,15 @@ func DefaultRequestDecoder(r *http.Request, v any) error {
 func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v any) error {
 	if v == nil {
 		return nil
+	}
+	if body, ok := httpBody(v); ok {
+		contentType := body.GetContentType()
+		if contentType == "" {
+			contentType = defaultHTTPBodyContentType
+		}
+		w.Header().Set("Content-Type", contentType)
+		_, err := w.Write(body.GetData())
+		return err
 	}
 	if rd, ok := v.(Redirector); ok {
 		url, code := rd.Redirect()
@@ -132,4 +154,29 @@ func CodecForRequest(r *http.Request, name string) (encoding.Codec, bool) {
 		}
 	}
 	return encoding.GetCodec("json"), false
+}
+
+func httpBody(v any) (*httpbody.HttpBody, bool) {
+	switch body := v.(type) {
+	case *httpbody.HttpBody:
+		return body, body != nil
+	case **httpbody.HttpBody:
+		if body == nil {
+			return nil, false
+		}
+		if *body == nil {
+			*body = new(httpbody.HttpBody)
+		}
+		return *body, true
+	default:
+		return nil, false
+	}
+}
+
+// BodyContentType returns the content type carried by v or a binary default.
+func BodyContentType(v any) string {
+	if body, ok := httpBody(v); ok && body.GetContentType() != "" {
+		return body.GetContentType()
+	}
+	return defaultHTTPBodyContentType
 }

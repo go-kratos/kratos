@@ -17,12 +17,20 @@ type BuildPathOption func(*buildPathOptions)
 
 type buildPathOptions struct {
 	queryParams bool
+	omitFields  []string
 }
 
 // WithQueryParams appends request fields that are not bound in the path as query parameters.
 func WithQueryParams() BuildPathOption {
 	return func(o *buildPathOptions) {
 		o.queryParams = true
+	}
+}
+
+// WithOmitFields excludes fields from generated query parameters.
+func WithOmitFields(fields ...string) BuildPathOption {
+	return func(o *buildPathOptions) {
+		o.omitFields = append(o.omitFields, fields...)
 	}
 }
 
@@ -61,9 +69,25 @@ func BuildPath(pathTemplate string, msg any, opts ...BuildPathOption) string {
 		for key := range pathParams {
 			delete(queryParams, key)
 		}
+		omitQueryParams(queryParams, options.omitFields)
 		if query := queryParams.Encode(); query != "" {
 			path += "?" + query
 		}
 	}
 	return path
+}
+
+func omitQueryParams(values map[string][]string, fields []string) {
+	for _, field := range fields {
+		if field == "" {
+			continue
+		}
+		delete(values, field)
+		prefix := field + "."
+		for key := range values {
+			if strings.HasPrefix(key, prefix) {
+				delete(values, key)
+			}
+		}
+	}
 }

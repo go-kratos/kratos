@@ -36,6 +36,13 @@ func TestBuildPath(t *testing.T) {
 			opts:         []BuildPathOption{WithQueryParams()},
 			want:         "/v1/publishers/go/books/kratos",
 		},
+		{
+			name:         "omit body field query params",
+			pathTemplate: "/helloworld/{name}",
+			request:      &binding.HelloRequest{Name: "kratos", Sub: &binding.Sub{Name: "go"}},
+			opts:         []BuildPathOption{WithQueryParams(), WithOmitFields("sub")},
+			want:         "/helloworld/kratos",
+		},
 	}
 
 	for _, tt := range tests {
