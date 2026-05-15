@@ -23,7 +23,6 @@ type discoveryResolver struct {
 	cancel context.CancelFunc
 
 	insecure    bool
-	debugLog    bool
 	selectorKey string
 	subsetSize  int
 }
@@ -91,10 +90,9 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	if err != nil {
 		log.Errorf("[resolver] failed to update state: %s", err)
 	}
-	if r.debugLog {
-		b, _ := json.Marshal(filtered)
-		log.Infof("[resolver] update instances: %s", b)
-	}
+
+	b, _ := json.Marshal(filtered)
+	log.Infof("[resolver] update instances: %s", b)
 }
 
 func (r *discoveryResolver) Close() {

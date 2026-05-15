@@ -119,38 +119,30 @@ func WithHealthCheck(healthCheck bool) ClientOption {
 	}
 }
 
-func WithPrintDiscoveryDebugLog(p bool) ClientOption {
-	return func(o *clientOptions) {
-		o.printDiscoveryDebugLog = p
-	}
-}
-
 // clientOptions is gRPC Client
 type clientOptions struct {
-	endpoint               string
-	subsetSize             int
-	tlsConf                *tls.Config
-	timeout                time.Duration
-	discovery              registry.Discovery
-	middleware             []middleware.Middleware
-	streamMiddleware       []middleware.Middleware
-	ints                   []grpc.UnaryClientInterceptor
-	streamInts             []grpc.StreamClientInterceptor
-	grpcOpts               []grpc.DialOption
-	balancerName           string
-	filters                []selector.NodeFilter
-	healthCheckConfig      string
-	printDiscoveryDebugLog bool
+	endpoint          string
+	subsetSize        int
+	tlsConf           *tls.Config
+	timeout           time.Duration
+	discovery         registry.Discovery
+	middleware        []middleware.Middleware
+	streamMiddleware  []middleware.Middleware
+	ints              []grpc.UnaryClientInterceptor
+	streamInts        []grpc.StreamClientInterceptor
+	grpcOpts          []grpc.DialOption
+	balancerName      string
+	filters           []selector.NodeFilter
+	healthCheckConfig string
 }
 
 // NewClient returns a gRPC client connection.
 func NewClient(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, error) {
 	options := clientOptions{
-		timeout:                2000 * time.Millisecond,
-		balancerName:           balancerName,
-		subsetSize:             25,
-		printDiscoveryDebugLog: true,
-		healthCheckConfig:      `,"healthCheckConfig":{"serviceName":""}`,
+		timeout:           2000 * time.Millisecond,
+		balancerName:      balancerName,
+		subsetSize:        25,
+		healthCheckConfig: `,"healthCheckConfig":{"serviceName":""}`,
 	}
 	for _, o := range opts {
 		o(&options)
@@ -187,7 +179,6 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, err
 					discovery.WithInsecure(isInsecure),
 					discovery.WithTimeout(options.timeout),
 					discovery.WithSubset(options.subsetSize),
-					discovery.PrintDebugLog(options.printDiscoveryDebugLog),
 				)))
 	}
 	if isInsecure {
