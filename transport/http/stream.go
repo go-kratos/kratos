@@ -351,9 +351,7 @@ func (s *sseClientStream) readEvent() (string, []byte, error) {
 			event = strings.TrimSpace(strings.TrimPrefix(line, "event:"))
 		case strings.HasPrefix(line, "data:"):
 			value := strings.TrimPrefix(line, "data:")
-			if strings.HasPrefix(value, " ") {
-				value = strings.TrimPrefix(value, " ")
-			}
+			value = strings.TrimPrefix(value, " ")
 			data.WriteString(value)
 			data.WriteByte('\n')
 		}
@@ -484,7 +482,7 @@ func (client *Client) ServerSentEvent(ctx context.Context, method, path string, 
 		request:      req,
 		pathTemplate: c.pathTemplate,
 	})
-	res, err := client.do(req.WithContext(ctx))
+	res, err := client.do(req.WithContext(ctx)) //nolint:bodyclose // newSSEClientStream owns and closes res.Body on success.
 	if res != nil {
 		cs := csAttempt{res: res}
 		for _, o := range opts {
@@ -492,6 +490,9 @@ func (client *Client) ServerSentEvent(ctx context.Context, method, path string, 
 		}
 	}
 	if err != nil {
+		if res != nil {
+			_ = res.Body.Close()
+		}
 		return nil, err
 	}
 	return newSSEClientStream(ctx, res, streamCodecFromCallInfo(c, "Accept", "Content-Type")), nil
@@ -567,10 +568,16 @@ func (client *Client) WebSocket(ctx context.Context, path string, opts ...CallOp
 		}
 	}
 	if err != nil {
+		if res != nil && res.Body != nil {
+			_ = res.Body.Close()
+		}
 		if done != nil {
 			done(ctx, selector.DoneInfo{Err: err})
 		}
 		return nil, err
+	}
+	if res != nil && res.Body != nil {
+		_ = res.Body.Close()
 	}
 	return &websocketClientStream{
 		ctx:     ctx,
@@ -602,7 +609,7 @@ func prepareClientRequest(client *Client, req *stdhttp.Request, contentType stri
 }
 
 func marshalStreamMessage(v any, codec encoding.Codec) ([]byte, error) {
-	if body, ok := HTTPBody(v); ok {
+	if body, ok := httpBody(v); ok {
 		return body.GetData(), nil
 	}
 	if codec == nil {
@@ -612,7 +619,7 @@ func marshalStreamMessage(v any, codec encoding.Codec) ([]byte, error) {
 }
 
 func unmarshalStreamMessage(data []byte, v any, codec encoding.Codec) error {
-	if body, ok := HTTPBody(v); ok {
+	if body, ok := httpBody(v); ok {
 		body.Data = data
 		return nil
 	}

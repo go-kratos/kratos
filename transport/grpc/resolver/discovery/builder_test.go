@@ -30,22 +30,6 @@ func TestWithTimeout(t *testing.T) {
 	}
 }
 
-func TestDisableDebugLog(t *testing.T) {
-	o := &builder{}
-	DisableDebugLog()(o)
-	if o.debugLog {
-		t.Errorf("expected debugLog true, got %v", o.debugLog)
-	}
-}
-
-func TestPrintDebugLog(t *testing.T) {
-	o := &builder{}
-	PrintDebugLog(true)(o)
-	if !o.debugLog {
-		t.Errorf("expected PrintdebugLog true, got %v", o.debugLog)
-	}
-}
-
 type mockDiscovery struct{}
 
 func (m *mockDiscovery) GetService(_ context.Context, _ string) ([]*registry.ServiceInstance, error) {
@@ -81,7 +65,7 @@ func (m *mockConn) ParseServiceConfig(_ string) *serviceconfig.ParseResult {
 }
 
 func TestBuilder_Build(t *testing.T) {
-	b := NewBuilder(&mockDiscovery{}, PrintDebugLog(false))
+	b := NewBuilder(&mockDiscovery{})
 	_, err := b.Build(
 		resolver.Target{
 			URL: url.URL{

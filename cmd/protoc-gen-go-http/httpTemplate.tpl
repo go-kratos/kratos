@@ -183,7 +183,7 @@ func (x *{{$svrType}}_{{.Name}}HTTPClient) open(m *{{.Request}}) error {
 	}
 	{{- if .BodyHTTPBody}}
 	opts := append([]http.CallOption{
-		http.ContentType(http.HTTPBodyContentType(m)),
+		http.ContentType(http.BodyContentType(m)),
 	}, x.opts...)
 	{{- else}}
 	opts := x.opts
@@ -279,7 +279,7 @@ func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Reque
 	opts = append([]http.CallOption{
 		http.Accept("text/event-stream"),
 		{{- if .BodyHTTPBody}}
-		http.ContentType(http.HTTPBodyContentType(in{{.Body}})),
+		http.ContentType(http.BodyContentType(in{{.Body}})),
 		{{- else}}
 		http.ContentType("application/protojson"),
 		{{- end}}
@@ -315,7 +315,7 @@ func (c *{{$svrType}}HTTPClientImpl) {{.Name}}(ctx context.Context, in *{{.Reque
 	opts = append([]http.CallOption{
 		http.Accept("application/protojson"),
 		{{- if .BodyHTTPBody}}
-		http.ContentType(http.HTTPBodyContentType(in{{.Body}})),
+		http.ContentType(http.BodyContentType(in{{.Body}})),
 		{{- else}}
 		http.ContentType("application/protojson"),
 		{{- end}}

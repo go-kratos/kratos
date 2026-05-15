@@ -18,6 +18,8 @@ import (
 // SupportPackageIsVersion3 These constants should not be referenced from any other code.
 const SupportPackageIsVersion3 = true
 
+const defaultHTTPBodyContentType = "application/octet-stream"
+
 // Redirector replies to the request with a redirect to url
 // which may be a path relative to the request path.
 type Redirector interface {
@@ -60,7 +62,7 @@ func DefaultRequestQuery(r *http.Request, v any) error {
 
 // DefaultRequestDecoder decodes the request body to object.
 func DefaultRequestDecoder(r *http.Request, v any) error {
-	if body, ok := HTTPBody(v); ok {
+	if body, ok := httpBody(v); ok {
 		data, err := io.ReadAll(r.Body)
 		r.Body = io.NopCloser(bytes.NewBuffer(data))
 		if err != nil {
@@ -96,10 +98,10 @@ func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v any) error
 	if v == nil {
 		return nil
 	}
-	if body, ok := HTTPBody(v); ok {
+	if body, ok := httpBody(v); ok {
 		contentType := body.GetContentType()
 		if contentType == "" {
-			contentType = "application/octet-stream"
+			contentType = defaultHTTPBodyContentType
 		}
 		w.Header().Set("Content-Type", contentType)
 		_, err := w.Write(body.GetData())
@@ -154,8 +156,7 @@ func CodecForRequest(r *http.Request, name string) (encoding.Codec, bool) {
 	return encoding.GetCodec("json"), false
 }
 
-// HTTPBody returns v as a google.api.HttpBody when possible.
-func HTTPBody(v any) (*httpbody.HttpBody, bool) {
+func httpBody(v any) (*httpbody.HttpBody, bool) {
 	switch body := v.(type) {
 	case *httpbody.HttpBody:
 		return body, body != nil
@@ -172,10 +173,10 @@ func HTTPBody(v any) (*httpbody.HttpBody, bool) {
 	}
 }
 
-// HTTPBodyContentType returns the content type carried by v or a binary default.
-func HTTPBodyContentType(v any) string {
-	if body, ok := HTTPBody(v); ok && body.GetContentType() != "" {
+// BodyContentType returns the content type carried by v or a binary default.
+func BodyContentType(v any) string {
+	if body, ok := httpBody(v); ok && body.GetContentType() != "" {
 		return body.GetContentType()
 	}
-	return "application/octet-stream"
+	return defaultHTTPBodyContentType
 }

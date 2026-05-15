@@ -156,7 +156,12 @@ func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *prot
 	} else if body != "" {
 		fd := m.Input.Desc.Fields().ByName(protoreflect.Name(body))
 		if fd == nil {
-			fmt.Fprintf(os.Stderr, "\u001B[31mERROR\u001B[m: The corresponding body field '%s' declaration in request message could not be found in '%s'\n", body, path)
+			fmt.Fprintf(
+				os.Stderr,
+				"\u001B[31mERROR\u001B[m: The corresponding body field '%s' declaration in request message could not be found in '%s'\n",
+				body,
+				path,
+			)
 			os.Exit(2)
 		}
 		md.HasBody = true
@@ -172,7 +177,12 @@ func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *prot
 	} else if responseBody != "" {
 		fd := m.Output.Desc.Fields().ByName(protoreflect.Name(responseBody))
 		if fd == nil {
-			fmt.Fprintf(os.Stderr, "\u001B[31mERROR\u001B[m: The corresponding response_body field '%s' declaration in response message could not be found in '%s'\n", responseBody, path)
+			fmt.Fprintf(
+				os.Stderr,
+				"\u001B[31mERROR\u001B[m: The corresponding response_body field '%s' declaration in response message could not be found in '%s'\n",
+				responseBody,
+				path,
+			)
 			os.Exit(2)
 		}
 		md.ResponseBody = "." + camelCaseVars(responseBody)

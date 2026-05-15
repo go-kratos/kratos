@@ -230,7 +230,7 @@ func TestHTTPTemplateStreamsAndHTTPBody(t *testing.T) {
 		`stream, err := x.cc.WebSocket(x.ctx, path, opts...)`,
 		`http.ContentType("application/protojson")`,
 		`return &Greeter_ChatHelloHTTPClient{ctx: ctx, cc: c.cc, pattern: pattern, opts: opts}, nil`,
-		`http.ContentType(http.HTTPBodyContentType(in.Body))`,
+		`http.ContentType(http.BodyContentType(in.Body))`,
 		`http.WithOmitFields("body")`,
 		`return ctx.Result(200, reply.Body)`,
 	} {

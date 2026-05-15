@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"testing"
 
+	"google.golang.org/genproto/googleapis/api/httpbody"
+
 	"github.com/go-kratos/kratos/v3/encoding"
 	"github.com/go-kratos/kratos/v3/errors"
-	"google.golang.org/genproto/googleapis/api/httpbody"
 )
 
 func TestDefaultRequestDecoder(t *testing.T) {
