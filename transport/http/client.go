@@ -344,6 +344,9 @@ func (client *Client) Close() error {
 
 // DefaultRequestEncoder is an HTTP request encoder.
 func DefaultRequestEncoder(_ context.Context, contentType string, in any) ([]byte, error) {
+	if body, ok := HTTPBody(in); ok {
+		return body.GetData(), nil
+	}
 	name := httputil.ContentSubtype(contentType)
 	body, err := encoding.GetCodec(name).Marshal(in)
 	if err != nil {
@@ -358,6 +361,11 @@ func DefaultResponseDecoder(_ context.Context, res *http.Response, v any) error 
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
+	}
+	if body, ok := HTTPBody(v); ok {
+		body.ContentType = res.Header.Get("Content-Type")
+		body.Data = data
+		return nil
 	}
 	return CodecForResponse(res).Unmarshal(data, v)
 }

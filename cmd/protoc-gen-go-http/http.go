@@ -18,6 +18,7 @@ import (
 const (
 	contextPackage       = protogen.GoImportPath("context")
 	transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v3/transport/http")
+	httpBodyFullName     = protoreflect.FullName("google.api.HttpBody")
 )
 
 var methodSets = make(map[string]int)
@@ -73,16 +74,13 @@ func genService(_ *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFi
 		Metadata:    file.Desc.Path(),
 	}
 	for _, method := range service.Methods {
-		if method.Desc.IsStreamingClient() || method.Desc.IsStreamingServer() {
-			continue
-		}
 		rule, ok := proto.GetExtension(method.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
 		if rule != nil && ok {
 			for _, bind := range rule.AdditionalBindings {
 				sd.Methods = append(sd.Methods, buildHTTPRule(g, service, method, bind, omitemptyPrefix))
 			}
 			sd.Methods = append(sd.Methods, buildHTTPRule(g, service, method, rule, omitemptyPrefix))
-		} else if !omitempty {
+		} else if !omitempty && !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
 			path := fmt.Sprintf("%s/%s/%s", omitemptyPrefix, service.Desc.FullName(), method.Desc.Name())
 			sd.Methods = append(sd.Methods, buildMethodDesc(g, method, http.MethodPost, path))
 		}
@@ -95,9 +93,6 @@ func genService(_ *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFi
 func hasHTTPRule(services []*protogen.Service) bool {
 	for _, service := range services {
 		for _, method := range service.Methods {
-			if method.Desc.IsStreamingClient() || method.Desc.IsStreamingServer() {
-				continue
-			}
 			rule, ok := proto.GetExtension(method.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
 			if rule != nil && ok {
 				return true
@@ -156,16 +151,32 @@ func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *prot
 	if body == "*" {
 		md.HasBody = true
 		md.Body = ""
+		md.BodyField = "*"
+		md.BodyHTTPBody = isHTTPBodyMessage(m.Input.Desc)
 	} else if body != "" {
+		fd := m.Input.Desc.Fields().ByName(protoreflect.Name(body))
+		if fd == nil {
+			fmt.Fprintf(os.Stderr, "\u001B[31mERROR\u001B[m: The corresponding body field '%s' declaration in request message could not be found in '%s'\n", body, path)
+			os.Exit(2)
+		}
 		md.HasBody = true
 		md.Body = "." + camelCaseVars(body)
+		md.BodyField = body
+		md.BodyQueryName = fd.JSONName()
+		md.BodyHTTPBody = isHTTPBodyField(fd)
 	} else {
 		md.HasBody = false
 	}
 	if responseBody == "*" {
 		md.ResponseBody = ""
 	} else if responseBody != "" {
+		fd := m.Output.Desc.Fields().ByName(protoreflect.Name(responseBody))
+		if fd == nil {
+			fmt.Fprintf(os.Stderr, "\u001B[31mERROR\u001B[m: The corresponding response_body field '%s' declaration in response message could not be found in '%s'\n", responseBody, path)
+			os.Exit(2)
+		}
 		md.ResponseBody = "." + camelCaseVars(responseBody)
+		md.ResponseBodyHTTPBody = isHTTPBodyField(fd)
 	}
 	return md
 }
@@ -214,17 +225,28 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 		comment += deprecationComment
 	}
 	return &methodDesc{
-		Name:         m.GoName,
-		OriginalName: string(m.Desc.Name()),
-		Num:          methodSets[m.GoName],
-		Request:      g.QualifiedGoIdent(m.Input.GoIdent),
-		Reply:        g.QualifiedGoIdent(m.Output.GoIdent),
-		Comment:      comment,
-		Path:         path,
-		PathTemplate: pathTemplate,
-		Method:       method,
-		HasVars:      len(vars) > 0,
+		Name:            m.GoName,
+		OriginalName:    string(m.Desc.Name()),
+		Num:             methodSets[m.GoName],
+		Request:         g.QualifiedGoIdent(m.Input.GoIdent),
+		Reply:           g.QualifiedGoIdent(m.Output.GoIdent),
+		Comment:         comment,
+		Path:            path,
+		PathTemplate:    pathTemplate,
+		Method:          method,
+		HasVars:         len(vars) > 0,
+		ReplyHTTPBody:   isHTTPBodyMessage(m.Output.Desc),
+		ClientStreaming: m.Desc.IsStreamingClient(),
+		ServerStreaming: m.Desc.IsStreamingServer(),
 	}
+}
+
+func isHTTPBodyField(fd protoreflect.FieldDescriptor) bool {
+	return fd != nil && fd.Kind() == protoreflect.MessageKind && isHTTPBodyMessage(fd.Message())
+}
+
+func isHTTPBodyMessage(md protoreflect.MessageDescriptor) bool {
+	return md != nil && md.FullName() == httpBodyFullName
 }
 
 func buildPathVars(path string) (res map[string]*string) {

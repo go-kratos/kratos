@@ -7,6 +7,7 @@ require (
 	github.com/go-playground/form/v4 v4.3.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
+	github.com/gorilla/websocket v1.5.3
 	golang.org/x/sync v0.20.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20260511170946-3700d4141b60
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260511170946-3700d4141b60
