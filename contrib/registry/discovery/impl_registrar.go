@@ -71,9 +71,7 @@ func (d *Discovery) register(ctx context.Context, ins *discoveryInstance) (err e
 	var metadata []byte
 	if ins.Metadata != nil {
 		if metadata, err = json.Marshal(ins.Metadata); err != nil {
-			log.Errorf(
-				"Discovery:register instance Marshal metadata(%v) failed!error(%v)", ins.Metadata, err,
-			)
+			log.Error("Discovery: register instance marshal metadata failed", "metadata", ins.Metadata, "error", err)
 		}
 	}
 	res := new(struct {
@@ -103,21 +101,18 @@ func (d *Discovery) register(ctx context.Context, ins *discoveryInstance) (err e
 		SetResult(&res).
 		Post(uri); err != nil {
 		d.switchNode()
-		log.Errorf("Discovery: register client.Get(%s) zone(%s) env(%s) appid(%s) addrs(%v) error(%v)",
-			uri+"?"+p.Encode(), c.Zone, c.Env, ins.AppID, ins.Addrs, err)
+		log.Error("Discovery: register client.Get failed",
+			"uri", uri+"?"+p.Encode(), "zone", c.Zone, "env", c.Env, "appid", ins.AppID, "addrs", ins.Addrs, "error", err)
 		return
 	}
 
 	if res.Code != 0 {
 		err = fmt.Errorf("ErrorCode: %d", res.Code)
-		log.Errorf("Discovery: register client.Get(%v) env(%s) appid(%s) addrs(%v) code(%v)",
-			uri, c.Env, ins.AppID, ins.Addrs, res.Code)
+		log.Error("Discovery: register client.Get returned code",
+			"uri", uri, "env", c.Env, "appid", ins.AppID, "addrs", ins.Addrs, "code", res.Code)
 	}
 
-	log.Infof(
-		"Discovery: register client.Get(%v) env(%s) appid(%s) addrs(%s) success\n",
-		uri, c.Env, ins.AppID, ins.Addrs,
-	)
+	log.Info("Discovery: register client.Get succeeded", "uri", uri, "env", c.Env, "appid", ins.AppID, "addrs", ins.Addrs)
 
 	return
 }

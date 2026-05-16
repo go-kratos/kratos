@@ -3,6 +3,7 @@ package log
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"log/slog"
 	"strings"
 	"testing"
@@ -54,6 +55,56 @@ func TestWith(t *testing.T) {
 	}
 	if got := handler.attrs[0]["kind"]; got != "test" {
 		t.Fatalf("kind = %v, want %q", got, "test")
+	}
+}
+
+func TestWithGroup(t *testing.T) {
+	old := Default()
+	defer SetDefault(old)
+
+	var out bytes.Buffer
+	SetDefault(slog.New(slog.NewJSONHandler(&out, nil)))
+
+	logger := WithGroup("request")
+	logger.Info("hello", "id", "r1")
+
+	var got map[string]any
+	if err := json.Unmarshal(bytes.TrimSpace(out.Bytes()), &got); err != nil {
+		t.Fatalf("unmarshal: %v (%q)", err, out.String())
+	}
+	group, ok := got["request"].(map[string]any)
+	if !ok {
+		t.Fatalf("request group = %v, want object", got["request"])
+	}
+	if group["id"] != "r1" {
+		t.Fatalf("request.id = %v, want r1", group["id"])
+	}
+}
+
+func TestHandler(t *testing.T) {
+	old := Default()
+	defer SetDefault(old)
+
+	handler := &captureHandler{}
+	SetDefault(slog.New(handler))
+
+	if got := Handler(); got != handler {
+		t.Fatalf("Handler() = %v, want %v", got, handler)
+	}
+}
+
+func TestEnabled(t *testing.T) {
+	old := Default()
+	defer SetDefault(old)
+
+	var out bytes.Buffer
+	SetDefault(slog.New(slog.NewTextHandler(&out, &slog.HandlerOptions{Level: LevelWarn})))
+
+	if Enabled(context.Background(), LevelInfo) {
+		t.Fatal("Enabled(_, LevelInfo) = true, want false")
+	}
+	if !Enabled(context.Background(), LevelWarn) {
+		t.Fatal("Enabled(_, LevelWarn) = false, want true")
 	}
 }
 
@@ -109,17 +160,38 @@ func TestInfoContextPropagatesAttrs(t *testing.T) {
 	}
 }
 
-func TestInfofFormats(t *testing.T) {
+func TestPackageHelpersReportCaller(t *testing.T) {
 	old := Default()
 	defer SetDefault(old)
 
 	var out bytes.Buffer
-	SetDefault(slog.New(slog.NewTextHandler(&out, nil)))
+	SetDefault(slog.New(NewHandler(
+		WithWriter(&out),
+		WithFormat(FormatJSON),
+		WithAddSource(true),
+	)))
 
-	Infof("listening on :%d", 8080)
+	Info("source")
+	assertLogSource(t, &out)
 
-	if got := out.String(); !strings.Contains(got, "listening on :8080") {
-		t.Fatalf("log output = %q, want listening on :8080", got)
+	out.Reset()
+	LogAttrs(context.Background(), LevelInfo, "source")
+	assertLogSource(t, &out)
+}
+
+func assertLogSource(t *testing.T, out *bytes.Buffer) {
+	t.Helper()
+	var got map[string]any
+	if err := json.Unmarshal(bytes.TrimSpace(out.Bytes()), &got); err != nil {
+		t.Fatalf("unmarshal: %v (%q)", err, out.String())
+	}
+	source, ok := got["source"].(map[string]any)
+	if !ok {
+		t.Fatalf("source = %v, want object", got["source"])
+	}
+	file, _ := source["file"].(string)
+	if !strings.HasSuffix(file, "log/log_test.go") {
+		t.Fatalf("source.file = %q, want log/log_test.go suffix", file)
 	}
 }
 

@@ -2,9 +2,9 @@ package log
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
-	"os"
+	"runtime"
+	"time"
 )
 
 // SetDefault sets the default logger used by the package-level helpers and by
@@ -19,125 +19,101 @@ func Default() *slog.Logger {
 }
 
 // With returns a logger that includes the given attributes in each output
-// operation. It mirrors [slog.With].
+// operation. It mirrors [slog.Logger.With] on the default logger.
 func With(args ...any) *slog.Logger {
 	return slog.With(args...)
 }
 
-// Log emits a record at the given level. It mirrors [slog.Log].
-func Log(ctx context.Context, level Level, msg string, args ...any) {
-	slog.Log(ctx, level, msg, args...)
+// WithGroup returns a logger that starts a group. It mirrors
+// [slog.Logger.WithGroup] on the default logger.
+func WithGroup(name string) *slog.Logger {
+	return Default().WithGroup(name)
 }
 
-// LogAttrs emits a typed-attr record at the given level. It mirrors
-// [slog.LogAttrs].
-//
-//nolint:revive // LogAttrs intentionally mirrors slog.LogAttrs.
-func LogAttrs(ctx context.Context, level Level, msg string, attrs ...slog.Attr) {
-	slog.LogAttrs(ctx, level, msg, attrs...)
+// Handler returns the default logger's handler. It mirrors
+// [slog.Logger.Handler] on the default logger.
+func Handler() slog.Handler {
+	return Default().Handler()
 }
 
-// Debug logs at debug level. Signature mirrors [slog.Debug].
+// Enabled reports whether the default logger emits log records at the given
+// context and level. It mirrors [slog.Logger.Enabled] on the default logger.
+func Enabled(ctx context.Context, level Level) bool {
+	return Default().Enabled(ctx, level)
+}
+
+// Debug logs at debug level. Signature mirrors [slog.Logger.Debug].
 func Debug(msg string, args ...any) {
-	slog.Debug(msg, args...)
+	log(context.Background(), LevelDebug, msg, args...)
 }
 
 // DebugContext logs at debug level with the provided context.
 func DebugContext(ctx context.Context, msg string, args ...any) {
-	slog.DebugContext(ctx, msg, args...)
+	log(ctx, LevelDebug, msg, args...)
 }
 
-// Debugf logs at debug level using fmt-style formatting. Kratos extension;
-// slog has no fmt variant.
-func Debugf(format string, args ...any) {
-	slog.Debug(fmt.Sprintf(format, args...))
-}
-
-// DebugfContext is the context-aware variant of [Debugf].
-func DebugfContext(ctx context.Context, format string, args ...any) {
-	slog.DebugContext(ctx, fmt.Sprintf(format, args...))
-}
-
-// Info logs at info level. Signature mirrors [slog.Info].
+// Info logs at info level. Signature mirrors [slog.Logger.Info].
 func Info(msg string, args ...any) {
-	slog.Info(msg, args...)
+	log(context.Background(), LevelInfo, msg, args...)
 }
 
 // InfoContext logs at info level with the provided context.
 func InfoContext(ctx context.Context, msg string, args ...any) {
-	slog.InfoContext(ctx, msg, args...)
+	log(ctx, LevelInfo, msg, args...)
 }
 
-// Infof logs at info level using fmt-style formatting.
-func Infof(format string, args ...any) {
-	slog.Info(fmt.Sprintf(format, args...))
-}
-
-// InfofContext is the context-aware variant of [Infof].
-func InfofContext(ctx context.Context, format string, args ...any) {
-	slog.InfoContext(ctx, fmt.Sprintf(format, args...))
-}
-
-// Warn logs at warn level. Signature mirrors [slog.Warn].
+// Warn logs at warn level. Signature mirrors [slog.Logger.Warn].
 func Warn(msg string, args ...any) {
-	slog.Warn(msg, args...)
+	log(context.Background(), LevelWarn, msg, args...)
 }
 
 // WarnContext logs at warn level with the provided context.
 func WarnContext(ctx context.Context, msg string, args ...any) {
-	slog.WarnContext(ctx, msg, args...)
+	log(ctx, LevelWarn, msg, args...)
 }
 
-// Warnf logs at warn level using fmt-style formatting.
-func Warnf(format string, args ...any) {
-	slog.Warn(fmt.Sprintf(format, args...))
-}
-
-// WarnfContext is the context-aware variant of [Warnf].
-func WarnfContext(ctx context.Context, format string, args ...any) {
-	slog.WarnContext(ctx, fmt.Sprintf(format, args...))
-}
-
-// Error logs at error level. Signature mirrors [slog.Error].
+// Error logs at error level. Signature mirrors [slog.Logger.Error].
 func Error(msg string, args ...any) {
-	slog.Error(msg, args...)
+	log(context.Background(), LevelError, msg, args...)
 }
 
 // ErrorContext logs at error level with the provided context.
 func ErrorContext(ctx context.Context, msg string, args ...any) {
-	slog.ErrorContext(ctx, msg, args...)
+	log(ctx, LevelError, msg, args...)
 }
 
-// Errorf logs at error level using fmt-style formatting.
-func Errorf(format string, args ...any) {
-	slog.Error(fmt.Sprintf(format, args...))
+// Log emits a record at the given level. It mirrors [slog.Logger.Log] on the
+// default logger.
+func Log(ctx context.Context, level Level, msg string, args ...any) {
+	log(ctx, level, msg, args...)
 }
 
-// ErrorfContext is the context-aware variant of [Errorf].
-func ErrorfContext(ctx context.Context, format string, args ...any) {
-	slog.ErrorContext(ctx, fmt.Sprintf(format, args...))
+// LogAttrs emits a typed-attr record at the given level. It mirrors
+// [slog.Logger.LogAttrs] on the default logger.
+//
+//nolint:revive // LogAttrs intentionally mirrors slog.Logger.LogAttrs.
+func LogAttrs(ctx context.Context, level Level, msg string, attrs ...slog.Attr) {
+	handler := slog.Default().Handler()
+	if !handler.Enabled(ctx, level) {
+		return
+	}
+	var pcs [1]uintptr
+	// Skip [runtime.Callers, LogAttrs].
+	runtime.Callers(2, pcs[:])
+	record := slog.NewRecord(time.Now(), level, msg, pcs[0])
+	record.AddAttrs(attrs...)
+	_ = handler.Handle(ctx, record)
 }
 
-// Fatal logs at [LevelFatal] and then calls os.Exit(1). Kratos extension.
-func Fatal(msg string, args ...any) {
-	slog.Log(context.Background(), LevelFatal, msg, args...)
-	os.Exit(1)
-}
-
-// FatalContext is the context-aware variant of [Fatal].
-func FatalContext(ctx context.Context, msg string, args ...any) {
-	slog.Log(ctx, LevelFatal, msg, args...)
-	os.Exit(1)
-}
-
-// Fatalf logs at [LevelFatal] with fmt-style formatting and then exits.
-func Fatalf(format string, args ...any) {
-	slog.Log(context.Background(), LevelFatal, fmt.Sprintf(format, args...))
-	os.Exit(1)
-}
-
-// FatalfContext is the context-aware variant of [Fatalf].
-func FatalfContext(ctx context.Context, format string, args ...any) {
-	slog.Log(ctx, LevelFatal, fmt.Sprintf(format, args...))
-	os.Exit(1)
+func log(ctx context.Context, level Level, msg string, args ...any) {
+	handler := slog.Default().Handler()
+	if !handler.Enabled(ctx, level) {
+		return
+	}
+	var pcs [1]uintptr
+	// Skip [runtime.Callers, log, exported helper].
+	runtime.Callers(3, pcs[:])
+	record := slog.NewRecord(time.Now(), level, msg, pcs[0])
+	record.Add(args...)
+	_ = handler.Handle(ctx, record)
 }

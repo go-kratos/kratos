@@ -218,7 +218,7 @@ func (s *Server) Start(ctx context.Context) error {
 		return s.err
 	}
 	s.baseCtx = ctx
-	log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
+	log.Info("[gRPC] server listening", "addr", s.lis.Addr().String())
 	s.health.Resume()
 	return s.Serve(s.lis)
 }

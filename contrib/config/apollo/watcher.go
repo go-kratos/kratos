@@ -50,7 +50,7 @@ func (c *customChangeListener) onChange(namespace string, changes map[string]*st
 	codec := encoding.GetCodec(f)
 	val, err := codec.Marshal(next)
 	if err != nil {
-		log.Warnf("apollo could not handle namespace %s: %v", namespace, err)
+		log.Warn("apollo could not handle namespace", "namespace", namespace, "error", err)
 		return nil
 	}
 	kv = append(kv, &config.KeyValue{

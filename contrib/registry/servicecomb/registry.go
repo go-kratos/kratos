@@ -154,7 +154,7 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 			<-ticker.C
 			_, err = r.cli.Heartbeat(sid, svcIns.ID)
 			if err != nil {
-				log.Errorf("failed to send heartbeat: %v", err)
+				log.Error("failed to send heartbeat", "error", err)
 				continue
 			}
 		}

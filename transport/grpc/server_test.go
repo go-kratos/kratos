@@ -420,7 +420,7 @@ func TestStop(t *testing.T) {
 			go func() {
 				err := s.Start(context.Background()) //nolint
 				if err != nil {
-					log.Fatal("server error", "error", err)
+					t.Errorf("server error: %v", err)
 				}
 			}()
 
@@ -441,7 +441,7 @@ func TestStop(t *testing.T) {
 					// Simulate a long-running request
 					s, err := client.SayHelloStream(context.Background()) //nolint
 					if err != nil {
-						log.Fatal("server error", "error", err)
+						t.Errorf("server error: %v", err)
 					}
 					// Keep the stream open
 					for {

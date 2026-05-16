@@ -89,15 +89,15 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 			if err != nil {
 				stopErr := watcher.Stop()
 				if stopErr != nil {
-					log.Errorf("failed to http client watch stop: %v, error: %+v", target, stopErr)
+					log.Error("failed to stop http client watcher", "target", target, "error", stopErr)
 				}
 				return nil, err
 			}
 		case <-ctx.Done():
-			log.Errorf("http client watch service %v reaching context deadline!", target)
+			log.Error("http client watch service reached context deadline", "target", target)
 			stopErr := watcher.Stop()
 			if stopErr != nil {
-				log.Errorf("failed to http client watch stop: %v, error: %+v", target, stopErr)
+				log.Error("failed to stop http client watcher", "target", target, "error", stopErr)
 			}
 			return nil, ctx.Err()
 		}
@@ -109,7 +109,7 @@ func newResolver(ctx context.Context, discovery registry.Discovery, target *Targ
 				if errors.Is(err, context.Canceled) {
 					return
 				}
-				log.Errorf("http client watch service %v got unexpected error:=%v", target, err)
+				log.Error("http client watch service got unexpected error", "target", target, "error", err)
 				time.Sleep(time.Second)
 				continue
 			}
@@ -124,7 +124,7 @@ func (r *resolver) update(services []*registry.ServiceInstance) bool {
 	for _, ins := range services {
 		ept, err := endpoint.ParseEndpoint(ins.Endpoints, endpoint.Scheme(schemeHTTP, !r.insecure))
 		if err != nil {
-			log.Errorf("Failed to parse (%v) discovery endpoint: %v error %v", r.target, ins.Endpoints, err)
+			log.Error("failed to parse discovery endpoint", "target", r.target, "endpoints", ins.Endpoints, "error", err)
 			continue
 		}
 		if ept == "" {
@@ -142,7 +142,7 @@ func (r *resolver) update(services []*registry.ServiceInstance) bool {
 	}
 
 	if len(nodes) == 0 {
-		log.Warnf("[http resolver]Zero endpoint found,refused to write,set: %s ins: %v", r.target.Endpoint, nodes)
+		log.Warn("[http resolver] zero endpoint found, refused to write", "endpoint", r.target.Endpoint, "nodes", nodes)
 		return false
 	}
 	r.rebalancer.Apply(nodes)

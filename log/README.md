@@ -25,7 +25,7 @@ or `slog.Attr` values.
 
 ```go
 log.Info("started")
-log.Infof("listening on %s", addr)
+log.Info("listening", "addr", addr)
 log.Info("service started", "service.name", "helloworld", "service.version", "v1.0.0")
 log.InfoContext(ctx, "user created", "user_id", userID)
 ```
