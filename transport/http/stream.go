@@ -19,6 +19,7 @@ import (
 	"github.com/go-kratos/kratos/v3/encoding"
 	kerrors "github.com/go-kratos/kratos/v3/errors"
 	"github.com/go-kratos/kratos/v3/internal/httputil"
+	"github.com/go-kratos/kratos/v3/middleware"
 	"github.com/go-kratos/kratos/v3/selector"
 	"github.com/go-kratos/kratos/v3/transport"
 )
@@ -267,10 +268,12 @@ func (s *serverStream) writeWebSocketClose(code int, text string) error {
 }
 
 type sseClientStream struct {
-	ctx     context.Context
-	res     *stdhttp.Response
-	scanner *bufio.Scanner
-	decoder encoding.Codec
+	ctx       context.Context
+	res       *stdhttp.Response
+	scanner   *bufio.Scanner
+	decoder   encoding.Codec
+	closeOnce sync.Once
+	closeErr  error
 }
 
 func newSSEClientStream(ctx context.Context, res *stdhttp.Response, decoder encoding.Codec) ClientStream {
@@ -288,7 +291,7 @@ func (s *sseClientStream) Trailer() metadata.MD {
 }
 
 func (s *sseClientStream) CloseSend() error {
-	return s.res.Body.Close()
+	return s.closeBody()
 }
 
 func (s *sseClientStream) Context() context.Context {
@@ -318,12 +321,18 @@ func (s *sseClientStream) RecvMsg(m any) error {
 	for {
 		event, data, err := s.readEvent()
 		if err != nil {
+			_ = s.closeBody()
 			return err
 		}
 		switch event {
 		case "", "message":
-			return unmarshalStreamMessage(data, m, s.decoder)
+			if err := unmarshalStreamMessage(data, m, s.decoder); err != nil {
+				_ = s.closeBody()
+				return err
+			}
+			return nil
 		case "error":
+			_ = s.closeBody()
 			se := new(kerrors.Error)
 			if err := unmarshalStreamMessage(data, se, s.decoder); err == nil {
 				return se
@@ -331,6 +340,16 @@ func (s *sseClientStream) RecvMsg(m any) error {
 			return stderrors.New(string(data))
 		}
 	}
+}
+
+func (s *sseClientStream) closeBody() error {
+	if s.res == nil || s.res.Body == nil {
+		return nil
+	}
+	s.closeOnce.Do(func() {
+		s.closeErr = s.res.Body.Close()
+	})
+	return s.closeErr
 }
 
 func (s *sseClientStream) readEvent() (string, []byte, error) {
@@ -423,7 +442,11 @@ func (s *websocketClientStream) SendMsg(m any) error {
 
 func (s *websocketClientStream) RecvMsg(m any) error {
 	if err := readWebSocketMessage(s.conn, m, s.decoder); err != nil {
-		_ = s.close(err)
+		doneErr := err
+		if stderrors.Is(err, io.EOF) {
+			doneErr = nil
+		}
+		_ = s.close(doneErr)
 		return err
 	}
 	return nil
@@ -482,20 +505,32 @@ func (client *Client) ServerSentEvent(ctx context.Context, method, path string, 
 		request:      req,
 		pathTemplate: c.pathTemplate,
 	})
-	res, err := client.do(req.WithContext(ctx)) //nolint:bodyclose // newSSEClientStream owns and closes res.Body on success.
-	if res != nil {
-		cs := csAttempt{res: res}
-		for _, o := range opts {
-			o.after(&c, &cs)
-		}
-	}
-	if err != nil {
+	h := func(ctx context.Context, _ any) (any, error) {
+		res, doErr := client.do(req.WithContext(ctx)) //nolint:bodyclose // newSSEClientStream owns and closes res.Body on success.
 		if res != nil {
-			_ = res.Body.Close()
+			cs := csAttempt{res: res}
+			for _, o := range opts {
+				o.after(&c, &cs)
+			}
 		}
+		if doErr != nil {
+			if res != nil {
+				_ = res.Body.Close()
+			}
+			return nil, doErr
+		}
+		return newSSEClientStream(ctx, res, streamCodecFromCallInfo(c, "Accept", "Content-Type")), nil
+	}
+	var p selector.Peer
+	ctx = selector.NewPeerContext(ctx, &p)
+	if len(client.opts.middleware) > 0 {
+		h = middleware.Chain(client.opts.middleware...)(h)
+	}
+	stream, err := h(ctx, args)
+	if err != nil {
 		return nil, err
 	}
-	return newSSEClientStream(ctx, res, streamCodecFromCallInfo(c, "Accept", "Content-Type")), nil
+	return clientStreamFromHandler(stream)
 }
 
 // WebSocket opens an HTTP bidirectional streaming call over WebSocket.
@@ -524,27 +559,8 @@ func (client *Client) WebSocket(ctx context.Context, path string, opts ...CallOp
 	if client.opts.userAgent != "" {
 		header.Set("User-Agent", client.opts.userAgent)
 	}
-
-	var done func(context.Context, selector.DoneInfo)
-	if client.r != nil {
-		node, doneFunc, err := client.selector.Select(ctx, selector.WithNodeFilter(client.opts.nodeFilters...))
-		if err != nil {
-			return nil, kerrors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
-		}
-		done = doneFunc
-		if client.insecure {
-			scheme = "ws"
-		} else {
-			scheme = "wss"
-		}
-		url = fmt.Sprintf("%s://%s%s", scheme, node.Address(), path)
-	}
-
 	req, err := stdhttp.NewRequestWithContext(ctx, stdhttp.MethodGet, url, nil)
 	if err != nil {
-		if done != nil {
-			done(ctx, selector.DoneInfo{Err: err})
-		}
 		return nil, err
 	}
 	req.Header = header
@@ -555,42 +571,85 @@ func (client *Client) WebSocket(ctx context.Context, path string, opts ...CallOp
 		request:      req,
 		pathTemplate: c.pathTemplate,
 	})
-	dialer := websocket.Dialer{
-		Proxy:            stdhttp.ProxyFromEnvironment,
-		HandshakeTimeout: client.opts.timeout,
-		TLSClientConfig:  client.opts.tlsConf,
-	}
-	conn, res, err := dialer.DialContext(ctx, url, header)
-	if res != nil {
-		cs := csAttempt{res: res}
-		for _, o := range opts {
-			o.after(&c, &cs)
+
+	h := func(ctx context.Context, _ any) (any, error) {
+		var done func(context.Context, selector.DoneInfo)
+		dialURL := req.URL.String()
+		if client.r != nil {
+			node, doneFunc, selectErr := client.selector.Select(ctx, selector.WithNodeFilter(client.opts.nodeFilters...))
+			if selectErr != nil {
+				return nil, kerrors.ServiceUnavailable("NODE_NOT_FOUND", selectErr.Error())
+			}
+			done = doneFunc
+			if client.insecure {
+				scheme = "ws"
+			} else {
+				scheme = "wss"
+			}
+			req.URL.Scheme = scheme
+			req.URL.Host = node.Address()
+			req.Host = node.Address()
+			dialURL = fmt.Sprintf("%s://%s%s", scheme, node.Address(), path)
 		}
-	}
-	if err != nil {
+		dialer := websocket.Dialer{
+			Proxy:            stdhttp.ProxyFromEnvironment,
+			HandshakeTimeout: client.opts.timeout,
+			TLSClientConfig:  client.opts.tlsConf,
+		}
+		conn, res, dialErr := dialer.DialContext(ctx, dialURL, req.Header)
+		if res != nil {
+			cs := csAttempt{res: res}
+			for _, o := range opts {
+				o.after(&c, &cs)
+			}
+		}
+		if dialErr != nil {
+			if res != nil && res.Body != nil {
+				_ = res.Body.Close()
+			}
+			if done != nil {
+				done(ctx, selector.DoneInfo{Err: dialErr})
+			}
+			return nil, dialErr
+		}
+		var resHeader stdhttp.Header
+		if res != nil {
+			resHeader = res.Header
+		}
 		if res != nil && res.Body != nil {
 			_ = res.Body.Close()
 		}
-		if done != nil {
-			done(ctx, selector.DoneInfo{Err: err})
-		}
+		return &websocketClientStream{
+			ctx:     ctx,
+			conn:    conn,
+			header:  resHeader,
+			encoder: streamCodecFromCallInfo(c, "Content-Type", "Accept"),
+			decoder: streamCodecFromCallInfo(c, "Accept", "Content-Type"),
+			done: func(err error) {
+				if done != nil {
+					done(ctx, selector.DoneInfo{Err: err})
+				}
+			},
+		}, nil
+	}
+	var p selector.Peer
+	ctx = selector.NewPeerContext(ctx, &p)
+	if len(client.opts.middleware) > 0 {
+		h = middleware.Chain(client.opts.middleware...)(h)
+	}
+	stream, err := h(ctx, nil)
+	if err != nil {
 		return nil, err
 	}
-	if res != nil && res.Body != nil {
-		_ = res.Body.Close()
+	return clientStreamFromHandler(stream)
+}
+
+func clientStreamFromHandler(v any) (ClientStream, error) {
+	stream, ok := v.(ClientStream)
+	if !ok {
+		return nil, stderrors.New("http stream middleware returned non-client stream")
 	}
-	return &websocketClientStream{
-		ctx:     ctx,
-		conn:    conn,
-		header:  res.Header,
-		encoder: streamCodecFromCallInfo(c, "Content-Type", "Accept"),
-		decoder: streamCodecFromCallInfo(c, "Accept", "Content-Type"),
-		done: func(err error) {
-			if done != nil {
-				done(ctx, selector.DoneInfo{Err: err})
-			}
-		},
-	}, nil
+	return stream, nil
 }
 
 func prepareClientRequest(client *Client, req *stdhttp.Request, contentType string, c callInfo) {
