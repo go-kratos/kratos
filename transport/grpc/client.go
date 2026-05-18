@@ -11,17 +11,16 @@ import (
 	grpcinsecure "google.golang.org/grpc/credentials/insecure"
 	grpcmd "google.golang.org/grpc/metadata"
 
-	"github.com/go-kratos/kratos/v2/internal/matcher"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/wrr"
-	"github.com/go-kratos/kratos/v2/transport"
-	"github.com/go-kratos/kratos/v2/transport/grpc/resolver/discovery"
+	"github.com/go-kratos/kratos/v3/internal/matcher"
+	"github.com/go-kratos/kratos/v3/middleware"
+	"github.com/go-kratos/kratos/v3/registry"
+	"github.com/go-kratos/kratos/v3/selector"
+	"github.com/go-kratos/kratos/v3/selector/wrr"
+	"github.com/go-kratos/kratos/v3/transport"
+	"github.com/go-kratos/kratos/v3/transport/grpc/resolver/discovery"
 
 	// init resolver
-	_ "github.com/go-kratos/kratos/v2/transport/grpc/resolver/direct"
+	_ "github.com/go-kratos/kratos/v3/transport/grpc/resolver/direct"
 )
 
 func init() {
@@ -83,14 +82,14 @@ func WithTLSConfig(c *tls.Config) ClientOption {
 	}
 }
 
-// WithUnaryInterceptor returns a DialOption that specifies the interceptor for unary RPCs.
+// WithUnaryInterceptor returns a ClientOption that specifies the interceptor for unary RPCs.
 func WithUnaryInterceptor(in ...grpc.UnaryClientInterceptor) ClientOption {
 	return func(o *clientOptions) {
 		o.ints = in
 	}
 }
 
-// WithStreamInterceptor returns a DialOption that specifies the interceptor for streaming RPCs.
+// WithStreamInterceptor returns a ClientOption that specifies the interceptor for streaming RPCs.
 func WithStreamInterceptor(in ...grpc.StreamClientInterceptor) ClientOption {
 	return func(o *clientOptions) {
 		o.streamInts = in
@@ -120,57 +119,38 @@ func WithHealthCheck(healthCheck bool) ClientOption {
 	}
 }
 
-// WithLogger with logger
-// Deprecated: use global logger instead.
-func WithLogger(log.Logger) ClientOption {
-	return func(*clientOptions) {}
-}
-
-func WithPrintDiscoveryDebugLog(p bool) ClientOption {
-	return func(o *clientOptions) {
-		o.printDiscoveryDebugLog = p
-	}
-}
-
 // clientOptions is gRPC Client
 type clientOptions struct {
-	endpoint               string
-	subsetSize             int
-	tlsConf                *tls.Config
-	timeout                time.Duration
-	discovery              registry.Discovery
-	middleware             []middleware.Middleware
-	streamMiddleware       []middleware.Middleware
-	ints                   []grpc.UnaryClientInterceptor
-	streamInts             []grpc.StreamClientInterceptor
-	grpcOpts               []grpc.DialOption
-	balancerName           string
-	filters                []selector.NodeFilter
-	healthCheckConfig      string
-	printDiscoveryDebugLog bool
+	endpoint          string
+	subsetSize        int
+	tlsConf           *tls.Config
+	timeout           time.Duration
+	discovery         registry.Discovery
+	middleware        []middleware.Middleware
+	streamMiddleware  []middleware.Middleware
+	ints              []grpc.UnaryClientInterceptor
+	streamInts        []grpc.StreamClientInterceptor
+	grpcOpts          []grpc.DialOption
+	balancerName      string
+	filters           []selector.NodeFilter
+	healthCheckConfig string
 }
 
-// Dial returns a GRPC connection.
-func Dial(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, error) {
-	return dial(ctx, false, opts...)
-}
-
-// DialInsecure returns an insecure GRPC connection.
-func DialInsecure(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, error) {
-	return dial(ctx, true, opts...)
-}
-
-func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.ClientConn, error) {
+// NewClient returns a gRPC client connection.
+func NewClient(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, error) {
 	options := clientOptions{
-		timeout:                2000 * time.Millisecond,
-		balancerName:           balancerName,
-		subsetSize:             25,
-		printDiscoveryDebugLog: true,
-		healthCheckConfig:      `,"healthCheckConfig":{"serviceName":""}`,
+		timeout:           2000 * time.Millisecond,
+		balancerName:      balancerName,
+		subsetSize:        25,
+		healthCheckConfig: `,"healthCheckConfig":{"serviceName":""}`,
 	}
 	for _, o := range opts {
 		o(&options)
 	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	isInsecure := options.tlsConf == nil
 	ints := []grpc.UnaryClientInterceptor{
 		unaryClientInterceptor(options.middleware, options.timeout, options.filters),
 	}
@@ -196,22 +176,25 @@ func dial(ctx context.Context, insecure bool, opts ...ClientOption) (*grpc.Clien
 			grpc.WithResolvers(
 				discovery.NewBuilder(
 					options.discovery,
-					discovery.WithInsecure(insecure),
+					discovery.WithInsecure(isInsecure),
 					discovery.WithTimeout(options.timeout),
 					discovery.WithSubset(options.subsetSize),
-					discovery.PrintDebugLog(options.printDiscoveryDebugLog),
 				)))
 	}
-	if insecure {
+	if isInsecure {
 		grpcOpts = append(grpcOpts, grpc.WithTransportCredentials(grpcinsecure.NewCredentials()))
-	}
-	if options.tlsConf != nil {
+	} else {
 		grpcOpts = append(grpcOpts, grpc.WithTransportCredentials(credentials.NewTLS(options.tlsConf)))
 	}
 	if len(options.grpcOpts) > 0 {
 		grpcOpts = append(grpcOpts, options.grpcOpts...)
 	}
-	return grpc.DialContext(ctx, options.endpoint, grpcOpts...)
+	conn, err := grpc.NewClient(options.endpoint, grpcOpts...)
+	if err != nil {
+		return nil, err
+	}
+	conn.Connect()
+	return conn, nil
 }
 
 func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, filters []selector.NodeFilter) grpc.UnaryClientInterceptor {

@@ -9,15 +9,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/internal/host"
-	"github.com/go-kratos/kratos/v2/internal/httputil"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/wrr"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v3/encoding"
+	"github.com/go-kratos/kratos/v3/errors"
+	"github.com/go-kratos/kratos/v3/internal/host"
+	"github.com/go-kratos/kratos/v3/internal/httputil"
+	"github.com/go-kratos/kratos/v3/middleware"
+	"github.com/go-kratos/kratos/v3/registry"
+	"github.com/go-kratos/kratos/v3/selector"
+	"github.com/go-kratos/kratos/v3/selector/wrr"
+	"github.com/go-kratos/kratos/v3/transport"
 )
 
 func init() {
@@ -187,7 +187,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
 	selector := selector.GlobalSelector().Build()
 	var r *resolver
 	if options.discovery != nil {
-		if target.Scheme == "discovery" {
+		if target.Scheme == schemeDiscovery {
 			if r, err = newResolver(ctx, options.discovery, target, selector, options.block, insecure, options.subsetSize); err != nil {
 				return nil, fmt.Errorf("[http client] new resolver failed for endpoint %q: %w", options.endpoint, err)
 			}
@@ -239,6 +239,9 @@ func (client *Client) Invoke(ctx context.Context, method, path string, args any,
 
 	if contentType != "" {
 		req.Header.Set("Content-Type", c.contentType)
+	}
+	if c.accept != "" {
+		req.Header.Set("Accept", c.accept)
 	}
 	if client.opts.userAgent != "" {
 		req.Header.Set("User-Agent", client.opts.userAgent)
@@ -304,9 +307,9 @@ func (client *Client) do(req *http.Request) (*http.Response, error) {
 			return nil, errors.ServiceUnavailable("NODE_NOT_FOUND", err.Error())
 		}
 		if client.insecure {
-			req.URL.Scheme = "http"
+			req.URL.Scheme = schemeHTTP
 		} else {
-			req.URL.Scheme = "https"
+			req.URL.Scheme = schemeHTTPS
 		}
 		req.URL.Host = node.Address()
 		req.Host = node.Address()
@@ -341,6 +344,9 @@ func (client *Client) Close() error {
 
 // DefaultRequestEncoder is an HTTP request encoder.
 func DefaultRequestEncoder(_ context.Context, contentType string, in any) ([]byte, error) {
+	if body, ok := httpBody(in); ok {
+		return body.GetData(), nil
+	}
 	name := httputil.ContentSubtype(contentType)
 	body, err := encoding.GetCodec(name).Marshal(in)
 	if err != nil {
@@ -355,6 +361,11 @@ func DefaultResponseDecoder(_ context.Context, res *http.Response, v any) error 
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
+	}
+	if body, ok := httpBody(v); ok {
+		body.ContentType = res.Header.Get("Content-Type")
+		body.Data = data
+		return nil
 	}
 	return CodecForResponse(res).Unmarshal(data, v)
 }

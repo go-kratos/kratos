@@ -11,8 +11,8 @@ import (
 	"github.com/go-chassis/sc-client"
 	"github.com/gofrs/uuid"
 
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/log"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 func init() {
@@ -154,7 +154,7 @@ func (r *Registry) Register(_ context.Context, svcIns *registry.ServiceInstance)
 			<-ticker.C
 			_, err = r.cli.Heartbeat(sid, svcIns.ID)
 			if err != nil {
-				log.Errorf("failed to send heartbeat: %v", err)
+				log.Error("failed to send heartbeat", "error", err)
 				continue
 			}
 		}

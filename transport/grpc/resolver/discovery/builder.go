@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc/resolver"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 const name = "discovery"
@@ -40,27 +40,11 @@ func WithSubset(size int) Option {
 	}
 }
 
-// Deprecated: please use PrintDebugLog
-// DisableDebugLog disables update instances log.
-func DisableDebugLog() Option {
-	return func(b *builder) {
-		b.debugLog = false
-	}
-}
-
-// PrintDebugLog print grpc resolver watch service log
-func PrintDebugLog(p bool) Option {
-	return func(b *builder) {
-		b.debugLog = p
-	}
-}
-
 type builder struct {
 	discoverer registry.Discovery
 	timeout    time.Duration
 	insecure   bool
 	subsetSize int
-	debugLog   bool
 }
 
 // NewBuilder creates a builder which is used to factory registry resolvers.
@@ -69,7 +53,6 @@ func NewBuilder(d registry.Discovery, opts ...Option) resolver.Builder {
 		discoverer: d,
 		timeout:    time.Second * 10,
 		insecure:   false,
-		debugLog:   true,
 		subsetSize: 25,
 	}
 	for _, o := range opts {
@@ -116,7 +99,6 @@ func (b *builder) Build(target resolver.Target, cc resolver.ClientConn, _ resolv
 		ctx:         ctx,
 		cancel:      cancel,
 		insecure:    b.insecure,
-		debugLog:    b.debugLog,
 		subsetSize:  b.subsetSize,
 		selectorKey: uuid.New().String(),
 	}

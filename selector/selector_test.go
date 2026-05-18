@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 var errNodeNotMatch = errors.New("node is not match")
@@ -100,7 +100,7 @@ func TestDefault(t *testing.T) {
 		Balancer: &mockBalancerBuilder{},
 	}
 	selector := builder.Build()
-	var nodes []Node
+	nodes := make([]Node, 0, 2)
 	nodes = append(nodes, NewNode(
 		"http",
 		"127.0.0.1:8080",
@@ -242,7 +242,7 @@ func TestNoPick(t *testing.T) {
 		Node:     &mockWeightedNodeBuilder{},
 		Balancer: &mockMustErrorBalancerBuilder{},
 	}
-	var nodes []Node
+	nodes := make([]Node, 0, 2)
 	nodes = append(nodes, NewNode(
 		"http",
 		"127.0.0.1:8080",

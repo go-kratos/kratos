@@ -7,7 +7,6 @@ import (
 	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"google.golang.org/grpc"
 )
 
 const testKey = "/kratos/test/config"
@@ -16,7 +15,6 @@ func TestConfig(t *testing.T) {
 	client, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"127.0.0.1:2379"},
 		DialTimeout: time.Second,
-		DialOptions: []grpc.DialOption{grpc.WithBlock()},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -70,7 +68,7 @@ func TestConfig(t *testing.T) {
 func TestExtToFormat(t *testing.T) {
 	client, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"127.0.0.1:2379"},
-		DialTimeout: time.Second, DialOptions: []grpc.DialOption{grpc.WithBlock()},
+		DialTimeout: time.Second,
 	})
 	if err != nil {
 		t.Fatal(err)

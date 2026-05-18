@@ -9,8 +9,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/middleware"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 func TestWithEndpoint(t *testing.T) {
@@ -140,7 +140,7 @@ func TestWithHealthCheck(t *testing.T) {
 	}
 }
 
-func TestDial(t *testing.T) {
+func TestNewClientOptions(t *testing.T) {
 	o := &clientOptions{}
 	v := []grpc.DialOption{
 		grpc.EmptyDialOption{},
@@ -151,10 +151,9 @@ func TestDial(t *testing.T) {
 	}
 }
 
-func TestDialConn(t *testing.T) {
-	_, err := dial(
+func TestNewClient(t *testing.T) {
+	conn, err := NewClient(
 		context.Background(),
-		true,
 		WithDiscovery(&mockRegistry{}),
 		WithTimeout(10*time.Second),
 		WithEndpoint("abc"),
@@ -162,6 +161,7 @@ func TestDialConn(t *testing.T) {
 		WithStreamMiddleware(EmptyMiddleware()),
 	)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
+	defer conn.Close()
 }

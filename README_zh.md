@@ -2,164 +2,147 @@
 
 <p align="center">
 <a href="https://github.com/go-kratos/kratos/actions"><img src="https://github.com/go-kratos/kratos/workflows/Go/badge.svg" alt="Build Status"></a>
-<a href="https://pkg.go.dev/github.com/go-kratos/kratos/v2"><img src="https://pkg.go.dev/badge/github.com/go-kratos/kratos/v2" alt="GoDoc"></a>
+<a href="https://pkg.go.dev/github.com/go-kratos/kratos/v3"><img src="https://pkg.go.dev/badge/github.com/go-kratos/kratos/v3" alt="GoDoc"></a>
+<a href="https://deepwiki.com/go-kratos/kratos"><img src="https://img.shields.io/badge/DeepWiki-go--kratos%2Fkratos-blue.svg" alt="DeepWiki"></a>
 <a href="https://codecov.io/gh/go-kratos/kratos"><img src="https://codecov.io/gh/go-kratos/kratos/master/graph/badge.svg" alt="codeCov"></a>
 <a href="https://goreportcard.com/report/github.com/go-kratos/kratos"><img src="https://goreportcard.com/badge/github.com/go-kratos/kratos" alt="Go Report Card"></a>
 <a href="https://github.com/go-kratos/kratos/blob/main/LICENSE"><img src="https://img.shields.io/github/license/go-kratos/kratos" alt="License"></a>
 <a href="https://github.com/avelino/awesome-go"><img src="https://awesome.re/mentioned-badge.svg" alt="Awesome Go"></a>
 <a href="https://discord.gg/BWzJsUJ"><img src="https://img.shields.io/discord/766619759214854164?label=chat&logo=discord" alt="Discord"></a>
 </p>
+
 <p align="center">
-<a href="https://trendshift.io/repositories/3233" target="_blank"><img src="https://trendshift.io/api/badge/repositories/3233" alt="go-kratos%2Fkratos | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-<a href="https://www.producthunt.com/posts/go-kratos?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-go-kratos" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=306565&theme=light" alt="Go Kratos - A Go framework for microservices. | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+<a href="https://trendshift.io/repositories/3233" target="_blank"><img src="https://trendshift.io/api/badge/repositories/3233" alt="go-kratos%2Fkratos | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"></a>
+<a href="https://www.producthunt.com/posts/go-kratos?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-go-kratos" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=306565&theme=light" alt="Go Kratos - A Go framework for microservices. | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54"></a>
 </p>
 
 Translations: [English](README.md) | [简体中文](README_zh.md)
 
 # Kratos
 
-Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关功能及工具。
+Kratos 是一套轻量级 Go 微服务框架，围绕传输、Middleware、注册发现、配置、日志、编码和代码生成提供清晰的基础能力，让业务代码保持聚焦。
 
-> 名字来源于:《战神》游戏以希腊神话为背景，讲述奎托斯（Kratos）由凡人成为战神并展开弑神屠杀的冒险经历。
+## 功能特性
 
-## Goals
+- 以 Protobuf 为中心定义 API，并生成 HTTP/gRPC 代码。
+- 统一的 [Transport](https://go-kratos.dev/zh-cn/docs/component/transport/overview) 抽象，支持 [HTTP](https://go-kratos.dev/zh-cn/docs/component/transport/http) 和 [gRPC](https://go-kratos.dev/zh-cn/docs/component/transport/grpc)。
+- 可组合的 [Middleware](https://go-kratos.dev/zh-cn/docs/component/middleware/overview)，覆盖 Recovery、Logging、Validation、Tracing、Metrics、Auth 等场景。
+- 插件化的 [Registry](https://go-kratos.dev/zh-cn/docs/component/registry)、[Config](https://go-kratos.dev/zh-cn/docs/component/config) 和 [Encoding](https://go-kratos.dev/zh-cn/docs/component/encoding) 能力。
+- 基于标准库 `log/slog` 的日志能力，OpenTelemetry 扩展由 contrib 包提供。
+- 统一的 Metadata、Errors、Validation、OpenAPI 和代码生成工作流。
+- contrib 生态提供注册中心、配置中心、Middleware、编码和可观测性等可选集成。
 
-我们致力于提供完整、全面的微服务研发体验，通过整合相关框架和工具，微服务治理部分能够无缝融入整个业务开发周期，使开发者更加专注于业务交付。
-对每位开发者而言，Kratos 是非常不错的学习仓库，可以了解和参考微服务领域的技术积累和经验。
+## 安装
 
-### Principles
+### 环境要求
 
-* 简单：不过度设计，代码平实简单；
-* 通用：通用业务开发所需要的基础库的功能；
-* 高效：提高业务迭代的效率；
-* 稳定：基础库可测试性高，覆盖率高，有线上实践安全可靠；
-* 健壮：通过良好的基础库设计，减少错用；
-* 高性能：性能高，但不特定为了性能做 hack 优化，引入 unsafe ；
-* 扩展性：良好的接口设计，来扩展实现，或者通过新增基础库目录来扩展功能；
-* 容错性：为失败设计，大量引入对 SRE 的理解，鲁棒性高；
-* 工具链：包含大量工具链，比如 cache 代码生成，lint 工具等等。
-
-## Features
-
-* [APIs](https://go-kratos.dev/zh-cn/docs/component/api) ：协议通信以 HTTP/gRPC 为基础，通过 Protobuf 进行定义；
-* [Errors](https://go-kratos.dev/zh-cn/docs/component/errors/) ：通过 Protobuf 的 Enum 作为错误码定义，以及工具生成判定接口；
-* [Metadata](https://go-kratos.dev/zh-cn/docs/component/metadata) ：在协议通信 HTTP/gRPC 中，通过 Middleware 规范化服务元信息传递；
-* [Config](https://go-kratos.dev/zh-cn/docs/component/config) ：支持多数据源方式，进行配置合并铺平，通过 Atomic 方式支持动态配置；
-* [Logger](https://go-kratos.dev/zh-cn/docs/component/log) ：标准日志接口，可方便集成三方 log 库，并可通过 fluentd 收集日志；
-* [Metrics](https://go-kratos.dev/zh-cn/docs/component/middleware/metrics) ：统一指标接口，可以实现各种指标系统，默认集成 Prometheus；
-* [Tracing](https://go-kratos.dev/zh-cn/docs/component/middleware/tracing) ：遵循 OpenTelemetry 规范定义，以实现微服务链路追踪；
-* [Encoding](https://go-kratos.dev/zh-cn/docs/component/encoding) ：支持 Accept 和 Content-Type 进行自动选择内容编码；
-* [Transport](https://go-kratos.dev/zh-cn/docs/component/transport/overview) ：通用的 [HTTP](https://go-kratos.dev/zh-cn/docs/component/transport/http) /[gRPC](https://go-kratos.dev/zh-cn/docs/component/transport/grpc) 传输层，实现统一的 [Middleware](https://go-kratos.dev/zh-cn/docs/component/middleware/overview) 插件支持；
-* [Registry](https://go-kratos.dev/zh-cn/docs/component/registry) ：实现统一注册中心接口，可插件化对接各种注册中心；
-* [Validation](https://go-kratos.dev/zh-cn/docs/component/middleware/validate): 通过 Protobuf 统一定义校验规则，并同时适用于 HTTP/gRPC 服务；
-* [SwaggerAPI](https://go-kratos.dev/zh-cn/docs/guide/openapi): 通过集成第三方 [Swagger 插件](https://github.com/go-kratos/swagger-api) 能够自动生成 Swagger API 文档并启动内置的 Swagger UI服 务。
-
-## Getting Started
-
-### Required
-
-- [go](https://golang.org/dl/)
+- [Go](https://go.dev/dl/) 1.25 或更高版本
 - [protoc](https://github.com/protocolbuffers/protobuf)
 - [protoc-gen-go](https://github.com/protocolbuffers/protobuf-go)
 
-### Installing
+### 安装 CLI
 
-##### go install 安装：
-
-```
-go install github.com/go-kratos/kratos/cmd/kratos/v2@latest
+```shell
+go install github.com/go-kratos/kratos/cmd/kratos/v3@latest
 kratos upgrade
 ```
 
-##### 源码编译安装：
+## 创建服务
 
-```
-git clone https://github.com/go-kratos/kratos
-cd kratos
-make install
-```
-
-### Create a service
-
-```
-# 创建项目模板
+```shell
 kratos new helloworld
-
 cd helloworld
-# 拉取项目依赖
-go mod download
-
-# 生成 proto 模板
-kratos proto add api/helloworld/helloworld.proto
-# 生成 proto 源码
-kratos proto client api/helloworld/helloworld.proto
-# 生成 server 模板
-kratos proto server api/helloworld/helloworld.proto -t internal/service
-
-# 生成所有 proto 源码、wire 等等
-go generate ./...
-
-# 运行程序
+go mod tidy
 kratos run
 ```
 
-### Kratos Boot
+服务启动后访问 `http://localhost:8000/helloworld/kratos`。
 
+如果需要从 proto 开始生成服务代码：
+
+```shell
+kratos proto add api/helloworld/helloworld.proto
+kratos proto client api/helloworld/helloworld.proto
+kratos proto server api/helloworld/helloworld.proto -t internal/service
+go generate ./...
+kratos run
 ```
-import "github.com/go-kratos/kratos/v2"
-import "github.com/go-kratos/kratos/v2/transport/grpc"
-import "github.com/go-kratos/kratos/v2/transport/http"
 
-httpSrv := http.NewServer(http.Address(":8000"))
-grpcSrv := grpc.NewServer(grpc.Address(":9000"))
+## 使用示例
 
-app := kratos.New(
-    kratos.Name("kratos"),
-    kratos.Version("latest"),
-    kratos.Server(httpSrv, grpcSrv),
+```go
+package main
+
+import (
+	"github.com/go-kratos/kratos/v3"
+	"github.com/go-kratos/kratos/v3/transport/grpc"
+	"github.com/go-kratos/kratos/v3/transport/http"
 )
-app.Run()
+
+func main() {
+	httpSrv := http.NewServer(http.Address(":8000"))
+	grpcSrv := grpc.NewServer(grpc.Address(":9000"))
+
+	app := kratos.New(
+		kratos.Name("helloworld"),
+		kratos.Version("v1.0.0"),
+		kratos.Server(httpSrv, grpcSrv),
+	)
+	if err := app.Run(); err != nil {
+		panic(err)
+	}
+}
 ```
 
-## Related
+## v3 迁移
 
-* [Docs](https://go-kratos.dev/)
-* [Examples](https://github.com/go-kratos/examples)
-* [Service Layout](https://github.com/go-kratos/kratos-layout)
+Kratos v3 进一步降低核心依赖，并将历史上隐式的行为显式化。升级生产服务前请先阅读 [v2 到 v3 迁移指南](docs/migration/v2-to-v3_zh.md)。
 
-## Community
+## 扩展阅读
 
-* [Wechat Group](https://github.com/go-kratos/kratos/issues/682)
-* [Discord Group](https://discord.gg/BWzJsUJ)
-* Website:  [go-kratos.dev](https://go-kratos.dev)
-* QQ Group: 716486124
+- [文档](https://go-kratos.dev/zh-cn/docs/getting-started/start)
+- [示例](https://github.com/go-kratos/examples)
+- [项目模板](https://github.com/go-kratos/kratos-layout)
+- [v2 到 v3 迁移指南](docs/migration/v2-to-v3_zh.md)
+- [贡献指南](https://go-kratos.dev/zh-cn/docs/community/contribution)
 
-## WeChat Official Account
+## 开发
 
-![kratos](docs/images/wechat.png)
-
-## Conventional commits
-
-提交信息的结构应该如下所示:
-
-```text
-<type>[optional scope]: <description>
-
-[optional body]
-
-[optional footer(s)]
+```shell
+make test
+make lint
 ```
 
-提交信息应按照下面的格式:
-- fix: simply describe the problem that has been fixed
-- feat(log): simple describe of new features
-- deps(examples): simple describe the change of the dependency
-- break(http): simple describe the reasons for breaking change
+## 社区
 
-## Sponsors and Backers
+- [文档站点](https://go-kratos.dev/zh-cn)
+- [微信群](https://github.com/go-kratos/kratos/issues/682)
+- [Discord](https://discord.gg/BWzJsUJ)
+- [GitHub Discussions](https://github.com/go-kratos/kratos/discussions)
+- QQ 群：716486124
 
-![kratos](docs/images/alipay.png)
+## 安全
+
+如果你发现 Kratos 存在安全漏洞，请发送邮件到 go-kratos@googlegroups.com。安全问题会在公开披露前以私密方式处理。
+
+## 贡献者
+
+感谢所有为 Kratos 做出贡献的开发者。贡献流程请参考 [Kratos 贡献指南](https://go-kratos.dev/zh-cn/docs/community/contribution)。
+
+<a href="https://github.com/go-kratos/kratos/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=go-kratos/kratos" alt="Kratos contributors">
+</a>
+
+## 致谢
+
+以下项目对 Kratos 的设计有重要影响：
+
+- [go-kit/kit](https://github.com/go-kit/kit)
+- [go-micro](https://github.com/asim/go-micro)
+- [google/go-cloud](https://github.com/google/go-cloud)
+- [go-zero](https://github.com/zeromicro/go-zero)
+- [beego](https://github.com/beego/beego)
 
 ## License
 
-Kratos is MIT licensed. See the [LICENSE](./LICENSE) file for details.
+Kratos 基于 [MIT license](./LICENSE) 开源。
