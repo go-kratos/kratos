@@ -6,9 +6,11 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 
 	"github.com/gorilla/mux"
 	"google.golang.org/genproto/googleapis/api/httpbody"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/go-kratos/kratos/v3/encoding"
 	"github.com/go-kratos/kratos/v3/errors"
@@ -19,6 +21,8 @@ import (
 const SupportPackageIsVersion3 = true
 
 const defaultHTTPBodyContentType = "application/octet-stream"
+
+var protoMessageType = reflect.TypeOf((*proto.Message)(nil)).Elem()
 
 // Redirector replies to the request with a redirect to url
 // which may be a path relative to the request path.
@@ -87,7 +91,7 @@ func DefaultRequestDecoder(r *http.Request, v any) error {
 	if len(data) == 0 {
 		return nil
 	}
-	if err = codec.Unmarshal(data, v); err != nil {
+	if err = decodeWithCodec(codec, data, v); err != nil {
 		return errors.BadRequest("CODEC", fmt.Sprintf("body unmarshal %s", err.Error()))
 	}
 	return nil
@@ -171,6 +175,38 @@ func httpBody(v any) (*httpbody.HttpBody, bool) {
 	default:
 		return nil, false
 	}
+}
+
+func decodeWithCodec(codec encoding.Codec, data []byte, v any) error {
+	switch codec.Name() {
+	case "proto", "protojson":
+	default:
+		return codec.Unmarshal(data, v)
+	}
+
+	if msg, ok := v.(proto.Message); ok {
+		rv := reflect.ValueOf(v)
+		if rv.Kind() == reflect.Pointer && rv.IsNil() {
+			return codec.Unmarshal(data, v)
+		}
+		return codec.Unmarshal(data, msg)
+	}
+
+	rv := reflect.ValueOf(v)
+	if !rv.IsValid() || rv.Kind() != reflect.Pointer || rv.IsNil() {
+		return codec.Unmarshal(data, v)
+	}
+
+	elem := rv.Type().Elem()
+	if elem.Kind() != reflect.Pointer || !elem.Implements(protoMessageType) {
+		return codec.Unmarshal(data, v)
+	}
+
+	target := rv.Elem()
+	if target.IsNil() {
+		target.Set(reflect.New(elem.Elem()))
+	}
+	return codec.Unmarshal(data, target.Interface())
 }
 
 // BodyContentType returns the content type carried by v or a binary default.
