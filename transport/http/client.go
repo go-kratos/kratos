@@ -348,7 +348,11 @@ func DefaultRequestEncoder(_ context.Context, contentType string, in any) ([]byt
 		return body.GetData(), nil
 	}
 	name := httputil.ContentSubtype(contentType)
-	body, err := encoding.GetCodec(name).Marshal(in)
+	codec := encoding.GetCodec(name)
+	if codec == nil {
+		return nil, errors.BadRequest("CODEC", fmt.Sprintf("unregister Content-Type: %s", contentType))
+	}
+	body, err := codec.Marshal(in)
 	if err != nil {
 		return nil, err
 	}

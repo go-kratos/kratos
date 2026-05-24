@@ -255,6 +255,20 @@ func TestDefaultRequestEncoderHTTPBody(t *testing.T) {
 	}
 }
 
+func TestDefaultRequestEncoderUnknownCodec(t *testing.T) {
+	_, err := DefaultRequestEncoder(context.TODO(), "application/x-unknown", &struct{}{})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	se := new(kratoserrors.Error)
+	if !errors.As(err, &se) {
+		t.Fatalf("expected kratos error, got %T", err)
+	}
+	if se.Reason != "CODEC" {
+		t.Errorf("expected %v, got %v", "CODEC", se.Reason)
+	}
+}
+
 func TestInvokeAcceptHeader(t *testing.T) {
 	rt := &captureRoundTripper{}
 	client, err := NewClient(context.Background(), WithEndpoint("127.0.0.1:8888"), WithTransport(rt))

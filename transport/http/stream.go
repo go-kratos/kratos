@@ -382,14 +382,18 @@ func (s *sseClientStream) readEvent() (string, []byte, error) {
 }
 
 type websocketClientStream struct {
-	ctx     context.Context
-	conn    *websocket.Conn
-	header  stdhttp.Header
-	done    func(error)
-	encoder encoding.Codec
-	decoder encoding.Codec
-	closed  bool
-	writeMu sync.Mutex
+	ctx        context.Context
+	conn       *websocket.Conn
+	header     stdhttp.Header
+	done       func(error)
+	encoder    encoding.Codec
+	decoder    encoding.Codec
+	mu         sync.Mutex
+	sendClosed bool
+	closed     bool
+	closeOnce  sync.Once
+	closeErr   error
+	writeMu    sync.Mutex
 }
 
 func (s *websocketClientStream) Header() (metadata.MD, error) {
@@ -401,9 +405,13 @@ func (s *websocketClientStream) Trailer() metadata.MD {
 }
 
 func (s *websocketClientStream) CloseSend() error {
-	if s.closed {
+	s.mu.Lock()
+	if s.sendClosed || s.closed {
+		s.mu.Unlock()
 		return nil
 	}
+	s.sendClosed = true
+	s.mu.Unlock()
 	return s.writeControl(websocketControlEnd)
 }
 
@@ -431,12 +439,18 @@ func (s *websocketClientStream) CloseAndRecv(m any) error {
 }
 
 func (s *websocketClientStream) SendMsg(m any) error {
+	if err := s.checkSendOpen(); err != nil {
+		return err
+	}
 	data, err := marshalStreamMessage(m, s.encoder)
 	if err != nil {
 		return err
 	}
 	s.writeMu.Lock()
 	defer s.writeMu.Unlock()
+	if err := s.checkSendOpen(); err != nil {
+		return err
+	}
 	return s.conn.WriteMessage(websocket.TextMessage, data)
 }
 
@@ -459,15 +473,33 @@ func (s *websocketClientStream) writeControl(message string) error {
 }
 
 func (s *websocketClientStream) close(err error) error {
-	if s.closed {
+	s.closeOnce.Do(func() {
+		s.mu.Lock()
+		s.closed = true
+		s.sendClosed = true
+		s.mu.Unlock()
+		if s.done != nil {
+			s.done(err)
+		}
+		s.writeMu.Lock()
+		defer s.writeMu.Unlock()
+		_ = s.conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Now().Add(time.Second))
+		s.closeErr = s.conn.Close()
+	})
+	return s.closeErr
+}
+
+func (s *websocketClientStream) checkSendOpen() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	switch {
+	case s.sendClosed:
+		return stderrors.New("websocket client stream send side is closed")
+	case s.closed:
+		return stderrors.New("websocket client stream is closed")
+	default:
 		return nil
 	}
-	s.closed = true
-	if s.done != nil {
-		s.done(err)
-	}
-	_ = s.conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Now().Add(time.Second))
-	return s.conn.Close()
 }
 
 // ServerSentEvent opens an HTTP server-streaming call and receives replies as SSE events.

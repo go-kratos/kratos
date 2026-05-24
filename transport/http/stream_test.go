@@ -277,6 +277,46 @@ func TestWebSocketStreamUsesContentTypeCodec(t *testing.T) {
 	}
 }
 
+func TestWebSocketStreamCloseSendPreventsSend(t *testing.T) {
+	srv := NewServer()
+	srv.Route("/").GET("/ws", func(ctx Context) error {
+		stream, err := NewWebSocketServerStream(ctx)
+		if err != nil {
+			return err
+		}
+		in := new(binding.HelloRequest)
+		if err := stream.Recv(in); !errors.Is(err, io.EOF) {
+			return stream.Close(err)
+		}
+		return stream.Close(nil)
+	})
+
+	ts := httptest.NewServer(srv)
+	defer ts.Close()
+	client, err := NewClient(context.Background(), WithEndpoint(ts.URL), WithTimeout(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	stream, err := client.WebSocket(context.Background(), "/ws", Accept("application/protojson"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := stream.CloseSend(); err != nil {
+		t.Fatal(err)
+	}
+	if err := stream.CloseSend(); err != nil {
+		t.Fatal(err)
+	}
+	if err := stream.Send(&binding.HelloRequest{Name: "late"}); err == nil {
+		t.Fatal("expected Send after CloseSend to fail")
+	}
+
+	var out binding.HelloRequest
+	if err := stream.Recv(&out); !errors.Is(err, io.EOF) {
+		t.Fatalf("expected EOF, got %v", err)
+	}
+}
+
 func TestWebSocketStreamUsesClientMiddleware(t *testing.T) {
 	srv := NewServer()
 	srv.Route("/").GET("/ws", func(ctx Context) error {
