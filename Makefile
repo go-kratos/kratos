@@ -96,4 +96,4 @@ lint: $(LINTER)
 
 .PHONY: proto
 proto:
-	protoc --proto_path=./third_party --go_out=paths=source_relative:./errors/errors.proto
+	buf generate --path errors/errors.proto

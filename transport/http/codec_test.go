@@ -116,19 +116,16 @@ func TestDefaultResponseEncoderProtoJSONRejectsScalarField(t *testing.T) {
 	}
 }
 
-func TestDefaultResponseDecoderProtoJSONMessageFieldPointer(t *testing.T) {
+func TestDefaultResponseDecoderProtoJSONMessage(t *testing.T) {
 	resp := &http.Response{
 		Header:     http.Header{"Content-Type": []string{"application/protojson"}},
 		StatusCode: http.StatusOK,
 		Body:       io.NopCloser(bytes.NewBufferString(`{"naming":"go"}`)),
 	}
 
-	var sub *binding.Sub
-	if err := DefaultResponseDecoder(context.TODO(), resp, &sub); err != nil {
+	sub := new(binding.Sub)
+	if err := DefaultResponseDecoder(context.TODO(), resp, sub); err != nil {
 		t.Fatal(err)
-	}
-	if sub == nil {
-		t.Fatal("expected message field to be allocated")
 	}
 	if sub.Name != "go" {
 		t.Errorf("expected %v, got %v", "go", sub.Name)

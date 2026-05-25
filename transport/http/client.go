@@ -371,7 +371,7 @@ func DefaultResponseDecoder(_ context.Context, res *http.Response, v any) error 
 		body.Data = data
 		return nil
 	}
-	return decodeWithCodec(CodecForResponse(res), data, v)
+	return CodecForResponse(res).Unmarshal(data, v)
 }
 
 // DefaultErrorDecoder is an HTTP error decoder.

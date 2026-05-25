@@ -305,7 +305,7 @@ func TestDefaultResponseDecoder(t *testing.T) {
 		A string `json:"a"`
 		B int64  `json:"b"`
 	}{}
-	err := DefaultResponseDecoder(context.TODO(), resp1, &v1)
+	err := DefaultResponseDecoder(context.TODO(), resp1, v1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -325,7 +325,7 @@ func TestDefaultResponseDecoder(t *testing.T) {
 		A string `json:"a"`
 		B int64  `json:"b"`
 	}{}
-	err = DefaultResponseDecoder(context.TODO(), resp2, &v2)
+	err = DefaultResponseDecoder(context.TODO(), resp2, v2)
 	syntaxErr := &json.SyntaxError{}
 	if !errors.As(err, &syntaxErr) {
 		t.Errorf("expected %v, got %v", syntaxErr, err)
