@@ -85,6 +85,61 @@ func TestDirectError(t *testing.T) {
 	}
 }
 
+// TestCanceledDoesNotDegradeNode verifies that context.Canceled does not
+// lower a node's health score. Canceled means the caller gave up — it is
+// not evidence of backend failure. context.DeadlineExceeded (backend too
+// slow) should still degrade the node as before.
+func TestCanceledDoesNotDegradeNode(t *testing.T) {
+	newNode := func() selector.WeightedNode {
+		return (&Builder{}).Build(selector.NewNode(
+			"http",
+			"127.0.0.1:9090",
+			&registry.ServiceInstance{
+				ID:        "127.0.0.1:9090",
+				Name:      "helloworld",
+				Version:   "v1.0.0",
+				Endpoints: []string{"http://127.0.0.1:9090"},
+				Metadata:  map[string]string{"weight": "10"},
+			}))
+	}
+
+	// --- context.Canceled must NOT degrade health ---
+	wn := newNode()
+	// One successful pick to initialise EWMA state.
+	done := wn.Pick()
+	time.Sleep(time.Millisecond * 20)
+	done(context.Background(), selector.DoneInfo{})
+	baseline := wn.Weight()
+
+	// Several picks that all report context.Canceled.
+	for i := 0; i < 4; i++ {
+		done = wn.Pick()
+		time.Sleep(time.Millisecond * 20)
+		done(context.Background(), selector.DoneInfo{Err: context.Canceled})
+	}
+	if wn.Weight() < baseline*0.9 {
+		t.Errorf("context.Canceled should not degrade node weight: before=%.2f after=%.2f",
+			baseline, wn.Weight())
+	}
+
+	// --- context.DeadlineExceeded still degrades health ---
+	wn2 := newNode()
+	done = wn2.Pick()
+	time.Sleep(time.Millisecond * 20)
+	done(context.Background(), selector.DoneInfo{})
+	baseline2 := wn2.Weight()
+
+	for i := 0; i < 4; i++ {
+		done = wn2.Pick()
+		time.Sleep(time.Millisecond * 20)
+		done(context.Background(), selector.DoneInfo{Err: context.DeadlineExceeded})
+	}
+	if wn2.Weight() >= baseline2 {
+		t.Errorf("context.DeadlineExceeded should degrade node weight: before=%.2f after=%.2f",
+			baseline2, wn2.Weight())
+	}
+}
+
 func TestDirectErrorHandler(t *testing.T) {
 	b := &Builder{
 		ErrHandler: func(err error) bool {

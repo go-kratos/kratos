@@ -153,7 +153,12 @@ func (n *Node) Pick() selector.DoneFunc {
 				success = 0
 			}
 			var netErr net.Error
-			if errors.Is(context.DeadlineExceeded, di.Err) || errors.Is(context.Canceled, di.Err) ||
+			if errors.Is(context.DeadlineExceeded, di.Err) ||
+				// context.Canceled is intentionally excluded: it means the caller
+				// cancelled the request (user navigation, upstream timeout, etc.) and
+				// says nothing about whether the backend is healthy. Penalising nodes
+				// for client-side cancellations causes healthy backends to lose weight
+				// under normal frontend workloads with frequent in-flight cancellations.
 				errors.IsServiceUnavailable(di.Err) || errors.IsGatewayTimeout(di.Err) || errors.As(di.Err, &netErr) {
 				success = 0
 			}
