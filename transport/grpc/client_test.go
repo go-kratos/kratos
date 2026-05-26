@@ -103,6 +103,47 @@ func TestUnaryClientInterceptor(t *testing.T) {
 	}
 }
 
+// TestStreamClientInterceptorTimeout verifies that streamClientInterceptor
+// applies the configured timeout to the stream context, mirroring the
+// behaviour of unaryClientInterceptor. A nil cancel means no timeout was
+// configured; a non-nil cancel means the timeout deadline was set.
+func TestStreamClientInterceptorTimeout(t *testing.T) {
+	// With a positive timeout the interceptor should apply a deadline.
+	interceptorWithTimeout := streamClientInterceptor(nil, 50*time.Millisecond, nil)
+	deadlineSet := false
+	_, _ = interceptorWithTimeout(
+		context.Background(),
+		&grpc.StreamDesc{},
+		&grpc.ClientConn{},
+		"/test.Service/StreamMethod",
+		func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, opts ...grpc.CallOption) (grpc.ClientStream, error) {
+			_, deadlineSet = ctx.Deadline()
+			// Return an error so the test does not need a real connection.
+			return nil, context.DeadlineExceeded
+		},
+	)
+	if !deadlineSet {
+		t.Error("expected a deadline on the stream context when WithTimeout is set, got none")
+	}
+
+	// Without a timeout the context should be passed through unchanged.
+	interceptorNoTimeout := streamClientInterceptor(nil, 0, nil)
+	deadlineSet = false
+	_, _ = interceptorNoTimeout(
+		context.Background(),
+		&grpc.StreamDesc{},
+		&grpc.ClientConn{},
+		"/test.Service/StreamMethod",
+		func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, opts ...grpc.CallOption) (grpc.ClientStream, error) {
+			_, deadlineSet = ctx.Deadline()
+			return nil, context.DeadlineExceeded
+		},
+	)
+	if deadlineSet {
+		t.Error("expected no deadline on the stream context when timeout is zero, but deadline was set")
+	}
+}
+
 func TestWithUnaryInterceptor(t *testing.T) {
 	o := &clientOptions{}
 	v := []grpc.UnaryClientInterceptor{
