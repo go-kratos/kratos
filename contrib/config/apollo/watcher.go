@@ -6,9 +6,9 @@ import (
 
 	"github.com/apolloconfig/agollo/v4/storage"
 
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v3/config"
+	"github.com/go-kratos/kratos/v3/encoding"
+	"github.com/go-kratos/kratos/v3/log"
 )
 
 type watcher struct {
@@ -27,7 +27,7 @@ func (c *customChangeListener) onChange(namespace string, changes map[string]*st
 	kv := make([]*config.KeyValue, 0, 2)
 	if strings.Contains(namespace, ".") && !strings.HasSuffix(namespace, "."+properties) &&
 		(format(namespace) == yaml || format(namespace) == yml || format(namespace) == json) {
-		if value, ok := changes["content"]; ok {
+		if value, ok := changes[contentKey]; ok {
 			if s, ok := value.NewValue.(string); ok {
 				kv = append(kv, &config.KeyValue{
 					Key:    namespace,
@@ -50,7 +50,7 @@ func (c *customChangeListener) onChange(namespace string, changes map[string]*st
 	codec := encoding.GetCodec(f)
 	val, err := codec.Marshal(next)
 	if err != nil {
-		log.Warnf("apollo could not handle namespace %s: %v", namespace, err)
+		log.Warn("apollo could not handle namespace", "namespace", namespace, "error", err)
 		return nil
 	}
 	kv = append(kv, &config.KeyValue{

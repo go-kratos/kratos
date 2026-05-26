@@ -11,7 +11,7 @@ import (
 	"github.com/polarismesh/polaris-go"
 	"github.com/polarismesh/polaris-go/pkg/model"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 var (
@@ -197,13 +197,12 @@ func (r *Registry) Deregister(_ context.Context, serviceInstance *registry.Servi
 // GetService return the service instances in memory according to the service name.
 func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
 	// get all instances
-	instancesResponse, err := r.consumer.GetInstances(&polaris.GetInstancesRequest{
-		GetInstancesRequest: model.GetInstancesRequest{
-			Service:         serviceName,
-			Namespace:       r.opt.Namespace,
-			Timeout:         &r.opt.Timeout,
-			RetryCount:      &r.opt.RetryCount,
-			SkipRouteFilter: true,
+	instancesResponse, err := r.consumer.GetAllInstances(&polaris.GetAllInstancesRequest{
+		GetAllInstancesRequest: model.GetAllInstancesRequest{
+			Service:    serviceName,
+			Namespace:  r.opt.Namespace,
+			Timeout:    &r.opt.Timeout,
+			RetryCount: &r.opt.RetryCount,
 		},
 	})
 	if err != nil {

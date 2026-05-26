@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/url"
 	"reflect"
@@ -16,12 +17,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/internal/matcher"
-	pb "github.com/go-kratos/kratos/v2/internal/testdata/helloworld"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v3/errors"
+	"github.com/go-kratos/kratos/v3/internal/matcher"
+	pb "github.com/go-kratos/kratos/v3/internal/testdata/helloworld"
+	"github.com/go-kratos/kratos/v3/log"
+	"github.com/go-kratos/kratos/v3/middleware"
+	"github.com/go-kratos/kratos/v3/transport"
 )
 
 // server is used to implement helloworld.GreeterServer.
@@ -115,9 +116,8 @@ func testClient(t *testing.T, srv *Server) {
 		t.Fatal(err)
 	}
 	// new a gRPC client
-	conn, err := DialInsecure(context.Background(),
+	conn, err := NewClient(context.Background(),
 		WithEndpoint(u.Host),
-		WithOptions(grpc.WithBlock()),
 		WithUnaryInterceptor(
 			func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 				return invoker(ctx, method, req, reply, cc, opts...)
@@ -407,12 +407,12 @@ func TestStop(t *testing.T) {
 			}
 			defer l.Close()
 
-			old := log.GetLogger()
-			defer log.SetLogger(old)
+			old := log.Default()
+			defer log.SetDefault(old)
 
 			// Create a logger to capture logs
 			var logs safeBytesBuffer
-			log.SetLogger(log.NewStdLogger(&logs))
+			log.SetDefault(slog.New(slog.NewTextHandler(&logs, nil)))
 
 			s := NewServer(Listener(l))
 			pb.RegisterGreeterServer(s, &server{})
@@ -420,16 +420,15 @@ func TestStop(t *testing.T) {
 			go func() {
 				err := s.Start(context.Background()) //nolint
 				if err != nil {
-					log.Fatal(err)
+					t.Errorf("server error: %v", err)
 				}
 			}()
 
 			time.Sleep(100 * time.Millisecond)
 
-			conn, err := DialInsecure(
+			conn, err := NewClient(
 				context.Background(),
 				WithEndpoint(l.Addr().String()),
-				WithOptions(grpc.WithBlock()),
 			)
 			if err != nil {
 				t.Fatal(err)
@@ -442,7 +441,7 @@ func TestStop(t *testing.T) {
 					// Simulate a long-running request
 					s, err := client.SayHelloStream(context.Background()) //nolint
 					if err != nil {
-						log.Fatal(err)
+						t.Errorf("server error: %v", err)
 					}
 					// Keep the stream open
 					for {
@@ -455,7 +454,7 @@ func TestStop(t *testing.T) {
 				} else {
 					_, err := client.SayHello(context.Background(), &pb.HelloRequest{Name: "test"}) //nolint
 					if err != nil {
-						log.Error(err)
+						log.Error("client error", "error", err)
 					}
 				}
 			}()

@@ -22,7 +22,7 @@ import (
 	listerv1 "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 // Defines the key name of specific fields
@@ -195,7 +195,7 @@ func (s *Registry) sendLatestInstances(ctx context.Context, name string, announc
 func (s *Registry) Watch(ctx context.Context, name string) (registry.Watcher, error) {
 	stopCh := make(chan struct{}, 1)
 	announcement := make(chan []*registry.ServiceInstance, 1)
-	s.podInformer.AddEventHandler(cache.FilteringResourceEventHandler{
+	_, err := s.podInformer.AddEventHandler(cache.FilteringResourceEventHandler{
 		FilterFunc: func(obj any) bool {
 			select {
 			case <-stopCh:
@@ -220,6 +220,9 @@ func (s *Registry) Watch(ctx context.Context, name string) (registry.Watcher, er
 			},
 		},
 	})
+	if err != nil {
+		return nil, err
+	}
 	return NewIterator(announcement, stopCh), nil
 }
 
