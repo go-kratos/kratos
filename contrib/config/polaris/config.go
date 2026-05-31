@@ -7,8 +7,9 @@ import (
 	"strings"
 
 	"github.com/polarismesh/polaris-go"
+	"github.com/polarismesh/polaris-go/pkg/model"
 
-	"github.com/go-kratos/kratos/v2/config"
+	"github.com/go-kratos/kratos/v3/config"
 )
 
 // Option is polaris config option.
@@ -74,7 +75,14 @@ func New(client polaris.ConfigAPI, opts ...Option) (config.Source, error) {
 
 // Load return the config values
 func (s *source) Load() ([]*config.KeyValue, error) {
-	configFile, err := s.client.GetConfigFile(s.options.namespace, s.options.fileGroup, s.options.fileName)
+	configFile, err := s.client.FetchConfigFile(&polaris.GetConfigFileRequest{
+		GetConfigFileRequest: &model.GetConfigFileRequest{
+			Namespace: s.options.namespace,
+			FileGroup: s.options.fileGroup,
+			FileName:  s.options.fileName,
+			Subscribe: true,
+		},
+	})
 	if err != nil {
 		fmt.Println("fail to get config.", err)
 		return nil, err

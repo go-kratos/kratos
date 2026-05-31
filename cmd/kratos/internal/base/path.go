@@ -17,12 +17,12 @@ var protobufRawDescBlockRE = regexp.MustCompile(`(?ms)^const file_.*?_rawDesc = 
 func kratosHome() string {
 	dir, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to get user home directory: %v", err)
 	}
 	home := filepath.Join(dir, ".kratos")
 	if _, err := os.Stat(home); os.IsNotExist(err) {
 		if err := os.MkdirAll(home, 0o700); err != nil {
-			log.Fatal(err)
+			log.Fatalf("Failed to create kratos home %q: %v", home, err)
 		}
 	}
 	return home
@@ -32,7 +32,7 @@ func kratosHomeWithDir(dir string) string {
 	home := filepath.Join(kratosHome(), dir)
 	if _, err := os.Stat(home); os.IsNotExist(err) {
 		if err := os.MkdirAll(home, 0o700); err != nil {
-			log.Fatal(err)
+			log.Fatalf("Failed to create kratos home directory %q: %v", home, err)
 		}
 	}
 	return home

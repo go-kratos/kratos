@@ -2,12 +2,18 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
+	"strings"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/errors"
+	"google.golang.org/genproto/googleapis/api/httpbody"
+
+	"github.com/go-kratos/kratos/v3/encoding"
+	_ "github.com/go-kratos/kratos/v3/encoding/protojson"
+	"github.com/go-kratos/kratos/v3/errors"
+	"github.com/go-kratos/kratos/v3/internal/testdata/binding"
 )
 
 func TestDefaultRequestDecoder(t *testing.T) {
@@ -38,6 +44,108 @@ func TestDefaultRequestDecoder(t *testing.T) {
 	}
 	if bodyStr != string(data) {
 		t.Errorf("expected %v, got %v", bodyStr, string(data))
+	}
+}
+
+func TestDefaultRequestDecoderHTTPBody(t *testing.T) {
+	const bodyStr = "raw file content"
+	r, _ := http.NewRequest(http.MethodPost, "", io.NopCloser(bytes.NewBufferString(bodyStr)))
+	r.Header.Set("Content-Type", "text/plain")
+
+	var body *httpbody.HttpBody
+	if err := DefaultRequestDecoder(r, &body); err != nil {
+		t.Fatal(err)
+	}
+	if body.GetContentType() != "text/plain" {
+		t.Errorf("expected %v, got %v", "text/plain", body.GetContentType())
+	}
+	if string(body.GetData()) != bodyStr {
+		t.Errorf("expected %v, got %v", bodyStr, string(body.GetData()))
+	}
+
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(data) != bodyStr {
+		t.Errorf("expected request body reset to %q, got %q", bodyStr, string(data))
+	}
+}
+
+func TestDefaultRequestDecoderProtoJSONMessageFieldPointer(t *testing.T) {
+	r, _ := http.NewRequest(http.MethodPost, "", io.NopCloser(bytes.NewBufferString(`{"naming":"go"}`)))
+	r.Header.Set("Content-Type", "application/protojson")
+
+	var sub *binding.Sub
+	if err := DefaultRequestDecoder(r, &sub); err != nil {
+		t.Fatal(err)
+	}
+	if sub == nil {
+		t.Fatal("expected message field to be allocated")
+	}
+	if sub.Name != "go" {
+		t.Errorf("expected %v, got %v", "go", sub.Name)
+	}
+}
+
+func TestDefaultRequestDecoderProtoJSONRejectsScalarField(t *testing.T) {
+	r, _ := http.NewRequest(http.MethodPost, "", io.NopCloser(bytes.NewBufferString(`"kratos"`)))
+	r.Header.Set("Content-Type", "application/protojson")
+
+	var name string
+	err := DefaultRequestDecoder(r, &name)
+	if err == nil {
+		t.Fatal("expected scalar protojson body to fail")
+	}
+	if !strings.Contains(err.Error(), "want proto.Message") {
+		t.Errorf("expected proto message type error, got %v", err)
+	}
+}
+
+func TestDefaultResponseEncoderProtoJSONRejectsScalarField(t *testing.T) {
+	w := &mockResponseWriter{StatusCode: http.StatusOK, header: make(http.Header)}
+	r, _ := http.NewRequest(http.MethodGet, "", nil)
+	r.Header.Set("Accept", "application/protojson")
+
+	err := DefaultResponseEncoder(w, r, "kratos")
+	if err == nil {
+		t.Fatal("expected scalar protojson response to fail")
+	}
+	if !strings.Contains(err.Error(), "want proto.Message") {
+		t.Errorf("expected proto message type error, got %v", err)
+	}
+}
+
+func TestDefaultResponseDecoderProtoJSONMessage(t *testing.T) {
+	resp := &http.Response{
+		Header:     http.Header{"Content-Type": []string{"application/protojson"}},
+		StatusCode: http.StatusOK,
+		Body:       io.NopCloser(bytes.NewBufferString(`{"naming":"go"}`)),
+	}
+
+	sub := new(binding.Sub)
+	if err := DefaultResponseDecoder(context.TODO(), resp, sub); err != nil {
+		t.Fatal(err)
+	}
+	if sub.Name != "go" {
+		t.Errorf("expected %v, got %v", "go", sub.Name)
+	}
+}
+
+func TestDefaultResponseDecoderProtoJSONRejectsScalarField(t *testing.T) {
+	resp := &http.Response{
+		Header:     http.Header{"Content-Type": []string{"application/protojson"}},
+		StatusCode: http.StatusOK,
+		Body:       io.NopCloser(bytes.NewBufferString(`"kratos"`)),
+	}
+
+	var name string
+	err := DefaultResponseDecoder(context.TODO(), resp, &name)
+	if err == nil {
+		t.Fatal("expected scalar protojson response to fail")
+	}
+	if !strings.Contains(err.Error(), "want proto.Message") {
+		t.Errorf("expected proto message type error, got %v", err)
 	}
 }
 
@@ -100,6 +208,25 @@ func TestDefaultResponseEncoder(t *testing.T) {
 	}
 	if w.Data == nil {
 		t.Errorf("expected not nil, got %v", w.Data)
+	}
+}
+
+func TestDefaultResponseEncoderHTTPBody(t *testing.T) {
+	w := &mockResponseWriter{StatusCode: 200, header: make(http.Header)}
+	r, _ := http.NewRequest(http.MethodGet, "", nil)
+	body := &httpbody.HttpBody{
+		ContentType: "application/octet-stream",
+		Data:        []byte("raw response"),
+	}
+
+	if err := DefaultResponseEncoder(w, r, body); err != nil {
+		t.Fatal(err)
+	}
+	if got := w.Header().Get("Content-Type"); got != "application/octet-stream" {
+		t.Errorf("expected %v, got %v", "application/octet-stream", got)
+	}
+	if string(w.Data) != "raw response" {
+		t.Errorf("expected %v, got %v", "raw response", string(w.Data))
 	}
 }
 
