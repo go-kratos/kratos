@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
 
@@ -226,6 +227,87 @@ func TestWebSocketStreamBindsPathQueryAndExchangesMessages(t *testing.T) {
 	}
 	if err := stream.Recv(&out); !errors.Is(err, io.EOF) {
 		t.Fatalf("expected EOF, got %v", err)
+	}
+}
+
+func TestWebSocketStreamBindsNamedBodyField(t *testing.T) {
+	srv := NewServer()
+	srv.Route("/").GET("/ws/{name}", func(ctx Context) error {
+		stream, err := NewWebSocketServerStream(ctx, WithStreamBodyField("sub"))
+		if err != nil {
+			return err
+		}
+
+		in := new(binding.HelloRequest)
+		if err := stream.Recv(in); err != nil {
+			return stream.Close(err)
+		}
+		// name comes from the path var, the sub message from the streamed frame payload.
+		if in.GetName() != "kratos" {
+			return stream.Close(fmt.Errorf("expected path name kratos, got %s", in.GetName()))
+		}
+		if in.GetSub().GetName() != "go" {
+			return stream.Close(fmt.Errorf("expected body sub go, got %s", in.GetSub().GetName()))
+		}
+		if err := stream.Send(&binding.HelloRequest{Name: in.GetName(), Sub: in.GetSub()}); err != nil {
+			return stream.Close(err)
+		}
+		return stream.Close(nil)
+	})
+
+	ts := httptest.NewServer(srv)
+	defer ts.Close()
+	client, err := NewClient(context.Background(), WithEndpoint(ts.URL), WithTimeout(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	stream, err := client.WebSocket(context.Background(), "/ws/kratos", Accept("application/protojson"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The client streams only the body field (Sub), mirroring generated code that
+	// sends m.Sub instead of the whole request message.
+	if err := stream.Send(&binding.Sub{Name: "go"}); err != nil {
+		t.Fatal(err)
+	}
+
+	var out binding.HelloRequest
+	if err := stream.Recv(&out); err != nil {
+		t.Fatal(err)
+	}
+	if out.GetName() != "kratos" {
+		t.Fatalf("expected %v, got %v", "kratos", out.GetName())
+	}
+	if out.GetSub().GetName() != "go" {
+		t.Fatalf("expected %v, got %v", "go", out.GetSub().GetName())
+	}
+	if err := stream.Recv(&out); !errors.Is(err, io.EOF) {
+		t.Fatalf("expected EOF, got %v", err)
+	}
+}
+
+func TestServerStreamRecvMessageRejectsInvalidBodyField(t *testing.T) {
+	tests := []struct {
+		name      string
+		bodyField string
+	}{
+		{name: "unknown field", bodyField: "does_not_exist"},
+		{name: "scalar field", bodyField: "name"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &serverStream{mode: streamModeWebSocket, bodyField: tt.bodyField}
+			// The field validation happens before any frame is read, so no live
+			// connection is required to exercise the error path.
+			err := s.recvMessage(new(binding.HelloRequest))
+			if err == nil {
+				t.Fatalf("expected error for body field %q, got nil", tt.bodyField)
+			}
+			if !strings.Contains(err.Error(), tt.bodyField) {
+				t.Fatalf("expected error to mention %q, got %v", tt.bodyField, err)
+			}
+		})
 	}
 }
 
