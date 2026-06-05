@@ -65,7 +65,7 @@ func (x *{{$svrType}}_{{.Name}}HTTPServer) SendAndClose(m *{{.Reply}}) error {
 func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		{{- if .ClientStreaming}}
-		stream, err := http.NewWebSocketServerStream(ctx)
+		stream, err := http.NewWebSocketServerStream(ctx{{if .BodyMessage}}, http.WithStreamBodyField("{{.BodyField}}"){{end}})
 		if err != nil {
 			return err
 		}
@@ -216,7 +216,7 @@ func (x *{{$svrType}}_{{.Name}}HTTPClient) Send(m *{{.Request}}) error {
 	if err := x.open(m); err != nil {
 		return err
 	}
-	return x.ClientStream.Send(m)
+	return x.ClientStream.Send(m{{if .BodyMessage}}{{.Body}}{{end}})
 }
 {{- end}}
 

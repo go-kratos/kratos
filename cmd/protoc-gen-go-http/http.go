@@ -139,13 +139,18 @@ func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *prot
 	body = rule.Body
 	responseBody = rule.ResponseBody
 	md := buildMethodDesc(g, m, method, path)
-	if method == http.MethodGet || method == http.MethodDelete {
-		if body != "" {
-			_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s body should not be declared.\n", method, path)
-		}
-	} else {
-		if body == "" {
-			_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s does not declare a body.\n", method, path)
+	// Client-streaming RPCs are served over WebSocket, whose handshake is always an
+	// HTTP GET regardless of the declared verb. Declaring a body for them is legitimate
+	// (it identifies the streamed message field), so skip the GET/DELETE body warnings.
+	if !m.Desc.IsStreamingClient() {
+		if method == http.MethodGet || method == http.MethodDelete {
+			if body != "" {
+				_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s body should not be declared.\n", method, path)
+			}
+		} else {
+			if body == "" {
+				_, _ = fmt.Fprintf(os.Stderr, "\u001B[31mWARN\u001B[m: %s %s does not declare a body.\n", method, path)
+			}
 		}
 	}
 	if body == "*" {
@@ -169,6 +174,9 @@ func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *prot
 		md.BodyField = body
 		md.BodyQueryName = fd.JSONName()
 		md.BodyHTTPBody = isHTTPBodyField(fd)
+		// A singular message-kind body field can be streamed frame-by-frame for
+		// client-streaming RPCs (each frame carries just this field's payload).
+		md.BodyMessage = fd.Kind() == protoreflect.MessageKind && !fd.IsList() && !fd.IsMap()
 	} else {
 		md.HasBody = false
 	}
