@@ -135,7 +135,11 @@ func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) fu
 			return err
 		}
 		reply := out.(*{{.Reply}})
+		{{- if or .ReplyHTTPBody .ResponseBodyHTTPBody}}
+		return ctx.Blob(200, http.BodyContentType(reply{{.ResponseBody}}), reply{{.ResponseBody}}.GetData())
+		{{- else}}
 		return ctx.Result(200, reply{{.ResponseBody}})
+		{{- end}}
 		{{- end}}
 	}
 }
