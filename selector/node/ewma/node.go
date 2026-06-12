@@ -153,7 +153,7 @@ func (n *Node) Pick() selector.DoneFunc {
 				success = 0
 			}
 			var netErr net.Error
-			if errors.Is(context.DeadlineExceeded, di.Err) ||
+			if errors.Is(di.Err, context.DeadlineExceeded) ||
 				// context.Canceled is intentionally excluded: it means the caller
 				// cancelled the request (user navigation, upstream timeout, etc.) and
 				// says nothing about whether the backend is healthy. Penalising nodes

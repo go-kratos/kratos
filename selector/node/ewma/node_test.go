@@ -105,11 +105,12 @@ func TestCanceledDoesNotDegradeNode(t *testing.T) {
 
 	// --- context.Canceled must NOT degrade health ---
 	wn := newNode()
+	n := wn.(*Node)
 	// One successful pick to initialise EWMA state.
 	done := wn.Pick()
 	time.Sleep(time.Millisecond * 20)
 	done(context.Background(), selector.DoneInfo{})
-	baseline := wn.Weight()
+	baselineHealth := n.success.Load()
 
 	// Several picks that all report context.Canceled.
 	for i := 0; i < 4; i++ {
@@ -117,26 +118,31 @@ func TestCanceledDoesNotDegradeNode(t *testing.T) {
 		time.Sleep(time.Millisecond * 20)
 		done(context.Background(), selector.DoneInfo{Err: context.Canceled})
 	}
-	if wn.Weight() < baseline*0.9 {
-		t.Errorf("context.Canceled should not degrade node weight: before=%.2f after=%.2f",
-			baseline, wn.Weight())
+	afterHealth := n.success.Load()
+	// Health must not have dropped significantly — Canceled is not a backend fault.
+	// Allow a tiny EWMA drift but it must stay near 1000 (full health).
+	if afterHealth < baselineHealth*9/10 {
+		t.Errorf("context.Canceled should not degrade node health: before=%d after=%d",
+			baselineHealth, afterHealth)
 	}
 
 	// --- context.DeadlineExceeded still degrades health ---
 	wn2 := newNode()
+	n2 := wn2.(*Node)
 	done = wn2.Pick()
 	time.Sleep(time.Millisecond * 20)
 	done(context.Background(), selector.DoneInfo{})
-	baseline2 := wn2.Weight()
+	baselineHealth2 := n2.success.Load()
 
 	for i := 0; i < 4; i++ {
 		done = wn2.Pick()
 		time.Sleep(time.Millisecond * 20)
 		done(context.Background(), selector.DoneInfo{Err: context.DeadlineExceeded})
 	}
-	if wn2.Weight() >= baseline2 {
-		t.Errorf("context.DeadlineExceeded should degrade node weight: before=%.2f after=%.2f",
-			baseline2, wn2.Weight())
+	afterHealth2 := n2.success.Load()
+	if afterHealth2 >= baselineHealth2 {
+		t.Errorf("context.DeadlineExceeded should degrade node health: before=%d after=%d",
+			baselineHealth2, afterHealth2)
 	}
 }
 
