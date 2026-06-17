@@ -49,6 +49,8 @@ type ServerStream interface {
 	SendAndClose(any) error
 	Close(error) error
 	SetContext(context.Context)
+	SetReadDeadline(t time.Time) error
+	SetWriteDeadline(t time.Time) error
 }
 
 // ClientStream adapts HTTP streaming clients to grpc generated stream interfaces.
@@ -124,6 +126,43 @@ func NewWebSocketServerStream(ctx Context, opts ...ServerStreamOption) (ServerSt
 
 func (s *serverStream) SetContext(ctx context.Context) {
 	s.ctx = ctx
+}
+
+// SetReadDeadline sets the deadline for future Recv calls. A zero value for t
+// disables the deadline. For WebSocket streams it is applied to the underlying
+// connection; for SSE streams it is applied via http.ResponseController.
+func (s *serverStream) SetReadDeadline(t time.Time) error {
+	switch s.mode {
+	case streamModeWebSocket:
+		if s.conn == nil {
+			return stderrors.New("http: websocket connection not established")
+		}
+		return s.conn.SetReadDeadline(t)
+	case streamModeSSE:
+		return stdhttp.NewResponseController(s.res).SetReadDeadline(t)
+	default:
+		return stderrors.New("unknown HTTP stream mode")
+	}
+}
+
+// SetWriteDeadline sets the deadline for future Send calls. A zero value for t
+// disables the deadline. For WebSocket streams it is serialized against in-flight
+// writes via the stream's write mutex; for SSE streams it is applied via
+// http.ResponseController.
+func (s *serverStream) SetWriteDeadline(t time.Time) error {
+	switch s.mode {
+	case streamModeWebSocket:
+		if s.conn == nil {
+			return stderrors.New("http: websocket connection not established")
+		}
+		s.writeMu.Lock()
+		defer s.writeMu.Unlock()
+		return s.conn.SetWriteDeadline(t)
+	case streamModeSSE:
+		return stdhttp.NewResponseController(s.res).SetWriteDeadline(t)
+	default:
+		return stderrors.New("unknown HTTP stream mode")
+	}
 }
 
 func (s *serverStream) SetHeader(md metadata.MD) error {

@@ -497,6 +497,125 @@ func TestWebSocketStreamNormalEOFReportsSelectorSuccess(t *testing.T) {
 	}
 }
 
+func TestWebSocketStreamSetReadDeadline(t *testing.T) {
+	recvErr := make(chan error, 1)
+	srv := NewServer()
+	srv.Route("/").GET("/ws", func(ctx Context) error {
+		stream, err := NewWebSocketServerStream(ctx)
+		if err != nil {
+			return err
+		}
+		if err := stream.SetReadDeadline(time.Now().Add(100 * time.Millisecond)); err != nil {
+			recvErr <- err
+			return stream.Close(err)
+		}
+		var in binding.HelloRequest
+		err = stream.Recv(&in)
+		recvErr <- err
+		return stream.Close(err)
+	})
+
+	ts := httptest.NewServer(srv)
+	defer ts.Close()
+	client, err := NewClient(context.Background(), WithEndpoint(ts.URL), WithTimeout(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Open the stream but never send, so the server-side Recv hits its read deadline.
+	if _, err = client.WebSocket(context.Background(), "/ws", Accept("application/protojson")); err != nil {
+		t.Fatal(err)
+	}
+
+	select {
+	case err := <-recvErr:
+		if err == nil {
+			t.Fatal("expected read deadline error, got nil")
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for read deadline")
+	}
+}
+
+func TestWebSocketStreamSetWriteDeadline(t *testing.T) {
+	srv := NewServer()
+	srv.Route("/").GET("/ws", func(ctx Context) error {
+		stream, err := NewWebSocketServerStream(ctx)
+		if err != nil {
+			return err
+		}
+		if err := stream.SetWriteDeadline(time.Now().Add(time.Second)); err != nil {
+			return stream.Close(err)
+		}
+		if err := stream.Send(&binding.HelloRequest{Name: "kratos"}); err != nil {
+			return stream.Close(err)
+		}
+		return stream.Close(nil)
+	})
+
+	ts := httptest.NewServer(srv)
+	defer ts.Close()
+	client, err := NewClient(context.Background(), WithEndpoint(ts.URL), WithTimeout(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	stream, err := client.WebSocket(context.Background(), "/ws", Accept("application/protojson"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var out binding.HelloRequest
+	if err := stream.Recv(&out); err != nil {
+		t.Fatal(err)
+	}
+	if out.GetName() != "kratos" {
+		t.Fatalf("expected %v, got %v", "kratos", out.GetName())
+	}
+	if err := stream.Recv(&out); !errors.Is(err, io.EOF) {
+		t.Fatalf("expected EOF, got %v", err)
+	}
+}
+
+func TestServerSentEventStreamSetDeadlines(t *testing.T) {
+	srv := NewServer()
+	var setErr error
+	srv.Route("/").GET("/events", func(ctx Context) error {
+		stream := NewServerSentEventServerStream(ctx)
+		if err := stream.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
+			setErr = err
+		}
+		if err := stream.SetWriteDeadline(time.Now().Add(time.Second)); err != nil {
+			setErr = err
+		}
+		if err := stream.Send(&binding.HelloRequest{Name: "kratos"}); err != nil {
+			return stream.Close(err)
+		}
+		return stream.Close(nil)
+	})
+
+	ts := httptest.NewServer(srv)
+	defer ts.Close()
+	res, err := ts.Client().Get(ts.URL + "/events")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	if _, err := io.ReadAll(res.Body); err != nil {
+		t.Fatal(err)
+	}
+	if setErr != nil {
+		t.Fatalf("expected SSE deadline setters to succeed, got %v", setErr)
+	}
+}
+
+func TestServerStreamSetDeadlineUnknownMode(t *testing.T) {
+	s := &serverStream{mode: streamModeWebSocket}
+	if err := s.SetReadDeadline(time.Now()); err == nil {
+		t.Fatal("expected error when websocket connection is not established")
+	}
+	if err := s.SetWriteDeadline(time.Now()); err == nil {
+		t.Fatal("expected error when websocket connection is not established")
+	}
+}
+
 type closeCountingBody struct {
 	closed int
 }
