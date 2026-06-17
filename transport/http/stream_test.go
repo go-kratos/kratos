@@ -505,7 +505,7 @@ func TestWebSocketStreamSetReadDeadline(t *testing.T) {
 		if err != nil {
 			return err
 		}
-		if err := stream.SetReadDeadline(time.Now().Add(100 * time.Millisecond)); err != nil {
+		if err = stream.SetReadDeadline(time.Now().Add(100 * time.Millisecond)); err != nil {
 			recvErr <- err
 			return stream.Close(err)
 		}
