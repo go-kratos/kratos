@@ -93,7 +93,7 @@ func WithStreamBodyField(name string) ServerStreamOption {
 // NewServerSentEventServerStream returns a stream that writes server messages as SSE events.
 func NewServerSentEventServerStream(ctx Context) ServerStream {
 	s := &serverStream{
-		ctx:  ctx,
+		ctx:  detachStreamContext(ctx),
 		req:  ctx.Request(),
 		res:  ctx.Response(),
 		mode: streamModeSSE,
@@ -106,7 +106,7 @@ func NewServerSentEventServerStream(ctx Context) ServerStream {
 // NewWebSocketServerStream upgrades the current request and returns a WebSocket stream.
 func NewWebSocketServerStream(ctx Context, opts ...ServerStreamOption) (ServerStream, error) {
 	s := &serverStream{
-		ctx:  ctx,
+		ctx:  detachStreamContext(ctx),
 		req:  ctx.Request(),
 		res:  ctx.Response(),
 		mode: streamModeWebSocket,
@@ -124,8 +124,25 @@ func NewWebSocketServerStream(ctx Context, opts ...ServerStreamOption) (ServerSt
 	return s, nil
 }
 
+// SetContext stores the streaming handler context. The server timeout and
+// cancellation are detached so a long-lived stream is not torn down by the
+// per-request server timeout; only the context values (tracing, auth, metadata
+// injected by middleware) are preserved. The stream lifecycle is instead driven
+// by Send/Recv errors and the read/write deadlines set via SetReadDeadline and
+// SetWriteDeadline. This mirrors how the gRPC transport leaves streams on the
+// connection-scoped context rather than the per-request timeout context.
 func (s *serverStream) SetContext(ctx context.Context) {
-	s.ctx = ctx
+	s.ctx = detachStreamContext(ctx)
+}
+
+// detachStreamContext returns a context that keeps the values of ctx but drops
+// its deadline and cancellation, so the per-request server timeout does not
+// abort a long-lived stream.
+func detachStreamContext(ctx context.Context) context.Context {
+	if ctx == nil {
+		return context.Background()
+	}
+	return context.WithoutCancel(ctx)
 }
 
 // SetReadDeadline sets the deadline for future Recv calls. A zero value for t

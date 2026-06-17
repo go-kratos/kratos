@@ -616,6 +616,49 @@ func TestServerStreamSetDeadlineUnknownMode(t *testing.T) {
 	}
 }
 
+type streamCtxKey struct{}
+
+func TestServerStreamDetachesServerTimeout(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/events", nil)
+	// Simulate the per-request server timeout context plus a middleware-injected value.
+	base := context.WithValue(req.Context(), streamCtxKey{}, "trace-123")
+	ctx, cancel := context.WithTimeout(base, 10*time.Millisecond)
+	defer cancel()
+	req = req.WithContext(ctx)
+
+	srv := NewServer()
+	wrap := &wrapper{router: srv.Route("/")}
+	wrap.Reset(w, req)
+
+	stream := NewServerSentEventServerStream(wrap)
+
+	// The server timeout must not propagate to the stream context.
+	if _, ok := stream.Context().Deadline(); ok {
+		t.Fatal("expected stream context to have no deadline")
+	}
+	// Middleware-injected values must still be reachable.
+	if got := stream.Context().Value(streamCtxKey{}); got != "trace-123" {
+		t.Fatalf("expected stream context to preserve values, got %v", got)
+	}
+	// Even after the per-request timeout fires, the stream context stays alive.
+	time.Sleep(20 * time.Millisecond)
+	if err := stream.Context().Err(); err != nil {
+		t.Fatalf("expected stream context to stay alive after server timeout, got %v", err)
+	}
+
+	// SetContext applies the same detachment.
+	timedOut, cancel2 := context.WithTimeout(base, time.Nanosecond)
+	defer cancel2()
+	stream.SetContext(timedOut)
+	if _, ok := stream.Context().Deadline(); ok {
+		t.Fatal("expected SetContext to detach the deadline")
+	}
+	if err := stream.Context().Err(); err != nil {
+		t.Fatalf("expected stream context to stay alive after SetContext, got %v", err)
+	}
+}
+
 type closeCountingBody struct {
 	closed int
 }
