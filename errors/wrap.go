@@ -50,14 +50,19 @@ func Unwrap(err error) error {
 	return stderrors.Unwrap(err)
 }
 
-// Join returns an error that wraps the given errors. The returned error has a method Unwrap() []error that returns the
-// given errors in order.
+// Join returns an error that wraps the given errors. The returned error has a
+// method Unwrap() []error that returns the given errors in order.
 //
-// Join returns nil if errs contains no non-nil error values. If errs contains
-// a single non-nil error value, Join returns that error. If errs contains multiple non-nil error values, Join returns an error that formats as the concatenation of the
-// format of the non-nil error values, separated by "; ". The returned error's Unwrap method returns a slice of the non-nil error values.
+// Join returns nil if errs contains no non-nil error values. If errs contains a
+// single non-nil error value, Join returns that error. If errs contains multiple
+// non-nil error values, Join returns an error that formats as the concatenation
+// of the format of the non-nil error values, separated by "; ". The returned
+// error's Unwrap method returns a slice of the non-nil error values.
 //
-// Join is designed for use in situations where multiple errors may be returned, such as when processing a list of items and collecting errors from each item. It allows you to combine those errors into a single error value that can be returned to the caller.
+// Join is designed for use in situations where multiple errors may be returned,
+// such as when processing a list of items and collecting errors from each item.
+// It allows you to combine those errors into a single error value that can be
+// returned to the caller.
 func Join(errs ...error) error {
 	return stderrors.Join(errs...)
 }
