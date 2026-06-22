@@ -85,6 +85,67 @@ func TestDirectError(t *testing.T) {
 	}
 }
 
+// TestCanceledDoesNotDegradeNode verifies that context.Canceled does not
+// lower a node's health score. Canceled means the caller gave up — it is
+// not evidence of backend failure. context.DeadlineExceeded (backend too
+// slow) should still degrade the node as before.
+func TestCanceledDoesNotDegradeNode(t *testing.T) {
+	newNode := func() selector.WeightedNode {
+		return (&Builder{}).Build(selector.NewNode(
+			"http",
+			"127.0.0.1:9090",
+			&registry.ServiceInstance{
+				ID:        "127.0.0.1:9090",
+				Name:      "helloworld",
+				Version:   "v1.0.0",
+				Endpoints: []string{"http://127.0.0.1:9090"},
+				Metadata:  map[string]string{"weight": "10"},
+			}))
+	}
+
+	// --- context.Canceled must NOT degrade health ---
+	wn := newNode()
+	n := wn.(*Node)
+	// One successful pick to initialise EWMA state.
+	done := wn.Pick()
+	time.Sleep(time.Millisecond * 20)
+	done(context.Background(), selector.DoneInfo{})
+	baselineHealth := n.success.Load()
+
+	// Several picks that all report context.Canceled.
+	for i := 0; i < 4; i++ {
+		done = wn.Pick()
+		time.Sleep(time.Millisecond * 20)
+		done(context.Background(), selector.DoneInfo{Err: context.Canceled})
+	}
+	afterHealth := n.success.Load()
+	// Health must not have dropped significantly — Canceled is not a backend fault.
+	// Allow a tiny EWMA drift but it must stay near 1000 (full health).
+	if afterHealth < baselineHealth*9/10 {
+		t.Errorf("context.Canceled should not degrade node health: before=%d after=%d",
+			baselineHealth, afterHealth)
+	}
+
+	// --- context.DeadlineExceeded still degrades health ---
+	wn2 := newNode()
+	n2 := wn2.(*Node)
+	done = wn2.Pick()
+	time.Sleep(time.Millisecond * 20)
+	done(context.Background(), selector.DoneInfo{})
+	baselineHealth2 := n2.success.Load()
+
+	for i := 0; i < 4; i++ {
+		done = wn2.Pick()
+		time.Sleep(time.Millisecond * 20)
+		done(context.Background(), selector.DoneInfo{Err: context.DeadlineExceeded})
+	}
+	afterHealth2 := n2.success.Load()
+	if afterHealth2 >= baselineHealth2 {
+		t.Errorf("context.DeadlineExceeded should degrade node health: before=%d after=%d",
+			baselineHealth2, afterHealth2)
+	}
+}
+
 func TestDirectErrorHandler(t *testing.T) {
 	b := &Builder{
 		ErrHandler: func(err error) bool {
