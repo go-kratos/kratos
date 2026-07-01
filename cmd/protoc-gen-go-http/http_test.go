@@ -287,3 +287,16 @@ func TestHTTPTemplateStreamsAndHTTPBody(t *testing.T) {
 		t.Fatalf("scalar named body should not emit WithStreamBodyField:\n%s", got)
 	}
 }
+func TestReplaceBoundary(t *testing.T) {
+
+	path := "/test/{message.namespace=*}/name/{message.name=*}"
+	vars := buildPathVars(path)
+	for v, s := range vars {
+		if s != nil {
+			path = replacePath(v, *s, path)
+		}
+	}
+	if !reflect.DeepEqual("/test/{message.namespace:.*}/name/{message.name:.*}", path) {
+		t.Fatal(`"/test/{message.namespace=*}/name/{message.name=*}" should be "/test/{message.namespace:.*}/name/{message.name:.*}"`)
+	}
+}
