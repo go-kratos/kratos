@@ -16,6 +16,18 @@ type errorInfo struct {
 	CamelValue string
 	Comment    string
 	HasComment bool
+	Details    *errorDetails
+	HasDetails bool
+}
+
+type errorDetails struct {
+	Format    *errorFormat
+	HasFormat bool
+}
+
+type errorFormat struct {
+	Str      string
+	WithArgs bool
 }
 
 type errorWrapper struct {
