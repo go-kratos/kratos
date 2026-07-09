@@ -155,7 +155,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, err
 		unaryClientInterceptor(options.middleware, options.timeout, options.filters),
 	}
 	sints := []grpc.StreamClientInterceptor{
-		streamClientInterceptor(options.streamMiddleware, options.filters),
+		streamClientInterceptor(options.streamMiddleware, options.timeout, options.filters),
 	}
 
 	if len(options.ints) > 0 {
@@ -237,6 +237,11 @@ type wrappedClientStream struct {
 	grpc.ClientStream
 	ctx        context.Context
 	middleware matcher.Matcher
+	// cancel releases the per-stream timeout context created when WithTimeout is
+	// configured. It is nil when no timeout is set. Called on the first terminal
+	// RecvMsg error (including io.EOF) so the context is not held open past the
+	// stream's lifetime.
+	cancel context.CancelFunc
 }
 
 func (w *wrappedClientStream) Context() context.Context {
@@ -276,10 +281,17 @@ func (w *wrappedClientStream) RecvMsg(m any) error {
 	}
 
 	_, err := h(w.ctx, m)
+	// Release the per-stream timeout context on any terminal error (including
+	// io.EOF which signals normal stream completion). This ensures that a
+	// context created by streamClientInterceptor with WithTimeout is not held
+	// open beyond the stream's actual lifetime.
+	if err != nil && w.cancel != nil {
+		w.cancel()
+	}
 	return err
 }
 
-func streamClientInterceptor(ms []middleware.Middleware, filters []selector.NodeFilter) grpc.StreamClientInterceptor {
+func streamClientInterceptor(ms []middleware.Middleware, timeout time.Duration, filters []selector.NodeFilter) grpc.StreamClientInterceptor {
 	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) { // nolint
 		ctx = transport.NewClientContext(ctx, &Transport{
 			endpoint:    cc.Target(),
@@ -287,11 +299,23 @@ func streamClientInterceptor(ms []middleware.Middleware, filters []selector.Node
 			reqHeader:   headerCarrier{},
 			nodeFilters: filters,
 		})
+		// Apply the configured per-stream timeout. Unlike unary RPCs where the
+		// context is cancelled via defer when the handler returns, streaming RPCs
+		// are long-lived: the cancel function is stored in wrappedClientStream and
+		// called when RecvMsg receives its first terminal error (including io.EOF),
+		// so the context is released exactly when the stream ends.
+		var cancel context.CancelFunc
+		if timeout > 0 {
+			ctx, cancel = context.WithTimeout(ctx, timeout)
+		}
 		var p selector.Peer
 		ctx = selector.NewPeerContext(ctx, &p)
 
 		clientStream, err := streamer(ctx, desc, cc, method, opts...)
 		if err != nil {
+			if cancel != nil {
+				cancel()
+			}
 			return nil, err
 		}
 
@@ -309,6 +333,7 @@ func streamClientInterceptor(ms []middleware.Middleware, filters []selector.Node
 			ClientStream: clientStream,
 			ctx:          ctx,
 			middleware:   m,
+			cancel:       cancel,
 		}
 
 		return wrappedStream, nil
