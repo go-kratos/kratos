@@ -6,16 +6,14 @@ package helloworld
 
 import (
 	context "context"
-	http "github.com/go-kratos/kratos/v2/transport/http"
-	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
+	http "github.com/go-kratos/kratos/v3/transport/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
 var _ = new(context.Context)
-var _ = binding.EncodeURL
 
-const _ = http.SupportPackageIsVersion1
+const _ = http.SupportPackageIsVersion3
 
 const OperationGreeterSayHello = "/helloworld.Greeter/SayHello"
 
@@ -65,9 +63,12 @@ func NewGreeterHTTPClient(client *http.Client) GreeterHTTPClient {
 func (c *GreeterHTTPClientImpl) SayHello(ctx context.Context, in *HelloRequest, opts ...http.CallOption) (*HelloReply, error) {
 	var out HelloReply
 	pattern := "/helloworld/{name}"
-	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationGreeterSayHello))
-	opts = append(opts, http.PathTemplate(pattern))
+	path := http.BuildPath(pattern, in, http.WithQueryParams())
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.Operation(OperationGreeterSayHello),
+		http.PathTemplate(pattern),
+	}, opts...)
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err

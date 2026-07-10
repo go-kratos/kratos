@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/selector"
+	"github.com/go-kratos/kratos/v3/registry"
+	"github.com/go-kratos/kratos/v3/selector"
 )
 
 func TestParseTarget(t *testing.T) {
@@ -125,7 +125,7 @@ func (m *mockWatch) Stop() error {
 	if m.stopErr {
 		return errors.New("mock test error")
 	}
-	// 标记 next 需要报错
+	// Mark the next call to return an error.
 	m.nextErr = true
 	return nil
 }
@@ -140,7 +140,7 @@ func TestResolver(t *testing.T) {
 	cancelCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// 异步 无需报错
+	// Async mode should not return an error.
 	r, err := newResolver(cancelCtx, &mockDiscoveries{true, false, false}, ta, &mockRebalancer{}, false, false, 25)
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
@@ -149,7 +149,7 @@ func TestResolver(t *testing.T) {
 		_ = r.Close()
 	}
 
-	// 同步 一切正常运行
+	// Sync mode should run successfully.
 	r, err = newResolver(cancelCtx, &mockDiscoveries{false, false, false}, ta, &mockRebalancer{}, true, true, 25)
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
@@ -158,7 +158,7 @@ func TestResolver(t *testing.T) {
 		_ = r.Close()
 	}
 
-	// 同步 但是 next 出错 以及 stop 出错
+	// Sync mode should return an error when Next and Stop fail.
 	r, err = newResolver(cancelCtx, &mockDiscoveries{false, true, true}, ta, &mockRebalancer{}, true, true, 25)
 	if err == nil {
 		t.Errorf("expect err, got nil")
@@ -167,7 +167,7 @@ func TestResolver(t *testing.T) {
 		_ = r.Close()
 	}
 
-	// 同步 service name watch 失败
+	// Sync mode should return an error when service name watch fails.
 	r, err = newResolver(cancelCtx, &mockDiscoveries{false, true, true}, &Target{
 		Scheme:   "discovery",
 		Endpoint: errServiceName,
@@ -181,7 +181,7 @@ func TestResolver(t *testing.T) {
 
 	cancel()
 
-	// 此处应该打印出来 context.Canceled
+	// This should log context.Canceled.
 	r, err = newResolver(cancelCtx, &mockDiscoveries{false, false, false}, ta, &mockRebalancer{}, false, false, 25)
 	if err != nil {
 		t.Errorf("expect %v, got %v", nil, err)
@@ -190,7 +190,7 @@ func TestResolver(t *testing.T) {
 		_ = r.Close()
 	}
 
-	// 同步 但是服务取消，此时需要报错
+	// Sync mode should return an error when the service is canceled.
 	r, err = newResolver(cancelCtx, &mockDiscoveries{false, false, true}, ta, &mockRebalancer{}, true, true, 25)
 	if err == nil {
 		t.Errorf("expect ctx cancel err, got nil")

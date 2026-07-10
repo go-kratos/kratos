@@ -5,8 +5,8 @@ import (
 
 	"github.com/apolloconfig/agollo/v4/storage"
 
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/encoding"
+	"github.com/go-kratos/kratos/v3/config"
+	"github.com/go-kratos/kratos/v3/encoding"
 )
 
 func Test_onChange(t *testing.T) {
@@ -48,7 +48,7 @@ func Test_onChange(t *testing.T) {
 			"test json onChange",
 			"app.json",
 			map[string]*storage.ConfigChange{
-				"content": {
+				contentKey: {
 					OldValue:   `{"name":"old"}`,
 					NewValue:   `{"name":"new"}`,
 					ChangeType: storage.MODIFIED,
@@ -83,7 +83,7 @@ func Test_onChange_deletedContent(t *testing.T) {
 
 	t.Run("json content deleted should not panic", func(t *testing.T) {
 		changes := map[string]*storage.ConfigChange{
-			"content": {
+			contentKey: {
 				OldValue:   `{"name":"old"}`,
 				NewValue:   nil,
 				ChangeType: storage.DELETED,
@@ -99,7 +99,7 @@ func Test_onChange_deletedContent(t *testing.T) {
 
 	t.Run("yaml content deleted should not panic", func(t *testing.T) {
 		changes := map[string]*storage.ConfigChange{
-			"content": {
+			contentKey: {
 				OldValue:   "name: old",
 				NewValue:   nil,
 				ChangeType: storage.DELETED,
@@ -131,7 +131,7 @@ func Test_onChange_nonStringNewValue(t *testing.T) {
 
 	t.Run("json content with non-string NewValue should not panic", func(t *testing.T) {
 		changes := map[string]*storage.ConfigChange{
-			"content": {
+			contentKey: {
 				OldValue:   `{"name":"old"}`,
 				NewValue:   12345,
 				ChangeType: storage.MODIFIED,

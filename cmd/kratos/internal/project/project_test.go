@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/base"
+	"github.com/go-kratos/kratos/cmd/kratos/v3/internal/base"
 )
 
 // TestCmdNew tests the `kratos new` command.
@@ -24,9 +24,9 @@ func TestCmdNew(t *testing.T) {
 
 	// check that the expected files were created
 	for _, file := range []string{
-		"go.mod",
-		"go.sum",
-		"README.md",
+		goModFileName,
+		goSumFileName,
+		readmeFileName,
 		"cmd/helloworld/main.go",
 	} {
 		if _, err := os.Stat(filepath.Join(cwd, projectName, file)); err != nil {
@@ -35,7 +35,7 @@ func TestCmdNew(t *testing.T) {
 	}
 
 	// check that the go.mod file contains the expected module name
-	assertGoMod(t, filepath.Join(cwd, projectName, "go.mod"), projectName)
+	assertGoMod(t, filepath.Join(cwd, projectName, goModFileName), projectName)
 
 	assertImportsInclude(t, filepath.Join(cwd, projectName, "cmd", projectName, "wire.go"), fmt.Sprintf(`"%s/internal/biz"`, projectName))
 }
@@ -58,9 +58,9 @@ func TestCmdNewNoMod(t *testing.T) {
 
 	// check that the expected files were created
 	for _, file := range []string{
-		"go.mod",
-		"go.sum",
-		"README.md",
+		goModFileName,
+		goSumFileName,
+		readmeFileName,
 		"cmd/project/main.go",
 		"app/user/cmd/user/main.go",
 	} {

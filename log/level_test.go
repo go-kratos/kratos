@@ -1,100 +1,38 @@
 package log
 
-import "testing"
+import (
+	"log/slog"
+	"testing"
+)
 
-func TestLevel_Key(t *testing.T) {
-	if LevelInfo.Key() != LevelKey {
-		t.Errorf("want: %s, got: %s", LevelKey, LevelInfo.Key())
+func TestLevelAliases(t *testing.T) {
+	if LevelDebug != slog.LevelDebug {
+		t.Fatalf("LevelDebug = %v, want %v", LevelDebug, slog.LevelDebug)
 	}
-}
-
-func TestLevel_String(t *testing.T) {
-	tests := []struct {
-		name string
-		l    Level
-		want string
-	}{
-		{
-			name: "DEBUG",
-			l:    LevelDebug,
-			want: "DEBUG",
-		},
-		{
-			name: "INFO",
-			l:    LevelInfo,
-			want: "INFO",
-		},
-		{
-			name: "WARN",
-			l:    LevelWarn,
-			want: "WARN",
-		},
-		{
-			name: "ERROR",
-			l:    LevelError,
-			want: "ERROR",
-		},
-		{
-			name: "FATAL",
-			l:    LevelFatal,
-			want: "FATAL",
-		},
-		{
-			name: "other",
-			l:    10,
-			want: "",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.l.String(); got != tt.want {
-				t.Errorf("String() = %v, want %v", got, tt.want)
-			}
-		})
+	if LevelFatal != slog.LevelError+4 {
+		t.Fatalf("LevelFatal = %v, want %v", LevelFatal, slog.LevelError+4)
 	}
 }
 
 func TestParseLevel(t *testing.T) {
 	tests := []struct {
 		name string
-		s    string
+		in   string
 		want Level
 	}{
-		{
-			name: "DEBUG",
-			want: LevelDebug,
-			s:    "DEBUG",
-		},
-		{
-			name: "INFO",
-			want: LevelInfo,
-			s:    "INFO",
-		},
-		{
-			name: "WARN",
-			want: LevelWarn,
-			s:    "WARN",
-		},
-		{
-			name: "ERROR",
-			want: LevelError,
-			s:    "ERROR",
-		},
-		{
-			name: "FATAL",
-			want: LevelFatal,
-			s:    "FATAL",
-		},
-		{
-			name: "other",
-			want: LevelInfo,
-			s:    "other",
-		},
+		{name: "debug", in: "debug", want: LevelDebug},
+		{name: "info", in: "info", want: LevelInfo},
+		{name: "warn", in: "warn", want: LevelWarn},
+		{name: "error", in: "error", want: LevelError},
+		{name: "fatal", in: "fatal", want: LevelFatal},
+		{name: "custom", in: "INFO+1", want: LevelInfo + 1},
+		{name: "default", in: "unknown", want: LevelInfo},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ParseLevel(tt.s); got != tt.want {
-				t.Errorf("ParseLevel() = %v, want %v", got, tt.want)
+			if got := ParseLevel(tt.in); got != tt.want {
+				t.Fatalf("ParseLevel(%q) = %v, want %v", tt.in, got, tt.want)
 			}
 		})
 	}

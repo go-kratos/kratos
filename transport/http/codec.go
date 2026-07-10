@@ -6,17 +6,23 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 
 	"github.com/gorilla/mux"
+	"google.golang.org/genproto/googleapis/api/httpbody"
+	"google.golang.org/protobuf/proto"
 
-	"github.com/go-kratos/kratos/v2/encoding"
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/internal/httputil"
-	"github.com/go-kratos/kratos/v2/transport/http/binding"
+	"github.com/go-kratos/kratos/v3/encoding"
+	"github.com/go-kratos/kratos/v3/errors"
+	"github.com/go-kratos/kratos/v3/internal/httputil"
 )
 
-// SupportPackageIsVersion1 These constants should not be referenced from any other code.
-const SupportPackageIsVersion1 = true
+// SupportPackageIsVersion3 These constants should not be referenced from any other code.
+const SupportPackageIsVersion3 = true
+
+const defaultHTTPBodyContentType = "application/octet-stream"
+
+var protoMessageType = reflect.TypeOf((*proto.Message)(nil)).Elem()
 
 // Redirector replies to the request with a redirect to url
 // which may be a path relative to the request path.
@@ -50,16 +56,26 @@ func DefaultRequestVars(r *http.Request, v any) error {
 	for k, v := range raws {
 		vars[k] = []string{v}
 	}
-	return binding.BindQuery(vars, v)
+	return bindQuery(vars, v)
 }
 
 // DefaultRequestQuery decodes the request vars to object.
 func DefaultRequestQuery(r *http.Request, v any) error {
-	return binding.BindQuery(r.URL.Query(), v)
+	return bindQuery(r.URL.Query(), v)
 }
 
 // DefaultRequestDecoder decodes the request body to object.
 func DefaultRequestDecoder(r *http.Request, v any) error {
+	if body, ok := httpBody(v); ok {
+		data, err := io.ReadAll(r.Body)
+		r.Body = io.NopCloser(bytes.NewBuffer(data))
+		if err != nil {
+			return errors.BadRequest("CODEC", err.Error())
+		}
+		body.ContentType = r.Header.Get("Content-Type")
+		body.Data = data
+		return nil
+	}
 	codec, ok := CodecForRequest(r, "Content-Type")
 	if !ok {
 		return errors.BadRequest("CODEC", fmt.Sprintf("unregister Content-Type: %s", r.Header.Get("Content-Type")))
@@ -75,7 +91,7 @@ func DefaultRequestDecoder(r *http.Request, v any) error {
 	if len(data) == 0 {
 		return nil
 	}
-	if err = codec.Unmarshal(data, v); err != nil {
+	if err = decodeWithCodec(codec, data, v); err != nil {
 		return errors.BadRequest("CODEC", fmt.Sprintf("body unmarshal %s", err.Error()))
 	}
 	return nil
@@ -85,6 +101,15 @@ func DefaultRequestDecoder(r *http.Request, v any) error {
 func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v any) error {
 	if v == nil {
 		return nil
+	}
+	if body, ok := httpBody(v); ok {
+		contentType := body.GetContentType()
+		if contentType == "" {
+			contentType = defaultHTTPBodyContentType
+		}
+		w.Header().Set("Content-Type", contentType)
+		_, err := w.Write(body.GetData())
+		return err
 	}
 	if rd, ok := v.(Redirector); ok {
 		url, code := rd.Redirect()
@@ -133,4 +158,61 @@ func CodecForRequest(r *http.Request, name string) (encoding.Codec, bool) {
 		}
 	}
 	return encoding.GetCodec("json"), false
+}
+
+func httpBody(v any) (*httpbody.HttpBody, bool) {
+	switch body := v.(type) {
+	case *httpbody.HttpBody:
+		return body, body != nil
+	case **httpbody.HttpBody:
+		if body == nil {
+			return nil, false
+		}
+		if *body == nil {
+			*body = new(httpbody.HttpBody)
+		}
+		return *body, true
+	default:
+		return nil, false
+	}
+}
+
+func decodeWithCodec(codec encoding.Codec, data []byte, v any) error {
+	switch codec.Name() {
+	case "proto", "protojson":
+	default:
+		return codec.Unmarshal(data, v)
+	}
+
+	if msg, ok := v.(proto.Message); ok {
+		rv := reflect.ValueOf(v)
+		if rv.Kind() == reflect.Pointer && rv.IsNil() {
+			return codec.Unmarshal(data, v)
+		}
+		return codec.Unmarshal(data, msg)
+	}
+
+	rv := reflect.ValueOf(v)
+	if !rv.IsValid() || rv.Kind() != reflect.Pointer || rv.IsNil() {
+		return codec.Unmarshal(data, v)
+	}
+
+	elem := rv.Type().Elem()
+	if elem.Kind() != reflect.Pointer || !elem.Implements(protoMessageType) {
+		return codec.Unmarshal(data, v)
+	}
+
+	target := rv.Elem()
+	if target.IsNil() {
+		target.Set(reflect.New(elem.Elem()))
+	}
+	return codec.Unmarshal(data, target.Interface())
+}
+
+// BodyContentType returns the content type carried by v or a binary default.
+func BodyContentType(v any) string {
+	if body, ok := httpBody(v); ok && body.GetContentType() != "" {
+		return body.GetContentType()
+	}
+	return defaultHTTPBodyContentType
 }

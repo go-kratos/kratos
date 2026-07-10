@@ -5,11 +5,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/change"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/project"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/run"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/upgrade"
+	"github.com/go-kratos/kratos/cmd/kratos/v3/internal/change"
+	"github.com/go-kratos/kratos/cmd/kratos/v3/internal/project"
+	"github.com/go-kratos/kratos/cmd/kratos/v3/internal/proto"
+	"github.com/go-kratos/kratos/cmd/kratos/v3/internal/run"
+	"github.com/go-kratos/kratos/cmd/kratos/v3/internal/upgrade"
 )
 
 var rootCmd = &cobra.Command{
@@ -29,6 +29,6 @@ func init() {
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to execute command: %v", err)
 	}
 }

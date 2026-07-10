@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"runtime"
 	"strings"
@@ -14,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/internal/host"
+	"github.com/go-kratos/kratos/v3/internal/host"
 )
 
 const appJSONStr = "application/json"
@@ -194,6 +195,24 @@ func TestHandle(_ *testing.T) {
 	r.CONNECT("/connect", h)
 	r.OPTIONS("/options", h)
 	r.TRACE("/trace", h)
+}
+
+func TestRouterHandleWildcardMethod(t *testing.T) {
+	srv := NewServer()
+	srv.Route("/").Handle("*", "/wild", func(ctx Context) error {
+		return ctx.String(http.StatusNoContent, "")
+	})
+
+	for _, method := range []string{http.MethodGet, http.MethodPost} {
+		t.Run(method, func(t *testing.T) {
+			req := httptest.NewRequest(method, "/wild", nil)
+			w := httptest.NewRecorder()
+			srv.ServeHTTP(w, req)
+			if w.Code != http.StatusNoContent {
+				t.Fatalf("expected %d, got %d", http.StatusNoContent, w.Code)
+			}
+		})
+	}
 }
 
 func TestRouter_ContextDataRace(t *testing.T) {

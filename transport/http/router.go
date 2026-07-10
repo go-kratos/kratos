@@ -35,7 +35,7 @@ func newRouter(prefix string, srv *Server, filters ...FilterFunc) *Router {
 
 // Group returns a new router group.
 func (r *Router) Group(prefix string, filters ...FilterFunc) *Router {
-	var newFilters []FilterFunc
+	newFilters := make([]FilterFunc, 0, len(r.filters)+len(filters))
 	newFilters = append(newFilters, r.filters...)
 	newFilters = append(newFilters, filters...)
 	return newRouter(path.Join(r.prefix, prefix), r.srv, newFilters...)
@@ -52,7 +52,10 @@ func (r *Router) Handle(method, relativePath string, h HandlerFunc, filters ...F
 	}))
 	next = FilterChain(filters...)(next)
 	next = FilterChain(r.filters...)(next)
-	r.srv.router.Handle(path.Join(r.prefix, relativePath), next).Methods(method)
+	route := r.srv.router.Handle(path.Join(r.prefix, relativePath), next)
+	if method != "*" {
+		route.Methods(method)
+	}
 }
 
 // GET registers a new GET route for a path with matching handler in the router.

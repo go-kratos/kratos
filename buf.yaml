@@ -1,0 +1,12 @@
+version: v2
+modules:
+  - path: .
+    excludes:
+      - cmd/protoc-gen-go-errors
+      - third_party
+lint:
+  use:
+    - DEFAULT
+breaking:
+  use:
+    - FILE

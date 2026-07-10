@@ -53,8 +53,8 @@ func KratosMod() string {
 	if cachePath == "" {
 		cachePath = filepath.Join(gopath, "pkg", "mod")
 	}
-	if path, err := ModuleVersion("github.com/go-kratos/kratos/v2"); err == nil {
-		// $GOPATH/pkg/mod/github.com/go-kratos/kratos@v2
+	if path, err := ModuleVersion("github.com/go-kratos/kratos/v3"); err == nil {
+		// $GOPATH/pkg/mod/github.com/go-kratos/kratos/v3@v3.0.0
 		return filepath.Join(cachePath, path)
 	}
 	// $GOPATH/src/github.com/go-kratos/kratos

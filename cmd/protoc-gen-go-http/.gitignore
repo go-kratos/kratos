@@ -1,0 +1,2 @@
+# Compiled plugin binary produced by `go build` in this directory.
+/protoc-gen-go-http

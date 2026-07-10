@@ -8,7 +8,7 @@ import (
 	"github.com/go-chassis/sc-client"
 	"github.com/gofrs/uuid"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 var r *Registry

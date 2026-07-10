@@ -3,9 +3,9 @@ package proto
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto/add"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto/client"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto/server"
+	"github.com/go-kratos/kratos/cmd/kratos/v3/internal/proto/add"
+	"github.com/go-kratos/kratos/cmd/kratos/v3/internal/proto/client"
+	"github.com/go-kratos/kratos/cmd/kratos/v3/internal/proto/server"
 )
 
 // CmdProto represents the proto command.

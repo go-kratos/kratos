@@ -37,6 +37,16 @@ type GithubAPI struct {
 	Token string
 }
 
+const (
+	commitTypeFix   = "fix"
+	commitTypeFeat  = "feat"
+	commitTypeDeps  = "deps"
+	commitTypeBuild = "build"
+	commitTypeBreak = "break"
+	commitTypeChore = "chore"
+	commitTypeOther = "other"
+)
+
 // GetReleaseInfo for getting kratos release info.
 func (g *GithubAPI) GetReleaseInfo(version string) ReleaseInfo {
 	api := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", g.Owner, g.Repo)
@@ -113,13 +123,13 @@ func requestGithubAPI(url string, method string, body io.Reader, token string) (
 
 func ParseCommitsInfo(info []CommitInfo) string {
 	group := map[string][]string{
-		"fix":   {},
-		"feat":  {},
-		"deps":  {},
-		"build": {},
-		"break": {},
-		"chore": {},
-		"other": {},
+		commitTypeFix:   {},
+		commitTypeFeat:  {},
+		commitTypeDeps:  {},
+		commitTypeBuild: {},
+		commitTypeBreak: {},
+		commitTypeChore: {},
+		commitTypeOther: {},
 	}
 
 	for _, commitInfo := range info {
@@ -128,7 +138,7 @@ func ParseCommitsInfo(info []CommitInfo) string {
 		if index != -1 {
 			msg = msg[:index-1]
 		}
-		prefix := []string{"fix", "feat", "build", "deps", "break", "chore"}
+		prefix := []string{commitTypeFix, commitTypeFeat, commitTypeBuild, commitTypeDeps, commitTypeBreak, commitTypeChore}
 		var matched bool
 		for _, v := range prefix {
 			msg = strings.TrimPrefix(msg, " ")
@@ -138,7 +148,7 @@ func ParseCommitsInfo(info []CommitInfo) string {
 			}
 		}
 		if !matched {
-			group["other"] = append(group["other"], msg)
+			group[commitTypeOther] = append(group[commitTypeOther], msg)
 		}
 	}
 
@@ -146,19 +156,19 @@ func ParseCommitsInfo(info []CommitInfo) string {
 	for key, value := range group {
 		var text string
 		switch key {
-		case "break":
+		case commitTypeBreak:
 			text = "### Breaking Changes\n"
-		case "deps":
+		case commitTypeDeps:
 			text = "### Dependencies\n"
-		case "feat":
+		case commitTypeFeat:
 			text = "### New Features\n"
-		case "fix":
+		case commitTypeFix:
 			text = "### Bug Fixes\n"
-		case "build":
+		case commitTypeBuild:
 			text = "### Builds\n"
-		case "chore":
+		case commitTypeChore:
 			text = "### Chores\n"
-		case "other":
+		case commitTypeOther:
 			text = "### Others\n"
 		}
 		if len(value) == 0 {
@@ -169,7 +179,15 @@ func ParseCommitsInfo(info []CommitInfo) string {
 			md[key] += fmt.Sprintf("- %s\n", value)
 		}
 	}
-	return fmt.Sprint(md["break"], md["deps"], md["feat"], md["fix"], md["build"], md["chore"], md["other"])
+	return fmt.Sprint(
+		md[commitTypeBreak],
+		md[commitTypeDeps],
+		md[commitTypeFeat],
+		md[commitTypeFix],
+		md[commitTypeBuild],
+		md[commitTypeChore],
+		md[commitTypeOther],
+	)
 }
 
 func ParseReleaseInfo(info ReleaseInfo) string {

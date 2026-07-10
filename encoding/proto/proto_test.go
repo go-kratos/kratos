@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	testData "github.com/go-kratos/kratos/v2/internal/testdata/encoding"
+	testData "github.com/go-kratos/kratos/v3/internal/testdata/encoding"
 )
 
 func TestName(t *testing.T) {

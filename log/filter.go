@@ -1,94 +1,151 @@
 package log
 
-// FilterOption is filter option.
-type FilterOption func(*Filter)
+import (
+	"context"
+	"log/slog"
+	"strings"
+)
 
-const fuzzyStr = "***"
+const redactedValue = "***"
 
-// FilterLevel with filter level.
-func FilterLevel(level Level) FilterOption {
-	return func(opts *Filter) {
-		opts.level = level
-	}
+// FilterOption configures filtering in [WithFilter].
+type FilterOption func(*filterConfig)
+
+type filterConfig struct {
+	keys   map[string]struct{}
+	filter func(ctx context.Context, record slog.Record) bool
 }
 
-// FilterKey with filter key.
-func FilterKey(key ...string) FilterOption {
-	return func(o *Filter) {
-		for _, v := range key {
-			o.key[v] = struct{}{}
+// FilterKey redacts the values of attributes whose key matches any of the
+// provided keys. Keys may be leaf names ("password") or dotted group paths
+// ("user.password").
+func FilterKey(keys ...string) FilterOption {
+	return func(c *filterConfig) {
+		if c.keys == nil {
+			c.keys = make(map[string]struct{}, len(keys))
+		}
+		for _, k := range keys {
+			c.keys[k] = struct{}{}
 		}
 	}
 }
 
-// FilterValue with filter value.
-func FilterValue(value ...string) FilterOption {
-	return func(o *Filter) {
-		for _, v := range value {
-			o.value[v] = struct{}{}
-		}
-	}
+// FilterFunc drops records for which fn returns true. fn is evaluated after key
+// redaction.
+func FilterFunc(fn func(ctx context.Context, record slog.Record) bool) FilterOption {
+	return func(c *filterConfig) { c.filter = fn }
 }
 
-// FilterFunc with filter func.
-func FilterFunc(f func(level Level, keyvals ...any) bool) FilterOption {
-	return func(o *Filter) {
-		o.filter = f
+func newFilterHandler(next slog.Handler, opts ...FilterOption) slog.Handler {
+	if next == nil {
+		next = discardHandler{}
 	}
-}
-
-// Filter is a logger filter.
-type Filter struct {
-	logger Logger
-	level  Level
-	key    map[any]struct{}
-	value  map[any]struct{}
-	filter func(level Level, keyvals ...any) bool
-}
-
-// NewFilter new a logger filter.
-func NewFilter(logger Logger, opts ...FilterOption) *Filter {
-	options := Filter{
-		logger: logger,
-		key:    make(map[any]struct{}),
-		value:  make(map[any]struct{}),
-	}
+	cfg := &filterConfig{}
 	for _, o := range opts {
-		o(&options)
+		o(cfg)
 	}
-	return &options
+	if len(cfg.keys) == 0 && cfg.filter == nil {
+		return next
+	}
+	return &filterHandler{next: next, cfg: cfg}
 }
 
-// Log Print log by level and keyvals.
-func (f *Filter) Log(level Level, keyvals ...any) error {
-	if level < f.level {
+type filterHandler struct {
+	next   slog.Handler
+	cfg    *filterConfig
+	groups []string
+}
+
+func (h *filterHandler) Enabled(ctx context.Context, level slog.Level) bool {
+	return h.next.Enabled(ctx, level)
+}
+
+func (h *filterHandler) Handle(ctx context.Context, record slog.Record) error {
+	if h.needsRewrite() {
+		record = h.rewrite(record)
+	}
+	if h.cfg.filter != nil && h.cfg.filter(ctx, record) {
 		return nil
 	}
-	// prefixkv contains the slice of arguments defined as prefixes during the log initialization
-	var prefixkv []any
-	l, ok := f.logger.(*logger)
-	if ok && len(l.prefix) > 0 {
-		prefixkv = make([]any, 0, len(l.prefix))
-		prefixkv = append(prefixkv, l.prefix...)
-	}
+	return h.next.Handle(ctx, record)
+}
 
-	if f.filter != nil && (f.filter(level, prefixkv...) || f.filter(level, keyvals...)) {
-		return nil
+func (h *filterHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	if h.needsRewrite() {
+		attrs = h.redactAttrs(h.groups, attrs)
 	}
+	next := *h
+	next.next = h.next.WithAttrs(attrs)
+	return &next
+}
 
-	if len(f.key) > 0 || len(f.value) > 0 {
-		for i := 0; i < len(keyvals); i += 2 {
-			v := i + 1
-			if v >= len(keyvals) {
-				break
-			}
-			if _, ok := f.key[keyvals[i]]; ok {
-				keyvals[v] = fuzzyStr
-			}
-			if _, ok := f.value[keyvals[v]]; ok {
-				keyvals[v] = fuzzyStr
-			}
+func (h *filterHandler) WithGroup(name string) slog.Handler {
+	next := *h
+	next.groups = append(append([]string{}, h.groups...), name)
+	next.next = h.next.WithGroup(name)
+	return &next
+}
+
+func (h *filterHandler) needsRewrite() bool {
+	return len(h.cfg.keys) > 0
+}
+
+func (h *filterHandler) rewrite(record slog.Record) slog.Record {
+	cloned := record.Clone()
+	attrs := make([]slog.Attr, 0, cloned.NumAttrs())
+	cloned.Attrs(func(a slog.Attr) bool {
+		attrs = append(attrs, a)
+		return true
+	})
+	redacted := h.redactAttrs(h.groups, attrs)
+	out := slog.NewRecord(cloned.Time, cloned.Level, cloned.Message, cloned.PC)
+	out.AddAttrs(redacted...)
+	return out
+}
+
+func (h *filterHandler) redactAttrs(groups []string, attrs []slog.Attr) []slog.Attr {
+	out := make([]slog.Attr, len(attrs))
+	for i, a := range attrs {
+		out[i] = h.redactAttr(groups, a)
+	}
+	return out
+}
+
+func (h *filterHandler) redactAttr(groups []string, a slog.Attr) slog.Attr {
+	a.Value = a.Value.Resolve()
+	if a.Value.Kind() == slog.KindGroup {
+		group := a.Value.Group()
+		next := make([]slog.Attr, len(group))
+		nextGroups := appendPath(groups, a.Key)
+		for i, ga := range group {
+			next[i] = h.redactAttr(nextGroups, ga)
 		}
+		return slog.Attr{Key: a.Key, Value: slog.GroupValue(next...)}
 	}
-	return f.logger.Log(level, keyvals...)
+	if h.matchesKey(groups, a.Key) {
+		return slog.Attr{Key: a.Key, Value: slog.StringValue(redactedValue)}
+	}
+	return a
+}
+
+func (h *filterHandler) matchesKey(groups []string, key string) bool {
+	if _, ok := h.cfg.keys[key]; ok {
+		return true
+	}
+	if len(groups) == 0 {
+		return false
+	}
+	path := strings.Join(appendPath(groups, key), ".")
+	_, ok := h.cfg.keys[path]
+	return ok
+}
+
+func appendPath(groups []string, key string) []string {
+	if key == "" {
+		return groups
+	}
+	next := make([]string, 0, len(groups)+1)
+	next = append(next, groups...)
+	next = append(next, key)
+	return next
 }

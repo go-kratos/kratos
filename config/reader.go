@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v3/log"
 )
 
 // Reader is config reader.
@@ -44,11 +44,11 @@ func (r *reader) Merge(kvs ...*KeyValue) error {
 	for _, kv := range kvs {
 		next := make(map[string]any)
 		if err := r.opts.decoder(kv, next); err != nil {
-			log.Errorf("Failed to config decode error: %v key: %s value: %s", err, kv.Key, string(kv.Value))
+			log.Error("failed to decode config", "error", err, "key", kv.Key, "value", string(kv.Value))
 			return err
 		}
 		if err := r.opts.merge(&merged, convertMap(next)); err != nil {
-			log.Errorf("Failed to config merge error: %v key: %s value: %s", err, kv.Key, string(kv.Value))
+			log.Error("failed to merge config", "error", err, "key", kv.Key, "value", string(kv.Value))
 			return err
 		}
 	}

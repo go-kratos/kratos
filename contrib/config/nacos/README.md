@@ -5,7 +5,7 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 
-	kconfig "github.com/go-kratos/kratos/v2/config"
+	kconfig "github.com/go-kratos/kratos/v3/config"
 )
 
 sc := []constant.ServerConfig{
@@ -18,8 +18,6 @@ cc := &constant.ClientConfig{
 	NotLoadCacheAtStart: true,
 	LogDir:              "/tmp/nacos/log",
 	CacheDir:            "/tmp/nacos/cache",
-	RotateTime:          "1h",
-	MaxAge:              3,
 	LogLevel:            "debug",
 }
 

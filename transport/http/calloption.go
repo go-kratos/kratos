@@ -4,6 +4,13 @@ import (
 	"net/http"
 )
 
+const (
+	contentTypeJSON = "application/json"
+	schemeDiscovery = "discovery"
+	schemeHTTP      = "http"
+	schemeHTTPS     = "https"
+)
+
 // CallOption configures a Call before it starts or extracts information from
 // a Call after it completes.
 type CallOption interface {
@@ -17,10 +24,12 @@ type CallOption interface {
 }
 
 type callInfo struct {
-	contentType   string
-	operation     string
-	pathTemplate  string
-	headerCarrier *http.Header
+	contentType    string
+	contentTypeSet bool
+	accept         string
+	operation      string
+	pathTemplate   string
+	headerCarrier  *http.Header
 }
 
 // EmptyCallOption does not alter the Call configuration.
@@ -48,12 +57,29 @@ type ContentTypeCallOption struct {
 
 func (o ContentTypeCallOption) before(c *callInfo) error {
 	c.contentType = o.ContentType
+	c.contentTypeSet = true
+	return nil
+}
+
+// Accept sets the request Accept header.
+func Accept(contentType string) CallOption {
+	return AcceptCallOption{ContentType: contentType}
+}
+
+// AcceptCallOption sets the accepted response content type.
+type AcceptCallOption struct {
+	EmptyCallOption
+	ContentType string
+}
+
+func (o AcceptCallOption) before(c *callInfo) error {
+	c.accept = o.ContentType
 	return nil
 }
 
 func defaultCallInfo(path string) callInfo {
 	return callInfo{
-		contentType:  "application/json",
+		contentType:  contentTypeJSON,
 		operation:    path,
 		pathTemplate: path,
 	}

@@ -3,7 +3,7 @@ package etcd
 import (
 	"encoding/json"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 func marshal(si *registry.ServiceInstance) (string, error) {

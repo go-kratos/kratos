@@ -3,8 +3,8 @@ package validate
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v3/errors"
+	"github.com/go-kratos/kratos/v3/middleware"
 )
 
 // ValidatorFunc defines a validation function type.
@@ -16,28 +16,27 @@ type validator interface {
 }
 
 // Validator returns a middleware that performs validation on requests.
+// It validates requests that implement Validate and any custom validators.
 // Example usage:
 //
 // buf validate(https://github.com/bufbuild/protovalidate):
 // import "buf.build/go/protovalidate"
+// import "google.golang.org/protobuf/proto"
 //
 //	Validator(func(v any) error {
-//	    if msg, ok := req.(proto.Message); ok {
-//	        if err := protovalidate.Validate(msg); err != nil {
-//	            return nil, err
-//			}
+//	    if msg, ok := v.(proto.Message); ok {
+//	        return protovalidate.Validate(msg)
 //		}
 //	    return nil
 //	})
 //
 // Google AIP field behavior validate(https://google.aip.dev/203):
 // import "go.einride.tech/aip/fieldbehavior"
+// import "google.golang.org/protobuf/proto"
 //
 //	Validator(func(v any) error {
-//	    if msg, ok := req.(proto.Message); ok {
-//		    if err := fieldbehavior.ValidateRequiredFields(msg); err != nil {
-//		        return nil, err
-//		    }
+//	    if msg, ok := v.(proto.Message); ok {
+//	        return fieldbehavior.ValidateRequiredFields(msg)
 //		}
 //	    return nil
 //	})
