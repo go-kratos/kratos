@@ -37,6 +37,24 @@ func TestBuildPath(t *testing.T) {
 			want:         "/v1/publishers/go/books/kratos",
 		},
 		{
+			name:         "escape path parameter",
+			pathTemplate: "/helloworld/{name}",
+			request:      &binding.HelloRequest{Name: "kratos?admin=true#fragment"},
+			want:         "/helloworld/kratos%3Fadmin=true%23fragment",
+		},
+		{
+			name:         "escape resource name segments",
+			pathTemplate: "/v1/{name=publishers/*/books/*}",
+			request:      &binding.HelloRequest{Name: "publishers/go lang/books/kratos?#"},
+			want:         "/v1/publishers/go%20lang/books/kratos%3F%23",
+		},
+		{
+			name:         "preserve valid path segment characters",
+			pathTemplate: "/helloworld/{name}",
+			request:      &binding.HelloRequest{Name: "kratos!$&'()*+,:;=@"},
+			want:         "/helloworld/kratos!$&'()*+,:;=@",
+		},
+		{
 			name:         "omit body field query params",
 			pathTemplate: "/helloworld/{name}",
 			request:      &binding.HelloRequest{Name: "kratos", Sub: &binding.Sub{Name: "go"}},

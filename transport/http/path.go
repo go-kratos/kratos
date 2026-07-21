@@ -1,6 +1,7 @@
 package http
 
 import (
+	"net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -11,6 +12,16 @@ import (
 )
 
 var pathTemplateParamRE = regexp.MustCompile(`{([.\w]+)(=[^{}]*)?}`)
+
+var escapedPathSegmentSubDelimiters = strings.NewReplacer(
+	"%21", "!",
+	"%27", "'",
+	"%28", "(",
+	"%29", ")",
+	"%2A", "*",
+	"%2C", ",",
+	"%3B", ";",
+)
 
 // BuildPathOption configures path construction.
 type BuildPathOption func(*buildPathOptions)
@@ -53,7 +64,7 @@ func BuildPath(pathTemplate string, msg any, opts ...BuildPathOption) string {
 			matches := pathTemplateParamRE.FindStringSubmatch(in)
 			key := matches[1]
 			pathParams[key] = struct{}{}
-			return queryParams.Get(key)
+			return escapePathValue(queryParams.Get(key))
 		})
 	}
 
@@ -75,6 +86,16 @@ func BuildPath(pathTemplate string, msg any, opts ...BuildPathOption) string {
 		}
 	}
 	return path
+}
+
+func escapePathValue(value string) string {
+	segments := strings.Split(value, "/")
+	for i, segment := range segments {
+		// PathEscape also escapes RFC 3986 sub-delimiters that are valid in a path
+		// segment. Restore them to avoid changing existing BuildPath output.
+		segments[i] = escapedPathSegmentSubDelimiters.Replace(url.PathEscape(segment))
+	}
+	return strings.Join(segments, "/")
 }
 
 func omitQueryParams(values map[string][]string, fields []string) {
