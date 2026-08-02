@@ -181,6 +181,16 @@ func decodeWithCodec(codec encoding.Codec, data []byte, v any) error {
 	switch codec.Name() {
 	case "proto", "protojson":
 	default:
+		// When the codec is "json" and the target is a proto.Message,
+		// delegate to protojson to handle protobuf-specific JSON semantics
+		// (e.g., string-encoded int64 fields as per proto3 specification).
+		if codec.Name() == "json" {
+			if msg, ok := v.(proto.Message); ok {
+				if protoCodec := encoding.GetCodec("protojson"); protoCodec != nil {
+					return protoCodec.Unmarshal(data, msg)
+				}
+			}
+		}
 		return codec.Unmarshal(data, v)
 	}
 
