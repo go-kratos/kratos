@@ -20,6 +20,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
+	project.CLIVersion = release
 	rootCmd.AddCommand(project.CmdNew)
 	rootCmd.AddCommand(proto.CmdProto)
 	rootCmd.AddCommand(upgrade.CmdUpgrade)
