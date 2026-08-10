@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -49,6 +50,24 @@ func TestEncodeValues(t *testing.T) {
 	want := "a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=22.22&double=12.33&duration=2m0.000000022s&field=1%2C2&float=12.34&id=2233&int32=32&int64=64&map%5Bkratos%5D=https%3A%2F%2Fgo-kratos.dev%2F&map%5Bkratos_start%5D=https%3A%2F%2Fgo-kratos.dev%2Fdocs%2Fgetting-started%2Fstart%2F&map_int64_key%5B1%5D=kratos&map_int64_key%5B2%5D=go-zero&numberOne=2233&price=11.23&sex=woman&string=go-kratos&strings=3344&strings=5566&timestamp=1970-01-01T00%3A00%3A20.000000002Z&uint32=32&uint64=64&very_simple.component=5566" // nolint:lll
 	if got := query.Encode(); want != got {
 		t.Errorf("\nwant: %s, \ngot: %s", want, got)
+	}
+}
+
+func TestEncodeValuesDoesNotMutateFieldMask(t *testing.T) {
+	in := &complex.Complex{
+		Field: &fieldmaskpb.FieldMask{Paths: []string{"foo_bar", "nested.baz_qux"}},
+	}
+	want := proto.Clone(in)
+
+	query, err := EncodeValues(in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := query.Get("field"); got != "fooBar,nested.bazQux" {
+		t.Fatalf("unexpected encoded field mask: %q", got)
+	}
+	if !proto.Equal(in, want) {
+		t.Fatalf("EncodeValues() mutated its input: got %v, want %v", in.Field.Paths, want.(*complex.Complex).Field.Paths)
 	}
 }
 
