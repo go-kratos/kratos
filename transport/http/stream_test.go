@@ -710,10 +710,13 @@ func TestWebSocketStreamPingKeepalive(t *testing.T) {
 	ts := httptest.NewServer(srv)
 	defer ts.Close()
 
-	conn, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(ts.URL, "http")+"/ws", nil)
+	conn, res, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(ts.URL, "http")+"/ws", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
+	// On a successful upgrade gorilla replaces the response body with a
+	// no-op reader; closing it is safe and keeps bodyclose happy.
+	defer func() { _ = res.Body.Close() }()
 	defer conn.Close()
 
 	pingSeen := make(chan struct{})
@@ -776,10 +779,13 @@ func TestWebSocketStreamPingDropsSilentPeer(t *testing.T) {
 	ts := httptest.NewServer(srv)
 	defer ts.Close()
 
-	conn, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(ts.URL, "http")+"/ws", nil)
+	conn, res, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(ts.URL, "http")+"/ws", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
+	// On a successful upgrade gorilla replaces the response body with a
+	// no-op reader; closing it is safe and keeps bodyclose happy.
+	defer func() { _ = res.Body.Close() }()
 	defer conn.Close()
 	// Swallow pings without ever ponging, simulating a half-open peer.
 	conn.SetPingHandler(func(string) error { return nil })
