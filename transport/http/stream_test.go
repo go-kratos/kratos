@@ -9,8 +9,11 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"strings"
+	"sync"
 	"testing"
 	"time"
+
+	"github.com/gorilla/websocket"
 
 	"github.com/go-kratos/kratos/v3/encoding"
 	"github.com/go-kratos/kratos/v3/internal/testdata/binding"
@@ -684,3 +687,116 @@ func (s *streamTestSelector) Select(context.Context, ...selector.SelectOption) (
 }
 
 func (*streamTestSelector) Apply([]selector.Node) {}
+
+func TestWebSocketStreamPingKeepalive(t *testing.T) {
+	srv := NewServer()
+	srv.Route("/").GET("/ws", func(ctx Context) error {
+		stream, err := NewWebSocketServerStream(ctx, WithStreamPing(50*time.Millisecond, 200*time.Millisecond))
+		if err != nil {
+			return err
+		}
+		defer func() { _ = stream.Close(nil) }()
+		for {
+			in := new(binding.HelloRequest)
+			if err := stream.Recv(in); err != nil {
+				return nil
+			}
+			if err := stream.Send(in); err != nil {
+				return nil
+			}
+		}
+	})
+
+	ts := httptest.NewServer(srv)
+	defer ts.Close()
+
+	conn, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(ts.URL, "http")+"/ws", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	pingSeen := make(chan struct{})
+	var pingOnce sync.Once
+	conn.SetPingHandler(func(appData string) error {
+		pingOnce.Do(func() { close(pingSeen) })
+		return conn.WriteControl(websocket.PongMessage, []byte(appData), time.Now().Add(time.Second))
+	})
+	readErr := make(chan error, 1)
+	go func() {
+		for {
+			_, data, err := conn.ReadMessage()
+			if err != nil {
+				readErr <- err
+				return
+			}
+			readErr <- errors.New(string(data))
+		}
+	}()
+
+	select {
+	case <-pingSeen:
+	case <-time.After(2 * time.Second):
+		t.Fatal("expected a server ping")
+	}
+
+	// Stay silent well beyond pongWait: the connection must survive because the
+	// client's pongs keep extending the server-side read deadline.
+	time.Sleep(500 * time.Millisecond)
+	if err := conn.WriteMessage(websocket.TextMessage, []byte(`{"name":"alive"}`)); err != nil {
+		t.Fatalf("write after pong keepalive: %v", err)
+	}
+	select {
+	case err := <-readErr:
+		if err == nil || !strings.Contains(err.Error(), "alive") {
+			t.Fatalf("expected echoed message, got %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("expected echo after keepalive")
+	}
+}
+
+func TestWebSocketStreamPingDropsSilentPeer(t *testing.T) {
+	recvErr := make(chan error, 1)
+	srv := NewServer()
+	srv.Route("/").GET("/ws", func(ctx Context) error {
+		stream, err := NewWebSocketServerStream(ctx, WithStreamPing(50*time.Millisecond, 120*time.Millisecond))
+		if err != nil {
+			return err
+		}
+		defer func() { _ = stream.Close(nil) }()
+		for {
+			if err := stream.Recv(new(binding.HelloRequest)); err != nil {
+				recvErr <- err
+				return nil
+			}
+		}
+	})
+
+	ts := httptest.NewServer(srv)
+	defer ts.Close()
+
+	conn, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(ts.URL, "http")+"/ws", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	// Swallow pings without ever ponging, simulating a half-open peer.
+	conn.SetPingHandler(func(string) error { return nil })
+	go func() {
+		for {
+			if _, _, err := conn.ReadMessage(); err != nil {
+				return
+			}
+		}
+	}()
+
+	select {
+	case err := <-recvErr:
+		if err == nil {
+			t.Fatal("expected server Recv to fail for a peer that never pongs")
+		}
+	case <-time.After(3 * time.Second):
+		t.Fatal("expected server Recv to fail for a peer that never pongs")
+	}
+}
