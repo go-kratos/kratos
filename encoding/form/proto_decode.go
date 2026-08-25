@@ -122,6 +122,10 @@ func populateField(fd protoreflect.FieldDescriptor, v protoreflect.Message, valu
 	if err != nil {
 		return fmt.Errorf("parsing field %q: %w", fd.FullName().Name(), err)
 	}
+	if !val.IsValid() {
+		// null literal for a message field: leave it unset.
+		return nil
+	}
 	v.Set(fd, val)
 	return nil
 }
@@ -131,6 +135,10 @@ func populateRepeatedField(fd protoreflect.FieldDescriptor, list protoreflect.Li
 		v, err := parseField(fd, value)
 		if err != nil {
 			return fmt.Errorf("parsing list %q: %w", fd.FullName().Name(), err)
+		}
+		if !v.IsValid() {
+			// null literal for a message element: skip it.
+			continue
 		}
 		list.Append(v)
 	}
@@ -149,6 +157,10 @@ func populateMapField(fd protoreflect.FieldDescriptor, mp protoreflect.Map, fiel
 	value, err := parseField(fd.MapValue(), values[len(values)-1])
 	if err != nil {
 		return fmt.Errorf("parsing map value %q: %w", fd.FullName().Name(), err)
+	}
+	if !value.IsValid() {
+		// null literal for a message value: leave the entry unset.
+		return nil
 	}
 	mp.Set(key.MapKey(), value)
 	return nil
@@ -326,6 +338,12 @@ func parseMessage(md protoreflect.MessageDescriptor, value string) (protoreflect
 		msg = &v
 	default:
 		return protoreflect.Value{}, fmt.Errorf("unsupported message type: %q", string(md.FullName()))
+	}
+	if msg == nil {
+		// A null literal (e.g. "google.protobuf.Timestamp"/"Duration" with the
+		// value "null") leaves msg unset. Return an invalid Value so the caller
+		// skips assignment instead of dereferencing a nil proto.Message.
+		return protoreflect.Value{}, nil
 	}
 	return protoreflect.ValueOfMessage(msg.ProtoReflect()), nil
 }
