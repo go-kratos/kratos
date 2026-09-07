@@ -203,3 +203,133 @@ func TestConfig(t *testing.T) {
 		t.Error("len(testConf.Endpoints) is not equal to 2")
 	}
 }
+
+// stringKVSource is a config source that returns key-value pairs with
+// string values (like env source), for testing type coercion during Scan.
+type stringKVSource struct {
+	kvs map[string]string
+}
+
+func newStringKVSource(kvs map[string]string) *stringKVSource {
+	return &stringKVSource{kvs: kvs}
+}
+
+func (s *stringKVSource) Load() ([]*KeyValue, error) {
+	var out []*KeyValue
+	for k, v := range s.kvs {
+		out = append(out, &KeyValue{
+			Key:   k,
+			Value: []byte(v),
+		})
+	}
+	return out, nil
+}
+
+func (s *stringKVSource) Watch() (Watcher, error) {
+	return newTestWatcher(make(chan struct{}), make(chan struct{})), nil
+}
+
+func TestScanStringToTyped(t *testing.T) {
+	type nested struct {
+		Debug bool    `json:"debug"`
+		Port  int     `json:"port"`
+		Rate  float64 `json:"rate"`
+		Level string  `json:"level"`
+	}
+	type config struct {
+		Debug   bool    `json:"debug"`
+		Port    int     `json:"port"`
+		Rate    float64 `json:"rate"`
+		Level   string  `json:"level"`
+		Version string  `json:"version"`
+		Nested  nested  `json:"nested"`
+	}
+
+	src := newStringKVSource(map[string]string{
+		"debug":        "true",
+		"port":         "8080",
+		"rate":         "0.9",
+		"level":        "debug",
+		"version":      "1234",
+		"nested.debug": "false",
+		"nested.port":  "9090",
+		"nested.rate":  "1.5",
+		"nested.level": "info",
+	})
+
+	c := New(WithSource(src))
+	if err := c.Load(); err != nil {
+		t.Fatal(err)
+	}
+
+	var cfg config
+	if err := c.Scan(&cfg); err != nil {
+		t.Fatalf("Scan failed: %v", err)
+	}
+
+	if cfg.Debug != true {
+		t.Errorf("Debug want true, got %v", cfg.Debug)
+	}
+	if cfg.Port != 8080 {
+		t.Errorf("Port want 8080, got %d", cfg.Port)
+	}
+	if cfg.Rate != 0.9 {
+		t.Errorf("Rate want 0.9, got %f", cfg.Rate)
+	}
+	if cfg.Level != "debug" {
+		t.Errorf("Level want 'debug', got %q", cfg.Level)
+	}
+	if cfg.Version != "1234" {
+		t.Errorf("Version want '1234' (string), got %q", cfg.Version)
+	}
+	if cfg.Nested.Debug != false {
+		t.Errorf("Nested.Debug want false, got %v", cfg.Nested.Debug)
+	}
+	if cfg.Nested.Port != 9090 {
+		t.Errorf("Nested.Port want 9090, got %d", cfg.Nested.Port)
+	}
+	if cfg.Nested.Rate != 1.5 {
+		t.Errorf("Nested.Rate want 1.5, got %f", cfg.Nested.Rate)
+	}
+	if cfg.Nested.Level != "info" {
+		t.Errorf("Nested.Level want 'info', got %q", cfg.Nested.Level)
+	}
+}
+
+func TestScanStringToBoolEdgeCases(t *testing.T) {
+	type cfg struct {
+		Debug bool `json:"debug"`
+	}
+
+	tests := []struct {
+		name    string
+		value   string
+		want    bool
+		wantErr bool
+	}{
+		{"true", "true", true, false},
+		{"false", "false", false, false},
+		{"1", "1", true, false},
+		{"0", "0", false, false},
+		{"TRUE", "TRUE", true, false},
+		{"FALSE", "FALSE", false, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			src := newStringKVSource(map[string]string{"debug": tt.value})
+			c := New(WithSource(src))
+			if err := c.Load(); err != nil {
+				t.Fatal(err)
+			}
+			var c cfg
+			err := c.Scan(&c)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("err = %v, wantErr = %v", err, tt.wantErr)
+			}
+			if !tt.wantErr && c.Debug != tt.want {
+				t.Errorf("Debug want %v, got %v", tt.want, c.Debug)
+			}
+		})
+	}
+}
