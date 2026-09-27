@@ -128,10 +128,33 @@ func extractArgs(req any) string {
 	return fmt.Sprintf("%+v", req)
 }
 
-// extractError returns the level and stack to attach for err.
+// extractError returns the log level and an optional stack string for err.
+// stack is empty when %+v adds nothing beyond Error(), so callers do not
+// duplicate the same text under both "error" and "stack".
 func extractError(err error) (slog.Level, string) {
-	if err != nil {
-		return slog.LevelError, fmt.Sprintf("%+v", err)
+	if err == nil {
+		return slog.LevelInfo, ""
 	}
-	return slog.LevelInfo, ""
+	level := slog.LevelError
+	if se := errors.FromError(err); se != nil {
+		level = levelFromCode(se.Code)
+	}
+	stack := fmt.Sprintf("%+v", err)
+	if stack == err.Error() {
+		stack = ""
+	}
+	return level, stack
+}
+
+// levelFromCode maps an HTTP-style status code to a slog level.
+// 4xx client/business errors are warnings so they do not page like 5xx.
+func levelFromCode(code int32) slog.Level {
+	switch {
+	case code >= 100 && code < 400:
+		return slog.LevelInfo
+	case code >= 400 && code < 500:
+		return slog.LevelWarn
+	default:
+		return slog.LevelError
+	}
 }

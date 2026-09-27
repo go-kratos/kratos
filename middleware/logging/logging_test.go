@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"testing"
 
+	kratoserrors "github.com/go-kratos/kratos/v3/errors"
 	"github.com/go-kratos/kratos/v3/middleware"
 	"github.com/go-kratos/kratos/v3/transport"
 )
@@ -156,24 +157,47 @@ func TestExtractArgs(t *testing.T) {
 
 func TestExtractError(t *testing.T) {
 	tests := []struct {
-		name       string
-		err        error
-		wantLevel  slog.Level
-		wantErrStr string
+		name      string
+		err       error
+		wantLevel slog.Level
+		wantStack string
 	}{
-		{name: "no error", err: nil, wantLevel: slog.LevelInfo, wantErrStr: ""},
-		{name: "error", err: errors.New("test error"), wantLevel: slog.LevelError, wantErrStr: "test error"},
+		{name: "no error", err: nil, wantLevel: slog.LevelInfo, wantStack: ""},
+		{name: "stdlib error", err: errors.New("test error"), wantLevel: slog.LevelError, wantStack: ""},
+		{name: "bad request", err: kratoserrors.BadRequest("USER_NOT_FOUND", "user does not exist"), wantLevel: slog.LevelWarn, wantStack: ""},
+		{name: "internal", err: kratoserrors.InternalServer("BOOM", "boom"), wantLevel: slog.LevelError, wantStack: ""},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			level, errStr := extractError(test.err)
+			level, stack := extractError(test.err)
 			if level != test.wantLevel {
-				t.Errorf("want: %d, got: %d", test.wantLevel, level)
+				t.Errorf("level: want %v, got %v", test.wantLevel, level)
 			}
-			if errStr != test.wantErrStr {
-				t.Errorf("want: %s, got: %s", test.wantErrStr, errStr)
+			if stack != test.wantStack {
+				t.Errorf("stack: want %q, got %q", test.wantStack, stack)
 			}
 		})
+	}
+}
+
+func TestServerOmitsDuplicateStack(t *testing.T) {
+	handler := &captureHandler{}
+	logger := slog.New(handler)
+	next := Server(logger)(func(context.Context, any) (any, error) {
+		return nil, kratoserrors.BadRequest("USER_NOT_FOUND", "user does not exist")
+	})
+	_, _ = next(context.Background(), "req")
+	if len(handler.records) != 1 {
+		t.Fatalf("records = %d, want 1", len(handler.records))
+	}
+	if handler.records[0].Level != slog.LevelWarn {
+		t.Fatalf("level = %v, want warn", handler.records[0].Level)
+	}
+	if _, ok := handler.attrs[0]["stack"]; ok {
+		t.Fatalf("stack attr should be omitted when it equals Error()")
+	}
+	if _, ok := handler.attrs[0]["error"]; !ok {
+		t.Fatalf("error attr missing")
 	}
 }
 
