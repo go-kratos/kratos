@@ -166,6 +166,7 @@ func TestExtractError(t *testing.T) {
 		{name: "stdlib error", err: errors.New("test error"), wantLevel: slog.LevelError, wantStack: ""},
 		{name: "bad request", err: kratoserrors.BadRequest("USER_NOT_FOUND", "user does not exist"), wantLevel: slog.LevelWarn, wantStack: ""},
 		{name: "internal", err: kratoserrors.InternalServer("BOOM", "boom"), wantLevel: slog.LevelError, wantStack: ""},
+		{name: "service unavailable", err: kratoserrors.ServiceUnavailable("OVERLOADED", "try again later"), wantLevel: slog.LevelWarn, wantStack: ""},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

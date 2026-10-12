@@ -147,12 +147,14 @@ func extractError(err error) (slog.Level, string) {
 }
 
 // levelFromCode maps an HTTP-style status code to a slog level.
-// 4xx client/business errors are warnings so they do not page like 5xx.
+// 4xx client/business errors and 503 Service Unavailable (overload or
+// shedding, usually transient) are warnings so they do not page like
+// other 5xx errors.
 func levelFromCode(code int32) slog.Level {
 	switch {
 	case code >= 100 && code < 400:
 		return slog.LevelInfo
-	case code >= 400 && code < 500:
+	case code >= 400 && code < 500, code == 503:
 		return slog.LevelWarn
 	default:
 		return slog.LevelError
