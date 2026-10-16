@@ -164,7 +164,7 @@ func (r *reader) Resolve() error {
 	// so Scan keeps source precedence without rerunning the resolver.
 	if changes := resolvedChanges(before, r.values); len(changes) > 0 {
 		for i := len(r.layers) - 1; i >= 0; i-- {
-			mergeMap(r.layers[i], takeResolvedChanges(changes, r.layers[i]))
+			mergeMap(r.layers[i], takeResolvedChanges(changes, r.layers[i], before))
 		}
 		if len(changes) > 0 {
 			r.layers = append(r.layers, changes)
@@ -177,7 +177,8 @@ func (r *reader) Resolve() error {
 // takeResolvedChanges assigns edits to the latest layer containing their
 // original path. Keeping these edits in place preserves precedence when an
 // earlier spelling contains a placeholder and a later alias is already literal.
-func takeResolvedChanges(changes, source map[string]any) map[string]any {
+// The pre-resolution values distinguish nested edits from object replacements.
+func takeResolvedChanges(changes, source, before map[string]any) map[string]any {
 	selected := make(map[string]any)
 	for key, value := range changes {
 		original, exists := source[key]
@@ -186,8 +187,14 @@ func takeResolvedChanges(changes, source map[string]any) map[string]any {
 		}
 		changeMap, isMap := value.(map[string]any)
 		sourceMap, sourceIsMap := original.(map[string]any)
-		if isMap && sourceIsMap && len(changeMap) > 0 {
-			if nested := takeResolvedChanges(changeMap, sourceMap); len(nested) > 0 {
+		beforeMap, wasMap := before[key].(map[string]any)
+		if isMap && wasMap {
+			// An older scalar reset never owned a child of the current map.
+			// Leave unowned edits for the final resolver layer instead.
+			if !sourceIsMap {
+				continue
+			}
+			if nested := takeResolvedChanges(changeMap, sourceMap, beforeMap); len(nested) > 0 {
 				selected[key] = nested
 			}
 			if len(changeMap) == 0 {

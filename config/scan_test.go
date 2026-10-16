@@ -84,6 +84,95 @@ func TestScanPreservesNullResetsAcrossAliases(t *testing.T) {
 	}
 }
 
+func TestScanKeepsNestedResolverEditPrecedence(t *testing.T) {
+	for _, test := range []struct {
+		name   string
+		layers []string
+		patch  string
+		want   string
+	}{
+		{
+			"no reset",
+			[]string{`{"nested_config":{"dbHost":"source"}}`},
+			`{"nested_config":{"db_host":"resolved"}}`,
+			`{"nestedConfig":{"dbHost":"resolved"}}`,
+		},
+		{
+			"null reset",
+			[]string{`{"nested_config":null}`, `{"nested_config":{"dbHost":"source"}}`},
+			`{"nested_config":{"db_host":"resolved"}}`,
+			`{"nestedConfig":{"dbHost":"resolved"}}`,
+		},
+		{
+			"scalar reset",
+			[]string{`{"nested_config":"reset"}`, `{"nested_config":{"dbHost":"source"}}`},
+			`{"nested_config":{"db_host":"resolved"}}`,
+			`{"nestedConfig":{"dbHost":"resolved"}}`,
+		},
+		{
+			"reverse aliases",
+			[]string{`{"nestedConfig":null}`, `{"nestedConfig":{"db_host":"source"}}`},
+			`{"nestedConfig":{"dbHost":"resolved"}}`,
+			`{"nestedConfig":{"dbHost":"resolved"}}`,
+		},
+		{
+			"retain reset barrier",
+			[]string{`{"nestedConfig":{"url":"stale"}}`, `{"nested_config":null}`, `{"nested_config":{"dbHost":"source"}}`},
+			`{"nested_config":{"db_host":"resolved"}}`,
+			`{"nestedConfig":{"dbHost":"resolved"}}`,
+		},
+		{
+			"deeper reset",
+			[]string{`{"nested_config":{"nested_config":null}}`, `{"nested_config":{"nested_config":{"dbHost":"source"}}}`},
+			`{"nested_config":{"nested_config":{"db_host":"resolved"}}}`,
+			`{"nestedConfig":{"nestedConfig":{"dbHost":"resolved"}}}`,
+		},
+		{
+			"replace null with object",
+			[]string{`{"nested_config":null}`},
+			`{"nested_config":{"db_host":"resolved"}}`,
+			`{"nestedConfig":{"dbHost":"resolved"}}`,
+		},
+		{
+			"object replacement retains source priority",
+			[]string{`{"nested_config":null}`, `{"nestedConfig":{"dbHost":"source"}}`},
+			`{"nested_config":{"db_host":"resolved"}}`,
+			`{"nestedConfig":{"dbHost":"source"}}`,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var patch map[string]any
+			if err := unmarshalJSON([]byte(test.patch), &patch); err != nil {
+				t.Fatal(err)
+			}
+			c := New(WithResolver(func(values map[string]any) error {
+				mergeMap(values, patch)
+				return nil
+			})).(*config)
+			for _, body := range test.layers {
+				if err := c.reader.Merge(&KeyValue{Format: "json", Value: []byte(body)}); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := c.reader.Resolve(); err != nil {
+				t.Fatal(err)
+			}
+			desc := testResolutionDescriptor(t)
+			want := dynamicpb.NewMessage(desc)
+			if err := unmarshalJSON([]byte(test.want), want); err != nil {
+				t.Fatal(err)
+			}
+			got := dynamicpb.NewMessage(desc)
+			if err := c.Scan(got); err != nil {
+				t.Fatal(err)
+			}
+			if !proto.Equal(got, want) {
+				t.Fatalf("got %v, want %v", got, want)
+			}
+		})
+	}
+}
+
 func TestScanResolverDeletesOriginalSpelling(t *testing.T) {
 	for _, test := range []struct {
 		name   string
