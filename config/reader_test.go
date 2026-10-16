@@ -4,9 +4,69 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/go-kratos/kratos/v3/encoding"
 )
+
+func TestReaderMergeCallbacksCanReadConfig(t *testing.T) {
+	for _, kind := range []string{"decoder", "merge"} {
+		t.Run(kind, func(t *testing.T) {
+			var c *config
+			readConfig := false
+			read := func() error {
+				if !readConfig {
+					return nil
+				}
+				value, err := c.Value("existing").String()
+				if err != nil {
+					return err
+				}
+				if value != "readable" {
+					return fmt.Errorf("existing = %q, want readable", value)
+				}
+				return nil
+			}
+			var option Option
+			if kind == "decoder" {
+				option = WithDecoder(func(kv *KeyValue, dst map[string]any) error {
+					if err := read(); err != nil {
+						return err
+					}
+					return defaultDecoder(kv, dst)
+				})
+			} else {
+				option = WithMergeFunc(func(dst, src any) error {
+					if err := read(); err != nil {
+						return err
+					}
+					return defaultMerge(dst, src)
+				})
+			}
+			c = New(option).(*config)
+			if err := c.reader.Merge(&KeyValue{Format: "json", Value: []byte(`{"existing":"readable"}`)}); err != nil {
+				t.Fatal(err)
+			}
+			// Keep existing out of the Config cache so Value must read the reader.
+			readConfig = true
+			done := make(chan error, 1)
+			go func() {
+				done <- c.reader.Merge(&KeyValue{Format: "json", Value: []byte(`{"next":"updated"}`)})
+			}()
+			select {
+			case err := <-done:
+				if err != nil {
+					t.Fatal(err)
+				}
+			case <-time.After(time.Second):
+				t.Fatal("merge callback blocked while reading config")
+			}
+			if value, err := c.Value("next").String(); err != nil || value != "updated" {
+				t.Fatalf("next = %q, %v; want updated", value, err)
+			}
+		})
+	}
+}
 
 func TestReader_Merge(t *testing.T) {
 	var (
@@ -71,6 +131,26 @@ func TestReader_Merge(t *testing.T) {
 	}
 	if vvx != 2 {
 		t.Fatal("vvx is not equal to 2")
+	}
+}
+
+func TestReaderMergeCompactsLayerHistory(t *testing.T) {
+	r := newReader(options{
+		decoder:  defaultDecoder,
+		resolver: defaultResolver,
+		merge:    defaultMerge,
+	}).(*reader)
+	for i := 0; i < 100; i++ {
+		if err := r.Merge(&KeyValue{
+			Key:    "config",
+			Value:  []byte(fmt.Sprintf(`{"value":%d}`, i)),
+			Format: "json",
+		}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if got := len(r.layers); got != 1 {
+		t.Fatalf("expected one retained layer for repeated updates, got %d", got)
 	}
 }
 
