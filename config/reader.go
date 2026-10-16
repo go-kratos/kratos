@@ -32,7 +32,7 @@ type reader struct {
 	updateLock sync.Mutex
 }
 
-// deletedConfigValue records a resolver deletion until layers are replayed.
+// deletedConfigValue records a resolver deletion until layers are compacted.
 type deletedConfigValue struct{}
 
 func newReader(opts options) Reader {
@@ -88,19 +88,13 @@ func (r *reader) Merge(kvs ...*KeyValue) error {
 // later source. Different spellings are kept because their destination field
 // is not known until Scan.
 func compactLayers(layers []map[string]any) []map[string]any {
-	if len(layers) <= 1 {
-		return layers
-	}
-	suffix := make(map[string]any)
+	covered := make(map[string]any)
 	retained := make([]map[string]any, 0, len(layers))
 	for i := len(layers) - 1; i >= 0; i-- {
-		layer := filterOverridden(layers[i], suffix)
+		layer := filterOverridden(layers[i], covered)
 		if len(layer) > 0 {
 			retained = append(retained, layer)
 		}
-		base := cloneMergeValue(layers[i]).(map[string]any)
-		mergeMap(base, suffix)
-		suffix = base
 	}
 	for left, right := 0, len(retained)-1; left < right; left, right = left+1, right-1 {
 		retained[left], retained[right] = retained[right], retained[left]
@@ -108,20 +102,36 @@ func compactLayers(layers []map[string]any) []map[string]any {
 	return retained
 }
 
-func filterOverridden(current, later map[string]any) map[string]any {
+// filterOverridden incrementally records covered paths while walking backwards.
+// A map tracks its children; nil means a replacement already covers the whole
+// path. Values and the accumulated suffix never need to be copied into this index.
+func filterOverridden(current, covered map[string]any) map[string]any {
 	filtered := make(map[string]any, len(current))
 	for key, value := range current {
-		laterValue, overridden := later[key]
-		if !overridden {
-			filtered[key] = cloneMergeValue(value)
+		laterValue, overridden := covered[key]
+		laterMap, laterIsMap := laterValue.(map[string]any)
+		if overridden && !laterIsMap {
+			continue
+		}
+		if _, deleted := value.(deletedConfigValue); deleted {
+			// Delete only this spelling, including its older layers. Consuming
+			// the marker here leaves other aliases intact when Scan merges them.
+			covered[key] = nil
 			continue
 		}
 		currentMap, currentIsMap := value.(map[string]any)
-		laterMap, laterIsMap := laterValue.(map[string]any)
-		if !currentIsMap || !laterIsMap {
+		if !currentIsMap {
+			// A scalar or null before later maps is a reset: dropping it could
+			// resurrect fields from an earlier map under another alias.
+			filtered[key] = cloneMergeValue(value)
+			covered[key] = nil
 			continue
 		}
-		if nested := filterOverridden(currentMap, laterMap); len(nested) > 0 {
+		if !overridden {
+			laterMap = make(map[string]any)
+			covered[key] = laterMap
+		}
+		if nested := filterOverridden(currentMap, laterMap); len(nested) > 0 || !overridden {
 			filtered[key] = nested
 		}
 	}

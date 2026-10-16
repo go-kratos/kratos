@@ -36,19 +36,7 @@ func (r *reader) SourceFor(v any) ([]byte, error) {
 		}
 		mergeMap(merged, canonical)
 	}
-	removeDeletedValues(merged)
 	return marshalJSON(merged)
-}
-
-func removeDeletedValues(values map[string]any) {
-	for key, value := range values {
-		switch v := value.(type) {
-		case deletedConfigValue:
-			delete(values, key)
-		case map[string]any:
-			removeDeletedValues(v)
-		}
-	}
 }
 
 func canonicalizeProtoMap(src map[string]any, desc protoreflect.MessageDescriptor) (map[string]any, error) {

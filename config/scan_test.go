@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"reflect"
 	"sync"
 	"testing"
 
@@ -54,6 +55,143 @@ func TestScanKeepsResolverDefaultsBeforeFirstLayer(t *testing.T) {
 		}
 		if !plain.ApplySchema || !msg.Get(desc.Fields().ByName("apply_schema")).Bool() {
 			t.Fatalf("update %q lost resolver default: Go Scan = %v, protobuf Scan = %v", body, plain, msg)
+		}
+	}
+}
+
+func TestScanPreservesNullResetsAcrossAliases(t *testing.T) {
+	for _, bodies := range [][]string{
+		{`{"nestedConfig":{"db_host":"old"}}`, `{"nested_config":null}`, `{"nested_config":{"url":"new"}}`},
+		{`{"nested_config":{"db_host":"old"}}`, `{"nestedConfig":null}`, `{"nestedConfig":{"url":"new"}}`},
+		{`{"nested_config":{"db_host":"old"}}`, `{"nested_config":null}`, `{"nested_config":{"url":"new"}}`},
+	} {
+		c := New().(*config)
+		for _, body := range bodies {
+			if err := c.reader.Merge(&KeyValue{Format: "json", Value: []byte(body)}); err != nil {
+				t.Fatal(err)
+			}
+		}
+		msg := dynamicpb.NewMessage(testResolutionDescriptor(t))
+		if err := c.Scan(msg); err != nil {
+			t.Fatal(err)
+		}
+		nested := msg.Get(msg.Descriptor().Fields().ByName("nested_config")).Message()
+		old := nested.Get(nested.Descriptor().Fields().ByName("db_host")).String()
+		latest := nested.Get(nested.Descriptor().Fields().ByName("url")).String()
+		if old != "" || latest != "new" {
+			t.Fatalf("layers %v: db_host = %q, url = %q; want only new url", bodies, old, latest)
+		}
+	}
+}
+
+func TestScanResolverDeletesOriginalSpelling(t *testing.T) {
+	for _, test := range []struct {
+		name   string
+		layers []string
+		path   []string
+		want   string
+	}{
+		{"JSON name", []string{`{"db_host":"old"}`, `{"dbHost":"new"}`}, []string{"dbHost"}, `{"dbHost":"old"}`},
+		{"proto name", []string{`{"dbHost":"old"}`, `{"db_host":"new"}`}, []string{"db_host"}, `{"dbHost":"old"}`},
+		{"single layer", []string{`{"dbHost":"new"}`}, []string{"dbHost"}, `{}`},
+		{"same spelling", []string{`{"db_host":"old"}`, `{"db_host":"new"}`}, []string{"db_host"}, `{}`},
+		{
+			"nested field",
+			[]string{`{"nested_config":{"db_host":"old"}}`, `{"nested_config":{"dbHost":"new"}}`},
+			[]string{"nested_config", "dbHost"},
+			`{"nestedConfig":{"dbHost":"old"}}`,
+		},
+		{
+			"whole object",
+			[]string{`{"nested_config":{"db_host":"old"}}`, `{"nestedConfig":{"url":"new"}}`},
+			[]string{"nestedConfig"},
+			`{"nestedConfig":{"dbHost":"old"}}`,
+		},
+		{
+			"reset and object",
+			[]string{`{"nestedConfig":{"db_host":"old"}}`, `{"nested_config":null}`, `{"nested_config":{"url":"new"}}`},
+			[]string{"nested_config"},
+			`{"nestedConfig":{"dbHost":"old"}}`,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			c := New(WithResolver(func(values map[string]any) error {
+				for _, key := range test.path[:len(test.path)-1] {
+					values = values[key].(map[string]any)
+				}
+				delete(values, test.path[len(test.path)-1])
+				return nil
+			})).(*config)
+			for _, body := range test.layers {
+				if err := c.reader.Merge(&KeyValue{Format: "json", Value: []byte(body)}); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := c.reader.Resolve(); err != nil {
+				t.Fatal(err)
+			}
+			desc := testResolutionDescriptor(t)
+			want := dynamicpb.NewMessage(desc)
+			if err := unmarshalJSON([]byte(test.want), want); err != nil {
+				t.Fatal(err)
+			}
+			for range 2 {
+				got := dynamicpb.NewMessage(desc)
+				if err := c.Scan(got); err != nil {
+					t.Fatal(err)
+				}
+				if !proto.Equal(got, want) {
+					t.Fatalf("got %v, want %v", got, want)
+				}
+			}
+		})
+	}
+}
+
+func TestCompactLayersPreservesProtoReplay(t *testing.T) {
+	// Exercise interleaved aliases, empty maps, and resets at two nesting levels.
+	variants := []map[string]any{
+		{"nested_config": nil},
+		{"nestedConfig": nil},
+		{"nested_config": map[string]any{"db_host": "old"}},
+		{"nestedConfig": map[string]any{"dbHost": "new"}},
+		{"nested_config": map[string]any{"url": "url"}},
+		{"nestedConfig": map[string]any{}},
+		{"nested_config": map[string]any{"nested_config": nil}},
+		{"nestedConfig": map[string]any{"nestedConfig": map[string]any{"db_host": "deep"}}},
+	}
+	desc := testResolutionDescriptor(t)
+	replay := func(layers []map[string]any) map[string]any {
+		merged := make(map[string]any)
+		for _, layer := range layers {
+			canonical, err := canonicalizeProtoMap(layer, desc)
+			if err != nil {
+				t.Fatal(err)
+			}
+			mergeMap(merged, canonical)
+		}
+		return merged
+	}
+	const depth = 4
+	count := 1
+	for range depth {
+		count *= len(variants)
+	}
+	for sequence := range count {
+		layers := make([]map[string]any, 0, depth)
+		var compacted []map[string]any
+		index := sequence
+		for range depth {
+			layer := variants[index%len(variants)]
+			index /= len(variants)
+			layers = append(layers, layer)
+			compacted = compactLayers(append(compacted, layer))
+		}
+		want := replay(layers)
+		for _, candidate := range [][]map[string]any{compacted, compactLayers(layers)} {
+			if got := replay(candidate); !reflect.DeepEqual(got, want) {
+				t.Fatalf("layers %v: compacted result %v, want %v", layers, got, want)
+			}
 		}
 	}
 }

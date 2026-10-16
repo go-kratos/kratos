@@ -154,6 +154,24 @@ func TestReaderMergeCompactsLayerHistory(t *testing.T) {
 	}
 }
 
+func BenchmarkCompactLayersDistinctKeys(b *testing.B) {
+	for _, count := range []int{500, 1000, 2000, 10000} {
+		b.Run(fmt.Sprintf("keys_%d", count), func(b *testing.B) {
+			layers := make([]map[string]any, count)
+			for i := range layers {
+				layers[i] = map[string]any{fmt.Sprintf("key_%d", i): "value"}
+			}
+			b.ReportAllocs()
+			b.ResetTimer()
+			for range b.N {
+				if got := compactLayers(layers); len(got) != count {
+					b.Fatalf("retained %d layers, want %d", len(got), count)
+				}
+			}
+		})
+	}
+}
+
 func TestReader_Value(t *testing.T) {
 	opts := options{
 		decoder: func(kv *KeyValue, v map[string]any) error {
