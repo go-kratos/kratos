@@ -2,11 +2,14 @@ package ewma
 
 import (
 	"context"
+	"fmt"
 	"net"
+	"net/url"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/go-kratos/kratos/v3/errors"
 	"github.com/go-kratos/kratos/v3/registry"
 	"github.com/go-kratos/kratos/v3/selector"
 )
@@ -85,64 +88,47 @@ func TestDirectError(t *testing.T) {
 	}
 }
 
-// TestCanceledDoesNotDegradeNode verifies that context.Canceled does not
-// lower a node's health score. Canceled means the caller gave up — it is
-// not evidence of backend failure. context.DeadlineExceeded (backend too
-// slow) should still degrade the node as before.
+// TestCanceledDoesNotDegradeNode checks the health signal for each error
+// kind. Cancellation, direct or wrapped by a transport, must not lower node
+// health; backend failures still must. Each case uses a fresh node and a
+// single completion: with no previous lag sample the EWMA decay factor is
+// zero, so success is exactly 1000 or 0 and the test needs no sleeps.
 func TestCanceledDoesNotDegradeNode(t *testing.T) {
-	newNode := func() selector.WeightedNode {
-		return (&Builder{}).Build(selector.NewNode(
-			"http",
-			"127.0.0.1:9090",
-			&registry.ServiceInstance{
-				ID:        "127.0.0.1:9090",
-				Name:      "helloworld",
-				Version:   "v1.0.0",
-				Endpoints: []string{"http://127.0.0.1:9090"},
-				Metadata:  map[string]string{"weight": "10"},
-			}))
+	tests := []struct {
+		name       string
+		err        error
+		errHandler func(error) bool
+		want       uint64
+	}{
+		{name: "nil", err: nil, want: 1000},
+		{name: "canceled", err: context.Canceled, want: 1000},
+		{name: "wrapped canceled", err: fmt.Errorf("call: %w", context.Canceled), want: 1000},
+		{name: "http canceled", err: &url.Error{Op: "Get", URL: "http://127.0.0.1:9090", Err: context.Canceled}, want: 1000},
+		{name: "dial canceled", err: &net.OpError{Op: "dial", Net: "tcp", Err: context.Canceled}, want: 1000},
+		{name: "deadline exceeded", err: context.DeadlineExceeded, want: 0},
+		{name: "wrapped deadline exceeded", err: fmt.Errorf("call: %w", context.DeadlineExceeded), want: 0},
+		{name: "http deadline exceeded", err: &url.Error{Op: "Get", URL: "http://127.0.0.1:9090", Err: context.DeadlineExceeded}, want: 0},
+		{name: "net error", err: &net.OpError{Op: "dial", Net: "tcp", Err: fmt.Errorf("connection refused")}, want: 0},
+		{name: "service unavailable", err: errors.ServiceUnavailable("", ""), want: 0},
+		{name: "gateway timeout", err: errors.GatewayTimeout("", ""), want: 0},
+		{name: "service unavailable canceled while reading", err: errors.ServiceUnavailable("", "").WithCause(context.Canceled), want: 0},
+		{name: "gateway timeout canceled while reading", err: errors.GatewayTimeout("", "").WithCause(context.Canceled), want: 0},
+		{name: "other error", err: fmt.Errorf("bad request"), want: 1000},
+		{
+			name:       "error handler can still penalize canceled",
+			err:        context.Canceled,
+			errHandler: func(err error) bool { return errors.Is(err, context.Canceled) },
+			want:       0,
+		},
 	}
-
-	// --- context.Canceled must NOT degrade health ---
-	wn := newNode()
-	n := wn.(*Node)
-	// One successful pick to initialise EWMA state.
-	done := wn.Pick()
-	time.Sleep(time.Millisecond * 20)
-	done(context.Background(), selector.DoneInfo{})
-	baselineHealth := n.success.Load()
-
-	// Several picks that all report context.Canceled.
-	for i := 0; i < 4; i++ {
-		done = wn.Pick()
-		time.Sleep(time.Millisecond * 20)
-		done(context.Background(), selector.DoneInfo{Err: context.Canceled})
-	}
-	afterHealth := n.success.Load()
-	// Health must not have dropped significantly — Canceled is not a backend fault.
-	// Allow a tiny EWMA drift but it must stay near 1000 (full health).
-	if afterHealth < baselineHealth*9/10 {
-		t.Errorf("context.Canceled should not degrade node health: before=%d after=%d",
-			baselineHealth, afterHealth)
-	}
-
-	// --- context.DeadlineExceeded still degrades health ---
-	wn2 := newNode()
-	n2 := wn2.(*Node)
-	done = wn2.Pick()
-	time.Sleep(time.Millisecond * 20)
-	done(context.Background(), selector.DoneInfo{})
-	baselineHealth2 := n2.success.Load()
-
-	for i := 0; i < 4; i++ {
-		done = wn2.Pick()
-		time.Sleep(time.Millisecond * 20)
-		done(context.Background(), selector.DoneInfo{Err: context.DeadlineExceeded})
-	}
-	afterHealth2 := n2.success.Load()
-	if afterHealth2 >= baselineHealth2 {
-		t.Errorf("context.DeadlineExceeded should degrade node health: before=%d after=%d",
-			baselineHealth2, afterHealth2)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			n := (&Builder{ErrHandler: tt.errHandler}).Build(nil).(*Node)
+			n.Pick()(context.Background(), selector.DoneInfo{Err: tt.err})
+			if got := n.success.Load(); got != tt.want {
+				t.Errorf("success = %d, want %d", got, tt.want)
+			}
+		})
 	}
 }
 
