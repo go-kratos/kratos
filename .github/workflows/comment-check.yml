@@ -21,11 +21,9 @@ jobs:
       EXCLUDE_FILES: ".md .txt .html .css .min.js .mdx"
 
     steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          fetch-depth: 0
+      # The PR code is not checked out. This workflow runs on pull_request_target
+      # with the base repository's token, and actions/checkout refuses to check out
+      # fork code in that context. Changed files are read through the API as data.
 
       # - name: Search for Non-English comments in the entire repository
       #   run: |
@@ -70,16 +68,34 @@ jobs:
       #     done
 
       - name: Search for Non-English comments in PR diff files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          set -e
+          set -eo pipefail
           # Define the regex pattern to match Chinese characters
           pattern='[\p{Han}]'
             
-          # Get the list of files changed in this PR compared to the base branch
-          changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+          # Get the status, blob SHA and path of each file changed in this PR
+          gh api --paginate "repos/${REPO}/pulls/${PR_NUMBER}/files?per_page=100" \
+            --jq '.[] | [.status, .sha, .filename] | @tsv' > changed_files.tsv
+
+          # The files API returns at most 3000 files. Fail rather than pass on an incomplete scan.
+          expected_files=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.changed_files')
+          listed_files=$(( $(wc -l < changed_files.tsv) ))
+          if [ "$listed_files" -lt "$expected_files" ]; then
+            echo "::error::Only ${listed_files} of ${expected_files} changed files could be listed through the API, so the PR could not be fully checked."
+            exit 1
+          fi
             
           # Loop over each changed file
-          for file in $changed_files; do
+          while IFS=$'\t' read -r status blob_sha file; do
+            # Removed files have no content to check
+            if [ "$status" = "removed" ]; then
+              continue
+            fi
+
             # Skip files in excluded directories
             skip_file=false
             for dir in ${EXCLUDE_DIRS}; do
@@ -102,14 +118,17 @@ jobs:
               continue
             fi
        
+            # Fetch the file content at the PR head (fork blobs are reachable from the base repository)
+            gh api -H "Accept: application/vnd.github.raw" "repos/${REPO}/git/blobs/${blob_sha}" < /dev/null > file_content
+
             # Use grep to find all comments containing Non-English characters in filtered files
-            grep_output=$(grep -PnH "$pattern" "$file" || true)
+            grep_output=$(grep -Pn "$pattern" file_content || true)
             if [ -n "$grep_output" ]; then
-              # Insert a tab after the line number, keeping the colon between the file path and line number
-              formatted_output=$(echo "$grep_output" | sed 's/^\(.*:[0-9]\+\):/\1\t/')
+              # Prefix the file path and insert a tab after the line number
+              formatted_output=$(printf '%s\n' "$grep_output" | while IFS= read -r line; do printf '%s:%s\n' "$file" "$line"; done | sed 's/^\(.*:[0-9]\+\):/\1\t/')
               echo "$formatted_output" >> non_english_comments.txt  # Save to file
             fi
-          done
+          done < changed_files.tsv
 
       - name: Store non-English comments in ENV
         run: |
@@ -122,6 +141,7 @@ jobs:
           fi
 
       - name: Output non-English comments if found
+        id: report
         run: |
           if [ -s non_english_comments.txt ]; then
             echo "Non-English comments found in the following locations:"
@@ -132,7 +152,7 @@ jobs:
           fi
       
       - name: Find Comment
-        if: failure() && github.event_name != 'workflow_dispatch'
+        if: failure() && steps.report.outcome == 'failure' && github.event_name != 'workflow_dispatch'
         uses: peter-evans/find-comment@v4.0.0
         id: fc
         with:
@@ -141,7 +161,7 @@ jobs:
           body-includes: Non-English comments were found in the following locations
 
       - name: Comment on PR if errors found
-        if: failure() && github.event_name != 'workflow_dispatch' # This step runs only if the previous step fails
+        if: failure() && steps.report.outcome == 'failure' && github.event_name != 'workflow_dispatch' # This step runs only if non-English comments were found
         uses: peter-evans/create-or-update-comment@v5.0.0
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
