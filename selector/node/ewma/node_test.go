@@ -2,11 +2,14 @@ package ewma
 
 import (
 	"context"
+	"fmt"
 	"net"
+	"net/url"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/go-kratos/kratos/v3/errors"
 	"github.com/go-kratos/kratos/v3/registry"
 	"github.com/go-kratos/kratos/v3/selector"
 )
@@ -82,6 +85,50 @@ func TestDirectError(t *testing.T) {
 	}
 	if float64(2000) <= wn.Weight() {
 		t.Errorf("float64(2000) <= wn.Weight()(%v)", wn.Weight())
+	}
+}
+
+// TestCanceledDoesNotDegradeNode checks the health signal for each error
+// kind. Cancellation, direct or wrapped by a transport, must not lower node
+// health; backend failures still must. Each case uses a fresh node and a
+// single completion: with no previous lag sample the EWMA decay factor is
+// zero, so success is exactly 1000 or 0 and the test needs no sleeps.
+func TestCanceledDoesNotDegradeNode(t *testing.T) {
+	tests := []struct {
+		name       string
+		err        error
+		errHandler func(error) bool
+		want       uint64
+	}{
+		{name: "nil", err: nil, want: 1000},
+		{name: "canceled", err: context.Canceled, want: 1000},
+		{name: "wrapped canceled", err: fmt.Errorf("call: %w", context.Canceled), want: 1000},
+		{name: "http canceled", err: &url.Error{Op: "Get", URL: "http://127.0.0.1:9090", Err: context.Canceled}, want: 1000},
+		{name: "dial canceled", err: &net.OpError{Op: "dial", Net: "tcp", Err: context.Canceled}, want: 1000},
+		{name: "deadline exceeded", err: context.DeadlineExceeded, want: 0},
+		{name: "wrapped deadline exceeded", err: fmt.Errorf("call: %w", context.DeadlineExceeded), want: 0},
+		{name: "http deadline exceeded", err: &url.Error{Op: "Get", URL: "http://127.0.0.1:9090", Err: context.DeadlineExceeded}, want: 0},
+		{name: "net error", err: &net.OpError{Op: "dial", Net: "tcp", Err: fmt.Errorf("connection refused")}, want: 0},
+		{name: "service unavailable", err: errors.ServiceUnavailable("", ""), want: 0},
+		{name: "gateway timeout", err: errors.GatewayTimeout("", ""), want: 0},
+		{name: "service unavailable canceled while reading", err: errors.ServiceUnavailable("", "").WithCause(context.Canceled), want: 0},
+		{name: "gateway timeout canceled while reading", err: errors.GatewayTimeout("", "").WithCause(context.Canceled), want: 0},
+		{name: "other error", err: fmt.Errorf("bad request"), want: 1000},
+		{
+			name:       "error handler can still penalize canceled",
+			err:        context.Canceled,
+			errHandler: func(err error) bool { return errors.Is(err, context.Canceled) },
+			want:       0,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			n := (&Builder{ErrHandler: tt.errHandler}).Build(nil).(*Node)
+			n.Pick()(context.Background(), selector.DoneInfo{Err: tt.err})
+			if got := n.success.Load(); got != tt.want {
+				t.Errorf("success = %d, want %d", got, tt.want)
+			}
+		})
 	}
 }
 
