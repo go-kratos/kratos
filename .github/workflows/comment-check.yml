@@ -77,12 +77,25 @@ jobs:
           # Define the regex pattern to match Chinese characters
           pattern='[\p{Han}]'
             
-          # Get the blob SHA and path of each file changed in this PR (removed files have no content)
+          # Get the status, blob SHA and path of each file changed in this PR
           gh api --paginate "repos/${REPO}/pulls/${PR_NUMBER}/files?per_page=100" \
-            --jq '.[] | select(.status != "removed") | [.sha, .filename] | @tsv' > changed_files.tsv
+            --jq '.[] | [.status, .sha, .filename] | @tsv' > changed_files.tsv
+
+          # The files API returns at most 3000 files. Fail rather than pass on an incomplete scan.
+          expected_files=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.changed_files')
+          listed_files=$(( $(wc -l < changed_files.tsv) ))
+          if [ "$listed_files" -lt "$expected_files" ]; then
+            echo "::error::Only ${listed_files} of ${expected_files} changed files could be listed through the API, so the PR could not be fully checked."
+            exit 1
+          fi
             
           # Loop over each changed file
-          while IFS=$'\t' read -r blob_sha file; do
+          while IFS=$'\t' read -r status blob_sha file; do
+            # Removed files have no content to check
+            if [ "$status" = "removed" ]; then
+              continue
+            fi
+
             # Skip files in excluded directories
             skip_file=false
             for dir in ${EXCLUDE_DIRS}; do
