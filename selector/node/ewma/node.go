@@ -152,9 +152,17 @@ func (n *Node) Pick() selector.DoneFunc {
 			if n.errHandler != nil && n.errHandler(di.Err) {
 				success = 0
 			}
+			// context.Canceled means the caller canceled the request (user
+			// navigation, an aborted upstream request, etc.) and says nothing about
+			// whether the backend is healthy. The HTTP transport wraps it: net/http
+			// returns a *url.Error, which is itself a net.Error, so cancellation is
+			// excluded from the net.Error check. Backend errors such as 503/504 are
+			// still penalized even if the request was canceled while reading them.
+			// A custom errHandler can still penalize cancellation.
 			var netErr net.Error
-			if errors.Is(context.DeadlineExceeded, di.Err) || errors.Is(context.Canceled, di.Err) ||
-				errors.IsServiceUnavailable(di.Err) || errors.IsGatewayTimeout(di.Err) || errors.As(di.Err, &netErr) {
+			if errors.Is(di.Err, context.DeadlineExceeded) ||
+				errors.IsServiceUnavailable(di.Err) || errors.IsGatewayTimeout(di.Err) ||
+				(!errors.Is(di.Err, context.Canceled) && errors.As(di.Err, &netErr)) {
 				success = 0
 			}
 		}
