@@ -1,7 +1,6 @@
 package http
 
 import (
-	"net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -38,8 +37,14 @@ func WithOmitFields(fields ...string) BuildPathOption {
 }
 
 // BuildPath builds an HTTP request path from a path template and request message.
-// Protobuf field paths may use proto names or JSON names. Values are escaped as
-// single segments, except resource-name templates which preserve slash separators.
+// Protobuf field paths may use proto names or JSON names.
+//
+// Path values must not be pre-escaped: BuildPath escapes characters that are not
+// allowed in a path segment ("/", "?", "#", "%", spaces, non-ASCII, ...), so an
+// already escaped value such as "a%20b" is sent as "a%2520b". Values made of
+// characters allowed in a segment are left unchanged. A plain variable or "*"
+// is one segment and escapes "/"; resource-name templates such as
+// {name=publishers/*} or {name=**} keep "/" as the separator.
 func BuildPath(pathTemplate string, msg any, opts ...BuildPathOption) string {
 	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Pointer && reflect.ValueOf(msg).IsNil()) {
 		return pathTemplate
@@ -113,20 +118,58 @@ func queryFieldName(msg any, path string) string {
 }
 
 func escapePathValue(value, template string) string {
-	parts := []string{value}
 	// Resource-name templates preserve their hierarchy; a plain variable or *
 	// represents one segment and must escape embedded slashes.
-	if strings.Contains(template, "/") || strings.Contains(template, "**") {
-		parts = strings.Split(value, "/")
+	if !strings.Contains(template, "/") && !strings.Contains(template, "**") {
+		return escapePathSegment(value)
 	}
+	parts := strings.Split(value, "/")
 	for i, part := range parts {
-		if part == "." || part == ".." {
-			parts[i] = strings.Repeat("%2E", len(part))
-		} else {
-			parts[i] = url.PathEscape(part)
-		}
+		parts[i] = escapePathSegment(part)
 	}
 	return strings.Join(parts, "/")
+}
+
+// escapePathSegment escapes s as a single RFC 3986 path segment. Characters
+// allowed in a segment are kept, so values that were already valid produce
+// the same path as before escaping was introduced.
+func escapePathSegment(s string) string {
+	if s == "." || s == ".." {
+		return strings.Repeat("%2E", len(s))
+	}
+	n := 0
+	for i := 0; i < len(s); i++ {
+		if !isPathSegmentChar(s[i]) {
+			n++
+		}
+	}
+	if n == 0 {
+		return s
+	}
+	const upperhex = "0123456789ABCDEF"
+	var b strings.Builder
+	b.Grow(len(s) + 2*n)
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if isPathSegmentChar(c) {
+			b.WriteByte(c)
+			continue
+		}
+		b.WriteByte('%')
+		b.WriteByte(upperhex[c>>4])
+		b.WriteByte(upperhex[c&15])
+	}
+	return b.String()
+}
+
+// isPathSegmentChar reports whether c is an RFC 3986 pchar that needs no escaping:
+// unreserved, sub-delims, ':' or '@'.
+func isPathSegmentChar(c byte) bool {
+	switch {
+	case 'a' <= c && c <= 'z', 'A' <= c && c <= 'Z', '0' <= c && c <= '9':
+		return true
+	}
+	return strings.IndexByte("-._~!$&'()*+,;=:@", c) >= 0
 }
 
 func omitQueryParams(values map[string][]string, fields []string, msg any) {

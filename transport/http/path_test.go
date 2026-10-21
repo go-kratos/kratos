@@ -137,6 +137,12 @@ func TestBuildPathEscapesValues(t *testing.T) {
 		{"resource name", "/v1/{name=publishers/*/books/*}", "publishers/go/books/one?#%", "/v1/publishers/go/books/one%3F%23%25"},
 		{"multiple segments", "/v1/{name=**}", "publishers/go/books/one?#%", "/v1/publishers/go/books/one%3F%23%25"},
 		{"resource dot segment", "/v1/{name=publishers/*}", "publishers/..", "/v1/publishers/%2E%2E"},
+		// Characters allowed in a segment are kept, matching the unescaped output.
+		{"segment chars unchanged", "/items/{name}", "a-b_c.d~e!$&'()*+,;=:@", "/items/a-b_c.d~e!$&'()*+,;=:@"},
+		{"dots in value", "/items/{name}", "v1.2...", "/items/v1.2..."},
+		{"space and non-ASCII", "/items/{name}", "a b中", "/items/a%20b%E4%B8%AD"},
+		// Values must not be pre-escaped; "%" is always escaped.
+		{"pre-escaped value", "/items/{name}", "a%20b", "/items/a%2520b"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -174,7 +180,7 @@ func TestBuildPathCompatibility(t *testing.T) {
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}",
 			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "2233!!!!"}},
-			want:         "http://helloworld.Greeter/helloworld/test/sub/2233%21%21%21%21",
+			want:         "http://helloworld.Greeter/helloworld/test/sub/2233!!!!",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}",
@@ -199,7 +205,7 @@ func TestBuildPathCompatibility(t *testing.T) {
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/{name}/sub/{sub.naming}",
 			request:      &binding.HelloRequest{Name: "test", Sub: &binding.Sub{Name: "5566!!!"}},
-			want:         "http://helloworld.Greeter/helloworld/test/sub/5566%21%21%21",
+			want:         "http://helloworld.Greeter/helloworld/test/sub/5566!!!",
 		},
 		{
 			pathTemplate: "http://helloworld.Greeter/helloworld/sub",

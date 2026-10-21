@@ -55,6 +55,34 @@ func TestEncodeValues(t *testing.T) {
 	}
 }
 
+func TestTimestampRoundTrip(t *testing.T) {
+	for _, zone := range []struct {
+		name   string
+		offset int
+	}{
+		{"UTC+8", 8 * 60 * 60},
+		{"UTC-7", -7 * 60 * 60},
+	} {
+		t.Run(zone.name, func(t *testing.T) {
+			previous := time.Local
+			time.Local = time.FixedZone(zone.name, zone.offset)
+			t.Cleanup(func() { time.Local = previous })
+			want := &complex.Complex{Timestamp: timestamppb.New(time.Date(2026, 10, 1, 23, 30, 0, 123456789, time.UTC))}
+			values, err := EncodeValues(want)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := &complex.Complex{}
+			if err := DecodeValues(got, values); err != nil {
+				t.Fatal(err)
+			}
+			if !proto.Equal(got.Timestamp, want.Timestamp) {
+				t.Fatalf("timestamp round trip = %v, want %v (query %q)", got.Timestamp.AsTime(), want.Timestamp.AsTime(), values.Get("timestamp"))
+			}
+		})
+	}
+}
+
 func TestFieldMaskEncodingPreservesRequest(t *testing.T) {
 	request := &binding.HelloRequest{
 		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"opt_string", "sub.name"}},
