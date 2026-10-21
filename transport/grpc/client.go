@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"io"
 	"time"
 
 	"google.golang.org/grpc"
@@ -48,9 +49,19 @@ func WithSubset(size int) ClientOption {
 }
 
 // WithTimeout with client timeout.
+// It does not apply to streaming calls; use WithStreamTimeout for those.
 func WithTimeout(timeout time.Duration) ClientOption {
 	return func(o *clientOptions) {
 		o.timeout = timeout
+	}
+}
+
+// WithStreamTimeout with client stream timeout.
+// It bounds the whole lifetime of each streaming call, so leave it unset for
+// long-lived streams. Zero value (the default) means no timeout.
+func WithStreamTimeout(timeout time.Duration) ClientOption {
+	return func(o *clientOptions) {
+		o.streamTimeout = timeout
 	}
 }
 
@@ -125,6 +136,7 @@ type clientOptions struct {
 	subsetSize        int
 	tlsConf           *tls.Config
 	timeout           time.Duration
+	streamTimeout     time.Duration
 	discovery         registry.Discovery
 	middleware        []middleware.Middleware
 	streamMiddleware  []middleware.Middleware
@@ -155,7 +167,7 @@ func NewClient(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, err
 		unaryClientInterceptor(options.middleware, options.timeout, options.filters),
 	}
 	sints := []grpc.StreamClientInterceptor{
-		streamClientInterceptor(options.streamMiddleware, options.filters),
+		streamClientInterceptor(options.streamMiddleware, options.streamTimeout, options.filters),
 	}
 
 	if len(options.ints) > 0 {
@@ -237,6 +249,31 @@ type wrappedClientStream struct {
 	grpc.ClientStream
 	ctx        context.Context
 	middleware matcher.Matcher
+	// cancel releases the per-stream timeout context created when
+	// WithStreamTimeout is configured. It is nil when no timeout is set.
+	cancel context.CancelFunc
+	// serverStreams reports whether the server can send more than one message.
+	// If not, the stream ends with the first successful RecvMsg.
+	serverStreams bool
+}
+
+// releaseTimeout releases the per-stream timeout context once the underlying
+// stream has ended: on any RecvMsg error (including io.EOF), on a successful
+// RecvMsg when the server does not stream (for example CloseAndRecv on a
+// client-streaming call), and on any non-io.EOF error from SendMsg or Header.
+// Errors returned only by middleware do not end the stream.
+func (w *wrappedClientStream) releaseTimeout() {
+	if w.cancel != nil {
+		w.cancel()
+	}
+}
+
+func (w *wrappedClientStream) Header() (grpcmd.MD, error) {
+	md, err := w.ClientStream.Header()
+	if err != nil && err != io.EOF {
+		w.releaseTimeout()
+	}
+	return md, err
 }
 
 func (w *wrappedClientStream) Context() context.Context {
@@ -245,7 +282,11 @@ func (w *wrappedClientStream) Context() context.Context {
 
 func (w *wrappedClientStream) SendMsg(m any) error {
 	h := func(_ context.Context, req any) (any, error) {
-		return req, w.ClientStream.SendMsg(m)
+		err := w.ClientStream.SendMsg(m)
+		if err != nil && err != io.EOF {
+			w.releaseTimeout()
+		}
+		return req, err
 	}
 
 	info, ok := transport.FromClientContext(w.ctx)
@@ -263,7 +304,11 @@ func (w *wrappedClientStream) SendMsg(m any) error {
 
 func (w *wrappedClientStream) RecvMsg(m any) error {
 	h := func(_ context.Context, req any) (any, error) {
-		return req, w.ClientStream.RecvMsg(m)
+		err := w.ClientStream.RecvMsg(m)
+		if err != nil || !w.serverStreams {
+			w.releaseTimeout()
+		}
+		return req, err
 	}
 
 	info, ok := transport.FromClientContext(w.ctx)
@@ -279,7 +324,7 @@ func (w *wrappedClientStream) RecvMsg(m any) error {
 	return err
 }
 
-func streamClientInterceptor(ms []middleware.Middleware, filters []selector.NodeFilter) grpc.StreamClientInterceptor {
+func streamClientInterceptor(ms []middleware.Middleware, timeout time.Duration, filters []selector.NodeFilter) grpc.StreamClientInterceptor {
 	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) { // nolint
 		ctx = transport.NewClientContext(ctx, &Transport{
 			endpoint:    cc.Target(),
@@ -287,11 +332,21 @@ func streamClientInterceptor(ms []middleware.Middleware, filters []selector.Node
 			reqHeader:   headerCarrier{},
 			nodeFilters: filters,
 		})
+		// Apply the configured per-stream timeout. Unlike unary RPCs, where the
+		// context is canceled when the handler returns, the cancel function is
+		// stored in wrappedClientStream and called when the stream ends.
+		var cancel context.CancelFunc
+		if timeout > 0 {
+			ctx, cancel = context.WithTimeout(ctx, timeout)
+		}
 		var p selector.Peer
 		ctx = selector.NewPeerContext(ctx, &p)
 
 		clientStream, err := streamer(ctx, desc, cc, method, opts...)
 		if err != nil {
+			if cancel != nil {
+				cancel()
+			}
 			return nil, err
 		}
 
@@ -306,9 +361,11 @@ func streamClientInterceptor(ms []middleware.Middleware, filters []selector.Node
 		}
 
 		wrappedStream := &wrappedClientStream{
-			ClientStream: clientStream,
-			ctx:          ctx,
-			middleware:   m,
+			ClientStream:  clientStream,
+			ctx:           ctx,
+			middleware:    m,
+			cancel:        cancel,
+			serverStreams: desc != nil && desc.ServerStreams,
 		}
 
 		return wrappedStream, nil
