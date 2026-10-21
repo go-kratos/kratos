@@ -140,7 +140,7 @@ func TestBuildPathEscapesValues(t *testing.T) {
 		// Characters allowed in a segment are kept, matching the unescaped output.
 		{"segment chars unchanged", "/items/{name}", "a-b_c.d~e!$&'()*+,;=:@", "/items/a-b_c.d~e!$&'()*+,;=:@"},
 		{"dots in value", "/items/{name}", "v1.2...", "/items/v1.2..."},
-		{"space and non-ASCII", "/items/{name}", "a b中", "/items/a%20b%E4%B8%AD"},
+		{"space and non-ASCII", "/items/{name}", "a b\xe4\xb8\xad", "/items/a%20b%E4%B8%AD"},
 		// Values must not be pre-escaped; "%" is always escaped.
 		{"pre-escaped value", "/items/{name}", "a%20b", "/items/a%2520b"},
 	}
