@@ -68,6 +68,14 @@ func Run(cmd *cobra.Command, args []string) {
 			dir = cmdPath[dir]
 		}
 	}
+	if !filepath.IsAbs(dir) {
+		abs, err := filepath.Abs(dir)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
+			return
+		}
+		dir = abs
+	}
 	fd := exec.Command("go", append([]string{"run", dir}, programArgs...)...)
 	fd.Stdout = os.Stdout
 	fd.Stderr = os.Stderr
