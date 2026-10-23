@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/go-kratos/kratos/v3 v3.0.0
-	github.com/nacos-group/nacos-sdk-go v1.1.6
+	github.com/nacos-group/nacos-sdk-go/v2 v2.3.5
 )
 
 require (
