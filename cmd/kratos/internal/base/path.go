@@ -44,13 +44,17 @@ func copyFile(src, dst string, replaces []string) error {
 	if err != nil {
 		return err
 	}
-	var old string
-	for i, next := range replaces {
-		if i%2 == 0 {
-			old = next
-			continue
+	// Generated protobuf files embed a serialized FileDescriptorProto; replacing
+	// the module path there corrupts length-prefixed go_package values.
+	if !strings.HasSuffix(dst, ".pb.go") {
+		var old string
+		for i, next := range replaces {
+			if i%2 == 0 {
+				old = next
+				continue
+			}
+			buf = bytes.ReplaceAll(buf, []byte(old), []byte(next))
 		}
-		buf = bytes.ReplaceAll(buf, []byte(old), []byte(next))
 	}
 	return os.WriteFile(dst, buf, srcinfo.Mode())
 }
