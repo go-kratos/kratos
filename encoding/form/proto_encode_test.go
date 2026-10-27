@@ -4,11 +4,14 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
+	"github.com/go-kratos/kratos/v3/internal/testdata/binding"
 	"github.com/go-kratos/kratos/v3/internal/testdata/complex"
 )
 
@@ -29,7 +32,7 @@ func TestEncodeValues(t *testing.T) {
 		Map:         map[string]string{"kratos": "https://go-kratos.dev/", "kratos_start": "https://go-kratos.dev/docs/getting-started/start/"},
 		MapInt64Key: map[int64]string{1: "kratos", 2: "go-zero"},
 
-		Timestamp: timestamppb.New(time.Date(1970, 1, 1, 0, 0, 20, 2, time.Local)),
+		Timestamp: timestamppb.New(time.Date(1970, 1, 1, 0, 0, 20, 2, time.UTC)),
 		Duration:  &durationpb.Duration{Seconds: 120, Nanos: 22},
 		Field:     &fieldmaskpb.FieldMask{Paths: []string{"1", "2"}},
 		Double:    &wrapperspb.DoubleValue{Value: 12.33},
@@ -49,6 +52,60 @@ func TestEncodeValues(t *testing.T) {
 	want := "a=19&age=18&b=true&bool=false&byte=MTIz&bytes=MTIz&count=3&d=22.22&double=12.33&duration=2m0.000000022s&field=1%2C2&float=12.34&id=2233&int32=32&int64=64&map%5Bkratos%5D=https%3A%2F%2Fgo-kratos.dev%2F&map%5Bkratos_start%5D=https%3A%2F%2Fgo-kratos.dev%2Fdocs%2Fgetting-started%2Fstart%2F&map_int64_key%5B1%5D=kratos&map_int64_key%5B2%5D=go-zero&numberOne=2233&price=11.23&sex=woman&string=go-kratos&strings=3344&strings=5566&timestamp=1970-01-01T00%3A00%3A20.000000002Z&uint32=32&uint64=64&very_simple.component=5566" // nolint:lll
 	if got := query.Encode(); want != got {
 		t.Errorf("\nwant: %s, \ngot: %s", want, got)
+	}
+}
+
+func TestTimestampRoundTrip(t *testing.T) {
+	for _, zone := range []struct {
+		name   string
+		offset int
+	}{
+		{"UTC+8", 8 * 60 * 60},
+		{"UTC-7", -7 * 60 * 60},
+	} {
+		t.Run(zone.name, func(t *testing.T) {
+			previous := time.Local
+			time.Local = time.FixedZone(zone.name, zone.offset)
+			t.Cleanup(func() { time.Local = previous })
+			want := &complex.Complex{Timestamp: timestamppb.New(time.Date(2026, 10, 1, 23, 30, 0, 123456789, time.UTC))}
+			values, err := EncodeValues(want)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := &complex.Complex{}
+			if err := DecodeValues(got, values); err != nil {
+				t.Fatal(err)
+			}
+			if !proto.Equal(got.Timestamp, want.Timestamp) {
+				t.Fatalf("timestamp round trip = %v, want %v (query %q)", got.Timestamp.AsTime(), want.Timestamp.AsTime(), values.Get("timestamp"))
+			}
+		})
+	}
+}
+
+func TestFieldMaskEncodingPreservesRequest(t *testing.T) {
+	request := &binding.HelloRequest{
+		UpdateMask: &fieldmaskpb.FieldMask{Paths: []string{"opt_string", "sub.name"}},
+	}
+	for _, query := range []bool{false, true} {
+		input := proto.Clone(request)
+		if query {
+			values, err := EncodeValues(input)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := values.Get("updateMask"); got != "optString,sub.name" {
+				t.Fatalf("FieldMask query = %q", got)
+			}
+		} else if got := EncodeFieldMask(input.ProtoReflect()); got != "updateMask=optString,sub.name" {
+			t.Fatalf("FieldMask = %q", got)
+		}
+		if !proto.Equal(input, request) {
+			t.Fatalf("FieldMask encoding mutated the request: %v", input)
+		}
+		if _, err := protojson.Marshal(input); err != nil {
+			t.Fatalf("request can no longer be encoded as ProtoJSON: %v", err)
+		}
 	}
 }
 
