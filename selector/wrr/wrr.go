@@ -25,29 +25,6 @@ type options struct{}
 type Balancer struct {
 	mu            sync.Mutex
 	currentWeight map[string]float64
-	lastNodes     []selector.WeightedNode
-}
-
-// equalNodes checks if two slices of WeightedNode contain the same nodes
-func equalNodes(a, b []selector.WeightedNode) bool {
-	if len(a) != len(b) {
-		return false
-	}
-
-	// Create a map of addresses from slice a
-	aMap := make(map[string]bool, len(a))
-	for _, node := range a {
-		aMap[node.Address()] = true
-	}
-
-	// Check if all nodes in slice b exist in slice a
-	for _, node := range b {
-		if !aMap[node.Address()] {
-			return false
-		}
-	}
-
-	return true
 }
 
 // New random a selector.
@@ -63,26 +40,6 @@ func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selec
 
 	p.mu.Lock()
 	defer p.mu.Unlock()
-
-	// Check if the node list has changed
-	if !equalNodes(p.lastNodes, nodes) {
-		// Update lastNodes
-		p.lastNodes = make([]selector.WeightedNode, len(nodes))
-		copy(p.lastNodes, nodes)
-
-		// Create a set of current node addresses for cleanup
-		currentNodes := make(map[string]bool, len(nodes))
-		for _, node := range nodes {
-			currentNodes[node.Address()] = true
-		}
-
-		// Clean up stale entries from currentWeight map
-		for address := range p.currentWeight {
-			if !currentNodes[address] {
-				delete(p.currentWeight, address)
-			}
-		}
-	}
 
 	var totalWeight float64
 	var selected selector.WeightedNode
@@ -102,8 +59,31 @@ func (p *Balancer) Pick(_ context.Context, nodes []selector.WeightedNode) (selec
 	}
 	p.currentWeight[selected.Address()] = selectWeight - totalWeight
 
+	// After the loop, currentWeight has an entry for every current node, plus any
+	// leftover entries for nodes that have disappeared from service discovery. So
+	// len(currentWeight) > len(nodes) exactly when stale entries exist: drop them
+	// to keep the map from growing without bound as nodes churn. When the node set
+	// is unchanged (the common case) the sizes match and cleanup is skipped, so the
+	// per-pick cost is just the algorithm itself with no extra bookkeeping.
+	if len(p.currentWeight) > len(nodes) {
+		p.cleanupStaleEntries(nodes)
+	}
+
 	d := selected.Pick()
 	return selected, d, nil
+}
+
+// cleanupStaleEntries removes currentWeight entries whose node is no longer present.
+func (p *Balancer) cleanupStaleEntries(nodes []selector.WeightedNode) {
+	current := make(map[string]struct{}, len(nodes))
+	for _, node := range nodes {
+		current[node.Address()] = struct{}{}
+	}
+	for address := range p.currentWeight {
+		if _, ok := current[address]; !ok {
+			delete(p.currentWeight, address)
+		}
+	}
 }
 
 // NewBuilder returns a selector builder with wrr balancer
