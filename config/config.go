@@ -129,6 +129,13 @@ func (c *config) Value(key string) Value {
 }
 
 func (c *config) Scan(v any) error {
+	if sr, ok := c.reader.(interface{ SourceFor(any) ([]byte, error) }); ok {
+		data, err := sr.SourceFor(v)
+		if err != nil {
+			return err
+		}
+		return unmarshalJSON(data, v)
+	}
 	data, err := c.reader.Source()
 	if err != nil {
 		return err
