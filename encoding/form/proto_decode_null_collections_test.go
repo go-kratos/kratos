@@ -25,16 +25,27 @@ func TestDecodeValuesNullCollections(t *testing.T) {
 			message := descriptorpb.FieldDescriptorProto_TYPE_MESSAGE
 			str := descriptorpb.FieldDescriptorProto_TYPE_STRING
 			fd, err := protodesc.NewFile(&descriptorpb.FileDescriptorProto{
-				Name: proto.String("null_collection_" + tc.name + ".proto"), Package: proto.String("formregression"), Syntax: proto.String("proto3"), Dependency: []string{tc.dependency},
-				MessageType: []*descriptorpb.DescriptorProto{{Name: proto.String("Container"),
+				Name:       proto.String("null_collection_" + tc.name + ".proto"),
+				Package:    proto.String("formregression"),
+				Syntax:     proto.String("proto3"),
+				Dependency: []string{tc.dependency},
+				MessageType: []*descriptorpb.DescriptorProto{{
+					Name: proto.String("Container"),
 					Field: []*descriptorpb.FieldDescriptorProto{
 						{Name: proto.String("items"), Number: proto.Int32(1), Label: &repeated, Type: &message, TypeName: proto.String(tc.message)},
-						{Name: proto.String("entries"), Number: proto.Int32(2), Label: &repeated, Type: &message, TypeName: proto.String(".formregression.Container.EntriesEntry")},
+						{
+							Name: proto.String("entries"), Number: proto.Int32(2), Label: &repeated,
+							Type: &message, TypeName: proto.String(".formregression.Container.EntriesEntry"),
+						},
 					},
-					NestedType: []*descriptorpb.DescriptorProto{{Name: proto.String("EntriesEntry"), Options: &descriptorpb.MessageOptions{MapEntry: proto.Bool(true)}, Field: []*descriptorpb.FieldDescriptorProto{
-						{Name: proto.String("key"), Number: proto.Int32(1), Label: &optional, Type: &str},
-						{Name: proto.String("value"), Number: proto.Int32(2), Label: &optional, Type: &message, TypeName: proto.String(tc.message)},
-					}}},
+					NestedType: []*descriptorpb.DescriptorProto{{
+						Name:    proto.String("EntriesEntry"),
+						Options: &descriptorpb.MessageOptions{MapEntry: proto.Bool(true)},
+						Field: []*descriptorpb.FieldDescriptorProto{
+							{Name: proto.String("key"), Number: proto.Int32(1), Label: &optional, Type: &str},
+							{Name: proto.String("value"), Number: proto.Int32(2), Label: &optional, Type: &message, TypeName: proto.String(tc.message)},
+						},
+					}},
 				}},
 			}, protoregistry.GlobalFiles)
 			if err != nil {
