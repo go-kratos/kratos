@@ -145,7 +145,14 @@ func (a *App) Run() error {
 	}
 	err = nil
 	for _, fn := range a.opts.afterStop {
-		err = fn(sctx)
+		if err != nil {
+			log.Warnf("%s", err)
+		}
+
+		fnErr := fn(sctx)
+		if fnErr != nil {
+			err = fnErr
+		}
 	}
 	return err
 }
@@ -154,7 +161,13 @@ func (a *App) Run() error {
 func (a *App) Stop() (err error) {
 	sctx := NewContext(a.ctx, a)
 	for _, fn := range a.opts.beforeStop {
-		err = fn(sctx)
+		if err != nil {
+			log.Warnf("%s", err)
+		}
+		fnErr := fn(sctx)
+		if fnErr != nil {
+			err = fnErr
+		}
 	}
 
 	a.mu.Lock()
