@@ -36,6 +36,11 @@ var (
 	timeout = "60s"
 )
 
+// CLIVersion is the kratos CLI version, injected from the main package.
+// It is used to match the layout template tag to the CLI version, so that
+// a v2.x CLI pulls the v2.x template instead of the main (v3) branch.
+var CLIVersion string
+
 func init() {
 	CmdNew.Flags().StringVarP(&repo, "repo", "r", repo, "custom repo url")
 	CmdNew.Flags().StringVarP(&branch, "branch", "b", branch, "repo branch")
@@ -79,6 +84,12 @@ func run(_ *cobra.Command, args []string) {
 			fmt.Fprintf(os.Stderr, "\033[31mERROR: failed to select repo(%s)\033[m\n", err.Error())
 			return
 		}
+	}
+	// When using the default service layout and no explicit branch was
+	// given, match the layout tag to the CLI version (e.g. CLI v2.9.2
+	// pulls the v2.9.2 template instead of the main branch which is v3).
+	if branch == "" && repoURL == projects["service"] && CLIVersion != "" {
+		branch = CLIVersion
 	}
 	go func() {
 		if !nomod {
