@@ -216,7 +216,9 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, f
 				keys := header.Keys()
 				keyvals := make([]string, 0, len(keys))
 				for _, k := range keys {
-					keyvals = append(keyvals, k, header.Get(k))
+					for _, v := range header.Values(k) {
+						keyvals = append(keyvals, k, v)
+					}
 				}
 				ctx = grpcmd.AppendToOutgoingContext(ctx, keyvals...)
 			}
