@@ -360,6 +360,130 @@ func TestServer_streamServerInterceptor(t *testing.T) {
 	}
 }
 
+type streamCtxKey struct{}
+
+func TestServer_streamMiddlewareOnceAndContext(t *testing.T) {
+	u, err := url.Parse("grpc://hello/world")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var calls int
+	mw := func(next middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req any) (any, error) {
+			calls++
+			return next(context.WithValue(ctx, streamCtxKey{}, "user-from-middleware"), req)
+		}
+	}
+	srv := &Server{
+		baseCtx:          context.Background(),
+		endpoint:         u,
+		middleware:       matcher.New(),
+		streamMiddleware: matcher.New(),
+	}
+	srv.streamMiddleware.Use(mw)
+	mockStream := &mockServerStream{ctx: srv.baseCtx}
+	var saw string
+	handler := func(_ any, stream grpc.ServerStream) error {
+		saw, _ = stream.Context().Value(streamCtxKey{}).(string)
+		return stream.SendMsg(&testResp{Data: "ok"})
+	}
+	info := &grpc.StreamServerInfo{FullMethod: "/repro.Stream/Watch"}
+	if err = srv.streamServerInterceptor()(nil, mockStream, info, handler); err != nil {
+		t.Fatal(err)
+	}
+	if calls != 1 {
+		t.Errorf("expect middleware once, got %d", calls)
+	}
+	if saw != "user-from-middleware" {
+		t.Errorf("expect user-from-middleware, got %q", saw)
+	}
+}
+
+func TestServer_streamMiddlewareRejectsBeforeHandler(t *testing.T) {
+	u, err := url.Parse("grpc://hello/world")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mw := func(middleware.Handler) middleware.Handler {
+		return func(context.Context, any) (any, error) {
+			return nil, errors.Unauthorized("UNAUTHORIZED", "JWT token is missing")
+		}
+	}
+	srv := &Server{
+		baseCtx:          context.Background(),
+		endpoint:         u,
+		middleware:       matcher.New(),
+		streamMiddleware: matcher.New(),
+	}
+	srv.streamMiddleware.Use(mw)
+	called := false
+	handler := func(any, grpc.ServerStream) error {
+		called = true
+		return nil
+	}
+	info := &grpc.StreamServerInfo{FullMethod: "/repro.Stream/Watch"}
+	err = srv.streamServerInterceptor()(nil, &mockServerStream{ctx: srv.baseCtx}, info, handler)
+	if err == nil {
+		t.Fatal("expect middleware error")
+	}
+	if called {
+		t.Fatal("handler ran after middleware rejected the stream")
+	}
+}
+
+func TestServer_healthBypassesMiddleware(t *testing.T) {
+	u, err := url.Parse("grpc://hello/world")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var unaryCalls, streamCalls int
+	reject := func(counter *int) middleware.Middleware {
+		return func(middleware.Handler) middleware.Handler {
+			return func(context.Context, any) (any, error) {
+				*counter++
+				return nil, errors.Unauthorized("UNAUTHORIZED", "JWT token is missing")
+			}
+		}
+	}
+	srv := &Server{
+		baseCtx:          context.Background(),
+		endpoint:         u,
+		middleware:       matcher.New(),
+		streamMiddleware: matcher.New(),
+	}
+	srv.middleware.Use(reject(&unaryCalls))
+	srv.streamMiddleware.Use(reject(&streamCalls))
+
+	_, err = srv.unaryServerInterceptor()(context.Background(), &struct{}{}, &grpc.UnaryServerInfo{
+		FullMethod: "/grpc.health.v1.Health/Check",
+	}, func(context.Context, any) (any, error) {
+		return &testResp{Data: "ok"}, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if unaryCalls != 0 {
+		t.Errorf("expect health check to skip unary middleware, got %d", unaryCalls)
+	}
+
+	called := false
+	err = srv.streamServerInterceptor()(nil, &mockServerStream{ctx: srv.baseCtx}, &grpc.StreamServerInfo{
+		FullMethod: "/grpc.health.v1.Health/Watch",
+	}, func(any, grpc.ServerStream) error {
+		called = true
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !called {
+		t.Fatal("health watch handler did not run")
+	}
+	if streamCalls != 0 {
+		t.Errorf("expect health watch to skip stream middleware, got %d", streamCalls)
+	}
+}
+
 func TestListener(t *testing.T) {
 	lis, err := net.Listen("tcp", ":0")
 	if err != nil {

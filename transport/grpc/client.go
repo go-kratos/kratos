@@ -11,7 +11,6 @@ import (
 	grpcinsecure "google.golang.org/grpc/credentials/insecure"
 	grpcmd "google.golang.org/grpc/metadata"
 
-	"github.com/go-kratos/kratos/v3/internal/matcher"
 	"github.com/go-kratos/kratos/v3/middleware"
 	"github.com/go-kratos/kratos/v3/registry"
 	"github.com/go-kratos/kratos/v3/selector"
@@ -232,51 +231,15 @@ func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, f
 	}
 }
 
-// wrappedClientStream wraps the grpc.ClientStream and applies middleware
+// wrappedClientStream carries the context returned by client stream middleware.
+// SendMsg and RecvMsg stay on the embedded stream, so the chain runs once.
 type wrappedClientStream struct {
 	grpc.ClientStream
-	ctx        context.Context
-	middleware matcher.Matcher
+	ctx context.Context
 }
 
 func (w *wrappedClientStream) Context() context.Context {
 	return w.ctx
-}
-
-func (w *wrappedClientStream) SendMsg(m any) error {
-	h := func(_ context.Context, req any) (any, error) {
-		return req, w.ClientStream.SendMsg(m)
-	}
-
-	info, ok := transport.FromClientContext(w.ctx)
-	if !ok {
-		return fmt.Errorf("transport value stored in ctx returns: %v", ok)
-	}
-
-	if next := w.middleware.Match(info.Operation()); len(next) > 0 {
-		h = middleware.Chain(next...)(h)
-	}
-
-	_, err := h(w.ctx, m)
-	return err
-}
-
-func (w *wrappedClientStream) RecvMsg(m any) error {
-	h := func(_ context.Context, req any) (any, error) {
-		return req, w.ClientStream.RecvMsg(m)
-	}
-
-	info, ok := transport.FromClientContext(w.ctx)
-	if !ok {
-		return fmt.Errorf("transport value stored in ctx returns: %v", ok)
-	}
-
-	if next := w.middleware.Match(info.Operation()); len(next) > 0 {
-		h = middleware.Chain(next...)(h)
-	}
-
-	_, err := h(w.ctx, m)
-	return err
 }
 
 func streamClientInterceptor(ms []middleware.Middleware, filters []selector.NodeFilter) grpc.StreamClientInterceptor {
@@ -290,27 +253,36 @@ func streamClientInterceptor(ms []middleware.Middleware, filters []selector.Node
 		var p selector.Peer
 		ctx = selector.NewPeerContext(ctx, &p)
 
-		clientStream, err := streamer(ctx, desc, cc, method, opts...)
+		// Run the chain once, as unaryClientInterceptor does, and open the stream
+		// with the context that chain returns. The previous chain was discarded,
+		// and SendMsg/RecvMsg ran it again per message without keeping that context.
+		h := func(callCtx context.Context, _ any) (any, error) {
+			if tr, ok := transport.FromClientContext(callCtx); ok {
+				header := tr.RequestHeader()
+				keys := header.Keys()
+				keyvals := make([]string, 0, len(keys))
+				for _, k := range keys {
+					keyvals = append(keyvals, k, header.Get(k))
+				}
+				callCtx = grpcmd.AppendToOutgoingContext(callCtx, keyvals...)
+			}
+			clientStream, err := streamer(callCtx, desc, cc, method, opts...)
+			if err != nil {
+				return nil, err
+			}
+			return &wrappedClientStream{ClientStream: clientStream, ctx: callCtx}, nil
+		}
+		if len(ms) > 0 {
+			h = middleware.Chain(ms...)(h)
+		}
+		reply, err := h(ctx, nil)
 		if err != nil {
 			return nil, err
 		}
-
-		h := func(_ context.Context, _ any) (any, error) {
-			return streamer, nil
+		clientStream, ok := reply.(grpc.ClientStream)
+		if !ok || clientStream == nil {
+			return nil, fmt.Errorf("client stream middleware returned %T", reply)
 		}
-
-		m := matcher.New()
-		if len(ms) > 0 {
-			m.Use(ms...)
-			middleware.Chain(ms...)(h)
-		}
-
-		wrappedStream := &wrappedClientStream{
-			ClientStream: clientStream,
-			ctx:          ctx,
-			middleware:   m,
-		}
-
-		return wrappedStream, nil
+		return clientStream, nil
 	}
 }
