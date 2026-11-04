@@ -78,56 +78,64 @@ func _{{$svrType}}_{{.Name}}{{.Num}}_HTTP_Handler(srv {{$svrType}}HTTPServer) fu
 		return stream.Close(err)
 		{{- else if .ServerStreaming}}
 		var in {{.Request}}
+		var bindErr error
 		{{- if .HasBody}}
-		if err := ctx.Bind(&in{{.Body}}); err != nil {
-			return err
+		if err := ctx.Bind(&in{{.Body}}); err != nil && bindErr == nil {
+			bindErr = err
 		}
 		{{- end}}
 		{{- if not .HasBody}}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
+		if err := ctx.BindQuery(&in); err != nil && bindErr == nil {
+			bindErr = err
 		}
 		{{- else if ne .BodyField "*"}}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
+		if err := ctx.BindQuery(&in); err != nil && bindErr == nil {
+			bindErr = err
 		}
 		{{- end}}
 		{{- if .HasVars}}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
+		if err := ctx.BindVars(&in); err != nil && bindErr == nil {
+			bindErr = err
 		}
 		{{- end}}
 		stream := http.NewServerSentEventServerStream(ctx)
 		http.SetOperation(ctx,Operation{{$svrType}}{{.OriginalName}})
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			stream.SetContext(ctx)
+			if bindErr != nil {
+				return nil, bindErr
+			}
 			return nil, srv.{{.Name}}(req.(*{{.Request}}), &{{$svrType}}_{{.Name}}HTTPServer{ServerStream: stream})
 		})
 		_, err := h(ctx, &in)
 		return stream.Close(err)
 		{{- else}}
 		var in {{.Request}}
+		var bindErr error
 		{{- if .HasBody}}
-		if err := ctx.Bind(&in{{.Body}}); err != nil {
-			return err
+		if err := ctx.Bind(&in{{.Body}}); err != nil && bindErr == nil {
+			bindErr = err
 		}
 		{{- end}}
 		{{- if not .HasBody}}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
+		if err := ctx.BindQuery(&in); err != nil && bindErr == nil {
+			bindErr = err
 		}
 		{{- else if ne .BodyField "*"}}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
+		if err := ctx.BindQuery(&in); err != nil && bindErr == nil {
+			bindErr = err
 		}
 		{{- end}}
 		{{- if .HasVars}}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
+		if err := ctx.BindVars(&in); err != nil && bindErr == nil {
+			bindErr = err
 		}
 		{{- end}}
 		http.SetOperation(ctx,Operation{{$svrType}}{{.OriginalName}})
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			if bindErr != nil {
+				return nil, bindErr
+			}
 			return srv.{{.Name}}(ctx, req.(*{{.Request}}))
 		})
 		out, err := h(ctx, &in)
