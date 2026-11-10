@@ -107,7 +107,9 @@ jobs:
             if [ -n "$grep_output" ]; then
               # Insert a tab after the line number, keeping the colon between the file path and line number
               formatted_output=$(echo "$grep_output" | sed 's/^\(.*:[0-9]\+\):/\1\t/')
-              echo "$formatted_output" >> non_english_comments.txt  # Save to file
+              if [ -n "$formatted_output" ]; then
+                echo "$formatted_output" >> non_english_comments.txt  # Save to file
+              fi
             fi
           done
 
