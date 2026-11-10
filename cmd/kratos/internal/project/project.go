@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -19,6 +20,46 @@ import (
 var projects = map[string]string{
 	"service": "https://github.com/go-kratos/kratos-layout.git",
 	"admin":   "https://github.com/go-kratos/kratos-admin.git",
+}
+
+// KratosVersion is the version of the running kratos CLI. It is set from the
+// main package so that kratos new can generate a project that matches the
+// installed kratos version.
+var KratosVersion string
+
+// resolveTemplateVersion returns the template repository ref to use when
+// creating a new project. When the user provides an explicit ref via -b it is
+// used as-is. Otherwise, if the running kratos CLI has a version and the
+// template repository exposes a tag matching that version, that tag is used.
+func resolveTemplateVersion(ctx context.Context, repoURL string) (string, error) {
+	if branch != "" {
+		return branch, nil
+	}
+	if KratosVersion == "" {
+		return "", nil
+	}
+	cmd := exec.CommandContext(ctx, "git", "ls-remote", "--tags", repoURL)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		// Fall back to the default branch when the tag list cannot be fetched.
+		return "", nil
+	}
+	for _, line := range strings.Split(string(out), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) < 2 {
+			continue
+		}
+		ref := fields[1]
+		if !strings.HasPrefix(ref, "refs/tags/") {
+			continue
+		}
+		tag := strings.TrimPrefix(ref, "refs/tags/")
+		tag = strings.TrimSuffix(tag, "^{}")
+		if tag == KratosVersion {
+			return tag, nil
+		}
+	}
+	return "", nil
 }
 
 // CmdNew represents the new command.
@@ -80,9 +121,16 @@ func run(_ *cobra.Command, args []string) {
 			return
 		}
 	}
+	// When no -b flag is provided, try to match the template version to the
+	// installed kratos version so the generated project is compatible.
+	resolvedBranch, err := resolveTemplateVersion(ctx, repoURL)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mERROR: failed to resolve template version(%s)\033[m\n", err.Error())
+		return
+	}
 	go func() {
 		if !nomod {
-			done <- p.New(ctx, workingDir, repoURL, branch)
+			done <- p.New(ctx, workingDir, repoURL, resolvedBranch)
 			return
 		}
 		projectRoot := getgomodProjectRoot(workingDir)
@@ -105,7 +153,7 @@ func run(_ *cobra.Command, args []string) {
 		}
 		// Get the relative path for adding a project based on Go modules
 		p.Path = filepath.Join(strings.TrimPrefix(workingDir, projectRoot+"/"), p.Name)
-		done <- p.Add(ctx, workingDir, repoURL, branch, mod, packagePath)
+		done <- p.Add(ctx, workingDir, repoURL, resolvedBranch, mod, packagePath)
 	}()
 	select {
 	case <-ctx.Done():
