@@ -1,0 +1,39 @@
+name: Release contrib modules
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Root module release version, for example v3.0.0
+        required: true
+        default: v3.0.0
+        type: string
+      ref:
+        description: Git ref containing the release commit
+        required: true
+        default: v3.0.0
+        type: string
+
+jobs:
+  release:
+    if: github.repository == 'go-kratos/kratos'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref }}
+
+      - name: Create and push contrib module tags
+        env:
+          RELEASE_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          bash hack/release-contrib-modules.sh "${RELEASE_VERSION}" --push
