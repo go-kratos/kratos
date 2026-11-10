@@ -99,6 +99,14 @@ func findCMD(base string) (map[string]string, error) {
 	next := func(dir string) (map[string]string, error) {
 		cmdPath := make(map[string]string)
 		err := filepath.Walk(dir, func(walkPath string, info os.FileInfo, _ error) error {
+			// Skip dependency and VCS directories that contain no project cmd/*.
+			// Fixes https://github.com/go-kratos/kratos/issues/3859
+			if info.IsDir() {
+				switch info.Name() {
+				case "node_modules", ".git", "vendor", ".idea":
+					return filepath.SkipDir
+				}
+			}
 			// multi level directory is not allowed under the cmdPath directory, so it is judged that the path ends with cmdPath.
 			if strings.HasSuffix(walkPath, "cmd") {
 				paths, err := os.ReadDir(walkPath)
