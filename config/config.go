@@ -133,6 +133,13 @@ func (c *config) Scan(v any) error {
 	if err != nil {
 		return err
 	}
+	// Sources that deliver every value as a string (e.g. env) would make
+	// unmarshalling reject typed fields (bool/int/float). Coerce string leaves
+	// to the types declared by the destination before decoding.
+	data, err = coerceScalarTypes(data, v)
+	if err != nil {
+		return err
+	}
 	return unmarshalJSON(data, v)
 }
 
