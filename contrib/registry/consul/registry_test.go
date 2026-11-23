@@ -391,7 +391,7 @@ func TestRegistry_Watch(t *testing.T) {
 				opts: []Option{
 					WithHeartbeat(true),
 					WithHealthCheck(true),
-					WithHealthCheckInterval(5),
+					WithHealthCheckInterval(1),
 				},
 			},
 			want:    []*registry.ServiceInstance{instance3},
