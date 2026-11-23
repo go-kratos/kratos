@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"net/url"
 	"reflect"
 	"testing"
 
@@ -175,5 +176,98 @@ func TestOptions_hasPrefix(t *testing.T) {
 				t.Errorf("key: '%sr', not exists prefixs: %v", test.key, test.options.prefix)
 			}
 		})
+	}
+}
+
+func TestEncodeValue(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{"plain ascii", "global-value", "global-value"},
+		{"chinese", "张三", "%E5%BC%A0%E4%B8%89"},
+		{"emoji", "🙂", "%F0%9F%99%82"},
+		{"percent", "100% off", "100%25%20off"},
+		{"plus preserved", "+861234567890", "+861234567890"},
+		{"empty", "", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := encodeValue(tt.in); got != tt.want {
+				t.Errorf("encodeValue(%q) = %q, want %q", tt.in, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDecodeValue(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{"plain ascii", "global-value", "global-value"},
+		{"chinese", "%E5%BC%A0%E4%B8%89", "张三"},
+		{"emoji", "%F0%9F%99%82", "🙂"},
+		{"percent escaped", "100%25%20off", "100% off"},
+		{"plus preserved", "+861234567890", "+861234567890"},
+		{"bare percent error fallback", "100% off", "100% off"},
+		{"empty", "", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := decodeValue(tt.in); got != tt.want {
+				t.Errorf("decodeValue(%q) = %q, want %q", tt.in, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNonASCIIRoundTripThroughClientServer(t *testing.T) {
+	// Simulate a client sending a non-ASCII value through the middleware chain:
+	// Client encodes it into the header, then Server reads and decodes it back.
+	want := "张三" // any non-ASCII value
+	key := "x-md-global-name"
+
+	// Client side: put the value into client metadata, let Client middleware encode it.
+	hs := func(ctx context.Context, in any) (any, error) {
+		// This handler runs "server-side"; read the value from server context.
+		md, ok := metadata.FromServerContext(ctx)
+		if !ok {
+			return nil, errors.New("no server md")
+		}
+		if got := md.Get(key); got != want {
+			return nil, errors.New("server md value mismatch")
+		}
+		return in, nil
+	}
+
+	// Build the encoded header by running the Client middleware against a carrier.
+	clientMD := metadata.New()
+	clientMD.Set(key, want)
+	clientCtx := metadata.NewClientContext(context.Background(), clientMD)
+	carrier := headerCarrier{}
+	clientCtx = transport.NewClientContext(clientCtx, &testTransport{carrier})
+	_, err := Client()(func(ctx context.Context, in any) (any, error) { return in, nil })(clientCtx, "req")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The header value on the wire must be percent-encoded, not raw UTF-8.
+	wire := carrier.Get(key)
+	if wire == want {
+		t.Fatalf("expected percent-encoded value on the wire, got raw %q", wire)
+	}
+	if wire != url.PathEscape(want) {
+		t.Fatalf("wire value = %q, want %q", wire, url.PathEscape(want))
+	}
+
+	// Server side: feed the encoded header into the Server middleware.
+	serverCarrier := headerCarrier{}
+	serverCarrier.Set(key, wire)
+	serverCtx := transport.NewServerContext(context.Background(), &testTransport{serverCarrier})
+	_, err = Server()(hs)(serverCtx, "req")
+	if err != nil {
+		t.Fatal(err)
 	}
 }

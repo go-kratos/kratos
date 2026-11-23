@@ -2,12 +2,39 @@ package metadata
 
 import (
 	"context"
+	"net/url"
 	"strings"
+	"unicode"
 
 	"github.com/go-kratos/kratos/v3/metadata"
 	"github.com/go-kratos/kratos/v3/middleware"
 	"github.com/go-kratos/kratos/v3/transport"
 )
+
+// encodeValue percent-encodes v only when necessary: non-ASCII bytes or '%'.
+// Printable ASCII values without '%' are written unchanged for backward
+// compatibility with older peers that do not percent-decode on read.
+func encodeValue(v string) string {
+	for _, r := range v {
+		if r > unicode.MaxASCII || r == '%' {
+			return url.PathEscape(v)
+		}
+	}
+	return v
+}
+
+// decodeValue percent-decodes v. Values without '%' are returned as-is.
+// Malformed percent-sequences (e.g. a legacy value containing a bare '%')
+// fall back to the original string.
+func decodeValue(v string) string {
+	if !strings.ContainsRune(v, '%') {
+		return v
+	}
+	if decoded, err := url.PathUnescape(v); err == nil {
+		return decoded
+	}
+	return v
+}
 
 // Option is metadata option.
 type Option func(*options)
@@ -61,7 +88,7 @@ func Server(opts ...Option) middleware.Middleware {
 			for _, k := range header.Keys() {
 				if options.hasPrefix(k) {
 					for _, v := range header.Values(k) {
-						md.Add(k, v)
+						md.Add(k, decodeValue(v))
 					}
 				}
 			}
@@ -90,13 +117,13 @@ func Client(opts ...Option) middleware.Middleware {
 			// x-md-local-
 			for k, vList := range options.md {
 				for _, v := range vList {
-					header.Add(k, v)
+					header.Add(k, encodeValue(v))
 				}
 			}
 			if md, ok := metadata.FromClientContext(ctx); ok {
 				for k, vList := range md {
 					for _, v := range vList {
-						header.Add(k, v)
+						header.Add(k, encodeValue(v))
 					}
 				}
 			}
@@ -105,7 +132,7 @@ func Client(opts ...Option) middleware.Middleware {
 				for k, vList := range md {
 					if options.hasPrefix(k) {
 						for _, v := range vList {
-							header.Add(k, v)
+							header.Add(k, encodeValue(v))
 						}
 					}
 				}
