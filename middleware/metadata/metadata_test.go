@@ -156,6 +156,84 @@ func TestOptions_WithPropagatedPrefix(t *testing.T) {
 	}
 }
 
+func TestEncodeDecodeValue(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+	}{
+		{"ascii", "global-value"},
+		{"empty", ""},
+		{"chinese", "你好世界"},
+		{"emoji", "hello 🌍"},
+		{"accented", "café"},
+		{"percent", "100% done"},
+		{"mixed", "foo-中-文-bar"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			enc := encodeValue(tt.in)
+			// encoded value must be printable ASCII
+			for i := 0; i < len(enc); i++ {
+				if enc[i] < 0x20 || enc[i] > 0x7E {
+					t.Fatalf("encoded value %q contains non-printable byte 0x%02X", enc, enc[i])
+				}
+			}
+			dec := decodeValue(enc)
+			if dec != tt.in {
+				t.Errorf("round-trip mismatch: got %q want %q (encoded %q)", dec, tt.in, enc)
+			}
+		})
+	}
+}
+
+func TestMetadataRoundTripNonASCII(t *testing.T) {
+	// A client with a non-ASCII metadata value must produce a header value
+	// that a server can correctly decode back to the original value.
+	const cnKey = "x-md-global-name"
+	const cnValue = "张三"
+
+	var sentHeader = headerCarrier{}
+	clientMD := metadata.New()
+	clientMD.Set(cnKey, cnValue)
+	ctx := metadata.NewClientContext(context.Background(), clientMD)
+	ctx = transport.NewClientContext(ctx, &testTransport{sentHeader})
+
+	_, err := Client()(func(ctx context.Context, in any) (any, error) {
+		return in, nil
+	})(ctx, "req")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// The value written to the transport header must be printable ASCII.
+	gotWire := sentHeader.Get(cnKey)
+	for i := 0; i < len(gotWire); i++ {
+		if gotWire[i] < 0x20 || gotWire[i] > 0x7E {
+			t.Fatalf("wire header value %q contains non-printable byte 0x%02X", gotWire, gotWire[i])
+		}
+	}
+
+	// A server reading that header must reconstruct the original value.
+	recvHeader := headerCarrier{}
+	recvHeader.Set(cnKey, gotWire)
+	serverCtx := transport.NewServerContext(context.Background(), &testTransport{recvHeader})
+	var gotMD metadata.Metadata
+	_, err = Server()(func(ctx context.Context, in any) (any, error) {
+		var ok bool
+		gotMD, ok = metadata.FromServerContext(ctx)
+		if !ok {
+			return nil, errors.New("no md")
+		}
+		return in, nil
+	})(serverCtx, "req")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := gotMD.Get(cnKey); got != cnValue {
+		t.Errorf("server decoded metadata %q, want %q (wire %q)", got, cnValue, gotWire)
+	}
+}
+
 func TestOptions_hasPrefix(t *testing.T) {
 	tests := []struct {
 		name    string
