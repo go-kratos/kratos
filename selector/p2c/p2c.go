@@ -3,7 +3,6 @@ package p2c
 import (
 	"context"
 	"math/rand/v2"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -32,17 +31,15 @@ func New(opts ...Option) selector.Selector {
 
 // Balancer is p2c selector.
 type Balancer struct {
-	mu     sync.Mutex
-	r      *rand.Rand
 	picked atomic.Bool
 }
 
 // choose two distinct nodes.
 func (s *Balancer) prePick(nodes []selector.WeightedNode) (nodeA selector.WeightedNode, nodeB selector.WeightedNode) {
-	s.mu.Lock()
-	a := s.r.IntN(len(nodes))
-	b := s.r.IntN(len(nodes) - 1)
-	s.mu.Unlock()
+	// rand/v2 top-level functions are safe for concurrent use and lock-free, so
+	// no per-balancer mutex/Rand is needed - picks no longer serialize on a lock.
+	a := rand.IntN(len(nodes))
+	b := rand.IntN(len(nodes) - 1)
 	if b >= a {
 		b = b + 1
 	}
@@ -96,5 +93,5 @@ type Builder struct{}
 
 // Build creates Balancer
 func (b *Builder) Build() selector.Balancer {
-	return &Balancer{r: rand.New(rand.NewPCG(uint64(time.Now().UnixNano()), 0))}
+	return &Balancer{}
 }
