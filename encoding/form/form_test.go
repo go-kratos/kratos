@@ -294,3 +294,19 @@ func TestWithUnsupportedType(t *testing.T) {
 		t.Fatalf("got %s", query.Encode())
 	}
 }
+
+func TestEncodeUnknownEnum(t *testing.T) {
+	// proto3 enums are open, so a field may hold a number with no declared
+	// name. Encoding it should fall back to the number instead of panicking.
+	in := &complex.Complex{
+		Id:  2233,
+		Sex: complex.Sex(99),
+	}
+	query, err := EncodeValues(in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := query.Get("sex"); got != "99" {
+		t.Fatalf("sex: got %q, want %q", got, "99")
+	}
+}

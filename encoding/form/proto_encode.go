@@ -129,6 +129,11 @@ func EncodeField(fieldDescriptor protoreflect.FieldDescriptor, value protoreflec
 			return nullStr, nil
 		}
 		desc := fieldDescriptor.Enum().Values().ByNumber(value.Enum())
+		if desc == nil {
+			// Unknown enum number (proto3 open enums allow it). Fall back to the
+			// numeric value like protojson does, instead of dereferencing nil.
+			return strconv.FormatInt(int64(value.Enum()), 10), nil
+		}
 		return string(desc.Name()), nil
 	case protoreflect.BytesKind:
 		return base64.URLEncoding.EncodeToString(value.Bytes()), nil
