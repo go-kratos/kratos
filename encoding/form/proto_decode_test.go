@@ -346,3 +346,27 @@ func BenchmarkParseURLQueryMapKey(b *testing.B) {
 		})
 	}
 }
+
+// TestDecodeValues_NullWellKnownType ensures that a "null" literal for a
+// well-known message field (Timestamp/Duration) leaves the field unset instead
+// of panicking with a nil pointer dereference in parseMessage.
+func TestDecodeValues_NullWellKnownType(t *testing.T) {
+	form, err := url.ParseQuery("timestamp=null&duration=null&id=2233")
+	if err != nil {
+		t.Fatal(err)
+	}
+	comp := &complex.Complex{}
+	if err := DecodeValues(comp, form); err != nil {
+		t.Fatalf("DecodeValues returned unexpected error: %v", err)
+	}
+	if comp.Timestamp != nil {
+		t.Errorf("timestamp: want nil (unset) for null value, got %v", comp.Timestamp)
+	}
+	if comp.Duration != nil {
+		t.Errorf("duration: want nil (unset) for null value, got %v", comp.Duration)
+	}
+	// Sibling non-null fields must still be decoded.
+	if comp.Id != int64(2233) {
+		t.Errorf("id: want %d, got %d", 2233, comp.Id)
+	}
+}
