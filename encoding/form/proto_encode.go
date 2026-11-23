@@ -160,10 +160,11 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 		if !ok || m == nil {
 			return "", nil
 		}
+		paths := make([]string, len(m.Paths))
 		for i, v := range m.Paths {
-			m.Paths[i] = jsonCamelCase(v)
+			paths[i] = jsonCamelCase(v)
 		}
-		return strings.Join(m.Paths, ","), nil
+		return strings.Join(paths, ","), nil
 	default:
 		return "", fmt.Errorf("unsupported message type: %q", string(msgDescriptor.FullName()))
 	}
