@@ -486,3 +486,44 @@ func (b *safeBytesBuffer) String() string {
 	defer b.mu.Unlock()
 	return b.buf.String()
 }
+
+// TestServerDoesNotFallBackToDefaultServeMux makes sure handlers registered on
+// http.DefaultServeMux (for example by importing net/http/pprof) are not
+// reachable through a Kratos server.
+func TestServerDoesNotFallBackToDefaultServeMux(t *testing.T) {
+	const (
+		defaultOnly = "/kratos-test-default-only"
+		shared      = "/kratos-test-shared"
+	)
+	leak := func(w http.ResponseWriter, _ *http.Request) { _, _ = w.Write([]byte("leaked")) }
+	http.HandleFunc(defaultOnly, leak)
+	http.HandleFunc(shared, leak)
+
+	srv := NewServer()
+	srv.router.HandleFunc(shared, func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("ok"))
+	}).Methods(http.MethodGet)
+
+	tests := []struct {
+		name   string
+		method string
+		path   string
+		code   int
+	}{
+		{"path only on DefaultServeMux", http.MethodGet, defaultOnly, http.StatusNotFound},
+		{"method not allowed", http.MethodPost, shared, http.StatusMethodNotAllowed},
+		{"matched route", http.MethodGet, shared, http.StatusOK},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			srv.ServeHTTP(rec, httptest.NewRequest(tt.method, tt.path, nil))
+			if strings.Contains(rec.Body.String(), "leaked") {
+				t.Fatalf("request reached http.DefaultServeMux")
+			}
+			if rec.Code != tt.code {
+				t.Fatalf("status = %d, want %d", rec.Code, tt.code)
+			}
+		})
+	}
+}
