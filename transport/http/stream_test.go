@@ -684,3 +684,104 @@ func (s *streamTestSelector) Select(context.Context, ...selector.SelectOption) (
 }
 
 func (*streamTestSelector) Apply([]selector.Node) {}
+
+// Regression test for https://github.com/go-kratos/kratos/issues/3841:
+// the per-request server timeout must not tear down a long-lived SSE stream,
+// matching the gRPC transport where the stream server interceptor
+// intentionally skips the timeout.
+func TestServerSentEventStreamSurvivesServerTimeout(t *testing.T) {
+	srv := NewServer(Timeout(100 * time.Millisecond))
+	srv.Route("/").GET("/events", func(ctx Context) error {
+		stream := NewServerSentEventServerStream(ctx)
+		ticker := time.NewTicker(50 * time.Millisecond)
+		defer ticker.Stop()
+		for i := 0; i < 5; i++ {
+			select {
+			case <-stream.Context().Done():
+				return stream.Close(stream.Context().Err())
+			case <-ticker.C:
+			}
+			if err := stream.Send(&binding.HelloRequest{Name: "event"}); err != nil {
+				return stream.Close(err)
+			}
+		}
+		return stream.Close(nil)
+	})
+
+	ts := httptest.NewServer(srv)
+	defer ts.Close()
+	client, err := NewClient(context.Background(), WithEndpoint(ts.URL), WithTimeout(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	stream, err := client.ServerSentEvent(context.Background(), http.MethodGet, "/events", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The stream outlives the 100ms server timeout; all five events arrive.
+	for i := 0; i < 5; i++ {
+		var out binding.HelloRequest
+		if err := stream.Recv(&out); err != nil {
+			t.Fatalf("server timeout killed the stream after %d events: %v", i, err)
+		}
+		if out.GetName() != "event" {
+			t.Fatalf("expected %v, got %v", "event", out.GetName())
+		}
+	}
+	var out binding.HelloRequest
+	if err := stream.Recv(&out); !errors.Is(err, io.EOF) {
+		t.Fatalf("expected EOF, got %v", err)
+	}
+}
+
+// Regression test for https://github.com/go-kratos/kratos/issues/3841:
+// the per-request server timeout must not tear down a long-lived WebSocket
+// stream either.
+func TestWebSocketStreamSurvivesServerTimeout(t *testing.T) {
+	srv := NewServer(Timeout(100 * time.Millisecond))
+	srv.Route("/").GET("/ws", func(ctx Context) error {
+		stream, err := NewWebSocketServerStream(ctx)
+		if err != nil {
+			return err
+		}
+		ticker := time.NewTicker(50 * time.Millisecond)
+		defer ticker.Stop()
+		for i := 0; i < 5; i++ {
+			select {
+			case <-stream.Context().Done():
+				return stream.Close(stream.Context().Err())
+			case <-ticker.C:
+			}
+			if err := stream.Send(&binding.HelloRequest{Name: "event"}); err != nil {
+				return stream.Close(err)
+			}
+		}
+		return stream.Close(nil)
+	})
+
+	ts := httptest.NewServer(srv)
+	defer ts.Close()
+	client, err := NewClient(context.Background(), WithEndpoint(ts.URL), WithTimeout(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	stream, err := client.WebSocket(context.Background(), "/ws")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 5; i++ {
+		var out binding.HelloRequest
+		if err := stream.Recv(&out); err != nil {
+			t.Fatalf("server timeout killed the stream after %d messages: %v", i, err)
+		}
+		if out.GetName() != "event" {
+			t.Fatalf("expected %v, got %v", "event", out.GetName())
+		}
+	}
+	var out binding.HelloRequest
+	if err := stream.Recv(&out); !errors.Is(err, io.EOF) {
+		t.Fatalf("expected EOF, got %v", err)
+	}
+}
