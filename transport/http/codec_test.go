@@ -102,6 +102,26 @@ func TestDefaultRequestDecoderProtoJSONRejectsScalarField(t *testing.T) {
 	}
 }
 
+func TestDefaultRequestDecoderJSONWithProtoMessage(t *testing.T) {
+	// When a request uses Content-Type: application/json and the target
+	// is a proto.Message with string-encoded int64 fields (proto3 spec),
+	// the decoder should fall back to protojson for correct unmarshaling.
+	r, _ := http.NewRequest(http.MethodPost, "",
+		io.NopCloser(bytes.NewBufferString(`{"opt_int64":"42"}`)))
+	r.Header.Set("Content-Type", "application/json")
+
+	req := &binding.HelloRequest{}
+	if err := DefaultRequestDecoder(r, &req); err != nil {
+		t.Fatal(err)
+	}
+	if req.OptInt64 == nil {
+		t.Fatal("expected OptInt64 to be allocated")
+	}
+	if *req.OptInt64 != 42 {
+		t.Errorf("expected OptInt64=42, got %d", *req.OptInt64)
+	}
+}
+
 func TestDefaultResponseEncoderProtoJSONRejectsScalarField(t *testing.T) {
 	w := &mockResponseWriter{StatusCode: http.StatusOK, header: make(http.Header)}
 	r, _ := http.NewRequest(http.MethodGet, "", nil)
