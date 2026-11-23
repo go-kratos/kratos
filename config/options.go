@@ -189,6 +189,19 @@ var placeholderRegexp = regexp.MustCompile(`\${(.*?)}`)
 func expand(s string, mapping func(string) string, toType bool) any {
 	re := placeholderRegexp.FindAllStringSubmatch(s, -1)
 	var ct any
+	// A value that is exactly one placeholder resolving to "true"/"false" is
+	// stored as a bool: protojson accepts strings for numeric fields but not
+	// for bool ones, so "${ENABLED:true}" would otherwise fail to unmarshal.
+	if !toType && len(re) == 1 && re[0][0] == s {
+		switch m := mapping(re[0][1]); m {
+		case boolTrueValue:
+			return true
+		case boolFalseValue:
+			return false
+		default:
+			return m
+		}
+	}
 	for _, i := range re {
 		if len(i) == 2 { //nolint:mnd
 			m := mapping(i[1])
