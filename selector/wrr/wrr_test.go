@@ -114,125 +114,78 @@ func TestCurrentWeightCleanup(t *testing.T) {
 	}
 }
 
-// TestCleanupOnlyWhenNodesChange verifies that cleanup logic only runs when nodes actually change
+// addrSet returns the set of addresses currently tracked in currentWeight.
+func addrSet(b *Balancer) map[string]struct{} {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	s := make(map[string]struct{}, len(b.currentWeight))
+	for addr := range b.currentWeight {
+		s[addr] = struct{}{}
+	}
+	return s
+}
+
+// assertTracked checks that currentWeight tracks exactly the given addresses,
+// i.e. no stale entries linger and the map never grows beyond the live node set.
+func assertTracked(t *testing.T, b *Balancer, want ...string) {
+	t.Helper()
+	got := addrSet(b)
+	if len(got) != len(want) {
+		t.Fatalf("currentWeight tracks %d entries, want %d (%v)", len(got), len(want), got)
+	}
+	for _, addr := range want {
+		if _, ok := got[addr]; !ok {
+			t.Fatalf("expected %q to be tracked, currentWeight=%v", addr, got)
+		}
+	}
+}
+
+// TestCleanupOnlyWhenNodesChange verifies that repeated picks with the same node
+// set never accumulate stale entries, and that changing the node set (including a
+// same-length swap and a partial overlap) drops entries for nodes that disappeared.
 func TestCleanupOnlyWhenNodesChange(t *testing.T) {
-	// Create a custom balancer that tracks cleanup calls
-	type trackingBalancer struct {
-		*Balancer
-		cleanupCount int
-	}
-
-	// Override the Pick method to count cleanup operations
-	balancer := &trackingBalancer{
-		Balancer: &Balancer{currentWeight: make(map[string]float64)},
-	}
-
-	originalPick := func(_ context.Context, nodes []selector.WeightedNode) (selector.WeightedNode, selector.DoneFunc, error) {
-		if len(nodes) == 0 {
-			return nil, nil, selector.ErrNoAvailable
-		}
-
-		balancer.mu.Lock()
-		defer balancer.mu.Unlock()
-
-		// Check if the node list has changed
-		if len(balancer.lastNodes) != len(nodes) || !equalNodes(balancer.lastNodes, nodes) {
-			balancer.cleanupCount++ // Count cleanup operations
-
-			// Update lastNodes
-			balancer.lastNodes = make([]selector.WeightedNode, len(nodes))
-			copy(balancer.lastNodes, nodes)
-
-			// Create a set of current node addresses for cleanup
-			currentNodes := make(map[string]bool)
-			for _, node := range nodes {
-				currentNodes[node.Address()] = true
-			}
-
-			// Clean up stale entries from currentWeight map
-			for address := range balancer.currentWeight {
-				if !currentNodes[address] {
-					delete(balancer.currentWeight, address)
-				}
-			}
-		}
-
-		var totalWeight float64
-		var selected selector.WeightedNode
-		var selectWeight float64
-
-		// nginx wrr load balancing algorithm
-		for _, node := range nodes {
-			totalWeight += node.Weight()
-			cwt := balancer.currentWeight[node.Address()]
-			cwt += node.Weight()
-			balancer.currentWeight[node.Address()] = cwt
-			if selected == nil || selectWeight < cwt {
-				selectWeight = cwt
-				selected = node
-			}
-		}
-		balancer.currentWeight[selected.Address()] = selectWeight - totalWeight
-
-		d := selected.Pick()
-		return selected, d, nil
-	}
-
 	ctx := context.Background()
+	balancer := &Balancer{currentWeight: make(map[string]float64)}
+
 	nodes1 := []selector.WeightedNode{
 		&mockWeightedNode{address: "node1", weight: 10},
 		&mockWeightedNode{address: "node2", weight: 20},
 	}
-
+	// nodes2 is a full swap of nodes1 with the same length - the trickiest case
+	// for length-based staleness detection.
 	nodes2 := []selector.WeightedNode{
 		&mockWeightedNode{address: "node3", weight: 30},
 		&mockWeightedNode{address: "node4", weight: 40},
 	}
-
-	var err error
-
-	// First call with nodes1 - should trigger cleanup (initialization)
-	_, _, err = originalPick(ctx, nodes1)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	// nodes3 keeps node3 but replaces node4 with node5 (same length, partial overlap).
+	nodes3 := []selector.WeightedNode{
+		&mockWeightedNode{address: "node3", weight: 30},
+		&mockWeightedNode{address: "node5", weight: 50},
 	}
 
-	if balancer.cleanupCount != 1 {
-		t.Errorf("expected 1 cleanup call after first pick, got %d", balancer.cleanupCount)
-	}
-
-	// Multiple calls with same nodes1 - should NOT trigger additional cleanup
-	for i := 0; i < 5; i++ {
-		_, _, err = originalPick(ctx, nodes1)
-		if err != nil {
+	pick := func(nodes []selector.WeightedNode) {
+		t.Helper()
+		if _, _, err := balancer.Pick(ctx, nodes); err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 	}
 
-	if balancer.cleanupCount != 1 {
-		t.Errorf("expected still 1 cleanup call after repeated picks with same nodes, got %d", balancer.cleanupCount)
+	// Repeated picks with the same nodes must not grow the map.
+	for i := 0; i < 6; i++ {
+		pick(nodes1)
+		assertTracked(t, balancer, "node1", "node2")
 	}
 
-	// Call with different nodes2 - should trigger cleanup
-	_, _, err = originalPick(ctx, nodes2)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	// Full swap of an equal-length node set must drop the old entries.
+	for i := 0; i < 4; i++ {
+		pick(nodes2)
+		assertTracked(t, balancer, "node3", "node4")
 	}
 
-	if balancer.cleanupCount != 2 {
-		t.Errorf("expected 2 cleanup calls after node change, got %d", balancer.cleanupCount)
-	}
-
-	// Multiple calls with same nodes2 - should NOT trigger additional cleanup
-	for i := 0; i < 3; i++ {
-		_, _, err = originalPick(ctx, nodes2)
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-	}
-
-	if balancer.cleanupCount != 2 {
-		t.Errorf("expected still 2 cleanup calls after repeated picks with same nodes, got %d", balancer.cleanupCount)
+	// Partial overlap swap: node4 leaves, node5 joins, node3 stays.
+	for i := 0; i < 4; i++ {
+		pick(nodes3)
+		assertTracked(t, balancer, "node3", "node5")
 	}
 }
 
