@@ -216,6 +216,40 @@ func TestHTTPTemplateStreamsAndHTTPBody(t *testing.T) {
 				BodyHTTPBody:  true,
 				ResponseBody:  ".Body",
 			},
+			{
+				Name:            "ChatData",
+				OriginalName:    "ChatData",
+				Request:         "ChatDataRequest",
+				Reply:           "ChatDataReply",
+				Path:            "/v1/bitto/chat",
+				PathTemplate:    "/v1/bitto/chat",
+				Method:          "GET",
+				HasBody:         true,
+				Body:            ".Data",
+				BodyField:       "data",
+				BodyQueryName:   "data",
+				BodyMessage:     true,
+				ClientStreaming: true,
+				ServerStreaming: true,
+			},
+			{
+				// Client-streaming RPC whose named body is a scalar field: it is not
+				// streamable frame-by-frame, so the whole message is sent/decoded.
+				Name:            "ChatText",
+				OriginalName:    "ChatText",
+				Request:         "ChatTextRequest",
+				Reply:           "ChatTextReply",
+				Path:            "/v1/bitto/text",
+				PathTemplate:    "/v1/bitto/text",
+				Method:          "GET",
+				HasBody:         true,
+				Body:            ".Text",
+				BodyField:       "text",
+				BodyQueryName:   "text",
+				BodyMessage:     false,
+				ClientStreaming: true,
+				ServerStreaming: true,
+			},
 		},
 	}
 	got := sd.execute()
@@ -233,9 +267,23 @@ func TestHTTPTemplateStreamsAndHTTPBody(t *testing.T) {
 		`http.ContentType(http.BodyContentType(in.Body))`,
 		`http.WithOmitFields("body")`,
 		`return ctx.Result(200, reply.Body)`,
+		// Client-streaming RPC with a streamable (message-kind) named body field.
+		`stream, err := http.NewWebSocketServerStream(ctx, http.WithStreamBodyField("data"))`,
+		`return x.ClientStream.Send(m.Data)`,
+		// Client-streaming RPC with a scalar named body: whole message is streamed.
+		`func (x *Greeter_ChatTextHTTPClient) Send(m *ChatTextRequest) error`,
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("generated template missing %q in:\n%s", want, got)
 		}
+	}
+	// The whole-message streaming client (ChatHello) and the scalar-body streaming
+	// client (ChatText) must both send the whole message, not a sub-field.
+	if !strings.Contains(got, "return x.ClientStream.Send(m)\n") {
+		t.Fatalf("generated template should send whole message for non-streamable body:\n%s", got)
+	}
+	// The scalar-body server handler must NOT receive a stream body-field option.
+	if strings.Contains(got, `http.WithStreamBodyField("text")`) {
+		t.Fatalf("scalar named body should not emit WithStreamBodyField:\n%s", got)
 	}
 }

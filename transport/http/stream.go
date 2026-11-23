@@ -15,6 +15,8 @@ import (
 	"github.com/gorilla/websocket"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 
 	"github.com/go-kratos/kratos/v3/encoding"
 	kerrors "github.com/go-kratos/kratos/v3/errors"
@@ -47,6 +49,8 @@ type ServerStream interface {
 	SendAndClose(any) error
 	Close(error) error
 	SetContext(context.Context)
+	SetReadDeadline(t time.Time) error
+	SetWriteDeadline(t time.Time) error
 }
 
 // ClientStream adapts HTTP streaming clients to grpc generated stream interfaces.
@@ -58,24 +62,38 @@ type ClientStream interface {
 }
 
 type serverStream struct {
-	ctx      context.Context
-	req      *stdhttp.Request
-	res      stdhttp.ResponseWriter
-	mode     streamMode
-	conn     *websocket.Conn
-	header   metadata.MD
-	trailer  metadata.MD
-	encoder  encoding.Codec
-	decoder  encoding.Codec
-	started  bool
-	writeMu  sync.Mutex
-	upgrader websocket.Upgrader
+	ctx       context.Context
+	req       *stdhttp.Request
+	res       stdhttp.ResponseWriter
+	mode      streamMode
+	conn      *websocket.Conn
+	header    metadata.MD
+	trailer   metadata.MD
+	encoder   encoding.Codec
+	decoder   encoding.Codec
+	started   bool
+	writeMu   sync.Mutex
+	upgrader  websocket.Upgrader
+	bodyField string
+}
+
+// ServerStreamOption customizes a server stream created by the HTTP transport.
+type ServerStreamOption func(*serverStream)
+
+// WithStreamBodyField declares the request message field that carries each streamed
+// frame's payload. It is used for client-streaming RPCs whose HTTP rule maps a named
+// body field (e.g. body: "data"): every received frame is decoded into that field while
+// the remaining fields are bound from the request query and path vars.
+func WithStreamBodyField(name string) ServerStreamOption {
+	return func(s *serverStream) {
+		s.bodyField = name
+	}
 }
 
 // NewServerSentEventServerStream returns a stream that writes server messages as SSE events.
 func NewServerSentEventServerStream(ctx Context) ServerStream {
 	s := &serverStream{
-		ctx:  ctx,
+		ctx:  detachStreamContext(ctx),
 		req:  ctx.Request(),
 		res:  ctx.Response(),
 		mode: streamModeSSE,
@@ -86,12 +104,15 @@ func NewServerSentEventServerStream(ctx Context) ServerStream {
 }
 
 // NewWebSocketServerStream upgrades the current request and returns a WebSocket stream.
-func NewWebSocketServerStream(ctx Context) (ServerStream, error) {
+func NewWebSocketServerStream(ctx Context, opts ...ServerStreamOption) (ServerStream, error) {
 	s := &serverStream{
-		ctx:  ctx,
+		ctx:  detachStreamContext(ctx),
 		req:  ctx.Request(),
 		res:  ctx.Response(),
 		mode: streamModeWebSocket,
+	}
+	for _, opt := range opts {
+		opt(s)
 	}
 	s.encoder = streamCodecFromHeaders(s.req.Header, "Accept", "Content-Type")
 	s.decoder = streamCodecFromHeaders(s.req.Header, "Content-Type", "Accept")
@@ -103,8 +124,62 @@ func NewWebSocketServerStream(ctx Context) (ServerStream, error) {
 	return s, nil
 }
 
+// SetContext stores the streaming handler context. The server timeout and
+// cancellation are detached so a long-lived stream is not torn down by the
+// per-request server timeout; only the context values (tracing, auth, metadata
+// injected by middleware) are preserved. The stream lifecycle is instead driven
+// by Send/Recv errors and the read/write deadlines set via SetReadDeadline and
+// SetWriteDeadline. This mirrors how the gRPC transport leaves streams on the
+// connection-scoped context rather than the per-request timeout context.
 func (s *serverStream) SetContext(ctx context.Context) {
-	s.ctx = ctx
+	s.ctx = detachStreamContext(ctx)
+}
+
+// detachStreamContext returns a context that keeps the values of ctx but drops
+// its deadline and cancellation, so the per-request server timeout does not
+// abort a long-lived stream.
+func detachStreamContext(ctx context.Context) context.Context {
+	if ctx == nil {
+		return context.Background()
+	}
+	return context.WithoutCancel(ctx)
+}
+
+// SetReadDeadline sets the deadline for future Recv calls. A zero value for t
+// disables the deadline. For WebSocket streams it is applied to the underlying
+// connection; for SSE streams it is applied via http.ResponseController.
+func (s *serverStream) SetReadDeadline(t time.Time) error {
+	switch s.mode {
+	case streamModeWebSocket:
+		if s.conn == nil {
+			return stderrors.New("http: websocket connection not established")
+		}
+		return s.conn.SetReadDeadline(t)
+	case streamModeSSE:
+		return stdhttp.NewResponseController(s.res).SetReadDeadline(t)
+	default:
+		return stderrors.New("unknown HTTP stream mode")
+	}
+}
+
+// SetWriteDeadline sets the deadline for future Send calls. A zero value for t
+// disables the deadline. For WebSocket streams it is serialized against in-flight
+// writes via the stream's write mutex; for SSE streams it is applied via
+// http.ResponseController.
+func (s *serverStream) SetWriteDeadline(t time.Time) error {
+	switch s.mode {
+	case streamModeWebSocket:
+		if s.conn == nil {
+			return stderrors.New("http: websocket connection not established")
+		}
+		s.writeMu.Lock()
+		defer s.writeMu.Unlock()
+		return s.conn.SetWriteDeadline(t)
+	case streamModeSSE:
+		return stdhttp.NewResponseController(s.res).SetWriteDeadline(t)
+	default:
+		return stderrors.New("unknown HTTP stream mode")
+	}
 }
 
 func (s *serverStream) SetHeader(md metadata.MD) error {
@@ -141,7 +216,7 @@ func (s *serverStream) Send(m any) error {
 }
 
 func (s *serverStream) Recv(m any) error {
-	if err := s.RecvMsg(m); err != nil {
+	if err := s.recvMessage(m); err != nil {
 		return err
 	}
 	if s.req != nil {
@@ -152,6 +227,31 @@ func (s *serverStream) Recv(m any) error {
 			return err
 		}
 	}
+	return nil
+}
+
+// recvMessage decodes the next frame. When a named body field is declared the frame
+// carries only that field's payload, so it is decoded into a freshly allocated sub-message
+// and assigned back onto m; otherwise the frame is decoded into m directly. The generator
+// only declares a body field for a singular message-kind field, so a mismatch here is a
+// programming error and is reported rather than silently ignored.
+func (s *serverStream) recvMessage(m any) error {
+	if s.bodyField == "" {
+		return s.RecvMsg(m)
+	}
+	pm, ok := m.(proto.Message)
+	if !ok {
+		return fmt.Errorf("http: stream body field %q requires a proto.Message, got %T", s.bodyField, m)
+	}
+	fd := pm.ProtoReflect().Descriptor().Fields().ByName(protoreflect.Name(s.bodyField))
+	if fd == nil || fd.Kind() != protoreflect.MessageKind || fd.IsList() || fd.IsMap() {
+		return fmt.Errorf("http: stream body field %q is not a singular message field", s.bodyField)
+	}
+	sub := pm.ProtoReflect().NewField(fd)
+	if err := s.RecvMsg(sub.Message().Interface()); err != nil {
+		return err
+	}
+	pm.ProtoReflect().Set(fd, sub)
 	return nil
 }
 
