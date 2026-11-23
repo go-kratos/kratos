@@ -36,6 +36,7 @@ type methodDesc struct {
 	BodyField            string
 	BodyQueryName        string
 	BodyHTTPBody         bool
+	BodyMessage          bool
 	ResponseBody         string
 	ResponseBodyHTTPBody bool
 	ReplyHTTPBody        bool
