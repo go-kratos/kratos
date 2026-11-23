@@ -385,6 +385,83 @@ func TestExpand(t *testing.T) {
 	}
 }
 
+func TestExpandBoolPlaceholder(t *testing.T) {
+	mapping := func(s string) string {
+		switch s {
+		case "port":
+			return "8080"
+		case "debug":
+			return "true"
+		case "disabled":
+			return "false"
+		}
+		return ""
+	}
+	tests := []struct {
+		name  string
+		input string
+		want  any
+	}{
+		{
+			name:  "whole value is a placeholder resolving to true",
+			input: "${debug}",
+			want:  true,
+		},
+		{
+			name:  "whole value is a placeholder resolving to false",
+			input: "${disabled}",
+			want:  false,
+		},
+		{
+			name:  "whole value is a placeholder resolving to a non-bool string",
+			input: "${port}",
+			want:  "8080",
+		},
+		{
+			name:  "placeholder embedded in a longer value stays a string",
+			input: "port=${port}",
+			want:  "port=8080",
+		},
+		{
+			name:  "value without placeholder stays a string",
+			input: "true",
+			want:  "true",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := expand(tt.input, mapping, false); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("expand() want: %#v, got: %#v", tt.want, got)
+			}
+		})
+	}
+}
+
+// TestDefaultResolverBoolPlaceholder guards the bool field case end to end: the
+// default resolver leaves values as strings, which json and protojson then
+// reject when the destination field is a bool.
+func TestDefaultResolverBoolPlaceholder(t *testing.T) {
+	data := map[string]any{
+		"debug": "${DEBUG:false}",
+		"port":  "${PORT:8080}",
+		"name":  "${NAME:1234}",
+	}
+	if err := defaultResolver(data); err != nil {
+		t.Fatal(err)
+	}
+	if got, ok := data["debug"].(bool); !ok || got {
+		t.Errorf("debug want: false (bool), got: %#v", data["debug"])
+	}
+	// Values that are not booleans keep their string shape, so a string field
+	// holding a numeric-looking value is not mistyped.
+	if got, ok := data["port"].(string); !ok || got != "8080" {
+		t.Errorf("port want: %q (string), got: %#v", "8080", data["port"])
+	}
+	if got, ok := data["name"].(string); !ok || got != "1234" {
+		t.Errorf("name want: %q (string), got: %#v", "1234", data["name"])
+	}
+}
+
 func TestWithMergeFunc(t *testing.T) {
 	c := &options{}
 	a := func(any, any) error {
