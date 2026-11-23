@@ -184,7 +184,7 @@ func NewServer(opts ...ServerOption) *Server {
 		router:      mux.NewRouter(),
 	}
 	srv.router.NotFoundHandler = http.NotFoundHandler()
-	srv.router.MethodNotAllowedHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv.router.MethodNotAllowedHandler = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	})
 	for _, o := range opts {
