@@ -69,16 +69,33 @@ func (r *Repo) Pull(ctx context.Context) error {
 	cmd.Dir = r.Path()
 	_, err := cmd.CombinedOutput()
 	if err != nil {
+		// HEAD is detached (e.g. the cache was checked out at a tag via
+		// `-b vX.Y.Z`). `git pull` cannot update a detached HEAD, so fetch
+		// the requested ref and re-checkout it instead.
+		if r.branch != "" {
+			cmd = exec.CommandContext(ctx, "git", "fetch", "origin", r.branch)
+			cmd.Dir = r.Path()
+			out, ferr := cmd.CombinedOutput()
+			fmt.Println(string(out))
+			if ferr != nil {
+				return ferr
+			}
+			cmd = exec.CommandContext(ctx, "git", "checkout", r.branch)
+			cmd.Dir = r.Path()
+			out, ferr = cmd.CombinedOutput()
+			fmt.Println(string(out))
+			return ferr
+		}
 		return err
 	}
 	cmd = exec.CommandContext(ctx, "git", "pull")
 	cmd.Dir = r.Path()
-	out, err := cmd.CombinedOutput()
+	out, perr := cmd.CombinedOutput()
 	fmt.Println(string(out))
-	if err != nil {
-		return err
+	if perr != nil {
+		return perr
 	}
-	return err
+	return nil
 }
 
 // Clone clones the repository to cache path.
@@ -124,3 +141,4 @@ func (r *Repo) CopyToV2(ctx context.Context, to string, modPath string, ignores,
 	replaces = append([]string{mod, modPath}, replaces...)
 	return copyDir(r.Path(), to, replaces, ignores)
 }
+
