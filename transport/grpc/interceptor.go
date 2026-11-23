@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"google.golang.org/grpc"
 	grpcmd "google.golang.org/grpc/metadata"
@@ -36,8 +37,11 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 		h := func(ctx context.Context, req any) (any, error) {
 			return handler(ctx, req)
 		}
-		if next := s.middleware.Match(tr.Operation()); len(next) > 0 {
-			h = middleware.Chain(next...)(h)
+		// The built-in health service is probed without user credentials.
+		if !strings.HasPrefix(info.FullMethod, builtinHealthPrefix) {
+			if next := s.middleware.Match(tr.Operation()); len(next) > 0 {
+				h = middleware.Chain(next...)(h)
+			}
 		}
 		reply, err := h(ctx, req)
 		if len(replyHeader) > 0 {
@@ -47,11 +51,18 @@ func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
 	}
 }
 
+// builtinHealthPrefix is the standard gRPC health service. The Kratos client
+// watches it with no user credentials, so user stream middleware must not see it.
+const builtinHealthPrefix = "/grpc.health.v1.Health/"
+
 // wrappedStream is rewrite grpc stream's context
 type wrappedStream struct {
 	grpc.ServerStream
 	ctx        context.Context
 	middleware matcher.Matcher
+	// opened is set when the stream interceptor already ran the middleware once.
+	// SendMsg and RecvMsg then pass through, so the chain is not run again per message.
+	opened bool
 }
 
 func NewWrappedStream(ctx context.Context, stream grpc.ServerStream, m matcher.Matcher) grpc.ServerStream {
@@ -73,28 +84,39 @@ func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
 		defer cancel()
 		md, _ := grpcmd.FromIncomingContext(ctx)
 		replyHeader := grpcmd.MD{}
-		ctx = transport.NewServerContext(ctx, &Transport{
-			endpoint:    s.endpoint.String(),
+		tr := &Transport{
 			operation:   info.FullMethod,
 			reqHeader:   headerCarrier(md),
 			replyHeader: headerCarrier(replyHeader),
-		})
-
-		h := func(_ context.Context, _ any) (any, error) {
-			return handler(srv, ss), nil
 		}
-
-		if next := s.streamMiddleware.Match(info.FullMethod); len(next) > 0 {
-			middleware.Chain(next...)(h)
+		if s.endpoint != nil {
+			tr.endpoint = s.endpoint.String()
 		}
-
+		ctx = transport.NewServerContext(ctx, tr)
 		ctx = context.WithValue(ctx, stream{
 			ServerStream:     ss,
 			streamMiddleware: s.streamMiddleware,
 		}, ss)
-		ws := NewWrappedStream(ctx, ss, s.streamMiddleware)
 
-		err := handler(srv, ws)
+		// Run the chain once, as unaryServerInterceptor does, and let the handler
+		// read the derived context from stream.Context(). The built chain used to
+		// be discarded, and SendMsg/RecvMsg ran it again per message without
+		// keeping that context.
+		h := func(callCtx context.Context, _ any) (any, error) {
+			ws := &wrappedStream{
+				ServerStream: ss,
+				ctx:          callCtx,
+				middleware:   s.streamMiddleware,
+				opened:       true,
+			}
+			return nil, handler(srv, ws)
+		}
+		if !strings.HasPrefix(info.FullMethod, builtinHealthPrefix) {
+			if next := s.streamMiddleware.Match(info.FullMethod); len(next) > 0 {
+				h = middleware.Chain(next...)(h)
+			}
+		}
+		_, err := h(ctx, nil)
 		if len(replyHeader) > 0 {
 			_ = grpc.SetHeader(ctx, replyHeader)
 		}
@@ -112,7 +134,11 @@ func GetStream(ctx context.Context) grpc.ServerStream {
 }
 
 func (w *wrappedStream) SendMsg(m any) error {
-	h := func(_ context.Context, req any) (any, error) {
+	if w.opened {
+		return w.ServerStream.SendMsg(m)
+	}
+	h := func(ctx context.Context, req any) (any, error) {
+		w.ctx = ctx
 		return req, w.ServerStream.SendMsg(m)
 	}
 
@@ -130,7 +156,11 @@ func (w *wrappedStream) SendMsg(m any) error {
 }
 
 func (w *wrappedStream) RecvMsg(m any) error {
-	h := func(_ context.Context, req any) (any, error) {
+	if w.opened {
+		return w.ServerStream.RecvMsg(m)
+	}
+	h := func(ctx context.Context, req any) (any, error) {
+		w.ctx = ctx
 		return req, w.ServerStream.RecvMsg(m)
 	}
 

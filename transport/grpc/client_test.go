@@ -8,9 +8,12 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	grpcmd "google.golang.org/grpc/metadata"
 
+	"github.com/go-kratos/kratos/v3/errors"
 	"github.com/go-kratos/kratos/v3/middleware"
 	"github.com/go-kratos/kratos/v3/registry"
+	"github.com/go-kratos/kratos/v3/transport"
 )
 
 func TestWithEndpoint(t *testing.T) {
@@ -164,4 +167,84 @@ func TestNewClient(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer conn.Close()
+}
+
+type mockClientStream struct {
+	grpc.ClientStream
+	ctx context.Context
+}
+
+func (m *mockClientStream) Context() context.Context {
+	return m.ctx
+}
+
+func (m *mockClientStream) SendMsg(any) error { return nil }
+
+func (m *mockClientStream) RecvMsg(any) error { return nil }
+
+type clientStreamCtxKey struct{}
+
+func TestStreamClientInterceptorOnceAndContext(t *testing.T) {
+	var calls int
+	mw := func(next middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req any) (any, error) {
+			calls++
+			if tr, ok := transport.FromClientContext(ctx); ok {
+				tr.RequestHeader().Set("authorization", "Bearer x")
+			}
+			return next(context.WithValue(ctx, clientStreamCtxKey{}, "user-from-middleware"), req)
+		}
+	}
+	var sawHeader string
+	streamer := func(ctx context.Context, _ *grpc.StreamDesc, _ *grpc.ClientConn, _ string, _ ...grpc.CallOption) (grpc.ClientStream, error) {
+		md, _ := grpcmd.FromOutgoingContext(ctx)
+		if vals := md.Get("authorization"); len(vals) > 0 {
+			sawHeader = vals[0]
+		}
+		return &mockClientStream{ctx: ctx}, nil
+	}
+	cs, err := streamClientInterceptor([]middleware.Middleware{mw}, nil)(
+		context.Background(), &grpc.StreamDesc{}, &grpc.ClientConn{}, "/repro.Stream/Watch", streamer,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = cs.SendMsg(struct{}{}); err != nil {
+		t.Fatal(err)
+	}
+	if err = cs.RecvMsg(struct{}{}); err != nil {
+		t.Fatal(err)
+	}
+	if calls != 1 {
+		t.Errorf("expect middleware once, got %d", calls)
+	}
+	got, _ := cs.Context().Value(clientStreamCtxKey{}).(string)
+	if got != "user-from-middleware" {
+		t.Errorf("expect user-from-middleware, got %q", got)
+	}
+	if sawHeader != "Bearer x" {
+		t.Errorf("expect authorization header, got %q", sawHeader)
+	}
+}
+
+func TestStreamClientInterceptorRejectsBeforeOpen(t *testing.T) {
+	mw := func(middleware.Handler) middleware.Handler {
+		return func(context.Context, any) (any, error) {
+			return nil, errors.Unauthorized("UNAUTHORIZED", "rejected")
+		}
+	}
+	opened := false
+	streamer := func(context.Context, *grpc.StreamDesc, *grpc.ClientConn, string, ...grpc.CallOption) (grpc.ClientStream, error) {
+		opened = true
+		return &mockClientStream{}, nil
+	}
+	_, err := streamClientInterceptor([]middleware.Middleware{mw}, nil)(
+		context.Background(), &grpc.StreamDesc{}, &grpc.ClientConn{}, "/repro.Stream/Watch", streamer,
+	)
+	if err == nil {
+		t.Fatal("expect middleware error")
+	}
+	if opened {
+		t.Fatal("stream opened after middleware rejected it")
+	}
 }
