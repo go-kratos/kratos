@@ -48,8 +48,14 @@ func (b *balancerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 			subConn: conn,
 		})
 	}
+	// b.builder may be nil: init() captures selector.GlobalSelector() before
+	// client.go's init() sets the default, so resolve it here instead (#3842).
+	builder := b.builder
+	if builder == nil {
+		builder = selector.GlobalSelector()
+	}
 	p := &balancerPicker{
-		selector: b.builder.Build(),
+		selector: builder.Build(),
 	}
 	p.selector.Apply(nodes)
 	return p
