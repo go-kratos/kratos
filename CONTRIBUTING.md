@@ -113,6 +113,22 @@ BREAKING CHANGE:
 
 You can use `kratos changelog dev` to generate a change log during.
 
+Each directory under `contrib` with its own `go.mod` is a separate Go module.
+When releasing `vX.Y.Z`, create its tag from the module's physical repository
+directory, for example `contrib/otel/v3.0.0` for the module
+`github.com/go-kratos/kratos/contrib/otel/v3`. The `/v3` suffix belongs to the
+module path and is not another directory in the tag name.
+
+Use the release helper to create all matching contrib module tags together:
+
+```shell
+bash hack/release-contrib-modules.sh v3.0.0 --push
+```
+
+The helper refuses to move an existing tag that points to a different commit.
+The `Release contrib modules` workflow runs automatically for root module
+release tags and can be dispatched to backfill tags for an existing release.
+
 The following is the list of supported types:
 
 - Breaking Change
