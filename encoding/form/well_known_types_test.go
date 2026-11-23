@@ -17,11 +17,11 @@ func TestMarshalTimeStamp(t *testing.T) {
 		expect string
 	}{
 		{
-			input:  timestamppb.New(time.Date(2022, 1, 2, 3, 4, 5, 6, time.Local)),
+			input:  timestamppb.New(time.Date(2022, 1, 2, 3, 4, 5, 6, time.UTC)),
 			expect: "2022-01-02T03:04:05.000000006Z",
 		},
 		{
-			input:  timestamppb.New(time.Date(2022, 13, 1, 13, 61, 61, 100, time.Local)),
+			input:  timestamppb.New(time.Date(2022, 13, 1, 13, 61, 61, 100, time.UTC)),
 			expect: "2023-01-01T14:02:01.000000100Z",
 		},
 	}
@@ -33,6 +33,37 @@ func TestMarshalTimeStamp(t *testing.T) {
 		if want := v.expect; got != want {
 			t.Errorf("expect %v, got %v", want, got)
 		}
+	}
+}
+
+func TestMarshalTimestampUsesUTC(t *testing.T) {
+	for _, zone := range []struct {
+		name   string
+		offset int
+	}{
+		{"UTC+8", 8 * 60 * 60},
+		{"UTC-7", -7 * 60 * 60},
+	} {
+		t.Run(zone.name, func(t *testing.T) {
+			previous := time.Local
+			time.Local = time.FixedZone(zone.name, zone.offset)
+			t.Cleanup(func() { time.Local = previous })
+			for _, tt := range []struct {
+				nanos int
+				want  string
+			}{
+				{0, "2026-10-01T00:00:00Z"},
+				{123000000, "2026-10-01T00:00:00.123Z"},
+				{123456000, "2026-10-01T00:00:00.123456Z"},
+				{123456789, "2026-10-01T00:00:00.123456789Z"},
+			} {
+				input := timestamppb.New(time.Date(2026, 10, 1, 0, 0, 0, tt.nanos, time.UTC))
+				got, err := marshalTimestamp(input.ProtoReflect())
+				if err != nil || got != tt.want {
+					t.Fatalf("marshalTimestamp() = %q, %v; want %q", got, err, tt.want)
+				}
+			}
+		})
 	}
 }
 
