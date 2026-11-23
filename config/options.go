@@ -22,10 +22,11 @@ type Merge func(dst, src any) error
 type Option func(*options)
 
 type options struct {
-	sources  []Source
-	decoder  Decoder
-	resolver Resolver
-	merge    Merge
+	sources     []Source
+	decoder     Decoder
+	resolver    Resolver
+	merge       Merge
+	customMerge bool
 }
 
 const (
@@ -67,9 +68,12 @@ func WithResolver(r Resolver) Option {
 }
 
 // WithMergeFunc with config merge func.
+// With a custom merger, Scan decodes the merged result directly: protobuf
+// field aliases (proto name vs JSON name) are not unified across sources.
 func WithMergeFunc(m Merge) Option {
 	return func(o *options) {
 		o.merge = m
+		o.customMerge = true
 	}
 }
 
