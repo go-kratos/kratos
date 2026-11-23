@@ -75,6 +75,17 @@ type serverStream struct {
 	writeMu   sync.Mutex
 	upgrader  websocket.Upgrader
 	bodyField string
+	ping      *streamPingConfig
+}
+
+// streamPingConfig holds the WebSocket keepalive settings and lifecycle state for
+// a server stream. A nil *streamPingConfig on serverStream means keepalive is
+// disabled.
+type streamPingConfig struct {
+	interval time.Duration
+	pongWait time.Duration
+	stop     chan struct{}
+	stopOnce sync.Once
 }
 
 // ServerStreamOption customizes a server stream created by the HTTP transport.
@@ -87,6 +98,22 @@ type ServerStreamOption func(*serverStream)
 func WithStreamBodyField(name string) ServerStreamOption {
 	return func(s *serverStream) {
 		s.bodyField = name
+	}
+}
+
+// WithStreamPing enables WebSocket keepalive on a server stream: the stream writes
+// a protocol ping every interval and installs a pong handler that extends the read
+// deadline by pongWait on every received pong. A peer that stops answering pings
+// lets the read deadline expire, so a blocked Recv fails and the handler can
+// release the connection. pongWait must be greater than interval; otherwise it
+// defaults to twice the interval. The option has no effect on SSE streams, and it
+// conflicts with application-managed read deadlines set via SetReadDeadline.
+func WithStreamPing(interval, pongWait time.Duration) ServerStreamOption {
+	return func(s *serverStream) {
+		if interval <= 0 {
+			return
+		}
+		s.ping = &streamPingConfig{interval: interval, pongWait: pongWait}
 	}
 }
 
@@ -121,6 +148,9 @@ func NewWebSocketServerStream(ctx Context, opts ...ServerStreamOption) (ServerSt
 		return nil, err
 	}
 	s.conn = conn
+	if s.ping != nil {
+		s.startWebSocketPing()
+	}
 	return s, nil
 }
 
@@ -292,6 +322,7 @@ func (s *serverStream) Close(err error) error {
 		if s.conn == nil {
 			return err
 		}
+		s.stopWebSocketPing()
 		if err != nil {
 			_ = s.writeWebSocketControl(websocketControlError + err.Error())
 			_ = s.writeWebSocketClose(websocket.CloseInternalServerErr, err.Error())
@@ -365,6 +396,55 @@ func (s *serverStream) writeWebSocketClose(code int, text string) error {
 	defer s.writeMu.Unlock()
 	msg := websocket.FormatCloseMessage(code, text)
 	return s.conn.WriteControl(websocket.CloseMessage, msg, time.Now().Add(time.Second))
+}
+
+// startWebSocketPing arms the keepalive read deadline and launches the ping
+// ticker. The pong handler extends the read deadline on every pong, so only a
+// peer that stops answering pings lets the deadline expire and fails Recv. Ping
+// writes are serialized with regular sends via writeMu.
+func (s *serverStream) startWebSocketPing() {
+	ping := s.ping
+	if ping.pongWait <= ping.interval {
+		ping.pongWait = 2 * ping.interval
+	}
+	ping.stop = make(chan struct{})
+	_ = s.conn.SetReadDeadline(time.Now().Add(ping.pongWait))
+	s.conn.SetPongHandler(func(string) error {
+		return s.conn.SetReadDeadline(time.Now().Add(ping.pongWait))
+	})
+	go func() {
+		ticker := time.NewTicker(ping.interval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				s.writeMu.Lock()
+				err := s.conn.WriteControl(websocket.PingMessage, nil, time.Now().Add(ping.interval))
+				s.writeMu.Unlock()
+				if err != nil {
+					// The write side is broken; close the connection so a
+					// blocked Recv returns and the handler can clean up.
+					_ = s.conn.Close()
+					return
+				}
+			case <-ping.stop:
+				return
+			}
+		}
+	}()
+}
+
+// stopWebSocketPing signals the ping ticker to exit. It is safe to call multiple
+// times and on streams without keepalive enabled. gorilla's Close and
+// WriteControl methods tolerate concurrent calls, so an in-flight ping write
+// during Close errors out and terminates the ticker on its own.
+func (s *serverStream) stopWebSocketPing() {
+	if s.ping == nil || s.ping.stop == nil {
+		return
+	}
+	s.ping.stopOnce.Do(func() {
+		close(s.ping.stop)
+	})
 }
 
 type sseClientStream struct {
