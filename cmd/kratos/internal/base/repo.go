@@ -84,7 +84,18 @@ func (r *Repo) Pull(ctx context.Context) error {
 // Clone clones the repository to cache path.
 func (r *Repo) Clone(ctx context.Context) error {
 	if _, err := os.Stat(r.Path()); !os.IsNotExist(err) {
-		return r.Pull(ctx)
+		// If the cached copy is checked out at a tag it is in a detached HEAD
+		// state, and git pull cannot update it. Detect this and remove the cache
+		// so the tag can be re-cloned cleanly.
+		cmd := exec.CommandContext(ctx, "git", "symbolic-ref", "HEAD")
+		cmd.Dir = r.Path()
+		if err := cmd.Run(); err != nil {
+			if err := os.RemoveAll(r.Path()); err != nil {
+				return err
+			}
+		} else {
+			return r.Pull(ctx)
+		}
 	}
 	var cmd *exec.Cmd
 	if r.branch == "" {
