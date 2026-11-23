@@ -23,8 +23,9 @@ func NewBuilder() resolver.Builder {
 }
 
 func (d *directBuilder) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (resolver.Resolver, error) {
-	addrs := make([]resolver.Address, 0)
-	for _, addr := range strings.Split(strings.TrimPrefix(target.URL.Path, "/"), ",") {
+	parts := strings.Split(strings.TrimPrefix(target.URL.Path, "/"), ",")
+	addrs := make([]resolver.Address, 0, len(parts))
+	for _, addr := range parts {
 		addrs = append(addrs, resolver.Address{Addr: addr})
 	}
 	err := cc.UpdateState(resolver.State{

@@ -14,13 +14,12 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
-	apimd "github.com/go-kratos/kratos/v2/api/metadata"
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
-	"github.com/go-kratos/kratos/v2/internal/host"
-	"github.com/go-kratos/kratos/v2/internal/matcher"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v3/internal/endpoint"
+	"github.com/go-kratos/kratos/v3/internal/host"
+	"github.com/go-kratos/kratos/v3/internal/matcher"
+	"github.com/go-kratos/kratos/v3/log"
+	"github.com/go-kratos/kratos/v3/middleware"
+	"github.com/go-kratos/kratos/v3/transport"
 )
 
 var (
@@ -57,12 +56,6 @@ func Timeout(timeout time.Duration) ServerOption {
 	return func(s *Server) {
 		s.timeout = timeout
 	}
-}
-
-// Logger with server logger.
-// Deprecated: use global logger instead.
-func Logger(log.Logger) ServerOption {
-	return func(*Server) {}
 }
 
 // Middleware with server middleware.
@@ -145,7 +138,6 @@ type Server struct {
 	grpcOpts          []grpc.ServerOption
 	health            *health.Server
 	customHealth      bool
-	metadata          *apimd.Server
 	adminClean        func()
 	disableReflection bool
 }
@@ -187,12 +179,10 @@ func NewServer(opts ...ServerOption) *Server {
 		grpcOpts = append(grpcOpts, srv.grpcOpts...)
 	}
 	srv.Server = grpc.NewServer(grpcOpts...)
-	srv.metadata = apimd.NewServer(srv.Server)
 	// internal register
 	if !srv.customHealth {
 		grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
 	}
-	apimd.RegisterMetadataServer(srv.Server, srv.metadata)
 	// reflection register
 	if !srv.disableReflection {
 		reflection.Register(srv.Server)
@@ -228,7 +218,7 @@ func (s *Server) Start(ctx context.Context) error {
 		return s.err
 	}
 	s.baseCtx = ctx
-	log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
+	log.Info("[gRPC] server listening", "addr", s.lis.Addr().String())
 	s.health.Resume()
 	return s.Serve(s.lis)
 }

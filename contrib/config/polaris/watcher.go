@@ -8,8 +8,8 @@ import (
 	"github.com/polarismesh/polaris-go"
 	"github.com/polarismesh/polaris-go/pkg/model"
 
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v3/config"
+	"github.com/go-kratos/kratos/v3/log"
 )
 
 type Watcher struct {
@@ -33,7 +33,7 @@ func receive(event model.ConfigFileChangeEvent) {
 	ec := eventChanMap[getFullPath(meta.GetNamespace(), meta.GetFileGroup(), meta.GetFileName())]
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error(err)
+			log.Error("panic recovered", "err", err)
 		}
 	}()
 	if !ec.closed {

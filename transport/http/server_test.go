@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -17,9 +18,9 @@ import (
 	"testing"
 	"time"
 
-	kratoserrors "github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/internal/host"
-	"github.com/go-kratos/kratos/v2/log"
+	kratoserrors "github.com/go-kratos/kratos/v3/errors"
+	"github.com/go-kratos/kratos/v3/internal/host"
+	"github.com/go-kratos/kratos/v3/log"
 )
 
 var h = func(w http.ResponseWriter, r *http.Request) {
@@ -416,12 +417,12 @@ func TestStop(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			old := log.GetLogger()
-			defer log.SetLogger(old)
+			old := log.Default()
+			defer log.SetDefault(old)
 
 			// Create a logger to capture logs
 			var logs safeBytesBuffer
-			log.SetLogger(log.NewStdLogger(&logs))
+			log.SetDefault(slog.New(slog.NewTextHandler(&logs, nil)))
 
 			testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				t := time.NewTimer(tt.sleep)

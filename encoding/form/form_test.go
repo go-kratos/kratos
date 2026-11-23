@@ -11,14 +11,14 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
-	"github.com/go-kratos/kratos/v2/encoding"
-	bdtest "github.com/go-kratos/kratos/v2/internal/testdata/binding"
-	"github.com/go-kratos/kratos/v2/internal/testdata/complex"
-	ectest "github.com/go-kratos/kratos/v2/internal/testdata/encoding"
+	"github.com/go-kratos/kratos/v3/encoding"
+	bdtest "github.com/go-kratos/kratos/v3/internal/testdata/binding"
+	"github.com/go-kratos/kratos/v3/internal/testdata/complex"
+	ectest "github.com/go-kratos/kratos/v3/internal/testdata/encoding"
 )
 
 // This variable can be replaced with -ldflags like below:
-// go test "-ldflags=-X github.com/go-kratos/kratos/v2/encoding/form.tagNameTest=form"
+// go test "-ldflags=-X github.com/go-kratos/kratos/v3/encoding/form.tagNameTest=form"
 var tagNameTest string
 
 func init() {
@@ -165,7 +165,7 @@ func TestProtoEncodeDecode(t *testing.T) {
 		Byte:    []byte("123"),
 		Map:     map[string]string{"kratos": "https://go-kratos.dev/", "kratos_start": "https://go-kratos.dev/en/docs/getting-started/start/"},
 
-		Timestamp: timestamppb.New(time.Date(1970, 1, 1, 0, 0, 20, 2, time.Local)),
+		Timestamp: timestamppb.New(time.Date(1970, 1, 1, 0, 0, 20, 2, time.UTC)),
 		Duration:  &durationpb.Duration{Seconds: 120, Nanos: 22},
 		Field:     &fieldmaskpb.FieldMask{Paths: []string{"1", "2"}},
 		Double:    &wrapperspb.DoubleValue{Value: 12.33},

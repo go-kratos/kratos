@@ -31,6 +31,23 @@ func TestContentTypeCallOption_before(t *testing.T) {
 	}
 }
 
+func TestAccept(t *testing.T) {
+	if !reflect.DeepEqual(Accept("aaa").(AcceptCallOption).ContentType, "aaa") {
+		t.Errorf("want: %v,got: %v", "aaa", Accept("aaa").(AcceptCallOption).ContentType)
+	}
+}
+
+func TestAcceptCallOption_before(t *testing.T) {
+	c := &callInfo{}
+	err := Accept("aaa").before(c)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if !reflect.DeepEqual("aaa", c.accept) {
+		t.Errorf("want: %v, got: %v", "aaa", c.accept)
+	}
+}
+
 func TestDefaultCallInfo(t *testing.T) {
 	path := "hi"
 	rv := defaultCallInfo(path)

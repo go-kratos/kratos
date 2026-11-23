@@ -9,7 +9,7 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/v2/model"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 var _ registry.Watcher = (*watcher)(nil)
@@ -60,7 +60,17 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 	select {
 	case <-w.ctx.Done():
 		return nil, w.ctx.Err()
+	default:
+	}
+	select {
+	case <-w.ctx.Done():
+		return nil, w.ctx.Err()
 	case <-w.watchChan:
+	}
+	select {
+	case <-w.ctx.Done():
+		return nil, w.ctx.Err()
+	default:
 	}
 	res, err := w.cli.GetService(vo.GetServiceParam{
 		ServiceName: w.serviceName,
@@ -73,7 +83,7 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 	items := make([]*registry.ServiceInstance, 0, len(res.Hosts))
 	for _, in := range res.Hosts {
 		kind := w.kind
-		if k, ok := in.Metadata["kind"]; ok {
+		if k, ok := in.Metadata[kindKey]; ok {
 			kind = k
 		}
 		// use ip#port#cluster#service as instance id if instance id is empty
@@ -81,7 +91,7 @@ func (w *watcher) Next() ([]*registry.ServiceInstance, error) {
 		items = append(items, &registry.ServiceInstance{
 			ID:        id,
 			Name:      in.ServiceName,
-			Version:   in.Metadata["version"],
+			Version:   in.Metadata[versionKey],
 			Metadata:  in.Metadata,
 			Endpoints: []string{kind + "://" + net.JoinHostPort(in.Ip, strconv.Itoa(int(in.Port)))},
 		})

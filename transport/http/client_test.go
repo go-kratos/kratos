@@ -15,16 +15,32 @@ import (
 	"testing"
 	"time"
 
-	kratoserrors "github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/selector"
+	"google.golang.org/genproto/googleapis/api/httpbody"
+	"google.golang.org/protobuf/types/known/emptypb"
+
+	kratoserrors "github.com/go-kratos/kratos/v3/errors"
+	"github.com/go-kratos/kratos/v3/middleware"
+	"github.com/go-kratos/kratos/v3/registry"
+	"github.com/go-kratos/kratos/v3/selector"
 )
 
 type mockRoundTripper struct{}
 
 func (rt *mockRoundTripper) RoundTrip(_ *http.Request) (resp *http.Response, err error) {
 	return
+}
+
+type captureRoundTripper struct {
+	req *http.Request
+}
+
+func (rt *captureRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	rt.req = req
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{"Content-Type": []string{"application/protojson"}},
+		Body:       io.NopCloser(bytes.NewBufferString("{}")),
+	}, nil
 }
 
 type mockCallOption struct {
@@ -228,6 +244,57 @@ func TestDefaultRequestEncoder(t *testing.T) {
 	}
 }
 
+func TestDefaultRequestEncoderHTTPBody(t *testing.T) {
+	body := &httpbody.HttpBody{Data: []byte("raw request")}
+	got, err := DefaultRequestEncoder(context.TODO(), "application/octet-stream", body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != "raw request" {
+		t.Errorf("expected %v, got %v", "raw request", string(got))
+	}
+}
+
+func TestDefaultRequestEncoderUnknownCodec(t *testing.T) {
+	_, err := DefaultRequestEncoder(context.TODO(), "application/x-unknown", &struct{}{})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	se := new(kratoserrors.Error)
+	if !errors.As(err, &se) {
+		t.Fatalf("expected kratos error, got %T", err)
+	}
+	if se.Reason != "CODEC" {
+		t.Errorf("expected %v, got %v", "CODEC", se.Reason)
+	}
+}
+
+func TestInvokeAcceptHeader(t *testing.T) {
+	rt := &captureRoundTripper{}
+	client, err := NewClient(context.Background(), WithEndpoint("127.0.0.1:8888"), WithTransport(rt))
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = client.Invoke(
+		context.Background(),
+		http.MethodPost,
+		"/go",
+		&emptypb.Empty{},
+		&emptypb.Empty{},
+		Accept("application/protojson"),
+		ContentType("application/protojson"),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := rt.req.Header.Get("Accept"); got != "application/protojson" {
+		t.Errorf("expected %v got %v", "application/protojson", got)
+	}
+	if got := rt.req.Header.Get("Content-Type"); got != "application/protojson" {
+		t.Errorf("expected %v got %v", "application/protojson", got)
+	}
+}
+
 func TestDefaultResponseDecoder(t *testing.T) {
 	resp1 := &http.Response{
 		Header:     make(http.Header),
@@ -238,7 +305,7 @@ func TestDefaultResponseDecoder(t *testing.T) {
 		A string `json:"a"`
 		B int64  `json:"b"`
 	}{}
-	err := DefaultResponseDecoder(context.TODO(), resp1, &v1)
+	err := DefaultResponseDecoder(context.TODO(), resp1, v1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -258,10 +325,28 @@ func TestDefaultResponseDecoder(t *testing.T) {
 		A string `json:"a"`
 		B int64  `json:"b"`
 	}{}
-	err = DefaultResponseDecoder(context.TODO(), resp2, &v2)
+	err = DefaultResponseDecoder(context.TODO(), resp2, v2)
 	syntaxErr := &json.SyntaxError{}
 	if !errors.As(err, &syntaxErr) {
 		t.Errorf("expected %v, got %v", syntaxErr, err)
+	}
+}
+
+func TestDefaultResponseDecoderHTTPBody(t *testing.T) {
+	resp := &http.Response{
+		Header:     http.Header{"Content-Type": []string{"application/pdf"}},
+		StatusCode: http.StatusOK,
+		Body:       io.NopCloser(bytes.NewBufferString("raw response")),
+	}
+	var body *httpbody.HttpBody
+	if err := DefaultResponseDecoder(context.TODO(), resp, &body); err != nil {
+		t.Fatal(err)
+	}
+	if body.GetContentType() != "application/pdf" {
+		t.Errorf("expected %v, got %v", "application/pdf", body.GetContentType())
+	}
+	if string(body.GetData()) != "raw response" {
+		t.Errorf("expected %v, got %v", "raw response", string(body.GetData()))
 	}
 }
 

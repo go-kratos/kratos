@@ -8,9 +8,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
-
-	kratosjson "github.com/go-kratos/kratos/v2/encoding/json"
 )
 
 var (
@@ -172,7 +171,7 @@ func (v *atomicValue) Scan(obj any) error {
 		return err
 	}
 	if pb, ok := obj.(proto.Message); ok {
-		return kratosjson.UnmarshalOptions.Unmarshal(data, pb)
+		return protojson.UnmarshalOptions{DiscardUnknown: true}.Unmarshal(data, pb)
 	}
 	return json.Unmarshal(data, obj)
 }

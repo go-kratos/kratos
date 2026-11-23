@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/serviceconfig"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 func TestWithInsecure(t *testing.T) {
@@ -27,22 +27,6 @@ func TestWithTimeout(t *testing.T) {
 	WithTimeout(v)(o)
 	if !reflect.DeepEqual(v, o.timeout) {
 		t.Errorf("expected %v, got %v", v, o.timeout)
-	}
-}
-
-func TestDisableDebugLog(t *testing.T) {
-	o := &builder{}
-	DisableDebugLog()(o)
-	if o.debugLog {
-		t.Errorf("expected debugLog true, got %v", o.debugLog)
-	}
-}
-
-func TestPrintDebugLog(t *testing.T) {
-	o := &builder{}
-	PrintDebugLog(true)(o)
-	if !o.debugLog {
-		t.Errorf("expected PrintdebugLog true, got %v", o.debugLog)
 	}
 }
 
@@ -81,7 +65,7 @@ func (m *mockConn) ParseServiceConfig(_ string) *serviceconfig.ParseResult {
 }
 
 func TestBuilder_Build(t *testing.T) {
-	b := NewBuilder(&mockDiscovery{}, PrintDebugLog(false))
+	b := NewBuilder(&mockDiscovery{})
 	_, err := b.Build(
 		resolver.Target{
 			URL: url.URL{

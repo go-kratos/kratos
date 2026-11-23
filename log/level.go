@@ -1,60 +1,43 @@
 package log
 
-import "strings"
+import (
+	"log/slog"
+	"strings"
+)
 
 // Level is a logger level.
-type Level int8
+type Level = slog.Level
+
+// Leveler provides a log level.
+type Leveler = slog.Leveler
+
+// LevelVar is a variable log level.
+type LevelVar = slog.LevelVar
 
 // LevelKey is logger level key.
-const LevelKey = "level"
+const LevelKey = slog.LevelKey
 
 const (
 	// LevelDebug is logger debug level.
-	LevelDebug Level = iota - 1
+	LevelDebug Level = slog.LevelDebug
 	// LevelInfo is logger info level.
-	LevelInfo
+	LevelInfo Level = slog.LevelInfo
 	// LevelWarn is logger warn level.
-	LevelWarn
+	LevelWarn Level = slog.LevelWarn
 	// LevelError is logger error level.
-	LevelError
-	// LevelFatal is logger fatal level
-	LevelFatal
+	LevelError Level = slog.LevelError
+	// LevelFatal is logger fatal level.
+	LevelFatal Level = slog.LevelError + 4
 )
-
-func (l Level) Key() string {
-	return LevelKey
-}
-
-func (l Level) String() string {
-	switch l {
-	case LevelDebug:
-		return "DEBUG"
-	case LevelInfo:
-		return "INFO"
-	case LevelWarn:
-		return "WARN"
-	case LevelError:
-		return "ERROR"
-	case LevelFatal:
-		return "FATAL"
-	default:
-		return ""
-	}
-}
 
 // ParseLevel parses a level string into a logger Level value.
 func ParseLevel(s string) Level {
-	switch strings.ToUpper(s) {
-	case "DEBUG":
-		return LevelDebug
-	case "INFO":
-		return LevelInfo
-	case "WARN":
-		return LevelWarn
-	case "ERROR":
-		return LevelError
-	case "FATAL":
+	if strings.EqualFold(s, "FATAL") {
 		return LevelFatal
+	}
+	var level slog.Level
+	if err := level.UnmarshalText([]byte(s)); err == nil {
+		return level
 	}
 	return LevelInfo
 }

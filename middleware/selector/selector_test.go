@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v3/middleware"
+	"github.com/go-kratos/kratos/v3/transport"
 )
 
 var _ transport.Transporter = (*Transport)(nil)

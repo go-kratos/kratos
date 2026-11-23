@@ -9,10 +9,10 @@ import (
 	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/resolver"
 
-	"github.com/go-kratos/aegis/subset"
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/internal/endpoint"
+	"github.com/go-kratos/kratos/v3/internal/subset"
+	"github.com/go-kratos/kratos/v3/log"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 type discoveryResolver struct {
@@ -23,7 +23,6 @@ type discoveryResolver struct {
 	cancel context.CancelFunc
 
 	insecure    bool
-	debugLog    bool
 	selectorKey string
 	subsetSize  int
 }
@@ -40,7 +39,7 @@ func (r *discoveryResolver) watch() {
 			if errors.Is(err, context.Canceled) {
 				return
 			}
-			log.Errorf("[resolver] Failed to watch discovery endpoint: %v", err)
+			log.Error("[resolver] failed to watch discovery endpoint", "error", err)
 			time.Sleep(time.Second)
 			continue
 		}
@@ -56,7 +55,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	for _, in := range ins {
 		ept, err := endpoint.ParseEndpoint(in.Endpoints, endpoint.Scheme("grpc", !r.insecure))
 		if err != nil {
-			log.Errorf("[resolver] Failed to parse discovery endpoint: %v", err)
+			log.Error("[resolver] failed to parse discovery endpoint", "error", err)
 			continue
 		}
 		if ept == "" {
@@ -84,24 +83,23 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 		addrs = append(addrs, addr)
 	}
 	if len(addrs) == 0 {
-		log.Warnf("[resolver] Zero endpoint found,refused to write, instances: %v", ins)
+		log.Warn("[resolver] zero endpoint found, refused to write", "instances", ins)
 		return
 	}
 	err := r.cc.UpdateState(resolver.State{Addresses: addrs})
 	if err != nil {
-		log.Errorf("[resolver] failed to update state: %s", err)
+		log.Error("[resolver] failed to update state", "error", err)
 	}
-	if r.debugLog {
-		b, _ := json.Marshal(filtered)
-		log.Infof("[resolver] update instances: %s", b)
-	}
+
+	b, _ := json.Marshal(filtered)
+	log.Info("[resolver] update instances", "instances", string(b))
 }
 
 func (r *discoveryResolver) Close() {
 	r.cancel()
 	err := r.w.Stop()
 	if err != nil {
-		log.Errorf("[resolver] failed to watch top: %s", err)
+		log.Error("[resolver] failed to stop watcher", "error", err)
 	}
 }
 

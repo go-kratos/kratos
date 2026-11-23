@@ -8,8 +8,8 @@ import (
 	"github.com/polarismesh/polaris-go"
 	"github.com/polarismesh/polaris-go/pkg/model"
 
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v3/config"
+	"github.com/go-kratos/kratos/v3/log"
 )
 
 // ConfigOption is polaris config option.
@@ -42,7 +42,14 @@ type source struct {
 func (s *source) Load() ([]*config.KeyValue, error) {
 	kvs := make([]*config.KeyValue, 0, len(s.options.files))
 	for _, file := range s.options.files {
-		configFile, err := s.client.GetConfigFile(s.options.namespace, file.Group, file.Name)
+		configFile, err := s.client.FetchConfigFile(&polaris.GetConfigFileRequest{
+			GetConfigFileRequest: &model.GetConfigFileRequest{
+				Namespace: s.options.namespace,
+				FileGroup: file.Group,
+				FileName:  file.Name,
+				Subscribe: true,
+			},
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -70,7 +77,7 @@ func receive(event chan model.ConfigFileChangeEvent) func(m model.ConfigFileChan
 	return func(m model.ConfigFileChangeEvent) {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Error(err)
+				log.Error("panic recovered", "err", err)
 			}
 		}()
 		event <- m

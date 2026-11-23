@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-chassis/sc-client"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 var _ registry.Watcher = (*Watcher)(nil)
@@ -52,7 +52,7 @@ func (w *Watcher) Put(svcIns *registry.ServiceInstance) {
 }
 
 func (w *Watcher) Next() ([]*registry.ServiceInstance, error) {
-	var svcInstances []*registry.ServiceInstance
+	svcInstances := make([]*registry.ServiceInstance, 0, 1)
 	svcIns := <-w.ch
 	svcInstances = append(svcInstances, svcIns)
 	return svcInstances, nil

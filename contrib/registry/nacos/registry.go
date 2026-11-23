@@ -14,10 +14,16 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-kratos/kratos/v3/registry"
 )
 
 var ErrServiceInstanceNameEmpty = errors.New("kratos/nacos: ServiceInstance.Name can not be empty")
+
+const (
+	defaultKind = "grpc"
+	kindKey     = "kind"
+	versionKey  = "version"
+)
 
 var (
 	_ registry.Registrar = (*Registry)(nil)
@@ -73,7 +79,7 @@ func New(cli naming_client.INamingClient, opts ...Option) (r *Registry) {
 		cluster: "DEFAULT",
 		group:   constant.DEFAULT_GROUP,
 		weight:  100,
-		kind:    "grpc",
+		kind:    defaultKind,
 	}
 	for _, option := range opts {
 		option(&op)
@@ -106,13 +112,13 @@ func (r *Registry) Register(_ context.Context, si *registry.ServiceInstance) err
 		var rmd map[string]string
 		if si.Metadata == nil {
 			rmd = map[string]string{
-				"kind":    u.Scheme,
-				"version": si.Version,
+				kindKey:    u.Scheme,
+				versionKey: si.Version,
 			}
 		} else {
 			rmd = maps.Clone(si.Metadata)
-			rmd["kind"] = u.Scheme
-			rmd["version"] = si.Version
+			rmd[kindKey] = u.Scheme
+			rmd[versionKey] = si.Version
 			if w, ok := si.Metadata["weight"]; ok {
 				weight, err = strconv.ParseFloat(w, 64)
 				if err != nil {
@@ -187,7 +193,7 @@ func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registr
 	for _, in := range res {
 		kind := r.opts.kind
 		weight := r.opts.weight
-		if k, ok := in.Metadata["kind"]; ok {
+		if k, ok := in.Metadata[kindKey]; ok {
 			kind = k
 		}
 		if in.Weight > 0 {
@@ -200,7 +206,7 @@ func (r *Registry) GetService(_ context.Context, serviceName string) ([]*registr
 		r := &registry.ServiceInstance{
 			ID:        id,
 			Name:      in.ServiceName,
-			Version:   in.Metadata["version"],
+			Version:   in.Metadata[versionKey],
 			Metadata:  in.Metadata,
 			Endpoints: []string{kind + "://" + net.JoinHostPort(in.Ip, strconv.Itoa(int(in.Port)))},
 		}

@@ -11,12 +11,12 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/go-kratos/kratos/v2/internal/endpoint"
-	"github.com/go-kratos/kratos/v2/internal/host"
-	"github.com/go-kratos/kratos/v2/internal/matcher"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v3/internal/endpoint"
+	"github.com/go-kratos/kratos/v3/internal/host"
+	"github.com/go-kratos/kratos/v3/internal/matcher"
+	"github.com/go-kratos/kratos/v3/log"
+	"github.com/go-kratos/kratos/v3/middleware"
+	"github.com/go-kratos/kratos/v3/transport"
 )
 
 var (
@@ -54,12 +54,6 @@ func Timeout(timeout time.Duration) ServerOption {
 	return func(s *Server) {
 		s.timeout = timeout
 	}
-}
-
-// Logger with server logger.
-// Deprecated: use global logger instead.
-func Logger(log.Logger) ServerOption {
-	return func(*Server) {}
 }
 
 // Middleware with service middleware option.
@@ -327,7 +321,7 @@ func (s *Server) Start(ctx context.Context) error {
 	s.BaseContext = func(net.Listener) context.Context {
 		return ctx
 	}
-	log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
+	log.Info("[HTTP] server listening", "addr", s.lis.Addr().String())
 	var err error
 	if s.tlsConf != nil {
 		err = s.ServeTLS(s.lis, "", "")

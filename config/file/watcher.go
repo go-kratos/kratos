@@ -8,7 +8,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 
-	"github.com/go-kratos/kratos/v2/config"
+	"github.com/go-kratos/kratos/v3/config"
 )
 
 var _ config.Watcher = (*watcher)(nil)
@@ -38,7 +38,7 @@ func (w *watcher) Next() ([]*config.KeyValue, error) {
 	case <-w.ctx.Done():
 		return nil, w.ctx.Err()
 	case event := <-w.fw.Events:
-		if event.Op == fsnotify.Rename {
+		if event.Has(fsnotify.Rename) {
 			if _, err := os.Stat(event.Name); err == nil || os.IsExist(err) {
 				if err := w.fw.Add(event.Name); err != nil {
 					return nil, err

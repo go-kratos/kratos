@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/filter"
+	"github.com/go-kratos/kratos/v3/registry"
+	"github.com/go-kratos/kratos/v3/selector"
+	"github.com/go-kratos/kratos/v3/selector/filter"
 )
 
 func TestWrr(t *testing.T) {
 	wrr := New()
-	var nodes []selector.Node
+	nodes := make([]selector.Node, 0, 2)
 	nodes = append(nodes, selector.NewNode(
 		"http",
 		"127.0.0.1:8080",

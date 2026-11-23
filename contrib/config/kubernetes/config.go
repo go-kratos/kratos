@@ -13,7 +13,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/go-kratos/kratos/v2/config"
+	"github.com/go-kratos/kratos/v3/config"
 )
 
 // Option is kubernetes option.

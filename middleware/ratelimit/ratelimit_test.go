@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"testing"
-
-	"github.com/go-kratos/aegis/ratelimit"
 )
 
 type (
@@ -17,14 +15,14 @@ type (
 	}
 )
 
-func (r *ratelimitMock) Allow() (ratelimit.DoneFunc, error) {
-	return func(_ ratelimit.DoneInfo) {
+func (r *ratelimitMock) Allow() (DoneFunc, error) {
+	return func(_ DoneInfo) {
 		r.reached = true
 	}, nil
 }
 
-func (r *ratelimitReachedMock) Allow() (ratelimit.DoneFunc, error) {
-	return func(_ ratelimit.DoneInfo) {
+func (r *ratelimitReachedMock) Allow() (DoneFunc, error) {
+	return func(_ DoneInfo) {
 		r.reached = true
 	}, errors.New("errored")
 }

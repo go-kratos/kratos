@@ -1,14 +1,13 @@
 package logging
 
 import (
-	"bytes"
 	"context"
 	"errors"
+	"log/slog"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v3/middleware"
+	"github.com/go-kratos/kratos/v3/transport"
 )
 
 var _ transport.Transporter = (*Transport)(nil)
@@ -41,59 +40,73 @@ func (tr *Transport) ReplyHeader() transport.Header {
 
 func TestHTTP(t *testing.T) {
 	err := errors.New("reply.error")
-	bf := bytes.NewBuffer(nil)
-	logger := log.NewStdLogger(bf)
+	handler := &captureHandler{}
+	logger := slog.New(handler)
 
 	tests := []struct {
 		name string
-		kind func(logger log.Logger) middleware.Middleware
+		kind func(*slog.Logger) middleware.Middleware
 		err  error
 		ctx  context.Context
+		want slog.Level
 	}{
 		{
-			"http-server@fail",
-			Server,
-			err,
-			func() context.Context {
-				return transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
-			}(),
+			name: "http-server@fail",
+			kind: Server,
+			err:  err,
+			ctx:  transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"}),
+			want: slog.LevelError,
 		},
 		{
-			"http-server@succ",
-			Server,
-			nil,
-			func() context.Context {
-				return transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
-			}(),
+			name: "http-server@succ",
+			kind: Server,
+			ctx:  transport.NewServerContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"}),
+			want: slog.LevelInfo,
 		},
 		{
-			"http-client@succ",
-			Client,
-			nil,
-			func() context.Context {
-				return transport.NewClientContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
-			}(),
+			name: "http-client@succ",
+			kind: Client,
+			ctx:  transport.NewClientContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"}),
+			want: slog.LevelInfo,
 		},
 		{
-			"http-client@fail",
-			Client,
-			err,
-			func() context.Context {
-				return transport.NewClientContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"})
-			}(),
+			name: "http-client@fail",
+			kind: Client,
+			err:  err,
+			ctx:  transport.NewClientContext(context.Background(), &Transport{kind: transport.KindHTTP, endpoint: "endpoint", operation: "/package.service/method"}),
+			want: slog.LevelError,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			bf.Reset()
+			handler.reset()
 			next := func(context.Context, any) (any, error) {
 				return "reply", test.err
 			}
 			next = test.kind(logger)(next)
-			v, e := next(test.ctx, "req.args")
-			t.Logf("[%s]reply: %v, error: %v", test.name, v, e)
-			t.Logf("[%s]log:%s", test.name, bf.String())
+			reply, gotErr := next(test.ctx, "req.args")
+			if reply != "reply" {
+				t.Fatalf("reply = %v, want %q", reply, "reply")
+			}
+			if gotErr != test.err {
+				t.Fatalf("err = %v, want %v", gotErr, test.err)
+			}
+			if len(handler.records) != 1 {
+				t.Fatalf("records len = %d, want 1", len(handler.records))
+			}
+			if handler.records[0].Level != test.want {
+				t.Fatalf("level = %v, want %v", handler.records[0].Level, test.want)
+			}
+			if got := handler.attrs[0]["component"]; got != "http" {
+				t.Fatalf("component = %v, want %q", got, "http")
+			}
+			if got := handler.attrs[0]["operation"]; got != "/package.service/method" {
+				t.Fatalf("operation = %v, want %q", got, "/package.service/method")
+			}
+			if got := handler.attrs[0]["args"]; got != "req.args" {
+				t.Fatalf("args = %v, want %q", got, "req.args")
+			}
 		})
 	}
 }
@@ -128,19 +141,9 @@ func TestExtractArgs(t *testing.T) {
 		req      any
 		expected string
 	}{
-		{
-			name:     "dummyStringer",
-			req:      &dummyStringer{field: ""},
-			expected: "my value",
-		}, {
-			name:     "dummy",
-			req:      &dummy{field: "value"},
-			expected: "&{field:value}",
-		}, {
-			name:     "dummyStringerRedacter",
-			req:      &dummyStringerRedacter{field: ""},
-			expected: "my value redacted",
-		},
+		{name: "dummyStringer", req: &dummyStringer{field: ""}, expected: "my value"},
+		{name: "dummy", req: &dummy{field: "value"}, expected: "&{field:value}"},
+		{name: "dummyStringerRedacter", req: &dummyStringerRedacter{field: ""}, expected: "my value redacted"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -155,15 +158,11 @@ func TestExtractError(t *testing.T) {
 	tests := []struct {
 		name       string
 		err        error
-		wantLevel  log.Level
+		wantLevel  slog.Level
 		wantErrStr string
 	}{
-		{
-			"no error", nil, log.LevelInfo, "",
-		},
-		{
-			"error", errors.New("test error"), log.LevelError, "test error",
-		},
+		{name: "no error", err: nil, wantLevel: slog.LevelInfo, wantErrStr: ""},
+		{name: "error", err: errors.New("test error"), wantLevel: slog.LevelError, wantErrStr: "test error"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -178,58 +177,35 @@ func TestExtractError(t *testing.T) {
 	}
 }
 
-type extractKeyValues [][]any
-
-func (l *extractKeyValues) Log(_ log.Level, kv ...any) error { *l = append(*l, kv); return nil }
-
-func TestServer_CallerPath(t *testing.T) {
-	var a extractKeyValues
-	logger := log.With(&a, "caller", log.Caller(5)) // report where the helper was called
-
-	// make sure the caller is same
-	sameCaller := func(fn middleware.Handler) { _, _ = fn(context.Background(), nil) }
-
-	// caller: [... log inside middleware, fn(context.Background(), nil)]
-	h := func(context.Context, any) (a any, e error) { return }
-	h = Server(logger)(h)
-	sameCaller(h)
-
-	// caller: [... helper.Info("foo"), fn(context.Background(), nil)]
-	helper := log.NewHelper(logger)
-	sameCaller(func(context.Context, any) (a any, e error) { helper.Info("foo"); return })
-
-	t.Log(a[0])
-	t.Log(a[1])
-	if a[0][0] != "caller" || a[1][0] != "caller" {
-		t.Fatal("caller not found")
-	}
-	if a[0][1] != a[1][1] {
-		t.Fatalf("middleware should have the same caller as log.Helper. middleware: %s, helper: %s", a[0][1], a[1][1])
-	}
+type captureHandler struct {
+	records []slog.Record
+	attrs   []map[string]any
 }
 
-func TestClient_CallerPath(t *testing.T) {
-	var a extractKeyValues
-	logger := log.With(&a, "caller", log.Caller(5)) // report where the helper was called
+func (h *captureHandler) reset() {
+	h.records = nil
+	h.attrs = nil
+}
 
-	// make sure the caller is same
-	sameCaller := func(fn middleware.Handler) { _, _ = fn(context.Background(), nil) }
+func (h *captureHandler) Enabled(context.Context, slog.Level) bool {
+	return true
+}
 
-	// caller: [... log inside middleware, fn(context.Background(), nil)]
-	h := func(context.Context, any) (a any, e error) { return }
-	h = Client(logger)(h)
-	sameCaller(h)
+func (h *captureHandler) Handle(_ context.Context, record slog.Record) error {
+	attrs := make(map[string]any)
+	record.Attrs(func(attr slog.Attr) bool {
+		attrs[attr.Key] = attr.Value.Any()
+		return true
+	})
+	h.records = append(h.records, record.Clone())
+	h.attrs = append(h.attrs, attrs)
+	return nil
+}
 
-	// caller: [... helper.Info("foo"), fn(context.Background(), nil)]
-	helper := log.NewHelper(logger)
-	sameCaller(func(context.Context, any) (a any, e error) { helper.Info("foo"); return })
+func (h *captureHandler) WithAttrs([]slog.Attr) slog.Handler {
+	return h
+}
 
-	t.Log(a[0])
-	t.Log(a[1])
-	if a[0][0] != "caller" || a[1][0] != "caller" {
-		t.Fatal("caller not found")
-	}
-	if a[0][1] != a[1][1] {
-		t.Fatalf("middleware should have the same caller as log.Helper. middleware: %s, helper: %s", a[0][1], a[1][1])
-	}
+func (h *captureHandler) WithGroup(string) slog.Handler {
+	return h
 }

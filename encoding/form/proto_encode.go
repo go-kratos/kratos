@@ -15,7 +15,7 @@ import (
 
 // EncodeValues encode a message into url values.
 func EncodeValues(msg any) (url.Values, error) {
-	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Ptr && reflect.ValueOf(msg).IsNil()) {
+	if msg == nil || (reflect.ValueOf(msg).Kind() == reflect.Pointer && reflect.ValueOf(msg).IsNil()) {
 		return url.Values{}, nil
 	}
 	if v, ok := msg.(proto.Message); ok {
@@ -160,10 +160,11 @@ func encodeMessage(msgDescriptor protoreflect.MessageDescriptor, value protorefl
 		if !ok || m == nil {
 			return "", nil
 		}
+		paths := make([]string, len(m.Paths))
 		for i, v := range m.Paths {
-			m.Paths[i] = jsonCamelCase(v)
+			paths[i] = jsonCamelCase(v)
 		}
-		return strings.Join(m.Paths, ","), nil
+		return strings.Join(paths, ","), nil
 	default:
 		return "", fmt.Errorf("unsupported message type: %q", string(msgDescriptor.FullName()))
 	}
