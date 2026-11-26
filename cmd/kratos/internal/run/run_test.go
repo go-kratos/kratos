@@ -1,53 +1,61 @@
 package run
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
 
-func TestAbsPath(t *testing.T) {
+func TestResolveDir(t *testing.T) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("os.Getwd() error = %v", err)
+	}
+
 	tests := []struct {
-		name    string
-		input   string
-		wantAbs bool
+		name  string
+		input string
+		want  string
 	}{
 		{
-			name:    "absolute path",
-			input:   "/absolute/path",
-			wantAbs: true,
+			name:  "absolute path is unchanged",
+			input: "/absolute/path",
+			want:  "/absolute/path",
 		},
 		{
-			name:    "relative path",
-			input:   "relative/path",
-			wantAbs: false,
+			name:  "relative path becomes absolute",
+			input: "relative/path",
+			want:  filepath.Join(cwd, "relative/path"),
 		},
 		{
-			name:    "relative path with dot",
-			input:   "./cmd/foo",
-			wantAbs: false,
+			name:  "dot-relative path becomes absolute",
+			input: "./cmd/foo",
+			want:  filepath.Join(cwd, "cmd/foo"),
 		},
 		{
-			name:    "relative path with parent",
-			input:   "../cmd/foo",
-			wantAbs: false,
+			name:  "parent-relative path becomes absolute",
+			input: "../cmd/foo",
+			want:  filepath.Join(cwd, "../cmd/foo"),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			isAbs := filepath.IsAbs(tt.input)
-			if isAbs != tt.wantAbs {
-				t.Errorf("filepath.IsAbs(%q) = %v, want %v", tt.input, isAbs, tt.wantAbs)
+			got, err := resolveDir(tt.input)
+			if err != nil {
+				t.Fatalf("resolveDir(%q) error = %v", tt.input, err)
 			}
 
-			if !isAbs {
-				abs, err := filepath.Abs(tt.input)
-				if err != nil {
-					t.Fatalf("filepath.Abs(%q) error = %v", tt.input, err)
-				}
-				if !filepath.IsAbs(abs) {
-					t.Errorf("filepath.Abs(%q) = %q, not absolute", tt.input, abs)
-				}
+			// Clean both paths so the comparison is canonical.
+			want := filepath.Clean(tt.want)
+			got = filepath.Clean(got)
+
+			if got != want {
+				t.Errorf("resolveDir(%q) = %q, want %q", tt.input, got, want)
+			}
+
+			if !filepath.IsAbs(got) {
+				t.Errorf("resolveDir(%q) = %q, expected absolute path", tt.input, got)
 			}
 		})
 	}

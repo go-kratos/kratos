@@ -68,13 +68,10 @@ func Run(cmd *cobra.Command, args []string) {
 			dir = cmdPath[dir]
 		}
 	}
-	if !filepath.IsAbs(dir) {
-		abs, err := filepath.Abs(dir)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
-			return
-		}
-		dir = abs
+	dir, err = resolveDir(dir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
+		return
 	}
 	fd := exec.Command("go", append([]string{"run", dir}, programArgs...)...)
 	fd.Stdout = os.Stdout
@@ -143,6 +140,15 @@ func findCMD(base string) (map[string]string, error) {
 		base = filepath.Join(base, "..")
 	}
 	return map[string]string{"": base}, nil
+}
+
+// resolveDir converts a relative directory path to an absolute path.
+// If dir is already absolute it is returned unchanged.
+func resolveDir(dir string) (string, error) {
+	if filepath.IsAbs(dir) {
+		return dir, nil
+	}
+	return filepath.Abs(dir)
 }
 
 func changeWorkingDirectory(cmd *exec.Cmd, targetDir string) {
