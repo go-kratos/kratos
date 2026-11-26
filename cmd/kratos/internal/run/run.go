@@ -38,7 +38,8 @@ func Run(cmd *cobra.Command, args []string) {
 	}
 	if dir == "" {
 		// find the directory containing the cmd/*
-		cmdPath, err := findCMD(base)
+		var cmdPath map[string]string
+		cmdPath, err = findCMD(base)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "\033[31mERROR: %s\033[m\n", err)
 			return
